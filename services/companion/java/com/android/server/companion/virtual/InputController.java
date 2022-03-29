@@ -22,6 +22,7 @@ import android.annotation.StringDef;
 import android.graphics.Point;
 import android.graphics.PointF;
 import android.hardware.display.DisplayManagerInternal;
+import android.hardware.input.InputDeviceIdentifier;
 import android.hardware.input.InputManager;
 import android.hardware.input.InputManagerInternal;
 import android.hardware.input.VirtualKeyEvent;
@@ -29,11 +30,13 @@ import android.hardware.input.VirtualMouseButtonEvent;
 import android.hardware.input.VirtualMouseRelativeEvent;
 import android.hardware.input.VirtualMouseScrollEvent;
 import android.hardware.input.VirtualTouchEvent;
+import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.ArrayMap;
 import android.util.Slog;
 import android.view.Display;
+import android.view.InputDevice;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
@@ -44,7 +47,11 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Objects;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.Supplier;
 
 /** Controls virtual input devices, including device lifecycle and event dispatch. */
 class InputController {
@@ -72,20 +79,27 @@ class InputController {
     @GuardedBy("mLock")
     final Map<IBinder, InputDeviceDescriptor> mInputDeviceDescriptors = new ArrayMap<>();
 
+    private final Handler mHandler;
     private final NativeWrapper mNativeWrapper;
     private final DisplayManagerInternal mDisplayManagerInternal;
     private final InputManagerInternal mInputManagerInternal;
+    private final DeviceCreationThreadVerifier mThreadVerifier;
 
-    InputController(@NonNull Object lock) {
-        this(lock, new NativeWrapper());
+    InputController(@NonNull Object lock, @NonNull Handler handler) {
+        this(lock, new NativeWrapper(), handler,
+                // Verify that virtual devices are not created on the handler thread.
+                () -> !handler.getLooper().isCurrentThread());
     }
 
     @VisibleForTesting
-    InputController(@NonNull Object lock, @NonNull NativeWrapper nativeWrapper) {
+    InputController(@NonNull Object lock, @NonNull NativeWrapper nativeWrapper,
+            @NonNull Handler handler, @NonNull DeviceCreationThreadVerifier threadVerifier) {
         mLock = lock;
+        mHandler = handler;
         mNativeWrapper = nativeWrapper;
         mDisplayManagerInternal = LocalServices.getService(DisplayManagerInternal.class);
         mInputManagerInternal = LocalServices.getService(InputManagerInternal.class);
+        mThreadVerifier = threadVerifier;
     }
 
     void close() {
@@ -108,23 +122,13 @@ class InputController {
             @NonNull IBinder deviceToken,
             int displayId) {
         final String phys = createPhys(PHYS_TYPE_KEYBOARD);
-        setUniqueIdAssociation(displayId, phys);
-        final int fd = mNativeWrapper.openUinputKeyboard(deviceName, vendorId, productId, phys);
-        if (fd < 0) {
-            throw new RuntimeException(
-                    "A native error occurred when creating keyboard: " + -fd);
-        }
-        final BinderDeathRecipient binderDeathRecipient = new BinderDeathRecipient(deviceToken);
-        synchronized (mLock) {
-            mInputDeviceDescriptors.put(deviceToken,
-                    new InputDeviceDescriptor(fd, binderDeathRecipient,
-                            InputDeviceDescriptor.TYPE_KEYBOARD, displayId, phys));
-        }
         try {
-            deviceToken.linkToDeath(binderDeathRecipient, /* flags= */ 0);
-        } catch (RemoteException e) {
-            // TODO(b/215608394): remove and close InputDeviceDescriptor
-            throw new RuntimeException("Could not create virtual keyboard", e);
+            createDeviceInternal(InputDeviceDescriptor.TYPE_KEYBOARD, deviceName, vendorId,
+                    productId, deviceToken, displayId, phys,
+                    () -> mNativeWrapper.openUinputKeyboard(deviceName, vendorId, productId, phys));
+        } catch (DeviceCreationException e) {
+            throw new RuntimeException(
+                    "Failed to create virtual keyboard device '" + deviceName + "'.", e);
         }
     }
 
@@ -134,25 +138,15 @@ class InputController {
             @NonNull IBinder deviceToken,
             int displayId) {
         final String phys = createPhys(PHYS_TYPE_MOUSE);
-        setUniqueIdAssociation(displayId, phys);
-        final int fd = mNativeWrapper.openUinputMouse(deviceName, vendorId, productId, phys);
-        if (fd < 0) {
-            throw new RuntimeException(
-                    "A native error occurred when creating mouse: " + -fd);
-        }
-        final BinderDeathRecipient binderDeathRecipient = new BinderDeathRecipient(deviceToken);
-        synchronized (mLock) {
-            mInputDeviceDescriptors.put(deviceToken,
-                    new InputDeviceDescriptor(fd, binderDeathRecipient,
-                            InputDeviceDescriptor.TYPE_MOUSE, displayId, phys));
-            mInputManagerInternal.setVirtualMousePointerDisplayId(displayId);
-        }
         try {
-            deviceToken.linkToDeath(binderDeathRecipient, /* flags= */ 0);
-        } catch (RemoteException e) {
-            // TODO(b/215608394): remove and close InputDeviceDescriptor
-            throw new RuntimeException("Could not create virtual mouse", e);
+            createDeviceInternal(InputDeviceDescriptor.TYPE_MOUSE, deviceName, vendorId, productId,
+                    deviceToken, displayId, phys,
+                    () -> mNativeWrapper.openUinputMouse(deviceName, vendorId, productId, phys));
+        } catch (DeviceCreationException e) {
+            throw new RuntimeException(
+                    "Failed to create virtual mouse device: '" + deviceName + "'.", e);
         }
+        mInputManagerInternal.setVirtualMousePointerDisplayId(displayId);
     }
 
     void createTouchscreen(@NonNull String deviceName,
@@ -162,24 +156,14 @@ class InputController {
             int displayId,
             @NonNull Point screenSize) {
         final String phys = createPhys(PHYS_TYPE_TOUCHSCREEN);
-        setUniqueIdAssociation(displayId, phys);
-        final int fd = mNativeWrapper.openUinputTouchscreen(deviceName, vendorId, productId, phys,
-                screenSize.y, screenSize.x);
-        if (fd < 0) {
-            throw new RuntimeException(
-                    "A native error occurred when creating touchscreen: " + -fd);
-        }
-        final BinderDeathRecipient binderDeathRecipient = new BinderDeathRecipient(deviceToken);
-        synchronized (mLock) {
-            mInputDeviceDescriptors.put(deviceToken,
-                    new InputDeviceDescriptor(fd, binderDeathRecipient,
-                            InputDeviceDescriptor.TYPE_TOUCHSCREEN, displayId, phys));
-        }
         try {
-            deviceToken.linkToDeath(binderDeathRecipient, /* flags= */ 0);
-        } catch (RemoteException e) {
-            // TODO(b/215608394): remove and close InputDeviceDescriptor
-            throw new RuntimeException("Could not create virtual touchscreen", e);
+            createDeviceInternal(InputDeviceDescriptor.TYPE_TOUCHSCREEN, deviceName, vendorId,
+                    productId, deviceToken, displayId, phys,
+                    () -> mNativeWrapper.openUinputTouchscreen(deviceName, vendorId, productId,
+                            phys, screenSize.y, screenSize.x));
+        } catch (DeviceCreationException e) {
+            throw new RuntimeException(
+                    "Failed to create virtual touchscreen device '" + deviceName + "'.", e);
         }
     }
 
@@ -509,5 +493,134 @@ class InputController {
             Slog.e(TAG, "Virtual input controller binder died");
             unregisterInputDevice(mDeviceToken);
         }
+    }
+
+    /** A helper class used to wait for an input device to be registered. */
+    private class WaitForDevice implements  AutoCloseable {
+        private final CountDownLatch mDeviceAddedLatch = new CountDownLatch(1);
+        private final InputManager.InputDeviceListener mListener;
+
+        WaitForDevice(String deviceName, int vendorId, int productId) {
+            mListener = new InputManager.InputDeviceListener() {
+                @Override
+                public void onInputDeviceAdded(int deviceId) {
+                    final InputDevice device = InputManager.getInstance().getInputDevice(
+                            deviceId);
+                    Objects.requireNonNull(device, "Newly added input device was null.");
+                    if (!device.getName().equals(deviceName)) {
+                        return;
+                    }
+                    final InputDeviceIdentifier id = device.getIdentifier();
+                    if (id.getVendorId() != vendorId || id.getProductId() != productId) {
+                        return;
+                    }
+                    mDeviceAddedLatch.countDown();
+                }
+
+                @Override
+                public void onInputDeviceRemoved(int deviceId) {
+
+                }
+
+                @Override
+                public void onInputDeviceChanged(int deviceId) {
+
+                }
+            };
+            InputManager.getInstance().registerInputDeviceListener(mListener, mHandler);
+        }
+
+        /** Note: This must not be called from {@link #mHandler}'s thread. */
+        void waitForDeviceCreation() throws DeviceCreationException {
+            try {
+                if (!mDeviceAddedLatch.await(1, TimeUnit.MINUTES)) {
+                    throw new DeviceCreationException(
+                            "Timed out waiting for virtual device to be created.");
+                }
+            } catch (InterruptedException e) {
+                throw new DeviceCreationException(
+                        "Interrupted while waiting for virtual device to be created.", e);
+            }
+        }
+
+        @Override
+        public void close() {
+            InputManager.getInstance().unregisterInputDeviceListener(mListener);
+        }
+    }
+
+    /** An internal exception that is thrown to indicate an error when opening a virtual device. */
+    private static class DeviceCreationException extends Exception {
+        DeviceCreationException(String message) {
+            super(message);
+        }
+        DeviceCreationException(String message, Exception cause) {
+            super(message, cause);
+        }
+    }
+
+    /**
+     * Creates a virtual input device synchronously, and waits for the notification that the device
+     * was added.
+     *
+     * Note: Input device creation is expected to happen on a binder thread, and the calling thread
+     * will be blocked until the input device creation is successful. This should not be called on
+     * the handler's thread.
+     *
+     * @throws DeviceCreationException Throws this exception if anything unexpected happens in the
+     *                                 process of creating the device. This method will take care
+     *                                 to restore the state of the system in the event of any
+     *                                 unexpected behavior.
+     */
+    private void createDeviceInternal(@InputDeviceDescriptor.Type int type, String deviceName,
+            int vendorId, int productId, IBinder deviceToken, int displayId, String phys,
+            Supplier<Integer> deviceOpener)
+            throws DeviceCreationException {
+        if (!mThreadVerifier.isValidThread()) {
+            throw new IllegalStateException(
+                    "Virtual device creation should happen on an auxiliary thread (e.g. binder "
+                            + "thread) and not from the handler's thread.");
+        }
+
+        final int fd;
+        final BinderDeathRecipient binderDeathRecipient;
+
+        setUniqueIdAssociation(displayId, phys);
+        try (WaitForDevice waiter = new WaitForDevice(deviceName, vendorId, productId)) {
+            fd = deviceOpener.get();
+            if (fd < 0) {
+                throw new DeviceCreationException(
+                        "A native error occurred when creating touchscreen: " + -fd);
+            }
+            // The fd is valid from here, so ensure that all failures close the fd after this point.
+            try {
+                waiter.waitForDeviceCreation();
+
+                binderDeathRecipient = new BinderDeathRecipient(deviceToken);
+                try {
+                    deviceToken.linkToDeath(binderDeathRecipient, /* flags= */ 0);
+                } catch (RemoteException e) {
+                    throw new DeviceCreationException(
+                            "Client died before virtual device could be created.", e);
+                }
+            } catch (DeviceCreationException e) {
+                mNativeWrapper.closeUinput(fd);
+                throw e;
+            }
+        } catch (DeviceCreationException e) {
+            InputManager.getInstance().removeUniqueIdAssociation(phys);
+            throw e;
+        }
+
+        synchronized (mLock) {
+            mInputDeviceDescriptors.put(deviceToken,
+                    new InputDeviceDescriptor(fd, binderDeathRecipient, type, displayId, phys));
+        }
+    }
+
+    @VisibleForTesting
+    interface DeviceCreationThreadVerifier {
+        /** Returns true if the calling thread is a valid thread for device creation. */
+        boolean isValidThread();
     }
 }

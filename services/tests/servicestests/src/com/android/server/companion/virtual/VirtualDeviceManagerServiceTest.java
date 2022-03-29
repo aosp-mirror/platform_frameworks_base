@@ -54,6 +54,7 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.graphics.Point;
 import android.hardware.display.DisplayManagerInternal;
+import android.hardware.input.IInputManager;
 import android.hardware.input.InputManagerInternal;
 import android.hardware.input.VirtualKeyEvent;
 import android.hardware.input.VirtualMouseButtonEvent;
@@ -118,6 +119,7 @@ public class VirtualDeviceManagerServiceTest {
     private static final int FLAG_CANNOT_DISPLAY_ON_REMOTE_DEVICES = 0x00000;
 
     private Context mContext;
+    private InputManagerMockHelper mInputManagerMockHelper;
     private VirtualDeviceImpl mDeviceImpl;
     private InputController mInputController;
     private AssociationInfo mAssociationInfo;
@@ -146,6 +148,8 @@ public class VirtualDeviceManagerServiceTest {
     private IAudioConfigChangedCallback mConfigChangedCallback;
     @Mock
     private ApplicationInfo mApplicationInfoMock;
+    @Mock
+    IInputManager mIInputManagerMock;
 
     private ArraySet<ComponentName> getBlockedActivities() {
         ArraySet<ComponentName> blockedActivities = new ArraySet<>();
@@ -170,7 +174,7 @@ public class VirtualDeviceManagerServiceTest {
     }
 
     @Before
-    public void setUp() {
+    public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
 
         LocalServices.removeServiceForTest(DisplayManagerInternal.class);
@@ -199,7 +203,13 @@ public class VirtualDeviceManagerServiceTest {
                 new Handler(TestableLooper.get(this).getLooper()));
         when(mContext.getSystemService(Context.POWER_SERVICE)).thenReturn(mPowerManager);
 
-        mInputController = new InputController(new Object(), mNativeWrapperMock);
+        mInputManagerMockHelper = new InputManagerMockHelper(
+                TestableLooper.get(this), mNativeWrapperMock, mIInputManagerMock);
+        // Allow virtual devices to be created on the looper thread for testing.
+        final InputController.DeviceCreationThreadVerifier threadVerifier = () -> true;
+        mInputController = new InputController(new Object(), mNativeWrapperMock,
+                new Handler(TestableLooper.get(this).getLooper()), threadVerifier);
+
         mAssociationInfo = new AssociationInfo(1, 0, null,
                 MacAddress.BROADCAST_ADDRESS, "", null, true, false, 0, 0);
 
