@@ -109,12 +109,9 @@
     <string name="bluetooth_battery_level" msgid="2893696778200201555">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> de bateria"</string>
     <string name="bluetooth_battery_level_untethered" msgid="4002282355111504349">"E: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> de bateria, D: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> de bateria"</string>
     <string name="bluetooth_active_no_battery_level" msgid="4155462233006205630">"Ativo"</string>
-    <!-- no translation found for bluetooth_hearing_aid_left_active (7084887715570971441) -->
-    <skip />
-    <!-- no translation found for bluetooth_hearing_aid_right_active (8574683234077567230) -->
-    <skip />
-    <!-- no translation found for bluetooth_hearing_aid_left_and_right_active (407704460573163973) -->
-    <skip />
+    <string name="bluetooth_hearing_aid_left_active" msgid="7084887715570971441">"Ativo, apenas esquerdo"</string>
+    <string name="bluetooth_hearing_aid_right_active" msgid="8574683234077567230">"Ativo, apenas direito"</string>
+    <string name="bluetooth_hearing_aid_left_and_right_active" msgid="407704460573163973">"Ativo, esquerdo e direito"</string>
     <string name="bluetooth_profile_a2dp" msgid="4632426382762851724">"Áudio de multimédia"</string>
     <string name="bluetooth_profile_headset" msgid="5395952236133499331">"Chamadas telefónicas"</string>
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"Transferência do ficheiro"</string>
