@@ -61,7 +61,8 @@ public class ActiveSourceActionTest {
     public void setUp() throws Exception {
         mContextSpy = spy(new ContextWrapper(InstrumentationRegistry.getTargetContext()));
 
-        mHdmiControlService = new HdmiControlService(mContextSpy, Collections.emptyList()) {
+        mHdmiControlService = new HdmiControlService(mContextSpy, Collections.emptyList(),
+                new FakeAudioDeviceVolumeManagerWrapper()) {
             @Override
             AudioManager getAudioManager() {
                 return new AudioManager() {

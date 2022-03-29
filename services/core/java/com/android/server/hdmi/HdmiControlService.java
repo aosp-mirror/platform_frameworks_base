@@ -411,6 +411,9 @@ public class HdmiControlService extends SystemService {
     private PowerManagerInternalWrapper mPowerManagerInternal;
 
     @Nullable
+    private AudioDeviceVolumeManagerWrapperInterface mAudioDeviceVolumeManager;
+
+    @Nullable
     private Looper mIoLooper;
 
     @Nullable
@@ -439,11 +442,21 @@ public class HdmiControlService extends SystemService {
 
     private final SelectRequestBuffer mSelectRequestBuffer = new SelectRequestBuffer();
 
-    @VisibleForTesting HdmiControlService(Context context, List<Integer> deviceTypes) {
+    /**
+     * Constructor for testing.
+     *
+     * It's critical to use a fake AudioDeviceVolumeManager because a normally instantiated
+     * AudioDeviceVolumeManager can access the "real" AudioService on the DUT.
+     *
+     * @see FakeAudioDeviceVolumeManagerWrapper
+     */
+    @VisibleForTesting HdmiControlService(Context context, List<Integer> deviceTypes,
+            AudioDeviceVolumeManagerWrapperInterface audioDeviceVolumeManager) {
         super(context);
         mLocalDevices = deviceTypes;
         mSettingsObserver = new SettingsObserver(mHandler);
         mHdmiCecConfig = new HdmiCecConfig(context);
+        mAudioDeviceVolumeManager = audioDeviceVolumeManager;
     }
 
     public HdmiControlService(Context context) {
@@ -744,6 +757,8 @@ public class HdmiControlService extends SystemService {
                     Context.TV_INPUT_SERVICE);
             mPowerManager = new PowerManagerWrapper(getContext());
             mPowerManagerInternal = new PowerManagerInternalWrapper();
+            mAudioDeviceVolumeManager =
+                    new AudioDeviceVolumeManagerWrapper(getContext());
         } else if (phase == SystemService.PHASE_BOOT_COMPLETED) {
             runOnServiceThread(this::bootCompleted);
         }
@@ -3086,15 +3101,17 @@ public class HdmiControlService extends SystemService {
     private void announceHdmiCecVolumeControlFeatureChange(
             @HdmiControlManager.VolumeControl int hdmiCecVolumeControl) {
         assertRunOnServiceThread();
-        mHdmiCecVolumeControlFeatureListenerRecords.broadcast(listener -> {
-            try {
-                listener.onHdmiCecVolumeControlFeature(hdmiCecVolumeControl);
-            } catch (RemoteException e) {
-                Slog.e(TAG,
-                        "Failed to report HdmiControlVolumeControlStatusChange: "
-                                + hdmiCecVolumeControl);
-            }
-        });
+        synchronized (mLock) {
+            mHdmiCecVolumeControlFeatureListenerRecords.broadcast(listener -> {
+                try {
+                    listener.onHdmiCecVolumeControlFeature(hdmiCecVolumeControl);
+                } catch (RemoteException e) {
+                    Slog.e(TAG,
+                            "Failed to report HdmiControlVolumeControlStatusChange: "
+                                    + hdmiCecVolumeControl);
+                }
+            });
+        }
     }
 
     public HdmiCecLocalDeviceTv tv() {
@@ -3133,6 +3150,14 @@ public class HdmiControlService extends SystemService {
 
     AudioManager getAudioManager() {
         return (AudioManager) getContext().getSystemService(Context.AUDIO_SERVICE);
+    }
+
+    /**
+     * Returns null before the boot phase {@link SystemService#PHASE_SYSTEM_SERVICES_READY}.
+     */
+    @Nullable
+    private AudioDeviceVolumeManagerWrapperInterface getAudioDeviceVolumeManager() {
+        return mAudioDeviceVolumeManager;
     }
 
     boolean isControlEnabled() {

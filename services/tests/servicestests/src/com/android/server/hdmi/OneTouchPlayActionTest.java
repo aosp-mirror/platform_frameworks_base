@@ -87,7 +87,8 @@ public class OneTouchPlayActionTest {
         mContextSpy = spy(new ContextWrapper(InstrumentationRegistry.getTargetContext()));
         mHdmiCecConfig = new FakeHdmiCecConfig(mContextSpy);
 
-        mHdmiControlService = new HdmiControlService(mContextSpy, Collections.emptyList()) {
+        mHdmiControlService = new HdmiControlService(mContextSpy, Collections.emptyList(),
+                new FakeAudioDeviceVolumeManagerWrapper()) {
             @Override
             AudioManager getAudioManager() {
                 return new AudioManager() {

@@ -100,7 +100,7 @@ public class DeviceSelectActionFromPlaybackTest {
 
         mHdmiControlService =
                 new HdmiControlService(InstrumentationRegistry.getTargetContext(),
-                        Collections.emptyList()) {
+                        Collections.emptyList(), new FakeAudioDeviceVolumeManagerWrapper()) {
                     @Override
                     boolean isControlEnabled() {
                         return true;

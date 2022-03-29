@@ -125,7 +125,7 @@ public class HdmiCecLocalDeviceTvTest {
 
         mHdmiControlService =
                 new HdmiControlService(InstrumentationRegistry.getTargetContext(),
-                        Collections.emptyList()) {
+                        Collections.emptyList(), new FakeAudioDeviceVolumeManagerWrapper()) {
                     @Override
                     void wakeUp() {
                         mWokenUp = true;

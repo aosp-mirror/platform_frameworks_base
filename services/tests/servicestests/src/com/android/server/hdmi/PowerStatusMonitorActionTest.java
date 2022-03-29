@@ -68,7 +68,8 @@ public class PowerStatusMonitorActionTest {
         mContextSpy = spy(new ContextWrapper(InstrumentationRegistry.getTargetContext()));
 
         mHdmiControlService = new HdmiControlService(mContextSpy,
-                Collections.singletonList(HdmiDeviceInfo.DEVICE_TV)) {
+                Collections.singletonList(HdmiDeviceInfo.DEVICE_TV),
+                new FakeAudioDeviceVolumeManagerWrapper()) {
             @Override
             AudioManager getAudioManager() {
                 return new AudioManager() {

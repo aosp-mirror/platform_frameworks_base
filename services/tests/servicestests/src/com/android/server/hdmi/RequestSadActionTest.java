@@ -96,8 +96,8 @@ public class RequestSadActionTest {
         mMyLooper = mTestLooper.getLooper();
 
         mHdmiControlService =
-                new HdmiControlService(context,
-                        Collections.emptyList()) {
+                new HdmiControlService(context, Collections.emptyList(),
+                        new FakeAudioDeviceVolumeManagerWrapper()) {
                     @Override
                     boolean isControlEnabled() {
                         return true;

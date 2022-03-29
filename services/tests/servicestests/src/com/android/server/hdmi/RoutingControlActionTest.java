@@ -149,7 +149,7 @@ public class RoutingControlActionTest {
 
         mHdmiControlService =
                 new HdmiControlService(InstrumentationRegistry.getTargetContext(),
-                        Collections.emptyList()) {
+                        Collections.emptyList(), new FakeAudioDeviceVolumeManagerWrapper()) {
                     @Override
                     boolean isControlEnabled() {
                         return true;

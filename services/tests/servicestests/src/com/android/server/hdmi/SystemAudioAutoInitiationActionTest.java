@@ -69,7 +69,8 @@ public class SystemAudioAutoInitiationActionTest {
 
         Looper myLooper = mTestLooper.getLooper();
 
-        mHdmiControlService = new HdmiControlService(mContextSpy, Collections.emptyList()) {
+        mHdmiControlService = new HdmiControlService(mContextSpy, Collections.emptyList(),
+                new FakeAudioDeviceVolumeManagerWrapper()) {
             @Override
             AudioManager getAudioManager() {
                 return new AudioManager() {
