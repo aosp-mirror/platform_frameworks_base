@@ -775,8 +775,7 @@
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"Digərlərini görmək üçün sürüşdürün"</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"Tövsiyələr yüklənir"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"Media"</string>
-    <!-- no translation found for controls_media_close_session (4780485355795635052) -->
-    <skip />
+    <string name="controls_media_close_session" msgid="4780485355795635052">"<xliff:g id="APP_NAME">%1$s</xliff:g> üçün bu media nizamlayıcısı gizlədilsin?"</string>
     <string name="controls_media_active_session" msgid="3146882316024153337">"Cari media sessiyası gizlədilə bilməz."</string>
     <string name="controls_media_dismiss_button" msgid="4485675693008031646">"Gizlədin"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"Davam edin"</string>
@@ -796,8 +795,7 @@
     <string name="media_move_closer_to_end_cast" msgid="6495907340926563656">"Burada oxutmaq üçün <xliff:g id="DEVICENAME">%1$s</xliff:g> cihazına yaxınlaşın"</string>
     <string name="media_transfer_playing_different_device" msgid="7186806382609785610">"<xliff:g id="DEVICENAME">%1$s</xliff:g> cihazında oxudulur"</string>
     <string name="media_transfer_playing_this_device" msgid="1856890686844499172">"Bu telefonda oxudulur"</string>
-    <!-- no translation found for media_transfer_failed (7955354964610603723) -->
-    <skip />
+    <string name="media_transfer_failed" msgid="7955354964610603723">"Xəta oldu. Yenə cəhd edin."</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"Aktiv deyil, tətbiqi yoxlayın"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"Tapılmadı"</string>
     <string name="controls_error_removed_title" msgid="1207794911208047818">"Nəzarət əlçatan deyil"</string>

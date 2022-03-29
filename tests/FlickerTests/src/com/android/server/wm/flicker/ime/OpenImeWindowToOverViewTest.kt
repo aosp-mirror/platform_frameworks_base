@@ -17,15 +17,23 @@
 package com.android.server.wm.flicker.ime
 
 import android.app.Instrumentation
-import android.platform.test.annotations.Postsubmit
+import android.platform.test.annotations.Presubmit
 import android.platform.test.annotations.RequiresDevice
 import android.view.Surface
 import android.view.WindowManagerPolicyConstants
+import androidx.test.filters.FlakyTest
 import androidx.test.platform.app.InstrumentationRegistry
-import com.android.server.wm.flicker.*
+import com.android.server.wm.flicker.FlickerBuilderProvider
+import com.android.server.wm.flicker.FlickerParametersRunnerFactory
+import com.android.server.wm.flicker.FlickerTestParameter
+import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.annotation.Group4
 import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.flicker.helpers.ImeAppAutoFocusHelper
+import com.android.server.wm.flicker.navBarLayerIsVisible
+import com.android.server.wm.flicker.navBarWindowIsVisible
+import com.android.server.wm.flicker.statusBarLayerIsVisible
+import com.android.server.wm.flicker.statusBarWindowIsVisible
 import com.android.server.wm.traces.common.FlickerComponentName
 import com.android.server.wm.traces.parser.windowmanager.WindowManagerStateHelper
 import org.junit.Assume.assumeTrue
@@ -69,32 +77,32 @@ class OpenImeWindowToOverViewTest(private val testSpec: FlickerTestParameter) {
             }
         }
     }
-    @Postsubmit
+    @Presubmit
     @Test
     fun navBarWindowIsVisible() = testSpec.navBarWindowIsVisible()
 
-    @Postsubmit
+    @Presubmit
     @Test
     fun statusBarWindowIsVisible() = testSpec.statusBarWindowIsVisible()
 
-    @Postsubmit
+    @Presubmit
     @Test
     fun imeWindowIsAlwaysVisible() {
         testSpec.imeWindowIsAlwaysVisible()
     }
 
-    @Postsubmit
+    @FlakyTest(bugId = 227189877)
     @Test
     fun navBarLayerIsVisible() = testSpec.navBarLayerIsVisible()
 
-    @Postsubmit
+    @FlakyTest(bugId = 206753786)
     @Test
     fun statusBarLayerIsVisibleInPortrait() {
         assumeFalse(testSpec.isLandscapeOrSeascapeAtStart)
         testSpec.statusBarLayerIsVisible()
     }
 
-    @Postsubmit
+    @Presubmit
     @Test
     fun statusBarLayerIsInVisibleInLandscape() {
         assumeTrue(testSpec.isLandscapeOrSeascapeAtStart)
@@ -106,7 +114,7 @@ class OpenImeWindowToOverViewTest(private val testSpec: FlickerTestParameter) {
         }
     }
 
-    @Postsubmit
+    @Presubmit
     @Test
     fun imeLayerIsVisibleAndAssociatedWithAppWidow() {
         testSpec.assertLayersStart {

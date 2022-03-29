@@ -2105,6 +2105,19 @@
     <!-- Controls tile secondary label when device is locked and user does not want access to controls from lockscreen [CHAR LIMIT=20] -->
     <string name="controls_tile_locked">Device locked</string>
 
+    <!-- Title of the dialog to show and control devices from lock screen [CHAR LIMIT=NONE] -->
+    <string name="controls_settings_show_controls_dialog_title">Show and control devices from lock screen?</string>
+    <!-- Message of the dialog to show and control devices from lock screen [CHAR LIMIT=NONE] -->
+    <string name="controls_settings_show_controls_dialog_message">You can add controls for your external devices to the lock screen.\n\nYour device app may allow you to control some devices without unlocking your phone or tablet.\n\nYou can make changes any time in Settings.</string>
+    <!-- Title of the dialog to control certain devices from lock screen without auth [CHAR LIMIT=NONE] -->
+    <string name="controls_settings_trivial_controls_dialog_title">Control devices from lock screen?</string>
+    <!-- Message of the dialog to control certain devices from lock screen without auth [CHAR LIMIT=NONE] -->
+    <string name="controls_settings_trivial_controls_dialog_message">You can control some devices without unlocking your phone or tablet.\n\nYour device app determines which devices can be controlled in this way.</string>
+    <!-- Neutral button title of the controls dialog [CHAR LIMIT=NONE] -->
+    <string name="controls_settings_dialog_neutral_button">No thanks</string>
+    <!-- Positive button title of the controls dialog  [CHAR LIMIT=NONE] -->
+    <string name="controls_settings_dialog_positive_button">Yes</string>
+
     <!-- Controls PIN entry dialog, switch to alphanumeric keyboard [CHAR LIMIT=100] -->
     <string name="controls_pin_use_alphanumeric">PIN contains letters or symbols</string>
     <!-- Controls PIN entry dialog, title [CHAR LIMIT=30] -->
@@ -2214,6 +2227,21 @@
     <!-- Button text for stopping casting [CHAR LIMIT=60] -->
     <string name="media_output_dialog_button_stop_casting">Stop casting</string>
 
+    <!-- Media Output Broadcast Dialog -->
+    <!-- Title for Broadcast First Notify Dialog [CHAR LIMIT=60] -->
+    <string name="media_output_first_broadcast_title">How broadcasting works</string>
+    <!-- Title for Broadcast Notify Dialog [CHAR LIMIT=60] -->
+    <string name="media_output_broadcast">Broadcast</string>
+    <!-- Message for notifying the user about the Broadcast at first launch [CHAR LIMIT=NONE] -->
+    <string name="media_output_first_notify_broadcast_message">People near you with compatible Bluetooth devices can listen to the media you\'re broadcasting</string>
+    <!-- Message for Broadcasting information and QR code [CHAR LIMIT=NONE] -->
+    <string name="media_output_broadcasting_message">To listen to your broadcast, people nearby with compatible Bluetooth devices can scan your QR code or use your broadcast name and password</string>
+    <!-- Title for Broadcast Name [CHAR LIMIT=60] -->
+    <string name="media_output_broadcast_name">Broadcast Name</string>
+    <!-- Title for Broadcast Code(Password) [CHAR LIMIT=60] -->
+    <string name="media_output_broadcast_code">Password</string>
+    <!-- Button for change broadcast name and broadcast code [CHAR LIMIT=60] -->
+    <string name="media_output_broadcast_dialog_save">Save</string>
 
     <!-- Label for clip data when copying the build number off QS [CHAR LIMIT=NONE]-->
     <string name="build_number_clip_data_label">Build number</string>

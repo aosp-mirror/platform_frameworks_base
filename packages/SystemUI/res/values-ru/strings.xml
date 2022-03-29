@@ -456,8 +456,7 @@
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"Разблокировать для использования"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"Не удалось получить информацию о картах. Повторите попытку позже."</string>
     <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"Настройки заблокированного экрана"</string>
-    <!-- no translation found for qr_code_scanner_title (5290201053875420785) -->
-    <skip />
+    <string name="qr_code_scanner_title" msgid="5290201053875420785">"Сканировать QR-код"</string>
     <string name="status_bar_work" msgid="5238641949837091056">"Рабочий профиль"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"Режим полета"</string>
     <string name="zen_alarm_warning" msgid="7844303238486849503">"Следующий будильник: <xliff:g id="WHEN">%1$s</xliff:g>. Звук отключен."</string>
@@ -809,8 +808,7 @@
     <string name="media_move_closer_to_end_cast" msgid="6495907340926563656">"Для воспроизведения на этом устройстве подойдите ближе к другому (<xliff:g id="DEVICENAME">%1$s</xliff:g>)."</string>
     <string name="media_transfer_playing_different_device" msgid="7186806382609785610">"Воспроизводится на устройстве \"<xliff:g id="DEVICENAME">%1$s</xliff:g>\"."</string>
     <string name="media_transfer_playing_this_device" msgid="1856890686844499172">"Воспроизводится на этом телефоне."</string>
-    <!-- no translation found for media_transfer_failed (7955354964610603723) -->
-    <skip />
+    <string name="media_transfer_failed" msgid="7955354964610603723">"Произошла ошибка. Повторите попытку."</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"Нет ответа. Проверьте приложение."</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"Не найдено."</string>
     <string name="controls_error_removed_title" msgid="1207794911208047818">"Управление недоступно"</string>

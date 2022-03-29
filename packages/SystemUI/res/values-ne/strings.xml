@@ -775,8 +775,7 @@
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"थप हेर्न स्वाइप गर्नुहोस्"</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"सिफारिसहरू लोड गर्दै"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"मिडिया"</string>
-    <!-- no translation found for controls_media_close_session (4780485355795635052) -->
-    <skip />
+    <string name="controls_media_close_session" msgid="4780485355795635052">"<xliff:g id="APP_NAME">%1$s</xliff:g> का हकमा यो मिडिया कन्ट्रोल लुकाउने हो?"</string>
     <string name="controls_media_active_session" msgid="3146882316024153337">"हालको मिडिया सत्र लुकाउन मिल्दैन।"</string>
     <string name="controls_media_dismiss_button" msgid="4485675693008031646">"लुकाउनुहोस्"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"सुचारु गर्नुहोस्"</string>

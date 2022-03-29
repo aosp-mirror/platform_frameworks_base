@@ -18,6 +18,7 @@ package android.trust.test.lib
 
 import android.content.Context
 import android.util.Log
+import android.view.KeyEvent
 import android.view.WindowManagerGlobal
 import androidx.test.core.app.ApplicationProvider.getApplicationContext
 import androidx.test.platform.app.InstrumentationRegistry.getInstrumentation
@@ -64,16 +65,18 @@ class ScreenLockRule : TestRule {
 
     fun dismissKeyguard() {
         wait("keyguard dismissed") { count ->
-            windowManager.dismissKeyguard(null, null)
-
-            // Sometimes, bouncer gets shown due to a race, so we have to put display to sleep
-            // and wake it back up to get it to go away
-            if (count >= 10 && count % 5 == 0) {
-                Log.i(TAG, "Escalation: attempting screen off/on to get rid of bouncer")
-                uiDevice.sleep()
-                Thread.sleep(250)
+            if (!uiDevice.isScreenOn) {
+                Log.i(TAG, "Waking device, +500ms")
                 uiDevice.wakeUp()
             }
+
+            // Bouncer may be shown due to a race; back dismisses it
+            if (count >= 10) {
+                Log.i(TAG, "Pressing back to dismiss Bouncer")
+                uiDevice.pressKeyCode(KeyEvent.KEYCODE_BACK)
+            }
+
+            windowManager.dismissKeyguard(null, null)
 
             !windowManager.isKeyguardLocked
         }
