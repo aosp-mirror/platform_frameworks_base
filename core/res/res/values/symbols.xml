@@ -550,7 +550,6 @@
   <java-symbol type="string" name="activity_resolver_work_profiles_support" />
   <java-symbol type="string" name="app_running_notification_title" />
   <java-symbol type="string" name="app_running_notification_text" />
-  <java-symbol type="string" name="copied" />
   <java-symbol type="string" name="delete" />
   <java-symbol type="string" name="deleteText" />
   <java-symbol type="string" name="grant_permissions_header_text" />
@@ -1327,6 +1326,8 @@
   <java-symbol type="dimen" name="lock_pattern_dot_size_activated" />
   <java-symbol type="dimen" name="lock_pattern_dot_hit_factor" />
   <java-symbol type="dimen" name="lock_pattern_fade_away_gradient_width" />
+  <java-symbol type="integer" name="lock_pattern_line_fade_out_duration" />
+  <java-symbol type="integer" name="lock_pattern_line_fade_out_delay" />
   <java-symbol type="drawable" name="clock_dial" />
   <java-symbol type="drawable" name="clock_hand_hour" />
   <java-symbol type="drawable" name="clock_hand_minute" />
@@ -1713,6 +1714,10 @@
   <java-symbol type="anim" name="activity_open_exit" />
   <java-symbol type="anim" name="activity_close_enter" />
   <java-symbol type="anim" name="activity_close_exit" />
+  <java-symbol type="anim" name="activity_open_enter_legacy" />
+  <java-symbol type="anim" name="activity_open_exit_legacy" />
+  <java-symbol type="anim" name="activity_close_enter_legacy" />
+  <java-symbol type="anim" name="activity_close_exit_legacy" />
   <java-symbol type="anim" name="task_fragment_close_enter" />
   <java-symbol type="anim" name="task_fragment_close_exit" />
   <java-symbol type="anim" name="task_fragment_open_enter" />
@@ -3294,6 +3299,7 @@
   <java-symbol type="string" name="app_blocked_message" />
 
   <java-symbol type="string" name="app_streaming_blocked_title" />
+  <java-symbol type="string" name="app_streaming_blocked_title_for_permission_dialog" />
   <java-symbol type="string" name="app_streaming_blocked_message" />
 
   <!-- Used internally for assistant to launch activity transitions -->

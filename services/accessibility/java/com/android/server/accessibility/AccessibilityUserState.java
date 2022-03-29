@@ -37,6 +37,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.os.Binder;
 import android.os.RemoteCallbackList;
 import android.provider.Settings;
@@ -123,8 +124,8 @@ class AccessibilityUserState {
     private int mInteractiveUiTimeout = 0;
     private int mLastSentClientState = -1;
 
-    /** {@code true} if the device config supports magnification area. */
-    private final boolean mSupportMagnificationArea;
+    /** {@code true} if the device config supports window magnification. */
+    private final boolean mSupportWindowMagnification;
     // The magnification modes on displays.
     private final SparseIntArray mMagnificationModes = new SparseIntArray();
     // The magnification capabilities used to know magnification mode could be switched.
@@ -148,7 +149,7 @@ class AccessibilityUserState {
 
     boolean isValidMagnificationModeLocked(int displayId) {
         final int mode = getMagnificationModeLocked(displayId);
-        if (!mSupportMagnificationArea
+        if (!mSupportWindowMagnification
                 && mode == Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW) {
             return false;
         }
@@ -170,8 +171,9 @@ class AccessibilityUserState {
                 R.color.accessibility_focus_highlight_color);
         mFocusStrokeWidth = mFocusStrokeWidthDefaultValue;
         mFocusColor = mFocusColorDefaultValue;
-        mSupportMagnificationArea = mContext.getResources().getBoolean(
-                R.bool.config_magnification_area);
+        mSupportWindowMagnification = mContext.getResources().getBoolean(
+                R.bool.config_magnification_area) && mContext.getPackageManager().hasSystemFeature(
+                PackageManager.FEATURE_WINDOW_MAGNIFICATION);
     }
 
     boolean isHandlingAccessibilityEventsLocked() {

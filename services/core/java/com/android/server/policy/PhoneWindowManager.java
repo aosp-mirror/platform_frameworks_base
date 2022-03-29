@@ -1491,11 +1491,19 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     private long getAccessibilityShortcutTimeout() {
-        ViewConfiguration config = ViewConfiguration.get(mContext);
-        return Settings.Secure.getIntForUser(mContext.getContentResolver(),
-                Settings.Secure.ACCESSIBILITY_SHORTCUT_DIALOG_SHOWN, 0, mCurrentUserId) == 0
-                ? config.getAccessibilityShortcutKeyTimeout()
-                : config.getAccessibilityShortcutKeyTimeoutAfterConfirmation();
+        final ViewConfiguration config = ViewConfiguration.get(mContext);
+        final boolean hasDialogShown = Settings.Secure.getIntForUser(mContext.getContentResolver(),
+                Settings.Secure.ACCESSIBILITY_SHORTCUT_DIALOG_SHOWN, 0, mCurrentUserId) != 0;
+        final boolean skipTimeoutRestriction =
+                Settings.Secure.getIntForUser(mContext.getContentResolver(),
+                        Settings.Secure.SKIP_ACCESSIBILITY_SHORTCUT_DIALOG_TIMEOUT_RESTRICTION, 0,
+                        mCurrentUserId) != 0;
+
+        // If users manually set the volume key shortcut for any accessibility service, the
+        // system would bypass the timeout restriction of the shortcut dialog.
+        return hasDialogShown || skipTimeoutRestriction
+                ? config.getAccessibilityShortcutKeyTimeoutAfterConfirmation()
+                : config.getAccessibilityShortcutKeyTimeout();
     }
 
     private long getScreenshotChordLongPressDelay() {

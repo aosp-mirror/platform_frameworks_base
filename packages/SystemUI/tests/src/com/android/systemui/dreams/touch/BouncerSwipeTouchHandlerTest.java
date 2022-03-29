@@ -22,6 +22,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyFloat;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -37,6 +39,7 @@ import android.view.VelocityTracker;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.shared.system.InputChannelCompat;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
@@ -89,6 +92,9 @@ public class BouncerSwipeTouchHandlerTest extends SysuiTestCase {
     @Mock
     VelocityTracker mVelocityTracker;
 
+    @Mock
+    UiEventLogger mUiEventLogger;
+
     final DisplayMetrics mDisplayMetrics = new DisplayMetrics();
 
     private static final float TOUCH_REGION = .3f;
@@ -110,11 +116,11 @@ public class BouncerSwipeTouchHandlerTest extends SysuiTestCase {
                 mVelocityTrackerFactory,
                 mFlingAnimationUtils,
                 mFlingAnimationUtilsClosing,
-                TOUCH_REGION);
+                TOUCH_REGION,
+                mUiEventLogger);
 
         when(mCentralSurfaces.isBouncerShowing()).thenReturn(false);
         when(mCentralSurfaces.getDisplayHeight()).thenReturn((float) SCREEN_HEIGHT_PX);
-        when(mCentralSurfaces.isBouncerShowing()).thenReturn(false);
         when(mValueAnimatorCreator.create(anyFloat(), anyFloat())).thenReturn(mValueAnimator);
         when(mVelocityTrackerFactory.obtain()).thenReturn(mVelocityTracker);
         when(mFlingAnimationUtils.getMinVelocityPxPerSecond()).thenReturn(Float.MAX_VALUE);
@@ -154,18 +160,22 @@ public class BouncerSwipeTouchHandlerTest extends SysuiTestCase {
                         2)).isTrue();
     }
 
+    private enum Direction {
+        DOWN,
+        UP,
+    }
+
     /**
-     * Makes sure expansion amount is proportional to scroll.
+     * Makes sure the expansion amount is proportional to (1 - scroll).
      */
     @Test
-    public void testExpansionAmount_whenBouncerHidden_setsCorrectValue() {
+    public void testSwipeUp_setsCorrectExpansionAmount() {
         mTouchHandler.onSessionStart(mTouchSession);
         ArgumentCaptor<GestureDetector.OnGestureListener> gestureListenerCaptor =
                 ArgumentCaptor.forClass(GestureDetector.OnGestureListener.class);
         verify(mTouchSession).registerGestureListener(gestureListenerCaptor.capture());
 
         final OnGestureListener gestureListener = gestureListenerCaptor.getValue();
-        when(mCentralSurfaces.isBouncerShowing()).thenReturn(false);
         verifyScroll(.3f, Direction.UP, true, gestureListener);
 
         // Ensure that subsequent gestures are treated as expanding even if the bouncer state
@@ -175,28 +185,24 @@ public class BouncerSwipeTouchHandlerTest extends SysuiTestCase {
     }
 
     /**
-     * Makes sure collapse amount is proportional to scroll.
+     * Makes sure the expansion amount is proportional to scroll.
      */
     @Test
-    public void testCollapseAmount() {
+    public void testSwipeDown_setsCorrectExpansionAmount() {
+        when(mCentralSurfaces.isBouncerShowing()).thenReturn(true);
+
         mTouchHandler.onSessionStart(mTouchSession);
         ArgumentCaptor<GestureDetector.OnGestureListener> gestureListenerCaptor =
                 ArgumentCaptor.forClass(GestureDetector.OnGestureListener.class);
         verify(mTouchSession).registerGestureListener(gestureListenerCaptor.capture());
 
         final OnGestureListener gestureListener = gestureListenerCaptor.getValue();
-        when(mCentralSurfaces.isBouncerShowing()).thenReturn(true);
         verifyScroll(.3f, Direction.DOWN, false, gestureListener);
 
         // Ensure that subsequent gestures are treated as collapsing even if the bouncer state
         // changes.
         when(mCentralSurfaces.isBouncerShowing()).thenReturn(false);
         verifyScroll(.7f, Direction.DOWN, false, gestureListener);
-    }
-
-    private enum Direction {
-        DOWN,
-        UP,
     }
 
     private void verifyScroll(float percent, Direction direction, boolean expanding,
@@ -209,36 +215,8 @@ public class BouncerSwipeTouchHandlerTest extends SysuiTestCase {
         final MotionEvent event2 = MotionEvent.obtain(0, 0, MotionEvent.ACTION_MOVE,
                 0, direction == Direction.UP ? SCREEN_HEIGHT_PX - distanceY : distanceY, 0);
 
+        reset(mStatusBarKeyguardViewManager);
         assertThat(gestureListener.onScroll(event1, event2, 0, distanceY))
-                .isTrue();
-
-        // Ensure correct expansion passed in.
-        verify(mStatusBarKeyguardViewManager)
-                .onPanelExpansionChanged(
-                        eq(expanding ? 1 - percent : percent), eq(false), eq(true));
-    }
-
-    /**
-     * Makes sure expansion amount is proportional to scroll.
-     */
-    @Test
-    public void testExpansionAmount_whenBouncerShown_setsCorrectValue() {
-        when(mCentralSurfaces.isBouncerShowing()).thenReturn(true);
-
-        mTouchHandler.onSessionStart(mTouchSession);
-        ArgumentCaptor<GestureDetector.OnGestureListener> gestureListenerCaptor =
-                ArgumentCaptor.forClass(GestureDetector.OnGestureListener.class);
-        verify(mTouchSession).registerGestureListener(gestureListenerCaptor.capture());
-
-        final float scrollAmount = .3f;
-        final float distanceY = SCREEN_HEIGHT_PX * scrollAmount;
-
-        final MotionEvent event1 = MotionEvent.obtain(0, 0, MotionEvent.ACTION_MOVE,
-                0, SCREEN_HEIGHT_PX, 0);
-        final MotionEvent event2 = MotionEvent.obtain(0, 0, MotionEvent.ACTION_MOVE,
-                0, SCREEN_HEIGHT_PX - distanceY, 0);
-
-        assertThat(gestureListenerCaptor.getValue().onScroll(event1, event2, 0, distanceY))
                 .isTrue();
 
         // Ensure only called once
@@ -247,10 +225,118 @@ public class BouncerSwipeTouchHandlerTest extends SysuiTestCase {
 
         // Ensure correct expansion passed in.
         verify(mStatusBarKeyguardViewManager)
-                .onPanelExpansionChanged(eq(scrollAmount), eq(false), eq(true));
+                .onPanelExpansionChanged(
+                        eq(expanding ? 1 - percent : percent), eq(false), eq(true));
     }
 
-    private void swipeToPosition(float position, float velocityY) {
+    /**
+     * Tests that ending an upward swipe before the set threshold leads to bouncer collapsing down.
+     */
+    @Test
+    public void testSwipeUpPositionBelowThreshold_collapsesBouncer() {
+        final float swipeUpPercentage = .3f;
+        final float expansion = 1 - swipeUpPercentage;
+        // The upward velocity is ignored.
+        final float velocityY = -1;
+        swipeToPosition(swipeUpPercentage, Direction.UP, velocityY);
+
+        verify(mValueAnimatorCreator).create(eq(expansion), eq(KeyguardBouncer.EXPANSION_HIDDEN));
+        verify(mFlingAnimationUtilsClosing).apply(eq(mValueAnimator),
+                eq(SCREEN_HEIGHT_PX * expansion),
+                eq(SCREEN_HEIGHT_PX * KeyguardBouncer.EXPANSION_HIDDEN),
+                eq(velocityY), eq((float) SCREEN_HEIGHT_PX));
+        verify(mValueAnimator).start();
+        verify(mUiEventLogger, never()).log(any());
+    }
+
+    /**
+     * Tests that ending an upward swipe above the set threshold will continue the expansion.
+     */
+    @Test
+    public void testSwipeUpPositionAboveThreshold_expandsBouncer() {
+        final float swipeUpPercentage = .7f;
+        final float expansion = 1 - swipeUpPercentage;
+        // The downward velocity is ignored.
+        final float velocityY = 1;
+        swipeToPosition(swipeUpPercentage, Direction.UP, velocityY);
+
+        verify(mValueAnimatorCreator).create(eq(expansion), eq(KeyguardBouncer.EXPANSION_VISIBLE));
+        verify(mFlingAnimationUtils).apply(eq(mValueAnimator), eq(SCREEN_HEIGHT_PX * expansion),
+                eq(SCREEN_HEIGHT_PX * KeyguardBouncer.EXPANSION_VISIBLE),
+                eq(velocityY), eq((float) SCREEN_HEIGHT_PX));
+        verify(mValueAnimator).start();
+        verify(mUiEventLogger).log(BouncerSwipeTouchHandler.DreamEvent.DREAM_SWIPED);
+    }
+
+    /**
+     * Tests that ending a downward swipe above the set threshold will continue the expansion,
+     * but will not trigger logging of the DREAM_SWIPED event.
+     */
+    @Test
+    public void testSwipeDownPositionAboveThreshold_expandsBouncer_doesNotLog() {
+        when(mCentralSurfaces.isBouncerShowing()).thenReturn(true);
+
+        final float swipeDownPercentage = .3f;
+        // The downward velocity is ignored.
+        final float velocityY = 1;
+        swipeToPosition(swipeDownPercentage, Direction.DOWN, velocityY);
+
+        verify(mValueAnimatorCreator).create(eq(swipeDownPercentage),
+                eq(KeyguardBouncer.EXPANSION_VISIBLE));
+        verify(mFlingAnimationUtils).apply(eq(mValueAnimator),
+                eq(SCREEN_HEIGHT_PX * swipeDownPercentage),
+                eq(SCREEN_HEIGHT_PX * KeyguardBouncer.EXPANSION_VISIBLE),
+                eq(velocityY), eq((float) SCREEN_HEIGHT_PX));
+        verify(mValueAnimator).start();
+        verify(mUiEventLogger, never()).log(any());
+    }
+
+    /**
+     * Tests that swiping down with a speed above the set threshold leads to bouncer collapsing
+     * down.
+     */
+    @Test
+    public void testSwipeDownVelocityAboveMin_collapsesBouncer() {
+        when(mCentralSurfaces.isBouncerShowing()).thenReturn(true);
+        when(mFlingAnimationUtils.getMinVelocityPxPerSecond()).thenReturn((float) 0);
+
+        // The ending position above the set threshold is ignored.
+        final float swipeDownPercentage = .3f;
+        final float velocityY = 1;
+        swipeToPosition(swipeDownPercentage, Direction.DOWN, velocityY);
+
+        verify(mValueAnimatorCreator).create(eq(swipeDownPercentage),
+                eq(KeyguardBouncer.EXPANSION_HIDDEN));
+        verify(mFlingAnimationUtilsClosing).apply(eq(mValueAnimator),
+                eq(SCREEN_HEIGHT_PX * swipeDownPercentage),
+                eq(SCREEN_HEIGHT_PX * KeyguardBouncer.EXPANSION_HIDDEN),
+                eq(velocityY), eq((float) SCREEN_HEIGHT_PX));
+        verify(mValueAnimator).start();
+        verify(mUiEventLogger, never()).log(any());
+    }
+
+    /**
+     * Tests that swiping up with a speed above the set threshold will continue the expansion.
+     */
+    @Test
+    public void testSwipeUpVelocityAboveMin_expandsBouncer() {
+        when(mFlingAnimationUtils.getMinVelocityPxPerSecond()).thenReturn((float) 0);
+
+        // The ending position below the set threshold is ignored.
+        final float swipeUpPercentage = .3f;
+        final float expansion = 1 - swipeUpPercentage;
+        final float velocityY = -1;
+        swipeToPosition(swipeUpPercentage, Direction.UP, velocityY);
+
+        verify(mValueAnimatorCreator).create(eq(expansion), eq(KeyguardBouncer.EXPANSION_VISIBLE));
+        verify(mFlingAnimationUtils).apply(eq(mValueAnimator), eq(SCREEN_HEIGHT_PX * expansion),
+                eq(SCREEN_HEIGHT_PX * KeyguardBouncer.EXPANSION_VISIBLE),
+                eq(velocityY), eq((float) SCREEN_HEIGHT_PX));
+        verify(mValueAnimator).start();
+        verify(mUiEventLogger).log(BouncerSwipeTouchHandler.DreamEvent.DREAM_SWIPED);
+    }
+
+    private void swipeToPosition(float percent, Direction direction, float velocityY) {
         mTouchHandler.onSessionStart(mTouchSession);
         ArgumentCaptor<GestureDetector.OnGestureListener> gestureListenerCaptor =
                 ArgumentCaptor.forClass(GestureDetector.OnGestureListener.class);
@@ -261,12 +347,12 @@ public class BouncerSwipeTouchHandlerTest extends SysuiTestCase {
 
         when(mVelocityTracker.getYVelocity()).thenReturn(velocityY);
 
-        final float distanceY = SCREEN_HEIGHT_PX * position;
+        final float distanceY = SCREEN_HEIGHT_PX * percent;
 
         final MotionEvent event1 = MotionEvent.obtain(0, 0, MotionEvent.ACTION_MOVE,
-                0, SCREEN_HEIGHT_PX, 0);
+                0, direction == Direction.UP ? SCREEN_HEIGHT_PX : 0, 0);
         final MotionEvent event2 = MotionEvent.obtain(0, 0, MotionEvent.ACTION_MOVE,
-                0, SCREEN_HEIGHT_PX - distanceY, 0);
+                0, direction == Direction.UP ? SCREEN_HEIGHT_PX - distanceY : distanceY, 0);
 
         assertThat(gestureListenerCaptor.getValue().onScroll(event1, event2, 0, distanceY))
                 .isTrue();
@@ -275,85 +361,5 @@ public class BouncerSwipeTouchHandlerTest extends SysuiTestCase {
                 0, 0, 0);
 
         inputEventListenerCaptor.getValue().onInputEvent(upEvent);
-    }
-
-    /**
-     * Tests that ending a swipe before the set expansion threshold leads to bouncer collapsing
-     * down.
-     */
-    @Test
-    public void testSwipeBelowThreshold_collapsesBouncer() {
-        final float swipeUpPercentage = .3f;
-        final float expansion = 1 - swipeUpPercentage;
-        // The upward velocity is ignored.
-        final float velocityY = -1;
-        swipeToPosition(swipeUpPercentage, velocityY);
-
-        verify(mValueAnimatorCreator).create(eq(expansion), eq(KeyguardBouncer.EXPANSION_HIDDEN));
-        verify(mFlingAnimationUtilsClosing).apply(eq(mValueAnimator),
-                eq(SCREEN_HEIGHT_PX * expansion),
-                eq(SCREEN_HEIGHT_PX * KeyguardBouncer.EXPANSION_HIDDEN),
-                eq(velocityY), eq((float) SCREEN_HEIGHT_PX));
-        verify(mValueAnimator).start();
-    }
-
-    /**
-     * Tests that ending a swipe above the set expansion threshold will continue the expansion.
-     */
-    @Test
-    public void testSwipeAboveThreshold_expandsBouncer() {
-        final float swipeUpPercentage = .7f;
-        final float expansion = 1 - swipeUpPercentage;
-        // The downward velocity is ignored.
-        final float velocityY = 1;
-        swipeToPosition(swipeUpPercentage, velocityY);
-
-        verify(mValueAnimatorCreator).create(eq(expansion), eq(KeyguardBouncer.EXPANSION_VISIBLE));
-        verify(mFlingAnimationUtils).apply(eq(mValueAnimator), eq(SCREEN_HEIGHT_PX * expansion),
-                eq(SCREEN_HEIGHT_PX * KeyguardBouncer.EXPANSION_VISIBLE),
-                eq(velocityY), eq((float) SCREEN_HEIGHT_PX));
-        verify(mValueAnimator).start();
-    }
-
-    /**
-     * Tests that swiping down with a speed above the set threshold leads to bouncer collapsing
-     * down.
-     */
-    @Test
-    public void testSwipeDownVelocityAboveMin_collapsesBouncer() {
-        when(mFlingAnimationUtils.getMinVelocityPxPerSecond()).thenReturn((float) 0);
-
-        // The swipe amount above the set expansion threshold is ignored.
-        final float swipeUpPercentage = .7f;
-        final float expansion = 1 - swipeUpPercentage;
-        final float velocityY = 1;
-        swipeToPosition(swipeUpPercentage, velocityY);
-
-        verify(mValueAnimatorCreator).create(eq(expansion), eq(KeyguardBouncer.EXPANSION_HIDDEN));
-        verify(mFlingAnimationUtilsClosing).apply(eq(mValueAnimator),
-                eq(SCREEN_HEIGHT_PX * expansion),
-                eq(SCREEN_HEIGHT_PX * KeyguardBouncer.EXPANSION_HIDDEN),
-                eq(velocityY), eq((float) SCREEN_HEIGHT_PX));
-        verify(mValueAnimator).start();
-    }
-
-    /**
-     * Tests that swiping up with a speed above the set threshold will continue the expansion.
-     */
-    @Test
-    public void testSwipeUpVelocityAboveMin_expandsBouncer() {
-        when(mFlingAnimationUtils.getMinVelocityPxPerSecond()).thenReturn((float) 0);
-
-        // The swipe amount below the set expansion threshold is ignored.
-        final float swipeUpPercentage = .3f;
-        final float expansion = 1 - swipeUpPercentage;
-        final float velocityY = -1;
-        swipeToPosition(swipeUpPercentage, velocityY);
-
-        verify(mValueAnimatorCreator).create(eq(expansion), eq(KeyguardBouncer.EXPANSION_VISIBLE));
-        verify(mFlingAnimationUtils).apply(eq(mValueAnimator), eq(SCREEN_HEIGHT_PX * expansion),
-                eq(SCREEN_HEIGHT_PX * KeyguardBouncer.EXPANSION_VISIBLE),
-                eq(velocityY), eq((float) SCREEN_HEIGHT_PX));
-        verify(mValueAnimator).start();
     }
 }

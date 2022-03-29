@@ -8,9 +8,6 @@ package android {
   public static final class Manifest.permission {
     ctor public Manifest.permission();
     field public static final String ACCEPT_HANDOVER = "android.permission.ACCEPT_HANDOVER";
-    field public static final String ACCESS_ADSERVICES_ATTRIBUTION = "android.permission.ACCESS_ADSERVICES_ATTRIBUTION";
-    field public static final String ACCESS_ADSERVICES_CUSTOM_AUDIENCES = "android.permission.ACCESS_ADSERVICES_CUSTOM_AUDIENCES";
-    field public static final String ACCESS_ADSERVICES_TOPICS = "android.permission.ACCESS_ADSERVICES_TOPICS";
     field public static final String ACCESS_BACKGROUND_LOCATION = "android.permission.ACCESS_BACKGROUND_LOCATION";
     field public static final String ACCESS_BLOBS_ACROSS_USERS = "android.permission.ACCESS_BLOBS_ACROSS_USERS";
     field public static final String ACCESS_CHECKIN_PROPERTIES = "android.permission.ACCESS_CHECKIN_PROPERTIES";
@@ -12331,6 +12328,7 @@ package android.content.pm {
     method @Nullable public java.util.Set<java.lang.String> getCategories();
     method @Nullable public CharSequence getDisabledMessage();
     method public int getDisabledReason();
+    method public int getExcludedFromSurfaces();
     method @Nullable public android.os.PersistableBundle getExtras();
     method @NonNull public String getId();
     method @Nullable public android.content.Intent getIntent();
@@ -12347,8 +12345,8 @@ package android.content.pm {
     method public boolean isDeclaredInManifest();
     method public boolean isDynamic();
     method public boolean isEnabled();
+    method public boolean isExcludedFromSurfaces(int);
     method public boolean isImmutable();
-    method public boolean isIncludedIn(int);
     method public boolean isPinned();
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.content.pm.ShortcutInfo> CREATOR;
@@ -26207,6 +26205,7 @@ package android.media.tv.interactive {
     method public void onCurrentChannelUri(@Nullable android.net.Uri);
     method public void onCurrentTvInputId(@Nullable String);
     method public void onDestroyBiInteractiveAppRequest(@NonNull String);
+    method public void onError(@NonNull String, @NonNull android.os.Bundle);
     method public boolean onGenericMotionEvent(@NonNull android.view.MotionEvent);
     method public boolean onKeyDown(int, @NonNull android.view.KeyEvent);
     method public boolean onKeyLongPress(int, @NonNull android.view.KeyEvent);
@@ -26268,6 +26267,7 @@ package android.media.tv.interactive {
     method public void destroyBiInteractiveApp(@NonNull String);
     method public boolean dispatchUnhandledInputEvent(@NonNull android.view.InputEvent);
     method @Nullable public android.media.tv.interactive.TvInteractiveAppView.OnUnhandledInputEventListener getOnUnhandledInputEventListener();
+    method public void notifyError(@NonNull String, @NonNull android.os.Bundle);
     method public void onAttachedToWindow();
     method public void onDetachedFromWindow();
     method public void onLayout(boolean, int, int, int, int);
@@ -26294,6 +26294,7 @@ package android.media.tv.interactive {
     field public static final String BI_INTERACTIVE_APP_KEY_HTTP_ADDITIONAL_HEADERS = "http_additional_headers";
     field public static final String BI_INTERACTIVE_APP_KEY_HTTP_USER_AGENT = "http_user_agent";
     field public static final String BI_INTERACTIVE_APP_KEY_PRIVATE_KEY = "private_key";
+    field public static final String ERROR_KEY_METHOD_NAME = "method_name";
   }
 
   public static interface TvInteractiveAppView.OnUnhandledInputEventListener {

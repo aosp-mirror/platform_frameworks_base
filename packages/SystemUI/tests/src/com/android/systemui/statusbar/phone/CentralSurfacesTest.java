@@ -861,11 +861,17 @@ public class CentralSurfacesTest extends SysuiTestCase {
 
     @Test
     public void testSetOccluded_propagatesToScrimController() {
-        mCentralSurfaces.setOccluded(true);
+        ArgumentCaptor<KeyguardStateController.Callback> callbackCaptor =
+                ArgumentCaptor.forClass(KeyguardStateController.Callback.class);
+        verify(mKeyguardStateController).addCallback(callbackCaptor.capture());
+
+        when(mKeyguardStateController.isOccluded()).thenReturn(true);
+        callbackCaptor.getValue().onKeyguardShowingChanged();
         verify(mScrimController).setKeyguardOccluded(eq(true));
 
         reset(mScrimController);
-        mCentralSurfaces.setOccluded(false);
+        when(mKeyguardStateController.isOccluded()).thenReturn(false);
+        callbackCaptor.getValue().onKeyguardShowingChanged();
         verify(mScrimController).setKeyguardOccluded(eq(false));
     }
 

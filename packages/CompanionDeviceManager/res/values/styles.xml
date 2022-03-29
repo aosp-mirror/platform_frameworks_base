@@ -108,4 +108,11 @@
         <item name="android:background">@android:color/system_accent1_300</item>
     </style>
 
+    <style name="Spinner"
+           parent="@android:style/Widget.Material.Light.ProgressBar.Large">
+        <item name="android:layout_width">56dp</item>
+        <item name="android:layout_height">56dp</item>
+        <item name="android:indeterminate">true</item>
+        <item name="android:layout_centerInParent">true</item>
+    </style>
 </resources>

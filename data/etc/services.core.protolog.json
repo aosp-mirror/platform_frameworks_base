@@ -397,6 +397,12 @@
       "group": "WM_DEBUG_WINDOW_TRANSITIONS",
       "at": "com\/android\/server\/wm\/Transition.java"
     },
+    "-1717147904": {
+      "message": "Current focused window is embeddedWindow. Dispatch KEYCODE_BACK.",
+      "level": "DEBUG",
+      "group": "WM_DEBUG_BACK_PREVIEW",
+      "at": "com\/android\/server\/wm\/BackNavigationController.java"
+    },
     "-1715268616": {
       "message": "Last window, removing starting window %s",
       "level": "VERBOSE",
@@ -612,12 +618,6 @@
       "level": "VERBOSE",
       "group": "WM_DEBUG_CONFIGURATION",
       "at": "com\/android\/server\/wm\/ActivityStarter.java"
-    },
-    "-1488852351": {
-      "message": "Task=%d contains embedded TaskFragment in untrusted mode. Disabled all input during TaskFragment remote animation.",
-      "level": "DEBUG",
-      "group": "WM_DEBUG_APP_TRANSITIONS",
-      "at": "com\/android\/server\/wm\/AppTransitionController.java"
     },
     "-1483435730": {
       "message": "InsetsSource setWin %s for type %s",
@@ -1093,6 +1093,12 @@
       "group": "WM_DEBUG_STATES",
       "at": "com\/android\/server\/wm\/ActivityRecord.java"
     },
+    "-1010850753": {
+      "message": "No focused window, defaulting to top task's window",
+      "level": "WARN",
+      "group": "WM_DEBUG_BACK_PREVIEW",
+      "at": "com\/android\/server\/wm\/BackNavigationController.java"
+    },
     "-1009117329": {
       "message": "isFetchingAppTransitionSpecs=true",
       "level": "VERBOSE",
@@ -1110,6 +1116,12 @@
       "level": "VERBOSE",
       "group": "WM_DEBUG_STATES",
       "at": "com\/android\/server\/wm\/ActivityRecord.java"
+    },
+    "-997565097": {
+      "message": "Focused window found using getFocusedWindowToken",
+      "level": "DEBUG",
+      "group": "WM_DEBUG_BACK_PREVIEW",
+      "at": "com\/android\/server\/wm\/BackNavigationController.java"
     },
     "-993378225": {
       "message": "finishDrawingLocked: mDrawState=COMMIT_DRAW_PENDING %s in %s",
@@ -1332,6 +1344,12 @@
       "level": "VERBOSE",
       "group": "WM_DEBUG_FOCUS_LIGHT",
       "at": "com\/android\/server\/wm\/ActivityRecord.java"
+    },
+    "-767349300": {
+      "message": "%s: Setting back callback %s. Client IWindow %s",
+      "level": "DEBUG",
+      "group": "WM_DEBUG_BACK_PREVIEW",
+      "at": "com\/android\/server\/wm\/WindowState.java"
     },
     "-766059044": {
       "message": "Display id=%d selected orientation %s (%d), got rotation %s (%d)",
@@ -1675,12 +1693,6 @@
       "group": "WM_DEBUG_STATES",
       "at": "com\/android\/server\/wm\/RootWindowContainer.java"
     },
-    "-432881038": {
-      "message": "startBackNavigation task=%s, topRunningActivity=%s, applicationBackCallback=%s, systemBackCallback=%s",
-      "level": "DEBUG",
-      "group": "WM_DEBUG_BACK_PREVIEW",
-      "at": "com\/android\/server\/wm\/BackNavigationController.java"
-    },
     "-415865166": {
       "message": "findFocusedWindow: Found new focus @ %s",
       "level": "VERBOSE",
@@ -1890,12 +1902,6 @@
       "level": "VERBOSE",
       "group": "WM_DEBUG_SYNC_ENGINE",
       "at": "com\/android\/server\/wm\/BLASTSyncEngine.java"
-    },
-    "-228813488": {
-      "message": "%s: Setting back callback %s",
-      "level": "DEBUG",
-      "group": "WM_DEBUG_BACK_PREVIEW",
-      "at": "com\/android\/server\/wm\/WindowState.java"
     },
     "-208825711": {
       "message": "shouldWaitAnimatingExit: isWallpaperTarget: %s",
@@ -2365,6 +2371,12 @@
       "group": "WM_DEBUG_REMOTE_ANIMATIONS",
       "at": "com\/android\/server\/wm\/RemoteAnimationController.java"
     },
+    "250620778": {
+      "message": "startBackNavigation task=%s, topRunningActivity=%s, applicationBackCallback=%s, systemBackCallback=%s, currentFocus=%s",
+      "level": "DEBUG",
+      "group": "WM_DEBUG_BACK_PREVIEW",
+      "at": "com\/android\/server\/wm\/BackNavigationController.java"
+    },
     "251812577": {
       "message": "Register display organizer=%s uid=%d",
       "level": "VERBOSE",
@@ -2683,6 +2695,12 @@
       "group": "WM_SHOW_TRANSACTIONS",
       "at": "com\/android\/server\/wm\/WindowContainerThumbnail.java"
     },
+    "531891870": {
+      "message": "Previous Destination is Activity:%s Task:%s removedContainer:%s, backType=%s",
+      "level": "DEBUG",
+      "group": "WM_DEBUG_BACK_PREVIEW",
+      "at": "com\/android\/server\/wm\/BackNavigationController.java"
+    },
     "535103992": {
       "message": "Wallpaper may change!  Adjusting",
       "level": "VERBOSE",
@@ -2916,6 +2934,12 @@
       "level": "WARN",
       "group": "WM_DEBUG_LOCKTASK",
       "at": "com\/android\/server\/wm\/ActivityTaskManagerService.java"
+    },
+    "716528224": {
+      "message": "Focused window found using wmService.getFocusedWindowLocked()",
+      "level": "DEBUG",
+      "group": "WM_DEBUG_BACK_PREVIEW",
+      "at": "com\/android\/server\/wm\/BackNavigationController.java"
     },
     "726205185": {
       "message": "Moving to DESTROYED: %s (destroy skipped)",
@@ -3439,12 +3463,6 @@
       "group": "WM_ERROR",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"
     },
-    "1333520287": {
-      "message": "Creating PendingTransition: %s",
-      "level": "VERBOSE",
-      "group": "WM_DEBUG_WINDOW_TRANSITIONS",
-      "at": "com\/android\/server\/wm\/TransitionController.java"
-    },
     "1335791109": {
       "message": "createSurface %s: mDrawState=DRAW_PENDING",
       "level": "INFO",
@@ -3739,6 +3757,12 @@
       "group": "WM_DEBUG_IME",
       "at": "com\/android\/server\/wm\/InsetsStateController.java"
     },
+    "1667162379": {
+      "message": "Creating Pending Transition: %s",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_WINDOW_TRANSITIONS",
+      "at": "com\/android\/server\/wm\/WindowOrganizerController.java"
+    },
     "1670933628": {
       "message": " Setting allReady override",
       "level": "VERBOSE",
@@ -3792,6 +3816,12 @@
       "level": "WARN",
       "group": "WM_ERROR",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"
+    },
+    "1730300180": {
+      "message": "PendingStartTransaction found",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_SYNC_ENGINE",
+      "at": "com\/android\/server\/wm\/BLASTSyncEngine.java"
     },
     "1739298851": {
       "message": "removeWindowToken: Attempted to remove token: %s for non-exiting displayId=%d",
@@ -4105,12 +4135,6 @@
       "group": "WM_DEBUG_BOOT",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"
     },
-    "2034988903": {
-      "message": "PendingStartTransaction found",
-      "level": "VERBOSE",
-      "group": "WM_DEBUG_WINDOW_TRANSITIONS",
-      "at": "com\/android\/server\/wm\/WindowOrganizerController.java"
-    },
     "2039056415": {
       "message": "Found matching affinity candidate!",
       "level": "DEBUG",
@@ -4164,6 +4188,12 @@
       "level": "DEBUG",
       "group": "WM_DEBUG_KEEP_SCREEN_ON",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"
+    },
+    "2100457473": {
+      "message": "Task=%d contains embedded TaskFragment. Disabled all input during TaskFragment remote animation.",
+      "level": "DEBUG",
+      "group": "WM_DEBUG_APP_TRANSITIONS",
+      "at": "com\/android\/server\/wm\/AppTransitionController.java"
     },
     "2114149926": {
       "message": "Not removing %s because app died while it's visible",

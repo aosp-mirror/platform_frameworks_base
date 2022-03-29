@@ -37,9 +37,6 @@ final class FactoryErrorDialog extends BaseErrorDialog {
         attrs.setTitle("Factory Error");
         getWindow().setAttributes(attrs);
     }
-    
-    public void onStop() {
-    }
 
     @Override
     protected void closeDialog() {

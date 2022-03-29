@@ -247,7 +247,10 @@ public class ClipboardOverlayController {
                 SELF_PERMISSION, null);
         monitorOutsideTouches();
 
-        mContext.sendBroadcast(new Intent(COPY_OVERLAY_ACTION), SELF_PERMISSION);
+        Intent copyIntent = new Intent(COPY_OVERLAY_ACTION);
+        // Set package name so the system knows it's safe
+        copyIntent.setPackage(mContext.getPackageName());
+        mContext.sendBroadcast(copyIntent, SELF_PERMISSION);
     }
 
     void setClipData(ClipData clipData, String clipSource) {
@@ -291,6 +294,7 @@ public class ClipboardOverlayController {
                     OverlayActionChip chip = constructActionChip(action);
                     mActionContainer.addView(chip);
                     mActionChips.add(chip);
+                    break; // only show at most one action chip
                 }
             }
         });

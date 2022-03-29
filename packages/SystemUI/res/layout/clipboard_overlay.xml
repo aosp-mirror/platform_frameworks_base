@@ -18,6 +18,7 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:androidprv="http://schemas.android.com/apk/prv/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:theme="@style/FloatingOverlay"
     android:alpha="0"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
@@ -29,7 +30,6 @@
         android:src="@drawable/overlay_actions_background_protection"/>
     <com.android.systemui.screenshot.DraggableConstraintLayout
         android:id="@+id/clipboard_ui"
-        android:theme="@style/FloatingOverlay"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
         <ImageView
