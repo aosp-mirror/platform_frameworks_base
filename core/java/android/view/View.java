@@ -12032,7 +12032,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     @Nullable
     public Rect getHandwritingArea() {
         final ListenerInfo info = mListenerInfo;
-        if (info != null) {
+        if (info != null && info.mHandwritingArea != null) {
             return new Rect(info.mHandwritingArea);
         }
         return null;
