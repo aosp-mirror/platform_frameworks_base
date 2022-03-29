@@ -21,6 +21,8 @@ import static android.app.AppOpsManager.MODE_ALLOWED;
 import static android.app.AppOpsManager.MODE_FOREGROUND;
 import static android.app.AppOpsManager.MODE_IGNORED;
 import static android.app.AppOpsManager.OP_NONE;
+import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
+import static android.content.Intent.FLAG_ACTIVITY_NO_USER_ACTION;
 import static android.content.pm.PackageManager.ACTION_REQUEST_PERMISSIONS;
 import static android.content.pm.PackageManager.ACTION_REQUEST_PERMISSIONS_FOR_OTHER;
 import static android.content.pm.PackageManager.FLAG_PERMISSION_APPLY_RESTRICTION;
@@ -1181,6 +1183,8 @@ public final class PermissionPolicyService extends SystemService {
                 int taskId) {
             Intent grantPermission = mPackageManager
                     .buildRequestPermissionsIntent(new String[] { POST_NOTIFICATIONS });
+            // Prevent the front-most activity entering pip due to overlay activity started on top.
+            grantPermission.addFlags(FLAG_ACTIVITY_NEW_TASK | FLAG_ACTIVITY_NO_USER_ACTION);
             grantPermission.setAction(
                     ACTION_REQUEST_PERMISSIONS_FOR_OTHER);
             grantPermission.putExtra(Intent.EXTRA_PACKAGE_NAME, pkgName);
@@ -1188,13 +1192,15 @@ public final class PermissionPolicyService extends SystemService {
             ActivityOptions options = new ActivityOptions(new Bundle());
             options.setTaskOverlay(true, false);
             options.setLaunchTaskId(taskId);
-            try {
-                mHandler.postDelayed(() -> mContext.startActivityAsUser(
-                        grantPermission, options.toBundle(), user), ACTIVITY_START_DELAY_MS);
-            } catch (Exception e) {
-                Log.e(LOG_TAG, "couldn't start grant permission dialog"
-                        + "for other package " + pkgName, e);
-            }
+            mHandler.postDelayed(() -> {
+                try {
+                    mContext.startActivityAsUser(
+                            grantPermission, options.toBundle(), user);
+                } catch (Exception e) {
+                    Log.e(LOG_TAG, "couldn't start grant permission dialog"
+                            + "for other package " + pkgName, e);
+                }
+            }, ACTIVITY_START_DELAY_MS);
         }
 
         @Override
