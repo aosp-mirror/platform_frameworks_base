@@ -1232,6 +1232,7 @@ class TaskFragment extends WindowContainer<WindowContainer> {
 
             // This activity is now becoming visible.
             if (!next.mVisibleRequested || next.stopped || lastActivityTranslucent) {
+                next.app.addToPendingTop();
                 next.setVisibility(true);
             }
 

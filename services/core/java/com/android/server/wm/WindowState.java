@@ -3526,6 +3526,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                     "Setting visibility of " + this + ": " + clientVisible);
             mClient.dispatchAppVisibility(clientVisible);
         } catch (RemoteException e) {
+            Slog.w(TAG, "Exception thrown during dispatchAppVisibility " + this, e);
         }
     }
 

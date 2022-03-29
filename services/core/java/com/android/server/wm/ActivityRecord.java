@@ -1403,6 +1403,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                             + "activityRecord=%s", this);
             return false;
         }
+        if (onTop) {
+            app.addToPendingTop();
+        }
         try {
             ProtoLog.v(WM_DEBUG_STATES, "Sending position change to %s, onTop: %b",
                     this, onTop);
