@@ -287,6 +287,9 @@ public class Installer extends SystemService {
      * Sets in Installd that it is first boot after data wipe
      */
     public void setFirstBoot() throws InstallerException {
+        if (!checkBeforeRemote()) {
+            return;
+        }
         try {
             mInstalld.setFirstBoot();
         } catch (RemoteException e) {
