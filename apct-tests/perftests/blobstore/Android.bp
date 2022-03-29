@@ -22,17 +22,18 @@ package {
 }
 
 android_test {
-  name: "BlobStorePerfTests",
-  srcs: ["src/**/*.java"],
-  static_libs: [
-    "BlobStoreTestUtils",
-    "androidx.test.rules",
-    "androidx.annotation_annotation",
-    "apct-perftests-utils",
-    "ub-uiautomator",
-    "collector-device-lib-platform",
-  ],
-  platform_apis: true,
-  test_suites: ["device-tests"],
-  certificate: "platform",
+    name: "BlobStorePerfTests",
+    srcs: ["src/**/*.java"],
+    static_libs: [
+        "BlobStoreTestUtils",
+        "androidx.test.rules",
+        "androidx.annotation_annotation",
+        "apct-perftests-utils",
+        "ub-uiautomator",
+        "collector-device-lib-platform",
+        "androidx.benchmark_benchmark-macro",
+    ],
+    platform_apis: true,
+    test_suites: ["device-tests"],
+    certificate: "platform",
 }

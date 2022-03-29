@@ -601,14 +601,15 @@ public final class AccessibilityWindowsPopulator extends WindowInfosListener {
         // Data
         private IWindow mWindow;
         private int mDisplayId;
-        private int mFlags;
+        @WindowManager.LayoutParams.WindowType
         private int mType;
+        @InputWindowHandle.InputConfigFlags
+        private int mInputConfig;
         private int mPrivateFlags;
         private boolean mIsPIPMenu;
         private boolean mIsFocused;
         private boolean mShouldMagnify;
         private boolean mIgnoreDuetoRecentsAnimation;
-        private boolean mIsTrustedOverlay;
         private final Region mTouchableRegionInScreen = new Region();
         private final Region mTouchableRegionInWindow = new Region();
         private final Region mLetterBoxBounds = new Region();
@@ -631,7 +632,7 @@ public final class AccessibilityWindowsPopulator extends WindowInfosListener {
 
             instance.mWindow = inputWindowHandle.getWindow();
             instance.mDisplayId = inputWindowHandle.displayId;
-            instance.mFlags = inputWindowHandle.layoutParamsFlags;
+            instance.mInputConfig = inputWindowHandle.inputConfig;
             instance.mType = inputWindowHandle.layoutParamsType;
             instance.mIsPIPMenu = inputWindowHandle.getWindow().asBinder().equals(pipIBinder);
 
@@ -644,8 +645,6 @@ public final class AccessibilityWindowsPopulator extends WindowInfosListener {
             final RecentsAnimationController controller = service.getRecentsAnimationController();
             instance.mIgnoreDuetoRecentsAnimation = windowState != null && controller != null
                     && controller.shouldIgnoreForAccessibility(windowState);
-            instance.mIsTrustedOverlay =
-                    (inputWindowHandle.inputConfig & InputConfig.TRUSTED_OVERLAY) != 0;
 
             // TODO (b/199358388) : gets the letterbox bounds of the window from other way.
             if (windowState != null && windowState.areAppWindowBoundsLetterboxed()) {
@@ -680,13 +679,6 @@ public final class AccessibilityWindowsPopulator extends WindowInfosListener {
          */
         public void getTouchableRegionInWindow(Region outRegion) {
             outRegion.set(mTouchableRegionInWindow);
-        }
-
-        /**
-         * @return the layout parameter flag {@link android.view.WindowManager.LayoutParams#flags}.
-         */
-        public int getFlags() {
-            return mFlags;
         }
 
         /**
@@ -751,7 +743,14 @@ public final class AccessibilityWindowsPopulator extends WindowInfosListener {
          * @return true if this window is the trusted overlay.
          */
         public boolean isTrustedOverlay() {
-            return mIsTrustedOverlay;
+            return (mInputConfig & InputConfig.TRUSTED_OVERLAY) != 0;
+        }
+
+        /**
+         * @return true if this window is touchable.
+         */
+        public boolean isTouchable() {
+            return (mInputConfig & InputConfig.NOT_TOUCHABLE) == 0;
         }
 
         /**
@@ -824,8 +823,8 @@ public final class AccessibilityWindowsPopulator extends WindowInfosListener {
             windowInfo.displayId = window.mDisplayId;
             windowInfo.type = window.mType;
             windowInfo.token = window.mWindow.asBinder();
-            windowInfo.hasFlagWatchOutsideTouch = (window.mFlags
-                    & WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH) != 0;
+            windowInfo.hasFlagWatchOutsideTouch = (window.mInputConfig
+                    & InputConfig.WATCH_OUTSIDE_TOUCH) != 0;
             windowInfo.inPictureInPicture = false;
 
             // There only are two windowless windows now, one is split window, and the other
@@ -851,13 +850,13 @@ public final class AccessibilityWindowsPopulator extends WindowInfosListener {
         public String toString() {
             String builder = "A11yWindow=[" + mWindow.asBinder()
                     + ", displayId=" + mDisplayId
-                    + ", flag=0x" + Integer.toHexString(mFlags)
+                    + ", inputConfig=0x" + Integer.toHexString(mInputConfig)
                     + ", type=" + mType
                     + ", privateFlag=0x" + Integer.toHexString(mPrivateFlags)
                     + ", focused=" + mIsFocused
                     + ", shouldMagnify=" + mShouldMagnify
                     + ", ignoreDuetoRecentsAnimation=" + mIgnoreDuetoRecentsAnimation
-                    + ", isTrustedOverlay=" + mIsTrustedOverlay
+                    + ", isTrustedOverlay=" + isTrustedOverlay()
                     + ", regionInScreen=" + mTouchableRegionInScreen
                     + ", touchableRegion=" + mTouchableRegionInWindow
                     + ", letterBoxBounds=" + mLetterBoxBounds

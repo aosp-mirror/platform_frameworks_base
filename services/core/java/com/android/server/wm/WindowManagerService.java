@@ -8162,6 +8162,27 @@ public class WindowManagerService extends IWindowManager.Stub
                         .build();
             }
         }
+
+        @Override
+        public void replaceInputSurfaceTouchableRegionWithWindowCrop(
+                @NonNull SurfaceControl inputSurface,
+                @NonNull InputWindowHandle inputWindowHandle,
+                @NonNull IBinder windowToken) {
+            synchronized (mGlobalLock) {
+                final WindowState w = mWindowMap.get(windowToken);
+                if (w == null) {
+                    return;
+                }
+                // Make a copy of the InputWindowHandle to avoid leaking the window's
+                // SurfaceControl.
+                final InputWindowHandle localHandle = new InputWindowHandle(inputWindowHandle);
+                localHandle.replaceTouchableRegionWithCrop(w.getSurfaceControl());
+                final SurfaceControl.Transaction t = mTransactionFactory.get();
+                t.setInputWindowInfo(inputSurface, localHandle);
+                t.apply();
+                t.close();
+            }
+        }
     }
 
     void registerAppFreezeListener(AppFreezeListener listener) {

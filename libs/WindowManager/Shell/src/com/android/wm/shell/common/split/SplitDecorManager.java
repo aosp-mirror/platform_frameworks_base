@@ -124,6 +124,9 @@ public class SplitDecorManager extends WindowlessWindowManager {
 
     /** Releases the surfaces for split decor. */
     public void release(SurfaceControl.Transaction t) {
+        if (mFadeAnimator != null && mFadeAnimator.isRunning()) {
+            mFadeAnimator.cancel();
+        }
         if (mViewHost != null) {
             mViewHost.release();
             mViewHost = null;
@@ -139,6 +142,8 @@ public class SplitDecorManager extends WindowlessWindowManager {
         mHostLeash = null;
         mIcon = null;
         mResizingIconView = null;
+        mIsResizing = false;
+        mShown = false;
     }
 
     /** Showing resizing hint. */
@@ -181,13 +186,13 @@ public class SplitDecorManager extends WindowlessWindowManager {
             if (mFadeAnimator != null && mFadeAnimator.isRunning()) {
                 mFadeAnimator.cancel();
             }
-            startFadeAnimation(show, false /* releaseLeash */);
+            startFadeAnimation(show, false /* isResized */);
             mShown = show;
         }
     }
 
     /** Stops showing resizing hint. */
-    public void onResized(Rect newBounds, SurfaceControl.Transaction t) {
+    public void onResized(SurfaceControl.Transaction t) {
         if (mResizingIconView == null) {
             return;
         }
@@ -200,7 +205,7 @@ public class SplitDecorManager extends WindowlessWindowManager {
                 mFadeAnimator.addListener(new AnimatorListenerAdapter() {
                     @Override
                     public void onAnimationEnd(Animator animation) {
-                        releaseLeash(finishT);
+                        releaseDecor(finishT);
                         finishT.apply();
                         finishT.close();
                     }
@@ -212,22 +217,25 @@ public class SplitDecorManager extends WindowlessWindowManager {
             mFadeAnimator.cancel();
         }
         if (mShown) {
-            startFadeAnimation(false /* show */, true /* releaseLeash */);
-            mShown = false;
+            startFadeAnimation(false /* show */, true /* isResized */);
         } else {
-            // Surface is hidden so release it directly.
-            releaseLeash(t);
+            // Decor surface is hidden so release it directly.
+            releaseDecor(t);
         }
     }
 
-    private void startFadeAnimation(boolean show, boolean releaseLeash) {
+    private void startFadeAnimation(boolean show, boolean isResized) {
         final SurfaceControl.Transaction animT = new SurfaceControl.Transaction();
         mFadeAnimator = ValueAnimator.ofFloat(0f, 1f);
         mFadeAnimator.setDuration(FADE_DURATION);
         mFadeAnimator.addUpdateListener(valueAnimator-> {
             final float progress = (float) valueAnimator.getAnimatedValue();
-            animT.setAlpha(mBackgroundLeash, show ? progress : 1 - progress);
-            animT.setAlpha(mIconLeash, show ? progress : 1 - progress);
+            if (mBackgroundLeash != null) {
+                animT.setAlpha(mBackgroundLeash, show ? progress : 1 - progress);
+            }
+            if (mIconLeash != null) {
+                animT.setAlpha(mIconLeash, show ? progress : 1 - progress);
+            }
             animT.apply();
         });
         mFadeAnimator.addListener(new AnimatorListenerAdapter() {
@@ -241,19 +249,25 @@ public class SplitDecorManager extends WindowlessWindowManager {
             @Override
             public void onAnimationEnd(@NonNull Animator animation) {
                 if (!show) {
-                    animT.hide(mBackgroundLeash).hide(mIconLeash).apply();
+                    if (mBackgroundLeash != null) {
+                        animT.hide(mBackgroundLeash);
+                    }
+                    if (mIconLeash != null) {
+                        animT.hide(mIconLeash);
+                    }
                 }
-                if (releaseLeash) {
-                    releaseLeash(animT);
-                    animT.apply();
+                if (isResized) {
+                    releaseDecor(animT);
                 }
+                animT.apply();
                 animT.close();
             }
         });
         mFadeAnimator.start();
     }
 
-    private void releaseLeash(SurfaceControl.Transaction t) {
+    /** Release or hide decor hint. */
+    private void releaseDecor(SurfaceControl.Transaction t) {
         if (mBackgroundLeash != null) {
             t.remove(mBackgroundLeash);
             mBackgroundLeash = null;

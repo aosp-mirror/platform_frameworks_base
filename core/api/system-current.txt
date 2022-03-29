@@ -2675,7 +2675,13 @@ package android.app.wallpapereffectsgeneration {
     method @NonNull public String getTaskId();
     method @NonNull public java.util.List<android.app.wallpapereffectsgeneration.TexturedMesh> getTexturedMeshes();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field public static final int CINEMATIC_EFFECT_STATUS_ANIMATION_FAILURE = 10; // 0xa
+    field public static final int CINEMATIC_EFFECT_STATUS_CONTENT_TARGET_ERROR = 8; // 0x8
+    field public static final int CINEMATIC_EFFECT_STATUS_CONTENT_TOO_FLAT = 9; // 0x9
+    field public static final int CINEMATIC_EFFECT_STATUS_CONTENT_UNSUPPORTED = 7; // 0x7
     field public static final int CINEMATIC_EFFECT_STATUS_ERROR = 0; // 0x0
+    field public static final int CINEMATIC_EFFECT_STATUS_FEATURE_DISABLED = 5; // 0x5
+    field public static final int CINEMATIC_EFFECT_STATUS_IMAGE_FORMAT_NOT_SUITABLE = 6; // 0x6
     field public static final int CINEMATIC_EFFECT_STATUS_NOT_READY = 2; // 0x2
     field public static final int CINEMATIC_EFFECT_STATUS_OK = 1; // 0x1
     field public static final int CINEMATIC_EFFECT_STATUS_PENDING = 3; // 0x3

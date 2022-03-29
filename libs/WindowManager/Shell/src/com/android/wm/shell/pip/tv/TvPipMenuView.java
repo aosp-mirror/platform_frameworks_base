@@ -303,7 +303,7 @@ public class TvPipMenuView extends FrameLayout implements View.OnClickListener {
      */
     private boolean actionsMatch(RemoteAction action1, RemoteAction action2) {
         if (action1 == action2) return true;
-        if (action1 == null) return false;
+        if (action1 == null || action2 == null) return false;
         return Objects.equals(action1.getTitle(), action2.getTitle())
                 && Objects.equals(action1.getContentDescription(), action2.getContentDescription())
                 && Objects.equals(action1.getActionIntent(), action2.getActionIntent());
