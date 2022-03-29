@@ -808,8 +808,7 @@
     <string name="media_move_closer_to_end_cast" msgid="6495907340926563656">"Pokud zde chcete přehrávat média, přibližte se k zařízení <xliff:g id="DEVICENAME">%1$s</xliff:g>"</string>
     <string name="media_transfer_playing_different_device" msgid="7186806382609785610">"Přehrávání v zařízení <xliff:g id="DEVICENAME">%1$s</xliff:g>"</string>
     <string name="media_transfer_playing_this_device" msgid="1856890686844499172">"Přehrávání v tomto telefonu"</string>
-    <!-- no translation found for media_transfer_failed (7955354964610603723) -->
-    <skip />
+    <string name="media_transfer_failed" msgid="7955354964610603723">"Došlo k chybě. Zkuste to znovu."</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"Neaktivní, zkontrolujte aplikaci"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"Nenalezeno"</string>
     <string name="controls_error_removed_title" msgid="1207794911208047818">"Ovládání není k dispozici"</string>

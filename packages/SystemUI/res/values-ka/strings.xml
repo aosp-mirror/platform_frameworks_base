@@ -775,8 +775,7 @@
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"გადაფურცლეთ მეტის სანახავად"</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"მიმდინარეობს რეკომენდაციების ჩატვირთვა"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"მედია"</string>
-    <!-- no translation found for controls_media_close_session (4780485355795635052) -->
-    <skip />
+    <string name="controls_media_close_session" msgid="4780485355795635052">"დაიმალოს მედიის ეს კონტროლერი <xliff:g id="APP_NAME">%1$s</xliff:g> აპში?"</string>
     <string name="controls_media_active_session" msgid="3146882316024153337">"მედიის მიმდინარე სესიის დამალვა შეუძლებელია."</string>
     <string name="controls_media_dismiss_button" msgid="4485675693008031646">"დამალვა"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"გაგრძელება"</string>

@@ -796,8 +796,7 @@
     <string name="media_move_closer_to_end_cast" msgid="6495907340926563656">"Sogeza karibu na <xliff:g id="DEVICENAME">%1$s</xliff:g> ili kucheza hapa"</string>
     <string name="media_transfer_playing_different_device" msgid="7186806382609785610">"Inacheza kwenye <xliff:g id="DEVICENAME">%1$s</xliff:g>"</string>
     <string name="media_transfer_playing_this_device" msgid="1856890686844499172">"Inacheza kwenye simu hii"</string>
-    <!-- no translation found for media_transfer_failed (7955354964610603723) -->
-    <skip />
+    <string name="media_transfer_failed" msgid="7955354964610603723">"Hitilafu fulani imetokea. Jaribu tena."</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"Haitumiki, angalia programu"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"Hakipatikani"</string>
     <string name="controls_error_removed_title" msgid="1207794911208047818">"Kidhibiti hakipatikani"</string>

@@ -114,7 +114,7 @@
     <string name="accessibility_phone_button" msgid="4256353121703100427">"Tālruņa numurs"</string>
     <string name="accessibility_voice_assist_button" msgid="6497706615649754510">"Balss palīgs"</string>
     <string name="accessibility_wallet_button" msgid="1458258783460555507">"Maks"</string>
-    <string name="accessibility_qr_code_scanner_button" msgid="7521277927692910795">"Ātrās atbildes koda skeneris"</string>
+    <string name="accessibility_qr_code_scanner_button" msgid="7521277927692910795">"Kvadrātkoda skeneris"</string>
     <string name="accessibility_unlock_button" msgid="122785427241471085">"Atbloķēt"</string>
     <string name="accessibility_lock_icon" msgid="661492842417875775">"Ierīce ir bloķēta"</string>
     <string name="accessibility_scanning_face" msgid="3093828357921541387">"Sejas skenēšana"</string>
@@ -453,7 +453,7 @@
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"Lai izmantotu, atbloķējiet ekrānu"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"Ienesot jūsu kartes, radās problēma. Lūdzu, vēlāk mēģiniet vēlreiz."</string>
     <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"Bloķēšanas ekrāna iestatījumi"</string>
-    <string name="qr_code_scanner_title" msgid="5290201053875420785">"QR koda skenēšana"</string>
+    <string name="qr_code_scanner_title" msgid="5290201053875420785">"Kvadrātkoda skenēšana"</string>
     <string name="status_bar_work" msgid="5238641949837091056">"Darba profils"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"Lidojuma režīms"</string>
     <string name="zen_alarm_warning" msgid="7844303238486849503">"Nākamais signāls (<xliff:g id="WHEN">%1$s</xliff:g>) netiks atskaņots."</string>
@@ -802,8 +802,7 @@
     <string name="media_move_closer_to_end_cast" msgid="6495907340926563656">"Pārvietojieties tuvāk ierīcei “<xliff:g id="DEVICENAME">%1$s</xliff:g>”, lai atskaņotu šeit"</string>
     <string name="media_transfer_playing_different_device" msgid="7186806382609785610">"Notiek atskaņošana ierīcē <xliff:g id="DEVICENAME">%1$s</xliff:g>."</string>
     <string name="media_transfer_playing_this_device" msgid="1856890686844499172">"Notiek atskaņošana šajā tālrunī"</string>
-    <!-- no translation found for media_transfer_failed (7955354964610603723) -->
-    <skip />
+    <string name="media_transfer_failed" msgid="7955354964610603723">"Radās kļūda. Mēģiniet vēlreiz."</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"Neaktīva, pārbaudiet lietotni"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"Netika atrasta"</string>
     <string name="controls_error_removed_title" msgid="1207794911208047818">"Vadīkla nav pieejama"</string>
