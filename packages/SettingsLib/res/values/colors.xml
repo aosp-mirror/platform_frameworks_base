@@ -40,4 +40,10 @@
     <color name="light_mode_icon_color_single_tone">#ffffff</color>
 
     <color name="user_avatar_color_bg">?android:attr/colorBackgroundFloating</color>
+
+    <!-- QR code scanner colors -->
+    <color name="qr_corner_line_color">#ffdadce0</color>
+    <color name="qr_focused_corner_line_color">#ff1a73e8</color>
+    <color name="qr_background_color">#b3ffffff</color> <!-- 70% white transparency -->
+    <!-- End of QR code scanner colors -->
 </resources>
