@@ -757,7 +757,7 @@ public class JobSchedulerServiceTest {
         job.setStandbyBucket(RARE_INDEX);
 
         // Not enough RARE jobs to run.
-        mService.mPendingJobQueue.clear();
+        mService.getPendingJobQueue().clear();
         maybeQueueFunctor.reset();
         for (int i = 0; i < mService.mConstants.MIN_READY_NON_ACTIVE_JOBS_COUNT / 2; ++i) {
             maybeQueueFunctor.accept(job);
@@ -766,10 +766,10 @@ public class JobSchedulerServiceTest {
             assertEquals(sElapsedRealtimeClock.millis(), job.getFirstForceBatchedTimeElapsed());
         }
         maybeQueueFunctor.postProcessLocked();
-        assertEquals(0, mService.mPendingJobQueue.size());
+        assertEquals(0, mService.getPendingJobQueue().size());
 
         // Enough RARE jobs to run.
-        mService.mPendingJobQueue.clear();
+        mService.getPendingJobQueue().clear();
         maybeQueueFunctor.reset();
         for (int i = 0; i < mService.mConstants.MIN_READY_NON_ACTIVE_JOBS_COUNT; ++i) {
             maybeQueueFunctor.accept(job);
@@ -778,10 +778,10 @@ public class JobSchedulerServiceTest {
             assertEquals(sElapsedRealtimeClock.millis(), job.getFirstForceBatchedTimeElapsed());
         }
         maybeQueueFunctor.postProcessLocked();
-        assertEquals(5, mService.mPendingJobQueue.size());
+        assertEquals(5, mService.getPendingJobQueue().size());
 
         // Not enough RARE jobs to run, but a non-batched job saves the day.
-        mService.mPendingJobQueue.clear();
+        mService.getPendingJobQueue().clear();
         maybeQueueFunctor.reset();
         JobStatus activeJob = createJobStatus(
                 "testRareJobBatching",
@@ -795,10 +795,10 @@ public class JobSchedulerServiceTest {
         }
         maybeQueueFunctor.accept(activeJob);
         maybeQueueFunctor.postProcessLocked();
-        assertEquals(3, mService.mPendingJobQueue.size());
+        assertEquals(3, mService.getPendingJobQueue().size());
 
         // Not enough RARE jobs to run, but an old RARE job saves the day.
-        mService.mPendingJobQueue.clear();
+        mService.getPendingJobQueue().clear();
         maybeQueueFunctor.reset();
         JobStatus oldRareJob = createJobStatus("testRareJobBatching", createJobInfo());
         oldRareJob.setStandbyBucket(RARE_INDEX);
@@ -814,7 +814,7 @@ public class JobSchedulerServiceTest {
         maybeQueueFunctor.accept(oldRareJob);
         assertEquals(oldBatchTime, oldRareJob.getFirstForceBatchedTimeElapsed());
         maybeQueueFunctor.postProcessLocked();
-        assertEquals(3, mService.mPendingJobQueue.size());
+        assertEquals(3, mService.getPendingJobQueue().size());
     }
 
     /** Tests that jobs scheduled by the app itself are counted towards scheduling limits. */

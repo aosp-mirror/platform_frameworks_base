@@ -19,6 +19,8 @@ package com.android.server.devicepolicy;
 import static android.app.admin.DevicePolicyManager.NEARBY_STREAMING_SAME_MANAGED_ACCOUNT_ONLY;
 import static android.app.admin.DevicePolicyManager.PASSWORD_COMPLEXITY_NONE;
 import static android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED;
+import static android.app.admin.WifiSsidPolicy.WIFI_SSID_POLICY_TYPE_ALLOWLIST;
+import static android.app.admin.WifiSsidPolicy.WIFI_SSID_POLICY_TYPE_DENYLIST;
 
 import static com.android.server.devicepolicy.DevicePolicyManagerService.LOG_TAG;
 
@@ -33,7 +35,9 @@ import android.app.admin.DevicePolicyManager;
 import android.app.admin.FactoryResetProtectionPolicy;
 import android.app.admin.PasswordPolicy;
 import android.app.admin.PreferentialNetworkServiceConfig;
+import android.app.admin.WifiSsidPolicy;
 import android.graphics.Color;
+import android.net.wifi.WifiSsid;
 import android.os.Bundle;
 import android.os.PersistableBundle;
 import android.os.UserHandle;
@@ -53,6 +57,7 @@ import com.android.server.utils.Slogf;
 import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -60,6 +65,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 class ActiveAdmin {
     private static final String TAG_DISABLE_KEYGUARD_FEATURES = "disable-keyguard-features";
@@ -242,13 +248,8 @@ class ActiveAdmin {
     // List of package names to keep cached.
     List<String> keepUninstalledPackages;
 
-    // The allowlist of SSIDs the device may connect to.
-    // By default, the allowlist restriction is deactivated.
-    List<String> mSsidAllowlist;
-
-    // The denylist of SSIDs the device may not connect to.
-    // By default, the denylist restriction is deactivated.
-    List<String> mSsidDenylist;
+    // Wi-Fi SSID restriction policy.
+    WifiSsidPolicy mWifiSsidPolicy;
 
     // TODO: review implementation decisions with frameworks team
     boolean specifiesGlobalProxy = false;
@@ -594,12 +595,20 @@ class ActiveAdmin {
         if (mWifiMinimumSecurityLevel != DevicePolicyManager.WIFI_SECURITY_OPEN) {
             writeAttributeValueToXml(out, TAG_WIFI_MIN_SECURITY, mWifiMinimumSecurityLevel);
         }
-        if (mSsidAllowlist != null && !mSsidAllowlist.isEmpty()) {
-            writeAttributeValuesToXml(out, TAG_SSID_ALLOWLIST, TAG_SSID, mSsidAllowlist);
+        if (mWifiSsidPolicy != null) {
+            List<String> ssids = ssidsToStrings(mWifiSsidPolicy.getSsids());
+            if (mWifiSsidPolicy.getPolicyType() == WIFI_SSID_POLICY_TYPE_ALLOWLIST) {
+                writeAttributeValuesToXml(out, TAG_SSID_ALLOWLIST, TAG_SSID, ssids);
+            } else if (mWifiSsidPolicy.getPolicyType() == WIFI_SSID_POLICY_TYPE_DENYLIST) {
+                writeAttributeValuesToXml(out, TAG_SSID_DENYLIST, TAG_SSID, ssids);
+            }
         }
-        if (mSsidDenylist != null && !mSsidDenylist.isEmpty()) {
-            writeAttributeValuesToXml(out, TAG_SSID_DENYLIST, TAG_SSID, mSsidDenylist);
-        }
+    }
+
+    private List<String> ssidsToStrings(Set<WifiSsid> ssids) {
+        return ssids.stream()
+                .map(ssid -> new String(ssid.getBytes(), StandardCharsets.UTF_8))
+                .collect(Collectors.toList());
     }
 
     void writeTextToXml(TypedXmlSerializer out, String tag, String text) throws IOException {
@@ -855,16 +864,28 @@ class ActiveAdmin {
             } else if (TAG_WIFI_MIN_SECURITY.equals(tag)) {
                 mWifiMinimumSecurityLevel = parser.getAttributeInt(null, ATTR_VALUE);
             } else if (TAG_SSID_ALLOWLIST.equals(tag)) {
-                mSsidAllowlist = new ArrayList<>();
-                readAttributeValues(parser, TAG_SSID, mSsidAllowlist);
+                List<WifiSsid> ssids = readWifiSsids(parser, TAG_SSID);
+                mWifiSsidPolicy = new WifiSsidPolicy(
+                        WIFI_SSID_POLICY_TYPE_ALLOWLIST, new ArraySet<>(ssids));
             } else if (TAG_SSID_DENYLIST.equals(tag)) {
-                mSsidDenylist = new ArrayList<>();
-                readAttributeValues(parser, TAG_SSID, mSsidDenylist);
+                List<WifiSsid> ssids = readWifiSsids(parser, TAG_SSID);
+                mWifiSsidPolicy = new WifiSsidPolicy(
+                        WIFI_SSID_POLICY_TYPE_DENYLIST, new ArraySet<>(ssids));
             } else {
                 Slogf.w(LOG_TAG, "Unknown admin tag: %s", tag);
                 XmlUtils.skipCurrentTag(parser);
             }
         }
+    }
+
+    private List<WifiSsid> readWifiSsids(TypedXmlPullParser parser, String tag)
+            throws XmlPullParserException, IOException {
+        List<String> ssidStrings = new ArrayList<>();
+        readAttributeValues(parser, tag, ssidStrings);
+        List<WifiSsid> ssids = ssidStrings.stream()
+                .map(ssid -> WifiSsid.fromBytes(ssid.getBytes(StandardCharsets.UTF_8)))
+                .collect(Collectors.toList());
+        return ssids;
     }
 
     private List<String> readPackageList(TypedXmlPullParser parser,
@@ -1222,11 +1243,14 @@ class ActiveAdmin {
         pw.print("mWifiMinimumSecurityLevel=");
         pw.println(mWifiMinimumSecurityLevel);
 
-        pw.print("mSsidAllowlist=");
-        pw.println(mSsidAllowlist);
-
-        pw.print("mSsidDenylist=");
-        pw.println(mSsidDenylist);
+        if (mWifiSsidPolicy != null) {
+            if (mWifiSsidPolicy.getPolicyType() == WIFI_SSID_POLICY_TYPE_ALLOWLIST) {
+                pw.print("mSsidAllowlist=");
+            } else {
+                pw.print("mSsidDenylist=");
+            }
+            pw.println(ssidsToStrings(mWifiSsidPolicy.getSsids()));
+        }
 
         if (mFactoryResetProtectionPolicy != null) {
             pw.println("mFactoryResetProtectionPolicy:");

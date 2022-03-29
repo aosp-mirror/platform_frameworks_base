@@ -35,6 +35,7 @@ import android.accounts.AccountManagerInternal;
 import android.accounts.CantAddAccountActivity;
 import android.accounts.IAccountManagerResponse;
 import android.app.AppOpsManager;
+import android.app.PropertyInvalidatedCache;
 import android.app.INotificationManager;
 import android.app.PropertyInvalidatedCache;
 import android.app.admin.DevicePolicyManager;

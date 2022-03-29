@@ -2949,6 +2949,27 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
     }
 
+    /**
+     * If the caller is an {@link Process#isSdkSandboxUid(int) SDK sandbox uid}, enforces that the
+     * SDK sandbox has permission to start or bind to a given service.
+     *
+     * @param intent the intent used to start or bind to the service.
+     * @throws IllegalStateException if {@link SdkSandboxManagerLocal} cannot be resolved.
+     * @throws SecurityException if the SDK sandbox is not allowed to bind to this service.
+     */
+    private void enforceAllowedToStartOrBindServiceIfSdkSandbox(Intent intent) {
+        if (Process.isSdkSandboxUid(Binder.getCallingUid())) {
+            SdkSandboxManagerLocal sdkSandboxManagerLocal =
+                    LocalManagerRegistry.getManager(SdkSandboxManagerLocal.class);
+            if (sdkSandboxManagerLocal != null) {
+                sdkSandboxManagerLocal.enforceAllowedToStartOrBindService(intent);
+            } else {
+                throw new IllegalStateException("SdkSandboxManagerLocal not found when checking"
+                        + " whether SDK sandbox uid may start or bind to a service.");
+            }
+        }
+    }
+
     @Override
     public void setPackageScreenCompatMode(String packageName, int mode) {
         mActivityTaskManager.setPackageScreenCompatMode(packageName, mode);
@@ -12363,6 +12384,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             String callingFeatureId, int userId)
             throws TransactionTooLargeException {
         enforceNotIsolatedCaller("startService");
+        enforceAllowedToStartOrBindServiceIfSdkSandbox(service);
         // Refuse possible leaked file descriptors
         if (service != null && service.hasFileDescriptors() == true) {
             throw new IllegalArgumentException("File descriptors passed in Intent");
@@ -12523,6 +12545,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             String sdkSandboxClientAppPackage, String callingPackage, int userId)
             throws TransactionTooLargeException {
         enforceNotIsolatedCaller("bindService");
+        enforceAllowedToStartOrBindServiceIfSdkSandbox(service);
 
         // Refuse possible leaked file descriptors
         if (service != null && service.hasFileDescriptors() == true) {
@@ -13646,6 +13669,16 @@ public class ActivityManagerService extends IActivityManager.Stub
                     Slog.i(TAG, "Broadcast action " + action + " forcing include-background");
                 }
                 intent.addFlags(Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND);
+            }
+
+            if (Process.isSdkSandboxUid(realCallingUid)) {
+                SdkSandboxManagerLocal sdkSandboxManagerLocal = LocalManagerRegistry.getManager(
+                        SdkSandboxManagerLocal.class);
+                if (sdkSandboxManagerLocal == null) {
+                    throw new IllegalStateException("SdkSandboxManagerLocal not found when sending"
+                            + " a broadcast from an SDK sandbox uid.");
+                }
+                sdkSandboxManagerLocal.enforceAllowedToSendBroadcast(intent);
             }
 
             switch (action) {

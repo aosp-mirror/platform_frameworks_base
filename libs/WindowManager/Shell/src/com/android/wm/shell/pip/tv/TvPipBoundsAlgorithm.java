@@ -95,13 +95,14 @@ public class TvPipBoundsAlgorithm extends PipBoundsAlgorithm {
             ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
                     "%s: getEntryDestinationBounds()", TAG);
         }
-        if (mTvPipBoundsState.isTvExpandedPipSupported()
+        updateExpandedPipSize();
+        final boolean isPipExpanded = mTvPipBoundsState.isTvExpandedPipSupported()
                 && mTvPipBoundsState.getDesiredTvExpandedAspectRatio() != 0
-                && !mTvPipBoundsState.isTvPipManuallyCollapsed()) {
-            updateExpandedPipSize();
+                && !mTvPipBoundsState.isTvPipManuallyCollapsed();
+        if (isPipExpanded) {
             updateGravityOnExpandToggled(Gravity.NO_GRAVITY, true);
-            mTvPipBoundsState.setTvPipExpanded(true);
         }
+        mTvPipBoundsState.setTvPipExpanded(isPipExpanded);
         return getTvPipBounds().getBounds();
     }
 

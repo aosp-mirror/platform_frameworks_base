@@ -1486,6 +1486,10 @@ public final class PermissionManager {
         }
     }
 
+    // Only warn once for assuming that root or system UID has a permission
+    // to reduce duplicate logcat output.
+    private static volatile boolean sShouldWarnMissingActivityManager = true;
+
     /* @hide */
     private static int checkPermissionUncached(@Nullable String permission, int pid, int uid) {
         final IActivityManager am = ActivityManager.getService();
@@ -1495,8 +1499,11 @@ public final class PermissionManager {
             // permission this is.
             final int appId = UserHandle.getAppId(uid);
             if (appId == Process.ROOT_UID || appId == Process.SYSTEM_UID) {
-                Slog.w(LOG_TAG, "Missing ActivityManager; assuming " + uid + " holds "
-                        + permission);
+                if (sShouldWarnMissingActivityManager) {
+                    Slog.w(LOG_TAG, "Missing ActivityManager; assuming " + uid + " holds "
+                            + permission);
+                    sShouldWarnMissingActivityManager = false;
+                }
                 return PackageManager.PERMISSION_GRANTED;
             }
             Slog.w(LOG_TAG, "Missing ActivityManager; assuming " + uid + " does not hold "
@@ -1504,6 +1511,7 @@ public final class PermissionManager {
             return PackageManager.PERMISSION_DENIED;
         }
         try {
+            sShouldWarnMissingActivityManager = true;
             return am.checkPermission(permission, pid, uid);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();

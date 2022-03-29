@@ -19,6 +19,8 @@ package android.view;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.graphics.Rect;
+import android.util.DisplayMetrics;
+import android.util.TypedValue;
 import android.view.inputmethod.InputMethodManager;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -49,6 +51,12 @@ import java.util.List;
  * @hide
  */
 public class HandwritingInitiator {
+    /** The amount of extra space added to handwriting in dip. */
+    private static final int HANDWRITING_AREA_PADDING_DIP = 20;
+
+    /** The amount of extra space added to handwriting in px. */
+    private final float mHandwritingAreaPaddingPx;
+
     /**
      * The touchSlop from {@link ViewConfiguration} used to decide whether a pointer is considered
      * moving or stationary.
@@ -88,9 +96,13 @@ public class HandwritingInitiator {
 
     @VisibleForTesting
     public HandwritingInitiator(@NonNull ViewConfiguration viewConfiguration,
-            @NonNull InputMethodManager inputMethodManager) {
+            @NonNull InputMethodManager inputMethodManager, DisplayMetrics displayMetrics) {
         mTouchSlop = viewConfiguration.getScaledTouchSlop();
         mHandwritingTimeoutInMillis = ViewConfiguration.getLongPressTimeout();
+        mHandwritingAreaPaddingPx = TypedValue.applyDimension(
+                TypedValue.COMPLEX_UNIT_DIP,
+                HANDWRITING_AREA_PADDING_DIP,
+                displayMetrics);
         mImm = inputMethodManager;
     }
 
@@ -250,7 +262,8 @@ public class HandwritingInitiator {
         }
 
         final Rect handwritingArea = getViewHandwritingArea(connectedView);
-        if (contains(handwritingArea, mState.mStylusDownX, mState.mStylusDownY)) {
+        if (containsInExtendedHandwritingArea(handwritingArea,
+                mState.mStylusDownX, mState.mStylusDownY)) {
             startHandwriting(connectedView);
         } else {
             reset();
@@ -281,14 +294,21 @@ public class HandwritingInitiator {
      */
     @Nullable
     private View findBestCandidateView(float x, float y) {
+        float minDistance = Float.MAX_VALUE;
+        View bestCandidate = null;
+
         // If the connectedView is not null and do not set any handwriting area, it will check
         // whether the connectedView's boundary contains the initial stylus position. If true,
         // directly return the connectedView.
         final View connectedView = getConnectedView();
         if (connectedView != null && connectedView.isAutoHandwritingEnabled()) {
-            final Rect handwritingArea = getViewHandwritingArea(connectedView);
-            if (contains(handwritingArea, x, y)) {
-                return connectedView;
+            Rect handwritingArea = getViewHandwritingArea(connectedView);
+            if (containsInExtendedHandwritingArea(handwritingArea, x, y)) {
+                final float distance = distance(handwritingArea, x, y);
+                if (distance == 0f) return connectedView;
+
+                bestCandidate = connectedView;
+                minDistance = distance;
             }
         }
 
@@ -297,18 +317,78 @@ public class HandwritingInitiator {
                 mHandwritingAreasTracker.computeViewInfos();
         for (HandwritableViewInfo viewInfo : handwritableViewInfos) {
             final View view = viewInfo.getView();
-            if (!view.isAutoHandwritingEnabled()) continue;
-            if (contains(viewInfo.getHandwritingArea(), x, y)) {
-                return viewInfo.getView();
+            final Rect handwritingArea = viewInfo.getHandwritingArea();
+            if (!containsInExtendedHandwritingArea(handwritingArea, x, y)) continue;
+
+            final float distance = distance(handwritingArea, x, y);
+
+            if (distance == 0f) return view;
+            if (distance < minDistance) {
+                minDistance = distance;
+                bestCandidate = view;
             }
         }
-        return null;
+        return bestCandidate;
+    }
+
+    /**
+     *  Return the square of the distance from point (x, y) to the given rect, which is mainly used
+     *  for comparison. The distance is defined to be: the shortest distance between (x, y) to any
+     *  point on rect. When (x, y) is contained by the rect, return 0f.
+     */
+    private static float distance(@NonNull Rect rect, float x, float y) {
+        if (contains(rect, x, y, 0f, 0f, 0f, 0f)) {
+            return 0f;
+        }
+
+        /* The distance between point (x, y) and rect, there are 2 basic cases:
+         * a) The distance is the distance from (x, y) to the closest corner on rect.
+         *                    o |     |
+         *         ---+-----+---
+         *            |     |
+         *         ---+-----+---
+         *            |     |
+         * b) The distance is the distance from (x, y) to the closest edge on rect.
+         *                      |  o  |
+         *         ---+-----+---
+         *            |     |
+         *         ---+-----+---
+         *            |     |
+         * We define xDistance as following(similar for yDistance):
+         *   If x is in [left, right) 0, else min(abs(x - left), abs(x - y))
+         * For case a, sqrt(xDistance^2 + yDistance^2) is the final distance.
+         * For case b, distance should be yDistance, which is also equal to
+         * sqrt(xDistance^2 + yDistance^2) because xDistance is 0.
+         */
+        final float xDistance;
+        if (x >= rect.left && x < rect.right) {
+            xDistance = 0f;
+        } else if (x < rect.left) {
+            xDistance = rect.left - x;
+        } else {
+            xDistance = x - rect.right;
+        }
+
+        final float yDistance;
+        if (y >= rect.top && y < rect.bottom) {
+            yDistance = 0f;
+        } else if (y < rect.top) {
+            yDistance = rect.top - y;
+        } else {
+            yDistance = y - rect.bottom;
+        }
+        // We can omit sqrt here because we only need the distance for comparison.
+        return xDistance * xDistance + yDistance * yDistance;
     }
 
     /**
      * Return the handwriting area of the given view, represented in the window's coordinate.
      * If the view didn't set any handwriting area, it will return the view's boundary.
      * It will return null if the view or its handwriting area is not visible.
+     *
+     * The handwriting area is clipped to its visible part.
+     * Notice that the returned rectangle is the view's original handwriting area without the
+     * view's handwriting area extends.
      */
     @Nullable
     private static Rect getViewHandwritingArea(@NonNull View view) {
@@ -329,11 +409,24 @@ public class HandwritingInitiator {
     }
 
     /**
-     * Return true if the (x, y) is inside by the given {@link Rect}.
+     * Return true if the (x, y) is inside by the given {@link Rect} extended by the View's
+     * handwriting extends settings.
      */
-    private boolean contains(@Nullable Rect rect, float x, float y) {
-        if (rect == null) return false;
-        return x >= rect.left && x < rect.right && y >= rect.top && y < rect.bottom;
+    private boolean containsInExtendedHandwritingArea(@Nullable Rect handwritingArea,
+            float x, float y) {
+        if (handwritingArea == null) return false;
+        return contains(handwritingArea, x, y, mHandwritingAreaPaddingPx, mHandwritingAreaPaddingPx,
+                mHandwritingAreaPaddingPx, mHandwritingAreaPaddingPx);
+    }
+
+    /**
+     * Return true if the (x, y) is inside by the given {@link Rect} extended by the given
+     * extendLeft, extendTop, extendRight and extendBottom.
+     */
+    private static boolean contains(@NonNull Rect rect, float x, float y,
+            float extendLeft, float extendTop, float extendRight, float extendBottom) {
+        return x >= rect.left - extendLeft && x < rect.right  + extendRight
+                && y >= rect.top - extendTop && y < rect.bottom + extendBottom;
     }
 
     private boolean largerThanTouchSlop(float x1, float y1, float x2, float y2) {
