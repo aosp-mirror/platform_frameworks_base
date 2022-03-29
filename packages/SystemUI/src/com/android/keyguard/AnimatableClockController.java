@@ -23,7 +23,9 @@ import android.content.IntentFilter;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.icu.text.NumberFormat;
+import android.util.Log;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.VisibleForTesting;
 
 import com.android.settingslib.Utils;
@@ -34,6 +36,7 @@ import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.util.ViewController;
 
+import java.io.PrintWriter;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.TimeZone;
@@ -43,6 +46,7 @@ import java.util.TimeZone;
  * {@link KeyguardClockSwitchController}.
  */
 public class AnimatableClockController extends ViewController<AnimatableClockView> {
+    private static final String TAG = "AnimatableClockCtrl";
     private static final int FORMAT_NUMBER = 1234567890;
 
     private final StatusBarStateController mStatusBarStateController;
@@ -140,6 +144,7 @@ public class AnimatableClockController extends ViewController<AnimatableClockVie
 
     @Override
     protected void onViewAttached() {
+        Log.d(TAG, "onViewAttached mView=" + mView);
         updateLocale();
         mBroadcastDispatcher.registerReceiver(mLocaleBroadcastReceiver,
                 new IntentFilter(Intent.ACTION_LOCALE_CHANGED));
@@ -157,6 +162,7 @@ public class AnimatableClockController extends ViewController<AnimatableClockVie
 
     @Override
     protected void onViewDetached() {
+        Log.d(TAG, "onViewDetached mView=" + mView);
         mBroadcastDispatcher.unregisterReceiver(mLocaleBroadcastReceiver);
         mKeyguardUpdateMonitor.removeCallback(mKeyguardUpdateMonitorCallback);
         mBatteryController.removeCallback(mBatteryCallback);
@@ -222,5 +228,13 @@ public class AnimatableClockController extends ViewController<AnimatableClockVie
                 com.android.systemui.R.attr.wallpaperTextColorAccent);
         mView.setColors(mDozingColor, mLockScreenColor);
         mView.animateDoze(mIsDozing, false);
+    }
+
+    /**
+     * Dump information for debugging
+     */
+    public void dump(@NonNull PrintWriter pw) {
+        pw.println(this);
+        mView.dump(pw);
     }
 }
