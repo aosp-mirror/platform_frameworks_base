@@ -427,6 +427,15 @@ public class NavigationBarController implements
         }
     }
 
+    public boolean isOverviewEnabled(int displayId) {
+        final NavigationBarView navBarView = getNavigationBarView(displayId);
+        if (navBarView != null) {
+            return navBarView.isOverviewEnabled();
+        } else {
+            return mTaskbarDelegate.isOverviewEnabled();
+        }
+    }
+
     /** @return {@link NavigationBar} on the default display. */
     @Nullable
     public NavigationBar getDefaultNavigationBar() {
