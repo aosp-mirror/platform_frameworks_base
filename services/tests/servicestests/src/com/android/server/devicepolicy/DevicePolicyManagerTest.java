@@ -158,6 +158,7 @@ import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.mockito.internal.util.collections.Sets;
@@ -186,6 +187,7 @@ import java.util.concurrent.TimeUnit;
  */
 @SmallTest
 @Presubmit
+@Ignore("b/225415867")
 public class DevicePolicyManagerTest extends DpmTestBase {
 
     private static final String TAG = DevicePolicyManagerTest.class.getSimpleName();
