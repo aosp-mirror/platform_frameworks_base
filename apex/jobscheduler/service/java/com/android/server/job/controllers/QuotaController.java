@@ -404,6 +404,10 @@ public final class QuotaController extends StateController {
         @Override
         public void onUidCachedChanged(int uid, boolean cached) {
         }
+
+        @Override
+        public void onUidProcAdjChanged(int uid) {
+        }
     }
 
     /**

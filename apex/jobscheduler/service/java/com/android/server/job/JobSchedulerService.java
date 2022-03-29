@@ -1009,6 +1009,9 @@ public class JobSchedulerService extends com.android.server.SystemService
 
         @Override public void onUidCachedChanged(int uid, boolean cached) {
         }
+
+        @Override public void onUidProcAdjChanged(int uid) {
+        }
     };
 
     public Context getTestableContext() {
