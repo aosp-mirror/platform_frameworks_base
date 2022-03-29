@@ -2693,9 +2693,19 @@
          rat-name:rmem_min,rmem_def,rmem_max,wmem_min,wmem_def,wmem_max
          If no value is found for the rat-name in use, the system default will be applied.
 
-         This is deprecated. Please use config_tcp_buffers.
+         This is deprecated. Please use config_mobile_tcp_buffers for rat-based TCP buffers sizes or
+         config_tcp_buffers for rat-independent TCP buffer sizes.
     -->
     <string-array name="config_mobile_tcp_buffers">
+    </string-array>
+
+    <!-- Configure tcp buffer sizes per network type in the form:
+         network-type:rmem_min,rmem_def,rmem_max,wmem_min,wmem_def,wmem_max
+
+         The network-type must be a valid DataConfigNetworkType value. If no value is found for the
+         network-type in use, config_tcp_buffers will be used instead.
+    -->
+    <string-array name="config_network_type_tcp_buffers">
     </string-array>
 
     <!-- Configure tcp buffer sizes in the form:
@@ -2704,12 +2714,6 @@
 
          For now this config is used by mobile data only. In the future it should be
          used by Wi-Fi as well.
-
-         Note that starting from Android 13, the TCP buffer size is fixed after boot up, and should
-         never be changed based on carriers or the network types. The value should be configured
-         appropriately based on the device's memory and performance. It is recommended to use lower
-         values if the device has low memory or doesn't support high-speed network such like LTE,
-         NR, or Wifi.
     -->
     <string name="config_tcp_buffers" translatable="false"></string>
 
