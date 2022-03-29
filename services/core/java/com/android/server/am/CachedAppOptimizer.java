@@ -1146,11 +1146,24 @@ public final class CachedAppOptimizer {
         if(wakefulness == PowerManagerInternal.WAKEFULNESS_AWAKE) {
             // Remove any pending compaction we may have scheduled to happen while screen was off
             Slog.e(TAG_AM, "Cancel pending or running compactions as system is awake");
-            synchronized(mProcLock) {
-                mPendingCompactionProcesses.clear();
-            }
-            cancelCompaction();
+            cancelAllCompactions();
         }
+    }
+
+    void cancelAllCompactions() {
+        synchronized (mProcLock) {
+            int size = mPendingCompactionProcesses.size();
+            ProcessRecord record;
+            for (int i=0; i < size; ++i) {
+                record = mPendingCompactionProcesses.get(i);
+                // The process record is kept alive after compactions are cleared,
+                // so make sure to reset the compaction state to avoid skipping any future
+                // compactions due to a stale value here.
+                record.mOptRecord.setHasPendingCompact(false);
+            }
+            mPendingCompactionProcesses.clear();
+        }
+        cancelCompaction();
     }
 
     @GuardedBy({"mService", "mProcLock"})
