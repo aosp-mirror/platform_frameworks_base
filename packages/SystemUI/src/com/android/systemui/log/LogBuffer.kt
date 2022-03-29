@@ -23,6 +23,9 @@ import java.io.PrintWriter
 import java.text.SimpleDateFormat
 import java.util.ArrayDeque
 import java.util.Locale
+import java.util.concurrent.ArrayBlockingQueue
+import java.util.concurrent.BlockingQueue
+import kotlin.concurrent.thread
 
 /**
  * A simple ring buffer of recyclable log messages
@@ -81,6 +84,19 @@ class LogBuffer @JvmOverloads constructor(
     }
 
     private val buffer: ArrayDeque<LogMessageImpl> = ArrayDeque()
+    private val echoMessageQueue: BlockingQueue<LogMessageImpl> = ArrayBlockingQueue(poolSize)
+
+    init {
+        thread(start = true, priority = Thread.NORM_PRIORITY) {
+            try {
+                while (true) {
+                    echoToDesiredEndpoints(echoMessageQueue.take())
+                }
+            } catch (e: InterruptedException) {
+                Thread.currentThread().interrupt()
+            }
+        }
+    }
 
     var frozen = false
         private set
@@ -176,6 +192,16 @@ class LogBuffer @JvmOverloads constructor(
             buffer.removeFirst()
         }
         buffer.add(message as LogMessageImpl)
+        // Log in the background thread only if it has capacity to avoid blocking this thread
+        if (echoMessageQueue.remainingCapacity() > 0) {
+            echoMessageQueue.put(message)
+        } else {
+            echoToDesiredEndpoints(message)
+        }
+    }
+
+    /** Sends message to echo after determining whether to use Logcat and/or systrace. */
+    private fun echoToDesiredEndpoints(message: LogMessageImpl) {
         val includeInLogcat = logcatEchoTracker.isBufferLoggable(name, message.level) ||
                 logcatEchoTracker.isTagLoggable(message.tag, message.level)
         echo(message, toLogcat = includeInLogcat, toSystrace = systrace)
