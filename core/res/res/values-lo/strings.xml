@@ -70,6 +70,7 @@
     <string name="ThreeWCMmi" msgid="2436550866139999411">"ການໂທສາມສາຍ"</string>
     <string name="RuacMmi" msgid="1876047385848991110">"ປະຕິເສດສາຍທີ່ບໍ່ຕ້ອງການຮັບ"</string>
     <string name="CndMmi" msgid="185136449405618437">"ການສົ່ງໝາຍເລກທີ່ໂທ"</string>
+    <string name="DndMmi" msgid="8797375819689129800">"ຫ້າມລົບກວນ"</string>
     <string name="CLIRDefaultOnNextCallOn" msgid="4511621022859867988">"ໝາຍເລກຜູ່ໂທຖືກຕັ້ງຄ່າເລີ່ມຕົ້ນໃຫ້ຖືກຈຳກັດ. ການໂທຄັ້ງຕໍ່ໄປ: ຖືກຈຳກັດ"</string>
     <string name="CLIRDefaultOnNextCallOff" msgid="5036749051007098105">"ໝາຍເລກຜູ່ໂທ ໄດ້ຮັບການຕັ້ງຄ່າເລີ່ມຕົ້ນເປັນ ຖືກຈຳກັດ. ການໂທຄັ້ງຕໍ່ໄປ: ບໍ່ຖືກຈຳກັດ."</string>
     <string name="CLIRDefaultOffNextCallOn" msgid="1022781126694885017">"Caller ID ໂດຍເລີ່ມຕົ້ນຖືກປັບໃຫ້ບໍ່ມີການປິດກັ້ນ. ການໂທຕໍ່ໄປ:ປິດກັ້ນ"</string>
@@ -84,8 +85,8 @@
     <string name="RestrictedStateContentMsimTemplate" msgid="5228235722511044687">"ຜູ້ເບິ່ງແຍງລະບົບຂອງທ່ານປິດໄວ້ສຳລັບຊິມ <xliff:g id="SIMNUMBER">%d</xliff:g>"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"ບໍ່ສາມາດຕິດຕໍ່ເຄືອຂ່າຍມືຖືໄດ້"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"ໃຫ້ລອງປ່ຽນເຄືອຂ່າຍທີ່ຕ້ອງການ. ແຕະເພື່ອປ່ຽນ."</string>
-    <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"ບໍ່ສາມາດໃຊ້ການໂທສຸກເສີນໄດ້"</string>
-    <string name="EmergencyCallWarningSummary" msgid="1194185880092805497">"ບໍ່ສາມາດໂທສຸກເສີນຜ່ານ Wi‑Fi ໄດ້"</string>
+    <string name="EmergencyCallWarningTitle" msgid="9164532362414787774">"ການໂທ​ສຸກ​ເສີນອາດບໍ່ສາມາດໃຊ້ໄດ້"</string>
+    <string name="EmergencyCallWarningSummary" msgid="3365701131304664899">"<xliff:g id="SPN">%s</xliff:g> ບໍ່ຮອງຮັບການໂທ​ສຸກ​ເສີນຂ້າມ Wi-Fi. ແຕະເພື່ອເບິ່ງລາຍລະອຽດ."</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"ການເຕືອນ"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"ການໂອນສາຍ"</string>
     <string name="notification_channel_emergency_callback" msgid="54074839059123159">"ໂໝດໂທກັບສຸກເສີນ"</string>
@@ -424,10 +425,10 @@
     <string name="permdesc_writeCallLog" product="tablet" msgid="2657525794731690397">"ອະນຸຍາດໃຫ້ແອັບຯແກ້ໄຂບັນທຶກການໂທຂອງແທັບເລັດ ຮວມທັງຂໍ້ມູນກ່ຽວກັບການໂທອອກ ແລະໂທເຂົ້ານຳ. ແອັບຯທີ່ເປັນອັນຕະລາຍອາດໃຊ້ຄຸນສົມບັດນີ້ເພື່ອລຶບ ຫຼືແກ້ໄຂບັນທຶກການໂທຂອງທ່ານໄດ້."</string>
     <string name="permdesc_writeCallLog" product="tv" msgid="3934939195095317432">"ອະນຸຍາດໃຫ້ແອັບແກ້ໄຂບັນທຶກການໂທຂອງອຸປະກອນ Android TV ທ່ານ, ຮວມທັງສາຍໂທເຂົ້າ ແລະ ໂທອອກ. ແອັບທີ່ເປັນອັນຕະລາຍສາມາດໃຊ້ຄຸນສົມບັດນີ້ເພື່ອລຶບ ຫຼື ແກ້ໄຂບັນທຶກການໂທຂອງທ່ານໄດ້."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="5903033505665134802">"ອະນຸຍາດໃຫ້ແອັບຯ ແກ້ໄຂລາຍການການໂທໃນໂທລະສັບຂອງທ່ານ, ຮວມທັງຂໍ້ມູນກ່ຽວກັບສາຍໂທເຂົ້າ ແລະການໂທອອກ. ແອັບຯທີ່ເປັນອັນຕະລາຍ ອາດໃຊ້ຄວາມສາມາດນີ້ ເພື່ອລຶບ ຫຼືແກ້ໄຂລາຍການການໂທຂອງທ່ານໄດ້."</string>
-    <string name="permlab_bodySensors" msgid="3411035315357380862">"ເຂົ້າ​ຫາເຊັນ​ເຊີ​​ກວດຮ່າງ​ກາຍ (ເຊັ່ນ: ​ຈໍຕິດ​ຕາມ​ອັດ​ຕາ​ການ​ເຕັ້ນ​ຂອງຫົວ​ໃຈ)"</string>
-    <string name="permdesc_bodySensors" product="default" msgid="3208940894182188063">"ເຂົ້າເຖິງຂໍ້ມູນຈາກເຊັນເຊີຮ່າງກາຍ ເຊັ່ນ: ອັດຕາການເຕັ້ນຫົວໃຈ, ອຸນຫະພູມ, ເປີເຊັນອອກຊິເຈນໃນເລືອດ ແລະ ອື່ນໆ."</string>
-    <string name="permlab_bodySensors_background" msgid="4352831883331744370">"ເຂົ້າເຖິງເຊັນເຊີຮ່າງກາຍ (ເຊັ່ນ: ເຄື່ອງວັດແທກອັດຕາການເຕັ້ນຫົວໃຈ) ໃນຂະນະທີ່ຢູ່ໃນພື້ນຫຼັງ"</string>
-    <string name="permdesc_bodySensors_background" product="default" msgid="8512392249166660872">"ເຂົ້າເຖິງຂໍ້ມູນຈາກເຊັນເຊີຮ່າງກາຍ ເຊັ່ນ: ອັດຕາການເຕັ້ນຫົວໃຈ, ອຸນຫະພູມ, ເປີເຊັນອອກຊິເຈນໃນເລືອດ ແລະ ອື່ນໆໃນຂະນະທີ່ຢູ່ໃນພື້ນຫຼັງ."</string>
+    <string name="permlab_bodySensors" msgid="662918578601619569">"ເຂົ້າເຖິງຂໍ້ມູນເຊັນເຊີຮ່າງກາຍ, ເຊັ່ນ: ອັດຕາການເຕັ້ນຫົວໃຈ, ໃນຂະນະທີ່ນຳໃຊ້ຢູ່"</string>
+    <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"ອະນຸຍາດໃຫ້ແອັບເຂົ້າເຖິງຂໍ້ມູນເຊັນເຊີຮ່າງກາຍ, ເຊັ່ນ: ອັດຕາການເຕັ້ນຫົວໃຈ, ອຸນຫະພູມ ແລະ ເປີເຊັນອອກຊິເຈນໃນເລືອດ, ໃນຂະນະທີ່ໃຊ້ແອັບຢູ່."</string>
+    <string name="permlab_bodySensors_background" msgid="4912560779957760446">"ເຂົ້າເຖິງຂໍ້ມູນເຊັນເຊີຮ່າງກາຍ, ເຊັ່ນ: ອັດຕາການເຕັ້ນຫົວໃຈ, ໃນຂະນະທີ່ແອັບຢູ່ໃນພື້ນຫຼັງ"</string>
+    <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"ອະນຸຍາດໃຫ້ແອັບເຂົ້າເຖິງຂໍ້ມູນເຊັນເຊີຮ່າງກາຍ, ເຊັ່ນ: ອັດຕາການເຕັ້ນຫົວໃຈ, ອຸນຫະພູມ ແລະ ເປີເຊັນອອກຊິເຈນໃນເລືອດ, ໃນຂະນະທີ່ແອັບຢູ່ໃນພື້ນຫຼັງ."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"Read calendar events and details"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"This app can read all calendar events stored on your tablet and share or save your calendar data."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"ແອັບນີ້ສາມາດອ່ານນັດໝາຍປະຕິທິນທັງໝົດທີ່ບັນທຶກໄວ້ຢູ່ອຸປະກອນ Android TV ຂອງທ່ານ ແລະ ແບ່ງປັນ ຫຼື ບັນທຶກຂໍ້ມູນປະຕິທິນຂອງທ່ານ."</string>
@@ -688,8 +689,8 @@
     <string name="permdesc_readMediaAudio" msgid="5299772574434619399">"ອະນຸຍາດໃຫ້ແອັບອ່ານໄຟລ໌ສຽງຈາກບ່ອນຈັດເກັບຂໍ້ມູນທີ່ແບ່ງປັນຂອງທ່ານ."</string>
     <string name="permlab_readMediaVideo" msgid="7768003311260655007">"ອ່ານໄຟລ໌ວິດີໂອຈາກບ່ອນຈັດເກັບຂໍ້ມູນທີ່ແບ່ງປັນ"</string>
     <string name="permdesc_readMediaVideo" msgid="3846400073770403528">"ອະນຸຍາດໃຫ້ແອັບອ່ານໄຟລ໌ວິດີໂອຈາກບ່ອນຈັດເກັບຂໍ້ມູນທີ່ແບ່ງປັນຂອງທ່ານ."</string>
-    <string name="permlab_readMediaImage" msgid="1507059005825769856">"ອ່ານໄຟລ໌ຮູບຈາກບ່ອນຈັດເກັບຂໍ້ມູນທີ່ແບ່ງປັນ"</string>
-    <string name="permdesc_readMediaImage" msgid="8328052622292457588">"ອະນຸຍາດໃຫ້ແອັບອ່ານໄຟລ໌ຮູບຈາກບ່ອນຈັດເກັບຂໍ້ມູນທີ່ແບ່ງປັນຂອງທ່ານ."</string>
+    <string name="permlab_readMediaImages" msgid="4057590631020986789">"ອ່ານໄຟລ໌ຮູບຈາກບ່ອນຈັດເກັບຂໍ້ມູນທີ່ແບ່ງປັນ"</string>
+    <string name="permdesc_readMediaImages" msgid="5836219373138469259">"ອະນຸຍາດໃຫ້ແອັບອ່ານໄຟລ໌ຮູບຈາກບ່ອນຈັດເກັບຂໍ້ມູນທີ່ແບ່ງປັນຂອງທ່ານ."</string>
     <string name="permlab_sdcardWrite" msgid="4863021819671416668">"ແກ້ໄຂ ຫຼືລຶບເນື້ອຫາໃນບ່ອນຈັດເກັບຂໍ້ມູນທີ່ແບ່ງປັນຂອງທ່ານ"</string>
     <string name="permdesc_sdcardWrite" msgid="8376047679331387102">"ອະນຸຍາດໃຫ້ແອັບຂຽນເນື້ອຫາຕ່າງໆຂອງບ່ອນຈັດເກັບຂໍ້ມູນທີ່ແບ່ງປັນຂອງທ່ານ."</string>
     <string name="permlab_use_sip" msgid="8250774565189337477">"ຮັບສາຍ/ໂທອອກ ຜ່ານ SIP"</string>
@@ -736,6 +737,8 @@
     <string name="permdesc_bindCarrierMessagingService" msgid="6316457028173478345">"ອະນຸຍາດໃຫ້ຜູ້ຖືຜູກ​ພັນ​ກັບຕົວ​ປະ​ສານລະດັບສູງສຸດຂອງບໍລິການສົ່ງ​ຂໍ້​ຄວາມ​ຜູ້​ໃຫ້​ບໍ​ລິ​ການ. ບໍ່ຈຳເປັນສຳລັບແອັບຯທົ່ວໄປ."</string>
     <string name="permlab_bindCarrierServices" msgid="2395596978626237474">"ປະ​ຕິ​ບັດ​ຕາມ​ການ​ບໍ​ລິ​ການ​​ຂອງ​ບໍ​ລິ​ສັດ​ເຄືອ​ຂ່າຍ​ມື​ຖື"</string>
     <string name="permdesc_bindCarrierServices" msgid="9185614481967262900">"ອະ​ນຸ​ຍາດ​ໃຫ້​ເຈົ້າ​ຂອງ​ປະ​ຕິ​ບັດ​ຕາມ​ການ​ບໍ​ລິ​ການ​​ຂອງ​ບໍ​ລິ​ສັດ​ເຄືອ​ຂ່າຍ​ມື​ຖື. ບໍ່​ຄວນ​ຈະໃຊ້​ໃນ​ແອັບ​ທົ່ວ​ໄປ."</string>
+    <string name="permlab_access_notification_policy" msgid="5524112842876975537">"​ເຂົ້າ​ເຖິງ  ບໍ່​ລົບ​ກວນ"</string>
+    <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"ອະນຸຍາດ​​ໃຫ້​ແອັບ​ອ່ານ​ ​ແລະ​ຂຽນການກນຳ​ດຄ່າ ບໍ່​ລົບ​ກວນ."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"ເລີ່ມການໃຊ້ສິດອະນຸຍາດການເບິ່ງ"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"ອະນຸຍາດໃຫ້ຜູ້ຖືເລີ່ມການໃຊ້ສິດອະນຸຍາດສຳລັບແອັບໃດໜຶ່ງໄດ້. ແອັບປົກກະຕິບໍ່ຄວນຕ້ອງໃຊ້."</string>
     <string name="permlab_startReviewPermissionDecisions" msgid="8690578688476599284">"ເລີ່ມເບິ່ງການຕັດສິນໃຈການອະນຸຍາດ"</string>
@@ -909,7 +912,7 @@
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="7982445492532123308">"ກົດ ເມນູ ເພື່ອປົດລັອກ ຫຼື ໂທອອກຫາເບີສຸກເສີນ."</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="7434061749374801753">"ກົດ \"ເມນູ\" ເພື່ອປົດລັອກ."</string>
     <string name="lockscreen_pattern_instructions" msgid="3169991838169244941">"ແຕ້ມຮູບແບບເພື່ອປົດລັອກ"</string>
-    <string name="lockscreen_emergency_call" msgid="7549683825868928636">"ການໂທສຸກເສີນ"</string>
+    <string name="lockscreen_emergency_call" msgid="7500692654885445299">"ສຸກ​ເສີນ"</string>
     <string name="lockscreen_return_to_call" msgid="3156883574692006382">"ກັບໄປຫາການໂທ"</string>
     <string name="lockscreen_pattern_correct" msgid="8050630103651508582">"ຖືກຕ້ອງ!"</string>
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"ລອງໃໝ່ອີກຄັ້ງ"</string>
@@ -1048,7 +1051,6 @@
     <string name="save_password_never" msgid="6776808375903410659">"ບໍ່ຕ້ອງຈື່"</string>
     <string name="open_permission_deny" msgid="5136793905306987251">"ທ່ານບໍ່ໄດ້ຮັບອະນຸຍາດໃຫ້ເປີດໜ້ານີ້."</string>
     <string name="text_copied" msgid="2531420577879738860">"ສຳເນົາຂໍ້ຄວາມໃສ່ຄລິບບອດແລ້ວ."</string>
-    <string name="copied" msgid="4675902854553014676">"ສຳເນົາແລ້ວ"</string>
     <string name="pasted_from_app" msgid="5627698450808256545">"ວາງ <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> ຈາກ <xliff:g id="SOURCE_APP_NAME">%2$s</xliff:g> ແລ້ວ"</string>
     <string name="pasted_from_clipboard" msgid="7355790625710831847">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> ວາງຈາກຄລິບບອດຂອງທ່ານແລ້ວ"</string>
     <string name="pasted_text" msgid="4298871641549173733">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> ວາງຂໍ້ຄວາມທີ່ທ່ານສຳເນົາແລ້ວ"</string>
@@ -1449,8 +1451,6 @@
     <string name="permdesc_requestIgnoreBatteryOptimizations" msgid="634260656917874356">"ອະນຸຍາດໃຫ້ແອັບຖາມສິດອະນຸຍາດເພື່ອເພີກເສີຍຕໍ່ການປັບແຕ່ງແບັດເຕີຣີສຳລັບແອັບນັ້ນ."</string>
     <string name="permlab_queryAllPackages" msgid="2928450604653281650">"ຊອກຫາແພັກເກດທັງໝົດ"</string>
     <string name="permdesc_queryAllPackages" msgid="5339069855520996010">"ອະນຸຍາດໃຫ້ແອັບເບິ່ງເຫັນແພັກເກດທີ່ຕິດຕັ້ງແລ້ວທັງໝົດໄດ້."</string>
-    <string name="permlab_accessSupplementalApi" msgid="3544659160536960275">"ເຂົ້າເຖິງ SupplementalApis"</string>
-    <string name="permdesc_accessSupplementalApi" msgid="8974758769370951074">"ອະນຸຍາດໃຫ້ແອັບພລິເຄຊັນເຂົ້າເຖິງ SupplementalApis ໄດ້."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1842872462124648678">"ແຕະສອງເທື່ອເພື່ອຄວບຄຸມການຊູມ"</string>
     <string name="gadget_host_error_inflating" msgid="2449961590495198720">"ບໍ່ສາມາດເພີ່ມວິດເຈັດໄດ້."</string>
     <string name="ime_action_go" msgid="5536744546326495436">"ໄປ"</string>
@@ -1501,8 +1501,7 @@
     <string name="skip_button_label" msgid="3566599811326688389">"ຂ້າມ"</string>
     <string name="no_matches" msgid="6472699895759164599">"ບໍ່ພົບຜົນການຊອກຫາ"</string>
     <string name="find_on_page" msgid="5400537367077438198">"ຊອກໃນໜ້າ"</string>
-    <!-- no translation found for matches_found (2296462299979507689) -->
-    <skip />
+    <string name="matches_found" msgid="2296462299979507689">"{count,plural, =1{ກົງກັນ # ລາຍການ}other{# ຈາກທັງໝົດ {total}}}"</string>
     <string name="action_mode_done" msgid="2536182504764803222">"ແລ້ວໆ"</string>
     <string name="progress_erasing" msgid="6891435992721028004">"ກຳລັງລຶບບ່ອນຈັດເກັບຂໍ້ມູນທີ່ແບ່ງປັນ…"</string>
     <string name="share" msgid="4157615043345227321">"ແບ່ງປັນ"</string>
@@ -1714,6 +1713,7 @@
     <string name="user_switching_message" msgid="1912993630661332336">"ກຳລັງສະຫຼັບໄປຫາ<xliff:g id="NAME">%1$s</xliff:g>…"</string>
     <string name="user_logging_out_message" msgid="7216437629179710359">"ກຳລັງອອກຈາກລະບົບ <xliff:g id="NAME">%1$s</xliff:g>…"</string>
     <string name="owner_name" msgid="8713560351570795743">"ເຈົ້າຂອງ"</string>
+    <string name="guest_name" msgid="8502103277839834324">"ແຂກ"</string>
     <string name="error_message_title" msgid="4082495589294631966">"ຜິດພາດ"</string>
     <string name="error_message_change_not_allowed" msgid="843159705042381454">"ຜູ້ເບິ່ງແຍງລະບົບຂອງທ່ານບໍ່ອະນຸຍາດໃຫ້ປ່ຽນແປງສິ່ງນີ້"</string>
     <string name="app_not_found" msgid="3429506115332341800">"ບໍ່ພົບແອັບພລິເຄຊັນເພື່ອຈັດການເຮັດວຽກນີ້."</string>
@@ -1867,8 +1867,10 @@
     <string name="zen_mode_until" msgid="2250286190237669079">"ຈົນ​ຮອດ <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_alarm" msgid="7046911727540499275">"ຈົນ​ກ​່​ວາ <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> (ສັນ​ຍານ​ເຕືອນ​ຕໍ່ໄປ​)"</string>
     <string name="zen_mode_forever" msgid="740585666364912448">"ຈົນກວ່າທ່ານຈະປິດ"</string>
+    <string name="zen_mode_forever_dnd" msgid="3423201955704180067">"ຈົນ​ກ່​ວາ​ທ່ານ​ປິດ​ຫ້າມ​ລົບ​ກວນ"</string>
     <string name="zen_mode_rule_name_combination" msgid="7174598364351313725">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="8009920446193610996">"ຫຍໍ້"</string>
+    <string name="zen_mode_feature_name" msgid="3785547207263754500">"ຫ້າມ​ລົບ​ກວນ"</string>
     <string name="zen_mode_downtime_feature_name" msgid="5886005761431427128">"​ເວ​ລາ​ປິດ​ເຮັດ​ວຽກ"</string>
     <string name="zen_mode_default_weeknights_name" msgid="7902108149994062847">"ຄ່ຳ​ຄືນ​ໃນ​ອາ​ທິດ"</string>
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"ທ້າຍອາທິດ"</string>
@@ -1931,6 +1933,8 @@
     <string name="app_blocked_title" msgid="7353262160455028160">"ແອັບບໍ່ສາມາດໃຊ້ໄດ້"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> ບໍ່ສາມາດໃຊ້ໄດ້ໃນຕອນນີ້."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"ບໍ່ສາມາດໃຊ້ <xliff:g id="ACTIVITY">%1$s</xliff:g> ໄດ້"</string>
+    <!-- no translation found for app_streaming_blocked_title_for_permission_dialog (4483161748582966785) -->
+    <skip />
     <string name="app_streaming_blocked_message" product="tv" msgid="4003011766528814377">"ບໍ່ສາມາດເຂົ້າເຖິງແອັບນີ້ໄດ້ຢູ່ <xliff:g id="DEVICE">%1$s</xliff:g> ຂອງທ່ານໃນຕອນນີ້. ກະລຸນາລອງໃຊ້ຢູ່ອຸປະກອນ Android TV ຂອງທ່ານແທນ."</string>
     <string name="app_streaming_blocked_message" product="tablet" msgid="4242053045964946062">"ບໍ່ສາມາດເຂົ້າເຖິງແອັບນີ້ໄດ້ຢູ່ <xliff:g id="DEVICE">%1$s</xliff:g> ຂອງທ່ານໃນຕອນນີ້. ກະລຸນາລອງຢູ່ແທັບເລັດຂອງທ່ານແທນ."</string>
     <string name="app_streaming_blocked_message" product="default" msgid="6159168735030739398">"ບໍ່ສາມາດເຂົ້າເຖິງແອັບນີ້ໄດ້ຢູ່ <xliff:g id="DEVICE">%1$s</xliff:g> ຂອງທ່ານໃນຕອນນີ້. ກະລຸນາລອງຢູ່ໂທລະສັບຂອງທ່ານແທນ."</string>
@@ -2023,17 +2027,20 @@
     <string name="harmful_app_warning_uninstall" msgid="6472912975664191772">"ຖອນການຕິດຕັ້ງ"</string>
     <string name="harmful_app_warning_open_anyway" msgid="5963657791740211807">"ຢືນຢັນການເປີດ"</string>
     <string name="harmful_app_warning_title" msgid="8794823880881113856">"ກວດສອບແອັບທີ່ເປັນອັນຕະລາຍ"</string>
-    <string name="log_access_confirmation_title" msgid="3143035474800851565">"ຄຳຮ້ອງຂໍການເຂົ້າເຖິງບັນທຶກລະບົບ"</string>
+    <string name="log_access_confirmation_title" msgid="2343578467290592708">"ອະນຸຍາດໃຫ້ <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> ເຂົ້າເຖິງບັນທຶກອຸປະກອນທັງໝົດບໍ?"</string>
     <string name="log_access_confirmation_allow" msgid="143157286283302512">"ສະເພາະເທື່ອນີ້"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"ບໍ່ອະນຸຍາດ"</string>
-    <string name="log_access_confirmation_body" msgid="7599059550906238538">"<xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> ຮ້ອງຂໍບັນທຶກລະບົບສຳລັບການດີບັກການເຮັດວຽກ. ບັນທຶກເຫຼົ່ານີ້ອາດມີເນື້ອຫາທີ່ແອັບ ແລະ ບໍລິການຢູ່ອຸປະກອນຂອງທ່ານໄດ້ຂຽນໄວ້."</string>
+    <string name="log_access_confirmation_body" msgid="4483075525611652922">"ບັນທຶກອຸປະກອນຈະບັນທຶກສິ່ງທີ່ເກີດຂຶ້ນຢູ່ອຸປະກອນຂອງທ່ານ. ແອັບສາມາດໃຊ້ບັນທຶກເຫຼົ່ານີ້ເພື່ອຊອກຫາ ແລະ ແກ້ໄຂບັນຫາໄດ້.\n\nບັນທຶກບາງຢ່າງອາດມີຂໍ້ມູນລະອຽດອ່ອນ, ດັ່ງນັ້ນໃຫ້ອະນຸຍາດສະເພາະແອັບທີ່ທ່ານເຊື່ອຖືໃຫ້ເຂົ້າເຖິງບັນທຶກອຸປະກອນທັງໝົດເທົ່ານັ້ນ. \n\nຫາກທ່ານບໍ່ອະນຸຍາດແອັບນີ້ໃຫ້ເຂົ້າເຖິງບັນທຶກອຸປະກອນທັງໝົດ, ມັນຈະຍັງຄົງສາມາດເຂົ້າເຖິງບັນທຶກຂອງຕົວມັນເອງໄດ້ຢູ່ ແລະ ຜູ້ຜະລິດອຸປະກອນຂອງທ່ານອາດຍັງຄົງສາມາດເຂົ້າເຖິງບັນທຶກ ຫຼື ຂໍ້ມູນບາງຢ່າງຢູ່ອຸປະກອນຂອງທ່ານໄດ້. ສຶກສາເພີ່ມເຕີມ"</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"ບໍ່ຕ້ອງສະແດງອີກ"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g> ຕ້ອງການສະແດງ <xliff:g id="APP_2">%2$s</xliff:g> ສະໄລ້"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"ແກ້ໄຂ"</string>
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"ການໂທ ແລະ ການແຈ້ງເຕືອນຈະສັ່ນ"</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"ການໂທ ແລະ ການແຈ້ງເຕືອນຈະບໍ່ມີສຽງ"</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"ການປ່ຽນແປງລະບົບ"</string>
+    <string name="notification_channel_do_not_disturb" msgid="7832584281883687653">"ຫ້າມລົບກວນ"</string>
+    <string name="zen_upgrade_notification_visd_title" msgid="2001148984371968620">"ໃໝ່: ໂໝດຫ້າມລົບກວນຈະເຊື່ອງການແຈ້ງເຕືອນໄວ້"</string>
     <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"ແຕະເພື່ອສຶກສາເພີ່ມເຕີມ ແລະ ປ່ຽນແປງ."</string>
+    <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"ປ່ຽນໂໝດຫ້າມລົບກວນແລ້ວ"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"ແຕະເພື່ອກວດສອບວ່າມີຫຍັງຖືກບລັອກໄວ້ແດ່."</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"ລະບົບ"</string>
     <string name="notification_app_name_settings" msgid="9088548800899952531">"ການຕັ້ງຄ່າ"</string>
@@ -2050,6 +2057,7 @@
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"ຕົກລົງ"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"ປິດໄວ້"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"ສຶກສາເພີ່ມເຕີມ"</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"ການແຈ້ງເຕືອນແບບປັບຕົວໄດ້ຂອງ Android ຖືກແທນທີ່ດ້ວຍການແຈ້ງເຕືອນທີ່ປັບປຸງໃຫ້ດີຂຶ້ນໃນ Android 12 ແລ້ວ. ຄຸນສົມບັດນີ້ສະແດງຄຳສັ່ງ ແລະ ການຕອບກັບທີ່ແນະນຳ ແລະ ຈັດລະບຽບການແຈ້ງເຕືອນຂອງທ່ານ.\n\nການແຈ້ງເຕືອນທີ່ປັບປຸງໃຫ້ດີຂຶ້ນສາມາດເຂົ້າເຖິງເນື້ອຫາການແຈ້ງເຕືອນໄດ້, ຮວມທັງຂໍ້ມູນສ່ວນຕົວ ເຊັ່ນ: ຊື່ຜູ້ຕິດຕໍ່ ແລະ ຂໍ້ຄວາມ. ຄຸນສົມບັດນີ້ສາມາດປິດ ຫຼື ຕອບກັບຫາການແຈ້ງເຕືອນໄດ້ນຳ ເຊັ່ນ: ການຮັບສາຍໂທລະສັບ ແລະ ຄວບຄຸມໂໝດຫ້າມລົບກວນ."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"ການແຈ້ງເຕືອນຂໍ້ມູນໂໝດກິດຈະວັດປະຈຳວັນ"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"ແບັດເຕີຣີອາດໝົດກ່ອນການສາກຕາມປົກກະຕິ"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"ເປີດຕົວປະຢັດແບັດເຕີຣີເພື່ອຂະຫຍາຍອາຍຸແບັດເຕີຣີ"</string>
@@ -2256,6 +2264,7 @@
     <string name="notification_content_abusive_bg_apps" msgid="5572096708044958249">"<xliff:g id="APP">%1$s</xliff:g> ກຳລັງເຮັດວຽກໃນພື້ນຫຼັງ ແລະ ໃຊ້ແບັດເຕີຣີຫຼາຍ. ແຕະເພື່ອກວດສອບ."</string>
     <string name="notification_content_long_running_fgs" msgid="8878031652441570178">"<xliff:g id="APP">%1$s</xliff:g> ກຳລັງເຮັດວຽກໃນພື້ນຫຼັງເປັນເວລາດົນແລ້ວ. ແຕະເພື່ອກວດສອບ."</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"ກວດສອບແອັບທີ່ເຄື່ອນໄຫວ"</string>
-    <!-- no translation found for vdm_camera_access_denied (6345652513729130490) -->
+    <string name="vdm_camera_access_denied" msgid="6345652513729130490">"ບໍ່ສາມາດເຂົ້າເຖິງກ້ອງຖ່າຍຮູບຈາກອຸປະກອນນີ້ໄດ້"</string>
+    <!-- no translation found for system_locale_title (3978041860457277638) -->
     <skip />
 </resources>

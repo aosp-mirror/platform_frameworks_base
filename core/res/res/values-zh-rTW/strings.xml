@@ -70,6 +70,7 @@
     <string name="ThreeWCMmi" msgid="2436550866139999411">"三方通話"</string>
     <string name="RuacMmi" msgid="1876047385848991110">"拒接不想接聽的騷擾電話"</string>
     <string name="CndMmi" msgid="185136449405618437">"顯示發話號碼"</string>
+    <string name="DndMmi" msgid="8797375819689129800">"勿干擾"</string>
     <string name="CLIRDefaultOnNextCallOn" msgid="4511621022859867988">"預設不顯示本機號碼，下一通電話也不顯示。"</string>
     <string name="CLIRDefaultOnNextCallOff" msgid="5036749051007098105">"預設不顯示本機號碼，但下一通電話顯示。"</string>
     <string name="CLIRDefaultOffNextCallOn" msgid="1022781126694885017">"預設顯示本機號碼，但下一通電話不顯示。"</string>
@@ -84,8 +85,8 @@
     <string name="RestrictedStateContentMsimTemplate" msgid="5228235722511044687">"SIM 卡 <xliff:g id="SIMNUMBER">%d</xliff:g> 暫時遭電信業者停用"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"無法連上行動網路"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"請嘗試變更偏好的網路。輕觸即可變更。"</string>
-    <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"無法撥打緊急電話"</string>
-    <string name="EmergencyCallWarningSummary" msgid="1194185880092805497">"無法透過 Wi‑Fi 撥打緊急電話"</string>
+    <string name="EmergencyCallWarningTitle" msgid="9164532362414787774">"可能無法撥打緊急電話"</string>
+    <string name="EmergencyCallWarningSummary" msgid="3365701131304664899">"「<xliff:g id="SPN">%s</xliff:g>」不支援透過 Wi-Fi 撥打緊急電話。輕觸即可瞭解詳情。"</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"快訊"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"來電轉接"</string>
     <string name="notification_channel_emergency_callback" msgid="54074839059123159">"緊急回撥模式"</string>
@@ -304,10 +305,8 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"存取你的日曆"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"簡訊"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"傳送及查看簡訊"</string>
-    <!-- no translation found for permgrouplab_storage (9173334109512154196) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_storage (8352226729501080525) -->
-    <skip />
+    <string name="permgrouplab_storage" msgid="9173334109512154196">"檔案與文件"</string>
+    <string name="permgroupdesc_storage" msgid="8352226729501080525">"存取裝置上的檔案與文件"</string>
     <string name="permgrouplab_readMediaAural" msgid="5885210465560755316">"音樂和其他音訊"</string>
     <string name="permgroupdesc_readMediaAural" msgid="1170143315714662822">"存取裝置上的音訊檔案"</string>
     <string name="permgrouplab_readMediaVisual" msgid="9137695801926624061">"相片和影片"</string>
@@ -426,10 +425,10 @@
     <string name="permdesc_writeCallLog" product="tablet" msgid="2657525794731690397">"允許應用程式修改平板電腦的通話記錄，包括來電和已撥電話相關資料。請注意，惡意應用程式可能濫用此功能刪除或修改你的通話記錄。"</string>
     <string name="permdesc_writeCallLog" product="tv" msgid="3934939195095317432">"允許應用程式修改 Android TV 裝置的通話記錄，包括來電和撥出電話相關資料。惡意應用程式可能會藉此清除或修改你的通話記錄。"</string>
     <string name="permdesc_writeCallLog" product="default" msgid="5903033505665134802">"允許應用程式修改手機的通話記錄，包括來電和已撥電話相關資料。請注意，惡意應用程式可能濫用此功能刪除或修改你的通話記錄。"</string>
-    <string name="permlab_bodySensors" msgid="3411035315357380862">"存取人體感應器 (例如心跳速率監測器)"</string>
-    <string name="permdesc_bodySensors" product="default" msgid="3208940894182188063">"存取人體感應器的資料，例如心跳速率、體溫、血氧比例等等。"</string>
-    <string name="permlab_bodySensors_background" msgid="4352831883331744370">"在背景存取人體感應器 (例如心跳速率監測器) 的資料"</string>
-    <string name="permdesc_bodySensors_background" product="default" msgid="8512392249166660872">"在背景存取人體感應器的資料，例如心跳速率、體溫、血氧比例等等。"</string>
+    <string name="permlab_bodySensors" msgid="662918578601619569">"在使用期間可存取人體感應器資料，例如心跳速率"</string>
+    <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"允許應用程式在使用期間存取人體感應器資料，例如心跳速率、體溫和血氧比例。"</string>
+    <string name="permlab_bodySensors_background" msgid="4912560779957760446">"在背景執行時可存取人體感應器資料，例如心跳速率"</string>
+    <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"允許應用程式在背景執行時存取人體感應器資料，例如心跳速率、體溫和血氧比例。"</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"讀取日曆活動和詳細資訊"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"這個應用程式可讀取所有儲存在平板電腦上的日曆活動資訊，以及共用或儲存日曆資料。"</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"這個應用程式可讀取所有儲存在 Android TV 裝置上的日曆活動，以及共用或儲存日曆資料。"</string>
@@ -548,7 +547,7 @@
     <string name="permlab_uwb_ranging" msgid="8141915781475770665">"判斷附近超寬頻裝置間的相對位置"</string>
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"允許應用程式判斷附近超寬頻裝置間的相對位置"</string>
     <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"與鄰近的 Wi-Fi 裝置互動"</string>
-    <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"允許應用程式向鄰近的 Wi-Fi 裝置廣播、與這些裝置連線，並能判斷這些裝置的相對位置"</string>
+    <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"允許應用程式顯示鄰近的 Wi-Fi 裝置的資料、與其連線並判斷相對位置"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"首選 NFC 付費服務資訊"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"允許應用程式取得首選 NFC 付費服務資訊，例如已註冊的輔助工具和路線目的地。"</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"控制近距離無線通訊"</string>
@@ -588,12 +587,9 @@
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"如要繼續操作，請輸入螢幕鎖定憑證"</string>
     <string name="fingerprint_acquired_partial" msgid="694598777291084823">"僅偵測到局部指紋"</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"無法處理指紋，請再試一次。"</string>
-    <!-- no translation found for fingerprint_acquired_imager_dirty (1770676120848224250) -->
-    <skip />
-    <!-- no translation found for fingerprint_acquired_imager_dirty_alt (9169582140486372897) -->
-    <skip />
-    <!-- no translation found for fingerprint_acquired_too_fast (1628459767349116104) -->
-    <skip />
+    <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"請清潔指紋感應器，然後再試一次"</string>
+    <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"清潔感應器，然後再試一次"</string>
+    <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"請確實按住感應器"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"手指移動速度過慢，請再試一次。"</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"改用其他指紋"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"太亮"</string>
@@ -601,10 +597,8 @@
     <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"每次掃描時請稍微變更手指的位置"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
-    <!-- no translation found for fingerprint_error_not_match (4599441812893438961) -->
-    <skip />
-    <!-- no translation found for fingerprint_udfps_error_not_match (4709197752023550709) -->
-    <skip />
+    <string name="fingerprint_error_not_match" msgid="4599441812893438961">"指紋辨識失敗"</string>
+    <string name="fingerprint_udfps_error_not_match" msgid="4709197752023550709">"請確實按住感應器"</string>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"指紋驗證成功"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"臉孔驗證成功"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"臉孔驗證成功，請按下 [確認] 按鈕"</string>
@@ -695,8 +689,8 @@
     <string name="permdesc_readMediaAudio" msgid="5299772574434619399">"允許應用程式讀取共用儲存空間中的音訊檔案。"</string>
     <string name="permlab_readMediaVideo" msgid="7768003311260655007">"讀取共用儲存空間中的影片檔案"</string>
     <string name="permdesc_readMediaVideo" msgid="3846400073770403528">"允許應用程式讀取共用儲存空間中的影片檔案。"</string>
-    <string name="permlab_readMediaImage" msgid="1507059005825769856">"讀取共用儲存空間中的圖片檔案"</string>
-    <string name="permdesc_readMediaImage" msgid="8328052622292457588">"允許應用程式讀取共用儲存空間中的圖片檔案。"</string>
+    <string name="permlab_readMediaImages" msgid="4057590631020986789">"讀取共用儲存空間中的圖片檔案"</string>
+    <string name="permdesc_readMediaImages" msgid="5836219373138469259">"允許應用程式讀取共用儲存空間中的圖片檔案。"</string>
     <string name="permlab_sdcardWrite" msgid="4863021819671416668">"修改或刪除共用儲存空間中的內容"</string>
     <string name="permdesc_sdcardWrite" msgid="8376047679331387102">"允許這個應用程式寫入共用儲存空間中的內容。"</string>
     <string name="permlab_use_sip" msgid="8250774565189337477">"撥打/接聽 SIP 通話"</string>
@@ -743,6 +737,8 @@
     <string name="permdesc_bindCarrierMessagingService" msgid="6316457028173478345">"允許應用程式與電信業者簡訊服務的頂層介面繫結 (一般應用程式並不需要)。"</string>
     <string name="permlab_bindCarrierServices" msgid="2395596978626237474">"與電信業者服務繫結"</string>
     <string name="permdesc_bindCarrierServices" msgid="9185614481967262900">"允許應用程式繫結至電信業者服務 (一般應用程式並不需要)。"</string>
+    <string name="permlab_access_notification_policy" msgid="5524112842876975537">"存取「零打擾」模式"</string>
+    <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"允許應用程式讀取及寫入「零打擾」設定。"</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"啟動檢視權限用途"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"允許應用程式開始使用其他應用程式 (一般應用程式並不需要)。"</string>
     <string name="permlab_startReviewPermissionDecisions" msgid="8690578688476599284">"開始檢視權限決定"</string>
@@ -916,7 +912,7 @@
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="7982445492532123308">"按下 [Menu] 解鎖或撥打緊急電話。"</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="7434061749374801753">"按下 Menu 鍵解鎖。"</string>
     <string name="lockscreen_pattern_instructions" msgid="3169991838169244941">"畫出解鎖圖案"</string>
-    <string name="lockscreen_emergency_call" msgid="7549683825868928636">"緊急電話"</string>
+    <string name="lockscreen_emergency_call" msgid="7500692654885445299">"緊急撥號"</string>
     <string name="lockscreen_return_to_call" msgid="3156883574692006382">"返回通話"</string>
     <string name="lockscreen_pattern_correct" msgid="8050630103651508582">"正確！"</string>
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"再試一次"</string>
@@ -1055,7 +1051,6 @@
     <string name="save_password_never" msgid="6776808375903410659">"永不"</string>
     <string name="open_permission_deny" msgid="5136793905306987251">"你沒有開啟這個頁面的權限。"</string>
     <string name="text_copied" msgid="2531420577879738860">"文字已複製到剪貼簿。"</string>
-    <string name="copied" msgid="4675902854553014676">"已複製"</string>
     <string name="pasted_from_app" msgid="5627698450808256545">"「<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g>」已貼上從「<xliff:g id="SOURCE_APP_NAME">%2$s</xliff:g>」複製的資料"</string>
     <string name="pasted_from_clipboard" msgid="7355790625710831847">"已將剪貼簿內容貼到「<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g>」"</string>
     <string name="pasted_text" msgid="4298871641549173733">"你複製的文字已貼到「<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g>」"</string>
@@ -1456,8 +1451,6 @@
     <string name="permdesc_requestIgnoreBatteryOptimizations" msgid="634260656917874356">"允許應用程式要求權限，以便忽略針對該應用程式的電池效能最佳化設定。"</string>
     <string name="permlab_queryAllPackages" msgid="2928450604653281650">"查詢所有套件"</string>
     <string name="permdesc_queryAllPackages" msgid="5339069855520996010">"允許應用程式查看所有已安裝的套件。"</string>
-    <string name="permlab_accessSupplementalApi" msgid="3544659160536960275">"存取 SupplementalApis"</string>
-    <string name="permdesc_accessSupplementalApi" msgid="8974758769370951074">"允許應用程式存取 SupplementalApis。"</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1842872462124648678">"點兩下以進行縮放控制"</string>
     <string name="gadget_host_error_inflating" msgid="2449961590495198720">"無法新增小工具。"</string>
     <string name="ime_action_go" msgid="5536744546326495436">"開始"</string>
@@ -1508,8 +1501,7 @@
     <string name="skip_button_label" msgid="3566599811326688389">"略過"</string>
     <string name="no_matches" msgid="6472699895759164599">"沒有相符項目"</string>
     <string name="find_on_page" msgid="5400537367077438198">"在頁面中尋找"</string>
-    <!-- no translation found for matches_found (2296462299979507689) -->
-    <skip />
+    <string name="matches_found" msgid="2296462299979507689">"{count,plural, =1{# 個相符的項目}other{第 # 個，共 {total} 個相符的項目}}"</string>
     <string name="action_mode_done" msgid="2536182504764803222">"完成"</string>
     <string name="progress_erasing" msgid="6891435992721028004">"正在清除共用儲存空間…"</string>
     <string name="share" msgid="4157615043345227321">"分享"</string>
@@ -1721,6 +1713,7 @@
     <string name="user_switching_message" msgid="1912993630661332336">"正在切換至<xliff:g id="NAME">%1$s</xliff:g>…"</string>
     <string name="user_logging_out_message" msgid="7216437629179710359">"正在將<xliff:g id="NAME">%1$s</xliff:g>登出帳戶…"</string>
     <string name="owner_name" msgid="8713560351570795743">"擁有者"</string>
+    <string name="guest_name" msgid="8502103277839834324">"訪客"</string>
     <string name="error_message_title" msgid="4082495589294631966">"錯誤"</string>
     <string name="error_message_change_not_allowed" msgid="843159705042381454">"你的管理員不允許這項變更"</string>
     <string name="app_not_found" msgid="3429506115332341800">"找不到支援此操作的應用程式"</string>
@@ -1874,8 +1867,10 @@
     <string name="zen_mode_until" msgid="2250286190237669079">"結束時間：<xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_alarm" msgid="7046911727540499275">"到<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> 為止 (下一個鬧鐘)"</string>
     <string name="zen_mode_forever" msgid="740585666364912448">"直到你關閉為止"</string>
+    <string name="zen_mode_forever_dnd" msgid="3423201955704180067">"直到你關閉「零打擾」模式"</string>
     <string name="zen_mode_rule_name_combination" msgid="7174598364351313725">"<xliff:g id="FIRST">%1$s</xliff:g>/<xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="8009920446193610996">"收合"</string>
+    <string name="zen_mode_feature_name" msgid="3785547207263754500">"零打擾"</string>
     <string name="zen_mode_downtime_feature_name" msgid="5886005761431427128">"停機"</string>
     <string name="zen_mode_default_weeknights_name" msgid="7902108149994062847">"週間晚上"</string>
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"週末"</string>
@@ -1938,6 +1933,8 @@
     <string name="app_blocked_title" msgid="7353262160455028160">"應用程式無法使用"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"「<xliff:g id="APP_NAME">%1$s</xliff:g>」目前無法使用。"</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"無法存取「<xliff:g id="ACTIVITY">%1$s</xliff:g>」"</string>
+    <!-- no translation found for app_streaming_blocked_title_for_permission_dialog (4483161748582966785) -->
+    <skip />
     <string name="app_streaming_blocked_message" product="tv" msgid="4003011766528814377">"目前無法在 <xliff:g id="DEVICE">%1$s</xliff:g> 上存取這個應用程式，請改用 Android TV 裝置。"</string>
     <string name="app_streaming_blocked_message" product="tablet" msgid="4242053045964946062">"目前無法在 <xliff:g id="DEVICE">%1$s</xliff:g> 上存取這個應用程式，請改用平板電腦。"</string>
     <string name="app_streaming_blocked_message" product="default" msgid="6159168735030739398">"目前無法在 <xliff:g id="DEVICE">%1$s</xliff:g> 上存取這個應用程式，請改用手機。"</string>
@@ -2030,17 +2027,20 @@
     <string name="harmful_app_warning_uninstall" msgid="6472912975664191772">"解除安裝"</string>
     <string name="harmful_app_warning_open_anyway" msgid="5963657791740211807">"仍要開啟"</string>
     <string name="harmful_app_warning_title" msgid="8794823880881113856">"偵測到有害應用程式"</string>
-    <string name="log_access_confirmation_title" msgid="3143035474800851565">"系統記錄存取要求"</string>
+    <string name="log_access_confirmation_title" msgid="2343578467290592708">"要允許「<xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g>」存取所有裝置記錄嗎？"</string>
     <string name="log_access_confirmation_allow" msgid="143157286283302512">"僅允許這一次"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"不允許"</string>
-    <string name="log_access_confirmation_body" msgid="7599059550906238538">"「<xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g>」要求存取系統記錄以進行功能偵錯。這些記錄可能包含應用程式和服務在你裝置上寫入的資訊。"</string>
+    <string name="log_access_confirmation_body" msgid="4483075525611652922">"系統會透過裝置記錄記下裝置上的活動。應用程式可以根據這些記錄找出問題並進行修正。\n\n某些記錄可能含有機密資訊，因此請勿讓不信任的應用程式存取所有裝置記錄。\n\n即使你不允許這個應用程式存取所有裝置記錄，這個應用程式仍能存取自己的記錄，而且裝置製造商或許仍可存取裝置的某些記錄或資訊。瞭解詳情"</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"不要再顯示"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"「<xliff:g id="APP_0">%1$s</xliff:g>」想要顯示「<xliff:g id="APP_2">%2$s</xliff:g>」的區塊"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"編輯"</string>
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"有來電和通知時會震動"</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"有來電和通知時會靜音"</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"系統變更"</string>
+    <string name="notification_channel_do_not_disturb" msgid="7832584281883687653">"零打擾"</string>
+    <string name="zen_upgrade_notification_visd_title" msgid="2001148984371968620">"新功能：「零打擾」模式現在可以隱藏通知"</string>
     <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"輕觸即可瞭解詳情及進行變更。"</string>
+    <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"「零打擾」設定已變更"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"輕觸即可查看遭封鎖的項目。"</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"系統"</string>
     <string name="notification_app_name_settings" msgid="9088548800899952531">"設定"</string>
@@ -2057,6 +2057,7 @@
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"確定"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"關閉"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"瞭解詳情"</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"在 Android 12 中，加強型通知功能已取代 Android 自動調整通知。這項功能可以顯示建議的操作和回覆內容，也可以幫你整理通知訊息。\n\n加強型通知功能可存取通知內容，包括聯絡人名稱和訊息內文等個人資訊。此外，這項功能還能關閉或回覆通知，例如接聽來電及控管「零打擾」功能。"</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"日常安排模式資訊通知"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"電池電力可能會在你平常的充電時間前耗盡"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"已啟用省電模式以延長電池續航力"</string>
@@ -2263,6 +2264,7 @@
     <string name="notification_content_abusive_bg_apps" msgid="5572096708044958249">"「<xliff:g id="APP">%1$s</xliff:g>」正在背景運作且耗用大量電力。輕觸即可查看。"</string>
     <string name="notification_content_long_running_fgs" msgid="8878031652441570178">"「<xliff:g id="APP">%1$s</xliff:g>」已長時間在背景運作。輕觸即可查看。"</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"查看使用中的應用程式"</string>
-    <!-- no translation found for vdm_camera_access_denied (6345652513729130490) -->
+    <string name="vdm_camera_access_denied" msgid="6345652513729130490">"無法存取這部裝置的相機"</string>
+    <!-- no translation found for system_locale_title (3978041860457277638) -->
     <skip />
 </resources>

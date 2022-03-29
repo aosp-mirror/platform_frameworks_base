@@ -70,6 +70,7 @@
     <string name="ThreeWCMmi" msgid="2436550866139999411">"Hiru hizlaritako deiak"</string>
     <string name="RuacMmi" msgid="1876047385848991110">"Nahigabeko dei gogaikarriak ukatzea"</string>
     <string name="CndMmi" msgid="185136449405618437">"Deitzailearen zenbakia ematea"</string>
+    <string name="DndMmi" msgid="8797375819689129800">"Ez molestatzeko modua"</string>
     <string name="CLIRDefaultOnNextCallOn" msgid="4511621022859867988">"Deien identifikazio-zerbitzuaren balio lehenetsiak murriztapenak ezartzen ditu. Hurrengo deia: murriztapenekin"</string>
     <string name="CLIRDefaultOnNextCallOff" msgid="5036749051007098105">"Deien identifikazio-zerbitzuaren balio lehenetsiak murriztapenak ezartzen ditu. Hurrengo deia: murriztapenik gabe"</string>
     <string name="CLIRDefaultOffNextCallOn" msgid="1022781126694885017">"Deien identifikazio-zerbitzuaren balio lehenetsiak ez du murriztapenik ezartzen. Hurrengo deia: murriztapenekin"</string>
@@ -84,8 +85,8 @@
     <string name="RestrictedStateContentMsimTemplate" msgid="5228235722511044687">"Operadoreak <xliff:g id="SIMNUMBER">%d</xliff:g> SIM txartela desaktibatu egin du aldi baterako"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"Ezin da konektatu sare mugikorrera"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"Aldatu sare hobetsia. Sakatu aldatzeko."</string>
-    <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"Ezin da egin larrialdi-deirik"</string>
-    <string name="EmergencyCallWarningSummary" msgid="1194185880092805497">"Ezin duzu egin larrialdi-deirik Wi-Fi bidez"</string>
+    <string name="EmergencyCallWarningTitle" msgid="9164532362414787774">"Baliteke larrialdi-deiak erabilgarri ez egotea"</string>
+    <string name="EmergencyCallWarningSummary" msgid="3365701131304664899">"<xliff:g id="SPN">%s</xliff:g> hornitzaileak ez du onartzen larrialdi-deiak wifi bidez egitea. Sakatu hau xehetasunak ikusteko."</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"Alertak"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"Dei-desbideratzea"</string>
     <string name="notification_channel_emergency_callback" msgid="54074839059123159">"Larrialdi-zerbitzuen deiak jasotzeko modua"</string>
@@ -290,7 +291,7 @@
     <string name="notification_channel_accessibility_security_policy" msgid="1727787021725251912">"Erabilerraztasun-hobespenak"</string>
     <string name="foreground_service_app_in_background" msgid="1439289699671273555">"<xliff:g id="APP_NAME">%1$s</xliff:g> ari da bateria erabiltzen"</string>
     <string name="foreground_service_apps_in_background" msgid="7340037176412387863">"<xliff:g id="NUMBER">%1$d</xliff:g> aplikazio ari dira bateria erabiltzen"</string>
-    <string name="foreground_service_tap_for_details" msgid="9078123626015586751">"Sakatu bateria eta datuen erabilerari buruzko xehetasunak ikusteko"</string>
+    <string name="foreground_service_tap_for_details" msgid="9078123626015586751">"Sakatu bateria eta datu-erabilerari buruzko xehetasunak ikusteko"</string>
     <string name="foreground_service_multiple_separator" msgid="5002287361849863168">"<xliff:g id="LEFT_SIDE">%1$s</xliff:g>, <xliff:g id="RIGHT_SIDE">%2$s</xliff:g>"</string>
     <string name="safeMode" msgid="8974401416068943888">"Modu segurua"</string>
     <string name="android_system_label" msgid="5974767339591067210">"Android sistema"</string>
@@ -304,10 +305,8 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"atzitu egutegia"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMSak"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"bidali eta ikusi SMS mezuak"</string>
-    <!-- no translation found for permgrouplab_storage (9173334109512154196) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_storage (8352226729501080525) -->
-    <skip />
+    <string name="permgrouplab_storage" msgid="9173334109512154196">"Fitxategiak eta dokumentuak"</string>
+    <string name="permgroupdesc_storage" msgid="8352226729501080525">"gailuko fitxategiak eta dokumentuak atzitu"</string>
     <string name="permgrouplab_readMediaAural" msgid="5885210465560755316">"Musika eta bestelako audioa"</string>
     <string name="permgroupdesc_readMediaAural" msgid="1170143315714662822">"atzitu gailuko audio-fitxategiak"</string>
     <string name="permgrouplab_readMediaVisual" msgid="9137695801926624061">"Argazkiak eta bideoak"</string>
@@ -393,7 +392,7 @@
     <string name="permlab_runInBackground" msgid="541863968571682785">"exekutatu atzeko planoan"</string>
     <string name="permdesc_runInBackground" msgid="4344539472115495141">"Atzeko planoan exekuta liteke aplikazioa eta horrek bizkorrago agor lezake bateria."</string>
     <string name="permlab_useDataInBackground" msgid="783415807623038947">"erabili datuak atzeko planoan"</string>
-    <string name="permdesc_useDataInBackground" msgid="1230753883865891987">"Aplikazioak datuak erabil litzake atzeko planoan eta horrek datuen erabilera areago lezake."</string>
+    <string name="permdesc_useDataInBackground" msgid="1230753883865891987">"Aplikazioak datuak erabil litzake atzeko planoan eta horrek datu-erabilera areago lezake."</string>
     <string name="permlab_persistentActivity" msgid="464970041740567970">"izan aplikazioa beti abian"</string>
     <string name="permdesc_persistentActivity" product="tablet" msgid="6055271149187369916">"Beren zati batzuk memoria modu iraunkorrean ezartzeko baimena ematen die aplikazioei. Horrela, beste aplikazioek erabilgarri duten memoria murritz daiteke eta tableta motel daiteke."</string>
     <string name="permdesc_persistentActivity" product="tv" msgid="6800526387664131321">"Beren zati batzuk memorian modu iraunkorrean ezartzeko baimena ematen die aplikazioei. Ondorioz, beste aplikazioek memoria gutxiago izan lezakete erabilgarri, eta Android TV gailuak motelago funtziona lezake."</string>
@@ -426,10 +425,10 @@
     <string name="permdesc_writeCallLog" product="tablet" msgid="2657525794731690397">"Tabletaren deien erregistroa aldatzeko baimena ematen die aplikazioei, sarrerako eta irteerako deiei buruzko datuak barne. Asmo txarreko aplikazioek deien erregistroa ezabatzeko edo aldatzeko erabil dezakete."</string>
     <string name="permdesc_writeCallLog" product="tv" msgid="3934939195095317432">"Android TV gailuko deien erregistroa aldatzeko baimena ematen die aplikazioei, jasotako eta egindako deiei buruzko datuak barne. Baliteke asmo txarreko aplikazioek deien erregistroa ezabatzea edo aldatzea."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="5903033505665134802">"Telefonoaren deien erregistroa aldatzeko baimena ematen die aplikazioei, sarrerako eta irteerako deiei buruzko datuak barne. Asmo txarreko aplikazioek deien erregistroa ezabatzeko edo aldatzeko erabil dezakete."</string>
-    <string name="permlab_bodySensors" msgid="3411035315357380862">"Atzitu gorputzaren sentsoreak (adibidez, bihotz-maiztasunarenak)"</string>
-    <string name="permdesc_bodySensors" product="default" msgid="3208940894182188063">"Gorputz-sentsoreen datuak atzitzeko baimena; esate baterako, bihotz-maiztasuna, tenperatura, odolean dagoen oxigenoaren ehunekoa, etab."</string>
-    <string name="permlab_bodySensors_background" msgid="4352831883331744370">"atzitu atzeko planoan gorputz-sentsoreak (adibidez, bihotz-maiztasunaren neurgailuak)"</string>
-    <string name="permdesc_bodySensors_background" product="default" msgid="8512392249166660872">"Atzeko planoan gorputz-sentsoreen datuak atzitzeko baimena; esate baterako, bihotz-maiztasuna, tenperatura, odolean dagoen oxigenoaren ehunekoa, etab."</string>
+    <string name="permlab_bodySensors" msgid="662918578601619569">"Atzitu gorputz-sentsoreen datuak (esaterako, bihotz-maiztasuna) aplikazioa erabili bitartean"</string>
+    <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"Aplikazioak erabiltzen diren bitartean, gorputz-sentsoreen datuak (besteak beste, bihotz-maiztasuna, tenperatura eta odolean dagoen oxigenoaren ehunekoa) atzitzeko baimena ematen die aplikazio horiei."</string>
+    <string name="permlab_bodySensors_background" msgid="4912560779957760446">"Atzitu gorputz-sentsoreen datuak (esaterako, bihotz-maiztasuna) aplikazioa atzeko planoan dagoen bitartean"</string>
+    <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"Aplikazioak atzeko planoan egon bitartean, gorputz-sentsoreen datuak (besteak beste, bihotz-maiztasuna, tenperatura eta odolean dagoen oxigenoaren ehunekoa) atzitzeko baimena ematen die aplikazio horiei."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"irakurri egutegiko gertaerak eta xehetasunak"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"Aplikazioak tabletan gordetako egutegiko gertaerak irakur ditzake eta egutegiko datuak parteka eta gorde ditzake."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"Aplikazioak Android TV gailuan gordeta dituzun egutegiko gertaerak irakur ditzake, baita egutegiko datuak partekatu eta gorde ere."</string>
@@ -588,12 +587,9 @@
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"Aurrera egiteko, desblokeatu pantailaren blokeoa"</string>
     <string name="fingerprint_acquired_partial" msgid="694598777291084823">"Hatz-marka ez da osorik hauteman"</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"Ezin izan da prozesatu hatz-marka. Saiatu berriro."</string>
-    <!-- no translation found for fingerprint_acquired_imager_dirty (1770676120848224250) -->
-    <skip />
-    <!-- no translation found for fingerprint_acquired_imager_dirty_alt (9169582140486372897) -->
-    <skip />
-    <!-- no translation found for fingerprint_acquired_too_fast (1628459767349116104) -->
-    <skip />
+    <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"Garbitu hatz-marken sentsorea eta saiatu berriro"</string>
+    <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"Garbitu sentsorea eta saiatu berriro"</string>
+    <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"Sakatu irmo sentsorea"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"Mantsoegi mugitu duzu hatza. Saiatu berriro."</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"Erabili beste hatz-marka bat"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"Argi gehiegi dago"</string>
@@ -601,10 +597,8 @@
     <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"Aldi bakoitzean, aldatu hatzaren posizioa apur bat"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
-    <!-- no translation found for fingerprint_error_not_match (4599441812893438961) -->
-    <skip />
-    <!-- no translation found for fingerprint_udfps_error_not_match (4709197752023550709) -->
-    <skip />
+    <string name="fingerprint_error_not_match" msgid="4599441812893438961">"Ez da ezagutu hatz-marka"</string>
+    <string name="fingerprint_udfps_error_not_match" msgid="4709197752023550709">"Sakatu irmo sentsorea"</string>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"Autentifikatu da hatz-marka"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"Autentifikatu da aurpegia"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"Autentifikatu da aurpegia; sakatu Berretsi"</string>
@@ -695,8 +689,8 @@
     <string name="permdesc_readMediaAudio" msgid="5299772574434619399">"Biltegi partekatuko audio-fitxategiak irakurtzeko baimena ematen die aplikazioei."</string>
     <string name="permlab_readMediaVideo" msgid="7768003311260655007">"irakurri biltegi partekatuko bideo-fitxategiak"</string>
     <string name="permdesc_readMediaVideo" msgid="3846400073770403528">"Biltegi partekatuko bideo-fitxategiak irakurtzeko baimena ematen die aplikazioei."</string>
-    <string name="permlab_readMediaImage" msgid="1507059005825769856">"irakurri biltegi partekatuko irudi-fitxategiak"</string>
-    <string name="permdesc_readMediaImage" msgid="8328052622292457588">"Biltegi partekatuko irudi-fitxategiak irakurtzeko baimena ematen die aplikazioei."</string>
+    <string name="permlab_readMediaImages" msgid="4057590631020986789">"irakurri biltegi partekatuko irudi-fitxategiak"</string>
+    <string name="permdesc_readMediaImages" msgid="5836219373138469259">"Biltegi partekatuko irudi-fitxategiak irakurtzeko baimena ematen die aplikazioei."</string>
     <string name="permlab_sdcardWrite" msgid="4863021819671416668">"aldatu edo ezabatu biltegi partekatuko edukia"</string>
     <string name="permdesc_sdcardWrite" msgid="8376047679331387102">"Biltegi partekatuko edukian idazteko baimena ematen die aplikazioei."</string>
     <string name="permlab_use_sip" msgid="8250774565189337477">"egin/jaso SIP deiak"</string>
@@ -743,6 +737,8 @@
     <string name="permdesc_bindCarrierMessagingService" msgid="6316457028173478345">"Operadore baten mezularitza-zerbitzuaren goi-mailako interfazeari lotzea baimentzen die erabiltzaileei. Aplikazio normalek ez lukete inoiz beharko."</string>
     <string name="permlab_bindCarrierServices" msgid="2395596978626237474">"lotu operadorearen zerbitzuei"</string>
     <string name="permdesc_bindCarrierServices" msgid="9185614481967262900">"Operadorearen zerbitzuei lotzea baimentzen die titularrei. Aplikazio normalek ez dute baimen hau behar."</string>
+    <string name="permlab_access_notification_policy" msgid="5524112842876975537">"atzitu ez molestatzeko modua"</string>
+    <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"Ez molestatzeko moduaren konfigurazioa irakurtzeko eta bertan idazteko baimena ematen die aplikazioei."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"hasi ikusteko baimena erabiltzen"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"Aplikazioaren baimena erabiltzen hasteko baimena ematen die titularrei. Aplikazio normalek ez lukete beharko."</string>
     <string name="permlab_startReviewPermissionDecisions" msgid="8690578688476599284">"hasi baimenen inguruko erabakiak ikusten"</string>
@@ -916,7 +912,7 @@
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="7982445492532123308">"Desblokeatzeko edo larrialdi-deia egiteko, sakatu Menua."</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="7434061749374801753">"Desblokeatzeko, sakatu Menua."</string>
     <string name="lockscreen_pattern_instructions" msgid="3169991838169244941">"Desblokeatzeko, marraztu eredua"</string>
-    <string name="lockscreen_emergency_call" msgid="7549683825868928636">"Larrialdi-deia"</string>
+    <string name="lockscreen_emergency_call" msgid="7500692654885445299">"Larrialdi-deiak"</string>
     <string name="lockscreen_return_to_call" msgid="3156883574692006382">"Itzuli deira"</string>
     <string name="lockscreen_pattern_correct" msgid="8050630103651508582">"Eredua zuzena da!"</string>
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"Saiatu berriro"</string>
@@ -1055,7 +1051,6 @@
     <string name="save_password_never" msgid="6776808375903410659">"Inoiz ez"</string>
     <string name="open_permission_deny" msgid="5136793905306987251">"Ez duzu orri hau irekitzeko baimenik."</string>
     <string name="text_copied" msgid="2531420577879738860">"Testua arbelean kopiatu da."</string>
-    <string name="copied" msgid="4675902854553014676">"Kopiatu da"</string>
     <string name="pasted_from_app" msgid="5627698450808256545">"<xliff:g id="SOURCE_APP_NAME">%2$s</xliff:g> aplikaziotik itsatsi da <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g>"</string>
     <string name="pasted_from_clipboard" msgid="7355790625710831847">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> aplikazioak arbeleko edukia itsatsi du"</string>
     <string name="pasted_text" msgid="4298871641549173733">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> aplikazioak kopiatu duzun testua itsatsi du"</string>
@@ -1070,7 +1065,7 @@
     <string name="menu_sym_shortcut_label" msgid="4037566049061218776">"Sym +"</string>
     <string name="menu_function_shortcut_label" msgid="2367112760987662566">"Funtzioa +"</string>
     <string name="menu_space_shortcut_label" msgid="5949311515646872071">"zuriunea tekla"</string>
-    <string name="menu_enter_shortcut_label" msgid="6709499510082897320">"sartu tekla"</string>
+    <string name="menu_enter_shortcut_label" msgid="6709499510082897320">"\"sartu\" tekla"</string>
     <string name="menu_delete_shortcut_label" msgid="4365787714477739080">"ezabatu"</string>
     <string name="search_go" msgid="2141477624421347086">"Bilatu"</string>
     <string name="search_hint" msgid="455364685740251925">"Bilatu…"</string>
@@ -1456,8 +1451,6 @@
     <string name="permdesc_requestIgnoreBatteryOptimizations" msgid="634260656917874356">"Bateriaren optimizazioei ez ikusi egiteko baimena eskatzea baimentzen die aplikazioei."</string>
     <string name="permlab_queryAllPackages" msgid="2928450604653281650">"Kontsultatu pakete guztiak"</string>
     <string name="permdesc_queryAllPackages" msgid="5339069855520996010">"Instalatutako pakete guztiak ikusteko baimena ematen dio aplikazioari."</string>
-    <string name="permlab_accessSupplementalApi" msgid="3544659160536960275">"atzitu SupplementalApis"</string>
-    <string name="permdesc_accessSupplementalApi" msgid="8974758769370951074">"SupplementalApis direlakoak (API osagarriak) atzitzeko baimena ematen die aplikazioei."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1842872462124648678">"Sakatu birritan zooma kontrolatzeko"</string>
     <string name="gadget_host_error_inflating" msgid="2449961590495198720">"Ezin izan da widgeta gehitu."</string>
     <string name="ime_action_go" msgid="5536744546326495436">"Joan"</string>
@@ -1468,7 +1461,7 @@
     <string name="ime_action_previous" msgid="6548799326860401611">"Atzera"</string>
     <string name="ime_action_default" msgid="8265027027659800121">"Abiarazi"</string>
     <string name="dial_number_using" msgid="6060769078933953531">"Markatu zenbakia \n<xliff:g id="NUMBER">%s</xliff:g> erabilita"</string>
-    <string name="create_contact_using" msgid="6200708808003692594">"Sortu kontaktua\n<xliff:g id="NUMBER">%s</xliff:g> erabilita"</string>
+    <string name="create_contact_using" msgid="6200708808003692594">"Sortu kontaktu bat\n<xliff:g id="NUMBER">%s</xliff:g> erabilita"</string>
     <string name="grant_credentials_permission_message_header" msgid="5365733888842570481">"Aplikazio hauetako bat edo gehiago kontua orain eta etorkizunean atzitzeko baimena eskatzen ari dira."</string>
     <string name="grant_credentials_permission_message_footer" msgid="1886710210516246461">"Eskaera onartu nahi duzu?"</string>
     <string name="grant_permissions_header_text" msgid="3420736827804657201">"Sarbide-eskaera"</string>
@@ -1508,8 +1501,7 @@
     <string name="skip_button_label" msgid="3566599811326688389">"Saltatu"</string>
     <string name="no_matches" msgid="6472699895759164599">"Ez dago emaitzarik"</string>
     <string name="find_on_page" msgid="5400537367077438198">"Aurkitu orri honetan"</string>
-    <!-- no translation found for matches_found (2296462299979507689) -->
-    <skip />
+    <string name="matches_found" msgid="2296462299979507689">"{count,plural, =1{# emaitza}other{#/{total}}}"</string>
     <string name="action_mode_done" msgid="2536182504764803222">"Eginda"</string>
     <string name="progress_erasing" msgid="6891435992721028004">"Biltegi partekatuko eduki guztia ezabatzen…"</string>
     <string name="share" msgid="4157615043345227321">"Partekatu"</string>
@@ -1573,7 +1565,7 @@
     <string name="storage_usb_drive_label" msgid="6631740655876540521">"<xliff:g id="MANUFACTURER">%s</xliff:g> enpresaren USB bidezko unitatea"</string>
     <string name="storage_usb" msgid="2391213347883616886">"USB bidezko memoria"</string>
     <string name="extract_edit_menu_button" msgid="63954536535863040">"Editatu"</string>
-    <string name="data_usage_warning_title" msgid="9034893717078325845">"Datuen erabileraren abisua"</string>
+    <string name="data_usage_warning_title" msgid="9034893717078325845">"Datu-erabileraren abisua"</string>
     <string name="data_usage_warning_body" msgid="1669325367188029454">"<xliff:g id="APP">%s</xliff:g> erabili dituzu"</string>
     <string name="data_usage_mobile_limit_title" msgid="3911447354393775241">"Datu-konexioaren mugara iritsi zara"</string>
     <string name="data_usage_wifi_limit_title" msgid="2069698056520812232">"Wi-Fi datuen mugara iritsi zara"</string>
@@ -1721,6 +1713,7 @@
     <string name="user_switching_message" msgid="1912993630661332336">"\"<xliff:g id="NAME">%1$s</xliff:g>\" erabiltzailera aldatzen…"</string>
     <string name="user_logging_out_message" msgid="7216437629179710359">"<xliff:g id="NAME">%1$s</xliff:g> erabiltzailearen saioa amaitzen…"</string>
     <string name="owner_name" msgid="8713560351570795743">"Jabea"</string>
+    <string name="guest_name" msgid="8502103277839834324">"Gonbidatua"</string>
     <string name="error_message_title" msgid="4082495589294631966">"Errorea"</string>
     <string name="error_message_change_not_allowed" msgid="843159705042381454">"Administratzaileak ez du eman aldaketa egiteko baimena"</string>
     <string name="app_not_found" msgid="3429506115332341800">"Ez da ekintza gauza dezakeen aplikaziorik aurkitu"</string>
@@ -1859,7 +1852,7 @@
     <string name="confirm_battery_saver" msgid="5247976246208245754">"Ados"</string>
     <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"Bateria-aurrezleak gai iluna aktibatzen du, eta murriztu edo desaktibatu egiten ditu atzeko planoko jarduerak, zenbait efektu bisual, eta eginbide jakin eta sareko konexio batzuk."</string>
     <string name="battery_saver_description" msgid="8518809702138617167">"Bateria-aurrezleak gai iluna aktibatzen du, eta atzeko planoko jarduerak, zenbait efektu bisual, eta eginbide jakin eta sareko konexio batzuk murrizten edo desaktibatzen ditu."</string>
-    <string name="data_saver_description" msgid="4995164271550590517">"Datuen erabilera murrizteko, atzeko planoan datuak bidaltzea eta jasotzea galarazten die datu-aurrezleak aplikazio batzuei. Une honetan erabiltzen ari zaren aplikazio batek datuak atzitu ahal izango ditu, baina baliteke maiztasun txikiagoarekin atzitzea. Horrela, adibidez, baliteke irudiak ez erakustea haiek sakatu arte."</string>
+    <string name="data_saver_description" msgid="4995164271550590517">"Datu-erabilera murrizteko, atzeko planoan datuak bidaltzea eta jasotzea galarazten die datu-aurrezleak aplikazio batzuei. Une honetan erabiltzen ari zaren aplikazio batek datuak atzitu ahal izango ditu, baina baliteke maiztasun txikiagoarekin atzitzea. Horrela, adibidez, baliteke irudiak ez erakustea haiek sakatu arte."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Datu-aurrezlea aktibatu nahi duzu?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Aktibatu"</string>
     <string name="zen_mode_duration_minutes_summary" msgid="4555514757230849789">"{count,plural, =1{Minutu batez ({formattedTime} arte)}other{# minutuz ({formattedTime} arte)}}"</string>
@@ -1874,8 +1867,10 @@
     <string name="zen_mode_until" msgid="2250286190237669079">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> arte"</string>
     <string name="zen_mode_alarm" msgid="7046911727540499275">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> arte (hurrengo alarma)"</string>
     <string name="zen_mode_forever" msgid="740585666364912448">"Zuk desaktibatu arte"</string>
+    <string name="zen_mode_forever_dnd" msgid="3423201955704180067">"Ez molestatzeko modua desaktibatzen duzun arte"</string>
     <string name="zen_mode_rule_name_combination" msgid="7174598364351313725">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="8009920446193610996">"Tolestu"</string>
+    <string name="zen_mode_feature_name" msgid="3785547207263754500">"Ez molestatzeko modua"</string>
     <string name="zen_mode_downtime_feature_name" msgid="5886005761431427128">"Jarduerarik gabeko denbora"</string>
     <string name="zen_mode_default_weeknights_name" msgid="7902108149994062847">"Lanegunetako gaua"</string>
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"Asteburua"</string>
@@ -1938,6 +1933,8 @@
     <string name="app_blocked_title" msgid="7353262160455028160">"Aplikazioa ez dago erabilgarri"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> ez dago erabilgarri une honetan."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> ez dago erabilgarri"</string>
+    <!-- no translation found for app_streaming_blocked_title_for_permission_dialog (4483161748582966785) -->
+    <skip />
     <string name="app_streaming_blocked_message" product="tv" msgid="4003011766528814377">"Une honetan, aplikazioa ezin da <xliff:g id="DEVICE">%1$s</xliff:g> erabilita atzitu. Gailu horren ordez, erabili Android TV gailua."</string>
     <string name="app_streaming_blocked_message" product="tablet" msgid="4242053045964946062">"Une honetan, aplikazioa ezin da <xliff:g id="DEVICE">%1$s</xliff:g> erabilita atzitu. Gailu horren ordez, erabili tableta."</string>
     <string name="app_streaming_blocked_message" product="default" msgid="6159168735030739398">"Une honetan, aplikazioa ezin da <xliff:g id="DEVICE">%1$s</xliff:g> erabilita atzitu. Gailu horren ordez, erabili telefonoa."</string>
@@ -2030,17 +2027,20 @@
     <string name="harmful_app_warning_uninstall" msgid="6472912975664191772">"DESINSTALATU"</string>
     <string name="harmful_app_warning_open_anyway" msgid="5963657791740211807">"IREKI, HALA ERE"</string>
     <string name="harmful_app_warning_title" msgid="8794823880881113856">"Aplikazio kaltegarri bat hauteman da"</string>
-    <string name="log_access_confirmation_title" msgid="3143035474800851565">"Sistemaren erregistroak atzitzeko eskaera"</string>
+    <string name="log_access_confirmation_title" msgid="2343578467290592708">"Gailuko erregistro guztiak atzitzeko baimena eman nahi diozu <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> aplikazioari?"</string>
     <string name="log_access_confirmation_allow" msgid="143157286283302512">"Oraingoan soilik"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"Ez eman baimenik"</string>
-    <string name="log_access_confirmation_body" msgid="7599059550906238538">"<xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> aplikazioak sistemaren erregistroak atzitu behar ditu funtzioak arazteko. Litekeena da gailuko aplikazio eta zerbitzuek idatzitako informazioa agertzea erregistro horietan."</string>
+    <string name="log_access_confirmation_body" msgid="4483075525611652922">"Gailuko erregistroetan gailuan gertatzen den guztia gordetzen da. Arazoak bilatu eta konpontzeko erabil ditzakete aplikazioek erregistro horiek.\n\nBaliteke erregistro batzuek kontuzko informazioa edukitzea. Beraz, eman gailuko erregistro guztiak atzitzeko baimena fidagarritzat jotzen dituzun aplikazioei bakarrik. \n\nNahiz eta gailuko erregistro guztiak atzitzeko baimena ez eman aplikazio honi, aplikazioak hari dagozkion erregistroak atzitu ahalko ditu, eta baliteke gailuaren fabrikatzaileak gailuko erregistro edo datu batzuk atzitu ahal izatea. Lortu informazio gehiago"</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"Ez erakutsi berriro"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g> aplikazioak <xliff:g id="APP_2">%2$s</xliff:g> aplikazioaren zatiak erakutsi nahi ditu"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"Editatu"</string>
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"Dar-dar egingo du deiak eta jakinarazpenak jasotzean"</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"Ez da joko tonurik deiak eta jakinarazpenak jasotzean"</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"Sistema-aldaketak"</string>
+    <string name="notification_channel_do_not_disturb" msgid="7832584281883687653">"Ez molestatzeko modua"</string>
+    <string name="zen_upgrade_notification_visd_title" msgid="2001148984371968620">"Berria: Ez molestatzeko modua jakinarazpenak ezkutatzen ari da"</string>
     <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"Sakatu informazio gehiago lortzeko eta portaera aldatzeko."</string>
+    <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"Ez molestatzeko modua aldatu da"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Sakatu zer dagoen blokeatuta ikusteko."</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"Sistema"</string>
     <string name="notification_app_name_settings" msgid="9088548800899952531">"Ezarpenak"</string>
@@ -2057,6 +2057,7 @@
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"Ados"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"Desaktibatu"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"Lortu informazio gehiago"</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"Android 12-n, jakinarazpen hobetuek ordeztu dituzte Android-eko jakinarazpen egokituak. Eginbide horrek, iradokitako ekintzak eta erantzunak erakusten, eta zure jakinarazpenak antolatzen ditu.\n\nJakinarazpen hobetuek jakinarazpenen eduki osoa atzi dezakete, informazio pertsonala barne (esaterako, kontaktuen izenak eta mezuak). Halaber, eginbideak jakinarazpenak baztertu, edo haiei erantzun diezaieke; adibidez, telefono-deiei erantzun diezaieke, eta ez molestatzeko modua kontrolatu."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Ohitura moduaren informazio-jakinarazpena"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Baliteke bateria ohi baino lehenago agortzea"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Bateria-aurrezlea aktibatuta dago bateriaren iraupena luzatzeko"</string>
@@ -2260,9 +2261,10 @@
     <string name="ui_translation_accessibility_translation_finished" msgid="3057830947610088465">"<xliff:g id="FROM_LANGUAGE">%1$s</xliff:g> hizkuntzatik <xliff:g id="TO_LANGUAGE">%2$s</xliff:g> hizkuntzara itzuli da mezua."</string>
     <string name="notification_channel_abusive_bg_apps" msgid="6092140213264920355">"Atzeko planoko jarduerak"</string>
     <string name="notification_title_abusive_bg_apps" msgid="344582472797982073">"Atzeko planoko jarduerak"</string>
-    <string name="notification_content_abusive_bg_apps" msgid="5572096708044958249">"<xliff:g id="APP">%1$s</xliff:g> atzeko planoan exekutatzen eta bateria xahutzen ari da. Sakatu berrikusteko."</string>
+    <string name="notification_content_abusive_bg_apps" msgid="5572096708044958249">"<xliff:g id="APP">%1$s</xliff:g>, atzeko planoan exekutatzen, eta bateria xahutzen ari da. Sakatu berrikusteko."</string>
     <string name="notification_content_long_running_fgs" msgid="8878031652441570178">"<xliff:g id="APP">%1$s</xliff:g> aplikazioak denbora asko darama atzeko planoan exekutatzen. Sakatu berrikusteko."</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Ikusi zer aplikazio dauden aktibo"</string>
-    <!-- no translation found for vdm_camera_access_denied (6345652513729130490) -->
+    <string name="vdm_camera_access_denied" msgid="6345652513729130490">"Ezin da atzitu kamera gailu honetatik"</string>
+    <!-- no translation found for system_locale_title (3978041860457277638) -->
     <skip />
 </resources>

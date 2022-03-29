@@ -51,8 +51,8 @@
     <string name="needPuk2" msgid="7032612093451537186">"Introduza o PUK2 para desbloquear o cartão SIM."</string>
     <string name="enablePin" msgid="2543771964137091212">"Ação sem êxito. Ative o bloqueio do SIM/RUIM."</string>
     <plurals name="pinpuk_attempts" formatted="false" msgid="1619867269012213584">
-      <item quantity="one">Tem mais <xliff:g id="NUMBER_0">%d</xliff:g> tentativa antes de o cartão SIM ficar bloqueado.</item>
       <item quantity="other">Tem mais <xliff:g id="NUMBER_1">%d</xliff:g> tentativas antes de o cartão SIM ficar bloqueado.</item>
+      <item quantity="one">Tem mais <xliff:g id="NUMBER_0">%d</xliff:g> tentativa antes de o cartão SIM ficar bloqueado.</item>
     </plurals>
     <string name="imei" msgid="2157082351232630390">"IMEI"</string>
     <string name="meid" msgid="3291227361605924674">"MEID"</string>
@@ -70,6 +70,7 @@
     <string name="ThreeWCMmi" msgid="2436550866139999411">"Chamada de conferência entre três interlocutores"</string>
     <string name="RuacMmi" msgid="1876047385848991110">"Rejeição de chamadas inoportunas indesejadas"</string>
     <string name="CndMmi" msgid="185136449405618437">"Entrega do número chamador"</string>
+    <string name="DndMmi" msgid="8797375819689129800">"Não incomodar"</string>
     <string name="CLIRDefaultOnNextCallOn" msgid="4511621022859867988">"ID do autor da chamada é predefinido como restrito. Chamada seguinte: Restrita"</string>
     <string name="CLIRDefaultOnNextCallOff" msgid="5036749051007098105">"ID do autor da chamada é predefinido como restrito. Chamada seguinte: Não restrita"</string>
     <string name="CLIRDefaultOffNextCallOn" msgid="1022781126694885017">"ID do autor da chamada é predefinido como não restrito. Chamada seguinte: Restrita"</string>
@@ -84,8 +85,8 @@
     <string name="RestrictedStateContentMsimTemplate" msgid="5228235722511044687">"Serviço temporariamente desativado pelo operador no SIM <xliff:g id="SIMNUMBER">%d</xliff:g>."</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"Não é possível estabelecer ligação à rede móvel."</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"Experimente alterar a rede preferida. Toque para alterar."</string>
-    <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"Chamadas de emergência indisponíveis"</string>
-    <string name="EmergencyCallWarningSummary" msgid="1194185880092805497">"Não é possível efetuar chamadas de emergência através de Wi‑Fi."</string>
+    <string name="EmergencyCallWarningTitle" msgid="9164532362414787774">"As chamadas de emergência podem estar indisponíveis"</string>
+    <string name="EmergencyCallWarningSummary" msgid="3365701131304664899">"<xliff:g id="SPN">%s</xliff:g> não suporta chamadas de emergência através de Wi-Fi. Toque para obter detalhes."</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"Alertas"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"Reencaminhamento de chamadas"</string>
     <string name="notification_channel_emergency_callback" msgid="54074839059123159">"Modo de chamada de retorno de emergência"</string>
@@ -179,7 +180,7 @@
     <string name="low_memory" product="watch" msgid="3479447988234030194">"O armazenamento de visualizações está cheio. Elimine alguns ficheiros para libertar espaço."</string>
     <string name="low_memory" product="tv" msgid="6663680413790323318">"O armazenamento do dispositivo Android TV está cheio. Elimine alguns ficheiros para libertar espaço."</string>
     <string name="low_memory" product="default" msgid="2539532364144025569">"O armazenamento do telemóvel está cheio. Elimine alguns ficheiros para libertar espaço."</string>
-    <string name="ssl_ca_cert_warning" msgid="7233573909730048571">"{count,plural, =1{Autoridade de certificação instalada}one{Autoridade(s) de certificação instalada(s)}other{Autoridades de certificação instaladas}}"</string>
+    <string name="ssl_ca_cert_warning" msgid="7233573909730048571">"{count,plural, =1{Autoridade de certificação instalada}other{Autoridades de certificação instaladas}}"</string>
     <string name="ssl_ca_cert_noti_by_unknown" msgid="4961102218216815242">"Por um terceiro desconhecido"</string>
     <string name="ssl_ca_cert_noti_by_administrator" msgid="4564941950768783879">"Pelo gestor do seu perfil de trabalho"</string>
     <string name="ssl_ca_cert_noti_managed" msgid="217337232273211674">"Por <xliff:g id="MANAGING_DOMAIN">%s</xliff:g>"</string>
@@ -253,7 +254,7 @@
     <string name="bugreport_option_interactive_summary" msgid="8493795476325339542">"Utilize esta opção na maioria das circunstâncias. Permite monitorizar o progresso do relatório, introduzir mais detalhes acerca do problema e tirar capturas de ecrã. Pode omitir algumas secções menos utilizadas que demoram muito tempo a comunicar."</string>
     <string name="bugreport_option_full_title" msgid="7681035745950045690">"Relatório completo"</string>
     <string name="bugreport_option_full_summary" msgid="1975130009258435885">"Utilize esta opção para uma interferência mínima do sistema quando o dispositivo não responder ou estiver demasiado lento, ou quando precisar de todas as secções de relatório. Não permite introduzir mais detalhes ou tirar capturas de ecrã adicionais."</string>
-    <string name="bugreport_countdown" msgid="6418620521782120755">"{count,plural, =1{A fazer uma captura de ecrã do relatório de erro dentro de # segundo.}one{A fazer uma captura de ecrã do relatório de erro dentro de # segundo(s).}other{A fazer uma captura de ecrã do relatório de erro dentro de # segundos.}}"</string>
+    <string name="bugreport_countdown" msgid="6418620521782120755">"{count,plural, =1{A fazer uma captura de ecrã do relatório de erro dentro de # segundo.}other{A fazer uma captura de ecrã do relatório de erro dentro de # segundos.}}"</string>
     <string name="bugreport_screenshot_success_toast" msgid="7986095104151473745">"Captura de ecrã tirada com o relatório de erro."</string>
     <string name="bugreport_screenshot_failure_toast" msgid="6736320861311294294">"Falha ao fazer captura de ecrã com o relatório de erro."</string>
     <string name="global_action_toggle_silent_mode" msgid="8464352592860372188">"Modo silencioso"</string>
@@ -304,10 +305,8 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"aceder ao calendário"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"enviar e ver mensagens SMS"</string>
-    <!-- no translation found for permgrouplab_storage (9173334109512154196) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_storage (8352226729501080525) -->
-    <skip />
+    <string name="permgrouplab_storage" msgid="9173334109512154196">"Ficheiros e documentos"</string>
+    <string name="permgroupdesc_storage" msgid="8352226729501080525">"aceder a ficheiros e documentos no seu dispositivo"</string>
     <string name="permgrouplab_readMediaAural" msgid="5885210465560755316">"Música e outro áudio"</string>
     <string name="permgroupdesc_readMediaAural" msgid="1170143315714662822">"aceder a ficheiros de áudio no dispositivo"</string>
     <string name="permgrouplab_readMediaVisual" msgid="9137695801926624061">"Fotos e vídeos"</string>
@@ -426,10 +425,10 @@
     <string name="permdesc_writeCallLog" product="tablet" msgid="2657525794731690397">"Permite à app modificar o registo de chamadas do tablet, incluindo os dados sobre as chamadas recebidas e efetuadas. As aplicações maliciosas podem utilizar esta funcionalidade para apagar ou modificar o registo de chamadas."</string>
     <string name="permdesc_writeCallLog" product="tv" msgid="3934939195095317432">"Permite à app modificar o registo de chamadas do seu dispositivo Android TV, incluindo os dados sobre as chamadas recebidas e efetuadas. As aplicações maliciosas podem utilizar esta funcionalidade para apagar ou modificar o seu registo de chamadas."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="5903033505665134802">"Permite à app modificar o registo de chamadas do telemóvel, incluindo os dados sobre as chamadas recebidas e efetuadas. As aplicações maliciosas podem utilizar esta funcionalidade para apagar ou modificar o seu registo de chamadas."</string>
-    <string name="permlab_bodySensors" msgid="3411035315357380862">"aceder a sensores corporais (como monitores do ritmo cardíaco)"</string>
-    <string name="permdesc_bodySensors" product="default" msgid="3208940894182188063">"Acesso a dados dos sensores de corpo, como o ritmo cardíaco, a temperatura, a percentagem de oxigénio no sangue, etc."</string>
-    <string name="permlab_bodySensors_background" msgid="4352831883331744370">"aceder a sensores de corpo (como monitores do ritmo cardíaco) em segundo plano"</string>
-    <string name="permdesc_bodySensors_background" product="default" msgid="8512392249166660872">"Acesso a dados dos sensores de corpo, como o ritmo cardíaco, a temperatura, a percentagem de oxigénio no sangue, etc., em segundo plano."</string>
+    <string name="permlab_bodySensors" msgid="662918578601619569">"Aceder a dados de sensores de corpo, como ritmo cardíaco, durante a utilização"</string>
+    <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"Permite à app aceder a dados de sensores de corpo, como ritmo cardíaco, temperatura e percentagem de oxigénio no sangue, enquanto está a ser usada."</string>
+    <string name="permlab_bodySensors_background" msgid="4912560779957760446">"Aceder a dados de sensores de corpo, como ritmo cardíaco, quando em seg. plano"</string>
+    <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"Permite à app aceder a dados de sensores de corpo, como ritmo cardíaco, temperatura e percentagem de oxigénio no sangue, enquanto está em segundo plano."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"Ler detalhes e eventos do calendário"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"Esta app pode ler todos os eventos do calendário armazenados no seu tablet e partilhar ou guardar os dados do calendário."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"Esta app pode ler todos os eventos do calendário armazenados no seu dispositivo Android TV e partilhar ou guardar os dados do calendário."</string>
@@ -588,12 +587,9 @@
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"Introduza o bloqueio de ecrã para continuar"</string>
     <string name="fingerprint_acquired_partial" msgid="694598777291084823">"Impressão digital parcial detetada"</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"Não foi possível processar a impressão digital. Tente novamente."</string>
-    <!-- no translation found for fingerprint_acquired_imager_dirty (1770676120848224250) -->
-    <skip />
-    <!-- no translation found for fingerprint_acquired_imager_dirty_alt (9169582140486372897) -->
-    <skip />
-    <!-- no translation found for fingerprint_acquired_too_fast (1628459767349116104) -->
-    <skip />
+    <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"Limpe o sensor de impressões digitais e tente novamente"</string>
+    <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"Limpe o sensor e tente novamente"</string>
+    <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"Prima firmemente o sensor"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"Moveu o dedo demasiado lentamente. Tente novamente."</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"Experimente outra impressão digital"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"Está demasiado claro"</string>
@@ -601,10 +597,8 @@
     <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"Altere a posição do seu dedo ligeiramente de cada vez"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
-    <!-- no translation found for fingerprint_error_not_match (4599441812893438961) -->
-    <skip />
-    <!-- no translation found for fingerprint_udfps_error_not_match (4709197752023550709) -->
-    <skip />
+    <string name="fingerprint_error_not_match" msgid="4599441812893438961">"Impressão digital não reconhecida"</string>
+    <string name="fingerprint_udfps_error_not_match" msgid="4709197752023550709">"Prima firmemente o sensor"</string>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"A impressão digital foi autenticada."</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"Rosto autenticado."</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"Rosto autenticado. Prima Confirmar."</string>
@@ -695,8 +689,8 @@
     <string name="permdesc_readMediaAudio" msgid="5299772574434619399">"Permite que a app leia ficheiros de áudio do armazenamento partilhado."</string>
     <string name="permlab_readMediaVideo" msgid="7768003311260655007">"ler ficheiros de vídeo do armazenamento partilhado"</string>
     <string name="permdesc_readMediaVideo" msgid="3846400073770403528">"Permite que a app leia ficheiros de vídeo do armazenamento partilhado."</string>
-    <string name="permlab_readMediaImage" msgid="1507059005825769856">"ler ficheiros de imagem do armazenamento partilhado"</string>
-    <string name="permdesc_readMediaImage" msgid="8328052622292457588">"Permite que a app leia ficheiros de imagem do armazenamento partilhado."</string>
+    <string name="permlab_readMediaImages" msgid="4057590631020986789">"ler ficheiros de imagem do armazenamento partilhado"</string>
+    <string name="permdesc_readMediaImages" msgid="5836219373138469259">"Permite que a app leia ficheiros de imagem do armazenamento partilhado."</string>
     <string name="permlab_sdcardWrite" msgid="4863021819671416668">"modif./elim. os conteúdos do armazenam. partilhado"</string>
     <string name="permdesc_sdcardWrite" msgid="8376047679331387102">"Permite que a apl. escreva conteúd. do armazen. partilhado."</string>
     <string name="permlab_use_sip" msgid="8250774565189337477">"efetuar/receber chamadas SIP"</string>
@@ -743,6 +737,8 @@
     <string name="permdesc_bindCarrierMessagingService" msgid="6316457028173478345">"Permite ao titular ligar à interface de nível superior do serviço de mensagens de um operador. Nunca deve ser necessário para aplicações normais."</string>
     <string name="permlab_bindCarrierServices" msgid="2395596978626237474">"vincular a serviços do operador"</string>
     <string name="permdesc_bindCarrierServices" msgid="9185614481967262900">"Permite ao titular vincular-se a serviços do operador. Nunca deverá ser necessário nas aplicações normais."</string>
+    <string name="permlab_access_notification_policy" msgid="5524112842876975537">"aceder a Não incomodar"</string>
+    <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"Permite à app ler e alterar a configuração de Não incomodar"</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"iniciar utilização da autorização de visualização"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"Permite que o titular inicie a utilização de autorizações para uma app. Nunca deverá ser necessário para aplicações normais."</string>
     <string name="permlab_startReviewPermissionDecisions" msgid="8690578688476599284">"começar a ver as decisões de autorização"</string>
@@ -916,7 +912,7 @@
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="7982445492532123308">"Prima Menu para desbloquear ou efectuar uma chamada de emergência."</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="7434061749374801753">"Prima Menu para desbloquear."</string>
     <string name="lockscreen_pattern_instructions" msgid="3169991838169244941">"Desenhar padrão para desbloquear"</string>
-    <string name="lockscreen_emergency_call" msgid="7549683825868928636">"Chamada de emergência"</string>
+    <string name="lockscreen_emergency_call" msgid="7500692654885445299">"Emergência"</string>
     <string name="lockscreen_return_to_call" msgid="3156883574692006382">"Regressar à chamada"</string>
     <string name="lockscreen_pattern_correct" msgid="8050630103651508582">"Correcto!"</string>
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"Tentar novamente"</string>
@@ -1055,7 +1051,6 @@
     <string name="save_password_never" msgid="6776808375903410659">"Nunca"</string>
     <string name="open_permission_deny" msgid="5136793905306987251">"Não tem autorização para abrir esta página."</string>
     <string name="text_copied" msgid="2531420577879738860">"Texto copiado para a área de transferência."</string>
-    <string name="copied" msgid="4675902854553014676">"Copiado"</string>
     <string name="pasted_from_app" msgid="5627698450808256545">"A app <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> colou da app <xliff:g id="SOURCE_APP_NAME">%2$s</xliff:g>"</string>
     <string name="pasted_from_clipboard" msgid="7355790625710831847">"A app <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> colou a partir da área de transferência"</string>
     <string name="pasted_text" msgid="4298871641549173733">"A app <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> colou o texto que copiou"</string>
@@ -1084,7 +1079,7 @@
     <string name="enable_explore_by_touch_warning_message" product="default" msgid="4312979647356179250">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> pretende ativar a funcionalidade Explorar Através do Toque. Quando a funcionalidade Explorar Através do Toque estiver ativada, pode ouvir ou visualizar descrições sobre o que está por baixo do seu dedo ou executar gestos para interagir com o telemóvel."</string>
     <string name="oneMonthDurationPast" msgid="4538030857114635777">"Há 1 mês"</string>
     <string name="beforeOneMonthDurationPast" msgid="8315149541372065392">"Há mais de 1 mês"</string>
-    <string name="last_num_days" msgid="2393660431490280537">"{count,plural, =1{# dia anterior}one{# dia(s) anterior(es)}other{# dias anteriores}}"</string>
+    <string name="last_num_days" msgid="2393660431490280537">"{count,plural, =1{# dia anterior}other{# dias anteriores}}"</string>
     <string name="last_month" msgid="1528906781083518683">"Último mês"</string>
     <string name="older" msgid="1645159827884647400">"Mais antiga"</string>
     <string name="preposition_for_date" msgid="2780767868832729599">"a <xliff:g id="DATE">%s</xliff:g>"</string>
@@ -1111,14 +1106,14 @@
     <string name="duration_hours_shortest_future" msgid="2979276794547981674">"em <xliff:g id="COUNT">%d</xliff:g> h"</string>
     <string name="duration_days_shortest_future" msgid="3392722163935571543">"em <xliff:g id="COUNT">%d</xliff:g> d"</string>
     <string name="duration_years_shortest_future" msgid="5537464088352970388">"em <xliff:g id="COUNT">%d</xliff:g> a"</string>
-    <string name="duration_minutes_relative" msgid="8620337701051015593">"{count,plural, =1{Há # minuto}one{Há # minutos(s)}other{Há # minutos}}"</string>
-    <string name="duration_hours_relative" msgid="4836449961693180253">"{count,plural, =1{Há # hora}one{Há # hora(s)}other{Há # horas}}"</string>
-    <string name="duration_days_relative" msgid="621965767567258302">"{count,plural, =1{Há # dia}one{Há # dia(s)}other{Há # dias}}"</string>
-    <string name="duration_years_relative" msgid="8731202348869424370">"{count,plural, =1{Há # ano}one{Há # ano(s)}other{Há # anos}}"</string>
-    <string name="duration_minutes_relative_future" msgid="5259574171747708115">"{count,plural, =1{# minuto}one{# minuto(s)}other{# minutos}}"</string>
-    <string name="duration_hours_relative_future" msgid="6670440478481140565">"{count,plural, =1{# hora}one{# hora(s)}other{# horas}}"</string>
-    <string name="duration_days_relative_future" msgid="8870658635774250746">"{count,plural, =1{# dia}one{# dia(s)}other{# dias}}"</string>
-    <string name="duration_years_relative_future" msgid="8855853883925918380">"{count,plural, =1{# ano}one{# ano(s)}other{# anos}}"</string>
+    <string name="duration_minutes_relative" msgid="8620337701051015593">"{count,plural, =1{Há # minuto}other{Há # minutos}}"</string>
+    <string name="duration_hours_relative" msgid="4836449961693180253">"{count,plural, =1{Há # hora}other{Há # horas}}"</string>
+    <string name="duration_days_relative" msgid="621965767567258302">"{count,plural, =1{Há # dia}other{Há # dias}}"</string>
+    <string name="duration_years_relative" msgid="8731202348869424370">"{count,plural, =1{Há # ano}other{Há # anos}}"</string>
+    <string name="duration_minutes_relative_future" msgid="5259574171747708115">"{count,plural, =1{# minuto}other{# minutos}}"</string>
+    <string name="duration_hours_relative_future" msgid="6670440478481140565">"{count,plural, =1{# hora}other{# horas}}"</string>
+    <string name="duration_days_relative_future" msgid="8870658635774250746">"{count,plural, =1{# dia}other{# dias}}"</string>
+    <string name="duration_years_relative_future" msgid="8855853883925918380">"{count,plural, =1{# ano}other{# anos}}"</string>
     <string name="VideoView_error_title" msgid="5750686717225068016">"Problema com o vídeo"</string>
     <string name="VideoView_error_text_invalid_progressive_playback" msgid="3782449246085134720">"Este vídeo não é válido para transmissão neste aparelho."</string>
     <string name="VideoView_error_text_unknown" msgid="7658683339707607138">"Não é possível reproduzir este vídeo."</string>
@@ -1456,8 +1451,6 @@
     <string name="permdesc_requestIgnoreBatteryOptimizations" msgid="634260656917874356">"Permite que uma app solicite autorização para ignorar as otimizações da bateria para a mesma."</string>
     <string name="permlab_queryAllPackages" msgid="2928450604653281650">"consultar todos os pacotes"</string>
     <string name="permdesc_queryAllPackages" msgid="5339069855520996010">"Permite a uma app ver todos os pacotes instalados."</string>
-    <string name="permlab_accessSupplementalApi" msgid="3544659160536960275">"aceder a SupplementalApis"</string>
-    <string name="permdesc_accessSupplementalApi" msgid="8974758769370951074">"Permite a uma aplicação aceder a SupplementalApis."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1842872462124648678">"Tocar duas vezes para controlar o zoom"</string>
     <string name="gadget_host_error_inflating" msgid="2449961590495198720">"Não foi possível adicionar widget."</string>
     <string name="ime_action_go" msgid="5536744546326495436">"Ir"</string>
@@ -1508,8 +1501,7 @@
     <string name="skip_button_label" msgid="3566599811326688389">"Ignorar"</string>
     <string name="no_matches" msgid="6472699895759164599">"Sem correspondências"</string>
     <string name="find_on_page" msgid="5400537367077438198">"Localizar na página"</string>
-    <!-- no translation found for matches_found (2296462299979507689) -->
-    <skip />
+    <string name="matches_found" msgid="2296462299979507689">"{count,plural, =1{# correspondência}other{# de {total}}}"</string>
     <string name="action_mode_done" msgid="2536182504764803222">"Concluído"</string>
     <string name="progress_erasing" msgid="6891435992721028004">"A apagar o armazenamento partilhado…"</string>
     <string name="share" msgid="4157615043345227321">"Partilhar"</string>
@@ -1721,6 +1713,7 @@
     <string name="user_switching_message" msgid="1912993630661332336">"A mudar para <xliff:g id="NAME">%1$s</xliff:g>…"</string>
     <string name="user_logging_out_message" msgid="7216437629179710359">"A terminar a sessão de <xliff:g id="NAME">%1$s</xliff:g>…"</string>
     <string name="owner_name" msgid="8713560351570795743">"Proprietário"</string>
+    <string name="guest_name" msgid="8502103277839834324">"Convidado"</string>
     <string name="error_message_title" msgid="4082495589294631966">"Erro"</string>
     <string name="error_message_change_not_allowed" msgid="843159705042381454">"O gestor não permite esta alteração"</string>
     <string name="app_not_found" msgid="3429506115332341800">"Não foram encontradas aplicações para executar esta ação"</string>
@@ -1862,20 +1855,22 @@
     <string name="data_saver_description" msgid="4995164271550590517">"Para ajudar a reduzir a utilização de dados, a Poupança de dados impede que algumas apps enviem ou recebam dados em segundo plano. Uma determinada app que esteja a utilizar atualmente pode aceder aos dados, mas é possível que o faça com menos frequência. Isto pode significar, por exemplo, que as imagens não são apresentadas até que toque nas mesmas."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Pretende ativar a Poupança de dados?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Ativar"</string>
-    <string name="zen_mode_duration_minutes_summary" msgid="4555514757230849789">"{count,plural, =1{Durante um minuto (até à[s] {formattedTime})}one{Durante # minuto(s) (até à[s] {formattedTime})}other{Durante # minutos (até à[s] {formattedTime})}}"</string>
-    <string name="zen_mode_duration_minutes_summary_short" msgid="1187553788355486950">"{count,plural, =1{Durante 1 min (até à[s] {formattedTime})}one{Durante # min (até à[s] {formattedTime})}other{Durante # min (até à[s] {formattedTime})}}"</string>
-    <string name="zen_mode_duration_hours_summary" msgid="3866333100793277211">"{count,plural, =1{Durante 1 hora (até à[s] {formattedTime})}one{Durante # hora(s) (até à[s] {formattedTime})}other{Durante # horas (até à[s] {formattedTime})}}"</string>
-    <string name="zen_mode_duration_hours_summary_short" msgid="687919813833347945">"{count,plural, =1{Durante 1 h (até à[s] {formattedTime})}one{Durante # h (até à[s] {formattedTime})}other{Durante # h (até à[s] {formattedTime})}}"</string>
-    <string name="zen_mode_duration_minutes" msgid="2340007982276569054">"{count,plural, =1{Durante um minuto}one{Durante # minuto(s)}other{Durante # minutos}}"</string>
-    <string name="zen_mode_duration_minutes_short" msgid="2435756450204526554">"{count,plural, =1{Durante 1 min}one{Durante # min}other{Durante # min}}"</string>
-    <string name="zen_mode_duration_hours" msgid="7841806065034711849">"{count,plural, =1{Durante 1 hora}one{Durante # hora(s)}other{Durante # horas}}"</string>
-    <string name="zen_mode_duration_hours_short" msgid="3666949653933099065">"{count,plural, =1{Durante 1 h}one{Durante # h}other{Durante # h}}"</string>
+    <string name="zen_mode_duration_minutes_summary" msgid="4555514757230849789">"{count,plural, =1{Durante um minuto (até à[s] {formattedTime})}other{Durante # minutos (até à[s] {formattedTime})}}"</string>
+    <string name="zen_mode_duration_minutes_summary_short" msgid="1187553788355486950">"{count,plural, =1{Durante 1 min (até à[s] {formattedTime})}other{Durante # min (até à[s] {formattedTime})}}"</string>
+    <string name="zen_mode_duration_hours_summary" msgid="3866333100793277211">"{count,plural, =1{Durante 1 hora (até à[s] {formattedTime})}other{Durante # horas (até à[s] {formattedTime})}}"</string>
+    <string name="zen_mode_duration_hours_summary_short" msgid="687919813833347945">"{count,plural, =1{Durante 1 h (até à[s] {formattedTime})}other{Durante # h (até à[s] {formattedTime})}}"</string>
+    <string name="zen_mode_duration_minutes" msgid="2340007982276569054">"{count,plural, =1{Durante um minuto}other{Durante # minutos}}"</string>
+    <string name="zen_mode_duration_minutes_short" msgid="2435756450204526554">"{count,plural, =1{Durante 1 min}other{Durante # min}}"</string>
+    <string name="zen_mode_duration_hours" msgid="7841806065034711849">"{count,plural, =1{Durante 1 hora}other{Durante # horas}}"</string>
+    <string name="zen_mode_duration_hours_short" msgid="3666949653933099065">"{count,plural, =1{Durante 1 h}other{Durante # h}}"</string>
     <string name="zen_mode_until_next_day" msgid="1403042784161725038">"Até <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_until" msgid="2250286190237669079">"Até às <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_alarm" msgid="7046911727540499275">"Até <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> (próximo alarme)"</string>
     <string name="zen_mode_forever" msgid="740585666364912448">"Até desativar"</string>
+    <string name="zen_mode_forever_dnd" msgid="3423201955704180067">"Até desativar Não incomodar"</string>
     <string name="zen_mode_rule_name_combination" msgid="7174598364351313725">"<xliff:g id="FIRST">%1$s</xliff:g>/<xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="8009920446193610996">"Reduzir"</string>
+    <string name="zen_mode_feature_name" msgid="3785547207263754500">"Não incomodar"</string>
     <string name="zen_mode_downtime_feature_name" msgid="5886005761431427128">"Período de inatividade"</string>
     <string name="zen_mode_default_weeknights_name" msgid="7902108149994062847">"Dias da semana à noite"</string>
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"Fim de semana"</string>
@@ -1938,6 +1933,8 @@
     <string name="app_blocked_title" msgid="7353262160455028160">"A app não está disponível"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"De momento, a app <xliff:g id="APP_NAME">%1$s</xliff:g> não está disponível."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> indisponível"</string>
+    <!-- no translation found for app_streaming_blocked_title_for_permission_dialog (4483161748582966785) -->
+    <skip />
     <string name="app_streaming_blocked_message" product="tv" msgid="4003011766528814377">"De momento, não é possível aceder a esta app no seu <xliff:g id="DEVICE">%1$s</xliff:g>. Em alternativa, experimente no dispositivo Android TV."</string>
     <string name="app_streaming_blocked_message" product="tablet" msgid="4242053045964946062">"De momento, não é possível aceder a esta app no seu <xliff:g id="DEVICE">%1$s</xliff:g>. Em alternativa, experimente no tablet."</string>
     <string name="app_streaming_blocked_message" product="default" msgid="6159168735030739398">"De momento, não é possível aceder a esta app no seu <xliff:g id="DEVICE">%1$s</xliff:g>. Em alternativa, experimente no telemóvel."</string>
@@ -1983,7 +1980,7 @@
     <string name="autofill_save_accessibility_title" msgid="1523225776218450005">"Guardar para o Preenchimento automático"</string>
     <string name="autofill_error_cannot_autofill" msgid="6528827648643138596">"Não é possível preencher automaticamente o conteúdo"</string>
     <string name="autofill_picker_no_suggestions" msgid="1076022650427481509">"Sem sugestões do preenchimento automático"</string>
-    <string name="autofill_picker_some_suggestions" msgid="5560549696296202701">"{count,plural, =1{Uma sugestão do preenchimento automático}one{# sugestão(ões) de preenchimento automático}other{# sugestões de preenchimento automático}}"</string>
+    <string name="autofill_picker_some_suggestions" msgid="5560549696296202701">"{count,plural, =1{Uma sugestão do preenchimento automático}other{# sugestões de preenchimento automático}}"</string>
     <string name="autofill_save_title" msgid="7719802414283739775">"Pretende guardar em "<b>"<xliff:g id="LABEL">%1$s</xliff:g>"</b>"?"</string>
     <string name="autofill_save_title_with_type" msgid="3002460014579799605">"Pretende guardar <xliff:g id="TYPE">%1$s</xliff:g> em "<b>"<xliff:g id="LABEL">%2$s</xliff:g>"</b>"?"</string>
     <string name="autofill_save_title_with_2types" msgid="3783270967447869241">"Pretende guardar <xliff:g id="TYPE_0">%1$s</xliff:g> e <xliff:g id="TYPE_1">%2$s</xliff:g> em "<b>"<xliff:g id="LABEL">%3$s</xliff:g>"</b>"?"</string>
@@ -2030,17 +2027,20 @@
     <string name="harmful_app_warning_uninstall" msgid="6472912975664191772">"DESINSTALAR"</string>
     <string name="harmful_app_warning_open_anyway" msgid="5963657791740211807">"ABRIR MESMO ASSIM"</string>
     <string name="harmful_app_warning_title" msgid="8794823880881113856">"Aplicação prejudicial detetada"</string>
-    <string name="log_access_confirmation_title" msgid="3143035474800851565">"Pedido de acesso ao registo do sistema"</string>
+    <string name="log_access_confirmation_title" msgid="2343578467290592708">"Permitir que a app <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> aceda a todos os registos do dispositivo?"</string>
     <string name="log_access_confirmation_allow" msgid="143157286283302512">"Apenas desta vez"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"Não permitir"</string>
-    <string name="log_access_confirmation_body" msgid="7599059550906238538">"A app <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> solicita registos do sistema para depuração funcional. Estes registos podem conter informações escritas por apps e serviços no seu dispositivo."</string>
+    <string name="log_access_confirmation_body" msgid="4483075525611652922">"Os registos do dispositivo documentam o que ocorre no seu dispositivo. As apps podem usar esses registos para detetar e corrigir problemas.\n\nAlguns registos podem conter informações confidenciais, pelo que o acesso a todos os registos do dispositivo deve apenas ser permitido às apps nas quais confia. \n\nSe não permitir o acesso desta app a todos os registos do dispositivo, a mesma pode ainda assim aceder aos seus próprios registos e o fabricante do dispositivo pode continuar a aceder a alguns registos ou informações no seu dispositivo. Saiba mais"</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"Não mostrar de novo"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"A app <xliff:g id="APP_0">%1$s</xliff:g> pretende mostrar partes da app <xliff:g id="APP_2">%2$s</xliff:g>."</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"Editar"</string>
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"As chamadas e as notificações vibram."</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"É desativado o som das chamadas e das notificações."</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"Alterações ao sistema"</string>
+    <string name="notification_channel_do_not_disturb" msgid="7832584281883687653">"Não incomodar"</string>
+    <string name="zen_upgrade_notification_visd_title" msgid="2001148984371968620">"Novo: o modo Não incomodar está a ocultar as notificações"</string>
     <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"Toque para saber mais e alterar."</string>
+    <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"O modo Não incomodar foi alterado"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Toque para verificar o que está bloqueado."</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"Sistema"</string>
     <string name="notification_app_name_settings" msgid="9088548800899952531">"Definições"</string>
@@ -2057,6 +2057,7 @@
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"OK"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"Desativar"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"Saber mais"</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"As notificações melhoradas substituíram as notificações adaptáveis do Android no Android 12. Esta funcionalidade mostra ações e respostas sugeridas e organiza as suas notificações.\n\nAs notificações melhoradas podem aceder a todo o conteúdo das notificações, incluindo informações pessoais como nomes de contactos e mensagens. Esta funcionalidade também pode ignorar ou responder a notificações, como atender chamadas telefónicas, e controlar o modo Não incomodar."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Notificação de informações do Modo rotina"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Pode ficar sem bateria antes do carregamento habitual"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Poupança de bateria ativada para prolongar a duração da bateria"</string>
@@ -2085,7 +2086,7 @@
     <string name="mime_type_presentation_ext" msgid="8761049335564371468">"Apresentação <xliff:g id="EXTENSION">%1$s</xliff:g>"</string>
     <string name="bluetooth_airplane_mode_toast" msgid="2066399056595768554">"O Bluetooth continuará ativado durante o modo de avião."</string>
     <string name="car_loading_profile" msgid="8219978381196748070">"A carregar…"</string>
-    <string name="file_count" msgid="3220018595056126969">"{count,plural, =1{{file_name} + # ficheiro}one{{file_name} + # ficheiro(s)}other{{file_name} + # ficheiros}}"</string>
+    <string name="file_count" msgid="3220018595056126969">"{count,plural, =1{{file_name} + # ficheiro}other{{file_name} + # ficheiros}}"</string>
     <string name="chooser_no_direct_share_targets" msgid="1511722103987329028">"Não existem pessoas recomendadas com quem partilhar"</string>
     <string name="chooser_all_apps_button_label" msgid="3230427756238666328">"Lista de aplicações"</string>
     <string name="usb_device_resolve_prompt_warn" msgid="325871329788064199">"Esta app não recebeu autorização de gravação, mas pode capturar áudio através deste dispositivo USB."</string>
@@ -2260,9 +2261,10 @@
     <string name="ui_translation_accessibility_translation_finished" msgid="3057830947610088465">"Mensagem traduzida de <xliff:g id="FROM_LANGUAGE">%1$s</xliff:g> para <xliff:g id="TO_LANGUAGE">%2$s</xliff:g>."</string>
     <string name="notification_channel_abusive_bg_apps" msgid="6092140213264920355">"Atividade em segundo plano"</string>
     <string name="notification_title_abusive_bg_apps" msgid="344582472797982073">"Atividade em segundo plano"</string>
-    <string name="notification_content_abusive_bg_apps" msgid="5572096708044958249">"A app <xliff:g id="APP">%1$s</xliff:g> está a ser executada em segundo plano e a consumir rapidamente a bateria Toque para analisar."</string>
+    <string name="notification_content_abusive_bg_apps" msgid="5572096708044958249">"<xliff:g id="APP">%1$s</xliff:g> está a ser executada em 2.º plano e a consumir muita bateria. Toque para analisar."</string>
     <string name="notification_content_long_running_fgs" msgid="8878031652441570178">"A app <xliff:g id="APP">%1$s</xliff:g> está a ser executada em segundo plano há muito tempo. Toque para analisar."</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Verificar apps ativas"</string>
-    <!-- no translation found for vdm_camera_access_denied (6345652513729130490) -->
+    <string name="vdm_camera_access_denied" msgid="6345652513729130490">"Não é possível aceder à câmara a partir deste dispositivo"</string>
+    <!-- no translation found for system_locale_title (3978041860457277638) -->
     <skip />
 </resources>

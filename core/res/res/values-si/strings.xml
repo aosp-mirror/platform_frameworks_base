@@ -70,6 +70,7 @@
     <string name="ThreeWCMmi" msgid="2436550866139999411">"තුන් මාර්ග ඇමතීම"</string>
     <string name="RuacMmi" msgid="1876047385848991110">"අනවශ්‍ය හිරිහැරදායක ඇමතුම් ප්‍රතික්ෂේප කිරීම"</string>
     <string name="CndMmi" msgid="185136449405618437">"ඇමතීමේ අංකය භාරදීම"</string>
+    <string name="DndMmi" msgid="8797375819689129800">"බාධා නොකරන්න"</string>
     <string name="CLIRDefaultOnNextCallOn" msgid="4511621022859867988">"අමතන්නාගේ ID සුපුරුද්ද අනුව සීමා වී ඇත. මීළඟ ඇමතුම: සීමා කර ඇත"</string>
     <string name="CLIRDefaultOnNextCallOff" msgid="5036749051007098105">"අමතන්නාගේ ID සුපුරුදු අනුව සීමා වී ඇත. මීළඟ ඇමතුම: සීමා කර නැත"</string>
     <string name="CLIRDefaultOffNextCallOn" msgid="1022781126694885017">"අමතන්නාගේ ID සුපුරුදු අනුව සීමා වී නැත. මීළඟ ඇමතුම: සීමා කර ඇත"</string>
@@ -84,8 +85,8 @@
     <string name="RestrictedStateContentMsimTemplate" msgid="5228235722511044687">"SIM <xliff:g id="SIMNUMBER">%d</xliff:g> සඳහා ඔබේ වාහකය විසින් තාවකාලිකව ක්‍රියාවිරහිත කරන ලදී"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"ජංගම ජාලය වෙත ළඟා විය නොහැකිය"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"කැමති ජාලය වෙනස් කිරීමට උත්සාහ කරන්න. වෙනස් කිරීමට තට්ටු කරන්න."</string>
-    <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"හදිසි ඇමතුම් ලබා ගත නොහැකිය"</string>
-    <string name="EmergencyCallWarningSummary" msgid="1194185880092805497">"Wi-Fi හරහා හදිසි ඇමතුම් ලබා ගත නොහැකිය"</string>
+    <string name="EmergencyCallWarningTitle" msgid="9164532362414787774">"හදිසි ඇමතුම් ලබා ගත නොහැකි වීමට ඉඩ ඇත"</string>
+    <string name="EmergencyCallWarningSummary" msgid="3365701131304664899">"<xliff:g id="SPN">%s</xliff:g> Wi-Fi හරහා හදිසි ඇමතුම් සඳහා සහාය නොදක්වයි. විස්තර සඳහා තට්ටු කරන්න."</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"ඇඟවීම්"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"ඇමතුම ප්‍රතියොමු කිරීම"</string>
     <string name="notification_channel_emergency_callback" msgid="54074839059123159">"හදිසි අවස්ථා පසු ඇමතුම් ප්‍රකාරය"</string>
@@ -304,10 +305,8 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"ඔබේ දින දර්ශනයට පිවිසෙන්න"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"කෙටි පණිවිඩ"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"SMS පණිවිඩ යැවීම සහ බැලීම"</string>
-    <!-- no translation found for permgrouplab_storage (9173334109512154196) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_storage (8352226729501080525) -->
-    <skip />
+    <string name="permgrouplab_storage" msgid="9173334109512154196">"ගොනු සහ ලේඛන"</string>
+    <string name="permgroupdesc_storage" msgid="8352226729501080525">"ඔබගේ උපාංගයේ ගොනු සහ ලේඛන වෙත ප්‍රවේශ වන්න"</string>
     <string name="permgrouplab_readMediaAural" msgid="5885210465560755316">"සංගීතය සහ වෙනත් ශ්‍රව්‍ය"</string>
     <string name="permgroupdesc_readMediaAural" msgid="1170143315714662822">"ඔබගේ උපාංගයෙහි ඇති ශ්‍රව්‍ය ගොනුවලට ප්‍රවේශ වන්න"</string>
     <string name="permgrouplab_readMediaVisual" msgid="9137695801926624061">"ඡායාරූප සහ වීඩියෝ"</string>
@@ -426,10 +425,10 @@
     <string name="permdesc_writeCallLog" product="tablet" msgid="2657525794731690397">"ලැබෙන ඇමතුම් සහ පිටවන ඇමතුම් දත්ත ඇතුළත්ව ඔබගේ ටැබ්ලටයේ ඇමතුම් ලොගය වෙනස් කිරීමට යෙදුමට අවසර දෙන්න. ඔබගේ ඇමතුම් ලොගය මැකීමට හෝ වෙනස් කිරීමට අනිෂ්ට යෙදුම් මෙය භාවිතා කෙරේ."</string>
     <string name="permdesc_writeCallLog" product="tv" msgid="3934939195095317432">"ලැබෙන ඇමතුම් සහ පිටවන ඇමතුම් දත්ත ඇතුළත්ව ඔබගේ Android TV උපාංගයෙහි ඇමතුම් ලොගය වෙනස් කිරීමට යෙදුමට ඉඩ දෙයි. ඔබගේ ඇමතුම් ලොගය මැකීමට හෝ වෙනස් කිරීමට අනිෂ්ට යෙදුම් මෙය භාවිත කළ හැකිය."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="5903033505665134802">"පැමිණෙන සහ පිටවෙන ඇමතුම් දත්ත ඇතුළුව ඔබගේ දුරකථනයේ ඇමතුම් ලොගය වෙනස් කිරීමට යෙදුමට අවසර දෙන්න. ඔබගේ ඇමතුම් ලොගය මැකීමට හෝ වෙනස් කිරීමට අනිෂ්ට යෙදුම් මෙය භාවිත කල හැක."</string>
-    <string name="permlab_bodySensors" msgid="3411035315357380862">"දේහ සංවේදකවලට (හෘද ස්පන්දන වේග මොනිටර වැනි) පිවිසීම"</string>
-    <string name="permdesc_bodySensors" product="default" msgid="3208940894182188063">"හෘද ස්පන්දන වේගය, උෂ්ණත්වය, රුධිර ඔක්සිජන් ප්‍රතිශතය වැනි ශරීර සංවේදකවලින් දත්ත වෙත ප්‍රවේශය."</string>
-    <string name="permlab_bodySensors_background" msgid="4352831883331744370">"පසුබිමේ සිටියදී ශරීර සංවේදක (හෘද ස්පන්දන වේග මොනිටර වැනි) වෙත ප්‍රවේශය"</string>
-    <string name="permdesc_bodySensors_background" product="default" msgid="8512392249166660872">"පසුබිමේ සිටියදී, හෘද ස්පන්දන වේගය, උෂ්ණත්වය, රුධිර ඔක්සිජන් ප්‍රතිශතය වැනි ශරීර සංවේදකවලින් දත්ත වෙත ප්‍රවේශය."</string>
+    <string name="permlab_bodySensors" msgid="662918578601619569">"භාවිතයේ ඇති අතරතුර හෘද ස්පන්දන වේගය වැනි ශරීර සංවේදක දත්ත වෙත ප්‍රවේශ වන්න"</string>
+    <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"යෙදුම භාවිතයේ පවතින අතරතුර හෘද ස්පන්දන වේගය, උෂ්ණත්වය සහ රුධිර ඔක්සිජන් ප්‍රතිශතය වැනි ශරීර සංවේදක දත්ත වෙත ප්‍රවේශ වීමට යෙදුමට අවසර දෙයි."</string>
+    <string name="permlab_bodySensors_background" msgid="4912560779957760446">"පසුබිමේ ඇති අතරතුර හෘද ස්පන්දන වේගය වැනි ශරීර සංවේදක දත්ත වෙත ප්‍රවේශ වන්න"</string>
+    <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"යෙදුම පසුබිමේ ඇති අතර හෘද ස්පන්දන වේගය, උෂ්ණත්වය සහ රුධිර ඔක්සිජන් ප්‍රතිශතය වැනි ශරීර සංවේදක දත්ත වෙත ප්‍රවේශ වීමට යෙදුමට අවසර දෙයි."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"දින දර්ශන සිදුවීම් හා විස්තර කියවන්න"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"මෙම යෙදුමට ඔබගේ ටැබ්ලට් පරිගණකය මත ගබඩා වී ඇති සියලු දින දර්ශන කියවීමට සහ සහ ඔබගේ දින දර්ශන දත්ත බෙදා ගැනීමට සහ සුරැකීමට හැකිය."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"මෙම යෙදුමට ඔබගේ Android TV මත ගබඩා කර ඇති සියලු දින දර්ශන සිදුවීම් කියවීමට සහ ඔබගේ දින දර්ශන දත්ත බෙදා ගැනීමට හෝ සුරැකීමට හැකිය."</string>
@@ -588,12 +587,9 @@
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"ඉදිරියට යාමට ඔබගේ තිර අගුල ඇතුළත් කරන්න"</string>
     <string name="fingerprint_acquired_partial" msgid="694598777291084823">"අර්ධ ඇඟිලි සලකුණක් අනාවරණය කරන ලදි"</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"ඇඟිලි සලකුණ පිරිසැකසීමට නොහැකි විය. කරුණාකර නැවත උත්සාහ කරන්න."</string>
-    <!-- no translation found for fingerprint_acquired_imager_dirty (1770676120848224250) -->
-    <skip />
-    <!-- no translation found for fingerprint_acquired_imager_dirty_alt (9169582140486372897) -->
-    <skip />
-    <!-- no translation found for fingerprint_acquired_too_fast (1628459767349116104) -->
-    <skip />
+    <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"ඇඟිලි සලකුණු සංවේදකය පිරිසිදු කර නැවත උත්සාහ කරන්න"</string>
+    <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"සංවේදකය පිරිසිදු කර නැවත උත්සාහ කරන්න"</string>
+    <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"සංවේදකය මත තදින් ඔබන්න"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"ඇඟිල්ල වඩා සෙමෙන් ගෙන යන ලදි. කරුණාකර නැවත උත්සාහ කරන්න."</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"තවත් ඇඟිලි සලකුණක් උත්සාහ කරන්න"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"දීප්තිය වැඩියි"</string>
@@ -601,10 +597,8 @@
     <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"එක් එක් අවස්ථාවේ ඔබගේ ඇඟිල්ලේ පිහිටීම මදක් වෙනස් කරන්න"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
-    <!-- no translation found for fingerprint_error_not_match (4599441812893438961) -->
-    <skip />
-    <!-- no translation found for fingerprint_udfps_error_not_match (4709197752023550709) -->
-    <skip />
+    <string name="fingerprint_error_not_match" msgid="4599441812893438961">"ඇඟිලි සලකුණ හඳුනා නොගන්නා ලදි"</string>
+    <string name="fingerprint_udfps_error_not_match" msgid="4709197752023550709">"සංවේදකය මත තදින් ඔබන්න"</string>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"ඇඟිලි සලකුණ සත්‍යාපනය කරන ලදී"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"මුහුණ සත්‍යාපනය කරන ලදී"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"මුහුණ සත්‍යාපනය කරන ලදී, කරුණාකර තහවුරු කරන්න ඔබන්න"</string>
@@ -695,8 +689,8 @@
     <string name="permdesc_readMediaAudio" msgid="5299772574434619399">"ඔබගේ බෙදා ගත් ගබඩාවෙන් ශ්‍රව්‍ය ගොනු කියවීමට යෙදුමට ඉඩ දෙයි."</string>
     <string name="permlab_readMediaVideo" msgid="7768003311260655007">"බෙදා ගත් ගබඩාවෙන් වීඩියෝ ගොනු කියවන්න"</string>
     <string name="permdesc_readMediaVideo" msgid="3846400073770403528">"ඔබගේ බෙදා ගත් ගබඩාවෙන් වීඩියෝ ගොනු කියවීමට යෙදුමට ඉඩ දෙයි."</string>
-    <string name="permlab_readMediaImage" msgid="1507059005825769856">"බෙදා ගත් ගබඩාවෙන් රූප ගොනු කියවන්න"</string>
-    <string name="permdesc_readMediaImage" msgid="8328052622292457588">"ඔබගේ බෙදා ගත් ගබඩාවෙන් රූප ගොනු කියවීමට යෙදුමට ඉඩ දෙයි."</string>
+    <string name="permlab_readMediaImages" msgid="4057590631020986789">"බෙදා ගත් ගබඩාවෙන් රූප ගොනු කියවන්න"</string>
+    <string name="permdesc_readMediaImages" msgid="5836219373138469259">"ඔබගේ බෙදා ගත් ගබඩාවෙන් රූප ගොනු කියවීමට යෙදුමට ඉඩ දෙයි."</string>
     <string name="permlab_sdcardWrite" msgid="4863021819671416668">"ඔබේ බෙදා ගත් ගබඩාවේ අන්තර්ගත වෙනස් කරන්න නැතහොත් මකන්න"</string>
     <string name="permdesc_sdcardWrite" msgid="8376047679331387102">"යෙදුමට ඔබේ බෙදා ගත් ගබඩාවේ අන්තර්ගත කියවීමට ඉඩ දෙයි."</string>
     <string name="permlab_use_sip" msgid="8250774565189337477">"SIP ඇමතුම් සිදුකිරීමට/ලබාගැනීමට"</string>
@@ -743,6 +737,8 @@
     <string name="permdesc_bindCarrierMessagingService" msgid="6316457028173478345">"වාහක සේවාව ඉහල මට්ටමේ අතුරු මුහුණතක් වෙත සම්බන්ධ කිරීමට ධාරකයාට අවසර දෙන්න. සාමාන්‍ය යෙදුම්වලට කිසි විටෙක අවශ්‍ය නොවෙයි."</string>
     <string name="permlab_bindCarrierServices" msgid="2395596978626237474">"වාහක සේවා වෙත බඳින්න"</string>
     <string name="permdesc_bindCarrierServices" msgid="9185614481967262900">"වාහක සේවා වෙත සම්බන්ධ කිරීමට ධාරකයාට අවසර දේ. සාමාන්‍ය යෙදුම් සඳහා කිසිදා අවශ්‍ය නොවිය යුතුය."</string>
+    <string name="permlab_access_notification_policy" msgid="5524112842876975537">"බාධා නොකරන්න ප්‍රවේශ වන්න"</string>
+    <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"බාධා නොකරන්න වින්‍යාස කිරීම කියවීමට සහ ලිවීමට යෙදුමට ඉඩ දෙයි."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"අවසර භාවිතය බැලීමට ආරම්භ කරන්න"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"තබා සිටින්නාට යෙදුමක් සඳහා අවසර භාවිතය ආරම්භ කිරීමට ඉඩ දෙයි. සාමාන්‍ය යෙදුම් සඳහා කිසි විටෙක අවශ්‍ය නොවිය යුතු ය."</string>
     <string name="permlab_startReviewPermissionDecisions" msgid="8690578688476599284">"නව අවසර තීරණ ආරම්භ කරන්න"</string>
@@ -916,7 +912,7 @@
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="7982445492532123308">"අගුළු හැරීමට මෙනුව ඔබන්න හෝ හදිසි ඇමතුම ලබාගන්න."</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="7434061749374801753">"අගුළු හැරීමට මෙනු ඔබන්න."</string>
     <string name="lockscreen_pattern_instructions" msgid="3169991838169244941">"අගුළු ඇරීමට රටාව අඳින්න"</string>
-    <string name="lockscreen_emergency_call" msgid="7549683825868928636">"හදිසි ඇමතුම"</string>
+    <string name="lockscreen_emergency_call" msgid="7500692654885445299">"හදිසි"</string>
     <string name="lockscreen_return_to_call" msgid="3156883574692006382">"ඇමතුම වෙත නැවත යන්න"</string>
     <string name="lockscreen_pattern_correct" msgid="8050630103651508582">"නිවැරදියි!"</string>
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"නැවත උත්සාහ කරන්න"</string>
@@ -1055,7 +1051,6 @@
     <string name="save_password_never" msgid="6776808375903410659">"කවදාවත් නොවේ"</string>
     <string name="open_permission_deny" msgid="5136793905306987251">"මෙම පිටුව විවෘත කිරීමට ඔබට අවසර නැත."</string>
     <string name="text_copied" msgid="2531420577879738860">"පෙළ පසුරු පුවරුවට පිටපත් කරන ලදි."</string>
-    <string name="copied" msgid="4675902854553014676">"පිටපත් කළා"</string>
     <string name="pasted_from_app" msgid="5627698450808256545">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> <xliff:g id="SOURCE_APP_NAME">%2$s</xliff:g> වෙතින් අලවන ලදි"</string>
     <string name="pasted_from_clipboard" msgid="7355790625710831847">"ඔබගේ පසුරු පුවරුව වෙතින් <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> පිටපත් කරන ලදි"</string>
     <string name="pasted_text" msgid="4298871641549173733">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> ඔබ පිටපත් කළ පෙළ ඇලවීය"</string>
@@ -1456,8 +1451,6 @@
     <string name="permdesc_requestIgnoreBatteryOptimizations" msgid="634260656917874356">"යෙදුමකට එම යෙදුම සඳහා බැටරි ප්‍රශස්තකරණ නොසලකා හැරීමට අවසර ඉල්ලීමට ඉඩ දෙයි."</string>
     <string name="permlab_queryAllPackages" msgid="2928450604653281650">"සියලු පැකේජ විමසන්න"</string>
     <string name="permdesc_queryAllPackages" msgid="5339069855520996010">"ස්ථාපනය කර ඇති සියලු පැකේජ බැලීමට යෙදුමකට ඉඩ දෙයි."</string>
-    <string name="permlab_accessSupplementalApi" msgid="3544659160536960275">"SupplementalApis වෙත ප්‍රවේශ වන්න"</string>
-    <string name="permdesc_accessSupplementalApi" msgid="8974758769370951074">"SupplementalApis වෙත ප්‍රවේශ වීමට යෙදුමකට ඉඩ දෙයි."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1842872462124648678">"විශාලන පාලක සඳහා දෙවතාවක් තට්ටු කරන්න"</string>
     <string name="gadget_host_error_inflating" msgid="2449961590495198720">"විජටය එකතු කිරීමට නොහැකි විය."</string>
     <string name="ime_action_go" msgid="5536744546326495436">"යන්න"</string>
@@ -1508,8 +1501,7 @@
     <string name="skip_button_label" msgid="3566599811326688389">"මඟ හරින්න"</string>
     <string name="no_matches" msgid="6472699895759164599">"ගැලපීම් නැත"</string>
     <string name="find_on_page" msgid="5400537367077438198">"පිටුවෙහි සෙවීම"</string>
-    <!-- no translation found for matches_found (2296462299979507689) -->
-    <skip />
+    <string name="matches_found" msgid="2296462299979507689">"{count,plural, =1{ගැළපීම් #}one{{total}කින් #}other{{total}කින් #}}"</string>
     <string name="action_mode_done" msgid="2536182504764803222">"හරි"</string>
     <string name="progress_erasing" msgid="6891435992721028004">"බෙදා ගත් ගබඩාව මකා දමමින්…"</string>
     <string name="share" msgid="4157615043345227321">"බෙදාගන්න"</string>
@@ -1721,6 +1713,7 @@
     <string name="user_switching_message" msgid="1912993630661332336">"<xliff:g id="NAME">%1$s</xliff:g> වෙත මාරු කරමින්…"</string>
     <string name="user_logging_out_message" msgid="7216437629179710359">"<xliff:g id="NAME">%1$s</xliff:g> වරමින්…"</string>
     <string name="owner_name" msgid="8713560351570795743">"හිමිකරු"</string>
+    <string name="guest_name" msgid="8502103277839834324">"ආගන්තුක"</string>
     <string name="error_message_title" msgid="4082495589294631966">"දෝෂය"</string>
     <string name="error_message_change_not_allowed" msgid="843159705042381454">"ඔබගේ පරිපාලක විසින් මෙම වෙනස් කිරීමට ඉඩ නොදේ"</string>
     <string name="app_not_found" msgid="3429506115332341800">"මෙම ක්‍රියාව හසුරුවීමට යෙදුමක් සොයාගත්තේ නැත"</string>
@@ -1874,8 +1867,10 @@
     <string name="zen_mode_until" msgid="2250286190237669079">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> තෙක්"</string>
     <string name="zen_mode_alarm" msgid="7046911727540499275">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> තෙක් (ඊළඟ එලාමය)"</string>
     <string name="zen_mode_forever" msgid="740585666364912448">"ඔබ ක්‍රියාවිරහිත කරන තුරු"</string>
+    <string name="zen_mode_forever_dnd" msgid="3423201955704180067">"බාධා නොකරන්න ඔබ අක්‍රිය කරන තුරු"</string>
     <string name="zen_mode_rule_name_combination" msgid="7174598364351313725">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="8009920446193610996">"හකුළන්න"</string>
+    <string name="zen_mode_feature_name" msgid="3785547207263754500">"බාධා නොකරන්න"</string>
     <string name="zen_mode_downtime_feature_name" msgid="5886005761431427128">"බිඳවැටුම් කාලය"</string>
     <string name="zen_mode_default_weeknights_name" msgid="7902108149994062847">"Weeknight"</string>
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"සති අන්තය"</string>
@@ -1938,6 +1933,8 @@
     <string name="app_blocked_title" msgid="7353262160455028160">"යෙදුම ලබා ගත නොහැකිය"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> මේ දැන් ලබා ගත නොහැකිය."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> නොතිබේ"</string>
+    <!-- no translation found for app_streaming_blocked_title_for_permission_dialog (4483161748582966785) -->
+    <skip />
     <string name="app_streaming_blocked_message" product="tv" msgid="4003011766528814377">"මේ අවස්ථාවේදී මෙයට ඔබගේ <xliff:g id="DEVICE">%1$s</xliff:g> හි ප්‍රවේශ විය නොහැකිය. ඒ වෙනුවට ඔබගේ Android TV උපාංගයෙහි උත්සාහ කරන්න."</string>
     <string name="app_streaming_blocked_message" product="tablet" msgid="4242053045964946062">"මේ අවස්ථාවේදී මෙයට ඔබගේ <xliff:g id="DEVICE">%1$s</xliff:g> හි ප්‍රවේශ විය නොහැකිය. ඒ වෙනුවට ඔබගේ ටැබ්ලටයෙහි උත්සාහ කරන්න."</string>
     <string name="app_streaming_blocked_message" product="default" msgid="6159168735030739398">"මේ අවස්ථාවේදී මෙයට ඔබගේ <xliff:g id="DEVICE">%1$s</xliff:g> හි ප්‍රවේශ විය නොහැකිය. ඒ වෙනුවට ඔබගේ දුරකථනයෙහි උත්සාහ කරන්න."</string>
@@ -2030,17 +2027,20 @@
     <string name="harmful_app_warning_uninstall" msgid="6472912975664191772">"අස්ථාපනය කරන්න"</string>
     <string name="harmful_app_warning_open_anyway" msgid="5963657791740211807">"කෙසේ වුවත් විවෘත කරන්න"</string>
     <string name="harmful_app_warning_title" msgid="8794823880881113856">"හානිකර යෙදුමක් අනාවරණය කර ගන්නා ලදී"</string>
-    <string name="log_access_confirmation_title" msgid="3143035474800851565">"පද්ධති ලොග ප්‍රවේශ ඉල්ලීම"</string>
+    <string name="log_access_confirmation_title" msgid="2343578467290592708">"<xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> හට සියලු උපාංග ලොග ප්‍රවේශ වීමට ඉඩ දෙන්නද?"</string>
     <string name="log_access_confirmation_allow" msgid="143157286283302512">"මෙම වතාවේ පමණි"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"ඉඩ නොදෙන්න"</string>
-    <string name="log_access_confirmation_body" msgid="7599059550906238538">"<xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> ක්‍රියාකාරී නිදොස් කිරීම සඳහා පද්ධති ලොග ඉල්ලයි. මෙම ලොගවල ඔබගේ උපාංගයේ යෙදුම් සහ සේවා ලියා ඇති තොරතුරු අඩංගු විය හැකිය."</string>
+    <string name="log_access_confirmation_body" msgid="4483075525611652922">"උපාංග ලොග ඔබගේ උපාංගයේ සිදු වන දේ වාර්තා කරයි. ගැටලු සොයා ගැනීමට සහ විසඳීමට යෙදුම්වලට මෙම ලොග භාවිත කළ හැකිය.\n\nසමහර ලොගවල සංවේදී තොරතුරු අඩංගු විය හැකිය, එබැවින් ඔබ විශ්වාස කරන යෙදුම්වලට පමණක් සියලු උපාංග ලොග වෙත ප්‍රවේශ වීමට ඉඩ දෙන්න. \n\nඔබ මෙම යෙදුමට සියලු උපාංග ලොග වෙත ප්‍රවේශ වීමට ඉඩ නොදෙන්නේ නම්, එයට තවමත් එහිම ලොග වෙත ප්‍රවේශ විය හැකි අතර ඔබගේ උපාංග නිෂ්පාදකයාට තවමත් ඔබගේ උපාංගයේ සමහර ලොග හෝ තොරතුරු වෙත ප්‍රවේශ විය හැකිය. තව දැන ගන්න"</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"නැවත නොපෙන්වන්න"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g> හට කොටස් <xliff:g id="APP_2">%2$s</xliff:g>ක් පෙන්වීමට අවශ්‍යයි"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"සංස්කරණය"</string>
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"ඇමතුම් සහ දැනුම්දීම් කම්පනය වනු ඇත"</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"ඇමතුම් සහ දැනුම්දීම් නිහඬ වනු ඇත"</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"පද්ධති වෙනස් කිරීම්"</string>
+    <string name="notification_channel_do_not_disturb" msgid="7832584281883687653">"බාධා නොකරන්න"</string>
+    <string name="zen_upgrade_notification_visd_title" msgid="2001148984371968620">"නව: බාධා නොකරන්න දැනුම්දීම් සඟවමින්"</string>
     <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"තව දැන ගැනීමට සහ වෙනස් කිරීමට තට්ටු කරන්න."</string>
+    <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"බාධා නොකරන්න වෙනස් කර ඇත"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"අවහිර කර ඇති දේ පරීක්ෂා කිරීමට තට්ටු කරන්න."</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"පද්ධතිය"</string>
     <string name="notification_app_name_settings" msgid="9088548800899952531">"සැකසීම්"</string>
@@ -2057,6 +2057,7 @@
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"හරි"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"ක්‍රියාවිරහිත කරන්න"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"තව දැන ගන්න"</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"වැඩිදියුණු කළ දැනුම්දීම් Android 12 හි Android අනුවර්තී දැනුම්දීම් ප්‍රතිස්ථාපනය කරයි. මෙම විශේෂාංගය යෝජිත ක්‍රියා සහ පිළිතුරු පෙන්වන අතර, ඔබගේ දැනුම්දීම් සංවිධානය කරයි.\n\nවැඩිදියුණු කළ දැනුම්දීම්වලට සම්බන්ධතා නම් සහ පණිවිඩ වැනි පුද්ගලික තොරතුරු ඇතුළුව, සියලු දැනුම්දීම් අන්තර්ගතය වෙත ප්‍රවේශ විය හැකිය. මෙම විශේෂාංගයට දැනුම්දීම් ඉවත දැමීමට හෝ දුරකථන ඇමතුම්වලට පිළිතුරු දීම සහ බාධා නොකිරීම පාලනය කිරීම වැනි, දැනුම්දීම්වලට ප්‍රතිචාර දැක්වීමටද හැකිය."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"දිනචරියා ප්‍රකාර තතු දැනුම්දීම"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"බැටරිය සුපුරුදු ආරෝපණයට පෙර ඉවර විය හැක"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"බැටරි සුරැකුම බැටරි ආයු කාලය දීර්ඝ කිරීමට සක්‍රිය කෙරිණි"</string>
@@ -2263,6 +2264,7 @@
     <string name="notification_content_abusive_bg_apps" msgid="5572096708044958249">"<xliff:g id="APP">%1$s</xliff:g> පසුබිමේ ධාවනය වන අතර බැටරිය බැස යයි. සමාලෝචනය කිරීමට තට්ටු කරන්න."</string>
     <string name="notification_content_long_running_fgs" msgid="8878031652441570178">"<xliff:g id="APP">%1$s</xliff:g> දිගු වේලාවක් පසුබිමේ ධාවනය වේ. සමාලෝචනය කිරීමට තට්ටු කරන්න."</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"සක්‍රිය යෙදුම් පරීක්ෂා කරන්න"</string>
-    <!-- no translation found for vdm_camera_access_denied (6345652513729130490) -->
+    <string name="vdm_camera_access_denied" msgid="6345652513729130490">"මෙම උපාංගයෙන් කැමරාවට ප්‍රවේශ විය නොහැකිය"</string>
+    <!-- no translation found for system_locale_title (3978041860457277638) -->
     <skip />
 </resources>

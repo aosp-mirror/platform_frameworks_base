@@ -72,6 +72,7 @@
     <string name="ThreeWCMmi" msgid="2436550866139999411">"Połączenie dla trzech abonentów"</string>
     <string name="RuacMmi" msgid="1876047385848991110">"Odrzucanie niepożądanych, irytujących połączeń"</string>
     <string name="CndMmi" msgid="185136449405618437">"Dostarczanie numeru telefonującego"</string>
+    <string name="DndMmi" msgid="8797375819689129800">"Nie przeszkadzać"</string>
     <string name="CLIRDefaultOnNextCallOn" msgid="4511621022859867988">"ID rozmówcy ustawiony jest domyślnie na „zastrzeżony”. Następne połączenie: zastrzeżony"</string>
     <string name="CLIRDefaultOnNextCallOff" msgid="5036749051007098105">"ID rozmówcy ustawiony jest domyślnie na „zastrzeżony”. Następne połączenie: nie zastrzeżony"</string>
     <string name="CLIRDefaultOffNextCallOn" msgid="1022781126694885017">"ID rozmówcy ustawiony jest domyślnie na „nie zastrzeżony”. Następne połączenie: zastrzeżony"</string>
@@ -86,8 +87,8 @@
     <string name="RestrictedStateContentMsimTemplate" msgid="5228235722511044687">"Tymczasowo wyłączone przez operatora karty SIM <xliff:g id="SIMNUMBER">%d</xliff:g>"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"Brak zasięgu sieci komórkowej"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"Spróbuj zmienić preferowaną sieć. Kliknij, by zmienić."</string>
-    <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"Połączenia alarmowe są niedostępne"</string>
-    <string name="EmergencyCallWarningSummary" msgid="1194185880092805497">"Nie można nawiązywać połączeń alarmowych przez Wi‑Fi"</string>
+    <string name="EmergencyCallWarningTitle" msgid="9164532362414787774">"Połączenia alarmowe mogą nie być dostępne."</string>
+    <string name="EmergencyCallWarningSummary" msgid="3365701131304664899">"<xliff:g id="SPN">%s</xliff:g> nie obsługuje połączeń alarmowych przez Wi-Fi. Kliknij, aby wyświetlić szczegóły."</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"Alerty"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"Przekierowanie połączeń"</string>
     <string name="notification_channel_emergency_callback" msgid="54074839059123159">"Tryb alarmowego połączenia zwrotnego"</string>
@@ -306,10 +307,8 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"dostęp do kalendarza"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"wysyłanie i wyświetlanie SMS‑ów"</string>
-    <!-- no translation found for permgrouplab_storage (9173334109512154196) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_storage (8352226729501080525) -->
-    <skip />
+    <string name="permgrouplab_storage" msgid="9173334109512154196">"Pliki i dokumenty"</string>
+    <string name="permgroupdesc_storage" msgid="8352226729501080525">"dostęp do plików i dokumentów na urządzeniu"</string>
     <string name="permgrouplab_readMediaAural" msgid="5885210465560755316">"Muzyka i inne dźwięki"</string>
     <string name="permgroupdesc_readMediaAural" msgid="1170143315714662822">"dostęp do plików audio na urządzeniu"</string>
     <string name="permgrouplab_readMediaVisual" msgid="9137695801926624061">"Zdjęcia i filmy"</string>
@@ -428,10 +427,10 @@
     <string name="permdesc_writeCallLog" product="tablet" msgid="2657525794731690397">"Zezwala aplikacji na modyfikowanie rejestru połączeń tabletu, w tym danych o połączeniach przychodzących i wychodzących. Złośliwe aplikacje mogą wykorzystać tę możliwość, by wyczyścić lub zmodyfikować rejestr połączeń."</string>
     <string name="permdesc_writeCallLog" product="tv" msgid="3934939195095317432">"Pozwala aplikacji modyfikować rejestr połączeń na urządzeniu z Androidem TV, w tym dane o połączeniach przychodzących i wychodzących. Złośliwe aplikacje mogą wykorzystać tę możliwość, by wykasować lub zmodyfikować rejestr połączeń."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="5903033505665134802">"Zezwala aplikacji na modyfikowanie rejestru połączeń telefonu, w tym danych o połączeniach przychodzących i wychodzących. Złośliwe aplikacje mogą wykorzystać tę możliwość, by wyczyścić lub zmodyfikować rejestr połączeń."</string>
-    <string name="permlab_bodySensors" msgid="3411035315357380862">"dostęp do czujników ciała (np. monitorujących tętno)"</string>
-    <string name="permdesc_bodySensors" product="default" msgid="3208940894182188063">"Dostęp do danych pochodzących z czujników na ciele, takich jak tętno, temperatura, procent tlenu we krwi itd."</string>
-    <string name="permlab_bodySensors_background" msgid="4352831883331744370">"dostęp do czujników na ciele (np. monitorujących tętno) podczas pracy w tle"</string>
-    <string name="permdesc_bodySensors_background" product="default" msgid="8512392249166660872">"Dostęp do danych pochodzących z czujników na ciele, takich jak tętno, temperatura, procent tlenu we krwi itd., gdy aplikacja pracuje w tle."</string>
+    <string name="permlab_bodySensors" msgid="662918578601619569">"Zezwól na dostęp do danych z czujników na ciele, np. tętna, podczas używania aplikacji"</string>
+    <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"Zezwala aplikacji na dostęp do danych z czujników na ciele, takich jak tętno, temperatura i poziom saturacji, gdy aplikacja ta jest używana."</string>
+    <string name="permlab_bodySensors_background" msgid="4912560779957760446">"Zezwól na dostęp do danych z czujników na ciele, np. tętna, podczas używania aplikacji w tle"</string>
+    <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"Zezwala aplikacji na dostęp do danych z czujników na ciele, takich jak tętno, temperatura i poziom saturacji, gdy aplikacja ta jest używana w tle."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"Odczytywanie wydarzeń i informacji z kalendarza"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"Ta aplikacja może odczytywać wszystkie zapisane na tablecie wydarzenia z kalendarza i udostępniać oraz zapisywać dane kalendarza."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"Ta aplikacja może odczytywać wszystkie wydarzenia z kalendarza zapisane na urządzeniu z Androidem TV oraz udostępniać i zapisywać dane z kalendarza."</string>
@@ -590,12 +589,9 @@
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"Użyj blokady ekranu, aby kontynuować"</string>
     <string name="fingerprint_acquired_partial" msgid="694598777291084823">"Wykryto częściowy odcisk palca"</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"Nie udało się przetworzyć odcisku palca. Spróbuj ponownie."</string>
-    <!-- no translation found for fingerprint_acquired_imager_dirty (1770676120848224250) -->
-    <skip />
-    <!-- no translation found for fingerprint_acquired_imager_dirty_alt (9169582140486372897) -->
-    <skip />
-    <!-- no translation found for fingerprint_acquired_too_fast (1628459767349116104) -->
-    <skip />
+    <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"Wyczyść czytnik linii papilarnych i spróbuj ponownie"</string>
+    <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"Wyczyść czujnik i spróbuj ponownie"</string>
+    <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"Mocno naciśnij czujnik"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"Palec został obrócony zbyt wolno. Spróbuj ponownie."</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"Użyj odcisku innego palca"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"Zbyt jasno"</string>
@@ -603,10 +599,8 @@
     <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"Za każdym razem lekko zmieniaj ułożenie palca"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
-    <!-- no translation found for fingerprint_error_not_match (4599441812893438961) -->
-    <skip />
-    <!-- no translation found for fingerprint_udfps_error_not_match (4709197752023550709) -->
-    <skip />
+    <string name="fingerprint_error_not_match" msgid="4599441812893438961">"Nie rozpoznano odcisku palca"</string>
+    <string name="fingerprint_udfps_error_not_match" msgid="4709197752023550709">"Mocno naciśnij czujnik"</string>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"Uwierzytelniono odciskiem palca"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"Twarz rozpoznana"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"Twarz rozpoznana, kliknij Potwierdź"</string>
@@ -697,8 +691,8 @@
     <string name="permdesc_readMediaAudio" msgid="5299772574434619399">"Zezwala na odczyt przez aplikację plików audio w pamięci współdzielonej."</string>
     <string name="permlab_readMediaVideo" msgid="7768003311260655007">"odczyt plików wideo z pamięci współdzielonej"</string>
     <string name="permdesc_readMediaVideo" msgid="3846400073770403528">"Zezwala na odczyt przez aplikację plików wideo w pamięci współdzielonej."</string>
-    <string name="permlab_readMediaImage" msgid="1507059005825769856">"odczyt plików graficznych z pamięci współdzielonej"</string>
-    <string name="permdesc_readMediaImage" msgid="8328052622292457588">"Zezwala na odczyt przez aplikację plików graficznych w pamięci współdzielonej."</string>
+    <string name="permlab_readMediaImages" msgid="4057590631020986789">"odczyt plików graficznych z pamięci współdzielonej"</string>
+    <string name="permdesc_readMediaImages" msgid="5836219373138469259">"Zezwala na odczyt przez aplikację plików graficznych w pamięci współdzielonej."</string>
     <string name="permlab_sdcardWrite" msgid="4863021819671416668">"modyfikowanie i usuwanie zawartości pamięci współdzielonej"</string>
     <string name="permdesc_sdcardWrite" msgid="8376047679331387102">"Zezwala aplikacji na zapis zawartości pamięci współdzielonej."</string>
     <string name="permlab_use_sip" msgid="8250774565189337477">"wykonywanie/odbieranie połączeń SIP"</string>
@@ -745,6 +739,8 @@
     <string name="permdesc_bindCarrierMessagingService" msgid="6316457028173478345">"Zezwala posiadaczowi na tworzenie powiązania z interfejsem najwyższego poziomu w usłudze przesyłania wiadomości przez operatora. Nie powinno być nigdy potrzebne dla zwykłych aplikacji."</string>
     <string name="permlab_bindCarrierServices" msgid="2395596978626237474">"powiązanie z usługami operatora"</string>
     <string name="permdesc_bindCarrierServices" msgid="9185614481967262900">"Umożliwia właścicielowi powiązanie z usługami operatora. Nie powinno być nigdy potrzebne w normalnych aplikacjach."</string>
+    <string name="permlab_access_notification_policy" msgid="5524112842876975537">"dostęp do trybu Nie przeszkadzać"</string>
+    <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"Pozwala aplikacji na odczyt i zmianę konfiguracji trybu Nie przeszkadzać."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"rozpocząć wyświetlanie użycia uprawnień"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"Umożliwia rozpoczęcie korzystania z uprawnienia dotyczącego danej aplikacji jego posiadaczowi. Zwykłe aplikacje nie powinny potrzebować tego uprawnienia."</string>
     <string name="permlab_startReviewPermissionDecisions" msgid="8690578688476599284">"rozpoczęcie wyświetlania decyzji dotyczących uprawnień"</string>
@@ -918,7 +914,7 @@
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="7982445492532123308">"Naciśnij Menu, aby odblokować lub wykonać połączenie alarmowe."</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="7434061749374801753">"Naciśnij Menu, aby odblokować."</string>
     <string name="lockscreen_pattern_instructions" msgid="3169991838169244941">"Narysuj wzór, aby odblokować"</string>
-    <string name="lockscreen_emergency_call" msgid="7549683825868928636">"Połączenie alarmowe"</string>
+    <string name="lockscreen_emergency_call" msgid="7500692654885445299">"Alarmowe"</string>
     <string name="lockscreen_return_to_call" msgid="3156883574692006382">"Powrót do połączenia"</string>
     <string name="lockscreen_pattern_correct" msgid="8050630103651508582">"Poprawnie!"</string>
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"Spróbuj ponownie."</string>
@@ -1057,7 +1053,6 @@
     <string name="save_password_never" msgid="6776808375903410659">"Nigdy"</string>
     <string name="open_permission_deny" msgid="5136793905306987251">"Nie masz pozwolenia na otwarcie tej strony."</string>
     <string name="text_copied" msgid="2531420577879738860">"Tekst został skopiowany do schowka."</string>
-    <string name="copied" msgid="4675902854553014676">"Skopiowano"</string>
     <string name="pasted_from_app" msgid="5627698450808256545">"Aplikacja <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> wkleiła dane z aplikacji <xliff:g id="SOURCE_APP_NAME">%2$s</xliff:g>"</string>
     <string name="pasted_from_clipboard" msgid="7355790625710831847">"Aplikacja <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> wkleiła dane ze schowka"</string>
     <string name="pasted_text" msgid="4298871641549173733">"Aplikacja <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> wkleiła skopiowany tekst"</string>
@@ -1458,8 +1453,6 @@
     <string name="permdesc_requestIgnoreBatteryOptimizations" msgid="634260656917874356">"Zezwala aplikacji na proszenie o uprawnienia do ignorowania optymalizacji wykorzystania baterii w przypadku danej aplikacji."</string>
     <string name="permlab_queryAllPackages" msgid="2928450604653281650">"zapytanie o wszystkie pakiety"</string>
     <string name="permdesc_queryAllPackages" msgid="5339069855520996010">"Pozwala aplikacji wyświetlać wszystkie zainstalowane pakiety."</string>
-    <string name="permlab_accessSupplementalApi" msgid="3544659160536960275">"dostęp do SupplementalApis"</string>
-    <string name="permdesc_accessSupplementalApi" msgid="8974758769370951074">"Zezwala na dostęp aplikacji do SupplementalApis."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1842872462124648678">"Dotknij dwukrotnie, aby sterować powiększeniem"</string>
     <string name="gadget_host_error_inflating" msgid="2449961590495198720">"Nie można dodać widżetu."</string>
     <string name="ime_action_go" msgid="5536744546326495436">"OK"</string>
@@ -1510,8 +1503,7 @@
     <string name="skip_button_label" msgid="3566599811326688389">"Pomiń"</string>
     <string name="no_matches" msgid="6472699895759164599">"Brak wyników"</string>
     <string name="find_on_page" msgid="5400537367077438198">"Znajdź na stronie"</string>
-    <!-- no translation found for matches_found (2296462299979507689) -->
-    <skip />
+    <string name="matches_found" msgid="2296462299979507689">"{count,plural, =1{# dopasowanie}few{# z {total}}many{# z {total}}other{# z {total}}}"</string>
     <string name="action_mode_done" msgid="2536182504764803222">"Gotowe"</string>
     <string name="progress_erasing" msgid="6891435992721028004">"Kasuję dane z pamięci współdzielonej…"</string>
     <string name="share" msgid="4157615043345227321">"Udostępnij"</string>
@@ -1723,6 +1715,7 @@
     <string name="user_switching_message" msgid="1912993630661332336">"Przełączam na użytkownika <xliff:g id="NAME">%1$s</xliff:g>…"</string>
     <string name="user_logging_out_message" msgid="7216437629179710359">"Wylogowuję użytkownika <xliff:g id="NAME">%1$s</xliff:g>…"</string>
     <string name="owner_name" msgid="8713560351570795743">"Właściciel"</string>
+    <string name="guest_name" msgid="8502103277839834324">"Gość"</string>
     <string name="error_message_title" msgid="4082495589294631966">"Błąd"</string>
     <string name="error_message_change_not_allowed" msgid="843159705042381454">"Ta zmiana nie jest dozwolona przez administratora"</string>
     <string name="app_not_found" msgid="3429506115332341800">"Nie znaleziono aplikacji do obsługi tej akcji"</string>
@@ -1876,8 +1869,10 @@
     <string name="zen_mode_until" msgid="2250286190237669079">"Do <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_alarm" msgid="7046911727540499275">"Do <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> (następny alarm)"</string>
     <string name="zen_mode_forever" msgid="740585666364912448">"Dopóki nie wyłączysz"</string>
+    <string name="zen_mode_forever_dnd" msgid="3423201955704180067">"Do wyłączenia Nie przeszkadzać"</string>
     <string name="zen_mode_rule_name_combination" msgid="7174598364351313725">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="8009920446193610996">"Zwiń"</string>
+    <string name="zen_mode_feature_name" msgid="3785547207263754500">"Nie przeszkadzać"</string>
     <string name="zen_mode_downtime_feature_name" msgid="5886005761431427128">"Powiadomienia wyłączone"</string>
     <string name="zen_mode_default_weeknights_name" msgid="7902108149994062847">"Noc poza weekendem"</string>
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"Weekend"</string>
@@ -1940,6 +1935,8 @@
     <string name="app_blocked_title" msgid="7353262160455028160">"Aplikacja jest niedostępna"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"Aplikacja <xliff:g id="APP_NAME">%1$s</xliff:g> jest obecnie niedostępna."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> – brak dostępu"</string>
+    <!-- no translation found for app_streaming_blocked_title_for_permission_dialog (4483161748582966785) -->
+    <skip />
     <string name="app_streaming_blocked_message" product="tv" msgid="4003011766528814377">"W tej chwili nie można z tego skorzystać na urządzeniu <xliff:g id="DEVICE">%1$s</xliff:g>. Użyj urządzenia z Androidem TV."</string>
     <string name="app_streaming_blocked_message" product="tablet" msgid="4242053045964946062">"W tej chwili nie można z tego skorzystać na urządzeniu <xliff:g id="DEVICE">%1$s</xliff:g>. Użyj tabletu."</string>
     <string name="app_streaming_blocked_message" product="default" msgid="6159168735030739398">"W tej chwili nie można z tego skorzystać na urządzeniu <xliff:g id="DEVICE">%1$s</xliff:g>. Użyj telefonu."</string>
@@ -2032,17 +2029,20 @@
     <string name="harmful_app_warning_uninstall" msgid="6472912975664191772">"ODINSTALUJ"</string>
     <string name="harmful_app_warning_open_anyway" msgid="5963657791740211807">"OTWÓRZ MIMO TO"</string>
     <string name="harmful_app_warning_title" msgid="8794823880881113856">"Wykryto szkodliwą aplikację"</string>
-    <string name="log_access_confirmation_title" msgid="3143035474800851565">"Prośba o dostęp do dziennika systemowego"</string>
+    <string name="log_access_confirmation_title" msgid="2343578467290592708">"Zezwolić aplikacji <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> na dostęp do wszystkich dzienników urządzenia?"</string>
     <string name="log_access_confirmation_allow" msgid="143157286283302512">"Tylko tym razem"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"Nie zezwalaj"</string>
-    <string name="log_access_confirmation_body" msgid="7599059550906238538">"Aplikacja <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> prosi o dzienniki systemowe do funkcjonalnego debugowania. Te dzienniki mogą zawierać informacje zapisane Twoim urządzeniu przez aplikacje i usługi."</string>
+    <string name="log_access_confirmation_body" msgid="4483075525611652922">"Dzienniki urządzenia zapisują, co dzieje się na urządzeniu. Aplikacje mogą ich używać do wykrywania i rozwiązywania problemów.\n\nNiektóre dzienniki mogą zawierać poufne dane, dlatego na dostęp do wszystkich dzienników zezwalaj tylko aplikacjom, którym ufasz. \n\nNawet jeśli nie zezwolisz tej aplikacji na dostęp do wszystkich dzienników na urządzeniu, będzie miała dostęp do własnych, a producent urządzenia będzie mógł korzystać z niektórych dzienników na urządzeniu. Więcej informacji"</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"Nie pokazuj ponownie"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"Aplikacja <xliff:g id="APP_0">%1$s</xliff:g> chce pokazywać wycinki z aplikacji <xliff:g id="APP_2">%2$s</xliff:g>"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"Edytuj"</string>
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"Wibracje przy połączeniach i powiadomieniach"</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"Wyciszenie połączeń i powiadomień"</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"Zmiany w systemie"</string>
+    <string name="notification_channel_do_not_disturb" msgid="7832584281883687653">"Nie przeszkadzać"</string>
+    <string name="zen_upgrade_notification_visd_title" msgid="2001148984371968620">"Nowość: w trybie Nie przeszkadzać powiadomienia są ukrywane"</string>
     <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"Kliknij, by dowiedzieć się więcej i zmienić ustawienia."</string>
+    <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"Zmiany w trybie Nie przeszkadzać"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Kliknij, by sprawdzić, co jest zablokowane."</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"System"</string>
     <string name="notification_app_name_settings" msgid="9088548800899952531">"Ustawienia"</string>
@@ -2059,6 +2059,7 @@
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"OK"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"Wyłącz"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"Więcej informacji"</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"W Androidzie 12 ulepszone powiadomienia zastąpiły dotychczasowe powiadomienia adaptacyjne. Ta funkcja pokazuje sugerowane działania i odpowiedzi oraz porządkuje powiadomienia.\n\nUlepszone powiadomienia mogą czytać całą zawartość powiadomień, w tym informacje osobiste takie jak nazwy kontaktów i treść wiadomości. Funkcja może też zamykać powiadomienia oraz reagować na nie, np. odbierać połączenia telefoniczne i sterować trybem Nie przeszkadzać."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Powiadomienie z informacją o trybie rutynowym"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Bateria może się wyczerpać przed zwykłą porą ładowania"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Włączono Oszczędzanie baterii, by wydłużyć czas pracy na baterii"</string>
@@ -2265,6 +2266,7 @@
     <string name="notification_content_abusive_bg_apps" msgid="5572096708044958249">"Aplikacja <xliff:g id="APP">%1$s</xliff:g> działa w tle i zużywa baterię. Kliknij, aby sprawdzić."</string>
     <string name="notification_content_long_running_fgs" msgid="8878031652441570178">"Aplikacja <xliff:g id="APP">%1$s</xliff:g> długo działa w tle. Kliknij, aby sprawdzić."</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Sprawdź aktywne aplikacje"</string>
-    <!-- no translation found for vdm_camera_access_denied (6345652513729130490) -->
+    <string name="vdm_camera_access_denied" msgid="6345652513729130490">"Nie można uzyskać dostępu do aparatu z tego urządzenia"</string>
+    <!-- no translation found for system_locale_title (3978041860457277638) -->
     <skip />
 </resources>
