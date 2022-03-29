@@ -1191,70 +1191,88 @@ public class OomAdjuster {
         }
         for (int i = activeUids.size() - 1; i >= 0; i--) {
             final UidRecord uidRec = activeUids.valueAt(i);
-            int uidChange = 0;
-            if (uidRec.getCurProcState() != PROCESS_STATE_NONEXISTENT
-                    && (uidRec.getSetProcState() != uidRec.getCurProcState()
-                    || uidRec.getSetCapability() != uidRec.getCurCapability()
-                    || uidRec.isSetAllowListed() != uidRec.isCurAllowListed())) {
-                if (DEBUG_UID_OBSERVERS) Slog.i(TAG_UID_OBSERVERS, "Changes in " + uidRec
-                        + ": proc state from " + uidRec.getSetProcState() + " to "
-                        + uidRec.getCurProcState() + ", capability from "
-                        + uidRec.getSetCapability() + " to " + uidRec.getCurCapability()
-                        + ", allowlist from " + uidRec.isSetAllowListed()
-                        + " to " + uidRec.isCurAllowListed());
-                if (ActivityManager.isProcStateBackground(uidRec.getCurProcState())
-                        && !uidRec.isCurAllowListed()) {
-                    // UID is now in the background (and not on the temp allowlist).  Was it
-                    // previously in the foreground (or on the temp allowlist)?
-                    if (!ActivityManager.isProcStateBackground(uidRec.getSetProcState())
-                            || uidRec.isSetAllowListed()) {
-                        uidRec.setLastBackgroundTime(nowElapsed);
-                        if (!mService.mHandler.hasMessages(IDLE_UIDS_MSG)) {
-                            // Note: the background settle time is in elapsed realtime, while
-                            // the handler time base is uptime.  All this means is that we may
-                            // stop background uids later than we had intended, but that only
-                            // happens because the device was sleeping so we are okay anyway.
-                            mService.mHandler.sendEmptyMessageDelayed(IDLE_UIDS_MSG,
-                                    mConstants.BACKGROUND_SETTLE_TIME);
+            if (uidRec.getCurProcState() != PROCESS_STATE_NONEXISTENT) {
+                if (uidRec.getSetProcState() != uidRec.getCurProcState()
+                        || uidRec.getSetCapability() != uidRec.getCurCapability()
+                        || uidRec.isSetAllowListed() != uidRec.isCurAllowListed()
+                        || uidRec.getProcAdjChanged()) {
+                    int uidChange = 0;
+                    if (DEBUG_UID_OBSERVERS) {
+                        Slog.i(TAG_UID_OBSERVERS, "Changes in " + uidRec
+                                + ": proc state from " + uidRec.getSetProcState() + " to "
+                                + uidRec.getCurProcState() + ", capability from "
+                                + uidRec.getSetCapability() + " to " + uidRec.getCurCapability()
+                                + ", allowlist from " + uidRec.isSetAllowListed()
+                                + " to " + uidRec.isCurAllowListed()
+                                + ", procAdjChanged: " + uidRec.getProcAdjChanged());
+                    }
+                    if (ActivityManager.isProcStateBackground(uidRec.getCurProcState())
+                            && !uidRec.isCurAllowListed()) {
+                        // UID is now in the background (and not on the temp allowlist).  Was it
+                        // previously in the foreground (or on the temp allowlist)?
+                        if (!ActivityManager.isProcStateBackground(uidRec.getSetProcState())
+                                || uidRec.isSetAllowListed()) {
+                            uidRec.setLastBackgroundTime(nowElapsed);
+                            if (!mService.mHandler.hasMessages(IDLE_UIDS_MSG)) {
+                                // Note: the background settle time is in elapsed realtime, while
+                                // the handler time base is uptime.  All this means is that we may
+                                // stop background uids later than we had intended, but that only
+                                // happens because the device was sleeping so we are okay anyway.
+                                mService.mHandler.sendEmptyMessageDelayed(IDLE_UIDS_MSG,
+                                        mConstants.BACKGROUND_SETTLE_TIME);
+                            }
                         }
+                        if (uidRec.isIdle() && !uidRec.isSetIdle()) {
+                            uidChange |= UidRecord.CHANGE_IDLE;
+                            becameIdle.add(uidRec);
+                        }
+                    } else {
+                        if (uidRec.isIdle()) {
+                            uidChange |= UidRecord.CHANGE_ACTIVE;
+                            EventLogTags.writeAmUidActive(uidRec.getUid());
+                            uidRec.setIdle(false);
+                        }
+                        uidRec.setLastBackgroundTime(0);
                     }
-                    if (uidRec.isIdle() && !uidRec.isSetIdle()) {
-                        uidChange |= UidRecord.CHANGE_IDLE;
-                        becameIdle.add(uidRec);
+                    final boolean wasCached = uidRec.getSetProcState()
+                            > ActivityManager.PROCESS_STATE_RECEIVER;
+                    final boolean isCached = uidRec.getCurProcState()
+                            > ActivityManager.PROCESS_STATE_RECEIVER;
+                    if (wasCached != isCached
+                            || uidRec.getSetProcState() == PROCESS_STATE_NONEXISTENT) {
+                        uidChange |= isCached ? UidRecord.CHANGE_CACHED :
+                                UidRecord.CHANGE_UNCACHED;
                     }
-                } else {
-                    if (uidRec.isIdle()) {
-                        uidChange |= UidRecord.CHANGE_ACTIVE;
-                        EventLogTags.writeAmUidActive(uidRec.getUid());
-                        uidRec.setIdle(false);
+                    if (uidRec.getSetCapability() != uidRec.getCurCapability()) {
+                        uidChange |= UidRecord.CHANGE_CAPABILITY;
                     }
-                    uidRec.setLastBackgroundTime(0);
-                }
-                final boolean wasCached = uidRec.getSetProcState()
-                        > ActivityManager.PROCESS_STATE_RECEIVER;
-                final boolean isCached = uidRec.getCurProcState()
-                        > ActivityManager.PROCESS_STATE_RECEIVER;
-                if (wasCached != isCached
-                        || uidRec.getSetProcState() == PROCESS_STATE_NONEXISTENT) {
-                    uidChange |= isCached ? UidRecord.CHANGE_CACHED : UidRecord.CHANGE_UNCACHED;
-                }
-                if (uidRec.getSetCapability() != uidRec.getCurCapability()) {
-                    uidChange |= UidRecord.CHANGE_CAPABILITY;
-                }
-                if (uidRec.getSetProcState() != uidRec.getCurProcState()) {
-                    uidChange |= UidRecord.CHANGE_PROCSTATE;
-                }
-                uidRec.setSetProcState(uidRec.getCurProcState());
-                uidRec.setSetCapability(uidRec.getCurCapability());
-                uidRec.setSetAllowListed(uidRec.isCurAllowListed());
-                uidRec.setSetIdle(uidRec.isIdle());
-                mService.mAtmInternal.onUidProcStateChanged(
-                        uidRec.getUid(), uidRec.getSetProcState());
-                mService.enqueueUidChangeLocked(uidRec, -1, uidChange);
-                mService.noteUidProcessState(uidRec.getUid(), uidRec.getCurProcState(),
-                        uidRec.getCurCapability());
-                if (uidRec.hasForegroundServices()) {
-                    mService.mServices.foregroundServiceProcStateChangedLocked(uidRec);
+                    if (uidRec.getSetProcState() != uidRec.getCurProcState()) {
+                        uidChange |= UidRecord.CHANGE_PROCSTATE;
+                    }
+                    if (uidRec.getProcAdjChanged()) {
+                        uidChange |= UidRecord.CHANGE_PROCADJ;
+                    }
+                    uidRec.setSetProcState(uidRec.getCurProcState());
+                    uidRec.setSetCapability(uidRec.getCurCapability());
+                    uidRec.setSetAllowListed(uidRec.isCurAllowListed());
+                    uidRec.setSetIdle(uidRec.isIdle());
+                    uidRec.clearProcAdjChanged();
+                    if ((uidChange & UidRecord.CHANGE_PROCSTATE) != 0
+                            || (uidChange & UidRecord.CHANGE_CAPABILITY) != 0) {
+                        mService.mAtmInternal.onUidProcStateChanged(
+                                uidRec.getUid(), uidRec.getSetProcState());
+                    }
+                    if (uidChange != 0) {
+                        mService.enqueueUidChangeLocked(uidRec, -1, uidChange);
+                    }
+                    if ((uidChange & UidRecord.CHANGE_PROCSTATE) != 0
+                            || (uidChange & UidRecord.CHANGE_CAPABILITY) != 0) {
+                        mService.noteUidProcessState(uidRec.getUid(), uidRec.getCurProcState(),
+                                uidRec.getCurCapability());
+                    }
+                    if (uidRec.hasForegroundServices()) {
+                        mService.mServices.foregroundServiceProcStateChangedLocked(uidRec);
+                    }
                 }
             }
             mService.mInternal.deletePendingTopUid(uidRec.getUid(), nowElapsed);
@@ -2531,6 +2549,7 @@ public class OomAdjuster {
             long nowElapsed) {
         boolean success = true;
         final ProcessStateRecord state = app.mState;
+        final UidRecord uidRec = app.getUidRecord();
 
         if (state.getCurRawAdj() != state.getSetRawAdj()) {
             state.setSetRawAdj(state.getCurRawAdj());
@@ -2569,6 +2588,9 @@ public class OomAdjuster {
                 reportOomAdjMessageLocked(TAG_OOM_ADJ, msg);
             }
             state.setSetAdj(state.getCurAdj());
+            if (uidRec != null) {
+                uidRec.noteProcAdjChanged();
+            }
             state.setVerifiedAdj(ProcessList.INVALID_ADJ);
         }
 

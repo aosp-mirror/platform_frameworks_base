@@ -48,6 +48,9 @@ public final class UidRecord {
     private int mSetProcState = ActivityManager.PROCESS_STATE_NONEXISTENT;
 
     @CompositeRWLock({"mService", "mProcLock"})
+    private boolean mProcAdjChanged;
+
+    @CompositeRWLock({"mService", "mProcLock"})
     private int mCurCapability;
 
     @CompositeRWLock({"mService", "mProcLock"})
@@ -126,6 +129,7 @@ public final class UidRecord {
     static final int CHANGE_CACHED = 1 << 3;
     static final int CHANGE_UNCACHED = 1 << 4;
     static final int CHANGE_CAPABILITY = 1 << 5;
+    static final int CHANGE_PROCADJ = 1 << 6;
     static final int CHANGE_PROCSTATE = 1 << 31;
 
     // Keep the enum lists in sync
@@ -184,6 +188,21 @@ public final class UidRecord {
     @GuardedBy({"mService", "mProcLock"})
     void setSetProcState(int setProcState) {
         mSetProcState = setProcState;
+    }
+
+    @GuardedBy({"mService", "mProcLock"})
+    void noteProcAdjChanged() {
+        mProcAdjChanged = true;
+    }
+
+    @GuardedBy({"mService", "mProcLock"})
+    void clearProcAdjChanged() {
+        mProcAdjChanged = false;
+    }
+
+    @GuardedBy({"mService", "mProcLock"})
+    boolean getProcAdjChanged() {
+        return mProcAdjChanged;
     }
 
     @GuardedBy(anyOf = {"mService", "mProcLock"})
@@ -427,6 +446,12 @@ public final class UidRecord {
                     sb.append("|");
                 }
                 sb.append("procstate");
+            }
+            if ((mLastReportedChange & CHANGE_PROCADJ) != 0) {
+                if (printed) {
+                    sb.append("|");
+                }
+                sb.append("procadj");
             }
         }
         sb.append(" procs:");
