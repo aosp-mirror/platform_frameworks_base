@@ -128,7 +128,7 @@
     <public name="localeConfig" />
     <public name="showBackground" />
     <public name="useTargetActivityForQuickAccess"/>
-    <public name="inheritKeyStoreKeys" />
+    <public name="removed_inheritKeyStoreKeys" />
     <public name="preferKeepClear" />
     <public name="autoHandwritingEnabled" />
     <public name="fromExtendLeft" />
@@ -148,6 +148,10 @@
     <public name="supportsInlineSuggestionsWithTouchExploration" />
     <public name="lineBreakStyle" />
     <public name="lineBreakWordStyle" />
+    <!-- @hide -->
+    <public name="maxDrawableWidth" />
+    <!-- @hide -->
+    <public name="maxDrawableHeight" />
   </staging-public-group>
 
   <staging-public-group type="id" first-id="0x01de0000">
@@ -175,6 +179,10 @@
     <public name="config_systemAutomotiveCalendarSyncManager" />
     <!-- @hide @SystemApi -->
     <public name="config_defaultAutomotiveNavigation" />
+    <!-- @hide @SystemApi -->
+    <public name="safety_protection_display_text" />
+    <!-- @hide @SystemApi -->
+    <public name="config_systemSettingsIntelligence" />
   </staging-public-group>
 
   <staging-public-group type="dimen" first-id="0x01db0000">
@@ -189,6 +197,8 @@
   </staging-public-group>
 
   <staging-public-group type="drawable" first-id="0x01d80000">
+    <!-- @hide @SystemApi -->
+    <public name="ic_safety_protection" />
   </staging-public-group>
 
   <staging-public-group type="layout" first-id="0x01d70000">

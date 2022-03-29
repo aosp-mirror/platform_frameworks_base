@@ -419,15 +419,8 @@ class MediaCarouselController @Inject constructor(
                 .elementAtOrNull(mediaCarouselScrollHandler.visibleMediaIndex)
         if (existingPlayer == null) {
             var newPlayer = mediaControlPanelFactory.get()
-            if (mediaFlags.useMediaSessionLayout()) {
-                newPlayer.attachPlayer(
-                        PlayerSessionViewHolder.create(LayoutInflater.from(context), mediaContent),
-                        MediaViewController.TYPE.PLAYER_SESSION)
-            } else {
-                newPlayer.attachPlayer(
-                        PlayerViewHolder.create(LayoutInflater.from(context), mediaContent),
-                        MediaViewController.TYPE.PLAYER)
-            }
+            newPlayer.attachPlayer(MediaViewHolder.create(
+                    LayoutInflater.from(context), mediaContent))
             newPlayer.mediaViewController.sizeChangedListener = this::updateCarouselDimensions
             val lp = LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
                     ViewGroup.LayoutParams.WRAP_CONTENT)
@@ -522,7 +515,7 @@ class MediaCarouselController @Inject constructor(
 
     private fun recreatePlayers() {
         bgColor = getBackgroundColor()
-        pageIndicator.tintList = ColorStateList.valueOf(getForegroundColor())
+        pageIndicator.tintList = ColorStateList.valueOf(R.color.material_dynamic_neutral_variant80)
 
         MediaPlayerData.mediaData().forEach { (key, data, isSsMediaRec) ->
             if (isSsMediaRec) {
@@ -541,14 +534,6 @@ class MediaCarouselController @Inject constructor(
 
     private fun getBackgroundColor(): Int {
         return context.getColor(R.color.material_dynamic_secondary95)
-    }
-
-    private fun getForegroundColor(): Int {
-        return if (mediaFlags.useMediaSessionLayout()) {
-            context.getColor(R.color.material_dynamic_neutral_variant80)
-        } else {
-            context.getColor(R.color.material_dynamic_secondary10)
-        }
     }
 
     private fun updatePageIndicator() {

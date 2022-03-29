@@ -49,6 +49,7 @@ import static android.view.WindowManager.DISPLAY_IME_POLICY_HIDE;
 import static android.view.WindowManager.DISPLAY_IME_POLICY_LOCAL;
 
 import static com.android.server.inputmethod.InputMethodBindingController.TIME_TO_RECONNECT;
+import static com.android.server.inputmethod.InputMethodUtils.isSoftInputModeStateVisibleAllowed;
 
 import static java.lang.annotation.RetentionPolicy.SOURCE;
 
@@ -165,6 +166,7 @@ import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.internal.notification.SystemNotificationChannels;
 import com.android.internal.os.SomeArgs;
 import com.android.internal.os.TransferPipe;
+import com.android.internal.util.ConcurrentUtils;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.view.IInlineSuggestionsRequestCallback;
 import com.android.internal.view.IInlineSuggestionsResponseCallback;
@@ -178,6 +180,7 @@ import com.android.server.AccessibilityManagerInternal;
 import com.android.server.EventLogTags;
 import com.android.server.LocalServices;
 import com.android.server.ServiceThread;
+import com.android.server.SystemServerInitThreadPool;
 import com.android.server.SystemService;
 import com.android.server.inputmethod.InputMethodManagerInternal.InputMethodListListener;
 import com.android.server.inputmethod.InputMethodSubtypeSwitchingController.ImeSubtypeListItem;
@@ -186,6 +189,8 @@ import com.android.server.pm.UserManagerInternal;
 import com.android.server.statusbar.StatusBarManagerService;
 import com.android.server.utils.PriorityDump;
 import com.android.server.wm.WindowManagerInternal;
+
+import com.google.android.collect.Sets;
 
 import java.io.FileDescriptor;
 import java.io.IOException;
@@ -201,8 +206,10 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.OptionalInt;
+import java.util.Set;
 import java.util.WeakHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -230,6 +237,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
 
     private static final int MSG_RESET_HANDWRITING = 1090;
     private static final int MSG_START_HANDWRITING = 1100;
+    private static final int MSG_FINISH_HANDWRITING = 1110;
 
     private static final int MSG_UNBIND_CLIENT = 3000;
     private static final int MSG_UNBIND_ACCESSIBILITY_SERVICE = 3001;
@@ -266,6 +274,14 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
      * starting from {@link android.os.Build.VERSION_CODES#P}.
      */
     private final boolean mPreventImeStartupUnlessTextEditor;
+
+    /**
+     * These IMEs are known not to behave well when evicted from memory and thus are exempt
+     * from the IME startup avoidance behavior that is enabled by
+     * {@link #mPreventImeStartupUnlessTextEditor}.
+     */
+    @NonNull
+    private final Set<String> mNonPreemptibleInputMethods;
 
     @UserIdInt
     private int mLastSwitchUserId;
@@ -339,6 +355,9 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     @GuardedBy("ImfLock.class")
     @Nullable
     private OverlayableSystemBooleanResourceWrapper mImeDrawsImeNavBarRes;
+    @GuardedBy("ImfLock.class")
+    @Nullable
+    Future<?> mImeDrawsImeNavBarResLazyInitFuture;
 
     static class SessionState {
         final ClientState client;
@@ -1692,6 +1711,8 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         mBindingController = new InputMethodBindingController(this);
         mPreventImeStartupUnlessTextEditor = mRes.getBoolean(
                 com.android.internal.R.bool.config_preventImeStartupUnlessTextEditor);
+        mNonPreemptibleInputMethods = Sets.newHashSet(mRes.getStringArray(
+                com.android.internal.R.array.config_nonPreemptibleInputMethods));
         mHwController = new HandwritingModeController(thread.getLooper(),
                 new InkWindowInitializer());
     }
@@ -1728,7 +1749,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     }
 
     @GuardedBy("ImfLock.class")
-    private void recreateImeDrawsImeNavBarResIfNecessary(@UserIdInt int targetUserId) {
+    private void maybeInitImeNavbarConfigLocked(@UserIdInt int targetUserId) {
         // Currently, com.android.internal.R.bool.config_imeDrawsImeNavBar is overlaid only for the
         // profile parent user.
         // TODO(b/221443458): See if we can make OverlayManager be aware of profile groups.
@@ -1772,7 +1793,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         if (DEBUG) Slog.d(TAG, "Switching user stage 1/3. newUserId=" + newUserId
                 + " currentUserId=" + mSettings.getCurrentUserId());
 
-        recreateImeDrawsImeNavBarResIfNecessary(newUserId);
+        maybeInitImeNavbarConfigLocked(newUserId);
 
         // ContentObserver should be registered again when the user is changed
         mSettingsObserver.registerContentObserverLocked(newUserId);
@@ -1878,7 +1899,22 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                     });
                 }
 
-                recreateImeDrawsImeNavBarResIfNecessary(currentUserId);
+                // TODO(b/32343335): The entire systemRunning() method needs to be revisited.
+                mImeDrawsImeNavBarResLazyInitFuture = SystemServerInitThreadPool.submit(() -> {
+                    // Note that the synchronization block below guarantees that the task
+                    // can never be completed before the returned Future<?> object is assigned to
+                    // the "mImeDrawsImeNavBarResLazyInitFuture" field.
+                    synchronized (ImfLock.class) {
+                        mImeDrawsImeNavBarResLazyInitFuture = null;
+                        if (currentUserId != mSettings.getCurrentUserId()) {
+                            // This means that the current user is already switched to other user
+                            // before the background task is executed. In this scenario the relevant
+                            // field should already be initialized.
+                            return;
+                        }
+                        maybeInitImeNavbarConfigLocked(currentUserId);
+                    }
+                }, "Lazily initialize IMMS#mImeDrawsImeNavBarRes");
 
                 mMyPackageMonitor.register(mContext, null, UserHandle.ALL, true);
                 mSettingsObserver.registerContentObserverLocked(currentUserId);
@@ -2548,7 +2584,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             @StartInputFlags int startInputFlags, @StartInputReason int startInputReason,
             int unverifiedTargetSdkVersion) {
         // If no method is currently selected, do nothing.
-        String selectedMethodId = getSelectedMethodIdLocked();
+        final String selectedMethodId = getSelectedMethodIdLocked();
         if (selectedMethodId == null) {
             return InputBindResult.NO_IME;
         }
@@ -2592,10 +2628,8 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         mCurAttribute = attribute;
 
         // If configured, we want to avoid starting up the IME if it is not supposed to be showing
-        if (mPreventImeStartupUnlessTextEditor
-                && !InputMethodUtils.isSoftInputModeStateVisibleAllowed(unverifiedTargetSdkVersion,
-                startInputFlags)
-                && !mShowRequested) {
+        if (shouldPreventImeStartupLocked(selectedMethodId, startInputFlags,
+                unverifiedTargetSdkVersion)) {
             if (DEBUG) {
                 Slog.d(TAG, "Avoiding IME startup and unbinding current input method.");
             }
@@ -2634,6 +2668,34 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         mBindingController.unbindCurrentMethod();
 
         return mBindingController.bindCurrentMethod();
+    }
+
+    @GuardedBy("ImfLock.class")
+    private boolean shouldPreventImeStartupLocked(
+            @NonNull String selectedMethodId,
+            @StartInputFlags int startInputFlags,
+            int unverifiedTargetSdkVersion) {
+        // Fast-path for the majority of cases
+        if (!mPreventImeStartupUnlessTextEditor) {
+            return false;
+        }
+
+        final boolean imeVisibleAllowed =
+                isSoftInputModeStateVisibleAllowed(unverifiedTargetSdkVersion, startInputFlags);
+
+        return !(imeVisibleAllowed
+                || mShowRequested
+                || isNonPreemptibleImeLocked(selectedMethodId));
+    }
+
+    /** Return {@code true} if the given IME is non-preemptible like the tv remote service. */
+    @GuardedBy("ImfLock.class")
+    private boolean isNonPreemptibleImeLocked(@NonNull  String selectedMethodId) {
+        final InputMethodInfo imi = mMethodMap.get(selectedMethodId);
+        if (imi != null) {
+            return mNonPreemptibleInputMethods.contains(imi.getPackageName());
+        }
+        return false;
     }
 
     @GuardedBy("ImfLock.class")
@@ -2988,6 +3050,11 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     @GuardedBy("ImfLock.class")
     @InputMethodNavButtonFlags
     private int getInputMethodNavButtonFlagsLocked() {
+        if (mImeDrawsImeNavBarResLazyInitFuture != null) {
+            // TODO(b/225366708): Avoid Future.get(), which is internally used here.
+            ConcurrentUtils.waitForFutureNoInterrupt(mImeDrawsImeNavBarResLazyInitFuture,
+                    "Waiting for the lazy init of mImeDrawsImeNavBarRes");
+        }
         final boolean canImeDrawsImeNavBar =
                 mImeDrawsImeNavBarRes != null && mImeDrawsImeNavBarRes.get();
         final boolean shouldShowImeSwitcherWhenImeIsShown = shouldShowImeSwitcherLocked(
@@ -3370,6 +3437,10 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                 final OptionalInt requestId = mHwController.getCurrentRequestId();
                 if (!requestId.isPresent()) {
                     Slog.e(TAG, "Stylus handwriting was not initialized.");
+                    return;
+                }
+                if (!mHwController.isStylusGestureOngoing()) {
+                    Slog.e(TAG, "There is no ongoing stylus gesture to start stylus handwriting.");
                     return;
                 }
                 if (DEBUG) Slog.v(TAG, "Client requesting Stylus Handwriting to be started");
@@ -3826,7 +3897,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             case LayoutParams.SOFT_INPUT_STATE_VISIBLE:
                 if ((softInputMode & LayoutParams.SOFT_INPUT_IS_FORWARD_NAVIGATION) != 0) {
                     if (DEBUG) Slog.v(TAG, "Window asks to show input going forward");
-                    if (InputMethodUtils.isSoftInputModeStateVisibleAllowed(
+                    if (isSoftInputModeStateVisibleAllowed(
                             unverifiedTargetSdkVersion, startInputFlags)) {
                         if (attribute != null) {
                             res = startInputUncheckedLocked(cs, inputContext, attribute,
@@ -3844,7 +3915,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                 break;
             case LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE:
                 if (DEBUG) Slog.v(TAG, "Window asks to always show input");
-                if (InputMethodUtils.isSoftInputModeStateVisibleAllowed(
+                if (isSoftInputModeStateVisibleAllowed(
                         unverifiedTargetSdkVersion, startInputFlags)) {
                     if (!sameWindowFocused) {
                         if (attribute != null) {
@@ -4430,7 +4501,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     }
 
     @BinderThread
-    private void finishStylusHandwriting(int requestId) {
+    private void resetStylusHandwriting(int requestId) {
         synchronized (ImfLock.class) {
             final OptionalInt curRequest = mHwController.getCurrentRequestId();
             if (!curRequest.isPresent() || curRequest.getAsInt() != requestId) {
@@ -4764,8 +4835,9 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             case MSG_RESET_HANDWRITING: {
                 synchronized (ImfLock.class) {
                     if (mBindingController.supportsStylusHandwriting()
-                            && getCurMethodLocked() != null) {
-                        mHwController.initializeHandwritingSpy(mCurTokenDisplayId);
+                            && getCurMethodLocked() != null && mCurFocusedWindow != null) {
+                        mHwController.initializeHandwritingSpy(
+                                mCurTokenDisplayId, mCurFocusedWindow);
                     } else {
                         mHwController.reset();
                     }
@@ -4793,7 +4865,15 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                             session.getHandwritingChannel(), session.getRecordedEvents())) {
                         // When failed to issue IPCs, re-initialize handwriting state.
                         Slog.w(TAG, "Resetting handwriting mode.");
-                        mHwController.initializeHandwritingSpy(mCurTokenDisplayId);
+                        scheduleResetStylusHandwriting();
+                    }
+                }
+                return true;
+            case MSG_FINISH_HANDWRITING:
+                synchronized (ImfLock.class) {
+                    IInputMethodInvoker curMethod = getCurMethodLocked();
+                    if (curMethod != null && mHwController.getCurrentRequestId().isPresent()) {
+                        curMethod.finishStylusHandwriting();
                     }
                 }
                 return true;
@@ -5434,6 +5514,12 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                     }
                 }
             }
+        }
+
+        @Override
+        public void maybeFinishStylusHandwriting() {
+            mHandler.removeMessages(MSG_FINISH_HANDWRITING);
+            mHandler.obtainMessage(MSG_FINISH_HANDWRITING).sendToTarget();
         }
     }
 
@@ -6388,8 +6474,8 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
 
         @BinderThread
         @Override
-        public void finishStylusHandwriting(int requestId) {
-            mImms.finishStylusHandwriting(requestId);
+        public void resetStylusHandwriting(int requestId) {
+            mImms.resetStylusHandwriting(requestId);
         }
     }
 }

@@ -16,6 +16,7 @@
 
 package android.trust.test
 
+import android.service.trust.GrantTrustResult
 import android.trust.BaseTrustAgentService
 import android.trust.TrustTestActivity
 import android.trust.test.lib.LockStateTrackingRule
@@ -25,11 +26,13 @@ import androidx.test.ext.junit.rules.ActivityScenarioRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry.getInstrumentation
 import androidx.test.uiautomator.UiDevice
+import com.android.server.testutils.mock
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.RuleChain
 import org.junit.runner.RunWith
+import org.mockito.Mockito.verifyZeroInteractions
 
 /**
  * Test for testing revokeTrust & grantTrust for non-renewable trust.
@@ -66,7 +69,7 @@ class GrantAndRevokeTrustTest {
 
     @Test
     fun grantKeepsDeviceUnlocked() {
-        trustAgentRule.agent.grantTrust(GRANT_MESSAGE, 10000, 0)
+        trustAgentRule.agent.grantTrust(GRANT_MESSAGE, 10000, 0) {}
         uiDevice.sleep()
 
         lockStateTrackingRule.assertUnlocked()
@@ -74,12 +77,21 @@ class GrantAndRevokeTrustTest {
 
     @Test
     fun grantKeepsDeviceUnlocked_untilRevoked() {
-        trustAgentRule.agent.grantTrust(GRANT_MESSAGE, 0, 0)
+        trustAgentRule.agent.grantTrust(GRANT_MESSAGE, 0, 0) {}
         await()
         uiDevice.sleep()
         trustAgentRule.agent.revokeTrust()
 
         lockStateTrackingRule.assertLocked()
+    }
+
+    @Test
+    fun grantDoesNotCallBack() {
+        val callback = mock<(GrantTrustResult) -> Unit>()
+        trustAgentRule.agent.grantTrust(GRANT_MESSAGE, 0, 0, callback)
+        await()
+
+        verifyZeroInteractions(callback)
     }
 
     companion object {

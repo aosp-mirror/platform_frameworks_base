@@ -110,7 +110,7 @@ public class CreateUserActivity extends Activity {
                 },
                 null,
                 defaultUserName,
-                getString(R.string.user_add_user),
+                getString(com.android.settingslib.R.string.user_add_user),
                 this::addUserNow,
                 this::finish
         );
@@ -134,7 +134,7 @@ public class CreateUserActivity extends Activity {
         mSetupUserDialog.dismiss();
 
         userName = (userName == null || userName.trim().isEmpty())
-                ? getString(R.string.user_new_user_name)
+                ? getString(com.android.settingslib.R.string.user_new_user_name)
                 : userName;
 
         mUserCreator.createUser(userName, userIcon,

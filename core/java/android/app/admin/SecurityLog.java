@@ -517,14 +517,15 @@ public class SecurityLog {
     public static final int TAG_PASSWORD_CHANGED = SecurityLogTags.SECURITY_PASSWORD_CHANGED;
 
     /**
-     * Indicates that the device attempts to connect to a WiFi network.
-     * The log entry contains the following information about the
+     * Indicates that an event occurred as the device attempted to connect to
+     * a WiFi network. The log entry contains the following information about the
      * event, encapsulated in an {@link Object} array and accessible via
      * {@link SecurityEvent#getData()}:
-     * <li> [0] The SSID of the network ({@code String})
-     * <li> [1] The BSSID of the network ({@code String})
-     * <li> [2] Whether the connection is successful ({@code Integer}, 1 if successful, 0 otherwise)
-     * <li> [3] Optional human-readable failure reason, empty string if none ({@code String})
+     * <li> [0] Last 2 octets of the network BSSID ({@code String}, in the form "xx:xx:xx:xx:AA:BB")
+     * <li> [1] Type of event that occurred ({@code String}). Event types are CONNECTED,
+     *      DISCONNECTED, ASSOCIATING, ASSOCIATED, EAP_METHOD_SELECTED, EAP_FAILURE,
+     *      SSID_TEMP_DISABLED, and OPEN_SSL_FAILURE.
+     * <li> [2] Optional human-readable failure reason, empty string if none ({@code String})
      */
     public static final int TAG_WIFI_CONNECTION = SecurityLogTags.SECURITY_WIFI_CONNECTION;
 
@@ -533,9 +534,8 @@ public class SecurityLog {
      * The log entry contains the following information about the
      * event, encapsulated in an {@link Object} array and accessible via
      * {@link SecurityEvent#getData()}:
-     * <li> [0] The SSID of the connected network ({@code String})
-     * <li> [1] The BSSID of the connected network ({@code String})
-     * <li> [2] Optional human-readable disconnection reason, empty string if none ({@code String})
+     * <li> [0] Last 2 octets of the network BSSID ({@code String}, in the form "xx:xx:xx:xx:AA:BB")
+     * <li> [1] Optional human-readable disconnection reason, empty string if none ({@code String})
      */
     public static final int TAG_WIFI_DISCONNECTION = SecurityLogTags.SECURITY_WIFI_DISCONNECTION;
 

@@ -16,11 +16,13 @@
 
 package com.android.internal.app;
 
+import android.app.LocaleManager;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.os.LocaleList;
 import android.provider.Settings;
 import android.telephony.TelephonyManager;
+import android.util.Log;
 
 import java.io.Serializable;
 import java.util.HashMap;
@@ -31,12 +33,17 @@ import java.util.Set;
 
 public class LocaleStore {
     private static final HashMap<String, LocaleInfo> sLocaleCache = new HashMap<>();
+    private static final String TAG = LocaleStore.class.getSimpleName();
     private static boolean sFullyInitialized = false;
 
     public static class LocaleInfo implements Serializable {
         private static final int SUGGESTION_TYPE_NONE = 0;
         private static final int SUGGESTION_TYPE_SIM = 1 << 0;
         private static final int SUGGESTION_TYPE_CFG = 1 << 1;
+        // Only for per-app language picker
+        private static final int SUGGESTION_TYPE_CURRENT = 1 << 2;
+        // Only for per-app language picker
+        private static final int SUGGESTION_TYPE_SYSTEM_LANGUAGE = 1 << 3;
 
         private final Locale mLocale;
         private final Locale mParent;
@@ -189,6 +196,14 @@ public class LocaleStore {
         public void setChecked(boolean checked) {
             mIsChecked = checked;
         }
+
+        public boolean isAppCurrentLocale() {
+            return (mSuggestionFlags & SUGGESTION_TYPE_CURRENT) > 0;
+        }
+
+        public boolean isSystemLocale() {
+            return (mSuggestionFlags & SUGGESTION_TYPE_SYSTEM_LANGUAGE) > 0;
+        }
     }
 
     private static Set<String> getSimCountries(Context context) {
@@ -237,6 +252,40 @@ public class LocaleStore {
                 li.mSuggestionFlags |= LocaleInfo.SUGGESTION_TYPE_SIM;
             }
         }
+    }
+
+    public static LocaleInfo getAppCurrentLocaleInfo(Context context, String appPackageName) {
+        if (appPackageName == null) {
+            return null;
+        }
+
+        LocaleManager localeManager = context.getSystemService(LocaleManager.class);
+        try {
+            LocaleList localeList = (localeManager == null)
+                    ? null : localeManager.getApplicationLocales(appPackageName);
+            Locale locale = localeList == null ? null : localeList.get(0);
+
+            if (locale != null) {
+                LocaleInfo localeInfo = new LocaleInfo(locale);
+                localeInfo.mSuggestionFlags |= LocaleInfo.SUGGESTION_TYPE_CURRENT;
+                localeInfo.mIsTranslated = true;
+                return localeInfo;
+            }
+        } catch (IllegalArgumentException e) {
+            Log.d(TAG, "IllegalArgumentException ", e);
+        }
+        return null;
+    }
+
+    /**
+     * The "system default" is special case for per-app picker. Intentionally keep the locale
+     * empty to let activity know "system default" been selected.
+     */
+    public static LocaleInfo getSystemDefaultLocaleInfo() {
+        LocaleInfo systemDefaultInfo = new LocaleInfo("");
+        systemDefaultInfo.mSuggestionFlags |= LocaleInfo.SUGGESTION_TYPE_SYSTEM_LANGUAGE;
+        systemDefaultInfo.mIsTranslated = true;
+        return systemDefaultInfo;
     }
 
     /*

@@ -20,14 +20,17 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="4811759950673118541">"सिस्टीम UI"</string>
-    <string name="battery_low_title" msgid="6891106956328275225">"बॅटरी लवकर संपू शकते"</string>
+    <string name="battery_low_title" msgid="5319680173344341779">"बॅटरी सेव्हर सुरू करायचे आहे का?"</string>
+    <string name="battery_low_description" msgid="3282977755476423966">"तुमच्याकडे <xliff:g id="PERCENTAGE">%s</xliff:g> बॅटरी शिल्लक आहे. बॅटरी सेव्हर गडद थीम सुरू करते, बॅकग्राउंड ॲक्टिव्हिटी मर्यादित करते, यामुळे सूचना विलंबाने मिळतात."</string>
+    <string name="battery_low_intro" msgid="5148725009653088790">"बॅटरी सेव्हर गडद थीम सुरू करते, बॅकग्राउंड ॲक्टिव्हिटी मर्यादित करते, यामुळे सूचना विलंबाने मिळतात."</string>
     <string name="battery_low_percent_format" msgid="4276661262843170964">"<xliff:g id="PERCENTAGE">%s</xliff:g> शिल्लक"</string>
     <string name="invalid_charger_title" msgid="938685362320735167">"USB द्वारे चार्ज होऊ शकत नाही"</string>
     <string name="invalid_charger_text" msgid="2339310107232691577">"तुमच्या डिव्हाइससह आलेल्या चार्जरचा वापर करा"</string>
     <string name="battery_saver_confirmation_title" msgid="1234998463717398453">"बॅटरी सेव्हर सुरू करायचा का?"</string>
     <string name="battery_saver_confirmation_title_generic" msgid="2299231884234959849">"बॅटरी सेव्हर बाबत"</string>
     <string name="battery_saver_confirmation_ok" msgid="5042136476802816494">"सुरू करा"</string>
-    <string name="battery_saver_start_action" msgid="4553256017945469937">"बॅटरी सेव्हर सुरू करा"</string>
+    <string name="battery_saver_start_action" msgid="8353766979886287140">"सुरू करा"</string>
+    <string name="battery_saver_dismiss_action" msgid="7199342621040014738">"नाही, नको"</string>
     <string name="status_bar_settings_auto_rotation" msgid="8329080442278431708">"ऑटो-रोटेट स्क्रीन"</string>
     <string name="usb_device_permission_prompt" msgid="4414719028369181772">"<xliff:g id="APPLICATION">%1$s</xliff:g> ला <xliff:g id="USB_DEVICE">%2$s</xliff:g> अ‍ॅक्सेस करण्याची अनुमती द्यायची का?"</string>
     <string name="usb_device_permission_prompt_warn" msgid="2309129784984063656">"<xliff:g id="APPLICATION">%1$s</xliff:g> ला <xliff:g id="USB_DEVICE">%2$s</xliff:g> अ‍ॅक्सेस करण्याची अनुमती द्यायची का?\nया अ‍ॅपला रेकॉर्ड करण्याची परवानगी दिलेली नाही पण या USB डिव्हाइसद्वारे ऑडिओ कॅप्चर केला जाऊ शकतो."</string>
@@ -128,6 +131,7 @@
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="2242167416140740920">"चेहरा ऑथेंटिकेशन केलेला आहे"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"निश्चित केले"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"पूर्ण करण्यासाठी खात्री करा वर टॅप करा"</string>
+    <string name="biometric_dialog_tap_confirm_with_face" msgid="1597899891472340950">"तुमच्या चेहऱ्याने अनलॉक केले. पुढे सुरू ठेवण्यासाठी दाबा."</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"ऑथेंटिकेशन केलेले"</string>
     <string name="biometric_dialog_use_pin" msgid="8385294115283000709">"पिन वापरा"</string>
     <string name="biometric_dialog_use_pattern" msgid="2315593393167211194">"पॅटर्न वापरा"</string>
@@ -147,10 +151,6 @@
     <string name="biometric_dialog_last_pattern_attempt_before_wipe_profile" msgid="6045224069529284686">"तुम्‍ही पुढील प्रयत्‍नात चुकीचा पॅटर्न एंटर केल्यास, तुमची कार्य प्रोफाइल आणि तिचा डेटा हटवला जाईल."</string>
     <string name="biometric_dialog_last_pin_attempt_before_wipe_profile" msgid="545567685899091757">"तुम्‍ही पुढील प्रयत्‍नात चुकीचा पिन एंटर केल्यास, तुमची कार्य प्रोफाइल आणि तिचा डेटा हटवला जाईल."</string>
     <string name="biometric_dialog_last_password_attempt_before_wipe_profile" msgid="8538032972389729253">"तुम्‍ही पुढील प्रयत्‍नात चुकीचा पासवर्ड एंटर केल्यास, तुमची कार्य प्रोफाइल आणि तिचा डेटा हटवला जाईल."</string>
-    <string name="biometric_dialog_failed_attempts_now_wiping_device" msgid="6585503524026243042">"बरेच चुकीचे प्रयत्‍न. या डिव्‍हाइसचा डेटा हटवला जाईल."</string>
-    <string name="biometric_dialog_failed_attempts_now_wiping_user" msgid="7015008539146949115">"बरेच चुकीचे प्रयत्‍न. हा वापरकर्ता हटवला जाईल."</string>
-    <string name="biometric_dialog_failed_attempts_now_wiping_profile" msgid="5239378521440749682">"बरेच चुकीचे प्रयत्‍न. ही कार्य प्रोफाइल आणि त्यामधील डेटा हटवला जाईल."</string>
-    <string name="biometric_dialog_now_wiping_dialog_dismiss" msgid="7189432882125106154">"डिसमिस करा"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"फिंगरप्रिंट सेन्सरला स्पर्श करा"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="4465698996175640549">"फिंगरप्रिंट आयकन"</string>
     <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"चेहरा ओळखू शकत नाही. त्याऐवजी फिंगरप्रिंट वापरा."</string>
@@ -181,6 +181,7 @@
     <string name="accessibility_desc_close" msgid="8293708213442107755">"बंद करा"</string>
     <string name="accessibility_quick_settings_dnd_none_on" msgid="3235552940146035383">"संपूर्ण शांतता"</string>
     <string name="accessibility_quick_settings_dnd_alarms_on" msgid="3375848309132140014">"फक्‍त अलार्म"</string>
+    <string name="accessibility_quick_settings_dnd" msgid="2415967452264206047">"व्यत्यय आणू नका."</string>
     <string name="accessibility_quick_settings_bluetooth" msgid="8250942386687551283">"ब्लूटूथ."</string>
     <string name="accessibility_quick_settings_bluetooth_on" msgid="3819082137684078013">"ब्लूटूथ सुरू."</string>
     <string name="accessibility_quick_settings_alarm" msgid="558094529584082090">"<xliff:g id="TIME">%s</xliff:g> साठी अलार्म सेट केला."</string>
@@ -205,6 +206,7 @@
     <string name="dessert_case" msgid="9104973640704357717">"मिष्ठान्न प्रकरण"</string>
     <string name="start_dreams" msgid="9131802557946276718">"स्क्रीन सेव्हर"</string>
     <string name="ethernet_label" msgid="2203544727007463351">"इथरनेट"</string>
+    <string name="quick_settings_dnd_label" msgid="7728690179108024338">"व्यत्यय आणू नका"</string>
     <string name="quick_settings_bluetooth_label" msgid="7018763367142041481">"ब्लूटूथ"</string>
     <string name="quick_settings_bluetooth_detail_empty_text" msgid="5760239584390514322">"कोणतेही जोडलेले डिव्हाइसेस उपलब्ध नाहीत"</string>
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g> बॅटरी"</string>
@@ -317,17 +319,12 @@
     <string name="keyguard_indication_charging_time_slowly" msgid="301936949731705417">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • हळू चार्ज होत आहे • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> मध्ये पूर्ण होईल"</string>
     <string name="keyguard_indication_charging_time_dock" msgid="6150404291427377863">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • चार्जिंग डॉक • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> मध्ये पूर्ण होईल"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"वापरकर्ता स्विच करा"</string>
-    <string name="user_add_user" msgid="4336657383006913022">"वापरकर्ता जोडा"</string>
-    <string name="user_new_user_name" msgid="2019166282704195789">"नवीन वापरकर्ता"</string>
-    <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"अतिथी काढायचे?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"या सत्रातील सर्व अ‍ॅप्स आणि डेटा हटवला जाईल."</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"काढा"</string>
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"अतिथी, तुमचे पुन्‍हा स्‍वागत आहे!"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"तुम्ही तुमचे सत्र सुरू ठेवू इच्छिता?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"येथून सुरू करा"</string>
     <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"होय, सुरू ठेवा"</string>
-    <string name="user_add_user_title" msgid="4172327541504825032">"नवीन वापरकर्ता जोडायचा?"</string>
-    <string name="user_add_user_message_short" msgid="2599370307878014791">"तुम्ही एक नवीन वापरकर्ता जोडता तेव्हा, त्या व्यक्तीने त्यांचे स्थान सेट करणे आवश्यक असते.\n\nकोणताही वापरकर्ता इतर सर्व वापरकर्त्यांसाठी अ‍ॅप्स अपडेट करू शकतो."</string>
     <string name="user_limit_reached_title" msgid="2429229448830346057">"वापरकर्ता मर्यादा गाठली"</string>
     <plurals name="user_limit_reached_message" formatted="false" msgid="2573535787802908398">
       <item quantity="other">तुम्ही <xliff:g id="COUNT">%d</xliff:g> वापरकर्त्यांपर्यंत जोडू शकता.</item>
@@ -348,6 +345,7 @@
     <string name="notification_section_header_alerting" msgid="5581175033680477651">"सूचना"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"संभाषणे"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"सर्व सायलंट सूचना साफ करा"</string>
+    <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"व्यत्यय आणून नकाद्वारे सूचना थांबवल्या"</string>
     <string name="media_projection_action_text" msgid="3634906766918186440">"आता सुरू करा"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"सूचना नाहीत"</string>
     <string name="quick_settings_disclosure_parental_controls" msgid="2114102871438223600">"हे डिव्हाइस तुमच्या पालकाने व्यवस्थापित केले आहे"</string>
@@ -452,8 +450,7 @@
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"वापरण्यासाठी अनलॉक करा"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"तुमची कार्ड मिळवताना समस्या आली, कृपया नंतर पुन्हा प्रयत्न करा"</string>
     <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"लॉक स्क्रीन सेटिंग्ज"</string>
-    <string name="qr_code_scanner_title" msgid="5660820608548306581">"QR कोड"</string>
-    <string name="qr_code_scanner_description" msgid="7937603775306661863">"स्कॅन करण्यासाठी टॅप करा"</string>
+    <string name="qr_code_scanner_title" msgid="5290201053875420785">"QR कोड स्कॅन करा"</string>
     <string name="status_bar_work" msgid="5238641949837091056">"कार्य प्रोफाईल"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"विमान मोड"</string>
     <string name="zen_alarm_warning" msgid="7844303238486849503">"तुम्ही तुमचा <xliff:g id="WHEN">%1$s</xliff:g> वाजता होणारा पुढील अलार्म ऐकणार नाही"</string>
@@ -491,6 +488,8 @@
     <string name="notification_channel_summary_automatic_demoted" msgid="1831303964660807700">"&lt;b&gt;स्थिती&lt;/b&gt; ला थोडी कमी म्हणून रँक केले गेले"</string>
     <string name="notification_channel_summary_priority_baseline" msgid="46674690072551234">"संभाषण सूचनांच्या वरती आणि लॉक स्क्रीनवरील प्रोफाइल फोटो म्हणून दिसते"</string>
     <string name="notification_channel_summary_priority_bubble" msgid="1275413109619074576">"संभाषण सूचनांच्या वरती आणि लॉक स्क्रीनवरील प्रोफाइल फोटो म्हणून दिसते, बबल म्हणून दिसते"</string>
+    <string name="notification_channel_summary_priority_dnd" msgid="6665395023264154361">"संभाषण सूचनांच्या वरती आणि लॉक स्क्रीनवरील प्रोफाइल फोटो म्हणून दिसते, व्यत्यय आणू नका यामध्ये अडथळा आणते"</string>
+    <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"संभाषण सूचनांच्या वरती आणि लॉक स्क्रीनवरील प्रोफाइल फोटो म्हणून दिसते, बबल म्हणून दिसते, व्यत्यय आणू नका यामध्ये अडथळा आणते"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"प्राधान्य"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> हे संभाषण वैशिष्ट्यांना सपोर्ट करत नाही"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"या सूचनांमध्ये सुधारणा केली जाऊ शकत नाही."</string>
@@ -566,6 +565,7 @@
     <string name="keyboard_shortcut_group_applications_sms" msgid="6912633831752843566">"SMS"</string>
     <string name="keyboard_shortcut_group_applications_music" msgid="9032078456666204025">"संगीत"</string>
     <string name="keyboard_shortcut_group_applications_calendar" msgid="4229602992120154157">"कॅलेंडर"</string>
+    <string name="volume_and_do_not_disturb" msgid="502044092739382832">"व्यत्यय आणू नका"</string>
     <string name="volume_dnd_silent" msgid="4154597281458298093">"आवाजाच्या बटणांचा शार्टकट"</string>
     <string name="battery" msgid="769686279459897127">"बॅटरी"</string>
     <string name="headset" msgid="4485892374984466437">"हेडसेट"</string>
@@ -684,6 +684,10 @@
     <string name="mobile_carrier_text_format" msgid="8912204177152950766">"<xliff:g id="CARRIER_NAME">%1$s</xliff:g>, <xliff:g id="MOBILE_DATA_TYPE">%2$s</xliff:g>"</string>
     <string name="wifi_is_off" msgid="5389597396308001471">"वाय-फाय बंद आहे"</string>
     <string name="bt_is_off" msgid="7436344904889461591">"ब्लूटूथ बंद आहे"</string>
+    <string name="dnd_is_off" msgid="3185706903793094463">"व्यत्यय आणू नका बंद आहे"</string>
+    <string name="qs_dnd_prompt_auto_rule" msgid="3535469468310002616">"व्यत्यय आणू नका एका <xliff:g id="ID_1">%s</xliff:g> स्वयंचलित नियमाने सुरू केले."</string>
+    <string name="qs_dnd_prompt_app" msgid="4027984447935396820">"व्यत्यय आणू नका (<xliff:g id="ID_1">%s</xliff:g>) ॲपने सुरू केले."</string>
+    <string name="qs_dnd_prompt_auto_rule_app" msgid="1841469944118486580">"व्यत्यय आणू नका एका स्वयंचलित नियमाने किंवा ॲपने सुरू केले."</string>
     <string name="running_foreground_services_title" msgid="5137313173431186685">"अ‍ॅप्स बॅकग्राउंडमध्‍ये सुरू आहेत"</string>
     <string name="running_foreground_services_msg" msgid="3009459259222695385">"बॅटरी आणि डेटा वापराच्‍या तपशीलांसाठी टॅप करा"</string>
     <string name="mobile_data_disable_title" msgid="5366476131671617790">"मोबाइल डेटा बंद करायचा?"</string>
@@ -708,6 +712,8 @@
     <string name="ongoing_privacy_dialog_enterprise" msgid="3003314125311966061">"(ऑफिस)"</string>
     <string name="ongoing_privacy_dialog_phonecall" msgid="4487370562589839298">"फोन कॉल"</string>
     <string name="ongoing_privacy_dialog_attribution_text" msgid="4738795925380373994">"(<xliff:g id="APPLICATION_NAME_S_">%s</xliff:g> द्वारे)"</string>
+    <string name="ongoing_privacy_dialog_attribution_label" msgid="3385241594101496292">"(<xliff:g id="ATTRIBUTION_LABEL">%s</xliff:g>)"</string>
+    <string name="ongoing_privacy_dialog_attribution_proxy_label" msgid="1111829599659403249">"(<xliff:g id="ATTRIBUTION_LABEL">%1$s</xliff:g> • <xliff:g id="PROXY_LABEL">%2$s</xliff:g>)"</string>
     <string name="privacy_type_camera" msgid="7974051382167078332">"camera"</string>
     <string name="privacy_type_location" msgid="7991481648444066703">"स्थान"</string>
     <string name="privacy_type_microphone" msgid="9136763906797732428">"मायक्रोफोन"</string>
@@ -769,9 +775,10 @@
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"अधिक पाहण्यासाठी स्वाइप करा"</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"शिफारशी लोड करत आहे"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"मीडिया"</string>
-    <string name="controls_media_close_session" msgid="1193000643003066508">"हे मीडिया सेशन लपवायचे आहे का?"</string>
+    <!-- no translation found for controls_media_close_session (4780485355795635052) -->
+    <skip />
     <string name="controls_media_active_session" msgid="3146882316024153337">"सध्याचे मीडिया सेशन लपवू शकत नाही."</string>
-    <string name="controls_media_dismiss_button" msgid="9081375542265132213">"डिसमिस करा"</string>
+    <string name="controls_media_dismiss_button" msgid="4485675693008031646">"लपवा"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"पुन्हा सुरू करा"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"सेटिंग्ज"</string>
     <string name="controls_media_playing_item_description" msgid="4531853311504359098">"<xliff:g id="APP_LABEL">%3$s</xliff:g> मध्ये <xliff:g id="ARTIST_NAME">%2$s</xliff:g> चे <xliff:g id="SONG_NAME">%1$s</xliff:g> प्ले होत आहे"</string>
@@ -789,7 +796,7 @@
     <string name="media_move_closer_to_end_cast" msgid="6495907340926563656">"येथे प्ले करण्यासाठी <xliff:g id="DEVICENAME">%1$s</xliff:g> च्या जवळ जा"</string>
     <string name="media_transfer_playing_different_device" msgid="7186806382609785610">"<xliff:g id="DEVICENAME">%1$s</xliff:g> वर प्ले केला जात आहे"</string>
     <string name="media_transfer_playing_this_device" msgid="1856890686844499172">"या फोनवर प्ले होत आहे"</string>
-    <string name="media_transfer_failed" msgid="2640354446629980227">"काहीतरी चूक झाली"</string>
+    <string name="media_transfer_failed" msgid="7955354964610603723">"काहीतरी चूक झाली. पुन्हा प्रयत्न करा."</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"निष्क्रिय, ॲप तपासा"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"आढळले नाही"</string>
     <string name="controls_error_removed_title" msgid="1207794911208047818">"नियंत्रण उपलब्ध नाही"</string>
@@ -806,6 +813,9 @@
     <string name="media_output_dialog_disconnected" msgid="7090512852817111185">"(डिस्कनेक्ट केलेले)"</string>
     <string name="media_output_dialog_connect_failed" msgid="3080972621975339387">"स्विच करू शकत नाही. पुन्हा प्रयत्न करण्यासाठी टॅप करा."</string>
     <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"नवीन डिव्हाइससोबत पेअर करा"</string>
+    <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"हे सेशन कास्ट करण्यासाठी, कृपया ॲप उघडा."</string>
+    <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"अज्ञात अ‍ॅप"</string>
+    <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"कास्ट करणे थांबवा"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"बिल्ड नंबर"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"बिल्ड नंबर क्लिपबोर्डवर कॉपी केला."</string>
     <string name="basic_status" msgid="2315371112182658176">"संभाषण उघडा"</string>
@@ -839,6 +849,7 @@
     <string name="messages_count_overflow_indicator" msgid="7850934067082006043">"<xliff:g id="NUMBER">%d</xliff:g>+"</string>
     <string name="people_tile_description" msgid="8154966188085545556">"अलीकडील मेसेज, मिस्ड कॉल आणि स्टेटस अपडेट पहा"</string>
     <string name="people_tile_title" msgid="6589377493334871272">"संभाषण"</string>
+    <string name="paused_by_dnd" msgid="7856941866433556428">"व्यत्यय आणू नका द्वारे थांबवले गेले"</string>
     <string name="new_notification_text_content_description" msgid="2915029960094389291">"<xliff:g id="NAME">%1$s</xliff:g> यांनी मेसेज पाठवला: <xliff:g id="NOTIFICATION">%2$s</xliff:g>"</string>
     <string name="new_notification_image_content_description" msgid="6017506886810813123">"<xliff:g id="NAME">%1$s</xliff:g> यांनी इमेज पाठवली"</string>
     <string name="new_status_content_description" msgid="6046637888641308327">"<xliff:g id="NAME">%1$s</xliff:g> यांनी स्टेटस अपडेट केले: <xliff:g id="STATUS">%2$s</xliff:g>"</string>
@@ -877,8 +888,7 @@
       <item quantity="other"><xliff:g id="COUNT_1">%s</xliff:g> अ‍ॅक्टिव्ह ॲप्स</item>
       <item quantity="one"><xliff:g id="COUNT_0">%s</xliff:g> अ‍ॅक्टिव्ह ॲप</item>
     </plurals>
-    <!-- no translation found for fgs_dot_content_description (2865071539464777240) -->
-    <skip />
+    <string name="fgs_dot_content_description" msgid="2865071539464777240">"नवीन माहिती"</string>
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"अ‍ॅक्टिव्ह ॲप्स"</string>
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"थांबवा"</string>
     <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"थांबवले"</string>
@@ -889,8 +899,12 @@
     <string name="clipboard_edit_text_description" msgid="805254383912962103">"कॉपी केलेला मजकूर संपादित करा"</string>
     <string name="clipboard_edit_image_description" msgid="8904857948976041306">"कॉपी केलेली इमेज संपादित करा"</string>
     <string name="clipboard_send_nearby_description" msgid="4629769637846717650">"जवळपासच्या डिव्हाइसवर पाठवा"</string>
-    <!-- no translation found for add (81036585205287996) -->
-    <skip />
-    <!-- no translation found for manage_users (1823875311934643849) -->
-    <skip />
+    <string name="add" msgid="81036585205287996">"जोडा"</string>
+    <string name="manage_users" msgid="1823875311934643849">"वापरकर्ते व्यवस्‍थापित करा"</string>
+    <string name="drag_split_not_supported" msgid="4326847447699729722">"ही सूचना स्प्लिटस्क्रीनवर ड्रॅग करण्याला सपोर्ट करत नाही."</string>
+    <string name="dream_overlay_status_bar_wifi_off" msgid="4497069245055003582">"वाय-फाय उपलब्ध नाही"</string>
+    <string name="dream_overlay_status_bar_priority_mode" msgid="5428462123314728739">"प्राधान्य मोड"</string>
+    <string name="dream_overlay_status_bar_alarm_set" msgid="566707328356590886">"अलार्म सेट केला"</string>
+    <string name="dream_overlay_status_bar_camera_mic_off" msgid="3199425257833773569">"कॅमेरा आणि माइक बंद आहेत"</string>
+    <string name="dream_overlay_status_bar_notification_indicator" msgid="8091389255691081711">"{count,plural, =1{# सूचना}other{# सूचना}}"</string>
 </resources>

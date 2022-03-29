@@ -2360,6 +2360,20 @@ class Task extends TaskFragment {
         return parentTask == null ? null : parentTask.getOrganizedTask();
     }
 
+    /** @return the first create-by-organizer task. */
+    @Nullable
+    Task getCreatedByOrganizerTask() {
+        if (mCreatedByOrganizer) {
+            return this;
+        }
+        final WindowContainer parent = getParent();
+        if (parent == null) {
+            return null;
+        }
+        final Task parentTask = parent.asTask();
+        return parentTask == null ? null : parentTask.getCreatedByOrganizerTask();
+    }
+
     // TODO(task-merge): Figure out what's the right thing to do for places that used it.
     boolean isRootTask() {
         return getRootTask() == this;
@@ -2687,7 +2701,7 @@ class Task extends TaskFragment {
     @Override
     void onDisplayChanged(DisplayContent dc) {
         final boolean isRootTask = isRootTask();
-        if (!isRootTask) {
+        if (!isRootTask && !mCreatedByOrganizer) {
             adjustBoundsForDisplayChangeIfNeeded(dc);
         }
         super.onDisplayChanged(dc);
@@ -3297,9 +3311,10 @@ class Task extends TaskFragment {
             mTmpDimBoundsRect.offsetTo(0, 0);
         }
 
-        updateShadowsRadius(isFocused(), getSyncTransaction());
+        final SurfaceControl.Transaction t = getSyncTransaction();
+        updateShadowsRadius(isFocused(), t);
 
-        if (mDimmer.updateDims(getPendingTransaction(), mTmpDimBoundsRect)) {
+        if (mDimmer.updateDims(t, mTmpDimBoundsRect)) {
             scheduleAnimation();
         }
 
@@ -3309,7 +3324,7 @@ class Task extends TaskFragment {
         final boolean show = isVisible() || isAnimating(TRANSITION | PARENTS | CHILDREN);
         if (mSurfaceControl != null) {
             if (show != mLastSurfaceShowing) {
-                getSyncTransaction().setVisibility(mSurfaceControl, show);
+                t.setVisibility(mSurfaceControl, show);
             }
         }
         mLastSurfaceShowing = show;
@@ -3453,9 +3468,9 @@ class Task extends TaskFragment {
         forAllActivities(r -> {
             info.addLaunchCookie(r.mLaunchCookie);
         });
-        final Task rootTask = getRootTask();
-        info.parentTaskId = rootTask == getParent() && rootTask.mCreatedByOrganizer
-                ? rootTask.mTaskId
+        final Task parentTask = getParent() != null ? getParent().asTask() : null;
+        info.parentTaskId = parentTask != null && parentTask.mCreatedByOrganizer
+                ? parentTask.mTaskId
                 : INVALID_TASK_ID;
         info.isFocused = isFocused();
         info.isVisible = hasVisibleChildren();
@@ -4131,13 +4146,13 @@ class Task extends TaskFragment {
 
     private boolean canBeOrganized() {
         // All root tasks can be organized
-        if (isRootTask()) {
+        if (isRootTask() || mCreatedByOrganizer) {
             return true;
         }
 
-        // Task could be organized if it's the direct child of the root created by organizer.
-        final Task rootTask = getRootTask();
-        return rootTask == getParent() && rootTask.mCreatedByOrganizer;
+        // Task could be organized if it's the direct child of a task created by organizer.
+        final Task parentTask = getParent().asTask();
+        return parentTask != null && parentTask.mCreatedByOrganizer;
     }
 
     @Override
@@ -6098,7 +6113,7 @@ class Task extends TaskFragment {
     /**
      * Sets the current picture-in-picture actions.
      */
-    void setPictureInPictureActions(List<RemoteAction> actions) {
+    void setPictureInPictureActions(List<RemoteAction> actions, RemoteAction closeAction) {
         if (!mWmService.mAtmService.mSupportsPictureInPicture) {
             return;
         }
@@ -6107,7 +6122,7 @@ class Task extends TaskFragment {
             return;
         }
 
-        getDisplayContent().getPinnedTaskController().setActions(actions);
+        getDisplayContent().getPinnedTaskController().setActions(actions, closeAction);
     }
 
     public DisplayInfo getDisplayInfo() {

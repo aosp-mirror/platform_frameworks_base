@@ -20,14 +20,17 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="4811759950673118541">"Stelsel-UI"</string>
-    <string name="battery_low_title" msgid="6891106956328275225">"Battery kan binnekort afloop"</string>
+    <string name="battery_low_title" msgid="5319680173344341779">"Skakel Batterybespaarder aan?"</string>
+    <string name="battery_low_description" msgid="3282977755476423966">"Jy het <xliff:g id="PERCENTAGE">%s</xliff:g> batterykrag oor. Batterybespaarder skakel Donkertema aan, beperk agtergrondaktiwiteit en vertraag kennisgewings."</string>
+    <string name="battery_low_intro" msgid="5148725009653088790">"Batterybespaarder skakel Donkertema aan, beperk agtergrondaktiwiteit en vertraag kennisgewings."</string>
     <string name="battery_low_percent_format" msgid="4276661262843170964">"<xliff:g id="PERCENTAGE">%s</xliff:g> oor"</string>
     <string name="invalid_charger_title" msgid="938685362320735167">"Kan nie deur USB laai nie"</string>
     <string name="invalid_charger_text" msgid="2339310107232691577">"Gebruik die laaier wat jy saam met jou toestel gekry het"</string>
     <string name="battery_saver_confirmation_title" msgid="1234998463717398453">"Skakel Batterybespaarder aan?"</string>
     <string name="battery_saver_confirmation_title_generic" msgid="2299231884234959849">"Meer oor Batterybespaarder"</string>
     <string name="battery_saver_confirmation_ok" msgid="5042136476802816494">"Skakel aan"</string>
-    <string name="battery_saver_start_action" msgid="4553256017945469937">"Skakel Batterybespaarder aan"</string>
+    <string name="battery_saver_start_action" msgid="8353766979886287140">"Skakel aan"</string>
+    <string name="battery_saver_dismiss_action" msgid="7199342621040014738">"Nee, dankie"</string>
     <string name="status_bar_settings_auto_rotation" msgid="8329080442278431708">"Outodraai skerm"</string>
     <string name="usb_device_permission_prompt" msgid="4414719028369181772">"Gee <xliff:g id="APPLICATION">%1$s</xliff:g> toegang tot <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
     <string name="usb_device_permission_prompt_warn" msgid="2309129784984063656">"Laat <xliff:g id="APPLICATION">%1$s</xliff:g> toe om by <xliff:g id="USB_DEVICE">%2$s</xliff:g> in te gaan?\nOpneemtoestemming is nie aan hierdie program verleen nie, maar dit kan oudio deur hierdie USB-toestel vasvang."</string>
@@ -128,6 +131,7 @@
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="2242167416140740920">"Gesig is gestaaf"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"Bevestig"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"Tik op Bevestig om te voltooi"</string>
+    <string name="biometric_dialog_tap_confirm_with_face" msgid="1597899891472340950">"Ontsluit met jou gesig. Druk om voort te gaan."</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"Gestaaf"</string>
     <string name="biometric_dialog_use_pin" msgid="8385294115283000709">"Gebruik PIN"</string>
     <string name="biometric_dialog_use_pattern" msgid="2315593393167211194">"Gebruik patroon"</string>
@@ -147,10 +151,6 @@
     <string name="biometric_dialog_last_pattern_attempt_before_wipe_profile" msgid="6045224069529284686">"As jy met jou volgende poging \'n verkeerde patroon invoer, sal jou werkprofiel en die data daarvan uitgevee word."</string>
     <string name="biometric_dialog_last_pin_attempt_before_wipe_profile" msgid="545567685899091757">"As jy met jou volgende poging \'n verkeerde PIN invoer, sal jou werkprofiel en die data daarvan uitgevee word."</string>
     <string name="biometric_dialog_last_password_attempt_before_wipe_profile" msgid="8538032972389729253">"As jy met jou volgende poging \'n verkeerde wagwoord invoer, sal jou werkprofiel en die data daarvan uitgevee word."</string>
-    <string name="biometric_dialog_failed_attempts_now_wiping_device" msgid="6585503524026243042">"Te veel verkeerde pogings. Hierdie toestel se data sal uitgevee word."</string>
-    <string name="biometric_dialog_failed_attempts_now_wiping_user" msgid="7015008539146949115">"Te veel verkeerde pogings. Hierdie gebruiker sal uitgevee word."</string>
-    <string name="biometric_dialog_failed_attempts_now_wiping_profile" msgid="5239378521440749682">"Te veel verkeerde pogings. Hierdie werkprofiel en sy data sal uitgevee word."</string>
-    <string name="biometric_dialog_now_wiping_dialog_dismiss" msgid="7189432882125106154">"Maak toe"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"Raak die vingerafdruksensor"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="4465698996175640549">"Vingerafdrukikoon"</string>
     <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"Kan nie gesig herken nie. Gebruik eerder vingerafdruk."</string>
@@ -181,6 +181,7 @@
     <string name="accessibility_desc_close" msgid="8293708213442107755">"Maak toe"</string>
     <string name="accessibility_quick_settings_dnd_none_on" msgid="3235552940146035383">"volkome stilte"</string>
     <string name="accessibility_quick_settings_dnd_alarms_on" msgid="3375848309132140014">"net wekkers"</string>
+    <string name="accessibility_quick_settings_dnd" msgid="2415967452264206047">"Moenie Steur Nie."</string>
     <string name="accessibility_quick_settings_bluetooth" msgid="8250942386687551283">"Bluetooth."</string>
     <string name="accessibility_quick_settings_bluetooth_on" msgid="3819082137684078013">"Bluetooth aan."</string>
     <string name="accessibility_quick_settings_alarm" msgid="558094529584082090">"Wekker gestel vir <xliff:g id="TIME">%s</xliff:g>."</string>
@@ -205,6 +206,7 @@
     <string name="dessert_case" msgid="9104973640704357717">"Nageregkas"</string>
     <string name="start_dreams" msgid="9131802557946276718">"Sluimerskerm"</string>
     <string name="ethernet_label" msgid="2203544727007463351">"Ethernet"</string>
+    <string name="quick_settings_dnd_label" msgid="7728690179108024338">"Moenie Steur Nie"</string>
     <string name="quick_settings_bluetooth_label" msgid="7018763367142041481">"Bluetooth"</string>
     <string name="quick_settings_bluetooth_detail_empty_text" msgid="5760239584390514322">"Geen saamgebinde toestelle beskikbaar nie"</string>
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g> batterykrag"</string>
@@ -317,17 +319,12 @@
     <string name="keyguard_indication_charging_time_slowly" msgid="301936949731705417">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Laai tans stadig • Vol oor <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
     <string name="keyguard_indication_charging_time_dock" msgid="6150404291427377863">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Laaidok • Vol oor <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Wissel gebruiker"</string>
-    <string name="user_add_user" msgid="4336657383006913022">"Voeg gebruiker by"</string>
-    <string name="user_new_user_name" msgid="2019166282704195789">"Nuwe gebruiker"</string>
-    <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"Verwyder gas?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Alle programme en data in hierdie sessie sal uitgevee word."</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"Verwyder"</string>
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"Welkom terug, gas!"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"Wiil jy jou sessie voortsit?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"Begin van voor af"</string>
     <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"Ja, gaan voort"</string>
-    <string name="user_add_user_title" msgid="4172327541504825032">"Voeg nuwe gebruiker by?"</string>
-    <string name="user_add_user_message_short" msgid="2599370307878014791">"Wanneer jy \'n nuwe gebruiker byvoeg, moet daardie persoon hul spasie opstel.\n\nEnige gebruiker kan programme vir al die ander gebruikers opdateer."</string>
     <string name="user_limit_reached_title" msgid="2429229448830346057">"Gebruikerlimiet is bereik"</string>
     <plurals name="user_limit_reached_message" formatted="false" msgid="2573535787802908398">
       <item quantity="other">Jy kan tot <xliff:g id="COUNT">%d</xliff:g> gebruikers byvoeg.</item>
@@ -348,6 +345,7 @@
     <string name="notification_section_header_alerting" msgid="5581175033680477651">"Kennisgewings"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"Gesprekke"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"Vee alle stil kennisgewings uit"</string>
+    <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"Kennisgewings onderbreek deur Moenie Steur Nie"</string>
     <string name="media_projection_action_text" msgid="3634906766918186440">"Begin nou"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"Geen kennisgewings nie"</string>
     <string name="quick_settings_disclosure_parental_controls" msgid="2114102871438223600">"Hierdie toestel word deur jou ouer bestuur"</string>
@@ -452,8 +450,7 @@
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"Ontsluit om te gebruik"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"Kon nie jou kaarte kry nie; probeer later weer"</string>
     <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"Sluitskerminstellings"</string>
-    <string name="qr_code_scanner_title" msgid="5660820608548306581">"QR-kode"</string>
-    <string name="qr_code_scanner_description" msgid="7937603775306661863">"Tik om te skandeer"</string>
+    <string name="qr_code_scanner_title" msgid="5290201053875420785">"Skandeer QR-kode"</string>
     <string name="status_bar_work" msgid="5238641949837091056">"Werkprofiel"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"Vliegtuigmodus"</string>
     <string name="zen_alarm_warning" msgid="7844303238486849503">"Jy sal nie jou volgende wekker <xliff:g id="WHEN">%1$s</xliff:g> hoor nie"</string>
@@ -491,6 +488,8 @@
     <string name="notification_channel_summary_automatic_demoted" msgid="1831303964660807700">"&lt;b&gt;Status:&lt;/b&gt; Laer gegradeer"</string>
     <string name="notification_channel_summary_priority_baseline" msgid="46674690072551234">"Word aan die bokant van gesprekskennisgewings en as \'n profielfoto op sluitskerm gewys"</string>
     <string name="notification_channel_summary_priority_bubble" msgid="1275413109619074576">"Word aan die bokant van gesprekskennisgewings en as \'n profielfoto op sluitskerm gewys, verskyn as \'n borrel"</string>
+    <string name="notification_channel_summary_priority_dnd" msgid="6665395023264154361">"Word aan die bokant van gesprekskennisgewings en as \'n profielfoto op sluitskerm gewys, onderbreek Moenie Steur Nie"</string>
+    <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"Word aan die bokant van gesprekskennisgewings en as \'n profielfoto op sluitskerm gewys, verskyn as \'n borrel, onderbreek Moenie Steur Nie"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Prioriteit"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> steun nie gesprekskenmerke nie"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Hierdie kennisgewings kan nie gewysig word nie."</string>
@@ -566,6 +565,7 @@
     <string name="keyboard_shortcut_group_applications_sms" msgid="6912633831752843566">"SMS"</string>
     <string name="keyboard_shortcut_group_applications_music" msgid="9032078456666204025">"Musiek"</string>
     <string name="keyboard_shortcut_group_applications_calendar" msgid="4229602992120154157">"Kalender"</string>
+    <string name="volume_and_do_not_disturb" msgid="502044092739382832">"Moenie Steur Nie"</string>
     <string name="volume_dnd_silent" msgid="4154597281458298093">"Volumeknoppieskortpad"</string>
     <string name="battery" msgid="769686279459897127">"Battery"</string>
     <string name="headset" msgid="4485892374984466437">"Kopstuk"</string>
@@ -684,6 +684,10 @@
     <string name="mobile_carrier_text_format" msgid="8912204177152950766">"<xliff:g id="CARRIER_NAME">%1$s</xliff:g>, <xliff:g id="MOBILE_DATA_TYPE">%2$s</xliff:g>"</string>
     <string name="wifi_is_off" msgid="5389597396308001471">"Wi-Fi is af"</string>
     <string name="bt_is_off" msgid="7436344904889461591">"Bluetooth is af"</string>
+    <string name="dnd_is_off" msgid="3185706903793094463">"Moenie Steur Nie is af"</string>
+    <string name="qs_dnd_prompt_auto_rule" msgid="3535469468310002616">"\'n Outomatiese reël (<xliff:g id="ID_1">%s</xliff:g>) het Moenie Steur Nie aangeskakel."</string>
+    <string name="qs_dnd_prompt_app" msgid="4027984447935396820">"\'n Program (<xliff:g id="ID_1">%s</xliff:g>) het Moenie Steur Nie aangeskakel."</string>
+    <string name="qs_dnd_prompt_auto_rule_app" msgid="1841469944118486580">"\'n Outomatiese reël of program het Moenie Steur Nie aangeskakel."</string>
     <string name="running_foreground_services_title" msgid="5137313173431186685">"Programme wat op die agtergrond loop"</string>
     <string name="running_foreground_services_msg" msgid="3009459259222695385">"Tik vir besonderhede oor battery- en datagebruik"</string>
     <string name="mobile_data_disable_title" msgid="5366476131671617790">"Skakel mobiele data af?"</string>
@@ -708,6 +712,8 @@
     <string name="ongoing_privacy_dialog_enterprise" msgid="3003314125311966061">"(werk)"</string>
     <string name="ongoing_privacy_dialog_phonecall" msgid="4487370562589839298">"Oproep"</string>
     <string name="ongoing_privacy_dialog_attribution_text" msgid="4738795925380373994">"(deur <xliff:g id="APPLICATION_NAME_S_">%s</xliff:g>)"</string>
+    <string name="ongoing_privacy_dialog_attribution_label" msgid="3385241594101496292">"(<xliff:g id="ATTRIBUTION_LABEL">%s</xliff:g>)"</string>
+    <string name="ongoing_privacy_dialog_attribution_proxy_label" msgid="1111829599659403249">"(<xliff:g id="ATTRIBUTION_LABEL">%1$s</xliff:g> • <xliff:g id="PROXY_LABEL">%2$s</xliff:g>)"</string>
     <string name="privacy_type_camera" msgid="7974051382167078332">"kamera"</string>
     <string name="privacy_type_location" msgid="7991481648444066703">"ligging"</string>
     <string name="privacy_type_microphone" msgid="9136763906797732428">"mikrofoon"</string>
@@ -769,9 +775,10 @@
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"Swiep om meer te sien"</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"Laai tans aanbevelings"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"Media"</string>
-    <string name="controls_media_close_session" msgid="1193000643003066508">"Versteek hierdie mediasessie?"</string>
+    <!-- no translation found for controls_media_close_session (4780485355795635052) -->
+    <skip />
     <string name="controls_media_active_session" msgid="3146882316024153337">"Die huidige mediasessie kan nie versteek word nie."</string>
-    <string name="controls_media_dismiss_button" msgid="9081375542265132213">"Maak toe"</string>
+    <string name="controls_media_dismiss_button" msgid="4485675693008031646">"Versteek"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"Hervat"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"Instellings"</string>
     <string name="controls_media_playing_item_description" msgid="4531853311504359098">"<xliff:g id="SONG_NAME">%1$s</xliff:g> deur <xliff:g id="ARTIST_NAME">%2$s</xliff:g> speel tans vanaf <xliff:g id="APP_LABEL">%3$s</xliff:g>"</string>
@@ -789,7 +796,8 @@
     <string name="media_move_closer_to_end_cast" msgid="6495907340926563656">"Beweeg nader aan <xliff:g id="DEVICENAME">%1$s</xliff:g> om hier te speel"</string>
     <string name="media_transfer_playing_different_device" msgid="7186806382609785610">"Speel tans op <xliff:g id="DEVICENAME">%1$s</xliff:g>"</string>
     <string name="media_transfer_playing_this_device" msgid="1856890686844499172">"Speel tans op hierdie foon"</string>
-    <string name="media_transfer_failed" msgid="2640354446629980227">"Iets is fout"</string>
+    <!-- no translation found for media_transfer_failed (7955354964610603723) -->
+    <skip />
     <string name="controls_error_timeout" msgid="794197289772728958">"Onaktief, gaan program na"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"Nie gekry nie"</string>
     <string name="controls_error_removed_title" msgid="1207794911208047818">"Kontrole is nie beskikbaar nie"</string>
@@ -806,6 +814,9 @@
     <string name="media_output_dialog_disconnected" msgid="7090512852817111185">"(ontkoppel)"</string>
     <string name="media_output_dialog_connect_failed" msgid="3080972621975339387">"Kan nie wissel nie. Tik om weer te probeer."</string>
     <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"Bind nuwe toestel saam"</string>
+    <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"Maak die program oop om hierdie sessie uit te saai."</string>
+    <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"Onbekende program"</string>
+    <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"Hou op uitsaai"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"Bounommer"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"Bounommer is na knipbord gekopieer."</string>
     <string name="basic_status" msgid="2315371112182658176">"Maak gesprek oop"</string>
@@ -839,6 +850,7 @@
     <string name="messages_count_overflow_indicator" msgid="7850934067082006043">"<xliff:g id="NUMBER">%d</xliff:g>+"</string>
     <string name="people_tile_description" msgid="8154966188085545556">"Sien onlangse boodskappe, gemiste oproepe en statusopdaterings"</string>
     <string name="people_tile_title" msgid="6589377493334871272">"Gesprek"</string>
+    <string name="paused_by_dnd" msgid="7856941866433556428">"Onderbreek deur Moenie Steur nie"</string>
     <string name="new_notification_text_content_description" msgid="2915029960094389291">"<xliff:g id="NAME">%1$s</xliff:g> het \'n boodskap gestuur: <xliff:g id="NOTIFICATION">%2$s</xliff:g>"</string>
     <string name="new_notification_image_content_description" msgid="6017506886810813123">"<xliff:g id="NAME">%1$s</xliff:g> het \'n prent gestuur"</string>
     <string name="new_status_content_description" msgid="6046637888641308327">"<xliff:g id="NAME">%1$s</xliff:g> het \'n statusopdatering: <xliff:g id="STATUS">%2$s</xliff:g>"</string>
@@ -877,8 +889,7 @@
       <item quantity="other"><xliff:g id="COUNT_1">%s</xliff:g> aktiewe programme</item>
       <item quantity="one"><xliff:g id="COUNT_0">%s</xliff:g> aktiewe program</item>
     </plurals>
-    <!-- no translation found for fgs_dot_content_description (2865071539464777240) -->
-    <skip />
+    <string name="fgs_dot_content_description" msgid="2865071539464777240">"Nuwe inligting"</string>
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"Aktiewe programme"</string>
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"Stop"</string>
     <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"Gestop"</string>
@@ -889,8 +900,12 @@
     <string name="clipboard_edit_text_description" msgid="805254383912962103">"Wysig gekopieerde teks"</string>
     <string name="clipboard_edit_image_description" msgid="8904857948976041306">"Wysig gekopieerde prent"</string>
     <string name="clipboard_send_nearby_description" msgid="4629769637846717650">"Stuur na toestel in die omtrek"</string>
-    <!-- no translation found for add (81036585205287996) -->
-    <skip />
-    <!-- no translation found for manage_users (1823875311934643849) -->
-    <skip />
+    <string name="add" msgid="81036585205287996">"Voeg by"</string>
+    <string name="manage_users" msgid="1823875311934643849">"Bestuur gebruikers"</string>
+    <string name="drag_split_not_supported" msgid="4326847447699729722">"Sleep na verdeelde skerm word nie vir hierdie kennisgewing gesteun nie."</string>
+    <string name="dream_overlay_status_bar_wifi_off" msgid="4497069245055003582">"Wi‑fi onbeskikbaar"</string>
+    <string name="dream_overlay_status_bar_priority_mode" msgid="5428462123314728739">"Prioriteitmodus"</string>
+    <string name="dream_overlay_status_bar_alarm_set" msgid="566707328356590886">"Wekker gestel"</string>
+    <string name="dream_overlay_status_bar_camera_mic_off" msgid="3199425257833773569">"Kamera en mikrofoon is af"</string>
+    <string name="dream_overlay_status_bar_notification_indicator" msgid="8091389255691081711">"{count,plural, =1{# kennisgewing}other{# kennisgewings}}"</string>
 </resources>

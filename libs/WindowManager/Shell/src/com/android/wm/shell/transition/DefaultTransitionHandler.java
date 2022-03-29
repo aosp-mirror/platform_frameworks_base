@@ -189,7 +189,7 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
     }
 
     private void updateEnterpriseThumbnailDrawable() {
-        mEnterpriseThumbnailDrawable = mDevicePolicyManager.getDrawable(
+        mEnterpriseThumbnailDrawable = mDevicePolicyManager.getResources().getDrawable(
                 WORK_PROFILE_ICON, OUTLINE, PROFILE_SWITCH_ANIMATION,
                 () -> mContext.getDrawable(R.drawable.ic_corp_badge));
     }
@@ -369,12 +369,20 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
             }
 
             if (change.getMode() == TRANSIT_CHANGE) {
-                // If task is child task, only set position in parent.
+                // If task is child task, only set position in parent and update crop when needed.
                 if (isTask && change.getParent() != null
                         && info.getChange(change.getParent()).getTaskInfo() != null) {
                     final Point positionInParent = change.getTaskInfo().positionInParent;
                     startTransaction.setPosition(change.getLeash(),
                             positionInParent.x, positionInParent.y);
+
+                    if (!change.getEndAbsBounds().equals(
+                            info.getChange(change.getParent()).getEndAbsBounds())) {
+                        startTransaction.setWindowCrop(change.getLeash(),
+                                change.getEndAbsBounds().width(),
+                                change.getEndAbsBounds().height());
+                    }
+
                     continue;
                 }
 
@@ -434,6 +442,10 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
                         // If available use the background color provided through AnimationOptions
                         backgroundColorForTransition =
                                 info.getAnimationOptions().getBackgroundColor();
+                    } else if (a.getBackgroundColor() != 0) {
+                        // Otherwise fallback on the background color provided through the animation
+                        // definition.
+                        backgroundColorForTransition = a.getBackgroundColor();
                     } else if (change.getBackgroundColor() != 0) {
                         // Otherwise default to the window's background color if provided through
                         // the theme as the background color for the animation - the top most window

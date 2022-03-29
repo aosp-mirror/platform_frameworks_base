@@ -49,7 +49,6 @@ import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayInsetsController;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SyncTransactionQueue;
-import com.android.wm.shell.compatui.CompatUIController;
 import com.android.wm.shell.startingsurface.StartingWindowController;
 
 import org.junit.Before;
@@ -67,7 +66,6 @@ public class KidsModeTaskOrganizerTest {
     @Mock private ITaskOrganizerController mTaskOrganizerController;
     @Mock private Context mContext;
     @Mock private Handler mHandler;
-    @Mock private CompatUIController mCompatUI;
     @Mock private SyncTransactionQueue mSyncTransactionQueue;
     @Mock private ShellExecutor mTestExecutor;
     @Mock private DisplayController mDisplayController;
@@ -86,9 +84,11 @@ public class KidsModeTaskOrganizerTest {
         try {
             doReturn(ParceledListSlice.<TaskAppearedInfo>emptyList())
                     .when(mTaskOrganizerController).registerTaskOrganizer(any());
-        } catch (RemoteException e) { }
+        } catch (RemoteException e) {
+        }
+        // NOTE: KidsModeTaskOrganizer should have a null CompatUIController.
         mOrganizer = spy(new KidsModeTaskOrganizer(mTaskOrganizerController, mTestExecutor,
-                mHandler, mContext, mCompatUI, mSyncTransactionQueue, mDisplayController,
+                mHandler, mContext, mSyncTransactionQueue, mDisplayController,
                 mDisplayInsetsController, Optional.empty(), mObserver));
         mOrganizer.initialize(mStartingWindowController);
         doReturn(mTransaction).when(mOrganizer).getWindowContainerTransaction();

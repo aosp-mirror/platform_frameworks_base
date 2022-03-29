@@ -20,14 +20,17 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="4811759950673118541">"Giao diện người dùng hệ thống"</string>
-    <string name="battery_low_title" msgid="6891106956328275225">"Có thể sắp hết pin"</string>
+    <string name="battery_low_title" msgid="5319680173344341779">"Bật Trình tiết kiệm pin?"</string>
+    <string name="battery_low_description" msgid="3282977755476423966">"Bạn còn <xliff:g id="PERCENTAGE">%s</xliff:g> pin. Trình tiết kiệm pin sẽ bật Giao diện tối, giới hạn hoạt động trong nền và trì hoãn thông báo."</string>
+    <string name="battery_low_intro" msgid="5148725009653088790">"Trình tiết kiệm pin sẽ bật Giao diện tối, giới hạn hoạt động trong nền và trì hoãn thông báo."</string>
     <string name="battery_low_percent_format" msgid="4276661262843170964">"Còn lại <xliff:g id="PERCENTAGE">%s</xliff:g>"</string>
     <string name="invalid_charger_title" msgid="938685362320735167">"Không thể sạc qua USB"</string>
     <string name="invalid_charger_text" msgid="2339310107232691577">"Sử dụng bộ sạc đi kèm với thiết bị"</string>
     <string name="battery_saver_confirmation_title" msgid="1234998463717398453">"Bật trình tiết kiệm pin?"</string>
     <string name="battery_saver_confirmation_title_generic" msgid="2299231884234959849">"Giới thiệu về Trình tiết kiệm pin"</string>
     <string name="battery_saver_confirmation_ok" msgid="5042136476802816494">"Bật"</string>
-    <string name="battery_saver_start_action" msgid="4553256017945469937">"Bật trình tiết kiệm pin"</string>
+    <string name="battery_saver_start_action" msgid="8353766979886287140">"Bật"</string>
+    <string name="battery_saver_dismiss_action" msgid="7199342621040014738">"Không, cảm ơn"</string>
     <string name="status_bar_settings_auto_rotation" msgid="8329080442278431708">"Tự động xoay màn hình"</string>
     <string name="usb_device_permission_prompt" msgid="4414719028369181772">"Cho phép <xliff:g id="APPLICATION">%1$s</xliff:g> truy cập <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
     <string name="usb_device_permission_prompt_warn" msgid="2309129784984063656">"Cho phép <xliff:g id="APPLICATION">%1$s</xliff:g> truy cập vào <xliff:g id="USB_DEVICE">%2$s</xliff:g>?\nỨng dụng này chưa được cấp quyền ghi âm nhưng vẫn có thể ghi âm thông qua thiết bị USB này."</string>
@@ -128,6 +131,7 @@
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="2242167416140740920">"Đã xác thực khuôn mặt"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"Ðã xác nhận"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"Nhấn vào Xác nhận để hoàn tất"</string>
+    <string name="biometric_dialog_tap_confirm_with_face" msgid="1597899891472340950">"Đã mở khoá bằng khuôn mặt bạn. Hãy nhấn để tiếp tục."</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"Đã xác thực"</string>
     <string name="biometric_dialog_use_pin" msgid="8385294115283000709">"Dùng mã PIN"</string>
     <string name="biometric_dialog_use_pattern" msgid="2315593393167211194">"Dùng hình mở khóa"</string>
@@ -147,10 +151,6 @@
     <string name="biometric_dialog_last_pattern_attempt_before_wipe_profile" msgid="6045224069529284686">"Nếu bạn nhập hình mở khóa không chính xác vào lần thử tiếp theo, thì hồ sơ công việc của bạn và dữ liệu của hồ sơ công việc sẽ bị xóa."</string>
     <string name="biometric_dialog_last_pin_attempt_before_wipe_profile" msgid="545567685899091757">"Nếu bạn nhập mã PIN không chính xác vào lần thử tiếp theo, thì hồ sơ công việc của bạn và dữ liệu của hồ sơ công việc sẽ bị xóa."</string>
     <string name="biometric_dialog_last_password_attempt_before_wipe_profile" msgid="8538032972389729253">"Nếu bạn nhập mật khẩu không chính xác vào lần thử tiếp theo, thì hồ sơ công việc của bạn và dữ liệu của hồ sơ công việc sẽ bị xóa."</string>
-    <string name="biometric_dialog_failed_attempts_now_wiping_device" msgid="6585503524026243042">"Dữ liệu trên thiết bị này sẽ bị xóa do có quá nhiều lần nhập sai khóa thiết bị."</string>
-    <string name="biometric_dialog_failed_attempts_now_wiping_user" msgid="7015008539146949115">"Người dùng này sẽ bị xóa do có quá nhiều lần nhập sai khóa người dùng."</string>
-    <string name="biometric_dialog_failed_attempts_now_wiping_profile" msgid="5239378521440749682">"Hồ sơ công việc này và dữ liệu của hồ sơ công việc sẽ bị xóa do có quá nhiều lần nhập sai khóa công việc."</string>
-    <string name="biometric_dialog_now_wiping_dialog_dismiss" msgid="7189432882125106154">"Đóng"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"Chạm vào cảm biến vân tay"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="4465698996175640549">"Biểu tượng vân tay"</string>
     <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"Không thể nhận dạng khuôn mặt. Hãy dùng vân tay."</string>
@@ -181,6 +181,7 @@
     <string name="accessibility_desc_close" msgid="8293708213442107755">"Đóng"</string>
     <string name="accessibility_quick_settings_dnd_none_on" msgid="3235552940146035383">"hoàn toàn tắt tiếng"</string>
     <string name="accessibility_quick_settings_dnd_alarms_on" msgid="3375848309132140014">"chỉ chuông báo"</string>
+    <string name="accessibility_quick_settings_dnd" msgid="2415967452264206047">"Không làm phiền."</string>
     <string name="accessibility_quick_settings_bluetooth" msgid="8250942386687551283">"Bluetooth."</string>
     <string name="accessibility_quick_settings_bluetooth_on" msgid="3819082137684078013">"Bluetooth bật."</string>
     <string name="accessibility_quick_settings_alarm" msgid="558094529584082090">"Báo thức được đặt cho <xliff:g id="TIME">%s</xliff:g>."</string>
@@ -205,6 +206,7 @@
     <string name="dessert_case" msgid="9104973640704357717">"Tủ trưng bày bánh ngọt"</string>
     <string name="start_dreams" msgid="9131802557946276718">"Trình bảo vệ m.hình"</string>
     <string name="ethernet_label" msgid="2203544727007463351">"Ethernet"</string>
+    <string name="quick_settings_dnd_label" msgid="7728690179108024338">"Không làm phiền"</string>
     <string name="quick_settings_bluetooth_label" msgid="7018763367142041481">"Bluetooth"</string>
     <string name="quick_settings_bluetooth_detail_empty_text" msgid="5760239584390514322">"Không có thiết bị nào được ghép nối"</string>
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g> pin"</string>
@@ -317,17 +319,12 @@
     <string name="keyguard_indication_charging_time_slowly" msgid="301936949731705417">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Đang sạc chậm • Sẽ đầy sau <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
     <string name="keyguard_indication_charging_time_dock" msgid="6150404291427377863">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Đế sạc • Sạc đầy sau <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Chuyển đổi người dùng"</string>
-    <string name="user_add_user" msgid="4336657383006913022">"Thêm người dùng"</string>
-    <string name="user_new_user_name" msgid="2019166282704195789">"Người dùng mới"</string>
-    <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"Xóa phiên khách?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Tất cả ứng dụng và dữ liệu trong phiên này sẽ bị xóa."</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"Xóa"</string>
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"Chào mừng bạn trở lại!"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"Bạn có muốn tiếp tục phiên của mình không?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"Bắt đầu lại"</string>
     <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"Có, tiếp tục"</string>
-    <string name="user_add_user_title" msgid="4172327541504825032">"Thêm người dùng mới?"</string>
-    <string name="user_add_user_message_short" msgid="2599370307878014791">"Khi bạn thêm người dùng mới, họ cần thiết lập không gian của mình.\n\nMọi người dùng đều có thể cập nhật ứng dụng cho tất cả người dùng khác."</string>
     <string name="user_limit_reached_title" msgid="2429229448830346057">"Đã đạt đến giới hạn người dùng"</string>
     <plurals name="user_limit_reached_message" formatted="false" msgid="2573535787802908398">
       <item quantity="other">Bạn có thể thêm tối đa <xliff:g id="COUNT">%d</xliff:g> người dùng.</item>
@@ -348,6 +345,7 @@
     <string name="notification_section_header_alerting" msgid="5581175033680477651">"Thông báo"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"Cuộc trò chuyện"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"Xóa tất cả thông báo im lặng"</string>
+    <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"Chế độ Không làm phiền đã tạm dừng thông báo"</string>
     <string name="media_projection_action_text" msgid="3634906766918186440">"Bắt đầu ngay"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"Không có thông báo nào"</string>
     <string name="quick_settings_disclosure_parental_controls" msgid="2114102871438223600">"Thiết bị này do cha mẹ của bạn quản lý"</string>
@@ -452,8 +450,7 @@
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"Mở khóa để sử dụng"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"Đã xảy ra sự cố khi tải thẻ của bạn. Vui lòng thử lại sau"</string>
     <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"Cài đặt màn hình khóa"</string>
-    <string name="qr_code_scanner_title" msgid="5660820608548306581">"Mã QR"</string>
-    <string name="qr_code_scanner_description" msgid="7937603775306661863">"Nhấn để quét"</string>
+    <string name="qr_code_scanner_title" msgid="5290201053875420785">"Quét mã QR"</string>
     <string name="status_bar_work" msgid="5238641949837091056">"Hồ sơ công việc"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"Chế độ máy bay"</string>
     <string name="zen_alarm_warning" msgid="7844303238486849503">"Bạn sẽ không nghe thấy báo thức tiếp theo lúc <xliff:g id="WHEN">%1$s</xliff:g> của mình"</string>
@@ -491,6 +488,8 @@
     <string name="notification_channel_summary_automatic_demoted" msgid="1831303964660807700">"&lt;b&gt;Trạng thái:&lt;/b&gt; Đã giảm mức độ quan trọng"</string>
     <string name="notification_channel_summary_priority_baseline" msgid="46674690072551234">"Hiện ở đầu phần thông báo cuộc trò chuyện và ở dạng ảnh hồ sơ trên màn hình khóa"</string>
     <string name="notification_channel_summary_priority_bubble" msgid="1275413109619074576">"Hiện ở đầu phần thông báo cuộc trò chuyện và ở dạng ảnh hồ sơ trên màn hình khóa, xuất hiện ở dạng bong bóng"</string>
+    <string name="notification_channel_summary_priority_dnd" msgid="6665395023264154361">"Hiện ở đầu phần thông báo cuộc trò chuyện và ở dạng ảnh hồ sơ trên màn hình khóa, làm gián đoạn chế độ Không làm phiền"</string>
+    <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"Hiện ở đầu phần thông báo cuộc trò chuyện và ở dạng ảnh hồ sơ trên màn hình khóa, xuất hiện ở dạng bong bóng, làm gián đoạn chế độ Không làm phiền"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Mức độ ưu tiên"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> không hỗ trợ các tính năng trò chuyện"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Không thể sửa đổi các thông báo này."</string>
@@ -566,6 +565,7 @@
     <string name="keyboard_shortcut_group_applications_sms" msgid="6912633831752843566">"SMS"</string>
     <string name="keyboard_shortcut_group_applications_music" msgid="9032078456666204025">"Âm nhạc"</string>
     <string name="keyboard_shortcut_group_applications_calendar" msgid="4229602992120154157">"Lịch"</string>
+    <string name="volume_and_do_not_disturb" msgid="502044092739382832">"Không làm phiền"</string>
     <string name="volume_dnd_silent" msgid="4154597281458298093">"Phím tắt các nút âm lượng"</string>
     <string name="battery" msgid="769686279459897127">"Pin"</string>
     <string name="headset" msgid="4485892374984466437">"Tai nghe"</string>
@@ -684,6 +684,10 @@
     <string name="mobile_carrier_text_format" msgid="8912204177152950766">"<xliff:g id="CARRIER_NAME">%1$s</xliff:g>, <xliff:g id="MOBILE_DATA_TYPE">%2$s</xliff:g>"</string>
     <string name="wifi_is_off" msgid="5389597396308001471">"Wi-Fi tắt"</string>
     <string name="bt_is_off" msgid="7436344904889461591">"Bluetooth tắt"</string>
+    <string name="dnd_is_off" msgid="3185706903793094463">"Không làm phiền tắt"</string>
+    <string name="qs_dnd_prompt_auto_rule" msgid="3535469468310002616">"Không làm phiền đã được một quy tắc tự động (<xliff:g id="ID_1">%s</xliff:g>) bật."</string>
+    <string name="qs_dnd_prompt_app" msgid="4027984447935396820">"Không làm phiền đã được một ứng dụng (<xliff:g id="ID_1">%s</xliff:g>) bật."</string>
+    <string name="qs_dnd_prompt_auto_rule_app" msgid="1841469944118486580">"Không làm phiền đã được một quy tắc tự động hoặc ứng dụng bật."</string>
     <string name="running_foreground_services_title" msgid="5137313173431186685">"Ứng dụng đang chạy trong nền"</string>
     <string name="running_foreground_services_msg" msgid="3009459259222695385">"Nhấn để biết chi tiết về mức sử dụng dữ liệu và pin"</string>
     <string name="mobile_data_disable_title" msgid="5366476131671617790">"Tắt dữ liệu di động?"</string>
@@ -708,6 +712,8 @@
     <string name="ongoing_privacy_dialog_enterprise" msgid="3003314125311966061">"(công việc)"</string>
     <string name="ongoing_privacy_dialog_phonecall" msgid="4487370562589839298">"Cuộc gọi điện thoại"</string>
     <string name="ongoing_privacy_dialog_attribution_text" msgid="4738795925380373994">"(thông qua <xliff:g id="APPLICATION_NAME_S_">%s</xliff:g>)"</string>
+    <string name="ongoing_privacy_dialog_attribution_label" msgid="3385241594101496292">"(<xliff:g id="ATTRIBUTION_LABEL">%s</xliff:g>)"</string>
+    <string name="ongoing_privacy_dialog_attribution_proxy_label" msgid="1111829599659403249">"(<xliff:g id="ATTRIBUTION_LABEL">%1$s</xliff:g> • <xliff:g id="PROXY_LABEL">%2$s</xliff:g>)"</string>
     <string name="privacy_type_camera" msgid="7974051382167078332">"máy ảnh"</string>
     <string name="privacy_type_location" msgid="7991481648444066703">"vị trí"</string>
     <string name="privacy_type_microphone" msgid="9136763906797732428">"micrô"</string>
@@ -769,9 +775,10 @@
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"Vuốt để xem thêm"</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"Đang tải các đề xuất"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"Nội dung nghe nhìn"</string>
-    <string name="controls_media_close_session" msgid="1193000643003066508">"Ẩn phiên phát nội dung nghe nhìn này?"</string>
+    <!-- no translation found for controls_media_close_session (4780485355795635052) -->
+    <skip />
     <string name="controls_media_active_session" msgid="3146882316024153337">"Không thể ẩn phiên phát nội dung nghe nhìn hiện tại."</string>
-    <string name="controls_media_dismiss_button" msgid="9081375542265132213">"Đóng"</string>
+    <string name="controls_media_dismiss_button" msgid="4485675693008031646">"Ẩn"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"Tiếp tục"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"Cài đặt"</string>
     <string name="controls_media_playing_item_description" msgid="4531853311504359098">"Đang phát <xliff:g id="SONG_NAME">%1$s</xliff:g> của <xliff:g id="ARTIST_NAME">%2$s</xliff:g> trên <xliff:g id="APP_LABEL">%3$s</xliff:g>"</string>
@@ -789,7 +796,8 @@
     <string name="media_move_closer_to_end_cast" msgid="6495907340926563656">"Di chuyển đến gần <xliff:g id="DEVICENAME">%1$s</xliff:g> hơn để phát tại đây"</string>
     <string name="media_transfer_playing_different_device" msgid="7186806382609785610">"Đang phát trên <xliff:g id="DEVICENAME">%1$s</xliff:g>"</string>
     <string name="media_transfer_playing_this_device" msgid="1856890686844499172">"Đang phát trên điện thoại này"</string>
-    <string name="media_transfer_failed" msgid="2640354446629980227">"Đã xảy ra lỗi"</string>
+    <!-- no translation found for media_transfer_failed (7955354964610603723) -->
+    <skip />
     <string name="controls_error_timeout" msgid="794197289772728958">"Không hoạt động, hãy kiểm tra ứng dụng"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"Không tìm thấy"</string>
     <string name="controls_error_removed_title" msgid="1207794911208047818">"Không có chức năng điều khiển"</string>
@@ -806,6 +814,9 @@
     <string name="media_output_dialog_disconnected" msgid="7090512852817111185">"(đã ngắt kết nối)"</string>
     <string name="media_output_dialog_connect_failed" msgid="3080972621975339387">"Không thể chuyển đổi. Hãy nhấn để thử lại."</string>
     <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"Ghép nối thiết bị mới"</string>
+    <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"Vui lòng mở ứng dụng để truyền phiên này."</string>
+    <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"Ứng dụng không xác định"</string>
+    <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"Dừng truyền"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"Số bản dựng"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"Đã sao chép số bản dựng vào bảng nhớ tạm."</string>
     <string name="basic_status" msgid="2315371112182658176">"Mở cuộc trò chuyện"</string>
@@ -839,6 +850,7 @@
     <string name="messages_count_overflow_indicator" msgid="7850934067082006043">"Hơn <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="people_tile_description" msgid="8154966188085545556">"Xem các tin nhắn, cuộc gọi nhỡ và thông tin cập nhật trạng thái gần đây"</string>
     <string name="people_tile_title" msgid="6589377493334871272">"Cuộc trò chuyện"</string>
+    <string name="paused_by_dnd" msgid="7856941866433556428">"Đã tạm dừng do chế độ Không làm phiền"</string>
     <string name="new_notification_text_content_description" msgid="2915029960094389291">"<xliff:g id="NAME">%1$s</xliff:g> đã gửi một tin nhắn: <xliff:g id="NOTIFICATION">%2$s</xliff:g>"</string>
     <string name="new_notification_image_content_description" msgid="6017506886810813123">"<xliff:g id="NAME">%1$s</xliff:g> đã gửi một hình ảnh"</string>
     <string name="new_status_content_description" msgid="6046637888641308327">"<xliff:g id="NAME">%1$s</xliff:g> đã cập nhật trạng thái: <xliff:g id="STATUS">%2$s</xliff:g>"</string>
@@ -877,8 +889,7 @@
       <item quantity="other"><xliff:g id="COUNT_1">%s</xliff:g> ứng dụng đang hoạt động</item>
       <item quantity="one"><xliff:g id="COUNT_0">%s</xliff:g> ứng dụng đang hoạt động</item>
     </plurals>
-    <!-- no translation found for fgs_dot_content_description (2865071539464777240) -->
-    <skip />
+    <string name="fgs_dot_content_description" msgid="2865071539464777240">"Thông tin mới"</string>
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"Ứng dụng đang hoạt động"</string>
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"Dừng"</string>
     <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"Đã dừng"</string>
@@ -886,14 +897,15 @@
     <string name="clipboard_overlay_text_copied" msgid="1872624400464891363">"Đã sao chép"</string>
     <string name="clipboard_edit_source" msgid="9156488177277788029">"Từ <xliff:g id="APPNAME">%1$s</xliff:g>"</string>
     <string name="clipboard_dismiss_description" msgid="7544573092766945657">"Đóng giao diện người dùng sao chép"</string>
-    <!-- no translation found for clipboard_edit_text_description (805254383912962103) -->
-    <skip />
-    <!-- no translation found for clipboard_edit_image_description (8904857948976041306) -->
-    <skip />
-    <!-- no translation found for clipboard_send_nearby_description (4629769637846717650) -->
-    <skip />
-    <!-- no translation found for add (81036585205287996) -->
-    <skip />
-    <!-- no translation found for manage_users (1823875311934643849) -->
-    <skip />
+    <string name="clipboard_edit_text_description" msgid="805254383912962103">"Chỉnh sửa văn bản đã sao chép"</string>
+    <string name="clipboard_edit_image_description" msgid="8904857948976041306">"Chỉnh sửa hình ảnh đã sao chép"</string>
+    <string name="clipboard_send_nearby_description" msgid="4629769637846717650">"Gửi đến thiết bị ở gần"</string>
+    <string name="add" msgid="81036585205287996">"Thêm"</string>
+    <string name="manage_users" msgid="1823875311934643849">"Quản lý người dùng"</string>
+    <string name="drag_split_not_supported" msgid="4326847447699729722">"Thông báo này không hỗ trợ thao tác kéo để Chia đôi màn hình."</string>
+    <string name="dream_overlay_status_bar_wifi_off" msgid="4497069245055003582">"Không có Wi‑Fi"</string>
+    <string name="dream_overlay_status_bar_priority_mode" msgid="5428462123314728739">"Chế độ ưu tiên"</string>
+    <string name="dream_overlay_status_bar_alarm_set" msgid="566707328356590886">"Đã đặt chuông báo"</string>
+    <string name="dream_overlay_status_bar_camera_mic_off" msgid="3199425257833773569">"Máy ảnh và micrô đang tắt"</string>
+    <string name="dream_overlay_status_bar_notification_indicator" msgid="8091389255691081711">"{count,plural, =1{# thông báo}other{# thông báo}}"</string>
 </resources>

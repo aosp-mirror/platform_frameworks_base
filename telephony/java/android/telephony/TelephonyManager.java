@@ -41,6 +41,7 @@ import android.annotation.SystemService;
 import android.annotation.TestApi;
 import android.annotation.WorkerThread;
 import android.app.PendingIntent;
+import android.app.PropertyInvalidatedCache;
 import android.app.role.RoleManager;
 import android.compat.Compatibility;
 import android.compat.annotation.ChangeId;
@@ -360,6 +361,42 @@ public class TelephonyManager {
     private static ISms sISms;
     @GuardedBy("sCacheLock")
     private static final DeathRecipient sServiceDeath = new DeathRecipient();
+
+    /**
+     * Cache key for a {@link PropertyInvalidatedCache} which maps from {@link PhoneAccountHandle}
+     * to subscription Id.  The cache is initialized in {@code PhoneInterfaceManager}'s constructor
+     * when {@link PropertyInvalidatedCache#invalidateCache(String)} is called.
+     * The cache is cleared from {@code TelecomAccountRegistry#tearDown} when all phone accounts are
+     * removed from Telecom.
+     * @hide
+     */
+    public static final String CACHE_KEY_PHONE_ACCOUNT_TO_SUBID =
+            "cache_key.telephony.phone_account_to_subid";
+    private static final int CACHE_MAX_SIZE = 4;
+
+    /**
+     * A {@link PropertyInvalidatedCache} which lives in an app's {@link TelephonyManager} instance.
+     * Caches any queries for a mapping between {@link PhoneAccountHandle} and {@code subscription
+     * id}.  The cache may be invalidated from Telephony when phone account re-registration takes
+     * place.
+     */
+    private PropertyInvalidatedCache<PhoneAccountHandle, Integer> mPhoneAccountHandleToSubIdCache =
+            new PropertyInvalidatedCache<PhoneAccountHandle, Integer>(CACHE_MAX_SIZE,
+                    CACHE_KEY_PHONE_ACCOUNT_TO_SUBID) {
+                @Override
+                public Integer recompute(PhoneAccountHandle phoneAccountHandle) {
+                    try {
+                        ITelephony telephony = getITelephony();
+                        if (telephony != null) {
+                            return telephony.getSubIdForPhoneAccountHandle(phoneAccountHandle,
+                                    mContext.getOpPackageName(), mContext.getAttributionTag());
+                        }
+                    } catch (RemoteException e) {
+                        throw e.rethrowAsRuntimeException();
+                    }
+                    return SubscriptionManager.INVALID_SUBSCRIPTION_ID;
+                }
+            };
 
     /** Enum indicating multisim variants
      *  DSDS - Dual SIM Dual Standby
@@ -11880,19 +11917,7 @@ public class TelephonyManager {
     @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
     @RequiresFeature(PackageManager.FEATURE_TELEPHONY_SUBSCRIPTION)
     public int getSubscriptionId(@NonNull PhoneAccountHandle phoneAccountHandle) {
-        int retval = SubscriptionManager.INVALID_SUBSCRIPTION_ID;
-        try {
-            ITelephony service = getITelephony();
-            if (service != null) {
-                retval = service.getSubIdForPhoneAccountHandle(
-                        phoneAccountHandle, mContext.getOpPackageName(),
-                        mContext.getAttributionTag());
-            }
-        } catch (RemoteException ex) {
-            Log.e(TAG, "getSubscriptionId RemoteException", ex);
-            ex.rethrowAsRuntimeException();
-        }
-        return retval;
+        return mPhoneAccountHandleToSubIdCache.query(phoneAccountHandle);
     }
 
     /**
@@ -14918,7 +14943,7 @@ public class TelephonyManager {
             }
             ITelephony service = getITelephony();
             if (service != null) {
-                return service.isMvnoMatched(getSubId(), mvnoType, mvnoMatchData);
+                return service.isMvnoMatched(getSlotIndex(), mvnoType, mvnoMatchData);
             }
         } catch (RemoteException ex) {
             Rlog.e(TAG, "Telephony#matchesCurrentSimOperator RemoteException" + ex);
@@ -16763,32 +16788,6 @@ public class TelephonyManager {
     }
 
     /**
-     * Callback to listen for when the set of packages with carrier privileges for a SIM changes.
-     *
-     * @hide
-     * @deprecated Use {@link CarrierPrivilegesCallback} instead. This API will be removed soon
-     * prior to API finalization.
-     */
-    @Deprecated
-    @SystemApi
-    public interface CarrierPrivilegesListener {
-        /**
-         * Called when the set of packages with carrier privileges has changed.
-         *
-         * <p>Of note, this callback will <b>not</b> be fired if a carrier triggers a SIM profile
-         * switch and the same set of packages remains privileged after the switch.
-         *
-         * <p>At registration, the callback will receive the current set of privileged packages.
-         *
-         * @param privilegedPackageNames The updated set of package names that have carrier
-         *     privileges
-         * @param privilegedUids The updated set of UIDs that have carrier privileges
-         */
-        void onCarrierPrivilegesChanged(
-                @NonNull List<String> privilegedPackageNames, @NonNull int[] privilegedUids);
-    }
-
-    /**
      * Callbacks to listen for when the set of packages with carrier privileges for a SIM changes.
      *
      * <p>Of note, when multiple callbacks are registered, they may be triggered one after another.
@@ -16834,61 +16833,6 @@ public class TelephonyManager {
                 @Nullable String carrierServicePackageName, int carrierServiceUid) {
             // do nothing by default
         }
-    }
-
-    /**
-     * Registers a {@link CarrierPrivilegesListener} on the given {@code logicalSlotIndex} to
-     * receive callbacks when the set of packages with carrier privileges changes. The callback will
-     * immediately be called with the latest state.
-     *
-     * @param logicalSlotIndex The SIM slot to listen on
-     * @param executor The executor where {@code listener} will be invoked
-     * @param listener The callback to register
-     * @hide
-     * @deprecated Use {@link #unregisterCarrierPrivilegesCallback} instead. This API will be
-     * removed prior to API finalization.
-     */
-    @Deprecated
-    @SystemApi
-    @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
-    public void addCarrierPrivilegesListener(
-            int logicalSlotIndex,
-            @NonNull @CallbackExecutor Executor executor,
-            @NonNull CarrierPrivilegesListener listener) {
-        if (mContext == null) {
-            throw new IllegalStateException("Telephony service is null");
-        } else if (executor == null || listener == null) {
-            throw new IllegalArgumentException(
-                    "CarrierPrivilegesListener and executor must be non-null");
-        }
-        mTelephonyRegistryMgr = mContext.getSystemService(TelephonyRegistryManager.class);
-        if (mTelephonyRegistryMgr == null) {
-            throw new IllegalStateException("Telephony registry service is null");
-        }
-        mTelephonyRegistryMgr.addCarrierPrivilegesListener(logicalSlotIndex, executor, listener);
-    }
-
-    /**
-     * Unregisters an existing {@link CarrierPrivilegesListener}.
-     *
-     * @hide
-     * @deprecated Use {@link #unregisterCarrierPrivilegesCallback} instead. This API will be
-     * removed prior to API finalization.
-     */
-    @Deprecated
-    @SystemApi
-    @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
-    public void removeCarrierPrivilegesListener(@NonNull CarrierPrivilegesListener listener) {
-        if (mContext == null) {
-            throw new IllegalStateException("Telephony service is null");
-        } else if (listener == null) {
-            throw new IllegalArgumentException("CarrierPrivilegesListener must be non-null");
-        }
-        mTelephonyRegistryMgr = mContext.getSystemService(TelephonyRegistryManager.class);
-        if (mTelephonyRegistryMgr == null) {
-            throw new IllegalStateException("Telephony registry service is null");
-        }
-        mTelephonyRegistryMgr.removeCarrierPrivilegesListener(listener);
     }
 
     /**

@@ -17,6 +17,7 @@
 package android.window;
 
 import android.graphics.Matrix;
+import android.util.Pair;
 import android.util.Size;
 import android.view.InputWindowHandle;
 
@@ -47,9 +48,13 @@ public abstract class WindowInfosListener {
 
     /**
      * Register the WindowInfosListener.
+     *
+     * @return The cached values for InputWindowHandles and DisplayInfos. This is the last updated
+     * value that was sent from SurfaceFlinger to this particular process. If there was nothing
+     * registered previously, then the data can be empty.
      */
-    public void register() {
-        nativeRegister(mNativeListener);
+    public Pair<InputWindowHandle[], DisplayInfo[]> register() {
+        return nativeRegister(mNativeListener);
     }
 
     /**
@@ -60,7 +65,7 @@ public abstract class WindowInfosListener {
     }
 
     private static native long nativeCreate(WindowInfosListener thiz);
-    private static native void nativeRegister(long ptr);
+    private static native Pair<InputWindowHandle[], DisplayInfo[]> nativeRegister(long ptr);
     private static native void nativeUnregister(long ptr);
     private static native long nativeGetFinalizer();
 

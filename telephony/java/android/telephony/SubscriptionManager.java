@@ -1085,6 +1085,10 @@ public class SubscriptionManager {
      * <p>Refer to voice-centric mode in 3gpp 24.301 sec 4.3 and 3gpp 24.501 sec 4.3.
      * Also refer to "UE's usage setting" as defined in 3gpp 24.301 section 3.1 and 3gpp 23.221
      * Annex A.
+     *
+     * <p>Devices that support {@link PackageManager#FEATURE_TELEPHONY_CALLING} and support usage
+     * setting configuration must support setting this value via
+     * {@link CarrierConfigManager#KEY_CELLULAR_USAGE_SETTING_INT}.
      */
     public static final int USAGE_SETTING_VOICE_CENTRIC = 1;
 
@@ -1094,6 +1098,10 @@ public class SubscriptionManager {
      * <p>Refer to data-centric mode in 3gpp 24.301 sec 4.3 and 3gpp 24.501 sec 4.3.
      * Also refer to "UE's usage setting" as defined in 3gpp 24.301 section 3.1 and 3gpp 23.221
      * Annex A.
+     *
+     * <p>Devices that support {@link PackageManager#FEATURE_TELEPHONY_DATA} and support usage
+     * setting configuration must support setting this value via.
+     * {@link CarrierConfigManager#KEY_CELLULAR_USAGE_SETTING_INT}.
      */
     public static final int USAGE_SETTING_DATA_CENTRIC = 2;
 

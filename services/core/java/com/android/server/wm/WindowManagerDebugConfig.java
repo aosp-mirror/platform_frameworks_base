@@ -34,7 +34,6 @@ public class WindowManagerDebugConfig {
     static final String TAG_WM = "WindowManager";
 
     static final boolean DEBUG = false;
-    static final boolean DEBUG_ANIM = false;
     static final boolean DEBUG_LAYOUT = false;
     static final boolean DEBUG_LAYERS = false;
     static final boolean DEBUG_INPUT = false;

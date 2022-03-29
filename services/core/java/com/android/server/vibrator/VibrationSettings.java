@@ -121,6 +121,11 @@ final class VibrationSettings {
                     USAGE_PHYSICAL_EMULATION,
                     USAGE_HARDWARE_FEEDBACK));
 
+    private static final IntentFilter USER_SWITCHED_INTENT_FILTER =
+            new IntentFilter(Intent.ACTION_USER_SWITCHED);
+    private static final IntentFilter INTERNAL_RINGER_MODE_CHANGED_INTENT_FILTER =
+            new IntentFilter(AudioManager.INTERNAL_RINGER_MODE_CHANGED_ACTION);
+
     /** Listener for changes on vibration settings. */
     interface OnVibratorSettingsChanged {
         /** Callback triggered when any of the vibrator settings change. */
@@ -130,11 +135,11 @@ final class VibrationSettings {
     private final Object mLock = new Object();
     private final Context mContext;
     private final String mSystemUiPackage;
-    private final SettingsObserver mSettingObserver;
+    private final SettingsContentObserver mSettingObserver;
     @VisibleForTesting
     final UidObserver mUidObserver;
     @VisibleForTesting
-    final UserObserver mUserReceiver;
+    final SettingsBroadcastReceiver mSettingChangeReceiver;
 
     @GuardedBy("mLock")
     private final List<OnVibratorSettingsChanged> mListeners = new ArrayList<>();
@@ -154,6 +159,8 @@ final class VibrationSettings {
     private boolean mBatterySaverMode;
     @GuardedBy("mLock")
     private boolean mVibrateOn;
+    @GuardedBy("mLock")
+    private int mRingerMode;
 
     VibrationSettings(Context context, Handler handler) {
         this(context, handler, new VibrationConfig(context.getResources()));
@@ -163,9 +170,9 @@ final class VibrationSettings {
     VibrationSettings(Context context, Handler handler, VibrationConfig config) {
         mContext = context;
         mVibrationConfig = config;
-        mSettingObserver = new SettingsObserver(handler);
+        mSettingObserver = new SettingsContentObserver(handler);
         mUidObserver = new UidObserver();
-        mUserReceiver = new UserObserver();
+        mSettingChangeReceiver = new SettingsBroadcastReceiver();
 
         mSystemUiPackage = LocalServices.getService(PackageManagerInternal.class)
                 .getSystemUiServiceComponent().getPackageName();
@@ -188,12 +195,13 @@ final class VibrationSettings {
                 VibrationEffect.get(VibrationEffect.EFFECT_TICK, false));
 
         // Update with current values from settings.
-        updateSettings();
+        update();
     }
 
     public void onSystemReady() {
         synchronized (mLock) {
             mAudioManager = mContext.getSystemService(AudioManager.class);
+            mRingerMode = mAudioManager.getRingerModeInternal();
         }
         try {
             ActivityManager.getService().registerUidObserver(mUidObserver,
@@ -224,8 +232,8 @@ final class VibrationSettings {
                     }
                 });
 
-        IntentFilter filter = new IntentFilter(Intent.ACTION_USER_SWITCHED);
-        mContext.registerReceiver(mUserReceiver, filter, Context.RECEIVER_NOT_EXPORTED);
+        registerSettingsChangeReceiver(USER_SWITCHED_INTENT_FILTER);
+        registerSettingsChangeReceiver(INTERNAL_RINGER_MODE_CHANGED_INTENT_FILTER);
 
         // Listen to all settings that might affect the result of Vibrator.getVibrationIntensity.
         registerSettingsObserver(Settings.System.getUriFor(Settings.System.VIBRATE_INPUT_DEVICES));
@@ -248,7 +256,7 @@ final class VibrationSettings {
                 Settings.System.getUriFor(Settings.System.RING_VIBRATION_INTENSITY));
 
         // Update with newly loaded services.
-        updateSettings();
+        update();
     }
 
     /**
@@ -396,16 +404,17 @@ final class VibrationSettings {
             // Only ringtone and notification vibrations are disabled when phone is on silent mode.
             return true;
         }
-        // If audio manager was not loaded yet then assume most restrictive mode.
-        int ringerMode = (mAudioManager == null)
-                ? AudioManager.RINGER_MODE_SILENT
-                : mAudioManager.getRingerModeInternal();
-        return ringerMode != AudioManager.RINGER_MODE_SILENT;
+        return mRingerMode != AudioManager.RINGER_MODE_SILENT;
     }
 
-    /** Updates all vibration settings and triggers registered listeners. */
-    @VisibleForTesting
-    void updateSettings() {
+    /** Update all cached settings and triggers registered listeners. */
+    void update() {
+        updateSettings();
+        updateRingerMode();
+        notifyListeners();
+    }
+
+    private void updateSettings() {
         synchronized (mLock) {
             mVibrateInputDevices = loadSystemSetting(Settings.System.VIBRATE_INPUT_DEVICES, 0) > 0;
             mVibrateOn = loadSystemSetting(Settings.System.VIBRATE_ON, 1) > 0;
@@ -434,7 +443,6 @@ final class VibrationSettings {
             int ringIntensity = toIntensity(
                     loadSystemSetting(Settings.System.RING_VIBRATION_INTENSITY, -1),
                     getDefaultIntensity(USAGE_RINGTONE));
-
 
             mCurrentVibrationIntensities.clear();
             mCurrentVibrationIntensities.put(USAGE_ALARM, alarmIntensity);
@@ -469,7 +477,16 @@ final class VibrationSettings {
             // A11y is not disabled by any haptic feedback setting.
             mCurrentVibrationIntensities.put(USAGE_ACCESSIBILITY, positiveHapticFeedbackIntensity);
         }
-        notifyListeners();
+    }
+
+    private void updateRingerMode() {
+        synchronized (mLock) {
+            // If audio manager was not loaded yet then assume most restrictive mode.
+            // This will be loaded again as soon as the audio manager is loaded in onSystemReady.
+            mRingerMode = (mAudioManager == null)
+                    ? AudioManager.RINGER_MODE_SILENT
+                    : mAudioManager.getRingerModeInternal();
+        }
     }
 
     @Override
@@ -586,6 +603,11 @@ final class VibrationSettings {
                 UserHandle.USER_ALL);
     }
 
+    private void registerSettingsChangeReceiver(IntentFilter intentFilter) {
+        mContext.registerReceiver(mSettingChangeReceiver, intentFilter,
+                Context.RECEIVER_NOT_EXPORTED);
+    }
+
     @Nullable
     private VibrationEffect createEffectFromResource(int resId) {
         long[] timings = getLongIntArray(mContext.getResources(), resId);
@@ -616,24 +638,33 @@ final class VibrationSettings {
     }
 
     /** Implementation of {@link ContentObserver} to be registered to a setting {@link Uri}. */
-    private final class SettingsObserver extends ContentObserver {
-        SettingsObserver(Handler handler) {
+    private final class SettingsContentObserver extends ContentObserver {
+        SettingsContentObserver(Handler handler) {
             super(handler);
         }
 
         @Override
         public void onChange(boolean selfChange) {
             updateSettings();
+            notifyListeners();
         }
     }
 
-    /** Implementation of {@link BroadcastReceiver} to update settings on current user change. */
+    /**
+     * Implementation of {@link BroadcastReceiver} to update settings on current user or ringer
+     * mode change.
+     */
     @VisibleForTesting
-    final class UserObserver extends BroadcastReceiver {
+    final class SettingsBroadcastReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
-            if (Intent.ACTION_USER_SWITCHED.equals(intent.getAction())) {
-                updateSettings();
+            String action = intent.getAction();
+            if (Intent.ACTION_USER_SWITCHED.equals(action)) {
+                // Reload all settings, as they are user-based.
+                update();
+            } else if (AudioManager.INTERNAL_RINGER_MODE_CHANGED_ACTION.equals(action)) {
+                updateRingerMode();
+                notifyListeners();
             }
         }
     }

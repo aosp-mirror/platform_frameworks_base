@@ -16,8 +16,10 @@
   -->
 <resources>
     <color name="tv_pip_menu_icon_focused">#0E0E0F</color>
-    <color name="tv_pip_menu_icon_unfocused">#E8EAED</color>
+    <color name="tv_pip_menu_icon_unfocused">#F8F9FA</color>
     <color name="tv_pip_menu_icon_disabled">#80868B</color>
+    <color name="tv_pip_menu_close_icon_bg_focused">#D93025</color>
+    <color name="tv_pip_menu_close_icon_bg_unfocused">#D69F261F</color>
     <color name="tv_pip_menu_icon_bg_focused">#E8EAED</color>
     <color name="tv_pip_menu_icon_bg_unfocused">#990E0E0F</color>
     <color name="tv_pip_menu_focus_border">#E8EAED</color>

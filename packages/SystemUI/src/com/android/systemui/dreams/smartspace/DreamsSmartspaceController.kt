@@ -160,9 +160,8 @@ class DreamsSmartspaceController @Inject constructor(
             return
         }
 
-        // TODO(b/217559844): Replace with "dream" session when available.
         val newSession = smartspaceManager.createSmartspaceSession(
-                SmartspaceConfig.Builder(context, "lockscreen").build())
+                SmartspaceConfig.Builder(context, "dream").build())
         Log.d(TAG, "Starting smartspace session for dream")
         newSession.addOnTargetsAvailableListener(uiExecutor, sessionListener)
         this.session = newSession

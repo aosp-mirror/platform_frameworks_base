@@ -82,5 +82,6 @@ public class GlobalSettings {
         Settings.Global.USER_PREFERRED_REFRESH_RATE,
         Settings.Global.USER_PREFERRED_RESOLUTION_HEIGHT,
         Settings.Global.USER_PREFERRED_RESOLUTION_WIDTH,
+        Settings.Global.POWER_BUTTON_LONG_PRESS
     };
 }

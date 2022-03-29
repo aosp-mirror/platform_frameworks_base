@@ -16,7 +16,6 @@
 
 package com.android.server.am;
 
-import static com.android.server.am.ActiveServices.SERVICE_START_FOREGROUND_TIMEOUT;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
 
@@ -64,13 +63,15 @@ public abstract class BaseAppStateTracker<T extends BaseAppStatePolicy> {
     static final int STATE_TYPE_MEDIA_SESSION = 1;
     static final int STATE_TYPE_FGS_MEDIA_PLAYBACK = 1 << 1;
     static final int STATE_TYPE_FGS_LOCATION = 1 << 2;
-    static final int STATE_TYPE_PERMISSION = 1 << 3;
-    static final int STATE_TYPE_NUM = 4;
+    static final int STATE_TYPE_FGS_WITH_NOTIFICATION = 1 << 3;
+    static final int STATE_TYPE_PERMISSION = 1 << 4;
+    static final int STATE_TYPE_NUM = 5;
 
     static final int STATE_TYPE_INDEX_MEDIA_SESSION = 0;
     static final int STATE_TYPE_INDEX_FGS_MEDIA_PLAYBACK = 1;
     static final int STATE_TYPE_INDEX_FGS_LOCATION = 2;
-    static final int STATE_TYPE_INDEX_PERMISSION = 3;
+    static final int STATE_TYPE_INDEX_FGS_WITH_NOTIFICATION = 3;
+    static final int STATE_TYPE_INDEX_PERMISSION = 4;
 
     protected final AppRestrictionController mAppRestrictionController;
     protected final Injector<T> mInjector;
@@ -128,6 +129,9 @@ public abstract class BaseAppStateTracker<T extends BaseAppStatePolicy> {
                     break;
                 case STATE_TYPE_FGS_LOCATION:
                     sb.append("FGS_LOCATION");
+                    break;
+                case STATE_TYPE_FGS_WITH_NOTIFICATION:
+                    sb.append("FGS_NOTIFICATION");
                     break;
                 case STATE_TYPE_PERMISSION:
                     sb.append("PERMISSION");
@@ -357,7 +361,7 @@ public abstract class BaseAppStateTracker<T extends BaseAppStatePolicy> {
         }
 
         long getServiceStartForegroundTimeout() {
-            return SERVICE_START_FOREGROUND_TIMEOUT;
+            return mActivityManagerInternal.getServiceStartForegroundTimeout();
         }
 
         RoleManager getRoleManager() {

@@ -28,6 +28,8 @@ import static android.app.usage.UsageStatsManager.REASON_SUB_USAGE_USER_INTERACT
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.os.BatteryConsumer.POWER_COMPONENT_ANY;
 import static android.os.BatteryConsumer.PROCESS_STATE_BACKGROUND;
+import static android.os.BatteryConsumer.PROCESS_STATE_CACHED;
+import static android.os.BatteryConsumer.PROCESS_STATE_COUNT;
 import static android.os.BatteryConsumer.PROCESS_STATE_FOREGROUND;
 import static android.os.BatteryConsumer.PROCESS_STATE_FOREGROUND_SERVICE;
 import static android.os.BatteryConsumer.PROCESS_STATE_UNSPECIFIED;
@@ -740,7 +742,8 @@ final class AppBatteryTracker extends BaseAppStateTracker<AppBatteryPolicy>
         static final int BATTERY_USAGE_INDEX_FOREGROUND = PROCESS_STATE_FOREGROUND;
         static final int BATTERY_USAGE_INDEX_BACKGROUND = PROCESS_STATE_BACKGROUND;
         static final int BATTERY_USAGE_INDEX_FOREGROUND_SERVICE = PROCESS_STATE_FOREGROUND_SERVICE;
-        static final int BATTERY_USAGE_COUNT = 4;
+        static final int BATTERY_USAGE_INDEX_CACHED = PROCESS_STATE_CACHED;
+        static final int BATTERY_USAGE_COUNT = PROCESS_STATE_COUNT;
 
         static final Dimensions[] BATT_DIMENS = new Dimensions[] {
                 new Dimensions(AppBatteryPolicy.DEFAULT_BG_CURRENT_DRAIN_POWER_COMPONENTS,
@@ -751,17 +754,20 @@ final class AppBatteryTracker extends BaseAppStateTracker<AppBatteryPolicy>
                         PROCESS_STATE_BACKGROUND),
                 new Dimensions(AppBatteryPolicy.DEFAULT_BG_CURRENT_DRAIN_POWER_COMPONENTS,
                         PROCESS_STATE_FOREGROUND_SERVICE),
+                new Dimensions(AppBatteryPolicy.DEFAULT_BG_CURRENT_DRAIN_POWER_COMPONENTS,
+                        PROCESS_STATE_CACHED),
         };
 
         @NonNull double[] mUsage;
         @Nullable double[] mPercentage;
 
         BatteryUsage() {
-            this(0.0d, 0.0d, 0.0d, 0.0d);
+            this(0.0d, 0.0d, 0.0d, 0.0d, 0.0d);
         }
 
-        BatteryUsage(double unspecifiedUsage, double fgUsage, double bgUsage, double fgsUsage) {
-            mUsage = new double[] {unspecifiedUsage, fgUsage, bgUsage, fgsUsage};
+        BatteryUsage(double unspecifiedUsage, double fgUsage, double bgUsage, double fgsUsage,
+                double cachedUsage) {
+            mUsage = new double[] {unspecifiedUsage, fgUsage, bgUsage, fgsUsage, cachedUsage};
         }
 
         BatteryUsage(@NonNull double[] usage) {
@@ -784,7 +790,8 @@ final class AppBatteryTracker extends BaseAppStateTracker<AppBatteryPolicy>
                     getConsumedPowerNoThrow(consumer, dims[BATTERY_USAGE_INDEX_UNSPECIFIED]),
                     getConsumedPowerNoThrow(consumer, dims[BATTERY_USAGE_INDEX_FOREGROUND]),
                     getConsumedPowerNoThrow(consumer, dims[BATTERY_USAGE_INDEX_BACKGROUND]),
-                    getConsumedPowerNoThrow(consumer, dims[BATTERY_USAGE_INDEX_FOREGROUND_SERVICE])
+                    getConsumedPowerNoThrow(consumer, dims[BATTERY_USAGE_INDEX_FOREGROUND_SERVICE]),
+                    getConsumedPowerNoThrow(consumer, dims[BATTERY_USAGE_INDEX_CACHED]),
             };
         }
 
@@ -905,19 +912,21 @@ final class AppBatteryTracker extends BaseAppStateTracker<AppBatteryPolicy>
         }
 
         private static String formatBatteryUsage(double[] usage) {
-            return String.format("%.3f %.3f %.3f %.3f mAh",
+            return String.format("%.3f %.3f %.3f %.3f %.3f mAh",
                     usage[BATTERY_USAGE_INDEX_UNSPECIFIED],
                     usage[BATTERY_USAGE_INDEX_FOREGROUND],
                     usage[BATTERY_USAGE_INDEX_BACKGROUND],
-                    usage[BATTERY_USAGE_INDEX_FOREGROUND_SERVICE]);
+                    usage[BATTERY_USAGE_INDEX_FOREGROUND_SERVICE],
+                    usage[BATTERY_USAGE_INDEX_CACHED]);
         }
 
         static String formatBatteryUsagePercentage(double[] percentage) {
-            return String.format("%4.2f%% %4.2f%% %4.2f%% %4.2f%%",
+            return String.format("%4.2f%% %4.2f%% %4.2f%% %4.2f%% %4.2f%%",
                     percentage[BATTERY_USAGE_INDEX_UNSPECIFIED],
                     percentage[BATTERY_USAGE_INDEX_FOREGROUND],
                     percentage[BATTERY_USAGE_INDEX_BACKGROUND],
-                    percentage[BATTERY_USAGE_INDEX_FOREGROUND_SERVICE]);
+                    percentage[BATTERY_USAGE_INDEX_FOREGROUND_SERVICE],
+                    percentage[BATTERY_USAGE_INDEX_CACHED]);
         }
 
         private static double getConsumedPowerNoThrow(final UidBatteryConsumer uidConsumer,
@@ -936,8 +945,8 @@ final class AppBatteryTracker extends BaseAppStateTracker<AppBatteryPolicy>
         }
 
         ImmutableBatteryUsage(double unspecifiedUsage, double fgUsage, double bgUsage,
-                double fgsUsage) {
-            super(unspecifiedUsage, fgUsage, bgUsage, fgsUsage);
+                double fgsUsage, double cachedUsage) {
+            super(unspecifiedUsage, fgUsage, bgUsage, fgsUsage, cachedUsage);
         }
 
         ImmutableBatteryUsage(@NonNull double[] usage) {
@@ -997,6 +1006,7 @@ final class AppBatteryTracker extends BaseAppStateTracker<AppBatteryPolicy>
         static final int BATTERY_USAGE_TYPE_FOREGROUND = 1 << 1;
         static final int BATTERY_USAGE_TYPE_BACKGROUND = 1 << 2;
         static final int BATTERY_USAGE_TYPE_FOREGROUND_SERVICE = 1 << 3;
+        static final int BATTERY_USAGE_TYPE_CACHED = 1 << 4;
 
         /**
          * Whether or not we should enable the monitoring on background current drains.
@@ -1072,8 +1082,8 @@ final class AppBatteryTracker extends BaseAppStateTracker<AppBatteryPolicy>
         /**
          * The types of battery drain we're checking on each app; if the sum of the battery drain
          * exceeds the threshold, it'll be moved to restricted standby bucket; the type here
-         * must be one of, or combination of {@link #BATTERY_USAGE_TYPE_BACKGROUND} and
-         * {@link #BATTERY_USAGE_TYPE_FOREGROUND_SERVICE}.
+         * must be one of, or combination of {@link #BATTERY_USAGE_TYPE_BACKGROUND},
+         * {@link #BATTERY_USAGE_TYPE_FOREGROUND_SERVICE} and {@link #BATTERY_USAGE_TYPE_CACHED}.
          */
         static final String KEY_BG_CURRENT_DRAIN_TYPES_TO_RESTRICTED_BUCKET =
                 DEVICE_CONFIG_SUBNAMESPACE_PREFIX + "current_drain_types_to_restricted_bucket";
@@ -1081,8 +1091,8 @@ final class AppBatteryTracker extends BaseAppStateTracker<AppBatteryPolicy>
         /**
          * The types of battery drain we're checking on each app; if the sum of the battery drain
          * exceeds the threshold, it'll be moved to background restricted level; the type here
-         * must be one of, or combination of {@link #BATTERY_USAGE_TYPE_BACKGROUND} and
-         * {@link #BATTERY_USAGE_TYPE_FOREGROUND_SERVICE}.
+         * must be one of, or combination of {@link #BATTERY_USAGE_TYPE_BACKGROUND},
+         * {@link #BATTERY_USAGE_TYPE_FOREGROUND_SERVICE} and {@link #BATTERY_USAGE_TYPE_CACHED}.
          */
         static final String KEY_BG_CURRENT_DRAIN_TYPES_TO_BG_RESTRICTED =
                 DEVICE_CONFIG_SUBNAMESPACE_PREFIX + "current_drain_types_to_bg_restricted";
@@ -1525,6 +1535,9 @@ final class AppBatteryTracker extends BaseAppStateTracker<AppBatteryPolicy>
                         break;
                     case BATTERY_USAGE_TYPE_FOREGROUND_SERVICE:
                         sb.append("FOREGROUND_SERVICE");
+                        break;
+                    case BATTERY_USAGE_TYPE_CACHED:
+                        sb.append("CACHED");
                         break;
                     default:
                         return "[UNKNOWN(" + Integer.toHexString(types) + ")]";

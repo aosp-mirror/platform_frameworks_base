@@ -601,8 +601,10 @@ public class PreferencesHelper implements RankingConfig {
                 out.attribute(null, ATT_NAME, r.pkg);
                 if (!notifPermissions.isEmpty()) {
                     Pair<Integer, String> app = new Pair(r.uid, r.pkg);
+                    final Pair<Boolean, Boolean> permission = notifPermissions.get(app);
                     out.attributeInt(null, ATT_IMPORTANCE,
-                            notifPermissions.get(app).first ? IMPORTANCE_DEFAULT : IMPORTANCE_NONE);
+                            permission != null && permission.first ? IMPORTANCE_DEFAULT
+                                    : IMPORTANCE_NONE);
                     notifPermissions.remove(app);
                 } else {
                     if (r.importance != DEFAULT_IMPORTANCE) {

@@ -134,7 +134,7 @@ public class Utils {
                     ? getUpdatableManagedUserTitle(context)
                     : context.getString(R.string.managed_user_title);
         } else if (info.isGuest()) {
-            name = context.getString(R.string.user_guest);
+            name = context.getString(com.android.internal.R.string.guest_name);
         }
         if (name == null && info != null) {
             name = Integer.toString(info.id);
@@ -146,7 +146,7 @@ public class Utils {
 
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     private static String getUpdatableManagedUserTitle(Context context) {
-        return context.getSystemService(DevicePolicyManager.class).getString(
+        return context.getSystemService(DevicePolicyManager.class).getResources().getString(
                 WORK_PROFILE_USER_LABEL,
                 () -> context.getString(R.string.managed_user_title));
     }

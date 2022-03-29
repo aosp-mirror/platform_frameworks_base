@@ -374,7 +374,7 @@ public class QSPanel extends LinearLayout implements Tunable {
         setPaddingRelative(getPaddingStart(),
                 paddingTop,
                 getPaddingEnd(),
-                mUseNewFooter ? res.getDimensionPixelSize(R.dimen.qs_panel_padding_bottom) : 0);
+                getPaddingEnd());
     }
 
     void addOnConfigurationChangedListener(OnConfigurationChangedListener listener) {

@@ -19,7 +19,6 @@ package com.android.systemui.statusbar.notification.stack;
 import static com.android.internal.jank.InteractionJankMonitor.CUJ_NOTIFICATION_SHADE_SCROLL_FLING;
 import static com.android.systemui.statusbar.notification.stack.NotificationPriorityBucketKt.BUCKET_SILENT;
 import static com.android.systemui.statusbar.notification.stack.StackStateAnimator.ANIMATION_DURATION_SWIPE;
-import static com.android.systemui.util.Utils.shouldUseSplitNotificationShade;
 
 import static java.lang.annotation.RetentionPolicy.SOURCE;
 
@@ -110,6 +109,7 @@ import com.android.systemui.statusbar.policy.HeadsUpUtil;
 import com.android.systemui.statusbar.policy.ScrollAdapter;
 import com.android.systemui.util.Assert;
 import com.android.systemui.util.DumpUtilsKt;
+import com.android.systemui.util.LargeScreenUtils;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -689,7 +689,8 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         boolean showFooterView = (showDismissView || mController.getVisibleNotificationCount() > 0)
                 && mIsCurrentUserSetup  // see: b/193149550
                 && mStatusBarState != StatusBarState.KEYGUARD
-                && mQsExpansionFraction != 1
+                // quick settings don't affect notifications when not in full screen
+                && (mQsExpansionFraction != 1 || !mQsFullScreen)
                 && !mScreenOffAnimationController.shouldHideNotificationsFooter()
                 && !mIsRemoteInputActive;
         boolean showHistory = mController.isHistoryEnabled();
@@ -799,6 +800,9 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         y = (int) (mAmbientState.getStackY() + mKeyguardNotificationAvailableSpace);
         drawDebugInfo(canvas, y, Color.RED, /* label= */
                 "mAmbientState.getStackY() + mKeyguardNotificationAvailableSpace = " + y);
+
+        drawDebugInfo(canvas, mRoundedRectClippingBottom, Color.DKGRAY,
+                /* label= */ "mRoundedRectClippingBottom) = " + y);
     }
 
     private void drawDebugInfo(Canvas canvas, int y, int color, String label) {
@@ -1311,7 +1315,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         if (mOnStackYChanged != null) {
             mOnStackYChanged.accept(listenerNeedsAnimation);
         }
-        if (mQsExpansionFraction <= 0 && !shouldSkipHeightUpdate()) {
+        if ((mQsExpansionFraction <= 0 || !mQsFullScreen) && !shouldSkipHeightUpdate()) {
             final float endHeight = updateStackEndHeight();
             updateStackHeight(endHeight, fraction);
         }
@@ -5022,6 +5026,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
                 .append(" qsExpandFraction=").append(mQsExpansionFraction)
                 .append(" isCurrentUserSetup=").append(mIsCurrentUserSetup)
                 .append(" hideAmount=").append(mAmbientState.getHideAmount())
+                .append(" ambientStateSwipingUp=").append(mAmbientState.isSwipingUp())
                 .append("]");
         pw.println(sb.toString());
         DumpUtilsKt.withIncreasedIndent(pw, () -> {
@@ -5536,7 +5541,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     }
 
     private void updateSplitNotificationShade() {
-        boolean split = shouldUseSplitNotificationShade(getResources());
+        boolean split = LargeScreenUtils.shouldUseSplitNotificationShade(getResources());
         if (split != mShouldUseSplitNotificationShade) {
             mShouldUseSplitNotificationShade = split;
             updateDismissBehavior();

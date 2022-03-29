@@ -129,7 +129,8 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
     private static final int MSG_STOP = 9;
     private static final int MSG_UPDATE_BRIGHTNESS = 10;
     private static final int MSG_UPDATE_RBC = 11;
-    private static final int MSG_STATSD_HBM_BRIGHTNESS = 12;
+    private static final int MSG_BRIGHTNESS_RAMP_DONE = 12;
+    private static final int MSG_STATSD_HBM_BRIGHTNESS = 13;
 
     private static final int PROXIMITY_UNKNOWN = -1;
     private static final int PROXIMITY_NEGATIVE = 0;
@@ -781,7 +782,13 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                 mDisplayStatsId = mUniqueDisplayId.hashCode();
                 mDisplayDeviceConfig = config;
                 loadFromDisplayDeviceConfig(token, info);
+                if (DEBUG) {
+                    Trace.beginAsyncSection("DisplayPowerController#updatePowerState", 0);
+                }
                 updatePowerState();
+                if (DEBUG) {
+                    Trace.endAsyncSection("DisplayPowerController#updatePowerState", 0);
+                }
             }
         });
     }
@@ -1050,9 +1057,8 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         @Override
         public void onAnimationEnd() {
             sendUpdatePowerState();
-
-            final float brightness = mPowerState.getScreenBrightness();
-            reportStats(brightness);
+            Message msg = mHandler.obtainMessage(MSG_BRIGHTNESS_RAMP_DONE);
+            mHandler.sendMessage(msg);
         }
     };
 
@@ -1066,6 +1072,12 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
             mCallbacks.releaseSuspendBlocker();
             mUnfinishedBusiness = false;
         }
+
+        final float brightness = mPowerState != null
+            ? mPowerState.getScreenBrightness()
+            : PowerManager.BRIGHTNESS_MIN;
+        reportStats(brightness);
+
         if (mPowerState != null) {
             mPowerState.stop();
             mPowerState = null;
@@ -2580,6 +2592,10 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
     }
 
     private void reportStats(float brightness) {
+        if (mLastStatsBrightness == brightness) {
+            return;
+        }
+
         float hbmTransitionPoint = PowerManager.BRIGHTNESS_MAX;
         synchronized(mCachedBrightnessInfo) {
             if (mCachedBrightnessInfo.hbmTransitionPoint == null) {
@@ -2678,6 +2694,13 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                     final int strengthChanged = msg.arg1;
                     final int justActivated = msg.arg2;
                     handleRbcChanged(strengthChanged == 1, justActivated == 1);
+                    break;
+
+                case MSG_BRIGHTNESS_RAMP_DONE:
+                    if (mPowerState != null)  {
+                        final float brightness = mPowerState.getScreenBrightness();
+                        reportStats(brightness);
+                    }
                     break;
 
                 case MSG_STATSD_HBM_BRIGHTNESS:

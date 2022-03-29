@@ -146,6 +146,7 @@ public class SecureSettings {
         Settings.Secure.ACCESSIBILITY_INTERACTIVE_UI_TIMEOUT_MS,
         Settings.Secure.TRUST_AGENTS_EXTEND_UNLOCK,
         Settings.Secure.UI_NIGHT_MODE,
+        Settings.Secure.UI_NIGHT_MODE_CUSTOM_TYPE,
         Settings.Secure.DARK_THEME_CUSTOM_START_TIME,
         Settings.Secure.DARK_THEME_CUSTOM_END_TIME,
         Settings.Secure.LOCK_SCREEN_WHEN_TRUST_LOST,

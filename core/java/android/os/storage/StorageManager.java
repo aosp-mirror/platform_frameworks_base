@@ -301,28 +301,7 @@ public class StorageManager {
 
     /** @hide The volume is not encrypted. */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
-    public static final int ENCRYPTION_STATE_NONE =
-            IVold.ENCRYPTION_STATE_NONE;
-
-    /** @hide The volume has been encrypted succesfully. */
-    public static final int ENCRYPTION_STATE_OK =
-            IVold.ENCRYPTION_STATE_OK;
-
-    /** @hide The volume is in a bad state. */
-    public static final int ENCRYPTION_STATE_ERROR_UNKNOWN =
-            IVold.ENCRYPTION_STATE_ERROR_UNKNOWN;
-
-    /** @hide Encryption is incomplete */
-    public static final int ENCRYPTION_STATE_ERROR_INCOMPLETE =
-            IVold.ENCRYPTION_STATE_ERROR_INCOMPLETE;
-
-    /** @hide Encryption is incomplete and irrecoverable */
-    public static final int ENCRYPTION_STATE_ERROR_INCONSISTENT =
-            IVold.ENCRYPTION_STATE_ERROR_INCONSISTENT;
-
-    /** @hide Underlying data is corrupt */
-    public static final int ENCRYPTION_STATE_ERROR_CORRUPT =
-            IVold.ENCRYPTION_STATE_ERROR_CORRUPT;
+    public static final int ENCRYPTION_STATE_NONE = 1;
 
     private static volatile IStorageManager sStorageManager = null;
 
@@ -3033,15 +3012,10 @@ public class StorageManager {
     @GuardedBy("mFuseAppLoopLock")
     private @Nullable FuseAppLoop mFuseAppLoop = null;
 
-    /// Consts to match the password types in cryptfs.h
     /** @hide */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
-    public static final int CRYPT_TYPE_PASSWORD = IVold.PASSWORD_TYPE_PASSWORD;
+    public static final int CRYPT_TYPE_PASSWORD = 0;
     /** @hide */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
-    public static final int CRYPT_TYPE_DEFAULT = IVold.PASSWORD_TYPE_DEFAULT;
-    /** @hide */
-    public static final int CRYPT_TYPE_PATTERN = IVold.PASSWORD_TYPE_PATTERN;
-    /** @hide */
-    public static final int CRYPT_TYPE_PIN = IVold.PASSWORD_TYPE_PIN;
+    public static final int CRYPT_TYPE_DEFAULT = 1;
 }

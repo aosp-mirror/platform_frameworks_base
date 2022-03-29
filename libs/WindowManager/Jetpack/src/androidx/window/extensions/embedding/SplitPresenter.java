@@ -80,7 +80,8 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
 
         container.finish(shouldFinishDependent, this, wct, mController);
 
-        final TaskFragmentContainer newTopContainer = mController.getTopActiveContainer();
+        final TaskFragmentContainer newTopContainer = mController.getTopActiveContainer(
+                container.getTaskId());
         if (newTopContainer != null) {
             mController.updateContainer(wct, newTopContainer);
         }
@@ -103,7 +104,8 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
                 primaryActivity, primaryRectBounds, null);
 
         // Create new empty task fragment
-        final TaskFragmentContainer secondaryContainer = mController.newContainer(null);
+        final TaskFragmentContainer secondaryContainer = mController.newContainer(null,
+                primaryContainer.getTaskId());
         final Rect secondaryRectBounds = getBoundsForPosition(POSITION_END, parentBounds,
                 rule, isLtr(primaryActivity, rule));
         createTaskFragment(wct, secondaryContainer.getTaskFragmentToken(),
@@ -159,7 +161,8 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
      * Creates a new expanded container.
      */
     TaskFragmentContainer createNewExpandedContainer(@NonNull Activity launchingActivity) {
-        final TaskFragmentContainer newContainer = mController.newContainer(null);
+        final TaskFragmentContainer newContainer = mController.newContainer(null,
+                launchingActivity.getTaskId());
 
         final WindowContainerTransaction wct = new WindowContainerTransaction();
         createTaskFragment(wct, newContainer.getTaskFragmentToken(),
@@ -180,7 +183,7 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
         TaskFragmentContainer container = mController.getContainerWithActivity(
                 activity.getActivityToken());
         if (container == null || container == containerToAvoid) {
-            container = mController.newContainer(activity);
+            container = mController.newContainer(activity, activity.getTaskId());
 
             final TaskFragmentCreationParams fragmentOptions =
                     createFragmentOptions(
@@ -222,10 +225,12 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
         TaskFragmentContainer primaryContainer = mController.getContainerWithActivity(
                 launchingActivity.getActivityToken());
         if (primaryContainer == null) {
-            primaryContainer = mController.newContainer(launchingActivity);
+            primaryContainer = mController.newContainer(launchingActivity,
+                    launchingActivity.getTaskId());
         }
 
-        TaskFragmentContainer secondaryContainer = mController.newContainer(null);
+        TaskFragmentContainer secondaryContainer = mController.newContainer(null,
+                primaryContainer.getTaskId());
         final WindowContainerTransaction wct = new WindowContainerTransaction();
         mController.registerSplit(wct, primaryContainer, launchingActivity, secondaryContainer,
                 rule);

@@ -129,8 +129,6 @@ import com.android.server.pm.parsing.PackageInfoUtils;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.pm.parsing.pkg.AndroidPackageUtils;
 import com.android.server.pm.permission.PermissionManagerServiceInternal;
-import com.android.server.pm.pkg.PackageState;
-import com.android.server.pm.pkg.PackageStateImpl;
 import com.android.server.pm.pkg.PackageStateInternal;
 import com.android.server.pm.pkg.PackageStateUtils;
 import com.android.server.pm.pkg.PackageUserStateInternal;
@@ -1431,7 +1429,8 @@ public class ComputerEngine implements Computer {
         if (userId == UserHandle.USER_SYSTEM) {
             return resolveInfos;
         }
-        for (int i = resolveInfos.size() - 1; i >= 0; i--) {
+
+        for (int i = CollectionUtils.size(resolveInfos) - 1; i >= 0; i--) {
             ResolveInfo info = resolveInfos.get(i);
             if ((info.activityInfo.flags & ActivityInfo.FLAG_SYSTEM_USER_ONLY) != 0) {
                 resolveInfos.remove(i);
@@ -2638,6 +2637,13 @@ public class ComputerEngine implements Computer {
     public final boolean shouldFilterApplication(@Nullable PackageStateInternal ps,
             int callingUid, @Nullable ComponentName component,
             @PackageManager.ComponentType int componentType, int userId) {
+        if (Process.isSdkSandboxUid(callingUid)) {
+            int clientAppUid = Process.getAppUidForSdkSandboxUid(callingUid);
+            // SDK sandbox should be able to see it's client app
+            if (clientAppUid == UserHandle.getUid(userId, ps.getAppId())) {
+                return false;
+            }
+        }
         // if we're in an isolated process, get the real calling UID
         if (Process.isIsolated(callingUid)) {
             callingUid = getIsolatedOwner(callingUid);

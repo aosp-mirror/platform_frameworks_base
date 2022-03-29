@@ -33,7 +33,7 @@
             android:layout_height="match_parent"
             android:background="@drawable/media_output_item_background"
             android:layout_gravity="center_vertical|start">
-            <SeekBar
+            <com.android.systemui.media.dialog.MediaOutputSeekbar
                 android:id="@+id/volume_seekbar"
                 android:splitTrack="false"
                 android:visibility="gone"
@@ -127,6 +127,7 @@
             android:layout_gravity="right|center"
             android:button="@drawable/ic_circle_check_box"
             android:visibility="gone"
+            android:clickable="false"
         />
     </FrameLayout>
 </LinearLayout>

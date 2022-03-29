@@ -1486,6 +1486,10 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                 @Override
                 public void onAuthenticationFailed() {
                     handleFingerprintAuthFailed();
+
+                    // TODO(b/225231929): Refactor as needed, add tests, etc.
+                    mTrustManager.reportUserRequestedUnlock(
+                            KeyguardUpdateMonitor.getCurrentUser(), true);
                 }
 
                 @Override
@@ -1497,17 +1501,23 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
 
                 @Override
                 public void onAuthenticationHelp(int helpMsgId, CharSequence helpString) {
+                    Trace.beginSection("KeyguardUpdateMonitor#onAuthenticationHelp");
                     handleFingerprintHelp(helpMsgId, helpString.toString());
+                    Trace.endSection();
                 }
 
                 @Override
                 public void onAuthenticationError(int errMsgId, CharSequence errString) {
+                    Trace.beginSection("KeyguardUpdateMonitor#onAuthenticationError");
                     handleFingerprintError(errMsgId, errString.toString());
+                    Trace.endSection();
                 }
 
                 @Override
                 public void onAuthenticationAcquired(int acquireInfo) {
+                    Trace.beginSection("KeyguardUpdateMonitor#onAuthenticationAcquired");
                     handleFingerprintAcquired(acquireInfo);
+                    Trace.endSection();
                 }
 
                 @Override
@@ -2258,7 +2268,8 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         }
 
         if (shouldTriggerActiveUnlock()) {
-            mTrustManager.reportUserRequestedUnlock(KeyguardUpdateMonitor.getCurrentUser());
+            // TODO(b/225231929): Refactor surrounding code to reflect calling of new method
+            mTrustManager.reportUserMayRequestUnlock(KeyguardUpdateMonitor.getCurrentUser());
         }
     }
 
@@ -2712,12 +2723,20 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     }
 
     /**
-     * Handle {@link #MSG_DPM_STATE_CHANGED}
+     * Handle {@link #MSG_DPM_STATE_CHANGED} which can change primary authentication methods to
+     * pin/pattern/password/none.
      */
     private void handleDevicePolicyManagerStateChanged(int userId) {
         Assert.isMainThread();
         updateFingerprintListeningState(BIOMETRIC_ACTION_UPDATE);
         updateSecondaryLockscreenRequirement(userId);
+
+        for (int i = 0; i < mCallbacks.size(); i++) {
+            KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
+            if (cb != null) {
+                cb.onDevicePolicyManagerStateChanged();
+            }
+        }
     }
 
     /**

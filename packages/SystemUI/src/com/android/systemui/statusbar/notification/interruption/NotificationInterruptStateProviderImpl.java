@@ -312,7 +312,7 @@ public class NotificationInterruptStateProviderImpl implements NotificationInter
             return false;
         }
 
-        if (mKeyguardNotificationVisibilityProvider.hideNotification(entry)) {
+        if (mKeyguardNotificationVisibilityProvider.shouldHideNotification(entry)) {
             mLogger.keyguardHideNotification(entry.getKey());
             return false;
         }

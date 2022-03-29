@@ -646,11 +646,9 @@ public abstract class Animation implements Cloneable {
      * @param bg The background color.  If 0, no background.  Currently must
      * be black, with any desired alpha level.
      *
-     * @deprecated None of window animations are running with background color.
      */
-    @Deprecated
     public void setBackgroundColor(@ColorInt int bg) {
-        // The background color is not needed any more, do nothing.
+        mBackgroundColor = bg;
     }
 
     /**
@@ -824,13 +822,10 @@ public abstract class Animation implements Cloneable {
 
     /**
      * Returns the background color behind the animation.
-     *
-     * @deprecated None of window animations are running with background color.
      */
-    @Deprecated
     @ColorInt
     public int getBackgroundColor() {
-        return 0;
+        return mBackgroundColor;
     }
 
     /**

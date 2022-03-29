@@ -2723,7 +2723,7 @@
     <string name="config_bandwidthEstimateSource">bandwidth_estimator</string>
 
     <!-- Whether force to enable telephony new data stack or not -->
-    <bool name="config_force_enable_telephony_new_data_stack">false</bool>
+    <bool name="config_force_enable_telephony_new_data_stack">true</bool>
 
     <!-- Whether WiFi display is supported by this device.
          There are many prerequisites for this feature to work correctly.
@@ -2931,8 +2931,8 @@
     <!-- Apps that are authorized to access shared accounts, overridden by product overlays -->
     <string name="config_appsAuthorizedForSharedAccounts" translatable="false">;com.android.settings;</string>
 
-    <!-- Settings intelligence package name -->
-    <string name="config_settingsIntelligencePackageName" translatable="false">
+    <!-- System settings intelligence package name -->
+    <string name="config_systemSettingsIntelligence" translatable="false">
         com.android.settings.intelligence
     </string>
 
@@ -2962,6 +2962,11 @@
     <!-- Prevent the InputMethodManagerService from starting up the IME unless
      the currently focused view is a text editor. -->
     <bool name="config_preventImeStartupUnlessTextEditor">false</bool>
+
+    <!-- These IMEs are known not to behave well when evicted from memory and thus are exempt
+         from the IME startup prevention behavior that is enabled by
+         config_preventImeStartupUnlessTextEditor. -->
+    <string-array name="config_nonPreemptibleInputMethods" translatable="false" />
 
     <!-- The list of classes that should be added to the notification ranking pipeline.
      See {@link com.android.server.notification.NotificationSignalExtractor}
@@ -5742,13 +5747,13 @@
         exceeds the threshold, it'll be moved to restricted standby bucket. The value must be
         one of or combination of the definitions in AppBatteryPolicy.
     -->
-    <integer name="config_bg_current_drain_types_to_restricted_bucket">4</integer>
+    <integer name="config_bg_current_drain_types_to_restricted_bucket">20</integer>
 
     <!-- The types of battery drain we're checking on each app; if the sum of the battery drain
         exceeds the threshold, it'll be moved to background restricted level. The value must be
         one of or combination of the definitions in AppBatteryPolicy.
     -->
-    <integer name="config_bg_current_drain_types_to_bg_restricted">12</integer>
+    <integer name="config_bg_current_drain_types_to_bg_restricted">28</integer>
 
     <!-- The power usage components we're monitoring. Must one of the definition in BatteryConsumer.
     -->
@@ -5796,11 +5801,21 @@
     <!-- The types of state where we'll exempt its battery usage during that state.
          The state here must be one or a combination of STATE_TYPE_* in BaseAppStateTracker.
     -->
-    <integer name="config_bg_current_drain_exempted_types">9</integer>
+    <integer name="config_bg_current_drain_exempted_types">25</integer>
 
     <!-- The behavior when an app has the permission ACCESS_BACKGROUND_LOCATION granted,
          whether or not the system will use a higher threshold towards its background battery usage
          because of it.
     -->
     <bool name="config_bg_current_drain_high_threshold_by_bg_location">false</bool>
+
+    <!-- Start safety protection resources to be overlaid -->
+
+    <!-- Safety protection icon to be overlaid -->
+    <item name="ic_safety_protection" type="drawable">@null</item>
+
+    <!-- Display text for safety protection to be overlaid. This is translatable -->
+    <string name="safety_protection_display_text"></string>
+
+    <!-- End safety protection resources to be overlaid -->
 </resources>

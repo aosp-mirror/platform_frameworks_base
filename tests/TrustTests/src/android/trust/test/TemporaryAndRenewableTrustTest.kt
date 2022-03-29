@@ -16,16 +16,20 @@
 
 package android.trust.test
 
+import android.service.trust.GrantTrustResult
+import android.service.trust.GrantTrustResult.STATUS_UNLOCKED_BY_GRANT
 import android.service.trust.TrustAgentService.FLAG_GRANT_TRUST_TEMPORARY_AND_RENEWABLE
 import android.trust.BaseTrustAgentService
 import android.trust.TrustTestActivity
 import android.trust.test.lib.LockStateTrackingRule
 import android.trust.test.lib.ScreenLockRule
 import android.trust.test.lib.TrustAgentRule
+import android.util.Log
 import androidx.test.ext.junit.rules.ActivityScenarioRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry.getInstrumentation
 import androidx.test.uiautomator.UiDevice
+import com.google.common.truth.Truth.assertThat
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -70,7 +74,8 @@ class TemporaryAndRenewableTrustTest {
         uiDevice.sleep()
         lockStateTrackingRule.assertLocked()
 
-        trustAgentRule.agent.grantTrust(GRANT_MESSAGE, 0, FLAG_GRANT_TRUST_TEMPORARY_AND_RENEWABLE)
+        trustAgentRule.agent.grantTrust(
+            GRANT_MESSAGE, 0, FLAG_GRANT_TRUST_TEMPORARY_AND_RENEWABLE) {}
         uiDevice.wakeUp()
 
         lockStateTrackingRule.assertLocked()
@@ -78,7 +83,8 @@ class TemporaryAndRenewableTrustTest {
 
     @Test
     fun grantTrustUnlockedDevice_deviceLocksOnScreenOff() {
-        trustAgentRule.agent.grantTrust(GRANT_MESSAGE, 0, FLAG_GRANT_TRUST_TEMPORARY_AND_RENEWABLE)
+        trustAgentRule.agent.grantTrust(
+            GRANT_MESSAGE, 0, FLAG_GRANT_TRUST_TEMPORARY_AND_RENEWABLE) {}
         uiDevice.sleep()
 
         lockStateTrackingRule.assertLocked()
@@ -86,20 +92,48 @@ class TemporaryAndRenewableTrustTest {
 
     @Test
     fun grantTrustLockedDevice_grantTrustOnLockedDeviceUnlocksDevice() {
-        trustAgentRule.agent.grantTrust(GRANT_MESSAGE, 0, FLAG_GRANT_TRUST_TEMPORARY_AND_RENEWABLE)
+        trustAgentRule.agent.grantTrust(
+            GRANT_MESSAGE, 0, FLAG_GRANT_TRUST_TEMPORARY_AND_RENEWABLE) {}
         uiDevice.sleep()
 
         lockStateTrackingRule.assertLocked()
 
-        trustAgentRule.agent.grantTrust(GRANT_MESSAGE, 0, FLAG_GRANT_TRUST_TEMPORARY_AND_RENEWABLE)
+        trustAgentRule.agent.grantTrust(
+            GRANT_MESSAGE, 0, FLAG_GRANT_TRUST_TEMPORARY_AND_RENEWABLE) {}
         uiDevice.wakeUp()
 
         lockStateTrackingRule.assertUnlocked()
     }
 
     @Test
+    fun grantTrustLockedDevice_callsBackWhenUnlocked() {
+        Log.i(TAG, "Granting renewable trust while unlocked")
+        trustAgentRule.agent.grantTrust(
+            GRANT_MESSAGE, 0, FLAG_GRANT_TRUST_TEMPORARY_AND_RENEWABLE) {}
+        await(1000)
+
+        Log.i(TAG, "Locking device")
+        uiDevice.sleep()
+
+        lockStateTrackingRule.assertLocked()
+
+        Log.i(TAG, "Renewing trust and unlocking")
+        var result: GrantTrustResult? = null
+        trustAgentRule.agent.grantTrust(
+                GRANT_MESSAGE, 0, FLAG_GRANT_TRUST_TEMPORARY_AND_RENEWABLE) {
+            Log.i(TAG, "Callback received; status=${it.status}")
+            result = it
+        }
+        uiDevice.wakeUp()
+        lockStateTrackingRule.assertUnlocked()
+
+        assertThat(result?.status).isEqualTo(STATUS_UNLOCKED_BY_GRANT)
+    }
+
+    @Test
     fun grantTrustLockedDevice_revokeTrustPreventsSubsequentUnlock() {
-        trustAgentRule.agent.grantTrust(GRANT_MESSAGE, 0, FLAG_GRANT_TRUST_TEMPORARY_AND_RENEWABLE)
+        trustAgentRule.agent.grantTrust(
+            GRANT_MESSAGE, 0, FLAG_GRANT_TRUST_TEMPORARY_AND_RENEWABLE) {}
         uiDevice.sleep()
 
         lockStateTrackingRule.assertLocked()
@@ -109,7 +143,8 @@ class TemporaryAndRenewableTrustTest {
         uiDevice.wakeUp()
         await(500)
 
-        trustAgentRule.agent.grantTrust(GRANT_MESSAGE, 0, FLAG_GRANT_TRUST_TEMPORARY_AND_RENEWABLE)
+        trustAgentRule.agent.grantTrust(
+            GRANT_MESSAGE, 0, FLAG_GRANT_TRUST_TEMPORARY_AND_RENEWABLE) {}
 
         lockStateTrackingRule.assertLocked()
     }

@@ -898,7 +898,8 @@ public class AppStandbyController
                     }
                 }
 
-                if (app.lastRestrictAttemptElapsedTime > app.lastUsedByUserElapsedTime
+                if (app.lastUsedByUserElapsedTime >= 0
+                        && app.lastRestrictAttemptElapsedTime > app.lastUsedByUserElapsedTime
                         && elapsedTimeAdjusted - app.lastUsedByUserElapsedTime
                         >= mInjector.getAutoRestrictedBucketDelayMs()) {
                     newBucket = STANDBY_BUCKET_RESTRICTED;
@@ -971,7 +972,7 @@ public class AppStandbyController
             long elapsedRealtime) {
         int bucketIndex = mAppIdleHistory.getThresholdIndex(packageName, userId,
                 elapsedRealtime, mAppStandbyScreenThresholds, mAppStandbyElapsedThresholds);
-        return THRESHOLD_BUCKETS[bucketIndex];
+        return bucketIndex >= 0 ? THRESHOLD_BUCKETS[bucketIndex] : STANDBY_BUCKET_NEVER;
     }
 
     private void notifyBatteryStats(String packageName, int userId, boolean idle) {
@@ -1435,8 +1436,8 @@ public class AppStandbyController
         }
     }
 
-    @VisibleForTesting
-    int getAppStandbyBucketReason(String packageName, int userId, long elapsedRealtime) {
+    @Override
+    public int getAppStandbyBucketReason(String packageName, int userId, long elapsedRealtime) {
         synchronized (mAppIdleLock) {
             return mAppIdleHistory.getAppStandbyReason(packageName, userId, elapsedRealtime);
         }
@@ -1854,6 +1855,13 @@ public class AppStandbyController
     }
 
     @Override
+    public void clearLastUsedTimestampsForTest(@NonNull String packageName, @UserIdInt int userId) {
+        synchronized (mAppIdleLock) {
+            mAppIdleHistory.clearLastUsedTimestamps(packageName, userId);
+        }
+    }
+
+    @Override
     public void flushToDisk() {
         synchronized (mAppIdleLock) {
             mAppIdleHistory.writeAppIdleTimes(mInjector.elapsedRealtime());
@@ -2091,6 +2099,13 @@ public class AppStandbyController
     public void postReportExemptedSyncStart(String packageName, int userId) {
         mHandler.obtainMessage(MSG_REPORT_EXEMPTED_SYNC_START, userId, 0, packageName)
                 .sendToTarget();
+    }
+
+    @VisibleForTesting
+    AppIdleHistory getAppIdleHistoryForTest() {
+        synchronized (mAppIdleLock) {
+            return mAppIdleHistory;
+        }
     }
 
     @Override

@@ -994,6 +994,15 @@ public class InputMethodService extends AbstractInputMethodService {
 
         /**
          * {@inheritDoc}
+         * @hide
+         */
+        @Override
+        public void finishStylusHandwriting() {
+            InputMethodService.this.finishStylusHandwriting();
+        }
+
+        /**
+         * {@inheritDoc}
          */
         @MainThread
         @Override
@@ -2461,7 +2470,7 @@ public class InputMethodService extends AbstractInputMethodService {
         mHandwritingEventReceiver = null;
         mInkWindow.hide(false /* remove */);
 
-        mPrivOps.finishStylusHandwriting(requestId);
+        mPrivOps.resetStylusHandwriting(requestId);
         mOnPreparedStylusHwCalled = false;
         onFinishStylusHandwriting();
     }

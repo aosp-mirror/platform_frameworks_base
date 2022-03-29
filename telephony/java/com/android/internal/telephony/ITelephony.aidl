@@ -2142,7 +2142,7 @@ interface ITelephony {
 
     List<RadioAccessSpecifier> getSystemSelectionChannels(int subId);
 
-    boolean isMvnoMatched(int subId, int mvnoType, String mvnoMatchData);
+    boolean isMvnoMatched(int slotIndex, int mvnoType, String mvnoMatchData);
 
     /**
      * Enqueue a pending sms Consumer, which will answer with the user specified selection for an

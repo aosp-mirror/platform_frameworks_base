@@ -18,6 +18,8 @@ import com.android.systemui.navigationbar.NavigationModeController
 import com.android.systemui.navigationbar.NavigationModeController.ModeChangedListener
 import com.android.systemui.recents.OverviewProxyService
 import com.android.systemui.recents.OverviewProxyService.OverviewProxyListener
+import com.android.systemui.util.concurrency.FakeExecutor
+import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
 import org.junit.Test
@@ -31,6 +33,7 @@ import org.mockito.Mockito.anyInt
 import org.mockito.Mockito.doNothing
 import org.mockito.Mockito.eq
 import org.mockito.Mockito.mock
+import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 import java.util.function.Consumer
@@ -71,6 +74,8 @@ class NotificationQSContainerControllerTest : SysuiTestCase() {
     private lateinit var navigationModeCallback: ModeChangedListener
     private lateinit var taskbarVisibilityCallback: OverviewProxyListener
     private lateinit var windowInsetsCallback: Consumer<WindowInsets>
+    private lateinit var delayableExecutor: FakeExecutor
+    private lateinit var fakeSystemClock: FakeSystemClock
 
     @Before
     fun setup() {
@@ -78,11 +83,14 @@ class NotificationQSContainerControllerTest : SysuiTestCase() {
         mContext.ensureTestableResources()
         whenever(notificationsQSContainer.context).thenReturn(mContext)
         whenever(notificationsQSContainer.resources).thenReturn(mContext.resources)
+        fakeSystemClock = FakeSystemClock()
+        delayableExecutor = FakeExecutor(fakeSystemClock)
         controller = NotificationsQSContainerController(
                 notificationsQSContainer,
                 navigationModeController,
                 overviewProxyService,
-                featureFlags
+                featureFlags,
+                delayableExecutor
         )
 
         overrideResource(R.dimen.split_shade_notifications_scrim_margin_bottom, SCRIM_MARGIN)
@@ -460,6 +468,29 @@ class NotificationQSContainerControllerTest : SysuiTestCase() {
     }
 
     @Test
+    fun testLargeScreenLayout_qsAndNotifsTopMarginIsOfHeaderHeight() {
+        setLargeScreen()
+        val largeScreenHeaderHeight = 100
+        overrideResource(R.dimen.large_screen_shade_header_height, largeScreenHeaderHeight)
+
+        controller.updateResources()
+
+        assertThat(getConstraintSetLayout(R.id.qs_frame).topMargin)
+                .isEqualTo(largeScreenHeaderHeight)
+        assertThat(getConstraintSetLayout(R.id.notification_stack_scroller).topMargin)
+                .isEqualTo(largeScreenHeaderHeight)
+    }
+
+    @Test
+    fun testSmallScreenLayout_qsAndNotifsTopMarginIsZero() {
+        setSmallScreen()
+        controller.updateResources()
+        assertThat(getConstraintSetLayout(R.id.qs_frame).topMargin).isEqualTo(0)
+        assertThat(getConstraintSetLayout(R.id.notification_stack_scroller).topMargin)
+                .isEqualTo(0)
+    }
+
+    @Test
     fun testSinglePaneShadeLayout_qsFrameHasHorizontalMarginsSetToCorrectValue() {
         disableSplitShade()
         controller.updateResources()
@@ -490,11 +521,30 @@ class NotificationQSContainerControllerTest : SysuiTestCase() {
         container.addView(newViewWithId(1))
         container.addView(newViewWithId(View.NO_ID))
         val controller = NotificationsQSContainerController(container, navigationModeController,
-                overviewProxyService, featureFlags)
+                overviewProxyService, featureFlags, delayableExecutor)
         controller.updateResources()
 
         assertThat(container.getChildAt(0).id).isEqualTo(1)
         assertThat(container.getChildAt(1).id).isNotEqualTo(View.NO_ID)
+    }
+
+    @Test
+    fun testWindowInsetDebounce() {
+        disableSplitShade()
+        useNewFooter(true)
+
+        given(taskbarVisible = false,
+            navigationMode = GESTURES_NAVIGATION,
+            insets = emptyInsets(),
+            applyImmediately = false)
+        fakeSystemClock.advanceTime(INSET_DEBOUNCE_MILLIS / 2)
+        windowInsetsCallback.accept(windowInsets().withStableBottom())
+
+        delayableExecutor.advanceClockToLast()
+        delayableExecutor.runAllReady()
+
+        verify(notificationsQSContainer, never()).setQSContainerPaddingBottom(0)
+        verify(notificationsQSContainer).setQSContainerPaddingBottom(STABLE_INSET_BOTTOM)
     }
 
     private fun disableSplitShade() {
@@ -510,15 +560,32 @@ class NotificationQSContainerControllerTest : SysuiTestCase() {
         controller.updateResources()
     }
 
+    private fun setSmallScreen() {
+        setLargeScreenEnabled(false)
+    }
+
+    private fun setLargeScreen() {
+        setLargeScreenEnabled(true)
+    }
+
+    private fun setLargeScreenEnabled(enabled: Boolean) {
+        overrideResource(R.bool.config_use_large_screen_shade_header, enabled)
+    }
+
     private fun given(
         taskbarVisible: Boolean,
         navigationMode: Int,
-        insets: WindowInsets
+        insets: WindowInsets,
+        applyImmediately: Boolean = true
     ) {
         Mockito.clearInvocations(notificationsQSContainer)
         taskbarVisibilityCallback.onTaskbarStatusUpdated(taskbarVisible, false)
         navigationModeCallback.onNavigationModeChanged(navigationMode)
         windowInsetsCallback.accept(insets)
+        if (applyImmediately) {
+            delayableExecutor.advanceClockToLast()
+            delayableExecutor.runAllReady()
+        }
     }
 
     fun then(

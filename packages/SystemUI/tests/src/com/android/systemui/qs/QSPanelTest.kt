@@ -137,20 +137,6 @@ class QSPanelTest : SysuiTestCase() {
         assertThat(mQsPanel.indexOfChild(mQsPanel.mSecurityFooter)).isEqualTo(-1)
     }
 
-    @Test
-    fun testBottomPadding() {
-        mQsPanel.setUseNewFooter(false)
-
-        mQsPanel.updatePadding()
-        assertThat(mQsPanel.paddingBottom).isEqualTo(0)
-
-        mQsPanel.setUseNewFooter(true)
-
-        mQsPanel.updatePadding()
-        assertThat(mQsPanel.paddingBottom)
-                .isEqualTo(mContext.resources.getDimensionPixelSize(R.dimen.new_footer_height))
-    }
-
     private fun getNewOrientationConfig(@Configuration.Orientation newOrientation: Int) =
             context.resources.configuration.apply { orientation = newOrientation }
 }

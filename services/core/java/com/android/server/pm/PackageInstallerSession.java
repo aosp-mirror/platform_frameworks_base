@@ -272,7 +272,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
     /**
      * The default value of {@link #mValidatedTargetSdk} is {@link Integer#MAX_VALUE}. If {@link
-     * #mValidatedTargetSdk} is compared with {@link Build.VERSION_CODES#Q} before getting the
+     * #mValidatedTargetSdk} is compared with {@link Build.VERSION_CODES#R} before getting the
      * target sdk version from a validated apk in {@link #validateApkInstallLocked()}, the compared
      * result will not trigger any user action in
      * {@link #checkUserActionRequirement(PackageInstallerSession)}.
@@ -704,6 +704,18 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         }
     };
 
+    static boolean isDataLoaderInstallation(SessionParams params) {
+        return params.dataLoaderParams != null;
+    }
+
+    static boolean isSystemDataLoaderInstallation(SessionParams params) {
+        if (!isDataLoaderInstallation(params)) {
+            return false;
+        }
+        return SYSTEM_DATA_LOADER_PACKAGE.equals(
+                params.dataLoaderParams.getComponentName().getPackageName());
+    }
+
     private final Handler.Callback mHandlerCallback = new Handler.Callback() {
         @Override
         public boolean handleMessage(Message msg) {
@@ -743,7 +755,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     };
 
     private boolean isDataLoaderInstallation() {
-        return params.dataLoaderParams != null;
+        return isDataLoaderInstallation(this.params);
     }
 
     private boolean isStreamingInstallation() {
@@ -755,11 +767,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     }
 
     private boolean isSystemDataLoaderInstallation() {
-        if (!isDataLoaderInstallation()) {
-            return false;
-        }
-        return SYSTEM_DATA_LOADER_PACKAGE.equals(
-                this.params.dataLoaderParams.getComponentName().getPackageName());
+        return isSystemDataLoaderInstallation(this.params);
     }
 
     /**
@@ -1258,13 +1266,21 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             return;
         }
 
-        final String initiatingPackageName = getInstallSource().initiatingPackageName;
+        final String installerPackageName;
+        if (!TextUtils.isEmpty(getInstallSource().initiatingPackageName)) {
+            installerPackageName = getInstallSource().initiatingPackageName;
+        } else {
+            installerPackageName = getInstallSource().installerPackageName;
+        }
+        if (TextUtils.isEmpty(installerPackageName)) {
+            throw new IllegalStateException("Installer package is empty.");
+        }
 
         final AppOpsManager appOps = mContext.getSystemService(AppOpsManager.class);
-        appOps.checkPackage(Binder.getCallingUid(), initiatingPackageName);
+        appOps.checkPackage(Binder.getCallingUid(), installerPackageName);
 
         final PackageManagerInternal pmi = LocalServices.getService(PackageManagerInternal.class);
-        final AndroidPackage callingInstaller = pmi.getPackage(initiatingPackageName);
+        final AndroidPackage callingInstaller = pmi.getPackage(installerPackageName);
         if (callingInstaller == null) {
             throw new IllegalStateException("Can't obtain calling installer's package.");
         }
@@ -2067,7 +2083,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             }
 
             if (validatedTargetSdk != INVALID_TARGET_SDK_VERSION
-                    && validatedTargetSdk < Build.VERSION_CODES.Q) {
+                    && validatedTargetSdk < Build.VERSION_CODES.R) {
                 session.sendPendingUserActionIntent(target);
                 return true;
             }
@@ -4288,9 +4304,9 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     private static String getDeviceOwnerInstalledPackageMsg(Context context, boolean update) {
         DevicePolicyManager dpm = context.getSystemService(DevicePolicyManager.class);
         return update
-                ? dpm.getString(PACKAGE_UPDATED_BY_DO,
+                ? dpm.getResources().getString(PACKAGE_UPDATED_BY_DO,
                     () -> context.getString(R.string.package_updated_device_owner))
-                : dpm.getString(PACKAGE_INSTALLED_BY_DO,
+                : dpm.getResources().getString(PACKAGE_INSTALLED_BY_DO,
                     () -> context.getString(R.string.package_installed_device_owner));
     }
 

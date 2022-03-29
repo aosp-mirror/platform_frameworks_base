@@ -31,6 +31,7 @@ import android.util.Slog;
 
 import com.android.server.SystemService;
 
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -199,5 +200,10 @@ abstract class BaseIDevicePolicyManager extends IDevicePolicyManager.Stub {
     @Override
     public boolean shouldAllowBypassingDevicePolicyManagementRoleQualification() {
         return false;
+    }
+
+    @Override
+    public List<UserHandle> getPolicyManagedProfiles(UserHandle userHandle) {
+        return Collections.emptyList();
     }
 }

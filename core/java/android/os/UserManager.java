@@ -17,7 +17,7 @@
 package android.os;
 
 import static android.app.admin.DevicePolicyResources.Strings.Core.WORK_PROFILE_BADGED_LABEL;
-import static android.app.admin.DevicePolicyResources.Strings.UNDEFINED;
+import static android.app.admin.DevicePolicyResources.UNDEFINED;
 
 import android.Manifest;
 import android.accounts.AccountManager;
@@ -2186,9 +2186,17 @@ public class UserManager {
      * @hide
      */
     @SystemApi
-    @RequiresPermission(anyOf = {Manifest.permission.MANAGE_USERS,
-            Manifest.permission.GET_ACCOUNTS_PRIVILEGED})
-    @UserHandleAware(enabledSinceTargetSdkVersion = Build.VERSION_CODES.TIRAMISU)
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.MANAGE_USERS,
+            android.Manifest.permission.CREATE_USERS,
+            android.Manifest.permission.QUERY_USERS,
+            android.Manifest.permission.GET_ACCOUNTS_PRIVILEGED})
+    @UserHandleAware(
+            enabledSinceTargetSdkVersion = Build.VERSION_CODES.TIRAMISU,
+            requiresAnyOfPermissionsIfNotCaller = {
+                    android.Manifest.permission.MANAGE_USERS,
+                    android.Manifest.permission.CREATE_USERS,
+                    android.Manifest.permission.QUERY_USERS})
     public boolean isUserNameSet() {
         try {
             return mService.isUserNameSet(getContextUserIfAppropriate());
@@ -2292,8 +2300,11 @@ public class UserManager {
      * @hide
      */
     @SystemApi
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.MANAGE_USERS,
+            android.Manifest.permission.CREATE_USERS,
+            android.Manifest.permission.QUERY_USERS})
     @UserHandleAware
-    @RequiresPermission(android.Manifest.permission.MANAGE_USERS)
     public boolean isUserOfType(@NonNull String userType) {
         try {
             return mService.isUserOfType(mUserId, userType);
@@ -4749,7 +4760,7 @@ public class UserManager {
             return label;
         }
         DevicePolicyManager dpm = mContext.getSystemService(DevicePolicyManager.class);
-        return dpm.getString(
+        return dpm.getResources().getString(
                 getUpdatableUserBadgedLabelId(userId),
                 () -> getDefaultUserBadgedLabel(label, userId),
                 /* formatArgs= */ label);

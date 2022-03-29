@@ -899,7 +899,7 @@ public class BubbleStackView extends FrameLayout
                     mStackAnimationController.updateResources();
                     mBubbleOverflow.updateResources();
 
-                    if (mRelativeStackPositionBeforeRotation != null) {
+                    if (!isStackEduShowing() && mRelativeStackPositionBeforeRotation != null) {
                         mStackAnimationController.setStackPosition(
                                 mRelativeStackPositionBeforeRotation);
                         mRelativeStackPositionBeforeRotation = null;
@@ -1139,6 +1139,7 @@ public class BubbleStackView extends FrameLayout
         // The menu itself should respect locale direction so the icons are on the correct side.
         mManageMenu.setLayoutDirection(LAYOUT_DIRECTION_LOCALE);
         addView(mManageMenu);
+        updateManageButtonListener();
     }
 
     /**
@@ -1200,6 +1201,8 @@ public class BubbleStackView extends FrameLayout
             addView(mStackEduView);
         }
         mBubbleContainer.bringToFront();
+        // Ensure the stack is in the correct spot
+        mStackAnimationController.setStackPosition(mPositioner.getDefaultStartPosition());
         return mStackEduView.show(mPositioner.getDefaultStartPosition());
     }
 
@@ -1214,6 +1217,8 @@ public class BubbleStackView extends FrameLayout
             mStackEduView = new StackEducationView(mContext, mPositioner, mBubbleController);
             addView(mStackEduView);
             mBubbleContainer.bringToFront(); // Stack appears on top of the stack education
+            // Ensure the stack is in the correct spot
+            mStackAnimationController.setStackPosition(mPositioner.getDefaultStartPosition());
             mStackEduView.show(mPositioner.getDefaultStartPosition());
         }
         if (mManageEduView != null && mManageEduView.getVisibility() == VISIBLE) {
@@ -1311,7 +1316,6 @@ public class BubbleStackView extends FrameLayout
     /** Respond to the display size change by recalculating view size and location. */
     public void onDisplaySizeChanged() {
         updateOverflow();
-        setUpManageMenu();
         setUpFlyout();
         setUpDismissView();
         updateUserEdu();
@@ -1331,13 +1335,16 @@ public class BubbleStackView extends FrameLayout
         mStackAnimationController.updateResources();
         mDismissView.updateResources();
         mMagneticTarget.setMagneticFieldRadiusPx(mBubbleSize * 2);
-        mStackAnimationController.setStackPosition(
-                new RelativeStackPosition(
-                        mPositioner.getRestingPosition(),
-                        mStackAnimationController.getAllowableStackPositionRegion()));
+        if (!isStackEduShowing()) {
+            mStackAnimationController.setStackPosition(
+                    new RelativeStackPosition(
+                            mPositioner.getRestingPosition(),
+                            mStackAnimationController.getAllowableStackPositionRegion()));
+        }
         if (mIsExpanded) {
             updateExpandedView();
         }
+        setUpManageMenu();
     }
 
     @Override
@@ -2802,13 +2809,30 @@ public class BubbleStackView extends FrameLayout
             mExpandedViewContainer.setVisibility(View.INVISIBLE);
             mExpandedViewContainer.setAlpha(0f);
             mExpandedViewContainer.addView(bev);
-            bev.setManageClickListener((view) -> showManageMenu(!mShowingManage));
+
+            postDelayed(() -> {
+                // Set the Manage button click handler from postDelayed. This appears to resolve
+                // a race condition with adding the BubbleExpandedView view to the expanded view
+                // container. Due to the race condition the click handler sometimes is not set up
+                // correctly and is never called.
+                updateManageButtonListener();
+            }, 0);
 
             if (!mIsExpansionAnimating) {
                 mSurfaceSynchronizer.syncSurfaceAndRun(() -> {
                     post(this::animateSwitchBubbles);
                 });
             }
+        }
+    }
+
+    private void updateManageButtonListener() {
+        if (mIsExpanded && mExpandedBubble != null
+                && mExpandedBubble.getExpandedView() != null) {
+            BubbleExpandedView bev = mExpandedBubble.getExpandedView();
+            bev.setManageClickListener((view) -> {
+                showManageMenu(true /* show */);
+            });
         }
     }
 

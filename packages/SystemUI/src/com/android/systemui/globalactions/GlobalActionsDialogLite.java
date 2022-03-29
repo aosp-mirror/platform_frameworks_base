@@ -1067,13 +1067,7 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
             // Add a little delay before executing, to give the dialog a chance to go away before
             // switching user
             mHandler.postDelayed(() -> {
-                try {
-                    int currentUserId = getCurrentUser().id;
-                    mIActivityManager.switchUser(UserHandle.USER_SYSTEM);
-                    mIActivityManager.stopUser(currentUserId, true /*force*/, null);
-                } catch (RemoteException re) {
-                    Log.e(TAG, "Couldn't logout user " + re);
-                }
+                mDevicePolicyManager.logoutUser();
             }, mDialogPressDelay);
         }
     }

@@ -254,10 +254,14 @@ public class VisualStabilityCoordinator implements Coordinator, Dumpable,
 
     @Override
     public void dump(@NonNull FileDescriptor fd, @NonNull PrintWriter pw, @NonNull String[] args) {
+        pw.println("pipelineRunAllowed: " + mPipelineRunAllowed);
+        pw.println("  notifPanelCollapsing: " + mNotifPanelCollapsing);
+        pw.println("  launchingNotifActivity: " + mNotifPanelLaunchingActivity);
         pw.println("reorderingAllowed: " + mReorderingAllowed);
         pw.println("  screenOn: " + mScreenOn);
         pw.println("  panelExpanded: " + mPanelExpanded);
         pw.println("  pulsing: " + mPulsing);
+        pw.println("isSuppressingPipelineRun: " + mIsSuppressingPipelineRun);
         pw.println("isSuppressingGroupChange: " + mIsSuppressingGroupChange);
         pw.println("isSuppressingEntryReorder: " + mIsSuppressingEntryReorder);
         pw.println("entriesWithSuppressedSectionChange: "

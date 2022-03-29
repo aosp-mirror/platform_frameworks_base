@@ -617,8 +617,8 @@ public class TransitionTests extends WindowTestsBase {
         }
         player.startTransition();
 
-        assertFalse(statusBar.mToken.inTransition());
-        assertFalse(decorToken.inTransition());
+        assertFalse(mDisplayContent.mTransitionController.isCollecting(statusBar.mToken));
+        assertFalse(mDisplayContent.mTransitionController.isCollecting(decorToken));
         assertTrue(ime.mToken.inTransition());
         assertTrue(task.inTransition());
         assertTrue(asyncRotationController.isTargetToken(decorToken));
@@ -735,7 +735,7 @@ public class TransitionTests extends WindowTestsBase {
         statusBar.setOrientationChanging(true);
         player.startTransition();
         // Non-app windows should not be collected.
-        assertFalse(statusBar.mToken.inTransition());
+        assertFalse(mDisplayContent.mTransitionController.isCollecting(statusBar.mToken));
 
         onRotationTransactionReady(player, mWm.mTransactionFactory.get()).onTransactionCommitted();
         assertEquals(ROTATION_ANIMATION_SEAMLESS, player.mLastReady.getChange(

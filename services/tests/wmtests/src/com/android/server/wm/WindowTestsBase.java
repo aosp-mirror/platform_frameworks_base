@@ -903,7 +903,7 @@ class WindowTestsBase extends SystemServiceTestsBase {
         doReturn(100).when(hardwareBuffer).getHeight();
     }
 
-    private static ComponentName getUniqueComponentName() {
+    static ComponentName getUniqueComponentName() {
         return ComponentName.createRelative(DEFAULT_COMPONENT_PACKAGE_NAME,
                 DEFAULT_COMPONENT_CLASS_NAME + sCurrentActivityId++);
     }
@@ -1264,6 +1264,7 @@ class WindowTestsBase extends SystemServiceTestsBase {
                         mOrganizer.getOrganizerToken(), DEFAULT_TASK_FRAGMENT_ORGANIZER_UID,
                         DEFAULT_TASK_FRAGMENT_ORGANIZER_PROCESS_NAME);
             }
+            spyOn(taskFragment);
             return taskFragment;
         }
     }
