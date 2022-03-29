@@ -460,7 +460,8 @@ public class StagedInstallInternalTest {
         {
             PackageInfo apex = pm.getPackageInfo("test.apex.rebootless", PackageManager.MATCH_APEX);
             assertThat(apex.getLongVersionCode()).isEqualTo(1);
-            assertThat(apex.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM).isEqualTo(0);
+            assertThat(apex.applicationInfo.flags & ApplicationInfo.FLAG_UPDATED_SYSTEM_APP)
+                    .isEqualTo(ApplicationInfo.FLAG_UPDATED_SYSTEM_APP);
             assertThat(apex.applicationInfo.flags & ApplicationInfo.FLAG_INSTALLED)
                     .isEqualTo(ApplicationInfo.FLAG_INSTALLED);
             assertThat(apex.applicationInfo.sourceDir).startsWith("/data/apex/active");
@@ -482,7 +483,8 @@ public class StagedInstallInternalTest {
         {
             PackageInfo apex = pm.getPackageInfo("test.apex.rebootless", PackageManager.MATCH_APEX);
             assertThat(apex.getLongVersionCode()).isEqualTo(2);
-            assertThat(apex.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM).isEqualTo(0);
+            assertThat(apex.applicationInfo.flags & ApplicationInfo.FLAG_UPDATED_SYSTEM_APP)
+                    .isEqualTo(ApplicationInfo.FLAG_UPDATED_SYSTEM_APP);
             assertThat(apex.applicationInfo.flags & ApplicationInfo.FLAG_INSTALLED)
                     .isEqualTo(ApplicationInfo.FLAG_INSTALLED);
             assertThat(apex.applicationInfo.sourceDir).startsWith("/data/apex/active");
