@@ -173,9 +173,8 @@ public class DisplayResolveInfo implements TargetInfo, Parcelable {
 
     @Override
     public boolean startAsCaller(ResolverActivity activity, Bundle options, int userId) {
-        // TODO: if the start-as-caller API no longer requires a permission token, this can go back
-        // to inlining the real activity-start call, and we can remove startAsCallerImpl.
-        return activity.startAsCallerImpl(mResolvedIntent, options, false, userId);
+        activity.startActivityAsCaller(mResolvedIntent, options, false, userId);
+        return true;
     }
 
     @Override
