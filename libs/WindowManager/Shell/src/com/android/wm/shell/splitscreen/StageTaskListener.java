@@ -268,12 +268,12 @@ class StageTaskListener implements ShellTaskOrganizer.TaskListener {
             mChildrenTaskInfo.remove(taskId);
             mChildrenLeashes.remove(taskId);
             mCallbacks.onChildTaskStatusChanged(taskId, false /* present */, taskInfo.isVisible);
-            if (taskInfo.getWindowingMode() == WINDOWING_MODE_PINNED) {
-                mCallbacks.onChildTaskEnterPip(taskId);
-            }
             if (ENABLE_SHELL_TRANSITIONS) {
                 // Status is managed/synchronized by the transition lifecycle.
                 return;
+            }
+            if (taskInfo.getWindowingMode() == WINDOWING_MODE_PINNED) {
+                mCallbacks.onChildTaskEnterPip(taskId);
             }
             sendStatusChanged();
         } else {

@@ -435,33 +435,42 @@ public class Transitions implements RemoteCallable<Transitions> {
                 playing.mToken, (wct, cb) -> onFinish(merging.mToken, wct, cb));
     }
 
-    boolean startAnimation(@NonNull ActiveTransition active, TransitionHandler handler) {
-        return handler.startAnimation(active.mToken, active.mInfo, active.mStartT, active.mFinishT,
-                (wct, cb) -> onFinish(active.mToken, wct, cb));
-    }
-
-    void playTransition(@NonNull ActiveTransition active) {
+    private void playTransition(@NonNull ActiveTransition active) {
         setupAnimHierarchy(active.mInfo, active.mStartT, active.mFinishT);
 
         // If a handler already chose to run this animation, try delegating to it first.
         if (active.mHandler != null) {
             ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, " try firstHandler %s",
                     active.mHandler);
-            if (startAnimation(active, active.mHandler)) {
+            boolean consumed = active.mHandler.startAnimation(active.mToken, active.mInfo,
+                    active.mStartT, active.mFinishT, (wct, cb) -> onFinish(active.mToken, wct, cb));
+            if (consumed) {
                 ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, " animated by firstHandler");
                 return;
             }
         }
-        // Otherwise give every other handler a chance (in order)
+        // Otherwise give every other handler a chance
+        active.mHandler = dispatchTransition(active.mToken, active.mInfo, active.mStartT,
+                active.mFinishT, (wct, cb) -> onFinish(active.mToken, wct, cb), active.mHandler);
+    }
+
+    /**
+     * Gives every handler (in order) a chance to animate until one consumes the transition.
+     * @return the handler which consumed the transition.
+     */
+    TransitionHandler dispatchTransition(@NonNull IBinder transition, @NonNull TransitionInfo info,
+            @NonNull SurfaceControl.Transaction startT, @NonNull SurfaceControl.Transaction finishT,
+            @NonNull TransitionFinishCallback finishCB, @Nullable TransitionHandler skip) {
         for (int i = mHandlers.size() - 1; i >= 0; --i) {
-            if (mHandlers.get(i) == active.mHandler) continue;
+            if (mHandlers.get(i) == skip) continue;
             ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, " try handler %s",
                     mHandlers.get(i));
-            if (startAnimation(active, mHandlers.get(i))) {
+            boolean consumed = mHandlers.get(i).startAnimation(transition, info, startT, finishT,
+                    finishCB);
+            if (consumed) {
                 ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, " animated by %s",
                         mHandlers.get(i));
-                active.mHandler = mHandlers.get(i);
-                return;
+                return mHandlers.get(i);
             }
         }
         throw new IllegalStateException(

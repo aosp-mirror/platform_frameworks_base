@@ -34,6 +34,7 @@ import com.android.wm.shell.pip.phone.PipTouchHandler;
 import com.android.wm.shell.recents.RecentTasksController;
 import com.android.wm.shell.splitscreen.SplitScreenController;
 import com.android.wm.shell.startingsurface.StartingWindowController;
+import com.android.wm.shell.transition.DefaultMixedHandler;
 import com.android.wm.shell.transition.Transitions;
 import com.android.wm.shell.unfold.UnfoldTransitionHandler;
 
@@ -131,6 +132,13 @@ public class ShellInitImpl {
         if (Transitions.ENABLE_SHELL_TRANSITIONS) {
             mTransitions.register(mShellTaskOrganizer);
             mUnfoldTransitionHandler.ifPresent(UnfoldTransitionHandler::init);
+            if (mSplitScreenOptional.isPresent() && mPipTouchHandlerOptional.isPresent()) {
+                final DefaultMixedHandler mixedHandler = new DefaultMixedHandler(mTransitions,
+                        mPipTouchHandlerOptional.get().getTransitionHandler(),
+                        mSplitScreenOptional.get().getTransitionHandler());
+                // Added at end so that it has highest priority.
+                mTransitions.addHandler(mixedHandler);
+            }
         }
 
         // TODO(b/181599115): This should really be the pip controller, but until we can provide the
