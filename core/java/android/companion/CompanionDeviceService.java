@@ -29,6 +29,7 @@ import android.os.IBinder;
 import android.util.Log;
 
 import java.util.Objects;
+import java.util.concurrent.Executor;
 
 /**
  * A service that receives calls from the system when the associated companion device appears
@@ -152,11 +153,9 @@ public abstract class CompanionDeviceService extends Service {
      * @param messageId system assigned id of the message to be sent
      * @param associationId association id of the associated device
      * @param message message to be sent
-     *
-     * @hide
      */
-    @MainThread
-    public void onDispatchMessage(int messageId, int associationId, @NonNull byte[] message) {
+    public void onMessageDispatchedFromSystem(int messageId, int associationId,
+            @NonNull byte[] message) {
         // do nothing. Companion apps can override this function for system to send messages.
     }
 
@@ -167,17 +166,31 @@ public abstract class CompanionDeviceService extends Service {
      * <p>Calling app must declare uses-permission
      * {@link android.Manifest.permission#DELIVER_COMPANION_MESSAGES}</p>
      *
+     * <p>Note 1: messageId was assigned by the system, and sender should send the messageId along
+     * with the message to the receiver. messageId will later be used for verification purpose.
+     * Misusing the messageId will result in no action.</p>
+     *
+     * <p>Note 2: associationId should be local to your device which is calling this API. It's not
+     * the associationId on your remote device. If you don't have one, you can call
+     * {@link CompanionDeviceManager#associate(AssociationRequest, Executor,
+     * CompanionDeviceManager.Callback)} to create one. Misusing the associationId will result in
+     * {@link DeviceNotAssociatedException}.</p>
+     *
      * @param messageId id of the message
      * @param associationId id of the associated device
-     * @param message messaged received from the associated device
-     *
-     * @hide
+     * @param message message received from the associated device
      */
     @RequiresPermission(android.Manifest.permission.DELIVER_COMPANION_MESSAGES)
-    public final void dispatchMessage(int messageId, int associationId, @NonNull byte[] message) {
+    public final void dispatchMessageToSystem(int messageId, int associationId,
+            @NonNull byte[] message)
+            throws DeviceNotAssociatedException {
         CompanionDeviceManager companionDeviceManager =
                 getSystemService(CompanionDeviceManager.class);
-        companionDeviceManager.dispatchMessage(messageId, associationId, message);
+        if (companionDeviceManager != null) {
+            companionDeviceManager.dispatchMessage(messageId, associationId, message);
+        } else {
+            Log.e(LOG_TAG, "CompanionDeviceManager is null. Can't dispatch messages.");
+        }
     }
 
     /**
@@ -239,9 +252,11 @@ public abstract class CompanionDeviceService extends Service {
         }
 
         @Override
-        public void onDispatchMessage(int messageId, int associationId, @NonNull byte[] message) {
+        public void onMessageDispatchedFromSystem(int messageId, int associationId,
+                @NonNull byte[] message) {
             mMainHandler.postAtFrontOfQueue(
-                    () -> mService.onDispatchMessage(messageId, associationId, message));
+                    () -> mService.onMessageDispatchedFromSystem(messageId, associationId,
+                            message));
         }
     }
 }

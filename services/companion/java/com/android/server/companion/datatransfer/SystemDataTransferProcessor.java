@@ -24,13 +24,12 @@ import static android.content.ComponentName.createRelative;
 
 import static com.android.server.companion.Utils.prepareForIpc;
 
-import static java.util.Objects.requireNonNull;
-
 import android.annotation.UserIdInt;
 import android.app.PendingIntent;
 import android.companion.AssociationInfo;
 import android.companion.DeviceNotAssociatedException;
-import android.companion.SystemDataTransferRequest;
+import android.companion.datatransfer.PermissionSyncRequest;
+import android.companion.datatransfer.SystemDataTransferRequest;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -58,7 +57,7 @@ public class SystemDataTransferProcessor {
     // Values from UI to SystemDataTransferProcessor via ResultReceiver
     private static final int RESULT_CODE_SYSTEM_DATA_TRANSFER_ALLOWED = 0;
     private static final int RESULT_CODE_SYSTEM_DATA_TRANSFER_DISALLOWED = 1;
-    private static final String EXTRA_SYSTEM_DATA_TRANSFER_REQUEST = "system_data_transfer_request";
+    private static final String EXTRA_PERMISSION_SYNC_REQUEST = "permission_sync_request";
     private static final String EXTRA_SYSTEM_DATA_TRANSFER_RESULT_RECEIVER =
             "system_data_transfer_result_receiver";
     private static final ComponentName SYSTEM_DATA_TRANSFER_REQUEST_APPROVAL_ACTIVITY =
@@ -78,35 +77,28 @@ public class SystemDataTransferProcessor {
     }
 
     /**
-     * Build a PendingIntent of user consent dialog
+     * Build a PendingIntent of permission sync user consent dialog
      */
-    public PendingIntent buildSystemDataTransferConfirmationIntent(@UserIdInt int userId,
-            SystemDataTransferRequest request) throws RemoteException {
+    public PendingIntent buildPermissionTransferUserConsentIntent(String packageName,
+            @UserIdInt int userId, int associationId) throws RemoteException {
         // The association must exist and either belong to the calling package,
         // or the calling package must hold REQUEST_SYSTEM_DATA_TRANSFER permission.
-        int associationId = request.getAssociationId();
         AssociationInfo association = mAssociationStore.getAssociationById(associationId);
         if (association == null) {
             throw new RemoteException(new DeviceNotAssociatedException(
                     "Association id: " + associationId + " doesn't exist."));
         } else {
-            // If the package is not the companion app which owns the association,
-            // it must hold REQUEST_SYSTEM_DATA_TRANSFER permission.
-            // TODO(b/204593788): uncomment the following with the API changes
-//            if (!association.getPackageName()
-//                    .equals(mContext.getPackageManager().getNameForUid(Binder.getCallingUid()))) {
-//                mContext.enforceCallingOrSelfPermission(
-//                        Manifest.permission.REQUEST_COMPANION_DEVICE_SYSTEM_DATA_TRANSFER,
-//                        "requestSystemDataTransfer requires REQUEST_SYSTEM_DATA_TRANSFER "
-//                                + "permission if the package doesn't own the association.");
-//            }
+            if (!association.getPackageName().equals(packageName)) {
+                Slog.e(LOG_TAG, "The calling package doesn't own the association.");
+                return null;
+            }
 
             // Check if the request's data type has been requested before.
             List<SystemDataTransferRequest> storedRequests =
                     mSystemDataTransferRequestStore.readRequestsByAssociationId(userId,
                             associationId);
             for (SystemDataTransferRequest storedRequest : storedRequests) {
-                if (request.hasSameDataType(storedRequest)) {
+                if (storedRequest instanceof PermissionSyncRequest) {
                     Slog.e(LOG_TAG, "The request has been sent before, you can not send "
                             + "the same request type again.");
                     return null;
@@ -114,13 +106,14 @@ public class SystemDataTransferProcessor {
             }
         }
 
-        Slog.i(LOG_TAG, "Creating PendingIntent for associationId: " + associationId + ", request: "
-                + request);
+        Slog.i(LOG_TAG, "Creating permission sync intent for userId=" + userId
+                + "associationId: " + associationId);
 
         // Create an internal intent to launch the user consent dialog
         final Bundle extras = new Bundle();
+        PermissionSyncRequest request = new PermissionSyncRequest(associationId);
         request.setUserId(userId);
-        extras.putParcelable(EXTRA_SYSTEM_DATA_TRANSFER_REQUEST, request);
+        extras.putParcelable(EXTRA_PERMISSION_SYNC_REQUEST, request);
         extras.putParcelable(EXTRA_SYSTEM_DATA_TRANSFER_RESULT_RECEIVER,
                 prepareForIpc(mOnSystemDataTransferRequestConfirmationReceiver));
 
@@ -147,14 +140,16 @@ public class SystemDataTransferProcessor {
 
                     if (resultCode == RESULT_CODE_SYSTEM_DATA_TRANSFER_ALLOWED
                             || resultCode == RESULT_CODE_SYSTEM_DATA_TRANSFER_DISALLOWED) {
-                        final SystemDataTransferRequest request =
-                                data.getParcelable(EXTRA_SYSTEM_DATA_TRANSFER_REQUEST);
-                        requireNonNull(request);
-
-                        request.setUserConsented(
-                                resultCode == RESULT_CODE_SYSTEM_DATA_TRANSFER_ALLOWED);
-                        Slog.i(LOG_TAG, "Recording request: " + request);
-                        mSystemDataTransferRequestStore.writeRequest(request.getUserId(), request);
+                        final PermissionSyncRequest request =
+                                data.getParcelable(EXTRA_PERMISSION_SYNC_REQUEST,
+                                        PermissionSyncRequest.class);
+                        if (request != null) {
+                            request.setUserConsented(
+                                    resultCode == RESULT_CODE_SYSTEM_DATA_TRANSFER_ALLOWED);
+                            Slog.i(LOG_TAG, "Recording request: " + request);
+                            mSystemDataTransferRequestStore.writeRequest(request.getUserId(),
+                                    request);
+                        }
 
                         return;
                     }

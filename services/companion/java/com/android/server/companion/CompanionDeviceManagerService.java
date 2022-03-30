@@ -97,6 +97,8 @@ import com.android.internal.util.DumpUtils;
 import com.android.server.FgThread;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
+import com.android.server.companion.datatransfer.SystemDataTransferProcessor;
+import com.android.server.companion.datatransfer.SystemDataTransferRequestStore;
 import com.android.server.companion.presence.CompanionDevicePresenceMonitor;
 import com.android.server.pm.UserManagerInternal;
 
@@ -128,7 +130,9 @@ public class CompanionDeviceManagerService extends SystemService {
     private final PersistUserStateHandler mUserPersistenceHandler;
 
     private final AssociationStoreImpl mAssociationStore;
+    private final SystemDataTransferRequestStore mSystemDataTransferRequestStore;
     private AssociationRequestsProcessor mAssociationRequestsProcessor;
+    private SystemDataTransferProcessor mSystemDataTransferProcessor;
     private CompanionDevicePresenceMonitor mDevicePresenceMonitor;
     private CompanionApplicationController mCompanionAppController;
 
@@ -162,6 +166,7 @@ public class CompanionDeviceManagerService extends SystemService {
 
         mUserPersistenceHandler = new PersistUserStateHandler();
         mAssociationStore = new AssociationStoreImpl();
+        mSystemDataTransferRequestStore = new SystemDataTransferRequestStore();
     }
 
     @Override
@@ -176,6 +181,8 @@ public class CompanionDeviceManagerService extends SystemService {
 
         mAssociationRequestsProcessor = new AssociationRequestsProcessor(
                 /* cdmService */this, mAssociationStore);
+        mSystemDataTransferProcessor = new SystemDataTransferProcessor(this, mAssociationStore,
+                mSystemDataTransferRequestStore);
 
         final Context context = getContext();
         mCompanionAppController = new CompanionApplicationController(
@@ -597,6 +604,18 @@ public class CompanionDeviceManagerService extends SystemService {
         public void dispatchMessage(int messageId, int associationId, byte[] message)
                 throws RemoteException {
             // TODO(b/199427116): implement.
+        }
+
+        @Override
+        public PendingIntent buildPermissionTransferUserConsentIntent(String packageName,
+                int userId, int associationId) throws RemoteException {
+            return mSystemDataTransferProcessor.buildPermissionTransferUserConsentIntent(
+                    packageName, userId, associationId);
+        }
+
+        @Override
+        public void startSystemDataTransfer(int userId, int associationId) throws RemoteException {
+            // TODO(b/222121838)
         }
 
         @Override

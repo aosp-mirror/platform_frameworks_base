@@ -774,7 +774,8 @@ public final class CompanionDeviceManager {
     }
 
     /**
-     * Dispatch a message to system for processing.
+     * Dispatch a message to system for processing. It should only be called by
+     * {@link CompanionDeviceService#dispatchMessageToSystem(int, int, byte[])}
      *
      * <p>Calling app must declare uses-permission
      * {@link android.Manifest.permission#DELIVER_COMPANION_MESSAGES}</p>
@@ -870,6 +871,66 @@ public final class CompanionDeviceManager {
         try {
             mService.notifyDeviceDisappeared(associationId);
         } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Build a permission sync user consent dialog.
+     *
+     * <p>Only the companion app which owns the association can call this method. Otherwise a null
+     * IntentSender will be returned from this method and an error will be logged.
+     * The The app should launch the {@link Activity} in the returned {@code intentSender}
+     * {@link IntentSender} by calling
+     * {@link Activity#startIntentSenderForResult(IntentSender, int, Intent, int, int, int)}.</p>
+     *
+     * <p>The permission transfer doesn't happen immediately after the call or user consented.
+     * The app needs to trigger the system data transfer manually by calling
+     * {@link #startSystemDataTransfer(int)}, when it confirms the communication channel between
+     * the two devices is established.</p>
+     *
+     * @param associationId The unique {@link AssociationInfo#getId ID} assigned to the association
+     *                      of the companion device recorded by CompanionDeviceManager
+     * @return An {@link IntentSender} that the app should use to launch the UI for
+     *         the user to confirm the system data transfer request.
+     */
+    @UserHandleAware
+    @Nullable
+    public IntentSender buildPermissionTransferUserConsentIntent(int associationId)
+            throws DeviceNotAssociatedException {
+        try {
+            PendingIntent pendingIntent = mService.buildPermissionTransferUserConsentIntent(
+                    mContext.getOpPackageName(),
+                    mContext.getUserId(),
+                    associationId);
+            if (pendingIntent == null) {
+                return null;
+            }
+            return pendingIntent.getIntentSender();
+        } catch (RemoteException e) {
+            ExceptionUtils.propagateIfInstanceOf(e.getCause(), DeviceNotAssociatedException.class);
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Start system data transfer which has been previously approved by the user.
+     *
+     * <p>Before calling this method, the app needs to make sure there's a communication channel
+     * between two devices, and has prompted user consent dialogs built by one of these methods:
+     * {@link #buildPermissionTransferUserConsentIntent(int)}.
+     * The transfer may fail if the communication channel is disconnected during the transfer.</p>
+     *
+     * @param associationId The unique {@link AssociationInfo#getId ID} assigned to the Association
+     *                      of the companion device recorded by CompanionDeviceManager
+     * @throws DeviceNotAssociatedException Exception if the companion device is not associated
+     */
+    @UserHandleAware
+    public void startSystemDataTransfer(int associationId) throws DeviceNotAssociatedException {
+        try {
+            mService.startSystemDataTransfer(mContext.getUserId(), associationId);
+        } catch (RemoteException e) {
+            ExceptionUtils.propagateIfInstanceOf(e.getCause(), DeviceNotAssociatedException.class);
             throw e.rethrowFromSystemServer();
         }
     }
