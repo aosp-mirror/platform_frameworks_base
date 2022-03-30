@@ -34,10 +34,12 @@ import org.junit.runners.Parameterized
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @Group4
-@FlakyTest(bugId = 217777115)
 class PipRotationTestShellTransit(testSpec: FlickerTestParameter) : PipRotationTest(testSpec) {
     @Before
     override fun before() {
         Assume.assumeTrue(isShellTransitionsEnabled)
     }
+
+    @FlakyTest(bugId = 227214914)
+    override fun pipLayerRotates_StartingBounds() = super.pipLayerRotates_StartingBounds()
 }
