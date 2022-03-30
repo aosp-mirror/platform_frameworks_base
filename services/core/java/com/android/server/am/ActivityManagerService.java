@@ -207,7 +207,7 @@ import android.app.usage.UsageStatsManagerInternal;
 import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetManagerInternal;
 import android.compat.annotation.ChangeId;
-import android.compat.annotation.EnabledSince;
+import android.compat.annotation.Disabled;
 import android.content.AttributionSource;
 import android.content.AutofillOptions;
 import android.content.BroadcastReceiver;
@@ -460,14 +460,6 @@ public class ActivityManagerService extends IActivityManager.Stub
     private static final String SYSTEM_PROPERTY_DEVICE_PROVISIONED =
             "persist.sys.device_provisioned";
 
-    /**
-     * Enabling this flag enforces the requirement for context registered receivers to use one of
-     * {@link Context#RECEIVER_EXPORTED} or {@link Context#RECEIVER_NOT_EXPORTED} for unprotected
-     * broadcasts
-     */
-    private static final boolean ENFORCE_DYNAMIC_RECEIVER_EXPLICIT_EXPORT =
-            SystemProperties.getBoolean("fw.enforce_dynamic_receiver_explicit_export", false);
-
     static final String TAG = TAG_WITH_CLASS_NAME ? "ActivityManagerService" : TAG_AM;
     static final String TAG_BACKUP = TAG + POSTFIX_BACKUP;
     private static final String TAG_BROADCAST = TAG + POSTFIX_BROADCAST;
@@ -584,7 +576,7 @@ public class ActivityManagerService extends IActivityManager.Stub
      * unprotected broadcast in code.
      */
     @ChangeId
-    @EnabledSince(targetSdkVersion = Build.VERSION_CODES.TIRAMISU)
+    @Disabled
     private static final long DYNAMIC_RECEIVER_EXPLICIT_EXPORT_REQUIRED = 161145287L;
 
     /**
@@ -13068,25 +13060,14 @@ public class ActivityManagerService extends IActivityManager.Stub
                     // sticky broadcast, no flag specified (flag isn't required)
                     flags |= Context.RECEIVER_EXPORTED;
                 } else if (requireExplicitFlagForDynamicReceivers && !explicitExportStateDefined) {
-                    if (ENFORCE_DYNAMIC_RECEIVER_EXPLICIT_EXPORT) {
-                        throw new SecurityException(
-                                callerPackage + ": Targeting T+ (version "
-                                        + Build.VERSION_CODES.TIRAMISU
-                                        + " and above) requires that one of RECEIVER_EXPORTED or "
-                                        + "RECEIVER_NOT_EXPORTED be specified when registering a "
-                                        + "receiver");
-                    } else {
-                        Slog.wtf(TAG,
-                                callerPackage + ": Targeting T+ (version "
-                                        + Build.VERSION_CODES.TIRAMISU
-                                        + " and above) requires that one of RECEIVER_EXPORTED or "
-                                        + "RECEIVER_NOT_EXPORTED be specified when registering a "
-                                        + "receiver");
-                        // Assume default behavior-- flag check is not enforced
-                        flags |= Context.RECEIVER_EXPORTED;
-                    }
-                } else if (!requireExplicitFlagForDynamicReceivers) {
-                    // Change is not enabled, thus not targeting T+. Assume exported.
+                    throw new SecurityException(
+                            callerPackage + ": One of RECEIVER_EXPORTED or "
+                                    + "RECEIVER_NOT_EXPORTED should be specified when a receiver "
+                                    + "isn't being registered exclusively for system broadcasts");
+                    // Assume default behavior-- flag check is not enforced
+                } else if (!requireExplicitFlagForDynamicReceivers && (
+                        (flags & Context.RECEIVER_NOT_EXPORTED) == 0)) {
+                    // Change is not enabled, assume exported unless otherwise specified.
                     flags |= Context.RECEIVER_EXPORTED;
                 }
             } else if ((flags & Context.RECEIVER_NOT_EXPORTED) == 0) {
