@@ -16,7 +16,6 @@
 
 package com.android.server.job;
 
-import static com.android.server.job.JobSchedulerService.MAX_JOB_CONTEXTS_COUNT;
 import static com.android.server.job.JobSchedulerService.RESTRICTED_INDEX;
 import static com.android.server.job.JobSchedulerService.sElapsedRealtimeClock;
 
@@ -82,6 +81,11 @@ class JobConcurrencyManager {
     private static final String TAG = JobSchedulerService.TAG + ".Concurrency";
     private static final boolean DEBUG = JobSchedulerService.DEBUG;
 
+    /** The maximum number of concurrent jobs we'll aim to run at one time. */
+    public static final int STANDARD_CONCURRENCY_LIMIT = 16;
+    /** The maximum number of objects we should retain in memory when not in use. */
+    private static final int MAX_RETAINED_OBJECTS = (int) (1.5 * STANDARD_CONCURRENCY_LIMIT);
+
     static final String CONFIG_KEY_PREFIX_CONCURRENCY = "concurrency_";
     private static final String KEY_SCREEN_OFF_ADJUSTMENT_DELAY_MS =
             CONFIG_KEY_PREFIX_CONCURRENCY + "screen_off_adjustment_delay_ms";
@@ -93,7 +97,7 @@ class JobConcurrencyManager {
     @VisibleForTesting
     static final String KEY_PKG_CONCURRENCY_LIMIT_REGULAR =
             CONFIG_KEY_PREFIX_CONCURRENCY + "pkg_concurrency_limit_regular";
-    private static final int DEFAULT_PKG_CONCURRENCY_LIMIT_REGULAR = MAX_JOB_CONTEXTS_COUNT / 2;
+    private static final int DEFAULT_PKG_CONCURRENCY_LIMIT_REGULAR = STANDARD_CONCURRENCY_LIMIT / 2;
 
     /**
      * Set of possible execution types that a job can have. The actual type(s) of a job are based
@@ -309,7 +313,7 @@ class JobConcurrencyManager {
     private final ArrayList<ContextAssignment> mRecycledStoppable = new ArrayList<>();
 
     private final Pools.Pool<ContextAssignment> mContextAssignmentPool =
-            new Pools.SimplePool<>(MAX_JOB_CONTEXTS_COUNT);
+            new Pools.SimplePool<>(MAX_RETAINED_OBJECTS);
 
     /**
      * Set of JobServiceContexts that are actively running jobs.
@@ -317,14 +321,16 @@ class JobConcurrencyManager {
     final List<JobServiceContext> mActiveServices = new ArrayList<>();
 
     /** Set of JobServiceContexts that aren't currently running any jobs. */
-    final ArraySet<JobServiceContext> mIdleContexts = new ArraySet<>();
+    private final ArraySet<JobServiceContext> mIdleContexts = new ArraySet<>();
+
+    private int mNumDroppedContexts = 0;
 
     private final ArraySet<JobStatus> mRunningJobs = new ArraySet<>();
 
     private final WorkCountTracker mWorkCountTracker = new WorkCountTracker();
 
     private final Pools.Pool<PackageStats> mPkgStatsPool =
-            new Pools.SimplePool<>(MAX_JOB_CONTEXTS_COUNT);
+            new Pools.SimplePool<>(MAX_RETAINED_OBJECTS);
 
     private final SparseArrayMap<String, PackageStats> mActivePkgStats = new SparseArrayMap<>();
 
@@ -406,7 +412,7 @@ class JobConcurrencyManager {
     void onThirdPartyAppsCanStart() {
         final IBatteryStats batteryStats = IBatteryStats.Stub.asInterface(
                 ServiceManager.getService(BatteryStats.SERVICE_NAME));
-        for (int i = 0; i < MAX_JOB_CONTEXTS_COUNT; i++) {
+        for (int i = 0; i < STANDARD_CONCURRENCY_LIMIT; i++) {
             mIdleContexts.add(
                     new JobServiceContext(mService, this, batteryStats,
                             mService.mJobPackageTracker, mContext.getMainLooper()));
@@ -655,13 +661,13 @@ class JobConcurrencyManager {
         }
         preferredUidOnly.sort(sDeterminationComparator);
         stoppable.sort(sDeterminationComparator);
-        for (int i = numRunningJobs; i < MAX_JOB_CONTEXTS_COUNT; ++i) {
+        for (int i = numRunningJobs; i < STANDARD_CONCURRENCY_LIMIT; ++i) {
             final JobServiceContext jsc;
             final int numIdleContexts = mIdleContexts.size();
             if (numIdleContexts > 0) {
                 jsc = mIdleContexts.removeAt(numIdleContexts - 1);
             } else {
-                Slog.wtf(TAG, "Had fewer than " + MAX_JOB_CONTEXTS_COUNT + " in existence");
+                Slog.wtf(TAG, "Had fewer than " + STANDARD_CONCURRENCY_LIMIT + " in existence");
                 jsc = createNewJobServiceContext();
             }
 
@@ -681,6 +687,7 @@ class JobConcurrencyManager {
 
         JobStatus nextPending;
         pendingJobQueue.resetIterator();
+        int projectedRunningCount = numRunningJobs;
         while ((nextPending = pendingJobQueue.next()) != null) {
             if (mRunningJobs.contains(nextPending)) {
                 continue;
@@ -694,6 +701,9 @@ class JobConcurrencyManager {
             ContextAssignment selectedContext = null;
             final int allWorkTypes = getJobWorkTypes(nextPending);
             final boolean pkgConcurrencyOkay = !isPkgConcurrencyLimitedLocked(nextPending);
+            final boolean isTopEj = nextPending.shouldTreatAsExpeditedJob()
+                    && nextPending.lastEvaluatedBias == JobInfo.BIAS_TOP_APP;
+            final boolean isInOverage = projectedRunningCount > STANDARD_CONCURRENCY_LIMIT;
             boolean startingJob = false;
             if (idle.size() > 0) {
                 final int idx = idle.size() - 1;
@@ -711,14 +721,36 @@ class JobConcurrencyManager {
                     assignment.newWorkType = workType;
                 }
             }
-            if (selectedContext == null) {
+            if (selectedContext == null && stoppable.size() > 0) {
+                int topEjCount = 0;
+                for (int r = mRunningJobs.size() - 1; r >= 0; --r) {
+                    JobStatus js = mRunningJobs.valueAt(r);
+                    if (js.startedAsExpeditedJob && js.lastEvaluatedBias == JobInfo.BIAS_TOP_APP) {
+                        topEjCount++;
+                    }
+                }
                 for (int s = stoppable.size() - 1; s >= 0; --s) {
                     final ContextAssignment assignment = stoppable.get(s);
                     final JobStatus runningJob = assignment.context.getRunningJobLocked();
-                    // Maybe stop the job if it has had its day in the sun. Don't let a different
-                    // app preempt jobs started for TOP apps though.
-                    if (runningJob.lastEvaluatedBias < JobInfo.BIAS_TOP_APP
-                            && assignment.shouldStopJobReason != null) {
+                    // Maybe stop the job if it has had its day in the sun. Only allow replacing
+                    // for one of the following conditions:
+                    // 1. We're putting in the current TOP app's EJ
+                    // 2. There aren't too many jobs running AND the current job started when the
+                    //    app was in the background
+                    // 3. There aren't too many jobs running AND the current job started when the
+                    //    app was on TOP, but the app has since left TOP
+                    // 4. There aren't too many jobs running AND the current job started when the
+                    //    app was on TOP, the app is still TOP, but there are too many TOP+EJs
+                    //    running (because we don't want them to starve out other apps and the
+                    //    current job has already run for the minimum guaranteed time).
+                    boolean canReplace = isTopEj; // Case 1
+                    if (!canReplace && !isInOverage) {
+                        final int currentJobBias = mService.evaluateJobBiasLocked(runningJob);
+                        canReplace = runningJob.lastEvaluatedBias < JobInfo.BIAS_TOP_APP // Case 2
+                                || currentJobBias < JobInfo.BIAS_TOP_APP // Case 3
+                                || topEjCount > .5 * mWorkTypeConfig.getMaxTotal(); // Case 4
+                    }
+                    if (canReplace) {
                         int replaceWorkType = mWorkCountTracker.canJobStart(allWorkTypes,
                                 assignment.context.getRunningJobWorkType());
                         if (replaceWorkType != WORK_TYPE_NONE) {
@@ -736,7 +768,7 @@ class JobConcurrencyManager {
                     }
                 }
             }
-            if (selectedContext == null) {
+            if (selectedContext == null && (!isInOverage || isTopEj)) {
                 int lowestBiasSeen = Integer.MAX_VALUE;
                 for (int p = preferredUidOnly.size() - 1; p >= 0; --p) {
                     final ContextAssignment assignment = preferredUidOnly.get(p);
@@ -765,10 +797,43 @@ class JobConcurrencyManager {
                     preferredUidOnly.remove(selectedContext);
                 }
             }
+            // Make sure to run EJs for the TOP app immediately.
+            if (isTopEj) {
+                if (selectedContext != null
+                        && selectedContext.context.getRunningJobLocked() != null) {
+                    // We're "replacing" a currently running job, but we want TOP EJs to start
+                    // immediately, so we'll start the EJ on a fresh available context and
+                    // stop this currently running job to replace in two steps.
+                    changed.add(selectedContext);
+                    projectedRunningCount--;
+                    selectedContext.newJob = null;
+                    selectedContext.newWorkType = WORK_TYPE_NONE;
+                    selectedContext = null;
+                }
+                if (selectedContext == null) {
+                    selectedContext = mContextAssignmentPool.acquire();
+                    if (selectedContext == null) {
+                        selectedContext = new ContextAssignment();
+                    }
+                    selectedContext.context = mIdleContexts.size() > 0
+                            ? mIdleContexts.removeAt(mIdleContexts.size() - 1)
+                            : createNewJobServiceContext();
+                    selectedContext.newJob = nextPending;
+                    final int workType = mWorkCountTracker.canJobStart(allWorkTypes);
+                    selectedContext.newWorkType =
+                            (workType != WORK_TYPE_NONE) ? workType : WORK_TYPE_TOP;
+                }
+            }
             final PackageStats packageStats = getPkgStatsLocked(
                     nextPending.getSourceUserId(), nextPending.getSourcePackageName());
             if (selectedContext != null) {
                 changed.add(selectedContext);
+                if (selectedContext.context.getRunningJobLocked() != null) {
+                    projectedRunningCount--;
+                }
+                if (selectedContext.newJob != null) {
+                    projectedRunningCount++;
+                }
                 packageStats.adjustStagedCount(true, nextPending.shouldTreatAsExpeditedJob());
             }
             if (startingJob) {
@@ -793,7 +858,7 @@ class JobConcurrencyManager {
                 if (DEBUG) {
                     Slog.d(TAG, "preempting job: " + js);
                 }
-                // preferredUid will be set to uid of currently running job.
+                // preferredUid will be set to uid of currently running job, if appropriate.
                 assignment.context.cancelExecutingJobLocked(
                         assignment.preemptReasonCode,
                         JobParameters.INTERNAL_STOP_REASON_PREEMPT, assignment.preemptReason);
@@ -811,9 +876,6 @@ class JobConcurrencyManager {
         }
         for (int s = stoppable.size() - 1; s >= 0; --s) {
             final ContextAssignment assignment = stoppable.get(s);
-            // The preferred UID is set when we cancel with PREEMPT reason, but don't preserve the
-            // UID for any stoppable contexts since we want to open the context up to any/all apps.
-            assignment.context.clearPreferredUid();
             assignment.clear();
             mContextAssignmentPool.release(assignment);
         }
@@ -835,6 +897,21 @@ class JobConcurrencyManager {
         mWorkCountTracker.resetStagingCount();
         mActivePkgStats.forEach(mPackageStatsStagingCountClearer);
         noteConcurrency();
+    }
+
+    @GuardedBy("mLock")
+    void onUidBiasChangedLocked(int prevBias, int newBias) {
+        if (prevBias != JobInfo.BIAS_TOP_APP && newBias != JobInfo.BIAS_TOP_APP) {
+            // TOP app didn't change. Nothing to do.
+            return;
+        }
+        if (mService.getPendingJobQueue().size() == 0) {
+            // Nothing waiting for the top app to leave. Nothing to do.
+            return;
+        }
+        // Don't stop the TOP jobs directly. Instead, see if they would be replaced by some
+        // pending job (there may not always be something to replace them).
+        assignJobsToContextsLocked();
     }
 
     @GuardedBy("mLock")
@@ -1041,7 +1118,13 @@ class JobConcurrencyManager {
         mWorkCountTracker.onJobFinished(workType);
         mRunningJobs.remove(jobStatus);
         mActiveServices.remove(worker);
-        mIdleContexts.add(worker);
+        if (mIdleContexts.size() < MAX_RETAINED_OBJECTS) {
+            // Don't need to save all new contexts, but keep some extra around in case we need
+            // extras for another TOP+EJ overage.
+            mIdleContexts.add(worker);
+        } else {
+            mNumDroppedContexts++;
+        }
         final PackageStats packageStats =
                 mActivePkgStats.get(jobStatus.getSourceUserId(), jobStatus.getSourcePackageName());
         if (packageStats == null) {
@@ -1052,6 +1135,14 @@ class JobConcurrencyManager {
                 mActivePkgStats.delete(packageStats.userId, packageStats.packageName);
                 mPkgStatsPool.release(packageStats);
             }
+        }
+
+        if (mActiveServices.size() >= STANDARD_CONCURRENCY_LIMIT) {
+            worker.clearPreferredUid();
+            // We're over the limit (because the TOP app scheduled a lot of EJs). Don't start
+            // running anything new until we get back below the limit.
+            noteConcurrency();
+            return;
         }
 
         final PendingJobQueue pendingJobQueue = mService.getPendingJobQueue();
@@ -1245,6 +1336,18 @@ class JobConcurrencyManager {
                 }
             } else if (mWorkCountTracker.getPendingJobCount(WORK_TYPE_EJ) > 0) {
                 return "blocking " + workTypeToString(WORK_TYPE_EJ) + " queue";
+            } else if (js.startedAsExpeditedJob && js.lastEvaluatedBias == JobInfo.BIAS_TOP_APP) {
+                // Try not to let TOP + EJ starve out other apps.
+                int topEjCount = 0;
+                for (int r = mRunningJobs.size() - 1; r >= 0; --r) {
+                    JobStatus j = mRunningJobs.valueAt(r);
+                    if (j.startedAsExpeditedJob && j.lastEvaluatedBias == JobInfo.BIAS_TOP_APP) {
+                        topEjCount++;
+                    }
+                }
+                if (topEjCount > .5 * mWorkTypeConfig.getMaxTotal()) {
+                    return "prevent top EJ dominance";
+                }
             }
             // No other pending EJs. Return null so we don't let regular jobs preempt an EJ.
             return null;
@@ -1361,10 +1464,10 @@ class JobConcurrencyManager {
         CONFIG_LIMITS_SCREEN_OFF.low.update(properties);
         CONFIG_LIMITS_SCREEN_OFF.critical.update(properties);
 
-        // Package concurrency limits must in the range [1, MAX_JOB_CONTEXTS_COUNT].
-        mPkgConcurrencyLimitEj = Math.max(1, Math.min(MAX_JOB_CONTEXTS_COUNT,
+        // Package concurrency limits must in the range [1, STANDARD_CONCURRENCY_LIMIT].
+        mPkgConcurrencyLimitEj = Math.max(1, Math.min(STANDARD_CONCURRENCY_LIMIT,
                 properties.getInt(KEY_PKG_CONCURRENCY_LIMIT_EJ, DEFAULT_PKG_CONCURRENCY_LIMIT_EJ)));
-        mPkgConcurrencyLimitRegular = Math.max(1, Math.min(MAX_JOB_CONTEXTS_COUNT,
+        mPkgConcurrencyLimitRegular = Math.max(1, Math.min(STANDARD_CONCURRENCY_LIMIT,
                 properties.getInt(
                         KEY_PKG_CONCURRENCY_LIMIT_REGULAR, DEFAULT_PKG_CONCURRENCY_LIMIT_REGULAR)));
     }
@@ -1492,6 +1595,13 @@ class JobConcurrencyManager {
             jsc.dumpLocked(pw, nowElapsed);
         }
         pw.decreaseIndent();
+
+        if (mNumDroppedContexts > 0) {
+            pw.println();
+            pw.print("Dropped ");
+            pw.print(mNumDroppedContexts);
+            pw.println(" contexts");
+        }
     }
 
     public void dumpProtoLocked(ProtoOutputStream proto, long tag, long now, long nowRealtime) {
@@ -1600,7 +1710,7 @@ class JobConcurrencyManager {
         WorkTypeConfig(@NonNull String configIdentifier, int defaultMaxTotal,
                 List<Pair<Integer, Integer>> defaultMin, List<Pair<Integer, Integer>> defaultMax) {
             mConfigIdentifier = configIdentifier;
-            mDefaultMaxTotal = mMaxTotal = Math.min(defaultMaxTotal, MAX_JOB_CONTEXTS_COUNT);
+            mDefaultMaxTotal = mMaxTotal = Math.min(defaultMaxTotal, STANDARD_CONCURRENCY_LIMIT);
             int numReserved = 0;
             for (int i = defaultMin.size() - 1; i >= 0; --i) {
                 mDefaultMinReservedSlots.put(defaultMin.get(i).first, defaultMin.get(i).second);
@@ -1621,8 +1731,8 @@ class JobConcurrencyManager {
         }
 
         void update(@NonNull DeviceConfig.Properties properties) {
-            // Ensure total in the range [1, MAX_JOB_CONTEXTS_COUNT].
-            mMaxTotal = Math.max(1, Math.min(MAX_JOB_CONTEXTS_COUNT,
+            // Ensure total in the range [1, STANDARD_CONCURRENCY_LIMIT].
+            mMaxTotal = Math.max(1, Math.min(STANDARD_CONCURRENCY_LIMIT,
                     properties.getInt(KEY_PREFIX_MAX_TOTAL + mConfigIdentifier, mDefaultMaxTotal)));
 
             mMaxAllowedSlots.clear();
