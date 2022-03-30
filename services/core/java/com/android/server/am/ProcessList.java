@@ -482,9 +482,8 @@ public final class ProcessList {
      * Having a global counter ensures that seq numbers are monotonically increasing for a
      * particular uid even when the uidRecord is re-created.
      */
-    @GuardedBy("mService")
     @VisibleForTesting
-    long mProcStateSeqCounter = 0;
+    volatile long mProcStateSeqCounter = 0;
 
     /**
      * A global counter for generating sequence numbers to uniquely identify pending process starts.
@@ -4954,6 +4953,10 @@ public final class ProcessList {
                 }
             }
         }
+    }
+
+    long getProcStateSeqCounter() {
+        return mProcStateSeqCounter;
     }
 
     /**
