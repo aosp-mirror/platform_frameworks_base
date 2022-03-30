@@ -996,7 +996,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 final int changes = ActivityManager.UID_OBSERVER_PROCSTATE
                         | ActivityManager.UID_OBSERVER_GONE
                         | ActivityManager.UID_OBSERVER_CAPABILITY;
-                mActivityManager.registerUidObserver(mUidObserver, changes,
+                mActivityManagerInternal.registerNetworkPolicyUidObserver(mUidObserver, changes,
                         NetworkPolicyManager.FOREGROUND_THRESHOLD_STATE, "android");
                 mNetworkManager.registerObserver(mAlertObserver);
             } catch (RemoteException e) {
