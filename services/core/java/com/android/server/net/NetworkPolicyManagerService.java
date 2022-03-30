@@ -5027,8 +5027,8 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         }
         if (oldEffectiveBlockedReasons != newEffectiveBlockedReasons) {
             postBlockedReasonsChangedMsg(uid,
-                    oldEffectiveBlockedReasons,
-                    newEffectiveBlockedReasons);
+                    newEffectiveBlockedReasons,
+                    oldEffectiveBlockedReasons);
 
             postUidRulesChangedMsg(uid, uidRules);
         }
