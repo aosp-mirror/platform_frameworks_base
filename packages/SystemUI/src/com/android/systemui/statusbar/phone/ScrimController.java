@@ -1024,6 +1024,10 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
         if (aodWallpaperTimeout || occludedKeyguard) {
             mBehindAlpha = 1;
         }
+        // Prevent notification scrim flicker when transitioning away from keyguard.
+        if (mKeyguardStateController.isKeyguardGoingAway()) {
+            mNotificationsAlpha = 0;
+        }
         setScrimAlpha(mScrimInFront, mInFrontAlpha);
         setScrimAlpha(mScrimBehind, mBehindAlpha);
         setScrimAlpha(mNotificationsScrim, mNotificationsAlpha);
