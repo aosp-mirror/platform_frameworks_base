@@ -23,6 +23,7 @@ import static android.view.WindowManager.LayoutParams.FLAG_SECURE;
 import static android.view.WindowManager.LayoutParams.SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.StringRes;
 import android.app.Activity;
@@ -34,7 +35,8 @@ import android.companion.virtual.IVirtualDevice;
 import android.companion.virtual.IVirtualDeviceActivityListener;
 import android.companion.virtual.VirtualDeviceManager.ActivityListener;
 import android.companion.virtual.VirtualDeviceParams;
-import android.companion.virtual.audio.IAudioSessionCallback;
+import android.companion.virtual.audio.IAudioConfigChangedCallback;
+import android.companion.virtual.audio.IAudioRoutingCallback;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -269,7 +271,9 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
 
     @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
     @Override // Binder call
-    public void onAudioSessionStarting(int displayId, IAudioSessionCallback callback) {
+    public void onAudioSessionStarting(int displayId,
+            @NonNull IAudioRoutingCallback routingCallback,
+            @Nullable IAudioConfigChangedCallback configChangedCallback) {
         mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.CREATE_VIRTUAL_DEVICE,
                 "Permission required to start audio session");
@@ -283,7 +287,8 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
             if (mVirtualAudioController == null) {
                 mVirtualAudioController = new VirtualAudioController(mContext);
                 GenericWindowPolicyController gwpc = mWindowPolicyControllers.get(displayId);
-                mVirtualAudioController.startListening(gwpc, callback);
+                mVirtualAudioController.startListening(gwpc, routingCallback,
+                        configChangedCallback);
             }
         }
     }
