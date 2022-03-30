@@ -75,7 +75,7 @@ class RoundedCornerResDelegateTest : SysuiTestCase() {
     fun testUpdateTuningSizeFactor() {
         mContext.orCreateTestableResources.addOverrides(
                 mockTypeArray = mockTypedArray,
-                radiusTop = 0,
+                radiusTop = 2,
                 radiusBottom = 0,
                 multipleRadius = false)
 
