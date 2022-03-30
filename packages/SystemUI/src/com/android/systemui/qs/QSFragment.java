@@ -262,9 +262,13 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
         if (mListening) {
             setListening(false);
         }
-        mQSCustomizerController.setQs(null);
+        if (mQSCustomizerController != null) {
+            mQSCustomizerController.setQs(null);
+        }
         mScrollListener = null;
-        mDumpManager.unregisterDumpable(mContainer.getClass().getName());
+        if (mContainer != null) {
+            mDumpManager.unregisterDumpable(mContainer.getClass().getName());
+        }
     }
 
     @Override
@@ -272,7 +276,9 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
         super.onSaveInstanceState(outState);
         outState.putBoolean(EXTRA_EXPANDED, mQsExpanded);
         outState.putBoolean(EXTRA_LISTENING, mListening);
-        mQSCustomizerController.saveInstanceState(outState);
+        if (mQSCustomizerController != null) {
+            mQSCustomizerController.saveInstanceState(outState);
+        }
         if (mQsExpanded) {
             mQSPanelController.getTileLayout().saveInstanceState(outState);
         }
