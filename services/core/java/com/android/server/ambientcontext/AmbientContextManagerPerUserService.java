@@ -217,9 +217,13 @@ final class AmbientContextManagerPerUserService extends
             RemoteCallback detectionResultCallback, RemoteCallback statusCallback) {
         Slog.d(TAG, "Requested detection of " + request.getEventTypes());
         synchronized (mLock) {
-            ensureRemoteServiceInitiated();
-            mRemoteService.startDetection(request, callingPackage, detectionResultCallback,
-                    statusCallback);
+            if (setUpServiceIfNeeded()) {
+                ensureRemoteServiceInitiated();
+                mRemoteService.startDetection(request, callingPackage, detectionResultCallback,
+                        statusCallback);
+            } else {
+                Slog.w(TAG, "No valid component found for AmbientContextDetectionService");
+            }
         }
     }
 
@@ -371,8 +375,10 @@ final class AmbientContextManagerPerUserService extends
     void stopDetection(String packageName) {
         Slog.d(TAG, "Stop detection for " + packageName);
         synchronized (mLock) {
-            ensureRemoteServiceInitiated();
-            mRemoteService.stopDetection(packageName);
+            if (mComponentName != null) {
+                ensureRemoteServiceInitiated();
+                mRemoteService.stopDetection(packageName);
+            }
         }
     }
 
