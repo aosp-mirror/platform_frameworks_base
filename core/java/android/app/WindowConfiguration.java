@@ -222,9 +222,6 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
     })
     public @interface WindowConfig {}
 
-    /** @hide */
-    public static final int PINNED_WINDOWING_MODE_ELEVATION_IN_DIP = 5;
-
     @UnsupportedAppUsage
     public WindowConfiguration() {
         unset();
