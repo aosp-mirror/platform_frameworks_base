@@ -105,10 +105,11 @@ std::shared_ptr<InputApplicationHandle> android_view_InputApplicationHandle_getH
 
 jobject android_view_InputApplicationHandle_fromInputApplicationInfo(
         JNIEnv* env, gui::InputApplicationInfo inputApplicationInfo) {
-    jobject binderObject = javaObjectForIBinder(env, inputApplicationInfo.token);
+    ScopedLocalRef<jobject> binderObject(env,
+                                         javaObjectForIBinder(env, inputApplicationInfo.token));
     ScopedLocalRef<jstring> name(env, env->NewStringUTF(inputApplicationInfo.name.data()));
     return env->NewObject(gInputApplicationHandleClassInfo.clazz,
-                          gInputApplicationHandleClassInfo.ctor, binderObject, name.get(),
+                          gInputApplicationHandleClassInfo.ctor, binderObject.get(), name.get(),
                           inputApplicationInfo.dispatchingTimeoutMillis);
 }
 
