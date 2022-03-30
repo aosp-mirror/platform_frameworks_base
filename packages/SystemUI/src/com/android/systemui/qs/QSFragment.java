@@ -600,7 +600,7 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
         } else if (progress > 0 && view.getVisibility() != View.VISIBLE) {
             view.setVisibility((View.VISIBLE));
         }
-        float alpha = (mState == StatusBarState.KEYGUARD || mState == StatusBarState.SHADE_LOCKED)
+        float alpha = mQSPanelController.bouncerInTransit()
                 ? BouncerPanelExpansionCalculator.getBackScrimScaledExpansion(progress)
                 : ShadeInterpolation.getContentAlpha(progress);
         view.setAlpha(alpha);
