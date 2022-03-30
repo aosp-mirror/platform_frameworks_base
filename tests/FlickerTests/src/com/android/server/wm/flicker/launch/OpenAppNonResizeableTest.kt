@@ -17,7 +17,6 @@
 package com.android.server.wm.flicker.launch
 
 import androidx.test.filters.FlakyTest
-import android.platform.test.annotations.Postsubmit
 import android.platform.test.annotations.Presubmit
 import android.platform.test.annotations.RequiresDevice
 import android.view.Surface
@@ -99,7 +98,7 @@ open class OpenAppNonResizeableTest(testSpec: FlickerTestParameter)
      * Checks that the nav bar starts the transition invisible, then becomes visible during
      * the unlocking animation and remains visible at the end of the transition
      */
-    @Postsubmit
+    @Presubmit
     @Test
     fun navBarWindowsVisibilityChanges() {
         testSpec.assertWm {

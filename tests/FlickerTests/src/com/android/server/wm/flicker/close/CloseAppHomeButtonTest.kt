@@ -16,6 +16,7 @@
 
 package com.android.server.wm.flicker.close
 
+import android.platform.test.annotations.Presubmit
 import androidx.test.filters.FlakyTest
 import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
@@ -23,9 +24,6 @@ import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.annotation.Group4
 import com.android.server.wm.flicker.dsl.FlickerBuilder
-import com.android.server.wm.flicker.helpers.isShellTransitionsEnabled
-import org.junit.Assume.assumeFalse
-import org.junit.Assume.assumeTrue
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -82,19 +80,31 @@ class CloseAppHomeButtonTest(testSpec: FlickerTestParameter) : CloseAppTransitio
     override fun navBarLayerRotatesAndScales() = super.navBarLayerRotatesAndScales()
 
     /** {@inheritDoc} */
-    @FlakyTest(bugId = 206753786)
+    @FlakyTest(bugId = 227430489)
     @Test
     override fun statusBarLayerRotatesScales() {
-        // This test doesn't work in shell transitions because of b/206753786
-        assumeFalse(isShellTransitionsEnabled)
         super.statusBarLayerRotatesScales()
     }
 
-    @FlakyTest(bugId = 214452854)
+    /** {@inheritDoc} */
+    @Presubmit
     @Test
-    fun statusBarLayerRotatesScales_shellTransit() {
-        assumeTrue(isShellTransitionsEnabled)
-        super.statusBarLayerRotatesScales()
+    override fun launcherLayerReplacesApp() {
+        super.launcherLayerReplacesApp()
+    }
+
+    /** {@inheritDoc} */
+    @Presubmit
+    @Test
+    override fun entireScreenCovered() {
+        super.entireScreenCovered()
+    }
+
+    /** {@inheritDoc} */
+    @Presubmit
+    @Test
+    override fun visibleLayersShownMoreThanOneConsecutiveEntry() {
+        super.visibleLayersShownMoreThanOneConsecutiveEntry()
     }
 
     companion object {
