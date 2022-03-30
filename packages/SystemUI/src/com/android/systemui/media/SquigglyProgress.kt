@@ -13,6 +13,7 @@ import android.graphics.PixelFormat
 import android.graphics.drawable.Drawable
 import android.os.SystemClock
 import androidx.annotation.VisibleForTesting
+import com.android.internal.graphics.ColorUtils
 import com.android.systemui.animation.Interpolators
 import kotlin.math.abs
 import kotlin.math.cos
@@ -157,8 +158,7 @@ class SquigglyProgress : Drawable() {
     }
 
     override fun setAlpha(alpha: Int) {
-        wavePaint.alpha = alpha
-        linePaint.alpha = (DISABLED_ALPHA * (alpha / 255f)).toInt()
+        updateColors(wavePaint.color, alpha)
     }
 
     override fun getAlpha(): Int {
@@ -166,8 +166,7 @@ class SquigglyProgress : Drawable() {
     }
 
     override fun setTint(tintColor: Int) {
-        wavePaint.color = tintColor
-        linePaint.color = tintColor
+        updateColors(tintColor, alpha)
     }
 
     override fun onLevelChange(level: Int): Boolean {
@@ -178,7 +177,12 @@ class SquigglyProgress : Drawable() {
         if (tint == null) {
             return
         }
-        wavePaint.color = tint.defaultColor
-        linePaint.color = tint.defaultColor
+        updateColors(tint.defaultColor, alpha)
+    }
+
+    private fun updateColors(tintColor: Int, alpha: Int) {
+        wavePaint.color = ColorUtils.setAlphaComponent(tintColor, alpha)
+        linePaint.color = ColorUtils.setAlphaComponent(tintColor,
+                (DISABLED_ALPHA * (alpha / 255f)).toInt())
     }
 }
