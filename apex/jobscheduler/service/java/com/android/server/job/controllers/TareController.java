@@ -289,9 +289,9 @@ public class TareController extends StateController {
             };
 
     /**
-     * List of jobs that started while the UID was in the TOP state. There will be no more than
-     * 16 ({@link JobSchedulerService#MAX_JOB_CONTEXTS_COUNT}) running at once, so an ArraySet is
-     * fine.
+     * List of jobs that started while the UID was in the TOP state. There will usually be no more
+     * than {@value JobConcurrencyManager#MAX_STANDARD_JOB_CONCURRENCY} running at once, so an
+     * ArraySet is fine.
      */
     @GuardedBy("mLock")
     private final ArraySet<JobStatus> mTopStartedJobs = new ArraySet<>();
