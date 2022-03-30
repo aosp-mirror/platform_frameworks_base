@@ -350,11 +350,6 @@ public class QuickAccessWalletClientImpl implements QuickAccessWalletClient, Ser
         return mServiceInfo == null ? null : mServiceInfo.getShortcutLongLabel(mContext);
     }
 
-    @Override
-    public boolean useTargetActivityForQuickAccess() {
-        return mServiceInfo.getUseTargetActivityForQuickAccess();
-    }
-
     private void connect() {
         mHandler.post(this::connectInternal);
     }
