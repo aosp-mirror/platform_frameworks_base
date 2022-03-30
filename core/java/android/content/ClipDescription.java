@@ -134,6 +134,26 @@ public class ClipDescription implements Parcelable {
     public static final String EXTRA_LOGGING_INSTANCE_ID =
             "android.intent.extra.LOGGING_INSTANCE_ID";
 
+    /**
+     * Indicates that a ClipData contains potentially sensitive information, such as a
+     * password or credit card number.
+     * <p>
+     * Type: boolean
+     * </p>
+     * <p>
+     * This extra can be used to indicate that a ClipData contains sensitive information that
+     * should be redacted or hidden from view until a user takes explicit action to reveal it
+     * (e.g., by pasting).
+     * </p>
+     * <p>
+     * Adding this extra does not change clipboard behavior or add additional security to
+     * the ClipData. Its purpose is essentially a rendering hint from the source application,
+     * asking that the data within be obfuscated or redacted, unless the user has taken action
+     * to make it visible.
+     * </p>
+     */
+    public static final String EXTRA_IS_SENSITIVE = "android.content.extra.IS_SENSITIVE";
+
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(value =
