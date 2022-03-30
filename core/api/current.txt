@@ -33410,6 +33410,7 @@ package android.print {
 
   public final class PrintManager {
     method @NonNull public java.util.List<android.print.PrintJob> getPrintJobs();
+    method public boolean isPrintServiceEnabled(@NonNull android.content.ComponentName);
     method @NonNull public android.print.PrintJob print(@NonNull String, @NonNull android.print.PrintDocumentAdapter, @Nullable android.print.PrintAttributes);
   }
 
