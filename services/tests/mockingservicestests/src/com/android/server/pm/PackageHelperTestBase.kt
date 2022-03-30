@@ -112,14 +112,14 @@ open class PackageHelperTestBase {
         Mockito.doReturn(DIALER_PACKAGE).`when`(defaultAppProvider)
                 .getDefaultDialer(eq(TEST_USER_ID))
         Mockito.doReturn(arrayOf(INSTALLER_PACKAGE)).`when`(pms).getKnownPackageNamesInternal(
-                any(), eq(PackageManagerInternal.PACKAGE_INSTALLER), eq(TEST_USER_ID))
+                any(), eq(KnownPackages.PACKAGE_INSTALLER), eq(TEST_USER_ID))
         Mockito.doReturn(arrayOf(UNINSTALLER_PACKAGE)).`when`(pms).getKnownPackageNamesInternal(
-                any(), eq(PackageManagerInternal.PACKAGE_UNINSTALLER), eq(TEST_USER_ID))
+                any(), eq(KnownPackages.PACKAGE_UNINSTALLER), eq(TEST_USER_ID))
         Mockito.doReturn(arrayOf(VERIFIER_PACKAGE)).`when`(pms).getKnownPackageNamesInternal(
-                any(), eq(PackageManagerInternal.PACKAGE_VERIFIER), eq(TEST_USER_ID))
+                any(), eq(KnownPackages.PACKAGE_VERIFIER), eq(TEST_USER_ID))
         Mockito.doReturn(arrayOf(PERMISSION_CONTROLLER_PACKAGE)).`when`(pms)
                 .getKnownPackageNamesInternal(any(),
-                        eq(PackageManagerInternal.PACKAGE_PERMISSION_CONTROLLER), eq(TEST_USER_ID))
+                        eq(KnownPackages.PACKAGE_PERMISSION_CONTROLLER), eq(TEST_USER_ID))
     }
 
     private fun createPackageManagerService(vararg stageExistingPackages: String):

@@ -22,6 +22,7 @@ import android.os.Binder
 import android.os.PersistableBundle
 import android.util.ArrayMap
 import android.util.SparseArray
+import com.android.server.pm.KnownPackages
 import com.android.server.pm.pkg.PackageStateInternal
 import com.android.server.testutils.any
 import com.android.server.testutils.eq
