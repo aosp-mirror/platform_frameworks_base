@@ -427,7 +427,7 @@ final class InstallPackageHelper {
         } else {
             // We're doing major surgery on this package, so it better be frozen
             // right now to keep it from launching
-            mPm.checkPackageFrozen(pkgName);
+            mPm.snapshotComputer().checkPackageFrozen(pkgName);
         }
 
         final boolean isReplace =
