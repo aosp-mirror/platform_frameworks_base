@@ -25,12 +25,14 @@ import android.content.pm.ProviderInfo;
 import android.content.pm.ResolveInfo;
 
 import com.android.server.pm.Computer;
+import com.android.server.pm.DumpState;
 import com.android.server.pm.PackageManagerTracedLock;
 import com.android.server.pm.UserManagerService;
 import com.android.server.pm.pkg.component.ParsedActivity;
 import com.android.server.pm.pkg.component.ParsedProvider;
 import com.android.server.pm.pkg.component.ParsedService;
 
+import java.io.PrintWriter;
 import java.util.List;
 
 public abstract class ComponentResolverLocked extends ComponentResolverBase {
@@ -187,6 +189,53 @@ public abstract class ComponentResolverLocked extends ComponentResolverBase {
             @NonNull List<ProviderInfo> outInfo, boolean safeMode, @UserIdInt int userId) {
         synchronized (mLock) {
             super.querySyncProviders(computer, outNames, outInfo, safeMode, userId);
+        }
+    }
+
+    @Override
+    public void dumpActivityResolvers(@NonNull PrintWriter pw, @NonNull DumpState dumpState,
+            @NonNull String packageName) {
+        synchronized (mLock) {
+            super.dumpActivityResolvers(pw, dumpState, packageName);
+        }
+    }
+
+    @Override
+    public void dumpProviderResolvers(@NonNull PrintWriter pw, @NonNull DumpState dumpState,
+            @NonNull String packageName) {
+        synchronized (mLock) {
+            super.dumpProviderResolvers(pw, dumpState, packageName);
+        }
+    }
+
+    @Override
+    public void dumpReceiverResolvers(@NonNull PrintWriter pw, @NonNull DumpState dumpState,
+            @NonNull String packageName) {
+        synchronized (mLock) {
+            super.dumpReceiverResolvers(pw, dumpState, packageName);
+        }
+    }
+
+    @Override
+    public void dumpServiceResolvers(@NonNull PrintWriter pw, @NonNull DumpState dumpState,
+            @NonNull String packageName) {
+        synchronized (mLock) {
+            super.dumpServiceResolvers(pw, dumpState, packageName);
+        }
+    }
+
+    @Override
+    public void dumpContentProviders(@NonNull Computer computer, @NonNull PrintWriter pw,
+            @NonNull DumpState dumpState, @NonNull String packageName) {
+        synchronized (mLock) {
+            super.dumpContentProviders(computer, pw, dumpState, packageName);
+        }
+    }
+
+    @Override
+    public void dumpServicePermissions(@NonNull PrintWriter pw, @NonNull DumpState dumpState) {
+        synchronized (mLock) {
+            super.dumpServicePermissions(pw, dumpState);
         }
     }
 }

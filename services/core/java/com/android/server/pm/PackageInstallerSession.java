@@ -1745,7 +1745,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     private static boolean isSecureFrpInstallAllowed(Context context, int callingUid) {
         final PackageManagerInternal pmi = LocalServices.getService(PackageManagerInternal.class);
         final String[] systemInstaller = pmi.getKnownPackageNames(
-                PackageManagerInternal.PACKAGE_INSTALLER, UserHandle.USER_SYSTEM);
+                KnownPackages.PACKAGE_INSTALLER, UserHandle.USER_SYSTEM);
         final AndroidPackage callingInstaller = pmi.getPackage(callingUid);
         if (callingInstaller != null
                 && ArrayUtils.contains(systemInstaller, callingInstaller.getPackageName())) {
