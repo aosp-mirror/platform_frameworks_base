@@ -45,6 +45,7 @@ import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
+import com.android.systemui.dump.DumpManager;
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
 import com.android.systemui.plugins.ClockPlugin;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
@@ -101,6 +102,8 @@ public class KeyguardClockSwitchControllerTest extends SysuiTestCase {
     private ClockPlugin mClockPlugin;
     @Mock
     ColorExtractor.GradientColors mGradientColors;
+    @Mock
+    DumpManager mDumpManager;
 
     @Mock
     private NotificationIconContainer mNotificationIcons;
@@ -149,12 +152,12 @@ public class KeyguardClockSwitchControllerTest extends SysuiTestCase {
                 mBroadcastDispatcher,
                 mBatteryController,
                 mKeyguardUpdateMonitor,
-                mBypassController,
                 mSmartspaceController,
                 mKeyguardUnlockAnimationController,
                 mSecureSettings,
                 mExecutor,
-                mResources
+                mResources,
+                mDumpManager
         );
 
         when(mStatusBarStateController.getState()).thenReturn(StatusBarState.SHADE);

@@ -109,12 +109,9 @@
     <string name="bluetooth_battery_level" msgid="2893696778200201555">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> заряду акумулятора"</string>
     <string name="bluetooth_battery_level_untethered" msgid="4002282355111504349">"Л: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> заряду акумулятора, П: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> заряду акумулятора"</string>
     <string name="bluetooth_active_no_battery_level" msgid="4155462233006205630">"Активовано"</string>
-    <!-- no translation found for bluetooth_hearing_aid_left_active (7084887715570971441) -->
-    <skip />
-    <!-- no translation found for bluetooth_hearing_aid_right_active (8574683234077567230) -->
-    <skip />
-    <!-- no translation found for bluetooth_hearing_aid_left_and_right_active (407704460573163973) -->
-    <skip />
+    <string name="bluetooth_hearing_aid_left_active" msgid="7084887715570971441">"Активовано, лише лівий"</string>
+    <string name="bluetooth_hearing_aid_right_active" msgid="8574683234077567230">"Активовано, лише правий"</string>
+    <string name="bluetooth_hearing_aid_left_and_right_active" msgid="407704460573163973">"Активовано, лівий і правий"</string>
     <string name="bluetooth_profile_a2dp" msgid="4632426382762851724">"Звук медіа-файлів"</string>
     <string name="bluetooth_profile_headset" msgid="5395952236133499331">"Телефонні дзвінки"</string>
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"Передавання файлів"</string>
