@@ -8093,14 +8093,17 @@ public final class ViewRootImpl implements ViewParent,
     private void setFrame(Rect frame) {
         mWinFrame.set(frame);
 
+        final WindowConfiguration winConfig = getConfiguration().windowConfiguration;
+        mPendingBackDropFrame.set(mPendingDragResizing && !winConfig.useWindowFrameForBackdrop()
+                ? winConfig.getMaxBounds()
+                : frame);
         // Surface position is now inherited from parent, and BackdropFrameRenderer uses backdrop
         // frame to position content. Thus, we just keep the size of backdrop frame, and remove the
         // offset to avoid double offset from display origin.
-        mPendingBackDropFrame.set(frame);
         mPendingBackDropFrame.offsetTo(0, 0);
 
         mInsetsController.onFrameChanged(mOverrideInsetsFrame != null ?
-            mOverrideInsetsFrame : frame);
+                mOverrideInsetsFrame : frame);
     }
 
     /**
