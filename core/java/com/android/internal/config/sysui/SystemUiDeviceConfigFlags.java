@@ -514,9 +514,10 @@ public final class SystemUiDeviceConfigFlags {
             "is_nearby_share_first_target_in_ranked_app";
 
     /**
-     * (boolean) Whether to enable the new unbundled "delegate chooser" implementation.
+     * (boolean) Whether to enable the new unbundled sharesheet
+     * (com.android.intentresolver.ChooserActivity).
      */
-    public static final String USE_DELEGATE_CHOOSER = "use_delegate_chooser";
+    public static final String USE_UNBUNDLED_SHARESHEET = "use_unbundled_sharesheet";
 
     /**
      * (int) The delay (in ms) before refreshing the Sharesheet UI after a change to the share
