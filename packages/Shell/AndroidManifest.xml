@@ -495,6 +495,9 @@
     <!-- Permission needed for CTS test - DefaultDisplayModeTest -->
     <uses-permission android:name="android.permission.MODIFY_USER_PREFERRED_DISPLAY_MODE" />
 
+    <!-- Permissions needed for manual testing telephony time zone detector behavior -->
+    <uses-permission android:name="android.permission.SUGGEST_TELEPHONY_TIME_AND_ZONE" />
+
     <!-- Permissions needed for CTS test - TimeManagerTest -->
     <uses-permission android:name="android.permission.MANAGE_TIME_AND_ZONE_DETECTION" />
     <uses-permission android:name="android.permission.SUGGEST_EXTERNAL_TIME" />
