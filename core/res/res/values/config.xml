@@ -4105,12 +4105,6 @@
     <!-- Intent extra key for the event code int array while requesting ambient context consent. -->
     <string translatable="false" name="config_ambientContextEventArrayExtraKey"></string>
 
-    <!-- The component name for the system-wide captions service.
-         This service must be trusted, as it controls part of the UI of the volume bar.
-         Example: "com.android.captions/.SystemCaptionsService"
-    -->
-    <string name="config_defaultSystemCaptionsService" translatable="false"></string>
-
     <!-- The component name for the system-wide captions manager service.
          This service must be trusted, as the system binds to it and keeps it running.
          Example: "com.android.captions/.SystemCaptionsManagerService"
