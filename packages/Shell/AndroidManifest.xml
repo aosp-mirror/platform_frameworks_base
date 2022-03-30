@@ -671,6 +671,9 @@
     <!-- Permission required for CTS test - CtsTelephonyTestCases -->
     <uses-permission android:name="android.permission.BIND_TELECOM_CONNECTION_SERVICE" />
 
+    <!-- Permission required for CTS test - CtsPersistentDataBlockManagerTestCases -->
+    <uses-permission android:name="android.permission.ACCESS_PDB_STATE" />
+
     <!-- Permission required for CTS test - CtsAppEnumerationTestCases -->
     <uses-permission android:name="android.permission.MAKE_UID_VISIBLE" />
 
