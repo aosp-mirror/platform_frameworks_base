@@ -416,6 +416,7 @@ public final class Parcel {
      */
     public final void recycle() {
         if (DEBUG_RECYCLE) mStack = null;
+        mClassCookies = null;
         freeBuffer();
 
         final Parcel[] pool;
