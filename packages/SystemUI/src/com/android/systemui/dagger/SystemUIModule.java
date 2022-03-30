@@ -45,7 +45,6 @@ import com.android.systemui.lowlightclock.LowLightClockController;
 import com.android.systemui.model.SysUiState;
 import com.android.systemui.navigationbar.NavigationBarComponent;
 import com.android.systemui.plugins.BcSmartspaceDataPlugin;
-import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.screenshot.dagger.ScreenshotModule;
 import com.android.systemui.settings.dagger.SettingsModule;
@@ -72,6 +71,7 @@ import com.android.systemui.statusbar.phone.ShadeController;
 import com.android.systemui.statusbar.phone.dagger.CentralSurfacesComponent;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
+import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.ZenModeController;
 import com.android.systemui.statusbar.policy.dagger.SmartRepliesInflationModule;
 import com.android.systemui.statusbar.policy.dagger.StatusBarPolicyModule;
@@ -198,25 +198,43 @@ public abstract class SystemUIModule {
     static Optional<BubblesManager> provideBubblesManager(Context context,
             Optional<Bubbles> bubblesOptional,
             NotificationShadeWindowController notificationShadeWindowController,
-            StatusBarStateController statusBarStateController, ShadeController shadeController,
+            KeyguardStateController keyguardStateController,
+            ShadeController shadeController,
             ConfigurationController configurationController,
             @Nullable IStatusBarService statusBarService,
             INotificationManager notificationManager,
             NotificationVisibilityProvider visibilityProvider,
             NotificationInterruptStateProvider interruptionStateProvider,
-            ZenModeController zenModeController, NotificationLockscreenUserManager notifUserManager,
-            NotificationGroupManagerLegacy groupManager, NotificationEntryManager entryManager,
+            ZenModeController zenModeController,
+            NotificationLockscreenUserManager notifUserManager,
+            NotificationGroupManagerLegacy groupManager,
+            NotificationEntryManager entryManager,
             CommonNotifCollection notifCollection,
-            NotifPipeline notifPipeline, SysUiState sysUiState,
-            NotifPipelineFlags notifPipelineFlags, DumpManager dumpManager,
+            NotifPipeline notifPipeline,
+            SysUiState sysUiState,
+            NotifPipelineFlags notifPipelineFlags,
+            DumpManager dumpManager,
             @Main Executor sysuiMainExecutor) {
-        return Optional.ofNullable(BubblesManager.create(context, bubblesOptional,
-                notificationShadeWindowController, statusBarStateController, shadeController,
-                configurationController, statusBarService, notificationManager,
+        return Optional.ofNullable(BubblesManager.create(context,
+                bubblesOptional,
+                notificationShadeWindowController,
+                keyguardStateController,
+                shadeController,
+                configurationController,
+                statusBarService,
+                notificationManager,
                 visibilityProvider,
-                interruptionStateProvider, zenModeController, notifUserManager,
-                groupManager, entryManager, notifCollection, notifPipeline, sysUiState,
-                notifPipelineFlags, dumpManager, sysuiMainExecutor));
+                interruptionStateProvider,
+                zenModeController,
+                notifUserManager,
+                groupManager,
+                entryManager,
+                notifCollection,
+                notifPipeline,
+                sysUiState,
+                notifPipelineFlags,
+                dumpManager,
+                sysuiMainExecutor));
     }
 
     @BindsOptionalOf
