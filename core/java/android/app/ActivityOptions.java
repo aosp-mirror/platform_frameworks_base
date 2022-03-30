@@ -365,6 +365,9 @@ public class ActivityOptions extends ComponentOptions {
     private static final String KEY_DISMISS_KEYGUARD_IF_INSECURE =
             "android.activity.dismissKeyguardIfInsecure";
 
+    private static final String KEY_IGNORE_PENDING_INTENT_CREATOR_FOREGROUND_STATE =
+            "android.activity.ignorePendingIntentCreatorForegroundState";
+
     /**
      * @see #setLaunchCookie
      * @hide
@@ -462,6 +465,7 @@ public class ActivityOptions extends ComponentOptions {
     private boolean mTransientLaunch;
     private PictureInPictureParams mLaunchIntoPipParams;
     private boolean mDismissKeyguardIfInsecure;
+    private boolean mIgnorePendingIntentCreatorForegroundState;
 
     /**
      * Create an ActivityOptions specifying a custom animation to run when
@@ -1260,6 +1264,8 @@ public class ActivityOptions extends ComponentOptions {
         mIsEligibleForLegacyPermissionPrompt =
                 opts.getBoolean(KEY_LEGACY_PERMISSION_PROMPT_ELIGIBLE);
         mDismissKeyguardIfInsecure = opts.getBoolean(KEY_DISMISS_KEYGUARD_IF_INSECURE);
+        mIgnorePendingIntentCreatorForegroundState = opts.getBoolean(
+                KEY_IGNORE_PENDING_INTENT_CREATOR_FOREGROUND_STATE);
     }
 
     /**
@@ -1877,6 +1883,23 @@ public class ActivityOptions extends ComponentOptions {
     }
 
     /**
+     * Sets background activity launch logic won't use pending intent creator foreground state.
+     * @hide
+     */
+    public void setIgnorePendingIntentCreatorForegroundState(boolean state) {
+        mIgnorePendingIntentCreatorForegroundState = state;
+    }
+
+    /**
+     * @return whether background activity launch logic should use pending intent creator
+     * foreground state.
+     * @hide
+     */
+    public boolean getIgnorePendingIntentCreatorForegroundState() {
+        return mIgnorePendingIntentCreatorForegroundState;
+    }
+
+    /**
      * Update the current values in this ActivityOptions from those supplied
      * in <var>otherOptions</var>.  Any values
      * defined in <var>otherOptions</var> replace those in the base options.
@@ -2139,6 +2162,10 @@ public class ActivityOptions extends ComponentOptions {
         }
         if (mDismissKeyguardIfInsecure) {
             b.putBoolean(KEY_DISMISS_KEYGUARD_IF_INSECURE, mDismissKeyguardIfInsecure);
+        }
+        if (mIgnorePendingIntentCreatorForegroundState) {
+            b.putBoolean(KEY_IGNORE_PENDING_INTENT_CREATOR_FOREGROUND_STATE,
+                    mIgnorePendingIntentCreatorForegroundState);
         }
         return b;
     }

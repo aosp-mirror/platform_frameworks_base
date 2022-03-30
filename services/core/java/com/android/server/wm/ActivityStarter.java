@@ -1268,29 +1268,36 @@ class ActivityStarter {
             boolean allowBackgroundActivityStart, Intent intent, ActivityOptions checkedOptions) {
         // don't abort for the most important UIDs
         final int callingAppId = UserHandle.getAppId(callingUid);
-        if (callingUid == Process.ROOT_UID || callingAppId == Process.SYSTEM_UID
-                || callingAppId == Process.NFC_UID) {
-            if (DEBUG_ACTIVITY_STARTS) {
-                Slog.d(TAG, "Activity start allowed for important callingUid (" + callingUid + ")");
+        final boolean useCallingUidState =
+                originatingPendingIntent == null || checkedOptions == null
+                        || !checkedOptions.getIgnorePendingIntentCreatorForegroundState();
+        if (useCallingUidState) {
+            if (callingUid == Process.ROOT_UID || callingAppId == Process.SYSTEM_UID
+                    || callingAppId == Process.NFC_UID) {
+                if (DEBUG_ACTIVITY_STARTS) {
+                    Slog.d(TAG,
+                            "Activity start allowed for important callingUid (" + callingUid + ")");
+                }
+                return false;
             }
-            return false;
-        }
 
-        // Always allow home application to start activities.
-        if (isHomeApp(callingUid, callingPackage)) {
-            if (DEBUG_ACTIVITY_STARTS) {
-                Slog.d(TAG, "Activity start allowed for home app callingUid (" + callingUid + ")");
+            // Always allow home application to start activities.
+            if (isHomeApp(callingUid, callingPackage)) {
+                if (DEBUG_ACTIVITY_STARTS) {
+                    Slog.d(TAG,
+                            "Activity start allowed for home app callingUid (" + callingUid + ")");
+                }
+                return false;
             }
-            return false;
-        }
 
-        // IME should always be allowed to start activity, like IME settings.
-        final WindowState imeWindow = mRootWindowContainer.getCurrentInputMethodWindow();
-        if (imeWindow != null && callingAppId == imeWindow.mOwnerUid) {
-            if (DEBUG_ACTIVITY_STARTS) {
-                Slog.d(TAG, "Activity start allowed for active ime (" + callingUid + ")");
+            // IME should always be allowed to start activity, like IME settings.
+            final WindowState imeWindow = mRootWindowContainer.getCurrentInputMethodWindow();
+            if (imeWindow != null && callingAppId == imeWindow.mOwnerUid) {
+                if (DEBUG_ACTIVITY_STARTS) {
+                    Slog.d(TAG, "Activity start allowed for active ime (" + callingUid + ")");
+                }
+                return false;
             }
-            return false;
         }
 
         // This is used to block background activity launch even if the app is still
@@ -1310,9 +1317,11 @@ class ActivityStarter {
         // is allowed, or apps like live wallpaper with non app visible window will be allowed.
         final boolean appSwitchAllowedOrFg =
                 appSwitchState == APP_SWITCH_ALLOW || appSwitchState == APP_SWITCH_FG_ONLY;
-        if (((appSwitchAllowedOrFg || mService.mActiveUids.hasNonAppVisibleWindow(callingUid))
+        final boolean allowCallingUidStartActivity =
+                ((appSwitchAllowedOrFg || mService.mActiveUids.hasNonAppVisibleWindow(callingUid))
                 && callingUidHasAnyVisibleWindow)
-                || isCallingUidPersistentSystemProcess) {
+                || isCallingUidPersistentSystemProcess;
+        if (useCallingUidState && allowCallingUidStartActivity) {
             if (DEBUG_ACTIVITY_STARTS) {
                 Slog.d(TAG, "Activity start allowed: callingUidHasAnyVisibleWindow = " + callingUid
                         + ", isCallingUidPersistentSystemProcess = "
@@ -1400,47 +1409,52 @@ class ActivityStarter {
                 return false;
             }
         }
-        // don't abort if the callingUid has START_ACTIVITIES_FROM_BACKGROUND permission
-        if (mService.checkPermission(START_ACTIVITIES_FROM_BACKGROUND, callingPid, callingUid)
-                == PERMISSION_GRANTED) {
-            if (DEBUG_ACTIVITY_STARTS) {
-                Slog.d(TAG,
-                        "Background activity start allowed: START_ACTIVITIES_FROM_BACKGROUND "
-                                + "permission granted for uid "
-                                + callingUid);
+        if (useCallingUidState) {
+            // don't abort if the callingUid has START_ACTIVITIES_FROM_BACKGROUND permission
+            if (mService.checkPermission(
+                    START_ACTIVITIES_FROM_BACKGROUND, callingPid, callingUid)
+                    == PERMISSION_GRANTED) {
+                if (DEBUG_ACTIVITY_STARTS) {
+                    Slog.d(TAG,
+                            "Background activity start allowed: START_ACTIVITIES_FROM_BACKGROUND "
+                                    + "permission granted for uid "
+                                    + callingUid);
+                }
+                return false;
             }
-            return false;
-        }
-        // don't abort if the caller has the same uid as the recents component
-        if (mSupervisor.mRecentTasks.isCallerRecents(callingUid)) {
-            if (DEBUG_ACTIVITY_STARTS) {
-                Slog.d(TAG, "Background activity start allowed: callingUid (" + callingUid
-                        + ") is recents");
+            // don't abort if the caller has the same uid as the recents component
+            if (mSupervisor.mRecentTasks.isCallerRecents(callingUid)) {
+                if (DEBUG_ACTIVITY_STARTS) {
+                    Slog.d(TAG, "Background activity start allowed: callingUid (" + callingUid
+                            + ") is recents");
+                }
+                return false;
             }
-            return false;
-        }
-        // don't abort if the callingUid is the device owner
-        if (mService.isDeviceOwner(callingUid)) {
-            if (DEBUG_ACTIVITY_STARTS) {
-                Slog.d(TAG, "Background activity start allowed: callingUid (" + callingUid
-                        + ") is device owner");
+            // don't abort if the callingUid is the device owner
+            if (mService.isDeviceOwner(callingUid)) {
+                if (DEBUG_ACTIVITY_STARTS) {
+                    Slog.d(TAG, "Background activity start allowed: callingUid (" + callingUid
+                            + ") is device owner");
+                }
+                return false;
             }
-            return false;
-        }
-        // don't abort if the callingUid has companion device
-        final int callingUserId = UserHandle.getUserId(callingUid);
-        if (mService.isAssociatedCompanionApp(callingUserId, callingUid)) {
-            if (DEBUG_ACTIVITY_STARTS) {
-                Slog.d(TAG, "Background activity start allowed: callingUid (" + callingUid
-                        + ") is companion app");
+            // don't abort if the callingUid has companion device
+            final int callingUserId = UserHandle.getUserId(callingUid);
+            if (mService.isAssociatedCompanionApp(callingUserId,
+                    callingUid)) {
+                if (DEBUG_ACTIVITY_STARTS) {
+                    Slog.d(TAG, "Background activity start allowed: callingUid (" + callingUid
+                            + ") is companion app");
+                }
+                return false;
             }
-            return false;
-        }
-        // don't abort if the callingUid has SYSTEM_ALERT_WINDOW permission
-        if (mService.hasSystemAlertWindowPermission(callingUid, callingPid, callingPackage)) {
-            Slog.w(TAG, "Background activity start for " + callingPackage
-                    + " allowed because SYSTEM_ALERT_WINDOW permission is granted.");
-            return false;
+            // don't abort if the callingUid has SYSTEM_ALERT_WINDOW permission
+            if (mService.hasSystemAlertWindowPermission(callingUid,
+                    callingPid, callingPackage)) {
+                Slog.w(TAG, "Background activity start for " + callingPackage
+                        + " allowed because SYSTEM_ALERT_WINDOW permission is granted.");
+                return false;
+            }
         }
         // If we don't have callerApp at this point, no caller was provided to startActivity().
         // That's the case for PendingIntent-based starts, since the creator's process might not be
@@ -1452,7 +1466,7 @@ class ActivityStarter {
             callerAppUid = realCallingUid;
         }
         // don't abort if the callerApp or other processes of that uid are allowed in any way
-        if (callerApp != null) {
+        if (callerApp != null && useCallingUidState) {
             // first check the original calling process
             if (callerApp.areBackgroundActivityStartsAllowed(appSwitchState)) {
                 if (DEBUG_ACTIVITY_STARTS) {

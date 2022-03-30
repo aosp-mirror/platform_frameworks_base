@@ -55,6 +55,7 @@ import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
+import android.app.ActivityOptions;
 import android.app.AnrController;
 import android.app.AppOpsManager;
 import android.app.IActivityManager;
@@ -3528,9 +3529,12 @@ class StorageManagerService extends IStorageManager.Stub
                     appInfo.manageSpaceActivityName);
             intent.setFlags(FLAG_ACTIVITY_NEW_TASK);
 
+            final ActivityOptions options = ActivityOptions.makeBasic();
+            options.setIgnorePendingIntentCreatorForegroundState(true);
+
             PendingIntent activity = PendingIntent.getActivity(targetAppContext, requestCode,
                     intent,
-                    FLAG_ONE_SHOT | FLAG_CANCEL_CURRENT | FLAG_IMMUTABLE);
+                    FLAG_ONE_SHOT | FLAG_CANCEL_CURRENT | FLAG_IMMUTABLE, options.toBundle());
             return activity;
         } catch (PackageManager.NameNotFoundException e) {
             throw new IllegalArgumentException(
