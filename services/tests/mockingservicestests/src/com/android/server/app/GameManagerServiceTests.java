@@ -19,6 +19,7 @@ package com.android.server.app;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
@@ -49,6 +50,7 @@ import android.content.res.XmlResourceParser;
 import android.hardware.power.Mode;
 import android.os.Bundle;
 import android.os.PowerManagerInternal;
+import android.os.UserManager;
 import android.os.test.TestLooper;
 import android.platform.test.annotations.Presubmit;
 import android.provider.DeviceConfig;
@@ -69,6 +71,8 @@ import org.mockito.Mock;
 import org.mockito.MockitoSession;
 import org.mockito.quality.Strictness;
 
+import java.io.File;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -79,7 +83,7 @@ import java.util.function.Supplier;
 @Presubmit
 public class GameManagerServiceTests {
     @Mock MockContext mMockContext;
-    private static final String TAG = "GameServiceTests";
+    private static final String TAG = "GameManagerServiceTests";
     private static final String PACKAGE_NAME_INVALID = "com.android.app";
     private static final int USER_ID_1 = 1001;
     private static final int USER_ID_2 = 1002;
@@ -91,6 +95,8 @@ public class GameManagerServiceTests {
     private PackageManager mMockPackageManager;
     @Mock
     private PowerManagerInternal mMockPowerManager;
+    @Mock
+    private UserManager mMockUserManager;
 
     // Stolen from ConnectivityServiceTest.MockContext
     class MockContext extends ContextWrapper {
@@ -150,6 +156,15 @@ public class GameManagerServiceTests {
         public PackageManager getPackageManager() {
             return mMockPackageManager;
         }
+
+        @Override
+        public Object getSystemService(String name) {
+            switch (name) {
+                case Context.USER_SERVICE:
+                    return mMockUserManager;
+            }
+            throw new UnsupportedOperationException("Couldn't find system service: " + name);
+        }
     }
 
     @Before
@@ -196,6 +211,19 @@ public class GameManagerServiceTests {
         UserInfo userInfo = new UserInfo(userId, "name", 0);
         gameManagerService.onUserStarting(new SystemService.TargetUser(userInfo));
         mTestLooper.dispatchAll();
+    }
+
+    private void switchUser(GameManagerService gameManagerService, int from, int to) {
+        UserInfo userInfoFrom = new UserInfo(from, "name", 0);
+        UserInfo userInfoTo = new UserInfo(to, "name", 0);
+        gameManagerService.onUserSwitching(/* from */ new SystemService.TargetUser(userInfoFrom),
+                /* to */ new SystemService.TargetUser(userInfoTo));
+        mTestLooper.dispatchAll();
+    }
+
+    private void mockManageUsersGranted() {
+        mMockContext.setPermission(Manifest.permission.MANAGE_USERS,
+                PackageManager.PERMISSION_GRANTED);
     }
 
     private void mockModifyGameModeGranted() {
@@ -819,6 +847,7 @@ public class GameManagerServiceTests {
         GameManagerService gameManagerService = new GameManagerService(
                 mMockContext, mTestLooper.getLooper());
         startUser(gameManagerService, USER_ID_1);
+
         gameManagerService.setGameModeConfigOverride(mPackageName, USER_ID_1,
                 GameManager.GAME_MODE_PERFORMANCE, "120", "0.3");
         gameManagerService.setGameModeConfigOverride(mPackageName, USER_ID_1,
@@ -1245,5 +1274,134 @@ public class GameManagerServiceTests {
     @Test
     public void testSetGameStateNotLoading() {
         setGameState(false);
+    }
+
+    private List<String> readGameModeInterventionList() throws Exception {
+        final File interventionFile = new File(InstrumentationRegistry.getContext().getFilesDir(),
+                "system/game_mode_intervention.list");
+        assertNotNull(interventionFile);
+        List<String> output = Files.readAllLines(interventionFile.toPath());
+        return output;
+    }
+
+    private void mockInterventionListForMultipleUsers() {
+        final String[] packageNames = new String[] {"com.android.app0",
+                "com.android.app1", "com.android.app2"};
+
+        final ApplicationInfo[] applicationInfos = new ApplicationInfo[3];
+        final PackageInfo[] pis = new PackageInfo[3];
+        for (int i = 0; i < 3; ++i) {
+            applicationInfos[i] = new ApplicationInfo();
+            applicationInfos[i].category = ApplicationInfo.CATEGORY_GAME;
+            applicationInfos[i].packageName = packageNames[i];
+
+            pis[i] = new PackageInfo();
+            pis[i].packageName = packageNames[i];
+            pis[i].applicationInfo = applicationInfos[i];
+        }
+
+        final List<PackageInfo> userOnePackages = new ArrayList<>();
+        final List<PackageInfo> userTwoPackages = new ArrayList<>();
+        userOnePackages.add(pis[1]);
+        userTwoPackages.add(pis[0]);
+        userTwoPackages.add(pis[2]);
+
+        final List<UserInfo> userInfos = new ArrayList<>(2);
+        userInfos.add(new UserInfo());
+        userInfos.add(new UserInfo());
+        userInfos.get(0).id = USER_ID_1;
+        userInfos.get(1).id = USER_ID_2;
+
+        when(mMockPackageManager.getInstalledPackagesAsUser(anyInt(), eq(USER_ID_1)))
+                .thenReturn(userOnePackages);
+        when(mMockPackageManager.getInstalledPackagesAsUser(anyInt(), eq(USER_ID_2)))
+                .thenReturn(userTwoPackages);
+        when(mMockUserManager.getUsers()).thenReturn(userInfos);
+    }
+
+    @Test
+    public void testVerifyInterventionList() throws Exception {
+        mockDeviceConfigAll();
+        mockInterventionListForMultipleUsers();
+        mockManageUsersGranted();
+        mockModifyGameModeGranted();
+        final Context context = InstrumentationRegistry.getContext();
+        GameManagerService gameManagerService =
+                new GameManagerService(mMockContext,
+                                       mTestLooper.getLooper(),
+                                       context.getFilesDir());
+        startUser(gameManagerService, USER_ID_1);
+        startUser(gameManagerService, USER_ID_2);
+
+        gameManagerService.setGameModeConfigOverride("com.android.app0", USER_ID_2,
+                GameManager.GAME_MODE_PERFORMANCE, "120", "0.6");
+        gameManagerService.setGameModeConfigOverride("com.android.app2", USER_ID_2,
+                GameManager.GAME_MODE_BATTERY, "60", "0.5");
+        mTestLooper.dispatchAll();
+
+        /* Expected fileOutput (order may vary)
+         com.android.app2 <UID>   0   2   angle=0,scaling=0.5,fps=90  3   angle=0,scaling=0.5,fps=60
+         com.android.app1 <UID>   1   2   angle=0,scaling=0.5,fps=90  3   angle=0,scaling=0.7,fps=30
+         com.android.app0 <UID>   0   2   angle=0,scaling=0.6,fps=120 3   angle=0,scaling=0.7,fps=30
+
+         The current game mode would only be set to non-zero if the current user have that game
+         installed.
+        */
+
+        List<String> fileOutput = readGameModeInterventionList();
+        assertEquals(fileOutput.size(), 3);
+
+        String[] splitLine = fileOutput.get(0).split("\\s+");
+        assertEquals(splitLine[0], "com.android.app2");
+        assertEquals(splitLine[2], "3");
+        assertEquals(splitLine[3], "2");
+        assertEquals(splitLine[4], "angle=0,scaling=0.5,fps=90");
+        assertEquals(splitLine[5], "3");
+        assertEquals(splitLine[6], "angle=0,scaling=0.5,fps=60");
+        splitLine = fileOutput.get(1).split("\\s+");
+        assertEquals(splitLine[0], "com.android.app1");
+        assertEquals(splitLine[2], "0");
+        assertEquals(splitLine[3], "2");
+        assertEquals(splitLine[4], "angle=0,scaling=0.5,fps=90");
+        assertEquals(splitLine[5], "3");
+        assertEquals(splitLine[6], "angle=0,scaling=0.7,fps=30");
+        splitLine = fileOutput.get(2).split("\\s+");
+        assertEquals(splitLine[0], "com.android.app0");
+        assertEquals(splitLine[2], "2");
+        assertEquals(splitLine[3], "2");
+        assertEquals(splitLine[4], "angle=0,scaling=0.6,fps=120");
+        assertEquals(splitLine[5], "3");
+        assertEquals(splitLine[6], "angle=0,scaling=0.7,fps=30");
+
+        switchUser(gameManagerService, USER_ID_2, USER_ID_1);
+        gameManagerService.setGameMode("com.android.app1",
+                GameManager.GAME_MODE_BATTERY, USER_ID_1);
+        mTestLooper.dispatchAll();
+
+        fileOutput = readGameModeInterventionList();
+        assertEquals(fileOutput.size(), 3);
+
+        splitLine = fileOutput.get(0).split("\\s+");
+        assertEquals(splitLine[0], "com.android.app2");
+        assertEquals(splitLine[2], "0");
+        assertEquals(splitLine[3], "2");
+        assertEquals(splitLine[4], "angle=0,scaling=0.5,fps=90");
+        assertEquals(splitLine[5], "3");
+        assertEquals(splitLine[6], "angle=0,scaling=0.5,fps=60");
+        splitLine = fileOutput.get(1).split("\\s+");
+        assertEquals(splitLine[0], "com.android.app1");
+        assertEquals(splitLine[2], "3");
+        assertEquals(splitLine[3], "2");
+        assertEquals(splitLine[4], "angle=0,scaling=0.5,fps=90");
+        assertEquals(splitLine[5], "3");
+        assertEquals(splitLine[6], "angle=0,scaling=0.7,fps=30");
+        splitLine = fileOutput.get(2).split("\\s+");
+        assertEquals(splitLine[0], "com.android.app0");
+        assertEquals(splitLine[2], "0");
+        assertEquals(splitLine[3], "2");
+        assertEquals(splitLine[4], "angle=0,scaling=0.6,fps=120");
+        assertEquals(splitLine[5], "3");
+        assertEquals(splitLine[6], "angle=0,scaling=0.7,fps=30");
+
     }
 }
