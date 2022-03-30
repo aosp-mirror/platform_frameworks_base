@@ -6265,14 +6265,16 @@ ul.</string>
     <!-- Title for the notification channel notifying user of abusive background apps. [CHAR LIMIT=NONE] -->
     <string name="notification_channel_abusive_bg_apps">Background Activity</string>
     <!-- Title of notification indicating abusive background apps. [CHAR LIMIT=NONE] -->
-    <string name="notification_title_abusive_bg_apps">Background Activity</string>
+    <string name="notification_title_abusive_bg_apps">An app is using battery</string>
+    <!-- Title of notification indicating long running foreground services. [CHAR LIMIT=NONE] -->
+    <string name="notification_title_long_running_fgs">An app is still active</string>
     <!-- Content of notification indicating abusive background apps. [CHAR LIMIT=NONE] -->
     <string name="notification_content_abusive_bg_apps">
-        <xliff:g id="app" example="Gmail">%1$s</xliff:g> is running in the background and draining battery. Tap to review.
+        <xliff:g id="app" example="Gmail">%1$s</xliff:g> is using battery in the background. Tap to review.
     </string>
     <!-- Content of notification indicating long running foreground service. [CHAR LIMIT=NONE] -->
     <string name="notification_content_long_running_fgs">
-        <xliff:g id="app" example="Gmail">%1$s</xliff:g> is running in the background for a long time. Tap to review.
+        <xliff:g id="app" example="Gmail">%1$s</xliff:g> might affect battery life. Tap to review active apps.
     </string>
     <!-- Action label of notification for user to check background apps. [CHAR LIMIT=NONE]  -->
     <string name="notification_action_check_bg_apps">Check active apps</string>
