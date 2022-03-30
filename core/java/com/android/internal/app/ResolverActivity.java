@@ -157,8 +157,6 @@ public class ResolverActivity extends Activity implements
     /** See {@link #setRetainInOnStop}. */
     private boolean mRetainInOnStop;
 
-    protected static final int REQUEST_CODE_RETURN_FROM_DELEGATE_CHOOSER = 20;
-
     private static final String EXTRA_SHOW_FRAGMENT_ARGS = ":settings:show_fragment_args";
     private static final String EXTRA_FRAGMENT_ARG_KEY = ":settings:fragment_args_key";
     private static final String OPEN_LINKS_COMPONENT_KEY = "app_link_state";
@@ -1454,18 +1452,6 @@ public class ResolverActivity extends Activity implements
                 .write();
     }
 
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        switch (requestCode) {
-            case REQUEST_CODE_RETURN_FROM_DELEGATE_CHOOSER:
-                // Repeat the delegate's result as our own.
-                setResult(resultCode, data);
-                finish();
-                break;
-            default:
-                super.onActivityResult(requestCode, resultCode, data);
-        }
-    }
 
     public void onActivityStarted(TargetInfo cti) {
         // Do nothing
