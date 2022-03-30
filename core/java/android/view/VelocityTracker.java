@@ -16,17 +16,10 @@
 
 package android.view;
 
-import static android.Manifest.permission.READ_DEVICE_CONFIG;
-import static android.content.pm.PackageManager.PERMISSION_GRANTED;
-import static  android.provider.DeviceConfig.NAMESPACE_INPUT_NATIVE_BOOT;
-
 import android.annotation.IntDef;
-import android.annotation.Nullable;
+import android.app.ActivityThread;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Build;
-import android.os.Process;
-import android.permission.PermissionManager;
-import android.provider.DeviceConfig;
 import android.util.ArrayMap;
 import android.util.Pools.SynchronizedPool;
 
@@ -178,9 +171,6 @@ public final class VelocityTracker {
     })
     public @interface VelocityTrackerStrategy {}
 
-    // Feature flag name for the strategy to be used in VelocityTracker
-    private static final String VELOCITYTRACKER_STRATEGY = "velocitytracker_strategy";
-
     private long mPtr;
     @VelocityTrackerStrategy
     private final int mStrategy;
@@ -285,22 +275,13 @@ public final class VelocityTracker {
         return mStrategy;
     }
 
-    @Nullable
-    // Read the VelocityTracker strategy property from DeviceConfig
-    private static String readStrategyProperty() {
-        if (PermissionManager.checkPermission(
-                READ_DEVICE_CONFIG, Process.myPid(), Process.myUid()) == PERMISSION_GRANTED) {
-            return DeviceConfig.getProperty(NAMESPACE_INPUT_NATIVE_BOOT, VELOCITYTRACKER_STRATEGY);
-        }
-        // The process using VelocityTracker can't read the config.
-        return null;
-    }
-
     private VelocityTracker(@VelocityTrackerStrategy int strategy) {
         // If user has not selected a specific strategy
         if (strategy == VELOCITY_TRACKER_STRATEGY_DEFAULT) {
+            final String strategyProperty = ViewConfiguration.get(
+                    ActivityThread.currentActivityThread().getApplication())
+                    .getVelocityTrackerStrategy();
             // Check if user specified strategy by overriding system property.
-            final String strategyProperty = readStrategyProperty();
             if (strategyProperty == null || strategyProperty.isEmpty()) {
                 mStrategy = strategy;
             } else {

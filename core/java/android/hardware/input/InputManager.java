@@ -272,8 +272,15 @@ public final class InputManager {
      */
     public static final int SWITCH_STATE_ON = 1;
 
+    private static String sVelocityTrackerStrategy;
+
     private InputManager(IInputManager im) {
         mIm = im;
+        try {
+            sVelocityTrackerStrategy = mIm.getVelocityTrackerStrategy();
+        } catch (RemoteException ex) {
+            Log.w(TAG, "Could not get VelocityTracker strategy: " + ex);
+        }
     }
 
     /**
@@ -323,6 +330,14 @@ public final class InputManager {
             }
             return sInstance;
         }
+    }
+
+    /**
+     * Get the current VelocityTracker strategy. Only works when the system has fully booted up.
+     * @hide
+     */
+    public String getVelocityTrackerStrategy() {
+        return sVelocityTrackerStrategy;
     }
 
     /**
