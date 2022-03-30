@@ -63,7 +63,6 @@ import android.print.PrinterInfo;
 import android.printservice.PrintServiceInfo;
 import android.printservice.recommendation.IRecommendationsChangeListener;
 import android.printservice.recommendation.RecommendationInfo;
-import android.provider.DocumentsContract;
 import android.provider.Settings;
 import android.service.print.CachedPrintJobProto;
 import android.service.print.InstalledPrintServiceProto;
@@ -435,6 +434,15 @@ final class UserState implements PrintSpoolerCallbacks, PrintServiceCallbacks,
 
                 onConfigurationChangedLocked();
             }
+        }
+    }
+
+    public boolean isPrintServiceEnabled(@NonNull ComponentName serviceName) {
+        synchronized (mLock) {
+            if (mDisabledServices.contains(serviceName)) {
+                return false;
+            }
+            return true;
         }
     }
 
