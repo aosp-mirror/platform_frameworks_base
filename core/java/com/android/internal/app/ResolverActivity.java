@@ -210,7 +210,7 @@ public class ResolverActivity extends Activity implements
 
     private UserHandle mWorkProfileUserHandle;
 
-    protected boolean mAwaitingDelegateResponse;
+
 
     /**
      * Get the string resource to be used as a label for the link to the resolver activity for an
@@ -682,9 +682,7 @@ public class ResolverActivity extends Activity implements
         mProfileSwitchMessage = null;
 
         onTargetSelected(dri, false);
-        if (!mAwaitingDelegateResponse) {
-            finish();
-        }
+        finish();
     }
 
     /**
@@ -974,7 +972,7 @@ public class ResolverActivity extends Activity implements
         }
         final Intent intent = getIntent();
         if ((intent.getFlags() & FLAG_ACTIVITY_NEW_TASK) != 0 && !isVoiceInteraction()
-                && !mResolvingHome && !mRetainInOnStop && !mAwaitingDelegateResponse) {
+                && !mResolvingHome && !mRetainInOnStop) {
             // This resolver is in the unusual situation where it has been
             // launched at the top of a new task.  We don't let it be added
             // to the recent tasks shown to the user, and we need to make sure
@@ -1143,9 +1141,7 @@ public class ResolverActivity extends Activity implements
                     mMultiProfilePagerAdapter.getActiveListAdapter().hasFilteredItem()
                             ? MetricsProto.MetricsEvent.ACTION_HIDE_APP_DISAMBIG_APP_FEATURED
                             : MetricsProto.MetricsEvent.ACTION_HIDE_APP_DISAMBIG_NONE_FEATURED);
-            if (!mAwaitingDelegateResponse) {
-                finish();
-            }
+            finish();
         }
     }
 
@@ -2365,9 +2361,7 @@ public class ResolverActivity extends Activity implements
                         .getItem(selections[0].getIndex());
                 if (ra.onTargetSelected(ti, false)) {
                     ra.mPickOptionRequest = null;
-                    if (!ra.mAwaitingDelegateResponse) {
-                        ra.finish();
-                    }
+                    ra.finish();
                 }
             }
         }
