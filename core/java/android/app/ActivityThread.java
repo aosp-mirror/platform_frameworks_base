@@ -4109,8 +4109,8 @@ public final class ActivityThread extends ClientTransactionHandler
             @NonNull SurfaceControl startingWindowLeash) {
         final SplashScreenView.Builder builder = new SplashScreenView.Builder(r.activity);
         final SplashScreenView view = builder.createFromParcel(parcelable).build();
+        view.attachHostWindow(r.window);
         decorView.addView(view);
-        view.attachHostActivityAndSetSystemUIColors(r.activity, r.window);
         view.requestLayout();
 
         view.getViewTreeObserver().addOnDrawListener(new ViewTreeObserver.OnDrawListener() {
