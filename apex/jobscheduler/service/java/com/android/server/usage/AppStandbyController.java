@@ -1309,7 +1309,7 @@ public class AppStandbyController
                 return STANDBY_BUCKET_WORKING_SET;
             }
 
-            if (mInjector.hasScheduleExactAlarm(packageName, UserHandle.getUid(userId, appId))) {
+            if (mInjector.hasExactAlarmPermission(packageName, UserHandle.getUid(userId, appId))) {
                 return STANDBY_BUCKET_WORKING_SET;
             }
         }
@@ -2326,8 +2326,8 @@ public class AppStandbyController
             return mWellbeingApp != null && mWellbeingApp.equals(packageName);
         }
 
-        boolean hasScheduleExactAlarm(String packageName, int uid) {
-            return mAlarmManagerInternal.hasScheduleExactAlarm(packageName, uid);
+        boolean hasExactAlarmPermission(String packageName, int uid) {
+            return mAlarmManagerInternal.hasExactAlarmPermission(packageName, uid);
         }
 
         void updatePowerWhitelistCache() {
