@@ -119,6 +119,8 @@ public class ScrimControllerTest extends SysuiTestCase {
     //   event-dispatch-on-registration pattern caused some of these unit tests to fail.)
     @Mock
     private PanelExpansionStateManager mPanelExpansionStateManager;
+    @Mock
+    private StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
 
 
     private static class AnimatorListener implements Animator.AnimatorListener {
@@ -233,7 +235,8 @@ public class ScrimControllerTest extends SysuiTestCase {
                 mDockManager, mConfigurationController, new FakeExecutor(new FakeSystemClock()),
                 mScreenOffAnimationController,
                 mPanelExpansionStateManager,
-                mKeyguardUnlockAnimationController);
+                mKeyguardUnlockAnimationController,
+                mStatusBarKeyguardViewManager);
         mScrimController.setScrimVisibleListener(visible -> mScrimVisibility = visible);
         mScrimController.attachViews(mScrimBehind, mNotificationsScrim, mScrimInFront);
         mScrimController.setAnimatorListener(mAnimatorListener);
@@ -1234,6 +1237,8 @@ public class ScrimControllerTest extends SysuiTestCase {
 
     @Test
     public void testNotificationTransparency_followsPanelExpansionInShadeLockedState() {
+        when(mStatusBarKeyguardViewManager.bouncerIsInTransit()).thenReturn(true);
+
         mScrimController.transitionTo(ScrimState.SHADE_LOCKED);
 
         assertAlphaAfterExpansion(mNotificationsScrim, /* alpha */ 0f, /* expansion */ 0.8f);
@@ -1242,6 +1247,8 @@ public class ScrimControllerTest extends SysuiTestCase {
 
     @Test
     public void testNotificationTransparency_unnocclusion() {
+        when(mStatusBarKeyguardViewManager.bouncerIsInTransit()).thenReturn(true);
+
         mScrimController.transitionTo(ScrimState.KEYGUARD);
         mScrimController.setUnocclusionAnimationRunning(true);
 
@@ -1255,6 +1262,8 @@ public class ScrimControllerTest extends SysuiTestCase {
 
     @Test
     public void testNotificationTransparency_inKeyguardState() {
+        when(mStatusBarKeyguardViewManager.bouncerIsInTransit()).thenReturn(true);
+
         mScrimController.transitionTo(ScrimState.KEYGUARD);
 
         assertAlphaAfterExpansion(mNotificationsScrim, /* alpha */ 1f, /* expansion */ 0.8f);

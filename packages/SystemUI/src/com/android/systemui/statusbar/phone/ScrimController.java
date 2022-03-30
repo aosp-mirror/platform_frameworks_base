@@ -204,6 +204,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
     private final Executor mMainExecutor;
     private final ScreenOffAnimationController mScreenOffAnimationController;
     private final KeyguardUnlockAnimationController mKeyguardUnlockAnimationController;
+    private final StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
 
     private GradientColors mColors;
     private boolean mNeedsDrawableColorUpdate;
@@ -266,7 +267,8 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
             ConfigurationController configurationController, @Main Executor mainExecutor,
             ScreenOffAnimationController screenOffAnimationController,
             PanelExpansionStateManager panelExpansionStateManager,
-            KeyguardUnlockAnimationController keyguardUnlockAnimationController) {
+            KeyguardUnlockAnimationController keyguardUnlockAnimationController,
+            StatusBarKeyguardViewManager statusBarKeyguardViewManager) {
         mScrimStateListener = lightBarController::setScrimState;
         mDefaultScrimAlpha = BUSY_SCRIM_ALPHA;
 
@@ -292,6 +294,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
                         keyguardStateController.getKeyguardFadingAwayDuration());
             }
         });
+        mStatusBarKeyguardViewManager = statusBarKeyguardViewManager;
         configurationController.addCallback(new ConfigurationController.ConfigurationListener() {
             @Override
             public void onThemeChanged() {
@@ -1057,7 +1060,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
     }
 
     private float getInterpolatedFraction() {
-        if (mState == ScrimState.KEYGUARD || mState == ScrimState.SHADE_LOCKED) {
+        if (mStatusBarKeyguardViewManager.bouncerIsInTransit()) {
             return BouncerPanelExpansionCalculator
                     .getBackScrimScaledExpansion(mPanelExpansionFraction);
         }
