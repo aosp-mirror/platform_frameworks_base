@@ -135,7 +135,7 @@ open class OpenAppFromOverviewTest(testSpec: FlickerTestParameter)
     override fun appLayerBecomesVisible() = super.appLayerBecomesVisible_warmStart()
 
     /** {@inheritDoc} */
-    @FlakyTest(bugId = 218624176)
+    @Presubmit
     @Test
     override fun appWindowBecomesVisible() = super.appWindowBecomesVisible_warmStart()
 

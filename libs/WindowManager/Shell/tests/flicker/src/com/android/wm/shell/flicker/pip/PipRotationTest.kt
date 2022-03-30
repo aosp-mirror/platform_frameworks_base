@@ -64,7 +64,6 @@ import org.junit.runners.Parameterized
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @Group4
-@FlakyTest(bugId = 218604389)
 open class PipRotationTest(testSpec: FlickerTestParameter) : PipTransition(testSpec) {
     private val fixedApp = FixedAppHelper(instrumentation)
     private val screenBoundsStart = WindowUtils.getDisplayBounds(testSpec.startRotation)
@@ -138,7 +137,7 @@ open class PipRotationTest(testSpec: FlickerTestParameter) : PipTransition(testS
      */
     @Presubmit
     @Test
-    fun pipLayerRotates_StartingBounds() {
+    open fun pipLayerRotates_StartingBounds() {
         testSpec.assertLayersStart {
             visibleRegion(pipApp.component).coversAtMost(screenBoundsStart)
         }
