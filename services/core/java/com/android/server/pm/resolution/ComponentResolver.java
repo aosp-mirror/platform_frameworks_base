@@ -47,13 +47,11 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.ArrayUtils;
 import com.android.server.IntentResolver;
 import com.android.server.pm.Computer;
-import com.android.server.pm.DumpState;
 import com.android.server.pm.PackageManagerException;
 import com.android.server.pm.UserManagerService;
 import com.android.server.pm.UserNeedsBadgingCache;
 import com.android.server.pm.parsing.PackageInfoUtils;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
-import com.android.server.pm.parsing.pkg.AndroidPackageUtils;
 import com.android.server.pm.pkg.PackageStateInternal;
 import com.android.server.pm.pkg.PackageStateUtils;
 import com.android.server.pm.pkg.PackageUserStateInternal;
@@ -76,7 +74,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.function.Function;
@@ -268,119 +265,6 @@ public class ComponentResolver extends ComponentResolverLocked implements Snappa
                 filter.setPriority(0);
             }
             onChanged();
-        }
-    }
-
-    public void dumpActivityResolvers(PrintWriter pw, DumpState dumpState, String packageName) {
-        synchronized (mLock) {
-            if (mActivities.dump(pw, dumpState.getTitlePrinted() ? "\nActivity Resolver Table:"
-                            : "Activity Resolver Table:", "  ", packageName,
-                    dumpState.isOptionEnabled(DumpState.OPTION_SHOW_FILTERS), true)) {
-                dumpState.setTitlePrinted(true);
-            }
-        }
-    }
-
-    public void dumpProviderResolvers(PrintWriter pw, DumpState dumpState, String packageName) {
-        synchronized (mLock) {
-            if (mProviders.dump(pw, dumpState.getTitlePrinted() ? "\nProvider Resolver Table:"
-                            : "Provider Resolver Table:", "  ", packageName,
-                    dumpState.isOptionEnabled(DumpState.OPTION_SHOW_FILTERS), true)) {
-                dumpState.setTitlePrinted(true);
-            }
-        }
-    }
-
-    public void dumpReceiverResolvers(PrintWriter pw, DumpState dumpState, String packageName) {
-        synchronized (mLock) {
-            if (mReceivers.dump(pw, dumpState.getTitlePrinted() ? "\nReceiver Resolver Table:"
-                            : "Receiver Resolver Table:", "  ", packageName,
-                    dumpState.isOptionEnabled(DumpState.OPTION_SHOW_FILTERS), true)) {
-                dumpState.setTitlePrinted(true);
-            }
-        }
-    }
-
-    public void dumpServiceResolvers(PrintWriter pw, DumpState dumpState, String packageName) {
-        synchronized (mLock) {
-            if (mServices.dump(pw, dumpState.getTitlePrinted() ? "\nService Resolver Table:"
-                            : "Service Resolver Table:", "  ", packageName,
-                    dumpState.isOptionEnabled(DumpState.OPTION_SHOW_FILTERS), true)) {
-                dumpState.setTitlePrinted(true);
-            }
-        }
-    }
-
-    public void dumpContentProviders(@NonNull Computer computer, PrintWriter pw,
-            DumpState dumpState, String packageName) {
-        synchronized (mLock) {
-            boolean printedSomething = false;
-            for (ParsedProvider p : mProviders.mProviders.values()) {
-                if (packageName != null && !packageName.equals(p.getPackageName())) {
-                    continue;
-                }
-                if (!printedSomething) {
-                    if (dumpState.onTitlePrinted()) {
-                        pw.println();
-                    }
-                    pw.println("Registered ContentProviders:");
-                    printedSomething = true;
-                }
-                pw.print("  ");
-                ComponentName.printShortString(pw, p.getPackageName(), p.getName());
-                pw.println(":");
-                pw.print("    ");
-                pw.println(p.toString());
-            }
-            printedSomething = false;
-            for (Map.Entry<String, ParsedProvider> entry :
-                    mProvidersByAuthority.entrySet()) {
-                ParsedProvider p = entry.getValue();
-                if (packageName != null && !packageName.equals(p.getPackageName())) {
-                    continue;
-                }
-                if (!printedSomething) {
-                    if (dumpState.onTitlePrinted()) {
-                        pw.println();
-                    }
-                    pw.println("ContentProvider Authorities:");
-                    printedSomething = true;
-                }
-                pw.print("  [");
-                pw.print(entry.getKey());
-                pw.println("]:");
-                pw.print("    ");
-                pw.println(p.toString());
-
-                AndroidPackage pkg = computer.getPackage(p.getPackageName());
-
-                if (pkg != null) {
-                    pw.print("      applicationInfo=");
-                    pw.println(AndroidPackageUtils.generateAppInfoWithoutState(pkg));
-                }
-            }
-        }
-    }
-
-    public void dumpServicePermissions(PrintWriter pw, DumpState dumpState) {
-        synchronized (mLock) {
-            if (dumpState.onTitlePrinted()) pw.println();
-            pw.println("Service permissions:");
-
-            final Iterator<Pair<ParsedService, ParsedIntentInfo>> filterIterator =
-                    mServices.filterIterator();
-            while (filterIterator.hasNext()) {
-                final Pair<ParsedService, ParsedIntentInfo> pair = filterIterator.next();
-                ParsedService service = pair.first;
-
-                final String permission = service.getPermission();
-                if (permission != null) {
-                    pw.print("    ");
-                    pw.print(service.getComponentName().flattenToShortString());
-                    pw.print(": ");
-                    pw.println(permission);
-                }
-            }
         }
     }
 
