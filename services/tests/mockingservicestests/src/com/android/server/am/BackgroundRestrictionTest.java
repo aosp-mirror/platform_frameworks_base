@@ -579,6 +579,7 @@ public final class BackgroundRestrictionTest {
         DeviceConfigSession<Boolean> bgPromptFgsWithNotiToBgRestricted = null;
         DeviceConfigSession<Long> bgNotificationMinInterval = null;
         DeviceConfigSession<Integer> bgBatteryExemptionTypes = null;
+        DeviceConfigSession<Boolean> bgCurrentDrainDecoupleThresholds = null;
 
         mBgRestrictionController.addAppBackgroundRestrictionListener(listener);
 
@@ -647,6 +648,13 @@ public final class BackgroundRestrictionTest {
                     mContext.getResources().getInteger(
                             R.integer.config_bg_current_drain_exempted_types));
             bgBatteryExemptionTypes.set(0);
+
+            bgCurrentDrainDecoupleThresholds = new DeviceConfigSession<>(
+                    DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                    AppBatteryPolicy.KEY_BG_CURRENT_DRAIN_DECOUPLE_THRESHOLDS,
+                    DeviceConfig::getBoolean,
+                    AppBatteryPolicy.DEFAULT_BG_CURRENT_DRAIN_DECOUPLE_THRESHOLD);
+            bgCurrentDrainDecoupleThresholds.set(true);
 
             mCurrentTimeMillis = 10_000L;
             doReturn(mCurrentTimeMillis - windowMs).when(stats).getStatsStartTimestamp();
@@ -785,6 +793,11 @@ public final class BackgroundRestrictionTest {
                                 anyInt(), anyInt());
                     });
 
+            // Pretend we have the standby buckets set above.
+            doReturn(STANDBY_BUCKET_RESTRICTED)
+                    .when(mAppStandbyInternal)
+                    .getAppStandbyBucket(eq(testPkgName), eq(testUser), anyLong(), anyBoolean());
+
             // Sleep a while and set a higher drain
             Thread.sleep(windowMs);
             clearInvocations(mInjector.getAppStandbyInternal());
@@ -921,6 +934,11 @@ public final class BackgroundRestrictionTest {
                 // Expected.
             }
 
+            // Reset the standby bucket.
+            doReturn(STANDBY_BUCKET_RARE)
+                    .when(mAppStandbyInternal)
+                    .getAppStandbyBucket(eq(testPkgName), eq(testUser), anyLong(), anyBoolean());
+
             // Turn OFF the FAS.
             listener.mLatchHolder[0] = new CountDownLatch(1);
             clearInvocations(mInjector.getAppStandbyInternal());
@@ -930,6 +948,99 @@ public final class BackgroundRestrictionTest {
             // It'll go back to restricted bucket because it used to behave poorly.
             listener.verify(timeout, testUid, testPkgName, RESTRICTION_LEVEL_RESTRICTED_BUCKET);
             verifyRestrictionLevel(RESTRICTION_LEVEL_RESTRICTED_BUCKET, testPkgName, testUid);
+
+            clearInvocations(mInjector.getAppStandbyInternal());
+            // Trigger user interaction.
+            runTestBgCurrentDrainMonitorOnce(listener, stats, uids,
+                    new double[]{restrictBucketThresholdMah - 1, 0},
+                    new double[]{0, restrictBucketThresholdMah - 1}, zeros, zeros,
+                    () -> {
+                        doReturn(mCurrentTimeMillis).when(stats).getStatsStartTimestamp();
+                        doReturn(mCurrentTimeMillis + windowMs)
+                                .when(stats).getStatsEndTimestamp();
+                        mCurrentTimeMillis += windowMs + 1;
+                        mIdleStateListener.onUserInteractionStarted(testPkgName, testUser);
+                        waitForIdleHandler(mBgRestrictionController.getBackgroundHandler());
+                        // It should have been back to normal.
+                        listener.verify(timeout, testUid, testPkgName,
+                                RESTRICTION_LEVEL_ADAPTIVE_BUCKET);
+                        verify(mInjector.getAppStandbyInternal(), atLeast(1)).maybeUnrestrictApp(
+                                eq(testPkgName),
+                                eq(testUser),
+                                eq(REASON_MAIN_USAGE),
+                                eq(REASON_SUB_USAGE_USER_INTERACTION),
+                                eq(REASON_MAIN_USAGE),
+                                eq(REASON_SUB_USAGE_USER_INTERACTION));
+                    });
+
+            bgCurrentDrainDecoupleThresholds.set(true);
+            clearInvocations(mInjector.getAppStandbyInternal());
+
+            // Go to the threshold right away.
+            runTestBgCurrentDrainMonitorOnce(listener, stats, uids,
+                    new double[]{0, restrictBucketThresholdMah - 1},
+                    new double[]{bgRestrictedThresholdMah + 1, 0}, zeros, zeros,
+                    () -> {
+                        doReturn(mCurrentTimeMillis).when(stats).getStatsStartTimestamp();
+                        doReturn(mCurrentTimeMillis + windowMs)
+                                .when(stats).getStatsEndTimestamp();
+                        mCurrentTimeMillis += windowMs + 1;
+                        // We won't change restriction level automatically because it needs
+                        // user consent.
+                        try {
+                            listener.verify(timeout, testUid, testPkgName,
+                                    RESTRICTION_LEVEL_BACKGROUND_RESTRICTED);
+                            fail("There shouldn't be level change event like this");
+                        } catch (Exception e) {
+                            // Expected.
+                        }
+                        verify(mInjector.getAppStandbyInternal(), never()).setAppStandbyBucket(
+                                eq(testPkgName),
+                                eq(STANDBY_BUCKET_RARE),
+                                eq(testUser),
+                                anyInt(), anyInt());
+                        // We should have requested to goto background restricted level.
+                        verify(mBgRestrictionController, times(1)).handleRequestBgRestricted(
+                                eq(testPkgName),
+                                eq(testUid));
+                        // Verify we have the notification posted now because its FGS is invisible.
+                        checkNotificationShown(new String[] {testPkgName}, atLeast(1), true);
+                    });
+
+            bgCurrentDrainDecoupleThresholds.set(false);
+            clearInvocations(mInjector.getAppStandbyInternal());
+            clearInvocations(mBgRestrictionController);
+
+            // Go to the threshold right away, but this time, it shouldn't even request to goto
+            // bg restricted level because it requires to be in restricted bucket before that.
+            runTestBgCurrentDrainMonitorOnce(listener, stats, uids,
+                    new double[]{0, restrictBucketThresholdMah - 1},
+                    new double[]{bgRestrictedThresholdMah + 1, 0}, zeros, zeros,
+                    () -> {
+                        doReturn(mCurrentTimeMillis).when(stats).getStatsStartTimestamp();
+                        doReturn(mCurrentTimeMillis + windowMs)
+                                .when(stats).getStatsEndTimestamp();
+                        mCurrentTimeMillis += windowMs + 1;
+                        // We won't change restriction level automatically because it needs
+                        // user consent.
+                        try {
+                            listener.verify(timeout, testUid, testPkgName,
+                                    RESTRICTION_LEVEL_BACKGROUND_RESTRICTED);
+                            fail("There shouldn't be level change event like this");
+                        } catch (Exception e) {
+                            // Expected.
+                        }
+                        verify(mInjector.getAppStandbyInternal(), never()).setAppStandbyBucket(
+                                eq(testPkgName),
+                                eq(STANDBY_BUCKET_RARE),
+                                eq(testUser),
+                                anyInt(), anyInt());
+                        // We should NOT have requested to goto background restricted level.
+                        verify(mBgRestrictionController, never()).handleRequestBgRestricted(
+                                eq(testPkgName),
+                                eq(testUid));
+                    });
+
         } finally {
             closeIfNotNull(bgCurrentDrainMonitor);
             closeIfNotNull(bgCurrentDrainWindow);
@@ -938,6 +1049,7 @@ public final class BackgroundRestrictionTest {
             closeIfNotNull(bgPromptFgsWithNotiToBgRestricted);
             closeIfNotNull(bgNotificationMinInterval);
             closeIfNotNull(bgBatteryExemptionTypes);
+            closeIfNotNull(bgCurrentDrainDecoupleThresholds);
         }
     }
 
@@ -1441,6 +1553,7 @@ public final class BackgroundRestrictionTest {
         DeviceConfigSession<Boolean> bgPermissionMonitorEnabled = null;
         DeviceConfigSession<String> bgPermissionsInMonitor = null;
         DeviceConfigSession<Boolean> bgCurrentDrainHighThresholdByBgLocation = null;
+        DeviceConfigSession<Boolean> bgCurrentDrainDecoupleThresholds = null;
 
         mBgRestrictionController.addAppBackgroundRestrictionListener(listener);
 
@@ -1571,6 +1684,13 @@ public final class BackgroundRestrictionTest {
                     mContext.getResources().getBoolean(
                             R.bool.config_bg_current_drain_high_threshold_by_bg_location));
             bgCurrentDrainHighThresholdByBgLocation.set(true);
+
+            bgCurrentDrainDecoupleThresholds = new DeviceConfigSession<>(
+                    DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                    AppBatteryPolicy.KEY_BG_CURRENT_DRAIN_DECOUPLE_THRESHOLDS,
+                    DeviceConfig::getBoolean,
+                    AppBatteryPolicy.DEFAULT_BG_CURRENT_DRAIN_DECOUPLE_THRESHOLD);
+            bgCurrentDrainDecoupleThresholds.set(true);
 
             mCurrentTimeMillis = 10_000L;
             doReturn(mCurrentTimeMillis - windowMs).when(stats).getStatsStartTimestamp();
@@ -1990,6 +2110,7 @@ public final class BackgroundRestrictionTest {
             closeIfNotNull(bgPermissionMonitorEnabled);
             closeIfNotNull(bgPermissionsInMonitor);
             closeIfNotNull(bgCurrentDrainHighThresholdByBgLocation);
+            closeIfNotNull(bgCurrentDrainDecoupleThresholds);
         }
     }
 
