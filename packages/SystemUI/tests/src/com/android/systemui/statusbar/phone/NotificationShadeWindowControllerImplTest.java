@@ -18,6 +18,7 @@ package com.android.systemui.statusbar.phone;
 
 import static android.view.WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
+import static android.view.WindowManager.LayoutParams.FLAG_SECURE;
 import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -90,7 +91,12 @@ public class NotificationShadeWindowControllerImplTest extends SysuiTestCase {
                 mWindowManager, mActivityManager, mDozeParameters, mStatusBarStateController,
                 mConfigurationController, mKeyguardViewMediator, mKeyguardBypassController,
                 mColorExtractor, mDumpManager, mKeyguardStateController,
-                mUnlockedScreenOffAnimationController, mAuthController);
+                mUnlockedScreenOffAnimationController, mAuthController) {
+                    @Override
+                    protected boolean isDebuggable() {
+                        return false;
+                    }
+            };
         mNotificationShadeWindowController.setScrimsVisibilityListener((visibility) -> {});
         mNotificationShadeWindowController.setNotificationShadeView(mNotificationShadeWindowView);
 
@@ -238,5 +244,21 @@ public class NotificationShadeWindowControllerImplTest extends SysuiTestCase {
             verify(mWindowManager, never()).updateViewLayout(any(), any());
         });
         verify(mWindowManager).updateViewLayout(any(), any());
+    }
+  
+    @Test
+    public void setKeyguardShowing_enablesSecureFlag() {
+        mNotificationShadeWindowController.setBouncerShowing(true);
+
+        verify(mWindowManager).updateViewLayout(any(), mLayoutParameters.capture());
+        assertThat((mLayoutParameters.getValue().flags & FLAG_SECURE) != 0).isTrue();
+    }
+
+    @Test
+    public void setKeyguardNotShowing_disablesSecureFlag() {
+        mNotificationShadeWindowController.setBouncerShowing(false);
+
+        verify(mWindowManager).updateViewLayout(any(), mLayoutParameters.capture());
+        assertThat((mLayoutParameters.getValue().flags & FLAG_SECURE) == 0).isTrue();
     }
 }
