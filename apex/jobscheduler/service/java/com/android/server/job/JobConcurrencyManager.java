@@ -68,6 +68,8 @@ import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Comparator;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
@@ -267,10 +269,44 @@ class JobConcurrencyManager {
                     )
             );
 
+    /**
+     * Comparator to sort the determination lists, putting the ContextAssignments that we most
+     * prefer to use at the end of the list.
+     */
+    private static final Comparator<ContextAssignment> sDeterminationComparator = (ca1, ca2) -> {
+        if (ca1 == ca2) {
+            return 0;
+        }
+        final JobStatus js1 = ca1.context.getRunningJobLocked();
+        final JobStatus js2 = ca2.context.getRunningJobLocked();
+        // Prefer using an empty context over one with a running job.
+        if (js1 == null) {
+            if (js2 == null) {
+                return 0;
+            }
+            return 1;
+        } else if (js2 == null) {
+            return -1;
+        }
+        // We would prefer to replace bg jobs over TOP jobs.
+        if (js1.lastEvaluatedBias == JobInfo.BIAS_TOP_APP) {
+            if (js2.lastEvaluatedBias != JobInfo.BIAS_TOP_APP) {
+                return -1;
+            }
+        } else if (js2.lastEvaluatedBias == JobInfo.BIAS_TOP_APP) {
+            return 1;
+        }
+        // Prefer replacing the job that has been running the longest.
+        return Long.compare(
+                ca2.context.getExecutionStartTimeElapsed(),
+                ca1.context.getExecutionStartTimeElapsed());
+    };
+
+    // We reuse the lists to avoid GC churn.
     private final ArraySet<ContextAssignment> mRecycledChanged = new ArraySet<>();
     private final ArraySet<ContextAssignment> mRecycledIdle = new ArraySet<>();
-    private final ArraySet<ContextAssignment> mRecycledPreferredUidOnly = new ArraySet<>();
-    private final ArraySet<ContextAssignment> mRecycledStoppable = new ArraySet<>();
+    private final ArrayList<ContextAssignment> mRecycledPreferredUidOnly = new ArrayList<>();
+    private final ArrayList<ContextAssignment> mRecycledStoppable = new ArrayList<>();
 
     private final Pools.Pool<ContextAssignment> mContextAssignmentPool =
             new Pools.SimplePool<>(MAX_JOB_CONTEXTS_COUNT);
@@ -570,14 +606,19 @@ class JobConcurrencyManager {
             Slog.d(TAG, printPendingQueueLocked());
         }
 
+        if (mService.getPendingJobQueue().size() == 0) {
+            // Nothing to do.
+            return;
+        }
+
         final PendingJobQueue pendingJobQueue = mService.getPendingJobQueue();
         final List<JobServiceContext> activeServices = mActiveServices;
 
         // To avoid GC churn, we recycle the arrays.
         final ArraySet<ContextAssignment> changed = mRecycledChanged;
         final ArraySet<ContextAssignment> idle = mRecycledIdle;
-        final ArraySet<ContextAssignment> preferredUidOnly = mRecycledPreferredUidOnly;
-        final ArraySet<ContextAssignment> stoppable = mRecycledStoppable;
+        final ArrayList<ContextAssignment> preferredUidOnly = mRecycledPreferredUidOnly;
+        final ArrayList<ContextAssignment> stoppable = mRecycledStoppable;
 
         updateCounterConfigLocked();
         // Reset everything since we'll re-evaluate the current state.
@@ -612,6 +653,8 @@ class JobConcurrencyManager {
                 preferredUidOnly.add(assignment);
             }
         }
+        preferredUidOnly.sort(sDeterminationComparator);
+        stoppable.sort(sDeterminationComparator);
         for (int i = numRunningJobs; i < MAX_JOB_CONTEXTS_COUNT; ++i) {
             final JobServiceContext jsc;
             final int numIdleContexts = mIdleContexts.size();
@@ -670,8 +713,8 @@ class JobConcurrencyManager {
             }
             if (selectedContext == null) {
                 for (int s = stoppable.size() - 1; s >= 0; --s) {
-                    ContextAssignment assignment = stoppable.valueAt(s);
-                    JobStatus runningJob = assignment.context.getRunningJobLocked();
+                    final ContextAssignment assignment = stoppable.get(s);
+                    final JobStatus runningJob = assignment.context.getRunningJobLocked();
                     // Maybe stop the job if it has had its day in the sun. Don't let a different
                     // app preempt jobs started for TOP apps though.
                     if (runningJob.lastEvaluatedBias < JobInfo.BIAS_TOP_APP
@@ -685,7 +728,7 @@ class JobConcurrencyManager {
                             assignment.preemptReason = assignment.shouldStopJobReason;
                             assignment.preemptReasonCode = JobParameters.STOP_REASON_DEVICE_STATE;
                             selectedContext = assignment;
-                            stoppable.removeAt(s);
+                            stoppable.remove(s);
                             assignment.newJob = nextPending;
                             assignment.newWorkType = replaceWorkType;
                             break;
@@ -696,7 +739,7 @@ class JobConcurrencyManager {
             if (selectedContext == null) {
                 int lowestBiasSeen = Integer.MAX_VALUE;
                 for (int p = preferredUidOnly.size() - 1; p >= 0; --p) {
-                    final ContextAssignment assignment = preferredUidOnly.valueAt(p);
+                    final ContextAssignment assignment = preferredUidOnly.get(p);
                     final JobStatus runningJob = assignment.context.getRunningJobLocked();
                     if (runningJob.getUid() != nextPending.getUid()) {
                         continue;
@@ -767,7 +810,7 @@ class JobConcurrencyManager {
             mContextAssignmentPool.release(assignment);
         }
         for (int s = stoppable.size() - 1; s >= 0; --s) {
-            final ContextAssignment assignment = stoppable.valueAt(s);
+            final ContextAssignment assignment = stoppable.get(s);
             // The preferred UID is set when we cancel with PREEMPT reason, but don't preserve the
             // UID for any stoppable contexts since we want to open the context up to any/all apps.
             assignment.context.clearPreferredUid();
@@ -775,7 +818,7 @@ class JobConcurrencyManager {
             mContextAssignmentPool.release(assignment);
         }
         for (int p = preferredUidOnly.size() - 1; p >= 0; --p) {
-            final ContextAssignment assignment = preferredUidOnly.valueAt(p);
+            final ContextAssignment assignment = preferredUidOnly.get(p);
             assignment.clear();
             mContextAssignmentPool.release(assignment);
         }
@@ -1275,12 +1318,12 @@ class JobConcurrencyManager {
         return s.toString();
     }
 
-    private static String printAssignments(String header, ArraySet<ContextAssignment>... list) {
+    private static String printAssignments(String header, Collection<ContextAssignment>... list) {
         final StringBuilder s = new StringBuilder(header + ": ");
         for (int l = 0; l < list.length; ++l) {
-            ArraySet<ContextAssignment> assignments = list[l];
-            for (int c = 0; c < assignments.size(); ++c) {
-                final ContextAssignment assignment = assignments.valueAt(c);
+            final Collection<ContextAssignment> assignments = list[l];
+            int c = 0;
+            for (final ContextAssignment assignment : assignments) {
                 final JobStatus job = assignment.newJob == null
                         ? assignment.context.getRunningJobLocked() : assignment.newJob;
 
@@ -1294,6 +1337,7 @@ class JobConcurrencyManager {
                     s.append(job.getJobId()).append("/").append(job.getUid());
                 }
                 s.append(")");
+                c++;
             }
         }
         return s.toString();

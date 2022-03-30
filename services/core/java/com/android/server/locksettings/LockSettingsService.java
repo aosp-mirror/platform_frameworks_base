@@ -685,19 +685,19 @@ public class LockSettingsService extends ILockSettings.Stub {
     }
 
     private String getEncryptionNotificationTitle() {
-        return mInjector.getDevicePolicyManager().getString(
+        return mInjector.getDevicePolicyManager().getResources().getString(
                 PROFILE_ENCRYPTED_TITLE,
                 () -> mContext.getString(R.string.profile_encrypted_title));
     }
 
     private String getEncryptionNotificationDetail() {
-        return mInjector.getDevicePolicyManager().getString(
+        return mInjector.getDevicePolicyManager().getResources().getString(
                 PROFILE_ENCRYPTED_DETAIL,
                 () -> mContext.getString(R.string.profile_encrypted_detail));
     }
 
     private String getEncryptionNotificationMessage() {
-        return mInjector.getDevicePolicyManager().getString(
+        return mInjector.getDevicePolicyManager().getResources().getString(
                 PROFILE_ENCRYPTED_MESSAGE,
                 () -> mContext.getString(R.string.profile_encrypted_message));
     }
@@ -3315,6 +3315,10 @@ public class LockSettingsService extends ILockSettings.Stub {
         synchronized (mSpManager) {
             if (!mSpManager.hasEscrowData(userId)) {
                 throw new SecurityException("Escrow token is disabled on the current user");
+            }
+            if (!isEscrowTokenActive(tokenHandle, userId)) {
+                Slog.e(TAG, "Unknown or unactivated token: " + Long.toHexString(tokenHandle));
+                return false;
             }
             result = setLockCredentialWithTokenInternalLocked(
                     credential, tokenHandle, token, userId);

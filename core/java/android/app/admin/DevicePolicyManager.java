@@ -42,7 +42,6 @@ import android.annotation.WorkerThread;
 import android.app.Activity;
 import android.app.IServiceConnection;
 import android.app.KeyguardManager;
-import android.app.admin.DevicePolicyResources.Drawables;
 import android.app.admin.SecurityLog.SecurityEvent;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
@@ -56,10 +55,8 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.UserInfo;
-import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
-import android.graphics.drawable.Icon;
 import android.net.PrivateDnsConnectivityChecker;
 import android.net.ProxyInfo;
 import android.net.Uri;
@@ -97,7 +94,6 @@ import android.telephony.data.ApnSetting;
 import android.text.TextUtils;
 import android.util.ArraySet;
 import android.util.DebugUtils;
-import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.Pair;
 
@@ -137,7 +133,6 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;
-import java.util.function.Supplier;
 
 // TODO(b/172376923) - add CarDevicePolicyManager examples below (or remove reference to it).
 /**
@@ -172,6 +167,7 @@ public class DevicePolicyManager {
     private final Context mContext;
     private final IDevicePolicyManager mService;
     private final boolean mParentInstance;
+    private final DevicePolicyResourcesManager mResourcesManager;
 
     /** @hide */
     public DevicePolicyManager(Context context, IDevicePolicyManager service) {
@@ -185,6 +181,7 @@ public class DevicePolicyManager {
         mContext = context;
         mService = service;
         mParentInstance = parentInstance;
+        mResourcesManager = new DevicePolicyResourcesManager(context, service);
     }
 
     /** @hide test will override it. */
@@ -3744,7 +3741,8 @@ public class DevicePolicyManager {
     /**
      * Broadcast action: notify system apps (e.g. settings, SysUI, etc) that the device management
      * resources with IDs {@link #EXTRA_RESOURCE_IDS} has been updated, the updated resources can be
-     * retrieved using {@link #getDrawable} and {@code #getString}.
+     * retrieved using {@link DevicePolicyResourcesManager#getDrawable} and
+     * {@link DevicePolicyResourcesManager#getString}.
      *
      * <p>This broadcast is sent to registered receivers only.
      *
@@ -15270,475 +15268,12 @@ public class DevicePolicyManager {
     }
 
     /**
-     * For each {@link DevicePolicyDrawableResource} item in {@code drawables}, if
-     * {@link DevicePolicyDrawableResource#getDrawableSource()} is not set or is set to
-     * {@link DevicePolicyResources.Drawables.Source#UNDEFINED}, it updates the drawable resource for
-     * the combination of {@link DevicePolicyDrawableResource#getDrawableId()} and
-     * {@link DevicePolicyDrawableResource#getDrawableStyle()}, (see
-     * {@link DevicePolicyResources.Drawables} and {@link DevicePolicyResources.Drawables.Style}) to
-     * the drawable with ID {@link DevicePolicyDrawableResource#getResourceIdInCallingPackage()},
-     * meaning any system UI surface calling {@link #getDrawable}
-     * with {@code drawableId} and {@code drawableStyle} will get the new resource after this API
-     * is called.
-     *
-     * <p>Otherwise, if {@link DevicePolicyDrawableResource#getDrawableSource()} is set (see
-     * {@link DevicePolicyResources.Drawables.Source}, it overrides any drawables that was set for
-     * the same {@code drawableId} and {@code drawableStyle} for the provided source.
-     *
-     * <p>Sends a broadcast with action {@link #ACTION_DEVICE_POLICY_RESOURCE_UPDATED} to
-     * registered receivers when a resource has been updated successfully.
-     *
-     * <p>Important notes to consider when using this API:
-     * <ul>
-     * <li>{@link #getDrawable} references the resource
-     * {@link DevicePolicyDrawableResource#getResourceIdInCallingPackage()} in the
-     * calling package each time it gets called. You have to ensure that the resource is always
-     * available in the calling package as long as it is used as an updated resource.
-     * <li>You still have to re-call {@code setDrawables} even if you only make changes to the
-     * content of the resource with ID
-     * {@link DevicePolicyDrawableResource#getResourceIdInCallingPackage()} as the content might be
-     * cached and would need updating.
-     * </ul>
-     *
-     * @param drawables The list of {@link DevicePolicyDrawableResource} to update.
-     *
-     * @hide
+     * Returns a {@link DevicePolicyResourcesManager} containing the required APIs to set, reset,
+     * and get device policy related resources.
      */
-    @SystemApi
-    @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_MANAGEMENT_RESOURCES)
-    public void setDrawables(@NonNull Set<DevicePolicyDrawableResource> drawables) {
-        if (mService != null) {
-            try {
-                mService.setDrawables(new ArrayList<>(drawables));
-            } catch (RemoteException e) {
-                throw e.rethrowFromSystemServer();
-            }
-        }
-    }
-
-    /**
-     * Removes all updated drawables for the list of {@code drawableIds} (see
-     * {@link DevicePolicyResources.Drawables} that was previously set by calling
-     * {@link #setDrawables}, meaning any subsequent calls to {@link #getDrawable} for the provided
-     * IDs with any {@link DevicePolicyResources.Drawables.Style} and any
-     * {@link DevicePolicyResources.Drawables.Source} will return the default drawable from
-     * {@code defaultDrawableLoader}.
-     *
-     * <p>Sends a broadcast with action {@link #ACTION_DEVICE_POLICY_RESOURCE_UPDATED} to
-     * registered receivers when a resource has been reset successfully.
-     *
-     * @param drawableIds The list of IDs to remove.
-     *
-     * @hide
-     */
-    @SystemApi
-    @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_MANAGEMENT_RESOURCES)
-    public void resetDrawables(@NonNull Set<String> drawableIds) {
-        if (mService != null) {
-            try {
-                mService.resetDrawables(new ArrayList<>(drawableIds));
-            } catch (RemoteException e) {
-                throw e.rethrowFromSystemServer();
-            }
-        }
-    }
-
-    /**
-     * Returns the appropriate updated drawable for the {@code drawableId}
-     * (see {@link DevicePolicyResources.Drawables}), with style {@code drawableStyle}
-     * (see {@link DevicePolicyResources.Drawables.Style}) if one was set using
-     * {@code setDrawables}, otherwise returns the drawable from {@code defaultDrawableLoader}.
-     *
-     * <p>Also returns the drawable from {@code defaultDrawableLoader} if
-     * {@link DevicePolicyResources.Drawables#UNDEFINED} was passed.
-     *
-     * <p>Calls to this API will not return {@code null} unless no updated drawable was found
-     * and the call to {@code defaultDrawableLoader} returned {@code null}.
-     *
-     * <p>This API uses the screen density returned from {@link Resources#getConfiguration()}, to
-     * set a different value use
-     * {@link #getDrawableForDensity(String, String, int, Supplier)}.
-     *
-     * <p>Callers should register for {@link #ACTION_DEVICE_POLICY_RESOURCE_UPDATED} to get
-     * notified when a resource has been updated.
-     *
-     * <p>Note that each call to this API loads the resource from the package that called
-     * {@code setDrawables} to set the updated resource.
-     *
-     * @param drawableId The drawable ID to get the updated resource for.
-     * @param drawableStyle The drawable style to use.
-     * @param defaultDrawableLoader To get the default drawable if no updated drawable was set for
-     *                              the provided params.
-     */
-    @Nullable
-    public Drawable getDrawable(
-            @NonNull @DevicePolicyResources.UpdatableDrawableId String drawableId,
-            @NonNull @DevicePolicyResources.UpdatableDrawableStyle String drawableStyle,
-            @NonNull Supplier<Drawable> defaultDrawableLoader) {
-        return getDrawable(
-                drawableId, drawableStyle, Drawables.Source.UNDEFINED, defaultDrawableLoader);
-    }
-
-    /**
-     * Similar to {@link #getDrawable(String, String, Supplier)}, but also accepts
-     * a {@code drawableSource} (see {@link DevicePolicyResources.Drawables.Source}) which
-     * could result in returning a different drawable than
-     * {@link #getDrawable(String, String, Supplier)}
-     * if an override was set for that specific source.
-     *
-     * <p>Calls to this API will not return {@code null} unless no updated drawable was found
-     * and the call to {@code defaultDrawableLoader} returned {@code null}.
-     *
-     * <p>Callers should register for {@link #ACTION_DEVICE_POLICY_RESOURCE_UPDATED} to get
-     * notified when a resource has been updated.
-     *
-     * @param drawableId The drawable ID to get the updated resource for.
-     * @param drawableStyle The drawable style to use.
-     * @param drawableSource The source for the caller.
-     * @param defaultDrawableLoader To get the default drawable if no updated drawable was set for
-     *                              the provided params.
-     */
-    @Nullable
-    public Drawable getDrawable(
-            @NonNull @DevicePolicyResources.UpdatableDrawableId String drawableId,
-            @NonNull @DevicePolicyResources.UpdatableDrawableStyle String drawableStyle,
-            @NonNull @DevicePolicyResources.UpdatableDrawableSource String drawableSource,
-            @NonNull Supplier<Drawable> defaultDrawableLoader) {
-
-        Objects.requireNonNull(drawableId, "drawableId can't be null");
-        Objects.requireNonNull(drawableStyle, "drawableStyle can't be null");
-        Objects.requireNonNull(drawableSource, "drawableSource can't be null");
-        Objects.requireNonNull(defaultDrawableLoader, "defaultDrawableLoader can't be null");
-
-        if (Drawables.UNDEFINED.equals(drawableId)) {
-            return ParcelableResource.loadDefaultDrawable(defaultDrawableLoader);
-        }
-        if (mService != null) {
-            try {
-                ParcelableResource resource = mService.getDrawable(
-                        drawableId, drawableStyle, drawableSource);
-                if (resource == null) {
-                    return ParcelableResource.loadDefaultDrawable(
-                            defaultDrawableLoader);
-                }
-                return resource.getDrawable(
-                        mContext,
-                        /* density= */ 0,
-                        defaultDrawableLoader);
-
-            } catch (RemoteException e) {
-                Log.e(
-                        TAG,
-                        "Error getting the updated drawable from DevicePolicyManagerService.",
-                        e);
-                return ParcelableResource.loadDefaultDrawable(defaultDrawableLoader);
-            }
-        }
-        return ParcelableResource.loadDefaultDrawable(defaultDrawableLoader);
-    }
-
-    /**
-     * Similar to {@link #getDrawable(String, String, Supplier)}, but also accepts
-     * {@code density}. See {@link Resources#getDrawableForDensity(int, int, Resources.Theme)}.
-     *
-     * <p>Calls to this API will not return {@code null} unless no updated drawable was found
-     * and the call to {@code defaultDrawableLoader} returned {@code null}.
-     *
-     * <p>Callers should register for {@link #ACTION_DEVICE_POLICY_RESOURCE_UPDATED} to get
-     * notified when a resource has been updated.
-     *
-     * @param drawableId The drawable ID to get the updated resource for.
-     * @param drawableStyle The drawable style to use.
-     * @param density The desired screen density indicated by the resource as
-     *            found in {@link DisplayMetrics}. A value of 0 means to use the
-     *            density returned from {@link Resources#getConfiguration()}.
-     * @param defaultDrawableLoader To get the default drawable if no updated drawable was set for
-     *                              the provided params.
-     */
-    @Nullable
-    public Drawable getDrawableForDensity(
-            @NonNull @DevicePolicyResources.UpdatableDrawableId String drawableId,
-            @NonNull @DevicePolicyResources.UpdatableDrawableStyle String drawableStyle,
-            int density,
-            @NonNull Supplier<Drawable> defaultDrawableLoader) {
-        return getDrawableForDensity(
-                drawableId,
-                drawableStyle,
-                Drawables.Source.UNDEFINED,
-                density,
-                defaultDrawableLoader);
-    }
-
-     /**
-     * Similar to {@link #getDrawable(String, String, String, Supplier)}, but also accepts
-     * {@code density}. See {@link Resources#getDrawableForDensity(int, int, Resources.Theme)}.
-     *
-      * <p>Calls to this API will not return {@code null} unless no updated drawable was found
-      * and the call to {@code defaultDrawableLoader} returned {@code null}.
-     *
-     * <p>Callers should register for {@link #ACTION_DEVICE_POLICY_RESOURCE_UPDATED} to get
-     * notified when a resource has been updated.
-     *
-     * @param drawableId The drawable ID to get the updated resource for.
-     * @param drawableStyle The drawable style to use.
-     * @param drawableSource The source for the caller.
-     * @param density The desired screen density indicated by the resource as
-     *            found in {@link DisplayMetrics}. A value of 0 means to use the
-     *            density returned from {@link Resources#getConfiguration()}.
-     * @param defaultDrawableLoader To get the default drawable if no updated drawable was set for
-     *                              the provided params.
-     */
-    @Nullable
-    public Drawable getDrawableForDensity(
-            @NonNull @DevicePolicyResources.UpdatableDrawableId String drawableId,
-            @NonNull @DevicePolicyResources.UpdatableDrawableStyle String drawableStyle,
-            @NonNull @DevicePolicyResources.UpdatableDrawableSource String drawableSource,
-            int density,
-            @NonNull Supplier<Drawable> defaultDrawableLoader) {
-
-        Objects.requireNonNull(drawableId, "drawableId can't be null");
-        Objects.requireNonNull(drawableStyle, "drawableStyle can't be null");
-        Objects.requireNonNull(drawableSource, "drawableSource can't be null");
-        Objects.requireNonNull(defaultDrawableLoader, "defaultDrawableLoader can't be null");
-
-        if (Drawables.UNDEFINED.equals(drawableId)) {
-            return ParcelableResource.loadDefaultDrawable(defaultDrawableLoader);
-        }
-        if (mService != null) {
-            try {
-                ParcelableResource resource = mService.getDrawable(
-                        drawableId, drawableStyle, drawableSource);
-                if (resource == null) {
-                    return ParcelableResource.loadDefaultDrawable(
-                            defaultDrawableLoader);
-                }
-                return resource.getDrawable(mContext, density, defaultDrawableLoader);
-            } catch (RemoteException e) {
-                Log.e(
-                        TAG,
-                        "Error getting the updated drawable from DevicePolicyManagerService.",
-                        e);
-                return ParcelableResource.loadDefaultDrawable(defaultDrawableLoader);
-            }
-        }
-        return ParcelableResource.loadDefaultDrawable(defaultDrawableLoader);
-    }
-
-    /**
-     * Similar to {@link #getDrawable(String, String, String, Supplier)} but returns an
-     * {@link Icon} instead of a {@link Drawable}.
-     *
-     * @param drawableId The drawable ID to get the updated resource for.
-     * @param drawableStyle The drawable style to use.
-     * @param drawableSource The source for the caller.
-     * @param defaultIcon Returned if no updated drawable was set for the provided params.
-     */
-    @Nullable
-    public Icon getDrawableAsIcon(
-            @NonNull @DevicePolicyResources.UpdatableDrawableId String drawableId,
-            @NonNull @DevicePolicyResources.UpdatableDrawableStyle String drawableStyle,
-            @NonNull @DevicePolicyResources.UpdatableDrawableSource String drawableSource,
-            @Nullable Icon defaultIcon) {
-        Objects.requireNonNull(drawableId, "drawableId can't be null");
-        Objects.requireNonNull(drawableStyle, "drawableStyle can't be null");
-        Objects.requireNonNull(drawableSource, "drawableSource can't be null");
-        Objects.requireNonNull(defaultIcon, "defaultIcon can't be null");
-
-        if (Drawables.UNDEFINED.equals(drawableId)) {
-            return defaultIcon;
-        }
-        if (mService != null) {
-            try {
-                ParcelableResource resource = mService.getDrawable(
-                        drawableId, drawableStyle, drawableSource);
-                if (resource == null) {
-                    return defaultIcon;
-                }
-                return Icon.createWithResource(resource.getPackageName(), resource.getResourceId());
-            } catch (RemoteException e) {
-                Log.e(
-                        TAG,
-                        "Error getting the updated drawable from DevicePolicyManagerService.",
-                        e);
-                return defaultIcon;
-            }
-        }
-        return defaultIcon;
-    }
-
-    /**
-     * Similar to {@link #getDrawable(String, String, Supplier)} but returns an {@link Icon}
-     * instead of a {@link Drawable}.
-     *
-     * @param drawableId The drawable ID to get the updated resource for.
-     * @param drawableStyle The drawable style to use.
-     * @param defaultIcon Returned if no updated drawable was set for the provided params.
-     */
-    @Nullable
-    public Icon getDrawableAsIcon(
-            @NonNull @DevicePolicyResources.UpdatableDrawableId String drawableId,
-            @NonNull @DevicePolicyResources.UpdatableDrawableStyle String drawableStyle,
-            @Nullable Icon defaultIcon) {
-        return getDrawableAsIcon(
-                drawableId, drawableStyle, Drawables.Source.UNDEFINED, defaultIcon);
-    }
-
-
-    /**
-     * For each {@link DevicePolicyStringResource} item in {@code strings}, it updates the string
-     * resource for {@link DevicePolicyStringResource#getStringId()} to the string with ID
-     * {@code callingPackageResourceId} (see {@link DevicePolicyResources.Strings}), meaning any
-     * system UI surface calling {@link #getString} with {@code stringId} will get
-     * the new resource after this API is called.
-     *
-     * <p>Sends a broadcast with action {@link #ACTION_DEVICE_POLICY_RESOURCE_UPDATED} to
-     * registered receivers when a resource has been updated successfully.
-     *
-     * <p>Important notes to consider when using this API:
-     * <ul>
-     * <li> {@link #getString} references the resource
-     * {@code callingPackageResourceId} in the calling package each time it gets called. You have to
-     * ensure that the resource is always available in the calling package as long as it is used as
-     * an updated resource.
-     * <li> You still have to re-call {@code setStrings} even if you only make changes to the
-     * content of the resource with ID {@code callingPackageResourceId} as the content might be
-     * cached and would need updating.
-     * </ul>
-     *
-     * @param strings The list of {@link DevicePolicyStringResource} to update.
-     *
-     * @hide
-     */
-    @SystemApi
-    @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_MANAGEMENT_RESOURCES)
-    public void setStrings(@NonNull Set<DevicePolicyStringResource> strings) {
-        if (mService != null) {
-            try {
-                mService.setStrings(new ArrayList<>(strings));
-            } catch (RemoteException e) {
-                throw e.rethrowFromSystemServer();
-            }
-        }
-    }
-
-    /**
-     * Removes the updated strings for the list of {@code stringIds} (see
-     * {@link DevicePolicyResources.Strings}) that was previously set by calling {@link #setStrings},
-     * meaning any subsequent calls to {@link #getString} for the provided IDs will
-     * return the default string from {@code defaultStringLoader}.
-     *
-     * <p>Sends a broadcast with action {@link #ACTION_DEVICE_POLICY_RESOURCE_UPDATED} to
-     * registered receivers when a resource has been reset successfully.
-     *
-     * @param stringIds The list of IDs to remove the updated resources for.
-     *
-     * @hide
-     */
-    @SystemApi
-    @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_MANAGEMENT_RESOURCES)
-    public void resetStrings(@NonNull Set<String> stringIds) {
-        if (mService != null) {
-            try {
-                mService.resetStrings(new ArrayList<>(stringIds));
-            } catch (RemoteException e) {
-                throw e.rethrowFromSystemServer();
-            }
-        }
-    }
-
-    /**
-     * Returns the appropriate updated string for the {@code stringId} (see
-     * {@link DevicePolicyResources.Strings}) if one was set using
-     * {@code setStrings}, otherwise returns the string from {@code defaultStringLoader}.
-     *
-     * <p>Also returns the string from {@code defaultStringLoader} if
-     * {@link DevicePolicyResources.Strings#UNDEFINED} was passed.
-     *
-     * <p>Calls to this API will not return {@code null} unless no updated drawable was found
-     * and the call to {@code defaultStringLoader} returned {@code null}.
-     *
-     * <p>Callers should register for {@link #ACTION_DEVICE_POLICY_RESOURCE_UPDATED} to get
-     * notified when a resource has been updated.
-     *
-     * <p>Note that each call to this API loads the resource from the package that called
-     * {@code setStrings} to set the updated resource.
-     *
-     * @param stringId The IDs to get the updated resource for.
-     * @param defaultStringLoader To get the default string if no updated string was set for
-     *         {@code stringId}.
-     */
-    @Nullable
-    public String getString(
-            @NonNull @DevicePolicyResources.UpdatableStringId String stringId,
-            @NonNull Supplier<String> defaultStringLoader) {
-
-        Objects.requireNonNull(stringId, "stringId can't be null");
-        Objects.requireNonNull(defaultStringLoader, "defaultStringLoader can't be null");
-
-        if (stringId.equals(DevicePolicyResources.Strings.UNDEFINED)) {
-            return ParcelableResource.loadDefaultString(defaultStringLoader);
-        }
-        if (mService != null) {
-            try {
-                ParcelableResource resource = mService.getString(stringId);
-                if (resource == null) {
-                    return ParcelableResource.loadDefaultString(defaultStringLoader);
-                }
-                return resource.getString(mContext, defaultStringLoader);
-            } catch (RemoteException e) {
-                Log.e(
-                        TAG,
-                        "Error getting the updated string from DevicePolicyManagerService.",
-                        e);
-                return ParcelableResource.loadDefaultString(defaultStringLoader);
-            }
-        }
-        return ParcelableResource.loadDefaultString(defaultStringLoader);
-    }
-
-    /**
-     * Similar to {@link #getString(String, Supplier)} but accepts {@code formatArgs} and returns a
-     * localized formatted string, substituting the format arguments as defined in
-     * {@link java.util.Formatter} and {@link java.lang.String#format}, (see
-     * {@link Resources#getString(int, Object...)}).
-     *
-     * <p>Calls to this API will not return {@code null} unless no updated drawable was found
-     * and the call to {@code defaultStringLoader} returned {@code null}.
-     *
-     * @param stringId The IDs to get the updated resource for.
-     * @param defaultStringLoader To get the default string if no updated string was set for
-     *         {@code stringId}.
-     * @param formatArgs The format arguments that will be used for substitution.
-     */
-    @Nullable
-    @SuppressLint("SamShouldBeLast")
-    public String getString(
-            @NonNull @DevicePolicyResources.UpdatableStringId String stringId,
-            @NonNull Supplier<String> defaultStringLoader,
-            @NonNull Object... formatArgs) {
-
-        Objects.requireNonNull(stringId, "stringId can't be null");
-        Objects.requireNonNull(defaultStringLoader, "defaultStringLoader can't be null");
-
-        if (stringId.equals(DevicePolicyResources.Strings.UNDEFINED)) {
-            return ParcelableResource.loadDefaultString(defaultStringLoader);
-        }
-        if (mService != null) {
-            try {
-                ParcelableResource resource = mService.getString(stringId);
-                if (resource == null) {
-                    return ParcelableResource.loadDefaultString(defaultStringLoader);
-                }
-                return resource.getString(mContext, defaultStringLoader, formatArgs);
-            } catch (RemoteException e) {
-                Log.e(
-                        TAG,
-                        "Error getting the updated string from DevicePolicyManagerService.",
-                        e);
-                return ParcelableResource.loadDefaultString(defaultStringLoader);
-            }
-        }
-        return ParcelableResource.loadDefaultString(defaultStringLoader);
+    @NonNull
+    public DevicePolicyResourcesManager getResources() {
+        return mResourcesManager;
     }
 
     /**

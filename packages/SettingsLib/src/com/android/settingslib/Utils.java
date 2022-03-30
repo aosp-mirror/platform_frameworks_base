@@ -146,7 +146,7 @@ public class Utils {
 
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     private static String getUpdatableManagedUserTitle(Context context) {
-        return context.getSystemService(DevicePolicyManager.class).getString(
+        return context.getSystemService(DevicePolicyManager.class).getResources().getString(
                 WORK_PROFILE_USER_LABEL,
                 () -> context.getString(R.string.managed_user_title));
     }

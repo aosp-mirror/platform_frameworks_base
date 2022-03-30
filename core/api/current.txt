@@ -110,7 +110,6 @@ package android {
     field public static final String MANAGE_MEDIA = "android.permission.MANAGE_MEDIA";
     field public static final String MANAGE_ONGOING_CALLS = "android.permission.MANAGE_ONGOING_CALLS";
     field public static final String MANAGE_OWN_CALLS = "android.permission.MANAGE_OWN_CALLS";
-    field @Deprecated public static final String MANAGE_WIFI_AUTO_JOIN = "android.permission.MANAGE_WIFI_AUTO_JOIN";
     field public static final String MANAGE_WIFI_INTERFACES = "android.permission.MANAGE_WIFI_INTERFACES";
     field public static final String MANAGE_WIFI_NETWORK_SELECTION = "android.permission.MANAGE_WIFI_NETWORK_SELECTION";
     field public static final String MASTER_CLEAR = "android.permission.MASTER_CLEAR";
@@ -7418,12 +7417,6 @@ package android.app.admin {
     method @NonNull public java.util.List<java.lang.String> getDelegatedScopes(@Nullable android.content.ComponentName, @NonNull String);
     method public CharSequence getDeviceOwnerLockScreenInfo();
     method @Nullable public String getDevicePolicyManagementRoleHolderPackage();
-    method @Nullable public android.graphics.drawable.Drawable getDrawable(@NonNull String, @NonNull String, @NonNull java.util.function.Supplier<android.graphics.drawable.Drawable>);
-    method @Nullable public android.graphics.drawable.Drawable getDrawable(@NonNull String, @NonNull String, @NonNull String, @NonNull java.util.function.Supplier<android.graphics.drawable.Drawable>);
-    method @Nullable public android.graphics.drawable.Icon getDrawableAsIcon(@NonNull String, @NonNull String, @NonNull String, @Nullable android.graphics.drawable.Icon);
-    method @Nullable public android.graphics.drawable.Icon getDrawableAsIcon(@NonNull String, @NonNull String, @Nullable android.graphics.drawable.Icon);
-    method @Nullable public android.graphics.drawable.Drawable getDrawableForDensity(@NonNull String, @NonNull String, int, @NonNull java.util.function.Supplier<android.graphics.drawable.Drawable>);
-    method @Nullable public android.graphics.drawable.Drawable getDrawableForDensity(@NonNull String, @NonNull String, @NonNull String, int, @NonNull java.util.function.Supplier<android.graphics.drawable.Drawable>);
     method public CharSequence getEndUserSessionMessage(@NonNull android.content.ComponentName);
     method @NonNull public String getEnrollmentSpecificId();
     method @Nullable public android.app.admin.FactoryResetProtectionPolicy getFactoryResetProtectionPolicy(@Nullable android.content.ComponentName);
@@ -7470,14 +7463,13 @@ package android.app.admin {
     method @NonNull public java.util.List<android.app.admin.PreferentialNetworkServiceConfig> getPreferentialNetworkServiceConfigs();
     method public int getRequiredPasswordComplexity();
     method public long getRequiredStrongAuthTimeout(@Nullable android.content.ComponentName);
+    method @NonNull public android.app.admin.DevicePolicyResourcesManager getResources();
     method public boolean getScreenCaptureDisabled(@Nullable android.content.ComponentName);
     method public java.util.List<android.os.UserHandle> getSecondaryUsers(@NonNull android.content.ComponentName);
     method public CharSequence getShortSupportMessage(@NonNull android.content.ComponentName);
     method public CharSequence getStartUserSessionMessage(@NonNull android.content.ComponentName);
     method @Deprecated public boolean getStorageEncryption(@Nullable android.content.ComponentName);
     method public int getStorageEncryptionStatus();
-    method @Nullable public String getString(@NonNull String, @NonNull java.util.function.Supplier<java.lang.String>);
-    method @Nullable public String getString(@NonNull String, @NonNull java.util.function.Supplier<java.lang.String>, @NonNull java.lang.Object...);
     method @Nullable public android.app.admin.SystemUpdatePolicy getSystemUpdatePolicy();
     method @Nullable public android.os.PersistableBundle getTransferOwnershipBundle();
     method @Nullable public java.util.List<android.os.PersistableBundle> getTrustAgentConfiguration(@Nullable android.content.ComponentName, @NonNull android.content.ComponentName);
@@ -7839,31 +7831,18 @@ package android.app.admin {
   }
 
   public final class DevicePolicyResources {
-  }
-
-  public static final class DevicePolicyResources.Drawables {
-    field public static final String UNDEFINED = "UNDEFINED";
-    field public static final String WORK_PROFILE_ICON = "WORK_PROFILE_ICON";
-    field public static final String WORK_PROFILE_ICON_BADGE = "WORK_PROFILE_ICON_BADGE";
-    field public static final String WORK_PROFILE_OFF_ICON = "WORK_PROFILE_OFF_ICON";
-    field public static final String WORK_PROFILE_USER_ICON = "WORK_PROFILE_USER_ICON";
-  }
-
-  public static final class DevicePolicyResources.Drawables.Source {
-    field public static final String HOME_WIDGET = "HOME_WIDGET";
-    field public static final String LAUNCHER_OFF_BUTTON = "LAUNCHER_OFF_BUTTON";
-    field public static final String NOTIFICATION = "NOTIFICATION";
-    field public static final String PROFILE_SWITCH_ANIMATION = "PROFILE_SWITCH_ANIMATION";
-    field public static final String QUICK_SETTINGS = "QUICK_SETTINGS";
-    field public static final String STATUS_BAR = "STATUS_BAR";
     field public static final String UNDEFINED = "UNDEFINED";
   }
 
-  public static final class DevicePolicyResources.Drawables.Style {
-    field public static final String DEFAULT = "DEFAULT";
-    field public static final String OUTLINE = "OUTLINE";
-    field public static final String SOLID_COLORED = "SOLID_COLORED";
-    field public static final String SOLID_NOT_COLORED = "SOLID_NOT_COLORED";
+  public class DevicePolicyResourcesManager {
+    method @Nullable public android.graphics.drawable.Drawable getDrawable(@NonNull String, @NonNull String, @NonNull java.util.function.Supplier<android.graphics.drawable.Drawable>);
+    method @Nullable public android.graphics.drawable.Drawable getDrawable(@NonNull String, @NonNull String, @NonNull String, @NonNull java.util.function.Supplier<android.graphics.drawable.Drawable>);
+    method @Nullable public android.graphics.drawable.Icon getDrawableAsIcon(@NonNull String, @NonNull String, @NonNull String, @Nullable android.graphics.drawable.Icon);
+    method @Nullable public android.graphics.drawable.Icon getDrawableAsIcon(@NonNull String, @NonNull String, @Nullable android.graphics.drawable.Icon);
+    method @Nullable public android.graphics.drawable.Drawable getDrawableForDensity(@NonNull String, @NonNull String, int, @NonNull java.util.function.Supplier<android.graphics.drawable.Drawable>);
+    method @Nullable public android.graphics.drawable.Drawable getDrawableForDensity(@NonNull String, @NonNull String, @NonNull String, int, @NonNull java.util.function.Supplier<android.graphics.drawable.Drawable>);
+    method @Nullable public String getString(@NonNull String, @NonNull java.util.function.Supplier<java.lang.String>);
+    method @Nullable public String getString(@NonNull String, @NonNull java.util.function.Supplier<java.lang.String>, @NonNull java.lang.Object...);
   }
 
   public final class DnsEvent extends android.app.admin.NetworkEvent implements android.os.Parcelable {
@@ -39655,12 +39634,9 @@ package android.speech {
 
   public final class RecognitionSupport implements android.os.Parcelable {
     method public int describeContents();
-    method @Deprecated @NonNull public java.util.List<java.lang.String> getInstalledLanguages();
     method @NonNull public java.util.List<java.lang.String> getInstalledOnDeviceLanguages();
     method @NonNull public java.util.List<java.lang.String> getOnlineLanguages();
-    method @Deprecated @NonNull public java.util.List<java.lang.String> getPendingLanguages();
     method @NonNull public java.util.List<java.lang.String> getPendingOnDeviceLanguages();
-    method @Deprecated @NonNull public java.util.List<java.lang.String> getSupportedLanguages();
     method @NonNull public java.util.List<java.lang.String> getSupportedOnDeviceLanguages();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.speech.RecognitionSupport> CREATOR;
@@ -39668,20 +39644,14 @@ package android.speech {
 
   public static final class RecognitionSupport.Builder {
     ctor public RecognitionSupport.Builder();
-    method @Deprecated @NonNull public android.speech.RecognitionSupport.Builder addInstalledLanguage(@NonNull String);
     method @NonNull public android.speech.RecognitionSupport.Builder addInstalledOnDeviceLanguage(@NonNull String);
     method @NonNull public android.speech.RecognitionSupport.Builder addOnlineLanguage(@NonNull String);
-    method @Deprecated @NonNull public android.speech.RecognitionSupport.Builder addPendingLanguage(@NonNull String);
     method @NonNull public android.speech.RecognitionSupport.Builder addPendingOnDeviceLanguage(@NonNull String);
-    method @Deprecated @NonNull public android.speech.RecognitionSupport.Builder addSupportedLanguage(@NonNull String);
     method @NonNull public android.speech.RecognitionSupport.Builder addSupportedOnDeviceLanguage(@NonNull String);
     method @NonNull public android.speech.RecognitionSupport build();
-    method @Deprecated @NonNull public android.speech.RecognitionSupport.Builder setInstalledLanguages(@NonNull java.util.List<java.lang.String>);
     method @NonNull public android.speech.RecognitionSupport.Builder setInstalledOnDeviceLanguages(@NonNull java.util.List<java.lang.String>);
     method @NonNull public android.speech.RecognitionSupport.Builder setOnlineLanguages(@NonNull java.util.List<java.lang.String>);
-    method @Deprecated @NonNull public android.speech.RecognitionSupport.Builder setPendingLanguages(@NonNull java.util.List<java.lang.String>);
     method @NonNull public android.speech.RecognitionSupport.Builder setPendingOnDeviceLanguages(@NonNull java.util.List<java.lang.String>);
-    method @Deprecated @NonNull public android.speech.RecognitionSupport.Builder setSupportedLanguages(@NonNull java.util.List<java.lang.String>);
     method @NonNull public android.speech.RecognitionSupport.Builder setSupportedOnDeviceLanguages(@NonNull java.util.List<java.lang.String>);
   }
 

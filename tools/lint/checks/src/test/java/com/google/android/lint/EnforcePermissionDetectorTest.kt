@@ -147,14 +147,57 @@ annotation must be used on TestClass6.testMethod [MissingEnforcePermissionAnnota
 1 errors, 0 warnings""".addLineContinuation())
     }
 
+    fun testDetectIssuesExtraAnnotationMethod() {
+        lint().files(java(
+            """
+            package test.pkg;
+            public class TestClass7 extends IBar.Stub {
+                @android.annotation.EnforcePermission(android.Manifest.permission.INTERNET)
+                public void testMethod() {}
+            }
+            """).indented(),
+                *stubs
+        )
+        .run()
+        .expect("""src/test/pkg/TestClass7.java:4: Error: The method TestClass7.testMethod \
+overrides the method Stub.testMethod which is not annotated with @EnforcePermission. The same \
+annotation must be used on Stub.testMethod. Did you forget to annotate the AIDL definition? \
+[MissingEnforcePermissionAnnotation]
+    public void testMethod() {}
+                ~~~~~~~~~~
+1 errors, 0 warnings""".addLineContinuation())
+    }
+
+    fun testDetectIssuesExtraAnnotationInterface() {
+        lint().files(java(
+            """
+            package test.pkg;
+            @android.annotation.EnforcePermission(android.Manifest.permission.INTERNET)
+            public class TestClass8 extends IBar.Stub {
+                public void testMethod() {}
+            }
+            """).indented(),
+                *stubs
+        )
+        .run()
+        .expect("""src/test/pkg/TestClass8.java:2: Error: The class test.pkg.TestClass8 \
+extends the class IBar.Stub which is not annotated with @EnforcePermission. The same annotation \
+must be used on IBar.Stub. Did you forget to annotate the AIDL definition? \
+[MissingEnforcePermissionAnnotation]
+@android.annotation.EnforcePermission(android.Manifest.permission.INTERNET)
+^
+1 errors, 0 warnings""".addLineContinuation())
+    }
+
     /* Stubs */
 
+    // A service with permission annotation on the class.
     private val interfaceIFooStub: TestFile = java(
         """
         @android.annotation.EnforcePermission(android.Manifest.permission.READ_PHONE_STATE)
         public interface IFoo {
          @android.annotation.EnforcePermission(android.Manifest.permission.READ_PHONE_STATE)
-         public static abstract class Stub implements IFoo {
+         public static abstract class Stub extends android.os.Binder implements IFoo {
            @Override
            public void testMethod() {}
          }
@@ -163,15 +206,29 @@ annotation must be used on TestClass6.testMethod [MissingEnforcePermissionAnnota
         """
     ).indented()
 
+    // A service with permission annotation on the method.
     private val interfaceIFooMethodStub: TestFile = java(
         """
         public interface IFooMethod {
-         public static abstract class Stub implements IFooMethod {
+         public static abstract class Stub extends android.os.Binder implements IFooMethod {
             @Override
             @android.annotation.EnforcePermission(android.Manifest.permission.READ_PHONE_STATE)
             public void testMethod() {}
           }
           @android.annotation.EnforcePermission(android.Manifest.permission.READ_PHONE_STATE)
+          public void testMethod();
+        }
+        """
+    ).indented()
+
+    // A service without any permission annotation.
+    private val interfaceIBarStub: TestFile = java(
+        """
+        public interface IBar {
+         public static abstract class Stub extends android.os.Binder implements IBar {
+            @Override
+            public void testMethod() {}
+          }
           public void testMethod();
         }
         """
@@ -194,7 +251,7 @@ annotation must be used on TestClass6.testMethod [MissingEnforcePermissionAnnota
         """
     ).indented()
 
-    private val stubs = arrayOf(interfaceIFooStub, interfaceIFooMethodStub,
+    private val stubs = arrayOf(interfaceIFooStub, interfaceIFooMethodStub, interfaceIBarStub,
             manifestPermissionStub, enforcePermissionAnnotationStub)
 
     // Substitutes "backslash + new line" with an empty string to imitate line continuation

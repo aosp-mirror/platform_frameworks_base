@@ -551,7 +551,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
     private void updateEnterpriseThumbnailDrawable(Context context) {
         DevicePolicyManager dpm = context.getSystemService(DevicePolicyManager.class);
-        mEnterpriseThumbnailDrawable = dpm.getDrawable(
+        mEnterpriseThumbnailDrawable = dpm.getResources().getDrawable(
                 WORK_PROFILE_ICON, OUTLINE, PROFILE_SWITCH_ANIMATION,
                 () -> context.getDrawable(R.drawable.ic_corp_badge));
     }

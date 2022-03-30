@@ -174,7 +174,7 @@ public class TelephonySubscriptionTrackerTest {
 
     private IntentFilter getIntentFilter() {
         final ArgumentCaptor<IntentFilter> captor = ArgumentCaptor.forClass(IntentFilter.class);
-        verify(mContext).registerReceiver(any(), captor.capture(), any(), any(), anyInt());
+        verify(mContext).registerReceiver(any(), captor.capture(), any(), any());
 
         return captor.getValue();
     }
@@ -258,8 +258,7 @@ public class TelephonySubscriptionTrackerTest {
                         eq(mTelephonySubscriptionTracker),
                         any(IntentFilter.class),
                         any(),
-                        eq(mHandler),
-                        eq(Context.RECEIVER_NOT_EXPORTED));
+                        eq(mHandler));
         final IntentFilter filter = getIntentFilter();
         assertEquals(2, filter.countActions());
         assertTrue(filter.hasAction(ACTION_CARRIER_CONFIG_CHANGED));
