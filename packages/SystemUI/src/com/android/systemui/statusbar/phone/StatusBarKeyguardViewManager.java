@@ -1368,6 +1368,15 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     }
 
     /**
+     * Returns if bouncer expansion is between 0 and 1 non-inclusive.
+     */
+    public boolean bouncerIsInTransit() {
+        if (mBouncer == null) return false;
+
+        return mBouncer.inTransit();
+    }
+
+    /**
      * Delegate used to send show/reset events to an alternate authentication method instead of the
      * regular pin/pattern/password bouncer.
      */

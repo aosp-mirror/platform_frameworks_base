@@ -14,6 +14,8 @@
 
 package com.android.systemui.qs;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
@@ -37,8 +39,10 @@ import android.view.ViewGroup;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.logging.UiEventLogger;
+import com.android.keyguard.BouncerPanelExpansionCalculator;
 import com.android.systemui.R;
 import com.android.systemui.SysuiBaseFragmentTest;
+import com.android.systemui.animation.ShadeInterpolation;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.media.MediaHost;
@@ -54,6 +58,7 @@ import com.android.systemui.qs.tileimpl.QSFactoryImpl;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.shared.plugins.PluginManager;
 import com.android.systemui.statusbar.CommandQueue;
+import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.phone.AutoTileManager;
 import com.android.systemui.statusbar.phone.CentralSurfaces;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
@@ -77,47 +82,29 @@ import java.util.Optional;
 @SmallTest
 public class QSFragmentTest extends SysuiBaseFragmentTest {
 
-    @Mock
-    private QSFragmentComponent.Factory mQsComponentFactory;
-    @Mock
-    private QSFragmentComponent mQsFragmentComponent;
-    @Mock
-    private QSPanelController mQSPanelController;
-    @Mock
-    private MediaHost mQSMediaHost;
-    @Mock
-    private MediaHost mQQSMediaHost;
-    @Mock
-    private KeyguardBypassController mBypassController;
-    @Mock
-    private FalsingManager mFalsingManager;
-    @Mock
-    private TileServiceRequestController.Builder mTileServiceRequestControllerBuilder;
-    @Mock
-    private TileServiceRequestController mTileServiceRequestController;
-    @Mock
-    private QSCustomizerController mQsCustomizerController;
-    @Mock
-    private QuickQSPanelController mQuickQSPanelController;
-    @Mock
-    private FooterActionsController mQSFooterActionController;
-    @Mock
-    private QSContainerImplController mQSContainerImplController;
-    @Mock
-    private QSContainerImpl mContainer;
-    @Mock
-    private QSFooter mFooter;
-    @Mock
-    private LayoutInflater mLayoutInflater;
-    @Mock
-    private NonInterceptingScrollView mQSPanelScrollView;
-    @Mock
-    private QuickStatusBarHeader mHeader;
-    @Mock
-    private QSPanel.QSTileLayout mQsTileLayout;
-    @Mock
-    private QSPanel.QSTileLayout mQQsTileLayout;
+    @Mock private QSFragmentComponent.Factory mQsComponentFactory;
+    @Mock private QSFragmentComponent mQsFragmentComponent;
+    @Mock private QSPanelController mQSPanelController;
+    @Mock private MediaHost mQSMediaHost;
+    @Mock private MediaHost mQQSMediaHost;
+    @Mock private KeyguardBypassController mBypassController;
+    @Mock private FalsingManager mFalsingManager;
+    @Mock private TileServiceRequestController.Builder mTileServiceRequestControllerBuilder;
+    @Mock private TileServiceRequestController mTileServiceRequestController;
+    @Mock private QSCustomizerController mQsCustomizerController;
+    @Mock private QuickQSPanelController mQuickQSPanelController;
+    @Mock private FooterActionsController mQSFooterActionController;
+    @Mock private QSContainerImplController mQSContainerImplController;
+    @Mock private QSContainerImpl mContainer;
+    @Mock private QSFooter mFooter;
+    @Mock private LayoutInflater mLayoutInflater;
+    @Mock private NonInterceptingScrollView mQSPanelScrollView;
+    @Mock private QuickStatusBarHeader mHeader;
+    @Mock private QSPanel.QSTileLayout mQsTileLayout;
+    @Mock private QSPanel.QSTileLayout mQQsTileLayout;
+    @Mock private QSAnimator mQSAnimator;
     private View mQsFragmentView;
+    @Mock private StatusBarStateController mStatusBarStateController;
 
     public QSFragmentTest() {
         super(QSFragment.class);
@@ -134,14 +121,26 @@ public class QSFragmentTest extends SysuiBaseFragmentTest {
         mFragments.dispatchResume();
         processAllMessages();
 
-        QSTileHost host = new QSTileHost(mContext, mock(StatusBarIconController.class),
-                mock(QSFactoryImpl.class), new Handler(), Looper.myLooper(),
-                mock(PluginManager.class), mock(TunerService.class),
-                () -> mock(AutoTileManager.class), mock(DumpManager.class),
-                mock(BroadcastDispatcher.class), Optional.of(mock(CentralSurfaces.class)),
-                mock(QSLogger.class), mock(UiEventLogger.class), mock(UserTracker.class),
-                mock(SecureSettings.class), mock(CustomTileStatePersister.class),
-                mTileServiceRequestControllerBuilder, mock(TileLifecycleManager.Factory.class));
+        QSTileHost host =
+                new QSTileHost(
+                        mContext,
+                        mock(StatusBarIconController.class),
+                        mock(QSFactoryImpl.class),
+                        new Handler(),
+                        Looper.myLooper(),
+                        mock(PluginManager.class),
+                        mock(TunerService.class),
+                        () -> mock(AutoTileManager.class),
+                        mock(DumpManager.class),
+                        mock(BroadcastDispatcher.class),
+                        Optional.of(mock(CentralSurfaces.class)),
+                        mock(QSLogger.class),
+                        mock(UiEventLogger.class),
+                        mock(UserTracker.class),
+                        mock(SecureSettings.class),
+                        mock(CustomTileStatePersister.class),
+                        mTileServiceRequestControllerBuilder,
+                        mock(TileLifecycleManager.Factory.class));
 
         qs.setListening(true);
         processAllMessages();
@@ -170,6 +169,75 @@ public class QSFragmentTest extends SysuiBaseFragmentTest {
         assertTrue(qs.isExpanded());
     }
 
+    @Test
+    public void transitionToFullShade_inSplitShade_setsAlphaBasedOnProgress() {
+        QSFragment fragment = resumeAndGetFragment();
+        enableSplitShade();
+        int transitionPxAmount = 123;
+        float transitionProgress = 0.5f;
+
+        fragment.setTransitionToFullShadeAmount(transitionPxAmount, transitionProgress);
+
+        assertThat(mQsFragmentView.getAlpha())
+                .isEqualTo(ShadeInterpolation.getContentAlpha(transitionProgress));
+    }
+
+    @Test
+    public void
+            transitionToFullShade_inSplitShade_onKeyguard_bouncerNotActive_usesShadeInterpolator() {
+        QSFragment fragment = resumeAndGetFragment();
+        enableSplitShade();
+        setStatusBarState(StatusBarState.KEYGUARD);
+        when(mQSPanelController.bouncerInTransit()).thenReturn(false);
+        int transitionPxAmount = 123;
+        float transitionProgress = 0.5f;
+
+        fragment.setTransitionToFullShadeAmount(transitionPxAmount, transitionProgress);
+
+        assertThat(mQsFragmentView.getAlpha())
+                .isEqualTo(ShadeInterpolation.getContentAlpha(transitionProgress));
+    }
+
+    @Test
+    public void
+            transitionToFullShade_inSplitShade_onKeyguard_bouncerActive_usesBouncerInterpolator() {
+        QSFragment fragment = resumeAndGetFragment();
+        enableSplitShade();
+        setStatusBarState(StatusBarState.KEYGUARD);
+        when(mQSPanelController.bouncerInTransit()).thenReturn(true);
+        int transitionPxAmount = 123;
+        float transitionProgress = 0.5f;
+
+        fragment.setTransitionToFullShadeAmount(transitionPxAmount, transitionProgress);
+
+        assertThat(mQsFragmentView.getAlpha())
+                .isEqualTo(
+                        BouncerPanelExpansionCalculator.getBackScrimScaledExpansion(
+                                transitionProgress));
+    }
+
+    @Test
+    public void transitionToFullShade_notInSplitShade_alwaysSetsAlphaTo1() {
+        QSFragment fragment = resumeAndGetFragment();
+        disableSplitShade();
+
+        int transitionPxAmount = 12;
+        float transitionProgress = 0.1f;
+        fragment.setTransitionToFullShadeAmount(transitionPxAmount, transitionProgress);
+        assertThat(mQsFragmentView.getAlpha()).isEqualTo(1);
+
+        transitionPxAmount = 123;
+        transitionProgress = 0.5f;
+        fragment.setTransitionToFullShadeAmount(transitionPxAmount, transitionProgress);
+        assertThat(mQsFragmentView.getAlpha()).isEqualTo(1);
+        assertThat(mQsFragmentView.getAlpha()).isEqualTo(1);
+
+        transitionPxAmount = 234;
+        transitionProgress = 0.7f;
+        fragment.setTransitionToFullShadeAmount(transitionPxAmount, transitionProgress);
+        assertThat(mQsFragmentView.getAlpha()).isEqualTo(1);
+    }
+
     @Override
     protected Fragment instantiate(Context context, String className, Bundle arguments) {
         MockitoAnnotations.initMocks(this);
@@ -182,10 +250,10 @@ public class QSFragmentTest extends SysuiBaseFragmentTest {
         setUpOther();
 
         return new QSFragment(
-                new RemoteInputQuickSettingsDisabler(context, commandQueue,
-                        mock(ConfigurationController.class)),
+                new RemoteInputQuickSettingsDisabler(
+                        context, commandQueue, mock(ConfigurationController.class)),
                 mock(QSTileHost.class),
-                mock(StatusBarStateController.class),
+                mStatusBarStateController,
                 commandQueue,
                 mQSMediaHost,
                 mQQSMediaHost,
@@ -212,8 +280,8 @@ public class QSFragmentTest extends SysuiBaseFragmentTest {
 
     private void setUpViews() {
         mQsFragmentView = spy(new View(mContext));
-        when(mQsFragmentView.findViewById(R.id.expanded_qs_scroll_view)).thenReturn(
-                mQSPanelScrollView);
+        when(mQsFragmentView.findViewById(R.id.expanded_qs_scroll_view))
+                .thenReturn(mQSPanelScrollView);
         when(mQsFragmentView.findViewById(R.id.header)).thenReturn(mHeader);
         when(mQsFragmentView.findViewById(android.R.id.edit)).thenReturn(new View(mContext));
     }
@@ -222,8 +290,7 @@ public class QSFragmentTest extends SysuiBaseFragmentTest {
         when(mLayoutInflater.cloneInContext(any(Context.class))).thenReturn(mLayoutInflater);
         when(mLayoutInflater.inflate(anyInt(), any(ViewGroup.class), anyBoolean()))
                 .thenReturn(mQsFragmentView);
-        mContext.addMockSystemService(Context.LAYOUT_INFLATER_SERVICE,
-                mLayoutInflater);
+        mContext.addMockSystemService(Context.LAYOUT_INFLATER_SERVICE, mLayoutInflater);
     }
 
     private void setupQsComponent() {
@@ -231,10 +298,38 @@ public class QSFragmentTest extends SysuiBaseFragmentTest {
         when(mQsFragmentComponent.getQSPanelController()).thenReturn(mQSPanelController);
         when(mQsFragmentComponent.getQuickQSPanelController()).thenReturn(mQuickQSPanelController);
         when(mQsFragmentComponent.getQSCustomizerController()).thenReturn(mQsCustomizerController);
-        when(mQsFragmentComponent.getQSContainerImplController()).thenReturn(
-                mQSContainerImplController);
+        when(mQsFragmentComponent.getQSContainerImplController())
+                .thenReturn(mQSContainerImplController);
         when(mQsFragmentComponent.getQSFooter()).thenReturn(mFooter);
-        when(mQsFragmentComponent.getQSFooterActionController()).thenReturn(
-                mQSFooterActionController);
+        when(mQsFragmentComponent.getQSFooterActionController())
+                .thenReturn(mQSFooterActionController);
+        when(mQsFragmentComponent.getQSAnimator()).thenReturn(mQSAnimator);
+    }
+
+    private QSFragment getFragment() {
+        return ((QSFragment) mFragment);
+    }
+
+    private QSFragment resumeAndGetFragment() {
+        mFragments.dispatchResume();
+        processAllMessages();
+        return getFragment();
+    }
+
+    private void setStatusBarState(int statusBarState) {
+        when(mStatusBarStateController.getState()).thenReturn(statusBarState);
+        getFragment().onStateChanged(statusBarState);
+    }
+
+    private void enableSplitShade() {
+        setSplitShadeEnabled(true);
+    }
+
+    private void disableSplitShade() {
+        setSplitShadeEnabled(false);
+    }
+
+    private void setSplitShadeEnabled(boolean enabled) {
+        getFragment().setInSplitShade(enabled);
     }
 }

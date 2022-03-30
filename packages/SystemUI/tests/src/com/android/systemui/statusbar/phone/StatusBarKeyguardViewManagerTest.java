@@ -55,6 +55,8 @@ import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.unfold.SysUIUnfoldComponent;
 
+import com.google.common.truth.Truth;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -433,5 +435,15 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
         mStatusBarKeyguardViewManager.updateKeyguardPosition(1.0f);
 
         verify(mBouncer).updateKeyguardPosition(1.0f);
+    }
+
+    @Test
+    public void testBouncerIsInTransit() {
+        when(mBouncer.inTransit()).thenReturn(true);
+        Truth.assertThat(mStatusBarKeyguardViewManager.bouncerIsInTransit()).isTrue();
+        when(mBouncer.inTransit()).thenReturn(false);
+        Truth.assertThat(mStatusBarKeyguardViewManager.bouncerIsInTransit()).isFalse();
+        mBouncer = null;
+        Truth.assertThat(mStatusBarKeyguardViewManager.bouncerIsInTransit()).isFalse();
     }
 }
