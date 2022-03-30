@@ -21,9 +21,6 @@ import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SuppressLint;
-import android.annotation.TestApi;
-import android.compat.annotation.ChangeId;
-import android.compat.annotation.EnabledSince;
 import android.os.Build;
 
 import java.lang.annotation.Retention;
@@ -38,23 +35,6 @@ import java.lang.annotation.RetentionPolicy;
  * target (a.k.a. the callback to be invoked next), or its behavior.
  */
 public interface OnBackInvokedDispatcher {
-    /**
-     * Enables dispatching the "back" action via {@link OnBackInvokedDispatcher}.
-     *
-     * When enabled, the following APIs are no longer invoked:
-     * <ul>
-     * <li> {@link android.app.Activity#onBackPressed}
-     * <li> {@link android.app.Dialog#onBackPressed}
-     * <li> {@link android.view.KeyEvent#KEYCODE_BACK} is no longer dispatched.
-     * </ul>
-     *
-     * @hide
-     */
-    @TestApi
-    @ChangeId
-    @EnabledSince(targetSdkVersion = Build.VERSION_CODES.TIRAMISU)
-    long DISPATCH_BACK_INVOCATION_AHEAD_OF_TIME = 195946584L;
-
     /** @hide */
     String TAG = "OnBackInvokedDispatcher";
 
