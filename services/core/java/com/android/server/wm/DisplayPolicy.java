@@ -1498,10 +1498,6 @@ public class DisplayPolicy {
         }
     }
 
-    // TODO(b/161810301): No one is calling this since we haven't moved window layout to the client.
-    //                    When that happens, this should be called when the display rotation is
-    //                    changed, so that we can dispatch the correct insets to all the clients
-    //                    before the insets source windows report their frames to the server.
     void updateInsetsSourceFramesExceptIme(DisplayFrames displayFrames) {
         for (int i = mInsetsSourceWindowsExceptIme.size() - 1; i >= 0; i--) {
             final WindowState win = mInsetsSourceWindowsExceptIme.valueAt(i);
