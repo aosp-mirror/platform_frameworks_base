@@ -1737,7 +1737,7 @@ public final class CachedAppOptimizer {
      * Default implementation for ProcessDependencies, public vor visibility to OomAdjuster class.
      */
     private static final class DefaultProcessDependencies implements ProcessDependencies {
-        public static int mPidCompacting = -1;
+        public static volatile int mPidCompacting = -1;
 
         // Get memory RSS from process.
         @Override

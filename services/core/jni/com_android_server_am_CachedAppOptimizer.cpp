@@ -79,6 +79,8 @@ using android::base::unique_fd;
 
 namespace android {
 
+// Signal happening in separate thread that would bail out compaction
+// before starting next VMA batch
 static std::atomic<bool> cancelRunningCompaction;
 
 // Legacy method for compacting processes, any new code should
