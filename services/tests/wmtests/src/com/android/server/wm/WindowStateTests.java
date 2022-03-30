@@ -503,7 +503,6 @@ public class WindowStateTests extends WindowTestsBase {
         win.applyWithNextDraw(t -> handledT[0] = t);
         assertTrue(win.useBLASTSync());
         final SurfaceControl.Transaction drawT = new StubTransaction();
-        win.prepareDrawHandlers();
         assertTrue(win.finishDrawing(drawT, Integer.MAX_VALUE));
         assertEquals(drawT, handledT[0]);
         assertFalse(win.useBLASTSync());

@@ -1453,12 +1453,6 @@
     <string name="permdesc_requestIgnoreBatteryOptimizations" msgid="634260656917874356">"Umožňuje aplikácii požiadať o povolenie ignorovať optimalizácie výdrže batérie pre danú aplikáciu."</string>
     <string name="permlab_queryAllPackages" msgid="2928450604653281650">"dopytovať všetky balíky"</string>
     <string name="permdesc_queryAllPackages" msgid="5339069855520996010">"Povoľuje aplikácii čítať všetky nainštalované balíky."</string>
-    <string name="permlab_accessAdServicesTopics" msgid="6687112022940098945">"prístup k rozhraniu AdServices Topics API"</string>
-    <string name="permdesc_accessAdServicesTopics" msgid="6011532458156465929">"Umožňuje aplikácii prístup k rozhraniu AdServices Topics API."</string>
-    <string name="permlab_accessAdServicesAttribution" msgid="3268942271128309354">"prístup k rozhraniam AdServices Attribution API"</string>
-    <string name="permdesc_accessAdServicesAttribution" msgid="577482544832578288">"Umožňuje aplikácii prístup k rozhraniam AdServices Attribution API."</string>
-    <string name="permlab_accessAdServicesCustomAudiences" msgid="7249286630514600684">"prístup k rozhraniu AdServices Custom Audiences API"</string>
-    <string name="permdesc_accessAdServicesCustomAudiences" msgid="645526926477180315">"Umožňuje aplikácii prístup k rozhraniu AdServices Custom Audiences API."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1842872462124648678">"Dvojitým klepnutím môžete ovládať priblíženie"</string>
     <string name="gadget_host_error_inflating" msgid="2449961590495198720">"Miniaplikáciu sa nepodarilo pridať."</string>
     <string name="ime_action_go" msgid="5536744546326495436">"Hľadať"</string>
@@ -1941,6 +1935,8 @@
     <string name="app_blocked_title" msgid="7353262160455028160">"Aplikácia nie je dostupná"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"Aplikácia <xliff:g id="APP_NAME">%1$s</xliff:g> nie je teraz dostupná."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> nie je k dispozícii"</string>
+    <!-- no translation found for app_streaming_blocked_title_for_permission_dialog (4483161748582966785) -->
+    <skip />
     <string name="app_streaming_blocked_message" product="tv" msgid="4003011766528814377">"V zariadení <xliff:g id="DEVICE">%1$s</xliff:g> momentálne nemáte k tomuto obsahu prístup. Skúste namiesto toho použiť zariadenie Android TV."</string>
     <string name="app_streaming_blocked_message" product="tablet" msgid="4242053045964946062">"V zariadení <xliff:g id="DEVICE">%1$s</xliff:g> momentálne nemáte k tomuto obsahu prístup. Skúste namiesto toho použiť tablet."</string>
     <string name="app_streaming_blocked_message" product="default" msgid="6159168735030739398">"V zariadení <xliff:g id="DEVICE">%1$s</xliff:g> momentálne nemáte k tomuto obsahu prístup. Skúste namiesto toho použiť telefón."</string>
@@ -2036,7 +2032,8 @@
     <string name="log_access_confirmation_title" msgid="2343578467290592708">"Chcete povoliť aplikácii <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> prístup k všetkým denníkom zariadenia?"</string>
     <string name="log_access_confirmation_allow" msgid="143157286283302512">"Iba tentokrát"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"Nepovoliť"</string>
-    <string name="log_access_confirmation_body" msgid="4483075525611652922">"Denníky zariadenia zaznamenávajú, čo sa deje vo vašom zariadení. Aplikácie môžu pomocou týchto denníkov vyhľadávať a riešiť problémy.\n\nNiektoré denníky môžu obsahovať citlivé údaje, preto povoľte prístup k všetkým denníkom zariadenia iba dôveryhodným aplikáciám. \n\nAk tejto aplikácii nepovolíte prístup k všetkým denníkom zariadenia, stále bude mať prístup k vlastným denníkom a výrobca vášho zariadenia bude mať naďalej prístup k niektorým denníkom alebo informáciám vo vašom zariadení. Ďalšie informácie"</string>
+    <!-- no translation found for log_access_confirmation_body (6581985716241928135) -->
+    <skip />
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"Už nezobrazovať"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g> chce zobrazovať rezy z aplikácie <xliff:g id="APP_2">%2$s</xliff:g>"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"Upraviť"</string>
@@ -2270,7 +2267,9 @@
     <string name="notification_content_abusive_bg_apps" msgid="5572096708044958249">"Aplikácie <xliff:g id="APP">%1$s</xliff:g> je spustená na pozadí a vybíja batériu. Skontrolujte to klepnutím."</string>
     <string name="notification_content_long_running_fgs" msgid="8878031652441570178">"Aplikácia <xliff:g id="APP">%1$s</xliff:g> je dlhodobo spustená na pozadí. Skontrolujte to klepnutím."</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Skontrolovať aktívne aplikácie"</string>
-    <string name="vdm_camera_access_denied" msgid="6345652513729130490">"V tomto zariadení nemáte prístup ku kamere"</string>
-    <!-- no translation found for system_locale_title (3978041860457277638) -->
+    <!-- no translation found for vdm_camera_access_denied (6102378580971542473) -->
     <skip />
+    <!-- no translation found for vdm_camera_access_denied (6895968310395249076) -->
+    <skip />
+    <string name="system_locale_title" msgid="3978041860457277638">"Jazyk systému"</string>
 </resources>

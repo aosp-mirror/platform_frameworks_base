@@ -720,15 +720,51 @@
     <string name="sensor_privacy_start_use_mic_dialog_title">Unblock device microphone?</string>
     <!--- Title of dialog triggered if the camera is disabled but an app tried to access it. [CHAR LIMIT=150] -->
     <string name="sensor_privacy_start_use_camera_dialog_title">Unblock device camera?</string>
-    <!--- Title of dialog triggered if the camera is disabled but an app tried to access it. [CHAR LIMIT=150] -->
+    <!--- Title of dialog triggered if both microphone and camera are disabled but an app tried to access them. [CHAR LIMIT=150] -->
     <string name="sensor_privacy_start_use_mic_camera_dialog_title">Unblock device camera and microphone?</string>
 
     <!--- Content of dialog triggered if the microphone is disabled but an app tried to access it. [CHAR LIMIT=NONE] -->
     <string name="sensor_privacy_start_use_mic_dialog_content">This unblocks access for all apps and services allowed to use your microphone.</string>
     <!--- Content of dialog triggered if the camera is disabled but an app tried to access it. [CHAR LIMIT=NONE] -->
     <string name="sensor_privacy_start_use_camera_dialog_content">This unblocks access for all apps and services allowed to use your camera.</string>
-    <!--- Content of dialog triggered if the camera is disabled but an app tried to access it. [CHAR LIMIT=NONE] -->
+    <!--- Title of dialog triggered if both microphone and camera are disabled but an app tried to access them. [CHAR LIMIT=150] -->
     <string name="sensor_privacy_start_use_mic_camera_dialog_content">This unblocks access for all apps and services allowed to use your camera or microphone.</string>
+
+    <!--- Title of dialog triggered if the microphone is blocked by a hardware privacy switch but an app tried to access it. [CHAR LIMIT=150] -->
+    <string name="sensor_privacy_start_use_mic_blocked_dialog_title">Microphone is blocked</string>
+    <!--- Title of dialog triggered if the camera is blocked by a hardware privacy switch but an app tried to access it. [CHAR LIMIT=150] -->
+    <string name="sensor_privacy_start_use_camera_blocked_dialog_title">Camera is blocked</string>
+    <!--- Title of dialog triggered if both microphone and camera are blocked by a hardware privacy switch but an app tried to access them. [CHAR LIMIT=150] -->
+    <string name="sensor_privacy_start_use_mic_camera_blocked_dialog_title">The mic &amp; camera are blocked</string>
+
+    <!--- Content of dialog triggered if the microphone is disabled by HW toggle but an app tried to access it. [CHAR LIMIT=NONE] -->
+    <string name="sensor_privacy_start_use_mic_blocked_dialog_content">
+        To unblock, move the privacy switch on your device to the microphone on position to allow
+        microphone access. Refer to the device manual to locate the privacy switch on your device.
+    </string>
+    <!--- Content of dialog triggered if the camera is disabled by HW toggle but an app tried to access it. [CHAR LIMIT=NONE] -->
+    <string name="sensor_privacy_start_use_camera_blocked_dialog_content">
+        To unblock, move the privacy switch on your device to the camera on position to allow camera
+        access. Refer to the device manual to locate the privacy switch on your device.
+    </string>
+    <!--- Content of dialog triggered if the camera is disabled by HW toggle but an app tried to access it. [CHAR LIMIT=NONE] -->
+    <string name="sensor_privacy_start_use_mic_camera_blocked_dialog_content">
+        To unblock them, move the privacy switch on your device to the unblocked position to allow
+        access. Refer to the device manual to locate the privacy switch on your device.
+    </string>
+
+    <!--- Content of toast triggered if the microphone privacy is unblocked while the HW toggle privacy dialog was shown. [CHAR LIMIT=NONE] -->
+    <string name="sensor_privacy_mic_unblocked_toast_content">
+        Microphone available
+    </string>
+    <!--- Content of toast triggered if the camera privacy is unblocked while the HW toggle privacy dialog was shown. [CHAR LIMIT=NONE] -->
+    <string name="sensor_privacy_camera_unblocked_toast_content">
+        Camera available
+    </string>
+    <!--- Content of toast triggered if both mic and camera privacy is unblocked while the HW toggle privacy dialog was shown. [CHAR LIMIT=NONE] -->
+    <string name="sensor_privacy_mic_camera_unblocked_toast_content">
+        Microphone and camera available
+    </string>
 
     <!-- Default name for the media device shown in the output switcher when the name is not available [CHAR LIMIT=30] -->
     <string name="media_seamless_other_device">Other device</string>
@@ -2227,6 +2263,21 @@
     <!-- Button text for stopping casting [CHAR LIMIT=60] -->
     <string name="media_output_dialog_button_stop_casting">Stop casting</string>
 
+    <!-- Media Output Broadcast Dialog -->
+    <!-- Title for Broadcast First Notify Dialog [CHAR LIMIT=60] -->
+    <string name="media_output_first_broadcast_title">How broadcasting works</string>
+    <!-- Title for Broadcast Notify Dialog [CHAR LIMIT=60] -->
+    <string name="media_output_broadcast">Broadcast</string>
+    <!-- Message for notifying the user about the Broadcast at first launch [CHAR LIMIT=NONE] -->
+    <string name="media_output_first_notify_broadcast_message">People near you with compatible Bluetooth devices can listen to the media you\'re broadcasting</string>
+    <!-- Message for Broadcasting information and QR code [CHAR LIMIT=NONE] -->
+    <string name="media_output_broadcasting_message">To listen to your broadcast, people nearby with compatible Bluetooth devices can scan your QR code or use your broadcast name and password</string>
+    <!-- Title for Broadcast Name [CHAR LIMIT=60] -->
+    <string name="media_output_broadcast_name">Broadcast Name</string>
+    <!-- Title for Broadcast Code(Password) [CHAR LIMIT=60] -->
+    <string name="media_output_broadcast_code">Password</string>
+    <!-- Button for change broadcast name and broadcast code [CHAR LIMIT=60] -->
+    <string name="media_output_broadcast_dialog_save">Save</string>
 
     <!-- Label for clip data when copying the build number off QS [CHAR LIMIT=NONE]-->
     <string name="build_number_clip_data_label">Build number</string>

@@ -674,6 +674,9 @@
     <!-- Permission required for CTS test - CtsAppEnumerationTestCases -->
     <uses-permission android:name="android.permission.MAKE_UID_VISIBLE" />
 
+    <!-- Permission required for CTS test - CtsKeystoreTestCases -->
+    <uses-permission android:name="android.permission.REQUEST_UNIQUE_ID_ATTESTATION" />
+
     <application android:label="@string/app_label"
                 android:theme="@android:style/Theme.DeviceDefault.DayNight"
                 android:defaultToDeviceProtectedStorage="true"

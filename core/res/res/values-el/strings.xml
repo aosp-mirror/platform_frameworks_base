@@ -1451,12 +1451,6 @@
     <string name="permdesc_requestIgnoreBatteryOptimizations" msgid="634260656917874356">"Επιτρέπει σε μια εφαρμογή να ζητήσει άδεια για την αγνόηση βελτιστοποιήσεων της μπαταρίας για τη συγκεκριμένη εφαρμογή."</string>
     <string name="permlab_queryAllPackages" msgid="2928450604653281650">"υποβολή ερωτήματος σε όλα τα πακέτα"</string>
     <string name="permdesc_queryAllPackages" msgid="5339069855520996010">"Επιτρέπει σε μια εφαρμογή να βλέπει όλα τα εγκατεστημένα πακέτα."</string>
-    <string name="permlab_accessAdServicesTopics" msgid="6687112022940098945">"πρόσβαση σε API θεμάτων AdServices."</string>
-    <string name="permdesc_accessAdServicesTopics" msgid="6011532458156465929">"Επιτρέπει σε μια εφαρμογή να αποκτήσει πρόσβαση σε API θεμάτων AdServices."</string>
-    <string name="permlab_accessAdServicesAttribution" msgid="3268942271128309354">"πρόσβαση σε API απόδοσης AdServices"</string>
-    <string name="permdesc_accessAdServicesAttribution" msgid="577482544832578288">"Επιτρέπει σε μια εφαρμογή να αποκτήσει πρόσβαση σε API απόδοσης AdServices."</string>
-    <string name="permlab_accessAdServicesCustomAudiences" msgid="7249286630514600684">"πρόσβαση σε API προσαρμοσμένων κοινών AdServices"</string>
-    <string name="permdesc_accessAdServicesCustomAudiences" msgid="645526926477180315">"Επιτρέπει σε μια εφαρμογή να αποκτήσει πρόσβαση σε API προσαρμοσμένων κοινών AdServices."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1842872462124648678">"Πατήστε δύο φορές για έλεγχο εστίασης"</string>
     <string name="gadget_host_error_inflating" msgid="2449961590495198720">"Δεν ήταν δυνατή η προσθήκη του γραφικού στοιχείου."</string>
     <string name="ime_action_go" msgid="5536744546326495436">"Μετάβαση"</string>
@@ -1939,6 +1933,8 @@
     <string name="app_blocked_title" msgid="7353262160455028160">"Η εφαρμογή δεν είναι διαθέσιμη"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"Η εφαρμογή <xliff:g id="APP_NAME">%1$s</xliff:g> δεν είναι διαθέσιμη αυτήν τη στιγμή."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> δεν διατίθεται"</string>
+    <!-- no translation found for app_streaming_blocked_title_for_permission_dialog (4483161748582966785) -->
+    <skip />
     <string name="app_streaming_blocked_message" product="tv" msgid="4003011766528814377">"Δεν είναι δυνατή η πρόσβαση στη συγκεκριμένη εφαρμογή από τη συσκευή <xliff:g id="DEVICE">%1$s</xliff:g> αυτήν τη στιγμή. Δοκιμάστε στη συσκευή Android TV."</string>
     <string name="app_streaming_blocked_message" product="tablet" msgid="4242053045964946062">"Δεν είναι δυνατή η πρόσβαση στη συγκεκριμένη εφαρμογή από τη συσκευή <xliff:g id="DEVICE">%1$s</xliff:g> αυτήν τη στιγμή. Δοκιμάστε στο tablet σας."</string>
     <string name="app_streaming_blocked_message" product="default" msgid="6159168735030739398">"Δεν είναι δυνατή η πρόσβαση στη συγκεκριμένη εφαρμογή από τη συσκευή <xliff:g id="DEVICE">%1$s</xliff:g> αυτήν τη στιγμή. Δοκιμάστε στο τηλέφωνό σας."</string>
@@ -2034,7 +2030,8 @@
     <string name="log_access_confirmation_title" msgid="2343578467290592708">"Να επιτρέπεται στην εφαρμογή <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> η πρόσβαση σε όλα τα αρχεία καταγραφής συσκευής;"</string>
     <string name="log_access_confirmation_allow" msgid="143157286283302512">"Μόνο αυτήν τη φορά"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"Να μην επιτραπεί"</string>
-    <string name="log_access_confirmation_body" msgid="4483075525611652922">"Τα αρχεία καταγραφής συσκευής καταγράφουν ό,τι συμβαίνει στη συσκευή σας. Οι εφαρμογές μπορούν να χρησιμοποιούν αυτά τα αρχεία καταγραφής για να εντοπίζουν και να διορθώνουν ζητήματα.\n\nΟρισμένα αρχεία καταγραφής ενδέχεται να περιέχουν ευαίσθητες πληροφορίες, επομένως, επιτρέψτε την πρόσβαση σε όλα τα αρχεία καταγραφής συσκευής μόνο στις εφαρμογές που εμπιστεύεστε. \n\nΑν δεν επιτρέψετε σε αυτήν την εφαρμογή την πρόσβαση σε όλα τα αρχεία καταγραφής συσκευής, εξακολουθεί να έχει πρόσβαση στα δικά της αρχεία καταγραφής, ενώ ο κατασκευαστής της συσκευής σας ενδέχεται να εξακολουθεί να έχει πρόσβαση σε ορισμένα αρχεία καταγραφής ή πληροφορίες στη συσκευή σας. Μάθετε περισσότερα"</string>
+    <!-- no translation found for log_access_confirmation_body (6581985716241928135) -->
+    <skip />
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"Να μην εμφανισ. ξανά"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"Η εφαρμογή <xliff:g id="APP_0">%1$s</xliff:g> θέλει να εμφανίζει τμήματα της εφαρμογής <xliff:g id="APP_2">%2$s</xliff:g>"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"Επεξεργασία"</string>
@@ -2268,7 +2265,9 @@
     <string name="notification_content_abusive_bg_apps" msgid="5572096708044958249">"Το <xliff:g id="APP">%1$s</xliff:g> εκτελείται στο παρασκήνιο και καταναλώνει μπαταρία. Έλεγχος."</string>
     <string name="notification_content_long_running_fgs" msgid="8878031652441570178">"Η εφαρμογή <xliff:g id="APP">%1$s</xliff:g> εκτελείται στο παρασκήνιο για πολύ ώρα. Πατήστε για έλεγχο."</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Έλεγχος ενεργών εφαρμογών"</string>
-    <string name="vdm_camera_access_denied" msgid="6345652513729130490">"Δεν είναι δυνατή η πρόσβαση στην κάμερα από αυτήν τη συσκευή."</string>
-    <!-- no translation found for system_locale_title (3978041860457277638) -->
+    <!-- no translation found for vdm_camera_access_denied (6102378580971542473) -->
     <skip />
+    <!-- no translation found for vdm_camera_access_denied (6895968310395249076) -->
+    <skip />
+    <string name="system_locale_title" msgid="3978041860457277638">"Γλώσσα συστήματος"</string>
 </resources>
