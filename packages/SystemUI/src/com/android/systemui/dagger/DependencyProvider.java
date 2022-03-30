@@ -36,6 +36,7 @@ import android.view.IWindowManager;
 import android.view.LayoutInflater;
 
 import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.UiEventLogger;
 import com.android.internal.util.NotificationMessagingUtil;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardUpdateMonitor;
@@ -296,7 +297,8 @@ public class DependencyProvider {
     /***/
     @Provides
     @SysUISingleton
-    public ClipboardOverlayControllerFactory provideClipboardOverlayControllerFactory() {
-        return new ClipboardOverlayControllerFactory();
+    public ClipboardOverlayControllerFactory provideClipboardOverlayControllerFactory(
+            UiEventLogger uiEventLogger) {
+        return new ClipboardOverlayControllerFactory(uiEventLogger);
     }
 }
