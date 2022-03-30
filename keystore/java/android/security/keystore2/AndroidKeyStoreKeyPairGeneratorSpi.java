@@ -28,7 +28,6 @@ import android.hardware.security.keymint.Tag;
 import android.os.Build;
 import android.os.RemoteException;
 import android.security.GenerateRkpKey;
-import android.security.GenerateRkpKeyException;
 import android.security.KeyPairGeneratorSpec;
 import android.security.KeyStore2;
 import android.security.KeyStoreException;
@@ -618,18 +617,44 @@ public abstract class AndroidKeyStoreKeyPairGeneratorSpi extends KeyPairGenerato
 
     @Override
     public KeyPair generateKeyPair() {
-        try {
-            return generateKeyPairHelper();
-        } catch (GenerateRkpKeyException e) {
-            try {
-                return generateKeyPairHelper();
-            } catch (GenerateRkpKeyException f) {
-                throw new ProviderException("Failed to provision new attestation keys.");
+        GenerateKeyPairHelperResult result = new GenerateKeyPairHelperResult(0, null);
+        for (int i = 0; i < 2; i++) {
+            /**
+             * NOTE: There is no need to delay between re-tries because the call to
+             * GenerateRkpKey.notifyEmpty() will delay for a while before returning.
+             */
+            result = generateKeyPairHelper();
+            if (result.rkpStatus == KeyStoreException.RKP_SUCCESS) {
+                return result.keyPair;
             }
+        }
+
+        // RKP failure
+        if (result.rkpStatus != KeyStoreException.RKP_SUCCESS) {
+            KeyStoreException ksException = new KeyStoreException(ResponseCode.OUT_OF_KEYS,
+                    "Could not get RKP keys", result.rkpStatus);
+            throw new ProviderException("Failed to provision new attestation keys.", ksException);
+        }
+
+        return result.keyPair;
+    }
+
+    private static class GenerateKeyPairHelperResult {
+        // Zero indicates success, non-zero indicates failure. Values should be
+        // {@link android.security.KeyStoreException#RKP_TEMPORARILY_UNAVAILABLE},
+        // {@link android.security.KeyStoreException#RKP_SERVER_REFUSED_ISSUANCE},
+        // {@link android.security.KeyStoreException#RKP_FETCHING_PENDING_CONNECTIVITY}
+        public final int rkpStatus;
+        @Nullable
+        public final KeyPair keyPair;
+
+        private GenerateKeyPairHelperResult(int rkpStatus, KeyPair keyPair) {
+            this.rkpStatus = rkpStatus;
+            this.keyPair = keyPair;
         }
     }
 
-    private KeyPair generateKeyPairHelper() throws GenerateRkpKeyException {
+    private GenerateKeyPairHelperResult generateKeyPairHelper() {
         if (mKeyStore == null || mSpec == null) {
             throw new IllegalStateException("Not initialized");
         }
@@ -679,7 +704,8 @@ public abstract class AndroidKeyStoreKeyPairGeneratorSpi extends KeyPairGenerato
                 Log.d(TAG, "Couldn't connect to the RemoteProvisioner backend.", e);
             }
             success = true;
-            return new KeyPair(publicKey, publicKey.getPrivateKey());
+            KeyPair kp = new KeyPair(publicKey, publicKey.getPrivateKey());
+            return new GenerateKeyPairHelperResult(0, kp);
         } catch (android.security.KeyStoreException e) {
             switch (e.getErrorCode()) {
                 case KeymasterDefs.KM_ERROR_HARDWARE_TYPE_UNAVAILABLE:
@@ -688,11 +714,19 @@ public abstract class AndroidKeyStoreKeyPairGeneratorSpi extends KeyPairGenerato
                     GenerateRkpKey keyGen = new GenerateRkpKey(ActivityThread
                             .currentApplication());
                     try {
+                        //TODO: When detailed error information is available from the remote
+                        //provisioner, propagate it up.
                         keyGen.notifyEmpty(securityLevel);
                     } catch (RemoteException f) {
-                        throw new ProviderException("Failed to talk to RemoteProvisioner", f);
+                        KeyStoreException ksException = new KeyStoreException(
+                                ResponseCode.OUT_OF_KEYS,
+                                "Remote exception: " + f.getMessage(),
+                                KeyStoreException.RKP_TEMPORARILY_UNAVAILABLE);
+                        throw new ProviderException("Failed to talk to RemoteProvisioner",
+                                ksException);
                     }
-                    throw new GenerateRkpKeyException();
+                    return new GenerateKeyPairHelperResult(
+                            KeyStoreException.RKP_TEMPORARILY_UNAVAILABLE, null);
                 default:
                     ProviderException p = new ProviderException("Failed to generate key pair.", e);
                     if ((mSpec.getPurposes() & KeyProperties.PURPOSE_WRAP_KEY) != 0) {
