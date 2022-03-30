@@ -34,6 +34,7 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.LinearLayout;
 
 import androidx.annotation.VisibleForTesting;
@@ -61,6 +62,8 @@ public class QSPanel extends LinearLayout implements Tunable {
     protected final Context mContext;
     private final int mMediaTopMargin;
     private final int mMediaTotalBottomMargin;
+
+    private Runnable mCollapseExpandAction;
 
     /**
      * The index where the content starts that needs to be moved between parents
@@ -676,6 +679,28 @@ public class QSPanel extends LinearLayout implements Tunable {
      */
     public void setShouldMoveMediaOnExpansion(boolean shouldMoveMediaOnExpansion) {
         mShouldMoveMediaOnExpansion = shouldMoveMediaOnExpansion;
+    }
+
+    @Override
+    public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
+        super.onInitializeAccessibilityNodeInfo(info);
+        info.addAction(AccessibilityNodeInfo.AccessibilityAction.ACTION_COLLAPSE);
+    }
+
+    @Override
+    public boolean performAccessibilityAction(int action, Bundle arguments) {
+        if (action == AccessibilityNodeInfo.ACTION_EXPAND
+                || action == AccessibilityNodeInfo.ACTION_COLLAPSE) {
+            if (mCollapseExpandAction != null) {
+                mCollapseExpandAction.run();
+                return true;
+            }
+        }
+        return super.performAccessibilityAction(action, arguments);
+    }
+
+    public void setCollapseExpandAction(Runnable action) {
+        mCollapseExpandAction = action;
     }
 
     private class H extends Handler {
