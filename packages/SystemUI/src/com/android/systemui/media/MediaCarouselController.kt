@@ -12,6 +12,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
 import androidx.annotation.VisibleForTesting
+import com.android.internal.logging.InstanceId
 import com.android.systemui.Dumpable
 import com.android.systemui.R
 import com.android.systemui.classifier.FalsingCollector
@@ -59,7 +60,7 @@ class MediaCarouselController @Inject constructor(
     falsingCollector: FalsingCollector,
     falsingManager: FalsingManager,
     dumpManager: DumpManager,
-    private val mediaFlags: MediaFlags
+    private val logger: MediaUiEventLogger
 ) : Dumpable {
     /**
      * The current width of the carousel
@@ -119,7 +120,9 @@ class MediaCarouselController @Inject constructor(
     private val mediaCarousel: MediaScrollView
     val mediaCarouselScrollHandler: MediaCarouselScrollHandler
     val mediaFrame: ViewGroup
-    private lateinit var settingsButton: View
+    @VisibleForTesting
+    lateinit var settingsButton: View
+        private set
     private val mediaContent: ViewGroup
     private val pageIndicator: PageIndicator
     private val visualStabilityCallback: OnReorderingAllowedListener
@@ -183,7 +186,8 @@ class MediaCarouselController @Inject constructor(
         pageIndicator = mediaFrame.requireViewById(R.id.media_page_indicator)
         mediaCarouselScrollHandler = MediaCarouselScrollHandler(mediaCarousel, pageIndicator,
                 executor, this::onSwipeToDismiss, this::updatePageIndicatorLocation,
-                this::closeGuts, falsingCollector, falsingManager, this::logSmartspaceImpression)
+                this::closeGuts, falsingCollector, falsingManager, this::logSmartspaceImpression,
+                logger)
         isRtl = context.resources.configuration.layoutDirection == View.LAYOUT_DIRECTION_RTL
         inflateSettingsButton()
         mediaContent = mediaCarousel.requireViewById(R.id.media_carousel)
@@ -220,7 +224,7 @@ class MediaCarouselController @Inject constructor(
                     MediaPlayerData.getMediaPlayer(key)?.let {
                         /* ktlint-disable max-line-length */
                         logSmartspaceCardReported(759, // SMARTSPACE_CARD_RECEIVED
-                                it.mInstanceId,
+                                it.mSmartspaceId,
                                 it.mUid,
                                 /* isRecommendationCard */ false,
                                 intArrayOf(
@@ -239,12 +243,12 @@ class MediaCarouselController @Inject constructor(
                     // resume card is ranked first
                     MediaPlayerData.players().forEachIndexed { index, it ->
                         if (it.recommendationViewHolder == null) {
-                            it.mInstanceId = SmallHash.hash(it.mUid +
+                            it.mSmartspaceId = SmallHash.hash(it.mUid +
                                     systemClock.currentTimeMillis().toInt())
                             it.mIsImpressed = false
                             /* ktlint-disable max-line-length */
                             logSmartspaceCardReported(759, // SMARTSPACE_CARD_RECEIVED
-                                    it.mInstanceId,
+                                    it.mSmartspaceId,
                                     it.mUid,
                                     /* isRecommendationCard */ false,
                                     intArrayOf(
@@ -291,12 +295,12 @@ class MediaCarouselController @Inject constructor(
                         // recommendation card is valid and ranked first
                         MediaPlayerData.players().forEachIndexed { index, it ->
                             if (it.recommendationViewHolder == null) {
-                                it.mInstanceId = SmallHash.hash(it.mUid +
+                                it.mSmartspaceId = SmallHash.hash(it.mUid +
                                         systemClock.currentTimeMillis().toInt())
                                 it.mIsImpressed = false
                                 /* ktlint-disable max-line-length */
                                 logSmartspaceCardReported(759, // SMARTSPACE_CARD_RECEIVED
-                                        it.mInstanceId,
+                                        it.mSmartspaceId,
                                         it.mUid,
                                         /* isRecommendationCard */ false,
                                         intArrayOf(
@@ -312,7 +316,7 @@ class MediaCarouselController @Inject constructor(
                     MediaPlayerData.getMediaPlayer(key)?.let {
                         /* ktlint-disable max-line-length */
                         logSmartspaceCardReported(759, // SMARTSPACE_CARD_RECEIVED
-                                it.mInstanceId,
+                                it.mSmartspaceId,
                                 it.mUid,
                                 /* isRecommendationCard */ true,
                                 intArrayOf(
@@ -369,6 +373,7 @@ class MediaCarouselController @Inject constructor(
         mediaFrame.addView(settingsButton)
         mediaCarouselScrollHandler.onSettingsButtonUpdated(settings)
         settingsButton.setOnClickListener {
+            logger.logCarouselSettings()
             activityStarter.startActivity(settingsIntent, true /* dismissShade */)
         }
     }
@@ -752,7 +757,7 @@ class MediaCarouselController @Inject constructor(
                 return
             }
             logSmartspaceCardReported(800, // SMARTSPACE_CARD_SEEN
-                    mediaControlPanel.mInstanceId,
+                    mediaControlPanel.mSmartspaceId,
                     mediaControlPanel.mUid,
                     isRecommendationCard,
                     intArrayOf(mediaControlPanel.surfaceForSmartspaceLogging))
@@ -836,7 +841,7 @@ class MediaCarouselController @Inject constructor(
             index, it ->
             if (it.mIsImpressed) {
                 logSmartspaceCardReported(SMARTSPACE_CARD_DISMISS_EVENT,
-                        it.mInstanceId,
+                        it.mSmartspaceId,
                         it.mUid,
                         it.recommendationViewHolder != null,
                         intArrayOf(it.surfaceForSmartspaceLogging),
@@ -846,6 +851,7 @@ class MediaCarouselController @Inject constructor(
                 it.mIsImpressed = false
             }
         }
+        logger.logSwipeDismiss()
         mediaManager.onSwipeToDismiss()
     }
 
@@ -881,7 +887,9 @@ internal object MediaPlayerData {
             clickIntent = null,
             device = null,
             active = true,
-            resumeAction = null)
+            resumeAction = null,
+            instanceId = InstanceId.fakeInstanceId(-1),
+            appUid = -1)
     // Whether should prioritize Smartspace card.
     internal var shouldPrioritizeSs: Boolean = false
         private set

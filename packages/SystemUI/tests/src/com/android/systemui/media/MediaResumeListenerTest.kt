@@ -24,7 +24,6 @@ import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.content.pm.ResolveInfo
 import android.content.pm.ServiceInfo
-import android.graphics.Color
 import android.media.MediaDescription
 import android.media.session.MediaSession
 import android.provider.Settings
@@ -57,13 +56,9 @@ import org.mockito.MockitoAnnotations
 
 private const val KEY = "TEST_KEY"
 private const val OLD_KEY = "RESUME_KEY"
-private const val APP = "APP"
-private const val BG_COLOR = Color.RED
 private const val PACKAGE_NAME = "PKG"
 private const val CLASS_NAME = "CLASS"
-private const val ARTIST = "ARTIST"
 private const val TITLE = "TITLE"
-private const val USER_ID = 0
 private const val MEDIA_PREFERENCES = "media_control_prefs"
 private const val RESUME_COMPONENTS = "package1/class1:package2/class2:package3/class3"
 
@@ -130,24 +125,10 @@ class MediaResumeListenerTest : SysuiTestCase() {
         resumeListener.setManager(mediaDataManager)
         mediaDataManager.addListener(resumeListener)
 
-        data = MediaData(
-                userId = USER_ID,
-                initialized = true,
-                backgroundColor = BG_COLOR,
-                app = APP,
-                appIcon = null,
-                artist = ARTIST,
+        data = MediaTestUtils.emptyMediaData.copy(
                 song = TITLE,
-                artwork = null,
-                actions = emptyList(),
-                actionsToShowInCompact = emptyList(),
                 packageName = PACKAGE_NAME,
-                token = token,
-                clickIntent = null,
-                device = device,
-                active = true,
-                notificationKey = KEY,
-                resumeAction = null)
+                token = token)
     }
 
     @After

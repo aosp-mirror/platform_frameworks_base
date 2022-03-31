@@ -53,6 +53,7 @@ import androidx.annotation.UiThread;
 import androidx.constraintlayout.widget.ConstraintSet;
 
 import com.android.internal.jank.InteractionJankMonitor;
+import com.android.internal.logging.InstanceId;
 import com.android.settingslib.widget.AdaptiveIcon;
 import com.android.systemui.R;
 import com.android.systemui.animation.ActivityLaunchAnimator;
@@ -131,8 +132,6 @@ public class MediaControlPanel {
     private MediaController mController;
     private Lazy<MediaDataManager> mMediaDataManagerLazy;
     private int mBackgroundColor;
-    // Instance id for logging purpose.
-    protected int mInstanceId = -1;
     // Uid for the media app.
     protected int mUid = Process.INVALID_UID;
     private int mSmartspaceMediaItemsCount;
@@ -140,9 +139,13 @@ public class MediaControlPanel {
     private final MediaOutputDialogFactory mMediaOutputDialogFactory;
     private final FalsingManager mFalsingManager;
 
-    // Used for swipe-to-dismiss logging.
+    // Used for logging.
     protected boolean mIsImpressed = false;
     private SystemClock mSystemClock;
+    private MediaUiEventLogger mLogger;
+    private InstanceId mInstanceId;
+    protected int mSmartspaceId = -1;
+    private String mPackageName;
 
     /**
      * Initialize a new control panel
@@ -157,7 +160,7 @@ public class MediaControlPanel {
             Lazy<MediaDataManager> lazyMediaDataManager,
             MediaOutputDialogFactory mediaOutputDialogFactory,
             MediaCarouselController mediaCarouselController,
-            FalsingManager falsingManager, SystemClock systemClock) {
+            FalsingManager falsingManager, SystemClock systemClock, MediaUiEventLogger logger) {
         mContext = context;
         mBackgroundExecutor = backgroundExecutor;
         mActivityStarter = activityStarter;
@@ -169,8 +172,12 @@ public class MediaControlPanel {
         mMediaCarouselController = mediaCarouselController;
         mFalsingManager = falsingManager;
         mSystemClock = systemClock;
+        mLogger = logger;
 
-        mSeekBarViewModel.setLogSmartspaceClick(() -> {
+        mSeekBarViewModel.setLogSeek(() -> {
+            if (mPackageName != null && mInstanceId != null) {
+                mLogger.logSeek(mUid, mPackageName, mInstanceId);
+            }
             logSmartspaceCardReported(SMARTSPACE_CARD_CLICK_EVENT,
                     /* isRecommendationCard */ false);
             return Unit.INSTANCE;
@@ -261,6 +268,7 @@ public class MediaControlPanel {
         });
         vh.getSettings().setOnClickListener(v -> {
             if (!mFalsingManager.isFalseTap(FalsingManager.LOW_PENALTY)) {
+                mLogger.logLongPressSettings(mUid, mPackageName, mInstanceId);
                 mActivityStarter.startActivity(SETTINGS_INTENT, true /* dismissShade */);
             }
         });
@@ -301,16 +309,13 @@ public class MediaControlPanel {
         }
         mKey = key;
         MediaSession.Token token = data.getToken();
-        PackageManager packageManager = mContext.getPackageManager();
-        try {
-            mUid = packageManager.getApplicationInfo(data.getPackageName(), 0 /* flags */).uid;
-        } catch (PackageManager.NameNotFoundException e) {
-            Log.e(TAG, "Unable to look up package name", e);
-        }
+        mPackageName = data.getPackageName();
+        mUid = data.getAppUid();
         // Only assigns instance id if it's unassigned.
-        if (mInstanceId == -1) {
-            mInstanceId = SmallHash.hash(mUid + (int) mSystemClock.currentTimeMillis());
+        if (mSmartspaceId == -1) {
+            mSmartspaceId = SmallHash.hash(mUid + (int) mSystemClock.currentTimeMillis());
         }
+        mInstanceId = data.getInstanceId();
 
         mBackgroundColor = data.getBackgroundColor();
         if (mToken == null || !mToken.equals(token)) {
@@ -401,6 +406,7 @@ public class MediaControlPanel {
                     if (mFalsingManager.isFalseTap(FalsingManager.LOW_PENALTY)) {
                         return;
                     }
+                    mLogger.logOpenOutputSwitcher(mUid, mPackageName, mInstanceId);
                     if (device.getIntent() != null) {
                         if (device.getIntent().isActivity()) {
                             mActivityStarter.startActivity(
@@ -413,7 +419,7 @@ public class MediaControlPanel {
                             }
                         }
                     } else {
-                        mMediaOutputDialogFactory.create(data.getPackageName(), true,
+                        mMediaOutputDialogFactory.create(mPackageName, true,
                                 mMediaViewHolder.getSeamlessButton());
                     }
                 });
@@ -437,6 +443,7 @@ public class MediaControlPanel {
 
             logSmartspaceCardReported(SMARTSPACE_CARD_DISMISS_EVENT,
                     /* isRecommendationCard */ false);
+            mLogger.logLongPressDismiss(mUid, mPackageName, mInstanceId);
 
             if (mKey != null) {
                 closeGuts();
@@ -675,6 +682,7 @@ public class MediaControlPanel {
                 button.setEnabled(true);
                 button.setOnClickListener(v -> {
                     if (!mFalsingManager.isFalseTap(FalsingManager.LOW_PENALTY)) {
+                        mLogger.logTapAction(button.getId(), mUid, mPackageName, mInstanceId);
                         logSmartspaceCardReported(SMARTSPACE_CARD_CLICK_EVENT,
                                 /* isRecommendationCard */ false);
                         action.run();
@@ -794,7 +802,7 @@ public class MediaControlPanel {
             return;
         }
 
-        mInstanceId = SmallHash.hash(data.getTargetId());
+        mSmartspaceId = SmallHash.hash(data.getTargetId());
         mBackgroundColor = data.getBackgroundColor();
         TransitionLayout recommendationCard = mRecommendationViewHolder.getRecommendations();
         recommendationCard.setBackgroundTintList(ColorStateList.valueOf(mBackgroundColor));
@@ -976,6 +984,7 @@ public class MediaControlPanel {
             mRecommendationViewHolder.marquee(true, mMediaViewController.GUTS_ANIMATION_DURATION);
         }
         mMediaViewController.openGuts();
+        mLogger.logLongPressOpen(mUid, mPackageName, mInstanceId);
     }
 
     /**
@@ -1138,7 +1147,7 @@ public class MediaControlPanel {
     private void logSmartspaceCardReported(int eventId, boolean isRecommendationCard,
             int interactedSubcardRank, int interactedSubcardCardinality) {
         mMediaCarouselController.logSmartspaceCardReported(eventId,
-                mInstanceId,
+                mSmartspaceId,
                 mUid,
                 isRecommendationCard,
                 new int[]{getSurfaceForSmartspaceLogging()},
