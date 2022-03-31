@@ -9225,6 +9225,7 @@ package android.content {
     field public static final int CLASSIFICATION_NOT_COMPLETE = 1; // 0x1
     field public static final int CLASSIFICATION_NOT_PERFORMED = 2; // 0x2
     field @NonNull public static final android.os.Parcelable.Creator<android.content.ClipDescription> CREATOR;
+    field public static final String EXTRA_IS_SENSITIVE = "android.content.extra.IS_SENSITIVE";
     field public static final String MIMETYPE_TEXT_HTML = "text/html";
     field public static final String MIMETYPE_TEXT_INTENT = "text/vnd.android.intent";
     field public static final String MIMETYPE_TEXT_PLAIN = "text/plain";
@@ -33405,6 +33406,7 @@ package android.print {
 
   public final class PrintManager {
     method @NonNull public java.util.List<android.print.PrintJob> getPrintJobs();
+    method public boolean isPrintServiceEnabled(@NonNull android.content.ComponentName);
     method @NonNull public android.print.PrintJob print(@NonNull String, @NonNull android.print.PrintDocumentAdapter, @Nullable android.print.PrintAttributes);
   }
 
@@ -37577,10 +37579,12 @@ package android.security {
 
   public class KeyStoreException extends java.lang.Exception {
     method public int getNumericErrorCode();
+    method public int getRetryPolicy();
     method public boolean isSystemError();
     method public boolean isTransientFailure();
     method public boolean requiresUserAuthentication();
     field public static final int ERROR_ATTESTATION_CHALLENGE_TOO_LARGE = 9; // 0x9
+    field public static final int ERROR_ATTESTATION_KEYS_UNAVAILABLE = 16; // 0x10
     field public static final int ERROR_ID_ATTESTATION_FAILURE = 8; // 0x8
     field public static final int ERROR_INCORRECT_USAGE = 13; // 0xd
     field public static final int ERROR_INTERNAL_SYSTEM_ERROR = 4; // 0x4
@@ -37595,6 +37599,9 @@ package android.security {
     field public static final int ERROR_PERMISSION_DENIED = 5; // 0x5
     field public static final int ERROR_UNIMPLEMENTED = 12; // 0xc
     field public static final int ERROR_USER_AUTHENTICATION_REQUIRED = 2; // 0x2
+    field public static final int RETRY_NEVER = 1; // 0x1
+    field public static final int RETRY_WHEN_CONNECTIVITY_AVAILABLE = 3; // 0x3
+    field public static final int RETRY_WITH_EXPONENTIAL_BACKOFF = 2; // 0x2
   }
 
   @Deprecated public final class KeyStoreParameter implements java.security.KeyStore.ProtectionParameter {

@@ -70,6 +70,7 @@ import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.XmlUtils;
 import com.android.server.LocalServices;
 import com.android.server.ServiceThread;
+import com.android.server.pm.KnownPackages;
 import com.android.server.pm.permission.LegacyPermissionManagerInternal.PackagesProvider;
 import com.android.server.pm.permission.LegacyPermissionManagerInternal.SyncAdapterPackagesProvider;
 
@@ -585,19 +586,19 @@ final class DefaultPermissionGrantPolicy {
         // Installer
         grantSystemFixedPermissionsToSystemPackage(pm,
                 ArrayUtils.firstOrNull(getKnownPackages(
-                        PackageManagerInternal.PACKAGE_INSTALLER, userId)),
+                        KnownPackages.PACKAGE_INSTALLER, userId)),
                 userId, STORAGE_PERMISSIONS, NOTIFICATION_PERMISSIONS);
 
         // Verifier
         final String verifier = ArrayUtils.firstOrNull(getKnownPackages(
-                PackageManagerInternal.PACKAGE_VERIFIER, userId));
+                KnownPackages.PACKAGE_VERIFIER, userId));
         grantSystemFixedPermissionsToSystemPackage(pm, verifier, userId, STORAGE_PERMISSIONS);
         grantPermissionsToSystemPackage(pm, verifier, userId, PHONE_PERMISSIONS, SMS_PERMISSIONS,
                 NOTIFICATION_PERMISSIONS);
 
         // SetupWizard
         final String setupWizardPackage = ArrayUtils.firstOrNull(getKnownPackages(
-                PackageManagerInternal.PACKAGE_SETUP_WIZARD, userId));
+                KnownPackages.PACKAGE_SETUP_WIZARD, userId));
         grantPermissionsToSystemPackage(pm, setupWizardPackage, userId, PHONE_PERMISSIONS,
                 CONTACTS_PERMISSIONS, ALWAYS_LOCATION_PERMISSIONS, CAMERA_PERMISSIONS);
         grantSystemFixedPermissionsToSystemPackage(pm, setupWizardPackage, userId,
@@ -758,7 +759,7 @@ final class DefaultPermissionGrantPolicy {
 
         // Browser
         String browserPackage = ArrayUtils.firstOrNull(getKnownPackages(
-                PackageManagerInternal.PACKAGE_BROWSER, userId));
+                KnownPackages.PACKAGE_BROWSER, userId));
         if (browserPackage == null) {
             browserPackage = getDefaultSystemHandlerActivityPackageForCategory(pm,
                     Intent.CATEGORY_APP_BROWSER, userId);
@@ -890,7 +891,7 @@ final class DefaultPermissionGrantPolicy {
 
         // TextClassifier Service
         for (String textClassifierPackage :
-                getKnownPackages(PackageManagerInternal.PACKAGE_SYSTEM_TEXT_CLASSIFIER, userId)) {
+                getKnownPackages(KnownPackages.PACKAGE_SYSTEM_TEXT_CLASSIFIER, userId)) {
             grantPermissionsToSystemPackage(pm, textClassifierPackage, userId,
                     COARSE_BACKGROUND_LOCATION_PERMISSIONS, CONTACTS_PERMISSIONS);
         }

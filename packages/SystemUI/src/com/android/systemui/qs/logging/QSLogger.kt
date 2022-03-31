@@ -73,7 +73,7 @@ class QSLogger @Inject constructor(
         log(DEBUG, {
             str1 = tileSpec
             int1 = statusBarState
-            str2 = StatusBarState.toShortString(statusBarState)
+            str2 = StatusBarState.toString(statusBarState)
             str3 = toStateString(state)
         }, {
             "[$str1] Tile clicked. StatusBarState=$str2. TileState=$str3"
@@ -84,7 +84,7 @@ class QSLogger @Inject constructor(
         log(DEBUG, {
             str1 = tileSpec
             int1 = statusBarState
-            str2 = StatusBarState.toShortString(statusBarState)
+            str2 = StatusBarState.toString(statusBarState)
             str3 = toStateString(state)
         }, {
             "[$str1] Tile long clicked. StatusBarState=$str2. TileState=$str3"
@@ -95,7 +95,7 @@ class QSLogger @Inject constructor(
         log(DEBUG, {
             str1 = tileSpec
             int1 = statusBarState
-            str2 = StatusBarState.toShortString(statusBarState)
+            str2 = StatusBarState.toString(statusBarState)
             str3 = toStateString(state)
         }, {
             "[$str1] Tile long clicked. StatusBarState=$str2. TileState=$str3"

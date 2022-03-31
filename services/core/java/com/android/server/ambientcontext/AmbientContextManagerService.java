@@ -42,6 +42,7 @@ import com.android.server.LocalServices;
 import com.android.server.SystemService;
 import com.android.server.infra.AbstractMasterSystemService;
 import com.android.server.infra.FrameworkResourcesServiceNameResolver;
+import com.android.server.pm.KnownPackages;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -117,7 +118,7 @@ public class AmbientContextManagerService extends
     public static boolean isDetectionServiceConfigured() {
         final PackageManagerInternal pmi = LocalServices.getService(PackageManagerInternal.class);
         final String[] packageNames = pmi.getKnownPackageNames(
-                PackageManagerInternal.PACKAGE_AMBIENT_CONTEXT_DETECTION, UserHandle.USER_SYSTEM);
+                KnownPackages.PACKAGE_AMBIENT_CONTEXT_DETECTION, UserHandle.USER_SYSTEM);
         boolean isServiceConfigured = (packageNames.length != 0);
         Slog.i(TAG, "Detection service configured: " + isServiceConfigured);
         return isServiceConfigured;
@@ -249,6 +250,8 @@ public class AmbientContextManagerService extends
             Objects.requireNonNull(eventTypes);
             Objects.requireNonNull(callingPackage);
             assertCalledByPackageOwner(callingPackage);
+            mContext.enforceCallingOrSelfPermission(
+                    Manifest.permission.ACCESS_AMBIENT_CONTEXT_EVENT, TAG);
             mService.onStartConsentActivity(eventTypes, callingPackage);
         }
 

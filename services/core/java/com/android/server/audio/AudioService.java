@@ -905,6 +905,9 @@ public class AudioService extends IAudioService.Stub
             disableAudioForUid(cached, uid);
         }
 
+        @Override public void onUidProcAdjChanged(int uid) {
+        }
+
         private void disableAudioForUid(boolean disable, int uid) {
             queueMsgUnderWakeLock(mAudioHandler, MSG_DISABLE_AUDIO_FOR_UID,
                     disable ? 1 : 0 /* arg1 */,  uid /* arg2 */,
