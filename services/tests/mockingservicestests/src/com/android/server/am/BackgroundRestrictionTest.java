@@ -1067,6 +1067,8 @@ public final class BackgroundRestrictionTest {
         final int testUid2 = UserHandle.getUid(testUser2, TEST_PACKAGE_APPID_BASE + testPkgIndex2);
         final int testPid2 = 1235;
 
+        final int fgsNotificationId = 1000;
+
         final long windowMs = 2_000;
         final long thresholdMs = 1_000;
         final long shortMs = 100;
@@ -1074,6 +1076,7 @@ public final class BackgroundRestrictionTest {
         DeviceConfigSession<Boolean> longRunningFGSMonitor = null;
         DeviceConfigSession<Long> longRunningFGSWindow = null;
         DeviceConfigSession<Long> longRunningFGSThreshold = null;
+        DeviceConfigSession<Boolean> longRunningFGSWithNotification = null;
 
         try {
             longRunningFGSMonitor = new DeviceConfigSession<>(
@@ -1096,6 +1099,13 @@ public final class BackgroundRestrictionTest {
                     DeviceConfig::getLong,
                     AppFGSPolicy.DEFAULT_BG_FGS_LONG_RUNNING_THRESHOLD);
             longRunningFGSThreshold.set(thresholdMs);
+
+            longRunningFGSWithNotification = new DeviceConfigSession<>(
+                    DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                    ConstantsObserver.KEY_BG_PROMPT_FGS_WITH_NOTIFICATION_ON_LONG_RUNNING,
+                    DeviceConfig::getBoolean,
+                    ConstantsObserver.DEFAULT_BG_PROMPT_FGS_WITH_NOTIFICATION_ON_LONG_RUNNING);
+            longRunningFGSWithNotification.set(true);
 
             // Basic case
             mAppFGSTracker.onForegroundServiceStateChanged(testPkgName1, testUid1,
@@ -1196,10 +1206,42 @@ public final class BackgroundRestrictionTest {
             mAppFGSTracker.onForegroundServiceStateChanged(testPkgName1, testUid1,
                     testPid1, false);
             checkNotificationGone(testPkgName1, timeout(windowMs), notificationId);
+
+            // Start over with the flag to not show prompt when it has an active notification.
+            clearInvocations(mInjector.getNotificationManager());
+            mBgRestrictionController.resetRestrictionSettings();
+            longRunningFGSWithNotification.set(false);
+
+            // Start an FGS with notification.
+            mAppFGSTracker.onForegroundServiceStateChanged(testPkgName1, testUid1,
+                    testPid1, true);
+            mAppFGSTracker.onForegroundServiceNotificationUpdated(
+                    testPkgName1, testUid1, fgsNotificationId);
+            mAppFGSTracker.mNotificationListener.onNotificationPosted(new StatusBarNotification(
+                    testPkgName1, null, fgsNotificationId, null, testUid1, testPid1,
+                    new Notification(), UserHandle.of(testUser1), null, mCurrentTimeMillis), null);
+
+            // Verify we won't prompt the user because it has a visible FGS notification.
+            checkNotificationShown(
+                    new String[] {testPkgName1}, timeout(windowMs * 2).times(0), false);
+
+            // Pretend we have the notification dismissed.
+            mAppFGSTracker.onForegroundServiceNotificationUpdated(
+                    testPkgName1, testUid1, -fgsNotificationId);
+
+            // Verify we have the notification.
+            notificationId = checkNotificationShown(
+                    new String[] {testPkgName1}, timeout(windowMs * 2).times(2), true)[0];
+
+            // Stop the FGS.
+            mAppFGSTracker.onForegroundServiceStateChanged(testPkgName1, testUid1,
+                    testPid1, false);
+            checkNotificationGone(testPkgName1, timeout(windowMs), notificationId);
         } finally {
             closeIfNotNull(longRunningFGSMonitor);
             closeIfNotNull(longRunningFGSWindow);
             closeIfNotNull(longRunningFGSThreshold);
+            closeIfNotNull(longRunningFGSWithNotification);
         }
     }
 
@@ -1225,6 +1267,7 @@ public final class BackgroundRestrictionTest {
         DeviceConfigSession<Long> longRunningFGSThreshold = null;
         DeviceConfigSession<Long> mediaPlaybackFGSThreshold = null;
         DeviceConfigSession<Long> locationFGSThreshold = null;
+        DeviceConfigSession<Boolean> longRunningFGSWithNotification = null;
 
         doReturn(testPkgName1).when(mInjector).getPackageName(testPid1);
         doReturn(testPkgName2).when(mInjector).getPackageName(testPid2);
@@ -1264,6 +1307,13 @@ public final class BackgroundRestrictionTest {
                     DeviceConfig::getLong,
                     AppFGSPolicy.DEFAULT_BG_FGS_LOCATION_THRESHOLD);
             locationFGSThreshold.set(thresholdMs);
+
+            longRunningFGSWithNotification = new DeviceConfigSession<>(
+                    DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                    ConstantsObserver.KEY_BG_PROMPT_FGS_WITH_NOTIFICATION_ON_LONG_RUNNING,
+                    DeviceConfig::getBoolean,
+                    ConstantsObserver.DEFAULT_BG_PROMPT_FGS_WITH_NOTIFICATION_ON_LONG_RUNNING);
+            longRunningFGSWithNotification.set(true);
 
             // Long-running FGS with type "location", but ran for a very short time.
             runTestLongFGSExemptionOnce(testPkgName1, testUid1, testPid1,
@@ -1372,6 +1422,7 @@ public final class BackgroundRestrictionTest {
             closeIfNotNull(longRunningFGSThreshold);
             closeIfNotNull(mediaPlaybackFGSThreshold);
             closeIfNotNull(locationFGSThreshold);
+            closeIfNotNull(longRunningFGSWithNotification);
         }
     }
 
