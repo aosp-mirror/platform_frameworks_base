@@ -53,6 +53,7 @@ import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.graphics.Matrix;
 import android.graphics.Rect;
 import android.inputmethodservice.InputMethodService;
 import android.os.Binder;
@@ -453,6 +454,18 @@ public final class InputMethodManager {
     private CursorAnchorInfo mCursorAnchorInfo = null;
 
     /**
+     * A special {@link Matrix} that can be provided by the system when this instance is running
+     * inside a virtual display.
+     *
+     * <p>If this is non-{@code null}, {@link #updateCursorAnchorInfo(View, CursorAnchorInfo)}
+     * should be adjusted with this {@link Matrix}.</p>
+     *
+     * <p>{@code null} when not used.</p>
+     */
+    @GuardedBy("mH")
+    private Matrix mVirtualDisplayToScreenMatrix = null;
+
+    /**
      * As reported by {@link InputBindResult}. This value is determined by
      * {@link com.android.internal.R.styleable#InputMethod_suppressesSpellChecking}.
      */
@@ -528,6 +541,7 @@ public final class InputMethodManager {
     static final int MSG_REPORT_FULLSCREEN_MODE = 10;
     static final int MSG_BIND_ACCESSIBILITY_SERVICE = 11;
     static final int MSG_UNBIND_ACCESSIBILITY_SERVICE = 12;
+    static final int MSG_UPDATE_VIRTUAL_DISPLAY_TO_SCREEN_MATRIX = 30;
 
     private static boolean isAutofillUIShowing(View servedView) {
         AutofillManager afm = servedView.getContext().getSystemService(AutofillManager.class);
@@ -892,6 +906,7 @@ public final class InputMethodManager {
                                 InputMethodSessionWrapper.createOrNull(res.method);
                         mCurId = res.id;
                         mBindSequence = res.sequence;
+                        mVirtualDisplayToScreenMatrix = res.getVirtualDisplayToScreenMatrix();
                         mIsInputMethodSuppressingSpellChecker =
                                 res.isInputMethodSuppressingSpellChecker;
                     }
@@ -1063,6 +1078,45 @@ public final class InputMethodManager {
                     }
                     return;
                 }
+                case MSG_UPDATE_VIRTUAL_DISPLAY_TO_SCREEN_MATRIX: {
+                    final float[] matrixValues = (float[]) msg.obj;
+                    final int bindSequence = msg.arg1;
+                    synchronized (mH) {
+                        if (mBindSequence != bindSequence) {
+                            return;
+                        }
+                        if (matrixValues == null || mVirtualDisplayToScreenMatrix == null) {
+                            // Either InputBoundResult#mVirtualDisplayToScreenMatrixValues is null
+                            // OR this app is unbound from the parent VirtualDisplay. In this case,
+                            // calling updateCursorAnchorInfo() isn't safe. Only clear the matrix.
+                            mVirtualDisplayToScreenMatrix = null;
+                            return;
+                        }
+
+                        final float[] currentValues = new float[9];
+                        mVirtualDisplayToScreenMatrix.getValues(currentValues);
+                        if (Arrays.equals(currentValues, matrixValues)) {
+                            return;
+                        }
+                        mVirtualDisplayToScreenMatrix.setValues(matrixValues);
+
+                        if (mCursorAnchorInfo == null || mCurrentInputMethodSession == null
+                                || mServedInputConnection == null) {
+                            return;
+                        }
+                        final boolean isMonitoring = (mRequestUpdateCursorAnchorInfoMonitorMode
+                                & InputConnection.CURSOR_UPDATE_MONITOR) != 0;
+                        if (!isMonitoring) {
+                            return;
+                        }
+                        // Since the host VirtualDisplay is moved, we need to issue
+                        // IMS#updateCursorAnchorInfo() again.
+                        mCurrentInputMethodSession.updateCursorAnchorInfo(
+                                CursorAnchorInfo.createForAdditionalParentMatrix(
+                                        mCursorAnchorInfo, mVirtualDisplayToScreenMatrix));
+                    }
+                    return;
+                }
             }
         }
     }
@@ -1125,6 +1179,12 @@ public final class InputMethodManager {
         public void reportFullscreenMode(boolean fullscreen) {
             mH.obtainMessage(MSG_REPORT_FULLSCREEN_MODE, fullscreen ? 1 : 0, 0)
                     .sendToTarget();
+        }
+
+        @Override
+        public void updateVirtualDisplayToScreenMatrix(int bindSequence, float[] matrixValues) {
+            mH.obtainMessage(MSG_UPDATE_VIRTUAL_DISPLAY_TO_SCREEN_MATRIX, bindSequence, 0,
+                    matrixValues).sendToTarget();
         }
 
         @Override
@@ -1596,7 +1656,9 @@ public final class InputMethodManager {
      * Disconnect any existing input connection, clearing the served view.
      */
     @UnsupportedAppUsage
+    @GuardedBy("mH")
     void finishInputLocked() {
+        mVirtualDisplayToScreenMatrix = null;
         mIsInputMethodSuppressingSpellChecker = false;
         setNextServedViewLocked(null);
         if (getServedViewLocked() != null) {
@@ -2275,6 +2337,7 @@ public final class InputMethodManager {
                         + InputMethodDebug.startInputFlagsToString(startInputFlags));
                 return false;
             }
+            mVirtualDisplayToScreenMatrix = res.getVirtualDisplayToScreenMatrix();
             mIsInputMethodSuppressingSpellChecker = res.isInputMethodSuppressingSpellChecker;
             if (res.id != null) {
                 setInputChannelLocked(res.channel);
@@ -2695,7 +2758,13 @@ public final class InputMethodManager {
                 return;
             }
             if (DEBUG) Log.v(TAG, "updateCursorAnchorInfo: " + cursorAnchorInfo);
-            mCurrentInputMethodSession.updateCursorAnchorInfo(cursorAnchorInfo);
+            if (mVirtualDisplayToScreenMatrix != null) {
+                mCurrentInputMethodSession.updateCursorAnchorInfo(
+                        CursorAnchorInfo.createForAdditionalParentMatrix(
+                                cursorAnchorInfo, mVirtualDisplayToScreenMatrix));
+            } else {
+                mCurrentInputMethodSession.updateCursorAnchorInfo(cursorAnchorInfo);
+            }
             mCursorAnchorInfo = cursorAnchorInfo;
             // Clear immediate bit (if any).
             mRequestUpdateCursorAnchorInfoMonitorMode &= ~CURSOR_UPDATE_IMMEDIATE;
@@ -3266,6 +3335,43 @@ public final class InputMethodManager {
             return mService.getInputMethodWindowVisibleHeight(mClient);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * An internal API for {@link android.hardware.display.VirtualDisplay} to report where its
+     * embedded virtual display is placed.
+     *
+     * @param childDisplayId Display ID of the embedded virtual display.
+     * @param matrix         {@link Matrix} to convert virtual display screen coordinates to
+     *                       the host screen coordinates. {@code null} to clear the relationship.
+     * @hide
+     */
+    public void reportVirtualDisplayGeometry(int childDisplayId, @Nullable Matrix matrix) {
+        try {
+            final float[] matrixValues;
+            if (matrix == null) {
+                matrixValues = null;
+            } else {
+                matrixValues = new float[9];
+                matrix.getValues(matrixValues);
+            }
+            mService.reportVirtualDisplayGeometryAsync(mClient, childDisplayId, matrixValues);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * An internal API that returns if the current display has a transformation matrix to apply.
+     *
+     * @return {@code true} if {@link Matrix} to convert virtual display screen coordinates to
+     * the host screen coordinates is set.
+     * @hide
+     */
+    public boolean hasVirtualDisplayToScreenMatrix() {
+        synchronized (mH) {
+            return mVirtualDisplayToScreenMatrix != null;
         }
     }
 
