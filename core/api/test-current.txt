@@ -1191,6 +1191,9 @@ package android.hardware.display {
     method public boolean alwaysOnAvailable();
     method public boolean alwaysOnAvailableForUser(int);
     method public boolean alwaysOnEnabled(int);
+    method public void disableDozeSettings(int);
+    method public void disableDozeSettings(boolean, int);
+    method public void restoreDozeSettings(int);
   }
 
   public final class DisplayManager {
