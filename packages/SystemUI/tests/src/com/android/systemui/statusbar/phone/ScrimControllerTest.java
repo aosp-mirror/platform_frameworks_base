@@ -122,7 +122,6 @@ public class ScrimControllerTest extends SysuiTestCase {
     @Mock
     private StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
 
-
     private static class AnimatorListener implements Animator.AnimatorListener {
         private int mNumStarts;
         private int mNumEnds;
@@ -1368,6 +1367,21 @@ public class ScrimControllerTest extends SysuiTestCase {
         assertThat(mNotificationsScrim.getViewAlpha()).isEqualTo(TRANSPARENT);
     }
 
+
+    @Test
+    public void setUnOccludingAnimationKeyguard() {
+        mScrimController.setUnocclusionAnimationRunning(true);
+        mScrimController.transitionTo(ScrimState.KEYGUARD);
+        finishAnimationsImmediately();
+        assertThat(mNotificationsScrim.getViewAlpha())
+                .isWithin(0.01f).of(ScrimState.KEYGUARD.getNotifAlpha());
+        assertThat(mNotificationsScrim.getTint())
+                .isEqualTo(ScrimState.KEYGUARD.getNotifTint());
+        assertThat(mScrimBehind.getViewAlpha())
+                .isWithin(0.01f).of(ScrimState.KEYGUARD.getBehindAlpha());
+        assertThat(mScrimBehind.getTint())
+                .isEqualTo(ScrimState.KEYGUARD.getBehindTint());
+    }
 
     private void assertAlphaAfterExpansion(ScrimView scrim, float expectedAlpha, float expansion) {
         mScrimController.setRawPanelExpansionFraction(expansion);
