@@ -5635,6 +5635,13 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             return false;
         }
 
+        // We don't need to set the window to be relatively above IME if the IME is not visible.
+        // In case seeing the window is animating above the app transition layer because its
+        // relative layer is above the IME container on the display area but actually not necessary.
+        if (!getDisplayContent().getImeContainer().isVisible()) {
+            return false;
+        }
+
         if (isChildWindow()) {
             // If we are a child of the input method target we need this promotion.
             if (getParentWindow().isImeLayeringTarget()) {
