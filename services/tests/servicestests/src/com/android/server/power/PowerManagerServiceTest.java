@@ -1620,6 +1620,58 @@ public class PowerManagerServiceTest {
     }
 
     @Test
+    public void testMultiDisplay_defaultDisplayCanDoze() {
+        createService();
+        startSystem();
+        assertThat(mService.getGlobalWakefulnessLocked()).isEqualTo(WAKEFULNESS_AWAKE);
+        assertThat(mService.getWakefulnessLocked(Display.DEFAULT_DISPLAY_GROUP)).isEqualTo(
+                WAKEFULNESS_AWAKE);
+
+        forceDozing();
+        // Allow handleSandman() to be called asynchronously
+        advanceTime(500);
+        verify(mDreamManagerInternalMock).startDream(eq(true));
+    }
+
+    @Test
+    public void testMultiDisplay_twoDisplays_defaultDisplayCanDoze() {
+        final int nonDefaultDisplayGroupId = Display.DEFAULT_DISPLAY_GROUP + 1;
+        final int nonDefaultDisplay = Display.DEFAULT_DISPLAY + 1;
+        final AtomicReference<DisplayManagerInternal.DisplayGroupListener> listener =
+                new AtomicReference<>();
+        doAnswer((Answer<Void>) invocation -> {
+            listener.set(invocation.getArgument(0));
+            return null;
+        }).when(mDisplayManagerInternalMock).registerDisplayGroupListener(any());
+        final DisplayInfo info = new DisplayInfo();
+        info.displayGroupId = nonDefaultDisplayGroupId;
+        when(mDisplayManagerInternalMock.getDisplayInfo(nonDefaultDisplay)).thenReturn(info);
+
+        createService();
+        startSystem();
+
+        listener.get().onDisplayGroupAdded(nonDefaultDisplayGroupId);
+
+        assertThat(mService.getWakefulnessLocked(Display.DEFAULT_DISPLAY_GROUP)).isEqualTo(
+                WAKEFULNESS_AWAKE);
+        assertThat(mService.getWakefulnessLocked(nonDefaultDisplayGroupId)).isEqualTo(
+                WAKEFULNESS_AWAKE);
+        assertThat(mService.getGlobalWakefulnessLocked()).isEqualTo(WAKEFULNESS_AWAKE);
+
+        forceDozing();
+
+        assertThat(mService.getWakefulnessLocked(Display.DEFAULT_DISPLAY_GROUP)).isEqualTo(
+                WAKEFULNESS_DOZING);
+        assertThat(mService.getWakefulnessLocked(nonDefaultDisplayGroupId)).isEqualTo(
+                WAKEFULNESS_AWAKE);
+        assertThat(mService.getGlobalWakefulnessLocked()).isEqualTo(WAKEFULNESS_AWAKE);
+
+        // Allow handleSandman() to be called asynchronously
+        advanceTime(500);
+        verify(mDreamManagerInternalMock).startDream(eq(true));
+    }
+
+    @Test
     public void testLastSleepTime_notUpdatedWhenDreaming() {
         createService();
         startSystem();
