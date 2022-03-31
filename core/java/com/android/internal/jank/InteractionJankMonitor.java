@@ -385,7 +385,8 @@ public class InteractionJankMonitor {
         synchronized (mLock) {
             FrameTrackerListener eventsListener = (s, act) -> handleCujEvents(act, s);
             return new FrameTracker(session, mWorker.getThreadHandler(),
-                    threadedRenderer, viewRoot, surfaceControl, choreographer, mMetrics,
+                    threadedRenderer, viewRoot, surfaceControl, choreographer,
+                    mMetrics, new FrameTracker.StatsLogWrapper(),
                     mTraceThresholdMissedFrames, mTraceThresholdFrameTimeMillis,
                     eventsListener, config);
         }
