@@ -128,6 +128,7 @@ import java.util.Base64;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -829,7 +830,7 @@ class PackageManagerShellCommand extends ShellCommand {
         boolean showVersionCode = false;
         boolean listApexOnly = false;
         int uid = -1;
-        int userId = UserHandle.USER_SYSTEM;
+        int defaultUserId = UserHandle.USER_ALL;
         try {
             String opt;
             while ((opt = getNextOption()) != null) {
@@ -873,7 +874,7 @@ class PackageManagerShellCommand extends ShellCommand {
                         listApexOnly = true;
                         break;
                     case "--user":
-                        userId = UserHandle.parseUserArg(getNextArgRequired());
+                        defaultUserId = UserHandle.parseUserArg(getNextArgRequired());
                         break;
                     case "--uid":
                         showUid = true;
@@ -891,84 +892,104 @@ class PackageManagerShellCommand extends ShellCommand {
 
         final String filter = getNextArg();
 
-        if (userId == UserHandle.USER_ALL) {
-            getFlags |= PackageManager.MATCH_KNOWN_PACKAGES;
+        int[] userIds = {defaultUserId};
+        if (defaultUserId == UserHandle.USER_ALL) {
+            final UserManagerInternal umi = LocalServices.getService(UserManagerInternal.class);
+            userIds = umi.getUserIds();
         }
         if (showSdks) {
             getFlags |= PackageManager.MATCH_STATIC_SHARED_AND_SDK_LIBRARIES;
         }
-        final int translatedUserId =
-                translateUserId(userId, UserHandle.USER_SYSTEM, "runListPackages");
-        @SuppressWarnings("unchecked")
-        final ParceledListSlice<PackageInfo> slice =
-                mInterface.getInstalledPackages(getFlags, translatedUserId);
-        final List<PackageInfo> packages = slice.getList();
 
-        final int count = packages.size();
-        for (int p = 0; p < count; p++) {
-            final PackageInfo info = packages.get(p);
-            if (filter != null && !info.packageName.contains(filter)) {
-                continue;
-            }
-            final boolean isApex = info.isApex;
-            if (uid != -1 && !isApex && info.applicationInfo.uid != uid) {
-                continue;
-            }
+        // Build a map of packages to a list of corresponding uids. Keys are strings containing
+        // the sdk or package name along with optional additional information based on opt.
+        final Map<String, List<String>> out = new HashMap<>();
+        for (int userId : userIds) {
+            final int translatedUserId =
+                    translateUserId(userId, UserHandle.USER_SYSTEM, "runListPackages");
+            @SuppressWarnings("unchecked") final ParceledListSlice<PackageInfo> slice =
+                    mInterface.getInstalledPackages(getFlags, translatedUserId);
+            final List<PackageInfo> packages = slice.getList();
 
-            final boolean isSystem = !isApex &&
-                    (info.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0;
-            final boolean isEnabled = !isApex && info.applicationInfo.enabled;
-            if ((listDisabled && isEnabled) ||
-                    (listEnabled && !isEnabled) ||
-                    (listSystem && !isSystem) ||
-                    (listThirdParty && isSystem) ||
-                    (listApexOnly && !isApex)) {
-                continue;
-            }
-
-            String name = null;
-            if (showSdks) {
-                final ParceledListSlice<SharedLibraryInfo> libsSlice =
-                        mInterface.getDeclaredSharedLibraries(info.packageName, getFlags, userId);
-                if (libsSlice == null) {
+            final int count = packages.size();
+            for (int p = 0; p < count; p++) {
+                final PackageInfo info = packages.get(p);
+                final StringBuilder stringBuilder = new StringBuilder();
+                if (filter != null && !info.packageName.contains(filter)) {
                     continue;
                 }
-                final List<SharedLibraryInfo> libs = libsSlice.getList();
-                for (int l = 0, lsize = libs.size(); l < lsize; ++l) {
-                    SharedLibraryInfo lib = libs.get(l);
-                    if (lib.getType() == SharedLibraryInfo.TYPE_SDK_PACKAGE) {
-                        name = lib.getName() + ":" + lib.getLongVersion();
-                        break;
+                final boolean isApex = info.isApex;
+                if (uid != -1 && !isApex && info.applicationInfo.uid != uid) {
+                    continue;
+                }
+
+                final boolean isSystem = !isApex
+                        && (info.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0;
+                final boolean isEnabled = !isApex && info.applicationInfo.enabled;
+                if ((listDisabled && isEnabled)
+                        || (listEnabled && !isEnabled)
+                        || (listSystem && !isSystem)
+                        || (listThirdParty && isSystem)
+                        || (listApexOnly && !isApex)) {
+                    continue;
+                }
+
+                String name = null;
+                if (showSdks) {
+                    final ParceledListSlice<SharedLibraryInfo> libsSlice =
+                            mInterface.getDeclaredSharedLibraries(
+                                info.packageName, getFlags, userId
+                            );
+                    if (libsSlice == null) {
+                        continue;
+                    }
+                    final List<SharedLibraryInfo> libs = libsSlice.getList();
+                    for (int l = 0, lsize = libs.size(); l < lsize; ++l) {
+                        SharedLibraryInfo lib = libs.get(l);
+                        if (lib.getType() == SharedLibraryInfo.TYPE_SDK_PACKAGE) {
+                            name = lib.getName() + ":" + lib.getLongVersion();
+                            break;
+                        }
+                    }
+                    if (name == null) {
+                        continue;
+                    }
+                } else {
+                    name = info.packageName;
+                }
+
+                stringBuilder.append(prefix);
+                if (showSourceDir) {
+                    stringBuilder.append(info.applicationInfo.sourceDir);
+                    stringBuilder.append("=");
+                }
+                stringBuilder.append(name);
+                if (showVersionCode) {
+                    stringBuilder.append(" versionCode:");
+                    if (info.applicationInfo != null) {
+                        stringBuilder.append(info.applicationInfo.longVersionCode);
+                    } else {
+                        stringBuilder.append(info.getLongVersionCode());
                     }
                 }
-                if (name == null) {
-                    continue;
+                if (listInstaller) {
+                    stringBuilder.append("  installer=");
+                    stringBuilder.append(mInterface.getInstallerPackageName(info.packageName));
                 }
-            } else {
-                name = info.packageName;
-            }
-
-            pw.print(prefix);
-            if (showSourceDir) {
-                pw.print(info.applicationInfo.sourceDir);
-                pw.print("=");
-            }
-            pw.print(name);
-            if (showVersionCode) {
-                pw.print(" versionCode:");
-                if (info.applicationInfo != null) {
-                    pw.print(info.applicationInfo.longVersionCode);
-                } else {
-                    pw.print(info.getLongVersionCode());
+                List<String> uids = out.computeIfAbsent(
+                        stringBuilder.toString(), k -> new ArrayList<>()
+                );
+                if (showUid && !isApex) {
+                    uids.add(String.valueOf(info.applicationInfo.uid));
                 }
             }
-            if (listInstaller) {
-                pw.print("  installer=");
-                pw.print(mInterface.getInstallerPackageName(info.packageName));
-            }
-            if (showUid && !isApex) {
+        }
+        for (Map.Entry<String, List<String>> entry : out.entrySet()) {
+            pw.print(entry.getKey());
+            List<String> uids = entry.getValue();
+            if (!uids.isEmpty()) {
                 pw.print(" uid:");
-                pw.print(info.applicationInfo.uid);
+                pw.print(String.join(",", uids));
             }
             pw.println();
         }
