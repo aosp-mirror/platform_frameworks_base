@@ -1810,10 +1810,14 @@ public class DisplayPolicy {
     /**
      * Called when the resource overlays change.
      */
-    public void onOverlayChangedLw() {
+    void onOverlayChanged() {
         updateCurrentUserResources();
+        // Update the latest display size, cutout.
+        mDisplayContent.updateDisplayInfo();
+        // The height of status bar needs to update in case display cutout is changed.
         onConfigurationChanged();
-        mSystemGestures.onConfigurationChanged();
+        // The height of status bar can affect screen size configuration.
+        mDisplayContent.reconfigureDisplayLocked();
     }
 
     /**
