@@ -1321,11 +1321,7 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
             }
             change.setMode(info.getTransitMode(target));
             change.setStartAbsBounds(info.mAbsoluteBounds);
-            change.setEndAbsBounds(target.getBounds());
-            change.setEndRelOffset(target.getBounds().left - target.getParent().getBounds().left,
-                    target.getBounds().top - target.getParent().getBounds().top);
             change.setFlags(info.getChangeFlags(target));
-            change.setRotation(info.mRotation, target.getWindowConfiguration().getRotation());
             final Task task = target.asTask();
             if (task != null) {
                 final ActivityManager.RunningTaskInfo tinfo = new ActivityManager.RunningTaskInfo();
@@ -1353,13 +1349,32 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
             } else if ((info.mFlags & ChangeInfo.FLAG_SEAMLESS_ROTATION) != 0) {
                 change.setRotationAnimation(ROTATION_ANIMATION_SEAMLESS);
             }
+
+            final WindowContainer<?> parent = target.getParent();
+            final Rect bounds = target.getBounds();
+            final Rect parentBounds = parent.getBounds();
+            change.setEndRelOffset(bounds.left - parentBounds.left,
+                    bounds.top - parentBounds.top);
+            int endRotation = target.getWindowConfiguration().getRotation();
             final ActivityRecord activityRecord = target.asActivityRecord();
             if (activityRecord != null) {
                 final Task arTask = activityRecord.getTask();
                 final int backgroundColor = ColorUtils.setAlphaComponent(
                         arTask.getTaskDescription().getBackgroundColor(), 255);
                 change.setBackgroundColor(backgroundColor);
+                // TODO(b/227427984): Shell needs to aware letterbox.
+                // Always use parent bounds of activity because letterbox area (e.g. fixed aspect
+                // ratio or size compat mode) should be included in the animation.
+                change.setEndAbsBounds(parentBounds);
+                if (activityRecord.getRelativeDisplayRotation() != 0
+                        && !activityRecord.mTransitionController.useShellTransitionsRotation()) {
+                    // Use parent rotation because shell doesn't know the surface is rotated.
+                    endRotation = parent.getWindowConfiguration().getRotation();
+                }
+            } else {
+                change.setEndAbsBounds(bounds);
             }
+            change.setRotation(info.mRotation, endRotation);
 
             out.addChange(change);
         }
