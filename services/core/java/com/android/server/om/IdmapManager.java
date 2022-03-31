@@ -19,6 +19,7 @@ package com.android.server.om;
 import static com.android.server.om.OverlayManagerService.DEBUG;
 import static com.android.server.om.OverlayManagerService.TAG;
 
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.content.om.OverlayInfo;
 import android.content.om.OverlayableInfo;
@@ -33,6 +34,8 @@ import android.util.Slog;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
 
 import java.io.IOException;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.List;
 
 /**
@@ -56,6 +59,18 @@ final class IdmapManager {
         VENDOR_IS_Q_OR_LATER = isQOrLater;
     }
 
+    static final int IDMAP_NOT_EXIST = 0;
+    static final int IDMAP_IS_VERIFIED = 1;
+    static final int IDMAP_IS_MODIFIED = 1 << 1;
+
+    @IntDef(flag = true, prefix = { "IDMAP_" }, value = {
+            IDMAP_NOT_EXIST,
+            IDMAP_IS_VERIFIED,
+            IDMAP_IS_MODIFIED,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface IdmapStatus {}
+
     private final IdmapDaemon mIdmapDaemon;
     private final PackageManagerHelper mPackageManager;
 
@@ -76,8 +91,14 @@ final class IdmapManager {
     /**
      * Creates the idmap for the target/overlay combination and returns whether the idmap file was
      * modified.
+     * @return the status of the specific idmap file. It's one of the following.<ul>
+     *     <li>{@link #IDMAP_NOT_EXIST} means the idmap file is not existed.</li>
+     *     <li>{@link #IDMAP_IS_VERIFIED} means the idmap file is verified by Idmap2d.</li>
+     *     <li>{@link #IDMAP_IS_MODIFIED | IDMAP_IS_VERIFIED } means the idmap file is modified and
+     *     verified by Idmap2d.</li>
+     * </ul>.
      */
-    boolean createIdmap(@NonNull final AndroidPackage targetPackage,
+    @IdmapStatus int createIdmap(@NonNull final AndroidPackage targetPackage,
             @NonNull final AndroidPackage overlayPackage, String overlayBasePath,
             String overlayName, int userId) {
         if (DEBUG) {
@@ -90,14 +111,15 @@ final class IdmapManager {
             boolean enforce = enforceOverlayable(overlayPackage);
             if (mIdmapDaemon.verifyIdmap(targetPath, overlayBasePath, overlayName, policies,
                     enforce, userId)) {
-                return false;
+                return IDMAP_IS_VERIFIED;
             }
-            return mIdmapDaemon.createIdmap(targetPath, overlayBasePath, overlayName, policies,
-                    enforce, userId) != null;
+            final boolean idmapCreated = mIdmapDaemon.createIdmap(targetPath, overlayBasePath,
+                    overlayName, policies, enforce, userId) != null;
+            return (idmapCreated) ? IDMAP_IS_MODIFIED | IDMAP_IS_VERIFIED : IDMAP_NOT_EXIST;
         } catch (Exception e) {
             Slog.w(TAG, "failed to generate idmap for " + targetPath + " and "
                     + overlayBasePath, e);
-            return false;
+            return IDMAP_NOT_EXIST;
         }
     }
 
