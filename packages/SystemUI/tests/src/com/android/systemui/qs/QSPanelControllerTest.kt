@@ -15,7 +15,9 @@ import com.android.systemui.qs.customize.QSCustomizerController
 import com.android.systemui.qs.logging.QSLogger
 import com.android.systemui.settings.brightness.BrightnessController
 import com.android.systemui.settings.brightness.BrightnessSliderController
+import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager
 import com.android.systemui.tuner.TunerService
+import com.google.common.truth.Truth.assertThat
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
@@ -52,6 +54,7 @@ class QSPanelControllerTest : SysuiTestCase() {
     @Mock private lateinit var mediaHost: MediaHost
     @Mock private lateinit var tile: QSTile
     @Mock private lateinit var otherTile: QSTile
+    @Mock private lateinit var statusBarKeyguardViewManager: StatusBarKeyguardViewManager
 
     private lateinit var controller: QSPanelController
 
@@ -62,6 +65,7 @@ class QSPanelControllerTest : SysuiTestCase() {
         whenever(brightnessSliderFactory.create(any(), any())).thenReturn(brightnessSlider)
         whenever(brightnessControllerFactory.create(any())).thenReturn(brightnessController)
         whenever(qsPanel.resources).thenReturn(mContext.orCreateTestableResources.resources)
+        whenever(statusBarKeyguardViewManager.bouncerIsInTransit()).thenReturn(false)
 
         controller = QSPanelController(
             qsPanel,
@@ -80,7 +84,8 @@ class QSPanelControllerTest : SysuiTestCase() {
             brightnessControllerFactory,
             brightnessSliderFactory,
             falsingManager,
-            featureFlags
+            featureFlags,
+            statusBarKeyguardViewManager
         )
     }
 
@@ -108,5 +113,13 @@ class QSPanelControllerTest : SysuiTestCase() {
 
         verify(tile).refreshState()
         verify(otherTile, Mockito.never()).refreshState()
+    }
+
+    @Test
+    fun testBouncerIsInTransit() {
+        whenever(statusBarKeyguardViewManager.bouncerIsInTransit()).thenReturn(true)
+        assertThat(controller.bouncerInTransit()).isEqualTo(true)
+        whenever(statusBarKeyguardViewManager.bouncerIsInTransit()).thenReturn(false)
+        assertThat(controller.bouncerInTransit()).isEqualTo(false)
     }
 }

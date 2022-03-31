@@ -905,6 +905,9 @@ public class AudioService extends IAudioService.Stub
             disableAudioForUid(cached, uid);
         }
 
+        @Override public void onUidProcAdjChanged(int uid) {
+        }
+
         private void disableAudioForUid(boolean disable, int uid) {
             queueMsgUnderWakeLock(mAudioHandler, MSG_DISABLE_AUDIO_FOR_UID,
                     disable ? 1 : 0 /* arg1 */,  uid /* arg2 */,
@@ -10734,7 +10737,8 @@ public class AudioService extends IAudioService.Stub
         return mMediaFocusControl.sendFocusLoss(focusLoser);
     }
 
-    private static final String[] HAL_VERSIONS = new String[] {"7.1", "7.0", "6.0", "4.0", "2.0"};
+    private static final String[] HAL_VERSIONS =
+            new String[] {"7.1", "7.0", "6.0", "5.0", "4.0", "2.0"};
 
     /** @see AudioManager#getHalVersion */
     public @Nullable String getHalVersion() {

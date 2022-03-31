@@ -32,7 +32,6 @@ import com.android.server.wm.flicker.annotation.Group1
 import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.flicker.helpers.NonResizeableAppHelper
 import com.android.server.wm.flicker.helpers.SimpleAppHelper
-import com.android.server.wm.flicker.helpers.isShellTransitionsEnabled
 import com.android.server.wm.flicker.navBarLayerIsVisible
 import com.android.server.wm.flicker.navBarLayerRotatesAndScales
 import com.android.server.wm.flicker.navBarWindowIsVisible
@@ -40,8 +39,6 @@ import com.android.server.wm.flicker.statusBarLayerIsVisible
 import com.android.server.wm.flicker.statusBarWindowIsVisible
 import com.android.server.wm.traces.common.FlickerComponentName
 import com.android.server.wm.traces.common.Rect
-import org.junit.Assume
-import org.junit.Before
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -101,7 +98,6 @@ open class QuickSwitchBetweenTwoAppsForwardTest(private val testSpec: FlickerTes
                 taplInstrumentation.launchedAppState.quickSwitchToPreviousAppSwipeLeft()
 
                 wmHelper.waitForFullScreenApp(testApp2.component)
-                wmHelper.waitSnapshotGone()
                 wmHelper.waitForAppTransitionIdle()
                 wmHelper.waitForNavBarStatusBarVisible()
             }
@@ -113,12 +109,6 @@ open class QuickSwitchBetweenTwoAppsForwardTest(private val testSpec: FlickerTes
                 }
             }
         }
-    }
-
-    @Before
-    open fun setup() {
-        // This test doesn't work in shell transitions because of b/213867585
-        Assume.assumeFalse(isShellTransitionsEnabled)
     }
 
     /**

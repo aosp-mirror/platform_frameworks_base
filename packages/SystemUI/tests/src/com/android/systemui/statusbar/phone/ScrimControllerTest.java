@@ -119,7 +119,8 @@ public class ScrimControllerTest extends SysuiTestCase {
     //   event-dispatch-on-registration pattern caused some of these unit tests to fail.)
     @Mock
     private PanelExpansionStateManager mPanelExpansionStateManager;
-
+    @Mock
+    private StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
 
     private static class AnimatorListener implements Animator.AnimatorListener {
         private int mNumStarts;
@@ -233,7 +234,8 @@ public class ScrimControllerTest extends SysuiTestCase {
                 mDockManager, mConfigurationController, new FakeExecutor(new FakeSystemClock()),
                 mScreenOffAnimationController,
                 mPanelExpansionStateManager,
-                mKeyguardUnlockAnimationController);
+                mKeyguardUnlockAnimationController,
+                mStatusBarKeyguardViewManager);
         mScrimController.setScrimVisibleListener(visible -> mScrimVisibility = visible);
         mScrimController.attachViews(mScrimBehind, mNotificationsScrim, mScrimInFront);
         mScrimController.setAnimatorListener(mAnimatorListener);
@@ -1234,6 +1236,8 @@ public class ScrimControllerTest extends SysuiTestCase {
 
     @Test
     public void testNotificationTransparency_followsPanelExpansionInShadeLockedState() {
+        when(mStatusBarKeyguardViewManager.bouncerIsInTransit()).thenReturn(true);
+
         mScrimController.transitionTo(ScrimState.SHADE_LOCKED);
 
         assertAlphaAfterExpansion(mNotificationsScrim, /* alpha */ 0f, /* expansion */ 0.8f);
@@ -1242,6 +1246,8 @@ public class ScrimControllerTest extends SysuiTestCase {
 
     @Test
     public void testNotificationTransparency_unnocclusion() {
+        when(mStatusBarKeyguardViewManager.bouncerIsInTransit()).thenReturn(true);
+
         mScrimController.transitionTo(ScrimState.KEYGUARD);
         mScrimController.setUnocclusionAnimationRunning(true);
 
@@ -1255,6 +1261,8 @@ public class ScrimControllerTest extends SysuiTestCase {
 
     @Test
     public void testNotificationTransparency_inKeyguardState() {
+        when(mStatusBarKeyguardViewManager.bouncerIsInTransit()).thenReturn(true);
+
         mScrimController.transitionTo(ScrimState.KEYGUARD);
 
         assertAlphaAfterExpansion(mNotificationsScrim, /* alpha */ 1f, /* expansion */ 0.8f);
@@ -1349,6 +1357,30 @@ public class ScrimControllerTest extends SysuiTestCase {
                 mScrimBehind, true,
                 mNotificationsScrim, false
         ));
+    }
+
+    @Test
+    public void keyguardGoingAwayUpdateScrims() {
+        when(mKeyguardStateController.isKeyguardGoingAway()).thenReturn(true);
+        mScrimController.updateScrims();
+        finishAnimationsImmediately();
+        assertThat(mNotificationsScrim.getViewAlpha()).isEqualTo(TRANSPARENT);
+    }
+
+
+    @Test
+    public void setUnOccludingAnimationKeyguard() {
+        mScrimController.setUnocclusionAnimationRunning(true);
+        mScrimController.transitionTo(ScrimState.KEYGUARD);
+        finishAnimationsImmediately();
+        assertThat(mNotificationsScrim.getViewAlpha())
+                .isWithin(0.01f).of(ScrimState.KEYGUARD.getNotifAlpha());
+        assertThat(mNotificationsScrim.getTint())
+                .isEqualTo(ScrimState.KEYGUARD.getNotifTint());
+        assertThat(mScrimBehind.getViewAlpha())
+                .isWithin(0.01f).of(ScrimState.KEYGUARD.getBehindAlpha());
+        assertThat(mScrimBehind.getTint())
+                .isEqualTo(ScrimState.KEYGUARD.getBehindTint());
     }
 
     private void assertAlphaAfterExpansion(ScrimView scrim, float expectedAlpha, float expansion) {

@@ -2513,7 +2513,6 @@ public class WindowManagerService extends IWindowManager.Stub
 
             if (mUseBLASTSync && win.useBLASTSync() && viewVisibility != View.GONE
                     && (win.mSyncSeqId > win.mLastSeqIdSentToRelayout)) {
-                win.prepareDrawHandlers();
                 win.markRedrawForSyncReported();
 
                 win.mLastSeqIdSentToRelayout = win.mSyncSeqId;
@@ -5692,7 +5691,9 @@ public class WindowManagerService extends IWindowManager.Stub
                             || displayContent.mBaseDisplayHeight != height) {
                         ProtoLog.i(WM_ERROR, "FORCED DISPLAY SIZE: %dx%d", width, height);
                         displayContent.updateBaseDisplayMetrics(width, height,
-                                displayContent.mBaseDisplayDensity);
+                                displayContent.mBaseDisplayDensity,
+                                displayContent.mBaseDisplayPhysicalXDpi,
+                                displayContent.mBaseDisplayPhysicalYDpi);
                         changed = true;
                     }
                 } catch (NumberFormatException ex) {
@@ -6967,13 +6968,17 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     public void onOverlayChanged() {
-        synchronized (mGlobalLock) {
-            mRoot.forAllDisplays(displayContent -> {
-                displayContent.getDisplayPolicy().onOverlayChangedLw();
-                displayContent.updateDisplayInfo();
-            });
-            requestTraversal();
-        }
+        // Post to display thread so it can get the latest display info.
+        mH.post(() -> {
+            synchronized (mGlobalLock) {
+                mAtmService.deferWindowLayout();
+                try {
+                    mRoot.forAllDisplays(dc -> dc.getDisplayPolicy().onOverlayChanged());
+                } finally {
+                    mAtmService.continueWindowLayout();
+                }
+            }
+        });
     }
 
     @Override

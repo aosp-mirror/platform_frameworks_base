@@ -109,12 +109,9 @@
     <string name="bluetooth_battery_level" msgid="2893696778200201555">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> ബാറ്ററി"</string>
     <string name="bluetooth_battery_level_untethered" msgid="4002282355111504349">"ഇടത്ത്: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> ബാറ്ററി, വലത്ത്: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> ബാറ്ററി"</string>
     <string name="bluetooth_active_no_battery_level" msgid="4155462233006205630">"സജീവം"</string>
-    <!-- no translation found for bluetooth_hearing_aid_left_active (7084887715570971441) -->
-    <skip />
-    <!-- no translation found for bluetooth_hearing_aid_right_active (8574683234077567230) -->
-    <skip />
-    <!-- no translation found for bluetooth_hearing_aid_left_and_right_active (407704460573163973) -->
-    <skip />
+    <string name="bluetooth_hearing_aid_left_active" msgid="7084887715570971441">"സജീവമാണ്, ഇടത്തേത് മാത്രം"</string>
+    <string name="bluetooth_hearing_aid_right_active" msgid="8574683234077567230">"സജീവമാണ്, വലത്തേത് മാത്രം"</string>
+    <string name="bluetooth_hearing_aid_left_and_right_active" msgid="407704460573163973">"സജീവമാണ്, ഇടത്തേതും വലത്തേതും"</string>
     <string name="bluetooth_profile_a2dp" msgid="4632426382762851724">"മീഡിയ ഓഡിയോ"</string>
     <string name="bluetooth_profile_headset" msgid="5395952236133499331">"ഫോണ്‍‌ കോളുകൾ"</string>
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"ഫയൽ കൈമാറൽ"</string>
@@ -592,27 +589,21 @@
     <string name="add_user_failed" msgid="4809887794313944872">"പുതിയ ഉപയോക്താവിനെ സൃഷ്‌ടിക്കാനായില്ല"</string>
     <string name="add_guest_failed" msgid="8074548434469843443">"പുതിയ അതിഥിയെ സൃഷ്‌ടിക്കാനായില്ല"</string>
     <string name="user_nickname" msgid="262624187455825083">"വിളിപ്പേര്"</string>
-    <!-- no translation found for user_add_user (7876449291500212468) -->
-    <skip />
+    <string name="user_add_user" msgid="7876449291500212468">"ഉപയോക്താവിനെ ചേർക്കുക"</string>
     <string name="guest_new_guest" msgid="3482026122932643557">"അതിഥിയെ ചേർക്കുക"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"അതിഥിയെ നീക്കം ചെയ്യുക"</string>
     <string name="guest_reset_guest" msgid="6110013010356013758">"അതിഥിയെ റീസെറ്റ് ചെയ്യുക"</string>
     <string name="guest_reset_guest_dialog_title" msgid="8047270010895437534">"അതിഥിയെ റീസെറ്റ് ചെയ്യണോ?"</string>
-    <!-- no translation found for guest_remove_guest_dialog_title (4548511006624088072) -->
-    <skip />
+    <string name="guest_remove_guest_dialog_title" msgid="4548511006624088072">"അതിഥിയെ നീക്കം ചെയ്യണോ?"</string>
     <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"റീസെറ്റ് ചെയ്യുക"</string>
     <string name="guest_resetting" msgid="7822120170191509566">"അതിഥിയെ റീസെറ്റ് ചെയ്യുന്നു…"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"ഒരു ഫോട്ടോ എടുക്കുക"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"ഒരു ചിത്രം തിരഞ്ഞെടുക്കുക"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"ഫോട്ടോ തിരഞ്ഞെടുക്കുക"</string>
-    <!-- no translation found for failed_attempts_now_wiping_device (4016329172216428897) -->
-    <skip />
-    <!-- no translation found for failed_attempts_now_wiping_user (469060411789668050) -->
-    <skip />
-    <!-- no translation found for failed_attempts_now_wiping_profile (7626589520888963129) -->
-    <skip />
-    <!-- no translation found for failed_attempts_now_wiping_dialog_dismiss (2749889771223578925) -->
-    <skip />
+    <string name="failed_attempts_now_wiping_device" msgid="4016329172216428897">"ഒരുപാട് തെറ്റായ ശ്രമങ്ങൾ. ഈ ഉപകരണത്തിലെ ഡാറ്റ ഇല്ലാതാക്കപ്പെടും."</string>
+    <string name="failed_attempts_now_wiping_user" msgid="469060411789668050">"ഒരുപാട് തെറ്റായ ശ്രമങ്ങൾ. ഈ ഉപയോക്താവ് ഇല്ലാതാക്കപ്പെടും."</string>
+    <string name="failed_attempts_now_wiping_profile" msgid="7626589520888963129">"ഒരുപാട് തെറ്റായ ശ്രമങ്ങൾ. ഈ ഔദ്യോഗിക പ്രൊഫൈലും അതിന്റെ ഡാറ്റയും ഇല്ലാതാക്കപ്പെടും."</string>
+    <string name="failed_attempts_now_wiping_dialog_dismiss" msgid="2749889771223578925">"ഡിസ്‌മിസ് ചെയ്യുക"</string>
     <string name="cached_apps_freezer_device_default" msgid="2616594131750144342">"ഉപകരണത്തിന്റെ ഡിഫോൾട്ട് പ്രവർത്തനം"</string>
     <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"പ്രവർത്തനരഹിതമാക്കി"</string>
     <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"പ്രവർത്തനക്ഷമമാക്കി"</string>

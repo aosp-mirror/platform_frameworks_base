@@ -188,7 +188,7 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
         if (mStageCoordinator == null) {
             // TODO: Multi-display
             mStageCoordinator = new StageCoordinator(mContext, DEFAULT_DISPLAY, mSyncQueue,
-                    mRootTDAOrganizer, mTaskOrganizer, mDisplayController, mDisplayImeController,
+                    mTaskOrganizer, mDisplayController, mDisplayImeController,
                     mDisplayInsetsController, mTransitions, mTransactionPool, mLogger,
                     mIconProvider, mRecentTasksOptional, mUnfoldControllerProvider);
         }
@@ -237,10 +237,6 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
 
     public void setSideStagePosition(@SplitPosition int sideStagePosition) {
         mStageCoordinator.setSideStagePosition(sideStagePosition, null /* wct */);
-    }
-
-    public void setSideStageVisibility(boolean visible) {
-        mStageCoordinator.setSideStageVisibility(visible);
     }
 
     public void enterSplitScreen(int taskId, boolean leftOrTop) {
@@ -641,14 +637,6 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
             executeRemoteCallWithTaskPermission(mController, "exitSplitScreenOnHide",
                     (controller) -> {
                         controller.exitSplitScreenOnHide(exitSplitScreenOnHide);
-                    });
-        }
-
-        @Override
-        public void setSideStageVisibility(boolean visible) {
-            executeRemoteCallWithTaskPermission(mController, "setSideStageVisibility",
-                    (controller) -> {
-                        controller.setSideStageVisibility(visible);
                     });
         }
 

@@ -81,7 +81,7 @@ public final class IntentResolverInterceptor {
     private void updateUseDelegateChooser() {
         mUseDelegateChooser = DeviceConfig.getBoolean(
                 DeviceConfig.NAMESPACE_SYSTEMUI,
-                SystemUiDeviceConfigFlags.USE_DELEGATE_CHOOSER,
+                SystemUiDeviceConfigFlags.USE_UNBUNDLED_SHARESHEET,
                 false);
     }
 
