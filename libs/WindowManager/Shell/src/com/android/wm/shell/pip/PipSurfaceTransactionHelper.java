@@ -20,6 +20,7 @@ import android.content.Context;
 import android.graphics.Matrix;
 import android.graphics.Rect;
 import android.graphics.RectF;
+import android.view.Choreographer;
 import android.view.SurfaceControl;
 
 import com.android.wm.shell.R;
@@ -212,5 +213,19 @@ public class PipSurfaceTransactionHelper {
 
     public interface SurfaceControlTransactionFactory {
         SurfaceControl.Transaction getTransaction();
+    }
+
+    /**
+     * Implementation of {@link SurfaceControlTransactionFactory} that returns
+     * {@link SurfaceControl.Transaction} with VsyncId being set.
+     */
+    public static class VsyncSurfaceControlTransactionFactory
+            implements SurfaceControlTransactionFactory {
+        @Override
+        public SurfaceControl.Transaction getTransaction() {
+            final SurfaceControl.Transaction tx = new SurfaceControl.Transaction();
+            tx.setFrameTimelineVsync(Choreographer.getInstance().getVsyncId());
+            return tx;
+        }
     }
 }
