@@ -2675,7 +2675,8 @@ class PackageManagerShellCommand extends ShellCommand {
         while ((opt = getNextOption()) != null) {
             String newUserType = null;
             if ("--profileOf".equals(opt)) {
-                userId = UserHandle.parseUserArg(getNextArgRequired());
+                userId = translateUserId(UserHandle.parseUserArg(getNextArgRequired()),
+                            UserHandle.USER_ALL, "runCreateUser");
             } else if ("--managed".equals(opt)) {
                 newUserType = UserManager.USER_TYPE_PROFILE_MANAGED;
             } else if ("--restricted".equals(opt)) {
