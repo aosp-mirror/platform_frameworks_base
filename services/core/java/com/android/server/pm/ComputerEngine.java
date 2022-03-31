@@ -380,7 +380,7 @@ public class ComputerEngine implements Computer {
     private final ResolveInfo mInstantAppInstallerInfo;
     private final InstantAppRegistry mInstantAppRegistry;
     private final ApplicationInfo mLocalAndroidApplication;
-    private final AppsFilter mAppsFilter;
+    private final AppsFilterSnapshot mAppsFilter;
     private final WatchedArrayMap<String, Integer> mFrozenPackages;
 
     // Immutable service attribute
