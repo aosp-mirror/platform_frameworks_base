@@ -22,6 +22,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyFloat;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.inOrder;
@@ -186,6 +187,8 @@ public class UdfpsControllerTest extends SysuiTestCase {
     private SystemUIDialogManager mSystemUIDialogManager;
     @Mock
     private ActivityLaunchAnimator mActivityLaunchAnimator;
+    @Mock
+    private AlternateUdfpsTouchProvider mTouchProvider;
 
     // Capture listeners so that they can be used to send events
     @Captor private ArgumentCaptor<IUdfpsOverlayController> mOverlayCaptor;
@@ -260,7 +263,8 @@ public class UdfpsControllerTest extends SysuiTestCase {
                 mUnlockedScreenOffAnimationController,
                 mSystemUIDialogManager,
                 mLatencyTracker,
-                mActivityLaunchAnimator);
+                mActivityLaunchAnimator,
+                Optional.of(mTouchProvider));
         verify(mFingerprintManager).setUdfpsOverlayController(mOverlayCaptor.capture());
         mOverlayController = mOverlayCaptor.getValue();
         verify(mScreenLifecycle).addObserver(mScreenObserverCaptor.capture());
@@ -491,9 +495,10 @@ public class UdfpsControllerTest extends SysuiTestCase {
         mTouchListenerCaptor.getValue().onTouch(mUdfpsView, moveEvent);
         moveEvent.recycle();
         // THEN FingerprintManager is notified about onPointerDown
-        verify(mFingerprintManager).onPointerDown(eq(TEST_REQUEST_ID),
-                eq(mUdfpsController.mSensorProps.sensorId),
+        verify(mTouchProvider).onPointerDown(eq(TEST_REQUEST_ID),
                 eq(0), eq(0), eq(0f), eq(0f));
+        verify(mFingerprintManager, never()).onPointerDown(anyLong(), anyInt(), anyInt(), anyInt(),
+                anyFloat(), anyFloat());
         verify(mLatencyTracker).onActionStart(eq(LatencyTracker.ACTION_UDFPS_ILLUMINATE));
         // AND illumination begins
         verify(mUdfpsView).startIllumination(mOnIlluminatedRunnableCaptor.capture());
@@ -520,9 +525,10 @@ public class UdfpsControllerTest extends SysuiTestCase {
         // AND onIlluminatedRunnable that notifies FingerprintManager is set
         verify(mUdfpsView).startIllumination(mOnIlluminatedRunnableCaptor.capture());
         mOnIlluminatedRunnableCaptor.getValue().run();
-        verify(mFingerprintManager).onPointerDown(eq(TEST_REQUEST_ID),
-                eq(mUdfpsController.mSensorProps.sensorId),
+        verify(mTouchProvider).onPointerDown(eq(TEST_REQUEST_ID),
                 eq(0), eq(0), eq(3f) /* minor */, eq(2f) /* major */);
+        verify(mFingerprintManager, never()).onPointerDown(anyLong(), anyInt(), anyInt(), anyInt(),
+                anyFloat(), anyFloat());
     }
 
     @Test
