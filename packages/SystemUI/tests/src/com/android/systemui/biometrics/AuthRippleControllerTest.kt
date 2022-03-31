@@ -299,7 +299,7 @@ class AuthRippleControllerTest : SysuiTestCase() {
         `when`(keyguardUpdateMonitor.isKeyguardVisible).thenReturn(true)
         `when`(biometricUnlockController.isWakeAndUnlock).thenReturn(true)
 
-        controller.showRipple(BiometricSourceType.FINGERPRINT)
+        controller.showUnlockRipple(BiometricSourceType.FINGERPRINT)
         assertTrue("reveal didn't start on keyguardFadingAway",
             controller.startLightRevealScrimOnKeyguardFadingAway)
         `when`(keyguardStateController.isKeyguardFadingAway).thenReturn(true)
