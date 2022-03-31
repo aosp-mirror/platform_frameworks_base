@@ -20,6 +20,7 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
@@ -103,8 +104,8 @@ public class QSFragmentTest extends SysuiBaseFragmentTest {
     @Mock private QSPanel.QSTileLayout mQsTileLayout;
     @Mock private QSPanel.QSTileLayout mQQsTileLayout;
     @Mock private QSAnimator mQSAnimator;
-    private View mQsFragmentView;
     @Mock private StatusBarStateController mStatusBarStateController;
+    private View mQsFragmentView;
 
     public QSFragmentTest() {
         super(QSFragment.class);
@@ -238,6 +239,71 @@ public class QSFragmentTest extends SysuiBaseFragmentTest {
         assertThat(mQsFragmentView.getAlpha()).isEqualTo(1);
     }
 
+    @Test
+    public void getQsMinExpansionHeight_notInSplitShade_returnsHeaderHeight() {
+        QSFragment fragment = resumeAndGetFragment();
+        disableSplitShade();
+        when(mHeader.getHeight()).thenReturn(1234);
+
+        int height = fragment.getQsMinExpansionHeight();
+
+        assertThat(height).isEqualTo(mHeader.getHeight());
+    }
+
+    @Test
+    public void getQsMinExpansionHeight_inSplitShade_returnsAbsoluteBottomOfQSContainer() {
+        int top = 1234;
+        int height = 9876;
+        QSFragment fragment = resumeAndGetFragment();
+        enableSplitShade();
+        setLocationOnScreen(mQsFragmentView, top);
+        when(mQsFragmentView.getHeight()).thenReturn(height);
+
+        int expectedHeight = top + height;
+        assertThat(fragment.getQsMinExpansionHeight()).isEqualTo(expectedHeight);
+    }
+
+    @Test
+    public void getQsMinExpansionHeight_inSplitShade_returnsAbsoluteBottomExcludingTranslation() {
+        int top = 1234;
+        int height = 9876;
+        float translationY = -600f;
+        QSFragment fragment = resumeAndGetFragment();
+        enableSplitShade();
+        setLocationOnScreen(mQsFragmentView, (int) (top + translationY));
+        when(mQsFragmentView.getHeight()).thenReturn(height);
+        when(mQsFragmentView.getTranslationY()).thenReturn(translationY);
+
+        int expectedHeight = top + height;
+        assertThat(fragment.getQsMinExpansionHeight()).isEqualTo(expectedHeight);
+    }
+
+    @Test
+    public void hideImmediately_notInSplitShade_movesViewUpByHeaderHeight() {
+        QSFragment fragment = resumeAndGetFragment();
+        disableSplitShade();
+        when(mHeader.getHeight()).thenReturn(555);
+
+        fragment.hideImmediately();
+
+        assertThat(mQsFragmentView.getY()).isEqualTo(-mHeader.getHeight());
+    }
+
+    @Test
+    public void hideImmediately_inSplitShade_movesViewUpByQSAbsoluteBottom() {
+        QSFragment fragment = resumeAndGetFragment();
+        enableSplitShade();
+        int top = 1234;
+        int height = 9876;
+        setLocationOnScreen(mQsFragmentView, top);
+        when(mQsFragmentView.getHeight()).thenReturn(height);
+
+        fragment.hideImmediately();
+
+        int qsAbsoluteBottom = top + height;
+        assertThat(mQsFragmentView.getY()).isEqualTo(-qsAbsoluteBottom);
+    }
+
     @Override
     protected Fragment instantiate(Context context, String className, Bundle arguments) {
         MockitoAnnotations.initMocks(this);
@@ -331,5 +397,14 @@ public class QSFragmentTest extends SysuiBaseFragmentTest {
 
     private void setSplitShadeEnabled(boolean enabled) {
         getFragment().setInSplitShade(enabled);
+    }
+
+    private void setLocationOnScreen(View view, int top) {
+        doAnswer(invocation -> {
+            int[] locationOnScreen = invocation.getArgument(/* index= */ 0);
+            locationOnScreen[0] = 0;
+            locationOnScreen[1] = top;
+            return null;
+        }).when(view).getLocationOnScreen(any(int[].class));
     }
 }
