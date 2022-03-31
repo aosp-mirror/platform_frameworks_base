@@ -86,6 +86,7 @@ public class LocationControllerImpl extends BroadcastReceiver implements Locatio
     private boolean mShouldDisplayAllAccesses;
     private boolean mShowSystemAccessesFlag;
     private boolean mShowSystemAccessesSetting;
+    private boolean mExperimentStarted;
 
     @Inject
     public LocationControllerImpl(Context context, AppOpsController appOpsController,
@@ -107,6 +108,9 @@ public class LocationControllerImpl extends BroadcastReceiver implements Locatio
         mShouldDisplayAllAccesses = getAllAccessesSetting();
         mShowSystemAccessesFlag = getShowSystemFlag();
         mShowSystemAccessesSetting = getShowSystemSetting();
+        mExperimentStarted = getExperimentStarted();
+        toggleSystemSettingIfExperimentJustStarted();
+
         mContentObserver = new ContentObserver(mBackgroundHandler) {
             @Override
             public void onChange(boolean selfChange) {
@@ -123,8 +127,15 @@ public class LocationControllerImpl extends BroadcastReceiver implements Locatio
                 DeviceConfig.NAMESPACE_PRIVACY,
                 backgroundHandler::post,
                 properties -> {
+                    // Update the Device Config flag which controls the experiment to display
+                    // location accesses.
                     mShouldDisplayAllAccesses = getAllAccessesSetting();
-                    mShowSystemAccessesFlag = getShowSystemSetting();
+                    // Update the Device Config flag which controls the experiment to display
+                    // system location accesses.
+                    mShowSystemAccessesFlag = getShowSystemFlag();
+                    // Update the local flag for the system accesses experiment and potentially
+                    // update the behavior based on the flag value.
+                    toggleSystemSettingIfExperimentJustStarted();
                     updateActiveLocationRequests();
                 });
 
@@ -222,6 +233,33 @@ public class LocationControllerImpl extends BroadcastReceiver implements Locatio
         return mSecureSettings.getInt(Settings.Secure.LOCATION_SHOW_SYSTEM_OPS, 0) == 1;
     }
 
+    private boolean getExperimentStarted() {
+        return mSecureSettings
+                .getInt(Settings.Secure.LOCATION_INDICATOR_EXPERIMENT_STARTED, 0) == 1;
+    }
+
+    private void toggleSystemSettingIfExperimentJustStarted() {
+        // mShowSystemAccessesFlag indicates whether the Device Config flag is flipped
+        // by an experiment. mExperimentStarted is the local device value which indicates the last
+        // value the device has seen for the Device Config flag.
+        // The local device value is needed to determine that the Device Config flag was just
+        // flipped, as the experiment behavior should only happen once after the experiment is
+        // enabled.
+        if (mShowSystemAccessesFlag && !mExperimentStarted) {
+            // If the Device Config flag is enabled, but the local device setting is not then the
+            // experiment just started. Update the local flag to match and enable the experiment
+            // behavior by flipping the show system setting value.
+            mSecureSettings.putInt(Settings.Secure.LOCATION_INDICATOR_EXPERIMENT_STARTED, 1);
+            mSecureSettings.putInt(Settings.Secure.LOCATION_SHOW_SYSTEM_OPS, 1);
+            mExperimentStarted = true;
+        } else if (!mShowSystemAccessesFlag && mExperimentStarted) {
+            // If the Device Config flag is disabled, but the local device flag is enabled then
+            // update the local device flag to match.
+            mSecureSettings.putInt(Settings.Secure.LOCATION_INDICATOR_EXPERIMENT_STARTED, 0);
+            mExperimentStarted = false;
+        }
+    }
+
     /**
      * Returns true if there currently exist active high power location requests.
      */
@@ -249,7 +287,6 @@ public class LocationControllerImpl extends BroadcastReceiver implements Locatio
         }
         boolean hadActiveLocationRequests = mAreActiveLocationRequests;
         boolean shouldDisplay = false;
-        boolean showSystem = mShowSystemAccessesFlag || mShowSystemAccessesSetting;
         boolean systemAppOp = false;
         boolean nonSystemAppOp = false;
         boolean isSystemApp;
@@ -267,7 +304,7 @@ public class LocationControllerImpl extends BroadcastReceiver implements Locatio
                     nonSystemAppOp = true;
                 }
 
-                shouldDisplay = showSystem || shouldDisplay || !isSystemApp;
+                shouldDisplay = mShowSystemAccessesSetting || shouldDisplay || !isSystemApp;
             }
         }
 
