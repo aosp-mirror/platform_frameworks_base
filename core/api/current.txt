@@ -1651,7 +1651,6 @@ package android {
     field public static final int useEmbeddedDex = 16844190; // 0x101059e
     field public static final int useIntrinsicSizeAsMinimum = 16843536; // 0x1010310
     field public static final int useLevel = 16843167; // 0x101019f
-    field public static final int useTargetActivityForQuickAccess;
     field public static final int userVisible = 16843409; // 0x1010291
     field public static final int usesCleartextTraffic = 16844012; // 0x10104ec
     field public static final int usesPermissionFlags = 16844356; // 0x1010644
