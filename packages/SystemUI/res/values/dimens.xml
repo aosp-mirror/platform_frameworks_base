@@ -1382,8 +1382,7 @@
 
     <!-- Dream overlay complications related dimensions -->
     <dimen name="dream_overlay_complication_clock_time_text_size">72sp</dimen>
-    <dimen name="dream_overlay_complication_clock_date_text_size">18sp</dimen>
-    <dimen name="dream_overlay_complication_weather_text_size">18sp</dimen>
+    <dimen name="dream_overlay_complication_clock_subtitle_text_size">18sp</dimen>
     <dimen name="dream_overlay_complication_preview_text_size">36sp</dimen>
     <dimen name="dream_overlay_complication_preview_icon_padding">28dp</dimen>
     <dimen name="dream_overlay_complication_shadow_padding">2dp</dimen>
