@@ -21,9 +21,26 @@ package android.util;
  * @hide
  */
 public class SparseSetArray<T> {
-    private final SparseArray<ArraySet<T>> mData = new SparseArray<>();
+    private final SparseArray<ArraySet<T>> mData;
 
     public SparseSetArray() {
+        mData = new SparseArray<>();
+    }
+
+    /**
+     * Copy constructor
+     */
+    public SparseSetArray(SparseSetArray<T> src) {
+        final int arraySize = src.size();
+        mData = new SparseArray<>(arraySize);
+        for (int i = 0; i < arraySize; i++) {
+            final int key = src.keyAt(i);
+            final ArraySet<T> set = src.get(key);
+            final int setSize = set.size();
+            for (int j = 0; j < setSize; j++) {
+                add(key, set.valueAt(j));
+            }
+        }
     }
 
     /**
