@@ -34,6 +34,10 @@
     <string name="status_bar_settings_auto_rotation" msgid="8329080442278431708">"Rodar ecrã automaticamente"</string>
     <string name="usb_device_permission_prompt" msgid="4414719028369181772">"Permitir que a app <xliff:g id="APPLICATION">%1$s</xliff:g> aceda ao dispositivo <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
     <string name="usb_device_permission_prompt_warn" msgid="2309129784984063656">"Permitir que <xliff:g id="APPLICATION">%1$s</xliff:g> aceda a <xliff:g id="USB_DEVICE">%2$s</xliff:g>?\nEsta app não recebeu autorização de gravação, mas pode capturar áudio através deste dispositivo USB."</string>
+    <string name="usb_audio_device_permission_prompt_title" msgid="4221351137250093451">"Permitir que a app <xliff:g id="APPLICATION">%1$s</xliff:g> aceda a <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
+    <string name="usb_audio_device_confirm_prompt_title" msgid="8828406516732985696">"Abrir a app <xliff:g id="APPLICATION">%1$s</xliff:g> para controlar <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
+    <string name="usb_audio_device_prompt_warn" msgid="2504972133361130335">"Esta app não recebeu autorização de gravação, mas pode capturar áudio através deste dispositivo USB. A utilização da app <xliff:g id="APPLICATION">%1$s</xliff:g> neste dispositivo pode impedir a audição de chamadas, notificações e alarmes."</string>
+    <string name="usb_audio_device_prompt" msgid="7944987408206252949">"A utilização da app <xliff:g id="APPLICATION">%1$s</xliff:g> neste dispositivo pode impedir a audição de chamadas, notificações e alarmes."</string>
     <string name="usb_accessory_permission_prompt" msgid="717963550388312123">"Permitir que a app <xliff:g id="APPLICATION">%1$s</xliff:g> aceda ao acessório <xliff:g id="USB_ACCESSORY">%2$s</xliff:g>?"</string>
     <string name="usb_device_confirm_prompt" msgid="4091711472439910809">"Pretende abrir a app <xliff:g id="APPLICATION">%1$s</xliff:g> para controlar o acessório <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
     <string name="usb_device_confirm_prompt_warn" msgid="990208659736311769">"Pretende abrir a app <xliff:g id="APPLICATION">%1$s</xliff:g> para controlar o acessório <xliff:g id="USB_DEVICE">%2$s</xliff:g>?\nEsta app não recebeu autorização de gravação, mas pode capturar áudio através deste dispositivo USB."</string>
@@ -131,7 +135,8 @@
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="2242167416140740920">"Rosto autenticado"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"Confirmado"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"Toque em Confirmar para concluir."</string>
-    <string name="biometric_dialog_tap_confirm_with_face" msgid="1597899891472340950">"Desbloqueado com o rosto. Prima para continuar."</string>
+    <!-- no translation found for biometric_dialog_tap_confirm_with_face (7538145860465755864) -->
+    <skip />
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"Autenticado"</string>
     <string name="biometric_dialog_use_pin" msgid="8385294115283000709">"Utilizar PIN"</string>
     <string name="biometric_dialog_use_pattern" msgid="2315593393167211194">"Utilizar padrão"</string>
@@ -287,6 +292,24 @@
     <string name="sensor_privacy_start_use_mic_dialog_content" msgid="1624701280680913717">"Isto desbloqueia o acesso a todas as apps e serviços com autorização para utilizar o seu microfone."</string>
     <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"Isto desbloqueia o acesso a todas as apps e serviços com autorização para utilizar a sua câmara."</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_content" msgid="3577642558418404919">"Isto desbloqueia o acesso a todas as apps e serviços com autorização para utilizar a sua câmara ou microfone."</string>
+    <!-- no translation found for sensor_privacy_start_use_mic_blocked_dialog_title (2640140287496469689) -->
+    <skip />
+    <!-- no translation found for sensor_privacy_start_use_camera_blocked_dialog_title (7398084286822440384) -->
+    <skip />
+    <!-- no translation found for sensor_privacy_start_use_mic_camera_blocked_dialog_title (195236134743281973) -->
+    <skip />
+    <!-- no translation found for sensor_privacy_start_use_mic_blocked_dialog_content (2138318880682877747) -->
+    <skip />
+    <!-- no translation found for sensor_privacy_start_use_camera_blocked_dialog_content (7216015168047965948) -->
+    <skip />
+    <!-- no translation found for sensor_privacy_start_use_mic_camera_blocked_dialog_content (3960837827570483762) -->
+    <skip />
+    <!-- no translation found for sensor_privacy_mic_unblocked_toast_content (306555320557065068) -->
+    <skip />
+    <!-- no translation found for sensor_privacy_camera_unblocked_toast_content (7843105715964332311) -->
+    <skip />
+    <!-- no translation found for sensor_privacy_mic_camera_unblocked_toast_content (7339355093282661115) -->
+    <skip />
     <string name="media_seamless_other_device" msgid="4654849800789196737">"Outro dispositivo"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"Ativar/desativar Vista geral"</string>
     <string name="zen_priority_introduction" msgid="3159291973383796646">"Não é incomodado por sons e vibrações, exceto de alarmes, lembretes, eventos e autores de chamadas que especificar. Continua a ouvir tudo o que optar por reproduzir, incluindo música, vídeos e jogos."</string>
@@ -320,7 +343,6 @@
     <string name="keyguard_indication_charging_time_dock" msgid="6150404291427377863">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • A carregar na estação de ancoragem • Carga completa em <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Mudar utilizador"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Todas as apps e dados desta sessão serão eliminados."</string>
-    <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"Remover"</string>
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"Bem-vindo de volta, convidado!"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"Pretende continuar a sessão?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"Recomeçar"</string>
@@ -766,6 +788,18 @@
     <string name="controls_dialog_ok" msgid="2770230012857881822">"Adicionar"</string>
     <string name="controls_dialog_message" msgid="342066938390663844">"Sugerido por <xliff:g id="APP">%s</xliff:g>"</string>
     <string name="controls_tile_locked" msgid="731547768182831938">"Dispositivo bloq."</string>
+    <!-- no translation found for controls_settings_show_controls_dialog_title (3357852503553809554) -->
+    <skip />
+    <!-- no translation found for controls_settings_show_controls_dialog_message (7666211700524587969) -->
+    <skip />
+    <!-- no translation found for controls_settings_trivial_controls_dialog_title (7593188157655036677) -->
+    <skip />
+    <!-- no translation found for controls_settings_trivial_controls_dialog_message (237183787721917586) -->
+    <skip />
+    <!-- no translation found for controls_settings_dialog_neutral_button (4514446354793124140) -->
+    <skip />
+    <!-- no translation found for controls_settings_dialog_positive_button (436070672551674863) -->
+    <skip />
     <string name="controls_pin_use_alphanumeric" msgid="8478371861023048414">"O PIN contém letras ou símbolos."</string>
     <string name="controls_pin_verify" msgid="3452778292918877662">"Validar <xliff:g id="DEVICE">%s</xliff:g>"</string>
     <string name="controls_pin_wrong" msgid="6162694056042164211">"PIN incorreto"</string>
@@ -775,8 +809,7 @@
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"Deslize rapidamente para ver mais."</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"A carregar recomendações…"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"Multimédia"</string>
-    <!-- no translation found for controls_media_close_session (4780485355795635052) -->
-    <skip />
+    <string name="controls_media_close_session" msgid="4780485355795635052">"Ocultar este controlo de multimédia para a app <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="controls_media_active_session" msgid="3146882316024153337">"Não pode ocultar a sessão de multimédia atual."</string>
     <string name="controls_media_dismiss_button" msgid="4485675693008031646">"Ocultar"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"Retomar"</string>
@@ -816,6 +849,20 @@
     <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"Para transmitir esta sessão, abra a app."</string>
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"App desconhecida"</string>
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"Parar transmissão"</string>
+    <!-- no translation found for media_output_first_broadcast_title (6292237789860753022) -->
+    <skip />
+    <!-- no translation found for media_output_broadcast (3555580945878071543) -->
+    <skip />
+    <!-- no translation found for media_output_first_notify_broadcast_message (6353857724136398494) -->
+    <skip />
+    <!-- no translation found for media_output_broadcasting_message (4150299923404886073) -->
+    <skip />
+    <!-- no translation found for media_output_broadcast_name (8786127091542624618) -->
+    <skip />
+    <!-- no translation found for media_output_broadcast_code (870795639644728542) -->
+    <skip />
+    <!-- no translation found for media_output_broadcast_dialog_save (7910865591430010198) -->
+    <skip />
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"Número da compilação"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"Número da compilação copiado para a área de transferência."</string>
     <string name="basic_status" msgid="2315371112182658176">"Abrir conversa"</string>
@@ -892,7 +939,8 @@
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"Apps ativas"</string>
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"Parar"</string>
     <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"Parada"</string>
-    <string name="clipboard_edit_text_copy" msgid="770856373439969178">"Copiar"</string>
+    <!-- no translation found for clipboard_edit_text_done (4551887727694022409) -->
+    <skip />
     <string name="clipboard_overlay_text_copied" msgid="1872624400464891363">"Copiado"</string>
     <string name="clipboard_edit_source" msgid="9156488177277788029">"Da app <xliff:g id="APPNAME">%1$s</xliff:g>"</string>
     <string name="clipboard_dismiss_description" msgid="7544573092766945657">"Ignorar cópia de IU"</string>
