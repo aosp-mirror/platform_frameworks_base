@@ -83,6 +83,7 @@ abstract class PackageManagerInternalBase extends PackageManagerInternal {
     @NonNull protected abstract PackageObserverHelper getPackageObserverHelper();
     @NonNull protected abstract ResolveIntentHelper getResolveIntentHelper();
     @NonNull protected abstract SuspendPackageHelper getSuspendPackageHelper();
+    @NonNull protected abstract DistractingPackageHelper getDistractingPackageHelper();
     @NonNull protected abstract ProtectedPackages getProtectedPackages();
     @NonNull protected abstract UserNeedsBadgingCache getUserNeedsBadging();
     @NonNull protected abstract InstantAppRegistry getInstantAppRegistry();
@@ -248,8 +249,8 @@ abstract class PackageManagerInternalBase extends PackageManagerInternal {
     @Override
     @Deprecated
     public final void removeDistractingPackageRestrictions(String packageName, int userId) {
-        mService.removeDistractingPackageRestrictions(snapshot(), new String[]{packageName},
-                userId);
+        getDistractingPackageHelper().removeDistractingPackageRestrictions(snapshot(),
+                new String[]{packageName}, userId);
     }
 
     @Override
