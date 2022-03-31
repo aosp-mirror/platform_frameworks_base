@@ -16,11 +16,12 @@
 
 package com.android.server.pm
 
-import android.content.pm.PackageManagerInternal
 import android.os.Build
 import android.os.Bundle
 import android.os.UserHandle
 import android.os.UserManager
+import android.util.ArrayMap
+import android.util.SparseArray
 import com.android.server.pm.pkg.PackageStateInternal
 import com.android.server.testutils.TestHandler
 import com.android.server.testutils.any
@@ -32,6 +33,7 @@ import org.mockito.ArgumentCaptor
 import org.mockito.Captor
 import org.mockito.Mock
 import org.mockito.Mockito
+import org.mockito.Mockito.argThat
 import org.mockito.Mockito.spy
 import org.mockito.MockitoAnnotations
 
@@ -138,5 +140,16 @@ open class PackageHelperTestBase {
                 Build.VERSION.INCREMENTAL)
         rule.system().validateFinalState()
         return pms
+    }
+
+    protected fun allowList(vararg uids: Int) = SparseArray<IntArray>().apply {
+        this.put(TEST_USER_ID, uids)
+    }
+
+    protected fun mockAllowList(pkgSetting: PackageStateInternal, list: SparseArray<IntArray>?) {
+        whenever(rule.mocks().appsFilter.getVisibilityAllowList(
+                argThat { it?.packageName == pkgSetting.packageName }, any(IntArray::class.java),
+                any() as ArrayMap<String, out PackageStateInternal>
+        )).thenReturn(list)
     }
 }
