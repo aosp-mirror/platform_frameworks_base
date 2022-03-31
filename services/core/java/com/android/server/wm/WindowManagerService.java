@@ -5691,7 +5691,9 @@ public class WindowManagerService extends IWindowManager.Stub
                             || displayContent.mBaseDisplayHeight != height) {
                         ProtoLog.i(WM_ERROR, "FORCED DISPLAY SIZE: %dx%d", width, height);
                         displayContent.updateBaseDisplayMetrics(width, height,
-                                displayContent.mBaseDisplayDensity);
+                                displayContent.mBaseDisplayDensity,
+                                displayContent.mBaseDisplayPhysicalXDpi,
+                                displayContent.mBaseDisplayPhysicalYDpi);
                         changed = true;
                     }
                 } catch (NumberFormatException ex) {
