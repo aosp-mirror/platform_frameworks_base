@@ -332,21 +332,23 @@ public class VirtualDisplayTest extends AndroidTestCase {
     }
 
     private void runOnUiThread(Runnable runnable) {
-        Runnable waiter = new Runnable() {
-            @Override
-            public void run() {
-                synchronized (this) {
-                    notifyAll();
-                }
-            }
-        };
-        synchronized (waiter) {
-            mHandler.post(runnable);
-            mHandler.post(waiter);
+        final Throwable[] thrown = new Throwable[1];
+        assertTrue("Timed out", mHandler.runWithScissors(() -> {
             try {
-                waiter.wait(TIMEOUT);
-            } catch (InterruptedException ex) {
+                runnable.run();
+            } catch (Throwable t) {
+                t.printStackTrace();
+                thrown[0] = t;
             }
+        }, TIMEOUT));
+        if (thrown[0] != null) {
+            if (thrown[0] instanceof RuntimeException) {
+                throw (RuntimeException) thrown[0];
+            }
+            if (thrown[0] instanceof Error) {
+                throw (Error) thrown[0];
+            }
+            throw new RuntimeException(thrown[0]);
         }
     }
 
