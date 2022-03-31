@@ -162,7 +162,6 @@ import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.mockito.internal.util.collections.Sets;
@@ -191,7 +190,6 @@ import java.util.concurrent.TimeUnit;
  */
 @SmallTest
 @Presubmit
-@Ignore("b/225415867")
 public class DevicePolicyManagerTest extends DpmTestBase {
 
     private static final String TAG = DevicePolicyManagerTest.class.getSimpleName();
@@ -1794,10 +1792,9 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         final int userId = CALLER_USER_HANDLE;
         final UserHandle user = UserHandle.of(userId);
 
-        mContext.applicationInfo = new ApplicationInfo();
-        mContext.callerPermissions.add(permission.MANAGE_USERS);
-        mContext.packageName = "com.android.frameworks.servicestests";
-        getServices().addPackageContext(user, mContext);
+        mServiceContext.packageName = mRealTestContext.getPackageName();
+        mServiceContext.applicationInfo = new ApplicationInfo();
+        mServiceContext.binder.callingUid = DpmMockContext.SYSTEM_UID;
         when(mContext.resources.getColor(anyInt(), anyObject())).thenReturn(Color.WHITE);
 
         StringParceledListSlice oneCert = asSlice(new String[] {"1"});
@@ -6289,6 +6286,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
     @Test
     public void testGetOwnerInstalledCaCertsForDeviceOwner() throws Exception {
         mServiceContext.packageName = mRealTestContext.getPackageName();
+        mServiceContext.applicationInfo = new ApplicationInfo();
         mServiceContext.binder.callingUid = DpmMockContext.SYSTEM_UID;
         mAdmin1Context.binder.callingUid = DpmMockContext.CALLER_SYSTEM_USER_UID;
         setDeviceOwner();
@@ -6299,6 +6297,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
     @Test
     public void testGetOwnerInstalledCaCertsForProfileOwner() throws Exception {
         mServiceContext.packageName = mRealTestContext.getPackageName();
+        mServiceContext.applicationInfo = new ApplicationInfo();
         mServiceContext.binder.callingUid = DpmMockContext.SYSTEM_UID;
         mAdmin1Context.binder.callingUid = DpmMockContext.CALLER_UID;
         setAsProfileOwner(admin1);
@@ -6310,6 +6309,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
     @Test
     public void testGetOwnerInstalledCaCertsForDelegate() throws Exception {
         mServiceContext.packageName = mRealTestContext.getPackageName();
+        mServiceContext.applicationInfo = new ApplicationInfo();
         mServiceContext.binder.callingUid = DpmMockContext.SYSTEM_UID;
         mAdmin1Context.binder.callingUid = DpmMockContext.CALLER_UID;
         setAsProfileOwner(admin1);
