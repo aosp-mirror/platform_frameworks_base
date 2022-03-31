@@ -36,6 +36,7 @@ import android.os.Trace;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.SparseArray;
+import android.util.StatsLog;
 import android.view.Choreographer;
 import android.view.FrameMetrics;
 import android.view.SurfaceControl;
@@ -98,6 +99,7 @@ public class FrameTracker extends SurfaceControl.OnJankDataListener
     private final ViewRootImpl.SurfaceChangedCallback mSurfaceChangedCallback;
     private final Handler mHandler;
     private final ChoreographerWrapper mChoreographer;
+    private final StatsLogWrapper mStatsLog;
     private final Object mLock = InteractionJankMonitor.getInstance().getLock();
     private final boolean mDeferMonitoring;
 
@@ -148,6 +150,7 @@ public class FrameTracker extends SurfaceControl.OnJankDataListener
             @NonNull SurfaceControlWrapper surfaceControlWrapper,
             @NonNull ChoreographerWrapper choreographer,
             @Nullable FrameMetricsWrapper metrics,
+            @NonNull StatsLogWrapper statsLog,
             int traceThresholdMissedFrames, int traceThresholdFrameTimeMillis,
             @Nullable FrameTrackerListener listener, @NonNull Configuration config) {
         mSurfaceOnly = config.isSurfaceOnly();
@@ -155,6 +158,7 @@ public class FrameTracker extends SurfaceControl.OnJankDataListener
         mHandler = handler;
         mChoreographer = choreographer;
         mSurfaceControlWrapper = surfaceControlWrapper;
+        mStatsLog = statsLog;
         mDeferMonitoring = config.shouldDeferMonitor();
 
         // HWUI instrumentation init.
@@ -215,7 +219,7 @@ public class FrameTracker extends SurfaceControl.OnJankDataListener
                             }
                             if (!mMetricsFinalized) {
                                 end(REASON_END_SURFACE_DESTROYED);
-                                finish(mJankInfos.size() - 1);
+                                finish();
                             }
                         }
                     }, 50);
@@ -309,7 +313,7 @@ public class FrameTracker extends SurfaceControl.OnJankDataListener
                 // Waiting at most 10 seconds for all callbacks to finish.
                 mWaitForFinishTimedOut = () -> {
                     Log.e(TAG, "force finish cuj because of time out:" + mSession.getName());
-                    finish(mJankInfos.size() - 1);
+                    finish();
                 };
                 mHandler.postDelayed(mWaitForFinishTimedOut, TimeUnit.SECONDS.toMillis(10));
                 notifyCujEvent(ACTION_SESSION_END);
@@ -426,51 +430,45 @@ public class FrameTracker extends SurfaceControl.OnJankDataListener
         }
     }
 
-    /**
-     * Finds the first index in {@link #mJankInfos} which happened on or after {@link #mEndVsyncId},
-     * or -1 if the session hasn't ended yet.
-     */
-    private int getIndexOnOrAfterEnd() {
-        if (mEndVsyncId == INVALID_ID || mMetricsFinalized) {
-            return -1;
+    private boolean hasReceivedCallbacksAfterEnd() {
+        if (mEndVsyncId == INVALID_ID) {
+            return false;
         }
         JankInfo last = mJankInfos.size() == 0 ? null : mJankInfos.valueAt(mJankInfos.size() - 1);
         if (last == null) {
-            return -1;
+            return false;
         }
         if (last.frameVsyncId < mEndVsyncId) {
-            return -1;
+            return false;
         }
-
-        int lastIndex = -1;
         for (int i = mJankInfos.size() - 1; i >= 0; i--) {
             JankInfo info = mJankInfos.valueAt(i);
             if (info.frameVsyncId >= mEndVsyncId) {
-                if (isLastIndexCandidate(info)) {
-                    lastIndex = i;
+                if (callbacksReceived(info)) {
+                    return true;
                 }
-            } else {
-                break;
             }
         }
-        return lastIndex;
+        return false;
     }
 
     private void processJankInfos() {
-        int indexOnOrAfterEnd = getIndexOnOrAfterEnd();
-        if (indexOnOrAfterEnd == -1) {
+        if (mMetricsFinalized) {
             return;
         }
-        finish(indexOnOrAfterEnd);
+        if (!hasReceivedCallbacksAfterEnd()) {
+            return;
+        }
+        finish();
     }
 
-    private boolean isLastIndexCandidate(JankInfo info) {
+    private boolean callbacksReceived(JankInfo info) {
         return mSurfaceOnly
                 ? info.surfaceControlCallbackFired
                 : info.hwuiCallbackFired && info.surfaceControlCallbackFired;
     }
 
-    private void finish(int indexOnOrAfterEnd) {
+    private void finish() {
         mHandler.removeCallbacks(mWaitForFinishTimedOut);
         mWaitForFinishTimedOut = null;
         mMetricsFinalized = true;
@@ -484,11 +482,14 @@ public class FrameTracker extends SurfaceControl.OnJankDataListener
         int missedAppFramesCount = 0;
         int missedSfFramesCount = 0;
 
-        for (int i = 0; i <= indexOnOrAfterEnd; i++) {
+        for (int i = 0; i < mJankInfos.size(); i++) {
             JankInfo info = mJankInfos.valueAt(i);
             final boolean isFirstDrawn = !mSurfaceOnly && info.isFirstFrame;
             if (isFirstDrawn) {
                 continue;
+            }
+            if (info.frameVsyncId > mEndVsyncId) {
+                break;
             }
             if (info.surfaceControlCallbackFired) {
                 totalFramesCount++;
@@ -541,7 +542,7 @@ public class FrameTracker extends SurfaceControl.OnJankDataListener
             triggerPerfetto();
         }
         if (mSession.logToStatsd()) {
-            FrameworkStatsLog.write(
+            mStatsLog.write(
                     FrameworkStatsLog.UI_INTERACTION_FRAME_INFO_REPORTED,
                     mSession.getStatsdInteractionType(),
                     totalFramesCount,
@@ -688,6 +689,13 @@ public class FrameTracker extends SurfaceControl.OnJankDataListener
 
         public long getVsyncId() {
             return mChoreographer.getVsyncId();
+        }
+    }
+
+    public static class StatsLogWrapper {
+        public void write(int code,
+                int arg1, long arg2, long arg3, long arg4, long arg5, long arg6) {
+            FrameworkStatsLog.write(code, arg1, arg2, arg3, arg4, arg5, arg6);
         }
     }
 
