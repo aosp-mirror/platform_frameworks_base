@@ -682,31 +682,43 @@ public class DisplayContentTests extends WindowTestsBase {
         final int baseWidth = 1440;
         final int baseHeight = 2560;
         final int baseDensity = 300;
+        final float baseXDpi = 60;
+        final float baseYDpi = 60;
 
-        displayContent.updateBaseDisplayMetrics(baseWidth, baseHeight, baseDensity);
+        displayContent.updateBaseDisplayMetrics(baseWidth, baseHeight, baseDensity, baseYDpi,
+                baseYDpi);
 
         final int maxWidth = 300;
-        final int resultingHeight = (maxWidth * baseHeight) / baseWidth;
-        final int resultingDensity = (baseDensity * maxWidth) / baseWidth;
+        final float ratioChange = maxWidth / (float) baseWidth;
+        final int resultingHeight = (int) (baseHeight * ratioChange);
+        final int resultingDensity = (int) (baseDensity * ratioChange);
+        final float resultingXDpi = baseXDpi * ratioChange;
+        final float resultingYDpi = baseYDpi * ratioChange;
 
         displayContent.setMaxUiWidth(maxWidth);
-        verifySizes(displayContent, maxWidth, resultingHeight, resultingDensity);
+        verifySizes(displayContent, maxWidth, resultingHeight, resultingDensity, resultingXDpi,
+                resultingYDpi);
 
         // Assert setting values again does not change;
-        displayContent.updateBaseDisplayMetrics(baseWidth, baseHeight, baseDensity);
-        verifySizes(displayContent, maxWidth, resultingHeight, resultingDensity);
+        displayContent.updateBaseDisplayMetrics(baseWidth, baseHeight, baseDensity, baseXDpi,
+                baseYDpi);
+        verifySizes(displayContent, maxWidth, resultingHeight, resultingDensity, resultingXDpi,
+                resultingYDpi);
 
         final int smallerWidth = 200;
         final int smallerHeight = 400;
         final int smallerDensity = 100;
 
         // Specify smaller dimension, verify that it is honored
-        displayContent.updateBaseDisplayMetrics(smallerWidth, smallerHeight, smallerDensity);
-        verifySizes(displayContent, smallerWidth, smallerHeight, smallerDensity);
+        displayContent.updateBaseDisplayMetrics(smallerWidth, smallerHeight, smallerDensity,
+                baseXDpi, baseYDpi);
+        verifySizes(displayContent, smallerWidth, smallerHeight, smallerDensity, baseXDpi,
+                baseYDpi);
 
         // Verify that setting the max width to a greater value than the base width has no effect
         displayContent.setMaxUiWidth(maxWidth);
-        verifySizes(displayContent, smallerWidth, smallerHeight, smallerDensity);
+        verifySizes(displayContent, smallerWidth, smallerHeight, smallerDensity, baseXDpi,
+                baseYDpi);
     }
 
     @Test
@@ -716,11 +728,14 @@ public class DisplayContentTests extends WindowTestsBase {
         final int baseWidth = 1280;
         final int baseHeight = 720;
         final int baseDensity = 320;
+        final float baseXDpi = 60;
+        final float baseYDpi = 60;
 
         displayContent.mInitialDisplayWidth = baseWidth;
         displayContent.mInitialDisplayHeight = baseHeight;
         displayContent.mInitialDisplayDensity = baseDensity;
-        displayContent.updateBaseDisplayMetrics(baseWidth, baseHeight, baseDensity);
+        displayContent.updateBaseDisplayMetrics(baseWidth, baseHeight, baseDensity, baseXDpi,
+                baseYDpi);
 
         final int forcedWidth = 1920;
         final int forcedHeight = 1080;
@@ -741,11 +756,14 @@ public class DisplayContentTests extends WindowTestsBase {
         final int baseWidth = 1280;
         final int baseHeight = 720;
         final int baseDensity = 320;
+        final float baseXDpi = 60;
+        final float baseYDpi = 60;
 
         displayContent.mInitialDisplayWidth = baseWidth;
         displayContent.mInitialDisplayHeight = baseHeight;
         displayContent.mInitialDisplayDensity = baseDensity;
-        displayContent.updateBaseDisplayMetrics(baseWidth, baseHeight, baseDensity);
+        displayContent.updateBaseDisplayMetrics(baseWidth, baseHeight, baseDensity, baseXDpi,
+                baseYDpi);
 
         displayContent.setMaxUiWidth(baseWidth);
 
@@ -767,11 +785,14 @@ public class DisplayContentTests extends WindowTestsBase {
         final int baseWidth = 1280;
         final int baseHeight = 720;
         final int baseDensity = 320;
+        final float baseXDpi = 60;
+        final float baseYDpi = 60;
 
         displayContent.mInitialDisplayWidth = baseWidth;
         displayContent.mInitialDisplayHeight = baseHeight;
         displayContent.mInitialDisplayDensity = baseDensity;
-        displayContent.updateBaseDisplayMetrics(baseWidth, baseHeight, baseDensity);
+        displayContent.updateBaseDisplayMetrics(baseWidth, baseHeight, baseDensity, baseXDpi,
+                baseYDpi);
 
         final int forcedDensity = 600;
 
@@ -2511,6 +2532,16 @@ public class DisplayContentTests extends WindowTestsBase {
         assertEquals(expectedBaseWidth, displayContent.mBaseDisplayWidth);
         assertEquals(expectedBaseHeight, displayContent.mBaseDisplayHeight);
         assertEquals(expectedBaseDensity, displayContent.mBaseDisplayDensity);
+    }
+
+    private static void verifySizes(DisplayContent displayContent, int expectedBaseWidth,
+            int expectedBaseHeight, int expectedBaseDensity, float expectedBaseXDpi,
+            float expectedBaseYDpi) {
+        assertEquals(expectedBaseWidth, displayContent.mBaseDisplayWidth);
+        assertEquals(expectedBaseHeight, displayContent.mBaseDisplayHeight);
+        assertEquals(expectedBaseDensity, displayContent.mBaseDisplayDensity);
+        assertEquals(expectedBaseXDpi, displayContent.mBaseDisplayPhysicalXDpi, 1.0f /* delta */);
+        assertEquals(expectedBaseYDpi, displayContent.mBaseDisplayPhysicalYDpi, 1.0f /* delta */);
     }
 
     private void updateFocusedWindow() {
