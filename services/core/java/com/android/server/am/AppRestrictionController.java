@@ -1776,7 +1776,7 @@ public final class AppRestrictionController {
             }
 
             postNotificationIfNecessary(NOTIFICATION_TYPE_LONG_RUNNING_FGS,
-                    com.android.internal.R.string.notification_title_abusive_bg_apps,
+                    com.android.internal.R.string.notification_title_long_running_fgs,
                     com.android.internal.R.string.notification_content_long_running_fgs,
                     pendingIntent, packageName, uid, null);
         }

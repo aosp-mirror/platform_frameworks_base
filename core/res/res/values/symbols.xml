@@ -4743,6 +4743,7 @@
 
   <java-symbol type="string" name="notification_channel_abusive_bg_apps"/>
   <java-symbol type="string" name="notification_title_abusive_bg_apps"/>
+  <java-symbol type="string" name="notification_title_long_running_fgs"/>
   <java-symbol type="string" name="notification_content_abusive_bg_apps"/>
   <java-symbol type="string" name="notification_content_long_running_fgs"/>
   <java-symbol type="string" name="notification_action_check_bg_apps"/>
