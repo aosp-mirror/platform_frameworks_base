@@ -35,26 +35,11 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
+import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 import javax.inject.Provider
 
-private val DATA = MediaData(
-    userId = -1,
-    initialized = false,
-    backgroundColor = 0,
-    app = null,
-    appIcon = null,
-    artist = null,
-    song = null,
-    artwork = null,
-    actions = emptyList(),
-    actionsToShowInCompact = emptyList(),
-    packageName = "INVALID",
-    token = null,
-    clickIntent = null,
-    device = null,
-    active = true,
-    resumeAction = null)
+private val DATA = MediaTestUtils.emptyMediaData
 
 private val SMARTSPACE_KEY = "smartspace"
 
@@ -74,7 +59,7 @@ class MediaCarouselControllerTest : SysuiTestCase() {
     @Mock lateinit var falsingCollector: FalsingCollector
     @Mock lateinit var falsingManager: FalsingManager
     @Mock lateinit var dumpManager: DumpManager
-    @Mock lateinit var mediaFlags: MediaFlags
+    @Mock lateinit var logger: MediaUiEventLogger
 
     private val clock = FakeSystemClock()
     private lateinit var mediaCarouselController: MediaCarouselController
@@ -95,7 +80,7 @@ class MediaCarouselControllerTest : SysuiTestCase() {
             falsingCollector,
             falsingManager,
             dumpManager,
-            mediaFlags
+            logger
         )
 
         MediaPlayerData.clear()
@@ -188,5 +173,19 @@ class MediaCarouselControllerTest : SysuiTestCase() {
         // Then it should be shown at the end of the carousel
         val size = MediaPlayerData.playerKeys().size
         assertTrue(MediaPlayerData.playerKeys().elementAt(size - 1).isSsMediaRec)
+    }
+
+    @Test
+    fun testSwipeDismiss_logged() {
+        mediaCarouselController.mediaCarouselScrollHandler.dismissCallback.invoke()
+
+        verify(logger).logSwipeDismiss()
+    }
+
+    @Test
+    fun testSettingsButton_logged() {
+        mediaCarouselController.settingsButton.callOnClick()
+
+        verify(logger).logCarouselSettings()
     }
 }
