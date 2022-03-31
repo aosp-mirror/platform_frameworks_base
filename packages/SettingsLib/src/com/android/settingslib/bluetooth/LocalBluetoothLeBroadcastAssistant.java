@@ -19,7 +19,6 @@ package com.android.settingslib.bluetooth;
 import android.annotation.NonNull;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
-import android.bluetooth.BluetoothLeBroadcast;
 import android.bluetooth.BluetoothLeBroadcastAssistant;
 import android.bluetooth.BluetoothLeBroadcastMetadata;
 import android.bluetooth.BluetoothLeBroadcastReceiveState;
@@ -71,7 +70,7 @@ public class LocalBluetoothLeBroadcastAssistant implements
         }
     };
 
-    LocalBluetoothLeBroadcastAssistant(Context context,
+    public LocalBluetoothLeBroadcastAssistant(Context context,
             LocalBluetoothProfileManager profileManager) {
         mProfileManager = profileManager;
         BluetoothAdapter.getDefaultAdapter().
@@ -80,6 +79,40 @@ public class LocalBluetoothLeBroadcastAssistant implements
         mBuilder = new BluetoothLeBroadcastMetadata.Builder();
     }
 
+    /**
+     * Add a Broadcast Source to the Broadcast Sink with {@link BluetoothLeBroadcastMetadata}.
+     *
+     * @param sink Broadcast Sink to which the Broadcast Source should be added
+     * @param metadata Broadcast Source metadata to be added to the Broadcast Sink
+     * @param isGroupOp {@code true} if Application wants to perform this operation for all
+     *                  coordinated set members throughout this session. Otherwise, caller
+     *                  would have to add, modify, and remove individual set members.
+     */
+    public void addSource(BluetoothDevice sink, BluetoothLeBroadcastMetadata metadata,
+            boolean isGroupOp) {
+        mBluetoothLeBroadcastAssistant.addSource(sink, metadata, isGroupOp);
+    }
+
+    /**
+     * Add a Broadcast Source to the Broadcast Sink with the information which are separated from
+     * the qr code string.
+     *
+     * @param sink Broadcast Sink to which the Broadcast Source should be added
+     * @param sourceAddressType hardware MAC Address of the device. See
+     *                          {@link BluetoothDevice.AddressType}.
+     * @param presentationDelayMicros presentation delay of this Broadcast Source in microseconds.
+     * @param sourceAdvertisingSid 1-byte long Advertising_SID of the Broadcast Source.
+     * @param broadcastId 3-byte long Broadcast_ID of the Broadcast Source.
+     * @param paSyncInterval Periodic Advertising Sync interval of the broadcast Source,
+     *                       {@link BluetoothLeBroadcastMetadata#PA_SYNC_INTERVAL_UNKNOWN} if
+     *                       unknown.
+     * @param isEncrypted whether the Broadcast Source is encrypted.
+     * @param broadcastCode Broadcast Code for this Broadcast Source, null if code is not required.
+     * @param sourceDevice source advertiser address.
+     * @param isGroupOp {@code true} if Application wants to perform this operation for all
+     *                  coordinated set members throughout this session. Otherwise, caller
+     *                  would have to add, modify, and remove individual set members.
+     */
     public void addSource(@NonNull BluetoothDevice sink, int sourceAddressType,
             int presentationDelayMicros, int sourceAdvertisingSid, int broadcastId,
             int paSyncInterval, boolean isEncrypted, byte[] broadcastCode,

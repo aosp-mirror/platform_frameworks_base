@@ -1568,8 +1568,7 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             logExit(dismissTransition.mReason);
             // TODO: Have a proper remote for this. Until then, though, reset state and use the
             //       normal animation stuff (which falls back to the normal launcher remote).
-            setDividerVisibility(false, t);
-            mSplitLayout.release();
+            mSplitLayout.release(t);
             mSplitTransitions.mPendingDismiss = null;
             return false;
         } else {
@@ -1595,7 +1594,8 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         return true;
     }
 
-    void finishRecentAnimation(boolean dismissSplit) {
+    void onRecentTransitionFinished(boolean returnToHome, WindowContainerTransaction wct,
+            SurfaceControl.Transaction finishT) {
         // Exclude the case that the split screen has been dismissed already.
         if (!mMainStage.isActive()) {
             // The latest split dismissing transition might be a no-op transition and thus won't
@@ -1605,13 +1605,14 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             return;
         }
 
-        if (dismissSplit) {
-            final WindowContainerTransaction wct = new WindowContainerTransaction();
+        if (returnToHome) {
+            // When returning to home from recent apps, the splitting tasks are already hidden, so
+            // append the reset of dismissing operations into the clean-up wct.
             prepareExitSplitScreen(STAGE_TYPE_UNDEFINED, wct);
-            mSplitTransitions.startDismissTransition(null /* transition */, wct, this,
-                    STAGE_TYPE_UNDEFINED, EXIT_REASON_RETURN_HOME);
+            setSplitsVisible(false);
+            logExit(EXIT_REASON_RETURN_HOME);
         } else {
-            setDividerVisibility(true, null /* t */);
+            setDividerVisibility(true, finishT);
         }
     }
 

@@ -278,7 +278,8 @@ public final class ViewRootImpl implements ViewParent,
      * Whether the caption is drawn by the shell.
      * @hide
      */
-    public static final boolean CAPTION_ON_SHELL = false;
+    public static final boolean CAPTION_ON_SHELL =
+            SystemProperties.getBoolean("persist.debug.caption_on_shell", false);
 
     /**
      * Whether the client should compute the window frame on its own.
