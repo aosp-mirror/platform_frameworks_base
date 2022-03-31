@@ -2578,11 +2578,17 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                     return;
                 }
 
+                // Remove immediately if there is display transition because the animation is
+                // usually unnoticeable (e.g. covered by rotation animation) and the animation
+                // bounds could be inconsistent, such as depending on when the window applies
+                // its draw transaction with new rotation.
+                final boolean allowExitAnimation = !getDisplayContent().inTransition();
+
                 if (wasVisible) {
                     final int transit = (!startingWindow) ? TRANSIT_EXIT : TRANSIT_PREVIEW_DONE;
 
                     // Try starting an animation.
-                    if (mWinAnimator.applyAnimationLocked(transit, false)) {
+                    if (allowExitAnimation && mWinAnimator.applyAnimationLocked(transit, false)) {
                         ProtoLog.v(WM_DEBUG_ANIM,
                                 "Set animatingExit: reason=remove/applyAnimation win=%s", this);
                         mAnimatingExit = true;
@@ -2596,7 +2602,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                         mWmService.mAccessibilityController.onWindowTransition(this, transit);
                     }
                 }
-                final boolean isAnimating = mAnimatingExit || isExitAnimationRunningSelfOrParent();
+                final boolean isAnimating = allowExitAnimation
+                        && (mAnimatingExit || isExitAnimationRunningSelfOrParent());
                 final boolean lastWindowIsStartingWindow = startingWindow && mActivityRecord != null
                         && mActivityRecord.isLastWindow(this);
                 // We delay the removal of a window if it has a showing surface that can be used to run
@@ -5254,12 +5261,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
         // If we are an inset provider, all our animations are driven by the inset client.
         if (mControllableInsetProvider != null) {
-            return;
-        }
-        if (getDisplayContent().inTransition()) {
-            // Skip because the animation is usually unnoticeable (e.g. covered by rotation
-            // animation) and the animation bounds could be inconsistent, such as depending
-            // on when the window applies its draw transaction with new rotation.
             return;
         }
 
