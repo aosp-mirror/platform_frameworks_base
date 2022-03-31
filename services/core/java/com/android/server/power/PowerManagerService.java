@@ -669,8 +669,12 @@ public final class PowerManagerService extends SystemService
                 int reason, int uid, int opUid, String opPackageName, String details) {
             if (wakefulness == WAKEFULNESS_AWAKE) {
                 // Kick user activity to prevent newly awake group from timing out instantly.
+                // The dream may end without user activity if the dream app crashes / is updated,
+                // don't poke the user activity timer for these wakes.
+                int flags = reason == PowerManager.WAKE_REASON_DREAM_FINISHED
+                        ? PowerManager.USER_ACTIVITY_FLAG_NO_CHANGE_LIGHTS : 0;
                 userActivityNoUpdateLocked(mPowerGroups.get(groupId), eventTime,
-                        PowerManager.USER_ACTIVITY_EVENT_OTHER, 0, uid);
+                        PowerManager.USER_ACTIVITY_EVENT_OTHER, flags, uid);
             }
             mDirty |= DIRTY_DISPLAY_GROUP_WAKEFULNESS;
             updateGlobalWakefulnessLocked(eventTime, reason, uid, opUid, opPackageName, details);
@@ -3275,7 +3279,7 @@ public final class PowerManagerService extends SystemService
                     }
                 } else {
                     wakePowerGroupLocked(powerGroup, now,
-                            PowerManager.WAKE_REASON_UNKNOWN,
+                            PowerManager.WAKE_REASON_DREAM_FINISHED,
                             "android.server.power:DREAM_FINISHED", Process.SYSTEM_UID,
                             mContext.getOpPackageName(), Process.SYSTEM_UID);
                 }
