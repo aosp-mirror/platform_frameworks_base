@@ -278,7 +278,6 @@ import android.net.wifi.WifiManager;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.CancellationSignal;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.IBinder;
@@ -7235,47 +7234,45 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             Preconditions.checkState(admin != null,
                     "Lost mode location updates can only be sent on an organization-owned device.");
             mInjector.binderWithCleanCallingIdentity(() -> {
-                final List<String> providers =
-                        mInjector.getLocationManager().getAllProviders().stream()
-                                .filter(mInjector.getLocationManager()::isProviderEnabled)
-                                .collect(Collectors.toList());
-                if (providers.isEmpty()) {
-                    future.complete(false);
-                    return;
-                }
-
-                final CancellationSignal cancellationSignal = new CancellationSignal();
-                List<String> providersWithNullLocation = new ArrayList<String>();
-                for (String provider : providers) {
-                    mInjector.getLocationManager().getCurrentLocation(provider, cancellationSignal,
-                            mContext.getMainExecutor(), location -> {
-                                if (cancellationSignal.isCanceled()) {
-                                    return;
-                                } else if (location != null) {
-                                    sendLostModeLocationUpdate(admin, location);
-                                    cancellationSignal.cancel();
-                                    future.complete(true);
-                                } else {
-                                    // location == null, provider wasn't able to get location, see
-                                    // if there are more providers
-                                    providersWithNullLocation.add(provider);
-                                    if (providers.size() == providersWithNullLocation.size()) {
-                                        future.complete(false);
-                                    }
-                                }
-                            }
-                    );
-                }
+                String[] providers = {LocationManager.FUSED_PROVIDER,
+                        LocationManager.NETWORK_PROVIDER, LocationManager.GPS_PROVIDER};
+                tryRetrieveAndSendLocationUpdate(admin, future, providers, /* index= */ 0);
             });
         }
     }
 
-    private void sendLostModeLocationUpdate(ActiveAdmin admin, Location location) {
+    /** Send lost mode location updates recursively, in order of the list of location providers. */
+    private void tryRetrieveAndSendLocationUpdate(ActiveAdmin admin,
+            AndroidFuture<Boolean> future, String[] providers, int index) {
+        // None of the providers were able to get location, return false
+        if (index == providers.length) {
+            future.complete(false);
+            return;
+        }
+        if (mInjector.getLocationManager().isProviderEnabled(providers[index])) {
+            mInjector.getLocationManager().getCurrentLocation(providers[index],
+                    /* cancellationSignal= */ null, mContext.getMainExecutor(), location -> {
+                        if (location != null) {
+                            mContext.sendBroadcastAsUser(
+                                    newLostModeLocationUpdateIntent(admin, location),
+                                    admin.getUserHandle());
+                            future.complete(true);
+                        } else {
+                            tryRetrieveAndSendLocationUpdate(admin, future, providers, index + 1);
+                        }
+                    }
+            );
+        } else {
+           tryRetrieveAndSendLocationUpdate(admin, future, providers, index + 1);
+        }
+    }
+
+    private Intent newLostModeLocationUpdateIntent(ActiveAdmin admin, Location location) {
         final Intent intent = new Intent(
                 DevicePolicyManager.ACTION_LOST_MODE_LOCATION_UPDATE);
         intent.putExtra(DevicePolicyManager.EXTRA_LOST_MODE_LOCATION, location);
         intent.setPackage(admin.info.getPackageName());
-        mContext.sendBroadcastAsUser(intent, admin.getUserHandle());
+        return intent;
     }
 
     /**

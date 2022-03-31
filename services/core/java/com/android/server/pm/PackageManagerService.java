@@ -655,9 +655,6 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
 
     final ProtectedPackages mProtectedPackages;
 
-    @GuardedBy("mLoadedVolumes")
-    final ArraySet<String> mLoadedVolumes = new ArraySet<>();
-
     private boolean mFirstBoot;
 
     final boolean mIsEngBuild;
@@ -667,7 +664,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
     PackageManagerInternal.ExternalSourcesPolicy mExternalSourcesPolicy;
 
     @GuardedBy("mAvailableFeatures")
-    final ArrayMap<String, FeatureInfo> mAvailableFeatures;
+    private final ArrayMap<String, FeatureInfo> mAvailableFeatures;
 
     @Watched
     final InstantAppRegistry mInstantAppRegistry;
@@ -943,6 +940,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
     private final DexOptHelper mDexOptHelper;
     private final SuspendPackageHelper mSuspendPackageHelper;
     private final IntentResolverInterceptor mIntentResolverInterceptor;
+    private final StorageEventHelper mStorageEventHelper;
 
     /**
      * Invalidate the package info cache, which includes updating the cached computer.
@@ -1584,7 +1582,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
     }
 
     /**
-     * A extremely minimal constructor designed to start up a PackageManagerService instance for
+     * An extremely minimal constructor designed to start up a PackageManagerService instance for
      * testing.
      *
      * It is assumed that all methods under test will mock the internal fields and thus
@@ -1689,6 +1687,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         mSharedLibraries.setDeletePackageHelper(mDeletePackageHelper);
 
         mIntentResolverInterceptor = null;
+        mStorageEventHelper = testParams.storageEventHelper;
 
         registerObservers(false);
         invalidatePackageInfoCache();
@@ -1841,6 +1840,8 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         mDexOptHelper = new DexOptHelper(this);
         mSuspendPackageHelper = new SuspendPackageHelper(this, mInjector, mBroadcastHelper,
                 mProtectedPackages);
+        mStorageEventHelper = new StorageEventHelper(this, mDeletePackageHelper,
+                mRemovePackageHelper);
 
         synchronized (mLock) {
             // Create the computer as soon as the state objects have been installed.  The
@@ -4055,17 +4056,15 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         mUserManager.systemReady();
 
         // Watch for external volumes that come and go over time
-        final StorageEventHelper storageEventHelper = new StorageEventHelper(this,
-                mDeletePackageHelper, mRemovePackageHelper);
         final StorageManager storage = mInjector.getSystemService(StorageManager.class);
-        storage.registerListener(storageEventHelper);
+        storage.registerListener(mStorageEventHelper);
 
         mInstallerService.systemReady();
         mPackageDexOptimizer.systemReady();
 
         // Now that we're mostly running, clean up stale users and apps
         mUserManager.reconcileUsers(StorageManager.UUID_PRIVATE_INTERNAL);
-        storageEventHelper.reconcileApps(snapshotComputer(), StorageManager.UUID_PRIVATE_INTERNAL);
+        mStorageEventHelper.reconcileApps(snapshotComputer(), StorageManager.UUID_PRIVATE_INTERNAL);
 
         mPermissionManager.onSystemReady();
 
@@ -4163,20 +4162,6 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         }
     }
 
-    void dumpSnapshotStats(PrintWriter pw, boolean isBrief) {
-        if (mSnapshotStatistics == null) {
-            return;
-        }
-        int hits = 0;
-        synchronized (mSnapshotLock) {
-            if (mSnapshotComputer != null) {
-                hits = mSnapshotComputer.getUsed();
-            }
-        }
-        final long now = SystemClock.currentTimeMicro();
-        mSnapshotStatistics.dump(pw, "  ", now, hits, -1, isBrief);
-    }
-
     //TODO: b/111402650
     private void disableSkuSpecificApps() {
         String[] apkList = mContext.getResources().getStringArray(
@@ -4218,17 +4203,6 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
             return new PackageFreezer(this);
         } else {
             return freezePackage(packageName, userId, killReason);
-        }
-    }
-
-    /**
-     * Verify that given package is currently frozen.
-     */
-    void checkPackageFrozen(String packageName) {
-        synchronized (mLock) {
-            if (!mFrozenPackages.containsKey(packageName)) {
-                Slog.wtf(TAG, "Expected " + packageName + " to be frozen!", new Throwable());
-            }
         }
     }
 
@@ -6050,7 +6024,37 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         @Override
         protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
             if (!DumpUtils.checkDumpAndUsageStatsPermission(mContext, TAG, pw)) return;
-            new DumpHelper(PackageManagerService.this).doDump(fd, pw, args);
+            final Computer snapshot = snapshotComputer();
+            final KnownPackages knownPackages = new KnownPackages(
+                    mDefaultAppProvider,
+                    mRequiredInstallerPackage,
+                    mRequiredUninstallerPackage,
+                    mSetupWizardPackage,
+                    mRequiredVerifierPackage,
+                    mDefaultTextClassifierPackage,
+                    mSystemTextClassifierPackageName,
+                    mRequiredPermissionControllerPackage,
+                    mConfiguratorPackage,
+                    mIncidentReportApproverPackage,
+                    mAmbientContextDetectionPackage,
+                    mAppPredictionServicePackage,
+                    COMPANION_PACKAGE_NAME,
+                    mRetailDemoPackage,
+                    mOverlayConfigSignaturePackage,
+                    mRecentsPackage);
+            final ArrayMap<String, FeatureInfo> availableFeatures;
+            synchronized (mAvailableFeatures) {
+                availableFeatures = new ArrayMap<>(mAvailableFeatures);
+            }
+            final ArraySet<String> protectedBroadcasts;
+            synchronized (mProtectedBroadcasts) {
+                protectedBroadcasts = new ArraySet<>(mProtectedBroadcasts);
+            }
+            new DumpHelper(mPermissionManager, mApexManager, mStorageEventHelper,
+                    mDomainVerificationManager, mInstallerService, mRequiredVerifierPackage,
+                    knownPackages, mChangedPackagesTracker, availableFeatures, protectedBroadcasts,
+                    getPerUidReadTimeouts(snapshot)
+            ).doDump(snapshot, fd, pw, args);
         }
     }
 
@@ -6984,45 +6988,24 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
 
     String[] getKnownPackageNamesInternal(@NonNull Computer snapshot, int knownPackage,
             int userId) {
-        switch (knownPackage) {
-            case PackageManagerInternal.PACKAGE_BROWSER:
-                return new String[] { mDefaultAppProvider.getDefaultBrowser(userId) };
-            case PackageManagerInternal.PACKAGE_INSTALLER:
-                return snapshot.filterOnlySystemPackages(mRequiredInstallerPackage);
-            case PackageManagerInternal.PACKAGE_UNINSTALLER:
-                return snapshot.filterOnlySystemPackages(mRequiredUninstallerPackage);
-            case PackageManagerInternal.PACKAGE_SETUP_WIZARD:
-                return snapshot.filterOnlySystemPackages(mSetupWizardPackage);
-            case PackageManagerInternal.PACKAGE_SYSTEM:
-                return new String[]{"android"};
-            case PackageManagerInternal.PACKAGE_VERIFIER:
-                return snapshot.filterOnlySystemPackages(mRequiredVerifierPackage);
-            case PackageManagerInternal.PACKAGE_SYSTEM_TEXT_CLASSIFIER:
-                return snapshot.filterOnlySystemPackages(
-                        mDefaultTextClassifierPackage, mSystemTextClassifierPackageName);
-            case PackageManagerInternal.PACKAGE_PERMISSION_CONTROLLER:
-                return snapshot.filterOnlySystemPackages(mRequiredPermissionControllerPackage);
-            case PackageManagerInternal.PACKAGE_CONFIGURATOR:
-                return snapshot.filterOnlySystemPackages(mConfiguratorPackage);
-            case PackageManagerInternal.PACKAGE_INCIDENT_REPORT_APPROVER:
-                return snapshot.filterOnlySystemPackages(mIncidentReportApproverPackage);
-            case PackageManagerInternal.PACKAGE_AMBIENT_CONTEXT_DETECTION:
-                return snapshot.filterOnlySystemPackages(mAmbientContextDetectionPackage);
-            case PackageManagerInternal.PACKAGE_APP_PREDICTOR:
-                return snapshot.filterOnlySystemPackages(mAppPredictionServicePackage);
-            case PackageManagerInternal.PACKAGE_COMPANION:
-                return snapshot.filterOnlySystemPackages(COMPANION_PACKAGE_NAME);
-            case PackageManagerInternal.PACKAGE_RETAIL_DEMO:
-                return TextUtils.isEmpty(mRetailDemoPackage)
-                        ? ArrayUtils.emptyArray(String.class)
-                        : new String[] {mRetailDemoPackage};
-            case PackageManagerInternal.PACKAGE_OVERLAY_CONFIG_SIGNATURE:
-                return snapshot.filterOnlySystemPackages(mOverlayConfigSignaturePackage);
-            case PackageManagerInternal.PACKAGE_RECENTS:
-                return snapshot.filterOnlySystemPackages(mRecentsPackage);
-            default:
-                return ArrayUtils.emptyArray(String.class);
-        }
+        return new KnownPackages(
+                mDefaultAppProvider,
+                mRequiredInstallerPackage,
+                mRequiredUninstallerPackage,
+                mSetupWizardPackage,
+                mRequiredVerifierPackage,
+                mDefaultTextClassifierPackage,
+                mSystemTextClassifierPackageName,
+                mRequiredPermissionControllerPackage,
+                mConfiguratorPackage,
+                mIncidentReportApproverPackage,
+                mAmbientContextDetectionPackage,
+                mAppPredictionServicePackage,
+                COMPANION_PACKAGE_NAME,
+                mRetailDemoPackage,
+                mOverlayConfigSignaturePackage,
+                mRecentsPackage)
+                .getKnownPackageNames(snapshot, knownPackage, userId);
     }
 
     String getActiveLauncherPackageName(int userId) {

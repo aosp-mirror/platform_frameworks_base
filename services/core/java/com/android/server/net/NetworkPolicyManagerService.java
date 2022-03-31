@@ -1128,6 +1128,9 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
         @Override public void onUidCachedChanged(int uid, boolean cached) {
         }
+
+        @Override public void onUidProcAdjChanged(int uid) {
+        }
     };
 
     private static final class UidStateCallbackInfo {
@@ -5027,8 +5030,8 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         }
         if (oldEffectiveBlockedReasons != newEffectiveBlockedReasons) {
             postBlockedReasonsChangedMsg(uid,
-                    oldEffectiveBlockedReasons,
-                    newEffectiveBlockedReasons);
+                    newEffectiveBlockedReasons,
+                    oldEffectiveBlockedReasons);
 
             postUidRulesChangedMsg(uid, uidRules);
         }

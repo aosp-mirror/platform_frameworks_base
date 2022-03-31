@@ -8,6 +8,7 @@ import android.graphics.Rect
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import androidx.test.filters.SmallTest
+import com.android.internal.graphics.ColorUtils
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.util.mockito.any
 import com.google.common.truth.Truth.assertThat
@@ -113,6 +114,7 @@ class SquigglyProgressTest : SysuiTestCase() {
                 linePaintCaptor.capture())
 
         assertThat(wavePaintCaptor.value.color).isEqualTo(tint)
-        assertThat(linePaintCaptor.value.color).isEqualTo(tint)
+        assertThat(linePaintCaptor.value.color).isEqualTo(
+                ColorUtils.setAlphaComponent(tint, DISABLED_ALPHA))
     }
 }

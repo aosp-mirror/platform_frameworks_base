@@ -508,7 +508,7 @@ public class StatusBarStateControllerImpl implements
      * Returns String readable state of status bar from {@link StatusBarState}
      */
     public static String describe(int state) {
-        return StatusBarState.toShortString(state);
+        return StatusBarState.toString(state);
     }
 
     @Override

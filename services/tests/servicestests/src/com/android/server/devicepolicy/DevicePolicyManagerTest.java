@@ -48,6 +48,9 @@ import static android.app.admin.DevicePolicyManager.WIFI_SECURITY_PERSONAL;
 import static android.app.admin.DevicePolicyManager.WIPE_EUICC;
 import static android.app.admin.PasswordMetrics.computeForPasswordOrPin;
 import static android.content.pm.ApplicationInfo.PRIVATE_FLAG_DIRECT_BOOT_AWARE;
+import static android.location.LocationManager.FUSED_PROVIDER;
+import static android.location.LocationManager.GPS_PROVIDER;
+import static android.location.LocationManager.NETWORK_PROVIDER;
 import static android.net.ConnectivityManager.PROFILE_NETWORK_PREFERENCE_DEFAULT;
 import static android.net.ConnectivityManager.PROFILE_NETWORK_PREFERENCE_ENTERPRISE;
 import static android.net.ConnectivityManager.PROFILE_NETWORK_PREFERENCE_ENTERPRISE_NO_FALLBACK;
@@ -8462,34 +8465,44 @@ public class DevicePolicyManagerTest extends DpmTestBase {
 
     @Test
     public void testSendLostModeLocationUpdate_asDeviceOwner() throws Exception {
-        final String TEST_PROVIDER = "network";
         mContext.callerPermissions.add(permission.TRIGGER_LOST_MODE);
         setDeviceOwner();
-        when(getServices().locationManager.getAllProviders()).thenReturn(List.of(TEST_PROVIDER));
-        when(getServices().locationManager.isProviderEnabled(TEST_PROVIDER)).thenReturn(true);
+        when(getServices().locationManager.isProviderEnabled(FUSED_PROVIDER)).thenReturn(true);
 
         dpm.sendLostModeLocationUpdate(getServices().executor, /* empty callback */ result -> {});
 
         verify(getServices().locationManager, times(1)).getCurrentLocation(
-                eq(TEST_PROVIDER), any(), eq(getServices().executor), any());
+                eq(FUSED_PROVIDER), any(), eq(getServices().executor), any());
     }
 
     @Test
     public void testSendLostModeLocationUpdate_asProfileOwnerOfOrgOwnedDevice() throws Exception {
-        final String TEST_PROVIDER = "network";
         final int MANAGED_PROFILE_ADMIN_UID =
                 UserHandle.getUid(CALLER_USER_HANDLE, DpmMockContext.SYSTEM_UID);
         mContext.binder.callingUid = MANAGED_PROFILE_ADMIN_UID;
         mContext.callerPermissions.add(permission.TRIGGER_LOST_MODE);
         addManagedProfile(admin1, MANAGED_PROFILE_ADMIN_UID, admin1);
         configureProfileOwnerOfOrgOwnedDevice(admin1, CALLER_USER_HANDLE);
-        when(getServices().locationManager.getAllProviders()).thenReturn(List.of(TEST_PROVIDER));
-        when(getServices().locationManager.isProviderEnabled(TEST_PROVIDER)).thenReturn(true);
+        when(getServices().locationManager.isProviderEnabled(FUSED_PROVIDER)).thenReturn(true);
 
         dpm.sendLostModeLocationUpdate(getServices().executor, /* empty callback */ result -> {});
 
         verify(getServices().locationManager, times(1)).getCurrentLocation(
-                eq(TEST_PROVIDER), any(), eq(getServices().executor), any());
+                eq(FUSED_PROVIDER), any(), eq(getServices().executor), any());
+    }
+
+    @Test
+    public void testSendLostModeLocationUpdate_noProviderIsEnabled() throws Exception {
+        mContext.callerPermissions.add(permission.TRIGGER_LOST_MODE);
+        setDeviceOwner();
+        when(getServices().locationManager.isProviderEnabled(FUSED_PROVIDER)).thenReturn(false);
+        when(getServices().locationManager.isProviderEnabled(NETWORK_PROVIDER)).thenReturn(false);
+        when(getServices().locationManager.isProviderEnabled(GPS_PROVIDER)).thenReturn(false);
+
+        dpm.sendLostModeLocationUpdate(getServices().executor, /* empty callback */ result -> {});
+
+        verify(getServices().locationManager, never()).getCurrentLocation(
+                eq(FUSED_PROVIDER), any(), eq(getServices().executor), any());
     }
 
     private void setupVpnAuthorization(String userVpnPackage, int userVpnUid) {

@@ -475,6 +475,7 @@
   <java-symbol type="array"   name="config_network_type_tcp_buffers" />
   <java-symbol type="string"  name="config_tcp_buffers" />
   <java-symbol type="bool" name="config_force_enable_telephony_new_data_stack" />
+  <java-symbol type="bool" name="config_enable_iwlan_handover_policy" />
   <java-symbol type="integer" name="config_volte_replacement_rat"/>
   <java-symbol type="integer" name="config_valid_wappush_index" />
   <java-symbol type="integer" name="config_overrideHasPermanentMenuKey" />
@@ -3708,7 +3709,6 @@
   <java-symbol type="string" name="config_defaultMusicRecognitionService" />
   <java-symbol type="string" name="config_defaultAttentionService" />
   <java-symbol type="string" name="config_defaultRotationResolverService" />
-  <java-symbol type="string" name="config_defaultSystemCaptionsService" />
   <java-symbol type="string" name="config_defaultSystemCaptionsManagerService" />
   <java-symbol type="string" name="config_defaultAmbientContextDetectionService" />
   <java-symbol type="string" name="config_defaultAmbientContextConsentComponent" />

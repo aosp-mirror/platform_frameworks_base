@@ -118,6 +118,7 @@ public class BackAnimationControllerTest {
                 BackNavigationInfo.TYPE_CROSS_ACTIVITY);
         mController.onMotionEvent(
                 MotionEvent.obtain(0, 0, MotionEvent.ACTION_DOWN, 0, 0, 0),
+                MotionEvent.ACTION_DOWN,
                 BackEvent.EDGE_LEFT);
         verify(mTransaction).setBuffer(screenshotSurface, hardwareBuffer);
         verify(mTransaction).setVisibility(screenshotSurface, true);
@@ -133,9 +134,11 @@ public class BackAnimationControllerTest {
                 BackNavigationInfo.TYPE_CROSS_ACTIVITY);
         mController.onMotionEvent(
                 MotionEvent.obtain(0, 0, MotionEvent.ACTION_DOWN, 0, 0, 0),
+                MotionEvent.ACTION_DOWN,
                 BackEvent.EDGE_LEFT);
         mController.onMotionEvent(
                 MotionEvent.obtain(10, 0, MotionEvent.ACTION_MOVE, 100, 100, 0),
+                MotionEvent.ACTION_MOVE,
                 BackEvent.EDGE_LEFT);
         verify(mTransaction).setPosition(animationTarget.leash, 100, 100);
         verify(mTransaction, atLeastOnce()).apply();
@@ -151,12 +154,14 @@ public class BackAnimationControllerTest {
         // Check that back start is dispatched.
         mController.onMotionEvent(
                 MotionEvent.obtain(0, 0, MotionEvent.ACTION_DOWN, 0, 0, 0),
+                MotionEvent.ACTION_DOWN,
                 BackEvent.EDGE_LEFT);
         verify(mIOnBackInvokedCallback).onBackStarted();
 
         // Check that back progress is dispatched.
         mController.onMotionEvent(
                 MotionEvent.obtain(10, 0, MotionEvent.ACTION_MOVE, 100, 100, 0),
+                MotionEvent.ACTION_MOVE,
                 BackEvent.EDGE_LEFT);
         ArgumentCaptor<BackEvent> backEventCaptor = ArgumentCaptor.forClass(BackEvent.class);
         verify(mIOnBackInvokedCallback).onBackProgressed(backEventCaptor.capture());
@@ -166,6 +171,7 @@ public class BackAnimationControllerTest {
         mController.setTriggerBack(true);   // Fake trigger back
         mController.onMotionEvent(
                 MotionEvent.obtain(0, 0, MotionEvent.ACTION_UP, 0, 0, 0),
+                MotionEvent.ACTION_UP,
                 BackEvent.EDGE_LEFT);
         verify(mIOnBackInvokedCallback).onBackInvoked();
     }

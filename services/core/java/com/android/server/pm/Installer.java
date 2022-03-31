@@ -692,6 +692,20 @@ public class Installer extends SystemService {
         }
     }
 
+    /**
+     * Deletes the reference profile with the given name of the given package.
+     * @throws InstallerException if the deletion fails.
+     */
+    public void deleteReferenceProfile(String packageName, String profileName)
+            throws InstallerException {
+        if (!checkBeforeRemote()) return;
+        try {
+            mInstalld.deleteReferenceProfile(packageName, profileName);
+        } catch (Exception e) {
+            throw InstallerException.from(e);
+        }
+    }
+
     public void createUserData(String uuid, int userId, int userSerial, int flags)
             throws InstallerException {
         if (!checkBeforeRemote()) return;

@@ -726,7 +726,11 @@ public class Dialog implements DialogInterface, Window.Callback,
      * Called when the dialog has detected the user's press of the back
      * key.  The default implementation simply cancels the dialog (only if
      * it is cancelable), but you can override this to do whatever you want.
+     *
+     * @deprecated Use {@link OnBackInvokedCallback} or
+     * {@code androidx.activity.OnBackPressedCallback} to handle back navigation instead.
      */
+    @Deprecated
     public void onBackPressed() {
         if (mCancelable) {
             cancel();

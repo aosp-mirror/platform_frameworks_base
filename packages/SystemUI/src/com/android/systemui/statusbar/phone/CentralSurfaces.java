@@ -3436,6 +3436,10 @@ public class CentralSurfaces extends CoreStartable implements
         return mNavigationBarController.getNavigationBarView(mDisplayId);
     }
 
+    public boolean isOverviewEnabled() {
+        return mNavigationBarController.isOverviewEnabled(mDisplayId);
+    }
+
     public void showPinningEnterExitToast(boolean entering) {
         mNavigationBarController.showPinningEnterExitToast(mDisplayId, entering);
     }

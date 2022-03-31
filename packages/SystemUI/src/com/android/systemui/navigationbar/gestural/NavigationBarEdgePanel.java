@@ -480,7 +480,9 @@ public class NavigationBarEdgePanel extends View implements NavigationEdgeBackPl
     public void onMotionEvent(MotionEvent event) {
         if (mBackAnimation != null) {
             mBackAnimation.onBackMotion(
-                    event, mIsLeftPanel ? BackEvent.EDGE_LEFT : BackEvent.EDGE_RIGHT);
+                    event,
+                    event.getActionMasked(),
+                    mIsLeftPanel ? BackEvent.EDGE_LEFT : BackEvent.EDGE_RIGHT);
         }
         if (mVelocityTracker == null) {
             mVelocityTracker = VelocityTracker.obtain();

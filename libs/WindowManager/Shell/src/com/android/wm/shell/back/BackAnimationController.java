@@ -138,8 +138,9 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
         }
 
         @Override
-        public void onBackMotion(MotionEvent event, @BackEvent.SwipeEdge int swipeEdge) {
-            mShellExecutor.execute(() -> onMotionEvent(event, swipeEdge));
+        public void onBackMotion(
+                MotionEvent event, int action, @BackEvent.SwipeEdge int swipeEdge) {
+            mShellExecutor.execute(() -> onMotionEvent(event, action, swipeEdge));
         }
 
         @Override
@@ -209,13 +210,13 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
      * Called when a new motion event needs to be transferred to this
      * {@link BackAnimationController}
      */
-    public void onMotionEvent(MotionEvent event, @BackEvent.SwipeEdge int swipeEdge) {
-        int action = event.getActionMasked();
+    public void onMotionEvent(MotionEvent event, int action, @BackEvent.SwipeEdge int swipeEdge) {
         if (action == MotionEvent.ACTION_DOWN) {
             initAnimation(event);
         } else if (action == MotionEvent.ACTION_MOVE) {
             onMove(event, swipeEdge);
         } else if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL) {
+            ProtoLog.d(WM_SHELL_BACK_PREVIEW, "Finishing gesture with event: %s", event);
             onGestureFinished();
         }
     }

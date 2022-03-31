@@ -53,6 +53,7 @@ import static android.view.Surface.ROTATION_0;
 import static android.view.Surface.ROTATION_270;
 import static android.view.Surface.ROTATION_90;
 import static android.view.View.GONE;
+import static android.view.ViewRootImpl.LOCAL_LAYOUT;
 import static android.view.WindowInsets.Type.displayCutout;
 import static android.view.WindowInsets.Type.ime;
 import static android.view.WindowInsets.Type.systemBars;
@@ -2647,29 +2648,27 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         mCurrentPrivacyIndicatorBounds =
                 mCurrentPrivacyIndicatorBounds.updateStaticBounds(staticBounds);
         if (!Objects.equals(oldBounds, mCurrentPrivacyIndicatorBounds)) {
-            final DisplayInfo info = mDisplayInfo;
-            if (mDisplayFrames.onDisplayInfoUpdated(info,
-                    calculateDisplayCutoutForRotation(info.rotation),
-                    calculateRoundedCornersForRotation(info.rotation),
-                    calculatePrivacyIndicatorBoundsForRotation(info.rotation))) {
-                mInsetsStateController.onDisplayInfoUpdated(true);
-            }
+            updateDisplayFrames(false /* insetsSourceMayChange */, true /* notifyInsetsChange */);
         }
     }
 
     void onDisplayInfoChanged() {
-        final DisplayInfo info = mDisplayInfo;
-        if (mDisplayFrames.onDisplayInfoUpdated(info,
-                calculateDisplayCutoutForRotation(info.rotation),
-                calculateRoundedCornersForRotation(info.rotation),
-                calculatePrivacyIndicatorBoundsForRotation(info.rotation))) {
-            // TODO(b/161810301): Set notifyInsetsChange to true while the server no longer performs
-            //                    layout.
-            mInsetsStateController.onDisplayInfoUpdated(false /* notifyInsetsChanged */);
-        }
+        updateDisplayFrames(LOCAL_LAYOUT, LOCAL_LAYOUT);
         mMinSizeOfResizeableTaskDp = getMinimalTaskSizeDp();
-        mInputMonitor.layoutInputConsumers(info.logicalWidth, info.logicalHeight);
-        mDisplayPolicy.onDisplayInfoChanged(info);
+        mInputMonitor.layoutInputConsumers(mDisplayInfo.logicalWidth, mDisplayInfo.logicalHeight);
+        mDisplayPolicy.onDisplayInfoChanged(mDisplayInfo);
+    }
+
+    private void updateDisplayFrames(boolean insetsSourceMayChange, boolean notifyInsetsChange) {
+        if (mDisplayFrames.update(mDisplayInfo,
+                calculateDisplayCutoutForRotation(mDisplayInfo.rotation),
+                calculateRoundedCornersForRotation(mDisplayInfo.rotation),
+                calculatePrivacyIndicatorBoundsForRotation(mDisplayInfo.rotation))) {
+            if (insetsSourceMayChange) {
+                mDisplayPolicy.updateInsetsSourceFramesExceptIme(mDisplayFrames);
+            }
+            mInsetsStateController.onDisplayFramesUpdated(notifyInsetsChange);
+        }
     }
 
     @Override
@@ -3979,6 +3978,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         }
 
         ProtoLog.i(WM_DEBUG_IME, "setInputMethodTarget %s", target);
+        final boolean layeringTargetChanged = target != mImeLayeringTarget;
         mImeLayeringTarget = target;
 
         // 1. Reparent the IME container window to the target root DA to get the correct bounds and
@@ -4006,7 +4006,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         // 4. Update the IME control target to apply any inset change and animation.
         // 5. Reparent the IME container surface to either the input target app, or the IME window
         // parent.
-        updateImeControlTarget(true /* forceUpdateImeParent */);
+        updateImeControlTarget(layeringTargetChanged);
     }
 
     @VisibleForTesting
