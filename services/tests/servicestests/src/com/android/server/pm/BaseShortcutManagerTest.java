@@ -266,6 +266,11 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
         public void sendIntentSender(IntentSender intent) {
             // Placeholder for spying.
         }
+
+        @Override
+        public String getPackageName() {
+            return SYSTEM_PACKAGE_NAME;
+        }
     }
 
     /** ShortcutService with injection override methods. */
@@ -693,6 +698,7 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
 
     protected UriPermissionOwner mUriPermissionOwner;
 
+    protected static final String SYSTEM_PACKAGE_NAME = "android";
 
     protected static final String CALLING_PACKAGE_1 = "com.android.test.1";
     protected static final int CALLING_UID_1 = 10001;
