@@ -16,6 +16,7 @@
 
 package android.view.autofill;
 
+import static android.service.autofill.FillRequest.FLAG_IME_SHOWING;
 import static android.service.autofill.FillRequest.FLAG_MANUAL_REQUEST;
 import static android.service.autofill.FillRequest.FLAG_PASSWORD_INPUT_TYPE;
 import static android.service.autofill.FillRequest.FLAG_SUPPORTS_FILL_DIALOG;
@@ -76,6 +77,7 @@ import android.view.ContentInfo;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewRootImpl;
+import android.view.WindowInsets;
 import android.view.WindowManager;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
@@ -667,6 +669,9 @@ public final class AutofillManager {
 
     private final boolean mIsFillDialogEnabled;
 
+    // Indicates whether called the showAutofillDialog() method.
+    private boolean mShowAutofillDialogCalled = false;
+
     /** @hide */
     public interface AutofillClient {
         /**
@@ -1123,6 +1128,14 @@ public final class AutofillManager {
         notifyViewEntered(view, flags);
     }
 
+    private int getImeStateFlag(View v) {
+        final WindowInsets rootWindowInsets = v.getRootWindowInsets();
+        if (rootWindowInsets != null && rootWindowInsets.isVisible(WindowInsets.Type.ime())) {
+            return FLAG_IME_SHOWING;
+        }
+        return 0;
+    }
+
     @GuardedBy("mLock")
     private boolean shouldIgnoreViewEnteredLocked(@NonNull AutofillId id, int flags) {
         if (isDisabledByServiceLocked()) {
@@ -1201,6 +1214,8 @@ public final class AutofillManager {
                 if (view instanceof TextView && ((TextView) view).isAnyPasswordInputType()) {
                     flags |= FLAG_PASSWORD_INPUT_TYPE;
                 }
+
+                flags |= getImeStateFlag(view);
 
                 if (!isActiveLocked()) {
                     // Starts new session.
@@ -1378,6 +1393,8 @@ public final class AutofillManager {
                     flags |= FLAG_PASSWORD_INPUT_TYPE;
                 }
 
+                flags |= getImeStateFlag(view);
+
                 if (!isActiveLocked()) {
                     // Starts new session.
                     startSessionLocked(id, bounds, null, flags);
@@ -1493,7 +1510,7 @@ public final class AutofillManager {
                 value = view.getAutofillValue();
             }
 
-            updateSessionLocked(id, null, value, ACTION_VALUE_CHANGED, 0);
+            updateSessionLocked(id, null, value, ACTION_VALUE_CHANGED, getImeStateFlag(view));
         }
     }
 
@@ -1518,7 +1535,7 @@ public final class AutofillManager {
             }
 
             final AutofillId id = getAutofillId(view, virtualId);
-            updateSessionLocked(id, null, value, ACTION_VALUE_CHANGED, 0);
+            updateSessionLocked(id, null, value, ACTION_VALUE_CHANGED, getImeStateFlag(view));
         }
     }
 
@@ -2110,6 +2127,8 @@ public final class AutofillManager {
         mIdShownFillUi = null;
         mIsFillRequested = false;
         mRequireAutofill = false;
+        mShowAutofillDialogCalled = false;
+        mFillDialogTriggerIds = null;
         if (resetEnteredIds) {
             mEnteredIds = null;
         }
@@ -3126,8 +3145,9 @@ public final class AutofillManager {
      * dialog-style UI</a> are available for {@code view}, shows a dialog allowing the user to
      * select a suggestion and returns {@code true}.
      * <p>
-     * The dialog may not be available if the autofill service does not support it, or if the
-     * autofill request has not returned a response yet.
+     * The dialog may not be shown if the autofill service does not support it, if the autofill
+     * request has not returned a response yet, if the dialog was shown previously, or if the
+     * input method is already shown.
      * <p>
      * It is recommended apps to call this method the first time a user focuses on
      * an autofill-able form, and to avoid showing the input method if the dialog is shown. If
@@ -3143,9 +3163,16 @@ public final class AutofillManager {
     // TODO(b/210926084): Consider whether to include the one-time show logic within this method.
     public boolean showAutofillDialog(@NonNull View view) {
         Objects.requireNonNull(view);
-        if (shouldShowAutofillDialog(view.getAutofillId())) {
-            // If the id matches a trigger id, this will trigger the fill dialog.
-            notifyViewEntered(view);
+        if (shouldShowAutofillDialog(view, view.getAutofillId())) {
+            mShowAutofillDialogCalled = true;
+            final WeakReference<View> wrView = new WeakReference<>(view);
+            // The id matches a trigger id, this will trigger the fill dialog.
+            post(() -> {
+                final View v = wrView.get();
+                if (v != null) {
+                    notifyViewEntered(v);
+                }
+            });
             return true;
         }
         return false;
@@ -3174,18 +3201,33 @@ public final class AutofillManager {
      */
     public boolean showAutofillDialog(@NonNull View view, int virtualId) {
         Objects.requireNonNull(view);
-        if (shouldShowAutofillDialog(getAutofillId(view, virtualId))) {
-            // If the id matches a trigger id, this will trigger the fill dialog.
-            notifyViewEntered(view, virtualId, /* bounds= */ null, /* flags= */ 0);
+        if (shouldShowAutofillDialog(view, getAutofillId(view, virtualId))) {
+            mShowAutofillDialogCalled = true;
+            final WeakReference<View> wrView = new WeakReference<>(view);
+            // The id matches a trigger id, this will trigger the fill dialog.
+            post(() -> {
+                final View v = wrView.get();
+                if (v != null) {
+                    notifyViewEntered(v, virtualId, /* bounds= */ null, /* flags= */ 0);
+                }
+            });
             return true;
         }
         return false;
     }
 
-    private boolean shouldShowAutofillDialog(AutofillId id) {
-        if (!hasFillDialogUiFeature() || mFillDialogTriggerIds == null) {
+    private boolean shouldShowAutofillDialog(View view, AutofillId id) {
+        if (!hasFillDialogUiFeature()
+                || mShowAutofillDialogCalled
+                || mFillDialogTriggerIds == null) {
             return false;
         }
+
+        if (getImeStateFlag(view) == FLAG_IME_SHOWING) {
+            // IME is showing
+            return false;
+        }
+
         final int size = mFillDialogTriggerIds.size();
         for (int i = 0; i < size; i++) {
             AutofillId fillId = mFillDialogTriggerIds.get(i);
