@@ -43,6 +43,8 @@ import android.window.WindowContainerTransaction;
 
 import androidx.window.common.EmptyLifecycleCallbacksAdapter;
 
+import com.android.internal.annotations.VisibleForTesting;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -65,10 +67,12 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
      * When the app is host of multiple Tasks, there can be multiple splits controlled by the same
      * organizer.
      */
-    private final SparseArray<TaskContainer> mTaskContainers = new SparseArray<>();
+    @VisibleForTesting
+    final SparseArray<TaskContainer> mTaskContainers = new SparseArray<>();
 
     // Callback to Jetpack to notify about changes to split states.
-    private @NonNull Consumer<List<SplitInfo>> mEmbeddingCallback;
+    @NonNull
+    private Consumer<List<SplitInfo>> mEmbeddingCallback;
     private final List<SplitInfo> mLastReportedSplitStates = new ArrayList<>();
 
     // We currently only support split activity embedding within the one root Task.
@@ -1029,7 +1033,8 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
     }
 
     /** Represents TaskFragments and split pairs below a Task. */
-    private static class TaskContainer {
+    @VisibleForTesting
+    static class TaskContainer {
         final List<TaskFragmentContainer> mContainers = new ArrayList<>();
         final List<SplitContainer> mSplitContainers = new ArrayList<>();
     }
