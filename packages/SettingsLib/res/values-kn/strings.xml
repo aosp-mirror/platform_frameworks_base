@@ -596,6 +596,8 @@
     <string name="guest_reset_guest_dialog_title" msgid="8047270010895437534">"ಅತಿಥಿ ಬಳಕೆದಾರರನ್ನು ರೀಸೆಟ್ ಮಾಡಬೇಕೆ?"</string>
     <string name="guest_remove_guest_dialog_title" msgid="4548511006624088072">"ಅತಿಥಿಯನ್ನು ತೆಗೆದುಹಾಕಬೇಕೇ?"</string>
     <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"ರೀಸೆಟ್ ಮಾಡಿ"</string>
+    <!-- no translation found for guest_remove_guest_confirm_button (7858123434954143879) -->
+    <skip />
     <string name="guest_resetting" msgid="7822120170191509566">"ಅತಿಥಿ ಬಳಕೆದಾರರ ಸೆಟ್ಟಿಂಗ್ ಅನ್ನು ರೀಸೆಟ್ ಮಾಡಲಾಗುತ್ತಿದೆ…"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"ಫೋಟೋ ತೆಗೆದುಕೊಳ್ಳಿ"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"ಚಿತ್ರವನ್ನು ಆರಿಸಿ"</string>
@@ -651,4 +653,10 @@
     <string name="turn_screen_on_title" msgid="3266937298097573424">"ಸ್ಕ್ರೀನ್ ಅನ್ನು ಆನ್ ಮಾಡಿ"</string>
     <string name="allow_turn_screen_on" msgid="6194845766392742639">"ಸ್ಕ್ರೀನ್ ಅನ್ನು ಆನ್ ಮಾಡಲು ಅನುಮತಿಸಿ"</string>
     <string name="allow_turn_screen_on_description" msgid="43834403291575164">"ಸ್ಕ್ರೀನ್ ಅನ್ನು ಆನ್ ಮಾಡಲು ಆ್ಯಪ್‌ಗೆ ಅನುಮತಿಸಿ. ಅನುಮತಿಸಿದರೆ, ನಿಮಗೆ ಅಗತ್ಯವಿಲ್ಲದಿದ್ದಾಗಲೂ ಆ್ಯಪ್ ಯಾವುದೇ ಸಮಯದಲ್ಲಿ ಸ್ಕ್ರೀನ್ ಅನ್ನು ಆನ್ ಮಾಡಬಹುದು."</string>
+    <!-- no translation found for bt_le_audio_scan_qr_code (3521809854780392679) -->
+    <skip />
+    <!-- no translation found for bt_le_audio_scan_qr_code_scanner (4679500020630341107) -->
+    <skip />
+    <!-- no translation found for bt_le_audio_qr_code_is_not_valid_format (6092191081849434734) -->
+    <skip />
 </resources>

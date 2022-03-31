@@ -596,6 +596,8 @@
     <string name="guest_reset_guest_dialog_title" msgid="8047270010895437534">"Желите ли да ресетујете сесију госта?"</string>
     <string name="guest_remove_guest_dialog_title" msgid="4548511006624088072">"Желите ли да уклоните госта?"</string>
     <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"Ресетуј"</string>
+    <!-- no translation found for guest_remove_guest_confirm_button (7858123434954143879) -->
+    <skip />
     <string name="guest_resetting" msgid="7822120170191509566">"Сесија госта се ресетује…"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"Сликај"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"Одабери слику"</string>
@@ -651,4 +653,10 @@
     <string name="turn_screen_on_title" msgid="3266937298097573424">"Укључите екран"</string>
     <string name="allow_turn_screen_on" msgid="6194845766392742639">"Дозволи укључивање екрана"</string>
     <string name="allow_turn_screen_on_description" msgid="43834403291575164">"Дозвољава апликацији да укључи екран. Ако се омогући, апликација може да укључи екран у било ком тренутку без ваше експлицитне намере."</string>
+    <!-- no translation found for bt_le_audio_scan_qr_code (3521809854780392679) -->
+    <skip />
+    <!-- no translation found for bt_le_audio_scan_qr_code_scanner (4679500020630341107) -->
+    <skip />
+    <!-- no translation found for bt_le_audio_qr_code_is_not_valid_format (6092191081849434734) -->
+    <skip />
 </resources>
