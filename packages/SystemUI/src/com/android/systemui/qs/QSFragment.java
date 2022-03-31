@@ -763,13 +763,32 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
 
     @Override
     public int getQsMinExpansionHeight() {
+        if (mInSplitShade) {
+            return getQsMinExpansionHeightForSplitShade();
+        }
         return mHeader.getHeight();
+    }
+
+    /**
+     * Returns the min expansion height for split shade.
+     *
+     * On split shade, QS is always expanded and goes from the top of the screen to the bottom of
+     * the QS container.
+     */
+    private int getQsMinExpansionHeightForSplitShade() {
+        getView().getLocationOnScreen(mTemp);
+        int top = mTemp[1];
+        // We want to get the original top position, so we subtract any translation currently set.
+        int originalTop = (int) (top - getView().getTranslationY());
+        // On split shade the QS view doesn't start at the top of the screen, so we need to add the
+        // top margin.
+        return originalTop + getView().getHeight();
     }
 
     @Override
     public void hideImmediately() {
         getView().animate().cancel();
-        getView().setY(-mHeader.getHeight());
+        getView().setY(-getQsMinExpansionHeight());
     }
 
     private final ViewTreeObserver.OnPreDrawListener mStartHeaderSlidingIn
