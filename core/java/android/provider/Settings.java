@@ -2829,6 +2829,7 @@ public final class Settings {
         // for the fast path of retrieving settings.
         private final String mCallGetCommand;
         private final String mCallSetCommand;
+        private final String mCallDeleteCommand;
         private final String mCallListCommand;
         private final String mCallSetAllCommand;
 
@@ -2840,17 +2841,19 @@ public final class Settings {
         private GenerationTracker mGenerationTracker;
 
         <T extends NameValueTable> NameValueCache(Uri uri, String getCommand,
-                String setCommand, ContentProviderHolder providerHolder, Class<T> callerClass) {
-            this(uri, getCommand, setCommand, null, null, providerHolder,
+                String setCommand, String deleteCommand, ContentProviderHolder providerHolder,
+                Class<T> callerClass) {
+            this(uri, getCommand, setCommand, deleteCommand, null, null, providerHolder,
                     callerClass);
         }
 
         private <T extends NameValueTable> NameValueCache(Uri uri, String getCommand,
-                String setCommand, String listCommand, String setAllCommand,
+                String setCommand, String deleteCommand, String listCommand, String setAllCommand,
                 ContentProviderHolder providerHolder, Class<T> callerClass) {
             mUri = uri;
             mCallGetCommand = getCommand;
             mCallSetCommand = setCommand;
+            mCallDeleteCommand = deleteCommand;
             mCallListCommand = listCommand;
             mCallSetAllCommand = setAllCommand;
             mProviderHolder = providerHolder;
@@ -2906,6 +2909,20 @@ public final class Settings {
                 // Not supported by the remote side
                 return SET_ALL_RESULT_FAILURE;
             }
+        }
+
+        public boolean deleteStringForUser(ContentResolver cr, String name, final int userHandle) {
+            try {
+                Bundle arg = new Bundle();
+                arg.putInt(CALL_METHOD_USER_KEY, userHandle);
+                IContentProvider cp = mProviderHolder.getProvider(cr);
+                cp.call(cr.getAttributionSource(),
+                        mProviderHolder.mUri.getAuthority(), mCallDeleteCommand, name, arg);
+            } catch (RemoteException e) {
+                Log.w(TAG, "Can't delete key " + name + " in " + mUri, e);
+                return false;
+            }
+            return true;
         }
 
         @UnsupportedAppUsage
@@ -3370,6 +3387,7 @@ public final class Settings {
                 CONTENT_URI,
                 CALL_METHOD_GET_SYSTEM,
                 CALL_METHOD_PUT_SYSTEM,
+                CALL_METHOD_DELETE_SYSTEM,
                 sProviderHolder,
                 System.class);
 
@@ -5690,6 +5708,7 @@ public final class Settings {
                 CONTENT_URI,
                 CALL_METHOD_GET_SECURE,
                 CALL_METHOD_PUT_SECURE,
+                CALL_METHOD_DELETE_SECURE,
                 sProviderHolder,
                 Secure.class);
 
@@ -15176,6 +15195,7 @@ public final class Settings {
                     CONTENT_URI,
                     CALL_METHOD_GET_GLOBAL,
                     CALL_METHOD_PUT_GLOBAL,
+                    CALL_METHOD_DELETE_GLOBAL,
                     sProviderHolder,
                     Global.class);
 
@@ -16408,6 +16428,7 @@ public final class Settings {
                 DeviceConfig.CONTENT_URI,
                 CALL_METHOD_GET_CONFIG,
                 CALL_METHOD_PUT_CONFIG,
+                CALL_METHOD_DELETE_CONFIG,
                 CALL_METHOD_LIST_CONFIG,
                 CALL_METHOD_SET_ALL_CONFIG,
                 sProviderHolder,
@@ -16514,6 +16535,26 @@ public final class Settings {
             }
             // If can't set given configuration that means it's bad
             throw new DeviceConfig.BadConfigException();
+        }
+
+        /**
+         * Delete a name/value pair from the database for the specified namespace.
+         *
+         * @param resolver to access the database with.
+         * @param namespace to delete the name/value pair from.
+         * @param name to delete.
+         * @return true if the value was deleted, false on database errors. If the name/value pair
+         * did not exist, return True.
+         *
+         * @see #resetToDefaults(ContentResolver, int, String)
+         *
+         * @hide
+         */
+        @RequiresPermission(Manifest.permission.WRITE_DEVICE_CONFIG)
+        static boolean deleteString(@NonNull ContentResolver resolver, @NonNull String namespace,
+                @NonNull String name) {
+            return sNameValueCache.deleteStringForUser(resolver,
+                    createCompositeName(namespace, name), resolver.getUserId());
         }
 
         /**

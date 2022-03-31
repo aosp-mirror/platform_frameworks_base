@@ -822,7 +822,7 @@ public final class DeviceConfig {
     }
 
     /**
-     * Create a new property with the the provided name and value in the provided namespace, or
+     * Create a new property with the provided name and value in the provided namespace, or
      * update the value of such a property if it already exists. The same name can exist in multiple
      * namespaces and might have different values in any or all namespaces.
      * <p>
@@ -869,6 +869,22 @@ public final class DeviceConfig {
         ContentResolver contentResolver = ActivityThread.currentApplication().getContentResolver();
         return Settings.Config.setStrings(contentResolver, properties.getNamespace(),
                 properties.mMap);
+    }
+
+    /**
+     * Delete a property with the provided name and value in the provided namespace
+     *
+     * @param namespace   The namespace containing the property to create or update.
+     * @param name        The name of the property to create or update.
+     * @return True if the property was deleted or it did not exist in the first place.
+     * False if the storage implementation throws errors.
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(WRITE_DEVICE_CONFIG)
+    public static boolean deleteProperty(@NonNull String namespace, @NonNull String name) {
+        ContentResolver contentResolver = ActivityThread.currentApplication().getContentResolver();
+        return Settings.Config.deleteString(contentResolver, namespace, name);
     }
 
     /**
