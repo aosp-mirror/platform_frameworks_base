@@ -2029,8 +2029,7 @@
     <string name="log_access_confirmation_title" msgid="2343578467290592708">"Payagan ang <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> na i-access ang lahat ng log ng device?"</string>
     <string name="log_access_confirmation_allow" msgid="143157286283302512">"Ngayon lang"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"Huwag payagan"</string>
-    <!-- no translation found for log_access_confirmation_body (6581985716241928135) -->
-    <skip />
+    <string name="log_access_confirmation_body" msgid="6581985716241928135">"Nire-record ng mga log ng device kung ano ang nangyayari sa iyong device. Magagamit ng mga app ang mga log na ito para maghanap at mag-ayos ng mga isyu.\n\nPosibleng maglaman ang ilang log ng sensitibong impormasyon, kaya ang mga app lang na pinagkakatiwalaan mo ang payagang maka-access sa lahat ng log ng device. \n\nKung hindi mo papayagan ang app na ito na i-access ang lahat ng log ng device, maa-access pa rin nito ang mga sarili nitong log. Posible pa ring ma-access ng manufacturer ng iyong device ang ilang log o impormasyon sa device mo. Matuto pa"</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"Huwag ipakita ulit"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"Gustong ipakita ng <xliff:g id="APP_0">%1$s</xliff:g> ang mga slice ng <xliff:g id="APP_2">%2$s</xliff:g>"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"I-edit"</string>
@@ -2264,9 +2263,7 @@
     <string name="notification_content_abusive_bg_apps" msgid="5572096708044958249">"Gumagana ang <xliff:g id="APP">%1$s</xliff:g> sa background at gumagamit ito ng baterya I-tap para suriin."</string>
     <string name="notification_content_long_running_fgs" msgid="8878031652441570178">"Napakatagal nang gumagana ang <xliff:g id="APP">%1$s</xliff:g> sa background. I-tap para suriin."</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Tingnan ang mga aktibong app"</string>
-    <!-- no translation found for vdm_camera_access_denied (6102378580971542473) -->
-    <skip />
-    <!-- no translation found for vdm_camera_access_denied (6895968310395249076) -->
-    <skip />
+    <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"Hindi ma-access ang camera ng telepono mula sa iyong <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
+    <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"Hindi ma-access ang camera ng tablet mula sa iyong <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
     <string name="system_locale_title" msgid="3978041860457277638">"Wika ng system"</string>
 </resources>
