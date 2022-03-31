@@ -432,6 +432,11 @@ public class PipAnimationController {
             return !isOutPipDirection(mTransitionDirection);
         }
 
+        boolean shouldApplyShadowRadius() {
+            return !isOutPipDirection(mTransitionDirection)
+                    && !isRemovePipDirection(mTransitionDirection);
+        }
+
         boolean inScaleTransition() {
             if (mAnimationType != ANIM_TYPE_BOUNDS) return false;
             final int direction = getTransitionDirection();
@@ -483,7 +488,7 @@ public class PipAnimationController {
                     setCurrentValue(alpha);
                     getSurfaceTransactionHelper().alpha(tx, leash, alpha)
                             .round(tx, leash, shouldApplyCornerRadius())
-                            .shadow(tx, leash);
+                            .shadow(tx, leash, shouldApplyShadowRadius());
                     tx.apply();
                 }
 
@@ -497,7 +502,7 @@ public class PipAnimationController {
                             .resetScale(tx, leash, getDestinationBounds())
                             .crop(tx, leash, getDestinationBounds())
                             .round(tx, leash, shouldApplyCornerRadius())
-                            .shadow(tx, leash);
+                            .shadow(tx, leash, shouldApplyShadowRadius());
                     tx.show(leash);
                     tx.apply();
                 }
@@ -585,7 +590,7 @@ public class PipAnimationController {
                             getSurfaceTransactionHelper().crop(tx, leash, base)
                                     .scale(tx, leash, base, bounds, angle)
                                     .round(tx, leash, base, bounds)
-                                    .shadow(tx, leash);
+                                    .shadow(tx, leash, shouldApplyShadowRadius());
                         }
                     } else {
                         final Rect insets = computeInsets(fraction);
@@ -596,7 +601,7 @@ public class PipAnimationController {
                             sourceBounds.inset(insets);
                             getSurfaceTransactionHelper()
                                     .round(tx, leash, sourceBounds, bounds)
-                                    .shadow(tx, leash);
+                                    .shadow(tx, leash, shouldApplyShadowRadius());
                         }
                     }
                     if (!handlePipTransaction(leash, tx, bounds)) {
@@ -649,7 +654,7 @@ public class PipAnimationController {
                     if (shouldApplyCornerRadius()) {
                         getSurfaceTransactionHelper()
                                 .round(tx, leash, sourceBounds, bounds)
-                                .shadow(tx, leash);
+                                .shadow(tx, leash, shouldApplyShadowRadius());
                     }
                     tx.apply();
                 }
@@ -668,7 +673,7 @@ public class PipAnimationController {
                     getSurfaceTransactionHelper()
                             .alpha(tx, leash, 1f)
                             .round(tx, leash, shouldApplyCornerRadius())
-                            .shadow(tx, leash);
+                            .shadow(tx, leash, shouldApplyShadowRadius());
                     // TODO(b/178632364): this is a work around for the black background when
                     // entering PiP in buttion navigation mode.
                     if (isInPipDirection(direction)) {
