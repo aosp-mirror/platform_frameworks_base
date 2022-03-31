@@ -34,6 +34,10 @@
     <string name="status_bar_settings_auto_rotation" msgid="8329080442278431708">"திரையைத் தானாகச் சுழற்று"</string>
     <string name="usb_device_permission_prompt" msgid="4414719028369181772">"<xliff:g id="USB_DEVICE">%2$s</xliff:g>ஐ அணுக, <xliff:g id="APPLICATION">%1$s</xliff:g> ஆப்ஸை அனுமதிக்கவா?"</string>
     <string name="usb_device_permission_prompt_warn" msgid="2309129784984063656">"<xliff:g id="USB_DEVICE">%2$s</xliff:g>ஐப் பயன்படுத்த <xliff:g id="APPLICATION">%1$s</xliff:g>ஐ அனுமதிக்கவா?\nஇந்த ஆப்ஸிற்கு ரெக்கார்டு செய்வதற்கான அனுமதி வழங்கப்படவில்லை, எனினும் இந்த USB சாதனம் மூலம் ஆடியோவைப் பதிவுசெய்யும்."</string>
+    <string name="usb_audio_device_permission_prompt_title" msgid="4221351137250093451">"<xliff:g id="USB_DEVICE">%2$s</xliff:g> சாதனத்தை அணுக <xliff:g id="APPLICATION">%1$s</xliff:g> ஆப்ஸை அனுமதிக்கவா?"</string>
+    <string name="usb_audio_device_confirm_prompt_title" msgid="8828406516732985696">"<xliff:g id="USB_DEVICE">%2$s</xliff:g> சாதனத்தைக் கையாள <xliff:g id="APPLICATION">%1$s</xliff:g> ஆப்ஸைத் திறக்கவா?"</string>
+    <string name="usb_audio_device_prompt_warn" msgid="2504972133361130335">"இந்த ஆப்ஸில் ரெக்கார்டு செய்வதற்கு அனுமதி இல்லை, எனினும் இந்த USB சாதனம் மூலம் ஆடியோவைப் பதிவுசெய்யலாம். இந்தச் சாதனத்தில் <xliff:g id="APPLICATION">%1$s</xliff:g> ஆப்ஸைப் பயன்படுத்தினால் அழைப்புகள், அறிவிப்புகள், அலாரங்கள் ஆகியவற்றின் ஒலி கேட்பது தடுக்கப்படக்கூடும்."</string>
+    <string name="usb_audio_device_prompt" msgid="7944987408206252949">"இந்தச் சாதனத்தில் <xliff:g id="APPLICATION">%1$s</xliff:g> ஆப்ஸைப் பயன்படுத்தினால் அழைப்புகள், அறிவிப்புகள், அலாரங்கள் ஆகியவற்றின் ஒலி கேட்பது தடுக்கப்படக்கூடும்."</string>
     <string name="usb_accessory_permission_prompt" msgid="717963550388312123">"<xliff:g id="USB_ACCESSORY">%2$s</xliff:g>ஐ அணுக, <xliff:g id="APPLICATION">%1$s</xliff:g> ஆப்ஸை அனுமதிக்கவா?"</string>
     <string name="usb_device_confirm_prompt" msgid="4091711472439910809">"<xliff:g id="USB_DEVICE">%2$s</xliff:g>ஐக் கையாள, <xliff:g id="APPLICATION">%1$s</xliff:g> பயன்பாட்டைத் திறக்கவா?"</string>
     <string name="usb_device_confirm_prompt_warn" msgid="990208659736311769">"<xliff:g id="USB_DEVICE">%2$s</xliff:g>ஐக் கையாள <xliff:g id="APPLICATION">%1$s</xliff:g>ஐத் திறக்கவா?\nஇந்த ஆப்ஸிற்கு ரெக்கார்டு செய்வதற்கான அனுமதி வழங்கப்படவில்லை, எனினும் இந்த USB சாதனம் மூலம் ஆடியோவைப் பதிவுசெய்ய முடியும்."</string>
@@ -131,7 +135,8 @@
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="2242167416140740920">"முகம் அங்கீகரிக்கப்பட்டது"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"உறுதிப்படுத்தப்பட்டது"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"முடிக்க \'உறுதிப்படுத்துக\' என்பதை தட்டவும்"</string>
-    <string name="biometric_dialog_tap_confirm_with_face" msgid="1597899891472340950">"முகத்தை வைத்து அன்லாக் செய்யப்பட்டது. திறக்க அழுத்தவும்."</string>
+    <!-- no translation found for biometric_dialog_tap_confirm_with_face (7538145860465755864) -->
+    <skip />
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"அங்கீகரிக்கப்பட்டது"</string>
     <string name="biometric_dialog_use_pin" msgid="8385294115283000709">"பின்னைப் பயன்படுத்து"</string>
     <string name="biometric_dialog_use_pattern" msgid="2315593393167211194">"பேட்டர்னைப் பயன்படுத்து"</string>
@@ -287,6 +292,24 @@
     <string name="sensor_privacy_start_use_mic_dialog_content" msgid="1624701280680913717">"உங்கள் மைக்ரோஃபோனைப் பயன்படுத்த அனுமதிக்கப்பட்டுள்ள அனைத்து ஆப்ஸ் மற்றும் சேவைகளை அணுகுவதற்கான தடுப்பை இது நீக்கும்."</string>
     <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"உங்கள் கேமராவைப் பயன்படுத்த அனுமதிக்கப்பட்டுள்ள அனைத்து ஆப்ஸ் மற்றும் சேவைகளை அணுகுவதற்கான தடுப்பை இது நீக்கும்."</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_content" msgid="3577642558418404919">"உங்கள் கேமராவையோ மைக்ரோஃபோனையோ பயன்படுத்த அனுமதிக்கப்பட்டுள்ள அனைத்து ஆப்ஸ் மற்றும் சேவைகளை அணுகுவதற்கான தடுப்பை இது நீக்கும்."</string>
+    <!-- no translation found for sensor_privacy_start_use_mic_blocked_dialog_title (2640140287496469689) -->
+    <skip />
+    <!-- no translation found for sensor_privacy_start_use_camera_blocked_dialog_title (7398084286822440384) -->
+    <skip />
+    <!-- no translation found for sensor_privacy_start_use_mic_camera_blocked_dialog_title (195236134743281973) -->
+    <skip />
+    <!-- no translation found for sensor_privacy_start_use_mic_blocked_dialog_content (2138318880682877747) -->
+    <skip />
+    <!-- no translation found for sensor_privacy_start_use_camera_blocked_dialog_content (7216015168047965948) -->
+    <skip />
+    <!-- no translation found for sensor_privacy_start_use_mic_camera_blocked_dialog_content (3960837827570483762) -->
+    <skip />
+    <!-- no translation found for sensor_privacy_mic_unblocked_toast_content (306555320557065068) -->
+    <skip />
+    <!-- no translation found for sensor_privacy_camera_unblocked_toast_content (7843105715964332311) -->
+    <skip />
+    <!-- no translation found for sensor_privacy_mic_camera_unblocked_toast_content (7339355093282661115) -->
+    <skip />
     <string name="media_seamless_other_device" msgid="4654849800789196737">"பிற சாதனம்"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"மேலோட்டப் பார்வையை நிலைமாற்று"</string>
     <string name="zen_priority_introduction" msgid="3159291973383796646">"அலாரங்கள், நினைவூட்டல்கள், நிகழ்வுகள் மற்றும் குறிப்பிட்ட அழைப்பாளர்களைத் தவிர்த்து, பிற ஒலிகள் மற்றும் அதிர்வுகளின் தொந்தரவு இருக்காது. எனினும், நீங்கள் எதையேனும் (இசை, வீடியோக்கள், கேம்ஸ் போன்றவை) ஒலிக்கும்படி தேர்ந்தெடுத்திருந்தால், அவை வழக்கம் போல் ஒலிக்கும்."</string>
@@ -320,7 +343,6 @@
     <string name="keyguard_indication_charging_time_dock" msgid="6150404291427377863">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • டாக் மூலம் சார்ஜாகிறது • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> இல் முழுமையாகச் சார்ஜாகிவிடும்"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"பயனரை மாற்று"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"இந்த அமர்வின் எல்லா ஆப்ஸும் தரவும் நீக்கப்படும்."</string>
-    <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"அகற்று"</string>
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"நல்வரவு!"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"உங்கள் அமர்வைத் தொடர விருப்பமா?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"மீண்டும் தொடங்கு"</string>
@@ -766,6 +788,18 @@
     <string name="controls_dialog_ok" msgid="2770230012857881822">"சேர்"</string>
     <string name="controls_dialog_message" msgid="342066938390663844">"<xliff:g id="APP">%s</xliff:g> ஆப்ஸால் பரிந்துரைக்கப்பட்டது"</string>
     <string name="controls_tile_locked" msgid="731547768182831938">"சாதனம் பூட்டப்பட்டது"</string>
+    <!-- no translation found for controls_settings_show_controls_dialog_title (3357852503553809554) -->
+    <skip />
+    <!-- no translation found for controls_settings_show_controls_dialog_message (7666211700524587969) -->
+    <skip />
+    <!-- no translation found for controls_settings_trivial_controls_dialog_title (7593188157655036677) -->
+    <skip />
+    <!-- no translation found for controls_settings_trivial_controls_dialog_message (237183787721917586) -->
+    <skip />
+    <!-- no translation found for controls_settings_dialog_neutral_button (4514446354793124140) -->
+    <skip />
+    <!-- no translation found for controls_settings_dialog_positive_button (436070672551674863) -->
+    <skip />
     <string name="controls_pin_use_alphanumeric" msgid="8478371861023048414">"பின்னில் எழுத்துகள் அல்லது குறிகள் உள்ளன"</string>
     <string name="controls_pin_verify" msgid="3452778292918877662">"<xliff:g id="DEVICE">%s</xliff:g> ஐச் சரிபார்த்தல்"</string>
     <string name="controls_pin_wrong" msgid="6162694056042164211">"தவறான பின்"</string>
@@ -815,6 +849,20 @@
     <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"இந்த அமர்வை அலைபரப்ப ஆப்ஸைத் திறங்கள்."</string>
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"அறியப்படாத ஆப்ஸ்"</string>
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"அலைபரப்புவதை நிறுத்து"</string>
+    <!-- no translation found for media_output_first_broadcast_title (6292237789860753022) -->
+    <skip />
+    <!-- no translation found for media_output_broadcast (3555580945878071543) -->
+    <skip />
+    <!-- no translation found for media_output_first_notify_broadcast_message (6353857724136398494) -->
+    <skip />
+    <!-- no translation found for media_output_broadcasting_message (4150299923404886073) -->
+    <skip />
+    <!-- no translation found for media_output_broadcast_name (8786127091542624618) -->
+    <skip />
+    <!-- no translation found for media_output_broadcast_code (870795639644728542) -->
+    <skip />
+    <!-- no translation found for media_output_broadcast_dialog_save (7910865591430010198) -->
+    <skip />
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"பதிப்பு எண்"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"பதிப்பு எண் கிளிப்போர்டுக்கு நகலெடுக்கப்பட்டது."</string>
     <string name="basic_status" msgid="2315371112182658176">"திறந்தநிலை உரையாடல்"</string>
@@ -891,7 +939,8 @@
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"செயலிலுள்ள ஆப்ஸ்"</string>
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"நிறுத்து"</string>
     <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"இயங்கவில்லை"</string>
-    <string name="clipboard_edit_text_copy" msgid="770856373439969178">"நகலெடு"</string>
+    <!-- no translation found for clipboard_edit_text_done (4551887727694022409) -->
+    <skip />
     <string name="clipboard_overlay_text_copied" msgid="1872624400464891363">"நகலெடுக்கப்பட்டது"</string>
     <string name="clipboard_edit_source" msgid="9156488177277788029">"<xliff:g id="APPNAME">%1$s</xliff:g> ஆப்ஸிலிருந்து"</string>
     <string name="clipboard_dismiss_description" msgid="7544573092766945657">"கிளிப்போர்டு மேலடுக்கை மூடுக"</string>

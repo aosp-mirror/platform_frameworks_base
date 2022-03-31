@@ -34,6 +34,10 @@
     <string name="status_bar_settings_auto_rotation" msgid="8329080442278431708">"自動旋轉螢幕"</string>
     <string name="usb_device_permission_prompt" msgid="4414719028369181772">"要允許「<xliff:g id="APPLICATION">%1$s</xliff:g>」存取「<xliff:g id="USB_DEVICE">%2$s</xliff:g>」嗎？"</string>
     <string name="usb_device_permission_prompt_warn" msgid="2309129784984063656">"要允許「<xliff:g id="APPLICATION">%1$s</xliff:g>」存取「<xliff:g id="USB_DEVICE">%2$s</xliff:g>」嗎？\n此應用程式尚未獲授予錄音權限，但可透過此 USB 裝置記錄音訊。"</string>
+    <string name="usb_audio_device_permission_prompt_title" msgid="4221351137250093451">"要允許「<xliff:g id="APPLICATION">%1$s</xliff:g>」存取「<xliff:g id="USB_DEVICE">%2$s</xliff:g>」嗎？"</string>
+    <string name="usb_audio_device_confirm_prompt_title" msgid="8828406516732985696">"要開啟「<xliff:g id="APPLICATION">%1$s</xliff:g>」處理「<xliff:g id="USB_DEVICE">%2$s</xliff:g>」嗎？"</string>
+    <string name="usb_audio_device_prompt_warn" msgid="2504972133361130335">"此應用程式尚未獲授予錄音權限，但可透過此 USB 裝置記錄音訊。如將「<xliff:g id="APPLICATION">%1$s</xliff:g>」與此裝置配合使用，您可能無法聽見來電、通知及鬧鐘的音效。"</string>
+    <string name="usb_audio_device_prompt" msgid="7944987408206252949">"如將「<xliff:g id="APPLICATION">%1$s</xliff:g>」與此裝置配合使用，您可能無法聽見來電、通知及鬧鐘的音效。"</string>
     <string name="usb_accessory_permission_prompt" msgid="717963550388312123">"要允許「<xliff:g id="APPLICATION">%1$s</xliff:g>」存取「<xliff:g id="USB_ACCESSORY">%2$s</xliff:g>」嗎？"</string>
     <string name="usb_device_confirm_prompt" msgid="4091711472439910809">"要開啟「<xliff:g id="APPLICATION">%1$s</xliff:g>」處理「<xliff:g id="USB_DEVICE">%2$s</xliff:g>」嗎？"</string>
     <string name="usb_device_confirm_prompt_warn" msgid="990208659736311769">"要開啟「<xliff:g id="APPLICATION">%1$s</xliff:g>」應用程式來控制「<xliff:g id="USB_DEVICE">%2$s</xliff:g>」嗎？\n此應用程式尚未獲授予錄音權限，但可透過此 USB 裝置記錄音訊。"</string>
@@ -131,7 +135,8 @@
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="2242167416140740920">"臉孔已經驗證"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"已確認"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"輕按 [確定] 以完成"</string>
-    <string name="biometric_dialog_tap_confirm_with_face" msgid="1597899891472340950">"您已使用面孔解鎖。按下即可繼續操作。"</string>
+    <!-- no translation found for biometric_dialog_tap_confirm_with_face (7538145860465755864) -->
+    <skip />
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"驗證咗"</string>
     <string name="biometric_dialog_use_pin" msgid="8385294115283000709">"使用 PIN"</string>
     <string name="biometric_dialog_use_pattern" msgid="2315593393167211194">"使用圖案"</string>
@@ -287,6 +292,24 @@
     <string name="sensor_privacy_start_use_mic_dialog_content" msgid="1624701280680913717">"解除封鎖後，凡有存取權的應用程式和服務都可使用您的麥克風。"</string>
     <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"解除封鎖後，凡有存取權的應用程式和服務都可使用您的相機。"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_content" msgid="3577642558418404919">"解除封鎖後，凡有存取權的應用程式和服務都可使用您的相機或麥克風。"</string>
+    <!-- no translation found for sensor_privacy_start_use_mic_blocked_dialog_title (2640140287496469689) -->
+    <skip />
+    <!-- no translation found for sensor_privacy_start_use_camera_blocked_dialog_title (7398084286822440384) -->
+    <skip />
+    <!-- no translation found for sensor_privacy_start_use_mic_camera_blocked_dialog_title (195236134743281973) -->
+    <skip />
+    <!-- no translation found for sensor_privacy_start_use_mic_blocked_dialog_content (2138318880682877747) -->
+    <skip />
+    <!-- no translation found for sensor_privacy_start_use_camera_blocked_dialog_content (7216015168047965948) -->
+    <skip />
+    <!-- no translation found for sensor_privacy_start_use_mic_camera_blocked_dialog_content (3960837827570483762) -->
+    <skip />
+    <!-- no translation found for sensor_privacy_mic_unblocked_toast_content (306555320557065068) -->
+    <skip />
+    <!-- no translation found for sensor_privacy_camera_unblocked_toast_content (7843105715964332311) -->
+    <skip />
+    <!-- no translation found for sensor_privacy_mic_camera_unblocked_toast_content (7339355093282661115) -->
+    <skip />
     <string name="media_seamless_other_device" msgid="4654849800789196737">"其他裝置"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"切換概覽"</string>
     <string name="zen_priority_introduction" msgid="3159291973383796646">"您不會受到聲音和震動騷擾 (鬧鐘、提醒、活動和您指定的來電者鈴聲除外)。當您選擇播放音樂、影片和遊戲等，仍可以聽到該內容的聲音。"</string>
@@ -320,7 +343,6 @@
     <string name="keyguard_indication_charging_time_dock" msgid="6150404291427377863">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • 正在插座上充電 • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>後充滿電"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"切換使用者"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"這個工作階段中的所有應用程式和資料都會被刪除。"</string>
-    <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"移除"</string>
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"訪客您好，歡迎回來！"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"您要繼續您的工作階段嗎？"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"重新開始"</string>
@@ -766,6 +788,18 @@
     <string name="controls_dialog_ok" msgid="2770230012857881822">"新增"</string>
     <string name="controls_dialog_message" msgid="342066938390663844">"由「<xliff:g id="APP">%s</xliff:g>」提供的建議"</string>
     <string name="controls_tile_locked" msgid="731547768182831938">"裝置已上鎖"</string>
+    <!-- no translation found for controls_settings_show_controls_dialog_title (3357852503553809554) -->
+    <skip />
+    <!-- no translation found for controls_settings_show_controls_dialog_message (7666211700524587969) -->
+    <skip />
+    <!-- no translation found for controls_settings_trivial_controls_dialog_title (7593188157655036677) -->
+    <skip />
+    <!-- no translation found for controls_settings_trivial_controls_dialog_message (237183787721917586) -->
+    <skip />
+    <!-- no translation found for controls_settings_dialog_neutral_button (4514446354793124140) -->
+    <skip />
+    <!-- no translation found for controls_settings_dialog_positive_button (436070672551674863) -->
+    <skip />
     <string name="controls_pin_use_alphanumeric" msgid="8478371861023048414">"PIN 含有字母或符號"</string>
     <string name="controls_pin_verify" msgid="3452778292918877662">"驗證<xliff:g id="DEVICE">%s</xliff:g>"</string>
     <string name="controls_pin_wrong" msgid="6162694056042164211">"PIN 錯誤"</string>
@@ -775,8 +809,7 @@
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"滑動以查看更多"</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"正在載入建議"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"媒體"</string>
-    <!-- no translation found for controls_media_close_session (4780485355795635052) -->
-    <skip />
+    <string name="controls_media_close_session" msgid="4780485355795635052">"要隱藏此「<xliff:g id="APP_NAME">%1$s</xliff:g>」媒體控制嗎？"</string>
     <string name="controls_media_active_session" msgid="3146882316024153337">"無法隱藏目前的媒體工作階段。"</string>
     <string name="controls_media_dismiss_button" msgid="4485675693008031646">"隱藏"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"繼續播放"</string>
@@ -816,6 +849,20 @@
     <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"如要投放此工作階段，請開啟應用程式。"</string>
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"不明應用程式"</string>
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"停止投放"</string>
+    <!-- no translation found for media_output_first_broadcast_title (6292237789860753022) -->
+    <skip />
+    <!-- no translation found for media_output_broadcast (3555580945878071543) -->
+    <skip />
+    <!-- no translation found for media_output_first_notify_broadcast_message (6353857724136398494) -->
+    <skip />
+    <!-- no translation found for media_output_broadcasting_message (4150299923404886073) -->
+    <skip />
+    <!-- no translation found for media_output_broadcast_name (8786127091542624618) -->
+    <skip />
+    <!-- no translation found for media_output_broadcast_code (870795639644728542) -->
+    <skip />
+    <!-- no translation found for media_output_broadcast_dialog_save (7910865591430010198) -->
+    <skip />
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"版本號碼"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"版本號碼已複製到剪貼簿。"</string>
     <string name="basic_status" msgid="2315371112182658176">"開啟對話"</string>
@@ -892,7 +939,8 @@
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"使用中的應用程式"</string>
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"停止"</string>
     <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"已停止"</string>
-    <string name="clipboard_edit_text_copy" msgid="770856373439969178">"複製"</string>
+    <!-- no translation found for clipboard_edit_text_done (4551887727694022409) -->
+    <skip />
     <string name="clipboard_overlay_text_copied" msgid="1872624400464891363">"已複製"</string>
     <string name="clipboard_edit_source" msgid="9156488177277788029">"來自「<xliff:g id="APPNAME">%1$s</xliff:g>」"</string>
     <string name="clipboard_dismiss_description" msgid="7544573092766945657">"關閉剪貼簿使用者介面"</string>
