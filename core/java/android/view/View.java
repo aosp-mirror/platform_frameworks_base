@@ -12048,13 +12048,16 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
-     * Compute the view's coordinate within the surface.
+     * Gets the coordinates of this view in the coordinate space of the
+     * {@link Surface} that contains the view.
      *
-     * <p>Computes the coordinates of this view in its surface. The argument
-     * must be an array of two integers. After the method returns, the array
-     * contains the x and y location in that order.</p>
+     * <p>After the method returns, the argument array contains the x- and
+     * y-coordinates of the view relative to the view's left and top edges,
+     * respectively.
      *
-     * @param location an array of two integers in which to hold the coordinates
+     * @param location A two-element integer array in which the view coordinates
+     *      are stored. The x-coordinate is at index 0; the y-coordinate, at
+     *      index 1.
      */
     public void getLocationInSurface(@NonNull @Size(2) int[] location) {
         getLocationInWindow(location);
@@ -25553,11 +25556,27 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
-     * <p>Computes the coordinates of this view on the screen. The argument
-     * must be an array of two integers. After the method returns, the array
-     * contains the x and y location in that order.</p>
+     * Gets the global coordinates of this view. The coordinates are in the
+     * coordinate space of the device screen, irrespective of system decorations
+     * and whether the system is in multi-window mode.
      *
-     * @param outLocation an array of two integers in which to hold the coordinates
+     * <p>In multi-window mode, the global coordinate space encompasses the
+     * entire device screen, ignoring the bounds of the app window. For
+     * example, if the view is in the bottom portion of a horizontal split
+     * screen, the top edge of the screen&mdash;not the top edge of the
+     * window&mdash;is the origin from which the y-coordinate is calculated.
+     *
+     * <p><b>Note:</b> In multiple-screen scenarios, the global coordinate space
+     * is restricted to the screen on which the view is displayed. The
+     * coordinate space does not span multiple screens.
+     *
+     * <p>After the method returns, the argument array contains the x- and
+     * y-coordinates of the view relative to the view's left and top edges,
+     * respectively.
+     *
+     * @param outLocation A two-element integer array in which the view
+     *      coordinates are stored. The x-coordinate is at index 0; the
+     *      y-coordinate, at index 1.
      */
     public void getLocationOnScreen(@Size(2) int[] outLocation) {
         getLocationInWindow(outLocation);
@@ -25570,11 +25589,20 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
-     * <p>Computes the coordinates of this view in its window. The argument
-     * must be an array of two integers. After the method returns, the array
-     * contains the x and y location in that order.</p>
+     * Gets the coordinates of this view in the coordinate space of the window
+     * that contains the view, irrespective of system decorations.
      *
-     * @param outLocation an array of two integers in which to hold the coordinates
+     * <p>In multi-window mode, the origin of the coordinate space is the
+     * top left corner of the window that contains the view. In full screen
+     * mode, the origin is the top left corner of the device screen.
+     *
+     * <p>After the method returns, the argument array contains the x- and
+     * y-coordinates of the view relative to the view's left and top edges,
+     * respectively.
+     *
+     * @param outLocation A two-element integer array in which the view
+     *      coordinates are stored. The x-coordinate is at index 0; the
+     *      y-coordinate, at index 1.
      */
     public void getLocationInWindow(@Size(2) int[] outLocation) {
         if (outLocation == null || outLocation.length < 2) {
