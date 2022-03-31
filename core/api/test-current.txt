@@ -2404,7 +2404,6 @@ package android.service.quickaccesswallet {
     method public void notifyWalletDismissed();
     method public void removeWalletServiceEventListener(@NonNull android.service.quickaccesswallet.QuickAccessWalletClient.WalletServiceEventListener);
     method public void selectWalletCard(@NonNull android.service.quickaccesswallet.SelectWalletCardRequest);
-    method public boolean useTargetActivityForQuickAccess();
   }
 
   public static interface QuickAccessWalletClient.OnWalletCardsRetrievedCallback {
