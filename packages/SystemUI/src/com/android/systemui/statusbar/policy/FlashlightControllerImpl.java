@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.policy;
 
+import android.annotation.WorkerThread;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -219,6 +220,7 @@ public class FlashlightControllerImpl implements FlashlightController {
             new CameraManager.TorchCallback() {
 
         @Override
+        @WorkerThread
         public void onTorchModeUnavailable(String cameraId) {
             if (TextUtils.equals(cameraId, mCameraId)) {
                 setCameraAvailable(false);
@@ -229,6 +231,7 @@ public class FlashlightControllerImpl implements FlashlightController {
         }
 
         @Override
+        @WorkerThread
         public void onTorchModeChanged(String cameraId, boolean enabled) {
             if (TextUtils.equals(cameraId, mCameraId)) {
                 setCameraAvailable(true);

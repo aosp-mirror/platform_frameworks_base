@@ -275,7 +275,7 @@ class QuickSwitchFromLauncherTest(private val testSpec: FlickerTestParameter) {
         testSpec.assertLayers {
             this.isVisible(LAUNCHER_COMPONENT)
                     .then()
-                    .isVisible(FlickerComponentName.SNAPSHOT)
+                    .isVisible(FlickerComponentName.SNAPSHOT, isOptional = true)
                     .then()
                     .isVisible(testApp.component)
         }

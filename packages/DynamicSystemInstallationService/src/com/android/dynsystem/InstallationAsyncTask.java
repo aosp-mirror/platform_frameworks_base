@@ -23,9 +23,11 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.os.MemoryFile;
 import android.os.ParcelFileDescriptor;
+import android.os.SystemProperties;
 import android.os.image.DynamicSystemManager;
 import android.service.persistentdata.PersistentDataBlockManager;
 import android.util.Log;
+import android.util.Range;
 import android.webkit.URLUtil;
 
 import org.json.JSONException;
@@ -39,16 +41,25 @@ import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipInputStream;
 
-class InstallationAsyncTask extends AsyncTask<String, InstallationAsyncTask.Progress, Throwable> {
+class InstallationAsyncTask extends AsyncTask<String, Long, Throwable> {
 
     private static final String TAG = "InstallationAsyncTask";
 
-    private static final int READ_BUFFER_SIZE = 1 << 13;
+    private static final int MIN_SHARED_MEMORY_SIZE = 8 << 10; // 8KiB
+    private static final int MAX_SHARED_MEMORY_SIZE = 8 << 20; // 8MiB
+    private static final int DEFAULT_SHARED_MEMORY_SIZE = 512 << 10; // 512KiB
+    private static final String SHARED_MEMORY_SIZE_PROP =
+            "dynamic_system.data_transfer.shared_memory.size";
+
     private static final long MIN_PROGRESS_TO_PUBLISH = 1 << 27;
 
     private static final List<String> UNSUPPORTED_PARTITIONS =
@@ -106,14 +117,25 @@ class InstallationAsyncTask extends AsyncTask<String, InstallationAsyncTask.Prog
 
     static class Progress {
         public final String partitionName;
-        public final long partitionSize;
-        public final int numInstalledPartitions;
-        public long installedSize;
+        public final long installedBytes;
+        public final long totalBytes;
+        public final int partitionNumber;
+        public final int totalPartitionNumber;
+        public final int totalProgressPercentage;
 
-        Progress(String partitionName, long partitionSize, int numInstalledPartitions) {
+        Progress(
+                String partitionName,
+                long installedBytes,
+                long totalBytes,
+                int partitionNumber,
+                int totalPartitionNumber,
+                int totalProgressPercentage) {
             this.partitionName = partitionName;
-            this.partitionSize = partitionSize;
-            this.numInstalledPartitions = numInstalledPartitions;
+            this.installedBytes = installedBytes;
+            this.totalBytes = totalBytes;
+            this.partitionNumber = partitionNumber;
+            this.totalPartitionNumber = totalPartitionNumber;
+            this.totalProgressPercentage = totalProgressPercentage;
         }
     }
 
@@ -123,6 +145,7 @@ class InstallationAsyncTask extends AsyncTask<String, InstallationAsyncTask.Prog
         void onResult(int resultCode, Throwable detail);
     }
 
+    private final int mSharedMemorySize;
     private final String mUrl;
     private final String mDsuSlot;
     private final String mPublicKey;
@@ -133,16 +156,27 @@ class InstallationAsyncTask extends AsyncTask<String, InstallationAsyncTask.Prog
     private final ProgressListener mListener;
     private final boolean mIsNetworkUrl;
     private final boolean mIsDeviceBootloaderUnlocked;
+    private final boolean mWantScratchPartition;
     private DynamicSystemManager.Session mInstallationSession;
     private KeyRevocationList mKeyRevocationList;
 
     private boolean mIsZip;
     private boolean mIsCompleted;
-
-    private int mNumInstalledPartitions;
-
     private InputStream mStream;
     private ZipFile mZipFile;
+
+    private static final double PROGRESS_READONLY_PARTITION_WEIGHT = 0.8;
+    private static final double PROGRESS_WRITABLE_PARTITION_WEIGHT = 0.2;
+
+    private String mProgressPartitionName;
+    private long mProgressTotalBytes;
+    private int mProgressPartitionNumber;
+    private boolean mProgressPartitionIsReadonly;
+    private int mProgressCompletedReadonlyPartitions;
+    private int mProgressCompletedWritablePartitions;
+    private int mTotalReadonlyPartitions;
+    private int mTotalWritablePartitions;
+    private int mTotalPartitionNumber;
 
     InstallationAsyncTask(
             String url,
@@ -153,6 +187,11 @@ class InstallationAsyncTask extends AsyncTask<String, InstallationAsyncTask.Prog
             Context context,
             DynamicSystemManager dynSystem,
             ProgressListener listener) {
+        mSharedMemorySize =
+                Range.create(MIN_SHARED_MEMORY_SIZE, MAX_SHARED_MEMORY_SIZE)
+                        .clamp(
+                                SystemProperties.getInt(
+                                        SHARED_MEMORY_SIZE_PROP, DEFAULT_SHARED_MEMORY_SIZE));
         mUrl = url;
         mDsuSlot = dsuSlot;
         mPublicKey = publicKey;
@@ -169,6 +208,7 @@ class InstallationAsyncTask extends AsyncTask<String, InstallationAsyncTask.Prog
                 (pdbManager != null)
                         && (pdbManager.getFlashLockState()
                                 == PersistentDataBlockManager.FLASH_LOCK_UNLOCKED);
+        mWantScratchPartition = Build.IS_DEBUGGABLE;
     }
 
     @Override
@@ -198,7 +238,7 @@ class InstallationAsyncTask extends AsyncTask<String, InstallationAsyncTask.Prog
                 return null;
             }
 
-            if (Build.IS_DEBUGGABLE) {
+            if (mWantScratchPartition) {
                 // If host is debuggable, then install a scratch partition so that we can do
                 // adb remount in the guest system.
                 try {
@@ -262,9 +302,54 @@ class InstallationAsyncTask extends AsyncTask<String, InstallationAsyncTask.Prog
     }
 
     @Override
-    protected void onProgressUpdate(Progress... values) {
-        Progress progress = values[0];
-        mListener.onProgressUpdate(progress);
+    protected void onProgressUpdate(Long... progress) {
+        final long installedBytes = progress[0];
+        int totalProgressPercentage = 0;
+        if (mTotalPartitionNumber > 0) {
+            final double readonlyPartitionWeight =
+                    mTotalReadonlyPartitions > 0
+                            ? PROGRESS_READONLY_PARTITION_WEIGHT / mTotalReadonlyPartitions
+                            : 0;
+            final double writablePartitionWeight =
+                    mTotalWritablePartitions > 0
+                            ? PROGRESS_WRITABLE_PARTITION_WEIGHT / mTotalWritablePartitions
+                            : 0;
+            double totalProgress = 0.0;
+            if (mProgressTotalBytes > 0) {
+                totalProgress +=
+                        (mProgressPartitionIsReadonly
+                                        ? readonlyPartitionWeight
+                                        : writablePartitionWeight)
+                                * installedBytes
+                                / mProgressTotalBytes;
+            }
+            totalProgress += readonlyPartitionWeight * mProgressCompletedReadonlyPartitions;
+            totalProgress += writablePartitionWeight * mProgressCompletedWritablePartitions;
+            totalProgressPercentage = (int) (totalProgress * 100);
+        }
+        mListener.onProgressUpdate(
+                new Progress(
+                        mProgressPartitionName,
+                        installedBytes,
+                        mProgressTotalBytes,
+                        mProgressPartitionNumber,
+                        mTotalPartitionNumber,
+                        totalProgressPercentage));
+    }
+
+    private void initPartitionProgress(String partitionName, long totalBytes, boolean readonly) {
+        if (mProgressPartitionNumber > 0) {
+            // Assume previous partition completed successfully.
+            if (mProgressPartitionIsReadonly) {
+                ++mProgressCompletedReadonlyPartitions;
+            } else {
+                ++mProgressCompletedWritablePartitions;
+            }
+        }
+        mProgressPartitionName = partitionName;
+        mProgressTotalBytes = totalBytes;
+        mProgressPartitionIsReadonly = readonly;
+        ++mProgressPartitionNumber;
     }
 
     private void verifyAndPrepare() throws Exception {
@@ -295,6 +380,32 @@ class InstallationAsyncTask extends AsyncTask<String, InstallationAsyncTask.Prog
         } else {
             throw new UnsupportedUrlException(
                     String.format(Locale.US, "Unsupported URL: %s", mUrl));
+        }
+
+        boolean hasTotalPartitionNumber = false;
+        if (mIsZip) {
+            if (mZipFile != null) {
+                // {*.img in zip} + {userdata}
+                hasTotalPartitionNumber = true;
+                mTotalReadonlyPartitions = calculateNumberOfImagesInLocalZip(mZipFile);
+                mTotalWritablePartitions = 1;
+            } else {
+                // TODO: Come up with a way to retrieve the number of total partitions from
+                // network URL.
+            }
+        } else {
+            // gzip has exactly two partitions, {system, userdata}
+            hasTotalPartitionNumber = true;
+            mTotalReadonlyPartitions = 1;
+            mTotalWritablePartitions = 1;
+        }
+
+        if (hasTotalPartitionNumber) {
+            if (mWantScratchPartition) {
+                // {scratch}
+                ++mTotalWritablePartitions;
+            }
+            mTotalPartitionNumber = mTotalReadonlyPartitions + mTotalWritablePartitions;
         }
 
         try {
@@ -333,9 +444,11 @@ class InstallationAsyncTask extends AsyncTask<String, InstallationAsyncTask.Prog
             }
         };
 
-        thread.start();
-        Progress progress = new Progress(partitionName, partitionSize, mNumInstalledPartitions++);
+        initPartitionProgress(partitionName, partitionSize, /* readonly = */ false);
+        publishProgress(/* installedSize = */ 0L);
 
+        long prevInstalledSize = 0;
+        thread.start();
         while (thread.isAlive()) {
             if (isCancelled()) {
                 return;
@@ -343,9 +456,9 @@ class InstallationAsyncTask extends AsyncTask<String, InstallationAsyncTask.Prog
 
             final long installedSize = mDynSystem.getInstallationProgress().bytes_processed;
 
-            if (installedSize > progress.installedSize + MIN_PROGRESS_TO_PUBLISH) {
-                progress.installedSize = installedSize;
-                publishProgress(progress);
+            if (installedSize > prevInstalledSize + MIN_PROGRESS_TO_PUBLISH) {
+                publishProgress(installedSize);
+                prevInstalledSize = installedSize;
             }
 
             try {
@@ -353,6 +466,10 @@ class InstallationAsyncTask extends AsyncTask<String, InstallationAsyncTask.Prog
             } catch (InterruptedException e) {
                 // Ignore the error.
             }
+        }
+
+        if (prevInstalledSize != partitionSize) {
+            publishProgress(partitionSize);
         }
 
         if (mInstallationSession == null) {
@@ -375,7 +492,7 @@ class InstallationAsyncTask extends AsyncTask<String, InstallationAsyncTask.Prog
         installWritablePartition("userdata", mUserdataSize);
     }
 
-    private void installImages() throws IOException, ImageValidationException {
+    private void installImages() throws ExecutionException, IOException, ImageValidationException {
         if (mStream != null) {
             if (mIsZip) {
                 installStreamingZipUpdate();
@@ -387,19 +504,49 @@ class InstallationAsyncTask extends AsyncTask<String, InstallationAsyncTask.Prog
         }
     }
 
-    private void installStreamingGzUpdate() throws IOException, ImageValidationException {
+    private void installStreamingGzUpdate()
+            throws ExecutionException, IOException, ImageValidationException {
         Log.d(TAG, "To install a streaming GZ update");
         installImage("system", mSystemSize, new GZIPInputStream(mStream));
     }
 
-    private void installStreamingZipUpdate() throws IOException, ImageValidationException {
+    private boolean shouldInstallEntry(String name) {
+        if (!name.endsWith(".img")) {
+            return false;
+        }
+        String partitionName = name.substring(0, name.length() - 4);
+        if (UNSUPPORTED_PARTITIONS.contains(partitionName)) {
+            return false;
+        }
+        return true;
+    }
+
+    private int calculateNumberOfImagesInLocalZip(ZipFile zipFile) {
+        int total = 0;
+        Enumeration<? extends ZipEntry> entries = zipFile.entries();
+        while (entries.hasMoreElements()) {
+            ZipEntry entry = entries.nextElement();
+            if (shouldInstallEntry(entry.getName())) {
+                ++total;
+            }
+        }
+        return total;
+    }
+
+    private void installStreamingZipUpdate()
+            throws ExecutionException, IOException, ImageValidationException {
         Log.d(TAG, "To install a streaming ZIP update");
 
         ZipInputStream zis = new ZipInputStream(mStream);
-        ZipEntry zipEntry = null;
+        ZipEntry entry = null;
 
-        while ((zipEntry = zis.getNextEntry()) != null) {
-            installImageFromAnEntry(zipEntry, zis);
+        while ((entry = zis.getNextEntry()) != null) {
+            String name = entry.getName();
+            if (shouldInstallEntry(name)) {
+                installImageFromAnEntry(entry, zis);
+            } else {
+                Log.d(TAG, name + " installation is not supported, skip it.");
+            }
 
             if (isCancelled()) {
                 break;
@@ -407,14 +554,20 @@ class InstallationAsyncTask extends AsyncTask<String, InstallationAsyncTask.Prog
         }
     }
 
-    private void installLocalZipUpdate() throws IOException, ImageValidationException {
+    private void installLocalZipUpdate()
+            throws ExecutionException, IOException, ImageValidationException {
         Log.d(TAG, "To install a local ZIP update");
 
         Enumeration<? extends ZipEntry> entries = mZipFile.entries();
 
         while (entries.hasMoreElements()) {
             ZipEntry entry = entries.nextElement();
-            installImageFromAnEntry(entry, mZipFile.getInputStream(entry));
+            String name = entry.getName();
+            if (shouldInstallEntry(name)) {
+                installImageFromAnEntry(entry, mZipFile.getInputStream(entry));
+            } else {
+                Log.d(TAG, name + " installation is not supported, skip it.");
+            }
 
             if (isCancelled()) {
                 break;
@@ -422,32 +575,20 @@ class InstallationAsyncTask extends AsyncTask<String, InstallationAsyncTask.Prog
         }
     }
 
-    private boolean installImageFromAnEntry(ZipEntry entry, InputStream is)
-            throws IOException, ImageValidationException {
+    private void installImageFromAnEntry(ZipEntry entry, InputStream is)
+            throws ExecutionException, IOException, ImageValidationException {
         String name = entry.getName();
 
         Log.d(TAG, "ZipEntry: " + name);
 
-        if (!name.endsWith(".img")) {
-            return false;
-        }
-
         String partitionName = name.substring(0, name.length() - 4);
-
-        if (UNSUPPORTED_PARTITIONS.contains(partitionName)) {
-            Log.d(TAG, name + " installation is not supported, skip it.");
-            return false;
-        }
-
         long uncompressedSize = entry.getSize();
 
         installImage(partitionName, uncompressedSize, is);
-
-        return true;
     }
 
     private void installImage(String partitionName, long uncompressedSize, InputStream is)
-            throws IOException, ImageValidationException {
+            throws ExecutionException, IOException, ImageValidationException {
 
         SparseInputStream sis = new SparseInputStream(new BufferedInputStream(is));
 
@@ -492,34 +633,64 @@ class InstallationAsyncTask extends AsyncTask<String, InstallationAsyncTask.Prog
 
         Log.d(TAG, "Start installing: " + partitionName);
 
-        MemoryFile memoryFile = new MemoryFile("dsu_" + partitionName, READ_BUFFER_SIZE);
+        MemoryFile memoryFile = new MemoryFile("dsu_" + partitionName, mSharedMemorySize);
         ParcelFileDescriptor pfd = new ParcelFileDescriptor(memoryFile.getFileDescriptor());
 
-        mInstallationSession.setAshmem(pfd, READ_BUFFER_SIZE);
+        mInstallationSession.setAshmem(pfd, memoryFile.length());
 
-        Progress progress = new Progress(partitionName, partitionSize, mNumInstalledPartitions++);
+        initPartitionProgress(partitionName, partitionSize, /* readonly = */ true);
+        publishProgress(/* installedSize = */ 0L);
 
+        long prevInstalledSize = 0;
         long installedSize = 0;
-        byte[] bytes = new byte[READ_BUFFER_SIZE];
-        int numBytesRead;
+        byte[] bytes = new byte[memoryFile.length()];
+        ExecutorService executor = Executors.newSingleThreadExecutor();
+        Future<Boolean> submitPromise = null;
 
-        while ((numBytesRead = sis.read(bytes, 0, READ_BUFFER_SIZE)) != -1) {
+        while (true) {
+            final int numBytesRead = sis.read(bytes, 0, bytes.length);
+
+            if (submitPromise != null) {
+                // Wait until the previous submit task is complete.
+                while (true) {
+                    try {
+                        if (!submitPromise.get()) {
+                            throw new IOException("Failed submitFromAshmem() to DynamicSystem");
+                        }
+                        break;
+                    } catch (InterruptedException e) {
+                        // Ignore.
+                    }
+                }
+
+                // Publish the progress of the previous submit task.
+                if (installedSize > prevInstalledSize + MIN_PROGRESS_TO_PUBLISH) {
+                    publishProgress(installedSize);
+                    prevInstalledSize = installedSize;
+                }
+            }
+
+            // Ensure the previous submit task (submitPromise) is complete before exiting the loop.
+            if (numBytesRead < 0) {
+                break;
+            }
+
             if (isCancelled()) {
                 return;
             }
 
             memoryFile.writeBytes(bytes, 0, 0, numBytesRead);
+            submitPromise =
+                    executor.submit(() -> mInstallationSession.submitFromAshmem(numBytesRead));
 
-            if (!mInstallationSession.submitFromAshmem(numBytesRead)) {
-                throw new IOException("Failed write() to DynamicSystem");
-            }
-
+            // Even though we update the bytes counter here, the actual progress is updated only
+            // after the submit task (submitPromise) is complete.
             installedSize += numBytesRead;
+        }
 
-            if (installedSize > progress.installedSize + MIN_PROGRESS_TO_PUBLISH) {
-                progress.installedSize = installedSize;
-                publishProgress(progress);
-            }
+        // Ensure a 100% mark is published.
+        if (prevInstalledSize != partitionSize) {
+            publishProgress(partitionSize);
         }
 
         AvbPublicKey avbPublicKey = new AvbPublicKey();

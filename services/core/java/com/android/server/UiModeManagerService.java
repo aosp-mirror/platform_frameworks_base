@@ -362,11 +362,9 @@ final class UiModeManagerService extends SystemService {
         getContext().getContentResolver().unregisterContentObserver(mSetupWizardObserver);
         verifySetupWizardCompleted();
         synchronized (mLock) {
-            // only update if the value is actually changed
-            if (updateNightModeFromSettingsLocked(getContext(), getContext().getResources(),
-                    to.getUserIdentifier())) {
-                updateLocked(0, 0);
-            }
+            updateNightModeFromSettingsLocked(getContext(), getContext().getResources(),
+                    to.getUserIdentifier());
+            updateLocked(0, 0);
         }
     }
 
@@ -534,19 +532,16 @@ final class UiModeManagerService extends SystemService {
     }
 
     /**
-     * Updates the night mode setting in Settings.Secure and returns if the value was successfully
-     * changed.
+     * Updates the night mode setting in Settings.Secure
      *
      * @param context A valid context
      * @param res     A valid resource object
      * @param userId  The user to update the setting for
-     * @return True if the new value is different from the old value. False otherwise.
      */
-    private boolean updateNightModeFromSettingsLocked(Context context, Resources res, int userId) {
+    private void updateNightModeFromSettingsLocked(Context context, Resources res, int userId) {
         if (mCarModeEnabled || mCar) {
-            return false;
+            return;
         }
-        int oldNightMode = mNightMode;
         if (mSetupWizardComplete) {
             mNightMode = Secure.getIntForUser(context.getContentResolver(),
                     Secure.UI_NIGHT_MODE, res.getInteger(
@@ -570,8 +565,6 @@ final class UiModeManagerService extends SystemService {
                         Secure.UI_NIGHT_MODE_LAST_COMPUTED, 0, userId) != 0;
             }
         }
-
-        return oldNightMode != mNightMode;
     }
 
     private static long toMilliSeconds(LocalTime t) {
@@ -1302,7 +1295,7 @@ final class UiModeManagerService extends SystemService {
             pw.print(" mLastBroadcastState="); pw.println(mLastBroadcastState);
 
             pw.print("  mNightMode="); pw.print(mNightMode); pw.print(" (");
-            pw.print(Shell.nightModeToStr(mNightMode)); pw.print(") ");
+            pw.print(Shell.nightModeToStr(mNightMode, mNightModeCustomType)); pw.print(") ");
             pw.print(" mOverrideOn/Off="); pw.print(mOverrideNightModeOn);
             pw.print("/"); pw.print(mOverrideNightModeOff);
 
@@ -1917,7 +1910,8 @@ final class UiModeManagerService extends SystemService {
         public static final String NIGHT_MODE_STR_YES = "yes";
         public static final String NIGHT_MODE_STR_NO = "no";
         public static final String NIGHT_MODE_STR_AUTO = "auto";
-        public static final String NIGHT_MODE_STR_CUSTOM = "custom";
+        public static final String NIGHT_MODE_STR_CUSTOM_SCHEDULE = "custom_schedule";
+        public static final String NIGHT_MODE_STR_CUSTOM_BEDTIME = "custom_bedtime";
         public static final String NIGHT_MODE_STR_UNKNOWN = "unknown";
         private final IUiModeManager mInterface;
 
@@ -1931,7 +1925,7 @@ final class UiModeManagerService extends SystemService {
             pw.println("UiModeManager service (uimode) commands:");
             pw.println("  help");
             pw.println("    Print this help text.");
-            pw.println("  night [yes|no|auto|custom]");
+            pw.println("  night [yes|no|auto|custom_schedule|custom_bedtime]");
             pw.println("    Set or read night mode.");
             pw.println("  car [yes|no]");
             pw.println("    Set or read car mode.");
@@ -2001,14 +1995,19 @@ final class UiModeManagerService extends SystemService {
             }
 
             final int mode = strToNightMode(modeStr);
+            final int customType = strToNightModeCustomType(modeStr);
             if (mode >= 0) {
                 mInterface.setNightMode(mode);
+                if (mode == UiModeManager.MODE_NIGHT_CUSTOM) {
+                    mInterface.setNightModeCustomType(customType);
+                }
                 printCurrentNightMode();
                 return 0;
             } else {
                 err.println("Error: mode must be '" + NIGHT_MODE_STR_YES + "', '"
                         + NIGHT_MODE_STR_NO + "', or '" + NIGHT_MODE_STR_AUTO
-                        +  "', or '" + NIGHT_MODE_STR_CUSTOM + "'");
+                        +  "', or '" + NIGHT_MODE_STR_CUSTOM_SCHEDULE + "', or '"
+                        + NIGHT_MODE_STR_CUSTOM_BEDTIME + "'");
                 return -1;
             }
         }
@@ -2016,11 +2015,12 @@ final class UiModeManagerService extends SystemService {
         private void printCurrentNightMode() throws RemoteException {
             final PrintWriter pw = getOutPrintWriter();
             final int currMode = mInterface.getNightMode();
-            final String currModeStr = nightModeToStr(currMode);
+            final int customType = mInterface.getNightModeCustomType();
+            final String currModeStr = nightModeToStr(currMode, customType);
             pw.println("Night mode: " + currModeStr);
         }
 
-        private static String nightModeToStr(int mode) {
+        private static String nightModeToStr(int mode, int customType) {
             switch (mode) {
                 case UiModeManager.MODE_NIGHT_YES:
                     return NIGHT_MODE_STR_YES;
@@ -2029,7 +2029,12 @@ final class UiModeManagerService extends SystemService {
                 case UiModeManager.MODE_NIGHT_AUTO:
                     return NIGHT_MODE_STR_AUTO;
                 case MODE_NIGHT_CUSTOM:
-                    return NIGHT_MODE_STR_CUSTOM;
+                    if (customType == UiModeManager.MODE_NIGHT_CUSTOM_TYPE_SCHEDULE) {
+                        return NIGHT_MODE_STR_CUSTOM_SCHEDULE;
+                    }
+                    if (customType == UiModeManager.MODE_NIGHT_CUSTOM_TYPE_BEDTIME) {
+                        return NIGHT_MODE_STR_CUSTOM_BEDTIME;
+                    }
                 default:
                     return NIGHT_MODE_STR_UNKNOWN;
             }
@@ -2043,8 +2048,20 @@ final class UiModeManagerService extends SystemService {
                     return UiModeManager.MODE_NIGHT_NO;
                 case NIGHT_MODE_STR_AUTO:
                     return UiModeManager.MODE_NIGHT_AUTO;
-                case NIGHT_MODE_STR_CUSTOM:
+                case NIGHT_MODE_STR_CUSTOM_SCHEDULE:
+                case NIGHT_MODE_STR_CUSTOM_BEDTIME:
                     return UiModeManager.MODE_NIGHT_CUSTOM;
+                default:
+                    return -1;
+            }
+        }
+
+        private static int strToNightModeCustomType(String customTypeStr) {
+            switch (customTypeStr) {
+                case NIGHT_MODE_STR_CUSTOM_BEDTIME:
+                    return UiModeManager.MODE_NIGHT_CUSTOM_TYPE_BEDTIME;
+                case NIGHT_MODE_STR_CUSTOM_SCHEDULE:
+                    return UiModeManager.MODE_NIGHT_CUSTOM_TYPE_SCHEDULE;
                 default:
                     return -1;
             }

@@ -384,14 +384,16 @@ public class AppIdleHistory {
         return userHistory;
     }
 
+    // TODO (206518483): Remove unused parameter 'elapsedRealtime'.
     private AppUsageHistory getPackageHistory(ArrayMap<String, AppUsageHistory> userHistory,
             String packageName, long elapsedRealtime, boolean create) {
         AppUsageHistory appUsageHistory = userHistory.get(packageName);
         if (appUsageHistory == null && create) {
             appUsageHistory = new AppUsageHistory();
-            appUsageHistory.lastUsedElapsedTime = getElapsedTime(elapsedRealtime);
-            appUsageHistory.lastUsedScreenTime = getScreenOnTime(elapsedRealtime);
-            appUsageHistory.lastPredictedTime = getElapsedTime(0);
+            appUsageHistory.lastUsedByUserElapsedTime = Integer.MIN_VALUE;
+            appUsageHistory.lastUsedElapsedTime = Integer.MIN_VALUE;
+            appUsageHistory.lastUsedScreenTime = Integer.MIN_VALUE;
+            appUsageHistory.lastPredictedTime = Integer.MIN_VALUE;
             appUsageHistory.currentBucket = STANDBY_BUCKET_NEVER;
             appUsageHistory.bucketingReason = REASON_MAIN_DEFAULT;
             appUsageHistory.lastInformedBucket = -1;
@@ -544,7 +546,7 @@ public class AppIdleHistory {
         AppUsageHistory appUsageHistory =
                 getPackageHistory(userHistory, packageName, elapsedRealtime, false);
         if (appUsageHistory == null || appUsageHistory.lastUsedByUserElapsedTime == Long.MIN_VALUE
-                || appUsageHistory.lastUsedByUserElapsedTime == 0) {
+                || appUsageHistory.lastUsedByUserElapsedTime <= 0) {
             return Long.MAX_VALUE;
         }
         return getElapsedTime(elapsedRealtime) - appUsageHistory.lastUsedByUserElapsedTime;
@@ -621,7 +623,8 @@ public class AppIdleHistory {
      * @param elapsedRealtime current time
      * @param screenTimeThresholds Array of screen times, in ascending order, first one is 0
      * @param elapsedTimeThresholds Array of elapsed time, in ascending order, first one is 0
-     * @return The index whose values the app's used time exceeds (in both arrays)
+     * @return The index whose values the app's used time exceeds (in both arrays) or {@code -1} to
+     *         indicate that the app has never been used.
      */
     int getThresholdIndex(String packageName, int userId, long elapsedRealtime,
             long[] screenTimeThresholds, long[] elapsedTimeThresholds) {
@@ -629,7 +632,10 @@ public class AppIdleHistory {
         AppUsageHistory appUsageHistory = getPackageHistory(userHistory, packageName,
                 elapsedRealtime, false);
         // If we don't have any state for the app, assume never used
-        if (appUsageHistory == null) return screenTimeThresholds.length - 1;
+        if (appUsageHistory == null || appUsageHistory.lastUsedElapsedTime < 0
+                || appUsageHistory.lastUsedScreenTime < 0) {
+            return -1;
+        }
 
         long screenOnDelta = getScreenOnTime(elapsedRealtime) - appUsageHistory.lastUsedScreenTime;
         long elapsedDelta = getElapsedTime(elapsedRealtime) - appUsageHistory.lastUsedElapsedTime;
@@ -667,8 +673,8 @@ public class AppIdleHistory {
     long getBucketExpiryTimeMs(String packageName, int userId, int bucket, long elapsedRealtimeMs) {
         ArrayMap<String, AppUsageHistory> userHistory = getUserHistory(userId);
         AppUsageHistory appUsageHistory = getPackageHistory(userHistory, packageName,
-                elapsedRealtimeMs, true);
-        if (appUsageHistory.bucketExpiryTimesMs == null) {
+                elapsedRealtimeMs, false /* create */);
+        if (appUsageHistory == null || appUsageHistory.bucketExpiryTimesMs == null) {
             return 0;
         }
         return appUsageHistory.bucketExpiryTimesMs.get(bucket, 0);
@@ -678,6 +684,17 @@ public class AppIdleHistory {
     File getUserFile(int userId) {
         return new File(new File(new File(mStorageDir, "users"),
                 Integer.toString(userId)), APP_IDLE_FILENAME);
+    }
+
+    void clearLastUsedTimestamps(String packageName, int userId) {
+        ArrayMap<String, AppUsageHistory> userHistory = getUserHistory(userId);
+        AppUsageHistory appUsageHistory = getPackageHistory(userHistory, packageName,
+                SystemClock.elapsedRealtime(), false /* create */);
+        if (appUsageHistory != null) {
+            appUsageHistory.lastUsedByUserElapsedTime = Integer.MIN_VALUE;
+            appUsageHistory.lastUsedElapsedTime = Integer.MIN_VALUE;
+            appUsageHistory.lastUsedScreenTime = Integer.MIN_VALUE;
+        }
     }
 
     /**
@@ -951,14 +968,14 @@ public class AppIdleHistory {
                     + " reason="
                     + UsageStatsManager.reasonToString(appUsageHistory.bucketingReason));
             idpw.print(" used=");
-            TimeUtils.formatDuration(totalElapsedTime - appUsageHistory.lastUsedElapsedTime, idpw);
+            printLastActionElapsedTime(idpw, totalElapsedTime, appUsageHistory.lastUsedElapsedTime);
             idpw.print(" usedByUser=");
-            TimeUtils.formatDuration(totalElapsedTime - appUsageHistory.lastUsedByUserElapsedTime,
-                    idpw);
+            printLastActionElapsedTime(idpw, totalElapsedTime,
+                    appUsageHistory.lastUsedByUserElapsedTime);
             idpw.print(" usedScr=");
-            TimeUtils.formatDuration(screenOnTime - appUsageHistory.lastUsedScreenTime, idpw);
+            printLastActionElapsedTime(idpw, totalElapsedTime, appUsageHistory.lastUsedScreenTime);
             idpw.print(" lastPred=");
-            TimeUtils.formatDuration(totalElapsedTime - appUsageHistory.lastPredictedTime, idpw);
+            printLastActionElapsedTime(idpw, totalElapsedTime, appUsageHistory.lastPredictedTime);
             dumpBucketExpiryTimes(idpw, appUsageHistory, totalElapsedTime);
             idpw.print(" lastJob=");
             TimeUtils.formatDuration(totalElapsedTime - appUsageHistory.lastJobRunTime, idpw);
@@ -984,6 +1001,15 @@ public class AppIdleHistory {
         TimeUtils.formatDuration(getScreenOnTime(elapsedRealtime), idpw);
         idpw.println();
         idpw.decreaseIndent();
+    }
+
+    private void printLastActionElapsedTime(IndentingPrintWriter idpw, long totalElapsedTimeMS,
+            long lastActionTimeMs) {
+        if (lastActionTimeMs < 0) {
+            idpw.print("<uninitialized>");
+        } else {
+            TimeUtils.formatDuration(totalElapsedTimeMS - lastActionTimeMs, idpw);
+        }
     }
 
     private void dumpBucketExpiryTimes(IndentingPrintWriter idpw, AppUsageHistory appUsageHistory,

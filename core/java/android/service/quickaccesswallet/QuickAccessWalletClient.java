@@ -42,7 +42,19 @@ public interface QuickAccessWalletClient extends Closeable {
      */
     @NonNull
     static QuickAccessWalletClient create(@NonNull Context context) {
-        return new QuickAccessWalletClientImpl(context);
+        return create(context, null /* bgExecutor */);
+    }
+
+    /**
+     * Create a client for accessing wallet cards from the {@link QuickAccessWalletService}. If the
+     * service is unavailable, {@link #isWalletServiceAvailable()} will return false.
+     * @param context Context.
+     * @param bgExecutor A background {@link Executor} for service registration.
+     * @hide
+     */
+    @NonNull
+    static QuickAccessWalletClient create(@NonNull Context context, @Nullable Executor bgExecutor) {
+        return new QuickAccessWalletClientImpl(context, bgExecutor);
     }
 
     /**

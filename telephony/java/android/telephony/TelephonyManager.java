@@ -41,6 +41,7 @@ import android.annotation.SystemService;
 import android.annotation.TestApi;
 import android.annotation.WorkerThread;
 import android.app.PendingIntent;
+import android.app.PropertyInvalidatedCache;
 import android.app.role.RoleManager;
 import android.compat.Compatibility;
 import android.compat.annotation.ChangeId;
@@ -360,6 +361,42 @@ public class TelephonyManager {
     private static ISms sISms;
     @GuardedBy("sCacheLock")
     private static final DeathRecipient sServiceDeath = new DeathRecipient();
+
+    /**
+     * Cache key for a {@link PropertyInvalidatedCache} which maps from {@link PhoneAccountHandle}
+     * to subscription Id.  The cache is initialized in {@code PhoneInterfaceManager}'s constructor
+     * when {@link PropertyInvalidatedCache#invalidateCache(String)} is called.
+     * The cache is cleared from {@code TelecomAccountRegistry#tearDown} when all phone accounts are
+     * removed from Telecom.
+     * @hide
+     */
+    public static final String CACHE_KEY_PHONE_ACCOUNT_TO_SUBID =
+            "cache_key.telephony.phone_account_to_subid";
+    private static final int CACHE_MAX_SIZE = 4;
+
+    /**
+     * A {@link PropertyInvalidatedCache} which lives in an app's {@link TelephonyManager} instance.
+     * Caches any queries for a mapping between {@link PhoneAccountHandle} and {@code subscription
+     * id}.  The cache may be invalidated from Telephony when phone account re-registration takes
+     * place.
+     */
+    private PropertyInvalidatedCache<PhoneAccountHandle, Integer> mPhoneAccountHandleToSubIdCache =
+            new PropertyInvalidatedCache<PhoneAccountHandle, Integer>(CACHE_MAX_SIZE,
+                    CACHE_KEY_PHONE_ACCOUNT_TO_SUBID) {
+                @Override
+                public Integer recompute(PhoneAccountHandle phoneAccountHandle) {
+                    try {
+                        ITelephony telephony = getITelephony();
+                        if (telephony != null) {
+                            return telephony.getSubIdForPhoneAccountHandle(phoneAccountHandle,
+                                    mContext.getOpPackageName(), mContext.getAttributionTag());
+                        }
+                    } catch (RemoteException e) {
+                        throw e.rethrowAsRuntimeException();
+                    }
+                    return SubscriptionManager.INVALID_SUBSCRIPTION_ID;
+                }
+            };
 
     /** Enum indicating multisim variants
      *  DSDS - Dual SIM Dual Standby
@@ -8352,24 +8389,6 @@ public class TelephonyManager {
     }
 
     /**
-     * Get P-CSCF address from PCO after data connection is established or modified.
-     * @param apnType the apnType, "ims" for IMS APN, "emergency" for EMERGENCY APN
-     * @return array of P-CSCF address
-     * @hide
-     */
-    public String[] getPcscfAddress(String apnType) {
-        try {
-            ITelephony telephony = getITelephony();
-            if (telephony == null)
-                return new String[0];
-            return telephony.getPcscfAddress(apnType, getOpPackageName(), getAttributionTag());
-        } catch (RemoteException e) {
-            return new String[0];
-        }
-    }
-
-
-    /**
      * Resets the {@link android.telephony.ims.ImsService} associated with the specified sim slot.
      * Used by diagnostic apps to force the IMS stack to be disabled and re-enabled in an effort to
      * recover from scenarios where the {@link android.telephony.ims.ImsService} gets in to a bad
@@ -9833,15 +9852,7 @@ public class TelephonyManager {
     @SystemApi
     @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     public @Nullable String getCarrierServicePackageName() {
-        // TODO(b/205736323) plumb this through to CarrierPrivilegesTracker, which will cache the
-        // value instead of re-querying every time.
-        List<String> carrierServicePackages =
-                getCarrierPackageNamesForIntent(
-                        new Intent(CarrierService.CARRIER_SERVICE_INTERFACE));
-        if (carrierServicePackages != null && !carrierServicePackages.isEmpty()) {
-            return carrierServicePackages.get(0);
-        }
-        return null;
+        return getCarrierServicePackageNameForLogicalSlot(getPhoneId());
     }
 
     /**
@@ -9858,13 +9869,15 @@ public class TelephonyManager {
     @SystemApi
     @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     public @Nullable String getCarrierServicePackageNameForLogicalSlot(int logicalSlotIndex) {
-        // TODO(b/205736323) plumb this through to CarrierPrivilegesTracker, which will cache the
-        // value instead of re-querying every time.
-        List<String> carrierServicePackages =
-                getCarrierPackageNamesForIntentAndPhone(
-                        new Intent(CarrierService.CARRIER_SERVICE_INTERFACE), logicalSlotIndex);
-        if (carrierServicePackages != null && !carrierServicePackages.isEmpty()) {
-            return carrierServicePackages.get(0);
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                return telephony.getCarrierServicePackageNameForLogicalSlot(logicalSlotIndex);
+            }
+        } catch (RemoteException ex) {
+            Rlog.e(TAG, "getCarrierServicePackageNameForLogicalSlot RemoteException", ex);
+        } catch (NullPointerException ex) {
+            Rlog.e(TAG, "getCarrierServicePackageNameForLogicalSlot NPE", ex);
         }
         return null;
     }
@@ -11904,19 +11917,7 @@ public class TelephonyManager {
     @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
     @RequiresFeature(PackageManager.FEATURE_TELEPHONY_SUBSCRIPTION)
     public int getSubscriptionId(@NonNull PhoneAccountHandle phoneAccountHandle) {
-        int retval = SubscriptionManager.INVALID_SUBSCRIPTION_ID;
-        try {
-            ITelephony service = getITelephony();
-            if (service != null) {
-                retval = service.getSubIdForPhoneAccountHandle(
-                        phoneAccountHandle, mContext.getOpPackageName(),
-                        mContext.getAttributionTag());
-            }
-        } catch (RemoteException ex) {
-            Log.e(TAG, "getSubscriptionId RemoteException", ex);
-            ex.rethrowAsRuntimeException();
-        }
-        return retval;
+        return mPhoneAccountHandleToSubIdCache.query(phoneAccountHandle);
     }
 
     /**
@@ -14942,7 +14943,7 @@ public class TelephonyManager {
             }
             ITelephony service = getITelephony();
             if (service != null) {
-                return service.isMvnoMatched(getSubId(), mvnoType, mvnoMatchData);
+                return service.isMvnoMatched(getSlotIndex(), mvnoType, mvnoMatchData);
             }
         } catch (RemoteException ex) {
             Rlog.e(TAG, "Telephony#matchesCurrentSimOperator RemoteException" + ex);
@@ -16787,12 +16788,15 @@ public class TelephonyManager {
     }
 
     /**
-     * Callback to listen for when the set of packages with carrier privileges for a SIM changes.
+     * Callbacks to listen for when the set of packages with carrier privileges for a SIM changes.
+     *
+     * <p>Of note, when multiple callbacks are registered, they may be triggered one after another.
+     * The ordering of them is not guaranteed and thus should not be depend on.
      *
      * @hide
      */
     @SystemApi
-    public interface CarrierPrivilegesListener {
+    public interface CarrierPrivilegesCallback {
         /**
          * Called when the set of packages with carrier privileges has changed.
          *
@@ -16802,60 +16806,33 @@ public class TelephonyManager {
          * <p>At registration, the callback will receive the current set of privileged packages.
          *
          * @param privilegedPackageNames The updated set of package names that have carrier
-         *     privileges
-         * @param privilegedUids The updated set of UIDs that have carrier privileges
+         *                               privileges
+         * @param privilegedUids         The updated set of UIDs that have carrier privileges
          */
         void onCarrierPrivilegesChanged(
-                @NonNull List<String> privilegedPackageNames, @NonNull int[] privilegedUids);
-    }
+                @NonNull Set<String> privilegedPackageNames, @NonNull Set<Integer> privilegedUids);
 
-    /**
-     * Registers a {@link CarrierPrivilegesListener} on the given {@code logicalSlotIndex} to
-     * receive callbacks when the set of packages with carrier privileges changes. The callback will
-     * immediately be called with the latest state.
-     *
-     * @param logicalSlotIndex The SIM slot to listen on
-     * @param executor The executor where {@code listener} will be invoked
-     * @param listener The callback to register
-     * @hide
-     */
-    @SystemApi
-    @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
-    public void addCarrierPrivilegesListener(
-            int logicalSlotIndex,
-            @NonNull @CallbackExecutor Executor executor,
-            @NonNull CarrierPrivilegesListener listener) {
-        if (mContext == null) {
-            throw new IllegalStateException("Telephony service is null");
-        } else if (executor == null || listener == null) {
-            throw new IllegalArgumentException(
-                    "CarrierPrivilegesListener and executor must be non-null");
+        /**
+         * Called when the {@link CarrierService} for the current user profile has changed.
+         *
+         * <p>This method does nothing by default. Clients that are interested in the carrier
+         * service change should override this method to get package name and UID info.
+         *
+         * <p>At registration, the callback will receive the current carrier service info.
+         *
+         * <p>Of note, this callback will <b>not</b> be fired if a carrier triggers a SIM profile
+         * switch and the same carrier service remains after switch.
+         *
+         * @param carrierServicePackageName package name of the {@link CarrierService}. May be
+         *                                  {@code null} when no carrier service is detected.
+         * @param carrierServiceUid         UID of the {@link CarrierService}. May be
+         *                                  {@link android.os.Process#INVALID_UID} if no carrier
+         *                                  service is detected.
+         */
+        default void onCarrierServiceChanged(
+                @Nullable String carrierServicePackageName, int carrierServiceUid) {
+            // do nothing by default
         }
-        mTelephonyRegistryMgr = mContext.getSystemService(TelephonyRegistryManager.class);
-        if (mTelephonyRegistryMgr == null) {
-            throw new IllegalStateException("Telephony registry service is null");
-        }
-        mTelephonyRegistryMgr.addCarrierPrivilegesListener(logicalSlotIndex, executor, listener);
-    }
-
-    /**
-     * Unregisters an existing {@link CarrierPrivilegesListener}.
-     *
-     * @hide
-     */
-    @SystemApi
-    @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
-    public void removeCarrierPrivilegesListener(@NonNull CarrierPrivilegesListener listener) {
-        if (mContext == null) {
-            throw new IllegalStateException("Telephony service is null");
-        } else if (listener == null) {
-            throw new IllegalArgumentException("CarrierPrivilegesListener must be non-null");
-        }
-        mTelephonyRegistryMgr = mContext.getSystemService(TelephonyRegistryManager.class);
-        if (mTelephonyRegistryMgr == null) {
-            throw new IllegalStateException("Telephony registry service is null");
-        }
-        mTelephonyRegistryMgr.removeCarrierPrivilegesListener(listener);
     }
 
     /**
@@ -16889,5 +16866,54 @@ public class TelephonyManager {
         } catch (RemoteException ex) {
             ex.rethrowAsRuntimeException();
         }
+    }
+
+    /**
+     * Registers a {@link CarrierPrivilegesCallback} on the given {@code logicalSlotIndex} to
+     * receive callbacks when the set of packages with carrier privileges changes. The callback will
+     * immediately be called with the latest state.
+     *
+     * @param logicalSlotIndex The SIM slot to listen on
+     * @param executor The executor where {@code callback} will be invoked
+     * @param callback The callback to register
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    public void registerCarrierPrivilegesCallback(
+            int logicalSlotIndex,
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull CarrierPrivilegesCallback callback) {
+        if (mContext == null) {
+            throw new IllegalStateException("Telephony service is null");
+        } else if (executor == null || callback == null) {
+            throw new IllegalArgumentException(
+                    "CarrierPrivilegesCallback and executor must be non-null");
+        }
+        mTelephonyRegistryMgr = mContext.getSystemService(TelephonyRegistryManager.class);
+        if (mTelephonyRegistryMgr == null) {
+            throw new IllegalStateException("Telephony registry service is null");
+        }
+        mTelephonyRegistryMgr.addCarrierPrivilegesCallback(logicalSlotIndex, executor, callback);
+    }
+
+    /**
+     * Unregisters an existing {@link CarrierPrivilegesCallback}.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    public void unregisterCarrierPrivilegesCallback(@NonNull CarrierPrivilegesCallback callback) {
+        if (mContext == null) {
+            throw new IllegalStateException("Telephony service is null");
+        } else if (callback == null) {
+            throw new IllegalArgumentException("CarrierPrivilegesCallback must be non-null");
+        }
+        mTelephonyRegistryMgr = mContext.getSystemService(TelephonyRegistryManager.class);
+        if (mTelephonyRegistryMgr == null) {
+            throw new IllegalStateException("Telephony registry service is null");
+        }
+        mTelephonyRegistryMgr.removeCarrierPrivilegesCallback(callback);
     }
 }

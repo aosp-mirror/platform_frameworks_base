@@ -24,6 +24,8 @@ import android.os.Parcelable;
 
 import com.android.internal.util.AnnotationValidations;
 
+import java.util.Objects;
+
 /**
  * Represents a status for the {@code AmbientContextDetectionService}.
  *
@@ -121,7 +123,9 @@ public final class AmbientContextDetectionServiceStatus implements Parcelable {
         private @NonNull String mPackageName;
         private long mBuilderFieldsSet = 0L;
 
-        public Builder() {
+        public Builder(@NonNull String packageName) {
+            Objects.requireNonNull(packageName);
+            mPackageName = packageName;
         }
 
         /**
@@ -134,26 +138,13 @@ public final class AmbientContextDetectionServiceStatus implements Parcelable {
             return this;
         }
 
-        /**
-         * The package to deliver the response to.
-         */
-        public @NonNull Builder setPackageName(@NonNull String value) {
-            checkNotUsed();
-            mBuilderFieldsSet |= 0x2;
-            mPackageName = value;
-            return this;
-        }
-
         /** Builds the instance. This builder should not be touched after calling this! */
         public @NonNull AmbientContextDetectionServiceStatus build() {
             checkNotUsed();
-            mBuilderFieldsSet |= 0x4; // Mark builder used
+            mBuilderFieldsSet |= 0x2; // Mark builder used
 
             if ((mBuilderFieldsSet & 0x1) == 0) {
                 mStatusCode = AmbientContextManager.STATUS_UNKNOWN;
-            }
-            if ((mBuilderFieldsSet & 0x2) == 0) {
-                mPackageName = "";
             }
             AmbientContextDetectionServiceStatus o = new AmbientContextDetectionServiceStatus(
                     mStatusCode,
@@ -162,7 +153,7 @@ public final class AmbientContextDetectionServiceStatus implements Parcelable {
         }
 
         private void checkNotUsed() {
-            if ((mBuilderFieldsSet & 0x4) != 0) {
+            if ((mBuilderFieldsSet & 0x2) != 0) {
                 throw new IllegalStateException(
                         "This Builder should not be reused. Use a new Builder instance instead");
             }

@@ -170,11 +170,41 @@ class HeadsUpCoordinatorTest : SysuiTestCase() {
     }
 
     @Test
+    fun testCancelAndReAddStickyNotification() {
+        whenever(mHeadsUpManager.isSticky(anyString())).thenReturn(true)
+        addHUN(mEntry)
+        whenever(mHeadsUpManager.canRemoveImmediately(anyString())).thenReturn(false, true, false)
+        whenever(mHeadsUpManager.getEarliestRemovalTime(anyString())).thenReturn(1000L)
+        assertTrue(mNotifLifetimeExtender.maybeExtendLifetime(mEntry, 0))
+        addHUN(mEntry)
+        assertFalse(mNotifLifetimeExtender.maybeExtendLifetime(mEntry, 0))
+        mExecutor.advanceClockToLast()
+        mExecutor.runAllReady()
+        assertTrue(mNotifLifetimeExtender.maybeExtendLifetime(mEntry, 0))
+        verify(mHeadsUpManager, times(0)).removeNotification(anyString(), eq(false))
+        verify(mHeadsUpManager, times(0)).removeNotification(anyString(), eq(true))
+    }
+
+    @Test
+    fun hunNotRemovedWhenExtensionCancelled() {
+        whenever(mHeadsUpManager.isSticky(anyString())).thenReturn(true)
+        addHUN(mEntry)
+        whenever(mHeadsUpManager.canRemoveImmediately(anyString())).thenReturn(false)
+        whenever(mHeadsUpManager.getEarliestRemovalTime(anyString())).thenReturn(1000L)
+        assertTrue(mNotifLifetimeExtender.maybeExtendLifetime(mEntry, 0))
+        mNotifLifetimeExtender.cancelLifetimeExtension(mEntry)
+        mExecutor.advanceClockToLast()
+        mExecutor.runAllReady()
+        verify(mHeadsUpManager, times(0)).removeNotification(anyString(), any())
+    }
+
+    @Test
     fun testCancelUpdatedStickyNotification() {
         whenever(mHeadsUpManager.isSticky(anyString())).thenReturn(true)
         addHUN(mEntry)
         whenever(mHeadsUpManager.getEarliestRemovalTime(anyString())).thenReturn(1000L, 500L)
         assertTrue(mNotifLifetimeExtender.maybeExtendLifetime(mEntry, 0))
+        addHUN(mEntry)
         mExecutor.advanceClockToLast()
         mExecutor.runAllReady()
         verify(mHeadsUpManager, times(0)).removeNotification(anyString(), eq(false))
@@ -305,6 +335,7 @@ class HeadsUpCoordinatorTest : SysuiTestCase() {
         mHuns.add(entry)
         whenever(mHeadsUpManager.topEntry).thenReturn(entry)
         mOnHeadsUpChangedListener.onHeadsUpStateChanged(entry, true)
+        mNotifLifetimeExtender.cancelLifetimeExtension(entry)
     }
 
     @Test

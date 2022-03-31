@@ -31,6 +31,7 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteException;
+import android.telephony.AccessNetworkConstants.RadioAccessNetworkType;
 import android.util.Log;
 import android.util.SparseArray;
 
@@ -166,7 +167,8 @@ public abstract class DataService extends Service {
          *        link properties of the existing data connection, otherwise null.
          * @param callback The result callback for this request.
          */
-        public void setupDataCall(int accessNetworkType, @NonNull DataProfile dataProfile,
+        public void setupDataCall(
+                @RadioAccessNetworkType int accessNetworkType, @NonNull DataProfile dataProfile,
                 boolean isRoaming, boolean allowRoaming,
                 @SetupDataReason int reason, @Nullable LinkProperties linkProperties,
                 @NonNull DataServiceCallback callback) {
@@ -214,7 +216,8 @@ public abstract class DataService extends Service {
          *        for example, a zero-rating slice.
          * @param callback The result callback for this request.
          */
-        public void setupDataCall(int accessNetworkType, @NonNull DataProfile dataProfile,
+        public void setupDataCall(
+                @RadioAccessNetworkType int accessNetworkType, @NonNull DataProfile dataProfile,
                 boolean isRoaming, boolean allowRoaming,
                 @SetupDataReason int reason,
                 @Nullable LinkProperties linkProperties,
@@ -294,6 +297,9 @@ public abstract class DataService extends Service {
          * with reason {@link DataService.REQUEST_REASON_HANDOVER}. The target transport now owns
          * the transferred resources and is responsible for releasing them.
          *
+         * <p/>
+         * Note that the callback will be executed on binder thread.
+         *
          * @param cid The identifier of the data call which is provided in {@link DataCallResponse}
          * @param callback The result callback for this request.
          *
@@ -321,6 +327,9 @@ public abstract class DataService extends Service {
          *     The data call on the source transport was lost.
          * </li>
          * </ul>
+         *
+         * <p/>
+         * Note that the callback will be executed on binder thread.
          *
          * @param cid The identifier of the data call which is provided in {@link DataCallResponse}
          * @param callback The result callback for this request.

@@ -32,13 +32,13 @@ import org.junit.rules.RuleChain
 import org.junit.runner.RunWith
 
 /**
- * Test for testing the user unlock trigger.
+ * Test for the user unlock triggers.
  *
  * atest TrustTests:UserUnlockRequestTest
  */
 @RunWith(AndroidJUnit4::class)
 class UserUnlockRequestTest {
-    private val context: Context = getApplicationContext()
+    private val context = getApplicationContext<Context>()
     private val trustManager = context.getSystemService(TrustManager::class.java) as TrustManager
     private val userId = context.userId
     private val activityScenarioRule = ActivityScenarioRule(TrustTestActivity::class.java)
@@ -53,10 +53,29 @@ class UserUnlockRequestTest {
     @Test
     fun reportUserRequestedUnlock_propagatesToAgent() {
         val oldCount = trustAgentRule.agent.onUserRequestedUnlockCallCount
-        trustManager.reportUserRequestedUnlock(userId)
+        trustManager.reportUserRequestedUnlock(userId, false)
         await()
 
         assertThat(trustAgentRule.agent.onUserRequestedUnlockCallCount)
+            .isEqualTo(oldCount + 1)
+    }
+
+    @Test
+    fun reportUserRequestedUnlock_propagatesToAgentWithDismissKeyguard() {
+        trustManager.reportUserRequestedUnlock(userId, true)
+        await()
+
+        assertThat(trustAgentRule.agent.lastCallDismissKeyguard)
+            .isTrue()
+    }
+
+    @Test
+    fun reportUserMayRequestUnlock_propagatesToAgent() {
+        val oldCount = trustAgentRule.agent.onUserMayRequestUnlockCallCount
+        trustManager.reportUserMayRequestUnlock(userId)
+        await()
+
+        assertThat(trustAgentRule.agent.onUserMayRequestUnlockCallCount)
             .isEqualTo(oldCount + 1)
     }
 
@@ -69,10 +88,20 @@ class UserUnlockRequestTest {
 class UserUnlockRequestTrustAgent : BaseTrustAgentService() {
     var onUserRequestedUnlockCallCount: Long = 0
         private set
+    var onUserMayRequestUnlockCallCount: Long = 0
+        private set
+    var lastCallDismissKeyguard: Boolean = false
+        private set
 
-    override fun onUserRequestedUnlock() {
-        Log.i(TAG, "onUserRequestedUnlock")
+    override fun onUserRequestedUnlock(dismissKeyguard: Boolean) {
+        Log.i(TAG, "onUserRequestedUnlock($dismissKeyguard)")
         onUserRequestedUnlockCallCount++
+        lastCallDismissKeyguard = dismissKeyguard
+    }
+
+    override fun onUserMayRequestUnlock() {
+        Log.i(TAG, "onUserMayRequestUnlock")
+        onUserMayRequestUnlockCallCount++
     }
 
     companion object {

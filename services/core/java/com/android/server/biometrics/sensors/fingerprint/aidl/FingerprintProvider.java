@@ -580,39 +580,37 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
     }
 
     @Override
-    public void onPointerDown(int sensorId, int x, int y, float minor, float major) {
+    public void onPointerDown(long requestId, int sensorId, int x, int y,
+            float minor, float major) {
         final BaseClientMonitor client =
-                mSensors.get(sensorId).getScheduler().getCurrentClient();
+                mSensors.get(sensorId).getScheduler().getCurrentClientIfMatches(requestId);
         if (!(client instanceof Udfps)) {
             Slog.e(getTag(), "onPointerDown received during client: " + client);
             return;
         }
-        final Udfps udfps = (Udfps) client;
-        udfps.onPointerDown(x, y, minor, major);
+        ((Udfps) client).onPointerDown(x, y, minor, major);
     }
 
     @Override
-    public void onPointerUp(int sensorId) {
+    public void onPointerUp(long requestId, int sensorId) {
         final BaseClientMonitor client =
-                mSensors.get(sensorId).getScheduler().getCurrentClient();
+                mSensors.get(sensorId).getScheduler().getCurrentClientIfMatches(requestId);
         if (!(client instanceof Udfps)) {
             Slog.e(getTag(), "onPointerUp received during client: " + client);
             return;
         }
-        final Udfps udfps = (Udfps) client;
-        udfps.onPointerUp();
+        ((Udfps) client).onPointerUp();
     }
 
     @Override
-    public void onUiReady(int sensorId) {
+    public void onUiReady(long requestId, int sensorId) {
         final BaseClientMonitor client =
-                mSensors.get(sensorId).getScheduler().getCurrentClient();
+                mSensors.get(sensorId).getScheduler().getCurrentClientIfMatches(requestId);
         if (!(client instanceof Udfps)) {
             Slog.e(getTag(), "onUiReady received during client: " + client);
             return;
         }
-        final Udfps udfps = (Udfps) client;
-        udfps.onUiReady();
+        ((Udfps) client).onUiReady();
     }
 
     @Override

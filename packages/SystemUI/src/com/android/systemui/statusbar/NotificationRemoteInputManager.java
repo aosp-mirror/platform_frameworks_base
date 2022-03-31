@@ -507,12 +507,11 @@ public class NotificationRemoteInputManager implements Dumpable {
                 Math.max(cx + cy, cx + (h - cy)),
                 Math.max((w - cx) + cy, (w - cx) + (h - cy)));
 
-        riv.setRevealParameters(cx, cy, r);
-        riv.setPendingIntent(pendingIntent);
+        riv.getController().setRevealParams(new RemoteInputView.RevealParams(cx, cy, r));
         riv.getController().setPendingIntent(pendingIntent);
-        riv.setRemoteInput(inputs, input, editedSuggestionInfo);
         riv.getController().setRemoteInput(input);
         riv.getController().setRemoteInputs(inputs);
+        riv.getController().setEditedSuggestionInfo(editedSuggestionInfo);
         riv.focusAnimated();
         if (userMessageContent != null) {
             riv.setEditTextContent(userMessageContent);

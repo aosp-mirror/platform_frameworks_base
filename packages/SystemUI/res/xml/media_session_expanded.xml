@@ -28,57 +28,108 @@
         app:layout_constraintBottom_toBottomOf="parent" />
 
     <Constraint
+        android:id="@+id/header_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/qs_media_padding"
+        android:layout_marginEnd="@dimen/qs_media_padding"
+        app:layout_constraintEnd_toStartOf="@id/actionPlayPause"
+        app:layout_constrainedWidth="true"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/header_artist"
+        app:layout_constraintHorizontal_bias="0" />
+    <Constraint
+        android:id="@+id/header_artist"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="@dimen/qs_media_padding"
+        android:layout_marginBottom="@dimen/qs_media_padding"
+        android:layout_marginTop="0dp"
+        app:layout_constrainedWidth="true"
+        app:layout_constraintEnd_toStartOf="@id/actionPlayPause"
+        app:layout_constraintStart_toStartOf="@id/header_title"
+        app:layout_constraintBottom_toTopOf="@id/media_action_barrier_top"
+        app:layout_constraintVertical_bias="0"
+        app:layout_constraintHorizontal_bias="0" />
+
+    <Constraint
         android:id="@+id/actionPlayPause"
         android:layout_width="48dp"
         android:layout_height="48dp"
+        android:layout_marginStart="@dimen/qs_media_padding"
         android:layout_marginEnd="@dimen/qs_media_padding"
+        android:layout_marginBottom="@dimen/qs_media_padding"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/media_seamless"
-        app:layout_constraintBottom_toTopOf="@id/actionEnd" />
+        app:layout_constraintBottom_toTopOf="@id/media_action_barrier_top" />
 
+    <!--
+    The bottom row of action buttons should remain in the same order when RTL, so their constraints
+    are set with right/left instead of start/end.
+    The chain is set to "spread" so that the progress bar can be weighted to fill any empty space.
+     -->
     <Constraint
         android:id="@+id/actionPrev"
         android:layout_width="48dp"
         android:layout_height="48dp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toStartOf="@id/media_progress_bar"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toLeftOf="@id/media_progress_bar"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/actionPlayPause" />
+        app:layout_constraintHorizontal_chainStyle="spread" />
 
     <Constraint
         android:id="@+id/media_progress_bar"
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        app:layout_constraintStart_toEndOf="@id/actionPrev"
-        app:layout_constraintEnd_toStartOf="@id/actionNext"
+        android:layout_height="48dp"
+        app:layout_constraintLeft_toRightOf="@id/actionPrev"
+        app:layout_constraintRight_toLeftOf="@id/actionNext"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/actionPlayPause" />
+        app:layout_constraintHorizontal_weight="1" />
 
     <Constraint
         android:id="@+id/actionNext"
         android:layout_width="48dp"
         android:layout_height="48dp"
-        app:layout_constraintStart_toEndOf="@id/media_progress_bar"
-        app:layout_constraintEnd_toStartOf="@id/actionStart"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/actionPlayPause" />
+        app:layout_constraintLeft_toRightOf="@id/media_progress_bar"
+        app:layout_constraintRight_toLeftOf="@id/action0"
+        app:layout_constraintBottom_toBottomOf="parent" />
 
     <Constraint
-        android:id="@+id/actionStart"
+        android:id="@+id/action0"
         android:layout_width="48dp"
         android:layout_height="48dp"
-        app:layout_constraintStart_toEndOf="@id/actionNext"
-        app:layout_constraintEnd_toStartOf="@id/actionEnd"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/actionPlayPause" />
+        app:layout_constraintLeft_toRightOf="@id/actionNext"
+        app:layout_constraintRight_toLeftOf="@id/action1"
+        app:layout_constraintBottom_toBottomOf="parent" />
 
     <Constraint
-        android:id="@+id/actionEnd"
+        android:id="@+id/action1"
         android:layout_width="48dp"
         android:layout_height="48dp"
-        app:layout_constraintStart_toEndOf="@id/actionStart"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/actionPlayPause" />
+        app:layout_constraintLeft_toRightOf="@id/action0"
+        app:layout_constraintRight_toLeftOf="@id/action2"
+        app:layout_constraintBottom_toBottomOf="parent" />
 
+    <Constraint
+        android:id="@+id/action2"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        app:layout_constraintLeft_toRightOf="@id/action1"
+        app:layout_constraintRight_toLeftOf="@id/action3"
+        app:layout_constraintBottom_toBottomOf="parent"/>
+
+    <Constraint
+        android:id="@+id/action3"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        app:layout_constraintLeft_toRightOf="@id/action2"
+        app:layout_constraintRight_toLeftOf="@id/action4"
+        app:layout_constraintBottom_toBottomOf="parent"/>
+
+    <Constraint
+        android:id="@+id/action4"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        app:layout_constraintLeft_toRightOf="@id/action3"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent" />
 </ConstraintSet>

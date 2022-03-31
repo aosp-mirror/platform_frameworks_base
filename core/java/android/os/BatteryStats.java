@@ -680,6 +680,8 @@ public abstract class BatteryStats implements Parcelable {
                 return BatteryConsumer.PROCESS_STATE_BACKGROUND;
             case BatteryStats.Uid.PROCESS_STATE_FOREGROUND_SERVICE:
                 return BatteryConsumer.PROCESS_STATE_FOREGROUND_SERVICE;
+            case BatteryStats.Uid.PROCESS_STATE_CACHED:
+                return BatteryConsumer.PROCESS_STATE_CACHED;
             default:
                 return BatteryConsumer.PROCESS_STATE_UNSPECIFIED;
         }
@@ -2681,7 +2683,7 @@ public abstract class BatteryStats implements Parcelable {
     public static final String[] RADIO_ACCESS_TECHNOLOGY_NAMES = {"Other", "LTE", "NR"};
 
     /**
-     * Returns the time in microseconds that the mobile radio has been active on a
+     * Returns the time in milliseconds that the mobile radio has been active on a
      * given Radio Access Technology (RAT), at a given frequency (NR RAT only), for a given
      * transmission power level.
      *
@@ -2699,6 +2701,46 @@ public abstract class BatteryStats implements Parcelable {
     public abstract long getActiveRadioDurationMs(@RadioAccessTechnology int rat,
             @ServiceState.FrequencyRange int frequencyRange, int signalStrength,
             long elapsedRealtimeMs);
+
+    /**
+     * Returns the time in milliseconds that the mobile radio has been actively transmitting data on
+     * a given Radio Access Technology (RAT), at a given frequency (NR RAT only), for a given
+     * transmission power level.
+     *
+     * @param rat            Radio Access Technology {@see RadioAccessTechnology}
+     * @param frequencyRange frequency range {@see ServiceState.FrequencyRange}, only needed for
+     *                       RADIO_ACCESS_TECHNOLOGY_NR. Use
+     *                       {@link ServiceState.FREQUENCY_RANGE_UNKNOWN} for other Radio Access
+     *                       Technologies.
+     * @param signalStrength the cellular signal strength. {@see CellSignalStrength#getLevel()}
+     * @param elapsedRealtimeMs current elapsed realtime
+     * @return time (in milliseconds) the mobile radio spent actively transmitting data in the
+     *         specified state, while on battery. Returns {@link DURATION_UNAVAILABLE} if
+     *         data unavailable.
+     * @hide
+     */
+    public abstract long getActiveTxRadioDurationMs(@RadioAccessTechnology int rat,
+            @ServiceState.FrequencyRange int frequencyRange, int signalStrength,
+            long elapsedRealtimeMs);
+
+    /**
+     * Returns the time in milliseconds that the mobile radio has been actively receiving data on a
+     * given Radio Access Technology (RAT), at a given frequency (NR RAT only), for a given
+     * transmission power level.
+     *
+     * @param rat            Radio Access Technology {@see RadioAccessTechnology}
+     * @param frequencyRange frequency range {@see ServiceState.FrequencyRange}, only needed for
+     *                       RADIO_ACCESS_TECHNOLOGY_NR. Use
+     *                       {@link ServiceState.FREQUENCY_RANGE_UNKNOWN} for other Radio Access
+     *                       Technologies.
+     * @param elapsedRealtimeMs current elapsed realtime
+     * @return time (in milliseconds) the mobile radio spent actively receiving data in the
+     *         specified state, while on battery. Returns {@link DURATION_UNAVAILABLE} if
+     *         data unavailable.
+     * @hide
+     */
+    public abstract long getActiveRxRadioDurationMs(@RadioAccessTechnology int rat,
+            @ServiceState.FrequencyRange int frequencyRange, long elapsedRealtimeMs);
 
     static final String[] WIFI_SUPPL_STATE_NAMES = {
         "invalid", "disconn", "disabled", "inactive", "scanning",
@@ -2718,6 +2760,13 @@ public abstract class BatteryStats implements Parcelable {
      * {@hide}
      */
     public static final long POWER_DATA_UNAVAILABLE = -1L;
+
+    /**
+     * Returned value if duration data is unavailable.
+     *
+     * {@hide}
+     */
+    public static final long DURATION_UNAVAILABLE = -1L;
 
     /**
      * Returns the battery consumption (in microcoulombs) of bluetooth, derived from on
@@ -4093,6 +4142,10 @@ public abstract class BatteryStats implements Parcelable {
                 "    Mmwave frequency (greater than 6GHz):\n"};
         final String signalStrengthHeader =
                 "      Signal Strength Time:\n";
+        final String txHeader =
+                "      Tx Time:\n";
+        final String rxHeader =
+                "      Rx Time: ";
         final String[] signalStrengthDescription = new String[]{
                 "        unknown:  ",
                 "        poor:     ",
@@ -4143,6 +4196,29 @@ public abstract class BatteryStats implements Parcelable {
                     sb.append(formatRatioLocked(timeMs, totalActiveTimesMs));
                     sb.append(")\n");
                 }
+
+                sb.append(prefix);
+                sb.append(txHeader);
+                for (int strength = 0; strength < numSignalStrength; strength++) {
+                    final long timeMs = getActiveTxRadioDurationMs(rat, freqLvl, strength,
+                            rawRealtimeMs);
+                    if (timeMs <= 0) continue;
+                    hasFreqData = true;
+                    sb.append(prefix);
+                    sb.append(signalStrengthDescription[strength]);
+                    formatTimeMs(sb, timeMs);
+                    sb.append("(");
+                    sb.append(formatRatioLocked(timeMs, totalActiveTimesMs));
+                    sb.append(")\n");
+                }
+
+                sb.append(prefix);
+                sb.append(rxHeader);
+                final long rxTimeMs = getActiveRxRadioDurationMs(rat, freqLvl, rawRealtimeMs);
+                formatTimeMs(sb, rxTimeMs);
+                sb.append("(");
+                sb.append(formatRatioLocked(rxTimeMs, totalActiveTimesMs));
+                sb.append(")\n");
 
                 if (hasFreqData) {
                     hasData = true;
@@ -5655,6 +5731,7 @@ public abstract class BatteryStats implements Parcelable {
                         .setMaxStatsAgeMs(0)
                         .includePowerModels()
                         .includeProcessStateData()
+                        .includeVirtualUids()
                         .build());
         stats.dump(pw, prefix);
 

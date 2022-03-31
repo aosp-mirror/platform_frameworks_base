@@ -20,19 +20,17 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="4811759950673118541">"Kiolesura"</string>
-    <!-- no translation found for battery_low_title (5319680173344341779) -->
-    <skip />
-    <!-- no translation found for battery_low_description (3282977755476423966) -->
-    <skip />
-    <!-- no translation found for battery_low_intro (5148725009653088790) -->
-    <skip />
+    <string name="battery_low_title" msgid="5319680173344341779">"Ungependa Kuwasha Kiokoa Betri?"</string>
+    <string name="battery_low_description" msgid="3282977755476423966">"Umebakiza asilimia <xliff:g id="PERCENTAGE">%s</xliff:g> ya betri. Kiokoa Betri kinawasha Mandhari meusi, kinazuia shughuli za chinichini na kuchelewesha arifa."</string>
+    <string name="battery_low_intro" msgid="5148725009653088790">"Kiokoa Betri kinawasha Mandhari meusi, kinazuia shughuli za chinichini na kuchelewesha arifa."</string>
     <string name="battery_low_percent_format" msgid="4276661262843170964">"Imebakisha <xliff:g id="PERCENTAGE">%s</xliff:g>"</string>
     <string name="invalid_charger_title" msgid="938685362320735167">"Haiwezi kuchaji kupitia USB"</string>
     <string name="invalid_charger_text" msgid="2339310107232691577">"Tumia chaja ambayo ilikuja na kifaa chako"</string>
     <string name="battery_saver_confirmation_title" msgid="1234998463717398453">"Ungependa Kuwasha Kiokoa Betri?"</string>
     <string name="battery_saver_confirmation_title_generic" msgid="2299231884234959849">"Kuhusu Kiokoa betri"</string>
     <string name="battery_saver_confirmation_ok" msgid="5042136476802816494">"Washa"</string>
-    <string name="battery_saver_start_action" msgid="4553256017945469937">"Washa Kiokoa Betri"</string>
+    <string name="battery_saver_start_action" msgid="8353766979886287140">"Washa"</string>
+    <string name="battery_saver_dismiss_action" msgid="7199342621040014738">"Hapana"</string>
     <string name="status_bar_settings_auto_rotation" msgid="8329080442278431708">"Skrini ijizungushe kiotomatiki"</string>
     <string name="usb_device_permission_prompt" msgid="4414719028369181772">"Ungependa kuruhusu <xliff:g id="APPLICATION">%1$s</xliff:g> ifikie <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
     <string name="usb_device_permission_prompt_warn" msgid="2309129784984063656">"Ungependa kuruhusu <xliff:g id="APPLICATION">%1$s</xliff:g> ifikie <xliff:g id="USB_DEVICE">%2$s</xliff:g>?\nProgramu hii haijapewa ruhusa ya kurekodi lakini inaweza kurekodi sauti kupitia kifaa hiki cha USB."</string>
@@ -133,8 +131,7 @@
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="2242167416140740920">"Uso umethibitishwa"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"Imethibitishwa"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"Gusa Thibitisha ili ukamilishe"</string>
-    <!-- no translation found for biometric_dialog_tap_confirm_with_face (1597899891472340950) -->
-    <skip />
+    <string name="biometric_dialog_tap_confirm_with_face" msgid="1597899891472340950">"Imefunguliwa kwa kutumia uso wako. Bonyeza ili uendelee."</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"Umethibitishwa"</string>
     <string name="biometric_dialog_use_pin" msgid="8385294115283000709">"Tumia PIN"</string>
     <string name="biometric_dialog_use_pattern" msgid="2315593393167211194">"Tumia mchoro"</string>
@@ -154,10 +151,6 @@
     <string name="biometric_dialog_last_pattern_attempt_before_wipe_profile" msgid="6045224069529284686">"Ukiweka mchoro usio sahihi utakapojaribu tena, wasifu wako wa kazini utafutwa pamoja na data yake."</string>
     <string name="biometric_dialog_last_pin_attempt_before_wipe_profile" msgid="545567685899091757">"Ukiweka PIN isiyo sahihi utakapojaribu tena, wasifu wako wa kazini utafutwa pamoja na data yake."</string>
     <string name="biometric_dialog_last_password_attempt_before_wipe_profile" msgid="8538032972389729253">"Ukiweka nenosiri lisilo sahihi utakapojaribu tena, wasifu wako wa kazini utafutwa pamoja na data yake."</string>
-    <string name="biometric_dialog_failed_attempts_now_wiping_device" msgid="6585503524026243042">"Umejaribu kufungua mara nyingi mno kwa njia isiyo sahihi. Data iliyo kwenye kifaa hiki itafutwa."</string>
-    <string name="biometric_dialog_failed_attempts_now_wiping_user" msgid="7015008539146949115">"Umejaribu kufungua mara nyingi mno kwa njia isiyo sahihi. Maelezo ya mtumiaji huyu yatafutwa."</string>
-    <string name="biometric_dialog_failed_attempts_now_wiping_profile" msgid="5239378521440749682">"Umejaribu kufungua mara nyingi mno kwa njia isiyo sahihi. Wasifu huu wa kazini utafutwa pamoja na data yake."</string>
-    <string name="biometric_dialog_now_wiping_dialog_dismiss" msgid="7189432882125106154">"Ondoa"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"Gusa kitambua alama ya kidole"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="4465698996175640549">"Aikoni ya alama ya kidole"</string>
     <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"Imeshindwa kutambua uso. Tumia alama ya kidole."</string>
@@ -326,17 +319,12 @@
     <string name="keyguard_indication_charging_time_slowly" msgid="301936949731705417">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Inachaji polepole • Itajaa baada ya <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
     <string name="keyguard_indication_charging_time_dock" msgid="6150404291427377863">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Kituo cha Kuchaji • Itajaa baada ya <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Badili mtumiaji"</string>
-    <string name="user_add_user" msgid="4336657383006913022">"Ongeza mtumiaji"</string>
-    <string name="user_new_user_name" msgid="2019166282704195789">"Mtumiaji mpya"</string>
-    <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"Ungependa kumwondoa mgeni?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Data na programu zote katika kipindi hiki zitafutwa."</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"Ondoa"</string>
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"Karibu tena mgeni!"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"Je, unataka kuendelea na kipindi chako?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"Anza upya"</string>
     <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"Ndiyo, endelea"</string>
-    <string name="user_add_user_title" msgid="4172327541504825032">"Ungependa kuongeza mtumiaji?"</string>
-    <string name="user_add_user_message_short" msgid="2599370307878014791">"Mtumiaji mpya utakayemwongeza atahitaji kuongeza akaunti yake.\n\nMtumiaji yoyote anaweza kusasisha programu kwa niaba ya wengine wote."</string>
     <string name="user_limit_reached_title" msgid="2429229448830346057">"Umefikia kima cha juu cha watumiaji"</string>
     <plurals name="user_limit_reached_message" formatted="false" msgid="2573535787802908398">
       <item quantity="other">Unaruhusiwa kuongeza hadi watumiaji <xliff:g id="COUNT">%d</xliff:g>.</item>
@@ -462,8 +450,7 @@
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"Fungua ili utumie"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"Hitilafu imetokea wakati wa kuleta kadi zako, tafadhali jaribu tena baadaye"</string>
     <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"Mipangilio ya kufunga skrini"</string>
-    <string name="qr_code_scanner_title" msgid="5660820608548306581">"Msimbo wa QR"</string>
-    <string name="qr_code_scanner_description" msgid="7937603775306661863">"Gusa ili uchanganue"</string>
+    <string name="qr_code_scanner_title" msgid="5290201053875420785">"Changanua msimbo wa QR"</string>
     <string name="status_bar_work" msgid="5238641949837091056">"Wasifu wa kazini"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"Hali ya ndegeni"</string>
     <string name="zen_alarm_warning" msgid="7844303238486849503">"Hutasikia kengele yako inayofuata ya saa <xliff:g id="WHEN">%1$s</xliff:g>"</string>
@@ -788,9 +775,10 @@
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"Telezesha kidole ili uone zaidi"</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"Inapakia mapendekezo"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"Maudhui"</string>
-    <string name="controls_media_close_session" msgid="1193000643003066508">"Ungependa kuficha kipindi hiki cha maudhui?"</string>
+    <!-- no translation found for controls_media_close_session (4780485355795635052) -->
+    <skip />
     <string name="controls_media_active_session" msgid="3146882316024153337">"Kipindi cha sasa cha maudhui hakiwezi kufichwa."</string>
-    <string name="controls_media_dismiss_button" msgid="9081375542265132213">"Ondoa"</string>
+    <string name="controls_media_dismiss_button" msgid="4485675693008031646">"Ficha"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"Endelea"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"Mipangilio"</string>
     <string name="controls_media_playing_item_description" msgid="4531853311504359098">"<xliff:g id="SONG_NAME">%1$s</xliff:g> ulioimbwa na <xliff:g id="ARTIST_NAME">%2$s</xliff:g> unacheza katika <xliff:g id="APP_LABEL">%3$s</xliff:g>"</string>
@@ -808,7 +796,7 @@
     <string name="media_move_closer_to_end_cast" msgid="6495907340926563656">"Sogeza karibu na <xliff:g id="DEVICENAME">%1$s</xliff:g> ili kucheza hapa"</string>
     <string name="media_transfer_playing_different_device" msgid="7186806382609785610">"Inacheza kwenye <xliff:g id="DEVICENAME">%1$s</xliff:g>"</string>
     <string name="media_transfer_playing_this_device" msgid="1856890686844499172">"Inacheza kwenye simu hii"</string>
-    <string name="media_transfer_failed" msgid="2640354446629980227">"Hitilafu fulani imetokea"</string>
+    <string name="media_transfer_failed" msgid="7955354964610603723">"Hitilafu fulani imetokea. Jaribu tena."</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"Haitumiki, angalia programu"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"Hakipatikani"</string>
     <string name="controls_error_removed_title" msgid="1207794911208047818">"Kidhibiti hakipatikani"</string>
@@ -827,6 +815,7 @@
     <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"Oanisha kifaa kipya"</string>
     <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"Ili utume kipindi hiki, tafadhali fungua programu."</string>
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"Programu isiyojulikana"</string>
+    <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"Acha kutuma"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"Nambari ya muundo"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"Nambari ya muundo imewekwa kwenye ubao wa kunakili."</string>
     <string name="basic_status" msgid="2315371112182658176">"Fungua mazungumzo"</string>
@@ -916,8 +905,6 @@
     <string name="dream_overlay_status_bar_wifi_off" msgid="4497069245055003582">"Wi-Fi haipatikani"</string>
     <string name="dream_overlay_status_bar_priority_mode" msgid="5428462123314728739">"Hali ya kipaumbele"</string>
     <string name="dream_overlay_status_bar_alarm_set" msgid="566707328356590886">"Kengele imewekwa"</string>
-    <string name="dream_overlay_status_bar_assistant_guest_mode_enabled" msgid="3715897096012469615">"Matumizi ya wageni ya Mratibu yamewashwa"</string>
     <string name="dream_overlay_status_bar_camera_mic_off" msgid="3199425257833773569">"Kamera na maikrofoni zimezimwa"</string>
-    <!-- no translation found for dream_overlay_status_bar_notification_indicator (8091389255691081711) -->
-    <skip />
+    <string name="dream_overlay_status_bar_notification_indicator" msgid="8091389255691081711">"{count,plural, =1{Arifa #}other{Arifa #}}"</string>
 </resources>

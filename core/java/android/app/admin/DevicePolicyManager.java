@@ -16,9 +16,12 @@
 
 package android.app.admin;
 
+import static android.net.NetworkCapabilities.NET_ENTERPRISE_ID_1;
+
 import static com.android.internal.util.function.pooled.PooledLambda.obtainMessage;
 
 import android.Manifest.permission;
+import android.accounts.Account;
 import android.annotation.CallbackExecutor;
 import android.annotation.ColorInt;
 import android.annotation.IntDef;
@@ -39,7 +42,6 @@ import android.annotation.WorkerThread;
 import android.app.Activity;
 import android.app.IServiceConnection;
 import android.app.KeyguardManager;
-import android.app.admin.DevicePolicyResources.Drawables;
 import android.app.admin.SecurityLog.SecurityEvent;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
@@ -53,14 +55,11 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.UserInfo;
-import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
-import android.graphics.drawable.Icon;
 import android.net.PrivateDnsConnectivityChecker;
 import android.net.ProxyInfo;
 import android.net.Uri;
-import android.net.wifi.WifiSsid;
 import android.nfc.NfcAdapter;
 import android.os.Binder;
 import android.os.Build;
@@ -95,7 +94,6 @@ import android.telephony.data.ApnSetting;
 import android.text.TextUtils;
 import android.util.ArraySet;
 import android.util.DebugUtils;
-import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.Pair;
 
@@ -113,7 +111,6 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
-import java.nio.charset.StandardCharsets;
 import java.security.KeyFactory;
 import java.security.KeyPair;
 import java.security.NoSuchAlgorithmException;
@@ -136,7 +133,6 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;
-import java.util.function.Supplier;
 
 // TODO(b/172376923) - add CarDevicePolicyManager examples below (or remove reference to it).
 /**
@@ -171,6 +167,7 @@ public class DevicePolicyManager {
     private final Context mContext;
     private final IDevicePolicyManager mService;
     private final boolean mParentInstance;
+    private final DevicePolicyResourcesManager mResourcesManager;
 
     /** @hide */
     public DevicePolicyManager(Context context, IDevicePolicyManager service) {
@@ -184,6 +181,7 @@ public class DevicePolicyManager {
         mContext = context;
         mService = service;
         mParentInstance = parentInstance;
+        mResourcesManager = new DevicePolicyResourcesManager(context, service);
     }
 
     /** @hide test will override it. */
@@ -717,10 +715,11 @@ public class DevicePolicyManager {
 
     /**
      * A {@code boolean} extra which determines whether to force a role holder update, regardless
-     * of any internal conditions {@link #ACTION_UPDATE_DEVICE_MANAGEMENT_ROLE_HOLDER} might have.
+     * of any internal conditions {@link #ACTION_UPDATE_DEVICE_POLICY_MANAGEMENT_ROLE_HOLDER} might
+     * have.
      *
      * <p>This extra can be provided to intents with action {@link
-     * #ACTION_UPDATE_DEVICE_MANAGEMENT_ROLE_HOLDER}.
+     * #ACTION_UPDATE_DEVICE_POLICY_MANAGEMENT_ROLE_HOLDER}.
      *
      * @hide
      */
@@ -905,6 +904,14 @@ public class DevicePolicyManager {
      */
     public static final String EXTRA_REMOTE_BUGREPORT_HASH =
             "android.intent.extra.REMOTE_BUGREPORT_HASH";
+
+    /**
+     * Extra for shared bugreport's nonce in long integer type.
+     *
+     * @hide
+     */
+    public static final String EXTRA_REMOTE_BUGREPORT_NONCE =
+            "android.intent.extra.REMOTE_BUGREPORT_NONCE";
 
     /**
      * Extra for remote bugreport notification shown type.
@@ -1620,14 +1627,26 @@ public class DevicePolicyManager {
             "android.app.extra.PROVISIONING_SKIP_EDUCATION_SCREENS";
 
     /**
-     * A boolean extra indicating if mobile data should be used during NFC device owner provisioning
-     * for downloading the mobile device management application. If {@link
-     * #EXTRA_PROVISIONING_WIFI_SSID} is also specified, wifi network will be used instead.
+     * A boolean extra indicating if mobile data should be used during the provisioning flow
+     * for downloading the admin app. If {@link #EXTRA_PROVISIONING_WIFI_SSID} is also specified,
+     * wifi network will be used instead.
      *
-     * <p>Use in an NFC record with {@link #MIME_TYPE_PROVISIONING_NFC} that starts device owner
-     * provisioning via an NFC bump.
+     * <p>Default value is {@code false}.
      *
-     * @hide
+     * <p>If this extra is set to {@code true} and {@link #EXTRA_PROVISIONING_WIFI_SSID} is not
+     * specified, this extra has different behaviour depending on the way provisioning is triggered:
+     * <ul>
+     * <li>
+     *     For provisioning started via a QR code or an NFC tag, mobile data is always used for
+     *     downloading the admin app.
+     * </li>
+     * <li>
+     *     For all other provisioning methods, a mobile data connection check is made at the start
+     *     of provisioning. If mobile data is connected at that point, the admin app download will
+     *     happen using mobile data. If mobile data is not connected at that point, the end-user
+     *     will be asked to pick a wifi network and the admin app download will proceed over wifi.
+     * </li>
+     * </ul>
      */
     public static final String EXTRA_PROVISIONING_USE_MOBILE_DATA =
             "android.app.extra.PROVISIONING_USE_MOBILE_DATA";
@@ -3279,39 +3298,84 @@ public class DevicePolicyManager {
      *
      * <p>The activity must handle the device policy management role holder update and set the
      * intent result to either {@link Activity#RESULT_OK} if the update was successful, {@link
-     * #RESULT_UPDATE_DEVICE_MANAGEMENT_ROLE_HOLDER_RECOVERABLE_ERROR} if it encounters a problem
-     * that may be solved by relaunching it again, or {@link
-     * #RESULT_UPDATE_DEVICE_MANAGEMENT_ROLE_HOLDER_UNRECOVERABLE_ERROR} if it encounters a problem
-     * that will not be solved by relaunching it again.
+     * #RESULT_UPDATE_DEVICE_POLICY_MANAGEMENT_ROLE_HOLDER_RECOVERABLE_ERROR} if it encounters a
+     * problem that may be solved by relaunching it again, {@link
+     * #RESULT_UPDATE_DEVICE_POLICY_MANAGEMENT_ROLE_HOLDER_PROVISIONING_DISABLED} if role holder
+     * provisioning is disabled, or {@link
+     * #RESULT_UPDATE_DEVICE_POLICY_MANAGEMENT_ROLE_HOLDER_UNRECOVERABLE_ERROR} if it encounters
+     * any other problem that will not be solved by relaunching it again.
      *
      * <p>If this activity has additional internal conditions which are not met, it should return
-     * {@link #RESULT_UPDATE_DEVICE_MANAGEMENT_ROLE_HOLDER_UNRECOVERABLE_ERROR}.
+     * {@link #RESULT_UPDATE_DEVICE_POLICY_MANAGEMENT_ROLE_HOLDER_UNRECOVERABLE_ERROR}.
      *
      * @hide
      */
     @RequiresPermission(android.Manifest.permission.LAUNCH_DEVICE_MANAGER_SETUP)
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     @SystemApi
-    public static final String ACTION_UPDATE_DEVICE_MANAGEMENT_ROLE_HOLDER =
-            "android.app.action.UPDATE_DEVICE_MANAGEMENT_ROLE_HOLDER";
+    public static final String ACTION_UPDATE_DEVICE_POLICY_MANAGEMENT_ROLE_HOLDER =
+            "android.app.action.UPDATE_DEVICE_POLICY_MANAGEMENT_ROLE_HOLDER";
 
     /**
-     * Result code that can be returned by the {@link #ACTION_UPDATE_DEVICE_MANAGEMENT_ROLE_HOLDER}
-     * handler if it encounters a problem that may be solved by relaunching it again.
+     * Result code that can be returned by the {@link
+     * #ACTION_UPDATE_DEVICE_POLICY_MANAGEMENT_ROLE_HOLDER} handler if it encounters a problem
+     * that may be solved by relaunching it again.
      *
      * @hide
      */
     @SystemApi
-    public static final int RESULT_UPDATE_DEVICE_MANAGEMENT_ROLE_HOLDER_RECOVERABLE_ERROR = 1;
+    public static final int RESULT_UPDATE_DEVICE_POLICY_MANAGEMENT_ROLE_HOLDER_RECOVERABLE_ERROR =
+            1;
 
     /**
-     * Result code that can be returned by the {@link #ACTION_UPDATE_DEVICE_MANAGEMENT_ROLE_HOLDER}
-     * handler if it encounters a problem that will not be solved by relaunching it again.
+     * Result code that can be returned by the {@link
+     * #ACTION_UPDATE_DEVICE_POLICY_MANAGEMENT_ROLE_HOLDER} handler if it encounters a problem that
+     * will not be solved by relaunching it again.
      *
      * @hide
      */
     @SystemApi
-    public static final int RESULT_UPDATE_DEVICE_MANAGEMENT_ROLE_HOLDER_UNRECOVERABLE_ERROR = 2;
+    public static final int RESULT_UPDATE_DEVICE_POLICY_MANAGEMENT_ROLE_HOLDER_UNRECOVERABLE_ERROR =
+            2;
+
+    /**
+     * Result code that can be returned by the {@link
+     * #ACTION_UPDATE_DEVICE_POLICY_MANAGEMENT_ROLE_HOLDER} handler if role holder provisioning
+     * is disabled.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int
+            RESULT_UPDATE_DEVICE_POLICY_MANAGEMENT_ROLE_HOLDER_PROVISIONING_DISABLED = 3;
+
+    /**
+     * An {@code int} extra which contains the result code of the last attempt to update
+     * the device policy management role holder.
+     *
+     * <p>This extra is provided to the device policy management role holder via either {@link
+     * #ACTION_ROLE_HOLDER_PROVISION_MANAGED_DEVICE_FROM_TRUSTED_SOURCE} or {@link
+     * #ACTION_ROLE_HOLDER_PROVISION_MANAGED_PROFILE} when started after the role holder
+     * had previously returned {@link #RESULT_UPDATE_ROLE_HOLDER}.
+     *
+     * <p>If the role holder update had failed, the role holder can use the value of this extra to
+     * make a decision whether to fail the provisioning flow or to carry on with the older version
+     * of the role holder.
+     *
+     * <p>Possible values can be:
+     * <ul>
+     *    <li>{@link Activity#RESULT_OK} if the update was successful
+     *    <li>{@link #RESULT_UPDATE_DEVICE_POLICY_MANAGEMENT_ROLE_HOLDER_RECOVERABLE_ERROR} if it
+     *    encounters a problem that may be solved by relaunching it again.
+     *    <li>{@link #RESULT_UPDATE_DEVICE_POLICY_MANAGEMENT_ROLE_HOLDER_UNRECOVERABLE_ERROR} if
+     *    it encounters a problem that will not be solved by relaunching it again.
+     * </ul>
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String EXTRA_ROLE_HOLDER_UPDATE_RESULT_CODE =
+            "android.app.extra.ROLE_HOLDER_UPDATE_RESULT_CODE";
 
     /**
      * An {@link Intent} extra which resolves to a custom user consent screen.
@@ -3331,6 +3395,16 @@ public class DevicePolicyManager {
      *     {@link #EXTRA_PROVISIONING_DISCLAIMER_HEADER} and {@link
      *     #EXTRA_PROVISIONING_DISCLAIMER_CONTENT} metadata in their manifests</li>
      *     <li>General disclaimer relevant to the provisioning mode</li>
+     * </ul>
+     *
+     * <p>When this {@link Intent} is started, the following intent extras will be supplied:
+     * <ul>
+     *     <li>{@link #EXTRA_PROVISIONING_DISCLAIMERS}</li>
+     *     <li>{@link #EXTRA_PROVISIONING_MODE}</li>
+     *     <li>{@link #EXTRA_PROVISIONING_LOCALE}</li>
+     *     <li>{@link #EXTRA_PROVISIONING_LOCAL_TIME}</li>
+     *     <li>{@link #EXTRA_PROVISIONING_TIME_ZONE}</li>
+     *     <li>{@link #EXTRA_PROVISIONING_SKIP_EDUCATION_SCREENS}</li>
      * </ul>
      *
      * <p>If the custom consent screens are granted by the user {@link Activity#RESULT_OK} is
@@ -3667,7 +3741,8 @@ public class DevicePolicyManager {
     /**
      * Broadcast action: notify system apps (e.g. settings, SysUI, etc) that the device management
      * resources with IDs {@link #EXTRA_RESOURCE_IDS} has been updated, the updated resources can be
-     * retrieved using {@link #getDrawable} and {@code #getString}.
+     * retrieved using {@link DevicePolicyResourcesManager#getDrawable} and
+     * {@link DevicePolicyResourcesManager#getString}.
      *
      * <p>This broadcast is sent to registered receivers only.
      *
@@ -6120,7 +6195,7 @@ public class DevicePolicyManager {
      * organization-owned managed profile.
      *
      * <p>The caller must hold the
-     * {@link android.Manifest.permission#SEND_LOST_MODE_LOCATION_UPDATES} permission.
+     * {@link android.Manifest.permission#TRIGGER_LOST_MODE} permission.
      *
      * <p> Not for use by third-party applications.
      *
@@ -6130,7 +6205,7 @@ public class DevicePolicyManager {
      * @hide
      */
     @SystemApi
-    @RequiresPermission(android.Manifest.permission.SEND_LOST_MODE_LOCATION_UPDATES)
+    @RequiresPermission(android.Manifest.permission.TRIGGER_LOST_MODE)
     public void sendLostModeLocationUpdate(@NonNull @CallbackExecutor Executor executor,
             @NonNull Consumer<Boolean> callback) {
         throwIfParentInstance("sendLostModeLocationUpdate");
@@ -11031,7 +11106,7 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Sets whether preferential network service is enabled on the work profile.
+     * Sets whether preferential network service is enabled.
      * For example, an organization can have a deal/agreement with a carrier that all of
      * the work data from its employees’ devices will be sent via a network service dedicated
      * for enterprise use.
@@ -11039,75 +11114,72 @@ public class DevicePolicyManager {
      * An example of a supported preferential network service is the Enterprise
      * slice on 5G networks.
      *
-     * By default, preferential network service is disabled on the work profile on supported
-     * carriers and devices. Admins can explicitly enable it with this API.
-     * On fully-managed devices this method is unsupported because all traffic is considered
-     * work traffic.
+     * By default, preferential network service is disabled on the work profile and
+     * fully managed devices, on supported carriers and devices.
+     * Admins can explicitly enable it with this API.
      *
      * <p> This method enables preferential network service with a default configuration.
-     * To fine-tune the configuration, use {@link #setPreferentialNetworkServiceConfig) instead.
+     * To fine-tune the configuration, use {@link #setPreferentialNetworkServiceConfigs) instead.
+     * <p> Before Android version {@link android.os.Build.VERSION_CODES#TIRAMISU}:
+     * this method can be called by the profile owner of a managed profile.
+     * <p> Starting from Android version {@link android.os.Build.VERSION_CODES#TIRAMISU}:
+     * This method can be called by the profile owner of a managed profile
+     * or device owner.
      *
-     * <p>This method can only be called by the profile owner of a managed profile.
      * @param enabled whether preferential network service should be enabled.
-     * @throws SecurityException if the caller is not the profile owner.
+     * @throws SecurityException if the caller is not the profile owner or device owner.
      **/
     public void setPreferentialNetworkServiceEnabled(boolean enabled) {
         throwIfParentInstance("setPreferentialNetworkServiceEnabled");
-        if (mService == null) {
-            return;
+        PreferentialNetworkServiceConfig.Builder configBuilder =
+                new PreferentialNetworkServiceConfig.Builder();
+        configBuilder.setEnabled(enabled);
+        if (enabled) {
+            configBuilder.setNetworkId(NET_ENTERPRISE_ID_1);
         }
-
-        try {
-            mService.setPreferentialNetworkServiceEnabled(enabled);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
+        setPreferentialNetworkServiceConfigs(List.of(configBuilder.build()));
     }
 
     /**
      * Indicates whether preferential network service is enabled.
      *
-     * <p>This method can be called by the profile owner of a managed profile.
+     * <p> Before Android version {@link android.os.Build.VERSION_CODES#TIRAMISU}:
+     * This method can be called by the profile owner of a managed profile.
+     * <p> Starting from Android version {@link android.os.Build.VERSION_CODES#TIRAMISU}:
+     * This method can be called by the profile owner of a managed profile
+     * or device owner.
      *
      * @return whether preferential network service is enabled.
-     * @throws SecurityException if the caller is not the profile owner.
+     * @throws SecurityException if the caller is not the profile owner or device owner.
      */
     public boolean isPreferentialNetworkServiceEnabled() {
         throwIfParentInstance("isPreferentialNetworkServiceEnabled");
-        if (mService == null) {
-            return false;
-        }
-        try {
-            return mService.isPreferentialNetworkServiceEnabled(myUserId());
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
+        return getPreferentialNetworkServiceConfigs().stream().anyMatch(c -> c.isEnabled());
     }
 
     /**
-     * Sets preferential network configuration on the work profile.
+     * Sets preferential network configurations.
      * {@see PreferentialNetworkServiceConfig}
      *
      * An example of a supported preferential network service is the Enterprise
      * slice on 5G networks.
      *
-     * By default, preferential network service is disabled on the work profile on supported
-     * carriers and devices. Admins can explicitly enable it with this API.
-     * On fully-managed devices this method is unsupported because all traffic is considered
-     * work traffic.
+     * By default, preferential network service is disabled on the work profile and fully managed
+     * devices, on supported carriers and devices. Admins can explicitly enable it with this API.
+     * If admin wants to have multiple enterprise slices,
+     * it can be configured by passing list of {@link PreferentialNetworkServiceConfig} objects.
      *
-     * <p>This method can only be called by the profile owner of a managed profile.
-     * @param preferentialNetworkServiceConfig preferential network configuration.
-     * @throws SecurityException if the caller is not the profile owner.
+     * @param preferentialNetworkServiceConfigs list of preferential network configurations.
+     * @throws SecurityException if the caller is not the profile owner or device owner.
      **/
-    public void setPreferentialNetworkServiceConfig(
-            @NonNull PreferentialNetworkServiceConfig preferentialNetworkServiceConfig) {
-        throwIfParentInstance("setPreferentialNetworkServiceConfig");
+    public void setPreferentialNetworkServiceConfigs(
+            @NonNull List<PreferentialNetworkServiceConfig> preferentialNetworkServiceConfigs) {
+        throwIfParentInstance("setPreferentialNetworkServiceConfigs");
         if (mService == null) {
             return;
         }
         try {
-            mService.setPreferentialNetworkServiceConfig(preferentialNetworkServiceConfig);
+            mService.setPreferentialNetworkServiceConfigs(preferentialNetworkServiceConfigs);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -11117,18 +11189,16 @@ public class DevicePolicyManager {
      * Get preferential network configuration
      * {@see PreferentialNetworkServiceConfig}
      *
-     * <p>This method can be called by the profile owner of a managed profile.
-     *
      * @return preferential network configuration.
-     * @throws SecurityException if the caller is not the profile owner.
+     * @throws SecurityException if the caller is not the profile owner or device owner.
      */
-    public @NonNull PreferentialNetworkServiceConfig getPreferentialNetworkServiceConfig() {
-        throwIfParentInstance("getPreferentialNetworkServiceConfig");
+    public @NonNull List<PreferentialNetworkServiceConfig> getPreferentialNetworkServiceConfigs() {
+        throwIfParentInstance("getPreferentialNetworkServiceConfigs");
         if (mService == null) {
-            return PreferentialNetworkServiceConfig.DEFAULT;
+            return List.of(PreferentialNetworkServiceConfig.DEFAULT);
         }
         try {
-            return mService.getPreferentialNetworkServiceConfig();
+            return mService.getPreferentialNetworkServiceConfigs();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -13612,13 +13682,18 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by device owner to add an override APN.
+     * Called by device owner or profile owner to add an override APN.
      *
      * <p>This method may returns {@code -1} if {@code apnSetting} conflicts with an existing
      * override APN. Update the existing conflicted APN with
      * {@link #updateOverrideApn(ComponentName, int, ApnSetting)} instead of adding a new entry.
      * <p>Two override APNs are considered to conflict when all the following APIs return
      * the same values on both override APNs:
+     * <p> Before Android version {@link android.os.Build.VERSION_CODES#TIRAMISU}:
+     * Only device owners can add APNs.
+     * <p> Starting from Android version {@link android.os.Build.VERSION_CODES#TIRAMISU}:
+     * Device and profile owners can add enterprise APNs
+     * ({@link ApnSetting#TYPE_ENTERPRISE}), while only device owners can add other type of APNs.
      * <ul>
      *   <li>{@link ApnSetting#getOperatorNumeric()}</li>
      *   <li>{@link ApnSetting#getApnName()}</li>
@@ -13637,7 +13712,8 @@ public class DevicePolicyManager {
      * @param apnSetting the override APN to insert
      * @return The {@code id} of inserted override APN. Or {@code -1} when failed to insert into
      *         the database.
-     * @throws SecurityException if {@code admin} is not a device owner.
+     * @throws SecurityException If request is for enterprise APN {@code admin} is either device
+     * owner or profile owner and in all other types of APN if {@code admin} is not a device owner.
      *
      * @see #setOverrideApnsEnabled(ComponentName, boolean)
      */
@@ -13654,20 +13730,26 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by device owner to update an override APN.
+     * Called by device owner or profile owner to update an override APN.
      *
      * <p>This method may returns {@code false} if there is no override APN with the given
      * {@code apnId}.
      * <p>This method may also returns {@code false} if {@code apnSetting} conflicts with an
      * existing override APN. Update the existing conflicted APN instead.
      * <p>See {@link #addOverrideApn} for the definition of conflict.
+     * <p> Before Android version {@link android.os.Build.VERSION_CODES#TIRAMISU}:
+     * Only device owners can update APNs.
+     * <p> Starting from Android version {@link android.os.Build.VERSION_CODES#TIRAMISU}:
+     * Device and profile owners can update enterprise APNs
+     * ({@link ApnSetting#TYPE_ENTERPRISE}), while only device owners can update other type of APNs.
      *
      * @param admin which {@link DeviceAdminReceiver} this request is associated with
      * @param apnId the {@code id} of the override APN to update
      * @param apnSetting the override APN to update
      * @return {@code true} if the required override APN is successfully updated,
      *         {@code false} otherwise.
-     * @throws SecurityException if {@code admin} is not a device owner.
+     * @throws SecurityException If request is for enterprise APN {@code admin} is either device
+     * owner or profile owner and in all other types of APN if {@code admin} is not a device owner.
      *
      * @see #setOverrideApnsEnabled(ComponentName, boolean)
      */
@@ -13685,16 +13767,22 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by device owner to remove an override APN.
+     * Called by device owner or profile owner to remove an override APN.
      *
      * <p>This method may returns {@code false} if there is no override APN with the given
      * {@code apnId}.
+     * <p> Before Android version {@link android.os.Build.VERSION_CODES#TIRAMISU}:
+     * Only device owners can remove APNs.
+     * <p> Starting from Android version {@link android.os.Build.VERSION_CODES#TIRAMISU}:
+     * Device and profile owners can remove enterprise APNs
+     * ({@link ApnSetting#TYPE_ENTERPRISE}), while only device owners can remove other type of APNs.
      *
      * @param admin which {@link DeviceAdminReceiver} this request is associated with
      * @param apnId the {@code id} of the override APN to remove
      * @return {@code true} if the required override APN is successfully removed, {@code false}
      *         otherwise.
-     * @throws SecurityException if {@code admin} is not a device owner.
+     * @throws SecurityException If request is for enterprise APN {@code admin} is either device
+     * owner or profile owner and in all other types of APN if {@code admin} is not a device owner.
      *
      * @see #setOverrideApnsEnabled(ComponentName, boolean)
      */
@@ -13989,12 +14077,12 @@ public class DevicePolicyManager {
     /**
      * Deprecated. Use {@code markProfileOwnerOnOrganizationOwnedDevice} instead.
      * When called by an app targeting SDK level {@link android.os.Build.VERSION_CODES#Q} or
-     * below, will behave the same as {@link #markProfileOwnerOnOrganizationOwnedDevice}.
+     * below, will behave the same as {@link #setProfileOwnerOnOrganizationOwnedDevice}.
      *
      * When called by an app targeting SDK level {@link android.os.Build.VERSION_CODES#R}
      * or above, will throw an UnsupportedOperationException when called.
      *
-     * @deprecated Use {@link #markProfileOwnerOnOrganizationOwnedDevice} instead.
+     * @deprecated Use {@link #setProfileOwnerOnOrganizationOwnedDevice} instead.
      *
      * @hide
      */
@@ -14009,14 +14097,14 @@ public class DevicePolicyManager {
                     "This method is deprecated. use markProfileOwnerOnOrganizationOwnedDevice"
                     + " instead.");
         } else {
-            markProfileOwnerOnOrganizationOwnedDevice(who);
+            setProfileOwnerOnOrganizationOwnedDevice(who, true);
         }
     }
 
     /**
-     * Marks the profile owner of the given user as managing an organization-owned device.
-     * That will give it access to device identifiers (such as serial number, IMEI and MEID)
-     * as well as other privileges.
+     * Sets whether the profile owner of the given user as managing an organization-owned device.
+     * Managing an organization-owned device will give it access to device identifiers (such as
+     * serial number, IMEI and MEID) as well as other privileges.
      *
      * @hide
      */
@@ -14024,13 +14112,15 @@ public class DevicePolicyManager {
     @RequiresPermission(anyOf = {
             android.Manifest.permission.MARK_DEVICE_ORGANIZATION_OWNED,
             android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS
-    }, conditional = true)
-    public void markProfileOwnerOnOrganizationOwnedDevice(@NonNull ComponentName who) {
+            }, conditional = true)
+    public void setProfileOwnerOnOrganizationOwnedDevice(@NonNull ComponentName who,
+            boolean isProfileOwnerOnOrganizationOwnedDevice) {
         if (mService == null) {
             return;
         }
         try {
-            mService.markProfileOwnerOnOrganizationOwnedDevice(who, myUserId());
+            mService.setProfileOwnerOnOrganizationOwnedDevice(who, myUserId(),
+                    isProfileOwnerOnOrganizationOwnedDevice);
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
@@ -14780,6 +14870,28 @@ public class DevicePolicyManager {
     }
 
     /**
+     * Called when a managed profile has been provisioned.
+     *
+     * @throws SecurityException if the caller does not hold
+     * {@link android.Manifest.permission#MANAGE_PROFILE_AND_DEVICE_OWNERS}.
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS)
+    public void finalizeWorkProfileProvisioning(
+            @NonNull UserHandle managedProfileUser, @Nullable Account migratedAccount) {
+        Objects.requireNonNull(managedProfileUser, "managedProfileUser can't be null");
+        if (mService == null) {
+            throw new IllegalStateException("Could not find DevicePolicyManagerService");
+        }
+        try {
+            mService.finalizeWorkProfileProvisioning(managedProfileUser, migratedAccount);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * The localized error message to show to the end-user. If {@code null}, a generic error
      * message will be shown.
      */
@@ -15123,26 +15235,15 @@ public class DevicePolicyManager {
      */
     public void setWifiSsidPolicy(@Nullable WifiSsidPolicy policy) {
         throwIfParentInstance("setWifiSsidPolicy");
-        if (mService != null) {
-            try {
-                if (policy == null) {
-                    mService.setSsidAllowlist(new ArrayList<>());
-                } else {
-                    int policyType = policy.getPolicyType();
-                    List<String> ssidList = new ArrayList<>();
-                    for (WifiSsid ssid : policy.getSsids()) {
-                        ssidList.add(new String(ssid.getBytes(), StandardCharsets.UTF_8));
-                    }
-                    if (policyType == WifiSsidPolicy.WIFI_SSID_POLICY_TYPE_ALLOWLIST) {
-                        mService.setSsidAllowlist(ssidList);
-                    } else {
-                        mService.setSsidDenylist(ssidList);
-                    }
-                }
-            } catch (RemoteException e) {
-                throw e.rethrowFromSystemServer();
-            }
+        if (mService == null) {
+            return;
         }
+        try {
+            mService.setWifiSsidPolicy(policy);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+
     }
 
     /**
@@ -15160,508 +15261,19 @@ public class DevicePolicyManager {
             return null;
         }
         try {
-            List<String> allowlist = mService.getSsidAllowlist();
-            if (!allowlist.isEmpty()) {
-                List<WifiSsid> wifiSsidAllowlist = new ArrayList<>();
-                for (String ssid : allowlist) {
-                    wifiSsidAllowlist.add(
-                            WifiSsid.fromBytes(ssid.getBytes(StandardCharsets.UTF_8)));
-                }
-                return new WifiSsidPolicy(WifiSsidPolicy.WIFI_SSID_POLICY_TYPE_ALLOWLIST,
-                        new ArraySet<>(wifiSsidAllowlist));
-            }
-            List<String> denylist = mService.getSsidDenylist();
-            if (!denylist.isEmpty()) {
-                List<WifiSsid> wifiSsidDenylist = new ArrayList<>();
-                for (String ssid : denylist) {
-                    wifiSsidDenylist.add(
-                            WifiSsid.fromBytes(ssid.getBytes(StandardCharsets.UTF_8)));
-                }
-                return new WifiSsidPolicy(WifiSsidPolicy.WIFI_SSID_POLICY_TYPE_DENYLIST,
-                        new ArraySet<>(wifiSsidDenylist));
-            }
+            return mService.getWifiSsidPolicy();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
-        return null;
     }
 
     /**
-     * For each {@link DevicePolicyDrawableResource} item in {@code drawables}, if
-     * {@link DevicePolicyDrawableResource#getDrawableSource()} is not set or is set to
-     * {@link DevicePolicyResources.Drawables.Source#UNDEFINED}, it updates the drawable resource for
-     * the combination of {@link DevicePolicyDrawableResource#getDrawableId()} and
-     * {@link DevicePolicyDrawableResource#getDrawableStyle()}, (see
-     * {@link DevicePolicyResources.Drawables} and {@link DevicePolicyResources.Drawables.Style}) to
-     * the drawable with ID {@link DevicePolicyDrawableResource#getResourceIdInCallingPackage()},
-     * meaning any system UI surface calling {@link #getDrawable}
-     * with {@code drawableId} and {@code drawableStyle} will get the new resource after this API
-     * is called.
-     *
-     * <p>Otherwise, if {@link DevicePolicyDrawableResource#getDrawableSource()} is set (see
-     * {@link DevicePolicyResources.Drawables.Source}, it overrides any drawables that was set for
-     * the same {@code drawableId} and {@code drawableStyle} for the provided source.
-     *
-     * <p>Sends a broadcast with action {@link #ACTION_DEVICE_POLICY_RESOURCE_UPDATED} to
-     * registered receivers when a resource has been updated successfully.
-     *
-     * <p>Important notes to consider when using this API:
-     * <ul>
-     * <li>{@link #getDrawable} references the resource
-     * {@link DevicePolicyDrawableResource#getResourceIdInCallingPackage()} in the
-     * calling package each time it gets called. You have to ensure that the resource is always
-     * available in the calling package as long as it is used as an updated resource.
-     * <li>You still have to re-call {@code setDrawables} even if you only make changes to the
-     * content of the resource with ID
-     * {@link DevicePolicyDrawableResource#getResourceIdInCallingPackage()} as the content might be
-     * cached and would need updating.
-     * </ul>
-     *
-     * @param drawables The list of {@link DevicePolicyDrawableResource} to update.
-     *
-     * @hide
+     * Returns a {@link DevicePolicyResourcesManager} containing the required APIs to set, reset,
+     * and get device policy related resources.
      */
-    @SystemApi
-    @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_MANAGEMENT_RESOURCES)
-    public void setDrawables(@NonNull Set<DevicePolicyDrawableResource> drawables) {
-        if (mService != null) {
-            try {
-                mService.setDrawables(new ArrayList<>(drawables));
-            } catch (RemoteException e) {
-                throw e.rethrowFromSystemServer();
-            }
-        }
-    }
-
-    /**
-     * Removes all updated drawables for the list of {@code drawableIds} (see
-     * {@link DevicePolicyResources.Drawables} that was previously set by calling
-     * {@link #setDrawables}, meaning any subsequent calls to {@link #getDrawable} for the provided
-     * IDs with any {@link DevicePolicyResources.Drawables.Style} and any
-     * {@link DevicePolicyResources.Drawables.Source} will return the default drawable from
-     * {@code defaultDrawableLoader}.
-     *
-     * <p>Sends a broadcast with action {@link #ACTION_DEVICE_POLICY_RESOURCE_UPDATED} to
-     * registered receivers when a resource has been reset successfully.
-     *
-     * @param drawableIds The list of IDs  to remove.
-     *
-     * @hide
-     */
-    @SystemApi
-    @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_MANAGEMENT_RESOURCES)
-    public void resetDrawables(@NonNull String[] drawableIds) {
-        if (mService != null) {
-            try {
-                mService.resetDrawables(drawableIds);
-            } catch (RemoteException e) {
-                throw e.rethrowFromSystemServer();
-            }
-        }
-    }
-
-    /**
-     * Returns the appropriate updated drawable for the {@code drawableId}
-     * (see {@link DevicePolicyResources.Drawables}), with style {@code drawableStyle}
-     * (see {@link DevicePolicyResources.Drawables.Style}) if one was set using
-     * {@code setDrawables}, otherwise returns the drawable from {@code defaultDrawableLoader}.
-     *
-     * <p>Also returns the drawable from {@code defaultDrawableLoader} if
-     * {@link DevicePolicyResources.Drawables#UNDEFINED} was passed.
-     *
-     * <p>Calls to this API will not return {@code null} unless no updated drawable was found
-     * and the call to {@code defaultDrawableLoader} returned {@code null}.
-     *
-     * <p>This API uses the screen density returned from {@link Resources#getConfiguration()}, to
-     * set a different value use
-     * {@link #getDrawableForDensity(String, String, int, Supplier)}.
-     *
-     * <p>Callers should register for {@link #ACTION_DEVICE_POLICY_RESOURCE_UPDATED} to get
-     * notified when a resource has been updated.
-     *
-     * <p>Note that each call to this API loads the resource from the package that called
-     * {@code setDrawables} to set the updated resource.
-     *
-     * @param drawableId The drawable ID to get the updated resource for.
-     * @param drawableStyle The drawable style to use.
-     * @param defaultDrawableLoader To get the default drawable if no updated drawable was set for
-     *                              the provided params.
-     */
-    @Nullable
-    public Drawable getDrawable(
-            @NonNull @DevicePolicyResources.UpdatableDrawableId String drawableId,
-            @NonNull @DevicePolicyResources.UpdatableDrawableStyle String drawableStyle,
-            @NonNull Supplier<Drawable> defaultDrawableLoader) {
-        return getDrawable(
-                drawableId, drawableStyle, Drawables.Source.UNDEFINED, defaultDrawableLoader);
-    }
-
-    /**
-     * Similar to {@link #getDrawable(String, String, Supplier)}, but also accepts
-     * a {@code drawableSource} (see {@link DevicePolicyResources.Drawables.Source}) which
-     * could result in returning a different drawable than
-     * {@link #getDrawable(String, String, Supplier)}
-     * if an override was set for that specific source.
-     *
-     * <p>Calls to this API will not return {@code null} unless no updated drawable was found
-     * and the call to {@code defaultDrawableLoader} returned {@code null}.
-     *
-     * <p>Callers should register for {@link #ACTION_DEVICE_POLICY_RESOURCE_UPDATED} to get
-     * notified when a resource has been updated.
-     *
-     * @param drawableId The drawable ID to get the updated resource for.
-     * @param drawableStyle The drawable style to use.
-     * @param drawableSource The source for the caller.
-     * @param defaultDrawableLoader To get the default drawable if no updated drawable was set for
-     *                              the provided params.
-     */
-    @Nullable
-    public Drawable getDrawable(
-            @NonNull @DevicePolicyResources.UpdatableDrawableId String drawableId,
-            @NonNull @DevicePolicyResources.UpdatableDrawableStyle String drawableStyle,
-            @NonNull @DevicePolicyResources.UpdatableDrawableSource String drawableSource,
-            @NonNull Supplier<Drawable> defaultDrawableLoader) {
-
-        Objects.requireNonNull(drawableId, "drawableId can't be null");
-        Objects.requireNonNull(drawableStyle, "drawableStyle can't be null");
-        Objects.requireNonNull(drawableSource, "drawableSource can't be null");
-        Objects.requireNonNull(defaultDrawableLoader, "defaultDrawableLoader can't be null");
-
-        if (Drawables.UNDEFINED.equals(drawableId)) {
-            return ParcelableResource.loadDefaultDrawable(defaultDrawableLoader);
-        }
-        if (mService != null) {
-            try {
-                ParcelableResource resource = mService.getDrawable(
-                        drawableId, drawableStyle, drawableSource);
-                if (resource == null) {
-                    return ParcelableResource.loadDefaultDrawable(
-                            defaultDrawableLoader);
-                }
-                return resource.getDrawable(
-                        mContext,
-                        /* density= */ 0,
-                        defaultDrawableLoader);
-
-            } catch (RemoteException e) {
-                Log.e(
-                        TAG,
-                        "Error getting the updated drawable from DevicePolicyManagerService.",
-                        e);
-                return ParcelableResource.loadDefaultDrawable(defaultDrawableLoader);
-            }
-        }
-        return ParcelableResource.loadDefaultDrawable(defaultDrawableLoader);
-    }
-
-    /**
-     * Similar to {@link #getDrawable(String, String, Supplier)}, but also accepts
-     * {@code density}. See {@link Resources#getDrawableForDensity(int, int, Resources.Theme)}.
-     *
-     * <p>Calls to this API will not return {@code null} unless no updated drawable was found
-     * and the call to {@code defaultDrawableLoader} returned {@code null}.
-     *
-     * <p>Callers should register for {@link #ACTION_DEVICE_POLICY_RESOURCE_UPDATED} to get
-     * notified when a resource has been updated.
-     *
-     * @param drawableId The drawable ID to get the updated resource for.
-     * @param drawableStyle The drawable style to use.
-     * @param density The desired screen density indicated by the resource as
-     *            found in {@link DisplayMetrics}. A value of 0 means to use the
-     *            density returned from {@link Resources#getConfiguration()}.
-     * @param defaultDrawableLoader To get the default drawable if no updated drawable was set for
-     *                              the provided params.
-     */
-    @Nullable
-    public Drawable getDrawableForDensity(
-            @NonNull @DevicePolicyResources.UpdatableDrawableId String drawableId,
-            @NonNull @DevicePolicyResources.UpdatableDrawableStyle String drawableStyle,
-            int density,
-            @NonNull Supplier<Drawable> defaultDrawableLoader) {
-        return getDrawableForDensity(
-                drawableId,
-                drawableStyle,
-                Drawables.Source.UNDEFINED,
-                density,
-                defaultDrawableLoader);
-    }
-
-     /**
-     * Similar to {@link #getDrawable(String, String, String, Supplier)}, but also accepts
-     * {@code density}. See {@link Resources#getDrawableForDensity(int, int, Resources.Theme)}.
-     *
-      * <p>Calls to this API will not return {@code null} unless no updated drawable was found
-      * and the call to {@code defaultDrawableLoader} returned {@code null}.
-     *
-     * <p>Callers should register for {@link #ACTION_DEVICE_POLICY_RESOURCE_UPDATED} to get
-     * notified when a resource has been updated.
-     *
-     * @param drawableId The drawable ID to get the updated resource for.
-     * @param drawableStyle The drawable style to use.
-     * @param drawableSource The source for the caller.
-     * @param density The desired screen density indicated by the resource as
-     *            found in {@link DisplayMetrics}. A value of 0 means to use the
-     *            density returned from {@link Resources#getConfiguration()}.
-     * @param defaultDrawableLoader To get the default drawable if no updated drawable was set for
-     *                              the provided params.
-     */
-    @Nullable
-    public Drawable getDrawableForDensity(
-            @NonNull @DevicePolicyResources.UpdatableDrawableId String drawableId,
-            @NonNull @DevicePolicyResources.UpdatableDrawableStyle String drawableStyle,
-            @NonNull @DevicePolicyResources.UpdatableDrawableSource String drawableSource,
-            int density,
-            @NonNull Supplier<Drawable> defaultDrawableLoader) {
-
-        Objects.requireNonNull(drawableId, "drawableId can't be null");
-        Objects.requireNonNull(drawableStyle, "drawableStyle can't be null");
-        Objects.requireNonNull(drawableSource, "drawableSource can't be null");
-        Objects.requireNonNull(defaultDrawableLoader, "defaultDrawableLoader can't be null");
-
-        if (Drawables.UNDEFINED.equals(drawableId)) {
-            return ParcelableResource.loadDefaultDrawable(defaultDrawableLoader);
-        }
-        if (mService != null) {
-            try {
-                ParcelableResource resource = mService.getDrawable(
-                        drawableId, drawableStyle, drawableSource);
-                if (resource == null) {
-                    return ParcelableResource.loadDefaultDrawable(
-                            defaultDrawableLoader);
-                }
-                return resource.getDrawable(mContext, density, defaultDrawableLoader);
-            } catch (RemoteException e) {
-                Log.e(
-                        TAG,
-                        "Error getting the updated drawable from DevicePolicyManagerService.",
-                        e);
-                return ParcelableResource.loadDefaultDrawable(defaultDrawableLoader);
-            }
-        }
-        return ParcelableResource.loadDefaultDrawable(defaultDrawableLoader);
-    }
-
-    /**
-     * Similar to {@link #getDrawable(String, String, String, Supplier)} but returns an
-     * {@link Icon} instead of a {@link Drawable}.
-     *
-     * @param drawableId The drawable ID to get the updated resource for.
-     * @param drawableStyle The drawable style to use.
-     * @param drawableSource The source for the caller.
-     * @param defaultIcon Returned if no updated drawable was set for the provided params.
-     */
-    @Nullable
-    public Icon getDrawableAsIcon(
-            @NonNull @DevicePolicyResources.UpdatableDrawableId String drawableId,
-            @NonNull @DevicePolicyResources.UpdatableDrawableStyle String drawableStyle,
-            @NonNull @DevicePolicyResources.UpdatableDrawableSource String drawableSource,
-            @Nullable Icon defaultIcon) {
-        Objects.requireNonNull(drawableId, "drawableId can't be null");
-        Objects.requireNonNull(drawableStyle, "drawableStyle can't be null");
-        Objects.requireNonNull(drawableSource, "drawableSource can't be null");
-        Objects.requireNonNull(defaultIcon, "defaultIcon can't be null");
-
-        if (Drawables.UNDEFINED.equals(drawableId)) {
-            return defaultIcon;
-        }
-        if (mService != null) {
-            try {
-                ParcelableResource resource = mService.getDrawable(
-                        drawableId, drawableStyle, drawableSource);
-                if (resource == null) {
-                    return defaultIcon;
-                }
-                return Icon.createWithResource(resource.getPackageName(), resource.getResourceId());
-            } catch (RemoteException e) {
-                Log.e(
-                        TAG,
-                        "Error getting the updated drawable from DevicePolicyManagerService.",
-                        e);
-                return defaultIcon;
-            }
-        }
-        return defaultIcon;
-    }
-
-    /**
-     * Similar to {@link #getDrawable(String, String, Supplier)} but returns an {@link Icon}
-     * instead of a {@link Drawable}.
-     *
-     * @param drawableId The drawable ID to get the updated resource for.
-     * @param drawableStyle The drawable style to use.
-     * @param defaultIcon Returned if no updated drawable was set for the provided params.
-     */
-    @Nullable
-    public Icon getDrawableAsIcon(
-            @NonNull @DevicePolicyResources.UpdatableDrawableId String drawableId,
-            @NonNull @DevicePolicyResources.UpdatableDrawableStyle String drawableStyle,
-            @Nullable Icon defaultIcon) {
-        return getDrawableAsIcon(
-                drawableId, drawableStyle, Drawables.Source.UNDEFINED, defaultIcon);
-    }
-
-
-    /**
-     * For each {@link DevicePolicyStringResource} item in {@code strings}, it updates the string
-     * resource for {@link DevicePolicyStringResource#getStringId()} to the string with ID
-     * {@code callingPackageResourceId} (see {@link DevicePolicyResources.Strings}), meaning any
-     * system UI surface calling {@link #getString} with {@code stringId} will get
-     * the new resource after this API is called.
-     *
-     * <p>Sends a broadcast with action {@link #ACTION_DEVICE_POLICY_RESOURCE_UPDATED} to
-     * registered receivers when a resource has been updated successfully.
-     *
-     * <p>Important notes to consider when using this API:
-     * <ul>
-     * <li> {@link #getString} references the resource
-     * {@code callingPackageResourceId} in the calling package each time it gets called. You have to
-     * ensure that the resource is always available in the calling package as long as it is used as
-     * an updated resource.
-     * <li> You still have to re-call {@code setStrings} even if you only make changes to the
-     * content of the resource with ID {@code callingPackageResourceId} as the content might be
-     * cached and would need updating.
-     * </ul>
-     *
-     * @param strings The list of {@link DevicePolicyStringResource} to update.
-     *
-     * @hide
-     */
-    @SystemApi
-    @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_MANAGEMENT_RESOURCES)
-    public void setStrings(@NonNull Set<DevicePolicyStringResource> strings) {
-        if (mService != null) {
-            try {
-                mService.setStrings(new ArrayList<>(strings));
-            } catch (RemoteException e) {
-                throw e.rethrowFromSystemServer();
-            }
-        }
-    }
-
-    /**
-     * Removes the updated strings for the list of {@code stringIds} (see
-     * {@link DevicePolicyResources.Strings}) that was previously set by calling {@link #setStrings},
-     * meaning any subsequent calls to {@link #getString} for the provided IDs will
-     * return the default string from {@code defaultStringLoader}.
-     *
-     * <p>Sends a broadcast with action {@link #ACTION_DEVICE_POLICY_RESOURCE_UPDATED} to
-     * registered receivers when a resource has been reset successfully.
-     *
-     * @param stringIds The list of IDs to remove the updated resources for.
-     *
-     * @hide
-     */
-    @SystemApi
-    @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_MANAGEMENT_RESOURCES)
-    public void resetStrings(@NonNull String[] stringIds) {
-        if (mService != null) {
-            try {
-                mService.resetStrings(stringIds);
-            } catch (RemoteException e) {
-                throw e.rethrowFromSystemServer();
-            }
-        }
-    }
-
-    /**
-     * Returns the appropriate updated string for the {@code stringId} (see
-     * {@link DevicePolicyResources.Strings}) if one was set using
-     * {@link #setStrings}, otherwise returns the string from {@code defaultStringLoader}.
-     *
-     * <p>Also returns the string from {@code defaultStringLoader} if
-     * {@link DevicePolicyResources.Strings#UNDEFINED} was passed.
-     *
-     * <p>Calls to this API will not return {@code null} unless no updated drawable was found
-     * and the call to {@code defaultStringLoader} returned {@code null}.
-     *
-     * <p>Callers should register for {@link #ACTION_DEVICE_POLICY_RESOURCE_UPDATED} to get
-     * notified when a resource has been updated.
-     *
-     * <p>Note that each call to this API loads the resource from the package that called
-     * {@link #setStrings} to set the updated resource.
-     *
-     * @param stringId The IDs to get the updated resource for.
-     * @param defaultStringLoader To get the default string if no updated string was set for
-     *         {@code stringId}.
-     *
-     * @hide
-     */
-    @SystemApi
-    @Nullable
-    public String getString(
-            @NonNull @DevicePolicyResources.UpdatableStringId String stringId,
-            @NonNull Supplier<String> defaultStringLoader) {
-
-        Objects.requireNonNull(stringId, "stringId can't be null");
-        Objects.requireNonNull(defaultStringLoader, "defaultStringLoader can't be null");
-
-        if (stringId.equals(DevicePolicyResources.Strings.UNDEFINED)) {
-            return ParcelableResource.loadDefaultString(defaultStringLoader);
-        }
-        if (mService != null) {
-            try {
-                ParcelableResource resource = mService.getString(stringId);
-                if (resource == null) {
-                    return ParcelableResource.loadDefaultString(defaultStringLoader);
-                }
-                return resource.getString(mContext, defaultStringLoader);
-            } catch (RemoteException e) {
-                Log.e(
-                        TAG,
-                        "Error getting the updated string from DevicePolicyManagerService.",
-                        e);
-                return ParcelableResource.loadDefaultString(defaultStringLoader);
-            }
-        }
-        return ParcelableResource.loadDefaultString(defaultStringLoader);
-    }
-
-    /**
-     * Similar to {@link #getString(String, Supplier)} but accepts {@code formatArgs} and returns a
-     * localized formatted string, substituting the format arguments as defined in
-     * {@link java.util.Formatter} and {@link java.lang.String#format}, (see
-     * {@link Resources#getString(int, Object...)}).
-     *
-     * <p>Calls to this API will not return {@code null} unless no updated drawable was found
-     * and the call to {@code defaultStringLoader} returned {@code null}.
-     *
-     * @param stringId The IDs to get the updated resource for.
-     * @param defaultStringLoader To get the default string if no updated string was set for
-     *         {@code stringId}.
-     * @param formatArgs The format arguments that will be used for substitution.
-     *
-     * @hide
-     */
-    @SystemApi
-    @Nullable
-    @SuppressLint("SamShouldBeLast")
-    public String getString(
-            @NonNull @DevicePolicyResources.UpdatableStringId String stringId,
-            @NonNull Supplier<String> defaultStringLoader,
-            @NonNull Object... formatArgs) {
-
-        Objects.requireNonNull(stringId, "stringId can't be null");
-        Objects.requireNonNull(defaultStringLoader, "defaultStringLoader can't be null");
-
-        if (stringId.equals(DevicePolicyResources.Strings.UNDEFINED)) {
-            return ParcelableResource.loadDefaultString(defaultStringLoader);
-        }
-        if (mService != null) {
-            try {
-                ParcelableResource resource = mService.getString(stringId);
-                if (resource == null) {
-                    return ParcelableResource.loadDefaultString(defaultStringLoader);
-                }
-                return resource.getString(mContext, defaultStringLoader, formatArgs);
-            } catch (RemoteException e) {
-                Log.e(
-                        TAG,
-                        "Error getting the updated string from DevicePolicyManagerService.",
-                        e);
-                return ParcelableResource.loadDefaultString(defaultStringLoader);
-            }
-        }
-        return ParcelableResource.loadDefaultString(defaultStringLoader);
+    @NonNull
+    public DevicePolicyResourcesManager getResources() {
+        return mResourcesManager;
     }
 
     /**
@@ -15717,9 +15329,51 @@ public class DevicePolicyManager {
      */
     @Nullable
     public String getDevicePolicyManagementRoleHolderPackage() {
-        String deviceManagerConfig = mContext.getString(
+        String devicePolicyManagementConfig = mContext.getString(
                 com.android.internal.R.string.config_devicePolicyManagement);
-        return extractPackageNameFromDeviceManagerConfig(deviceManagerConfig);
+        return extractPackageNameFromDeviceManagerConfig(devicePolicyManagementConfig);
+    }
+
+    /**
+     * Returns the package name of the device policy management role holder updater.
+     *
+     * <p>If the device policy management role holder updater is not configured for this device,
+     * returns {@code null}.
+     *
+     * @hide
+     */
+    @Nullable
+    @TestApi
+    public String getDevicePolicyManagementRoleHolderUpdaterPackage() {
+        String devicePolicyManagementUpdaterConfig = mContext.getString(
+                com.android.internal.R.string.config_devicePolicyManagementUpdater);
+        if (TextUtils.isEmpty(devicePolicyManagementUpdaterConfig)) {
+            return null;
+        }
+        return devicePolicyManagementUpdaterConfig;
+    }
+
+    /**
+     * Returns a {@link List} of managed profiles managed by some profile owner within the profile
+     * group of the given user, or an empty {@link List} if there is not one.
+     *
+     * @param user the user whose profile group to look within to return managed profiles
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(permission.MANAGE_PROFILE_AND_DEVICE_OWNERS)
+    @NonNull
+    public List<UserHandle> getPolicyManagedProfiles(@NonNull UserHandle user) {
+        Objects.requireNonNull(user);
+        if (mService != null) {
+            try {
+                return mService.getPolicyManagedProfiles(user);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+        return Collections.emptyList();
     }
 
     /**
@@ -15744,5 +15398,24 @@ public class DevicePolicyManager {
             return deviceManagerConfig.split(":")[0];
         }
         return deviceManagerConfig;
+    }
+
+    /**
+     * @return {@code true} if bypassing the device policy management role qualification is allowed
+     * with the current state of the device.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.MANAGE_ROLE_HOLDERS)
+    public boolean shouldAllowBypassingDevicePolicyManagementRoleQualification() {
+        if (mService != null) {
+            try {
+                return mService.shouldAllowBypassingDevicePolicyManagementRoleQualification();
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+        return false;
     }
 }

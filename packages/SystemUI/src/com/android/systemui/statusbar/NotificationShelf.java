@@ -226,10 +226,7 @@ public class NotificationShelf extends ActivatableNotificationView implements
                 ? MathUtils.lerp(shortestWidth, getWidth(), fractionToShade)
                 : getWidth();
         ActivatableNotificationView anv = (ActivatableNotificationView) this;
-        NotificationBackgroundView bg = anv.getBackgroundNormal();
-        if (bg != null) {
-            anv.getBackgroundNormal().setActualWidth((int) actualWidth);
-        }
+        anv.setBackgroundWidth((int) actualWidth);
         if (mShelfIcons != null) {
             mShelfIcons.setActualLayoutWidth((int) actualWidth);
         }

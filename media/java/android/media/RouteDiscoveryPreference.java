@@ -119,6 +119,7 @@ public final class RouteDiscoveryPreference implements Parcelable {
      * first in the provided list will remain.
      *
      * @see #shouldRemoveDuplicates()
+     * @hide
      */
     @NonNull
     public List<String> getDeduplicationPackageOrder() {
@@ -130,6 +131,7 @@ public final class RouteDiscoveryPreference implements Parcelable {
      * <p>
      * If it's not empty, it will only discover routes from the provider whose package name
      * belongs to the list.
+     * @hide
      */
     @NonNull
     public List<String> getAllowedPackages() {
@@ -151,6 +153,7 @@ public final class RouteDiscoveryPreference implements Parcelable {
      * Gets whether duplicate routes removal is enabled.
      *
      * @see #getDeduplicationPackageOrder()
+     * @hide
      */
     public boolean shouldRemoveDuplicates() {
         return !mPackageOrder.isEmpty();
@@ -293,6 +296,7 @@ public final class RouteDiscoveryPreference implements Parcelable {
          * <p>
          * If it's non-empty, media router only discovers route from the provider in the list.
          * The default value is empty, which discovers routes from all providers.
+         * @hide
          */
         @NonNull
         public Builder setAllowedPackages(@NonNull List<String> allowedPackages) {
@@ -324,6 +328,7 @@ public final class RouteDiscoveryPreference implements Parcelable {
          *
          * @param packageOrder ordered list of package names used to remove duplicate routes, or an
          *                     empty list if deduplication should not be enabled.
+         * @hide
          */
         @NonNull
         public Builder setDeduplicationPackageOrder(@NonNull List<String> packageOrder) {

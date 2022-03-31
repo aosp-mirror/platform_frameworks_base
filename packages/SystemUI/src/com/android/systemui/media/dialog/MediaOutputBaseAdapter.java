@@ -34,7 +34,6 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
-import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
@@ -46,6 +45,8 @@ import com.android.settingslib.media.MediaDevice;
 import com.android.settingslib.utils.ThreadUtils;
 import com.android.systemui.R;
 import com.android.systemui.animation.Interpolators;
+
+import java.util.List;
 
 /**
  * Base adapter for media output dialog.
@@ -95,7 +96,18 @@ public abstract class MediaOutputBaseAdapter extends
 
     boolean isCurrentlyConnected(MediaDevice device) {
         return TextUtils.equals(device.getId(),
-                mController.getCurrentConnectedMediaDevice().getId());
+                mController.getCurrentConnectedMediaDevice().getId())
+                || (mController.getSelectedMediaDevice().size() == 1
+                && isDeviceIncluded(mController.getSelectedMediaDevice(), device));
+    }
+
+    boolean isDeviceIncluded(List<MediaDevice> deviceList, MediaDevice targetDevice) {
+        for (MediaDevice device : deviceList) {
+            if (TextUtils.equals(device.getId(), targetDevice.getId())) {
+                return true;
+            }
+        }
+        return false;
     }
 
     boolean isDragging() {
@@ -129,7 +141,7 @@ public abstract class MediaOutputBaseAdapter extends
         final ImageView mTitleIcon;
         final ProgressBar mProgressBar;
         final SeekBar mSeekBar;
-        final RelativeLayout mTwoLineLayout;
+        final LinearLayout mTwoLineLayout;
         final ImageView mStatusIcon;
         final CheckBox mCheckBox;
         private String mDeviceId;
@@ -171,14 +183,16 @@ public abstract class MediaOutputBaseAdapter extends
         void setSingleLineLayout(CharSequence title, boolean bFocused, boolean showSeekBar,
                 boolean showProgressBar, boolean showStatus) {
             mTwoLineLayout.setVisibility(View.GONE);
+            boolean isActive = showSeekBar || showProgressBar;
             final Drawable backgroundDrawable =
-                    showSeekBar || showProgressBar
+                    isActive
                             ? mContext.getDrawable(R.drawable.media_output_item_background_active)
                                     .mutate() : mContext.getDrawable(
                             R.drawable.media_output_item_background)
                             .mutate();
             backgroundDrawable.setColorFilter(new PorterDuffColorFilter(
-                    mController.getColorItemBackground(),
+                    isActive ? mController.getColorConnectedItemBackground()
+                            : mController.getColorItemBackground(),
                     PorterDuff.Mode.SRC_IN));
             mItemLayout.setBackground(backgroundDrawable);
             mProgressBar.setVisibility(showProgressBar ? View.VISIBLE : View.GONE);
@@ -367,7 +381,7 @@ public abstract class MediaOutputBaseAdapter extends
                     .mutate();
             drawable.setColorFilter(
                     new PorterDuffColorFilter(Utils.getColorStateListDefaultColor(mContext,
-                            R.color.media_dialog_active_item_main_content),
+                            R.color.media_dialog_item_main_content),
                             PorterDuff.Mode.SRC_IN));
             return drawable;
         }

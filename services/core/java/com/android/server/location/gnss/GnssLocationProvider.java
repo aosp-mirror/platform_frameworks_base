@@ -156,9 +156,6 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
     private static final int AGPS_SUPL_MODE_MSA = 0x02;
     private static final int AGPS_SUPL_MODE_MSB = 0x01;
 
-    // PSDS stands for Predicted Satellite Data Service
-    private static final int DOWNLOAD_PSDS_DATA = 6;
-
     // TCP/IP constants.
     // Valid TCP/UDP port range is (0, 65535].
     private static final int TCP_MIN_PORT = 0;
@@ -286,6 +283,7 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
 
     // true if PSDS is supported
     private boolean mSupportsPsds;
+    private final Object mPsdsPeriodicDownloadToken = new Object();
     @GuardedBy("mLock")
     private final PowerManager.WakeLock mDownloadPsdsWakeLock;
     @GuardedBy("mLock")
@@ -670,10 +668,12 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
                 });
                 PackageManager pm = mContext.getPackageManager();
                 if (pm != null && pm.hasSystemFeature(FEATURE_WATCH)
+                        && psdsType == GnssPsdsDownloader.LONG_TERM_PSDS_SERVER_INDEX
                         && mGnssConfiguration.isPsdsPeriodicDownloadEnabled()) {
-                    if (DEBUG) Log.d(TAG, "scheduling next Psds download");
-                    mHandler.removeMessages(DOWNLOAD_PSDS_DATA);
-                    mHandler.sendEmptyMessageDelayed(DOWNLOAD_PSDS_DATA,
+                    if (DEBUG) Log.d(TAG, "scheduling next long term Psds download");
+                    mHandler.removeCallbacksAndMessages(mPsdsPeriodicDownloadToken);
+                    mHandler.postDelayed(() -> handleDownloadPsdsData(psdsType),
+                            mPsdsPeriodicDownloadToken,
                             GnssPsdsDownloader.PSDS_INTERVAL);
                 }
             } else {
@@ -1184,6 +1184,7 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
                 mAlarmManager.cancel(mBatchingAlarm);
                 mBatchingAlarm = null;
             }
+            mGnssNative.flushBatch();
             mGnssNative.stopBatch();
             mBatchingStarted = false;
         }

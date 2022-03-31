@@ -668,8 +668,14 @@
     <dimen name="lock_pattern_dot_line_width">22dp</dimen>
     <dimen name="lock_pattern_dot_size">14dp</dimen>
     <dimen name="lock_pattern_dot_size_activated">30dp</dimen>
+    <!-- How much of the cell space is classified as hit areas [0..1] where 1 means that hit area is
+         a circle with diameter equals to cell minimum side min(width, height). -->
+    <item type="dimen" format="float" name="lock_pattern_dot_hit_factor">0.6</item>
     <!-- Width of a gradient applied to a lock pattern line while its disappearing animation. -->
     <dimen name="lock_pattern_fade_away_gradient_width">8dp</dimen>
+    <!-- Parameters applied to line disappearing animation in LockPatternView in milliseconds. -->
+    <integer name="lock_pattern_line_fade_out_duration">500</integer>
+    <integer name="lock_pattern_line_fade_out_delay">150</integer>
 
     <dimen name="text_handle_min_size">40dp</dimen>
 

@@ -20,19 +20,17 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="4811759950673118541">"واجهة مستخدم النظام"</string>
-    <!-- no translation found for battery_low_title (5319680173344341779) -->
-    <skip />
-    <!-- no translation found for battery_low_description (3282977755476423966) -->
-    <skip />
-    <!-- no translation found for battery_low_intro (5148725009653088790) -->
-    <skip />
+    <string name="battery_low_title" msgid="5319680173344341779">"هل تريد تفعيل ميزة \"توفير شحن البطارية\"؟"</string>
+    <string name="battery_low_description" msgid="3282977755476423966">"يتبقى لديك <xliff:g id="PERCENTAGE">%s</xliff:g> من شحن البطارية. يؤدي استخدام ميزة \"توفير شحن البطارية\" إلى تفعيل وضع \"المظهر الداكن\" وتقييد الأنشطة في الخلفية وتأخير الإشعارات."</string>
+    <string name="battery_low_intro" msgid="5148725009653088790">"يؤدي استخدام ميزة \"توفير شحن البطارية\" إلى تفعيل وضع \"المظهر الداكن\" وتقييد الأنشطة في الخلفية وتأخير الإشعارات."</string>
     <string name="battery_low_percent_format" msgid="4276661262843170964">"متبقي <xliff:g id="PERCENTAGE">%s</xliff:g>"</string>
     <string name="invalid_charger_title" msgid="938685362320735167">"‏يتعذّر الشحن باستخدام USB."</string>
     <string name="invalid_charger_text" msgid="2339310107232691577">"استخدم الشاحن المرفق بجهازك."</string>
     <string name="battery_saver_confirmation_title" msgid="1234998463717398453">"هل تريد تفعيل ميزة توفير شحن البطارية؟"</string>
     <string name="battery_saver_confirmation_title_generic" msgid="2299231884234959849">"لمحة عن ميزة \"توفير شحن البطارية\""</string>
     <string name="battery_saver_confirmation_ok" msgid="5042136476802816494">"تفعيل"</string>
-    <string name="battery_saver_start_action" msgid="4553256017945469937">"هل تريد تفعيل ميزة توفير شحن البطارية؟"</string>
+    <string name="battery_saver_start_action" msgid="8353766979886287140">"تفعيل"</string>
+    <string name="battery_saver_dismiss_action" msgid="7199342621040014738">"لا، شكرًا"</string>
     <string name="status_bar_settings_auto_rotation" msgid="8329080442278431708">"التدوير التلقائي للشاشة"</string>
     <string name="usb_device_permission_prompt" msgid="4414719028369181772">"هل تريد السماح لتطبيق <xliff:g id="APPLICATION">%1$s</xliff:g> بالدخول إلى <xliff:g id="USB_DEVICE">%2$s</xliff:g>؟"</string>
     <string name="usb_device_permission_prompt_warn" msgid="2309129784984063656">"‏هل تريد السماح لتطبيق <xliff:g id="APPLICATION">%1$s</xliff:g> بالدخول إلى <xliff:g id="USB_DEVICE">%2$s</xliff:g>؟\nلم يتم منح هذا التطبيق إذن تسجيل، ولكن يمكنه تسجيل الصوت من خلال جهاز USB هذا."</string>
@@ -133,8 +131,7 @@
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="2242167416140740920">"تمّت مصادقة الوجه."</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"تمّ التأكيد."</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"يمكنك النقر على \"تأكيد\" لإكمال المهمة."</string>
-    <!-- no translation found for biometric_dialog_tap_confirm_with_face (1597899891472340950) -->
-    <skip />
+    <string name="biometric_dialog_tap_confirm_with_face" msgid="1597899891472340950">"تم فتح قفل الجهاز بالتعرف على وجهك. اضغط للمتابعة."</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"مصادقة"</string>
     <string name="biometric_dialog_use_pin" msgid="8385294115283000709">"استخدام رقم تعريف شخصي"</string>
     <string name="biometric_dialog_use_pattern" msgid="2315593393167211194">"استخدام نقش"</string>
@@ -154,10 +151,6 @@
     <string name="biometric_dialog_last_pattern_attempt_before_wipe_profile" msgid="6045224069529284686">"عند إدخال نقش غير صحيح في المحاولة التالية، سيتم حذف ملفك الشخصي للعمل وبياناته."</string>
     <string name="biometric_dialog_last_pin_attempt_before_wipe_profile" msgid="545567685899091757">"عند إدخال رقم تعريف شخصي غير صحيح في المحاولة التالية، سيتم حذف ملفك الشخصي للعمل وبياناته."</string>
     <string name="biometric_dialog_last_password_attempt_before_wipe_profile" msgid="8538032972389729253">"عند إدخال كلمة مرور غير صحيحة في المحاولة التالية، سيتم حذف ملفك الشخصي للعمل وبياناته."</string>
-    <string name="biometric_dialog_failed_attempts_now_wiping_device" msgid="6585503524026243042">"لقد استنفدت عدد المحاولات غير الصحيحة وسيتم حذف بيانات هذا الجهاز."</string>
-    <string name="biometric_dialog_failed_attempts_now_wiping_user" msgid="7015008539146949115">"لقد استنفدت عدد المحاولات غير الصحيحة وسيتم حذف هذا المستخدم."</string>
-    <string name="biometric_dialog_failed_attempts_now_wiping_profile" msgid="5239378521440749682">"لقد استنفدت عدد المحاولات غير الصحيحة وسيتم حذف الملف الشخصي للعمل وبياناته."</string>
-    <string name="biometric_dialog_now_wiping_dialog_dismiss" msgid="7189432882125106154">"إغلاق"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"المس مستشعر بصمة الإصبع"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="4465698996175640549">"رمز بصمة الإصبع"</string>
     <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"يتعذّر التعرّف على الوجه. استخدِم بصمة الإصبع بدلاً من ذلك."</string>
@@ -334,17 +327,12 @@
     <string name="keyguard_indication_charging_time_slowly" msgid="301936949731705417">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • جارٍ الشحن ببطء • ستمتلئ البطارية خلال <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
     <string name="keyguard_indication_charging_time_dock" msgid="6150404291427377863">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • جارٍ الشحن على وحدة الإرساء • ستمتلئ البطارية خلال <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"تبديل المستخدم"</string>
-    <string name="user_add_user" msgid="4336657383006913022">"إضافة مستخدم"</string>
-    <string name="user_new_user_name" msgid="2019166282704195789">"مستخدم جديد"</string>
-    <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"هل تريد إزالة جلسة الضيف؟"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"سيتم حذف كل التطبيقات والبيانات في هذه الجلسة."</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"إزالة"</string>
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"مرحبًا بك مجددًا في جلسة الضيف"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"هل تريد متابعة جلستك؟"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"البدء من جديد"</string>
     <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"نعم، متابعة"</string>
-    <string name="user_add_user_title" msgid="4172327541504825032">"هل تريد إضافة مستخدم جديد؟"</string>
-    <string name="user_add_user_message_short" msgid="2599370307878014791">"عند إضافة مستخدم جديد، عليه إعداد مساحته.\n\nويُمكن لأي مستخدم تحديث التطبيقات لجميع المستخدمين الآخرين."</string>
     <string name="user_limit_reached_title" msgid="2429229448830346057">"تم الوصول إلى أقصى عدد للمستخدمين"</string>
     <plurals name="user_limit_reached_message" formatted="false" msgid="2573535787802908398">
       <item quantity="zero">يمكنك إضافة ما يصل إلى <xliff:g id="COUNT">%d</xliff:g> مستخدم.</item>
@@ -474,8 +462,7 @@
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"فتح القفل للاستخدام"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"حدثت مشكلة أثناء الحصول على البطاقات، يُرجى إعادة المحاولة لاحقًا."</string>
     <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"إعدادات شاشة القفل"</string>
-    <string name="qr_code_scanner_title" msgid="5660820608548306581">"رمز الاستجابة السريعة"</string>
-    <string name="qr_code_scanner_description" msgid="7937603775306661863">"انقر للمسح ضوئيًا"</string>
+    <string name="qr_code_scanner_title" msgid="5290201053875420785">"مسح رمز الاستجابة السريعة ضوئيًا"</string>
     <string name="status_bar_work" msgid="5238641949837091056">"الملف الشخصي للعمل"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"وضع الطيران"</string>
     <string name="zen_alarm_warning" msgid="7844303238486849503">"لن تسمع المنبّه القادم في <xliff:g id="WHEN">%1$s</xliff:g>"</string>
@@ -812,9 +799,10 @@
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"مرّر سريعًا لرؤية المزيد."</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"جارٍ تحميل الاقتراحات"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"الوسائط"</string>
-    <string name="controls_media_close_session" msgid="1193000643003066508">"هل تريد إخفاء جلسة الوسائط هذه؟"</string>
+    <!-- no translation found for controls_media_close_session (4780485355795635052) -->
+    <skip />
     <string name="controls_media_active_session" msgid="3146882316024153337">"لا يمكن إخفاء جلسة الوسائط الحالية."</string>
-    <string name="controls_media_dismiss_button" msgid="9081375542265132213">"إغلاق"</string>
+    <string name="controls_media_dismiss_button" msgid="4485675693008031646">"إخفاء"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"استئناف التشغيل"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"الإعدادات"</string>
     <string name="controls_media_playing_item_description" msgid="4531853311504359098">"يتم تشغيل <xliff:g id="SONG_NAME">%1$s</xliff:g> للفنان <xliff:g id="ARTIST_NAME">%2$s</xliff:g> من تطبيق <xliff:g id="APP_LABEL">%3$s</xliff:g>."</string>
@@ -832,7 +820,7 @@
     <string name="media_move_closer_to_end_cast" msgid="6495907340926563656">"يُرجى الاقتراب من <xliff:g id="DEVICENAME">%1$s</xliff:g> لتشغيل الوسائط هنا."</string>
     <string name="media_transfer_playing_different_device" msgid="7186806382609785610">"جارٍ تشغيل الوسائط على <xliff:g id="DEVICENAME">%1$s</xliff:g>"</string>
     <string name="media_transfer_playing_this_device" msgid="1856890686844499172">"جارٍ تشغيل الوسائط على هذا الهاتف"</string>
-    <string name="media_transfer_failed" msgid="2640354446629980227">"حدث خطأ."</string>
+    <string name="media_transfer_failed" msgid="7955354964610603723">"حدث خطأ. يُرجى إعادة المحاولة."</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"غير نشط، تحقّق من التطبيق."</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"لم يتم العثور عليه."</string>
     <string name="controls_error_removed_title" msgid="1207794911208047818">"عنصر التحكّم غير متوفّر"</string>
@@ -851,6 +839,7 @@
     <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"إقران جهاز جديد"</string>
     <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"لبث هذه الجلسة، يُرجى فتح التطبيق"</string>
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"تطبيق غير معروف"</string>
+    <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"إيقاف البث"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"رقم الإصدار"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"تم نسخ رقم الإصدار إلى الحافظة."</string>
     <string name="basic_status" msgid="2315371112182658176">"محادثة مفتوحة"</string>
@@ -928,7 +917,7 @@
       <item quantity="one">تطبيق واحد (<xliff:g id="COUNT_0">%s</xliff:g>) نشط</item>
     </plurals>
     <string name="fgs_dot_content_description" msgid="2865071539464777240">"معلومات جديدة"</string>
-    <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"# تطبيق نشط"</string>
+    <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"التطبيقات النشطة"</string>
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"إيقاف"</string>
     <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"متوقّف"</string>
     <string name="clipboard_edit_text_copy" msgid="770856373439969178">"نسخ"</string>
@@ -944,8 +933,6 @@
     <string name="dream_overlay_status_bar_wifi_off" msgid="4497069245055003582">"‏شبكة Wi‑Fi غير متاحة"</string>
     <string name="dream_overlay_status_bar_priority_mode" msgid="5428462123314728739">"وضع الأولوية"</string>
     <string name="dream_overlay_status_bar_alarm_set" msgid="566707328356590886">"تم ضبط المنبه."</string>
-    <string name="dream_overlay_status_bar_assistant_guest_mode_enabled" msgid="3715897096012469615">"‏تم تفعيل وضع الضيف لاستخدام \"مساعد Google\"."</string>
     <string name="dream_overlay_status_bar_camera_mic_off" msgid="3199425257833773569">"الكاميرا والميكروفون غير مفعّلين."</string>
-    <!-- no translation found for dream_overlay_status_bar_notification_indicator (8091389255691081711) -->
-    <skip />
+    <string name="dream_overlay_status_bar_notification_indicator" msgid="8091389255691081711">"{count,plural, =1{إشعار واحد}zero{# إشعار}two{إشعاران}few{# إشعارات}many{# إشعارًا}other{# إشعار}}"</string>
 </resources>

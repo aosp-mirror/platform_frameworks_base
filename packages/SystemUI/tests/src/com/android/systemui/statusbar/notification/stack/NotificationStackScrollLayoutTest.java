@@ -103,6 +103,7 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
     @Mock private NotificationStackScrollLayoutController mStackScrollLayoutController;
     @Mock private UnlockedScreenOffAnimationController mUnlockedScreenOffAnimationController;
     @Mock private NotificationShelf mNotificationShelf;
+    @Mock private NotificationStackSizeCalculator mNotificationStackSizeCalculator;
 
     @Before
     @UiThreadTest
@@ -138,7 +139,8 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
         // holds a copy of the CUT's instances of these KeyguardBypassController, so they still
         // refer to the CUT's member variables, not the spy's member variables.
         mStackScrollerInternal = new NotificationStackScrollLayout(getContext(), null);
-        mStackScrollerInternal.initView(getContext(), mNotificationSwipeHelper);
+        mStackScrollerInternal.initView(getContext(), mNotificationSwipeHelper,
+                mNotificationStackSizeCalculator);
         mStackScroller = spy(mStackScrollerInternal);
         mStackScroller.setShelfController(notificationShelfController);
         mStackScroller.setCentralSurfaces(mCentralSurfaces);
@@ -158,17 +160,6 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
         doNothing().when(mGroupExpansionManager).collapseGroups();
         doNothing().when(mExpandHelper).cancelImmediately();
         doNothing().when(mNotificationShelf).setAnimationsEnabled(anyBoolean());
-    }
-
-    @Test
-    public void testUpdateStackEndHeight_forEndOfStackHeightAnimation() {
-        final float nsslHeight = 10f;
-        final float bottomMargin = 1f;
-        final float topPadding = 1f;
-
-        mStackScroller.updateStackEndHeight(nsslHeight, bottomMargin, topPadding);
-        final float stackEndHeight = nsslHeight - bottomMargin - topPadding;
-        assertTrue(mAmbientState.getStackEndHeight() == stackEndHeight);
     }
 
     @Test

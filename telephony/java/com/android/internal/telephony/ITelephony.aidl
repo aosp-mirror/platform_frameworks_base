@@ -978,14 +978,6 @@ interface ITelephony {
      boolean isManualNetworkSelectionAllowed(int subId);
 
     /**
-     * Get P-CSCF address from PCO after data connection is established or modified.
-     * @param apnType the apnType, "ims" for IMS APN, "emergency" for EMERGENCY APN
-     * @param callingPackage The package making the call.
-     * @param callingFeatureId The feature in the package.
-     */
-    String[] getPcscfAddress(String apnType, String callingPackage, String callingFeatureId);
-
-    /**
      * Set IMS registration state
      */
     void setImsRegistrationState(boolean registered);
@@ -2150,7 +2142,7 @@ interface ITelephony {
 
     List<RadioAccessSpecifier> getSystemSelectionChannels(int subId);
 
-    boolean isMvnoMatched(int subId, int mvnoType, String mvnoMatchData);
+    boolean isMvnoMatched(int slotIndex, int mvnoType, String mvnoMatchData);
 
     /**
      * Enqueue a pending sms Consumer, which will answer with the user specified selection for an
@@ -2549,4 +2541,15 @@ interface ITelephony {
      * PhoneAccount#CAPABILITY_VOICE_CALLING_AVAILABLE.
      */
     void setVoiceServiceStateOverride(int subId, boolean hasService, String callingPackage);
+
+    /**
+     * Returns the package name that provides the {@link CarrierService} implementation for the
+     * specified {@code logicalSlotIndex}, or {@code null} if no package with carrier privileges
+     * declares one.
+     *
+     * @param logicalSlotIndex The slot index to fetch the {@link CarrierService} package for
+     * @return The system-selected package that provides the {@link CarrierService} implementation
+     * for the slot, or {@code null} if none is resolved
+     */
+    String getCarrierServicePackageNameForLogicalSlot(int logicalSlotIndex);
 }

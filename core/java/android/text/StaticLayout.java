@@ -112,6 +112,7 @@ public class StaticLayout extends Layout {
             b.mBreakStrategy = Layout.BREAK_STRATEGY_SIMPLE;
             b.mHyphenationFrequency = Layout.HYPHENATION_FREQUENCY_NONE;
             b.mJustificationMode = Layout.JUSTIFICATION_MODE_NONE;
+            b.mLineBreakConfig = LineBreakConfig.NONE;
             return b;
         }
 
@@ -410,7 +411,8 @@ public class StaticLayout extends Layout {
          *
          * @param lineBreakConfig the line break configuration for text wrapping.
          * @return this builder, useful for chaining.
-         * @see android.widget.TextView#setLineBreakConfig
+         * @see android.widget.TextView#setLineBreakStyle
+         * @see android.widget.TextView#setLineBreakWordStyle
          */
         @NonNull
         public Builder setLineBreakConfig(@NonNull LineBreakConfig lineBreakConfig) {
@@ -454,7 +456,7 @@ public class StaticLayout extends Layout {
         @Nullable private int[] mRightIndents;
         private int mJustificationMode;
         private boolean mAddLastLineLineSpacing;
-        private LineBreakConfig mLineBreakConfig;
+        private LineBreakConfig mLineBreakConfig = LineBreakConfig.NONE;
 
         private final Paint.FontMetricsInt mFontMetricsInt = new Paint.FontMetricsInt();
 

@@ -358,8 +358,13 @@ public class DozeMachine {
             return State.FINISH;
         }
         if (mDozeHost.isAlwaysOnSuppressed() && requestedState.isAlwaysOn()) {
-            Log.i(TAG, "Doze is suppressed. Suppressing state: " + requestedState);
-            mDozeLog.traceAlwaysOnSuppressed(requestedState);
+            Log.i(TAG, "Doze is suppressed by an app. Suppressing state: " + requestedState);
+            mDozeLog.traceAlwaysOnSuppressed(requestedState, "app");
+            return State.DOZE;
+        }
+        if (mDozeHost.isPowerSaveActive() && requestedState.isAlwaysOn()) {
+            Log.i(TAG, "Doze is suppressed by battery saver. Suppressing state: " + requestedState);
+            mDozeLog.traceAlwaysOnSuppressed(requestedState, "batterySaver");
             return State.DOZE;
         }
         if ((mState == State.DOZE_AOD_PAUSED || mState == State.DOZE_AOD_PAUSING

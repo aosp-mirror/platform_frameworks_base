@@ -496,11 +496,13 @@ public class UsbHostManager {
                 // MIDI
                 ArrayList<UsbDirectMidiDevice> midiDevices =
                         mMidiDevices.remove(deviceAddress);
-                for (UsbDirectMidiDevice midiDevice : midiDevices) {
-                    if (midiDevice != null) {
-                        Slog.i(TAG, "USB MIDI Device Removed: " + deviceAddress);
-                        IoUtils.closeQuietly(midiDevice);
+                if (midiDevices != null) {
+                    for (UsbDirectMidiDevice midiDevice : midiDevices) {
+                        if (midiDevice != null) {
+                            IoUtils.closeQuietly(midiDevice);
+                        }
                     }
+                    Slog.i(TAG, "USB MIDI Devices Removed: " + deviceAddress);
                 }
 
                 getCurrentUserSettings().usbDeviceRemoved(device);

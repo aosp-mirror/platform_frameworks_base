@@ -24,4 +24,5 @@
     <string name="pip_move" msgid="1544227837964635439">"ផ្លាស់ទី PIP"</string>
     <string name="pip_expand" msgid="7605396312689038178">"ពង្រីក PIP"</string>
     <string name="pip_collapse" msgid="5732233773786896094">"បង្រួម PIP"</string>
+    <string name="pip_edu_text" msgid="3672999496647508701">" ចុចពីរដងលើ"<annotation icon="home_icon">"ប៊ូតុងដើម"</annotation>" ដើម្បីបើកផ្ទាំងគ្រប់គ្រង"</string>
 </resources>

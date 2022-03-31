@@ -312,7 +312,7 @@ public class Signature implements Parcelable {
      * @hide
      */
     public static boolean areExactMatch(Signature[] a, Signature[] b) {
-        return (a.length == b.length) && ArrayUtils.containsAll(a, b)
+        return (ArrayUtils.size(a) == ArrayUtils.size(b)) && ArrayUtils.containsAll(a, b)
                 && ArrayUtils.containsAll(b, a);
     }
 

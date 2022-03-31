@@ -100,7 +100,7 @@ public final class SearchRequest implements Parcelable {
      *
      */
     @NonNull
-    private String mSource;
+    private String mCallerPackageName;
 
     private SearchRequest(Parcel in) {
         this.mQuery = in.readString();
@@ -109,17 +109,17 @@ public final class SearchRequest implements Parcelable {
         this.mMaxLatencyMillis = in.readFloat();
         this.mSearchConstraints = in.readBundle();
         this.mId = in.readString();
-        this.mSource = in.readString();
+        this.mCallerPackageName = in.readString();
     }
 
     private SearchRequest(String query, int resultOffset, int resultNumber, float maxLatencyMillis,
-            Bundle searchConstraints, String source) {
+            Bundle searchConstraints, String callerPackageName) {
         mQuery = query;
         mResultOffset = resultOffset;
         mResultNumber = resultNumber;
         mMaxLatencyMillis = maxLatencyMillis;
         mSearchConstraints = searchConstraints;
-        mSource = source;
+        mCallerPackageName = callerPackageName;
     }
 
     /** Returns the original query. */
@@ -151,8 +151,8 @@ public final class SearchRequest implements Parcelable {
 
     /** Gets the caller's package name. */
     @NonNull
-    public String getSource() {
-        return mSource;
+    public String getCallerPackageName() {
+        return mCallerPackageName;
     }
 
     /** Returns the search request id, which is used to identify the request. */
@@ -169,8 +169,8 @@ public final class SearchRequest implements Parcelable {
      *
      * @hide
      */
-    public void setSource(@NonNull String source) {
-        this.mSource = source;
+    public void setCallerPackageName(@NonNull String callerPackageName) {
+        this.mCallerPackageName = callerPackageName;
     }
 
     private SearchRequest(Builder b) {
@@ -179,7 +179,7 @@ public final class SearchRequest implements Parcelable {
         mResultNumber = b.mResultNumber;
         mMaxLatencyMillis = b.mMaxLatencyMillis;
         mSearchConstraints = requireNonNull(b.mSearchConstraints);
-        mSource = requireNonNull(b.mSource);
+        mCallerPackageName = requireNonNull(b.mCallerPackageName);
     }
 
     /**
@@ -207,7 +207,7 @@ public final class SearchRequest implements Parcelable {
         dest.writeFloat(this.mMaxLatencyMillis);
         dest.writeBundle(this.mSearchConstraints);
         dest.writeString(getRequestId());
-        dest.writeString(this.mSource);
+        dest.writeString(this.mCallerPackageName);
     }
 
     @Override
@@ -231,7 +231,7 @@ public final class SearchRequest implements Parcelable {
                 && mResultNumber == that.mResultNumber
                 && mMaxLatencyMillis == that.mMaxLatencyMillis
                 && Objects.equals(mSearchConstraints, that.mSearchConstraints)
-                && Objects.equals(mSource, that.mSource);
+                && Objects.equals(mCallerPackageName, that.mCallerPackageName);
     }
 
     @Override
@@ -246,14 +246,15 @@ public final class SearchRequest implements Parcelable {
         }
 
         return String.format("SearchRequest: {query:%s,offset:%d;number:%d;max_latency:%f;"
-                        + "is_presubmit:%b;search_provider:%s;source:%s}", mQuery, mResultOffset,
-                mResultNumber, mMaxLatencyMillis, isPresubmit, searchProvider, mSource);
+                        + "is_presubmit:%b;search_provider:%s;callerPackageName:%s}", mQuery,
+                mResultOffset, mResultNumber, mMaxLatencyMillis, isPresubmit, searchProvider,
+                mCallerPackageName);
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(mQuery, mResultOffset, mResultNumber, mMaxLatencyMillis,
-                mSearchConstraints, mSource);
+                mSearchConstraints, mCallerPackageName);
     }
 
     /**
@@ -268,7 +269,7 @@ public final class SearchRequest implements Parcelable {
         private int mResultNumber;
         private float mMaxLatencyMillis;
         private Bundle mSearchConstraints;
-        private String mSource;
+        private String mCallerPackageName;
 
         /**
          *
@@ -284,7 +285,7 @@ public final class SearchRequest implements Parcelable {
             mResultNumber = 10;
             mMaxLatencyMillis = 200;
             mSearchConstraints = Bundle.EMPTY;
-            mSource = "DEFAULT_CALLER";
+            mCallerPackageName = "DEFAULT_CALLER";
         }
 
         /** Sets the input query. */
@@ -329,8 +330,8 @@ public final class SearchRequest implements Parcelable {
          */
         @NonNull
         @TestApi
-        public Builder setSource(@NonNull String source) {
-            this.mSource = source;
+        public Builder setCallerPackageName(@NonNull String callerPackageName) {
+            this.mCallerPackageName = callerPackageName;
             return this;
         }
 
@@ -343,7 +344,7 @@ public final class SearchRequest implements Parcelable {
             }
 
             return new SearchRequest(mQuery, mResultOffset, mResultNumber, mMaxLatencyMillis,
-                               mSearchConstraints, mSource);
+                               mSearchConstraints, mCallerPackageName);
         }
     }
 }

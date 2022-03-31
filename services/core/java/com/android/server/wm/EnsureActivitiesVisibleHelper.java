@@ -108,8 +108,11 @@ class EnsureActivitiesVisibleHelper {
                     && childTaskFragment.getTopNonFinishingActivity() != null) {
                 childTaskFragment.updateActivityVisibilities(starting, configChanges,
                         preserveWindows, notifyClients);
+                // The TaskFragment should fully occlude the activities below if the bounds
+                // equals to its parent task, unless it is translucent.
                 mBehindFullyOccludedContainer |=
-                        childTaskFragment.getBounds().equals(mTaskFragment.getBounds());
+                        (childTaskFragment.getBounds().equals(mTaskFragment.getBounds())
+                                && !childTaskFragment.isTranslucent(starting));
                 if (mAboveTop && mTop.getTaskFragment() == childTaskFragment) {
                     mAboveTop = false;
                 }

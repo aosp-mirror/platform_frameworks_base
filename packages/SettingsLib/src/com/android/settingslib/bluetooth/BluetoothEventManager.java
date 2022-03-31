@@ -371,7 +371,7 @@ public class BluetoothEventManager {
                         || cachedDevice.getHiSyncId() != BluetoothHearingAid.HI_SYNC_ID_INVALID) {
                     mDeviceManager.onDeviceUnpaired(cachedDevice);
                 }
-                int reason = intent.getIntExtra(BluetoothDevice.EXTRA_REASON,
+                int reason = intent.getIntExtra(BluetoothDevice.EXTRA_UNBOND_REASON,
                         BluetoothDevice.ERROR);
 
                 showUnbondMessage(context, cachedDevice.getName(), reason);

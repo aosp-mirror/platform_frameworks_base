@@ -20,19 +20,17 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="4811759950673118541">"อินเทอร์เฟซผู้ใช้ของระบบ"</string>
-    <!-- no translation found for battery_low_title (5319680173344341779) -->
-    <skip />
-    <!-- no translation found for battery_low_description (3282977755476423966) -->
-    <skip />
-    <!-- no translation found for battery_low_intro (5148725009653088790) -->
-    <skip />
+    <string name="battery_low_title" msgid="5319680173344341779">"เปิดโหมดประหยัดแบตเตอรี่ใช่ไหม"</string>
+    <string name="battery_low_description" msgid="3282977755476423966">"คุณมีแบตเตอรี่เหลืออยู่ <xliff:g id="PERCENTAGE">%s</xliff:g> โหมดประหยัดแบตเตอรี่จะเปิดธีมมืด จำกัดกิจกรรมในเบื้องหลัง และหน่วงเวลาการแจ้งเตือน"</string>
+    <string name="battery_low_intro" msgid="5148725009653088790">"โหมดประหยัดแบตเตอรี่จะเปิดธีมมืด จำกัดกิจกรรมในเบื้องหลัง และหน่วงเวลาการแจ้งเตือน"</string>
     <string name="battery_low_percent_format" msgid="4276661262843170964">"เหลืออีก <xliff:g id="PERCENTAGE">%s</xliff:g>"</string>
     <string name="invalid_charger_title" msgid="938685362320735167">"ชาร์จผ่าน USB ไม่ได้"</string>
     <string name="invalid_charger_text" msgid="2339310107232691577">"ใช้ที่ชาร์จที่ให้มาพร้อมกับอุปกรณ์"</string>
     <string name="battery_saver_confirmation_title" msgid="1234998463717398453">"เปิดโหมดประหยัดแบตเตอรี่ใช่ไหม"</string>
     <string name="battery_saver_confirmation_title_generic" msgid="2299231884234959849">"เกี่ยวกับโหมดประหยัดแบตเตอรี่"</string>
     <string name="battery_saver_confirmation_ok" msgid="5042136476802816494">"เปิด"</string>
-    <string name="battery_saver_start_action" msgid="4553256017945469937">"เปิดโหมดประหยัดแบตเตอรี่"</string>
+    <string name="battery_saver_start_action" msgid="8353766979886287140">"เปิด"</string>
+    <string name="battery_saver_dismiss_action" msgid="7199342621040014738">"ไม่เป็นไร"</string>
     <string name="status_bar_settings_auto_rotation" msgid="8329080442278431708">"หมุนหน้าจออัตโนมัติ"</string>
     <string name="usb_device_permission_prompt" msgid="4414719028369181772">"อนุญาตให้ <xliff:g id="APPLICATION">%1$s</xliff:g> เข้าถึง <xliff:g id="USB_DEVICE">%2$s</xliff:g> ไหม"</string>
     <string name="usb_device_permission_prompt_warn" msgid="2309129784984063656">"อนุญาตให้ <xliff:g id="APPLICATION">%1$s</xliff:g> เข้าถึง <xliff:g id="USB_DEVICE">%2$s</xliff:g> ไหม\nแอปนี้ไม่ได้รับอนุญาตให้อัดเสียงแต่จะอัดเสียงผ่านอุปกรณ์ USB นี้ได้"</string>
@@ -133,8 +131,7 @@
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="2242167416140740920">"ตรวจสอบสิทธิ์ใบหน้าแล้ว"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"ยืนยันแล้ว"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"แตะยืนยันเพื่อดำเนินการให้เสร็จสมบูรณ์"</string>
-    <!-- no translation found for biometric_dialog_tap_confirm_with_face (1597899891472340950) -->
-    <skip />
+    <string name="biometric_dialog_tap_confirm_with_face" msgid="1597899891472340950">"ปลดล็อกโดยใช้ใบหน้าแล้ว กดเพื่อดำเนินการต่อ"</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"ตรวจสอบสิทธิ์แล้ว"</string>
     <string name="biometric_dialog_use_pin" msgid="8385294115283000709">"ใช้ PIN"</string>
     <string name="biometric_dialog_use_pattern" msgid="2315593393167211194">"ใช้รูปแบบ"</string>
@@ -154,10 +151,6 @@
     <string name="biometric_dialog_last_pattern_attempt_before_wipe_profile" msgid="6045224069529284686">"หากคุณป้อนรูปแบบไม่ถูกต้องในความพยายามครั้งถัดไป ระบบจะลบโปรไฟล์งานและข้อมูลในโปรไฟล์"</string>
     <string name="biometric_dialog_last_pin_attempt_before_wipe_profile" msgid="545567685899091757">"หากคุณป้อน PIN ไม่ถูกต้องในความพยายามครั้งถัดไป ระบบจะลบโปรไฟล์งานและข้อมูลในโปรไฟล์"</string>
     <string name="biometric_dialog_last_password_attempt_before_wipe_profile" msgid="8538032972389729253">"หากคุณป้อนรหัสผ่านไม่ถูกต้องในความพยายามครั้งถัดไป ระบบจะลบโปรไฟล์งานและข้อมูลในโปรไฟล์"</string>
-    <string name="biometric_dialog_failed_attempts_now_wiping_device" msgid="6585503524026243042">"ใช้ความพยายามหลายครั้งเกินไป ระบบจะลบข้อมูลในอุปกรณ์เครื่องนี้"</string>
-    <string name="biometric_dialog_failed_attempts_now_wiping_user" msgid="7015008539146949115">"ใช้ความพยายามหลายครั้งเกินไป ระบบจะลบผู้ใช้รายนี้"</string>
-    <string name="biometric_dialog_failed_attempts_now_wiping_profile" msgid="5239378521440749682">"ใช้ความพยายามหลายครั้งเกินไป ระบบจะลบโปรไฟล์งานนี้และข้อมูลในโปรไฟล์"</string>
-    <string name="biometric_dialog_now_wiping_dialog_dismiss" msgid="7189432882125106154">"ปิด"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"แตะเซ็นเซอร์ลายนิ้วมือ"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="4465698996175640549">"ไอคอนลายนิ้วมือ"</string>
     <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"ไม่รู้จักใบหน้า ใช้ลายนิ้วมือแทน"</string>
@@ -326,17 +319,12 @@
     <string name="keyguard_indication_charging_time_slowly" msgid="301936949731705417">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • กำลังชาร์จอย่างช้าๆ • จะเต็มในอีก <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
     <string name="keyguard_indication_charging_time_dock" msgid="6150404291427377863">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • กำลังชาร์จบนแท่นชาร์จ • จะเต็มในอีก <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"สลับผู้ใช้"</string>
-    <string name="user_add_user" msgid="4336657383006913022">"เพิ่มผู้ใช้"</string>
-    <string name="user_new_user_name" msgid="2019166282704195789">"ผู้ใช้ใหม่"</string>
-    <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"ต้องการนำผู้ใช้ชั่วคราวออกไหม"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"ระบบจะลบแอปและข้อมูลทั้งหมดในเซสชันนี้"</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"นำออก"</string>
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"ยินดีต้อนรับผู้เข้าร่วมกลับมาอีกครั้ง"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"คุณต้องการอยู่ในเซสชันต่อไปไหม"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"เริ่มต้นใหม่"</string>
     <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"ใช่ ดำเนินการต่อ"</string>
-    <string name="user_add_user_title" msgid="4172327541504825032">"ต้องการเพิ่มผู้ใช้ใหม่ใช่ไหม"</string>
-    <string name="user_add_user_message_short" msgid="2599370307878014791">"เมื่อคุณเพิ่มผู้ใช้ใหม่ ผู้ใช้ดังกล่าวจะต้องตั้งค่าพื้นที่ของตนเอง\n\nผู้ใช้ทุกคนสามารถอัปเดตแอปสำหรับผู้ใช้รายอื่นทุกคนได้"</string>
     <string name="user_limit_reached_title" msgid="2429229448830346057">"ถึงขีดจำกัดผู้ใช้แล้ว"</string>
     <plurals name="user_limit_reached_message" formatted="false" msgid="2573535787802908398">
       <item quantity="other">คุณเพิ่มผู้ใช้ได้สูงสุด <xliff:g id="COUNT">%d</xliff:g> คน</item>
@@ -462,8 +450,7 @@
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"ปลดล็อกเพื่อใช้"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"เกิดปัญหาในการดึงข้อมูลบัตรของคุณ โปรดลองอีกครั้งในภายหลัง"</string>
     <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"การตั้งค่าหน้าจอล็อก"</string>
-    <string name="qr_code_scanner_title" msgid="5660820608548306581">"คิวอาร์โค้ด"</string>
-    <string name="qr_code_scanner_description" msgid="7937603775306661863">"แตะเพื่อสแกน"</string>
+    <string name="qr_code_scanner_title" msgid="5290201053875420785">"สแกนคิวอาร์โค้ด"</string>
     <string name="status_bar_work" msgid="5238641949837091056">"โปรไฟล์งาน"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"โหมดบนเครื่องบิน"</string>
     <string name="zen_alarm_warning" msgid="7844303238486849503">"คุณจะไม่ได้ยินเสียงปลุกครั้งถัดไปในเวลา <xliff:g id="WHEN">%1$s</xliff:g>"</string>
@@ -788,9 +775,9 @@
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"เลื่อนเพื่อดูเพิ่มเติม"</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"กำลังโหลดคำแนะนำ"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"สื่อ"</string>
-    <string name="controls_media_close_session" msgid="1193000643003066508">"ซ่อนเซสชันสื่อนี้ไหม"</string>
+    <string name="controls_media_close_session" msgid="4780485355795635052">"ซ่อนตัวควบคุมสื่อนี้สำหรับ <xliff:g id="APP_NAME">%1$s</xliff:g> ไหม"</string>
     <string name="controls_media_active_session" msgid="3146882316024153337">"ซ่อนเซสชันสื่อในปัจจุบันไม่ได้"</string>
-    <string name="controls_media_dismiss_button" msgid="9081375542265132213">"ปิด"</string>
+    <string name="controls_media_dismiss_button" msgid="4485675693008031646">"ซ่อน"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"เล่นต่อ"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"การตั้งค่า"</string>
     <string name="controls_media_playing_item_description" msgid="4531853311504359098">"กำลังเปิดเพลง <xliff:g id="SONG_NAME">%1$s</xliff:g> ของ <xliff:g id="ARTIST_NAME">%2$s</xliff:g> จาก <xliff:g id="APP_LABEL">%3$s</xliff:g>"</string>
@@ -808,7 +795,7 @@
     <string name="media_move_closer_to_end_cast" msgid="6495907340926563656">"ขยับไปใกล้ <xliff:g id="DEVICENAME">%1$s</xliff:g> มากขึ้นเพื่อเล่นที่นี่"</string>
     <string name="media_transfer_playing_different_device" msgid="7186806382609785610">"กำลังเล่นใน <xliff:g id="DEVICENAME">%1$s</xliff:g>"</string>
     <string name="media_transfer_playing_this_device" msgid="1856890686844499172">"กำลังเล่นในโทรศัพท์เครื่องนี้"</string>
-    <string name="media_transfer_failed" msgid="2640354446629980227">"เกิดข้อผิดพลาด"</string>
+    <string name="media_transfer_failed" msgid="7955354964610603723">"เกิดข้อผิดพลาด โปรดลองอีกครั้ง"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"ไม่มีการใช้งาน โปรดตรวจสอบแอป"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"ไม่พบ"</string>
     <string name="controls_error_removed_title" msgid="1207794911208047818">"ใช้การควบคุมไม่ได้"</string>
@@ -827,6 +814,7 @@
     <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"จับคู่อุปกรณ์ใหม่"</string>
     <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"โปรดเปิดแอปหากต้องการแคสต์เซสชันนี้"</string>
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"แอปที่ไม่รู้จัก"</string>
+    <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"หยุดแคสต์"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"หมายเลขบิลด์"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"คัดลอกหมายเลขบิลด์ไปยังคลิปบอร์ดแล้ว"</string>
     <string name="basic_status" msgid="2315371112182658176">"เปิดการสนทนา"</string>
@@ -889,7 +877,7 @@
     <string name="wifi_wont_autoconnect_for_now" msgid="5782282612749867762">"Wi-Fi จะไม่เชื่อมต่ออัตโนมัติในตอนนี้"</string>
     <string name="see_all_networks" msgid="3773666844913168122">"ดูทั้งหมด"</string>
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"ตัดการเชื่อมต่ออีเทอร์เน็ตเพื่อสลับเครือข่าย"</string>
-    <string name="wifi_scan_notify_message" msgid="3753839537448621794">"เพื่อปรับปรุงประสบการณ์การใช้อุปกรณ์ แอปและบริการต่างๆ จะยังคงสแกนหาเครือข่าย Wi‑Fi ได้ทุกเมื่อแม้ว่า Wi‑Fi จะปิดอยู่ คุณเปลี่ยนตัวเลือกนี้ได้ในการตั้งค่าการสแกนหา Wi-Fi "<annotation id="link">"เปลี่ยน"</annotation></string>
+    <string name="wifi_scan_notify_message" msgid="3753839537448621794">"เพื่อปรับปรุงประสบการณ์การใช้อุปกรณ์ แอปและบริการต่างๆ จะยังคงสแกนหาเครือข่าย Wi‑Fi ได้ทุกเมื่อแม้ว่า Wi‑Fi จะปิดอยู่ คุณเปลี่ยนตัวเลือกนี้ได้ในการตั้งค่าการสแกนหา Wi-Fi "<annotation id="link">"เปลี่ยนการตั้งค่า"</annotation></string>
     <string name="turn_off_airplane_mode" msgid="8425587763226548579">"ปิดโหมดบนเครื่องบิน"</string>
     <string name="qs_tile_request_dialog_text" msgid="3501359944139877694">"<xliff:g id="APPNAME">%1$s</xliff:g> ต้องการเพิ่มชิ้นส่วนต่อไปนี้ในการตั้งค่าด่วน"</string>
     <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"เพิ่มชิ้นส่วน"</string>
@@ -916,7 +904,6 @@
     <string name="dream_overlay_status_bar_wifi_off" msgid="4497069245055003582">"ใช้ Wi‑Fi ไม่ได้"</string>
     <string name="dream_overlay_status_bar_priority_mode" msgid="5428462123314728739">"โหมดลำดับความสำคัญ"</string>
     <string name="dream_overlay_status_bar_alarm_set" msgid="566707328356590886">"ตั้งปลุกแล้ว"</string>
-    <string name="dream_overlay_status_bar_assistant_guest_mode_enabled" msgid="3715897096012469615">"เปิดใช้โหมดผู้มาเยือนของ Assistant แล้ว"</string>
     <string name="dream_overlay_status_bar_camera_mic_off" msgid="3199425257833773569">"กล้องและไมค์ปิดอยู่"</string>
     <string name="dream_overlay_status_bar_notification_indicator" msgid="8091389255691081711">"{count,plural, =1{การแจ้งเตือน # รายการ}other{การแจ้งเตือน # รายการ}}"</string>
 </resources>

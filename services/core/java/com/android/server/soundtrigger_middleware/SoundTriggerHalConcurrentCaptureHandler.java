@@ -24,7 +24,6 @@ import android.media.soundtrigger.PhraseSoundModel;
 import android.media.soundtrigger.Properties;
 import android.media.soundtrigger.RecognitionConfig;
 import android.media.soundtrigger.RecognitionEvent;
-import android.media.soundtrigger.RecognitionStatus;
 import android.media.soundtrigger.SoundModel;
 import android.media.soundtrigger.SoundModelType;
 import android.media.soundtrigger.Status;
@@ -391,21 +390,14 @@ public class SoundTriggerHalConcurrentCaptureHandler implements ISoundTriggerHal
     /** Notify the client that recognition has been aborted. */
     private static void notifyAbort(int modelHandle, LoadedModel model) {
         switch (model.type) {
-            case SoundModelType.GENERIC: {
-                RecognitionEvent event = new RecognitionEvent();
-                event.status = RecognitionStatus.ABORTED;
-                event.type = SoundModelType.GENERIC;
-                model.callback.recognitionCallback(modelHandle, event);
-            }
-            break;
+            case SoundModelType.GENERIC:
+                model.callback.recognitionCallback(modelHandle, AidlUtil.newAbortEvent());
+                break;
 
-            case SoundModelType.KEYPHRASE: {
-                PhraseRecognitionEvent event = new PhraseRecognitionEvent();
-                event.common.status = RecognitionStatus.ABORTED;
-                event.common.type = SoundModelType.KEYPHRASE;
-                model.callback.phraseRecognitionCallback(modelHandle, event);
-            }
-            break;
+            case SoundModelType.KEYPHRASE:
+                model.callback.phraseRecognitionCallback(modelHandle,
+                        AidlUtil.newAbortPhraseEvent());
+                break;
         }
     }
 

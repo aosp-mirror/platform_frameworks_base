@@ -113,6 +113,22 @@ public class KeyguardStatusView extends GridLayout {
         }
     }
 
+    /** Sets a translationY value on every child view except for the media view. */
+    public void setChildrenTranslationYExcludingMediaView(float translationY) {
+        setChildrenTranslationYExcluding(translationY, Set.of(mMediaHostContainer));
+    }
+
+    /** Sets a translationY value on every view except for the views in the provided set. */
+    private void setChildrenTranslationYExcluding(float translationY, Set<View> excludedViews) {
+        for (int i = 0; i < mStatusViewContainer.getChildCount(); i++) {
+            final View child = mStatusViewContainer.getChildAt(i);
+
+            if (!excludedViews.contains(child)) {
+                child.setTranslationY(translationY);
+            }
+        }
+    }
+
     public float getChildrenAlphaExcludingSmartSpace() {
         return mChildrenAlphaExcludingSmartSpace;
     }

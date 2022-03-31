@@ -799,6 +799,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                     final BatteryUsageStatsQuery querySinceReset =
                             new BatteryUsageStatsQuery.Builder()
                                     .includeProcessStateData()
+                                    .includeVirtualUids()
                                     .build();
                     bus = getBatteryUsageStats(List.of(querySinceReset)).get(0);
                     break;
@@ -806,6 +807,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                     final BatteryUsageStatsQuery queryPowerProfile =
                             new BatteryUsageStatsQuery.Builder()
                                     .includeProcessStateData()
+                                    .includeVirtualUids()
                                     .powerProfileModeledOnly()
                                     .build();
                     bus = getBatteryUsageStats(List.of(queryPowerProfile)).get(0);
@@ -821,6 +823,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                     final BatteryUsageStatsQuery queryBeforeReset =
                             new BatteryUsageStatsQuery.Builder()
                                     .includeProcessStateData()
+                                    .includeVirtualUids()
                                     .aggregateSnapshots(sessionStart, sessionEnd)
                                     .build();
                     bus = getBatteryUsageStats(List.of(queryBeforeReset)).get(0);

@@ -247,18 +247,7 @@ internal class FooterActionsController @Inject constructor(
     }
 
     fun setExpansion(headerExpansionFraction: Float) {
-        if (featureFlags.isEnabled(Flags.NEW_FOOTER)) {
-            if (headerExpansionFraction != lastExpansion) {
-                if (headerExpansionFraction >= 1f) {
-                    mView.animate().alpha(1f).setDuration(500L).start()
-                } else if (lastExpansion >= 1f && headerExpansionFraction < 1f) {
-                    mView.animate().alpha(0f).setDuration(250L).start()
-                }
-                lastExpansion = headerExpansionFraction
-            }
-        } else {
-            alphaAnimator.setPosition(headerExpansionFraction)
-        }
+        alphaAnimator.setPosition(headerExpansionFraction)
     }
 
     fun setKeyguardShowing(showing: Boolean) {

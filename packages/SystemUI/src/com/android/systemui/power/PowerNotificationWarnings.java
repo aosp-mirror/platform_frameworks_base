@@ -60,6 +60,7 @@ import com.android.settingslib.fuelgauge.BatterySaverUtils;
 import com.android.settingslib.utils.PowerUtil;
 import com.android.systemui.R;
 import com.android.systemui.SystemUIApplication;
+import com.android.systemui.broadcast.BroadcastSender;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.statusbar.phone.SystemUIDialog;
@@ -119,7 +120,8 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
             "PNW.autoSaverNoThanks";
 
     private static final String ACTION_ENABLE_SEVERE_BATTERY_DIALOG = "PNW.enableSevereDialog";
-
+    private static final String EXTRA_SCHEDULED_BY_PERCENTAGE =
+            "extra_scheduled_by_percentage";
     public static final String BATTERY_SAVER_SCHEDULE_SCREEN_INTENT_ACTION =
             "com.android.settings.BATTERY_SAVER_SCHEDULE_SETTINGS";
 
@@ -160,17 +162,20 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
     @VisibleForTesting SystemUIDialog mUsbHighTempDialog;
     private BatteryStateSnapshot mCurrentBatterySnapshot;
     private ActivityStarter mActivityStarter;
+    private final BroadcastSender mBroadcastSender;
 
     /**
      */
     @Inject
-    public PowerNotificationWarnings(Context context, ActivityStarter activityStarter) {
+    public PowerNotificationWarnings(Context context, ActivityStarter activityStarter,
+            BroadcastSender broadcastSender) {
         mContext = context;
         mNoMan = mContext.getSystemService(NotificationManager.class);
         mPowerMan = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
         mKeyguard = mContext.getSystemService(KeyguardManager.class);
         mReceiver.init();
         mActivityStarter = activityStarter;
+        mBroadcastSender = broadcastSender;
         mUseSevereDialog = mContext.getResources().getBoolean(R.bool.config_severe_battery_dialog);
     }
 
@@ -258,13 +263,17 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
 
     protected void showWarningNotification() {
         if (showSevereLowBatteryDialog()) {
-            mContext.sendBroadcast(new Intent(ACTION_ENABLE_SEVERE_BATTERY_DIALOG)
+            mBroadcastSender.sendBroadcast(new Intent(ACTION_ENABLE_SEVERE_BATTERY_DIALOG)
                     .setPackage(mContext.getPackageName())
+                    .putExtra(EXTRA_SCHEDULED_BY_PERCENTAGE, isScheduledByPercentage())
                     .addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY
                             | Intent.FLAG_RECEIVER_FOREGROUND));
             // Reset the state once dialog been enabled
             dismissLowBatteryNotification();
             mPlaySound = false;
+            return;
+        }
+        if (isScheduledByPercentage()) {
             return;
         }
 
@@ -317,6 +326,22 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
     private boolean showSevereLowBatteryDialog() {
         final boolean isSevereState = !mCurrentBatterySnapshot.isHybrid() || mBucket < -1;
         return isSevereState && mUseSevereDialog;
+    }
+
+    /**
+     * Checking battery saver schedule mode is set as "Based on percentage" or not.
+     *
+     * return {@code true} if scheduled by percentage.
+     */
+    private boolean isScheduledByPercentage() {
+        final ContentResolver resolver = mContext.getContentResolver();
+        final int mode = Settings.Global.getInt(resolver, Global.AUTOMATIC_POWER_SAVE_MODE,
+                PowerManager.POWER_SAVE_MODE_TRIGGER_PERCENTAGE);
+
+        // Return false if battery saver mode trigger percentage is less than 0, which means it is
+        // set as "Based on routine" mode, otherwise it will be "Based on percentage" mode.
+        return mode == PowerManager.POWER_SAVE_MODE_TRIGGER_PERCENTAGE
+                && Settings.Global.getInt(resolver, Global.LOW_POWER_MODE_TRIGGER_LEVEL, 0) > 0;
     }
 
     private void showAutoSaverSuggestionNotification() {
@@ -716,9 +741,9 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
                         mSaverConfirmation.dismiss();
                     }
                     // Also close the notification shade, if it's open.
-                    mContext.sendBroadcast(
+                    mBroadcastSender.sendBroadcast(
                             new Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS)
-                            .setFlags(Intent.FLAG_RECEIVER_FOREGROUND));
+                                    .setFlags(Intent.FLAG_RECEIVER_FOREGROUND));
 
                     final Uri uri = Uri.parse(getURL());
                     Context context = widget.getContext();

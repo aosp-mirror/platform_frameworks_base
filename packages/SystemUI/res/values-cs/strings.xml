@@ -20,19 +20,17 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="4811759950673118541">"UI systému"</string>
-    <!-- no translation found for battery_low_title (5319680173344341779) -->
-    <skip />
-    <!-- no translation found for battery_low_description (3282977755476423966) -->
-    <skip />
-    <!-- no translation found for battery_low_intro (5148725009653088790) -->
-    <skip />
+    <string name="battery_low_title" msgid="5319680173344341779">"Zapnout spořič baterie?"</string>
+    <string name="battery_low_description" msgid="3282977755476423966">"Zbývá <xliff:g id="PERCENTAGE">%s</xliff:g> baterie. Spořič baterie zapne tmavý motiv, omezí aktivitu na pozadí a pozdrží oznámení."</string>
+    <string name="battery_low_intro" msgid="5148725009653088790">"Spořič baterie zapne tmavý motiv, omezí aktivitu na pozadí a pozdrží oznámení."</string>
     <string name="battery_low_percent_format" msgid="4276661262843170964">"Zbývá <xliff:g id="PERCENTAGE">%s</xliff:g>"</string>
     <string name="invalid_charger_title" msgid="938685362320735167">"Nabíjení přes USB nefunguje"</string>
     <string name="invalid_charger_text" msgid="2339310107232691577">"Používejte originální nabíječku, která byla dodána spolu se zařízením."</string>
     <string name="battery_saver_confirmation_title" msgid="1234998463717398453">"Zapnout spořič baterie?"</string>
     <string name="battery_saver_confirmation_title_generic" msgid="2299231884234959849">"Informace o spořiči baterie"</string>
     <string name="battery_saver_confirmation_ok" msgid="5042136476802816494">"Zapnout"</string>
-    <string name="battery_saver_start_action" msgid="4553256017945469937">"Zapnout spořič baterie"</string>
+    <string name="battery_saver_start_action" msgid="8353766979886287140">"Zapnout"</string>
+    <string name="battery_saver_dismiss_action" msgid="7199342621040014738">"Ne, díky"</string>
     <string name="status_bar_settings_auto_rotation" msgid="8329080442278431708">"Automatické otočení obrazovky"</string>
     <string name="usb_device_permission_prompt" msgid="4414719028369181772">"Povolit aplikaci <xliff:g id="APPLICATION">%1$s</xliff:g> přístup k zařízení <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
     <string name="usb_device_permission_prompt_warn" msgid="2309129784984063656">"Povolit aplikaci <xliff:g id="APPLICATION">%1$s</xliff:g> přístup k zařízení <xliff:g id="USB_DEVICE">%2$s</xliff:g>?\nTato aplikace nemá oprávnění k nahrávání, ale může zaznamenávat zvuk prostřednictvím tohoto zařízení USB."</string>
@@ -133,8 +131,7 @@
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="2242167416140740920">"Obličej byl ověřen"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"Potvrzeno"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"Ověření dokončíte klepnutím na Potvrdit"</string>
-    <!-- no translation found for biometric_dialog_tap_confirm_with_face (1597899891472340950) -->
-    <skip />
+    <string name="biometric_dialog_tap_confirm_with_face" msgid="1597899891472340950">"Odemyká se obličejem. Pokračujte stisknutím."</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"Ověřeno"</string>
     <string name="biometric_dialog_use_pin" msgid="8385294115283000709">"Použít kód PIN"</string>
     <string name="biometric_dialog_use_pattern" msgid="2315593393167211194">"Použít gesto"</string>
@@ -154,10 +151,6 @@
     <string name="biometric_dialog_last_pattern_attempt_before_wipe_profile" msgid="6045224069529284686">"Pokud při příštím pokusu zadáte nesprávné gesto, váš pracovní profil a přidružená data budou smazána."</string>
     <string name="biometric_dialog_last_pin_attempt_before_wipe_profile" msgid="545567685899091757">"Pokud při příštím pokusu zadáte nesprávný PIN, váš pracovní profil a přidružená data budou smazána."</string>
     <string name="biometric_dialog_last_password_attempt_before_wipe_profile" msgid="8538032972389729253">"Pokud při příštím pokusu zadáte nesprávné heslo, váš pracovní profil a přidružená data budou smazána."</string>
-    <string name="biometric_dialog_failed_attempts_now_wiping_device" msgid="6585503524026243042">"Příliš mnoho neplatných pokusů. Data v tomto zařízení budou smazána."</string>
-    <string name="biometric_dialog_failed_attempts_now_wiping_user" msgid="7015008539146949115">"Příliš mnoho neplatných pokusů. Tento uživatel bude smazán."</string>
-    <string name="biometric_dialog_failed_attempts_now_wiping_profile" msgid="5239378521440749682">"Příliš mnoho neplatných pokusů. Tento pracovní profil a přidružená data budou smazána."</string>
-    <string name="biometric_dialog_now_wiping_dialog_dismiss" msgid="7189432882125106154">"Zavřít"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"Dotkněte se snímače otisků prstů"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="4465698996175640549">"Ikona otisku prstu"</string>
     <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"Obličej se nepodařilo rozpoznat. Použijte místo něj otisk prstu."</string>
@@ -330,17 +323,12 @@
     <string name="keyguard_indication_charging_time_slowly" msgid="301936949731705417">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Pomalé nabíjení • Plně nabito za <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
     <string name="keyguard_indication_charging_time_dock" msgid="6150404291427377863">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Nabíjecí dok • Plně nabito za <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Přepnout uživatele"</string>
-    <string name="user_add_user" msgid="4336657383006913022">"Přidat uživatele"</string>
-    <string name="user_new_user_name" msgid="2019166282704195789">"Nový uživatel"</string>
-    <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"Odstranit hosta?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Veškeré aplikace a data v této relaci budou vymazána."</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"Odstranit"</string>
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"Vítejte zpět v relaci hosta!"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"Chcete v relaci pokračovat?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"Začít znovu"</string>
     <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"Ano, pokračovat"</string>
-    <string name="user_add_user_title" msgid="4172327541504825032">"Přidat nového uživatele?"</string>
-    <string name="user_add_user_message_short" msgid="2599370307878014791">"Když přidáte nového uživatele, musí si nastavit vlastní prostor.\n\nJakýkoli uživatel může aktualizovat aplikace všech ostatních uživatelů."</string>
     <string name="user_limit_reached_title" msgid="2429229448830346057">"Bylo dosaženo limitu uživatelů"</string>
     <plurals name="user_limit_reached_message" formatted="false" msgid="2573535787802908398">
       <item quantity="few">Lze přidat až <xliff:g id="COUNT">%d</xliff:g> uživatele.</item>
@@ -468,8 +456,7 @@
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"Odemknout a použít"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"Při načítání karet došlo k problému, zkuste to později"</string>
     <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"Nastavení obrazovky uzamčení"</string>
-    <string name="qr_code_scanner_title" msgid="5660820608548306581">"QR kód"</string>
-    <string name="qr_code_scanner_description" msgid="7937603775306661863">"Klepnutím naskenujete kód"</string>
+    <string name="qr_code_scanner_title" msgid="5290201053875420785">"Naskenovat QR kód"</string>
     <string name="status_bar_work" msgid="5238641949837091056">"Pracovní profil"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"Režim Letadlo"</string>
     <string name="zen_alarm_warning" msgid="7844303238486849503">"Svůj další budík <xliff:g id="WHEN">%1$s</xliff:g> neuslyšíte"</string>
@@ -800,9 +787,10 @@
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"Přejetím prstem zobrazíte další položky"</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"Načítání doporučení"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"Média"</string>
-    <string name="controls_media_close_session" msgid="1193000643003066508">"Skrýt tuto mediální relaci?"</string>
+    <!-- no translation found for controls_media_close_session (4780485355795635052) -->
+    <skip />
     <string name="controls_media_active_session" msgid="3146882316024153337">"Aktuální mediální relaci nelze skrýt."</string>
-    <string name="controls_media_dismiss_button" msgid="9081375542265132213">"Zavřít"</string>
+    <string name="controls_media_dismiss_button" msgid="4485675693008031646">"Skrýt"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"Pokračovat"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"Nastavení"</string>
     <string name="controls_media_playing_item_description" msgid="4531853311504359098">"Skladba <xliff:g id="SONG_NAME">%1$s</xliff:g> od interpreta <xliff:g id="ARTIST_NAME">%2$s</xliff:g> hrajte z aplikace <xliff:g id="APP_LABEL">%3$s</xliff:g>"</string>
@@ -820,7 +808,7 @@
     <string name="media_move_closer_to_end_cast" msgid="6495907340926563656">"Pokud zde chcete přehrávat média, přibližte se k zařízení <xliff:g id="DEVICENAME">%1$s</xliff:g>"</string>
     <string name="media_transfer_playing_different_device" msgid="7186806382609785610">"Přehrávání v zařízení <xliff:g id="DEVICENAME">%1$s</xliff:g>"</string>
     <string name="media_transfer_playing_this_device" msgid="1856890686844499172">"Přehrávání v tomto telefonu"</string>
-    <string name="media_transfer_failed" msgid="2640354446629980227">"Něco se pokazilo"</string>
+    <string name="media_transfer_failed" msgid="7955354964610603723">"Došlo k chybě. Zkuste to znovu."</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"Neaktivní, zkontrolujte aplikaci"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"Nenalezeno"</string>
     <string name="controls_error_removed_title" msgid="1207794911208047818">"Ovládání není k dispozici"</string>
@@ -839,6 +827,7 @@
     <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"Spárovat nové zařízení"</string>
     <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"Pokud chcete odesílat relaci, otevřete aplikaci."</string>
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"Neznámá aplikace"</string>
+    <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"Zastavit odesílání"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"Číslo sestavení"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"Číslo sestavení bylo zkopírováno do schránky."</string>
     <string name="basic_status" msgid="2315371112182658176">"Otevřít konverzaci"</string>
@@ -930,7 +919,6 @@
     <string name="dream_overlay_status_bar_wifi_off" msgid="4497069245055003582">"Síť Wi‑Fi není k dispozici"</string>
     <string name="dream_overlay_status_bar_priority_mode" msgid="5428462123314728739">"Prioritní režim"</string>
     <string name="dream_overlay_status_bar_alarm_set" msgid="566707328356590886">"Je nastaven budík"</string>
-    <string name="dream_overlay_status_bar_assistant_guest_mode_enabled" msgid="3715897096012469615">"U Asistenta je aktivován režim hosta"</string>
     <string name="dream_overlay_status_bar_camera_mic_off" msgid="3199425257833773569">"Fotoaparát a mikrofon jsou vypnuté"</string>
     <string name="dream_overlay_status_bar_notification_indicator" msgid="8091389255691081711">"{count,plural, =1{# oznámení}few{# oznámení}many{# oznámení}other{# oznámení}}"</string>
 </resources>

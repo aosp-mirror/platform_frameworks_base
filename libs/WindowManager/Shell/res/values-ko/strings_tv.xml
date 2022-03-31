@@ -24,4 +24,5 @@
     <string name="pip_move" msgid="1544227837964635439">"PIP 이동"</string>
     <string name="pip_expand" msgid="7605396312689038178">"PIP 펼치기"</string>
     <string name="pip_collapse" msgid="5732233773786896094">"PIP 접기"</string>
+    <string name="pip_edu_text" msgid="3672999496647508701">" 제어 메뉴에 액세스하려면 "<annotation icon="home_icon">" 홈 "</annotation>"을 두 번 누르세요."</string>
 </resources>

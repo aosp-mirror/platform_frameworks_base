@@ -1000,7 +1000,7 @@ public class RippleDrawable extends LayerDrawable {
     }
 
     private int clampAlpha(@ColorInt int color) {
-        if (Color.alpha(color) > 128) {
+        if (Color.alpha(color) < 128) {
             return  (color & 0x00FFFFFF) | 0x80000000;
         }
         return color;
@@ -1098,19 +1098,16 @@ public class RippleDrawable extends LayerDrawable {
         }
 
         // Draw the appropriate mask anchored to (0,0).
+        final int saveCount = mMaskCanvas.save();
         final int left = bounds.left;
         final int top = bounds.top;
-        if (mState.mRippleStyle == STYLE_SOLID) {
-            mMaskCanvas.translate(-left, -top);
-        }
+        mMaskCanvas.translate(-left, -top);
         if (maskType == MASK_EXPLICIT) {
             drawMask(mMaskCanvas);
         } else if (maskType == MASK_CONTENT) {
             drawContent(mMaskCanvas);
         }
-        if (mState.mRippleStyle == STYLE_SOLID) {
-            mMaskCanvas.translate(left, top);
-        }
+        mMaskCanvas.restoreToCount(saveCount);
         if (mState.mRippleStyle == STYLE_PATTERNED) {
             for (int i = 0; i < mRunningAnimations.size(); i++) {
                 mRunningAnimations.get(i).getProperties().getShader().setShader(mMaskShader);
@@ -1210,9 +1207,13 @@ public class RippleDrawable extends LayerDrawable {
         updateMaskShaderIfNeeded();
 
         // Position the shader to account for canvas translation.
-        if (mMaskShader != null && mState.mRippleStyle == STYLE_SOLID) {
+        if (mMaskShader != null) {
             final Rect bounds = getBounds();
-            mMaskMatrix.setTranslate(bounds.left - x, bounds.top - y);
+            if (mState.mRippleStyle == STYLE_PATTERNED) {
+                mMaskMatrix.setTranslate(bounds.left, bounds.top);
+            } else {
+                mMaskMatrix.setTranslate(bounds.left - x, bounds.top - y);
+            }
             mMaskShader.setLocalMatrix(mMaskMatrix);
         }
 

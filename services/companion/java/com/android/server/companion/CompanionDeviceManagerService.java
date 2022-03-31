@@ -254,9 +254,12 @@ public class CompanionDeviceManagerService extends SystemService {
 
         final int userId = association.getUserId();
         final String packageName = association.getPackageName();
+        // Set bindImportant to true when the association is self-managed to avoid the target
+        // service being killed.
+        final boolean bindImportant = association.isSelfManaged();
 
         if (!mCompanionAppController.isCompanionApplicationBound(userId, packageName)) {
-            mCompanionAppController.bindCompanionApplication(userId, packageName);
+            mCompanionAppController.bindCompanionApplication(userId, packageName, bindImportant);
         } else if (DEBUG) {
             Log.i(TAG, "u" + userId + "\\" + packageName + " is already bound");
         }

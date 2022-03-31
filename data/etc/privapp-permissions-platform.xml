@@ -38,24 +38,6 @@ applications that come with the platform
         <permission name="android.permission.CRYPT_KEEPER"/>
     </privapp-permissions>
 
-    <privapp-permissions package="com.android.cellbroadcastreceiver.module">
-        <permission name="android.permission.BROADCAST_CLOSE_SYSTEM_DIALOGS"/>
-        <permission name="android.permission.INTERACT_ACROSS_USERS"/>
-        <permission name="android.permission.MANAGE_USERS"/>
-        <permission name="android.permission.STATUS_BAR"/>
-        <permission name="android.permission.MODIFY_PHONE_STATE"/>
-        <permission name="android.permission.MODIFY_CELL_BROADCASTS"/>
-        <permission name="android.permission.READ_PRIVILEGED_PHONE_STATE"/>
-        <permission name="android.permission.RECEIVE_EMERGENCY_BROADCAST"/>
-        <permission name="android.permission.START_ACTIVITIES_FROM_BACKGROUND"/>
-    </privapp-permissions>
-
-    <privapp-permissions package="com.android.cellbroadcastservice">
-        <permission name="android.permission.MODIFY_PHONE_STATE"/>
-        <permission name="android.permission.READ_PRIVILEGED_PHONE_STATE"/>
-        <permission name="android.permission.RECEIVE_EMERGENCY_BROADCAST"/>
-    </privapp-permissions>
-
     <privapp-permissions package="com.android.externalstorage">
         <permission name="android.permission.MOUNT_UNMOUNT_FILESYSTEMS"/>
         <permission name="android.permission.WRITE_MEDIA_STORAGE"/>
@@ -275,6 +257,8 @@ applications that come with the platform
         <!-- Needed for test only -->
         <permission name="android.permission.BATTERY_PREDICTION"/>
         <permission name="android.permission.BATTERY_STATS"/>
+        <!-- BLUETOOTH_PRIVILEGED is needed for test only -->
+        <permission name="android.permission.BLUETOOTH_PRIVILEGED"/>
         <permission name="android.permission.BIND_APPWIDGET"/>
         <permission name="android.permission.CHANGE_APP_IDLE_STATE"/>
         <permission name="android.permission.CHANGE_COMPONENT_ENABLED_STATE"/>
@@ -312,6 +296,8 @@ applications that come with the platform
         <permission name="android.permission.MANAGE_LOW_POWER_STANDBY" />
         <permission name="android.permission.MANAGE_ROLLBACKS"/>
         <permission name="android.permission.MANAGE_USB"/>
+        <!-- Needed for tests only -->
+        <permission name="android.permission.MANAGE_WALLPAPER_EFFECTS_GENERATION" />
         <permission name="android.permission.MODIFY_APPWIDGET_BIND_PERMISSIONS"/>
         <permission name="android.permission.MODIFY_DAY_NIGHT_MODE"/>
         <permission name="android.permission.MODIFY_PHONE_STATE"/>
@@ -452,10 +438,11 @@ applications that come with the platform
         <permission name="android.permission.WIFI_ACCESS_COEX_UNSAFE_CHANNELS" />
         <permission name="android.permission.WIFI_UPDATE_COEX_UNSAFE_CHANNELS" />
         <permission name="android.permission.NEARBY_WIFI_DEVICES" />
+        <permission name="android.permission.MANAGE_WIFI_INTERFACES" />
         <permission name="android.permission.OVERRIDE_WIFI_CONFIG" />
         <!-- Permission needed for CTS test - ConcurrencyTest#testP2pExternalApprover
-             P2P external approver API sets require MANAGE_WIFI_AUTO_JOIN permission. -->
-        <permission name="android.permission.MANAGE_WIFI_AUTO_JOIN" />
+             P2P external approver API sets require MANAGE_WIFI_NETWORK_SELECTION permission. -->
+        <permission name="android.permission.MANAGE_WIFI_NETWORK_SELECTION" />
         <!-- Permission required for CTS test CarrierMessagingServiceWrapperTest -->
         <permission name="android.permission.BIND_CARRIER_SERVICES"/>
         <!-- Permission required for CTS test - MusicRecognitionManagerTest -->
@@ -515,7 +502,6 @@ applications that come with the platform
         <!-- Permissions required for CTS test - CtsSafetyCenterTestCases -->
         <permission name="android.permission.SEND_SAFETY_CENTER_UPDATE" />
         <permission name="android.permission.READ_SAFETY_CENTER_STATUS" />
-        <permission name="android.permission.SEND_LOST_MODE_LOCATION_UPDATES" />
         <!-- Permission required for CTS test - CtsTelephonyTestCases -->
         <permission name="android.permission.BIND_TELECOM_CONNECTION_SERVICE" />
     </privapp-permissions>

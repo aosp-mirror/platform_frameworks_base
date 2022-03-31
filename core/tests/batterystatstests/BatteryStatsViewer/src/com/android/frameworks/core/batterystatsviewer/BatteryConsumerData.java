@@ -188,6 +188,9 @@ public class BatteryConsumerData {
                 case BatteryConsumer.PROCESS_STATE_FOREGROUND_SERVICE:
                     label = "FGS";
                     break;
+                case BatteryConsumer.PROCESS_STATE_CACHED:
+                    label = "cached";
+                    break;
                 default:
                     continue;
             }

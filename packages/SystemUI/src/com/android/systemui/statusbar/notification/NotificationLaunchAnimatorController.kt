@@ -22,15 +22,18 @@ class NotificationLaunchAnimatorControllerProvider @Inject constructor(
     private val headsUpManager: HeadsUpManagerPhone,
     private val jankMonitor: InteractionJankMonitor
 ) {
+    @JvmOverloads
     fun getAnimatorController(
-        notification: ExpandableNotificationRow
+        notification: ExpandableNotificationRow,
+        onFinishAnimationCallback: Runnable? = null
     ): NotificationLaunchAnimatorController {
         return NotificationLaunchAnimatorController(
             notificationShadeWindowViewController,
             notificationListContainer,
             headsUpManager,
             notification,
-            jankMonitor
+            jankMonitor,
+            onFinishAnimationCallback
         )
     }
 }
@@ -45,7 +48,8 @@ class NotificationLaunchAnimatorController(
     private val notificationListContainer: NotificationListContainer,
     private val headsUpManager: HeadsUpManagerPhone,
     private val notification: ExpandableNotificationRow,
-    private val jankMonitor: InteractionJankMonitor
+    private val jankMonitor: InteractionJankMonitor,
+    private val onFinishAnimationCallback: Runnable?
 ) : ActivityLaunchAnimator.Controller {
 
     companion object {
@@ -119,6 +123,7 @@ class NotificationLaunchAnimatorController(
 
         if (!willAnimate) {
             removeHun(animate = true)
+            onFinishAnimationCallback?.run()
         }
     }
 
@@ -137,6 +142,7 @@ class NotificationLaunchAnimatorController(
         notificationShadeWindowViewController.setExpandAnimationRunning(false)
         notificationEntry.isExpandAnimationRunning = false
         removeHun(animate = true)
+        onFinishAnimationCallback?.run()
     }
 
     override fun onLaunchAnimationStart(isExpandingFullyAbove: Boolean) {
@@ -156,6 +162,7 @@ class NotificationLaunchAnimatorController(
         notificationListContainer.setExpandingNotification(null)
         applyParams(null)
         removeHun(animate = false)
+        onFinishAnimationCallback?.run()
     }
 
     private fun applyParams(params: ExpandAnimationParameters?) {

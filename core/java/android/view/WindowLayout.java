@@ -42,6 +42,7 @@ import android.graphics.Insets;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.util.Log;
+import android.window.ClientWindowFrames;
 
 /**
  * Computes window frames.
@@ -56,15 +57,17 @@ public class WindowLayout {
     private final Rect mTempDisplayCutoutSafeExceptMaybeBarsRect = new Rect();
     private final Rect mTempRect = new Rect();
 
-    public boolean computeFrames(WindowManager.LayoutParams attrs, InsetsState state,
+    public void computeFrames(WindowManager.LayoutParams attrs, InsetsState state,
             Rect displayCutoutSafe, Rect windowBounds, @WindowingMode int windowingMode,
             int requestedWidth, int requestedHeight, InsetsVisibilities requestedVisibilities,
-            Rect attachedWindowFrame, float compatScale, Rect outDisplayFrame, Rect outParentFrame,
-            Rect outFrame) {
+            Rect attachedWindowFrame, float compatScale, ClientWindowFrames outFrames) {
         final int type = attrs.type;
         final int fl = attrs.flags;
         final int pfl = attrs.privateFlags;
         final boolean layoutInScreen = (fl & FLAG_LAYOUT_IN_SCREEN) == FLAG_LAYOUT_IN_SCREEN;
+        final Rect outDisplayFrame = outFrames.displayFrame;
+        final Rect outParentFrame = outFrames.parentFrame;
+        final Rect outFrame = outFrames.frame;
 
         // Compute bounds restricted by insets
         final Insets insets = state.calculateInsets(windowBounds, attrs.getFitInsetsTypes(),
@@ -95,7 +98,7 @@ public class WindowLayout {
         final DisplayCutout cutout = state.getDisplayCutout();
         final Rect displayCutoutSafeExceptMaybeBars = mTempDisplayCutoutSafeExceptMaybeBarsRect;
         displayCutoutSafeExceptMaybeBars.set(displayCutoutSafe);
-        boolean clippedByDisplayCutout = false;
+        outFrames.isParentFrameClippedByDisplayCutout = false;
         if (cutoutMode != LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS && !cutout.isEmpty()) {
             // Ensure that windows with a non-ALWAYS display cutout mode are laid out in
             // the cutout safe zone.
@@ -158,7 +161,7 @@ public class WindowLayout {
             if (!attachedInParent && !floatingInScreenWindow) {
                 mTempRect.set(outParentFrame);
                 outParentFrame.intersectUnchecked(displayCutoutSafeExceptMaybeBars);
-                clippedByDisplayCutout = !mTempRect.equals(outParentFrame);
+                outFrames.isParentFrameClippedByDisplayCutout = !mTempRect.equals(outParentFrame);
             }
             outDisplayFrame.intersectUnchecked(displayCutoutSafeExceptMaybeBars);
         }
@@ -176,6 +179,8 @@ public class WindowLayout {
         final boolean hasCompatScale = compatScale != 1f;
         final int pw = outParentFrame.width();
         final int ph = outParentFrame.height();
+        final boolean extendedByCutout =
+                (attrs.privateFlags & PRIVATE_FLAG_LAYOUT_SIZE_EXTENDED_BY_CUTOUT) != 0;
         int rw = requestedWidth;
         int rh = requestedHeight;
         float x, y;
@@ -183,11 +188,13 @@ public class WindowLayout {
 
         // If the view hierarchy hasn't been measured, the requested width and height would be
         // UNSPECIFIED_LENGTH. This can happen in the first layout of a window or in the simulated
-        // layout.
-        if (rw == UNSPECIFIED_LENGTH) {
+        // layout. If extendedByCutout is true, we cannot use the requested lengths. Otherwise,
+        // the window frame might be extended again because the requested lengths may come from the
+        // window frame.
+        if (rw == UNSPECIFIED_LENGTH || extendedByCutout) {
             rw = attrs.width >= 0 ? attrs.width : pw;
         }
-        if (rh == UNSPECIFIED_LENGTH) {
+        if (rh == UNSPECIFIED_LENGTH || extendedByCutout) {
             rh = attrs.height >= 0 ? attrs.height : ph;
         }
 
@@ -259,37 +266,21 @@ public class WindowLayout {
             Gravity.applyDisplay(attrs.gravity, outDisplayFrame, outFrame);
         }
 
-        if ((attrs.privateFlags & PRIVATE_FLAG_LAYOUT_SIZE_EXTENDED_BY_CUTOUT) != 0
-                && !cutout.isEmpty()) {
-            // If the actual frame covering a display cutout, and the window is requesting to extend
-            // it's requested frame, re-do the frame calculation after getting the new requested
-            // size.
+        if (extendedByCutout && !displayCutoutSafe.contains(outFrame)) {
             mTempRect.set(outFrame);
-            // Do nothing if the display cutout and window don't overlap entirely. This may happen
-            // when the cutout is not on the same side with the window.
-            boolean shouldExpand = false;
-            final Rect [] cutoutBounds = cutout.getBoundingRectsAll();
-            for (Rect cutoutBound : cutoutBounds) {
-                if (cutoutBound.isEmpty()) continue;
-                if (mTempRect.contains(cutoutBound) || cutoutBound.contains(mTempRect)) {
-                    shouldExpand = true;
-                    break;
-                }
-            }
-            if (shouldExpand) {
-                // Try to fit move the bar to avoid the display cutout first. Make sure the clip
-                // flags are not set to make the window move.
-                final int clipFlags = DISPLAY_CLIP_VERTICAL | DISPLAY_CLIP_HORIZONTAL;
-                Gravity.applyDisplay(attrs.gravity & ~clipFlags, displayCutoutSafe,
-                        mTempRect);
+
+            // Move the frame into displayCutoutSafe.
+            final int clipFlags = DISPLAY_CLIP_VERTICAL | DISPLAY_CLIP_HORIZONTAL;
+            Gravity.applyDisplay(attrs.gravity & ~clipFlags, displayCutoutSafe,
+                    mTempRect);
+
+            if (mTempRect.intersect(outDisplayFrame)) {
                 outFrame.union(mTempRect);
             }
         }
 
         if (DEBUG) Log.d(TAG, "computeWindowFrames " + attrs.getTitle()
-                + " outFrame=" + outFrame.toShortString()
-                + " outParentFrame=" + outParentFrame.toShortString()
-                + " outDisplayFrame=" + outDisplayFrame.toShortString()
+                + " outFrames=" + outFrames
                 + " windowBounds=" + windowBounds.toShortString()
                 + " attachedWindowFrame=" + (attachedWindowFrame != null
                         ? attachedWindowFrame.toShortString()
@@ -302,8 +293,6 @@ public class WindowLayout {
                 + " attrs=" + attrs
                 + " state=" + state
                 + " requestedVisibilities=" + requestedVisibilities);
-
-        return clippedByDisplayCutout;
     }
 
     public static void computeSurfaceSize(WindowManager.LayoutParams attrs, Rect maxBounds,

@@ -923,14 +923,15 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
      * @hide
      */
     @RequiresPermission(USE_BIOMETRIC_INTERNAL)
-    public void onPointerDown(int sensorId, int x, int y, float minor, float major) {
+    public void onPointerDown(long requestId, int sensorId, int x, int y,
+            float minor, float major) {
         if (mService == null) {
             Slog.w(TAG, "onFingerDown: no fingerprint service");
             return;
         }
 
         try {
-            mService.onPointerDown(sensorId, x, y, minor, major);
+            mService.onPointerDown(requestId, sensorId, x, y, minor, major);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -940,14 +941,14 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
      * @hide
      */
     @RequiresPermission(USE_BIOMETRIC_INTERNAL)
-    public void onPointerUp(int sensorId) {
+    public void onPointerUp(long requestId, int sensorId) {
         if (mService == null) {
             Slog.w(TAG, "onFingerDown: no fingerprint service");
             return;
         }
 
         try {
-            mService.onPointerUp(sensorId);
+            mService.onPointerUp(requestId, sensorId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -957,14 +958,14 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
      * @hide
      */
     @RequiresPermission(USE_BIOMETRIC_INTERNAL)
-    public void onUiReady(int sensorId) {
+    public void onUiReady(long requestId, int sensorId) {
         if (mService == null) {
             Slog.w(TAG, "onUiReady: no fingerprint service");
             return;
         }
 
         try {
-            mService.onUiReady(sensorId);
+            mService.onUiReady(requestId, sensorId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

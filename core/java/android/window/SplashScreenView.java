@@ -104,6 +104,9 @@ public final class SplashScreenView extends FrameLayout {
     private Duration mIconAnimationDuration;
     private Instant mIconAnimationStart;
 
+    private final Rect mTmpRect = new Rect();
+    private final int[] mTmpPos = new int[2];
+
     // The host activity when transfer view to it.
     private Activity mHostActivity;
 
@@ -233,14 +236,6 @@ public final class SplashScreenView extends FrameLayout {
         }
 
         /**
-         * Set the animation duration if icon is animatable.
-         */
-        public Builder setAnimationDurationMillis(long duration) {
-            mIconAnimationDuration = Duration.ofMillis(duration);
-            return this;
-        }
-
-        /**
          * Set the Runnable that can receive the task which should be executed on UI thread.
          * @param uiThreadInitTask
          */
@@ -294,8 +289,7 @@ public final class SplashScreenView extends FrameLayout {
                 } else {
                     view.mIconView = createSurfaceView(view);
                 }
-                view.initIconAnimation(mIconDrawable,
-                        mIconAnimationDuration != null ? mIconAnimationDuration.toMillis() : 0);
+                view.initIconAnimation(mIconDrawable);
                 view.mIconAnimationStart = mIconAnimationStart;
                 view.mIconAnimationDuration = mIconAnimationDuration;
             } else if (mIconSize != 0) {
@@ -463,6 +457,11 @@ public final class SplashScreenView extends FrameLayout {
     /**
      * Returns the duration of the icon animation if icon is animatable.
      *
+     * Note the return value can be null or 0 if the
+     * {@link android.R.attr#windowSplashScreenAnimatedIcon} is not
+     * {@link android.graphics.drawable.AnimationDrawable} or
+     * {@link android.graphics.drawable.AnimatedVectorDrawable}.
+     *
      * @see android.R.attr#windowSplashScreenAnimatedIcon
      * @see android.R.attr#windowSplashScreenAnimationDuration
      */
@@ -497,12 +496,12 @@ public final class SplashScreenView extends FrameLayout {
         mSurfaceView.setChildSurfacePackage(mSurfacePackage);
     }
 
-    void initIconAnimation(Drawable iconDrawable, long duration) {
+    void initIconAnimation(Drawable iconDrawable) {
         if (!(iconDrawable instanceof IconAnimateListener)) {
             return;
         }
         IconAnimateListener aniDrawable = (IconAnimateListener) iconDrawable;
-        aniDrawable.prepareAnimate(duration, this::animationStartCallback);
+        aniDrawable.prepareAnimate(this::animationStartCallback);
         aniDrawable.setAnimationJankMonitoring(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationCancel(Animator animation) {
@@ -524,7 +523,7 @@ public final class SplashScreenView extends FrameLayout {
 
     private void animationStartCallback(long animDuration) {
         mIconAnimationStart = Instant.now();
-        if (animDuration > 0) {
+        if (animDuration >= 0) {
             mIconAnimationDuration = Duration.ofMillis(animDuration);
         }
     }
@@ -580,6 +579,45 @@ public final class SplashScreenView extends FrameLayout {
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
         releaseAnimationSurfaceHost();
+    }
+
+    @Override
+    protected void onLayout(boolean changed, int l, int t, int r, int b) {
+        super.onLayout(changed, l, t, r, b);
+
+        mBrandingImageView.getDrawingRect(mTmpRect);
+        final int brandingHeight = mTmpRect.height();
+        if (brandingHeight == 0 || mIconView == null) {
+            return;
+        }
+        final int visibility = mBrandingImageView.getVisibility();
+        if (visibility != VISIBLE) {
+            return;
+        }
+        final int currentHeight = b - t;
+
+        mIconView.getLocationInWindow(mTmpPos);
+        mIconView.getDrawingRect(mTmpRect);
+        final int iconHeight = mTmpRect.height();
+
+        final ViewGroup.MarginLayoutParams params =
+                (ViewGroup.MarginLayoutParams) mBrandingImageView.getLayoutParams();
+        if (params == null) {
+            Log.e(TAG, "Unable to adjust branding image layout, layout changed?");
+            return;
+        }
+        final int marginBottom = params.bottomMargin;
+        final int remainingHeight = currentHeight - mTmpPos[1] - iconHeight;
+        final int remainingMaxMargin = remainingHeight - brandingHeight;
+        if (remainingHeight < brandingHeight) {
+            // unable to show the branding image, hide it
+            mBrandingImageView.setVisibility(GONE);
+        } else if (remainingMaxMargin < marginBottom) {
+            // shorter than original margin
+            params.bottomMargin = (int) Math.round(remainingMaxMargin / 2.0);
+            mBrandingImageView.setLayoutParams(params);
+        }
+        // nothing need to adjust
     }
 
     private void releaseAnimationSurfaceHost() {
@@ -695,10 +733,9 @@ public final class SplashScreenView extends FrameLayout {
     public interface IconAnimateListener {
         /**
          * Prepare the animation if this drawable also be animatable.
-         * @param duration The animation duration.
          * @param startListener The callback listener used to receive the start of the animation.
          */
-        void prepareAnimate(long duration, LongConsumer startListener);
+        void prepareAnimate(LongConsumer startListener);
 
         /**
          * Stop animation.
@@ -762,6 +799,9 @@ public final class SplashScreenView extends FrameLayout {
                 final Rect initialBounds = drawable.copyBounds();
                 final int width = initialBounds.width();
                 final int height = initialBounds.height();
+                if (width <= 0 || height <= 0) {
+                    return null;
+                }
 
                 final Bitmap snapshot = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
                 final Canvas bmpCanvas = new Canvas(snapshot);

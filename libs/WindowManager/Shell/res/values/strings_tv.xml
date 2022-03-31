@@ -39,5 +39,10 @@
 
     <!-- Button to collapse/shrink the picture-in-picture (PIP) window [CHAR LIMIT=30] -->
     <string name="pip_collapse">Collapse PIP</string>
+
+    <!-- Educative text instructing the user to double press the HOME button to access the pip
+        controls menu [CHAR LIMIT=50] -->
+    <string name="pip_edu_text"> Double press <annotation icon="home_icon"> HOME </annotation> for
+        controls </string>
 </resources>
 

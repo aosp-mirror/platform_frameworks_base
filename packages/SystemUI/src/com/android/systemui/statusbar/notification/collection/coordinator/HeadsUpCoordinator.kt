@@ -72,9 +72,10 @@ class HeadsUpCoordinator @Inject constructor(
     private var mEndLifetimeExtension: OnEndLifetimeExtensionCallback? = null
     private lateinit var mNotifPipeline: NotifPipeline
     private var mNow: Long = -1
-    // notifs we've extended the lifetime for
-    private val mNotifsExtendingLifetime = ArraySet<NotificationEntry>()
     private val mPostedEntries = LinkedHashMap<String, PostedEntry>()
+
+    // notifs we've extended the lifetime for with cancellation callbacks
+    private val mNotifsExtendingLifetime = ArrayMap<NotificationEntry, Runnable?>()
 
     override fun attach(pipeline: NotifPipeline) {
         mNotifPipeline = pipeline
@@ -460,23 +461,20 @@ class HeadsUpCoordinator @Inject constructor(
             }
             if (isSticky(entry)) {
                 val removeAfterMillis = mHeadsUpManager.getEarliestRemovalTime(entry.key)
-                mExecutor.executeDelayed({
-                    val canStillRemove = mHeadsUpManager.canRemoveImmediately(entry.key)
-                    if (mNotifsExtendingLifetime.contains(entry) && canStillRemove) {
-                        mHeadsUpManager.removeNotification(entry.key, /* releaseImmediately */ true)
-                    }
+                mNotifsExtendingLifetime[entry] = mExecutor.executeDelayed({
+                    mHeadsUpManager.removeNotification(entry.key, /* releaseImmediately */ true)
                 }, removeAfterMillis)
             } else {
                 mExecutor.execute {
                     mHeadsUpManager.removeNotification(entry.key, /* releaseImmediately */ false)
                 }
+                mNotifsExtendingLifetime[entry] = null
             }
-            mNotifsExtendingLifetime.add(entry)
             return true
         }
 
         override fun cancelLifetimeExtension(entry: NotificationEntry) {
-            mNotifsExtendingLifetime.remove(entry)
+            mNotifsExtendingLifetime.remove(entry)?.run()
         }
     }
 
@@ -543,7 +541,8 @@ class HeadsUpCoordinator @Inject constructor(
         mPostedEntries[entry.key]?.calculateShouldBeHeadsUpStrict ?: isAttemptingToShowHun(entry)
 
     private fun endNotifLifetimeExtensionIfExtended(entry: NotificationEntry) {
-        if (mNotifsExtendingLifetime.remove(entry)) {
+        if (mNotifsExtendingLifetime.contains(entry)) {
+            mNotifsExtendingLifetime.remove(entry)?.run()
             mEndLifetimeExtension?.onEndLifetimeExtension(mLifetimeExtender, entry)
         }
     }

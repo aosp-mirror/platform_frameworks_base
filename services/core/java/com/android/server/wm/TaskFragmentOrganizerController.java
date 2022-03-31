@@ -140,7 +140,7 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
                 mLastSentTaskFragmentInfos.put(tf, info);
                 tf.mTaskFragmentAppearedSent = true;
             } catch (RemoteException e) {
-                Slog.e(TAG, "Exception sending onTaskFragmentAppeared callback", e);
+                Slog.d(TAG, "Exception sending onTaskFragmentAppeared callback", e);
             }
             onTaskFragmentParentInfoChanged(organizer, tf);
         }
@@ -150,7 +150,7 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
             try {
                 organizer.onTaskFragmentVanished(tf.getTaskFragmentInfo());
             } catch (RemoteException e) {
-                Slog.e(TAG, "Exception sending onTaskFragmentVanished callback", e);
+                Slog.d(TAG, "Exception sending onTaskFragmentVanished callback", e);
             }
             tf.mTaskFragmentAppearedSent = false;
             mLastSentTaskFragmentInfos.remove(tf);
@@ -175,7 +175,7 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
                 organizer.onTaskFragmentInfoChanged(tf.getTaskFragmentInfo());
                 mLastSentTaskFragmentInfos.put(tf, info);
             } catch (RemoteException e) {
-                Slog.e(TAG, "Exception sending onTaskFragmentInfoChanged callback", e);
+                Slog.d(TAG, "Exception sending onTaskFragmentInfoChanged callback", e);
             }
         }
 
@@ -198,7 +198,7 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
                 organizer.onTaskFragmentParentInfoChanged(tf.getFragmentToken(), parentConfig);
                 mLastSentTaskFragmentParentConfigs.put(tf, new Configuration(parentConfig));
             } catch (RemoteException e) {
-                Slog.e(TAG, "Exception sending onTaskFragmentParentInfoChanged callback", e);
+                Slog.d(TAG, "Exception sending onTaskFragmentParentInfoChanged callback", e);
             }
         }
 
@@ -210,7 +210,7 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
             try {
                 organizer.onTaskFragmentError(errorCallbackToken, exceptionBundle);
             } catch (RemoteException e) {
-                Slog.e(TAG, "Exception sending onTaskFragmentError callback", e);
+                Slog.d(TAG, "Exception sending onTaskFragmentError callback", e);
             }
         }
     }
@@ -304,18 +304,7 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
         synchronized (mGlobalLock) {
             final TaskFragmentOrganizerState organizerState =
                     mTaskFragmentOrganizerState.get(organizer.asBinder());
-            if (organizerState == null) {
-                return null;
-            }
-            for (TaskFragment tf : organizerState.mOrganizedTaskFragments) {
-                if (!tf.isAllowedToBeEmbeddedInTrustedMode()) {
-                    // Disable client-driven animations for organizer if at least one of the
-                    // embedded task fragments is not embedding in trusted mode.
-                    // TODO(b/197364677): replace with a stub or Shell-driven one instead of skip?
-                    return null;
-                }
-            }
-            return organizerState.mRemoteAnimationDefinition;
+            return organizerState != null ? organizerState.mRemoteAnimationDefinition : null;
         }
     }
 

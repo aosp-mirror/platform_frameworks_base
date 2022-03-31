@@ -850,6 +850,8 @@ public class PackageManagerServiceUtils {
         ret.recommendedInstallLocation = recommendedInstallLocation;
         ret.multiArch = pkg.isMultiArch();
         ret.debuggable = pkg.isDebuggable();
+        ret.isSdkLibrary = pkg.isIsSdkLibrary();
+
         return ret;
     }
 

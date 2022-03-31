@@ -19,6 +19,7 @@ package com.android.server.inputmethod;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
+import android.inputmethodservice.InputMethodService;
 import android.os.IBinder;
 import android.view.inputmethod.InlineSuggestionsRequest;
 import android.view.inputmethod.InputMethodInfo;
@@ -150,6 +151,12 @@ public abstract class InputMethodManagerInternal {
     public abstract void updateImeWindowStatus(boolean disableImeIcon);
 
     /**
+     * Finish stylus handwriting by calling {@link InputMethodService#finishStylusHandwriting()} if
+     * there is an ongoing handwriting session.
+     */
+    public abstract void maybeFinishStylusHandwriting();
+
+    /**
      * Callback when the IInputMethodSession from the accessibility service with the specified
      * accessibilityConnectionId is created.
      *
@@ -238,6 +245,10 @@ public abstract class InputMethodManagerInternal {
 
                 @Override
                 public void unbindAccessibilityFromCurrentClient(int accessibilityConnectionId) {
+                }
+
+                @Override
+                public void maybeFinishStylusHandwriting() {
                 }
             };
 

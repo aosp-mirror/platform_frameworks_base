@@ -28,7 +28,7 @@ import java.util.Objects;
 
 /**
  * Network configuration to be set for the user profile
- * {@see DevicePolicyManager#setPreferentialNetworkServiceConfig}.
+ * {@see DevicePolicyManager#setPreferentialNetworkServiceConfigs}.
  */
 public final class PreferentialNetworkServiceConfig implements Parcelable {
     final boolean mIsEnabled;
@@ -147,8 +147,6 @@ public final class PreferentialNetworkServiceConfig implements Parcelable {
 
     /**
      * @return preference enterprise identifier.
-     * valid values starts from
-     * {@link #PREFERENTIAL_NETWORK_ID_1} to {@link #PREFERENTIAL_NETWORK_ID_5}.
      * preference identifier is applicable only if preference network service is enabled
      *
      */
@@ -286,8 +284,6 @@ public final class PreferentialNetworkServiceConfig implements Parcelable {
 
         /**
          * Set the preferential network identifier.
-         * Valid values starts from {@link #PREFERENTIAL_NETWORK_ID_1} to
-         * {@link #PREFERENTIAL_NETWORK_ID_5}.
          * preference identifier is applicable only if preferential network service is enabled.
          * @param preferenceId  preference Id
          * @return The builder to facilitate chaining.

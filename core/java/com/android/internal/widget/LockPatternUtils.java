@@ -526,20 +526,6 @@ public class LockPatternUtils {
     }
 
     /**
-     * Check to see if vold already has the password.
-     * Note that this also clears vold's copy of the password.
-     * @return Whether the vold password matches or not.
-     */
-    public boolean checkVoldPassword(int userId) {
-        try {
-            return getLockSettings().checkVoldPassword(userId);
-        } catch (RemoteException re) {
-            Log.e(TAG, "failed to check vold password", re);
-            return false;
-        }
-    }
-
-    /**
      * Returns the password history hash factor, needed to check new password against password
      * history with {@link #checkPasswordHistory(byte[], byte[], int)}
      */
@@ -722,38 +708,14 @@ public class LockPatternUtils {
         return true;
     }
 
-    private void updateCryptoUserInfo(int userId) {
-        if (userId != UserHandle.USER_SYSTEM) {
-            return;
-        }
-
-        final String ownerInfo = isOwnerInfoEnabled(userId) ? getOwnerInfo(userId) : "";
-
-        IBinder service = ServiceManager.getService("mount");
-        if (service == null) {
-            Log.e(TAG, "Could not find the mount service to update the user info");
-            return;
-        }
-
-        IStorageManager storageManager = IStorageManager.Stub.asInterface(service);
-        try {
-            Log.d(TAG, "Setting owner info");
-            storageManager.setField(StorageManager.OWNER_INFO_KEY, ownerInfo);
-        } catch (RemoteException e) {
-            Log.e(TAG, "Error changing user info", e);
-        }
-    }
-
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public void setOwnerInfo(String info, int userId) {
         setString(LOCK_SCREEN_OWNER_INFO, info, userId);
-        updateCryptoUserInfo(userId);
     }
 
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public void setOwnerInfoEnabled(boolean enabled, int userId) {
         setBoolean(LOCK_SCREEN_OWNER_INFO_ENABLED, enabled, userId);
-        updateCryptoUserInfo(userId);
     }
 
     @UnsupportedAppUsage
@@ -808,17 +770,6 @@ public class LockPatternUtils {
     }
 
     /**
-     * Clears the encryption password.
-     */
-    public void clearEncryptionPassword() {
-        try {
-            getLockSettings().updateEncryptionPassword(StorageManager.CRYPT_TYPE_DEFAULT, null);
-        } catch (RemoteException e) {
-            Log.e(TAG, "Couldn't clear encryption password");
-        }
-    }
-
-    /**
      * Retrieves the quality mode for {@code userHandle}.
      * @see DevicePolicyManager#getPasswordQuality(android.content.ComponentName)
      *
@@ -843,7 +794,7 @@ public class LockPatternUtils {
      */
     public void setSeparateProfileChallengeEnabled(int userHandle, boolean enabled,
             LockscreenCredential profilePassword) {
-        if (!isCredentialSharedWithParent(userHandle)) {
+        if (!isCredentialSharableWithParent(userHandle)) {
             return;
         }
         try {
@@ -859,7 +810,7 @@ public class LockPatternUtils {
      * Returns true if {@code userHandle} is a managed profile with separate challenge.
      */
     public boolean isSeparateProfileChallengeEnabled(int userHandle) {
-        return isCredentialSharedWithParent(userHandle) && hasSeparateChallenge(userHandle);
+        return isCredentialSharableWithParent(userHandle) && hasSeparateChallenge(userHandle);
     }
 
     /**
@@ -884,8 +835,8 @@ public class LockPatternUtils {
         return info != null && info.isManagedProfile();
     }
 
-    private boolean isCredentialSharedWithParent(int userHandle) {
-        return getUserManager(userHandle).isCredentialSharedWithParent();
+    private boolean isCredentialSharableWithParent(int userHandle) {
+        return getUserManager(userHandle).isCredentialSharableWithParent();
     }
 
     /**
@@ -1042,24 +993,6 @@ public class LockPatternUtils {
      */
     public void setVisiblePatternEnabled(boolean enabled, int userId) {
         setBoolean(Settings.Secure.LOCK_PATTERN_VISIBLE, enabled, userId);
-
-        // Update for crypto if owner
-        if (userId != UserHandle.USER_SYSTEM) {
-            return;
-        }
-
-        IBinder service = ServiceManager.getService("mount");
-        if (service == null) {
-            Log.e(TAG, "Could not find the mount service to update the user info");
-            return;
-        }
-
-        IStorageManager storageManager = IStorageManager.Stub.asInterface(service);
-        try {
-            storageManager.setField(StorageManager.PATTERN_VISIBLE_KEY, enabled ? "1" : "0");
-        } catch (RemoteException e) {
-            Log.e(TAG, "Error changing pattern visible state", e);
-        }
     }
 
     public boolean isVisiblePatternEverChosen(int userId) {
@@ -1070,23 +1003,7 @@ public class LockPatternUtils {
      * Set whether the visible password is enabled for cryptkeeper screen.
      */
     public void setVisiblePasswordEnabled(boolean enabled, int userId) {
-        // Update for crypto if owner
-        if (userId != UserHandle.USER_SYSTEM) {
-            return;
-        }
-
-        IBinder service = ServiceManager.getService("mount");
-        if (service == null) {
-            Log.e(TAG, "Could not find the mount service to update the user info");
-            return;
-        }
-
-        IStorageManager storageManager = IStorageManager.Stub.asInterface(service);
-        try {
-            storageManager.setField(StorageManager.PASSWORD_VISIBLE_KEY, enabled ? "1" : "0");
-        } catch (RemoteException e) {
-            Log.e(TAG, "Error changing password visible state", e);
-        }
+        // No longer does anything.
     }
 
     /**
@@ -1204,7 +1121,7 @@ public class LockPatternUtils {
     public List<ComponentName> getEnabledTrustAgents(int userId) {
         String serialized = getString(ENABLED_TRUST_AGENTS, userId);
         if (TextUtils.isEmpty(serialized)) {
-            return null;
+            return new ArrayList<ComponentName>();
         }
         String[] split = serialized.split(",");
         ArrayList<ComponentName> activeTrustAgents = new ArrayList<ComponentName>(split.length);

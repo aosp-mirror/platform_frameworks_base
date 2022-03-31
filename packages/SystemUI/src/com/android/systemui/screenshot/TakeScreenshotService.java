@@ -51,7 +51,6 @@ import androidx.annotation.NonNull;
 import com.android.internal.logging.UiEventLogger;
 import com.android.internal.util.ScreenshotHelper;
 import com.android.systemui.R;
-import com.android.systemui.shared.recents.utilities.BitmapUtil;
 
 import java.util.function.Consumer;
 
@@ -208,7 +207,7 @@ public class TakeScreenshotService extends Service {
                 if (DEBUG_SERVICE) {
                     Log.d(TAG, "handleMessage: TAKE_SCREENSHOT_PROVIDED_IMAGE");
                 }
-                Bitmap screenshot = BitmapUtil.bundleToHardwareBitmap(
+                Bitmap screenshot = ScreenshotHelper.HardwareBitmapBundler.bundleToHardwareBitmap(
                         screenshotRequest.getBitmapBundle());
                 Rect screenBounds = screenshotRequest.getBoundsInScreen();
                 Insets insets = screenshotRequest.getInsets();

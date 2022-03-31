@@ -2172,7 +2172,7 @@ public final class Parcel {
      *   sized with the exact size of dimensions.
      *
      * @see #readFixedArray
-     * @see #createFixedArray
+     * @see #createFixedArray createFixedArray(Class&lt;T&gt;, Parcelable.Creator&lt;S&gt;, int...)
      * @see #writeBooleanArray
      * @see #writeByteArray
      * @see #writeCharArray

@@ -95,12 +95,12 @@ public class UnlaunchableAppActivity extends Activity
     }
 
     private String getDialogTitle() {
-        return getSystemService(DevicePolicyManager.class).getString(
+        return getSystemService(DevicePolicyManager.class).getResources().getString(
                 UNLAUNCHABLE_APP_WORK_PAUSED_TITLE, () -> getString(R.string.work_mode_off_title));
     }
 
     private String getDialogMessage() {
-        return getSystemService(DevicePolicyManager.class).getString(
+        return getSystemService(DevicePolicyManager.class).getResources().getString(
                 UNLAUNCHABLE_APP_WORK_PAUSED_MESSAGE,
                 () -> getString(R.string.work_mode_off_message));
     }

@@ -71,6 +71,7 @@ public class FingerprintAuthenticationClientTest {
 
     private static final int USER_ID = 8;
     private static final long OP_ID = 7;
+    private static final long REQUEST_ID = 88;
     private static final int POINTER_ID = 0;
     private static final int TOUCH_X = 8;
     private static final int TOUCH_Y = 20;
@@ -259,7 +260,7 @@ public class FingerprintAuthenticationClientTest {
 
         client.start(mCallback);
 
-        verify(mUdfpsOverlayController).showUdfpsOverlay(anyInt(), anyInt(), any());
+        verify(mUdfpsOverlayController).showUdfpsOverlay(eq(REQUEST_ID), anyInt(), anyInt(), any());
         verify(mSideFpsController).show(anyInt(), anyInt());
 
         block.accept(client);
@@ -277,7 +278,7 @@ public class FingerprintAuthenticationClientTest {
 
         final AidlSession aidl = new AidlSession(version, mHal, USER_ID, mHalSessionCallback);
         return new FingerprintAuthenticationClient(mContext, () -> aidl, mToken,
-                2 /* requestId */, mClientMonitorCallbackConverter, 5 /* targetUserId */, OP_ID,
+                REQUEST_ID, mClientMonitorCallbackConverter, 5 /* targetUserId */, OP_ID,
         false /* restricted */, "test-owner", 4 /* cookie */, false /* requireConfirmation */,
         9 /* sensorId */, mBiometricLogger, mBiometricContext,
         true /* isStrongBiometric */,

@@ -89,6 +89,7 @@ import com.android.wm.shell.transition.Transitions;
 
 import java.io.PrintWriter;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Consumer;
 
 /**
@@ -130,12 +131,18 @@ public class PipController implements PipTransitionController.PipTransitionCallb
         void onPipAnimationStarted();
 
         /**
-         * Notifies the listener about PiP round corner radius changes.
+         * Notifies the listener about PiP resource dimensions changed.
          * Listener can expect an immediate callback the first time they attach.
          *
          * @param cornerRadius the pixel value of the corner radius, zero means it's disabled.
+         * @param shadowRadius the pixel value of the shadow radius, zero means it's disabled.
          */
-        void onPipCornerRadiusChanged(int cornerRadius);
+        void onPipResourceDimensionsChanged(int cornerRadius, int shadowRadius);
+
+        /**
+         * Notifies the listener that user leaves PiP by tapping on the expand button.
+         */
+        void onExpandPip();
     }
 
     /**
@@ -143,6 +150,9 @@ public class PipController implements PipTransitionController.PipTransitionCallb
      */
     private final DisplayChangeController.OnDisplayChangingListener mRotationController = (
             int displayId, int fromRotation, int toRotation, WindowContainerTransaction t) -> {
+        if (mPipTransitionController.handleRotateDisplay(fromRotation, toRotation, t)) {
+            return;
+        }
         if (mPipBoundsState.getDisplayLayout().rotation() == toRotation) {
             // The same rotation may have been set by auto PiP-able or fixed rotation. So notify
             // the change with fromRotation=false to apply the rotated destination bounds from
@@ -225,6 +235,14 @@ public class PipController implements PipTransitionController.PipTransitionCallb
                     onDisplayChanged(mDisplayController.getDisplayLayout(displayId),
                             true /* saveRestoreSnapFraction */);
                 }
+
+                @Override
+                public void onKeepClearAreasChanged(int displayId, Set<Rect> restricted,
+                        Set<Rect> unrestricted) {
+                    if (mPipBoundsState.getDisplayId() == displayId) {
+                        mPipBoundsState.setKeepClearAreas(restricted, unrestricted);
+                    }
+                }
             };
 
     /**
@@ -246,8 +264,9 @@ public class PipController implements PipTransitionController.PipTransitionCallb
         }
 
         @Override
-        public void onActionsChanged(ParceledListSlice<RemoteAction> actions) {
-            mMenuController.setAppActions(actions);
+        public void onActionsChanged(ParceledListSlice<RemoteAction> actions,
+                RemoteAction closeAction) {
+            mMenuController.setAppActions(actions, closeAction);
         }
 
         @Override
@@ -461,7 +480,7 @@ public class PipController implements PipTransitionController.PipTransitionCallb
 
     private void onDensityOrFontScaleChanged() {
         mPipTaskOrganizer.onDensityOrFontScaleChanged(mContext);
-        onPipCornerRadiusChanged();
+        onPipResourceDimensionsChanged();
     }
 
     private void onOverlayChanged() {
@@ -572,14 +591,14 @@ public class PipController implements PipTransitionController.PipTransitionCallb
 
     private void setPinnedStackAnimationListener(PipAnimationListener callback) {
         mPinnedStackAnimationRecentsCallback = callback;
-        onPipCornerRadiusChanged();
+        onPipResourceDimensionsChanged();
     }
 
-    private void onPipCornerRadiusChanged() {
+    private void onPipResourceDimensionsChanged() {
         if (mPinnedStackAnimationRecentsCallback != null) {
-            final int cornerRadius =
-                    mContext.getResources().getDimensionPixelSize(R.dimen.pip_corner_radius);
-            mPinnedStackAnimationRecentsCallback.onPipCornerRadiusChanged(cornerRadius);
+            mPinnedStackAnimationRecentsCallback.onPipResourceDimensionsChanged(
+                    mContext.getResources().getDimensionPixelSize(R.dimen.pip_corner_radius),
+                    mContext.getResources().getDimensionPixelSize(R.dimen.pip_shadow_radius));
         }
     }
 
@@ -639,6 +658,9 @@ public class PipController implements PipTransitionController.PipTransitionCallb
         mTouchHandler.setTouchEnabled(false);
         if (mPinnedStackAnimationRecentsCallback != null) {
             mPinnedStackAnimationRecentsCallback.onPipAnimationStarted();
+            if (direction == TRANSITION_DIRECTION_LEAVE_PIP) {
+                mPinnedStackAnimationRecentsCallback.onExpandPip();
+            }
         }
     }
 
@@ -895,8 +917,13 @@ public class PipController implements PipTransitionController.PipTransitionCallb
             }
 
             @Override
-            public void onPipCornerRadiusChanged(int cornerRadius) {
-                mListener.call(l -> l.onPipCornerRadiusChanged(cornerRadius));
+            public void onPipResourceDimensionsChanged(int cornerRadius, int shadowRadius) {
+                mListener.call(l -> l.onPipResourceDimensionsChanged(cornerRadius, shadowRadius));
+            }
+
+            @Override
+            public void onExpandPip() {
+                mListener.call(l -> l.onExpandPip());
             }
         };
 

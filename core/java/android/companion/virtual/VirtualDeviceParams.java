@@ -28,6 +28,8 @@ import android.os.Parcelable;
 import android.os.UserHandle;
 import android.util.ArraySet;
 
+import com.android.internal.util.Preconditions;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -81,8 +83,31 @@ public final class VirtualDeviceParams implements Parcelable {
      */
     public static final int ACTIVITY_POLICY_DEFAULT_BLOCKED = 1;
 
+    /** @hide */
+    @IntDef(prefix = "NAVIGATION_POLICY_",
+        value = {NAVIGATION_POLICY_DEFAULT_ALLOWED, NAVIGATION_POLICY_DEFAULT_BLOCKED})
+    @Retention(RetentionPolicy.SOURCE)
+    @Target({ElementType.TYPE_PARAMETER, ElementType.TYPE_USE})
+    public @interface NavigationPolicy {}
+
+    /**
+     * Indicates that tasks are allowed to navigate to other tasks on this virtual device,
+     * unless they are explicitly blocked by {@link Builder#setBlockedCrossTaskNavigations}.
+     */
+    public static final int NAVIGATION_POLICY_DEFAULT_ALLOWED = 0;
+
+    /**
+     * Indicates that tasks are blocked from navigating to other tasks by default on this virtual
+     * device, unless allowed by {@link Builder#setAllowedCrossTaskNavigations}.
+     */
+    public static final int NAVIGATION_POLICY_DEFAULT_BLOCKED = 1;
+
     private final int mLockState;
-    private final ArraySet<UserHandle> mUsersWithMatchingAccounts;
+    @NonNull private final ArraySet<UserHandle> mUsersWithMatchingAccounts;
+    @NonNull private final ArraySet<ComponentName> mAllowedCrossTaskNavigations;
+    @NonNull private final ArraySet<ComponentName> mBlockedCrossTaskNavigations;
+    @NavigationPolicy
+    private final int mDefaultNavigationPolicy;
     @NonNull private final ArraySet<ComponentName> mAllowedActivities;
     @NonNull private final ArraySet<ComponentName> mBlockedActivities;
     @ActivityPolicy
@@ -91,13 +116,25 @@ public final class VirtualDeviceParams implements Parcelable {
     private VirtualDeviceParams(
             @LockState int lockState,
             @NonNull Set<UserHandle> usersWithMatchingAccounts,
+            @NonNull Set<ComponentName> allowedCrossTaskNavigations,
+            @NonNull Set<ComponentName> blockedCrossTaskNavigations,
+            @NavigationPolicy int defaultNavigationPolicy,
             @NonNull Set<ComponentName> allowedActivities,
             @NonNull Set<ComponentName> blockedActivities,
             @ActivityPolicy int defaultActivityPolicy) {
+        Preconditions.checkNotNull(usersWithMatchingAccounts);
+        Preconditions.checkNotNull(allowedCrossTaskNavigations);
+        Preconditions.checkNotNull(blockedCrossTaskNavigations);
+        Preconditions.checkNotNull(allowedActivities);
+        Preconditions.checkNotNull(blockedActivities);
+
         mLockState = lockState;
         mUsersWithMatchingAccounts = new ArraySet<>(usersWithMatchingAccounts);
-        mAllowedActivities = allowedActivities == null ? null : new ArraySet<>(allowedActivities);
-        mBlockedActivities = blockedActivities == null ? null : new ArraySet<>(blockedActivities);
+        mAllowedCrossTaskNavigations = new ArraySet<>(allowedCrossTaskNavigations);
+        mBlockedCrossTaskNavigations = new ArraySet<>(blockedCrossTaskNavigations);
+        mDefaultNavigationPolicy = defaultNavigationPolicy;
+        mAllowedActivities = new ArraySet<>(allowedActivities);
+        mBlockedActivities = new ArraySet<>(blockedActivities);
         mDefaultActivityPolicy = defaultActivityPolicy;
     }
 
@@ -105,6 +142,9 @@ public final class VirtualDeviceParams implements Parcelable {
     private VirtualDeviceParams(Parcel parcel) {
         mLockState = parcel.readInt();
         mUsersWithMatchingAccounts = (ArraySet<UserHandle>) parcel.readArraySet(null);
+        mAllowedCrossTaskNavigations = (ArraySet<ComponentName>) parcel.readArraySet(null);
+        mBlockedCrossTaskNavigations = (ArraySet<ComponentName>) parcel.readArraySet(null);
+        mDefaultNavigationPolicy = parcel.readInt();
         mAllowedActivities = (ArraySet<ComponentName>) parcel.readArraySet(null);
         mBlockedActivities = (ArraySet<ComponentName>) parcel.readArraySet(null);
         mDefaultActivityPolicy = parcel.readInt();
@@ -130,30 +170,63 @@ public final class VirtualDeviceParams implements Parcelable {
     }
 
     /**
-     * Returns the set of activities allowed to be streamed, or {@code null} if all activities are
+     * Returns the set of tasks that are allowed to navigate from current task,
+     * or empty set if all tasks are allowed, except the ones explicitly blocked.
+     * If neither allowed or blocked tasks are provided, all task navigations will
+     * be be allowed by default.
+     *
+     * @see Builder#setAllowedCrossTaskNavigations(Set)
+     */
+    @NonNull
+    public Set<ComponentName> getAllowedCrossTaskNavigations() {
+        return Collections.unmodifiableSet(mAllowedCrossTaskNavigations);
+    }
+
+    /**
+     * Returns the set of tasks that are blocked from navigating from the current task,
+     * or empty set to indicate that all tasks in {@link #getAllowedCrossTaskNavigations}
+     * are allowed. If neither allowed or blocked tasks are provided, all task navigations
+     * will be be allowed by default.
+     *
+     * @see Builder#setBlockedCrossTaskNavigations(Set)
+     */
+    @NonNull
+    public Set<ComponentName> getBlockedCrossTaskNavigations() {
+        return Collections.unmodifiableSet(mBlockedCrossTaskNavigations);
+    }
+
+    /**
+     * Returns {@link #NAVIGATION_POLICY_DEFAULT_ALLOWED} if tasks are allowed to navigate on
+     * this virtual device by default, or {@link #NAVIGATION_POLICY_DEFAULT_BLOCKED} if tasks
+     * must be allowed by {@link Builder#setAllowedCrossTaskNavigations} to navigate here.
+     *
+     * @see Builder#setAllowedCrossTaskNavigations
+     * @see Builder#setBlockedCrossTaskNavigations
+     */
+    @NavigationPolicy
+    public int getDefaultNavigationPolicy() {
+        return mDefaultNavigationPolicy;
+    }
+
+    /**
+     * Returns the set of activities allowed to be streamed, or empty set if all activities are
      * allowed, except the ones explicitly blocked.
      *
      * @see Builder#setAllowedActivities(Set)
      */
     @NonNull
     public Set<ComponentName> getAllowedActivities() {
-        if (mAllowedActivities == null) {
-            return Collections.emptySet();
-        }
         return Collections.unmodifiableSet(mAllowedActivities);
     }
 
     /**
-     * Returns the set of activities that are blocked from streaming, or {@code null} to indicate
+     * Returns the set of activities that are blocked from streaming, or empty set to indicate
      * that all activities in {@link #getAllowedActivities} are allowed.
      *
      * @see Builder#setBlockedActivities(Set)
      */
     @NonNull
     public Set<ComponentName> getBlockedActivities() {
-        if (mBlockedActivities == null) {
-            return Collections.emptySet();
-        }
         return Collections.unmodifiableSet(mBlockedActivities);
     }
 
@@ -179,6 +252,9 @@ public final class VirtualDeviceParams implements Parcelable {
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         dest.writeInt(mLockState);
         dest.writeArraySet(mUsersWithMatchingAccounts);
+        dest.writeArraySet(mAllowedCrossTaskNavigations);
+        dest.writeArraySet(mBlockedCrossTaskNavigations);
+        dest.writeInt(mDefaultNavigationPolicy);
         dest.writeArraySet(mAllowedActivities);
         dest.writeArraySet(mBlockedActivities);
         dest.writeInt(mDefaultActivityPolicy);
@@ -195,6 +271,9 @@ public final class VirtualDeviceParams implements Parcelable {
         VirtualDeviceParams that = (VirtualDeviceParams) o;
         return mLockState == that.mLockState
                 && mUsersWithMatchingAccounts.equals(that.mUsersWithMatchingAccounts)
+                && Objects.equals(mAllowedCrossTaskNavigations, that.mAllowedCrossTaskNavigations)
+                && Objects.equals(mBlockedCrossTaskNavigations, that.mBlockedCrossTaskNavigations)
+                && mDefaultNavigationPolicy == that.mDefaultNavigationPolicy
                 && Objects.equals(mAllowedActivities, that.mAllowedActivities)
                 && Objects.equals(mBlockedActivities, that.mBlockedActivities)
                 && mDefaultActivityPolicy == that.mDefaultActivityPolicy;
@@ -203,8 +282,9 @@ public final class VirtualDeviceParams implements Parcelable {
     @Override
     public int hashCode() {
         return Objects.hash(
-                mLockState, mUsersWithMatchingAccounts, mAllowedActivities, mBlockedActivities,
-                mDefaultActivityPolicy);
+                mLockState, mUsersWithMatchingAccounts, mAllowedCrossTaskNavigations,
+                mBlockedCrossTaskNavigations, mDefaultNavigationPolicy,  mAllowedActivities,
+                mBlockedActivities, mDefaultActivityPolicy);
     }
 
     @Override
@@ -213,6 +293,9 @@ public final class VirtualDeviceParams implements Parcelable {
         return "VirtualDeviceParams("
                 + " mLockState=" + mLockState
                 + " mUsersWithMatchingAccounts=" + mUsersWithMatchingAccounts
+                + " mAllowedCrossTaskNavigations=" + mAllowedCrossTaskNavigations
+                + " mBlockedCrossTaskNavigations=" + mBlockedCrossTaskNavigations
+                + " mDefaultNavigationPolicy=" + mDefaultNavigationPolicy
                 + " mAllowedActivities=" + mAllowedActivities
                 + " mBlockedActivities=" + mBlockedActivities
                 + " mDefaultActivityPolicy=" + mDefaultActivityPolicy
@@ -237,7 +320,12 @@ public final class VirtualDeviceParams implements Parcelable {
     public static final class Builder {
 
         private @LockState int mLockState = LOCK_STATE_DEFAULT;
-        private Set<UserHandle> mUsersWithMatchingAccounts;
+        @NonNull private Set<UserHandle> mUsersWithMatchingAccounts = Collections.emptySet();
+        @NonNull private Set<ComponentName> mAllowedCrossTaskNavigations = Collections.emptySet();
+        @NonNull private Set<ComponentName> mBlockedCrossTaskNavigations = Collections.emptySet();
+        @NavigationPolicy
+        private int mDefaultNavigationPolicy = NAVIGATION_POLICY_DEFAULT_ALLOWED;
+        private boolean mDefaultNavigationPolicyConfigured = false;
         @NonNull private Set<ComponentName> mBlockedActivities = Collections.emptySet();
         @NonNull private Set<ComponentName> mAllowedActivities = Collections.emptySet();
         @ActivityPolicy
@@ -282,7 +370,72 @@ public final class VirtualDeviceParams implements Parcelable {
         @NonNull
         public Builder setUsersWithMatchingAccounts(
                 @NonNull Set<UserHandle> usersWithMatchingAccounts) {
+            Preconditions.checkNotNull(usersWithMatchingAccounts);
             mUsersWithMatchingAccounts = usersWithMatchingAccounts;
+            return this;
+        }
+
+        /**
+         * Sets the tasks allowed to navigate from current task in the virtual device. Tasks
+         * not in {@code allowedCrossTaskNavigations} will be blocked from navigating to a new
+         * task. Calling this method will cause {@link #getDefaultNavigationPolicy()} to be
+         * {@link #NAVIGATION_POLICY_DEFAULT_BLOCKED}, meaning tasks not in
+         * {@code allowedCrossTaskNavigations} will be blocked from navigating here.
+         *
+         * <p>This method must not be called if {@link #setBlockedCrossTaskNavigations(Set)} has
+         * been called.
+         *
+         * @throws IllegalArgumentException if {@link #setBlockedCrossTaskNavigations(Set)} has been
+         * called.
+         *
+         * @param allowedCrossTaskNavigations A set of tasks {@link ComponentName} allowed to
+         *   navigate to new tasks in the virtual device.
+         */
+        @NonNull
+        public Builder setAllowedCrossTaskNavigations(
+                @NonNull Set<ComponentName> allowedCrossTaskNavigations) {
+            Preconditions.checkNotNull(allowedCrossTaskNavigations);
+            if (mDefaultNavigationPolicyConfigured
+                    && mDefaultNavigationPolicy != NAVIGATION_POLICY_DEFAULT_BLOCKED) {
+                throw new IllegalArgumentException(
+                     "Allowed cross task navigation and blocked task navigation cannot "
+                     + " both be set.");
+            }
+            mDefaultNavigationPolicy = NAVIGATION_POLICY_DEFAULT_BLOCKED;
+            mDefaultNavigationPolicyConfigured = true;
+            mAllowedCrossTaskNavigations = allowedCrossTaskNavigations;
+            return this;
+        }
+
+        /**
+         * Sets the tasks blocked from navigating from current task in the virtual device.
+         * Tasks are allowed to navigate unless they are in
+         * {@code blockedCrossTaskNavigations}. Calling this method will cause
+         * {@link #NAVIGATION_POLICY_DEFAULT_ALLOWED}, meaning activities are allowed to launch
+         * unless they are in {@code blockedCrossTaskNavigations}.
+         *
+         * <p> This method must not be called if {@link #setAllowedCrossTaskNavigations(Set)} has
+         * been called.
+         *
+         * @throws IllegalArgumentException if {@link #setAllowedCrossTaskNavigations(Set)} has
+         * been called.
+         *
+         * @param blockedCrossTaskNavigations A set of tasks {@link ComponentName} to be
+         * blocked from navigating to new tasks in the virtual device.
+         */
+        @NonNull
+        public Builder setBlockedCrossTaskNavigations(
+                @NonNull Set<ComponentName> blockedCrossTaskNavigations) {
+            Preconditions.checkNotNull(blockedCrossTaskNavigations);
+            if (mDefaultNavigationPolicyConfigured
+                     && mDefaultNavigationPolicy != NAVIGATION_POLICY_DEFAULT_ALLOWED) {
+                throw new IllegalArgumentException(
+                     "Allowed cross task navigation and blocked task navigation cannot "
+                     + " be set.");
+            }
+            mDefaultNavigationPolicy = NAVIGATION_POLICY_DEFAULT_ALLOWED;
+            mDefaultNavigationPolicyConfigured = true;
+            mBlockedCrossTaskNavigations = blockedCrossTaskNavigations;
             return this;
         }
 
@@ -301,6 +454,7 @@ public final class VirtualDeviceParams implements Parcelable {
          */
         @NonNull
         public Builder setAllowedActivities(@NonNull Set<ComponentName> allowedActivities) {
+            Preconditions.checkNotNull(allowedActivities);
             if (mDefaultActivityPolicyConfigured
                     && mDefaultActivityPolicy != ACTIVITY_POLICY_DEFAULT_BLOCKED) {
                 throw new IllegalArgumentException(
@@ -327,6 +481,7 @@ public final class VirtualDeviceParams implements Parcelable {
          */
         @NonNull
         public Builder setBlockedActivities(@NonNull Set<ComponentName> blockedActivities) {
+            Preconditions.checkNotNull(blockedActivities);
             if (mDefaultActivityPolicyConfigured
                     && mDefaultActivityPolicy != ACTIVITY_POLICY_DEFAULT_ALLOWED) {
                 throw new IllegalArgumentException(
@@ -343,12 +498,12 @@ public final class VirtualDeviceParams implements Parcelable {
          */
         @NonNull
         public VirtualDeviceParams build() {
-            if (mUsersWithMatchingAccounts == null) {
-                mUsersWithMatchingAccounts = Collections.emptySet();
-            }
             return new VirtualDeviceParams(
                     mLockState,
                     mUsersWithMatchingAccounts,
+                    mAllowedCrossTaskNavigations,
+                    mBlockedCrossTaskNavigations,
+                    mDefaultNavigationPolicy,
                     mAllowedActivities,
                     mBlockedActivities,
                     mDefaultActivityPolicy);

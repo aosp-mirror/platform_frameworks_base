@@ -297,6 +297,11 @@ oneway interface IStatusBar
      */
     void runGcForTest();
 
+    /**
+     * Send a request to SystemUI to put a given active tile in listening state
+     */
+    void requestTileServiceListeningState(in ComponentName componentName);
+
     void requestAddTile(in ComponentName componentName, in CharSequence appName, in CharSequence label, in Icon icon, in IAddTileResultCallback callback);
     void cancelRequestAddTile(in String packageName);
 

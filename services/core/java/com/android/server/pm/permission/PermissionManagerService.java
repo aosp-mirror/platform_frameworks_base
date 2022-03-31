@@ -562,12 +562,6 @@ public class PermissionManagerService extends IPermissionManager.Stub {
     }
 
     @Override
-    public void revokeOwnPermissionsOnKill(@NonNull String packageName,
-            @NonNull List<String> permissions) {
-        mPermissionManagerServiceImpl.revokeOwnPermissionsOnKill(packageName, permissions);
-    }
-
-    @Override
     public boolean shouldShowRequestPermissionRationale(String packageName, String permissionName,
             int userId) {
         return mPermissionManagerServiceImpl.shouldShowRequestPermissionRationale(packageName,

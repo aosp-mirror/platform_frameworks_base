@@ -360,6 +360,53 @@ public final class ApplicationExitInfo implements Parcelable {
      */
     public static final int SUBREASON_FREEZER_BINDER_TRANSACTION = 20;
 
+    /**
+     * The process was killed because of force-stop, it could be due to that
+     * the user clicked the "Force stop" button of the application in the Settings;
+     * this would be set only when the reason is {@link #REASON_USER_REQUESTED}.
+     *
+     * For internal use only.
+     * @hide
+     */
+    public static final int SUBREASON_FORCE_STOP = 21;
+
+    /**
+     * The process was killed because the user removed the application away from Recents;
+     * this would be set only when the reason is {@link #REASON_USER_REQUESTED}.
+     *
+     * For internal use only.
+     * @hide
+     */
+    public static final int SUBREASON_REMOVE_TASK = 22;
+
+    /**
+     * The process was killed because the user stopped the application from the task manager;
+     * this would be set only when the reason is {@link #REASON_USER_REQUESTED}.
+     *
+     * For internal use only.
+     * @hide
+     */
+    public static final int SUBREASON_STOP_APP = 23;
+
+    /**
+     * The process was killed because the user stopped the application from developer options,
+     * or via the adb shell commmand interface; this would be set only when the reason is
+     * {@link #REASON_USER_REQUESTED}.
+     *
+     * For internal use only.
+     * @hide
+     */
+    public static final int SUBREASON_KILL_BACKGROUND = 24;
+
+    /**
+     * The process was killed because of package update; this would be set only when the reason is
+     * {@link #REASON_USER_REQUESTED}.
+     *
+     * For internal use only.
+     * @hide
+     */
+    public static final int SUBREASON_PACKAGE_UPDATE = 25;
+
     // If there is any OEM code which involves additional app kill reasons, it should
     // be categorized in {@link #REASON_OTHER}, with subreason code starting from 1000.
 
@@ -520,6 +567,11 @@ public final class ApplicationExitInfo implements Parcelable {
         SUBREASON_ISOLATED_NOT_NEEDED,
         SUBREASON_FREEZER_BINDER_IOCTL,
         SUBREASON_FREEZER_BINDER_TRANSACTION,
+        SUBREASON_FORCE_STOP,
+        SUBREASON_REMOVE_TASK,
+        SUBREASON_STOP_APP,
+        SUBREASON_KILL_BACKGROUND,
+        SUBREASON_PACKAGE_UPDATE,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface SubReason {}
@@ -1193,6 +1245,16 @@ public final class ApplicationExitInfo implements Parcelable {
                 return "FREEZER BINDER IOCTL";
             case SUBREASON_FREEZER_BINDER_TRANSACTION:
                 return "FREEZER BINDER TRANSACTION";
+            case SUBREASON_FORCE_STOP:
+                return "FORCE STOP";
+            case SUBREASON_REMOVE_TASK:
+                return "REMOVE TASK";
+            case SUBREASON_STOP_APP:
+                return "STOP APP";
+            case SUBREASON_KILL_BACKGROUND:
+                return "KILL BACKGROUND";
+            case SUBREASON_PACKAGE_UPDATE:
+                return "PACKAGE UPDATE";
             default:
                 return "UNKNOWN";
         }

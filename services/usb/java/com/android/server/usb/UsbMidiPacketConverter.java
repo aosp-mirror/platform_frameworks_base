@@ -74,8 +74,15 @@ public class UsbMidiPacketConverter {
     private static final byte SYSEX_START_EXCLUSIVE = (byte) 0xF0;
     private static final byte SYSEX_END_EXCLUSIVE = (byte) 0xF7;
 
-    private UsbMidiEncoder mUsbMidiEncoder = new UsbMidiEncoder();
     private UsbMidiDecoder mUsbMidiDecoder = new UsbMidiDecoder();
+    private UsbMidiEncoder[] mUsbMidiEncoders;
+
+    public UsbMidiPacketConverter(int numEncoders) {
+        mUsbMidiEncoders = new UsbMidiEncoder[numEncoders];
+        for (int i = 0; i < numEncoders; i++) {
+            mUsbMidiEncoders[i] = new UsbMidiEncoder();
+        }
+    }
 
     /**
      * Converts a USB MIDI array into a raw MIDI array.
@@ -93,10 +100,11 @@ public class UsbMidiPacketConverter {
      *
      * @param midiBytes the raw MIDI bytes to convert
      * @param size the size of usbMidiBytes
+     * @param encoderId which encoder to use
      * @return byte array of USB MIDI packets
      */
-    public byte[] rawMidiToUsbMidi(byte[] midiBytes, int size) {
-        return mUsbMidiEncoder.encode(midiBytes, size);
+    public byte[] rawMidiToUsbMidi(byte[] midiBytes, int size, int encoderId) {
+        return mUsbMidiEncoders[encoderId].encode(midiBytes, size);
     }
 
     private class UsbMidiDecoder {

@@ -112,4 +112,13 @@ public class KeyguardStatusViewControllerTest extends SysuiTestCase {
         mKeyguardUpdateMonitorCallbackCaptor.getValue().onUserSwitchComplete(0);
         verify(mKeyguardClockSwitchController).refreshFormat();
     }
+
+    @Test
+    public void setTranslationYExcludingMedia_forwardsCallToView() {
+        float translationY = 123f;
+
+        mController.setTranslationYExcludingMedia(translationY);
+
+        verify(mKeyguardStatusView).setChildrenTranslationYExcludingMediaView(translationY);
+    }
 }

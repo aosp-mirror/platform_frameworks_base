@@ -24,4 +24,5 @@
     <string name="pip_move" msgid="1544227837964635439">"PIP tətbiq edin"</string>
     <string name="pip_expand" msgid="7605396312689038178">"PIP-ni genişləndirin"</string>
     <string name="pip_collapse" msgid="5732233773786896094">"PIP-ni yığcamlaşdırın"</string>
+    <string name="pip_edu_text" msgid="3672999496647508701">" Nizamlayıcılar üçün "<annotation icon="home_icon">" ƏSAS SƏHİFƏ "</annotation>" süçimini iki dəfə basın"</string>
 </resources>

@@ -37,6 +37,7 @@ import android.content.res.CompatibilityInfo;
 import android.content.res.Resources;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.FileUtils;
 import android.os.GraphicsEnvironment;
 import android.os.Handler;
@@ -409,6 +410,26 @@ public final class LoadedApk {
         if (aInfo.requestsIsolatedSplitLoading() && !ArrayUtils.isEmpty(mSplitNames)) {
             mSplitLoader = new SplitDependencyLoaderImpl(aInfo.splitDependencies);
         }
+    }
+
+    /** @hide */
+    void setSdkSandboxStorage(String sdkSandboxClientAppPackage) {
+        int userId = UserHandle.myUserId();
+        mDeviceProtectedDataDirFile = Environment
+                .getDataMiscDeSharedSdkSandboxDirectory(userId, sdkSandboxClientAppPackage)
+                .getAbsoluteFile();
+        mCredentialProtectedDataDirFile = Environment
+                .getDataMiscCeSharedSdkSandboxDirectory(userId, sdkSandboxClientAppPackage)
+                .getAbsoluteFile();
+
+        if ((mApplicationInfo.privateFlags
+                & ApplicationInfo.PRIVATE_FLAG_DEFAULT_TO_DEVICE_PROTECTED_STORAGE) != 0
+                && PackageManager.APPLY_DEFAULT_TO_DEVICE_PROTECTED_STORAGE) {
+            mDataDirFile = mDeviceProtectedDataDirFile;
+        } else {
+            mDataDirFile = mCredentialProtectedDataDirFile;
+        }
+        mDataDir = mDataDirFile.getAbsolutePath();
     }
 
     public static void makePaths(ActivityThread activityThread,
@@ -1352,9 +1373,28 @@ public final class LoadedApk {
         return mResources;
     }
 
+    /**
+     * This is for 3p apps accessing this hidden API directly... in which case, we don't return
+     * the cached Application instance.
+     */
     @UnsupportedAppUsage
     public Application makeApplication(boolean forceDefaultAppClass,
             Instrumentation instrumentation) {
+        return makeApplicationInner(forceDefaultAppClass, instrumentation,
+                /* allowDuplicateInstances= */ true);
+    }
+
+    /**
+     * This is for all the (internal) callers, for which we do return the cached instance.
+     */
+    public Application makeApplicationInner(boolean forceDefaultAppClass,
+            Instrumentation instrumentation) {
+        return makeApplicationInner(forceDefaultAppClass, instrumentation,
+                /* allowDuplicateInstances= */ false);
+    }
+
+    private Application makeApplicationInner(boolean forceDefaultAppClass,
+            Instrumentation instrumentation, boolean allowDuplicateInstances) {
         if (mApplication != null) {
             return mApplication;
         }
@@ -1366,11 +1406,15 @@ public final class LoadedApk {
                 // Looks like this is always happening for the system server, because
                 // the LoadedApk created in systemMain() -> attach() isn't cached properly?
                 if (!"android".equals(mPackageName)) {
-                    Slog.wtf(TAG, "App instance already created for package=" + mPackageName
+                    Slog.wtfStack(TAG, "App instance already created for package=" + mPackageName
                             + " instance=" + cached);
                 }
-                mApplication = cached;
-                return cached;
+                if (!allowDuplicateInstances) {
+                    mApplication = cached;
+                    return cached;
+                }
+                // Some apps intentionally call makeApplication() to create a new Application
+                // instance... Sigh...
             }
         }
 
@@ -1421,8 +1465,10 @@ public final class LoadedApk {
         }
         mActivityThread.mAllApplications.add(app);
         mApplication = app;
-        synchronized (sApplications) {
-            sApplications.put(mPackageName, app);
+        if (!allowDuplicateInstances) {
+            synchronized (sApplications) {
+                sApplications.put(mPackageName, app);
+            }
         }
 
         if (instrumentation != null) {

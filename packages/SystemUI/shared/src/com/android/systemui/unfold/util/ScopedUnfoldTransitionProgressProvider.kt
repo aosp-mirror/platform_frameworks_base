@@ -28,7 +28,7 @@ import com.android.systemui.unfold.UnfoldTransitionProgressProvider.TransitionPr
  * If the transition has already started by the moment when the clients are ready to play the
  * transition then it will report transition started callback and current animation progress.
  */
-class ScopedUnfoldTransitionProgressProvider
+open class ScopedUnfoldTransitionProgressProvider
 @JvmOverloads
 constructor(source: UnfoldTransitionProgressProvider? = null) :
     UnfoldTransitionProgressProvider, TransitionProgressListener {

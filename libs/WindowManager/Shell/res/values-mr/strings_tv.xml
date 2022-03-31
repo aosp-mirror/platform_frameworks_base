@@ -24,4 +24,5 @@
     <string name="pip_move" msgid="1544227837964635439">"PIP हलवा"</string>
     <string name="pip_expand" msgid="7605396312689038178">"PIP चा विस्तार करा"</string>
     <string name="pip_collapse" msgid="5732233773786896094">"PIP कोलॅप्स करा"</string>
+    <string name="pip_edu_text" msgid="3672999496647508701">" नियंत्रणांसाठी "<annotation icon="home_icon">" होम "</annotation>" दोनदा दाबा"</string>
 </resources>

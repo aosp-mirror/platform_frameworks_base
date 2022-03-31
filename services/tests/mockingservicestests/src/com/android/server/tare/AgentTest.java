@@ -21,7 +21,6 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSess
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 import android.app.AlarmManager;
 import android.content.Context;
@@ -71,10 +70,10 @@ public class AgentTest {
                 .strictness(Strictness.LENIENT)
                 .mockStatic(LocalServices.class)
                 .startMocking();
-        when(mIrs.getContext()).thenReturn(mContext);
-        when(mIrs.getCompleteEconomicPolicyLocked()).thenReturn(mEconomicPolicy);
-        when(mIrs.getLock()).thenReturn(mIrs);
-        when(mContext.getSystemService(Context.ALARM_SERVICE)).thenReturn(mock(AlarmManager.class));
+        doReturn(mContext).when(mIrs).getContext();
+        doReturn(mEconomicPolicy).when(mIrs).getCompleteEconomicPolicyLocked();
+        doReturn(mIrs).when(mIrs).getLock();
+        doReturn(mock(AlarmManager.class)).when(mContext).getSystemService(Context.ALARM_SERVICE);
         mScribe = new MockScribe(mIrs);
     }
 

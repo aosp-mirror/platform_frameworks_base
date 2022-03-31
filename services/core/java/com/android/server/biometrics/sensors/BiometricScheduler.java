@@ -285,7 +285,7 @@ public class BiometricScheduler {
 
         // Not all operations start immediately. BiometricPrompt waits for its operation
         // to arrive at the head of the queue, before pinging it to start.
-        final int cookie = mCurrentOperation.isReadyToStart();
+        final int cookie = mCurrentOperation.isReadyToStart(mInternalCallback);
         if (cookie == 0) {
             if (!mCurrentOperation.start(mInternalCallback)) {
                 // Note down current length of queue
@@ -461,6 +461,18 @@ public class BiometricScheduler {
      */
     public BaseClientMonitor getCurrentClient() {
         return mCurrentOperation != null ? mCurrentOperation.getClientMonitor() : null;
+    }
+
+    /** The current operation if the requestId is set and matches. */
+    @Deprecated
+    @Nullable
+    public BaseClientMonitor getCurrentClientIfMatches(long requestId) {
+        if (mCurrentOperation != null) {
+            if (mCurrentOperation.isMatchingRequestId(requestId)) {
+                return mCurrentOperation.getClientMonitor();
+            }
+        }
+        return null;
     }
 
     public int getCurrentPendingCount() {

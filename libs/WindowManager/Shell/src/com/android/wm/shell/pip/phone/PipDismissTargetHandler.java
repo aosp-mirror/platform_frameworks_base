@@ -253,11 +253,11 @@ public class PipDismissTargetHandler implements ViewTreeObserver.OnPreDrawListen
     private WindowManager.LayoutParams getDismissTargetLayoutParams() {
         final Point windowSize = new Point();
         mWindowManager.getDefaultDisplay().getRealSize(windowSize);
-
+        int height = Math.min(windowSize.y, mDismissAreaHeight);
         final WindowManager.LayoutParams lp = new WindowManager.LayoutParams(
                 WindowManager.LayoutParams.MATCH_PARENT,
-                mDismissAreaHeight,
-                0, windowSize.y - mDismissAreaHeight,
+                height,
+                0, windowSize.y - height,
                 WindowManager.LayoutParams.TYPE_NAVIGATION_BAR_PANEL,
                 WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
                         | WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE

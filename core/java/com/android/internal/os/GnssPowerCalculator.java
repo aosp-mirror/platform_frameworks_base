@@ -58,8 +58,11 @@ public class GnssPowerCalculator extends PowerCalculator {
             final long consumptionUC =
                     app.getBatteryStatsUid().getGnssMeasuredBatteryConsumptionUC();
             final int powerModel = getPowerModel(consumptionUC, query);
-            appsPowerMah += calculateApp(app, app.getBatteryStatsUid(), powerModel,
+            final double powerMah = calculateApp(app, app.getBatteryStatsUid(), powerModel,
                     rawRealtimeUs, averageGnssPowerMa, consumptionUC);
+            if (!app.isVirtualUid()) {
+                appsPowerMah += powerMah;
+            }
         }
 
         final long consumptionUC = batteryStats.getGnssMeasuredBatteryConsumptionUC();

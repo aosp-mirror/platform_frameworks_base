@@ -134,12 +134,18 @@ public abstract class AmbientContextDetectionService extends Service {
     }
 
     /**
-     * Starts detection and provides detected events to the statusConsumer. The ongoing detection
-     * will keep running, until onStopDetection is called. If there were previously requested
-     * detection from the same package, the previous request will be replaced with the new request.
-     * The implementation should keep track of whether the user consented each requested
-     * AmbientContextEvent for the app. If not consented, the statusConsumer should get a response
-     * with STATUS_ACCESS_DENIED.
+     * Called when a client app requests starting detection of the events in the request. The
+     * implementation should keep track of whether the user has explicitly consented to detecting
+     * the events using on-going ambient sensor (e.g. microphone), and agreed to share the
+     * detection results with this client app. If the user has not consented, the detection
+     * should not start, and the statusConsumer should get a response with STATUS_ACCESS_DENIED.
+     * If the user has made the consent and the underlying services are available, the
+     * implementation should start detection and provide detected events to the
+     * detectionResultConsumer. If the type of event needs immediate attention, the implementation
+     * should send result as soon as detected. Otherwise, the implementation can bulk send response.
+     * The ongoing detection will keep running, until onStopDetection is called. If there were
+     * previously requested detection from the same package, regardless of the type of events in
+     * the request, the previous request will be replaced with the new request.
      *
      * @param request The request with events to detect.
      * @param packageName the requesting app's package name

@@ -89,6 +89,8 @@ public class PipTransition extends PipTransitionController {
     private final Rect mExitDestinationBounds = new Rect();
     @Nullable
     private IBinder mExitTransition;
+    private IBinder mRequestedEnterTransition;
+    private WindowContainerToken mRequestedEnterTask;
     /** The Task window that is currently in PIP windowing mode. */
     @Nullable
     private WindowContainerToken mCurrentPipTaskToken;
@@ -166,8 +168,7 @@ public class PipTransition extends PipTransitionController {
             mExitTransition = null;
             mHasFadeOut = false;
             if (mFinishCallback != null) {
-                mFinishCallback.onTransitionFinished(null, null);
-                mFinishCallback = null;
+                callFinishCallback(null /* wct */);
                 mFinishTransaction = null;
                 throw new RuntimeException("Previous callback not called, aborting exit PIP.");
             }
@@ -202,6 +203,9 @@ public class PipTransition extends PipTransitionController {
             }
             mCurrentPipTaskToken = null;
             return true;
+        } else if (transition == mRequestedEnterTransition) {
+            mRequestedEnterTransition = null;
+            mRequestedEnterTask = null;
         }
 
         // The previous PIP Task is no longer in PIP, but this is not an exit transition (This can
@@ -232,6 +236,11 @@ public class PipTransition extends PipTransitionController {
         return false;
     }
 
+    /** Helper to identify whether this handler is currently the one playing an animation */
+    private boolean isAnimatingLocally() {
+        return mFinishTransaction != null;
+    }
+
     @Nullable
     @Override
     public WindowContainerTransaction handleRequest(@NonNull IBinder transition,
@@ -239,6 +248,8 @@ public class PipTransition extends PipTransitionController {
         if (request.getType() == TRANSIT_PIP) {
             WindowContainerTransaction wct = new WindowContainerTransaction();
             if (mOneShotAnimationType == ANIM_TYPE_ALPHA) {
+                mRequestedEnterTransition = transition;
+                mRequestedEnterTask = request.getTriggerTask().token;
                 wct.setActivityWindowingMode(request.getTriggerTask().token,
                         WINDOWING_MODE_UNDEFINED);
                 final Rect destinationBounds = mPipBoundsAlgorithm.getEntryDestinationBounds();
@@ -248,6 +259,23 @@ public class PipTransition extends PipTransitionController {
         } else {
             return null;
         }
+    }
+
+    @Override
+    public boolean handleRotateDisplay(int startRotation, int endRotation,
+            WindowContainerTransaction wct) {
+        if (mRequestedEnterTransition != null && mOneShotAnimationType == ANIM_TYPE_ALPHA) {
+            // A fade-in was requested but not-yet started. In this case, just recalculate the
+            // initial state under the new rotation.
+            int rotationDelta = deltaRotation(startRotation, endRotation);
+            if (rotationDelta != Surface.ROTATION_0) {
+                mPipBoundsState.getDisplayLayout().rotateTo(mContext.getResources(), endRotation);
+                final Rect destinationBounds = mPipBoundsAlgorithm.getEntryDestinationBounds();
+                wct.setBounds(mRequestedEnterTask, destinationBounds);
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override
@@ -282,9 +310,11 @@ public class PipTransition extends PipTransitionController {
         if (enteringPip) {
             mPipTransitionState.setTransitionState(ENTERED_PIP);
         }
-        // If there is an expected exit transition, then the exit will be "merged" into this
-        // transition so don't fire the finish-callback in that case.
-        if (mExitTransition == null && mFinishCallback != null) {
+        // If we have an exit transition, but aren't playing a transition locally, it
+        // means we're expecting the exit transition will be "merged" into another transition
+        // (likely a remote like launcher), so don't fire the finish-callback here -- wait until
+        // the exit transition is merged.
+        if ((mExitTransition == null || isAnimatingLocally()) && mFinishCallback != null) {
             WindowContainerTransaction wct = new WindowContainerTransaction();
             prepareFinishResizeTransaction(taskInfo, destinationBounds,
                     direction, wct);
@@ -305,10 +335,17 @@ public class PipTransition extends PipTransitionController {
                 mSurfaceTransactionHelper.crop(mFinishTransaction, leash, finishBounds);
             }
             mFinishTransaction = null;
-            mFinishCallback.onTransitionFinished(wct, null /* callback */);
-            mFinishCallback = null;
+            callFinishCallback(wct);
         }
         finishResizeForMenu(destinationBounds);
+    }
+
+    private void callFinishCallback(WindowContainerTransaction wct) {
+        // Need to unset mFinishCallback first because onTransitionFinished can re-enter this
+        // handler if there is a pending PiP animation.
+        final Transitions.TransitionFinishCallback finishCallback = mFinishCallback;
+        mFinishCallback = null;
+        finishCallback.onTransitionFinished(wct, null /* callback */);
     }
 
     @Override
@@ -572,8 +609,7 @@ public class PipTransition extends PipTransitionController {
         mHasFadeOut = false;
 
         if (mFinishCallback != null) {
-            mFinishCallback.onTransitionFinished(null /* wct */, null /* callback */);
-            mFinishCallback = null;
+            callFinishCallback(null /* wct */);
             mFinishTransaction = null;
             throw new RuntimeException("Previous callback not called, aborting entering PIP.");
         }

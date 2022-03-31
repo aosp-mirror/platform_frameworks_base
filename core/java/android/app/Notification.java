@@ -19,8 +19,8 @@ package android.app;
 import static android.annotation.Dimension.DP;
 import static android.app.admin.DevicePolicyResources.Drawables.Source.NOTIFICATION;
 import static android.app.admin.DevicePolicyResources.Drawables.Style.SOLID_COLORED;
-import static android.app.admin.DevicePolicyResources.Drawables.UNDEFINED;
 import static android.app.admin.DevicePolicyResources.Drawables.WORK_PROFILE_ICON;
+import static android.app.admin.DevicePolicyResources.UNDEFINED;
 import static android.graphics.drawable.Icon.TYPE_URI;
 import static android.graphics.drawable.Icon.TYPE_URI_ADAPTIVE_BITMAP;
 
@@ -5079,7 +5079,7 @@ public class Notification implements Parcelable
             // Note: This assumes that the current user can read the profile badge of the
             // originating user.
             DevicePolicyManager dpm = mContext.getSystemService(DevicePolicyManager.class);
-            return dpm.getDrawable(
+            return dpm.getResources().getDrawable(
                     getUpdatableProfileBadgeId(), SOLID_COLORED, NOTIFICATION,
                     this::getDefaultProfileBadgeDrawable);
         }

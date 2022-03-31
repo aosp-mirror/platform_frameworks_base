@@ -18,7 +18,6 @@ package com.android.server.accessibility;
 
 import static android.accessibilityservice.AccessibilityService.SoftKeyboardController.ENABLE_IME_FAIL_BY_ADMIN;
 import static android.accessibilityservice.AccessibilityService.SoftKeyboardController.ENABLE_IME_SUCCESS;
-import static android.content.pm.PackageManagerInternal.PACKAGE_INSTALLER;
 
 import android.Manifest;
 import android.accessibilityservice.AccessibilityService;
@@ -31,9 +30,7 @@ import android.app.admin.DevicePolicyManager;
 import android.appwidget.AppWidgetManagerInternal;
 import android.content.ComponentName;
 import android.content.Context;
-import android.content.pm.InstallSourceInfo;
 import android.content.pm.PackageManager;
-import android.content.pm.PackageManagerInternal;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.content.pm.UserInfo;
@@ -42,14 +39,12 @@ import android.os.IBinder;
 import android.os.Process;
 import android.os.UserHandle;
 import android.os.UserManager;
-import android.text.TextUtils;
 import android.util.ArraySet;
 import android.util.Slog;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.inputmethod.InputMethodInfo;
 
 import com.android.internal.util.ArrayUtils;
-import com.android.server.LocalServices;
 import com.android.server.inputmethod.InputMethodManagerInternal;
 import com.android.settingslib.RestrictedLockUtils;
 
@@ -734,7 +729,7 @@ public class AccessibilitySecurityPolicy {
             final AccessibilityServiceInfo a11yServiceInfo = boundServices.get(
                     i).getServiceInfo();
             final ComponentName service = a11yServiceInfo.getComponentName().clone();
-            if (!isA11yCategoryService(a11yServiceInfo)) {
+            if (!a11yServiceInfo.isAccessibilityTool()) {
                 tempNonA11yCategoryServices.add(service);
                 if (mNonA11yCategoryServices.contains(service)) {
                     mNonA11yCategoryServices.remove(service);
@@ -793,70 +788,5 @@ public class AccessibilitySecurityPolicy {
         }
 
         mPolicyWarningUIController.onEnabledServicesChangedLocked(userId, enabledServices);
-    }
-
-    /**
-     * Identifies whether the accessibility service is true and designed for accessibility. An
-     * accessibility service is considered as accessibility category if meets all conditions below:
-     * <ul>
-     *     <li> {@link AccessibilityServiceInfo#isAccessibilityTool} is true</li>
-     *     <li> is installed from the trusted install source</li>
-     * </ul>
-     *
-     * @param serviceInfo The accessibility service's serviceInfo.
-     * @return Returns true if it is a true accessibility service.
-     */
-    public boolean isA11yCategoryService(AccessibilityServiceInfo serviceInfo) {
-        if (!serviceInfo.isAccessibilityTool()) {
-            return false;
-        }
-        if (!serviceInfo.getResolveInfo().serviceInfo.applicationInfo.isSystemApp()) {
-            return hasTrustedSystemInstallSource(
-                    serviceInfo.getResolveInfo().serviceInfo.packageName);
-        }
-        return true;
-    }
-
-    /** Returns true if the {@code installedPackage} is installed from the trusted install source.
-     */
-    private boolean hasTrustedSystemInstallSource(String installedPackage) {
-        try {
-            InstallSourceInfo installSourceInfo = mPackageManager.getInstallSourceInfo(
-                    installedPackage);
-            if (installSourceInfo == null) {
-                return false;
-            }
-            final String installSourcePackageName = installSourceInfo.getInitiatingPackageName();
-            if (installSourcePackageName == null || !mPackageManager.getPackageInfo(
-                    installSourcePackageName,
-                    0).applicationInfo.isSystemApp()) {
-                return false;
-            }
-            return isTrustedInstallSource(installSourcePackageName);
-        } catch (PackageManager.NameNotFoundException e) {
-            Slog.w(LOG_TAG, "can't find the package's install source:" + installedPackage);
-        }
-        return false;
-    }
-
-    /** Returns true if the {@code installerPackage} is a trusted install source. */
-    private boolean isTrustedInstallSource(String installerPackage) {
-        final String[] allowedInstallingSources = mContext.getResources().getStringArray(
-                com.android.internal.R.array
-                        .config_accessibility_allowed_install_source);
-
-        if (allowedInstallingSources.length == 0) {
-            //Filters unwanted default installers if no allowed install sources.
-            String defaultInstaller = ArrayUtils.firstOrNull(LocalServices.getService(
-                    PackageManagerInternal.class).getKnownPackageNames(PACKAGE_INSTALLER,
-                    mCurrentUserId));
-            return !TextUtils.equals(defaultInstaller, installerPackage);
-        }
-        for (int i = 0; i < allowedInstallingSources.length; i++) {
-            if (TextUtils.equals(allowedInstallingSources[i], installerPackage)) {
-                return true;
-            }
-        }
-        return false;
     }
 }

@@ -20,6 +20,7 @@ import android.content.Context;
 import android.graphics.Matrix;
 import android.graphics.Rect;
 import android.graphics.RectF;
+import android.view.Choreographer;
 import android.view.SurfaceControl;
 
 import com.android.wm.shell.R;
@@ -37,6 +38,7 @@ public class PipSurfaceTransactionHelper {
     private final Rect mTmpDestinationRect = new Rect();
 
     private int mCornerRadius;
+    private int mShadowRadius;
 
     /**
      * Called when display size or font size of settings changed
@@ -45,6 +47,7 @@ public class PipSurfaceTransactionHelper {
      */
     public void onDensityOrFontScaleChanged(Context context) {
         mCornerRadius = context.getResources().getDimensionPixelSize(R.dimen.pip_corner_radius);
+        mShadowRadius = context.getResources().getDimensionPixelSize(R.dimen.pip_shadow_radius);
     }
 
     /**
@@ -200,18 +203,29 @@ public class PipSurfaceTransactionHelper {
     }
 
     /**
-     * Re-parents the snapshot to the parent's surface control and shows it.
+     * Operates the shadow radius on a given transaction and leash
+     * @return same {@link PipSurfaceTransactionHelper} instance for method chaining
      */
-    public PipSurfaceTransactionHelper reparentAndShowSurfaceSnapshot(
-            SurfaceControl.Transaction t, SurfaceControl parent, SurfaceControl snapshot) {
-        t.reparent(snapshot, parent);
-        t.setLayer(snapshot, Integer.MAX_VALUE);
-        t.show(snapshot);
-        t.apply();
+    public PipSurfaceTransactionHelper shadow(SurfaceControl.Transaction tx, SurfaceControl leash) {
+        tx.setShadowRadius(leash, mShadowRadius);
         return this;
     }
 
     public interface SurfaceControlTransactionFactory {
         SurfaceControl.Transaction getTransaction();
+    }
+
+    /**
+     * Implementation of {@link SurfaceControlTransactionFactory} that returns
+     * {@link SurfaceControl.Transaction} with VsyncId being set.
+     */
+    public static class VsyncSurfaceControlTransactionFactory
+            implements SurfaceControlTransactionFactory {
+        @Override
+        public SurfaceControl.Transaction getTransaction() {
+            final SurfaceControl.Transaction tx = new SurfaceControl.Transaction();
+            tx.setFrameTimelineVsync(Choreographer.getInstance().getVsyncId());
+            return tx;
+        }
     }
 }

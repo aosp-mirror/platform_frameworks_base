@@ -79,7 +79,6 @@ import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.util.ContrastColorUtil;
 import com.android.internal.widget.CachingIconView;
 import com.android.internal.widget.CallLayout;
-import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.animation.Interpolators;
 import com.android.systemui.classifier.FalsingCollector;
@@ -90,6 +89,7 @@ import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin.MenuItem
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.NotificationMediaManager;
 import com.android.systemui.statusbar.RemoteInputController;
+import com.android.systemui.statusbar.SmartReplyController;
 import com.android.systemui.statusbar.StatusBarIconView;
 import com.android.systemui.statusbar.notification.AboveShelfChangedListener;
 import com.android.systemui.statusbar.notification.ExpandAnimationParameters;
@@ -111,10 +111,11 @@ import com.android.systemui.statusbar.notification.stack.ExpandableViewState;
 import com.android.systemui.statusbar.notification.stack.NotificationChildrenContainer;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
 import com.android.systemui.statusbar.notification.stack.SwipeableView;
-import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.CentralSurfaces;
+import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.statusbar.policy.InflatedSmartReplyState;
+import com.android.systemui.statusbar.policy.SmartReplyConstants;
 import com.android.systemui.statusbar.policy.dagger.RemoteInputViewSubcomponent;
 import com.android.systemui.util.Compile;
 import com.android.systemui.util.DumpUtilsKt;
@@ -169,6 +170,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     private RowContentBindStage mRowContentBindStage;
     private PeopleNotificationIdentifier mPeopleNotificationIdentifier;
     private Optional<BubblesManager> mBubblesManagerOptional;
+    private MetricsLogger mMetricsLogger;
     private int mIconTransformContentShift;
     private int mMaxHeadsUpHeightBeforeN;
     private int mMaxHeadsUpHeightBeforeP;
@@ -304,8 +306,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
                 final boolean wasExpanded = mGroupExpansionManager.isGroupExpanded(mEntry);
                 boolean nowExpanded = mGroupExpansionManager.toggleGroupExpansion(mEntry);
                 mOnExpandClickListener.onExpandClicked(mEntry, v, nowExpanded);
-                MetricsLogger.action(mContext, MetricsEvent.ACTION_NOTIFICATION_GROUP_EXPANDER,
-                        nowExpanded);
+                mMetricsLogger.action(MetricsEvent.ACTION_NOTIFICATION_GROUP_EXPANDER, nowExpanded);
                 onExpansionChanged(true /* userAction */, wasExpanded);
             } else if (mEnableNonGroupedNotificationExpand) {
                 if (v.isAccessibilityFocused()) {
@@ -327,8 +328,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
                 }
                 notifyHeightChanged(true);
                 mOnExpandClickListener.onExpandClicked(mEntry, v, nowExpanded);
-                MetricsLogger.action(mContext, MetricsEvent.ACTION_NOTIFICATION_EXPANDER,
-                        nowExpanded);
+                mMetricsLogger.action(MetricsEvent.ACTION_NOTIFICATION_EXPANDER, nowExpanded);
             }
         }
     };
@@ -1271,7 +1271,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
             addView(mMenuRow.getMenuView(), menuIndex);
         }
         for (NotificationContentView l : mLayouts) {
-            l.initView();
+            l.reinflate();
             l.reInflateViews();
         }
         mEntry.getSbn().clearPackageContext();
@@ -1464,7 +1464,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
      * @param fromAccessibility whether this dismiss is coming from an accessibility action
      */
     public void performDismiss(boolean fromAccessibility) {
-        Dependency.get(MetricsLogger.class).count(NotificationCounters.NOTIFICATION_DISMISSED, 1);
+        mMetricsLogger.count(NotificationCounters.NOTIFICATION_DISMISSED, 1);
         dismiss(fromAccessibility);
         if (mEntry.isDismissable()) {
             if (mOnUserInteractionCallback != null) {
@@ -1600,7 +1600,10 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
             PeopleNotificationIdentifier peopleNotificationIdentifier,
             OnUserInteractionCallback onUserInteractionCallback,
             Optional<BubblesManager> bubblesManagerOptional,
-            NotificationGutsManager gutsManager) {
+            NotificationGutsManager gutsManager,
+            MetricsLogger metricsLogger,
+            SmartReplyConstants smartReplyConstants,
+            SmartReplyController smartReplyController) {
         mEntry = entry;
         mAppName = appName;
         if (mMenuRow == null) {
@@ -1623,15 +1626,18 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         mFalsingManager = falsingManager;
         mFalsingCollector = falsingCollector;
         mStatusBarStateController = statusBarStateController;
-
         mPeopleNotificationIdentifier = peopleNotificationIdentifier;
         for (NotificationContentView l : mLayouts) {
-            l.setPeopleNotificationIdentifier(mPeopleNotificationIdentifier);
-            l.setRemoteInputViewSubcomponentFactory(rivSubcomponentFactory);
+            l.initialize(
+                    mPeopleNotificationIdentifier,
+                    rivSubcomponentFactory,
+                    smartReplyConstants,
+                    smartReplyController);
         }
         mOnUserInteractionCallback = onUserInteractionCallback;
         mBubblesManagerOptional = bubblesManagerOptional;
         mNotificationGutsManager = gutsManager;
+        mMetricsLogger = metricsLogger;
 
         cacheIsSystemNotification();
     }
@@ -3127,7 +3133,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         if (mGroupMembershipManager.isGroupSummary(mEntry)) {
             event = MetricsEvent.ACTION_NOTIFICATION_GROUP_GESTURE_EXPANDER;
         }
-        MetricsLogger.action(mContext, event, userExpanded);
+        mMetricsLogger.action(event, userExpanded);
     }
 
     @Override

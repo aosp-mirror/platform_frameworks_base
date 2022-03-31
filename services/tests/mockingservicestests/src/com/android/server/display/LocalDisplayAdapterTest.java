@@ -118,6 +118,7 @@ public class LocalDisplayAdapterTest {
         LocalServices.removeServiceForTest(LightsManager.class);
         LocalServices.addService(LightsManager.class, mMockedLightsManager);
         mInjector = new Injector();
+        when(mSurfaceControlProxy.getBootDisplayModeSupport()).thenReturn(true);
         mAdapter = new LocalDisplayAdapter(mMockedSyncRoot, mMockedContext, mHandler,
                 mListener, mInjector);
         spyOn(mAdapter);
@@ -177,7 +178,7 @@ public class LocalDisplayAdapterTest {
         // This should be public
         assertDisplayPrivateFlag(mListener.addedDisplays.get(0).getDisplayDeviceInfoLocked(),
                 PORT_A, false);
-        // This should be public
+        // This should be private
         assertDisplayPrivateFlag(mListener.addedDisplays.get(1).getDisplayDeviceInfoLocked(),
                 PORT_B, true);
         // This should be public
@@ -904,7 +905,6 @@ public class LocalDisplayAdapterTest {
                 .thenReturn(display.dynamicInfo);
         when(mSurfaceControlProxy.getDesiredDisplayModeSpecs(display.token))
                 .thenReturn(display.desiredDisplayModeSpecs);
-        when(mSurfaceControlProxy.getBootDisplayModeSupport()).thenReturn(true);
     }
 
     private void updateAvailableDisplays() {

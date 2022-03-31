@@ -24,4 +24,5 @@
     <string name="pip_move" msgid="1544227837964635439">"Տեղափոխել PIP-ը"</string>
     <string name="pip_expand" msgid="7605396312689038178">"Ծավալել PIP-ը"</string>
     <string name="pip_collapse" msgid="5732233773786896094">"Ծալել PIP-ը"</string>
+    <string name="pip_edu_text" msgid="3672999496647508701">" Կարգավորումների համար կրկնակի սեղմեք "<annotation icon="home_icon">"ԳԼԽԱՎՈՐ ԷԿՐԱՆ"</annotation></string>
 </resources>

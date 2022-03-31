@@ -324,9 +324,9 @@ public class ActivityClient {
         }
     }
 
-    void setPreferDockBigOverlays(IBinder token, boolean preferDockBigOverlays) {
+    void setShouldDockBigOverlays(IBinder token, boolean shouldDockBigOverlays) {
         try {
-            getActivityClientController().setPreferDockBigOverlays(token, preferDockBigOverlays);
+            getActivityClientController().setShouldDockBigOverlays(token, shouldDockBigOverlays);
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();
         }

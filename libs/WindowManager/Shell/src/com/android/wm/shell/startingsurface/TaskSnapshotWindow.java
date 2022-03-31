@@ -62,6 +62,7 @@ import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.hardware.HardwareBuffer;
+import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.Trace;
@@ -89,6 +90,8 @@ import com.android.internal.protolog.common.ProtoLog;
 import com.android.internal.view.BaseIWindow;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
+
+import java.lang.ref.WeakReference;
 
 /**
  * This class represents a starting window that shows a snapshot.
@@ -148,7 +151,7 @@ public class TaskSnapshotWindow {
     private final SurfaceControl.Transaction mTransaction;
     private final Matrix mSnapshotMatrix = new Matrix();
     private final float[] mTmpFloat9 = new float[9];
-    private Runnable mScheduledRunnable;
+    private final Runnable mScheduledRunnable = this::removeImmediately;
     private final boolean mHasImeSurface;
 
     static TaskSnapshotWindow create(StartingWindowInfo info, IBinder appToken,
@@ -243,7 +246,7 @@ public class TaskSnapshotWindow {
             Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "TaskSnapshot#relayout");
             session.relayout(window, layoutParams, -1, -1, View.VISIBLE, 0,
                     tmpFrames, tmpMergedConfiguration, surfaceControl, tmpInsetsState,
-                    tmpControls);
+                    tmpControls, new Bundle());
             Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
         } catch (RemoteException e) {
             snapshotSurface.clearWindowSynced();
@@ -305,21 +308,13 @@ public class TaskSnapshotWindow {
         mSystemBarBackgroundPainter.drawNavigationBarBackground(c);
     }
 
-    void scheduleRemove(Runnable onRemove, boolean deferRemoveForIme) {
+    void scheduleRemove(boolean deferRemoveForIme) {
         // Show the latest content as soon as possible for unlocking to home.
         if (mActivityType == ACTIVITY_TYPE_HOME) {
             removeImmediately();
-            onRemove.run();
             return;
         }
-        if (mScheduledRunnable != null) {
-            mSplashScreenExecutor.removeCallbacks(mScheduledRunnable);
-            mScheduledRunnable = null;
-        }
-        mScheduledRunnable = () -> {
-            TaskSnapshotWindow.this.removeImmediately();
-            onRemove.run();
-        };
+        mSplashScreenExecutor.removeCallbacks(mScheduledRunnable);
         final long delayRemovalTime = mHasImeSurface && deferRemoveForIme
                 ? MAX_DELAY_REMOVAL_TIME_IME_VISIBLE
                 : DELAY_REMOVAL_TIME_GENERAL;
@@ -517,40 +512,43 @@ public class TaskSnapshotWindow {
 
     private void reportDrawn() {
         try {
-            mSession.finishDrawing(mWindow, null /* postDrawTransaction */);
+            mSession.finishDrawing(mWindow, null /* postDrawTransaction */, Integer.MAX_VALUE);
         } catch (RemoteException e) {
             clearWindowSynced();
         }
     }
 
-    @BinderThread
     static class Window extends BaseIWindow {
-        private TaskSnapshotWindow mOuter;
+        private WeakReference<TaskSnapshotWindow> mOuter;
 
         public void setOuter(TaskSnapshotWindow outer) {
-            mOuter = outer;
+            mOuter = new WeakReference<>(outer);
         }
 
+        @BinderThread
         @Override
         public void resized(ClientWindowFrames frames, boolean reportDraw,
-                MergedConfiguration mergedConfiguration, boolean forceLayout,
-                boolean alwaysConsumeSystemBars, int displayId) {
-            if (mOuter != null) {
-                mOuter.mSplashScreenExecutor.execute(() -> {
-                    if (mergedConfiguration != null
-                            && mOuter.mOrientationOnCreation
-                            != mergedConfiguration.getMergedConfiguration().orientation) {
-                        // The orientation of the screen is changing. We better remove the snapshot
-                        // ASAP as we are going to wait on the new window in any case to unfreeze
-                        // the screen, and the starting window is not needed anymore.
-                        mOuter.clearWindowSynced();
-                    } else if (reportDraw) {
-                        if (mOuter.mHasDrawn) {
-                            mOuter.reportDrawn();
-                        }
-                    }
-                });
+                MergedConfiguration mergedConfiguration, InsetsState insetsState,
+                boolean forceLayout, boolean alwaysConsumeSystemBars, int displayId, int seqId,
+                int resizeMode) {
+            final TaskSnapshotWindow snapshot = mOuter.get();
+            if (snapshot == null) {
+                return;
             }
+            snapshot.mSplashScreenExecutor.execute(() -> {
+                if (mergedConfiguration != null
+                        && snapshot.mOrientationOnCreation
+                        != mergedConfiguration.getMergedConfiguration().orientation) {
+                    // The orientation of the screen is changing. We better remove the snapshot
+                    // ASAP as we are going to wait on the new window in any case to unfreeze
+                    // the screen, and the starting window is not needed anymore.
+                    snapshot.clearWindowSynced();
+                } else if (reportDraw) {
+                    if (snapshot.mHasDrawn) {
+                        snapshot.reportDrawn();
+                    }
+                }
+            });
         }
     }
 

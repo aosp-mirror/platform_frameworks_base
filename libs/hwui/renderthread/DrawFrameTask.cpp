@@ -133,6 +133,7 @@ int DrawFrameTask::drawFrame() {
 }
 
 void DrawFrameTask::postAndWait() {
+    ATRACE_CALL();
     AutoMutex _lock(mLock);
     mRenderThread->queue().post([this]() { run(); });
     mSignal.wait(mLock);
@@ -147,6 +148,8 @@ void DrawFrameTask::run() {
     bool canDrawThisFrame;
     {
         TreeInfo info(TreeInfo::MODE_FULL, *mContext);
+        info.forceDrawFrame = mForceDrawFrame;
+        mForceDrawFrame = false;
         canUnblockUiThread = syncFrameState(info);
         canDrawThisFrame = info.out.canDrawThisFrame;
 

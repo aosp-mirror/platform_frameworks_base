@@ -35,6 +35,10 @@ final class GameSessionRecord {
         // A Game Session is created and attached.
         // GameSessionRecord.getGameSession() != null.
         GAME_SESSION_ATTACHED,
+        // A Game Session did exist for a given game task but was destroyed because the last process
+        // for the game died.
+        // GameSessionRecord.getGameSession() == null.
+        GAME_SESSION_ENDED_PROCESS_DEATH,
     }
 
     private final int mTaskId;
@@ -96,6 +100,20 @@ final class GameSessionRecord {
                 mRootComponentName,
                 gameSession,
                 surfacePackage);
+    }
+
+    @NonNull
+    public GameSessionRecord withGameSessionEndedOnProcessDeath() {
+        return new GameSessionRecord(
+                mTaskId,
+                State.GAME_SESSION_ENDED_PROCESS_DEATH,
+                mRootComponentName,
+                /* gameSession=*/ null,
+                /* surfacePackage=*/ null);
+    }
+
+    public boolean isGameSessionEndedForProcessDeath() {
+        return mState == State.GAME_SESSION_ENDED_PROCESS_DEATH;
     }
 
     @NonNull

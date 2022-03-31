@@ -606,9 +606,9 @@ public class NotificationPermissionMigrationTest extends UiServiceTestCase {
 
     @Test
     public void testUpdateAppNotifyCreatorBlock() throws Exception {
-        when(mAppOpsManager.checkOpNoThrow(anyInt(), eq(mUid), eq(PKG))).thenReturn(MODE_IGNORED);
+        when(mPermissionHelper.hasPermission(mUid)).thenReturn(true);
 
-        mService.mAppOpsCallback.opChanged(0, mUid, PKG);
+        mBinderService.setNotificationsEnabledForPackage(PKG, mUid, false);
         Thread.sleep(500);
         waitForIdle();
 
@@ -618,14 +618,14 @@ public class NotificationPermissionMigrationTest extends UiServiceTestCase {
         assertEquals(NotificationManager.ACTION_APP_BLOCK_STATE_CHANGED,
                 captor.getValue().getAction());
         assertEquals(PKG, captor.getValue().getPackage());
-        assertFalse(captor.getValue().getBooleanExtra(EXTRA_BLOCKED_STATE, true));
+        assertTrue(captor.getValue().getBooleanExtra(EXTRA_BLOCKED_STATE, true));
     }
 
     @Test
     public void testUpdateAppNotifyCreatorUnblock() throws Exception {
-        when(mAppOpsManager.checkOpNoThrow(anyInt(), eq(mUid), eq(PKG))).thenReturn(MODE_ALLOWED);
+        when(mPermissionHelper.hasPermission(mUid)).thenReturn(false);
 
-        mService.mAppOpsCallback.opChanged(0, mUid, PKG);
+        mBinderService.setNotificationsEnabledForPackage(PKG, mUid, true);
         Thread.sleep(500);
         waitForIdle();
 
@@ -722,7 +722,7 @@ public class NotificationPermissionMigrationTest extends UiServiceTestCase {
         when(mPermissionHelper.isPermissionFixed(PKG, temp.getUserId())).thenReturn(true);
 
         NotificationRecord r = mService.createAutoGroupSummary(
-                temp.getUserId(), temp.getSbn().getPackageName(), temp.getKey());
+                temp.getUserId(), temp.getSbn().getPackageName(), temp.getKey(), false);
 
         assertThat(r.isImportanceFixed()).isTrue();
     }

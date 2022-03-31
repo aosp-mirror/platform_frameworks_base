@@ -53,7 +53,6 @@ interface ILockSettings {
     VerifyCredentialResponse verifyTiedProfileChallenge(in LockscreenCredential credential, int userId, int flags);
     VerifyCredentialResponse verifyGatekeeperPasswordHandle(long gatekeeperPasswordHandle, long challenge, int userId);
     void removeGatekeeperPasswordHandle(long gatekeeperPasswordHandle);
-    boolean checkVoldPassword(int userId);
     int getCredentialType(int userId);
     byte[] getHashFactor(in LockscreenCredential currentCredential, int userId);
     void setSeparateProfileChallengeEnabled(int userId, boolean enabled, in LockscreenCredential managedUserPassword);
@@ -97,7 +96,6 @@ interface ILockSettings {
     boolean hasSecureLockScreen();
     boolean tryUnlockWithCachedUnifiedChallenge(int userId);
     void removeCachedUnifiedChallenge(int userId);
-    void updateEncryptionPassword(int type, in byte[] password);
     boolean registerWeakEscrowTokenRemovedListener(in IWeakEscrowTokenRemovedListener listener);
     boolean unregisterWeakEscrowTokenRemovedListener(in IWeakEscrowTokenRemovedListener listener);
     long addWeakEscrowToken(in byte[] token, int userId, in IWeakEscrowTokenActivatedListener callback);

@@ -19,6 +19,13 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <Constraint
+        android:id="@+id/media_action_barrier"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintTop_toBottomOf="@id/media_seamless"
+        app:layout_constraintStart_toEndOf="@id/action_button_guideline" />
+
+    <Constraint
         android:id="@+id/album_art"
         android:layout_width="match_parent"
         android:layout_height="@dimen/qs_media_session_height_collapsed"
@@ -28,33 +35,73 @@
         app:layout_constraintBottom_toBottomOf="parent" />
 
     <Constraint
+        android:id="@+id/header_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:layout_marginStart="@dimen/qs_media_padding"
+        android:layout_marginEnd="@dimen/qs_media_padding"
+        app:layout_constraintEnd_toStartOf="@id/action_button_guideline"
+        app:layout_constrainedWidth="true"
+        app:layout_constraintTop_toBottomOf="@id/icon"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintHorizontal_bias="0" />
+    <Constraint
+        android:id="@+id/header_artist"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="@dimen/qs_media_padding"
+        android:layout_marginTop="0dp"
+        app:layout_constraintEnd_toStartOf="@id/action_button_guideline"
+        app:layout_constrainedWidth="true"
+        app:layout_constraintTop_toBottomOf="@id/header_title"
+        app:layout_constraintStart_toStartOf="@id/header_title"
+        app:layout_constraintVertical_bias="0"
+        app:layout_constraintHorizontal_bias="0" />
+
+    <Constraint
         android:id="@+id/actionPlayPause"
         android:layout_width="48dp"
         android:layout_height="48dp"
         android:layout_marginEnd="@dimen/qs_media_padding"
-        app:layout_constraintStart_toEndOf="@id/actionEnd"
+        android:layout_marginBottom="@dimen/qs_media_padding"
+        app:layout_constraintVertical_bias="1"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintTop_toBottomOf="@id/media_seamless"
-        app:layout_constraintBottom_toBottomOf="parent" />
+        app:layout_constraintStart_toEndOf="@id/media_action_barrier_end" />
 
+    <!--
+    There will only be 3 action buttons shown at most in this layout (controlled in code).
+    Play/Pause should always be at the end, but the other buttons should remain in the same order
+    when in RTL.
+    This is accomplished by setting two barriers at the start and end of the small buttons,
+    anchored to a guideline set at 3x button width from the end. The text and play/pause button are
+    positioned relative to the barriers, and the small buttons use right/left constraints to stay
+    in the correct order inside the barriers.
+    -->
     <Constraint
         android:id="@+id/actionPrev"
         android:layout_width="48dp"
         android:layout_height="48dp"
+        android:layout_marginBottom="@dimen/qs_media_padding"
         app:layout_constraintHorizontal_bias="1"
+        app:layout_constraintVertical_bias="1"
         app:layout_constraintHorizontal_chainStyle="packed"
-        app:layout_constraintStart_toEndOf="@id/header_artist"
-        app:layout_constraintEnd_toStartOf="@id/media_progress_bar"
+        app:layout_constraintRight_toLeftOf="@id/media_progress_bar"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/media_seamless" />
+        app:layout_constraintTop_toBottomOf="@id/media_seamless"
+        app:layout_constraintLeft_toRightOf="@id/media_action_barrier" />
 
     <Constraint
         android:id="@+id/media_progress_bar"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginBottom="@dimen/qs_media_padding"
         android:visibility="gone"
-        app:layout_constraintStart_toEndOf="@id/actionPrev"
-        app:layout_constraintEnd_toStartOf="@id/actionNext"
+        app:layout_constraintVertical_bias="1"
+        app:layout_constraintLeft_toRightOf="@id/actionPrev"
+        app:layout_constraintRight_toLeftOf="@id/actionNext"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintTop_toBottomOf="@id/media_seamless" />
 
@@ -62,29 +109,70 @@
         android:id="@+id/actionNext"
         android:layout_width="48dp"
         android:layout_height="48dp"
-        app:layout_constraintStart_toEndOf="@id/media_progress_bar"
-        app:layout_constraintEnd_toStartOf="@id/actionStart"
+        android:layout_marginBottom="@dimen/qs_media_padding"
+        app:layout_constraintVertical_bias="1"
+        app:layout_constraintLeft_toRightOf="@id/media_progress_bar"
+        app:layout_constraintRight_toLeftOf="@id/action0"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintTop_toBottomOf="@id/media_seamless" />
 
     <Constraint
-        android:id="@+id/actionStart"
+        android:id="@+id/action0"
         android:layout_width="48dp"
         android:layout_height="48dp"
+        android:layout_marginBottom="@dimen/qs_media_padding"
         android:visibility="gone"
-        app:layout_constraintStart_toEndOf="@id/actionNext"
-        app:layout_constraintEnd_toStartOf="@id/actionEnd"
+        app:layout_constraintVertical_bias="1"
+        app:layout_constraintLeft_toRightOf="@id/actionNext"
+        app:layout_constraintRight_toLeftOf="@id/action1"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintTop_toBottomOf="@id/media_seamless" />
 
     <Constraint
-        android:id="@+id/actionEnd"
+        android:id="@+id/action1"
         android:layout_width="48dp"
         android:layout_height="48dp"
+        android:layout_marginBottom="@dimen/qs_media_padding"
         android:visibility="gone"
-        app:layout_constraintStart_toEndOf="@id/actionStart"
-        app:layout_constraintEnd_toStartOf="@id/actionPlayPause"
+        app:layout_constraintVertical_bias="1"
+        app:layout_constraintLeft_toRightOf="@id/action0"
+        app:layout_constraintRight_toLeftOf="@id/action2"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintTop_toBottomOf="@id/media_seamless" />
 
+    <Constraint
+        android:id="@+id/action2"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_marginBottom="@dimen/qs_media_padding"
+        android:visibility="gone"
+        app:layout_constraintVertical_bias="1"
+        app:layout_constraintLeft_toRightOf="@id/action1"
+        app:layout_constraintRight_toLeftOf="@id/action3"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/media_seamless" />
+
+    <Constraint
+        android:id="@+id/action3"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_marginBottom="@dimen/qs_media_padding"
+        android:visibility="gone"
+        app:layout_constraintVertical_bias="1"
+        app:layout_constraintLeft_toRightOf="@id/action2"
+        app:layout_constraintRight_toLeftOf="@id/action4"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/media_seamless" />
+
+    <Constraint
+        android:id="@+id/action4"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_marginBottom="@dimen/qs_media_padding"
+        android:visibility="gone"
+        app:layout_constraintVertical_bias="1"
+        app:layout_constraintLeft_toRightOf="@id/action3"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/media_seamless"
+        app:layout_constraintRight_toLeftOf="@id/media_action_barrier_end" />
 </ConstraintSet>

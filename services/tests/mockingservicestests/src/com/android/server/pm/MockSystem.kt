@@ -203,6 +203,7 @@ class MockSystem(withSession: (StaticMockitoSessionBuilder) -> Unit = {}) {
         val domainVerificationManagerInternal: DomainVerificationManagerInternal = mock()
         val handler = TestHandler(null)
         val defaultAppProvider: DefaultAppProvider = mock()
+        val backgroundHandler = TestHandler(null)
     }
 
     companion object {
@@ -222,6 +223,10 @@ class MockSystem(withSession: (StaticMockitoSessionBuilder) -> Unit = {}) {
             DEFAULT_VERSION_INFO.fingerprint = "abcdef"
             DEFAULT_VERSION_INFO.sdkVersion = Build.VERSION_CODES.R
             DEFAULT_VERSION_INFO.databaseVersion = Settings.CURRENT_DATABASE_VERSION
+        }
+
+        fun addDefaultSharedLibrary(libName: String, libEntry: SystemConfig.SharedLibraryEntry) {
+            DEFAULT_SHARED_LIBRARIES_LIST[libName] = libEntry
         }
     }
 
@@ -282,6 +287,7 @@ class MockSystem(withSession: (StaticMockitoSessionBuilder) -> Unit = {}) {
             .thenReturn(mocks.domainVerificationManagerInternal)
         whenever(mocks.injector.handler) { mocks.handler }
         whenever(mocks.injector.defaultAppProvider) { mocks.defaultAppProvider }
+        whenever(mocks.injector.backgroundHandler) { mocks.backgroundHandler }
         wheneverStatic { SystemConfig.getInstance() }.thenReturn(mocks.systemConfig)
         whenever(mocks.systemConfig.availableFeatures).thenReturn(DEFAULT_AVAILABLE_FEATURES_MAP)
         whenever(mocks.systemConfig.sharedLibraries).thenReturn(DEFAULT_SHARED_LIBRARIES_LIST)
@@ -365,7 +371,7 @@ class MockSystem(withSession: (StaticMockitoSessionBuilder) -> Unit = {}) {
                 })
         existingSettingBuilderRef[0]?.setPackage(null)
         val packageSetting = existingSettingBuilderRef[0]?.let { withExistingSetting(it) }!!.build()
-        addPreExistingSetting(packageName, packageSetting)
+        addPreExistingSetting(packageSetting.name, packageSetting)
     }
 
     /**
@@ -394,7 +400,8 @@ class MockSystem(withSession: (StaticMockitoSessionBuilder) -> Unit = {}) {
         stageParse(apkPath, pkg)
         val parentFile = apkPath.parentFile
         val settingBuilder = withSetting(createBasicSettingBuilder(parentFile, pkg))
-        stageSettingInsert(packageName, settingBuilder.build())
+        val packageSetting = settingBuilder.build()
+        stageSettingInsert(packageSetting.name, packageSetting)
     }
 
     /**

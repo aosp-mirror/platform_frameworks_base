@@ -73,7 +73,7 @@ public class NotificationGroupManagerLegacy implements
         GroupExpansionManager,
         Dumpable {
 
-    private static final String TAG = "NotifGroupManager";
+    private static final String TAG = "LegacyNotifGroupManager";
     private static final boolean DEBUG = Compile.IS_DEBUG && Log.isLoggable(TAG, Log.DEBUG);
     private static final boolean SPEW = Compile.IS_DEBUG && Log.isLoggable(TAG, Log.VERBOSE);
     /**

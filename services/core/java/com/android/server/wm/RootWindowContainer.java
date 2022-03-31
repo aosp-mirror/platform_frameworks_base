@@ -2754,7 +2754,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         // First preference goes to the launch root task set in the activity options.
         if (options != null) {
             final Task candidateRoot = Task.fromWindowContainerToken(options.getLaunchRootTask());
-            if (canLaunchOnDisplay(r, candidateRoot)) {
+            if (candidateRoot != null && canLaunchOnDisplay(r, candidateRoot)) {
                 return candidateRoot;
             }
         }
@@ -3376,11 +3376,17 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
                 return new ArrayList<>();
             }
         } else {
+            final RecentTasks recentTasks = mWindowManager.mAtmService.getRecentTasks();
+            final int recentsComponentUid = recentTasks != null
+                    ? recentTasks.getRecentsComponentUid()
+                    : -1;
             final ArrayList<ActivityRecord> activities = new ArrayList<>();
-            forAllRootTasks(rootTask -> {
-                if (!dumpVisibleRootTasksOnly || rootTask.shouldBeVisible(null)) {
-                    activities.addAll(rootTask.getDumpActivitiesLocked(name, userId));
+            forAllLeafTasks(task -> {
+                final boolean isRecents = (task.effectiveUid == recentsComponentUid);
+                if (!dumpVisibleRootTasksOnly || task.shouldBeVisible(null) || isRecents) {
+                    activities.addAll(task.getDumpActivitiesLocked(name, userId));
                 }
+                return false;
             });
             return activities;
         }

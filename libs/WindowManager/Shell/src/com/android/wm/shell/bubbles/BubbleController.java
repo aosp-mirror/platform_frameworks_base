@@ -383,23 +383,15 @@ public class BubbleController {
         mTaskStackListener.addListener(new TaskStackListenerCallback() {
             @Override
             public void onTaskMovedToFront(int taskId) {
-                if (mSysuiProxy == null) {
-                    return;
-                }
-
-                mSysuiProxy.isNotificationShadeExpand((expand) -> {
-                    mMainExecutor.execute(() -> {
-                        int expandedId = INVALID_TASK_ID;
-                        if (mStackView != null && mStackView.getExpandedBubble() != null
-                                && isStackExpanded() && !mStackView.isExpansionAnimating()
-                                && !expand) {
-                            expandedId = mStackView.getExpandedBubble().getTaskId();
-                        }
-
-                        if (expandedId != INVALID_TASK_ID && expandedId != taskId) {
-                            mBubbleData.setExpanded(false);
-                        }
-                    });
+                mMainExecutor.execute(() -> {
+                    int expandedId = INVALID_TASK_ID;
+                    if (mStackView != null && mStackView.getExpandedBubble() != null
+                            && isStackExpanded() && !mStackView.isExpansionAnimating()) {
+                        expandedId = mStackView.getExpandedBubble().getTaskId();
+                    }
+                    if (expandedId != INVALID_TASK_ID && expandedId != taskId) {
+                        mBubbleData.setExpanded(false);
+                    }
                 });
             }
 
@@ -538,7 +530,8 @@ public class BubbleController {
         }
     }
 
-    private void onStatusBarStateChanged(boolean isShade) {
+    @VisibleForTesting
+    public void onStatusBarStateChanged(boolean isShade) {
         mIsStatusBarShade = isShade;
         if (!mIsStatusBarShade) {
             collapseStack();

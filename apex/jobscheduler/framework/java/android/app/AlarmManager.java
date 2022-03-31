@@ -210,6 +210,8 @@ public class AlarmManager {
      * on how frequently it can be scheduled.  Only available (and automatically applied) to
      * system alarms.
      *
+     * <p>Note that alarms set with a {@link WorkSource} <b>do not</b> get this flag.
+     *
      * @hide
      */
     @UnsupportedAppUsage
@@ -267,6 +269,16 @@ public class AlarmManager {
     @ChangeId
     @EnabledSince(targetSdkVersion = Build.VERSION_CODES.S)
     public static final long ENFORCE_MINIMUM_WINDOW_ON_INEXACT_ALARMS = 185199076L;
+
+    /**
+     * For apps targeting {@link Build.VERSION_CODES#TIRAMISU} or above, certain kinds of apps can
+     * use {@link Manifest.permission#USE_EXACT_ALARM} to schedule exact alarms.
+     *
+     * @hide
+     */
+    @ChangeId
+    @EnabledSince(targetSdkVersion = Build.VERSION_CODES.TIRAMISU)
+    public static final long ENABLE_USE_EXACT_ALARM = 218533173L;
 
     @UnsupportedAppUsage
     private final IAlarmManager mService;

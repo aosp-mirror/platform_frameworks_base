@@ -18,12 +18,14 @@ package com.android.wm.shell.splitscreen;
 
 import static android.app.ActivityManager.START_SUCCESS;
 import static android.app.ActivityManager.START_TASK_TO_FRONT;
+import static android.content.Intent.FLAG_ACTIVITY_NO_USER_ACTION;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.RemoteAnimationTarget.MODE_OPENING;
 
 import static com.android.wm.shell.common.ExecutorUtils.executeRemoteCallWithTaskPermission;
 import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_BOTTOM_OR_RIGHT;
 import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_TOP_OR_LEFT;
+import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_UNDEFINED;
 import static com.android.wm.shell.splitscreen.SplitScreen.STAGE_TYPE_SIDE;
 import static com.android.wm.shell.splitscreen.SplitScreen.STAGE_TYPE_UNDEFINED;
 import static com.android.wm.shell.transition.Transitions.ENABLE_SHELL_TRANSITIONS;
@@ -32,6 +34,7 @@ import android.app.ActivityManager;
 import android.app.ActivityTaskManager;
 import android.app.PendingIntent;
 import android.content.ActivityNotFoundException;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.LauncherApps;
@@ -68,6 +71,7 @@ import com.android.wm.shell.common.SingleInstanceRemoteListener;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.common.TransactionPool;
 import com.android.wm.shell.common.annotations.ExternalThread;
+import com.android.wm.shell.common.split.SplitLayout;
 import com.android.wm.shell.common.split.SplitScreenConstants.SplitPosition;
 import com.android.wm.shell.draganddrop.DragAndDropPolicy;
 import com.android.wm.shell.recents.RecentTasksController;
@@ -184,7 +188,7 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
         if (mStageCoordinator == null) {
             // TODO: Multi-display
             mStageCoordinator = new StageCoordinator(mContext, DEFAULT_DISPLAY, mSyncQueue,
-                    mRootTDAOrganizer, mTaskOrganizer, mDisplayController, mDisplayImeController,
+                    mTaskOrganizer, mDisplayController, mDisplayImeController,
                     mDisplayInsetsController, mTransitions, mTransactionPool, mLogger,
                     mIconProvider, mRecentTasksOptional, mUnfoldControllerProvider);
         }
@@ -196,11 +200,12 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
 
     @Nullable
     public ActivityManager.RunningTaskInfo getTaskInfo(@SplitPosition int splitPosition) {
-        if (isSplitScreenVisible()) {
-            int taskId = mStageCoordinator.getTaskId(splitPosition);
-            return mTaskOrganizer.getRunningTaskInfo(taskId);
+        if (!isSplitScreenVisible() || splitPosition == SPLIT_POSITION_UNDEFINED) {
+            return null;
         }
-        return null;
+
+        final int taskId = mStageCoordinator.getTaskId(splitPosition);
+        return mTaskOrganizer.getRunningTaskInfo(taskId);
     }
 
     public boolean isTaskInSplitScreen(int taskId) {
@@ -232,10 +237,6 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
 
     public void setSideStagePosition(@SplitPosition int sideStagePosition) {
         mStageCoordinator.setSideStagePosition(sideStagePosition, null /* wct */);
-    }
-
-    public void setSideStageVisibility(boolean visible) {
-        mStageCoordinator.setSideStageVisibility(visible);
     }
 
     public void enterSplitScreen(int taskId, boolean leftOrTop) {
@@ -321,8 +322,8 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
         }
     }
 
-    public void startIntent(PendingIntent intent, Intent fillInIntent, @SplitPosition int position,
-            @Nullable Bundle options) {
+    public void startIntent(PendingIntent intent, @Nullable Intent fillInIntent,
+            @SplitPosition int position, @Nullable Bundle options) {
         if (!ENABLE_SHELL_TRANSITIONS) {
             startIntentLegacy(intent, fillInIntent, position, options);
             return;
@@ -331,6 +332,15 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
         try {
             options = mStageCoordinator.resolveStartStage(STAGE_TYPE_UNDEFINED, position, options,
                     null /* wct */);
+
+            // Flag this as a no-user-action launch to prevent sending user leaving event to the
+            // current top activity since it's going to be put into another side of the split. This
+            // prevents the current top activity from going into pip mode due to user leaving event.
+            if (fillInIntent == null) {
+                fillInIntent = new Intent();
+            }
+            fillInIntent.addFlags(FLAG_ACTIVITY_NO_USER_ACTION);
+
             intent.send(mContext, 0, fillInIntent, null /* onFinished */, null /* handler */,
                     null /* requiredPermission */, options);
         } catch (PendingIntent.CanceledException e) {
@@ -338,7 +348,7 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
         }
     }
 
-    private void startIntentLegacy(PendingIntent intent, Intent fillInIntent,
+    private void startIntentLegacy(PendingIntent intent, @Nullable Intent fillInIntent,
             @SplitPosition int position, @Nullable Bundle options) {
         final WindowContainerTransaction evictWct = new WindowContainerTransaction();
         mStageCoordinator.prepareEvictChildTasks(position, evictWct);
@@ -350,6 +360,18 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
                     IRemoteAnimationFinishedCallback finishedCallback,
                     SurfaceControl.Transaction t) {
                 if (apps == null || apps.length == 0) {
+                    final ActivityManager.RunningTaskInfo pairedTaskInfo =
+                            getTaskInfo(SplitLayout.reversePosition(position));
+                    final ComponentName pairedActivity =
+                            pairedTaskInfo != null ? pairedTaskInfo.baseActivity : null;
+                    final ComponentName intentActivity =
+                            intent.getIntent() != null ? intent.getIntent().getComponent() : null;
+                    if (pairedActivity != null && pairedActivity.equals(intentActivity)) {
+                        // Switch split position if dragging the same activity to another side.
+                        setSideStagePosition(SplitLayout.reversePosition(
+                                mStageCoordinator.getSideStagePosition()));
+                    }
+
                     // Do nothing when the animation was cancelled.
                     t.apply();
                     return;
@@ -377,6 +399,15 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
 
         final WindowContainerTransaction wct = new WindowContainerTransaction();
         options = mStageCoordinator.resolveStartStage(STAGE_TYPE_UNDEFINED, position, options, wct);
+
+        // Flag this as a no-user-action launch to prevent sending user leaving event to the current
+        // top activity since it's going to be put into another side of the split. This prevents the
+        // current top activity from going into pip mode due to user leaving event.
+        if (fillInIntent == null) {
+            fillInIntent = new Intent();
+        }
+        fillInIntent.addFlags(FLAG_ACTIVITY_NO_USER_ACTION);
+
         wct.sendPendingIntent(intent, fillInIntent, options);
         mSyncQueue.queue(transition, WindowManager.TRANSIT_OPEN, wct);
     }
@@ -606,14 +637,6 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
             executeRemoteCallWithTaskPermission(mController, "exitSplitScreenOnHide",
                     (controller) -> {
                         controller.exitSplitScreenOnHide(exitSplitScreenOnHide);
-                    });
-        }
-
-        @Override
-        public void setSideStageVisibility(boolean visible) {
-            executeRemoteCallWithTaskPermission(mController, "setSideStageVisibility",
-                    (controller) -> {
-                        controller.setSideStageVisibility(visible);
                     });
         }
 

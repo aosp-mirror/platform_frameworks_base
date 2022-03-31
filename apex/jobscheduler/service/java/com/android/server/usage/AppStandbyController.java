@@ -78,6 +78,7 @@ import android.content.pm.CrossProfileAppsInternal;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
+import android.content.pm.ResolveInfo;
 import android.database.ContentObserver;
 import android.hardware.display.DisplayManager;
 import android.net.NetworkScoreManager;
@@ -99,6 +100,7 @@ import android.os.UserHandle;
 import android.provider.DeviceConfig;
 import android.provider.Settings.Global;
 import android.telephony.TelephonyManager;
+import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.IndentingPrintWriter;
 import android.util.Slog;
@@ -129,6 +131,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 
@@ -219,7 +222,8 @@ public class AppStandbyController
 
     private static final int HEADLESS_APP_CHECK_FLAGS =
             PackageManager.MATCH_DIRECT_BOOT_AWARE | PackageManager.MATCH_DIRECT_BOOT_UNAWARE
-                    | PackageManager.GET_ACTIVITIES | PackageManager.MATCH_DISABLED_COMPONENTS;
+                    | PackageManager.MATCH_DISABLED_COMPONENTS
+                    | PackageManager.MATCH_SYSTEM_ONLY;
 
     // To name the lock for stack traces
     static class Lock {}
@@ -253,7 +257,7 @@ public class AppStandbyController
     private final SparseArray<Set<String>> mActiveAdminApps = new SparseArray<>();
 
     /**
-     * Set of system apps that are headless (don't have any declared activities, enabled or
+     * Set of system apps that are headless (don't have any "front door" activities, enabled or
      * disabled). Presence in this map indicates that the app is a headless system app.
      */
     @GuardedBy("mHeadlessSystemApps")
@@ -371,6 +375,15 @@ public class AppStandbyController
      */
     volatile int mBroadcastResponseFgThresholdState =
             ConstantsObserver.DEFAULT_BROADCAST_RESPONSE_FG_THRESHOLD_STATE;
+
+    /**
+     * Map of last known values of keys in {@link DeviceConfig#NAMESPACE_APP_STANDBY}.
+     *
+     * Note: We are intentionally not guarding this by any lock since this is only updated on
+     * a handler thread and when querying, if we do end up seeing slightly older values, it is fine
+     * since the values are only used in tests and doesn't need to be queried in any other cases.
+     */
+    private final Map<String, String> mAppStandbyProperties = new ArrayMap<>();
 
     /**
      * Whether we should allow apps into the
@@ -885,7 +898,8 @@ public class AppStandbyController
                     }
                 }
 
-                if (app.lastRestrictAttemptElapsedTime > app.lastUsedByUserElapsedTime
+                if (app.lastUsedByUserElapsedTime >= 0
+                        && app.lastRestrictAttemptElapsedTime > app.lastUsedByUserElapsedTime
                         && elapsedTimeAdjusted - app.lastUsedByUserElapsedTime
                         >= mInjector.getAutoRestrictedBucketDelayMs()) {
                     newBucket = STANDBY_BUCKET_RESTRICTED;
@@ -958,7 +972,7 @@ public class AppStandbyController
             long elapsedRealtime) {
         int bucketIndex = mAppIdleHistory.getThresholdIndex(packageName, userId,
                 elapsedRealtime, mAppStandbyScreenThresholds, mAppStandbyElapsedThresholds);
-        return THRESHOLD_BUCKETS[bucketIndex];
+        return bucketIndex >= 0 ? THRESHOLD_BUCKETS[bucketIndex] : STANDBY_BUCKET_NEVER;
     }
 
     private void notifyBatteryStats(String packageName, int userId, boolean idle) {
@@ -1295,7 +1309,7 @@ public class AppStandbyController
                 return STANDBY_BUCKET_WORKING_SET;
             }
 
-            if (mInjector.hasScheduleExactAlarm(packageName, UserHandle.getUid(userId, appId))) {
+            if (mInjector.hasExactAlarmPermission(packageName, UserHandle.getUid(userId, appId))) {
                 return STANDBY_BUCKET_WORKING_SET;
             }
         }
@@ -1422,8 +1436,8 @@ public class AppStandbyController
         }
     }
 
-    @VisibleForTesting
-    int getAppStandbyBucketReason(String packageName, int userId, long elapsedRealtime) {
+    @Override
+    public int getAppStandbyBucketReason(String packageName, int userId, long elapsedRealtime) {
         synchronized (mAppIdleLock) {
             return mAppIdleHistory.getAppStandbyReason(packageName, userId, elapsedRealtime);
         }
@@ -1573,8 +1587,10 @@ public class AppStandbyController
                     (reason & REASON_MAIN_MASK) == REASON_MAIN_FORCED_BY_SYSTEM;
 
             if (app.currentBucket == newBucket && wasForcedBySystem && isForcedBySystem) {
-                mAppIdleHistory
-                        .noteRestrictionAttempt(packageName, userId, elapsedRealtime, reason);
+                if (newBucket == STANDBY_BUCKET_RESTRICTED) {
+                    mAppIdleHistory
+                            .noteRestrictionAttempt(packageName, userId, elapsedRealtime, reason);
+                }
                 // Keep track of all restricting reasons
                 reason = REASON_MAIN_FORCED_BY_SYSTEM
                         | (app.bucketingReason & REASON_SUB_MASK)
@@ -1833,6 +1849,19 @@ public class AppStandbyController
     }
 
     @Override
+    @Nullable
+    public String getAppStandbyConstant(@NonNull String key) {
+        return mAppStandbyProperties.get(key);
+    }
+
+    @Override
+    public void clearLastUsedTimestampsForTest(@NonNull String packageName, @UserIdInt int userId) {
+        synchronized (mAppIdleLock) {
+            mAppIdleHistory.clearLastUsedTimestamps(packageName, userId);
+        }
+    }
+
+    @Override
     public void flushToDisk() {
         synchronized (mAppIdleLock) {
             mAppIdleHistory.writeAppIdleTimes(mInjector.elapsedRealtime());
@@ -1942,7 +1971,7 @@ public class AppStandbyController
         try {
             PackageInfo pi = mPackageManager.getPackageInfoAsUser(
                     packageName, HEADLESS_APP_CHECK_FLAGS, userId);
-            evaluateSystemAppException(pi);
+            maybeUpdateHeadlessSystemAppCache(pi);
         } catch (PackageManager.NameNotFoundException e) {
             synchronized (mHeadlessSystemApps) {
                 mHeadlessSystemApps.remove(packageName);
@@ -1950,19 +1979,31 @@ public class AppStandbyController
         }
     }
 
-    /** Returns true if the exception status changed. */
-    private boolean evaluateSystemAppException(@Nullable PackageInfo pkgInfo) {
+    /**
+     * Update the "headless system app" cache.
+     *
+     * @return true if the cache is updated.
+     */
+    private boolean maybeUpdateHeadlessSystemAppCache(@Nullable PackageInfo pkgInfo) {
         if (pkgInfo == null || pkgInfo.applicationInfo == null
                 || (!pkgInfo.applicationInfo.isSystemApp()
                         && !pkgInfo.applicationInfo.isUpdatedSystemApp())) {
             return false;
         }
+        final Intent frontDoorActivityIntent = new Intent(Intent.ACTION_MAIN)
+                .addCategory(Intent.CATEGORY_LAUNCHER)
+                .setPackage(pkgInfo.packageName);
+        List<ResolveInfo> res = mPackageManager.queryIntentActivitiesAsUser(frontDoorActivityIntent,
+                HEADLESS_APP_CHECK_FLAGS, UserHandle.USER_SYSTEM);
+        return updateHeadlessSystemAppCache(pkgInfo.packageName, ArrayUtils.isEmpty(res));
+    }
+
+    private boolean updateHeadlessSystemAppCache(String packageName, boolean add) {
         synchronized (mHeadlessSystemApps) {
-            if (pkgInfo.activities == null || pkgInfo.activities.length == 0) {
-                // Headless system app.
-                return mHeadlessSystemApps.add(pkgInfo.packageName);
+            if (add) {
+                return mHeadlessSystemApps.add(packageName);
             } else {
-                return mHeadlessSystemApps.remove(pkgInfo.packageName);
+                return mHeadlessSystemApps.remove(packageName);
             }
         }
     }
@@ -1999,20 +2040,45 @@ public class AppStandbyController
         }
     }
 
+    /** Returns the packages that have launcher icons. */
+    private Set<String> getSystemPackagesWithLauncherActivities() {
+        final Intent intent = new Intent(Intent.ACTION_MAIN)
+                .addCategory(Intent.CATEGORY_LAUNCHER);
+        List<ResolveInfo> activities = mPackageManager.queryIntentActivitiesAsUser(intent,
+                HEADLESS_APP_CHECK_FLAGS, UserHandle.USER_SYSTEM);
+        final ArraySet<String> ret = new ArraySet<>();
+        for (ResolveInfo ri : activities) {
+            ret.add(ri.activityInfo.packageName);
+        }
+        return ret;
+    }
+
     /** Call on system boot to get the initial set of headless system apps. */
     private void loadHeadlessSystemAppCache() {
-        Slog.d(TAG, "Loading headless system app cache. appIdleEnabled=" + mAppIdleEnabled);
+        final long start = SystemClock.uptimeMillis();
         final List<PackageInfo> packages = mPackageManager.getInstalledPackagesAsUser(
                 HEADLESS_APP_CHECK_FLAGS, UserHandle.USER_SYSTEM);
+
+        final Set<String> systemLauncherActivities = getSystemPackagesWithLauncherActivities();
+
         final int packageCount = packages.size();
         for (int i = 0; i < packageCount; i++) {
-            PackageInfo pkgInfo = packages.get(i);
-            if (pkgInfo != null && evaluateSystemAppException(pkgInfo)) {
+            final PackageInfo pkgInfo = packages.get(i);
+            if (pkgInfo == null) {
+                continue;
+            }
+            final String pkg = pkgInfo.packageName;
+            final boolean isHeadLess = !systemLauncherActivities.contains(pkg);
+
+            if (updateHeadlessSystemAppCache(pkg, isHeadLess)) {
                 mHandler.obtainMessage(MSG_CHECK_PACKAGE_IDLE_STATE,
-                        UserHandle.USER_SYSTEM, -1, pkgInfo.packageName)
+                        UserHandle.USER_SYSTEM, -1, pkg)
                     .sendToTarget();
             }
         }
+        final long end = SystemClock.uptimeMillis();
+        Slog.d(TAG, "Loaded headless system app cache in " + (end - start) + " ms:"
+                + " appIdleEnabled=" + mAppIdleEnabled);
     }
 
     @Override
@@ -2033,6 +2099,13 @@ public class AppStandbyController
     public void postReportExemptedSyncStart(String packageName, int userId) {
         mHandler.obtainMessage(MSG_REPORT_EXEMPTED_SYNC_START, userId, 0, packageName)
                 .sendToTarget();
+    }
+
+    @VisibleForTesting
+    AppIdleHistory getAppIdleHistoryForTest() {
+        synchronized (mAppIdleLock) {
+            return mAppIdleHistory;
+        }
     }
 
     @Override
@@ -2253,8 +2326,8 @@ public class AppStandbyController
             return mWellbeingApp != null && mWellbeingApp.equals(packageName);
         }
 
-        boolean hasScheduleExactAlarm(String packageName, int uid) {
-            return mAlarmManagerInternal.hasScheduleExactAlarm(packageName, uid);
+        boolean hasExactAlarmPermission(String packageName, int uid) {
+            return mAlarmManagerInternal.hasExactAlarmPermission(packageName, uid);
         }
 
         void updatePowerWhitelistCache() {
@@ -2733,6 +2806,7 @@ public class AppStandbyController
                             }
                             break;
                     }
+                    mAppStandbyProperties.put(name, properties.getString(name, null));
                 }
             }
         }

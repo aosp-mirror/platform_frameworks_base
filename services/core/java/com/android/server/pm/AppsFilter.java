@@ -52,6 +52,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.function.QuadFunction;
 import com.android.server.FgThread;
+import com.android.server.LocalServices;
 import com.android.server.compat.CompatChange;
 import com.android.server.om.OverlayReferenceMapper;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
@@ -486,12 +487,12 @@ public class AppsFilter implements Watchable, Snappable {
     }
 
     /** Builder method for an AppsFilter */
-    public static AppsFilter create(
-            PackageManagerInternal pms, PackageManagerServiceInjector injector) {
+    public static AppsFilter create(@NonNull PackageManagerServiceInjector injector,
+            @NonNull PackageManagerInternal pmInt) {
         final boolean forceSystemAppsQueryable =
                 injector.getContext().getResources()
                         .getBoolean(R.bool.config_forceSystemPackagesQueryable);
-        final FeatureConfigImpl featureConfig = new FeatureConfigImpl(pms, injector);
+        final FeatureConfigImpl featureConfig = new FeatureConfigImpl(pmInt, injector);
         final String[] forcedQueryablePackageNames;
         if (forceSystemAppsQueryable) {
             // all system apps already queryable, no need to read and parse individual exceptions
@@ -512,7 +513,7 @@ public class AppsFilter implements Watchable, Snappable {
         };
         AppsFilter appsFilter = new AppsFilter(stateProvider, featureConfig,
                 forcedQueryablePackageNames, forceSystemAppsQueryable, null,
-                injector.getBackgroundExecutor(), pms);
+                injector.getBackgroundExecutor(), pmInt);
         featureConfig.setAppsFilter(appsFilter);
         return appsFilter;
     }
@@ -1329,7 +1330,9 @@ public class AppsFilter implements Watchable, Snappable {
                                 + callingUid + " -> " + targetUid);
                         return true;
                     }
-                    return mShouldFilterCache.valueAt(callingIndex, targetIndex);
+                    if (!mShouldFilterCache.valueAt(callingIndex, targetIndex)) {
+                        return false;
+                    }
                 } else {
                     if (!shouldFilterApplicationInternal(
                             callingUid, callingSetting, targetPkgSetting, userId)) {

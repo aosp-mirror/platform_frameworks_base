@@ -62,7 +62,9 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.Process;
 import android.util.Log;
+
 import com.android.internal.util.FrameworkStatsLog;
+
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.ref.WeakReference;
@@ -2147,12 +2149,12 @@ public class Tuner implements AutoCloseable  {
             Objects.requireNonNull(executor, "executor must not be null");
             Objects.requireNonNull(cb, "LnbCallback must not be null");
             if (mLnb != null) {
-                mLnb.setCallbackAndOwner(executor, cb, this);
+                mLnb.setCallbackAndOwner(this, executor, cb);
                 return mLnb;
             }
             if (checkResource(TunerResourceManager.TUNER_RESOURCE_TYPE_LNB, mLnbLock)
                     && mLnb != null) {
-                mLnb.setCallbackAndOwner(executor, cb, this);
+                mLnb.setCallbackAndOwner(this, executor, cb);
                 setLnb(mLnb);
                 return mLnb;
             }
@@ -2186,7 +2188,7 @@ public class Tuner implements AutoCloseable  {
                     mLnbHandle = null;
                 }
                 mLnb = newLnb;
-                mLnb.setCallbackAndOwner(executor, cb, this);
+                mLnb.setCallbackAndOwner(this, executor, cb);
                 setLnb(mLnb);
             }
             return mLnb;

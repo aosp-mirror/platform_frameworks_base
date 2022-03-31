@@ -296,8 +296,8 @@ public final class UsbPortAidl implements UsbPortHal {
                             + operationID + " key:" + key);
                 }
                 try {
-                    sCallbacks.put(operationID, callback);
-                    mProxy.resetUsbPort(portName, operationID);
+                    sCallbacks.put(key, callback);
+                    mProxy.resetUsbPort(portName, key);
                 } catch (RemoteException e) {
                     logAndPrintException(mPw,
                             "resetUsbPort: Failed to resetUsbPort: portID="

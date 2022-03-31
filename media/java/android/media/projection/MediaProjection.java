@@ -25,13 +25,14 @@ import android.hardware.display.DisplayManager;
 import android.hardware.display.VirtualDisplay;
 import android.hardware.display.VirtualDisplayConfig;
 import android.os.Handler;
-import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.ArrayMap;
 import android.util.Log;
 import android.view.ContentRecordingSession;
+import android.view.IWindowManager;
 import android.view.Surface;
 import android.view.WindowManagerGlobal;
+import android.window.WindowContainerToken;
 
 import java.util.Map;
 
@@ -171,43 +172,39 @@ public final class MediaProjection {
             @NonNull VirtualDisplayConfig.Builder virtualDisplayConfig,
             @Nullable VirtualDisplay.Callback callback, @Nullable Handler handler) {
         try {
-            final Context windowContext = mContext.createWindowContext(
-                    mContext.getDisplayNoVerify(),
-                    TYPE_APPLICATION, null /* options */);
-            final IBinder windowContextToken = windowContext.getWindowContextToken();
+            final IWindowManager wmService = WindowManagerGlobal.getWindowManagerService();
+            final WindowContainerToken taskWindowContainerToken =
+                    mImpl.getTaskRecordingWindowContainerToken();
+            Context windowContext = null;
+            ContentRecordingSession session;
+            if (taskWindowContainerToken == null) {
+                windowContext = mContext.createWindowContext(mContext.getDisplayNoVerify(),
+                        TYPE_APPLICATION, null /* options */);
+                session = ContentRecordingSession.createDisplaySession(
+                        windowContext.getWindowContextToken());
+            } else {
+                session = ContentRecordingSession.createTaskSession(
+                        taskWindowContainerToken.asBinder());
+            }
             virtualDisplayConfig.setWindowManagerMirroring(true);
             final DisplayManager dm = mContext.getSystemService(DisplayManager.class);
             final VirtualDisplay virtualDisplay = dm.createVirtualDisplay(this,
-                    virtualDisplayConfig.build(),
-                    callback, handler, windowContext);
-            setSession(windowContextToken, virtualDisplay);
+                    virtualDisplayConfig.build(), callback, handler, windowContext);
+            if (virtualDisplay == null) {
+                // Since WM handling a new display and DM creating a new VirtualDisplay is async,
+                // WM may have tried to start task recording and encountered an error that required
+                // stopping recording entirely. The VirtualDisplay would then be null when the
+                // MediaProjection is no longer active.
+                return null;
+            }
+            session.setDisplayId(virtualDisplay.getDisplay().getDisplayId());
+            // Successfully set up, so save the current session details.
+            wmService.setContentRecordingSession(session);
             return virtualDisplay;
         } catch (RemoteException e) {
             // Can not capture if WMS is not accessible, so bail out.
             throw e.rethrowFromSystemServer();
         }
-    }
-
-    /**
-     * Updates the {@link ContentRecordingSession} describing the recording taking place on this
-     * {@link VirtualDisplay}.
-     *
-     * @throws RemoteException if updating the session on the server failed.
-     */
-    private void setSession(@NonNull IBinder windowContextToken,
-            @Nullable VirtualDisplay virtualDisplay)
-            throws RemoteException {
-        if (virtualDisplay == null) {
-            // Not able to set up a new VirtualDisplay.
-            return;
-        }
-        // Identify the VirtualDisplay that will be hosting the recording.
-        ContentRecordingSession session = ContentRecordingSession.createDisplaySession(
-                windowContextToken);
-        session.setDisplayId(virtualDisplay.getDisplay().getDisplayId());
-        // TODO(b/216625226) handle task recording.
-        // Successfully set up, so save the current session details.
-        WindowManagerGlobal.getWindowManagerService().setContentRecordingSession(session);
     }
 
     /**

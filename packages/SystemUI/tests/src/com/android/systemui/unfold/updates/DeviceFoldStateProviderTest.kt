@@ -16,6 +16,11 @@
 
 package com.android.systemui.unfold.updates
 
+import android.app.ActivityManager
+import android.app.ActivityManager.RunningTaskInfo
+import android.app.WindowConfiguration.ACTIVITY_TYPE_HOME
+import android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD
+import android.app.WindowConfiguration.ActivityType
 import android.hardware.devicestate.DeviceStateManager
 import android.hardware.devicestate.DeviceStateManager.FoldStateListener
 import android.os.Handler
@@ -30,7 +35,6 @@ import com.android.systemui.unfold.util.FoldableDeviceStates
 import com.android.systemui.unfold.util.FoldableTestUtils
 import com.android.systemui.util.mockito.any
 import com.google.common.truth.Truth.assertThat
-import java.lang.Exception
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -50,6 +54,8 @@ class DeviceFoldStateProviderTest : SysuiTestCase() {
     @Mock private lateinit var screenStatusProvider: ScreenStatusProvider
 
     @Mock private lateinit var deviceStateManager: DeviceStateManager
+
+    @Mock private lateinit var activityManager: ActivityManager
 
     @Mock private lateinit var handler: Handler
 
@@ -80,6 +86,7 @@ class DeviceFoldStateProviderTest : SysuiTestCase() {
                 hingeAngleProvider,
                 screenStatusProvider,
                 deviceStateManager,
+                activityManager,
                 context.mainExecutor,
                 handler)
 
@@ -113,6 +120,9 @@ class DeviceFoldStateProviderTest : SysuiTestCase() {
             }
             null
         }
+
+        // By default, we're on launcher.
+        setupForegroundActivityType(ACTIVITY_TYPE_HOME)
     }
 
     @Test
@@ -256,6 +266,31 @@ class DeviceFoldStateProviderTest : SysuiTestCase() {
             assertThat(foldUpdates).containsExactly(FOLD_UPDATE_START_CLOSING)
             simulateTimeout() // Timeout to set the state to aborted.
         }
+    }
+
+    @Test
+    fun startClosingEvent_whileNotOnLauncher_doesNotTriggerBeforeThreshold() {
+        setupForegroundActivityType(ACTIVITY_TYPE_STANDARD)
+        sendHingeAngleEvent(180)
+
+        sendHingeAngleEvent(START_CLOSING_ON_APPS_THRESHOLD_DEGREES + 1)
+
+        assertThat(foldUpdates).isEmpty()
+    }
+
+    @Test
+    fun startClosingEvent_whileNotOnLauncher_triggersAfterThreshold() {
+        setupForegroundActivityType(ACTIVITY_TYPE_STANDARD)
+        sendHingeAngleEvent(START_CLOSING_ON_APPS_THRESHOLD_DEGREES)
+
+        sendHingeAngleEvent(START_CLOSING_ON_APPS_THRESHOLD_DEGREES - 1)
+
+        assertThat(foldUpdates).containsExactly(FOLD_UPDATE_START_CLOSING)
+    }
+
+    private fun setupForegroundActivityType(@ActivityType type: Int) {
+        val taskInfo = RunningTaskInfo().apply { topActivityType = type }
+        whenever(activityManager.getRunningTasks(1)).thenReturn(listOf(taskInfo))
     }
 
     private fun simulateTimeout(waitTime: Long = HALF_OPENED_TIMEOUT_MILLIS) {

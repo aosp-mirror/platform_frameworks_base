@@ -553,6 +553,15 @@ public class Notifier {
     }
 
     /**
+     * Called when an individual PowerGroup changes wakefulness.
+     */
+    public void onPowerGroupWakefulnessChanged(int groupId, int groupWakefulness, int changeReason,
+            int globalWakefulness) {
+        mHandler.post(() -> mPolicy.onPowerGroupWakefulnessChanged(groupId, groupWakefulness,
+                changeReason, globalWakefulness));
+    }
+
+    /**
      * Called when there has been user activity.
      */
     public void onUserActivity(int displayGroupId, int event, int uid) {

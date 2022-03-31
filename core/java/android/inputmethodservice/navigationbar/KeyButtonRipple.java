@@ -90,7 +90,7 @@ final class KeyButtonRipple extends Drawable {
 
     private Type mType = Type.ROUNDED_RECT;
 
-    public KeyButtonRipple(Context ctx, View targetView, @DimenRes int maxWidthResource) {
+    KeyButtonRipple(Context ctx, View targetView, @DimenRes int maxWidthResource) {
         mMaxWidthResource = maxWidthResource;
         mMaxWidth = ctx.getResources().getDimensionPixelSize(maxWidthResource);
         mTargetView = targetView;
@@ -126,7 +126,7 @@ final class KeyButtonRipple extends Drawable {
     private void drawSoftware(Canvas canvas) {
         if (mGlowAlpha > 0f) {
             final Paint p = getRipplePaint();
-            p.setAlpha((int)(mGlowAlpha * 255f));
+            p.setAlpha((int) (mGlowAlpha * 255f));
 
             final float w = getBounds().width();
             final float h = getBounds().height();
@@ -412,7 +412,7 @@ final class KeyButtonRipple extends Drawable {
         mDrawingHardwareGlow = true;
         setExtendStart(CanvasProperty.createFloat(getExtendSize() / 2));
         final RenderNodeAnimator startAnim = new RenderNodeAnimator(getExtendStart(),
-                getExtendSize()/2 - GLOW_MAX_SCALE_FACTOR * getRippleSize()/2);
+                getExtendSize() / 2 - GLOW_MAX_SCALE_FACTOR * getRippleSize() / 2);
         startAnim.setDuration(ANIMATION_DURATION_SCALE);
         startAnim.setInterpolator(mInterpolator);
         startAnim.addListener(mAnimatorListener);
@@ -420,7 +420,7 @@ final class KeyButtonRipple extends Drawable {
 
         setExtendEnd(CanvasProperty.createFloat(getExtendSize() / 2));
         final RenderNodeAnimator endAnim = new RenderNodeAnimator(getExtendEnd(),
-                getExtendSize()/2 + GLOW_MAX_SCALE_FACTOR * getRippleSize()/2);
+                getExtendSize() / 2 + GLOW_MAX_SCALE_FACTOR * getRippleSize() / 2);
         endAnim.setDuration(ANIMATION_DURATION_SCALE);
         endAnim.setInterpolator(mInterpolator);
         endAnim.addListener(mAnimatorListener);
@@ -430,13 +430,13 @@ final class KeyButtonRipple extends Drawable {
         if (isHorizontal()) {
             mTopProp = CanvasProperty.createFloat(0f);
             mBottomProp = CanvasProperty.createFloat(getBounds().height());
-            mRxProp = CanvasProperty.createFloat(getBounds().height()/2);
-            mRyProp = CanvasProperty.createFloat(getBounds().height()/2);
+            mRxProp = CanvasProperty.createFloat(getBounds().height() / 2);
+            mRyProp = CanvasProperty.createFloat(getBounds().height() / 2);
         } else {
             mLeftProp = CanvasProperty.createFloat(0f);
             mRightProp = CanvasProperty.createFloat(getBounds().width());
-            mRxProp = CanvasProperty.createFloat(getBounds().width()/2);
-            mRyProp = CanvasProperty.createFloat(getBounds().width()/2);
+            mRxProp = CanvasProperty.createFloat(getBounds().width() / 2);
+            mRyProp = CanvasProperty.createFloat(getBounds().width() / 2);
         }
 
         mGlowScale = GLOW_MAX_SCALE_FACTOR;

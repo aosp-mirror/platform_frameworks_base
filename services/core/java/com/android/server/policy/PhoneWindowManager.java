@@ -792,7 +792,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         public void onWakeUp() {
             synchronized (mLock) {
                 if (shouldEnableWakeGestureLp()
-                        && mBatteryManagerInternal.getPlugType() != BATTERY_PLUGGED_WIRELESS) {
+                        && getBatteryManagerInternal().getPlugType() != BATTERY_PLUGGED_WIRELESS) {
                     performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY, false,
                             "Wake Up");
                     wakeUp(SystemClock.uptimeMillis(), mAllowTheaterModeWakeFromWakeGesture,
@@ -1023,7 +1023,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     break;
                 }
                 case SHORT_PRESS_POWER_LOCK_OR_SLEEP: {
-                    if (keyguardOn()) {
+                    if (mKeyguardDelegate == null || !mKeyguardDelegate.hasKeyguard()
+                            || !mKeyguardDelegate.isSecure(mCurrentUserId) || keyguardOn()) {
                         sleepDefaultDisplayFromPowerButton(eventTime, 0);
                     } else {
                         lockNow(null /*options*/);
@@ -1490,11 +1491,19 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     private long getAccessibilityShortcutTimeout() {
-        ViewConfiguration config = ViewConfiguration.get(mContext);
-        return Settings.Secure.getIntForUser(mContext.getContentResolver(),
-                Settings.Secure.ACCESSIBILITY_SHORTCUT_DIALOG_SHOWN, 0, mCurrentUserId) == 0
-                ? config.getAccessibilityShortcutKeyTimeout()
-                : config.getAccessibilityShortcutKeyTimeoutAfterConfirmation();
+        final ViewConfiguration config = ViewConfiguration.get(mContext);
+        final boolean hasDialogShown = Settings.Secure.getIntForUser(mContext.getContentResolver(),
+                Settings.Secure.ACCESSIBILITY_SHORTCUT_DIALOG_SHOWN, 0, mCurrentUserId) != 0;
+        final boolean skipTimeoutRestriction =
+                Settings.Secure.getIntForUser(mContext.getContentResolver(),
+                        Settings.Secure.SKIP_ACCESSIBILITY_SHORTCUT_DIALOG_TIMEOUT_RESTRICTION, 0,
+                        mCurrentUserId) != 0;
+
+        // If users manually set the volume key shortcut for any accessibility service, the
+        // system would bypass the timeout restriction of the shortcut dialog.
+        return hasDialogShown || skipTimeoutRestriction
+                ? config.getAccessibilityShortcutKeyTimeoutAfterConfirmation()
+                : config.getAccessibilityShortcutKeyTimeout();
     }
 
     private long getScreenshotChordLongPressDelay() {
@@ -4517,6 +4526,18 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     // Called on the PowerManager's Notifier thread.
     @Override
+    public void onPowerGroupWakefulnessChanged(int groupId, int wakefulness,
+            @PowerManager.GoToSleepReason int pmSleepReason, int globalWakefulness) {
+        if (wakefulness != globalWakefulness
+                && wakefulness != PowerManagerInternal.WAKEFULNESS_AWAKE
+                && groupId == Display.DEFAULT_DISPLAY_GROUP
+                && mKeyguardDelegate != null) {
+            mKeyguardDelegate.doKeyguardTimeout(null);
+        }
+    }
+
+    // Called on the PowerManager's Notifier thread.
+    @Override
     public void startedWakingUp(@PowerManager.WakeReason int pmWakeReason) {
         EventLogTags.writeScreenToggled(1);
         if (DEBUG_WAKEUP) {
@@ -5445,8 +5466,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         VibrationAttributes attrs = getVibrationAttributes(effectId);
         if (always) {
             attrs = new VibrationAttributes.Builder(attrs)
-                    .setFlags(VibrationAttributes.FLAG_BYPASS_USER_VIBRATION_INTENSITY_OFF,
-                            VibrationAttributes.FLAG_BYPASS_USER_VIBRATION_INTENSITY_OFF)
+                    .setFlags(VibrationAttributes.FLAG_BYPASS_USER_VIBRATION_INTENSITY_OFF)
                     .build();
         }
         mVibrator.vibrate(uid, packageName, effect, reason, attrs);

@@ -28,9 +28,21 @@ import android.graphics.Rect;
  */
 public interface WindowCallbacks {
 
-    public static final int RESIZE_MODE_INVALID = -1;
-    public static final int RESIZE_MODE_FREEFORM = 0;
-    public static final int RESIZE_MODE_DOCKED_DIVIDER = 1;
+    int RESIZE_MODE_INVALID = -1;
+
+    /**
+     * The window is being resized by dragging one of the window corners,
+     * in this case the surface would be fullscreen-sized. The client should
+     * render to the actual frame location (instead of (0,curScrollY)).
+     */
+    int RESIZE_MODE_FREEFORM = 0;
+
+    /**
+     * The window is being resized by dragging on the docked divider. The client should render
+     * at (0, 0) and extend its background to the background frame passed into
+     * {@link IWindow#resized}.
+     */
+    int RESIZE_MODE_DOCKED_DIVIDER = 1;
 
     /**
      * Called by the system when the window got changed by the user, before the layouter got called.

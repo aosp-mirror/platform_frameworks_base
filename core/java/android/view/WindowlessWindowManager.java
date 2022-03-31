@@ -16,12 +16,15 @@
 
 package android.view;
 
+import static android.view.WindowCallbacks.RESIZE_MODE_INVALID;
+
 import android.annotation.Nullable;
 import android.content.res.Configuration;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.os.Binder;
+import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteCallback;
 import android.os.RemoteException;
@@ -81,9 +84,8 @@ public class WindowlessWindowManager implements IWindowSession {
     private final IBinder mHostInputToken;
     private final IBinder mFocusGrantToken = new Binder();
     private InsetsState mInsetsState;
-
-    private int mForceHeight = -1;
-    private int mForceWidth = -1;
+    private final ClientWindowFrames mTmpFrames = new ClientWindowFrames();
+    private final MergedConfiguration mTmpConfig = new MergedConfiguration();
 
     public WindowlessWindowManager(Configuration c, SurfaceControl rootSurface,
             IBinder hostInputToken) {
@@ -217,9 +219,13 @@ public class WindowlessWindowManager implements IWindowSession {
             throw new IllegalArgumentException(
                     "Invalid window token (never added or removed already)");
         }
+        removeSurface(state.mSurfaceControl);
+    }
 
+    /** Separate from {@link #remove} so that subclasses can put removal on a sync transaction. */
+    protected void removeSurface(SurfaceControl sc) {
         try (SurfaceControl.Transaction t = new SurfaceControl.Transaction()) {
-            t.remove(state.mSurfaceControl).apply();
+            t.remove(sc).apply();
         }
     }
 
@@ -277,7 +283,7 @@ public class WindowlessWindowManager implements IWindowSession {
             int requestedWidth, int requestedHeight, int viewFlags, int flags,
             ClientWindowFrames outFrames, MergedConfiguration mergedConfiguration,
             SurfaceControl outSurfaceControl, InsetsState outInsetsState,
-            InsetsSourceControl[] outActiveControls) {
+            InsetsSourceControl[] outActiveControls, Bundle outSyncSeqIdBundle) {
         final State state;
         synchronized (this) {
             state = mStateForWindow.get(window.asBinder());
@@ -327,8 +333,22 @@ public class WindowlessWindowManager implements IWindowSession {
             outInsetsState.set(mInsetsState);
         }
 
-        // Include whether the window is in touch mode.
-        return isInTouchMode() ? WindowManagerGlobal.RELAYOUT_RES_IN_TOUCH_MODE : 0;
+        return 0;
+    }
+
+    @Override
+    public int updateVisibility(IWindow window, WindowManager.LayoutParams inAttrs,
+            int viewVisibility, MergedConfiguration outMergedConfiguration,
+            SurfaceControl outSurfaceControl, InsetsState outInsetsState,
+            InsetsSourceControl[] outActiveControls) {
+        // TODO(b/161810301): Finish the implementation.
+        return 0;
+    }
+
+    @Override
+    public void updateLayout(IWindow window, WindowManager.LayoutParams inAttrs, int flags,
+            ClientWindowFrames clientWindowFrames, int requestedWidth, int requestedHeight) {
+        // TODO(b/161810301): Finish the implementation.
     }
 
     @Override
@@ -354,7 +374,7 @@ public class WindowlessWindowManager implements IWindowSession {
 
     @Override
     public void finishDrawing(android.view.IWindow window,
-            android.view.SurfaceControl.Transaction postDrawTransaction) {
+            android.view.SurfaceControl.Transaction postDrawTransaction, int seqId) {
         synchronized (this) {
             final ResizeCompleteCallback c =
                 mResizeCompletionForWindow.get(window.asBinder());
@@ -521,7 +541,12 @@ public class WindowlessWindowManager implements IWindowSession {
         mInsetsState = state;
         for (State s : mStateForWindow.values()) {
             try {
-                s.mClient.insetsChanged(state, false, false);
+                mTmpFrames.frame.set(0, 0, s.mParams.width, s.mParams.height);
+                mTmpFrames.displayFrame.set(mTmpFrames.frame);
+                mTmpConfig.setConfiguration(mConfiguration, mConfiguration);
+                s.mClient.resized(mTmpFrames, false /* reportDraw */, mTmpConfig, state,
+                        false /* forceLayout */, false /* alwaysConsumeSystemBars */, s.mDisplayId,
+                        Integer.MAX_VALUE, RESIZE_MODE_INVALID);
             } catch (RemoteException e) {
                 // Too bad
             }
