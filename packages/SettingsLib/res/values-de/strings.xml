@@ -596,6 +596,8 @@
     <string name="guest_reset_guest_dialog_title" msgid="8047270010895437534">"Gast zurücksetzen?"</string>
     <string name="guest_remove_guest_dialog_title" msgid="4548511006624088072">"Gast entfernen?"</string>
     <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"Zurücksetzen"</string>
+    <!-- no translation found for guest_remove_guest_confirm_button (7858123434954143879) -->
+    <skip />
     <string name="guest_resetting" msgid="7822120170191509566">"Gast wird zurückgesetzt…"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"Foto machen"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"Bild auswählen"</string>
@@ -651,4 +653,10 @@
     <string name="turn_screen_on_title" msgid="3266937298097573424">"Display aktivieren"</string>
     <string name="allow_turn_screen_on" msgid="6194845766392742639">"Aktivieren des Displays erlauben"</string>
     <string name="allow_turn_screen_on_description" msgid="43834403291575164">"Einer App erlauben, das Display zu aktivieren. Wenn du diese Erlaubnis erteilst, kann die App jederzeit das Display aktivieren – auch ohne deine explizite Absicht."</string>
+    <!-- no translation found for bt_le_audio_scan_qr_code (3521809854780392679) -->
+    <skip />
+    <!-- no translation found for bt_le_audio_scan_qr_code_scanner (4679500020630341107) -->
+    <skip />
+    <!-- no translation found for bt_le_audio_qr_code_is_not_valid_format (6092191081849434734) -->
+    <skip />
 </resources>
