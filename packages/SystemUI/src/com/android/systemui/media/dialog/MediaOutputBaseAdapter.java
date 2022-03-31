@@ -46,6 +46,8 @@ import com.android.settingslib.utils.ThreadUtils;
 import com.android.systemui.R;
 import com.android.systemui.animation.Interpolators;
 
+import java.util.List;
+
 /**
  * Base adapter for media output dialog.
  */
@@ -94,7 +96,18 @@ public abstract class MediaOutputBaseAdapter extends
 
     boolean isCurrentlyConnected(MediaDevice device) {
         return TextUtils.equals(device.getId(),
-                mController.getCurrentConnectedMediaDevice().getId());
+                mController.getCurrentConnectedMediaDevice().getId())
+                || (mController.getSelectedMediaDevice().size() == 1
+                && isDeviceIncluded(mController.getSelectedMediaDevice(), device));
+    }
+
+    boolean isDeviceIncluded(List<MediaDevice> deviceList, MediaDevice targetDevice) {
+        for (MediaDevice device : deviceList) {
+            if (TextUtils.equals(device.getId(), targetDevice.getId())) {
+                return true;
+            }
+        }
+        return false;
     }
 
     boolean isDragging() {
