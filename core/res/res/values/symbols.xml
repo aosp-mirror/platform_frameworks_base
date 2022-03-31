@@ -1716,10 +1716,6 @@
   <java-symbol type="anim" name="activity_open_exit" />
   <java-symbol type="anim" name="activity_close_enter" />
   <java-symbol type="anim" name="activity_close_exit" />
-  <java-symbol type="anim" name="activity_open_enter_legacy" />
-  <java-symbol type="anim" name="activity_open_exit_legacy" />
-  <java-symbol type="anim" name="activity_close_enter_legacy" />
-  <java-symbol type="anim" name="activity_close_exit_legacy" />
   <java-symbol type="anim" name="task_fragment_close_enter" />
   <java-symbol type="anim" name="task_fragment_close_exit" />
   <java-symbol type="anim" name="task_fragment_open_enter" />
