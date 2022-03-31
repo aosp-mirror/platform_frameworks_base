@@ -3182,7 +3182,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
 
     @Override
     public void onFillReady(@NonNull FillResponse response, @NonNull AutofillId filledId,
-            @Nullable AutofillValue value) {
+            @Nullable AutofillValue value, int flags) {
         synchronized (mLock) {
             if (mDestroyed) {
                 Slog.w(TAG, "Call to Session#onFillReady() rejected - session: "
@@ -3207,7 +3207,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             return;
         }
 
-        if (requestShowFillDialog(response, filledId, filterText)) {
+        if (requestShowFillDialog(response, filledId, filterText, flags)) {
             synchronized (mLock) {
                 final ViewState currentView = mViewStates.get(mCurrentViewId);
                 currentView.setState(ViewState.STATE_FILL_DIALOG_SHOWN);
@@ -3312,9 +3312,14 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
     }
 
     private boolean requestShowFillDialog(FillResponse response,
-            AutofillId filledId, String filterText) {
+            AutofillId filledId, String filterText, int flags) {
         if (!isFillDialogUiEnabled()) {
             // Unsupported fill dialog UI
+            return false;
+        }
+
+        if ((flags & FillRequest.FLAG_IME_SHOWING) != 0) {
+            // IME is showing, fallback to normal suggestions UI
             return false;
         }
 
