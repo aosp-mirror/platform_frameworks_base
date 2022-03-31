@@ -57974,7 +57974,7 @@ package android.widget.inline {
 package android.window {
 
   public interface OnBackInvokedCallback {
-    method public default void onBackInvoked();
+    method public void onBackInvoked();
   }
 
   public interface OnBackInvokedDispatcher {
