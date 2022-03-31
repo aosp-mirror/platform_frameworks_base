@@ -982,7 +982,11 @@ public class HdmiCecLocalDevicePlaybackTest {
     }
 
     @Test
-    public void handleOnInitializeCecComplete_ByScreenOn() {
+    public void handleOnInitializeCecComplete_ByScreenOn_PowerControlModeTv() {
+        mHdmiCecLocalDevicePlayback.mService.getHdmiCecConfig().setStringValue(
+                HdmiControlManager.CEC_SETTING_NAME_POWER_CONTROL_MODE,
+                HdmiControlManager.POWER_CONTROL_MODE_TV);
+
         mHdmiCecLocalDevicePlayback.onInitializeCecComplete(
                 mHdmiControlService.INITIATED_BY_SCREEN_ON);
         mTestLooper.dispatchAll();
@@ -996,6 +1000,27 @@ public class HdmiCecLocalDevicePlaybackTest {
 
         assertThat(mNativeWrapper.getResultMessages()).contains(activeSource);
         assertThat(mNativeWrapper.getResultMessages()).contains(textViewOn);
+    }
+
+    @Test
+    public void handleOnInitializeCecComplete_ByScreenOn_PowerControlModeNone() {
+        mHdmiCecLocalDevicePlayback.mService.getHdmiCecConfig().setStringValue(
+                HdmiControlManager.CEC_SETTING_NAME_POWER_CONTROL_MODE,
+                HdmiControlManager.POWER_CONTROL_MODE_NONE);
+
+        mHdmiCecLocalDevicePlayback.onInitializeCecComplete(
+                mHdmiControlService.INITIATED_BY_SCREEN_ON);
+        mTestLooper.dispatchAll();
+
+        HdmiCecMessage activeSource =
+                HdmiCecMessageBuilder.buildActiveSource(mPlaybackLogicalAddress,
+                        mPlaybackPhysicalAddress);
+        HdmiCecMessage textViewOn =
+                HdmiCecMessageBuilder.buildTextViewOn(mPlaybackLogicalAddress,
+                        ADDR_TV);
+
+        assertThat(mNativeWrapper.getResultMessages()).doesNotContain(activeSource);
+        assertThat(mNativeWrapper.getResultMessages()).doesNotContain(textViewOn);
     }
 
     @Test
