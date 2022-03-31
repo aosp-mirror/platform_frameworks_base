@@ -127,7 +127,7 @@
     <public name="allowGameFpsOverride" />
     <public name="localeConfig" />
     <public name="showBackground" />
-    <public name="useTargetActivityForQuickAccess"/>
+    <public name="removed_useTargetActivityForQuickAccess"/>
     <public name="removed_inheritKeyStoreKeys" />
     <public name="preferKeepClear" />
     <public name="autoHandwritingEnabled" />
