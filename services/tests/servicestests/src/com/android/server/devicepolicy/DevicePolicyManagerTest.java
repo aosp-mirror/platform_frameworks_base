@@ -128,6 +128,7 @@ import android.net.wifi.WifiSsid;
 import android.os.Build;
 import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
+import android.os.IpcDataCache;
 import android.os.Process;
 import android.os.UserHandle;
 import android.os.UserManager;
@@ -262,6 +263,10 @@ public class DevicePolicyManagerTest extends DpmTestBase {
 
     @Before
     public void setUp() throws Exception {
+
+        // Disable caches in this test process. This must happen early, since some of the
+        // following initialization steps invalidate caches.
+        IpcDataCache.disableForTestMode();
 
         mContext = getContext();
         mServiceContext = mContext;
