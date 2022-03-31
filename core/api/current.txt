@@ -51473,6 +51473,7 @@ package android.view {
     ctor public WindowManager.LayoutParams(int, int, int, int, int);
     ctor public WindowManager.LayoutParams(int, int, int, int, int, int, int);
     ctor public WindowManager.LayoutParams(android.os.Parcel);
+    method public boolean areWallpaperTouchEventsEnabled();
     method public final int copyFrom(android.view.WindowManager.LayoutParams);
     method public String debug(String);
     method public int describeContents();
@@ -51489,6 +51490,7 @@ package android.view {
     method public void setFitInsetsSides(int);
     method public void setFitInsetsTypes(int);
     method public final void setTitle(CharSequence);
+    method public void setWallpaperTouchEventsEnabled(boolean);
     method public void writeToParcel(android.os.Parcel, int);
     field public static final int ALPHA_CHANGED = 128; // 0x80
     field public static final int ANIMATION_CHANGED = 16; // 0x10

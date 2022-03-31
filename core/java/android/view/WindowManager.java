@@ -1955,6 +1955,13 @@ public interface WindowManager extends ViewManager {
          * {@link android.R.style#Theme_Holo_Wallpaper_NoTitleBar},
          * {@link android.R.style#Theme_DeviceDefault_Wallpaper}, and
          * {@link android.R.style#Theme_DeviceDefault_Wallpaper_NoTitleBar}.</p>
+         *
+         * <p> When this flag is set, all touch events sent to this window is also sent to the
+         * wallpaper, which is used to interact with live wallpapers. Check
+         * {@link LayoutParams#areWallpaperTouchEventsEnabled()}, which is set to {@code true}
+         * by default. When showing sensitive information on the window, if you want to disable
+         * sending the touch events to the wallpaper, use
+         * {@link LayoutParams#setWallpaperTouchEventsEnabled(boolean)}.</p>
          */
         public static final int FLAG_SHOW_WALLPAPER = 0x00100000;
 
@@ -3626,6 +3633,15 @@ public interface WindowManager extends ViewManager {
         public LayoutParams[] paramsForRotation;
 
         /**
+         * Specifies whether to send touch events to wallpaper, if the window shows wallpaper in the
+         * background. By default, this is set to {@code true} i.e. if any window shows wallpaper
+         * in the background, the wallpaper will receive touch events, unless specified otherwise.
+         *
+         * @see android.view.WindowManager.LayoutParams#FLAG_SHOW_WALLPAPER
+         */
+        private boolean mWallpaperTouchEventsEnabled = true;
+
+        /**
          * Specifies types of insets that this window should avoid overlapping during layout.
          *
          * @param types which {@link WindowInsets.Type}s of insets that this window should avoid.
@@ -3700,6 +3716,31 @@ public interface WindowManager extends ViewManager {
         public boolean isSystemApplicationOverlay() {
             return (privateFlags & PRIVATE_FLAG_SYSTEM_APPLICATION_OVERLAY)
                     == PRIVATE_FLAG_SYSTEM_APPLICATION_OVERLAY;
+        }
+
+        /**
+         * Set whether sending touch events to the system wallpaper (which can be provided by a
+         * third-party application) should be enabled for windows that show wallpaper in
+         * background. By default, this is set to {@code true}.
+         * Check {@link android.view.WindowManager.LayoutParams#FLAG_SHOW_WALLPAPER} for more
+         * information on showing system wallpaper behind the window.
+         *
+         * @param enable whether to enable sending touch events to the system wallpaper.
+         */
+        public void setWallpaperTouchEventsEnabled(boolean enable) {
+            mWallpaperTouchEventsEnabled = enable;
+        }
+
+        /**
+         * Returns whether sending touch events to the system wallpaper (which can be provided by a
+         * third-party application) is enabled for windows that show wallpaper in background.
+         * Check {@link android.view.WindowManager.LayoutParams#FLAG_SHOW_WALLPAPER} for more
+         * information on showing system wallpaper behind the window.
+         *
+         * @return whether sending touch events to the system wallpaper is enabled.
+         */
+        public boolean areWallpaperTouchEventsEnabled() {
+            return mWallpaperTouchEventsEnabled;
         }
 
         /**
@@ -4010,6 +4051,7 @@ public interface WindowManager extends ViewManager {
             } else {
                 out.writeInt(0);
             }
+            out.writeBoolean(mWallpaperTouchEventsEnabled);
         }
 
         public static final @android.annotation.NonNull Parcelable.Creator<LayoutParams> CREATOR
@@ -4097,6 +4139,7 @@ public interface WindowManager extends ViewManager {
                 paramsForRotation = new LayoutParams[paramsForRotationLength];
                 in.readTypedArray(paramsForRotation, LayoutParams.CREATOR);
             }
+            mWallpaperTouchEventsEnabled = in.readBoolean();
         }
 
         @SuppressWarnings({"PointlessBitwiseExpression"})
@@ -4411,6 +4454,11 @@ public interface WindowManager extends ViewManager {
             if (!Arrays.equals(paramsForRotation, o.paramsForRotation)) {
                 paramsForRotation = o.paramsForRotation;
                 checkNonRecursiveParams();
+                changes |= LAYOUT_CHANGED;
+            }
+
+            if (mWallpaperTouchEventsEnabled != o.mWallpaperTouchEventsEnabled) {
+                mWallpaperTouchEventsEnabled = o.mWallpaperTouchEventsEnabled;
                 changes |= LAYOUT_CHANGED;
             }
 
