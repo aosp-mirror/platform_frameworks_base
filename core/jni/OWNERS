@@ -59,6 +59,7 @@ per-file android_media_* = file:/media/java/android/media/OWNERS
 per-file android_media_midi_* = file:/media/java/android/media/midi/OWNERS
 per-file android_opengl_* = file:/opengl/java/android/opengl/OWNERS
 per-file android_os_storage_* = file:/core/java/android/os/storage/OWNERS
+per-file android_os_Trace* = file:/TRACE_OWNERS
 per-file android_se_* = file:/omapi/java/android/se/OWNERS
 per-file android_security_* = file:/core/java/android/security/OWNERS
 per-file android_view_* = file:/core/java/android/view/OWNERS

@@ -227,6 +227,8 @@ final class LogicalDisplay {
                 info.largestNominalAppHeight = mOverrideDisplayInfo.largestNominalAppHeight;
                 info.logicalWidth = mOverrideDisplayInfo.logicalWidth;
                 info.logicalHeight = mOverrideDisplayInfo.logicalHeight;
+                info.physicalXDpi = mOverrideDisplayInfo.physicalXDpi;
+                info.physicalYDpi = mOverrideDisplayInfo.physicalYDpi;
                 info.rotation = mOverrideDisplayInfo.rotation;
                 info.displayCutout = mOverrideDisplayInfo.displayCutout;
                 info.logicalDensityDpi = mOverrideDisplayInfo.logicalDensityDpi;

@@ -53,6 +53,7 @@ import static android.view.Surface.ROTATION_0;
 import static android.view.Surface.ROTATION_270;
 import static android.view.Surface.ROTATION_90;
 import static android.view.View.GONE;
+import static android.view.ViewRootImpl.LOCAL_LAYOUT;
 import static android.view.WindowInsets.Type.displayCutout;
 import static android.view.WindowInsets.Type.ime;
 import static android.view.WindowInsets.Type.systemBars;
@@ -354,6 +355,8 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     int mInitialDisplayWidth = 0;
     int mInitialDisplayHeight = 0;
     int mInitialDisplayDensity = 0;
+    float mInitialPhysicalXDpi = 0.0f;
+    float mInitialPhysicalYDpi = 0.0f;
 
     DisplayCutout mInitialDisplayCutout;
     private final RotationCache<DisplayCutout, WmDisplayCutout> mDisplayCutoutCache
@@ -394,6 +397,12 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     boolean mIsDensityForced = false;
 
     /**
+     * Overridden display physical dpi.
+     */
+    float mBaseDisplayPhysicalXDpi = 0.0f;
+    float mBaseDisplayPhysicalYDpi = 0.0f;
+
+    /**
      * Whether to disable display scaling. This can be set via shell command "adb shell wm scaling".
      * @see WindowManagerService#setForcedDisplayScalingMode(int, int)
      */
@@ -426,7 +435,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
 
     /**
      * Compat metrics computed based on {@link #mDisplayMetrics}.
-     * @see #updateDisplayAndOrientation(int)
+     * @see #updateDisplayAndOrientation(int, Configuration)
      */
     private final DisplayMetrics mCompatDisplayMetrics = new DisplayMetrics();
 
@@ -2034,6 +2043,8 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         mDisplayInfo.logicalWidth = dw;
         mDisplayInfo.logicalHeight = dh;
         mDisplayInfo.logicalDensityDpi = mBaseDisplayDensity;
+        mDisplayInfo.physicalXDpi = mBaseDisplayPhysicalXDpi;
+        mDisplayInfo.physicalYDpi = mBaseDisplayPhysicalYDpi;
         mDisplayInfo.appWidth = appWidth;
         mDisplayInfo.appHeight = appHeight;
         if (isDefaultDisplay) {
@@ -2647,29 +2658,27 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         mCurrentPrivacyIndicatorBounds =
                 mCurrentPrivacyIndicatorBounds.updateStaticBounds(staticBounds);
         if (!Objects.equals(oldBounds, mCurrentPrivacyIndicatorBounds)) {
-            final DisplayInfo info = mDisplayInfo;
-            if (mDisplayFrames.onDisplayInfoUpdated(info,
-                    calculateDisplayCutoutForRotation(info.rotation),
-                    calculateRoundedCornersForRotation(info.rotation),
-                    calculatePrivacyIndicatorBoundsForRotation(info.rotation))) {
-                mInsetsStateController.onDisplayInfoUpdated(true);
-            }
+            updateDisplayFrames(false /* insetsSourceMayChange */, true /* notifyInsetsChange */);
         }
     }
 
     void onDisplayInfoChanged() {
-        final DisplayInfo info = mDisplayInfo;
-        if (mDisplayFrames.onDisplayInfoUpdated(info,
-                calculateDisplayCutoutForRotation(info.rotation),
-                calculateRoundedCornersForRotation(info.rotation),
-                calculatePrivacyIndicatorBoundsForRotation(info.rotation))) {
-            // TODO(b/161810301): Set notifyInsetsChange to true while the server no longer performs
-            //                    layout.
-            mInsetsStateController.onDisplayInfoUpdated(false /* notifyInsetsChanged */);
-        }
+        updateDisplayFrames(LOCAL_LAYOUT, LOCAL_LAYOUT);
         mMinSizeOfResizeableTaskDp = getMinimalTaskSizeDp();
-        mInputMonitor.layoutInputConsumers(info.logicalWidth, info.logicalHeight);
-        mDisplayPolicy.onDisplayInfoChanged(info);
+        mInputMonitor.layoutInputConsumers(mDisplayInfo.logicalWidth, mDisplayInfo.logicalHeight);
+        mDisplayPolicy.onDisplayInfoChanged(mDisplayInfo);
+    }
+
+    private void updateDisplayFrames(boolean insetsSourceMayChange, boolean notifyInsetsChange) {
+        if (mDisplayFrames.update(mDisplayInfo,
+                calculateDisplayCutoutForRotation(mDisplayInfo.rotation),
+                calculateRoundedCornersForRotation(mDisplayInfo.rotation),
+                calculatePrivacyIndicatorBoundsForRotation(mDisplayInfo.rotation))) {
+            if (insetsSourceMayChange) {
+                mDisplayPolicy.updateInsetsSourceFramesExceptIme(mDisplayFrames);
+            }
+            mInsetsStateController.onDisplayFramesUpdated(notifyInsetsChange);
+        }
     }
 
     @Override
@@ -2698,10 +2707,13 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         }
 
         updateBaseDisplayMetrics(mDisplayInfo.logicalWidth, mDisplayInfo.logicalHeight,
-                mDisplayInfo.logicalDensityDpi);
+                mDisplayInfo.logicalDensityDpi, mDisplayInfo.physicalXDpi,
+                mDisplayInfo.physicalYDpi);
         mInitialDisplayWidth = mDisplayInfo.logicalWidth;
         mInitialDisplayHeight = mDisplayInfo.logicalHeight;
         mInitialDisplayDensity = mDisplayInfo.logicalDensityDpi;
+        mInitialPhysicalXDpi = mDisplayInfo.physicalXDpi;
+        mInitialPhysicalYDpi = mDisplayInfo.physicalYDpi;
         mInitialDisplayCutout = mDisplayInfo.displayCutout;
         mInitialRoundedCorners = mDisplayInfo.roundedCorners;
         mCurrentPrivacyIndicatorBounds = new PrivacyIndicatorBounds(new Rect[4],
@@ -2720,6 +2732,8 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         final int newWidth = rotated ? mDisplayInfo.logicalHeight : mDisplayInfo.logicalWidth;
         final int newHeight = rotated ? mDisplayInfo.logicalWidth : mDisplayInfo.logicalHeight;
         final int newDensity = mDisplayInfo.logicalDensityDpi;
+        final float newXDpi = mDisplayInfo.physicalXDpi;
+        final float newYDpi = mDisplayInfo.physicalYDpi;
         final DisplayCutout newCutout = mIgnoreDisplayCutout
                 ? DisplayCutout.NO_CUTOUT : mDisplayInfo.displayCutout;
         final String newUniqueId = mDisplayInfo.uniqueId;
@@ -2727,7 +2741,9 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
 
         final boolean displayMetricsChanged = mInitialDisplayWidth != newWidth
                 || mInitialDisplayHeight != newHeight
-                || mInitialDisplayDensity != mDisplayInfo.logicalDensityDpi
+                || mInitialDisplayDensity != newDensity
+                || mInitialPhysicalXDpi != newXDpi
+                || mInitialPhysicalYDpi != newYDpi
                 || !Objects.equals(mInitialDisplayCutout, newCutout)
                 || !Objects.equals(mInitialRoundedCorners, newRoundedCorners);
         final boolean physicalDisplayChanged = !newUniqueId.equals(mCurrentUniqueDisplayId);
@@ -2744,7 +2760,9 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             // If there is an override set for base values - use it, otherwise use new values.
             updateBaseDisplayMetrics(mIsSizeForced ? mBaseDisplayWidth : newWidth,
                     mIsSizeForced ? mBaseDisplayHeight : newHeight,
-                    mIsDensityForced ? mBaseDisplayDensity : newDensity);
+                    mIsDensityForced ? mBaseDisplayDensity : newDensity,
+                    mIsSizeForced ? mBaseDisplayPhysicalXDpi : newXDpi,
+                    mIsSizeForced ? mBaseDisplayPhysicalYDpi : newYDpi);
 
             configureDisplayPolicy();
 
@@ -2759,6 +2777,8 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             mInitialDisplayWidth = newWidth;
             mInitialDisplayHeight = newHeight;
             mInitialDisplayDensity = newDensity;
+            mInitialPhysicalXDpi = newXDpi;
+            mInitialPhysicalYDpi = newYDpi;
             mInitialDisplayCutout = newCutout;
             mInitialRoundedCorners = newRoundedCorners;
             mCurrentUniqueDisplayId = newUniqueId;
@@ -2775,19 +2795,25 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         mMaxUiWidth = width;
 
         // Update existing metrics.
-        updateBaseDisplayMetrics(mBaseDisplayWidth, mBaseDisplayHeight, mBaseDisplayDensity);
+        updateBaseDisplayMetrics(mBaseDisplayWidth, mBaseDisplayHeight, mBaseDisplayDensity,
+                mBaseDisplayPhysicalXDpi, mBaseDisplayPhysicalYDpi);
     }
 
     /** Update base (override) display metrics. */
-    void updateBaseDisplayMetrics(int baseWidth, int baseHeight, int baseDensity) {
+    void updateBaseDisplayMetrics(int baseWidth, int baseHeight, int baseDensity, float baseXDpi,
+            float baseYDpi) {
         mBaseDisplayWidth = baseWidth;
         mBaseDisplayHeight = baseHeight;
         mBaseDisplayDensity = baseDensity;
+        mBaseDisplayPhysicalXDpi = baseXDpi;
+        mBaseDisplayPhysicalYDpi = baseYDpi;
 
         if (mMaxUiWidth > 0 && mBaseDisplayWidth > mMaxUiWidth) {
             final float ratio = mMaxUiWidth / (float) mBaseDisplayWidth;
             mBaseDisplayHeight = (int) (mBaseDisplayHeight * ratio);
             mBaseDisplayWidth = mMaxUiWidth;
+            mBaseDisplayPhysicalXDpi = mBaseDisplayPhysicalXDpi * ratio;
+            mBaseDisplayPhysicalYDpi = mBaseDisplayPhysicalYDpi * ratio;
             if (!mIsDensityForced) {
                 // Update the density proportionally so the size of the UI elements won't change
                 // from the user's perspective.
@@ -2861,7 +2887,8 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         }
 
         Slog.i(TAG_WM, "Using new display size: " + width + "x" + height);
-        updateBaseDisplayMetrics(width, height, mBaseDisplayDensity);
+        updateBaseDisplayMetrics(width, height, mBaseDisplayDensity, mBaseDisplayPhysicalXDpi,
+                mBaseDisplayPhysicalYDpi);
         reconfigureDisplayLocked();
 
         if (!mIsSizeForced) {
@@ -3979,6 +4006,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         }
 
         ProtoLog.i(WM_DEBUG_IME, "setInputMethodTarget %s", target);
+        final boolean layeringTargetChanged = target != mImeLayeringTarget;
         mImeLayeringTarget = target;
 
         // 1. Reparent the IME container window to the target root DA to get the correct bounds and
@@ -4006,7 +4034,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         // 4. Update the IME control target to apply any inset change and animation.
         // 5. Reparent the IME container surface to either the input target app, or the IME window
         // parent.
-        updateImeControlTarget(true /* forceUpdateImeParent */);
+        updateImeControlTarget(layeringTargetChanged);
     }
 
     @VisibleForTesting
@@ -4140,6 +4168,10 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         final SurfaceControl.Transaction t = getPendingTransaction();
         // Prepare IME screenshot for the target if it allows to attach into.
         if (mInputMethodWindow != null && mInputMethodWindow.isVisible()) {
+            // Remove the obsoleted IME snapshot first in case the new snapshot happens to
+            // override the current one before the transition finish and the surface never be
+            // removed on the task.
+            removeImeSurfaceImmediately();
             mImeScreenshot = new ImeScreenshot(
                     mWmService.mSurfaceControlFactory.apply(null), mImeLayeringTarget);
             mImeScreenshot.attachAndShow(t);

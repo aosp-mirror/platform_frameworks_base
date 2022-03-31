@@ -270,6 +270,16 @@ public class AlarmManager {
     @EnabledSince(targetSdkVersion = Build.VERSION_CODES.S)
     public static final long ENFORCE_MINIMUM_WINDOW_ON_INEXACT_ALARMS = 185199076L;
 
+    /**
+     * For apps targeting {@link Build.VERSION_CODES#TIRAMISU} or above, certain kinds of apps can
+     * use {@link Manifest.permission#USE_EXACT_ALARM} to schedule exact alarms.
+     *
+     * @hide
+     */
+    @ChangeId
+    @EnabledSince(targetSdkVersion = Build.VERSION_CODES.TIRAMISU)
+    public static final long ENABLE_USE_EXACT_ALARM = 218533173L;
+
     @UnsupportedAppUsage
     private final IAlarmManager mService;
     private final Context mContext;

@@ -278,7 +278,8 @@ public final class ViewRootImpl implements ViewParent,
      * Whether the caption is drawn by the shell.
      * @hide
      */
-    public static final boolean CAPTION_ON_SHELL = false;
+    public static final boolean CAPTION_ON_SHELL =
+            SystemProperties.getBoolean("persist.debug.caption_on_shell", false);
 
     /**
      * Whether the client should compute the window frame on its own.
@@ -817,12 +818,7 @@ public final class ViewRootImpl implements ViewParent,
     private final SurfaceSyncer mSurfaceSyncer = new SurfaceSyncer();
     private int mLastSyncId = -1;
     private SurfaceSyncer.SyncBufferCallback mSyncBufferCallback;
-
-    /**
-     * Keeps track of the last frame number that was attempted to draw. Should only be accessed on
-     * the RenderThread.
-     */
-    private long mRtLastAttemptedDrawFrameNum = 0;
+    private int mNumSyncsInProgress = 0;
 
     private HashSet<ScrollCaptureCallback> mRootScrollCaptureCallbacks;
 
@@ -4250,7 +4246,7 @@ public final class ViewRootImpl implements ViewParent,
         mHasPendingTransactions = false;
 
         try {
-            boolean canUseAsync = draw(fullRedrawNeeded);
+            boolean canUseAsync = draw(fullRedrawNeeded, usingAsyncReport && mSyncBuffer);
             if (usingAsyncReport && !canUseAsync) {
                 mAttachInfo.mThreadedRenderer.setFrameCallback(null);
                 usingAsyncReport = false;
@@ -4410,7 +4406,7 @@ public final class ViewRootImpl implements ViewParent,
         }
     }
 
-    private boolean draw(boolean fullRedrawNeeded) {
+    private boolean draw(boolean fullRedrawNeeded, boolean forceDraw) {
         Surface surface = mSurface;
         if (!surface.isValid()) {
             return false;
@@ -4547,6 +4543,9 @@ public final class ViewRootImpl implements ViewParent,
 
                 useAsyncReport = true;
 
+                if (forceDraw) {
+                    mAttachInfo.mThreadedRenderer.forceDrawNextFrame();
+                }
                 mAttachInfo.mThreadedRenderer.draw(mView, mAttachInfo, this);
             } else {
                 // If we get here with a disabled & requested hardware renderer, something went
@@ -8095,14 +8094,17 @@ public final class ViewRootImpl implements ViewParent,
     private void setFrame(Rect frame) {
         mWinFrame.set(frame);
 
+        final WindowConfiguration winConfig = getConfiguration().windowConfiguration;
+        mPendingBackDropFrame.set(mPendingDragResizing && !winConfig.useWindowFrameForBackdrop()
+                ? winConfig.getMaxBounds()
+                : frame);
         // Surface position is now inherited from parent, and BackdropFrameRenderer uses backdrop
         // frame to position content. Thus, we just keep the size of backdrop frame, and remove the
         // offset to avoid double offset from display origin.
-        mPendingBackDropFrame.set(frame);
         mPendingBackDropFrame.offsetTo(0, 0);
 
         mInsetsController.onFrameChanged(mOverrideInsetsFrame != null ?
-            mOverrideInsetsFrame : frame);
+                mOverrideInsetsFrame : frame);
     }
 
     /**
@@ -10870,9 +10872,28 @@ public final class ViewRootImpl implements ViewParent,
         });
     }
 
-    public final SurfaceSyncer.SyncTarget mSyncTarget = this::readyToSync;
+    public final SurfaceSyncer.SyncTarget mSyncTarget = new SurfaceSyncer.SyncTarget() {
+        @Override
+        public void onReadyToSync(SurfaceSyncer.SyncBufferCallback syncBufferCallback) {
+            readyToSync(syncBufferCallback);
+        }
+
+        @Override
+        public void onSyncComplete() {
+            mHandler.postAtFrontOfQueue(() -> {
+                if (--mNumSyncsInProgress == 0 && mAttachInfo.mThreadedRenderer != null) {
+                    HardwareRenderer.setRtAnimationsEnabled(true);
+                }
+            });
+        }
+    };
 
     private void readyToSync(SurfaceSyncer.SyncBufferCallback syncBufferCallback) {
+        mNumSyncsInProgress++;
+        if (mAttachInfo.mThreadedRenderer != null) {
+            HardwareRenderer.setRtAnimationsEnabled(false);
+        }
+
         if (mSyncBufferCallback != null) {
             Log.d(mTag, "Already set sync for the next draw.");
             mSyncBufferCallback.onBufferReady(null);

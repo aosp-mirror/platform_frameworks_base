@@ -30,7 +30,6 @@ import android.content.res.Resources;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.os.UserHandle;
-import android.os.storage.StorageManager;
 import android.provider.Settings;
 import android.security.Credentials;
 import android.security.KeyChain;
@@ -132,9 +131,6 @@ public class CertificateMonitor {
     private final BroadcastReceiver mRootCaReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            if (StorageManager.inCryptKeeperBounce()) {
-                return;
-            }
             final int userId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, getSendingUserId());
             updateInstalledCertificates(UserHandle.of(userId));
         }

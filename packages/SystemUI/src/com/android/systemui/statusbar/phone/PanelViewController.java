@@ -797,10 +797,9 @@ public abstract class PanelViewController {
             }
             mExpandedFraction = Math.min(1f,
                     maxPanelHeight == 0 ? 0 : mExpandedHeight / maxPanelHeight);
-            mAmbientState.setExpansionFraction(mKeyguardStateController.isUnlocked()
-                    ? mExpandedFraction
-                    : BouncerPanelExpansionCalculator
-                            .getBackScrimScaledExpansion(mExpandedFraction));
+            mAmbientState.setExpansionFraction(mStatusBarKeyguardViewManager.bouncerIsInTransit()
+                    ? BouncerPanelExpansionCalculator.getBackScrimScaledExpansion(mExpandedFraction)
+                    : mExpandedFraction);
             onHeightUpdated(mExpandedHeight);
             updatePanelExpansionAndVisibility();
         });

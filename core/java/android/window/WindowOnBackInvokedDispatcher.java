@@ -18,7 +18,6 @@ package android.window;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.app.compat.CompatChanges;
 import android.content.Context;
 import android.os.Debug;
 import android.os.Handler;
@@ -253,21 +252,20 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
      * {@link OnBackInvokedCallback}.
      */
     public static boolean isOnBackInvokedCallbackEnabled(@Nullable Context context) {
-        // new back is enabled if the app targets T AND the feature flag is enabled AND the app
-        // does not explicitly request legacy back.
-        boolean targetsT = CompatChanges.isChangeEnabled(DISPATCH_BACK_INVOCATION_AHEAD_OF_TIME);
+        // new back is enabled if the feature flag is enabled AND the app does not explicitly
+        // request legacy back.
         boolean featureFlagEnabled = IS_BACK_PREDICTABILITY_ENABLED;
         // If the context is null, we assume true and fallback on the two other conditions.
-        boolean appRequestsLegacy =
-                context == null || !context.getApplicationInfo().isOnBackInvokedCallbackEnabled();
+        boolean appRequestsPredictiveBack =
+                context != null && context.getApplicationInfo().isOnBackInvokedCallbackEnabled();
 
         if (DEBUG) {
-            Log.d(TAG, TextUtils.formatSimple("App: %s isChangeEnabled=%s featureFlagEnabled=%s "
-                            + "onBackInvokedEnabled=%s",
+            Log.d(TAG, TextUtils.formatSimple("App: %s featureFlagEnabled=%s "
+                            + "appRequestsPredictiveBack=%s",
                     context != null ? context.getApplicationInfo().packageName : "null context",
-                    targetsT, featureFlagEnabled, !appRequestsLegacy));
+                    featureFlagEnabled, appRequestsPredictiveBack));
         }
 
-        return targetsT && featureFlagEnabled && !appRequestsLegacy;
+        return featureFlagEnabled && appRequestsPredictiveBack;
     }
 }

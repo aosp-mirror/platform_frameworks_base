@@ -109,12 +109,9 @@
     <string name="bluetooth_battery_level" msgid="2893696778200201555">"බැටරිය <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="bluetooth_battery_level_untethered" msgid="4002282355111504349">"ව: බැටරිය <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>, ද: බැටරිය <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g>"</string>
     <string name="bluetooth_active_no_battery_level" msgid="4155462233006205630">"ක්‍රියාකාරී"</string>
-    <!-- no translation found for bluetooth_hearing_aid_left_active (7084887715570971441) -->
-    <skip />
-    <!-- no translation found for bluetooth_hearing_aid_right_active (8574683234077567230) -->
-    <skip />
-    <!-- no translation found for bluetooth_hearing_aid_left_and_right_active (407704460573163973) -->
-    <skip />
+    <string name="bluetooth_hearing_aid_left_active" msgid="7084887715570971441">"සක්‍රිය, වම පමණි"</string>
+    <string name="bluetooth_hearing_aid_right_active" msgid="8574683234077567230">"සක්‍රිය, දකුණ පමණි"</string>
+    <string name="bluetooth_hearing_aid_left_and_right_active" msgid="407704460573163973">"සක්‍රිය, වම සහ දකුණ"</string>
     <string name="bluetooth_profile_a2dp" msgid="4632426382762851724">"මාධ්‍ය ශ්‍රව්‍ය"</string>
     <string name="bluetooth_profile_headset" msgid="5395952236133499331">"දුරකථන ඇමතුම්"</string>
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"ගොනු හුවමාරුව"</string>

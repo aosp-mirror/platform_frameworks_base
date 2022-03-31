@@ -394,7 +394,7 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
         pw.println("  mUserUnlockedWithBiometric: " + mUserUnlockedWithBiometric);
         pw.println("  mRunningFPS: " + mRunningFPS);
         pw.println("  mCanDismissLockScreen: " + mCanDismissLockScreen);
-        pw.println("  mStatusBarState: " + StatusBarState.toShortString(mStatusBarState));
+        pw.println("  mStatusBarState: " + StatusBarState.toString(mStatusBarState));
         pw.println("  mQsExpanded: " + mQsExpanded);
         pw.println("  mInterpolatedDarkAmount: " + mInterpolatedDarkAmount);
 

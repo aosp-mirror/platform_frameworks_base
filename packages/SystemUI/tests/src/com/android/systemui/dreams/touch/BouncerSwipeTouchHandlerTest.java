@@ -166,6 +166,76 @@ public class BouncerSwipeTouchHandlerTest extends SysuiTestCase {
     }
 
     /**
+     * Makes sure swiping up when bouncer initially showing doesn't change the expansion amount.
+     */
+    @Test
+    public void testSwipeUp_whenBouncerInitiallyShowing_keepsExpansionAtZero() {
+        when(mCentralSurfaces.isBouncerShowing()).thenReturn(true);
+
+        mTouchHandler.onSessionStart(mTouchSession);
+        ArgumentCaptor<GestureDetector.OnGestureListener> gestureListenerCaptor =
+                ArgumentCaptor.forClass(GestureDetector.OnGestureListener.class);
+        verify(mTouchSession).registerGestureListener(gestureListenerCaptor.capture());
+
+        final OnGestureListener gestureListener = gestureListenerCaptor.getValue();
+
+        final float percent = .3f;
+        final float distanceY = SCREEN_HEIGHT_PX * percent;
+
+        // Swiping up near the top of the screen where the touch initiation region is.
+        final MotionEvent event1 = MotionEvent.obtain(0, 0, MotionEvent.ACTION_MOVE,
+                0, distanceY, 0);
+        final MotionEvent event2 = MotionEvent.obtain(0, 0, MotionEvent.ACTION_MOVE,
+                0, 0, 0);
+
+        assertThat(gestureListener.onScroll(event1, event2, 0, distanceY))
+                .isTrue();
+
+        // Ensure only called once
+        verify(mStatusBarKeyguardViewManager)
+                .onPanelExpansionChanged(anyFloat(), anyBoolean(), anyBoolean());
+
+        // TODO(b/227348372): update the logic and also this test.
+        // Ensure the expansion is kept at 0.
+        verify(mStatusBarKeyguardViewManager).onPanelExpansionChanged(eq(0f), eq(false),
+                eq(true));
+    }
+
+    /**
+     * Makes sure swiping down when bouncer initially hidden doesn't change the expansion amount.
+     */
+    @Test
+    public void testSwipeDown_whenBouncerInitiallyHidden_keepsExpansionAtOne() {
+        mTouchHandler.onSessionStart(mTouchSession);
+        ArgumentCaptor<GestureDetector.OnGestureListener> gestureListenerCaptor =
+                ArgumentCaptor.forClass(GestureDetector.OnGestureListener.class);
+        verify(mTouchSession).registerGestureListener(gestureListenerCaptor.capture());
+
+        final OnGestureListener gestureListener = gestureListenerCaptor.getValue();
+
+        final float percent = .15f;
+        final float distanceY = SCREEN_HEIGHT_PX * percent;
+
+        // Swiping down near the bottom of the screen where the touch initiation region is.
+        final MotionEvent event1 = MotionEvent.obtain(0, 0, MotionEvent.ACTION_MOVE,
+                0, SCREEN_HEIGHT_PX - distanceY, 0);
+        final MotionEvent event2 = MotionEvent.obtain(0, 0, MotionEvent.ACTION_MOVE,
+                0, SCREEN_HEIGHT_PX, 0);
+
+        assertThat(gestureListener.onScroll(event1, event2, 0, distanceY))
+                .isTrue();
+
+        // Ensure only called once
+        verify(mStatusBarKeyguardViewManager)
+                .onPanelExpansionChanged(anyFloat(), anyBoolean(), anyBoolean());
+
+        // TODO(b/227348372): update the logic and also this test.
+        // Ensure the expansion is kept at 1.
+        verify(mStatusBarKeyguardViewManager).onPanelExpansionChanged(eq(1f), eq(false),
+                eq(true));
+    }
+
+    /**
      * Makes sure the expansion amount is proportional to (1 - scroll).
      */
     @Test
@@ -176,12 +246,13 @@ public class BouncerSwipeTouchHandlerTest extends SysuiTestCase {
         verify(mTouchSession).registerGestureListener(gestureListenerCaptor.capture());
 
         final OnGestureListener gestureListener = gestureListenerCaptor.getValue();
-        verifyScroll(.3f, Direction.UP, true, gestureListener);
+
+        verifyScroll(.3f, Direction.UP, false, gestureListener);
 
         // Ensure that subsequent gestures are treated as expanding even if the bouncer state
         // changes.
         when(mCentralSurfaces.isBouncerShowing()).thenReturn(true);
-        verifyScroll(.7f, Direction.UP, true, gestureListener);
+        verifyScroll(.7f, Direction.UP, false, gestureListener);
     }
 
     /**
@@ -197,17 +268,17 @@ public class BouncerSwipeTouchHandlerTest extends SysuiTestCase {
         verify(mTouchSession).registerGestureListener(gestureListenerCaptor.capture());
 
         final OnGestureListener gestureListener = gestureListenerCaptor.getValue();
-        verifyScroll(.3f, Direction.DOWN, false, gestureListener);
+
+        verifyScroll(.3f, Direction.DOWN, true, gestureListener);
 
         // Ensure that subsequent gestures are treated as collapsing even if the bouncer state
         // changes.
         when(mCentralSurfaces.isBouncerShowing()).thenReturn(false);
-        verifyScroll(.7f, Direction.DOWN, false, gestureListener);
+        verifyScroll(.7f, Direction.DOWN, true, gestureListener);
     }
 
-    private void verifyScroll(float percent, Direction direction, boolean expanding,
-            android.view.GestureDetector.OnGestureListener gestureListener) {
-
+    private void verifyScroll(float percent, Direction direction,
+            boolean isBouncerInitiallyShowing, GestureDetector.OnGestureListener gestureListener) {
         final float distanceY = SCREEN_HEIGHT_PX * percent;
 
         final MotionEvent event1 = MotionEvent.obtain(0, 0, MotionEvent.ACTION_MOVE,
@@ -223,10 +294,11 @@ public class BouncerSwipeTouchHandlerTest extends SysuiTestCase {
         verify(mStatusBarKeyguardViewManager)
                 .onPanelExpansionChanged(anyFloat(), anyBoolean(), anyBoolean());
 
+        final float expansion = isBouncerInitiallyShowing ? percent : 1 - percent;
+
         // Ensure correct expansion passed in.
-        verify(mStatusBarKeyguardViewManager)
-                .onPanelExpansionChanged(
-                        eq(expanding ? 1 - percent : percent), eq(false), eq(true));
+        verify(mStatusBarKeyguardViewManager).onPanelExpansionChanged(eq(expansion), eq(false),
+                eq(true));
     }
 
     /**
@@ -340,9 +412,9 @@ public class BouncerSwipeTouchHandlerTest extends SysuiTestCase {
         mTouchHandler.onSessionStart(mTouchSession);
         ArgumentCaptor<GestureDetector.OnGestureListener> gestureListenerCaptor =
                 ArgumentCaptor.forClass(GestureDetector.OnGestureListener.class);
+        verify(mTouchSession).registerGestureListener(gestureListenerCaptor.capture());
         ArgumentCaptor<InputChannelCompat.InputEventListener> inputEventListenerCaptor =
                 ArgumentCaptor.forClass(InputChannelCompat.InputEventListener.class);
-        verify(mTouchSession).registerGestureListener(gestureListenerCaptor.capture());
         verify(mTouchSession).registerInputListener(inputEventListenerCaptor.capture());
 
         when(mVelocityTracker.getYVelocity()).thenReturn(velocityY);

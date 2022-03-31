@@ -296,7 +296,6 @@ package android {
     field public static final String SECURE_ELEMENT_PRIVILEGED_OPERATION = "android.permission.SECURE_ELEMENT_PRIVILEGED_OPERATION";
     field public static final String SEND_CATEGORY_CAR_NOTIFICATIONS = "android.permission.SEND_CATEGORY_CAR_NOTIFICATIONS";
     field public static final String SEND_DEVICE_CUSTOMIZATION_READY = "android.permission.SEND_DEVICE_CUSTOMIZATION_READY";
-    field public static final String SEND_LOST_MODE_LOCATION_UPDATES = "android.permission.SEND_LOST_MODE_LOCATION_UPDATES";
     field public static final String SEND_SAFETY_CENTER_UPDATE = "android.permission.SEND_SAFETY_CENTER_UPDATE";
     field public static final String SEND_SHOW_SUSPENDED_APP_DETAILS = "android.permission.SEND_SHOW_SUSPENDED_APP_DETAILS";
     field public static final String SEND_SMS_NO_CONFIRMATION = "android.permission.SEND_SMS_NO_CONFIRMATION";
@@ -2785,16 +2784,14 @@ package android.companion.virtual {
 
   public final class VirtualDeviceManager {
     method @NonNull @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE) public android.companion.virtual.VirtualDeviceManager.VirtualDevice createVirtualDevice(int, @NonNull android.companion.virtual.VirtualDeviceParams);
+    field public static final int LAUNCH_FAILURE_NO_ACTIVITY = 2; // 0x2
+    field public static final int LAUNCH_FAILURE_PENDING_INTENT_CANCELED = 1; // 0x1
+    field public static final int LAUNCH_SUCCESS = 0; // 0x0
   }
 
   public static interface VirtualDeviceManager.ActivityListener {
     method public void onDisplayEmpty(int);
     method public void onTopActivityChanged(int, @NonNull android.content.ComponentName);
-  }
-
-  public static interface VirtualDeviceManager.LaunchCallback {
-    method public void onLaunchFailed();
-    method public void onLaunchSuccess();
   }
 
   public static class VirtualDeviceManager.VirtualDevice implements java.lang.AutoCloseable {
@@ -2805,7 +2802,7 @@ package android.companion.virtual {
     method @NonNull @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE) public android.hardware.input.VirtualKeyboard createVirtualKeyboard(@NonNull android.hardware.display.VirtualDisplay, @NonNull String, int, int);
     method @NonNull @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE) public android.hardware.input.VirtualMouse createVirtualMouse(@NonNull android.hardware.display.VirtualDisplay, @NonNull String, int, int);
     method @NonNull @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE) public android.hardware.input.VirtualTouchscreen createVirtualTouchscreen(@NonNull android.hardware.display.VirtualDisplay, @NonNull String, int, int);
-    method public void launchPendingIntent(int, @NonNull android.app.PendingIntent, @NonNull java.util.concurrent.Executor, @NonNull android.companion.virtual.VirtualDeviceManager.LaunchCallback);
+    method public void launchPendingIntent(int, @NonNull android.app.PendingIntent, @NonNull java.util.concurrent.Executor, @NonNull java.util.function.IntConsumer);
     method public void removeActivityListener(@NonNull android.companion.virtual.VirtualDeviceManager.ActivityListener);
     method @NonNull @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE) public void setShowPointerIcon(boolean);
   }

@@ -203,6 +203,7 @@ class MockSystem(withSession: (StaticMockitoSessionBuilder) -> Unit = {}) {
         val domainVerificationManagerInternal: DomainVerificationManagerInternal = mock()
         val handler = TestHandler(null)
         val defaultAppProvider: DefaultAppProvider = mock()
+        val backgroundHandler = TestHandler(null)
     }
 
     companion object {
@@ -286,6 +287,7 @@ class MockSystem(withSession: (StaticMockitoSessionBuilder) -> Unit = {}) {
             .thenReturn(mocks.domainVerificationManagerInternal)
         whenever(mocks.injector.handler) { mocks.handler }
         whenever(mocks.injector.defaultAppProvider) { mocks.defaultAppProvider }
+        whenever(mocks.injector.backgroundHandler) { mocks.backgroundHandler }
         wheneverStatic { SystemConfig.getInstance() }.thenReturn(mocks.systemConfig)
         whenever(mocks.systemConfig.availableFeatures).thenReturn(DEFAULT_AVAILABLE_FEATURES_MAP)
         whenever(mocks.systemConfig.sharedLibraries).thenReturn(DEFAULT_SHARED_LIBRARIES_LIST)

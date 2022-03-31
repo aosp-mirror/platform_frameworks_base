@@ -17,7 +17,6 @@
 package com.android.server.pm
 
 import android.content.Intent
-import android.content.pm.PackageManagerInternal
 import android.content.pm.SuspendDialogInfo
 import android.os.Binder
 import android.os.Build
@@ -27,6 +26,7 @@ import android.os.UserHandle
 import android.os.UserManager
 import android.util.ArrayMap
 import android.util.SparseArray
+import com.android.server.pm.KnownPackages
 import com.android.server.pm.pkg.PackageStateInternal
 import com.android.server.testutils.TestHandler
 import com.android.server.testutils.any
@@ -484,14 +484,14 @@ class SuspendPackageHelperTest {
         Mockito.doReturn(DIALER_PACKAGE).`when`(defaultAppProvider)
             .getDefaultDialer(eq(TEST_USER_ID))
         Mockito.doReturn(arrayOf(INSTALLER_PACKAGE)).`when`(pms).getKnownPackageNamesInternal(
-            any(), eq(PackageManagerInternal.PACKAGE_INSTALLER), eq(TEST_USER_ID))
+            any(), eq(KnownPackages.PACKAGE_INSTALLER), eq(TEST_USER_ID))
         Mockito.doReturn(arrayOf(UNINSTALLER_PACKAGE)).`when`(pms).getKnownPackageNamesInternal(
-            any(), eq(PackageManagerInternal.PACKAGE_UNINSTALLER), eq(TEST_USER_ID))
+            any(), eq(KnownPackages.PACKAGE_UNINSTALLER), eq(TEST_USER_ID))
         Mockito.doReturn(arrayOf(VERIFIER_PACKAGE)).`when`(pms).getKnownPackageNamesInternal(
-            any(), eq(PackageManagerInternal.PACKAGE_VERIFIER), eq(TEST_USER_ID))
+            any(), eq(KnownPackages.PACKAGE_VERIFIER), eq(TEST_USER_ID))
         Mockito.doReturn(arrayOf(PERMISSION_CONTROLLER_PACKAGE)).`when`(pms)
             .getKnownPackageNamesInternal(any(),
-                eq(PackageManagerInternal.PACKAGE_PERMISSION_CONTROLLER), eq(TEST_USER_ID))
+                eq(KnownPackages.PACKAGE_PERMISSION_CONTROLLER), eq(TEST_USER_ID))
     }
 
     private fun createPackageManagerService(vararg stageExistingPackages: String):

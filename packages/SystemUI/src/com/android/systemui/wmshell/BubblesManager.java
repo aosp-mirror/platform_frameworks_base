@@ -28,7 +28,6 @@ import static android.service.notification.NotificationListenerService.REASON_GR
 import static android.service.notification.NotificationStats.DISMISSAL_BUBBLE;
 import static android.service.notification.NotificationStats.DISMISS_SENTIMENT_NEUTRAL;
 
-import static com.android.systemui.statusbar.StatusBarState.SHADE;
 import static com.android.systemui.statusbar.notification.NotificationEntryManager.UNDEFINED_DISMISS_REASON;
 import static com.android.wm.shell.bubbles.BubbleDebugConfig.TAG_BUBBLES;
 import static com.android.wm.shell.bubbles.BubbleDebugConfig.TAG_WITH_CLASS_NAME;
@@ -61,7 +60,6 @@ import com.android.systemui.Dumpable;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.model.SysUiState;
-import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.shared.system.QuickStepContract;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
@@ -81,6 +79,7 @@ import com.android.systemui.statusbar.notification.collection.render.Notificatio
 import com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProvider;
 import com.android.systemui.statusbar.phone.ShadeController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
+import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.ZenModeController;
 import com.android.wm.shell.bubbles.Bubble;
 import com.android.wm.shell.bubbles.BubbleEntry;
@@ -132,7 +131,7 @@ public class BubblesManager implements Dumpable {
     public static BubblesManager create(Context context,
             Optional<Bubbles> bubblesOptional,
             NotificationShadeWindowController notificationShadeWindowController,
-            StatusBarStateController statusBarStateController,
+            KeyguardStateController keyguardStateController,
             ShadeController shadeController,
             ConfigurationController configurationController,
             @Nullable IStatusBarService statusBarService,
@@ -150,13 +149,26 @@ public class BubblesManager implements Dumpable {
             DumpManager dumpManager,
             Executor sysuiMainExecutor) {
         if (bubblesOptional.isPresent()) {
-            return new BubblesManager(context, bubblesOptional.get(),
-                    notificationShadeWindowController, statusBarStateController, shadeController,
-                    configurationController, statusBarService, notificationManager,
+            return new BubblesManager(context,
+                    bubblesOptional.get(),
+                    notificationShadeWindowController,
+                    keyguardStateController,
+                    shadeController,
+                    configurationController,
+                    statusBarService,
+                    notificationManager,
                     visibilityProvider,
-                    interruptionStateProvider, zenModeController, notifUserManager,
-                    groupManager, entryManager, notifCollection, notifPipeline, sysUiState,
-                    notifPipelineFlags, dumpManager, sysuiMainExecutor);
+                    interruptionStateProvider,
+                    zenModeController,
+                    notifUserManager,
+                    groupManager,
+                    entryManager,
+                    notifCollection,
+                    notifPipeline,
+                    sysUiState,
+                    notifPipelineFlags,
+                    dumpManager,
+                    sysuiMainExecutor);
         } else {
             return null;
         }
@@ -166,7 +178,7 @@ public class BubblesManager implements Dumpable {
     BubblesManager(Context context,
             Bubbles bubbles,
             NotificationShadeWindowController notificationShadeWindowController,
-            StatusBarStateController statusBarStateController,
+            KeyguardStateController keyguardStateController,
             ShadeController shadeController,
             ConfigurationController configurationController,
             @Nullable IStatusBarService statusBarService,
@@ -210,11 +222,12 @@ public class BubblesManager implements Dumpable {
 
         dumpManager.registerDumpable(TAG, this);
 
-        statusBarStateController.addCallback(new StatusBarStateController.StateListener() {
+        keyguardStateController.addCallback(new KeyguardStateController.Callback() {
             @Override
-            public void onStateChanged(int newState) {
-                boolean isShade = newState == SHADE;
-                bubbles.onStatusBarStateChanged(isShade);
+            public void onKeyguardShowingChanged() {
+                boolean isUnlockedShade = !keyguardStateController.isShowing()
+                        && !keyguardStateController.isOccluded();
+                bubbles.onStatusBarStateChanged(isUnlockedShade);
             }
         });
 

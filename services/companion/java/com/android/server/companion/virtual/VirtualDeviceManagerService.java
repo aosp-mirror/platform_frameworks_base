@@ -21,7 +21,6 @@ import static com.android.server.wm.ActivityInterceptorCallback.VIRTUAL_DEVICE_S
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.app.ActivityOptions;
 import android.companion.AssociationInfo;
 import android.companion.CompanionDeviceManager;
@@ -29,6 +28,7 @@ import android.companion.CompanionDeviceManager.OnAssociationsChangedListener;
 import android.companion.virtual.IVirtualDevice;
 import android.companion.virtual.IVirtualDeviceActivityListener;
 import android.companion.virtual.IVirtualDeviceManager;
+import android.companion.virtual.VirtualDeviceManager;
 import android.companion.virtual.VirtualDeviceParams;
 import android.content.Context;
 import android.os.Handler;
@@ -64,7 +64,7 @@ public class VirtualDeviceManagerService extends SystemService {
 
     private final Object mVirtualDeviceManagerLock = new Object();
     private final VirtualDeviceManagerImpl mImpl;
-    private VirtualDeviceManagerInternal mLocalService;
+    private final VirtualDeviceManagerInternal mLocalService;
     private final Handler mHandler = new Handler(Looper.getMainLooper());
     private final PendingTrampolineMap mPendingTrampolines = new PendingTrampolineMap(mHandler);
     /**
@@ -115,7 +115,7 @@ public class VirtualDeviceManagerService extends SystemService {
             if (pt == null) {
                 return null;
             }
-            pt.mResultReceiver.send(Activity.RESULT_OK, null);
+            pt.mResultReceiver.send(VirtualDeviceManager.LAUNCH_SUCCESS, null);
             ActivityOptions options = info.checkedOptions;
             if (options == null) {
                 options = ActivityOptions.makeBasic();
@@ -314,7 +314,8 @@ public class VirtualDeviceManagerService extends SystemService {
                     pendingTrampoline.mPendingIntent.getCreatorPackage(),
                     pendingTrampoline);
             if (existing != null) {
-                existing.mResultReceiver.send(Activity.RESULT_CANCELED, null);
+                existing.mResultReceiver.send(
+                        VirtualDeviceManager.LAUNCH_FAILURE_NO_ACTIVITY, null);
             }
         }
 

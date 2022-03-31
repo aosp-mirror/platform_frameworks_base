@@ -4526,6 +4526,18 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     // Called on the PowerManager's Notifier thread.
     @Override
+    public void onPowerGroupWakefulnessChanged(int groupId, int wakefulness,
+            @PowerManager.GoToSleepReason int pmSleepReason, int globalWakefulness) {
+        if (wakefulness != globalWakefulness
+                && wakefulness != PowerManagerInternal.WAKEFULNESS_AWAKE
+                && groupId == Display.DEFAULT_DISPLAY_GROUP
+                && mKeyguardDelegate != null) {
+            mKeyguardDelegate.doKeyguardTimeout(null);
+        }
+    }
+
+    // Called on the PowerManager's Notifier thread.
+    @Override
     public void startedWakingUp(@PowerManager.WakeReason int pmWakeReason) {
         EventLogTags.writeScreenToggled(1);
         if (DEBUG_WAKEUP) {

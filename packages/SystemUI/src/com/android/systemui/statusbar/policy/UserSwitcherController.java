@@ -1155,7 +1155,8 @@ public class UserSwitcherController implements Dumpable {
             setButton(DialogInterface.BUTTON_POSITIVE,
                     context.getString(mGuestUserAutoCreated
                             ? com.android.settingslib.R.string.guest_reset_guest_confirm_button
-                            : R.string.guest_exit_guest_dialog_remove), this);
+                            : com.android.settingslib.R.string.guest_remove_guest_confirm_button),
+                    this);
             SystemUIDialog.setWindowOnTop(this, mKeyguardStateController.isShowing());
             setCanceledOnTouchOutside(false);
             mGuestId = guestId;

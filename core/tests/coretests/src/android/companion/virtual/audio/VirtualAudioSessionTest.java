@@ -167,7 +167,7 @@ public class VirtualAudioSessionTest {
     public void onPlaybackConfigChanged_sendsCallback() {
         List<AudioPlaybackConfiguration> configs = new ArrayList<>();
 
-        mVirtualAudioSession.onPlaybackConfigChanged(configs);
+        mVirtualAudioSession.getAudioConfigChangedListener().onPlaybackConfigChanged(configs);
 
         verify(mCallback, timeout(2000)).onPlaybackConfigChanged(configs);
     }
@@ -176,7 +176,7 @@ public class VirtualAudioSessionTest {
     public void onRecordingConfigChanged_sendCallback() {
         List<AudioRecordingConfiguration> configs = new ArrayList<>();
 
-        mVirtualAudioSession.onRecordingConfigChanged(configs);
+        mVirtualAudioSession.getAudioConfigChangedListener().onRecordingConfigChanged(configs);
 
         verify(mCallback, timeout(2000)).onRecordingConfigChanged(configs);
     }
