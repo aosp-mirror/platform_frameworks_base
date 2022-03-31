@@ -299,6 +299,10 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     final SessionParams params;
     final long createdMillis;
 
+    /** Used for tracking whether user action was required for an install. */
+    @Nullable
+    private Boolean mUserActionRequired;
+
     /** Staging location where client data is written. */
     final File stageDir;
     final String stageCid;
@@ -1741,7 +1745,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     private static boolean isSecureFrpInstallAllowed(Context context, int callingUid) {
         final PackageManagerInternal pmi = LocalServices.getService(PackageManagerInternal.class);
         final String[] systemInstaller = pmi.getKnownPackageNames(
-                PackageManagerInternal.PACKAGE_INSTALLER, UserHandle.USER_SYSTEM);
+                KnownPackages.PACKAGE_INSTALLER, UserHandle.USER_SYSTEM);
         final AndroidPackage callingInstaller = pmi.getPackage(callingUid);
         if (callingInstaller != null
                 && ArrayUtils.contains(systemInstaller, callingInstaller.getPackageName())) {
@@ -2131,8 +2135,16 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
          * in its belong session set. When the user answers the yes,
          * {@link #setPermissionsResult(boolean)} is called and then {@link #MSG_INSTALL} is
          * handled to come back here to check again.
+         *
+         * {@code mUserActionRequired} is used to track when user action is required for an
+         * install. Since control may come back here more than 1 time, we must ensure that it's
+         * value is not overwritten.
          */
-        if (sendPendingUserActionIntentIfNeeded()) {
+        boolean wasUserActionIntentSent = sendPendingUserActionIntentIfNeeded();
+        if (mUserActionRequired == null) {
+            mUserActionRequired = wasUserActionIntentSent;
+        }
+        if (wasUserActionIntentSent) {
             return;
         }
 
@@ -3321,6 +3333,18 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         synchronized (mLock) {
             return mPackageLite;
         }
+    }
+
+    /**
+     * @return a boolean value indicating whether user action was requested for the install.
+     * Returns {@code false} if {@code mUserActionRequired} is {@code null}
+     */
+    public boolean getUserActionRequired() {
+        if (mUserActionRequired != null) {
+            return mUserActionRequired.booleanValue();
+        }
+        Slog.wtf(TAG, "mUserActionRequired should not be null.");
+        return false;
     }
 
     private static String getRelativePath(File file, File base) throws IOException {

@@ -166,6 +166,7 @@ final class DeletePackageHelper {
                 if (userInfo == null || !userInfo.isAdmin()) {
                     Slog.w(TAG, "Not removing package " + packageName
                             + " as only admin user may downgrade system apps");
+                    EventLog.writeEvent(0x534e4554, "170646036", -1, packageName);
                     return PackageManager.DELETE_FAILED_USER_RESTRICTED;
                 }
             }

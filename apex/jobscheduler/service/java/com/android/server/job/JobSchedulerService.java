@@ -159,8 +159,6 @@ public class JobSchedulerService extends com.android.server.SystemService
     public static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
     public static final boolean DEBUG_STANDBY = DEBUG || false;
 
-    /** The maximum number of concurrent jobs we run at one time. */
-    static final int MAX_JOB_CONTEXTS_COUNT = 16;
     /** The maximum number of jobs that we allow an app to schedule */
     private static final int MAX_JOBS_PER_APP = 150;
     /** The number of the most recently completed jobs to keep track of for debugging purposes. */
@@ -1423,6 +1421,7 @@ public class JobSchedulerService extends com.android.server.SystemService
                 for (int c = 0; c < mControllers.size(); ++c) {
                     mControllers.get(c).onUidBiasChangedLocked(uid, prevBias, newBias);
                 }
+                mConcurrencyManager.onUidBiasChangedLocked(prevBias, newBias);
             }
         }
     }

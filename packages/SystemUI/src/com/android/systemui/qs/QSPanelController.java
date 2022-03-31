@@ -43,6 +43,7 @@ import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.settings.brightness.BrightnessController;
 import com.android.systemui.settings.brightness.BrightnessMirrorHandler;
 import com.android.systemui.settings.brightness.BrightnessSliderController;
+import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.statusbar.policy.BrightnessMirrorController;
 import com.android.systemui.tuner.TunerService;
 
@@ -65,6 +66,7 @@ public class QSPanelController extends QSPanelControllerBase<QSPanel> {
     private final BrightnessSliderController mBrightnessSliderController;
     private final BrightnessMirrorHandler mBrightnessMirrorHandler;
     private final FeatureFlags mFeatureFlags;
+    private final StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
 
     private boolean mGridContentVisible = true;
 
@@ -101,7 +103,8 @@ public class QSPanelController extends QSPanelControllerBase<QSPanel> {
             DumpManager dumpManager, MetricsLogger metricsLogger, UiEventLogger uiEventLogger,
             QSLogger qsLogger, BrightnessController.Factory brightnessControllerFactory,
             BrightnessSliderController.Factory brightnessSliderFactory,
-            FalsingManager falsingManager, FeatureFlags featureFlags) {
+            FalsingManager falsingManager, FeatureFlags featureFlags,
+            StatusBarKeyguardViewManager statusBarKeyguardViewManager) {
         super(view, qstileHost, qsCustomizerController, usingMediaPlayer, mediaHost,
                 metricsLogger, uiEventLogger, qsLogger, dumpManager);
         mQSFgsManagerFooter = qsFgsManagerFooter;
@@ -117,6 +120,7 @@ public class QSPanelController extends QSPanelControllerBase<QSPanel> {
         mBrightnessController = brightnessControllerFactory.create(mBrightnessSliderController);
         mBrightnessMirrorHandler = new BrightnessMirrorHandler(mBrightnessController);
         mFeatureFlags = featureFlags;
+        mStatusBarKeyguardViewManager = statusBarKeyguardViewManager;
         view.setUseNewFooter(featureFlags.isEnabled(Flags.NEW_FOOTER));
     }
 
@@ -280,6 +284,15 @@ public class QSPanelController extends QSPanelControllerBase<QSPanel> {
 
     void setPageMargin(int pageMargin) {
         mView.setPageMargin(pageMargin);
+    }
+
+    /**
+     * Determines if bouncer expansion is between 0 and 1 non-inclusive.
+     *
+     * @return if bouncer is in transit
+     */
+    public boolean bouncerInTransit() {
+        return mStatusBarKeyguardViewManager.bouncerIsInTransit();
     }
 }
 

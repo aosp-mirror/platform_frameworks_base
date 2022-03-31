@@ -62,7 +62,7 @@ interface ICompanionDeviceManager {
     void createAssociation(in String packageName, in String macAddress, int userId,
         in byte[] certificate);
 
-    void dispatchMessage(in int messageId, in int associationId, in byte[] message);
+    void dispatchMessage(int messageId, int associationId, in byte[] message);
 
     void addOnAssociationsChangedListener(IOnAssociationsChangedListener listener, int userId);
 
@@ -71,4 +71,9 @@ interface ICompanionDeviceManager {
     void notifyDeviceAppeared(int associationId);
 
     void notifyDeviceDisappeared(int associationId);
+
+    PendingIntent buildPermissionTransferUserConsentIntent(String callingPackage, int userId,
+        int associationId);
+
+    void startSystemDataTransfer(int userId, int associationId);
 }

@@ -4188,6 +4188,8 @@ public abstract class PackageManager {
     /**
      * Feature for {@link #getSystemAvailableFeatures} and {@link #hasSystemFeature}: The device
      * supports window magnification.
+     *
+     * @see android.accessibilityservice.MagnificationConfig#MAGNIFICATION_MODE_WINDOW
      */
     @SdkConstant(SdkConstantType.FEATURE)
     public static final String FEATURE_WINDOW_MAGNIFICATION =
@@ -4245,6 +4247,7 @@ public abstract class PackageManager {
      */
     public static final String EXTRA_VERIFICATION_PACKAGE_NAME
             = "android.content.pm.extra.VERIFICATION_PACKAGE_NAME";
+
     /**
      * Extra field name for the result of a verification, either
      * {@link #VERIFICATION_ALLOW}, or {@link #VERIFICATION_REJECT}.
@@ -4252,6 +4255,14 @@ public abstract class PackageManager {
      */
     public static final String EXTRA_VERIFICATION_RESULT
             = "android.content.pm.extra.VERIFICATION_RESULT";
+
+    /**
+     * Extra field name for tracking whether user action
+     * was requested for a particular install, either {@code true} or {@code false}.
+     * @hide
+     */
+    public static final String EXTRA_USER_ACTION_REQUIRED
+            = "android.content.pm.extra.USER_ACTION_REQUIRED";
 
     /**
      * Extra field name for the version code of a package pending verification.
@@ -4263,8 +4274,7 @@ public abstract class PackageManager {
             = "android.content.pm.extra.VERIFICATION_VERSION_CODE";
 
     /**
-     * Extra field name for the long version code of a package pending verification.
-     *
+     * Extra field name for the long version code of a package pending verification
      * @hide
      */
     public static final String EXTRA_VERIFICATION_LONG_VERSION_CODE =

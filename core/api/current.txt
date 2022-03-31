@@ -8996,6 +8996,7 @@ package android.companion {
   public final class CompanionDeviceManager {
     method @RequiresPermission(anyOf={android.Manifest.permission.REQUEST_COMPANION_PROFILE_WATCH, android.Manifest.permission.REQUEST_COMPANION_PROFILE_COMPUTER, android.Manifest.permission.REQUEST_COMPANION_PROFILE_APP_STREAMING, android.Manifest.permission.REQUEST_COMPANION_PROFILE_AUTOMOTIVE_PROJECTION}, conditional=true) public void associate(@NonNull android.companion.AssociationRequest, @NonNull android.companion.CompanionDeviceManager.Callback, @Nullable android.os.Handler);
     method @RequiresPermission(anyOf={android.Manifest.permission.REQUEST_COMPANION_PROFILE_WATCH, android.Manifest.permission.REQUEST_COMPANION_PROFILE_COMPUTER, android.Manifest.permission.REQUEST_COMPANION_PROFILE_APP_STREAMING, android.Manifest.permission.REQUEST_COMPANION_PROFILE_AUTOMOTIVE_PROJECTION}, conditional=true) public void associate(@NonNull android.companion.AssociationRequest, @NonNull java.util.concurrent.Executor, @NonNull android.companion.CompanionDeviceManager.Callback);
+    method @Nullable public android.content.IntentSender buildPermissionTransferUserConsentIntent(int) throws android.companion.DeviceNotAssociatedException;
     method @Deprecated public void disassociate(@NonNull String);
     method public void disassociate(int);
     method @Deprecated @NonNull public java.util.List<java.lang.String> getAssociations();
@@ -9003,6 +9004,7 @@ package android.companion {
     method @Deprecated public boolean hasNotificationAccess(android.content.ComponentName);
     method public void requestNotificationAccess(android.content.ComponentName);
     method @RequiresPermission(android.Manifest.permission.REQUEST_OBSERVE_COMPANION_DEVICE_PRESENCE) public void startObservingDevicePresence(@NonNull String) throws android.companion.DeviceNotAssociatedException;
+    method public void startSystemDataTransfer(int) throws android.companion.DeviceNotAssociatedException;
     method @RequiresPermission(android.Manifest.permission.REQUEST_OBSERVE_COMPANION_DEVICE_PRESENCE) public void stopObservingDevicePresence(@NonNull String) throws android.companion.DeviceNotAssociatedException;
     field public static final String EXTRA_ASSOCIATION = "android.companion.extra.ASSOCIATION";
     field @Deprecated public static final String EXTRA_DEVICE = "android.companion.extra.DEVICE";
@@ -9018,11 +9020,13 @@ package android.companion {
 
   public abstract class CompanionDeviceService extends android.app.Service {
     ctor public CompanionDeviceService();
+    method @RequiresPermission(android.Manifest.permission.DELIVER_COMPANION_MESSAGES) public final void dispatchMessageToSystem(int, int, @NonNull byte[]) throws android.companion.DeviceNotAssociatedException;
     method @Nullable public final android.os.IBinder onBind(@NonNull android.content.Intent);
     method @Deprecated @MainThread public void onDeviceAppeared(@NonNull String);
     method @MainThread public void onDeviceAppeared(@NonNull android.companion.AssociationInfo);
     method @Deprecated @MainThread public void onDeviceDisappeared(@NonNull String);
     method @MainThread public void onDeviceDisappeared(@NonNull android.companion.AssociationInfo);
+    method public void onMessageDispatchedFromSystem(int, int, @NonNull byte[]);
     field public static final String SERVICE_INTERFACE = "android.companion.CompanionDeviceService";
   }
 
@@ -9225,6 +9229,7 @@ package android.content {
     field public static final int CLASSIFICATION_NOT_COMPLETE = 1; // 0x1
     field public static final int CLASSIFICATION_NOT_PERFORMED = 2; // 0x2
     field @NonNull public static final android.os.Parcelable.Creator<android.content.ClipDescription> CREATOR;
+    field public static final String EXTRA_IS_SENSITIVE = "android.content.extra.IS_SENSITIVE";
     field public static final String MIMETYPE_TEXT_HTML = "text/html";
     field public static final String MIMETYPE_TEXT_INTENT = "text/vnd.android.intent";
     field public static final String MIMETYPE_TEXT_PLAIN = "text/plain";
@@ -37577,10 +37582,12 @@ package android.security {
 
   public class KeyStoreException extends java.lang.Exception {
     method public int getNumericErrorCode();
+    method public int getRetryPolicy();
     method public boolean isSystemError();
     method public boolean isTransientFailure();
     method public boolean requiresUserAuthentication();
     field public static final int ERROR_ATTESTATION_CHALLENGE_TOO_LARGE = 9; // 0x9
+    field public static final int ERROR_ATTESTATION_KEYS_UNAVAILABLE = 16; // 0x10
     field public static final int ERROR_ID_ATTESTATION_FAILURE = 8; // 0x8
     field public static final int ERROR_INCORRECT_USAGE = 13; // 0xd
     field public static final int ERROR_INTERNAL_SYSTEM_ERROR = 4; // 0x4
@@ -37595,6 +37602,9 @@ package android.security {
     field public static final int ERROR_PERMISSION_DENIED = 5; // 0x5
     field public static final int ERROR_UNIMPLEMENTED = 12; // 0xc
     field public static final int ERROR_USER_AUTHENTICATION_REQUIRED = 2; // 0x2
+    field public static final int RETRY_NEVER = 1; // 0x1
+    field public static final int RETRY_WHEN_CONNECTIVITY_AVAILABLE = 3; // 0x3
+    field public static final int RETRY_WITH_EXPONENTIAL_BACKOFF = 2; // 0x2
   }
 
   @Deprecated public final class KeyStoreParameter implements java.security.KeyStore.ProtectionParameter {

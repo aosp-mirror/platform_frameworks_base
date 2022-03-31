@@ -24,6 +24,7 @@ import static android.app.ActivityManager.RESTRICTION_LEVEL_ADAPTIVE_BUCKET;
 import static android.app.ActivityManager.RESTRICTION_LEVEL_BACKGROUND_RESTRICTED;
 import static android.app.ActivityManager.RESTRICTION_LEVEL_EXEMPTED;
 import static android.app.ActivityManager.RESTRICTION_LEVEL_HIBERNATION;
+import static android.app.ActivityManager.RESTRICTION_LEVEL_MAX;
 import static android.app.ActivityManager.RESTRICTION_LEVEL_RESTRICTED_BUCKET;
 import static android.app.ActivityManager.RESTRICTION_LEVEL_UNKNOWN;
 import static android.app.ActivityManager.UID_OBSERVER_ACTIVE;
@@ -678,7 +679,7 @@ public final class AppRestrictionController {
         /**
          * Default value to {@link #mBgAbusiveNotificationMinIntervalMs}.
          */
-        static final long DEFAULT_BG_ABUSIVE_NOTIFICATION_MINIMAL_INTERVAL_MS = ONE_DAY;
+        static final long DEFAULT_BG_ABUSIVE_NOTIFICATION_MINIMAL_INTERVAL_MS = 30 * ONE_DAY;
 
         /**
          * Default value to {@link #mBgAbusiveNotificationMinIntervalMs}.
@@ -1152,7 +1153,8 @@ public final class AppRestrictionController {
                         ? RESTRICTION_LEVEL_RESTRICTED_BUCKET
                         : RESTRICTION_LEVEL_ADAPTIVE_BUCKET;
                 if (calcTrackers) {
-                    @RestrictionLevel int l = calcAppRestrictionLevelFromTackers(uid, packageName);
+                    @RestrictionLevel int l = calcAppRestrictionLevelFromTackers(uid, packageName,
+                            RESTRICTION_LEVEL_MAX);
                     if (l == RESTRICTION_LEVEL_EXEMPTED) {
                         return RESTRICTION_LEVEL_EXEMPTED;
                     }
@@ -1164,7 +1166,8 @@ public final class AppRestrictionController {
                                     uid, 0, packageName).sendToTarget();
                         }
                         // Lower the level.
-                        level = RESTRICTION_LEVEL_RESTRICTED_BUCKET;
+                        level = calcAppRestrictionLevelFromTackers(uid, packageName,
+                                RESTRICTION_LEVEL_BACKGROUND_RESTRICTED);
                     }
                 }
                 break;
@@ -1181,12 +1184,13 @@ public final class AppRestrictionController {
      * monitors certain dimensions of the app, the abusive behaviors could be detected in one or
      * more of these dimensions, but not necessarily all of them. </p>
      */
-    private @RestrictionLevel int calcAppRestrictionLevelFromTackers(int uid, String packageName) {
+    private @RestrictionLevel int calcAppRestrictionLevelFromTackers(int uid, String packageName,
+            @RestrictionLevel int maxLevel) {
         @RestrictionLevel int level = RESTRICTION_LEVEL_UNKNOWN;
         final boolean isRestrictedBucketEnabled = mConstantsObserver.mRestrictedBucketEnabled;
         for (int i = mAppStateTrackers.size() - 1; i >= 0; i--) {
             @RestrictionLevel int l = mAppStateTrackers.get(i).getPolicy()
-                    .getProposedRestrictionLevel(packageName, uid);
+                    .getProposedRestrictionLevel(packageName, uid, maxLevel);
             if (!isRestrictedBucketEnabled && l == RESTRICTION_LEVEL_RESTRICTED_BUCKET) {
                 l = RESTRICTION_LEVEL_ADAPTIVE_BUCKET;
             }
@@ -1475,17 +1479,15 @@ public final class AppRestrictionController {
         } else if (curLevel >= RESTRICTION_LEVEL_RESTRICTED_BUCKET
                 && level < RESTRICTION_LEVEL_RESTRICTED_BUCKET) {
             // Moved out of the background-restricted state.
-            if (curBucket != STANDBY_BUCKET_RARE) {
-                synchronized (mSettingsLock) {
-                    final int index = mActiveUids.indexOfKey(uid, pkgName);
-                    if (index >= 0) {
-                        mActiveUids.add(uid, pkgName, null);
-                    }
+            synchronized (mSettingsLock) {
+                final int index = mActiveUids.indexOfKey(uid, pkgName);
+                if (index >= 0) {
+                    mActiveUids.add(uid, pkgName, null);
                 }
-                appStandbyInternal.maybeUnrestrictApp(pkgName, UserHandle.getUserId(uid),
-                        prevReason & REASON_MAIN_MASK, prevReason & REASON_SUB_MASK,
-                        reason, subReason);
             }
+            appStandbyInternal.maybeUnrestrictApp(pkgName, UserHandle.getUserId(uid),
+                    prevReason & REASON_MAIN_MASK, prevReason & REASON_SUB_MASK,
+                    reason, subReason);
         }
     }
 

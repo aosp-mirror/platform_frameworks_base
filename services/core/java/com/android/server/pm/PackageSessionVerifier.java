@@ -167,7 +167,7 @@ final class PackageSessionVerifier {
         }
         return new VerificationParams(user, session.stageDir, observer, session.params,
                 session.getInstallSource(), session.getInstallerUid(), session.getSigningDetails(),
-                session.sessionId, session.getPackageLite(), mPm);
+                session.sessionId, session.getPackageLite(), session.getUserActionRequired(), mPm);
     }
 
     /**

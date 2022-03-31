@@ -1045,13 +1045,22 @@ public class ScreenDecorations extends CoreStartable implements Tunable , Dumpab
         mExecutor.execute(() -> {
             if (mOverlays == null) return;
             if (SIZE.equals(key)) {
+                boolean hasReloadRoundedCornerRes = false;
                 if (newValue != null) {
                     try {
                         mRoundedCornerResDelegate.updateTuningSizeFactor(
                                 Integer.parseInt(newValue));
+                        hasReloadRoundedCornerRes = true;
                     } catch (Exception e) {
                     }
                 }
+
+                // When onTuningChanged() is not called through updateRoundedCornerRadii(),
+                // we need to reload rounded corner res to prevent incorrect dimen
+                if (!hasReloadRoundedCornerRes) {
+                    mRoundedCornerResDelegate.reloadAll(mDisplayUniqueId);
+                }
+
                 updateRoundedCornerSize(
                         mRoundedCornerResDelegate.getTopRoundedSize(),
                         mRoundedCornerResDelegate.getBottomRoundedSize());
