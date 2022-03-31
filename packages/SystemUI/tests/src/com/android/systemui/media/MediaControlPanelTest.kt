@@ -41,6 +41,7 @@ import androidx.constraintlayout.widget.Barrier
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.lifecycle.LiveData
 import androidx.test.filters.SmallTest
+import com.android.internal.logging.InstanceId
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.broadcast.BroadcastSender
@@ -49,6 +50,7 @@ import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.util.animation.TransitionLayout
 import com.android.systemui.util.concurrency.FakeExecutor
+import com.android.systemui.util.mockito.KotlinArgumentCaptor
 import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
@@ -59,6 +61,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
+import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.ArgumentMatchers.anyLong
 import org.mockito.Mock
 import org.mockito.Mockito.any
@@ -69,7 +72,6 @@ import org.mockito.Mockito.verify
 import org.mockito.junit.MockitoJUnit
 
 private const val KEY = "TEST_KEY"
-private const val APP = "APP"
 private const val BG_COLOR = Color.RED
 private const val PACKAGE = "PKG"
 private const val ARTIST = "ARTIST"
@@ -78,7 +80,6 @@ private const val DEVICE_NAME = "DEVICE_NAME"
 private const val SESSION_KEY = "SESSION_KEY"
 private const val SESSION_ARTIST = "SESSION_ARTIST"
 private const val SESSION_TITLE = "SESSION_TITLE"
-private const val USER_ID = 0
 private const val DISABLED_DEVICE_NAME = "DISABLED_DEVICE_NAME"
 
 @SmallTest
@@ -137,6 +138,8 @@ public class MediaControlPanelTest : SysuiTestCase() {
     private val disabledDevice = MediaDeviceData(false, null, DISABLED_DEVICE_NAME)
     private lateinit var mediaData: MediaData
     private val clock = FakeSystemClock()
+    @Mock private lateinit var logger: MediaUiEventLogger
+    @Mock private lateinit var instanceId: InstanceId
 
     @JvmField @Rule val mockito = MockitoJUnit.rule()
 
@@ -148,7 +151,7 @@ public class MediaControlPanelTest : SysuiTestCase() {
 
         player = MediaControlPanel(context, bgExecutor, activityStarter, broadcastSender,
             mediaViewController, seekBarViewModel, Lazy { mediaDataManager },
-            mediaOutputDialogFactory, mediaCarouselController, falsingManager, clock)
+            mediaOutputDialogFactory, mediaCarouselController, falsingManager, clock, logger)
         whenever(seekBarViewModel.progress).thenReturn(seekBarData)
 
         // Set up mock views for the players
@@ -212,23 +215,14 @@ public class MediaControlPanelTest : SysuiTestCase() {
         }
         session.setActive(true)
 
-        mediaData = MediaData(
-                userId = USER_ID,
-                initialized = true,
+        mediaData = MediaTestUtils.emptyMediaData.copy(
                 backgroundColor = BG_COLOR,
-                app = APP,
-                appIcon = null,
                 artist = ARTIST,
                 song = TITLE,
-                artwork = null,
-                actions = emptyList(),
-                actionsToShowInCompact = emptyList(),
                 packageName = PACKAGE,
                 token = session.sessionToken,
-                clickIntent = null,
                 device = device,
-                active = true,
-                resumeAction = null)
+                instanceId = instanceId)
     }
 
     /**
@@ -534,6 +528,7 @@ public class MediaControlPanelTest : SysuiTestCase() {
     @Test
     fun longClick_gutsClosed() {
         player.attachPlayer(viewHolder)
+        player.bindPlayer(mediaData, KEY)
         whenever(mediaViewController.isGutsVisible).thenReturn(false)
 
         val captor = ArgumentCaptor.forClass(View.OnLongClickListener::class.java)
@@ -541,6 +536,7 @@ public class MediaControlPanelTest : SysuiTestCase() {
 
         captor.value.onLongClick(viewHolder.player)
         verify(mediaViewController).openGuts()
+        verify(logger).logLongPressOpen(anyInt(), eq(PACKAGE), eq(instanceId))
     }
 
     @Test
@@ -568,8 +564,10 @@ public class MediaControlPanelTest : SysuiTestCase() {
     @Test
     fun settingsButtonClick() {
         player.attachPlayer(viewHolder)
+        player.bindPlayer(mediaData, KEY)
 
         settings.callOnClick()
+        verify(logger).logLongPressSettings(anyInt(), eq(PACKAGE), eq(instanceId))
 
         val captor = ArgumentCaptor.forClass(Intent::class.java)
         verify(activityStarter).startActivity(captor.capture(), eq(true))
@@ -586,6 +584,7 @@ public class MediaControlPanelTest : SysuiTestCase() {
 
         assertThat(dismiss.isEnabled).isEqualTo(true)
         dismiss.callOnClick()
+        verify(logger).logLongPressDismiss(anyInt(), eq(PACKAGE), eq(instanceId))
         verify(mediaDataManager).dismissMediaData(eq(mediaKey), anyLong())
     }
 
@@ -613,5 +612,152 @@ public class MediaControlPanelTest : SysuiTestCase() {
 
         verify(mediaDataManager).dismissMediaData(eq(mediaKey), anyLong())
         verify(mediaCarouselController).removePlayer(eq(mediaKey), eq(false), eq(false))
+    }
+
+    @Test
+    fun actionPlayPauseClick_isLogged() {
+        val semanticActions = MediaButton(
+            playOrPause = MediaAction(null, Runnable {}, "play", null)
+        )
+        val data = mediaData.copy(semanticActions = semanticActions)
+
+        player.attachPlayer(viewHolder)
+        player.bindPlayer(data, KEY)
+
+        viewHolder.actionPlayPause.callOnClick()
+        verify(logger).logTapAction(eq(R.id.actionPlayPause), anyInt(), eq(PACKAGE), eq(instanceId))
+    }
+
+    @Test
+    fun actionPrevClick_isLogged() {
+        val semanticActions = MediaButton(
+            prevOrCustom = MediaAction(null, Runnable {}, "previous", null)
+        )
+        val data = mediaData.copy(semanticActions = semanticActions)
+
+        player.attachPlayer(viewHolder)
+        player.bindPlayer(data, KEY)
+
+        viewHolder.actionPrev.callOnClick()
+        verify(logger).logTapAction(eq(R.id.actionPrev), anyInt(), eq(PACKAGE), eq(instanceId))
+    }
+
+    @Test
+    fun actionNextClick_isLogged() {
+        val semanticActions = MediaButton(
+            nextOrCustom = MediaAction(null, Runnable {}, "next", null)
+        )
+        val data = mediaData.copy(semanticActions = semanticActions)
+
+        player.attachPlayer(viewHolder)
+        player.bindPlayer(data, KEY)
+
+        viewHolder.actionNext.callOnClick()
+        verify(logger).logTapAction(eq(R.id.actionNext), anyInt(), eq(PACKAGE), eq(instanceId))
+    }
+
+    @Test
+    fun actionCustom0Click_isLogged() {
+        val semanticActions = MediaButton(
+            custom0 = MediaAction(null, Runnable {}, "custom 0", null)
+        )
+        val data = mediaData.copy(semanticActions = semanticActions)
+
+        player.attachPlayer(viewHolder)
+        player.bindPlayer(data, KEY)
+
+        viewHolder.action0.callOnClick()
+        verify(logger).logTapAction(eq(R.id.action0), anyInt(), eq(PACKAGE), eq(instanceId))
+    }
+
+    @Test
+    fun actionCustom1Click_isLogged() {
+        val semanticActions = MediaButton(
+            custom1 = MediaAction(null, Runnable {}, "custom 1", null)
+        )
+        val data = mediaData.copy(semanticActions = semanticActions)
+
+        player.attachPlayer(viewHolder)
+        player.bindPlayer(data, KEY)
+
+        viewHolder.action1.callOnClick()
+        verify(logger).logTapAction(eq(R.id.action1), anyInt(), eq(PACKAGE), eq(instanceId))
+    }
+
+    @Test
+    fun actionCustom2Click_isLogged() {
+        val actions = listOf(
+            MediaAction(null, Runnable {}, "action 0", null),
+            MediaAction(null, Runnable {}, "action 1", null),
+            MediaAction(null, Runnable {}, "action 2", null),
+            MediaAction(null, Runnable {}, "action 3", null),
+            MediaAction(null, Runnable {}, "action 4", null)
+        )
+        val data = mediaData.copy(actions = actions)
+
+        player.attachPlayer(viewHolder)
+        player.bindPlayer(data, KEY)
+
+        viewHolder.action2.callOnClick()
+        verify(logger).logTapAction(eq(R.id.action2), anyInt(), eq(PACKAGE), eq(instanceId))
+    }
+
+    @Test
+    fun actionCustom3Click_isLogged() {
+        val actions = listOf(
+            MediaAction(null, Runnable {}, "action 0", null),
+            MediaAction(null, Runnable {}, "action 1", null),
+            MediaAction(null, Runnable {}, "action 2", null),
+            MediaAction(null, Runnable {}, "action 3", null),
+            MediaAction(null, Runnable {}, "action 4", null)
+        )
+        val data = mediaData.copy(actions = actions)
+
+        player.attachPlayer(viewHolder)
+        player.bindPlayer(data, KEY)
+
+        viewHolder.action1.callOnClick()
+        verify(logger).logTapAction(eq(R.id.action1), anyInt(), eq(PACKAGE), eq(instanceId))
+    }
+
+    @Test
+    fun actionCustom4Click_isLogged() {
+        val actions = listOf(
+            MediaAction(null, Runnable {}, "action 0", null),
+            MediaAction(null, Runnable {}, "action 1", null),
+            MediaAction(null, Runnable {}, "action 2", null),
+            MediaAction(null, Runnable {}, "action 3", null),
+            MediaAction(null, Runnable {}, "action 4", null)
+        )
+        val data = mediaData.copy(actions = actions)
+
+        player.attachPlayer(viewHolder)
+        player.bindPlayer(data, KEY)
+
+        viewHolder.action1.callOnClick()
+        verify(logger).logTapAction(eq(R.id.action1), anyInt(), eq(PACKAGE), eq(instanceId))
+    }
+
+    @Test
+    fun openOutputSwitcher_isLogged() {
+        player.attachPlayer(viewHolder)
+        player.bindPlayer(mediaData, KEY)
+
+        seamless.callOnClick()
+
+        verify(logger).logOpenOutputSwitcher(anyInt(), eq(PACKAGE), eq(instanceId))
+    }
+
+    @Test
+    fun logSeek() {
+        player.attachPlayer(viewHolder)
+        player.bindPlayer(mediaData, KEY)
+
+        val callback: () -> Unit = {}
+        val captor = KotlinArgumentCaptor(callback::class.java)
+        verify(seekBarViewModel).logSeek = captor.capture()
+        captor.value.invoke()
+
+        verify(logger).logSeek(anyInt(), eq(PACKAGE), eq(instanceId))
     }
 }

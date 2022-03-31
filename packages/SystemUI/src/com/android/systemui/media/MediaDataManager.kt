@@ -27,6 +27,7 @@ import android.content.ContentResolver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.ImageDecoder
 import android.graphics.drawable.Icon
@@ -37,6 +38,7 @@ import android.media.session.MediaSession
 import android.media.session.PlaybackState
 import android.net.Uri
 import android.os.Parcelable
+import android.os.Process
 import android.os.UserHandle
 import android.provider.Settings
 import android.service.notification.StatusBarNotification
@@ -44,6 +46,7 @@ import android.text.TextUtils
 import android.util.Log
 import androidx.media.utils.MediaConstants
 import com.android.internal.annotations.VisibleForTesting
+import com.android.internal.logging.InstanceId
 import com.android.systemui.Dumpable
 import com.android.systemui.R
 import com.android.systemui.broadcast.BroadcastDispatcher
@@ -94,7 +97,9 @@ private val LOADING = MediaData(
         clickIntent = null,
         device = null,
         active = true,
-        resumeAction = null)
+        resumeAction = null,
+        instanceId = InstanceId.fakeInstanceId(-1),
+        appUid = Process.INVALID_UID)
 
 @VisibleForTesting
 internal val EMPTY_SMARTSPACE_MEDIA_DATA = SmartspaceMediaData("INVALID", false, false,
@@ -138,7 +143,8 @@ class MediaDataManager(
     private val useQsMediaPlayer: Boolean,
     private val systemClock: SystemClock,
     private val tunerService: TunerService,
-    private val mediaFlags: MediaFlags
+    private val mediaFlags: MediaFlags,
+    private val logger: MediaUiEventLogger
 ) : Dumpable, BcSmartspaceDataPlugin.SmartspaceTargetListener {
 
     companion object {
@@ -202,12 +208,13 @@ class MediaDataManager(
         smartspaceMediaDataProvider: SmartspaceMediaDataProvider,
         clock: SystemClock,
         tunerService: TunerService,
-        mediaFlags: MediaFlags
+        mediaFlags: MediaFlags,
+        logger: MediaUiEventLogger
     ) : this(context, backgroundExecutor, foregroundExecutor, mediaControllerFactory,
             broadcastDispatcher, dumpManager, mediaTimeoutListener, mediaResumeListener,
             mediaSessionBasedFilter, mediaDeviceManager, mediaDataCombineLatest, mediaDataFilter,
             activityStarter, smartspaceMediaDataProvider, Utils.useMediaResumption(context),
-            Utils.useQsMediaPlayer(context), clock, tunerService, mediaFlags)
+            Utils.useQsMediaPlayer(context), clock, tunerService, mediaFlags, logger)
 
     private val appChangeReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
@@ -298,17 +305,24 @@ class MediaDataManager(
 
     fun onNotificationAdded(key: String, sbn: StatusBarNotification) {
         if (useQsMediaPlayer && isMediaNotification(sbn)) {
+            var logEvent = false
             Assert.isMainThread()
             val oldKey = findExistingEntry(key, sbn.packageName)
             if (oldKey == null) {
-                val temp = LOADING.copy(packageName = sbn.packageName)
+                val instanceId = logger.getNewInstanceId()
+                val temp = LOADING.copy(
+                    packageName = sbn.packageName,
+                    instanceId = instanceId
+                )
                 mediaEntries.put(key, temp)
+                logEvent = true
             } else if (oldKey != key) {
-                // Move to new key
+                // Resume -> active conversion; move to new key
                 val oldData = mediaEntries.remove(oldKey)!!
+                logEvent = true
                 mediaEntries.put(key, oldData)
             }
-            loadMediaData(key, sbn, oldKey)
+            loadMediaData(key, sbn, oldKey, logEvent)
         } else {
             onNotificationRemoved(key)
         }
@@ -340,9 +354,23 @@ class MediaDataManager(
     ) {
         // Resume controls don't have a notification key, so store by package name instead
         if (!mediaEntries.containsKey(packageName)) {
-            val resumeData = LOADING.copy(packageName = packageName, resumeAction = action,
-                hasCheckedForResume = true)
+            val instanceId = logger.getNewInstanceId()
+            val appUid = try {
+                context.packageManager.getApplicationInfo(packageName, 0)?.uid!!
+            } catch (e: PackageManager.NameNotFoundException) {
+                Log.w(TAG, "Could not get app UID for $packageName", e)
+                Process.INVALID_UID
+            }
+
+            val resumeData = LOADING.copy(
+                packageName = packageName,
+                resumeAction = action,
+                hasCheckedForResume = true,
+                instanceId = instanceId,
+                appUid = appUid
+            )
             mediaEntries.put(packageName, resumeData)
+            logger.logResumeMediaAdded(appUid, packageName, instanceId)
         }
         backgroundExecutor.execute {
             loadMediaDataInBgForResumption(userId, desc, action, token, appName, appIntent,
@@ -368,10 +396,11 @@ class MediaDataManager(
     private fun loadMediaData(
         key: String,
         sbn: StatusBarNotification,
-        oldKey: String?
+        oldKey: String?,
+        logEvent: Boolean = false
     ) {
         backgroundExecutor.execute {
-            loadMediaDataInBg(key, sbn, oldKey)
+            loadMediaDataInBg(key, sbn, oldKey, logEvent)
         }
     }
 
@@ -449,6 +478,10 @@ class MediaDataManager(
      */
     internal fun setTimedOut(key: String, timedOut: Boolean, forceUpdate: Boolean = false) {
         mediaEntries[key]?.let {
+            if (timedOut && !forceUpdate) {
+                // Only log this event when media expires on its own
+                logger.logMediaTimeout(it.appUid, it.packageName, it.instanceId)
+            }
             if (it.active == !timedOut && !forceUpdate) {
                 if (it.resumption) {
                     if (DEBUG) Log.d(TAG, "timing out resume player $key")
@@ -463,7 +496,9 @@ class MediaDataManager(
     }
 
     private fun removeEntry(key: String) {
-        mediaEntries.remove(key)
+        mediaEntries.remove(key)?.let {
+            logger.logMediaRemoved(it.appUid, it.packageName, it.instanceId)
+        }
         notifyMediaDataRemoved(key)
     }
 
@@ -537,6 +572,10 @@ class MediaDataManager(
             null
         }
 
+        val currentEntry = mediaEntries.get(packageName)
+        val instanceId = currentEntry?.instanceId ?: logger.getNewInstanceId()
+        val appUid = currentEntry?.appUid ?: Process.INVALID_UID
+
         val mediaAction = getResumeMediaAction(resumeAction)
         val lastActive = systemClock.elapsedRealtime()
         foregroundExecutor.execute {
@@ -545,14 +584,16 @@ class MediaDataManager(
                     MediaButton(playOrPause = mediaAction), packageName, token, appIntent,
                     device = null, active = false,
                     resumeAction = resumeAction, resumption = true, notificationKey = packageName,
-                    hasCheckedForResume = true, lastActive = lastActive))
+                    hasCheckedForResume = true, lastActive = lastActive, instanceId = instanceId,
+                    appUid = appUid))
         }
     }
 
     private fun loadMediaDataInBg(
         key: String,
         sbn: StatusBarNotification,
-        oldKey: String?
+        oldKey: String?,
+        logEvent: Boolean = false
     ) {
         val token = sbn.notification.extras.getParcelable(Notification.EXTRA_MEDIA_SESSION)
                 as MediaSession.Token?
@@ -636,6 +677,22 @@ class MediaDataManager(
                         MediaController.PlaybackInfo.PLAYBACK_TYPE_LOCAL) MediaData.PLAYBACK_LOCAL
                 else MediaData.PLAYBACK_CAST_LOCAL
         val isPlaying = mediaController.playbackState?.let { isPlayingState(it.state) } ?: null
+
+        val currentEntry = mediaEntries.get(key)
+        val instanceId = currentEntry?.instanceId ?: logger.getNewInstanceId()
+        val appUid = try {
+            context.packageManager.getApplicationInfo(sbn.packageName, 0)?.uid!!
+        } catch (e: PackageManager.NameNotFoundException) {
+            Log.w(TAG, "Could not get app UID for ${sbn.packageName}", e)
+            Process.INVALID_UID
+        }
+
+        if (logEvent) {
+            logger.logActiveMediaAdded(appUid, sbn.packageName, instanceId, playbackLocation)
+        } else if (playbackLocation != currentEntry?.playbackLocation) {
+            logger.logPlaybackLocationChange(appUid, sbn.packageName, instanceId, playbackLocation)
+        }
+
         val lastActive = systemClock.elapsedRealtime()
         foregroundExecutor.execute {
             val resumeAction: Runnable? = mediaEntries[key]?.resumeAction
@@ -647,7 +704,7 @@ class MediaDataManager(
                     active, resumeAction = resumeAction, playbackLocation = playbackLocation,
                     notificationKey = key, hasCheckedForResume = hasCheckedForResume,
                     isPlaying = isPlaying, isClearable = sbn.isClearable(),
-                    lastActive = lastActive))
+                    lastActive = lastActive, instanceId = instanceId, appUid = appUid))
         }
     }
 
@@ -989,10 +1046,12 @@ class MediaDataManager(
                 notifyMediaDataRemoved(key)
                 notifyMediaDataLoaded(pkg, pkg, updated)
             }
+            logger.logActiveConvertedToResume(updated.appUid, pkg, updated.instanceId)
             return
         }
         if (removed != null) {
             notifyMediaDataRemoved(key)
+            logger.logMediaRemoved(removed.appUid, removed.packageName, removed.instanceId)
         }
     }
 
@@ -1009,6 +1068,7 @@ class MediaDataManager(
             filtered.forEach {
                 mediaEntries.remove(it.key)
                 notifyMediaDataRemoved(it.key)
+                logger.logMediaRemoved(it.value.appUid, it.value.packageName, it.value.instanceId)
             }
         }
     }
