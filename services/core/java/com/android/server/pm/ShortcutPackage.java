@@ -894,12 +894,8 @@ class ShortcutPackage extends ShortcutPackageItem {
 
         // Get the list of all dynamic shortcuts in this package.
         final ArrayList<ShortcutInfo> shortcuts = new ArrayList<>();
-        // Pass callingLauncher to ensure pinned flag marked by system ui, e.g. ShareSheet, are
-        // included in the result
         findAll(shortcuts, ShortcutInfo::isNonManifestVisible,
-                ShortcutInfo.CLONE_REMOVE_FOR_APP_PREDICTION,
-                mShortcutUser.mService.mContext.getPackageName(),
-                0, /*getPinnedByAnyLauncher=*/ false);
+                ShortcutInfo.CLONE_REMOVE_FOR_APP_PREDICTION);
 
         final List<ShortcutManager.ShareShortcutInfo> result = new ArrayList<>();
         for (int i = 0; i < shortcuts.size(); i++) {
