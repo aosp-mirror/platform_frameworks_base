@@ -1933,8 +1933,7 @@
     <string name="app_blocked_title" msgid="7353262160455028160">"App ist nicht verfügbar"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> ist derzeit nicht verfügbar."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> nicht verfügbar"</string>
-    <!-- no translation found for app_streaming_blocked_title_for_permission_dialog (4483161748582966785) -->
-    <skip />
+    <string name="app_streaming_blocked_title_for_permission_dialog" msgid="4483161748582966785">"Berechtigung erforderlich"</string>
     <string name="app_streaming_blocked_message" product="tv" msgid="4003011766528814377">"Auf deinem <xliff:g id="DEVICE">%1$s</xliff:g> ist derzeit kein Zugriff möglich. Versuche es stattdessen auf deinem Android TV-Gerät."</string>
     <string name="app_streaming_blocked_message" product="tablet" msgid="4242053045964946062">"Auf deinem <xliff:g id="DEVICE">%1$s</xliff:g> ist derzeit kein Zugriff möglich. Versuche es stattdessen auf deinem Tablet."</string>
     <string name="app_streaming_blocked_message" product="default" msgid="6159168735030739398">"Auf deinem <xliff:g id="DEVICE">%1$s</xliff:g> ist derzeit kein Zugriff möglich. Versuche es stattdessen auf deinem Smartphone."</string>
@@ -2030,7 +2029,8 @@
     <string name="log_access_confirmation_title" msgid="2343578467290592708">"<xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> den Zugriff auf alle Geräteprotokolle erlauben?"</string>
     <string name="log_access_confirmation_allow" msgid="143157286283302512">"Nur dieses Mal"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"Nicht zulassen"</string>
-    <string name="log_access_confirmation_body" msgid="4483075525611652922">"In Geräteprotokollen wird aufgezeichnet, welche Aktionen auf deinem Gerät ausgeführt werden. Apps können diese Protokolle verwenden, um Probleme zu finden und zu beheben.\n\nEinige Protokolle enthalten unter Umständen vertrauliche Informationen. Daher solltest du nur vertrauenswürdigen Apps den Zugriff auf alle Geräteprotokolle gewähren. \n\nWenn du dieser App keinen Zugriff auf alle Geräteprotokolle gewährst, kann sie trotzdem auf ihre eigenen Protokolle zugreifen. Dein Gerätehersteller hat möglicherweise auch Zugriff auf einige Protokolle oder Informationen auf deinem Gerät. Weitere Informationen"</string>
+    <!-- no translation found for log_access_confirmation_body (6581985716241928135) -->
+    <skip />
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"Nicht mehr anzeigen"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g> möchte Teile von <xliff:g id="APP_2">%2$s</xliff:g> anzeigen"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"Bearbeiten"</string>
@@ -2264,7 +2264,9 @@
     <string name="notification_content_abusive_bg_apps" msgid="5572096708044958249">"<xliff:g id="APP">%1$s</xliff:g> wird im Hintergrund ausgeführt und belastet den Akku. Zum Prüfen tippen."</string>
     <string name="notification_content_long_running_fgs" msgid="8878031652441570178">"<xliff:g id="APP">%1$s</xliff:g> wird schon längere Zeit im Hintergrund ausgeführt. Zum Prüfen tippen."</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Aktive Apps prüfen"</string>
-    <string name="vdm_camera_access_denied" msgid="6345652513729130490">"Von diesem Gerät aus ist kein Zugriff auf die Kamera möglich"</string>
-    <!-- no translation found for system_locale_title (3978041860457277638) -->
+    <!-- no translation found for vdm_camera_access_denied (6102378580971542473) -->
     <skip />
+    <!-- no translation found for vdm_camera_access_denied (6895968310395249076) -->
+    <skip />
+    <string name="system_locale_title" msgid="3978041860457277638">"Systemsprache"</string>
 </resources>

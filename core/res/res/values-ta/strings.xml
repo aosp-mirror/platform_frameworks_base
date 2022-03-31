@@ -2030,7 +2030,8 @@
     <string name="log_access_confirmation_title" msgid="2343578467290592708">"சாதனப் பதிவுகள் அனைத்தையும் <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> அணுக அனுமதிக்கவா?"</string>
     <string name="log_access_confirmation_allow" msgid="143157286283302512">"இப்போது மட்டும்"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"அனுமதிக்க வேண்டாம்"</string>
-    <string name="log_access_confirmation_body" msgid="4483075525611652922">"உங்கள் சாதனத்தில் நடப்பவற்றைச் சாதனப் பதிவுகள் ரெக்கார்டு செய்யும். சிக்கல்களைக் கண்டறிந்து சரிசெய்ய ஆப்ஸ் இந்தப் பதிவுகளைப் பயன்படுத்தலாம்.\n\nபாதுகாக்கப்பட வேண்டிய தகவல்கள் சில பதிவுகளில் இருக்கக்கூடும் என்பதால் சாதனப் பதிவுகள் அனைத்தையும் அணுக நீங்கள் நம்பும் ஆப்ஸை மட்டுமே அனுமதிக்கவும். \n\nசாதனப் பதிவுகள் அனைத்தையும் அணுக இந்த ஆப்ஸை நீங்கள் அனுமதிக்கவில்லை என்றாலும் அதற்குச் சொந்தமான பதிவுகளைத் தொடர்ந்து அதனால் அணுக முடியும். மேலும் உங்கள் சாதன உற்பத்தியாளர் உங்கள் சாதனத்திலுள்ள சில பதிவுகளையோ தகவல்களையோ தொடர்ந்து அணுகக்கூடும். மேலும் அறிக"</string>
+    <!-- no translation found for log_access_confirmation_body (6581985716241928135) -->
+    <skip />
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"மீண்டும் காட்டாதே"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_2">%2$s</xliff:g> ஆப்ஸின் விழிப்பூட்டல்களைக் காண்பிக்க, <xliff:g id="APP_0">%1$s</xliff:g> அனுமதி கேட்கிறது"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"திருத்து"</string>
@@ -2264,6 +2265,9 @@
     <string name="notification_content_abusive_bg_apps" msgid="5572096708044958249">"<xliff:g id="APP">%1$s</xliff:g> ஆப்ஸ் பின்னணியில் இயங்குவதுடன் பேட்டரியை அதிகமாகப் பயன்படுத்துகிறது. பார்க்க தட்டவும்."</string>
     <string name="notification_content_long_running_fgs" msgid="8878031652441570178">"<xliff:g id="APP">%1$s</xliff:g> ஆப்ஸ் நீண்ட நேரமாகப் பின்னணியில் இயங்குகிறது. பார்க்க தட்டவும்."</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"செயலிலுள்ள ஆப்ஸைப் பாருங்கள்"</string>
-    <string name="vdm_camera_access_denied" msgid="6345652513729130490">"இந்தச் சாதனத்திலிருந்து கேமராவை அணுக முடியவில்லை"</string>
+    <!-- no translation found for vdm_camera_access_denied (6102378580971542473) -->
+    <skip />
+    <!-- no translation found for vdm_camera_access_denied (6895968310395249076) -->
+    <skip />
     <string name="system_locale_title" msgid="3978041860457277638">"சிஸ்டம் மொழி"</string>
 </resources>

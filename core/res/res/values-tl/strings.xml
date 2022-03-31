@@ -1933,8 +1933,7 @@
     <string name="app_blocked_title" msgid="7353262160455028160">"Hindi available ang app"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"Hindi available sa ngayon ang <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"Hindi available ang <xliff:g id="ACTIVITY">%1$s</xliff:g>"</string>
-    <!-- no translation found for app_streaming_blocked_title_for_permission_dialog (4483161748582966785) -->
-    <skip />
+    <string name="app_streaming_blocked_title_for_permission_dialog" msgid="4483161748582966785">"Kailangan ng pahintulot"</string>
     <string name="app_streaming_blocked_message" product="tv" msgid="4003011766528814377">"Hindi ito maa-access sa iyong <xliff:g id="DEVICE">%1$s</xliff:g> sa ngayon. Subukan na lang sa iyong Android TV device."</string>
     <string name="app_streaming_blocked_message" product="tablet" msgid="4242053045964946062">"Hindi ito maa-access sa iyong <xliff:g id="DEVICE">%1$s</xliff:g> sa ngayon. Subukan na lang sa iyong tablet."</string>
     <string name="app_streaming_blocked_message" product="default" msgid="6159168735030739398">"Hindi ito maa-access sa iyong <xliff:g id="DEVICE">%1$s</xliff:g> sa ngayon. Subukan na lang sa iyong telepono."</string>
@@ -2030,7 +2029,7 @@
     <string name="log_access_confirmation_title" msgid="2343578467290592708">"Payagan ang <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> na i-access ang lahat ng log ng device?"</string>
     <string name="log_access_confirmation_allow" msgid="143157286283302512">"Ngayon lang"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"Huwag payagan"</string>
-    <string name="log_access_confirmation_body" msgid="4483075525611652922">"Nire-record ng mga log ng device kung ano ang nangyayari sa iyong device. Magagamit ng mga app ang mga log na ito para maghanap at mag-ayos ng mga isyu.\n\nPosibleng maglaman ang ilang log ng sensitibong impormasyon, kaya ang mga app lang na pinagkakatiwalaan mo ang payagang maka-access sa lahat ng log ng device. \n\nKung hindi mo papayagan ang app na ito na i-access ang lahat ng log ng device, maa-access pa rin nito ang mga sarili nitong log, at posible pa ring ma-access ng manufacturer ng iyong device ang ilang log o impormasyon sa device mo. Matuto pa"</string>
+    <string name="log_access_confirmation_body" msgid="6581985716241928135">"Nire-record ng mga log ng device kung ano ang nangyayari sa iyong device. Magagamit ng mga app ang mga log na ito para maghanap at mag-ayos ng mga isyu.\n\nPosibleng maglaman ang ilang log ng sensitibong impormasyon, kaya ang mga app lang na pinagkakatiwalaan mo ang payagang maka-access sa lahat ng log ng device. \n\nKung hindi mo papayagan ang app na ito na i-access ang lahat ng log ng device, maa-access pa rin nito ang mga sarili nitong log. Posible pa ring ma-access ng manufacturer ng iyong device ang ilang log o impormasyon sa device mo. Matuto pa"</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"Huwag ipakita ulit"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"Gustong ipakita ng <xliff:g id="APP_0">%1$s</xliff:g> ang mga slice ng <xliff:g id="APP_2">%2$s</xliff:g>"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"I-edit"</string>
@@ -2264,6 +2263,7 @@
     <string name="notification_content_abusive_bg_apps" msgid="5572096708044958249">"Gumagana ang <xliff:g id="APP">%1$s</xliff:g> sa background at gumagamit ito ng baterya I-tap para suriin."</string>
     <string name="notification_content_long_running_fgs" msgid="8878031652441570178">"Napakatagal nang gumagana ang <xliff:g id="APP">%1$s</xliff:g> sa background. I-tap para suriin."</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Tingnan ang mga aktibong app"</string>
-    <string name="vdm_camera_access_denied" msgid="6345652513729130490">"Hindi ma-access ang camera mula sa device na ito"</string>
+    <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"Hindi ma-access ang camera ng telepono mula sa iyong <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
+    <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"Hindi ma-access ang camera ng tablet mula sa iyong <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
     <string name="system_locale_title" msgid="3978041860457277638">"Wika ng system"</string>
 </resources>

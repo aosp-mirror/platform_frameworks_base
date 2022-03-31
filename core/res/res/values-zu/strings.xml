@@ -1933,8 +1933,7 @@
     <string name="app_blocked_title" msgid="7353262160455028160">"Uhlelo lokusebenza alutholakali"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"I-<xliff:g id="APP_NAME">%1$s</xliff:g> ayitholakali khona manje."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"okungatholakali <xliff:g id="ACTIVITY">%1$s</xliff:g>"</string>
-    <!-- no translation found for app_streaming_blocked_title_for_permission_dialog (4483161748582966785) -->
-    <skip />
+    <string name="app_streaming_blocked_title_for_permission_dialog" msgid="4483161748582966785">"Kudingeka imvume"</string>
     <string name="app_streaming_blocked_message" product="tv" msgid="4003011766528814377">"Lokhu akukwazi ukufinyelelwa ku-<xliff:g id="DEVICE">%1$s</xliff:g> yakho ngalesi sikhathi. Zama kudivayisi yakho ye-Android TV kunalokho."</string>
     <string name="app_streaming_blocked_message" product="tablet" msgid="4242053045964946062">"Lokhu akukwazi ukufinyelelwa ku-<xliff:g id="DEVICE">%1$s</xliff:g> yakho ngalesi sikhathi. Zama kuthebhulethi yakho kunalokho."</string>
     <string name="app_streaming_blocked_message" product="default" msgid="6159168735030739398">"Lokhu akukwazi ukufinyelelwa ku-<xliff:g id="DEVICE">%1$s</xliff:g> yakho ngalesi sikhathi. Zama efonini yakho kunalokho."</string>
@@ -2030,7 +2029,8 @@
     <string name="log_access_confirmation_title" msgid="2343578467290592708">"Vumela i-<xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> ukuba ifinyelele wonke amalogu edivayisi?"</string>
     <string name="log_access_confirmation_allow" msgid="143157286283302512">"Kulokhu kuphela"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"Ungavumeli"</string>
-    <string name="log_access_confirmation_body" msgid="4483075525611652922">"Amalogu edivayisi arekhoda okwenzekayo kudivayisi yakho. Ama-app angasebenzisa lawa malogu ukuze athole futhi alungise izinkinga.\n\nAmanye amalogu angase aqukathe ulwazi olubucayi, ngakho vumela ama-app owathembayo kuphela ukuthi afinyelele wonke amalogu edivayisi. \n\nUma ungayivumeli le-app ukuthi ifinyelele wonke amalogu edivayisi, isengakwazi ukufinyelela amalogu ayo futhi umkhiqizi wedivayisi yakho usengakwazi ukufinyelela amanye amalogu noma ulwazi kudivayisi yakho. Funda kabanzi"</string>
+    <!-- no translation found for log_access_confirmation_body (6581985716241928135) -->
+    <skip />
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"Ungabonisi futhi"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"I-<xliff:g id="APP_0">%1$s</xliff:g> ifuna ukubonisa izingcezu ze-<xliff:g id="APP_2">%2$s</xliff:g>"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"Hlela"</string>
@@ -2264,6 +2264,9 @@
     <string name="notification_content_abusive_bg_apps" msgid="5572096708044958249">"I-<xliff:g id="APP">%1$s</xliff:g> isebenza ngemuva futhi idla ibhethri. Thepha ukuze ubuyekeze."</string>
     <string name="notification_content_long_running_fgs" msgid="8878031652441570178">"I-<xliff:g id="APP">%1$s</xliff:g> isebenza ngemuva isikhathi eside. Thepha ukuze ubuyekeze."</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Hlola ama-app asebenzayo"</string>
-    <string name="vdm_camera_access_denied" msgid="6345652513729130490">"Ayikwazi ukufinyelela ikhamera kule divayisi"</string>
+    <!-- no translation found for vdm_camera_access_denied (6102378580971542473) -->
+    <skip />
+    <!-- no translation found for vdm_camera_access_denied (6895968310395249076) -->
+    <skip />
     <string name="system_locale_title" msgid="3978041860457277638">"Ulimi lwesistimu"</string>
 </resources>

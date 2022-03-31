@@ -1933,8 +1933,7 @@
     <string name="app_blocked_title" msgid="7353262160455028160">"应用无法使用"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g>目前无法使用。"</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g>不可用"</string>
-    <!-- no translation found for app_streaming_blocked_title_for_permission_dialog (4483161748582966785) -->
-    <skip />
+    <string name="app_streaming_blocked_title_for_permission_dialog" msgid="4483161748582966785">"需要权限"</string>
     <string name="app_streaming_blocked_message" product="tv" msgid="4003011766528814377">"目前无法在您的<xliff:g id="DEVICE">%1$s</xliff:g>上访问此内容。您可以尝试在 Android TV 设备上访问。"</string>
     <string name="app_streaming_blocked_message" product="tablet" msgid="4242053045964946062">"目前无法在您的<xliff:g id="DEVICE">%1$s</xliff:g>上访问此内容。您可以尝试在平板电脑上访问。"</string>
     <string name="app_streaming_blocked_message" product="default" msgid="6159168735030739398">"目前无法在您的<xliff:g id="DEVICE">%1$s</xliff:g>上访问此内容。您可以尝试在手机上访问。"</string>
@@ -2030,7 +2029,8 @@
     <string name="log_access_confirmation_title" msgid="2343578467290592708">"允许“<xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g>”访问所有设备日志吗？"</string>
     <string name="log_access_confirmation_allow" msgid="143157286283302512">"仅限这一次"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"不允许"</string>
-    <string name="log_access_confirmation_body" msgid="4483075525611652922">"设备日志会记录设备上发生的活动。应用可以使用这些日志查找和修复问题。\n\n部分日志可能包含敏感信息，因此请仅允许您信任的应用访问所有设备日志。\n\n如果您不授予此应用访问所有设备日志的权限，那么它仍然可以访问自己的日志，并且您的设备制造商可能仍然能够访问您设备上的部分日志或信息。了解详情"</string>
+    <!-- no translation found for log_access_confirmation_body (6581985716241928135) -->
+    <skip />
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"不再显示"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"“<xliff:g id="APP_0">%1$s</xliff:g>”想要显示“<xliff:g id="APP_2">%2$s</xliff:g>”图块"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"编辑"</string>
@@ -2264,7 +2264,9 @@
     <string name="notification_content_abusive_bg_apps" msgid="5572096708044958249">"“<xliff:g id="APP">%1$s</xliff:g>”正在后台运行，并且消耗了大量电池电量。点按即可查看。"</string>
     <string name="notification_content_long_running_fgs" msgid="8878031652441570178">"“<xliff:g id="APP">%1$s</xliff:g>”已在后台运行较长时间。点按即可查看。"</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"查看使用中的应用"</string>
-    <string name="vdm_camera_access_denied" msgid="6345652513729130490">"无法使用此设备的摄像头"</string>
-    <!-- no translation found for system_locale_title (3978041860457277638) -->
+    <!-- no translation found for vdm_camera_access_denied (6102378580971542473) -->
     <skip />
+    <!-- no translation found for vdm_camera_access_denied (6895968310395249076) -->
+    <skip />
+    <string name="system_locale_title" msgid="3978041860457277638">"系统语言"</string>
 </resources>

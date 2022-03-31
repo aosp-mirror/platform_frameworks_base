@@ -1933,8 +1933,7 @@
     <string name="app_blocked_title" msgid="7353262160455028160">"Az alkalmazás nem hozzáférhető"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"A(z) <xliff:g id="APP_NAME">%1$s</xliff:g> jelenleg nem hozzáférhető."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"A(z) <xliff:g id="ACTIVITY">%1$s</xliff:g> nem áll rendelkezése"</string>
-    <!-- no translation found for app_streaming_blocked_title_for_permission_dialog (4483161748582966785) -->
-    <skip />
+    <string name="app_streaming_blocked_title_for_permission_dialog" msgid="4483161748582966785">"Engedély szükséges"</string>
     <string name="app_streaming_blocked_message" product="tv" msgid="4003011766528814377">"Ehhez jelenleg nem lehet hozzáférni a következő eszközön: <xliff:g id="DEVICE">%1$s</xliff:g>. Próbálja újra Android TV-eszközén."</string>
     <string name="app_streaming_blocked_message" product="tablet" msgid="4242053045964946062">"Ehhez jelenleg nem lehet hozzáférni a következő eszközön: <xliff:g id="DEVICE">%1$s</xliff:g>. Próbálja újra a táblagépén."</string>
     <string name="app_streaming_blocked_message" product="default" msgid="6159168735030739398">"Ehhez jelenleg nem lehet hozzáférni a következő eszközön: <xliff:g id="DEVICE">%1$s</xliff:g>. Próbálja újra a telefonján."</string>
@@ -2030,7 +2029,8 @@
     <string name="log_access_confirmation_title" msgid="2343578467290592708">"Engedélyezi a(z) <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> számára, hogy hozzáférjen az összes eszköznaplóhoz?"</string>
     <string name="log_access_confirmation_allow" msgid="143157286283302512">"Csak most"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"Tiltás"</string>
-    <string name="log_access_confirmation_body" msgid="4483075525611652922">"Az eszköznaplók rögzítik, hogy mi történik az eszközén. Az alkalmazások ezeket a naplókat használhatják a problémák megkeresésére és kijavítására.\n\nBizonyos naplók érzékeny adatokat is tartalmazhatnak, ezért csak olyan alkalmazások számára engedélyezze az összes eszköznaplóhoz való hozzáférést, amelyekben megbízik. \n\nHa nem engedélyezi ennek az alkalmazásnak, hogy hozzáférjen az összes eszköznaplójához, az app továbbra is hozzáférhet a saját naplóihoz, és előfordulhat, hogy az eszköz gyártója továbbra is hozzáfér az eszközön található bizonyos naplókhoz és adatokhoz. További információ."</string>
+    <!-- no translation found for log_access_confirmation_body (6581985716241928135) -->
+    <skip />
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"Ne jelenjen meg újra"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"A(z) <xliff:g id="APP_0">%1$s</xliff:g> alkalmazás részleteket szeretne megjeleníteni a(z) <xliff:g id="APP_2">%2$s</xliff:g> alkalmazásból"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"Szerkesztés"</string>
@@ -2264,6 +2264,9 @@
     <string name="notification_content_abusive_bg_apps" msgid="5572096708044958249">"A(z) <xliff:g id="APP">%1$s</xliff:g> fut a háttérben, és meríti az akkumulátort. Koppintson az áttekintéshez."</string>
     <string name="notification_content_long_running_fgs" msgid="8878031652441570178">"A(z) <xliff:g id="APP">%1$s</xliff:g> alkalmazás már hosszú ideje fut a háttérben. Koppintson az áttekintéshez."</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Aktív alkalmazások ellenőrzése"</string>
-    <string name="vdm_camera_access_denied" msgid="6345652513729130490">"Ezen az eszközön nem lehet hozzáférni a kamerához"</string>
+    <!-- no translation found for vdm_camera_access_denied (6102378580971542473) -->
+    <skip />
+    <!-- no translation found for vdm_camera_access_denied (6895968310395249076) -->
+    <skip />
     <string name="system_locale_title" msgid="3978041860457277638">"Alapértelmezett nyelv"</string>
 </resources>
