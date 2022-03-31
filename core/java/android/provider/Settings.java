@@ -7223,6 +7223,13 @@ public final class Settings {
          */
         public static final String LOCATION_SHOW_SYSTEM_OPS = "locationShowSystemOps";
 
+
+        /**
+         * Whether or not an indicator experiment has started.
+         * @hide
+         */
+        public static final String LOCATION_INDICATOR_EXPERIMENT_STARTED =
+                "locationIndicatorExperimentStarted";
         /**
          * A flag containing settings used for biometric weak
          * @hide
