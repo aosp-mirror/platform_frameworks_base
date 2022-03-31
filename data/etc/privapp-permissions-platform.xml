@@ -297,6 +297,7 @@ applications that come with the platform
         <permission name="android.permission.MANAGE_ROLLBACKS"/>
         <permission name="android.permission.MANAGE_USB"/>
         <!-- Needed for tests only -->
+        <permission name="android.permission.MANAGE_CLOUDSEARCH" />
         <permission name="android.permission.MANAGE_WALLPAPER_EFFECTS_GENERATION" />
         <permission name="android.permission.MODIFY_APPWIDGET_BIND_PERMISSIONS"/>
         <permission name="android.permission.MODIFY_DAY_NIGHT_MODE"/>
