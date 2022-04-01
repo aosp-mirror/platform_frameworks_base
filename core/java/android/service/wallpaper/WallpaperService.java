@@ -1632,6 +1632,7 @@ public abstract class WallpaperService extends Service {
             float finalXOffsetStep = xOffsetStep;
             float finalXOffset = xOffset;
             mHandler.post(() -> {
+                Trace.beginSection("WallpaperService#processLocalColors");
                 resetWindowPages();
                 int xPage = xCurrentPage;
                 EngineWindowPage current;
@@ -1662,6 +1663,7 @@ public abstract class WallpaperService extends Service {
                 }
                 current = mWindowPages[xPage];
                 updatePage(current, xPage, xPages, finalXOffsetStep);
+                Trace.endSection();
             });
         }
 
@@ -1734,6 +1736,7 @@ public abstract class WallpaperService extends Service {
         private void updatePageColors(EngineWindowPage page, int pageIndx, int numPages,
                 float xOffsetStep) {
             if (page.getBitmap() == null) return;
+            Trace.beginSection("WallpaperService#updatePageColors");
             if (DEBUG) {
                 Log.d(TAG, "updatePageColorsLocked for page " + pageIndx + " with areas "
                         + page.getAreas().size() + " and bitmap size of "
@@ -1779,6 +1782,7 @@ public abstract class WallpaperService extends Service {
                     }
                 }
             }
+            Trace.endSection();
         }
 
         private RectF generateSubRect(RectF in, int pageInx, int numPages) {
