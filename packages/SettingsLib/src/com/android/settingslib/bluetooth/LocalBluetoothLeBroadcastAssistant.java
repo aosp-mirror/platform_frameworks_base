@@ -65,10 +65,6 @@ public class LocalBluetoothLeBroadcastAssistant implements LocalBluetoothProfile
     private final ServiceListener mServiceListener = new ServiceListener() {
         @Override
         public void onServiceConnected(int profile, BluetoothProfile proxy) {
-            if (profile != BluetoothProfile.LE_AUDIO_BROADCAST_ASSISTANT) {
-                Log.d(TAG, "The profile is not LE_AUDIO_BROADCAST_ASSISTANT");
-                return;
-            }
             if (DEBUG) {
                 Log.d(TAG, "Bluetooth service connected");
             }
