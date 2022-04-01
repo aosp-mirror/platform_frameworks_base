@@ -674,6 +674,10 @@
     <!-- Indicates whether to enable hinge angle sensor when using unfold animation -->
     <bool name="config_unfoldTransitionHingeAngle">false</bool>
 
+    <!-- Indicates the time needed to time out the fold animation if the device stops in half folded
+         mode. -->
+    <integer name="config_unfoldTransitionHalfFoldedTimeout">600</integer>
+
     <!-- Indicates that the device supports having more than one internal display on at the same
          time. Only applicable to devices with more than one internal display. If this option is
          set to false, DisplayManager will make additional effort to ensure no more than 1 internal
