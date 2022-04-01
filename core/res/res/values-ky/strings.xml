@@ -1933,8 +1933,7 @@
     <string name="app_blocked_title" msgid="7353262160455028160">"Колдонмо учурда жеткиликсиз"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> учурда жеткиликсиз"</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> жеткиликсиз"</string>
-    <!-- no translation found for app_streaming_blocked_title_for_permission_dialog (4483161748582966785) -->
-    <skip />
+    <string name="app_streaming_blocked_title_for_permission_dialog" msgid="4483161748582966785">"Уруксат керек"</string>
     <string name="app_streaming_blocked_message" product="tv" msgid="4003011766528814377">"Учурда буга <xliff:g id="DEVICE">%1$s</xliff:g> түзмөгүңүздөн кире албайсыз. Android TV түзмөгүңүздөн аракет кылып көрүңүз."</string>
     <string name="app_streaming_blocked_message" product="tablet" msgid="4242053045964946062">"Учурда буга <xliff:g id="DEVICE">%1$s</xliff:g> түзмөгүңүздөн кире албайсыз. Планшетиңизден кирип көрүңүз."</string>
     <string name="app_streaming_blocked_message" product="default" msgid="6159168735030739398">"Учурда буга <xliff:g id="DEVICE">%1$s</xliff:g> түзмөгүңүздөн кире албайсыз. Анын ордуна телефондон кирип көрүңүз."</string>

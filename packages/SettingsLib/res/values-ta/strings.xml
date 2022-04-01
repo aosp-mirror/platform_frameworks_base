@@ -598,6 +598,8 @@
     <!-- no translation found for guest_remove_guest_dialog_title (4548511006624088072) -->
     <skip />
     <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"மீட்டமை"</string>
+    <!-- no translation found for guest_remove_guest_confirm_button (7858123434954143879) -->
+    <skip />
     <string name="guest_resetting" msgid="7822120170191509566">"கெஸ்ட்டை மீட்டமைக்கிறது…"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"படமெடுங்கள்"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"படத்தைத் தேர்வுசெய்யுங்கள்"</string>
@@ -657,4 +659,10 @@
     <string name="turn_screen_on_title" msgid="3266937298097573424">"திரையை ஆன் செய்தல்"</string>
     <string name="allow_turn_screen_on" msgid="6194845766392742639">"திரையை ஆன் செய்வதை அனுமதி"</string>
     <string name="allow_turn_screen_on_description" msgid="43834403291575164">"திரையை ஆன் செய்ய ஓர் ஆப்ஸை அனுமதிக்கவும். அனுமதித்தால், உங்கள் தலையீடு இல்லாமலே ஆப்ஸ் எப்போது வேண்டுமானாலும் திரையை ஆன் செய்யக்கூடும்."</string>
+    <!-- no translation found for bt_le_audio_scan_qr_code (3521809854780392679) -->
+    <skip />
+    <!-- no translation found for bt_le_audio_scan_qr_code_scanner (4679500020630341107) -->
+    <skip />
+    <!-- no translation found for bt_le_audio_qr_code_is_not_valid_format (6092191081849434734) -->
+    <skip />
 </resources>

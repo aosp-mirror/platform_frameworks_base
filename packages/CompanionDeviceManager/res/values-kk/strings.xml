@@ -26,8 +26,7 @@
     <string name="permission_apps_summary" msgid="798718816711515431">"Телефон қолданбаларын трансляциялайды."</string>
     <string name="title_app_streaming" msgid="2270331024626446950">"&lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; қолданбасына телефоныңыздағы осы ақпаратты пайдалануға рұқсат беріңіз."</string>
     <string name="helper_title_app_streaming" msgid="4151687003439969765">"Аралық құрылғы қызметтері"</string>
-    <!-- no translation found for helper_summary_app_streaming (7380294597268573523) -->
-    <skip />
+    <string name="helper_summary_app_streaming" msgid="7380294597268573523">"<xliff:g id="APP_NAME">%1$s</xliff:g> қолданбасы <xliff:g id="DEVICE_TYPE">%2$s</xliff:g> атынан телефондағы фотосуреттерді, медиафайлдар мен хабарландыруларды пайдалану үшін рұқсат сұрайды."</string>
     <string name="title_automotive_projection" msgid="3296005598978412847"></string>
     <string name="summary_automotive_projection" msgid="8683801274662496164"></string>
     <string name="title_computer" msgid="4693714143506569253">"&lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; қолданбасына телефоныңыздағы осы ақпаратты пайдалануға рұқсат беріңіз."</string>
@@ -37,14 +36,12 @@
     <string name="permission_storage" msgid="6831099350839392343">"Фотосуреттер мен медиафайлдар"</string>
     <string name="permission_storage_summary" msgid="3918240895519506417"></string>
     <string name="helper_title_computer" msgid="4671071173916176037">"Google Play қызметтері"</string>
-    <!-- no translation found for helper_summary_computer (1676407599909474428) -->
-    <skip />
+    <string name="helper_summary_computer" msgid="1676407599909474428">"<xliff:g id="APP_NAME">%1$s</xliff:g> қолданбасы <xliff:g id="DEVICE_TYPE">%2$s</xliff:g> атынан құрылғылар арасында қолданбалар трансляциялау үшін рұқсат сұрайды."</string>
     <string name="profile_name_generic" msgid="6851028682723034988">"құрылғы"</string>
     <string name="summary_generic" msgid="2346762210105903720"></string>
     <string name="consent_yes" msgid="8344487259618762872">"Рұқсат беру"</string>
     <string name="consent_no" msgid="2640796915611404382">"Рұқсат бермеу"</string>
-    <!-- no translation found for consent_back (2560683030046918882) -->
-    <skip />
+    <string name="consent_back" msgid="2560683030046918882">"Артқа"</string>
     <string name="permission_sync_confirmation_title" msgid="667074294393493186">"Қолданба рұқсаттарын сағатқа ауыстыру"</string>
     <string name="permission_sync_summary" msgid="8873391306499120778">"Реттеу кезінде сағатқа орнатылған қолданбалар телефондағыдай рұқсаттарды пайдаланады. Осылайша сағат оңай реттеледі.\n\n Бұл рұқсаттар сағаттың микрофоны мен геодерегін пайдалануды қамтиды."</string>
 </resources>

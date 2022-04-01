@@ -37,12 +37,18 @@ public class LocalImageResolver {
 
     private static final String TAG = "LocalImageResolver";
 
+    /** There's no max size specified, load at original size. */
+    public static final int NO_MAX_SIZE = -1;
+
     @VisibleForTesting
     static final int DEFAULT_MAX_SAFE_ICON_SIZE_PX = 480;
 
     /**
      * Resolve an image from the given Uri using {@link ImageDecoder} if it contains a
      * bitmap reference.
+     * Negative or zero dimensions will result in icon loaded in its original size.
+     *
+     * @throws IOException if the icon could not be loaded.
      */
     @Nullable
     public static Drawable resolveImage(Uri uri, Context context) throws IOException {
@@ -63,8 +69,10 @@ public class LocalImageResolver {
      * Get the drawable from Icon using {@link ImageDecoder} if it contains a bitmap reference, or
      * using {@link Icon#loadDrawable(Context)} otherwise.  This will correctly apply the Icon's,
      * tint, if present, to the drawable.
+     * Negative or zero dimensions will result in icon loaded in its original size.
      *
-     * @return drawable or null if loading failed.
+     * @return drawable or null if the passed icon parameter was null.
+     * @throws IOException if the icon could not be loaded.
      */
     @Nullable
     public static Drawable resolveImage(@Nullable Icon icon, Context context) throws IOException {
@@ -76,8 +84,10 @@ public class LocalImageResolver {
      * Get the drawable from Icon using {@link ImageDecoder} if it contains a bitmap reference, or
      * using {@link Icon#loadDrawable(Context)} otherwise.  This will correctly apply the Icon's,
      * tint, if present, to the drawable.
+     * Negative or zero dimensions will result in icon loaded in its original size.
      *
-     * @throws IOException if the icon could not be loaded for whichever reason
+     * @return loaded icon or null if a null icon was passed as a parameter.
+     * @throws IOException if the icon could not be loaded.
      */
     @Nullable
     public static Drawable resolveImage(@Nullable Icon icon, Context context, int maxWidth,
@@ -144,19 +154,22 @@ public class LocalImageResolver {
     @Nullable
     private static Drawable resolveBitmapImage(Icon icon, Context context, int maxWidth,
             int maxHeight) {
-        Bitmap bitmap = icon.getBitmap();
-        if (bitmap == null) {
-            return null;
-        }
 
-        if (bitmap.getWidth() > maxWidth || bitmap.getHeight() > maxHeight) {
-            Icon smallerIcon = icon.getType() == Icon.TYPE_ADAPTIVE_BITMAP
-                    ? Icon.createWithAdaptiveBitmap(bitmap) : Icon.createWithBitmap(bitmap);
-            // We don't want to modify the source icon, create a copy.
-            smallerIcon.setTintList(icon.getTintList())
-                    .setTintBlendMode(icon.getTintBlendMode())
-                    .scaleDownIfNecessary(maxWidth, maxHeight);
-            return smallerIcon.loadDrawable(context);
+        if (maxWidth > 0 && maxHeight > 0) {
+            Bitmap bitmap = icon.getBitmap();
+            if (bitmap == null) {
+                return null;
+            }
+
+            if (bitmap.getWidth() > maxWidth || bitmap.getHeight() > maxHeight) {
+                Icon smallerIcon = icon.getType() == Icon.TYPE_ADAPTIVE_BITMAP
+                        ? Icon.createWithAdaptiveBitmap(bitmap) : Icon.createWithBitmap(bitmap);
+                // We don't want to modify the source icon, create a copy.
+                smallerIcon.setTintList(icon.getTintList())
+                        .setTintBlendMode(icon.getTintBlendMode())
+                        .scaleDownIfNecessary(maxWidth, maxHeight);
+                return smallerIcon.loadDrawable(context);
+            }
         }
 
         return icon.loadDrawable(context);
@@ -202,7 +215,7 @@ public class LocalImageResolver {
         // in some cases despite it not saying so. Rethrow it as an IOException to keep
         // our API contract.
         } catch (IOException | Resources.NotFoundException e) {
-            Log.e(TAG, "Failed to load image drawable", e);
+            Log.d(TAG, "Couldn't use ImageDecoder for drawable, falling back to non-resized load.");
             return null;
         }
     }

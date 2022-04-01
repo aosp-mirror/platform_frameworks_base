@@ -1935,8 +1935,7 @@
     <string name="app_blocked_title" msgid="7353262160455028160">"Aplikace není k dispozici"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"Aplikace <xliff:g id="APP_NAME">%1$s</xliff:g> v tuto chvíli není k dispozici."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> není k dispozici"</string>
-    <!-- no translation found for app_streaming_blocked_title_for_permission_dialog (4483161748582966785) -->
-    <skip />
+    <string name="app_streaming_blocked_title_for_permission_dialog" msgid="4483161748582966785">"Je vyžadováno oprávnění"</string>
     <string name="app_streaming_blocked_message" product="tv" msgid="4003011766528814377">"Tato položka na vašem zařízení <xliff:g id="DEVICE">%1$s</xliff:g> v tuto chvíli není k dispozici. Zkuste to na zařízení Android TV."</string>
     <string name="app_streaming_blocked_message" product="tablet" msgid="4242053045964946062">"Tato položka na vašem zařízení <xliff:g id="DEVICE">%1$s</xliff:g> v tuto chvíli není k dispozici. Zkuste to na tabletu."</string>
     <string name="app_streaming_blocked_message" product="default" msgid="6159168735030739398">"Tato položka na vašem zařízení <xliff:g id="DEVICE">%1$s</xliff:g> v tuto chvíli není k dispozici. Zkuste to na telefonu."</string>
@@ -2032,8 +2031,7 @@
     <string name="log_access_confirmation_title" msgid="2343578467290592708">"Povolit aplikaci <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> přístup ke všem protokolům zařízení?"</string>
     <string name="log_access_confirmation_allow" msgid="143157286283302512">"Pouze tentokrát"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"Nepovolovat"</string>
-    <!-- no translation found for log_access_confirmation_body (6581985716241928135) -->
-    <skip />
+    <string name="log_access_confirmation_body" msgid="6581985716241928135">"Do protokolů zařízení se zaznamenává, co se na zařízení děje. Aplikace tyto protokoly mohou používat k vyhledání a odstranění problémů.\n\nNěkteré protokoly mohou zahrnovat citlivé údaje. Přístup k protokolům zařízení proto povolte pouze aplikacím, kterým důvěřujete. \n\nPokud této aplikaci nepovolíte přístup ke všem protokolům zařízení, bude mít stále přístup ke svým vlastním protokolům. Výrobce zařízení může mít stále přístup k některým protokolům nebo informacím na vašem zařízení. Další informace"</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"Příště nezobrazovat"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"Aplikace <xliff:g id="APP_0">%1$s</xliff:g> chce zobrazovat ukázky z aplikace <xliff:g id="APP_2">%2$s</xliff:g>"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"Upravit"</string>
@@ -2267,9 +2265,7 @@
     <string name="notification_content_abusive_bg_apps" msgid="5572096708044958249">"Aplikace <xliff:g id="APP">%1$s</xliff:g> je spuštěna na pozadí a vybíjí baterii. Klepnutím ji zkontrolujete."</string>
     <string name="notification_content_long_running_fgs" msgid="8878031652441570178">"Aplikace <xliff:g id="APP">%1$s</xliff:g> je už dlouhou dobu spuštěna na pozadí. Klepnutím ji zkontrolujete."</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Zkontrolujte aktivní aplikace"</string>
-    <!-- no translation found for vdm_camera_access_denied (6102378580971542473) -->
-    <skip />
-    <!-- no translation found for vdm_camera_access_denied (6895968310395249076) -->
-    <skip />
+    <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"Ze zařízení <xliff:g id="DEVICE">%1$s</xliff:g> nelze získat přístup k fotoaparátu telefonu"</string>
+    <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"Ze zařízení <xliff:g id="DEVICE">%1$s</xliff:g> nelze získat přístup k fotoaparátu tabletu"</string>
     <string name="system_locale_title" msgid="3978041860457277638">"Jazyk systému"</string>
 </resources>

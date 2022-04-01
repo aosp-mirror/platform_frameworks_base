@@ -549,7 +549,7 @@
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"هذا الهاتف"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"حدثت مشكلة أثناء الاتصال. يُرجى إيقاف الجهاز ثم إعادة تشغيله."</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"جهاز سماعي سلكي"</string>
-    <string name="help_label" msgid="3528360748637781274">"المساعدة والملاحظات والآراء"</string>
+    <string name="help_label" msgid="3528360748637781274">"المساعدة والملاحظات"</string>
     <string name="storage_category" msgid="2287342585424631813">"مساحة التخزين"</string>
     <string name="shared_data_title" msgid="1017034836800864953">"البيانات المشتركة"</string>
     <string name="shared_data_summary" msgid="5516326713822885652">"عرض البيانات المشتركة وتعديلها"</string>
@@ -598,6 +598,8 @@
     <!-- no translation found for guest_remove_guest_dialog_title (4548511006624088072) -->
     <skip />
     <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"إعادة الضبط"</string>
+    <!-- no translation found for guest_remove_guest_confirm_button (7858123434954143879) -->
+    <skip />
     <string name="guest_resetting" msgid="7822120170191509566">"جارٍ إعادة ضبط جلسة الضيف…"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"التقاط صورة"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"اختيار صورة"</string>
@@ -657,4 +659,10 @@
     <string name="turn_screen_on_title" msgid="3266937298097573424">"تشغيل الشاشة"</string>
     <string name="allow_turn_screen_on" msgid="6194845766392742639">"السماح بتشغيل الشاشة"</string>
     <string name="allow_turn_screen_on_description" msgid="43834403291575164">"يمكنك السماح لأحد التطبيقات بتشغيل الشاشة. في حال منحت هذا الإذن، قد يشغِّل التطبيق الشاشة في أي وقت بدون إذن صريح منك."</string>
+    <!-- no translation found for bt_le_audio_scan_qr_code (3521809854780392679) -->
+    <skip />
+    <!-- no translation found for bt_le_audio_scan_qr_code_scanner (4679500020630341107) -->
+    <skip />
+    <!-- no translation found for bt_le_audio_qr_code_is_not_valid_format (6092191081849434734) -->
+    <skip />
 </resources>

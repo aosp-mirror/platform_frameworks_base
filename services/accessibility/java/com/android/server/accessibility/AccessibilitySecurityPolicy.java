@@ -647,6 +647,14 @@ public class AccessibilitySecurityPolicy {
             return false;
         }
 
+        if ((serviceInfo.flags & ServiceInfo.FLAG_EXTERNAL_SERVICE) != 0) {
+            Slog.w(LOG_TAG, "Skipping accessibility service " + new ComponentName(
+                    serviceInfo.packageName, serviceInfo.name).flattenToShortString()
+                    + ": the service is the external one and doesn't allow to register as "
+                    + "an accessibility service ");
+            return false;
+        }
+
         int servicePackageUid = serviceInfo.applicationInfo.uid;
         if (mAppOpsManager.noteOpNoThrow(AppOpsManager.OPSTR_BIND_ACCESSIBILITY_SERVICE,
                 servicePackageUid, serviceInfo.packageName, null, null)

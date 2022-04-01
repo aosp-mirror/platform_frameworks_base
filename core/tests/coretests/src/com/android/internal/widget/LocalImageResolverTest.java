@@ -145,6 +145,56 @@ public class LocalImageResolverTest {
     }
 
     @Test
+    public void resolveImage_largeResourceIcon_negativeWidth_dontResize() {
+        Icon icon = Icon.createWithResource(mContext, R.drawable.big_a);
+        Drawable d = LocalImageResolver.resolveImage(icon, mContext, LocalImageResolver.NO_MAX_SIZE,
+                50);
+
+        assertThat(d).isInstanceOf(BitmapDrawable.class);
+        BitmapDrawable bd = (BitmapDrawable) d;
+        assertThat(bd.getBitmap().getWidth()).isGreaterThan(101);
+        assertThat(bd.getBitmap().getHeight()).isGreaterThan(51);
+    }
+
+    @Test
+    public void resolveImage_largeResourceIcon_negativeHeight_dontResize() {
+        Icon icon = Icon.createWithResource(mContext, R.drawable.big_a);
+        Drawable d = LocalImageResolver.resolveImage(icon, mContext, 100,
+                LocalImageResolver.NO_MAX_SIZE);
+
+        assertThat(d).isInstanceOf(BitmapDrawable.class);
+        BitmapDrawable bd = (BitmapDrawable) d;
+        assertThat(bd.getBitmap().getWidth()).isGreaterThan(101);
+        assertThat(bd.getBitmap().getHeight()).isGreaterThan(51);
+    }
+
+    @Test
+    public void resolveImage_largeBitmapIcon_passedNegativeWidth_dontResize() {
+        Icon icon = Icon.createWithBitmap(
+                BitmapFactory.decodeResource(mContext.getResources(), R.drawable.big_a));
+        Drawable d = LocalImageResolver.resolveImage(icon, mContext, LocalImageResolver.NO_MAX_SIZE,
+                50);
+
+        assertThat(d).isInstanceOf(BitmapDrawable.class);
+        BitmapDrawable bd = (BitmapDrawable) d;
+        assertThat(bd.getBitmap().getWidth()).isGreaterThan(101);
+        assertThat(bd.getBitmap().getHeight()).isGreaterThan(51);
+    }
+
+    @Test
+    public void resolveImage_largeBitmapIcon_passedNegativeHeight_dontResize() {
+        Icon icon = Icon.createWithBitmap(
+                BitmapFactory.decodeResource(mContext.getResources(), R.drawable.big_a));
+        Drawable d = LocalImageResolver.resolveImage(icon, mContext, LocalImageResolver.NO_MAX_SIZE,
+                50);
+
+        assertThat(d).isInstanceOf(BitmapDrawable.class);
+        BitmapDrawable bd = (BitmapDrawable) d;
+        assertThat(bd.getBitmap().getWidth()).isGreaterThan(101);
+        assertThat(bd.getBitmap().getHeight()).isGreaterThan(51);
+    }
+
+    @Test
     public void resolveImage_largeBitmapIcon_passedSize_resizeToDefinedSize() {
         Icon icon = Icon.createWithBitmap(
                 BitmapFactory.decodeResource(mContext.getResources(), R.drawable.big_a));

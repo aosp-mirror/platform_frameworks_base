@@ -1933,8 +1933,7 @@
     <string name="app_blocked_title" msgid="7353262160455028160">"အက်ပ်ကို မရနိုင်ပါ"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> ကို ယခု မရနိုင်ပါ။"</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> မရနိုင်ပါ"</string>
-    <!-- no translation found for app_streaming_blocked_title_for_permission_dialog (4483161748582966785) -->
-    <skip />
+    <string name="app_streaming_blocked_title_for_permission_dialog" msgid="4483161748582966785">"ခွင့်ပြုချက်လိုအပ်သည်"</string>
     <string name="app_streaming_blocked_message" product="tv" msgid="4003011766528814377">"၎င်းအား ယခု သင့် <xliff:g id="DEVICE">%1$s</xliff:g> တွင် ဝင်၍မရပါ။ ယင်းအစား Android TV စက်တွင် စမ်းကြည့်ပါ။"</string>
     <string name="app_streaming_blocked_message" product="tablet" msgid="4242053045964946062">"၎င်းအား ယခု သင့် <xliff:g id="DEVICE">%1$s</xliff:g> တွင် ဝင်၍မရပါ။ ယင်းအစား တက်ဘလက်တွင် စမ်းကြည့်ပါ။"</string>
     <string name="app_streaming_blocked_message" product="default" msgid="6159168735030739398">"၎င်းအား ယခု သင့် <xliff:g id="DEVICE">%1$s</xliff:g> တွင် ဝင်၍မရပါ။ ယင်းအစား ဖုန်းတွင် စမ်းကြည့်ပါ။"</string>

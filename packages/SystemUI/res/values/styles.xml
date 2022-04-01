@@ -1133,4 +1133,18 @@
         <item name="android:textSize">14sp</item>
         <item name="android:textColor">?android:attr/textColorSecondary</item>
     </style>
+
+    <!-- Dream Overlay Complication UI styles -->
+    <style name="clock_subtitle">
+        <item name="android:textSize">@dimen/dream_overlay_complication_clock_subtitle_text_size
+        </item>
+        <item name="android:paddingHorizontal">@dimen/dream_overlay_complication_shadow_padding
+        </item>
+        <item name="android:fontFamily">@*android:string/config_headlineFontFamily</item>
+        <item name="android:textColor">@android:color/white</item>
+        <item name="android:gravity">center_horizontal</item>
+        <item name="android:ellipsize">none</item>
+        <item name="android:shadowColor">@color/keyguard_shadow_color</item>
+        <item name="android:shadowRadius">?attr/shadowRadius</item>
+    </style>
 </resources>
