@@ -1435,7 +1435,7 @@ public class UsageStatsService extends SystemService implements
             @NonNull String packageName, int eventType) {
         synchronized (mLock) {
             if (!mUserUnlockedStates.contains(userId)) {
-                Slog.w(TAG, "Failed to query earliset package events for locked user " + userId);
+                Slog.w(TAG, "Failed to query earliest package events for locked user " + userId);
                 return null;
             }
 
