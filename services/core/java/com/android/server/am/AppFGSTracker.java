@@ -54,6 +54,7 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.am.AppFGSTracker.AppFGSPolicy;
 import com.android.server.am.AppFGSTracker.PackageDurations;
+import com.android.server.am.AppRestrictionController.TrackerType;
 import com.android.server.am.BaseAppStateEventsTracker.BaseAppStateEventsPolicy;
 import com.android.server.am.BaseAppStateTimeEvents.BaseTimeEvent;
 import com.android.server.am.BaseAppStateTracker.Injector;
@@ -173,6 +174,11 @@ final class AppFGSTracker extends BaseAppStateDurationsTracker<AppFGSPolicy, Pac
         super(context, controller, injector, outerContext);
         mHandler = new MyHandler(this);
         mInjector.setPolicy(new AppFGSPolicy(mInjector, this));
+    }
+
+    @Override
+    @TrackerType int getType() {
+        return AppRestrictionController.TRACKER_TYPE_FGS;
     }
 
     @Override

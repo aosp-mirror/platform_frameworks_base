@@ -73,6 +73,7 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
 import com.android.server.am.AppBatteryTracker.AppBatteryPolicy;
+import com.android.server.am.AppRestrictionController.TrackerType;
 import com.android.server.am.AppRestrictionController.UidBatteryUsageProvider;
 import com.android.server.pm.UserManagerInternal;
 
@@ -192,6 +193,11 @@ final class AppBatteryTracker extends BaseAppStateTracker<AppBatteryPolicy>
                     BATTERY_USAGE_STATS_POLLING_MIN_INTERVAL_MS_DEBUG;
         }
         mInjector.setPolicy(new AppBatteryPolicy(mInjector, this));
+    }
+
+    @Override
+    @TrackerType int getType() {
+        return AppRestrictionController.TRACKER_TYPE_BATTERY;
     }
 
     @Override
