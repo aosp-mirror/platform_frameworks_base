@@ -280,7 +280,7 @@ class AuthRippleController @Inject constructor(
             }
         }
 
-        override fun onKeyguardBouncerChanged(bouncerIsOrWillBeShowing: Boolean) {
+        override fun onKeyguardBouncerStateChanged(bouncerIsOrWillBeShowing: Boolean) {
             if (bouncerIsOrWillBeShowing) {
                 mView.fadeDwellRipple()
             }
