@@ -261,8 +261,8 @@ jobject android_view_InputWindowHandle_fromWindowInfo(JNIEnv* env, gui::WindowIn
     }
     LOG_ALWAYS_FATAL_IF(inputWindowHandle == nullptr,
                         "Failed to create new InputWindowHandle object.");
-    ScopedLocalRef<jobject> token(env, javaObjectForIBinder(env, windowInfo.token));
-    env->SetObjectField(inputWindowHandle, gInputWindowHandleClassInfo.token, token.get());
+    env->SetObjectField(inputWindowHandle, gInputWindowHandleClassInfo.token,
+                        javaObjectForIBinder(env, windowInfo.token));
     ScopedLocalRef<jstring> name(env, env->NewStringUTF(windowInfo.name.data()));
     env->SetObjectField(inputWindowHandle, gInputWindowHandleClassInfo.name, name.get());
     env->SetIntField(inputWindowHandle, gInputWindowHandleClassInfo.layoutParamsFlags,
@@ -317,9 +317,8 @@ jobject android_view_InputWindowHandle_fromWindowInfo(JNIEnv* env, gui::WindowIn
     ScopedLocalRef<jobject> matrixObj(env, AMatrix_newInstance(env, transformVals));
     env->SetObjectField(inputWindowHandle, gInputWindowHandleClassInfo.transform, matrixObj.get());
 
-    ScopedLocalRef<jobject> windowToken(env, javaObjectForIBinder(env, windowInfo.windowToken));
     env->SetObjectField(inputWindowHandle, gInputWindowHandleClassInfo.windowToken,
-                        windowToken.get());
+                        javaObjectForIBinder(env, windowInfo.windowToken));
 
     return inputWindowHandle;
 }
