@@ -273,13 +273,6 @@ public class WatchedArrayList<E> extends WatchableImpl
     }
 
     /**
-     * Return true if all the objects in the given collection are in this array list.
-     */
-    public boolean containsAll(Collection<?> c) {
-        return mStorage.containsAll(c);
-    }
-
-    /**
      * Ensure capacity.
      */
     public void ensureCapacity(int min) {
