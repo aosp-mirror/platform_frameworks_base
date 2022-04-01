@@ -396,8 +396,8 @@ public class DozeLog implements Dumpable {
         }
 
         @Override
-        public void onKeyguardBouncerChanged(boolean bouncer) {
-            traceKeyguardBouncerChanged(bouncer);
+        public void onKeyguardBouncerFullyShowingChanged(boolean fullyShowing) {
+            traceKeyguardBouncerChanged(fullyShowing);
         }
 
         @Override
