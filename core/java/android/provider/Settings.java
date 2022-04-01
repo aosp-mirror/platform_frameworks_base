@@ -7223,6 +7223,13 @@ public final class Settings {
          */
         public static final String LOCATION_SHOW_SYSTEM_OPS = "locationShowSystemOps";
 
+
+        /**
+         * Whether or not an indicator experiment has started.
+         * @hide
+         */
+        public static final String LOCATION_INDICATOR_EXPERIMENT_STARTED =
+                "locationIndicatorExperimentStarted";
         /**
          * A flag containing settings used for biometric weak
          * @hide
@@ -10276,10 +10283,18 @@ public final class Settings {
          * The strategy used for generating the tonal palettes can be defined with the
          * {@code android.theme.customization.theme_style} key, with one of the following options:
          * <ul>
-         *   <li> TONAL_SPOT = Default Material You theme since Android S.</li>
-         *   <li> VIBRANT = Theme where accent 2 and 3 are analogous to accent 1.</li>
-         *   <li> EXPRESSIVE = Highly chromatic theme.</li>
-         *   <li> SPRITZ = Desaturated theme, almost greyscale.</li>
+         *   <li> {@code TONAL_SPOT} is a mid vibrancy palette that uses an accent 3 analogous to
+         *   accent 1.</li>
+         *   <li> {@code VIBRANT} is a high vibrancy palette that harmoniously blends subtle shifts
+         *   between colors.</li>
+         *   <li> {@code EXPRESSIVE} is a high vibrancy palette that pairs unexpected and unique
+         *   accents colors together.</li>
+         *   <li> {@code SPRITZ} is a low vibrancy palette that creates a soft wash between
+         *   colors.</li>
+         *   <li> {@code RAINBOW} uses both chromatic accents and neutral surfaces to create a more
+         *   subtle color experience for users.</li>
+         *   <li> {@code FRUIT_SALAD} experiments with the concept of "two tone colors" to give
+         *   users more expression.</li>
          * </ul>
          *
          * Example of valid fabricated theme specification:

@@ -843,7 +843,7 @@ public class AppTransition implements Dump {
         setAppTransitionFinishedCallbackIfNeeded(a);
 
         if (mNextAppTransitionBackgroundColor != 0) {
-            a.setBackgroundColor(mNextAppTransitionBackgroundColor);
+            a.setBackdropColor(mNextAppTransitionBackgroundColor);
         }
 
         return a;

@@ -228,7 +228,7 @@ public class MediaOutputBroadcastDialog extends MediaOutputBaseDialog {
      * that convert BluetoothLeBroadcastMetadata object to String format.
      */
     private String getBroadcastMetaData() {
-        return "";
+        return "TEST";
     }
 
     /**

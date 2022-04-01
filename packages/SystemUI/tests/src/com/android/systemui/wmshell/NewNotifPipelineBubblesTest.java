@@ -59,6 +59,7 @@ import android.service.notification.NotificationListenerService;
 import android.service.notification.ZenModeConfig;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
+import android.view.View;
 import android.view.WindowManager;
 
 import androidx.test.filters.SmallTest;
@@ -342,7 +343,7 @@ public class NewNotifPipelineBubblesTest extends SysuiTestCase {
                 mContext,
                 mBubbleController.asBubbles(),
                 mNotificationShadeWindowController,
-                mStatusBarStateController,
+                mock(KeyguardStateController.class),
                 mShadeController,
                 mConfigurationController,
                 mStatusBarService,
@@ -1245,6 +1246,23 @@ public class NewNotifPipelineBubblesTest extends SysuiTestCase {
         Intent i = new Intent(Intent.ACTION_SCREEN_OFF);
         mBroadcastReceiverArgumentCaptor.getValue().onReceive(mContext, i);
         assertStackCollapsed();
+    }
+
+    @Test
+    public void testOnStatusBarStateChanged() {
+        mBubbleController.updateBubble(mBubbleEntry);
+        mBubbleData.setExpanded(true);
+        assertStackExpanded();
+        BubbleStackView stackView = mBubbleController.getStackView();
+        assertThat(stackView.getVisibility()).isEqualTo(View.VISIBLE);
+
+        mBubbleController.onStatusBarStateChanged(false);
+
+        assertStackCollapsed();
+        assertThat(stackView.getVisibility()).isEqualTo(View.INVISIBLE);
+
+        mBubbleController.onStatusBarStateChanged(true);
+        assertThat(stackView.getVisibility()).isEqualTo(View.VISIBLE);
     }
 
     /**

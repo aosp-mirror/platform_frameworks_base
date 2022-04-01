@@ -1694,7 +1694,7 @@
     <string name="screen_lock_dialog_default_subtitle">Enter your screen lock to continue</string>
 
     <!-- Message shown during fingerprint acquisision when the fingerprint cannot be recognized -->
-    <string name="fingerprint_acquired_partial">Partial fingerprint detected</string>
+    <string name="fingerprint_acquired_partial">Press firmly on the sensor</string>
     <!-- Message shown during fingerprint acquisision when the fingerprint cannot be recognized -->
     <string name="fingerprint_acquired_insufficient">Couldn\'t process fingerprint. Please try again.</string>
     <!-- Message shown during fingerprint acquisision when the fingerprint sensor needs cleaning -->
@@ -1718,7 +1718,7 @@
     <!-- Message shown when fingerprint fails to match -->
     <string name="fingerprint_error_not_match">Fingerprint not recognized</string>
     <!-- Message shown when UDFPS fails to match -->
-    <string name="fingerprint_udfps_error_not_match">Press firmly on the sensor</string>
+    <string name="fingerprint_udfps_error_not_match">Fingerprint not recognized</string>
 
     <!-- Accessibility message announced when a fingerprint has been authenticated [CHAR LIMIT=NONE] -->
     <string name="fingerprint_authenticated">Fingerprint authenticated</string>
@@ -6265,14 +6265,16 @@ ul.</string>
     <!-- Title for the notification channel notifying user of abusive background apps. [CHAR LIMIT=NONE] -->
     <string name="notification_channel_abusive_bg_apps">Background Activity</string>
     <!-- Title of notification indicating abusive background apps. [CHAR LIMIT=NONE] -->
-    <string name="notification_title_abusive_bg_apps">Background Activity</string>
+    <string name="notification_title_abusive_bg_apps">An app is using battery</string>
+    <!-- Title of notification indicating long running foreground services. [CHAR LIMIT=NONE] -->
+    <string name="notification_title_long_running_fgs">An app is still active</string>
     <!-- Content of notification indicating abusive background apps. [CHAR LIMIT=NONE] -->
     <string name="notification_content_abusive_bg_apps">
-        <xliff:g id="app" example="Gmail">%1$s</xliff:g> is running in the background and draining battery. Tap to review.
+        <xliff:g id="app" example="Gmail">%1$s</xliff:g> is using battery in the background. Tap to review.
     </string>
     <!-- Content of notification indicating long running foreground service. [CHAR LIMIT=NONE] -->
     <string name="notification_content_long_running_fgs">
-        <xliff:g id="app" example="Gmail">%1$s</xliff:g> is running in the background for a long time. Tap to review.
+        <xliff:g id="app" example="Gmail">%1$s</xliff:g> might affect battery life. Tap to review active apps.
     </string>
     <!-- Action label of notification for user to check background apps. [CHAR LIMIT=NONE]  -->
     <string name="notification_action_check_bg_apps">Check active apps</string>

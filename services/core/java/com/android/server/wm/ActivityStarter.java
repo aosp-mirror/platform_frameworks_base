@@ -1585,7 +1585,7 @@ class ActivityStarter {
         }
 
         if (ActivityManager.isStartResultSuccessful(result)) {
-            mInterceptor.onActivityLaunched(targetTask.getTaskInfo(), r.info);
+            mInterceptor.onActivityLaunched(targetTask.getTaskInfo(), r);
         }
     }
 

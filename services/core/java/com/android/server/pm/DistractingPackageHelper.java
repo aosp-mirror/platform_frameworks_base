@@ -17,6 +17,7 @@
 package com.android.server.pm;
 
 import static android.content.pm.PackageManager.RESTRICTION_NONE;
+import static android.os.Process.SYSTEM_UID;
 
 import android.annotation.NonNull;
 import android.content.Intent;
@@ -27,11 +28,13 @@ import android.os.UserHandle;
 import android.util.ArraySet;
 import android.util.IntArray;
 import android.util.Slog;
+import android.util.SparseArray;
 
 import com.android.internal.util.ArrayUtils;
 import com.android.server.pm.pkg.PackageStateInternal;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -126,7 +129,7 @@ public final class DistractingPackageHelper {
         if (!changedPackagesList.isEmpty()) {
             final String[] changedPackages = changedPackagesList.toArray(
                     new String[changedPackagesList.size()]);
-            sendDistractingPackagesChanged(changedPackages, changedUids.toArray(), userId,
+            sendDistractingPackagesChanged(snapshot, changedPackages, changedUids.toArray(), userId,
                     restrictionFlags);
             mPm.scheduleWritePackageRestrictions(userId);
         }
@@ -168,7 +171,7 @@ public final class DistractingPackageHelper {
         if (!changedPackages.isEmpty()) {
             final String[] packageArray = changedPackages.toArray(
                     new String[changedPackages.size()]);
-            sendDistractingPackagesChanged(packageArray, changedUids.toArray(), userId,
+            sendDistractingPackagesChanged(snapshot, packageArray, changedUids.toArray(), userId,
                     RESTRICTION_NONE);
             mPm.scheduleWritePackageRestrictions(userId);
         }
@@ -181,18 +184,53 @@ public final class DistractingPackageHelper {
      * @param uidList The uids of packages which have suspension changes.
      * @param userId The user where packages reside.
      */
-    void sendDistractingPackagesChanged(@NonNull String[] pkgList,
+    void sendDistractingPackagesChanged(@NonNull Computer snapshot, @NonNull String[] pkgList,
             int[] uidList, int userId, int distractionFlags) {
-        final Bundle extras = new Bundle(3);
-        extras.putStringArray(Intent.EXTRA_CHANGED_PACKAGE_LIST, pkgList);
-        extras.putIntArray(Intent.EXTRA_CHANGED_UID_LIST, uidList);
-        extras.putInt(Intent.EXTRA_DISTRACTION_RESTRICTIONS, distractionFlags);
+        final List<List<String>> pkgsToSend = new ArrayList(pkgList.length);
+        final List<IntArray> uidsToSend = new ArrayList(pkgList.length);
+        final List<SparseArray<int[]>> allowListsToSend = new ArrayList(pkgList.length);
+        final int[] userIds = new int[] {userId};
+        // Get allow lists for the pkg in the pkgList. Merge into the existed pkgs and uids if
+        // allow lists are the same.
+        for (int i = 0; i < pkgList.length; i++) {
+            final String pkgName = pkgList[i];
+            final int uid = uidList[i];
+            SparseArray<int[]> allowList = mInjector.getAppsFilter().getVisibilityAllowList(
+                    snapshot.getPackageStateInternal(pkgName, SYSTEM_UID),
+                    userIds, snapshot.getPackageStates());
+            if (allowList == null) {
+                allowList = new SparseArray<>(0);
+            }
+            boolean merged = false;
+            for (int j = 0; j < allowListsToSend.size(); j++) {
+                if (Arrays.equals(allowListsToSend.get(j).get(userId), allowList.get(userId))) {
+                    pkgsToSend.get(j).add(pkgName);
+                    uidsToSend.get(j).add(uid);
+                    merged = true;
+                    break;
+                }
+            }
+            if (!merged) {
+                pkgsToSend.add(new ArrayList<>(Arrays.asList(pkgName)));
+                uidsToSend.add(IntArray.wrap(new int[] {uid}));
+                allowListsToSend.add(allowList);
+            }
+        }
 
         final Handler handler = mInjector.getHandler();
-        handler.post(() -> mBroadcastHelper.sendPackageBroadcast(
-                Intent.ACTION_DISTRACTING_PACKAGES_CHANGED, null /* pkg */, extras,
-                Intent.FLAG_RECEIVER_REGISTERED_ONLY, null /* targetPkg */,
-                null /* finishedReceiver */, new int[]{userId}, null /* instantUserIds */,
-                null /* allowList */, null /* bOptions */));
+        for (int i = 0; i < pkgsToSend.size(); i++) {
+            final Bundle extras = new Bundle(3);
+            extras.putStringArray(Intent.EXTRA_CHANGED_PACKAGE_LIST,
+                    pkgsToSend.get(i).toArray(new String[pkgsToSend.get(i).size()]));
+            extras.putIntArray(Intent.EXTRA_CHANGED_UID_LIST, uidsToSend.get(i).toArray());
+            extras.putInt(Intent.EXTRA_DISTRACTION_RESTRICTIONS, distractionFlags);
+            final SparseArray<int[]> allowList = allowListsToSend.get(i).size() == 0
+                    ? null : allowListsToSend.get(i);
+            handler.post(() -> mBroadcastHelper.sendPackageBroadcast(
+                    Intent.ACTION_DISTRACTING_PACKAGES_CHANGED, null /* pkg */,
+                    extras, Intent.FLAG_RECEIVER_REGISTERED_ONLY, null /* targetPkg */,
+                    null /* finishedReceiver */, userIds, null /* instantUserIds */,
+                    allowList, null /* bOptions */));
+        }
     }
 }

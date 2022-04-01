@@ -12172,15 +12172,7 @@ public class TelephonyManager {
     })
     @RequiresFeature(PackageManager.FEATURE_TELEPHONY_RADIO_ACCESS)
     public @Nullable ServiceState getServiceState() {
-        if (getRenouncedPermissions().contains(Manifest.permission.ACCESS_FINE_LOCATION))  {
-            if (getRenouncedPermissions().contains(Manifest.permission.ACCESS_COARSE_LOCATION)) {
-                return getServiceState(INCLUDE_LOCATION_DATA_NONE);
-            } else {
-                return getServiceState(INCLUDE_LOCATION_DATA_COARSE);
-            }
-        }
-
-        return getServiceState(INCLUDE_LOCATION_DATA_FINE);
+        return getServiceState(getLocationData());
     }
 
     /**
@@ -16171,17 +16163,21 @@ public class TelephonyManager {
      */
     public void registerTelephonyCallback(@NonNull @CallbackExecutor Executor executor,
             @NonNull TelephonyCallback callback) {
-        if (getRenouncedPermissions().contains(Manifest.permission.ACCESS_FINE_LOCATION))  {
-            if (getRenouncedPermissions().contains(Manifest.permission.ACCESS_COARSE_LOCATION)) {
-                registerTelephonyCallback(INCLUDE_LOCATION_DATA_NONE, executor, callback);
-                return;
-            } else {
-                registerTelephonyCallback(INCLUDE_LOCATION_DATA_COARSE, executor, callback);
-                return;
-            }
-        }
+        registerTelephonyCallback(getLocationData(), executor, callback);
+    }
 
-        registerTelephonyCallback(INCLUDE_LOCATION_DATA_FINE, executor, callback);
+    private int getLocationData() {
+        boolean renounceCoarseLocation =
+                getRenouncedPermissions().contains(Manifest.permission.ACCESS_COARSE_LOCATION);
+        boolean renounceFineLocation =
+                getRenouncedPermissions().contains(Manifest.permission.ACCESS_FINE_LOCATION);
+        if (renounceCoarseLocation) {
+            return INCLUDE_LOCATION_DATA_NONE;
+        } else if (renounceFineLocation) {
+            return INCLUDE_LOCATION_DATA_COARSE;
+        } else {
+            return INCLUDE_LOCATION_DATA_FINE;
+        }
     }
 
     /** @hide */

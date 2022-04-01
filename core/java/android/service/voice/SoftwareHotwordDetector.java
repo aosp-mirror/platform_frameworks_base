@@ -78,7 +78,7 @@ class SoftwareHotwordDetector extends AbstractHotwordDetector {
 
     @RequiresPermission(RECORD_AUDIO)
     @Override
-    public boolean startRecognition() {
+    public boolean startRecognition() throws IllegalDetectorStateException {
         if (DEBUG) {
             Slog.i(TAG, "#startRecognition");
         }
@@ -101,7 +101,7 @@ class SoftwareHotwordDetector extends AbstractHotwordDetector {
     /** TODO: stopRecognition */
     @RequiresPermission(RECORD_AUDIO)
     @Override
-    public boolean stopRecognition() {
+    public boolean stopRecognition() throws IllegalDetectorStateException {
         if (DEBUG) {
             Slog.i(TAG, "#stopRecognition");
         }

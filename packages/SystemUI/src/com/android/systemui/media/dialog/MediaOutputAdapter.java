@@ -20,7 +20,6 @@ import android.content.res.ColorStateList;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
 import android.graphics.drawable.Drawable;
-import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
@@ -233,15 +232,6 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
                     device)) {
                 mController.removeDeviceFromPlayMedia(device);
             }
-        }
-
-        private boolean isDeviceIncluded(List<MediaDevice> deviceList, MediaDevice targetDevice) {
-            for (MediaDevice device : deviceList) {
-                if (TextUtils.equals(device.getId(), targetDevice.getId())) {
-                    return true;
-                }
-            }
-            return false;
         }
 
         private void onItemClick(View view, MediaDevice device) {

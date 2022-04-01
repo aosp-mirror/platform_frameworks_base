@@ -186,6 +186,12 @@ public final class AppRestrictionController {
      */
     private static final boolean ENABLE_SHOW_FOREGROUND_SERVICE_MANAGER = true;
 
+    /**
+     * Whether or not to show the action to the foreground service manager when
+     * posting the notification for background restriction.
+     */
+    private static final boolean ENABLE_SHOW_FGS_MANAGER_ACTION_ON_BG_RESTRICTION = false;
+
     private final Context mContext;
     private final HandlerThread mBgHandlerThread;
     private final BgHandler mBgHandler;
@@ -666,6 +672,14 @@ public final class AppRestrictionController {
                 DEVICE_CONFIG_SUBNAMESPACE_PREFIX + "prompt_fgs_with_noti_to_bg_restricted";
 
         /**
+         * The behavior for an app with a FGS and its notification is still showing, when the system
+         * detects it's running for a very long time, should we prompt the user.
+         * {@code true} - we'll show the prompt to user, {@code false} - we'll not show it.
+         */
+        static final String KEY_BG_PROMPT_FGS_WITH_NOTIFICATION_ON_LONG_RUNNING =
+                DEVICE_CONFIG_SUBNAMESPACE_PREFIX + "prompt_fgs_with_noti_on_long_running";
+
+        /**
          * The list of packages to be exempted from all these background restrictions.
          */
         static final String KEY_BG_RESTRICTION_EXEMPTED_PACKAGES =
@@ -685,6 +699,11 @@ public final class AppRestrictionController {
          * Default value to {@link #mBgAbusiveNotificationMinIntervalMs}.
          */
         static final long DEFAULT_BG_LONG_FGS_NOTIFICATION_MINIMAL_INTERVAL_MS = 30 * ONE_DAY;
+
+        /**
+         * Default value to {@link #mBgPromptFgsWithNotiOnLongRunning}.
+         */
+        static final boolean DEFAULT_BG_PROMPT_FGS_WITH_NOTIFICATION_ON_LONG_RUNNING = false;
 
         /**
          * Default value to {@link #mBgPromptFgsWithNotiToBgRestricted}.
@@ -711,6 +730,11 @@ public final class AppRestrictionController {
          */
         volatile boolean mBgPromptFgsWithNotiToBgRestricted;
 
+        /**
+         * @see #KEY_BG_PROMPT_FGS_WITH_NOTIFICATION_ON_LONG_RUNNING.
+         */
+        volatile boolean mBgPromptFgsWithNotiOnLongRunning;
+
         ConstantsObserver(Handler handler, Context context) {
             super(handler);
             mDefaultBgPromptFgsWithNotiToBgRestricted = context.getResources().getBoolean(
@@ -735,6 +759,9 @@ public final class AppRestrictionController {
                         break;
                     case KEY_BG_PROMPT_FGS_WITH_NOTIFICATION_TO_BG_RESTRICTED:
                         updateBgPromptFgsWithNotiToBgRestricted();
+                        break;
+                    case KEY_BG_PROMPT_FGS_WITH_NOTIFICATION_ON_LONG_RUNNING:
+                        updateBgPromptFgsWithNotiOnLongRunning();
                         break;
                     case KEY_BG_RESTRICTION_EXEMPTED_PACKAGES:
                         updateBgRestrictionExemptedPackages();
@@ -772,6 +799,7 @@ public final class AppRestrictionController {
             updateBgAbusiveNotificationMinimalInterval();
             updateBgLongFgsNotificationMinimalInterval();
             updateBgPromptFgsWithNotiToBgRestricted();
+            updateBgPromptFgsWithNotiOnLongRunning();
             updateBgRestrictionExemptedPackages();
         }
 
@@ -805,6 +833,13 @@ public final class AppRestrictionController {
                     DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
                     KEY_BG_PROMPT_FGS_WITH_NOTIFICATION_TO_BG_RESTRICTED,
                     mDefaultBgPromptFgsWithNotiToBgRestricted);
+        }
+
+        private void updateBgPromptFgsWithNotiOnLongRunning() {
+            mBgPromptFgsWithNotiOnLongRunning = DeviceConfig.getBoolean(
+                    DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                    KEY_BG_PROMPT_FGS_WITH_NOTIFICATION_ON_LONG_RUNNING,
+                    DEFAULT_BG_PROMPT_FGS_WITH_NOTIFICATION_ON_LONG_RUNNING);
         }
 
         private void updateBgRestrictionExemptedPackages() {
@@ -1691,7 +1726,9 @@ public final class AppRestrictionController {
                     return;
                 }
             }
-            if (ENABLE_SHOW_FOREGROUND_SERVICE_MANAGER && hasForegroundServices) {
+            if (ENABLE_SHOW_FOREGROUND_SERVICE_MANAGER
+                    && ENABLE_SHOW_FGS_MANAGER_ACTION_ON_BG_RESTRICTION
+                    && hasForegroundServices) {
                 final Intent trampoline = new Intent(ACTION_FGS_MANAGER_TRAMPOLINE);
                 trampoline.setPackage("android");
                 trampoline.putExtra(Intent.EXTRA_PACKAGE_NAME, packageName);
@@ -1716,6 +1753,13 @@ public final class AppRestrictionController {
 
         void postLongRunningFgsIfNecessary(String packageName, int uid) {
             PendingIntent pendingIntent;
+            if (!mBgController.mConstantsObserver.mBgPromptFgsWithNotiOnLongRunning
+                    && mBgController.hasForegroundServiceNotifications(packageName, uid)) {
+                if (DEBUG_BG_RESTRICTION_CONTROLLER) {
+                    Slog.i(TAG, "Not prompt long-running due to FGS with notification");
+                }
+                return;
+            }
             if (ENABLE_SHOW_FOREGROUND_SERVICE_MANAGER) {
                 final Intent intent = new Intent(ACTION_SHOW_FOREGROUND_SERVICE_MANAGER);
                 intent.addFlags(Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND);
@@ -1732,7 +1776,7 @@ public final class AppRestrictionController {
             }
 
             postNotificationIfNecessary(NOTIFICATION_TYPE_LONG_RUNNING_FGS,
-                    com.android.internal.R.string.notification_title_abusive_bg_apps,
+                    com.android.internal.R.string.notification_title_long_running_fgs,
                     com.android.internal.R.string.notification_content_long_running_fgs,
                     pendingIntent, packageName, uid, null);
         }
