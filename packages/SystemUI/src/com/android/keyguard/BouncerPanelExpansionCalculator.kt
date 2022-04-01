@@ -46,4 +46,24 @@ object BouncerPanelExpansionCalculator {
     fun getKeyguardClockScaledExpansion(fraction: Float): Float {
         return MathUtils.constrain((fraction - 0.7f) / 0.3f, 0f, 1f)
     }
+
+    /**
+     *  Scale the position of the dream complications.
+     */
+    @JvmStatic
+    fun getDreamYPositionScaledExpansion(fraction: Float): Float {
+        return when {
+            fraction >= 0.98f -> 1f
+            fraction < 0.93 -> 0f
+            else -> (fraction - 0.93f) / 0.05f
+        }
+    }
+
+    /**
+     *  Scale the alpha of the dream complications.
+     */
+    @JvmStatic
+    fun getDreamAlphaScaledExpansion(fraction: Float): Float {
+        return MathUtils.constrain((fraction - 0.94f) / 0.06f, 0f, 1f)
+    }
 }
