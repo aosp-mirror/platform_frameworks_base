@@ -21,49 +21,29 @@ import android.app.Dialog;
 import android.view.View;
 
 /**
- * Interface for applications to register back invocation callbacks. This allows the client
- * to customize various back behaviors by overriding the corresponding callback methods.
- *
+ * Callback allowing applications to handle back events in place of the system.
+ * <p>
  * Callback instances can be added to and removed from {@link OnBackInvokedDispatcher}, held
  * by classes that implement {@link OnBackInvokedDispatcherOwner} (such as {@link Activity},
  * {@link Dialog} and {@link View}).
- *
+ * <p>
  * Under the hood callbacks are registered at window level. When back is triggered,
  * callbacks on the in-focus window are invoked in reverse order in which they are added
  * within the same priority. Between different pirorities, callbacks with higher priority
  * are invoked first.
+ * <p>
+ * This replaces {@link Activity#onBackPressed()}, {@link Dialog#onBackPressed()} and
+ * {@link android.view.KeyEvent#KEYCODE_BACK}
  *
- * See {@link OnBackInvokedDispatcher#registerOnBackInvokedCallback(int, OnBackInvokedCallback)}
- * for specifying callback priority.
+ * @see OnBackInvokedDispatcher#registerOnBackInvokedCallback(int, OnBackInvokedCallback)
+ * registerOnBackInvokedCallback(priority, OnBackInvokedCallback)
+ * to specify callback priority.
  */
+@SuppressWarnings("deprecation")
 public interface OnBackInvokedCallback {
-   /**
-    * Called when a back gesture has been started, or back button has been pressed down.
-    *
-    * @hide
-    */
-    default void onBackStarted() { };
-
-    /**
-     * Called on back gesture progress.
-     *
-     * @param backEvent An {@link android.window.BackEvent} object describing the progress event.
-     *
-     * @see android.window.BackEvent
-     * @hide
-     */
-    default void onBackProgressed(BackEvent backEvent) { };
-
-    /**
-     * Called when a back gesture or back button press has been cancelled.
-     *
-     * @hide
-     */
-    default void onBackCancelled() { };
-
     /**
      * Called when a back gesture has been completed and committed, or back button pressed
      * has been released and committed.
      */
-    default void onBackInvoked() { };
+    void onBackInvoked();
 }
