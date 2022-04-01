@@ -13,6 +13,7 @@ extern int register_android_graphics_CreateJavaOutputStreamAdaptor(JNIEnv* env);
 extern int register_android_graphics_Graphics(JNIEnv* env);
 extern int register_android_graphics_MaskFilter(JNIEnv* env);
 extern int register_android_graphics_Shader(JNIEnv* env);
+extern int register_android_graphics_Typeface(JNIEnv* env);
 
 namespace android {
 
@@ -28,6 +29,8 @@ extern int register_android_graphics_PathMeasure(JNIEnv* env);
 extern int register_android_graphics_Region(JNIEnv* env);
 extern int register_android_graphics_fonts_Font(JNIEnv* env);
 extern int register_android_graphics_fonts_FontFamily(JNIEnv* env);
+extern int register_android_graphics_text_LineBreaker(JNIEnv* env);
+extern int register_android_graphics_text_MeasuredText(JNIEnv* env);
 
 #define REG_JNI(name) \
     { name }
@@ -55,8 +58,11 @@ static const RegJNIRec graphicsJNI[] = {
         REG_JNI(register_android_graphics_PathMeasure),
         REG_JNI(register_android_graphics_Region),
         REG_JNI(register_android_graphics_Shader),
+        REG_JNI(register_android_graphics_Typeface),
         REG_JNI(register_android_graphics_fonts_Font),
         REG_JNI(register_android_graphics_fonts_FontFamily),
+        REG_JNI(register_android_graphics_text_LineBreaker),
+        REG_JNI(register_android_graphics_text_MeasuredText),
 };
 
 JNIEnv* AndroidRuntime::getJNIEnv() {
