@@ -502,11 +502,11 @@ public class ClipboardOverlayController {
             mWindowManager.removeViewImmediate(decorView);
         }
         if (mCloseDialogsReceiver != null) {
-            mContext.unregisterReceiver(mCloseDialogsReceiver);
+            mBroadcastDispatcher.unregisterReceiver(mCloseDialogsReceiver);
             mCloseDialogsReceiver = null;
         }
         if (mScreenshotReceiver != null) {
-            mContext.unregisterReceiver(mScreenshotReceiver);
+            mBroadcastDispatcher.unregisterReceiver(mScreenshotReceiver);
             mScreenshotReceiver = null;
         }
         if (mInputEventReceiver != null) {
