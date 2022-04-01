@@ -10743,7 +10743,7 @@ public final class ViewRootImpl implements ViewParent,
     private void registerBackCallbackOnWindow() {
         if (OnBackInvokedDispatcher.DEBUG) {
             Log.d(OnBackInvokedDispatcher.TAG, TextUtils.formatSimple(
-                    "ViewRootImpl.registerBackCallbackOnWindow. Callback:%s Package:%s "
+                    "ViewRootImpl.registerBackCallbackOnWindow. Dispatcher:%s Package:%s "
                             + "IWindow:%s Session:%s",
                     mOnBackInvokedDispatcher, mBasePackageName, mWindow, mWindowSession));
         }
