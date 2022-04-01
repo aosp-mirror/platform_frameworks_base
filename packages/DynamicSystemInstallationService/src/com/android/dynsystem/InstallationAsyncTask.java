@@ -18,6 +18,7 @@ package com.android.dynsystem;
 
 import android.content.Context;
 import android.gsi.AvbPublicKey;
+import android.gsi.IGsiService;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
@@ -27,6 +28,7 @@ import android.os.SystemProperties;
 import android.os.image.DynamicSystemManager;
 import android.service.persistentdata.PersistentDataBlockManager;
 import android.util.Log;
+import android.util.Pair;
 import android.util.Range;
 import android.webkit.URLUtil;
 
@@ -106,8 +108,15 @@ class InstallationAsyncTask extends AsyncTask<String, Long, Throwable> {
         }
     }
 
+    static class InsufficientSpaceException extends IOException {
+        InsufficientSpaceException(String message) {
+            super(message);
+        }
+    }
+
     /** UNSET means the installation is not completed */
     static final int RESULT_UNSET = 0;
+
     static final int RESULT_OK = 1;
     static final int RESULT_CANCELLED = 2;
     static final int RESULT_ERROR_IO = 3;
@@ -157,6 +166,7 @@ class InstallationAsyncTask extends AsyncTask<String, Long, Throwable> {
     private final boolean mIsNetworkUrl;
     private final boolean mIsDeviceBootloaderUnlocked;
     private final boolean mWantScratchPartition;
+    private int mCreatePartitionStatus;
     private DynamicSystemManager.Session mInstallationSession;
     private KeyRevocationList mKeyRevocationList;
 
@@ -364,7 +374,7 @@ class InstallationAsyncTask extends AsyncTask<String, Long, Throwable> {
             mIsZip = true;
         } else {
             throw new UnsupportedFormatException(
-                String.format(Locale.US, "Unsupported file format: %s", mUrl));
+                    String.format(Locale.US, "Unsupported file format: %s", mUrl));
         }
 
         if (mIsNetworkUrl) {
@@ -435,14 +445,19 @@ class InstallationAsyncTask extends AsyncTask<String, Long, Throwable> {
             throws IOException {
         Log.d(TAG, "Creating writable partition: " + partitionName + ", size: " + partitionSize);
 
-        Thread thread = new Thread() {
-            @Override
-            public void run() {
-                mInstallationSession =
-                        mDynSystem.createPartition(
-                                partitionName, partitionSize, /* readOnly= */ false);
-            }
-        };
+        mCreatePartitionStatus = 0;
+        mInstallationSession = null;
+        Thread thread =
+                new Thread() {
+                    @Override
+                    public void run() {
+                        Pair<Integer, DynamicSystemManager.Session> result =
+                                mDynSystem.createPartition(
+                                        partitionName, partitionSize, /* readOnly = */ false);
+                        mCreatePartitionStatus = result.first;
+                        mInstallationSession = result.second;
+                    }
+                };
 
         initPartitionProgress(partitionName, partitionSize, /* readonly = */ false);
         publishProgress(/* installedSize = */ 0L);
@@ -468,19 +483,28 @@ class InstallationAsyncTask extends AsyncTask<String, Long, Throwable> {
             }
         }
 
-        if (prevInstalledSize != partitionSize) {
-            publishProgress(partitionSize);
-        }
-
         if (mInstallationSession == null) {
-            throw new IOException(
-                    "Failed to start installation with requested size: " + partitionSize);
+            if (mCreatePartitionStatus == IGsiService.INSTALL_ERROR_NO_SPACE
+                    || mCreatePartitionStatus == IGsiService.INSTALL_ERROR_FILE_SYSTEM_CLUTTERED) {
+                throw new InsufficientSpaceException(
+                        "Failed to create "
+                                + partitionName
+                                + " partition: storage media has insufficient free space");
+            } else {
+                throw new IOException(
+                        "Failed to start installation with requested size: " + partitionSize);
+            }
         }
 
         // Reset installation session and verify that installation completes successfully.
         mInstallationSession = null;
         if (!mDynSystem.closePartition()) {
             throw new IOException("Failed to complete partition installation: " + partitionName);
+        }
+
+        // Ensure a 100% mark is published.
+        if (prevInstalledSize != partitionSize) {
+            publishProgress(partitionSize);
         }
     }
 
@@ -606,10 +630,19 @@ class InstallationAsyncTask extends AsyncTask<String, Long, Throwable> {
             throw new IOException("Cannot get raw size for " + partitionName);
         }
 
-        Thread thread = new Thread(() -> {
-            mInstallationSession =
-                    mDynSystem.createPartition(partitionName, partitionSize, true);
-        });
+        mCreatePartitionStatus = 0;
+        mInstallationSession = null;
+        Thread thread =
+                new Thread() {
+                    @Override
+                    public void run() {
+                        Pair<Integer, DynamicSystemManager.Session> result =
+                                mDynSystem.createPartition(
+                                        partitionName, partitionSize, /* readOnly = */ true);
+                        mCreatePartitionStatus = result.first;
+                        mInstallationSession = result.second;
+                    }
+                };
 
         Log.d(TAG, "Start creating partition: " + partitionName);
         thread.start();
@@ -627,8 +660,16 @@ class InstallationAsyncTask extends AsyncTask<String, Long, Throwable> {
         }
 
         if (mInstallationSession == null) {
-            throw new IOException(
-                    "Failed to start installation with requested size: " + partitionSize);
+            if (mCreatePartitionStatus == IGsiService.INSTALL_ERROR_NO_SPACE
+                    || mCreatePartitionStatus == IGsiService.INSTALL_ERROR_FILE_SYSTEM_CLUTTERED) {
+                throw new InsufficientSpaceException(
+                        "Failed to create "
+                                + partitionName
+                                + " partition: storage media has insufficient free space");
+            } else {
+                throw new IOException(
+                        "Failed to start installation with requested size: " + partitionSize);
+            }
         }
 
         Log.d(TAG, "Start installing: " + partitionName);
@@ -688,11 +729,6 @@ class InstallationAsyncTask extends AsyncTask<String, Long, Throwable> {
             installedSize += numBytesRead;
         }
 
-        // Ensure a 100% mark is published.
-        if (prevInstalledSize != partitionSize) {
-            publishProgress(partitionSize);
-        }
-
         AvbPublicKey avbPublicKey = new AvbPublicKey();
         if (!mInstallationSession.getAvbPublicKey(avbPublicKey)) {
             imageValidationThrowOrWarning(new PublicKeyException("getAvbPublicKey() failed"));
@@ -707,6 +743,11 @@ class InstallationAsyncTask extends AsyncTask<String, Long, Throwable> {
         mInstallationSession = null;
         if (!mDynSystem.closePartition()) {
             throw new IOException("Failed to complete partition installation: " + partitionName);
+        }
+
+        // Ensure a 100% mark is published.
+        if (prevInstalledSize != partitionSize) {
+            publishProgress(partitionSize);
         }
     }
 
