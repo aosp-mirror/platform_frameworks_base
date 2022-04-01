@@ -2029,8 +2029,7 @@
     <string name="log_access_confirmation_title" msgid="2343578467290592708">"<xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g>-д төхөөрөмжийн бүх логт хандахыг зөвшөөрөх үү?"</string>
     <string name="log_access_confirmation_allow" msgid="143157286283302512">"Зөвхөн энэ удаа"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"Бүү зөвшөөр"</string>
-    <!-- no translation found for log_access_confirmation_body (6581985716241928135) -->
-    <skip />
+    <string name="log_access_confirmation_body" msgid="6581985716241928135">"Төхөөрөмжийн лог нь таны төхөөрөмж дээр юу болж байгааг бичдэг. Аппууд эдгээр логийг асуудлыг олох болон засахад ашиглах боломжтой.\n\nЗарим лог эмзэг мэдээлэл агуулж байж магадгүй тул та зөвхөн итгэдэг аппууддаа төхөөрөмжийн бүх логт хандахыг зөвшөөрнө үү. \n\nХэрэв та энэ аппад төхөөрөмжийн бүх логт хандахыг зөвшөөрөхгүй бол энэ нь өөрийн логт хандах боломжтой хэвээр байх болно. Tаны төхөөрөмж үйлдвэрлэгч таны төхөөрөмж дээрх зарим лог эсвэл мэдээлэлд хандах боломжтой хэвээр байж магадгүй. Нэмэлт мэдээлэл авах"</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"Дахиж бүү харуул"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g> <xliff:g id="APP_2">%2$s</xliff:g>-н хэсгүүдийг (slices) харуулах хүсэлтэй байна"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"Засах"</string>
@@ -2264,9 +2263,7 @@
     <string name="notification_content_abusive_bg_apps" msgid="5572096708044958249">"<xliff:g id="APP">%1$s</xliff:g> дэвсгэрт ажиллаж байгаа бөгөөд батарейг дуусгаж байна. Хянахын тулд товшино уу."</string>
     <string name="notification_content_long_running_fgs" msgid="8878031652441570178">"<xliff:g id="APP">%1$s</xliff:g> дэвсгэрт удаан хугацааны турш ажиллаж байна. Хянахын тулд товшино уу."</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Идэвхтэй аппуудыг шалгах"</string>
-    <!-- no translation found for vdm_camera_access_denied (6102378580971542473) -->
-    <skip />
-    <!-- no translation found for vdm_camera_access_denied (6895968310395249076) -->
-    <skip />
+    <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"Таны <xliff:g id="DEVICE">%1$s</xliff:g>-с утасны камерт хандах боломжгүй"</string>
+    <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"Таны <xliff:g id="DEVICE">%1$s</xliff:g>-с таблетын камерт хандах боломжгүй"</string>
     <string name="system_locale_title" msgid="3978041860457277638">"Системийн хэл"</string>
 </resources>
