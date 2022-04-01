@@ -157,7 +157,7 @@ public class PipSurfaceTransactionHelper {
     /** @return {@link SurfaceControl.Transaction} instance with vsync-id */
     public static SurfaceControl.Transaction newSurfaceControlTransaction() {
         final SurfaceControl.Transaction tx = new SurfaceControl.Transaction();
-        tx.setFrameTimelineVsync(Choreographer.getSfInstance().getVsyncId());
+        tx.setFrameTimelineVsync(Choreographer.getInstance().getVsyncId());
         return tx;
     }
 }

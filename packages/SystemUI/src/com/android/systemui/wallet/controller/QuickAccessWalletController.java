@@ -211,27 +211,24 @@ public class QuickAccessWalletController {
     public void startQuickAccessUiIntent(ActivityStarter activityStarter,
             ActivityLaunchAnimator.Controller animationController,
             boolean hasCard) {
-        if (mQuickAccessWalletClient.useTargetActivityForQuickAccess() || !hasCard) {
-            mQuickAccessWalletClient.getWalletPendingIntent(mCallbackExecutor,
-                    walletPendingIntent -> {
-                        if (walletPendingIntent == null) {
-                            Intent intent = mQuickAccessWalletClient.createWalletIntent();
-                            if (intent == null) {
-                                intent = getSysUiWalletIntent();
-                            }
-                            startQuickAccessViaIntent(intent, hasCard, activityStarter,
-                                    animationController);
-                            return;
-                        }
-                        startQuickAccessViaPendingIntent(walletPendingIntent,
-                                activityStarter, animationController);
-                    });
-        } else {
-            startQuickAccessViaIntent(getSysUiWalletIntent(),
-                    hasCard,
-                    activityStarter,
-                    animationController);
-        }
+        mQuickAccessWalletClient.getWalletPendingIntent(mCallbackExecutor,
+                walletPendingIntent -> {
+                    if (walletPendingIntent != null) {
+                        startQuickAccessViaPendingIntent(walletPendingIntent, activityStarter,
+                                animationController);
+                        return;
+                    }
+                    Intent intent = null;
+                    if (!hasCard) {
+                        intent = mQuickAccessWalletClient.createWalletIntent();
+                    }
+                    if (intent == null) {
+                        intent = getSysUiWalletIntent();
+                    }
+                    startQuickAccessViaIntent(intent, hasCard, activityStarter,
+                            animationController);
+
+                });
     }
 
     private Intent getSysUiWalletIntent() {

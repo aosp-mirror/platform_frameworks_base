@@ -1651,7 +1651,6 @@ package android {
     field public static final int useEmbeddedDex = 16844190; // 0x101059e
     field public static final int useIntrinsicSizeAsMinimum = 16843536; // 0x1010310
     field public static final int useLevel = 16843167; // 0x101019f
-    field public static final int useTargetActivityForQuickAccess;
     field public static final int userVisible = 16843409; // 0x1010291
     field public static final int usesCleartextTraffic = 16844012; // 0x10104ec
     field public static final int usesPermissionFlags = 16844356; // 0x1010644
@@ -4157,7 +4156,7 @@ package android.app {
     method protected void onActivityResult(int, int, android.content.Intent);
     method @Deprecated public void onAttachFragment(android.app.Fragment);
     method public void onAttachedToWindow();
-    method public void onBackPressed();
+    method @Deprecated public void onBackPressed();
     method protected void onChildTitleChanged(android.app.Activity, CharSequence);
     method public void onConfigurationChanged(@NonNull android.content.res.Configuration);
     method public void onContentChanged();
@@ -5049,7 +5048,7 @@ package android.app {
     method @CallSuper public void onActionModeFinished(android.view.ActionMode);
     method @CallSuper public void onActionModeStarted(android.view.ActionMode);
     method public void onAttachedToWindow();
-    method public void onBackPressed();
+    method @Deprecated public void onBackPressed();
     method public void onContentChanged();
     method public boolean onContextItemSelected(@NonNull android.view.MenuItem);
     method public void onContextMenuClosed(@NonNull android.view.Menu);
@@ -32947,6 +32946,7 @@ package android.preference {
     method @Deprecated public boolean isMultiPane();
     method @Deprecated protected boolean isValidFragment(String);
     method @Deprecated public void loadHeadersFromResource(@XmlRes int, java.util.List<android.preference.PreferenceActivity.Header>);
+    method @Deprecated public void onBackPressed();
     method @Deprecated public void onBuildHeaders(java.util.List<android.preference.PreferenceActivity.Header>);
     method @Deprecated public android.content.Intent onBuildStartFragmentIntent(String, android.os.Bundle, @StringRes int, int);
     method @Deprecated public android.preference.PreferenceActivity.Header onGetInitialHeader();

@@ -58,7 +58,9 @@ import androidx.mediarouter.media.MediaRouterParams;
 import com.android.settingslib.RestrictedLockUtilsInternal;
 import com.android.settingslib.Utils;
 import com.android.settingslib.bluetooth.BluetoothUtils;
+import com.android.settingslib.bluetooth.CachedBluetoothDevice;
 import com.android.settingslib.bluetooth.LocalBluetoothManager;
+import com.android.settingslib.media.BluetoothMediaDevice;
 import com.android.settingslib.media.InfoMediaManager;
 import com.android.settingslib.media.LocalMediaManager;
 import com.android.settingslib.media.MediaDevice;
@@ -683,11 +685,38 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
                 || features.contains(MediaRoute2Info.FEATURE_REMOTE_GROUP_PLAYBACK));
     }
 
+    boolean isBluetoothLeDevice(@NonNull MediaDevice device) {
+        if (device instanceof BluetoothMediaDevice) {
+            final CachedBluetoothDevice cachedDevice =
+                    ((BluetoothMediaDevice) device).getCachedDevice();
+            boolean isConnectedLeAudioDevice =
+                    (cachedDevice != null) ? cachedDevice.isConnectedLeAudioDevice() : false;
+            if (DEBUG) {
+                Log.d(TAG, "isConnectedLeAudioDevice=" + isConnectedLeAudioDevice);
+            }
+            return isConnectedLeAudioDevice;
+        }
+        return false;
+    }
+
     private boolean isPlayBackInfoLocal() {
         return mMediaController != null
                 && mMediaController.getPlaybackInfo() != null
                 && mMediaController.getPlaybackInfo().getPlaybackType()
                 == MediaController.PlaybackInfo.PLAYBACK_TYPE_LOCAL;
+    }
+
+    boolean isPlaying() {
+        if (mMediaController == null) {
+            return false;
+        }
+
+        PlaybackState state = mMediaController.getPlaybackState();
+        if (state == null) {
+            return false;
+        }
+
+        return (state.getState() == PlaybackState.STATE_PLAYING);
     }
 
     boolean isVolumeControlEnabled(@NonNull MediaDevice device) {

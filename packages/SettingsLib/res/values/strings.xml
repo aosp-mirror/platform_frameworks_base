@@ -1582,4 +1582,11 @@
     <string name="allow_turn_screen_on">Allow turning the screen on</string>
     <!-- Description for a setting which controls whether an app can turn the screen on [CHAR LIMIT=NONE] -->
     <string name="allow_turn_screen_on_description">Allow an app to turn the screen on. If granted, the app may turn on the screen at any time without your explicit intent.</string>
+
+    <!-- [CHAR LIMIT=NONE] Le audio QR code scanner title -->
+    <string name="bt_le_audio_scan_qr_code">Scan QR code</string>
+    <!-- [CHAR LIMIT=NONE] Le audio QR code scanner sub-title -->
+    <string name="bt_le_audio_scan_qr_code_scanner">To start listening, center the QR code below</string>
+    <!-- [CHAR LIMIT=NONE] Hint for QR code process failure -->
+    <string name="bt_le_audio_qr_code_is_not_valid_format">QR code isn\u0027t a valid format</string>
 </resources>

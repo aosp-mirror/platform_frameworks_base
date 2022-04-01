@@ -8871,8 +8871,6 @@
         <attr name="shortcutLongLabel"/>
         <!-- Text shown on the button that takes users to the wallet application -->
         <attr name="shortcutShortLabel"/>
-        <!-- When true, launch the component specified in targetActivity for quick access -->
-        <attr name="useTargetActivityForQuickAccess" format="boolean"/>
     </declare-styleable>
 
     <!-- Use <code>recognition-service</code> as the root tag of the XML resource that

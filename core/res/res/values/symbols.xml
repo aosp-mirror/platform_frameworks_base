@@ -1716,10 +1716,6 @@
   <java-symbol type="anim" name="activity_open_exit" />
   <java-symbol type="anim" name="activity_close_enter" />
   <java-symbol type="anim" name="activity_close_exit" />
-  <java-symbol type="anim" name="activity_open_enter_legacy" />
-  <java-symbol type="anim" name="activity_open_exit_legacy" />
-  <java-symbol type="anim" name="activity_close_enter_legacy" />
-  <java-symbol type="anim" name="activity_close_exit_legacy" />
   <java-symbol type="anim" name="task_fragment_close_enter" />
   <java-symbol type="anim" name="task_fragment_close_exit" />
   <java-symbol type="anim" name="task_fragment_open_enter" />
@@ -2239,6 +2235,7 @@
   <java-symbol type="array" name="config_supportedDreamComplications" />
   <java-symbol type="array" name="config_dreamComplicationsEnabledByDefault" />
   <java-symbol type="array" name="config_disabledDreamComponents" />
+  <java-symbol type="string" name="config_loggable_dream_prefix" />
   <java-symbol type="string" name="config_dozeComponent" />
   <java-symbol type="string" name="enable_explore_by_touch_warning_title" />
   <java-symbol type="string" name="enable_explore_by_touch_warning_message" />
@@ -4743,6 +4740,7 @@
 
   <java-symbol type="string" name="notification_channel_abusive_bg_apps"/>
   <java-symbol type="string" name="notification_title_abusive_bg_apps"/>
+  <java-symbol type="string" name="notification_title_long_running_fgs"/>
   <java-symbol type="string" name="notification_content_abusive_bg_apps"/>
   <java-symbol type="string" name="notification_content_long_running_fgs"/>
   <java-symbol type="string" name="notification_action_check_bg_apps"/>

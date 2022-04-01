@@ -2259,7 +2259,8 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
                 attrs.type == TYPE_APPLICATION || attrs.type == TYPE_DRAWN_APPLICATION;
         final WindowConfiguration winConfig = getResources().getConfiguration().windowConfiguration;
         // Only a non floating application window on one of the allowed workspaces can get a caption
-        if (!mWindow.isFloating() && isApplication && winConfig.hasWindowDecorCaption()) {
+        if (!mWindow.isFloating() && isApplication && winConfig.hasWindowDecorCaption()
+                && !CAPTION_ON_SHELL) {
             // Dependent on the brightness of the used title we either use the
             // dark or the light button frame.
             if (decorCaptionView == null) {

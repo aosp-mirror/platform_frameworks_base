@@ -46,6 +46,12 @@ android_test {
         "android.test.runner",
     ],
 
+    // These are not normally accessible from apps so they must be explicitly included.
+    jni_libs: [
+        "libdexmakerjvmtiagent",
+        "libstaticjvmtiagent",
+    ],
+
     optimize: {
         enabled: false,
     },

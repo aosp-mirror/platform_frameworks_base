@@ -27,6 +27,7 @@ import androidx.core.graphics.drawable.IconCompat;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.UiEvent;
 import com.android.internal.logging.UiEventLogger;
+import com.android.settingslib.media.MediaDevice;
 import com.android.systemui.R;
 import com.android.systemui.broadcast.BroadcastSender;
 import com.android.systemui.dagger.SysUISingleton;
@@ -87,8 +88,20 @@ public class MediaOutputDialog extends MediaOutputBaseDialog {
 
     @Override
     int getStopButtonVisibility() {
-        return mMediaOutputController.isActiveRemoteDevice(
-                mMediaOutputController.getCurrentConnectedMediaDevice()) ? View.VISIBLE : View.GONE;
+        boolean isActiveRemoteDevice = mMediaOutputController.isActiveRemoteDevice(
+                mMediaOutputController.getCurrentConnectedMediaDevice());
+        boolean isBroadCastSupported = isBroadcastSupported();
+
+        return (isActiveRemoteDevice || isBroadCastSupported) ? View.VISIBLE : View.GONE;
+    }
+
+    @Override
+    public boolean isBroadcastSupported() {
+        MediaDevice device = mMediaOutputController.getCurrentConnectedMediaDevice();
+        if (device == null) {
+            return false;
+        }
+        return mMediaOutputController.isBluetoothLeDevice(device);
     }
 
     @VisibleForTesting
