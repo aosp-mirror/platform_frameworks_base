@@ -23,8 +23,13 @@ import static android.window.BackNavigationInfo.typeToString;
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth.assertWithMessage;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -32,19 +37,25 @@ import static org.mockito.Mockito.when;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.hardware.HardwareBuffer;
+import android.os.RemoteException;
 import android.platform.test.annotations.Presubmit;
 import android.view.WindowManager;
 import android.window.BackEvent;
 import android.window.BackNavigationInfo;
 import android.window.IOnBackInvokedCallback;
+import android.window.OnBackInvokedCallback;
 import android.window.OnBackInvokedDispatcher;
 import android.window.TaskSnapshot;
+import android.window.WindowOnBackInvokedDispatcher;
 
 import com.android.server.LocalServices;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 @Presubmit
 @RunWith(WindowTestRunner.class)
@@ -148,6 +159,61 @@ public class BackNavigationControllerTests extends WindowTestsBase {
         assertThat(backNavigationInfo.getOnBackInvokedCallback()).isEqualTo(appCallback);
     }
 
+    @Test
+    public void testUnregisterCallbacksWithSystemCallback()
+            throws InterruptedException, RemoteException {
+        CountDownLatch systemLatch = new CountDownLatch(1);
+        CountDownLatch appLatch = new CountDownLatch(1);
+
+        Task task = createTopTaskWithActivity();
+        WindowState appWindow = task.getTopVisibleAppMainWindow();
+        WindowOnBackInvokedDispatcher dispatcher = new WindowOnBackInvokedDispatcher();
+        doAnswer(invocation -> {
+            appWindow.setOnBackInvokedCallback(invocation.getArgument(1),
+                    invocation.getArgument(2));
+            return null;
+        }).when(appWindow.mSession).setOnBackInvokedCallback(eq(appWindow.mClient), any(),
+                anyInt());
+
+        addToWindowMap(appWindow, true);
+        dispatcher.attachToWindow(appWindow.mSession, appWindow.mClient);
+
+
+        OnBackInvokedCallback appCallback = createBackCallback(appLatch);
+        OnBackInvokedCallback systemCallback = createBackCallback(systemLatch);
+
+        // Register both a system callback and an application callback
+        dispatcher.registerSystemOnBackInvokedCallback(systemCallback);
+        dispatcher.registerOnBackInvokedCallback(OnBackInvokedDispatcher.PRIORITY_DEFAULT,
+                appCallback);
+
+        // Check that the top callback is the app callback
+        assertEquals(appCallback, dispatcher.getTopCallback());
+
+        // Now unregister the app callback and check that the top callback is the system callback
+        dispatcher.unregisterOnBackInvokedCallback(appCallback);
+        assertEquals(systemCallback, dispatcher.getTopCallback());
+
+        // Verify that this has correctly been propagated to the server and that the
+        // BackNavigationInfo object will contain the system callback
+        BackNavigationInfo backNavigationInfo = startBackNavigation();
+        assertWithMessage("BackNavigationInfo").that(backNavigationInfo).isNotNull();
+        IOnBackInvokedCallback callback = backNavigationInfo.getOnBackInvokedCallback();
+        assertThat(callback).isNotNull();
+
+        try {
+            callback.onBackInvoked();
+        } catch (RemoteException e) {
+            throw new RuntimeException(e);
+        }
+
+        // Check that the system callback has been call
+        assertTrue("System callback has not been called",
+                systemLatch.await(500, TimeUnit.MILLISECONDS));
+        assertEquals("App callback should not have been called",
+                1, appLatch.getCount());
+    }
+
     private IOnBackInvokedCallback withSystemCallback(Task task) {
         IOnBackInvokedCallback callback = createOnBackInvokedCallback();
         task.getTopMostActivity().getTopChild().setOnBackInvokedCallback(callback,
@@ -184,6 +250,17 @@ public class BackNavigationControllerTests extends WindowTestsBase {
 
             @Override
             public void onBackInvoked() {
+            }
+        };
+    }
+
+    private OnBackInvokedCallback createBackCallback(CountDownLatch latch) {
+        return new OnBackInvokedCallback() {
+            @Override
+            public void onBackInvoked() {
+                if (latch != null) {
+                    latch.countDown();
+                }
             }
         };
     }
