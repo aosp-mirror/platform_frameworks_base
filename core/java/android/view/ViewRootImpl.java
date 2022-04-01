@@ -10772,12 +10772,9 @@ public final class ViewRootImpl implements ViewParent,
     }
 
     private void registerCompatOnBackInvokedCallback() {
-        mCompatOnBackInvokedCallback = new OnBackInvokedCallback() {
-            @Override
-            public void onBackInvoked() {
+        mCompatOnBackInvokedCallback = () -> {
                 sendBackKeyEvent(KeyEvent.ACTION_DOWN);
                 sendBackKeyEvent(KeyEvent.ACTION_UP);
-            }
         };
         mOnBackInvokedDispatcher.registerOnBackInvokedCallback(
                 OnBackInvokedDispatcher.PRIORITY_DEFAULT, mCompatOnBackInvokedCallback);
