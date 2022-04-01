@@ -2029,8 +2029,7 @@
     <string name="log_access_confirmation_title" msgid="2343578467290592708">"Allow <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> to access all device logs?"</string>
     <string name="log_access_confirmation_allow" msgid="143157286283302512">"Only this time"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"Don’t allow"</string>
-    <!-- no translation found for log_access_confirmation_body (6581985716241928135) -->
-    <skip />
+    <string name="log_access_confirmation_body" msgid="6581985716241928135">"Device logs record what happens on your device. Apps can use these logs to find and fix issues.\n\nSome logs may contain sensitive info, so only allow apps that you trust to access all device logs. \n\nIf you don’t allow this app to access all device logs, it can still access its own logs. Your device manufacturer may still be able to access some logs or info on your device. Learn more"</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"Don’t show again"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g> wants to show <xliff:g id="APP_2">%2$s</xliff:g> slices"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"Edit"</string>
@@ -2264,9 +2263,7 @@
     <string name="notification_content_abusive_bg_apps" msgid="5572096708044958249">"<xliff:g id="APP">%1$s</xliff:g> is running in the background and draining battery. Tap to review."</string>
     <string name="notification_content_long_running_fgs" msgid="8878031652441570178">"<xliff:g id="APP">%1$s</xliff:g> is running in the background for a long time. Tap to review."</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Check active apps"</string>
-    <!-- no translation found for vdm_camera_access_denied (6102378580971542473) -->
-    <skip />
-    <!-- no translation found for vdm_camera_access_denied (6895968310395249076) -->
-    <skip />
+    <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"Can’t access the phone’s camera from your <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
+    <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"Can’t access the tablet’s camera from your <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
     <string name="system_locale_title" msgid="3978041860457277638">"System language"</string>
 </resources>

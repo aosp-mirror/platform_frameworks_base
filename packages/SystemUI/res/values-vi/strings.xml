@@ -34,6 +34,10 @@
     <string name="status_bar_settings_auto_rotation" msgid="8329080442278431708">"Tự động xoay màn hình"</string>
     <string name="usb_device_permission_prompt" msgid="4414719028369181772">"Cho phép <xliff:g id="APPLICATION">%1$s</xliff:g> truy cập <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
     <string name="usb_device_permission_prompt_warn" msgid="2309129784984063656">"Cho phép <xliff:g id="APPLICATION">%1$s</xliff:g> truy cập vào <xliff:g id="USB_DEVICE">%2$s</xliff:g>?\nỨng dụng này chưa được cấp quyền ghi âm nhưng vẫn có thể ghi âm thông qua thiết bị USB này."</string>
+    <string name="usb_audio_device_permission_prompt_title" msgid="4221351137250093451">"Cho phép <xliff:g id="APPLICATION">%1$s</xliff:g> truy cập vào <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
+    <string name="usb_audio_device_confirm_prompt_title" msgid="8828406516732985696">"Mở <xliff:g id="APPLICATION">%1$s</xliff:g> để điều khiển <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
+    <string name="usb_audio_device_prompt_warn" msgid="2504972133361130335">"Ứng dụng này chưa được cấp quyền ghi âm nhưng vẫn có thể ghi âm thông qua thiết bị USB này. Việc sử dụng <xliff:g id="APPLICATION">%1$s</xliff:g> cùng với thiết bị này có thể giúp bạn tránh phải nghe cuộc gọi, thông báo và chuông báo."</string>
+    <string name="usb_audio_device_prompt" msgid="7944987408206252949">"Việc sử dụng <xliff:g id="APPLICATION">%1$s</xliff:g> cùng với thiết bị này có thể giúp bạn tránh phải nghe cuộc gọi, thông báo và chuông báo."</string>
     <string name="usb_accessory_permission_prompt" msgid="717963550388312123">"Cho phép <xliff:g id="APPLICATION">%1$s</xliff:g> truy cập <xliff:g id="USB_ACCESSORY">%2$s</xliff:g>?"</string>
     <string name="usb_device_confirm_prompt" msgid="4091711472439910809">"Mở <xliff:g id="APPLICATION">%1$s</xliff:g> để điều khiển <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
     <string name="usb_device_confirm_prompt_warn" msgid="990208659736311769">"Mở <xliff:g id="APPLICATION">%1$s</xliff:g> để điều khiển <xliff:g id="USB_DEVICE">%2$s</xliff:g>?\nDù chưa được cấp quyền ghi âm, nhưng ứng dụng có thể ghi âm thông qua thiết bị USB này."</string>
@@ -131,7 +135,8 @@
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="2242167416140740920">"Đã xác thực khuôn mặt"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"Ðã xác nhận"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"Nhấn vào Xác nhận để hoàn tất"</string>
-    <string name="biometric_dialog_tap_confirm_with_face" msgid="1597899891472340950">"Đã mở khoá bằng khuôn mặt bạn. Hãy nhấn để tiếp tục."</string>
+    <!-- no translation found for biometric_dialog_tap_confirm_with_face (7538145860465755864) -->
+    <skip />
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"Đã xác thực"</string>
     <string name="biometric_dialog_use_pin" msgid="8385294115283000709">"Dùng mã PIN"</string>
     <string name="biometric_dialog_use_pattern" msgid="2315593393167211194">"Dùng hình mở khóa"</string>
@@ -287,6 +292,24 @@
     <string name="sensor_privacy_start_use_mic_dialog_content" msgid="1624701280680913717">"Thao tác này sẽ bỏ chặn quyền truy cập cho mọi ứng dụng và dịch vụ được phép sử dụng micrô của bạn."</string>
     <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"Thao tác này sẽ bỏ chặn quyền truy cập cho mọi ứng dụng và dịch vụ được phép sử dụng máy ảnh của bạn."</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_content" msgid="3577642558418404919">"Thao tác này sẽ bỏ chặn quyền truy cập cho mọi ứng dụng và dịch vụ được phép sử dụng máy ảnh hoặc micrô của bạn."</string>
+    <!-- no translation found for sensor_privacy_start_use_mic_blocked_dialog_title (2640140287496469689) -->
+    <skip />
+    <!-- no translation found for sensor_privacy_start_use_camera_blocked_dialog_title (7398084286822440384) -->
+    <skip />
+    <!-- no translation found for sensor_privacy_start_use_mic_camera_blocked_dialog_title (195236134743281973) -->
+    <skip />
+    <!-- no translation found for sensor_privacy_start_use_mic_blocked_dialog_content (2138318880682877747) -->
+    <skip />
+    <!-- no translation found for sensor_privacy_start_use_camera_blocked_dialog_content (7216015168047965948) -->
+    <skip />
+    <!-- no translation found for sensor_privacy_start_use_mic_camera_blocked_dialog_content (3960837827570483762) -->
+    <skip />
+    <!-- no translation found for sensor_privacy_mic_unblocked_toast_content (306555320557065068) -->
+    <skip />
+    <!-- no translation found for sensor_privacy_camera_unblocked_toast_content (7843105715964332311) -->
+    <skip />
+    <!-- no translation found for sensor_privacy_mic_camera_unblocked_toast_content (7339355093282661115) -->
+    <skip />
     <string name="media_seamless_other_device" msgid="4654849800789196737">"Thiết bị khác"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"Bật/tắt chế độ xem Tổng quan"</string>
     <string name="zen_priority_introduction" msgid="3159291973383796646">"Bạn sẽ không bị làm phiền bởi âm thanh và tiếng rung, ngoại trừ báo thức, lời nhắc, sự kiện và người gọi mà bạn chỉ định. Bạn sẽ vẫn nghe thấy mọi thứ bạn chọn phát, bao gồm nhạc, video và trò chơi."</string>
@@ -320,7 +343,6 @@
     <string name="keyguard_indication_charging_time_dock" msgid="6150404291427377863">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Đế sạc • Sạc đầy sau <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Chuyển đổi người dùng"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Tất cả ứng dụng và dữ liệu trong phiên này sẽ bị xóa."</string>
-    <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"Xóa"</string>
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"Chào mừng bạn trở lại!"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"Bạn có muốn tiếp tục phiên của mình không?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"Bắt đầu lại"</string>
@@ -766,6 +788,18 @@
     <string name="controls_dialog_ok" msgid="2770230012857881822">"Thêm"</string>
     <string name="controls_dialog_message" msgid="342066938390663844">"Do <xliff:g id="APP">%s</xliff:g> đề xuất"</string>
     <string name="controls_tile_locked" msgid="731547768182831938">"Đã khóa thiết bị"</string>
+    <!-- no translation found for controls_settings_show_controls_dialog_title (3357852503553809554) -->
+    <skip />
+    <!-- no translation found for controls_settings_show_controls_dialog_message (7666211700524587969) -->
+    <skip />
+    <!-- no translation found for controls_settings_trivial_controls_dialog_title (7593188157655036677) -->
+    <skip />
+    <!-- no translation found for controls_settings_trivial_controls_dialog_message (237183787721917586) -->
+    <skip />
+    <!-- no translation found for controls_settings_dialog_neutral_button (4514446354793124140) -->
+    <skip />
+    <!-- no translation found for controls_settings_dialog_positive_button (436070672551674863) -->
+    <skip />
     <string name="controls_pin_use_alphanumeric" msgid="8478371861023048414">"Mã PIN chứa các ký tự hoặc ký hiệu"</string>
     <string name="controls_pin_verify" msgid="3452778292918877662">"Xác minh <xliff:g id="DEVICE">%s</xliff:g>"</string>
     <string name="controls_pin_wrong" msgid="6162694056042164211">"Mã PIN sai"</string>
@@ -775,8 +809,7 @@
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"Vuốt để xem thêm"</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"Đang tải các đề xuất"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"Nội dung nghe nhìn"</string>
-    <!-- no translation found for controls_media_close_session (4780485355795635052) -->
-    <skip />
+    <string name="controls_media_close_session" msgid="4780485355795635052">"Ẩn chế độ điều khiển nội dung nghe nhìn này cho <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="controls_media_active_session" msgid="3146882316024153337">"Không thể ẩn phiên phát nội dung nghe nhìn hiện tại."</string>
     <string name="controls_media_dismiss_button" msgid="4485675693008031646">"Ẩn"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"Tiếp tục"</string>
@@ -816,6 +849,20 @@
     <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"Vui lòng mở ứng dụng để truyền phiên này."</string>
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"Ứng dụng không xác định"</string>
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"Dừng truyền"</string>
+    <!-- no translation found for media_output_first_broadcast_title (6292237789860753022) -->
+    <skip />
+    <!-- no translation found for media_output_broadcast (3555580945878071543) -->
+    <skip />
+    <!-- no translation found for media_output_first_notify_broadcast_message (6353857724136398494) -->
+    <skip />
+    <!-- no translation found for media_output_broadcasting_message (4150299923404886073) -->
+    <skip />
+    <!-- no translation found for media_output_broadcast_name (8786127091542624618) -->
+    <skip />
+    <!-- no translation found for media_output_broadcast_code (870795639644728542) -->
+    <skip />
+    <!-- no translation found for media_output_broadcast_dialog_save (7910865591430010198) -->
+    <skip />
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"Số bản dựng"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"Đã sao chép số bản dựng vào bảng nhớ tạm."</string>
     <string name="basic_status" msgid="2315371112182658176">"Mở cuộc trò chuyện"</string>
@@ -892,7 +939,8 @@
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"Ứng dụng đang hoạt động"</string>
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"Dừng"</string>
     <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"Đã dừng"</string>
-    <string name="clipboard_edit_text_copy" msgid="770856373439969178">"Sao chép"</string>
+    <!-- no translation found for clipboard_edit_text_done (4551887727694022409) -->
+    <skip />
     <string name="clipboard_overlay_text_copied" msgid="1872624400464891363">"Đã sao chép"</string>
     <string name="clipboard_edit_source" msgid="9156488177277788029">"Từ <xliff:g id="APPNAME">%1$s</xliff:g>"</string>
     <string name="clipboard_dismiss_description" msgid="7544573092766945657">"Đóng giao diện người dùng sao chép"</string>

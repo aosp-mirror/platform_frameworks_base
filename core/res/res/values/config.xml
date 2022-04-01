@@ -1372,10 +1372,6 @@
     <integer name="config_screenBrightnessDoze">1</integer>
     <item name="config_screenBrightnessDozeFloat" format="float" type="dimen">0.0</item>
 
-    <!-- Delay that allows some content to arrive at the display before switching
-         from DOZE to ON. -->
-    <integer name="config_wakeUpDelayDoze">0</integer>
-
     <!-- Whether or not to skip the initial brightness ramps when the display transitions to
          STATE_ON. Setting this to true will skip the brightness ramp to the last stored active
          brightness value and will repeat for the following ramp if autobrightness is enabled. -->
@@ -2402,6 +2398,9 @@
     <integer name="config_dreamsBatteryLevelDrainCutoff">5</integer>
     <!-- Limit of how long the device can remain unlocked due to attention checking.  -->
     <integer name="config_attentionMaximumExtension">900000</integer> <!-- 15 minutes.  -->
+
+    <!-- The prefix of dream component names that are loggable. If empty, logs "other" for all. -->
+    <string name ="config_loggable_dream_prefix" translatable="false"></string>
 
     <!-- ComponentName of a dream to show whenever the system would otherwise have
          gone to sleep.  When the PowerManager is asked to go to sleep, it will instead

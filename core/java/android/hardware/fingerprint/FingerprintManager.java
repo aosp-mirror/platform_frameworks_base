@@ -594,8 +594,16 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
                 mAuthenticationCallback = callback;
                 mCryptoObject = crypto;
                 final long operationId = crypto != null ? crypto.getOpId() : 0;
-                final long authId = mService.authenticate(mToken, operationId, sensorId, userId,
-                        mServiceReceiver, mContext.getOpPackageName(), ignoreEnrollmentState);
+                final long authId =
+                        mService.authenticate(
+                                mToken,
+                                operationId,
+                                sensorId,
+                                userId,
+                                mServiceReceiver,
+                                mContext.getOpPackageName(),
+                                mContext.getAttributionTag(),
+                                ignoreEnrollmentState);
                 if (cancel != null) {
                     cancel.setOnCancelListener(new OnAuthenticationCancelListener(authId));
                 }
@@ -838,7 +846,8 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public List<Fingerprint> getEnrolledFingerprints(int userId) {
         if (mService != null) try {
-            return mService.getEnrolledFingerprints(userId, mContext.getOpPackageName());
+                return mService.getEnrolledFingerprints(
+                        userId, mContext.getOpPackageName(), mContext.getAttributionTag());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -997,7 +1006,8 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
             INTERACT_ACROSS_USERS})
     public boolean hasEnrolledFingerprints(int userId) {
         if (mService != null) try {
-            return mService.hasEnrolledFingerprintsDeprecated(userId, mContext.getOpPackageName());
+                return mService.hasEnrolledFingerprintsDeprecated(
+                        userId, mContext.getOpPackageName(), mContext.getAttributionTag());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -1021,7 +1031,8 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
 
         if (mService != null) {
             try {
-                return mService.isHardwareDetectedDeprecated(mContext.getOpPackageName());
+                return mService.isHardwareDetectedDeprecated(
+                        mContext.getOpPackageName(), mContext.getAttributionTag());
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -1331,7 +1342,11 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
 
     private void cancelAuthentication(long requestId) {
         if (mService != null) try {
-            mService.cancelAuthentication(mToken, mContext.getOpPackageName(), requestId);
+                mService.cancelAuthentication(
+                        mToken,
+                        mContext.getOpPackageName(),
+                        mContext.getAttributionTag(),
+                        requestId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

@@ -159,7 +159,6 @@ import android.util.ArraySet;
 import android.util.DisplayMetrics;
 import android.util.EventLog;
 import android.util.ExceptionUtils;
-import android.util.IntArray;
 import android.util.Log;
 import android.util.Pair;
 import android.util.Slog;
@@ -721,7 +720,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
     }
 
     @Watched
-    final AppsFilter mAppsFilter;
+    final AppsFilterImpl mAppsFilter;
 
     final PackageParser2.Callback mPackageParserCallback;
 
@@ -939,6 +938,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
     private final ResolveIntentHelper mResolveIntentHelper;
     private final DexOptHelper mDexOptHelper;
     private final SuspendPackageHelper mSuspendPackageHelper;
+    private final DistractingPackageHelper mDistractingPackageHelper;
     private final IntentResolverInterceptor mIntentResolverInterceptor;
     private final StorageEventHelper mStorageEventHelper;
 
@@ -979,7 +979,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         public final InstantAppRegistry instantAppRegistry;
         public final ApplicationInfo androidApplication;
         public final String appPredictionServicePackage;
-        public final AppsFilter appsFilter;
+        public final AppsFilterSnapshot appsFilter;
         public final ComponentResolverApi componentResolver;
         public final PackageManagerService service;
         public final WatchedArrayMap<String, Integer> frozenPackages;
@@ -1431,7 +1431,8 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                         RuntimePermissionsPersistence.createInstance(),
                         i.getPermissionManagerServiceInternal(),
                         domainVerificationService, lock),
-                (i, pm) -> AppsFilter.create(i, i.getLocalService(PackageManagerInternal.class)),
+                (i, pm) -> AppsFilterImpl.create(i,
+                        i.getLocalService(PackageManagerInternal.class)),
                 (i, pm) -> (PlatformCompat) ServiceManager.getService("platform_compat"),
                 (i, pm) -> SystemConfig.getInstance(),
                 (i, pm) -> new PackageDexOptimizer(i.getInstaller(), i.getInstallLock(),
@@ -1683,6 +1684,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         mResolveIntentHelper = testParams.resolveIntentHelper;
         mDexOptHelper = testParams.dexOptHelper;
         mSuspendPackageHelper = testParams.suspendPackageHelper;
+        mDistractingPackageHelper = testParams.distractingPackageHelper;
 
         mSharedLibraries.setDeletePackageHelper(mDeletePackageHelper);
 
@@ -1842,6 +1844,8 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                 mProtectedPackages);
         mStorageEventHelper = new StorageEventHelper(this, mDeletePackageHelper,
                 mRemovePackageHelper);
+        mDistractingPackageHelper = new DistractingPackageHelper(this, mInjector, mBroadcastHelper,
+                mSuspendPackageHelper);
 
         synchronized (mLock) {
             // Create the computer as soon as the state objects have been installed.  The
@@ -3065,43 +3069,19 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
 
     void removeAllDistractingPackageRestrictions(@NonNull Computer snapshot, int userId) {
         final String[] allPackages = snapshot.getAllAvailablePackageNames();
-        removeDistractingPackageRestrictions(snapshot, allPackages, userId);
+        mDistractingPackageHelper.removeDistractingPackageRestrictions(snapshot, allPackages,
+                userId);
     }
 
-    /**
-     * Removes any {@link android.content.pm.PackageManager.DistractionRestriction restrictions}
-     * set on given packages.
-     *
-     * <p> Caller must flush package restrictions if it cares about immediate data consistency.
-     *
-     * @param packagesToChange The packages on which restrictions are to be removed.
-     * @param userId the user for which changes are taking place.
-     */
-    void removeDistractingPackageRestrictions(@NonNull Computer snapshot,
-            String[] packagesToChange, int userId) {
-        final List<String> changedPackages = new ArrayList<>();
-        final IntArray changedUids = new IntArray();
-        for (String packageName : packagesToChange) {
-            final PackageStateInternal ps = snapshot.getPackageStateInternal(packageName);
-            if (ps != null && ps.getUserStateOrDefault(userId).getDistractionFlags() != 0) {
-                changedPackages.add(ps.getPackageName());
-                changedUids.add(UserHandle.getUid(userId, ps.getAppId()));
-            }
-        }
-        commitPackageStateMutation(null, mutator -> {
-            for (int index = 0; index < changedPackages.size(); index++) {
-                mutator.forPackage(changedPackages.get(index))
-                        .userState(userId)
-                        .setDistractionFlags(0);
-            }
-        });
+    private void enforceCanSetDistractingPackageRestrictionsAsUser(@NonNull Computer snapshot,
+            int callingUid, int userId, String callingMethod) {
+        mContext.enforceCallingOrSelfPermission(Manifest.permission.SUSPEND_APPS,
+                callingMethod);
 
-        if (!changedPackages.isEmpty()) {
-            final String[] packageArray = changedPackages.toArray(
-                    new String[changedPackages.size()]);
-            mHandler.post(() -> mBroadcastHelper.sendDistractingPackagesChanged(
-                    packageArray, changedUids.toArray(), userId, 0));
-            scheduleWritePackageRestrictions(userId);
+        if (callingUid != Process.ROOT_UID && callingUid != Process.SYSTEM_UID
+                && UserHandle.getUserId(callingUid) != userId) {
+            throw new SecurityException("Calling uid " + callingUid + " cannot call for user "
+                    + userId);
         }
     }
 
@@ -5591,73 +5571,13 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         @Override
         public String[] setDistractingPackageRestrictionsAsUser(String[] packageNames,
                 int restrictionFlags, int userId) {
-            mContext.enforceCallingOrSelfPermission(Manifest.permission.SUSPEND_APPS,
-                    "setDistractingPackageRestrictionsAsUser");
-
             final int callingUid = Binder.getCallingUid();
-            if (callingUid != Process.ROOT_UID && callingUid != Process.SYSTEM_UID
-                    && UserHandle.getUserId(callingUid) != userId) {
-                throw new SecurityException("Calling uid " + callingUid + " cannot call for user "
-                        + userId);
-            }
-            Objects.requireNonNull(packageNames, "packageNames cannot be null");
             final Computer snapshot = snapshotComputer();
-            if (restrictionFlags != 0
-                    && !mSuspendPackageHelper.isSuspendAllowedForUser(snapshot, userId,
-                    callingUid)) {
-                Slog.w(PackageManagerService.TAG, "Cannot restrict packages due to restrictions on user " + userId);
-                return packageNames;
-            }
-
-            final List<String> changedPackagesList = new ArrayList<>(packageNames.length);
-            final IntArray changedUids = new IntArray(packageNames.length);
-            final List<String> unactionedPackages = new ArrayList<>(packageNames.length);
-
-            ArraySet<String> changesToCommit = new ArraySet<>();
-            final boolean[] canRestrict = (restrictionFlags != 0)
-                    ? mSuspendPackageHelper.canSuspendPackageForUser(snapshot, packageNames, userId,
-                    callingUid) : null;
-            for (int i = 0; i < packageNames.length; i++) {
-                final String packageName = packageNames[i];
-                final PackageStateInternal packageState =
-                        snapshot.getPackageStateInternal(packageName);
-                if (packageState == null
-                        || snapshot.shouldFilterApplication(packageState, callingUid, userId)) {
-                    Slog.w(PackageManagerService.TAG, "Could not find package setting for package: " + packageName
-                            + ". Skipping...");
-                    unactionedPackages.add(packageName);
-                    continue;
-                }
-                if (canRestrict != null && !canRestrict[i]) {
-                    unactionedPackages.add(packageName);
-                    continue;
-                }
-                final int oldDistractionFlags = packageState.getUserStateOrDefault(userId)
-                        .getDistractionFlags();
-                if (restrictionFlags != oldDistractionFlags) {
-                    changedPackagesList.add(packageName);
-                    changedUids.add(UserHandle.getUid(userId, packageState.getAppId()));
-                    changesToCommit.add(packageName);
-                }
-            }
-
-            commitPackageStateMutation(null, mutator -> {
-                final int size = changesToCommit.size();
-                for (int index = 0; index < size; index++) {
-                    mutator.forPackage(changesToCommit.valueAt(index))
-                            .userState(userId)
-                            .setDistractionFlags(restrictionFlags);
-                }
-            });
-
-            if (!changedPackagesList.isEmpty()) {
-                final String[] changedPackages = changedPackagesList.toArray(
-                        new String[changedPackagesList.size()]);
-                mHandler.post(() -> mBroadcastHelper.sendDistractingPackagesChanged(
-                        changedPackages, changedUids.toArray(), userId, restrictionFlags));
-                scheduleWritePackageRestrictions(userId);
-            }
-            return unactionedPackages.toArray(new String[0]);
+            enforceCanSetDistractingPackageRestrictionsAsUser(snapshot, callingUid, userId,
+                    "setDistractingPackageRestrictionsAsUser");
+            Objects.requireNonNull(packageNames, "packageNames cannot be null");
+            return mDistractingPackageHelper.setDistractingPackageRestrictionsAsUser(snapshot,
+                    packageNames, restrictionFlags, userId, callingUid);
         }
 
         @Override
@@ -6117,6 +6037,12 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         @Override
         protected SuspendPackageHelper getSuspendPackageHelper() {
             return mSuspendPackageHelper;
+        }
+
+        @NonNull
+        @Override
+        protected DistractingPackageHelper getDistractingPackageHelper() {
+            return mDistractingPackageHelper;
         }
 
         @NonNull

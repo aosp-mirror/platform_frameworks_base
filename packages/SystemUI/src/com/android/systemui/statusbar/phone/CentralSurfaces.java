@@ -1438,7 +1438,6 @@ public class CentralSurfaces extends CoreStartable implements
         IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
         filter.addAction(Intent.ACTION_SCREEN_OFF);
-        filter.addAction(DevicePolicyManager.ACTION_SHOW_DEVICE_MONITORING_DIALOG);
         mBroadcastDispatcher.registerReceiver(mBroadcastReceiver, filter, null, UserHandle.ALL);
     }
 
@@ -2628,8 +2627,6 @@ public class CentralSurfaces extends CoreStartable implements
                 }
                 finishBarAnimations();
                 resetUserExpandedStates();
-            } else if (DevicePolicyManager.ACTION_SHOW_DEVICE_MONITORING_DIALOG.equals(action)) {
-                mQSPanelController.showDeviceMonitoringDialog();
             }
             Trace.endSection();
         }

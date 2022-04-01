@@ -34,6 +34,10 @@
     <string name="status_bar_settings_auto_rotation" msgid="8329080442278431708">"Аўтаматычны паварот экрана"</string>
     <string name="usb_device_permission_prompt" msgid="4414719028369181772">"Дазволіць праграме <xliff:g id="APPLICATION">%1$s</xliff:g> доступ да прылады <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
     <string name="usb_device_permission_prompt_warn" msgid="2309129784984063656">"Даць праграме \"<xliff:g id="APPLICATION">%1$s</xliff:g>\" доступ да прылады \"<xliff:g id="USB_DEVICE">%2$s</xliff:g>\"?\nУ гэтай праграмы няма дазволу на запіс, аднак яна зможа запісваць аўдыя праз гэту прыладу USB."</string>
+    <string name="usb_audio_device_permission_prompt_title" msgid="4221351137250093451">"Дазволіць праграме \"<xliff:g id="APPLICATION">%1$s</xliff:g>\" доступ да прылады \"<xliff:g id="USB_DEVICE">%2$s</xliff:g>\"?"</string>
+    <string name="usb_audio_device_confirm_prompt_title" msgid="8828406516732985696">"Адкрыць праграму \"<xliff:g id="APPLICATION">%1$s</xliff:g>\" для працы з прыладай \"<xliff:g id="USB_DEVICE">%2$s</xliff:g>\"?"</string>
+    <string name="usb_audio_device_prompt_warn" msgid="2504972133361130335">"У гэтай праграмы няма дазволу на запіс, аднак яна зможа запісваць аўдыя праз гэту USB-прыладу. Выкарыстоўваючы праграму \"<xliff:g id="APPLICATION">%1$s</xliff:g>\" з гэтай прыладай, вы можаце не пачуць гукі выклікаў, апавяшчэнняў і будзільнікаў."</string>
+    <string name="usb_audio_device_prompt" msgid="7944987408206252949">"Выкарыстоўваючы праграму \"<xliff:g id="APPLICATION">%1$s</xliff:g>\" з гэтай прыладай, вы можаце не пачуць гукі выклікаў, апавяшчэнняў і будзільнікаў."</string>
     <string name="usb_accessory_permission_prompt" msgid="717963550388312123">"Дазволіць праграме <xliff:g id="APPLICATION">%1$s</xliff:g> доступ да прылады <xliff:g id="USB_ACCESSORY">%2$s</xliff:g>?"</string>
     <string name="usb_device_confirm_prompt" msgid="4091711472439910809">"Адкрыць праграму <xliff:g id="APPLICATION">%1$s</xliff:g> для працы з прыладай <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
     <string name="usb_device_confirm_prompt_warn" msgid="990208659736311769">"Адкрыць праграму \"<xliff:g id="APPLICATION">%1$s</xliff:g>\", каб выкарыстоўваць прыладу \"<xliff:g id="USB_DEVICE">%2$s</xliff:g>\"?\nУ гэтай праграмы няма дазволу на запіс, аднак яна зможа запісваць аўдыя праз гэту USB-прыладу."</string>
@@ -131,7 +135,8 @@
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="2242167416140740920">"Твар распазнаны"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"Пацверджана"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"Націсніце \"Пацвердзіць\", каб завяршыць"</string>
-    <string name="biometric_dialog_tap_confirm_with_face" msgid="1597899891472340950">"Разблакіравана распазнаваннем твару. Націсніце для працягу."</string>
+    <!-- no translation found for biometric_dialog_tap_confirm_with_face (7538145860465755864) -->
+    <skip />
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"Распазнана"</string>
     <string name="biometric_dialog_use_pin" msgid="8385294115283000709">"Увесці PIN-код"</string>
     <string name="biometric_dialog_use_pattern" msgid="2315593393167211194">"Выкарыстаць узор разблакіроўкі"</string>
@@ -291,6 +296,24 @@
     <string name="sensor_privacy_start_use_mic_dialog_content" msgid="1624701280680913717">"Доступ адкрыецца для ўсіх праграм і сэрвісаў, якім дазволена выкарыстоўваць мікрафон."</string>
     <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"Доступ адкрыецца для ўсіх праграм і сэрвісаў, якім дазволена выкарыстоўваць камеру."</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_content" msgid="3577642558418404919">"Доступ адкрыецца для ўсіх праграм і сэрвісаў, якім дазволена выкарыстоўваць камеру ці мікрафон."</string>
+    <!-- no translation found for sensor_privacy_start_use_mic_blocked_dialog_title (2640140287496469689) -->
+    <skip />
+    <!-- no translation found for sensor_privacy_start_use_camera_blocked_dialog_title (7398084286822440384) -->
+    <skip />
+    <!-- no translation found for sensor_privacy_start_use_mic_camera_blocked_dialog_title (195236134743281973) -->
+    <skip />
+    <!-- no translation found for sensor_privacy_start_use_mic_blocked_dialog_content (2138318880682877747) -->
+    <skip />
+    <!-- no translation found for sensor_privacy_start_use_camera_blocked_dialog_content (7216015168047965948) -->
+    <skip />
+    <!-- no translation found for sensor_privacy_start_use_mic_camera_blocked_dialog_content (3960837827570483762) -->
+    <skip />
+    <!-- no translation found for sensor_privacy_mic_unblocked_toast_content (306555320557065068) -->
+    <skip />
+    <!-- no translation found for sensor_privacy_camera_unblocked_toast_content (7843105715964332311) -->
+    <skip />
+    <!-- no translation found for sensor_privacy_mic_camera_unblocked_toast_content (7339355093282661115) -->
+    <skip />
     <string name="media_seamless_other_device" msgid="4654849800789196737">"Іншая прылада"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"Уключыць/выключыць агляд"</string>
     <string name="zen_priority_introduction" msgid="3159291973383796646">"Вас не будуць турбаваць гукі і вібрацыя, за выключэннем будзільнікаў, напамінаў, падзей і выбраных вамі абанентаў. Вы будзеце чуць усё, што ўключыце, у тым ліку музыку, відэа і гульні."</string>
@@ -324,7 +347,6 @@
     <string name="keyguard_indication_charging_time_dock" msgid="6150404291427377863">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Ідзе зарадка праз док-станцыю • Поўнасцю зарадзіцца праз <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Перайсці да іншага карыстальніка"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Усе праграмы і даныя гэтага сеанса будуць выдалены."</string>
-    <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"Выдаліць"</string>
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"З вяртаннем, госць!"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"Хочаце працягнуць сеанс?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"Пачаць зноў"</string>
@@ -778,6 +800,18 @@
     <string name="controls_dialog_ok" msgid="2770230012857881822">"Дадаць"</string>
     <string name="controls_dialog_message" msgid="342066938390663844">"Прапанавана праграмай \"<xliff:g id="APP">%s</xliff:g>\""</string>
     <string name="controls_tile_locked" msgid="731547768182831938">"Прылада блакіравана"</string>
+    <!-- no translation found for controls_settings_show_controls_dialog_title (3357852503553809554) -->
+    <skip />
+    <!-- no translation found for controls_settings_show_controls_dialog_message (7666211700524587969) -->
+    <skip />
+    <!-- no translation found for controls_settings_trivial_controls_dialog_title (7593188157655036677) -->
+    <skip />
+    <!-- no translation found for controls_settings_trivial_controls_dialog_message (237183787721917586) -->
+    <skip />
+    <!-- no translation found for controls_settings_dialog_neutral_button (4514446354793124140) -->
+    <skip />
+    <!-- no translation found for controls_settings_dialog_positive_button (436070672551674863) -->
+    <skip />
     <string name="controls_pin_use_alphanumeric" msgid="8478371861023048414">"PIN-код складаецца з літар або знакаў"</string>
     <string name="controls_pin_verify" msgid="3452778292918877662">"Спраўдзіце прыладу \"<xliff:g id="DEVICE">%s</xliff:g>\""</string>
     <string name="controls_pin_wrong" msgid="6162694056042164211">"Няправільны PIN-код"</string>
@@ -787,8 +821,7 @@
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"Правядзіце пальцам, каб убачыць больш інфармацыі"</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"Загружаюцца рэкамендацыі"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"Мультымедыя"</string>
-    <!-- no translation found for controls_media_close_session (4780485355795635052) -->
-    <skip />
+    <string name="controls_media_close_session" msgid="4780485355795635052">"Схаваць гэту панэль мультымедыя для праграмы \"<xliff:g id="APP_NAME">%1$s</xliff:g>\"?"</string>
     <string name="controls_media_active_session" msgid="3146882316024153337">"Не ўдалося схаваць бягучы сеанс мультымедыя."</string>
     <string name="controls_media_dismiss_button" msgid="4485675693008031646">"Схаваць"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"Узнавіць"</string>
@@ -828,6 +861,20 @@
     <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"Для трансляцыі гэтага сеанса адкрыйце праграму."</string>
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"Невядомая праграма"</string>
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"Спыніць трансляцыю"</string>
+    <!-- no translation found for media_output_first_broadcast_title (6292237789860753022) -->
+    <skip />
+    <!-- no translation found for media_output_broadcast (3555580945878071543) -->
+    <skip />
+    <!-- no translation found for media_output_first_notify_broadcast_message (6353857724136398494) -->
+    <skip />
+    <!-- no translation found for media_output_broadcasting_message (4150299923404886073) -->
+    <skip />
+    <!-- no translation found for media_output_broadcast_name (8786127091542624618) -->
+    <skip />
+    <!-- no translation found for media_output_broadcast_code (870795639644728542) -->
+    <skip />
+    <!-- no translation found for media_output_broadcast_dialog_save (7910865591430010198) -->
+    <skip />
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"Нумар зборкі"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"Нумар зборкі скапіраваны ў буфер абмену."</string>
     <string name="basic_status" msgid="2315371112182658176">"Адкрытая размова"</string>
@@ -906,7 +953,8 @@
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"Актыўныя праграмы"</string>
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"Спыніць"</string>
     <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"Спынена"</string>
-    <string name="clipboard_edit_text_copy" msgid="770856373439969178">"Капіраваць"</string>
+    <!-- no translation found for clipboard_edit_text_done (4551887727694022409) -->
+    <skip />
     <string name="clipboard_overlay_text_copied" msgid="1872624400464891363">"Скапіравана"</string>
     <string name="clipboard_edit_source" msgid="9156488177277788029">"З праграмы \"<xliff:g id="APPNAME">%1$s</xliff:g>\""</string>
     <string name="clipboard_dismiss_description" msgid="7544573092766945657">"Закрыць інтэрфейс капіравання"</string>
