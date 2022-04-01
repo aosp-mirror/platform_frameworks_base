@@ -16,11 +16,7 @@
 
 package com.android.server.wm;
 
-import static android.view.InsetsState.ITYPE_CLIMATE_BAR;
-import static android.view.InsetsState.ITYPE_EXTRA_NAVIGATION_BAR;
 import static android.view.InsetsState.ITYPE_IME;
-import static android.view.InsetsState.ITYPE_NAVIGATION_BAR;
-import static android.view.InsetsState.ITYPE_STATUS_BAR;
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_WINDOW_INSETS;
 import static com.android.server.wm.InsetsSourceProviderProto.CAPTURED_LEASH;
@@ -127,18 +123,7 @@ abstract class InsetsSourceProvider {
         mStateController = stateController;
         mFakeControl = new InsetsSourceControl(
                 source.getType(), null /* leash */, new Point(), Insets.NONE);
-
-        switch (source.getType()) {
-            case ITYPE_STATUS_BAR:
-            case ITYPE_NAVIGATION_BAR:
-            case ITYPE_IME:
-            case ITYPE_CLIMATE_BAR:
-            case ITYPE_EXTRA_NAVIGATION_BAR:
-                mControllable = true;
-                break;
-            default:
-                mControllable = false;
-        }
+        mControllable = InsetsPolicy.isInsetsTypeControllable(source.getType());
     }
 
     InsetsSource getSource() {
