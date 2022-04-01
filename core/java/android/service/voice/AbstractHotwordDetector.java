@@ -22,6 +22,7 @@ import android.annotation.CallSuper;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityThread;
+import android.app.compat.CompatChanges;
 import android.media.AudioFormat;
 import android.media.permission.Identity;
 import android.os.Handler;
@@ -80,7 +81,7 @@ abstract class AbstractHotwordDetector implements HotwordDetector {
     public boolean startRecognition(
             @NonNull ParcelFileDescriptor audioStream,
             @NonNull AudioFormat audioFormat,
-            @Nullable PersistableBundle options) {
+            @Nullable PersistableBundle options) throws IllegalDetectorStateException {
         if (DEBUG) {
             Slog.i(TAG, "#recognizeHotword");
         }
@@ -105,19 +106,22 @@ abstract class AbstractHotwordDetector implements HotwordDetector {
      * Set configuration and pass read-only data to hotword detection service.
      *
      * @param options Application configuration data to provide to the
-     * {@link HotwordDetectionService}. PersistableBundle does not allow any remotable objects or
-     * other contents that can be used to communicate with other processes.
+     *         {@link HotwordDetectionService}. PersistableBundle does not allow any remotable
+     *         objects or other contents that can be used to communicate with other processes.
      * @param sharedMemory The unrestricted data blob to provide to the
-     * {@link HotwordDetectionService}. Use this to provide the hotword models data or other
-     * such data to the trusted process.
-     *
-     * @throws IllegalStateException if this AlwaysOnHotwordDetector wasn't specified to use a
-     * {@link HotwordDetectionService} when it was created. In addition, if this
-     * AlwaysOnHotwordDetector is in an invalid or error state.
+     *         {@link HotwordDetectionService}. Use this to provide the hotword models data or other
+     *         such data to the trusted process.
+     * @throws IllegalDetectorStateException Thrown when a caller has a target SDK of
+     *         Android Tiramisu or above and attempts to start a recognition when the detector is
+     *         not able based on the state. Because the caller receives updates via an asynchronous
+     *         callback and the state of the detector can change without caller's knowledge, a
+     *         checked exception is thrown.
+     * @throws IllegalStateException if this HotwordDetector wasn't specified to use a
+     *         {@link HotwordDetectionService} when it was created.
      */
     @Override
     public void updateState(@Nullable PersistableBundle options,
-            @Nullable SharedMemory sharedMemory) {
+            @Nullable SharedMemory sharedMemory) throws IllegalDetectorStateException {
         if (DEBUG) {
             Slog.d(TAG, "updateState()");
         }
@@ -163,9 +167,13 @@ abstract class AbstractHotwordDetector implements HotwordDetector {
         }
     }
 
-    protected void throwIfDetectorIsNoLongerActive() {
+    protected void throwIfDetectorIsNoLongerActive() throws IllegalDetectorStateException {
         if (!mIsDetectorActive.get()) {
             Slog.e(TAG, "attempting to use a destroyed detector which is no longer active");
+            if (CompatChanges.isChangeEnabled(HOTWORD_DETECTOR_THROW_CHECKED_EXCEPTION)) {
+                throw new IllegalDetectorStateException(
+                        "attempting to use a destroyed detector which is no longer active");
+            }
             throw new IllegalStateException(
                     "attempting to use a destroyed detector which is no longer active");
         }

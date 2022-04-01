@@ -23,10 +23,14 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
+import android.compat.annotation.ChangeId;
+import android.compat.annotation.EnabledSince;
 import android.media.AudioFormat;
+import android.os.Build;
 import android.os.ParcelFileDescriptor;
 import android.os.PersistableBundle;
 import android.os.SharedMemory;
+import android.util.AndroidException;
 
 /**
  * Basic functionality for hotword detectors.
@@ -35,6 +39,23 @@ import android.os.SharedMemory;
  */
 @SystemApi
 public interface HotwordDetector {
+
+    /**
+     * Prior to API level 33, API calls of {@link android.service.voice.HotwordDetector} could
+     * return both {@link java.lang.IllegalStateException} or
+     * {@link java.lang.UnsupportedOperationException} depending on the detector's underlying state.
+     * This lead to confusing behavior as the underlying state of the detector can be modified
+     * without the knowledge of the caller via system service layer updates.
+     *
+     * This change ID, when enabled, changes the API calls to only throw checked exception
+     * {@link android.service.voice.HotwordDetector.IllegalDetectorStateException} when checking
+     * against state information modified by both the caller and the system services.
+     *
+     * @hide
+     */
+    @ChangeId
+    @EnabledSince(targetSdkVersion = Build.VERSION_CODES.TIRAMISU)
+    long HOTWORD_DETECTOR_THROW_CHECKED_EXCEPTION = 226355112L;
 
     /**
      * Indicates that it is a non-trusted hotword detector.
@@ -74,16 +95,26 @@ public interface HotwordDetector {
      * Calling this again while recognition is active does nothing.
      *
      * @return true if the request to start recognition succeeded
+     * @throws IllegalDetectorStateException Thrown when a caller has a target SDK of API level 33
+     *         or above and attempts to start a recognition when the detector is not able based on
+     *         the state. This can be thrown even if the state has been checked before calling this
+     *         method because the caller receives updates via an asynchronous callback, and the
+     *         state of the detector can change concurrently to the caller calling this method.
      */
     @RequiresPermission(allOf = {RECORD_AUDIO, CAPTURE_AUDIO_HOTWORD})
-    boolean startRecognition();
+    boolean startRecognition() throws IllegalDetectorStateException;
 
     /**
      * Stops hotword recognition.
      *
      * @return true if the request to stop recognition succeeded
+     * @throws IllegalDetectorStateException Thrown when a caller has a target SDK of API level 33
+     *         or above and attempts to stop a recognition when the detector is not able based on
+     *         the state. This can be thrown even if the state has been checked before calling this
+     *         method because the caller receives updates via an asynchronous callback, and the
+     *         state of the detector can change concurrently to the caller calling this method.
      */
-    boolean stopRecognition();
+    boolean stopRecognition() throws IllegalDetectorStateException;
 
     /**
      * Starts hotword recognition on audio coming from an external connected microphone.
@@ -97,26 +128,37 @@ public interface HotwordDetector {
      *         PersistableBundle does not allow any remotable objects or other contents that can be
      *         used to communicate with other processes.
      * @return true if the request to start recognition succeeded
+     * @throws IllegalDetectorStateException Thrown when a caller has a target SDK of API level 33
+     *         or above and attempts to start a recognition when the detector is not able based on
+     *         the state. This can be thrown even if the state has been checked before calling this
+     *         method because the caller receives updates via an asynchronous callback, and the
+     *         state of the detector can change concurrently to the caller calling this method.
      */
     boolean startRecognition(
             @NonNull ParcelFileDescriptor audioStream,
             @NonNull AudioFormat audioFormat,
-            @Nullable PersistableBundle options);
+            @Nullable PersistableBundle options) throws IllegalDetectorStateException;
 
     /**
      * Set configuration and pass read-only data to hotword detection service.
      *
      * @param options Application configuration data to provide to the
-     * {@link HotwordDetectionService}. PersistableBundle does not allow any remotable objects or
-     * other contents that can be used to communicate with other processes.
+     *         {@link HotwordDetectionService}. PersistableBundle does not allow any remotable
+     *         objects or other contents that can be used to communicate with other processes.
      * @param sharedMemory The unrestricted data blob to provide to the
-     * {@link HotwordDetectionService}. Use this to provide the hotword models data or other
-     * such data to the trusted process.
-     *
+     *         {@link HotwordDetectionService}. Use this to provide the hotword models data or other
+     *         such data to the trusted process.
+     * @throws IllegalDetectorStateException Thrown when a caller has a target SDK of API level 33
+     *         or above and the detector is not able to perform the operation based on the
+     *         underlying state. This can be thrown even if the state has been checked before
+     *         calling this method because the caller receives updates via an asynchronous callback,
+     *         and the state of the detector can change concurrently to the caller calling this
+     *         method.
      * @throws IllegalStateException if this HotwordDetector wasn't specified to use a
-     * {@link HotwordDetectionService} when it was created.
+     *         {@link HotwordDetectionService} when it was created.
      */
-    void updateState(@Nullable PersistableBundle options, @Nullable SharedMemory sharedMemory);
+    void updateState(@Nullable PersistableBundle options, @Nullable SharedMemory sharedMemory)
+            throws IllegalDetectorStateException;
 
     /**
      * Invalidates this hotword detector so that any future calls to this result
@@ -204,5 +246,15 @@ public interface HotwordDetector {
          * the newly created service.
          */
         void onHotwordDetectionServiceRestarted();
+    }
+
+    /**
+     * {@link HotwordDetector} specific exception thrown when the underlying state of the detector
+     * is invalid for the given action.
+     */
+    class IllegalDetectorStateException extends AndroidException {
+        IllegalDetectorStateException(String message) {
+            super(message);
+        }
     }
 }
