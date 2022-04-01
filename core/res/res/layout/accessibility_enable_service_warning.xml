@@ -54,14 +54,6 @@
                 android:fontFamily="google-sans-medium"/>
 
             <TextView
-                android:id="@+id/accessibility_encryption_warning"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:padding="10dip"
-                android:textAlignment="viewStart"
-                android:textAppearance="?android:attr/textAppearanceMedium"/>
-
-            <TextView
                 android:id="@+id/accessibility_permissionDialog_description"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
