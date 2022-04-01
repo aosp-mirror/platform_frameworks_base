@@ -1219,7 +1219,7 @@ public class KeyguardViewMediator extends CoreStartable implements Dumpable,
                 doKeyguardLaterLocked(timeout);
                 mLockLater = true;
             } else if (!mLockPatternUtils.isLockScreenDisabled(currentUser)) {
-                mPendingLock = true;
+                setPendingLock(true);
             }
 
             if (mPendingLock) {
@@ -1263,7 +1263,7 @@ public class KeyguardViewMediator extends CoreStartable implements Dumpable,
                 mContext.getSystemService(PowerManager.class).wakeUp(SystemClock.uptimeMillis(),
                         PowerManager.WAKE_REASON_CAMERA_LAUNCH,
                         "com.android.systemui:CAMERA_GESTURE_PREVENT_LOCK");
-                mPendingLock = false;
+                setPendingLock(false);
                 mPendingReset = false;
             }
 
@@ -1333,7 +1333,7 @@ public class KeyguardViewMediator extends CoreStartable implements Dumpable,
             }
 
             doKeyguardLocked(null);
-            mPendingLock = false;
+            setPendingLock(false);
         }
     }
 
@@ -2134,6 +2134,7 @@ public class KeyguardViewMediator extends CoreStartable implements Dumpable,
             Log.i(TAG, "Device is going to sleep, aborting keyguardDone");
             return;
         }
+        setPendingLock(false); // user may have authenticated during the screen off animation
         if (mExitSecureCallback != null) {
             try {
                 mExitSecureCallback.onKeyguardExitResult(true /* authenciated */);
@@ -2264,7 +2265,7 @@ public class KeyguardViewMediator extends CoreStartable implements Dumpable,
             mHiding = false;
             mKeyguardExitAnimationRunner = null;
             mWakeAndUnlocking = false;
-            mPendingLock = false;
+            setPendingLock(false);
             setShowingLocked(true);
             mKeyguardViewControllerLazy.get().show(options);
             resetKeyguardDonePendingLocked();
@@ -3038,6 +3039,11 @@ public class KeyguardViewMediator extends CoreStartable implements Dumpable,
                 }
             }
         }
+    }
+
+    private void setPendingLock(boolean hasPendingLock) {
+        mPendingLock = hasPendingLock;
+        Trace.traceCounter(Trace.TRACE_TAG_APP, "pendingLock", mPendingLock ? 1 : 0);
     }
 
     public void addStateMonitorCallback(IKeyguardStateCallback callback) {
