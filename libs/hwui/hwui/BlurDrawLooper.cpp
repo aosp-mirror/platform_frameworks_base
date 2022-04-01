@@ -15,6 +15,7 @@
  */
 
 #include "BlurDrawLooper.h"
+#include <SkColorSpace.h>
 #include <SkMaskFilter.h>
 
 namespace android {

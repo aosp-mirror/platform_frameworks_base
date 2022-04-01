@@ -26,6 +26,7 @@
 #include <nativehelper/ScopedPrimitiveArray.h>
 
 #include "SkColorFilter.h"
+#include "SkColorSpace.h"
 #include "SkFont.h"
 #include "SkFontMetrics.h"
 #include "SkFontTypes.h"

@@ -16,7 +16,9 @@
 #ifndef DEVICEINFO_H
 #define DEVICEINFO_H
 
+#include <SkColorSpace.h>
 #include <SkImageInfo.h>
+#include <SkRefCnt.h>
 #include <android/data_space.h>
 
 #include <mutex>
