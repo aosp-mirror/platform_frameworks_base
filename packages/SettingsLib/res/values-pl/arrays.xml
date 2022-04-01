@@ -247,7 +247,7 @@
     <item msgid="5023908510820531131">"W: <xliff:g id="AS_TYPED_COMMAND">adb shell dumpsys gfxinfo</xliff:g>"</item>
   </string-array>
   <string-array name="debug_hw_overdraw_entries">
-    <item msgid="1968128556747588800">"Wyłączone"</item>
+    <item msgid="1968128556747588800">"Wył."</item>
     <item msgid="3033215374382962216">"Pokaż przerysowywane obszary"</item>
     <item msgid="3474333938380896988">"Pokaż obszary dostosowane do deuteranomalii"</item>
   </string-array>

@@ -65,7 +65,7 @@
     <string name="wifi_passpoint_expired" msgid="6540867261754427561">"만료됨"</string>
     <string name="preference_summary_default_combination" msgid="2644094566845577901">"<xliff:g id="STATE">%1$s</xliff:g>/<xliff:g id="DESCRIPTION">%2$s</xliff:g>"</string>
     <string name="bluetooth_disconnected" msgid="7739366554710388701">"연결 끊김"</string>
-    <string name="bluetooth_disconnecting" msgid="7638892134401574338">"연결 해제 중…"</string>
+    <string name="bluetooth_disconnecting" msgid="7638892134401574338">"연결을 끊는 중…"</string>
     <string name="bluetooth_connecting" msgid="5871702668260192755">"연결 중…"</string>
     <string name="bluetooth_connected" msgid="8065345572198502293">"연결됨<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
     <string name="bluetooth_pairing" msgid="4269046942588193600">"페어링 중..."</string>
@@ -95,9 +95,7 @@
     <string name="bluetooth_profile_a2dp_high_quality" msgid="4739440941324792775">"HD 오디오: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="2477639096903834374">"HD 오디오"</string>
     <string name="bluetooth_profile_hearing_aid" msgid="58154575573984914">"보청기"</string>
-    <string name="bluetooth_profile_le_audio" msgid="5158149987518342036">"LE_AUDIO"</string>
     <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="8191273236809964030">"보청기에 연결됨"</string>
-    <string name="bluetooth_le_audio_profile_summary_connected" msgid="3162538609379333442">"LE_AUDIO에 연결됨"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="7422607970115444153">"미디어 오디오에 연결됨"</string>
     <string name="bluetooth_headset_profile_summary_connected" msgid="2420981566026949688">"휴대전화 오디오에 연결됨"</string>
     <string name="bluetooth_opp_profile_summary_connected" msgid="2393521801478157362">"파일 전송 서버에 연결됨"</string>
@@ -115,7 +113,6 @@
     <string name="bluetooth_opp_profile_summary_use_for" msgid="461981154387015457">"파일 전송에 사용"</string>
     <string name="bluetooth_hid_profile_summary_use_for" msgid="4289460627406490952">"입력에 사용"</string>
     <string name="bluetooth_hearing_aid_profile_summary_use_for" msgid="7689393730163320483">"보청기로 사용"</string>
-    <string name="bluetooth_le_audio_profile_summary_use_for" msgid="2778318636027348572">"LE_AUDIO에 사용"</string>
     <string name="bluetooth_pairing_accept" msgid="2054232610815498004">"페어링"</string>
     <string name="bluetooth_pairing_accept_all_caps" msgid="2734383073450506220">"페어링"</string>
     <string name="bluetooth_pairing_decline" msgid="6483118841204885890">"취소"</string>
@@ -255,7 +252,7 @@
     <string name="wifi_display_certification" msgid="1805579519992520381">"무선 디스플레이 인증서"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"Wi-Fi 상세 로깅 사용"</string>
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"Wi‑Fi 검색 제한"</string>
-    <string name="wifi_enhanced_mac_randomization" msgid="882650208573834301">"Wi‑Fi 비지속적인 MAC 주소 무작위 순서 지정"</string>
+    <string name="wifi_enhanced_mac_randomization" msgid="5437378364995776979">"Wi‑Fi로 MAC 무작위 순서 지정 개선"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"항상 모바일 데이터 활성화"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"테더링 하드웨어 가속"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"이름이 없는 블루투스 기기 표시"</string>
@@ -356,7 +353,6 @@
     <string name="debug_layout_summary" msgid="8825829038287321978">"클립 경계, 여백 등을 표시"</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"RTL 레이아웃 방향 강제 적용"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"모든 언어에 대해 화면 레이아웃 방향을 RTL로 강제 적용"</string>
-    <string name="window_blurs" msgid="6831008984828425106">"창 수준 블러 허용"</string>
     <string name="force_msaa" msgid="4081288296137775550">"4x MSAA 강제 사용"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"OpenGL ES 2.0 앱에서 4x MSAA 사용"</string>
     <string name="show_non_rect_clip" msgid="7499758654867881817">"사각형이 아닌 클립 작업 디버그"</string>
@@ -409,12 +405,17 @@
     <string name="transcode_enable_all" msgid="2411165920039166710">"트랜스코딩 사용"</string>
     <string name="transcode_default" msgid="3784803084573509491">"앱이 최신 형식을 지원하는 것으로 가정"</string>
     <string name="transcode_notification" msgid="5560515979793436168">"트랜스코딩 알림 표시"</string>
-    <string name="transcode_disable_cache" msgid="3160069309377467045">"트랜스코딩 캐시 사용 중지"</string>
     <string name="runningservices_settings_title" msgid="6460099290493086515">"실행 중인 서비스"</string>
     <string name="runningservices_settings_summary" msgid="1046080643262665743">"현재 실행 중인 서비스 보기 및 제어"</string>
     <string name="select_webview_provider_title" msgid="3917815648099445503">"WebView 구현"</string>
     <string name="select_webview_provider_dialog_title" msgid="2444261109877277714">"WebView 구현 설정"</string>
     <string name="select_webview_provider_toast_text" msgid="8512254949169359848">"선택이 더 이상 유효하지 않습니다. 다시 시도하세요."</string>
+    <string name="convert_to_file_encryption" msgid="2828976934129751818">"파일 암호화로 변환"</string>
+    <string name="convert_to_file_encryption_enabled" msgid="840757431284311754">"변환..."</string>
+    <string name="convert_to_file_encryption_done" msgid="8965831011811180627">"파일이 이미 암호화됨"</string>
+    <string name="title_convert_fbe" msgid="5780013350366495149">"파일 기반 암호화로 변환"</string>
+    <string name="convert_to_fbe_warning" msgid="34294381569282109">"데이터 파티션을 파일 기반 암호화로 변환하세요.\n !!경고!! 이 기능을 사용하면 모든 데이터가 삭제됩니다.\n 이 기능은 알파 버전이며 제대로 작동하지 않을 수 있습니다.\n 계속하려면 \'삭제 및 변환...\'을 누르세요."</string>
+    <string name="button_convert_fbe" msgid="1159861795137727671">"삭제 및 변환..."</string>
     <string name="picture_color_mode" msgid="1013807330552931903">"사진 색상 모드"</string>
     <string name="picture_color_mode_desc" msgid="151780973768136200">"sRGB 사용"</string>
     <string name="daltonizer_mode_disabled" msgid="403424372812399228">"사용 중지됨"</string>
@@ -426,7 +427,7 @@
     <string name="accessibility_display_daltonizer_preference_subtitle" msgid="2333641630205214702">"기기에 색상이 표시되는 방식을 조정합니다. 다음과 같은 상황에서 유용합니다.&lt;br/&gt;&lt;br/&gt; &lt;ol&gt; &lt;li&gt;&amp;nbsp;색상을 더욱 정확하게 보고 싶을 때&lt;/li&gt; &lt;li&gt;&amp;nbsp;집중을 위해 색상을 제거하고 싶을 때&lt;/li&gt; &lt;/ol&gt;"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"<xliff:g id="TITLE">%1$s</xliff:g> 우선 적용됨"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g>, <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
-    <string name="power_remaining_duration_only" msgid="8264199158671531431">"남은 시간: 약 <xliff:g id="TIME_REMAINING">%1$s</xliff:g>"</string>
+    <string name="power_remaining_duration_only" msgid="8264199158671531431">"남은 시간 약 <xliff:g id="TIME_REMAINING">%1$s</xliff:g>"</string>
     <string name="power_discharging_duration" msgid="1076561255466053220">"남은 시간 약 <xliff:g id="TIME_REMAINING">%1$s</xliff:g>(<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_duration_only_enhanced" msgid="2527842780666073218">"내 사용량을 기준으로 약 <xliff:g id="TIME_REMAINING">%1$s</xliff:g> 남음"</string>
     <string name="power_discharging_duration_enhanced" msgid="1800465736237672323">"내 사용량(<xliff:g id="LEVEL">%2$s</xliff:g>)을 기준으로 약 <xliff:g id="TIME_REMAINING">%1$s</xliff:g> 남음"</string>
@@ -449,17 +450,19 @@
     <string name="power_remaining_duration_shutdown_imminent" product="tablet" msgid="7703677921000858479">"태블릿이 곧 종료될 수 있음(<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_remaining_duration_shutdown_imminent" product="device" msgid="4374784375644214578">"기기가 곧 종료될 수 있음(<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
-    <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"<xliff:g id="TIME">%1$s</xliff:g> 후 충전 완료"</string>
-    <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g>: <xliff:g id="TIME">%2$s</xliff:g> 후 충전 완료"</string>
-    <string name="power_charging_limited" msgid="7956120998372505295">"<xliff:g id="LEVEL">%1$s</xliff:g> - 충전이 일시적으로 제한됨"</string>
+    <!-- no translation found for power_remaining_charging_duration_only (8085099012811384899) -->
+    <skip />
+    <!-- no translation found for power_charging_duration (6127154952524919719) -->
+    <skip />
+    <string name="power_charging_limited" msgid="1956874810658999681">"<xliff:g id="LEVEL">%1$s</xliff:g> - 배터리 상태 최적화 중"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"알 수 없음"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"충전 중"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"고속 충전 중"</string>
     <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"저속 충전 중"</string>
-    <string name="battery_info_status_charging_wireless" msgid="8924722966861282197">"무선 충전 중"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"충전 안함"</string>
-    <string name="battery_info_status_not_charging" msgid="3371084153747234837">"연결됨, 충전 중 아님"</string>
-    <string name="battery_info_status_full" msgid="1339002294876531312">"충전됨"</string>
+    <string name="battery_info_status_not_charging" msgid="8330015078868707899">"전원이 연결되었지만 현재 충전할 수 없음"</string>
+    <!-- no translation found for battery_info_status_full (1339002294876531312) -->
+    <skip />
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"관리자가 제어"</string>
     <string name="disabled" msgid="8017887509554714950">"사용 안함"</string>
     <string name="external_source_trusted" msgid="1146522036773132905">"허용됨"</string>
@@ -502,10 +505,10 @@
     <string name="cancel" msgid="5665114069455378395">"취소"</string>
     <string name="okay" msgid="949938843324579502">"확인"</string>
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"알람 및 리마인더"</string>
-    <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"알람 및 리마인더 설정 허용"</string>
-    <string name="alarms_and_reminders_title" msgid="8819933264635406032">"알람 및 리마인더"</string>
-    <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"이 앱이 알람을 설정하고 시간 기반 작업을 예약할 수 있도록 허용합니다. 이렇게 하면 백그라운드에서 앱 실행이 허용되어 배터리 사용량이 증가할 수 있습니다.\n\n이 권한을 사용 중지하면 이 앱에서 예약한 기존의 알람 및 시간 기반 일정이 작동하지 않습니다."</string>
-    <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"일정 예약, 알람, 리마인더, 시계"</string>
+    <string name="alarms_and_reminders_switch_title" msgid="186992351401152744">"알람 또는 리마인더를 설정하도록 허용"</string>
+    <string name="alarms_and_reminders_title" msgid="2988400785896875237">"알람 및 리마인더"</string>
+    <string name="alarms_and_reminders_footer_title" msgid="5882788882647778753">"이 앱에서 알람 또는 다른 시간 기반 일정을 예약하도록 허용합니다. 이렇게 하면 기기를 사용하고 있지 않더라도 앱이 절전 모드에서 해제된 후 실행됩니다. 이 권한을 취소하면 앱이 오작동할 수 있으며 특히 이 앱에서 예약한 모든 알람은 더 이상 작동하지 않습니다."</string>
+    <string name="keywords_alarms_and_reminders" msgid="8882739572152019456">"일정 예약, 알람, 리마인더, 이벤트"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"사용 설정"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"방해 금지 모드 사용 설정"</string>
     <string name="zen_mode_settings_summary_off" msgid="3832876036123504076">"사용 안함"</string>
@@ -559,15 +562,12 @@
     <string name="user_set_lock_button" msgid="1427128184982594856">"잠금 설정"</string>
     <string name="user_switch_to_user" msgid="6975428297154968543">"<xliff:g id="USER_NAME">%s</xliff:g>(으)로 전환"</string>
     <string name="creating_new_user_dialog_message" msgid="7232880257538970375">"새로운 사용자를 만드는 중…"</string>
-    <string name="add_user_failed" msgid="4809887794313944872">"새 사용자를 만들지 못함"</string>
+    <!-- no translation found for add_user_failed (4809887794313944872) -->
+    <skip />
     <string name="user_nickname" msgid="262624187455825083">"닉네임"</string>
     <string name="guest_new_guest" msgid="3482026122932643557">"게스트 추가"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"게스트 삭제"</string>
-    <string name="guest_reset_guest" msgid="6110013010356013758">"게스트 재설정"</string>
     <string name="guest_nickname" msgid="6332276931583337261">"게스트"</string>
-    <string name="guest_reset_guest_dialog_title" msgid="8047270010895437534">"게스트를 재설정하시겠습니까?"</string>
-    <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"재설정"</string>
-    <string name="guest_resetting" msgid="7822120170191509566">"게스트 재설정 중…"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"사진 찍기"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"이미지 선택"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"사진 선택"</string>

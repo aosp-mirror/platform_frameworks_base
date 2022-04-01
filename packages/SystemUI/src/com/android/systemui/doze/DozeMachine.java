@@ -118,9 +118,11 @@ public class DozeMachine {
             switch (this) {
                 case UNINITIALIZED:
                 case INITIALIZED:
-                case DOZE_REQUEST_PULSE:
                     return parameters.shouldControlScreenOff() ? Display.STATE_ON
                             : Display.STATE_OFF;
+                case DOZE_REQUEST_PULSE:
+                    return parameters.getDisplayNeedsBlanking() ? Display.STATE_OFF
+                            : Display.STATE_ON;
                 case DOZE_AOD_PAUSED:
                 case DOZE:
                     return Display.STATE_OFF;

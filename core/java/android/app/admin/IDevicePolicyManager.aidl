@@ -265,7 +265,8 @@ interface IDevicePolicyManager {
     int getLogoutUserId();
     void clearLogoutUser();
     List<UserHandle> getSecondaryUsers(in ComponentName who);
-    void resetNewUserDisclaimer();
+    void acknowledgeNewUserDisclaimer();
+    boolean isNewUserDisclaimerAcknowledged();
 
     void enableSystemApp(in ComponentName admin, in String callerPackage, in String packageName);
     int enableSystemAppWithIntent(in ComponentName admin, in String callerPackage, in Intent intent);

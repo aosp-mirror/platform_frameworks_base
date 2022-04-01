@@ -95,9 +95,7 @@
     <string name="bluetooth_profile_a2dp_high_quality" msgid="4739440941324792775">"เสียง HD: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="2477639096903834374">"เสียง HD"</string>
     <string name="bluetooth_profile_hearing_aid" msgid="58154575573984914">"เครื่องช่วยฟัง"</string>
-    <string name="bluetooth_profile_le_audio" msgid="5158149987518342036">"LE_AUDIO"</string>
     <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="8191273236809964030">"เชื่อมต่อกับเครื่องช่วยฟังแล้ว"</string>
-    <string name="bluetooth_le_audio_profile_summary_connected" msgid="3162538609379333442">"เชื่อมต่อกับ LE_AUDIO แล้ว"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="7422607970115444153">"เชื่อมต่อกับระบบเสียงของสื่อแล้ว"</string>
     <string name="bluetooth_headset_profile_summary_connected" msgid="2420981566026949688">"เชื่อมต่อกับระบบเสียงของโทรศัพท์แล้ว"</string>
     <string name="bluetooth_opp_profile_summary_connected" msgid="2393521801478157362">"เชื่อมต่อกับเซิร์ฟเวอร์สำหรับโอนไฟล์แล้ว"</string>
@@ -115,7 +113,6 @@
     <string name="bluetooth_opp_profile_summary_use_for" msgid="461981154387015457">"ใช้สำหรับการโอนไฟล์"</string>
     <string name="bluetooth_hid_profile_summary_use_for" msgid="4289460627406490952">"ใช้สำหรับการป้อนข้อมูล"</string>
     <string name="bluetooth_hearing_aid_profile_summary_use_for" msgid="7689393730163320483">"ใช้สำหรับเครื่องช่วยฟัง"</string>
-    <string name="bluetooth_le_audio_profile_summary_use_for" msgid="2778318636027348572">"ใช้สำหรับ LE_AUDIO"</string>
     <string name="bluetooth_pairing_accept" msgid="2054232610815498004">"จับคู่อุปกรณ์"</string>
     <string name="bluetooth_pairing_accept_all_caps" msgid="2734383073450506220">"จับคู่อุปกรณ์"</string>
     <string name="bluetooth_pairing_decline" msgid="6483118841204885890">"ยกเลิก"</string>
@@ -200,7 +197,7 @@
     <string name="choose_profile" msgid="343803890897657450">"เลือกโปรไฟล์"</string>
     <string name="category_personal" msgid="6236798763159385225">"ส่วนตัว"</string>
     <string name="category_work" msgid="4014193632325996115">"ที่ทำงาน"</string>
-    <string name="development_settings_title" msgid="140296922921597393">"ตัวเลือกสำหรับนักพัฒนาแอป"</string>
+    <string name="development_settings_title" msgid="140296922921597393">"ตัวเลือกสำหรับนักพัฒนาซอฟต์แวร์"</string>
     <string name="development_settings_enable" msgid="4285094651288242183">"เปิดใช้ตัวเลือกสำหรับนักพัฒนาซอฟต์แวร์"</string>
     <string name="development_settings_summary" msgid="8718917813868735095">"ตั้งค่าตัวเลือกสำหรับการพัฒนาแอปพลิเคชัน"</string>
     <string name="development_settings_not_available" msgid="355070198089140951">"ตัวเลือกสำหรับนักพัฒนาซอฟต์แวร์ไม่สามารถใช้ได้สำหรับผู้ใช้นี้"</string>
@@ -255,7 +252,7 @@
     <string name="wifi_display_certification" msgid="1805579519992520381">"การรับรองการแสดงผลแบบไร้สาย"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"เปิดใช้การบันทึกรายละเอียด Wi-Fi"</string>
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"การควบคุมการสแกนหา Wi‑Fi"</string>
-    <string name="wifi_enhanced_mac_randomization" msgid="882650208573834301">"การสุ่ม MAC ที่มี Wi-Fi ไม่ถาวร"</string>
+    <string name="wifi_enhanced_mac_randomization" msgid="5437378364995776979">"การสุ่ม MAC เพื่อเพิ่มความปลอดภัย Wi-Fi"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"เปิดใช้เน็ตมือถือเสมอ"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"การเร่งฮาร์ดแวร์การเชื่อมต่ออินเทอร์เน็ตผ่านมือถือ"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"แสดงอุปกรณ์บลูทูธที่ไม่มีชื่อ"</string>
@@ -284,7 +281,7 @@
     <string name="private_dns_mode_provider" msgid="3619040641762557028">"ชื่อโฮสต์ของผู้ให้บริการ DNS ส่วนตัว"</string>
     <string name="private_dns_mode_provider_hostname_hint" msgid="6564868953748514595">"ป้อนชื่อโฮสต์ของผู้ให้บริการ DNS"</string>
     <string name="private_dns_mode_provider_failure" msgid="8356259467861515108">"เชื่อมต่อไม่ได้"</string>
-    <string name="wifi_display_certification_summary" msgid="8111151348106907513">"แสดงตัวเลือกสำหรับการรับรองการแสดงผลแบบไร้สาย"</string>
+    <string name="wifi_display_certification_summary" msgid="8111151348106907513">"แสดงตัวเลือกสำหรับการรับรองการแสดงผล แบบไร้สาย"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"เพิ่มระดับการบันทึก Wi‑Fi แสดงต่อ SSID RSSI ในตัวเลือก Wi‑Fi"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"ลดการเปลืองแบตเตอรี่และเพิ่มประสิทธิภาพเครือข่าย"</string>
     <string name="wifi_enhanced_mac_randomization_summary" msgid="1210663439867489931">"เมื่อเปิดใช้โหมดนี้ ที่อยู่ MAC ของอุปกรณ์นี้อาจเปลี่ยนทุกครั้งที่เชื่อมต่อกับเครือข่ายที่มีการเปิดใช้การสุ่ม MAC"</string>
@@ -356,7 +353,6 @@
     <string name="debug_layout_summary" msgid="8825829038287321978">"แสดงหน้าปกคลิป ขอบ ฯลฯ"</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"บังคับทิศทางการจัดวาง RTL"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"บังคับทิศทางการจัดวางหน้าจอเป็น RTL สำหรับทุกภาษา"</string>
-    <string name="window_blurs" msgid="6831008984828425106">"อนุญาตการเบลอระดับหน้าต่าง"</string>
     <string name="force_msaa" msgid="4081288296137775550">"บังคับใช้ 4x MSAA"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"เปิดใช้งาน 4x MSAA ในแอปพลิเคชัน OpenGL ES 2.0"</string>
     <string name="show_non_rect_clip" msgid="7499758654867881817">"แก้ไขการทำงานของคลิปที่ไม่ใช่สี่เหลี่ยม"</string>
@@ -372,9 +368,9 @@
     <string name="debug_applications_category" msgid="5394089406638954196">"แอปพลิเคชัน"</string>
     <string name="immediately_destroy_activities" msgid="1826287490705167403">"ไม่เก็บกิจกรรม"</string>
     <string name="immediately_destroy_activities_summary" msgid="6289590341144557614">"ล้างทุกกิจกรรมทันทีที่ผู้ใช้ออกไป"</string>
-    <string name="app_process_limit_title" msgid="8361367869453043007">"ขีดจำกัดกระบวนการเบื้องหลัง"</string>
+    <string name="app_process_limit_title" msgid="8361367869453043007">"ขีดจำกัดกระบวนการพื้นหลัง"</string>
     <string name="show_all_anrs" msgid="9160563836616468726">"แสดง ANR พื้นหลัง"</string>
-    <string name="show_all_anrs_summary" msgid="8562788834431971392">"แสดงกล่องโต้ตอบ \"แอปไม่ตอบสนอง\" สำหรับแอปเบื้องหลัง"</string>
+    <string name="show_all_anrs_summary" msgid="8562788834431971392">"แสดงกล่องโต้ตอบ \"แอปไม่ตอบสนอง\" สำหรับแอปพื้นหลัง"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"แสดงคำเตือนจากช่องทางการแจ้งเตือน"</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"แสดงคำเตือนบนหน้าจอเมื่อแอปโพสต์การแจ้งเตือนโดยไม่มีช่องทางที่ถูกต้อง"</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"บังคับให้แอปสามารถใช้ที่เก็บภายนอก"</string>
@@ -409,12 +405,17 @@
     <string name="transcode_enable_all" msgid="2411165920039166710">"เปิดใช้การแปลง"</string>
     <string name="transcode_default" msgid="3784803084573509491">"ถือว่าแอปรองรับรูปแบบสมัยใหม่"</string>
     <string name="transcode_notification" msgid="5560515979793436168">"แสดงการแจ้งเตือนการแปลง"</string>
-    <string name="transcode_disable_cache" msgid="3160069309377467045">"ปิดใช้แคชสำหรับการแปลง"</string>
     <string name="runningservices_settings_title" msgid="6460099290493086515">"บริการที่ทำงานอยู่"</string>
     <string name="runningservices_settings_summary" msgid="1046080643262665743">"ดูและควบคุมบริการที่ทำงานอยู่"</string>
     <string name="select_webview_provider_title" msgid="3917815648099445503">"การใช้งาน WebView"</string>
     <string name="select_webview_provider_dialog_title" msgid="2444261109877277714">"ตั้งค่าการใช้งาน WebView"</string>
     <string name="select_webview_provider_toast_text" msgid="8512254949169359848">"ตัวเลือกนี้ใช้ไม่ได้อีกต่อไป โปรดลองอีกครั้ง"</string>
+    <string name="convert_to_file_encryption" msgid="2828976934129751818">"แปลงเป็นการเข้ารหัสไฟล์"</string>
+    <string name="convert_to_file_encryption_enabled" msgid="840757431284311754">"แปลง…"</string>
+    <string name="convert_to_file_encryption_done" msgid="8965831011811180627">"เข้ารหัสไฟล์แล้ว"</string>
+    <string name="title_convert_fbe" msgid="5780013350366495149">"การแปลงเป็นการเข้ารหัสตามไฟล์"</string>
+    <string name="convert_to_fbe_warning" msgid="34294381569282109">"แปลงพาร์ทิชันข้อมูลเป็นการเข้ารหัสแบบไฟล์\n !!คำเตือน!! การดำเนินการนี้จะลบข้อมูลทั้งหมดของคุณ\n ฟีเจอร์นี้เป็นแบบอัลฟา และอาจทำงานไม่เป็นปกติ\n กด \"ลบและแปลง...\" เพื่อดำเนินการต่อ"</string>
+    <string name="button_convert_fbe" msgid="1159861795137727671">"ลบและแปลง…"</string>
     <string name="picture_color_mode" msgid="1013807330552931903">"โหมดสีของรูปภาพ"</string>
     <string name="picture_color_mode_desc" msgid="151780973768136200">"ใช้ sRGB"</string>
     <string name="daltonizer_mode_disabled" msgid="403424372812399228">"ปิดใช้"</string>
@@ -449,17 +450,19 @@
     <string name="power_remaining_duration_shutdown_imminent" product="tablet" msgid="7703677921000858479">"แท็บเล็ตอาจปิดเครื่องในไม่ช้า (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_remaining_duration_shutdown_imminent" product="device" msgid="4374784375644214578">"อุปกรณ์อาจปิดเครื่องในไม่ช้า (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
-    <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"อีก <xliff:g id="TIME">%1$s</xliff:g>จึงจะเต็ม"</string>
-    <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> - อีก <xliff:g id="TIME">%2$s</xliff:g> จึงจะเต็ม"</string>
-    <string name="power_charging_limited" msgid="7956120998372505295">"<xliff:g id="LEVEL">%1$s</xliff:g> - จำกัดการชาร์จชั่วคราว"</string>
+    <!-- no translation found for power_remaining_charging_duration_only (8085099012811384899) -->
+    <skip />
+    <!-- no translation found for power_charging_duration (6127154952524919719) -->
+    <skip />
+    <string name="power_charging_limited" msgid="1956874810658999681">"<xliff:g id="LEVEL">%1$s</xliff:g> - กำลังเพิ่มประสิทธิภาพแบตเตอรี่"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"ไม่ทราบ"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"กำลังชาร์จ"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"กำลังชาร์จอย่างเร็ว"</string>
     <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"กำลังชาร์จอย่างช้าๆ"</string>
-    <string name="battery_info_status_charging_wireless" msgid="8924722966861282197">"กำลังชาร์จแบบไร้สาย"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"ไม่ได้ชาร์จ"</string>
-    <string name="battery_info_status_not_charging" msgid="3371084153747234837">"เชื่อมต่ออยู่ ไม่ได้ชาร์จ"</string>
-    <string name="battery_info_status_full" msgid="1339002294876531312">"ชาร์จแล้ว"</string>
+    <string name="battery_info_status_not_charging" msgid="8330015078868707899">"เสียบอยู่ ไม่สามารถชาร์จได้ในขณะนี้"</string>
+    <!-- no translation found for battery_info_status_full (1339002294876531312) -->
+    <skip />
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"ผู้ดูแลระบบเป็นผู้ควบคุม"</string>
     <string name="disabled" msgid="8017887509554714950">"ปิดอยู่"</string>
     <string name="external_source_trusted" msgid="1146522036773132905">"อนุญาต"</string>
@@ -502,10 +505,10 @@
     <string name="cancel" msgid="5665114069455378395">"ยกเลิก"</string>
     <string name="okay" msgid="949938843324579502">"ตกลง"</string>
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"การปลุกและการช่วยเตือน"</string>
-    <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"อนุญาตให้ตั้งปลุกและการช่วยเตือน"</string>
-    <string name="alarms_and_reminders_title" msgid="8819933264635406032">"การปลุกและการช่วยเตือน"</string>
-    <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"อนุญาตให้แอปนี้ตั้งปลุกและกำหนดเวลาการดำเนินการที่ต้องคำนึงถึงเวลาเป็นสำคัญ สิทธิ์นี้ช่วยให้แอปทำงานในเบื้องหลังได้ จึงอาจทำให้ใช้แบตเตอรี่มากขึ้น\n\nหากปิดใช้สิทธิ์นี้ การปลุกที่มีอยู่และกิจกรรมที่ต้องคำนึงถึงเวลาเป็นสำคัญซึ่งแอปนี้กำหนดเวลาไว้จะไม่ทำงาน"</string>
-    <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"กำหนดเวลา การปลุก การช่วยเตือน นาฬิกา"</string>
+    <string name="alarms_and_reminders_switch_title" msgid="186992351401152744">"อนุญาตให้ตั้งนาฬิกาปลุกหรือการช่วยเตือน"</string>
+    <string name="alarms_and_reminders_title" msgid="2988400785896875237">"การปลุกและการช่วยเตือน"</string>
+    <string name="alarms_and_reminders_footer_title" msgid="5882788882647778753">"อนุญาตให้แอปนี้ตั้งนาฬิกาปลุกหรือเหตุการณ์ตามการจับเวลาอื่นๆ ซึ่งจะเป็นการปลุกระบบให้แอปทำงานแม้ว่าคุณไม่ได้ใช้อุปกรณ์อยู่ก็ตาม โปรดทราบว่าการเพิกถอนสิทธิ์นี้อาจทำให้แอปทำงานผิดปกติ นั่นคือการปลุกที่แอปตั้งเวลาไว้จะใช้ไม่ได้อีก"</string>
+    <string name="keywords_alarms_and_reminders" msgid="8882739572152019456">"กำหนดเวลา การปลุก การช่วยเตือน เหตุการณ์"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"เปิด"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"เปิด \"ห้ามรบกวน\""</string>
     <string name="zen_mode_settings_summary_off" msgid="3832876036123504076">"ไม่เลย"</string>
@@ -559,15 +562,12 @@
     <string name="user_set_lock_button" msgid="1427128184982594856">"ตั้งค่าล็อก"</string>
     <string name="user_switch_to_user" msgid="6975428297154968543">"เปลี่ยนเป็น <xliff:g id="USER_NAME">%s</xliff:g>"</string>
     <string name="creating_new_user_dialog_message" msgid="7232880257538970375">"กำลังสร้างผู้ใช้ใหม่…"</string>
-    <string name="add_user_failed" msgid="4809887794313944872">"สร้างผู้ใช้ใหม่ไม่ได้"</string>
+    <!-- no translation found for add_user_failed (4809887794313944872) -->
+    <skip />
     <string name="user_nickname" msgid="262624187455825083">"ชื่อเล่น"</string>
-    <string name="guest_new_guest" msgid="3482026122932643557">"เพิ่มผู้ใช้ชั่วคราว"</string>
-    <string name="guest_exit_guest" msgid="5908239569510734136">"นำผู้ใช้ชั่วคราวออก"</string>
-    <string name="guest_reset_guest" msgid="6110013010356013758">"รีเซ็ตผู้เข้าร่วม"</string>
+    <string name="guest_new_guest" msgid="3482026122932643557">"เพิ่มผู้เข้าร่วม"</string>
+    <string name="guest_exit_guest" msgid="5908239569510734136">"นำผู้เข้าร่วมออก"</string>
     <string name="guest_nickname" msgid="6332276931583337261">"ผู้ใช้ชั่วคราว"</string>
-    <string name="guest_reset_guest_dialog_title" msgid="8047270010895437534">"รีเซ็ตผู้เข้าร่วมไหม"</string>
-    <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"รีเซ็ต"</string>
-    <string name="guest_resetting" msgid="7822120170191509566">"กำลังรีเซ็ตผู้เข้าร่วม…"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"ถ่ายรูป"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"เลือกรูปภาพ"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"เลือกรูปภาพ"</string>

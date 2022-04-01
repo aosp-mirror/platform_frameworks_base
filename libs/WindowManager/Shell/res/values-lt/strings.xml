@@ -20,7 +20,6 @@
     <string name="pip_phone_close" msgid="5783752637260411309">"Uždaryti"</string>
     <string name="pip_phone_expand" msgid="2579292903468287504">"Išskleisti"</string>
     <string name="pip_phone_settings" msgid="5468987116750491918">"Nustatymai"</string>
-    <string name="pip_phone_enter_split" msgid="7042877263880641911">"Įjungti išskaidyto ekrano režimą"</string>
     <string name="pip_menu_title" msgid="5393619322111827096">"Meniu"</string>
     <string name="pip_notification_title" msgid="1347104727641353453">"<xliff:g id="NAME">%s</xliff:g> rodom. vaizdo vaizde"</string>
     <string name="pip_notification_message" msgid="8854051911700302620">"Jei nenorite, kad „<xliff:g id="NAME">%s</xliff:g>“ naudotų šią funkciją, palietę atidarykite nustatymus ir išjunkite ją."</string>
@@ -29,8 +28,6 @@
     <string name="pip_skip_to_next" msgid="8403429188794867653">"Praleisti ir eiti į kitą"</string>
     <string name="pip_skip_to_prev" msgid="7172158111196394092">"Praleisti ir eiti į ankstesnį"</string>
     <string name="accessibility_action_pip_resize" msgid="4623966104749543182">"Pakeisti dydį"</string>
-    <string name="accessibility_action_pip_stash" msgid="4060775037619702641">"Paslėpti"</string>
-    <string name="accessibility_action_pip_unstash" msgid="7467499339610437646">"Nebeslėpti"</string>
     <string name="dock_forced_resizable" msgid="1749750436092293116">"Programa gali neveikti naudojant išskaidyto ekrano režimą."</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="7408396418008948957">"Programoje nepalaikomas skaidytas ekranas."</string>
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"Programa gali neveikti antriniame ekrane."</string>
@@ -73,4 +70,5 @@
     <string name="manage_bubbles_text" msgid="7730624269650594419">"Tvarkyti"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"Debesėlio atsisakyta."</string>
     <string name="restart_button_description" msgid="5887656107651190519">"Palieskite, kad paleistumėte iš naujo šią programą ir įjungtumėte viso ekrano režimą."</string>
+    <string name="got_it" msgid="4428750913636945527">"Supratau"</string>
 </resources>

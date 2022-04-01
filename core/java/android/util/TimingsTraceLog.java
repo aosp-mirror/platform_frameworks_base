@@ -127,7 +127,7 @@ public class TimingsTraceLog {
      * Logs a duration so it can be parsed by external tools for performance reporting.
      */
     public void logDuration(String name, long timeMs) {
-        Slog.d(mTag, name + " took to complete: " + timeMs + "ms");
+        Slog.v(mTag, name + " took to complete: " + timeMs + "ms");
     }
 
     /**

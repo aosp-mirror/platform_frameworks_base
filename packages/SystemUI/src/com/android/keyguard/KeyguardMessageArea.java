@@ -18,6 +18,7 @@ package com.android.keyguard;
 
 import android.content.Context;
 import android.content.res.ColorStateList;
+import android.content.res.Configuration;
 import android.content.res.TypedArray;
 import android.graphics.Color;
 import android.os.Handler;
@@ -29,6 +30,8 @@ import android.util.TypedValue;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+
+import androidx.annotation.Nullable;
 
 import com.android.internal.policy.SystemBarUtils;
 import com.android.settingslib.Utils;
@@ -57,8 +60,14 @@ public class KeyguardMessageArea extends TextView implements SecurityMessageDisp
     private ColorStateList mNextMessageColorState = ColorStateList.valueOf(DEFAULT_COLOR);
     private boolean mBouncerVisible;
     private boolean mAltBouncerShowing;
+    /**
+     * Container that wraps the KeyguardMessageArea - may be null if current view hierarchy doesn't
+     * contain {@link R.id.keyguard_message_area_container}.
+     */
+    @Nullable
     private ViewGroup mContainer;
-    private int mTopMargin;
+    private int mContainerTopMargin;
+    private int mLastOrientation = -1;
 
     public KeyguardMessageArea(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -74,16 +83,31 @@ public class KeyguardMessageArea extends TextView implements SecurityMessageDisp
         mContainer = getRootView().findViewById(R.id.keyguard_message_area_container);
     }
 
-    void onConfigChanged() {
-        final int newTopMargin = SystemBarUtils.getStatusBarHeight(getContext());
-        if (mTopMargin == newTopMargin) {
+    void onConfigChanged(Configuration newConfig) {
+        if (mContainer == null) {
             return;
         }
-        mTopMargin = newTopMargin;
-        ViewGroup.MarginLayoutParams lp =
+        final int newTopMargin = SystemBarUtils.getStatusBarHeight(getContext());
+        if (mContainerTopMargin != newTopMargin) {
+            mContainerTopMargin = newTopMargin;
+            ViewGroup.MarginLayoutParams lp =
                 (ViewGroup.MarginLayoutParams) mContainer.getLayoutParams();
-        lp.topMargin = mTopMargin;
-        mContainer.setLayoutParams(lp);
+            lp.topMargin = mContainerTopMargin;
+            mContainer.setLayoutParams(lp);
+        }
+
+        if (mLastOrientation != newConfig.orientation) {
+            mLastOrientation = newConfig.orientation;
+            int messageAreaTopMargin = 0;
+            if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT) {
+                messageAreaTopMargin = mContext.getResources().getDimensionPixelSize(
+                        R.dimen.keyguard_lock_padding);
+            }
+
+            ViewGroup.MarginLayoutParams lp = (ViewGroup.MarginLayoutParams) getLayoutParams();
+            lp.topMargin = messageAreaTopMargin;
+            setLayoutParams(lp);
+        }
     }
 
     @Override

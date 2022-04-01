@@ -95,9 +95,7 @@
     <string name="bluetooth_profile_a2dp_high_quality" msgid="4739440941324792775">"HD ऑडिओ: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="2477639096903834374">"HD ऑडिओ"</string>
     <string name="bluetooth_profile_hearing_aid" msgid="58154575573984914">"श्रवणयंत्रे"</string>
-    <string name="bluetooth_profile_le_audio" msgid="5158149987518342036">"LE_AUDIO"</string>
     <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="8191273236809964030">"श्रवण यंत्रांशी कनेक्ट केले आहे"</string>
-    <string name="bluetooth_le_audio_profile_summary_connected" msgid="3162538609379333442">"LE_AUDIO शी कनेक्ट केले आहे"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="7422607970115444153">"मीडिया ऑडिओवर कनेक्ट केले"</string>
     <string name="bluetooth_headset_profile_summary_connected" msgid="2420981566026949688">"फोन ऑडिओ वर कनेक्ट केले"</string>
     <string name="bluetooth_opp_profile_summary_connected" msgid="2393521801478157362">"फाइल स्थानांतर सर्व्हरवर कनेक्ट केले"</string>
@@ -115,7 +113,6 @@
     <string name="bluetooth_opp_profile_summary_use_for" msgid="461981154387015457">"फाइल स्थानांतरणासाठी वापरा"</string>
     <string name="bluetooth_hid_profile_summary_use_for" msgid="4289460627406490952">"इनपुट साठी वापरा"</string>
     <string name="bluetooth_hearing_aid_profile_summary_use_for" msgid="7689393730163320483">"श्रवण यंत्रांसाठी वापरा"</string>
-    <string name="bluetooth_le_audio_profile_summary_use_for" msgid="2778318636027348572">"LE_AUDIO साठी वापरले आहे"</string>
     <string name="bluetooth_pairing_accept" msgid="2054232610815498004">"पेअर करा"</string>
     <string name="bluetooth_pairing_accept_all_caps" msgid="2734383073450506220">"पेअर करा"</string>
     <string name="bluetooth_pairing_decline" msgid="6483118841204885890">"रद्द करा"</string>
@@ -229,7 +226,7 @@
     <string name="adb_pairing_device_dialog_title" msgid="7141739231018530210">"डिव्हाइससह पेअर करा"</string>
     <string name="adb_pairing_device_dialog_pairing_code_label" msgid="3639239786669722731">"वाय-फाय पेअरिंग कोड"</string>
     <string name="adb_pairing_device_dialog_failed_title" msgid="3426758947882091735">"पेअर करता आले नाही"</string>
-    <string name="adb_pairing_device_dialog_failed_msg" msgid="6611097519661997148">"डिव्हाइस त्याच नेटवर्कशी कनेक्ट केले असल्याची खात्री करा."</string>
+    <string name="adb_pairing_device_dialog_failed_msg" msgid="6611097519661997148">"डिव्हाइस समान नेटवर्कशी कनेक्ट केले असल्याची खात्री करा."</string>
     <string name="adb_wireless_qrcode_summary" msgid="8051414549011801917">"QR कोड स्कॅन करून वाय-फाय वापरून डिव्हाइस पेअर करा"</string>
     <string name="adb_wireless_verifying_qrcode_text" msgid="6123192424916029207">"डिव्हाइस पेअर करत आहे…"</string>
     <string name="adb_qrcode_pairing_device_failed_msg" msgid="6936292092592914132">"डिव्हाइस पेअर करता आले नाही. QR कोड चुकीचा होता किंवा डिव्हाइस समान नेटवर्कशी कनेक्ट केलेले नाही."</string>
@@ -249,15 +246,15 @@
     <string name="confirm_enable_oem_unlock_title" msgid="8249318129774367535">"OEM अनलॉक करण्यास अनुमती द्यायची?"</string>
     <string name="confirm_enable_oem_unlock_text" msgid="854131050791011970">"चेतावणी: हे सेटिंग सुरू असताना या डिव्हाइस वर डिव्हाइस संरक्षण वैशिष्ट्ये काम करणार नाहीत."</string>
     <string name="mock_location_app" msgid="6269380172542248304">"बनावट स्थान अ‍ॅप निवडा"</string>
-    <string name="mock_location_app_not_set" msgid="6972032787262831155">"कोणतेही बनावट स्थान अ‍ॅप सेट केले नाही"</string>
+    <string name="mock_location_app_not_set" msgid="6972032787262831155">"कोणताही बनावट स्थान अ‍ॅप सेट केला नाही"</string>
     <string name="mock_location_app_set" msgid="4706722469342913843">"बनावट स्थान अ‍ॅप: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="debug_networking_category" msgid="6829757985772659599">"नेटवर्किंग"</string>
     <string name="wifi_display_certification" msgid="1805579519992520381">"वायरलेस डिस्प्ले प्रमाणीकरण"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"वाय-फाय व्हर्बोझ लॉगिंग सुरू करा"</string>
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"वाय-फाय स्कॅन थ्रॉटलिंग"</string>
-    <string name="wifi_enhanced_mac_randomization" msgid="882650208573834301">"वाय-फायचे सातत्याने न होणारे MAC रँडमायझेशन"</string>
+    <string name="wifi_enhanced_mac_randomization" msgid="5437378364995776979">"वाय-फाय वर्धित केलेले MAC रँडमायझेशन"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"मोबाइल डेटा नेहमी सक्रिय"</string>
-    <string name="tethering_hardware_offload" msgid="4116053719006939161">"टेदरिंग हार्डवेअर अ‍ॅक्सिलरेशन"</string>
+    <string name="tethering_hardware_offload" msgid="4116053719006939161">"टेदरिंग हार्डवेअर प्रवेग"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"नावांशिवाय ब्‍लूटूथ डिव्‍हाइस दाखवा"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="1452342324349203434">"संपूर्ण आवाज बंद करा"</string>
     <string name="bluetooth_enable_gabeldorsche" msgid="9131730396242883416">"गाबलडॉर्ष सुरू करा"</string>
@@ -267,10 +264,10 @@
     <string name="bluetooth_select_map_version_dialog_title" msgid="7085934373987428460">"ब्लूटूथ MAP आवृत्ती निवडा"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="952001408455456494">"ब्लूटूथ ऑडिओ कोडेक"</string>
     <string name="bluetooth_select_a2dp_codec_type_dialog_title" msgid="7510542404227225545">"ब्लूटूथ ऑडिओ Codec ट्रिगर करा\nनिवड"</string>
-    <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="1638623076480928191">"ब्लूटूथ ऑडिओ नमुना दर"</string>
+    <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="1638623076480928191">"ब्लूटूथ ऑडिओ पॅटर्न दर"</string>
     <string name="bluetooth_select_a2dp_codec_sample_rate_dialog_title" msgid="5876305103137067798">"ब्लूटूथ ऑडिओ Codec ट्रिगर करा\nनिवड: नमुना दर"</string>
     <string name="bluetooth_select_a2dp_codec_type_help_info" msgid="8647200416514412338">"फोन किंवा हेडसेटला सपोर्ट करत नाही म्हणजे ती निकामी झाली आहे"</string>
-    <string name="bluetooth_select_a2dp_codec_bits_per_sample" msgid="6253965294594390806">"प्रति नमुना ब्लूटूथ ऑडिओ बिट"</string>
+    <string name="bluetooth_select_a2dp_codec_bits_per_sample" msgid="6253965294594390806">"प्रति पॅटर्न ब्लूटूध ऑडिओ बिट"</string>
     <string name="bluetooth_select_a2dp_codec_bits_per_sample_dialog_title" msgid="4898693684282596143">"ब्लूटूथ ऑडिओ Codec ट्रिगर करा\nनिवड: बिट प्रति नमुना"</string>
     <string name="bluetooth_select_a2dp_codec_channel_mode" msgid="364277285688014427">"ब्लूटूथ ऑडिओ चॅनल मोड"</string>
     <string name="bluetooth_select_a2dp_codec_channel_mode_dialog_title" msgid="2076949781460359589">"ब्लूटूथ ऑडिओ Codec ट्रिगर करा\nनिवड: चॅनल मोड"</string>
@@ -310,9 +307,9 @@
     <string name="adb_keys_warning_message" msgid="2968555274488101220">"तुम्ही पूर्वी ऑथोराइझ केलेल्या सर्व संगणकांवरुन USB डीबग करण्यासाठी अ‍ॅक्सेस रीव्होक करायचा?"</string>
     <string name="dev_settings_warning_title" msgid="8251234890169074553">"विकास सेटिंग्जला अनुमती द्यायची?"</string>
     <string name="dev_settings_warning_message" msgid="37741686486073668">"या सेटिंग्जचा हेतू फक्त विकास वापरासाठी आहे. त्यामुळे तुमचे डिव्हाइस आणि त्यावरील ॲप्लिकेशन ब्रेक होऊ शकतात किंवा नेहमीपेक्षा वेगळे वर्तन करू शकतात."</string>
-    <string name="verify_apps_over_usb_title" msgid="6031809675604442636">"USB वर अ‍ॅप्स पडताळून पहा"</string>
+    <string name="verify_apps_over_usb_title" msgid="6031809675604442636">"USB वर अ‍ॅप्स पडताळून पाहा"</string>
     <string name="verify_apps_over_usb_summary" msgid="1317933737581167839">"हानिकारक वर्तनासाठी ADB/ADT द्वारे इंस्टॉल अ‍ॅप्स तपासा."</string>
-    <string name="bluetooth_show_devices_without_names_summary" msgid="780964354377854507">"नावांशिवाय ब्‍लूटूथ डिव्‍हाइस (फक्‍त MAC पत्ते) दाखवले जातील"</string>
+    <string name="bluetooth_show_devices_without_names_summary" msgid="780964354377854507">"नावांशिवाय ब्‍लूटूथ डीव्‍हाइस (फक्‍त MAC पत्‍ते) दाखवले जातील"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="2006309932135547681">"रिमोट डिव्हाइसमध्ये सहन न होणारा मोठा आवाज किंवा नियंत्रणाचा अभाव यासारखी आवाजाची समस्या असल्यास ब्लूटूथ संपूर्ण आवाज वैशिष्ट्य बंद करते."</string>
     <string name="bluetooth_enable_gabeldorsche_summary" msgid="2054730331770712629">"ब्लूटूथ गाबलडॉर्ष वैशिष्‍ट्य स्टॅक सुरू करा."</string>
     <string name="enhanced_connectivity_summary" msgid="1576414159820676330">"वर्धित कनेक्टिव्हिटी वैशिष्‍ट्य सुरू करा."</string>
@@ -329,7 +326,7 @@
     <string name="wait_for_debugger" msgid="7461199843335409809">"डीबगरची प्रतीक्षा करा"</string>
     <string name="wait_for_debugger_summary" msgid="6846330006113363286">"डीबग केलेले ॲप्लिकेशन अंमलात आणण्यापूर्वी डीबगर संलग्न करण्याची प्रतीक्षा करतो"</string>
     <string name="debug_input_category" msgid="7349460906970849771">"इनपुट"</string>
-    <string name="debug_drawing_category" msgid="5066171112313666619">"ड्रॉइंग"</string>
+    <string name="debug_drawing_category" msgid="5066171112313666619">"रेखांकन"</string>
     <string name="debug_hw_drawing_category" msgid="5830815169336975162">"हार्डवेअर ॲक्सलरेटेड रेंडरिंग"</string>
     <string name="media_category" msgid="8122076702526144053">"मीडिया"</string>
     <string name="debug_monitoring_category" msgid="1597387133765424994">"परीक्षण"</string>
@@ -348,7 +345,7 @@
     <string name="debug_hw_overdraw" msgid="8944851091008756796">"GPU ओव्हरड्रॉ डीबग करा"</string>
     <string name="disable_overlays" msgid="4206590799671557143">"HW ओव्हरले बंद करा"</string>
     <string name="disable_overlays_summary" msgid="1954852414363338166">"स्क्रीन तयार करण्यासाठी नेहमी GPU वापरा"</string>
-    <string name="simulate_color_space" msgid="1206503300335835151">"रंग स्थान सिम्युलेट करा"</string>
+    <string name="simulate_color_space" msgid="1206503300335835151">"रंग स्थानाची बतावणी करा"</string>
     <string name="enable_opengl_traces_title" msgid="4638773318659125196">"OpenGL ट्रेस सुरू करा"</string>
     <string name="usb_audio_disable_routing" msgid="3367656923544254975">"USB ऑडिओ राउटिंग बंद करा"</string>
     <string name="usb_audio_disable_routing_summary" msgid="8768242894849534699">"USB ऑडिओ परिधीय वरील स्वयंचलित राउटिंग बंद करा"</string>
@@ -356,7 +353,6 @@
     <string name="debug_layout_summary" msgid="8825829038287321978">"क्लिप सीमा, समास इत्यादी दर्शवा."</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"RTL लेआउट दिशानिर्देशाची सक्ती करा"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"सर्व लोकॅलसाठी RTL स्क्रीन लेआउट दिशानिर्देशाची सक्ती करा"</string>
-    <string name="window_blurs" msgid="6831008984828425106">"विंडो पातळीवरील ब्लरना अनुमती द्या"</string>
     <string name="force_msaa" msgid="4081288296137775550">"4x MSAA ची सक्ती करा"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"OpenGL ES 2.0 ॲप्समध्ये 4x MSAA सुरू करा"</string>
     <string name="show_non_rect_clip" msgid="7499758654867881817">"आयताकृती नसलेले क्लिप ऑपरेशन डीबग करा"</string>
@@ -376,11 +372,11 @@
     <string name="show_all_anrs" msgid="9160563836616468726">"बॅकग्राउंड ANR दाखवा"</string>
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"बॅकग्राउंड अ‍ॅप्ससाठी अ‍ॅप प्रतिसाद देत नाही दाखवते"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"सूचना चॅनल चेतावण्या दाखवा"</string>
-    <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"एखादे अ‍ॅप वैध चॅनलशिवाय सूचना पोस्ट करते तेव्हा स्क्रीनवर चेतावणी देते"</string>
+    <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"एखादे अ‍ॅप वैध चॅनेलशिवाय सूचना पोस्ट करते तेव्हा स्क्रीनवर चेतावणी देते"</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"बाह्यवर ॲप्सना अनुमती देण्याची सक्ती करा"</string>
-    <string name="force_allow_on_external_summary" msgid="8525425782530728238">"मॅनिफेस्‍ट मूल्ये काहीही असू देत, कोणत्याही अ‍ॅपला बाह्य स्टोरेजवर राइट करण्यासाठी पात्र बनविते"</string>
+    <string name="force_allow_on_external_summary" msgid="8525425782530728238">"manifest मूल्यांकडे दुर्लक्ष करून, कोणत्याही ॲपला बाह्य स्टोरेजवर लेखन केले जाण्यासाठी पात्र बनविते"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"ॲक्टिव्हिटीचा आकार बदलण्यायोग्य होण्याची सक्ती करा"</string>
-    <string name="force_resizable_activities_summary" msgid="2490382056981583062">"मॅनिफेस्‍ट मूल्ये काहीही असू देत, एकाहून अधिक विंडोसाठी सर्व अ‍ॅक्टिव्हिटीचा आकार बदलण्यायोग्य करा."</string>
+    <string name="force_resizable_activities_summary" msgid="2490382056981583062">"manifest मूल्यांकडे दुर्लक्ष करून, एकाहून अधिक-विंडोसाठी सर्व अ‍ॅक्टिव्हिटींचा आकार बदलण्यायोग्य करा."</string>
     <string name="enable_freeform_support" msgid="7599125687603914253">"freeform विंडो सुरू करा"</string>
     <string name="enable_freeform_support_summary" msgid="1822862728719276331">"प्रायोगिक मुक्तस्वरूपाच्या विंडोसाठी सपोर्ट सुरू करा."</string>
     <string name="local_backup_password_title" msgid="4631017948933578709">"डेस्कटॉप बॅकअप पासवर्ड"</string>
@@ -409,12 +405,17 @@
     <string name="transcode_enable_all" msgid="2411165920039166710">"ट्रान्सकोडिंग सुरू करा"</string>
     <string name="transcode_default" msgid="3784803084573509491">"असे गृहीत धरा की, ॲप्स आधुनिक फॉरमॅटना सपोर्ट करतात"</string>
     <string name="transcode_notification" msgid="5560515979793436168">"ट्रान्सकोडिंग सूचना दाखवा"</string>
-    <string name="transcode_disable_cache" msgid="3160069309377467045">"ट्रान्सकोडिंग कॅशे बंद करा"</string>
     <string name="runningservices_settings_title" msgid="6460099290493086515">"सुरू सेवा"</string>
     <string name="runningservices_settings_summary" msgid="1046080643262665743">"सध्या सुरू असलेल्या सेवा पहा आणि नियंत्रित करा"</string>
     <string name="select_webview_provider_title" msgid="3917815648099445503">"वेबदृश्य अंमलबजावणी"</string>
     <string name="select_webview_provider_dialog_title" msgid="2444261109877277714">"वेबदृश्य अंमलबजावणी सेट करा"</string>
     <string name="select_webview_provider_toast_text" msgid="8512254949169359848">"ही निवड यापुढे वैध असणार नाही. पुन्हा प्रयत्न करा."</string>
+    <string name="convert_to_file_encryption" msgid="2828976934129751818">"फाइल कूटबद्धीकरणावर रूपांतरित करा"</string>
+    <string name="convert_to_file_encryption_enabled" msgid="840757431284311754">"रूपांतरित करा..."</string>
+    <string name="convert_to_file_encryption_done" msgid="8965831011811180627">"फाइल आधीपासून एंक्रिप्ट होती"</string>
+    <string name="title_convert_fbe" msgid="5780013350366495149">"फाइल आधारित कूटबद्धीकरणावर रूपांतरित करणे"</string>
+    <string name="convert_to_fbe_warning" msgid="34294381569282109">"फाइल आधारित कूटबद्धीकरणावर डेटा विभाजक रूपांतरित करा.\n !!चेतावणी!! हे आपल्‍या सर्व डेटास मिटवेल.\n हे वैशिष्ट्य अल्‍फा आहे आणि कदाचित योग्यरित्या कार्य करू शकत नाही.\n सुरू ठेवण्‍यासाठी \'पुसा आणि रूपांतरित करा...\' दाबा."</string>
+    <string name="button_convert_fbe" msgid="1159861795137727671">"पुसा आणि रुपांतरित करा..."</string>
     <string name="picture_color_mode" msgid="1013807330552931903">"चित्र रंग मोड"</string>
     <string name="picture_color_mode_desc" msgid="151780973768136200">"sRGB वापरा"</string>
     <string name="daltonizer_mode_disabled" msgid="403424372812399228">"अक्षम केले"</string>
@@ -449,17 +450,19 @@
     <string name="power_remaining_duration_shutdown_imminent" product="tablet" msgid="7703677921000858479">"टॅबलेट लवकरच बंद होऊ शकतो (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_remaining_duration_shutdown_imminent" product="device" msgid="4374784375644214578">"डिव्हाइस लवकरच बंद होऊ शकते (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
-    <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"पूर्ण चार्ज होण्यासाठी <xliff:g id="TIME">%1$s</xliff:g> शिल्लक आहेत"</string>
-    <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> - पूर्ण चार्ज होण्यासाठी <xliff:g id="TIME">%2$s</xliff:g> शिल्लक आहे"</string>
-    <string name="power_charging_limited" msgid="7956120998372505295">"<xliff:g id="LEVEL">%1$s</xliff:g> • चार्जिंग तात्पुरते मर्यादित आहे"</string>
+    <!-- no translation found for power_remaining_charging_duration_only (8085099012811384899) -->
+    <skip />
+    <!-- no translation found for power_charging_duration (6127154952524919719) -->
+    <skip />
+    <string name="power_charging_limited" msgid="1956874810658999681">"<xliff:g id="LEVEL">%1$s</xliff:g> - बॅटरीची क्षमता वाढवण्यासाठी ऑप्टिमाइझ करत आहे"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"अज्ञात"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"चार्ज होत आहे"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"वेगाने चार्ज होत आहे"</string>
-    <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"हळू चार्ज होत आहे"</string>
-    <string name="battery_info_status_charging_wireless" msgid="8924722966861282197">"वायरलेसने चार्ज होत आहे"</string>
+    <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"हळूहळू चार्ज होत आहे"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"चार्ज होत नाही"</string>
-    <string name="battery_info_status_not_charging" msgid="3371084153747234837">"कनेक्ट केले, चार्ज होत नाही"</string>
-    <string name="battery_info_status_full" msgid="1339002294876531312">"चार्ज झाली"</string>
+    <string name="battery_info_status_not_charging" msgid="8330015078868707899">"प्लग इन केलेले आहे, आता चार्ज करू शकत नाही"</string>
+    <!-- no translation found for battery_info_status_full (1339002294876531312) -->
+    <skip />
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"प्रशासकाने नियंत्रित केलेले"</string>
     <string name="disabled" msgid="8017887509554714950">"अक्षम"</string>
     <string name="external_source_trusted" msgid="1146522036773132905">"अनुमती आहे"</string>
@@ -502,10 +505,10 @@
     <string name="cancel" msgid="5665114069455378395">"रद्द करा"</string>
     <string name="okay" msgid="949938843324579502">"ठीक आहे"</string>
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"अलार्म आणि रिमाइंडर"</string>
-    <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"अलार्म आणि रिमाइंडर सेट करण्याची अनुमती द्या"</string>
-    <string name="alarms_and_reminders_title" msgid="8819933264635406032">"अलार्म आणि रिमाइंडर"</string>
-    <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"या ॲपला अलार्म सेट करण्याची किंवा वेळेनुसार संवेदनशील असलेल्या कृती शेड्युल करण्याची अनुमती द्या. हे ॲपला बॅकग्राउंडमध्ये रन होऊ देते, ज्यामुळे जास्त बॅटरी वापरली जाऊ शकते.\n\nही परवानगी बंद असल्यास, सध्याचे अलार्म आणि या ॲपद्वारे शेड्युल केलेले वेळेवर आधारित इव्हेंट काम करणार नाहीत."</string>
-    <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"शेड्युल, अलार्म, रिमाइंडर, घड्याळ"</string>
+    <string name="alarms_and_reminders_switch_title" msgid="186992351401152744">"अलार्म किंवा रिमाइंडर सेट करण्याची अनुमती द्या"</string>
+    <string name="alarms_and_reminders_title" msgid="2988400785896875237">"अलार्म आणि रिमाइंडर"</string>
+    <string name="alarms_and_reminders_footer_title" msgid="5882788882647778753">"या अ‍ॅपला अलार्म किंवा वेळेवर आधारित इतर इव्हेंट शेड्युल करण्याची अनुमती द्या. यामुळे तुम्ही डिव्हाइस वापरत नसतानादेखील अ‍ॅपला सुरू आणि रन करण्याची अनुमती मिळते. लक्षात ठेवा की, ही परवानगी नाकारल्याने ॲप कदाचित नीट काम करणार नाही, विशेषतः अ‍ॅपने शेड्युल केलेले कोणतेही अलार्म यापुढे काम करणार नाहीत."</string>
+    <string name="keywords_alarms_and_reminders" msgid="8882739572152019456">"शेड्युल, अलार्म, रिमाइंडर, इव्‍हेंट"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"सुरू करा"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"व्यत्यय आणू नका सुरू करा"</string>
     <string name="zen_mode_settings_summary_off" msgid="3832876036123504076">"कधीही नाही"</string>
@@ -549,7 +552,7 @@
     <string name="user_setup_dialog_message" msgid="269931619868102841">"तो वापरकर्ता डिव्हाइसजवळ आहे आणि त्याचे स्थान सेट करण्यासाठी उपलब्ध आहे याची खात्री करा"</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"आता प्रोफाईल सेट करायचा?"</string>
     <string name="user_setup_button_setup_now" msgid="1708269547187760639">"आता सेट करा"</string>
-    <string name="user_setup_button_setup_later" msgid="8712980133555493516">"आता नको"</string>
+    <string name="user_setup_button_setup_later" msgid="8712980133555493516">"आत्ता नाही"</string>
     <string name="user_add_user_type_title" msgid="551279664052914497">"जोडा"</string>
     <string name="user_new_user_name" msgid="60979820612818840">"नवीन वापरकर्ता"</string>
     <string name="user_new_profile_name" msgid="2405500423304678841">"नवीन प्रोफाईल"</string>
@@ -559,15 +562,12 @@
     <string name="user_set_lock_button" msgid="1427128184982594856">"लॉक सेट करा"</string>
     <string name="user_switch_to_user" msgid="6975428297154968543">"<xliff:g id="USER_NAME">%s</xliff:g> वर स्विच करा"</string>
     <string name="creating_new_user_dialog_message" msgid="7232880257538970375">"नवीन वापरकर्ता तयार करत आहे…"</string>
-    <string name="add_user_failed" msgid="4809887794313944872">"नवीन वापरकर्ता तयार करता आला नाही"</string>
+    <!-- no translation found for add_user_failed (4809887794313944872) -->
+    <skip />
     <string name="user_nickname" msgid="262624187455825083">"टोपणनाव"</string>
     <string name="guest_new_guest" msgid="3482026122932643557">"अतिथी जोडा"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"अतिथी काढून टाका"</string>
-    <string name="guest_reset_guest" msgid="6110013010356013758">"अतिथी सेशन रीसेट करा"</string>
     <string name="guest_nickname" msgid="6332276931583337261">"अतिथी"</string>
-    <string name="guest_reset_guest_dialog_title" msgid="8047270010895437534">"अतिथीला रीसेट करायचे आहे का?"</string>
-    <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"रीसेट करा"</string>
-    <string name="guest_resetting" msgid="7822120170191509566">"अतिथीला रीसेट करत आहे…"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"फोटो काढा"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"इमेज निवडा"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"फोटो निवडा"</string>
@@ -579,7 +579,7 @@
     <string name="wifi_hotspot_switch_on_text" msgid="9212273118217786155">"सुरू करा"</string>
     <string name="wifi_hotspot_switch_off_text" msgid="7245567251496959764">"बंद करा"</string>
     <string name="carrier_network_change_mode" msgid="4257621815706644026">"वाहक नेटवर्क बदलत आहे"</string>
-    <string name="data_connection_3g" msgid="931852552688157407">"3G"</string>
+    <string name="data_connection_3g" msgid="931852552688157407">"३G"</string>
     <string name="data_connection_edge" msgid="4625509456544797637">"EDGE"</string>
     <string name="data_connection_cdma" msgid="9098161966701934334">"१X"</string>
     <string name="data_connection_gprs" msgid="1251945769006770189">"GPRS"</string>

@@ -97,7 +97,7 @@ class EnsureActivitiesVisibleHelper {
         // activities are actually behind other fullscreen activities, but still required
         // to be visible (such as performing Recents animation).
         final boolean resumeTopActivity = mTop != null && !mTop.mLaunchTaskBehind
-                && mTaskFragment.isTopActivityFocusable()
+                && mTaskFragment.canBeResumed(starting)
                 && (starting == null || !starting.isDescendantOf(mTaskFragment));
 
         ArrayList<TaskFragment> adjacentTaskFragments = null;

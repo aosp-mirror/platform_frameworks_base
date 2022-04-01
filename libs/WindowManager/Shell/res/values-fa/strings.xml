@@ -20,7 +20,6 @@
     <string name="pip_phone_close" msgid="5783752637260411309">"بستن"</string>
     <string name="pip_phone_expand" msgid="2579292903468287504">"بزرگ کردن"</string>
     <string name="pip_phone_settings" msgid="5468987116750491918">"تنظیمات"</string>
-    <string name="pip_phone_enter_split" msgid="7042877263880641911">"ورود به حالت «صفحهٔ دونیمه»"</string>
     <string name="pip_menu_title" msgid="5393619322111827096">"منو"</string>
     <string name="pip_notification_title" msgid="1347104727641353453">"<xliff:g id="NAME">%s</xliff:g> درحالت تصویر در تصویر است"</string>
     <string name="pip_notification_message" msgid="8854051911700302620">"اگر نمی‌خواهید <xliff:g id="NAME">%s</xliff:g> از این قابلیت استفاده کند، با ضربه زدن، تنظیمات را باز کنید و آن را خاموش کنید."</string>
@@ -29,8 +28,6 @@
     <string name="pip_skip_to_next" msgid="8403429188794867653">"رد شدن به بعدی"</string>
     <string name="pip_skip_to_prev" msgid="7172158111196394092">"رد شدن به قبلی"</string>
     <string name="accessibility_action_pip_resize" msgid="4623966104749543182">"تغییر اندازه"</string>
-    <string name="accessibility_action_pip_stash" msgid="4060775037619702641">"مخفی‌سازی"</string>
-    <string name="accessibility_action_pip_unstash" msgid="7467499339610437646">"لغو مخفی‌سازی"</string>
     <string name="dock_forced_resizable" msgid="1749750436092293116">"ممکن است برنامه با «صفحهٔ دونیمه» کار نکند."</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="7408396418008948957">"برنامه از تقسیم صفحه پشتیبانی نمی‌کند."</string>
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"ممکن است برنامه در نمایشگر ثانویه کار نکند."</string>
@@ -46,7 +43,7 @@
     <string name="accessibility_action_divider_top_50" msgid="8649582798829048946">"٪۵۰ بالا"</string>
     <string name="accessibility_action_divider_top_30" msgid="3572788224908570257">"٪۳۰ بالا"</string>
     <string name="accessibility_action_divider_bottom_full" msgid="2831868345092314060">"تمام‌صفحه پایین"</string>
-    <string name="one_handed_tutorial_title" msgid="4583241688067426350">"استفاده از حالت یک‌دستی"</string>
+    <string name="one_handed_tutorial_title" msgid="4583241688067426350">"استفاده از «حالت تک حرکت»"</string>
     <string name="one_handed_tutorial_description" msgid="3486582858591353067">"برای خارج شدن، از پایین صفحه‌نمایش تند به‌طرف بالا بکشید یا در هر جایی از بالای برنامه که می‌خواهید ضربه بزنید"</string>
     <string name="accessibility_action_start_one_handed" msgid="5070337354072861426">"آغاز «حالت تک حرکت»"</string>
     <string name="accessibility_action_stop_one_handed" msgid="1369940261782179442">"خروج از «حالت تک حرکت»"</string>
@@ -73,4 +70,5 @@
     <string name="manage_bubbles_text" msgid="7730624269650594419">"مدیریت"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"حبابک رد شد."</string>
     <string name="restart_button_description" msgid="5887656107651190519">"برای بازراه‌اندازی این برنامه و تغییر به حالت تمام‌صفحه، ضربه بزنید."</string>
+    <string name="got_it" msgid="4428750913636945527">"متوجه‌ام"</string>
 </resources>

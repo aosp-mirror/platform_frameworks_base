@@ -20,7 +20,6 @@
     <string name="pip_phone_close" msgid="5783752637260411309">"關閉"</string>
     <string name="pip_phone_expand" msgid="2579292903468287504">"展開"</string>
     <string name="pip_phone_settings" msgid="5468987116750491918">"設定"</string>
-    <string name="pip_phone_enter_split" msgid="7042877263880641911">"進入分割畫面"</string>
     <string name="pip_menu_title" msgid="5393619322111827096">"選單"</string>
     <string name="pip_notification_title" msgid="1347104727641353453">"「<xliff:g id="NAME">%s</xliff:g>」目前在子母畫面中"</string>
     <string name="pip_notification_message" msgid="8854051911700302620">"如果你不想讓「<xliff:g id="NAME">%s</xliff:g>」使用這項功能，請輕觸開啟設定頁面，然後停用此功能。"</string>
@@ -29,8 +28,6 @@
     <string name="pip_skip_to_next" msgid="8403429188794867653">"跳到下一個"</string>
     <string name="pip_skip_to_prev" msgid="7172158111196394092">"跳到上一個"</string>
     <string name="accessibility_action_pip_resize" msgid="4623966104749543182">"調整大小"</string>
-    <string name="accessibility_action_pip_stash" msgid="4060775037619702641">"暫時隱藏"</string>
-    <string name="accessibility_action_pip_unstash" msgid="7467499339610437646">"取消暫時隱藏"</string>
     <string name="dock_forced_resizable" msgid="1749750436092293116">"應用程式可能無法在分割畫面中運作。"</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="7408396418008948957">"這個應用程式不支援分割畫面。"</string>
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"應用程式可能無法在次要顯示器上運作。"</string>
@@ -47,7 +44,7 @@
     <string name="accessibility_action_divider_top_30" msgid="3572788224908570257">"以 30% 的螢幕空間顯示頂端畫面"</string>
     <string name="accessibility_action_divider_bottom_full" msgid="2831868345092314060">"以全螢幕顯示底部畫面"</string>
     <string name="one_handed_tutorial_title" msgid="4583241688067426350">"使用單手模式"</string>
-    <string name="one_handed_tutorial_description" msgid="3486582858591353067">"如要退出，請從螢幕底部向上滑動，或輕觸應用程式上方的任何位置"</string>
+    <string name="one_handed_tutorial_description" msgid="3486582858591353067">"如要退出，請從螢幕底部向上滑動，或輕觸應用程式上的任何位置"</string>
     <string name="accessibility_action_start_one_handed" msgid="5070337354072861426">"啟動單手模式"</string>
     <string name="accessibility_action_stop_one_handed" msgid="1369940261782179442">"結束單手模式"</string>
     <string name="bubbles_settings_button_description" msgid="1301286017420516912">"「<xliff:g id="APP_NAME">%1$s</xliff:g>」對話框的設定"</string>
@@ -73,4 +70,5 @@
     <string name="manage_bubbles_text" msgid="7730624269650594419">"管理"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"已關閉泡泡。"</string>
     <string name="restart_button_description" msgid="5887656107651190519">"輕觸即可重新啟動這個應用程式並進入全螢幕模式。"</string>
+    <string name="got_it" msgid="4428750913636945527">"我知道了"</string>
 </resources>

@@ -66,6 +66,7 @@ import android.os.Vibrator;
 import android.provider.Settings;
 import android.service.notification.Adjustment;
 import android.service.notification.StatusBarNotification;
+import android.util.ArraySet;
 import android.widget.RemoteViews;
 
 import androidx.test.filters.SmallTest;
@@ -1327,5 +1328,46 @@ public class NotificationRecordTest extends UiServiceTestCase {
         record.setPkgAllowedAsConvo(true);
 
         assertFalse(record.isConversation());
+    }
+
+    @Test
+    public void mergePhoneNumbers_nulls() {
+        // make sure nothing dies if we just don't have any phone numbers
+        StatusBarNotification sbn = getNotification(PKG_N_MR1, true /* noisy */,
+                true /* defaultSound */, false /* buzzy */, false /* defaultBuzz */,
+                false /* lights */, false /* defaultLights */, null /* group */);
+        NotificationRecord record = new NotificationRecord(mMockContext, sbn, defaultChannel);
+
+        // by default, no phone numbers
+        assertNull(record.getPhoneNumbers());
+
+        // nothing happens if we attempt to merge phone numbers but there aren't any
+        record.mergePhoneNumbers(null);
+        assertNull(record.getPhoneNumbers());
+    }
+
+    @Test
+    public void mergePhoneNumbers_addNumbers() {
+        StatusBarNotification sbn = getNotification(PKG_N_MR1, true /* noisy */,
+                true /* defaultSound */, false /* buzzy */, false /* defaultBuzz */,
+                false /* lights */, false /* defaultLights */, null /* group */);
+        NotificationRecord record = new NotificationRecord(mMockContext, sbn, defaultChannel);
+
+        // by default, no phone numbers
+        assertNull(record.getPhoneNumbers());
+
+        // make sure it behaves properly when we merge in some real content
+        record.mergePhoneNumbers(new ArraySet<>(
+                new String[]{"16175551212", "16175552121"}));
+        assertTrue(record.getPhoneNumbers().contains("16175551212"));
+        assertTrue(record.getPhoneNumbers().contains("16175552121"));
+        assertFalse(record.getPhoneNumbers().contains("16175553434"));
+
+        // now merge in a new number, make sure old ones are still there and the new one
+        // is also there
+        record.mergePhoneNumbers(new ArraySet<>(new String[]{"16175553434"}));
+        assertTrue(record.getPhoneNumbers().contains("16175551212"));
+        assertTrue(record.getPhoneNumbers().contains("16175552121"));
+        assertTrue(record.getPhoneNumbers().contains("16175553434"));
     }
 }

@@ -86,7 +86,7 @@
     <string name="bluetooth_profile_headset" msgid="5395952236133499331">"Telefonatat"</string>
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"Transferimi i skedarëve"</string>
     <string name="bluetooth_profile_hid" msgid="2969922922664315866">"Pajisja e hyrjes"</string>
-    <string name="bluetooth_profile_pan" msgid="1006235139308318188">"Qasje në internet"</string>
+    <string name="bluetooth_profile_pan" msgid="1006235139308318188">"Qasja në internet"</string>
     <string name="bluetooth_profile_pbap" msgid="7064307749579335765">"Ndarja e kontakteve"</string>
     <string name="bluetooth_profile_pbap_summary" msgid="2955819694801952056">"Përdore për ndarjen e kontakteve"</string>
     <string name="bluetooth_profile_pan_nap" msgid="7871974753822470050">"Ndarja e lidhjes së internetit"</string>
@@ -95,9 +95,7 @@
     <string name="bluetooth_profile_a2dp_high_quality" msgid="4739440941324792775">"Audio HD: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="2477639096903834374">"Audio HD"</string>
     <string name="bluetooth_profile_hearing_aid" msgid="58154575573984914">"Aparatet e dëgjimit"</string>
-    <string name="bluetooth_profile_le_audio" msgid="5158149987518342036">"LE_AUDIO"</string>
     <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="8191273236809964030">"Lidhur me aparatet e dëgjimit"</string>
-    <string name="bluetooth_le_audio_profile_summary_connected" msgid="3162538609379333442">"Lidhur me LE_AUDIO"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="7422607970115444153">"U lidh me audion e medias"</string>
     <string name="bluetooth_headset_profile_summary_connected" msgid="2420981566026949688">"U lidh me audion e telefonit"</string>
     <string name="bluetooth_opp_profile_summary_connected" msgid="2393521801478157362">"U lidh me serverin e transferimit të skedarëve"</string>
@@ -115,13 +113,12 @@
     <string name="bluetooth_opp_profile_summary_use_for" msgid="461981154387015457">"Përdor për transferimin e skedarëve"</string>
     <string name="bluetooth_hid_profile_summary_use_for" msgid="4289460627406490952">"Përdore për hyrjen"</string>
     <string name="bluetooth_hearing_aid_profile_summary_use_for" msgid="7689393730163320483">"Përdore për aparatet e dëgjimit"</string>
-    <string name="bluetooth_le_audio_profile_summary_use_for" msgid="2778318636027348572">"Përdor për LE_AUDIO"</string>
     <string name="bluetooth_pairing_accept" msgid="2054232610815498004">"Çifto"</string>
     <string name="bluetooth_pairing_accept_all_caps" msgid="2734383073450506220">"ÇIFTO"</string>
     <string name="bluetooth_pairing_decline" msgid="6483118841204885890">"Anulo"</string>
     <string name="bluetooth_pairing_will_share_phonebook" msgid="3064334458659165176">"Çiftimi lejon qasjen te kontaktet dhe historiku yt i telefonatave."</string>
     <string name="bluetooth_pairing_error_message" msgid="6626399020672335565">"Nuk mundi të çiftohej me <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
-    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"Nuk mundi të çiftohej me <xliff:g id="DEVICE_NAME">%1$s</xliff:g> për shkak të një kodi PIN ose çelësi kalimi të pasaktë."</string>
+    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"Nuk mundi të çiftohej me <xliff:g id="DEVICE_NAME">%1$s</xliff:g> për shkak të një kodi PIN ose një kodi të pasaktë."</string>
     <string name="bluetooth_pairing_device_down_error_message" msgid="2554424863101358857">"Nuk mund të komunikohet me <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
     <string name="bluetooth_pairing_rejected_error_message" msgid="5943444352777314442">"Çiftimi u refuzua nga <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
     <string name="bluetooth_talkback_computer" msgid="3736623135703893773">"Kompjuteri"</string>
@@ -233,7 +230,7 @@
     <string name="adb_wireless_qrcode_summary" msgid="8051414549011801917">"Çifto pajisjen përmes Wi‑Fi duke skanuar një kod QR"</string>
     <string name="adb_wireless_verifying_qrcode_text" msgid="6123192424916029207">"Po çifton pajisjen…"</string>
     <string name="adb_qrcode_pairing_device_failed_msg" msgid="6936292092592914132">"Çiftimi i pajisjes dështoi. Ose kodi QR nuk ishte i saktë, ose pajisja nuk është e lidhur me të njëjtin rrjet."</string>
-    <string name="adb_wireless_ip_addr_preference_title" msgid="8335132107715311730">"Adresa IP dhe porta"</string>
+    <string name="adb_wireless_ip_addr_preference_title" msgid="8335132107715311730">"Adresa e IP-së dhe porta"</string>
     <string name="adb_wireless_qrcode_pairing_title" msgid="1906409667944674707">"Skano kodin QR"</string>
     <string name="adb_wireless_qrcode_pairing_description" msgid="6014121407143607851">"Çifto pajisjen përmes Wi‑Fi duke skanuar një kod QR"</string>
     <string name="adb_wireless_no_network_msg" msgid="2365795244718494658">"Lidhu me një rrjet Wi-Fi"</string>
@@ -247,15 +244,15 @@
     <string name="oem_unlock_enable" msgid="5334869171871566731">"Shkyçja e OEM-së"</string>
     <string name="oem_unlock_enable_summary" msgid="5857388174390953829">"Lejo shkyçjen e ngarkimit të sistemit"</string>
     <string name="confirm_enable_oem_unlock_title" msgid="8249318129774367535">"Të lejohet shkyçja e OEM-së?"</string>
-    <string name="confirm_enable_oem_unlock_text" msgid="854131050791011970">"PARALAJMËRIM! Veçoritë e mbrojtjes së pajisjes nuk do të punojnë në këtë pajisje gjatë kohës që ky cilësim është i aktivizuar."</string>
+    <string name="confirm_enable_oem_unlock_text" msgid="854131050791011970">"PARALAJMËRIM! Funksionet e mbrojtjes së pajisjes nuk do të punojnë në këtë pajisje gjatë kohës që ky cilësim është i aktivizuar."</string>
     <string name="mock_location_app" msgid="6269380172542248304">"Zgjidh apl. që simulon vendndodhjen"</string>
     <string name="mock_location_app_not_set" msgid="6972032787262831155">"Nuk është vendosur asnjë aplikacion që simulon vendndodhjen"</string>
     <string name="mock_location_app_set" msgid="4706722469342913843">"Aplikacioni për simulimin e vendndodhjes: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="debug_networking_category" msgid="6829757985772659599">"Rrjetet"</string>
-    <string name="wifi_display_certification" msgid="1805579519992520381">"Certifikimi i ekranit pa tel"</string>
+    <string name="wifi_display_certification" msgid="1805579519992520381">"Certifikimi i ekranit valor"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"Aktivizo hyrjen Wi-Fi Verbose"</string>
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"Përshpejtimi i skanimit të Wi‑Fi"</string>
-    <string name="wifi_enhanced_mac_randomization" msgid="882650208573834301">"Renditje e rastësishme jo e përhershme e MAC për Wi‑Fi"</string>
+    <string name="wifi_enhanced_mac_randomization" msgid="5437378364995776979">"Renditja e rastësishme e adresave MAC të përmirësuara me Wi-Fi"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"Të dhënat celulare gjithmonë aktive"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"Përshpejtimi i harduerit për ndarjen e lidhjes (internet)"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"Shfaq pajisjet me Bluetooth pa emra"</string>
@@ -284,7 +281,7 @@
     <string name="private_dns_mode_provider" msgid="3619040641762557028">"Emri i pritësit të ofruesit të DNS-së private"</string>
     <string name="private_dns_mode_provider_hostname_hint" msgid="6564868953748514595">"Fut emrin e pritësit të ofruesit të DNS-së"</string>
     <string name="private_dns_mode_provider_failure" msgid="8356259467861515108">"Nuk mund të lidhej"</string>
-    <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Shfaq opsionet për certifikimin e ekranit pa tel"</string>
+    <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Shfaq opsionet për certifikimin e ekranit valor"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Rrit nivelin regjistrues të Wi‑Fi duke shfaqur SSID RSSI-në te Zgjedhësi i Wi‑Fi"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Zvogëlon shkarkimin e baterisë dhe përmirëson cilësinë e funksionimit të rrjetit"</string>
     <string name="wifi_enhanced_mac_randomization_summary" msgid="1210663439867489931">"Kur ky modalitet është i aktivizuar, adresa MAC e kësaj pajisjeje mund të ndryshojë çdo herë që lidhet me një rrjet që ka të aktivizuar renditjen e rastësishme të adresave MAC."</string>
@@ -350,13 +347,12 @@
     <string name="disable_overlays_summary" msgid="1954852414363338166">"Përdor gjithmonë GPU-në për përbërjen e ekranit"</string>
     <string name="simulate_color_space" msgid="1206503300335835151">"Simulo hapësirën e ngjyrës"</string>
     <string name="enable_opengl_traces_title" msgid="4638773318659125196">"Aktivizo gjurmët e OpenGL-së"</string>
-    <string name="usb_audio_disable_routing" msgid="3367656923544254975">"Çaktivizo kalimin e audios përmes USB-së"</string>
-    <string name="usb_audio_disable_routing_summary" msgid="8768242894849534699">"Çaktivizo kalimin automatik për te kufjet ose altoparlantët"</string>
+    <string name="usb_audio_disable_routing" msgid="3367656923544254975">"Çaktivizo rrugëzuezin e audios përmes USB-së"</string>
+    <string name="usb_audio_disable_routing_summary" msgid="8768242894849534699">"Çaktivizo router-in automatik për te kufjet ose altoparlantët"</string>
     <string name="debug_layout" msgid="1659216803043339741">"Shfaq konturet e kuadrit"</string>
     <string name="debug_layout_summary" msgid="8825829038287321978">"Shfaq konturet e klipit, hapësirat etj."</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"Detyro drejtimin e shkrimit nga e djathta në të majtë"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"Ndrysho me detyrim drejtimin e planit të ekranit nga e djathta në të majtë për të gjitha vendet"</string>
-    <string name="window_blurs" msgid="6831008984828425106">"Lejo turbullimet në nivel dritareje"</string>
     <string name="force_msaa" msgid="4081288296137775550">"Detyro 4x MSAA"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"Aktivizo 4x MSAA në aplikacionet OpenGL ES 2.0"</string>
     <string name="show_non_rect_clip" msgid="7499758654867881817">"Korrigjo veprimet mbi klipet jodrejtkëndore"</string>
@@ -409,12 +405,17 @@
     <string name="transcode_enable_all" msgid="2411165920039166710">"Aktivizo transkodimin"</string>
     <string name="transcode_default" msgid="3784803084573509491">"Supozo se aplikacionet i mbështetin formatet moderne"</string>
     <string name="transcode_notification" msgid="5560515979793436168">"Shfaq njoftimet e transkodimit"</string>
-    <string name="transcode_disable_cache" msgid="3160069309377467045">"Çaktivizo memorien specifike të transkodimit"</string>
     <string name="runningservices_settings_title" msgid="6460099290493086515">"Shërbimet në ekzekutim"</string>
     <string name="runningservices_settings_summary" msgid="1046080643262665743">"Shiko dhe kontrollo shërbimet që po ekzekutohen aktualisht"</string>
     <string name="select_webview_provider_title" msgid="3917815648099445503">"Zbatimi i WebView"</string>
     <string name="select_webview_provider_dialog_title" msgid="2444261109877277714">"Cakto zbatimin e WebView"</string>
     <string name="select_webview_provider_toast_text" msgid="8512254949169359848">"Kjo zgjedhje nuk është më e vlefshme. Provo përsëri."</string>
+    <string name="convert_to_file_encryption" msgid="2828976934129751818">"Konverto në enkriptimin e skedarit"</string>
+    <string name="convert_to_file_encryption_enabled" msgid="840757431284311754">"Konverto..."</string>
+    <string name="convert_to_file_encryption_done" msgid="8965831011811180627">"Enkriptimi i skedarit është kryer tashmë"</string>
+    <string name="title_convert_fbe" msgid="5780013350366495149">"Po konvertohet në enkriptimin e bazuar te skedari"</string>
+    <string name="convert_to_fbe_warning" msgid="34294381569282109">"Konverto ndarjen e të dhënave në enkriptimin e bazuar te skedari.\n !!Paralajmërim!! Kjo gjë do të spastrojë të gjitha të dhënat e tua.\n Ky funksion është alfa dhe mund të mos punojë si duhet.\n Shtyp \"Pastro dhe konverto...\" për të vazhduar."</string>
+    <string name="button_convert_fbe" msgid="1159861795137727671">"Pastro dhe konverto..."</string>
     <string name="picture_color_mode" msgid="1013807330552931903">"Modalitti i ngjyrave të figurës"</string>
     <string name="picture_color_mode_desc" msgid="151780973768136200">"Përdor sRGB"</string>
     <string name="daltonizer_mode_disabled" msgid="403424372812399228">"Çaktivizuar"</string>
@@ -449,17 +450,19 @@
     <string name="power_remaining_duration_shutdown_imminent" product="tablet" msgid="7703677921000858479">"Tableti mund të fiket së shpejti (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_remaining_duration_shutdown_imminent" product="device" msgid="4374784375644214578">"Pajisja mund të fiket së shpejti (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
-    <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"<xliff:g id="TIME">%1$s</xliff:g> derisa të mbushet"</string>
-    <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> derisa të mbushet"</string>
-    <string name="power_charging_limited" msgid="7956120998372505295">"<xliff:g id="LEVEL">%1$s</xliff:g> - Karikimi përkohësisht i kufizuar"</string>
+    <!-- no translation found for power_remaining_charging_duration_only (8085099012811384899) -->
+    <skip />
+    <!-- no translation found for power_charging_duration (6127154952524919719) -->
+    <skip />
+    <string name="power_charging_limited" msgid="1956874810658999681">"<xliff:g id="LEVEL">%1$s</xliff:g> - Po optimizohet për integritetin e baterisë"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"I panjohur"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"Po karikohet"</string>
-    <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"Karikim i shpejtë"</string>
+    <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"Po ngarkon me shpejtësi"</string>
     <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"Po karikohet ngadalë"</string>
-    <string name="battery_info_status_charging_wireless" msgid="8924722966861282197">"Po karikohet pa tel"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"Nuk po karikohet"</string>
-    <string name="battery_info_status_not_charging" msgid="3371084153747234837">"Lidhur, jo në karikim"</string>
-    <string name="battery_info_status_full" msgid="1339002294876531312">"Karikuar"</string>
+    <string name="battery_info_status_not_charging" msgid="8330015078868707899">"Në prizë, por nuk mund të karikohet për momentin"</string>
+    <!-- no translation found for battery_info_status_full (1339002294876531312) -->
+    <skip />
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"Kontrolluar nga administratori"</string>
     <string name="disabled" msgid="8017887509554714950">"Çaktivizuar"</string>
     <string name="external_source_trusted" msgid="1146522036773132905">"Lejohet"</string>
@@ -502,10 +505,10 @@
     <string name="cancel" msgid="5665114069455378395">"Anulo"</string>
     <string name="okay" msgid="949938843324579502">"Në rregull"</string>
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"Alarmet dhe alarmet rikujtuese"</string>
-    <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"Lejo caktimin e alarmeve dhe alarmeve rikujtuese"</string>
-    <string name="alarms_and_reminders_title" msgid="8819933264635406032">"Alarmet dhe alarmet rikujtuese"</string>
-    <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"Lejo që ky aplikacion të caktojë alarmet dhe të planifikojë veprime që kanë një afat të caktuar. Kjo mundëson që aplikacioni të ekzekutohet në sfond, gjë që mund të përdorë më shumë bateri.\n\nNëse kjo leje është caktuar si joaktive, alarmet ekzistuese dhe ngjarjet në bazë kohore të planifikuara nga ky aplikacion nuk do të funksionojnë."</string>
-    <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"planifiko, alarm, alarm rikujtues, ora"</string>
+    <string name="alarms_and_reminders_switch_title" msgid="186992351401152744">"Lejo që të caktohen alarmet dhe alarmet rikujtuese"</string>
+    <string name="alarms_and_reminders_title" msgid="2988400785896875237">"Alarmet dhe alarmet rikujtuese"</string>
+    <string name="alarms_and_reminders_footer_title" msgid="5882788882647778753">"Lejo që ky aplikacion të planifikojë alarmet dhe ngjarje të tjera të bazuara tek orari. Kjo do ta lejojë aplikacionin të zgjohet dhe të ekzekutohet edhe kur ti nuk e përdor pajisjen. Ki parasysh se anulimi i kësaj lejeje mund të shkaktojë keqfunksionim të aplikacionit. Në mënyrë specifike, çdo alarm që ka planifikuar aplikacioni nuk do të funksionojë më."</string>
+    <string name="keywords_alarms_and_reminders" msgid="8882739572152019456">"planifiko, alarm, alarm rikujtues, ngjarje"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"Aktivizo"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"Aktivizo \"Mos shqetëso\""</string>
     <string name="zen_mode_settings_summary_off" msgid="3832876036123504076">"Asnjëherë"</string>
@@ -517,7 +520,7 @@
     <string name="alarm_template_far" msgid="6382760514842998629">"ditën <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="zen_mode_duration_settings_title" msgid="1553451650289651489">"Kohëzgjatja"</string>
     <string name="zen_mode_duration_always_prompt_title" msgid="3212996860498119555">"Pyet çdo herë"</string>
-    <string name="zen_mode_forever" msgid="3339224497605461291">"Derisa ta çaktivizosh"</string>
+    <string name="zen_mode_forever" msgid="3339224497605461291">"Deri sa ta çaktivizosh"</string>
     <string name="time_unit_just_now" msgid="3006134267292728099">"Pikërisht tani"</string>
     <string name="media_transfer_this_device_name" msgid="2716555073132169240">"Altoparlanti i telefonit"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"Ky telefon"</string>
@@ -559,15 +562,12 @@
     <string name="user_set_lock_button" msgid="1427128184982594856">"Cakto kyçjen"</string>
     <string name="user_switch_to_user" msgid="6975428297154968543">"Kalo te <xliff:g id="USER_NAME">%s</xliff:g>"</string>
     <string name="creating_new_user_dialog_message" msgid="7232880257538970375">"Po krijohet një përdorues i ri…"</string>
-    <string name="add_user_failed" msgid="4809887794313944872">"Krijimi i një përdoruesi të ri dështoi"</string>
+    <!-- no translation found for add_user_failed (4809887794313944872) -->
+    <skip />
     <string name="user_nickname" msgid="262624187455825083">"Pseudonimi"</string>
     <string name="guest_new_guest" msgid="3482026122932643557">"Shto të ftuar"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"Hiq të ftuarin"</string>
-    <string name="guest_reset_guest" msgid="6110013010356013758">"Rivendos vizitorin"</string>
     <string name="guest_nickname" msgid="6332276931583337261">"I ftuar"</string>
-    <string name="guest_reset_guest_dialog_title" msgid="8047270010895437534">"Të rivendoset vizitori?"</string>
-    <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"Rivendos"</string>
-    <string name="guest_resetting" msgid="7822120170191509566">"Vizitori po rivendoset…"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"Bëj një fotografi"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"Zgjidh një imazh"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"Zgjidh një fotografi"</string>

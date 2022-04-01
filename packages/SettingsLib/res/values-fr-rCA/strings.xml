@@ -95,9 +95,7 @@
     <string name="bluetooth_profile_a2dp_high_quality" msgid="4739440941324792775">"Audio HD : <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="2477639096903834374">"Audio HD"</string>
     <string name="bluetooth_profile_hearing_aid" msgid="58154575573984914">"Prothèses auditives"</string>
-    <string name="bluetooth_profile_le_audio" msgid="5158149987518342036">"LE_AUDIO"</string>
     <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="8191273236809964030">"Connecté aux prothèses auditives"</string>
-    <string name="bluetooth_le_audio_profile_summary_connected" msgid="3162538609379333442">"Connecté à LE_AUDIO"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="7422607970115444153">"Connecté aux paramètres audio du média"</string>
     <string name="bluetooth_headset_profile_summary_connected" msgid="2420981566026949688">"Connecté à l\'audio du téléphone"</string>
     <string name="bluetooth_opp_profile_summary_connected" msgid="2393521801478157362">"Connexion au serveur de transfert de fichiers"</string>
@@ -115,13 +113,12 @@
     <string name="bluetooth_opp_profile_summary_use_for" msgid="461981154387015457">"Utiliser pour le transfert de fichiers"</string>
     <string name="bluetooth_hid_profile_summary_use_for" msgid="4289460627406490952">"Utiliser comme entrée"</string>
     <string name="bluetooth_hearing_aid_profile_summary_use_for" msgid="7689393730163320483">"Utiliser avec les prothèses auditives"</string>
-    <string name="bluetooth_le_audio_profile_summary_use_for" msgid="2778318636027348572">"Utiliser pour LE_AUDIO"</string>
     <string name="bluetooth_pairing_accept" msgid="2054232610815498004">"Associer"</string>
     <string name="bluetooth_pairing_accept_all_caps" msgid="2734383073450506220">"ASSOCIER"</string>
     <string name="bluetooth_pairing_decline" msgid="6483118841204885890">"Annuler"</string>
     <string name="bluetooth_pairing_will_share_phonebook" msgid="3064334458659165176">"L\'association vous permet d\'accéder à vos contacts et à l\'historique des appels lorsque vous êtes connecté."</string>
     <string name="bluetooth_pairing_error_message" msgid="6626399020672335565">"Impossible d\'associer à <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
-    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"Impossible d\'établir l\'association avec <xliff:g id="DEVICE_NAME">%1$s</xliff:g>. NIP ou d\'une clé d\'accès incorrects."</string>
+    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"Impossible d\'établir l\'association avec <xliff:g id="DEVICE_NAME">%1$s</xliff:g> en raison d\'un NIP ou d\'une clé d\'accès incorrects."</string>
     <string name="bluetooth_pairing_device_down_error_message" msgid="2554424863101358857">"Impossible d\'établir la communication avec <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
     <string name="bluetooth_pairing_rejected_error_message" msgid="5943444352777314442">"Association refusée par <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_talkback_computer" msgid="3736623135703893773">"Ordinateur"</string>
@@ -158,7 +155,7 @@
     <string name="running_process_item_user_label" msgid="3988506293099805796">"Utilisateur : <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
     <string name="launch_defaults_some" msgid="3631650616557252926">"Certaines préférences par défaut définies"</string>
     <string name="launch_defaults_none" msgid="8049374306261262709">"Aucune préférence par défaut définie"</string>
-    <string name="tts_settings" msgid="8130616705989351312">"Paramètres de synthèse vocale"</string>
+    <string name="tts_settings" msgid="8130616705989351312">"Synthèse vocale"</string>
     <string name="tts_settings_title" msgid="7602210956640483039">"Synthèse vocale"</string>
     <string name="tts_default_rate_title" msgid="3964187817364304022">"Cadence"</string>
     <string name="tts_default_rate_summary" msgid="3781937042151716987">"Vitesse à laquelle le texte est énoncé"</string>
@@ -200,10 +197,10 @@
     <string name="choose_profile" msgid="343803890897657450">"Sélectionnez un profil"</string>
     <string name="category_personal" msgid="6236798763159385225">"Personnel"</string>
     <string name="category_work" msgid="4014193632325996115">"Professionnel"</string>
-    <string name="development_settings_title" msgid="140296922921597393">"Options pour les développeurs"</string>
-    <string name="development_settings_enable" msgid="4285094651288242183">"Activer les options pour les développeurs"</string>
+    <string name="development_settings_title" msgid="140296922921597393">"Options pour les concepteurs"</string>
+    <string name="development_settings_enable" msgid="4285094651288242183">"Activer les options pour les concepteurs"</string>
     <string name="development_settings_summary" msgid="8718917813868735095">"Définir les options pour le développement de l\'application"</string>
-    <string name="development_settings_not_available" msgid="355070198089140951">"Les options proposées aux développeurs ne sont pas disponibles pour cet utilisateur."</string>
+    <string name="development_settings_not_available" msgid="355070198089140951">"Les options proposées aux concepteurs ne sont pas disponibles pour cet utilisateur."</string>
     <string name="vpn_settings_not_available" msgid="2894137119965668920">"Les paramètres de RPV ne sont pas disponibles pour cet utilisateur"</string>
     <string name="tethering_settings_not_available" msgid="266821736434699780">"Les paramètres de partage de connexion ne sont pas disponibles pour cet utilisateur"</string>
     <string name="apn_settings_not_available" msgid="1147111671403342300">"Les paramètres de point d\'accès ne sont pas disponibles pour cet utilisateur"</string>
@@ -237,9 +234,9 @@
     <string name="adb_wireless_qrcode_pairing_title" msgid="1906409667944674707">"Numériser le code QR"</string>
     <string name="adb_wireless_qrcode_pairing_description" msgid="6014121407143607851">"Associer l\'appareil par Wi-Fi en numérisant un code QR"</string>
     <string name="adb_wireless_no_network_msg" msgid="2365795244718494658">"Veuillez vous connecter à un réseau Wi-Fi"</string>
-    <string name="keywords_adb_wireless" msgid="6507505581882171240">"adb, débogage, développeur"</string>
+    <string name="keywords_adb_wireless" msgid="6507505581882171240">"adb, débogage, concepteur"</string>
     <string name="bugreport_in_power" msgid="8664089072534638709">"Raccourci de rapport de bogue"</string>
-    <string name="bugreport_in_power_summary" msgid="1885529649381831775">"Afficher un bouton permettant d\'établir un rapport de bogue dans le menu de l\'interrupteur"</string>
+    <string name="bugreport_in_power_summary" msgid="1885529649381831775">"Afficher un bouton permettant d\'établir un rapport de bogue dans le menu de démarrage"</string>
     <string name="keep_screen_on" msgid="1187161672348797558">"Rester activé"</string>
     <string name="keep_screen_on_summary" msgid="1510731514101925829">"L\'écran ne se met jamais en veille lors du chargement"</string>
     <string name="bt_hci_snoop_log" msgid="7291287955649081448">"Activer le journal HCI Snoop Bluetooth"</string>
@@ -255,7 +252,7 @@
     <string name="wifi_display_certification" msgid="1805579519992520381">"Certification de l\'affichage sans fil"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"Autoriser enreg. données Wi-Fi détaillées"</string>
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"Limiter la recherche de réseaux Wi-Fi"</string>
-    <string name="wifi_enhanced_mac_randomization" msgid="882650208573834301">"Réorganisation aléatoire MAC non persistante du Wi-Fi"</string>
+    <string name="wifi_enhanced_mac_randomization" msgid="5437378364995776979">"Sélect. aléatoire adr. MAC optim. par Wi‑Fi"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"Données cellulaires toujours actives"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"Accélération matérielle pour le partage de connexion"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"Afficher les appareils Bluetooth sans nom"</string>
@@ -287,7 +284,7 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Afficher les options pour la certification d\'affichage sans fil"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Détailler davantage les données Wi-Fi, afficher par SSID RSSI dans sélect. Wi-Fi"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Réduit l\'utilisation de la pile et améliore les performances réseau"</string>
-    <string name="wifi_enhanced_mac_randomization_summary" msgid="1210663439867489931">"Lorsque ce mode est activé, l\'adresse MAC de cet appareil pourrait changer chaque fois qu\'il se connecte à un réseau sur lequel la sélection aléatoire des adresses MAC est activée."</string>
+    <string name="wifi_enhanced_mac_randomization_summary" msgid="1210663439867489931">"Lorsque ce mode est activé, l\'adresse MAC de cet appareil pourrait changer chaque fois qu\'il se connecter à un réseau sur lequel la sélection aléatoire des adresses MAC est activée."</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"Facturé à l\'usage"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Non mesuré"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"Tailles des mémoires tampons d\'enregistreur"</string>
@@ -356,7 +353,6 @@
     <string name="debug_layout_summary" msgid="8825829038287321978">"Afficher les limites, les marges de clip, etc."</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"Forcer droite à gauche"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"Forcer l\'orientation droite à gauche (toutes langues)"</string>
-    <string name="window_blurs" msgid="6831008984828425106">"Autoriser le flou au niveau des fenêtres"</string>
     <string name="force_msaa" msgid="4081288296137775550">"Forcer MSAA 4x"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"Activer MSAA 4x dans les applications OpenGL ES 2.0"</string>
     <string name="show_non_rect_clip" msgid="7499758654867881817">"Déboguer opérations de découpage non rectangulaire"</string>
@@ -366,7 +362,7 @@
     <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"Activer le journal détaillé des fournisseurs"</string>
     <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"Incluez les journaux supplémentaires du fournisseur propres à l\'appareil dans les rapports de bogue. Ils peuvent contenir des données personnelles, épuiser la pile plus rapidement et/ou utiliser plus d\'espace de stockage."</string>
     <string name="window_animation_scale_title" msgid="5236381298376812508">"Échelle animation fenêtres"</string>
-    <string name="transition_animation_scale_title" msgid="1278477690695439337">"Éch. d\'animation des trans."</string>
+    <string name="transition_animation_scale_title" msgid="1278477690695439337">"Échelle animination transitions"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"Échelle durée animation"</string>
     <string name="overlay_display_devices_title" msgid="5411894622334469607">"Simuler affich. secondaires"</string>
     <string name="debug_applications_category" msgid="5394089406638954196">"Applications"</string>
@@ -380,11 +376,11 @@
     <string name="force_allow_on_external" msgid="9187902444231637880">"Forcer l\'autor. d\'applis sur stockage externe"</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"Rend possible l\'enregistrement de toute application sur un espace de stockage externe, indépendamment des valeurs du fichier manifeste"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"Forcer les activités à être redimensionnables"</string>
-    <string name="force_resizable_activities_summary" msgid="2490382056981583062">"Permet de redimensionner toutes les activités pour le mode multi-fenêtre, indépendamment des valeurs du fichier manifeste."</string>
+    <string name="force_resizable_activities_summary" msgid="2490382056981583062">"Permet de redimensionner toutes les activités pour le mode multifenêtre, indépendamment des valeurs du fichier manifeste."</string>
     <string name="enable_freeform_support" msgid="7599125687603914253">"Activer les fenêtres de forme libre"</string>
     <string name="enable_freeform_support_summary" msgid="1822862728719276331">"Activer la compatibilité avec les fenêtres de forme libre expérimentales."</string>
     <string name="local_backup_password_title" msgid="4631017948933578709">"Mot de passe sauvegarde PC"</string>
-    <string name="local_backup_password_summary_none" msgid="7646898032616361714">"Les sauvegardes complètes sur PC ne sont pas protégées actuellement"</string>
+    <string name="local_backup_password_summary_none" msgid="7646898032616361714">"Les sauvegardes complètes sur PC ne sont pas protégées actuellement."</string>
     <string name="local_backup_password_summary_change" msgid="1707357670383995567">"Touchez pour modifier ou supprimer le mot de passe utilisé pour les sauvegardes complètes sur ordinateur."</string>
     <string name="local_backup_password_toast_success" msgid="4891666204428091604">"Le nouveau mot de passe de secours a bien été défini."</string>
     <string name="local_backup_password_toast_confirmation_mismatch" msgid="2994718182129097733">"Le nouveau mot de passe et sa confirmation ne correspondent pas."</string>
@@ -409,12 +405,17 @@
     <string name="transcode_enable_all" msgid="2411165920039166710">"Activer le transcodage"</string>
     <string name="transcode_default" msgid="3784803084573509491">"Présumer que les applications prennent en charge les formats modernes"</string>
     <string name="transcode_notification" msgid="5560515979793436168">"Afficher les notifications de transcodage"</string>
-    <string name="transcode_disable_cache" msgid="3160069309377467045">"Désactiver le cache de transcodage"</string>
     <string name="runningservices_settings_title" msgid="6460099290493086515">"Services en cours d\'exécution"</string>
     <string name="runningservices_settings_summary" msgid="1046080643262665743">"Afficher et contrôler les services en cours d\'exécution"</string>
     <string name="select_webview_provider_title" msgid="3917815648099445503">"Mise en œuvre WebView"</string>
     <string name="select_webview_provider_dialog_title" msgid="2444261109877277714">"Définir la mise en œuvre WebView"</string>
     <string name="select_webview_provider_toast_text" msgid="8512254949169359848">"Ce choix n\'est plus valide. Réessayez."</string>
+    <string name="convert_to_file_encryption" msgid="2828976934129751818">"Convertir en chiffrement"</string>
+    <string name="convert_to_file_encryption_enabled" msgid="840757431284311754">"Convertir..."</string>
+    <string name="convert_to_file_encryption_done" msgid="8965831011811180627">"Déjà chiffré par un fichier"</string>
+    <string name="title_convert_fbe" msgid="5780013350366495149">"Conversion en chiffrement basé sur un fichier en cours"</string>
+    <string name="convert_to_fbe_warning" msgid="34294381569282109">"Convertir la partition de données en chiffrement basé sur un fichier.\nAvertissement! Cette opération supprimera toutes vos données.\nCette fonctionnalité est en version alpha et peut ne pas fonctionner correctement.\nTouchez « Effacer et convertir… » pour continuer."</string>
+    <string name="button_convert_fbe" msgid="1159861795137727671">"Effacer et convertir..."</string>
     <string name="picture_color_mode" msgid="1013807330552931903">"Mode couleur des images"</string>
     <string name="picture_color_mode_desc" msgid="151780973768136200">"Utiliser sRGB"</string>
     <string name="daltonizer_mode_disabled" msgid="403424372812399228">"Désactivé"</string>
@@ -449,17 +450,19 @@
     <string name="power_remaining_duration_shutdown_imminent" product="tablet" msgid="7703677921000858479">"Il se peut que la tablette s\'éteigne bientôt (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_remaining_duration_shutdown_imminent" product="device" msgid="4374784375644214578">"Il se peut que l\'appareil s\'éteigne bientôt (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
-    <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"<xliff:g id="TIME">%1$s</xliff:g> jusqu\'à la recharge complète"</string>
-    <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> (<xliff:g id="TIME">%2$s</xliff:g> jusqu\'à la recharge complète)"</string>
-    <string name="power_charging_limited" msgid="7956120998372505295">"<xliff:g id="LEVEL">%1$s</xliff:g> : recharge temporairement limitée"</string>
+    <!-- no translation found for power_remaining_charging_duration_only (8085099012811384899) -->
+    <skip />
+    <!-- no translation found for power_charging_duration (6127154952524919719) -->
+    <skip />
+    <string name="power_charging_limited" msgid="1956874810658999681">"<xliff:g id="LEVEL">%1$s</xliff:g> – Optimisation pour préserver la pile"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"Inconnu"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"Charge en cours…"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"Recharge rapide"</string>
     <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"Recharge lente"</string>
-    <string name="battery_info_status_charging_wireless" msgid="8924722966861282197">"En recharge sans fil"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"N\'est pas en charge"</string>
-    <string name="battery_info_status_not_charging" msgid="3371084153747234837">"Connecté, pas en charge"</string>
-    <string name="battery_info_status_full" msgid="1339002294876531312">"Chargée"</string>
+    <string name="battery_info_status_not_charging" msgid="8330015078868707899">"L\'appareil est branché, mais il ne peut pas être chargé pour le moment"</string>
+    <!-- no translation found for battery_info_status_full (1339002294876531312) -->
+    <skip />
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"Contrôlé par l\'administrateur"</string>
     <string name="disabled" msgid="8017887509554714950">"Désactivée"</string>
     <string name="external_source_trusted" msgid="1146522036773132905">"Autorisée"</string>
@@ -502,10 +505,10 @@
     <string name="cancel" msgid="5665114069455378395">"Annuler"</string>
     <string name="okay" msgid="949938843324579502">"OK"</string>
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"Alarmes et rappels"</string>
-    <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"Autoriser la création d\'alarmes et de rappels"</string>
-    <string name="alarms_and_reminders_title" msgid="8819933264635406032">"Alarmes et rappels"</string>
-    <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"Autorisez cette application à créer des alarmes et à programmer des actions urgentes. Cela permet à l’application de s\'exécuter en arrière-plan, ce qui peut nécessiter plus de pile.\n\nSi cette autorisation est désactivée, les alarmes existantes et les événements en temps réel programmés par cette application ne fonctionneront pas."</string>
-    <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"horaire, alarme, rappel, horloge"</string>
+    <string name="alarms_and_reminders_switch_title" msgid="186992351401152744">"Autoriser la création d\'alarmes ou de rappels"</string>
+    <string name="alarms_and_reminders_title" msgid="2988400785896875237">"Alarmes et rappels"</string>
+    <string name="alarms_and_reminders_footer_title" msgid="5882788882647778753">"Autorisez cette application à programmer des alarmes ou d\'autres événements temporels. Cette option permettra à l\'application de s\'activer et de fonctionner même si vous n\'utilisez pas l\'appareil. Notez que si vous révoquez cette autorisation, l\'application pourrait ne pas fonctionner correctement. En particulier, les alarmes que l\'application a programmées ne fonctionneront plus."</string>
+    <string name="keywords_alarms_and_reminders" msgid="8882739572152019456">"horaire, alarme, rappel, événement"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"Activer"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"Activer le mode Ne pas déranger"</string>
     <string name="zen_mode_settings_summary_off" msgid="3832876036123504076">"Jamais"</string>
@@ -558,16 +561,13 @@
     <string name="user_need_lock_message" msgid="4311424336209509301">"Avant de créer un profil limité, vous devez définir un écran de verrouillage pour protéger vos applications et vos données personnelles."</string>
     <string name="user_set_lock_button" msgid="1427128184982594856">"Définir verrouillage écran"</string>
     <string name="user_switch_to_user" msgid="6975428297154968543">"Passer à <xliff:g id="USER_NAME">%s</xliff:g>"</string>
-    <string name="creating_new_user_dialog_message" msgid="7232880257538970375">"Création d\'un utilisateur en cours…"</string>
-    <string name="add_user_failed" msgid="4809887794313944872">"Impossible de créer un utilisateur"</string>
+    <string name="creating_new_user_dialog_message" msgid="7232880257538970375">"Créer un utilisateur…"</string>
+    <!-- no translation found for add_user_failed (4809887794313944872) -->
+    <skip />
     <string name="user_nickname" msgid="262624187455825083">"Pseudo"</string>
     <string name="guest_new_guest" msgid="3482026122932643557">"Ajouter un invité"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"Supprimer l\'invité"</string>
-    <string name="guest_reset_guest" msgid="6110013010356013758">"Réinitialiser la session Invité"</string>
     <string name="guest_nickname" msgid="6332276931583337261">"Invité"</string>
-    <string name="guest_reset_guest_dialog_title" msgid="8047270010895437534">"Réinitialiser la session Invité?"</string>
-    <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"Réinitialiser"</string>
-    <string name="guest_resetting" msgid="7822120170191509566">"Réinitialisation de la session Invité en cours…"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"Prendre une photo"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"Sélectionner une image"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"Sélectionnez une photo"</string>

@@ -24,6 +24,7 @@ import android.content.Intent;
 import android.content.PermissionChecker;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.content.res.Resources;
 import android.hardware.usb.IUsbManager;
 import android.hardware.usb.UsbAccessory;
 import android.hardware.usb.UsbDevice;
@@ -35,7 +36,6 @@ import android.os.UserHandle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.Window;
 import android.view.WindowManager;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
@@ -57,6 +57,7 @@ public class UsbConfirmActivity extends AlertActivity
     private ResolveInfo mResolveInfo;
     private boolean mPermissionGranted;
     private UsbDisconnectedReceiver mDisconnectedReceiver;
+    private UsbAudioWarningDialogMessage mUsbConfirmMessageHandler;
 
     @Override
     public void onCreate(Bundle icicle) {
@@ -70,7 +71,9 @@ public class UsbConfirmActivity extends AlertActivity
         mAccessory = (UsbAccessory)intent.getParcelableExtra(UsbManager.EXTRA_ACCESSORY);
         mResolveInfo = (ResolveInfo) intent.getParcelableExtra("rinfo");
         String packageName = intent.getStringExtra(UsbManager.EXTRA_PACKAGE);
-
+        mUsbConfirmMessageHandler = new UsbAudioWarningDialogMessage(
+                getApplicationContext(), getIntent(),
+                UsbAudioWarningDialogMessage.TYPE_CONFIRM);
         PackageManager packageManager = getPackageManager();
         String appName = mResolveInfo.loadLabel(packageManager).toString();
 
@@ -78,8 +81,8 @@ public class UsbConfirmActivity extends AlertActivity
         ap.mTitle = appName;
         boolean useRecordWarning = false;
         if (mDevice == null) {
-            ap.mMessage = getString(R.string.usb_accessory_confirm_prompt, appName,
-                    mAccessory.getDescription());
+            final int messageId = mUsbConfirmMessageHandler.getUsbAccessoryPromptId();
+            ap.mMessage = getString(messageId, appName, mAccessory.getDescription());
             mDisconnectedReceiver = new UsbDisconnectedReceiver(this, mAccessory);
         } else {
             int uid = intent.getIntExtra(Intent.EXTRA_UID, -1);
@@ -91,11 +94,11 @@ public class UsbConfirmActivity extends AlertActivity
             boolean isAudioCaptureDevice = mDevice.getHasAudioCapture();
             useRecordWarning = isAudioCaptureDevice && !hasRecordPermission;
 
-            int strID = useRecordWarning
-                    ? R.string.usb_device_confirm_prompt_warn
-                    : R.string.usb_device_confirm_prompt;
-
-            ap.mMessage = getString(strID, appName, mDevice.getProductName());
+            final int messageId = mUsbConfirmMessageHandler.getMessageId();
+            final int titleId = mUsbConfirmMessageHandler.getPromptTitleId();
+            ap.mTitle = getString(titleId, appName, mDevice.getProductName());
+            ap.mMessage = (messageId != Resources.ID_NULL) ? getString(messageId, appName,
+                    mDevice.getProductName()) : null;
             mDisconnectedReceiver = new UsbDisconnectedReceiver(this, mDevice);
         }
         ap.mPositiveButtonText = getString(android.R.string.ok);

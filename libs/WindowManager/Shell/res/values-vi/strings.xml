@@ -20,7 +20,6 @@
     <string name="pip_phone_close" msgid="5783752637260411309">"Đóng"</string>
     <string name="pip_phone_expand" msgid="2579292903468287504">"Mở rộng"</string>
     <string name="pip_phone_settings" msgid="5468987116750491918">"Cài đặt"</string>
-    <string name="pip_phone_enter_split" msgid="7042877263880641911">"Truy cập chế độ chia đôi màn hình"</string>
     <string name="pip_menu_title" msgid="5393619322111827096">"Menu"</string>
     <string name="pip_notification_title" msgid="1347104727641353453">"<xliff:g id="NAME">%s</xliff:g> đang ở chế độ ảnh trong ảnh"</string>
     <string name="pip_notification_message" msgid="8854051911700302620">"Nếu bạn không muốn <xliff:g id="NAME">%s</xliff:g> sử dụng tính năng này, hãy nhấn để mở cài đặt và tắt tính năng này."</string>
@@ -29,8 +28,6 @@
     <string name="pip_skip_to_next" msgid="8403429188794867653">"Chuyển tới mục tiếp theo"</string>
     <string name="pip_skip_to_prev" msgid="7172158111196394092">"Chuyển về mục trước"</string>
     <string name="accessibility_action_pip_resize" msgid="4623966104749543182">"Đổi kích thước"</string>
-    <string name="accessibility_action_pip_stash" msgid="4060775037619702641">"Ẩn"</string>
-    <string name="accessibility_action_pip_unstash" msgid="7467499339610437646">"Hiện"</string>
     <string name="dock_forced_resizable" msgid="1749750436092293116">"Ứng dụng có thể không hoạt động với tính năng chia đôi màn hình."</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="7408396418008948957">"Ứng dụng không hỗ trợ chia đôi màn hình."</string>
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"Ứng dụng có thể không hoạt động trên màn hình phụ."</string>
@@ -73,4 +70,5 @@
     <string name="manage_bubbles_text" msgid="7730624269650594419">"Quản lý"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"Đã đóng bong bóng."</string>
     <string name="restart_button_description" msgid="5887656107651190519">"Nhấn để khởi động lại ứng dụng này và xem ở chế độ toàn màn hình."</string>
+    <string name="got_it" msgid="4428750913636945527">"Tôi hiểu"</string>
 </resources>

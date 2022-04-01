@@ -5893,6 +5893,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
      *   (1.1) The caller is the Device Owner
      *   (1.2) The caller is another app in the same user as the device owner, AND
      *         The caller is the delegated certificate installer.
+     *   (1.3) The caller is a Profile Owner and the calling user is affiliated.
      * (2) The user has a profile owner, AND:
      *   (2.1) The profile owner has been granted access to Device IDs and one of the following
      *         holds:
@@ -5918,12 +5919,14 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
          *  If the caller is from the work profile, then it must be the PO or the delegate, and
          *  it must have the right permission to access device identifiers.
          */
-        if (hasProfileOwner(caller.getUserId())) {
+        int callerUserId = caller.getUserId();
+        if (hasProfileOwner(callerUserId)) {
             // Make sure that the caller is the profile owner or delegate.
             Preconditions.checkCallAuthorization(canInstallCertificates(caller));
-            // Verify that the managed profile is on an organization-owned device and as such
-            // the profile owner can access Device IDs.
-            if (isProfileOwnerOfOrganizationOwnedDevice(caller.getUserId())) {
+            // Verify that the managed profile is on an organization-owned device (or is affiliated
+            // with the device owner user) and as such the profile owner can access Device IDs.
+            if (isProfileOwnerOfOrganizationOwnedDevice(callerUserId)
+                    || isUserAffiliatedWithDevice(callerUserId)) {
                 return;
             }
             throw new SecurityException(
@@ -8461,20 +8464,23 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                     admin.getPackageName(), userId, "set-device-owner");
 
             Slogf.i(LOG_TAG, "Device owner set: " + admin + " on user " + userId);
-
-            if (setProfileOwnerOnCurrentUserIfNecessary
-                    && mInjector.userManagerIsHeadlessSystemUserMode()) {
-                int currentForegroundUser = getCurrentForegroundUserId();
-                Slogf.i(LOG_TAG, "setDeviceOwner(): setting " + admin
-                        + " as profile owner on user " + currentForegroundUser);
-                // Sets profile owner on current foreground user since
-                // the human user will complete the DO setup workflow from there.
-                manageUserUnchecked(/* deviceOwner= */ admin, /* profileOwner= */ admin,
-                        /* managedUser= */ currentForegroundUser, /* adminExtras= */ null,
-                        /* showDisclaimer= */ false);
-            }
-            return true;
         }
+
+        if (setProfileOwnerOnCurrentUserIfNecessary
+                && mInjector.userManagerIsHeadlessSystemUserMode()) {
+            int currentForegroundUser;
+            synchronized (getLockObject()) {
+                currentForegroundUser = getCurrentForegroundUserId();
+            }
+            Slogf.i(LOG_TAG, "setDeviceOwner(): setting " + admin
+                    + " as profile owner on user " + currentForegroundUser);
+            // Sets profile owner on current foreground user since
+            // the human user will complete the DO setup workflow from there.
+            manageUserUnchecked(/* deviceOwner= */ admin, /* profileOwner= */ admin,
+                    /* managedUser= */ currentForegroundUser, /* adminExtras= */ null,
+                    /* showDisclaimer= */ false);
+        }
+        return true;
     }
 
     @Override
@@ -9304,10 +9310,11 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             return false;
         }
 
-        // Allow access to the device owner or delegate cert installer.
+        // Allow access to the device owner or delegate cert installer or profile owner of an
+        // affiliated user
         ComponentName deviceOwner = getDeviceOwnerComponent(true);
         if (deviceOwner != null && (deviceOwner.getPackageName().equals(packageName)
-                    || isCallerDelegate(packageName, uid, DELEGATION_CERT_INSTALL))) {
+                || isCallerDelegate(packageName, uid, DELEGATION_CERT_INSTALL))) {
             return true;
         }
         final int userId = UserHandle.getUserId(uid);
@@ -9317,7 +9324,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         final boolean isCallerProfileOwnerOrDelegate = profileOwner != null
                 && (profileOwner.getPackageName().equals(packageName)
                         || isCallerDelegate(packageName, uid, DELEGATION_CERT_INSTALL));
-        if (isCallerProfileOwnerOrDelegate && isProfileOwnerOfOrganizationOwnedDevice(userId)) {
+        if (isCallerProfileOwnerOrDelegate && (isProfileOwnerOfOrganizationOwnedDevice(userId)
+                || isUserAffiliatedWithDevice(userId))) {
             return true;
         }
 
@@ -10763,12 +10771,13 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
 
     @Override
-    public void resetNewUserDisclaimer() {
+    public void acknowledgeNewUserDisclaimer() {
         CallerIdentity callerIdentity = getCallerIdentity();
-        canManageUsers(callerIdentity);
+        Preconditions.checkCallAuthorization(canManageUsers(callerIdentity)
+                || hasCallingOrSelfPermission(permission.INTERACT_ACROSS_USERS));
 
         setShowNewUserDisclaimer(callerIdentity.getUserId(),
-                DevicePolicyData.NEW_USER_DISCLAIMER_SHOWN);
+                DevicePolicyData.NEW_USER_DISCLAIMER_ACKNOWLEDGED);
     }
 
     private void setShowNewUserDisclaimer(@UserIdInt int userId, String value) {
@@ -10798,6 +10807,18 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         // TODO(b/172691310): add CTS tests to make sure disclaimer is shown
         Slogf.i(LOG_TAG, "Dispatching ACTION_SHOW_NEW_USER_DISCLAIMER intent");
         mContext.sendBroadcastAsUser(intent, UserHandle.of(userId));
+    }
+
+    @Override
+    public boolean isNewUserDisclaimerAcknowledged() {
+        CallerIdentity callerIdentity = getCallerIdentity();
+        Preconditions.checkCallAuthorization(canManageUsers(callerIdentity)
+                || hasCallingOrSelfPermission(permission.INTERACT_ACROSS_USERS));
+        int userId = callerIdentity.getUserId();
+        synchronized (getLockObject()) {
+            DevicePolicyData policyData = getUserData(userId);
+            return policyData.isNewUserDisclaimerAcknowledged();
+        }
     }
 
     @Override
@@ -13188,12 +13209,17 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     /**
      * @param restriction The restriction enforced by admin. It could be any user restriction or
-     *                    policy like {@link DevicePolicyManager#POLICY_DISABLE_CAMERA} and
-     *                    {@link DevicePolicyManager#POLICY_DISABLE_SCREEN_CAPTURE}.
+     *                    policy like {@link DevicePolicyManager#POLICY_DISABLE_CAMERA},
+     *                    {@link DevicePolicyManager#POLICY_DISABLE_SCREEN_CAPTURE} and  {@link
+     *                    DevicePolicyManager#POLICY_SUSPEND_PACKAGES}.
      */
     private Bundle getEnforcingAdminAndUserDetailsInternal(int userId, String restriction) {
         Bundle result = null;
-        if (restriction == null) {
+
+        // For POLICY_SUSPEND_PACKAGES return PO or DO to keep the behavior same as
+        // before the bug fix for b/192245204.
+        if (restriction == null || DevicePolicyManager.POLICY_SUSPEND_PACKAGES.equals(
+                restriction)) {
             ComponentName profileOwner = mOwners.getProfileOwnerComponent(userId);
             if (profileOwner != null) {
                 result = new Bundle();
@@ -14588,7 +14614,13 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         final CallerIdentity caller = getCallerIdentity();
         Preconditions.checkCallAuthorization(hasCrossUsersPermission(caller, userId));
 
-        return isUserAffiliatedWithDeviceLocked(userId);
+        return isUserAffiliatedWithDevice(userId);
+    }
+
+    private boolean isUserAffiliatedWithDevice(@UserIdInt int userId) {
+        synchronized (getLockObject()) {
+            return isUserAffiliatedWithDeviceLocked(userId);
+        }
     }
 
     private boolean isUserAffiliatedWithDeviceLocked(@UserIdInt int userId) {

@@ -202,6 +202,7 @@
     <string name="gnss_service" msgid="8907781262179951385">"Dịch vụ GNSS"</string>
     <string name="sensor_notification_service" msgid="7474531979178682676">"Dịch vụ Thông báo của cảm biến"</string>
     <string name="twilight_service" msgid="8964898045693187224">"Dịch vụ Twilight"</string>
+    <string name="offline_location_time_zone_detection_service_attribution" msgid="303754195048744816">"Trình phát hiện múi giờ (Không có kết nối)"</string>
     <string name="gnss_time_update_service" msgid="9039489496037616095">"Dịch vụ cập nhật thời gian GNSS"</string>
     <string name="music_recognition_manager_service" msgid="7481956037950276359">"Dịch vụ quản lý tính năng nhận dạng nhạc"</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"Thiết bị của bạn sẽ bị xóa"</string>
@@ -266,7 +267,7 @@
     <string name="global_action_silent_mode_on_status" msgid="2371892537738632013">"Âm thanh TẮT"</string>
     <string name="global_action_silent_mode_off_status" msgid="6608006545950920042">"Âm thanh BẬT"</string>
     <string name="global_actions_toggle_airplane_mode" msgid="6911684460146916206">"Chế độ trên máy bay"</string>
-    <string name="global_actions_airplane_mode_on_status" msgid="5508025516695361936">"Chế độ trên máy bay đang bật"</string>
+    <string name="global_actions_airplane_mode_on_status" msgid="5508025516695361936">"Chế độ trên máy bay BẬT"</string>
     <string name="global_actions_airplane_mode_off_status" msgid="8522219771500505475">"Chế độ trên máy bay TẮT"</string>
     <string name="global_action_settings" msgid="4671878836947494217">"Cài đặt"</string>
     <string name="global_action_assist" msgid="2517047220311505805">"Hỗ trợ"</string>
@@ -348,7 +349,7 @@
     <string name="permdesc_expandStatusBar" msgid="7180756900448498536">"Cho phép ứng dụng mở rộng hoặc thu gọn thanh trạng thái."</string>
     <string name="permlab_fullScreenIntent" msgid="4310888199502509104">"hiển thị thông báo dưới dạng các hoạt động ở chế độ toàn màn hình trên thiết bị ở trạng thái khóa"</string>
     <string name="permdesc_fullScreenIntent" msgid="1100721419406643997">"Cho phép ứng dụng hiển thị thông báo dưới dạng các hoạt động ở chế độ toàn màn hình trên thiết bị ở trạng thái khóa"</string>
-    <string name="permlab_install_shortcut" msgid="7451554307502256221">"Cài đặt lối tắt"</string>
+    <string name="permlab_install_shortcut" msgid="7451554307502256221">"cài đặt lối tắt"</string>
     <string name="permdesc_install_shortcut" msgid="4476328467240212503">"Cho phép ứng dụng thêm lối tắt trên Màn hình chính mà không cần sự can thiệp của người dùng."</string>
     <string name="permlab_uninstall_shortcut" msgid="295263654781900390">"gỡ cài đặt lối tắt"</string>
     <string name="permdesc_uninstall_shortcut" msgid="1924735350988629188">"Cho phép ứng dụng xóa lối tắt trên Màn hình chính mà không cần sự can thiệp của người dùng."</string>
@@ -469,8 +470,6 @@
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"Cho phép ứng dụng sử dụng dịch vụ IMS để thực hiện cuộc gọi mà không có sự can thiệp của bạn."</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"đọc trạng thái và nhận dạng của điện thoại"</string>
     <string name="permdesc_readPhoneState" msgid="7229063553502788058">"Cho phép ứng dụng truy cập vào các tính năng điện thoại của thiết bị. Quyền này cho phép ứng dụng xác định số điện thoại và ID thiết bị, cho dù cuộc gọi có hiện hoạt hay không và số từ xa có được kết nối bằng một cuộc gọi hay không."</string>
-    <string name="permlab_readBasicPhoneState" msgid="3214853233263871347">"đọc danh tính và trạng thái cơ bản của điện thoại"</string>
-    <string name="permdesc_readBasicPhoneState" msgid="828185691675460520">"Cho phép ứng dụng dùng các tính năng cơ bản của điện thoại trên thiết bị."</string>
     <string name="permlab_manageOwnCalls" msgid="9033349060307561370">"định tuyến cuộc gọi thông qua hệ thống"</string>
     <string name="permdesc_manageOwnCalls" msgid="4431178362202142574">"Cho phép ứng dụng định tuyến cuộc gọi thông qua hệ thống nhằm cải thiện trải nghiệm gọi điện."</string>
     <string name="permlab_callCompanionApp" msgid="3654373653014126884">"xem và kiểm soát cuộc gọi thông qua hệ thống."</string>
@@ -543,8 +542,6 @@
     <string name="permdesc_bluetooth_advertise" product="default" msgid="6085174451034210183">"Cho phép ứng dụng quảng cáo trên các thiết bị Bluetooth ở gần"</string>
     <string name="permlab_uwb_ranging" msgid="8141915781475770665">"xác định khoảng cách tương đối giữa các thiết bị ở gần dùng Băng tần siêu rộng"</string>
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"Cho phép ứng dụng xác định khoảng cách tương đối giữa các thiết bị ở gần dùng Băng tần siêu rộng"</string>
-    <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"tương tác với các thiết bị Wi‑Fi lân cận"</string>
-    <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"Cho phép ứng dụng này thông báo, kết nối và xác định vị trí tương đối của các thiết bị Wi‑Fi lân cận"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Thông tin về dịch vụ thanh toán qua công nghệ giao tiếp tầm gần (NFC) được ưu tiên"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Cho phép ứng dụng nhận thông tin về dịch vụ thanh toán qua công nghệ giao tiếp tầm gần mà bạn ưu tiên, chẳng hạn như các hình thức hỗ trợ đã đăng ký và điểm đến trong hành trình."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"kiểm soát Liên lạc trường gần"</string>
@@ -583,12 +580,11 @@
     <string name="fingerprint_acquired_partial" msgid="694598777291084823">"Phát hiện thấy một phần vân tay"</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"Không thể xử lý vân tay. Vui lòng thử lại."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="5236744087471419479">"Hãy vệ sinh cảm biến"</string>
-    <string name="fingerprint_acquired_too_fast" msgid="6038375140739678098">"Hãy giữ tay lâu hơn một chút"</string>
+    <string name="fingerprint_acquired_too_fast" msgid="1254724478300787385">"Di chuyển ngón tay quá nhanh"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"Di chuyển ngón tay quá chậm. Vui lòng thử lại."</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"Hãy thử một vân tay khác"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"Quá sáng"</string>
     <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"Hãy thử điều chỉnh"</string>
-    <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"Mỗi lần, hãy thay đổi vị trí ngón tay một chút"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"Đã xác thực vân tay"</string>
@@ -605,7 +601,6 @@
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"Chưa đăng ký vân tay."</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"Thiết bị này không có cảm biến vân tay."</string>
     <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"Đã tạm thời tắt cảm biến."</string>
-    <string name="fingerprint_error_bad_calibration" msgid="4385512597740168120">"Không thể dùng cảm biến vân tay. Hãy liên hệ với một nhà cung cấp dịch vụ sửa chữa"</string>
     <string name="fingerprint_name_template" msgid="8941662088160289778">"Ngón tay <xliff:g id="FINGERID">%d</xliff:g>"</string>
     <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"Dùng vân tay"</string>
     <string name="fingerprint_or_screen_lock_app_setting_name" msgid="3501743523487644907">"Dùng vân tay hoặc phương thức khóa màn hình"</string>
@@ -613,19 +608,18 @@
     <string name="fingerprint_or_screen_lock_dialog_default_subtitle" msgid="5195808203117992200">"Dùng vân tay của bạn hoặc phương thức khóa màn hình để tiếp tục"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
-    <string name="fingerprint_error_vendor_unknown" msgid="4170002184907291065">"Đã xảy ra lỗi. Hãy thử lại."</string>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"Biểu tượng vân tay"</string>
-    <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"Mở khóa bằng khuôn mặt"</string>
-    <string name="face_recalibrate_notification_title" msgid="2524791952735579082">"Vấn đề với tính năng Mở khóa bằng khuôn mặt"</string>
-    <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"Nhấn để xóa mẫu khuôn mặt, sau đó thêm lại khuôn mặt của bạn"</string>
-    <string name="face_setup_notification_title" msgid="8843461561970741790">"Thiết lập tính năng Mở khóa bằng khuôn mặt"</string>
+    <string name="permlab_manageFace" msgid="4569549381889283282">"quản lý phần cứng mở khóa bằng khuôn mặt"</string>
+    <string name="permdesc_manageFace" msgid="6204569688492710471">"Cho phép ứng dụng gọi ra các phương pháp để thêm và xóa mẫu khuôn mặt sử dụng."</string>
+    <string name="permlab_useFaceAuthentication" msgid="1011430526454859030">"sử dụng phần cứng mở khóa bằng khuôn mặt"</string>
+    <string name="permdesc_useFaceAuthentication" msgid="3115697017684668012">"Cho phép ứng dụng dùng phần cứng mở khóa bằng khuôn mặt để tiến hành xác thực"</string>
+    <string name="face_recalibrate_notification_name" msgid="6006095897989257026">"Mở khóa bằng khuôn mặt"</string>
+    <string name="face_recalibrate_notification_title" msgid="5944930528030496897">"Đăng ký lại khuôn mặt của bạn"</string>
+    <string name="face_recalibrate_notification_content" msgid="892757485125249962">"Để cải thiện khả năng nhận dạng, hãy đăng ký lại khuôn mặt của bạn"</string>
+    <string name="face_setup_notification_title" msgid="550617822603450009">"Thiết lập tính năng mở khóa bằng khuôn mặt"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"Mở khóa điện thoại bằng cách nhìn vào điện thoại"</string>
-    <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"Để dùng tính năng Mở khoá bằng khuôn mặt, hãy bật tuỳ chọn "<b>"Truy cập máy ảnh"</b>" trong phần Cài đặt &gt; Quyền riêng tư"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Thiết lập thêm những cách mở khóa khác"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"Nhấn để thêm vân tay"</string>
-    <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Mở khóa bằng vân tay"</string>
-    <string name="fingerprint_recalibrate_notification_title" msgid="2406561052064558497">"Không thể dùng cảm biến vân tay"</string>
-    <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"Hãy liên hệ với một nhà cung cấp dịch vụ sửa chữa."</string>
     <string name="face_acquired_insufficient" msgid="2150805835949162453">"Không thể ghi lại đúng dữ liệu mặt. Hãy thử lại."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"Quá sáng. Hãy thử giảm độ sáng."</string>
     <string name="face_acquired_too_dark" msgid="252573548464426546">"Quá tối. Hãy thử tăng độ sáng."</string>
@@ -649,25 +643,23 @@
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"Không thể xác minh khuôn mặt. Phần cứng không có sẵn."</string>
-    <string name="face_error_timeout" msgid="2598544068593889762">"Hãy thử lại thao tác Mở khóa bằng khuôn mặt"</string>
+    <string name="face_error_timeout" msgid="522924647742024699">"Thử lại thao tác mở khóa bằng khuôn mặt."</string>
     <string name="face_error_no_space" msgid="5649264057026021723">"Không lưu được dữ liệu khuôn mặt mới. Hãy xóa dữ liệu cũ trước."</string>
     <string name="face_error_canceled" msgid="2164434737103802131">"Đã hủy thao tác dùng khuôn mặt."</string>
-    <string name="face_error_user_canceled" msgid="5766472033202928373">"Người dùng đã hủy thao tác Mở khóa bằng khuôn mặt"</string>
+    <string name="face_error_user_canceled" msgid="8553045452825849843">"Người dùng đã hủy thao tác mở khóa bằng khuôn mặt."</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"Bạn đã thử quá nhiều lần. Hãy thử lại sau."</string>
-    <string name="face_error_lockout_permanent" msgid="3277134834042995260">"Bạn đã thử quá nhiều lần. Thao tác Mở khóa bằng khuôn mặt đã bị vô hiệu hóa."</string>
-    <string name="face_error_lockout_screen_lock" msgid="5062609811636860928">"Bạn đã thử quá nhiều lần. Hãy nhập phương thức khóa màn hình."</string>
+    <string name="face_error_lockout_permanent" msgid="8277853602168960343">"Quá nhiều lần thử. Đã tắt tính năng mở khóa bằng khuôn mặt."</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"Không thể xác minh khuôn mặt. Hãy thử lại."</string>
-    <string name="face_error_not_enrolled" msgid="1134739108536328412">"Bạn chưa thiết lập tính năng Mở khóa bằng khuôn mặt"</string>
-    <string name="face_error_hw_not_present" msgid="7940978724978763011">"Thiết bị này không hỗ trợ tính năng Mở khóa bằng khuôn mặt"</string>
+    <string name="face_error_not_enrolled" msgid="7369928733504691611">"Bạn chưa thiết lập tính năng mở khóa bằng khuôn mặt."</string>
+    <string name="face_error_hw_not_present" msgid="1070600921591729944">"Thiết bị này không hỗ trợ tính năng mở khóa bằng khuôn mặt."</string>
     <string name="face_error_security_update_required" msgid="5076017208528750161">"Đã tạm thời tắt cảm biến."</string>
     <string name="face_name_template" msgid="3877037340223318119">"Khuôn mặt <xliff:g id="FACEID">%d</xliff:g>"</string>
-    <string name="face_app_setting_name" msgid="5854024256907828015">"Dùng tính năng Mở khóa bằng khuôn mặt"</string>
+    <string name="face_app_setting_name" msgid="8130135875458467243">"Dùng tính năng mở khóa bằng khuôn mặt"</string>
     <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"Dùng khuôn mặt hoặc phương thức khóa màn hình"</string>
     <string name="face_dialog_default_subtitle" msgid="6620492813371195429">"Hãy dùng khuôn mặt của bạn để tiếp tục"</string>
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"Dùng khuôn mặt của bạn hoặc phương thức khóa màn hình để tiếp tục"</string>
   <string-array name="face_error_vendor">
   </string-array>
-    <string name="face_error_vendor_unknown" msgid="7387005932083302070">"Đã xảy ra lỗi. Hãy thử lại."</string>
     <string name="face_icon_content_description" msgid="465030547475916280">"Biểu tượng khuôn mặt"</string>
     <string name="permlab_readSyncSettings" msgid="6250532864893156277">"đọc cài đặt đồng bộ hóa"</string>
     <string name="permdesc_readSyncSettings" msgid="1325658466358779298">"Cho phép ứng dụng đọc cài đặt đồng bộ hóa cho tài khoản. Ví dụ: việc này có thể xác định liệu ứng dụng Mọi người đã được đồng bộ hóa với tài khoản chưa."</string>
@@ -734,11 +726,9 @@
     <string name="policylab_watchLogin" msgid="7599669460083719504">"Giám sát những lần thử mở khóa màn hình"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"Theo dõi số lần nhập mật khẩu không chính xác khi mở khóa màn hình và khóa máy tính bảng hoặc xóa tất cả dữ liệu của máy tính bảng nếu có quá nhiều lần nhập mật khẩu không chính xác."</string>
     <string name="policydesc_watchLogin" product="tv" msgid="2140588224468517507">"Giám sát số lần nhập mật khẩu không chính xác khi mở khóa màn hình, đồng thời khóa thiết bị Android TV hoặc xóa tất cả dữ liệu trên thiết bị Android TV nếu bạn nhập mật khẩu sai quá nhiều lần."</string>
-    <string name="policydesc_watchLogin" product="automotive" msgid="7011438994051251521">"Theo dõi số lần nhập sai mật khẩu khi mở khoá màn hình và khoá hệ thống thông tin giải trí hoặc xoá tất cả dữ liệu của hệ thống này nếu có quá nhiều lần nhập sai mật khẩu."</string>
     <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"Theo dõi số lần nhập mật khẩu không chính xác khi mở khóa màn hình và khóa điện thoại hoặc xóa tất cả dữ liệu của điện thoại nếu có quá nhiều lần nhập mật khẩu không chính xác."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="2049038943004297474">"Giám sát số lần nhập sai mật khẩu khi mở khóa màn hình và khóa máy tính bảng hoặc xóa tất cả dữ liệu của người dùng này nếu nhập sai mật khẩu quá nhiều lần."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tv" msgid="8965224107449407052">"Giám sát số lần nhập mật khẩu không chính xác khi mở khóa màn hình, đồng thời khóa thiết bị Android TV hoặc xóa tất cả dữ liệu của người dùng này nếu bạn nhập mật khẩu sai quá nhiều lần."</string>
-    <string name="policydesc_watchLogin_secondaryUser" product="automotive" msgid="7180857406058327941">"Theo dõi số lần nhập sai mật khẩu khi mở khoá màn hình và khoá hệ thống thông tin giải trí hoặc xoá tất cả dữ liệu của hồ sơ này nếu có quá nhiều lần nhập sai mật khẩu."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="9177645136475155924">"Giám sát số lần nhập sai mật khẩu khi mở khóa màn hình và khóa điện thoại hoặc xóa tất cả dữ liệu của người dùng này nếu nhập sai mật khẩu quá nhiều lần."</string>
     <string name="policylab_resetPassword" msgid="214556238645096520">"Thay đổi phương thức khóa màn hình"</string>
     <string name="policydesc_resetPassword" msgid="4626419138439341851">"Thay đổi phương thức khóa màn hình."</string>
@@ -747,13 +737,10 @@
     <string name="policylab_wipeData" msgid="1359485247727537311">"Xóa tất cả dữ liệu"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"Xóa dữ liệu trên máy tính bảng mà không cần cảnh báo, bằng cách thực hiện thiết lập lại dữ liệu ban đầu."</string>
     <string name="policydesc_wipeData" product="tv" msgid="513862488950801261">"Xóa dữ liệu trên thiết bị Android TV mà không cảnh báo bằng cách thiết lập lại dữ liệu ban đầu."</string>
-    <string name="policydesc_wipeData" product="automotive" msgid="660804547737323300">"Xoá dữ liệu của hệ thống thông tin giải trí mà không cảnh báo bằng cách đặt lại dữ liệu về trạng thái ban đầu."</string>
     <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"Xóa dữ liệu trên điện thoại mà không cần cảnh báo, bằng cách thiết lập lại dữ liệu ban đầu."</string>
-    <string name="policylab_wipeData_secondaryUser" product="automotive" msgid="115034358520328373">"Xoá dữ liệu hồ sơ"</string>
-    <string name="policylab_wipeData_secondaryUser" product="default" msgid="413813645323433166">"Xóa dữ liệu người dùng"</string>
+    <string name="policylab_wipeData_secondaryUser" msgid="413813645323433166">"Xóa dữ liệu người dùng"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="2336676480090926470">"Xóa dữ liệu của người dùng trên máy tính bảng này mà không cảnh báo."</string>
     <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2293713284515865200">"Xóa dữ liệu của người dùng này trên thiết bị Android TV mà không cảnh báo."</string>
-    <string name="policydesc_wipeData_secondaryUser" product="automotive" msgid="4658832487305780879">"Xoá dữ liệu của hồ sơ này trên hệ thống thông tin giải trí này mà không cảnh báo."</string>
     <string name="policydesc_wipeData_secondaryUser" product="default" msgid="2788325512167208654">"Xóa dữ liệu của người dùng trên điện thoại này mà không cảnh báo."</string>
     <string name="policylab_setGlobalProxy" msgid="215332221188670221">"Đặt proxy chung của điện thoại"</string>
     <string name="policydesc_setGlobalProxy" msgid="7149665222705519604">"Đặt proxy chung của thiết bị được sử dụng trong khi chính sách bật. Chỉ chủ sở hữu thiết bị mới có thể đặt proxy chung."</string>
@@ -970,7 +957,7 @@
     <string name="keyguard_accessibility_expand_lock_area" msgid="4215280881346033434">"Mở rộng vùng khóa."</string>
     <string name="keyguard_accessibility_slide_unlock" msgid="2968195219692413046">"Mở khóa bằng cách trượt."</string>
     <string name="keyguard_accessibility_pattern_unlock" msgid="8669128146589233293">"Mở khóa bằng hình."</string>
-    <string name="keyguard_accessibility_face_unlock" msgid="4533832120787386728">"Mở khóa bằng khuôn mặt."</string>
+    <string name="keyguard_accessibility_face_unlock" msgid="632407612842329815">"Mở khóa bằng khuôn mặt."</string>
     <string name="keyguard_accessibility_pin_unlock" msgid="4020864007967340068">"Mở khóa bằng mã pin."</string>
     <string name="keyguard_accessibility_sim_pin_unlock" msgid="4895939120871890557">"Mở khóa bằng mã PIN của SIM."</string>
     <string name="keyguard_accessibility_sim_puk_unlock" msgid="3459003464041899101">"Mở khóa bằng mã PUK của SIM."</string>
@@ -1028,14 +1015,14 @@
     <string name="permlab_writeGeolocationPermissions" msgid="8605631647492879449">"sửa đổi các quyền về vị trí địa lý của Trình duyệt"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="5817346421222227772">"Cho phép ứng dụng sửa đổi cấp phép vị trí địa lý của Trình duyệt. Ứng dụng độc hại có thể lợi dụng quyền này để cho phép gửi thông tin vị trí tới các trang web tùy ý."</string>
     <string name="save_password_message" msgid="2146409467245462965">"Bạn có muốn trình duyệt nhớ mật khẩu này không?"</string>
-    <string name="save_password_notnow" msgid="2878327088951240061">"Để sau"</string>
+    <string name="save_password_notnow" msgid="2878327088951240061">"Không phải bây giờ"</string>
     <string name="save_password_remember" msgid="6490888932657708341">"Nhớ"</string>
     <string name="save_password_never" msgid="6776808375903410659">"Chưa bao giờ"</string>
     <string name="open_permission_deny" msgid="5136793905306987251">"Bạn không được phép mở trang này."</string>
     <string name="text_copied" msgid="2531420577879738860">"Đã sao chép văn bản vào bảng nhớ tạm thời."</string>
     <string name="copied" msgid="4675902854553014676">"Đã sao chép"</string>
     <string name="pasted_from_app" msgid="5627698450808256545">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> đã dán dữ liệu từ <xliff:g id="SOURCE_APP_NAME">%2$s</xliff:g>"</string>
-    <string name="pasted_from_clipboard" msgid="7355790625710831847">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> đã dán dữ liệu từ bảng nhớ tạm của bạn"</string>
+    <string name="pasted_from_clipboard" msgid="6295556725844421812">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> đã dán dữ liệu từ bảng nhớ tạm"</string>
     <string name="pasted_text" msgid="4298871641549173733">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> đã dán văn bản mà bạn sao chép"</string>
     <string name="pasted_image" msgid="4729097394781491022">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> đã dán một hình ảnh mà bạn sao chép"</string>
     <string name="pasted_content" msgid="646276353060777131">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> đã dán nội dung mà bạn sao chép"</string>
@@ -1083,7 +1070,7 @@
     <string name="weeks" msgid="3516247214269821391">"tuần"</string>
     <string name="year" msgid="5182610307741238982">"năm"</string>
     <string name="years" msgid="5797714729103773425">"năm"</string>
-    <string name="now_string_shortest" msgid="3684914126941650330">"vừa xong"</string>
+    <string name="now_string_shortest" msgid="3684914126941650330">"ngay lúc này"</string>
     <plurals name="duration_minutes_shortest" formatted="false" msgid="7519574894537185135">
       <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>ph</item>
       <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g>ph</item>
@@ -1272,10 +1259,6 @@
     <string name="android_preparing_apk" msgid="589736917792300956">"Đang chuẩn bị <xliff:g id="APPNAME">%1$s</xliff:g>."</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"Khởi động ứng dụng."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"Hoàn tất khởi động."</string>
-    <string name="fp_enrollment_powerbutton_intent_title" msgid="3385634173366119903">"Tắt màn hình?"</string>
-    <string name="fp_enrollment_powerbutton_intent_message" msgid="6582149052513682522">"Trong khi thiết lập vân tay, bạn đã nhấn vào nút Nguồn.\n\nThông thường, thao tác này sẽ tắt màn hình."</string>
-    <string name="fp_enrollment_powerbutton_intent_positive_button" msgid="5963520983910436791">"Tắt"</string>
-    <string name="fp_enrollment_powerbutton_intent_negative_button" msgid="6465764183480190748">"Hủy"</string>
     <string name="heavy_weight_notification" msgid="8382784283600329576">"<xliff:g id="APP">%1$s</xliff:g> đang hoạt động"</string>
     <string name="heavy_weight_notification_detail" msgid="6802247239468404078">"Nhấn để quay lại trò chơi"</string>
     <string name="heavy_weight_switcher_title" msgid="3861984210040100886">"Chọn trò chơi"</string>
@@ -1474,8 +1457,6 @@
     <string name="permdesc_requestDeletePackages" msgid="6133633516423860381">"Cho phép ứng dụng yêu cầu xóa gói."</string>
     <string name="permlab_requestIgnoreBatteryOptimizations" msgid="7646611326036631439">"hỏi để bỏ qua tối ưu hóa pin"</string>
     <string name="permdesc_requestIgnoreBatteryOptimizations" msgid="634260656917874356">"Cho phép ứng dụng hỏi quyền để bỏ qua tối ưu hóa pin cho ứng dụng đó."</string>
-    <string name="permlab_queryAllPackages" msgid="2928450604653281650">"truy vấn tất cả các gói"</string>
-    <string name="permdesc_queryAllPackages" msgid="5339069855520996010">"Cho phép một ứng dụng xem tất cả các gói đã cài đặt."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1842872462124648678">"Nhấn hai lần để kiểm soát thu phóng"</string>
     <string name="gadget_host_error_inflating" msgid="2449961590495198720">"Không thể thêm tiện ích."</string>
     <string name="ime_action_go" msgid="5536744546326495436">"Đến"</string>
@@ -1494,7 +1475,6 @@
     <string name="deny" msgid="6632259981847676572">"Từ chối"</string>
     <string name="permission_request_notification_title" msgid="1810025922441048273">"Đã yêu cầu quyền"</string>
     <string name="permission_request_notification_with_subtitle" msgid="3743417870360129298">"Đã yêu cầu quyền\ncho tài khoản <xliff:g id="ACCOUNT">%s</xliff:g>."</string>
-    <string name="permission_request_notification_for_app_with_subtitle" msgid="1298704005732851350">"Quyền do <xliff:g id="APP">%1$s</xliff:g>\nyêu cầu cho tài khoản <xliff:g id="ACCOUNT">%2$s</xliff:g>."</string>
     <string name="forward_intent_to_owner" msgid="4620359037192871015">"Bạn đang sử dụng ứng dụng này bên ngoài hồ sơ công việc của mình"</string>
     <string name="forward_intent_to_work" msgid="3620262405636021151">"Bạn đang sử dụng ứng dụng này trong hồ sơ công việc của mình"</string>
     <string name="input_method_binding_label" msgid="1166731601721983656">"Phương thức nhập"</string>
@@ -1594,7 +1574,7 @@
     <string name="storage_usb" msgid="2391213347883616886">"Bộ lưu trữ USB"</string>
     <string name="extract_edit_menu_button" msgid="63954536535863040">"Chỉnh sửa"</string>
     <string name="data_usage_warning_title" msgid="9034893717078325845">"Cảnh báo dữ liệu"</string>
-    <string name="data_usage_warning_body" msgid="1669325367188029454">"Bạn đã dùng <xliff:g id="APP">%s</xliff:g> dữ liệu"</string>
+    <string name="data_usage_warning_body" msgid="1669325367188029454">"Bạn đã sử dụng <xliff:g id="APP">%s</xliff:g> dữ liệu"</string>
     <string name="data_usage_mobile_limit_title" msgid="3911447354393775241">"Đã đạt đến giới hạn dữ liệu di động"</string>
     <string name="data_usage_wifi_limit_title" msgid="2069698056520812232">"Đã đạt tới g.hạn dữ liệu Wi-Fi"</string>
     <string name="data_usage_limit_body" msgid="3567699582000085710">"Đã tạm dừng dữ liệu đối với chu kỳ còn lại của bạn"</string>
@@ -1703,7 +1683,7 @@
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Khi phím tắt này đang bật, thao tác nhấn cả hai nút âm lượng trong 3 giây sẽ mở tính năng hỗ trợ tiếp cận."</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"Bật phím tắt cho các tính năng hỗ trợ tiếp cận?"</string>
     <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"Thao tác nhấn và giữ cả hai phím âm lượng trong vài giây sẽ bật các tính năng hỗ trợ tiếp cận. Việc bật các tính năng này có thể thay đổi cách thiết bị của bạn hoạt động.\n\nCác tính năng hiện tại:\n<xliff:g id="SERVICE">%1$s</xliff:g>\nBạn có thể thay đổi những tính năng đã chọn trong phần Cài đặt &gt; Hỗ trợ tiếp cận."</string>
-    <string name="accessibility_shortcut_multiple_service_list" msgid="2128323171922023762">" • <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
+    <string name="accessibility_shortcut_multiple_service_list" msgid="6935581470716541531">"	• <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
     <string name="accessibility_shortcut_single_service_warning_title" msgid="1909518473488345266">"Bật phím tắt cho <xliff:g id="SERVICE">%1$s</xliff:g>?"</string>
     <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"Thao tác nhấn và giữ cả hai phím âm lượng trong vài giây sẽ bật <xliff:g id="SERVICE">%1$s</xliff:g>, một tính năng hỗ trợ tiếp cận. Việc bật tính năng này có thể thay đổi cách thiết bị của bạn hoạt động.\n\nBạn có thể chuyển phím tắt này thành một tính năng khác trong phần Cài đặt &gt; Hỗ trợ tiếp cận."</string>
     <string name="accessibility_shortcut_on" msgid="5463618449556111344">"Bật"</string>
@@ -1729,7 +1709,6 @@
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Sử dụng phím tắt"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"Đảo màu"</string>
     <string name="color_correction_feature_name" msgid="3655077237805422597">"Chỉnh màu"</string>
-    <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"Chế độ một tay"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"Siêu tối"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Bạn đã giữ các phím âm lượng. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> đã bật."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Bạn đã giữ các phím âm lượng. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> đã tắt."</string>
@@ -1885,8 +1864,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Do quản trị viên của bạn cập nhật"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Do quản trị viên của bạn xóa"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"OK"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"Trình tiết kiệm pin sẽ bật Giao diện tối, đồng thời hạn chế hoặc tắt hoạt động chạy trong nền, một số hiệu ứng hình ảnh, các tính năng nhất định và một số đường kết nối mạng."</string>
-    <string name="battery_saver_description" msgid="8518809702138617167">"Trình tiết kiệm pin sẽ bật Giao diện tối, đồng thời hạn chế hoặc tắt hoạt động chạy trong nền, một số hiệu ứng hình ảnh, các tính năng nhất định, và một số kết nối mạng."</string>
+    <string name="battery_saver_description_with_learn_more" msgid="750683025714899363">"Tính năng Tiết kiệm pin sẽ bật Giao diện tối, đồng thời hạn chế hoặc tắt hoạt động chạy trong nền, một số hiệu ứng hình ảnh và các tính năng nhất định.\n\n"<annotation id="url">"Tìm hiểu thêm"</annotation></string>
+    <string name="battery_saver_description" msgid="5693741424234005958">"Tính năng Tiết kiệm pin sẽ bật Giao diện tối, đồng thời hạn chế hoặc tắt hoạt động chạy trong nền, một số hiệu ứng hình ảnh và các tính năng nhất định."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Để giúp giảm mức sử dụng dữ liệu, Trình tiết kiệm dữ liệu sẽ chặn một số ứng dụng gửi hoặc nhận dữ liệu trong nền. Ứng dụng mà bạn hiện sử dụng có thể dùng dữ liệu nhưng tần suất sẽ giảm. Ví dụ: hình ảnh sẽ không hiển thị cho đến khi bạn nhấn vào hình ảnh đó."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Bật Trình tiết kiệm dữ liệu?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Bật"</string>
@@ -1989,8 +1968,8 @@
     <string name="app_suspended_default_message" msgid="6451215678552004172">"<xliff:g id="APP_NAME_0">%1$s</xliff:g> hiện không sử dụng được. Chính sách này do <xliff:g id="APP_NAME_1">%2$s</xliff:g> quản lý."</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"Tìm hiểu thêm"</string>
     <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"Mở lại ứng dụng"</string>
-    <string name="work_mode_off_title" msgid="961171256005852058">"Bật các ứng dụng công việc?"</string>
-    <string name="work_mode_off_message" msgid="7319580997683623309">"Bạn sẽ có quyền truy cập vào các ứng dụng công việc và thông báo"</string>
+    <string name="work_mode_off_title" msgid="5503291976647976560">"Bạn muốn bật hồ sơ công việc?"</string>
+    <string name="work_mode_off_message" msgid="8417484421098563803">"Các ứng dụng công việc, thông báo, dữ liệu và các tính năng khác của hồ sơ công việc sẽ được bật"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"Bật"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"Ứng dụng này không dùng được"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> hiện không dùng được."</string>
@@ -2106,12 +2085,17 @@
     <string name="notification_feedback_indicator_silenced" msgid="3799442124723177262">"Hệ thống đã hạ mức ưu tiên của thông báo này xuống thành Im lặng. Hãy nhấn để chia sẻ ý kiến phản hồi."</string>
     <string name="notification_feedback_indicator_promoted" msgid="9030204303764698640">"Hệ thống đã nâng mức ưu tiên của thông báo này. Hãy nhấn để chia sẻ ý kiến phản hồi."</string>
     <string name="notification_feedback_indicator_demoted" msgid="8880309924296450875">"Hệ thống đã hạ mức ưu tiên của thông báo này. Hãy nhấn để chia sẻ ý kiến phản hồi."</string>
-    <string name="nas_upgrade_notification_title" msgid="8436359459300146555">"Thông báo nâng cao"</string>
-    <string name="nas_upgrade_notification_content" msgid="5157550369837103337">"Thông báo nâng cao hiện cung cấp các thao tác và câu trả lời đề xuất. Thông báo thích ứng trên Android không được hỗ trợ nữa."</string>
-    <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"OK"</string>
-    <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"Tắt"</string>
+    <!-- no translation found for nas_upgrade_notification_title (8436359459300146555) -->
+    <skip />
+    <!-- no translation found for nas_upgrade_notification_content (5157550369837103337) -->
+    <skip />
+    <!-- no translation found for nas_upgrade_notification_enable_action (3046406808378726874) -->
+    <skip />
+    <!-- no translation found for nas_upgrade_notification_disable_action (3794833210043497982) -->
+    <skip />
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"Tìm hiểu thêm"</string>
-    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"Thông báo nâng cao đã thay thế Thông báo thích ứng trên Android trong Android 12. Tính năng này hiển thị những thao tác và câu trả lời đề xuất, đồng thời sắp xếp các thông báo của bạn.\n\nThông báo nâng cao có thể đọc mọi nội dung thông báo, bao gồm cả thông tin cá nhân như tên liên hệ và tin nhắn. Tính năng này cũng có thể đóng hoặc phản hồi các thông báo, chẳng hạn như trả lời cuộc gọi điện thoại, đồng thời có thể kiểm soát chế độ Không làm phiền."</string>
+    <!-- no translation found for nas_upgrade_notification_learn_more_content (2353549817159426430) -->
+    <skip />
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Thông báo cung cấp thông tin về chế độ sạc thông thường"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Pin có thể hết trước khi sạc bình thường"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Trình tiết kiệm pin được kích hoạt để kéo dài thời lượng pin"</string>
@@ -2308,6 +2292,4 @@
     <string name="splash_screen_view_branding_description" msgid="7911129347402728216">"Hình ảnh thương hiệu của ứng dụng"</string>
     <string name="view_and_control_notification_title" msgid="4300765399209912240">"Hãy kiểm tra chế độ cài đặt quyền truy cập"</string>
     <string name="view_and_control_notification_content" msgid="8003766498562604034">"<xliff:g id="SERVICE_NAME">%s</xliff:g> có thể xem và điều khiển màn hình của bạn. Nhấn để xem lại."</string>
-    <string name="ui_translation_accessibility_translated_text" msgid="3197547218178944544">"Đã dịch <xliff:g id="MESSAGE">%1$s</xliff:g>."</string>
-    <string name="ui_translation_accessibility_translation_finished" msgid="3057830947610088465">"Đã dịch thông báo từ <xliff:g id="FROM_LANGUAGE">%1$s</xliff:g> sang <xliff:g id="TO_LANGUAGE">%2$s</xliff:g>."</string>
 </resources>

@@ -815,7 +815,7 @@ public class LauncherAppsService extends SystemService {
         PendingIntent injectCreatePendingIntent(int requestCode, @NonNull Intent[] intents,
                 int flags, Bundle options, String ownerPackage, int ownerUserId) {
             return mActivityManagerInternal.getPendingIntentActivityAsApp(requestCode, intents,
-                    flags, options, ownerPackage, ownerUserId);
+                    flags, null /* options */, ownerPackage, ownerUserId);
         }
 
         @Override
@@ -1117,7 +1117,7 @@ public class LauncherAppsService extends SystemService {
                 // calling identity to mirror the startActivityAsUser() call which does not validate
                 // the calling user
                 return PendingIntent.getActivityAsUser(mContext, 0 /* requestCode */, launchIntent,
-                        FLAG_IMMUTABLE, opts, user);
+                        FLAG_IMMUTABLE, null /* options */, user);
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }

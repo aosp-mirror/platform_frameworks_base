@@ -95,9 +95,7 @@
     <string name="bluetooth_profile_a2dp_high_quality" msgid="4739440941324792775">"高清音訊：<xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="2477639096903834374">"高清音訊"</string>
     <string name="bluetooth_profile_hearing_aid" msgid="58154575573984914">"助聽器"</string>
-    <string name="bluetooth_profile_le_audio" msgid="5158149987518342036">"LE_AUDIO"</string>
     <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="8191273236809964030">"已連接助聽器"</string>
-    <string name="bluetooth_le_audio_profile_summary_connected" msgid="3162538609379333442">"已連接 LE_AUDIO"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="7422607970115444153">"已連接媒體音頻裝置"</string>
     <string name="bluetooth_headset_profile_summary_connected" msgid="2420981566026949688">"已連接手機耳機"</string>
     <string name="bluetooth_opp_profile_summary_connected" msgid="2393521801478157362">"已連線至檔案傳輸伺服器"</string>
@@ -115,7 +113,6 @@
     <string name="bluetooth_opp_profile_summary_use_for" msgid="461981154387015457">"用於傳輸檔案"</string>
     <string name="bluetooth_hid_profile_summary_use_for" msgid="4289460627406490952">"用於輸入"</string>
     <string name="bluetooth_hearing_aid_profile_summary_use_for" msgid="7689393730163320483">"用於助聽器"</string>
-    <string name="bluetooth_le_audio_profile_summary_use_for" msgid="2778318636027348572">"用於 LE_AUDIO"</string>
     <string name="bluetooth_pairing_accept" msgid="2054232610815498004">"配對"</string>
     <string name="bluetooth_pairing_accept_all_caps" msgid="2734383073450506220">"配對"</string>
     <string name="bluetooth_pairing_decline" msgid="6483118841204885890">"取消"</string>
@@ -255,7 +252,7 @@
     <string name="wifi_display_certification" msgid="1805579519992520381">"無線螢幕分享認證"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"啟用 Wi‑Fi 詳細記錄"</string>
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"Wi‑Fi 掃瞄限流"</string>
-    <string name="wifi_enhanced_mac_randomization" msgid="882650208573834301">"Wi‑Fi 非持續性隨機 MAC 位址"</string>
+    <string name="wifi_enhanced_mac_randomization" msgid="5437378364995776979">"Wi-Fi 強化 MAC 隨機處理"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"一律保持啟用流動數據"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"網絡共享硬件加速"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"顯示沒有名稱的藍牙裝置"</string>
@@ -356,7 +353,6 @@
     <string name="debug_layout_summary" msgid="8825829038287321978">"顯示剪輯範圍、邊界等"</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"強制使用從右至左的版面配置方向"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"強制將所有語言代碼的畫面配置方向改為從右至左"</string>
-    <string name="window_blurs" msgid="6831008984828425106">"允許視窗層級模糊處理"</string>
     <string name="force_msaa" msgid="4081288296137775550">"強制 4x MSAA"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"在 OpenGL ES 2.0 應用程式中啟用 4x MSAA"</string>
     <string name="show_non_rect_clip" msgid="7499758654867881817">"對非矩形裁剪操作進行偵錯"</string>
@@ -409,12 +405,17 @@
     <string name="transcode_enable_all" msgid="2411165920039166710">"啟用轉碼功能"</string>
     <string name="transcode_default" msgid="3784803084573509491">"假設應用程式支援新型格式"</string>
     <string name="transcode_notification" msgid="5560515979793436168">"顯示轉碼通知"</string>
-    <string name="transcode_disable_cache" msgid="3160069309377467045">"停用轉碼快取"</string>
     <string name="runningservices_settings_title" msgid="6460099290493086515">"執行中的服務"</string>
     <string name="runningservices_settings_summary" msgid="1046080643262665743">"查看並控制目前正在執行中的服務"</string>
     <string name="select_webview_provider_title" msgid="3917815648099445503">"WebView 設置"</string>
     <string name="select_webview_provider_dialog_title" msgid="2444261109877277714">"設定 WebView 設置"</string>
     <string name="select_webview_provider_toast_text" msgid="8512254949169359848">"此選擇已失效，請再試一次。"</string>
+    <string name="convert_to_file_encryption" msgid="2828976934129751818">"轉換為檔案加密"</string>
+    <string name="convert_to_file_encryption_enabled" msgid="840757431284311754">"轉換…"</string>
+    <string name="convert_to_file_encryption_done" msgid="8965831011811180627">"已加密檔案"</string>
+    <string name="title_convert_fbe" msgid="5780013350366495149">"正在轉換為檔案式加密"</string>
+    <string name="convert_to_fbe_warning" msgid="34294381569282109">"轉換資料分區至檔案式加密。\n！警告！這會清除您的所有資料。\n 這是測試功能，可能未能正常運作。\n如要繼續，請按 [清除並轉換…] 。"</string>
+    <string name="button_convert_fbe" msgid="1159861795137727671">"清除並轉換…"</string>
     <string name="picture_color_mode" msgid="1013807330552931903">"相片顏色模式"</string>
     <string name="picture_color_mode_desc" msgid="151780973768136200">"使用 sRGB"</string>
     <string name="daltonizer_mode_disabled" msgid="403424372812399228">"已停用"</string>
@@ -449,17 +450,19 @@
     <string name="power_remaining_duration_shutdown_imminent" product="tablet" msgid="7703677921000858479">"平板電腦可能即將關機 (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_remaining_duration_shutdown_imminent" product="device" msgid="4374784375644214578">"裝置可能即將關機 (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
-    <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"<xliff:g id="TIME">%1$s</xliff:g>後充滿電"</string>
-    <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g>後充滿電"</string>
-    <string name="power_charging_limited" msgid="7956120998372505295">"<xliff:g id="LEVEL">%1$s</xliff:g> - 充電暫時受限"</string>
+    <!-- no translation found for power_remaining_charging_duration_only (8085099012811384899) -->
+    <skip />
+    <!-- no translation found for power_charging_duration (6127154952524919719) -->
+    <skip />
+    <string name="power_charging_limited" msgid="1956874810658999681">"<xliff:g id="LEVEL">%1$s</xliff:g> - 優化電池效能"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"未知"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"充電中"</string>
-    <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"快速充電中"</string>
-    <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"慢速充電中"</string>
-    <string name="battery_info_status_charging_wireless" msgid="8924722966861282197">"無線充電中"</string>
+    <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"正在快速充電"</string>
+    <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"正在慢速充電"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"非充電中"</string>
-    <string name="battery_info_status_not_charging" msgid="3371084153747234837">"已連接，非充電中"</string>
-    <string name="battery_info_status_full" msgid="1339002294876531312">"已充滿電"</string>
+    <string name="battery_info_status_not_charging" msgid="8330015078868707899">"已連接電源插頭，但目前無法充電"</string>
+    <!-- no translation found for battery_info_status_full (1339002294876531312) -->
+    <skip />
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"已由管理員停用"</string>
     <string name="disabled" msgid="8017887509554714950">"已停用"</string>
     <string name="external_source_trusted" msgid="1146522036773132905">"允許"</string>
@@ -502,10 +505,10 @@
     <string name="cancel" msgid="5665114069455378395">"取消"</string>
     <string name="okay" msgid="949938843324579502">"確定"</string>
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"鬧鐘和提醒"</string>
-    <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"允許設定鬧鐘和提醒"</string>
-    <string name="alarms_and_reminders_title" msgid="8819933264635406032">"鬧鐘和提醒"</string>
-    <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"允許此應用程式設定鬧鐘及安排具時效性的操作。這讓應用程式在背景中執行，因此可能會較耗電。\n\n如果關閉此權限，此應用程式將不會在預定時間響起已設定的鬧鐘，亦不會就特定時間的活動傳送通知。"</string>
-    <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"日程表, 鬧鐘, 提醒, 時鐘"</string>
+    <string name="alarms_and_reminders_switch_title" msgid="186992351401152744">"允許設定鬧鐘或提醒"</string>
+    <string name="alarms_and_reminders_title" msgid="2988400785896875237">"鬧鐘和提醒"</string>
+    <string name="alarms_and_reminders_footer_title" msgid="5882788882647778753">"允許此應用程式安排鬧鐘或其他有時限的活動。執行此操作後，即使您沒有使用裝置，應用程式仍可啟動並執行。請注意，撤消此權限可能會導致應用程式無法運作，尤其是應用程式設定的所有鬧鐘都將不會響鈴。"</string>
+    <string name="keywords_alarms_and_reminders" msgid="8882739572152019456">"日程表, 鬧鐘, 提醒, 活動"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"開啟"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"開啟「請勿騷擾」模式"</string>
     <string name="zen_mode_settings_summary_off" msgid="3832876036123504076">"永不"</string>
@@ -559,15 +562,12 @@
     <string name="user_set_lock_button" msgid="1427128184982594856">"設定上鎖畫面"</string>
     <string name="user_switch_to_user" msgid="6975428297154968543">"切換至<xliff:g id="USER_NAME">%s</xliff:g>"</string>
     <string name="creating_new_user_dialog_message" msgid="7232880257538970375">"正在建立新使用者…"</string>
-    <string name="add_user_failed" msgid="4809887794313944872">"無法建立新使用者"</string>
+    <!-- no translation found for add_user_failed (4809887794313944872) -->
+    <skip />
     <string name="user_nickname" msgid="262624187455825083">"暱稱"</string>
     <string name="guest_new_guest" msgid="3482026122932643557">"新增訪客"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"移除訪客"</string>
-    <string name="guest_reset_guest" msgid="6110013010356013758">"重設訪客"</string>
     <string name="guest_nickname" msgid="6332276931583337261">"訪客"</string>
-    <string name="guest_reset_guest_dialog_title" msgid="8047270010895437534">"要重設訪客嗎？"</string>
-    <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"重設"</string>
-    <string name="guest_resetting" msgid="7822120170191509566">"正在重設訪客…"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"拍照"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"選擇圖片"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"揀相"</string>

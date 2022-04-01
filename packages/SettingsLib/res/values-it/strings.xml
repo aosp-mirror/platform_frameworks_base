@@ -95,9 +95,7 @@
     <string name="bluetooth_profile_a2dp_high_quality" msgid="4739440941324792775">"Audio HD: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="2477639096903834374">"Audio HD"</string>
     <string name="bluetooth_profile_hearing_aid" msgid="58154575573984914">"Apparecchi acustici"</string>
-    <string name="bluetooth_profile_le_audio" msgid="5158149987518342036">"LE_AUDIO"</string>
     <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="8191273236809964030">"Connessione con gli apparecchi acustici stabilita"</string>
-    <string name="bluetooth_le_audio_profile_summary_connected" msgid="3162538609379333442">"Connesso a LE_AUDIO"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="7422607970115444153">"Collegato ad audio media"</string>
     <string name="bluetooth_headset_profile_summary_connected" msgid="2420981566026949688">"Collegato ad audio telefono"</string>
     <string name="bluetooth_opp_profile_summary_connected" msgid="2393521801478157362">"Collegato al server di trasferimento file"</string>
@@ -115,7 +113,6 @@
     <string name="bluetooth_opp_profile_summary_use_for" msgid="461981154387015457">"Usa per trasferimento file"</string>
     <string name="bluetooth_hid_profile_summary_use_for" msgid="4289460627406490952">"Utilizza per l\'input"</string>
     <string name="bluetooth_hearing_aid_profile_summary_use_for" msgid="7689393730163320483">"Utilizza per gli apparecchi acustici"</string>
-    <string name="bluetooth_le_audio_profile_summary_use_for" msgid="2778318636027348572">"Usa per LE_AUDIO"</string>
     <string name="bluetooth_pairing_accept" msgid="2054232610815498004">"Accoppia"</string>
     <string name="bluetooth_pairing_accept_all_caps" msgid="2734383073450506220">"ACCOPPIA"</string>
     <string name="bluetooth_pairing_decline" msgid="6483118841204885890">"Annulla"</string>
@@ -208,13 +205,13 @@
     <string name="tethering_settings_not_available" msgid="266821736434699780">"Le impostazioni Tethering non sono disponibili per questo utente"</string>
     <string name="apn_settings_not_available" msgid="1147111671403342300">"Le impostazioni del nome punto di accesso non sono disponibili per questo utente"</string>
     <string name="enable_adb" msgid="8072776357237289039">"Debug USB"</string>
-    <string name="enable_adb_summary" msgid="3711526030096574316">"Modalità debug in caso di connessione USB"</string>
+    <string name="enable_adb_summary" msgid="3711526030096574316">"Modalità debug quando è connesso tramite USB"</string>
     <string name="clear_adb_keys" msgid="3010148733140369917">"Revoca autorizzazioni debug USB"</string>
     <string name="enable_adb_wireless" msgid="6973226350963971018">"Debug wireless"</string>
-    <string name="enable_adb_wireless_summary" msgid="7344391423657093011">"Modalità debug in caso di connessione Wi-Fi"</string>
+    <string name="enable_adb_wireless_summary" msgid="7344391423657093011">"Modalità debug quando il Wi-Fi è connesso"</string>
     <string name="adb_wireless_error" msgid="721958772149779856">"Errore"</string>
     <string name="adb_wireless_settings" msgid="2295017847215680229">"Debug wireless"</string>
-    <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"Per trovare e utilizzare i dispositivi disponibili, attiva il debug wireless."</string>
+    <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"Per trovare e utilizzare i dispositivi disponibili, attiva il debug wireless"</string>
     <string name="adb_pair_method_qrcode_title" msgid="6982904096137468634">"Accoppia dispositivo con codice QR"</string>
     <string name="adb_pair_method_qrcode_summary" msgid="7130694277228970888">"Accoppia i nuovi dispositivi utilizzando lo scanner di codici QR"</string>
     <string name="adb_pair_method_code_title" msgid="1122590300445142904">"Accoppia dispositivo con codice di accoppiamento"</string>
@@ -241,7 +238,7 @@
     <string name="bugreport_in_power" msgid="8664089072534638709">"Scorciatoia segnalazione bug"</string>
     <string name="bugreport_in_power_summary" msgid="1885529649381831775">"Mostra un pulsante per segnalare i bug nel menu di accensione"</string>
     <string name="keep_screen_on" msgid="1187161672348797558">"Rimani attivo"</string>
-    <string name="keep_screen_on_summary" msgid="1510731514101925829">"Lo schermo non va mai in standby se sotto carica"</string>
+    <string name="keep_screen_on_summary" msgid="1510731514101925829">"Lo schermo non va mai in stand-by se sotto carica"</string>
     <string name="bt_hci_snoop_log" msgid="7291287955649081448">"Attiva log di esame HCI Bluetooth"</string>
     <string name="bt_hci_snoop_log_summary" msgid="6808538971394092284">"Acquisisci pacchetti Bluetooth. Attiva/disattiva Bluetooth dopo aver modificato questa impostazione."</string>
     <string name="oem_unlock_enable" msgid="5334869171871566731">"Sblocco OEM"</string>
@@ -255,7 +252,7 @@
     <string name="wifi_display_certification" msgid="1805579519992520381">"Certificazione display wireless"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"Attiva logging dettagliato Wi-Fi"</string>
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"Limita ricerca di reti Wi‑Fi"</string>
-    <string name="wifi_enhanced_mac_randomization" msgid="882650208573834301">"Randomizzazione indirizzi MAC non persistenti per connessione a reti Wi-Fi"</string>
+    <string name="wifi_enhanced_mac_randomization" msgid="5437378364995776979">"Randomizzazione MAC con Wi‑Fi migliorato"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"Dati mobili sempre attivi"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"Tethering accelerazione hardware"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"Mostra dispositivi Bluetooth senza nome"</string>
@@ -287,7 +284,7 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Mostra opzioni per la certificazione display wireless"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Aumenta livello di logging Wi-Fi, mostra SSID RSSI nel selettore Wi-Fi"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Riduce il consumo della batteria e migliora le prestazioni della rete"</string>
-    <string name="wifi_enhanced_mac_randomization_summary" msgid="1210663439867489931">"Quando questa modalità è attiva, l\'indirizzo MAC del dispositivo potrebbe cambiare ogni volta che si connette a una rete con randomizzazione MAC attivata"</string>
+    <string name="wifi_enhanced_mac_randomization_summary" msgid="1210663439867489931">"Quando questa modalità è attiva, l\'indirizzo MAC del dispositivo potrebbe cambiare ogni volta che si connette a una rete con randomizzazione MAC attivata."</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"A consumo"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Non a consumo"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"Dimensioni buffer logger"</string>
@@ -314,14 +311,14 @@
     <string name="verify_apps_over_usb_summary" msgid="1317933737581167839">"Controlla che le app installate tramite ADB/ADT non abbiano un comportamento dannoso"</string>
     <string name="bluetooth_show_devices_without_names_summary" msgid="780964354377854507">"Verranno mostrati solo dispositivi Bluetooth senza nome (solo indirizzo MAC)"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="2006309932135547681">"Disattiva la funzione del volume assoluto Bluetooth in caso di problemi con il volume dei dispositivi remoti, ad esempio un volume troppo alto o la mancanza di controllo"</string>
-    <string name="bluetooth_enable_gabeldorsche_summary" msgid="2054730331770712629">"Consente di attivare lo stack delle funzionalità Bluetooth Gabeldorsche"</string>
+    <string name="bluetooth_enable_gabeldorsche_summary" msgid="2054730331770712629">"Consente di attivare lo stack delle funzionalità Bluetooth Gabeldorsche."</string>
     <string name="enhanced_connectivity_summary" msgid="1576414159820676330">"Consente di attivare la funzionalità Connettività migliorata."</string>
     <string name="enable_terminal_title" msgid="3834790541986303654">"Terminale locale"</string>
     <string name="enable_terminal_summary" msgid="2481074834856064500">"Abilita l\'app Terminale che offre l\'accesso alla shell locale"</string>
     <string name="hdcp_checking_title" msgid="3155692785074095986">"Verifica HDCP"</string>
     <string name="hdcp_checking_dialog_title" msgid="7691060297616217781">"Comportamento di verifica HDCP"</string>
     <string name="debug_debugging_category" msgid="535341063709248842">"Debug"</string>
-    <string name="debug_app" msgid="8903350241392391766">"Seleziona l\'app per il debug"</string>
+    <string name="debug_app" msgid="8903350241392391766">"Seleziona l\'applicazione per il debug"</string>
     <string name="debug_app_not_set" msgid="1934083001283807188">"Nessuna applicazione impostata per il debug"</string>
     <string name="debug_app_set" msgid="6599535090477753651">"Debug dell\'applicazione: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="select_application" msgid="2543228890535466325">"Seleziona applicazione"</string>
@@ -334,17 +331,17 @@
     <string name="media_category" msgid="8122076702526144053">"Contenuti multimediali"</string>
     <string name="debug_monitoring_category" msgid="1597387133765424994">"Monitoraggio"</string>
     <string name="strict_mode" msgid="889864762140862437">"Attiva StrictMode"</string>
-    <string name="strict_mode_summary" msgid="1838248687233554654">"Schermo lampeggia per operazioni lunghe su thread principale"</string>
+    <string name="strict_mode_summary" msgid="1838248687233554654">"Flash dello schermo in caso di lunghe operazioni sul thread principale"</string>
     <string name="pointer_location" msgid="7516929526199520173">"Posizione puntatore"</string>
     <string name="pointer_location_summary" msgid="957120116989798464">"Overlay schermo che mostra i dati touch correnti"</string>
     <string name="show_touches" msgid="8437666942161289025">"Mostra tocchi"</string>
     <string name="show_touches_summary" msgid="3692861665994502193">"Mostra feedback visivi per i tocchi"</string>
     <string name="show_screen_updates" msgid="2078782895825535494">"Aggiornamenti superficie"</string>
-    <string name="show_screen_updates_summary" msgid="2126932969682087406">"Superfici delle finestre lampeggiano se aggiornate"</string>
+    <string name="show_screen_updates_summary" msgid="2126932969682087406">"Flash delle superfici delle finestre all\'aggiornamento"</string>
     <string name="show_hw_screen_updates" msgid="2021286231267747506">"Aggiornam. visualizzazione"</string>
-    <string name="show_hw_screen_updates_summary" msgid="3539770072741435691">"Visualizz. lampeggiano dentro finestre se disegnate"</string>
+    <string name="show_hw_screen_updates_summary" msgid="3539770072741435691">"Flash visualizzazioni dentro finestre se disegnate"</string>
     <string name="show_hw_layers_updates" msgid="5268370750002509767">"Aggiornam. livelli hardware"</string>
-    <string name="show_hw_layers_updates_summary" msgid="5850955890493054618">"Livelli hardware lampeggiano in verde se aggiornati"</string>
+    <string name="show_hw_layers_updates_summary" msgid="5850955890493054618">"Lampeggia in verde livelli hardware durante aggiornamento"</string>
     <string name="debug_hw_overdraw" msgid="8944851091008756796">"Debug overdraw GPU"</string>
     <string name="disable_overlays" msgid="4206590799671557143">"Disabilita overlay HW"</string>
     <string name="disable_overlays_summary" msgid="1954852414363338166">"Usa sempre GPU per la composizione dello schermo"</string>
@@ -356,7 +353,6 @@
     <string name="debug_layout_summary" msgid="8825829038287321978">"Mostra limiti, margini dei clip e così via"</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"Forza direzione layout RTL"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"Direzione layout schermo RTL per tutte le lingue"</string>
-    <string name="window_blurs" msgid="6831008984828425106">"Consenti sfocature finestre"</string>
     <string name="force_msaa" msgid="4081288296137775550">"Forza MSAA 4x"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"Attiva MSAA 4x in applicazioni OpenGL ES 2.0"</string>
     <string name="show_non_rect_clip" msgid="7499758654867881817">"Debug operazioni ritaglio non rettangolare"</string>
@@ -364,7 +360,7 @@
     <string name="enable_gpu_debug_layers" msgid="4986675516188740397">"Attiva livelli debug GPU"</string>
     <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"Consenti caricamento livelli debug GPU per app di debug"</string>
     <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"Attiva log dettagliati fornitori"</string>
-    <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"Includi log aggiuntivi di fornitori relativi a un dispositivo specifico nelle segnalazioni di bug che potrebbero contenere informazioni private, causare un maggior consumo della batteria e/o utilizzare più spazio di archiviazione"</string>
+    <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"Includi log aggiuntivi di fornitori relativi a un dispositivo specifico nelle segnalazioni di bug che potrebbero contenere informazioni private, causare un maggior consumo della batteria e/o utilizzare più spazio di archiviazione."</string>
     <string name="window_animation_scale_title" msgid="5236381298376812508">"Scala animazione finestra"</string>
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"Scala animazione transizione"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"Scala durata animatore"</string>
@@ -409,12 +405,17 @@
     <string name="transcode_enable_all" msgid="2411165920039166710">"Attiva transcodifica"</string>
     <string name="transcode_default" msgid="3784803084573509491">"Presupponi che le app supportino i formati moderni"</string>
     <string name="transcode_notification" msgid="5560515979793436168">"Mostra notifiche relative alla transcodifica"</string>
-    <string name="transcode_disable_cache" msgid="3160069309377467045">"Disattiva memorizzazione nella cache per la transcodifica"</string>
     <string name="runningservices_settings_title" msgid="6460099290493086515">"Servizi in esecuzione"</string>
     <string name="runningservices_settings_summary" msgid="1046080643262665743">"Visualizza e controlla i servizi attualmente in esecuzione"</string>
     <string name="select_webview_provider_title" msgid="3917815648099445503">"Implementazione di WebView"</string>
     <string name="select_webview_provider_dialog_title" msgid="2444261109877277714">"Imposta l\'implementazione di WebView"</string>
     <string name="select_webview_provider_toast_text" msgid="8512254949169359848">"La selezione non è più valida. Riprova."</string>
+    <string name="convert_to_file_encryption" msgid="2828976934129751818">"Converti in crittografia basata su file"</string>
+    <string name="convert_to_file_encryption_enabled" msgid="840757431284311754">"Converti…"</string>
+    <string name="convert_to_file_encryption_done" msgid="8965831011811180627">"Crittografia su base file già eseguita"</string>
+    <string name="title_convert_fbe" msgid="5780013350366495149">"Conversione in crittografia basata su file"</string>
+    <string name="convert_to_fbe_warning" msgid="34294381569282109">"Converti la partizione di dati in crittografia basata su file.\n Attenzione. Questa operazione eliminerà tutti i tuoi dati.\n Questa funzione è in versione alpha, pertanto potrebbe non funzionare correttamente.\n Premi \"Cancella e converti…\" per continuare."</string>
+    <string name="button_convert_fbe" msgid="1159861795137727671">"Cancella e converti…"</string>
     <string name="picture_color_mode" msgid="1013807330552931903">"Modalità colori immagini"</string>
     <string name="picture_color_mode_desc" msgid="151780973768136200">"Use sRGB"</string>
     <string name="daltonizer_mode_disabled" msgid="403424372812399228">"Disattivato"</string>
@@ -436,12 +437,12 @@
     <string name="power_discharge_by_only_enhanced" msgid="3268796172652988877">"Ora stimata esaurimento batteria in base al tuo utilizzo: <xliff:g id="TIME">%1$s</xliff:g> circa"</string>
     <string name="power_discharge_by" msgid="4113180890060388350">"Ora stimata esaurimento batteria: <xliff:g id="TIME">%1$s</xliff:g> circa (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_discharge_by_only" msgid="92545648425937000">"Ora stimata esaurimento batteria: <xliff:g id="TIME">%1$s</xliff:g> circa"</string>
-    <string name="power_discharge_by_only_short" msgid="5883041507426914446">"Fino a: <xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <string name="power_discharge_by_only_short" msgid="5883041507426914446">"Fino alle ore <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_suggestion_battery_run_out" msgid="6332089307827787087">"La batteria potrebbe esaurirsi entro le <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_remaining_less_than_duration_only" msgid="8956656616031395152">"Carica residua: meno di <xliff:g id="THRESHOLD">%1$s</xliff:g>"</string>
     <string name="power_remaining_less_than_duration" msgid="318215464914990578">"Carica residua: meno di <xliff:g id="THRESHOLD">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_more_than_subtext" msgid="446388082266121894">"Tempo residuo: più di <xliff:g id="TIME_REMAINING">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_remaining_only_more_than_subtext" msgid="4873750633368888062">"Tempo rimanente: più di <xliff:g id="TIME_REMAINING">%1$s</xliff:g>"</string>
+    <string name="power_remaining_only_more_than_subtext" msgid="4873750633368888062">"Tempo residuo: più di <xliff:g id="TIME_REMAINING">%1$s</xliff:g>"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="default" msgid="137330009791560774">"Il telefono potrebbe spegnersi a breve"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="tablet" msgid="145489081521468132">"Il tablet potrebbe spegnersi a breve"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="device" msgid="1070562682853942350">"Il dispositivo potrebbe spegnersi a breve"</string>
@@ -451,19 +452,18 @@
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"<xliff:g id="TIME">%1$s</xliff:g> alla ricarica completa"</string>
     <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> alla ricarica completa"</string>
-    <string name="power_charging_limited" msgid="7956120998372505295">"<xliff:g id="LEVEL">%1$s</xliff:g> - Ricarica momentaneamente limitata"</string>
+    <string name="power_charging_limited" msgid="1956874810658999681">"<xliff:g id="LEVEL">%1$s</xliff:g> - Ottimizzazione per integrità batteria"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"Sconosciuta"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"In carica"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"Ricarica veloce"</string>
     <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"Ricarica lenta"</string>
-    <string name="battery_info_status_charging_wireless" msgid="8924722966861282197">"In carica, wireless"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"Non in carica"</string>
-    <string name="battery_info_status_not_charging" msgid="3371084153747234837">"Dispositivo connesso, non in carica"</string>
+    <string name="battery_info_status_not_charging" msgid="8330015078868707899">"Collegato alla corrente. Impossibile caricare al momento"</string>
     <string name="battery_info_status_full" msgid="1339002294876531312">"Carica"</string>
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"Gestita dall\'amministratore"</string>
     <string name="disabled" msgid="8017887509554714950">"Disattivato"</string>
-    <string name="external_source_trusted" msgid="1146522036773132905">"Autorizzazione concessa"</string>
-    <string name="external_source_untrusted" msgid="5037891688911672227">"Autorizzazione non concessa"</string>
+    <string name="external_source_trusted" msgid="1146522036773132905">"Autorizzate"</string>
+    <string name="external_source_untrusted" msgid="5037891688911672227">"Non consentite"</string>
     <string name="install_other_apps" msgid="3232595082023199454">"Installa app sconosciute"</string>
     <string name="home" msgid="973834627243661438">"Home page Impostazioni"</string>
   <string-array name="battery_labels">
@@ -473,10 +473,10 @@
   </string-array>
     <string name="charge_length_format" msgid="6941645744588690932">"<xliff:g id="ID_1">%1$s</xliff:g> fa"</string>
     <string name="remaining_length_format" msgid="4310625772926171089">"<xliff:g id="ID_1">%1$s</xliff:g> rimanenti"</string>
-    <string name="screen_zoom_summary_small" msgid="6050633151263074260">"Piccole"</string>
+    <string name="screen_zoom_summary_small" msgid="6050633151263074260">"Piccolo"</string>
     <string name="screen_zoom_summary_default" msgid="1888865694033865408">"Predefinite"</string>
-    <string name="screen_zoom_summary_large" msgid="4706951482598978984">"Grandi"</string>
-    <string name="screen_zoom_summary_very_large" msgid="7317423942896999029">"Più grandi"</string>
+    <string name="screen_zoom_summary_large" msgid="4706951482598978984">"Grande"</string>
+    <string name="screen_zoom_summary_very_large" msgid="7317423942896999029">"Più grande"</string>
     <string name="screen_zoom_summary_extremely_large" msgid="1438045624562358554">"Massimo"</string>
     <string name="screen_zoom_summary_custom" msgid="3468154096832912210">"Personalizzato (<xliff:g id="DENSITYDPI">%d</xliff:g>)"</string>
     <string name="content_description_menu_button" msgid="6254844309171779931">"Menu"</string>
@@ -502,10 +502,10 @@
     <string name="cancel" msgid="5665114069455378395">"Annulla"</string>
     <string name="okay" msgid="949938843324579502">"OK"</string>
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"Sveglie e promemoria"</string>
-    <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"Consenti l\'impostazione di sveglie e promemoria"</string>
-    <string name="alarms_and_reminders_title" msgid="8819933264635406032">"Sveglie e promemoria"</string>
-    <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"Consenti a questa app di impostare sveglie e programmare azioni per le quali il fattore temporale è decisivo. L\'app potrà essere eseguita in background, comportando un consumo maggiore della batteria.\n\nSe questa autorizzazione viene disattivata, le sveglie esistenti e gli eventi basati sull\'orario programmati da questa app non funzioneranno."</string>
-    <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"programmare, sveglia, promemoria, orologio"</string>
+    <string name="alarms_and_reminders_switch_title" msgid="186992351401152744">"Consenti di impostare sveglie o promemoria"</string>
+    <string name="alarms_and_reminders_title" msgid="2988400785896875237">"Sveglie e promemoria"</string>
+    <string name="alarms_and_reminders_footer_title" msgid="5882788882647778753">"Consenti a questa app di programmare sveglie o altri eventi basati sull\'orario. In questo modo potrai riattivare ed eseguire l\'app anche quando non usi il dispositivo. Tieni presente che la revoca di questa autorizzazione potrebbe causare il malfunzionamento dell\'app; in particolare, le eventuali sveglie programmate nell\'app non funzioneranno più."</string>
+    <string name="keywords_alarms_and_reminders" msgid="8882739572152019456">"programmare, sveglia, promemoria, evento"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"Attiva"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"Attiva Non disturbare"</string>
     <string name="zen_mode_settings_summary_off" msgid="3832876036123504076">"Mai"</string>
@@ -559,15 +559,12 @@
     <string name="user_set_lock_button" msgid="1427128184982594856">"Imposta blocco"</string>
     <string name="user_switch_to_user" msgid="6975428297154968543">"Passa a <xliff:g id="USER_NAME">%s</xliff:g>"</string>
     <string name="creating_new_user_dialog_message" msgid="7232880257538970375">"Creazione nuovo utente…"</string>
-    <string name="add_user_failed" msgid="4809887794313944872">"Creazione nuovo utente non riuscita"</string>
+    <!-- no translation found for add_user_failed (4809887794313944872) -->
+    <skip />
     <string name="user_nickname" msgid="262624187455825083">"Nickname"</string>
     <string name="guest_new_guest" msgid="3482026122932643557">"Aggiungi ospite"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"Rimuovi ospite"</string>
-    <string name="guest_reset_guest" msgid="6110013010356013758">"Reimposta sessione Ospite"</string>
     <string name="guest_nickname" msgid="6332276931583337261">"Ospite"</string>
-    <string name="guest_reset_guest_dialog_title" msgid="8047270010895437534">"Reimpostare sessione Ospite?"</string>
-    <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"Reimposta"</string>
-    <string name="guest_resetting" msgid="7822120170191509566">"Reimpostazione sessione Ospite in corso…"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"Scatta una foto"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"Scegli un\'immagine"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"Seleziona la foto"</string>

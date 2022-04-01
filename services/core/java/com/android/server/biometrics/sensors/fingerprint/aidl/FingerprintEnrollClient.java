@@ -57,7 +57,7 @@ class FingerprintEnrollClient extends EnrollClient<ISession> implements Udfps {
     private boolean mIsPointerDown;
 
     FingerprintEnrollClient(@NonNull Context context,
-            @NonNull LazyDaemon<ISession> lazyDaemon, @NonNull IBinder token,
+            @NonNull LazyDaemon<ISession> lazyDaemon, @NonNull IBinder token, long requestId,
             @NonNull ClientMonitorCallbackConverter listener, int userId,
             @NonNull byte[] hardwareAuthToken, @NonNull String owner,
             @NonNull BiometricUtils<Fingerprint> utils, int sensorId,
@@ -69,6 +69,7 @@ class FingerprintEnrollClient extends EnrollClient<ISession> implements Udfps {
         super(context, lazyDaemon, token, listener, userId, hardwareAuthToken, owner, utils,
                 0 /* timeoutSec */, BiometricsProtoEnums.MODALITY_FINGERPRINT, sensorId,
                 !sensorProps.isAnyUdfpsType() /* shouldVibrate */);
+        setRequestId(requestId);
         mSensorProps = sensorProps;
         mSensorOverlays = new SensorOverlays(udfpsOverlayController, sidefpsController);
         mMaxTemplatesPerUser = maxTemplatesPerUser;

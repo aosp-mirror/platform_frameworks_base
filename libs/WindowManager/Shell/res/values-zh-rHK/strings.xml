@@ -20,7 +20,6 @@
     <string name="pip_phone_close" msgid="5783752637260411309">"關閉"</string>
     <string name="pip_phone_expand" msgid="2579292903468287504">"展開"</string>
     <string name="pip_phone_settings" msgid="5468987116750491918">"設定"</string>
-    <string name="pip_phone_enter_split" msgid="7042877263880641911">"進入分割螢幕"</string>
     <string name="pip_menu_title" msgid="5393619322111827096">"選單"</string>
     <string name="pip_notification_title" msgid="1347104727641353453">"「<xliff:g id="NAME">%s</xliff:g>」目前在畫中畫模式"</string>
     <string name="pip_notification_message" msgid="8854051911700302620">"如果您不想「<xliff:g id="NAME">%s</xliff:g>」使用此功能，請輕按以開啟設定，然後停用此功能。"</string>
@@ -29,8 +28,6 @@
     <string name="pip_skip_to_next" msgid="8403429188794867653">"跳到下一個"</string>
     <string name="pip_skip_to_prev" msgid="7172158111196394092">"跳到上一個"</string>
     <string name="accessibility_action_pip_resize" msgid="4623966104749543182">"調整大小"</string>
-    <string name="accessibility_action_pip_stash" msgid="4060775037619702641">"保護"</string>
-    <string name="accessibility_action_pip_unstash" msgid="7467499339610437646">"取消保護"</string>
     <string name="dock_forced_resizable" msgid="1749750436092293116">"應用程式可能無法在分割畫面中運作。"</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="7408396418008948957">"應用程式不支援分割畫面。"</string>
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"應用程式可能無法在次要顯示屏上運作。"</string>
@@ -73,4 +70,5 @@
     <string name="manage_bubbles_text" msgid="7730624269650594419">"管理"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"對話氣泡已關閉。"</string>
     <string name="restart_button_description" msgid="5887656107651190519">"輕按即可重新開啟此應用程式並放大至全螢幕。"</string>
+    <string name="got_it" msgid="4428750913636945527">"知道了"</string>
 </resources>

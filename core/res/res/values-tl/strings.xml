@@ -202,6 +202,7 @@
     <string name="gnss_service" msgid="8907781262179951385">"Serbisyo ng GNSS"</string>
     <string name="sensor_notification_service" msgid="7474531979178682676">"Serbisyo ng Notification ng Sensor"</string>
     <string name="twilight_service" msgid="8964898045693187224">"Serbisyo ng Twilight"</string>
+    <string name="offline_location_time_zone_detection_service_attribution" msgid="303754195048744816">"Detector ng Time Zone (Walang koneksyon)"</string>
     <string name="gnss_time_update_service" msgid="9039489496037616095">"Serbisyo sa Pag-update ng Oras ng GNSS"</string>
     <string name="music_recognition_manager_service" msgid="7481956037950276359">"Serbisyo ng Music Recognition Manager"</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"Buburahin ang iyong device"</string>
@@ -469,8 +470,6 @@
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"Pinapahintulutan ang app na gamitin ang serbisyo ng IMS upang tumawag nang walang pahintulot mo."</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"basahin ang katayuan at pagkakakilanlan ng telepono"</string>
     <string name="permdesc_readPhoneState" msgid="7229063553502788058">"Pinapayagan ang app na i-access ang mga tampok ng telepono ng device. Pinapayagan ng pahintulot na ito ang app na tukuyin ang numero ng telepono at  mga ID ng device, kung aktibo man ang isang tawag, at ang malayuang numerong ikinonekta ng isang tawag."</string>
-    <string name="permlab_readBasicPhoneState" msgid="3214853233263871347">"basahin ang pangunahing status at pagkakakilanlan sa telephony"</string>
-    <string name="permdesc_readBasicPhoneState" msgid="828185691675460520">"Pinapayagan ang app na i-access ang mga pangunahing feature sa telephony ng device."</string>
     <string name="permlab_manageOwnCalls" msgid="9033349060307561370">"iruta ang mga tawag sa pamamagitan ng system"</string>
     <string name="permdesc_manageOwnCalls" msgid="4431178362202142574">"Pinapayagan ang app na iruta ang mga tawag nito sa pamamagitan ng system upang mapahusay ang karanasan sa pagtawag."</string>
     <string name="permlab_callCompanionApp" msgid="3654373653014126884">"tingnan at kontrolin ang mga tawag sa pamamagitan ng system."</string>
@@ -543,8 +542,6 @@
     <string name="permdesc_bluetooth_advertise" product="default" msgid="6085174451034210183">"Nagbibigay-daan sa app na mag-advertise sa mga kalapit na Bluetooth device"</string>
     <string name="permlab_uwb_ranging" msgid="8141915781475770665">"tukuyin ang relatibong posisyon sa pagitan ng mga kalapit na Ultra-Wideband device"</string>
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"Payagan ang app na tukuyin ang relatibong posisyon sa pagitan ng mga kalapit na Ultra-Wideband device"</string>
-    <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"makipag-ugnayan sa mga kalapit na Wi‑Fi device"</string>
-    <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"Nagbibigay-daan sa app na i-advertise ang, kumonekta sa, at tukuyin ang nauugnay na posisyon ng mga kalapit na Wi‑Fi device"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Impormasyon sa Gustong NFC na Serbisyo sa Pagbabayad"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Pinapayagan ang app na makakuha ng impormasyon sa gustong nfc na serbisyo sa pagbabayad tulad ng mga nakarehistrong application ID at destinasyon ng ruta."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"kontrolin ang Near Field Communication"</string>
@@ -583,12 +580,11 @@
     <string name="fingerprint_acquired_partial" msgid="694598777291084823">"Hindi buo ang natukoy na fingerprint"</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"Hindi maproseso ang fingerprint. Pakisubukan ulit."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="5236744087471419479">"Linisin ang sensor"</string>
-    <string name="fingerprint_acquired_too_fast" msgid="6038375140739678098">"I-hold nang mas matagal nang kaunti"</string>
+    <string name="fingerprint_acquired_too_fast" msgid="1254724478300787385">"Masyadong mabilis ang paggalaw ng daliri"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"Masyadong mabagal ang paggalaw ng daliri. Pakisubukan ulit."</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"Sumubok ng ibang fingerprint"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"Masyadong maliwanag"</string>
     <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"Subukang isaayos"</string>
-    <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"Bahagyang baguhin ang posisyon ng iyong daliri sa bawat pagkakataon"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"Na-authenticate ang fingerprint"</string>
@@ -605,7 +601,6 @@
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"Walang naka-enroll na fingerprint."</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"Walang sensor ng fingerprint ang device na ito."</string>
     <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"Pansamantalang na-disable ang sensor."</string>
-    <string name="fingerprint_error_bad_calibration" msgid="4385512597740168120">"Hindi magamit ang sensor para sa fingerprint. Bumisita sa provider ng pag-aayos"</string>
     <string name="fingerprint_name_template" msgid="8941662088160289778">"Daliri <xliff:g id="FINGERID">%d</xliff:g>"</string>
     <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"Gumamit ng fingerprint"</string>
     <string name="fingerprint_or_screen_lock_app_setting_name" msgid="3501743523487644907">"Gumamit ng fingerprint o lock ng screen"</string>
@@ -613,19 +608,18 @@
     <string name="fingerprint_or_screen_lock_dialog_default_subtitle" msgid="5195808203117992200">"Gamitin ang iyong fingerprint o lock ng screen para magpatuloy"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
-    <string name="fingerprint_error_vendor_unknown" msgid="4170002184907291065">"Nagkaproblema. Subukan ulit."</string>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"Icon ng fingerprint"</string>
-    <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"Pag-unlock Gamit ang Mukha"</string>
-    <string name="face_recalibrate_notification_title" msgid="2524791952735579082">"Isyu sa Pag-unlock Gamit ang Mukha"</string>
-    <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"I-tap para i-delete ang iyong face model, pagkatapos ay idagdag ulit ang mukha mo"</string>
-    <string name="face_setup_notification_title" msgid="8843461561970741790">"I-set up ang Pag-unlock Gamit ang Mukha"</string>
+    <string name="permlab_manageFace" msgid="4569549381889283282">"pamahalaan ang hardware ng face unlock"</string>
+    <string name="permdesc_manageFace" msgid="6204569688492710471">"Pumapayag na mag-invoke ang app ng paraang magdagdag at mag-delete ng template ng mukha."</string>
+    <string name="permlab_useFaceAuthentication" msgid="1011430526454859030">"gamitin ang hardware ng face unlock"</string>
+    <string name="permdesc_useFaceAuthentication" msgid="3115697017684668012">"Pinapayagan ang app na gamitin ang hardware ng face unlock para sa pag-authenticate"</string>
+    <string name="face_recalibrate_notification_name" msgid="6006095897989257026">"Face unlock"</string>
+    <string name="face_recalibrate_notification_title" msgid="5944930528030496897">"I-enroll ulit ang iyong mukha"</string>
+    <string name="face_recalibrate_notification_content" msgid="892757485125249962">"Para mapahusay ang pagkilala, paki-enroll ulit ang iyong mukha"</string>
+    <string name="face_setup_notification_title" msgid="550617822603450009">"I-set up ang face unlock"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"I-unlock ang iyong telepono sa pamamagitan ng pagtingin dito"</string>
-    <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"Para magamit ang Pag-unlock Gamit ang Mukha, i-on ang "<b>"Access sa camera"</b>" sa Mga Setting &gt; Privacy"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Mag-set up ng higit pang paraan para mag-unlock"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"I-tap para magdagdag ng fingerprint"</string>
-    <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Pag-unlock Gamit ang Fingerprint"</string>
-    <string name="fingerprint_recalibrate_notification_title" msgid="2406561052064558497">"Hindi magamit ang sensor para sa fingerprint"</string>
-    <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"Bumisita sa provider ng pag-aayos."</string>
     <string name="face_acquired_insufficient" msgid="2150805835949162453">"Hindi makakuha ng tamang face data. Subukang muli."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"Masyadong maliwanag. Subukang bawasan ang liwanag."</string>
     <string name="face_acquired_too_dark" msgid="252573548464426546">"Masyadong madilim. Subukan sa mas maliwanag."</string>
@@ -649,25 +643,23 @@
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"Di ma-verify ang mukha. Di available ang hardware."</string>
-    <string name="face_error_timeout" msgid="2598544068593889762">"Subukan ulit ang Pag-unlock Gamit ang Mukha"</string>
+    <string name="face_error_timeout" msgid="522924647742024699">"Subukan ulit ang face unlock."</string>
     <string name="face_error_no_space" msgid="5649264057026021723">"Hindi ma-store ang data ng mukha. Mag-delete muna ng iba."</string>
     <string name="face_error_canceled" msgid="2164434737103802131">"Nakansela ang operation kaugnay ng mukha."</string>
-    <string name="face_error_user_canceled" msgid="5766472033202928373">"Kinansela ng user ang Pag-unlock Gamit ang Mukha"</string>
+    <string name="face_error_user_canceled" msgid="8553045452825849843">"Kinansela ng user ang face unlock."</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"Masyadong maraming pagsubok. Subukang muli mamaya."</string>
-    <string name="face_error_lockout_permanent" msgid="3277134834042995260">"Masyado nang maraming beses sinubukan. Na-disable ang Pag-unlock Gamit ang Mukha."</string>
-    <string name="face_error_lockout_screen_lock" msgid="5062609811636860928">"Masyado nang maraming beses sinubukan. Ilagay na lang ang lock ng screen."</string>
+    <string name="face_error_lockout_permanent" msgid="8277853602168960343">"Masyadong maraming pagsubok. Na-disable ang face unlock."</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"Hindi ma-verify ang mukha. Subukang muli."</string>
-    <string name="face_error_not_enrolled" msgid="1134739108536328412">"Hindi mo pa nase-set up ang Pag-unlock Gamit ang Mukha"</string>
-    <string name="face_error_hw_not_present" msgid="7940978724978763011">"Hindi sinusuportahan ang Pag-unlock Gamit ang Mukha sa device na ito"</string>
+    <string name="face_error_not_enrolled" msgid="7369928733504691611">"Hindi mo pa nase-set up ang face unlock."</string>
+    <string name="face_error_hw_not_present" msgid="1070600921591729944">"Hindi sinusuportahan ang face unlock sa device na ito."</string>
     <string name="face_error_security_update_required" msgid="5076017208528750161">"Pansamantalang na-disable ang sensor."</string>
     <string name="face_name_template" msgid="3877037340223318119">"Mukha <xliff:g id="FACEID">%d</xliff:g>"</string>
-    <string name="face_app_setting_name" msgid="5854024256907828015">"Gumamit ng Pag-unlock Gamit ang Mukha"</string>
+    <string name="face_app_setting_name" msgid="8130135875458467243">"Gumamit ng face unlock"</string>
     <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"Gumamit ng mukha o lock ng screen"</string>
     <string name="face_dialog_default_subtitle" msgid="6620492813371195429">"Gamitin ang iyong mukha para magpatuloy"</string>
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"Gamitin ang iyong mukha o lock ng screen para magpatuloy"</string>
   <string-array name="face_error_vendor">
   </string-array>
-    <string name="face_error_vendor_unknown" msgid="7387005932083302070">"Nagkaproblema. Subukan ulit."</string>
     <string name="face_icon_content_description" msgid="465030547475916280">"Face icon"</string>
     <string name="permlab_readSyncSettings" msgid="6250532864893156277">"basahin ang mga setting ng sync"</string>
     <string name="permdesc_readSyncSettings" msgid="1325658466358779298">"Pinapayagan ang app na basahin ang mga setting ng pag-sync para sa isang account. Halimbawa, matutukoy nito kung naka-sync ang app na Mga Tao sa isang account."</string>
@@ -734,11 +726,9 @@
     <string name="policylab_watchLogin" msgid="7599669460083719504">"Subaybayan ang mga pagsubok sa pag-unlock ng screen"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"Subaybayan ang bilang ng mga hindi tamang password na na-type kapag ina-unlock ang screen, at i-lock ang tablet o burahin ang lahat ng data ng tablet kung masyadong maraming hindi tamang password ang na-type."</string>
     <string name="policydesc_watchLogin" product="tv" msgid="2140588224468517507">"Subaybayan ang dami ng mga maling password na na-type kapag ina-unlock ang screen, at i-lock ang Android TV device o burahin ang lahat ng data ng Android TV device kung masyadong maraming maling password ang na-type."</string>
-    <string name="policydesc_watchLogin" product="automotive" msgid="7011438994051251521">"Subaybayan ang bilang ng mga maling password kapag ina-unlock ang screen, at i-lock ang infotainment system o burahin ang lahat ng data ng infotainment system kung masyadong maraming maling password ang nata-type."</string>
     <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"Subaybayan ang bilang ng mga maling password na na-type kapag ina-unlock ang screen, at i-lock ang telepono o burahin ang lahat ng data ng telepono kung masyadong maraming maling password ang na-type."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="2049038943004297474">"Subaybayan ang bilang ng mga maling password na na-type kapag ina-unlock ang screen, at i-lock ang tablet o burahin ang lahat ng data ng user na ito kung masyadong maraming maling password ang nata-type."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tv" msgid="8965224107449407052">"Subaybayan ang dami ng mga maling password na na-type kapag ina-unlock ang screen, at i-lock ang iyong Android TV device o burahin ang lahat ng data ng user na ito kung masyadong maraming maling password ang na-type."</string>
-    <string name="policydesc_watchLogin_secondaryUser" product="automotive" msgid="7180857406058327941">"Subaybayan ang bilang ng mga maling password na na-type kapag ina-unlock ang screen, at i-lock ang infotainment system o burahin ang lahat ng data ng profile na ito kung masyadong maraming maling password ang nata-type."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="9177645136475155924">"Subaybayan ang bilang ng mga maling password na na-type kapag ina-unlock ang screen, at i-lock ang telepono o burahin ang lahat ng data ng user na ito kung masyadong maraming maling password ang nata-type."</string>
     <string name="policylab_resetPassword" msgid="214556238645096520">"Palitan ang screen lock"</string>
     <string name="policydesc_resetPassword" msgid="4626419138439341851">"Palitan ang screen lock."</string>
@@ -747,13 +737,10 @@
     <string name="policylab_wipeData" msgid="1359485247727537311">"Burahin ang lahat ng data"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"Burahin ang data ng tablet nang walang babala sa pamamagitan ng pagsasagawa ng pag-reset ng factory data."</string>
     <string name="policydesc_wipeData" product="tv" msgid="513862488950801261">"Burahin ang data ng iyong Android TV device nang walang babala sa pamamagitan ng pagsasagawa ng pag-reset ng factory data."</string>
-    <string name="policydesc_wipeData" product="automotive" msgid="660804547737323300">"Burahin ang data ng infotainment system nang walang babala sa pamamagitan ng pagsasagawa ng pag-reset ng factory data."</string>
     <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"Burahin ang data ng telepono nang walang babala sa pamamagitan ng pagsasagawa ng pag-reset ng factory data."</string>
-    <string name="policylab_wipeData_secondaryUser" product="automotive" msgid="115034358520328373">"Burahin ang data ng profile"</string>
-    <string name="policylab_wipeData_secondaryUser" product="default" msgid="413813645323433166">"Burahin ang data ng user"</string>
+    <string name="policylab_wipeData_secondaryUser" msgid="413813645323433166">"Burahin ang data ng user"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="2336676480090926470">"Burahin ang data ng user na ito sa tablet na ito nang walang babala."</string>
     <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2293713284515865200">"Burahin ang data ng user na ito sa Android TV device na ito nang walang babala."</string>
-    <string name="policydesc_wipeData_secondaryUser" product="automotive" msgid="4658832487305780879">"Burahin ang data ng profile na ito sa infotainment system na ito nang walang babala."</string>
     <string name="policydesc_wipeData_secondaryUser" product="default" msgid="2788325512167208654">"Burahin ang data ng user na ito sa teleponong ito nang walang babala."</string>
     <string name="policylab_setGlobalProxy" msgid="215332221188670221">"Itakda ang pandaigdigang proxy ng device"</string>
     <string name="policydesc_setGlobalProxy" msgid="7149665222705519604">"Itakda ang pandaigdigang proxy ng device na gagamitin habang naka-enable ang patakaran. Ang may-ari ng device lang ang makakapagtakda sa pandaigdigang proxy."</string>
@@ -900,7 +887,7 @@
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"Subukang muli"</string>
     <string name="lockscreen_password_wrong" msgid="8605355913868947490">"Subukang muli"</string>
     <string name="lockscreen_storage_locked" msgid="634993789186443380">"I-unlock para sa lahat ng feature at data"</string>
-    <string name="faceunlock_multiple_failures" msgid="681991538434031708">"Nalagpasan na ang maximum na mga pagtatangka sa Pag-unlock Gamit ang Mukha"</string>
+    <string name="faceunlock_multiple_failures" msgid="681991538434031708">"Nalagpasan na ang maximum na mga pagtatangka sa Face Unlock"</string>
     <string name="lockscreen_missing_sim_message_short" msgid="1248431165144893792">"Walang SIM card"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="8596805728510570760">"Walang SIM card sa tablet."</string>
     <string name="lockscreen_missing_sim_message" product="tv" msgid="2582768023352171073">"Walang SIM card sa iyong Android TV device."</string>
@@ -970,7 +957,7 @@
     <string name="keyguard_accessibility_expand_lock_area" msgid="4215280881346033434">"Palakihin ang bahagi ng pag-unlock."</string>
     <string name="keyguard_accessibility_slide_unlock" msgid="2968195219692413046">"Pag-unlock ng slide."</string>
     <string name="keyguard_accessibility_pattern_unlock" msgid="8669128146589233293">"Pag-unlock ng pattern."</string>
-    <string name="keyguard_accessibility_face_unlock" msgid="4533832120787386728">"Pag-unlock Gamit ang Mukha."</string>
+    <string name="keyguard_accessibility_face_unlock" msgid="632407612842329815">"Face unlock."</string>
     <string name="keyguard_accessibility_pin_unlock" msgid="4020864007967340068">"Pag-unlock ng pin."</string>
     <string name="keyguard_accessibility_sim_pin_unlock" msgid="4895939120871890557">"Pag-unlock ng Pin ng Sim."</string>
     <string name="keyguard_accessibility_sim_puk_unlock" msgid="3459003464041899101">"Pag-unlock ng Puk ng Sim."</string>
@@ -1035,7 +1022,7 @@
     <string name="text_copied" msgid="2531420577879738860">"Nakopya ang teksto sa clipboard."</string>
     <string name="copied" msgid="4675902854553014676">"Nakopya"</string>
     <string name="pasted_from_app" msgid="5627698450808256545">"Na-paste ang <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> mula sa <xliff:g id="SOURCE_APP_NAME">%2$s</xliff:g>"</string>
-    <string name="pasted_from_clipboard" msgid="7355790625710831847">"Na-paste ang <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> mula sa iyong clipboard"</string>
+    <string name="pasted_from_clipboard" msgid="6295556725844421812">"Na-paste ang <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> mula sa clipboard"</string>
     <string name="pasted_text" msgid="4298871641549173733">"Nag-paste ang <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> ng text na nakopya mo"</string>
     <string name="pasted_image" msgid="4729097394781491022">"Nag-paste ang <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> ng larawang nakopya mo"</string>
     <string name="pasted_content" msgid="646276353060777131">"Nag-paste ang <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> ng content na nakopya mo"</string>
@@ -1272,10 +1259,6 @@
     <string name="android_preparing_apk" msgid="589736917792300956">"Ihinahanda ang <xliff:g id="APPNAME">%1$s</xliff:g>."</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"Sinisimulan ang apps."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"Pagtatapos ng pag-boot."</string>
-    <string name="fp_enrollment_powerbutton_intent_title" msgid="3385634173366119903">"I-off ang screen?"</string>
-    <string name="fp_enrollment_powerbutton_intent_message" msgid="6582149052513682522">"Habang sine-set up ang iyong fingerprint, pinindot mo ang Power button.\n\nKaraniwan nitong ino-off ang iyong screen."</string>
-    <string name="fp_enrollment_powerbutton_intent_positive_button" msgid="5963520983910436791">"I-off"</string>
-    <string name="fp_enrollment_powerbutton_intent_negative_button" msgid="6465764183480190748">"Kanselahin"</string>
     <string name="heavy_weight_notification" msgid="8382784283600329576">"Tumatakbo ang <xliff:g id="APP">%1$s</xliff:g>"</string>
     <string name="heavy_weight_notification_detail" msgid="6802247239468404078">"Mag-tap upang bumalik sa laro"</string>
     <string name="heavy_weight_switcher_title" msgid="3861984210040100886">"Pumili ng laro"</string>
@@ -1474,8 +1457,6 @@
     <string name="permdesc_requestDeletePackages" msgid="6133633516423860381">"Pinapayagan ang isang application na humiling ng pag-delete ng mga package."</string>
     <string name="permlab_requestIgnoreBatteryOptimizations" msgid="7646611326036631439">"hilingin na balewalain ang mga pag-optimize ng baterya"</string>
     <string name="permdesc_requestIgnoreBatteryOptimizations" msgid="634260656917874356">"Pinapayagang humingi ng pahintulot ang isang app na balewalain ang mga pag-optimize ng baterya para sa app na iyon."</string>
-    <string name="permlab_queryAllPackages" msgid="2928450604653281650">"i-query ang lahat ng package"</string>
-    <string name="permdesc_queryAllPackages" msgid="5339069855520996010">"Nagbibigay-daan sa isang app na makita ang lahat ng naka-install na package."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1842872462124648678">"Tapikin ng dalawang beses para sa pagkontrol ng zoom"</string>
     <string name="gadget_host_error_inflating" msgid="2449961590495198720">"Hindi maidagdag ang widget."</string>
     <string name="ime_action_go" msgid="5536744546326495436">"Pumunta"</string>
@@ -1494,7 +1475,6 @@
     <string name="deny" msgid="6632259981847676572">"Tanggihan"</string>
     <string name="permission_request_notification_title" msgid="1810025922441048273">"Hiniling ang pahintulot"</string>
     <string name="permission_request_notification_with_subtitle" msgid="3743417870360129298">"Hiniling ang pahintulot\npara sa account na <xliff:g id="ACCOUNT">%s</xliff:g>."</string>
-    <string name="permission_request_notification_for_app_with_subtitle" msgid="1298704005732851350">"Humiling ang <xliff:g id="APP">%1$s</xliff:g> ng pahintulot\npara sa account na <xliff:g id="ACCOUNT">%2$s</xliff:g>."</string>
     <string name="forward_intent_to_owner" msgid="4620359037192871015">"Ginagamit mo ang app na ito sa labas ng iyong profile sa trabaho"</string>
     <string name="forward_intent_to_work" msgid="3620262405636021151">"Ginagamit mo ang app na ito sa iyong profile sa trabaho"</string>
     <string name="input_method_binding_label" msgid="1166731601721983656">"Pamamaraan ng pag-input"</string>
@@ -1703,7 +1683,7 @@
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Kapag naka-on ang shortcut, magsisimula ang isang feature ng pagiging naa-access kapag pinindot ang parehong button ng volume."</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"I-on ang shortcut para sa mga feature ng pagiging naa-access?"</string>
     <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"Mao-on ang mga feature ng accessibility kapag pinindot nang matagal ang parehong volume key nang ilang segundo. Posibleng mabago nito ang paggana ng iyong device.\n\nMga kasalukuyang feature:\n<xliff:g id="SERVICE">%1$s</xliff:g>\nPuwede mong baguhin ang mga napiling feature sa Mga Setting &gt; Accessibility."</string>
-    <string name="accessibility_shortcut_multiple_service_list" msgid="2128323171922023762">" • <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
+    <string name="accessibility_shortcut_multiple_service_list" msgid="6935581470716541531">"	• <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
     <string name="accessibility_shortcut_single_service_warning_title" msgid="1909518473488345266">"I-on ang shortcut ng <xliff:g id="SERVICE">%1$s</xliff:g>?"</string>
     <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"Mao-on ang feature ng accessibility na <xliff:g id="SERVICE">%1$s</xliff:g> kapag pinindot nang matagal ang parehong volume key nang ilang segundo. Posibleng mabago nito ang paggana ng iyong device.\n\nPuwede mong palitan ng ibang feature ang shortcut na ito sa Mga Setting &gt; Accessibility."</string>
     <string name="accessibility_shortcut_on" msgid="5463618449556111344">"I-on"</string>
@@ -1729,7 +1709,6 @@
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Gamitin ang Shortcut"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"Pag-invert ng Kulay"</string>
     <string name="color_correction_feature_name" msgid="3655077237805422597">"Pagwawasto ng Kulay"</string>
-    <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"One-Hand mode"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"Extra dim"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Pinindot nang matagal ang volume keys. Na-on ang <xliff:g id="SERVICE_NAME">%1$s</xliff:g>."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Pinindot nang matagal ang volume keys. Na-off ang <xliff:g id="SERVICE_NAME">%1$s</xliff:g>."</string>
@@ -1885,8 +1864,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Na-update ng iyong admin"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Na-delete ng iyong admin"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"OK"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"Ino-on ng Pantipid ng Baterya ang Madilim na tema at nililimitahan o ino-off nito ang aktibidad sa background, ilang visual effect, ilang partikular na feature, at ilang koneksyon sa network."</string>
-    <string name="battery_saver_description" msgid="8518809702138617167">"Ino-on ng Pantipid ng Baterya ang Madilim na tema at nililimitahan o ino-off nito ang aktibidad sa background, ilang visual effect, ilang partikular na feature, at ilang koneksyon sa network."</string>
+    <string name="battery_saver_description_with_learn_more" msgid="750683025714899363">"Ino-on ng Pantipid ng Baterya ang Madilim na tema at nililimitahan o ino-off nito ang aktibidad sa background, ilang visual effect, at ilang partikular na feature.\n\n"<annotation id="url">"Matuto pa"</annotation></string>
+    <string name="battery_saver_description" msgid="5693741424234005958">"Ino-on ng Pantipid ng Baterya ang Madilim na tema at nililimitahan o ino-off nito ang aktibidad sa background, ilang visual effect, at ilang partikular na feature."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Upang makatulong na mabawasan ang paggamit ng data, pinipigilan ng Data Saver ang ilang app na magpadala o makatanggap ng data sa background. Maaaring mag-access ng data ang isang app na ginagamit mo sa kasalukuyan, ngunit mas bihira na nito magagawa iyon. Halimbawa, maaaring hindi lumabas ang mga larawan hangga\'t hindi mo nata-tap ang mga ito."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"I-on ang Data Saver?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"I-on"</string>
@@ -1989,8 +1968,8 @@
     <string name="app_suspended_default_message" msgid="6451215678552004172">"Hindi available ang <xliff:g id="APP_NAME_0">%1$s</xliff:g> sa ngayon. Pinamamahalaan ito ng <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"Matuto pa"</string>
     <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"I-unpause ang app"</string>
-    <string name="work_mode_off_title" msgid="961171256005852058">"I-on ang app para sa trabaho?"</string>
-    <string name="work_mode_off_message" msgid="7319580997683623309">"Makakuha ng access sa iyong mga app para sa trabaho at notification"</string>
+    <string name="work_mode_off_title" msgid="5503291976647976560">"I-on ang profile sa trabaho?"</string>
+    <string name="work_mode_off_message" msgid="8417484421098563803">"Mao-on ang iyong mga app sa trabaho, notification, data, at iba pang feature sa profile sa trabaho"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"I-on"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"Hindi available ang app"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"Hindi available sa ngayon ang <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
@@ -2111,7 +2090,7 @@
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"OK"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"I-off"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"Matuto pa"</string>
-    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"Pinalitan ng Mga pinahusay na notification ang Mga Adaptive na Notification ng Android sa Android 12. Nagpapakita ng mga iminumungkahing pagkilos at sagot ang feature na ito, at isinasaayos nito ang iyong mga notification.\n\nMaa-access ng Mga pinahusay na notification ang content ng notification, kabilang ang personal na impormasyon gaya ng mga pangalan ng contact at mensahe. Magagawa rin ng feature na ito na i-dismiss o tugunan ang mga notification, gaya ng pagsagot sa mga tawag sa telepono, at kontrolin ang Huwag Istorbohin."</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="2353549817159426430">"Pinalitan ng mga pinahusay na notification ang Mga Adaptive na Notification ng Android sa Android 12. Nagpapakita ng mga iminumungkahing pagkilos at tugon ang feature na ito, at isinasaayos nito ang iyong mga notification.\n\nMaa-access ng mga pinahusay na notification ang content ng notification, kabilang ang personal na impormasyon gaya ng mga pangalan ng contact at mensahe. Puwede ring i-dismiss o tugunan ng feature na ito ang mga notification, gaya ng pagsagot sa mga tawag at pagkontrol sa Huwag Istorbohin."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Notification ng impormasyon ng Routine Mode"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Maaaring maubos ang baterya bago ang karaniwang pag-charge"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Na-activate ang Pantipid ng Baterya para patagalin ang buhay ng baterya"</string>
@@ -2308,6 +2287,4 @@
     <string name="splash_screen_view_branding_description" msgid="7911129347402728216">"Representasyon ng brand ng application"</string>
     <string name="view_and_control_notification_title" msgid="4300765399209912240">"Tingnan ang mga setting ng pag-access"</string>
     <string name="view_and_control_notification_content" msgid="8003766498562604034">"Makikita at makokontrol ng <xliff:g id="SERVICE_NAME">%s</xliff:g> ang iyong screen. I-tap para suriin."</string>
-    <string name="ui_translation_accessibility_translated_text" msgid="3197547218178944544">"Naisalin ang <xliff:g id="MESSAGE">%1$s</xliff:g>."</string>
-    <string name="ui_translation_accessibility_translation_finished" msgid="3057830947610088465">"Naisalin ang mensahe sa <xliff:g id="TO_LANGUAGE">%2$s</xliff:g> mula sa <xliff:g id="FROM_LANGUAGE">%1$s</xliff:g>."</string>
 </resources>

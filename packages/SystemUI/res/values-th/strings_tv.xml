@@ -19,15 +19,11 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="mic_active" msgid="5766614241012047024">"ไมโครโฟนเปิดใช้งานอยู่"</string>
+    <string name="app_accessed_mic" msgid="2754428675130470196">"%1$s เข้าถึงไมโครโฟนแล้ว"</string>
     <string name="notification_vpn_connected" msgid="3891023882833274730">"เชื่อมต่อ VPN แล้ว"</string>
     <string name="notification_vpn_disconnected" msgid="7150747626448044843">"ยกเลิกการเชื่อมต่อ VPN แล้ว"</string>
     <string name="notification_disclosure_vpn_text" msgid="3873532735584866236">"ผ่าน <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
     <string name="tv_notification_panel_title" msgid="5311050946506276154">"การแจ้งเตือน"</string>
     <string name="tv_notification_panel_no_notifications" msgid="9115191912267270678">"ไม่มีการแจ้งเตือน"</string>
-    <string name="mic_recording_announcement" msgid="7587123608060316575">"ไมโครโฟนกำลังบันทึก"</string>
-    <string name="camera_recording_announcement" msgid="7240177719403759112">"กล้องกำลังบันทึก"</string>
-    <string name="mic_and_camera_recording_announcement" msgid="8599231390508812667">"กล้องและไมโครโฟนกำลังบันทึก"</string>
-    <string name="mic_stopped_recording_announcement" msgid="7301537004900721242">"ไมโครโฟนหยุดบันทึกแล้ว"</string>
-    <string name="camera_stopped_recording_announcement" msgid="8540496432367032801">"กล้องหยุดบันทึกแล้ว"</string>
-    <string name="mic_camera_stopped_recording_announcement" msgid="8708524579599977412">"กล้องและไมโครโฟนหยุดบันทึกแล้ว"</string>
 </resources>

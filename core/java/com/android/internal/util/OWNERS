@@ -4,4 +4,8 @@ per-file *Notification* = file:/services/core/java/com/android/server/notificati
 per-file *ContrastColor* = file:/services/core/java/com/android/server/notification/OWNERS
 per-file Protocol* = etancohen@google.com, lorenzo@google.com
 per-file State* = jchalard@google.com, lorenzo@google.com, satk@google.com
+<<<<<<< TARGET BRANCH (83dd0c Merge "(ImsService API changes for Better IMS Threading) Ims)
+per-file DataClass* = eugenesusla@google.com
+=======
 per-file *Dump* = file:/core/java/com/android/internal/util/dump/OWNERS
+>>>>>>> SOURCE BRANCH (2727d1 Merge "Adds OWNERS to com.androd.internal.util.Dump*" am: 0b)

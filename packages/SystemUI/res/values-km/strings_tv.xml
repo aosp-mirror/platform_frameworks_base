@@ -19,15 +19,11 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="mic_active" msgid="5766614241012047024">"មីក្រូហ្វូន​កំពុង​ដំណើរការ"</string>
+    <string name="app_accessed_mic" msgid="2754428675130470196">"%1$s បានចូលប្រើ​មីក្រូហ្វូន​របស់អ្នក"</string>
     <string name="notification_vpn_connected" msgid="3891023882833274730">"VPN ត្រូវបានភ្ជាប់"</string>
     <string name="notification_vpn_disconnected" msgid="7150747626448044843">"VPN ត្រូវបានផ្ដាច់"</string>
     <string name="notification_disclosure_vpn_text" msgid="3873532735584866236">"តាម​រយៈ <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
     <string name="tv_notification_panel_title" msgid="5311050946506276154">"ការ​ជូនដំណឹង"</string>
     <string name="tv_notification_panel_no_notifications" msgid="9115191912267270678">"គ្មាន​ការជូនដំណឹងទេ"</string>
-    <string name="mic_recording_announcement" msgid="7587123608060316575">"មីក្រូហ្វូនកំពុងថត"</string>
-    <string name="camera_recording_announcement" msgid="7240177719403759112">"កាមេរ៉ាកំពុងថត"</string>
-    <string name="mic_and_camera_recording_announcement" msgid="8599231390508812667">"កាមេរ៉ា និងមីក្រូហ្វូនកំពុងថត"</string>
-    <string name="mic_stopped_recording_announcement" msgid="7301537004900721242">"មីក្រូហ្វូនបានឈប់ថត"</string>
-    <string name="camera_stopped_recording_announcement" msgid="8540496432367032801">"កាមេរ៉ាបានឈប់ថត"</string>
-    <string name="mic_camera_stopped_recording_announcement" msgid="8708524579599977412">"កាមេរ៉ា និងមីក្រូហ្វូនបានឈប់ថត"</string>
 </resources>

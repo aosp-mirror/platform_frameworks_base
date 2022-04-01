@@ -480,8 +480,33 @@ public class UdfpsController implements DozeReceiver {
                         final long sinceLastLog = mSystemClock.elapsedRealtime() - mTouchLogTime;
                         if (!isIlluminationRequested && !mGoodCaptureReceived &&
                                 !exceedsVelocityThreshold) {
-                            onFingerDown((int) event.getRawX(), (int) event.getRawY(), minor,
-                                    major);
+                            final int rawX = (int) event.getRawX();
+                            final int rawY = (int) event.getRawY();
+                            // Default coordinates assume portrait mode.
+                            int x = rawX;
+                            int y = rawY;
+
+                            // Gets the size based on the current rotation of the display.
+                            Point p = new Point();
+                            mContext.getDisplay().getRealSize(p);
+
+                            // Transform x, y to portrait mode if the device is in landscape mode.
+                            switch (mContext.getDisplay().getRotation()) {
+                                case Surface.ROTATION_90:
+                                    x = p.y - rawY;
+                                    y = rawX;
+                                    break;
+
+                                case Surface.ROTATION_270:
+                                    x = rawY;
+                                    y = p.x - rawX;
+                                    break;
+
+                                default:
+                                    // Do nothing to stay in portrait mode.
+                            }
+
+                            onFingerDown(x, y, minor, major);
                             Log.v(TAG, "onTouch | finger down: " + touchInfo);
                             mTouchLogTime = mSystemClock.elapsedRealtime();
                             mPowerManager.userActivity(mSystemClock.uptimeMillis(),

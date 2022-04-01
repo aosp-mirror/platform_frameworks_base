@@ -20,7 +20,6 @@
     <string name="pip_phone_close" msgid="5783752637260411309">"Schließen"</string>
     <string name="pip_phone_expand" msgid="2579292903468287504">"Maximieren"</string>
     <string name="pip_phone_settings" msgid="5468987116750491918">"Einstellungen"</string>
-    <string name="pip_phone_enter_split" msgid="7042877263880641911">"„Bildschirm teilen“ aktivieren"</string>
     <string name="pip_menu_title" msgid="5393619322111827096">"Menü"</string>
     <string name="pip_notification_title" msgid="1347104727641353453">"<xliff:g id="NAME">%s</xliff:g> ist in Bild im Bild"</string>
     <string name="pip_notification_message" msgid="8854051911700302620">"Wenn du nicht möchtest, dass <xliff:g id="NAME">%s</xliff:g> diese Funktion verwendet, tippe, um die Einstellungen zu öffnen und die Funktion zu deaktivieren."</string>
@@ -29,8 +28,6 @@
     <string name="pip_skip_to_next" msgid="8403429188794867653">"Vorwärts springen"</string>
     <string name="pip_skip_to_prev" msgid="7172158111196394092">"Rückwärts springen"</string>
     <string name="accessibility_action_pip_resize" msgid="4623966104749543182">"Größe anpassen"</string>
-    <string name="accessibility_action_pip_stash" msgid="4060775037619702641">"In Stash legen"</string>
-    <string name="accessibility_action_pip_unstash" msgid="7467499339610437646">"Aus Stash entfernen"</string>
     <string name="dock_forced_resizable" msgid="1749750436092293116">"Die App funktioniert unter Umständen bei geteiltem Bildschirmmodus nicht."</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="7408396418008948957">"Das Teilen des Bildschirms wird in dieser App nicht unterstützt."</string>
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"Die App funktioniert auf einem sekundären Display möglicherweise nicht."</string>
@@ -63,9 +60,9 @@
     <string name="bubble_dismiss_text" msgid="8816558050659478158">"Bubble schließen"</string>
     <string name="bubbles_dont_bubble_conversation" msgid="310000317885712693">"Unterhaltung nicht als Bubble anzeigen"</string>
     <string name="bubbles_user_education_title" msgid="2112319053732691899">"Bubbles zum Chatten verwenden"</string>
-    <string name="bubbles_user_education_description" msgid="4215862563054175407">"Neue Unterhaltungen erscheinen als unverankerte Symbole, „Bubbles“ genannt. Wenn du eine Bubble öffnen möchtest, tippe sie an. Wenn du sie verschieben möchtest, zieh an ihr."</string>
+    <string name="bubbles_user_education_description" msgid="4215862563054175407">"Neue Unterhaltungen erscheinen als unverankerte Symbole, \"Bubbles\" genannt. Wenn du die Bubble öffnen möchtest, tippe sie an. Wenn du sie verschieben möchtest, zieh an ihr."</string>
     <string name="bubbles_user_education_manage_title" msgid="7042699946735628035">"Bubble-Einstellungen festlegen"</string>
-    <string name="bubbles_user_education_manage" msgid="3460756219946517198">"Tippe auf „Verwalten“, um Bubbles für diese App zu deaktivieren"</string>
+    <string name="bubbles_user_education_manage" msgid="3460756219946517198">"Tippe auf \"Verwalten\", um Bubbles für diese App zu deaktivieren"</string>
     <string name="bubbles_user_education_got_it" msgid="3382046149225428296">"OK"</string>
     <string name="bubble_overflow_empty_title" msgid="2397251267073294968">"Keine kürzlich geschlossenen Bubbles"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2627417924958633713">"Hier werden aktuelle und geschlossene Bubbles angezeigt"</string>
@@ -73,4 +70,5 @@
     <string name="manage_bubbles_text" msgid="7730624269650594419">"Verwalten"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"Bubble verworfen."</string>
     <string name="restart_button_description" msgid="5887656107651190519">"Tippe, um die App im Vollbildmodus neu zu starten."</string>
+    <string name="got_it" msgid="4428750913636945527">"Ok"</string>
 </resources>

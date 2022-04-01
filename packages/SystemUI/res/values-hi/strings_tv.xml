@@ -19,15 +19,11 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="mic_active" msgid="5766614241012047024">"माइक्रोफ़ोन चालू है"</string>
+    <string name="app_accessed_mic" msgid="2754428675130470196">"%1$s ने आपका माइक्रोफ़ोन ऐक्सेस किया था"</string>
     <string name="notification_vpn_connected" msgid="3891023882833274730">"वीपीएन कनेक्ट हो गया है"</string>
     <string name="notification_vpn_disconnected" msgid="7150747626448044843">"वीपीएन डिसकनेक्ट हो गया है"</string>
     <string name="notification_disclosure_vpn_text" msgid="3873532735584866236">"<xliff:g id="VPN_APP">%1$s</xliff:g> के ज़रिए"</string>
     <string name="tv_notification_panel_title" msgid="5311050946506276154">"सूचनाएं"</string>
     <string name="tv_notification_panel_no_notifications" msgid="9115191912267270678">"कोई सूचना नहीं है"</string>
-    <string name="mic_recording_announcement" msgid="7587123608060316575">"माइक्रोफ़ोन रिकॉर्ड कर रहा है"</string>
-    <string name="camera_recording_announcement" msgid="7240177719403759112">"कैमरा रिकॉर्ड कर रहा है"</string>
-    <string name="mic_and_camera_recording_announcement" msgid="8599231390508812667">"कैमरा और माइक्रोफ़ोन रिकॉर्ड कर रहे हैं"</string>
-    <string name="mic_stopped_recording_announcement" msgid="7301537004900721242">"माइक्रोफ़ोन ने रिकॉर्ड करना बंद कर दिया है"</string>
-    <string name="camera_stopped_recording_announcement" msgid="8540496432367032801">"कैमरे ने रिकॉर्ड करना बंद कर दिया है"</string>
-    <string name="mic_camera_stopped_recording_announcement" msgid="8708524579599977412">"कैमरे और माइक्रोफ़ोन ने रिकॉर्ड करना बंद कर दिया है"</string>
 </resources>

@@ -20,7 +20,6 @@
     <string name="pip_phone_close" msgid="5783752637260411309">"Zatvori"</string>
     <string name="pip_phone_expand" msgid="2579292903468287504">"Proširivanje"</string>
     <string name="pip_phone_settings" msgid="5468987116750491918">"Postavke"</string>
-    <string name="pip_phone_enter_split" msgid="7042877263880641911">"Otvorite podijeljeni zaslon"</string>
     <string name="pip_menu_title" msgid="5393619322111827096">"Izbornik"</string>
     <string name="pip_notification_title" msgid="1347104727641353453">"<xliff:g id="NAME">%s</xliff:g> jest na slici u slici"</string>
     <string name="pip_notification_message" msgid="8854051911700302620">"Ako ne želite da aplikacija <xliff:g id="NAME">%s</xliff:g> upotrebljava tu značajku, dodirnite da biste otvorili postavke i isključili je."</string>
@@ -29,8 +28,6 @@
     <string name="pip_skip_to_next" msgid="8403429188794867653">"Preskoči na sljedeće"</string>
     <string name="pip_skip_to_prev" msgid="7172158111196394092">"Preskoči na prethodno"</string>
     <string name="accessibility_action_pip_resize" msgid="4623966104749543182">"Promjena veličine"</string>
-    <string name="accessibility_action_pip_stash" msgid="4060775037619702641">"Sakrijte"</string>
-    <string name="accessibility_action_pip_unstash" msgid="7467499339610437646">"Poništite sakrivanje"</string>
     <string name="dock_forced_resizable" msgid="1749750436092293116">"Aplikacija možda neće funkcionirati s podijeljenim zaslonom."</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="7408396418008948957">"Aplikacija ne podržava podijeljeni zaslon."</string>
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"Aplikacija možda neće funkcionirati na sekundarnom zaslonu."</string>
@@ -73,4 +70,5 @@
     <string name="manage_bubbles_text" msgid="7730624269650594419">"Upravljanje"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"Oblačić odbačen."</string>
     <string name="restart_button_description" msgid="5887656107651190519">"Dodirnite da biste ponovo pokrenuli tu aplikaciju i prikazali je na cijelom zaslonu."</string>
+    <string name="got_it" msgid="4428750913636945527">"Shvaćam"</string>
 </resources>
