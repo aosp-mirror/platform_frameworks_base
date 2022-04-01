@@ -49645,6 +49645,7 @@ package android.view {
     method @CallSuper public void drawableHotspotChanged(float, float);
     method @CallSuper protected void drawableStateChanged();
     method public android.view.View findFocus();
+    method @Nullable public final android.window.OnBackInvokedDispatcher findOnBackInvokedDispatcher();
     method public final <T extends android.view.View> T findViewById(@IdRes int);
     method public final <T extends android.view.View> T findViewWithTag(Object);
     method public void findViewsWithText(java.util.ArrayList<android.view.View>, CharSequence, int);
@@ -50822,6 +50823,7 @@ package android.view {
     method public void childHasTransientStateChanged(@NonNull android.view.View, boolean);
     method public void clearChildFocus(android.view.View);
     method public void createContextMenu(android.view.ContextMenu);
+    method @Nullable public default android.window.OnBackInvokedDispatcher findOnBackInvokedDispatcherForChild(@NonNull android.view.View, @NonNull android.view.View);
     method public android.view.View focusSearch(android.view.View, int);
     method public void focusableViewAvailable(android.view.View);
     method public boolean getChildVisibleRect(android.view.View, android.graphics.Rect, android.graphics.Point);
