@@ -10738,6 +10738,13 @@ public final class ViewRootImpl implements ViewParent,
         return mOnBackInvokedDispatcher;
     }
 
+    @NonNull
+    @Override
+    public OnBackInvokedDispatcher findOnBackInvokedDispatcherForChild(
+            @NonNull View child, @NonNull View requester) {
+        return getOnBackInvokedDispatcher();
+    }
+
     /**
      * When this ViewRootImpl is added to the window manager, transfers the first
      * {@link OnBackInvokedCallback} to be called to the server.
