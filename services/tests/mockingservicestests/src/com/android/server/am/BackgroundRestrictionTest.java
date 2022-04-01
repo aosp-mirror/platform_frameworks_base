@@ -36,11 +36,15 @@ import static android.app.AppOpsManager.OP_CAMERA;
 import static android.app.AppOpsManager.OP_FINE_LOCATION;
 import static android.app.AppOpsManager.OP_NONE;
 import static android.app.AppOpsManager.OP_RECORD_AUDIO;
+import static android.app.usage.UsageStatsManager.REASON_MAIN_DEFAULT;
 import static android.app.usage.UsageStatsManager.REASON_MAIN_FORCED_BY_SYSTEM;
 import static android.app.usage.UsageStatsManager.REASON_MAIN_FORCED_BY_USER;
+import static android.app.usage.UsageStatsManager.REASON_MAIN_MASK;
 import static android.app.usage.UsageStatsManager.REASON_MAIN_USAGE;
+import static android.app.usage.UsageStatsManager.REASON_SUB_DEFAULT_UNDEFINED;
 import static android.app.usage.UsageStatsManager.REASON_SUB_FORCED_SYSTEM_FLAG_ABUSE;
 import static android.app.usage.UsageStatsManager.REASON_SUB_FORCED_USER_FLAG_INTERACTION;
+import static android.app.usage.UsageStatsManager.REASON_SUB_MASK;
 import static android.app.usage.UsageStatsManager.REASON_SUB_USAGE_USER_INTERACTION;
 import static android.app.usage.UsageStatsManager.STANDBY_BUCKET_ACTIVE;
 import static android.app.usage.UsageStatsManager.STANDBY_BUCKET_EXEMPTED;
@@ -93,6 +97,7 @@ import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+import android.annotation.UserIdInt;
 import android.app.ActivityManagerInternal;
 import android.app.ActivityManagerInternal.AppBackgroundRestrictionListener;
 import android.app.ActivityManagerInternal.BindServiceEventListener;
@@ -146,6 +151,7 @@ import com.android.server.am.AppFGSTracker.AppFGSPolicy;
 import com.android.server.am.AppMediaSessionTracker.AppMediaSessionPolicy;
 import com.android.server.am.AppRestrictionController.ConstantsObserver;
 import com.android.server.am.AppRestrictionController.NotificationHelper;
+import com.android.server.am.AppRestrictionController.RestrictionSettings;
 import com.android.server.am.AppRestrictionController.UidBatteryUsageProvider;
 import com.android.server.am.BaseAppStateTimeEvents.BaseTimeEvent;
 import com.android.server.apphibernation.AppHibernationManagerInternal;
@@ -165,6 +171,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.verification.VerificationMode;
 
+import java.io.File;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -356,6 +363,7 @@ public final class BackgroundRestrictionTest {
         verify(mAppBindServiceEventsTracker.mInjector.getActivityManagerInternal())
                 .addBindServiceEventListener(mBindServiceEventListenerCap.capture());
         mBindServiceEventListener = mBindServiceEventListenerCap.getValue();
+        waitForIdleHandler(mBgRestrictionController.getBackgroundHandler());
     }
 
     @After
@@ -2788,6 +2796,96 @@ public final class BackgroundRestrictionTest {
                 new double[] {10.0d, 1.0d, 12.0d, 1.0d, 18.0d, 1.0d})));
     }
 
+    @SuppressWarnings("GuardedBy")
+    @Test
+    public void testPersistRestrictionSettings() throws Exception {
+        final RestrictionSettings settings = mBgRestrictionController.mRestrictionSettings;
+        final String testPkg0 = TEST_PACKAGE_BASE + 0;
+        final String testPkg1 = TEST_PACKAGE_BASE + 1;
+        final String testPkg2 = TEST_PACKAGE_BASE + 2;
+        final String testPkg3 = TEST_PACKAGE_BASE + 3;
+        final int testUid0 = UserHandle.getUid(TEST_USER0, TEST_PACKAGE_APPID_BASE + 0);
+        final int testUid1 = UserHandle.getUid(TEST_USER0, TEST_PACKAGE_APPID_BASE + 1);
+        final int testUid2 = UserHandle.getUid(TEST_USER1, TEST_PACKAGE_APPID_BASE + 2);
+        final int testUid3 = UserHandle.getUid(TEST_USER1, TEST_PACKAGE_APPID_BASE + 3);
+        settings.reset();
+        setRestrictionSettings(settings, testPkg0, testUid0,
+                RESTRICTION_LEVEL_ADAPTIVE_BUCKET,
+                10_000L, REASON_MAIN_DEFAULT | REASON_SUB_DEFAULT_UNDEFINED,
+                new long[] {0L, 0L}, false);
+        setRestrictionSettings(settings, testPkg1, testUid1,
+                RESTRICTION_LEVEL_RESTRICTED_BUCKET,
+                20_000L, REASON_MAIN_FORCED_BY_SYSTEM | REASON_SUB_FORCED_SYSTEM_FLAG_ABUSE,
+                new long[] {10_000L, 0L}, false);
+        setRestrictionSettings(settings, testPkg2, testUid2,
+                RESTRICTION_LEVEL_BACKGROUND_RESTRICTED,
+                25_000L, REASON_MAIN_FORCED_BY_USER | REASON_SUB_FORCED_USER_FLAG_INTERACTION,
+                new long[] {0L, 15_000L}, false);
+        setRestrictionSettings(settings, testPkg3, testUid3,
+                RESTRICTION_LEVEL_RESTRICTED_BUCKET,
+                30_000L, REASON_MAIN_DEFAULT | REASON_SUB_DEFAULT_UNDEFINED,
+                new long[] {0L, 0L}, false);
+        RestrictionSettings test = (RestrictionSettings) settings.clone();
+
+        // Verify our clone works correctly.
+        assertTrue(settings.equals(test));
+
+        // Reset the test object.
+        test.resetToDefault();
+
+        // Save the original data into xml.
+        settings.persistToXml(TEST_USER0);
+        settings.persistToXml(TEST_USER1);
+
+        // Load it to our test object.
+        test.loadFromXml(false);
+        // Verify we restored it correctly.
+        assertTrue(settings.equals(test));
+
+        // Remove one package.
+        settings.removePackage(testPkg3, testUid3);
+        // Verify it.
+        verifyLoadedSettings(settings);
+
+        // Add it back.
+        setRestrictionSettings(settings, testPkg3, testUid3,
+                RESTRICTION_LEVEL_RESTRICTED_BUCKET,
+                30_000L, REASON_MAIN_DEFAULT | REASON_SUB_DEFAULT_UNDEFINED,
+                new long[] {0L, 1_000L}, true);
+        // Verify it.
+        verifyLoadedSettings(settings);
+
+        // Remove one user.
+        settings.removeUser(TEST_USER1);
+        // Verify it.
+        verifyLoadedSettings(settings);
+    }
+
+    private void verifyLoadedSettings(RestrictionSettings settings) throws Exception {
+        // Make a new copy and reset it.
+        RestrictionSettings test = (RestrictionSettings) settings.clone();
+        test.resetToDefault();
+
+        // Wait for the idleness so the data is persisted.
+        waitForIdleHandler(mBgRestrictionController.getBackgroundHandler());
+        // Load it to our test object.
+        test.loadFromXml(false);
+        // Verify we restored it correctly.
+        assertTrue(settings.equals(test));
+    }
+
+    @SuppressWarnings("GuardedBy")
+    private void setRestrictionSettings(RestrictionSettings settings, String pkgName, int uid,
+            int level, long levelTs, int reason, long[] notificationTime, boolean persist) {
+        mCurrentTimeMillis = levelTs;
+        settings.update(pkgName, uid, level, reason & REASON_MAIN_MASK, reason & REASON_SUB_MASK);
+        final RestrictionSettings.PkgSettings pkgSettings = settings.getRestrictionSettingsLocked(
+                uid, pkgName);
+        for (int i = 0; i < notificationTime.length; i++) {
+            pkgSettings.setLastNotificationTime(i, notificationTime[i], persist);
+        }
+    }
+
     private LinkedList<UidStateEventWithBattery> createUidStateEventWithBatteryList(
             boolean[] isStart, long[] timestamps, double[] batteryUsage) {
         final LinkedList<UidStateEventWithBattery> result = new LinkedList<>();
@@ -2947,6 +3045,16 @@ public final class BackgroundRestrictionTest {
         @Override
         void scheduleInitTrackers(Handler handler, Runnable initializers) {
             initializers.run();
+        }
+
+        @Override
+        File getDataSystemDeDirectory(@UserIdInt int userId) {
+            return new File(mContext.getFilesDir(), Integer.toString(userId));
+        }
+
+        @Override
+        long currentTimeMillis() {
+            return mCurrentTimeMillis;
         }
     }
 
