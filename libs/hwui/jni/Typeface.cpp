@@ -347,13 +347,14 @@ static jlongArray Typeface_readTypefaces(JNIEnv *env, jobject, jobject buffer) {
 static void Typeface_forceSetStaticFinalField(JNIEnv *env, jclass cls, jstring fieldName,
         jobject typeface) {
     ScopedUtfChars fieldNameChars(env, fieldName);
-    jfieldID fid =
-            env->GetStaticFieldID(cls, fieldNameChars.c_str(), "Landroid/graphics/Typeface;");
+    jclass typefaceClazz = FindClassOrDie(env, "android/graphics/Typeface");
+    jfieldID fid = env->GetStaticFieldID(typefaceClazz, fieldNameChars.c_str(),
+                                         "Landroid/graphics/Typeface;");
     if (fid == 0) {
         jniThrowRuntimeException(env, "Unable to find field");
         return;
     }
-    env->SetStaticObjectField(cls, fid, typeface);
+    env->SetStaticObjectField(typefaceClazz, fid, typeface);
 }
 
 // Critical Native
