@@ -56,6 +56,7 @@ class BroadcastDispatcherTest : SysuiTestCase() {
         val user0 = UserHandle.of(0)
         val user1 = UserHandle.of(1)
         const val DEFAULT_FLAG = Context.RECEIVER_EXPORTED
+        val DEFAULT_PERMISSION: String? = null
 
         fun <T> capture(argumentCaptor: ArgumentCaptor<T>): T = argumentCaptor.capture()
         const val TEST_ACTION = "TEST_ACTION"
@@ -187,6 +188,38 @@ class BroadcastDispatcherTest : SysuiTestCase() {
 
         assertSame(broadcastReceiver, argumentCaptor.value.receiver)
         assertSame(intentFilter, argumentCaptor.value.filter)
+    }
+
+    @Test
+    fun testAddReceiverCorrectPermission_executor() {
+        val flag = 3
+        val permission = "CUSTOM_PERMISSION"
+
+        broadcastDispatcher.registerReceiver(
+            broadcastReceiver,
+            intentFilter,
+            flags = flag,
+            permission = permission
+        )
+        testableLooper.processAllMessages()
+
+        verify(mockUBRUser0).registerReceiver(capture(argumentCaptor), eq(flag))
+
+        assertSame(broadcastReceiver, argumentCaptor.value.receiver)
+        assertSame(intentFilter, argumentCaptor.value.filter)
+        assertSame(permission, argumentCaptor.value.permission)
+    }
+
+    @Test
+    fun testAddReceiverDefaultPermission_executor() {
+        broadcastDispatcher.registerReceiver(broadcastReceiver, intentFilter)
+        testableLooper.processAllMessages()
+
+        verify(mockUBRUser0).registerReceiver(capture(argumentCaptor), eq(DEFAULT_FLAG))
+
+        assertSame(broadcastReceiver, argumentCaptor.value.receiver)
+        assertSame(intentFilter, argumentCaptor.value.filter)
+        assertSame(DEFAULT_PERMISSION, argumentCaptor.value.permission)
     }
 
     @Test

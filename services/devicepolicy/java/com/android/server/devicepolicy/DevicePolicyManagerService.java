@@ -138,6 +138,7 @@ import static android.net.ConnectivityManager.PROFILE_NETWORK_PREFERENCE_DEFAULT
 import static android.net.ConnectivityManager.PROFILE_NETWORK_PREFERENCE_ENTERPRISE;
 import static android.net.ConnectivityManager.PROFILE_NETWORK_PREFERENCE_ENTERPRISE_NO_FALLBACK;
 import static android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK;
+import static android.provider.Settings.Global.BYPASS_DEVICE_POLICY_MANAGEMENT_ROLE_QUALIFICATIONS;
 import static android.provider.Settings.Global.PRIVATE_DNS_SPECIFIER;
 import static android.provider.Settings.Secure.MANAGED_PROVISIONING_DPC_DOWNLOADED;
 import static android.provider.Settings.Secure.USER_SETUP_COMPLETE;
@@ -274,11 +275,9 @@ import android.net.Uri;
 import android.net.VpnManager;
 import android.net.metrics.IpConnectivityLog;
 import android.net.wifi.WifiManager;
-import android.net.wifi.WifiSsid;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.CancellationSignal;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.IBinder;
@@ -395,7 +394,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.reflect.Constructor;
-import java.nio.charset.StandardCharsets;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
@@ -1800,6 +1798,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     @VisibleForTesting
     DevicePolicyManagerService(Injector injector) {
+        DevicePolicyManager.disableGetKeyguardDisabledFeaturesCache();
+
         mInjector = injector;
         mContext = Objects.requireNonNull(injector.mContext);
         mHandler = new Handler(Objects.requireNonNull(injector.getMyLooper()));
@@ -1891,6 +1891,19 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         performPolicyVersionUpgrade();
 
         mDeviceManagementResourcesProvider.load();
+
+        // The binder caches are not enabled until the first invalidation.
+        invalidateBinderCaches();
+    }
+
+    /**
+     * Invalidate the binder API caches. The invalidation itself does not require any
+     * locking, but this specific call should be protected by getLockObject() to ensure
+     * that the invalidation is synchronous with cached queries, for those queries that
+     * are served under getLockObject().
+     */
+    static void invalidateBinderCaches() {
+        DevicePolicyManager.invalidateBinderCaches();
     }
 
     /**
@@ -2361,11 +2374,6 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
 
     private void setDeviceOwnershipSystemPropertyLocked() {
-        // Still at the first stage of CryptKeeper double bounce, nothing can be learnt about
-        // the real system at this point.
-        if (StorageManager.inCryptKeeperBounce()) {
-            return;
-        }
         final boolean deviceProvisioned =
                 mInjector.settingsGlobalGetInt(Settings.Global.DEVICE_PROVISIONED, 0) != 0;
         final boolean hasDeviceOwner = mOwners.hasDeviceOwner();
@@ -3072,6 +3080,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 !mInjector.storageManagerIsFileBasedEncryptionEnabled())) {
             sendChangedNotification(userHandle);
         }
+        invalidateBinderCaches();
     }
 
     private void sendChangedNotification(int userHandle) {
@@ -3393,6 +3402,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         if (owner != null) {
             mDeviceAdminServiceController.startServiceForOwner(
                     owner.getPackageName(), userId, actionForLog);
+            invalidateBinderCaches();
         }
     }
 
@@ -7241,47 +7251,45 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             Preconditions.checkState(admin != null,
                     "Lost mode location updates can only be sent on an organization-owned device.");
             mInjector.binderWithCleanCallingIdentity(() -> {
-                final List<String> providers =
-                        mInjector.getLocationManager().getAllProviders().stream()
-                                .filter(mInjector.getLocationManager()::isProviderEnabled)
-                                .collect(Collectors.toList());
-                if (providers.isEmpty()) {
-                    future.complete(false);
-                    return;
-                }
-
-                final CancellationSignal cancellationSignal = new CancellationSignal();
-                List<String> providersWithNullLocation = new ArrayList<String>();
-                for (String provider : providers) {
-                    mInjector.getLocationManager().getCurrentLocation(provider, cancellationSignal,
-                            mContext.getMainExecutor(), location -> {
-                                if (cancellationSignal.isCanceled()) {
-                                    return;
-                                } else if (location != null) {
-                                    sendLostModeLocationUpdate(admin, location);
-                                    cancellationSignal.cancel();
-                                    future.complete(true);
-                                } else {
-                                    // location == null, provider wasn't able to get location, see
-                                    // if there are more providers
-                                    providersWithNullLocation.add(provider);
-                                    if (providers.size() == providersWithNullLocation.size()) {
-                                        future.complete(false);
-                                    }
-                                }
-                            }
-                    );
-                }
+                String[] providers = {LocationManager.FUSED_PROVIDER,
+                        LocationManager.NETWORK_PROVIDER, LocationManager.GPS_PROVIDER};
+                tryRetrieveAndSendLocationUpdate(admin, future, providers, /* index= */ 0);
             });
         }
     }
 
-    private void sendLostModeLocationUpdate(ActiveAdmin admin, Location location) {
+    /** Send lost mode location updates recursively, in order of the list of location providers. */
+    private void tryRetrieveAndSendLocationUpdate(ActiveAdmin admin,
+            AndroidFuture<Boolean> future, String[] providers, int index) {
+        // None of the providers were able to get location, return false
+        if (index == providers.length) {
+            future.complete(false);
+            return;
+        }
+        if (mInjector.getLocationManager().isProviderEnabled(providers[index])) {
+            mInjector.getLocationManager().getCurrentLocation(providers[index],
+                    /* cancellationSignal= */ null, mContext.getMainExecutor(), location -> {
+                        if (location != null) {
+                            mContext.sendBroadcastAsUser(
+                                    newLostModeLocationUpdateIntent(admin, location),
+                                    admin.getUserHandle());
+                            future.complete(true);
+                        } else {
+                            tryRetrieveAndSendLocationUpdate(admin, future, providers, index + 1);
+                        }
+                    }
+            );
+        } else {
+           tryRetrieveAndSendLocationUpdate(admin, future, providers, index + 1);
+        }
+    }
+
+    private Intent newLostModeLocationUpdateIntent(ActiveAdmin admin, Location location) {
         final Intent intent = new Intent(
                 DevicePolicyManager.ACTION_LOST_MODE_LOCATION_UPDATE);
         intent.putExtra(DevicePolicyManager.EXTRA_LOST_MODE_LOCATION, location);
         intent.setPackage(admin.info.getPackageName());
-        mContext.sendBroadcastAsUser(intent, admin.getUserHandle());
+        return intent;
     }
 
     /**
@@ -8420,6 +8428,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     /**
      * Gets the disabled state for features in keyguard for the given admin,
      * or the aggregate of all active admins if who is null.
+     * This API is cached: invalidate with invalidateBinderCaches().
      */
     @Override
     public int getKeyguardDisabledFeatures(ComponentName who, int userHandle, boolean parent) {
@@ -8629,6 +8638,9 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         return true;
     }
 
+    /**
+     * This API is cached: invalidate with invalidateBinderCaches().
+     */
     @Override
     public boolean hasDeviceOwner() {
         final CallerIdentity caller = getCallerIdentity();
@@ -9404,6 +9416,9 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         });
     }
 
+    /**
+     * This API is cached: invalidate with invalidateBinderCaches().
+     */
     @Override
     public @Nullable ComponentName getProfileOwnerOrDeviceOwnerSupervisionComponent(
             @NonNull UserHandle userHandle) {
@@ -9469,6 +9484,9 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         return UserHandle.USER_NULL;
     }
 
+    /**
+     * This API is cached: invalidate with invalidateBinderCaches().
+     */
     @Override
     public boolean isOrganizationOwnedDeviceWithManagedProfile() {
         if (!mHasFeature) {
@@ -13054,6 +13072,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         @Override
         public void onChange(boolean selfChange, Uri uri, int userId) {
             mConstants = loadConstants();
+            invalidateBinderCaches();
 
             mInjector.binderWithCleanCallingIdentity(() -> {
                 final Intent intent = new Intent(
@@ -13214,6 +13233,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                     .createEvent(DevicePolicyEnums.SEPARATE_PROFILE_CHALLENGE_CHANGED)
                     .setBoolean(isSeparateProfileChallengeEnabled(userId))
                     .write();
+            invalidateBinderCaches();
         }
 
         @Override
@@ -14637,6 +14657,9 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
     }
 
+    /**
+     * This API is cached: invalidate with invalidateBinderCaches().
+     */
     @Override
     public CharSequence getDeviceOwnerOrganizationName() {
         if (!mHasFeature) {
@@ -14651,6 +14674,9 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
     }
 
+    /**
+     * This API is cached: invalidate with invalidateBinderCaches().
+     */
     @Override
     public CharSequence getOrganizationNameForUser(int userHandle) {
         if (!mHasFeature) {
@@ -15736,6 +15762,9 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         // available after next boot.
     }
 
+    /**
+     * This API is cached: invalidate with invalidateBinderCaches().
+     */
     @Override
     public boolean isNetworkLoggingEnabled(@Nullable ComponentName admin,
             @NonNull String packageName) {
@@ -18570,13 +18599,11 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                         .notifyMinimumRequiredWifiSecurityLevelChanged(level));
     }
 
-    private void notifyWifiSsidPolicyChanged(int policyType, List<String> ssids) {
-        List<WifiSsid> wifiSsidList = new ArrayList<>();
-        for (String ssid : ssids) {
-            wifiSsidList.add(
-                    WifiSsid.fromBytes(ssid.getBytes(StandardCharsets.UTF_8)));
+    private void notifyWifiSsidPolicyChanged(WifiSsidPolicy policy) {
+        if (policy == null) {
+            // If policy doesn't limit SSIDs, no need to disconnect anything.
+            return;
         }
-        WifiSsidPolicy policy = new WifiSsidPolicy(policyType, new ArraySet<>(wifiSsidList));
         mInjector.binderWithCleanCallingIdentity(
                 () -> mInjector.getWifiManager().notifyWifiSsidPolicyChanged(policy));
     }
@@ -18612,84 +18639,40 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
 
     @Override
-    public void setSsidAllowlist(List<String> ssids) {
-        final CallerIdentity caller = getCallerIdentity();
-        Preconditions.checkCallAuthorization(
-                isDefaultDeviceOwner(caller) || isProfileOwnerOfOrganizationOwnedDevice(caller),
-                "SSID allowlist can only be controlled by a device owner or "
-                        + "a profile owner on an organization-owned device.");
-
-        Collections.sort(ssids);
-        boolean changed = false;
-        synchronized (getLockObject()) {
-            final ActiveAdmin admin = getProfileOwnerOrDeviceOwnerLocked(caller);
-            if (!ssids.equals(admin.mSsidAllowlist)) {
-                admin.mSsidAllowlist = ssids;
-                admin.mSsidDenylist = null;
-                changed = true;
-            }
-            if (changed) saveSettingsLocked(caller.getUserId());
-        }
-        if (changed && !ssids.isEmpty()) {
-            notifyWifiSsidPolicyChanged(WifiSsidPolicy.WIFI_SSID_POLICY_TYPE_ALLOWLIST, ssids);
-        }
-    }
-
-    @Override
-    public List<String> getSsidAllowlist() {
+    public WifiSsidPolicy getWifiSsidPolicy() {
         final CallerIdentity caller = getCallerIdentity();
         Preconditions.checkCallAuthorization(
                 isDefaultDeviceOwner(caller) || isProfileOwnerOfOrganizationOwnedDevice(caller)
                         || canQueryAdminPolicy(caller),
-                "SSID allowlist can only be retrieved by a device owner or "
+                "SSID policy can only be retrieved by a device owner or "
                         + "a profile owner on an organization-owned device or "
                         + "an app with the QUERY_ADMIN_POLICY permission.");
         synchronized (getLockObject()) {
             final ActiveAdmin admin = getDeviceOwnerOrProfileOwnerOfOrganizationOwnedDeviceLocked(
                     UserHandle.USER_SYSTEM);
-            return (admin == null || admin.mSsidAllowlist == null) ? new ArrayList<>()
-                    : admin.mSsidAllowlist;
+            return admin != null ? admin.mWifiSsidPolicy : null;
         }
     }
 
     @Override
-    public void setSsidDenylist(List<String> ssids) {
+    public void setWifiSsidPolicy(WifiSsidPolicy policy) {
         final CallerIdentity caller = getCallerIdentity();
         Preconditions.checkCallAuthorization(
                 isDefaultDeviceOwner(caller) || isProfileOwnerOfOrganizationOwnedDevice(caller),
                 "SSID denylist can only be controlled by a device owner or "
                         + "a profile owner on an organization-owned device.");
 
-        Collections.sort(ssids);
         boolean changed = false;
         synchronized (getLockObject()) {
             final ActiveAdmin admin = getProfileOwnerOrDeviceOwnerLocked(caller);
-            if (!ssids.equals(admin.mSsidDenylist)) {
-                admin.mSsidDenylist = ssids;
-                admin.mSsidAllowlist = null;
+            if (!Objects.equals(policy, admin.mWifiSsidPolicy)) {
+                admin.mWifiSsidPolicy = policy;
                 changed = true;
             }
             if (changed) saveSettingsLocked(caller.getUserId());
         }
         if (changed) {
-            notifyWifiSsidPolicyChanged(WifiSsidPolicy.WIFI_SSID_POLICY_TYPE_DENYLIST, ssids);
-        }
-    }
-
-    @Override
-    public List<String> getSsidDenylist() {
-        final CallerIdentity caller = getCallerIdentity();
-        Preconditions.checkCallAuthorization(
-                isDefaultDeviceOwner(caller) || isProfileOwnerOfOrganizationOwnedDevice(caller)
-                        || canQueryAdminPolicy(caller),
-                "SSID denylist can only be retrieved by a device owner or "
-                        + "a profile owner on an organization-owned device or "
-                        + "an app with the QUERY_ADMIN_POLICY permission.");
-        synchronized (getLockObject()) {
-            final ActiveAdmin admin = getDeviceOwnerOrProfileOwnerOfOrganizationOwnedDeviceLocked(
-                    UserHandle.USER_SYSTEM);
-            return (admin == null || admin.mSsidDenylist == null) ? new ArrayList<>()
-                    : admin.mSsidDenylist;
+            notifyWifiSsidPolicyChanged(policy);
         }
     }
 
@@ -18824,13 +18807,26 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         Preconditions.checkCallAuthorization(hasCallingOrSelfPermission(
                 android.Manifest.permission.MANAGE_ROLE_HOLDERS));
         return mInjector.binderWithCleanCallingIdentity(() -> {
-            if (mUserManager.getUserCount() > 1) {
-                return false;
+            if (mInjector.settingsGlobalGetInt(
+                    BYPASS_DEVICE_POLICY_MANAGEMENT_ROLE_QUALIFICATIONS, /* def= */ 0) == 1) {
+                return true;
             }
-            AccountManager am = AccountManager.get(mContext);
-            Account[] accounts = am.getAccounts();
-            return accounts.length == 0;
+            if (shouldAllowBypassingDevicePolicyManagementRoleQualificationInternal()) {
+                mInjector.settingsGlobalPutInt(
+                        BYPASS_DEVICE_POLICY_MANAGEMENT_ROLE_QUALIFICATIONS, /* value= */ 1);
+                return true;
+            }
+            return false;
         });
+    }
+
+    private boolean shouldAllowBypassingDevicePolicyManagementRoleQualificationInternal() {
+        if (mUserManager.getUserCount() > 1) {
+            return false;
+        }
+        AccountManager am = AccountManager.get(mContext);
+        Account[] accounts = am.getAccounts();
+        return accounts.length == 0;
     }
 
     @Override

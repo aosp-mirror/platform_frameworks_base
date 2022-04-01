@@ -139,8 +139,9 @@ public class ScreenDecorations extends CoreStartable implements Tunable , Dumpab
     protected RoundedCornerResDelegate mRoundedCornerResDelegate;
     @VisibleForTesting
     protected OverlayWindow[] mOverlays = null;
+    @VisibleForTesting
     @Nullable
-    private DisplayCutoutView[] mCutoutViews;
+    DisplayCutoutView[] mCutoutViews;
     @VisibleForTesting
     ViewGroup mScreenDecorHwcWindow;
     @VisibleForTesting
@@ -360,6 +361,16 @@ public class ScreenDecorations extends CoreStartable implements Tunable , Dumpab
                         return;
                     }
                     updateRoundedCornerDrawable();
+                }
+                if (mCutoutViews != null) {
+                    final int size = mCutoutViews.length;
+                    for (int i = 0; i < size; i++) {
+                        final DisplayCutoutView cutoutView = mCutoutViews[i];
+                        if (cutoutView == null) {
+                            continue;
+                        }
+                        cutoutView.onDisplayChanged(displayId);
+                    }
                 }
                 if (mScreenDecorHwcLayer != null) {
                     mScreenDecorHwcLayer.onDisplayChanged(displayId);
@@ -1034,13 +1045,22 @@ public class ScreenDecorations extends CoreStartable implements Tunable , Dumpab
         mExecutor.execute(() -> {
             if (mOverlays == null) return;
             if (SIZE.equals(key)) {
+                boolean hasReloadRoundedCornerRes = false;
                 if (newValue != null) {
                     try {
                         mRoundedCornerResDelegate.updateTuningSizeFactor(
                                 Integer.parseInt(newValue));
+                        hasReloadRoundedCornerRes = true;
                     } catch (Exception e) {
                     }
                 }
+
+                // When onTuningChanged() is not called through updateRoundedCornerRadii(),
+                // we need to reload rounded corner res to prevent incorrect dimen
+                if (!hasReloadRoundedCornerRes) {
+                    mRoundedCornerResDelegate.reloadAll(mDisplayUniqueId);
+                }
+
                 updateRoundedCornerSize(
                         mRoundedCornerResDelegate.getTopRoundedSize(),
                         mRoundedCornerResDelegate.getBottomRoundedSize());

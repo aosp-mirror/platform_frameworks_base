@@ -212,13 +212,13 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
         updateBurnInOffsets();
         updateVisibility();
 
-        mAccessibilityManager.addTouchExplorationStateChangeListener(
-                mTouchExplorationStateChangeListener);
+        mAccessibilityManager.addAccessibilityStateChangeListener(
+                mAccessibilityStateChangeListener);
         updateAccessibility();
     }
 
     private void updateAccessibility() {
-        if (mAccessibilityManager.isTouchExplorationEnabled()) {
+        if (mAccessibilityManager.isEnabled()) {
             mView.setOnClickListener(mA11yClickListener);
         } else {
             mView.setOnClickListener(null);
@@ -238,8 +238,8 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
             mCancelDelayedUpdateVisibilityRunnable = null;
         }
 
-        mAccessibilityManager.removeTouchExplorationStateChangeListener(
-                mTouchExplorationStateChangeListener);
+        mAccessibilityManager.removeAccessibilityStateChangeListener(
+                mAccessibilityStateChangeListener);
     }
 
     public float getTop() {
@@ -394,7 +394,7 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
         pw.println("  mUserUnlockedWithBiometric: " + mUserUnlockedWithBiometric);
         pw.println("  mRunningFPS: " + mRunningFPS);
         pw.println("  mCanDismissLockScreen: " + mCanDismissLockScreen);
-        pw.println("  mStatusBarState: " + StatusBarState.toShortString(mStatusBarState));
+        pw.println("  mStatusBarState: " + StatusBarState.toString(mStatusBarState));
         pw.println("  mQsExpanded: " + mQsExpanded);
         pw.println("  mInterpolatedDarkAmount: " + mInterpolatedDarkAmount);
 
@@ -652,7 +652,7 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
         // pre-emptively set to true to hide view
         mIsBouncerShowing = true;
         if (mUdfpsSupported && mShowUnlockIcon && mAuthRippleController != null) {
-            mAuthRippleController.showRipple(FINGERPRINT);
+            mAuthRippleController.showUnlockRipple(FINGERPRINT);
         }
         updateVisibility();
         if (mOnGestureDetectedRunnable != null) {
@@ -721,6 +721,6 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
 
     private final View.OnClickListener mA11yClickListener = v -> onLongPress();
 
-    private final AccessibilityManager.TouchExplorationStateChangeListener
-            mTouchExplorationStateChangeListener = enabled -> updateAccessibility();
+    private final AccessibilityManager.AccessibilityStateChangeListener
+            mAccessibilityStateChangeListener = enabled -> updateAccessibility();
 }

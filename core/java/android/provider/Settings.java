@@ -78,6 +78,7 @@ import android.os.ResultReceiver;
 import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.speech.tts.TextToSpeech;
+import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.util.AndroidException;
 import android.util.ArrayMap;
@@ -86,6 +87,7 @@ import android.util.Log;
 import android.util.MemoryIntArray;
 import android.view.Display;
 import android.view.MotionEvent;
+import android.view.ViewConfiguration;
 import android.view.Window;
 import android.view.WindowManager.LayoutParams;
 import android.widget.Editor;
@@ -7228,6 +7230,13 @@ public final class Settings {
          */
         public static final String LOCATION_SHOW_SYSTEM_OPS = "locationShowSystemOps";
 
+
+        /**
+         * Whether or not an indicator experiment has started.
+         * @hide
+         */
+        public static final String LOCATION_INDICATOR_EXPERIMENT_STARTED =
+                "locationIndicatorExperimentStarted";
         /**
          * A flag containing settings used for biometric weak
          * @hide
@@ -7475,6 +7484,16 @@ public final class Settings {
         @Readable
         public static final String ACCESSIBILITY_SHORTCUT_DIALOG_SHOWN =
                 "accessibility_shortcut_dialog_shown";
+
+        /**
+         * Setting specifying if the timeout restriction
+         * {@link ViewConfiguration#getAccessibilityShortcutKeyTimeout()}
+         * of the accessibility shortcut dialog is skipped.
+         *
+         * @hide
+         */
+        public static final String SKIP_ACCESSIBILITY_SHORTCUT_DIALOG_TIMEOUT_RESTRICTION =
+                "skip_accessibility_shortcut_dialog_timeout_restriction";
 
         /**
          * Setting specifying the accessibility services, accessibility shortcut targets,
@@ -10271,10 +10290,18 @@ public final class Settings {
          * The strategy used for generating the tonal palettes can be defined with the
          * {@code android.theme.customization.theme_style} key, with one of the following options:
          * <ul>
-         *   <li> TONAL_SPOT = Default Material You theme since Android S.</li>
-         *   <li> VIBRANT = Theme where accent 2 and 3 are analogous to accent 1.</li>
-         *   <li> EXPRESSIVE = Highly chromatic theme.</li>
-         *   <li> SPRITZ = Desaturated theme, almost greyscale.</li>
+         *   <li> {@code TONAL_SPOT} is a mid vibrancy palette that uses an accent 3 analogous to
+         *   accent 1.</li>
+         *   <li> {@code VIBRANT} is a high vibrancy palette that harmoniously blends subtle shifts
+         *   between colors.</li>
+         *   <li> {@code EXPRESSIVE} is a high vibrancy palette that pairs unexpected and unique
+         *   accents colors together.</li>
+         *   <li> {@code SPRITZ} is a low vibrancy palette that creates a soft wash between
+         *   colors.</li>
+         *   <li> {@code RAINBOW} uses both chromatic accents and neutral surfaces to create a more
+         *   subtle color experience for users.</li>
+         *   <li> {@code FRUIT_SALAD} experiments with the concept of "two tone colors" to give
+         *   users more expression.</li>
          * </ul>
          *
          * Example of valid fabricated theme specification:
@@ -11305,8 +11332,9 @@ public final class Settings {
 
         /**
          * Whether or not data roaming is enabled. (0 = false, 1 = true)
+         * Use {@link TelephonyManager#isDataRoamingEnabled} instead of calling via settings.
          */
-        @Readable
+        @Readable(maxTargetSdk = Build.VERSION_CODES.S)
         public static final String DATA_ROAMING = "data_roaming";
 
         /**
@@ -11467,6 +11495,15 @@ public final class Settings {
         */
         @Readable
         public static final String DEVICE_PROVISIONED = "device_provisioned";
+
+        /**
+         * Whether bypassing the device policy management role holder qualifcation is allowed,
+         * (0 = false, 1 = true).
+         *
+         * @hide
+         */
+        public static final String BYPASS_DEVICE_POLICY_MANAGEMENT_ROLE_QUALIFICATIONS =
+                "bypass_device_policy_management_role_qualifications";
 
         /**
          * Indicates whether mobile data should be allowed while the device is being provisioned.

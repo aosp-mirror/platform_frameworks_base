@@ -16,9 +16,7 @@
 
 package com.android.internal.policy;
 
-import static android.app.WindowConfiguration.PINNED_WINDOWING_MODE_ELEVATION_IN_DIP;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
-import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
 import static android.os.Build.VERSION_CODES.M;
 import static android.os.Build.VERSION_CODES.N;
@@ -2261,7 +2259,8 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
                 attrs.type == TYPE_APPLICATION || attrs.type == TYPE_DRAWN_APPLICATION;
         final WindowConfiguration winConfig = getResources().getConfiguration().windowConfiguration;
         // Only a non floating application window on one of the allowed workspaces can get a caption
-        if (!mWindow.isFloating() && isApplication && winConfig.hasWindowDecorCaption()) {
+        if (!mWindow.isFloating() && isApplication && winConfig.hasWindowDecorCaption()
+                && !CAPTION_ON_SHELL) {
             // Dependent on the brightness of the used title we either use the
             // dark or the light button frame.
             if (decorCaptionView == null) {
@@ -2548,9 +2547,6 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
             }
             // Convert the DP elevation into physical pixels.
             elevation = dipToPx(elevation);
-            mElevationAdjustedForStack = true;
-        } else if (windowingMode == WINDOWING_MODE_PINNED) {
-            elevation = dipToPx(PINNED_WINDOWING_MODE_ELEVATION_IN_DIP);
             mElevationAdjustedForStack = true;
         } else {
             mElevationAdjustedForStack = false;

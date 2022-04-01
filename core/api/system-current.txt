@@ -296,7 +296,6 @@ package android {
     field public static final String SECURE_ELEMENT_PRIVILEGED_OPERATION = "android.permission.SECURE_ELEMENT_PRIVILEGED_OPERATION";
     field public static final String SEND_CATEGORY_CAR_NOTIFICATIONS = "android.permission.SEND_CATEGORY_CAR_NOTIFICATIONS";
     field public static final String SEND_DEVICE_CUSTOMIZATION_READY = "android.permission.SEND_DEVICE_CUSTOMIZATION_READY";
-    field public static final String SEND_LOST_MODE_LOCATION_UPDATES = "android.permission.SEND_LOST_MODE_LOCATION_UPDATES";
     field public static final String SEND_SAFETY_CENTER_UPDATE = "android.permission.SEND_SAFETY_CENTER_UPDATE";
     field public static final String SEND_SHOW_SUSPENDED_APP_DETAILS = "android.permission.SEND_SHOW_SUSPENDED_APP_DETAILS";
     field public static final String SEND_SMS_NO_CONFIRMATION = "android.permission.SEND_SMS_NO_CONFIRMATION";
@@ -2636,18 +2635,18 @@ package android.app.wallpapereffectsgeneration {
     method public int describeContents();
     method @NonNull public float[] getAnchorPointInOutputUvSpace();
     method @NonNull public float[] getAnchorPointInWorldSpace();
-    method public float getCameraOrbitPitchDegrees();
-    method public float getCameraOrbitYawDegrees();
+    method @FloatRange(from=-90.0F, to=90.0f) public float getCameraOrbitPitchDegrees();
+    method @FloatRange(from=-180.0F, to=180.0f) public float getCameraOrbitYawDegrees();
     method public float getDollyDistanceInWorldSpace();
-    method public float getFrustumFarInWorldSpace();
-    method public float getFrustumNearInWorldSpace();
-    method public float getVerticalFovDegrees();
+    method @FloatRange(from=0.0f) public float getFrustumFarInWorldSpace();
+    method @FloatRange(from=0.0f) public float getFrustumNearInWorldSpace();
+    method @FloatRange(from=0.0f, to=180.0f, fromInclusive=false) public float getVerticalFovDegrees();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.app.wallpapereffectsgeneration.CameraAttributes> CREATOR;
   }
 
   public static final class CameraAttributes.Builder {
-    ctor public CameraAttributes.Builder(@NonNull float[], @NonNull float[]);
+    ctor public CameraAttributes.Builder(@NonNull @Size(3) float[], @NonNull @Size(2) float[]);
     method @NonNull public android.app.wallpapereffectsgeneration.CameraAttributes build();
     method @NonNull public android.app.wallpapereffectsgeneration.CameraAttributes.Builder setCameraOrbitPitchDegrees(@FloatRange(from=-90.0F, to=90.0f) float);
     method @NonNull public android.app.wallpapereffectsgeneration.CameraAttributes.Builder setCameraOrbitYawDegrees(@FloatRange(from=-180.0F, to=180.0f) float);
@@ -2675,12 +2674,17 @@ package android.app.wallpapereffectsgeneration {
     method @NonNull public String getTaskId();
     method @NonNull public java.util.List<android.app.wallpapereffectsgeneration.TexturedMesh> getTexturedMeshes();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
-    field public static final int CINEMATIC_EFFECT_STATUS_ERROR = 2; // 0x2
-    field public static final int CINEMATIC_EFFECT_STATUS_NOT_READY = 3; // 0x3
+    field public static final int CINEMATIC_EFFECT_STATUS_ANIMATION_FAILURE = 10; // 0xa
+    field public static final int CINEMATIC_EFFECT_STATUS_CONTENT_TARGET_ERROR = 8; // 0x8
+    field public static final int CINEMATIC_EFFECT_STATUS_CONTENT_TOO_FLAT = 9; // 0x9
+    field public static final int CINEMATIC_EFFECT_STATUS_CONTENT_UNSUPPORTED = 7; // 0x7
+    field public static final int CINEMATIC_EFFECT_STATUS_ERROR = 0; // 0x0
+    field public static final int CINEMATIC_EFFECT_STATUS_FEATURE_DISABLED = 5; // 0x5
+    field public static final int CINEMATIC_EFFECT_STATUS_IMAGE_FORMAT_NOT_SUITABLE = 6; // 0x6
+    field public static final int CINEMATIC_EFFECT_STATUS_NOT_READY = 2; // 0x2
     field public static final int CINEMATIC_EFFECT_STATUS_OK = 1; // 0x1
-    field public static final int CINEMATIC_EFFECT_STATUS_PENDING = 4; // 0x4
-    field public static final int CINEMATIC_EFFECT_STATUS_TOO_MANY_REQUESTS = 5; // 0x5
-    field public static final int CINEMATIC_EFFECT_STATUS_UNKNOWN = 0; // 0x0
+    field public static final int CINEMATIC_EFFECT_STATUS_PENDING = 3; // 0x3
+    field public static final int CINEMATIC_EFFECT_STATUS_TOO_MANY_REQUESTS = 4; // 0x4
     field @NonNull public static final android.os.Parcelable.Creator<android.app.wallpapereffectsgeneration.CinematicEffectResponse> CREATOR;
     field public static final int IMAGE_CONTENT_TYPE_LANDSCAPE = 2; // 0x2
     field public static final int IMAGE_CONTENT_TYPE_OTHER = 3; // 0x3
@@ -2780,16 +2784,14 @@ package android.companion.virtual {
 
   public final class VirtualDeviceManager {
     method @NonNull @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE) public android.companion.virtual.VirtualDeviceManager.VirtualDevice createVirtualDevice(int, @NonNull android.companion.virtual.VirtualDeviceParams);
+    field public static final int LAUNCH_FAILURE_NO_ACTIVITY = 2; // 0x2
+    field public static final int LAUNCH_FAILURE_PENDING_INTENT_CANCELED = 1; // 0x1
+    field public static final int LAUNCH_SUCCESS = 0; // 0x0
   }
 
   public static interface VirtualDeviceManager.ActivityListener {
     method public void onDisplayEmpty(int);
     method public void onTopActivityChanged(int, @NonNull android.content.ComponentName);
-  }
-
-  public static interface VirtualDeviceManager.LaunchCallback {
-    method public void onLaunchFailed();
-    method public void onLaunchSuccess();
   }
 
   public static class VirtualDeviceManager.VirtualDevice implements java.lang.AutoCloseable {
@@ -2800,7 +2802,7 @@ package android.companion.virtual {
     method @NonNull @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE) public android.hardware.input.VirtualKeyboard createVirtualKeyboard(@NonNull android.hardware.display.VirtualDisplay, @NonNull String, int, int);
     method @NonNull @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE) public android.hardware.input.VirtualMouse createVirtualMouse(@NonNull android.hardware.display.VirtualDisplay, @NonNull String, int, int);
     method @NonNull @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE) public android.hardware.input.VirtualTouchscreen createVirtualTouchscreen(@NonNull android.hardware.display.VirtualDisplay, @NonNull String, int, int);
-    method public void launchPendingIntent(int, @NonNull android.app.PendingIntent, @NonNull java.util.concurrent.Executor, @NonNull android.companion.virtual.VirtualDeviceManager.LaunchCallback);
+    method public void launchPendingIntent(int, @NonNull android.app.PendingIntent, @NonNull java.util.concurrent.Executor, @NonNull java.util.function.IntConsumer);
     method public void removeActivityListener(@NonNull android.companion.virtual.VirtualDeviceManager.ActivityListener);
     method @NonNull @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE) public void setShowPointerIcon(boolean);
   }
@@ -12041,8 +12043,9 @@ package android.service.wallpapereffectsgeneration {
   public abstract class WallpaperEffectsGenerationService extends android.app.Service {
     ctor public WallpaperEffectsGenerationService();
     method @NonNull public final android.os.IBinder onBind(@NonNull android.content.Intent);
-    method public abstract void onGenerateCinematicEffect(@NonNull android.app.wallpapereffectsgeneration.CinematicEffectRequest);
+    method @MainThread public abstract void onGenerateCinematicEffect(@NonNull android.app.wallpapereffectsgeneration.CinematicEffectRequest);
     method public final void returnCinematicEffectResponse(@NonNull android.app.wallpapereffectsgeneration.CinematicEffectResponse);
+    field public static final String SERVICE_INTERFACE = "android.service.wallpapereffectsgeneration.WallpaperEffectsGenerationService";
   }
 
 }

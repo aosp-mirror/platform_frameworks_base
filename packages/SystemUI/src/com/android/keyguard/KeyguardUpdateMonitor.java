@@ -3562,8 +3562,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                 pw.println("        udfpsEnrolled=" + isUdfpsEnrolled());
                 pw.println("        shouldListenForUdfps=" + shouldListenForFingerprint(true));
                 pw.println("        bouncerVisible=" + mBouncer);
-                pw.println("        mStatusBarState="
-                        + StatusBarState.toShortString(mStatusBarState));
+                pw.println("        mStatusBarState=" + StatusBarState.toString(mStatusBarState));
             }
         }
         if (mFaceManager != null && mFaceManager.isHardwareDetected()) {

@@ -32,6 +32,7 @@ import android.testing.TestableLooper;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.internal.logging.InstanceId;
 import com.android.systemui.SysuiTestCase;
 
 import org.junit.Before;
@@ -77,7 +78,8 @@ public class MediaDataCombineLatestTest extends SysuiTestCase {
         mMediaData = new MediaData(
                 USER_ID, true, BG_COLOR, APP, null, ARTIST, TITLE, null,
                 new ArrayList<>(), new ArrayList<>(), null, PACKAGE, null, null, null, true, null,
-                MediaData.PLAYBACK_LOCAL, false, KEY, false, false, false, 0L);
+                MediaData.PLAYBACK_LOCAL, false, KEY, false, false, false, 0L,
+                InstanceId.fakeInstanceId(-1), -1);
         mDeviceData = new MediaDeviceData(true, null, DEVICE_NAME);
     }
 

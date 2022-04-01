@@ -17,7 +17,6 @@
 package com.android.systemui.media
 
 import android.app.smartspace.SmartspaceAction
-import android.graphics.Color
 import androidx.test.filters.SmallTest
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
@@ -25,6 +24,8 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.broadcast.BroadcastSender
 import com.android.systemui.statusbar.NotificationLockscreenUserManager
+import com.android.systemui.util.mockito.any
+import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
@@ -33,7 +34,6 @@ import org.junit.runner.RunWith
 import org.mockito.ArgumentMatchers.anyBoolean
 import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.Mock
-import org.mockito.Mockito
 import org.mockito.Mockito.`when`
 import org.mockito.Mockito.never
 import org.mockito.Mockito.reset
@@ -45,16 +45,8 @@ private const val KEY = "TEST_KEY"
 private const val KEY_ALT = "TEST_KEY_2"
 private const val USER_MAIN = 0
 private const val USER_GUEST = 10
-private const val APP = "APP"
-private const val BG_COLOR = Color.RED
 private const val PACKAGE = "PKG"
-private const val ARTIST = "ARTIST"
-private const val TITLE = "TITLE"
-private const val DEVICE_NAME = "DEVICE_NAME"
 private const val SMARTSPACE_KEY = "SMARTSPACE_KEY"
-
-private fun <T> eq(value: T): T = Mockito.eq(value) ?: value
-private fun <T> any(): T = Mockito.any()
 
 @SmallTest
 @RunWith(AndroidTestingRunner::class)
@@ -67,8 +59,6 @@ class MediaDataFilterTest : SysuiTestCase() {
     private lateinit var broadcastDispatcher: BroadcastDispatcher
     @Mock
     private lateinit var broadcastSender: BroadcastSender
-    @Mock
-    private lateinit var mediaResumeListener: MediaResumeListener
     @Mock
     private lateinit var mediaDataManager: MediaDataManager
     @Mock
@@ -83,7 +73,6 @@ class MediaDataFilterTest : SysuiTestCase() {
     private lateinit var mediaDataFilter: MediaDataFilter
     private lateinit var dataMain: MediaData
     private lateinit var dataGuest: MediaData
-    private val device = MediaDeviceData(true, null, DEVICE_NAME)
     private val clock = FakeSystemClock()
 
     @Before
@@ -99,23 +88,9 @@ class MediaDataFilterTest : SysuiTestCase() {
         setUser(USER_MAIN)
 
         // Set up test media data
-        dataMain = MediaData(
+        dataMain = MediaTestUtils.emptyMediaData.copy(
                 userId = USER_MAIN,
-                initialized = true,
-                backgroundColor = BG_COLOR,
-                app = APP,
-                appIcon = null,
-                artist = ARTIST,
-                song = TITLE,
-                artwork = null,
-                actions = emptyList(),
-                actionsToShowInCompact = emptyList(),
-                packageName = PACKAGE,
-                token = null,
-                clickIntent = null,
-                device = device,
-                active = true,
-                resumeAction = null)
+                packageName = PACKAGE)
         dataGuest = dataMain.copy(userId = USER_GUEST)
 
         `when`(smartspaceData.targetId).thenReturn(SMARTSPACE_KEY)

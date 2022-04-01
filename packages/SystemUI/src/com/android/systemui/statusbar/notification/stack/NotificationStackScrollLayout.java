@@ -347,7 +347,9 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
             setDimAmount((Float) animation.getAnimatedValue());
         }
     };
-    protected ViewGroup mQsContainer;
+    protected ViewGroup mQsHeader;
+    // Rect of QsHeader. Kept as a field just to avoid creating a new one each time.
+    private Rect mQsHeaderBound = new Rect();
     private boolean mContinuousShadowUpdate;
     private boolean mContinuousBackgroundUpdate;
     private ViewTreeObserver.OnPreDrawListener mShadowUpdater
@@ -1598,8 +1600,8 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     }
 
     @ShadeViewRefactor(RefactorComponent.ADAPTER)
-    public void setQsContainer(ViewGroup qsContainer) {
-        mQsContainer = qsContainer;
+    public void setQsHeader(ViewGroup qsHeader) {
+        mQsHeader = qsHeader;
     }
 
     @ShadeViewRefactor(RefactorComponent.ADAPTER)
@@ -3458,7 +3460,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         if (!isScrollingEnabled()) {
             return false;
         }
-        if (isInsideQsContainer(ev) && !mIsBeingDragged) {
+        if (isInsideQsHeader(ev) && !mIsBeingDragged) {
             return false;
         }
         mForcedScroll = null;
@@ -3611,8 +3613,9 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     }
 
     @ShadeViewRefactor(RefactorComponent.INPUT)
-    protected boolean isInsideQsContainer(MotionEvent ev) {
-        return ev.getY() < mQsContainer.getBottom();
+    protected boolean isInsideQsHeader(MotionEvent ev) {
+        mQsHeader.getBoundsOnScreen(mQsHeaderBound);
+        return mQsHeaderBound.contains((int) ev.getX(), (int) ev.getY());
     }
 
     @ShadeViewRefactor(RefactorComponent.INPUT)

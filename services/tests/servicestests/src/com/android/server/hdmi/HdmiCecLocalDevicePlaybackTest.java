@@ -2033,4 +2033,32 @@ public class HdmiCecLocalDevicePlaybackTest {
         mTestLooper.dispatchAll();
         assertThat(mPowerManager.isInteractive()).isFalse();
     }
+
+    @Test
+    public void onHotplugClearsDevices() {
+        mHdmiControlService.getHdmiCecNetwork().clearDeviceList();
+        assertThat(mHdmiControlService.getHdmiCecNetwork().getDeviceInfoList(false))
+                .isEmpty();
+        // Add a device to the network and assert that this device is included in the list of
+        // devices.
+        HdmiDeviceInfo infoPlayback = HdmiDeviceInfo.cecDeviceBuilder()
+                .setLogicalAddress(Constants.ADDR_PLAYBACK_3)
+                .setPhysicalAddress(0x1000)
+                .setPortId(PORT_1)
+                .setDeviceType(HdmiDeviceInfo.DEVICE_PLAYBACK)
+                .setVendorId(0x1000)
+                .setDisplayName("Playback 3")
+                .build();
+        mHdmiControlService.getHdmiCecNetwork().addCecDevice(infoPlayback);
+        mTestLooper.dispatchAll();
+        assertThat(mHdmiControlService.getHdmiCecNetwork().getDeviceInfoList(false))
+                .hasSize(1);
+
+        // HAL detects a hotplug out. Assert that this device gets removed from the list of devices.
+        mHdmiControlService.onHotplug(PORT_1, false);
+        mTestLooper.dispatchAll();
+
+        assertThat(mHdmiControlService.getHdmiCecNetwork().getDeviceInfoList(false))
+                .isEmpty();
+    }
 }

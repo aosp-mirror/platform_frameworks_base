@@ -36,6 +36,7 @@ package android {
     field public static final String READ_PRIVILEGED_PHONE_STATE = "android.permission.READ_PRIVILEGED_PHONE_STATE";
     field public static final String RECORD_BACKGROUND_AUDIO = "android.permission.RECORD_BACKGROUND_AUDIO";
     field public static final String REMOVE_TASKS = "android.permission.REMOVE_TASKS";
+    field public static final String REQUEST_UNIQUE_ID_ATTESTATION = "android.permission.REQUEST_UNIQUE_ID_ATTESTATION";
     field public static final String RESET_APP_ERRORS = "android.permission.RESET_APP_ERRORS";
     field public static final String REVOKE_POST_NOTIFICATIONS_WITHOUT_KILL = "android.permission.REVOKE_POST_NOTIFICATIONS_WITHOUT_KILL";
     field public static final String SET_AND_VERIFY_LOCKSCREEN_CREDENTIALS = "android.permission.SET_AND_VERIFY_LOCKSCREEN_CREDENTIALS";
@@ -1190,6 +1191,9 @@ package android.hardware.display {
     method public boolean alwaysOnAvailable();
     method public boolean alwaysOnAvailableForUser(int);
     method public boolean alwaysOnEnabled(int);
+    method public void disableDozeSettings(int);
+    method public void disableDozeSettings(boolean, int);
+    method public void restoreDozeSettings(int);
   }
 
   public final class DisplayManager {
@@ -2400,7 +2404,6 @@ package android.service.quickaccesswallet {
     method public void notifyWalletDismissed();
     method public void removeWalletServiceEventListener(@NonNull android.service.quickaccesswallet.QuickAccessWalletClient.WalletServiceEventListener);
     method public void selectWalletCard(@NonNull android.service.quickaccesswallet.SelectWalletCardRequest);
-    method public boolean useTargetActivityForQuickAccess();
   }
 
   public static interface QuickAccessWalletClient.OnWalletCardsRetrievedCallback {
@@ -3250,6 +3253,7 @@ package android.window {
     method public void onDisplayAreaVanished(@NonNull android.window.DisplayAreaInfo);
     method @CallSuper @NonNull @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_TASKS) public java.util.List<android.window.DisplayAreaAppearedInfo> registerOrganizer(int);
     field public static final int FEATURE_DEFAULT_TASK_CONTAINER = 1; // 0x1
+    field public static final int FEATURE_IME = 8; // 0x8
     field public static final int FEATURE_ONE_HANDED = 3; // 0x3
     field public static final int FEATURE_ROOT = 0; // 0x0
     field public static final int FEATURE_SYSTEM_FIRST = 0; // 0x0
@@ -3258,10 +3262,6 @@ package android.window {
     field public static final int FEATURE_VENDOR_FIRST = 10001; // 0x2711
     field public static final int FEATURE_WINDOWED_MAGNIFICATION = 4; // 0x4
     field public static final int FEATURE_WINDOW_TOKENS = 2; // 0x2
-  }
-
-  public interface OnBackInvokedDispatcher {
-    field public static final long DISPATCH_BACK_INVOCATION_AHEAD_OF_TIME = 195946584L; // 0xbade858L
   }
 
   public final class SplashScreenView extends android.widget.FrameLayout {

@@ -18,6 +18,7 @@ package com.android.systemui.shared.system;
 
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
+import static android.view.WindowManager.TRANSIT_CHANGE;
 import static android.view.WindowManager.TRANSIT_CLOSE;
 import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_GOING_AWAY;
 import static android.view.WindowManager.TRANSIT_OPEN;
@@ -46,6 +47,7 @@ import android.window.IRemoteTransition;
 import android.window.IRemoteTransitionFinishedCallback;
 import android.window.PictureInPictureSurfaceTransaction;
 import android.window.RemoteTransition;
+import android.window.TaskSnapshot;
 import android.window.TransitionFilter;
 import android.window.TransitionInfo;
 import android.window.WindowContainerToken;
@@ -244,6 +246,8 @@ public class RemoteTransitionCompat implements Parcelable {
                 RecentsAnimationListener recents) {
             ArrayList<TransitionInfo.Change> openingTasks = null;
             boolean cancelRecents = false;
+            boolean homeGoingAway = false;
+            boolean hasChangingApp = false;
             for (int i = info.getChanges().size() - 1; i >= 0; --i) {
                 final TransitionInfo.Change change = info.getChanges().get(i);
                 if (change.getMode() == TRANSIT_OPEN || change.getMode() == TRANSIT_TO_FRONT) {
@@ -257,7 +261,27 @@ public class RemoteTransitionCompat implements Parcelable {
                         }
                         openingTasks.add(change);
                     }
+                } else if (change.getMode() == TRANSIT_CLOSE
+                        || change.getMode() == TRANSIT_TO_BACK) {
+                    if (mRecentsTask.equals(change.getContainer())) {
+                        homeGoingAway = true;
+                    }
+                } else if (change.getMode() == TRANSIT_CHANGE) {
+                    hasChangingApp = true;
                 }
+            }
+            if (hasChangingApp && homeGoingAway) {
+                // This happens when a visible app is expanding (usually PiP). In this case,
+                // The transition probably has a special-purpose animation, so finish recents
+                // now and let it do its animation (since recents is going to be occluded).
+                if (!recents.onSwitchToScreenshot(() -> {
+                    finish(true /* toHome */, false /* userLeaveHint */);
+                })) {
+                    Log.w(TAG, "Recents callback doesn't support support switching to screenshot"
+                            + ", there might be a flicker.");
+                    finish(true /* toHome */, false /* userLeaveHint */);
+                }
+                return false;
             }
             if (openingTasks == null) return false;
             int pauseMatches = 0;
@@ -299,7 +323,16 @@ public class RemoteTransitionCompat implements Parcelable {
         }
 
         @Override public ThumbnailData screenshotTask(int taskId) {
-            return mWrapped != null ? mWrapped.screenshotTask(taskId) : null;
+            try {
+                final TaskSnapshot snapshot =
+                        ActivityTaskManager.getService().takeTaskSnapshot(taskId);
+                if (snapshot != null) {
+                    return new ThumbnailData(snapshot);
+                }
+            } catch (RemoteException e) {
+                Log.e(TAG, "Failed to screenshot task", e);
+            }
+            return null;
         }
 
         @Override public void setInputConsumerEnabled(boolean enabled) {

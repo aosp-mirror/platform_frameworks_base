@@ -21,6 +21,7 @@ import static android.view.WindowInsets.Type.statusBars;
 
 import android.app.WallpaperColors;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -35,6 +36,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -65,6 +67,8 @@ public abstract class MediaOutputBaseDialog extends SystemUIDialog implements
 
     private static final String TAG = "MediaOutputDialog";
     private static final String EMPTY_TITLE = " ";
+    private static final String PREF_NAME = "MediaOutputDialog";
+    private static final String PREF_IS_LE_BROADCAST_FIRST_LAUNCH = "PrefIsLeBroadcastFirstLaunch";
 
     private final Handler mMainThreadHandler = new Handler(Looper.getMainLooper());
     private final RecyclerView.LayoutManager mLayoutManager;
@@ -252,6 +256,33 @@ public abstract class MediaOutputBaseDialog extends SystemUIDialog implements
         }
         // Show when remote media session is available
         mStopButton.setVisibility(getStopButtonVisibility());
+        if (isBroadcastSupported() && mMediaOutputController.isPlaying()) {
+            mStopButton.setText(R.string.media_output_broadcast);
+            mStopButton.setOnClickListener(v -> {
+                SharedPreferences sharedPref = mContext.getSharedPreferences(PREF_NAME,
+                        Context.MODE_PRIVATE);
+
+                if (sharedPref != null
+                        && sharedPref.getBoolean(PREF_IS_LE_BROADCAST_FIRST_LAUNCH, true)) {
+                    Log.d(TAG, "PREF_IS_LE_BROADCAST_FIRST_LAUNCH: true");
+
+                    mMediaOutputController.launchLeBroadcastNotifyDialog(mDialogView,
+                            mBroadcastSender,
+                            MediaOutputController.BroadcastNotifyDialog.ACTION_FIRST_LAUNCH);
+                    SharedPreferences.Editor editor = sharedPref.edit();
+                    editor.putBoolean(PREF_IS_LE_BROADCAST_FIRST_LAUNCH, false);
+                    editor.apply();
+                } else {
+                    mMediaOutputController.launchMediaOutputBroadcastDialog(mDialogView,
+                            mBroadcastSender);
+                }
+            });
+        } else {
+            mStopButton.setOnClickListener(v -> {
+                mMediaOutputController.releaseSession();
+                dismiss();
+            });
+        }
     }
 
     private Drawable resizeDrawable(Drawable drawable, int size) {
@@ -283,6 +314,10 @@ public abstract class MediaOutputBaseDialog extends SystemUIDialog implements
     abstract CharSequence getHeaderSubtitle();
 
     abstract int getStopButtonVisibility();
+
+    public boolean isBroadcastSupported() {
+        return false;
+    }
 
     @Override
     public void onMediaChanged() {

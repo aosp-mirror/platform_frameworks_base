@@ -410,12 +410,14 @@
     <string name="launch_defaults_none">No defaults set</string>
     <!-- DO NOT TRANSLATE Empty summary for dynamic preferences -->
     <string name="summary_empty" translatable="false"></string>
+    <!-- DO NOT TRANSLATE Summary placeholder -->
+    <string name="summary_placeholder" translatable="false">&#160;</string>
     <!-- Text-To-Speech (TTS) settings --><skip />
     <!-- Name of the TTS package as listed by the package manager. -->
     <string name="tts_settings">Text-to-speech settings</string>
     <!-- TTS option item name in the main settings screen -->
     <string name="tts_settings_title">Text-to-speech output</string>
-  <!-- On main TTS Settings screen, in default settings section, setting default speech rate for synthesized voice -->
+    <!-- On main TTS Settings screen, in default settings section, setting default speech rate for synthesized voice -->
     <string name="tts_default_rate_title">Speech rate</string>
     <!-- On main TTS Settings screen, summary for default speech rate for synthesized voice -->
     <string name="tts_default_rate_summary">Speed at which the text is spoken</string>
@@ -1432,6 +1434,8 @@
     <string name="guest_remove_guest_dialog_title">Remove guest?</string>
     <!-- Label for button in confirmation dialog when resetting guest user [CHAR LIMIT=35] -->
     <string name="guest_reset_guest_confirm_button">Reset</string>
+    <!-- Label for button in confirmation dialog when removing guest session [CHAR LIMIT=35] -->
+    <string name="guest_remove_guest_confirm_button">Remove</string>
     <!-- Status message indicating the device is in the process of resetting the guest user. [CHAR_LIMIT=NONE] -->
     <string name="guest_resetting">Resetting guest\u2026</string>
     <!-- An option in a photo selection dialog to take a new photo [CHAR LIMIT=50] -->
@@ -1578,4 +1582,11 @@
     <string name="allow_turn_screen_on">Allow turning the screen on</string>
     <!-- Description for a setting which controls whether an app can turn the screen on [CHAR LIMIT=NONE] -->
     <string name="allow_turn_screen_on_description">Allow an app to turn the screen on. If granted, the app may turn on the screen at any time without your explicit intent.</string>
+
+    <!-- [CHAR LIMIT=NONE] Le audio QR code scanner title -->
+    <string name="bt_le_audio_scan_qr_code">Scan QR code</string>
+    <!-- [CHAR LIMIT=NONE] Le audio QR code scanner sub-title -->
+    <string name="bt_le_audio_scan_qr_code_scanner">To start listening, center the QR code below</string>
+    <!-- [CHAR LIMIT=NONE] Hint for QR code process failure -->
+    <string name="bt_le_audio_qr_code_is_not_valid_format">QR code isn\u0027t a valid format</string>
 </resources>

@@ -241,7 +241,8 @@ public final class SelectableTargetInfo implements ChooserTargetInfo {
         final boolean ignoreTargetSecurity = mSourceInfo != null
                 && mSourceInfo.getResolvedComponentName().getPackageName()
                 .equals(mChooserTarget.getComponentName().getPackageName());
-        return activity.startAsCallerImpl(intent, options, ignoreTargetSecurity, userId);
+        activity.startActivityAsCaller(intent, options, ignoreTargetSecurity, userId);
+        return true;
     }
 
     @Override

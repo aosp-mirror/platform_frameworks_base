@@ -1,6 +1,7 @@
 package com.android.server.usage;
 
 import android.annotation.CurrentTimeMillisLong;
+import android.annotation.ElapsedRealtimeLong;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
@@ -148,6 +149,12 @@ public interface AppStandbyInternal {
     @StandbyBuckets
     int getAppMinStandbyBucket(String packageName, int appId, int userId,
             boolean shouldObfuscateInstantApps);
+
+    /**
+     * Return the bucketing reason code of the given app.
+     */
+    int getAppStandbyBucketReason(@NonNull String packageName, @UserIdInt int userId,
+            @ElapsedRealtimeLong long elapsedRealtime);
 
     /**
      * Put the specified app in the

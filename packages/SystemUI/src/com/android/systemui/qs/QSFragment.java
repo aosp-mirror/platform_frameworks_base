@@ -26,6 +26,7 @@ import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.Trace;
+import android.util.IndentingPrintWriter;
 import android.util.Log;
 import android.view.ContextThemeWrapper;
 import android.view.LayoutInflater;
@@ -37,6 +38,8 @@ import android.view.ViewTreeObserver;
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 
+import com.android.keyguard.BouncerPanelExpansionCalculator;
+import com.android.systemui.Dumpable;
 import com.android.systemui.R;
 import com.android.systemui.animation.Interpolators;
 import com.android.systemui.animation.ShadeInterpolation;
@@ -57,13 +60,16 @@ import com.android.systemui.statusbar.policy.RemoteInputQuickSettingsDisabler;
 import com.android.systemui.util.LifecycleFragment;
 import com.android.systemui.util.Utils;
 
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
+import java.util.Arrays;
 import java.util.function.Consumer;
 
 import javax.inject.Inject;
 import javax.inject.Named;
 
 public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Callbacks,
-        StatusBarStateController.StateListener {
+        StatusBarStateController.StateListener, Dumpable {
     private static final String TAG = "QS";
     private static final boolean DEBUG = false;
     private static final String EXTRA_EXPANDED = "expanded";
@@ -134,7 +140,7 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
      */
     private boolean mAnimateNextQsUpdate;
 
-    private DumpManager mDumpManager;
+    private final DumpManager mDumpManager;
 
     /**
      * Progress of pull down from the center of the lock screen.
@@ -255,15 +261,26 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
     }
 
     @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        mDumpManager.registerDumpable(getClass().getName(), this);
+    }
+
+    @Override
     public void onDestroy() {
         super.onDestroy();
         mStatusBarStateController.removeCallback(this);
         if (mListening) {
             setListening(false);
         }
-        mQSCustomizerController.setQs(null);
+        if (mQSCustomizerController != null) {
+            mQSCustomizerController.setQs(null);
+        }
         mScrollListener = null;
-        mDumpManager.unregisterDumpable(mContainer.getClass().getName());
+        if (mContainer != null) {
+            mDumpManager.unregisterDumpable(mContainer.getClass().getName());
+        }
+        mDumpManager.unregisterDumpable(getClass().getName());
     }
 
     @Override
@@ -271,7 +288,9 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
         super.onSaveInstanceState(outState);
         outState.putBoolean(EXTRA_EXPANDED, mQsExpanded);
         outState.putBoolean(EXTRA_LISTENING, mListening);
-        mQSCustomizerController.saveInstanceState(outState);
+        if (mQSCustomizerController != null) {
+            mQSCustomizerController.saveInstanceState(outState);
+        }
         if (mQsExpanded) {
             mQSPanelController.getTileLayout().saveInstanceState(outState);
         }
@@ -593,7 +612,9 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
         } else if (progress > 0 && view.getVisibility() != View.VISIBLE) {
             view.setVisibility((View.VISIBLE));
         }
-        float alpha = ShadeInterpolation.getContentAlpha(progress);
+        float alpha = mQSPanelController.bouncerInTransit()
+                ? BouncerPanelExpansionCalculator.getBackScrimScaledExpansion(progress)
+                : ShadeInterpolation.getContentAlpha(progress);
         view.setAlpha(alpha);
     }
 
@@ -742,13 +763,32 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
 
     @Override
     public int getQsMinExpansionHeight() {
+        if (mInSplitShade) {
+            return getQsMinExpansionHeightForSplitShade();
+        }
         return mHeader.getHeight();
+    }
+
+    /**
+     * Returns the min expansion height for split shade.
+     *
+     * On split shade, QS is always expanded and goes from the top of the screen to the bottom of
+     * the QS container.
+     */
+    private int getQsMinExpansionHeightForSplitShade() {
+        getView().getLocationOnScreen(mTemp);
+        int top = mTemp[1];
+        // We want to get the original top position, so we subtract any translation currently set.
+        int originalTop = (int) (top - getView().getTranslationY());
+        // On split shade the QS view doesn't start at the top of the screen, so we need to add the
+        // top margin.
+        return originalTop + getView().getHeight();
     }
 
     @Override
     public void hideImmediately() {
         getView().animate().cancel();
-        getView().setY(-mHeader.getHeight());
+        getView().setY(-getQsMinExpansionHeight());
     }
 
     private final ViewTreeObserver.OnPreDrawListener mStartHeaderSlidingIn
@@ -783,5 +823,63 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
         mState = newState;
         setKeyguardShowing(newState == StatusBarState.KEYGUARD);
         updateShowCollapsedOnKeyguard();
+    }
+
+    @Override
+    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+        IndentingPrintWriter indentingPw = new IndentingPrintWriter(pw, /* singleIndent= */ "  ");
+        indentingPw.println("QSFragment:");
+        indentingPw.increaseIndent();
+        indentingPw.println("mQsBounds: " + mQsBounds);
+        indentingPw.println("mQsExpanded: " + mQsExpanded);
+        indentingPw.println("mHeaderAnimating: " + mHeaderAnimating);
+        indentingPw.println("mStackScrollerOverscrolling: " + mStackScrollerOverscrolling);
+        indentingPw.println("mListening: " + mListening);
+        indentingPw.println("mLayoutDirection: " + mLayoutDirection);
+        indentingPw.println("mLastQSExpansion: " + mLastQSExpansion);
+        indentingPw.println("mLastPanelFraction: " + mLastPanelFraction);
+        indentingPw.println("mSquishinessFraction: " + mSquishinessFraction);
+        indentingPw.println("mQsDisabled: " + mQsDisabled);
+        indentingPw.println("mTemp: " + Arrays.toString(mTemp));
+        indentingPw.println("mShowCollapsedOnKeyguard: " + mShowCollapsedOnKeyguard);
+        indentingPw.println("mLastKeyguardAndExpanded: " + mLastKeyguardAndExpanded);
+        indentingPw.println("mState: " + StatusBarState.toString(mState));
+        indentingPw.println("mTmpLocation: " + Arrays.toString(mTmpLocation));
+        indentingPw.println("mLastViewHeight: " + mLastViewHeight);
+        indentingPw.println("mLastHeaderTranslation: " + mLastHeaderTranslation);
+        indentingPw.println("mInSplitShade: " + mInSplitShade);
+        indentingPw.println("mTransitioningToFullShade: " + mTransitioningToFullShade);
+        indentingPw.println("mFullShadeProgress: " + mFullShadeProgress);
+        indentingPw.println("mOverScrolling: " + mOverScrolling);
+        indentingPw.println("isCustomizing: " + mQSCustomizerController.isCustomizing());
+        View view = getView();
+        if (view != null) {
+            indentingPw.println("top: " + view.getTop());
+            indentingPw.println("y: " + view.getY());
+            indentingPw.println("translationY: " + view.getTranslationY());
+            indentingPw.println("alpha: " + view.getAlpha());
+            indentingPw.println("height: " + view.getHeight());
+            indentingPw.println("measuredHeight: " + view.getMeasuredHeight());
+            indentingPw.println("clipBounds: " + view.getClipBounds());
+        } else {
+            indentingPw.println("getView(): null");
+        }
+        QuickStatusBarHeader header = mHeader;
+        if (header != null) {
+            indentingPw.println("headerHeight: " + header.getHeight());
+            indentingPw.println("Header visibility: " + visibilityToString(header.getVisibility()));
+        } else {
+            indentingPw.println("mHeader: null");
+        }
+    }
+
+    private static String visibilityToString(int visibility) {
+        if (visibility == View.VISIBLE) {
+            return "VISIBLE";
+        }
+        if (visibility == View.INVISIBLE) {
+            return "INVISIBLE";
+        }
+        return "GONE";
     }
 }

@@ -47,8 +47,7 @@ import android.service.dreams.IDreamManager;
 import android.util.Slog;
 import android.view.Display;
 
-import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.logging.UiEvent;
+import com.android.internal.R;
 import com.android.internal.logging.UiEventLogger;
 import com.android.internal.logging.UiEventLoggerImpl;
 import com.android.internal.util.DumpUtils;
@@ -82,6 +81,7 @@ public final class DreamManagerService extends SystemService {
     private final PowerManager.WakeLock mDozeWakeLock;
     private final ActivityTaskManagerInternal mAtmInternal;
     private final UiEventLogger mUiEventLogger;
+    private final DreamUiEventLogger mDreamUiEventLogger;
     private final ComponentName mAmbientDisplayComponent;
 
     private Binder mCurrentDreamToken;
@@ -99,26 +99,6 @@ public final class DreamManagerService extends SystemService {
 
     private AmbientDisplayConfiguration mDozeConfig;
 
-    @VisibleForTesting
-    public enum DreamManagerEvent implements UiEventLogger.UiEventEnum {
-        @UiEvent(doc = "The screensaver has started.")
-        DREAM_START(577),
-
-        @UiEvent(doc = "The screensaver has stopped.")
-        DREAM_STOP(578);
-
-        private final int mId;
-
-        DreamManagerEvent(int id) {
-            mId = id;
-        }
-
-        @Override
-        public int getId() {
-            return mId;
-        }
-    }
-
     public DreamManagerService(Context context) {
         super(context);
         mContext = context;
@@ -131,6 +111,8 @@ public final class DreamManagerService extends SystemService {
         mDozeWakeLock = mPowerManager.newWakeLock(PowerManager.DOZE_WAKE_LOCK, TAG);
         mDozeConfig = new AmbientDisplayConfiguration(mContext);
         mUiEventLogger = new UiEventLoggerImpl();
+        mDreamUiEventLogger = new DreamUiEventLoggerImpl(
+                mContext.getResources().getString(R.string.config_loggable_dream_prefix));
         AmbientDisplayConfiguration adc = new AmbientDisplayConfiguration(mContext);
         mAmbientDisplayComponent = ComponentName.unflattenFromString(adc.ambientDisplayComponent());
     }
@@ -417,7 +399,10 @@ public final class DreamManagerService extends SystemService {
         mCurrentDreamUserId = userId;
 
         if (!mCurrentDreamName.equals(mAmbientDisplayComponent)) {
-            mUiEventLogger.log(DreamManagerEvent.DREAM_START);
+            // TODO(b/213906448): Remove when metrics based on new atom are fully rolled out.
+            mUiEventLogger.log(DreamUiEventLogger.DreamUiEventEnum.DREAM_START);
+            mDreamUiEventLogger.log(DreamUiEventLogger.DreamUiEventEnum.DREAM_START,
+                    mCurrentDreamName.flattenToString());
         }
 
         PowerManager.WakeLock wakeLock = mPowerManager
@@ -453,7 +438,10 @@ public final class DreamManagerService extends SystemService {
 
     private void cleanupDreamLocked() {
         if (!mCurrentDreamName.equals(mAmbientDisplayComponent)) {
-            mUiEventLogger.log(DreamManagerEvent.DREAM_STOP);
+            // TODO(b/213906448): Remove when metrics based on new atom are fully rolled out.
+            mUiEventLogger.log(DreamUiEventLogger.DreamUiEventEnum.DREAM_STOP);
+            mDreamUiEventLogger.log(DreamUiEventLogger.DreamUiEventEnum.DREAM_STOP,
+                    mCurrentDreamName.flattenToString());
         }
         mCurrentDreamToken = null;
         mCurrentDreamName = null;

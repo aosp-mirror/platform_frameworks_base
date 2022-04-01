@@ -3592,7 +3592,7 @@ public class NotificationPanelViewController extends PanelViewController {
                 }
             });
             mLockscreenShadeTransitionController.setQS(mQs);
-            mNotificationStackScrollLayoutController.setQsContainer((ViewGroup) mQs.getView());
+            mNotificationStackScrollLayoutController.setQsHeader((ViewGroup) mQs.getHeader());
             mQs.setScrollListener(mScrollListener);
             updateQsExpansion();
         }
@@ -4900,7 +4900,6 @@ public class NotificationPanelViewController extends PanelViewController {
     private int mCurrentPanelState = STATE_CLOSED;
 
     private void onPanelStateChanged(@PanelState int state) {
-        mAmbientState.setIsShadeOpening(state == STATE_OPENING);
         updateQSExpansionEnabledAmbient();
 
         if (state == STATE_OPEN && mCurrentPanelState != state) {

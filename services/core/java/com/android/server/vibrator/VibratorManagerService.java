@@ -1852,6 +1852,9 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
                 Duration transitionDuration = isContinuous
                         ? Duration.ofMillis(durations.get(i))
                         : Duration.ZERO;
+                Duration sustainDuration = isContinuous
+                        ? Duration.ZERO
+                        : Duration.ofMillis(durations.get(i));
 
                 if (hasFrequencies) {
                     waveform.addTransition(transitionDuration, targetAmplitude(amplitudes.get(i)),
@@ -1859,8 +1862,10 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
                 } else {
                     waveform.addTransition(transitionDuration, targetAmplitude(amplitudes.get(i)));
                 }
-                if (!isContinuous) {
-                    waveform.addSustain(Duration.ofMillis(durations.get(i)));
+                if (!sustainDuration.isZero()) {
+                    // Add sustain only takes positive durations. Skip this since we already
+                    // did a transition to the desired values (even when duration is zero).
+                    waveform.addSustain(sustainDuration);
                 }
 
                 if ((i > 0) && (i == repeat)) {

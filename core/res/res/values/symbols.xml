@@ -472,8 +472,10 @@
   <java-symbol type="integer" name="config_safe_media_volume_usb_mB" />
   <java-symbol type="integer" name="config_mobile_mtu" />
   <java-symbol type="array"   name="config_mobile_tcp_buffers" />
+  <java-symbol type="array"   name="config_network_type_tcp_buffers" />
   <java-symbol type="string"  name="config_tcp_buffers" />
   <java-symbol type="bool" name="config_force_enable_telephony_new_data_stack" />
+  <java-symbol type="bool" name="config_enable_iwlan_handover_policy" />
   <java-symbol type="integer" name="config_volte_replacement_rat"/>
   <java-symbol type="integer" name="config_valid_wappush_index" />
   <java-symbol type="integer" name="config_overrideHasPermanentMenuKey" />
@@ -550,7 +552,6 @@
   <java-symbol type="string" name="activity_resolver_work_profiles_support" />
   <java-symbol type="string" name="app_running_notification_title" />
   <java-symbol type="string" name="app_running_notification_text" />
-  <java-symbol type="string" name="copied" />
   <java-symbol type="string" name="delete" />
   <java-symbol type="string" name="deleteText" />
   <java-symbol type="string" name="grant_permissions_header_text" />
@@ -1715,10 +1716,6 @@
   <java-symbol type="anim" name="activity_open_exit" />
   <java-symbol type="anim" name="activity_close_enter" />
   <java-symbol type="anim" name="activity_close_exit" />
-  <java-symbol type="anim" name="activity_open_enter_legacy" />
-  <java-symbol type="anim" name="activity_open_exit_legacy" />
-  <java-symbol type="anim" name="activity_close_enter_legacy" />
-  <java-symbol type="anim" name="activity_close_exit_legacy" />
   <java-symbol type="anim" name="task_fragment_close_enter" />
   <java-symbol type="anim" name="task_fragment_close_exit" />
   <java-symbol type="anim" name="task_fragment_open_enter" />
@@ -2238,6 +2235,7 @@
   <java-symbol type="array" name="config_supportedDreamComplications" />
   <java-symbol type="array" name="config_dreamComplicationsEnabledByDefault" />
   <java-symbol type="array" name="config_disabledDreamComponents" />
+  <java-symbol type="string" name="config_loggable_dream_prefix" />
   <java-symbol type="string" name="config_dozeComponent" />
   <java-symbol type="string" name="enable_explore_by_touch_warning_title" />
   <java-symbol type="string" name="enable_explore_by_touch_warning_message" />
@@ -3708,7 +3706,6 @@
   <java-symbol type="string" name="config_defaultMusicRecognitionService" />
   <java-symbol type="string" name="config_defaultAttentionService" />
   <java-symbol type="string" name="config_defaultRotationResolverService" />
-  <java-symbol type="string" name="config_defaultSystemCaptionsService" />
   <java-symbol type="string" name="config_defaultSystemCaptionsManagerService" />
   <java-symbol type="string" name="config_defaultAmbientContextDetectionService" />
   <java-symbol type="string" name="config_defaultAmbientContextConsentComponent" />
@@ -3972,7 +3969,6 @@
   <java-symbol type="string" name="config_misprovisionedBrandValue" />
 
   <java-symbol type="integer" name="db_wal_truncate_size" />
-  <java-symbol type="integer" name="config_wakeUpDelayDoze" />
 
   <!-- For Bluetooth AbsoluteVolume -->
   <java-symbol type="fraction" name="config_prescaleAbsoluteVolume_index1" />
@@ -4743,6 +4739,7 @@
 
   <java-symbol type="string" name="notification_channel_abusive_bg_apps"/>
   <java-symbol type="string" name="notification_title_abusive_bg_apps"/>
+  <java-symbol type="string" name="notification_title_long_running_fgs"/>
   <java-symbol type="string" name="notification_content_abusive_bg_apps"/>
   <java-symbol type="string" name="notification_content_long_running_fgs"/>
   <java-symbol type="string" name="notification_action_check_bg_apps"/>

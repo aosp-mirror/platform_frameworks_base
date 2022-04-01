@@ -16,13 +16,36 @@
 
 package com.android.settingslib.utils;
 
+import android.os.Build;
 import android.os.Build.VERSION;
+
+import androidx.annotation.ChecksSdkIntAtLeast;
 
 /**
  * An util class to check whether the current OS version is higher or equal to sdk version of
  * device.
  */
 public final class BuildCompatUtils {
+
+    /**
+     * Implementation of BuildCompat.isAtLeastS() suitable for use in Settings
+     *
+     * @return Whether the current OS version is higher or equal to S.
+     */
+    @ChecksSdkIntAtLeast(api = Build.VERSION_CODES.S)
+    public static boolean isAtLeastS() {
+        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.S;
+    }
+
+    /**
+     * Implementation of BuildCompat.isAtLeastS() suitable for use in Settings
+     *
+     * @return Whether the current OS version is higher or equal to Sv2.
+     */
+    @ChecksSdkIntAtLeast(api = Build.VERSION_CODES.S_V2)
+    public static boolean isAtLeastSV2() {
+        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.S_V2;
+    }
 
     /**
      * Implementation of BuildCompat.isAtLeast*() suitable for use in Settings
@@ -35,26 +58,27 @@ public final class BuildCompatUtils {
      * <p>Supported configurations:
      *
      * <ul>
-     *   <li>For current Android release: when new API is not finalized yet (CODENAME = "S", SDK_INT
-     *       = 30|31)
-     *   <li>For current Android release: when new API is finalized (CODENAME = "REL", SDK_INT = 31)
-     *   <li>For next Android release (CODENAME = "T", SDK_INT = 30+)
+     *   <li>For current Android release: when new API is not finalized yet (CODENAME = "Tiramisu",
+     *   SDK_INT = 32)
+     *   <li>For current Android release: when new API is finalized (CODENAME = "REL", SDK_INT = 33)
+     *   <li>For next Android release (CODENAME = "U", SDK_INT = 34+)
      * </ul>
      *
      * <p>Note that Build.VERSION_CODES.S cannot be used here until final SDK is available, because
      * it is equal to Build.VERSION_CODES.CUR_DEVELOPMENT before API finalization.
      *
-     * @return Whether the current OS version is higher or equal to S.
+     * @return Whether the current OS version is higher or equal to T.
      */
-    public static boolean isAtLeastS() {
-        if (VERSION.SDK_INT < 30) {
+    public static boolean isAtLeastT() {
+        if (!isAtLeastS()) {
             return false;
         }
 
-        return (VERSION.CODENAME.equals("REL") && VERSION.SDK_INT >= 31)
+        return (VERSION.CODENAME.equals("REL") && VERSION.SDK_INT >= 33)
                 || (VERSION.CODENAME.length() >= 1
-                && VERSION.CODENAME.toUpperCase().charAt(0) >= 'S'
-                && VERSION.CODENAME.toUpperCase().charAt(0) <= 'Z');
+                && VERSION.CODENAME.toUpperCase().charAt(0) >= 'T'
+                && VERSION.CODENAME.toUpperCase().charAt(0) <= 'Z')
+                || (Build.VERSION.CODENAME.equals("Tiramisu") && Build.VERSION.SDK_INT >= 32);
     }
 
     private BuildCompatUtils() {}

@@ -117,6 +117,7 @@ import android.util.SparseArray;
 import android.util.SparseBooleanArray;
 import android.util.TypedXmlSerializer;
 import android.util.Xml;
+import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
@@ -322,6 +323,37 @@ public class ComputerEngine implements Computer {
             }
             return res;
         }
+
+        public void dumpPackagesProto(ProtoOutputStream proto) {
+            mSettings.dumpPackagesProto(proto);
+        }
+
+        public void dumpPermissions(PrintWriter pw, String packageName,
+                ArraySet<String> permissionNames, DumpState dumpState) {
+            mSettings.dumpPermissions(pw, packageName, permissionNames, dumpState);
+        }
+
+        public void dumpPackages(PrintWriter pw, String packageName,
+                ArraySet<String> permissionNames, DumpState dumpState, boolean checkin) {
+            mSettings.dumpPackagesLPr(pw, packageName, permissionNames, dumpState, checkin);
+        }
+
+        public void dumpKeySet(PrintWriter pw, String packageName, DumpState dumpState) {
+            mSettings.getKeySetManagerService().dumpLPr(pw, packageName, dumpState);
+        }
+
+        public void dumpSharedUsers(PrintWriter pw, String packageName,
+                ArraySet<String> permissionNames, DumpState dumpState, boolean checkin) {
+            mSettings.dumpSharedUsersLPr(pw, packageName, permissionNames, dumpState, checkin);
+        }
+
+        public void dumpReadMessages(PrintWriter pw, DumpState dumpState) {
+            mSettings.dumpReadMessages(pw, dumpState);
+        }
+
+        public void dumpSharedUsersProto(ProtoOutputStream proto) {
+            mSettings.dumpSharedUsersProto(proto);
+        }
     }
 
     private static final Comparator<ProviderInfo> sProviderInitOrderSorter = (p1, p2) -> {
@@ -348,7 +380,7 @@ public class ComputerEngine implements Computer {
     private final ResolveInfo mInstantAppInstallerInfo;
     private final InstantAppRegistry mInstantAppRegistry;
     private final ApplicationInfo mLocalAndroidApplication;
-    private final AppsFilter mAppsFilter;
+    private final AppsFilterSnapshot mAppsFilter;
     private final WatchedArrayMap<String, Integer> mFrozenPackages;
 
     // Immutable service attribute
@@ -3211,6 +3243,34 @@ public class ComputerEngine implements Computer {
                 }
                 break;
             }
+
+            case DumpState.DUMP_MESSAGES: {
+                mSettings.dumpReadMessages(pw, dumpState);
+                break;
+            }
+
+            case DumpState.DUMP_FROZEN: {
+                // XXX should handle packageName != null by dumping only install data that
+                // the given package is involved with.
+                if (dumpState.onTitlePrinted()) {
+                    pw.println();
+                }
+                final IndentingPrintWriter ipw = new IndentingPrintWriter(pw, "  ", 120);
+                ipw.println();
+                ipw.println("Frozen packages:");
+                ipw.increaseIndent();
+                if (mFrozenPackages.size() == 0) {
+                    ipw.println("(none)");
+                } else {
+                    for (int i = 0; i < mFrozenPackages.size(); i++) {
+                        ipw.print("package=");
+                        ipw.print(mFrozenPackages.keyAt(i));
+                        ipw.print(", refCounts=");
+                        ipw.println(mFrozenPackages.valueAt(i));
+                    }
+                }
+                ipw.decreaseIndent();
+            }
         } // switch
     }
 
@@ -5698,10 +5758,58 @@ public class ComputerEngine implements Computer {
         return mFrozenPackages;
     }
 
+    @Override
+    public void checkPackageFrozen(@NonNull String packageName) {
+        if (!mFrozenPackages.containsKey(packageName)) {
+            Slog.wtf(TAG, "Expected " + packageName + " to be frozen!", new Throwable());
+        }
+    }
+
     @Nullable
     @Override
     public ComponentName getInstantAppInstallerComponent() {
         return mLocalInstantAppInstallerActivity == null
                 ? null : mLocalInstantAppInstallerActivity.getComponentName();
+    }
+
+    @Override
+    public void dumpPermissions(@NonNull PrintWriter pw, @NonNull String packageName,
+            @NonNull ArraySet<String> permissionNames, @NonNull DumpState dumpState) {
+        mSettings.dumpPermissions(pw, packageName, permissionNames, dumpState);
+    }
+
+    @Override
+    public void dumpPackages(@NonNull PrintWriter pw, @NonNull String packageName,
+            @NonNull ArraySet<String> permissionNames, @NonNull DumpState dumpState,
+            boolean checkin) {
+        mSettings.dumpPackages(pw, packageName, permissionNames, dumpState, checkin);
+    }
+
+    @Override
+    public void dumpKeySet(@NonNull PrintWriter pw, @NonNull String packageName,
+            @NonNull DumpState dumpState) {
+        mSettings.dumpKeySet(pw, packageName, dumpState);
+    }
+
+    @Override
+    public void dumpSharedUsers(@NonNull PrintWriter pw, @NonNull String packageName,
+            @NonNull ArraySet<String> permissionNames, @NonNull DumpState dumpState,
+            boolean checkin) {
+        mSettings.dumpSharedUsers(pw, packageName, permissionNames, dumpState, checkin);
+    }
+
+    @Override
+    public void dumpSharedUsersProto(@NonNull ProtoOutputStream proto) {
+        mSettings.dumpSharedUsersProto(proto);
+    }
+
+    @Override
+    public void dumpPackagesProto(@NonNull ProtoOutputStream proto) {
+        mSettings.dumpPackagesProto(proto);
+    }
+
+    @Override
+    public void dumpSharedLibrariesProto(@NonNull ProtoOutputStream proto) {
+        mSharedLibraries.dumpProto(proto);
     }
 }

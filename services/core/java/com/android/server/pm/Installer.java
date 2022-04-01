@@ -287,6 +287,9 @@ public class Installer extends SystemService {
      * Sets in Installd that it is first boot after data wipe
      */
     public void setFirstBoot() throws InstallerException {
+        if (!checkBeforeRemote()) {
+            return;
+        }
         try {
             mInstalld.setFirstBoot();
         } catch (RemoteException e) {
@@ -684,6 +687,20 @@ public class Installer extends SystemService {
         if (!checkBeforeRemote()) return;
         try {
             mInstalld.destroyAppProfiles(packageName);
+        } catch (Exception e) {
+            throw InstallerException.from(e);
+        }
+    }
+
+    /**
+     * Deletes the reference profile with the given name of the given package.
+     * @throws InstallerException if the deletion fails.
+     */
+    public void deleteReferenceProfile(String packageName, String profileName)
+            throws InstallerException {
+        if (!checkBeforeRemote()) return;
+        try {
+            mInstalld.deleteReferenceProfile(packageName, profileName);
         } catch (Exception e) {
             throw InstallerException.from(e);
         }

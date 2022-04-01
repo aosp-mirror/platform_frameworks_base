@@ -709,6 +709,9 @@ public class WindowManagerService extends IWindowManager.Stub
     // State while inside of layoutAndPlaceSurfacesLocked().
     boolean mFocusMayChange;
 
+    // Number of windows whose insets state have been changed.
+    int mWindowsInsetsChanged = 0;
+
     // This is held as long as we have the screen frozen, to give us time to
     // perform a rotation animation when turning off shows the lock screen which
     // changes the orientation.
@@ -2510,7 +2513,6 @@ public class WindowManagerService extends IWindowManager.Stub
 
             if (mUseBLASTSync && win.useBLASTSync() && viewVisibility != View.GONE
                     && (win.mSyncSeqId > win.mLastSeqIdSentToRelayout)) {
-                win.prepareDrawHandlers();
                 win.markRedrawForSyncReported();
 
                 win.mLastSeqIdSentToRelayout = win.mSyncSeqId;
@@ -2637,7 +2639,17 @@ public class WindowManagerService extends IWindowManager.Stub
 
     void updateWindowLayout(Session session, IWindow client, LayoutParams attrs, int flags,
             ClientWindowFrames clientWindowFrames, int requestedWidth, int requestedHeight) {
-        // TODO(b/161810301): Finish the implementation.
+        final long origId = Binder.clearCallingIdentity();
+        synchronized (mGlobalLock) {
+            final WindowState win = windowForClientLocked(session, client, false);
+            if (win == null) {
+                return;
+            }
+            win.setFrames(clientWindowFrames, requestedWidth, requestedHeight);
+
+            // TODO(b/161810301): Finish the implementation.
+        }
+        Binder.restoreCallingIdentity(origId);
     }
 
     public boolean outOfMemoryWindow(Session session, IWindow client) {
@@ -5218,6 +5230,7 @@ public class WindowManagerService extends IWindowManager.Stub
         public static final int LAYOUT_AND_ASSIGN_WINDOW_LAYERS_IF_NEEDED = 63;
         public static final int WINDOW_STATE_BLAST_SYNC_TIMEOUT = 64;
         public static final int REPARENT_TASK_TO_DEFAULT_DISPLAY = 65;
+        public static final int INSETS_CHANGED = 66;
 
         /**
          * Used to denote that an integer field in a message will not be used.
@@ -5544,6 +5557,17 @@ public class WindowManagerService extends IWindowManager.Stub
                     }
                     break;
                 }
+                case INSETS_CHANGED: {
+                    synchronized (mGlobalLock) {
+                        if (mWindowsInsetsChanged > 0) {
+                            mWindowsInsetsChanged = 0;
+                            // We need to update resizing windows and dispatch the new insets state
+                            // to them.
+                            mRoot.performSurfacePlacement();
+                        }
+                    }
+                    break;
+                }
             }
             if (DEBUG_WINDOW_TRACE) {
                 Slog.v(TAG_WM, "handleMessage: exit");
@@ -5677,7 +5701,9 @@ public class WindowManagerService extends IWindowManager.Stub
                             || displayContent.mBaseDisplayHeight != height) {
                         ProtoLog.i(WM_ERROR, "FORCED DISPLAY SIZE: %dx%d", width, height);
                         displayContent.updateBaseDisplayMetrics(width, height,
-                                displayContent.mBaseDisplayDensity);
+                                displayContent.mBaseDisplayDensity,
+                                displayContent.mBaseDisplayPhysicalXDpi,
+                                displayContent.mBaseDisplayPhysicalYDpi);
                         changed = true;
                     }
                 } catch (NumberFormatException ex) {
@@ -6289,8 +6315,6 @@ public class WindowManagerService extends IWindowManager.Stub
                         + " callers=" + Debug.getCallers(3));
                 return NAV_BAR_INVALID;
             }
-            displayContent.performLayout(false /* initial */,
-                    false /* updateInputWindows */);
             return displayContent.getDisplayPolicy().getNavBarPosition();
         }
     }
@@ -6952,13 +6976,17 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     public void onOverlayChanged() {
-        synchronized (mGlobalLock) {
-            mRoot.forAllDisplays(displayContent -> {
-                displayContent.getDisplayPolicy().onOverlayChangedLw();
-                displayContent.updateDisplayInfo();
-            });
-            requestTraversal();
-        }
+        // Post to display thread so it can get the latest display info.
+        mH.post(() -> {
+            synchronized (mGlobalLock) {
+                mAtmService.deferWindowLayout();
+                try {
+                    mRoot.forAllDisplays(dc -> dc.getDisplayPolicy().onOverlayChanged());
+                } finally {
+                    mAtmService.continueWindowLayout();
+                }
+            }
+        });
     }
 
     @Override
@@ -8145,6 +8173,27 @@ public class WindowManagerService extends IWindowManager.Stub
                         .setCallsite("getHandwritingSurfaceForDisplay")
                         .setParent(dc.getSurfaceControl())
                         .build();
+            }
+        }
+
+        @Override
+        public void replaceInputSurfaceTouchableRegionWithWindowCrop(
+                @NonNull SurfaceControl inputSurface,
+                @NonNull InputWindowHandle inputWindowHandle,
+                @NonNull IBinder windowToken) {
+            synchronized (mGlobalLock) {
+                final WindowState w = mWindowMap.get(windowToken);
+                if (w == null) {
+                    return;
+                }
+                // Make a copy of the InputWindowHandle to avoid leaking the window's
+                // SurfaceControl.
+                final InputWindowHandle localHandle = new InputWindowHandle(inputWindowHandle);
+                localHandle.replaceTouchableRegionWithCrop(w.getSurfaceControl());
+                final SurfaceControl.Transaction t = mTransactionFactory.get();
+                t.setInputWindowInfo(inputSurface, localHandle);
+                t.apply();
+                t.close();
             }
         }
     }

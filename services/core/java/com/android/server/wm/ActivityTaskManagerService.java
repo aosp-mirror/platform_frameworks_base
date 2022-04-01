@@ -244,6 +244,7 @@ import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.FastPrintWriter;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.util.function.pooled.PooledLambda;
+import com.android.server.LocalManagerRegistry;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
 import com.android.server.SystemServiceManager;
@@ -260,6 +261,7 @@ import com.android.server.am.UserState;
 import com.android.server.firewall.IntentFirewall;
 import com.android.server.pm.UserManagerService;
 import com.android.server.policy.PermissionPolicyInternal;
+import com.android.server.sdksandbox.SdkSandboxManagerLocal;
 import com.android.server.statusbar.StatusBarManagerInternal;
 import com.android.server.uri.NeededUriGrants;
 import com.android.server.uri.UriGrantsManagerInternal;
@@ -1212,6 +1214,15 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             ProfilerInfo profilerInfo, Bundle bOptions, int userId, boolean validateIncomingUser) {
         assertPackageMatchesCallingUid(callingPackage);
         enforceNotIsolatedCaller("startActivityAsUser");
+        if (Process.isSdkSandboxUid(Binder.getCallingUid())) {
+            SdkSandboxManagerLocal sdkSandboxManagerLocal = LocalManagerRegistry.getManager(
+                    SdkSandboxManagerLocal.class);
+            if (sdkSandboxManagerLocal == null) {
+                throw new IllegalStateException("SdkSandboxManagerLocal not found when starting"
+                        + " an activity from an SDK sandbox uid.");
+            }
+            sdkSandboxManagerLocal.enforceAllowedToStartActivity(intent);
+        }
 
         userId = getActivityStartController().checkTargetUser(userId, validateIncomingUser,
                 Binder.getCallingPid(), Binder.getCallingUid(), "startActivityAsUser");
@@ -1787,7 +1798,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         if (mBackNavigationController == null) {
             return null;
         }
-        return mBackNavigationController.startBackNavigation(getTopDisplayFocusedRootTask());
+        return mBackNavigationController.startBackNavigation(mWindowManager);
     }
 
     /**
@@ -3588,25 +3599,41 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         mAmInternal.enforceCallingPermission(READ_FRAME_BUFFER, "getTaskSnapshot()");
         final long ident = Binder.clearCallingIdentity();
         try {
-            return getTaskSnapshot(taskId, isLowResolution, true /* restoreFromDisk */);
+            final Task task;
+            synchronized (mGlobalLock) {
+                task = mRootWindowContainer.anyTaskForId(taskId,
+                        MATCH_ATTACHED_TASK_OR_RECENT_TASKS);
+                if (task == null) {
+                    Slog.w(TAG, "getTaskSnapshot: taskId=" + taskId + " not found");
+                    return null;
+                }
+            }
+            // Don't call this while holding the lock as this operation might hit the disk.
+            return mWindowManager.mTaskSnapshotController.getSnapshot(taskId, task.mUserId,
+                    true /* restoreFromDisk */, isLowResolution);
         } finally {
             Binder.restoreCallingIdentity(ident);
         }
     }
 
-    private TaskSnapshot getTaskSnapshot(int taskId, boolean isLowResolution,
-            boolean restoreFromDisk) {
-        final Task task;
-        synchronized (mGlobalLock) {
-            task = mRootWindowContainer.anyTaskForId(taskId,
-                    MATCH_ATTACHED_TASK_OR_RECENT_TASKS);
-            if (task == null) {
-                Slog.w(TAG, "getTaskSnapshot: taskId=" + taskId + " not found");
-                return null;
+    @Override
+    public TaskSnapshot takeTaskSnapshot(int taskId) {
+        mAmInternal.enforceCallingPermission(READ_FRAME_BUFFER, "takeTaskSnapshot()");
+        final long ident = Binder.clearCallingIdentity();
+        try {
+            synchronized (mGlobalLock) {
+                final Task task = mRootWindowContainer.anyTaskForId(taskId,
+                        MATCH_ATTACHED_TASK_OR_RECENT_TASKS);
+                if (task == null || !task.isVisible()) {
+                    Slog.w(TAG, "takeTaskSnapshot: taskId=" + taskId + " not found or not visible");
+                    return null;
+                }
+                return mWindowManager.mTaskSnapshotController.captureTaskSnapshot(
+                        task, false /* snapshotHome */);
             }
+        } finally {
+            Binder.restoreCallingIdentity(ident);
         }
-        // Don't call this while holding the lock as this operation might hit the disk.
-        return task.getSnapshot(isLowResolution, restoreFromDisk);
     }
 
     /** Return the user id of the last resumed activity. */
@@ -6548,8 +6575,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         @Override
         public TaskSnapshot getTaskSnapshotBlocking(
                 int taskId, boolean isLowResolution) {
-            return ActivityTaskManagerService.this.getTaskSnapshot(taskId, isLowResolution,
-                    true /* restoreFromDisk */);
+            return ActivityTaskManagerService.this.getTaskSnapshot(taskId, isLowResolution);
         }
 
         @Override

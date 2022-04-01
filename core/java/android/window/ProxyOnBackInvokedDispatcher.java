@@ -73,7 +73,7 @@ public class ProxyOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
     public void unregisterOnBackInvokedCallback(
             @NonNull OnBackInvokedCallback callback) {
         if (DEBUG) {
-            Log.v(TAG, String.format("Pending unregister %s. Actual=%s", callback,
+            Log.v(TAG, String.format("Proxy unregister %s. Actual=%s", callback,
                     mActualDispatcherOwner));
         }
         synchronized (mLock) {
@@ -109,8 +109,8 @@ public class ProxyOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
         OnBackInvokedDispatcher dispatcher =
                 mActualDispatcherOwner.getOnBackInvokedDispatcher();
         if (DEBUG) {
-            Log.v(TAG, String.format("Pending transferring %d callbacks to %s", mCallbacks.size(),
-                    dispatcher));
+            Log.v(TAG, String.format("Proxy: transferring %d pending callbacks to %s",
+                    mCallbacks.size(), dispatcher));
         }
         for (Pair<OnBackInvokedCallback, Integer> callbackPair : mCallbacks) {
             int priority = callbackPair.second;
@@ -144,7 +144,7 @@ public class ProxyOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
      */
     public void reset() {
         if (DEBUG) {
-            Log.v(TAG, "Pending reset callbacks");
+            Log.v(TAG, "Proxy: reset callbacks");
         }
         synchronized (mLock) {
             mCallbacks.clear();
@@ -165,7 +165,7 @@ public class ProxyOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
     public void setActualDispatcherOwner(
             @Nullable OnBackInvokedDispatcherOwner actualDispatcherOwner) {
         if (DEBUG) {
-            Log.v(TAG, String.format("Pending setActual %s. Current %s",
+            Log.v(TAG, String.format("Proxy setActual %s. Current %s",
                             actualDispatcherOwner, mActualDispatcherOwner));
         }
         synchronized (mLock) {

@@ -359,6 +359,16 @@ public class CentralSurfaces extends CoreStartable implements
     private float mTransitionToFullShadeProgress = 0f;
     private NotificationListContainer mNotifListContainer;
 
+    private final KeyguardStateController.Callback mKeyguardStateControllerCallback =
+            new KeyguardStateController.Callback() {
+                @Override
+                public void onKeyguardShowingChanged() {
+                    boolean occluded = mKeyguardStateController.isOccluded();
+                    mStatusBarHideIconsForBouncerManager.setIsOccludedAndTriggerUpdate(occluded);
+                    mScrimController.setKeyguardOccluded(occluded);
+                }
+            };
+
     void onStatusBarWindowStateChanged(@WindowVisibleState int state) {
         updateBubblesVisibility();
         mStatusBarWindowState = state;
@@ -655,7 +665,6 @@ public class CentralSurfaces extends CoreStartable implements
     private int mLastLoggedStateFingerprint;
     private boolean mTopHidesStatusBar;
     private boolean mStatusBarWindowHidden;
-    private boolean mIsOccluded;
     private boolean mIsLaunchingActivityOverLockscreen;
 
     private final UserSwitcherController mUserSwitcherController;
@@ -1002,7 +1011,6 @@ public class CentralSurfaces extends CoreStartable implements
             mCommandQueue.setIcon(result.mIcons.keyAt(i), result.mIcons.valueAt(i));
         }
 
-
         if (DEBUG) {
             Log.d(TAG, String.format(
                     "init: icons=%d disabled=0x%08x lights=0x%08x imeButton=0x%08x",
@@ -1036,7 +1044,6 @@ public class CentralSurfaces extends CoreStartable implements
         mKeyguardStateController.addCallback(new KeyguardStateController.Callback() {
             @Override
             public void onUnlockedChanged() {
-                updateKeyguardState();
                 logStateToEventlog();
             }
         });
@@ -1431,7 +1438,6 @@ public class CentralSurfaces extends CoreStartable implements
         IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
         filter.addAction(Intent.ACTION_SCREEN_OFF);
-        filter.addAction(DevicePolicyManager.ACTION_SHOW_DEVICE_MONITORING_DIALOG);
         mBroadcastDispatcher.registerReceiver(mBroadcastReceiver, filter, null, UserHandle.ALL);
     }
 
@@ -1599,6 +1605,7 @@ public class CentralSurfaces extends CoreStartable implements
                 mBiometricUnlockController,
                 mStackScroller,
                 mKeyguardBypassController);
+        mKeyguardStateController.addCallback(mKeyguardStateControllerCallback);
         mKeyguardIndicationController
                 .setStatusBarKeyguardViewManager(mStatusBarKeyguardViewManager);
         mBiometricUnlockController.setKeyguardViewController(mStatusBarKeyguardViewManager);
@@ -1853,13 +1860,7 @@ public class CentralSurfaces extends CoreStartable implements
      * @return whether the keyguard is currently occluded
      */
     public boolean isOccluded() {
-        return mIsOccluded;
-    }
-
-    public void setOccluded(boolean occluded) {
-        mIsOccluded = occluded;
-        mStatusBarHideIconsForBouncerManager.setIsOccludedAndTriggerUpdate(occluded);
-        mScrimController.setKeyguardOccluded(occluded);
+        return mKeyguardStateController.isOccluded();
     }
 
     /** A launch animation was cancelled. */
@@ -2626,8 +2627,6 @@ public class CentralSurfaces extends CoreStartable implements
                 }
                 finishBarAnimations();
                 resetUserExpandedStates();
-            } else if (DevicePolicyManager.ACTION_SHOW_DEVICE_MONITORING_DIALOG.equals(action)) {
-                mQSPanelController.showDeviceMonitoringDialog();
             }
             Trace.endSection();
         }
@@ -3383,11 +3382,6 @@ public class CentralSurfaces extends CoreStartable implements
         return mLightRevealScrim;
     }
 
-    private void updateKeyguardState() {
-        mKeyguardStateController.notifyKeyguardState(mStatusBarKeyguardViewManager.isShowing(),
-                mStatusBarKeyguardViewManager.isOccluded());
-    }
-
     public void onTrackingStarted() {
         mShadeController.runPostCollapseRunnables();
     }
@@ -3437,6 +3431,10 @@ public class CentralSurfaces extends CoreStartable implements
     // TODO: Figure out way to remove these.
     public NavigationBarView getNavigationBarView() {
         return mNavigationBarController.getNavigationBarView(mDisplayId);
+    }
+
+    public boolean isOverviewEnabled() {
+        return mNavigationBarController.isOverviewEnabled(mDisplayId);
     }
 
     public void showPinningEnterExitToast(boolean entering) {
@@ -3745,6 +3743,14 @@ public class CentralSurfaces extends CoreStartable implements
         mTransitionToFullShadeProgress = transitionToFullShadeProgress;
     }
 
+    /**
+     * Sets the amount of progress to the bouncer being fully hidden/visible. 1 means the bouncer
+     * is fully hidden, while 0 means the bouncer is visible.
+     */
+    public void setBouncerHiddenFraction(float expansion) {
+        mScrimController.setBouncerHiddenFraction(expansion);
+    }
+
     @VisibleForTesting
     public void updateScrimController() {
         Trace.beginSection("CentralSurfaces#updateScrimController");
@@ -3797,6 +3803,8 @@ public class CentralSurfaces extends CoreStartable implements
             mScrimController.transitionTo(ScrimState.AOD);
         } else if (mKeyguardStateController.isShowing() && !isOccluded() && !unlocking) {
             mScrimController.transitionTo(ScrimState.KEYGUARD);
+        } else if (mKeyguardStateController.isShowing() && mKeyguardUpdateMonitor.isDreaming()) {
+            mScrimController.transitionTo(ScrimState.DREAMING);
         } else {
             mScrimController.transitionTo(ScrimState.UNLOCKED, mUnlockScrimCallback);
         }
@@ -4203,6 +4211,7 @@ public class CentralSurfaces extends CoreStartable implements
             new KeyguardUpdateMonitorCallback() {
                 @Override
                 public void onDreamingStateChanged(boolean dreaming) {
+                    updateScrimController();
                     if (dreaming) {
                         maybeEscalateHeadsUp();
                     }
@@ -4385,7 +4394,6 @@ public class CentralSurfaces extends CoreStartable implements
                     checkBarModes();
                     updateScrimController();
                     mPresenter.updateMediaMetaData(false, mState != StatusBarState.KEYGUARD);
-                    updateKeyguardState();
                     Trace.endSection();
                 }
 
