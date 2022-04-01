@@ -546,7 +546,19 @@ final class AppBatteryTracker extends BaseAppStateTracker<AppBatteryPolicy>
             for (UidBatteryConsumer uidConsumer : uidConsumers) {
                 // TODO: b/200326767 - as we are not supporting per proc state attribution yet,
                 // we couldn't distinguish between a real FGS vs. a bound FGS proc state.
-                final int uid = uidConsumer.getUid();
+                final int rawUid = uidConsumer.getUid();
+                if (UserHandle.isIsolated(rawUid)) {
+                    // Isolated processes should have been attributed to their parent processes.
+                    continue;
+                }
+                int uid = rawUid;
+                // Keep the logic in sync with BatteryAppListPreferenceController.java
+                // Check if this UID is a shared GID. If so, we combine it with the OWNER's
+                // actual app UID.
+                final int sharedAppId = UserHandle.getAppIdFromSharedAppGid(uid);
+                if (sharedAppId > 0) {
+                    uid = UserHandle.getUid(UserHandle.USER_SYSTEM, sharedAppId);
+                }
                 final BatteryUsage bgUsage = new BatteryUsage(uidConsumer, bgPolicy)
                         .scale(scale);
                 int index = buf.indexOfKey(uid);
@@ -557,8 +569,11 @@ final class AppBatteryTracker extends BaseAppStateTracker<AppBatteryPolicy>
                     before.add(bgUsage);
                 }
                 if (DEBUG_BACKGROUND_BATTERY_TRACKER) {
-                    Slog.i(TAG, "updateBatteryUsageStatsOnceInternal uid=" + uid
+                    Slog.i(TAG, "updateBatteryUsageStatsOnceInternal uid=" + rawUid
                             + ", bgUsage=" + bgUsage
+                            + (rawUid == uid ? ""
+                            : ", realUid=" + uid
+                            + ", realUsage=" + buf.get(uid))
                             + ", start=" + start
                             + ", end=" + end);
                 }
