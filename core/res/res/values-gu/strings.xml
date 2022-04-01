@@ -1933,8 +1933,7 @@
     <string name="app_blocked_title" msgid="7353262160455028160">"ઍપ ઉપલબ્ધ નથી"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> હાલમાં ઉપલબ્ધ નથી."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> ઉપલબ્ધ નથી"</string>
-    <!-- no translation found for app_streaming_blocked_title_for_permission_dialog (4483161748582966785) -->
-    <skip />
+    <string name="app_streaming_blocked_title_for_permission_dialog" msgid="4483161748582966785">"પરવાનગી જરૂરી છે"</string>
     <string name="app_streaming_blocked_message" product="tv" msgid="4003011766528814377">"અત્યારે આને તમારા <xliff:g id="DEVICE">%1$s</xliff:g> પર ઍક્સેસ કરી શકાતી નથી. તેના બદલે તમારા Android TV ડિવાઇસ પર પ્રયાસ કરો."</string>
     <string name="app_streaming_blocked_message" product="tablet" msgid="4242053045964946062">"અત્યારે આને તમારા <xliff:g id="DEVICE">%1$s</xliff:g> પર ઍક્સેસ કરી શકાતી નથી. તેના બદલે તમારા ટૅબ્લેટ પર પ્રયાસ કરો."</string>
     <string name="app_streaming_blocked_message" product="default" msgid="6159168735030739398">"અત્યારે આને તમારા <xliff:g id="DEVICE">%1$s</xliff:g> પર ઍક્સેસ કરી શકાતી નથી. તેના બદલે તમારા ફોન પર પ્રયાસ કરો."</string>
@@ -2030,7 +2029,8 @@
     <string name="log_access_confirmation_title" msgid="2343578467290592708">"<xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g>ને ડિવાઇસનો બધો લૉગ ઍક્સેસ કરવાની મંજૂરી આપવી છે?"</string>
     <string name="log_access_confirmation_allow" msgid="143157286283302512">"માત્ર આ વખતે"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"મંજૂરી આપશો નહીં"</string>
-    <string name="log_access_confirmation_body" msgid="4483075525611652922">"તમારા ડિવાઇસ પર થતી કામગીરીને ડિવાઇસ લૉગ રેકોર્ડ કરે છે. ઍપ આ લૉગનો ઉપયોગ સમસ્યાઓ શોધી તેનું નિરાકરણ કરવા માટે કરી શકે છે.\n\nઅમુક લૉગમાં સંવેદનશીલ માહિતી હોઈ શકે, આથી ડિવાઇસનો બધો લૉગ ઍક્સેસ કરવાની મંજૂરી માત્ર તમારી વિશ્વાસપાત્ર ઍપને જ આપો. \n\nતમે આ ઍપને ડિવાઇસનો બધો લૉગ ઍક્સેસ કરવાની મંજૂરી નહીં આપી હોય, તો પણ તે તેના પોતાના લૉગ ઍક્સેસ કરી શકે છે અને તમારા ડિવાઇસના ઉત્પાદક હજુ પણ તમારા ડિવાઇસ પર અમુક લૉગ અથવા માહિતી ઍક્સેસ કરી શકે તેમ બની શકે છે. વધુ જાણો"</string>
+    <!-- no translation found for log_access_confirmation_body (6581985716241928135) -->
+    <skip />
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"ફરીથી બતાવશો નહીં"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g>એ <xliff:g id="APP_2">%2$s</xliff:g> સ્લાઇસ બતાવવા માગે છે"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"ફેરફાર કરો"</string>
@@ -2264,7 +2264,9 @@
     <string name="notification_content_abusive_bg_apps" msgid="5572096708044958249">"<xliff:g id="APP">%1$s</xliff:g> ઍપ બૅકગ્રાઉન્ડમાં ચાલી રહી છે અને અતિશય બૅટરી વાપરી રહી છે. રિવ્યૂ કરવા માટે ટૅપ કરો."</string>
     <string name="notification_content_long_running_fgs" msgid="8878031652441570178">"<xliff:g id="APP">%1$s</xliff:g> લાંબા સમયથી બૅકગ્રાઉન્ડમાં ચાલી રહી છે. રિવ્યૂ કરવા માટે ટૅપ કરો."</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"સક્રિય ઍપ ચેક કરો"</string>
-    <string name="vdm_camera_access_denied" msgid="6345652513729130490">"આ ડિવાઇસમાંથી કૅમેરા ઍક્સેસ કરી શકાતો નથી"</string>
-    <!-- no translation found for system_locale_title (3978041860457277638) -->
+    <!-- no translation found for vdm_camera_access_denied (6102378580971542473) -->
     <skip />
+    <!-- no translation found for vdm_camera_access_denied (6895968310395249076) -->
+    <skip />
+    <string name="system_locale_title" msgid="3978041860457277638">"સિસ્ટમની ભાષા"</string>
 </resources>

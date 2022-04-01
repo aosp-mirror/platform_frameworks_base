@@ -1933,8 +1933,7 @@
     <string name="app_blocked_title" msgid="7353262160455028160">"యాప్ అందుబాటులో లేదు"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> ప్రస్తుతం అందుబాటులో లేదు."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> అందుబాటులో లేదు"</string>
-    <!-- no translation found for app_streaming_blocked_title_for_permission_dialog (4483161748582966785) -->
-    <skip />
+    <string name="app_streaming_blocked_title_for_permission_dialog" msgid="4483161748582966785">"అనుమతి అవసరం"</string>
     <string name="app_streaming_blocked_message" product="tv" msgid="4003011766528814377">"ఈ సమయంలో మీ <xliff:g id="DEVICE">%1$s</xliff:g>లో దీన్ని యాక్సెస్ చేయడం సాధ్యపడదు. బదులుగా మీ Android TV పరికరంలో ట్రై చేయండి."</string>
     <string name="app_streaming_blocked_message" product="tablet" msgid="4242053045964946062">"ఈ సమయంలో మీ <xliff:g id="DEVICE">%1$s</xliff:g>లో దీన్ని యాక్సెస్ చేయడం సాధ్యపడదు. బదులుగా మీ టాబ్లెట్‌లో ట్రై చేయండి."</string>
     <string name="app_streaming_blocked_message" product="default" msgid="6159168735030739398">"ఈ సమయంలో మీ <xliff:g id="DEVICE">%1$s</xliff:g>లో దీన్ని యాక్సెస్ చేయడం సాధ్యపడదు. బదులుగా మీ ఫోన్‌లో ట్రై చేయండి."</string>
@@ -2030,7 +2029,8 @@
     <string name="log_access_confirmation_title" msgid="2343578467290592708">"అన్ని పరికర లాగ్‌లను యాక్సెస్ చేయడానికి <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g>‌ను అనుమతించాలా?"</string>
     <string name="log_access_confirmation_allow" msgid="143157286283302512">"ఈ ఒక్కసారి మాత్రమే"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"అనుమతించవద్దు"</string>
-    <string name="log_access_confirmation_body" msgid="4483075525611652922">"మీ పరికరంలో జరిగే దాన్ని పరికర లాగ్‌లు రికార్డ్ చేస్తాయి. సమస్యలను కనుగొని, పరిష్కరించడానికి యాప్‌లు ఈ లాగ్‌లను ఉపయోగిస్తాయి.\n\nకొన్ని లాగ్‌లలో గోప్యమైన సమాచారం ఉండవచ్చు, కాబట్టి మీరు విశ్వసించే యాప్‌లను మాత్రమే అన్ని పరికర లాగ్‌లను యాక్సెస్ చేయడానికి అనుమతించండి. \n\nఅన్ని పరికర లాగ్‌లను యాక్సెస్ చేయడానికి మీరు ఈ యాప్‌ను అనుమతించకపోతే, అది తన స్వంత లాగ్‌లను యాక్సెస్ చేయగలదు, మీ పరికర తయారీదారు ఇప్పటికీ మీ పరికరంలో కొన్ని లాగ్‌లు లేదా సమాచారాన్ని యాక్సెస్ చేయగలరు. మరింత తెలుసుకోండి"</string>
+    <!-- no translation found for log_access_confirmation_body (6581985716241928135) -->
+    <skip />
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"మళ్లీ చూపవద్దు"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g> <xliff:g id="APP_2">%2$s</xliff:g> స్లైస్‌లను చూపించాలనుకుంటోంది"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"ఎడిట్ చేయండి"</string>
@@ -2264,6 +2264,9 @@
     <string name="notification_content_abusive_bg_apps" msgid="5572096708044958249">"<xliff:g id="APP">%1$s</xliff:g> బ్యాక్‌గ్రౌండ్‌లో రన్ అవుతోంది, బ్యాటరీని ఎక్కువగా వాడుతోంది. రివ్యూ చేయడానికి ట్యాప్ చేయండి."</string>
     <string name="notification_content_long_running_fgs" msgid="8878031652441570178">"<xliff:g id="APP">%1$s</xliff:g> చాలా సమయం నుండి బ్యాక్‌గ్రౌండ్‌లో రన్ అవుతోంది. రివ్యూ చేయడానికి ట్యాప్ చేయండి."</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"యాక్టివ్‌గా ఉన్న యాప్‌లను చెక్ చేయండి"</string>
-    <string name="vdm_camera_access_denied" msgid="6345652513729130490">"ఈ పరికరం నుండి కెమెరాను యాక్సెస్ చేయడం సాధ్యపడదు"</string>
+    <!-- no translation found for vdm_camera_access_denied (6102378580971542473) -->
+    <skip />
+    <!-- no translation found for vdm_camera_access_denied (6895968310395249076) -->
+    <skip />
     <string name="system_locale_title" msgid="3978041860457277638">"సిస్టమ్ భాష"</string>
 </resources>

@@ -1933,8 +1933,7 @@
     <string name="app_blocked_title" msgid="7353262160455028160">"এপ্‌টো উপলব্ধ নহয়"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"এই মুহূৰ্তত <xliff:g id="APP_NAME">%1$s</xliff:g> উপলব্ধ নহয়।"</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> উপলব্ধ নহয়"</string>
-    <!-- no translation found for app_streaming_blocked_title_for_permission_dialog (4483161748582966785) -->
-    <skip />
+    <string name="app_streaming_blocked_title_for_permission_dialog" msgid="4483161748582966785">"অনুমতিৰ প্ৰয়োজন"</string>
     <string name="app_streaming_blocked_message" product="tv" msgid="4003011766528814377">"এইটো এতিয়া আপোনাৰ <xliff:g id="DEVICE">%1$s</xliff:g>ত এক্সেছ কৰিব পৰা নাযায়। তাৰ পৰিৱৰ্তে আপোনাৰ Android TVত চেষ্টা কৰি চাওক।"</string>
     <string name="app_streaming_blocked_message" product="tablet" msgid="4242053045964946062">"এইটো এতিয়া আপোনাৰ <xliff:g id="DEVICE">%1$s</xliff:g>ত এক্সেছ কৰিব পৰা নাযায়। তাৰ পৰিৱৰ্তে আপোনাৰ টেবলেটটোত চেষ্টা কৰি চাওক।"</string>
     <string name="app_streaming_blocked_message" product="default" msgid="6159168735030739398">"এইটো এতিয়া আপোনাৰ <xliff:g id="DEVICE">%1$s</xliff:g>ত এক্সেছ কৰিব পৰা নাযায়। তাৰ পৰিৱৰ্তে আপোনাৰ ফ’নত চেষ্টা কৰি চাওক।"</string>
@@ -2030,7 +2029,7 @@
     <string name="log_access_confirmation_title" msgid="2343578467290592708">"<xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g>ক আটাইবোৰ ডিভাইচৰ লগ এক্সেছ কৰাৰ অনুমতি প্ৰদান কৰিবনে?"</string>
     <string name="log_access_confirmation_allow" msgid="143157286283302512">"কেৱল এইবাৰৰ বাবে"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"অনুমতি নিদিব"</string>
-    <string name="log_access_confirmation_body" msgid="4483075525611652922">"আপোনাৰ ডিভাইচত কি কি ঘটে সেয়া ডিভাইচ লগে ৰেকৰ্ড কৰে। এপে সমস্যা বিচাৰিবলৈ আৰু সমাধান কৰিবলৈ এইসমূহ লগ ব্যৱহাৰ কৰিব পাৰে।\n\nকিছুমান লগত সংবেদনশীল তথ্য থাকিব পাৰে, গতিকে কেৱল আপুনি বিশ্বাস কৰা এপকহে আটাইবোৰ ডিভাইচ লগৰ এক্সেছৰ অনুমতি দিয়া উচিত। \n\nআপুনি যদি এই এপ্‌টোক আটাইবোৰ ডিভাইচৰ লগ এক্সেছ কৰাৰ অনুমতি নিদিয়ে, তেতিয়াও ই নিজৰ লগসমূহ এক্সেছ কৰিব পাৰিব আৰু আপোনাৰ ডিভাইচৰ নিৰ্মাতাই আপোনাৰ ডিভাইচটোত কিছু লগ অথবা তথ্য এক্সেছ কৰিবলৈ সক্ষম হ’ব। অধিক জানক"</string>
+    <string name="log_access_confirmation_body" msgid="6581985716241928135">"আপোনাৰ ডিভাইচত কি কি ঘটে সেয়া ডিভাইচ লগে ৰেকৰ্ড কৰে। এপ্‌সমূহে সমস্যা বিচাৰিবলৈ আৰু সমাধান কৰিবলৈ এই লগসমূহ ব্যৱহাৰ কৰিব পাৰে।\n\nকিছুমান লগত সংবেদনশীল তথ্য থাকিব পাৰে, গতিকে কেৱল আপুনি বিশ্বাস কৰা এপকহে আটাইবোৰ ডিভাইচ লগ এক্সেছ কৰাৰ অনুমতি দিয়ক। \n\nআপুনি যদি এই এপ্‌টোক আটাইবোৰ ডিভাইচ লগ এক্সেছ কৰাৰ অনুমতি নিদিয়ে, তথাপিও ই নিজৰ লগসমূহ এক্সেছ কৰিব পাৰিব। আপোনাৰ ডিভাইচৰ নিৰ্মাতাই তথাপিও হয়তো আপোনাৰ ডিভাইচটোত থকা কিছু লগ অথবা তথ্য এক্সেছ কৰিব পাৰিব। অধিক জানক"</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"পুনৰ নেদেখুৱাব"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g>এ <xliff:g id="APP_2">%2$s</xliff:g>ৰ অংশ দেখুওৱাব খুজিছে"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"সম্পাদনা কৰক"</string>
@@ -2264,6 +2263,7 @@
     <string name="notification_content_abusive_bg_apps" msgid="5572096708044958249">"<xliff:g id="APP">%1$s</xliff:g> নেপথ্যত চলি আছে আৰু অত্যধিক বেটাৰী খৰচ কৰিছে। পৰ্যালোচনা কৰিবলৈ টিপক।"</string>
     <string name="notification_content_long_running_fgs" msgid="8878031652441570178">"<xliff:g id="APP">%1$s</xliff:g> নেপথ্যত দীৰ্ঘ সময় ধৰি চলি আছে। পৰ্যালোচনা কৰিবলৈ টিপক।"</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"সক্ৰিয় এপ্‌সমূহ পৰীক্ষা কৰক"</string>
-    <string name="vdm_camera_access_denied" msgid="6345652513729130490">"এইটো ডিভাইচৰ পৰা কেমেৰা এক্সেছ কৰিব নোৱাৰি"</string>
+    <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"আপোনাৰ <xliff:g id="DEVICE">%1$s</xliff:g>ৰ পৰা ফ’নটোৰ কেমেৰা এক্সেছ কৰিব নোৱাৰি"</string>
+    <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"আপোনাৰ <xliff:g id="DEVICE">%1$s</xliff:g>ৰ পৰা টেবলেটটোৰ কেমেৰা এক্সেছ কৰিব নোৱাৰি"</string>
     <string name="system_locale_title" msgid="3978041860457277638">"ছিষ্টেমৰ ভাষা"</string>
 </resources>

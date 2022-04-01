@@ -553,7 +553,7 @@
     <string name="permlab_nfc" msgid="1904455246837674977">"controlar a comunicação a curta distância"</string>
     <string name="permdesc_nfc" msgid="8352737680695296741">"Permite que o app se comunique com leitores, cartões e etiqueta NFC (comunicação a curta distância)."</string>
     <string name="permlab_disableKeyguard" msgid="3605253559020928505">"desativar o bloqueio de tela"</string>
-    <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"Permite que o app desative o bloqueio de teclas e qualquer segurança por senha associada. Por exemplo, o telefone desativa o bloqueio de telas ao receber uma chamada e o reativa quando a chamada é finalizada."</string>
+    <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"Permite que o app desative o bloqueio de teclas e qualquer segurança por senha associada. Por exemplo, o telefone desativa o bloqueio de telas ao receber uma ligação e o reativa quando a chamada é finalizada."</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"Solicitar complexidade do bloqueio de tela"</string>
     <string name="permdesc_requestPasswordComplexity" msgid="1130556896836258567">"Permite que o app saiba o nível de complexidade do bloqueio de tela (alto, médio, baixo ou nenhum), que indica o intervalo possível de comprimento e o tipo de bloqueio de tela. O app também pode sugerir a atualização do bloqueio de tela até um certo nível, mas os usuários podem ignorar a sugestão. O bloqueio de tela não é armazenado em texto simples, então o app não tem acesso à senha exata."</string>
     <string name="permlab_postNotification" msgid="4875401198597803658">"mostrar notificações"</string>
@@ -1933,8 +1933,7 @@
     <string name="app_blocked_title" msgid="7353262160455028160">"O app não está disponível"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"O app <xliff:g id="APP_NAME">%1$s</xliff:g> não está disponível no momento."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> indisponível"</string>
-    <!-- no translation found for app_streaming_blocked_title_for_permission_dialog (4483161748582966785) -->
-    <skip />
+    <string name="app_streaming_blocked_title_for_permission_dialog" msgid="4483161748582966785">"Permissão necessária"</string>
     <string name="app_streaming_blocked_message" product="tv" msgid="4003011766528814377">"No momento, não é possível acessar esse app pelo <xliff:g id="DEVICE">%1$s</xliff:g>. Tente pelo dispositivo Android TV."</string>
     <string name="app_streaming_blocked_message" product="tablet" msgid="4242053045964946062">"No momento, não é possível acessar esse app pelo <xliff:g id="DEVICE">%1$s</xliff:g>. Tente pelo seu tablet."</string>
     <string name="app_streaming_blocked_message" product="default" msgid="6159168735030739398">"No momento, não é possível acessar esse app pelo <xliff:g id="DEVICE">%1$s</xliff:g>. Tente pelo seu smartphone."</string>
@@ -2030,7 +2029,7 @@
     <string name="log_access_confirmation_title" msgid="2343578467290592708">"Permitir que o app <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> acesse todos os registros do dispositivo?"</string>
     <string name="log_access_confirmation_allow" msgid="143157286283302512">"Apenas esta vez"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"Não permitir"</string>
-    <string name="log_access_confirmation_body" msgid="4483075525611652922">"Os registros do dispositivo gravam o que acontece nele. Os apps podem usar esses registros para encontrar e corrigir problemas.\n\nAlguns registros podem conter informações sensíveis, então permita que apenas os apps em que você confia acessem os registros. \n\nSe você não permitir que este app acesse todos os registros do dispositivo, ele ainda vai poder acessar os próprios registros. O fabricante do dispositivo também pode ter acesso a alguns registros ou informações. Saiba mais"</string>
+    <string name="log_access_confirmation_body" msgid="6581985716241928135">"Os registros do dispositivo gravam o que acontece nele. Os apps podem usar esses registros para encontrar e corrigir problemas.\n\nAlguns registros podem conter informações sensíveis, então autorize apenas os apps em que você confia a acessar os registros. \n\nSe você não permitir que esse app acesse todos os registros do dispositivo, ele ainda vai poder acessar os próprios. O fabricante do dispositivo também pode ter acesso a alguns registros ou informações. Saiba mais"</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"Não mostrar novamente"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g> quer mostrar partes do app <xliff:g id="APP_2">%2$s</xliff:g>"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"Editar"</string>
@@ -2264,6 +2263,7 @@
     <string name="notification_content_abusive_bg_apps" msgid="5572096708044958249">"<xliff:g id="APP">%1$s</xliff:g> está sendo executado em segundo plano e drenando a energia da bateria. Toque para revisar."</string>
     <string name="notification_content_long_running_fgs" msgid="8878031652441570178">"<xliff:g id="APP">%1$s</xliff:g> está sendo executado em segundo plano faz muito tempo. Toque para revisar."</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Verificar apps ativos"</string>
-    <string name="vdm_camera_access_denied" msgid="6345652513729130490">"Não é possível acessar a câmera neste dispositivo"</string>
+    <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"Não é possível acessar a câmera do smartphone pelo <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
+    <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"Não é possível acessar a câmera do tablet pelo <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
     <string name="system_locale_title" msgid="3978041860457277638">"Idioma do sistema"</string>
 </resources>

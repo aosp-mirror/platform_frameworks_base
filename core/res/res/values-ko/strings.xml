@@ -1933,8 +1933,7 @@
     <string name="app_blocked_title" msgid="7353262160455028160">"앱을 사용할 수 없습니다"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"현재 <xliff:g id="APP_NAME">%1$s</xliff:g> 앱을 사용할 수 없습니다."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> 사용할 수 없음"</string>
-    <!-- no translation found for app_streaming_blocked_title_for_permission_dialog (4483161748582966785) -->
-    <skip />
+    <string name="app_streaming_blocked_title_for_permission_dialog" msgid="4483161748582966785">"권한이 필요함"</string>
     <string name="app_streaming_blocked_message" product="tv" msgid="4003011766528814377">"현재 <xliff:g id="DEVICE">%1$s</xliff:g>에서 액세스할 수 없습니다. 대신 Android TV 기기에서 시도해 보세요."</string>
     <string name="app_streaming_blocked_message" product="tablet" msgid="4242053045964946062">"현재 <xliff:g id="DEVICE">%1$s</xliff:g>에서 액세스할 수 없습니다. 대신 태블릿에서 시도해 보세요."</string>
     <string name="app_streaming_blocked_message" product="default" msgid="6159168735030739398">"현재 <xliff:g id="DEVICE">%1$s</xliff:g>에서 액세스할 수 없습니다. 대신 스마트폰에서 시도해 보세요."</string>
@@ -2030,7 +2029,8 @@
     <string name="log_access_confirmation_title" msgid="2343578467290592708">"<xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g>에서 모든 기기에 액세스하도록 허용하시겠습니까?"</string>
     <string name="log_access_confirmation_allow" msgid="143157286283302512">"이번만 허용"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"허용 안함"</string>
-    <string name="log_access_confirmation_body" msgid="4483075525611652922">"기기 로그에 기기에서 발생한 상황이 기록됩니다. 앱은 문제를 찾고 해결하는 데 이 로그를 사용할 수 있습니다.\n\n일부 로그에는 민감한 정보가 포함될 수 있으므로 신뢰할 수 있는 앱만 전체 기기 로그에 액세스하도록 허용하세요. \n\n앱에 전체 기기 로그에 대한 액세스 권한을 부여하지 않아도 앱이 자체 로그에는 액세스할 수 있으며, 기기 제조업체에서 일부 로그 또는 기기 내 정보에 액세스할 수 있습니다. 자세히 알아보기"</string>
+    <!-- no translation found for log_access_confirmation_body (6581985716241928135) -->
+    <skip />
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"다시 표시 안함"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g>에서 <xliff:g id="APP_2">%2$s</xliff:g>의 슬라이스를 표시하려고 합니다"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"수정"</string>
@@ -2264,7 +2264,9 @@
     <string name="notification_content_abusive_bg_apps" msgid="5572096708044958249">"<xliff:g id="APP">%1$s</xliff:g> 앱이 백그라운드에서 실행 중이며 배터리를 소모하고 있습니다. 확인하려면 탭하세요."</string>
     <string name="notification_content_long_running_fgs" msgid="8878031652441570178">"<xliff:g id="APP">%1$s</xliff:g> 앱이 백그라운드에서 오랫동안 실행 중입니다. 확인하려면 탭하세요."</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"활성 상태의 앱 확인"</string>
-    <string name="vdm_camera_access_denied" msgid="6345652513729130490">"이 기기에서 카메라에 액세스할 수 없습니다."</string>
-    <!-- no translation found for system_locale_title (3978041860457277638) -->
+    <!-- no translation found for vdm_camera_access_denied (6102378580971542473) -->
     <skip />
+    <!-- no translation found for vdm_camera_access_denied (6895968310395249076) -->
+    <skip />
+    <string name="system_locale_title" msgid="3978041860457277638">"시스템 언어"</string>
 </resources>

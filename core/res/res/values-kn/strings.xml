@@ -1933,8 +1933,7 @@
     <string name="app_blocked_title" msgid="7353262160455028160">"ಆ್ಯಪ್ ಲಭ್ಯವಿಲ್ಲ"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> ಇದೀಗ ಲಭ್ಯವಿಲ್ಲ."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> ಲಭ್ಯವಿಲ್ಲ"</string>
-    <!-- no translation found for app_streaming_blocked_title_for_permission_dialog (4483161748582966785) -->
-    <skip />
+    <string name="app_streaming_blocked_title_for_permission_dialog" msgid="4483161748582966785">"ಅನುಮತಿಯ ಅಗತ್ಯವಿದೆ"</string>
     <string name="app_streaming_blocked_message" product="tv" msgid="4003011766528814377">"ಈ ಸಮಯದಲ್ಲಿ ನಿಮ್ಮ <xliff:g id="DEVICE">%1$s</xliff:g> ನಲ್ಲಿ ಇದನ್ನು ಪ್ರವೇಶಿಸಲು ಸಾಧ್ಯವಿಲ್ಲ. ಅದರ ಬದಲು ನಿಮ್ಮ Android TV ಸಾಧನದಲ್ಲಿ ಪ್ರಯತ್ನಿಸಿ."</string>
     <string name="app_streaming_blocked_message" product="tablet" msgid="4242053045964946062">"ಈ ಸಮಯದಲ್ಲಿ ನಿಮ್ಮ <xliff:g id="DEVICE">%1$s</xliff:g> ನಲ್ಲಿ ಇದನ್ನು ಪ್ರವೇಶಿಸಲು ಸಾಧ್ಯವಿಲ್ಲ. ಅದರ ಬದಲು ನಿಮ್ಮ ಟ್ಯಾಬ್ಲೆಟ್‌ನಲ್ಲಿ ಪ್ರಯತ್ನಿಸಿ."</string>
     <string name="app_streaming_blocked_message" product="default" msgid="6159168735030739398">"ಈ ಸಮಯದಲ್ಲಿ ನಿಮ್ಮ <xliff:g id="DEVICE">%1$s</xliff:g> ನಲ್ಲಿ ಇದನ್ನು ಪ್ರವೇಶಿಸಲು ಸಾಧ್ಯವಿಲ್ಲ. ಅದರ ಬದಲು ನಿಮ್ಮ ಫೋನ್‌ನಲ್ಲಿ ಪ್ರಯತ್ನಿಸಿ."</string>
@@ -2030,7 +2029,8 @@
     <string name="log_access_confirmation_title" msgid="2343578467290592708">"ಎಲ್ಲಾ ಸಾಧನದ ಲಾಗ್‌ಗಳನ್ನು ಆ್ಯಕ್ಸೆಸ್ ಮಾಡಲು <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> ಗೆ ಅನುಮತಿಸುವುದೇ?"</string>
     <string name="log_access_confirmation_allow" msgid="143157286283302512">"ಈ ಬಾರಿ ಮಾತ್ರ"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"ಅನುಮತಿಸಬೇಡಿ"</string>
-    <string name="log_access_confirmation_body" msgid="4483075525611652922">"ಸಾಧನವು ನಿಮ್ಮ ಸಾಧನದಲ್ಲಿನ ಕಾರ್ಯಾಚರಣೆಗಳನ್ನು ಲಾಗ್ ಮಾಡುತ್ತದೆ ಸಮಸ್ಯೆಗಳನ್ನು ಪತ್ತೆಹಚ್ಚಲು ಮತ್ತು ಪರಿಹರಿಸಲು ಆ್ಯಪ್‌ಗಳು ಈ ಲಾಗ್ ಅನ್ನು ಬಳಸಬಹುದು.\n\nಕೆಲವು ಲಾಗ್‌ಗಳು ಸೂಕ್ಷ್ಮ ಮಾಹಿತಿಯನ್ನು ಒಳಗೊಂಡಿರಬಹುದು, ಆದ್ದರಿಂದ ನಿಮ್ಮ ವಿಶ್ವಾಸಾರ್ಹ ಆ್ಯಪ್‌ಗಳಿಗೆ ಮಾತ್ರ ಸಾಧನದ ಎಲ್ಲಾ ಲಾಗ್‌ಗಳಿಗೆ ಆ್ಯಕ್ಸೆಸ್ ಅನ್ನು ಅನುಮತಿಸಿ. \n\nಎಲ್ಲಾ ಸಾಧನ ಲಾಗ್‌ಗಳನ್ನು ಆ್ಯಕ್ಸೆಸ್ ಮಾಡಲು ನೀವು ಈ ಅಪ್ಲಿಕೇಶನ್‌ಗೆ ಅನುಮತಿಸದಿದ್ದರೆ, ಅದು ಇನ್ನೂ ತನ್ನದೇ ಆದ ಲಾಗ್‌ಗಳನ್ನು ಆ್ಯಕ್ಸೆಸ್ ಮಾಡಬಹುದು ಮತ್ತು ನಿಮ್ಮ ಸಾಧನ ತಯಾರಕರು ನಿಮ್ಮ ಸಾಧನದಲ್ಲಿ ಕೆಲವು ಲಾಗ್‌ಗಳು ಅಥವಾ ಮಾಹಿತಿಯನ್ನು ಆ್ಯಕ್ಸೆಸ್ ಮಾಡಲು ಈಗಲೂ ಸಾಧ್ಯವಾಗುತ್ತದೆ. ಇನ್ನಷ್ಟು ತಿಳಿಯಿರಿ"</string>
+    <!-- no translation found for log_access_confirmation_body (6581985716241928135) -->
+    <skip />
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"ಮತ್ತೊಮ್ಮೆ ತೋರಿಸಬೇಡಿ"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_2">%2$s</xliff:g> ಸ್ಲೈಸ್‌ಗಳನ್ನು <xliff:g id="APP_0">%1$s</xliff:g> ತೋರಿಸಲು ಬಯಸಿದೆ"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"ಎಡಿಟ್"</string>
@@ -2264,6 +2264,9 @@
     <string name="notification_content_abusive_bg_apps" msgid="5572096708044958249">"<xliff:g id="APP">%1$s</xliff:g> ಹಿನ್ನೆಲೆಯಲ್ಲಿ ರನ್ ಆಗುತ್ತಿದ್ದು ಬ್ಯಾಟರಿ ಖಾಲಿ ಮಾಡುತ್ತಿದೆ. ಪರಿಶೀಲಿಸಲು ಟ್ಯಾಪ್ ಮಾಡಿ."</string>
     <string name="notification_content_long_running_fgs" msgid="8878031652441570178">"<xliff:g id="APP">%1$s</xliff:g> ಬಹಳ ಸಮಯದಿಂದ ಹಿನ್ನೆಲೆಯಲ್ಲಿ ರನ್ ಆಗುತ್ತಿದೆ. ಪರಿಶೀಲಿಸಲು ಟ್ಯಾಪ್ ಮಾಡಿ."</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"ಸಕ್ರಿಯ ಆ್ಯಪ್‌ಗಳನ್ನು ಪರಿಶೀಲಿಸಿ"</string>
-    <string name="vdm_camera_access_denied" msgid="6345652513729130490">"ಈ ಸಾಧನದಿಂದ ಕ್ಯಾಮರಾ ಪ್ರವೇಶಿಸಲು ಸಾಧ್ಯವಿಲ್ಲ"</string>
+    <!-- no translation found for vdm_camera_access_denied (6102378580971542473) -->
+    <skip />
+    <!-- no translation found for vdm_camera_access_denied (6895968310395249076) -->
+    <skip />
     <string name="system_locale_title" msgid="3978041860457277638">"ಸಿಸ್ಟಂ ಭಾಷೆ"</string>
 </resources>

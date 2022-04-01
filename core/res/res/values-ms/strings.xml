@@ -1933,8 +1933,7 @@
     <string name="app_blocked_title" msgid="7353262160455028160">"Apl tidak tersedia"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> tidak tersedia sekarang."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> tidak tersedia"</string>
-    <!-- no translation found for app_streaming_blocked_title_for_permission_dialog (4483161748582966785) -->
-    <skip />
+    <string name="app_streaming_blocked_title_for_permission_dialog" msgid="4483161748582966785">"Kebenaran diperlukan"</string>
     <string name="app_streaming_blocked_message" product="tv" msgid="4003011766528814377">"Aplikasi ini tidak boleh diakses pada <xliff:g id="DEVICE">%1$s</xliff:g> anda pada masa ini. Cuba pada peranti Android TV anda."</string>
     <string name="app_streaming_blocked_message" product="tablet" msgid="4242053045964946062">"Aplikasi ini tidak boleh diakses pada <xliff:g id="DEVICE">%1$s</xliff:g> anda pada masa ini. Cuba pada tablet anda."</string>
     <string name="app_streaming_blocked_message" product="default" msgid="6159168735030739398">"Aplikasi ini tidak boleh diakses pada <xliff:g id="DEVICE">%1$s</xliff:g> anda pada masa ini. Cuba pada telefon anda."</string>
@@ -2030,7 +2029,8 @@
     <string name="log_access_confirmation_title" msgid="2343578467290592708">"Benarkan <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> mengakses semua log peranti?"</string>
     <string name="log_access_confirmation_allow" msgid="143157286283302512">"Kali ini sahaja"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"Jangan benarkan"</string>
-    <string name="log_access_confirmation_body" msgid="4483075525611652922">"Log peranti merekodkan perkara yang berlaku pada peranti anda. Apl dapat menggunakan log ini untuk menemukan dan membetulkan isu.\n\nSesetengah log mungkin mengandungi maklumat sensitif, jadi benarkan apl yang anda percaya sahaja untuk mengakses semua log peranti. \n\nJika anda tidak membenarkan apl ini mengakses semua log peranti, apl masih boleh mengakses log sendiri dan pengilang peranti anda mungkin masih boleh mengakses sesetengah log atau maklumat pada peranti anda. Ketahui lebih lanjut"</string>
+    <!-- no translation found for log_access_confirmation_body (6581985716241928135) -->
+    <skip />
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"Jangan tunjuk lagi"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g> mahu menunjukkan <xliff:g id="APP_2">%2$s</xliff:g> hirisan"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"Edit"</string>
@@ -2264,7 +2264,9 @@
     <string name="notification_content_abusive_bg_apps" msgid="5572096708044958249">"<xliff:g id="APP">%1$s</xliff:g> dijalankan di latar belakang dan melemahkan bateri. Ketik untuk semak."</string>
     <string name="notification_content_long_running_fgs" msgid="8878031652441570178">"<xliff:g id="APP">%1$s</xliff:g>sedang berjalan di latar belakang untuk masa yang lama. Ketik untuk menyemak."</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Semak apl aktif"</string>
-    <string name="vdm_camera_access_denied" msgid="6345652513729130490">"Tidak dapat mengakses kamera daripada peranti ini"</string>
-    <!-- no translation found for system_locale_title (3978041860457277638) -->
+    <!-- no translation found for vdm_camera_access_denied (6102378580971542473) -->
     <skip />
+    <!-- no translation found for vdm_camera_access_denied (6895968310395249076) -->
+    <skip />
+    <string name="system_locale_title" msgid="3978041860457277638">"Bahasa sistem"</string>
 </resources>

@@ -1933,8 +1933,7 @@
     <string name="app_blocked_title" msgid="7353262160455028160">"Aplikacioni nuk ofrohet"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> nuk ofrohet për momentin."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> nuk ofrohet"</string>
-    <!-- no translation found for app_streaming_blocked_title_for_permission_dialog (4483161748582966785) -->
-    <skip />
+    <string name="app_streaming_blocked_title_for_permission_dialog" msgid="4483161748582966785">"Kërkohet leje"</string>
     <string name="app_streaming_blocked_message" product="tv" msgid="4003011766528814377">"Qasja është e pamundur në <xliff:g id="DEVICE">%1$s</xliff:g> për momentin. Provoje në pajisjen Android TV më mirë."</string>
     <string name="app_streaming_blocked_message" product="tablet" msgid="4242053045964946062">"Qasja është e pamundur në <xliff:g id="DEVICE">%1$s</xliff:g> për momentin. Provoje në tablet më mirë."</string>
     <string name="app_streaming_blocked_message" product="default" msgid="6159168735030739398">"Qasja është e pamundur në <xliff:g id="DEVICE">%1$s</xliff:g> për momentin. Provoje në telefon më mirë."</string>
@@ -2030,7 +2029,8 @@
     <string name="log_access_confirmation_title" msgid="2343578467290592708">"Të lejohet që <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> të ketë qasje te të gjitha evidencat e pajisjes?"</string>
     <string name="log_access_confirmation_allow" msgid="143157286283302512">"Vetëm këtë herë"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"Mos lejo"</string>
-    <string name="log_access_confirmation_body" msgid="4483075525611652922">"Evidencat e pajisjes regjistrojnë çfarë ndodh në pajisjen tënde. Aplikacionet mund t\'i përdorin këto evidenca për të gjetur dhe rregulluar problemet.\n\nDisa evidenca mund të përmbajnë informacione delikate, ndaj lejo vetëm aplikacionet që u beson të kenë qasje te të gjitha evidencat e pajisjes. \n\nNëse nuk e lejon këtë aplikacion që të ketë qasje te të gjitha evidencat e pajisjes, ai mund të ketë ende qasje tek evidencat e tij dhe prodhuesi i pajisjes sate mund të jetë ende në gjendje që të ketë qasje te disa evidenca ose informacione në pajisjen tënde. Mëso më shumë"</string>
+    <!-- no translation found for log_access_confirmation_body (6581985716241928135) -->
+    <skip />
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"Mos e shfaq më"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g> dëshiron të shfaqë pjesë të <xliff:g id="APP_2">%2$s</xliff:g>"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"Modifiko"</string>
@@ -2264,7 +2264,9 @@
     <string name="notification_content_abusive_bg_apps" msgid="5572096708044958249">"<xliff:g id="APP">%1$s</xliff:g> po ekzekutohet në sfond dhe po shkarkon baterinë. Trokit për ta shqyrtuar."</string>
     <string name="notification_content_long_running_fgs" msgid="8878031652441570178">"<xliff:g id="APP">%1$s</xliff:g> po ekzekutohet në sfond për një kohe të gjatë. Trokit për ta shqyrtuar."</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Kontrollo aplikacionet aktive"</string>
-    <string name="vdm_camera_access_denied" msgid="6345652513729130490">"Nuk mund të qasesh te kamera nga kjo pajisje"</string>
-    <!-- no translation found for system_locale_title (3978041860457277638) -->
+    <!-- no translation found for vdm_camera_access_denied (6102378580971542473) -->
     <skip />
+    <!-- no translation found for vdm_camera_access_denied (6895968310395249076) -->
+    <skip />
+    <string name="system_locale_title" msgid="3978041860457277638">"Gjuha e sistemit"</string>
 </resources>

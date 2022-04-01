@@ -1934,8 +1934,7 @@
     <string name="app_blocked_title" msgid="7353262160455028160">"Aplicația nu este disponibilă"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> nu este disponibilă momentan."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> nu este disponibilă"</string>
-    <!-- no translation found for app_streaming_blocked_title_for_permission_dialog (4483161748582966785) -->
-    <skip />
+    <string name="app_streaming_blocked_title_for_permission_dialog" msgid="4483161748582966785">"Necesită permisiune"</string>
     <string name="app_streaming_blocked_message" product="tv" msgid="4003011766528814377">"Aplicația nu poate fi accesată pe <xliff:g id="DEVICE">%1$s</xliff:g> momentan. Încercați pe dispozitivul Android TV."</string>
     <string name="app_streaming_blocked_message" product="tablet" msgid="4242053045964946062">"Aplicația nu poate fi accesată pe <xliff:g id="DEVICE">%1$s</xliff:g> momentan. Încercați pe tabletă."</string>
     <string name="app_streaming_blocked_message" product="default" msgid="6159168735030739398">"Aplicația nu poate fi accesată pe <xliff:g id="DEVICE">%1$s</xliff:g> momentan. Încercați pe telefon."</string>
@@ -2031,7 +2030,8 @@
     <string name="log_access_confirmation_title" msgid="2343578467290592708">"Permiteți ca <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> să acceseze toate jurnalele dispozitivului?"</string>
     <string name="log_access_confirmation_allow" msgid="143157286283302512">"Doar de data aceasta"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"Nu permiteți"</string>
-    <string name="log_access_confirmation_body" msgid="4483075525611652922">"Jurnalele dispozitivului înregistrează activitatea de pe dispozitivul dvs. Aplicațiile pot folosi aceste jurnale pentru a identifica și a remedia probleme.\n\nUnele jurnale pot să conțină informații sensibile, prin urmare permiteți accesul la toate jurnalele dispozitivului doar aplicațiilor în care aveți încredere. \n\nDacă nu permiteți accesul aplicației la toate jurnalele dispozitivului, aceasta poate în continuare să acceseze propriile jurnale și este posibil ca producătorul dispozitivului să acceseze în continuare unele jurnale sau informații de pe dispozitiv. Aflați mai multe"</string>
+    <!-- no translation found for log_access_confirmation_body (6581985716241928135) -->
+    <skip />
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"Nu mai afișa"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g> vrea să afișeze porțiuni din <xliff:g id="APP_2">%2$s</xliff:g>"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"Editați"</string>
@@ -2265,6 +2265,9 @@
     <string name="notification_content_abusive_bg_apps" msgid="5572096708044958249">"<xliff:g id="APP">%1$s</xliff:g> rulează în fundal și consumă bateria. Atingeți pentru a examina."</string>
     <string name="notification_content_long_running_fgs" msgid="8878031652441570178">"<xliff:g id="APP">%1$s</xliff:g> rulează în fundal mult timp. Atingeți pentru a examina."</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Verificați aplicațiile active"</string>
-    <string name="vdm_camera_access_denied" msgid="6345652513729130490">"Nu se poate accesa camera foto de pe acest dispozitiv"</string>
+    <!-- no translation found for vdm_camera_access_denied (6102378580971542473) -->
+    <skip />
+    <!-- no translation found for vdm_camera_access_denied (6895968310395249076) -->
+    <skip />
     <string name="system_locale_title" msgid="3978041860457277638">"Limba sistemului"</string>
 </resources>

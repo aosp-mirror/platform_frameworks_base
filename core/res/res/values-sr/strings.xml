@@ -1934,8 +1934,7 @@
     <string name="app_blocked_title" msgid="7353262160455028160">"Апликација није доступна"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"Апликација <xliff:g id="APP_NAME">%1$s</xliff:g> тренутно није доступна."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> – није доступно"</string>
-    <!-- no translation found for app_streaming_blocked_title_for_permission_dialog (4483161748582966785) -->
-    <skip />
+    <string name="app_streaming_blocked_title_for_permission_dialog" msgid="4483161748582966785">"Потребна је дозвола"</string>
     <string name="app_streaming_blocked_message" product="tv" msgid="4003011766528814377">"Овој апликацији тренутно не може да се приступи са уређаја <xliff:g id="DEVICE">%1$s</xliff:g>. Пробајте на Android TV уређају."</string>
     <string name="app_streaming_blocked_message" product="tablet" msgid="4242053045964946062">"Овој апликацији тренутно не може да се приступи са уређаја <xliff:g id="DEVICE">%1$s</xliff:g>. Пробајте на таблету."</string>
     <string name="app_streaming_blocked_message" product="default" msgid="6159168735030739398">"Овој апликацији тренутно не може да се приступи са уређаја <xliff:g id="DEVICE">%1$s</xliff:g>. Пробајте на телефону."</string>
@@ -2031,7 +2030,8 @@
     <string name="log_access_confirmation_title" msgid="2343578467290592708">"Желите да дозволите апликацији <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> да приступа свим евиденцијама уређаја?"</string>
     <string name="log_access_confirmation_allow" msgid="143157286283302512">"Само овај пут"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"Не дозволи"</string>
-    <string name="log_access_confirmation_body" msgid="4483075525611652922">"Евиденције уређаја региструју шта се дешава на уређају. Апликације могу да користе те евиденције да би пронашле и решиле проблеме.\n\nНеке евиденције могу да садрже осетљиве информације, па приступ свим евиденцијама уређаја треба да дозвољавате само апликацијама у које имате поверења. \n\nАко не дозволите овој апликацији да приступа свим евиденцијама уређаја, она и даље може да приступа сопственим евиденцијама, а произвођач уређаја ће можда и даље моћи да приступа неким евиденцијама или информацијама на уређају. Сазнајте више"</string>
+    <!-- no translation found for log_access_confirmation_body (6581985716241928135) -->
+    <skip />
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"Не приказуј поново"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"Апликација <xliff:g id="APP_0">%1$s</xliff:g> жели да приказује исечке из апликације <xliff:g id="APP_2">%2$s</xliff:g>"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"Измени"</string>
@@ -2265,7 +2265,9 @@
     <string name="notification_content_abusive_bg_apps" msgid="5572096708044958249">"Апликација <xliff:g id="APP">%1$s</xliff:g> троши батерију у позадини. Додирните да бисте прегледали."</string>
     <string name="notification_content_long_running_fgs" msgid="8878031652441570178">"Апликација <xliff:g id="APP">%1$s</xliff:g> је предуго покренута у позадини. Додирните да бисте прегледали."</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Проверите активне апликације"</string>
-    <string name="vdm_camera_access_denied" msgid="6345652513729130490">"Не можете да приступите камери са овог уређаја"</string>
-    <!-- no translation found for system_locale_title (3978041860457277638) -->
+    <!-- no translation found for vdm_camera_access_denied (6102378580971542473) -->
     <skip />
+    <!-- no translation found for vdm_camera_access_denied (6895968310395249076) -->
+    <skip />
+    <string name="system_locale_title" msgid="3978041860457277638">"Језик система"</string>
 </resources>

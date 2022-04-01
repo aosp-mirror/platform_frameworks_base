@@ -1474,7 +1474,7 @@
     <string name="forward_intent_to_work" msgid="3620262405636021151">"तुम्ही हा अ‍ॅप आपल्या कार्य प्रोफाईलमध्‍ये वापरत आहात"</string>
     <string name="input_method_binding_label" msgid="1166731601721983656">"इनपुट पद्धत"</string>
     <string name="sync_binding_label" msgid="469249309424662147">"सिंक करा"</string>
-    <string name="accessibility_binding_label" msgid="1974602776545801715">"प्रवेशयोग्यता"</string>
+    <string name="accessibility_binding_label" msgid="1974602776545801715">"अ‍ॅक्सेसिबिलिटी"</string>
     <string name="wallpaper_binding_label" msgid="1197440498000786738">"वॉलपेपर"</string>
     <string name="chooser_wallpaper" msgid="3082405680079923708">"वॉलपेपर बदला"</string>
     <string name="notification_listener_binding_label" msgid="2702165274471499713">"सूचना ऐकणारा"</string>
@@ -1933,8 +1933,7 @@
     <string name="app_blocked_title" msgid="7353262160455028160">"ॲप उपलब्ध नाही"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> आता उपलब्ध नाही."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> उपलब्ध नाही"</string>
-    <!-- no translation found for app_streaming_blocked_title_for_permission_dialog (4483161748582966785) -->
-    <skip />
+    <string name="app_streaming_blocked_title_for_permission_dialog" msgid="4483161748582966785">"परवानगी आवश्यक आहे"</string>
     <string name="app_streaming_blocked_message" product="tv" msgid="4003011766528814377">"हे यावेळी तुमच्या <xliff:g id="DEVICE">%1$s</xliff:g> वर अ‍ॅक्सेस करू शकत नाही. त्याऐवजी तुमच्या Android TV डिव्हाइसवर अ‍ॅक्सेस करून पहा."</string>
     <string name="app_streaming_blocked_message" product="tablet" msgid="4242053045964946062">"हे यावेळी तुमच्या <xliff:g id="DEVICE">%1$s</xliff:g> वर अ‍ॅक्सेस करू शकत नाही. त्याऐवजी तुमच्या टॅबलेटवर अ‍ॅक्सेस करून पहा."</string>
     <string name="app_streaming_blocked_message" product="default" msgid="6159168735030739398">"हे यावेळी तुमच्या <xliff:g id="DEVICE">%1$s</xliff:g> वर अ‍ॅक्सेस करू शकत नाही. त्याऐवजी तुमच्या फोनवर अ‍ॅक्सेस करून पहा."</string>
@@ -2030,7 +2029,8 @@
     <string name="log_access_confirmation_title" msgid="2343578467290592708">"<xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> ला सर्व डिव्हाइस लॉग अ‍ॅक्सेस करण्याची अनुमती द्यायची आहे का?"</string>
     <string name="log_access_confirmation_allow" msgid="143157286283302512">"फक्त यावेळी"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"अनुमती देऊ नका"</string>
-    <string name="log_access_confirmation_body" msgid="4483075525611652922">"तुमच्या डिव्हाइसवर काय होते ते डिव्हाइस लॉग रेकॉर्ड करते. समस्या शोधण्यासाठी आणि त्यांचे निराकरण करण्याकरिता ॲप्स हे लॉग वापरू शकतात.\n\nकाही लॉगमध्ये संवेदनशील माहिती असू शकते, त्यामुळे फक्त तुमचा विश्वास असलेल्या ॲप्सना सर्व डिव्हाइस लॉग अ‍ॅक्सेस करण्याची अनुमती द्या. \n\nतुम्ही या ॲपला सर्व डिव्हाइस लॉग अ‍ॅक्सेस करण्याची अनुमती न दिल्यास, ते तरीही त्याचा स्वतःचा लॉग अ‍ॅक्सेस करू शकते आणि तुमच्या डिव्हाइसचा उत्पादक तरीही काही लॉग किंवा तुमच्या डिव्हाइसवरील माहिती अ‍ॅक्सेस करू शकतो. अधिक जाणून घ्या"</string>
+    <!-- no translation found for log_access_confirmation_body (6581985716241928135) -->
+    <skip />
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"पुन्हा दाखवू नका"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g> ला <xliff:g id="APP_2">%2$s</xliff:g> चे तुकडे दाखवायचे आहेत"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"संपादित करा"</string>
@@ -2264,6 +2264,9 @@
     <string name="notification_content_abusive_bg_apps" msgid="5572096708044958249">"<xliff:g id="APP">%1$s</xliff:g> हे बॅकग्राउंडमध्ये रन होत आहे आणि बॅटरी संपवत आहे. पुनरावलोकनासाठी टॅप करा."</string>
     <string name="notification_content_long_running_fgs" msgid="8878031652441570178">"<xliff:g id="APP">%1$s</xliff:g> हे बऱ्याच कालावधीपासून बॅकग्राउंडमध्ये रन होत आहे. पुनरावलोकनासाठी टॅप करा."</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"ॲक्टिव्ह ॲप्स पहा"</string>
-    <string name="vdm_camera_access_denied" msgid="6345652513729130490">"या डिव्हाइसवरून कॅमेरा अ‍ॅक्सेस करू शकत नाही"</string>
+    <!-- no translation found for vdm_camera_access_denied (6102378580971542473) -->
+    <skip />
+    <!-- no translation found for vdm_camera_access_denied (6895968310395249076) -->
+    <skip />
     <string name="system_locale_title" msgid="3978041860457277638">"सिस्टीम भाषा"</string>
 </resources>

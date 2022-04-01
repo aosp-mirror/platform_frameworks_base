@@ -1933,8 +1933,7 @@
     <string name="app_blocked_title" msgid="7353262160455028160">"Η εφαρμογή δεν είναι διαθέσιμη"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"Η εφαρμογή <xliff:g id="APP_NAME">%1$s</xliff:g> δεν είναι διαθέσιμη αυτήν τη στιγμή."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> δεν διατίθεται"</string>
-    <!-- no translation found for app_streaming_blocked_title_for_permission_dialog (4483161748582966785) -->
-    <skip />
+    <string name="app_streaming_blocked_title_for_permission_dialog" msgid="4483161748582966785">"Απαιτείται άδεια"</string>
     <string name="app_streaming_blocked_message" product="tv" msgid="4003011766528814377">"Δεν είναι δυνατή η πρόσβαση στη συγκεκριμένη εφαρμογή από τη συσκευή <xliff:g id="DEVICE">%1$s</xliff:g> αυτήν τη στιγμή. Δοκιμάστε στη συσκευή Android TV."</string>
     <string name="app_streaming_blocked_message" product="tablet" msgid="4242053045964946062">"Δεν είναι δυνατή η πρόσβαση στη συγκεκριμένη εφαρμογή από τη συσκευή <xliff:g id="DEVICE">%1$s</xliff:g> αυτήν τη στιγμή. Δοκιμάστε στο tablet σας."</string>
     <string name="app_streaming_blocked_message" product="default" msgid="6159168735030739398">"Δεν είναι δυνατή η πρόσβαση στη συγκεκριμένη εφαρμογή από τη συσκευή <xliff:g id="DEVICE">%1$s</xliff:g> αυτήν τη στιγμή. Δοκιμάστε στο τηλέφωνό σας."</string>
@@ -2030,7 +2029,7 @@
     <string name="log_access_confirmation_title" msgid="2343578467290592708">"Να επιτρέπεται στην εφαρμογή <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> η πρόσβαση σε όλα τα αρχεία καταγραφής συσκευής;"</string>
     <string name="log_access_confirmation_allow" msgid="143157286283302512">"Μόνο αυτήν τη φορά"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"Να μην επιτραπεί"</string>
-    <string name="log_access_confirmation_body" msgid="4483075525611652922">"Τα αρχεία καταγραφής συσκευής καταγράφουν ό,τι συμβαίνει στη συσκευή σας. Οι εφαρμογές μπορούν να χρησιμοποιούν αυτά τα αρχεία καταγραφής για να εντοπίζουν και να διορθώνουν ζητήματα.\n\nΟρισμένα αρχεία καταγραφής ενδέχεται να περιέχουν ευαίσθητες πληροφορίες, επομένως, επιτρέψτε την πρόσβαση σε όλα τα αρχεία καταγραφής συσκευής μόνο στις εφαρμογές που εμπιστεύεστε. \n\nΑν δεν επιτρέψετε σε αυτήν την εφαρμογή την πρόσβαση σε όλα τα αρχεία καταγραφής συσκευής, εξακολουθεί να έχει πρόσβαση στα δικά της αρχεία καταγραφής, ενώ ο κατασκευαστής της συσκευής σας ενδέχεται να εξακολουθεί να έχει πρόσβαση σε ορισμένα αρχεία καταγραφής ή πληροφορίες στη συσκευή σας. Μάθετε περισσότερα"</string>
+    <string name="log_access_confirmation_body" msgid="6581985716241928135">"Τα αρχεία καταγραφής συσκευής καταγράφουν ό,τι συμβαίνει στη συσκευή σας. Οι εφαρμογές μπορούν να χρησιμοποιούν αυτά τα αρχεία καταγραφής για να εντοπίζουν και να διορθώνουν ζητήματα.\n\nΟρισμένα αρχεία καταγραφής ενδέχεται να περιέχουν ευαίσθητες πληροφορίες. Ως εκ τούτου, επιτρέψτε την πρόσβαση σε όλα τα αρχεία καταγραφής συσκευής μόνο στις εφαρμογές που εμπιστεύεστε. \n\nΕάν δεν επιτρέψετε σε αυτήν την εφαρμογή την πρόσβαση σε όλα τα αρχεία καταγραφής συσκευής, η εφαρμογή εξακολουθεί να έχει πρόσβαση στα δικά της αρχεία καταγραφής. Ο κατασκευαστής της συσκευής σας ενδέχεται να εξακολουθεί να έχει πρόσβαση σε ορισμένα αρχεία καταγραφής ή ορισμένες πληροφορίες στη συσκευή σας. Μάθετε περισσότερα"</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"Να μην εμφανισ. ξανά"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"Η εφαρμογή <xliff:g id="APP_0">%1$s</xliff:g> θέλει να εμφανίζει τμήματα της εφαρμογής <xliff:g id="APP_2">%2$s</xliff:g>"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"Επεξεργασία"</string>
@@ -2264,7 +2263,7 @@
     <string name="notification_content_abusive_bg_apps" msgid="5572096708044958249">"Το <xliff:g id="APP">%1$s</xliff:g> εκτελείται στο παρασκήνιο και καταναλώνει μπαταρία. Έλεγχος."</string>
     <string name="notification_content_long_running_fgs" msgid="8878031652441570178">"Η εφαρμογή <xliff:g id="APP">%1$s</xliff:g> εκτελείται στο παρασκήνιο για πολύ ώρα. Πατήστε για έλεγχο."</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Έλεγχος ενεργών εφαρμογών"</string>
-    <string name="vdm_camera_access_denied" msgid="6345652513729130490">"Δεν είναι δυνατή η πρόσβαση στην κάμερα από αυτήν τη συσκευή."</string>
-    <!-- no translation found for system_locale_title (3978041860457277638) -->
-    <skip />
+    <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"Δεν είναι δυνατή η πρόσβαση στην κάμερα του τηλεφώνου από τη συσκευή <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
+    <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"Δεν είναι δυνατή η πρόσβαση στην κάμερα του tablet από τη συσκευή <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
+    <string name="system_locale_title" msgid="3978041860457277638">"Γλώσσα συστήματος"</string>
 </resources>

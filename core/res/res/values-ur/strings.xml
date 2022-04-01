@@ -2030,7 +2030,8 @@
     <string name="log_access_confirmation_title" msgid="2343578467290592708">"<xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> کو آلے کے تمام لاگز تک رسائی کی اجازت دیں؟"</string>
     <string name="log_access_confirmation_allow" msgid="143157286283302512">"صرف اس وقت"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"اجازت نہ دیں"</string>
-    <string name="log_access_confirmation_body" msgid="4483075525611652922">"آپ کے آلے پر جو ہوتا ہے آلے کے لاگز اسے ریکارڈ کر لیتے ہیں۔ ایپس ان لاگز کا استعمال مسائل کو تلاش کرنے اور ان کو حل کرنے کے لیے کر سکتی ہیں۔\n\nکچھ لاگز میں حساس معلومات شامل ہو سکتی ہیں، اس لیے صرف اپنے بھروسے مند ایپس کو ہی آلے کے تمام لاگز تک رسائی کی اجازت دیں۔ \n\nاگر آپ اس ایپ کو آلے کے تمام لاگز تک رسائی کی اجازت نہیں دیتے ہیں، پھر بھی اسے اپنی خود کی لاگز تک رسائی حاصل ہو سکتی ہے اور آپ کے آلے کا مینوفیکچرر اب بھی آپ کے آلے پر موجود کچھ لاگز یا معلومات تک رسائی حاصل کر سکتا ہے۔ مزید جانیں"</string>
+    <!-- no translation found for log_access_confirmation_body (6581985716241928135) -->
+    <skip />
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"دوبارہ نہ دکھائیں"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g> <xliff:g id="APP_2">%2$s</xliff:g> کے سلائسز دکھانا چاہتی ہے"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"ترمیم کریں"</string>
@@ -2264,7 +2265,9 @@
     <string name="notification_content_abusive_bg_apps" msgid="5572096708044958249">"‫<xliff:g id="APP">%1$s</xliff:g> پس منظر میں چل رہی ہے اور بیٹری ختم ہو رہی ہے۔ جائزے کے لیے تھپتھپائیں۔"</string>
     <string name="notification_content_long_running_fgs" msgid="8878031652441570178">"<xliff:g id="APP">%1$s</xliff:g> کافی وقت سے پس منظر میں چل رہی ہے۔ جائزے کے لیے تھپتھپائیں۔"</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"فعال ایپس چیک کریں"</string>
-    <string name="vdm_camera_access_denied" msgid="6345652513729130490">"اس آلہ سے کیمرا تک رسائی حاصل نہیں کر سکتے"</string>
-    <!-- no translation found for system_locale_title (3978041860457277638) -->
+    <!-- no translation found for vdm_camera_access_denied (6102378580971542473) -->
     <skip />
+    <!-- no translation found for vdm_camera_access_denied (6895968310395249076) -->
+    <skip />
+    <string name="system_locale_title" msgid="3978041860457277638">"سسٹم کی زبان"</string>
 </resources>

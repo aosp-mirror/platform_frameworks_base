@@ -2034,7 +2034,8 @@
     <string name="log_access_confirmation_title" msgid="2343578467290592708">"هل تريد السماح لتطبيق <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> بالوصول إلى جميع سجلّات الجهاز؟"</string>
     <string name="log_access_confirmation_allow" msgid="143157286283302512">"هذه المرَّة فقط"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"عدم السماح"</string>
-    <string name="log_access_confirmation_body" msgid="4483075525611652922">"ترصد سجلّات الجهاز ما يحدث على جهازك. يمكن أن تستخدم التطبيقات هذه السجلّات لتحديد المشاكل وحلها.\n\nقد تحتوي بعض السجلّات على معلومات حساسة، ولذلك يجب عدم السماح بالوصول إلى جميع سجلّات الجهاز إلا للتطبيقات التي تثق بها. \n\nإذا لم تسمح بوصول هذا التطبيق إلى جميع سجلّات الجهاز، يظل بإمكان التطبيق الوصول إلى سجلّاته، ويظل بإمكان الشركة المصنّعة لجهازك الوصول إلى بعض السجلّات أو المعلومات المتوفّرة على جهازك. مزيد من المعلومات"</string>
+    <!-- no translation found for log_access_confirmation_body (6581985716241928135) -->
+    <skip />
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"عدم الإظهار مرة أخرى"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"يريد تطبيق <xliff:g id="APP_0">%1$s</xliff:g> عرض شرائح تطبيق <xliff:g id="APP_2">%2$s</xliff:g>."</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"تعديل"</string>
@@ -2268,7 +2269,9 @@
     <string name="notification_content_abusive_bg_apps" msgid="5572096708044958249">"يعمل تطبيق <xliff:g id="APP">%1$s</xliff:g> في الخلفية ويستنفد شحن البطارية. انقر لمراجعة الإعدادات."</string>
     <string name="notification_content_long_running_fgs" msgid="8878031652441570178">"يعمل تطبيق <xliff:g id="APP">%1$s</xliff:g> في الخلفية لفترة طويلة. انقر لمراجعة الإعدادات."</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"التحقّق من التطبيقات النشطة"</string>
-    <string name="vdm_camera_access_denied" msgid="6345652513729130490">"لا يمكن الوصول إلى الكاميرا من هذا الجهاز."</string>
-    <!-- no translation found for system_locale_title (3978041860457277638) -->
+    <!-- no translation found for vdm_camera_access_denied (6102378580971542473) -->
     <skip />
+    <!-- no translation found for vdm_camera_access_denied (6895968310395249076) -->
+    <skip />
+    <string name="system_locale_title" msgid="3978041860457277638">"لغة النظام"</string>
 </resources>
