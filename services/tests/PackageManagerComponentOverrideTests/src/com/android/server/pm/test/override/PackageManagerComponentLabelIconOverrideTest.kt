@@ -34,6 +34,7 @@ import com.android.server.pm.test.override.PackageManagerComponentLabelIconOverr
 import com.android.server.testutils.TestHandler
 import com.android.server.testutils.mock
 import com.android.server.testutils.mockThrowOnUnmocked
+import com.android.server.testutils.spy
 import com.android.server.testutils.whenever
 import com.android.server.wm.ActivityTaskManagerInternal
 import com.google.common.truth.Truth.assertThat
@@ -45,9 +46,13 @@ import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
 import org.mockito.Mockito.any
 import org.mockito.Mockito.anyInt
+import org.mockito.Mockito.clearInvocations
+import org.mockito.Mockito.doAnswer
 import org.mockito.Mockito.doReturn
 import org.mockito.Mockito.intThat
+import org.mockito.Mockito.never
 import org.mockito.Mockito.same
+import org.mockito.Mockito.verify
 import org.testng.Assert.assertThrows
 import java.io.File
 import java.util.UUID
@@ -360,7 +365,7 @@ class PackageManagerComponentLabelIconOverrideTest {
         val mockActivityTaskManager: ActivityTaskManagerInternal = mockThrowOnUnmocked {
             whenever(this.isCallerRecents(anyInt())) { false }
         }
-        val mockAppsFilter: AppsFilterImpl = mockThrowOnUnmocked {
+        val mockAppsFilter: AppsFilter = mockThrowOnUnmocked {
             whenever(this.shouldFilterApplication(anyInt(), any<PackageSetting>(),
                     any<PackageSetting>(), anyInt())) { false }
             whenever(this.snapshot()) { this@mockThrowOnUnmocked }
