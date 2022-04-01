@@ -2558,14 +2558,8 @@ public class NotificationManagerService extends SystemService {
             @Override
             public void addAutoGroupSummary(int userId, String pkg, String triggeringKey,
                     boolean needsOngoingFlag) {
-                NotificationRecord r = createAutoGroupSummary(
+                NotificationManagerService.this.addAutoGroupSummary(
                         userId, pkg, triggeringKey, needsOngoingFlag);
-                if (r != null) {
-                    final boolean isAppForeground =
-                            mActivityManager.getPackageImportance(pkg) == IMPORTANCE_FOREGROUND;
-                    mHandler.post(new EnqueueNotificationRunnable(userId, r, isAppForeground,
-                            SystemClock.elapsedRealtime()));
-                }
             }
 
             @Override
@@ -5758,17 +5752,30 @@ public class NotificationManagerService extends SystemService {
         r.addAdjustment(adjustment);
     }
 
+    @VisibleForTesting
+    void addAutoGroupSummary(int userId, String pkg, String triggeringKey,
+            boolean needsOngoingFlag) {
+        NotificationRecord r = createAutoGroupSummary(
+                userId, pkg, triggeringKey, needsOngoingFlag);
+        if (r != null) {
+            final boolean isAppForeground =
+                    mActivityManager.getPackageImportance(pkg) == IMPORTANCE_FOREGROUND;
+            mHandler.post(new EnqueueNotificationRunnable(userId, r, isAppForeground,
+                    SystemClock.elapsedRealtime()));
+        }
+    }
+
     // Clears the 'fake' auto-group summary.
+    @VisibleForTesting
     @GuardedBy("mNotificationLock")
-    private void clearAutogroupSummaryLocked(int userId, String pkg) {
+    void clearAutogroupSummaryLocked(int userId, String pkg) {
         ArrayMap<String, String> summaries = mAutobundledSummaries.get(userId);
         if (summaries != null && summaries.containsKey(pkg)) {
-            // Clear summary.
             final NotificationRecord removed = findNotificationByKeyLocked(summaries.remove(pkg));
             if (removed != null) {
-                boolean wasPosted = removeFromNotificationListsLocked(removed);
-                cancelNotificationLocked(removed, false, REASON_UNAUTOBUNDLED, wasPosted, null,
-                        SystemClock.elapsedRealtime());
+                final StatusBarNotification sbn = removed.getSbn();
+                cancelNotification(MY_UID, MY_PID, pkg, sbn.getTag(), sbn.getId(), 0, 0, false,
+                        userId, REASON_UNAUTOBUNDLED, null);
             }
         }
     }
