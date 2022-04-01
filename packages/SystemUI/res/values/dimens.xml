@@ -1429,6 +1429,8 @@
     <!-- The margin applied between complications -->
     <dimen name="dream_overlay_complication_margin">0dp</dimen>
 
+    <dimen name="dream_overlay_y_offset">80dp</dimen>
+
     <dimen name="status_view_margin_horizontal">0dp</dimen>
 
     <!-- Media output broadcast dialog QR code picture size -->
