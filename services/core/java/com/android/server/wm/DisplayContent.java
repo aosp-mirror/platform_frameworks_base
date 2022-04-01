@@ -848,10 +848,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                 w.onResizeHandled();
             }
 
-            if (w.mActivityRecord != null) {
-                w.mActivityRecord.layoutLetterbox(w);
-            }
-
             if (DEBUG_LAYOUT) Slog.v(TAG, "  LAYOUT: mFrame=" + w.getFrame()
                     + " mParentFrame=" + w.getParentFrame()
                     + " mDisplayFrame=" + w.getDisplayFrame());
