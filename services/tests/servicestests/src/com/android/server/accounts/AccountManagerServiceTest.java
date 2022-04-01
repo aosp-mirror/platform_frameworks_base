@@ -26,16 +26,17 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.nullable;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.accounts.AbstractAccountAuthenticator;
 import android.accounts.Account;
 import android.accounts.AccountManager;
 import android.accounts.AccountManagerInternal;
 import android.accounts.CantAddAccountActivity;
 import android.accounts.IAccountManagerResponse;
 import android.app.AppOpsManager;
-import android.app.PropertyInvalidatedCache;
 import android.app.INotificationManager;
 import android.app.PropertyInvalidatedCache;
 import android.app.admin.DevicePolicyManager;
@@ -1719,13 +1720,14 @@ public class AccountManagerServiceTest extends AndroidTestCase {
 
         final CountDownLatch latch = new CountDownLatch(1);
         Response response = new Response(latch, mMockAccountManagerResponse);
+        long expiryEpochTimeInMillis = System.currentTimeMillis() + ONE_DAY_IN_MILLISECOND;
         mAms.getAuthToken(
                     response, // response
                     AccountManagerServiceTestFixtures.ACCOUNT_SUCCESS,
                     "authTokenType", // authTokenType
                     true, // notifyOnAuthFailure
                     false, // expectActivityLaunch
-                    createGetAuthTokenOptions());
+                createGetAuthTokenOptionsWithExpiry(expiryEpochTimeInMillis));
         waitForLatch(latch);
 
         verify(mMockAccountManagerResponse).onResult(mBundleCaptor.capture());
@@ -1736,6 +1738,58 @@ public class AccountManagerServiceTest extends AndroidTestCase {
                 AccountManagerServiceTestFixtures.ACCOUNT_NAME_SUCCESS);
         assertEquals(result.getString(AccountManager.KEY_ACCOUNT_TYPE),
                 AccountManagerServiceTestFixtures.ACCOUNT_TYPE_1);
+        assertEquals(result.getLong(AbstractAccountAuthenticator.KEY_CUSTOM_TOKEN_EXPIRY),
+                expiryEpochTimeInMillis);
+    }
+
+    @SmallTest
+    public void testGetAuthTokenCachedSuccess() throws Exception {
+        unlockSystemUser();
+        when(mMockContext.createPackageContextAsUser(
+                anyString(), anyInt(), any(UserHandle.class))).thenReturn(mMockContext);
+        when(mMockContext.getPackageManager()).thenReturn(mMockPackageManager);
+        String[] list = new String[]{AccountManagerServiceTestFixtures.CALLER_PACKAGE};
+        when(mMockPackageManager.getPackagesForUid(anyInt())).thenReturn(list);
+
+        final CountDownLatch latch = new CountDownLatch(1);
+        Response response = new Response(latch, mMockAccountManagerResponse);
+        long expiryEpochTimeInMillis = System.currentTimeMillis() + ONE_DAY_IN_MILLISECOND;
+        mAms.getAuthToken(
+                response, // response
+                AccountManagerServiceTestFixtures.ACCOUNT_SUCCESS,
+                "authTokenType", // authTokenType
+                true, // notifyOnAuthFailure
+                false, // expectActivityLaunch
+                createGetAuthTokenOptionsWithExpiry(expiryEpochTimeInMillis));
+        waitForLatch(latch);
+
+        // Make call for cached token.
+        mAms.getAuthToken(
+                response, // response
+                AccountManagerServiceTestFixtures.ACCOUNT_SUCCESS,
+                "authTokenType", // authTokenType
+                true, // notifyOnAuthFailure
+                false, // expectActivityLaunch
+                createGetAuthTokenOptionsWithExpiry(expiryEpochTimeInMillis + 10));
+        waitForLatch(latch);
+
+        verify(mMockAccountManagerResponse, times(2)).onResult(mBundleCaptor.capture());
+        List<Bundle> result = mBundleCaptor.getAllValues();
+        assertGetTokenResponse(result.get(0), expiryEpochTimeInMillis);
+        // cached token was returned with the same expiration time as first token.
+        assertGetTokenResponse(result.get(1), expiryEpochTimeInMillis);
+    }
+
+    private void assertGetTokenResponse(Bundle result, long expiryEpochTimeInMillis) {
+        assertEquals(result.getString(AccountManager.KEY_AUTHTOKEN),
+                AccountManagerServiceTestFixtures.AUTH_TOKEN);
+        assertEquals(result.getString(AccountManager.KEY_ACCOUNT_NAME),
+                AccountManagerServiceTestFixtures.ACCOUNT_NAME_SUCCESS);
+        assertEquals(result.getString(AccountManager.KEY_ACCOUNT_TYPE),
+                AccountManagerServiceTestFixtures.ACCOUNT_TYPE_1);
+        assertEquals(result.getLong(AbstractAccountAuthenticator.KEY_CUSTOM_TOKEN_EXPIRY),
+                expiryEpochTimeInMillis);
+
     }
 
     @SmallTest
@@ -3262,11 +3316,16 @@ public class AccountManagerServiceTest extends AndroidTestCase {
     }
 
     private Bundle createGetAuthTokenOptions() {
+        return createGetAuthTokenOptionsWithExpiry(
+                System.currentTimeMillis() + ONE_DAY_IN_MILLISECOND);
+    }
+
+    private Bundle createGetAuthTokenOptionsWithExpiry(long expiryEpochTimeInMillis) {
         Bundle options = new Bundle();
         options.putString(AccountManager.KEY_ANDROID_PACKAGE_NAME,
                 AccountManagerServiceTestFixtures.CALLER_PACKAGE);
         options.putLong(AccountManagerServiceTestFixtures.KEY_TOKEN_EXPIRY,
-                System.currentTimeMillis() + ONE_DAY_IN_MILLISECOND);
+                expiryEpochTimeInMillis);
         return options;
     }
 
