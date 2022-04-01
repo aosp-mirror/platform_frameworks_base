@@ -3969,7 +3969,6 @@
   <java-symbol type="string" name="config_misprovisionedBrandValue" />
 
   <java-symbol type="integer" name="db_wal_truncate_size" />
-  <java-symbol type="integer" name="config_wakeUpDelayDoze" />
 
   <!-- For Bluetooth AbsoluteVolume -->
   <java-symbol type="fraction" name="config_prescaleAbsoluteVolume_index1" />
