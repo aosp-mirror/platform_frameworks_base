@@ -87,12 +87,12 @@ public class WindowAnimationSpec implements AnimationSpec {
 
     @Override
     public boolean getShowBackground() {
-        return mAnimation.getShowBackground();
+        return mAnimation.getShowBackdrop();
     }
 
     @Override
     public int getBackgroundColor() {
-        return mAnimation.getBackgroundColor();
+        return mAnimation.getBackdropColor();
     }
 
     /**
