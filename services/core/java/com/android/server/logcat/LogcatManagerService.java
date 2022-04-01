@@ -23,7 +23,6 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.os.Binder;
 import android.os.ILogd;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -76,6 +75,7 @@ public final class LogcatManagerService extends SystemService {
         @Override
         public void approve(int uid, int gid, int pid, int fd) {
             try {
+                Slog.d(TAG, "Allow logd access for uid: " + uid);
                 getLogdService().approve(uid, gid, pid, fd);
             } catch (RemoteException e) {
                 Slog.e(TAG, "Fails to call remote functions", e);
@@ -85,6 +85,7 @@ public final class LogcatManagerService extends SystemService {
         @Override
         public void decline(int uid, int gid, int pid, int fd) {
             try {
+                Slog.d(TAG, "Decline logd access for uid: " + uid);
                 getLogdService().decline(uid, gid, pid, fd);
             } catch (RemoteException e) {
                 Slog.e(TAG, "Fails to call remote functions", e);
@@ -194,8 +195,9 @@ public final class LogcatManagerService extends SystemService {
                     return;
                 }
 
-                final int procState = mActivityManager.getUidImportance(Binder.getCallingUid());
-                // If the process is foreground, send a notification for user consent
+                final int procState = LocalServices.getService(ActivityManagerInternal.class)
+                        .getUidProcessState(mUid);
+                // If the process is foreground, show a dialog for user consent
                 if (procState <= ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE) {
                     showDialog(mUid, mGid, mPid, mFd);
                 } else {
