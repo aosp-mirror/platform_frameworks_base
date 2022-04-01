@@ -445,6 +445,7 @@ public class SpatializerHelper {
 
     synchronized void addCompatibleAudioDevice(@NonNull AudioDeviceAttributes ada) {
         // TODO add log
+        Log.i(TAG, "addCompatibleAudioDevice: dev=" + ada);
         final int deviceType = ada.getType();
         final boolean wireless = isWireless(deviceType);
         boolean updateRouting = false;
@@ -468,13 +469,14 @@ public class SpatializerHelper {
             mSADevices.add(dev);
             updateRouting = true;
         }
-        if (updateRouting) {
+        //if (updateRouting) {
             onRoutingUpdated();
-        }
+        //}
     }
 
     synchronized void removeCompatibleAudioDevice(@NonNull AudioDeviceAttributes ada) {
         // TODO add log
+        Log.i(TAG, "removeCompatibleAudioDevice: dev=" + ada);
         final int deviceType = ada.getType();
         final boolean wireless = isWireless(deviceType);
         boolean updateRouting = false;
@@ -489,9 +491,9 @@ public class SpatializerHelper {
                 break;
             }
         }
-        if (updateRouting) {
+        //###if (updateRouting) {
             onRoutingUpdated();
-        }
+        //###}
     }
 
     /**
@@ -747,7 +749,6 @@ public class SpatializerHelper {
             }
         }
         mStateCallbacks.finishBroadcast();
-        mAudioService.persistSpatialAudioEnabled(featureEnabled);
     }
 
     private synchronized void setDispatchAvailableState(boolean available) {
