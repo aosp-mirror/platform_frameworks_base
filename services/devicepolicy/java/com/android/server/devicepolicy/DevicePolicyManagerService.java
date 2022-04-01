@@ -138,7 +138,6 @@ import static android.net.ConnectivityManager.PROFILE_NETWORK_PREFERENCE_DEFAULT
 import static android.net.ConnectivityManager.PROFILE_NETWORK_PREFERENCE_ENTERPRISE;
 import static android.net.ConnectivityManager.PROFILE_NETWORK_PREFERENCE_ENTERPRISE_NO_FALLBACK;
 import static android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK;
-import static android.provider.Settings.Global.BYPASS_DEVICE_POLICY_MANAGEMENT_ROLE_QUALIFICATIONS;
 import static android.provider.Settings.Global.PRIVATE_DNS_SPECIFIER;
 import static android.provider.Settings.Secure.MANAGED_PROVISIONING_DPC_DOWNLOADED;
 import static android.provider.Settings.Secure.USER_SETUP_COMPLETE;
@@ -222,6 +221,7 @@ import android.app.admin.UnsafeStateException;
 import android.app.admin.WifiSsidPolicy;
 import android.app.backup.IBackupManager;
 import android.app.compat.CompatChanges;
+import android.app.role.OnRoleHoldersChangedListener;
 import android.app.role.RoleManager;
 import android.app.trust.TrustManager;
 import android.app.usage.UsageStatsManagerInternal;
@@ -255,6 +255,7 @@ import android.content.pm.ParceledListSlice;
 import android.content.pm.PermissionInfo;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
+import android.content.pm.Signature;
 import android.content.pm.StringParceledListSlice;
 import android.content.pm.UserInfo;
 import android.content.res.Resources;
@@ -409,6 +410,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -756,6 +758,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     private @UserIdInt int mNetworkLoggingNotificationUserId = UserHandle.USER_NULL;
 
     private final DeviceManagementResourcesProvider mDeviceManagementResourcesProvider;
+    private final DevicePolicyManagementRoleObserver mDevicePolicyManagementRoleObserver;
 
     private static final boolean ENABLE_LOCK_GUARD = true;
 
@@ -1823,6 +1826,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         mBugreportCollectionManager = new RemoteBugreportManager(this, mInjector);
 
         mDeviceManagementResourcesProvider = mInjector.getDeviceManagementResourcesProvider();
+        mDevicePolicyManagementRoleObserver = new DevicePolicyManagementRoleObserver(mContext);
+        mDevicePolicyManagementRoleObserver.register();
 
         // "Lite" interface is available even when the device doesn't have the feature
         LocalServices.addService(DevicePolicyManagerLiteInternal.class, mLocalService);
@@ -18627,16 +18632,11 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         Preconditions.checkCallAuthorization(hasCallingOrSelfPermission(
                 android.Manifest.permission.MANAGE_ROLE_HOLDERS));
         return mInjector.binderWithCleanCallingIdentity(() -> {
-            if (mInjector.settingsGlobalGetInt(
-                    BYPASS_DEVICE_POLICY_MANAGEMENT_ROLE_QUALIFICATIONS, /* def= */ 0) == 1) {
+            if (getUserData(
+                    UserHandle.USER_SYSTEM).mBypassDevicePolicyManagementRoleQualifications) {
                 return true;
             }
-            if (shouldAllowBypassingDevicePolicyManagementRoleQualificationInternal()) {
-                mInjector.settingsGlobalPutInt(
-                        BYPASS_DEVICE_POLICY_MANAGEMENT_ROLE_QUALIFICATIONS, /* value= */ 1);
-                return true;
-            }
-            return false;
+            return shouldAllowBypassingDevicePolicyManagementRoleQualificationInternal();
         });
     }
 
@@ -18647,6 +18647,142 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         AccountManager am = AccountManager.get(mContext);
         Account[] accounts = am.getAccounts();
         return accounts.length == 0;
+    }
+
+    private void setBypassDevicePolicyManagementRoleQualificationStateInternal(
+            String currentRoleHolder, boolean allowBypass) {
+        boolean stateChanged = false;
+        DevicePolicyData policy = getUserData(UserHandle.USER_SYSTEM);
+        if (policy.mBypassDevicePolicyManagementRoleQualifications != allowBypass) {
+            policy.mBypassDevicePolicyManagementRoleQualifications = allowBypass;
+            stateChanged = true;
+        }
+        if (!Objects.equals(currentRoleHolder, policy.mCurrentRoleHolder)) {
+            policy.mCurrentRoleHolder = currentRoleHolder;
+            stateChanged = true;
+        }
+        if (stateChanged) {
+            synchronized (getLockObject()) {
+                saveSettingsLocked(UserHandle.USER_SYSTEM);
+            }
+        }
+    }
+
+    private final class DevicePolicyManagementRoleObserver implements OnRoleHoldersChangedListener {
+        private RoleManager mRm;
+        private final Executor mExecutor;
+        private final Context mContext;
+
+        DevicePolicyManagementRoleObserver(@NonNull Context context) {
+            mContext = context;
+            mExecutor = mContext.getMainExecutor();
+            mRm = mContext.getSystemService(RoleManager.class);
+        }
+
+        public void register() {
+            mRm.addOnRoleHoldersChangedListenerAsUser(mExecutor, this, UserHandle.SYSTEM);
+        }
+
+        @Override
+        public void onRoleHoldersChanged(@NonNull String roleName, @NonNull UserHandle user) {
+            if (!RoleManager.ROLE_DEVICE_POLICY_MANAGEMENT.equals(roleName)) {
+                return;
+            }
+            String newRoleHolder = getRoleHolder();
+            if (isDefaultRoleHolder(newRoleHolder)) {
+                Slogf.i(LOG_TAG,
+                        "onRoleHoldersChanged: Default role holder is set, returning early");
+                return;
+            }
+            if (newRoleHolder == null) {
+                Slogf.i(LOG_TAG,
+                        "onRoleHoldersChanged: New role holder is null, returning early");
+                return;
+            }
+            if (shouldAllowBypassingDevicePolicyManagementRoleQualificationInternal()) {
+                Slogf.w(LOG_TAG,
+                        "onRoleHoldersChanged: Updating current role holder to " + newRoleHolder);
+                setBypassDevicePolicyManagementRoleQualificationStateInternal(
+                        newRoleHolder, /* allowBypass= */ true);
+                return;
+            }
+            DevicePolicyData policy = getUserData(UserHandle.USER_SYSTEM);
+            if (!newRoleHolder.equals(policy.mCurrentRoleHolder)) {
+                Slogf.w(LOG_TAG,
+                        "onRoleHoldersChanged: You can't set a different role holder, role "
+                                + "is getting revoked from " + newRoleHolder);
+                setBypassDevicePolicyManagementRoleQualificationStateInternal(
+                        /* currentRoleHolder= */ null, /* allowBypass= */ false);
+                mRm.removeRoleHolderAsUser(
+                        RoleManager.ROLE_DEVICE_POLICY_MANAGEMENT,
+                        newRoleHolder,
+                        /* flags= */ 0,
+                        user,
+                        mExecutor,
+                        successful -> {});
+            }
+        }
+
+        private String getRoleHolder() {
+            return DevicePolicyManagerService.this.getDevicePolicyManagementRoleHolderPackageName(
+                    mContext);
+        }
+
+        private boolean isDefaultRoleHolder(String packageName) {
+            String defaultRoleHolder = getDefaultRoleHolderPackageName();
+            if (packageName == null || defaultRoleHolder == null) {
+                return false;
+            }
+            if (!defaultRoleHolder.equals(packageName)) {
+                return false;
+            }
+            return hasSigningCertificate(
+                    packageName, getDefaultRoleHolderPackageSignature());
+        }
+
+        private boolean hasSigningCertificate(String packageName, String  certificateString) {
+            if (packageName == null || certificateString == null) {
+                return false;
+            }
+            byte[] certificate;
+            try {
+                certificate = new Signature(certificateString).toByteArray();
+            } catch (IllegalArgumentException e) {
+                Slogf.w(LOG_TAG, "Cannot parse signing certificate: " + certificateString, e);
+                return false;
+            }
+            PackageManager pm = mInjector.getPackageManager();
+            return pm.hasSigningCertificate(
+                    packageName, certificate, PackageManager.CERT_INPUT_SHA256);
+        }
+
+        private String getDefaultRoleHolderPackageName() {
+            String[] info = getDefaultRoleHolderPackageNameAndSignature();
+            if (info == null) {
+                return null;
+            }
+            return info[0];
+        }
+
+        private String getDefaultRoleHolderPackageSignature() {
+            String[] info = getDefaultRoleHolderPackageNameAndSignature();
+            if (info == null || info.length < 2) {
+                return null;
+            }
+            return info[1];
+        }
+
+        private String[] getDefaultRoleHolderPackageNameAndSignature() {
+            String packageNameAndSignature = mContext.getString(
+                    com.android.internal.R.string.config_devicePolicyManagement);
+            if (TextUtils.isEmpty(packageNameAndSignature)) {
+                return null;
+            }
+            if (packageNameAndSignature.contains(":")) {
+                return packageNameAndSignature.split(":");
+            }
+            return new String[]{packageNameAndSignature};
+        }
     }
 
     @Override
