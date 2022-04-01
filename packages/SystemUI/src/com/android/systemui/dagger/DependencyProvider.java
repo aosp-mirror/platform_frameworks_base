@@ -36,7 +36,6 @@ import android.view.IWindowManager;
 import android.view.LayoutInflater;
 
 import com.android.internal.logging.MetricsLogger;
-import com.android.internal.logging.UiEventLogger;
 import com.android.internal.util.NotificationMessagingUtil;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardUpdateMonitor;
@@ -50,7 +49,6 @@ import com.android.systemui.accessibility.ModeSwitchesController;
 import com.android.systemui.accessibility.floatingmenu.AccessibilityFloatingMenuController;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.broadcast.logging.BroadcastDispatcherLogger;
-import com.android.systemui.clipboardoverlay.ClipboardOverlayControllerFactory;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.doze.AlwaysOnDisplayPolicy;
@@ -292,13 +290,5 @@ public class DependencyProvider {
     @SysUISingleton
     public ModeSwitchesController providesModeSwitchesController(Context context) {
         return new ModeSwitchesController(context);
-    }
-
-    /***/
-    @Provides
-    @SysUISingleton
-    public ClipboardOverlayControllerFactory provideClipboardOverlayControllerFactory(
-            UiEventLogger uiEventLogger) {
-        return new ClipboardOverlayControllerFactory(uiEventLogger);
     }
 }
