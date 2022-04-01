@@ -25,6 +25,7 @@ import com.android.systemui.R
 import com.android.systemui.statusbar.events.STATUS_BAR_X_MOVE_IN
 import com.android.systemui.statusbar.events.STATUS_BAR_X_MOVE_OUT
 import com.android.systemui.statusbar.events.SystemStatusAnimationCallback
+import com.android.systemui.util.animation.AnimationUtil.Companion.frames
 
 /**
  * Tied directly to [SystemStatusAnimationScheduler]. Any StatusBar-like thing (keyguard, collapsed
@@ -45,12 +46,12 @@ class StatusBarSystemEventAnimator(
             R.dimen.ongoing_appops_chip_animation_out_status_bar_translation_x)
 
     override fun onSystemEventAnimationBegin(): Animator {
-        val moveOut = ValueAnimator.ofFloat(0f, 1f).setDuration(383)
+        val moveOut = ValueAnimator.ofFloat(0f, 1f).setDuration(23.frames)
         moveOut.interpolator = STATUS_BAR_X_MOVE_OUT
         moveOut.addUpdateListener { animation: ValueAnimator ->
             animatedView.translationX = -(translationXIn * animation.animatedValue as Float)
         }
-        val alphaOut = ValueAnimator.ofFloat(1f, 0f).setDuration(133)
+        val alphaOut = ValueAnimator.ofFloat(1f, 0f).setDuration(8.frames)
         alphaOut.interpolator = null
         alphaOut.addUpdateListener { animation: ValueAnimator ->
             animatedView.alpha = animation.animatedValue as Float
@@ -63,14 +64,14 @@ class StatusBarSystemEventAnimator(
 
     override fun onSystemEventAnimationFinish(hasPersistentDot: Boolean): Animator {
         animatedView.translationX = translationXOut.toFloat()
-        val moveIn = ValueAnimator.ofFloat(1f, 0f).setDuration(467)
-        moveIn.startDelay = 33
+        val moveIn = ValueAnimator.ofFloat(1f, 0f).setDuration(28.frames)
+        moveIn.startDelay = 2.frames
         moveIn.interpolator = STATUS_BAR_X_MOVE_IN
         moveIn.addUpdateListener { animation: ValueAnimator ->
             animatedView.translationX = translationXOut * animation.animatedValue as Float
         }
-        val alphaIn = ValueAnimator.ofFloat(0f, 1f).setDuration(167)
-        alphaIn.startDelay = 67
+        val alphaIn = ValueAnimator.ofFloat(0f, 1f).setDuration(10.frames)
+        alphaIn.startDelay = 4.frames
         alphaIn.interpolator = null
         alphaIn.addUpdateListener { animation: ValueAnimator ->
             animatedView.alpha = animation.animatedValue as Float
