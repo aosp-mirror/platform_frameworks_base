@@ -1154,11 +1154,30 @@ public class Instrumentation {
         if ((event.getSource() & InputDevice.SOURCE_CLASS_POINTER) == 0) {
             event.setSource(InputDevice.SOURCE_TOUCHSCREEN);
         }
+
+        syncInputTransactionsAndInjectEvent(event);
+    }
+
+    private void syncInputTransactionsAndInjectEvent(MotionEvent event) {
+        final boolean syncBefore = event.getAction() == MotionEvent.ACTION_DOWN
+                || event.isFromSource(InputDevice.SOURCE_MOUSE);
+        final boolean syncAfter = event.getAction() == MotionEvent.ACTION_UP;
+
         try {
-            WindowManagerGlobal.getWindowManagerService().injectInputAfterTransactionsApplied(event,
-                    InputManager.INJECT_INPUT_EVENT_MODE_WAIT_FOR_FINISH,
-                    true /* waitForAnimations */);
+            if (syncBefore) {
+                WindowManagerGlobal.getWindowManagerService()
+                        .syncInputTransactions(true /*waitForAnimations*/);
+            }
+
+            InputManager.getInstance().injectInputEvent(
+                    event, InputManager.INJECT_INPUT_EVENT_MODE_WAIT_FOR_RESULT);
+
+            if (syncAfter) {
+                WindowManagerGlobal.getWindowManagerService()
+                        .syncInputTransactions(true /*waitForAnimations*/);
+            }
         } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
         }
     }
 

@@ -898,10 +898,6 @@ public class InputManagerService extends IInputManager.Stub
 
     @Override // Binder call
     public boolean injectInputEvent(InputEvent event, int mode) {
-        return injectInputEventInternal(event, mode);
-    }
-
-    private boolean injectInputEventInternal(InputEvent event, int mode) {
         Objects.requireNonNull(event, "event must not be null");
         if (mode != InputEventInjectionSync.NONE
                 && mode != InputEventInjectionSync.WAIT_FOR_FINISHED
@@ -3661,11 +3657,6 @@ public class InputManagerService extends IInputManager.Stub
         @Override
         public void setDisplayViewports(List<DisplayViewport> viewports) {
             setDisplayViewportsInternal(viewports);
-        }
-
-        @Override
-        public boolean injectInputEvent(InputEvent event, int mode) {
-            return injectInputEventInternal(event, mode);
         }
 
         @Override
