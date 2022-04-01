@@ -18530,7 +18530,7 @@ package android.hardware.fingerprint {
 package android.hardware.input {
 
   public final class InputManager {
-    method public android.view.InputDevice getInputDevice(int);
+    method @Nullable public android.view.InputDevice getInputDevice(int);
     method public int[] getInputDeviceIds();
     method @FloatRange(from=0, to=1) public float getMaximumObscuringOpacityForTouch();
     method public void registerInputDeviceListener(android.hardware.input.InputManager.InputDeviceListener, android.os.Handler);
@@ -48166,7 +48166,7 @@ package android.view {
     method @NonNull public android.hardware.BatteryState getBatteryState();
     method public int getControllerNumber();
     method public String getDescriptor();
-    method public static android.view.InputDevice getDevice(int);
+    method @Nullable public static android.view.InputDevice getDevice(int);
     method public static int[] getDeviceIds();
     method public int getId();
     method public android.view.KeyCharacterMap getKeyCharacterMap();
