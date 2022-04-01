@@ -51602,7 +51602,7 @@ package android.view {
     field public String packageName;
     field public boolean preferMinimalPostProcessing;
     field public int preferredDisplayModeId;
-    field @Deprecated public float preferredRefreshRate;
+    field public float preferredRefreshRate;
     field public int rotationAnimation;
     field public float screenBrightness;
     field public int screenOrientation;
