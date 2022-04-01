@@ -40,6 +40,7 @@ import android.util.proto.ProtoOutputStream;
 import com.android.internal.app.IAppOpsService;
 import com.android.server.DeviceIdleInternal;
 import com.android.server.LocalServices;
+import com.android.server.am.AppRestrictionController.TrackerType;
 import com.android.server.notification.NotificationManagerInternal;
 import com.android.server.pm.UserManagerInternal;
 import com.android.server.pm.permission.PermissionManagerServiceInternal;
@@ -158,6 +159,13 @@ public abstract class BaseAppStateTracker<T extends BaseAppStatePolicy> {
                 mStateListeners.get(i).onStateChange(uid, packageName, start, now, stateType);
             }
         }
+    }
+
+    /**
+     * Return the type of tracker (as defined by AppRestrictionController.TrackerType)
+     */
+    @TrackerType int getType() {
+        return AppRestrictionController.TRACKER_TYPE_UNKNOWN;
     }
 
     /**
