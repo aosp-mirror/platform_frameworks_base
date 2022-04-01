@@ -198,36 +198,30 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
         @Override
         public void onBackStarted() {
             Handler.getMain().post(() -> {
-                final OnBackInvokedCallback callback = mCallback.get();
-                if (callback == null) {
-                    return;
+                final OnBackAnimationCallback callback = getBackAnimationCallback();
+                if (callback != null) {
+                    callback.onBackStarted();
                 }
-
-                callback.onBackStarted();
             });
         }
 
         @Override
         public void onBackProgressed(BackEvent backEvent) {
             Handler.getMain().post(() -> {
-                final OnBackInvokedCallback callback = mCallback.get();
-                if (callback == null) {
-                    return;
+                final OnBackAnimationCallback callback = getBackAnimationCallback();
+                if (callback != null) {
+                    callback.onBackProgressed(backEvent);
                 }
-
-                callback.onBackProgressed(backEvent);
             });
         }
 
         @Override
         public void onBackCancelled() {
             Handler.getMain().post(() -> {
-                final OnBackInvokedCallback callback = mCallback.get();
-                if (callback == null) {
-                    return;
+                final OnBackAnimationCallback callback = getBackAnimationCallback();
+                if (callback != null) {
+                    callback.onBackCancelled();
                 }
-
-                callback.onBackCancelled();
             });
         }
 
@@ -241,6 +235,13 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
 
                 callback.onBackInvoked();
             });
+        }
+
+        @Nullable
+        private OnBackAnimationCallback getBackAnimationCallback() {
+            OnBackInvokedCallback callback = mCallback.get();
+            return callback instanceof OnBackAnimationCallback ? (OnBackAnimationCallback) callback
+                    : null;
         }
     }
 
