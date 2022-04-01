@@ -80,6 +80,8 @@ import android.widget.TextView;
 import com.android.internal.logging.UiEventLogger;
 import com.android.internal.policy.PhoneWindow;
 import com.android.systemui.R;
+import com.android.systemui.broadcast.BroadcastDispatcher;
+import com.android.systemui.broadcast.BroadcastSender;
 import com.android.systemui.screenshot.DraggableConstraintLayout;
 import com.android.systemui.screenshot.FloatingWindowUtil;
 import com.android.systemui.screenshot.OverlayActionChip;
@@ -105,6 +107,7 @@ public class ClipboardOverlayController {
 
     private final Context mContext;
     private final UiEventLogger mUiEventLogger;
+    private final BroadcastDispatcher mBroadcastDispatcher;
     private final DisplayManager mDisplayManager;
     private final DisplayMetrics mDisplayMetrics;
     private final WindowManager mWindowManager;
@@ -137,8 +140,11 @@ public class ClipboardOverlayController {
 
     private boolean mBlockAttach = false;
 
-    public ClipboardOverlayController(
-            Context context, TimeoutHandler timeoutHandler, UiEventLogger uiEventLogger) {
+    public ClipboardOverlayController(Context context,
+            BroadcastDispatcher broadcastDispatcher,
+            BroadcastSender broadcastSender,
+            TimeoutHandler timeoutHandler, UiEventLogger uiEventLogger) {
+        mBroadcastDispatcher = broadcastDispatcher;
         mDisplayManager = requireNonNull(context.getSystemService(DisplayManager.class));
         final Context displayContext = context.createDisplayContext(getDefaultDisplay());
         mContext = displayContext.createWindowContext(TYPE_SCREENSHOT, null);
@@ -247,9 +253,9 @@ public class ClipboardOverlayController {
                 }
             }
         };
-        mContext.registerReceiver(mCloseDialogsReceiver,
-                new IntentFilter(ACTION_CLOSE_SYSTEM_DIALOGS));
 
+        mBroadcastDispatcher.registerReceiver(mCloseDialogsReceiver,
+                new IntentFilter(ACTION_CLOSE_SYSTEM_DIALOGS));
         mScreenshotReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
@@ -258,14 +264,16 @@ public class ClipboardOverlayController {
                 }
             }
         };
-        mContext.registerReceiver(mScreenshotReceiver, new IntentFilter(SCREENSHOT_ACTION),
-                SELF_PERMISSION, null);
+
+        mBroadcastDispatcher.registerReceiver(mScreenshotReceiver,
+                new IntentFilter(SCREENSHOT_ACTION), null, null, Context.RECEIVER_EXPORTED,
+                SELF_PERMISSION);
         monitorOutsideTouches();
 
         Intent copyIntent = new Intent(COPY_OVERLAY_ACTION);
         // Set package name so the system knows it's safe
         copyIntent.setPackage(mContext.getPackageName());
-        mContext.sendBroadcast(copyIntent, SELF_PERMISSION);
+        broadcastSender.sendBroadcast(copyIntent, SELF_PERMISSION);
     }
 
     void setClipData(ClipData clipData, String clipSource) {
