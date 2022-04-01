@@ -527,6 +527,15 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
     }
 
     @Test
+    public void testNoStartAuthenticate_whenAboutToShowBouncer() {
+        mKeyguardUpdateMonitor.sendKeyguardBouncerChanged(
+                /* bouncerIsOrWillBeShowing */ true, /* bouncerFullyShown */ false);
+
+        verify(mFaceManager, never()).authenticate(any(), any(), any(), any(), anyInt(),
+                anyBoolean());
+    }
+
+    @Test
     public void testTriesToAuthenticate_whenKeyguard() {
         mKeyguardUpdateMonitor.dispatchStartedWakingUp();
         mTestableLooper.processAllMessages();
@@ -649,7 +658,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         // doesn't matter here
         mKeyguardUpdateMonitor.onFaceAuthenticated(KeyguardUpdateMonitor.getCurrentUser(),
                 true /* isStrongBiometric */);
-        mKeyguardUpdateMonitor.sendKeyguardBouncerChanged(true);
+        setKeyguardBouncerVisibility(true);
         mTestableLooper.processAllMessages();
 
         verify(mFaceManager, never()).authenticate(any(), any(), any(), any(), anyInt(),
@@ -1064,7 +1073,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
     }
 
     private void setKeyguardBouncerVisibility(boolean isVisible) {
-        mKeyguardUpdateMonitor.sendKeyguardBouncerChanged(isVisible);
+        mKeyguardUpdateMonitor.sendKeyguardBouncerChanged(isVisible, isVisible);
         mTestableLooper.processAllMessages();
     }
 
