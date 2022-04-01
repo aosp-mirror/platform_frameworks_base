@@ -10556,7 +10556,7 @@ public class TelephonyManager {
         try {
             ITelephony telephony = getITelephony();
             if (telephony != null)
-                return telephony.enableDataConnectivity();
+                return telephony.enableDataConnectivity(getOpPackageName());
         } catch (RemoteException e) {
             Log.e(TAG, "Error calling ITelephony#enableDataConnectivity", e);
         }
@@ -10571,7 +10571,7 @@ public class TelephonyManager {
         try {
             ITelephony telephony = getITelephony();
             if (telephony != null)
-                return telephony.disableDataConnectivity();
+                return telephony.disableDataConnectivity(getOpPackageName());
         } catch (RemoteException e) {
             Log.e(TAG, "Error calling ITelephony#disableDataConnectivity", e);
         }
@@ -11931,7 +11931,7 @@ public class TelephonyManager {
             Log.d(TAG, "factoryReset: subId=" + subId);
             ITelephony telephony = getITelephony();
             if (telephony != null) {
-                telephony.factoryReset(subId);
+                telephony.factoryReset(subId, getOpPackageName());
             }
         } catch (RemoteException e) {
         }
@@ -11951,7 +11951,7 @@ public class TelephonyManager {
             Log.d(TAG, "resetSettings: subId=" + getSubId());
             ITelephony telephony = getITelephony();
             if (telephony != null) {
-                telephony.factoryReset(getSubId());
+                telephony.factoryReset(getSubId(), getOpPackageName());
             }
         } catch (RemoteException e) {
         }
@@ -13219,7 +13219,7 @@ public class TelephonyManager {
         try {
             ITelephony service = getITelephony();
             if (service != null) {
-                service.setDataEnabledForReason(subId, reason, enabled);
+                service.setDataEnabledForReason(subId, reason, enabled, getOpPackageName());
             } else {
                 throw new IllegalStateException("telephony service is null.");
             }

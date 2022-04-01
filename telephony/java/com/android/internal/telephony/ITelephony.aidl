@@ -270,13 +270,13 @@ interface ITelephony {
      * Allow mobile data connections.
      */
     @UnsupportedAppUsage
-    boolean enableDataConnectivity();
+    boolean enableDataConnectivity(String callingPackage);
 
     /**
      * Disallow mobile data connections.
      */
     @UnsupportedAppUsage
-    boolean disableDataConnectivity();
+    boolean disableDataConnectivity(String callingPackage);
 
     /**
      * Report whether data connectivity is possible.
@@ -959,8 +959,9 @@ interface ITelephony {
      * @param subId user preferred subId.
      * @param reason the reason the data enable change is taking place
      * @param enable true to turn on, else false
+     * @param callingPackage the package that changed the data enabled state
      */
-     void setDataEnabledForReason(int subId, int reason, boolean enable);
+     void setDataEnabledForReason(int subId, int reason, boolean enable, String callingPackage);
 
     /**
      * Return whether data is enabled for certain reason
@@ -1327,7 +1328,7 @@ interface ITelephony {
      */
     PhoneAccountHandle getPhoneAccountHandleForSubscriptionId(int subscriptionId);
 
-    void factoryReset(int subId);
+    void factoryReset(int subId, String callingPackage);
 
     /**
      * Returns users's current locale based on the SIM.
