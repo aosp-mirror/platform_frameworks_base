@@ -12644,7 +12644,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     if (start >= 0 && start <= end && end <= text.length()) {
                         requestFocusOnNonEditableSelectableText();
                         Selection.setSelection((Spannable) text, start, end);
-                        hideAccessibilitySelectionControllers();
+                        // Make sure selection mode is engaged.
+                        if (mEditor != null) {
+                            mEditor.startSelectionActionModeAsync(false);
+                        }
                         return true;
                     }
                 }
@@ -13787,12 +13790,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             Selection.removeSelection((Spannable) text);
         }
         // Hide all selection controllers used for adjusting selection
-        // since we are doing so explicitly by other means and these
+        // since we are doing so explicitlty by other means and these
         // controllers interact with how selection behaves.
-        hideAccessibilitySelectionControllers();
-    }
-
-    private void hideAccessibilitySelectionControllers() {
         if (mEditor != null) {
             mEditor.hideCursorAndSpanControllers();
             mEditor.stopTextActionMode();
