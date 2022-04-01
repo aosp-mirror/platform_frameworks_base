@@ -54,7 +54,7 @@ public class ProxyOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
     public void registerOnBackInvokedCallback(
             int priority, @NonNull OnBackInvokedCallback callback) {
         if (DEBUG) {
-            Log.v(TAG, String.format("Pending register %s. Actual=%s", callback,
+            Log.v(TAG, String.format("Proxy: register %s. actualDispatcherOwner=%s", callback,
                     mActualDispatcherOwner));
         }
         if (priority < 0) {
