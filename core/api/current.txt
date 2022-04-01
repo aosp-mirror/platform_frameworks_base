@@ -390,6 +390,7 @@ package android {
     field public static final int autoVerify = 16844014; // 0x10104ee
     field public static final int autofillHints = 16844118; // 0x1010556
     field public static final int autofilledHighlight = 16844136; // 0x1010568
+    field public static final int backdropColor;
     field public static final int background = 16842964; // 0x10100d4
     field public static final int backgroundDimAmount = 16842802; // 0x1010032
     field public static final int backgroundDimEnabled = 16843295; // 0x101021f
@@ -1345,7 +1346,7 @@ package android {
     field public static final int shouldDisableView = 16843246; // 0x10101ee
     field public static final int shouldUseDefaultUnfoldTransition = 16844364; // 0x101064c
     field public static final int showAsAction = 16843481; // 0x10102d9
-    field public static final int showBackground;
+    field public static final int showBackdrop;
     field public static final int showClockAndComplications;
     field public static final int showDefault = 16843258; // 0x10101fa
     field public static final int showDividers = 16843561; // 0x1010329
@@ -52277,7 +52278,8 @@ package android.view.animation {
     method protected android.view.animation.Animation clone() throws java.lang.CloneNotSupportedException;
     method public long computeDurationHint();
     method protected void ensureInterpolator();
-    method @ColorInt public int getBackgroundColor();
+    method @ColorInt public int getBackdropColor();
+    method @Deprecated @ColorInt public int getBackgroundColor();
     method @Deprecated public boolean getDetachWallpaper();
     method public long getDuration();
     method public boolean getFillAfter();
@@ -52286,7 +52288,7 @@ package android.view.animation {
     method public int getRepeatCount();
     method public int getRepeatMode();
     method protected float getScaleFactor();
-    method public boolean getShowBackground();
+    method public boolean getShowBackdrop();
     method public long getStartOffset();
     method public long getStartTime();
     method public boolean getTransformation(long, android.view.animation.Transformation);
@@ -52302,7 +52304,8 @@ package android.view.animation {
     method public void restrictDuration(long);
     method public void scaleCurrentDuration(float);
     method public void setAnimationListener(android.view.animation.Animation.AnimationListener);
-    method public void setBackgroundColor(@ColorInt int);
+    method public void setBackdropColor(@ColorInt int);
+    method @Deprecated public void setBackgroundColor(@ColorInt int);
     method @Deprecated public void setDetachWallpaper(boolean);
     method public void setDuration(long);
     method public void setFillAfter(boolean);
@@ -52312,7 +52315,7 @@ package android.view.animation {
     method public void setInterpolator(android.view.animation.Interpolator);
     method public void setRepeatCount(int);
     method public void setRepeatMode(int);
-    method public void setShowBackground(boolean);
+    method public void setShowBackdrop(boolean);
     method public void setStartOffset(long);
     method public void setStartTime(long);
     method public void setZAdjustment(int);
