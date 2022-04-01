@@ -127,7 +127,6 @@ public class BiometricsUnlockControllerTest extends SysuiTestCase {
         when(mAuthController.isUdfpsFingerDown()).thenReturn(false);
         when(mKeyguardBypassController.canPlaySubtleWindowAnimations()).thenReturn(true);
         mDependency.injectTestDependency(NotificationMediaManager.class, mMediaManager);
-        res.addOverride(com.android.internal.R.integer.config_wakeUpDelayDoze, 0);
         mBiometricUnlockController = new BiometricUnlockController(mDozeScrimController,
                 mKeyguardViewMediator, mScrimController, mShadeController,
                 mNotificationShadeWindowController, mKeyguardStateController, mHandler,
