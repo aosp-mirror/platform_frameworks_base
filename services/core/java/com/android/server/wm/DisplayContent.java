@@ -6369,10 +6369,11 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
          * Notifies the remote insets controller that the top focused window has changed.
          *
          * @param packageName The name of the package that is open in the top focused window.
+         * @param requestedVisibilities The insets visibilities requested by the focussed window.
          */
-        void topFocusedWindowChanged(String packageName) {
+        void topFocusedWindowChanged(String packageName, InsetsVisibilities requestedVisibilities) {
             try {
-                mRemoteInsetsController.topFocusedWindowChanged(packageName);
+                mRemoteInsetsController.topFocusedWindowChanged(packageName, requestedVisibilities);
             } catch (RemoteException e) {
                 Slog.w(TAG, "Failed to deliver package in top focused window change", e);
             }
