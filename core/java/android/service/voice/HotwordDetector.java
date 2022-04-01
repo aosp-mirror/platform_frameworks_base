@@ -32,6 +32,8 @@ import android.os.PersistableBundle;
 import android.os.SharedMemory;
 import android.util.AndroidException;
 
+import java.io.PrintWriter;
+
 /**
  * Basic functionality for hotword detectors.
  *
@@ -174,6 +176,13 @@ public interface HotwordDetector {
     /**
      * @hide
      */
+    default boolean isUsingHotwordDetectionService() {
+        throw new UnsupportedOperationException("Not implemented. Must override in a subclass.");
+    }
+
+    /**
+     * @hide
+     */
     static String detectorTypeToString(int detectorType) {
         switch (detectorType) {
             case DETECTOR_TYPE_NORMAL:
@@ -185,6 +194,11 @@ public interface HotwordDetector {
             default:
                 return Integer.toString(detectorType);
         }
+    }
+
+    /** @hide */
+    default void dump(String prefix, PrintWriter pw) {
+        throw new UnsupportedOperationException("Not implemented. Must override in a subclass.");
     }
 
     /**

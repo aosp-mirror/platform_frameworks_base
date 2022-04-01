@@ -18,6 +18,7 @@ package android.service.voice;
 
 import static android.Manifest.permission.CAPTURE_AUDIO_HOTWORD;
 import static android.Manifest.permission.RECORD_AUDIO;
+import static android.service.voice.VoiceInteractionService.MULTIPLE_ACTIVE_HOTWORD_DETECTORS;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
@@ -51,6 +52,7 @@ import android.os.ParcelFileDescriptor;
 import android.os.PersistableBundle;
 import android.os.RemoteException;
 import android.os.SharedMemory;
+import android.text.TextUtils;
 import android.util.Log;
 import android.util.Slog;
 
@@ -67,6 +69,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -1439,16 +1442,16 @@ public class AlwaysOnHotwordDetector extends AbstractHotwordDetector {
             mAvailability = STATE_INVALID;
             mIsAvailabilityOverriddenByTestApi = false;
             notifyStateChangedLocked();
-
-            if (mSupportHotwordDetectionService) {
-                try {
-                    mModelManagementService.shutdownHotwordDetectionService();
-                } catch (RemoteException e) {
-                    throw e.rethrowFromSystemServer();
-                }
-            }
         }
         super.destroy();
+    }
+
+    /**
+     * @hide
+     */
+    @Override
+    public boolean isUsingHotwordDetectionService() {
+        return mSupportHotwordDetectionService;
     }
 
     /**
@@ -1820,7 +1823,26 @@ public class AlwaysOnHotwordDetector extends AbstractHotwordDetector {
         }
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        if (CompatChanges.isChangeEnabled(MULTIPLE_ACTIVE_HOTWORD_DETECTORS)) {
+            if (!(obj instanceof AlwaysOnHotwordDetector)) {
+                return false;
+            }
+            AlwaysOnHotwordDetector other = (AlwaysOnHotwordDetector) obj;
+            return TextUtils.equals(mText, other.mText) && mLocale.equals(other.mLocale);
+        }
+
+        return super.equals(obj);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(mText, mLocale);
+    }
+
     /** @hide */
+    @Override
     public void dump(String prefix, PrintWriter pw) {
         synchronized (mLock) {
             pw.print(prefix); pw.print("Text="); pw.println(mText);
