@@ -552,18 +552,23 @@ public abstract class PackageManagerInternal {
     /**
      * Set which overlay to use for a package.
      * @param userId The user for which to update the overlays.
-     * @param targetPackageName The package name of the package for which to update the overlays.
-     * @param overlayPaths  The complete list of overlay paths that should be enabled for
+     * @param pendingChanges is a map to describe all overlay targets and their related overlay
+     *                      paths. Its key is the overlay target package and its value is the
+     *                      complete list of overlay paths that should be enabled for
      *                      the target. Previously enabled overlays not specified in the list
      *                      will be disabled. Pass in null or empty paths to disable all overlays.
      *                      The order of the items is significant if several overlays modify the
-     *                      same resource.
+     *                      same resource. To pass the concrete ArrayMap type is to reduce the
+     *                      overheads of system server.
      * @param outUpdatedPackageNames An output list that contains the package names of packages
      *                               affected by the update of enabled overlays.
-     * @return true if all packages names were known by the package manager, false otherwise
+     * @param outInvalidPackageNames An output list that contains the package names of packages
+     *                               are not valid.
      */
-    public abstract boolean setEnabledOverlayPackages(int userId, String targetPackageName,
-            @Nullable OverlayPaths overlayPaths, Set<String> outUpdatedPackageNames);
+    public abstract void setEnabledOverlayPackages(int userId,
+            @NonNull ArrayMap<String, OverlayPaths> pendingChanges,
+            @NonNull Set<String> outUpdatedPackageNames,
+            @NonNull Set<String> outInvalidPackageNames);
 
     /**
      * Resolves an activity intent, allowing instant apps to be resolved.

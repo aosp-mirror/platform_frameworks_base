@@ -6246,11 +6246,12 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         }
 
         @Override
-        public boolean setEnabledOverlayPackages(int userId, @NonNull String targetPackageName,
-                @Nullable OverlayPaths overlayPaths,
-                @NonNull Set<String> outUpdatedPackageNames) {
-            return PackageManagerService.this.setEnabledOverlayPackages(userId, targetPackageName,
-                    overlayPaths, outUpdatedPackageNames);
+        public void setEnabledOverlayPackages(int userId,
+                @NonNull ArrayMap<String, OverlayPaths> pendingChanges,
+                @NonNull Set<String> outUpdatedPackageNames,
+                @NonNull Set<String> outInvalidPackageNames) {
+            PackageManagerService.this.setEnabledOverlayPackages(userId,
+                    pendingChanges, outUpdatedPackageNames, outInvalidPackageNames);
         }
 
         @Override
@@ -6458,85 +6459,119 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         }
     }
 
-    private boolean setEnabledOverlayPackages(@UserIdInt int userId,
-            @NonNull String targetPackageName, @Nullable OverlayPaths newOverlayPaths,
-            @NonNull Set<String> outUpdatedPackageNames) {
+    private void setEnabledOverlayPackages(@UserIdInt int userId,
+            @NonNull ArrayMap<String, OverlayPaths> pendingChanges,
+            @NonNull Set<String> outUpdatedPackageNames,
+            @NonNull Set<String> outInvalidPackageNames) {
+        final ArrayMap<String, ArrayMap<String, ArraySet<String>>>
+                targetPkgToLibNameToModifiedDependents = new ArrayMap<>();
+        final int numberOfPendingChanges = pendingChanges.size();
+
         synchronized (mOverlayPathsLock) {
-            final ArrayMap<String, ArraySet<String>> libNameToModifiedDependents = new ArrayMap<>();
             Computer computer = snapshotComputer();
-            final PackageStateInternal packageState = computer.getPackageStateInternal(
-                    targetPackageName);
-            final AndroidPackage targetPkg = packageState == null ? null : packageState.getPkg();
-            if (targetPackageName == null || targetPkg == null) {
-                Slog.e(TAG, "failed to find package " + targetPackageName);
-                return false;
-            }
+            for (int i = 0; i < numberOfPendingChanges; i++) {
+                final String targetPackageName = pendingChanges.keyAt(i);
+                final OverlayPaths newOverlayPaths = pendingChanges.valueAt(i);
+                final PackageStateInternal packageState = computer.getPackageStateInternal(
+                        targetPackageName);
+                final AndroidPackage targetPkg =
+                        packageState == null ? null : packageState.getPkg();
+                if (targetPackageName == null || targetPkg == null) {
+                    Slog.e(TAG, "failed to find package " + targetPackageName);
+                    outInvalidPackageNames.add(targetPackageName);
+                    continue;
+                }
 
-            if (Objects.equals(packageState.getUserStateOrDefault(userId).getOverlayPaths(),
-                    newOverlayPaths)) {
-                return true;
-            }
+                if (Objects.equals(packageState.getUserStateOrDefault(userId).getOverlayPaths(),
+                        newOverlayPaths)) {
+                    continue;
+                }
 
-            if (targetPkg.getLibraryNames() != null) {
-                // Set the overlay paths for dependencies of the shared library.
-                for (final String libName : targetPkg.getLibraryNames()) {
-                    ArraySet<String> modifiedDependents = null;
+                if (targetPkg.getLibraryNames() != null) {
+                    // Set the overlay paths for dependencies of the shared library.
+                    for (final String libName : targetPkg.getLibraryNames()) {
+                        ArraySet<String> modifiedDependents = null;
 
-                    final SharedLibraryInfo info = computer.getSharedLibraryInfo(libName,
-                            SharedLibraryInfo.VERSION_UNDEFINED);
-                    if (info == null) {
-                        continue;
-                    }
-                    final List<VersionedPackage> dependents = computer
-                            .getPackagesUsingSharedLibrary(info, 0, Process.SYSTEM_UID, userId);
-                    if (dependents == null) {
-                        continue;
-                    }
-                    for (final VersionedPackage dependent : dependents) {
-                        final PackageStateInternal dependentState =
-                                computer.getPackageStateInternal(dependent.getPackageName());
-                        if (dependentState == null) {
+                        final SharedLibraryInfo info = computer.getSharedLibraryInfo(libName,
+                                SharedLibraryInfo.VERSION_UNDEFINED);
+                        if (info == null) {
                             continue;
                         }
-                        if (!Objects.equals(dependentState.getUserStateOrDefault(userId)
-                                .getSharedLibraryOverlayPaths()
-                                .get(libName), newOverlayPaths)) {
-                            String dependentPackageName = dependent.getPackageName();
-                            modifiedDependents = ArrayUtils.add(modifiedDependents,
-                                    dependentPackageName);
-                            outUpdatedPackageNames.add(dependentPackageName);
+                        final List<VersionedPackage> dependents =
+                                computer.getPackagesUsingSharedLibrary(info, 0, Process.SYSTEM_UID,
+                                        userId);
+                        if (dependents == null) {
+                            continue;
+                        }
+                        for (final VersionedPackage dependent : dependents) {
+                            final PackageStateInternal dependentState =
+                                    computer.getPackageStateInternal(dependent.getPackageName());
+                            if (dependentState == null) {
+                                continue;
+                            }
+                            if (!Objects.equals(dependentState.getUserStateOrDefault(userId)
+                                    .getSharedLibraryOverlayPaths()
+                                    .get(libName), newOverlayPaths)) {
+                                String dependentPackageName = dependent.getPackageName();
+                                modifiedDependents = ArrayUtils.add(modifiedDependents,
+                                        dependentPackageName);
+                                outUpdatedPackageNames.add(dependentPackageName);
+                            }
+                        }
+
+                        if (modifiedDependents != null) {
+                            ArrayMap<String, ArraySet<String>> libNameToModifiedDependents =
+                                    targetPkgToLibNameToModifiedDependents.get(
+                                            targetPackageName);
+                            if (libNameToModifiedDependents == null) {
+                                libNameToModifiedDependents = new ArrayMap<>();
+                                targetPkgToLibNameToModifiedDependents.put(targetPackageName,
+                                        libNameToModifiedDependents);
+                            }
+                            libNameToModifiedDependents.put(libName, modifiedDependents);
                         }
                     }
-
-                    if (modifiedDependents != null) {
-                        libNameToModifiedDependents.put(libName, modifiedDependents);
-                    }
                 }
+
+                outUpdatedPackageNames.add(targetPackageName);
             }
 
-            outUpdatedPackageNames.add(targetPackageName);
-
             commitPackageStateMutation(null, mutator -> {
-                mutator.forPackage(targetPackageName)
-                        .userState(userId)
-                        .setOverlayPaths(newOverlayPaths);
+                for (int i = 0; i < numberOfPendingChanges; i++) {
+                    final String targetPackageName = pendingChanges.keyAt(i);
+                    final OverlayPaths newOverlayPaths = pendingChanges.valueAt(i);
 
-                for (int mapIndex = 0; mapIndex < libNameToModifiedDependents.size(); mapIndex++) {
-                    String libName = libNameToModifiedDependents.keyAt(mapIndex);
-                    ArraySet<String> modifiedDependents =
-                            libNameToModifiedDependents.valueAt(mapIndex);
-                    for (int setIndex = 0; setIndex < modifiedDependents.size(); setIndex++) {
-                        mutator.forPackage(modifiedDependents.valueAt(setIndex))
-                                .userState(userId)
-                                .setOverlayPathsForLibrary(libName, newOverlayPaths);
+                    if (!outUpdatedPackageNames.contains(targetPackageName)) {
+                        continue;
+                    }
+
+                    mutator.forPackage(targetPackageName)
+                            .userState(userId)
+                            .setOverlayPaths(newOverlayPaths);
+
+                    final ArrayMap<String, ArraySet<String>> libNameToModifiedDependents =
+                            targetPkgToLibNameToModifiedDependents.get(
+                                    targetPackageName);
+                    if (libNameToModifiedDependents == null) {
+                        continue;
+                    }
+
+                    for (int mapIndex = 0; mapIndex < libNameToModifiedDependents.size();
+                            mapIndex++) {
+                        String libName = libNameToModifiedDependents.keyAt(mapIndex);
+                        ArraySet<String> modifiedDependents =
+                                libNameToModifiedDependents.valueAt(mapIndex);
+                        for (int setIndex = 0; setIndex < modifiedDependents.size(); setIndex++) {
+                            mutator.forPackage(modifiedDependents.valueAt(setIndex))
+                                    .userState(userId)
+                                    .setOverlayPathsForLibrary(libName, newOverlayPaths);
+                        }
                     }
                 }
             });
         }
 
         invalidatePackageInfoCache();
-
-        return true;
     }
 
     private void enforceAdjustRuntimePermissionsPolicyOrUpgradeRuntimePermissions(
