@@ -5716,8 +5716,8 @@
 
     <!-- Title for the log access confirmation dialog. [CHAR LIMIT=NONE] -->
     <string name="log_access_confirmation_title">Allow <xliff:g id="log_access_app_name" example="Example App">%s</xliff:g> to access all device logs?</string>
-    <!-- Label for the allow button on the log access confirmation dialog. [CHAR LIMIT=20] -->
-    <string name="log_access_confirmation_allow">Only this time</string>
+    <!-- Label for the allow button on the log access confirmation dialog. [CHAR LIMIT=40] -->
+    <string name="log_access_confirmation_allow">Allow one-time access</string>
     <!-- Label for the deny button on the log access confirmation dialog. [CHAR LIMIT=20] -->
     <string name="log_access_confirmation_deny">Don\u2019t allow</string>
 
