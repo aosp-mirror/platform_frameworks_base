@@ -149,7 +149,7 @@ class MediaResumeListenerTest : SysuiTestCase() {
                 resumeBrowserFactory, dumpManager, clock)
         listener.setManager(mediaDataManager)
         verify(broadcastDispatcher, never()).registerReceiver(eq(listener.userChangeReceiver),
-            any(), any(), any(), anyInt())
+            any(), any(), any(), anyInt(), any())
 
         // When data is loaded, we do NOT execute or update anything
         listener.onMediaDataLoaded(KEY, OLD_KEY, data)
@@ -272,7 +272,7 @@ class MediaResumeListenerTest : SysuiTestCase() {
         // Make sure broadcast receiver is registered
         resumeListener.setManager(mediaDataManager)
         verify(broadcastDispatcher).registerReceiver(eq(resumeListener.userChangeReceiver),
-                any(), any(), any(), anyInt())
+                any(), any(), any(), anyInt(), any())
 
         // When we get an unlock event
         val intent = Intent(Intent.ACTION_USER_UNLOCKED)
