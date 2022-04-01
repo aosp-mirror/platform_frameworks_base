@@ -39,6 +39,7 @@ import com.android.server.am.AppBatteryExemptionTracker.UidBatteryStates;
 import com.android.server.am.AppBatteryTracker.AppBatteryPolicy;
 import com.android.server.am.AppBatteryTracker.BatteryUsage;
 import com.android.server.am.AppBatteryTracker.ImmutableBatteryUsage;
+import com.android.server.am.AppRestrictionController.TrackerType;
 import com.android.server.am.BaseAppStateTimeEvents.BaseTimeEvent;
 import com.android.server.am.BaseAppStateTracker.Injector;
 import com.android.server.am.BaseAppStateTracker.StateListener;
@@ -82,6 +83,11 @@ final class AppBatteryExemptionTracker
             Object outerContext) {
         super(context, controller, injector, outerContext);
         mInjector.setPolicy(new AppBatteryExemptionPolicy(mInjector, this));
+    }
+
+    @Override
+    @TrackerType int getType() {
+        return AppRestrictionController.TRACKER_TYPE_BATTERY_EXEMPTION;
     }
 
     @Override
