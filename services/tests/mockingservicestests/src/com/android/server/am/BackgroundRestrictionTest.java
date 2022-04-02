@@ -3056,6 +3056,11 @@ public final class BackgroundRestrictionTest {
         long currentTimeMillis() {
             return mCurrentTimeMillis;
         }
+
+        @Override
+        boolean isTest() {
+            return true;
+        }
     }
 
     private class TestBaseTrackerInjector<T extends BaseAppStatePolicy>
