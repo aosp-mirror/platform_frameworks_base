@@ -8071,7 +8071,11 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         final boolean orientationRequested = requestedOrientation != ORIENTATION_UNDEFINED;
         final int orientation = orientationRequested
                 ? requestedOrientation
-                : newParentConfiguration.orientation;
+                // We should use the original orientation of the activity when possible to avoid
+                // forcing the activity in the opposite orientation.
+                : mCompatDisplayInsets.mOriginalRequestedOrientation != ORIENTATION_UNDEFINED
+                        ? mCompatDisplayInsets.mOriginalRequestedOrientation
+                        : newParentConfiguration.orientation;
         int rotation = newParentConfiguration.windowConfiguration.getRotation();
         final boolean isFixedToUserRotation = mDisplayContent == null
                 || mDisplayContent.getDisplayRotation().isFixedToUserRotation();
@@ -9339,8 +9343,10 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      * compatibility mode activity compute the configuration without relying on its current display.
      */
     static class CompatDisplayInsets {
-        /** The original rotation the compat insets were computed in */
+        /** The original rotation the compat insets were computed in. */
         final @Rotation int mOriginalRotation;
+        /** The original requested orientation for the activity. */
+        final @Configuration.Orientation int mOriginalRequestedOrientation;
         /** The container width on rotation 0. */
         private final int mWidth;
         /** The container height on rotation 0. */
@@ -9369,6 +9375,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 @Nullable Rect fixedOrientationBounds) {
             mOriginalRotation = display.getRotation();
             mIsFloating = container.getWindowConfiguration().tasksAreFloating();
+            mOriginalRequestedOrientation = container.getRequestedConfigurationOrientation();
             if (mIsFloating) {
                 final Rect containerBounds = container.getWindowConfiguration().getBounds();
                 mWidth = containerBounds.width();
