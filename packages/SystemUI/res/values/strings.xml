@@ -338,7 +338,7 @@
     <!-- Message shown when a biometric is authenticated, waiting for the user to confirm authentication [CHAR LIMIT=40]-->
     <string name="biometric_dialog_tap_confirm">Tap Confirm to complete</string>
     <!-- Message shown when a biometric has authenticated with a user's face and is waiting for the user to confirm authentication [CHAR LIMIT=60]-->
-    <string name="biometric_dialog_tap_confirm_with_face">Unlocked by face. Press to continue.</string>
+    <string name="biometric_dialog_tap_confirm_with_face">Unlocked by face. Press the unlock icon to continue.</string>
     <!-- Talkback string when a biometric is authenticated [CHAR LIMIT=NONE] -->
     <string name="biometric_dialog_authenticated">Authenticated</string>
 
@@ -796,8 +796,11 @@
     <!-- Message shown when lock screen is tapped or face authentication fails. [CHAR LIMIT=60] -->
     <string name="keyguard_unlock">Swipe up to open</string>
 
-    <!-- Message shown when lock screen is tapped or face authentication fails. Provides extra instructions for how the user can enter their device (unlock or proceed to home) [CHAR LIMIT=60] -->
-    <string name="keyguard_unlock_press">Press to open</string>
+    <!-- Message shown when lock screen is unlocked (ie: by trust agent) and the user taps the empty space on the lock screen and UDFPS is supported. Provides extra instructions for how the user can enter their device [CHAR LIMIT=60] -->
+    <string name="keyguard_unlock_press">Press the unlock icon to open</string>
+
+    <!-- Message shown when non-bypass face authentication succeeds and UDFPS is supported. Provides extra instructions for how the user can enter their device [CHAR LIMIT=60] -->
+    <string name="keyguard_face_successful_unlock_press">Unlocked by face. Press the unlock icon to open.</string>
 
     <!-- Message shown when face authentication fails and the pin pad is visible. [CHAR LIMIT=60] -->
     <string name="keyguard_retry">Swipe up to try again</string>
