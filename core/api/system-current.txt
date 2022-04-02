@@ -5366,7 +5366,7 @@ package android.hardware.usb {
     method @CheckResult @RequiresPermission(android.Manifest.permission.MANAGE_USB) public int enableUsbData(boolean);
     method @CheckResult @RequiresPermission(android.Manifest.permission.MANAGE_USB) public int enableUsbDataWhileDocked();
     method @Nullable @RequiresPermission(android.Manifest.permission.MANAGE_USB) public android.hardware.usb.UsbPortStatus getStatus();
-    method @CheckResult @RequiresPermission(android.Manifest.permission.MANAGE_USB) public int resetUsbPort();
+    method @CheckResult @RequiresPermission(android.Manifest.permission.MANAGE_USB) public void resetUsbPort(@NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<java.lang.Integer>);
     method @RequiresPermission(android.Manifest.permission.MANAGE_USB) public void setRoles(int, int);
     field public static final int ENABLE_LIMIT_POWER_TRANSFER_ERROR_INTERNAL = 1; // 0x1
     field public static final int ENABLE_LIMIT_POWER_TRANSFER_ERROR_NOT_SUPPORTED = 2; // 0x2
@@ -5384,6 +5384,11 @@ package android.hardware.usb {
     field public static final int ENABLE_USB_DATA_WHILE_DOCKED_ERROR_OTHER = 5; // 0x5
     field public static final int ENABLE_USB_DATA_WHILE_DOCKED_ERROR_PORT_MISMATCH = 3; // 0x3
     field public static final int ENABLE_USB_DATA_WHILE_DOCKED_SUCCESS = 0; // 0x0
+    field public static final int RESET_USB_PORT_ERROR_INTERNAL = 1; // 0x1
+    field public static final int RESET_USB_PORT_ERROR_NOT_SUPPORTED = 2; // 0x2
+    field public static final int RESET_USB_PORT_ERROR_OTHER = 4; // 0x4
+    field public static final int RESET_USB_PORT_ERROR_PORT_MISMATCH = 3; // 0x3
+    field public static final int RESET_USB_PORT_SUCCESS = 0; // 0x0
   }
 
   public final class UsbPortStatus implements android.os.Parcelable {
