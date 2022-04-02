@@ -274,7 +274,7 @@ public final class UsbPortAidl implements UsbPortHal {
     }
 
     @Override
-    public boolean resetUsbPort(String portName, long operationID,
+    public void resetUsbPort(String portName, long operationID,
             IUsbOperationInternal callback) {
         Objects.requireNonNull(portName);
         Objects.requireNonNull(callback);
@@ -286,7 +286,6 @@ public final class UsbPortAidl implements UsbPortHal {
                             "resetUsbPort: Proxy is null. Retry !opID:"
                             + operationID);
                     callback.onOperationComplete(USB_OPERATION_ERROR_INTERNAL);
-                    return false;
                 }
                 while (sCallbacks.get(key) != null) {
                     key = ThreadLocalRandom.current().nextInt();
@@ -304,16 +303,13 @@ public final class UsbPortAidl implements UsbPortHal {
                             + portName + "opId:" + operationID, e);
                     callback.onOperationComplete(USB_OPERATION_ERROR_INTERNAL);
                     sCallbacks.remove(key);
-                    return false;
                 }
             } catch (RemoteException e) {
                 logAndPrintException(mPw,
                         "resetUsbPort: Failed to call onOperationComplete portID="
                         + portName + "opID:" + operationID, e);
                 sCallbacks.remove(key);
-                return false;
             }
-            return true;
         }
     }
 
