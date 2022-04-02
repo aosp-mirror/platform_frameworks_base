@@ -65,7 +65,6 @@ import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.LockscreenShadeTransitionController;
 import com.android.systemui.statusbar.VibratorHelper;
-import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.statusbar.phone.SystemUIDialogManager;
 import com.android.systemui.statusbar.phone.UnlockedScreenOffAnimationController;
@@ -124,7 +123,6 @@ public class UdfpsController implements DozeReceiver {
     @NonNull private final AccessibilityManager mAccessibilityManager;
     @NonNull private final LockscreenShadeTransitionController mLockscreenShadeTransitionController;
     @Nullable private final UdfpsHbmProvider mHbmProvider;
-    @NonNull private final KeyguardBypassController mKeyguardBypassController;
     @NonNull private final ConfigurationController mConfigurationController;
     @NonNull private final SystemClock mSystemClock;
     @NonNull private final UnlockedScreenOffAnimationController
@@ -533,7 +531,6 @@ public class UdfpsController implements DozeReceiver {
             @NonNull UdfpsHapticsSimulator udfpsHapticsSimulator,
             @NonNull Optional<UdfpsHbmProvider> hbmProvider,
             @NonNull KeyguardStateController keyguardStateController,
-            @NonNull KeyguardBypassController keyguardBypassController,
             @NonNull DisplayManager displayManager,
             @Main Handler mainHandler,
             @NonNull ConfigurationController configurationController,
@@ -565,7 +562,6 @@ public class UdfpsController implements DozeReceiver {
         mHbmProvider = hbmProvider.orElse(null);
         screenLifecycle.addObserver(mScreenObserver);
         mScreenOn = screenLifecycle.getScreenState() == ScreenLifecycle.SCREEN_ON;
-        mKeyguardBypassController = keyguardBypassController;
         mConfigurationController = configurationController;
         mSystemClock = systemClock;
         mUnlockedScreenOffAnimationController = unlockedScreenOffAnimationController;
@@ -795,11 +791,6 @@ public class UdfpsController implements DozeReceiver {
             Log.w(TAG, "Mismatched fingerDown: " + requestId
                     + " current: " + mOverlay.getRequestId());
             return;
-        }
-
-        if (mOverlay.getAnimationViewController() instanceof UdfpsKeyguardViewController
-                && !mStatusBarStateController.isDozing()) {
-            mKeyguardBypassController.setUserHasDeviceEntryIntent(true);
         }
 
         if (!mOnFingerDown) {
