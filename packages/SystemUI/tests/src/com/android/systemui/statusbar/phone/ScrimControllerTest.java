@@ -1460,6 +1460,24 @@ public class ScrimControllerTest extends SysuiTestCase {
                 .isEqualTo(ScrimState.KEYGUARD.getBehindTint());
     }
 
+    @Test
+    public void testHidesScrimFlickerInActivity() {
+        mScrimController.setKeyguardOccluded(true);
+        mScrimController.transitionTo(ScrimState.KEYGUARD);
+        finishAnimationsImmediately();
+        assertScrimAlpha(Map.of(
+                mScrimInFront, TRANSPARENT,
+                mScrimBehind, TRANSPARENT,
+                mNotificationsScrim, TRANSPARENT));
+
+        mScrimController.transitionTo(ScrimState.SHADE_LOCKED);
+        finishAnimationsImmediately();
+        assertScrimAlpha(Map.of(
+                mScrimInFront, TRANSPARENT,
+                mScrimBehind, TRANSPARENT,
+                mNotificationsScrim, TRANSPARENT));
+    }
+
     private void assertAlphaAfterExpansion(ScrimView scrim, float expectedAlpha, float expansion) {
         mScrimController.setRawPanelExpansionFraction(expansion);
         finishAnimationsImmediately();
