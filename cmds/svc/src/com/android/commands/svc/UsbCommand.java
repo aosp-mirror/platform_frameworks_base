@@ -26,6 +26,8 @@ import android.os.Looper;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 
+import java.util.function.Consumer;
+import java.util.concurrent.Executor;
 import java.util.List;
 
 public class UsbCommand extends Svc.Command {
@@ -80,6 +82,13 @@ public class UsbCommand extends Svc.Command {
             UsbManager usbManager = context.getSystemService(UsbManager.class);
             IUsbManager usbMgr = IUsbManager.Stub.asInterface(ServiceManager.getService(
                     Context.USB_SERVICE));
+
+            Executor executor = context.getMainExecutor();
+            Consumer<Integer> consumer = new Consumer<Integer>(){
+                public void accept(Integer status){
+                    System.out.println("Consumer status: " + status);
+                };
+            };
 
             if ("setFunctions".equals(args[1])) {
                 try {
@@ -179,7 +188,7 @@ public class UsbCommand extends Svc.Command {
                         if (port != null && portStatus.isConnected()) {
                             System.err.println(
                                     "Reset the USB port: port" + portNum);
-                            port.resetUsbPort();
+                            port.resetUsbPort(executor, consumer);
                         } else {
                             System.err.println(
                                     "There is no available reset USB port");
