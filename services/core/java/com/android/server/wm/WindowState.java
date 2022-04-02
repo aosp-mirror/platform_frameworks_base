@@ -33,6 +33,7 @@ import static android.view.InsetsState.ITYPE_INVALID;
 import static android.view.InsetsState.ITYPE_NAVIGATION_BAR;
 import static android.view.SurfaceControl.Transaction;
 import static android.view.SurfaceControl.getGlobalTransaction;
+import static android.view.ViewRootImpl.LOCAL_LAYOUT;
 import static android.view.ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_CONTENT;
 import static android.view.ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_FRAME;
 import static android.view.ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_REGION;
@@ -249,6 +250,7 @@ import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
 import android.window.ClientWindowFrames;
 import android.window.IOnBackInvokedCallback;
+import android.window.WindowOnBackInvokedDispatcher;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.policy.KeyInterceptionInfo;
@@ -1083,9 +1085,10 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
      */
     void setOnBackInvokedCallback(
             @Nullable IOnBackInvokedCallback onBackInvokedCallback, int priority) {
-        ProtoLog.d(WM_DEBUG_BACK_PREVIEW, "%s: Setting back callback %s. Client IWindow %s",
-                this, onBackInvokedCallback, mClient);
-        if (priority >= 0) {
+        ProtoLog.d(WM_DEBUG_BACK_PREVIEW, "WindowState: Setting back callback %s (priority: %d) "
+                        + "(Client IWindow: %s). (WindowState: %s)",
+                onBackInvokedCallback, priority, mClient, this);
+        if (priority >= WindowOnBackInvokedDispatcher.PRIORITY_DEFAULT) {
             mApplicationOnBackInvokedCallback = onBackInvokedCallback;
             mSystemOnBackInvokedCallback = null;
         } else {
@@ -1357,31 +1360,36 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         return mActivityRecord != null && mActivityRecord.mWaitForEnteringPinnedMode;
     }
 
-    // TODO(b/161810301): Make the frame be passed from the client side.
-    void setFrames(ClientWindowFrames clientWindowFrames) {
-        mHaveFrame = true;
-
+    void setFrames(ClientWindowFrames clientWindowFrames, int requestedWidth, int requestedHeight) {
         final WindowFrames windowFrames = mWindowFrames;
         mTmpRect.set(windowFrames.mParentFrame);
-        windowFrames.mDisplayFrame.set(clientWindowFrames.displayFrame);
-        windowFrames.mParentFrame.set(clientWindowFrames.parentFrame);
-        windowFrames.mFrame.set(clientWindowFrames.frame);
+
+        if (LOCAL_LAYOUT) {
+            windowFrames.mCompatFrame.set(clientWindowFrames.frame);
+
+            windowFrames.mFrame.set(clientWindowFrames.frame);
+            windowFrames.mDisplayFrame.set(clientWindowFrames.displayFrame);
+            windowFrames.mParentFrame.set(clientWindowFrames.parentFrame);
+            if (hasCompatScale()) {
+                // The frames sent from the client need to be adjusted to the real coordinate space.
+                windowFrames.mFrame.scale(mGlobalScale);
+                windowFrames.mDisplayFrame.scale(mGlobalScale);
+                windowFrames.mParentFrame.scale(mGlobalScale);
+            }
+        } else {
+            windowFrames.mDisplayFrame.set(clientWindowFrames.displayFrame);
+            windowFrames.mParentFrame.set(clientWindowFrames.parentFrame);
+            windowFrames.mFrame.set(clientWindowFrames.frame);
+
+            windowFrames.mCompatFrame.set(windowFrames.mFrame);
+            if (hasCompatScale()) {
+                // Also, the scaled frame that we report to the app needs to be adjusted to be in
+                // its coordinate space.
+                windowFrames.mCompatFrame.scale(mInvGlobalScale);
+            }
+        }
         windowFrames.setParentFrameWasClippedByDisplayCutout(
                 clientWindowFrames.isParentFrameClippedByDisplayCutout);
-
-        if (mRequestedWidth != mLastRequestedWidth || mRequestedHeight != mLastRequestedHeight
-                || !mTmpRect.equals(windowFrames.mParentFrame)) {
-            mLastRequestedWidth = mRequestedWidth;
-            mLastRequestedHeight = mRequestedHeight;
-            windowFrames.setContentChanged(true);
-        }
-
-        windowFrames.mCompatFrame.set(windowFrames.mFrame);
-        if (hasCompatScale()) {
-            // Also the scaled frame that we report to the app needs to be
-            // adjusted to be in its coordinate space.
-            windowFrames.mCompatFrame.scale(mInvGlobalScale);
-        }
 
         // Calculate relative frame
         windowFrames.mRelFrame.set(windowFrames.mFrame);
@@ -1399,6 +1407,13 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         windowFrames.mRelFrame.offsetTo(windowFrames.mFrame.left - parentLeft,
                 windowFrames.mFrame.top - parentTop);
 
+        if (requestedWidth != mLastRequestedWidth || requestedHeight != mLastRequestedHeight
+                || !mTmpRect.equals(windowFrames.mParentFrame)) {
+            mLastRequestedWidth = requestedWidth;
+            mLastRequestedHeight = requestedHeight;
+            windowFrames.setContentChanged(true);
+        }
+
         if (mAttrs.type == TYPE_DOCK_DIVIDER) {
             if (!windowFrames.mFrame.equals(windowFrames.mLastFrame)) {
                 mMovedByResize = true;
@@ -1414,6 +1429,19 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         }
 
         updateSourceFrame(windowFrames.mFrame);
+
+        if (LOCAL_LAYOUT) {
+            if (!mHaveFrame) {
+                // The first frame should not be considered as moved.
+                updateLastFrames();
+            }
+        }
+
+        if (mActivityRecord != null && !mIsChildWindow) {
+            mActivityRecord.layoutLetterbox(this);
+        }
+        mSurfacePlacementNeeded = true;
+        mHaveFrame = true;
     }
 
     void updateSourceFrame(Rect winFrame) {

@@ -27,6 +27,7 @@ import static android.app.ActivityManager.RESTRICTION_LEVEL_HIBERNATION;
 import static android.app.ActivityManager.RESTRICTION_LEVEL_MAX;
 import static android.app.ActivityManager.RESTRICTION_LEVEL_RESTRICTED_BUCKET;
 import static android.app.ActivityManager.RESTRICTION_LEVEL_UNKNOWN;
+import static android.app.ActivityManager.RESTRICTION_LEVEL_UNRESTRICTED;
 import static android.app.ActivityManager.UID_OBSERVER_ACTIVE;
 import static android.app.ActivityManager.UID_OBSERVER_GONE;
 import static android.app.ActivityManager.UID_OBSERVER_IDLE;
@@ -70,6 +71,7 @@ import static android.os.PowerExemptionManager.REASON_ROLE_EMERGENCY;
 import static android.os.PowerExemptionManager.REASON_SYSTEM_ALLOW_LISTED;
 import static android.os.PowerExemptionManager.REASON_SYSTEM_MODULE;
 import static android.os.PowerExemptionManager.REASON_SYSTEM_UID;
+import static android.os.PowerExemptionManager.getExemptionReasonForStatsd;
 import static android.os.PowerExemptionManager.reasonCodeToString;
 import static android.os.Process.SYSTEM_UID;
 import static android.os.Process.THREAD_PRIORITY_BACKGROUND;
@@ -80,7 +82,7 @@ import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NA
 import static com.android.server.am.AppFGSTracker.foregroundServiceTypeToIndex;
 import static com.android.server.am.BaseAppStateTracker.ONE_DAY;
 
-import android.annotation.ElapsedRealtimeLong;
+import android.annotation.CurrentTimeMillisLong;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -114,12 +116,14 @@ import android.content.pm.ServiceInfo.ForegroundServiceType;
 import android.database.ContentObserver;
 import android.graphics.drawable.Icon;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.HandlerExecutor;
 import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Message;
+import android.os.PowerExemptionManager.ExemptionReason;
 import android.os.PowerExemptionManager.ReasonCode;
 import android.os.RemoteException;
 import android.os.SystemClock;
@@ -131,17 +135,24 @@ import android.provider.DeviceConfig.Properties;
 import android.provider.Settings;
 import android.provider.Settings.Global;
 import android.telephony.TelephonyManager;
+import android.text.TextUtils;
 import android.util.ArraySet;
+import android.util.AtomicFile;
+import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseArrayMap;
 import android.util.TimeUtils;
+import android.util.TypedXmlPullParser;
+import android.util.TypedXmlSerializer;
+import android.util.Xml;
 import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.internal.util.ArrayUtils;
+import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.util.function.TriConsumer;
 import com.android.server.AppStateTracker;
 import com.android.server.LocalServices;
@@ -152,6 +163,15 @@ import com.android.server.pm.UserManagerInternal;
 import com.android.server.usage.AppStandbyInternal;
 import com.android.server.usage.AppStandbyInternal.AppIdleStateChangeListener;
 
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
+
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -163,6 +183,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 
 /**
@@ -192,6 +213,16 @@ public final class AppRestrictionController {
      */
     private static final boolean ENABLE_SHOW_FGS_MANAGER_ACTION_ON_BG_RESTRICTION = false;
 
+    private static final String APP_RESTRICTION_SETTINGS_DIRNAME = "apprestriction";
+    private static final String APP_RESTRICTION_SETTINGS_FILENAME = "settings.xml";
+
+    private static final String TAG_SETTINGS = "settings";
+    private static final String ATTR_PACKAGE = "package";
+    private static final String ATTR_UID = "uid";
+    private static final String ATTR_CUR_LEVEL = "curlevel";
+    private static final String ATTR_LEVEL_TS = "levelts";
+    private static final String ATTR_REASON = "reason";
+
     private final Context mContext;
     private final HandlerThread mBgHandlerThread;
     private final BgHandler mBgHandler;
@@ -200,8 +231,9 @@ public final class AppRestrictionController {
     // No lock is needed, as it's immutable after initialization in constructor.
     private final ArrayList<BaseAppStateTracker> mAppStateTrackers = new ArrayList<>();
 
+    @VisibleForTesting
     @GuardedBy("mSettingsLock")
-    private final RestrictionSettings mRestrictionSettings = new RestrictionSettings();
+    final RestrictionSettings mRestrictionSettings = new RestrictionSettings();
 
     private final CopyOnWriteArraySet<AppBackgroundRestrictionListener> mRestrictionListeners =
             new CopyOnWriteArraySet<>();
@@ -264,7 +296,32 @@ public final class AppRestrictionController {
     @GuardedBy("mCarrierPrivilegedLock")
     private List<String> mCarrierPrivilegedApps;
 
+    /**
+     * Whether or not we've loaded the restriction settings from the persistent storage.
+     */
+    private final AtomicBoolean mRestrictionSettingsXmlLoaded = new AtomicBoolean();
+
     final ActivityManagerService mActivityManagerService;
+
+    static final int TRACKER_TYPE_UNKNOWN = 0;
+    static final int TRACKER_TYPE_BATTERY = 1;
+    static final int TRACKER_TYPE_BATTERY_EXEMPTION = 2;
+    static final int TRACKER_TYPE_FGS = 3;
+    static final int TRACKER_TYPE_MEDIA_SESSION = 4;
+    static final int TRACKER_TYPE_PERMISSION = 5;
+    static final int TRACKER_TYPE_BROADCAST_EVENTS = 6;
+    static final int TRACKER_TYPE_BIND_SERVICE_EVENTS = 7;
+    @IntDef(prefix = { "TRACKER_TYPE_" }, value = {
+            TRACKER_TYPE_UNKNOWN,
+            TRACKER_TYPE_BATTERY,
+            TRACKER_TYPE_BATTERY_EXEMPTION,
+            TRACKER_TYPE_FGS,
+            TRACKER_TYPE_MEDIA_SESSION,
+            TRACKER_TYPE_PERMISSION,
+            TRACKER_TYPE_BROADCAST_EVENTS,
+            TRACKER_TYPE_BIND_SERVICE_EVENTS,
+    })
+    @interface TrackerType {}
 
     private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
         @Override
@@ -363,10 +420,10 @@ public final class AppRestrictionController {
 
             private @RestrictionLevel int mCurrentRestrictionLevel;
             private @RestrictionLevel int mLastRestrictionLevel;
-            private @ElapsedRealtimeLong long mLevelChangeTimeElapsed;
+            private @CurrentTimeMillisLong long mLevelChangeTime;
             private int mReason;
 
-            private @ElapsedRealtimeLong long[] mLastNotificationShownTimeElapsed;
+            private @CurrentTimeMillisLong long[] mLastNotificationShownTime;
             private int[] mNotificationId;
 
             PkgSettings(String packageName, int uid) {
@@ -380,7 +437,7 @@ public final class AppRestrictionController {
                 if (level != mCurrentRestrictionLevel) {
                     mLastRestrictionLevel = mCurrentRestrictionLevel;
                     mCurrentRestrictionLevel = level;
-                    mLevelChangeTimeElapsed = SystemClock.elapsedRealtime();
+                    mLevelChangeTime = mInjector.currentTimeMillis();
                     mReason = (REASON_MAIN_MASK & reason) | (REASON_SUB_MASK & subReason);
                     mBgHandler.obtainMessage(BgHandler.MSG_APP_RESTRICTION_LEVEL_CHANGED,
                             mUid, level, mPackageName).sendToTarget();
@@ -407,7 +464,7 @@ public final class AppRestrictionController {
                 return sb.toString();
             }
 
-            void dump(PrintWriter pw, @ElapsedRealtimeLong long nowElapsed) {
+            void dump(PrintWriter pw, @CurrentTimeMillisLong long now) {
                 synchronized (mSettingsLock) {
                     pw.print(toString());
                     if (mLastRestrictionLevel != RESTRICTION_LEVEL_UNKNOWN) {
@@ -415,15 +472,14 @@ public final class AppRestrictionController {
                         pw.print(ActivityManager.restrictionLevelToName(mLastRestrictionLevel));
                     }
                     pw.print(" levelChange=");
-                    TimeUtils.formatDuration(mLevelChangeTimeElapsed - nowElapsed, pw);
-                    if (mLastNotificationShownTimeElapsed != null) {
-                        for (int i = 0; i < mLastNotificationShownTimeElapsed.length; i++) {
-                            if (mLastNotificationShownTimeElapsed[i] > 0) {
+                    TimeUtils.formatDuration(mLevelChangeTime - now, pw);
+                    if (mLastNotificationShownTime != null) {
+                        for (int i = 0; i < mLastNotificationShownTime.length; i++) {
+                            if (mLastNotificationShownTime[i] > 0) {
                                 pw.print(" lastNoti(");
                                 pw.print(mNotificationHelper.notificationTypeToString(i));
                                 pw.print(")=");
-                                TimeUtils.formatDuration(
-                                        mLastNotificationShownTimeElapsed[i] - nowElapsed, pw);
+                                TimeUtils.formatDuration(mLastNotificationShownTime[i] - now, pw);
                             }
                         }
                     }
@@ -456,22 +512,32 @@ public final class AppRestrictionController {
             }
 
             @GuardedBy("mSettingsLock")
-            @ElapsedRealtimeLong long getLastNotificationTime(
+            @CurrentTimeMillisLong long getLastNotificationTime(
                     @NotificationHelper.NotificationType int notificationType) {
-                if (mLastNotificationShownTimeElapsed == null) {
+                if (mLastNotificationShownTime == null) {
                     return 0;
                 }
-                return mLastNotificationShownTimeElapsed[notificationType];
+                return mLastNotificationShownTime[notificationType];
             }
 
             @GuardedBy("mSettingsLock")
             void setLastNotificationTime(@NotificationHelper.NotificationType int notificationType,
-                    @ElapsedRealtimeLong long timestamp) {
-                if (mLastNotificationShownTimeElapsed == null) {
-                    mLastNotificationShownTimeElapsed =
+                    @CurrentTimeMillisLong long timestamp) {
+                setLastNotificationTime(notificationType, timestamp, true);
+            }
+
+            @VisibleForTesting
+            @GuardedBy("mSettingsLock")
+            void setLastNotificationTime(@NotificationHelper.NotificationType int notificationType,
+                    @CurrentTimeMillisLong long timestamp, boolean persist) {
+                if (mLastNotificationShownTime == null) {
+                    mLastNotificationShownTime =
                             new long[NotificationHelper.NOTIFICATION_TYPE_LAST];
                 }
-                mLastNotificationShownTimeElapsed[notificationType] = timestamp;
+                mLastNotificationShownTime[notificationType] = timestamp;
+                if (persist && mRestrictionSettingsXmlLoaded.get()) {
+                    schedulePersistToXml(UserHandle.getUserId(mUid));
+                }
             }
 
             @GuardedBy("mSettingsLock")
@@ -489,6 +555,51 @@ public final class AppRestrictionController {
                     mNotificationId = new int[NotificationHelper.NOTIFICATION_TYPE_LAST];
                 }
                 mNotificationId[notificationType] = notificationId;
+            }
+
+            @VisibleForTesting
+            @GuardedBy("mSettingsLock")
+            void setLevelChangeTime(@CurrentTimeMillisLong long timestamp) {
+                mLevelChangeTime = timestamp;
+            }
+
+            @GuardedBy("mSettingsLock")
+            @Override
+            public Object clone() {
+                final PkgSettings newObj = new PkgSettings(mPackageName, mUid);
+                newObj.mCurrentRestrictionLevel = mCurrentRestrictionLevel;
+                newObj.mLastRestrictionLevel = mLastRestrictionLevel;
+                newObj.mLevelChangeTime = mLevelChangeTime;
+                newObj.mReason = mReason;
+                if (mLastNotificationShownTime != null) {
+                    newObj.mLastNotificationShownTime = Arrays.copyOf(
+                            mLastNotificationShownTime, mLastNotificationShownTime.length);
+                }
+                if (mNotificationId != null) {
+                    newObj.mNotificationId = Arrays.copyOf(mNotificationId, mNotificationId.length);
+                }
+                return newObj;
+            }
+
+            @GuardedBy("mSettingsLock")
+            @Override
+            public boolean equals(Object other) {
+                if (other == this) {
+                    return true;
+                }
+                if (other == null || !(other instanceof PkgSettings)) {
+                    return false;
+                }
+                final PkgSettings otherSettings = (PkgSettings) other;
+                return otherSettings.mUid == mUid
+                        && otherSettings.mCurrentRestrictionLevel == mCurrentRestrictionLevel
+                        && otherSettings.mLastRestrictionLevel == mLastRestrictionLevel
+                        && otherSettings.mLevelChangeTime == mLevelChangeTime
+                        && otherSettings.mReason == mReason
+                        && TextUtils.equals(otherSettings.mPackageName, mPackageName)
+                        && Arrays.equals(otherSettings.mLastNotificationShownTime,
+                                mLastNotificationShownTime)
+                        && Arrays.equals(otherSettings.mNotificationId, mNotificationId);
             }
         }
 
@@ -604,21 +715,58 @@ public final class AppRestrictionController {
         }
 
         void removePackage(String pkgName, int uid) {
+            removePackage(pkgName, uid, true);
+        }
+
+        void removePackage(String pkgName, int uid, boolean persist) {
             synchronized (mSettingsLock) {
+                final int keyIndex = mRestrictionLevels.indexOfKey(uid);
                 mRestrictionLevels.delete(uid, pkgName);
+                if (keyIndex >= 0 && mRestrictionLevels.numElementsForKeyAt(keyIndex) == 0) {
+                    mRestrictionLevels.deleteAt(keyIndex);
+                }
+            }
+            if (persist && mRestrictionSettingsXmlLoaded.get()) {
+                schedulePersistToXml(UserHandle.getUserId(uid));
             }
         }
 
         void removeUid(int uid) {
+            removeUid(uid, true);
+        }
+
+        void removeUid(int uid, boolean persist) {
             synchronized (mSettingsLock) {
                 mRestrictionLevels.delete(uid);
+            }
+            if (persist && mRestrictionSettingsXmlLoaded.get()) {
+                schedulePersistToXml(UserHandle.getUserId(uid));
             }
         }
 
         @VisibleForTesting
         void reset() {
             synchronized (mSettingsLock) {
-                mRestrictionLevels.clear();
+                for (int i = mRestrictionLevels.numMaps() - 1; i >= 0; i--) {
+                    mRestrictionLevels.deleteAt(i);
+                }
+            }
+        }
+
+        @VisibleForTesting
+        void resetToDefault() {
+            synchronized (mSettingsLock) {
+                mRestrictionLevels.forEach(settings -> {
+                    settings.mCurrentRestrictionLevel = RESTRICTION_LEVEL_UNKNOWN;
+                    settings.mLastRestrictionLevel = RESTRICTION_LEVEL_UNKNOWN;
+                    settings.mLevelChangeTime = 0L;
+                    settings.mReason = REASON_MAIN_DEFAULT | REASON_SUB_DEFAULT_UNDEFINED;
+                    if (settings.mLastNotificationShownTime != null) {
+                        for (int i = 0; i < settings.mLastNotificationShownTime.length; i++) {
+                            settings.mLastNotificationShownTime[i] = 0L;
+                        }
+                    }
+                });
             }
         }
 
@@ -628,15 +776,271 @@ public final class AppRestrictionController {
                 mRestrictionLevels.forEach(setting -> settings.add(setting));
             }
             Collections.sort(settings, Comparator.comparingInt(PkgSettings::getUid));
-            final long nowElapsed = SystemClock.elapsedRealtime();
+            final long now = mInjector.currentTimeMillis();
             for (int i = 0, size = settings.size(); i < size; i++) {
                 pw.print(prefix);
                 pw.print('#');
                 pw.print(i);
                 pw.print(' ');
-                settings.get(i).dump(pw, nowElapsed);
+                settings.get(i).dump(pw, now);
                 pw.println();
             }
+        }
+
+        @VisibleForTesting
+        void schedulePersistToXml(@UserIdInt int userId) {
+            mBgHandler.obtainMessage(BgHandler.MSG_PERSIST_RESTRICTION_SETTINGS, userId, 0)
+                    .sendToTarget();
+        }
+
+        @VisibleForTesting
+        void scheduleLoadFromXml() {
+            mBgHandler.sendEmptyMessage(BgHandler.MSG_LOAD_RESTRICTION_SETTINGS);
+        }
+
+        @VisibleForTesting
+        File getXmlFileNameForUser(@UserIdInt int userId) {
+            final File dir = new File(mInjector.getDataSystemDeDirectory(
+                    userId), APP_RESTRICTION_SETTINGS_DIRNAME);
+            return new File(dir, APP_RESTRICTION_SETTINGS_FILENAME);
+        }
+
+        @VisibleForTesting
+        void loadFromXml(boolean applyLevel) {
+            final int[] allUsers = mInjector.getUserManagerInternal().getUserIds();
+            for (int userId : allUsers) {
+                loadFromXml(userId, applyLevel);
+            }
+            mRestrictionSettingsXmlLoaded.set(true);
+        }
+
+        void loadFromXml(@UserIdInt int userId, boolean applyLevel) {
+            final File file = getXmlFileNameForUser(userId);
+            if (!file.exists()) {
+                return;
+            }
+            final long[] ts = new long[NotificationHelper.NOTIFICATION_TYPE_LAST];
+            try (InputStream in = new FileInputStream(file)) {
+                final TypedXmlPullParser parser = Xml.resolvePullParser(in);
+                final long now = SystemClock.elapsedRealtime();
+                int type;
+                while ((type = parser.next()) != XmlPullParser.END_DOCUMENT) {
+                    if (type != XmlPullParser.START_TAG) {
+                        continue;
+                    }
+                    final String tagName = parser.getName();
+                    if (!TAG_SETTINGS.equals(tagName)) {
+                        Slog.w(TAG, "Unexpected tag name: " + tagName);
+                        continue;
+                    }
+                    loadOneFromXml(parser, now, ts, applyLevel);
+                }
+                if (DEBUG_BG_RESTRICTION_CONTROLLER) {
+                    Slog.i(TAG, "Loaded from " + file);
+                }
+            } catch (IOException | XmlPullParserException e) {
+            }
+        }
+
+        private void loadOneFromXml(TypedXmlPullParser parser, long now, long[] ts,
+                boolean applyLevel) {
+            // Reset the buffer.
+            for (int i = 0; i < ts.length; i++) {
+                ts[i] = 0L;
+            }
+            // Walk through the attributes.
+            int uid = 0;
+            String packageName = null;
+            int curLevel = RESTRICTION_LEVEL_UNKNOWN;
+            int reason = REASON_MAIN_DEFAULT;
+            long levelTs = 0L;
+            for (int i = 0; i < parser.getAttributeCount(); i++) {
+                try {
+                    final String attrName = parser.getAttributeName(i);
+                    final String attrValue = parser.getAttributeValue(i);
+                    switch (attrName) {
+                        case ATTR_UID:
+                            uid = Integer.parseInt(attrValue);
+                            break;
+                        case ATTR_PACKAGE:
+                            packageName = attrValue;
+                            break;
+                        case ATTR_CUR_LEVEL:
+                            curLevel = Integer.parseInt(attrValue);
+                            break;
+                        case ATTR_LEVEL_TS:
+                            levelTs = Long.parseLong(attrValue);
+                            break;
+                        case ATTR_REASON:
+                            reason = Integer.parseInt(attrValue);
+                            break;
+                        default:
+                            @NotificationHelper.NotificationType int type =
+                                    NotificationHelper.notificationTimeAttrToType(attrName);
+                            ts[type] = Long.parseLong(attrValue);
+                            break;
+                    }
+                } catch (IllegalArgumentException e) {
+                }
+            }
+            if (uid != 0) {
+                if (DEBUG_BG_RESTRICTION_CONTROLLER) {
+                    Slog.i(TAG, "Restoring " + packageName + "/" + UserHandle.formatUid(uid)
+                            + " level=" + curLevel + " reason=" + Integer.toHexString(reason)
+                            + " ts=" + levelTs + " noti=" + Arrays.toString(ts));
+                }
+                final PkgSettings pkgSettings;
+                synchronized (mSettingsLock) {
+                    pkgSettings = getRestrictionSettingsLocked(uid, packageName);
+                    if (pkgSettings == null) {
+                        return;
+                    }
+                    for (int i = 0; i < ts.length; i++) {
+                        if (pkgSettings.getLastNotificationTime(i) == 0 && ts[i] != 0) {
+                            pkgSettings.setLastNotificationTime(i, ts[i], false);
+                        }
+                    }
+                    if (pkgSettings.mCurrentRestrictionLevel >= curLevel) {
+                        // The current restriction level is the same or more restrictive,
+                        // don't restore.
+                        return;
+                    }
+                }
+                final int curBucket = mInjector.getAppStandbyInternal().getAppStandbyBucket(
+                        packageName, UserHandle.getUserId(uid), now, false);
+                if (applyLevel) {
+                    applyRestrictionLevel(packageName, uid, curLevel, TRACKER_TYPE_UNKNOWN,
+                            curBucket, true, reason & REASON_MAIN_MASK, reason & REASON_SUB_MASK);
+                } else {
+                    pkgSettings.update(curLevel,
+                            reason & REASON_MAIN_MASK, reason & REASON_SUB_MASK);
+                }
+                synchronized (mSettingsLock) {
+                    // Restore the mLevelChangeTime too.
+                    pkgSettings.setLevelChangeTime(levelTs);
+                }
+            }
+        }
+
+        @VisibleForTesting
+        void persistToXml(@UserIdInt int userId) {
+            final File file = getXmlFileNameForUser(userId);
+            final File dir = file.getParentFile();
+            if (!dir.isDirectory() && !dir.mkdirs()) {
+                Slog.w(TAG, "Failed to create folder for " + userId);
+                return;
+            }
+            final AtomicFile atomicFile = new AtomicFile(file);
+            FileOutputStream stream = null;
+            try {
+                stream = atomicFile.startWrite();
+                stream.write(toXmlByteArray(userId));
+            } catch (Exception e) {
+                Slog.e(TAG, "Failed to write file " + file, e);
+                if (stream != null) {
+                    atomicFile.failWrite(stream);
+                }
+                return;
+            }
+            atomicFile.finishWrite(stream);
+            if (DEBUG_BG_RESTRICTION_CONTROLLER) {
+                Slog.i(TAG, "Successfully written to " + atomicFile);
+            }
+        }
+
+        private byte[] toXmlByteArray(@UserIdInt int userId) {
+            try (ByteArrayOutputStream os = new ByteArrayOutputStream()) {
+                final TypedXmlSerializer serializer = Xml.resolveSerializer(os);
+
+                serializer.startDocument(/* encoding */ null, /* standalone */ true);
+
+                synchronized (mSettingsLock) {
+                    for (int i = mRestrictionLevels.numMaps() - 1; i >= 0; i--) {
+                        for (int j = mRestrictionLevels.numElementsForKeyAt(i) - 1; j >= 0; j--) {
+                            final PkgSettings settings = mRestrictionLevels.valueAt(i, j);
+                            final int uid = settings.getUid();
+                            if (UserHandle.getUserId(uid) != userId) {
+                                continue;
+                            }
+                            serializer.startTag(null, TAG_SETTINGS);
+                            serializer.attributeInt(null, ATTR_UID, uid);
+                            serializer.attribute(null, ATTR_PACKAGE, settings.getPackageName());
+                            serializer.attributeInt(null, ATTR_CUR_LEVEL,
+                                    settings.mCurrentRestrictionLevel);
+                            serializer.attributeLong(null, ATTR_LEVEL_TS,
+                                    settings.mLevelChangeTime);
+                            serializer.attributeInt(null, ATTR_REASON, settings.mReason);
+                            for (int k = 0; k < NotificationHelper.NOTIFICATION_TYPE_LAST; k++) {
+                                serializer.attributeLong(null,
+                                        NotificationHelper.notificationTypeToTimeAttr(k),
+                                        settings.getLastNotificationTime(k));
+                            }
+                            serializer.endTag(null, TAG_SETTINGS);
+                        }
+                    }
+                }
+
+                serializer.endDocument();
+                serializer.flush();
+
+                return os.toByteArray();
+            } catch (IOException e) {
+                return null;
+            }
+        }
+
+        @VisibleForTesting
+        void removeXml() {
+            final int[] allUsers = mInjector.getUserManagerInternal().getUserIds();
+            for (int userId : allUsers) {
+                getXmlFileNameForUser(userId).delete();
+            }
+        }
+
+        @Override
+        public Object clone() {
+            final RestrictionSettings newObj = new RestrictionSettings();
+            synchronized (mSettingsLock) {
+                for (int i = mRestrictionLevels.numMaps() - 1; i >= 0; i--) {
+                    for (int j = mRestrictionLevels.numElementsForKeyAt(i) - 1; j >= 0; j--) {
+                        final PkgSettings settings = mRestrictionLevels.valueAt(i, j);
+                        newObj.mRestrictionLevels.add(mRestrictionLevels.keyAt(i),
+                                mRestrictionLevels.keyAt(i, j), (PkgSettings) settings.clone());
+                    }
+                }
+            }
+            return newObj;
+        }
+
+        @Override
+        public boolean equals(Object other) {
+            if (other == this) {
+                return true;
+            }
+            if (other == null || !(other instanceof RestrictionSettings)) {
+                return false;
+            }
+            final SparseArrayMap<String, PkgSettings> otherSettings = ((RestrictionSettings) other)
+                    .mRestrictionLevels;
+            synchronized (mSettingsLock) {
+                if (otherSettings.numMaps() != mRestrictionLevels.numMaps()) {
+                    return false;
+                }
+                for (int i = mRestrictionLevels.numMaps() - 1; i >= 0; i--) {
+                    final int uid = mRestrictionLevels.keyAt(i);
+                    if (otherSettings.numElementsForKey(uid)
+                            != mRestrictionLevels.numElementsForKeyAt(i)) {
+                        return false;
+                    }
+                    for (int j = mRestrictionLevels.numElementsForKeyAt(i) - 1; j >= 0; j--) {
+                        final PkgSettings settings = mRestrictionLevels.valueAt(i, j);
+                        if (!settings.equals(otherSettings.get(uid, settings.getPackageName()))) {
+                            return false;
+                        }
+                    }
+                }
+            }
+            return true;
         }
     }
 
@@ -1010,6 +1414,7 @@ public final class AppRestrictionController {
         DeviceConfig.removeOnPropertiesChangedListener(mConstantsObserver);
         unregisterForUidObservers();
         unregisterForSystemBroadcasts();
+        mRestrictionSettings.removeXml();
     }
 
     private void initBgRestrictionExemptioFromSysConfig() {
@@ -1033,6 +1438,12 @@ public final class AppRestrictionController {
         for (int userId : allUsers) {
             refreshAppRestrictionLevelForUser(userId, REASON_MAIN_FORCED_BY_USER,
                     REASON_SUB_FORCED_USER_FLAG_INTERACTION);
+        }
+        // Load the previously saved levels and update the current levels if needed.
+        mRestrictionSettings.scheduleLoadFromXml();
+        // Also save the current levels right away.
+        for (int userId : allUsers) {
+            mRestrictionSettings.schedulePersistToXml(userId);
         }
     }
 
@@ -1124,15 +1535,15 @@ public final class AppRestrictionController {
                 Slog.e(TAG, "Unable to find " + info.mPackageName + "/u" + userId);
                 continue;
             }
-            final @RestrictionLevel int level = calcAppRestrictionLevel(
+            final Pair<Integer, Integer> levelTypePair = calcAppRestrictionLevel(
                     userId, uid, info.mPackageName, info.mStandbyBucket, false, false);
             if (DEBUG_BG_RESTRICTION_CONTROLLER) {
                 Slog.i(TAG, "Proposed restriction level of " + info.mPackageName + "/"
                         + UserHandle.formatUid(uid) + ": "
-                        + ActivityManager.restrictionLevelToName(level)
+                        + ActivityManager.restrictionLevelToName(levelTypePair.first)
                         + " " + info.mStandbyBucket);
             }
-            applyRestrictionLevel(info.mPackageName, uid, level,
+            applyRestrictionLevel(info.mPackageName, uid, levelTypePair.first, levelTypePair.second,
                     info.mStandbyBucket, true, reason, subReason);
         }
     }
@@ -1148,24 +1559,26 @@ public final class AppRestrictionController {
         final long now = SystemClock.elapsedRealtime();
         for (String pkg: packages) {
             final int curBucket = appStandbyInternal.getAppStandbyBucket(pkg, userId, now, false);
-            final @RestrictionLevel int level = calcAppRestrictionLevel(userId, uid, pkg,
+            final Pair<Integer, Integer> levelTypePair = calcAppRestrictionLevel(userId, uid, pkg,
                     curBucket, allowRequestBgRestricted, true);
             if (DEBUG_BG_RESTRICTION_CONTROLLER) {
                 Slog.i(TAG, "Proposed restriction level of " + pkg + "/"
                         + UserHandle.formatUid(uid) + ": "
-                        + ActivityManager.restrictionLevelToName(level));
+                        + ActivityManager.restrictionLevelToName(levelTypePair.first));
             }
-            applyRestrictionLevel(pkg, uid, level, curBucket, true, reason, subReason);
+            applyRestrictionLevel(pkg, uid, levelTypePair.first, levelTypePair.second,
+                    curBucket, true, reason, subReason);
         }
     }
 
-    private @RestrictionLevel int calcAppRestrictionLevel(@UserIdInt int userId, int uid,
+    private Pair<Integer, Integer> calcAppRestrictionLevel(@UserIdInt int userId, int uid,
             String packageName, @UsageStatsManager.StandbyBuckets int standbyBucket,
             boolean allowRequestBgRestricted, boolean calcTrackers) {
         if (mInjector.getAppHibernationInternal().isHibernatingForUser(packageName, userId)) {
-            return RESTRICTION_LEVEL_HIBERNATION;
+            return new Pair<>(RESTRICTION_LEVEL_HIBERNATION, TRACKER_TYPE_UNKNOWN);
         }
         @RestrictionLevel int level;
+        @TrackerType int trackerType = TRACKER_TYPE_UNKNOWN;
         switch (standbyBucket) {
             case STANDBY_BUCKET_EXEMPTED:
                 level = RESTRICTION_LEVEL_EXEMPTED;
@@ -1181,19 +1594,23 @@ public final class AppRestrictionController {
             default:
                 if (mInjector.getAppStateTracker()
                         .isAppBackgroundRestricted(uid, packageName)) {
-                    return RESTRICTION_LEVEL_BACKGROUND_RESTRICTED;
+                    return new Pair<>(RESTRICTION_LEVEL_BACKGROUND_RESTRICTED, trackerType);
                 }
                 level = mConstantsObserver.mRestrictedBucketEnabled
                         && standbyBucket == STANDBY_BUCKET_RESTRICTED
                         ? RESTRICTION_LEVEL_RESTRICTED_BUCKET
                         : RESTRICTION_LEVEL_ADAPTIVE_BUCKET;
                 if (calcTrackers) {
-                    @RestrictionLevel int l = calcAppRestrictionLevelFromTackers(uid, packageName,
-                            RESTRICTION_LEVEL_MAX);
+                    Pair<Integer, Integer> levelTypePair = calcAppRestrictionLevelFromTackers(
+                            uid, packageName, RESTRICTION_LEVEL_MAX);
+                    @RestrictionLevel int l = levelTypePair.first;
                     if (l == RESTRICTION_LEVEL_EXEMPTED) {
-                        return RESTRICTION_LEVEL_EXEMPTED;
+                        return new Pair<>(RESTRICTION_LEVEL_EXEMPTED, levelTypePair.second);
                     }
                     level = Math.max(l, level);
+                    if (l == level) {
+                        trackerType = levelTypePair.second;
+                    }
                     if (level == RESTRICTION_LEVEL_BACKGROUND_RESTRICTED) {
                         // This level can't be entered without user consent
                         if (allowRequestBgRestricted) {
@@ -1201,27 +1618,32 @@ public final class AppRestrictionController {
                                     uid, 0, packageName).sendToTarget();
                         }
                         // Lower the level.
-                        level = calcAppRestrictionLevelFromTackers(uid, packageName,
+                        levelTypePair = calcAppRestrictionLevelFromTackers(uid, packageName,
                                 RESTRICTION_LEVEL_BACKGROUND_RESTRICTED);
+                        level = levelTypePair.first;
+                        trackerType = levelTypePair.second;
                     }
                 }
                 break;
         }
-        return level;
+        return new Pair<>(level, trackerType);
     }
 
     /**
      * Ask each of the trackers for their proposed restriction levels for the given uid/package,
-     * and return the most restrictive level.
+     * and return the most restrictive level along with the type of tracker which applied this
+     * restriction level as a {@code Pair<@RestrictionLevel, @TrackerType>}.
      *
      * <p>Note, it's different from the {@link #getRestrictionLevel} where it returns the least
      * restrictive level. We're returning the most restrictive level here because each tracker
      * monitors certain dimensions of the app, the abusive behaviors could be detected in one or
      * more of these dimensions, but not necessarily all of them. </p>
      */
-    private @RestrictionLevel int calcAppRestrictionLevelFromTackers(int uid, String packageName,
+    private Pair<Integer, Integer> calcAppRestrictionLevelFromTackers(int uid, String packageName,
             @RestrictionLevel int maxLevel) {
         @RestrictionLevel int level = RESTRICTION_LEVEL_UNKNOWN;
+        @RestrictionLevel int prevLevel = level;
+        @TrackerType int trackerType = TRACKER_TYPE_UNKNOWN;
         final boolean isRestrictedBucketEnabled = mConstantsObserver.mRestrictedBucketEnabled;
         for (int i = mAppStateTrackers.size() - 1; i >= 0; i--) {
             @RestrictionLevel int l = mAppStateTrackers.get(i).getPolicy()
@@ -1230,8 +1652,12 @@ public final class AppRestrictionController {
                 l = RESTRICTION_LEVEL_ADAPTIVE_BUCKET;
             }
             level = Math.max(level, l);
+            if (level != prevLevel) {
+                trackerType = mAppStateTrackers.get(i).getType();
+                prevLevel = level;
+            }
         }
-        return level;
+        return new Pair<>(level, trackerType);
     }
 
     private static @RestrictionLevel int standbyBucketToRestrictionLevel(
@@ -1444,7 +1870,126 @@ public final class AppRestrictionController {
         }
     }
 
-    private void applyRestrictionLevel(String pkgName, int uid, @RestrictionLevel int level,
+    private int getRestrictionLevelStatsd(@RestrictionLevel int level) {
+        switch (level) {
+            case RESTRICTION_LEVEL_UNKNOWN:
+                return FrameworkStatsLog
+                        .APP_BACKGROUND_RESTRICTIONS_INFO__RESTRICTION_LEVEL__LEVEL_UNKNOWN;
+            case RESTRICTION_LEVEL_UNRESTRICTED:
+                return FrameworkStatsLog
+                        .APP_BACKGROUND_RESTRICTIONS_INFO__RESTRICTION_LEVEL__LEVEL_UNRESTRICTED;
+            case RESTRICTION_LEVEL_EXEMPTED:
+                return FrameworkStatsLog
+                        .APP_BACKGROUND_RESTRICTIONS_INFO__RESTRICTION_LEVEL__LEVEL_EXEMPTED;
+            case RESTRICTION_LEVEL_ADAPTIVE_BUCKET:
+                return FrameworkStatsLog
+                        .APP_BACKGROUND_RESTRICTIONS_INFO__RESTRICTION_LEVEL__LEVEL_ADAPTIVE_BUCKET;
+            case RESTRICTION_LEVEL_RESTRICTED_BUCKET:
+                return FrameworkStatsLog
+                        .APP_BACKGROUND_RESTRICTIONS_INFO__RESTRICTION_LEVEL__LEVEL_RESTRICTED_BUCKET;
+            case RESTRICTION_LEVEL_BACKGROUND_RESTRICTED:
+                return FrameworkStatsLog
+                        .APP_BACKGROUND_RESTRICTIONS_INFO__RESTRICTION_LEVEL__LEVEL_BACKGROUND_RESTRICTED;
+            case RESTRICTION_LEVEL_HIBERNATION:
+                return FrameworkStatsLog
+                        .APP_BACKGROUND_RESTRICTIONS_INFO__RESTRICTION_LEVEL__LEVEL_HIBERNATION;
+            default:
+                return FrameworkStatsLog
+                        .APP_BACKGROUND_RESTRICTIONS_INFO__RESTRICTION_LEVEL__LEVEL_UNKNOWN;
+        }
+    }
+
+    private int getThresholdStatsd(int reason) {
+        switch (reason) {
+            case REASON_MAIN_FORCED_BY_SYSTEM:
+                return FrameworkStatsLog
+                        .APP_BACKGROUND_RESTRICTIONS_INFO__THRESHOLD__THRESHOLD_RESTRICTED;
+            case REASON_MAIN_FORCED_BY_USER:
+                return FrameworkStatsLog
+                        .APP_BACKGROUND_RESTRICTIONS_INFO__THRESHOLD__THRESHOLD_USER;
+            default:
+                return FrameworkStatsLog
+                        .APP_BACKGROUND_RESTRICTIONS_INFO__THRESHOLD__THRESHOLD_UNKNOWN;
+        }
+    }
+
+    private int getTrackerTypeStatsd(@TrackerType int type) {
+        switch (type) {
+            case TRACKER_TYPE_BATTERY:
+                return FrameworkStatsLog.APP_BACKGROUND_RESTRICTIONS_INFO__TRACKER__BATTERY_TRACKER;
+            case TRACKER_TYPE_BATTERY_EXEMPTION:
+                return FrameworkStatsLog
+                        .APP_BACKGROUND_RESTRICTIONS_INFO__TRACKER__BATTERY_EXEMPTION_TRACKER;
+            case TRACKER_TYPE_FGS:
+                return FrameworkStatsLog.APP_BACKGROUND_RESTRICTIONS_INFO__TRACKER__FGS_TRACKER;
+            case TRACKER_TYPE_MEDIA_SESSION:
+                return FrameworkStatsLog
+                        .APP_BACKGROUND_RESTRICTIONS_INFO__TRACKER__MEDIA_SESSION_TRACKER;
+            case TRACKER_TYPE_PERMISSION:
+                return FrameworkStatsLog
+                        .APP_BACKGROUND_RESTRICTIONS_INFO__TRACKER__PERMISSION_TRACKER;
+            case TRACKER_TYPE_BROADCAST_EVENTS:
+                return FrameworkStatsLog
+                        .APP_BACKGROUND_RESTRICTIONS_INFO__TRACKER__BROADCAST_EVENTS_TRACKER;
+            case TRACKER_TYPE_BIND_SERVICE_EVENTS:
+                return FrameworkStatsLog
+                        .APP_BACKGROUND_RESTRICTIONS_INFO__TRACKER__BIND_SERVICE_EVENTS_TRACKER;
+            default:
+                return FrameworkStatsLog.APP_BACKGROUND_RESTRICTIONS_INFO__TRACKER__UNKNOWN_TRACKER;
+        }
+    }
+
+    private @ExemptionReason int getExemptionReasonStatsd(int uid, @RestrictionLevel int level) {
+        if (level != RESTRICTION_LEVEL_EXEMPTED) {
+            return FrameworkStatsLog
+                    .APP_BACKGROUND_RESTRICTIONS_INFO__EXEMPTION_REASON__REASON_DENIED;
+        }
+
+        @ReasonCode final int reasonCode = getBackgroundRestrictionExemptionReason(uid);
+        return getExemptionReasonForStatsd(reasonCode);
+    }
+
+    private int getOptimizationLevelStatsd(@RestrictionLevel int level) {
+        switch (level) {
+            case RESTRICTION_LEVEL_UNKNOWN:
+                return FrameworkStatsLog.APP_BACKGROUND_RESTRICTIONS_INFO__OPT_LEVEL__UNKNOWN;
+            case RESTRICTION_LEVEL_UNRESTRICTED:
+                return FrameworkStatsLog.APP_BACKGROUND_RESTRICTIONS_INFO__OPT_LEVEL__NOT_OPTIMIZED;
+            case RESTRICTION_LEVEL_ADAPTIVE_BUCKET:
+                return FrameworkStatsLog.APP_BACKGROUND_RESTRICTIONS_INFO__OPT_LEVEL__OPTIMIZED;
+            case RESTRICTION_LEVEL_BACKGROUND_RESTRICTED:
+                return FrameworkStatsLog
+                        .APP_BACKGROUND_RESTRICTIONS_INFO__OPT_LEVEL__BACKGROUND_RESTRICTED;
+            default:
+                return FrameworkStatsLog.APP_BACKGROUND_RESTRICTIONS_INFO__OPT_LEVEL__UNKNOWN;
+        }
+    }
+
+    @SuppressWarnings("AndroidFrameworkCompatChange")
+    private int getTargetSdkStatsd(String packageName) {
+        final PackageManager pm = mInjector.getPackageManager();
+        if (pm == null) {
+            return FrameworkStatsLog.APP_BACKGROUND_RESTRICTIONS_INFO__TARGET_SDK__SDK_UNKNOWN;
+        }
+        try {
+            final PackageInfo pkg = pm.getPackageInfo(packageName, 0 /* flags */);
+            final int targetSdk = pkg.applicationInfo.targetSdkVersion;
+            if (targetSdk < Build.VERSION_CODES.S) {
+                return FrameworkStatsLog.APP_BACKGROUND_RESTRICTIONS_INFO__TARGET_SDK__SDK_PRE_S;
+            } else if (targetSdk < Build.VERSION_CODES.TIRAMISU) {
+                return FrameworkStatsLog.APP_BACKGROUND_RESTRICTIONS_INFO__TARGET_SDK__SDK_S;
+            } else if (targetSdk == Build.VERSION_CODES.TIRAMISU) {
+                return FrameworkStatsLog.APP_BACKGROUND_RESTRICTIONS_INFO__TARGET_SDK__SDK_T;
+            } else {
+                return FrameworkStatsLog.APP_BACKGROUND_RESTRICTIONS_INFO__TARGET_SDK__SDK_UNKNOWN;
+            }
+        } catch (PackageManager.NameNotFoundException ignored) {
+        }
+        return FrameworkStatsLog.APP_BACKGROUND_RESTRICTIONS_INFO__TARGET_SDK__SDK_UNKNOWN;
+    }
+
+    private void applyRestrictionLevel(String pkgName, int uid,
+            @RestrictionLevel int level, @TrackerType int trackerType,
             int curBucket, boolean allowUpdateBucket, int reason, int subReason) {
         int curLevel;
         int prevReason;
@@ -1524,6 +2069,19 @@ public final class AppRestrictionController {
                     prevReason & REASON_MAIN_MASK, prevReason & REASON_SUB_MASK,
                     reason, subReason);
         }
+
+        FrameworkStatsLog.write(FrameworkStatsLog.APP_BACKGROUND_RESTRICTIONS_INFO, uid,
+                getRestrictionLevelStatsd(level),
+                getThresholdStatsd(reason),
+                getTrackerTypeStatsd(trackerType),
+                null, // FgsTrackerInfo
+                null, // BatteryTrackerInfo
+                null, // BroadcastEventsTrackerInfo
+                null, // BindServiceEventsTrackerInfo
+                getExemptionReasonStatsd(uid, level),
+                getOptimizationLevelStatsd(level),
+                getTargetSdkStatsd(pkgName),
+                ActivityManager.isLowRamDeviceStatic());
     }
 
     private void handleBackgroundRestrictionChanged(int uid, String pkgName, boolean restricted) {
@@ -1541,7 +2099,7 @@ public final class AppRestrictionController {
             // The app could fall into the background restricted with user consent only,
             // so set the reason to it.
             applyRestrictionLevel(pkgName, uid, RESTRICTION_LEVEL_BACKGROUND_RESTRICTED,
-                    curBucket, true, REASON_MAIN_FORCED_BY_USER,
+                    TRACKER_TYPE_UNKNOWN, curBucket, true, REASON_MAIN_FORCED_BY_USER,
                     REASON_SUB_FORCED_USER_FLAG_INTERACTION);
             mBgHandler.obtainMessage(BgHandler.MSG_CANCEL_REQUEST_BG_RESTRICTED, uid, 0, pkgName)
                     .sendToTarget();
@@ -1554,11 +2112,11 @@ public final class AppRestrictionController {
                     ? STANDBY_BUCKET_EXEMPTED
                     : (lastLevel == RESTRICTION_LEVEL_RESTRICTED_BUCKET
                             ? STANDBY_BUCKET_RESTRICTED : STANDBY_BUCKET_RARE);
-            final @RestrictionLevel int level = calcAppRestrictionLevel(
+            final Pair<Integer, Integer> levelTypePair = calcAppRestrictionLevel(
                     UserHandle.getUserId(uid), uid, pkgName, tentativeBucket, false, true);
 
-            applyRestrictionLevel(pkgName, uid, level, curBucket, true,
-                    REASON_MAIN_USAGE, REASON_SUB_USAGE_USER_INTERACTION);
+            applyRestrictionLevel(pkgName, uid, levelTypePair.first, levelTypePair.second,
+                    curBucket, true, REASON_MAIN_USAGE, REASON_SUB_USAGE_USER_INTERACTION);
         }
     }
 
@@ -1598,10 +2156,10 @@ public final class AppRestrictionController {
             @UserIdInt int userId) {
         final int uid = mInjector.getPackageManagerInternal().getPackageUid(
                 packageName, STOCK_PM_FLAGS, userId);
-        final @RestrictionLevel int level = calcAppRestrictionLevel(
+        final Pair<Integer, Integer> levelTypePair = calcAppRestrictionLevel(
                 userId, uid, packageName, bucket, false, false);
-        applyRestrictionLevel(packageName, uid, level, bucket, false,
-                REASON_MAIN_DEFAULT, REASON_SUB_DEFAULT_UNDEFINED);
+        applyRestrictionLevel(packageName, uid, levelTypePair.first, levelTypePair.second,
+                bucket, false, REASON_MAIN_DEFAULT, REASON_SUB_DEFAULT_UNDEFINED);
     }
 
     void handleRequestBgRestricted(String packageName, int uid) {
@@ -1642,6 +2200,9 @@ public final class AppRestrictionController {
         static final int NOTIFICATION_TYPE_LONG_RUNNING_FGS = 1;
         static final int NOTIFICATION_TYPE_LAST = 2;
 
+        static final String ATTR_LAST_BATTERY_NOTIFICATION_TIME = "last_batt_noti_ts";
+        static final String ATTR_LAST_LONG_FGS_NOTIFICATION_TIME = "last_long_fgs_noti_ts";
+
         @IntDef(prefix = { "NOTIFICATION_TYPE_"}, value = {
             NOTIFICATION_TYPE_ABUSIVE_CURRENT_DRAIN,
             NOTIFICATION_TYPE_LONG_RUNNING_FGS,
@@ -1653,6 +2214,25 @@ public final class AppRestrictionController {
             "Abusive current drain",
             "Long-running FGS",
         };
+
+        static final String[] NOTIFICATION_TIME_ATTRS = {
+            ATTR_LAST_BATTERY_NOTIFICATION_TIME,
+            ATTR_LAST_LONG_FGS_NOTIFICATION_TIME,
+        };
+
+        static @NotificationType int notificationTimeAttrToType(@NonNull String attr) {
+            switch (attr) {
+                case ATTR_LAST_BATTERY_NOTIFICATION_TIME:
+                    return NOTIFICATION_TYPE_ABUSIVE_CURRENT_DRAIN;
+                case ATTR_LAST_LONG_FGS_NOTIFICATION_TIME:
+                    return NOTIFICATION_TYPE_LONG_RUNNING_FGS;
+            }
+            throw new IllegalArgumentException();
+        }
+
+        static @NonNull String notificationTypeToTimeAttr(@NotificationType int type) {
+            return NOTIFICATION_TIME_ATTRS[type];
+        }
 
         static final String ACTION_FGS_MANAGER_TRAMPOLINE =
                 "com.android.server.am.ACTION_FGS_MANAGER_TRAMPOLINE";
@@ -1801,14 +2381,14 @@ public final class AppRestrictionController {
                     return 0;
                 }
 
-                final long now = SystemClock.elapsedRealtime();
-                final long lastNotificationShownTimeElapsed =
+                final long now = mInjector.currentTimeMillis();
+                final long lastNotificationShownTime =
                         settings.getLastNotificationTime(notificationType);
-                if (lastNotificationShownTimeElapsed != 0 && (lastNotificationShownTimeElapsed
+                if (lastNotificationShownTime != 0 && (lastNotificationShownTime
                         + getNotificationMinInterval(notificationType) > now)) {
                     if (DEBUG_BG_RESTRICTION_CONTROLLER) {
                         Slog.i(TAG, "Not showing notification as last notification was shown "
-                                + TimeUtils.formatDuration(now - lastNotificationShownTimeElapsed)
+                                + TimeUtils.formatDuration(now - lastNotificationShownTime)
                                 + " ago");
                     }
                     return 0;
@@ -1824,7 +2404,7 @@ public final class AppRestrictionController {
                             + "/" + UserHandle.formatUid(uid)
                             + ", id=" + notificationId
                             + ", now=" + now
-                            + ", lastShown=" + lastNotificationShownTimeElapsed);
+                            + ", lastShown=" + lastNotificationShownTime);
                 }
                 return notificationId;
             }
@@ -1861,7 +2441,7 @@ public final class AppRestrictionController {
                     ABUSIVE_BACKGROUND_APPS)
                     .setAutoCancel(true)
                     .setGroup(GROUP_KEY)
-                    .setWhen(System.currentTimeMillis())
+                    .setWhen(mInjector.currentTimeMillis())
                     .setSmallIcon(com.android.internal.R.drawable.stat_sys_warning)
                     .setColor(mContext.getColor(
                             com.android.internal.R.color.system_notification_accent_color))
@@ -2181,6 +2761,8 @@ public final class AppRestrictionController {
         static final int MSG_UID_GONE = 7;
         static final int MSG_UID_PROC_STATE_CHANGED = 8;
         static final int MSG_CANCEL_REQUEST_BG_RESTRICTED = 9;
+        static final int MSG_LOAD_RESTRICTION_SETTINGS = 10;
+        static final int MSG_PERSIST_RESTRICTION_SETTINGS = 11;
 
         private final Injector mInjector;
 
@@ -2225,6 +2807,12 @@ public final class AppRestrictionController {
                     // It also means this UID is inactive now.
                     c.handleUidInactive(msg.arg1, msg.arg2 == 1);
                     c.handleUidGone(msg.arg1);
+                } break;
+                case MSG_LOAD_RESTRICTION_SETTINGS: {
+                    c.mRestrictionSettings.loadFromXml(true);
+                } break;
+                case MSG_PERSIST_RESTRICTION_SETTINGS: {
+                    c.mRestrictionSettings.persistToXml(msg.arg1);
                 } break;
             }
         }
@@ -2398,6 +2986,14 @@ public final class AppRestrictionController {
 
         void scheduleInitTrackers(Handler handler, Runnable initializers) {
             handler.post(initializers);
+        }
+
+        File getDataSystemDeDirectory(@UserIdInt int userId) {
+            return Environment.getDataSystemDeDirectory(userId);
+        }
+
+        @CurrentTimeMillisLong long currentTimeMillis() {
+            return System.currentTimeMillis();
         }
     }
 

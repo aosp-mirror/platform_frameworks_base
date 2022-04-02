@@ -81,7 +81,6 @@ public class SystemDataTransferRequestStore {
 
     private static final String XML_TAG_REQUESTS = "requests";
     private static final String XML_TAG_REQUEST = "request";
-    private static final String XML_TAG_LIST = "list";
 
     private static final String XML_ATTR_ASSOCIATION_ID = "association_id";
     private static final String XML_ATTR_DATA_TYPE = "data_type";
@@ -122,6 +121,7 @@ public class SystemDataTransferRequestStore {
     }
 
     void writeRequest(@UserIdInt int userId, SystemDataTransferRequest request) {
+        Slog.i(LOG_TAG, "Writing request=" + request + " to store.");
         ArrayList<SystemDataTransferRequest> cachedRequests;
         synchronized (mLock) {
             // Write to cache
@@ -130,6 +130,23 @@ public class SystemDataTransferRequestStore {
             mCachedPerUser.set(userId, cachedRequests);
         }
         // Write to store
+        mExecutor.execute(() -> writeRequestsToStore(userId, cachedRequests));
+    }
+
+    /**
+     * Remove requests by association id. userId must be the one which owns the associationId.
+     */
+    public void removeRequestsByAssociationId(@UserIdInt int userId, int associationId) {
+        Slog.i(LOG_TAG, "Removing system data transfer requests for userId=" + userId
+                + ", associationId=" + associationId);
+        ArrayList<SystemDataTransferRequest> cachedRequests;
+        synchronized (mLock) {
+            // Remove requests from cache
+            cachedRequests = readRequestsFromCache(userId);
+            cachedRequests.removeIf(request -> request.getAssociationId() == associationId);
+            mCachedPerUser.set(userId, cachedRequests);
+        }
+        // Remove requests from store
         mExecutor.execute(() -> writeRequestsToStore(userId, cachedRequests));
     }
 

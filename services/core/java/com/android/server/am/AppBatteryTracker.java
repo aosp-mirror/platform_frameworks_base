@@ -73,6 +73,7 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
 import com.android.server.am.AppBatteryTracker.AppBatteryPolicy;
+import com.android.server.am.AppRestrictionController.TrackerType;
 import com.android.server.am.AppRestrictionController.UidBatteryUsageProvider;
 import com.android.server.pm.UserManagerInternal;
 
@@ -192,6 +193,11 @@ final class AppBatteryTracker extends BaseAppStateTracker<AppBatteryPolicy>
                     BATTERY_USAGE_STATS_POLLING_MIN_INTERVAL_MS_DEBUG;
         }
         mInjector.setPolicy(new AppBatteryPolicy(mInjector, this));
+    }
+
+    @Override
+    @TrackerType int getType() {
+        return AppRestrictionController.TRACKER_TYPE_BATTERY;
     }
 
     @Override
@@ -708,6 +714,7 @@ final class AppBatteryTracker extends BaseAppStateTracker<AppBatteryPolicy>
         final double foregroundUsage = usage.getUsagePowerMah(PROCESS_STATE_FOREGROUND);
         final double backgroundUsage = usage.getUsagePowerMah(PROCESS_STATE_BACKGROUND);
         final double fgsUsage = usage.getUsagePowerMah(PROCESS_STATE_FOREGROUND_SERVICE);
+        final double cachedUsage = usage.getUsagePowerMah(PROCESS_STATE_CACHED);
 
         if (foregroundUsage == 0 && backgroundUsage == 0 && fgsUsage == 0) {
             return;
@@ -724,6 +731,9 @@ final class AppBatteryTracker extends BaseAppStateTracker<AppBatteryPolicy>
         dumpProcessStateStats(proto,
                 AppBatteryStatsProto.UidStats.ProcessStateStats.FOREGROUND_SERVICE,
                 fgsUsage);
+        dumpProcessStateStats(proto,
+                AppBatteryStatsProto.UidStats.ProcessStateStats.CACHED,
+                cachedUsage);
         proto.end(token);
     }
 
@@ -864,9 +874,14 @@ final class AppBatteryTracker extends BaseAppStateTracker<AppBatteryPolicy>
 
         double getUsagePowerMah(@BatteryConsumer.ProcessState int processState) {
             switch (processState) {
-                case PROCESS_STATE_FOREGROUND: return mUsage[1];
-                case PROCESS_STATE_BACKGROUND: return mUsage[2];
-                case PROCESS_STATE_FOREGROUND_SERVICE: return mUsage[3];
+                case PROCESS_STATE_FOREGROUND:
+                    return mUsage[BATTERY_USAGE_INDEX_FOREGROUND];
+                case PROCESS_STATE_BACKGROUND:
+                    return mUsage[BATTERY_USAGE_INDEX_BACKGROUND];
+                case PROCESS_STATE_FOREGROUND_SERVICE:
+                    return mUsage[BATTERY_USAGE_INDEX_FOREGROUND_SERVICE];
+                case PROCESS_STATE_CACHED:
+                    return mUsage[BATTERY_USAGE_INDEX_CACHED];
             }
             return 0;
         }

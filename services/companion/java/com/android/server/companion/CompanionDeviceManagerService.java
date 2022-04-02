@@ -870,6 +870,9 @@ public class CompanionDeviceManagerService extends SystemService {
         // Removing the association.
         mAssociationStore.removeAssociation(associationId);
 
+        // Remove all the system data transfer requests for the association.
+        mSystemDataTransferRequestStore.removeRequestsByAssociationId(userId, associationId);
+
         final List<AssociationInfo> otherAssociations =
                 mAssociationStore.getAssociationsForPackage(userId, packageName);
 

@@ -355,6 +355,12 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
 
     @Override
     public void onPanelExpansionChanged(float fraction, boolean expanded, boolean tracking) {
+        // Avoid having the shade and the bouncer open at the same time over a dream.
+        final boolean hideBouncerOverDream =
+                mDreamOverlayStateController.isOverlayActive()
+                        && (mNotificationPanelViewController.isExpanded()
+                        || mNotificationPanelViewController.isExpanding());
+
         // We don't want to translate the bounce when:
         // • Keyguard is occluded, because we're in a FLAG_SHOW_WHEN_LOCKED activity and need to
         //   conserve the original animation.
@@ -371,7 +377,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
             return;
         } else if (bouncerNeedsScrimming()) {
             mBouncer.setExpansion(KeyguardBouncer.EXPANSION_VISIBLE);
-        } else if (mShowing) {
+        } else if (mShowing && !hideBouncerOverDream) {
             if (!isWakeAndUnlocking()
                     && !mCentralSurfaces.isInLaunchTransition()
                     && !isUnlockCollapsing()) {
@@ -1055,8 +1061,10 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         if ((showing && !occluded) != (mLastShowing && !mLastOccluded) || mFirstUpdate) {
             mKeyguardUpdateManager.onKeyguardVisibilityChanged(showing && !occluded);
         }
-        if (bouncerIsOrWillBeShowing != mLastBouncerIsOrWillBeShowing || mFirstUpdate) {
-            mKeyguardUpdateManager.sendKeyguardBouncerChanged(bouncerIsOrWillBeShowing);
+        if (bouncerIsOrWillBeShowing != mLastBouncerIsOrWillBeShowing || mFirstUpdate
+                || bouncerShowing != mLastBouncerShowing) {
+            mKeyguardUpdateManager.sendKeyguardBouncerChanged(bouncerIsOrWillBeShowing,
+                    bouncerShowing);
         }
 
         mFirstUpdate = false;

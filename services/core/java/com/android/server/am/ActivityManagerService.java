@@ -309,7 +309,6 @@ import android.sysprop.InitProperties;
 import android.sysprop.VoldProperties;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
-import android.text.format.DateUtils;
 import android.text.style.SuggestionSpan;
 import android.util.ArrayMap;
 import android.util.ArraySet;
@@ -8691,7 +8690,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
     }
 
-    private final ArrayMap<String, long[]> mErrorClusterRecords = new ArrayMap<>();
+    private final DropboxRateLimiter mDropboxRateLimiter = new DropboxRateLimiter();
 
     /**
      * Write a description of an error (crash, WTF, ANR) to the drop box.
@@ -8726,22 +8725,8 @@ public class ActivityManagerService extends IActivityManager.Stub
         final String dropboxTag = processClass(process) + "_" + eventType;
         if (dbox == null || !dbox.isTagEnabled(dropboxTag)) return;
 
-        // Rate-limit how often we're willing to do the heavy lifting below to
-        // collect and record logs; currently 5 logs per 10 second period per eventType.
-        final long now = SystemClock.elapsedRealtime();
-        synchronized (mErrorClusterRecords) {
-            long[] errRecord = mErrorClusterRecords.get(eventType);
-            if (errRecord == null) {
-                errRecord = new long[2]; // [0]: startTime, [1]: count
-                mErrorClusterRecords.put(eventType, errRecord);
-            }
-            if (now - errRecord[0] > 10 * DateUtils.SECOND_IN_MILLIS) {
-                errRecord[0] = now;
-                errRecord[1] = 1L;
-            } else {
-                if (errRecord[1]++ >= 5) return;
-            }
-        }
+        // Check if we should rate limit and abort early if needed.
+        if (mDropboxRateLimiter.shouldRateLimit(eventType, processName)) return;
 
         final StringBuilder sb = new StringBuilder(1024);
         appendDropBoxProcessHeaders(process, processName, sb);

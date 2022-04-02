@@ -2084,6 +2084,7 @@ public final class DisplayManagerService extends SystemService {
     }
 
     private SurfaceControl.ScreenshotHardwareBuffer systemScreenshotInternal(int displayId) {
+        final SurfaceControl.DisplayCaptureArgs captureArgs;
         synchronized (mSyncRoot) {
             final IBinder token = getDisplayToken(displayId);
             if (token == null) {
@@ -2095,15 +2096,14 @@ public final class DisplayManagerService extends SystemService {
             }
 
             final DisplayInfo displayInfo = logicalDisplay.getDisplayInfoLocked();
-            final SurfaceControl.DisplayCaptureArgs captureArgs =
-                    new SurfaceControl.DisplayCaptureArgs.Builder(token)
-                            .setSize(displayInfo.getNaturalWidth(), displayInfo.getNaturalHeight())
-                            .setUseIdentityTransform(true)
-                            .setCaptureSecureLayers(true)
-                            .setAllowProtected(true)
-                            .build();
-            return SurfaceControl.captureDisplay(captureArgs);
+            captureArgs = new SurfaceControl.DisplayCaptureArgs.Builder(token)
+                    .setSize(displayInfo.getNaturalWidth(), displayInfo.getNaturalHeight())
+                    .setUseIdentityTransform(true)
+                    .setCaptureSecureLayers(true)
+                    .setAllowProtected(true)
+                    .build();
         }
+        return SurfaceControl.captureDisplay(captureArgs);
     }
 
     private SurfaceControl.ScreenshotHardwareBuffer userScreenshotInternal(int displayId) {

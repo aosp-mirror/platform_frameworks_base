@@ -140,6 +140,7 @@ internal class FooterActionsController @Inject constructor(
 
     override fun onInit() {
         multiUserSwitchController.init()
+        securityFooterController.init()
         fgsManagerFooterController.init()
     }
 

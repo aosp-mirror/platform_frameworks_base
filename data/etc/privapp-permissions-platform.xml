@@ -116,24 +116,6 @@ applications that come with the platform
         <permission name="android.permission.PACKAGE_USAGE_STATS"/>
     </privapp-permissions>
 
-    <privapp-permissions package="com.android.permissioncontroller">
-        <permission name="android.permission.CLEAR_APP_CACHE"/>
-        <permission name="android.permission.MANAGE_USERS"/>
-        <permission name="android.permission.OBSERVE_GRANT_REVOKE_PERMISSIONS"/>
-        <permission name="android.permission.GET_APP_OPS_STATS"/>
-        <permission name="android.permission.UPDATE_APP_OPS_STATS"/>
-        <permission name="android.permission.REQUEST_INCIDENT_REPORT_APPROVAL"/>
-        <permission name="android.permission.APPROVE_INCIDENT_REPORTS"/>
-        <permission name="android.permission.READ_PRIVILEGED_PHONE_STATE" />
-        <permission name="android.permission.SUBSTITUTE_NOTIFICATION_APP_NAME" />
-        <permission name="android.permission.PACKAGE_USAGE_STATS" />
-        <permission name="android.permission.CHANGE_COMPONENT_ENABLED_STATE" />
-        <permission name="android.permission.MODIFY_AUDIO_ROUTING" />
-        <permission name="android.permission.WRITE_SECURE_SETTINGS" />
-        <permission name="android.permission.READ_SAFETY_CENTER_STATUS" />
-        <permission name="android.permission.SEND_SAFETY_CENTER_UPDATE" />
-    </privapp-permissions>
-
     <privapp-permissions package="com.android.phone">
         <permission name="android.permission.ACCESS_IMS_CALL_SERVICE"/>
         <permission name="android.permission.BIND_CARRIER_MESSAGING_SERVICE"/>
@@ -297,6 +279,7 @@ applications that come with the platform
         <permission name="android.permission.MANAGE_ROLLBACKS"/>
         <permission name="android.permission.MANAGE_USB"/>
         <!-- Needed for tests only -->
+        <permission name="android.permission.MANAGE_CLOUDSEARCH" />
         <permission name="android.permission.MANAGE_WALLPAPER_EFFECTS_GENERATION" />
         <permission name="android.permission.MODIFY_APPWIDGET_BIND_PERMISSIONS"/>
         <permission name="android.permission.MODIFY_DAY_NIGHT_MODE"/>

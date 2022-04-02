@@ -80,6 +80,8 @@ import android.widget.TextView;
 import com.android.internal.logging.UiEventLogger;
 import com.android.internal.policy.PhoneWindow;
 import com.android.systemui.R;
+import com.android.systemui.broadcast.BroadcastDispatcher;
+import com.android.systemui.broadcast.BroadcastSender;
 import com.android.systemui.screenshot.DraggableConstraintLayout;
 import com.android.systemui.screenshot.FloatingWindowUtil;
 import com.android.systemui.screenshot.OverlayActionChip;
@@ -105,6 +107,7 @@ public class ClipboardOverlayController {
 
     private final Context mContext;
     private final UiEventLogger mUiEventLogger;
+    private final BroadcastDispatcher mBroadcastDispatcher;
     private final DisplayManager mDisplayManager;
     private final DisplayMetrics mDisplayMetrics;
     private final WindowManager mWindowManager;
@@ -137,8 +140,11 @@ public class ClipboardOverlayController {
 
     private boolean mBlockAttach = false;
 
-    public ClipboardOverlayController(
-            Context context, TimeoutHandler timeoutHandler, UiEventLogger uiEventLogger) {
+    public ClipboardOverlayController(Context context,
+            BroadcastDispatcher broadcastDispatcher,
+            BroadcastSender broadcastSender,
+            TimeoutHandler timeoutHandler, UiEventLogger uiEventLogger) {
+        mBroadcastDispatcher = broadcastDispatcher;
         mDisplayManager = requireNonNull(context.getSystemService(DisplayManager.class));
         final Context displayContext = context.createDisplayContext(getDefaultDisplay());
         mContext = displayContext.createWindowContext(TYPE_SCREENSHOT, null);
@@ -215,17 +221,6 @@ public class ClipboardOverlayController {
         mRemoteCopyChip.setIcon(
                 Icon.createWithResource(mContext, R.drawable.ic_baseline_devices_24), true);
 
-        // Only show remote copy if it's available.
-        PackageManager packageManager = mContext.getPackageManager();
-        if (packageManager.resolveActivity(getRemoteCopyIntent(), 0) != null) {
-            mRemoteCopyChip.setOnClickListener((v) -> {
-                showNearby();
-            });
-            mRemoteCopyChip.setAlpha(1f);
-        } else {
-            mRemoteCopyChip.setVisibility(View.GONE);
-        }
-
         attachWindow();
         withWindowAttached(() -> {
             mWindow.setContentView(mContainer);
@@ -247,9 +242,9 @@ public class ClipboardOverlayController {
                 }
             }
         };
-        mContext.registerReceiver(mCloseDialogsReceiver,
-                new IntentFilter(ACTION_CLOSE_SYSTEM_DIALOGS));
 
+        mBroadcastDispatcher.registerReceiver(mCloseDialogsReceiver,
+                new IntentFilter(ACTION_CLOSE_SYSTEM_DIALOGS));
         mScreenshotReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
@@ -258,14 +253,16 @@ public class ClipboardOverlayController {
                 }
             }
         };
-        mContext.registerReceiver(mScreenshotReceiver, new IntentFilter(SCREENSHOT_ACTION),
-                SELF_PERMISSION, null);
+
+        mBroadcastDispatcher.registerReceiver(mScreenshotReceiver,
+                new IntentFilter(SCREENSHOT_ACTION), null, null, Context.RECEIVER_EXPORTED,
+                SELF_PERMISSION);
         monitorOutsideTouches();
 
         Intent copyIntent = new Intent(COPY_OVERLAY_ACTION);
         // Set package name so the system knows it's safe
         copyIntent.setPackage(mContext.getPackageName());
-        mContext.sendBroadcast(copyIntent, SELF_PERMISSION);
+        broadcastSender.sendBroadcast(copyIntent, SELF_PERMISSION);
     }
 
     void setClipData(ClipData clipData, String clipSource) {
@@ -285,6 +282,20 @@ public class ClipboardOverlayController {
         } else {
             showTextPreview(
                     mContext.getResources().getString(R.string.clipboard_overlay_text_copied));
+        }
+        Intent remoteCopyIntent = getRemoteCopyIntent(clipData);
+        // Only show remote copy if it's available.
+        PackageManager packageManager = mContext.getPackageManager();
+        if (remoteCopyIntent != null && packageManager.resolveActivity(
+                remoteCopyIntent, PackageManager.ResolveInfoFlags.of(0)) != null) {
+            mRemoteCopyChip.setOnClickListener((v) -> {
+                mUiEventLogger.log(CLIPBOARD_OVERLAY_REMOTE_COPY_TAPPED);
+                mContext.startActivity(remoteCopyIntent);
+                animateOut();
+            });
+            mRemoteCopyChip.setAlpha(1f);
+        } else {
+            mRemoteCopyChip.setVisibility(View.GONE);
         }
         mTimeoutHandler.resetTimeout();
     }
@@ -389,12 +400,6 @@ public class ClipboardOverlayController {
         animateOut();
     }
 
-    private void showNearby() {
-        mUiEventLogger.log(CLIPBOARD_OVERLAY_REMOTE_COPY_TAPPED);
-        mContext.startActivity(getRemoteCopyIntent());
-        animateOut();
-    }
-
     private void showTextPreview(CharSequence text) {
         mTextPreview.setVisibility(View.VISIBLE);
         mImagePreview.setVisibility(View.GONE);
@@ -434,8 +439,15 @@ public class ClipboardOverlayController {
         mImagePreview.setOnClickListener(listener);
     }
 
-    private Intent getRemoteCopyIntent() {
+    private Intent getRemoteCopyIntent(ClipData clipData) {
+        String remoteCopyPackage = mContext.getString(R.string.config_remoteCopyPackage);
+        if (TextUtils.isEmpty(remoteCopyPackage)) {
+            return null;
+        }
         Intent nearbyIntent = new Intent(REMOTE_COPY_ACTION);
+        nearbyIntent.setComponent(ComponentName.unflattenFromString(remoteCopyPackage));
+        nearbyIntent.setClipData(clipData);
+        nearbyIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
         nearbyIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         return nearbyIntent;
     }
@@ -490,11 +502,11 @@ public class ClipboardOverlayController {
             mWindowManager.removeViewImmediate(decorView);
         }
         if (mCloseDialogsReceiver != null) {
-            mContext.unregisterReceiver(mCloseDialogsReceiver);
+            mBroadcastDispatcher.unregisterReceiver(mCloseDialogsReceiver);
             mCloseDialogsReceiver = null;
         }
         if (mScreenshotReceiver != null) {
-            mContext.unregisterReceiver(mScreenshotReceiver);
+            mBroadcastDispatcher.unregisterReceiver(mScreenshotReceiver);
             mScreenshotReceiver = null;
         }
         if (mInputEventReceiver != null) {
