@@ -4074,7 +4074,7 @@ package android.app {
     method @Deprecated public void onTabUnselected(android.app.ActionBar.Tab, android.app.FragmentTransaction);
   }
 
-  @UiContext public class Activity extends android.view.ContextThemeWrapper implements android.content.ComponentCallbacks2 android.view.KeyEvent.Callback android.view.LayoutInflater.Factory2 android.window.OnBackInvokedDispatcherOwner android.view.View.OnCreateContextMenuListener android.view.Window.Callback {
+  @UiContext public class Activity extends android.view.ContextThemeWrapper implements android.content.ComponentCallbacks2 android.view.KeyEvent.Callback android.view.LayoutInflater.Factory2 android.view.View.OnCreateContextMenuListener android.view.Window.Callback {
     ctor public Activity();
     method public void addContentView(android.view.View, android.view.ViewGroup.LayoutParams);
     method public void closeContextMenu();
@@ -5018,7 +5018,7 @@ package android.app {
     method public void onDateSet(android.widget.DatePicker, int, int, int);
   }
 
-  public class Dialog implements android.content.DialogInterface android.view.KeyEvent.Callback android.window.OnBackInvokedDispatcherOwner android.view.View.OnCreateContextMenuListener android.view.Window.Callback {
+  public class Dialog implements android.content.DialogInterface android.view.KeyEvent.Callback android.view.View.OnCreateContextMenuListener android.view.Window.Callback {
     ctor public Dialog(@NonNull @UiContext android.content.Context);
     ctor public Dialog(@NonNull @UiContext android.content.Context, @StyleRes int);
     ctor protected Dialog(@NonNull @UiContext android.content.Context, boolean, @Nullable android.content.DialogInterface.OnCancelListener);
@@ -51087,6 +51087,7 @@ package android.view {
     method public android.media.session.MediaController getMediaController();
     method @ColorInt public abstract int getNavigationBarColor();
     method @ColorInt public int getNavigationBarDividerColor();
+    method @NonNull public android.window.OnBackInvokedDispatcher getOnBackInvokedDispatcher();
     method public android.transition.Transition getReenterTransition();
     method public android.transition.Transition getReturnTransition();
     method @Nullable public android.view.AttachedSurfaceControl getRootSurfaceControl();
@@ -57989,10 +57990,6 @@ package android.window {
     method public void unregisterOnBackInvokedCallback(@NonNull android.window.OnBackInvokedCallback);
     field public static final int PRIORITY_DEFAULT = 0; // 0x0
     field public static final int PRIORITY_OVERLAY = 1000000; // 0xf4240
-  }
-
-  public interface OnBackInvokedDispatcherOwner {
-    method @NonNull public android.window.OnBackInvokedDispatcher getOnBackInvokedDispatcher();
   }
 
   public interface SplashScreen {

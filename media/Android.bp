@@ -36,7 +36,7 @@ aidl_interface {
     ],
     imports: [
         "android.media.audio.common.types",
-        "android.media.soundtrigger.types",
+        "android.media.soundtrigger.types-V1",
         "media_permission-aidl",
     ],
 }
@@ -166,4 +166,11 @@ aidl_interface {
     imports: [
         "android.media.audio.common.types",
     ],
+    versions_with_info: [
+        {
+            version: "1",
+            imports: ["android.media.audio.common.types-V1"],
+        },
+    ],
+
 }

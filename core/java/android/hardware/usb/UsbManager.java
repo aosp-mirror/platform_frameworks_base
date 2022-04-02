@@ -1360,11 +1360,11 @@ public class UsbManager {
      * @hide
      */
     @RequiresPermission(Manifest.permission.MANAGE_USB)
-    boolean resetUsbPort(@NonNull UsbPort port, int operationId,
+    void resetUsbPort(@NonNull UsbPort port, int operationId,
             IUsbOperationInternal callback) {
         Objects.requireNonNull(port, "resetUsbPort: port must not be null. opId:" + operationId);
         try {
-            return mService.resetUsbPort(port.getId(), operationId, callback);
+            mService.resetUsbPort(port.getId(), operationId, callback);
         } catch (RemoteException e) {
             Log.e(TAG, "resetUsbPort: failed. ", e);
             try {
