@@ -6960,9 +6960,13 @@
         <!-- Special option for window animations: whether window should have rounded corners.
              @see ScreenDecorationsUtils#getWindowCornerRadius(Resources) -->
         <attr name="hasRoundedCorners" format="boolean" />
+        <!-- Special option for window animations: whether to show a background behind the animating
+             windows. By default the window's background is used unless overridden by the
+             animation. -->
+        <attr name="showBackdrop" format="boolean" />
         <!-- Special option for window animations: whether the window's background should be used as
              a background to the animation. -->
-        <attr name="showBackground" format="boolean" />
+        <attr name="backdropColor" format="color" />
     </declare-styleable>
 
     <declare-styleable name="AnimationSet">

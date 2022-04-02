@@ -171,6 +171,7 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
     private boolean mShouldUpdateRecents;
     private boolean mExitSplitScreenOnHide;
     private boolean mIsDividerRemoteAnimating;
+    private boolean mResizingSplits;
 
     /** The target stage to dismiss to when unlock after folded. */
     @StageType
@@ -1093,10 +1094,11 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
 
     @Override
     public void onSnappedToDismiss(boolean bottomOrRight) {
+        setResizingSplits(false /* resizing */);
+
         final boolean mainStageToTop =
                 bottomOrRight ? mSideStagePosition == SPLIT_POSITION_BOTTOM_OR_RIGHT
                         : mSideStagePosition == SPLIT_POSITION_TOP_OR_LEFT;
-
         if (!ENABLE_SHELL_TRANSITIONS) {
             exitSplitScreen(mainStageToTop ? mMainStage : mSideStage, EXIT_REASON_DRAG_DIVIDER);
             return;
@@ -1125,6 +1127,7 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
     @Override
     public void onLayoutSizeChanging(SplitLayout layout) {
         mSyncQueue.runInSync(t -> {
+            setResizingSplits(true /* resizing */);
             updateSurfaceBounds(layout, t);
             mMainStage.onResizing(getMainStageBounds(), t);
             mSideStage.onResizing(getSideStageBounds(), t);
@@ -1138,6 +1141,7 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         updateUnfoldBounds();
         mSyncQueue.queue(wct);
         mSyncQueue.runInSync(t -> {
+            setResizingSplits(false /* resizing */);
             updateSurfaceBounds(layout, t);
             mMainStage.onResized(t);
             mSideStage.onResized(t);
@@ -1177,6 +1181,16 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                 mSideStagePosition == SPLIT_POSITION_TOP_OR_LEFT ? mMainStage : mSideStage;
         (layout != null ? layout : mSplitLayout).applySurfaceChanges(t, topLeftStage.mRootLeash,
                 bottomRightStage.mRootLeash, topLeftStage.mDimLayer, bottomRightStage.mDimLayer);
+    }
+
+    void setResizingSplits(boolean resizing) {
+        if (resizing == mResizingSplits) return;
+        try {
+            ActivityTaskManager.getService().setSplitScreenResizing(resizing);
+            mResizingSplits = resizing;
+        } catch (RemoteException e) {
+            Slog.w(TAG, "Error calling setSplitScreenResizing", e);
+        }
     }
 
     @Override

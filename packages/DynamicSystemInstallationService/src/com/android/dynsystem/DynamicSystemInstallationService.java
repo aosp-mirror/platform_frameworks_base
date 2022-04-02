@@ -110,6 +110,7 @@ public class DynamicSystemInstallationService extends Service
     private static final int EVENT_DSU_PROGRESS_UPDATE = 120000;
     private static final int EVENT_DSU_INSTALL_COMPLETE = 120001;
     private static final int EVENT_DSU_INSTALL_FAILED = 120002;
+    private static final int EVENT_DSU_INSTALL_INSUFFICIENT_SPACE = 120003;
 
     protected static void logEventProgressUpdate(
             String partitionName,
@@ -134,6 +135,10 @@ public class DynamicSystemInstallationService extends Service
 
     protected static void logEventFailed(String cause) {
         EventLog.writeEvent(EVENT_DSU_INSTALL_FAILED, cause);
+    }
+
+    protected static void logEventInsufficientSpace() {
+        EventLog.writeEvent(EVENT_DSU_INSTALL_INSUFFICIENT_SPACE);
     }
 
     /*
@@ -258,6 +263,8 @@ public class DynamicSystemInstallationService extends Service
 
         if (result == RESULT_CANCELLED) {
             logEventFailed("Dynamic System installation task is canceled by the user.");
+        } else if (detail instanceof InstallationAsyncTask.InsufficientSpaceException) {
+            logEventInsufficientSpace();
         } else {
             logEventFailed("error: " + detail);
         }

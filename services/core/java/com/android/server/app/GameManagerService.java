@@ -572,11 +572,13 @@ public final class GameManagerService extends IGameManagerService.Stub {
             public static final String DEFAULT_SCALING = "1.0";
             public static final String DEFAULT_FPS = "";
             public static final String ANGLE_KEY = "useAngle";
+            public static final String LOADING_BOOST_KEY = "loadingBoost";
 
             private final @GameMode int mGameMode;
             private String mScaling;
             private String mFps;
             private final boolean mUseAngle;
+            private final int mLoadingBoostDuration;
 
             GameModeConfiguration(KeyValueListParser parser) {
                 mGameMode = parser.getInt(MODE_KEY, GameManager.GAME_MODE_UNSUPPORTED);
@@ -595,6 +597,9 @@ public final class GameManagerService extends IGameManagerService.Stub {
                 // - The Phenotype config has enabled it.
                 mUseAngle = mAllowAngle && !willGamePerformOptimizations(mGameMode)
                         && parser.getBoolean(ANGLE_KEY, false);
+
+                mLoadingBoostDuration = willGamePerformOptimizations(mGameMode) ? -1
+                        : parser.getInt(LOADING_BOOST_KEY, -1);
             }
 
             public int getGameMode() {
@@ -611,6 +616,10 @@ public final class GameManagerService extends IGameManagerService.Stub {
 
             public boolean getUseAngle() {
                 return mUseAngle;
+            }
+
+            public int getLoadingBoostDuration() {
+                return mLoadingBoostDuration;
             }
 
             public void setScaling(String scaling) {
@@ -633,7 +642,8 @@ public final class GameManagerService extends IGameManagerService.Stub {
              */
             public String toString() {
                 return "[Game Mode:" + mGameMode + ",Scaling:" + mScaling + ",Use Angle:"
-                        + mUseAngle + ",Fps:" + mFps + "]";
+                        + mUseAngle + ",Fps:" + mFps + ",Loading Boost Duration:"
+                        + mLoadingBoostDuration + "]";
             }
 
             /**
@@ -964,6 +974,63 @@ public final class GameManagerService extends IGameManagerService.Stub {
                 return false;
             }
             return gameModeConfiguration.getUseAngle();
+        }
+    }
+
+    /**
+     * If loading boost is applicable for the package for the currently enabled game mode, return
+     * the boost duration. If no configuration is available for the selected package or mode, the
+     * default is returned.
+     */
+    @VisibleForTesting
+    public int getLoadingBoostDuration(String packageName, int userId)
+            throws SecurityException {
+        final int gameMode = getGameMode(packageName, userId);
+        if (gameMode == GameManager.GAME_MODE_UNSUPPORTED) {
+            return -1;
+        }
+
+        synchronized (mDeviceConfigLock) {
+            final GamePackageConfiguration config = mConfigs.get(packageName);
+            if (config == null) {
+                return -1;
+            }
+            GamePackageConfiguration.GameModeConfiguration gameModeConfiguration =
+                    config.getGameModeConfiguration(gameMode);
+            if (gameModeConfiguration == null) {
+                return -1;
+            }
+            return gameModeConfiguration.getLoadingBoostDuration();
+        }
+    }
+
+    /**
+     * If loading boost is enabled, invoke it.
+     */
+    @Override
+    @RequiresPermission(Manifest.permission.MANAGE_GAME_MODE)
+    @GameMode public void notifyGraphicsEnvironmentSetup(String packageName, int userId)
+            throws SecurityException {
+        userId = ActivityManager.handleIncomingUser(Binder.getCallingPid(),
+                Binder.getCallingUid(), userId, false, true, "notifyGraphicsEnvironmentSetup",
+                "com.android.server.app.GameManagerService");
+
+        // Restrict to games only.
+        if (!isPackageGame(packageName, userId)) {
+            return;
+        }
+
+        if (!isValidPackageName(packageName, userId)) {
+            return;
+        }
+
+        final int gameMode = getGameMode(packageName, userId);
+        if (gameMode == GameManager.GAME_MODE_UNSUPPORTED) {
+            return;
+        }
+        final int loadingBoostDuration = getLoadingBoostDuration(packageName, userId);
+        if (loadingBoostDuration != -1) {
+            mPowerManagerInternal.setPowerBoost(Mode.GAME_LOADING, loadingBoostDuration);
         }
     }
 

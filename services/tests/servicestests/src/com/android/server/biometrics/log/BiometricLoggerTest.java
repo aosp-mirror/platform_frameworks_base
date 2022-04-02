@@ -23,6 +23,7 @@ import static org.mockito.Mockito.anyInt;
 import static org.mockito.Mockito.anyLong;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -248,6 +249,20 @@ public class BiometricLoggerTest {
 
         callback.onClientStarted(mClient);
         callback.onClientFinished(mClient, true /* success */);
+        verify(mSensorManager, never()).registerListener(any(), any(), anyInt());
+    }
+
+    @Test
+    public void testALSCallbackDestroyed() {
+        mLogger = createLogger();
+        final CallbackWithProbe<Probe> callback =
+                mLogger.createALSCallback(true /* startWithClient */);
+
+        callback.onClientStarted(mClient);
+        callback.onClientFinished(mClient, false /* success */);
+
+        reset(mSensorManager);
+        callback.getProbe().enable();
         verify(mSensorManager, never()).registerListener(any(), any(), anyInt());
     }
 }

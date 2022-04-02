@@ -1548,7 +1548,7 @@ public class DisplayPolicy {
                 win.getRequestedVisibilities(), attachedWindowFrame, win.mGlobalScale,
                 sTmpClientFrames);
 
-        win.setFrames(sTmpClientFrames);
+        win.setFrames(sTmpClientFrames, win.mRequestedWidth, win.mRequestedHeight);
     }
 
     WindowState getTopFullscreenOpaqueWindow() {
@@ -1810,14 +1810,10 @@ public class DisplayPolicy {
     /**
      * Called when the resource overlays change.
      */
-    void onOverlayChanged() {
+    public void onOverlayChangedLw() {
         updateCurrentUserResources();
-        // Update the latest display size, cutout.
-        mDisplayContent.updateDisplayInfo();
-        // The height of status bar needs to update in case display cutout is changed.
         onConfigurationChanged();
-        // The height of status bar can affect screen size configuration.
-        mDisplayContent.reconfigureDisplayLocked();
+        mSystemGestures.onConfigurationChanged();
     }
 
     /**
