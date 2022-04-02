@@ -32,6 +32,7 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.ArrayMap;
 import android.util.Slog;
+import android.util.SparseArray;
 import android.view.RemoteAnimationDefinition;
 import android.window.ITaskFragmentOrganizer;
 import android.window.ITaskFragmentOrganizerController;
@@ -83,11 +84,12 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
                 new WeakHashMap<>();
 
         /**
-         * @see android.window.TaskFragmentOrganizer#registerRemoteAnimations(
-         * RemoteAnimationDefinition)
+         * Map from Task Id to {@link RemoteAnimationDefinition}.
+         * @see android.window.TaskFragmentOrganizer#registerRemoteAnimations(int,
+         * RemoteAnimationDefinition) )
          */
-        @Nullable
-        private RemoteAnimationDefinition mRemoteAnimationDefinition;
+        private final SparseArray<RemoteAnimationDefinition> mRemoteAnimationDefinitions =
+                new SparseArray<>();
 
         TaskFragmentOrganizerState(ITaskFragmentOrganizer organizer) {
             mOrganizer = organizer;
@@ -251,7 +253,7 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
     }
 
     @Override
-    public void registerRemoteAnimations(ITaskFragmentOrganizer organizer,
+    public void registerRemoteAnimations(ITaskFragmentOrganizer organizer, int taskId,
             RemoteAnimationDefinition definition) {
         final int pid = Binder.getCallingPid();
         final int uid = Binder.getCallingUid();
@@ -264,19 +266,20 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
             if (organizerState == null) {
                 throw new IllegalStateException("The organizer hasn't been registered.");
             }
-            if (organizerState.mRemoteAnimationDefinition != null) {
+            if (organizerState.mRemoteAnimationDefinitions.contains(taskId)) {
                 throw new IllegalStateException(
                         "The organizer has already registered remote animations="
-                                + organizerState.mRemoteAnimationDefinition);
+                                + organizerState.mRemoteAnimationDefinitions.get(taskId)
+                                + " for TaskId=" + taskId);
             }
 
             definition.setCallingPidUid(pid, uid);
-            organizerState.mRemoteAnimationDefinition = definition;
+            organizerState.mRemoteAnimationDefinitions.put(taskId, definition);
         }
     }
 
     @Override
-    public void unregisterRemoteAnimations(ITaskFragmentOrganizer organizer) {
+    public void unregisterRemoteAnimations(ITaskFragmentOrganizer organizer, int taskId) {
         final int pid = Binder.getCallingPid();
         final long uid = Binder.getCallingUid();
         synchronized (mGlobalLock) {
@@ -290,7 +293,7 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
                 return;
             }
 
-            organizerState.mRemoteAnimationDefinition = null;
+            organizerState.mRemoteAnimationDefinitions.remove(taskId);
         }
     }
 
@@ -300,11 +303,13 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
      */
     @Nullable
     public RemoteAnimationDefinition getRemoteAnimationDefinition(
-            ITaskFragmentOrganizer organizer) {
+            ITaskFragmentOrganizer organizer, int taskId) {
         synchronized (mGlobalLock) {
             final TaskFragmentOrganizerState organizerState =
                     mTaskFragmentOrganizerState.get(organizer.asBinder());
-            return organizerState != null ? organizerState.mRemoteAnimationDefinition : null;
+            return organizerState != null
+                    ? organizerState.mRemoteAnimationDefinitions.get(taskId)
+                    : null;
         }
     }
 
