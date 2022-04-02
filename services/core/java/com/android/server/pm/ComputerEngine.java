@@ -354,6 +354,11 @@ public class ComputerEngine implements Computer {
         public void dumpSharedUsersProto(ProtoOutputStream proto) {
             mSettings.dumpSharedUsersProto(proto);
         }
+
+        public List<? extends PackageStateInternal> getVolumePackages(
+                @NonNull String volumeUuid) {
+            return mSettings.getVolumePackagesLPr(volumeUuid);
+        }
     }
 
     private static final Comparator<ProviderInfo> sProviderInitOrderSorter = (p1, p2) -> {
@@ -5808,5 +5813,11 @@ public class ComputerEngine implements Computer {
     @Override
     public void dumpSharedLibrariesProto(@NonNull ProtoOutputStream proto) {
         mSharedLibraries.dumpProto(proto);
+    }
+
+    @NonNull
+    @Override
+    public List<? extends PackageStateInternal> getVolumePackages(@NonNull String volumeUuid) {
+        return mSettings.getVolumePackages(volumeUuid);
     }
 }

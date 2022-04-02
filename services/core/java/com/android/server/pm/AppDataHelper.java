@@ -386,6 +386,7 @@ final class AppDataHelper {
         final File ceDir = Environment.getDataUserCeDirectory(volumeUuid, userId);
         final File deDir = Environment.getDataUserDeDirectory(volumeUuid, userId);
 
+        final Computer snapshot = mPm.snapshotComputer();
         // First look for stale data that doesn't belong, and check if things
         // have changed since we did our last restorecon
         if ((flags & StorageManager.FLAG_STORAGE_CE) != 0) {
@@ -400,7 +401,7 @@ final class AppDataHelper {
             for (File file : files) {
                 final String packageName = file.getName();
                 try {
-                    assertPackageStorageValid(volumeUuid, packageName, userId);
+                    assertPackageStorageValid(snapshot, volumeUuid, packageName, userId);
                 } catch (PackageManagerException e) {
                     logCriticalInfo(Log.WARN, "Destroying " + file + " due to: " + e);
                     try {
@@ -417,7 +418,7 @@ final class AppDataHelper {
             for (File file : files) {
                 final String packageName = file.getName();
                 try {
-                    assertPackageStorageValid(volumeUuid, packageName, userId);
+                    assertPackageStorageValid(snapshot, volumeUuid, packageName, userId);
                 } catch (PackageManagerException e) {
                     logCriticalInfo(Log.WARN, "Destroying " + file + " due to: " + e);
                     try {
@@ -434,12 +435,9 @@ final class AppDataHelper {
         // installed for this volume and user
         Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "prepareAppDataAndMigrate");
         Installer.Batch batch = new Installer.Batch();
-        final List<PackageSetting> packages;
-        synchronized (mPm.mLock) {
-            packages = mPm.mSettings.getVolumePackagesLPr(volumeUuid);
-        }
+        List<? extends PackageStateInternal> packages = snapshot.getVolumePackages(volumeUuid);
         int preparedCount = 0;
-        for (PackageSetting ps : packages) {
+        for (PackageStateInternal ps : packages) {
             final String packageName = ps.getPackageName();
             if (ps.getPkg() == null) {
                 Slog.w(TAG, "Odd, missing scanned package " + packageName);
@@ -453,7 +451,7 @@ final class AppDataHelper {
                 continue;
             }
 
-            if (ps.getInstalled(userId)) {
+            if (ps.getUserStateOrDefault(userId).isInstalled()) {
                 prepareAppDataAndMigrate(batch, ps.getPkg(), userId, flags, migrateAppData);
                 preparedCount++;
             }
@@ -469,33 +467,23 @@ final class AppDataHelper {
      * Asserts that storage path is valid by checking that {@code packageName} is present,
      * installed for the given {@code userId} and can have app data.
      */
-    private void assertPackageStorageValid(String volumeUuid, String packageName, int userId)
-            throws PackageManagerException {
-        synchronized (mPm.mLock) {
-            // Normalize package name to handle renamed packages
-            packageName = normalizePackageNameLPr(packageName);
-
-            final PackageSetting ps = mPm.mSettings.getPackageLPr(packageName);
-            if (ps == null) {
-                throw new PackageManagerException("Package " + packageName + " is unknown");
-            } else if (!TextUtils.equals(volumeUuid, ps.getVolumeUuid())) {
-                throw new PackageManagerException(
-                        "Package " + packageName + " found on unknown volume " + volumeUuid
-                                + "; expected volume " + ps.getVolumeUuid());
-            } else if (!ps.getInstalled(userId)) {
-                throw new PackageManagerException(
-                        "Package " + packageName + " not installed for user " + userId);
-            } else if (ps.getPkg() != null && !shouldHaveAppStorage(ps.getPkg())) {
-                throw new PackageManagerException(
-                        "Package " + packageName + " shouldn't have storage");
-            }
+    private void assertPackageStorageValid(@NonNull Computer snapshot, String volumeUuid,
+            String packageName, int userId) throws PackageManagerException {
+        final PackageStateInternal packageState = snapshot.getPackageStateInternal(packageName);
+        if (packageState == null) {
+            throw new PackageManagerException("Package " + packageName + " is unknown");
+        } else if (!TextUtils.equals(volumeUuid, packageState.getVolumeUuid())) {
+            throw new PackageManagerException(
+                    "Package " + packageName + " found on unknown volume " + volumeUuid
+                            + "; expected volume " + packageState.getVolumeUuid());
+        } else if (!packageState.getUserStateOrDefault(userId).isInstalled()) {
+            throw new PackageManagerException(
+                    "Package " + packageName + " not installed for user " + userId);
+        } else if (packageState.getPkg() != null
+                && !shouldHaveAppStorage(packageState.getPkg())) {
+            throw new PackageManagerException(
+                    "Package " + packageName + " shouldn't have storage");
         }
-    }
-
-    @GuardedBy("mPm.mLock")
-    private String normalizePackageNameLPr(String packageName) {
-        String normalizedPackageName = mPm.mSettings.getRenamedPackageLPr(packageName);
-        return normalizedPackageName != null ? normalizedPackageName : packageName;
     }
 
     /**
