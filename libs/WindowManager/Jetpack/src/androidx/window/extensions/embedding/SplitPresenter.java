@@ -419,7 +419,11 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
             }
         }
 
-        // TODO(b/190433398): Check if the client-side available info about parent bounds is enough.
+        return getTaskBoundsFromActivity(activity);
+    }
+
+    @NonNull
+    static Rect getTaskBoundsFromActivity(@NonNull Activity activity) {
         if (!activity.isInMultiWindowMode()) {
             // In fullscreen mode the max bounds should correspond to the task bounds.
             return activity.getResources().getConfiguration().windowConfiguration.getMaxBounds();
