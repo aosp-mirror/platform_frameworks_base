@@ -874,8 +874,8 @@ public final class DeviceConfig {
     /**
      * Delete a property with the provided name and value in the provided namespace
      *
-     * @param namespace   The namespace containing the property to create or update.
-     * @param name        The name of the property to create or update.
+     * @param namespace   The namespace containing the property to delete.
+     * @param name        The name of the property to delete.
      * @return True if the property was deleted or it did not exist in the first place.
      * False if the storage implementation throws errors.
      * @hide
