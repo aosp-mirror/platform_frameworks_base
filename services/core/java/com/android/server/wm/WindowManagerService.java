@@ -181,7 +181,6 @@ import android.hardware.configstore.V1_1.ISurfaceFlingerConfigs;
 import android.hardware.display.DisplayManager;
 import android.hardware.display.DisplayManagerInternal;
 import android.hardware.input.InputManager;
-import android.hardware.input.InputManagerInternal;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Build;
@@ -256,7 +255,6 @@ import android.view.IWindowSessionCallback;
 import android.view.InputApplicationHandle;
 import android.view.InputChannel;
 import android.view.InputDevice;
-import android.view.InputEvent;
 import android.view.InputWindowHandle;
 import android.view.InsetsSourceControl;
 import android.view.InsetsState;
@@ -2639,7 +2637,17 @@ public class WindowManagerService extends IWindowManager.Stub
 
     void updateWindowLayout(Session session, IWindow client, LayoutParams attrs, int flags,
             ClientWindowFrames clientWindowFrames, int requestedWidth, int requestedHeight) {
-        // TODO(b/161810301): Finish the implementation.
+        final long origId = Binder.clearCallingIdentity();
+        synchronized (mGlobalLock) {
+            final WindowState win = windowForClientLocked(session, client, false);
+            if (win == null) {
+                return;
+            }
+            win.setFrames(clientWindowFrames, requestedWidth, requestedHeight);
+
+            // TODO(b/161810301): Finish the implementation.
+        }
+        Binder.restoreCallingIdentity(origId);
     }
 
     public boolean outOfMemoryWindow(Session session, IWindow client) {
@@ -6305,8 +6313,6 @@ public class WindowManagerService extends IWindowManager.Stub
                         + " callers=" + Debug.getCallers(3));
                 return NAV_BAR_INVALID;
             }
-            displayContent.performLayout(false /* initial */,
-                    false /* updateInputWindows */);
             return displayContent.getDisplayPolicy().getNavBarPosition();
         }
     }
@@ -6968,17 +6974,13 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     public void onOverlayChanged() {
-        // Post to display thread so it can get the latest display info.
-        mH.post(() -> {
-            synchronized (mGlobalLock) {
-                mAtmService.deferWindowLayout();
-                try {
-                    mRoot.forAllDisplays(dc -> dc.getDisplayPolicy().onOverlayChanged());
-                } finally {
-                    mAtmService.continueWindowLayout();
-                }
-            }
-        });
+        synchronized (mGlobalLock) {
+            mRoot.forAllDisplays(displayContent -> {
+                displayContent.getDisplayPolicy().onOverlayChangedLw();
+                displayContent.updateDisplayInfo();
+            });
+            requestTraversal();
+        }
     }
 
     @Override
@@ -8313,37 +8315,6 @@ public class WindowManagerService extends IWindowManager.Stub
             mRoot.forAllDisplayPolicies(c);
             c.recycle();
         }
-    }
-
-    @Override
-    public boolean injectInputAfterTransactionsApplied(InputEvent ev, int mode,
-            boolean waitForAnimations) {
-        boolean isDown;
-        boolean isUp;
-
-        if (ev instanceof KeyEvent) {
-            KeyEvent keyEvent = (KeyEvent) ev;
-            isDown = keyEvent.getAction() == KeyEvent.ACTION_DOWN;
-            isUp = keyEvent.getAction() == KeyEvent.ACTION_UP;
-        } else {
-            MotionEvent motionEvent = (MotionEvent) ev;
-            isDown = motionEvent.getAction() == MotionEvent.ACTION_DOWN;
-            isUp = motionEvent.getAction() == MotionEvent.ACTION_UP;
-        }
-        final boolean isMouseEvent = ev.getSource() == InputDevice.SOURCE_MOUSE;
-
-        // For ACTION_DOWN, syncInputTransactions before injecting input.
-        // For all mouse events, also sync before injecting.
-        // For ACTION_UP, sync after injecting.
-        if (isDown || isMouseEvent) {
-            syncInputTransactions(waitForAnimations);
-        }
-        final boolean result =
-                LocalServices.getService(InputManagerInternal.class).injectInputEvent(ev, mode);
-        if (isUp) {
-            syncInputTransactions(waitForAnimations);
-        }
-        return result;
     }
 
     @Override

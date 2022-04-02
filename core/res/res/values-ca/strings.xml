@@ -390,7 +390,7 @@
     <string name="permlab_systemAlertWindow" msgid="5757218350944719065">"Aquesta aplicació pot mostrar-se a sobre d\'altres aplicacions"</string>
     <string name="permdesc_systemAlertWindow" msgid="1145660714855738308">"Aquesta aplicació pot mostrar-se a sobre d\'altres aplicacions o d\'altres parts de la pantalla. Això pot interferir en l\'ús normal de les aplicacions i alterar la manera en què es mostren."</string>
     <string name="permlab_runInBackground" msgid="541863968571682785">"Executar en segon pla"</string>
-    <string name="permdesc_runInBackground" msgid="4344539472115495141">"Aquesta aplicació es pot executar en segon pla. Això consumeix la bateria més ràpidament."</string>
+    <string name="permdesc_runInBackground" msgid="4344539472115495141">"Aquesta aplicació es pot executar en segon pla. Això pot exhaurir la bateria més ràpidament."</string>
     <string name="permlab_useDataInBackground" msgid="783415807623038947">"Utilitzar dades en segon pla"</string>
     <string name="permdesc_useDataInBackground" msgid="1230753883865891987">"Aquesta aplicació utilitza dades en segon pla. Això incrementa l\'ús de dades."</string>
     <string name="permlab_persistentActivity" msgid="464970041740567970">"fes que l\'aplicació s\'executi sempre"</string>
@@ -1933,8 +1933,7 @@
     <string name="app_blocked_title" msgid="7353262160455028160">"L\'aplicació no està disponible"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"Ara mateix, <xliff:g id="APP_NAME">%1$s</xliff:g> no està disponible."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> no està disponible"</string>
-    <!-- no translation found for app_streaming_blocked_title_for_permission_dialog (4483161748582966785) -->
-    <skip />
+    <string name="app_streaming_blocked_title_for_permission_dialog" msgid="4483161748582966785">"Permís necessari"</string>
     <string name="app_streaming_blocked_message" product="tv" msgid="4003011766528814377">"En aquests moments, no es pot accedir a aquesta aplicació al dispositiu <xliff:g id="DEVICE">%1$s</xliff:g>. Prova-ho al dispositiu Android TV."</string>
     <string name="app_streaming_blocked_message" product="tablet" msgid="4242053045964946062">"En aquests moments, no es pot accedir a aquesta aplicació al dispositiu <xliff:g id="DEVICE">%1$s</xliff:g>. Prova-ho a la tauleta."</string>
     <string name="app_streaming_blocked_message" product="default" msgid="6159168735030739398">"En aquests moments, no es pot accedir a aquesta aplicació al dispositiu <xliff:g id="DEVICE">%1$s</xliff:g>. Prova-ho al telèfon."</string>
@@ -2262,7 +2261,7 @@
     <string name="ui_translation_accessibility_translation_finished" msgid="3057830947610088465">"Missatge traduït de <xliff:g id="FROM_LANGUAGE">%1$s</xliff:g> a <xliff:g id="TO_LANGUAGE">%2$s</xliff:g>."</string>
     <string name="notification_channel_abusive_bg_apps" msgid="6092140213264920355">"Activitat en segon pla"</string>
     <string name="notification_title_abusive_bg_apps" msgid="344582472797982073">"Activitat en segon pla"</string>
-    <string name="notification_content_abusive_bg_apps" msgid="5572096708044958249">"<xliff:g id="APP">%1$s</xliff:g> s\'està executant en segon pla i esgotant la bateria. Toca per revisar-ho."</string>
+    <string name="notification_content_abusive_bg_apps" msgid="5572096708044958249">"<xliff:g id="APP">%1$s</xliff:g> s\'està executant en segon pla i està exhaurint la bateria. Toca per revisar-ho."</string>
     <string name="notification_content_long_running_fgs" msgid="8878031652441570178">"Fa molta estona que <xliff:g id="APP">%1$s</xliff:g> s\'està executant en segon pla. Toca per revisar-ho."</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Consulta les aplicacions actives"</string>
     <!-- no translation found for vdm_camera_access_denied (6102378580971542473) -->

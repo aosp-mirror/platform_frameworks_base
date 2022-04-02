@@ -26,6 +26,7 @@ import android.app.ActivityManagerInternal.BroadcastEventListener;
 import android.content.Context;
 
 import com.android.server.am.AppBroadcastEventsTracker.AppBroadcastEventsPolicy;
+import com.android.server.am.AppRestrictionController.TrackerType;
 import com.android.server.am.BaseAppStateTimeSlotEventsTracker.SimpleAppStateTimeslotEvents;
 import com.android.server.am.BaseAppStateTracker.Injector;
 
@@ -55,6 +56,11 @@ final class AppBroadcastEventsTracker extends BaseAppStateTimeSlotEventsTracker
         if (mInjector.getPolicy().isEnabled()) {
             onNewEvent(packageName, uid);
         }
+    }
+
+    @Override
+    @TrackerType int getType() {
+        return AppRestrictionController.TRACKER_TYPE_BROADCAST_EVENTS;
     }
 
     @Override

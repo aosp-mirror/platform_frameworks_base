@@ -22,6 +22,7 @@
 #include <gui/DisplayInfo.h>
 #include <gui/SurfaceComposerClient.h>
 #include <nativehelper/JNIHelp.h>
+#include <nativehelper/ScopedLocalFrame.h>
 #include <utils/Log.h>
 
 #include "android_hardware_input_InputWindowHandle.h"
@@ -95,6 +96,7 @@ struct WindowInfosListener : public gui::WindowInfosListener {
         JNIEnv* env = AndroidRuntime::getJNIEnv();
         LOG_ALWAYS_FATAL_IF(env == nullptr, "Unable to retrieve JNIEnv in onWindowInfoChanged.");
 
+        ScopedLocalFrame localFrame(env);
         jobject listener = env->NewGlobalRef(mListener);
         if (listener == nullptr) {
             // Weak reference went out of scope

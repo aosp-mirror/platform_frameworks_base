@@ -390,6 +390,7 @@ package android {
     field public static final int autoVerify = 16844014; // 0x10104ee
     field public static final int autofillHints = 16844118; // 0x1010556
     field public static final int autofilledHighlight = 16844136; // 0x1010568
+    field public static final int backdropColor;
     field public static final int background = 16842964; // 0x10100d4
     field public static final int backgroundDimAmount = 16842802; // 0x1010032
     field public static final int backgroundDimEnabled = 16843295; // 0x101021f
@@ -1345,7 +1346,7 @@ package android {
     field public static final int shouldDisableView = 16843246; // 0x10101ee
     field public static final int shouldUseDefaultUnfoldTransition = 16844364; // 0x101064c
     field public static final int showAsAction = 16843481; // 0x10102d9
-    field public static final int showBackground;
+    field public static final int showBackdrop;
     field public static final int showClockAndComplications;
     field public static final int showDefault = 16843258; // 0x10101fa
     field public static final int showDividers = 16843561; // 0x1010329
@@ -43457,7 +43458,7 @@ package android.telephony {
     method public int getPhoneType();
     method @RequiresPermission(anyOf={"android.permission.READ_PRIVILEGED_PHONE_STATE", android.Manifest.permission.READ_PHONE_STATE}) public int getPreferredOpportunisticDataSubscription();
     method @Nullable @RequiresPermission(allOf={android.Manifest.permission.READ_PHONE_STATE, android.Manifest.permission.ACCESS_COARSE_LOCATION}) public android.telephony.ServiceState getServiceState();
-    method @Nullable @RequiresPermission(allOf={android.Manifest.permission.READ_PHONE_STATE, android.Manifest.permission.ACCESS_COARSE_LOCATION}) public android.telephony.ServiceState getServiceState(boolean, boolean);
+    method @Nullable @RequiresPermission(allOf={android.Manifest.permission.READ_PHONE_STATE, android.Manifest.permission.ACCESS_COARSE_LOCATION}) public android.telephony.ServiceState getServiceState(int);
     method @Nullable public android.telephony.SignalStrength getSignalStrength();
     method public int getSimCarrierId();
     method @Nullable public CharSequence getSimCarrierIdName();
@@ -43512,10 +43513,10 @@ package android.telephony {
     method @Deprecated public void listen(android.telephony.PhoneStateListener, int);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void rebootModem();
     method public void registerTelephonyCallback(@NonNull java.util.concurrent.Executor, @NonNull android.telephony.TelephonyCallback);
-    method public void registerTelephonyCallback(boolean, boolean, @NonNull java.util.concurrent.Executor, @NonNull android.telephony.TelephonyCallback);
+    method public void registerTelephonyCallback(int, @NonNull java.util.concurrent.Executor, @NonNull android.telephony.TelephonyCallback);
     method @RequiresPermission(android.Manifest.permission.ACCESS_FINE_LOCATION) public void requestCellInfoUpdate(@NonNull java.util.concurrent.Executor, @NonNull android.telephony.TelephonyManager.CellInfoCallback);
     method @RequiresPermission(allOf={android.Manifest.permission.MODIFY_PHONE_STATE, android.Manifest.permission.ACCESS_FINE_LOCATION}) public android.telephony.NetworkScan requestNetworkScan(android.telephony.NetworkScanRequest, java.util.concurrent.Executor, android.telephony.TelephonyScanManager.NetworkScanCallback);
-    method @Nullable @RequiresPermission(allOf={android.Manifest.permission.MODIFY_PHONE_STATE, android.Manifest.permission.ACCESS_FINE_LOCATION}) public android.telephony.NetworkScan requestNetworkScan(boolean, @NonNull android.telephony.NetworkScanRequest, @NonNull java.util.concurrent.Executor, @NonNull android.telephony.TelephonyScanManager.NetworkScanCallback);
+    method @Nullable @RequiresPermission(allOf={android.Manifest.permission.MODIFY_PHONE_STATE, android.Manifest.permission.ACCESS_FINE_LOCATION}) public android.telephony.NetworkScan requestNetworkScan(int, @NonNull android.telephony.NetworkScanRequest, @NonNull java.util.concurrent.Executor, @NonNull android.telephony.TelephonyScanManager.NetworkScanCallback);
     method public void sendDialerSpecialCode(String);
     method public String sendEnvelopeWithStatus(String);
     method @RequiresPermission(android.Manifest.permission.CALL_PHONE) public void sendUssdRequest(String, android.telephony.TelephonyManager.UssdResponseCallback, android.os.Handler);
@@ -43625,6 +43626,9 @@ package android.telephony {
     field public static final String EXTRA_STATE_RINGING;
     field public static final String EXTRA_SUBSCRIPTION_ID = "android.telephony.extra.SUBSCRIPTION_ID";
     field public static final String EXTRA_VOICEMAIL_NUMBER = "android.telephony.extra.VOICEMAIL_NUMBER";
+    field public static final int INCLUDE_LOCATION_DATA_COARSE = 1; // 0x1
+    field public static final int INCLUDE_LOCATION_DATA_FINE = 2; // 0x2
+    field public static final int INCLUDE_LOCATION_DATA_NONE = 0; // 0x0
     field public static final String METADATA_HIDE_VOICEMAIL_SETTINGS_MENU = "android.telephony.HIDE_VOICEMAIL_SETTINGS_MENU";
     field public static final int MULTISIM_ALLOWED = 0; // 0x0
     field public static final int MULTISIM_NOT_SUPPORTED_BY_CARRIER = 2; // 0x2
@@ -49641,6 +49645,7 @@ package android.view {
     method @CallSuper public void drawableHotspotChanged(float, float);
     method @CallSuper protected void drawableStateChanged();
     method public android.view.View findFocus();
+    method @Nullable public final android.window.OnBackInvokedDispatcher findOnBackInvokedDispatcher();
     method public final <T extends android.view.View> T findViewById(@IdRes int);
     method public final <T extends android.view.View> T findViewWithTag(Object);
     method public void findViewsWithText(java.util.ArrayList<android.view.View>, CharSequence, int);
@@ -50818,6 +50823,7 @@ package android.view {
     method public void childHasTransientStateChanged(@NonNull android.view.View, boolean);
     method public void clearChildFocus(android.view.View);
     method public void createContextMenu(android.view.ContextMenu);
+    method @Nullable public default android.window.OnBackInvokedDispatcher findOnBackInvokedDispatcherForChild(@NonNull android.view.View, @NonNull android.view.View);
     method public android.view.View focusSearch(android.view.View, int);
     method public void focusableViewAvailable(android.view.View);
     method public boolean getChildVisibleRect(android.view.View, android.graphics.Rect, android.graphics.Point);
@@ -51599,7 +51605,7 @@ package android.view {
     field public String packageName;
     field public boolean preferMinimalPostProcessing;
     field public int preferredDisplayModeId;
-    field @Deprecated public float preferredRefreshRate;
+    field public float preferredRefreshRate;
     field public int rotationAnimation;
     field public float screenBrightness;
     field public int screenOrientation;
@@ -52274,7 +52280,8 @@ package android.view.animation {
     method protected android.view.animation.Animation clone() throws java.lang.CloneNotSupportedException;
     method public long computeDurationHint();
     method protected void ensureInterpolator();
-    method @ColorInt public int getBackgroundColor();
+    method @ColorInt public int getBackdropColor();
+    method @Deprecated @ColorInt public int getBackgroundColor();
     method @Deprecated public boolean getDetachWallpaper();
     method public long getDuration();
     method public boolean getFillAfter();
@@ -52283,7 +52290,7 @@ package android.view.animation {
     method public int getRepeatCount();
     method public int getRepeatMode();
     method protected float getScaleFactor();
-    method public boolean getShowBackground();
+    method public boolean getShowBackdrop();
     method public long getStartOffset();
     method public long getStartTime();
     method public boolean getTransformation(long, android.view.animation.Transformation);
@@ -52299,7 +52306,8 @@ package android.view.animation {
     method public void restrictDuration(long);
     method public void scaleCurrentDuration(float);
     method public void setAnimationListener(android.view.animation.Animation.AnimationListener);
-    method public void setBackgroundColor(@ColorInt int);
+    method public void setBackdropColor(@ColorInt int);
+    method @Deprecated public void setBackgroundColor(@ColorInt int);
     method @Deprecated public void setDetachWallpaper(boolean);
     method public void setDuration(long);
     method public void setFillAfter(boolean);
@@ -52309,7 +52317,7 @@ package android.view.animation {
     method public void setInterpolator(android.view.animation.Interpolator);
     method public void setRepeatCount(int);
     method public void setRepeatMode(int);
-    method public void setShowBackground(boolean);
+    method public void setShowBackdrop(boolean);
     method public void setStartOffset(long);
     method public void setStartTime(long);
     method public void setZAdjustment(int);
@@ -57973,7 +57981,7 @@ package android.widget.inline {
 package android.window {
 
   public interface OnBackInvokedCallback {
-    method public default void onBackInvoked();
+    method public void onBackInvoked();
   }
 
   public interface OnBackInvokedDispatcher {

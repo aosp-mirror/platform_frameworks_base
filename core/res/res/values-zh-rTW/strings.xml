@@ -1933,8 +1933,7 @@
     <string name="app_blocked_title" msgid="7353262160455028160">"應用程式無法使用"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"「<xliff:g id="APP_NAME">%1$s</xliff:g>」目前無法使用。"</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"無法存取「<xliff:g id="ACTIVITY">%1$s</xliff:g>」"</string>
-    <!-- no translation found for app_streaming_blocked_title_for_permission_dialog (4483161748582966785) -->
-    <skip />
+    <string name="app_streaming_blocked_title_for_permission_dialog" msgid="4483161748582966785">"需要相關權限"</string>
     <string name="app_streaming_blocked_message" product="tv" msgid="4003011766528814377">"目前無法在 <xliff:g id="DEVICE">%1$s</xliff:g> 上存取這個應用程式，請改用 Android TV 裝置。"</string>
     <string name="app_streaming_blocked_message" product="tablet" msgid="4242053045964946062">"目前無法在 <xliff:g id="DEVICE">%1$s</xliff:g> 上存取這個應用程式，請改用平板電腦。"</string>
     <string name="app_streaming_blocked_message" product="default" msgid="6159168735030739398">"目前無法在 <xliff:g id="DEVICE">%1$s</xliff:g> 上存取這個應用程式，請改用手機。"</string>

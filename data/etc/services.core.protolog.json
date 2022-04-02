@@ -703,6 +703,12 @@
       "group": "WM_DEBUG_STATES",
       "at": "com\/android\/server\/wm\/ActivityRecord.java"
     },
+    "-1427392850": {
+      "message": "WindowState: Setting back callback %s (priority: %d) (Client IWindow: %s). (WindowState: %s)",
+      "level": "DEBUG",
+      "group": "WM_DEBUG_BACK_PREVIEW",
+      "at": "com\/android\/server\/wm\/WindowState.java"
+    },
     "-1427184084": {
       "message": "addWindow: New client %s: window=%s Callers=%s",
       "level": "VERBOSE",

@@ -10736,6 +10736,13 @@ public final class ViewRootImpl implements ViewParent,
         return mOnBackInvokedDispatcher;
     }
 
+    @NonNull
+    @Override
+    public OnBackInvokedDispatcher findOnBackInvokedDispatcherForChild(
+            @NonNull View child, @NonNull View requester) {
+        return getOnBackInvokedDispatcher();
+    }
+
     /**
      * When this ViewRootImpl is added to the window manager, transfers the first
      * {@link OnBackInvokedCallback} to be called to the server.
@@ -10743,7 +10750,7 @@ public final class ViewRootImpl implements ViewParent,
     private void registerBackCallbackOnWindow() {
         if (OnBackInvokedDispatcher.DEBUG) {
             Log.d(OnBackInvokedDispatcher.TAG, TextUtils.formatSimple(
-                    "ViewRootImpl.registerBackCallbackOnWindow. Callback:%s Package:%s "
+                    "ViewRootImpl.registerBackCallbackOnWindow. Dispatcher:%s Package:%s "
                             + "IWindow:%s Session:%s",
                     mOnBackInvokedDispatcher, mBasePackageName, mWindow, mWindowSession));
         }
@@ -10765,12 +10772,9 @@ public final class ViewRootImpl implements ViewParent,
     }
 
     private void registerCompatOnBackInvokedCallback() {
-        mCompatOnBackInvokedCallback = new OnBackInvokedCallback() {
-            @Override
-            public void onBackInvoked() {
+        mCompatOnBackInvokedCallback = () -> {
                 sendBackKeyEvent(KeyEvent.ACTION_DOWN);
                 sendBackKeyEvent(KeyEvent.ACTION_UP);
-            }
         };
         mOnBackInvokedDispatcher.registerOnBackInvokedCallback(
                 OnBackInvokedDispatcher.PRIORITY_DEFAULT, mCompatOnBackInvokedCallback);
