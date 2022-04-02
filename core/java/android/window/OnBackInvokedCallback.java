@@ -18,23 +18,22 @@ package android.window;
 
 import android.app.Activity;
 import android.app.Dialog;
-import android.view.View;
+import android.view.Window;
 
 /**
  * Callback allowing applications to handle back events in place of the system.
  * <p>
- * Callback instances can be added to and removed from {@link OnBackInvokedDispatcher}, held
- * by classes that implement {@link OnBackInvokedDispatcherOwner} (such as {@link Activity},
- * {@link Dialog} and {@link View}).
+ * Callback instances can be added to and removed from {@link OnBackInvokedDispatcher}, which
+ * is held at window level and accessible through {@link Activity#getOnBackInvokedDispatcher()},
+ * {@link Dialog#getOnBackInvokedDispatcher()} and {@link Window#getOnBackInvokedDispatcher()}.
  * <p>
- * Under the hood callbacks are registered at window level. When back is triggered,
- * callbacks on the in-focus window are invoked in reverse order in which they are added
- * within the same priority. Between different pirorities, callbacks with higher priority
- * are invoked first.
+ * When back is triggered, callbacks on the in-focus window are invoked in reverse order in which
+ * they are added within the same priority. Between different priorities, callbacks with higher
+ * priority are invoked first.
  * <p>
  * This replaces {@link Activity#onBackPressed()}, {@link Dialog#onBackPressed()} and
  * {@link android.view.KeyEvent#KEYCODE_BACK}
- *
+ * <p>
  * @see OnBackInvokedDispatcher#registerOnBackInvokedCallback(int, OnBackInvokedCallback)
  * registerOnBackInvokedCallback(priority, OnBackInvokedCallback)
  * to specify callback priority.
