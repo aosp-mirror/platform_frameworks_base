@@ -166,4 +166,11 @@ aidl_interface {
     imports: [
         "android.media.audio.common.types",
     ],
+    versions_with_info: [
+        {
+            version: "1",
+            imports: ["android.media.audio.common.types-V1"],
+        },
+    ],
+
 }
