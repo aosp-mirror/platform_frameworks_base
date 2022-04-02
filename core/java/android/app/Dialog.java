@@ -62,7 +62,6 @@ import android.view.WindowManager;
 import android.view.accessibility.AccessibilityEvent;
 import android.window.OnBackInvokedCallback;
 import android.window.OnBackInvokedDispatcher;
-import android.window.OnBackInvokedDispatcherOwner;
 import android.window.WindowOnBackInvokedDispatcher;
 
 import com.android.internal.R;
@@ -98,8 +97,7 @@ import java.lang.ref.WeakReference;
  * </div>
  */
 public class Dialog implements DialogInterface, Window.Callback,
-        KeyEvent.Callback, OnCreateContextMenuListener, Window.OnWindowDismissedCallback,
-        OnBackInvokedDispatcherOwner {
+        KeyEvent.Callback, OnCreateContextMenuListener, Window.OnWindowDismissedCallback {
     private static final String TAG = "Dialog";
     @UnsupportedAppUsage
     private Activity mOwnerActivity;
@@ -1469,8 +1467,7 @@ public class Dialog implements DialogInterface, Window.Callback,
      * Returns null if the dialog is not attached to a window with a decor.
      */
     @NonNull
-    @Override
     public OnBackInvokedDispatcher getOnBackInvokedDispatcher() {
-        return ((OnBackInvokedDispatcherOwner) mWindow).getOnBackInvokedDispatcher();
+        return mWindow.getOnBackInvokedDispatcher();
     }
 }
