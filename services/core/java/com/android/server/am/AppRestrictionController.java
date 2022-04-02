@@ -1439,11 +1439,13 @@ public final class AppRestrictionController {
             refreshAppRestrictionLevelForUser(userId, REASON_MAIN_FORCED_BY_USER,
                     REASON_SUB_FORCED_USER_FLAG_INTERACTION);
         }
-        // Load the previously saved levels and update the current levels if needed.
-        mRestrictionSettings.scheduleLoadFromXml();
-        // Also save the current levels right away.
-        for (int userId : allUsers) {
-            mRestrictionSettings.schedulePersistToXml(userId);
+        if (!mInjector.isTest()) {
+            // Load the previously saved levels and update the current levels if needed.
+            mRestrictionSettings.scheduleLoadFromXml();
+            // Also save the current levels right away.
+            for (int userId : allUsers) {
+                mRestrictionSettings.schedulePersistToXml(userId);
+            }
         }
     }
 
@@ -2994,6 +2996,10 @@ public final class AppRestrictionController {
 
         @CurrentTimeMillisLong long currentTimeMillis() {
             return System.currentTimeMillis();
+        }
+
+        boolean isTest() {
+            return false;
         }
     }
 
