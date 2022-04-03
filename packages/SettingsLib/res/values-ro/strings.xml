@@ -95,9 +95,7 @@
     <string name="bluetooth_profile_a2dp_high_quality" msgid="4739440941324792775">"Audio HD: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="2477639096903834374">"Audio HD"</string>
     <string name="bluetooth_profile_hearing_aid" msgid="58154575573984914">"Aparate auditive"</string>
-    <string name="bluetooth_profile_le_audio" msgid="5158149987518342036">"LE_AUDIO"</string>
     <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="8191273236809964030">"Conectat la aparatul auditiv"</string>
-    <string name="bluetooth_le_audio_profile_summary_connected" msgid="3162538609379333442">"Conectat la LE_AUDIO"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="7422607970115444153">"Conectat la profilul pentru conținut media audio"</string>
     <string name="bluetooth_headset_profile_summary_connected" msgid="2420981566026949688">"Conectat la componenta audio a telefonului"</string>
     <string name="bluetooth_opp_profile_summary_connected" msgid="2393521801478157362">"Conectat la serverul de transfer de fișiere"</string>
@@ -115,13 +113,12 @@
     <string name="bluetooth_opp_profile_summary_use_for" msgid="461981154387015457">"Utilizați pentru transferul de fișiere"</string>
     <string name="bluetooth_hid_profile_summary_use_for" msgid="4289460627406490952">"Utilizați pentru introducere date"</string>
     <string name="bluetooth_hearing_aid_profile_summary_use_for" msgid="7689393730163320483">"Folosiți pentru aparatele auditive"</string>
-    <string name="bluetooth_le_audio_profile_summary_use_for" msgid="2778318636027348572">"Folosiți pentru LE_AUDIO"</string>
     <string name="bluetooth_pairing_accept" msgid="2054232610815498004">"Asociați"</string>
     <string name="bluetooth_pairing_accept_all_caps" msgid="2734383073450506220">"CONECTAȚI"</string>
     <string name="bluetooth_pairing_decline" msgid="6483118841204885890">"Anulați"</string>
     <string name="bluetooth_pairing_will_share_phonebook" msgid="3064334458659165176">"Asocierea dispozitivelor vă permite accesul la persoanele de contact și la istoricul apelurilor când dispozitivul este conectat."</string>
     <string name="bluetooth_pairing_error_message" msgid="6626399020672335565">"Nu s-a putut împerechea cu <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
-    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"Nu s-a putut asocia cu <xliff:g id="DEVICE_NAME">%1$s</xliff:g> din cauza unui cod PIN sau a unei chei de acces incorecte."</string>
+    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"Nu s-a putut împerechea cu <xliff:g id="DEVICE_NAME">%1$s</xliff:g> din cauza unui cod PIN sau al unei chei de acces incorecte."</string>
     <string name="bluetooth_pairing_device_down_error_message" msgid="2554424863101358857">"Nu se poate comunica cu <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
     <string name="bluetooth_pairing_rejected_error_message" msgid="5943444352777314442">"Împerechere respinsă de <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
     <string name="bluetooth_talkback_computer" msgid="3736623135703893773">"Computer"</string>
@@ -208,7 +205,7 @@
     <string name="tethering_settings_not_available" msgid="266821736434699780">"Setările pentru tethering nu sunt disponibile pentru acest utilizator"</string>
     <string name="apn_settings_not_available" msgid="1147111671403342300">"Setările pentru „Nume puncte de acces” nu sunt disponibile pentru acest utilizator"</string>
     <string name="enable_adb" msgid="8072776357237289039">"Remedierea erorilor prin USB"</string>
-    <string name="enable_adb_summary" msgid="3711526030096574316">"Mod de remediere a erorilor când este conectat USB"</string>
+    <string name="enable_adb_summary" msgid="3711526030096574316">"Mod de depanare când este conectat USB"</string>
     <string name="clear_adb_keys" msgid="3010148733140369917">"Revoc autorizații remediere a erorilor prin USB"</string>
     <string name="enable_adb_wireless" msgid="6973226350963971018">"Remedierea erorilor wireless"</string>
     <string name="enable_adb_wireless_summary" msgid="7344391423657093011">"Modul de remediere a erorilor când rețeaua Wi-Fi este conectată"</string>
@@ -255,7 +252,7 @@
     <string name="wifi_display_certification" msgid="1805579519992520381">"Certificare Ecran wireless"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"Înregistrare prin Wi-Fi de volume mari de date"</string>
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"Limitare căutare de rețele Wi-Fi"</string>
-    <string name="wifi_enhanced_mac_randomization" msgid="882650208573834301">"Randomizarea adresei MAC nepersistente pentru Wi-Fi"</string>
+    <string name="wifi_enhanced_mac_randomization" msgid="5437378364995776979">"Randomizare MAC îmbunătățită prin Wi-Fi"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"Date mobile permanent active"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"Accelerare hardware pentru tethering"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"Afișați dispozitivele Bluetooth fără nume"</string>
@@ -356,7 +353,6 @@
     <string name="debug_layout_summary" msgid="8825829038287321978">"Afișați limitele clipului, marginile etc."</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"Direcție aspect dreapta - stânga"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"Direcție obligatorie aspect ecran dreapta - stânga"</string>
-    <string name="window_blurs" msgid="6831008984828425106">"Permiteți estompări la nivel de fereastră"</string>
     <string name="force_msaa" msgid="4081288296137775550">"Forțați MSAA 4x"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"Activați MSAA 4x în aplicațiile OpenGL ES 2.0"</string>
     <string name="show_non_rect_clip" msgid="7499758654867881817">"Remediați decupări nerectangulare"</string>
@@ -409,12 +405,17 @@
     <string name="transcode_enable_all" msgid="2411165920039166710">"Activați transcodarea"</string>
     <string name="transcode_default" msgid="3784803084573509491">"Presupuneți că aplicațiile acceptă formatele moderne"</string>
     <string name="transcode_notification" msgid="5560515979793436168">"Vedeți notificările privind transcodarea"</string>
-    <string name="transcode_disable_cache" msgid="3160069309377467045">"Dezactivați memoria cache pentru transcodare"</string>
     <string name="runningservices_settings_title" msgid="6460099290493086515">"Servicii în curs de funcționare"</string>
     <string name="runningservices_settings_summary" msgid="1046080643262665743">"Vedeți și controlați serviciile care funcționează în prezent"</string>
     <string name="select_webview_provider_title" msgid="3917815648099445503">"Implementare WebView"</string>
     <string name="select_webview_provider_dialog_title" msgid="2444261109877277714">"Setați implementarea WebView"</string>
     <string name="select_webview_provider_toast_text" msgid="8512254949169359848">"Această opțiune nu mai este validă. Încercați din nou."</string>
+    <string name="convert_to_file_encryption" msgid="2828976934129751818">"Faceți conversia la criptarea bazată pe sistemul de fișiere"</string>
+    <string name="convert_to_file_encryption_enabled" msgid="840757431284311754">"Convertiți…"</string>
+    <string name="convert_to_file_encryption_done" msgid="8965831011811180627">"Criptarea bazată pe sistemul de fișiere este finalizată"</string>
+    <string name="title_convert_fbe" msgid="5780013350366495149">"Se face conversia la criptarea bazată pe sistemul de fișiere"</string>
+    <string name="convert_to_fbe_warning" msgid="34294381569282109">"Faceți conversia partiției de date la criptarea bazată pe sistemul de fișiere. \n AVERTISMENT! Astfel, toate datele dvs. vor fi șterse.\n Aceasta este o funcție în versiune alpha și este posibil să nu funcționeze corect.\n Apăsați pe „Ștergeți și convertiți…” pentru a continua."</string>
+    <string name="button_convert_fbe" msgid="1159861795137727671">"Ștergeți și convertiți…"</string>
     <string name="picture_color_mode" msgid="1013807330552931903">"Modul de culori pentru imagini"</string>
     <string name="picture_color_mode_desc" msgid="151780973768136200">"Folosiți sRGB"</string>
     <string name="daltonizer_mode_disabled" msgid="403424372812399228">"Dezactivat"</string>
@@ -449,22 +450,24 @@
     <string name="power_remaining_duration_shutdown_imminent" product="tablet" msgid="7703677921000858479">"Tableta se poate închide în curând (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_remaining_duration_shutdown_imminent" product="device" msgid="4374784375644214578">"Dispozitivul se poate închide în curând (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
-    <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"<xliff:g id="TIME">%1$s</xliff:g> până la finalizare"</string>
-    <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="TIME">%2$s</xliff:g> până la finalizare"</string>
-    <string name="power_charging_limited" msgid="7956120998372505295">"<xliff:g id="LEVEL">%1$s</xliff:g> – Încărcare limitată temporar"</string>
+    <!-- no translation found for power_remaining_charging_duration_only (8085099012811384899) -->
+    <skip />
+    <!-- no translation found for power_charging_duration (6127154952524919719) -->
+    <skip />
+    <string name="power_charging_limited" msgid="1956874810658999681">"<xliff:g id="LEVEL">%1$s</xliff:g> – Se fac optimizări pentru buna funcționare a bateriei"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"Necunoscut"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"Se încarcă"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"Se încarcă rapid"</string>
     <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"Se încarcă lent"</string>
-    <string name="battery_info_status_charging_wireless" msgid="8924722966861282197">"Se încarcă wireless"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"Nu se încarcă"</string>
-    <string name="battery_info_status_not_charging" msgid="3371084153747234837">"Conectat, nu se încarcă"</string>
-    <string name="battery_info_status_full" msgid="1339002294876531312">"Încărcată"</string>
+    <string name="battery_info_status_not_charging" msgid="8330015078868707899">"Conectat, nu se poate încărca chiar acum"</string>
+    <!-- no translation found for battery_info_status_full (1339002294876531312) -->
+    <skip />
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"Controlată de administrator"</string>
     <string name="disabled" msgid="8017887509554714950">"Dezactivată"</string>
     <string name="external_source_trusted" msgid="1146522036773132905">"Permise"</string>
     <string name="external_source_untrusted" msgid="5037891688911672227">"Nepermise"</string>
-    <string name="install_other_apps" msgid="3232595082023199454">"Instalarea aplicațiilor necunoscute"</string>
+    <string name="install_other_apps" msgid="3232595082023199454">"Instalare aplicații necunoscute"</string>
     <string name="home" msgid="973834627243661438">"Ecran principal Setări"</string>
   <string-array name="battery_labels">
     <item msgid="7878690469765357158">"0%"</item>
@@ -473,8 +476,8 @@
   </string-array>
     <string name="charge_length_format" msgid="6941645744588690932">"Acum <xliff:g id="ID_1">%1$s</xliff:g>"</string>
     <string name="remaining_length_format" msgid="4310625772926171089">"Timp rămas: <xliff:g id="ID_1">%1$s</xliff:g>"</string>
-    <string name="screen_zoom_summary_small" msgid="6050633151263074260">"Mică"</string>
-    <string name="screen_zoom_summary_default" msgid="1888865694033865408">"Prestabilită"</string>
+    <string name="screen_zoom_summary_small" msgid="6050633151263074260">"Mic"</string>
+    <string name="screen_zoom_summary_default" msgid="1888865694033865408">"Prestabilit"</string>
     <string name="screen_zoom_summary_large" msgid="4706951482598978984">"Mare"</string>
     <string name="screen_zoom_summary_very_large" msgid="7317423942896999029">"Mai mare"</string>
     <string name="screen_zoom_summary_extremely_large" msgid="1438045624562358554">"Cel mai mare"</string>
@@ -503,10 +506,10 @@
     <string name="cancel" msgid="5665114069455378395">"Anulați"</string>
     <string name="okay" msgid="949938843324579502">"OK"</string>
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"Alarme și mementouri"</string>
-    <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"Permiteți setarea pentru alarme și mementouri"</string>
-    <string name="alarms_and_reminders_title" msgid="8819933264635406032">"Alarme și mementouri"</string>
-    <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"Permiteți acestei aplicații să stabilească alarme și să planifice acțiuni dependente de timp. Astfel, aplicația poate să ruleze în fundal, fapt care ar putea consuma mai multă baterie.\n\nDacă permisiunea este dezactivată, alarmele și evenimentele dependente de timp planificate de aplicație nu vor funcționa."</string>
-    <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"programare, alarmă, memento, ceas"</string>
+    <string name="alarms_and_reminders_switch_title" msgid="186992351401152744">"Permiteți setarea de alarme sau mementouri"</string>
+    <string name="alarms_and_reminders_title" msgid="2988400785896875237">"Alarme și mementouri"</string>
+    <string name="alarms_and_reminders_footer_title" msgid="5882788882647778753">"Permiteți acestei aplicații să programeze alarme sau alte evenimente legate de timp. Astfel, aplicația va putea să se activeze și să ruleze chiar dacă nu folosiți dispozitivul. Rețineți că revocarea acestei permisiuni poate cauza funcționarea incorectă a aplicației, mai ales dezactivarea alarmelor programate de aplicație."</string>
+    <string name="keywords_alarms_and_reminders" msgid="8882739572152019456">"programare, alarmă, memento, eveniment"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"Activați"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"Activați Nu deranja"</string>
     <string name="zen_mode_settings_summary_off" msgid="3832876036123504076">"Niciodată"</string>
@@ -560,15 +563,12 @@
     <string name="user_set_lock_button" msgid="1427128184982594856">"Configurați blocarea"</string>
     <string name="user_switch_to_user" msgid="6975428297154968543">"Treceți la <xliff:g id="USER_NAME">%s</xliff:g>"</string>
     <string name="creating_new_user_dialog_message" msgid="7232880257538970375">"Se creează un utilizator nou…"</string>
-    <string name="add_user_failed" msgid="4809887794313944872">"Nu s-a creat noul utilizator"</string>
+    <!-- no translation found for add_user_failed (4809887794313944872) -->
+    <skip />
     <string name="user_nickname" msgid="262624187455825083">"Pseudonim"</string>
     <string name="guest_new_guest" msgid="3482026122932643557">"Adăugați un invitat"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"Ștergeți invitatul"</string>
-    <string name="guest_reset_guest" msgid="6110013010356013758">"Resetați sesiunea pentru invitați"</string>
     <string name="guest_nickname" msgid="6332276931583337261">"Invitat"</string>
-    <string name="guest_reset_guest_dialog_title" msgid="8047270010895437534">"Resetați invitatul?"</string>
-    <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"Resetați"</string>
-    <string name="guest_resetting" msgid="7822120170191509566">"Se resetează invitatul…"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"Faceți o fotografie"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"Alegeți o imagine"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"Selectați fotografia"</string>

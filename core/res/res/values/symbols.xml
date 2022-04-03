@@ -2618,6 +2618,7 @@
   <java-symbol type="integer" name="config_udfps_illumination_transition_ms" />
   <java-symbol type="bool" name="config_is_powerbutton_fps" />
   <java-symbol type="array" name="config_udfps_enroll_stage_thresholds" />
+  <java-symbol type="bool" name="config_udfpsSupportsNewUi" />
 
   <java-symbol type="array" name="config_face_acquire_enroll_ignorelist" />
   <java-symbol type="array" name="config_face_acquire_vendor_enroll_ignorelist" />

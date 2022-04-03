@@ -20,7 +20,6 @@
     <string name="pip_phone_close" msgid="5783752637260411309">"Fermer"</string>
     <string name="pip_phone_expand" msgid="2579292903468287504">"Développer"</string>
     <string name="pip_phone_settings" msgid="5468987116750491918">"Paramètres"</string>
-    <string name="pip_phone_enter_split" msgid="7042877263880641911">"Entrer dans l\'écran partagé"</string>
     <string name="pip_menu_title" msgid="5393619322111827096">"Menu"</string>
     <string name="pip_notification_title" msgid="1347104727641353453">"<xliff:g id="NAME">%s</xliff:g> est en mode d\'incrustation d\'image"</string>
     <string name="pip_notification_message" msgid="8854051911700302620">"Si vous ne voulez pas que <xliff:g id="NAME">%s</xliff:g> utilise cette fonctionnalité, touchez l\'écran pour ouvrir les paramètres, puis désactivez-la."</string>
@@ -29,8 +28,6 @@
     <string name="pip_skip_to_next" msgid="8403429188794867653">"Passer au suivant"</string>
     <string name="pip_skip_to_prev" msgid="7172158111196394092">"Revenir au précédent"</string>
     <string name="accessibility_action_pip_resize" msgid="4623966104749543182">"Redimensionner"</string>
-    <string name="accessibility_action_pip_stash" msgid="4060775037619702641">"Ajouter à la réserve"</string>
-    <string name="accessibility_action_pip_unstash" msgid="7467499339610437646">"Retirer de la réserve"</string>
     <string name="dock_forced_resizable" msgid="1749750436092293116">"Il est possible que l\'application ne fonctionne pas en mode Écran partagé."</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="7408396418008948957">"L\'application n\'est pas compatible avec l\'écran partagé."</string>
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"Il est possible que l\'application ne fonctionne pas sur un écran secondaire."</string>
@@ -73,4 +70,5 @@
     <string name="manage_bubbles_text" msgid="7730624269650594419">"Gérer"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"Bulle ignorée."</string>
     <string name="restart_button_description" msgid="5887656107651190519">"Touchez pour redémarrer cette application et passer en plein écran."</string>
+    <string name="got_it" msgid="4428750913636945527">"OK"</string>
 </resources>

@@ -95,9 +95,7 @@
     <string name="bluetooth_profile_a2dp_high_quality" msgid="4739440941324792775">"HD აუდიო: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="2477639096903834374">"HD აუდიო"</string>
     <string name="bluetooth_profile_hearing_aid" msgid="58154575573984914">"სმენის მოწყობილობები"</string>
-    <string name="bluetooth_profile_le_audio" msgid="5158149987518342036">"LE_AUDIO"</string>
     <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="8191273236809964030">"დაკავშირებულია სმენის მოწყობილობებთან"</string>
-    <string name="bluetooth_le_audio_profile_summary_connected" msgid="3162538609379333442">"დაკავშირებულია შემდეგთან: LE_AUDIO"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="7422607970115444153">"დაკავშირებულია აუდიო მულტიმედიურ სისტემასთან"</string>
     <string name="bluetooth_headset_profile_summary_connected" msgid="2420981566026949688">"დაკავშირებულია ტელეფონის აუდიო მოწყობილობასთან"</string>
     <string name="bluetooth_opp_profile_summary_connected" msgid="2393521801478157362">"დაკავშირებულია ფაილების გადაცემის სერვერთან"</string>
@@ -115,7 +113,6 @@
     <string name="bluetooth_opp_profile_summary_use_for" msgid="461981154387015457">"ფაილების ტრანსფერისათვის გამოყენება"</string>
     <string name="bluetooth_hid_profile_summary_use_for" msgid="4289460627406490952">"შეტანისთვის გამოყენება"</string>
     <string name="bluetooth_hearing_aid_profile_summary_use_for" msgid="7689393730163320483">"გამოყენება სმენის მოწყობილობებისთვის"</string>
-    <string name="bluetooth_le_audio_profile_summary_use_for" msgid="2778318636027348572">"გამოიყენება შემდეგისთვის: LE_AUDIO"</string>
     <string name="bluetooth_pairing_accept" msgid="2054232610815498004">"დაწყვილება"</string>
     <string name="bluetooth_pairing_accept_all_caps" msgid="2734383073450506220">"დაწყვილება"</string>
     <string name="bluetooth_pairing_decline" msgid="6483118841204885890">"გაუქმება"</string>
@@ -255,7 +252,7 @@
     <string name="wifi_display_certification" msgid="1805579519992520381">"უსადენო ეკრანის სერტიფიცირება"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"Wi‑Fi-ს დაწვრილებითი აღრიცხვის ჩართვა"</string>
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"Wi‑Fi სკანირების რეგულირება"</string>
-    <string name="wifi_enhanced_mac_randomization" msgid="882650208573834301">"Wi‑Fi-ს MAC მისამართების არამუდმივი რანდომიზაცია"</string>
+    <string name="wifi_enhanced_mac_randomization" msgid="5437378364995776979">"Wi‑Fi‑თ გაძლიერებული MAC მისამართის შემთხვევითობა"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"მობილური ინტერნეტის ყოველთვის გააქტიურება"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"ტეტერინგის აპარატურული აჩქარება"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"Bluetooth-მოწყობილობების ჩვენება სახელების გარეშე"</string>
@@ -356,7 +353,6 @@
     <string name="debug_layout_summary" msgid="8825829038287321978">"კლიპის საზღვრების, მინდვრების ჩვენება და ა.შ."</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"მარჯვნიდან მარცხნივ განლაგების მიმართულების იძულება"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"ეკრანის RTL მიმართულებაზე იძულება ყველა ლოკალისათვის"</string>
-    <string name="window_blurs" msgid="6831008984828425106">"ფანჯრის დონეზე გაბუნდოვნების დაშვება"</string>
     <string name="force_msaa" msgid="4081288296137775550">"4x MSAA-ს ჩართვა"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"4x MSAA-ის ჩართვა OpenGL ES 2.0 აპში."</string>
     <string name="show_non_rect_clip" msgid="7499758654867881817">"არა-მართკუთხა კლიპ-ოპერაციების გამართვა"</string>
@@ -409,12 +405,17 @@
     <string name="transcode_enable_all" msgid="2411165920039166710">"ტრანსკოდირების ჩართვა"</string>
     <string name="transcode_default" msgid="3784803084573509491">"დაშვება, რომ აპებს აქვთ თანამედროვე ფორმატების მხარდაჭერა"</string>
     <string name="transcode_notification" msgid="5560515979793436168">"ტრანსკოდირების შეტყობინებების ჩვენება"</string>
-    <string name="transcode_disable_cache" msgid="3160069309377467045">"ტრანსკოდირების ქეშის გათიშვა"</string>
     <string name="runningservices_settings_title" msgid="6460099290493086515">"მიმდინარე სერვისები"</string>
     <string name="runningservices_settings_summary" msgid="1046080643262665743">"ამჟამად მოქმედი სერვისების ნახვა და მართვა"</string>
     <string name="select_webview_provider_title" msgid="3917815648099445503">"WebView რეალიზაცია"</string>
     <string name="select_webview_provider_dialog_title" msgid="2444261109877277714">"WebView რეალიზაციის დაყენება"</string>
     <string name="select_webview_provider_toast_text" msgid="8512254949169359848">"თქვენი არჩევანი აღარ მოქმედებს. ცადეთ ხელახლა."</string>
+    <string name="convert_to_file_encryption" msgid="2828976934129751818">"ფაილების დაშიფვრაზე გარდაქმნა"</string>
+    <string name="convert_to_file_encryption_enabled" msgid="840757431284311754">"გარდაქმნა…"</string>
+    <string name="convert_to_file_encryption_done" msgid="8965831011811180627">"უკვე დაშიფრულია ფაილების დონეზე"</string>
+    <string name="title_convert_fbe" msgid="5780013350366495149">"ფაილების დონეზე დაშიფვრაზე გარდაქმნა…"</string>
+    <string name="convert_to_fbe_warning" msgid="34294381569282109">"მონაცემთა დანაყოფის გარდაქმნა ფაილების დონეზე დაშიფვრაზე.\n ყურადღება!!! ეს მოქმედება ყველა თქვენს მონაცემს ამოშლის.\n ეს ფუნქცია alpha სტადიაშია და შეიძლება არასწორად მუშაობდეს.\n გასაგრძელებლად დაჭერით აირჩიეთ „ამოშლა და გარდაქმნა…“."</string>
+    <string name="button_convert_fbe" msgid="1159861795137727671">"ამოშლა და გარდაქმნა…"</string>
     <string name="picture_color_mode" msgid="1013807330552931903">"გამოსახულების ფერების რეჟიმი"</string>
     <string name="picture_color_mode_desc" msgid="151780973768136200">"sRGB-ს გამოყენება"</string>
     <string name="daltonizer_mode_disabled" msgid="403424372812399228">"გამორთულია"</string>
@@ -449,17 +450,19 @@
     <string name="power_remaining_duration_shutdown_imminent" product="tablet" msgid="7703677921000858479">"ტაბლეტი შეიძლება მალე გაითიშოს (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_remaining_duration_shutdown_imminent" product="device" msgid="4374784375644214578">"მოწყობილობა შეიძლება მალე გაითიშოს (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
-    <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"სრულ დატენვამდე დარჩენილია <xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> — სრულ დატენვამდე დარჩენილია <xliff:g id="TIME">%2$s</xliff:g>"</string>
-    <string name="power_charging_limited" msgid="7956120998372505295">"<xliff:g id="LEVEL">%1$s</xliff:g> — დატენვა დროებით შეზღუდულია"</string>
+    <!-- no translation found for power_remaining_charging_duration_only (8085099012811384899) -->
+    <skip />
+    <!-- no translation found for power_charging_duration (6127154952524919719) -->
+    <skip />
+    <string name="power_charging_limited" msgid="1956874810658999681">"<xliff:g id="LEVEL">%1$s</xliff:g> — ოპტიმიზაცია ბატარეის გამართულობისთვის"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"უცნობი"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"იტენება"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"სწრაფად იტენება"</string>
     <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"ნელა იტენება"</string>
-    <string name="battery_info_status_charging_wireless" msgid="8924722966861282197">"უსადენოდ დატენა"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"არ იტენება"</string>
-    <string name="battery_info_status_not_charging" msgid="3371084153747234837">"დაკავშირებულია, არ იტენება"</string>
-    <string name="battery_info_status_full" msgid="1339002294876531312">"დატენილია"</string>
+    <string name="battery_info_status_not_charging" msgid="8330015078868707899">"მიერთებულია, დატენვა ამჟამად ვერ ხერხდება"</string>
+    <!-- no translation found for battery_info_status_full (1339002294876531312) -->
+    <skip />
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"იმართება ადმინისტრატორის მიერ"</string>
     <string name="disabled" msgid="8017887509554714950">"გამორთული"</string>
     <string name="external_source_trusted" msgid="1146522036773132905">"დაშვებულია"</string>
@@ -502,10 +505,10 @@
     <string name="cancel" msgid="5665114069455378395">"გაუქმება"</string>
     <string name="okay" msgid="949938843324579502">"კარგი"</string>
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"მაღვიძარები და შეხსენებები"</string>
-    <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"დაუშვით მაღვიძარების და შეხსენებების დაყენება"</string>
-    <string name="alarms_and_reminders_title" msgid="8819933264635406032">"მაღვიძარები და შეხსენებები"</string>
-    <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"ნებას რთავს ამ აპს, დააყენოს მაღვიძარები და დაგეგმოს დროზე დამოკიდებული მოქმედებები. ეს საშუალებას აძლევს აპს, იმუშაოს ფონურად, რამაც შეიძლება ბატარეის ხარჯი გაზარდოს.\n\nთუ ეს ნებართვა გამორთულია, ამ აპით დაგეგმილი მაღვიძარები და დროზე დამოკიდებული მოვლენები არ იმუშავებს."</string>
-    <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"განრიგი, მაღვიძარა, შეხსენება, საათი"</string>
+    <string name="alarms_and_reminders_switch_title" msgid="186992351401152744">"მაღვიძარებისა და შეხსენებების დაყენების დაშვება"</string>
+    <string name="alarms_and_reminders_title" msgid="2988400785896875237">"მაღვიძარები და შეხსენებები"</string>
+    <string name="alarms_and_reminders_footer_title" msgid="5882788882647778753">"ამ აპს საშუალებას მისცემს, შეიტანოს განრიგში მაღვიძარები ან დროზე დაფუძნებული სხვა მოვლენები. ეს აპს საშუალებას მისცემს, გაიღვიძოს და გაიშვას, თუნდაც იმ მომენტში მოწყობილობით არ სარგებლობდეთ. გაითვალისწინეთ, რომ ამ ნებართვის გაუქმებამ შეიძლება აპის გაუმართაობა გამოიწვიოს, კონკრეტულად, აპის მიერ განრიგში შეტანილი არცერთი მაღვიძარა აღარ იმუშავებს."</string>
+    <string name="keywords_alarms_and_reminders" msgid="8882739572152019456">"განრიგი, მაღვიძარა, შეხსენება, მოვლენა"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"ჩართვა"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"„არ შემაწუხოთ“ რეჟიმის ჩართვა"</string>
     <string name="zen_mode_settings_summary_off" msgid="3832876036123504076">"არასოდეს"</string>
@@ -559,15 +562,12 @@
     <string name="user_set_lock_button" msgid="1427128184982594856">"საკეტის დაყენება"</string>
     <string name="user_switch_to_user" msgid="6975428297154968543">"<xliff:g id="USER_NAME">%s</xliff:g>-ზე გადართვა"</string>
     <string name="creating_new_user_dialog_message" msgid="7232880257538970375">"მიმდინარეობს ახალი მომხმარებლის შექმნა…"</string>
-    <string name="add_user_failed" msgid="4809887794313944872">"ახალი მომხმარებლის შექმნა ვერ მოხერხდა"</string>
+    <!-- no translation found for add_user_failed (4809887794313944872) -->
+    <skip />
     <string name="user_nickname" msgid="262624187455825083">"მეტსახელი"</string>
     <string name="guest_new_guest" msgid="3482026122932643557">"სტუმრის დამატება"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"სტუმრის ამოშლა"</string>
-    <string name="guest_reset_guest" msgid="6110013010356013758">"სტუმრის სესიის გადაყენება"</string>
     <string name="guest_nickname" msgid="6332276931583337261">"სტუმარი"</string>
-    <string name="guest_reset_guest_dialog_title" msgid="8047270010895437534">"გადაყენდეს სტუმარი?"</string>
-    <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"გადაყენება"</string>
-    <string name="guest_resetting" msgid="7822120170191509566">"მიმდინარეობს სტუმრის გადაყენება…"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"ფოტოს გადაღება"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"აირჩიეთ სურათი"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"ფოტოს არჩევა"</string>

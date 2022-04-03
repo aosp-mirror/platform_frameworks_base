@@ -711,7 +711,7 @@
     <protected-broadcast android:name="android.scheduling.action.REBOOT_READY" />
     <protected-broadcast android:name="android.app.action.DEVICE_POLICY_CONSTANTS_CHANGED" />
     <protected-broadcast android:name="android.app.action.SCHEDULE_EXACT_ALARM_PERMISSION_STATE_CHANGED" />
-    <protected-broadcast android:name="android.app.action.ACTION_SHOW_NEW_USER_DISCLAIMER" />
+    <protected-broadcast android:name="android.app.action.SHOW_NEW_USER_DISCLAIMER" />
 
     <!-- ====================================================================== -->
     <!--                          RUNTIME PERMISSIONS                           -->

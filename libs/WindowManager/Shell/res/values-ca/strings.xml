@@ -20,17 +20,14 @@
     <string name="pip_phone_close" msgid="5783752637260411309">"Tanca"</string>
     <string name="pip_phone_expand" msgid="2579292903468287504">"Desplega"</string>
     <string name="pip_phone_settings" msgid="5468987116750491918">"Configuració"</string>
-    <string name="pip_phone_enter_split" msgid="7042877263880641911">"Entra al mode de pantalla dividida"</string>
     <string name="pip_menu_title" msgid="5393619322111827096">"Menú"</string>
     <string name="pip_notification_title" msgid="1347104727641353453">"<xliff:g id="NAME">%s</xliff:g> està en pantalla en pantalla"</string>
     <string name="pip_notification_message" msgid="8854051911700302620">"Si no vols que <xliff:g id="NAME">%s</xliff:g> utilitzi aquesta funció, toca per obrir la configuració i desactiva-la."</string>
     <string name="pip_play" msgid="3496151081459417097">"Reprodueix"</string>
     <string name="pip_pause" msgid="690688849510295232">"Posa en pausa"</string>
     <string name="pip_skip_to_next" msgid="8403429188794867653">"Ves al següent"</string>
-    <string name="pip_skip_to_prev" msgid="7172158111196394092">"Ves a l\'anterior"</string>
+    <string name="pip_skip_to_prev" msgid="7172158111196394092">"Torna a l\'anterior"</string>
     <string name="accessibility_action_pip_resize" msgid="4623966104749543182">"Canvia la mida"</string>
-    <string name="accessibility_action_pip_stash" msgid="4060775037619702641">"Amaga"</string>
-    <string name="accessibility_action_pip_unstash" msgid="7467499339610437646">"Deixa d\'amagar"</string>
     <string name="dock_forced_resizable" msgid="1749750436092293116">"És possible que l\'aplicació no funcioni amb la pantalla dividida."</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="7408396418008948957">"L\'aplicació no admet la pantalla dividida."</string>
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"És possible que l\'aplicació no funcioni en una pantalla secundària."</string>
@@ -73,4 +70,5 @@
     <string name="manage_bubbles_text" msgid="7730624269650594419">"Gestiona"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"La bombolla s\'ha ignorat."</string>
     <string name="restart_button_description" msgid="5887656107651190519">"Toca per reiniciar aquesta aplicació i passar a pantalla completa."</string>
+    <string name="got_it" msgid="4428750913636945527">"Entesos"</string>
 </resources>

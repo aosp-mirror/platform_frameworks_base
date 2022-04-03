@@ -9696,6 +9696,13 @@ public final class Settings {
                 "lockscreen_use_double_line_clock";
 
         /**
+         * Whether to show the vibrate icon in the Status Bar (default off)
+         *
+         * @hide
+         */
+        public static final String STATUS_BAR_SHOW_VIBRATE_ICON = "status_bar_show_vibrate_icon";
+
+        /**
          * Specifies whether the web action API is enabled.
          *
          * @hide
@@ -13785,6 +13792,16 @@ public final class Settings {
          */
         @Readable
         public static final String EMERGENCY_AFFORDANCE_NEEDED = "emergency_affordance_needed";
+
+        /**
+         * The power button "cooldown" period in milliseconds after the Emergency gesture is
+         * triggered, during which single-key actions on the power button are suppressed. Cooldown
+         * period is disabled if set to zero.
+         *
+         * @hide
+         */
+        public static final String EMERGENCY_GESTURE_POWER_BUTTON_COOLDOWN_PERIOD_MS =
+                "emergency_gesture_power_button_cooldown_period_ms";
 
         /**
          * Whether to enable automatic system server heap dumps. This only works on userdebug or

@@ -20,7 +20,6 @@
     <string name="pip_phone_close" msgid="5783752637260411309">"Cerrar"</string>
     <string name="pip_phone_expand" msgid="2579292903468287504">"Expandir"</string>
     <string name="pip_phone_settings" msgid="5468987116750491918">"Configuración"</string>
-    <string name="pip_phone_enter_split" msgid="7042877263880641911">"Introducir pantalla dividida"</string>
     <string name="pip_menu_title" msgid="5393619322111827096">"Menú"</string>
     <string name="pip_notification_title" msgid="1347104727641353453">"<xliff:g id="NAME">%s</xliff:g> está en modo de Pantalla en pantalla"</string>
     <string name="pip_notification_message" msgid="8854051911700302620">"Si no quieres que <xliff:g id="NAME">%s</xliff:g> use esta función, presiona para abrir la configuración y desactivarla."</string>
@@ -29,8 +28,6 @@
     <string name="pip_skip_to_next" msgid="8403429188794867653">"Siguiente"</string>
     <string name="pip_skip_to_prev" msgid="7172158111196394092">"Anterior"</string>
     <string name="accessibility_action_pip_resize" msgid="4623966104749543182">"Cambiar el tamaño"</string>
-    <string name="accessibility_action_pip_stash" msgid="4060775037619702641">"Almacenar de manera segura"</string>
-    <string name="accessibility_action_pip_unstash" msgid="7467499339610437646">"Dejar de almacenar de manera segura"</string>
     <string name="dock_forced_resizable" msgid="1749750436092293116">"Es posible que la app no funcione en el modo de pantalla dividida."</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="7408396418008948957">"La app no es compatible con la función de pantalla dividida."</string>
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"Es posible que la app no funcione en una pantalla secundaria."</string>
@@ -61,7 +58,7 @@
     <string name="bubble_accessibility_action_move_bottom_right" msgid="2107626346109206352">"Ubicar abajo a la derecha"</string>
     <string name="bubbles_app_settings" msgid="3617224938701566416">"Configuración de <xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g>"</string>
     <string name="bubble_dismiss_text" msgid="8816558050659478158">"Descartar burbuja"</string>
-    <string name="bubbles_dont_bubble_conversation" msgid="310000317885712693">"No mostrar la conversación en burbuja"</string>
+    <string name="bubbles_dont_bubble_conversation" msgid="310000317885712693">"No mostrar la conversación en burbujas"</string>
     <string name="bubbles_user_education_title" msgid="2112319053732691899">"Chat con burbujas"</string>
     <string name="bubbles_user_education_description" msgid="4215862563054175407">"Las conversaciones nuevas aparecen como elementos flotantes o burbujas. Presiona para abrir la burbuja. Arrástrala para moverla."</string>
     <string name="bubbles_user_education_manage_title" msgid="7042699946735628035">"Controla las burbujas"</string>
@@ -73,4 +70,5 @@
     <string name="manage_bubbles_text" msgid="7730624269650594419">"Administrar"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"Se descartó el cuadro."</string>
     <string name="restart_button_description" msgid="5887656107651190519">"Presiona para reiniciar esta app y acceder al modo de pantalla completa."</string>
+    <string name="got_it" msgid="4428750913636945527">"Entendido"</string>
 </resources>

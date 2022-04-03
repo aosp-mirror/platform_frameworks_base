@@ -95,9 +95,7 @@
     <string name="bluetooth_profile_a2dp_high_quality" msgid="4739440941324792775">"HD-oudio: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="2477639096903834374">"HD oudio"</string>
     <string name="bluetooth_profile_hearing_aid" msgid="58154575573984914">"Gehoortoestelle"</string>
-    <string name="bluetooth_profile_le_audio" msgid="5158149987518342036">"LE_AUDIO"</string>
     <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="8191273236809964030">"Gekoppel aan gehoortoestelle"</string>
-    <string name="bluetooth_le_audio_profile_summary_connected" msgid="3162538609379333442">"Gekoppel aan LE_AUDIO"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="7422607970115444153">"Gekoppel aan media-oudio"</string>
     <string name="bluetooth_headset_profile_summary_connected" msgid="2420981566026949688">"Gekoppel aan foonoudio"</string>
     <string name="bluetooth_opp_profile_summary_connected" msgid="2393521801478157362">"Gekoppel aan lêeroordragbediener"</string>
@@ -115,7 +113,6 @@
     <string name="bluetooth_opp_profile_summary_use_for" msgid="461981154387015457">"Gebruik vir lêeroordrag"</string>
     <string name="bluetooth_hid_profile_summary_use_for" msgid="4289460627406490952">"Gebruik vir invoer"</string>
     <string name="bluetooth_hearing_aid_profile_summary_use_for" msgid="7689393730163320483">"Gebruik vir gehoortoestelle"</string>
-    <string name="bluetooth_le_audio_profile_summary_use_for" msgid="2778318636027348572">"Gebruik vir LE_AUDIO"</string>
     <string name="bluetooth_pairing_accept" msgid="2054232610815498004">"Bind saam"</string>
     <string name="bluetooth_pairing_accept_all_caps" msgid="2734383073450506220">"BIND SAAM"</string>
     <string name="bluetooth_pairing_decline" msgid="6483118841204885890">"Kanselleer"</string>
@@ -255,7 +252,7 @@
     <string name="wifi_display_certification" msgid="1805579519992520381">"Draadlose skermsertifisering"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"Aktiveer Wi-Fi-woordryke aanmelding"</string>
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"Regulering van Wi-Fi-opsporing"</string>
-    <string name="wifi_enhanced_mac_randomization" msgid="882650208573834301">"Nie-aanhoudende MAC-verewekansiging vir wi-fi"</string>
+    <string name="wifi_enhanced_mac_randomization" msgid="5437378364995776979">"Wi‑Fi‑verbeterde MAC-verewekansiging"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"Mobiele data is altyd aktief"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"Hardewareversnelling vir verbinding"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"Wys Bluetooth-toestelle sonder name"</string>
@@ -356,7 +353,6 @@
     <string name="debug_layout_summary" msgid="8825829038287321978">"Wys snitgrense, kantlyne, ens."</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"Dwing RTL-uitlegrigting"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"Dwing skermuitlegrigting na RTL vir alle locales"</string>
-    <string name="window_blurs" msgid="6831008984828425106">"Laat venstervlakwasighede toe"</string>
     <string name="force_msaa" msgid="4081288296137775550">"Dwing 4x MSAA"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"Aktiveer 4x MSAA in OpenGL ES 2.0-programme"</string>
     <string name="show_non_rect_clip" msgid="7499758654867881817">"Ontfout nie-reghoekige knipbedrywighede"</string>
@@ -381,8 +377,8 @@
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"Maak dat enige program na eksterne berging geskryf kan word, ongeag manifeswaardes"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"Dwing aktiwiteite om verstelbaar te wees"</string>
     <string name="force_resizable_activities_summary" msgid="2490382056981583062">"Maak die groottes van alle aktiwiteite verstelbaar vir veelvuldige vensters, ongeag manifeswaardes."</string>
-    <string name="enable_freeform_support" msgid="7599125687603914253">"Aktiveer vormvrye vensters"</string>
-    <string name="enable_freeform_support_summary" msgid="1822862728719276331">"Aktiveer steun vir eksperimentele vormvrye vensters."</string>
+    <string name="enable_freeform_support" msgid="7599125687603914253">"Aktiveer vormvrye-Windows"</string>
+    <string name="enable_freeform_support_summary" msgid="1822862728719276331">"Aktiveer steun vir eksperimentele vormvrye-Windows."</string>
     <string name="local_backup_password_title" msgid="4631017948933578709">"Werkskerm-rugsteunwagwoord"</string>
     <string name="local_backup_password_summary_none" msgid="7646898032616361714">"Volle rekenaarrugsteune word nie tans beskerm nie"</string>
     <string name="local_backup_password_summary_change" msgid="1707357670383995567">"Tik om die wagwoord vir volledige rekenaarrugsteune te verander of te verwyder"</string>
@@ -409,12 +405,17 @@
     <string name="transcode_enable_all" msgid="2411165920039166710">"Aktiveer kodewisseling"</string>
     <string name="transcode_default" msgid="3784803084573509491">"Aanvaar dat programme moderne formate steun"</string>
     <string name="transcode_notification" msgid="5560515979793436168">"Wys kodewisselingkennisgewings"</string>
-    <string name="transcode_disable_cache" msgid="3160069309377467045">"Deaktiveer kodewisselingkas"</string>
     <string name="runningservices_settings_title" msgid="6460099290493086515">"Lopende dienste"</string>
     <string name="runningservices_settings_summary" msgid="1046080643262665743">"Sien en beheer dienste wat tans aktief is"</string>
     <string name="select_webview_provider_title" msgid="3917815648099445503">"WebView-implementering"</string>
     <string name="select_webview_provider_dialog_title" msgid="2444261109877277714">"Stel WebView-implementering"</string>
     <string name="select_webview_provider_toast_text" msgid="8512254949169359848">"Hierdie keuse is nie meer geldig nie. Probeer weer."</string>
+    <string name="convert_to_file_encryption" msgid="2828976934129751818">"Skakel om na lêerenkripsie"</string>
+    <string name="convert_to_file_encryption_enabled" msgid="840757431284311754">"Skakel om …"</string>
+    <string name="convert_to_file_encryption_done" msgid="8965831011811180627">"Lêerenkripsie is reeds uitgevoer"</string>
+    <string name="title_convert_fbe" msgid="5780013350366495149">"Skakel tans na lêer-gebaseerde enkripsie om"</string>
+    <string name="convert_to_fbe_warning" msgid="34294381569282109">"Skakel dataverdeling om in lêer-gebaseerde enkripsie.\n !!Waarskuwing!! Dit sal al jou data uitvee.\n Hierdie kenmerk is alfa en sal dalk nie reg werk nie.\n Druk \'Maak skoon en skakel om …\' om voort te gaan."</string>
+    <string name="button_convert_fbe" msgid="1159861795137727671">"Maak skoon en skakel om …"</string>
     <string name="picture_color_mode" msgid="1013807330552931903">"Fotokleurmodus"</string>
     <string name="picture_color_mode_desc" msgid="151780973768136200">"Gebruik sRGB"</string>
     <string name="daltonizer_mode_disabled" msgid="403424372812399228">"Gedeaktiveer"</string>
@@ -449,22 +450,24 @@
     <string name="power_remaining_duration_shutdown_imminent" product="tablet" msgid="7703677921000858479">"Tablet sal dalk binnekort afgaan (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_remaining_duration_shutdown_imminent" product="device" msgid="4374784375644214578">"Toestel sal dalk binnekort afgaan (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="STATE">%2$s</xliff:g>"</string>
-    <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"<xliff:g id="TIME">%1$s</xliff:g> oor tot vol"</string>
-    <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="TIME">%2$s</xliff:g> oor tot vol"</string>
-    <string name="power_charging_limited" msgid="7956120998372505295">"<xliff:g id="LEVEL">%1$s</xliff:g> – Laaiproses word tydelik beperk"</string>
+    <!-- no translation found for power_remaining_charging_duration_only (8085099012811384899) -->
+    <skip />
+    <!-- no translation found for power_charging_duration (6127154952524919719) -->
+    <skip />
+    <string name="power_charging_limited" msgid="1956874810658999681">"<xliff:g id="LEVEL">%1$s</xliff:g> – Optimeer tans vir batterygesondheid"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"Onbekend"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"Laai"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"Laai tans vinnig"</string>
     <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"Laai tans stadig"</string>
-    <string name="battery_info_status_charging_wireless" msgid="8924722966861282197">"Laai tans draadloos"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"Laai nie"</string>
-    <string name="battery_info_status_not_charging" msgid="3371084153747234837">"Gekoppel, laai nie"</string>
-    <string name="battery_info_status_full" msgid="1339002294876531312">"Gelaai"</string>
+    <string name="battery_info_status_not_charging" msgid="8330015078868707899">"Ingeprop; kan nie op die oomblik laai nie"</string>
+    <!-- no translation found for battery_info_status_full (1339002294876531312) -->
+    <skip />
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"Beheer deur administrateur"</string>
     <string name="disabled" msgid="8017887509554714950">"Gedeaktiveer"</string>
     <string name="external_source_trusted" msgid="1146522036773132905">"Toegelaat"</string>
     <string name="external_source_untrusted" msgid="5037891688911672227">"Nie toegelaat nie"</string>
-    <string name="install_other_apps" msgid="3232595082023199454">"Installeer onbekende programme"</string>
+    <string name="install_other_apps" msgid="3232595082023199454">"Installeer onbekende apps"</string>
     <string name="home" msgid="973834627243661438">"Instellingstuisblad"</string>
   <string-array name="battery_labels">
     <item msgid="7878690469765357158">"0%"</item>
@@ -502,10 +505,10 @@
     <string name="cancel" msgid="5665114069455378395">"Kanselleer"</string>
     <string name="okay" msgid="949938843324579502">"OK"</string>
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"Wekkers en onthounotas"</string>
-    <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"Laat toe dat wekkers en onthounotas gestel word"</string>
-    <string name="alarms_and_reminders_title" msgid="8819933264635406032">"Wekkers en onthounotas"</string>
-    <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"Laat hierdie program toe om wekkers te stel en tydsensitiewe handelinge te skeduleer. Dit laat die program op die agtergrond werk, wat meer batterykrag kan gebruik.\n\nAs hierdie toestemming af is, sal bestaande wekkers en tydgegronde geleenthede wat deur hierdie program geskeduleer is, nie werk nie."</string>
-    <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"skedule, wekker, onthounota, horlosie"</string>
+    <string name="alarms_and_reminders_switch_title" msgid="186992351401152744">"Laat toe om wekkers of onthounotas te stel"</string>
+    <string name="alarms_and_reminders_title" msgid="2988400785896875237">"Wekkers en onthounotas"</string>
+    <string name="alarms_and_reminders_footer_title" msgid="5882788882647778753">"Laat hierdie program toe om wekkers of ander tydgegronde geleenthede te stel. Die program sal kan wakker word en loop selfs wanneer jy nie die toestel gebruik nie. Neem kennis dat hierdie program dalk nie sal werk as hierdie toestemming herroep word nie – in besonder sal enige wekkers wat die program geskeduleer het, nie werk nie."</string>
+    <string name="keywords_alarms_and_reminders" msgid="8882739572152019456">"skedule, wekker, onthounota, geleentheid"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"Skakel aan"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"Skakel Moenie steur nie aan"</string>
     <string name="zen_mode_settings_summary_off" msgid="3832876036123504076">"Nooit"</string>
@@ -559,15 +562,12 @@
     <string name="user_set_lock_button" msgid="1427128184982594856">"Stel slot op"</string>
     <string name="user_switch_to_user" msgid="6975428297154968543">"Skakel oor na <xliff:g id="USER_NAME">%s</xliff:g>"</string>
     <string name="creating_new_user_dialog_message" msgid="7232880257538970375">"Skep tans nuwe gebruiker …"</string>
-    <string name="add_user_failed" msgid="4809887794313944872">"Kon nie \'n nuwe gebruiker skep nie"</string>
+    <!-- no translation found for add_user_failed (4809887794313944872) -->
+    <skip />
     <string name="user_nickname" msgid="262624187455825083">"Bynaam"</string>
     <string name="guest_new_guest" msgid="3482026122932643557">"Voeg gas by"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"Verwyder gas"</string>
-    <string name="guest_reset_guest" msgid="6110013010356013758">"Stel gassessie terug"</string>
     <string name="guest_nickname" msgid="6332276931583337261">"Gas"</string>
-    <string name="guest_reset_guest_dialog_title" msgid="8047270010895437534">"Stel gassessie terug?"</string>
-    <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"Stel terug"</string>
-    <string name="guest_resetting" msgid="7822120170191509566">"Stel tans gassessie terug …"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"Neem \'n foto"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"Kies \'n prent"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"Kies foto"</string>

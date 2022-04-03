@@ -29,6 +29,7 @@
     <string name="device_encryption_backup_text" msgid="5866590762672844664">"Sila masukkan kata laluan penyulitan peranti anda di bawah. Ini juga akan digunakan untuk menyulitkan arkib sandaran."</string>
     <string name="backup_enc_password_text" msgid="4981585714795233099">"Sila masukkan kata laluan yang hendak digunakan untuk menyulitkan data sandaran lengkap. Jika dibiarkan kosong, kata laluan sandaran semasa anda akan digunakan:"</string>
     <string name="backup_enc_password_optional" msgid="1350137345907579306">"Jika anda ingin menyulitkan data sandaran lengkap, masukkan kata laluan di bawah:"</string>
+    <string name="backup_enc_password_required" msgid="7889652203371654149">"Memandangkan peranti anda disulitkan, anda perlu menyulitkan sandaran anda. Sila masukkan kata laluan di bawah:"</string>
     <string name="restore_enc_password_text" msgid="6140898525580710823">"Jika pemulihan data disulitkan, sila masukkan kata laluan di bawah:"</string>
     <string name="toast_backup_started" msgid="550354281452756121">"Sandaran bermula..."</string>
     <string name="toast_backup_ended" msgid="3818080769548726424">"Sandaran selesai"</string>

@@ -20,7 +20,6 @@
     <string name="pip_phone_close" msgid="5783752637260411309">"Փակել"</string>
     <string name="pip_phone_expand" msgid="2579292903468287504">"Ընդարձակել"</string>
     <string name="pip_phone_settings" msgid="5468987116750491918">"Կարգավորումներ"</string>
-    <string name="pip_phone_enter_split" msgid="7042877263880641911">"Մտնել տրոհված էկրանի ռեժիմ"</string>
     <string name="pip_menu_title" msgid="5393619322111827096">"Ընտրացանկ"</string>
     <string name="pip_notification_title" msgid="1347104727641353453">"<xliff:g id="NAME">%s</xliff:g>-ը «Նկար նկարի մեջ» ռեժիմում է"</string>
     <string name="pip_notification_message" msgid="8854051911700302620">"Եթե չեք ցանկանում, որ <xliff:g id="NAME">%s</xliff:g>-ն օգտագործի այս գործառույթը, հպեք՝ կարգավորումները բացելու և այն անջատելու համար։"</string>
@@ -29,8 +28,6 @@
     <string name="pip_skip_to_next" msgid="8403429188794867653">"Անցնել հաջորդին"</string>
     <string name="pip_skip_to_prev" msgid="7172158111196394092">"Վերադառնալ նախորդին"</string>
     <string name="accessibility_action_pip_resize" msgid="4623966104749543182">"Փոխել չափը"</string>
-    <string name="accessibility_action_pip_stash" msgid="4060775037619702641">"Թաքցնել"</string>
-    <string name="accessibility_action_pip_unstash" msgid="7467499339610437646">"Ցուցադրել"</string>
     <string name="dock_forced_resizable" msgid="1749750436092293116">"Հավելվածը չի կարող աշխատել տրոհված էկրանի ռեժիմում։"</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="7408396418008948957">"Հավելվածը չի աջակցում էկրանի տրոհումը:"</string>
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"Հավելվածը կարող է չաշխատել լրացուցիչ էկրանի վրա"</string>
@@ -73,4 +70,5 @@
     <string name="manage_bubbles_text" msgid="7730624269650594419">"Կառավարել"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"Ամպիկը փակվեց։"</string>
     <string name="restart_button_description" msgid="5887656107651190519">"Հպեք՝ հավելվածը վերագործարկելու և լիաէկրան ռեժիմին անցնելու համար։"</string>
+    <string name="got_it" msgid="4428750913636945527">"Եղավ"</string>
 </resources>

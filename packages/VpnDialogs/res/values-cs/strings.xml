@@ -18,7 +18,6 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="prompt" msgid="3183836924226407828">"Žádost o připojení"</string>
     <string name="warning" msgid="809658604548412033">"Aplikace <xliff:g id="APP">%s</xliff:g> žádá o nastavení připojení VPN, pomocí kterého bude moci sledovat síťový provoz. Povolte, jen pokud zdroji důvěřujete. &lt;br /&gt; &lt;br /&gt; &lt;img src=vpn_icon /&gt; – když je síť VPN aktivní, v horní části obrazovky se zobrazuje tato ikona."</string>
-    <string name="warning" product="tv" msgid="5188957997628124947">"Aplikace <xliff:g id="APP">%s</xliff:g> chce nastavit připojení VPN, které umožňuje sledovat síťový provoz. Povolte, jen pokud zdroji důvěřujete. &lt;br /&gt; &lt;br /&gt; &lt;img src=vpn_icon /&gt; – když je síť VPN aktivní, na obrazovce se zobrazuje tato ikona."</string>
     <string name="legacy_title" msgid="192936250066580964">"Síť VPN je připojena"</string>
     <string name="session" msgid="6470628549473641030">"Relace:"</string>
     <string name="duration" msgid="3584782459928719435">"Doba trvání:"</string>

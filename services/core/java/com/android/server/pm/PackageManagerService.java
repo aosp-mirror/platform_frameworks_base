@@ -21608,6 +21608,16 @@ public class PackageManagerService extends IPackageManager.Stub
                 return PackageManager.DELETE_FAILED_INTERNAL_ERROR;
             }
 
+            if (isSystemApp(uninstalledPs)) {
+                UserInfo userInfo = mUserManager.getUserInfo(userId);
+                if (userInfo == null || !userInfo.isAdmin()) {
+                    Slog.w(TAG, "Not removing package " + packageName
+                            + " as only admin user may downgrade system apps");
+                    EventLog.writeEvent(0x534e4554, "170646036", -1, packageName);
+                    return PackageManager.DELETE_FAILED_USER_RESTRICTED;
+                }
+            }
+
             disabledSystemPs = mSettings.getDisabledSystemPkgLPr(packageName);
             // Static shared libs can be declared by any package, so let us not
             // allow removing a package if it provides a lib others depend on.

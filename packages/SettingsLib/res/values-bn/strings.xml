@@ -95,9 +95,7 @@
     <string name="bluetooth_profile_a2dp_high_quality" msgid="4739440941324792775">"HD অডিও: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="2477639096903834374">"HD অডিও"</string>
     <string name="bluetooth_profile_hearing_aid" msgid="58154575573984914">"হিয়ারিং এড"</string>
-    <string name="bluetooth_profile_le_audio" msgid="5158149987518342036">"LE_AUDIO"</string>
     <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="8191273236809964030">"হিয়ারিং এডের সাথে কানেক্ট করা হয়েছে"</string>
-    <string name="bluetooth_le_audio_profile_summary_connected" msgid="3162538609379333442">"LE_AUDIO-এ কানেক্ট করা হয়েছে"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="7422607970115444153">"মিডিয়া অডিওতে কানেক্ট রয়েছে"</string>
     <string name="bluetooth_headset_profile_summary_connected" msgid="2420981566026949688">"ফোন অডিওতে কানেক্ট"</string>
     <string name="bluetooth_opp_profile_summary_connected" msgid="2393521801478157362">"ফাইল স্থানান্তর সার্ভারের সঙ্গে কানেক্ট"</string>
@@ -115,7 +113,6 @@
     <string name="bluetooth_opp_profile_summary_use_for" msgid="461981154387015457">"ফাইল স্থানান্তরের জন্য ব্যবহার করুন"</string>
     <string name="bluetooth_hid_profile_summary_use_for" msgid="4289460627406490952">"ইনপুটের জন্য ব্যবহার করুন"</string>
     <string name="bluetooth_hearing_aid_profile_summary_use_for" msgid="7689393730163320483">"হিয়ারিং এডের জন্য ব্যবহার করুন"</string>
-    <string name="bluetooth_le_audio_profile_summary_use_for" msgid="2778318636027348572">"LE_AUDIO-এর জন্য ব্যবহার করুন"</string>
     <string name="bluetooth_pairing_accept" msgid="2054232610815498004">"যুক্ত করুন"</string>
     <string name="bluetooth_pairing_accept_all_caps" msgid="2734383073450506220">"যুক্ত করুন"</string>
     <string name="bluetooth_pairing_decline" msgid="6483118841204885890">"বাতিল করুন"</string>
@@ -231,7 +228,7 @@
     <string name="adb_pairing_device_dialog_failed_title" msgid="3426758947882091735">"পেয়ার করা যায়নি"</string>
     <string name="adb_pairing_device_dialog_failed_msg" msgid="6611097519661997148">"ডিভাইসটি একই নেটওয়ার্কে কানেক্ট আছে কিনা দেখে নিন।"</string>
     <string name="adb_wireless_qrcode_summary" msgid="8051414549011801917">"QR কোড স্ক্যান করে ওয়াই-ফাই ব্যবহার করে ডিভাইসের সাথে পেয়ার করুন"</string>
-    <string name="adb_wireless_verifying_qrcode_text" msgid="6123192424916029207">"ডিভাইস পেয়ার করা হচ্ছে…"</string>
+    <string name="adb_wireless_verifying_qrcode_text" msgid="6123192424916029207">"ডিভাইস যোগ করা হচ্ছে…"</string>
     <string name="adb_qrcode_pairing_device_failed_msg" msgid="6936292092592914132">"ডিভাইস যোগ করা যায়নি। এটি দুটি কারণে হয়ে থাকে - QR কোডটি সঠিক নয় বা ডিভাইসটি একই নেটওয়ার্কে কানেক্ট করা নেই।"</string>
     <string name="adb_wireless_ip_addr_preference_title" msgid="8335132107715311730">"IP অ্যাড্রেস ও পোর্ট"</string>
     <string name="adb_wireless_qrcode_pairing_title" msgid="1906409667944674707">"QR কোড স্ক্যান করুন"</string>
@@ -255,7 +252,7 @@
     <string name="wifi_display_certification" msgid="1805579519992520381">"ওয়্যারলেস ডিসপ্লে সার্টিফিকেশন"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"ওয়াই-ফাই ভারবোস লগিং চালু করুন"</string>
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"ওয়াই-ফাই স্ক্যান থ্রোটলিং"</string>
-    <string name="wifi_enhanced_mac_randomization" msgid="882650208573834301">"অল্প সময় ওয়াই-ফাই নেটওয়ার্কে যুক্ত হয় এমন MAC অ্যাড্রেস র‍্যান্ডমাইজেশনের সুবিধা"</string>
+    <string name="wifi_enhanced_mac_randomization" msgid="5437378364995776979">"ওয়াই-ফাই উন্নত MAC র‍্যান্ডমাইজেশন"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"মোবাইল ডেটা সব সময় সক্রিয় থাক"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"টিথারিং হার্ডওয়্যার অ্যাক্সিলারেশন"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"নামহীন ব্লুটুথ ডিভাইসগুলি দেখুন"</string>
@@ -321,7 +318,7 @@
     <string name="hdcp_checking_title" msgid="3155692785074095986">"HDCP পরীক্ষণ"</string>
     <string name="hdcp_checking_dialog_title" msgid="7691060297616217781">"HDCP চেক করার আচরণ সেট করুন"</string>
     <string name="debug_debugging_category" msgid="535341063709248842">"ডিবাগিং"</string>
-    <string name="debug_app" msgid="8903350241392391766">"ডিবাগ অ্যাপ বেছে নিন"</string>
+    <string name="debug_app" msgid="8903350241392391766">"ডিবাগ অ্যাপ্লিকেশান বেছে নিন"</string>
     <string name="debug_app_not_set" msgid="1934083001283807188">"ডিবাগ অ্যাপ্লিকেশান সেট করা নেই"</string>
     <string name="debug_app_set" msgid="6599535090477753651">"ডিবাগিং অ্যাপ্লিকেশান: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="select_application" msgid="2543228890535466325">"অ্যাপ্লিকেশান বেছে নিন"</string>
@@ -356,9 +353,8 @@
     <string name="debug_layout_summary" msgid="8825829038287321978">"ক্লিপ বাউন্ড, মার্জিন ইত্যাদি দেখান"</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"RTL লেআউট দিকনির্দেশ জোর দিন"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"সমস্ত স্থানের জন্য RTL এ স্ক্রিন লেআউট দিকনির্দেশে জোর দেয়"</string>
-    <string name="window_blurs" msgid="6831008984828425106">"উইন্ডো-লেভেল অস্পষ্ট করার সুবিধা চালু করুন"</string>
-    <string name="force_msaa" msgid="4081288296137775550">"4x MSAA-এ জোর দিন"</string>
-    <string name="force_msaa_summary" msgid="9070437493586769500">"OpenGL ES 2.0 অ্যাপের মধ্যে 4x MSAA চালু করুন"</string>
+    <string name="force_msaa" msgid="4081288296137775550">"4x MSAA এ জোর দিন"</string>
+    <string name="force_msaa_summary" msgid="9070437493586769500">"OpenGL ES 2.0 অ্যাপ্লিকেশানগুলির মধ্যে 4x MSAA সক্রিয় করুন"</string>
     <string name="show_non_rect_clip" msgid="7499758654867881817">"অ-আয়তক্ষেত্রাকার ক্লিপ অ্যাক্টিভিটি ডিবাগ করুন"</string>
     <string name="track_frame_time" msgid="522674651937771106">"প্রোফাইল HWUI রেন্ডারিং"</string>
     <string name="enable_gpu_debug_layers" msgid="4986675516188740397">"GPU ডিবাগ স্তর চালু করুন"</string>
@@ -409,12 +405,17 @@
     <string name="transcode_enable_all" msgid="2411165920039166710">"ট্রান্সকোডিং চালু করুন"</string>
     <string name="transcode_default" msgid="3784803084573509491">"অ্যাপ মর্ডার্ন ফর্ম্যাটে কাজ করবে বলে ধরে নিন"</string>
     <string name="transcode_notification" msgid="5560515979793436168">"ট্রান্সকোডিং বিজ্ঞপ্তি দেখুন"</string>
-    <string name="transcode_disable_cache" msgid="3160069309377467045">"ক্যাশে ট্রান্সকোডিং বন্ধ করুন"</string>
     <string name="runningservices_settings_title" msgid="6460099290493086515">"এখন চলছে যে পরিষেবাগুলি"</string>
     <string name="runningservices_settings_summary" msgid="1046080643262665743">"বর্তমান চলমান পরিষেবাগুলি দেখুন এবং নিয়ন্ত্রণ করুন"</string>
     <string name="select_webview_provider_title" msgid="3917815648099445503">"ওয়েবভিউ প্রয়োগ"</string>
     <string name="select_webview_provider_dialog_title" msgid="2444261109877277714">"ওয়েবভিউ প্রয়োগ সেট করুন"</string>
     <string name="select_webview_provider_toast_text" msgid="8512254949169359848">"এই পছন্দটি আর বৈধ নেই৷ আবার চেষ্টা করুন৷"</string>
+    <string name="convert_to_file_encryption" msgid="2828976934129751818">"ফাইল এনক্রিপশান রূপান্তর করুন"</string>
+    <string name="convert_to_file_encryption_enabled" msgid="840757431284311754">"রূপান্তর করুন..."</string>
+    <string name="convert_to_file_encryption_done" msgid="8965831011811180627">"ফাইল ইতিমধ্যেই এনক্রিপ্ট করা রয়েছে"</string>
+    <string name="title_convert_fbe" msgid="5780013350366495149">"ফাইল ভিত্তিক এনক্রিপশানে রূপান্তর করা হচ্ছে"</string>
+    <string name="convert_to_fbe_warning" msgid="34294381569282109">"ডেটা পার্টিশানকে ফাইলভিত্তিক এনক্রিপশানে রূপান্তর করুন৷ \n !!সতর্কবাণী!! এটি আপনার সমস্ত ডেটা মুছে ফেলবে৷\n এই বৈশিষ্ট্যটি আলফা এবং সঠিকভাবে কাজ নাও করতে পারে৷\n চালিয়ে যেতে \'মুছুন ও রূপান্তর করুন...\' টিপুন৷"</string>
+    <string name="button_convert_fbe" msgid="1159861795137727671">"মুছুন ও রূপান্তর করুন..."</string>
     <string name="picture_color_mode" msgid="1013807330552931903">"ছবি রঙ মোড"</string>
     <string name="picture_color_mode_desc" msgid="151780973768136200">"sRGB ব্যবহার করুন"</string>
     <string name="daltonizer_mode_disabled" msgid="403424372812399228">"অক্ষম হয়েছে"</string>
@@ -449,17 +450,19 @@
     <string name="power_remaining_duration_shutdown_imminent" product="tablet" msgid="7703677921000858479">"ট্যাবলেটটি শীঘ্রই বন্ধ হয়ে যেতে পারে (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_remaining_duration_shutdown_imminent" product="device" msgid="4374784375644214578">"ডিভাইসটি শীঘ্রই বন্ধ হয়ে যেতে পারে (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
-    <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"<xliff:g id="TIME">%1$s</xliff:g>-এ ব্যাটারি পুরো চার্জ হয়ে যাবে"</string>
-    <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g>-এ ব্যাটারি পুরো চার্জ হয়ে যাবে"</string>
-    <string name="power_charging_limited" msgid="7956120998372505295">"<xliff:g id="LEVEL">%1$s</xliff:g> - চার্জ সাময়িকভাবে বন্ধ করা আছে"</string>
+    <!-- no translation found for power_remaining_charging_duration_only (8085099012811384899) -->
+    <skip />
+    <!-- no translation found for power_charging_duration (6127154952524919719) -->
+    <skip />
+    <string name="power_charging_limited" msgid="1956874810658999681">"<xliff:g id="LEVEL">%1$s</xliff:g> - ব্যাটারির চার্জ অপটিমাইজ করা হচ্ছে"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"অজানা"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"চার্জ হচ্ছে"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"দ্রুত চার্জ হচ্ছে"</string>
     <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"ধীরে চার্জ হচ্ছে"</string>
-    <string name="battery_info_status_charging_wireless" msgid="8924722966861282197">"কেবল ছাড়া চার্জ হচ্ছে"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"চার্জ হচ্ছে না"</string>
-    <string name="battery_info_status_not_charging" msgid="3371084153747234837">"কানেক্ট করা থাকলেও চার্জ করা হচ্ছে না"</string>
-    <string name="battery_info_status_full" msgid="1339002294876531312">"চার্জ হয়েছে"</string>
+    <string name="battery_info_status_not_charging" msgid="8330015078868707899">"প্লাগ-ইন করা হয়েছে কিন্তু এখনই চার্জ করা যাবে না"</string>
+    <!-- no translation found for battery_info_status_full (1339002294876531312) -->
+    <skip />
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"প্রশাসকের দ্বারা নিয়ন্ত্রিত"</string>
     <string name="disabled" msgid="8017887509554714950">"অক্ষম হয়েছে"</string>
     <string name="external_source_trusted" msgid="1146522036773132905">"অনুমোদিত"</string>
@@ -502,10 +505,10 @@
     <string name="cancel" msgid="5665114069455378395">"বাতিল"</string>
     <string name="okay" msgid="949938843324579502">"ঠিক আছে"</string>
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"অ্যালার্ম এবং রিমাইন্ডার"</string>
-    <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"অ্যালার্ম এবং রিমাইন্ডার সেট করার অনুমতি দিন"</string>
-    <string name="alarms_and_reminders_title" msgid="8819933264635406032">"অ্যালার্ম এবং রিমাইন্ডার"</string>
-    <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"অ্যালার্ম এবং সময়ের মধ্যে শেষ করতে হবে এমন অ্যাকশনের শিডিউল সেট করতে এই অ্যাপকে অনুমতি দিন। এর ফলে ব্যাকগ্রাউন্ডে অ্যাপ চলতে পারে, যার জন্য আরও ব্যাটারির চার্জ খরচ হতে পারে।\n\nএই অনুমতি বন্ধ করা থাকলে, আগে থেকে থাকা অ্যালার্ম এবং অ্যাপের মাধ্যমে শিডিউল করা সময় ভিত্তিক ইভেন্টের রিমাইন্ডার কাজ করবে না।"</string>
-    <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"শিডিউল, অ্যালার্ম, রিমাইন্ডার, ঘড়ি"</string>
+    <string name="alarms_and_reminders_switch_title" msgid="186992351401152744">"অ্যালার্ম এবং রিমাইন্ডার সেট করতে অনুমতি দিন"</string>
+    <string name="alarms_and_reminders_title" msgid="2988400785896875237">"অ্যালার্ম এবং রিমাইন্ডার"</string>
+    <string name="alarms_and_reminders_footer_title" msgid="5882788882647778753">"অ্যালার্ম শিডিউল করা বা অন্য সময় ভিত্তিক ইভেন্টের জন্য এই অ্যাপকে অনুমতি দিন। আপনি ডিভাইস ব্যবহার না করলেও এর ফলে অ্যাপ কাজ করা শুরু করে দেবে। মনে রাখবেন অনুমতি না দিলে অ্যাপ ঠিকভাবে কাজ নাও করতে পারে, বিশেষ করে অ্যাপে শিডিউল করা যেকোনও অ্যালার্ম নাও বাজতে পারে।"</string>
+    <string name="keywords_alarms_and_reminders" msgid="8882739572152019456">"শিডিউল, অ্যালার্ম, রিমাইন্ডার, ইভেন্ট"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"চালু করুন"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"\'বিরক্ত করবে না\' মোড চালু করুন"</string>
     <string name="zen_mode_settings_summary_off" msgid="3832876036123504076">"কখনও নয়"</string>
@@ -559,15 +562,12 @@
     <string name="user_set_lock_button" msgid="1427128184982594856">"লক সেট করুন"</string>
     <string name="user_switch_to_user" msgid="6975428297154968543">"<xliff:g id="USER_NAME">%s</xliff:g>-এ পাল্টান"</string>
     <string name="creating_new_user_dialog_message" msgid="7232880257538970375">"নতুন ব্যবহারকারী তৈরি করা হচ্ছে…"</string>
-    <string name="add_user_failed" msgid="4809887794313944872">"নতুন ব্যবহারকারী যোগ করা যায়নি"</string>
+    <!-- no translation found for add_user_failed (4809887794313944872) -->
+    <skip />
     <string name="user_nickname" msgid="262624187455825083">"বিশেষ নাম"</string>
     <string name="guest_new_guest" msgid="3482026122932643557">"অতিথি যোগ করুন"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"অতিথি সরান"</string>
-    <string name="guest_reset_guest" msgid="6110013010356013758">"অতিথি সেশন রিসেট করুন"</string>
     <string name="guest_nickname" msgid="6332276931583337261">"অতিথি"</string>
-    <string name="guest_reset_guest_dialog_title" msgid="8047270010895437534">"গেস্ট সেশন রিসেট করবেন?"</string>
-    <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"রিসেট করুন"</string>
-    <string name="guest_resetting" msgid="7822120170191509566">"গেস্ট সেশন রিসেট করা হচ্ছে..."</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"ফটো তুলুন"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"একটি ইমেজ বেছে নিন"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"ফটো বেছে নিন"</string>

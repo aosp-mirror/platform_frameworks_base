@@ -95,9 +95,7 @@
     <string name="bluetooth_profile_a2dp_high_quality" msgid="4739440941324792775">"Аўдыя ў HD: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="2477639096903834374">"Аўдыя ў HD"</string>
     <string name="bluetooth_profile_hearing_aid" msgid="58154575573984914">"Слыхавыя апараты"</string>
-    <string name="bluetooth_profile_le_audio" msgid="5158149987518342036">"LE_AUDIO"</string>
     <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="8191273236809964030">"Падключана да слыхавых апаратаў"</string>
-    <string name="bluetooth_le_audio_profile_summary_connected" msgid="3162538609379333442">"Падключана да LE_AUDIO"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="7422607970115444153">"Падключана да аўдыё медыа"</string>
     <string name="bluetooth_headset_profile_summary_connected" msgid="2420981566026949688">"Падключана да аўдыё тэлефона"</string>
     <string name="bluetooth_opp_profile_summary_connected" msgid="2393521801478157362">"Падключаны да серверу перадачы файлаў"</string>
@@ -115,7 +113,6 @@
     <string name="bluetooth_opp_profile_summary_use_for" msgid="461981154387015457">"Выкарыстоўваць для перадачы файлаў"</string>
     <string name="bluetooth_hid_profile_summary_use_for" msgid="4289460627406490952">"Выкарыстоўваць для ўводу"</string>
     <string name="bluetooth_hearing_aid_profile_summary_use_for" msgid="7689393730163320483">"Выкарыстоўваць для слыхавых апаратаў"</string>
-    <string name="bluetooth_le_audio_profile_summary_use_for" msgid="2778318636027348572">"Выкарыстоўваць для LE_AUDIO"</string>
     <string name="bluetooth_pairing_accept" msgid="2054232610815498004">"Спалучыць"</string>
     <string name="bluetooth_pairing_accept_all_caps" msgid="2734383073450506220">"СПАЛУЧЫЦЬ"</string>
     <string name="bluetooth_pairing_decline" msgid="6483118841204885890">"Скасаваць"</string>
@@ -175,7 +172,7 @@
     <string name="tts_engine_security_warning" msgid="3372432853837988146">"Гэты модуль сінтэзу гаворкі можа збіраць увесь тэкст, які будзе прамоўлены, у тым ліку асабістыя дадзеныя, напрыклад паролі і нумары крэдытных карт. Ён адносіцца да модуля <xliff:g id="TTS_PLUGIN_ENGINE_NAME">%s</xliff:g>. Уключыць гэты модуль сінтэзу гаворкі?"</string>
     <string name="tts_engine_network_required" msgid="8722087649733906851">"Гэта мова патрабуе актыўнага падключэння да сеткі, каб выконваць функцыю прамаўлення тэксту."</string>
     <string name="tts_default_sample_string" msgid="6388016028292967973">"Гэта прыклад сінтэзу гаворкі"</string>
-    <string name="tts_status_title" msgid="8190784181389278640">"Статус стандартнай мовы"</string>
+    <string name="tts_status_title" msgid="8190784181389278640">"Статус мовы па змаўчанні"</string>
     <string name="tts_status_ok" msgid="8583076006537547379">"<xliff:g id="LOCALE">%1$s</xliff:g> цалкам падтрымліваецца"</string>
     <string name="tts_status_requires_network" msgid="8327617638884678896">"Для <xliff:g id="LOCALE">%1$s</xliff:g> патрабуецца падлучэнне да сеткі"</string>
     <string name="tts_status_not_supported" msgid="2702997696245523743">"<xliff:g id="LOCALE">%1$s</xliff:g> не падтрымліваецца"</string>
@@ -207,9 +204,9 @@
     <string name="vpn_settings_not_available" msgid="2894137119965668920">"Налады VPN недаступныя для гэтага карыстальніка"</string>
     <string name="tethering_settings_not_available" msgid="266821736434699780">"Налады мадэма недаступныя для гэтага карыстальніка"</string>
     <string name="apn_settings_not_available" msgid="1147111671403342300">"Налады Імя пункту доступу недаступныя для гэтага карыстальніка"</string>
-    <string name="enable_adb" msgid="8072776357237289039">"Адладка па USB"</string>
+    <string name="enable_adb" msgid="8072776357237289039">"Адладка USB"</string>
     <string name="enable_adb_summary" msgid="3711526030096574316">"Рэжым адладкі, калі USB падключаны"</string>
-    <string name="clear_adb_keys" msgid="3010148733140369917">"Скасаваць дазвол да адладкі па USB"</string>
+    <string name="clear_adb_keys" msgid="3010148733140369917">"Адклікаць дазвол USB-адладкі"</string>
     <string name="enable_adb_wireless" msgid="6973226350963971018">"Адладка па Wi-Fi"</string>
     <string name="enable_adb_wireless_summary" msgid="7344391423657093011">"Рэжым адладкі з падключанай сеткай Wi‑Fi"</string>
     <string name="adb_wireless_error" msgid="721958772149779856">"Памылка"</string>
@@ -255,7 +252,7 @@
     <string name="wifi_display_certification" msgid="1805579519992520381">"Сертыфікацыя бесправаднога экрана"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"Уключыць падрабязны журнал Wi‑Fi"</string>
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"Рэгуляванне пошуку сетак Wi‑Fi"</string>
-    <string name="wifi_enhanced_mac_randomization" msgid="882650208573834301">"Рандамізацыя выпадковых MAC-адрасоў у сетках Wi‑Fi"</string>
+    <string name="wifi_enhanced_mac_randomization" msgid="5437378364995776979">"Палепшаная Wi‑Fi рандамізацыя MAC-адраса"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"Мабільная перадача даных заўсёды актыўная"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"Апаратнае паскарэнне ў рэжыме мадэма"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"Паказваць прылады Bluetooth без назваў"</string>
@@ -303,17 +300,17 @@
     <string name="debug_view_attributes" msgid="3539609843984208216">"Уключыць прагляд атрыбутаў"</string>
     <string name="mobile_data_always_on_summary" msgid="1112156365594371019">"Перадача даных мабільнай сувязі заўсёды актыўная, нават калі актыўная сетка Wi‑Fi (для хуткага пераключэння паміж сеткамі)."</string>
     <string name="tethering_hardware_offload_summary" msgid="7801345335142803029">"Выкарыстоўваць апаратнае паскарэнне ў рэжыме мадэма пры наяўнасці"</string>
-    <string name="adb_warning_title" msgid="7708653449506485728">"Дазволіць адладку па USB?"</string>
-    <string name="adb_warning_message" msgid="8145270656419669221">"Адладка па USB прызначана толькі для мэт распрацоўкі. Яна можа выкарыстоўвацца, каб капіраваць даныя паміж камп\'ютарам і прыладай, усталёўваць праграмы на прыладзе без папярэдняга апавяшчэння і чытаць даныя журнала."</string>
+    <string name="adb_warning_title" msgid="7708653449506485728">"Дазволіць адладку USB?"</string>
+    <string name="adb_warning_message" msgid="8145270656419669221">"Адладка USB прызначана толькі для мэтаў распрацоўкі. Яна можа выкарыстоўвацца, каб капіяваць дадзеныя паміж кампутарам і прыладай, усталёўваць прыкладанні на прыладзе без папярэдняга апавяшчэння і чытаць дадзеныя дзённiка."</string>
     <string name="adbwifi_warning_title" msgid="727104571653031865">"Дазволіць адладку па Wi-Fi?"</string>
     <string name="adbwifi_warning_message" msgid="8005936574322702388">"Адладка па Wi-Fi прызначана толькі для мэт распрацоўкі. Яна можа выкарыстоўвацца, каб капіраваць даныя паміж камп\'ютарам і прыладай, усталёўваць праграмы на прыладзе без апавяшчэння і чытаць даныя журнала."</string>
-    <string name="adb_keys_warning_message" msgid="2968555274488101220">"Скасаваць доступ да адладкі па USB з усіх камп\'ютараў, на якiх вы уваходзiлi ў сiстэму?"</string>
+    <string name="adb_keys_warning_message" msgid="2968555274488101220">"Адклікаць доступ да адладкі USB з усіх камп\'ютараў, на якiх вы уваходзiлi ў сiстэму?"</string>
     <string name="dev_settings_warning_title" msgid="8251234890169074553">"Дазволiць налады распрацоўшчыка?"</string>
     <string name="dev_settings_warning_message" msgid="37741686486073668">"Гэтыя налады прызначаны толькi для распрацоўшыкаў. Яны могуць выклікаць збоi прылад i ўсталяваных на iх прыкладанняў, а таксама перашкаджаць iх працы."</string>
     <string name="verify_apps_over_usb_title" msgid="6031809675604442636">"Праверце праграмы па USB"</string>
     <string name="verify_apps_over_usb_summary" msgid="1317933737581167839">"Праверка бяспекі праграм, усталяваных з дапамогай ADB/ADT."</string>
     <string name="bluetooth_show_devices_without_names_summary" msgid="780964354377854507">"Прылады Bluetooth будуць паказаны без назваў (толькі MAC-адрасы)"</string>
-    <string name="bluetooth_disable_absolute_volume_summary" msgid="2006309932135547681">"Адключыць функцыю абсалютнага гуку Bluetooth у выпадку праблем з гукам на аддаленых прыладах, напрыклад пры непрымальна высокай гучнасці або адсутнасці кіравання."</string>
+    <string name="bluetooth_disable_absolute_volume_summary" msgid="2006309932135547681">"Адключыць функцыю абсалютнага гуку Bluetooth у выпадку праблем з гукам на аддаленых прыладах, напрыклад, пры непрымальна высокай гучнасці або адсутнасці кіравання."</string>
     <string name="bluetooth_enable_gabeldorsche_summary" msgid="2054730331770712629">"Уключае стос функцый Bluetooth Gabeldorsche."</string>
     <string name="enhanced_connectivity_summary" msgid="1576414159820676330">"Уключае функцыю \"Палепшанае падключэнне\"."</string>
     <string name="enable_terminal_title" msgid="3834790541986303654">"Лакальны тэрмінал"</string>
@@ -353,10 +350,9 @@
     <string name="usb_audio_disable_routing" msgid="3367656923544254975">"Адключыць аўдыямаршрутызацыю USB"</string>
     <string name="usb_audio_disable_routing_summary" msgid="8768242894849534699">"Выкл. аўтаперанакіраванне на USB-аўдыяпрылады"</string>
     <string name="debug_layout" msgid="1659216803043339741">"Паказаць межы макета"</string>
-    <string name="debug_layout_summary" msgid="8825829038287321978">"Паказаць межы абрэзкі, палі і г. д."</string>
+    <string name="debug_layout_summary" msgid="8825829038287321978">"Паказаць межы кліпа, палі і г. д."</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"Прымусовая раскладка справа налева"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"Прымусовая раскладка экрана справа налева для ўсіх рэгіянальных налад"</string>
-    <string name="window_blurs" msgid="6831008984828425106">"Размываць на ўзроўні акна"</string>
     <string name="force_msaa" msgid="4081288296137775550">"Прымусовае выкананне 4x MSAA"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"Уключыць 4x MSAA у праграмах з OpenGL ES 2.0"</string>
     <string name="show_non_rect_clip" msgid="7499758654867881817">"Адладка аперацый непрамавугольнага кліпа"</string>
@@ -377,8 +373,8 @@
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"Паведамляць аб тым, што праграма не адказвае"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"Паказваць папярэджанні канала апавяшчэннаў"</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"Паказвае папярэджанне на экране, калі праграма публікуе апавяшчэнне без сапраўднага канала"</string>
-    <string name="force_allow_on_external" msgid="9187902444231637880">"Прымусова дазволіць праграмы ў знешнім сховішчы"</string>
-    <string name="force_allow_on_external_summary" msgid="8525425782530728238">"Робіць любую праграму даступнай для запісу ў знешняе сховішча, незалежна ад значэнняў маніфеста"</string>
+    <string name="force_allow_on_external" msgid="9187902444231637880">"Прымусова дазволіць праграмы на вонкавым сховішчы"</string>
+    <string name="force_allow_on_external_summary" msgid="8525425782530728238">"Робіць любую праграму даступнай для запісу на вонкавае сховішча, незалежна ад значэнняў маніфеста"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"Зрабіць вокны дзеянняў даступнымі для змены памеру"</string>
     <string name="force_resizable_activities_summary" msgid="2490382056981583062">"Зрабіць усе віды дзейнасці даступнымі для змены памеру ў рэжыме некалькіх вокнаў, незалежна ад значэнняў маніфеста."</string>
     <string name="enable_freeform_support" msgid="7599125687603914253">"Уключыць адвольную форму вокнаў"</string>
@@ -391,7 +387,7 @@
     <string name="local_backup_password_toast_validation_failure" msgid="714669442363647122">"Збой пры ўсталёўцы паролю для рэзервовага капіявання"</string>
     <string name="loading_injected_setting_summary" msgid="8394446285689070348">"Ідзе загрузка…"</string>
   <string-array name="color_mode_names">
-    <item msgid="3836559907767149216">"Насычаны (стандартна)"</item>
+    <item msgid="3836559907767149216">"Сочны (па змаўчанні)"</item>
     <item msgid="9112200311983078311">"Натуральныя"</item>
     <item msgid="6564241960833766170">"Стандартны"</item>
   </string-array>
@@ -409,12 +405,17 @@
     <string name="transcode_enable_all" msgid="2411165920039166710">"Уключыць перакадзіраванне"</string>
     <string name="transcode_default" msgid="3784803084573509491">"Лічыца, што праграмы падтрымліваюць сучасныя фарматы"</string>
     <string name="transcode_notification" msgid="5560515979793436168">"Паказваць апавяшчэнні пра перакадзіраванне"</string>
-    <string name="transcode_disable_cache" msgid="3160069309377467045">"Адключыць кэш перакадзіравання"</string>
     <string name="runningservices_settings_title" msgid="6460099290493086515">"Запушчаныя службы"</string>
     <string name="runningservices_settings_summary" msgid="1046080643262665743">"Прагляд запушчаных службаў i кіраванне iмi"</string>
     <string name="select_webview_provider_title" msgid="3917815648099445503">"Рэалізацыя WebView"</string>
     <string name="select_webview_provider_dialog_title" msgid="2444261109877277714">"Наладзіць рэалізацыю WebView"</string>
     <string name="select_webview_provider_toast_text" msgid="8512254949169359848">"Гэты варыянт больш не даступны. Паспрабуйце яшчэ раз."</string>
+    <string name="convert_to_file_encryption" msgid="2828976934129751818">"Перайсці на шыфраванне файлаў"</string>
+    <string name="convert_to_file_encryption_enabled" msgid="840757431284311754">"Пераход..."</string>
+    <string name="convert_to_file_encryption_done" msgid="8965831011811180627">"Шыфраванне файлаў ужо дзейнічае"</string>
+    <string name="title_convert_fbe" msgid="5780013350366495149">"Пераход на шыфраванне файлаў"</string>
+    <string name="convert_to_fbe_warning" msgid="34294381569282109">"Перайдзіце з шыфравання раздзелаў даных на шыфраванне файлаў.\n !!Увага!! Гэта прывядзе да выдалення ўсіх даных.\n Гэта функцыя ў альфа-версіі, яна можа працаваць няправільна.\n Каб працягнуць, націсніце \"Сцерці і перайсці...\"."</string>
+    <string name="button_convert_fbe" msgid="1159861795137727671">"Сцерці і перайсці..."</string>
     <string name="picture_color_mode" msgid="1013807330552931903">"Каляровы рэжым выявы"</string>
     <string name="picture_color_mode_desc" msgid="151780973768136200">"Выкарыстоўваць sRGB"</string>
     <string name="daltonizer_mode_disabled" msgid="403424372812399228">"Выключана"</string>
@@ -422,7 +423,7 @@
     <string name="daltonizer_mode_deuteranomaly" msgid="3507284319584683963">"Дэйтэранамалія (чырвоны-зялёны)"</string>
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"Пратанамалія (чырвоны-зялёны)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"Трытанамалія (сіні-жоўты)"</string>
-    <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"Карэкцыя колераў"</string>
+    <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"Карэкцыя колеру"</string>
     <string name="accessibility_display_daltonizer_preference_subtitle" msgid="2333641630205214702">"Наладзьце адлюстраванне колераў на экране прылады. Гэта налада можа быць карыснай, калі вы захочаце:&lt;br/&gt;&lt;br/&gt; &lt;ol&gt; &lt;li&gt;&amp;nbsp;бачыць колеры больш дакладна;&lt;/li&gt; &lt;li&gt;&amp;nbsp;выдаліць колеры, якія перашкаджаюць вам сканцэнтравацца&lt;/li&gt; &lt;/ol&gt;"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"Перавызначаны <xliff:g id="TITLE">%1$s</xliff:g>"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> – <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
@@ -449,22 +450,24 @@
     <string name="power_remaining_duration_shutdown_imminent" product="tablet" msgid="7703677921000858479">"Планшэт у хуткім часе выключыцца (узровень зараду: <xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_remaining_duration_shutdown_imminent" product="device" msgid="4374784375644214578">"Прылада ў хуткім часе выключыцца (узровень зараду: <xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="STATE">%2$s</xliff:g>"</string>
-    <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"Да поўнай зарадкі засталося <xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> – да поўнай зарадкі засталося: <xliff:g id="TIME">%2$s</xliff:g>"</string>
-    <string name="power_charging_limited" msgid="7956120998372505295">"<xliff:g id="LEVEL">%1$s</xliff:g> – Зарадка часова абмежавана"</string>
+    <!-- no translation found for power_remaining_charging_duration_only (8085099012811384899) -->
+    <skip />
+    <!-- no translation found for power_charging_duration (6127154952524919719) -->
+    <skip />
+    <string name="power_charging_limited" msgid="1956874810658999681">"<xliff:g id="LEVEL">%1$s</xliff:g> - Аптымізацыя стану акумулятара"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"Невядома"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"Зарадка"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"Хуткая зарадка"</string>
     <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"Павольная зарадка"</string>
-    <string name="battery_info_status_charging_wireless" msgid="8924722966861282197">"Бесправадная зарадка"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"Не зараджаецца"</string>
-    <string name="battery_info_status_not_charging" msgid="3371084153747234837">"Падключана, не зараджаецца"</string>
-    <string name="battery_info_status_full" msgid="1339002294876531312">"Зараджаны"</string>
+    <string name="battery_info_status_not_charging" msgid="8330015078868707899">"Падключана да сеткі сілкавання, зарадзіць зараз немагчыма"</string>
+    <!-- no translation found for battery_info_status_full (1339002294876531312) -->
+    <skip />
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"Кантралюецца адміністратарам"</string>
     <string name="disabled" msgid="8017887509554714950">"Адключанае"</string>
     <string name="external_source_trusted" msgid="1146522036773132905">"Дазволена"</string>
     <string name="external_source_untrusted" msgid="5037891688911672227">"Забаронена"</string>
-    <string name="install_other_apps" msgid="3232595082023199454">"Усталёўка невядомых праграм"</string>
+    <string name="install_other_apps" msgid="3232595082023199454">"Усталёўваць невядомыя праграмы"</string>
     <string name="home" msgid="973834627243661438">"Галоўная старонка налад"</string>
   <string-array name="battery_labels">
     <item msgid="7878690469765357158">"0 %"</item>
@@ -504,10 +507,10 @@
     <string name="cancel" msgid="5665114069455378395">"Скасаваць"</string>
     <string name="okay" msgid="949938843324579502">"ОК"</string>
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"Будзільнікі і напаміны"</string>
-    <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"Дазволіць усталёўваць будзільнікі і напаміны"</string>
-    <string name="alarms_and_reminders_title" msgid="8819933264635406032">"Будзільнікі і напаміны"</string>
-    <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"Дазвольце гэтай праграме ўключаць будзільнікі і задаваць час дзеянняў. З такім дазволам праграма можа працаваць у фонавым рэжыме і ў выніку хутчэй разраджаць акумулятар.\n\nКалі вы не ўключыце гэты дазвол, існуючыя будзільнікі і запланаваны праграмай час падзей не будуць працаваць."</string>
-    <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"расклад, будзільнік, напамін, гадзіннік"</string>
+    <string name="alarms_and_reminders_switch_title" msgid="186992351401152744">"Дазволіць наладжваць будзільнікі і напаміны"</string>
+    <string name="alarms_and_reminders_title" msgid="2988400785896875237">"Будзільнікі і напаміны"</string>
+    <string name="alarms_and_reminders_footer_title" msgid="5882788882647778753">"Дазвольце гэтай праграме ўключаць будзільнікі і задаваць час падзей. Дзякуючы гэтаму праграма будзе абуджацца і працаваць, нават калі вы не выкарыстоўваеце прыладу. Звярніце ўвагу, што скасаванне дазволу можа прывесці да збояў у працы праграмы, у прыватнасці, будуць адключаны будзільнікі, зададзеныя праграмай."</string>
+    <string name="keywords_alarms_and_reminders" msgid="8882739572152019456">"расклад, будзільнік, напамін, падзея"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"Уключыць"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"Уключэнне рэжыму \"Не турбаваць\""</string>
     <string name="zen_mode_settings_summary_off" msgid="3832876036123504076">"Ніколі"</string>
@@ -561,15 +564,12 @@
     <string name="user_set_lock_button" msgid="1427128184982594856">"Усталёўка блакiроўкi"</string>
     <string name="user_switch_to_user" msgid="6975428297154968543">"Пераключыцца на карыстальніка <xliff:g id="USER_NAME">%s</xliff:g>"</string>
     <string name="creating_new_user_dialog_message" msgid="7232880257538970375">"Ствараецца новы карыстальнік…"</string>
-    <string name="add_user_failed" msgid="4809887794313944872">"Не ўдалося стварыць новага карыстальніка"</string>
+    <!-- no translation found for add_user_failed (4809887794313944872) -->
+    <skip />
     <string name="user_nickname" msgid="262624187455825083">"Псеўданім"</string>
     <string name="guest_new_guest" msgid="3482026122932643557">"Дадаць госця"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"Выдаліць госця"</string>
-    <string name="guest_reset_guest" msgid="6110013010356013758">"Скінуць гасцявы сеанс"</string>
     <string name="guest_nickname" msgid="6332276931583337261">"Госць"</string>
-    <string name="guest_reset_guest_dialog_title" msgid="8047270010895437534">"Скінуць гасцявы сеанс?"</string>
-    <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"Скінуць"</string>
-    <string name="guest_resetting" msgid="7822120170191509566">"Ідзе скід гасцявога сеанса…"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"Зрабіць фота"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"Выбраць відарыс"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"Выбраць фота"</string>

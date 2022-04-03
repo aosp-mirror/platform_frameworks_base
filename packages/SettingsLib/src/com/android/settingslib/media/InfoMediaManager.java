@@ -165,6 +165,31 @@ public class InfoMediaManager extends MediaManager {
         return sessionInfos.get(sessionInfos.size() - 1);
     }
 
+    boolean isRoutingSessionAvailableForVolumeControl() {
+        if (mVolumeAdjustmentForRemoteGroupSessions) {
+            return true;
+        }
+        List<RoutingSessionInfo> sessions =
+                mRouterManager.getRoutingSessions(mPackageName);
+        boolean foundNonSystemSession = false;
+        boolean isGroup = false;
+        for (RoutingSessionInfo session : sessions) {
+            if (!session.isSystemSession()) {
+                foundNonSystemSession = true;
+                int selectedRouteCount = session.getSelectedRoutes().size();
+                if (selectedRouteCount > 1) {
+                    isGroup = true;
+                    break;
+                }
+            }
+        }
+        if (!foundNonSystemSession) {
+            Log.d(TAG, "No routing session for " + mPackageName);
+            return false;
+        }
+        return !isGroup;
+    }
+
     /**
      * Remove a {@code device} from current media.
      *

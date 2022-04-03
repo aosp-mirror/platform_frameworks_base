@@ -20,16 +20,26 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="app_name" msgid="514691256816366517">"Keyguard"</string>
+    <string name="keyguard_password_enter_pin_code" msgid="8582296866585566671">"Ange pinkod"</string>
+    <string name="keyguard_password_enter_puk_code" msgid="3813154965969758868">"Ange PUK-koden och en ny pinkod för SIM-kortet"</string>
+    <string name="keyguard_password_enter_puk_prompt" msgid="3529260761374385243">"PUK-kod för SIM-kortet"</string>
+    <string name="keyguard_password_enter_pin_prompt" msgid="2304037870481240781">"Ny pinkod för SIM-kortet"</string>
+    <string name="keyguard_password_entry_touch_hint" msgid="6180028658339706333"><font size="17">"Tryck om du vill ange lösenord"</font></string>
+    <string name="keyguard_password_enter_password_code" msgid="7393393239623946777">"Lås upp med lösenordet"</string>
+    <string name="keyguard_password_enter_pin_password_code" msgid="3692259677395250509">"Lås upp med pinkoden"</string>
     <string name="keyguard_enter_your_pin" msgid="5429932527814874032">"Ange pinkoden"</string>
-    <string name="keyguard_enter_your_pattern" msgid="351503370332324745">"Ange mönstret"</string>
+    <string name="keyguard_enter_your_pattern" msgid="351503370332324745">"Ange det grafiska lösenordet"</string>
     <string name="keyguard_enter_your_password" msgid="7225626204122735501">"Ange ditt lösenord"</string>
+    <string name="keyguard_password_wrong_pin_code" msgid="3514267777289393046">"Fel pinkod."</string>
     <string name="keyguard_sim_error_message_short" msgid="633630844240494070">"Ogiltigt kort."</string>
     <string name="keyguard_charged" msgid="5478247181205188995">"Laddat"</string>
     <string name="keyguard_plugged_in_wireless" msgid="2537874724955057383">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Laddas trådlöst"</string>
     <string name="keyguard_plugged_in" msgid="8169926454348380863">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Laddas"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="4386594091107340426">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Laddas snabbt"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Laddas långsamt"</string>
-    <string name="keyguard_plugged_in_charging_limited" msgid="6091488837901216962">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Laddning har begränsats tillfälligt"</string>
+    <string name="keyguard_plugged_in_charging_limited" msgid="1158086783302116604">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Optimerar batteriets livslängd"</string>
+    <string name="keyguard_low_battery" msgid="1868012396800230904">"Anslut laddaren."</string>
     <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"Lås upp genom att trycka på Meny."</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"Nätverk låst"</string>
     <string name="keyguard_missing_sim_message_short" msgid="704159478161444907">"Inget SIM-kort"</string>
@@ -44,21 +54,26 @@
     <string name="keyguard_accessibility_password" msgid="3524161948484801450">"Lösenord för enhet"</string>
     <string name="keyguard_accessibility_sim_pin_area" msgid="6272116591533888062">"Pinkodsområde för SIM-kort"</string>
     <string name="keyguard_accessibility_sim_puk_area" msgid="5537294043180237374">"PUK-kodsområde för SIM-kort"</string>
+    <string name="keyguard_accessibility_next_alarm" msgid="4492876946798984630">"Nästa alarm är inställt på <xliff:g id="ALARM">%1$s</xliff:g>"</string>
     <string name="keyboardview_keycode_delete" msgid="8489719929424895174">"Radera"</string>
     <string name="disable_carrier_button_text" msgid="7153361131709275746">"Inaktivera eSIM"</string>
     <string name="error_disable_esim_title" msgid="3802652622784813119">"Det gick inte att inaktivera eSIM-kortet"</string>
     <string name="error_disable_esim_msg" msgid="2441188596467999327">"Det gick inte att inaktivera eSIM-kortet på grund av ett fel."</string>
     <string name="keyboardview_keycode_enter" msgid="6727192265631761174">"Retur"</string>
-    <string name="kg_wrong_pattern" msgid="5907301342430102842">"Fel mönster"</string>
+    <string name="kg_forgot_pattern_button_text" msgid="3304688032024541260">"Har du glömt ditt grafiska lösenord?"</string>
+    <string name="kg_wrong_pattern" msgid="5907301342430102842">"Fel grafiskt lösenord"</string>
     <string name="kg_wrong_password" msgid="4143127991071670512">"Fel lösenord"</string>
     <string name="kg_wrong_pin" msgid="4160978845968732624">"Fel pinkod"</string>
     <plurals name="kg_too_many_failed_attempts_countdown" formatted="false" msgid="991400408675793914">
       <item quantity="other">Försök igen om <xliff:g id="NUMBER">%d</xliff:g> sekunder.</item>
       <item quantity="one">Försök igen om 1 sekund.</item>
     </plurals>
+    <string name="kg_pattern_instructions" msgid="5376036737065051736">"Rita ditt grafiska lösenord"</string>
     <string name="kg_sim_pin_instructions" msgid="1942424305184242951">"Ange pinkod för SIM-kortet."</string>
     <string name="kg_sim_pin_instructions_multi" msgid="3639863309953109649">"Ange pinkod för SIM-kortet för <xliff:g id="CARRIER">%1$s</xliff:g>."</string>
     <string name="kg_sim_lock_esim_instructions" msgid="5577169988158738030">"<xliff:g id="PREVIOUS_MSG">%1$s</xliff:g> Inaktivera eSIM om du vill använda enheten utan mobiltjänst."</string>
+    <string name="kg_pin_instructions" msgid="822353548385014361">"Ange pinkod"</string>
+    <string name="kg_password_instructions" msgid="324455062831719903">"Ange lösenord"</string>
     <string name="kg_puk_enter_puk_hint" msgid="3005288372875367017">"SIM-kortet har inaktiverats. Du måste ange en PUK-kod innan du kan fortsätta. Kontakta operatören för mer information."</string>
     <string name="kg_puk_enter_puk_hint_multi" msgid="4876780689904862943">"SIM-kortet för <xliff:g id="CARRIER">%1$s</xliff:g> har inaktiverats. Du måste ange en PUK-kod innan du kan fortsätta. Kontakta operatören för mer information."</string>
     <string name="kg_puk_enter_pin_hint" msgid="6028432138916150399">"Ange önskad pinkod"</string>
@@ -66,6 +81,8 @@
     <string name="kg_sim_unlock_progress_dialog_message" msgid="4251352015304070326">"Låser upp SIM-kort …"</string>
     <string name="kg_invalid_sim_pin_hint" msgid="2762202646949552978">"Ange en pinkod med fyra till åtta siffror."</string>
     <string name="kg_invalid_sim_puk_hint" msgid="5319756880543857694">"PUK-koden ska vara minst åtta siffror."</string>
+    <string name="kg_invalid_puk" msgid="1774337070084931186">"Ange rätt PUK-kod. Om försöken upprepas inaktiveras SIM-kortet permanent."</string>
+    <string name="kg_login_too_many_attempts" msgid="4519957179182578690">"För många försök med grafiskt lösenord"</string>
     <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="544687656831558971">"Du har angett fel pinkod <xliff:g id="NUMBER_0">%1$d</xliff:g> gånger. \n\nFörsök igen om <xliff:g id="NUMBER_1">%2$d</xliff:g> sekunder."</string>
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="190984061975729494">"Du har angett fel lösenord <xliff:g id="NUMBER_0">%1$d</xliff:g> gånger. \n\nFörsök igen om <xliff:g id="NUMBER_1">%2$d</xliff:g> sekunder."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="4252405904570284368">"Du har ritat ditt grafiska lösenord fel <xliff:g id="NUMBER_0">%1$d</xliff:g> gånger. \n\nFörsök igen om <xliff:g id="NUMBER_1">%2$d</xliff:g> sekunder."</string>
@@ -81,19 +98,35 @@
     </plurals>
     <string name="kg_password_pin_failed" msgid="5136259126330604009">"Det gick inte att låsa upp med pinkoden för SIM-kortet."</string>
     <string name="kg_password_puk_failed" msgid="6778867411556937118">"Det gick inte att låsa upp med PUK-koden för SIM-kortet."</string>
+    <string name="kg_pin_accepted" msgid="1625501841604389716">"Koden godkändes."</string>
+    <string name="keyguard_carrier_default" msgid="6359808469637388586">"Ingen tjänst."</string>
     <string name="accessibility_ime_switch_button" msgid="9082358310194861329">"Byt inmatningsmetod"</string>
     <string name="airplane_mode" msgid="2528005343938497866">"Flygplansläge"</string>
-    <string name="kg_prompt_reason_restart_pattern" msgid="4720554342633852066">"Du måste rita mönster när du har startat om enheten"</string>
+    <string name="kg_prompt_reason_restart_pattern" msgid="4720554342633852066">"Du måste ange grafiskt lösenord när du har startat om enheten"</string>
     <string name="kg_prompt_reason_restart_pin" msgid="1587671566498057656">"Du måste ange pinkod när du har startat om enheten"</string>
     <string name="kg_prompt_reason_restart_password" msgid="8061279087240952002">"Du måste ange lösenord när du har startat om enheten"</string>
-    <string name="kg_prompt_reason_timeout_pattern" msgid="9170360502528959889">"Du måste rita mönster för ytterligare säkerhet"</string>
+    <string name="kg_prompt_reason_timeout_pattern" msgid="9170360502528959889">"Du måste ange grafiskt lösenord för ytterligare säkerhet"</string>
     <string name="kg_prompt_reason_timeout_pin" msgid="5945186097160029201">"Du måste ange pinkod för ytterligare säkerhet"</string>
     <string name="kg_prompt_reason_timeout_password" msgid="2258263949430384278">"Du måste ange lösenord för ytterligare säkerhet"</string>
+    <string name="kg_prompt_reason_switch_profiles_pattern" msgid="1922016914701991230">"Du måste ange grafiskt lösenord när du byter profil"</string>
+    <string name="kg_prompt_reason_switch_profiles_pin" msgid="6490434826361055400">"Du måste ange pinkod när du byter profil"</string>
+    <string name="kg_prompt_reason_switch_profiles_password" msgid="1680374696393804441">"Du måste ange lösenord när du byter profil"</string>
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"Administratören har låst enheten"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"Enheten har låsts manuellt"</string>
+    <plurals name="kg_prompt_reason_time_pattern" formatted="false" msgid="1337428979661197957">
+      <item quantity="other">Enheten har inte låsts upp på <xliff:g id="NUMBER_1">%d</xliff:g> timmar. Bekräfta det grafiska lösenordet.</item>
+      <item quantity="one">Enheten har inte låsts upp på <xliff:g id="NUMBER_0">%d</xliff:g> timme. Bekräfta det grafiska lösenordet.</item>
+    </plurals>
+    <plurals name="kg_prompt_reason_time_pin" formatted="false" msgid="6444519502336330270">
+      <item quantity="other">Enheten har inte låsts upp på <xliff:g id="NUMBER_1">%d</xliff:g> timmar. Bekräfta pinkoden.</item>
+      <item quantity="one">Enheten har inte låsts upp på <xliff:g id="NUMBER_0">%d</xliff:g> timme. Bekräfta pinkoden.</item>
+    </plurals>
+    <plurals name="kg_prompt_reason_time_password" formatted="false" msgid="5343961527665116914">
+      <item quantity="other">Enheten har inte låsts upp på <xliff:g id="NUMBER_1">%d</xliff:g> timmar. Bekräfta lösenordet.</item>
+      <item quantity="one">Enheten har inte låsts upp på <xliff:g id="NUMBER_0">%d</xliff:g> timme. Bekräfta lösenordet.</item>
+    </plurals>
     <string name="kg_fingerprint_not_recognized" msgid="5982606907039479545">"Identifierades inte"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"Identifierades inte"</string>
-    <string name="kg_face_sensor_privacy_enabled" msgid="6513157891227284806">"Om du vill använda ansiktslås aktiverar du "<b>"Kameraåtkomst"</b>" i Inställningar &gt; Integritet"</string>
     <plurals name="kg_password_default_pin_message" formatted="false" msgid="7730152526369857818">
       <item quantity="other">Ange pinkod för SIM-kortet. <xliff:g id="NUMBER_1">%d</xliff:g> försök återstår.</item>
       <item quantity="one">Ange pinkod för SIM-kortet. <xliff:g id="NUMBER_0">%d</xliff:g> försök återstår innan du måste kontakta operatören för att låsa upp enheten.</item>

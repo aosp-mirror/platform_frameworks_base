@@ -20,7 +20,6 @@
     <string name="pip_phone_close" msgid="5783752637260411309">"Aizvērt"</string>
     <string name="pip_phone_expand" msgid="2579292903468287504">"Izvērst"</string>
     <string name="pip_phone_settings" msgid="5468987116750491918">"Iestatījumi"</string>
-    <string name="pip_phone_enter_split" msgid="7042877263880641911">"Piekļūt ekrāna sadalīšanas režīmam"</string>
     <string name="pip_menu_title" msgid="5393619322111827096">"Izvēlne"</string>
     <string name="pip_notification_title" msgid="1347104727641353453">"<xliff:g id="NAME">%s</xliff:g> ir attēlā attēlā"</string>
     <string name="pip_notification_message" msgid="8854051911700302620">"Ja nevēlaties lietotnē <xliff:g id="NAME">%s</xliff:g> izmantot šo funkciju, pieskarieties, lai atvērtu iestatījumus un izslēgtu funkciju."</string>
@@ -29,8 +28,6 @@
     <string name="pip_skip_to_next" msgid="8403429188794867653">"Pāriet uz nākamo"</string>
     <string name="pip_skip_to_prev" msgid="7172158111196394092">"Pāriet uz iepriekšējo"</string>
     <string name="accessibility_action_pip_resize" msgid="4623966104749543182">"Mainīt lielumu"</string>
-    <string name="accessibility_action_pip_stash" msgid="4060775037619702641">"Paslēpt"</string>
-    <string name="accessibility_action_pip_unstash" msgid="7467499339610437646">"Rādīt"</string>
     <string name="dock_forced_resizable" msgid="1749750436092293116">"Iespējams, lietotne nedarbosies ekrāna sadalīšanas režīmā."</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="7408396418008948957">"Lietotnē netiek atbalstīta ekrāna sadalīšana."</string>
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"Lietotne, iespējams, nedarbosies sekundārajā displejā."</string>
@@ -73,4 +70,5 @@
     <string name="manage_bubbles_text" msgid="7730624269650594419">"Pārvaldīt"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"Burbulis ir noraidīts."</string>
     <string name="restart_button_description" msgid="5887656107651190519">"Pieskarieties, lai restartētu šo lietotni un pārietu pilnekrāna režīmā."</string>
+    <string name="got_it" msgid="4428750913636945527">"Labi"</string>
 </resources>

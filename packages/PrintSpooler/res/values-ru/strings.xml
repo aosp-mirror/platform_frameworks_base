@@ -24,7 +24,7 @@
     <string name="label_paper_size" msgid="908654383827777759">"Размер бумаги"</string>
     <string name="label_paper_size_summary" msgid="5668204981332138168">"Размер бумаги:"</string>
     <string name="label_color" msgid="1108690305218188969">"Печать"</string>
-    <string name="label_duplex" msgid="5370037254347072243">"С двух сторон"</string>
+    <string name="label_duplex" msgid="5370037254347072243">"Двусторонний"</string>
     <string name="label_orientation" msgid="2853142581990496477">"Ориентация"</string>
     <string name="label_pages" msgid="7768589729282182230">"Страницы"</string>
     <string name="destination_default_text" msgid="5422708056807065710">"Выберите принтер"</string>

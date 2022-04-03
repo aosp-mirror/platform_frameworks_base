@@ -156,7 +156,7 @@ class MediaCarouselControllerTest : SysuiTestCase() {
         expected.forEach {
             clock.setCurrentTimeMillis(it.third)
             MediaPlayerData.addMediaPlayer(it.first, it.second.copy(notificationKey = it.first),
-                panel, clock)
+                panel, clock, isSsReactivated = false)
         }
 
         for ((index, key) in MediaPlayerData.playerKeys().withIndex()) {

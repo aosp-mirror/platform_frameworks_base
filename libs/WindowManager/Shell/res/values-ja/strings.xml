@@ -20,7 +20,6 @@
     <string name="pip_phone_close" msgid="5783752637260411309">"閉じる"</string>
     <string name="pip_phone_expand" msgid="2579292903468287504">"展開"</string>
     <string name="pip_phone_settings" msgid="5468987116750491918">"設定"</string>
-    <string name="pip_phone_enter_split" msgid="7042877263880641911">"分割画面に切り替え"</string>
     <string name="pip_menu_title" msgid="5393619322111827096">"メニュー"</string>
     <string name="pip_notification_title" msgid="1347104727641353453">"<xliff:g id="NAME">%s</xliff:g>はピクチャー イン ピクチャーで表示中です"</string>
     <string name="pip_notification_message" msgid="8854051911700302620">"<xliff:g id="NAME">%s</xliff:g>でこの機能を使用しない場合は、タップして設定を開いて OFF にしてください。"</string>
@@ -29,8 +28,6 @@
     <string name="pip_skip_to_next" msgid="8403429188794867653">"次へスキップ"</string>
     <string name="pip_skip_to_prev" msgid="7172158111196394092">"前へスキップ"</string>
     <string name="accessibility_action_pip_resize" msgid="4623966104749543182">"サイズ変更"</string>
-    <string name="accessibility_action_pip_stash" msgid="4060775037619702641">"非表示"</string>
-    <string name="accessibility_action_pip_unstash" msgid="7467499339610437646">"表示"</string>
     <string name="dock_forced_resizable" msgid="1749750436092293116">"アプリは分割画面では動作しないことがあります。"</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="7408396418008948957">"アプリで分割画面がサポートされていません。"</string>
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"アプリはセカンダリ ディスプレイでは動作しないことがあります。"</string>
@@ -64,7 +61,7 @@
     <string name="bubbles_dont_bubble_conversation" msgid="310000317885712693">"会話をバブルで表示しない"</string>
     <string name="bubbles_user_education_title" msgid="2112319053732691899">"チャットでバブルを使う"</string>
     <string name="bubbles_user_education_description" msgid="4215862563054175407">"新しい会話はフローティング アイコン（バブル）として表示されます。タップするとバブルが開きます。ドラッグしてバブルを移動できます。"</string>
-    <string name="bubbles_user_education_manage_title" msgid="7042699946735628035">"バブルはいつでも管理可能"</string>
+    <string name="bubbles_user_education_manage_title" msgid="7042699946735628035">"いつでもバブルを管理"</string>
     <string name="bubbles_user_education_manage" msgid="3460756219946517198">"このアプリからのバブルを OFF にするには、[管理] をタップしてください"</string>
     <string name="bubbles_user_education_got_it" msgid="3382046149225428296">"OK"</string>
     <string name="bubble_overflow_empty_title" msgid="2397251267073294968">"最近閉じたバブルはありません"</string>
@@ -73,4 +70,5 @@
     <string name="manage_bubbles_text" msgid="7730624269650594419">"管理"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"ふきだしが非表示になっています。"</string>
     <string name="restart_button_description" msgid="5887656107651190519">"タップしてこのアプリを再起動すると、全画面表示になります。"</string>
+    <string name="got_it" msgid="4428750913636945527">"OK"</string>
 </resources>

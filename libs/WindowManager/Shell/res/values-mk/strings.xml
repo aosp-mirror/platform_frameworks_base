@@ -20,7 +20,6 @@
     <string name="pip_phone_close" msgid="5783752637260411309">"Затвори"</string>
     <string name="pip_phone_expand" msgid="2579292903468287504">"Проширете"</string>
     <string name="pip_phone_settings" msgid="5468987116750491918">"Поставки"</string>
-    <string name="pip_phone_enter_split" msgid="7042877263880641911">"Влези во поделен екран"</string>
     <string name="pip_menu_title" msgid="5393619322111827096">"Мени"</string>
     <string name="pip_notification_title" msgid="1347104727641353453">"<xliff:g id="NAME">%s</xliff:g> е во слика во слика"</string>
     <string name="pip_notification_message" msgid="8854051911700302620">"Ако не сакате <xliff:g id="NAME">%s</xliff:g> да ја користи функцијава, допрете за да ги отворите поставките и да ја исклучите."</string>
@@ -29,8 +28,6 @@
     <string name="pip_skip_to_next" msgid="8403429188794867653">"Прескокни до следната"</string>
     <string name="pip_skip_to_prev" msgid="7172158111196394092">"Прескокни до претходната"</string>
     <string name="accessibility_action_pip_resize" msgid="4623966104749543182">"Промени големина"</string>
-    <string name="accessibility_action_pip_stash" msgid="4060775037619702641">"Сокријте"</string>
-    <string name="accessibility_action_pip_unstash" msgid="7467499339610437646">"Прикажете"</string>
     <string name="dock_forced_resizable" msgid="1749750436092293116">"Апликацијата може да не работи со поделен екран."</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="7408396418008948957">"Апликацијата не поддржува поделен екран."</string>
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"Апликацијата може да не функционира на друг екран."</string>
@@ -73,4 +70,5 @@
     <string name="manage_bubbles_text" msgid="7730624269650594419">"Управувајте"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"Балончето е отфрлено."</string>
     <string name="restart_button_description" msgid="5887656107651190519">"Допрете за да ја рестартирате апликацијава и да ја отворите на цел екран."</string>
+    <string name="got_it" msgid="4428750913636945527">"Сфатив"</string>
 </resources>

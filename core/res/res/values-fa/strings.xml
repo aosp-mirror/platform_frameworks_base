@@ -202,6 +202,7 @@
     <string name="gnss_service" msgid="8907781262179951385">"‏سرویس GNSS"</string>
     <string name="sensor_notification_service" msgid="7474531979178682676">"سرویس اعلان حسگر"</string>
     <string name="twilight_service" msgid="8964898045693187224">"‏سرویس Twilight"</string>
+    <string name="offline_location_time_zone_detection_service_attribution" msgid="303754195048744816">"شناساگر منطقه زمانی (بدون اتصال)"</string>
     <string name="gnss_time_update_service" msgid="9039489496037616095">"‏سرویس به‌روزرسانی زمان GNSS"</string>
     <string name="music_recognition_manager_service" msgid="7481956037950276359">"سرویس مدیر تشخیص موسیقی"</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"دستگاهتان پاک خواهد شد"</string>
@@ -238,7 +239,7 @@
     <string name="reboot_safemode_title" msgid="5853949122655346734">"راه‌اندازی مجدد در حالت امن"</string>
     <string name="reboot_safemode_confirm" msgid="1658357874737219624">"آیا می‌خواهید با حالت امن راه‌اندازی مجدد کنید؟ با این کار همهٔ برنامه‌های شخص ثالثی که نصب کرده‌اید غیرفعال می‌شوند. با راه‌اندازی دوباره سیستم این برنامه‌ها دوباره بازیابی می‌شوند."</string>
     <string name="recent_tasks_title" msgid="8183172372995396653">"اخیر"</string>
-    <string name="no_recent_tasks" msgid="9063946524312275906">"برنامه‌های جدید موجود نیست."</string>
+    <string name="no_recent_tasks" msgid="9063946524312275906">"‏برنامه‎های جدید موجود نیست."</string>
     <string name="global_actions" product="tablet" msgid="4412132498517933867">"گزینه‌های رایانهٔ لوحی"</string>
     <string name="global_actions" product="tv" msgid="3871763739487450369">"‏گزینه‌های Android TV"</string>
     <string name="global_actions" product="default" msgid="6410072189971495460">"گزینه‌های تلفن"</string>
@@ -365,7 +366,7 @@
     <string name="permlab_manageOngoingCalls" msgid="281244770664231782">"مدیریت تماس‌های درحال انجام"</string>
     <string name="permdesc_manageOngoingCalls" msgid="7003138133829915265">"به برنامه اجازه می‌دهد جزئیات تماس‌های درحال انجام در دستگاه را ببیند و این تماس‌ها را کنترل کند."</string>
     <string name="permlab_readCellBroadcasts" msgid="5869884450872137693">"خواندن پیام‌های پخش سلولی"</string>
-    <string name="permdesc_readCellBroadcasts" msgid="672513437331980168">"‏به برنامه اجازه می‎دهد پیام‌های پخش سلولی دستگاه شما را بخواند. هشدارهای پخش سلولی در برخی از موقعیت‌های مکانی تحویل داده می‎شوند تا موقعیت‌های اضطراری را به شما اعلام کنند. وقتی پخش سلولی دریافت می‎شود، ممکن است برنامه‌های مخرب در عملکرد یا کارکرد دستگاه شما اختلال ایجاد کنند."</string>
+    <string name="permdesc_readCellBroadcasts" msgid="672513437331980168">"‏به برنامه اجازه می‎دهد پیام‌های پخش سلولی دستگاه شما را بخواند. هشدارهای پخش سلولی در برخی از موقعیت‌های مکانی تحویل داده می‎شوند تا موقعیت‌های اضطراری را به شما اعلام کنند. وقتی پخش سلولی دریافت می‎شود، ممکن است برنامه‎های مخرب در عملکرد یا کارکرد دستگاه شما اختلال ایجاد کنند."</string>
     <string name="permlab_subscribedFeedsRead" msgid="217624769238425461">"خواندن فیدهای مشترک"</string>
     <string name="permdesc_subscribedFeedsRead" msgid="6911349196661811865">"‏به برنامه اجازه می‎دهد تا جزئیات مربوط به فیدهای همگام شده کنونی را دریافت کند."</string>
     <string name="permlab_sendSms" msgid="7757368721742014252">"ارسال و نمایش پیام‌های پیامک"</string>
@@ -376,11 +377,11 @@
     <string name="permdesc_readSms" product="default" msgid="774753371111699782">"این برنامه می‌تواند همه پیامک‌های ذخیره‌شده در تلفن شما را بخواند."</string>
     <string name="permlab_receiveWapPush" msgid="4223747702856929056">"‏دریافت پیام‌های نوشتاری (WAP)"</string>
     <string name="permdesc_receiveWapPush" msgid="1638677888301778457">"‏به برنامه اجازه می‌دهد پیام‌های WAP را دریافت و پردازش کند. این مجوز می‌تواند پیام‌های ارسالی به شما را بدون نمایش آن‌ها به شما حذف یا کنترل کند."</string>
-    <string name="permlab_getTasks" msgid="7460048811831750262">"بازیابی برنامه‌های در حال اجرا"</string>
+    <string name="permlab_getTasks" msgid="7460048811831750262">"‏بازیابی برنامه‎های در حال اجرا"</string>
     <string name="permdesc_getTasks" msgid="7388138607018233726">"به برنامه امکان می‌دهد اطلاعات مربوط به کارهای در حال اجرای اخیر و کنونی را بازیابی کند. این ممکن است به برنامه امکان دهد به اطلاعات مربوط به برنامه‌هایی که در دستگاه استفاده می‌شوند دست یابد."</string>
     <string name="permlab_manageProfileAndDeviceOwners" msgid="639849495253987493">"مدیریت نمایه و مالکان دستگاه"</string>
     <string name="permdesc_manageProfileAndDeviceOwners" msgid="7304240671781989283">"به برنامه‌ها امکان می‌دهد، مالکان نمایه و مالک دستگاه را تنظیم کنند."</string>
-    <string name="permlab_reorderTasks" msgid="7598562301992923804">"تنظیم مجدد ترتیب برنامه‌های در حال اجرا"</string>
+    <string name="permlab_reorderTasks" msgid="7598562301992923804">"‏تنظیم مجدد ترتیب برنامه‎های در حال اجرا"</string>
     <string name="permdesc_reorderTasks" msgid="8796089937352344183">"‏به برنامه اجازه می‎دهد تا کارها را به پیش‌زمینه و پس‌زمینه منتقل کند. برنامه‎ ممکن است بدون دخالت شما این کار را انجام دهد."</string>
     <string name="permlab_enableCarMode" msgid="893019409519325311">"فعال کردن حالت خودرو"</string>
     <string name="permdesc_enableCarMode" msgid="56419168820473508">"‏به برنامه اجازه می‎دهد تا حالت خودرو را فعال کند."</string>
@@ -401,7 +402,7 @@
     <string name="permlab_getPackageSize" msgid="375391550792886641">"اندازه‌گیری اندازه فضای ذخیره‌سازی برنامه"</string>
     <string name="permdesc_getPackageSize" msgid="742743530909966782">"‏به برنامه اجازه می‎دهد تا کدها، داده‎ها و اندازه‎های حافظهٔ پنهان خود را بازیابی کند"</string>
     <string name="permlab_writeSettings" msgid="8057285063719277394">"تغییر تنظیمات سیستم"</string>
-    <string name="permdesc_writeSettings" msgid="8293047411196067188">"‏به برنامه اجازه می‎دهد تا داده‎های تنظیم سیستم را تغییر دهد. برنامه‌های مخرب می‎توانند پیکربندی سیستم شما را خراب کنند."</string>
+    <string name="permdesc_writeSettings" msgid="8293047411196067188">"‏به برنامه اجازه می‎دهد تا داده‎های تنظیم سیستم را تغییر دهد. برنامه‎های مخرب می‎توانند پیکربندی سیستم شما را خراب کنند."</string>
     <string name="permlab_receiveBootCompleted" msgid="6643339400247325379">"اجرا شدن در هنگام راه‌اندازی"</string>
     <string name="permdesc_receiveBootCompleted" product="tablet" msgid="5565659082718177484">"به برنامه اجازه می‌دهد که به محض پایان راه‌اندازی سیستم، راه‌اندازی شود. این ویژگی ممکن است باعث شود راه‌اندازی دستگاه مدت زمان بیشتری طول بکشد و به برنامه اجازه می‌دهد با همیشه درحال اجرا بودنش باعث کاهش سرعت کلی دستگاه شود."</string>
     <string name="permdesc_receiveBootCompleted" product="tv" msgid="4900842256047614307">"‏به برنامه اجازه می‌دهد به‌محض اتمام راه‌اندازی سیستم، خود را راه‌اندازی کند. ممکن است این مجوز باعث شود دستگاه Android TV آهسته‌تر راه‌اندازی شود و به برنامه اجازه می‌دهد با همیشه درحال اجرا بودن، سرعت کلی دستگاه را کاهش دهد."</string>
@@ -469,8 +470,6 @@
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"‏به برنامه اجازه می‌دهد از سرویس IMS برای برقراری تماس‌ها بدون دخالت شما استفاده کند."</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"خواندن وضعیت تلفن و شناسه"</string>
     <string name="permdesc_readPhoneState" msgid="7229063553502788058">"به برنامه اجازه می‌دهد به ویژگی‌های تلفن دستگاه شما دسترسی پیدا کند. این مجوز به برنامه اجازه می‌دهد شماره تلفن و شناسه‌های دستگاه، فعال بودن یک تماس و شماره راه دوری که با یک تماس متصل شده است را مشخص کند."</string>
-    <string name="permlab_readBasicPhoneState" msgid="3214853233263871347">"خواندن شناسه و وضعیت اصلی ارتباط دوربرد"</string>
-    <string name="permdesc_readBasicPhoneState" msgid="828185691675460520">"به برنامه اجازه می‌دهد به ویژگی‌های اصلی ارتباط دوربرد دستگاه دسترسی داشته باشد."</string>
     <string name="permlab_manageOwnCalls" msgid="9033349060307561370">"برقرار کردن تماس‌ها ازطریق سیستم"</string>
     <string name="permdesc_manageOwnCalls" msgid="4431178362202142574">"به برنامه امکان می‌دهد برای بهبود تجربه تماس، تماس‌هایش را ازطریق سیستم برقرار کند."</string>
     <string name="permlab_callCompanionApp" msgid="3654373653014126884">"دیدن و کنترل تماس‌ها ازطریق سیستم."</string>
@@ -543,8 +542,6 @@
     <string name="permdesc_bluetooth_advertise" product="default" msgid="6085174451034210183">"برنامه مجاز می‌شود در دستگاه‌های بلوتوث اطراف تبلیغ کند."</string>
     <string name="permlab_uwb_ranging" msgid="8141915781475770665">"مشخص کردن موقعیت نسبی بین دستگاه‌های باند فوق‌وسیع اطراف"</string>
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"به برنامه اجازه داده می‌شود موقعیت نسبی بین دستگاه‌های باند فوق‌وسیع اطراف را مشخص کند"</string>
-    <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"‏برقراری تعامل با دستگاه‌های Wi-Fi اطراف"</string>
-    <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"‏به برنامه اجازه می‌دهد در دستگاه‌های Wi-Fi اطراف تبلیغ کند، به آن‌ها متصل شود، و موقعیت نسبی آن‌ها را تشخیص دهد"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"‏اطلاعات ترجیحی سرویس پولی NFC"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"‏به برنامه اجازه می‌دهد اطلاعات ترجیحی سرویس پولی NFC، مانند کمک‌های ثبت‌شده و مقصد مسیر را دریافت کند."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"کنترل ارتباط راه نزدیک"</string>
@@ -583,12 +580,11 @@
     <string name="fingerprint_acquired_partial" msgid="694598777291084823">"بخشی از اثر انگشت شناسایی شد"</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"اثرانگشت پردازش نشد. لطفاً دوباره امتحان کنید."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="5236744087471419479">"حسگر را پاک کنید"</string>
-    <string name="fingerprint_acquired_too_fast" msgid="6038375140739678098">"کمی بیشتر نگه دارید"</string>
+    <string name="fingerprint_acquired_too_fast" msgid="1254724478300787385">"حرکت انگشت خیلی سریع بود"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"حرکت انگشت خیلی آهسته بود. لطفاً دوباره امتحان کنید."</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"اثر انگشت دیگری را امتحان کنید"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"خیلی روشن است"</string>
     <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"اثر انگشت را تنظیم کنید"</string>
-    <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"هربار موقعیت انگشتتان را کمی تغییر دهید"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"اثر انگشت اصالت‌سنجی شد"</string>
@@ -605,7 +601,6 @@
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"اثر انگشتی ثبت نشده است."</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"این دستگاه حسگر اثر انگشت ندارد."</string>
     <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"حسگر به‌طور موقت غیرفعال است."</string>
-    <string name="fingerprint_error_bad_calibration" msgid="4385512597740168120">"امکان استفاده از حسگر اثر انگشت وجود ندارد. به ارائه‌دهنده خدمات تعمیر مراجعه کنید"</string>
     <string name="fingerprint_name_template" msgid="8941662088160289778">"انگشت <xliff:g id="FINGERID">%d</xliff:g>"</string>
     <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"استفاده از اثر انگشت"</string>
     <string name="fingerprint_or_screen_lock_app_setting_name" msgid="3501743523487644907">"استفاده از اثر انگشت یا قفل صفحه"</string>
@@ -613,19 +608,18 @@
     <string name="fingerprint_or_screen_lock_dialog_default_subtitle" msgid="5195808203117992200">"برای ادامه، از اثر انگشت یا قفل صفحه استفاده کنید"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
-    <string name="fingerprint_error_vendor_unknown" msgid="4170002184907291065">"مشکلی پیش آمد. دوباره امتحان کنید."</string>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"نماد اثر انگشت"</string>
-    <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"قفل‌گشایی با چهره"</string>
-    <string name="face_recalibrate_notification_title" msgid="2524791952735579082">"مشکل در «قفل‌گشایی با چهره»"</string>
-    <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"برای حذف مدل چهره‌تان ضربه بزنید، سپس چهره‌تان را دوباره اضافه کنید"</string>
-    <string name="face_setup_notification_title" msgid="8843461561970741790">"راه‌اندازی «قفل‌گشایی با چهره»"</string>
+    <string name="permlab_manageFace" msgid="4569549381889283282">"مدیریت سخت‌افزار «بازگشایی با چهره»"</string>
+    <string name="permdesc_manageFace" msgid="6204569688492710471">"به برنامه امکان می‌دهد روش‌هایی را برای افزودن و حذف الگوهای چهره جهت استفاده فرابخواند."</string>
+    <string name="permlab_useFaceAuthentication" msgid="1011430526454859030">"استفاده از سخت‌افزار «بازگشایی با چهره»"</string>
+    <string name="permdesc_useFaceAuthentication" msgid="3115697017684668012">"به برنامه امکان می‌دهد از سخت‌افزار «بازگشایی با چهره» برای اصالت‌سنجی استفاده کند"</string>
+    <string name="face_recalibrate_notification_name" msgid="6006095897989257026">"بازگشایی با چهره"</string>
+    <string name="face_recalibrate_notification_title" msgid="5944930528030496897">"ثبت مجدد چهره"</string>
+    <string name="face_recalibrate_notification_content" msgid="892757485125249962">"برای بهبود تشخیص، لطفاً چهره‌تان را دوباره ثبت کنید"</string>
+    <string name="face_setup_notification_title" msgid="550617822603450009">"راه‌اندازی «بازگشایی با چهره»"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"برای باز کردن قفل تلفن خود به آن نگاه کنید"</string>
-    <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"‏برای استفاده از «قفل‌گشایی با چهره»، "<b>"دسترسی به دوربین"</b>" را در «تنظیمات &gt; حریم‌خصوصی» روشن کنید"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"راه‌اندازی روش‌های بیشتر برای باز کردن قفل"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"برای افزودن اثر انگشت، ضربه بزنید"</string>
-    <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"قفل‌گشایی با اثر انگشت"</string>
-    <string name="fingerprint_recalibrate_notification_title" msgid="2406561052064558497">"امکان استفاده از حسگر اثر انگشت وجود ندارد"</string>
-    <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"به ارائه‌دهنده خدمات تعمیر مراجعه کنید."</string>
     <string name="face_acquired_insufficient" msgid="2150805835949162453">"داده‌های دقیق چهره ضبط نشد. دوباره امتحان کنید."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"خیلی روشن است. روشنایی‌اش را ملایم‌تر کنید."</string>
     <string name="face_acquired_too_dark" msgid="252573548464426546">"خیلی تاریک است. تصویر را روشن‌تر کنید."</string>
@@ -649,25 +643,23 @@
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"چهره تأیید نشد. سخت‌افزار در دسترس نیست."</string>
-    <string name="face_error_timeout" msgid="2598544068593889762">"«قفل‌گشایی با چهره» را دوباره امتحان کنید"</string>
+    <string name="face_error_timeout" msgid="522924647742024699">"«بازگشایی با چهره» را دوباره امتحان کنید."</string>
     <string name="face_error_no_space" msgid="5649264057026021723">"داده‌ چهره جدید ذخیره نشد. اول داده‌ چهره قدیمی را حذف کنید."</string>
     <string name="face_error_canceled" msgid="2164434737103802131">"عملیات شناسایی چهره لغو شد."</string>
-    <string name="face_error_user_canceled" msgid="5766472033202928373">"کاربر «قفل‌گشایی با چهره» را لغو کرد"</string>
+    <string name="face_error_user_canceled" msgid="8553045452825849843">"کاربر «بازگشایی با چهره» را لغو کرد."</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"تعداد زیادی تلاش ناموفق. بعداً دوباره امتحان کنید."</string>
-    <string name="face_error_lockout_permanent" msgid="3277134834042995260">"تلاش‌ها بیش از حدمجاز شده است. «قفل‌گشایی با چهره» غیرفعال است."</string>
-    <string name="face_error_lockout_screen_lock" msgid="5062609811636860928">"تلاش‌ها بیش از حدمجاز شده است. درعوض قفل صفحه را وارد کنید."</string>
+    <string name="face_error_lockout_permanent" msgid="8277853602168960343">"تعداد تلاش‌ها بیش‌ازحد مجاز است. «بازگشایی با چهره» غیرفعال است."</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"چهره تأیید نشد. دوباره امتحان کنید."</string>
-    <string name="face_error_not_enrolled" msgid="1134739108536328412">"«قفل‌گشایی با چهره» را راه‌اندازی نکرده‌اید"</string>
-    <string name="face_error_hw_not_present" msgid="7940978724978763011">"از «قفل‌گشایی با چهره» در این دستگاه پشتیبانی نمی‌شود"</string>
+    <string name="face_error_not_enrolled" msgid="7369928733504691611">"«بازگشایی با چهره» را راه‌اندازی نکرده‌اید."</string>
+    <string name="face_error_hw_not_present" msgid="1070600921591729944">"«بازگشایی با چهره» در این دستگاه پشتیبانی نمی‌شود."</string>
     <string name="face_error_security_update_required" msgid="5076017208528750161">"حسگر به‌طور موقت غیرفعال است."</string>
     <string name="face_name_template" msgid="3877037340223318119">"چهره <xliff:g id="FACEID">%d</xliff:g>"</string>
-    <string name="face_app_setting_name" msgid="5854024256907828015">"استفاده از «قفل‌گشایی با چهره»"</string>
+    <string name="face_app_setting_name" msgid="8130135875458467243">"استفاده از «بازگشایی با چهره»"</string>
     <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"استفاده از قفل صفحه یا چهره"</string>
     <string name="face_dialog_default_subtitle" msgid="6620492813371195429">"برای ادامه، از چهره‌تان استفاده کنید"</string>
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"برای ادامه، از تشخیص چهره یا قفل صفحه استفاده کنید"</string>
   <string-array name="face_error_vendor">
   </string-array>
-    <string name="face_error_vendor_unknown" msgid="7387005932083302070">"مشکلی پیش آمد. دوباره امتحان کنید."</string>
     <string name="face_icon_content_description" msgid="465030547475916280">"نماد چهره"</string>
     <string name="permlab_readSyncSettings" msgid="6250532864893156277">"خواندن تنظیمات همگام‌سازی"</string>
     <string name="permdesc_readSyncSettings" msgid="1325658466358779298">"به برنامه اجازه می‌دهد تنظیمات را برای یک حساب بخواند. به‌عنوان مثال، این ویژگی می‌تواند تعیین کند آیا حساب «افراد» شما با یک حساب همگام‌سازی شده است."</string>
@@ -698,7 +690,7 @@
     <string name="permlab_manageNetworkPolicy" msgid="6872549423152175378">"مدیریت خط‌مشی شبکه"</string>
     <string name="permdesc_manageNetworkPolicy" msgid="1865663268764673296">"‏به برنامه اجازه می‎دهد تا خط‌مشی‎های شبکه را مدیریت کند و قوانین خاص برنامه را تعیین کند."</string>
     <string name="permlab_modifyNetworkAccounting" msgid="7448790834938749041">"تغییر محاسبه استفاده از شبکه"</string>
-    <string name="permdesc_modifyNetworkAccounting" msgid="5076042642247205390">"‏به برنامه اجازه می‎دهد تا نحوه محاسبه کاربرد شبکه در برنامه را تغییر دهد. برای استفاده برنامه‌های عادی نیست."</string>
+    <string name="permdesc_modifyNetworkAccounting" msgid="5076042642247205390">"‏به برنامه اجازه می‎دهد تا نحوه محاسبه کاربرد شبکه در برنامه را تغییر دهد. برای استفاده برنامه‎های عادی نیست."</string>
     <string name="permlab_accessNotifications" msgid="7130360248191984741">"اعلان‌های دسترسی"</string>
     <string name="permdesc_accessNotifications" msgid="761730149268789668">"به برنامه اجازه می‌دهد به بازیابی، بررسی و پاک کردن اعلان‌ها از جمله موارد پست شده توسط سایر برنامه‌ها بپردازد."</string>
     <string name="permlab_bindNotificationListenerService" msgid="5848096702733262458">"اتصال به یک سرویس شنونده اعلان"</string>
@@ -734,11 +726,9 @@
     <string name="policylab_watchLogin" msgid="7599669460083719504">"پایش تلاش‌های باز کردن قفل صفحه"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"‏تعداد گذرواژه‎های نادرست تایپ شده را هنگام بازکردن قفل صفحه کنترل می‌کند، و اگر دفعات زیادی گذرواژه نادرست وارد شود رایانهٔ لوحی را قفل می‌کند و همه داده‎های رایانهٔ لوحی را پاک می‌کند."</string>
     <string name="policydesc_watchLogin" product="tv" msgid="2140588224468517507">"‏بر تعداد گذرواژه‎های نادرستی که هنگام بازکردن قفل صفحه تایپ می‌شود، نظارت می‌کند، و اگر گذرواژه‌های نادرست دفعات زیادی تایپ شوند، Android TV را قفل می‌کند یا همه داده‎های آن را پاک می‌کند."</string>
-    <string name="policydesc_watchLogin" product="automotive" msgid="7011438994051251521">"بر تعداد گذرواژه‌های نادرست تایپ‌شده در زمان باز کردن قفل صفحه نظارت می‌شود و اگر گذرواژه‌های نادرست دفعات خیلی زیادی تایپ شود، سیستم اطلاعات-سرگرمی قفل می‌شود یا همه داده‌های سیستم اطلاعات-سرگرمی پاک می‌شود."</string>
     <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"‏تعداد گذرواژه‎های نادرست تایپ‌شده را هنگام بازکردن قفل صفحه کنترل می‎کند و اگر چندین بار گذرواژه‌های نادرست وارد شود، تلفن را قفل می‌کند یا همه داده‎های تلفن را پاک می‌کند."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="2049038943004297474">"بر تعداد گذرواژه‌های نادرستی که هنگام باز کردن قفل صفحه تایپ شده، نظارت می‌کند، و اگر تعداد گذرواژه‌های تایپ شده نادرست بیش از حد بود، رایانه لوحی را قفل می‌کند یا کلیه داده‌های کاربر را پاک می‌کند."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tv" msgid="8965224107449407052">"‏بر تعداد گذرواژه‌های نادرستی که هنگام باز کردن قفل صفحه تایپ می‌شود، نظارت می‌کند، و اگر گذرواژه‌های نادرست دفعات زیادی تایپ شوند، دستگاه Android TV را قفل یا همه داده‌های کاربر را پاک می‌کند."</string>
-    <string name="policydesc_watchLogin_secondaryUser" product="automotive" msgid="7180857406058327941">"بر تعداد گذرواژه‌های نادرستی که هنگام باز کردن قفل صفحه تایپ شده نظارت می‌شود و اگر گذرواژه‌های نادرست دفعات خیلی زیادی تایپ شود، تلفن قفل می‌شود یا همه داده‌های کاربر پاک می‌شود."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="9177645136475155924">"بر تعداد گذرواژه‌های نادرستی که هنگام باز کردن قفل صفحه تایپ شده، نظارت می‌کند، و اگر تعداد گذرواژه‌های تایپ شده نادرست بیش از حد بود، تلفن را قفل می‌کند یا کلیه داده‌های کاربر را پاک می‌کند."</string>
     <string name="policylab_resetPassword" msgid="214556238645096520">"تغییر قفل صفحه"</string>
     <string name="policydesc_resetPassword" msgid="4626419138439341851">"قفل صفحه را تغییر می‌دهد."</string>
@@ -747,13 +737,10 @@
     <string name="policylab_wipeData" msgid="1359485247727537311">"پاک کردن تمام داده‌ها"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"با انجام بازنشانی داده‌های کارخانه، داده‌های رایانهٔ لوحی بدون هشدار پاک می‌شود."</string>
     <string name="policydesc_wipeData" product="tv" msgid="513862488950801261">"‏داده‌های دستگاه Android TV شما، بدون نشان داده شدن هشدار و با انجام بازنشانی داده‌های کارخانه، پاک می‌شود."</string>
-    <string name="policydesc_wipeData" product="automotive" msgid="660804547737323300">"داده‌های سیستم اطلاعات-سرگرمی بدون هشدار و با انجام بازنشانی داده‌های کارخانه پاک می‌شود."</string>
     <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"با انجام بازنشانی داده‌های کارخانه، داده‌های تلفن بدون هشدار پاک می‌شود."</string>
-    <string name="policylab_wipeData_secondaryUser" product="automotive" msgid="115034358520328373">"پاک کردن داده‌های نمایه"</string>
-    <string name="policylab_wipeData_secondaryUser" product="default" msgid="413813645323433166">"پاک کردن داده‌های کاربر"</string>
+    <string name="policylab_wipeData_secondaryUser" msgid="413813645323433166">"پاک کردن داده‌های کاربر"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="2336676480090926470">"داده‌های این کاربر را در این رایانه لوحی بدون هشدار پاک می‌کند."</string>
     <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2293713284515865200">"‏بدون نشان داده شدن هشدار، داده‌های این کاربر در این دستگاه Android TV پاک می‌شود."</string>
-    <string name="policydesc_wipeData_secondaryUser" product="automotive" msgid="4658832487305780879">"داده‌های این نمایه در این سیستم اطلاعات-سرگرمی بدوم هشدار پاک می‌شود."</string>
     <string name="policydesc_wipeData_secondaryUser" product="default" msgid="2788325512167208654">"داده‌های این کاربر را در این تلفن بدون هشدار پاک می‌کند."</string>
     <string name="policylab_setGlobalProxy" msgid="215332221188670221">"تنظیم پروکسی جهانی دستگاه"</string>
     <string name="policydesc_setGlobalProxy" msgid="7149665222705519604">"پروکسی کلی دستگاه را برای استفاده هنگام فعال بودن این خط‌مشی تنظیم می‌کند. تنها مالک دستگاه می‌تواند پروکسی کلی را تنظیم کند."</string>
@@ -900,7 +887,7 @@
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"دوباره امتحان کنید"</string>
     <string name="lockscreen_password_wrong" msgid="8605355913868947490">"دوباره امتحان کنید"</string>
     <string name="lockscreen_storage_locked" msgid="634993789186443380">"باز کردن قفل تمام قابلیت‌ها و داده‌ها"</string>
-    <string name="faceunlock_multiple_failures" msgid="681991538434031708">"دفعات تلاش برای «قفل‌گشایی با چهره» از حداکثر مجاز بیشتر شد"</string>
+    <string name="faceunlock_multiple_failures" msgid="681991538434031708">"دفعات تلاش برای «بازگشایی با چهره» از حداکثر مجاز بیشتر شد"</string>
     <string name="lockscreen_missing_sim_message_short" msgid="1248431165144893792">"سیم کارت موجود نیست"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="8596805728510570760">"سیم کارت درون رایانهٔ لوحی نیست."</string>
     <string name="lockscreen_missing_sim_message" product="tv" msgid="2582768023352171073">"‏هیچ سیم‌کارتی در دستگاه Android TV شما قرار داده نشده است."</string>
@@ -913,21 +900,21 @@
     <string name="lockscreen_transport_next_description" msgid="2931509904881099919">"آهنگ بعدی"</string>
     <string name="lockscreen_transport_pause_description" msgid="6705284702135372494">"مکث"</string>
     <string name="lockscreen_transport_play_description" msgid="106868788691652733">"پخش"</string>
-    <string name="lockscreen_transport_stop_description" msgid="1449552232598355348">"متوقف کردن"</string>
+    <string name="lockscreen_transport_stop_description" msgid="1449552232598355348">"توقف"</string>
     <string name="lockscreen_transport_rew_description" msgid="7680106856221622779">"عقب بردن"</string>
     <string name="lockscreen_transport_ffw_description" msgid="4763794746640196772">"جلو بردن سریع"</string>
     <string name="emergency_calls_only" msgid="3057351206678279851">"فقط تماس‌های اضطراری"</string>
     <string name="lockscreen_network_locked_message" msgid="2814046965899249635">"شبکه قفل شد"</string>
     <string name="lockscreen_sim_puk_locked_message" msgid="6618356415831082174">"‏سیم کارت با PUK قفل شده است."</string>
-    <string name="lockscreen_sim_puk_locked_instructions" msgid="5307979043730860995">"لطفاً به «راهنمای کاربر» مراجعه کنید یا با مرکز «مراقبت از مشتریان» تماس بگیرید."</string>
+    <string name="lockscreen_sim_puk_locked_instructions" msgid="5307979043730860995">"لطفاً به راهنمای کاربر مراجعه کرده یا با مرکز پشتیبانی از مشتریان تماس بگیرید."</string>
     <string name="lockscreen_sim_locked_message" msgid="3160196135801185938">"سیم کارت قفل شد."</string>
     <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="2286497117428409709">"بازگشایی قفل سیم کارت…"</string>
-    <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="6458790975898594240">"‏الگوی بازگشایی قفل را <xliff:g id="NUMBER_0">%1$d</xliff:g> بار اشتباه کشیده‎‌اید. \n\nپس‌از <xliff:g id="NUMBER_1">%2$d</xliff:g> ثانیه دوباره امتحان کنید."</string>
+    <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="6458790975898594240">"‏الگوی بازگشایی قفل خود را <xliff:g id="NUMBER_0">%1$d</xliff:g> بار اشتباه کشیده‎اید. \n\nپس از <xliff:g id="NUMBER_1">%2$d</xliff:g> ثانیه دوباره امتحان کنید."</string>
     <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="3118353451602377380">"گذرواژهٔ خود را <xliff:g id="NUMBER_0">%1$d</xliff:g> بار اشتباه تایپ کرده‌اید. \n\nپس از <xliff:g id="NUMBER_1">%2$d</xliff:g> ثانیه دوباره امتحان کنید."</string>
     <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="2874278239714821984">"‏پین را<xliff:g id="NUMBER_0">%1$d</xliff:g>  بار اشتباه تایپ کرده‎اید. \n\nپس از <xliff:g id="NUMBER_1">%2$d</xliff:g> ثانیه دوباره امتحان کنید."</string>
-    <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="3069635524964070596">"‏الگوی بازگشایی قفل را <xliff:g id="NUMBER_0">%1$d</xliff:g> بار اشتباه کشیده‎‌اید. بعداز <xliff:g id="NUMBER_1">%2$d</xliff:g> تلاش ناموفق، از شما خواسته می‎‌شود که برای بازگشایی قفل رایانهٔ لوحی‌تان به Google وارد شوید.\n\n لطفاً پس‌از <xliff:g id="NUMBER_2">%3$d</xliff:g> ثانیه دوباره امتحان کنید."</string>
-    <string name="lockscreen_failed_attempts_almost_glogin" product="tv" msgid="6399092175942158529">"‏الگوی بازگشایی قفل را <xliff:g id="NUMBER_0">%1$d</xliff:g> بار اشتباه کشیده‌اید. اگر <xliff:g id="NUMBER_1">%2$d</xliff:g> تلاش ناموفق دیگر داشته باشید،‌ از شما خواسته می‌شود با اطلاعات ورود به سیستم Google خود، قفل دستگاه Android TV را باز کنید.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> ثانیه دیگر دوباره امتحان کنید."</string>
-    <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="5691623136957148335">"‏الگوی بازگشایی قفل را <xliff:g id="NUMBER_0">%1$d</xliff:g> بار اشتباه کشیده‌اید. پس‌از <xliff:g id="NUMBER_1">%2$d</xliff:g> تلاش ناموفق دیگر، از شما خواسته می‌‎شود که برای بازگشایی قفل گوشی به برنامه Google وارد شوید.\n\n پس‌از <xliff:g id="NUMBER_2">%3$d</xliff:g> ثانیه دوباره امتحان کنید."</string>
+    <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="3069635524964070596">"‏شما الگوی بازگشایی قفل خود را <xliff:g id="NUMBER_0">%1$d</xliff:g> بار اشتباه کشیده‎اید. بعد از <xliff:g id="NUMBER_1">%2$d</xliff:g> تلاش ناموفق، از شما خواسته می‎شود که برای بازگشایی قفل رایانهٔ لوحی خود به Google وارد شوید.\n\n لطفاً پس از <xliff:g id="NUMBER_2">%3$d</xliff:g> ثانیه دوباره امتحان کنید."</string>
+    <string name="lockscreen_failed_attempts_almost_glogin" product="tv" msgid="6399092175942158529">"‏<xliff:g id="NUMBER_0">%1$d</xliff:g> بار الگوی بازگشایی‌تان را اشتباه کشیده‌اید. اگر <xliff:g id="NUMBER_1">%2$d</xliff:g> تلاش ناموفق دیگر داشته باشید،‌ از شما خواسته می‌شود با اطلاعات ورود به سیستم Google خود، قفل دستگاه Android TV را باز کنید.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> ثانیه دیگر دوباره امتحان کنید."</string>
+    <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="5691623136957148335">"‏الگوی قفل‌گشایی را <xliff:g id="NUMBER_0">%1$d</xliff:g> بار اشتباه کشیده‌اید. پس از <xliff:g id="NUMBER_1">%2$d</xliff:g> تلاش ناموفق دیگر از شما خواسته می‎شود که برای بازگشایی قفل گوشی خود به برنامه Google وارد شوید.\n\n پس از <xliff:g id="NUMBER_2">%3$d</xliff:g> ثانیه دوباره امتحان کنید."</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="tablet" msgid="7914445759242151426">"شما به اشتباه <xliff:g id="NUMBER_0">%1$d</xliff:g> بار اقدام به باز کردن قفل رایانهٔ لوحی کرده‌اید. پس از <xliff:g id="NUMBER_1">%2$d</xliff:g> تلاش ناموفق دیگر، رایانهٔ لوحی به پیش‌فرض کارخانه بازنشانی می‌شود و تمام داده‌های کاربر از دست خواهد رفت."</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="tv" msgid="4275591249631864248">"‏<xliff:g id="NUMBER_0">%1$d</xliff:g> تلاش ناموفق برای باز کردن قفل Android TV خود داشته‌اید. اگر <xliff:g id="NUMBER_1">%2$d</xliff:g> تلاش ناموفق دیگر داشته باشید، دستگاه Android TV شما به تنظیمات پیش‌فرض کارخانه بازنشانی خواهد شد و همه داده‌های کاربر ازدست خواهد رفت."</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="default" msgid="1166532464798446579">"شما به اشتباه <xliff:g id="NUMBER_0">%1$d</xliff:g> بار اقدام به باز کردن قفل تلفن کرده‌اید. پس از<xliff:g id="NUMBER_1">%2$d</xliff:g> تلاش ناموفق دیگر، تلفن به پیش‌فرض کارخانه بازنشانی می‌شود و تمام داده‌های کاربر از دست خواهد رفت."</string>
@@ -970,7 +957,7 @@
     <string name="keyguard_accessibility_expand_lock_area" msgid="4215280881346033434">"گسترده کردن منطقه بازگشایی شده."</string>
     <string name="keyguard_accessibility_slide_unlock" msgid="2968195219692413046">"باز کردن قفل با کشیدن انگشت روی صفحه."</string>
     <string name="keyguard_accessibility_pattern_unlock" msgid="8669128146589233293">"باز کردن قفل با الگو."</string>
-    <string name="keyguard_accessibility_face_unlock" msgid="4533832120787386728">"قفل‌گشایی با چهره."</string>
+    <string name="keyguard_accessibility_face_unlock" msgid="632407612842329815">"بازگشایی با چهره."</string>
     <string name="keyguard_accessibility_pin_unlock" msgid="4020864007967340068">"باز کردن قفل با پین."</string>
     <string name="keyguard_accessibility_sim_pin_unlock" msgid="4895939120871890557">"قفل پین سیم‌کارت باز شد."</string>
     <string name="keyguard_accessibility_sim_puk_unlock" msgid="3459003464041899101">"‏قفل Puk سیم‌کارت باز شد."</string>
@@ -1022,11 +1009,11 @@
     <string name="permdesc_writeHistoryBookmarks" product="tv" msgid="88642768580408561">"‏به برنامه اجازه می‎دهد سابقه مرورگر یا نشانک‎های ذخیره‌شده در دستگاه Android TV را تغییر دهد. ممکن است به برنامه اجازه دهد داده‌های مرورگر را پاک کند یا تغییر دهد. توجه: ممکن است این مجوز توسط مرورگرهای شخص ثالث یا سایر برنامه‌های دارای قابلیت مرور وب اجرا نشود."</string>
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="2245203087160913652">"به برنامه اجازه می‌دهد سابقه مرورگر یا نشانک‌های ذخیره‌شده در تلفن شما را تغییر دهد. این ممکن است به برنامه اجازه دهد داده‌های مرورگر را حذف کند یا تغییر دهد. توجه: این مجوز ممکن است توسط مرورگرهای شخص ثالث یا سایر برنامه‌های دارای قابلیت مرور وب قابل اجرا نباشد."</string>
     <string name="permlab_setAlarm" msgid="1158001610254173567">"تنظیم زنگ"</string>
-    <string name="permdesc_setAlarm" msgid="2185033720060109640">"‏به برنامه اجازه می‎دهد تا زنگی را در برنامه ساعت زنگدار نصب‌شده تنظیم کند. برخی از برنامه‌های ساعت زنگدار نمی‌‎توانند این ویژگی را اعمال کنند."</string>
+    <string name="permdesc_setAlarm" msgid="2185033720060109640">"‏به برنامه اجازه می‎دهد تا زنگی را در برنامه ساعت زنگدار نصب‌شده تنظیم کند. برخی از برنامه‎های ساعت زنگدار نمی‌‎توانند این ویژگی را اعمال کنند."</string>
     <string name="permlab_addVoicemail" msgid="4770245808840814471">"افزودن پست صوتی"</string>
     <string name="permdesc_addVoicemail" msgid="5470312139820074324">"به برنامه اجازه می‌دهد تا پیام‌ها را به صندوق ورودی پست صوتی شما اضافه کند."</string>
     <string name="permlab_writeGeolocationPermissions" msgid="8605631647492879449">"تغییر مجوزهای مکان جغرافیایی مرورگر"</string>
-    <string name="permdesc_writeGeolocationPermissions" msgid="5817346421222227772">"‏به برنامه اجازه می‎دهد تا مجوزهای جغرافیایی مرورگر را تغییر دهد. برنامه‌های مخرب می‎توانند از آن استفاده کنند تا اطلاعات موقعیت مکانی را به سایت‌های وب کتابخانه بفرستند."</string>
+    <string name="permdesc_writeGeolocationPermissions" msgid="5817346421222227772">"‏به برنامه اجازه می‎دهد تا مجوزهای جغرافیایی مرورگر را تغییر دهد. برنامه‎های مخرب می‎توانند از آن استفاده کنند تا اطلاعات موقعیت مکانی را به سایت‌های وب کتابخانه بفرستند."</string>
     <string name="save_password_message" msgid="2146409467245462965">"می‌خواهید مرورگر این گذرواژه را به خاطر داشته باشد؟"</string>
     <string name="save_password_notnow" msgid="2878327088951240061">"اکنون نه"</string>
     <string name="save_password_remember" msgid="6490888932657708341">"به خاطر سپردن"</string>
@@ -1035,7 +1022,7 @@
     <string name="text_copied" msgid="2531420577879738860">"متن در بریده‌دان کپی شد."</string>
     <string name="copied" msgid="4675902854553014676">"کپی شد"</string>
     <string name="pasted_from_app" msgid="5627698450808256545">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> از <xliff:g id="SOURCE_APP_NAME">%2$s</xliff:g> جای‌گذاری کرد"</string>
-    <string name="pasted_from_clipboard" msgid="7355790625710831847">"‫<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> محتوا را از بریده‌دان جای‌گذاری کرد"</string>
+    <string name="pasted_from_clipboard" msgid="6295556725844421812">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> از بریده‌دان جای‌گذاری کرد"</string>
     <string name="pasted_text" msgid="4298871641549173733">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> نوشتاری را که کپی کردید جای‌گذاری کرد"</string>
     <string name="pasted_image" msgid="4729097394781491022">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> تصویری را که کپی کردید جای‌گذاری کرد"</string>
     <string name="pasted_content" msgid="646276353060777131">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> محتوایی را که کپی کردید جای‌گذاری کرد"</string>
@@ -1272,10 +1259,6 @@
     <string name="android_preparing_apk" msgid="589736917792300956">"آماده‌سازی <xliff:g id="APPNAME">%1$s</xliff:g>."</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"درحال آغاز کردن برنامه‌ها."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"درحال اتمام راه‌اندازی."</string>
-    <string name="fp_enrollment_powerbutton_intent_title" msgid="3385634173366119903">"صفحه‌نمایش خاموش شود؟"</string>
-    <string name="fp_enrollment_powerbutton_intent_message" msgid="6582149052513682522">"هنگام راه‌اندازی اثر انگشتتان، دکمه روشن/ خاموش را فشار دادید.\n\nاین کار معمولاً صفحه‌نمایش را خاموش می‌کند."</string>
-    <string name="fp_enrollment_powerbutton_intent_positive_button" msgid="5963520983910436791">"خاموش شود"</string>
-    <string name="fp_enrollment_powerbutton_intent_negative_button" msgid="6465764183480190748">"لغو شود"</string>
     <string name="heavy_weight_notification" msgid="8382784283600329576">"<xliff:g id="APP">%1$s</xliff:g> در حال اجرا"</string>
     <string name="heavy_weight_notification_detail" msgid="6802247239468404078">"برای برگشت به بازی، ضربه بزنید"</string>
     <string name="heavy_weight_switcher_title" msgid="3861984210040100886">"انتخاب بازی"</string>
@@ -1339,7 +1322,7 @@
     <string name="select_character" msgid="3352797107930786979">"درج نویسه"</string>
     <string name="sms_control_title" msgid="4748684259903148341">"درحال ارسال پیامک‌ها"</string>
     <string name="sms_control_message" msgid="6574313876316388239">"‏&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; درحال ارسال تعداد زیادی پیامک است. آیا اجازه می‌دهید این برنامه همچنان پیامک ارسال کند؟"</string>
-    <string name="sms_control_yes" msgid="4858845109269524622">"مجاز است"</string>
+    <string name="sms_control_yes" msgid="4858845109269524622">"مجاز بودن"</string>
     <string name="sms_control_no" msgid="4845717880040355570">"مجاز نبودن"</string>
     <string name="sms_short_code_confirm_message" msgid="1385416688897538724">"‏&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; مایل است پیامی به &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt; ارسال کند."</string>
     <string name="sms_short_code_details" msgid="2723725738333388351">"این مورد "<b>"شاید هزینه‌ای"</b>" را به حساب دستگاه همراهتان بگذارد."</string>
@@ -1474,8 +1457,6 @@
     <string name="permdesc_requestDeletePackages" msgid="6133633516423860381">"به برنامه اجازه می‌دهد حذف بسته‌ها را درخواست کند."</string>
     <string name="permlab_requestIgnoreBatteryOptimizations" msgid="7646611326036631439">"درخواست نادیده‌گرفتن بهینه‌سازی باتری"</string>
     <string name="permdesc_requestIgnoreBatteryOptimizations" msgid="634260656917874356">"به یک برنامه اجازه می‌دهد جهت نادیده گرفتن بهینه‌سازی باتری برای خود مجوز درخواست کند."</string>
-    <string name="permlab_queryAllPackages" msgid="2928450604653281650">"پُرسمان همه بسته‌ها"</string>
-    <string name="permdesc_queryAllPackages" msgid="5339069855520996010">"به برنامه اجازه می‌دهد همه بسته‌های نصب‌شده را ببیند."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1842872462124648678">"برای کنترل بزرگ‌نمایی، دو بار ضربه بزنید"</string>
     <string name="gadget_host_error_inflating" msgid="2449961590495198720">"افزودن ابزارک انجام نشد."</string>
     <string name="ime_action_go" msgid="5536744546326495436">"برو"</string>
@@ -1494,7 +1475,6 @@
     <string name="deny" msgid="6632259981847676572">"مجاز نبودن"</string>
     <string name="permission_request_notification_title" msgid="1810025922441048273">"مجوز درخواست شد"</string>
     <string name="permission_request_notification_with_subtitle" msgid="3743417870360129298">"مجوز\nبرای حساب <xliff:g id="ACCOUNT">%s</xliff:g> درخواست شد."</string>
-    <string name="permission_request_notification_for_app_with_subtitle" msgid="1298704005732851350">"<xliff:g id="APP">%1$s</xliff:g> برای دسترسی به حساب <xliff:g id="ACCOUNT">%2$s</xliff:g>\nدرخواست اجازه کرد."</string>
     <string name="forward_intent_to_owner" msgid="4620359037192871015">"شما از این برنامه در خارج از نمایه کاری‌تان استفاده می‌کنید"</string>
     <string name="forward_intent_to_work" msgid="3620262405636021151">"از این برنامه در نمایه کاری‌تان استفاده می‌کنید"</string>
     <string name="input_method_binding_label" msgid="1166731601721983656">"روش ورودی"</string>
@@ -1686,16 +1666,16 @@
     <string name="kg_login_checking_password" msgid="4676010303243317253">"درحال بررسی حساب..."</string>
     <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="23741434207544038">"پین خود را <xliff:g id="NUMBER_0">%1$d</xliff:g> بار اشتباه تایپ کردید. \n\nپس از <xliff:g id="NUMBER_1">%2$d</xliff:g> ثانیه دوباره امتحان کنید."</string>
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="3328686432962224215">"گذرواژه خود را <xliff:g id="NUMBER_0">%1$d</xliff:g> بار اشتباه تایپ کردید. \n\nپس از <xliff:g id="NUMBER_1">%2$d</xliff:g> ثانیه دوباره امتحان کنید."</string>
-    <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="7357404233979139075">"الگوی بازگشایی قفل را <xliff:g id="NUMBER_0">%1$d</xliff:g> بار اشتباه کشیده‌اید. \n\nلطفاً پس‌از <xliff:g id="NUMBER_1">%2$d</xliff:g> ثانیه دوباره امتحان کنید."</string>
+    <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="7357404233979139075">"الگوی بازگشایی قفل خود را <xliff:g id="NUMBER_0">%1$d</xliff:g> بار اشتباه کشیدید. \n\nلطفاً پس از <xliff:g id="NUMBER_1">%2$d</xliff:g> ثانیه دوباره امتحان کنید."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="3479940221343361587">"شما به اشتباه <xliff:g id="NUMBER_0">%1$d</xliff:g> بار اقدام به باز کردن قفل رایانه لوحی کرده‌اید. پس از <xliff:g id="NUMBER_1">%2$d</xliff:g> تلاش ناموفق دیگر، رایانهٔ لوحی به پیش‌فرض کارخانه بازنشانی می‌شود و تمام داده‌های کاربر از دست خواهد رفت."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="tv" msgid="9064457748587850217">"‏<xliff:g id="NUMBER_0">%1$d</xliff:g> تلاش ناموفق برای باز کردن قفل Android TV خود داشته‌اید. اگر <xliff:g id="NUMBER_1">%2$d</xliff:g> تلاش ناموفق دیگر داشته باشید، دستگاه Android TV شما به تنظیمات پیش‌فرض کارخانه بازنشانی خواهد شد و همه داده‌های کاربر ازدست خواهد رفت."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="5955398963754432548">"شما به اشتباه <xliff:g id="NUMBER_0">%1$d</xliff:g> بار اقدام به باز کردن قفل تلفن کرده‌اید. پس از <xliff:g id="NUMBER_1">%2$d</xliff:g> تلاش ناموفق دیگر، تلفن به پیش‌فرض کارخانه بازنشانی می‌شود و تمام داده‌های کاربر از دست خواهد رفت."</string>
     <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="2299099385175083308">"شما به اشتباه <xliff:g id="NUMBER">%d</xliff:g> بار اقدام به باز کردن قفل رایانه لوحی کرده‌اید. رایانه لوحی اکنون به پیش‌فرض کارخانه بازنشانی می‌شود."</string>
     <string name="kg_failed_attempts_now_wiping" product="tv" msgid="5045460916106267585">"‏<xliff:g id="NUMBER">%d</xliff:g> تلاش ناموفق برای باز کردن قفل Android TV خود داشته‌اید. اکنون دستگاه Android TV شما به تنظیمات پیش‌فرض کارخانه بازنشانی می‌شود."</string>
     <string name="kg_failed_attempts_now_wiping" product="default" msgid="5043730590446071189">"شما به اشتباه <xliff:g id="NUMBER">%d</xliff:g> بار اقدام به باز کردن قفل تلفن کرده‌اید. این تلفن اکنون به پیش‌فرض کارخانه بازنشانی می‌شود."</string>
-    <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="7086799295109717623">"‏الگوی بازگشایی قفل را <xliff:g id="NUMBER_0">%1$d</xliff:g> بار اشتباه کشیده‌‎اید. بعداز <xliff:g id="NUMBER_1">%2$d</xliff:g> تلاش ناموفق، از شما خواسته می‎‌شود که بااستفاده از یک حساب ایمیل قفل رایانه لوحی‌تان را باز کنید.\n\n لطفاً پس‌از <xliff:g id="NUMBER_2">%3$d</xliff:g> ثانیه دوباره امتحان کنید."</string>
-    <string name="kg_failed_attempts_almost_at_login" product="tv" msgid="4670840383567106114">"‏الگوی بازگشایی قفل را <xliff:g id="NUMBER_0">%1$d</xliff:g> بار اشتباه کشیده‌اید. اگر <xliff:g id="NUMBER_1">%2$d</xliff:g> تلاش ناموفق دیگر داشته باشید، از شما خواسته می‌شود بااستفاده از حساب ایمیلتان، قفل دستگاه Android TV را باز کنید.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> ثانیه دیگر دوباره امتحان کنید."</string>
-    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="5270861875006378092">"‏الگوی بازگشایی قفل را <xliff:g id="NUMBER_0">%1$d</xliff:g> بار اشتباه کشیده‌اید. پس‌از <xliff:g id="NUMBER_1">%2$d</xliff:g> تلاش ناموفق، از شما خواسته می‌‎شود که بااستفاده از یک حساب ایمیل قفل تلفنتان را باز کنید.\n\n لطفاً پس‌از <xliff:g id="NUMBER_2">%3$d</xliff:g> ثانیه دوباره امتحان کنید."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="7086799295109717623">"‏شما الگوی بازگشایی قفل خود را <xliff:g id="NUMBER_0">%1$d</xliff:g> بار اشتباه کشیده‎اید. بعد از <xliff:g id="NUMBER_1">%2$d</xliff:g> تلاش ناموفق، از شما خواسته می‎شود که با استفاده از یک حساب ایمیل قفل رایانه لوحی خود را باز کنید.\n\n لطفاً پس از <xliff:g id="NUMBER_2">%3$d</xliff:g> ثانیه دوباره امتحان کنید."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="tv" msgid="4670840383567106114">"‏<xliff:g id="NUMBER_0">%1$d</xliff:g> بار الگوی بازگشایی‌تان را اشتباه کشیده‌اید. اگر <xliff:g id="NUMBER_1">%2$d</xliff:g> تلاش ناموفق دیگر داشته باشید، از شما خواسته می‌شود بااستفاده از حساب ایمیل خود، قفل دستگاه Android TV را باز کنید.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> ثانیه دیگر دوباره امتحان کنید."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="5270861875006378092">"‏شما الگوی بازگشایی قفل خود را <xliff:g id="NUMBER_0">%1$d</xliff:g> بار اشتباه کشیده‌اید. پس از <xliff:g id="NUMBER_1">%2$d</xliff:g> تلاش ناموفق، از شما خواسته می‎شود که با استفاده از یک حساب ایمیل قفل تلفن خود را باز کنید.\n\n لطفاً پس از <xliff:g id="NUMBER_2">%3$d</xliff:g> ثانیه دوباره امتحان کنید."</string>
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"حذف"</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"میزان صدا را به بالاتر از حد توصیه شده افزایش می‌دهید؟\n\nگوش دادن به صداهای بلند برای مدت طولانی می‌تواند به شنوایی‌تان آسیب وارد کند."</string>
@@ -1703,7 +1683,7 @@
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"وقتی میان‌بر روشن باشد، با فشار دادن هردو دکمه صدا به‌مدت ۳ ثانیه ویژگی دسترس‌پذیری فعال می‌شود."</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"میان‌بر برای ویژگی‌های دسترس‌پذیری روشن شود؟"</string>
     <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"با پایین نگه داشتن هردو کلید میزان صدا به‌مدت چند ثانیه، ویژگی‌های دسترس‌پذیری روشن می‌شود. با این کار نحوه عملکرد دستگاهتان تغییر می‌کند.\n\nویژگی‌های فعلی:\n<xliff:g id="SERVICE">%1$s</xliff:g>\nمی‌توانید ویژگی‌های انتخابی را در «تنظیمات &gt; دسترس‌پذیری» تغییر دهید."</string>
-    <string name="accessibility_shortcut_multiple_service_list" msgid="2128323171922023762">" • <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
+    <string name="accessibility_shortcut_multiple_service_list" msgid="6935581470716541531">"	• <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
     <string name="accessibility_shortcut_single_service_warning_title" msgid="1909518473488345266">"میان‌بر <xliff:g id="SERVICE">%1$s</xliff:g> روشن شود؟"</string>
     <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"با پایین نگه داشتن هردو کلید میزان صدا به‌مدت چند ثانیه، <xliff:g id="SERVICE">%1$s</xliff:g> (یکی از ویژگی‌های دسترس‌پذیری) روشن می‌شود. با این کار نحوه عملکرد دستگاهتان تغییر می‌کند.\n\nمی‌توانید در «تنظیمات &gt; دسترس‌پذیری»،‌این میان‌بر را به ویژگی دیگری تغییر دهید."</string>
     <string name="accessibility_shortcut_on" msgid="5463618449556111344">"روشن شود"</string>
@@ -1729,7 +1709,6 @@
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"استفاده از میان‌بر"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"وارونگی رنگ"</string>
     <string name="color_correction_feature_name" msgid="3655077237805422597">"تصحیح رنگ"</string>
-    <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"حالت یک‌دستی"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"بسیار کم‌نور"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"کلیدهای میزان صدا پایین نگه داشته شد. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> روشن شد."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"کلیدهای میزان صدا پایین نگه داشته شد. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> خاموش شد."</string>
@@ -1879,14 +1858,14 @@
     <string name="managed_profile_label_badge_2" msgid="5673187309555352550">"کار دوم <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_3" msgid="6882151970556391957">"کار سوم <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="lock_to_app_unlock_pin" msgid="3890940811866290782">"درخواست کد پین قبل از برداشتن پین"</string>
-    <string name="lock_to_app_unlock_pattern" msgid="2694204070499712503">"درخواست الگوی بازگشایی قفل قبل‌از برداشتن سنجاق"</string>
+    <string name="lock_to_app_unlock_pattern" msgid="2694204070499712503">"درخواست الگوی باز کردن قفل قبل از برداشتن سنجاق"</string>
     <string name="lock_to_app_unlock_password" msgid="9126722403506560473">"درخواست گذرواژه قبل از برداشتن سنجاق"</string>
     <string name="package_installed_device_owner" msgid="7035926868974878525">"توسط سرپرست سیستم نصب شد"</string>
     <string name="package_updated_device_owner" msgid="7560272363805506941">"توسط سرپرست سیستم به‌روزرسانی شد"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"توسط سرپرست سیستم حذف شد"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"تأیید"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"«بهینه‌سازی باتری» «زمینه تیره» را روشن می‌کند و فعالیت پس‌زمینه، برخی از جلوه‌های بصری، ویژگی‌هایی خاص، و برخی از اتصال‌های شبکه را محدود یا خاموش می‌کند."</string>
-    <string name="battery_saver_description" msgid="8518809702138617167">"«بهینه‌سازی باتری» «زمینه تیره» را روشن می‌کند و فعالیت پس‌زمینه، برخی از جلوه‌های بصری، ویژگی‌هایی خاص، و برخی از اتصال‌های شبکه را محدود یا خاموش می‌کند."</string>
+    <string name="battery_saver_description_with_learn_more" msgid="750683025714899363">"«بهینه‌سازی باتری» «طرح زمینه تیره» را روشن می‌کند و فعالیت پس‌زمینه، برخی از جلوه‌های بصری، و ویژگی‌هایی خاص را محدود یا خاموش می‌کند.\n\n"<annotation id="url">"بیشتر بدانید"</annotation></string>
+    <string name="battery_saver_description" msgid="5693741424234005958">"«بهینه‌سازی باتری» «طرح زمینه تیره» را روشن می‌کند و فعالیت پس‌زمینه، برخی از جلوه‌های بصری، و ویژگی‌هایی خاص را محدود یا خاموش می‌کند."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"برای کمک به کاهش مصرف داده، «صرفه‌جویی داده» از ارسال و دریافت داده در پس‌زمینه در بعضی برنامه‌ها جلوگیری می‌کند. برنامه‌ای که درحال‌حاضر استفاده می‌کنید می‌تواند به داده‌ها دسترسی داشته باشد اما دفعات دسترسی آن محدود است. این می‌تواند به این معنی باشد که، برای مثال، تصاویر تازمانی‌که روی آن‌ها ضربه نزنید نشان داده نمی‌شوند."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"«صرفه‌جویی داده» روشن شود؟"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"روشن کردن"</string>
@@ -1961,7 +1940,7 @@
     <string name="maximize_button_text" msgid="4258922519914732645">"بزرگ کردن"</string>
     <string name="close_button_text" msgid="10603510034455258">"بستن"</string>
     <string name="notification_messaging_title_template" msgid="772857526770251989">"<xliff:g id="CONVERSATION_TITLE">%1$s</xliff:g>:‏ <xliff:g id="SENDER_NAME">%2$s</xliff:g>"</string>
-    <string name="call_notification_answer_action" msgid="5999246836247132937">"پاسخ دادن"</string>
+    <string name="call_notification_answer_action" msgid="5999246836247132937">"پاسخ"</string>
     <string name="call_notification_answer_video_action" msgid="2086030940195382249">"ویدیو"</string>
     <string name="call_notification_decline_action" msgid="3700345945214000726">"رد کردن"</string>
     <string name="call_notification_hang_up_action" msgid="9130720590159188131">"قطع تماس"</string>
@@ -1989,8 +1968,8 @@
     <string name="app_suspended_default_message" msgid="6451215678552004172">"<xliff:g id="APP_NAME_0">%1$s</xliff:g> درحال‌حاضر در دسترس نیست. <xliff:g id="APP_NAME_1">%2$s</xliff:g> آن را مدیریت می‌کند."</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"بیشتر بدانید"</string>
     <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"لغو توقف موقت برنامه"</string>
-    <string name="work_mode_off_title" msgid="961171256005852058">"برنامه‌های کاری روشن شود؟"</string>
-    <string name="work_mode_off_message" msgid="7319580997683623309">"دسترسی به اعلان‌ها و برنامه‌های کاری"</string>
+    <string name="work_mode_off_title" msgid="5503291976647976560">"نمایه کاری روشن شود؟"</string>
+    <string name="work_mode_off_message" msgid="8417484421098563803">"برنامه‌ها، اعلان‌ها، داده‌ها، و سایر ویژگی‌های نمایه کاری شما روشن خواهد شد"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"روشن کردن"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"برنامه در دسترس نیست"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> درحال‌حاضر در دسترس نیست."</string>
@@ -2111,7 +2090,7 @@
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"تأیید"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"خاموش کردن"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"بیشتر بدانید"</string>
-    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"‏در Android نسخه ۱۲، اعلان‌های بهبودیافته جایگزین «اعلان‌های تطبیقی» شده است. این ویژگی پاسخ‌ها و کنش‌های پیشنهادی را نمایش می‌دهد و اعلان‌هایتان را سازمان‌دهی می‌کند.\n\nاعلان‌های بهبودیافته می‌توانند به محتوای اعلان، ازجمله اطلاعات شخصی مثل نام‌ها و پیام‌های مخاطبین دسترسی داشته باشند. این ویژگی همچنین می‌تواند اعلان‌ها را رد کند یا به آن‌ها پاسخ دهد؛ مثلاً پاسخ به تماس‌های تلفنی و کنترل کردن «مزاحم نشوید»."</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="2353549817159426430">"‏در Android نسخه ۱۲، اعلان‌های بهبودیافته جایگزین «اعلان‌های تطبیقی» شده است. این ویژگی پاسخ‌ها و کنش‌های پیشنهادی را نمایش می‌دهد و اعلان‌هایتان را سازمان‌دهی می‌کند.\n\nاعلان‌های بهبودیافته می‌توانند به محتوای اعلان، ازجمله اطلاعات شخصی مثل نام‌ها و پیام‌های مخاطبین دسترسی داشته باشند. این ویژگی همچنین می‌تواند اعلان‌ها را رد کند یا به آن‌ها پاسخ دهد؛ مثلاً پاسخ به تماس‌های تلفنی و کنترل کردن «مزاحم نشوید»."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"اعلان اطلاعات حالت روال معمول"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"ممکن است شارژ باتری قبل از شارژ معمول تمام شود"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"جهت افزایش عمر باتری، «بهینه‌سازی باتری» فعال شد"</string>
@@ -2308,6 +2287,4 @@
     <string name="splash_screen_view_branding_description" msgid="7911129347402728216">"تصویر نمانام‌سازی برنامه"</string>
     <string name="view_and_control_notification_title" msgid="4300765399209912240">"بررسی تنظیمات دسترسی"</string>
     <string name="view_and_control_notification_content" msgid="8003766498562604034">"<xliff:g id="SERVICE_NAME">%s</xliff:g> می‌تواند صفحه‌نمایش شما را مشاهده و کنترل کند. برای مرور، ضربه بزنید."</string>
-    <string name="ui_translation_accessibility_translated_text" msgid="3197547218178944544">"<xliff:g id="MESSAGE">%1$s</xliff:g> ترجمه شد."</string>
-    <string name="ui_translation_accessibility_translation_finished" msgid="3057830947610088465">"پیام از <xliff:g id="FROM_LANGUAGE">%1$s</xliff:g> به <xliff:g id="TO_LANGUAGE">%2$s</xliff:g> ترجمه شد."</string>
 </resources>

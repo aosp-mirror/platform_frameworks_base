@@ -18,7 +18,6 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="prompt" msgid="3183836924226407828">"ချိတ်ဆက်ရန် တောင်းဆိုချက်"</string>
     <string name="warning" msgid="809658604548412033">"<xliff:g id="APP">%s</xliff:g> က ကွန်ရက် လုပ်ငန်းကို စောင့်ကြည့်ခွင့် ပြုမည့် VPN ချိတ်ဆက်မှုကို ထူထောင်လိုသည်။ ရင်းမြစ်ကို သင်က ယုံကြည်မှသာ လက်ခံပါ။ &lt;br /&gt; &lt;br /&gt; &lt;img src=vpn_icon /&gt; မှာ VPN အလုပ်လုပ်နေလျှင် သင်၏ မျက်နှာပြင် ထိပ်မှာ ပေါ်လာမည်။"</string>
-    <string name="warning" product="tv" msgid="5188957997628124947">"<xliff:g id="APP">%s</xliff:g> က ကွန်ရက်ဒေတာ စီးဆင်းမှုကို စောင့်ကြည့်ရန် ခွင့်ပြုသည့် VPN ချိတ်ဆက်မှုကို စနစ်ထည့်သွင်းလိုသည်။ ဤရင်းမြစ်ကို သင်ယုံကြည်မှသာ လက်ခံပါ။ &lt;br /&gt; &lt;br /&gt; &lt;img src=vpn_icon /&gt; သည် VPN ဖွင့်ထားသောအခါ သင့်ဖန်သားပြင်တွင် ပေါ်ပါသည်။"</string>
     <string name="legacy_title" msgid="192936250066580964">"VPNနှင့်ချိတ်ဆက်ထားသည်"</string>
     <string name="session" msgid="6470628549473641030">"သတ်မှတ်ပေးထားသည့်အချိန်:"</string>
     <string name="duration" msgid="3584782459928719435">"အချိန်ကာလ-"</string>
@@ -31,7 +30,7 @@
     <string name="always_on_disconnected_message_separator" msgid="3310614409322581371">" "</string>
     <string name="always_on_disconnected_message_settings_link" msgid="6172280302829992412">"VPN ဆက်တင်များ ပြောင်းရန်"</string>
     <string name="configure" msgid="4905518375574791375">"ပုံပေါ်စေသည်"</string>
-    <string name="disconnect" msgid="971412338304200056">"ချိတ်ဆက်မှုဖြုတ်ရန်"</string>
+    <string name="disconnect" msgid="971412338304200056">"ချိတ်ဆက်ခြင်းရပ်ရန်"</string>
     <string name="open_app" msgid="3717639178595958667">"အက်ပ်ကို ဖွင့်ရန်"</string>
     <string name="dismiss" msgid="6192859333764711227">"ပယ်ရန်"</string>
 </resources>

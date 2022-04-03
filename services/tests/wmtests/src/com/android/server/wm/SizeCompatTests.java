@@ -76,6 +76,7 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.ActivityInfo.ScreenOrientation;
 import android.content.res.Configuration;
 import android.graphics.Rect;
+import android.os.UserHandle;
 import android.platform.test.annotations.Presubmit;
 import android.provider.DeviceConfig;
 import android.provider.DeviceConfig.Properties;
@@ -2179,6 +2180,29 @@ public class SizeCompatTests extends WindowTestsBase {
                 .computeAspectRatio(minAspectRatioAppBounds), delta);
         assertEquals(targetMinAspectRatio, ActivityRecord
                 .computeAspectRatio(sizeCompatAppBounds), delta);
+    }
+
+    @Test
+    public void testClearSizeCompat_resetOverrideConfig() {
+        final int origDensity = 480;
+        final int newDensity = 520;
+        final DisplayContent display = new TestDisplayContent.Builder(mAtm, 600, 800)
+                .setDensityDpi(origDensity)
+                .build();
+        setUpApp(display);
+        prepareUnresizable(mActivity, -1.f /* maxAspect */, SCREEN_ORIENTATION_PORTRAIT);
+
+        // Activity should enter size compat with old density after display density change.
+        display.setForcedDensity(newDensity, UserHandle.USER_CURRENT);
+
+        assertScaled();
+        assertEquals(origDensity, mActivity.getConfiguration().densityDpi);
+
+        // Activity should exit size compat with new density.
+        mActivity.clearSizeCompatMode();
+
+        assertFitted();
+        assertEquals(newDensity, mActivity.getConfiguration().densityDpi);
     }
 
     private void assertHorizontalPositionForDifferentDisplayConfigsForLandscapeActivity(

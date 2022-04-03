@@ -20,7 +20,6 @@
     <string name="pip_phone_close" msgid="5783752637260411309">"Kapat"</string>
     <string name="pip_phone_expand" msgid="2579292903468287504">"Genişlet"</string>
     <string name="pip_phone_settings" msgid="5468987116750491918">"Ayarlar"</string>
-    <string name="pip_phone_enter_split" msgid="7042877263880641911">"Bölünmüş ekrana geç"</string>
     <string name="pip_menu_title" msgid="5393619322111827096">"Menü"</string>
     <string name="pip_notification_title" msgid="1347104727641353453">"<xliff:g id="NAME">%s</xliff:g>, pencere içinde pencere özelliğini kullanıyor"</string>
     <string name="pip_notification_message" msgid="8854051911700302620">"<xliff:g id="NAME">%s</xliff:g> uygulamasının bu özelliği kullanmasını istemiyorsanız dokunarak ayarları açın ve söz konusu özelliği kapatın."</string>
@@ -29,8 +28,6 @@
     <string name="pip_skip_to_next" msgid="8403429188794867653">"Sonrakine atla"</string>
     <string name="pip_skip_to_prev" msgid="7172158111196394092">"Öncekine atla"</string>
     <string name="accessibility_action_pip_resize" msgid="4623966104749543182">"Yeniden boyutlandır"</string>
-    <string name="accessibility_action_pip_stash" msgid="4060775037619702641">"Depola"</string>
-    <string name="accessibility_action_pip_unstash" msgid="7467499339610437646">"Depolama"</string>
     <string name="dock_forced_resizable" msgid="1749750436092293116">"Uygulama bölünmüş ekranda çalışmayabilir."</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="7408396418008948957">"Uygulama bölünmüş ekranı desteklemiyor."</string>
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"Uygulama ikincil ekranda çalışmayabilir."</string>
@@ -73,4 +70,5 @@
     <string name="manage_bubbles_text" msgid="7730624269650594419">"Yönet"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"Balon kapatıldı."</string>
     <string name="restart_button_description" msgid="5887656107651190519">"Bu uygulamayı yeniden başlatmak ve tam ekrana geçmek için dokunun."</string>
+    <string name="got_it" msgid="4428750913636945527">"Anladım"</string>
 </resources>

@@ -20,7 +20,6 @@
     <string name="pip_phone_close" msgid="5783752637260411309">"Yopish"</string>
     <string name="pip_phone_expand" msgid="2579292903468287504">"Yoyish"</string>
     <string name="pip_phone_settings" msgid="5468987116750491918">"Sozlamalar"</string>
-    <string name="pip_phone_enter_split" msgid="7042877263880641911">"Ajratilgan ekranga kirish"</string>
     <string name="pip_menu_title" msgid="5393619322111827096">"Menyu"</string>
     <string name="pip_notification_title" msgid="1347104727641353453">"<xliff:g id="NAME">%s</xliff:g> tasvir ustida tasvir rejimida"</string>
     <string name="pip_notification_message" msgid="8854051911700302620">"<xliff:g id="NAME">%s</xliff:g> ilovasi uchun bu funksiyani sozlamalar orqali faolsizlantirish mumkin."</string>
@@ -29,8 +28,6 @@
     <string name="pip_skip_to_next" msgid="8403429188794867653">"Keyingisiga o‘tish"</string>
     <string name="pip_skip_to_prev" msgid="7172158111196394092">"Avvalgisiga qaytish"</string>
     <string name="accessibility_action_pip_resize" msgid="4623966104749543182">"Oʻlchamini oʻzgartirish"</string>
-    <string name="accessibility_action_pip_stash" msgid="4060775037619702641">"Berkitish"</string>
-    <string name="accessibility_action_pip_unstash" msgid="7467499339610437646">"Chiqarish"</string>
     <string name="dock_forced_resizable" msgid="1749750436092293116">"Bu ilova ekranni ikkiga ajratish rejimini dastaklamaydi."</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="7408396418008948957">"Bu ilova ekranni bo‘lish xususiyatini qo‘llab-quvvatlamaydi."</string>
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"Bu ilova qo‘shimcha ekranda ishlamasligi mumkin."</string>
@@ -73,4 +70,5 @@
     <string name="manage_bubbles_text" msgid="7730624269650594419">"Boshqarish"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"Bulutcha yopildi."</string>
     <string name="restart_button_description" msgid="5887656107651190519">"Bu ilovani qaytadan ishga tushirish va butun ekranda ochish uchun bosing."</string>
+    <string name="got_it" msgid="4428750913636945527">"OK"</string>
 </resources>

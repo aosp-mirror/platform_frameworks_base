@@ -29,6 +29,7 @@
     <string name="device_encryption_backup_text" msgid="5866590762672844664">"Introduceți mai jos parola de criptare a dispozitivului. Aceasta va fi utilizată, de asemenea, pentru a cripta arhiva copiei de rezervă."</string>
     <string name="backup_enc_password_text" msgid="4981585714795233099">"Introduceți o parolă pentru a o utiliza la criptarea datelor copiei de rezervă complete. Dacă acest câmp rămâne necompletat, pentru copierea de rezervă se va utiliza parola dvs. actuală."</string>
     <string name="backup_enc_password_optional" msgid="1350137345907579306">"Dacă doriți să criptați datele copiei de rezervă complete, introduceți o parolă mai jos:"</string>
+    <string name="backup_enc_password_required" msgid="7889652203371654149">"Întrucât dispozitivul este criptat, trebuie să criptați backupurile. Introduceți o parolă mai jos:"</string>
     <string name="restore_enc_password_text" msgid="6140898525580710823">"Dacă datele pentru restabilire sunt criptate, introduceți parola mai jos:"</string>
     <string name="toast_backup_started" msgid="550354281452756121">"Se începe copierea de rezervă..."</string>
     <string name="toast_backup_ended" msgid="3818080769548726424">"Copierea de rezervă a fost finalizată"</string>

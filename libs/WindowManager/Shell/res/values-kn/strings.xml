@@ -20,7 +20,6 @@
     <string name="pip_phone_close" msgid="5783752637260411309">"ಮುಚ್ಚಿ"</string>
     <string name="pip_phone_expand" msgid="2579292903468287504">"ವಿಸ್ತೃತಗೊಳಿಸು"</string>
     <string name="pip_phone_settings" msgid="5468987116750491918">"ಸೆಟ್ಟಿಂಗ್‌ಗಳು"</string>
-    <string name="pip_phone_enter_split" msgid="7042877263880641911">"ಸ್ಪ್ಲಿಟ್‌-ಸ್ಕ್ರೀನ್‌ಗೆ ಪ್ರವೇಶಿಸಿ"</string>
     <string name="pip_menu_title" msgid="5393619322111827096">"ಮೆನು"</string>
     <string name="pip_notification_title" msgid="1347104727641353453">"<xliff:g id="NAME">%s</xliff:g> ಚಿತ್ರದಲ್ಲಿ ಚಿತ್ರವಾಗಿದೆ"</string>
     <string name="pip_notification_message" msgid="8854051911700302620">"<xliff:g id="NAME">%s</xliff:g> ಈ ವೈಶಿಷ್ಟ್ಯ ಬಳಸುವುದನ್ನು ನೀವು ಬಯಸದಿದ್ದರೆ, ಸೆಟ್ಟಿಂಗ್‌ಗಳನ್ನು ತೆರೆಯಲು ಮತ್ತು ಅದನ್ನು ಆಫ್ ಮಾಡಲು ಟ್ಯಾಪ್ ಮಾಡಿ."</string>
@@ -29,8 +28,6 @@
     <string name="pip_skip_to_next" msgid="8403429188794867653">"ಮುಂದಕ್ಕೆ ಸ್ಕಿಪ್‌ ಮಾಡಿ"</string>
     <string name="pip_skip_to_prev" msgid="7172158111196394092">"ಹಿಂದಕ್ಕೆ ಸ್ಕಿಪ್‌ ಮಾಡಿ"</string>
     <string name="accessibility_action_pip_resize" msgid="4623966104749543182">"ಮರುಗಾತ್ರಗೊಳಿಸಿ"</string>
-    <string name="accessibility_action_pip_stash" msgid="4060775037619702641">"ಸ್ಟ್ಯಾಶ್ ಮಾಡಿ"</string>
-    <string name="accessibility_action_pip_unstash" msgid="7467499339610437646">"ಅನ್‌ಸ್ಟ್ಯಾಶ್ ಮಾಡಿ"</string>
     <string name="dock_forced_resizable" msgid="1749750436092293116">"ವಿಭಜಿಸಿದ ಸ್ಕ್ರೀನ್‌ನಲ್ಲಿ ಆ್ಯಪ್ ಕೆಲಸ ಮಾಡದೇ ಇರಬಹುದು."</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="7408396418008948957">"ಅಪ್ಲಿಕೇಶನ್ ಸ್ಪ್ಲಿಟ್ ಸ್ಕ್ರೀನ್ ಅನ್ನು ಬೆಂಬಲಿಸುವುದಿಲ್ಲ."</string>
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"ಸೆಕೆಂಡರಿ ಡಿಸ್‌ಪ್ಲೇಗಳಲ್ಲಿ ಅಪ್ಲಿಕೇಶನ್‌ ಕಾರ್ಯ ನಿರ್ವಹಿಸದೇ ಇರಬಹುದು."</string>
@@ -73,4 +70,5 @@
     <string name="manage_bubbles_text" msgid="7730624269650594419">"ನಿರ್ವಹಿಸಿ"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"ಬಬಲ್ ವಜಾಗೊಳಿಸಲಾಗಿದೆ."</string>
     <string name="restart_button_description" msgid="5887656107651190519">"ಈ ಆ್ಯಪ್ ಅನ್ನು ಮರುಪ್ರಾರಂಭಿಸಲು ಮತ್ತು ಪೂರ್ಣ ಸ್ಕ್ರೀನ್‌ನಲ್ಲಿ ನೋಡಲು ಟ್ಯಾಪ್ ಮಾಡಿ."</string>
+    <string name="got_it" msgid="4428750913636945527">"ಅರ್ಥವಾಯಿತು"</string>
 </resources>

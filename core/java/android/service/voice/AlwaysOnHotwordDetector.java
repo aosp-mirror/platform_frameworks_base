@@ -578,7 +578,9 @@ public class AlwaysOnHotwordDetector extends AbstractHotwordDetector {
             IVoiceInteractionManagerService modelManagementService, int targetSdkVersion,
             boolean supportHotwordDetectionService, @Nullable PersistableBundle options,
             @Nullable SharedMemory sharedMemory) {
-        super(modelManagementService, callback);
+        super(modelManagementService, callback,
+                supportHotwordDetectionService ? DETECTOR_TYPE_TRUSTED_HOTWORD_DSP
+                        : DETECTOR_TYPE_NORMAL);
 
         mHandler = new MyHandler();
         mText = text;
@@ -590,7 +592,8 @@ public class AlwaysOnHotwordDetector extends AbstractHotwordDetector {
         mTargetSdkVersion = targetSdkVersion;
         mSupportHotwordDetectionService = supportHotwordDetectionService;
         if (mSupportHotwordDetectionService) {
-            updateStateLocked(options, sharedMemory, mInternalCallback);
+            updateStateLocked(options, sharedMemory, mInternalCallback,
+                    DETECTOR_TYPE_TRUSTED_HOTWORD_DSP);
         }
         try {
             Identity identity = new Identity();

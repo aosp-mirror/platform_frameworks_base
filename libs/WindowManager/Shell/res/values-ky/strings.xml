@@ -20,7 +20,6 @@
     <string name="pip_phone_close" msgid="5783752637260411309">"Жабуу"</string>
     <string name="pip_phone_expand" msgid="2579292903468287504">"Жайып көрсөтүү"</string>
     <string name="pip_phone_settings" msgid="5468987116750491918">"Жөндөөлөр"</string>
-    <string name="pip_phone_enter_split" msgid="7042877263880641911">"Экранды бөлүү режимине өтүү"</string>
     <string name="pip_menu_title" msgid="5393619322111827096">"Меню"</string>
     <string name="pip_notification_title" msgid="1347104727641353453">"<xliff:g id="NAME">%s</xliff:g> – сүрөт ичиндеги сүрөт"</string>
     <string name="pip_notification_message" msgid="8854051911700302620">"Эгер <xliff:g id="NAME">%s</xliff:g> колдонмосу бул функцияны пайдаланбасын десеңиз, жөндөөлөрдү ачып туруп, аны өчүрүп коюңуз."</string>
@@ -29,8 +28,6 @@
     <string name="pip_skip_to_next" msgid="8403429188794867653">"Кийинкисине өткөрүп жиберүү"</string>
     <string name="pip_skip_to_prev" msgid="7172158111196394092">"Мурункусуна өткөрүп жиберүү"</string>
     <string name="accessibility_action_pip_resize" msgid="4623966104749543182">"Өлчөмүн өзгөртүү"</string>
-    <string name="accessibility_action_pip_stash" msgid="4060775037619702641">"Сейфке салуу"</string>
-    <string name="accessibility_action_pip_unstash" msgid="7467499339610437646">"Сейфтен чыгаруу"</string>
     <string name="dock_forced_resizable" msgid="1749750436092293116">"Колдонмодо экран бөлүнбөшү мүмкүн."</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="7408396418008948957">"Колдонмодо экран бөлүнбөйт."</string>
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"Колдонмо кошумча экранда иштебей коюшу мүмкүн."</string>
@@ -47,7 +44,7 @@
     <string name="accessibility_action_divider_top_30" msgid="3572788224908570257">"Үстүнкү экранды 30%"</string>
     <string name="accessibility_action_divider_bottom_full" msgid="2831868345092314060">"Ылдыйкы экранды толук экран режимине өткөрүү"</string>
     <string name="one_handed_tutorial_title" msgid="4583241688067426350">"Бир кол режимин колдонуу"</string>
-    <string name="one_handed_tutorial_description" msgid="3486582858591353067">"Чыгуу үчүн экранды ылдый жагынан өйдө сүрүңүз же колдонмонун өйдө жагын басыңыз"</string>
+    <string name="one_handed_tutorial_description" msgid="3486582858591353067">"Чыгуу үчүн экранды ылдый жагынан өйдө көздөй сүрүңүз же колдонмонун өйдө жагын басыңыз"</string>
     <string name="accessibility_action_start_one_handed" msgid="5070337354072861426">"Бир кол режимин баштоо"</string>
     <string name="accessibility_action_stop_one_handed" msgid="1369940261782179442">"Бир кол режиминен чыгуу"</string>
     <string name="bubbles_settings_button_description" msgid="1301286017420516912">"<xliff:g id="APP_NAME">%1$s</xliff:g> калкып чыкма билдирмелер жөндөөлөрү"</string>
@@ -73,4 +70,5 @@
     <string name="manage_bubbles_text" msgid="7730624269650594419">"Башкаруу"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"Калкып чыкма билдирме жабылды."</string>
     <string name="restart_button_description" msgid="5887656107651190519">"Бул колдонмону өчүрүп күйгүзүп, толук экранга өтүү үчүн таптап коюңуз."</string>
+    <string name="got_it" msgid="4428750913636945527">"Түшүндүм"</string>
 </resources>

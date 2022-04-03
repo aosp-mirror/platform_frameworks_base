@@ -499,6 +499,14 @@ public class DevicePolicyManager {
             "android.intent.extra.REMOTE_BUGREPORT_HASH";
 
     /**
+     * Extra for shared bugreport's nonce in long integer type.
+     *
+     * @hide
+     */
+    public static final String EXTRA_REMOTE_BUGREPORT_NONCE =
+            "android.intent.extra.REMOTE_BUGREPORT_NONCE";
+
+    /**
      * Extra for remote bugreport notification shown type.
      *
      * @hide
@@ -3105,15 +3113,42 @@ public class DevicePolicyManager {
         }
     }
 
-    /** @hide */
-    public void resetNewUserDisclaimer() {
+    /**
+     * Acknoledges that the new managed user disclaimer was viewed by the (human) user
+     * so that {@link #ACTION_SHOW_NEW_USER_DISCLAIMER broadcast} is not sent again the next time
+     * this user is switched to.
+     *
+     * @hide
+     */
+    @RequiresPermission(anyOf = {android.Manifest.permission.MANAGE_USERS,
+            android.Manifest.permission.INTERACT_ACROSS_USERS})
+    public void acknowledgeNewUserDisclaimer() {
         if (mService != null) {
             try {
-                mService.resetNewUserDisclaimer();
+                mService.acknowledgeNewUserDisclaimer();
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
         }
+    }
+
+    /**
+     * Checks whether the new managed user disclaimer was viewed by the current user.
+     *
+     * @hide
+     */
+    @RequiresPermission(anyOf = {android.Manifest.permission.MANAGE_USERS,
+            android.Manifest.permission.INTERACT_ACROSS_USERS})
+    @TestApi
+    public boolean isNewUserDisclaimerAcknowledged() {
+        if (mService != null) {
+            try {
+                return mService.isNewUserDisclaimerAcknowledged();
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+        return false;
     }
 
     /**
@@ -5675,7 +5710,7 @@ public class DevicePolicyManager {
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_SHOW_NEW_USER_DISCLAIMER =
-            "android.app.action.ACTION_SHOW_NEW_USER_DISCLAIMER";
+            "android.app.action.SHOW_NEW_USER_DISCLAIMER";
 
     /**
      * Widgets are enabled in keyguard
@@ -6363,10 +6398,10 @@ public class DevicePolicyManager {
      * management app can use {@link #ID_TYPE_BASE_INFO} to request inclusion of the general device
      * information including manufacturer, model, brand, device and product in the attestation
      * record.
-     * Only device owner, profile owner on an organization-owned device and their delegated
-     * certificate installers can use {@link #ID_TYPE_SERIAL}, {@link #ID_TYPE_IMEI} and
-     * {@link #ID_TYPE_MEID} to request unique device identifiers to be attested (the serial number,
-     * IMEI and MEID correspondingly), if supported by the device
+     * Only device owner, profile owner on an organization-owned device or affiliated user, and
+     * their delegated certificate installers can use {@link #ID_TYPE_SERIAL}, {@link #ID_TYPE_IMEI}
+     * and {@link #ID_TYPE_MEID} to request unique device identifiers to be attested (the serial
+     * number, IMEI and MEID correspondingly), if supported by the device
      * (see {@link #isDeviceIdAttestationSupported()}).
      * Additionally, device owner, profile owner on an organization-owned device and their delegated
      * certificate installers can also request the attestation record to be signed using an

@@ -20,7 +20,6 @@
     <string name="pip_phone_close" msgid="5783752637260411309">"ปิด"</string>
     <string name="pip_phone_expand" msgid="2579292903468287504">"ขยาย"</string>
     <string name="pip_phone_settings" msgid="5468987116750491918">"การตั้งค่า"</string>
-    <string name="pip_phone_enter_split" msgid="7042877263880641911">"เข้าสู่โหมดแบ่งหน้าจอ"</string>
     <string name="pip_menu_title" msgid="5393619322111827096">"เมนู"</string>
     <string name="pip_notification_title" msgid="1347104727641353453">"<xliff:g id="NAME">%s</xliff:g> ใช้การแสดงภาพซ้อนภาพ"</string>
     <string name="pip_notification_message" msgid="8854051911700302620">"หากคุณไม่ต้องการให้ <xliff:g id="NAME">%s</xliff:g> ใช้ฟีเจอร์นี้ ให้แตะเพื่อเปิดการตั้งค่าแล้วปิดฟีเจอร์"</string>
@@ -29,8 +28,6 @@
     <string name="pip_skip_to_next" msgid="8403429188794867653">"ข้ามไปรายการถัดไป"</string>
     <string name="pip_skip_to_prev" msgid="7172158111196394092">"ข้ามไปรายการก่อนหน้า"</string>
     <string name="accessibility_action_pip_resize" msgid="4623966104749543182">"ปรับขนาด"</string>
-    <string name="accessibility_action_pip_stash" msgid="4060775037619702641">"เก็บเข้าที่เก็บส่วนตัว"</string>
-    <string name="accessibility_action_pip_unstash" msgid="7467499339610437646">"เอาออกจากที่เก็บส่วนตัว"</string>
     <string name="dock_forced_resizable" msgid="1749750436092293116">"แอปอาจใช้ไม่ได้กับโหมดแบ่งหน้าจอ"</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="7408396418008948957">"แอปไม่สนับสนุนการแยกหน้าจอ"</string>
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"แอปอาจไม่ทำงานในจอแสดงผลรอง"</string>
@@ -73,4 +70,5 @@
     <string name="manage_bubbles_text" msgid="7730624269650594419">"จัดการ"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"ปิดบับเบิลแล้ว"</string>
     <string name="restart_button_description" msgid="5887656107651190519">"แตะเพื่อรีสตาร์ทแอปนี้และแสดงแบบเต็มหน้าจอ"</string>
+    <string name="got_it" msgid="4428750913636945527">"รับทราบ"</string>
 </resources>
