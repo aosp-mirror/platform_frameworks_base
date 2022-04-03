@@ -46,7 +46,7 @@ java_library {
         "framework-annotations-lib",
     ],
     static_libs: [
-        "exoplayer2-extractor",
+        "exoplayer-media_apex",
         "mediatranscoding_aidl_interface-java",
         "modules-annotation-minsdk",
         "modules-utils-build",
