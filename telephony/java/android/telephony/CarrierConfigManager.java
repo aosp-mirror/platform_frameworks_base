@@ -5842,8 +5842,9 @@ public class CarrierConfigManager {
      *     <item value="source=GERAN|UTRAN, target:IWLAN, type=disallowed"/>
      *     <!-- Handover from IWLAN to 3G/4G/5G is not allowed if the device is roaming. -->
      *     <item value="source=IWLAN, target=UTRAN|EUTRAN|NGRAN, roaming=true, type=disallowed"/>
-     *     <!-- Handover from 4G to IWLAN is not allowed -->
-     *     <item value="source=EUTRAN, target=IWLAN, type=disallowed"/>
+     *     <!-- Handover from 4G to IWLAN is not allowed if the device has capability in either IMS
+     *     or EIMS-->
+     *     <item value="source=EUTRAN, target=IWLAN, type=disallowed, capabilities=IMS|EIMS"/>
      *     <!-- Handover is always allowed in any condition. -->
      *     <item value="source=GERAN|UTRAN|EUTRAN|NGRAN|IWLAN,
      *         target=GERAN|UTRAN|EUTRAN|NGRAN|IWLAN, type=allowed"/>
@@ -6836,42 +6837,26 @@ public class CarrierConfigManager {
     private void addConfig(String key, Object value, PersistableBundle configs) {
         if (value instanceof String) {
             configs.putString(key, (String) value);
-        }
-
-        if (value instanceof String[]) {
+        } else if (value instanceof String[]) {
             configs.putStringArray(key, (String[]) value);
-        }
-
-        if (value instanceof Integer) {
+        } else if (value instanceof Integer) {
             configs.putInt(key, (Integer) value);
-        }
-
-        if (value instanceof Long) {
+        } else if (value instanceof Long) {
             configs.putLong(key, (Long) value);
-        }
-
-        if (value instanceof Double) {
+        } else if (value instanceof Double) {
             configs.putDouble(key, (Double) value);
-        }
-
-        if (value instanceof Boolean) {
+        } else if (value instanceof Boolean) {
             configs.putBoolean(key, (Boolean) value);
-        }
-
-        if (value instanceof int[]) {
+        } else if (value instanceof int[]) {
             configs.putIntArray(key, (int[]) value);
-        }
-
-        if (value instanceof double[]) {
+        } else if (value instanceof double[]) {
             configs.putDoubleArray(key, (double[]) value);
-        }
-
-        if (value instanceof boolean[]) {
+        } else if (value instanceof boolean[]) {
             configs.putBooleanArray(key, (boolean[]) value);
-        }
-
-        if (value instanceof long[]) {
+        } else if (value instanceof long[]) {
             configs.putLongArray(key, (long[]) value);
+        } else if (value instanceof PersistableBundle) {
+            configs.putPersistableBundle(key, (PersistableBundle) value);
         }
     }
 }

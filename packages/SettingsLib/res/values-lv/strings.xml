@@ -95,7 +95,9 @@
     <string name="bluetooth_profile_a2dp_high_quality" msgid="4739440941324792775">"HD audio: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="2477639096903834374">"HD audio"</string>
     <string name="bluetooth_profile_hearing_aid" msgid="58154575573984914">"Dzirdes aparāti"</string>
+    <string name="bluetooth_profile_le_audio" msgid="5158149987518342036">"LE_AUDIO profils"</string>
     <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="8191273236809964030">"Izveidots savienojums ar dzirdes aparātiem"</string>
+    <string name="bluetooth_le_audio_profile_summary_connected" msgid="3162538609379333442">"Izveidots savienojums ar LE_AUDIO"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="7422607970115444153">"Savienots ar multivides audio"</string>
     <string name="bluetooth_headset_profile_summary_connected" msgid="2420981566026949688">"Savienots ar tālruņa audio"</string>
     <string name="bluetooth_opp_profile_summary_connected" msgid="2393521801478157362">"Savienots ar failu pārsūtīšanas serveri"</string>
@@ -113,6 +115,7 @@
     <string name="bluetooth_opp_profile_summary_use_for" msgid="461981154387015457">"Izmantot faila pārsūtīšanai"</string>
     <string name="bluetooth_hid_profile_summary_use_for" msgid="4289460627406490952">"Izmantot ievadei"</string>
     <string name="bluetooth_hearing_aid_profile_summary_use_for" msgid="7689393730163320483">"Izmantot dzirdes aparātiem"</string>
+    <string name="bluetooth_le_audio_profile_summary_use_for" msgid="2778318636027348572">"Izmantot LE_AUDIO profilam"</string>
     <string name="bluetooth_pairing_accept" msgid="2054232610815498004">"Izveidot pāri"</string>
     <string name="bluetooth_pairing_accept_all_caps" msgid="2734383073450506220">"SAVIENOT PĀRĪ"</string>
     <string name="bluetooth_pairing_decline" msgid="6483118841204885890">"Atcelt"</string>
@@ -198,9 +201,9 @@
     <string name="category_personal" msgid="6236798763159385225">"Privāts"</string>
     <string name="category_work" msgid="4014193632325996115">"Darba"</string>
     <string name="development_settings_title" msgid="140296922921597393">"Izstrādātāju opcijas"</string>
-    <string name="development_settings_enable" msgid="4285094651288242183">"Izstrādātājam paredzēto opciju iespējošana"</string>
+    <string name="development_settings_enable" msgid="4285094651288242183">"Izstrādātāju opciju iespējošana"</string>
     <string name="development_settings_summary" msgid="8718917813868735095">"Iestatīt lietotņu izstrādes opcijas"</string>
-    <string name="development_settings_not_available" msgid="355070198089140951">"Šim lietotājam nav pieejamas izstrādātāja opcijas."</string>
+    <string name="development_settings_not_available" msgid="355070198089140951">"Šim lietotājam nav pieejamas izstrādātāju opcijas."</string>
     <string name="vpn_settings_not_available" msgid="2894137119965668920">"VPN iestatījumi šim lietotājam nav pieejami."</string>
     <string name="tethering_settings_not_available" msgid="266821736434699780">"Piesaistes iestatījumi šim lietotājam nav pieejami."</string>
     <string name="apn_settings_not_available" msgid="1147111671403342300">"Piekļuves punkta nosaukuma iestatījumi šim lietotājam nav pieejami."</string>
@@ -212,8 +215,8 @@
     <string name="adb_wireless_error" msgid="721958772149779856">"Kļūda"</string>
     <string name="adb_wireless_settings" msgid="2295017847215680229">"Bezvadu atkļūdošana"</string>
     <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"Lai skatītu un izmantotu pieejamās ierīces, ieslēdziet bezvadu atkļūdošanu."</string>
-    <string name="adb_pair_method_qrcode_title" msgid="6982904096137468634">"Ierīču savienošana pārī, izmantojot QR kodu"</string>
-    <string name="adb_pair_method_qrcode_summary" msgid="7130694277228970888">"Savienot pārī jaunas ierīces, izmantojot QR koda skeneri"</string>
+    <string name="adb_pair_method_qrcode_title" msgid="6982904096137468634">"Ierīču savienošana pārī, izmantojot kvadrātkodu"</string>
+    <string name="adb_pair_method_qrcode_summary" msgid="7130694277228970888">"Savienot pārī jaunas ierīces, izmantojot kvadrātkoda skeneri"</string>
     <string name="adb_pair_method_code_title" msgid="1122590300445142904">"Ierīču savienošana pārī, izmantojot kodu"</string>
     <string name="adb_pair_method_code_summary" msgid="6370414511333685185">"Savienojiet pārī jaunas ierīces, izmantojot sešu ciparu kodu"</string>
     <string name="adb_paired_devices_title" msgid="5268997341526217362">"Pārī savienotās ierīces"</string>
@@ -227,12 +230,12 @@
     <string name="adb_pairing_device_dialog_pairing_code_label" msgid="3639239786669722731">"Wi‑Fi kods savienošanai pārī"</string>
     <string name="adb_pairing_device_dialog_failed_title" msgid="3426758947882091735">"Neizdevās izveidot savienojumu pārī"</string>
     <string name="adb_pairing_device_dialog_failed_msg" msgid="6611097519661997148">"Ierīcei ir jābūt izveidotam savienojumam ar to pašu tīklu."</string>
-    <string name="adb_wireless_qrcode_summary" msgid="8051414549011801917">"Izveidojiet savienojumu pārī ar ierīci Wi‑Fi tīklā, skenējot QR kodu."</string>
+    <string name="adb_wireless_qrcode_summary" msgid="8051414549011801917">"Izveidojiet savienojumu pārī ar ierīci Wi‑Fi tīklā, skenējot kvadrātkodu."</string>
     <string name="adb_wireless_verifying_qrcode_text" msgid="6123192424916029207">"Notiek savienošana pārī ar ierīci…"</string>
-    <string name="adb_qrcode_pairing_device_failed_msg" msgid="6936292092592914132">"Neizdevās izveidot savienojumu pārī ar ierīci. QR kods nebija pareizs, vai ierīcei nebija izveidots savienojums ar to pašu tīklu."</string>
+    <string name="adb_qrcode_pairing_device_failed_msg" msgid="6936292092592914132">"Neizdevās izveidot savienojumu pārī ar ierīci. Kvadrātkods nebija pareizs, vai ierīcei nebija izveidots savienojums ar to pašu tīklu."</string>
     <string name="adb_wireless_ip_addr_preference_title" msgid="8335132107715311730">"IP adrese un ports"</string>
-    <string name="adb_wireless_qrcode_pairing_title" msgid="1906409667944674707">"QR koda skenēšana"</string>
-    <string name="adb_wireless_qrcode_pairing_description" msgid="6014121407143607851">"Izveidojiet savienojumu pārī ar ierīci Wi‑Fi tīklā, skenējot QR kodu."</string>
+    <string name="adb_wireless_qrcode_pairing_title" msgid="1906409667944674707">"Kvadrātkoda skenēšana"</string>
+    <string name="adb_wireless_qrcode_pairing_description" msgid="6014121407143607851">"Izveidojiet savienojumu pārī ar ierīci Wi‑Fi tīklā, skenējot kvadrātkodu."</string>
     <string name="adb_wireless_no_network_msg" msgid="2365795244718494658">"Lūdzu, izveidojiet savienojumu ar Wi-Fi tīklu"</string>
     <string name="keywords_adb_wireless" msgid="6507505581882171240">"adb, atkļūdošana, izstrādātājiem"</string>
     <string name="bugreport_in_power" msgid="8664089072534638709">"Kļūdu pārskata saīsne"</string>
@@ -252,7 +255,7 @@
     <string name="wifi_display_certification" msgid="1805579519992520381">"Bezvadu attēlošanas sertifikācija"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"Iespējot Wi‑Fi detalizēto reģistrēšanu"</string>
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"Wi‑Fi meklēšanas ierobežošana"</string>
-    <string name="wifi_enhanced_mac_randomization" msgid="5437378364995776979">"MAC adrešu nejauša izveide ar Wi-Fi"</string>
+    <string name="wifi_enhanced_mac_randomization" msgid="882650208573834301">"Nepastāvīgu MAC adrešu nejauša izveide Wi-Fi savienojumiem"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"Vienmēr aktīvs mobilo datu savienojums"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"Paātrināta aparatūras darbība piesaistei"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"Rādīt Bluetooth ierīces bez nosaukumiem"</string>
@@ -353,6 +356,7 @@
     <string name="debug_layout_summary" msgid="8825829038287321978">"Rādīt klipu robežas, malas utt."</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"Virziens no labās uz kreiso (Obligāts) WL: 295"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"Obl. izkārt. virz. no labās uz kr. pusi visām lok."</string>
+    <string name="window_blurs" msgid="6831008984828425106">"Atļaut logu aizmiglošanu"</string>
     <string name="force_msaa" msgid="4081288296137775550">"4x MSAA piespiedu palaiš."</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"Iespējot 4x MSAA OpenGL ES 2.0 lietotnēs"</string>
     <string name="show_non_rect_clip" msgid="7499758654867881817">"Atkļūdot darbības daļā, kas nav taisnstūris."</string>
@@ -405,17 +409,12 @@
     <string name="transcode_enable_all" msgid="2411165920039166710">"Iespējot pārkodēšanu"</string>
     <string name="transcode_default" msgid="3784803084573509491">"Pieņemt, ka lietotnēs tiek atbalstīti moderni formāti"</string>
     <string name="transcode_notification" msgid="5560515979793436168">"Rādīt paziņojumus par pārkodēšanu"</string>
+    <string name="transcode_disable_cache" msgid="3160069309377467045">"Atspējot saglabāšanu kešatmiņā pārkodēšanai"</string>
     <string name="runningservices_settings_title" msgid="6460099290493086515">"Aktīvie pakalpojumi"</string>
     <string name="runningservices_settings_summary" msgid="1046080643262665743">"Pašreiz darbojošos pakalpojumu skatīšana un vadība"</string>
     <string name="select_webview_provider_title" msgid="3917815648099445503">"WebView ieviešana"</string>
     <string name="select_webview_provider_dialog_title" msgid="2444261109877277714">"Iestatīt WebView ieviešanu"</string>
     <string name="select_webview_provider_toast_text" msgid="8512254949169359848">"Šī iespēja vairs nav derīga. Mēģiniet vēlreiz."</string>
-    <string name="convert_to_file_encryption" msgid="2828976934129751818">"Pārvērst par failu šifrējumu"</string>
-    <string name="convert_to_file_encryption_enabled" msgid="840757431284311754">"Pārvērst…"</string>
-    <string name="convert_to_file_encryption_done" msgid="8965831011811180627">"Jau šifrēts failu līmenī"</string>
-    <string name="title_convert_fbe" msgid="5780013350366495149">"Pārvēršana par failu līmeņa šifrējumu"</string>
-    <string name="convert_to_fbe_warning" msgid="34294381569282109">"Pārvērtiet datu sadalījumu par failu līmeņa šifrējumu.\n Brīdinājums! Tiks dzēsti visi jūsu dati.\n Šī funkcija ir alfa izstrādes stadijā un var nedarboties, kā paredzēts.\n Lai turpinātu, nospiediet pogu “Dzēst un pārvērst…”"</string>
-    <string name="button_convert_fbe" msgid="1159861795137727671">"Dzēst un pārvērst…"</string>
     <string name="picture_color_mode" msgid="1013807330552931903">"Attēla krāsu režīms"</string>
     <string name="picture_color_mode_desc" msgid="151780973768136200">"Izmantot sRGB"</string>
     <string name="daltonizer_mode_disabled" msgid="403424372812399228">"Atspējota"</string>
@@ -450,19 +449,17 @@
     <string name="power_remaining_duration_shutdown_imminent" product="tablet" msgid="7703677921000858479">"Planšetdators, iespējams, drīz izslēgsies (<xliff:g id="LEVEL">%1$s</xliff:g>)."</string>
     <string name="power_remaining_duration_shutdown_imminent" product="device" msgid="4374784375644214578">"Ierīce, iespējams, drīz izslēgsies (<xliff:g id="LEVEL">%1$s</xliff:g>)."</string>
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> — <xliff:g id="STATE">%2$s</xliff:g>"</string>
-    <!-- no translation found for power_remaining_charging_duration_only (8085099012811384899) -->
-    <skip />
-    <!-- no translation found for power_charging_duration (6127154952524919719) -->
-    <skip />
-    <string name="power_charging_limited" msgid="1956874810658999681">"<xliff:g id="LEVEL">%1$s</xliff:g>: akumulatora darbības optimizēšana"</string>
+    <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"<xliff:g id="TIME">%1$s</xliff:g> līdz pilnai uzlādei"</string>
+    <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> — <xliff:g id="TIME">%2$s</xliff:g> līdz pilnai uzlādei"</string>
+    <string name="power_charging_limited" msgid="7956120998372505295">"<xliff:g id="LEVEL">%1$s</xliff:g> — uzlāde īslaicīgi ierobežota"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"Nezināms"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"Uzlāde"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"Notiek ātrā uzlāde"</string>
     <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"Notiek lēnā uzlāde"</string>
+    <string name="battery_info_status_charging_wireless" msgid="8924722966861282197">"Bezvadu uzlāde"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"Nenotiek uzlāde"</string>
-    <string name="battery_info_status_not_charging" msgid="8330015078868707899">"Pievienots, taču pašlaik nevar veikt uzlādi"</string>
-    <!-- no translation found for battery_info_status_full (1339002294876531312) -->
-    <skip />
+    <string name="battery_info_status_not_charging" msgid="3371084153747234837">"Ierīce pievienota, uzlāde nenotiek"</string>
+    <string name="battery_info_status_full" msgid="1339002294876531312">"Uzlādēts"</string>
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"Kontrolē administrators"</string>
     <string name="disabled" msgid="8017887509554714950">"Atspējots"</string>
     <string name="external_source_trusted" msgid="1146522036773132905">"Atļauts"</string>
@@ -506,10 +503,10 @@
     <string name="cancel" msgid="5665114069455378395">"Atcelt"</string>
     <string name="okay" msgid="949938843324579502">"LABI"</string>
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"Signāli un atgādinājumi"</string>
-    <string name="alarms_and_reminders_switch_title" msgid="186992351401152744">"Atļaut iestatīt signālus vai atgādinājumus"</string>
-    <string name="alarms_and_reminders_title" msgid="2988400785896875237">"Signāli un atgādinājumi"</string>
-    <string name="alarms_and_reminders_footer_title" msgid="5882788882647778753">"Atļaujiet šai lietotnei ieplānot signālus vai citus no laika atkarīgus notikumus. Tādējādi lietotne tiks aktivizēta un darbosies, pat ja neizmantosiet ierīci. Ņemiet vērā — atsaucot šo atļauju, var tikt traucēta lietotnes darbība, konkrētāk, vairs nedarbosies lietotnes ieplānotie signāli."</string>
-    <string name="keywords_alarms_and_reminders" msgid="8882739572152019456">"ieplānot, signāls, atgādinājums, notikums"</string>
+    <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"Atļaut iestatīt signālus un atgādinājumus"</string>
+    <string name="alarms_and_reminders_title" msgid="8819933264635406032">"Signāli un atgādinājumi"</string>
+    <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"Atļaujiet šai lietotnei iestatīt signālus un ieplānot darbības, kas jāveic konkrētā laikā. Tādējādi lietotne darbosies fonā un, iespējams, patērēs vairāk akumulatora enerģijas.\n\nJa šī atļauja nav piešķirta, esošie signāli un šīs lietotnes ieplānotie notikumi, kas jāizpilda konkrētā laikā, nedarbosies."</string>
+    <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"ieplānot, signāls, atgādinājums, pulkstenis"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"Ieslēgt"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"Režīma “Netraucēt” ieslēgšana"</string>
     <string name="zen_mode_settings_summary_off" msgid="3832876036123504076">"Nekad"</string>
@@ -563,12 +560,15 @@
     <string name="user_set_lock_button" msgid="1427128184982594856">"Iestatīt bloķēšanu"</string>
     <string name="user_switch_to_user" msgid="6975428297154968543">"Pārslēgties uz: <xliff:g id="USER_NAME">%s</xliff:g>"</string>
     <string name="creating_new_user_dialog_message" msgid="7232880257538970375">"Notiek jauna lietotāja izveide…"</string>
-    <!-- no translation found for add_user_failed (4809887794313944872) -->
-    <skip />
+    <string name="add_user_failed" msgid="4809887794313944872">"Neizdevās izveidot jaunu lietotāju"</string>
     <string name="user_nickname" msgid="262624187455825083">"Segvārds"</string>
     <string name="guest_new_guest" msgid="3482026122932643557">"Pievienot viesi"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"Noņemt viesi"</string>
+    <string name="guest_reset_guest" msgid="6110013010356013758">"Atiestatīt viesa sesiju"</string>
     <string name="guest_nickname" msgid="6332276931583337261">"Viesis"</string>
+    <string name="guest_reset_guest_dialog_title" msgid="8047270010895437534">"Vai atiestatīt viesa sesiju?"</string>
+    <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"Atiestatīt"</string>
+    <string name="guest_resetting" msgid="7822120170191509566">"Notiek viesa sesijas atiestatīšana…"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"Uzņemt fotoattēlu"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"Izvēlēties attēlu"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"Atlasīt fotoattēlu"</string>

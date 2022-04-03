@@ -466,6 +466,7 @@
   <java-symbol type="integer" name="config_safe_media_volume_usb_mB" />
   <java-symbol type="integer" name="config_mobile_mtu" />
   <java-symbol type="array"   name="config_mobile_tcp_buffers" />
+  <java-symbol type="array"   name="config_network_type_tcp_buffers" />
   <java-symbol type="string"  name="config_tcp_buffers" />
   <java-symbol type="integer" name="config_volte_replacement_rat"/>
   <java-symbol type="integer" name="config_valid_wappush_index" />
@@ -3413,14 +3414,12 @@
   <java-symbol type="string" name="accessibility_edit_shortcut_menu_volume_title" />
   <java-symbol type="string" name="accessibility_uncheck_legacy_item_warning" />
 
-  <java-symbol type="layout" name="accessibility_enable_service_encryption_warning" />
+  <java-symbol type="layout" name="accessibility_enable_service_warning" />
   <java-symbol type="id" name="accessibility_permissionDialog_icon" />
   <java-symbol type="id" name="accessibility_permissionDialog_title" />
-  <java-symbol type="id" name="accessibility_encryption_warning" />
   <java-symbol type="id" name="accessibility_permission_enable_allow_button" />
   <java-symbol type="id" name="accessibility_permission_enable_deny_button" />
   <java-symbol type="string" name="accessibility_enable_service_title" />
-  <java-symbol type="string" name="accessibility_enable_service_encryption_warning" />
 
   <java-symbol type="layout" name="accessibility_shortcut_chooser_item" />
   <java-symbol type="id" name="accessibility_shortcut_target_checkbox" />
