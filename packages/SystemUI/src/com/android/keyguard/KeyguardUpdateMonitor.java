@@ -1173,7 +1173,11 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                 || isSimPinSecure());
     }
 
-    private boolean getIsFaceAuthenticated() {
+    /**
+     * @return whether the current user has been authenticated with face. This may be true
+     * on the lockscreen if the user doesn't have bypass enabled.
+     */
+    public boolean getIsFaceAuthenticated() {
         boolean faceAuthenticated = false;
         BiometricAuthenticated bioFaceAuthenticated = mUserFaceAuthenticated.get(getCurrentUser());
         if (bioFaceAuthenticated != null) {
@@ -1536,6 +1540,10 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                 @Override
                 public void onUdfpsPointerDown(int sensorId) {
                     Log.d(TAG, "onUdfpsPointerDown, sensorId: " + sensorId);
+                    requestFaceAuth(true);
+                    if (isFaceDetectionRunning()) {
+                        mKeyguardBypassController.setUserHasDeviceEntryIntent(true);
+                    }
                 }
 
                 @Override
@@ -2237,7 +2245,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     public void requestFaceAuth(boolean userInitiatedRequest) {
         if (DEBUG) Log.d(TAG, "requestFaceAuth() userInitiated=" + userInitiatedRequest);
         mIsFaceAuthUserRequested |= userInitiatedRequest;
-        updateFaceListeningState(BIOMETRIC_ACTION_UPDATE);
+        updateFaceListeningState(BIOMETRIC_ACTION_START);
     }
 
     public boolean isFaceAuthUserRequested() {
@@ -2487,7 +2495,8 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         // instance of KeyguardUpdateMonitor for each user but KeyguardUpdateMonitor is user-aware.
         final boolean shouldListen =
                 (mBouncerFullyShown || mAuthInterruptActive || mOccludingAppRequestingFace
-                        || awakeKeyguard || shouldListenForFaceAssistant)
+                        || awakeKeyguard || shouldListenForFaceAssistant
+                        || mAuthController.isUdfpsFingerDown())
                 && !mSwitchingUser && !faceDisabledForUser && becauseCannotSkipBouncer
                 && !mKeyguardGoingAway && biometricEnabledForUser && !mLockIconPressed
                 && strongAuthAllowsScanning && mIsPrimaryUser
