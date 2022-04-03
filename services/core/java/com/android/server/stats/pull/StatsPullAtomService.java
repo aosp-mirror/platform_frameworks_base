@@ -1618,7 +1618,28 @@ public class StatsPullAtomService extends SystemService {
         if (adapter != null) {
             SynchronousResultReceiver bluetoothReceiver =
                     new SynchronousResultReceiver("bluetooth");
-            adapter.requestControllerActivityEnergyInfo(bluetoothReceiver);
+            adapter.requestControllerActivityEnergyInfo(
+                    Runnable::run,
+                    new BluetoothAdapter.OnBluetoothActivityEnergyInfoCallback() {
+                        @Override
+                        public void onBluetoothActivityEnergyInfoAvailable(
+                                BluetoothActivityEnergyInfo info) {
+                            Bundle bundle = new Bundle();
+                            bundle.putParcelable(
+                                    BatteryStats.RESULT_RECEIVER_CONTROLLER_KEY, info);
+                            bluetoothReceiver.send(0, bundle);
+                        }
+
+                        @Override
+                        public void onBluetoothActivityEnergyInfoError(int errorCode) {
+                            Slog.w(TAG, "error reading Bluetooth stats: " + errorCode);
+                            Bundle bundle = new Bundle();
+                            bundle.putParcelable(
+                                    BatteryStats.RESULT_RECEIVER_CONTROLLER_KEY, null);
+                            bluetoothReceiver.send(0, bundle);
+                        }
+                    }
+            );
             return awaitControllerInfo(bluetoothReceiver);
         } else {
             Slog.e(TAG, "Failed to get bluetooth adapter!");
