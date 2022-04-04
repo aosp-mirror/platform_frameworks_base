@@ -462,7 +462,7 @@ public final class AuthSession implements IBinder.DeathRecipient {
                     mState = STATE_SHOWING_DEVICE_CREDENTIAL;
                     mStatusBarService.onBiometricError(modality, error, vendorCode);
                 } else if (error == BiometricConstants.BIOMETRIC_ERROR_CANCELED) {
-                    mStatusBarService.hideAuthenticationDialog();
+                    mStatusBarService.hideAuthenticationDialog(mRequestId);
                     // TODO: If multiple authenticators are simultaneously running, this will
                     // need to be modified. Send the error to the client here, instead of doing
                     // a round trip to SystemUI.
@@ -480,7 +480,7 @@ public final class AuthSession implements IBinder.DeathRecipient {
                 // the client and clean up. The only error we should get here is
                 // ERROR_CANCELED due to another client kicking us out.
                 mClientReceiver.onError(modality, error, vendorCode);
-                mStatusBarService.hideAuthenticationDialog();
+                mStatusBarService.hideAuthenticationDialog(mRequestId);
                 return true;
             }
 
@@ -489,7 +489,7 @@ public final class AuthSession implements IBinder.DeathRecipient {
                 break;
 
             case STATE_CLIENT_DIED_CANCELLING:
-                mStatusBarService.hideAuthenticationDialog();
+                mStatusBarService.hideAuthenticationDialog(mRequestId);
                 return true;
 
             default:
@@ -665,7 +665,7 @@ public final class AuthSession implements IBinder.DeathRecipient {
                     cancelAllSensors();
                     return false;
                 default:
-                    mStatusBarService.hideAuthenticationDialog();
+                    mStatusBarService.hideAuthenticationDialog(mRequestId);
                     return true;
             }
         } catch (RemoteException e) {
@@ -832,7 +832,7 @@ public final class AuthSession implements IBinder.DeathRecipient {
                         BiometricConstants.BIOMETRIC_ERROR_CANCELED,
                         0 /* vendorCode */
                 );
-                mStatusBarService.hideAuthenticationDialog();
+                mStatusBarService.hideAuthenticationDialog(mRequestId);
                 return true;
             } catch (RemoteException e) {
                 Slog.e(TAG, "Remote exception", e);
