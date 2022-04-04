@@ -2,6 +2,8 @@
 
 [KeyguardBouncer][1] is the component responsible for displaying the security method set by the user (password, PIN, pattern) as well as SIM-related security methods, allowing the user to unlock the device or SIM.
 
+![ss-bouncer](./imgs/bouncer_pin.png)
+
 ## Supported States
 
 1. Phone, portrait mode - The default and typically only way to view the bouncer. Screen cannot rotate.
