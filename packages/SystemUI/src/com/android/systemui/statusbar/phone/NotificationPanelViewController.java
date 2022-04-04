@@ -239,7 +239,7 @@ public class NotificationPanelViewController extends PanelViewController {
 
     private final DozeParameters mDozeParameters;
     private final OnHeightChangedListener mOnHeightChangedListener = new OnHeightChangedListener();
-    private final OnClickListener mOnClickListener = new OnClickListener();
+    private final Runnable mCollapseExpandAction = new CollapseExpandAction();
     private final OnOverscrollTopChangedListener
             mOnOverscrollTopChangedListener =
             new OnOverscrollTopChangedListener();
@@ -3573,7 +3573,7 @@ public class NotificationPanelViewController extends PanelViewController {
         public void onFragmentViewCreated(String tag, Fragment fragment) {
             mQs = (QS) fragment;
             mQs.setPanelView(mHeightListener);
-            mQs.setExpandClickListener(mOnClickListener);
+            mQs.setCollapseExpandAction(mCollapseExpandAction);
             mQs.setHeaderClickable(isQsExpansionEnabled());
             mQs.setOverscrolling(mStackScrollerOverscrolling);
             mQs.setInSplitShade(mShouldUseSplitNotificationShade);
@@ -4216,9 +4216,9 @@ public class NotificationPanelViewController extends PanelViewController {
         }
     }
 
-    private class OnClickListener implements View.OnClickListener {
+    private class CollapseExpandAction implements Runnable {
         @Override
-        public void onClick(View v) {
+        public void run() {
             onQsExpansionStarted();
             if (mQsExpanded) {
                 flingSettings(0 /* vel */, FLING_COLLAPSE, null /* onFinishRunnable */,
