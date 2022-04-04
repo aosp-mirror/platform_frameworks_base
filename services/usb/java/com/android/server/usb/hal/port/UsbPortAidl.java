@@ -725,5 +725,15 @@ public final class UsbPortAidl implements UsbPortHal {
                         e);
             }
         }
+
+        @Override
+        public String getInterfaceHash() {
+            return IUsbCallback.HASH;
+        }
+
+        @Override
+        public int getInterfaceVersion() {
+            return IUsbCallback.VERSION;
+        }
     }
 }
