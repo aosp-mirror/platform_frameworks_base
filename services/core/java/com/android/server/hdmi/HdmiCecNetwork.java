@@ -865,10 +865,13 @@ public class HdmiCecNetwork {
      * on the current device.
      */
     int physicalAddressToPortId(int path) {
+        int physicalAddress = getPhysicalAddress();
+        if (path == physicalAddress) {
+            // The local device isn't connected to any port; assign portId 0
+            return Constants.CEC_SWITCH_HOME;
+        }
         int mask = 0xF000;
         int finalMask = 0xF000;
-        int physicalAddress;
-        physicalAddress = getPhysicalAddress();
         int maskedAddress = physicalAddress;
 
         while (maskedAddress != 0) {
