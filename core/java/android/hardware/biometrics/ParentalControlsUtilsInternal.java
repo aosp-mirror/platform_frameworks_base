@@ -32,21 +32,33 @@ import android.provider.Settings;
  */
 public class ParentalControlsUtilsInternal {
 
-    private static final String TEST_ALWAYS_REQUIRE_CONSENT =
-            "android.hardware.biometrics.ParentalControlsUtilsInternal.always_require_consent";
+    private static final String TEST_ALWAYS_REQUIRE_CONSENT_PACKAGE =
+            "android.hardware.biometrics.ParentalControlsUtilsInternal.require_consent_package";
+    private static final String TEST_ALWAYS_REQUIRE_CONSENT_CLASS =
+            "android.hardware.biometrics.ParentalControlsUtilsInternal.require_consent_class";
 
-    public static boolean isTestModeEnabled(@NonNull Context context) {
+    /**
+     * ComponentName of Parent Consent activity for testing Biometric authentication disabled by
+     * Parental Controls.
+     *
+     * <p>Component could be defined by values of {@link #TEST_ALWAYS_REQUIRE_CONSENT_PACKAGE} and
+     * {@link #TEST_ALWAYS_REQUIRE_CONSENT_CLASS} Secure settings.
+     */
+    public static ComponentName getTestComponentName(@NonNull Context context, int userId) {
         if (Build.IS_USERDEBUG || Build.IS_ENG) {
-            return Settings.Secure.getInt(context.getContentResolver(),
-                    TEST_ALWAYS_REQUIRE_CONSENT, 0) != 0;
+            final String pkg = Settings.Secure.getStringForUser(context.getContentResolver(),
+                    TEST_ALWAYS_REQUIRE_CONSENT_PACKAGE, userId);
+            final String cls = Settings.Secure.getStringForUser(context.getContentResolver(),
+                    TEST_ALWAYS_REQUIRE_CONSENT_CLASS, userId);
+            return pkg != null && cls != null ? new ComponentName(pkg, cls) : null;
         }
-        return false;
+        return null;
     }
 
     public static boolean parentConsentRequired(@NonNull Context context,
             @NonNull DevicePolicyManager dpm, @BiometricAuthenticator.Modality int modality,
             @NonNull UserHandle userHandle) {
-        if (isTestModeEnabled(context)) {
+        if (getTestComponentName(context, userHandle.getIdentifier()) != null) {
             return true;
         }
 
