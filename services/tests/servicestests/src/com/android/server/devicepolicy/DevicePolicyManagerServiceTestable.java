@@ -75,7 +75,7 @@ public class DevicePolicyManagerServiceTestable extends DevicePolicyManagerServi
                     services.activityManagerInternal, new MockInjector(services));
         }
 
-        static class MockInjector extends Injector {
+        static class MockInjector extends OwnersData.Injector {
             private final MockSystemServices mServices;
 
             private MockInjector(MockSystemServices services) {
