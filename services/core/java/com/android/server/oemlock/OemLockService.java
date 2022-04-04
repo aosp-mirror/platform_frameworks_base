@@ -16,11 +16,15 @@
 
 package com.android.server.oemlock;
 
-import android.Manifest;
+import static android.Manifest.permission.MANAGE_CARRIER_OEM_UNLOCK_STATE;
+import static android.Manifest.permission.MANAGE_USER_OEM_UNLOCK_STATE;
+import static android.Manifest.permission.OEM_UNLOCK_STATE;
+import static android.Manifest.permission.READ_OEM_UNLOCK_STATE;
+
+import android.annotation.EnforcePermission;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.content.Context;
-import android.content.pm.PackageManager;
 import android.hardware.oemlock.V1_0.IOemLock;
 import android.os.Binder;
 import android.os.Bundle;
@@ -114,9 +118,8 @@ public class OemLockService extends SystemService {
     private final IBinder mService = new IOemLockService.Stub() {
         @Override
         @Nullable
+        @EnforcePermission(MANAGE_CARRIER_OEM_UNLOCK_STATE)
         public String getLockName() {
-            enforceManageCarrierOemUnlockPermission();
-
             final long token = Binder.clearCallingIdentity();
             try {
                 return mOemLock.getLockName();
@@ -126,8 +129,8 @@ public class OemLockService extends SystemService {
         }
 
         @Override
+        @EnforcePermission(MANAGE_CARRIER_OEM_UNLOCK_STATE)
         public void setOemUnlockAllowedByCarrier(boolean allowed, @Nullable byte[] signature) {
-            enforceManageCarrierOemUnlockPermission();
             enforceUserIsAdmin();
 
             final long token = Binder.clearCallingIdentity();
@@ -139,9 +142,8 @@ public class OemLockService extends SystemService {
         }
 
         @Override
+        @EnforcePermission(MANAGE_CARRIER_OEM_UNLOCK_STATE)
         public boolean isOemUnlockAllowedByCarrier() {
-            enforceManageCarrierOemUnlockPermission();
-
             final long token = Binder.clearCallingIdentity();
             try {
               return mOemLock.isOemUnlockAllowedByCarrier();
@@ -153,13 +155,12 @@ public class OemLockService extends SystemService {
         // The user has the final say so if they allow unlock, then the device allows the bootloader
         // to OEM unlock it.
         @Override
+        @EnforcePermission(MANAGE_USER_OEM_UNLOCK_STATE)
         public void setOemUnlockAllowedByUser(boolean allowedByUser) {
             if (ActivityManager.isUserAMonkey()) {
                 // Prevent a monkey from changing this
                 return;
             }
-
-            enforceManageUserOemUnlockPermission();
             enforceUserIsAdmin();
 
             final long token = Binder.clearCallingIdentity();
@@ -180,9 +181,8 @@ public class OemLockService extends SystemService {
         }
 
         @Override
+        @EnforcePermission(MANAGE_USER_OEM_UNLOCK_STATE)
         public boolean isOemUnlockAllowedByUser() {
-            enforceManageUserOemUnlockPermission();
-
             final long token = Binder.clearCallingIdentity();
             try {
                 return mOemLock.isOemUnlockAllowedByDevice();
@@ -197,9 +197,8 @@ public class OemLockService extends SystemService {
          * TODO: Figure out better place to run sync e.g. adding new API
          */
         @Override
+        @EnforcePermission(anyOf = {READ_OEM_UNLOCK_STATE, OEM_UNLOCK_STATE})
         public boolean isOemUnlockAllowed() {
-            enforceOemUnlockReadPermission();
-
             final long token = Binder.clearCallingIdentity();
             try {
                 boolean allowed = mOemLock.isOemUnlockAllowedByCarrier()
@@ -212,9 +211,8 @@ public class OemLockService extends SystemService {
         }
 
         @Override
+        @EnforcePermission(anyOf = {READ_OEM_UNLOCK_STATE, OEM_UNLOCK_STATE})
         public boolean isDeviceOemUnlocked() {
-            enforceOemUnlockReadPermission();
-
             String locked = SystemProperties.get(FLASH_LOCK_PROP);
             switch (locked) {
                 case FLASH_LOCK_UNLOCKED:
@@ -242,28 +240,6 @@ public class OemLockService extends SystemService {
     private boolean isOemUnlockAllowedByAdmin() {
         return !UserManager.get(mContext)
                 .hasUserRestriction(UserManager.DISALLOW_FACTORY_RESET, UserHandle.SYSTEM);
-    }
-
-    private void enforceManageCarrierOemUnlockPermission() {
-        mContext.enforceCallingOrSelfPermission(
-                Manifest.permission.MANAGE_CARRIER_OEM_UNLOCK_STATE,
-                "Can't manage OEM unlock allowed by carrier");
-    }
-
-    private void enforceManageUserOemUnlockPermission() {
-        mContext.enforceCallingOrSelfPermission(
-                Manifest.permission.MANAGE_USER_OEM_UNLOCK_STATE,
-                "Can't manage OEM unlock allowed by user");
-    }
-
-    private void enforceOemUnlockReadPermission() {
-        if (mContext.checkCallingOrSelfPermission(Manifest.permission.READ_OEM_UNLOCK_STATE)
-                == PackageManager.PERMISSION_DENIED
-                && mContext.checkCallingOrSelfPermission(Manifest.permission.OEM_UNLOCK_STATE)
-                == PackageManager.PERMISSION_DENIED) {
-            throw new SecurityException("Can't access OEM unlock state. Requires "
-                    + "READ_OEM_UNLOCK_STATE or OEM_UNLOCK_STATE permission.");
-        }
     }
 
     private void enforceUserIsAdmin() {
