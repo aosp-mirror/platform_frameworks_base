@@ -59,8 +59,14 @@ class UnlockedScreenOffAnimationController @Inject constructor(
     private val powerManager: PowerManager,
     private val handler: Handler = Handler()
 ) : WakefulnessLifecycle.Observer, ScreenOffAnimation {
-
     private lateinit var mCentralSurfaces: CentralSurfaces
+    /**
+     * Whether or not [initialize] has been called to provide us with the StatusBar,
+     * NotificationPanelViewController, and LightRevealSrim so that we can run the unlocked screen
+     * off animation.
+     */
+    private var initialized = false
+
     private lateinit var lightRevealScrim: LightRevealScrim
 
     private var animatorDurationScale = 1f
@@ -116,6 +122,7 @@ class UnlockedScreenOffAnimationController @Inject constructor(
         centralSurfaces: CentralSurfaces,
         lightRevealScrim: LightRevealScrim
     ) {
+        this.initialized = true
         this.lightRevealScrim = lightRevealScrim
         this.mCentralSurfaces = centralSurfaces
 
@@ -262,6 +269,18 @@ class UnlockedScreenOffAnimationController @Inject constructor(
      * on the current state of the device.
      */
     fun shouldPlayUnlockedScreenOffAnimation(): Boolean {
+        // If we haven't been initialized yet, we don't have a StatusBar/LightRevealScrim yet, so we
+        // can't perform the animation.
+        if (!initialized) {
+            return false
+        }
+
+        // If the device isn't in a state where we can control unlocked screen off (no AOD enabled,
+        // power save, etc.) then we shouldn't try to do so.
+        if (!dozeParameters.get().canControlUnlockedScreenOff()) {
+            return false
+        }
+
         // If we explicitly already decided not to play the screen off animation, then never change
         // our mind.
         if (decidedToAnimateGoingToSleep == false) {
@@ -304,7 +323,7 @@ class UnlockedScreenOffAnimationController @Inject constructor(
     }
 
     override fun shouldDelayDisplayDozeTransition(): Boolean =
-        dozeParameters.get().shouldControlUnlockedScreenOff()
+        shouldPlayUnlockedScreenOffAnimation()
 
     /**
      * Whether we're doing the light reveal animation or we're done with that and animating in the
