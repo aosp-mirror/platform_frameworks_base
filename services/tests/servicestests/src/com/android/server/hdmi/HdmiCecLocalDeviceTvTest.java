@@ -56,12 +56,14 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.util.ArrayList;
+import java.util.List;
 
 @SmallTest
 @RunWith(JUnit4.class)
 /** Tests for {@link HdmiCecLocalDeviceTv} class. */
 public class HdmiCecLocalDeviceTvTest {
     private static final int TIMEOUT_MS = HdmiConfig.TIMEOUT_MS + 1;
+    private static final int PORT_1 = 1;
 
     private HdmiControlService mHdmiControlService;
     private HdmiCecController mHdmiCecController;
@@ -73,6 +75,25 @@ public class HdmiCecLocalDeviceTvTest {
     private int mTvPhysicalAddress;
     private int mTvLogicalAddress;
     private boolean mWokenUp;
+    private List<DeviceEventListener> mDeviceEventListeners = new ArrayList<>();
+
+    private class DeviceEventListener {
+        private HdmiDeviceInfo mDevice;
+        private int mStatus;
+
+        DeviceEventListener(HdmiDeviceInfo device, int status) {
+            this.mDevice = device;
+            this.mStatus = status;
+        }
+
+        int getStatus() {
+            return mStatus;
+        }
+
+        HdmiDeviceInfo getDeviceInfo() {
+            return mDevice;
+        }
+    }
 
     @Mock
     private IPowerManager mIPowerManagerMock;
@@ -123,6 +144,11 @@ public class HdmiCecLocalDeviceTvTest {
                     @Override
                     AudioManager getAudioManager() {
                         return mAudioManager;
+                    }
+
+                    @Override
+                    void invokeDeviceEventListeners(HdmiDeviceInfo device, int status) {
+                        mDeviceEventListeners.add(new DeviceEventListener(device, status));
                     }
                 };
 
@@ -595,5 +621,101 @@ public class HdmiCecLocalDeviceTvTest {
         mTestLooper.dispatchAll();
 
         verify(mAudioManager, never()).setStreamVolume(anyInt(), anyInt(), anyInt());
+    }
+
+    @Test
+    public void hotplugDetectionActionClearsDevices() {
+        mHdmiControlService.getHdmiCecNetwork().clearDeviceList();
+        assertThat(mHdmiControlService.getHdmiCecNetwork().getDeviceInfoList(false))
+                .isEmpty();
+        // Add a device to the network and assert that this device is included in the list of
+        // devices.
+        HdmiDeviceInfo infoPlayback = new HdmiDeviceInfo(
+                Constants.ADDR_PLAYBACK_2,
+                0x1000,
+                PORT_1,
+                HdmiDeviceInfo.DEVICE_PLAYBACK,
+                0x1000,
+                "Playback 2",
+                HdmiControlManager.POWER_STATUS_ON);
+        mHdmiControlService.getHdmiCecNetwork().addCecDevice(infoPlayback);
+        mTestLooper.dispatchAll();
+        assertThat(mHdmiControlService.getHdmiCecNetwork().getDeviceInfoList(false))
+                .hasSize(1);
+        mDeviceEventListeners.clear();
+        assertThat(mDeviceEventListeners.size()).isEqualTo(0);
+
+        // HAL detects a hotplug out. Assert that this device stays in the list of devices.
+        mHdmiControlService.onHotplug(PORT_1, false);
+        assertThat(mHdmiControlService.getHdmiCecNetwork().getDeviceInfoList(false))
+                .hasSize(1);
+        assertThat(mDeviceEventListeners).isEmpty();
+        mTestLooper.dispatchAll();
+        // Make the device not acknowledge the poll message sent by the HotplugDetectionAction.
+        // Assert that this device is removed from the list of devices.
+        mNativeWrapper.setPollAddressResponse(Constants.ADDR_PLAYBACK_2, SendMessageResult.NACK);
+        for (int pollCount = 0; pollCount < HotplugDetectionAction.TIMEOUT_COUNT; pollCount++) {
+            mTestLooper.moveTimeForward(HotplugDetectionAction.POLLING_INTERVAL_MS);
+            mTestLooper.dispatchAll();
+        }
+
+        assertThat(mHdmiControlService.getHdmiCecNetwork().getDeviceInfoList(false))
+                .isEmpty();
+        assertThat(mDeviceEventListeners.size()).isEqualTo(1);
+        assertThat(mDeviceEventListeners.get(0).getStatus())
+                .isEqualTo(HdmiControlManager.DEVICE_EVENT_REMOVE_DEVICE);
+        HdmiDeviceInfo removedDeviceInfo = mDeviceEventListeners.get(0).getDeviceInfo();
+        assertThat(removedDeviceInfo.getPortId()).isEqualTo(PORT_1);
+        assertThat(removedDeviceInfo.getLogicalAddress()).isEqualTo(Constants.ADDR_PLAYBACK_2);
+        assertThat(removedDeviceInfo.getPhysicalAddress()).isEqualTo(0x1000);
+        assertThat(removedDeviceInfo.getDeviceType()).isEqualTo(HdmiDeviceInfo.DEVICE_PLAYBACK);
+    }
+
+    @Test
+    public void hotplugDetectionActionClearsDevices_AudioSystem() {
+        mHdmiControlService.getHdmiCecNetwork().clearDeviceList();
+        assertThat(mHdmiControlService.getHdmiCecNetwork().getDeviceInfoList(false))
+                .isEmpty();
+        // Add a device to the network and assert that this device is included in the list of
+        // devices.
+        HdmiDeviceInfo infoAudioSystem = new HdmiDeviceInfo(
+                ADDR_AUDIO_SYSTEM,
+                0x1000,
+                PORT_1,
+                HdmiDeviceInfo.DEVICE_AUDIO_SYSTEM,
+                0x1000,
+                "Audio System",
+                HdmiControlManager.POWER_STATUS_ON);
+        mHdmiControlService.getHdmiCecNetwork().addCecDevice(infoAudioSystem);
+        mTestLooper.dispatchAll();
+        assertThat(mHdmiControlService.getHdmiCecNetwork().getDeviceInfoList(false))
+                .hasSize(1);
+        mDeviceEventListeners.clear();
+        assertThat(mDeviceEventListeners.size()).isEqualTo(0);
+
+        // HAL detects a hotplug out. Assert that this device stays in the list of devices.
+        mHdmiControlService.onHotplug(PORT_1, false);
+        assertThat(mHdmiControlService.getHdmiCecNetwork().getDeviceInfoList(false))
+                .hasSize(1);
+        assertThat(mDeviceEventListeners).isEmpty();
+        mTestLooper.dispatchAll();
+        // Make the device not acknowledge the poll message sent by the HotplugDetectionAction.
+        // Assert that this device is removed from the list of devices.
+        mNativeWrapper.setPollAddressResponse(ADDR_AUDIO_SYSTEM, SendMessageResult.NACK);
+        for (int pollCount = 0; pollCount < HotplugDetectionAction.TIMEOUT_COUNT; pollCount++) {
+            mTestLooper.moveTimeForward(HotplugDetectionAction.POLLING_INTERVAL_MS);
+            mTestLooper.dispatchAll();
+        }
+
+        assertThat(mHdmiControlService.getHdmiCecNetwork().getDeviceInfoList(false))
+                .isEmpty();
+        assertThat(mDeviceEventListeners.size()).isEqualTo(1);
+        assertThat(mDeviceEventListeners.get(0).getStatus())
+                .isEqualTo(HdmiControlManager.DEVICE_EVENT_REMOVE_DEVICE);
+        HdmiDeviceInfo removedDeviceInfo = mDeviceEventListeners.get(0).getDeviceInfo();
+        assertThat(removedDeviceInfo.getPortId()).isEqualTo(PORT_1);
+        assertThat(removedDeviceInfo.getLogicalAddress()).isEqualTo(Constants.ADDR_AUDIO_SYSTEM);
+        assertThat(removedDeviceInfo.getPhysicalAddress()).isEqualTo(0x1000);
+        assertThat(removedDeviceInfo.getDeviceType()).isEqualTo(HdmiDeviceInfo.DEVICE_AUDIO_SYSTEM);
     }
 }
