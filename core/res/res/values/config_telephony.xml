@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (C) 2022 The Android Open Source Project
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~      http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+<resources>
+    <!-- This file defines Android telephony related resources -->
+
+    <!-- Whether force to enable telephony new data stack or not -->
+    <bool name="config_force_enable_telephony_new_data_stack">true</bool>
+    <java-symbol type="bool" name="config_force_enable_telephony_new_data_stack" />
+
+    <!-- Configure tcp buffer sizes per network type in the form:
+         network-type:rmem_min,rmem_def,rmem_max,wmem_min,wmem_def,wmem_max
+
+         The network-type must be a valid DataConfigNetworkType value. If no value is found for the
+         network-type in use, config_tcp_buffers will be used instead.
+    -->
+    <string-array name="config_network_type_tcp_buffers">
+    </string-array>
+    <java-symbol type="array" name="config_network_type_tcp_buffers" />
+
+    <!-- Configure tcp buffer sizes in the form:
+         rmem_min,rmem_def,rmem_max,wmem_min,wmem_def,wmem_max
+         If this is configured as an empty string, the system default will be applied.
+    -->
+    <string name="config_tcp_buffers" translatable="false"></string>
+    <java-symbol type="string"  name="config_tcp_buffers" />
+
+    <!-- What source to use to estimate link upstream and downstream bandwidth capacities.
+         Default is bandwidth_estimator.
+         Values are bandwidth_estimator, carrier_config and modem. -->
+    <string name="config_bandwidthEstimateSource">bandwidth_estimator</string>
+    <java-symbol type="string" name="config_bandwidthEstimateSource" />
+
+    <!-- Whether to adopt the predefined handover policies for IWLAN.
+         {@see CarrierConfigManager#KEY_IWLAN_HANDOVER_POLICY_STRING_ARRAY}
+    -->
+    <bool name="config_enable_iwlan_handover_policy">true</bool>
+    <java-symbol type="bool" name="config_enable_iwlan_handover_policy" />
+
+    <!-- When a radio power off request is received, we will delay completing the request until
+         either IMS moves to the deregistered state or the timeout defined by this configuration
+         elapses. If 0, this feature is disabled and we do not delay radio power off requests.-->
+    <integer name="config_delay_for_ims_dereg_millis">0</integer>
+    <java-symbol type="integer" name="config_delay_for_ims_dereg_millis" />
+
+    <!-- Boolean indicating whether the Iwlan data service supports persistence of iwlan ipsec
+         tunnels across service restart. If iwlan tunnels are not persisted across restart,
+         Framework will clean up dangling data connections when service restarts -->
+    <bool name="config_wlan_data_service_conn_persistence_on_restart">true</bool>
+    <java-symbol type="bool" name="config_wlan_data_service_conn_persistence_on_restart" />
+
+    <!-- Cellular data service package name to bind to by default. If none is specified in an
+         overlay, an empty string is passed in -->
+    <string name="config_wwan_data_service_package" translatable="false">com.android.phone</string>
+    <java-symbol type="string" name="config_wwan_data_service_package" />
+
+    <!-- IWLAN data service package name to bind to by default. If none is specified in an overlay,
+         an empty string is passed in -->
+    <string name="config_wlan_data_service_package" translatable="false"></string>
+    <java-symbol type="string" name="config_wlan_data_service_package" />
+
+    <!-- Cellular data service class name to bind to by default. If none is specified in an overlay,
+         an empty string is passed in -->
+    <string name="config_wwan_data_service_class" translatable="false"></string>
+    <java-symbol type="string" name="config_wwan_data_service_class" />
+
+    <!-- IWLAN data service class name to bind to by default. If none is specified in an overlay, an
+         empty string is passed in -->
+    <string name="config_wlan_data_service_class" translatable="false"></string>
+    <java-symbol type="string" name="config_wlan_data_service_class" />
+
+    <!-- Cellular network service package name to bind to by default. -->
+    <string name="config_wwan_network_service_package" translatable="false">
+        com.android.phone
+    </string>
+    <java-symbol type="string" name="config_wwan_network_service_package" />
+
+    <!-- Cellular network service class name to bind to by default.-->
+    <string name="config_wwan_network_service_class" translatable="false"></string>
+    <java-symbol type="string" name="config_wwan_network_service_class" />
+
+    <!-- IWLAN network service package name to bind to by default. If none is specified in an
+         overlay, an empty string is passed in -->
+    <string name="config_wlan_network_service_package" translatable="false"></string>
+    <java-symbol type="string" name="config_wlan_network_service_package" />
+
+    <!-- IWLAN network service class name to bind to by default. If none is specified in an overlay,
+         an empty string is passed in -->
+    <string name="config_wlan_network_service_class" translatable="false"></string>
+    <java-symbol type="string" name="config_wlan_network_service_class" />
+
+    <!-- Telephony qualified networks service package name to bind to by default. -->
+    <string name="config_qualified_networks_service_package" translatable="false"></string>
+    <java-symbol type="string" name="config_qualified_networks_service_package" />
+
+    <!-- Telephony qualified networks service class name to bind to by default. -->
+    <string name="config_qualified_networks_service_class" translatable="false"></string>
+    <java-symbol type="string" name="config_qualified_networks_service_class" />
+</resources>
