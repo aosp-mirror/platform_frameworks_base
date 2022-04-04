@@ -432,6 +432,17 @@ public class InsetsState implements Parcelable {
             processSourceAsPublicType(source, typeInsetsMap, typeSideMap, typeVisibilityMap,
                     insets, Type.SYSTEM_GESTURES);
         }
+        if (type == Type.CAPTION_BAR) {
+            // Caption should also be gesture and tappable elements. This should not be needed when
+            // the caption is added from the shell, as the shell can add other types at the same
+            // time.
+            processSourceAsPublicType(source, typeInsetsMap, typeSideMap, typeVisibilityMap,
+                    insets, Type.SYSTEM_GESTURES);
+            processSourceAsPublicType(source, typeInsetsMap, typeSideMap, typeVisibilityMap,
+                    insets, Type.MANDATORY_SYSTEM_GESTURES);
+            processSourceAsPublicType(source, typeInsetsMap, typeSideMap, typeVisibilityMap,
+                    insets, Type.TAPPABLE_ELEMENT);
+        }
     }
 
     private void processSourceAsPublicType(InsetsSource source, Insets[] typeInsetsMap,
