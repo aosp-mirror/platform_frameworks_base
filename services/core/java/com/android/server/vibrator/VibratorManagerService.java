@@ -989,12 +989,13 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
      */
     @NonNull
     private VibrationAttributes fixupVibrationAttributes(@Nullable VibrationAttributes attrs,
-            CombinedVibration effect) {
+            @Nullable CombinedVibration effect) {
         if (attrs == null) {
             attrs = DEFAULT_ATTRIBUTES;
         }
         int usage = attrs.getUsage();
-        if ((usage == VibrationAttributes.USAGE_UNKNOWN) && effect.isHapticFeedbackCandidate()) {
+        if ((usage == VibrationAttributes.USAGE_UNKNOWN)
+                && (effect != null) && effect.isHapticFeedbackCandidate()) {
             usage = VibrationAttributes.USAGE_TOUCH;
         }
         int flags = attrs.getFlags();

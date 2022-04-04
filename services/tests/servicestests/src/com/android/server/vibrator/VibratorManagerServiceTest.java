@@ -1315,6 +1315,24 @@ public class VibratorManagerServiceTest {
         assertNotEquals(IExternalVibratorService.SCALE_MUTE, scale);
     }
 
+    @Test
+    public void onExternalVibration_withUnknownUsage_appliesMediaSettings() {
+        mockVibrators(1);
+        mVibratorProviders.get(1).setCapabilities(IVibrator.CAP_EXTERNAL_CONTROL);
+        setUserSetting(Settings.System.MEDIA_VIBRATION_INTENSITY,
+                Vibrator.VIBRATION_INTENSITY_OFF);
+        AudioAttributes flaggedAudioAttrs = new AudioAttributes.Builder()
+                .setUsage(AudioAttributes.USAGE_UNKNOWN)
+                .setFlags(AudioAttributes.FLAG_BYPASS_MUTE)
+                .build();
+        createSystemReadyService();
+
+        int scale = mExternalVibratorService.onExternalVibrationStart(
+                new ExternalVibration(/* uid= */ 123, PACKAGE_NAME, flaggedAudioAttrs,
+                        mock(IExternalVibrationController.class)));
+        assertEquals(IExternalVibratorService.SCALE_MUTE, scale);
+    }
+
     private VibrationEffectSegment expectedPrebaked(int effectId) {
         return expectedPrebaked(effectId, VibrationEffect.EFFECT_STRENGTH_MEDIUM);
     }
