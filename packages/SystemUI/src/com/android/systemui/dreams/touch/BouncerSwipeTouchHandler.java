@@ -117,15 +117,23 @@ public class BouncerSwipeTouchHandler implements DreamTouchHandler {
                         return false;
                     }
 
+                    // Don't set expansion for downward scroll when the bouncer is hidden.
+                    if (!mBouncerInitiallyShowing && (e1.getY() < e2.getY())) {
+                        return true;
+                    }
+
+                    // Don't set expansion for upward scroll when the bouncer is shown.
+                    if (mBouncerInitiallyShowing && (e1.getY() > e2.getY())) {
+                        return true;
+                    }
+
                     // For consistency, we adopt the expansion definition found in the
                     // PanelViewController. In this case, expansion refers to the view above the
                     // bouncer. As that view's expansion shrinks, the bouncer appears. The bouncer
                     // is fully hidden at full expansion (1) and fully visible when fully collapsed
                     // (0).
-                    final float dy = mBouncerInitiallyShowing ? e2.getY() - e1.getY()
-                            : e1.getY() - e2.getY();
-                    final float screenTravelPercentage = Math.max(0,
-                            dy / mCentralSurfaces.getDisplayHeight());
+                    final float screenTravelPercentage = Math.abs(e1.getY() - e2.getY())
+                            / mCentralSurfaces.getDisplayHeight();
                     setPanelExpansion(mBouncerInitiallyShowing
                             ? screenTravelPercentage : 1 - screenTravelPercentage);
                     return true;
