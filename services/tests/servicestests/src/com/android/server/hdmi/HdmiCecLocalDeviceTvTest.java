@@ -19,6 +19,7 @@ import static com.android.server.hdmi.Constants.ABORT_UNRECOGNIZED_OPCODE;
 import static com.android.server.hdmi.Constants.ADDR_AUDIO_SYSTEM;
 import static com.android.server.hdmi.Constants.ADDR_BROADCAST;
 import static com.android.server.hdmi.Constants.ADDR_PLAYBACK_1;
+import static com.android.server.hdmi.Constants.ADDR_PLAYBACK_2;
 import static com.android.server.hdmi.Constants.ADDR_RECORDER_1;
 import static com.android.server.hdmi.Constants.ADDR_TV;
 import static com.android.server.hdmi.HdmiControlService.INITIATED_BY_ENABLE_CEC;
@@ -717,5 +718,52 @@ public class HdmiCecLocalDeviceTvTest {
         assertThat(removedDeviceInfo.getLogicalAddress()).isEqualTo(Constants.ADDR_AUDIO_SYSTEM);
         assertThat(removedDeviceInfo.getPhysicalAddress()).isEqualTo(0x1000);
         assertThat(removedDeviceInfo.getDeviceType()).isEqualTo(HdmiDeviceInfo.DEVICE_AUDIO_SYSTEM);
+    }
+
+    @Test
+    public void listenerInvokedIfPhysicalAddressReported() {
+        mHdmiControlService.getHdmiCecNetwork().clearDeviceList();
+        assertThat(mHdmiControlService.getHdmiCecNetwork().getDeviceInfoList(false))
+                .isEmpty();
+        HdmiCecMessage reportPhysicalAddress =
+                HdmiCecMessageBuilder.buildReportPhysicalAddressCommand(
+                ADDR_PLAYBACK_2, 0x1000, HdmiDeviceInfo.DEVICE_PLAYBACK);
+        mNativeWrapper.onCecMessage(reportPhysicalAddress);
+        mTestLooper.dispatchAll();
+
+        assertThat(mHdmiControlService.getHdmiCecNetwork().getDeviceInfoList(false))
+                .hasSize(1);
+        assertThat(mDeviceEventListeners.size()).isEqualTo(1);
+        assertThat(mDeviceEventListeners.get(0).getStatus())
+                .isEqualTo(HdmiControlManager.DEVICE_EVENT_ADD_DEVICE);
+    }
+
+    @Test
+    public void listenerNotInvokedIfPhysicalAddressUnknown() {
+        mHdmiControlService.getHdmiCecNetwork().clearDeviceList();
+        assertThat(mHdmiControlService.getHdmiCecNetwork().getDeviceInfoList(false))
+                .isEmpty();
+        HdmiCecMessage setOsdName = HdmiCecMessageBuilder.buildSetOsdNameCommand(
+                ADDR_PLAYBACK_2, ADDR_TV, "Playback 2");
+        mNativeWrapper.onCecMessage(setOsdName);
+        mTestLooper.dispatchAll();
+
+        assertThat(mHdmiControlService.getHdmiCecNetwork().getDeviceInfoList(false))
+                .hasSize(1);
+        assertThat(mDeviceEventListeners).isEmpty();
+
+        // When the device reports its physical address, the listener eventually is invoked.
+        HdmiCecMessage reportPhysicalAddress =
+                HdmiCecMessageBuilder.buildReportPhysicalAddressCommand(
+                ADDR_PLAYBACK_2, 0x1000, HdmiDeviceInfo.DEVICE_PLAYBACK);
+        mNativeWrapper.onCecMessage(reportPhysicalAddress);
+        mTestLooper.dispatchAll();
+
+        assertThat(mHdmiControlService.getHdmiCecNetwork().getDeviceInfoList(false))
+                .hasSize(1);
+        assertThat(mDeviceEventListeners.size()).isEqualTo(1);
+        assertThat(mDeviceEventListeners.get(0).getStatus())
+                .isEqualTo(HdmiControlManager.DEVICE_EVENT_ADD_DEVICE);
+
     }
 }
