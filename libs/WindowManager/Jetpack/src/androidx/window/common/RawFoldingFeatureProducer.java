@@ -16,11 +16,6 @@
 
 package androidx.window.common;
 
-import static androidx.window.common.CommonFoldingFeature.COMMON_STATE_FLAT;
-import static androidx.window.common.CommonFoldingFeature.COMMON_STATE_HALF_OPENED;
-import static androidx.window.common.CommonFoldingFeature.COMMON_STATE_UNKNOWN;
-import static androidx.window.common.CommonFoldingFeature.parseListFromString;
-
 import android.annotation.NonNull;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -33,75 +28,88 @@ import android.text.TextUtils;
 
 import androidx.window.util.BaseDataProducer;
 
-import java.util.Collections;
-import java.util.List;
+import com.android.internal.R;
+
 import java.util.Optional;
+import java.util.Set;
 
 /**
- * Implementation of {@link androidx.window.util.DataProducer} that produces
- * {@link CommonFoldingFeature} parsed from a string stored in {@link Settings}.
+ * Implementation of {@link androidx.window.util.DataProducer} that produces a
+ * {@link String} that can be parsed to a {@link CommonFoldingFeature}.
+ * {@link RawFoldingFeatureProducer} searches for the value in two places. The first check is in
+ * settings where the {@link String} property is saved with the key
+ * {@link RawFoldingFeatureProducer#DISPLAY_FEATURES}. If this value is null or empty then the
+ * value in {@link android.content.res.Resources} is used. If both are empty then
+ * {@link RawFoldingFeatureProducer#getData()} returns an empty object.
+ * {@link RawFoldingFeatureProducer} listens to changes in the setting so that it can override
+ * the system {@link CommonFoldingFeature} data.
  */
-public final class SettingsDisplayFeatureProducer
-        extends BaseDataProducer<List<CommonFoldingFeature>> {
+public final class RawFoldingFeatureProducer extends BaseDataProducer<String> {
     private static final String DISPLAY_FEATURES = "display_features";
-    private static final String DEVICE_POSTURE = "device_posture";
 
-    private final Uri mDevicePostureUri =
-            Settings.Global.getUriFor(DEVICE_POSTURE);
     private final Uri mDisplayFeaturesUri =
             Settings.Global.getUriFor(DISPLAY_FEATURES);
 
     private final ContentResolver mResolver;
     private final ContentObserver mObserver;
+    private final String mResourceFeature;
     private boolean mRegisteredObservers;
 
-    public SettingsDisplayFeatureProducer(@NonNull Context context) {
+    public RawFoldingFeatureProducer(@NonNull Context context) {
         mResolver = context.getContentResolver();
         mObserver = new SettingsObserver();
-    }
-
-    private int getPosture() {
-        int posture = Settings.Global.getInt(mResolver, DEVICE_POSTURE, COMMON_STATE_UNKNOWN);
-        if (posture == COMMON_STATE_HALF_OPENED || posture == COMMON_STATE_FLAT) {
-            return posture;
-        } else {
-            return COMMON_STATE_UNKNOWN;
-        }
+        mResourceFeature = context.getResources().getString(R.string.config_display_features);
     }
 
     @Override
     @NonNull
-    public Optional<List<CommonFoldingFeature>> getData() {
-        String displayFeaturesString = Settings.Global.getString(mResolver, DISPLAY_FEATURES);
+    public Optional<String> getData() {
+        String displayFeaturesString = getFeatureString();
         if (displayFeaturesString == null) {
             return Optional.empty();
         }
+        return Optional.of(displayFeaturesString);
+    }
 
-        if (TextUtils.isEmpty(displayFeaturesString)) {
-            return Optional.of(Collections.emptyList());
+    /**
+     * Returns the {@link String} representation for a {@link CommonFoldingFeature} from settings if
+     * present and falls back to the resource value if empty or {@code null}.
+     */
+    private String getFeatureString() {
+        String settingsFeature = Settings.Global.getString(mResolver, DISPLAY_FEATURES);
+        if (TextUtils.isEmpty(settingsFeature)) {
+            return mResourceFeature;
         }
-        return Optional.of(parseListFromString(displayFeaturesString, getPosture()));
+        return settingsFeature;
+    }
+
+    @Override
+    protected void onListenersChanged(Set<Runnable> callbacks) {
+        if (callbacks.isEmpty()) {
+            unregisterObserversIfNeeded();
+        } else {
+            registerObserversIfNeeded();
+        }
     }
 
     /**
      * Registers settings observers, if needed. When settings observers are registered for this
      * producer callbacks for changes in data will be triggered.
      */
-    public void registerObserversIfNeeded() {
+    private void registerObserversIfNeeded() {
         if (mRegisteredObservers) {
             return;
         }
         mRegisteredObservers = true;
         mResolver.registerContentObserver(mDisplayFeaturesUri, false /* notifyForDescendants */,
                 mObserver /* ContentObserver */);
-        mResolver.registerContentObserver(mDevicePostureUri, false, mObserver);
     }
 
     /**
      * Unregisters settings observers, if needed. When settings observers are unregistered for this
      * producer callbacks for changes in data will not be triggered.
      */
-    public void unregisterObserversIfNeeded() {
+    private void unregisterObserversIfNeeded() {
         if (!mRegisteredObservers) {
             return;
         }
@@ -116,7 +124,7 @@ public final class SettingsDisplayFeatureProducer
 
         @Override
         public void onChange(boolean selfChange, Uri uri) {
-            if (mDisplayFeaturesUri.equals(uri) || mDevicePostureUri.equals(uri)) {
+            if (mDisplayFeaturesUri.equals(uri)) {
                 notifyDataChanged();
             }
         }
