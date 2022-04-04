@@ -768,13 +768,18 @@ public class AuthController extends CoreStartable implements CommandQueue.Callba
     }
 
     @Override
-    public void hideAuthenticationDialog() {
+    public void hideAuthenticationDialog(long requestId) {
         if (DEBUG) Log.d(TAG, "hideAuthenticationDialog: " + mCurrentDialog);
 
         if (mCurrentDialog == null) {
             // Could be possible if the caller canceled authentication after credential success
             // but before the client was notified.
             if (DEBUG) Log.d(TAG, "dialog already gone");
+            return;
+        }
+        if (requestId != mCurrentDialog.getRequestId()) {
+            Log.w(TAG, "ignore - ids do not match: " + requestId + " current: "
+                    + mCurrentDialog.getRequestId());
             return;
         }
 
