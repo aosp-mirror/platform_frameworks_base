@@ -178,8 +178,7 @@ public class MediaControlPanel {
             if (mPackageName != null && mInstanceId != null) {
                 mLogger.logSeek(mUid, mPackageName, mInstanceId);
             }
-            logSmartspaceCardReported(SMARTSPACE_CARD_CLICK_EVENT,
-                    /* isRecommendationCard */ false);
+            logSmartspaceCardReported(SMARTSPACE_CARD_CLICK_EVENT);
             return Unit.INSTANCE;
         });
     }
@@ -335,8 +334,7 @@ public class MediaControlPanel {
                 if (mFalsingManager.isFalseTap(FalsingManager.LOW_PENALTY)) return;
                 if (mMediaViewController.isGutsVisible()) return;
 
-                logSmartspaceCardReported(SMARTSPACE_CARD_CLICK_EVENT,
-                        /* isRecommendationCard */ false);
+                logSmartspaceCardReported(SMARTSPACE_CARD_CLICK_EVENT);
                 mActivityStarter.postStartActivityDismissingKeyguard(clickIntent,
                         buildLaunchAnimatorController(mMediaViewHolder.getPlayer()));
             });
@@ -440,9 +438,7 @@ public class MediaControlPanel {
         mMediaViewHolder.getDismiss().setEnabled(isDismissible);
         mMediaViewHolder.getDismiss().setOnClickListener(v -> {
             if (mFalsingManager.isFalseTap(FalsingManager.LOW_PENALTY)) return;
-
-            logSmartspaceCardReported(SMARTSPACE_CARD_DISMISS_EVENT,
-                    /* isRecommendationCard */ false);
+            logSmartspaceCardReported(SMARTSPACE_CARD_DISMISS_EVENT);
             mLogger.logLongPressDismiss(mUid, mPackageName, mInstanceId);
 
             if (mKey != null) {
@@ -683,8 +679,7 @@ public class MediaControlPanel {
                 button.setOnClickListener(v -> {
                     if (!mFalsingManager.isFalseTap(FalsingManager.LOW_PENALTY)) {
                         mLogger.logTapAction(button.getId(), mUid, mPackageName, mInstanceId);
-                        logSmartspaceCardReported(SMARTSPACE_CARD_CLICK_EVENT,
-                                /* isRecommendationCard */ false);
+                        logSmartspaceCardReported(SMARTSPACE_CARD_CLICK_EVENT);
                         action.run();
 
                         if (icon instanceof Animatable) {
@@ -932,8 +927,9 @@ public class MediaControlPanel {
         mRecommendationViewHolder.getDismiss().setOnClickListener(v -> {
             if (mFalsingManager.isFalseTap(FalsingManager.LOW_PENALTY)) return;
 
-            logSmartspaceCardReported(SMARTSPACE_CARD_DISMISS_EVENT,
-                    /* isRecommendationCard */ true);
+            logSmartspaceCardReported(
+                    761 // SMARTSPACE_CARD_DISMISS
+            );
             closeGuts();
             mMediaDataManagerLazy.get().dismissSmartspaceRecommendation(
                     data.getTargetId(), MediaViewController.GUTS_ANIMATION_DURATION + 100L);
@@ -1068,7 +1064,6 @@ public class MediaControlPanel {
             if (mFalsingManager.isFalseTap(FalsingManager.LOW_PENALTY)) return;
 
             logSmartspaceCardReported(SMARTSPACE_CARD_CLICK_EVENT,
-                    /* isRecommendationCard */ true,
                     interactedSubcardRank,
                     getSmartspaceSubCardCardinality());
 
@@ -1138,18 +1133,17 @@ public class MediaControlPanel {
         return SysUiStatsLog.SMART_SPACE_CARD_REPORTED__DISPLAY_SURFACE__DEFAULT_SURFACE;
     }
 
-    private void logSmartspaceCardReported(int eventId, boolean isRecommendationCard) {
-        logSmartspaceCardReported(eventId, isRecommendationCard,
+    private void logSmartspaceCardReported(int eventId) {
+        logSmartspaceCardReported(eventId,
                 /* interactedSubcardRank */ 0,
                 /* interactedSubcardCardinality */ 0);
     }
 
-    private void logSmartspaceCardReported(int eventId, boolean isRecommendationCard,
+    private void logSmartspaceCardReported(int eventId,
             int interactedSubcardRank, int interactedSubcardCardinality) {
         mMediaCarouselController.logSmartspaceCardReported(eventId,
                 mSmartspaceId,
                 mUid,
-                isRecommendationCard,
                 new int[]{getSurfaceForSmartspaceLogging()},
                 interactedSubcardRank,
                 interactedSubcardCardinality);

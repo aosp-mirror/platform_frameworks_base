@@ -1079,15 +1079,27 @@ class MediaDataManager(
     fun onSwipeToDismiss() = mediaDataFilter.onSwipeToDismiss()
 
     /**
-     * Are there any media notifications active?
+     * Are there any media notifications active, including the recommendations?
+     */
+    fun hasActiveMediaOrRecommendation() = mediaDataFilter.hasActiveMediaOrRecommendation()
+
+    /**
+     * Are there any media entries we should display, including the recommendations?
+     * If resumption is enabled, this will include inactive players
+     * If resumption is disabled, we only want to show active players
+     */
+    fun hasAnyMediaOrRecommendation() = mediaDataFilter.hasAnyMediaOrRecommendation()
+
+    /**
+     * Are there any resume media notifications active, excluding the recommendations?
      */
     fun hasActiveMedia() = mediaDataFilter.hasActiveMedia()
 
     /**
-     * Are there any media entries we should display?
-     * If resumption is enabled, this will include inactive players
-     * If resumption is disabled, we only want to show active players
-     */
+    * Are there any resume media notifications active, excluding the recommendations?
+    * If resumption is enabled, this will include inactive players
+    * If resumption is disabled, we only want to show active players
+    */
     fun hasAnyMedia() = mediaDataFilter.hasAnyMedia()
 
     interface Listener {
@@ -1106,13 +1118,17 @@ class MediaDataManager(
          * @param receivedSmartspaceCardLatency is the latency between headphone connects and sysUI
          * displays Smartspace media targets. Will be 0 if the data is not activated by Smartspace
          * signal.
+         *
+         * @param isSsReactivated indicates resume media card is reactivated by Smartspace
+         * recommendation signal
          */
         fun onMediaDataLoaded(
             key: String,
             oldKey: String?,
             data: MediaData,
             immediately: Boolean = true,
-            receivedSmartspaceCardLatency: Int = 0
+            receivedSmartspaceCardLatency: Int = 0,
+            isSsReactivated: Boolean = false
         ) {}
 
         /**
@@ -1121,15 +1137,11 @@ class MediaDataManager(
          * @param shouldPrioritize indicates the sorting priority of the Smartspace card. If true,
          * it will be prioritized as the first card. Otherwise, it will show up as the last card as
          * default.
-         *
-         * @param isSsReactivated indicates resume media card is reactivated by Smartspace
-         * recommendation signal
          */
         fun onSmartspaceMediaDataLoaded(
             key: String,
             data: SmartspaceMediaData,
-            shouldPrioritize: Boolean = false,
-            isSsReactivated: Boolean = false
+            shouldPrioritize: Boolean = false
         ) {}
 
         /** Called whenever a previously existing Media notification was removed. */
