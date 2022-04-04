@@ -29,6 +29,8 @@ import static android.view.WindowManager.TRANSIT_OLD_WALLPAPER_INTRA_CLOSE;
 import static android.view.WindowManager.TRANSIT_OLD_WALLPAPER_INTRA_OPEN;
 import static android.view.WindowManager.TRANSIT_OPEN;
 
+import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_ANIM;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
@@ -60,6 +62,7 @@ import android.view.animation.ScaleAnimation;
 import android.view.animation.TranslateAnimation;
 
 import com.android.internal.R;
+import com.android.internal.protolog.common.ProtoLog;
 
 import java.util.List;
 
@@ -97,10 +100,6 @@ public class TransitionAnimation {
             new PathInterpolator(0.3f, 0f, 0.1f, 1f);
 
     private static final String DEFAULT_PACKAGE = "android";
-
-    // TODO (b/215515255): remove once we full migrate to shell transitions
-    private static final boolean SHELL_TRANSITIONS_ENABLED =
-            SystemProperties.getBoolean("persist.wm.debug.shell_transit", false);
 
     private final Context mContext;
     private final String mTag;
@@ -256,32 +255,11 @@ public class TransitionAnimation {
                 resId = ent.array.getResourceId(animAttr, 0);
             }
         }
-        if (!SHELL_TRANSITIONS_ENABLED) {
-            resId = updateToLegacyIfNeeded(resId);
-        }
         resId = updateToTranslucentAnimIfNeeded(resId, transit);
         if (ResourceId.isValid(resId)) {
             return loadAnimationSafely(context, resId, mTag);
         }
         return null;
-    }
-
-    /**
-     * Replace animations that are not compatible with the legacy transition system with ones that
-     * are compatible with it.
-     * TODO (b/215515255): remove once we full migrate to shell transitions
-     */
-    private int updateToLegacyIfNeeded(int anim) {
-        if (anim == R.anim.activity_open_enter) {
-            return R.anim.activity_open_enter_legacy;
-        } else if (anim == R.anim.activity_open_exit) {
-            return R.anim.activity_open_exit_legacy;
-        } else if (anim == R.anim.activity_close_enter) {
-            return R.anim.activity_close_enter_legacy;
-        } else if (anim == R.anim.activity_close_exit) {
-            return R.anim.activity_close_exit_legacy;
-        }
-        return anim;
     }
 
     /** Load animation by attribute Id from a specific AnimationStyle resource. */
@@ -320,9 +298,9 @@ public class TransitionAnimation {
     @Nullable
     private AttributeCache.Entry getCachedAnimations(LayoutParams lp) {
         if (mDebug) {
-            Slog.v(mTag, "Loading animations: layout params pkg="
-                    + (lp != null ? lp.packageName : null)
-                    + " resId=0x" + (lp != null ? Integer.toHexString(lp.windowAnimations) : null));
+            ProtoLog.v(WM_DEBUG_ANIM, "Loading animations: layout params pkg=%s resId=0x%x",
+                    lp != null ? lp.packageName : null,
+                    lp != null ? lp.windowAnimations : 0);
         }
         if (lp != null && lp.windowAnimations != 0) {
             // If this is a system resource, don't try to load it from the
@@ -334,7 +312,7 @@ public class TransitionAnimation {
                 packageName = DEFAULT_PACKAGE;
             }
             if (mDebug) {
-                Slog.v(mTag, "Loading animations: picked package=" + packageName);
+                ProtoLog.v(WM_DEBUG_ANIM, "Loading animations: picked package=%s", packageName);
             }
             return AttributeCache.instance().get(packageName, resId,
                     com.android.internal.R.styleable.WindowAnimation);
@@ -345,16 +323,16 @@ public class TransitionAnimation {
     @Nullable
     private AttributeCache.Entry getCachedAnimations(String packageName, int resId) {
         if (mDebug) {
-            Slog.v(mTag, "Loading animations: package="
-                    + packageName + " resId=0x" + Integer.toHexString(resId));
+            ProtoLog.v(WM_DEBUG_ANIM, "Loading animations: package=%s resId=0x%x",
+                    packageName, resId);
         }
         if (packageName != null) {
             if ((resId & 0xFF000000) == 0x01000000) {
                 packageName = DEFAULT_PACKAGE;
             }
             if (mDebug) {
-                Slog.v(mTag, "Loading animations: picked package="
-                        + packageName);
+                ProtoLog.v(WM_DEBUG_ANIM, "Loading animations: picked package=%s",
+                        packageName);
             }
             return AttributeCache.instance().get(packageName, resId,
                     com.android.internal.R.styleable.WindowAnimation);

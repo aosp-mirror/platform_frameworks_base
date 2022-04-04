@@ -618,7 +618,7 @@ final class SettingsState {
             return;
         }
         HistoricalOperation operation = new HistoricalOperation(
-                SystemClock.elapsedRealtime(), type,
+                System.currentTimeMillis(), type,
                 setting != null ? new Setting(setting) : null);
         if (mNextHistoricalOpIdx >= mHistoricalOperations.size()) {
             mHistoricalOperations.add(operation);

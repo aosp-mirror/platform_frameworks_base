@@ -26,6 +26,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -75,6 +76,12 @@ import org.mockito.MockitoAnnotations;
 @SmallTest
 public class LetterboxEduWindowManagerTest extends ShellTestCase {
 
+    private static final int USER_ID_1 = 1;
+    private static final int USER_ID_2 = 2;
+
+    private static final String PREF_KEY_1 = String.valueOf(USER_ID_1);
+    private static final String PREF_KEY_2 = String.valueOf(USER_ID_2);
+
     private static final int TASK_ID = 1;
 
     private static final int TASK_WIDTH = 200;
@@ -98,9 +105,10 @@ public class LetterboxEduWindowManagerTest extends ShellTestCase {
     @Mock private Runnable mOnDismissCallback;
 
     private SharedPreferences mSharedPreferences;
-    private String mPrefKey;
     @Nullable
-    private Boolean mInitialPrefValue = null;
+    private Boolean mInitialPrefValue1 = null;
+    @Nullable
+    private Boolean mInitialPrefValue2 = null;
 
     @Before
     public void setUp() {
@@ -109,20 +117,28 @@ public class LetterboxEduWindowManagerTest extends ShellTestCase {
         mSharedPreferences = mContext.getSharedPreferences(
                 LetterboxEduWindowManager.HAS_SEEN_LETTERBOX_EDUCATION_PREF_NAME,
                 Context.MODE_PRIVATE);
-        mPrefKey = String.valueOf(mContext.getUserId());
-        if (mSharedPreferences.contains(mPrefKey)) {
-            mInitialPrefValue = mSharedPreferences.getBoolean(mPrefKey, /* default= */ false);
-            mSharedPreferences.edit().remove(mPrefKey).apply();
+        if (mSharedPreferences.contains(PREF_KEY_1)) {
+            mInitialPrefValue1 = mSharedPreferences.getBoolean(PREF_KEY_1, /* default= */ false);
+            mSharedPreferences.edit().remove(PREF_KEY_1).apply();
+        }
+        if (mSharedPreferences.contains(PREF_KEY_2)) {
+            mInitialPrefValue2 = mSharedPreferences.getBoolean(PREF_KEY_2, /* default= */ false);
+            mSharedPreferences.edit().remove(PREF_KEY_2).apply();
         }
     }
 
     @After
     public void tearDown() {
         SharedPreferences.Editor editor = mSharedPreferences.edit();
-        if (mInitialPrefValue == null) {
-            editor.remove(mPrefKey);
+        if (mInitialPrefValue1 == null) {
+            editor.remove(PREF_KEY_1);
         } else {
-            editor.putBoolean(mPrefKey, mInitialPrefValue);
+            editor.putBoolean(PREF_KEY_1, mInitialPrefValue1);
+        }
+        if (mInitialPrefValue2 == null) {
+            editor.remove(PREF_KEY_2);
+        } else {
+            editor.putBoolean(PREF_KEY_2, mInitialPrefValue2);
         }
         editor.apply();
     }
@@ -137,19 +153,9 @@ public class LetterboxEduWindowManagerTest extends ShellTestCase {
     }
 
     @Test
-    public void testCreateLayout_alreadyShownToUser_doesNotCreateLayout() {
-        LetterboxEduWindowManager windowManager = createWindowManager(/* eligible= */ true);
-        mSharedPreferences.edit().putBoolean(mPrefKey, true).apply();
-
-        assertFalse(windowManager.createLayout(/* canShow= */ true));
-
-        assertNull(windowManager.mLayout);
-    }
-
-    @Test
     public void testCreateLayout_taskBarEducationIsShowing_doesNotCreateLayout() {
         LetterboxEduWindowManager windowManager = createWindowManager(/* eligible= */
-                true, /* isTaskbarEduShowing= */ true);
+                true, USER_ID_1, /* isTaskbarEduShowing= */ true);
 
         assertFalse(windowManager.createLayout(/* canShow= */ true));
 
@@ -162,7 +168,7 @@ public class LetterboxEduWindowManagerTest extends ShellTestCase {
 
         assertTrue(windowManager.createLayout(/* canShow= */ false));
 
-        assertFalse(mSharedPreferences.getBoolean(mPrefKey, /* default= */ false));
+        assertFalse(mSharedPreferences.getBoolean(PREF_KEY_1, /* default= */ false));
         assertNull(windowManager.mLayout);
     }
 
@@ -172,7 +178,6 @@ public class LetterboxEduWindowManagerTest extends ShellTestCase {
 
         assertTrue(windowManager.createLayout(/* canShow= */ true));
 
-        assertTrue(mSharedPreferences.getBoolean(mPrefKey, /* default= */ false));
         LetterboxEduDialogLayout layout = windowManager.mLayout;
         assertNotNull(layout);
         verify(mViewHost).setView(eq(layout), mWindowAttrsCaptor.capture());
@@ -183,6 +188,8 @@ public class LetterboxEduWindowManagerTest extends ShellTestCase {
         assertNotNull(dialogTitle);
         spyOn(dialogTitle);
 
+        // The education shouldn't be marked as seen until enter animation is done.
+        assertFalse(mSharedPreferences.getBoolean(PREF_KEY_1, /* default= */ false));
         // Clicking the layout does nothing until enter animation is done.
         layout.performClick();
         verify(mAnimationController, never()).startExitAnimation(any(), any());
@@ -191,6 +198,7 @@ public class LetterboxEduWindowManagerTest extends ShellTestCase {
 
         verifyAndFinishEnterAnimation(layout);
 
+        assertTrue(mSharedPreferences.getBoolean(PREF_KEY_1, /* default= */ false));
         verify(dialogTitle).sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_FOCUSED);
         // Exit animation should start following a click on the layout.
         layout.performClick();
@@ -208,12 +216,41 @@ public class LetterboxEduWindowManagerTest extends ShellTestCase {
     }
 
     @Test
+    public void testCreateLayout_alreadyShownToUser_createsLayoutForOtherUserOnly() {
+        LetterboxEduWindowManager windowManager = createWindowManager(/* eligible= */ true,
+                USER_ID_1, /* isTaskbarEduShowing= */ false);
+
+        assertTrue(windowManager.createLayout(/* canShow= */ true));
+
+        assertNotNull(windowManager.mLayout);
+        verifyAndFinishEnterAnimation(windowManager.mLayout);
+        assertTrue(mSharedPreferences.getBoolean(PREF_KEY_1, /* default= */ false));
+
+        windowManager.release();
+        windowManager = createWindowManager(/* eligible= */ true,
+                USER_ID_1, /* isTaskbarEduShowing= */ false);
+
+        assertFalse(windowManager.createLayout(/* canShow= */ true));
+        assertNull(windowManager.mLayout);
+
+        clearInvocations(mTransitions, mAnimationController);
+
+        windowManager = createWindowManager(/* eligible= */ true,
+                USER_ID_2, /* isTaskbarEduShowing= */ false);
+
+        assertTrue(windowManager.createLayout(/* canShow= */ true));
+
+        assertNotNull(windowManager.mLayout);
+        verifyAndFinishEnterAnimation(windowManager.mLayout);
+        assertTrue(mSharedPreferences.getBoolean(PREF_KEY_1, /* default= */ false));
+    }
+
+    @Test
     public void testCreateLayout_windowManagerReleasedBeforeTransitionsIsIdle_doesNotStartAnim() {
         LetterboxEduWindowManager windowManager = createWindowManager(/* eligible= */ true);
 
         assertTrue(windowManager.createLayout(/* canShow= */ true));
-
-        assertTrue(mSharedPreferences.getBoolean(mPrefKey, /* default= */ false));
+        assertNotNull(windowManager.mLayout);
 
         verify(mTransitions).runOnIdle(mRunOnIdleCaptor.capture());
 
@@ -222,6 +259,7 @@ public class LetterboxEduWindowManagerTest extends ShellTestCase {
         mRunOnIdleCaptor.getValue().run();
 
         verify(mAnimationController, never()).startEnterAnimation(any(), any());
+        assertFalse(mSharedPreferences.getBoolean(PREF_KEY_1, /* default= */ false));
     }
 
     @Test
@@ -233,7 +271,7 @@ public class LetterboxEduWindowManagerTest extends ShellTestCase {
         assertNotNull(layout);
 
         assertTrue(windowManager.updateCompatInfo(
-                createTaskInfo(/* eligible= */ true, new Rect(50, 25, 150, 75)),
+                createTaskInfo(/* eligible= */ true, USER_ID_1, new Rect(50, 25, 150, 75)),
                 mTaskListener, /* canShow= */ true));
 
         verifyLayout(layout, layout.getLayoutParams(), /* expectedWidth= */ 100,
@@ -341,13 +379,13 @@ public class LetterboxEduWindowManagerTest extends ShellTestCase {
     }
 
     private LetterboxEduWindowManager createWindowManager(boolean eligible) {
-        return createWindowManager(eligible, /* isTaskbarEduShowing= */ false);
+        return createWindowManager(eligible, USER_ID_1, /* isTaskbarEduShowing= */ false);
     }
 
     private LetterboxEduWindowManager createWindowManager(boolean eligible,
-            boolean isTaskbarEduShowing) {
+            int userId, boolean isTaskbarEduShowing) {
         LetterboxEduWindowManager windowManager = new LetterboxEduWindowManager(mContext,
-                createTaskInfo(eligible), mSyncTransactionQueue, mTaskListener,
+                createTaskInfo(eligible, userId), mSyncTransactionQueue, mTaskListener,
                 createDisplayLayout(), mTransitions, mOnDismissCallback,
                 mAnimationController);
 
@@ -375,11 +413,16 @@ public class LetterboxEduWindowManagerTest extends ShellTestCase {
     }
 
     private static TaskInfo createTaskInfo(boolean eligible) {
-        return createTaskInfo(eligible, new Rect(0, 0, TASK_WIDTH, TASK_HEIGHT));
+        return createTaskInfo(eligible, USER_ID_1);
     }
 
-    private static TaskInfo createTaskInfo(boolean eligible, Rect bounds) {
+    private static TaskInfo createTaskInfo(boolean eligible, int userId) {
+        return createTaskInfo(eligible, userId, new Rect(0, 0, TASK_WIDTH, TASK_HEIGHT));
+    }
+
+    private static TaskInfo createTaskInfo(boolean eligible, int userId, Rect bounds) {
         ActivityManager.RunningTaskInfo taskInfo = new ActivityManager.RunningTaskInfo();
+        taskInfo.userId = userId;
         taskInfo.taskId = TASK_ID;
         taskInfo.topActivityEligibleForLetterboxEducation = eligible;
         taskInfo.configuration.windowConfiguration.setBounds(bounds);

@@ -71,38 +71,16 @@ public final class WindowManagerGlobal {
     public static final int RELAYOUT_RES_SURFACE_CHANGED = 1 << 1;
 
     /**
-     * The window is being resized by dragging on the docked divider. The client should render
-     * at (0, 0) and extend its background to the background frame passed into
-     * {@link IWindow#resized}.
-     */
-    public static final int RELAYOUT_RES_DRAG_RESIZING_DOCKED = 1 << 2;
-
-    /**
-     * The window is being resized by dragging one of the window corners,
-     * in this case the surface would be fullscreen-sized. The client should
-     * render to the actual frame location (instead of (0,curScrollY)).
-     */
-    public static final int RELAYOUT_RES_DRAG_RESIZING_FREEFORM = 1 << 3;
-
-    /**
      * The window manager has changed the size of the surface from the last call.
      */
-    public static final int RELAYOUT_RES_SURFACE_RESIZED = 1 << 4;
+    public static final int RELAYOUT_RES_SURFACE_RESIZED = 1 << 2;
 
     /**
      * In multi-window we force show the system bars. Because we don't want that the surface size
      * changes in this mode, we instead have a flag whether the system bar sizes should always be
      * consumed, so the app is treated like there is no virtual system bars at all.
      */
-    public static final int RELAYOUT_RES_CONSUME_ALWAYS_SYSTEM_BARS = 1 << 5;
-
-    /**
-     * This flag indicates the client should not directly submit it's next frame,
-     * but instead should pass it in the postDrawTransaction of
-     * {@link WindowManagerService#finishDrawing}. This is used by the WM
-     * BLASTSyncEngine to synchronize rendering of multiple windows.
-     */
-    public static final int RELAYOUT_RES_BLAST_SYNC = 1 << 6;
+    public static final int RELAYOUT_RES_CONSUME_ALWAYS_SYSTEM_BARS = 1 << 3;
 
     /**
      * Flag for relayout: the client will be later giving

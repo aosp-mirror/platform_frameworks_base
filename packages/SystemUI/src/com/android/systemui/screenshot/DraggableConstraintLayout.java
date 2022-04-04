@@ -44,10 +44,14 @@ import com.android.systemui.R;
 public class DraggableConstraintLayout extends ConstraintLayout
         implements ViewTreeObserver.OnComputeInternalInsetsListener {
 
+    private static final float VELOCITY_DP_PER_MS = 1;
+
     private final SwipeDismissHandler mSwipeDismissHandler;
     private final GestureDetector mSwipeDetector;
     private View mActionsContainer;
+    private View mActionsContainerBackground;
     private SwipeDismissCallbacks mCallbacks;
+    private final DisplayMetrics mDisplayMetrics;
 
     /**
      * Stores the callbacks when the view is interacted with or dismissed.
@@ -86,6 +90,9 @@ public class DraggableConstraintLayout extends ConstraintLayout
     public DraggableConstraintLayout(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
 
+        mDisplayMetrics = new DisplayMetrics();
+        mContext.getDisplay().getRealMetrics(mDisplayMetrics);
+
         mSwipeDismissHandler = new SwipeDismissHandler(mContext, this);
         setOnTouchListener(mSwipeDismissHandler);
 
@@ -112,7 +119,8 @@ public class DraggableConstraintLayout extends ConstraintLayout
 
     @Override // View
     protected void onFinishInflate() {
-        mActionsContainer = findViewById(R.id.actions_container_background);
+        mActionsContainer = findViewById(R.id.actions_container);
+        mActionsContainerBackground = findViewById(R.id.actions_container_background);
     }
 
     @Override
@@ -121,10 +129,6 @@ public class DraggableConstraintLayout extends ConstraintLayout
             mSwipeDismissHandler.onTouch(this, ev);
         }
         return mSwipeDetector.onTouchEvent(ev);
-    }
-
-    public int getVisibleRight() {
-        return mActionsContainer.getRight();
     }
 
     /**
@@ -283,7 +287,8 @@ public class DraggableConstraintLayout extends ConstraintLayout
         }
 
         void dismiss() {
-            ValueAnimator anim = createSwipeDismissAnimation(3);
+            float velocityPxPerMs = FloatingWindowUtil.dpToPx(mDisplayMetrics, VELOCITY_DP_PER_MS);
+            ValueAnimator anim = createSwipeDismissAnimation(velocityPxPerMs);
             mCallbacks.onSwipeDismissInitiated(anim);
             dismiss(anim);
         }
@@ -324,7 +329,7 @@ public class DraggableConstraintLayout extends ConstraintLayout
             if (startX > 0 || (startX == 0 && layoutDir == LAYOUT_DIRECTION_RTL)) {
                 finalX = mDisplayMetrics.widthPixels;
             } else {
-                finalX = -1 * mActionsContainer.getRight();
+                finalX = -1 * mActionsContainerBackground.getRight();
             }
             float distance = Math.abs(finalX - startX);
 

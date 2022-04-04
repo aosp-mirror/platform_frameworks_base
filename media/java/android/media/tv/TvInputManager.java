@@ -680,7 +680,7 @@ public final class TvInputManager {
          * @param session A {@link TvInputManager.Session} associated with this callback.
          * @param strength The current signal strength.
          */
-        public void onSignalStrength(Session session, @SignalStrength int strength) {
+        public void onSignalStrengthUpdated(Session session, @SignalStrength int strength) {
         }
 
         /**
@@ -898,7 +898,7 @@ public final class TvInputManager {
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    mSessionCallback.onSignalStrength(mSession, strength);
+                    mSessionCallback.onSignalStrengthUpdated(mSession, strength);
                     if (mSession.mIAppNotificationEnabled
                             && mSession.getInteractiveAppSession() != null) {
                         mSession.getInteractiveAppSession().notifySignalStrength(strength);

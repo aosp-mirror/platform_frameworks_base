@@ -446,6 +446,10 @@
          This name is in the ComponentName flattened format (package/class)  -->
     <string name="config_screenshotEditor" translatable="false"></string>
 
+    <!-- Remote copy default activity.  Must handle REMOTE_COPY_ACTION intents.
+     This name is in the ComponentName flattened format (package/class)  -->
+    <string name="config_remoteCopyPackage" translatable="false"></string>
+
     <!-- On debuggable builds, alert the user if SystemUI PSS goes over this number (in kb) -->
     <integer name="watch_heap_limit">256000</integer>
 
@@ -555,6 +559,9 @@
 
     <!-- Whether to use the split 2-column notification shade -->
     <bool name="config_use_split_notification_shade">false</bool>
+
+    <!-- Whether we use large screen shade header which takes only one row compared to QS header -->
+    <bool name="config_use_large_screen_shade_header">false</bool>
 
     <!-- Whether notification header should never show section headers. -->
     <bool name="config_notification_never_show_section_headers">false</bool>
@@ -707,4 +714,18 @@
     <integer name="complicationFadeInMs">500</integer>
 
     <integer name="complicationRestoreMs">1000</integer>
+
+    <!-- Icons that don't show in a collapsed non-keyguard statusbar -->
+    <string-array name="config_collapsed_statusbar_icon_blocklist" translatable="false">
+        <item>@*android:string/status_bar_volume</item>
+        <item>@*android:string/status_bar_alarm_clock</item>
+        <item>@*android:string/status_bar_call_strength</item>
+    </string-array>
+
+    <!-- Icons that don't show in a collapsed statusbar on keyguard -->
+    <string-array name="config_keyguard_statusbar_icon_blocklist" translatable="false">
+        <item>@*android:string/status_bar_volume</item>
+        <item>@*android:string/status_bar_alarm_clock</item>
+        <item>@*android:string/status_bar_call_strength</item>
+    </string-array>
 </resources>

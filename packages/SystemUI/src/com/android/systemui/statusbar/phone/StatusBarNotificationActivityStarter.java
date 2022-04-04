@@ -397,15 +397,25 @@ class StatusBarNotificationActivityStarter implements NotificationActivityStarte
             mMainThreadHandler.post(() -> {
                 final Runnable removeNotification = () -> {
                     mOnUserInteractionCallback.onDismiss(entry, REASON_CLICK, summaryToRemove);
+                    if (!animate) {
+                        // If we're animating, this would be invoked after the activity launch
+                        // animation completes. Since we're not animating, the launch already
+                        // happened synchronously, so we notify the launch is complete here after
+                        // onDismiss.
+                        mLaunchEventsEmitter.notifyFinishLaunchNotifActivity(entry);
+                    }
                 };
                 if (mPresenter.isCollapsing()) {
-                    // To avoid lags we're only performing the remove
-                    // after the shade is collapsed
+                    // To avoid lags we're only performing the remove after the shade is collapsed
                     mShadeController.addPostCollapseAction(removeNotification);
                 } else {
                     removeNotification.run();
                 }
             });
+        } else if (!canBubble && !animate) {
+            // Not animating, this is the end of the launch flow (see above comment for more info).
+            mMainThreadHandler.post(
+                    () -> mLaunchEventsEmitter.notifyFinishLaunchNotifActivity(entry));
         }
 
         mIsCollapsingToShowActivityOverLockscreen = false;
@@ -481,8 +491,9 @@ class StatusBarNotificationActivityStarter implements NotificationActivityStarte
             boolean isActivityIntent) {
         mLogger.logStartNotificationIntent(entry.getKey(), intent);
         try {
-            Runnable onFinishAnimationCallback =
-                    () -> mLaunchEventsEmitter.notifyFinishLaunchNotifActivity(entry);
+            Runnable onFinishAnimationCallback = animate
+                    ? () -> mLaunchEventsEmitter.notifyFinishLaunchNotifActivity(entry)
+                    : null;
             ActivityLaunchAnimator.Controller animationController =
                     new StatusBarLaunchAnimatorController(
                             mNotificationAnimationProvider

@@ -25,6 +25,7 @@ import android.media.soundtrigger.Properties;
 import android.media.soundtrigger.RecognitionConfig;
 import android.media.soundtrigger.RecognitionEvent;
 import android.media.soundtrigger.SoundModel;
+import android.media.soundtrigger.SoundModelType;
 import android.media.soundtrigger.Status;
 import android.media.soundtrigger_middleware.ISoundTriggerCallback;
 import android.media.soundtrigger_middleware.ISoundTriggerModule;
@@ -305,9 +306,12 @@ class SoundTriggerModule implements IBinder.DeathRecipient, ISoundTriggerHal.Glo
 
         @Override
         public void stopRecognition(int modelHandle) {
+            Model model;
             synchronized (SoundTriggerModule.this) {
-                mLoadedModels.get(modelHandle).stopRecognition();
+                checkValid();
+                model = mLoadedModels.get(modelHandle);
             }
+            model.stopRecognition();
         }
 
         @Override
@@ -374,6 +378,7 @@ class SoundTriggerModule implements IBinder.DeathRecipient, ISoundTriggerHal.Glo
         private class Model implements ISoundTriggerHal.ModelCallback {
             public int mHandle;
             private ModelState mState = ModelState.INIT;
+            private int mType = SoundModelType.INVALID;
             private SoundTriggerMiddlewareImpl.AudioSessionProvider.AudioSession mSession;
 
             private @NonNull
@@ -390,6 +395,7 @@ class SoundTriggerModule implements IBinder.DeathRecipient, ISoundTriggerHal.Glo
                     SoundTriggerMiddlewareImpl.AudioSessionProvider.AudioSession audioSession) {
                 mSession = audioSession;
                 mHandle = mHalService.loadSoundModel(model, this);
+                mType = SoundModelType.GENERIC;
                 setState(ModelState.LOADED);
                 mLoadedModels.put(mHandle, this);
                 return mHandle;
@@ -399,7 +405,7 @@ class SoundTriggerModule implements IBinder.DeathRecipient, ISoundTriggerHal.Glo
                     SoundTriggerMiddlewareImpl.AudioSessionProvider.AudioSession audioSession) {
                 mSession = audioSession;
                 mHandle = mHalService.loadPhraseSoundModel(model, this);
-
+                mType = SoundModelType.KEYPHRASE;
                 setState(ModelState.LOADED);
                 mLoadedModels.put(mHandle, this);
                 return mHandle;
@@ -422,12 +428,41 @@ class SoundTriggerModule implements IBinder.DeathRecipient, ISoundTriggerHal.Glo
             }
 
             private void stopRecognition() {
-                if (getState() == ModelState.LOADED) {
-                    // This call is idempotent in order to avoid races.
-                    return;
+                synchronized (SoundTriggerModule.this) {
+                    if (getState() == ModelState.LOADED) {
+                        // This call is idempotent in order to avoid races.
+                        return;
+                    }
                 }
+                // This must be invoked outside the lock.
                 mHalService.stopRecognition(mHandle);
-                setState(ModelState.LOADED);
+
+                // No more callbacks for this model after this point.
+                synchronized (SoundTriggerModule.this) {
+                    // Generate an abortion callback to the client if the model is still active.
+                    if (getState() == ModelState.ACTIVE) {
+                        if (mCallback != null) {
+                            try {
+                                switch (mType) {
+                                    case SoundModelType.GENERIC:
+                                        mCallback.onRecognition(mHandle, AidlUtil.newAbortEvent(),
+                                                mSession.mSessionHandle);
+                                        break;
+                                    case SoundModelType.KEYPHRASE:
+                                        mCallback.onPhraseRecognition(mHandle,
+                                                AidlUtil.newAbortPhraseEvent(),
+                                                mSession.mSessionHandle);
+                                        break;
+                                    default:
+                                        throw new RuntimeException(
+                                                "Unexpected model type: " + mType);
+                                }
+                            } catch (RemoteException e) {
+                            }
+                        }
+                        setState(ModelState.LOADED);
+                    }
+                }
             }
 
             /** Request a forced recognition event. Will do nothing if recognition is inactive. */
@@ -518,4 +553,5 @@ class SoundTriggerModule implements IBinder.DeathRecipient, ISoundTriggerHal.Glo
             }
         }
     }
+
 }

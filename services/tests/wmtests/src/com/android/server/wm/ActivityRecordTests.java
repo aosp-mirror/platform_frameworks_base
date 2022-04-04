@@ -16,6 +16,8 @@
 
 package com.android.server.wm;
 
+import static android.app.AppOpsManager.MODE_ALLOWED;
+import static android.app.AppOpsManager.OP_PICTURE_IN_PICTURE;
 import static android.app.TaskInfo.CAMERA_COMPAT_CONTROL_DISMISSED;
 import static android.app.TaskInfo.CAMERA_COMPAT_CONTROL_HIDDEN;
 import static android.app.TaskInfo.CAMERA_COMPAT_CONTROL_TREATMENT_APPLIED;
@@ -110,6 +112,7 @@ import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.never;
 
 import android.app.ActivityOptions;
+import android.app.AppOpsManager;
 import android.app.ICompatCameraControlCallback;
 import android.app.PictureInPictureParams;
 import android.app.servertransaction.ActivityConfigurationChangeItem;
@@ -2184,17 +2187,11 @@ public class ActivityRecordTests extends WindowTestsBase {
 
     @Test
     public void testSupportsPictureInPicture() {
-        final Task task = new TaskBuilder(mSupervisor)
-                .setDisplay(mDisplayContent).build();
         final ActivityRecord activity = new ActivityBuilder(mAtm)
-                .setTask(task)
+                .setCreateTask(true)
                 .setResizeMode(ActivityInfo.RESIZE_MODE_UNRESIZEABLE)
                 .setActivityFlags(FLAG_SUPPORTS_PICTURE_IN_PICTURE)
                 .build();
-        spyOn(mDisplayContent);
-        spyOn(mDisplayContent.mDwpcHelper);
-        doReturn(true).when(mDisplayContent.mDwpcHelper).isWindowingModeSupported(
-                WINDOWING_MODE_PINNED);
 
         // Device not supports PIP
         mAtm.mSupportsPictureInPicture = false;
@@ -2207,15 +2204,28 @@ public class ActivityRecordTests extends WindowTestsBase {
         // Activity not supports PIP
         activity.info.flags &= ~FLAG_SUPPORTS_PICTURE_IN_PICTURE;
         assertFalse(activity.supportsPictureInPicture());
+    }
 
-        // Activity supports PIP
-        activity.info.flags |= FLAG_SUPPORTS_PICTURE_IN_PICTURE;
-        assertTrue(activity.supportsPictureInPicture());
+    @Test
+    public void testCheckEnterPictureInPictureState_displayNotSupportedPip() {
+        final Task task = new TaskBuilder(mSupervisor)
+                .setDisplay(mDisplayContent).build();
+        final ActivityRecord activity = new ActivityBuilder(mAtm)
+                .setTask(task)
+                .setResizeMode(ActivityInfo.RESIZE_MODE_UNRESIZEABLE)
+                .setActivityFlags(FLAG_SUPPORTS_PICTURE_IN_PICTURE)
+                .build();
+        mAtm.mSupportsPictureInPicture = true;
+        AppOpsManager appOpsManager = mAtm.getAppOpsManager();
+        doReturn(MODE_ALLOWED).when(appOpsManager).checkOpNoThrow(eq(OP_PICTURE_IN_PICTURE),
+                anyInt(), any());
+        doReturn(false).when(mAtm).shouldDisableNonVrUiLocked();
 
-        // Display not supports PIP
+        spyOn(mDisplayContent.mDwpcHelper);
         doReturn(false).when(mDisplayContent.mDwpcHelper).isWindowingModeSupported(
                 WINDOWING_MODE_PINNED);
-        assertFalse(activity.supportsPictureInPicture());
+
+        assertFalse(activity.checkEnterPictureInPictureState("TEST", false /* beforeStopping */));
     }
 
     @Test
@@ -3149,12 +3159,14 @@ public class ActivityRecordTests extends WindowTestsBase {
         doReturn(true).when(app2).isReadyToDispatchInsetsState();
         mDisplayContent.setImeLayeringTarget(app2);
         mDisplayContent.updateImeInputAndControlTarget(app2);
+        mDisplayContent.mWmService.mRoot.performSurfacePlacement();
 
         // Verify after unfreezing app2's IME insets state, we won't dispatch visible IME insets
         // to client if the app didn't request IME visible.
         assertFalse(app2.mActivityRecord.mImeInsetsFrozenUntilStartInput);
-        verify(app2.mClient, atLeastOnce()).insetsChanged(insetsStateCaptor.capture(), anyBoolean(),
-                anyBoolean());
+        verify(app2.mClient, atLeastOnce()).resized(any(), anyBoolean(), any(),
+                insetsStateCaptor.capture(), anyBoolean(), anyBoolean(), anyInt(), anyInt(),
+                anyInt());
         assertFalse(app2.getInsetsState().getSource(ITYPE_IME).isVisible());
     }
 

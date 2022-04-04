@@ -447,4 +447,15 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
         controllerCaptor.getValue().onIntentStarted(false);
         verify(listener).onFinishLaunchNotifActivity(mNotificationRow.getEntry());
     }
+
+    @Test
+    public void testNotifActivityStarterEventSourceFinishEvent_postPanelCollapse_noAnimate() {
+        NotifActivityLaunchEvents.Listener listener =
+                mock(NotifActivityLaunchEvents.Listener.class);
+        mLaunchEventsEmitter.registerListener(listener);
+        when(mCentralSurfaces.shouldAnimateLaunch(anyBoolean())).thenReturn(false);
+        mNotificationActivityStarter
+                .onNotificationClicked(mNotificationRow.getEntry().getSbn(), mNotificationRow);
+        verify(listener).onFinishLaunchNotifActivity(mNotificationRow.getEntry());
+    }
 }

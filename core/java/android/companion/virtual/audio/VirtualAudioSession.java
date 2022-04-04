@@ -50,16 +50,14 @@ import java.util.concurrent.Executor;
  * @hide
  */
 @VisibleForTesting
-public final class VirtualAudioSession extends IAudioSessionCallback.Stub implements
+public final class VirtualAudioSession extends IAudioRoutingCallback.Stub implements
         UserRestrictionsCallback, Closeable {
     private static final String TAG = "VirtualAudioSession";
 
     private final Context mContext;
     private final UserRestrictionsDetector mUserRestrictionsDetector;
-    /** The {@link Executor} for sending {@link AudioConfigurationChangeCallback} to the caller */
-    private final Executor mExecutor;
     @Nullable
-    private final AudioConfigurationChangeCallback mCallback;
+    private final AudioConfigChangedCallback mAudioConfigChangedCallback;
     private final Object mLock = new Object();
     @GuardedBy("mLock")
     private final IntArray mReroutedAppUids = new IntArray();
@@ -73,13 +71,44 @@ public final class VirtualAudioSession extends IAudioSessionCallback.Stub implem
     @GuardedBy("mLock")
     private AudioInjection mAudioInjection;
 
+    /**
+     * Class to receive {@link IAudioConfigChangedCallback} callbacks from service.
+     *
+     * @hide
+     */
+    @VisibleForTesting
+    public static final class AudioConfigChangedCallback extends IAudioConfigChangedCallback.Stub {
+        private final Executor mExecutor;
+        private final AudioConfigurationChangeCallback mCallback;
+
+        AudioConfigChangedCallback(Context context, Executor executor,
+                AudioConfigurationChangeCallback callback) {
+            mExecutor = executor != null ? executor : context.getMainExecutor();
+            mCallback = callback;
+        }
+
+        @Override
+        public void onPlaybackConfigChanged(List<AudioPlaybackConfiguration> configs) {
+            if (mCallback != null) {
+                mExecutor.execute(() -> mCallback.onPlaybackConfigChanged(configs));
+            }
+        }
+
+        @Override
+        public void onRecordingConfigChanged(List<AudioRecordingConfiguration> configs) {
+            if (mCallback != null) {
+                mExecutor.execute(() -> mCallback.onRecordingConfigChanged(configs));
+            }
+        }
+    }
+
     @VisibleForTesting
     public VirtualAudioSession(Context context,
             @Nullable AudioConfigurationChangeCallback callback, @Nullable Executor executor) {
         mContext = context;
         mUserRestrictionsDetector = new UserRestrictionsDetector(context);
-        mCallback = callback;
-        mExecutor = executor != null ? executor : context.getMainExecutor();
+        mAudioConfigChangedCallback = callback == null ? null : new AudioConfigChangedCallback(
+                context, executor, callback);
     }
 
     /**
@@ -127,6 +156,13 @@ public final class VirtualAudioSession extends IAudioSessionCallback.Stub implem
             mAudioInjection.setSilent(mUserRestrictionsDetector.isUnmuteMicrophoneDisallowed());
             return mAudioInjection;
         }
+    }
+
+    /** @hide */
+    @VisibleForTesting
+    @Nullable
+    public AudioConfigChangedCallback getAudioConfigChangedListener() {
+        return mAudioConfigChangedCallback;
     }
 
     /** @hide */
@@ -260,20 +296,6 @@ public final class VirtualAudioSession extends IAudioSessionCallback.Stub implem
                 mAudioPolicy = null;
                 Log.i(TAG, "AudioPolicy unregistered");
             }
-        }
-    }
-
-    @Override
-    public void onPlaybackConfigChanged(List<AudioPlaybackConfiguration> configs) {
-        if (mCallback != null) {
-            mExecutor.execute(() -> mCallback.onPlaybackConfigChanged(configs));
-        }
-    }
-
-    @Override
-    public void onRecordingConfigChanged(List<AudioRecordingConfiguration> configs) {
-        if (mCallback != null) {
-            mExecutor.execute(() -> mCallback.onRecordingConfigChanged(configs));
         }
     }
 

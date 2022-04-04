@@ -85,15 +85,6 @@ final class GameServiceProviderInstanceImpl implements GameServiceProviderInstan
                         Slog.w(TAG, "Failed to send connected event", ex);
                     }
                 }
-
-                @Override
-                public void onDisconnected(@NonNull IGameService service) {
-                    try {
-                        service.disconnected();
-                    } catch (RemoteException ex) {
-                        Slog.w(TAG, "Failed to send disconnected event", ex);
-                    }
-                }
             };
 
     private final ServiceLifecycleCallbacks<IGameSessionService>
@@ -181,7 +172,8 @@ final class GameServiceProviderInstanceImpl implements GameServiceProviderInstan
         }
 
         @Override
-        public void onForegroundServicesChanged(int pid, int uid, int serviceTypes) {}
+        public void onForegroundServicesChanged(int pid, int uid, int serviceTypes) {
+        }
     };
 
     private final IGameServiceController mGameServiceController =
@@ -200,8 +192,11 @@ final class GameServiceProviderInstanceImpl implements GameServiceProviderInstan
     private final IGameSessionController mGameSessionController =
             new IGameSessionController.Stub() {
                 @Override
+                @RequiresPermission(android.Manifest.permission.MANAGE_GAME_ACTIVITY)
                 public void takeScreenshot(int taskId,
                         @NonNull AndroidFuture gameScreenshotResultFuture) {
+                    mContext.enforceCallingPermission(Manifest.permission.MANAGE_GAME_ACTIVITY,
+                            "takeScreenshot()");
                     mBackgroundExecutor.execute(() -> {
                         GameServiceProviderInstanceImpl.this.takeScreenshot(taskId,
                                 gameScreenshotResultFuture);
@@ -338,7 +333,9 @@ final class GameServiceProviderInstanceImpl implements GameServiceProviderInstan
 
         destroyAndClearAllGameSessionsLocked();
 
-        mGameServiceConnector.unbind();
+        mGameServiceConnector.post(IGameService::disconnected).whenComplete((result, t) -> {
+            mGameServiceConnector.unbind();
+        });
         mGameSessionServiceConnector.unbind();
 
         mGameServiceConnector.setServiceLifecycleCallbacks(null);

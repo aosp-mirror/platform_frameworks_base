@@ -140,6 +140,10 @@ public class NtpTrustedTime implements TrustedTime {
 
     /** An in-memory config override for use during tests. */
     @Nullable
+    private Integer mPortForTests;
+
+    /** An in-memory config override for use during tests. */
+    @Nullable
     private Duration mTimeoutForTests;
 
     // Declared volatile and accessed outside of synchronized blocks to avoid blocking reads during
@@ -163,9 +167,11 @@ public class NtpTrustedTime implements TrustedTime {
      * Overrides the NTP server config for tests. Passing {@code null} to a parameter clears the
      * test value, i.e. so the normal value will be used next time.
      */
-    public void setServerConfigForTests(@Nullable String hostname, @Nullable Duration timeout) {
+    public void setServerConfigForTests(
+            @Nullable String hostname, @Nullable Integer port, @Nullable Duration timeout) {
         synchronized (this) {
             mHostnameForTests = hostname;
+            mPortForTests = port;
             mTimeoutForTests = timeout;
         }
     }
@@ -195,8 +201,9 @@ public class NtpTrustedTime implements TrustedTime {
             if (LOGD) Log.d(TAG, "forceRefresh() from cache miss");
             final SntpClient client = new SntpClient();
             final String serverName = connectionInfo.getServer();
+            final int port = connectionInfo.getPort();
             final int timeoutMillis = connectionInfo.getTimeoutMillis();
-            if (client.requestTime(serverName, timeoutMillis, network)) {
+            if (client.requestTime(serverName, port, timeoutMillis, network)) {
                 long ntpCertainty = client.getRoundTripTime() / 2;
                 mTimeResult = new TimeResult(
                         client.getNtpTime(), client.getNtpTimeReference(), ntpCertainty);
@@ -297,16 +304,23 @@ public class NtpTrustedTime implements TrustedTime {
     private static class NtpConnectionInfo {
 
         @NonNull private final String mServer;
+        private final int mPort;
         private final int mTimeoutMillis;
 
-        NtpConnectionInfo(@NonNull String server, int timeoutMillis) {
+        NtpConnectionInfo(@NonNull String server, int port, int timeoutMillis) {
             mServer = Objects.requireNonNull(server);
+            mPort = port;
             mTimeoutMillis = timeoutMillis;
         }
 
         @NonNull
         public String getServer() {
             return mServer;
+        }
+
+        @NonNull
+        public int getPort() {
+            return mPort;
         }
 
         int getTimeoutMillis() {
@@ -317,6 +331,7 @@ public class NtpTrustedTime implements TrustedTime {
         public String toString() {
             return "NtpConnectionInfo{"
                     + "mServer='" + mServer + '\''
+                    + ", mPort='" + mPort + '\''
                     + ", mTimeoutMillis=" + mTimeoutMillis
                     + '}';
         }
@@ -341,6 +356,13 @@ public class NtpTrustedTime implements TrustedTime {
             }
         }
 
+        final Integer port;
+        if (mPortForTests != null) {
+            port = mPortForTests;
+        } else {
+            port = SntpClient.STANDARD_NTP_PORT;
+        }
+
         final int timeoutMillis;
         if (mTimeoutForTests != null) {
             timeoutMillis = (int) mTimeoutForTests.toMillis();
@@ -350,7 +372,8 @@ public class NtpTrustedTime implements TrustedTime {
             timeoutMillis = Settings.Global.getInt(
                     resolver, Settings.Global.NTP_TIMEOUT, defaultTimeoutMillis);
         }
-        return TextUtils.isEmpty(hostname) ? null : new NtpConnectionInfo(hostname, timeoutMillis);
+        return TextUtils.isEmpty(hostname) ? null :
+            new NtpConnectionInfo(hostname, port, timeoutMillis);
     }
 
     /** Prints debug information. */

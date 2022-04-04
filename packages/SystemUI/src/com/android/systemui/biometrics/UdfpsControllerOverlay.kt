@@ -80,6 +80,7 @@ class UdfpsControllerOverlay(
     private val unlockedScreenOffAnimationController: UnlockedScreenOffAnimationController,
     private val sensorProps: FingerprintSensorPropertiesInternal,
     private var hbmProvider: UdfpsHbmProvider,
+    val requestId: Long,
     @ShowReason val requestReason: Int,
     private val controllerCallback: IUdfpsOverlayControllerCallback,
     private val onTouch: (View, MotionEvent, Boolean) -> Boolean,
@@ -275,6 +276,9 @@ class UdfpsControllerOverlay(
             Log.e(TAG, "Remote exception", e)
         }
     }
+
+    /** Checks if the id is relevant for this overlay. */
+    fun matchesRequestId(id: Long): Boolean = requestId == -1L || requestId == id
 
     private fun WindowManager.LayoutParams.updateForLocation(
         location: SensorLocationInternal,

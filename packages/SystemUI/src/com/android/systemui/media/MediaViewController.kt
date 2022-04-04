@@ -22,7 +22,10 @@ import androidx.annotation.VisibleForTesting
 import androidx.constraintlayout.widget.ConstraintSet
 import com.android.systemui.R
 import com.android.systemui.statusbar.policy.ConfigurationController
-import com.android.systemui.util.animation.*
+import com.android.systemui.util.animation.MeasurementOutput
+import com.android.systemui.util.animation.TransitionLayout
+import com.android.systemui.util.animation.TransitionLayoutController
+import com.android.systemui.util.animation.TransitionViewState
 import javax.inject.Inject
 
 /**
@@ -40,7 +43,7 @@ class MediaViewController @Inject constructor(
      * session-based player, or recommendation
      */
     enum class TYPE {
-        PLAYER, PLAYER_SESSION, RECOMMENDATION
+        PLAYER, RECOMMENDATION
     }
 
     companion object {
@@ -186,11 +189,6 @@ class MediaViewController @Inject constructor(
     var isGutsVisible = false
         private set
 
-    /**
-     * Whether the settings button in the guts should be visible
-     */
-    var shouldHideGutsSettings = false
-
     init {
         mediaHostStatesManager.addController(this)
         layoutController.sizeChangedListener = { width: Int, height: Int ->
@@ -259,13 +257,11 @@ class MediaViewController @Inject constructor(
      */
     private fun setGutsViewState(viewState: TransitionViewState) {
         val controlsIds = when (type) {
-            TYPE.PLAYER -> PlayerViewHolder.controlsIds
-            TYPE.PLAYER_SESSION -> PlayerSessionViewHolder.controlsIds
+            TYPE.PLAYER -> MediaViewHolder.controlsIds
             TYPE.RECOMMENDATION -> RecommendationViewHolder.controlsIds
         }
         val gutsIds = when (type) {
-            TYPE.PLAYER -> PlayerViewHolder.gutsIds
-            TYPE.PLAYER_SESSION -> PlayerSessionViewHolder.gutsIds
+            TYPE.PLAYER -> MediaViewHolder.gutsIds
             TYPE.RECOMMENDATION -> RecommendationViewHolder.gutsIds
         }
         controlsIds.forEach { id ->
@@ -279,23 +275,22 @@ class MediaViewController @Inject constructor(
             viewState.widgetStates.get(id)?.alpha = if (isGutsVisible) 1f else 0f
             viewState.widgetStates.get(id)?.gone = !isGutsVisible
         }
-        if (shouldHideGutsSettings) {
-            viewState.widgetStates.get(R.id.settings)?.gone = true
-        }
     }
 
     /**
      * Apply squishFraction to a copy of viewState such that the cached version is untouched.
      */
-    private fun squishViewState(viewState: TransitionViewState,
-                                squishFraction: Float): TransitionViewState {
+    private fun squishViewState(
+        viewState: TransitionViewState,
+        squishFraction: Float
+    ): TransitionViewState {
         val squishedViewState = viewState.copy()
         squishedViewState.height = (squishedViewState.height * squishFraction).toInt()
         val albumArtViewState = viewState.widgetStates.get(R.id.album_art)
         if (albumArtViewState != null) {
             albumArtViewState.height = squishedViewState.height
         }
-        return squishedViewState;
+        return squishedViewState
     }
 
     /**
@@ -314,7 +309,7 @@ class MediaViewController @Inject constructor(
         if (viewState != null) {
             // we already have cached this measurement, let's continue
             if (state.squishFraction < 1f) {
-                return squishViewState(viewState, state.squishFraction);
+                return squishViewState(viewState, state.squishFraction)
             }
             return viewState
         }
@@ -351,7 +346,7 @@ class MediaViewController @Inject constructor(
                     state.expansion)
         }
         if (state.squishFraction < 1f) {
-            return squishViewState(result, state.squishFraction);
+            return squishViewState(result, state.squishFraction)
         }
         return result
     }
@@ -492,10 +487,6 @@ class MediaViewController @Inject constructor(
         // These XML resources contain ConstraintSets that will apply to this player type's layout
         when (type) {
             TYPE.PLAYER -> {
-                collapsedLayout.load(context, R.xml.media_collapsed)
-                expandedLayout.load(context, R.xml.media_expanded)
-            }
-            TYPE.PLAYER_SESSION -> {
                 collapsedLayout.load(context, R.xml.media_session_collapsed)
                 expandedLayout.load(context, R.xml.media_session_expanded)
             }

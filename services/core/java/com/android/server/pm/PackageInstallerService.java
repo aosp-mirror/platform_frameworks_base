@@ -410,7 +410,10 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
                     // Their staging dirs will be removed too
                     PackageInstallerSession root = !session.hasParentSessionId()
                             ? session : mSessions.get(session.getParentSessionId());
-                    if (!root.isDestroyed()) {
+                    if (root == null) {
+                        Slog.e(TAG, "freeStageDirs: found an orphaned session: "
+                                + session.sessionId + " parent=" + session.getParentSessionId());
+                    } else if (!root.isDestroyed()) {
                         root.abandon();
                     }
                 } else {
@@ -640,7 +643,8 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
                 && params.installerPackageName.length() < SessionParams.MAX_PACKAGE_NAME_LENGTH)
                 ? params.installerPackageName : installerPackageName;
 
-        if ((callingUid == Process.SHELL_UID) || (callingUid == Process.ROOT_UID)) {
+        if ((callingUid == Process.SHELL_UID) || (callingUid == Process.ROOT_UID)
+                || PackageInstallerSession.isSystemDataLoaderInstallation(params)) {
             params.installFlags |= PackageManager.INSTALL_FROM_ADB;
             // adb installs can override the installingPackageName, but not the
             // initiatingPackageName
@@ -666,8 +670,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
                     && !mPm.isCallerVerifier(snapshot, callingUid)) {
                 params.installFlags &= ~PackageManager.INSTALL_VIRTUAL_PRELOAD;
             }
-            if (mContext.checkCallingOrSelfPermission(
-                    Manifest.permission.INSTALL_TEST_ONLY_PACKAGE)
+            if (mContext.checkCallingOrSelfPermission(Manifest.permission.INSTALL_TEST_ONLY_PACKAGE)
                     != PackageManager.PERMISSION_GRANTED) {
                 params.installFlags &= ~PackageManager.INSTALL_ALLOW_TEST;
             }
@@ -1332,7 +1335,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
 
         private String getDeviceOwnerDeletedPackageMsg() {
             DevicePolicyManager dpm = mContext.getSystemService(DevicePolicyManager.class);
-            return dpm.getString(PACKAGE_DELETED_BY_DO,
+            return dpm.getResources().getString(PACKAGE_DELETED_BY_DO,
                     () -> mContext.getString(R.string.package_updated_device_owner));
         }
 

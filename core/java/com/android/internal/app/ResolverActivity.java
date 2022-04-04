@@ -210,7 +210,7 @@ public class ResolverActivity extends Activity implements
 
     private UserHandle mWorkProfileUserHandle;
 
-    protected boolean mAwaitingDelegateResponse;
+
 
     /**
      * Get the string resource to be used as a label for the link to the resolver activity for an
@@ -326,86 +326,6 @@ public class ResolverActivity extends Activity implements
      */
     protected void super_onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-    }
-
-    /**
-     * Pass-through API to support {@link ChooserActivity} running in "headless springboard" mode
-     * where we hand over to the unbundled chooser (while violating many of the invariants of a
-     * typical ResolverActivity implementation). Subclasses running in this mode need to be able
-     * to opt-out of the normal ResolverActivity behavior.
-     *
-     * TODO: this should be removed later on in the unbundling migration, when the springboard
-     * activity no longer needs to derive from ResolverActivity. The hold-over design here is
-     * <em>not</em> good practice (e.g. there could be other events that weren't anticipated as
-     * requiring this kind of "pass-through" override, and so might fall back on ResolverActivity
-     * implementations that depend on the invariants that are violated in the headless mode). If
-     * necessary, we could instead consider using a springboard-only activity on the system side
-     * immediately, which would delegate either to the unbundled chooser, or to a
-     * (properly-inheriting) system ChooserActivity. This would have performance implications even
-     * when the unbundling experiment is disabled.
-     */
-    protected void super_onRestart() {
-        super.onRestart();
-    }
-
-    /**
-     * Pass-through API to support {@link ChooserActivity} running in "headless springboard" mode
-     * where we hand over to the unbundled chooser (while violating many of the invariants of a
-     * typical ResolverActivity implementation). Subclasses running in this mode need to be able
-     * to opt-out of the normal ResolverActivity behavior.
-     *
-     * TODO: this should be removed later on in the unbundling migration, when the springboard
-     * activity no longer needs to derive from ResolverActivity. The hold-over design here is
-     * <em>not</em> good practice (e.g. there could be other events that weren't anticipated as
-     * requiring this kind of "pass-through" override, and so might fall back on ResolverActivity
-     * implementations that depend on the invariants that are violated in the headless mode). If
-     * necessary, we could instead consider using a springboard-only activity on the system side
-     * immediately, which would delegate either to the unbundled chooser, or to a
-     * (properly-inheriting) system ChooserActivity. This would have performance implications even
-     * when the unbundling experiment is disabled.
-     */
-    protected void super_onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-    }
-
-    /**
-     * Pass-through API to support {@link ChooserActivity} running in "headless springboard" mode
-     * where we hand over to the unbundled chooser (while violating many of the invariants of a
-     * typical ResolverActivity implementation). Subclasses running in this mode need to be able
-     * to opt-out of the normal ResolverActivity behavior.
-     *
-     * TODO: this should be removed later on in the unbundling migration, when the springboard
-     * activity no longer needs to derive from ResolverActivity. The hold-over design here is
-     * <em>not</em> good practice (e.g. there could be other events that weren't anticipated as
-     * requiring this kind of "pass-through" override, and so might fall back on ResolverActivity
-     * implementations that depend on the invariants that are violated in the headless mode). If
-     * necessary, we could instead consider using a springboard-only activity on the system side
-     * immediately, which would delegate either to the unbundled chooser, or to a
-     * (properly-inheriting) system ChooserActivity. This would have performance implications even
-     * when the unbundling experiment is disabled.
-     */
-    protected void super_onRestoreInstanceState(Bundle savedInstanceState) {
-        super.onRestoreInstanceState(savedInstanceState);
-    }
-
-    /**
-     * Pass-through API to support {@link ChooserActivity} running in "headless springboard" mode
-     * where we hand over to the unbundled chooser (while violating many of the invariants of a
-     * typical ResolverActivity implementation). Subclasses running in this mode need to be able
-     * to opt-out of the normal ResolverActivity behavior.
-     *
-     * TODO: this should be removed later on in the unbundling migration, when the springboard
-     * activity no longer needs to derive from ResolverActivity. The hold-over design here is
-     * <em>not</em> good practice (e.g. there could be other events that weren't anticipated as
-     * requiring this kind of "pass-through" override, and so might fall back on ResolverActivity
-     * implementations that depend on the invariants that are violated in the headless mode). If
-     * necessary, we could instead consider using a springboard-only activity on the system side
-     * immediately, which would delegate either to the unbundled chooser, or to a
-     * (properly-inheriting) system ChooserActivity. This would have performance implications even
-     * when the unbundling experiment is disabled.
-     */
-    public void super_onConfigurationChanged(Configuration newConfig) {
-        super.onConfigurationChanged(newConfig);
     }
 
     @Override
@@ -682,9 +602,7 @@ public class ResolverActivity extends Activity implements
         mProfileSwitchMessage = null;
 
         onTargetSelected(dri, false);
-        if (!mAwaitingDelegateResponse) {
-            finish();
-        }
+        finish();
     }
 
     /**
@@ -850,13 +768,13 @@ public class ResolverActivity extends Activity implements
     }
 
     private String getForwardToPersonalMsg() {
-        return getSystemService(DevicePolicyManager.class).getString(
+        return getSystemService(DevicePolicyManager.class).getResources().getString(
                 FORWARD_INTENT_TO_PERSONAL,
                 () -> getString(com.android.internal.R.string.forward_intent_to_owner));
     }
 
     private String getForwardToWorkMsg() {
-        return getSystemService(DevicePolicyManager.class).getString(
+        return getSystemService(DevicePolicyManager.class).getResources().getString(
                 FORWARD_INTENT_TO_WORK,
                 () -> getString(com.android.internal.R.string.forward_intent_to_work));
     }
@@ -974,7 +892,7 @@ public class ResolverActivity extends Activity implements
         }
         final Intent intent = getIntent();
         if ((intent.getFlags() & FLAG_ACTIVITY_NEW_TASK) != 0 && !isVoiceInteraction()
-                && !mResolvingHome && !mRetainInOnStop && !mAwaitingDelegateResponse) {
+                && !mResolvingHome && !mRetainInOnStop) {
             // This resolver is in the unusual situation where it has been
             // launched at the top of a new task.  We don't let it be added
             // to the recent tasks shown to the user, and we need to make sure
@@ -1143,14 +1061,12 @@ public class ResolverActivity extends Activity implements
                     mMultiProfilePagerAdapter.getActiveListAdapter().hasFilteredItem()
                             ? MetricsProto.MetricsEvent.ACTION_HIDE_APP_DISAMBIG_APP_FEATURED
                             : MetricsProto.MetricsEvent.ACTION_HIDE_APP_DISAMBIG_NONE_FEATURED);
-            if (!mAwaitingDelegateResponse) {
-                finish();
-            }
+            finish();
         }
     }
 
     private String getWorkProfileNotSupportedMsg(String launcherName) {
-        return getSystemService(DevicePolicyManager.class).getString(
+        return getSystemService(DevicePolicyManager.class).getResources().getString(
                 RESOLVER_WORK_PROFILE_NOT_SUPPORTED,
                 () -> getString(
                         com.android.internal.R.string.activity_resolver_work_profiles_support,
@@ -1456,15 +1372,6 @@ public class ResolverActivity extends Activity implements
                 .setStrings(getMetricsCategory(),
                         cti instanceof ChooserTargetInfo ? "direct_share" : "other_target")
                 .write();
-    }
-
-
-    public boolean startAsCallerImpl(Intent intent, Bundle options, boolean ignoreTargetSecurity,
-            int userId) {
-        // Note: this method will be overridden in the delegate implementation to use the passed-in
-        // permission token.
-        startActivityAsCaller(intent, options, null, false, userId);
-        return true;
     }
 
     @Override
@@ -1879,12 +1786,12 @@ public class ResolverActivity extends Activity implements
     }
 
     private String getPersonalTabLabel() {
-        return getSystemService(DevicePolicyManager.class).getString(
+        return getSystemService(DevicePolicyManager.class).getResources().getString(
                 RESOLVER_PERSONAL_TAB, () -> getString(R.string.resolver_personal_tab));
     }
 
     private String getWorkTabLabel() {
-        return getSystemService(DevicePolicyManager.class).getString(
+        return getSystemService(DevicePolicyManager.class).getResources().getString(
                 RESOLVER_WORK_TAB, () -> getString(R.string.resolver_work_tab));
     }
 
@@ -1935,13 +1842,13 @@ public class ResolverActivity extends Activity implements
     }
 
     private String getPersonalTabAccessibilityLabel() {
-        return getSystemService(DevicePolicyManager.class).getString(
+        return getSystemService(DevicePolicyManager.class).getResources().getString(
                 RESOLVER_PERSONAL_TAB_ACCESSIBILITY,
                 () -> getString(R.string.resolver_personal_tab_accessibility));
     }
 
     private String getWorkTabAccessibilityLabel() {
-        return getSystemService(DevicePolicyManager.class).getString(
+        return getSystemService(DevicePolicyManager.class).getResources().getString(
                 RESOLVER_WORK_TAB_ACCESSIBILITY,
                 () -> getString(R.string.resolver_work_tab_accessibility));
     }
@@ -2374,9 +2281,7 @@ public class ResolverActivity extends Activity implements
                         .getItem(selections[0].getIndex());
                 if (ra.onTargetSelected(ti, false)) {
                     ra.mPickOptionRequest = null;
-                    if (!ra.mAwaitingDelegateResponse) {
-                        ra.finish();
-                    }
+                    ra.finish();
                 }
             }
         }

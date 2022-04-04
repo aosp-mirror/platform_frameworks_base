@@ -55,10 +55,10 @@ public class HandwritingInitiator {
      */
     private final int mTouchSlop;
     /**
-     * The timeout used to distinguish tap from handwriting. If the stylus doesn't move before this
-     * timeout, it's not considered as handwriting.
+     * The timeout used to distinguish tap or long click from handwriting. If the stylus doesn't
+     * move before this timeout, it's not considered as handwriting.
      */
-    private final long mTapTimeoutInMillis;
+    private final long mHandwritingTimeoutInMillis;
 
     private State mState = new State();
     private final HandwritingAreaTracker mHandwritingAreasTracker = new HandwritingAreaTracker();
@@ -90,7 +90,7 @@ public class HandwritingInitiator {
     public HandwritingInitiator(@NonNull ViewConfiguration viewConfiguration,
             @NonNull InputMethodManager inputMethodManager) {
         mTouchSlop = viewConfiguration.getScaledTouchSlop();
-        mTapTimeoutInMillis = ViewConfiguration.getTapTimeout();
+        mHandwritingTimeoutInMillis = ViewConfiguration.getLongPressTimeout();
         mImm = inputMethodManager;
     }
 
@@ -145,7 +145,7 @@ public class HandwritingInitiator {
 
                 final long timeElapsed =
                         motionEvent.getEventTime() - mState.mStylusDownTimeInMillis;
-                if (timeElapsed > mTapTimeoutInMillis) {
+                if (timeElapsed > mHandwritingTimeoutInMillis) {
                     reset();
                     return;
                 }

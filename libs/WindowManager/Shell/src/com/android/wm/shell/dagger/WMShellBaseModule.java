@@ -92,6 +92,7 @@ import com.android.wm.shell.tasksurfacehelper.TaskSurfaceHelperController;
 import com.android.wm.shell.transition.ShellTransitions;
 import com.android.wm.shell.transition.Transitions;
 import com.android.wm.shell.unfold.ShellUnfoldProgressProvider;
+import com.android.wm.shell.unfold.UnfoldTransitionHandler;
 
 import java.util.Optional;
 
@@ -190,15 +191,13 @@ public abstract class WMShellBaseModule {
             @ShellMainThread ShellExecutor mainExecutor,
             @ShellMainThread Handler mainHandler,
             Context context,
-            CompatUIController compatUI,
             SyncTransactionQueue syncTransactionQueue,
             DisplayController displayController,
             DisplayInsetsController displayInsetsController,
             Optional<RecentTasksController> recentTasksOptional
     ) {
-        return new KidsModeTaskOrganizer(mainExecutor, mainHandler, context, compatUI,
-                syncTransactionQueue, displayController, displayInsetsController,
-                recentTasksOptional);
+        return new KidsModeTaskOrganizer(mainExecutor, mainHandler, context, syncTransactionQueue,
+                displayController, displayInsetsController, recentTasksOptional);
     }
 
     @WMSingleton
@@ -325,6 +324,21 @@ public abstract class WMShellBaseModule {
         if (progressProvider.isPresent()
                 && progressProvider.get() != ShellUnfoldProgressProvider.NO_PROVIDER) {
             return fullscreenUnfoldController;
+        }
+        return Optional.empty();
+    }
+
+    @WMSingleton
+    @Provides
+    static Optional<UnfoldTransitionHandler> provideUnfoldTransitionHandler(
+            Optional<ShellUnfoldProgressProvider> progressProvider,
+            TransactionPool transactionPool,
+            Transitions transitions,
+            @ShellMainThread ShellExecutor executor) {
+        if (progressProvider.isPresent()) {
+            return Optional.of(
+                    new UnfoldTransitionHandler(progressProvider.get(), transactionPool, executor,
+                            transitions));
         }
         return Optional.empty();
     }
@@ -662,6 +676,7 @@ public abstract class WMShellBaseModule {
             Optional<PipTouchHandler> pipTouchHandlerOptional,
             FullscreenTaskListener fullscreenTaskListener,
             Optional<FullscreenUnfoldController> appUnfoldTransitionController,
+            Optional<UnfoldTransitionHandler> unfoldTransitionHandler,
             Optional<FreeformTaskListener> freeformTaskListener,
             Optional<RecentTasksController> recentTasksOptional,
             Transitions transitions,
@@ -679,6 +694,7 @@ public abstract class WMShellBaseModule {
                 pipTouchHandlerOptional,
                 fullscreenTaskListener,
                 appUnfoldTransitionController,
+                unfoldTransitionHandler,
                 freeformTaskListener,
                 recentTasksOptional,
                 transitions,

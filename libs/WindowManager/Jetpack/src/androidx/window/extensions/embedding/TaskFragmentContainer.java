@@ -16,6 +16,8 @@
 
 package androidx.window.extensions.embedding;
 
+import static android.app.ActivityTaskManager.INVALID_TASK_ID;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.Activity;
@@ -40,6 +42,9 @@ class TaskFragmentContainer {
      */
     @NonNull
     private final IBinder mToken;
+
+    /** Parent leaf Task id. */
+    private final int mTaskId;
 
     /**
      * Server-provided task fragment information.
@@ -71,8 +76,12 @@ class TaskFragmentContainer {
      * Creates a container with an existing activity that will be re-parented to it in a window
      * container transaction.
      */
-    TaskFragmentContainer(@Nullable Activity activity) {
+    TaskFragmentContainer(@Nullable Activity activity, int taskId) {
         mToken = new Binder("TaskFragmentContainer");
+        if (taskId == INVALID_TASK_ID) {
+            throw new IllegalArgumentException("Invalid Task id");
+        }
+        mTaskId = taskId;
         if (activity != null) {
             addPendingAppearedActivity(activity);
         }
@@ -273,6 +282,11 @@ class TaskFragmentContainer {
         } else {
             mLastRequestedBounds.set(bounds);
         }
+    }
+
+    /** Gets the parent leaf Task id. */
+    int getTaskId() {
+        return mTaskId;
     }
 
     @Override

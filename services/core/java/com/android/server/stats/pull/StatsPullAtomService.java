@@ -1633,7 +1633,28 @@ public class StatsPullAtomService extends SystemService {
         if (adapter != null) {
             SynchronousResultReceiver bluetoothReceiver =
                     new SynchronousResultReceiver("bluetooth");
-            adapter.requestControllerActivityEnergyInfo(bluetoothReceiver);
+            adapter.requestControllerActivityEnergyInfo(
+                    Runnable::run,
+                    new BluetoothAdapter.OnBluetoothActivityEnergyInfoCallback() {
+                        @Override
+                        public void onBluetoothActivityEnergyInfoAvailable(
+                                BluetoothActivityEnergyInfo info) {
+                            Bundle bundle = new Bundle();
+                            bundle.putParcelable(
+                                    BatteryStats.RESULT_RECEIVER_CONTROLLER_KEY, info);
+                            bluetoothReceiver.send(0, bundle);
+                        }
+
+                        @Override
+                        public void onBluetoothActivityEnergyInfoError(int errorCode) {
+                            Slog.w(TAG, "error reading Bluetooth stats: " + errorCode);
+                            Bundle bundle = new Bundle();
+                            bundle.putParcelable(
+                                    BatteryStats.RESULT_RECEIVER_CONTROLLER_KEY, null);
+                            bluetoothReceiver.send(0, bundle);
+                        }
+                    }
+            );
             return awaitControllerInfo(bluetoothReceiver);
         } else {
             Slog.e(TAG, "Failed to get bluetooth adapter!");
@@ -2338,51 +2359,25 @@ public class StatsPullAtomService extends SystemService {
     }
 
     int pullProcessDmabufMemory(int atomTag, List<StatsEvent> pulledData) {
-        List<ProcessMemoryState> managedProcessList =
-                LocalServices.getService(ActivityManagerInternal.class)
-                        .getMemoryStateForProcesses();
-        for (ProcessMemoryState process : managedProcessList) {
-            KernelAllocationStats.ProcessDmabuf proc =
-                    KernelAllocationStats.getDmabufAllocations(process.pid);
-            if (proc == null || (proc.retainedBuffersCount <= 0 && proc.mappedBuffersCount <= 0)) {
-                continue;
-            }
-            pulledData.add(
-                    FrameworkStatsLog.buildStatsEvent(
-                            atomTag,
-                            process.uid,
-                            process.processName,
-                            process.oomScore,
-                            proc.retainedSizeKb,
-                            proc.retainedBuffersCount,
-                            proc.mappedSizeKb,
-                            proc.mappedBuffersCount));
+        KernelAllocationStats.ProcessDmabuf[] procBufs =
+                KernelAllocationStats.getDmabufAllocations();
+
+        if (procBufs == null) {
+            return StatsManager.PULL_SKIP;
         }
-        SparseArray<String> processCmdlines = getProcessCmdlines();
-        managedProcessList.forEach(managedProcess -> processCmdlines.delete(managedProcess.pid));
-        int size = processCmdlines.size();
-        for (int i = 0; i < size; ++i) {
-            int pid = processCmdlines.keyAt(i);
-            int uid = getUidForPid(pid);
-            // ignore root processes (unlikely to be interesting)
-            if (uid <= 0) {
-                continue;
-            }
-            KernelAllocationStats.ProcessDmabuf proc =
-                    KernelAllocationStats.getDmabufAllocations(pid);
-            if (proc == null || (proc.retainedBuffersCount <= 0 && proc.mappedBuffersCount <= 0)) {
-                continue;
-            }
-            pulledData.add(
-                    FrameworkStatsLog.buildStatsEvent(
-                            atomTag,
-                            uid,
-                            processCmdlines.valueAt(i),
-                            -1001 /*Placeholder for native processes, OOM_SCORE_ADJ_MIN - 1.*/,
-                            proc.retainedSizeKb,
-                            proc.retainedBuffersCount,
-                            proc.mappedSizeKb,
-                            proc.mappedBuffersCount));
+        for (KernelAllocationStats.ProcessDmabuf procBuf : procBufs) {
+            pulledData.add(FrameworkStatsLog.buildStatsEvent(
+                    atomTag,
+                    procBuf.uid,
+                    procBuf.processName,
+                    procBuf.oomScore,
+                    procBuf.retainedSizeKb,
+                    procBuf.retainedBuffersCount,
+                    0, /* mapped_dmabuf_kb - deprecated */
+                    0, /* mapped_dmabuf_count - deprecated */
+                    procBuf.surfaceFlingerSizeKb,
+                    procBuf.surfaceFlingerCount
+            ));
         }
         return StatsManager.PULL_SUCCESS;
     }

@@ -242,6 +242,11 @@ public class ParsingPackageUtils {
 
     public static final int PARSE_CHATTY = 1 << 31;
 
+    /** The total maximum number of activities, services, providers and activity-aliases */
+    private static final int MAX_NUM_COMPONENTS = 30000;
+    private static final String MAX_NUM_COMPONENTS_ERR_MSG =
+            "Total number of components has exceeded the maximum number: " + MAX_NUM_COMPONENTS;
+
     @IntDef(flag = true, prefix = { "PARSE_" }, value = {
             PARSE_CHATTY,
             PARSE_COLLECT_CERTIFICATES,
@@ -837,9 +842,18 @@ public class ParsingPackageUtils {
             if (result.isError()) {
                 return input.error(result);
             }
+
+            if (hasTooManyComponents(pkg)) {
+                return input.error(MAX_NUM_COMPONENTS_ERR_MSG);
+            }
         }
 
         return input.success(pkg);
+    }
+
+    private static boolean hasTooManyComponents(ParsingPackage pkg) {
+        return pkg.getActivities().size() + pkg.getServices().size() + pkg.getProviders().size()
+                > MAX_NUM_COMPONENTS;
     }
 
     /**
@@ -2144,6 +2158,9 @@ public class ParsingPackageUtils {
 
             if (result.isError()) {
                 return input.error(result);
+            }
+            if (hasTooManyComponents(pkg)) {
+                return input.error(MAX_NUM_COMPONENTS_ERR_MSG);
             }
         }
 

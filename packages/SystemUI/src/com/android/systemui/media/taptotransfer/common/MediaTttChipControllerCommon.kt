@@ -31,6 +31,7 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
+import android.widget.LinearLayout
 import com.android.internal.widget.CachingIconView
 import com.android.settingslib.Utils
 import com.android.systemui.R
@@ -137,6 +138,11 @@ abstract class MediaTttChipControllerCommon<T : ChipInfoCommon>(
     abstract fun updateChipView(chipInfo: T, currentChipView: ViewGroup)
 
     /**
+     * Returns the size that the icon should be, or null if no size override is needed.
+     */
+    open fun getIconSize(isAppIcon: Boolean): Int? = null
+
+    /**
      * An internal method to set the icon on the view.
      *
      * This is in the common superclass since both the sender and the receiver show an icon.
@@ -151,35 +157,47 @@ abstract class MediaTttChipControllerCommon<T : ChipInfoCommon>(
         appNameOverride: CharSequence? = null,
     ) {
         val appIconView = currentChipView.requireViewById<CachingIconView>(R.id.app_icon)
-        val appInfo = getAppInfo(appPackageName)
-        appIconView.contentDescription = appNameOverride ?: appInfo.appName
-        appIconView.setImageDrawable(appIconDrawableOverride ?: appInfo.appIcon)
+        val iconInfo = getIconInfo(appPackageName)
+
+        getIconSize(iconInfo.isAppIcon)?.let { size ->
+            val lp = appIconView.layoutParams
+            lp.width = size
+            lp.height = size
+            appIconView.layoutParams = lp
+        }
+
+        appIconView.contentDescription = appNameOverride ?: iconInfo.iconName
+        appIconView.setImageDrawable(appIconDrawableOverride ?: iconInfo.icon)
     }
 
     /**
-     * Returns the app name and icon of the app playing media, or a default name and icon if we
-     * can't find the app name/icon.
+     * Returns the information needed to display the icon.
+     *
+     * The information will either contain app name and icon of the app playing media, or a default
+     * name and icon if we can't find the app name/icon.
      */
-    private fun getAppInfo(appPackageName: String?): AppInfo {
+    private fun getIconInfo(appPackageName: String?): IconInfo {
         if (appPackageName != null) {
             try {
-                return AppInfo(
-                    appName = context.packageManager.getApplicationInfo(
+                return IconInfo(
+                    iconName = context.packageManager.getApplicationInfo(
                         appPackageName, PackageManager.ApplicationInfoFlags.of(0)
                     ).loadLabel(context.packageManager).toString(),
-                    appIcon = context.packageManager.getApplicationIcon(appPackageName)
+                    icon = context.packageManager.getApplicationIcon(appPackageName),
+                    isAppIcon = true
                 )
             } catch (e: PackageManager.NameNotFoundException) {
                 Log.w(TAG, "Cannot find package $appPackageName", e)
             }
         }
-        return AppInfo(
-            appName = context.getString(R.string.media_output_dialog_unknown_launch_app_name),
-            appIcon = context.resources.getDrawable(R.drawable.ic_cast).apply {
+        return IconInfo(
+            iconName = context.getString(R.string.media_output_dialog_unknown_launch_app_name),
+            icon = context.resources.getDrawable(R.drawable.ic_cast).apply {
                 this.setTint(
                     Utils.getColorAttrDefaultColor(context, android.R.attr.textColorPrimary)
                 )
-            }
+            },
+            isAppIcon = false
         )
     }
 
@@ -203,7 +221,9 @@ object MediaTttRemovalReason {
     const val REASON_SCREEN_TAP = "SCREEN_TAP"
 }
 
-private data class AppInfo(
-    val appName: String,
-    val appIcon: Drawable
+private data class IconInfo(
+    val iconName: String,
+    val icon: Drawable,
+    /** True if [icon] is the app's icon, and false if [icon] is some generic default icon. */
+    val isAppIcon: Boolean
 )

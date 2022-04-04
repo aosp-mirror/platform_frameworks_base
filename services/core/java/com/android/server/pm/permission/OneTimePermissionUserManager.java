@@ -272,6 +272,10 @@ public class OneTimePermissionUserManager {
                 mHandler.removeCallbacksAndMessages(mToken);
 
                 if (importance > IMPORTANCE_CACHED) {
+                    if (mRevokeAfterKilledDelay == 0) {
+                        onPackageInactiveLocked();
+                        return;
+                    }
                     // Delay revocation in case app is restarting
                     mHandler.postDelayed(() -> {
                         int imp = mActivityManager.getUidImportance(mUid);
@@ -313,9 +317,21 @@ public class OneTimePermissionUserManager {
             synchronized (mInnerLock) {
                 mIsFinished = true;
                 cancelAlarmLocked();
-                mActivityManager.removeOnUidImportanceListener(mStartTimerListener);
-                mActivityManager.removeOnUidImportanceListener(mSessionKillableListener);
-                mActivityManager.removeOnUidImportanceListener(mGoneListener);
+                try {
+                    mActivityManager.removeOnUidImportanceListener(mStartTimerListener);
+                } catch (IllegalArgumentException e) {
+                    Log.e(LOG_TAG, "Could not remove start timer listener", e);
+                }
+                try {
+                    mActivityManager.removeOnUidImportanceListener(mSessionKillableListener);
+                } catch (IllegalArgumentException e) {
+                    Log.e(LOG_TAG, "Could not remove session killable listener", e);
+                }
+                try {
+                    mActivityManager.removeOnUidImportanceListener(mGoneListener);
+                } catch (IllegalArgumentException e) {
+                    Log.e(LOG_TAG, "Could not remove gone listener", e);
+                }
             }
         }
 

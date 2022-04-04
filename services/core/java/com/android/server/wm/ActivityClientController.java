@@ -85,6 +85,7 @@ import com.android.internal.policy.IKeyguardDismissCallback;
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.server.LocalServices;
 import com.android.server.Watchdog;
+import com.android.server.pm.KnownPackages;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.uri.NeededUriGrants;
 import com.android.server.vr.VrManagerInternal;
@@ -627,7 +628,7 @@ class ActivityClientController extends IActivityClientController.Stub {
             return true;
         }
         final String[] installerNames = pm.getKnownPackageNames(
-                PackageManagerInternal.PACKAGE_INSTALLER, UserHandle.getUserId(uid));
+                KnownPackages.PACKAGE_INSTALLER, UserHandle.getUserId(uid));
         return installerNames.length > 0 && callingPkg.getPackageName().equals(installerNames[0]);
     }
 
@@ -749,7 +750,8 @@ class ActivityClientController extends IActivityClientController.Stub {
                     rootTask.setPictureInPictureAspectRatio(
                             r.pictureInPictureArgs.getAspectRatioFloat(),
                             r.pictureInPictureArgs.getExpandedAspectRatioFloat());
-                    rootTask.setPictureInPictureActions(r.pictureInPictureArgs.getActions());
+                    rootTask.setPictureInPictureActions(r.pictureInPictureArgs.getActions(),
+                            r.pictureInPictureArgs.getCloseAction());
                 }
             }
         } finally {

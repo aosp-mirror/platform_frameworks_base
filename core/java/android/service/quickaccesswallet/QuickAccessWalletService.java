@@ -336,6 +336,14 @@ public abstract class QuickAccessWalletService extends Service {
         mHandler.post(() -> sendWalletServiceEventInternal(serviceEvent));
     }
 
+    /**
+     * Specify a {@link PendingIntent} to be launched as the "Quick Access" activity.
+     *
+     * This activity will be launched directly by the system in lieu of the card switcher activity
+     * provided by the system.
+     *
+     * In order to use the system-provided card switcher activity, return null from this method.
+     */
     @Nullable
     public PendingIntent getTargetActivityPendingIntent() {
         return null;

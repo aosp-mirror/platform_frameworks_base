@@ -72,6 +72,7 @@ public class FingerprintEnrollClientTest {
 
     private static final byte[] HAT = new byte[69];
     private static final int USER_ID = 8;
+    private static final long REQUEST_ID = 9;
     private static final int POINTER_ID = 0;
     private static final int TOUCH_X = 8;
     private static final int TOUCH_Y = 20;
@@ -256,7 +257,7 @@ public class FingerprintEnrollClientTest {
 
         client.start(mCallback);
 
-        verify(mUdfpsOverlayController).showUdfpsOverlay(anyInt(), anyInt(), any());
+        verify(mUdfpsOverlayController).showUdfpsOverlay(eq(REQUEST_ID), anyInt(), anyInt(), any());
         verify(mSideFpsController).show(anyInt(), anyInt());
 
         block.accept(client);
@@ -273,7 +274,7 @@ public class FingerprintEnrollClientTest {
         when(mHal.getInterfaceVersion()).thenReturn(version);
 
         final AidlSession aidl = new AidlSession(version, mHal, USER_ID, mHalSessionCallback);
-        return new FingerprintEnrollClient(mContext, () -> aidl, mToken, 6 /* requestId */,
+        return new FingerprintEnrollClient(mContext, () -> aidl, mToken, REQUEST_ID,
         mClientMonitorCallbackConverter, 0 /* userId */,
         HAT, "owner", mBiometricUtils, 8 /* sensorId */,
         mBiometricLogger, mBiometricContext, mSensorProps, mUdfpsOverlayController,

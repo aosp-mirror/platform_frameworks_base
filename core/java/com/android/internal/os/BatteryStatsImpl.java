@@ -69,6 +69,7 @@ import android.os.connectivity.GpsBatteryStats;
 import android.os.connectivity.WifiActivityEnergyInfo;
 import android.os.connectivity.WifiBatteryStats;
 import android.provider.Settings;
+import android.telephony.AccessNetworkConstants;
 import android.telephony.Annotation.NetworkType;
 import android.telephony.CellSignalStrength;
 import android.telephony.CellSignalStrengthLte;
@@ -718,7 +719,7 @@ public class BatteryStatsImpl extends BatteryStats {
     int mNumHistoryItems;
 
     private static final int HISTORY_TAG_INDEX_LIMIT = 0x7ffe;
-    private static final int MAX_HISTORY_TAG_STRING_LENGTH = 256;
+    private static final int MAX_HISTORY_TAG_STRING_LENGTH = 1024;
 
     final HashMap<HistoryTag, Integer> mHistoryTagPool = new HashMap<>();
     private SparseArray<HistoryTag> mHistoryTags;
@@ -3969,6 +3970,12 @@ public class BatteryStatsImpl extends BatteryStats {
             Slog.wtfStack(TAG, "writeHistoryTag called with null name");
         }
 
+        final int stringLength = tag.string.length();
+        if (stringLength > MAX_HISTORY_TAG_STRING_LENGTH) {
+            Slog.e(TAG, "Long battery history tag: " + tag.string);
+            tag.string = tag.string.substring(0, MAX_HISTORY_TAG_STRING_LENGTH);
+        }
+
         Integer idxObj = mHistoryTagPool.get(tag);
         int idx;
         if (idxObj != null) {
@@ -3985,11 +3992,6 @@ public class BatteryStatsImpl extends BatteryStats {
             tag.poolIdx = idx;
             mHistoryTagPool.put(key, idx);
             mNextHistoryTagIdx++;
-            final int stringLength = key.string.length();
-
-            if (stringLength > MAX_HISTORY_TAG_STRING_LENGTH) {
-                Slog.wtf(TAG, "Long battery history tag: " + key.string);
-            }
 
             mNumHistoryTagChars += stringLength + 1;
             if (mHistoryTags != null) {
@@ -4763,8 +4765,11 @@ public class BatteryStatsImpl extends BatteryStats {
         if (Process.isSdkSandboxUid(uid)) {
             return Process.getAppUidForSdkSandboxUid(uid);
         }
-        int isolated = mIsolatedUids.get(uid, -1);
-        return isolated > 0 ? isolated : uid;
+        return mapIsolatedUid(uid);
+    }
+
+    private int mapIsolatedUid(int uid) {
+        return mIsolatedUids.get(/*key=*/uid, /*valueIfKeyNotFound=*/uid);
     }
 
     @GuardedBy("this")
@@ -5215,7 +5220,7 @@ public class BatteryStatsImpl extends BatteryStats {
                         FrameworkStatsLog.WAKELOCK_STATE_CHANGED__STATE__ACQUIRE);
             } else {
                 FrameworkStatsLog.write_non_chained(FrameworkStatsLog.WAKELOCK_STATE_CHANGED,
-                        mappedUid, null, getPowerManagerWakeLockLevel(type), name,
+                        mapIsolatedUid(uid), null, getPowerManagerWakeLockLevel(type), name,
                         FrameworkStatsLog.WAKELOCK_STATE_CHANGED__STATE__ACQUIRE);
             }
         }
@@ -5269,7 +5274,7 @@ public class BatteryStatsImpl extends BatteryStats {
                         FrameworkStatsLog.WAKELOCK_STATE_CHANGED__STATE__RELEASE);
             } else {
                 FrameworkStatsLog.write_non_chained(FrameworkStatsLog.WAKELOCK_STATE_CHANGED,
-                        mappedUid, null, getPowerManagerWakeLockLevel(type), name,
+                        mapIsolatedUid(uid), null, getPowerManagerWakeLockLevel(type), name,
                         FrameworkStatsLog.WAKELOCK_STATE_CHANGED__STATE__RELEASE);
             }
 
@@ -5429,7 +5434,6 @@ public class BatteryStatsImpl extends BatteryStats {
     @GuardedBy("this")
     public void noteLongPartialWakelockStart(String name, String historyName, int uid,
             long elapsedRealtimeMs, long uptimeMs) {
-        uid = mapUid(uid);
         noteLongPartialWakeLockStartInternal(name, historyName, uid, elapsedRealtimeMs, uptimeMs);
     }
 
@@ -5464,15 +5468,21 @@ public class BatteryStatsImpl extends BatteryStats {
     @GuardedBy("this")
     private void noteLongPartialWakeLockStartInternal(String name, String historyName, int uid,
             long elapsedRealtimeMs, long uptimeMs) {
+        final int mappedUid = mapUid(uid);
         if (historyName == null) {
             historyName = name;
         }
-        if (!mActiveEvents.updateState(HistoryItem.EVENT_LONG_WAKE_LOCK_START, historyName, uid,
-                0)) {
+        if (!mActiveEvents.updateState(HistoryItem.EVENT_LONG_WAKE_LOCK_START, historyName,
+                mappedUid, 0)) {
             return;
         }
         addHistoryEventLocked(elapsedRealtimeMs, uptimeMs, HistoryItem.EVENT_LONG_WAKE_LOCK_START,
-                historyName, uid);
+                historyName, mappedUid);
+        if (mappedUid != uid) {
+            // Prevent the isolated uid mapping from being removed while the wakelock is
+            // being held.
+            incrementIsolatedUidRefCount(uid);
+        }
     }
 
     @GuardedBy("this")
@@ -5484,7 +5494,6 @@ public class BatteryStatsImpl extends BatteryStats {
     @GuardedBy("this")
     public void noteLongPartialWakelockFinish(String name, String historyName, int uid,
             long elapsedRealtimeMs, long uptimeMs) {
-        uid = mapUid(uid);
         noteLongPartialWakeLockFinishInternal(name, historyName, uid, elapsedRealtimeMs, uptimeMs);
     }
 
@@ -5519,15 +5528,20 @@ public class BatteryStatsImpl extends BatteryStats {
     @GuardedBy("this")
     private void noteLongPartialWakeLockFinishInternal(String name, String historyName, int uid,
             long elapsedRealtimeMs, long uptimeMs) {
+        final int mappedUid = mapUid(uid);
         if (historyName == null) {
             historyName = name;
         }
-        if (!mActiveEvents.updateState(HistoryItem.EVENT_LONG_WAKE_LOCK_FINISH, historyName, uid,
-                0)) {
+        if (!mActiveEvents.updateState(HistoryItem.EVENT_LONG_WAKE_LOCK_FINISH, historyName,
+                mappedUid, 0)) {
             return;
         }
         addHistoryEventLocked(elapsedRealtimeMs, uptimeMs, HistoryItem.EVENT_LONG_WAKE_LOCK_FINISH,
-                historyName, uid);
+                historyName, mappedUid);
+        if (mappedUid != uid) {
+            // Decrement the ref count for the isolated uid and delete the mapping if uneeded.
+            maybeRemoveIsolatedUidLocked(uid, elapsedRealtimeMs, uptimeMs);
+        }
     }
 
     @GuardedBy("this")
@@ -5693,7 +5707,10 @@ public class BatteryStatsImpl extends BatteryStats {
     @GuardedBy("this")
     private void noteStartGpsLocked(int uid, WorkChain workChain,
             long elapsedRealtimeMs, long uptimeMs) {
-        uid = getAttributionUid(uid, workChain);
+        if (workChain != null) {
+            uid = workChain.getAttributionUid();
+        }
+        final int mappedUid = mapUid(uid);
         if (mGpsNesting == 0) {
             mHistoryCur.states |= HistoryItem.STATE_GPS_ON_FLAG;
             if (DEBUG_HISTORY) Slog.v(TAG, "Start GPS to: "
@@ -5703,21 +5720,24 @@ public class BatteryStatsImpl extends BatteryStats {
         mGpsNesting++;
 
         if (workChain == null) {
-            FrameworkStatsLog.write_non_chained(FrameworkStatsLog.GPS_SCAN_STATE_CHANGED, uid, null,
-                    FrameworkStatsLog.GPS_SCAN_STATE_CHANGED__STATE__ON);
+            FrameworkStatsLog.write_non_chained(FrameworkStatsLog.GPS_SCAN_STATE_CHANGED,
+                    mapIsolatedUid(uid), null, FrameworkStatsLog.GPS_SCAN_STATE_CHANGED__STATE__ON);
         } else {
             FrameworkStatsLog.write(FrameworkStatsLog.GPS_SCAN_STATE_CHANGED,
                     workChain.getUids(), workChain.getTags(),
                     FrameworkStatsLog.GPS_SCAN_STATE_CHANGED__STATE__ON);
         }
 
-        getUidStatsLocked(uid, elapsedRealtimeMs, uptimeMs).noteStartGps(elapsedRealtimeMs);
+        getUidStatsLocked(mappedUid, elapsedRealtimeMs, uptimeMs).noteStartGps(elapsedRealtimeMs);
     }
 
     @GuardedBy("this")
     private void noteStopGpsLocked(int uid, WorkChain workChain,
             long elapsedRealtimeMs, long uptimeMs) {
-        uid = getAttributionUid(uid, workChain);
+        if (workChain != null) {
+            uid = workChain.getAttributionUid();
+        }
+        final int mappedUid = mapUid(uid);
         mGpsNesting--;
         if (mGpsNesting == 0) {
             mHistoryCur.states &= ~HistoryItem.STATE_GPS_ON_FLAG;
@@ -5729,14 +5749,15 @@ public class BatteryStatsImpl extends BatteryStats {
         }
 
         if (workChain == null) {
-            FrameworkStatsLog.write_non_chained(FrameworkStatsLog.GPS_SCAN_STATE_CHANGED, uid, null,
+            FrameworkStatsLog.write_non_chained(FrameworkStatsLog.GPS_SCAN_STATE_CHANGED,
+                    mapIsolatedUid(uid), null,
                     FrameworkStatsLog.GPS_SCAN_STATE_CHANGED__STATE__OFF);
         } else {
             FrameworkStatsLog.write(FrameworkStatsLog.GPS_SCAN_STATE_CHANGED, workChain.getUids(),
                     workChain.getTags(), FrameworkStatsLog.GPS_SCAN_STATE_CHANGED__STATE__OFF);
         }
 
-        getUidStatsLocked(uid, elapsedRealtimeMs, uptimeMs).noteStopGps(elapsedRealtimeMs);
+        getUidStatsLocked(mappedUid, elapsedRealtimeMs, uptimeMs).noteStopGps(elapsedRealtimeMs);
     }
 
     @GuardedBy("this")
@@ -6811,6 +6832,27 @@ public class BatteryStatsImpl extends BatteryStats {
         }
     }
 
+    @RadioAccessTechnology
+    private static int mapRadioAccessNetworkTypeToRadioAccessTechnology(
+            @AccessNetworkConstants.RadioAccessNetworkType int dataType) {
+        switch (dataType) {
+            case AccessNetworkConstants.AccessNetworkType.NGRAN:
+                return RADIO_ACCESS_TECHNOLOGY_NR;
+            case AccessNetworkConstants.AccessNetworkType.EUTRAN:
+                return RADIO_ACCESS_TECHNOLOGY_LTE;
+            case AccessNetworkConstants.AccessNetworkType.UNKNOWN: //fallthrough
+            case AccessNetworkConstants.AccessNetworkType.GERAN: //fallthrough
+            case AccessNetworkConstants.AccessNetworkType.UTRAN: //fallthrough
+            case AccessNetworkConstants.AccessNetworkType.CDMA2000: //fallthrough
+            case AccessNetworkConstants.AccessNetworkType.IWLAN:
+                return RADIO_ACCESS_TECHNOLOGY_OTHER;
+            default:
+                Slog.w(TAG,
+                        "Unhandled RadioAccessNetworkType (" + dataType + "), mapping to OTHER");
+                return RADIO_ACCESS_TECHNOLOGY_OTHER;
+        }
+    }
+
     @GuardedBy("this")
     public void noteWifiOnLocked() {
         noteWifiOnLocked(mClock.elapsedRealtime(), mClock.uptimeMillis());
@@ -7154,7 +7196,10 @@ public class BatteryStatsImpl extends BatteryStats {
     @GuardedBy("this")
     private void noteBluetoothScanStartedLocked(WorkChain workChain, int uid,
             boolean isUnoptimized, long elapsedRealtimeMs, long uptimeMs) {
-        uid = getAttributionUid(uid, workChain);
+        if (workChain != null) {
+            uid = workChain.getAttributionUid();
+        }
+        uid = mapUid(uid);
         if (mBluetoothScanNesting == 0) {
             mHistoryCur.states2 |= HistoryItem.STATE2_BLUETOOTH_SCAN_FLAG;
             if (DEBUG_HISTORY) Slog.v(TAG, "BLE scan started for: "
@@ -7194,7 +7239,10 @@ public class BatteryStatsImpl extends BatteryStats {
     @GuardedBy("this")
     private void noteBluetoothScanStoppedLocked(WorkChain workChain, int uid,
             boolean isUnoptimized, long elapsedRealtimeMs, long uptimeMs) {
-        uid = getAttributionUid(uid, workChain);
+        if (workChain != null) {
+            uid = workChain.getAttributionUid();
+        }
+        uid = mapUid(uid);
         mBluetoothScanNesting--;
         if (mBluetoothScanNesting == 0) {
             mHistoryCur.states2 &= ~HistoryItem.STATE2_BLUETOOTH_SCAN_FLAG;
@@ -7205,14 +7253,6 @@ public class BatteryStatsImpl extends BatteryStats {
         }
         getUidStatsLocked(uid, elapsedRealtimeMs, uptimeMs)
                 .noteBluetoothScanStoppedLocked(elapsedRealtimeMs, isUnoptimized);
-    }
-
-    private int getAttributionUid(int uid, WorkChain workChain) {
-        if (workChain != null) {
-            return mapUid(workChain.getAttributionUid());
-        }
-
-        return mapUid(uid);
     }
 
     @GuardedBy("this")
@@ -13704,66 +13744,7 @@ public class BatteryStatsImpl extends BatteryStats {
                     mTmpRailStats.resetCellularTotalEnergyUsed();
                 }
 
-                // Proportionally smear Rx and Tx times across each RAt
-                final int levelCount = CellSignalStrength.getNumSignalStrengthLevels();
-                long[] perSignalStrengthActiveTimeMs = new long[levelCount];
-                long totalActiveTimeMs = 0;
-
-                for (int rat = 0; rat < RADIO_ACCESS_TECHNOLOGY_COUNT; rat++) {
-                    final RadioAccessTechnologyBatteryStats ratStats = mPerRatBatteryStats[rat];
-                    if (ratStats == null) continue;
-
-                    final int freqCount = ratStats.getFrequencyRangeCount();
-                    for (int freq = 0; freq < freqCount; freq++) {
-                        for (int level = 0; level < levelCount; level++) {
-                            final long durationMs = ratStats.getTimeSinceMark(freq, level,
-                                    elapsedRealtimeMs);
-                            perSignalStrengthActiveTimeMs[level] += durationMs;
-                            totalActiveTimeMs += durationMs;
-                        }
-                    }
-                }
-
-                if (totalActiveTimeMs != 0) {
-                    // Smear the provided Tx/Rx durations across each RAT, frequency, and signal
-                    // strength.
-                    for (int rat = 0; rat < RADIO_ACCESS_TECHNOLOGY_COUNT; rat++) {
-                        final RadioAccessTechnologyBatteryStats ratStats = mPerRatBatteryStats[rat];
-                        if (ratStats == null) continue;
-
-                        final int freqCount = ratStats.getFrequencyRangeCount();
-                        for (int freq = 0; freq < freqCount; freq++) {
-                            long frequencyDurationMs = 0;
-                            for (int level = 0; level < levelCount; level++) {
-                                final long durationMs = ratStats.getTimeSinceMark(freq, level,
-                                        elapsedRealtimeMs);
-                                final long totalLvlDurationMs =
-                                        perSignalStrengthActiveTimeMs[level];
-                                if (totalLvlDurationMs == 0) continue;
-                                final long totalTxLvlDurations =
-                                        deltaInfo.getTransmitDurationMillisAtPowerLevel(level);
-                                // Smear HAL provided Tx power level duration based on active modem
-                                // duration in a given state. (Add totalLvlDurationMs / 2 before
-                                // the integer division with totalLvlDurationMs for rounding.)
-                                final long proportionalTxDurationMs =
-                                        (durationMs * totalTxLvlDurations
-                                                + (totalLvlDurationMs / 2)) / totalLvlDurationMs;
-                                ratStats.incrementTxDuration(freq, level, proportionalTxDurationMs);
-                                frequencyDurationMs += durationMs;
-                            }
-                            final long totalRxDuration = deltaInfo.getReceiveTimeMillis();
-                            // Smear HAL provided Rx power duration based on active modem
-                            // duration in a given state.  (Add totalActiveTimeMs / 2 before the
-                            // integer division with totalActiveTimeMs for rounding.)
-                            final long proportionalRxDurationMs =
-                                    (frequencyDurationMs * totalRxDuration + (totalActiveTimeMs
-                                            / 2)) / totalActiveTimeMs;
-                            ratStats.incrementRxDuration(freq, proportionalRxDurationMs);
-                        }
-
-                        ratStats.setMark(elapsedRealtimeMs);
-                    }
-                }
+                incrementPerRatDataLocked(deltaInfo, elapsedRealtimeMs);
             }
             long totalAppRadioTimeUs = mMobileRadioActivePerAppTimer.getTimeSinceMarkLocked(
                     elapsedRealtimeMs * 1000);
@@ -13911,6 +13892,100 @@ public class BatteryStatsImpl extends BatteryStats {
 
                 delta = null;
             }
+        }
+    }
+
+    @GuardedBy("this")
+    private void incrementPerRatDataLocked(ModemActivityInfo deltaInfo, long elapsedRealtimeMs) {
+        final int infoSize = deltaInfo.getSpecificInfoLength();
+        if (infoSize == 1 && deltaInfo.getSpecificInfoRat(0)
+                == AccessNetworkConstants.AccessNetworkType.UNKNOWN
+                && deltaInfo.getSpecificInfoFrequencyRange(0)
+                == ServiceState.FREQUENCY_RANGE_UNKNOWN) {
+            // Specific info data unavailable. Proportionally smear Rx and Tx times across each RAT.
+            final int levelCount = CellSignalStrength.getNumSignalStrengthLevels();
+            long[] perSignalStrengthActiveTimeMs = new long[levelCount];
+            long totalActiveTimeMs = 0;
+
+            for (int rat = 0; rat < RADIO_ACCESS_TECHNOLOGY_COUNT; rat++) {
+                final RadioAccessTechnologyBatteryStats ratStats = mPerRatBatteryStats[rat];
+                if (ratStats == null) continue;
+
+                final int freqCount = ratStats.getFrequencyRangeCount();
+                for (int freq = 0; freq < freqCount; freq++) {
+                    for (int level = 0; level < levelCount; level++) {
+                        final long durationMs = ratStats.getTimeSinceMark(freq, level,
+                                elapsedRealtimeMs);
+                        perSignalStrengthActiveTimeMs[level] += durationMs;
+                        totalActiveTimeMs += durationMs;
+                    }
+                }
+            }
+            if (totalActiveTimeMs != 0) {
+                // Smear the provided Tx/Rx durations across each RAT, frequency, and signal
+                // strength.
+                for (int rat = 0; rat < RADIO_ACCESS_TECHNOLOGY_COUNT; rat++) {
+                    final RadioAccessTechnologyBatteryStats ratStats = mPerRatBatteryStats[rat];
+                    if (ratStats == null) continue;
+
+                    final int freqCount = ratStats.getFrequencyRangeCount();
+                    for (int freq = 0; freq < freqCount; freq++) {
+                        long frequencyDurationMs = 0;
+                        for (int level = 0; level < levelCount; level++) {
+                            final long durationMs = ratStats.getTimeSinceMark(freq, level,
+                                    elapsedRealtimeMs);
+                            final long totalLvlDurationMs =
+                                    perSignalStrengthActiveTimeMs[level];
+                            if (totalLvlDurationMs == 0) continue;
+                            final long totalTxLvlDurations =
+                                    deltaInfo.getTransmitDurationMillisAtPowerLevel(level);
+                            // Smear HAL provided Tx power level duration based on active modem
+                            // duration in a given state. (Add totalLvlDurationMs / 2 before
+                            // the integer division with totalLvlDurationMs for rounding.)
+                            final long proportionalTxDurationMs =
+                                    (durationMs * totalTxLvlDurations
+                                            + (totalLvlDurationMs / 2)) / totalLvlDurationMs;
+                            ratStats.incrementTxDuration(freq, level, proportionalTxDurationMs);
+                            frequencyDurationMs += durationMs;
+                        }
+                        final long totalRxDuration = deltaInfo.getReceiveTimeMillis();
+                        // Smear HAL provided Rx power duration based on active modem
+                        // duration in a given state.  (Add totalActiveTimeMs / 2 before the
+                        // integer division with totalActiveTimeMs for rounding.)
+                        final long proportionalRxDurationMs =
+                                (frequencyDurationMs * totalRxDuration + (totalActiveTimeMs
+                                        / 2)) / totalActiveTimeMs;
+                        ratStats.incrementRxDuration(freq, proportionalRxDurationMs);
+                    }
+
+                }
+            }
+        } else {
+            // Specific data available.
+            for (int index = 0; index < infoSize; index++) {
+                final int rat = deltaInfo.getSpecificInfoRat(index);
+                final int freq = deltaInfo.getSpecificInfoFrequencyRange(index);
+
+                // Map RadioAccessNetworkType to course grain RadioAccessTechnology.
+                final int ratBucket = mapRadioAccessNetworkTypeToRadioAccessTechnology(rat);
+                final RadioAccessTechnologyBatteryStats ratStats = getRatBatteryStatsLocked(
+                        ratBucket);
+
+                final long rxTimeMs = deltaInfo.getReceiveTimeMillis(rat, freq);
+                final int[] txTimesMs = deltaInfo.getTransmitTimeMillis(rat, freq);
+
+                ratStats.incrementRxDuration(freq, rxTimeMs);
+                final int numTxLvl = txTimesMs.length;
+                for (int lvl = 0; lvl < numTxLvl; lvl++) {
+                    ratStats.incrementTxDuration(freq, lvl, txTimesMs[lvl]);
+                }
+            }
+        }
+
+        for (int rat = 0; rat < RADIO_ACCESS_TECHNOLOGY_COUNT; rat++) {
+            final RadioAccessTechnologyBatteryStats ratStats = mPerRatBatteryStats[rat];
+            if (ratStats == null) continue;
+            ratStats.setMark(elapsedRealtimeMs);
         }
     }
 

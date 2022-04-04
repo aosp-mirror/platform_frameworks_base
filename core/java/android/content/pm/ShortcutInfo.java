@@ -52,7 +52,7 @@ import com.android.internal.util.Preconditions;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-import java.util.Collection;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -60,7 +60,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * Represents a shortcut that can be published via {@link ShortcutManager}.
@@ -501,7 +500,8 @@ public final class ShortcutInfo implements Parcelable {
         mRank = b.mRank;
         mExtras = b.mExtras;
         mLocusId = b.mLocusId;
-        mCapabilityBindings = b.mCapabilityBindings;
+        mCapabilityBindings =
+                cloneCapabilityBindings(b.mCapabilityBindings);
         mStartingThemeResName = b.mStartingThemeResId != 0
                 ? b.mContext.getResources().getResourceName(b.mStartingThemeResId) : null;
         updateTimestamp();
@@ -652,7 +652,8 @@ public final class ShortcutInfo implements Parcelable {
             // Set this bit.
             mFlags |= FLAG_KEY_FIELDS_ONLY;
         }
-        mCapabilityBindings = source.mCapabilityBindings;
+        mCapabilityBindings = cloneCapabilityBindings(
+                source.mCapabilityBindings);
         mStartingThemeResName = source.mStartingThemeResName;
     }
 
@@ -1003,7 +1004,8 @@ public final class ShortcutInfo implements Parcelable {
             mStartingThemeResName = source.mStartingThemeResName;
         }
         if (source.mCapabilityBindings != null) {
-            mCapabilityBindings = source.mCapabilityBindings;
+            mCapabilityBindings =
+                    cloneCapabilityBindings(source.mCapabilityBindings);
         }
     }
 
@@ -1447,43 +1449,25 @@ public final class ShortcutInfo implements Parcelable {
          * <P>This method can be called multiple times to add multiple parameters to the same
          * capability.
          *
-         * @param capability capability associated with the shortcut. e.g. actions.intent
-         *                   .START_EXERCISE.
-         * @param parameterName name of the parameter associated with given capability.
-         *                      e.g. exercise.name.
-         * @param parameterValues a list of values for that parameters. The first value will be
-         *                        the primary name, while the rest will be alternative names. If
-         *                        the values are empty, then the parameter will not be saved in
-         *                        the shortcut.
+         * @param capability {@link Capability} associated with the shortcut.
+         * @param capabilityParams Optional {@link CapabilityParams} associated with given
+         *                        capability.
          */
         @NonNull
-        public Builder addCapabilityBinding(@NonNull String capability,
-                @Nullable String parameterName, @Nullable List<String> parameterValues) {
+        public Builder addCapabilityBinding(@NonNull final Capability capability,
+                @Nullable final CapabilityParams capabilityParams) {
             Objects.requireNonNull(capability);
-            if (capability.contains("/")) {
-                throw new IllegalArgumentException("Illegal character '/' is found in capability");
-            }
             if (mCapabilityBindings == null) {
                 mCapabilityBindings = new ArrayMap<>(1);
             }
-            if (!mCapabilityBindings.containsKey(capability)) {
-                mCapabilityBindings.put(capability, new ArrayMap<>(0));
+            if (!mCapabilityBindings.containsKey(capability.getName())) {
+                mCapabilityBindings.put(capability.getName(), new ArrayMap<>(0));
             }
-            if (parameterName == null || parameterValues == null || parameterValues.isEmpty()) {
+            if (capabilityParams == null) {
                 return this;
             }
-            if (parameterName.contains("/")) {
-                throw new IllegalArgumentException(
-                        "Illegal character '/' is found in parameter name");
-            }
-            final Map<String, List<String>> params = mCapabilityBindings.get(capability);
-            if (!params.containsKey(parameterName)) {
-                params.put(parameterName, parameterValues);
-                return this;
-            }
-            params.put(parameterName,
-                    Stream.of(params.get(parameterName), parameterValues)
-                            .flatMap(Collection::stream).collect(Collectors.toList()));
+            final Map<String, List<String>> params = mCapabilityBindings.get(capability.getName());
+            params.put(capabilityParams.getName(), capabilityParams.getValues());
             return this;
         }
 
@@ -2257,48 +2241,95 @@ public final class ShortcutInfo implements Parcelable {
     }
 
     /**
-     * Return true if the shortcut is included in specified surface.
+     * Return true if the shortcut is excluded from specified surface.
      */
-    public boolean isIncludedIn(@Surface int surface) {
-        return (mExcludedSurfaces & surface) == 0;
+    public boolean isExcludedFromSurfaces(@Surface int surface) {
+        return (mExcludedSurfaces & surface) != 0;
     }
 
     /**
+     * Returns a bitmask of all surfaces this shortcut is excluded from.
+     *
+     * @see ShortcutInfo.Builder#setExcludedFromSurfaces(int)
+     */
+    @Surface
+    public int getExcludedFromSurfaces() {
+        return mExcludedSurfaces;
+    }
+
+    /**
+     * Returns an immutable copy of the capability bindings using internal data structure.
      * @hide
      */
-    public Map<String, Map<String, List<String>>> getCapabilityBindings() {
-        return mCapabilityBindings;
+    @Nullable
+    public Map<String, Map<String, List<String>>> getCapabilityBindingsInternal() {
+        return cloneCapabilityBindings(mCapabilityBindings);
+    }
+
+    @Nullable
+    private static Map<String, Map<String, List<String>>> cloneCapabilityBindings(
+            @Nullable final Map<String, Map<String, List<String>>> orig) {
+        if (orig == null) {
+            return null;
+        }
+        final Map<String, Map<String, List<String>>> ret = new ArrayMap<>();
+        for (String capability : orig.keySet()) {
+            final Map<String, List<String>> params = orig.get(capability);
+            final Map<String, List<String>> clone;
+            if (params == null) {
+                clone = null;
+            } else {
+                clone = new ArrayMap<>(params.size());
+                for (String paramName : params.keySet()) {
+                    final List<String> paramValues = params.get(paramName);
+                    clone.put(paramName, Collections.unmodifiableList(paramValues));
+                }
+            }
+            ret.put(capability, Collections.unmodifiableMap(clone));
+        }
+        return Collections.unmodifiableMap(ret);
     }
 
     /**
-     * Return true if the shortcut is or can be used in specified capability.
-     */
-    public boolean hasCapability(@NonNull String capability) {
-        Objects.requireNonNull(capability);
-        return mCapabilityBindings != null && mCapabilityBindings.containsKey(capability);
-    }
-
-    /**
-     *  Returns the values of specified parameter in associated with given capability.
-     *
-     *  @param capability capability associated with the shortcut. e.g. actions.intent
-     *                   .START_EXERCISE.
-     *  @param parameterName name of the parameter associated with given capability.
-     *                       e.g. exercise.name.
+     * Return a list of {@link Capability} associated with the shortcut.
      */
     @NonNull
-    public List<String> getCapabilityParameterValues(
-            @NonNull String capability, @NonNull String parameterName) {
-        Objects.requireNonNull(capability);
-        Objects.requireNonNull(parameterName);
+    public List<Capability> getCapabilities() {
         if (mCapabilityBindings == null) {
-            return Collections.emptyList();
+            return new ArrayList<>(0);
         }
-        final Map<String, List<String>> param = mCapabilityBindings.get(capability);
-        if (param == null || !param.containsKey(parameterName)) {
-            return Collections.emptyList();
+        return mCapabilityBindings.keySet().stream().map(Capability::new)
+                .collect(Collectors.toList());
+    }
+
+    /**
+     *  Returns the {@link CapabilityParams} in associated with given capability.
+     *
+     *  @param capability {@link Capability} associated with the shortcut.
+     */
+    @NonNull
+    public List<CapabilityParams> getCapabilityParams(@NonNull final Capability capability) {
+        Objects.requireNonNull(capability);
+        if (mCapabilityBindings == null) {
+            return new ArrayList<>(0);
         }
-        return param.get(parameterName);
+        final Map<String, List<String>> param = mCapabilityBindings.get(capability.getName());
+        if (param == null) {
+            return new ArrayList<>(0);
+        }
+        final List<CapabilityParams> ret = new ArrayList<>(param.size());
+        for (String key : param.keySet()) {
+            final List<String> values = param.get(key);
+            final String primaryValue = values.get(0);
+            final List<String> aliases = values.size() == 1
+                    ? Collections.emptyList() : values.subList(1, values.size());
+            CapabilityParams.Builder builder = new CapabilityParams.Builder(key, primaryValue);
+            for (String alias : aliases) {
+                builder = builder.addAlias(alias);
+            }
+            ret.add(builder.build());
+        }
+        return ret;
     }
 
     private ShortcutInfo(Parcel source) {
@@ -2357,7 +2388,7 @@ public final class ShortcutInfo implements Parcelable {
             final Map<String, Map<String, List<String>>> capabilityBindings =
                     new ArrayMap<>(rawCapabilityBindings.size());
             rawCapabilityBindings.forEach(capabilityBindings::put);
-            mCapabilityBindings = capabilityBindings;
+            mCapabilityBindings = cloneCapabilityBindings(capabilityBindings);
         }
     }
 
@@ -2522,7 +2553,7 @@ public final class ShortcutInfo implements Parcelable {
         if (isLongLived()) {
             sb.append("Liv");
         }
-        if (!isIncludedIn(SURFACE_LAUNCHER)) {
+        if (isExcludedFromSurfaces(SURFACE_LAUNCHER)) {
             sb.append("Hid-L");
         }
         sb.append("]");
@@ -2695,6 +2726,6 @@ public final class ShortcutInfo implements Parcelable {
         mPersons = persons;
         mLocusId = locusId;
         mStartingThemeResName = startingThemeResName;
-        mCapabilityBindings = capabilityBindings;
+        mCapabilityBindings = cloneCapabilityBindings(capabilityBindings);
     }
 }

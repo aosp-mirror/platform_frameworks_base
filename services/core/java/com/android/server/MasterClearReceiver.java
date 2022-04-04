@@ -169,7 +169,7 @@ public class MasterClearReceiver extends BroadcastReceiver {
 
     private String getWorkProfileDeletedTitle(Context context) {
         final DevicePolicyManager dpm = context.getSystemService(DevicePolicyManager.class);
-        return dpm.getString(WORK_PROFILE_DELETED_TITLE,
+        return dpm.getResources().getString(WORK_PROFILE_DELETED_TITLE,
                 () -> context.getString(R.string.work_profile_deleted));
     }
 

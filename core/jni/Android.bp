@@ -272,6 +272,7 @@ cc_library_shared {
                 "libinput",
                 "libcamera_client",
                 "libcamera_metadata",
+                "libprocinfo",
                 "libsqlite",
                 "libEGL",
                 "libGLESv1_CM",

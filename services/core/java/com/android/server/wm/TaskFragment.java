@@ -405,6 +405,12 @@ class TaskFragment extends WindowContainer<WindowContainer> {
             Slog.d(TAG, "setResumedActivity taskFrag:" + this + " + from: "
                     + mResumedActivity + " to:" + r + " reason:" + reason);
         }
+
+        if (r != null && mResumedActivity == null) {
+            // Task is becoming active.
+            getTask().touchActiveTime();
+        }
+
         final ActivityRecord prevR = mResumedActivity;
         mResumedActivity = r;
         mTaskSupervisor.updateTopResumedActivityIfNeeded();
@@ -518,7 +524,16 @@ class TaskFragment extends WindowContainer<WindowContainer> {
                 || isAllowedToEmbedActivityInTrustedMode(a);
     }
 
+    /**
+     * Checks if the organized task fragment is allowed to embed activity in untrusted mode.
+     */
     boolean isAllowedToEmbedActivityInUntrustedMode(@NonNull ActivityRecord a) {
+        final WindowContainer parent = getParent();
+        if (parent == null || !parent.getBounds().contains(getBounds())) {
+            // Without full trust between the host and the embedded activity, we don't allow
+            // TaskFragment to have bounds outside of the parent bounds.
+            return false;
+        }
         return (a.info.flags & FLAG_ALLOW_UNTRUSTED_ACTIVITY_EMBEDDING)
                 == FLAG_ALLOW_UNTRUSTED_ACTIVITY_EMBEDDING;
     }
@@ -1459,7 +1474,8 @@ class TaskFragment extends WindowContainer<WindowContainer> {
             // next activity.
             final boolean lastResumedCanPip = prev.checkEnterPictureInPictureState(
                     "shouldAutoPipWhilePausing", userLeaving);
-            if (lastResumedCanPip && prev.pictureInPictureArgs.isAutoEnterEnabled()) {
+            if (userLeaving && lastResumedCanPip
+                    && prev.pictureInPictureArgs.isAutoEnterEnabled()) {
                 shouldAutoPip = true;
             } else if (!lastResumedCanPip) {
                 // If the flag RESUME_WHILE_PAUSING is set, then continue to schedule the previous
@@ -1809,8 +1825,6 @@ class TaskFragment extends WindowContainer<WindowContainer> {
             return false;
         }
         if (tda == null) {
-            Slog.w(TAG, "Can't find TaskDisplayArea to determine support for multi"
-                    + " window. Task id=" + getTaskId() + " attached=" + isAttached());
             return false;
         }
         if (!getTask().isResizeable() && !tda.supportsNonResizableMultiWindow()) {
@@ -2424,7 +2438,7 @@ class TaskFragment extends WindowContainer<WindowContainer> {
         // Bounds need to be relative, as the dim layer is a child.
         final Rect dimBounds = getBounds();
         dimBounds.offsetTo(0 /* newLeft */, 0 /* newTop */);
-        if (mDimmer.updateDims(getPendingTransaction(), dimBounds)) {
+        if (mDimmer.updateDims(getSyncTransaction(), dimBounds)) {
             scheduleAnimation();
         }
     }

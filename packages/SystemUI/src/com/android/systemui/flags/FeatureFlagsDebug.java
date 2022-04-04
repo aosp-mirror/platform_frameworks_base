@@ -50,9 +50,9 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.TreeMap;
 import java.util.function.Consumer;
-import java.util.function.Supplier;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 
 /**
  * Concrete implementation of the a Flag manager that returns default values for debug builds
@@ -66,12 +66,13 @@ import javax.inject.Inject;
 @SysUISingleton
 public class FeatureFlagsDebug implements FeatureFlags, Dumpable {
     private static final String TAG = "SysUIFlags";
+    static final String ALL_FLAGS = "all_flags";
 
     private final FlagManager mFlagManager;
     private final SecureSettings mSecureSettings;
     private final Resources mResources;
     private final SystemPropertiesHelper mSystemProperties;
-    private final Supplier<Map<Integer, Flag<?>>> mFlagsCollector;
+    private final Map<Integer, Flag<?>> mAllFlags;
     private final Map<Integer, Boolean> mBooleanFlagCache = new TreeMap<>();
     private final Map<Integer, String> mStringFlagCache = new TreeMap<>();
     private final IStatusBarService mBarService;
@@ -84,13 +85,13 @@ public class FeatureFlagsDebug implements FeatureFlags, Dumpable {
             SystemPropertiesHelper systemProperties,
             @Main Resources resources,
             DumpManager dumpManager,
-            @Nullable Supplier<Map<Integer, Flag<?>>> flagsCollector,
+            @Named(ALL_FLAGS) Map<Integer, Flag<?>> allFlags,
             IStatusBarService barService) {
         mFlagManager = flagManager;
         mSecureSettings = secureSettings;
         mResources = resources;
         mSystemProperties = systemProperties;
-        mFlagsCollector = flagsCollector != null ? flagsCollector : Flags::collectFlags;
+        mAllFlags = allFlags;
         IntentFilter filter = new IntentFilter();
         filter.addAction(ACTION_SET_FLAG);
         filter.addAction(ACTION_GET_FLAGS);
@@ -107,7 +108,7 @@ public class FeatureFlagsDebug implements FeatureFlags, Dumpable {
         int id = flag.getId();
         if (!mBooleanFlagCache.containsKey(id)) {
             mBooleanFlagCache.put(id,
-                    readFlagValue(id, flag.getDefault(), BooleanFlagSerializer.INSTANCE));
+                    readFlagValue(id, flag.getDefault()));
         }
 
         return mBooleanFlagCache.get(id);
@@ -118,8 +119,7 @@ public class FeatureFlagsDebug implements FeatureFlags, Dumpable {
         int id = flag.getId();
         if (!mBooleanFlagCache.containsKey(id)) {
             mBooleanFlagCache.put(id,
-                    readFlagValue(id, mResources.getBoolean(flag.getResourceId()),
-                            BooleanFlagSerializer.INSTANCE));
+                    readFlagValue(id, mResources.getBoolean(flag.getResourceId())));
         }
 
         return mBooleanFlagCache.get(id);
@@ -129,8 +129,13 @@ public class FeatureFlagsDebug implements FeatureFlags, Dumpable {
     public boolean isEnabled(@NonNull SysPropBooleanFlag flag) {
         int id = flag.getId();
         if (!mBooleanFlagCache.containsKey(id)) {
+            // Use #readFlagValue to get the default. That will allow it to fall through to
+            // teamfood if need be.
             mBooleanFlagCache.put(
-                    id, mSystemProperties.getBoolean(flag.getName(), flag.getDefault()));
+                    id,
+                    mSystemProperties.getBoolean(
+                            flag.getName(),
+                            readFlagValue(id, flag.getDefault())));
         }
 
         return mBooleanFlagCache.get(id);
@@ -159,6 +164,19 @@ public class FeatureFlagsDebug implements FeatureFlags, Dumpable {
         }
 
         return mStringFlagCache.get(id);
+    }
+
+    /** Specific override for Boolean flags that checks against the teamfood list.*/
+    private boolean readFlagValue(int id, boolean defaultValue) {
+        Boolean result = readFlagValueInternal(id, BooleanFlagSerializer.INSTANCE);
+        // Only check for teamfood if the default is false.
+        if (!defaultValue && result == null && id != Flags.TEAMFOOD.getId()) {
+            if (mAllFlags.containsKey(id) && mAllFlags.get(id).getTeamfood()) {
+                return isEnabled(Flags.TEAMFOOD);
+            }
+        }
+
+        return result == null ? defaultValue : result;
     }
 
     @NonNull
@@ -266,8 +284,7 @@ public class FeatureFlagsDebug implements FeatureFlags, Dumpable {
             if (ACTION_SET_FLAG.equals(action)) {
                 handleSetFlag(intent.getExtras());
             } else if (ACTION_GET_FLAGS.equals(action)) {
-                Map<Integer, Flag<?>> knownFlagMap = mFlagsCollector.get();
-                ArrayList<Flag<?>> flags = new ArrayList<>(knownFlagMap.values());
+                ArrayList<Flag<?>> flags = new ArrayList<>(mAllFlags.values());
 
                 // Convert all flags to parcelable flags.
                 ArrayList<ParcelableFlag<?>> pFlags = new ArrayList<>();
@@ -296,12 +313,11 @@ public class FeatureFlagsDebug implements FeatureFlags, Dumpable {
                 return;
             }
 
-            Map<Integer, Flag<?>> flagMap = mFlagsCollector.get();
-            if (!flagMap.containsKey(id)) {
+            if (!mAllFlags.containsKey(id)) {
                 Log.w(TAG, "Tried to set unknown id: " + id);
                 return;
             }
-            Flag<?> flag = flagMap.get(id);
+            Flag<?> flag = mAllFlags.get(id);
 
             if (!extras.containsKey(EXTRA_VALUE)) {
                 eraseFlag(flag);
@@ -338,13 +354,16 @@ public class FeatureFlagsDebug implements FeatureFlags, Dumpable {
         @Nullable
         private ParcelableFlag<?> toParcelableFlag(Flag<?> f) {
             if (f instanceof BooleanFlag) {
-                return new BooleanFlag(f.getId(), isEnabled((BooleanFlag) f));
+                return new BooleanFlag(f.getId(), isEnabled((BooleanFlag) f), f.getTeamfood());
             }
             if (f instanceof ResourceBooleanFlag) {
-                return new BooleanFlag(f.getId(), isEnabled((ResourceBooleanFlag) f));
+                return new BooleanFlag(
+                        f.getId(), isEnabled((ResourceBooleanFlag) f), f.getTeamfood());
             }
             if (f instanceof SysPropBooleanFlag) {
-                return new BooleanFlag(f.getId(), isEnabled((SysPropBooleanFlag) f));
+                // TODO(b/223379190): Teamfood not supported for sysprop flags yet.
+                return new BooleanFlag(
+                        f.getId(), isEnabled((SysPropBooleanFlag) f), false);
             }
 
             // TODO: add support for other flag types.

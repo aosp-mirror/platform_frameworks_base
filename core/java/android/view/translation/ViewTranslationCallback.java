@@ -60,7 +60,7 @@ public interface ViewTranslationCallback {
     /**
      * Called when user wants to view the original content instead of the translated content. This
      * method will not be called before {@link View#onViewTranslationResponse} or
-     * {@link View#onViewTranslationResponse}.
+     * {@link View#onVirtualViewTranslationResponses}.
      *
      * @return {@code true} if the View handles hiding the translation.
      */

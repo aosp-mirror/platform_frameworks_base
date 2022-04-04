@@ -89,7 +89,7 @@ public class KeyButtonView extends ImageView implements ButtonInterface {
     public KeyButtonView(Context context, AttributeSet attrs) {
         super(context, attrs);
 
-        // TODO(b/205803355): Figure out better place to set this.
+        // TODO(b/215443343): Figure out better place to set this.
         switch (getId()) {
             case com.android.internal.R.id.input_method_nav_back:
                 mCode = KEYCODE_BACK;
@@ -285,11 +285,11 @@ public class KeyButtonView extends ImageView implements ButtonInterface {
     private void sendEvent(int action, int flags, long when) {
         if (mCode == KeyEvent.KEYCODE_BACK && flags != KeyEvent.FLAG_LONG_PRESS) {
             if (action == MotionEvent.ACTION_UP) {
-                // TODO(b/205803355): Implement notifyBackAction();
+                // TODO(b/215443343): Implement notifyBackAction();
             }
         }
 
-        // TODO(b/205803355): Consolidate this logic to somewhere else.
+        // TODO(b/215443343): Consolidate this logic to somewhere else.
         if (mContext instanceof InputMethodService) {
             final int repeatCount = (flags & KeyEvent.FLAG_LONG_PRESS) != 0 ? 1 : 0;
             final KeyEvent ev = new KeyEvent(mDownTime, when, action, mCode, repeatCount,

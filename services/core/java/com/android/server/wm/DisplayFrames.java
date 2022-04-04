@@ -64,26 +64,26 @@ public class DisplayFrames {
             PrivacyIndicatorBounds indicatorBounds) {
         mDisplayId = displayId;
         mInsetsState = insetsState;
-        onDisplayInfoUpdated(info, displayCutout, roundedCorners, indicatorBounds);
+        update(info, displayCutout, roundedCorners, indicatorBounds);
     }
 
     /**
-     * Update {@link DisplayFrames} when {@link DisplayInfo} is updated.
+     * This is called when {@link DisplayInfo} or {@link PrivacyIndicatorBounds} is updated.
      *
      * @param info the updated {@link DisplayInfo}.
      * @param displayCutout the updated {@link DisplayCutout}.
      * @param roundedCorners the updated {@link RoundedCorners}.
-     * @return {@code true} if the insets state has been changed; {@code false} otherwise.
+     * @param indicatorBounds the updated {@link PrivacyIndicatorBounds}.
+     * @return {@code true} if anything has been changed; {@code false} otherwise.
      */
-    public boolean onDisplayInfoUpdated(DisplayInfo info, @NonNull WmDisplayCutout displayCutout,
+    public boolean update(DisplayInfo info, @NonNull WmDisplayCutout displayCutout,
             @NonNull RoundedCorners roundedCorners,
             @NonNull PrivacyIndicatorBounds indicatorBounds) {
-        mRotation = info.rotation;
-
         final InsetsState state = mInsetsState;
         final Rect safe = mDisplayCutoutSafe;
         final DisplayCutout cutout = displayCutout.getDisplayCutout();
         if (mDisplayWidth == info.logicalWidth && mDisplayHeight == info.logicalHeight
+                && mRotation != info.rotation
                 && state.getDisplayCutout().equals(cutout)
                 && state.getRoundedCorners().equals(roundedCorners)
                 && state.getPrivacyIndicatorBounds().equals(indicatorBounds)) {
@@ -91,6 +91,7 @@ public class DisplayFrames {
         }
         mDisplayWidth = info.logicalWidth;
         mDisplayHeight = info.logicalHeight;
+        mRotation = info.rotation;
         final Rect unrestricted = mUnrestricted;
         unrestricted.set(0, 0, mDisplayWidth, mDisplayHeight);
         state.setDisplayFrame(unrestricted);

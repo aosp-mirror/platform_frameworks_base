@@ -20,7 +20,6 @@ import android.content.res.ColorStateList;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
 import android.graphics.drawable.Drawable;
-import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
@@ -169,12 +168,10 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
                     setSingleLineLayout(getItemTitle(device), true /* bFocused */,
                             true /* showSeekBar */,
                             false /* showProgressBar */, false /* showStatus */);
-                    mCheckBox.setOnCheckedChangeListener(null);
                     mCheckBox.setVisibility(View.VISIBLE);
                     mCheckBox.setChecked(true);
-                    mCheckBox.setOnCheckedChangeListener((buttonView, isChecked) -> {
-                        onCheckBoxClicked(false, device);
-                    });
+                    mSeekBar.setOnClickListener(null);
+                    mSeekBar.setOnClickListener(v -> onGroupActionTriggered(false, device));
                     setCheckBoxColor(mCheckBox, mController.getColorItemContent());
                     initSeekbar(device);
                 } else if (!mController.hasAdjustVolumeUserRestriction() && currentlyConnected) {
@@ -188,17 +185,13 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
                     initSeekbar(device);
                     mCurrentActivePosition = position;
                 } else if (isDeviceIncluded(mController.getSelectableMediaDevice(), device)) {
-                    mCheckBox.setOnCheckedChangeListener(null);
                     mCheckBox.setVisibility(View.VISIBLE);
                     mCheckBox.setChecked(false);
-                    mCheckBox.setOnCheckedChangeListener((buttonView, isChecked) -> {
-                        onCheckBoxClicked(true, device);
-                    });
+                    mContainerLayout.setOnClickListener(v -> onGroupActionTriggered(true, device));
                     setCheckBoxColor(mCheckBox, mController.getColorItemContent());
                     setSingleLineLayout(getItemTitle(device), false /* bFocused */,
                             false /* showSeekBar */,
                             false /* showProgressBar */, false /* showStatus */);
-                    mContainerLayout.setOnClickListener(v -> onItemClick(v, device));
                 } else {
                     setSingleLineLayout(getItemTitle(device), false /* bFocused */);
                     mContainerLayout.setOnClickListener(v -> onItemClick(v, device));
@@ -228,22 +221,13 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
             }
         }
 
-        private void onCheckBoxClicked(boolean isChecked, MediaDevice device) {
+        private void onGroupActionTriggered(boolean isChecked, MediaDevice device) {
             if (isChecked && isDeviceIncluded(mController.getSelectableMediaDevice(), device)) {
                 mController.addDeviceToPlayMedia(device);
             } else if (!isChecked && isDeviceIncluded(mController.getDeselectableMediaDevice(),
                     device)) {
                 mController.removeDeviceFromPlayMedia(device);
             }
-        }
-
-        private boolean isDeviceIncluded(List<MediaDevice> deviceList, MediaDevice targetDevice) {
-            for (MediaDevice device : deviceList) {
-                if (TextUtils.equals(device.getId(), targetDevice.getId())) {
-                    return true;
-                }
-            }
-            return false;
         }
 
         private void onItemClick(View view, MediaDevice device) {

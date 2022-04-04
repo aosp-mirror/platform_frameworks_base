@@ -253,7 +253,8 @@ public final class BackgroundDexOptService {
      *
      * <p>This is only for shell command and only root or shell user can use this.
      *
-     * @param packageNames dex optimize the passed packages or all packages if null
+     * @param packageNames dex optimize the passed packages in the given order, or all packages in
+     *         the default order if null
      *
      * @return true if dex optimization is complete. false if the task is cancelled or if there was
      *         an error.
@@ -268,11 +269,11 @@ public final class BackgroundDexOptService {
                 resetStatesForNewDexOptRunLocked(Thread.currentThread());
             }
             PackageManagerService pm = mInjector.getPackageManagerService();
-            ArraySet<String> packagesToOptimize;
+            List<String> packagesToOptimize;
             if (packageNames == null) {
                 packagesToOptimize = mDexOptHelper.getOptimizablePackages(pm.snapshotComputer());
             } else {
-                packagesToOptimize = new ArraySet<>(packageNames);
+                packagesToOptimize = packageNames;
             }
             return runIdleOptimization(pm, packagesToOptimize, /* isPostBootUpdate= */ false);
         } finally {
@@ -335,7 +336,7 @@ public final class BackgroundDexOptService {
             return false;
         }
 
-        ArraySet<String> pkgs = mDexOptHelper.getOptimizablePackages(pm.snapshotComputer());
+        List<String> pkgs = mDexOptHelper.getOptimizablePackages(pm.snapshotComputer());
         if (pkgs.isEmpty()) {
             Slog.i(TAG, "No packages to optimize");
             markPostBootUpdateCompleted(params);
@@ -525,7 +526,7 @@ public final class BackgroundDexOptService {
     }
 
     /** Returns true if completed */
-    private boolean runIdleOptimization(PackageManagerService pm, ArraySet<String> pkgs,
+    private boolean runIdleOptimization(PackageManagerService pm, List<String> pkgs,
             boolean isPostBootUpdate) {
         synchronized (mLock) {
             mLastExecutionStartTimeMs = SystemClock.elapsedRealtime();
@@ -581,10 +582,9 @@ public final class BackgroundDexOptService {
     }
 
     @Status
-    private int idleOptimizePackages(PackageManagerService pm, ArraySet<String> pkgs,
+    private int idleOptimizePackages(PackageManagerService pm, List<String> pkgs,
             long lowStorageThreshold, boolean isPostBootUpdate) {
         ArraySet<String> updatedPackages = new ArraySet<>();
-        ArraySet<String> updatedPackagesDueToSecondaryDex = new ArraySet<>();
 
         try {
             boolean supportSecondaryDex = mInjector.supportSecondaryDex();
@@ -640,25 +640,12 @@ public final class BackgroundDexOptService {
                         }
                     }
 
-                    pkgs = new ArraySet<>(pkgs);
+                    pkgs = new ArrayList<>(pkgs);
                     pkgs.removeAll(unusedPackages);
                 }
             }
 
-            @Status int primaryResult = optimizePackages(pkgs, lowStorageThreshold,
-                    /*isForPrimaryDex=*/ true, updatedPackages, isPostBootUpdate);
-            if (primaryResult != STATUS_OK) {
-                return primaryResult;
-            }
-
-            if (!supportSecondaryDex) {
-                return STATUS_OK;
-            }
-
-            @Status int secondaryResult = optimizePackages(pkgs, lowStorageThreshold,
-                    /*isForPrimaryDex*/ false, updatedPackagesDueToSecondaryDex,
-                    isPostBootUpdate);
-            return secondaryResult;
+            return optimizePackages(pkgs, lowStorageThreshold, updatedPackages, isPostBootUpdate);
         } finally {
             // Always let the pinner service know about changes.
             notifyPinService(updatedPackages);
@@ -670,8 +657,10 @@ public final class BackgroundDexOptService {
     }
 
     @Status
-    private int optimizePackages(ArraySet<String> pkgs, long lowStorageThreshold,
-            boolean isForPrimaryDex, ArraySet<String> updatedPackages, boolean isPostBootUpdate) {
+    private int optimizePackages(List<String> pkgs, long lowStorageThreshold,
+            ArraySet<String> updatedPackages, boolean isPostBootUpdate) {
+        boolean supportSecondaryDex = mInjector.supportSecondaryDex();
+
         for (String pkg : pkgs) {
             int abortCode = abortIdleOptimizations(lowStorageThreshold);
             if (abortCode != STATUS_OK) {
@@ -679,11 +668,23 @@ public final class BackgroundDexOptService {
                 return abortCode;
             }
 
-            @DexOptResult int result = optimizePackage(pkg, isForPrimaryDex, isPostBootUpdate);
-            if (result == PackageDexOptimizer.DEX_OPT_PERFORMED) {
+            @DexOptResult int primaryResult =
+                    optimizePackage(pkg, true /* isForPrimaryDex */, isPostBootUpdate);
+            if (primaryResult == PackageDexOptimizer.DEX_OPT_PERFORMED) {
                 updatedPackages.add(pkg);
-            } else if (result != PackageDexOptimizer.DEX_OPT_SKIPPED) {
-                return convertPackageDexOptimizerStatusToInternal(result);
+            } else if (primaryResult != PackageDexOptimizer.DEX_OPT_SKIPPED) {
+                return convertPackageDexOptimizerStatusToInternal(primaryResult);
+            }
+
+            if (!supportSecondaryDex) {
+                continue;
+            }
+
+            @DexOptResult int secondaryResult =
+                    optimizePackage(pkg, false /* isForPrimaryDex */, isPostBootUpdate);
+            if (secondaryResult != PackageDexOptimizer.DEX_OPT_PERFORMED
+                    && secondaryResult != PackageDexOptimizer.DEX_OPT_SKIPPED) {
+                return convertPackageDexOptimizerStatusToInternal(secondaryResult);
             }
         }
         return STATUS_OK;

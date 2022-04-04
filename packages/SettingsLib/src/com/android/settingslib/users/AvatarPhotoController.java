@@ -78,6 +78,11 @@ class AvatarPhotoController {
     static final int REQUEST_CODE_TAKE_PHOTO = 1002;
     static final int REQUEST_CODE_CROP_PHOTO = 1003;
 
+    /**
+     * Delay to allow the photo picker exit animation to complete before the crop activity opens.
+     */
+    private static final long DELAY_BEFORE_CROP_MILLIS = 150;
+
     private static final String IMAGES_DIR = "multi_user";
     private static final String PRE_CROP_PICTURE_FILE_NAME = "PreCropEditUserPhoto.jpg";
     private static final String CROP_PICTURE_FILE_NAME = "CropEditUserPhoto.jpg";
@@ -131,12 +136,14 @@ class AvatarPhotoController {
                 mAvatarUi.returnUriResult(pictureUri);
                 return true;
             case REQUEST_CODE_TAKE_PHOTO:
-            case REQUEST_CODE_CHOOSE_PHOTO:
                 if (mTakePictureUri.equals(pictureUri)) {
                     cropPhoto(pictureUri);
                 } else {
-                    copyAndCropPhoto(pictureUri);
+                    copyAndCropPhoto(pictureUri, false);
                 }
+                return true;
+            case REQUEST_CODE_CHOOSE_PHOTO:
+                copyAndCropPhoto(pictureUri, true);
                 return true;
         }
         return false;
@@ -154,7 +161,7 @@ class AvatarPhotoController {
         mAvatarUi.startActivityForResult(intent, REQUEST_CODE_CHOOSE_PHOTO);
     }
 
-    private void copyAndCropPhoto(final Uri pictureUri) {
+    private void copyAndCropPhoto(final Uri pictureUri, boolean delayBeforeCrop) {
         try {
             ThreadUtils.postOnBackgroundThread(() -> {
                 final ContentResolver cr = mContextInjector.getContentResolver();
@@ -165,11 +172,17 @@ class AvatarPhotoController {
                     Log.w(TAG, "Failed to copy photo", e);
                     return;
                 }
-                ThreadUtils.postOnMainThread(() -> {
+                Runnable cropRunnable = () -> {
                     if (!mAvatarUi.isFinishing()) {
                         cropPhoto(mPreCropPictureUri);
                     }
-                });
+                };
+                if (delayBeforeCrop) {
+                    ThreadUtils.postOnMainThreadDelayed(cropRunnable, DELAY_BEFORE_CROP_MILLIS);
+                } else {
+                    ThreadUtils.postOnMainThread(cropRunnable);
+                }
+
             }).get();
         } catch (InterruptedException | ExecutionException e) {
             Log.e(TAG, "Error performing copy-and-crop", e);

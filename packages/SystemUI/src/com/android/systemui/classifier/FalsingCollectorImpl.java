@@ -77,7 +77,7 @@ class FalsingCollectorImpl implements FalsingCollector {
             new StatusBarStateController.StateListener() {
                 @Override
                 public void onStateChanged(int newState) {
-                    logDebug("StatusBarState=" + StatusBarState.toShortString(newState));
+                    logDebug("StatusBarState=" + StatusBarState.toString(newState));
                     mState = newState;
                     updateSessionActive();
                 }

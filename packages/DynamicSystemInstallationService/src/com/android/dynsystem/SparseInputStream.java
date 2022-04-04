@@ -133,36 +133,32 @@ public class SparseInputStream extends InputStream {
         return mLeft == 0;
     }
 
-    /**
-     * It overrides the InputStream.read(byte[] buf)
-     */
-    public int read(byte[] buf) throws IOException {
+    @Override
+    public int read(byte[] buf, int off, int len) throws IOException {
         if (!mIsSparse) {
-            return mIn.read(buf);
+            return mIn.read(buf, off, len);
         }
         if (prepareChunk()) return -1;
         int n = -1;
         switch (mCur.mChunkType) {
             case SparseChunk.RAW:
-                n = mIn.read(buf, 0, (int) min(mLeft, buf.length));
+                n = mIn.read(buf, off, (int) min(mLeft, len));
                 mLeft -= n;
                 return n;
             case SparseChunk.DONTCARE:
-                n = (int) min(mLeft, buf.length);
-                Arrays.fill(buf, 0, n - 1, (byte) 0);
+                n = (int) min(mLeft, len);
+                Arrays.fill(buf, off, off + n, (byte) 0);
                 mLeft -= n;
                 return n;
             case SparseChunk.FILL:
                 // The FILL type is rarely used, so use a simple implmentation.
-                return super.read(buf);
+                return super.read(buf, off, len);
             default:
                 throw new IOException("Unsupported Chunk:" + mCur.toString());
         }
     }
 
-    /**
-     * It overrides the InputStream.read()
-     */
+    @Override
     public int read() throws IOException {
         if (!mIsSparse) {
             return mIn.read();

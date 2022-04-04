@@ -45,6 +45,7 @@ import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Pair;
 import android.util.SparseArray;
+import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
@@ -571,6 +572,34 @@ public interface Computer extends PackageDataSnapshot {
     @NonNull
     WatchedArrayMap<String, Integer> getFrozenPackages();
 
+    /**
+     * Verify that given package is currently frozen.
+     */
+    void checkPackageFrozen(@NonNull String packageName);
+
     @Nullable
     ComponentName getInstantAppInstallerComponent();
+
+    void dumpPermissions(@NonNull PrintWriter pw, @NonNull String packageName,
+            @NonNull ArraySet<String> permissionNames, @NonNull DumpState dumpState);
+
+    void dumpPackages(PrintWriter pw, @NonNull String packageName,
+            @NonNull ArraySet<String> permissionNames, @NonNull DumpState dumpState,
+            boolean checkin);
+
+    void dumpKeySet(@NonNull PrintWriter pw, @NonNull String packageName,
+            @NonNull DumpState dumpState);
+
+    void dumpSharedUsers(@NonNull PrintWriter pw, @NonNull String packageName,
+            @NonNull ArraySet<String> permissionNames,
+            @NonNull DumpState dumpState, boolean checkin);
+
+    void dumpSharedUsersProto(@NonNull ProtoOutputStream proto);
+
+    void dumpPackagesProto(@NonNull ProtoOutputStream proto);
+
+    void dumpSharedLibrariesProto(@NonNull ProtoOutputStream protoOutputStream);
+
+    @NonNull
+    List<? extends PackageStateInternal> getVolumePackages(@NonNull String volumeUuid);
 }

@@ -27,4 +27,16 @@
         <item name="android:background">@*android:drawable/btn_borderless_rect</item>
         <item name="android:gravity">center</item>
     </style>
+
+    <style name="TextAppearance.ErrorText"
+           parent="@*android:TextAppearance.DeviceDefault.Body1">
+        <item name="android:textColor">?android:attr/colorError</item>
+    </style>
+
+    <style name="QrCodeScanner">
+        <item name="android:fontFamily">@*android:string/config_headlineFontFamily</item>
+        <item name="android:textSize">16sp</item>
+        <item name="android:textColor">?android:attr/textColorPrimary</item>
+        <item name="android:textDirection">locale</item>
+    </style>
 </resources>

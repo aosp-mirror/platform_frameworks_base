@@ -51,6 +51,7 @@ import android.os.Parcel;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.UserHandle;
+import android.util.Log;
 import android.util.PackageUtils;
 import android.util.Slog;
 
@@ -332,13 +333,28 @@ class AssociationRequestsProcessor {
             }
         }
 
-        String[] sameOemPackages = mContext.getResources()
+        // Below we check if the requesting package is allowlisted (usually by the OEM) for creating
+        // CDM associations without user confirmation (prompt).
+        // For this we'll check to config arrays:
+        // - com.android.internal.R.array.config_companionDevicePackages
+        // and
+        // - com.android.internal.R.array.config_companionDeviceCerts.
+        // Both arrays are expected to contain similar number of entries.
+        // config_companionDevicePackages contains package names of the allowlisted packages.
+        // config_companionDeviceCerts contains SHA256 digests of the signatures of the
+        // corresponding packages.
+        // If a package may be signed with one of several certificates, its package name would
+        // appear multiple times in the config_companionDevicePackages, with different entries
+        // (one for each of the valid signing certificates) at the corresponding positions in
+        // config_companionDeviceCerts.
+        final String[] allowlistedPackages = mContext.getResources()
                 .getStringArray(com.android.internal.R.array.config_companionDevicePackages);
-        if (!ArrayUtils.contains(sameOemPackages, packageName)) {
-            Slog.w(TAG, packageName
-                    + " can not silently create associations due to no package found."
-                    + " Packages from OEM: " + Arrays.toString(sameOemPackages)
-            );
+        if (!ArrayUtils.contains(allowlistedPackages, packageName)) {
+            if (DEBUG) {
+                Log.d(TAG, packageName + " is not allowlisted for creating associations "
+                        + "without user confirmation (prompt)");
+                Log.v(TAG, "Allowlisted packages=" + Arrays.toString(allowlistedPackages));
+            }
             return false;
         }
 
@@ -361,44 +377,41 @@ class AssociationRequestsProcessor {
             }
         }
 
-        String[] sameOemCerts = mContext.getResources()
+        final String[] allowlistedPackagesSignatureDigests = mContext.getResources()
                 .getStringArray(com.android.internal.R.array.config_companionDeviceCerts);
-
-        Signature[] signatures = mPackageManager.getPackage(packageName).getSigningDetails()
-                .getSignatures();
-        String[] apkCerts = PackageUtils.computeSignaturesSha256Digests(signatures);
-
-        Set<String> sameOemPackageCerts =
-                getSameOemPackageCerts(packageName, sameOemPackages, sameOemCerts);
-
-        for (String cert : apkCerts) {
-            if (sameOemPackageCerts.contains(cert)) {
-                return true;
+        final Set<String> allowlistedSignatureDigestsForRequestingPackage = new HashSet<>();
+        for (int i = 0; i < allowlistedPackages.length; i++) {
+            if (allowlistedPackages[i].equals(packageName)) {
+                final String digest = allowlistedPackagesSignatureDigests[i].replaceAll(":", "");
+                allowlistedSignatureDigestsForRequestingPackage.add(digest);
             }
         }
 
-        Slog.w(TAG, packageName
-                + " can not silently create associations. " + packageName
-                + " has SHA256 certs from APK: " + Arrays.toString(apkCerts)
-                + " and from OEM: " + Arrays.toString(sameOemCerts)
-        );
+        final Signature[] requestingPackageSignatures = mPackageManager.getPackage(packageName)
+                .getSigningDetails().getSignatures();
+        final String[] requestingPackageSignatureDigests =
+                PackageUtils.computeSignaturesSha256Digests(requestingPackageSignatures);
 
-        return false;
-    }
-
-    private static Set<String> getSameOemPackageCerts(
-            String packageName, String[] oemPackages, String[] sameOemCerts) {
-        Set<String> sameOemPackageCerts = new HashSet<>();
-
-        // Assume OEM may enter same package name in the parallel string array with
-        // multiple APK certs corresponding to it
-        for (int i = 0; i < oemPackages.length; i++) {
-            if (oemPackages[i].equals(packageName)) {
-                sameOemPackageCerts.add(sameOemCerts[i].replaceAll(":", ""));
+        boolean requestingPackageSignatureAllowlisted = false;
+        for (String signatureDigest : requestingPackageSignatureDigests) {
+            if (allowlistedSignatureDigestsForRequestingPackage.contains(signatureDigest)) {
+                requestingPackageSignatureAllowlisted = true;
+                break;
             }
         }
 
-        return sameOemPackageCerts;
+        if (!requestingPackageSignatureAllowlisted) {
+            Slog.w(TAG, "Certificate mismatch for allowlisted package " + packageName);
+            if (DEBUG) {
+                Log.d(TAG, "  > allowlisted signatures for " + packageName + ": ["
+                        + String.join(", ", allowlistedSignatureDigestsForRequestingPackage)
+                        + "]");
+                Log.d(TAG, "  > actual signatures for " + packageName + ": "
+                        + Arrays.toString(requestingPackageSignatureDigests));
+            }
+        }
+
+        return requestingPackageSignatureAllowlisted;
     }
 
     /**

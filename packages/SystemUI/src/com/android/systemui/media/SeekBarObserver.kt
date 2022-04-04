@@ -27,28 +27,17 @@ import com.android.systemui.R
  * <p>Updates the seek bar views in response to changes to the model.
  */
 class SeekBarObserver(
-    private val holder: MediaViewHolder,
-    private val useSessionLayout: Boolean
+    private val holder: MediaViewHolder
 ) : Observer<SeekBarViewModel.Progress> {
 
     val seekBarEnabledMaxHeight = holder.seekBar.context.resources
         .getDimensionPixelSize(R.dimen.qs_media_enabled_seekbar_height)
     val seekBarDisabledHeight = holder.seekBar.context.resources
         .getDimensionPixelSize(R.dimen.qs_media_disabled_seekbar_height)
-    val seekBarEnabledVerticalPadding = if (useSessionLayout) {
-        holder.seekBar.context.resources
+    val seekBarEnabledVerticalPadding = holder.seekBar.context.resources
                 .getDimensionPixelSize(R.dimen.qs_media_session_enabled_seekbar_vertical_padding)
-    } else {
-        holder.seekBar.context.resources
-                .getDimensionPixelSize(R.dimen.qs_media_enabled_seekbar_vertical_padding)
-    }
-    val seekBarDisabledVerticalPadding = if (useSessionLayout) {
-        holder.seekBar.context.resources
+    val seekBarDisabledVerticalPadding = holder.seekBar.context.resources
                 .getDimensionPixelSize(R.dimen.qs_media_session_disabled_seekbar_vertical_padding)
-    } else {
-        holder.seekBar.context.resources
-                .getDimensionPixelSize(R.dimen.qs_media_disabled_seekbar_vertical_padding)
-    }
 
     init {
         val seekBarProgressWavelength = holder.seekBar.context.resources
@@ -89,7 +78,7 @@ class SeekBarObserver(
 
         holder.seekBar.thumb.alpha = if (data.seekAvailable) 255 else 0
         holder.seekBar.isEnabled = data.seekAvailable
-        progressDrawable?.animate = data.playing
+        progressDrawable?.animate = data.playing && !data.scrubbing
 
         if (holder.seekBar.maxHeight != seekBarEnabledMaxHeight) {
             holder.seekBar.maxHeight = seekBarEnabledMaxHeight

@@ -51,12 +51,12 @@ class CompanionDeviceServiceConnector extends ServiceConnector.Impl<ICompanionDe
         void onBindingDied(@UserIdInt int userId, @NonNull String packageName);
     }
 
-    @UserIdInt
-    private final int mUserId;
-    @NonNull
-    private final ComponentName mComponentName;
-    @Nullable
-    private Listener mListener;
+    private final @UserIdInt int mUserId;
+    private final @NonNull ComponentName mComponentName;
+    // IMPORTANT: this can (and will!) be null (at the moment, CompanionApplicationController only
+    // installs a listener to the primary ServiceConnector), hence we should always null-check the
+    // reference before calling on it.
+    private @Nullable Listener mListener;
 
     /**
      * Create a CompanionDeviceServiceConnector instance.
@@ -125,7 +125,9 @@ class CompanionDeviceServiceConnector extends ServiceConnector.Impl<ICompanionDe
 
         if (DEBUG) Log.d(TAG, "onBindingDied() " + mComponentName.toShortString());
 
-        mListener.onBindingDied(mUserId, mComponentName.getPackageName());
+        if (mListener != null) {
+            mListener.onBindingDied(mUserId, mComponentName.getPackageName());
+        }
     }
 
     @Override

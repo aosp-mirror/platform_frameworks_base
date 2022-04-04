@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 The Android Open Source Project
+ * Copyright 2021 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@ import android.media.tv.TvTrackInfo;
 import android.media.tv.interactive.AppLinkInfo;
 import android.media.tv.interactive.ITvInteractiveAppClient;
 import android.media.tv.interactive.ITvInteractiveAppManagerCallback;
-import android.media.tv.interactive.TvInteractiveAppInfo;
+import android.media.tv.interactive.TvInteractiveAppServiceInfo;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.Surface;
@@ -33,8 +33,7 @@ import android.view.Surface;
  * @hide
  */
 interface ITvInteractiveAppManager {
-    List<TvInteractiveAppInfo> getTvInteractiveAppServiceList(int userId);
-    void prepare(String tiasId, int type, int userId);
+    List<TvInteractiveAppServiceInfo> getTvInteractiveAppServiceList(int userId);
     void registerAppLinkInfo(String tiasId, in AppLinkInfo info, int userId);
     void unregisterAppLinkInfo(String tiasId, in AppLinkInfo info, int userId);
     void sendAppLinkCommand(String tiasId, in Bundle command, int userId);
@@ -50,6 +49,9 @@ interface ITvInteractiveAppManager {
     void sendStreamVolume(in IBinder sessionToken, float volume, int userId);
     void sendTrackInfoList(in IBinder sessionToken, in List<TvTrackInfo> tracks, int userId);
     void sendCurrentTvInputId(in IBinder sessionToken, in String inputId, int userId);
+    void sendSigningResult(in IBinder sessionToken, in String signingId, in byte[] result,
+            int userId);
+    void notifyError(in IBinder sessionToken, in String errMsg, in Bundle params, int userId);
     void createSession(in ITvInteractiveAppClient client, in String iAppServiceId, int type,
             int seq, int userId);
     void releaseSession(in IBinder sessionToken, int userId);

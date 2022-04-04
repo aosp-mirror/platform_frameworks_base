@@ -20,6 +20,7 @@ import static android.Manifest.permission.CAPTURE_AUDIO_HOTWORD;
 import static android.Manifest.permission.RECORD_AUDIO;
 import static android.service.voice.HotwordDetectionService.AUDIO_SOURCE_EXTERNAL;
 import static android.service.voice.HotwordDetectionService.AUDIO_SOURCE_MICROPHONE;
+import static android.service.voice.HotwordDetectionService.INITIALIZATION_STATUS_SUCCESS;
 import static android.service.voice.HotwordDetectionService.INITIALIZATION_STATUS_UNKNOWN;
 import static android.service.voice.HotwordDetectionService.KEY_INITIALIZATION_STATUS;
 
@@ -330,15 +331,16 @@ final class HotwordDetectionConnection {
             return new Pair<>(INITIALIZATION_STATUS_UNKNOWN, METRICS_INIT_UNKNOWN_NO_VALUE);
         }
         int status = bundle.getInt(KEY_INITIALIZATION_STATUS, INITIALIZATION_STATUS_UNKNOWN);
-        if (status > HotwordDetectionService.getMaxCustomInitializationStatus()
-                && status != INITIALIZATION_STATUS_UNKNOWN) {
+        if (status > HotwordDetectionService.getMaxCustomInitializationStatus()) {
             return new Pair<>(INITIALIZATION_STATUS_UNKNOWN,
-                    METRICS_INIT_UNKNOWN_OVER_MAX_CUSTOM_VALUE);
+                    status == INITIALIZATION_STATUS_UNKNOWN
+                    ? METRICS_INIT_UNKNOWN_NO_VALUE
+                    : METRICS_INIT_UNKNOWN_OVER_MAX_CUSTOM_VALUE);
         }
         // TODO: should guard against negative here
-        int metricsResult = status == INITIALIZATION_STATUS_UNKNOWN
-                ? METRICS_INIT_CALLBACK_STATE_ERROR
-                : METRICS_INIT_CALLBACK_STATE_SUCCESS;
+        int metricsResult = status == INITIALIZATION_STATUS_SUCCESS
+                ? METRICS_INIT_CALLBACK_STATE_SUCCESS
+                : METRICS_INIT_CALLBACK_STATE_ERROR;
         return new Pair<>(status, metricsResult);
     }
 
@@ -677,6 +679,7 @@ final class HotwordDetectionConnection {
     private void restartProcessLocked() {
         Slog.v(TAG, "Restarting hotword detection process");
         ServiceConnection oldConnection = mRemoteHotwordDetectionService;
+        HotwordDetectionServiceIdentity previousIdentity = mIdentity;
 
         // TODO(volnov): this can be done after connect() has been successful.
         if (mValidatingDspTrigger) {
@@ -720,6 +723,9 @@ final class HotwordDetectionConnection {
         }
         oldConnection.ignoreConnectionStatusEvents();
         oldConnection.unbind();
+        if (previousIdentity != null) {
+            removeServiceUidForAudioPolicy(previousIdentity.getIsolatedUid());
+        }
     }
 
     static final class SoundTriggerCallback extends IRecognitionStatusCallback.Stub {

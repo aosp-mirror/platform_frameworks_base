@@ -44,6 +44,7 @@ using SingleSatCorrection_Aidl =
 using ReflectingPlane_V1_0 =
         android::hardware::gnss::measurement_corrections::V1_0::ReflectingPlane;
 using ReflectingPlane_Aidl = android::hardware::gnss::measurement_corrections::ReflectingPlane;
+using ExcessPathInfo = SingleSatCorrection_Aidl::ExcessPathInfo;
 using GnssConstellationType_V1_0 = android::hardware::gnss::V1_0::GnssConstellationType;
 using GnssConstellationType_V2_0 = android::hardware::gnss::V2_0::GnssConstellationType;
 using GnssConstellationType_Aidl = android::hardware::gnss::GnssConstellationType;
@@ -62,7 +63,7 @@ jmethodID method_correctionsHasEnvironmentBearing;
 jmethodID method_correctionsGetEnvironmentBearingDegrees;
 jmethodID method_correctionsGetEnvironmentBearingUncertaintyDegrees;
 jmethodID method_listSize;
-jmethodID method_correctionListGet;
+jmethodID method_listGet;
 jmethodID method_correctionSatFlags;
 jmethodID method_correctionSatConstType;
 jmethodID method_correctionSatId;
@@ -71,10 +72,17 @@ jmethodID method_correctionSatIsLosProb;
 jmethodID method_correctionSatEpl;
 jmethodID method_correctionSatEplUnc;
 jmethodID method_correctionSatRefPlane;
+jmethodID method_correctionSatAttenuation;
+jmethodID method_correctionSatExcessPathInfoList;
 jmethodID method_correctionPlaneLatDeg;
 jmethodID method_correctionPlaneLngDeg;
 jmethodID method_correctionPlaneAltDeg;
 jmethodID method_correctionPlaneAzimDeg;
+jmethodID method_excessPathInfoFlags;
+jmethodID method_excessPathInfoEpl;
+jmethodID method_excessPathInfoEplUnc;
+jmethodID method_excessPathInfoRefPlane;
+jmethodID method_excessPathInfoAttenuation;
 } // anonymous namespace
 
 void MeasurementCorrections_class_init_once(JNIEnv* env, jclass clazz) {
@@ -103,7 +111,7 @@ void MeasurementCorrections_class_init_once(JNIEnv* env, jclass clazz) {
 
     jclass corrListClass = env->FindClass("java/util/List");
     method_listSize = env->GetMethodID(corrListClass, "size", "()I");
-    method_correctionListGet = env->GetMethodID(corrListClass, "get", "(I)Ljava/lang/Object;");
+    method_listGet = env->GetMethodID(corrListClass, "get", "(I)Ljava/lang/Object;");
 
     jclass singleSatCorrClass = env->FindClass("android/location/GnssSingleSatCorrection");
     method_correctionSatFlags =
@@ -121,12 +129,27 @@ void MeasurementCorrections_class_init_once(JNIEnv* env, jclass clazz) {
             env->GetMethodID(singleSatCorrClass, "getExcessPathLengthUncertaintyMeters", "()F");
     method_correctionSatRefPlane = env->GetMethodID(singleSatCorrClass, "getReflectingPlane",
                                                     "()Landroid/location/GnssReflectingPlane;");
+    method_correctionSatAttenuation =
+            env->GetMethodID(singleSatCorrClass, "getCombinedAttenuationDb", "()F");
+    method_correctionSatExcessPathInfoList =
+            env->GetMethodID(singleSatCorrClass, "getGnssExcessPathInfoList", "()Ljava/util/List;");
 
     jclass refPlaneClass = env->FindClass("android/location/GnssReflectingPlane");
     method_correctionPlaneLatDeg = env->GetMethodID(refPlaneClass, "getLatitudeDegrees", "()D");
     method_correctionPlaneLngDeg = env->GetMethodID(refPlaneClass, "getLongitudeDegrees", "()D");
     method_correctionPlaneAltDeg = env->GetMethodID(refPlaneClass, "getAltitudeMeters", "()D");
     method_correctionPlaneAzimDeg = env->GetMethodID(refPlaneClass, "getAzimuthDegrees", "()D");
+
+    jclass excessPathInfoClass = env->FindClass("android/location/GnssExcessPathInfo");
+    method_excessPathInfoFlags = env->GetMethodID(excessPathInfoClass, "getFlags", "()I");
+    method_excessPathInfoEpl =
+            env->GetMethodID(excessPathInfoClass, "getExcessPathLengthMeters", "()F");
+    method_excessPathInfoEplUnc =
+            env->GetMethodID(excessPathInfoClass, "getExcessPathLengthUncertaintyMeters", "()F");
+    method_excessPathInfoRefPlane = env->GetMethodID(excessPathInfoClass, "getReflectingPlane",
+                                                     "()Landroid/location/GnssReflectingPlane;");
+    method_excessPathInfoAttenuation =
+            env->GetMethodID(excessPathInfoClass, "getAttenuationDb", "()F");
 }
 
 template <>
@@ -324,7 +347,8 @@ jboolean MeasurementCorrectionsIface_V1_1::setCallback(
 SingleSatCorrection_V1_0
 MeasurementCorrectionsUtil::getSingleSatCorrection_1_0_withoutConstellation(
         JNIEnv* env, jobject singleSatCorrectionObj) {
-    jint correctionFlags = env->CallIntMethod(singleSatCorrectionObj, method_correctionSatFlags);
+    uint16_t corrFlags = static_cast<uint16_t>(
+            env->CallIntMethod(singleSatCorrectionObj, method_correctionSatFlags));
     jint satId = env->CallIntMethod(singleSatCorrectionObj, method_correctionSatId);
     jfloat carrierFreqHz =
             env->CallFloatMethod(singleSatCorrectionObj, method_correctionSatCarrierFreq);
@@ -332,14 +356,16 @@ MeasurementCorrectionsUtil::getSingleSatCorrection_1_0_withoutConstellation(
             env->CallFloatMethod(singleSatCorrectionObj, method_correctionSatIsLosProb);
     jfloat eplMeters = env->CallFloatMethod(singleSatCorrectionObj, method_correctionSatEpl);
     jfloat eplUncMeters = env->CallFloatMethod(singleSatCorrectionObj, method_correctionSatEplUnc);
-    uint16_t corrFlags = static_cast<uint16_t>(correctionFlags);
 
     ReflectingPlane_V1_0 reflectingPlane;
-    if ((corrFlags & GnssSingleSatCorrectionFlags_V1_0::HAS_REFLECTING_PLANE) != 0)
-        MeasurementCorrectionsUtil::getReflectingPlane<ReflectingPlane_V1_0>(env,
-                                                                             singleSatCorrectionObj,
+    if ((corrFlags & GnssSingleSatCorrectionFlags_V1_0::HAS_REFLECTING_PLANE) != 0) {
+        jobject reflectingPlaneObj =
+                env->CallObjectMethod(singleSatCorrectionObj, method_correctionSatRefPlane);
+        MeasurementCorrectionsUtil::setReflectingPlane<ReflectingPlane_V1_0>(env,
+                                                                             reflectingPlaneObj,
                                                                              reflectingPlane);
-
+        env->DeleteLocalRef(reflectingPlaneObj);
+    }
     SingleSatCorrection_V1_0 singleSatCorrection = {
             .singleSatCorrectionFlags = corrFlags,
             .svid = static_cast<uint16_t>(satId),
@@ -349,13 +375,14 @@ MeasurementCorrectionsUtil::getSingleSatCorrection_1_0_withoutConstellation(
             .excessPathLengthUncertaintyMeters = eplUncMeters,
             .reflectingPlane = reflectingPlane,
     };
-
     return singleSatCorrection;
 }
 
 SingleSatCorrection_Aidl MeasurementCorrectionsUtil::getSingleSatCorrection_Aidl(
         JNIEnv* env, jobject singleSatCorrectionObj) {
-    jint correctionFlags = env->CallIntMethod(singleSatCorrectionObj, method_correctionSatFlags);
+    int32_t corrFlags = static_cast<int32_t>(
+            env->CallIntMethod(singleSatCorrectionObj, method_correctionSatFlags));
+    jint constType = env->CallIntMethod(singleSatCorrectionObj, method_correctionSatConstType);
     jint satId = env->CallIntMethod(singleSatCorrectionObj, method_correctionSatId);
     jfloat carrierFreqHz =
             env->CallFloatMethod(singleSatCorrectionObj, method_correctionSatCarrierFreq);
@@ -363,15 +390,10 @@ SingleSatCorrection_Aidl MeasurementCorrectionsUtil::getSingleSatCorrection_Aidl
             env->CallFloatMethod(singleSatCorrectionObj, method_correctionSatIsLosProb);
     jfloat eplMeters = env->CallFloatMethod(singleSatCorrectionObj, method_correctionSatEpl);
     jfloat eplUncMeters = env->CallFloatMethod(singleSatCorrectionObj, method_correctionSatEplUnc);
-    int32_t corrFlags = static_cast<int32_t>(correctionFlags);
-
-    ReflectingPlane_Aidl reflectingPlane;
-    if ((corrFlags & SingleSatCorrection_Aidl::SINGLE_SAT_CORRECTION_HAS_REFLECTING_PLANE) != 0)
-        MeasurementCorrectionsUtil::getReflectingPlane<ReflectingPlane_Aidl>(env,
-                                                                             singleSatCorrectionObj,
-                                                                             reflectingPlane);
-
-    jint constType = env->CallIntMethod(singleSatCorrectionObj, method_correctionSatConstType);
+    jfloat attenuationDb =
+            env->CallFloatMethod(singleSatCorrectionObj, method_correctionSatAttenuation);
+    std::vector<ExcessPathInfo> excessPathInfos =
+            MeasurementCorrectionsUtil::getExcessPathInfoList(env, singleSatCorrectionObj);
 
     SingleSatCorrection_Aidl singleSatCorrection;
     singleSatCorrection.singleSatCorrectionFlags = corrFlags;
@@ -379,9 +401,10 @@ SingleSatCorrection_Aidl MeasurementCorrectionsUtil::getSingleSatCorrection_Aidl
     singleSatCorrection.svid = static_cast<int32_t>(satId);
     singleSatCorrection.carrierFrequencyHz = carrierFreqHz;
     singleSatCorrection.probSatIsLos = probSatIsLos;
-    singleSatCorrection.excessPathLengthMeters = eplMeters;
-    singleSatCorrection.excessPathLengthUncertaintyMeters = eplUncMeters;
-    singleSatCorrection.reflectingPlane = reflectingPlane;
+    singleSatCorrection.combinedExcessPathLengthMeters = eplMeters;
+    singleSatCorrection.combinedExcessPathLengthUncertaintyMeters = eplUncMeters;
+    singleSatCorrection.combinedAttenuationDb = attenuationDb;
+    singleSatCorrection.excessPathInfos = excessPathInfos;
 
     return singleSatCorrection;
 }
@@ -391,8 +414,7 @@ void MeasurementCorrectionsUtil::getSingleSatCorrectionList_1_0(
         hardware::hidl_vec<SingleSatCorrection_V1_0>& list) {
     for (uint16_t i = 0; i < list.size(); ++i) {
         jobject singleSatCorrectionObj =
-                env->CallObjectMethod(singleSatCorrectionList, method_correctionListGet, i);
-
+                env->CallObjectMethod(singleSatCorrectionList, method_listGet, i);
         SingleSatCorrection_V1_0 singleSatCorrection =
                 getSingleSatCorrection_1_0_withoutConstellation(env, singleSatCorrectionObj);
 
@@ -410,7 +432,7 @@ void MeasurementCorrectionsUtil::getSingleSatCorrectionList_1_1(
         hardware::hidl_vec<SingleSatCorrection_V1_1>& list) {
     for (uint16_t i = 0; i < list.size(); ++i) {
         jobject singleSatCorrectionObj =
-                env->CallObjectMethod(singleSatCorrectionList, method_correctionListGet, i);
+                env->CallObjectMethod(singleSatCorrectionList, method_listGet, i);
 
         SingleSatCorrection_V1_0 singleSatCorrection_1_0 =
                 getSingleSatCorrection_1_0_withoutConstellation(env, singleSatCorrectionObj);
@@ -431,7 +453,7 @@ void MeasurementCorrectionsUtil::getSingleSatCorrectionList_Aidl(
         JNIEnv* env, jobject singleSatCorrectionList, std::vector<SingleSatCorrection_Aidl>& list) {
     for (uint16_t i = 0; i < list.size(); ++i) {
         jobject singleSatCorrectionObj =
-                env->CallObjectMethod(singleSatCorrectionList, method_correctionListGet, i);
+                env->CallObjectMethod(singleSatCorrectionList, method_listGet, i);
 
         SingleSatCorrection_Aidl singleSatCorrection_Aidl =
                 getSingleSatCorrection_Aidl(env, singleSatCorrectionObj);
@@ -439,6 +461,65 @@ void MeasurementCorrectionsUtil::getSingleSatCorrectionList_Aidl(
         list[i] = singleSatCorrection_Aidl;
         env->DeleteLocalRef(singleSatCorrectionObj);
     }
+}
+
+template <>
+void MeasurementCorrectionsUtil::setReflectingPlaneAzimuthDegrees<ReflectingPlane_V1_0>(
+        ReflectingPlane_V1_0& reflectingPlane, double azimuthDegreeRefPlane) {
+    reflectingPlane.azimuthDegrees = azimuthDegreeRefPlane;
+}
+
+template <>
+void MeasurementCorrectionsUtil::setReflectingPlaneAzimuthDegrees<ReflectingPlane_Aidl>(
+        ReflectingPlane_Aidl& reflectingPlane, double azimuthDegreeRefPlane) {
+    reflectingPlane.reflectingPlaneAzimuthDegrees = azimuthDegreeRefPlane;
+}
+
+std::vector<ExcessPathInfo> MeasurementCorrectionsUtil::getExcessPathInfoList(
+        JNIEnv* env, jobject singleSatCorrectionObj) {
+    jobject excessPathInfoListObj =
+            env->CallObjectMethod(singleSatCorrectionObj, method_correctionSatExcessPathInfoList);
+
+    int len = env->CallIntMethod(excessPathInfoListObj, method_listSize);
+    std::vector<ExcessPathInfo> list(len);
+    for (int i = 0; i < len; ++i) {
+        jobject excessPathInfoObj = env->CallObjectMethod(excessPathInfoListObj, method_listGet, i);
+        list[i] = getExcessPathInfo(env, excessPathInfoObj);
+        env->DeleteLocalRef(excessPathInfoObj);
+    }
+    env->DeleteLocalRef(excessPathInfoListObj);
+    return list;
+}
+
+ExcessPathInfo MeasurementCorrectionsUtil::getExcessPathInfo(JNIEnv* env,
+                                                             jobject excessPathInfoObj) {
+    ExcessPathInfo excessPathInfo;
+    jint flags = env->CallIntMethod(excessPathInfoObj, method_excessPathInfoFlags);
+    excessPathInfo.excessPathInfoFlags = flags;
+    if ((flags & ExcessPathInfo::EXCESS_PATH_INFO_HAS_EXCESS_PATH_LENGTH) != 0) {
+        jfloat epl = env->CallFloatMethod(excessPathInfoObj, method_excessPathInfoEpl);
+        excessPathInfo.excessPathLengthMeters = epl;
+    }
+    if ((flags & ExcessPathInfo::EXCESS_PATH_INFO_HAS_EXCESS_PATH_LENGTH_UNC) != 0) {
+        jfloat eplUnc = env->CallFloatMethod(excessPathInfoObj, method_excessPathInfoEplUnc);
+        excessPathInfo.excessPathLengthUncertaintyMeters = eplUnc;
+    }
+    if ((flags & ExcessPathInfo::EXCESS_PATH_INFO_HAS_REFLECTING_PLANE) != 0) {
+        ReflectingPlane_Aidl reflectingPlane;
+        jobject reflectingPlaneObj =
+                env->CallObjectMethod(excessPathInfoObj, method_excessPathInfoRefPlane);
+        MeasurementCorrectionsUtil::setReflectingPlane<ReflectingPlane_Aidl>(env,
+                                                                             reflectingPlaneObj,
+                                                                             reflectingPlane);
+        env->DeleteLocalRef(reflectingPlaneObj);
+        excessPathInfo.reflectingPlane = reflectingPlane;
+    }
+    if ((flags & ExcessPathInfo::EXCESS_PATH_INFO_HAS_ATTENUATION) != 0) {
+        jfloat attenuation =
+                env->CallFloatMethod(excessPathInfoObj, method_excessPathInfoAttenuation);
+        excessPathInfo.attenuationDb = attenuation;
+    }
+    return excessPathInfo;
 }
 
 } // namespace android::gnss

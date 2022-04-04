@@ -33,7 +33,6 @@ import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.flags.Flags;
-import com.android.systemui.media.MediaFlags;
 import com.android.systemui.media.MediaHierarchyManager;
 import com.android.systemui.media.MediaHost;
 import com.android.systemui.media.MediaHostState;
@@ -44,9 +43,9 @@ import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.settings.brightness.BrightnessController;
 import com.android.systemui.settings.brightness.BrightnessMirrorHandler;
 import com.android.systemui.settings.brightness.BrightnessSliderController;
+import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.statusbar.policy.BrightnessMirrorController;
 import com.android.systemui.tuner.TunerService;
-import com.android.systemui.util.Utils;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -65,9 +64,9 @@ public class QSPanelController extends QSPanelControllerBase<QSPanel> {
     private final FalsingManager mFalsingManager;
     private final BrightnessController mBrightnessController;
     private final BrightnessSliderController mBrightnessSliderController;
-    private final MediaFlags mMediaFlags;
     private final BrightnessMirrorHandler mBrightnessMirrorHandler;
     private final FeatureFlags mFeatureFlags;
+    private final StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
 
     private boolean mGridContentVisible = true;
 
@@ -75,7 +74,6 @@ public class QSPanelController extends QSPanelControllerBase<QSPanel> {
             new QSPanel.OnConfigurationChangedListener() {
         @Override
         public void onConfigurationChange(Configuration newConfig) {
-            updateMediaExpansion();
             mView.updateResources();
             mQsSecurityFooter.onConfigurationChanged();
             if (mView.isListening()) {
@@ -106,7 +104,7 @@ public class QSPanelController extends QSPanelControllerBase<QSPanel> {
             QSLogger qsLogger, BrightnessController.Factory brightnessControllerFactory,
             BrightnessSliderController.Factory brightnessSliderFactory,
             FalsingManager falsingManager, FeatureFlags featureFlags,
-            MediaFlags mediaFlags) {
+            StatusBarKeyguardViewManager statusBarKeyguardViewManager) {
         super(view, qstileHost, qsCustomizerController, usingMediaPlayer, mediaHost,
                 metricsLogger, uiEventLogger, qsLogger, dumpManager);
         mQSFgsManagerFooter = qsFgsManagerFooter;
@@ -117,35 +115,24 @@ public class QSPanelController extends QSPanelControllerBase<QSPanel> {
         mFalsingManager = falsingManager;
 
         mBrightnessSliderController = brightnessSliderFactory.create(getContext(), mView);
-        mMediaFlags = mediaFlags;
         mView.setBrightnessView(mBrightnessSliderController.getRootView());
 
         mBrightnessController = brightnessControllerFactory.create(mBrightnessSliderController);
         mBrightnessMirrorHandler = new BrightnessMirrorHandler(mBrightnessController);
         mFeatureFlags = featureFlags;
+        mStatusBarKeyguardViewManager = statusBarKeyguardViewManager;
         view.setUseNewFooter(featureFlags.isEnabled(Flags.NEW_FOOTER));
     }
 
     @Override
     public void onInit() {
         super.onInit();
-        updateMediaExpansion();
+        mMediaHost.setExpansion(MediaHostState.EXPANDED);
         mMediaHost.setShowsOnlyActiveMedia(false);
         mMediaHost.init(MediaHierarchyManager.LOCATION_QS);
         mQsCustomizerController.init();
         mBrightnessSliderController.init();
         mQSFgsManagerFooter.init();
-    }
-
-    private void updateMediaExpansion() {
-        boolean inSplitShade = Utils.shouldUseSplitNotificationShade(getResources());
-        float expansion;
-        if (inSplitShade && !mMediaFlags.useMediaSessionLayout()) {
-            expansion = MediaHostState.COLLAPSED;
-        } else {
-            expansion = MediaHostState.EXPANDED;
-        }
-        mMediaHost.setExpansion(expansion);
     }
 
     @Override
@@ -227,10 +214,6 @@ public class QSPanelController extends QSPanelControllerBase<QSPanel> {
         return mHost;
     }
 
-    /** Show the device monitoring dialog. */
-    public void showDeviceMonitoringDialog() {
-        mQsSecurityFooter.showDeviceMonitoringDialog();
-    }
 
     /** Update appearance of QSPanel. */
     public void updateResources() {
@@ -297,6 +280,15 @@ public class QSPanelController extends QSPanelControllerBase<QSPanel> {
 
     void setPageMargin(int pageMargin) {
         mView.setPageMargin(pageMargin);
+    }
+
+    /**
+     * Determines if bouncer expansion is between 0 and 1 non-inclusive.
+     *
+     * @return if bouncer is in transit
+     */
+    public boolean bouncerInTransit() {
+        return mStatusBarKeyguardViewManager.bouncerIsInTransit();
     }
 }
 

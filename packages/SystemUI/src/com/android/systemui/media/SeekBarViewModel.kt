@@ -74,7 +74,7 @@ private fun PlaybackState.computePosition(duration: Long): Long {
 class SeekBarViewModel @Inject constructor(
     @Background private val bgExecutor: RepeatableExecutor
 ) {
-    private var _data = Progress(false, false, false, null, 0)
+    private var _data = Progress(false, false, false, false, null, 0)
         set(value) {
             field = value
             _progress.postValue(value)
@@ -127,10 +127,11 @@ class SeekBarViewModel @Inject constructor(
             if (field != value) {
                 field = value
                 checkIfPollingNeeded()
+                _data = _data.copy(scrubbing = value)
             }
         }
 
-    lateinit var logSmartspaceClick: () -> Unit
+    lateinit var logSeek: () -> Unit
 
     fun getEnabled() = _data.enabled
 
@@ -174,7 +175,7 @@ class SeekBarViewModel @Inject constructor(
             scrubbing = false
             checkPlaybackPosition()
         } else {
-            logSmartspaceClick()
+            logSeek()
             controller?.transportControls?.seekTo(position)
             // Invalidate the cached playbackState to avoid the thumb jumping back to the previous
             // position.
@@ -200,7 +201,7 @@ class SeekBarViewModel @Inject constructor(
         val enabled = if (playbackState == null ||
                 playbackState?.getState() == PlaybackState.STATE_NONE ||
                 (duration <= 0)) false else true
-        _data = Progress(enabled, seekAvailable, playing, position, duration)
+        _data = Progress(enabled, seekAvailable, playing, scrubbing, position, duration)
         checkIfPollingNeeded()
     }
 
@@ -418,6 +419,7 @@ class SeekBarViewModel @Inject constructor(
         val enabled: Boolean,
         val seekAvailable: Boolean,
         val playing: Boolean,
+        val scrubbing: Boolean,
         val elapsedTime: Int?,
         val duration: Int
     )

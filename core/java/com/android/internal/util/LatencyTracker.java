@@ -132,6 +132,11 @@ public class LatencyTracker {
      */
     public static final int ACTION_UDFPS_ILLUMINATE = 14;
 
+    /**
+     * Time it takes for the gesture back affordance arrow to show up.
+     */
+    public static final int ACTION_SHOW_BACK_ARROW = 15;
+
     private static final int[] ACTIONS_ALL = {
         ACTION_EXPAND_PANEL,
         ACTION_TOGGLE_RECENTS,
@@ -147,7 +152,8 @@ public class LatencyTracker {
         ACTION_LOCKSCREEN_UNLOCK,
         ACTION_USER_SWITCH,
         ACTION_SWITCH_DISPLAY_UNFOLD,
-        ACTION_UDFPS_ILLUMINATE
+        ACTION_UDFPS_ILLUMINATE,
+        ACTION_SHOW_BACK_ARROW,
     };
 
     /** @hide */
@@ -166,7 +172,8 @@ public class LatencyTracker {
         ACTION_LOCKSCREEN_UNLOCK,
         ACTION_USER_SWITCH,
         ACTION_SWITCH_DISPLAY_UNFOLD,
-        ACTION_UDFPS_ILLUMINATE
+        ACTION_UDFPS_ILLUMINATE,
+        ACTION_SHOW_BACK_ARROW
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface Action {
@@ -187,7 +194,8 @@ public class LatencyTracker {
             FrameworkStatsLog.UIACTION_LATENCY_REPORTED__ACTION__ACTION_LOCKSCREEN_UNLOCK,
             FrameworkStatsLog.UIACTION_LATENCY_REPORTED__ACTION__ACTION_USER_SWITCH,
             FrameworkStatsLog.UIACTION_LATENCY_REPORTED__ACTION__ACTION_SWITCH_DISPLAY_UNFOLD,
-            FrameworkStatsLog.UIACTION_LATENCY_REPORTED__ACTION__ACTION_UDFPS_ILLUMINATE
+            FrameworkStatsLog.UIACTION_LATENCY_REPORTED__ACTION__ACTION_UDFPS_ILLUMINATE,
+            FrameworkStatsLog.UIACTION_LATENCY_REPORTED__ACTION__ACTION_SHOW_BACK_ARROW,
     };
 
     private static LatencyTracker sLatencyTracker;
@@ -277,6 +285,8 @@ public class LatencyTracker {
                 return "ACTION_SWITCH_DISPLAY_UNFOLD";
             case 15:
                 return "ACTION_UDFPS_ILLUMINATE";
+            case 16:
+                return "ACTION_SHOW_BACK_ARROW";
             default:
                 throw new IllegalArgumentException("Invalid action");
         }

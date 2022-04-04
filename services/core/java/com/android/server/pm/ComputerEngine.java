@@ -117,6 +117,7 @@ import android.util.SparseArray;
 import android.util.SparseBooleanArray;
 import android.util.TypedXmlSerializer;
 import android.util.Xml;
+import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
@@ -129,8 +130,6 @@ import com.android.server.pm.parsing.PackageInfoUtils;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.pm.parsing.pkg.AndroidPackageUtils;
 import com.android.server.pm.permission.PermissionManagerServiceInternal;
-import com.android.server.pm.pkg.PackageState;
-import com.android.server.pm.pkg.PackageStateImpl;
 import com.android.server.pm.pkg.PackageStateInternal;
 import com.android.server.pm.pkg.PackageStateUtils;
 import com.android.server.pm.pkg.PackageUserStateInternal;
@@ -323,6 +322,42 @@ public class ComputerEngine implements Computer {
                 }
             }
             return res;
+        }
+
+        public void dumpPackagesProto(ProtoOutputStream proto) {
+            mSettings.dumpPackagesProto(proto);
+        }
+
+        public void dumpPermissions(PrintWriter pw, String packageName,
+                ArraySet<String> permissionNames, DumpState dumpState) {
+            mSettings.dumpPermissions(pw, packageName, permissionNames, dumpState);
+        }
+
+        public void dumpPackages(PrintWriter pw, String packageName,
+                ArraySet<String> permissionNames, DumpState dumpState, boolean checkin) {
+            mSettings.dumpPackagesLPr(pw, packageName, permissionNames, dumpState, checkin);
+        }
+
+        public void dumpKeySet(PrintWriter pw, String packageName, DumpState dumpState) {
+            mSettings.getKeySetManagerService().dumpLPr(pw, packageName, dumpState);
+        }
+
+        public void dumpSharedUsers(PrintWriter pw, String packageName,
+                ArraySet<String> permissionNames, DumpState dumpState, boolean checkin) {
+            mSettings.dumpSharedUsersLPr(pw, packageName, permissionNames, dumpState, checkin);
+        }
+
+        public void dumpReadMessages(PrintWriter pw, DumpState dumpState) {
+            mSettings.dumpReadMessages(pw, dumpState);
+        }
+
+        public void dumpSharedUsersProto(ProtoOutputStream proto) {
+            mSettings.dumpSharedUsersProto(proto);
+        }
+
+        public List<? extends PackageStateInternal> getVolumePackages(
+                @NonNull String volumeUuid) {
+            return mSettings.getVolumePackagesLPr(volumeUuid);
         }
     }
 
@@ -1431,7 +1466,8 @@ public class ComputerEngine implements Computer {
         if (userId == UserHandle.USER_SYSTEM) {
             return resolveInfos;
         }
-        for (int i = resolveInfos.size() - 1; i >= 0; i--) {
+
+        for (int i = CollectionUtils.size(resolveInfos) - 1; i >= 0; i--) {
             ResolveInfo info = resolveInfos.get(i);
             if ((info.activityInfo.flags & ActivityInfo.FLAG_SYSTEM_USER_ONLY) != 0) {
                 resolveInfos.remove(i);
@@ -2638,6 +2674,13 @@ public class ComputerEngine implements Computer {
     public final boolean shouldFilterApplication(@Nullable PackageStateInternal ps,
             int callingUid, @Nullable ComponentName component,
             @PackageManager.ComponentType int componentType, int userId) {
+        if (Process.isSdkSandboxUid(callingUid)) {
+            int clientAppUid = Process.getAppUidForSdkSandboxUid(callingUid);
+            // SDK sandbox should be able to see it's client app
+            if (clientAppUid == UserHandle.getUid(userId, ps.getAppId())) {
+                return false;
+            }
+        }
         // if we're in an isolated process, get the real calling UID
         if (Process.isIsolated(callingUid)) {
             callingUid = getIsolatedOwner(callingUid);
@@ -3204,6 +3247,34 @@ public class ComputerEngine implements Computer {
                     ipw.decreaseIndent();
                 }
                 break;
+            }
+
+            case DumpState.DUMP_MESSAGES: {
+                mSettings.dumpReadMessages(pw, dumpState);
+                break;
+            }
+
+            case DumpState.DUMP_FROZEN: {
+                // XXX should handle packageName != null by dumping only install data that
+                // the given package is involved with.
+                if (dumpState.onTitlePrinted()) {
+                    pw.println();
+                }
+                final IndentingPrintWriter ipw = new IndentingPrintWriter(pw, "  ", 120);
+                ipw.println();
+                ipw.println("Frozen packages:");
+                ipw.increaseIndent();
+                if (mFrozenPackages.size() == 0) {
+                    ipw.println("(none)");
+                } else {
+                    for (int i = 0; i < mFrozenPackages.size(); i++) {
+                        ipw.print("package=");
+                        ipw.print(mFrozenPackages.keyAt(i));
+                        ipw.print(", refCounts=");
+                        ipw.println(mFrozenPackages.valueAt(i));
+                    }
+                }
+                ipw.decreaseIndent();
             }
         } // switch
     }
@@ -5692,10 +5763,64 @@ public class ComputerEngine implements Computer {
         return mFrozenPackages;
     }
 
+    @Override
+    public void checkPackageFrozen(@NonNull String packageName) {
+        if (!mFrozenPackages.containsKey(packageName)) {
+            Slog.wtf(TAG, "Expected " + packageName + " to be frozen!", new Throwable());
+        }
+    }
+
     @Nullable
     @Override
     public ComponentName getInstantAppInstallerComponent() {
         return mLocalInstantAppInstallerActivity == null
                 ? null : mLocalInstantAppInstallerActivity.getComponentName();
+    }
+
+    @Override
+    public void dumpPermissions(@NonNull PrintWriter pw, @NonNull String packageName,
+            @NonNull ArraySet<String> permissionNames, @NonNull DumpState dumpState) {
+        mSettings.dumpPermissions(pw, packageName, permissionNames, dumpState);
+    }
+
+    @Override
+    public void dumpPackages(@NonNull PrintWriter pw, @NonNull String packageName,
+            @NonNull ArraySet<String> permissionNames, @NonNull DumpState dumpState,
+            boolean checkin) {
+        mSettings.dumpPackages(pw, packageName, permissionNames, dumpState, checkin);
+    }
+
+    @Override
+    public void dumpKeySet(@NonNull PrintWriter pw, @NonNull String packageName,
+            @NonNull DumpState dumpState) {
+        mSettings.dumpKeySet(pw, packageName, dumpState);
+    }
+
+    @Override
+    public void dumpSharedUsers(@NonNull PrintWriter pw, @NonNull String packageName,
+            @NonNull ArraySet<String> permissionNames, @NonNull DumpState dumpState,
+            boolean checkin) {
+        mSettings.dumpSharedUsers(pw, packageName, permissionNames, dumpState, checkin);
+    }
+
+    @Override
+    public void dumpSharedUsersProto(@NonNull ProtoOutputStream proto) {
+        mSettings.dumpSharedUsersProto(proto);
+    }
+
+    @Override
+    public void dumpPackagesProto(@NonNull ProtoOutputStream proto) {
+        mSettings.dumpPackagesProto(proto);
+    }
+
+    @Override
+    public void dumpSharedLibrariesProto(@NonNull ProtoOutputStream proto) {
+        mSharedLibraries.dumpProto(proto);
+    }
+
+    @NonNull
+    @Override
+    public List<? extends PackageStateInternal> getVolumePackages(@NonNull String volumeUuid) {
+        return mSettings.getVolumePackages(volumeUuid);
     }
 }

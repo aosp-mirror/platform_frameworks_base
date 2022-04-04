@@ -23,6 +23,7 @@ import static com.android.companiondevicemanager.Utils.getApplicationIcon;
 import static com.android.companiondevicemanager.Utils.getHtmlFromResources;
 
 import android.annotation.Nullable;
+import android.companion.AssociationRequest;
 import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
@@ -44,10 +45,7 @@ import androidx.fragment.app.DialogFragment;
  */
 public class CompanionVendorHelperDialogFragment extends DialogFragment {
     private static final String TAG = CompanionVendorHelperDialogFragment.class.getSimpleName();
-
-    private static final String PACKAGE_NAME_EXTRA = "packageName";
-    private static final String DEVICE_PROFILE_EXTRA = "deviceProfile";
-    private static final String USER_ID_EXTRA = "userId";
+    private static final String ASSOCIATION_REQUEST_EXTRA = "association_request";
 
     private CompanionVendorHelperDialogListener mListener;
     // Only present for selfManaged devices.
@@ -63,15 +61,12 @@ public class CompanionVendorHelperDialogFragment extends DialogFragment {
 
     private CompanionVendorHelperDialogFragment() {}
 
-    static CompanionVendorHelperDialogFragment newInstance(String packageName,
-            int userId, String deviceProfile) {
+    static CompanionVendorHelperDialogFragment newInstance(AssociationRequest request) {
         CompanionVendorHelperDialogFragment fragmentDialog =
                 new CompanionVendorHelperDialogFragment();
 
         Bundle bundle = new Bundle();
-        bundle.putString(PACKAGE_NAME_EXTRA, packageName);
-        bundle.putInt(USER_ID_EXTRA, userId);
-        bundle.putString(DEVICE_PROFILE_EXTRA, deviceProfile);
+        bundle.putParcelable(ASSOCIATION_REQUEST_EXTRA, request);
         fragmentDialog.setArguments(bundle);
 
         return fragmentDialog;
@@ -102,9 +97,13 @@ public class CompanionVendorHelperDialogFragment extends DialogFragment {
         super.onViewCreated(view, savedInstanceState);
 
         Drawable applicationIcon;
-        String packageName = getArguments().getString(PACKAGE_NAME_EXTRA);
-        String deviceProfile = getArguments().getString(DEVICE_PROFILE_EXTRA);
-        int userId = getArguments().getInt(USER_ID_EXTRA);
+        AssociationRequest request = getArguments().getParcelable(
+                ASSOCIATION_REQUEST_EXTRA, AssociationRequest.class);
+
+        final String deviceProfile = request.getDeviceProfile();
+        final String packageName = request.getPackageName();
+        final CharSequence displayName = request.getDisplayName();
+        final int userId = request.getUserId();
 
         try {
             applicationIcon = getApplicationIcon(getContext(), packageName);
@@ -117,7 +116,7 @@ public class CompanionVendorHelperDialogFragment extends DialogFragment {
         mTitle = view.findViewById(R.id.helper_title);
         mSummary = view.findViewById(R.id.helper_summary);
         mAppIcon = view.findViewById(R.id.app_icon);
-        mButton = view.findViewById(R.id.btn_ok);
+        mButton = view.findViewById(R.id.btn_back);
 
         final Spanned title;
         final Spanned summary;
@@ -125,12 +124,14 @@ public class CompanionVendorHelperDialogFragment extends DialogFragment {
         switch (deviceProfile) {
             case DEVICE_PROFILE_APP_STREAMING:
                 title = getHtmlFromResources(getContext(), R.string.helper_title_app_streaming);
-                summary = getHtmlFromResources(getContext(), R.string.helper_summary_app_streaming);
+                summary = getHtmlFromResources(
+                        getContext(), R.string.helper_summary_app_streaming, title, displayName);
                 break;
 
             case DEVICE_PROFILE_COMPUTER:
                 title = getHtmlFromResources(getContext(), R.string.helper_title_computer);
-                summary = getHtmlFromResources(getContext(), R.string.helper_summary_computer);
+                summary = getHtmlFromResources(
+                        getContext(), R.string.helper_summary_computer, title, displayName);
                 break;
 
             default:

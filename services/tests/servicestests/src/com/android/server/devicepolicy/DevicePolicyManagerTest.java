@@ -48,6 +48,9 @@ import static android.app.admin.DevicePolicyManager.WIFI_SECURITY_PERSONAL;
 import static android.app.admin.DevicePolicyManager.WIPE_EUICC;
 import static android.app.admin.PasswordMetrics.computeForPasswordOrPin;
 import static android.content.pm.ApplicationInfo.PRIVATE_FLAG_DIRECT_BOOT_AWARE;
+import static android.location.LocationManager.FUSED_PROVIDER;
+import static android.location.LocationManager.GPS_PROVIDER;
+import static android.location.LocationManager.NETWORK_PROVIDER;
 import static android.net.ConnectivityManager.PROFILE_NETWORK_PREFERENCE_DEFAULT;
 import static android.net.ConnectivityManager.PROFILE_NETWORK_PREFERENCE_ENTERPRISE;
 import static android.net.ConnectivityManager.PROFILE_NETWORK_PREFERENCE_ENTERPRISE_NO_FALLBACK;
@@ -125,6 +128,7 @@ import android.net.wifi.WifiSsid;
 import android.os.Build;
 import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
+import android.os.IpcDataCache;
 import android.os.Process;
 import android.os.UserHandle;
 import android.os.UserManager;
@@ -257,6 +261,10 @@ public class DevicePolicyManagerTest extends DpmTestBase {
 
     @Before
     public void setUp() throws Exception {
+
+        // Disable caches in this test process. This must happen early, since some of the
+        // following initialization steps invalidate caches.
+        IpcDataCache.disableForTestMode();
 
         mContext = getContext();
         mServiceContext = mContext;
@@ -1784,10 +1792,9 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         final int userId = CALLER_USER_HANDLE;
         final UserHandle user = UserHandle.of(userId);
 
-        mContext.applicationInfo = new ApplicationInfo();
-        mContext.callerPermissions.add(permission.MANAGE_USERS);
-        mContext.packageName = "com.android.frameworks.servicestests";
-        getServices().addPackageContext(user, mContext);
+        mServiceContext.packageName = mRealTestContext.getPackageName();
+        mServiceContext.applicationInfo = new ApplicationInfo();
+        mServiceContext.binder.callingUid = DpmMockContext.SYSTEM_UID;
         when(mContext.resources.getColor(anyInt(), anyObject())).thenReturn(Color.WHITE);
 
         StringParceledListSlice oneCert = asSlice(new String[] {"1"});
@@ -6279,6 +6286,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
     @Test
     public void testGetOwnerInstalledCaCertsForDeviceOwner() throws Exception {
         mServiceContext.packageName = mRealTestContext.getPackageName();
+        mServiceContext.applicationInfo = new ApplicationInfo();
         mServiceContext.binder.callingUid = DpmMockContext.SYSTEM_UID;
         mAdmin1Context.binder.callingUid = DpmMockContext.CALLER_SYSTEM_USER_UID;
         setDeviceOwner();
@@ -6289,6 +6297,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
     @Test
     public void testGetOwnerInstalledCaCertsForProfileOwner() throws Exception {
         mServiceContext.packageName = mRealTestContext.getPackageName();
+        mServiceContext.applicationInfo = new ApplicationInfo();
         mServiceContext.binder.callingUid = DpmMockContext.SYSTEM_UID;
         mAdmin1Context.binder.callingUid = DpmMockContext.CALLER_UID;
         setAsProfileOwner(admin1);
@@ -6300,6 +6309,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
     @Test
     public void testGetOwnerInstalledCaCertsForDelegate() throws Exception {
         mServiceContext.packageName = mRealTestContext.getPackageName();
+        mServiceContext.applicationInfo = new ApplicationInfo();
         mServiceContext.binder.callingUid = DpmMockContext.SYSTEM_UID;
         mAdmin1Context.binder.callingUid = DpmMockContext.CALLER_UID;
         setAsProfileOwner(admin1);
@@ -6665,7 +6675,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         configureContextForAccess(mContext, false);
 
         assertExpectException(SecurityException.class, /* messageRegex= */ null,
-                () -> dpm.markProfileOwnerOnOrganizationOwnedDevice(admin2));
+                () -> dpm.setProfileOwnerOnOrganizationOwnedDevice(admin2, true));
     }
 
     @Test
@@ -6674,7 +6684,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         configureContextForAccess(mContext, false);
 
         assertExpectException(SecurityException.class, /* messageRegex= */ null,
-                () -> dpm.markProfileOwnerOnOrganizationOwnedDevice(admin1));
+                () -> dpm.setProfileOwnerOnOrganizationOwnedDevice(admin1, true));
     }
 
     @Test
@@ -6709,7 +6719,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
                         DpmMockContext.CALLER_MANAGED_PROVISIONING_UID);
         try {
             runAsCaller(mServiceContext, dpms, dpm -> {
-                dpm.markProfileOwnerOnOrganizationOwnedDevice(admin1);
+                dpm.setProfileOwnerOnOrganizationOwnedDevice(admin1, true);
             });
         } finally {
             mServiceContext.binder.restoreCallingIdentity(ident);
@@ -7044,7 +7054,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
 
         configureContextForAccess(mServiceContext, true);
         runAsCaller(mServiceContext, dpms, dpm -> {
-            dpm.markProfileOwnerOnOrganizationOwnedDevice(who);
+            dpm.setProfileOwnerOnOrganizationOwnedDevice(who, true);
         });
         mServiceContext.binder.restoreCallingIdentity(ident);
     }
@@ -8453,41 +8463,51 @@ public class DevicePolicyManagerTest extends DpmTestBase {
 
     @Test
     public void testSendLostModeLocationUpdate_notOrganizationOwnedDevice() {
-        mContext.callerPermissions.add(permission.SEND_LOST_MODE_LOCATION_UPDATES);
+        mContext.callerPermissions.add(permission.TRIGGER_LOST_MODE);
         assertThrows(IllegalStateException.class, () -> dpm.sendLostModeLocationUpdate(
                 getServices().executor, /* empty callback */ result -> {}));
     }
 
     @Test
     public void testSendLostModeLocationUpdate_asDeviceOwner() throws Exception {
-        final String TEST_PROVIDER = "network";
-        mContext.callerPermissions.add(permission.SEND_LOST_MODE_LOCATION_UPDATES);
+        mContext.callerPermissions.add(permission.TRIGGER_LOST_MODE);
         setDeviceOwner();
-        when(getServices().locationManager.getAllProviders()).thenReturn(List.of(TEST_PROVIDER));
-        when(getServices().locationManager.isProviderEnabled(TEST_PROVIDER)).thenReturn(true);
+        when(getServices().locationManager.isProviderEnabled(FUSED_PROVIDER)).thenReturn(true);
 
         dpm.sendLostModeLocationUpdate(getServices().executor, /* empty callback */ result -> {});
 
         verify(getServices().locationManager, times(1)).getCurrentLocation(
-                eq(TEST_PROVIDER), any(), eq(getServices().executor), any());
+                eq(FUSED_PROVIDER), any(), eq(getServices().executor), any());
     }
 
     @Test
     public void testSendLostModeLocationUpdate_asProfileOwnerOfOrgOwnedDevice() throws Exception {
-        final String TEST_PROVIDER = "network";
         final int MANAGED_PROFILE_ADMIN_UID =
                 UserHandle.getUid(CALLER_USER_HANDLE, DpmMockContext.SYSTEM_UID);
         mContext.binder.callingUid = MANAGED_PROFILE_ADMIN_UID;
-        mContext.callerPermissions.add(permission.SEND_LOST_MODE_LOCATION_UPDATES);
+        mContext.callerPermissions.add(permission.TRIGGER_LOST_MODE);
         addManagedProfile(admin1, MANAGED_PROFILE_ADMIN_UID, admin1);
         configureProfileOwnerOfOrgOwnedDevice(admin1, CALLER_USER_HANDLE);
-        when(getServices().locationManager.getAllProviders()).thenReturn(List.of(TEST_PROVIDER));
-        when(getServices().locationManager.isProviderEnabled(TEST_PROVIDER)).thenReturn(true);
+        when(getServices().locationManager.isProviderEnabled(FUSED_PROVIDER)).thenReturn(true);
 
         dpm.sendLostModeLocationUpdate(getServices().executor, /* empty callback */ result -> {});
 
         verify(getServices().locationManager, times(1)).getCurrentLocation(
-                eq(TEST_PROVIDER), any(), eq(getServices().executor), any());
+                eq(FUSED_PROVIDER), any(), eq(getServices().executor), any());
+    }
+
+    @Test
+    public void testSendLostModeLocationUpdate_noProviderIsEnabled() throws Exception {
+        mContext.callerPermissions.add(permission.TRIGGER_LOST_MODE);
+        setDeviceOwner();
+        when(getServices().locationManager.isProviderEnabled(FUSED_PROVIDER)).thenReturn(false);
+        when(getServices().locationManager.isProviderEnabled(NETWORK_PROVIDER)).thenReturn(false);
+        when(getServices().locationManager.isProviderEnabled(GPS_PROVIDER)).thenReturn(false);
+
+        dpm.sendLostModeLocationUpdate(getServices().executor, /* empty callback */ result -> {});
+
+        verify(getServices().locationManager, never()).getCurrentLocation(
+                eq(FUSED_PROVIDER), any(), eq(getServices().executor), any());
     }
 
     private void setupVpnAuthorization(String userVpnPackage, int userVpnUid) {

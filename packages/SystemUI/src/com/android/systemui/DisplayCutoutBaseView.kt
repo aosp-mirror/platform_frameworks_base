@@ -79,6 +79,8 @@ open class DisplayCutoutBaseView : View, RegionInterceptableView {
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
         updateCutout()
+        updateProtectionBoundingPath()
+        onUpdate()
     }
 
     fun onDisplayChanged(displayId: Int) {
@@ -93,6 +95,7 @@ open class DisplayCutoutBaseView : View, RegionInterceptableView {
         if (displayId == display.displayId) {
             updateCutout()
             updateProtectionBoundingPath()
+            onUpdate()
         }
     }
 
@@ -100,7 +103,12 @@ open class DisplayCutoutBaseView : View, RegionInterceptableView {
         displayRotation = rotation
         updateCutout()
         updateProtectionBoundingPath()
+        onUpdate()
     }
+
+    // Called after the cutout and protection bounding path change. Subclasses
+    // should make any changes that need to happen based on the change.
+    open fun onUpdate() = Unit
 
     @VisibleForTesting(otherwise = VisibleForTesting.PROTECTED)
     public override fun onDraw(canvas: Canvas) {
