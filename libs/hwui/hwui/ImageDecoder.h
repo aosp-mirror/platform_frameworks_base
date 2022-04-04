@@ -17,9 +17,11 @@
 
 #include <SkAndroidCodec.h>
 #include <SkCodec.h>
+#include <SkColorSpace.h>
 #include <SkImageInfo.h>
 #include <SkPngChunkReader.h>
 #include <SkRect.h>
+#include <SkRefCnt.h>
 #include <SkSize.h>
 #include <cutils/compiler.h>
 

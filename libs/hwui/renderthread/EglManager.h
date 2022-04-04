@@ -18,6 +18,7 @@
 
 #include <EGL/egl.h>
 #include <EGL/eglext.h>
+#include <SkColorSpace.h>
 #include <SkImageInfo.h>
 #include <SkRect.h>
 #include <cutils/compiler.h>

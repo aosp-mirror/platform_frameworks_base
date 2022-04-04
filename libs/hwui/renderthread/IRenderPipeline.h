@@ -24,6 +24,7 @@
 #include "hwui/Bitmap.h"
 #include "ColorMode.h"
 
+#include <SkColorSpace.h>
 #include <SkRect.h>
 #include <utils/RefBase.h>
 

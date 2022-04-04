@@ -25,6 +25,7 @@
 #include "BitmapRegionDecoder.h"
 #include "SkBitmap.h"
 #include "SkCodec.h"
+#include "SkColorSpace.h"
 #include "SkData.h"
 #include "SkStream.h"
 

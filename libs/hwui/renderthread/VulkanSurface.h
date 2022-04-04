@@ -20,6 +20,7 @@
 #include <system/window.h>
 #include <vulkan/vulkan.h>
 
+#include <SkColorSpace.h>
 #include <SkRefCnt.h>
 #include <SkSize.h>
 
