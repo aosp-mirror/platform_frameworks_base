@@ -143,6 +143,7 @@ public class NavigationBarView extends FrameLayout {
     private boolean mDeadZoneConsuming = false;
     private final NavigationBarTransitions mBarTransitions;
     private final OverviewProxyService mOverviewProxyService;
+    @Nullable
     private AutoHideController mAutoHideController;
 
     // performs manual animation in sync with layout transitions
@@ -316,7 +317,7 @@ public class NavigationBarView extends FrameLayout {
             };
 
     private final Consumer<Boolean> mNavbarOverlayVisibilityChangeCallback = (visible) -> {
-        if (visible) {
+        if (visible && mAutoHideController != null) {
             mAutoHideController.touchAutoHide();
         }
         notifyActiveTouchRegions();
