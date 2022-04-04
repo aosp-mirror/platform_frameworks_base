@@ -3536,6 +3536,8 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                     EventLog.writeEvent(0x534e4554, "145981139", packageInfo.applicationInfo.uid,
                             "");
                 }
+                Log.w(TAG, "Missing required system package: " + packageName + (packageInfo != null
+                        ? ", but found with extended search." : "."));
                 return null;
             }
         } finally {
