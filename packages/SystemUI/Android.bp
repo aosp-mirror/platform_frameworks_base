@@ -125,6 +125,7 @@ android_library {
     ],
     manifest: "AndroidManifest.xml",
 
+    javacflags: ["-Adagger.fastInit=enabled"],
     kotlincflags: ["-Xjvm-default=enable"],
 
     plugins: ["dagger2-compiler"],
