@@ -167,16 +167,6 @@ public class ChooserActivity extends ResolverActivity implements
     public static final String EXTRA_PRIVATE_RETAIN_IN_ON_STOP
             = "com.android.internal.app.ChooserActivity.EXTRA_PRIVATE_RETAIN_IN_ON_STOP";
 
-    /**
-     * Boolean extra added to "unbundled Sharesheet" delegation intents to signal whether the app
-     * prediction service is available. Our query of the service <em>availability</em> depends on
-     * privileges that are only available in the system, even though the service itself would then
-     * be available to the unbundled component. For now, we just include the query result as part of
-     * the handover intent.
-     * TODO: investigate whether the privileged query is necessary to determine the availability.
-     */
-    public static final String EXTRA_IS_APP_PREDICTION_SERVICE_AVAILABLE =
-            "com.android.internal.app.ChooserActivity.EXTRA_IS_APP_PREDICTION_SERVICE_AVAILABLE";
 
     /**
      * Transition name for the first image preview.
@@ -986,6 +976,12 @@ public class ChooserActivity extends ResolverActivity implements
             setResult(RESULT_OK);
             finish();
         }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        Log.d(TAG, "onResume: " + getComponentName().flattenToShortString());
     }
 
     @Override
