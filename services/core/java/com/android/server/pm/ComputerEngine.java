@@ -354,6 +354,11 @@ public class ComputerEngine implements Computer {
         public void dumpSharedUsersProto(ProtoOutputStream proto) {
             mSettings.dumpSharedUsersProto(proto);
         }
+
+        public List<? extends PackageStateInternal> getVolumePackages(
+                @NonNull String volumeUuid) {
+            return mSettings.getVolumePackagesLPr(volumeUuid);
+        }
     }
 
     private static final Comparator<ProviderInfo> sProviderInitOrderSorter = (p1, p2) -> {
@@ -380,7 +385,7 @@ public class ComputerEngine implements Computer {
     private final ResolveInfo mInstantAppInstallerInfo;
     private final InstantAppRegistry mInstantAppRegistry;
     private final ApplicationInfo mLocalAndroidApplication;
-    private final AppsFilterSnapshot mAppsFilter;
+    private final AppsFilter mAppsFilter;
     private final WatchedArrayMap<String, Integer> mFrozenPackages;
 
     // Immutable service attribute
@@ -5811,5 +5816,11 @@ public class ComputerEngine implements Computer {
     @Override
     public void dumpSharedLibrariesProto(@NonNull ProtoOutputStream proto) {
         mSharedLibraries.dumpProto(proto);
+    }
+
+    @NonNull
+    @Override
+    public List<? extends PackageStateInternal> getVolumePackages(@NonNull String volumeUuid) {
+        return mSettings.getVolumePackages(volumeUuid);
     }
 }

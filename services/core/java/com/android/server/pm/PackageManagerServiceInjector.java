@@ -99,7 +99,7 @@ public class PackageManagerServiceInjector {
     private final Singleton<UserManagerService>
             mUserManagerProducer;
     private final Singleton<Settings> mSettingsProducer;
-    private final Singleton<AppsFilterImpl> mAppsFilterProducer;
+    private final Singleton<AppsFilter> mAppsFilterProducer;
     private final Singleton<PlatformCompat>
             mPlatformCompatProducer;
     private final Singleton<SystemConfig> mSystemConfigProducer;
@@ -148,7 +148,7 @@ public class PackageManagerServiceInjector {
             Producer<PermissionManagerServiceInternal> permissionManagerServiceProducer,
             Producer<UserManagerService> userManagerProducer,
             Producer<Settings> settingsProducer,
-            Producer<AppsFilterImpl> appsFilterProducer,
+            Producer<AppsFilter> appsFilterProducer,
             Producer<PlatformCompat> platformCompatProducer,
             Producer<SystemConfig> systemConfigProducer,
             Producer<PackageDexOptimizer> packageDexOptimizerProducer,
@@ -282,7 +282,7 @@ public class PackageManagerServiceInjector {
         return mSettingsProducer.get(this, mPackageManager);
     }
 
-    public AppsFilterImpl getAppsFilter() {
+    public AppsFilter getAppsFilter() {
         return mAppsFilterProducer.get(this, mPackageManager);
     }
 

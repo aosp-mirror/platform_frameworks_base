@@ -21,7 +21,7 @@ data class KeyguardFingerprintListenModel(
     override val listening: Boolean,
     // keep sorted
     val biometricEnabledForUser: Boolean,
-    val bouncer: Boolean,
+    val bouncerIsOrWillShow: Boolean,
     val canSkipBouncer: Boolean,
     val credentialAttempted: Boolean,
     val deviceInteractive: Boolean,
@@ -51,7 +51,7 @@ data class KeyguardFaceListenModel(
     val authInterruptActive: Boolean,
     val becauseCannotSkipBouncer: Boolean,
     val biometricSettingEnabledForUser: Boolean,
-    val bouncer: Boolean,
+    val bouncerFullyShown: Boolean,
     val faceAuthenticated: Boolean,
     val faceDisabled: Boolean,
     val keyguardAwake: Boolean,

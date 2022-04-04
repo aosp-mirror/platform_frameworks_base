@@ -741,11 +741,11 @@ public class DisplayDeviceConfig {
     }
 
     private void loadDensityMapping(DisplayConfiguration config) {
-        if (config.getDensityMap() == null) {
+        if (config.getDensityMapping() == null) {
             return;
         }
 
-        final List<Density> entriesFromXml = config.getDensityMap().getDensity();
+        final List<Density> entriesFromXml = config.getDensityMapping().getDensity();
 
         final DensityMapping.Entry[] entries =
                 new DensityMapping.Entry[entriesFromXml.size()];
