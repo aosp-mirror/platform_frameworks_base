@@ -1251,10 +1251,6 @@ public class HdmiControlService extends SystemService {
             device.onHotplug(portId, connected);
         }
 
-        if (!connected) {
-            mHdmiCecNetwork.removeDevicesConnectedToPort(portId);
-        }
-
         announceHotplugEvent(portId, connected);
     }
 
