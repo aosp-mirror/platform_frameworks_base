@@ -177,20 +177,20 @@ public class SpatializerHelper {
     }
 
     synchronized void init(boolean effectExpected) {
-        Log.i(TAG, "Initializing");
+        loglogi("init effectExpected=" + effectExpected);
         if (!effectExpected) {
-            Log.i(TAG, "Setting state to STATE_NOT_SUPPORTED due to effect not expected");
+            loglogi("init(): setting state to STATE_NOT_SUPPORTED due to effect not expected");
             mState = STATE_NOT_SUPPORTED;
             return;
         }
         if (mState != STATE_UNINITIALIZED) {
-            throw new IllegalStateException(("init() called in state:" + mState));
+            throw new IllegalStateException(logloge("init() called in state " + mState));
         }
         // is there a spatializer?
         mSpatCallback = new SpatializerCallback();
         final ISpatializer spat = AudioSystem.getSpatializer(mSpatCallback);
         if (spat == null) {
-            Log.i(TAG, "init(): No Spatializer found");
+            loglogi("init(): No Spatializer found");
             mState = STATE_NOT_SUPPORTED;
             return;
         }
@@ -201,14 +201,14 @@ public class SpatializerHelper {
                     || levels.length == 0
                     || (levels.length == 1
                     && levels[0] == Spatializer.SPATIALIZER_IMMERSIVE_LEVEL_NONE)) {
-                Log.e(TAG, "Spatializer is useless");
+                logloge("init(): found Spatializer is useless");
                 mState = STATE_NOT_SUPPORTED;
                 return;
             }
             for (byte level : levels) {
-                logd("found support for level: " + level);
+                loglogi("init(): found support for level: " + level);
                 if (level == Spatializer.SPATIALIZER_IMMERSIVE_LEVEL_MULTICHANNEL) {
-                    logd("Setting capable level to LEVEL_MULTICHANNEL");
+                    loglogi("init(): setting capable level to LEVEL_MULTICHANNEL");
                     mCapableSpatLevel = level;
                     break;
                 }
@@ -223,7 +223,7 @@ public class SpatializerHelper {
                         mTransauralSupported = true;
                         break;
                     default:
-                        Log.e(TAG, "Spatializer reports unknown supported mode:" + mode);
+                        logloge("init(): Spatializer reports unknown supported mode:" + mode);
                         break;
                 }
             }
@@ -277,7 +277,7 @@ public class SpatializerHelper {
      * @param featureEnabled
      */
     synchronized void reset(boolean featureEnabled) {
-        Log.i(TAG, "Resetting");
+        loglogi("Resetting featureEnabled=" + featureEnabled);
         releaseSpat();
         mState = STATE_UNINITIALIZED;
         mSpatLevel = Spatializer.SPATIALIZER_IMMERSIVE_LEVEL_NONE;
@@ -318,23 +318,24 @@ public class SpatializerHelper {
         if (enabledAvailable.second) {
             // available for Spatial audio, check w/ effect
             able = canBeSpatializedOnDevice(DEFAULT_ATTRIBUTES, DEFAULT_FORMAT, ROUTING_DEVICES);
-            Log.i(TAG, "onRoutingUpdated: can spatialize media 5.1:" + able
+            loglogi("onRoutingUpdated: can spatialize media 5.1:" + able
                     + " on device:" + ROUTING_DEVICES[0]);
             setDispatchAvailableState(able);
         } else {
-            Log.i(TAG, "onRoutingUpdated: device:" + ROUTING_DEVICES[0]
+            loglogi("onRoutingUpdated: device:" + ROUTING_DEVICES[0]
                     + " not available for Spatial Audio");
             setDispatchAvailableState(false);
         }
 
         if (able && enabledAvailable.first) {
-            Log.i(TAG, "Enabling Spatial Audio since enabled for media device:"
+            loglogi("Enabling Spatial Audio since enabled for media device:"
                     + ROUTING_DEVICES[0]);
         } else {
-            Log.i(TAG, "Disabling Spatial Audio since disabled for media device:"
+            loglogi("Disabling Spatial Audio since disabled for media device:"
                     + ROUTING_DEVICES[0]);
         }
-        setDispatchFeatureEnabledState(able && enabledAvailable.first);
+        setDispatchFeatureEnabledState(able && enabledAvailable.first,
+                "onRoutingUpdated");
 
         if (mDesiredHeadTrackingMode != Spatializer.HEAD_TRACKING_MODE_UNSUPPORTED
                 && mDesiredHeadTrackingMode != Spatializer.HEAD_TRACKING_MODE_DISABLED) {
@@ -347,7 +348,7 @@ public class SpatializerHelper {
     private final class SpatializerCallback extends INativeSpatializerCallback.Stub {
 
         public void onLevelChanged(byte level) {
-            logd("SpatializerCallback.onLevelChanged level:" + level);
+            loglogi("SpatializerCallback.onLevelChanged level:" + level);
             synchronized (SpatializerHelper.this) {
                 mSpatLevel = spatializationLevelToSpatializerInt(level);
             }
@@ -358,7 +359,7 @@ public class SpatializerHelper {
         }
 
         public void onOutputChanged(int output) {
-            logd("SpatializerCallback.onOutputChanged output:" + output);
+            loglogi("SpatializerCallback.onOutputChanged output:" + output);
             int oldOutput;
             synchronized (SpatializerHelper.this) {
                 oldOutput = mSpatOutput;
@@ -374,20 +375,21 @@ public class SpatializerHelper {
     // spatializer head tracking callback from native
     private final class SpatializerHeadTrackingCallback
             extends ISpatializerHeadTrackingCallback.Stub {
-        public void onHeadTrackingModeChanged(byte mode)  {
-            logd("SpatializerHeadTrackingCallback.onHeadTrackingModeChanged mode:" + mode);
+        public void onHeadTrackingModeChanged(byte mode) {
             int oldMode, newMode;
             synchronized (this) {
                 oldMode = mActualHeadTrackingMode;
                 mActualHeadTrackingMode = headTrackingModeTypeToSpatializerInt(mode);
                 newMode = mActualHeadTrackingMode;
             }
+            loglogi("SpatializerHeadTrackingCallback.onHeadTrackingModeChanged mode:"
+                    + Spatializer.headtrackingModeToString(newMode));
             if (oldMode != newMode) {
                 dispatchActualHeadTrackingMode(newMode);
             }
         }
 
-        public void onHeadToSoundStagePoseUpdated(float[] headToStage)  {
+        public void onHeadToSoundStagePoseUpdated(float[] headToStage) {
             if (headToStage == null) {
                 Log.e(TAG, "SpatializerHeadTrackingCallback.onHeadToStagePoseUpdated"
                         + "null transform");
@@ -404,7 +406,8 @@ public class SpatializerHelper {
                 for (float val : headToStage) {
                     t.append("[").append(String.format(Locale.ENGLISH, "%.3f", val)).append("]");
                 }
-                logd("SpatializerHeadTrackingCallback.onHeadToStagePoseUpdated headToStage:" + t);
+                loglogi("SpatializerHeadTrackingCallback.onHeadToStagePoseUpdated headToStage:"
+                        + t);
             }
             dispatchPoseUpdate(headToStage);
         }
@@ -444,10 +447,9 @@ public class SpatializerHelper {
     }
 
     synchronized void addCompatibleAudioDevice(@NonNull AudioDeviceAttributes ada) {
-        // TODO add log
+        loglogi("addCompatibleAudioDevice: dev=" + ada);
         final int deviceType = ada.getType();
         final boolean wireless = isWireless(deviceType);
-        boolean updateRouting = false;
         boolean isInList = false;
 
         for (SADeviceState deviceState : mSADevices) {
@@ -455,8 +457,6 @@ public class SpatializerHelper {
                     && (wireless && ada.getAddress().equals(deviceState.mDeviceAddress))
                     || !wireless) {
                 isInList = true;
-                // state change?
-                updateRouting = !deviceState.mEnabled;
                 deviceState.mEnabled = true;
                 break;
             }
@@ -466,32 +466,24 @@ public class SpatializerHelper {
                     wireless ? ada.getAddress() : null);
             dev.mEnabled = true;
             mSADevices.add(dev);
-            updateRouting = true;
         }
-        if (updateRouting) {
-            onRoutingUpdated();
-        }
+        onRoutingUpdated();
     }
 
     synchronized void removeCompatibleAudioDevice(@NonNull AudioDeviceAttributes ada) {
-        // TODO add log
+        loglogi("removeCompatibleAudioDevice: dev=" + ada);
         final int deviceType = ada.getType();
         final boolean wireless = isWireless(deviceType);
-        boolean updateRouting = false;
 
         for (SADeviceState deviceState : mSADevices) {
             if (deviceType == deviceState.mDeviceType
                     && (wireless && ada.getAddress().equals(deviceState.mDeviceAddress))
                     || !wireless) {
-                // state change?
-                updateRouting = deviceState.mEnabled;
                 deviceState.mEnabled = false;
                 break;
             }
         }
-        if (updateRouting) {
-            onRoutingUpdated();
-        }
+        onRoutingUpdated();
     }
 
     /**
@@ -629,6 +621,7 @@ public class SpatializerHelper {
     }
 
     synchronized void setFeatureEnabled(boolean enabled) {
+        loglogi("setFeatureEnabled(" + enabled + ") was featureEnabled:" + mFeatureEnabled);
         if (mFeatureEnabled == enabled) {
             return;
         }
@@ -652,7 +645,7 @@ public class SpatializerHelper {
         switch (mState) {
             case STATE_UNINITIALIZED:
                 if (enabled) {
-                    throw(new IllegalStateException("Can't enable when uninitialized"));
+                    throw (new IllegalStateException("Can't enable when uninitialized"));
                 }
                 return;
             case STATE_NOT_SUPPORTED:
@@ -679,7 +672,7 @@ public class SpatializerHelper {
                     return;
                 }
         }
-        setDispatchFeatureEnabledState(enabled);
+        setDispatchFeatureEnabledState(enabled, "setSpatializerEnabledInt");
     }
 
     synchronized int getCapableImmersiveAudioLevel() {
@@ -703,7 +696,8 @@ public class SpatializerHelper {
      * Update the feature state, no-op if no change
      * @param featureEnabled
      */
-    private synchronized void setDispatchFeatureEnabledState(boolean featureEnabled) {
+    private synchronized void setDispatchFeatureEnabledState(boolean featureEnabled, String source)
+    {
         if (featureEnabled) {
             switch (mState) {
                 case STATE_DISABLED_UNAVAILABLE:
@@ -715,9 +709,12 @@ public class SpatializerHelper {
                 case STATE_ENABLED_AVAILABLE:
                 case STATE_ENABLED_UNAVAILABLE:
                     // already enabled: no-op
+                    loglogi("setDispatchFeatureEnabledState(" + featureEnabled
+                            + ") no dispatch: mState:"
+                            + spatStateString(mState) + " src:" + source);
                     return;
                 default:
-                    throw(new IllegalStateException("Invalid mState:" + mState
+                    throw (new IllegalStateException("Invalid mState:" + mState
                             + " for enabled true"));
             }
         } else {
@@ -731,12 +728,17 @@ public class SpatializerHelper {
                 case STATE_DISABLED_AVAILABLE:
                 case STATE_DISABLED_UNAVAILABLE:
                     // already disabled: no-op
+                    loglogi("setDispatchFeatureEnabledState(" + featureEnabled
+                            + ") no dispatch: mState:" + spatStateString(mState)
+                            + " src:" + source);
                     return;
                 default:
                     throw (new IllegalStateException("Invalid mState:" + mState
                             + " for enabled false"));
             }
         }
+        loglogi("setDispatchFeatureEnabledState(" + featureEnabled
+                + ") mState:" + spatStateString(mState));
         final int nbCallbacks = mStateCallbacks.beginBroadcast();
         for (int i = 0; i < nbCallbacks; i++) {
             try {
@@ -747,14 +749,13 @@ public class SpatializerHelper {
             }
         }
         mStateCallbacks.finishBroadcast();
-        mAudioService.persistSpatialAudioEnabled(featureEnabled);
     }
 
     private synchronized void setDispatchAvailableState(boolean available) {
         switch (mState) {
             case STATE_UNINITIALIZED:
             case STATE_NOT_SUPPORTED:
-                throw(new IllegalStateException(
+                throw (new IllegalStateException(
                         "Should not update available state in state:" + mState));
             case STATE_DISABLED_UNAVAILABLE:
                 if (available) {
@@ -762,6 +763,8 @@ public class SpatializerHelper {
                     break;
                 } else {
                     // already in unavailable state
+                    loglogi("setDispatchAvailableState(" + available
+                            + ") no dispatch: mState:" + spatStateString(mState));
                     return;
                 }
             case STATE_ENABLED_UNAVAILABLE:
@@ -770,11 +773,15 @@ public class SpatializerHelper {
                     break;
                 } else {
                     // already in unavailable state
+                    loglogi("setDispatchAvailableState(" + available
+                            + ") no dispatch: mState:" + spatStateString(mState));
                     return;
                 }
             case STATE_DISABLED_AVAILABLE:
                 if (available) {
                     // already in available state
+                    loglogi("setDispatchAvailableState(" + available
+                            + ") no dispatch: mState:" + spatStateString(mState));
                     return;
                 } else {
                     mState = STATE_DISABLED_UNAVAILABLE;
@@ -783,12 +790,15 @@ public class SpatializerHelper {
             case STATE_ENABLED_AVAILABLE:
                 if (available) {
                     // already in available state
+                    loglogi("setDispatchAvailableState(" + available
+                            + ") no dispatch: mState:" + spatStateString(mState));
                     return;
                 } else {
                     mState = STATE_ENABLED_UNAVAILABLE;
                     break;
                 }
         }
+        loglogi("setDispatchAvailableState(" + available + ") mState:" + spatStateString(mState));
         final int nbCallbacks = mStateCallbacks.beginBroadcast();
         for (int i = 0; i < nbCallbacks; i++) {
             try {
@@ -813,7 +823,7 @@ public class SpatializerHelper {
             mSpatHeadTrackingCallback = new SpatializerHeadTrackingCallback();
             mSpat = AudioSystem.getSpatializer(mSpatCallback);
             try {
-                mSpat.setLevel((byte)  Spatializer.SPATIALIZER_IMMERSIVE_LEVEL_MULTICHANNEL);
+                mSpat.setLevel((byte) Spatializer.SPATIALIZER_IMMERSIVE_LEVEL_MULTICHANNEL);
                 mIsHeadTrackingSupported = mSpat.isHeadTrackingSupported();
                 //TODO: register heatracking callback only when sensors are registered
                 if (mIsHeadTrackingSupported) {
@@ -851,8 +861,6 @@ public class SpatializerHelper {
     // virtualization capabilities
     synchronized boolean canBeSpatialized(
             @NonNull AudioAttributes attributes, @NonNull AudioFormat format) {
-        logd("canBeSpatialized usage:" + attributes.getUsage()
-                + " format:" + format.toLogFriendlyString());
         switch (mState) {
             case STATE_UNINITIALIZED:
             case STATE_NOT_SUPPORTED:
@@ -879,7 +887,8 @@ public class SpatializerHelper {
         mASA.getDevicesForAttributes(
                 attributes, false /* forVolume */).toArray(devices);
         final boolean able = canBeSpatializedOnDevice(attributes, format, devices);
-        logd("canBeSpatialized returning " + able);
+        logd("canBeSpatialized usage:" + attributes.getUsage()
+                + " format:" + format.toLogFriendlyString() + " returning " + able);
         return able;
     }
 
@@ -1316,11 +1325,11 @@ public class SpatializerHelper {
         final boolean init = mFeatureEnabled && (mSpatLevel != SpatializationLevel.NONE);
         final String action = init ? "initializing" : "releasing";
         if (mSpat == null) {
-            Log.e(TAG, "not " + action + " sensors, null spatializer");
+            logloge("not " + action + " sensors, null spatializer");
             return;
         }
         if (!mIsHeadTrackingSupported) {
-            Log.e(TAG, "not " + action + " sensors, spatializer doesn't support headtracking");
+            logloge("not " + action + " sensors, spatializer doesn't support headtracking");
             return;
         }
         int headHandle = -1;
@@ -1345,7 +1354,7 @@ public class SpatializerHelper {
             //     does this happen before routing is updated?
             //     avoid by supporting adding device here AND in onRoutingUpdated()
             headHandle = getHeadSensorHandleUpdateTracker();
-            Log.i(TAG, "head tracker sensor handle initialized to " + headHandle);
+            loglogi("head tracker sensor handle initialized to " + headHandle);
             screenHandle = getScreenSensorHandle();
             Log.i(TAG, "found screen sensor handle initialized to " + screenHandle);
         } else {
@@ -1388,7 +1397,7 @@ public class SpatializerHelper {
             case SpatializerHeadTrackingMode.RELATIVE_SCREEN:
                 return Spatializer.HEAD_TRACKING_MODE_RELATIVE_DEVICE;
             default:
-                throw(new IllegalArgumentException("Unexpected head tracking mode:" + mode));
+                throw (new IllegalArgumentException("Unexpected head tracking mode:" + mode));
         }
     }
 
@@ -1403,7 +1412,7 @@ public class SpatializerHelper {
             case Spatializer.HEAD_TRACKING_MODE_RELATIVE_DEVICE:
                 return SpatializerHeadTrackingMode.RELATIVE_SCREEN;
             default:
-                throw(new IllegalArgumentException("Unexpected head tracking mode:" + sdkMode));
+                throw (new IllegalArgumentException("Unexpected head tracking mode:" + sdkMode));
         }
     }
 
@@ -1416,7 +1425,7 @@ public class SpatializerHelper {
             case SpatializationLevel.SPATIALIZER_MCHAN_BED_PLUS_OBJECTS:
                 return Spatializer.SPATIALIZER_IMMERSIVE_LEVEL_MCHAN_BED_PLUS_OBJECTS;
             default:
-                throw(new IllegalArgumentException("Unexpected spatializer level:" + level));
+                throw (new IllegalArgumentException("Unexpected spatializer level:" + level));
         }
     }
 
@@ -1429,18 +1438,19 @@ public class SpatializerHelper {
                 + Spatializer.headtrackingModeToString(mActualHeadTrackingMode));
         pw.println("\tmDesiredHeadTrackingMode:"
                 + Spatializer.headtrackingModeToString(mDesiredHeadTrackingMode));
-        String modesString = "";
+        pw.println("\tsupports binaural:" + mBinauralSupported + " / transaural:"
+                + mTransauralSupported);
+        StringBuilder modesString = new StringBuilder();
         int[] modes = getSupportedHeadTrackingModes();
         for (int mode : modes) {
-            modesString += Spatializer.headtrackingModeToString(mode) + " ";
+            modesString.append(Spatializer.headtrackingModeToString(mode)).append(" ");
         }
-        pw.println("\tsupports binaural:" + mBinauralSupported + " / transaural"
-                + mTransauralSupported);
         pw.println("\tsupported head tracking modes:" + modesString);
+        pw.println("\theadtracker available:" + mHeadTrackerAvailable);
         pw.println("\tmSpatOutput:" + mSpatOutput);
-        pw.println("\tdevices:\n");
+        pw.println("\tdevices:");
         for (SADeviceState device : mSADevices) {
-            pw.println("\t\t" + device + "\n");
+            pw.println("\t\t" + device);
         }
     }
 
@@ -1463,6 +1473,25 @@ public class SpatializerHelper {
         }
     }
 
+    private static String spatStateString(int state) {
+        switch (state) {
+            case STATE_UNINITIALIZED:
+                return "STATE_UNINITIALIZED";
+            case STATE_NOT_SUPPORTED:
+                return "STATE_NOT_SUPPORTED";
+            case STATE_DISABLED_UNAVAILABLE:
+                return "STATE_DISABLED_UNAVAILABLE";
+            case STATE_ENABLED_UNAVAILABLE:
+                return "STATE_ENABLED_UNAVAILABLE";
+            case STATE_ENABLED_AVAILABLE:
+                return "STATE_ENABLED_AVAILABLE";
+            case STATE_DISABLED_AVAILABLE:
+                return "STATE_DISABLED_AVAILABLE";
+            default:
+                return "invalid state";
+        }
+    }
+
     private static boolean isWireless(int deviceType) {
         for (int type : WIRELESS_TYPES) {
             if (type == deviceType) {
@@ -1473,7 +1502,7 @@ public class SpatializerHelper {
     }
 
     private static boolean isWirelessSpeaker(int deviceType) {
-        for (int type: WIRELESS_SPEAKER_TYPES) {
+        for (int type : WIRELESS_SPEAKER_TYPES) {
             if (type == deviceType) {
                 return true;
             }
@@ -1514,5 +1543,15 @@ public class SpatializerHelper {
             screenHandle = screenSensor.getHandle();
         }
         return screenHandle;
+    }
+
+
+    private static void loglogi(String msg) {
+        AudioService.sSpatialLogger.loglogi(msg, TAG);
+    }
+
+    private static String logloge(String msg) {
+        AudioService.sSpatialLogger.loglog(msg, AudioEventLogger.Event.ALOGE, TAG);
+        return msg;
     }
 }
