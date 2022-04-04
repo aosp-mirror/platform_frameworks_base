@@ -71,6 +71,8 @@ public class TvPipMenuView extends FrameLayout implements View.OnClickListener {
     private static final String TAG = "TvPipMenuView";
     private static final boolean DEBUG = TvPipController.DEBUG;
 
+    private static final int FIRST_CUSTOM_ACTION_POSITION = 3;
+
     @Nullable
     private Listener mListener;
 
@@ -485,6 +487,13 @@ public class TvPipMenuView extends FrameLayout implements View.OnClickListener {
                 });
     }
 
+    /**
+     * Button order:
+     * - Fullscreen
+     * - Close
+     * - Custom actions (app or media actions)
+     * - System actions
+     */
     void setAdditionalActions(List<RemoteAction> actions, RemoteAction closeAction,
             Handler mainHandler) {
         if (DEBUG) {
@@ -507,13 +516,13 @@ public class TvPipMenuView extends FrameLayout implements View.OnClickListener {
         final int actionsNumber = actions.size();
         int buttonsNumber = mAdditionalButtons.size();
         if (actionsNumber > buttonsNumber) {
-            // Add buttons until we have enough to display all of the actions.
+            // Add buttons until we have enough to display all the actions.
             while (actionsNumber > buttonsNumber) {
                 TvPipMenuActionButton button = new TvPipMenuActionButton(mContext);
                 button.setOnClickListener(this);
 
                 mActionButtonsContainer.addView(button,
-                        mActionButtonsContainer.getChildCount() - 1);
+                        FIRST_CUSTOM_ACTION_POSITION + buttonsNumber);
                 mAdditionalButtons.add(button);
 
                 buttonsNumber++;

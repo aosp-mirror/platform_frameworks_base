@@ -69,6 +69,15 @@
                 android:text="@string/pip_fullscreen" />
 
             <com.android.wm.shell.pip.tv.TvPipMenuActionButton
+                android:id="@+id/tv_pip_menu_close_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/pip_ic_close_white"
+                android:text="@string/pip_close" />
+
+            <!-- More TvPipMenuActionButtons may be added here at runtime. -->
+
+            <com.android.wm.shell.pip.tv.TvPipMenuActionButton
                 android:id="@+id/tv_pip_menu_move_button"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -82,15 +91,6 @@
                 android:src="@drawable/pip_ic_collapse"
                 android:visibility="gone"
                 android:text="@string/pip_collapse" />
-
-            <com.android.wm.shell.pip.tv.TvPipMenuActionButton
-                android:id="@+id/tv_pip_menu_close_button"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:src="@drawable/pip_ic_close_white"
-                android:text="@string/pip_close" />
-
-            <!-- More TvPipMenuActionButtons may be added here at runtime. -->
 
             <Space
                 android:layout_width="@dimen/pip_menu_button_wrapper_margin"
