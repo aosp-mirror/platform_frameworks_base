@@ -21,24 +21,19 @@ import android.testing.TestableLooper
 import android.testing.TestableLooper.RunWithLooper
 import android.view.View
 import android.view.ViewGroup
+import android.view.accessibility.AccessibilityNodeInfo
 import android.widget.FrameLayout
 import android.widget.LinearLayout
 import androidx.test.filters.SmallTest
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.plugins.qs.QSTileView
-import com.android.systemui.qs.QSPanelControllerBase.TileRecord
-import com.android.systemui.qs.logging.QSLogger
-import com.android.systemui.qs.tileimpl.QSTileImpl
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.ArgumentMatchers.any
-import org.mockito.ArgumentMatchers.anyBoolean
-import org.mockito.Mock
+import org.mockito.Mockito.mock
+import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
-import org.mockito.Mockito.`when` as whenever
 
 @RunWith(AndroidTestingRunner::class)
 @RunWithLooper
@@ -47,21 +42,7 @@ class QSPanelTest : SysuiTestCase() {
     private lateinit var mTestableLooper: TestableLooper
     private lateinit var mQsPanel: QSPanel
 
-    @Mock
-    private lateinit var mHost: QSTileHost
-
-    @Mock
-    private lateinit var dndTile: QSTileImpl<*>
-
-    @Mock
-    private lateinit var mDndTileRecord: TileRecord
-
-    @Mock
-    private lateinit var mQSLogger: QSLogger
     private lateinit var mParentView: ViewGroup
-
-    @Mock
-    private lateinit var mQSTileView: QSTileView
 
     private lateinit var mFooter: View
 
@@ -71,8 +52,6 @@ class QSPanelTest : SysuiTestCase() {
         MockitoAnnotations.initMocks(this)
         mTestableLooper = TestableLooper.get(this)
 
-        mDndTileRecord.tile = dndTile
-        mDndTileRecord.tileView = mQSTileView
         mTestableLooper.runWithLooper {
             mQsPanel = QSPanel(mContext, null)
             mQsPanel.initialize()
@@ -86,11 +65,6 @@ class QSPanelTest : SysuiTestCase() {
             mParentView = FrameLayout(mContext).apply {
                 addView(mQsPanel)
             }
-
-            whenever(dndTile.tileSpec).thenReturn("dnd")
-            whenever(mHost.tiles).thenReturn(emptyList())
-            whenever(mHost.createTileView(any(), any(), anyBoolean())).thenReturn(mQSTileView)
-            mQsPanel.addTile(mDndTileRecord)
         }
     }
 
@@ -135,6 +109,24 @@ class QSPanelTest : SysuiTestCase() {
 
         // -1 means that it is part of the mHeaderContainer
         assertThat(mQsPanel.indexOfChild(mQsPanel.mSecurityFooter)).isEqualTo(-1)
+    }
+
+    @Test
+    fun testHasCollapseAccessibilityAction() {
+        val info = AccessibilityNodeInfo(mQsPanel)
+        mQsPanel.onInitializeAccessibilityNodeInfo(info)
+
+        assertThat(info.actions and AccessibilityNodeInfo.ACTION_COLLAPSE).isNotEqualTo(0)
+        assertThat(info.actions and AccessibilityNodeInfo.ACTION_EXPAND).isEqualTo(0)
+    }
+
+    @Test
+    fun testCollapseActionCallsRunnable() {
+        val mockRunnable = mock(Runnable::class.java)
+        mQsPanel.setCollapseExpandAction(mockRunnable)
+
+        mQsPanel.performAccessibilityAction(AccessibilityNodeInfo.ACTION_COLLAPSE, null)
+        verify(mockRunnable).run()
     }
 
     private fun getNewOrientationConfig(@Configuration.Orientation newOrientation: Int) =

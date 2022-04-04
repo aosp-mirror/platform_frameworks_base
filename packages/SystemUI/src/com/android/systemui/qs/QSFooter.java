@@ -48,10 +48,5 @@ public interface QSFooter {
      */
     void setKeyguardShowing(boolean keyguardShowing);
 
-    /**
-     * Sets the {@link android.view.View.OnClickListener to be used on elements that expend QS.
-     */
-    void setExpandClickListener(View.OnClickListener onClickListener);
-
     default void disable(int state1, int state2, boolean animate) {}
 }
