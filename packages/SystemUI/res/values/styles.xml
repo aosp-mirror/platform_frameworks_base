@@ -958,6 +958,16 @@
         <item name="android:textAlignment">center</item>
     </style>
 
+    <!-- We explicitly overload this because we don't have control over the style or layout for
+         the cast dialog items, as it's in `@android:layout/media_route_list_item. -->
+    <style name="TextAppearance.CastItem" parent="@android:style/TextAppearance.DeviceDefault.Medium">
+        <item name="android:fontFamily">@*android:string/config_headlineFontFamily</item>
+    </style>
+
+    <style name="Theme.SystemUI.Dialog.Cast">
+        <item name="android:textAppearanceMedium">@style/TextAppearance.CastItem</item>
+    </style>
+    <!-- ************************************************************************************* -->
 
     <style name="Widget" />
     <style name="Widget.Dialog" />
