@@ -48,6 +48,30 @@ internal class WifiState(
                 .append(",subId=").append(subId)
     }
 
+    override fun tableColumns(): List<String> {
+        val columns = listOf("ssid",
+                "isTransient",
+                "isDefault",
+                "statusLabel",
+                "isCarrierMerged",
+                "subId")
+
+        return super.tableColumns() + columns
+    }
+
+    override fun tableData(): List<String> {
+        val data = listOf(ssid,
+        isTransient,
+        isDefault,
+        statusLabel,
+        isCarrierMerged,
+        subId).map {
+            it.toString()
+        }
+
+        return super.tableData() + data
+    }
+
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
