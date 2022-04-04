@@ -30,6 +30,7 @@ import static android.app.ActivityManager.INSTR_FLAG_DISABLE_ISOLATED_STORAGE;
 import static android.app.ActivityManager.INSTR_FLAG_DISABLE_TEST_API_CHECKS;
 import static android.app.ActivityManager.INSTR_FLAG_NO_RESTART;
 import static android.app.ActivityManager.INTENT_SENDER_ACTIVITY;
+import static android.app.ActivityManager.PROCESS_CAPABILITY_ALL;
 import static android.app.ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND;
 import static android.app.ActivityManager.PROCESS_STATE_NONEXISTENT;
 import static android.app.ActivityManager.PROCESS_STATE_TOP;
@@ -1483,6 +1484,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     final ActivityThread mSystemThread;
 
     final UidObserverController mUidObserverController;
+    private volatile IUidObserver mNetworkPolicyUidObserver;
 
     final AppRestrictionController mAppRestrictionController;
 
@@ -17300,6 +17302,19 @@ public class ActivityManagerService extends IActivityManager.Stub
             if (isNewPending && mOomAdjuster != null) { // It can be null in unit test.
                 mOomAdjuster.mCachedAppOptimizer.unfreezeProcess(pid);
             }
+            // We need to update the network rules for the app coming to the top state so that
+            // it can access network when the device or the app is in a restricted state
+            // (e.g. battery/data saver) but since waiting for updateOomAdj to complete and then
+            // informing NetworkPolicyManager might get delayed, informing the state change as soon
+            // as we know app is going to come to the top state.
+            if (mNetworkPolicyUidObserver != null) {
+                try {
+                    mNetworkPolicyUidObserver.onUidStateChanged(uid, PROCESS_STATE_TOP,
+                            mProcessList.getProcStateSeqCounter(), PROCESS_CAPABILITY_ALL);
+                } catch (RemoteException e) {
+                    // Should not happen; call is within the same process
+                }
+            }
         }
 
         @Override
@@ -17496,6 +17511,14 @@ public class ActivityManagerService extends IActivityManager.Stub
         @Override
         public void restart() {
             ActivityManagerService.this.restart();
+        }
+
+        @Override
+        public void registerNetworkPolicyUidObserver(@NonNull IUidObserver observer,
+                int which, int cutpoint, @NonNull String callingPackage) {
+            mNetworkPolicyUidObserver = observer;
+            mUidObserverController.register(observer, which, cutpoint, callingPackage,
+                    Binder.getCallingUid());
         }
     }
 
