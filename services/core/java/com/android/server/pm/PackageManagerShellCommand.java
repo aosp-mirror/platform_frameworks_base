@@ -3516,7 +3516,7 @@ class PackageManagerShellCommand extends ShellCommand {
             }
             List<PermissionInfo> ps = mPermissionManager
                     .queryPermissionsByGroup(groupList.get(i), 0 /*flags*/);
-            final int count = ps.size();
+            final int count = (ps == null ? 0 : ps.size());
             boolean first = true;
             for (int p = 0 ; p < count ; p++) {
                 PermissionInfo pi = ps.get(p);
