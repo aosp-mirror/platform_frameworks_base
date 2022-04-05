@@ -84,16 +84,19 @@ class LogBuffer @JvmOverloads constructor(
     }
 
     private val buffer: ArrayDeque<LogMessageImpl> = ArrayDeque()
-    private val echoMessageQueue: BlockingQueue<LogMessageImpl> = ArrayBlockingQueue(poolSize)
+    private val echoMessageQueue: BlockingQueue<LogMessageImpl>? =
+            if (logcatEchoTracker.logInBackgroundThread) ArrayBlockingQueue(poolSize) else null
 
     init {
-        thread(start = true, priority = Thread.NORM_PRIORITY) {
-            try {
-                while (true) {
-                    echoToDesiredEndpoints(echoMessageQueue.take())
+        if (logcatEchoTracker.logInBackgroundThread && echoMessageQueue != null) {
+            thread(start = true, priority = Thread.NORM_PRIORITY) {
+                try {
+                    while (true) {
+                        echoToDesiredEndpoints(echoMessageQueue.take())
+                    }
+                } catch (e: InterruptedException) {
+                    Thread.currentThread().interrupt()
                 }
-            } catch (e: InterruptedException) {
-                Thread.currentThread().interrupt()
             }
         }
     }
@@ -192,9 +195,15 @@ class LogBuffer @JvmOverloads constructor(
             buffer.removeFirst()
         }
         buffer.add(message as LogMessageImpl)
-        // Log in the background thread only if it has capacity to avoid blocking this thread
-        if (echoMessageQueue.remainingCapacity() > 0) {
-            echoMessageQueue.put(message)
+        // Log in the background thread only if echoMessageQueue exists and has capacity (checking
+        // capacity avoids the possibility of blocking this thread)
+        if (echoMessageQueue != null && echoMessageQueue.remainingCapacity() > 0) {
+            try {
+                echoMessageQueue.put(message)
+            } catch (e: InterruptedException) {
+                // the background thread has been shut down, so just log on this one
+                echoToDesiredEndpoints(message)
+            }
         } else {
             echoToDesiredEndpoints(message)
         }

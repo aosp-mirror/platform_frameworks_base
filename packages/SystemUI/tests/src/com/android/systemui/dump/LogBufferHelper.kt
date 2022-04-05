@@ -30,6 +30,7 @@ fun logcatLogBuffer(name: String = "EchoToLogcatLogBuffer") =
  * A [LogcatEchoTracker] that always allows echoing to the logcat.
  */
 class LogcatEchoTrackerAlways : LogcatEchoTracker {
+    override val logInBackgroundThread = false
     override fun isBufferLoggable(bufferName: String, level: LogLevel): Boolean = true
     override fun isTagLoggable(tagName: String, level: LogLevel): Boolean = true
 }
