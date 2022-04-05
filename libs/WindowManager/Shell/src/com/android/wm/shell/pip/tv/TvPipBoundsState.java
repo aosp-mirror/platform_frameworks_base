@@ -24,6 +24,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
+import android.graphics.Insets;
 import android.util.Size;
 import android.view.Gravity;
 
@@ -60,7 +61,7 @@ public class TvPipBoundsState extends PipBoundsState {
     private @Orientation int mTvFixedPipOrientation;
     private int mTvPipGravity;
     private @Nullable Size mTvExpandedSize;
-
+    private @NonNull Insets mPipMenuPermanentDecorInsets = Insets.NONE;
 
     public TvPipBoundsState(@NonNull Context context) {
         super(context);
@@ -159,4 +160,11 @@ public class TvPipBoundsState extends PipBoundsState {
         return mIsTvExpandedPipSupported;
     }
 
+    public void setPipMenuPermanentDecorInsets(@NonNull Insets permanentInsets) {
+        mPipMenuPermanentDecorInsets = permanentInsets;
+    }
+
+    public @NonNull Insets getPipMenuPermanentDecorInsets() {
+        return mPipMenuPermanentDecorInsets;
+    }
 }

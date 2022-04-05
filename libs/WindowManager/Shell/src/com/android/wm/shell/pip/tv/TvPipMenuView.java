@@ -81,6 +81,8 @@ public class TvPipMenuView extends FrameLayout implements View.OnClickListener {
     private final TvPipMenuActionButton mExpandButton;
     private final TvPipMenuActionButton mCloseButton;
 
+    private final int mPipMenuFadeAnimationDuration;
+
     public TvPipMenuView(@NonNull Context context) {
         this(context, null);
     }
@@ -121,6 +123,9 @@ public class TvPipMenuView extends FrameLayout implements View.OnClickListener {
         mArrowRight = findViewById(R.id.tv_pip_menu_arrow_right);
         mArrowDown = findViewById(R.id.tv_pip_menu_arrow_down);
         mArrowLeft = findViewById(R.id.tv_pip_menu_arrow_left);
+
+        mPipMenuFadeAnimationDuration = context.getResources()
+                .getInteger(R.integer.pip_menu_fade_animation_duration);
     }
 
     void updateLayout(Rect updatedBounds) {
@@ -184,30 +189,32 @@ public class TvPipMenuView extends FrameLayout implements View.OnClickListener {
         if (DEBUG) {
             ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE, "%s: showMoveMenu()", TAG);
         }
-        showMenuButtons(false);
+        showButtonsMenu(false);
         showMovementHints(gravity);
-        showMenuFrame(true);
+        setFrameHighlighted(true);
     }
 
-    void showButtonMenu() {
+    void showButtonsMenu() {
         if (DEBUG) {
-            ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE, "%s: showButtonMenu()", TAG);
+            ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                    "%s: showButtonsMenu()", TAG);
         }
-        showMenuButtons(true);
+        showButtonsMenu(true);
         hideMovementHints();
-        showMenuFrame(true);
+        setFrameHighlighted(true);
     }
 
     /**
      * Hides all menu views, including the menu frame.
      */
-    void hideAll() {
+    void hideAllUserControls() {
         if (DEBUG) {
-            ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE, "%s: hideAll()", TAG);
+            ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                    "%s: hideAllUserControls()", TAG);
         }
-        showMenuButtons(false);
+        showButtonsMenu(false);
         hideMovementHints();
-        showMenuFrame(false);
+        setFrameHighlighted(false);
     }
 
     private void animateAlphaTo(float alpha, View view) {
@@ -217,7 +224,7 @@ public class TvPipMenuView extends FrameLayout implements View.OnClickListener {
         view.animate()
                 .alpha(alpha)
                 .setInterpolator(alpha == 0f ? TvPipInterpolators.EXIT : TvPipInterpolators.ENTER)
-                .setDuration(500)
+                .setDuration(mPipMenuFadeAnimationDuration)
                 .withStartAction(() -> {
                     if (alpha != 0) {
                         view.setVisibility(VISIBLE);
@@ -228,15 +235,6 @@ public class TvPipMenuView extends FrameLayout implements View.OnClickListener {
                         view.setVisibility(GONE);
                     }
                 });
-    }
-
-    boolean isVisible() {
-        return mMenuFrameView.getAlpha() != 0f
-                || mActionButtonsContainer.getAlpha() != 0f
-                || mArrowUp.getAlpha() != 0f
-                || mArrowRight.getAlpha() != 0f
-                || mArrowDown.getAlpha() != 0f
-                || mArrowLeft.getAlpha() != 0f;
     }
 
     void setAdditionalActions(List<RemoteAction> actions, RemoteAction closeAction,
@@ -423,18 +421,18 @@ public class TvPipMenuView extends FrameLayout implements View.OnClickListener {
     }
 
     /**
-     * Show or hide the pip user actions.
+     * Show or hide the pip buttons menu.
      */
-    public void showMenuButtons(boolean show) {
+    public void showButtonsMenu(boolean show) {
         if (DEBUG) {
             ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
-                    "%s: showMenuButtons: %b", TAG, show);
+                    "%s: showUserActions: %b", TAG, show);
         }
         animateAlphaTo(show ? 1 : 0, mActionButtonsContainer);
     }
 
-    private void showMenuFrame(boolean show) {
-        animateAlphaTo(show ? 1 : 0, mMenuFrameView);
+    private void setFrameHighlighted(boolean highlighted) {
+        mMenuFrameView.setActivated(highlighted);
     }
 
     interface Listener {
