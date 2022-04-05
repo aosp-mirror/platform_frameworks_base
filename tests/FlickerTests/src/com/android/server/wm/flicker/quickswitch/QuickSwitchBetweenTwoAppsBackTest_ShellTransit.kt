@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-package com.android.server.wm.flicker.launch
+package com.android.server.wm.flicker.quickswitch
 
-import androidx.test.filters.FlakyTest
 import android.platform.test.annotations.RequiresDevice
+import androidx.test.filters.FlakyTest
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.annotation.Group1
@@ -30,30 +30,24 @@ import org.junit.runners.MethodSorters
 import org.junit.runners.Parameterized
 
 /**
- * Test launching an app while the device is locked
+ * Test quick switching back to previous app from last opened app
  *
- * To run this test: `atest FlickerTests:OpenAppNonResizeableTest`
+ * To run this test: `atest FlickerTests:QuickSwitchBetweenTwoAppsBackTest`
  *
  * Actions:
- *     Lock the device.
- *     Launch an app on top of the lock screen [testApp] and wait animation to complete
+ *     Launch an app [testApp1]
+ *     Launch another app [testApp2]
+ *     Swipe right from the bottom of the screen to quick switch back to the first app [testApp1]
  *
- * Notes:
- *     1. Some default assertions (e.g., nav bar, status bar and screen covered)
- *        are inherited [OpenAppTransition]
- *     2. Part of the test setup occurs automatically via
- *        [com.android.server.wm.flicker.TransitionRunnerWithRules],
- *        including configuring navigation mode, initial orientation and ensuring no
- *        apps are running before setup
  */
 @RequiresDevice
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @Group1
-@FlakyTest(bugId = 219688533)
-class OpenAppNonResizeableTest_ShellTransit(testSpec: FlickerTestParameter)
-    : OpenAppNonResizeableTest(testSpec) {
+@FlakyTest(bugId = 228009808)
+open class QuickSwitchBetweenTwoAppsBackTest_ShellTransit(testSpec: FlickerTestParameter)
+    : QuickSwitchBetweenTwoAppsBackTest(testSpec) {
     @Before
     override fun before() {
         Assume.assumeTrue(isShellTransitionsEnabled)
