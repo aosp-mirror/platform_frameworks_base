@@ -807,7 +807,7 @@ public class NewNotifPipelineBubblesTest extends SysuiTestCase {
         assertTrue(mBubbleController.hasBubbles());
 
         // Removes the notification
-        mEntryListener.onEntryRemoved(mRow, 0);
+        mEntryListener.onEntryRemoved(mRow, REASON_APP_CANCEL);
         assertFalse(mBubbleController.hasBubbles());
     }
 
@@ -938,7 +938,7 @@ public class NewNotifPipelineBubblesTest extends SysuiTestCase {
         mBubblesManager.handleDismissalInterception(groupSummary.getEntry());
 
         // WHEN the summary is cancelled by the app
-        mEntryListener.onEntryRemoved(groupSummary.getEntry(), 0);
+        mEntryListener.onEntryRemoved(groupSummary.getEntry(), REASON_APP_CANCEL);
 
         // THEN the summary and its children are removed from bubble data
         assertFalse(mBubbleData.hasBubbleInStackWithKey(groupedBubble.getEntry().getKey()));
