@@ -2036,7 +2036,7 @@ static jlong nativeCreateJankDataListenerWrapper(JNIEnv* env, jclass clazz,
 }
 
 static jint nativeGetGPUContextPriority(JNIEnv* env, jclass clazz) {
-    return static_cast<jint>(SurfaceComposerClient::getGPUContextPriority());
+    return static_cast<jint>(SurfaceComposerClient::getGpuContextPriority());
 }
 
 static void nativeSetTransformHint(JNIEnv* env, jclass clazz, jlong nativeSurfaceControl,
