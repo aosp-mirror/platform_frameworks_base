@@ -92,21 +92,6 @@ public abstract class UserManagerInternal {
     public abstract void setDevicePolicyUserRestrictions(int originatingUserId,
             @Nullable Bundle global, @Nullable RestrictionsSet local, boolean isDeviceOwner);
 
-    /**
-     * Returns the "base" user restrictions.
-     *
-     * Used by {@link com.android.server.devicepolicy.DevicePolicyManagerService} for upgrading
-     * from MNC.
-     */
-    public abstract Bundle getBaseUserRestrictions(int userId);
-
-    /**
-     * Called by {@link com.android.server.devicepolicy.DevicePolicyManagerService} for upgrading
-     * from MNC.
-     */
-    public abstract void setBaseUserRestrictionsByDpmsForMigration(int userId,
-            Bundle baseRestrictions);
-
     /** Return a user restriction. */
     public abstract boolean getUserRestriction(int userId, String key);
 
