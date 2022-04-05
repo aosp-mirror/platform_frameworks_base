@@ -2876,8 +2876,9 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         synchronized (mLock) {
             mPackageUsage.writeNow(mSettings.getPackagesLocked());
 
-            if (mHandler.hasMessages(WRITE_SETTINGS)) {
-                mHandler.removeMessages(WRITE_SETTINGS);
+            if (mHandler.hasMessages(WRITE_SETTINGS)
+                    || mHandler.hasMessages(WRITE_PACKAGE_RESTRICTIONS)
+                    || mHandler.hasMessages(WRITE_PACKAGE_LIST)) {
                 writeSettings();
             }
         }
