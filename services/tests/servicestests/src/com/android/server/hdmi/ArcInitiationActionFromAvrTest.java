@@ -68,7 +68,8 @@ public class ArcInitiationActionFromAvrTest {
         mContextSpy = spy(new ContextWrapper(InstrumentationRegistry.getTargetContext()));
 
         HdmiControlService hdmiControlService =
-                new HdmiControlService(mContextSpy, Collections.emptyList()) {
+                new HdmiControlService(mContextSpy, Collections.emptyList(),
+                        new FakeAudioDeviceVolumeManagerWrapper()) {
                     @Override
                     boolean isPowerStandby() {
                         return false;
