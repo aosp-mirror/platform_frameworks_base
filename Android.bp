@@ -324,6 +324,7 @@ java_defaults {
         "av-types-aidl-java",
         "tv_tuner_resource_manager_aidl_interface-java",
         "soundtrigger_middleware-aidl-java",
+        "modules-utils-build",
         "modules-utils-preconditions",
         "modules-utils-synchronous-result-receiver",
         "modules-utils-os",
