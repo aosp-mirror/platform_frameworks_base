@@ -2303,6 +2303,7 @@
   <java-symbol type="drawable" name="scrubber_control_disabled_holo" />
   <java-symbol type="drawable" name="scrubber_control_selector_holo" />
   <java-symbol type="drawable" name="scrubber_progress_horizontal_holo_dark" />
+  <java-symbol type="drawable" name="progress_small_material" />
   <java-symbol type="string" name="chooseUsbActivity" />
   <java-symbol type="string" name="ext_media_badremoval_notification_message" />
   <java-symbol type="string" name="ext_media_badremoval_notification_title" />
