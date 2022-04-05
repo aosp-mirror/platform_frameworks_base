@@ -15,6 +15,7 @@
  */
 package com.android.server.devicepolicy;
 
+import android.accounts.Account;
 import android.annotation.NonNull;
 import android.annotation.UserIdInt;
 import android.app.admin.DevicePolicySafetyChecker;
@@ -58,6 +59,7 @@ abstract class BaseIDevicePolicyManager extends IDevicePolicyManager.Stub {
      * @see {@link SystemService#onUserUnlocking}
      */
     abstract void handleUnlockUser(int userId);
+
     /**
      * To be called by {@link DevicePolicyManagerService#Lifecycle} after a user is being unlocked.
      *
@@ -131,6 +133,11 @@ abstract class BaseIDevicePolicyManager extends IDevicePolicyManager.Stub {
     public UserHandle createAndProvisionManagedProfile(
             @NonNull ManagedProfileProvisioningParams provisioningParams, String callerPackage) {
         return null;
+    }
+
+    public void finalizeWorkProfileProvisioning(
+            UserHandle managedProfileUser, Account migratedAccount) {
+
     }
 
     public void provisionFullyManagedDevice(
