@@ -303,6 +303,13 @@ abstract class HdmiCecLocalDevice {
         if (dispatchMessageToAction(message)) {
             return Constants.HANDLED;
         }
+
+        // If a message type has its own class, all valid messages of that type
+        // will be represented by an instance of that class.
+        if (message instanceof SetAudioVolumeLevelMessage) {
+            return handleSetAudioVolumeLevel((SetAudioVolumeLevelMessage) message);
+        }
+
         switch (message.getOpcode()) {
             case Constants.MESSAGE_ACTIVE_SOURCE:
                 return handleActiveSource(message);
@@ -634,6 +641,11 @@ abstract class HdmiCecLocalDevice {
 
     @Constants.HandleMessageResult
     protected int handleReportShortAudioDescriptor(HdmiCecMessage message) {
+        return Constants.NOT_HANDLED;
+    }
+
+    @Constants.HandleMessageResult
+    protected int handleSetAudioVolumeLevel(SetAudioVolumeLevelMessage message) {
         return Constants.NOT_HANDLED;
     }
 
@@ -1002,6 +1014,57 @@ abstract class HdmiCecLocalDevice {
         action.start();
     }
 
+    void addAvcAudioStatusAction(int targetAddress) {
+        if (!hasAction(AbsoluteVolumeAudioStatusAction.class)) {
+            addAndStartAction(new AbsoluteVolumeAudioStatusAction(this, targetAddress));
+        }
+    }
+
+    void removeAvcAudioStatusAction() {
+        removeAction(AbsoluteVolumeAudioStatusAction.class);
+    }
+
+    void updateAvcVolume(int volumeIndex) {
+        for (AbsoluteVolumeAudioStatusAction action :
+                getActions(AbsoluteVolumeAudioStatusAction.class)) {
+            action.updateVolume(volumeIndex);
+        }
+    }
+
+    /**
+     * Determines whether {@code targetAddress} supports <Set Audio Volume Level>. Does two things
+     * in parallel: send <Give Features> (to get <Report Features> in response),
+     * and send <Set Audio Volume Level> (to see if it gets a <Feature Abort> in response).
+     */
+    @ServiceThreadOnly
+    void queryAvcSupport(int targetAddress) {
+        assertRunOnServiceThread();
+
+        // Send <Give Features> if using CEC 2.0 or above.
+        if (mService.getCecVersion() >= HdmiControlManager.HDMI_CEC_VERSION_2_0) {
+            synchronized (mLock) {
+                mService.sendCecCommand(HdmiCecMessageBuilder.buildGiveFeatures(
+                        getDeviceInfo().getLogicalAddress(), targetAddress));
+            }
+        }
+
+        // If we don't already have a {@link SetAudioVolumeLevelDiscoveryAction} for the target
+        // device, start one.
+        List<SetAudioVolumeLevelDiscoveryAction> savlDiscoveryActions =
+                getActions(SetAudioVolumeLevelDiscoveryAction.class);
+        if (savlDiscoveryActions.stream().noneMatch(a -> a.getTargetAddress() == targetAddress)) {
+            addAndStartAction(new SetAudioVolumeLevelDiscoveryAction(this, targetAddress,
+                    new IHdmiControlCallback.Stub() {
+                            @Override
+                            public void onComplete(int result) {
+                                if (result == HdmiControlManager.RESULT_SUCCESS) {
+                                    getService().checkAndUpdateAbsoluteVolumeControlState();
+                                }
+                            }
+                        }));
+        }
+    }
+
     @ServiceThreadOnly
     void startQueuedActions() {
         assertRunOnServiceThread();
@@ -1205,6 +1268,9 @@ abstract class HdmiCecLocalDevice {
      */
     protected void disableDevice(
             boolean initiatedByCec, final PendingActionClearedCallback originalCallback) {
+        removeAction(AbsoluteVolumeAudioStatusAction.class);
+        removeAction(SetAudioVolumeLevelDiscoveryAction.class);
+
         mPendingActionClearedCallback =
                 new PendingActionClearedCallback() {
                     @Override

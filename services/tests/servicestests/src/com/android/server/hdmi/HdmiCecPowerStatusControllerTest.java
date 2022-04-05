@@ -15,6 +15,7 @@
  */
 package com.android.server.hdmi;
 
+import static com.android.server.SystemService.PHASE_SYSTEM_SERVICES_READY;
 import static com.android.server.hdmi.HdmiControlService.INITIATED_BY_ENABLE_CEC;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -65,7 +66,8 @@ public class HdmiCecPowerStatusControllerTest {
         Context contextSpy = spy(new ContextWrapper(InstrumentationRegistry.getTargetContext()));
         Looper myLooper = mTestLooper.getLooper();
 
-        mHdmiControlService = new HdmiControlService(contextSpy, Collections.emptyList()) {
+        mHdmiControlService = new HdmiControlService(contextSpy, Collections.emptyList(),
+                new FakeAudioDeviceVolumeManagerWrapper()) {
             @Override
             boolean isControlEnabled() {
                 return true;
@@ -105,6 +107,7 @@ public class HdmiCecPowerStatusControllerTest {
         mNativeWrapper.setPortInfo(hdmiPortInfos);
         mNativeWrapper.setPortConnectionStatus(1, true);
         mHdmiControlService.initService();
+        mHdmiControlService.onBootPhase(PHASE_SYSTEM_SERVICES_READY);
         mPowerManager = new FakePowerManagerWrapper(contextSpy);
         mHdmiControlService.setPowerManager(mPowerManager);
         mHdmiControlService.getHdmiCecNetwork().initPortInfo();
