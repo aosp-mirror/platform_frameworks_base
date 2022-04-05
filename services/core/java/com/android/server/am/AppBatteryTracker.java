@@ -49,6 +49,7 @@ import android.content.Context;
 import android.content.pm.ServiceInfo;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
+import android.os.AppBackgroundRestrictionsInfo;
 import android.os.AppBatteryStatsProto;
 import android.os.BatteryConsumer;
 import android.os.BatteryConsumer.Dimensions;
@@ -74,6 +75,7 @@ import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
+import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.am.AppBatteryTracker.AppBatteryPolicy;
 import com.android.server.am.AppRestrictionController.TrackerType;
 import com.android.server.am.AppRestrictionController.UidBatteryUsageProvider;
@@ -175,6 +177,12 @@ final class AppBatteryTracker extends BaseAppStateTracker<AppBatteryPolicy>
     @GuardedBy("mLock")
     private long mLastUidBatteryUsageStartTs;
 
+    /**
+     * elapseRealTime of last time the AppBatteryTracker is reported to statsd.
+     */
+    @GuardedBy("mLock")
+    private long mLastReportTime = 0;
+
     // For debug only.
     private final SparseArray<ImmutableBatteryUsage> mDebugUidPercentages = new SparseArray<>();
 
@@ -228,7 +236,90 @@ final class AppBatteryTracker extends BaseAppStateTracker<AppBatteryPolicy>
                     mBgHandler.postDelayed(mBgBatteryUsageStatsPolling, delay);
                 }
             }
+            logAppBatteryTrackerIfNeeded();
         }
+    }
+
+    /**
+     * Log per-uid BatteryTrackerInfo to statsd every 24 hours (as the window specified in
+     * {@link AppBatteryPolicy#mBgCurrentDrainWindowMs})
+     */
+    private void logAppBatteryTrackerIfNeeded() {
+        final long now = SystemClock.elapsedRealtime();
+        synchronized (mLock) {
+            final AppBatteryPolicy bgPolicy = mInjector.getPolicy();
+            if (now - mLastReportTime < bgPolicy.mBgCurrentDrainWindowMs) {
+                return;
+            } else {
+                mLastReportTime = now;
+            }
+        }
+        updateBatteryUsageStatsIfNecessary(mInjector.currentTimeMillis(), true);
+        synchronized (mLock) {
+            for (int i = 0, size = mUidBatteryUsageInWindow.size(); i < size; i++) {
+                final int uid = mUidBatteryUsageInWindow.keyAt(i);
+                if (!UserHandle.isCore(uid) && !UserHandle.isApp(uid)) {
+                    continue;
+                }
+                if (BATTERY_USAGE_NONE.equals(mUidBatteryUsageInWindow.valueAt(i))) {
+                    continue;
+                }
+                FrameworkStatsLog.write(FrameworkStatsLog.APP_BACKGROUND_RESTRICTIONS_INFO,
+                        uid,
+                        FrameworkStatsLog
+                                .APP_BACKGROUND_RESTRICTIONS_INFO__RESTRICTION_LEVEL__LEVEL_UNKNOWN,
+                        FrameworkStatsLog
+                                .APP_BACKGROUND_RESTRICTIONS_INFO__THRESHOLD__THRESHOLD_UNKNOWN,
+                        FrameworkStatsLog
+                                .APP_BACKGROUND_RESTRICTIONS_INFO__TRACKER__UNKNOWN_TRACKER,
+                        null /*byte[] fgs_tracker_info*/,
+                        getBatteryTrackerInfoProtoLocked(uid) /*byte[] battery_tracker_info*/,
+                        null /*byte[] broadcast_events_tracker_info*/,
+                        null /*byte[] bind_service_events_tracker_info*/,
+                        FrameworkStatsLog
+                                .APP_BACKGROUND_RESTRICTIONS_INFO__EXEMPTION_REASON__REASON_UNKNOWN,
+                        FrameworkStatsLog
+                                .APP_BACKGROUND_RESTRICTIONS_INFO__OPT_LEVEL__UNKNOWN,
+                        FrameworkStatsLog
+                                .APP_BACKGROUND_RESTRICTIONS_INFO__TARGET_SDK__SDK_UNKNOWN,
+                        isLowRamDeviceStatic());
+            }
+        }
+    }
+
+    /**
+     * Get the BatteryTrackerInfo proto of a UID.
+     * @param uid
+     * @return byte array of the proto.
+     */
+     @NonNull byte[] getBatteryTrackerInfoProtoLocked(int uid) {
+        final ImmutableBatteryUsage temp = mUidBatteryUsageInWindow.get(uid);
+        if (temp == null) {
+            return new byte[0];
+        }
+        final BatteryUsage bgUsage = temp.calcPercentage(uid, mInjector.getPolicy());
+        final double allUsage = bgUsage.mPercentage[BatteryUsage.BATTERY_USAGE_INDEX_UNSPECIFIED]
+                + bgUsage.mPercentage[BatteryUsage.BATTERY_USAGE_INDEX_FOREGROUND]
+                + bgUsage.mPercentage[BatteryUsage.BATTERY_USAGE_INDEX_BACKGROUND]
+                + bgUsage.mPercentage[BatteryUsage.BATTERY_USAGE_INDEX_FOREGROUND_SERVICE]
+                + bgUsage.mPercentage[BatteryUsage.BATTERY_USAGE_INDEX_CACHED];
+        final double usageBackground =
+                bgUsage.mPercentage[BatteryUsage.BATTERY_USAGE_INDEX_BACKGROUND];
+        final double usageFgs =
+                bgUsage.mPercentage[BatteryUsage.BATTERY_USAGE_INDEX_FOREGROUND_SERVICE];
+        Slog.d(TAG, "getBatteryTrackerInfoProtoLocked uid:" + uid
+                + " allUsage:" + String.format("%4.2f%%", allUsage)
+                + " usageBackground:" + String.format("%4.2f%%", usageBackground)
+                + " usageFgs:" + String.format("%4.2f%%", usageFgs));
+        final ProtoOutputStream proto = new ProtoOutputStream();
+        proto.write(AppBackgroundRestrictionsInfo.BatteryTrackerInfo.BATTERY_24H,
+                allUsage * 10000);
+        proto.write(AppBackgroundRestrictionsInfo.BatteryTrackerInfo.BATTERY_USAGE_BACKGROUND,
+                usageBackground * 10000);
+        proto.write(AppBackgroundRestrictionsInfo.BatteryTrackerInfo.BATTERY_USAGE_FGS,
+                usageFgs * 10000);
+        proto.flush();
+        return proto.getBytes();
     }
 
     @Override
