@@ -163,7 +163,7 @@ class MediaDeviceManager @Inject constructor(
             }
         // A device that is not yet connected but is expected to connect imminently. Because it's
         // expected to connect imminently, it should be displayed as the current device.
-        private var aboutToConnectDeviceOverride: MediaDeviceData? = null
+        private var aboutToConnectDeviceOverride: AboutToConnectDevice? = null
 
         @AnyThread
         fun start() = bgExecutor.execute {
@@ -221,22 +221,34 @@ class MediaDeviceManager @Inject constructor(
             }
         }
 
-        override fun onAboutToConnectDeviceChanged(deviceName: String?, deviceIcon: Drawable?) {
-            aboutToConnectDeviceOverride = if (deviceName == null || deviceIcon == null) {
-                null
-            } else {
-                MediaDeviceData(enabled = true, deviceIcon, deviceName)
-            }
+        override fun onAboutToConnectDeviceAdded(
+            deviceAddress: String,
+            deviceName: String,
+            deviceIcon: Drawable?
+        ) {
+            aboutToConnectDeviceOverride = AboutToConnectDevice(
+                fullMediaDevice = localMediaManager.getMediaDeviceById(deviceAddress),
+                backupMediaDeviceData = MediaDeviceData(enabled = true, deviceIcon, deviceName)
+            )
+            updateCurrent()
+        }
+
+        override fun onAboutToConnectDeviceRemoved() {
+            aboutToConnectDeviceOverride = null
             updateCurrent()
         }
 
         @WorkerThread
         private fun updateCurrent() {
-            if (aboutToConnectDeviceOverride != null) {
-                current = aboutToConnectDeviceOverride
-                return
+            val aboutToConnect = aboutToConnectDeviceOverride
+            if (aboutToConnect != null &&
+                aboutToConnect.fullMediaDevice == null &&
+                aboutToConnect.backupMediaDeviceData != null) {
+                    // Only use [backupMediaDeviceData] when we don't have [fullMediaDevice].
+                    current = aboutToConnect.backupMediaDeviceData
+                    return
             }
-            val device = localMediaManager.currentConnectedDevice
+            val device = aboutToConnect?.fullMediaDevice ?: localMediaManager.currentConnectedDevice
             val route = controller?.let { mr2manager.getRoutingSessionForMediaController(it) }
 
             // If we have a controller but get a null route, then don't trust the device
@@ -246,3 +258,17 @@ class MediaDeviceManager @Inject constructor(
         }
     }
 }
+
+/**
+ * A class storing information for the about-to-connect device. See
+ * [LocalMediaManager.DeviceCallback.onAboutToConnectDeviceAdded] for more information.
+ *
+ * @property fullMediaDevice a full-fledged [MediaDevice] object representing the device. If
+ *   non-null, prefer using [fullMediaDevice] over [backupMediaDeviceData].
+ * @property backupMediaDeviceData a backup [MediaDeviceData] object containing the minimum
+ *   information required to display the device. Only use if [fullMediaDevice] is null.
+ */
+private data class AboutToConnectDevice(
+    val fullMediaDevice: MediaDevice? = null,
+    val backupMediaDeviceData: MediaDeviceData? = null
+)
