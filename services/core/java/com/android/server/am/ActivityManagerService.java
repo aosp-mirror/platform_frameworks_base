@@ -46,6 +46,7 @@ import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_UNAWARE;
 import static android.content.pm.PackageManager.MATCH_SYSTEM_ONLY;
 import static android.content.pm.PackageManager.MATCH_UNINSTALLED_PACKAGES;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
+import static android.net.ConnectivityManager.BLOCKED_REASON_NONE;
 import static android.os.FactoryTest.FACTORY_TEST_OFF;
 import static android.os.IServiceManager.DUMP_FLAG_PRIORITY_CRITICAL;
 import static android.os.IServiceManager.DUMP_FLAG_PRIORITY_HIGH;
@@ -1417,6 +1418,9 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     final UidObserverController mUidObserverController;
     private volatile IUidObserver mNetworkPolicyUidObserver;
+
+    @GuardedBy("mUidNetworkBlockedReasons")
+    private final SparseIntArray mUidNetworkBlockedReasons = new SparseIntArray();
 
     private final class AppDeathRecipient implements IBinder.DeathRecipient {
         final ProcessRecord mApp;
@@ -15595,6 +15599,17 @@ public class ActivityManagerService extends IActivityManager.Stub
                                 + record.procStateSeqWaitingForNetwork);
                     }
                     record.networkStateLock.notifyAll();
+                }
+            }
+        }
+
+        @Override
+        public void onUidBlockedReasonsChanged(int uid, int blockedReasons) {
+            synchronized (mUidNetworkBlockedReasons) {
+                if (blockedReasons == BLOCKED_REASON_NONE) {
+                    mUidNetworkBlockedReasons.delete(uid);
+                } else {
+                    mUidNetworkBlockedReasons.put(uid, blockedReasons);
                 }
             }
         }
