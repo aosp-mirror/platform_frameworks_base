@@ -27,10 +27,7 @@ import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.annotation.Group1
 import com.android.server.wm.flicker.helpers.NonResizeableAppHelper
 import com.android.server.wm.flicker.helpers.WindowUtils
-import com.android.server.wm.flicker.helpers.isShellTransitionsEnabled
 import com.android.server.wm.traces.common.FlickerComponentName
-import org.junit.Assume
-import org.junit.Before
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -63,11 +60,6 @@ open class OpenAppNonResizeableTest(testSpec: FlickerTestParameter)
     : OpenAppFromLockTransition(testSpec) {
     override val testApp = NonResizeableAppHelper(instrumentation)
     private val colorFadComponent = FlickerComponentName("", "ColorFade BLAST#")
-
-    @Before
-    open fun before() {
-        Assume.assumeFalse(isShellTransitionsEnabled)
-    }
 
     /**
      * Checks that the nav bar layer starts invisible, becomes visible during unlocking animation

@@ -47,7 +47,6 @@ import org.junit.runners.Parameterized
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @Group4
-@FlakyTest(bugId = 218604389)
 open class SetRequestedOrientationWhilePinnedTest(
     testSpec: FlickerTestParameter
 ) : PipTransition(testSpec) {
