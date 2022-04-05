@@ -30,6 +30,12 @@ An indication to power off the device most likely comes from one of two signals:
 
 ### How the device locks
 
+## Debugging Tips
+Enable verbose keyguard logs that will print to logcat. Should only be used temporarily for debugging. See [KeyguardConstants][5].
+```
+adb shell setprop log.tag.Keyguard DEBUG && adb shell am crash com.android.systemui
+```
+
 More coming
 * Screen timeout
 * Smart lock
@@ -38,9 +44,8 @@ More coming
 * Lock timeout after screen timeout setting
 
 
-[1]: /frameworks/base/packages/SystemUI/docs/keyguard/bouncer.md
-[2]: /frameworks/base/services/core/java/com/android/server/power/PowerManagerService.java
-[3]: /frameworks/base/packages/SystemUI/docs/keyguard/doze.md
-[4]: /frameworks/base/services/core/java/com/android/server/policy/PhoneWindowManager.java
-
-
+[1]: /frameworks/base/packages/SystemUI/docs/device-entry/bouncer.md
+[2]: /com/android/server/power/PowerManagerService.java
+[3]: /frameworks/base/packages/SystemUI/docs/device-entry/doze.md
+[4]: /com/android/server/policy/PhoneWindowManager.java
+[5]: /frameworks/base/packages/SystemUI/src/com/android/keyguard/KeyguardConstants.java
