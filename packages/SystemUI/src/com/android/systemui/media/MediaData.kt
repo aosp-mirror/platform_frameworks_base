@@ -184,7 +184,12 @@ data class MediaAction(
     val icon: Drawable?,
     val action: Runnable?,
     val contentDescription: CharSequence?,
-    val background: Drawable?
+    val background: Drawable?,
+
+    // Rebind Id is used to detect identical rebinds and ignore them. It is intended
+    // to prevent continuously looping animations from restarting due to the arrival
+    // of repeated media notifications that are visually identical.
+    val rebindId: Int? = null
 )
 
 /** State of the media device. */

@@ -726,6 +726,25 @@ class MediaDataManagerTest : SysuiTestCase() {
     }
 
     @Test
+    fun testPlaybackActions_connecting() {
+        whenever(mediaFlags.areMediaSessionActionsEnabled(any(), any())).thenReturn(true)
+        val stateActions = PlaybackState.ACTION_PLAY
+        val stateBuilder = PlaybackState.Builder()
+                .setState(PlaybackState.STATE_BUFFERING, 0, 10f)
+                .setActions(stateActions)
+        whenever(controller.playbackState).thenReturn(stateBuilder.build())
+
+        addNotificationAndLoad()
+
+        assertThat(mediaDataCaptor.value!!.semanticActions).isNotNull()
+        val actions = mediaDataCaptor.value!!.semanticActions!!
+
+        assertThat(actions.playOrPause).isNotNull()
+        assertThat(actions.playOrPause!!.contentDescription).isEqualTo(
+                context.getString(R.string.controls_media_button_connecting))
+    }
+
+    @Test
     fun testPlaybackActions_reservedSpace() {
         val customDesc = arrayOf("custom 1", "custom 2", "custom 3", "custom 4")
         whenever(mediaFlags.areMediaSessionActionsEnabled(any(), any())).thenReturn(true)
