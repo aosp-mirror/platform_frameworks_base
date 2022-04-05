@@ -183,7 +183,8 @@ public final class LogcatManagerService extends SystemService {
 
                 ActivityManagerInternal ami = LocalServices.getService(
                         ActivityManagerInternal.class);
-                boolean isCallerInstrumented = ami.isUidCurrentlyInstrumented(mUid);
+                boolean isCallerInstrumented =
+                        ami.getInstrumentationSourceUid(mUid) != android.os.Process.INVALID_UID;
 
                 // The instrumented apks only run for testing, so we don't check user permission.
                 if (isCallerInstrumented) {
