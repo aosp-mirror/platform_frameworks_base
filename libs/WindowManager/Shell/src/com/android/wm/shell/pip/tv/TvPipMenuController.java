@@ -63,6 +63,9 @@ public class TvPipMenuController implements PipMenuController, TvPipMenuView.Lis
     private final SystemWindows mSystemWindows;
     private final TvPipBoundsState mTvPipBoundsState;
     private final Handler mMainHandler;
+    private final int mPipMenuBorderWidth;
+    private final int mPipEduTextShowDurationMs;
+    private final int mPipEduTextHeight;
 
     private Delegate mDelegate;
     private SurfaceControl mLeash;
@@ -98,7 +101,7 @@ public class TvPipMenuController implements PipMenuController, TvPipMenuView.Lis
             if (DEBUG) e.printStackTrace();
         }
     };
-    private final int mPipMenuSurfaceOuterSpace;
+    private final Runnable mCloseEduTextRunnable = this::closeEduText;
 
     public TvPipMenuController(Context context, TvPipBoundsState tvPipBoundsState,
             SystemWindows systemWindows, PipMediaController pipMediaController,
@@ -122,13 +125,12 @@ public class TvPipMenuController implements PipMenuController, TvPipMenuView.Lis
 
         pipMediaController.addActionListener(this::onMediaActionsChanged);
 
-        mPipMenuSurfaceOuterSpace = context.getResources()
-                .getDimensionPixelSize(R.dimen.pip_menu_outer_space);
-
-        final int pipBorderWidth = context.getResources()
+        mPipEduTextShowDurationMs = context.getResources()
+                .getInteger(R.integer.pip_edu_text_show_duration_ms);
+        mPipEduTextHeight = context.getResources()
+                .getDimensionPixelSize(R.dimen.pip_menu_edu_text_view_height);
+        mPipMenuBorderWidth = context.getResources()
                 .getDimensionPixelSize(R.dimen.pip_menu_border_width);
-        mTvPipBoundsState.setPipMenuPermanentDecorInsets(Insets.of(-pipBorderWidth,
-                -pipBorderWidth, -pipBorderWidth, -pipBorderWidth));
     }
 
     void setDelegate(Delegate delegate) {
@@ -169,6 +171,11 @@ public class TvPipMenuController implements PipMenuController, TvPipMenuView.Lis
 
         attachPipBackgroundView();
         attachPipMenuView();
+
+        mTvPipBoundsState.setPipMenuPermanentDecorInsets(Insets.of(-mPipMenuBorderWidth,
+                    -mPipMenuBorderWidth, -mPipMenuBorderWidth, -mPipMenuBorderWidth));
+        mTvPipBoundsState.setPipMenuTemporaryDecorInsets(Insets.of(0, 0, 0, -mPipEduTextHeight));
+        mMainHandler.postDelayed(mCloseEduTextRunnable, mPipEduTextShowDurationMs);
     }
 
     private void attachPipMenuView() {
@@ -204,6 +211,10 @@ public class TvPipMenuController implements PipMenuController, TvPipMenuView.Lis
                 0 /* displayId */, SHELL_ROOT_LAYER_PIP);
     }
 
+    void notifyPipAnimating(boolean animating) {
+        mPipMenuView.setEduTextActive(!animating);
+    }
+
     void showMovementMenuOnly() {
         if (DEBUG) {
             ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
@@ -228,6 +239,7 @@ public class TvPipMenuController implements PipMenuController, TvPipMenuView.Lis
         if (mPipMenuView == null) {
             return;
         }
+        maybeCloseEduText();
         maybeUpdateMenuViewActions();
         updateExpansionState();
 
@@ -237,6 +249,19 @@ public class TvPipMenuController implements PipMenuController, TvPipMenuView.Lis
         } else {
             mPipMenuView.showButtonsMenu();
         }
+    }
+
+    private void maybeCloseEduText() {
+        if (mMainHandler.hasCallbacks(mCloseEduTextRunnable)) {
+            mMainHandler.removeCallbacks(mCloseEduTextRunnable);
+            mCloseEduTextRunnable.run();
+        }
+    }
+
+    private void closeEduText() {
+        mTvPipBoundsState.setPipMenuTemporaryDecorInsets(Insets.NONE);
+        mPipMenuView.hideEduText();
+        mDelegate.closeEduText();
     }
 
     void updateGravity(int gravity) {
@@ -250,9 +275,7 @@ public class TvPipMenuController implements PipMenuController, TvPipMenuView.Lis
     }
 
     private Rect calculateMenuSurfaceBounds(Rect pipBounds) {
-        Rect menuBounds = new Rect(pipBounds);
-        menuBounds.inset(-mPipMenuSurfaceOuterSpace, -mPipMenuSurfaceOuterSpace);
-        return menuBounds;
+        return mPipMenuView.getPipMenuContainerBounds(pipBounds);
     }
 
     void closeMenu() {
@@ -321,6 +344,7 @@ public class TvPipMenuController implements PipMenuController, TvPipMenuView.Lis
     @Override
     public void detach() {
         closeMenu();
+        mMainHandler.removeCallbacks(mCloseEduTextRunnable);
         detachPipMenu();
         mLeash = null;
     }
@@ -597,6 +621,8 @@ public class TvPipMenuController implements PipMenuController, TvPipMenuView.Lis
         void togglePipExpansion();
 
         void onMenuClosed();
+
+        void closeEduText();
 
         void closePip();
     }

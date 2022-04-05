@@ -62,6 +62,7 @@ public class TvPipBoundsState extends PipBoundsState {
     private int mTvPipGravity;
     private @Nullable Size mTvExpandedSize;
     private @NonNull Insets mPipMenuPermanentDecorInsets = Insets.NONE;
+    private @NonNull Insets mPipMenuTemporaryDecorInsets = Insets.NONE;
 
     public TvPipBoundsState(@NonNull Context context) {
         super(context);
@@ -166,5 +167,13 @@ public class TvPipBoundsState extends PipBoundsState {
 
     public @NonNull Insets getPipMenuPermanentDecorInsets() {
         return mPipMenuPermanentDecorInsets;
+    }
+
+    public void setPipMenuTemporaryDecorInsets(@NonNull Insets temporaryDecorInsets) {
+        mPipMenuTemporaryDecorInsets = temporaryDecorInsets;
+    }
+
+    public @NonNull Insets getPipMenuTemporaryDecorInsets() {
+        return mPipMenuTemporaryDecorInsets;
     }
 }
