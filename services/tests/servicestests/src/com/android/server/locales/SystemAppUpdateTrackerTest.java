@@ -38,7 +38,6 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.InstallSourceInfo;
 import android.content.pm.PackageInstaller;
 import android.content.pm.PackageManager;
-import android.content.pm.PackageManagerInternal;
 import android.os.Binder;
 import android.os.Environment;
 import android.os.LocaleList;
@@ -93,8 +92,6 @@ public class SystemAppUpdateTrackerTest {
     @Mock
     PackageManager mMockPackageManager;
     @Mock
-    private PackageManagerInternal mMockPackageManagerInternal;
-    @Mock
     private ActivityTaskManagerInternal mMockActivityTaskManager;
     @Mock
     private ActivityManagerInternal mMockActivityManager;
@@ -110,21 +107,20 @@ public class SystemAppUpdateTrackerTest {
         mMockContext = mock(Context.class);
         mMockActivityTaskManager = mock(ActivityTaskManagerInternal.class);
         mMockActivityManager = mock(ActivityManagerInternal.class);
-        mMockPackageManagerInternal = mock(PackageManagerInternal.class);
+        mMockPackageManager = mock(PackageManager.class);
         LocaleManagerBackupHelper mockLocaleManagerBackupHelper =
                 mock(ShadowLocaleManagerBackupHelper.class);
         // PackageMonitor is not needed in LocaleManagerService for these tests hence it is
         // passed as null.
         mLocaleManagerService = new LocaleManagerService(mMockContext,
                 mMockActivityTaskManager, mMockActivityManager,
-                mMockPackageManagerInternal, mockLocaleManagerBackupHelper,
+                mMockPackageManager, mockLocaleManagerBackupHelper,
                 /* mPackageMonitor= */ null);
 
         doReturn(DEFAULT_USER_ID).when(mMockActivityManager)
                 .handleIncomingUser(anyInt(), anyInt(), eq(DEFAULT_USER_ID), anyBoolean(), anyInt(),
                         anyString(), anyString());
 
-        mMockPackageManager = mock(PackageManager.class);
         doReturn(DEFAULT_INSTALL_SOURCE_INFO).when(mMockPackageManager)
                 .getInstallSourceInfo(anyString());
         doReturn(mMockPackageManager).when(mMockContext).getPackageManager();
