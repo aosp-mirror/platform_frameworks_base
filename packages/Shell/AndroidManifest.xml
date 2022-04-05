@@ -606,6 +606,9 @@
     <!-- Permission required for ATS test - CarDevicePolicyManagerTest -->
     <uses-permission android:name="android.permission.LOCK_DEVICE" />
 
+    <!-- Permission required for CTS test - CtsKeystoreTestCases -->
+    <uses-permission android:name="android.permission.REQUEST_UNIQUE_ID_ATTESTATION" />
+
     <application android:label="@string/app_label"
                 android:theme="@android:style/Theme.DeviceDefault.DayNight"
                 android:defaultToDeviceProtectedStorage="true"
