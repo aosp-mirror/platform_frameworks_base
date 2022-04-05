@@ -95,8 +95,12 @@ class TvPipKeepClearAlgorithm(private val clock: () -> Long) {
     private var lastAreasOverlappingUnstashPosition: Set<Rect> = emptySet()
     private var lastStashTime: Long = Long.MIN_VALUE
 
-    /** Spaces around the PiP that we should leave space for when placing the PiP */
-    private var pipDecorInsets = Insets.NONE
+    /** Spaces around the PiP that we should leave space for when placing the PiP. Permanent PiP
+     * decorations are relevant for calculating intersecting keep clear areas */
+    private var pipPermanentDecorInsets = Insets.NONE
+    /** Spaces around the PiP that we should leave space for when placing the PiP. Temporary PiP
+     * decorations are not relevant for calculating intersecting keep clear areas */
+    private var pipTemporaryDecorInsets = Insets.NONE
 
     /**
      * Calculates the position the PiP should be placed at, taking into consideration the
@@ -125,19 +129,21 @@ class TvPipKeepClearAlgorithm(private val clock: () -> Long) {
         val transformedRestrictedAreas = transformAndFilterAreas(restrictedAreas)
         val transformedUnrestrictedAreas = transformAndFilterAreas(unrestrictedAreas)
 
-        val pipSizeWithDecors = addDecors(pipSize)
-        val pipAnchorBounds = getNormalPipAnchorBounds(pipSizeWithDecors, transformedMovementBounds)
+        val pipSizeWithAllDecors = addDecors(pipSize)
+        val pipAnchorBoundsWithAllDecors =
+                getNormalPipAnchorBounds(pipSizeWithAllDecors, transformedMovementBounds)
 
+        val pipAnchorBoundsWithPermanentDecors = removeTemporaryDecors(pipAnchorBoundsWithAllDecors)
         val result = calculatePipPositionTransformed(
-            pipAnchorBounds,
+            pipAnchorBoundsWithPermanentDecors,
             transformedRestrictedAreas,
             transformedUnrestrictedAreas
         )
 
-        val pipBounds = removeDecors(fromTransformedSpace(result.bounds))
-        val anchorBounds = removeDecors(fromTransformedSpace(result.anchorBounds))
+        val pipBounds = removePermanentDecors(fromTransformedSpace(result.bounds))
+        val anchorBounds = removePermanentDecors(fromTransformedSpace(result.anchorBounds))
         val unstashedDestBounds = result.unstashDestinationBounds?.let {
-            removeDecors(fromTransformedSpace(it))
+            removePermanentDecors(fromTransformedSpace(it))
         }
 
         return Placement(
@@ -458,9 +464,14 @@ class TvPipKeepClearAlgorithm(private val clock: () -> Long) {
         transformedMovementBounds = toTransformedSpace(movementBounds)
     }
 
-    fun setPipDecorInsets(insets: Insets) {
-        if (pipDecorInsets == insets) return
-        pipDecorInsets = insets
+    fun setPipPermanentDecorInsets(insets: Insets) {
+        if (pipPermanentDecorInsets == insets) return
+        pipPermanentDecorInsets = insets
+    }
+
+    fun setPipTemporaryDecorInsets(insets: Insets) {
+        if (pipTemporaryDecorInsets == insets) return
+        pipTemporaryDecorInsets = insets
     }
 
     /**
@@ -756,16 +767,26 @@ class TvPipKeepClearAlgorithm(private val clock: () -> Long) {
      */
     private fun addDecors(size: Size): Size {
         val bounds = Rect(0, 0, size.width, size.height)
-        bounds.inset(pipDecorInsets)
+        bounds.inset(pipPermanentDecorInsets)
+        bounds.inset(pipTemporaryDecorInsets)
 
         return Size(bounds.width(), bounds.height())
     }
 
     /**
-     * Removes the space that was reserved for decorations around the pip
+     * Removes the space that was reserved for permanent decorations around the pip
      */
-    private fun removeDecors(bounds: Rect): Rect {
-        val pipDecorReverseInsets = Insets.subtract(Insets.NONE, pipDecorInsets)
+    private fun removePermanentDecors(bounds: Rect): Rect {
+        val pipDecorReverseInsets = Insets.subtract(Insets.NONE, pipPermanentDecorInsets)
+        bounds.inset(pipDecorReverseInsets)
+        return bounds
+    }
+
+    /**
+     * Removes the space that was reserved for temporary decorations around the pip
+     */
+    private fun removeTemporaryDecors(bounds: Rect): Rect {
+        val pipDecorReverseInsets = Insets.subtract(Insets.NONE, pipTemporaryDecorInsets)
         bounds.inset(pipDecorReverseInsets)
         return bounds
     }

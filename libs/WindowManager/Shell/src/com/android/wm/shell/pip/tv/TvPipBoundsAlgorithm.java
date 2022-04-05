@@ -151,7 +151,10 @@ public class TvPipBoundsAlgorithm extends PipBoundsAlgorithm {
         mKeepClearAlgorithm.setScreenSize(screenSize);
         mKeepClearAlgorithm.setMovementBounds(insetBounds);
         mKeepClearAlgorithm.setStashOffset(mTvPipBoundsState.getStashOffset());
-        mKeepClearAlgorithm.setPipDecorInsets(mTvPipBoundsState.getPipMenuPermanentDecorInsets());
+        mKeepClearAlgorithm.setPipPermanentDecorInsets(
+                mTvPipBoundsState.getPipMenuPermanentDecorInsets());
+        mKeepClearAlgorithm.setPipTemporaryDecorInsets(
+                mTvPipBoundsState.getPipMenuTemporaryDecorInsets());
 
         final Placement placement = mKeepClearAlgorithm.calculatePipPosition(
                 pipSize,

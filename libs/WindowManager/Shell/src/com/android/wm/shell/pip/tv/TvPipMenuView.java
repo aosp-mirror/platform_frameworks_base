@@ -25,11 +25,17 @@ import static android.view.KeyEvent.KEYCODE_DPAD_RIGHT;
 import static android.view.KeyEvent.KEYCODE_DPAD_UP;
 import static android.view.KeyEvent.KEYCODE_ENTER;
 
+import android.animation.ValueAnimator;
 import android.app.PendingIntent;
 import android.app.RemoteAction;
 import android.content.Context;
 import android.graphics.Rect;
+import android.graphics.drawable.Drawable;
 import android.os.Handler;
+import android.text.Annotation;
+import android.text.Spannable;
+import android.text.SpannableString;
+import android.text.SpannedString;
 import android.util.AttributeSet;
 import android.view.Gravity;
 import android.view.KeyEvent;
@@ -40,6 +46,7 @@ import android.view.ViewRootImpl;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -49,6 +56,7 @@ import com.android.wm.shell.R;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
@@ -67,6 +75,15 @@ public class TvPipMenuView extends FrameLayout implements View.OnClickListener {
     private final LinearLayout mActionButtonsContainer;
     private final View mMenuFrameView;
     private final List<TvPipMenuActionButton> mAdditionalButtons = new ArrayList<>();
+    private final View mPipFrameView;
+    private final View mPipView;
+    private final TextView mEduTextView;
+    private final View mEduTextContainerView;
+    private final int mPipMenuOuterSpace;
+    private final int mPipMenuBorderWidth;
+    private final int mEduTextFadeExitAnimationDurationMs;
+    private final int mEduTextSlideExitAnimationDurationMs;
+    private int mEduTextHeight;
 
     private final ImageView mArrowUp;
     private final ImageView mArrowRight;
@@ -76,7 +93,7 @@ public class TvPipMenuView extends FrameLayout implements View.OnClickListener {
     private final ViewGroup mScrollView;
     private final ViewGroup mHorizontalScrollView;
 
-    private Rect mCurrentBounds;
+    private Rect mCurrentPipBounds;
 
     private final TvPipMenuActionButton mExpandButton;
     private final TvPipMenuActionButton mCloseButton;
@@ -118,24 +135,86 @@ public class TvPipMenuView extends FrameLayout implements View.OnClickListener {
         mHorizontalScrollView = findViewById(R.id.tv_pip_menu_horizontal_scroll);
 
         mMenuFrameView = findViewById(R.id.tv_pip_menu_frame);
+        mPipFrameView = findViewById(R.id.tv_pip_border);
+        mPipView = findViewById(R.id.tv_pip);
 
         mArrowUp = findViewById(R.id.tv_pip_menu_arrow_up);
         mArrowRight = findViewById(R.id.tv_pip_menu_arrow_right);
         mArrowDown = findViewById(R.id.tv_pip_menu_arrow_down);
         mArrowLeft = findViewById(R.id.tv_pip_menu_arrow_left);
 
+        mEduTextView = findViewById(R.id.tv_pip_menu_edu_text);
+        mEduTextContainerView = findViewById(R.id.tv_pip_menu_edu_text_container);
+
         mPipMenuFadeAnimationDuration = context.getResources()
                 .getInteger(R.integer.pip_menu_fade_animation_duration);
+        mPipMenuOuterSpace = context.getResources()
+                .getDimensionPixelSize(R.dimen.pip_menu_outer_space);
+        mPipMenuBorderWidth = context.getResources()
+                .getDimensionPixelSize(R.dimen.pip_menu_border_width);
+        mEduTextHeight = context.getResources()
+                .getDimensionPixelSize(R.dimen.pip_menu_edu_text_view_height);
+        mEduTextFadeExitAnimationDurationMs = context.getResources()
+                .getInteger(R.integer.pip_edu_text_view_exit_animation_duration_ms);
+        mEduTextSlideExitAnimationDurationMs = context.getResources()
+                .getInteger(R.integer.pip_edu_text_window_exit_animation_duration_ms);
+
+        initEduText();
     }
 
-    void updateLayout(Rect updatedBounds) {
-        ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
-                "%s: update menu layout: %s", TAG, updatedBounds.toShortString());
-        boolean previouslyVertical =
-                mCurrentBounds != null && mCurrentBounds.height() > mCurrentBounds.width();
-        boolean vertical = updatedBounds.height() > updatedBounds.width();
+    void initEduText() {
+        final SpannedString eduText = (SpannedString) getResources().getText(R.string.pip_edu_text);
+        final SpannableString spannableString = new SpannableString(eduText);
+        Arrays.stream(eduText.getSpans(0, eduText.length(), Annotation.class)).findFirst()
+                .ifPresent(annotation -> {
+                    final Drawable icon =
+                            getResources().getDrawable(R.drawable.home_icon, mContext.getTheme());
+                    if (icon != null) {
+                        icon.mutate();
+                        icon.setBounds(0, 0, icon.getIntrinsicWidth(), icon.getIntrinsicHeight());
+                        spannableString.setSpan(new CenteredImageSpan(icon),
+                                eduText.getSpanStart(annotation),
+                                eduText.getSpanEnd(annotation),
+                                Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                    }
+                });
 
-        mCurrentBounds = updatedBounds;
+        mEduTextView.setText(spannableString);
+    }
+
+    void setEduTextActive(boolean active) {
+        mEduTextView.setSelected(active);
+    }
+
+    void hideEduText() {
+        final ValueAnimator heightAnimation = ValueAnimator.ofInt(mEduTextHeight, 0);
+        heightAnimation.setDuration(mEduTextSlideExitAnimationDurationMs);
+        heightAnimation.setInterpolator(TvPipInterpolators.BROWSE);
+        heightAnimation.addUpdateListener(animator -> {
+            mEduTextHeight = (int) animator.getAnimatedValue();
+        });
+        mEduTextView.animate()
+                .alpha(0f)
+                .setInterpolator(TvPipInterpolators.EXIT)
+                .setDuration(mEduTextFadeExitAnimationDurationMs)
+                .withEndAction(() -> {
+                    mEduTextContainerView.setVisibility(GONE);
+                }).start();
+        heightAnimation.start();
+    }
+
+    void updateLayout(Rect updatedPipBounds) {
+        ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                "%s: update menu layout: %s", TAG, updatedPipBounds.toShortString());
+
+        boolean previouslyVertical =
+                mCurrentPipBounds != null && mCurrentPipBounds.height() > mCurrentPipBounds.width();
+        boolean vertical = updatedPipBounds.height() > updatedPipBounds.width();
+
+        mCurrentPipBounds = updatedPipBounds;
+
+        updatePipFrameBounds();
+
         if (previouslyVertical == vertical) {
             if (DEBUG) {
                 ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
@@ -161,6 +240,38 @@ public class TvPipMenuView extends FrameLayout implements View.OnClickListener {
 
         mScrollView.setVisibility(vertical ? VISIBLE : GONE);
         mHorizontalScrollView.setVisibility(vertical ? GONE : VISIBLE);
+    }
+
+    Rect getPipMenuContainerBounds(Rect pipBounds) {
+        final Rect menuUiBounds = new Rect(pipBounds);
+        menuUiBounds.inset(-mPipMenuOuterSpace, -mPipMenuOuterSpace);
+        menuUiBounds.bottom += mEduTextHeight;
+        return menuUiBounds;
+    }
+
+    /**
+     * Update mPipFrameView's bounds according to the new pip window bounds. We can't
+     * make mPipFrameView match_parent, because the pip menu might contain other content around
+     * the pip window (e.g. edu text).
+     * TvPipMenuView needs to account for this so that it can draw a white border around the whole
+     * pip menu when it gains focus.
+     */
+    private void updatePipFrameBounds() {
+        final ViewGroup.LayoutParams pipFrameParams = mPipFrameView.getLayoutParams();
+        if (pipFrameParams != null) {
+            pipFrameParams.width = mCurrentPipBounds.width() + 2 * mPipMenuBorderWidth;
+            pipFrameParams.height = mCurrentPipBounds.height() + 2 * mPipMenuBorderWidth;
+            mPipFrameView.setLayoutParams(pipFrameParams);
+        }
+
+        final ViewGroup.LayoutParams pipViewParams = mPipView.getLayoutParams();
+        if (pipViewParams != null) {
+            pipViewParams.width = mCurrentPipBounds.width();
+            pipViewParams.height = mCurrentPipBounds.height();
+            mPipView.setLayoutParams(pipViewParams);
+        }
+
+
     }
 
     void setListener(@Nullable Listener listener) {
