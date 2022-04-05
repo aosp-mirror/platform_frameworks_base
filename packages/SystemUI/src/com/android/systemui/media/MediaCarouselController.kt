@@ -690,6 +690,11 @@ class MediaCarouselController @Inject constructor(
         startDelay: Long = 0
     ) {
         desiredHostState?.let {
+            if (this.desiredLocation != desiredLocation) {
+                // Only log an event when location changes
+                logger.logCarouselPosition(desiredLocation)
+            }
+
             // This is a hosting view, let's remeasure our players
             this.desiredLocation = desiredLocation
             this.desiredHostState = it
