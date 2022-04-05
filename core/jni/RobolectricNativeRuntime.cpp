@@ -12,8 +12,10 @@ extern int register_android_graphics_BitmapFactory(JNIEnv*);
 extern int register_android_graphics_CreateJavaOutputStreamAdaptor(JNIEnv* env);
 extern int register_android_graphics_Graphics(JNIEnv* env);
 extern int register_android_graphics_MaskFilter(JNIEnv* env);
+extern int register_android_graphics_PathEffect(JNIEnv* env);
 extern int register_android_graphics_Shader(JNIEnv* env);
 extern int register_android_graphics_Typeface(JNIEnv* env);
+extern int register_android_graphics_RenderEffect(JNIEnv* env);
 
 namespace android {
 
@@ -55,8 +57,10 @@ static const RegJNIRec graphicsJNI[] = {
         REG_JNI(register_android_graphics_Matrix),
         REG_JNI(register_android_graphics_Paint),
         REG_JNI(register_android_graphics_Path),
+        REG_JNI(register_android_graphics_PathEffect),
         REG_JNI(register_android_graphics_PathMeasure),
         REG_JNI(register_android_graphics_Region),
+        REG_JNI(register_android_graphics_RenderEffect),
         REG_JNI(register_android_graphics_Shader),
         REG_JNI(register_android_graphics_Typeface),
         REG_JNI(register_android_graphics_fonts_Font),
