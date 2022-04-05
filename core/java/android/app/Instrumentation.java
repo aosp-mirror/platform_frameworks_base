@@ -1207,11 +1207,6 @@ public class Instrumentation {
      */
     public void sendTrackballEventSync(MotionEvent event) {
         validateNotAppThread();
-        if (event.isFromSource(InputDevice.SOURCE_CLASS_POINTER)) {
-            throw new IllegalArgumentException(
-                    "Cannot inject pointer events from sendTrackballEventSync()."
-                            + " Use sendPointerSync() to inject pointer events.");
-        }
         if (!event.isFromSource(InputDevice.SOURCE_CLASS_TRACKBALL)) {
             event.setSource(InputDevice.SOURCE_TRACKBALL);
         }
