@@ -405,7 +405,7 @@ public class NotificationPanelViewController extends PanelViewController {
      * Determines if QS should be already expanded when expanding shade.
      * Used for split shade, two finger gesture as well as accessibility shortcut to QS.
      */
-    private boolean mQsExpandImmediate;
+    @VisibleForTesting boolean mQsExpandImmediate;
     private boolean mTwoFingerQsExpandPossible;
     private String mHeaderDebugInfo;
 
@@ -430,7 +430,6 @@ public class NotificationPanelViewController extends PanelViewController {
     private boolean mExpandingFromHeadsUp;
     private boolean mCollapsedOnDown;
     private int mPositionMinSideMargin;
-    private int mLastOrientation = -1;
     private boolean mClosingWithAlphaFadeOut;
     private boolean mHeadsUpAnimatingAway;
     private boolean mLaunchingAffordance;
@@ -955,7 +954,6 @@ public class NotificationPanelViewController extends PanelViewController {
         mKeyguardBottomArea = mView.findViewById(R.id.keyguard_bottom_area);
         mPreviewContainer = mView.findViewById(R.id.preview_container);
         mKeyguardBottomArea.setPreviewContainer(mPreviewContainer);
-        mLastOrientation = mResources.getConfiguration().orientation;
 
         initBottomArea();
 
@@ -1993,9 +1991,6 @@ public class NotificationPanelViewController extends PanelViewController {
     public void startWaitingForOpenPanelGesture() {
         if (!isFullyCollapsed()) {
             return;
-        }
-        if (mShouldUseSplitNotificationShade) {
-            mQsExpandImmediate = true;
         }
         mExpectingSynthesizedDown = true;
         onTrackingStarted();
@@ -3172,6 +3167,9 @@ public class NotificationPanelViewController extends PanelViewController {
         mFalsingCollector.onTrackingStarted(!mKeyguardStateController.canDismissLockScreen());
         super.onTrackingStarted();
         mScrimController.onTrackingStarted();
+        if (mShouldUseSplitNotificationShade) {
+            mQsExpandImmediate = true;
+        }
         if (mQsFullyExpanded) {
             mQsExpandImmediate = true;
             setShowShelfOnly(true);
@@ -4876,7 +4874,6 @@ public class NotificationPanelViewController extends PanelViewController {
         public void onConfigurationChanged(Configuration newConfig) {
             super.onConfigurationChanged(newConfig);
             mAffordanceHelper.onConfigurationChanged();
-            mLastOrientation = newConfig.orientation;
         }
     }
 
