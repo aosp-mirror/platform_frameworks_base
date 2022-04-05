@@ -28,7 +28,7 @@ import android.app.ILocaleManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.content.pm.PackageManagerInternal;
+import android.content.pm.PackageManager.PackageInfoFlags;
 import android.content.res.Configuration;
 import android.os.Binder;
 import android.os.HandlerThread;
@@ -60,7 +60,7 @@ public class LocaleManagerService extends SystemService {
     private final LocaleManagerService.LocaleManagerBinderService mBinderService;
     private ActivityTaskManagerInternal mActivityTaskManagerInternal;
     private ActivityManagerInternal mActivityManagerInternal;
-    private PackageManagerInternal mPackageManagerInternal;
+    private PackageManager mPackageManager;
 
     private LocaleManagerBackupHelper mBackupHelper;
 
@@ -74,7 +74,7 @@ public class LocaleManagerService extends SystemService {
         mBinderService = new LocaleManagerBinderService();
         mActivityTaskManagerInternal = LocalServices.getService(ActivityTaskManagerInternal.class);
         mActivityManagerInternal = LocalServices.getService(ActivityManagerInternal.class);
-        mPackageManagerInternal = LocalServices.getService(PackageManagerInternal.class);
+        mPackageManager = mContext.getPackageManager();
 
         HandlerThread broadcastHandlerThread = new HandlerThread(TAG,
                 Process.THREAD_PRIORITY_BACKGROUND);
@@ -90,7 +90,7 @@ public class LocaleManagerService extends SystemService {
         });
 
         mBackupHelper = new LocaleManagerBackupHelper(this,
-                mPackageManagerInternal, broadcastHandlerThread);
+                mPackageManager, broadcastHandlerThread);
 
         mPackageMonitor = new LocaleManagerServicePackageMonitor(mBackupHelper,
                 systemAppUpdateTracker);
@@ -102,7 +102,7 @@ public class LocaleManagerService extends SystemService {
     @VisibleForTesting
     LocaleManagerService(Context context, ActivityTaskManagerInternal activityTaskManagerInternal,
             ActivityManagerInternal activityManagerInternal,
-            PackageManagerInternal packageManagerInternal,
+            PackageManager packageManager,
             LocaleManagerBackupHelper localeManagerBackupHelper,
             PackageMonitor packageMonitor) {
         super(context);
@@ -110,7 +110,7 @@ public class LocaleManagerService extends SystemService {
         mBinderService = new LocaleManagerBinderService();
         mActivityTaskManagerInternal = activityTaskManagerInternal;
         mActivityManagerInternal = activityManagerInternal;
-        mPackageManagerInternal = packageManagerInternal;
+        mPackageManager = packageManager;
         mBackupHelper = localeManagerBackupHelper;
         mPackageMonitor = packageMonitor;
     }
@@ -419,8 +419,12 @@ public class LocaleManagerService extends SystemService {
     }
 
     private int getPackageUid(String appPackageName, int userId) {
-        return mPackageManagerInternal
-                .getPackageUid(appPackageName, /* flags */ 0, userId);
+        try {
+            return mPackageManager
+                    .getPackageUidAsUser(appPackageName, PackageInfoFlags.of(0), userId);
+        } catch (PackageManager.NameNotFoundException e) {
+            return Process.INVALID_UID;
+        }
     }
 
     @Nullable
