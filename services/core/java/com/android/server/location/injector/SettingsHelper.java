@@ -146,6 +146,20 @@ public abstract class SettingsHelper {
     public abstract void removeOnGnssMeasurementsFullTrackingEnabledChangedListener(
             GlobalSettingChangedListener listener);
 
+    /** Retrieve adas allowlist. */
+    public abstract PackageTagsList getAdasAllowlist();
+
+    /**
+     * Add a listener for changes to the ADAS settings package allowlist. Callbacks occur on an
+     * unspecified thread.
+     */
+    public abstract void addAdasAllowlistChangedListener(GlobalSettingChangedListener listener);
+
+    /**
+     * Remove a listener for changes to the ADAS package allowlist.
+     */
+    public abstract void removeAdasAllowlistChangedListener(GlobalSettingChangedListener listener);
+
     /**
      * Retrieve the ignore location settings package+tags allowlist setting.
      */

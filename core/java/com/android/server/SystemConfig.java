@@ -88,8 +88,8 @@ public class SystemConfig {
     private static final int ALLOW_HIDDENAPI_WHITELISTING = 0x040;
     private static final int ALLOW_ASSOCIATIONS = 0x080;
     // ALLOW_OVERRIDE_APP_RESTRICTIONS allows to use "allow-in-power-save-except-idle",
-    // "allow-in-power-save", "allow-in-data-usage-save", "allow-unthrottled-location",
-    // and "allow-ignore-location-settings".
+    // "allow-in-power-save", "allow-in-data-usage-save","allow-unthrottled-location",
+    // "allow-ignore-location-settings" and "allow-adas-location-settings".
     private static final int ALLOW_OVERRIDE_APP_RESTRICTIONS = 0x100;
     private static final int ALLOW_IMPLICIT_BROADCASTS = 0x200;
     private static final int ALLOW_VENDOR_APEX = 0x400;
@@ -233,6 +233,10 @@ public class SystemConfig {
     // These are the packages that are white-listed to be able to run background location
     // without throttling, as read from the configuration files.
     final ArraySet<String> mAllowUnthrottledLocation = new ArraySet<>();
+
+    // These are the packages that are allow-listed to be able to retrieve location when
+    // the location state is driver assistance only.
+    final ArrayMap<String, ArraySet<String>> mAllowAdasSettings = new ArrayMap<>();
 
     // These are the packages that are white-listed to be able to retrieve location even when user
     // location settings are off, for emergency purposes, as read from the configuration files.
@@ -392,6 +396,10 @@ public class SystemConfig {
 
     public ArraySet<String> getAllowUnthrottledLocation() {
         return mAllowUnthrottledLocation;
+    }
+
+    public ArrayMap<String, ArraySet<String>> getAllowAdasLocationSettings() {
+        return mAllowAdasSettings;
     }
 
     public ArrayMap<String, ArraySet<String>> getAllowIgnoreLocationSettings() {
@@ -1001,6 +1009,34 @@ public class SystemConfig {
                                         + permFile + " at " + parser.getPositionDescription());
                             } else {
                                 mAllowUnthrottledLocation.add(pkgname);
+                            }
+                        } else {
+                            logNotAllowedInPartition(name, permFile, parser);
+                        }
+                        XmlUtils.skipCurrentTag(parser);
+                    } break;
+                    case "allow-adas-location-settings" : {
+                        if (allowOverrideAppRestrictions) {
+                            String pkgname = parser.getAttributeValue(null, "package");
+                            String attributionTag = parser.getAttributeValue(null,
+                                    "attributionTag");
+                            if (pkgname == null) {
+                                Slog.w(TAG, "<" + name + "> without package in "
+                                        + permFile + " at " + parser.getPositionDescription());
+                            } else {
+                                ArraySet<String> tags = mAllowAdasSettings.get(pkgname);
+                                if (tags == null || !tags.isEmpty()) {
+                                    if (tags == null) {
+                                        tags = new ArraySet<>(1);
+                                        mAllowAdasSettings.put(pkgname, tags);
+                                    }
+                                    if (!"*".equals(attributionTag)) {
+                                        if ("null".equals(attributionTag)) {
+                                            attributionTag = null;
+                                        }
+                                        tags.add(attributionTag);
+                                    }
+                                }
                             }
                         } else {
                             logNotAllowedInPartition(name, permFile, parser);
