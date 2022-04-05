@@ -58,6 +58,7 @@ public class SystemDataTransferProcessor {
     private static final int RESULT_CODE_SYSTEM_DATA_TRANSFER_ALLOWED = 0;
     private static final int RESULT_CODE_SYSTEM_DATA_TRANSFER_DISALLOWED = 1;
     private static final String EXTRA_PERMISSION_SYNC_REQUEST = "permission_sync_request";
+    private static final String EXTRA_COMPANION_DEVICE_NAME = "companion_device_name";
     private static final String EXTRA_SYSTEM_DATA_TRANSFER_RESULT_RECEIVER =
             "system_data_transfer_result_receiver";
     private static final ComponentName SYSTEM_DATA_TRANSFER_REQUEST_APPROVAL_ACTIVITY =
@@ -114,6 +115,7 @@ public class SystemDataTransferProcessor {
         PermissionSyncRequest request = new PermissionSyncRequest(associationId);
         request.setUserId(userId);
         extras.putParcelable(EXTRA_PERMISSION_SYNC_REQUEST, request);
+        extras.putCharSequence(EXTRA_COMPANION_DEVICE_NAME, association.getDisplayName());
         extras.putParcelable(EXTRA_SYSTEM_DATA_TRANSFER_RESULT_RECEIVER,
                 prepareForIpc(mOnSystemDataTransferRequestConfirmationReceiver));
 

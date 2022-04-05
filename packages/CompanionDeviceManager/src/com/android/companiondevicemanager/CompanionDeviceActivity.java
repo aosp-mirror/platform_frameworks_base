@@ -307,6 +307,7 @@ public class CompanionDeviceActivity extends FragmentActivity implements
 
     private void onUserSelectedDevice(@NonNull DeviceFilterPair<?> selectedDevice) {
         final MacAddress macAddress = selectedDevice.getMacAddress();
+        mRequest.setDisplayName(selectedDevice.getDisplayName());
         onAssociationApproved(macAddress);
     }
 
@@ -486,6 +487,7 @@ public class CompanionDeviceActivity extends FragmentActivity implements
         mSelectedDevice = requireNonNull(deviceFilterPairs.get(0));
 
         final String deviceName = mSelectedDevice.getDisplayName();
+        mRequest.setDisplayName(deviceName);
         final Spanned title = getHtmlFromResources(
                 this, R.string.confirmation_title, appLabel, deviceName);
         final Spanned summary;
