@@ -791,10 +791,11 @@ public abstract class ActivityManagerInternal {
          *
          * @param packageName The package name of the process.
          * @param uid The UID of the process.
-         * @param foregroundId The current foreground service notification ID, a negative value
-         *                     means this notification is being removed.
+         * @param foregroundId The current foreground service notification ID.
+         * @param canceling The given notification is being canceled.
          */
-        void onForegroundServiceNotificationUpdated(String packageName, int uid, int foregroundId);
+        void onForegroundServiceNotificationUpdated(String packageName, int uid, int foregroundId,
+                boolean canceling);
     }
 
     /**
