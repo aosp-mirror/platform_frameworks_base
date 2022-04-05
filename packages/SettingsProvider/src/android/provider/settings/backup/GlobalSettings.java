@@ -82,6 +82,17 @@ public class GlobalSettings {
         Settings.Global.USER_PREFERRED_REFRESH_RATE,
         Settings.Global.USER_PREFERRED_RESOLUTION_HEIGHT,
         Settings.Global.USER_PREFERRED_RESOLUTION_WIDTH,
-        Settings.Global.POWER_BUTTON_LONG_PRESS
+        Settings.Global.POWER_BUTTON_LONG_PRESS,
+        Settings.Global.Wearable.SMART_REPLIES_ENABLED,
+        Settings.Global.Wearable.CLOCKWORK_AUTO_TIME,
+        Settings.Global.Wearable.CLOCKWORK_AUTO_TIME_ZONE,
+        Settings.Global.Wearable.CLOCKWORK_24HR_TIME,
+        Settings.Global.Wearable.MUTE_WHEN_OFF_BODY_ENABLED,
+        Settings.Global.Wearable.AMBIENT_ENABLED,
+        Settings.Global.Wearable.AMBIENT_TILT_TO_WAKE,
+        Settings.Global.Wearable.AMBIENT_TOUCH_TO_WAKE,
+        Settings.Global.Wearable.TOUCH_AND_HOLD_WATCH_FACE,
+        Settings.Global.Wearable.BATTERY_SAVER_MODE,
+        Settings.Global.Wearable.WEAR_ACTIVITY_AUTO_RESUME_TIMEOUT_MS
     };
 }
