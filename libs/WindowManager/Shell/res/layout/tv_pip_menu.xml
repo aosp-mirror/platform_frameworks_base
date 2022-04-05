@@ -16,9 +16,10 @@
 -->
 <!-- Layout for TvPipMenuView -->
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-             android:id="@+id/tv_pip_menu"
-             android:layout_width="match_parent"
-             android:layout_height="match_parent">
+            android:id="@+id/tv_pip_menu"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center|top">
 
     <ScrollView
         android:id="@+id/tv_pip_menu_scroll"
@@ -92,7 +93,6 @@
         android:id="@+id/tv_pip_menu_frame"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:alpha="0"
         android:layout_margin="@dimen/pip_menu_outer_space_frame"
         android:background="@drawable/tv_pip_menu_border"/>
 

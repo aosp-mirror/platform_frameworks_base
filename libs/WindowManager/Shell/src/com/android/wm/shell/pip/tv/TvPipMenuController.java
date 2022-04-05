@@ -25,13 +25,17 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ParceledListSlice;
+import android.graphics.Insets;
 import android.graphics.Matrix;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.os.Handler;
 import android.os.RemoteException;
+import android.view.LayoutInflater;
 import android.view.SurfaceControl;
 import android.view.SyncRtSurfaceTransactionApplier;
+import android.view.View;
+import android.view.ViewRootImpl;
 import android.view.WindowManagerGlobal;
 
 import androidx.annotation.Nullable;
@@ -53,6 +57,7 @@ import java.util.Objects;
 public class TvPipMenuController implements PipMenuController, TvPipMenuView.Listener {
     private static final String TAG = "TvPipMenuController";
     private static final boolean DEBUG = TvPipController.DEBUG;
+    private static final String BACKGROUND_WINDOW_TITLE = "PipBackgroundView";
 
     private final Context mContext;
     private final SystemWindows mSystemWindows;
@@ -62,6 +67,7 @@ public class TvPipMenuController implements PipMenuController, TvPipMenuView.Lis
     private Delegate mDelegate;
     private SurfaceControl mLeash;
     private TvPipMenuView mPipMenuView;
+    private View mPipBackgroundView;
 
     // User can actively move the PiP via the DPAD.
     private boolean mInMoveMode;
@@ -74,6 +80,7 @@ public class TvPipMenuController implements PipMenuController, TvPipMenuView.Lis
     private RemoteAction mCloseAction;
 
     private SyncRtSurfaceTransactionApplier mApplier;
+    private SyncRtSurfaceTransactionApplier mBackgroundApplier;
     RectF mTmpSourceRectF = new RectF();
     RectF mTmpDestinationRectF = new RectF();
     Matrix mMoveTransform = new Matrix();
@@ -91,6 +98,7 @@ public class TvPipMenuController implements PipMenuController, TvPipMenuView.Lis
             if (DEBUG) e.printStackTrace();
         }
     };
+    private final int mPipMenuSurfaceOuterSpace;
 
     public TvPipMenuController(Context context, TvPipBoundsState tvPipBoundsState,
             SystemWindows systemWindows, PipMediaController pipMediaController,
@@ -113,6 +121,14 @@ public class TvPipMenuController implements PipMenuController, TvPipMenuView.Lis
                 mainHandler, Context.RECEIVER_EXPORTED);
 
         pipMediaController.addActionListener(this::onMediaActionsChanged);
+
+        mPipMenuSurfaceOuterSpace = context.getResources()
+                .getDimensionPixelSize(R.dimen.pip_menu_outer_space);
+
+        final int pipBorderWidth = context.getResources()
+                .getDimensionPixelSize(R.dimen.pip_menu_border_width);
+        mTvPipBoundsState.setPipMenuPermanentDecorInsets(Insets.of(-pipBorderWidth,
+                -pipBorderWidth, -pipBorderWidth, -pipBorderWidth));
     }
 
     void setDelegate(Delegate delegate) {
@@ -138,24 +154,54 @@ public class TvPipMenuController implements PipMenuController, TvPipMenuView.Lis
         }
 
         mLeash = leash;
+        attachPipMenu();
+    }
+
+    private void attachPipMenu() {
+        if (DEBUG) {
+            ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                    "%s: attachPipMenu()", TAG);
+        }
+
+        if (mPipMenuView != null) {
+            detachPipMenu();
+        }
+
+        attachPipBackgroundView();
         attachPipMenuView();
     }
 
     private void attachPipMenuView() {
-        if (DEBUG) {
-            ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
-                    "%s: attachPipMenuView()", TAG);
-        }
-
-        if (mPipMenuView != null) {
-            detachPipMenuView();
-        }
-
         mPipMenuView = new TvPipMenuView(mContext);
         mPipMenuView.setListener(this);
-        mSystemWindows.addView(mPipMenuView,
-                getPipMenuLayoutParams(MENU_WINDOW_TITLE, 0 /* width */, 0 /* height */),
-                0, SHELL_ROOT_LAYER_PIP);
+        setUpViewSurfaceZOrder(mPipMenuView, 1);
+        addPipMenuViewToSystemWindows(mPipMenuView, MENU_WINDOW_TITLE);
+    }
+
+    private void attachPipBackgroundView() {
+        mPipBackgroundView = LayoutInflater.from(mContext)
+                .inflate(R.layout.tv_pip_menu_background, null);
+        setUpViewSurfaceZOrder(mPipBackgroundView, -1);
+        addPipMenuViewToSystemWindows(mPipBackgroundView, BACKGROUND_WINDOW_TITLE);
+    }
+
+    private void setUpViewSurfaceZOrder(View v, int zOrderRelativeToPip) {
+        v.addOnAttachStateChangeListener(new View.OnAttachStateChangeListener() {
+                @Override
+                public void onViewAttachedToWindow(View v) {
+                    v.getViewRootImpl().addSurfaceChangedCallback(
+                            new PipMenuSurfaceChangedCallback(v, zOrderRelativeToPip));
+                }
+
+                @Override
+                public void onViewDetachedFromWindow(View v) {
+                }
+        });
+    }
+
+    private void addPipMenuViewToSystemWindows(View v, String title) {
+        mSystemWindows.addView(v, getPipMenuLayoutParams(title, 0 /* width */, 0 /* height */),
+                0 /* displayId */, SHELL_ROOT_LAYER_PIP);
     }
 
     void showMovementMenuOnly() {
@@ -171,8 +217,7 @@ public class TvPipMenuController implements PipMenuController, TvPipMenuView.Lis
     @Override
     public void showMenu() {
         if (DEBUG) {
-            ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
-                    "%s: showMenu()", TAG);
+            ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE, "%s: showMenu()", TAG);
         }
         mInMoveMode = false;
         mCloseAfterExitMoveMenu = false;
@@ -183,24 +228,14 @@ public class TvPipMenuController implements PipMenuController, TvPipMenuView.Lis
         if (mPipMenuView == null) {
             return;
         }
-        Rect menuBounds = getMenuBounds(mTvPipBoundsState.getBounds());
-        mSystemWindows.updateViewLayout(mPipMenuView, getPipMenuLayoutParams(
-                MENU_WINDOW_TITLE, menuBounds.width(), menuBounds.height()));
         maybeUpdateMenuViewActions();
         updateExpansionState();
 
-        SurfaceControl menuSurfaceControl = getSurfaceControl();
-        if (menuSurfaceControl != null) {
-            SurfaceControl.Transaction t = new SurfaceControl.Transaction();
-            t.setRelativeLayer(mPipMenuView.getWindowSurfaceControl(), mLeash, 1);
-            t.setPosition(menuSurfaceControl, menuBounds.left, menuBounds.top);
-            t.apply();
-        }
         grantPipMenuFocus(true);
         if (mInMoveMode) {
             mPipMenuView.showMoveMenu(mDelegate.getPipGravity());
         } else {
-            mPipMenuView.showButtonMenu();
+            mPipMenuView.showButtonsMenu();
         }
     }
 
@@ -214,11 +249,9 @@ public class TvPipMenuController implements PipMenuController, TvPipMenuView.Lis
         mPipMenuView.setIsExpanded(mTvPipBoundsState.isTvPipExpanded());
     }
 
-    private Rect getMenuBounds(Rect pipBounds) {
-        int extraSpaceInPx = mContext.getResources()
-                .getDimensionPixelSize(R.dimen.pip_menu_outer_space);
+    private Rect calculateMenuSurfaceBounds(Rect pipBounds) {
         Rect menuBounds = new Rect(pipBounds);
-        menuBounds.inset(-extraSpaceInPx, -extraSpaceInPx);
+        menuBounds.inset(-mPipMenuSurfaceOuterSpace, -mPipMenuSurfaceOuterSpace);
         return menuBounds;
     }
 
@@ -227,11 +260,12 @@ public class TvPipMenuController implements PipMenuController, TvPipMenuView.Lis
             ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
                     "%s: closeMenu()", TAG);
         }
+
         if (mPipMenuView == null) {
             return;
         }
 
-        mPipMenuView.hideAll();
+        mPipMenuView.hideAllUserControls();
         grantPipMenuFocus(false);
         mDelegate.onMenuClosed();
     }
@@ -266,7 +300,7 @@ public class TvPipMenuController implements PipMenuController, TvPipMenuView.Lis
         }
         if (mInMoveMode) {
             mInMoveMode = false;
-            mPipMenuView.showButtonMenu();
+            mPipMenuView.showButtonsMenu();
             return true;
         }
         return false;
@@ -287,7 +321,7 @@ public class TvPipMenuController implements PipMenuController, TvPipMenuView.Lis
     @Override
     public void detach() {
         closeMenu();
-        detachPipMenuView();
+        detachPipMenu();
         mLeash = null;
     }
 
@@ -346,20 +380,15 @@ public class TvPipMenuController implements PipMenuController, TvPipMenuView.Lis
 
     @Override
     public boolean isMenuVisible() {
-        boolean isVisible = mPipMenuView != null && mPipMenuView.isVisible();
-        if (DEBUG) {
-            ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
-                    "%s: isMenuVisible: %b", TAG, isVisible);
-        }
-        return isVisible;
+        return true;
     }
 
     /**
      * Does an immediate window crop of the PiP menu.
      */
     @Override
-    public void resizePipMenu(@android.annotation.Nullable SurfaceControl pipLeash,
-            @android.annotation.Nullable SurfaceControl.Transaction t,
+    public void resizePipMenu(@Nullable SurfaceControl pipLeash,
+            @Nullable SurfaceControl.Transaction t,
             Rect destinationBounds) {
         if (DEBUG) {
             ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
@@ -373,24 +402,36 @@ public class TvPipMenuController implements PipMenuController, TvPipMenuView.Lis
             return;
         }
 
-        SurfaceControl surfaceControl = getSurfaceControl();
-        SyncRtSurfaceTransactionApplier.SurfaceParams
-                params = new SyncRtSurfaceTransactionApplier.SurfaceParams.Builder(surfaceControl)
-                .withWindowCrop(getMenuBounds(destinationBounds))
+        final Rect menuBounds = calculateMenuSurfaceBounds(destinationBounds);
+
+        final SurfaceControl frontSurface = getSurfaceControl(mPipMenuView);
+        final SyncRtSurfaceTransactionApplier.SurfaceParams frontParams =
+                new SyncRtSurfaceTransactionApplier.SurfaceParams.Builder(frontSurface)
+                .withWindowCrop(menuBounds)
                 .build();
+
+        final SurfaceControl backSurface = getSurfaceControl(mPipBackgroundView);
+        final SyncRtSurfaceTransactionApplier.SurfaceParams backParams =
+                new SyncRtSurfaceTransactionApplier.SurfaceParams.Builder(backSurface)
+                .withWindowCrop(menuBounds)
+                .build();
+
+        // TODO(b/226580399): switch to using SurfaceSyncer (see b/200284684) to synchronize the
+        // animations of the pip surface with the content of the front and back menu surfaces
+        mBackgroundApplier.scheduleApply(backParams);
         if (pipLeash != null && t != null) {
-            SyncRtSurfaceTransactionApplier.SurfaceParams
+            final SyncRtSurfaceTransactionApplier.SurfaceParams
                     pipParams = new SyncRtSurfaceTransactionApplier.SurfaceParams.Builder(pipLeash)
                     .withMergeTransaction(t)
                     .build();
-            mApplier.scheduleApply(params, pipParams);
+            mApplier.scheduleApply(frontParams, pipParams);
         } else {
-            mApplier.scheduleApply(params);
+            mApplier.scheduleApply(frontParams);
         }
     }
 
-    private SurfaceControl getSurfaceControl() {
-        return mSystemWindows.getViewSurface(mPipMenuView);
+    private SurfaceControl getSurfaceControl(View v) {
+        return mSystemWindows.getViewSurface(v);
     }
 
     @Override
@@ -412,44 +453,52 @@ public class TvPipMenuController implements PipMenuController, TvPipMenuView.Lis
             return;
         }
 
-        Rect menuDestBounds = getMenuBounds(pipDestBounds);
-        Rect mTmpSourceBounds = new Rect();
+        final Rect menuDestBounds = calculateMenuSurfaceBounds(pipDestBounds);
+        final Rect tmpSourceBounds = new Rect();
         // If there is no pip leash supplied, that means the PiP leash is already finalized
         // resizing and the PiP menu is also resized. We then want to do a scale from the current
         // new menu bounds.
         if (pipLeash != null && transaction != null) {
             if (DEBUG) {
                 ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
-                        "%s: mTmpSourceBounds based on mPipMenuView.getBoundsOnScreen()", TAG);
+                        "%s: tmpSourceBounds based on mPipMenuView.getBoundsOnScreen()", TAG);
             }
-            mPipMenuView.getBoundsOnScreen(mTmpSourceBounds);
+            mPipMenuView.getBoundsOnScreen(tmpSourceBounds);
         } else {
             if (DEBUG) {
                 ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
-                        "%s: mTmpSourceBounds based on menu width and height", TAG);
+                        "%s: tmpSourceBounds based on menu width and height", TAG);
             }
-            mTmpSourceBounds.set(0, 0, menuDestBounds.width(), menuDestBounds.height());
+            tmpSourceBounds.set(0, 0, menuDestBounds.width(), menuDestBounds.height());
         }
 
-        mTmpSourceRectF.set(mTmpSourceBounds);
+        mTmpSourceRectF.set(tmpSourceBounds);
         mTmpDestinationRectF.set(menuDestBounds);
-        mMoveTransform.setRectToRect(mTmpSourceRectF, mTmpDestinationRectF, Matrix.ScaleToFit.FILL);
+        mMoveTransform.setTranslate(mTmpDestinationRectF.left, mTmpDestinationRectF.top);
 
-        SurfaceControl surfaceControl = getSurfaceControl();
-        SyncRtSurfaceTransactionApplier.SurfaceParams params =
-                new SyncRtSurfaceTransactionApplier.SurfaceParams.Builder(
-                        surfaceControl)
+        final SurfaceControl frontSurface = getSurfaceControl(mPipMenuView);
+        final SyncRtSurfaceTransactionApplier.SurfaceParams frontParams =
+                new SyncRtSurfaceTransactionApplier.SurfaceParams.Builder(frontSurface)
                         .withMatrix(mMoveTransform)
                         .build();
 
+        final SurfaceControl backSurface = getSurfaceControl(mPipBackgroundView);
+        final SyncRtSurfaceTransactionApplier.SurfaceParams backParams =
+                new SyncRtSurfaceTransactionApplier.SurfaceParams.Builder(backSurface)
+                        .withMatrix(mMoveTransform)
+                        .build();
+
+        // TODO(b/226580399): switch to using SurfaceSyncer (see b/200284684) to synchronize the
+        // animations of the pip surface with the content of the front and back menu surfaces
+        mBackgroundApplier.scheduleApply(backParams);
         if (pipLeash != null && transaction != null) {
-            SyncRtSurfaceTransactionApplier.SurfaceParams
-                    pipParams = new SyncRtSurfaceTransactionApplier.SurfaceParams.Builder(pipLeash)
+            final SyncRtSurfaceTransactionApplier.SurfaceParams pipParams =
+                    new SyncRtSurfaceTransactionApplier.SurfaceParams.Builder(pipLeash)
                     .withMergeTransaction(transaction)
                     .build();
-            mApplier.scheduleApply(params, pipParams);
+            mApplier.scheduleApply(frontParams, pipParams);
         } else {
-            mApplier.scheduleApply(params);
+            mApplier.scheduleApply(frontParams);
         }
 
         if (mPipMenuView.getViewRootImpl() != null) {
@@ -470,29 +519,40 @@ public class TvPipMenuController implements PipMenuController, TvPipMenuView.Lis
         if (mApplier == null) {
             mApplier = new SyncRtSurfaceTransactionApplier(mPipMenuView);
         }
+        if (mBackgroundApplier == null) {
+            mBackgroundApplier = new SyncRtSurfaceTransactionApplier(mPipBackgroundView);
+        }
         return true;
     }
 
-    private void detachPipMenuView() {
-        if (mPipMenuView == null) {
-            return;
+    private void detachPipMenu() {
+        if (mPipMenuView != null) {
+            mApplier = null;
+            mSystemWindows.removeView(mPipMenuView);
+            mPipMenuView = null;
         }
 
-        mApplier = null;
-        mSystemWindows.removeView(mPipMenuView);
-        mPipMenuView = null;
+        if (mPipBackgroundView != null) {
+            mBackgroundApplier = null;
+            mSystemWindows.removeView(mPipBackgroundView);
+            mPipBackgroundView = null;
+        }
     }
 
     @Override
     public void updateMenuBounds(Rect destinationBounds) {
-        Rect menuBounds = getMenuBounds(destinationBounds);
+        final Rect menuBounds = calculateMenuSurfaceBounds(destinationBounds);
         if (DEBUG) {
             ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
                     "%s: updateMenuBounds: %s", TAG, menuBounds.toShortString());
         }
+        mSystemWindows.updateViewLayout(mPipBackgroundView,
+                getPipMenuLayoutParams(BACKGROUND_WINDOW_TITLE, menuBounds.width(),
+                        menuBounds.height()));
         mSystemWindows.updateViewLayout(mPipMenuView,
                 getPipMenuLayoutParams(MENU_WINDOW_TITLE, menuBounds.width(),
                         menuBounds.height()));
+
         if (mPipMenuView != null) {
             mPipMenuView.updateLayout(destinationBounds);
         }
@@ -553,6 +613,32 @@ public class TvPipMenuController implements PipMenuController, TvPipMenuView.Lis
         } catch (Exception e) {
             ProtoLog.e(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
                     "%s: Unable to update focus, %s", TAG, e);
+        }
+    }
+
+    private class PipMenuSurfaceChangedCallback implements ViewRootImpl.SurfaceChangedCallback {
+        private final View mView;
+        private final int mZOrder;
+
+        PipMenuSurfaceChangedCallback(View v, int zOrder) {
+            mView = v;
+            mZOrder = zOrder;
+        }
+
+        @Override
+        public void surfaceCreated(SurfaceControl.Transaction t) {
+            final SurfaceControl sc = getSurfaceControl(mView);
+            if (sc != null) {
+                t.setRelativeLayer(sc, mLeash, mZOrder);
+            }
+        }
+
+        @Override
+        public void surfaceReplaced(SurfaceControl.Transaction t) {
+        }
+
+        @Override
+        public void surfaceDestroyed() {
         }
     }
 }
