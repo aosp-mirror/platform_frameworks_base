@@ -24,4 +24,7 @@
     <color name="tv_pip_menu_icon_bg_unfocused">#990E0E0F</color>
     <color name="tv_pip_menu_focus_border">#E8EAED</color>
     <color name="tv_pip_menu_background">#1E232C</color>
+
+    <color name="tv_pip_edu_text">#99D2E3FC</color>
+    <color name="tv_pip_edu_text_home_icon">#D2E3FC</color>
 </resources>
