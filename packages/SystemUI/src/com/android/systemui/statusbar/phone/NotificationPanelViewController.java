@@ -903,7 +903,7 @@ public class NotificationPanelViewController extends PanelViewController {
                                 onTrackingStopped(false);
                                 instantCollapse();
                             } else {
-                                fling(0f, false, 0.7f, false);
+                                fling(0f, false, 1f, false);
                             }
                         }
                     }
