@@ -13,9 +13,6 @@
  */
 package com.android.systemui.qs
 
-import android.content.res.Configuration
-import android.content.res.Configuration.ORIENTATION_LANDSCAPE
-import android.content.res.Configuration.ORIENTATION_PORTRAIT
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import android.testing.TestableLooper.RunWithLooper
@@ -59,56 +56,11 @@ class QSPanelTest : SysuiTestCase() {
             mFooter = LinearLayout(mContext).apply { id = R.id.qs_footer }
             mQsPanel.addView(mFooter)
             mQsPanel.onFinishInflate()
-            mQsPanel.setSecurityFooter(View(mContext), false)
-            mQsPanel.setHeaderContainer(LinearLayout(mContext))
             // Provides a parent with non-zero size for QSPanel
             mParentView = FrameLayout(mContext).apply {
                 addView(mQsPanel)
             }
         }
-    }
-
-    @Test
-    fun testSecurityFooter_appearsOnBottomOnSplitShade() {
-        mQsPanel.onConfigurationChanged(getNewOrientationConfig(ORIENTATION_LANDSCAPE))
-        mQsPanel.switchSecurityFooter(true)
-
-        mTestableLooper.runWithLooper {
-            mQsPanel.isExpanded = true
-        }
-
-        // After mFooter
-        assertThat(mQsPanel.indexOfChild(mQsPanel.mSecurityFooter)).isEqualTo(
-                mQsPanel.indexOfChild(mFooter) + 1
-        )
-    }
-
-    @Test
-    fun testSecurityFooter_appearsOnBottomIfPortrait() {
-        mQsPanel.onConfigurationChanged(getNewOrientationConfig(ORIENTATION_PORTRAIT))
-        mQsPanel.switchSecurityFooter(false)
-
-        mTestableLooper.runWithLooper {
-            mQsPanel.isExpanded = true
-        }
-
-        // After mFooter
-        assertThat(mQsPanel.indexOfChild(mQsPanel.mSecurityFooter)).isEqualTo(
-                mQsPanel.indexOfChild(mFooter) + 1
-        )
-    }
-
-    @Test
-    fun testSecurityFooter_appearsOnTopIfSmallScreenAndLandscape() {
-        mQsPanel.onConfigurationChanged(getNewOrientationConfig(ORIENTATION_LANDSCAPE))
-        mQsPanel.switchSecurityFooter(false)
-
-        mTestableLooper.runWithLooper {
-            mQsPanel.isExpanded = true
-        }
-
-        // -1 means that it is part of the mHeaderContainer
-        assertThat(mQsPanel.indexOfChild(mQsPanel.mSecurityFooter)).isEqualTo(-1)
     }
 
     @Test
@@ -128,7 +80,4 @@ class QSPanelTest : SysuiTestCase() {
         mQsPanel.performAccessibilityAction(AccessibilityNodeInfo.ACTION_COLLAPSE, null)
         verify(mockRunnable).run()
     }
-
-    private fun getNewOrientationConfig(@Configuration.Orientation newOrientation: Int) =
-            context.resources.configuration.apply { orientation = newOrientation }
 }
