@@ -16,8 +16,8 @@
 
 package com.android.server.hdmi;
 
-import android.hardware.hdmi.HdmiDeviceInfo;
 import android.hardware.hdmi.HdmiControlManager;
+import android.hardware.hdmi.HdmiDeviceInfo;
 import android.hardware.hdmi.IHdmiControlCallback;
 
 /**
@@ -65,7 +65,7 @@ final class SystemAudioActionFromAvr extends SystemAudioAction {
 
         if (mTargetAudioStatus) {
             setSystemAudioMode(true);
-            startAudioStatusAction();
+            finish();
         } else {
             setSystemAudioMode(false);
             finishWithCallback(HdmiControlManager.RESULT_SUCCESS);

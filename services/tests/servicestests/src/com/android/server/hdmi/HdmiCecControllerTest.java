@@ -101,7 +101,8 @@ public class HdmiCecControllerTest {
         mMyLooper = mTestLooper.getLooper();
 
         mHdmiControlServiceSpy = spy(new HdmiControlService(
-                InstrumentationRegistry.getTargetContext(), Collections.emptyList()));
+                InstrumentationRegistry.getTargetContext(), Collections.emptyList(),
+                new FakeAudioDeviceVolumeManagerWrapper()));
         doReturn(mMyLooper).when(mHdmiControlServiceSpy).getIoLooper();
         doReturn(mMyLooper).when(mHdmiControlServiceSpy).getServiceLooper();
         doAnswer(__ -> mCecVersion).when(mHdmiControlServiceSpy).getCecVersion();
