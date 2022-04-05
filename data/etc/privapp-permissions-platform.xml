@@ -273,6 +273,7 @@ applications that come with the platform
         <permission name="android.permission.LOCAL_MAC_ADDRESS"/>
         <permission name="android.permission.MANAGE_ACCESSIBILITY"/>
         <permission name="android.permission.MANAGE_DEVICE_ADMINS"/>
+        <permission name="android.permission.ACCESS_FPS_COUNTER"/>
         <permission name="android.permission.MANAGE_GAME_MODE"/>
         <permission name="android.permission.MANAGE_GAME_ACTIVITY" />
         <permission name="android.permission.MANAGE_LOW_POWER_STANDBY" />
