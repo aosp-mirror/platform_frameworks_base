@@ -2289,9 +2289,10 @@ public final class AppRestrictionController {
         void postRequestBgRestrictedIfNecessary(String packageName, int uid) {
             final Intent intent = new Intent(Settings.ACTION_VIEW_ADVANCED_POWER_USAGE_DETAIL);
             intent.setData(Uri.fromParts(PACKAGE_SCHEME, packageName, null));
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 
             final PendingIntent pendingIntent = PendingIntent.getActivityAsUser(mContext, 0,
-                    intent, PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE, null,
+                    intent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE, null,
                     UserHandle.of(UserHandle.getUserId(uid)));
             Notification.Action[] actions = null;
             final boolean hasForegroundServices =
@@ -2347,13 +2348,14 @@ public final class AppRestrictionController {
                 intent.addFlags(Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND);
                 // Task manager runs in SystemUI, which is SYSTEM user only.
                 pendingIntent = PendingIntent.getBroadcastAsUser(mContext, 0,
-                        intent, PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE,
+                        intent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE,
                         UserHandle.SYSTEM);
             } else {
                 final Intent intent = new Intent(Settings.ACTION_VIEW_ADVANCED_POWER_USAGE_DETAIL);
                 intent.setData(Uri.fromParts(PACKAGE_SCHEME, packageName, null));
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 pendingIntent = PendingIntent.getActivityAsUser(mContext, 0,
-                        intent, PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE,
+                        intent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE,
                         null, UserHandle.of(UserHandle.getUserId(uid)));
             }
 
