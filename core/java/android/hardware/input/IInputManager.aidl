@@ -57,10 +57,11 @@ interface IInputManager {
     // Temporarily changes the pointer speed.
     void tryPointerSpeed(int speed);
 
-    // Injects an input event into the system.  To inject into windows owned by other
-    // applications, the caller must have the INJECT_EVENTS permission.
+    // Injects an input event into the system. The caller must have the INJECT_EVENTS permission.
+    // The caller can target windows owned by a certain UID by providing a valid UID, or by
+    // providing {@link android.os.Process#INVALID_UID} to target all windows.
     @UnsupportedAppUsage
-    boolean injectInputEvent(in InputEvent ev, int mode);
+    boolean injectInputEvent(in InputEvent ev, int mode, int targetUid);
 
     VerifiedInputEvent verifyInputEvent(in InputEvent ev);
 

@@ -2367,7 +2367,8 @@ public class AppOpsService extends IAppOpsService.Stub {
         ActivityManagerInternal ami = LocalServices.getService(ActivityManagerInternal.class);
         boolean isSelfRequest = (filter & FILTER_BY_UID) != 0 && uid == Binder.getCallingUid();
         if (!isSelfRequest) {
-            boolean isCallerInstrumented = ami.isUidCurrentlyInstrumented(Binder.getCallingUid());
+            boolean isCallerInstrumented =
+                    ami.getInstrumentationSourceUid(Binder.getCallingUid()) != Process.INVALID_UID;
             boolean isCallerSystem = Binder.getCallingPid() == Process.myPid();
             boolean isCallerPermissionController;
             try {
@@ -6935,7 +6936,8 @@ public class AppOpsService extends IAppOpsService.Stub {
     @Override
     public @Nullable RuntimeAppOpAccessMessage collectRuntimeAppOpAccessMessage() {
         ActivityManagerInternal ami = LocalServices.getService(ActivityManagerInternal.class);
-        boolean isCallerInstrumented = ami.isUidCurrentlyInstrumented(Binder.getCallingUid());
+        boolean isCallerInstrumented =
+                ami.getInstrumentationSourceUid(Binder.getCallingUid()) != Process.INVALID_UID;
         boolean isCallerSystem = Binder.getCallingPid() == Process.myPid();
         if (!isCallerSystem && !isCallerInstrumented) {
             return null;
