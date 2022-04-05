@@ -134,6 +134,23 @@ class MediaUiEventLogger @Inject constructor(private val logger: UiEventLogger) 
     fun logOpenOutputSwitcher(uid: Int, packageName: String, instanceId: InstanceId) {
         logger.logWithInstanceId(MediaUiEvent.OPEN_OUTPUT_SWITCHER, uid, packageName, instanceId)
     }
+
+    fun logTapContentView(uid: Int, packageName: String, instanceId: InstanceId) {
+        logger.logWithInstanceId(MediaUiEvent.MEDIA_TAP_CONTENT_VIEW, uid, packageName, instanceId)
+    }
+
+    fun logCarouselPosition(@MediaLocation location: Int) {
+        val event = when (location) {
+            MediaHierarchyManager.LOCATION_QQS -> MediaUiEvent.MEDIA_CAROUSEL_LOCATION_QQS
+            MediaHierarchyManager.LOCATION_QS -> MediaUiEvent.MEDIA_CAROUSEL_LOCATION_QS
+            MediaHierarchyManager.LOCATION_LOCKSCREEN ->
+                MediaUiEvent.MEDIA_CAROUSEL_LOCATION_LOCKSCREEN
+            MediaHierarchyManager.LOCATION_DREAM_OVERLAY ->
+                MediaUiEvent.MEDIA_CAROUSEL_LOCATION_DREAM
+            else -> throw IllegalArgumentException("Unknown media carousel location $location")
+        }
+        logger.log(event)
+    }
 }
 
 enum class MediaUiEvent(val metricId: Int) : UiEventLogger.UiEventEnum {
@@ -201,7 +218,22 @@ enum class MediaUiEvent(val metricId: Int) : UiEventLogger.UiEventEnum {
     ACTION_SEEK(1027),
 
     @UiEvent(doc = "The user opened the output switcher from a media control")
-    OPEN_OUTPUT_SWITCHER(1028);
+    OPEN_OUTPUT_SWITCHER(1028),
+
+    @UiEvent(doc = "The user tapped on a media control view")
+    MEDIA_TAP_CONTENT_VIEW(1036),
+
+    @UiEvent(doc = "The media carousel moved to QQS")
+    MEDIA_CAROUSEL_LOCATION_QQS(1037),
+
+    @UiEvent(doc = "THe media carousel moved to QS")
+    MEDIA_CAROUSEL_LOCATION_QS(1038),
+
+    @UiEvent(doc = "The media carousel moved to the lockscreen")
+    MEDIA_CAROUSEL_LOCATION_LOCKSCREEN(1039),
+
+    @UiEvent(doc = "The media carousel moved to the dream state")
+    MEDIA_CAROUSEL_LOCATION_DREAM(1040);
 
     override fun getId() = metricId
 }

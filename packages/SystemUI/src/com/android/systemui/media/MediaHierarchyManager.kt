@@ -1146,7 +1146,10 @@ private val EMPTY_RECT = Rect()
 @Retention(AnnotationRetention.SOURCE)
 private annotation class TransformationType
 
-@IntDef(prefix = ["LOCATION_"], value = [MediaHierarchyManager.LOCATION_QS,
-    MediaHierarchyManager.LOCATION_QQS, MediaHierarchyManager.LOCATION_LOCKSCREEN])
+@IntDef(prefix = ["LOCATION_"], value = [
+    MediaHierarchyManager.LOCATION_QS,
+    MediaHierarchyManager.LOCATION_QQS,
+    MediaHierarchyManager.LOCATION_LOCKSCREEN,
+    MediaHierarchyManager.LOCATION_DREAM_OVERLAY])
 @Retention(AnnotationRetention.SOURCE)
 annotation class MediaLocation

@@ -333,7 +333,7 @@ public class MediaControlPanel {
             mMediaViewHolder.getPlayer().setOnClickListener(v -> {
                 if (mFalsingManager.isFalseTap(FalsingManager.LOW_PENALTY)) return;
                 if (mMediaViewController.isGutsVisible()) return;
-
+                mLogger.logTapContentView(mUid, mPackageName, mInstanceId);
                 logSmartspaceCardReported(SMARTSPACE_CARD_CLICK_EVENT);
                 mActivityStarter.postStartActivityDismissingKeyguard(clickIntent,
                         buildLaunchAnimatorController(mMediaViewHolder.getPlayer()));
