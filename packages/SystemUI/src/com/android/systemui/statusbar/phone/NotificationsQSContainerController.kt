@@ -168,14 +168,7 @@ class NotificationsQSContainerController @Inject constructor(
     private fun updateBottomSpacing() {
         val (containerPadding, notificationsMargin) = calculateBottomSpacing()
         var qsScrollPaddingBottom = 0
-        val newFooter = featureFlags.isEnabled(Flags.NEW_FOOTER)
-        if (!newFooter && !(splitShadeEnabled || isQSCustomizing || isQSDetailShowing ||
-                        isGestureNavigation || taskbarVisible)) {
-            // no taskbar, portrait, navigation buttons enabled:
-            // padding is needed so QS can scroll up over bottom insets - to reach the point when
-            // the whole QS is above bottom insets
-            qsScrollPaddingBottom = bottomStableInsets
-        } else if (newFooter && !(isQSCustomizing || isQSDetailShowing)) {
+        if (!(isQSCustomizing || isQSDetailShowing)) {
             // With the new footer, we also want this padding in the bottom in these cases
             qsScrollPaddingBottom = if (splitShadeEnabled) {
                 notificationsMargin - scrimShadeBottomMargin
@@ -185,11 +178,7 @@ class NotificationsQSContainerController @Inject constructor(
         }
         mView.setPadding(0, 0, 0, containerPadding)
         mView.setNotificationsMarginBottom(notificationsMargin)
-        if (newFooter) {
-            mView.setQSContainerPaddingBottom(qsScrollPaddingBottom)
-        } else {
-            mView.setQSScrollPaddingBottom(qsScrollPaddingBottom)
-        }
+        mView.setQSContainerPaddingBottom(qsScrollPaddingBottom)
     }
 
     private fun calculateBottomSpacing(): Pair<Int, Int> {
