@@ -623,6 +623,11 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
+        if (!mPhysicalCameraSettings.containsKey(mLogicalCameraId)) {
+            throw new IllegalStateException("Physical camera settings map must contain a key for "
+                    + "the logical camera id.");
+        }
+
         int physicalCameraCount = mPhysicalCameraSettings.size();
         dest.writeInt(physicalCameraCount);
         //Logical camera id and settings always come first.
