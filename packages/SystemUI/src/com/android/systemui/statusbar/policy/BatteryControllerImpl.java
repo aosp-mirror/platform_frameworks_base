@@ -28,6 +28,7 @@ import android.os.Handler;
 import android.os.PowerManager;
 import android.os.PowerSaveState;
 import android.util.Log;
+import android.view.View;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -45,8 +46,10 @@ import com.android.systemui.power.EnhancedEstimates;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Default implementation of a {@link BatteryController}. This controller monitors for battery
@@ -84,6 +87,11 @@ public class BatteryControllerImpl extends BroadcastReceiver implements BatteryC
     boolean mHasReceivedBattery = false;
     private Estimate mEstimate;
     private boolean mFetchingEstimate = false;
+
+    // Use AtomicReference because we may request it from a different thread
+    // Use WeakReference because we are keeping a reference to a View that's not as long lived
+    // as this controller.
+    private AtomicReference<WeakReference<View>> mPowerSaverStartView = new AtomicReference<>();
 
     @VisibleForTesting
     public BatteryControllerImpl(
@@ -141,8 +149,19 @@ public class BatteryControllerImpl extends BroadcastReceiver implements BatteryC
     }
 
     @Override
-    public void setPowerSaveMode(boolean powerSave) {
+    public void setPowerSaveMode(boolean powerSave, View view) {
+        if (powerSave) mPowerSaverStartView.set(new WeakReference<>(view));
         BatterySaverUtils.setPowerSaveMode(mContext, powerSave, /*needFirstTimeWarning*/ true);
+    }
+
+    @Override
+    public WeakReference<View> getLastPowerSaverStartView() {
+        return mPowerSaverStartView.get();
+    }
+
+    @Override
+    public void clearLastPowerSaverStartView() {
+        mPowerSaverStartView.set(null);
     }
 
     @Override
