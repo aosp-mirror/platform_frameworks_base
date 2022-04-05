@@ -176,13 +176,24 @@ class SurfaceAnimationRunner {
                 t.addTransactionCommittedListener(Runnable::run, () -> {
                     final WindowAnimationSpec animationSpec = a.asWindowAnimationSpec();
 
+                    final Transaction edgeExtensionCreationTransaction = new Transaction();
                     edgeExtendWindow(animationLeash,
                             animationSpec.getRootTaskBounds(), animationSpec.getAnimation(),
-                            mFrameTransaction);
+                            edgeExtensionCreationTransaction);
 
                     synchronized (mLock) {
                         // only run if animation is not yet canceled by this point
                         if (mPreProcessingAnimations.get(animationLeash) == runningAnim) {
+                            // In the case the animation is cancelled, edge extensions are removed
+                            // onAnimationLeashLost which is called before onAnimationCancelled.
+                            // So we need to check if the edge extensions have already been removed
+                            // or not, and if so we don't want to apply the transaction.
+                            synchronized (mEdgeExtensionLock) {
+                                if (!mEdgeExtensions.isEmpty()) {
+                                    edgeExtensionCreationTransaction.apply();
+                                }
+                            }
+
                             mPreProcessingAnimations.remove(animationLeash);
                             mPendingAnimations.put(animationLeash, runningAnim);
                             if (!mAnimationStartDeferred) {
