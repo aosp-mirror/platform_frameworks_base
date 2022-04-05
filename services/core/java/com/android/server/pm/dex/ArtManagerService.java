@@ -45,7 +45,6 @@ import android.util.ArrayMap;
 import android.util.Log;
 import android.util.Slog;
 
-import com.android.internal.annotations.GuardedBy;
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.os.RoSystemProperties;
 import com.android.internal.util.ArrayUtils;
@@ -94,8 +93,6 @@ public class ArtManagerService extends android.content.pm.dex.IArtManager.Stub {
 
     private final Context mContext;
     private IPackageManager mPackageManager;
-    private final Object mInstallLock;
-    @GuardedBy("mInstallLock")
     private final Installer mInstaller;
 
     private final Handler mHandler;
@@ -105,10 +102,9 @@ public class ArtManagerService extends android.content.pm.dex.IArtManager.Stub {
     }
 
     public ArtManagerService(Context context, Installer installer,
-            Object installLock) {
+            Object ignored) {
         mContext = context;
         mInstaller = installer;
-        mInstallLock = installLock;
         mHandler = new Handler(BackgroundThread.getHandler().getLooper());
 
         LocalServices.addService(ArtManagerInternal.class, new ArtManagerInternalImpl());
@@ -273,16 +269,14 @@ public class ArtManagerService extends android.content.pm.dex.IArtManager.Stub {
     private void createProfileSnapshot(String packageName, String profileName, String classpath,
             int appId, ISnapshotRuntimeProfileCallback callback) {
         // Ask the installer to snapshot the profile.
-        synchronized (mInstallLock) {
-            try {
-                if (!mInstaller.createProfileSnapshot(appId, packageName, profileName, classpath)) {
-                    postError(callback, packageName, ArtManager.SNAPSHOT_FAILED_INTERNAL_ERROR);
-                    return;
-                }
-            } catch (InstallerException e) {
+        try {
+            if (!mInstaller.createProfileSnapshot(appId, packageName, profileName, classpath)) {
                 postError(callback, packageName, ArtManager.SNAPSHOT_FAILED_INTERNAL_ERROR);
                 return;
             }
+        } catch (InstallerException e) {
+            postError(callback, packageName, ArtManager.SNAPSHOT_FAILED_INTERNAL_ERROR);
+            return;
         }
 
         // Open the snapshot and invoke the callback.
@@ -308,13 +302,11 @@ public class ArtManagerService extends android.content.pm.dex.IArtManager.Stub {
             Slog.d(TAG, "Destroying profile snapshot for" + packageName + ":" + profileName);
         }
 
-        synchronized (mInstallLock) {
-            try {
-                mInstaller.destroyProfileSnapshot(packageName, profileName);
-            } catch (InstallerException e) {
-                Slog.e(TAG, "Failed to destroy profile snapshot for " +
-                    packageName + ":" + profileName, e);
-            }
+        try {
+            mInstaller.destroyProfileSnapshot(packageName, profileName);
+        } catch (InstallerException e) {
+            Slog.e(TAG, "Failed to destroy profile snapshot for " + packageName + ":" + profileName,
+                    e);
         }
     }
 
@@ -480,9 +472,7 @@ public class ArtManagerService extends android.content.pm.dex.IArtManager.Stub {
             for (int i = packageProfileNames.size() - 1; i >= 0; i--) {
                 String codePath = packageProfileNames.keyAt(i);
                 String profileName = packageProfileNames.valueAt(i);
-                synchronized (mInstallLock) {
-                    mInstaller.dumpProfiles(sharedGid, pkg.getPackageName(), profileName, codePath);
-                }
+                mInstaller.dumpProfiles(sharedGid, pkg.getPackageName(), profileName, codePath);
             }
         } catch (InstallerException e) {
             Slog.w(TAG, "Failed to dump profiles", e);
@@ -512,10 +502,8 @@ public class ArtManagerService extends android.content.pm.dex.IArtManager.Stub {
                     ") to " + outDexFile);
             final long callingId = Binder.clearCallingIdentity();
             try {
-                synchronized (mInstallLock) {
-                    return mInstaller.compileLayouts(apkPath, packageName, outDexFile,
-                            pkg.getUid());
-                }
+                return mInstaller.compileLayouts(apkPath, packageName, outDexFile,
+                        pkg.getUid());
             } finally {
                 Binder.restoreCallingIdentity(callingId);
             }
