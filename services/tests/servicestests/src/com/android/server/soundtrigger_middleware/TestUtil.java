@@ -162,8 +162,8 @@ class TestUtil {
                 phrases.get(0).recognitionModes);
     }
 
-    static android.hardware.soundtrigger.V2_0.ISoundTriggerHw.Properties createDefaultProperties_2_0(
-            boolean supportConcurrentCapture) {
+    static android.hardware.soundtrigger.V2_0.ISoundTriggerHw.Properties
+            createDefaultProperties_2_0() {
         android.hardware.soundtrigger.V2_0.ISoundTriggerHw.Properties properties =
                 new android.hardware.soundtrigger.V2_0.ISoundTriggerHw.Properties();
         properties.implementor = "implementor";
@@ -185,17 +185,16 @@ class TestUtil {
                         | android.hardware.soundtrigger.V2_0.RecognitionMode.GENERIC_TRIGGER;
         properties.captureTransition = true;
         properties.maxBufferMs = 321;
-        properties.concurrentCapture = supportConcurrentCapture;
+        properties.concurrentCapture = true;
         properties.triggerInEvent = true;
         properties.powerConsumptionMw = 432;
         return properties;
     }
 
-    static android.hardware.soundtrigger.V2_3.Properties createDefaultProperties_2_3(
-            boolean supportConcurrentCapture) {
+    static android.hardware.soundtrigger.V2_3.Properties createDefaultProperties_2_3() {
         android.hardware.soundtrigger.V2_3.Properties properties =
                 new android.hardware.soundtrigger.V2_3.Properties();
-        properties.base = createDefaultProperties_2_0(supportConcurrentCapture);
+        properties.base = createDefaultProperties_2_0();
         properties.supportedModelArch = "supportedModelArch";
         properties.audioCapabilities =
                 android.hardware.soundtrigger.V2_3.AudioCapabilities.ECHO_CANCELLATION
@@ -203,7 +202,7 @@ class TestUtil {
         return properties;
     }
 
-    static Properties createDefaultProperties(boolean supportConcurrentCapture) {
+    static Properties createDefaultProperties() {
         Properties properties = new Properties();
         properties.implementor = "implementor";
         properties.description = "description";
@@ -217,7 +216,7 @@ class TestUtil {
                         | RecognitionMode.USER_AUTHENTICATION | RecognitionMode.GENERIC_TRIGGER;
         properties.captureTransition = true;
         properties.maxBufferMs = 321;
-        properties.concurrentCapture = supportConcurrentCapture;
+        properties.concurrentCapture = true;
         properties.triggerInEvent = true;
         properties.powerConsumptionMw = 432;
         properties.supportedModelArch = "supportedModelArch";
@@ -226,13 +225,13 @@ class TestUtil {
         return properties;
     }
 
-    static void validateDefaultProperties(Properties properties, boolean supportConcurrentCapture) {
-        validateDefaultProperties(properties, supportConcurrentCapture,
+    static void validateDefaultProperties(Properties properties) {
+        validateDefaultProperties(properties,
                 AudioCapabilities.ECHO_CANCELLATION | AudioCapabilities.NOISE_SUPPRESSION,
                 "supportedModelArch");
     }
 
-    static void validateDefaultProperties(Properties properties, boolean supportConcurrentCapture,
+    static void validateDefaultProperties(Properties properties,
             @AudioCapabilities int audioCapabilities, @NonNull String supportedModelArch) {
         assertEquals("implementor", properties.implementor);
         assertEquals("description", properties.description);
@@ -246,7 +245,7 @@ class TestUtil {
                 properties.recognitionModes);
         assertTrue(properties.captureTransition);
         assertEquals(321, properties.maxBufferMs);
-        assertEquals(supportConcurrentCapture, properties.concurrentCapture);
+        assertEquals(true, properties.concurrentCapture);
         assertTrue(properties.triggerInEvent);
         assertEquals(432, properties.powerConsumptionMw);
         assertEquals(supportedModelArch, properties.supportedModelArch);
