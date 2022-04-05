@@ -83,7 +83,6 @@ import com.android.wm.shell.common.FloatingContentCoordinator;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.magnetictarget.MagnetizedObject;
 
-import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -278,7 +277,7 @@ public class BubbleStackView extends FrameLayout
     private int mPointerIndexDown = -1;
 
     /** Description of current animation controller state. */
-    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+    public void dump(PrintWriter pw, String[] args) {
         pw.println("Stack view state:");
 
         String bubblesOnScreen = BubbleDebugConfig.formatBubblesString(
@@ -292,8 +291,8 @@ public class BubbleStackView extends FrameLayout
         pw.print("  expandedContainerMatrix: ");
         pw.println(mExpandedViewContainer.getAnimationMatrix());
 
-        mStackAnimationController.dump(fd, pw, args);
-        mExpandedAnimationController.dump(fd, pw, args);
+        mStackAnimationController.dump(pw, args);
+        mExpandedAnimationController.dump(pw, args);
 
         if (mExpandedBubble != null) {
             pw.println("Expanded bubble state:");

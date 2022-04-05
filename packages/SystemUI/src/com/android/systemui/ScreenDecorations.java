@@ -87,7 +87,6 @@ import com.android.systemui.util.concurrency.DelayableExecutor;
 import com.android.systemui.util.concurrency.ThreadFactory;
 import com.android.systemui.util.settings.SecureSettings;
 
-import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
@@ -839,7 +838,7 @@ public class ScreenDecorations extends CoreStartable implements Tunable , Dumpab
     }
 
     @Override
-    public void dump(@NonNull FileDescriptor fd, @NonNull PrintWriter pw, @NonNull String[] args) {
+    public void dump(@NonNull PrintWriter pw, @NonNull String[] args) {
         pw.println("ScreenDecorations state:");
         pw.println("  DEBUG_DISABLE_SCREEN_DECORATIONS:" + DEBUG_DISABLE_SCREEN_DECORATIONS);
         pw.println("  mIsPrivacyDotEnabled:" + isPrivacyDotEnabled());
@@ -864,7 +863,7 @@ public class ScreenDecorations extends CoreStartable implements Tunable , Dumpab
                 + (mOverlays != null && mOverlays[BOUNDS_POSITION_TOP] != null) + ","
                 + (mOverlays != null && mOverlays[BOUNDS_POSITION_RIGHT] != null) + ","
                 + (mOverlays != null && mOverlays[BOUNDS_POSITION_BOTTOM] != null) + ")");
-        mRoundedCornerResDelegate.dump(fd, pw, args);
+        mRoundedCornerResDelegate.dump(pw, args);
     }
 
     private void updateOrientation() {

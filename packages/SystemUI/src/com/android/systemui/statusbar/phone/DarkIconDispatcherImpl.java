@@ -28,7 +28,6 @@ import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.statusbar.CommandQueue;
 
-import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 
@@ -130,7 +129,7 @@ public class DarkIconDispatcherImpl implements SysuiDarkIconDispatcher,
     }
 
     @Override
-    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+    public void dump(PrintWriter pw, String[] args) {
         pw.println("DarkIconDispatcher: ");
         pw.println("  mIconTint: 0x" + Integer.toHexString(mIconTint));
         pw.println("  mDarkIntensity: " + mDarkIntensity + "f");

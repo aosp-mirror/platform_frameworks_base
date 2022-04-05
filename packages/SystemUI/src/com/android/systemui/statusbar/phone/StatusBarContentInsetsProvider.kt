@@ -23,9 +23,7 @@ import android.graphics.Rect
 import android.util.LruCache
 import android.util.Pair
 import android.view.DisplayCutout
-
 import androidx.annotation.VisibleForTesting
-
 import com.android.internal.policy.SystemBarUtils
 import com.android.systemui.Dumpable
 import com.android.systemui.R
@@ -40,11 +38,8 @@ import com.android.systemui.util.leak.RotationUtils.ROTATION_UPSIDE_DOWN
 import com.android.systemui.util.leak.RotationUtils.Rotation
 import com.android.systemui.util.leak.RotationUtils.getExactRotation
 import com.android.systemui.util.leak.RotationUtils.getResourcesForRotation
-
-import java.io.FileDescriptor
 import java.io.PrintWriter
 import java.lang.Math.max
-
 import javax.inject.Inject
 
 /**
@@ -263,7 +258,7 @@ class StatusBarContentInsetsProvider @Inject constructor(
         return res.getDimensionPixelSize(R.dimen.status_bar_padding_top)
     }
 
-    override fun dump(fd: FileDescriptor, pw: PrintWriter, args: Array<out String>) {
+    override fun dump(pw: PrintWriter, args: Array<out String>) {
         insetsCache.snapshot().forEach { (key, rect) ->
             pw.println("$key -> $rect")
         }

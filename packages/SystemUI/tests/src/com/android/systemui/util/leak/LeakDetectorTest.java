@@ -109,7 +109,7 @@ public class LeakDetectorTest extends SysuiTestCase {
         mLeakDetector.trackGarbage(o2);
 
         FileOutputStream fos = new FileOutputStream("/dev/null");
-        mLeakDetector.dump(fos.getFD(), new PrintWriter(fos), new String[0]);
+        mLeakDetector.dump(new PrintWriter(fos), new String[0]);
     }
 
     @Test
@@ -125,6 +125,6 @@ public class LeakDetectorTest extends SysuiTestCase {
         mLeakDetector.trackGarbage(o2);
 
         FileOutputStream fos = new FileOutputStream("/dev/null");
-        mLeakDetector.dump(fos.getFD(), new PrintWriter(fos), new String[0]);
+        mLeakDetector.dump(new PrintWriter(fos), new String[0]);
     }
 }
