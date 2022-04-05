@@ -1245,6 +1245,11 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     @ServiceThreadOnly
     void onHotplug(int portId, boolean connected) {
         assertRunOnServiceThread();
+
+        if (!connected) {
+            mService.getHdmiCecNetwork().removeCecSwitches(portId);
+        }
+
         // Turning System Audio Mode off when the AVR is unlugged or standby.
         // When the device is not unplugged but reawaken from standby, we check if the System
         // Audio Control Feature is enabled or not then decide if turning SAM on/off accordingly.

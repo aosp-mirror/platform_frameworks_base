@@ -37,6 +37,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
+import android.util.ArraySet;
 import android.util.SparseArray;
 import android.window.TaskFragmentInfo;
 import android.window.WindowContainerTransaction;
@@ -75,10 +76,6 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
     private Consumer<List<SplitInfo>> mEmbeddingCallback;
     private final List<SplitInfo> mLastReportedSplitStates = new ArrayList<>();
 
-    // We currently only support split activity embedding within the one root Task.
-    // TODO(b/207720388): move to TaskContainer
-    private final Rect mParentBounds = new Rect();
-
     public SplitController() {
         mPresenter = new SplitPresenter(new MainThreadExecutor(), this);
         ActivityThread activityThread = ActivityThread.currentActivityThread();
@@ -95,7 +92,9 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
     public void setEmbeddingRules(@NonNull Set<EmbeddingRule> rules) {
         mSplitRules.clear();
         mSplitRules.addAll(rules);
-        updateAnimationOverride();
+        for (int i = mTaskContainers.size() - 1; i >= 0; i--) {
+            updateAnimationOverride(mTaskContainers.keyAt(i));
+        }
     }
 
     @NonNull
@@ -163,38 +162,49 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
 
     @Override
     public void onTaskFragmentVanished(@NonNull TaskFragmentInfo taskFragmentInfo) {
-        TaskFragmentContainer container = getContainer(taskFragmentInfo.getFragmentToken());
-        if (container == null) {
-            return;
+        final TaskFragmentContainer container = getContainer(taskFragmentInfo.getFragmentToken());
+        if (container != null) {
+            // Cleanup if the TaskFragment vanished is not requested by the organizer.
+            mPresenter.cleanupContainer(container, true /* shouldFinishDependent */);
+            updateCallbackIfNecessary();
         }
-
-        mPresenter.cleanupContainer(container, true /* shouldFinishDependent */);
-        updateCallbackIfNecessary();
+        cleanupTaskFragment(taskFragmentInfo.getFragmentToken());
     }
 
     @Override
     public void onTaskFragmentParentInfoChanged(@NonNull IBinder fragmentToken,
             @NonNull Configuration parentConfig) {
-        onParentBoundsMayChange(parentConfig.windowConfiguration.getBounds());
         TaskFragmentContainer container = getContainer(fragmentToken);
         if (container != null) {
+            onTaskBoundsMayChange(container.getTaskId(),
+                    parentConfig.windowConfiguration.getBounds());
             mPresenter.updateContainer(container);
             updateCallbackIfNecessary();
         }
     }
 
-    private void onParentBoundsMayChange(Activity activity) {
-        if (activity.isFinishing()) {
+    /** Called on receiving {@link #onTaskFragmentVanished(TaskFragmentInfo)} for cleanup. */
+    private void cleanupTaskFragment(@NonNull IBinder taskFragmentToken) {
+        for (int i = mTaskContainers.size() - 1; i >= 0; i--) {
+            final TaskContainer taskContainer = mTaskContainers.valueAt(i);
+            if (!taskContainer.mFinishedContainer.remove(taskFragmentToken)) {
+                continue;
+            }
+            if (taskContainer.isEmpty()) {
+                // Cleanup the TaskContainer if it becomes empty.
+                mPresenter.stopOverrideSplitAnimation(taskContainer.mTaskId);
+                mTaskContainers.remove(taskContainer.mTaskId);
+            }
             return;
         }
-
-        onParentBoundsMayChange(mPresenter.getParentContainerBounds(activity));
     }
 
-    private void onParentBoundsMayChange(Rect parentBounds) {
-        if (!parentBounds.isEmpty() && !mParentBounds.equals(parentBounds)) {
-            mParentBounds.set(parentBounds);
-            updateAnimationOverride();
+    private void onTaskBoundsMayChange(int taskId, @NonNull Rect taskBounds) {
+        final TaskContainer taskContainer = mTaskContainers.get(taskId);
+        if (taskContainer != null && !taskBounds.isEmpty()
+                && !taskContainer.mTaskBounds.equals(taskBounds)) {
+            taskContainer.mTaskBounds.set(taskBounds);
+            updateAnimationOverride(taskId);
         }
     }
 
@@ -202,9 +212,10 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
      * Updates if we should override transition animation. We only want to override if the Task
      * bounds is large enough for at least one split rule.
      */
-    private void updateAnimationOverride() {
-        if (mParentBounds.isEmpty()) {
-            // We don't know about the parent bounds yet.
+    private void updateAnimationOverride(int taskId) {
+        final TaskContainer taskContainer = mTaskContainers.get(taskId);
+        if (taskContainer == null || !taskContainer.isTaskBoundsInitialized()) {
+            // We don't know about the Task bounds yet.
             return;
         }
 
@@ -214,7 +225,7 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
             if (!(rule instanceof SplitRule)) {
                 continue;
             }
-            if (mPresenter.shouldShowSideBySide(mParentBounds, (SplitRule) rule)) {
+            if (mPresenter.shouldShowSideBySide(taskContainer.mTaskBounds, (SplitRule) rule)) {
                 supportSplit = true;
                 break;
             }
@@ -222,9 +233,9 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
 
         // We only want to override if it supports split.
         if (supportSplit) {
-            mPresenter.startOverrideSplitAnimation();
+            mPresenter.startOverrideSplitAnimation(taskId);
         } else {
-            mPresenter.stopOverrideSplitAnimation();
+            mPresenter.stopOverrideSplitAnimation(taskId);
         }
     }
 
@@ -242,11 +253,6 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
         final List<EmbeddingRule> splitRules = getSplitRules();
         final TaskFragmentContainer currentContainer = getContainerWithActivity(
                 launchedActivity.getActivityToken());
-
-        if (currentContainer == null) {
-            // Initial check before any TaskFragment is created.
-            onParentBoundsMayChange(launchedActivity);
-        }
 
         // Check if the activity is configured to always be expanded.
         if (shouldExpand(launchedActivity, null, splitRules)) {
@@ -326,8 +332,6 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
             // onTaskFragmentParentInfoChanged
             return;
         }
-        // The bounds of the container may have been changed.
-        onParentBoundsMayChange(activity);
 
         // Check if activity requires a placeholder
         launchPlaceholderIfNecessary(activity);
@@ -357,9 +361,14 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
     TaskFragmentContainer newContainer(@Nullable Activity activity, int taskId) {
         final TaskFragmentContainer container = new TaskFragmentContainer(activity, taskId);
         if (!mTaskContainers.contains(taskId)) {
-            mTaskContainers.put(taskId, new TaskContainer());
+            mTaskContainers.put(taskId, new TaskContainer(taskId));
         }
-        mTaskContainers.get(taskId).mContainers.add(container);
+        final TaskContainer taskContainer = mTaskContainers.get(taskId);
+        taskContainer.mContainers.add(container);
+        if (activity != null && !taskContainer.isTaskBoundsInitialized()) {
+            // Initial check before any TaskFragment has appeared.
+            onTaskBoundsMayChange(taskId, SplitPresenter.getTaskBoundsFromActivity(activity));
+        }
         return container;
     }
 
@@ -391,11 +400,11 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
             return;
         }
         taskContainer.mContainers.remove(container);
-        if (taskContainer.mContainers.isEmpty()) {
-            mTaskContainers.remove(taskId);
-            // No more TaskFragment in this Task, so no need to check split container.
-            return;
-        }
+        // Marked as a pending removal which will be removed after it is actually removed on the
+        // server side (#onTaskFragmentVanished).
+        // In this way, we can keep track of the Task bounds until we no longer have any
+        // TaskFragment there.
+        taskContainer.mFinishedContainer.add(container.getTaskFragmentToken());
 
         final List<SplitContainer> containersToRemove = new ArrayList<>();
         for (SplitContainer splitContainer : taskContainer.mSplitContainers) {
@@ -543,7 +552,7 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
     }
 
     boolean launchPlaceholderIfNecessary(@NonNull Activity activity) {
-        final  TaskFragmentContainer container = getContainerWithActivity(
+        final TaskFragmentContainer container = getContainerWithActivity(
                 activity.getActivityToken());
         // Don't launch placeholder if the container is occluded.
         if (container != null && container != getTopActiveContainer(container.getTaskId())) {
@@ -1035,7 +1044,30 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
     /** Represents TaskFragments and split pairs below a Task. */
     @VisibleForTesting
     static class TaskContainer {
+        /** The unique task id. */
+        final int mTaskId;
+        /** Active TaskFragments in this Task. */
         final List<TaskFragmentContainer> mContainers = new ArrayList<>();
+        /** Active split pairs in this Task. */
         final List<SplitContainer> mSplitContainers = new ArrayList<>();
+        /**
+         * TaskFragments that the organizer has requested to be closed. They should be removed when
+         * the organizer receives {@link #onTaskFragmentVanished(TaskFragmentInfo)} event for them.
+         */
+        final Set<IBinder> mFinishedContainer = new ArraySet<>();
+        /** Available window bounds of this Task. */
+        final Rect mTaskBounds = new Rect();
+
+        TaskContainer(int taskId) {
+            mTaskId = taskId;
+        }
+
+        boolean isEmpty() {
+            return mContainers.isEmpty() && mFinishedContainer.isEmpty();
+        }
+
+        boolean isTaskBoundsInitialized() {
+            return !mTaskBounds.isEmpty();
+        }
     }
 }

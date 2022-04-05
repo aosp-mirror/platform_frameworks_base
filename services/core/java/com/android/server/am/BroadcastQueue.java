@@ -880,9 +880,9 @@ public final class BroadcastQueue {
 
         // Ensure that broadcasts are only sent to other apps if they are explicitly marked as
         // exported, or are System level broadcasts
-        if (!skip && !filter.exported && !Process.isCoreUid(r.callingUid)
-                && filter.receiverList.uid != r.callingUid) {
-
+        if (!skip && !filter.exported && mService.checkComponentPermission(null, r.callingPid,
+                r.callingUid, filter.receiverList.uid, filter.exported)
+                != PackageManager.PERMISSION_GRANTED) {
             Slog.w(TAG, "Exported Denial: sending "
                     + r.intent.toString()
                     + ", action: " + r.intent.getAction()

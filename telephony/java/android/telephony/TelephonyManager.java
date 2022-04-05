@@ -8979,7 +8979,7 @@ public class TelephonyManager {
     public NetworkScan requestNetworkScan(
             NetworkScanRequest request, Executor executor,
             TelephonyScanManager.NetworkScanCallback callback) {
-        return requestNetworkScan(false, request, executor, callback);
+        return requestNetworkScan(INCLUDE_LOCATION_DATA_FINE, request, executor, callback);
     }
 
     /**
@@ -9004,9 +9004,8 @@ public class TelephonyManager {
      *     and MCC/MNC info.</li>
      * </ol>
      *
-     * @param renounceFineLocationAccess Set this to true if the caller would not like to receive
-     * location related information which will be sent if the caller already possess
-     * {@link android.Manifest.permission#ACCESS_FINE_LOCATION} and do not renounce the permission
+     * @param includeLocationData Specifies if the caller would like to receive
+     * location related information.
      * @param request Contains all the RAT with bands/channels that need to be scanned.
      * @param executor The executor through which the callback should be invoked. Since the scan
      *        request may trigger multiple callbacks and they must be invoked in the same order as
@@ -9021,7 +9020,8 @@ public class TelephonyManager {
             Manifest.permission.ACCESS_FINE_LOCATION
     })
     public @Nullable NetworkScan requestNetworkScan(
-            boolean renounceFineLocationAccess, @NonNull NetworkScanRequest request,
+            @IncludeLocationData int includeLocationData,
+            @NonNull NetworkScanRequest request,
             @NonNull Executor executor,
             @NonNull TelephonyScanManager.NetworkScanCallback callback) {
         synchronized (sCacheLock) {
@@ -9029,7 +9029,8 @@ public class TelephonyManager {
                 mTelephonyScanManager = new TelephonyScanManager();
             }
         }
-        return mTelephonyScanManager.requestNetworkScan(getSubId(), renounceFineLocationAccess,
+        return mTelephonyScanManager.requestNetworkScan(getSubId(),
+                includeLocationData != INCLUDE_LOCATION_DATA_FINE,
                 request, executor, callback,
                 getOpPackageName(), getAttributionTag());
     }
@@ -10555,7 +10556,7 @@ public class TelephonyManager {
         try {
             ITelephony telephony = getITelephony();
             if (telephony != null)
-                return telephony.enableDataConnectivity();
+                return telephony.enableDataConnectivity(getOpPackageName());
         } catch (RemoteException e) {
             Log.e(TAG, "Error calling ITelephony#enableDataConnectivity", e);
         }
@@ -10570,7 +10571,7 @@ public class TelephonyManager {
         try {
             ITelephony telephony = getITelephony();
             if (telephony != null)
-                return telephony.disableDataConnectivity();
+                return telephony.disableDataConnectivity(getOpPackageName());
         } catch (RemoteException e) {
             Log.e(TAG, "Error calling ITelephony#disableDataConnectivity", e);
         }
@@ -11767,7 +11768,25 @@ public class TelephonyManager {
         if (SubscriptionManager.isValidPhoneId(phoneId)) {
             List<String> newList = updateTelephonyProperty(
                     TelephonyProperties.operator_alpha(), phoneId, name);
-            TelephonyProperties.operator_alpha(newList);
+            try {
+                TelephonyProperties.operator_alpha(newList);
+            } catch (IllegalArgumentException e) { //property value is longer than the byte limit
+                Log.e(TAG, "setNetworkOperatorNameForPhone: ", e);
+
+                int numberOfEntries = newList.size();
+                int maxOperatorLength = //save 1 byte for joiner " , "
+                        (SystemProperties.PROP_VALUE_MAX - numberOfEntries) / numberOfEntries;
+
+                //examine and truncate every operator and retry
+                for (int i = 0; i < newList.size(); i++) {
+                    if (newList.get(i) != null) {
+                        newList.set(i, TextUtils
+                                .truncateStringForUtf8Storage(newList.get(i), maxOperatorLength));
+                    }
+                }
+                TelephonyProperties.operator_alpha(newList);
+                Log.e(TAG, "successfully truncated operator_alpha: " + newList);
+            }
         }
     }
 
@@ -11930,7 +11949,7 @@ public class TelephonyManager {
             Log.d(TAG, "factoryReset: subId=" + subId);
             ITelephony telephony = getITelephony();
             if (telephony != null) {
-                telephony.factoryReset(subId);
+                telephony.factoryReset(subId, getOpPackageName());
             }
         } catch (RemoteException e) {
         }
@@ -11950,7 +11969,7 @@ public class TelephonyManager {
             Log.d(TAG, "resetSettings: subId=" + getSubId());
             ITelephony telephony = getITelephony();
             if (telephony != null) {
-                telephony.factoryReset(getSubId());
+                telephony.factoryReset(getSubId(), getOpPackageName());
             }
         } catch (RemoteException e) {
         }
@@ -12171,10 +12190,7 @@ public class TelephonyManager {
     })
     @RequiresFeature(PackageManager.FEATURE_TELEPHONY_RADIO_ACCESS)
     public @Nullable ServiceState getServiceState() {
-        return getServiceState(getRenouncedPermissions()
-                    .contains(Manifest.permission.ACCESS_FINE_LOCATION),
-                               getRenouncedPermissions()
-                    .contains(Manifest.permission.ACCESS_COARSE_LOCATION));
+        return getServiceState(getLocationData());
     }
 
     /**
@@ -12194,12 +12210,8 @@ public class TelephonyManager {
      * <p>Requires Permission: {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
      * or that the calling app has carrier privileges (see {@link #hasCarrierPrivileges})
      * and {@link android.Manifest.permission#ACCESS_COARSE_LOCATION}.
-     * @param renounceFineLocationAccess Set this to true if the caller would not like to receive
-     * location related information which will be sent if the caller already possess
-     * {@link android.Manifest.permission#ACCESS_FINE_LOCATION} and do not renounce the permission
-     * @param renounceCoarseLocationAccess Set this to true if the caller would not like to
-     * receive location related information which will be sent if the caller already possess
-     * {@link Manifest.permission#ACCESS_COARSE_LOCATION} and do not renounce the permissions.
+     * @param includeLocationData Specifies if the caller would like to receive
+     * location related information.
      * May return {@code null} when the subscription is inactive or when there was an error
      * communicating with the phone process.
      */
@@ -12208,10 +12220,10 @@ public class TelephonyManager {
             Manifest.permission.READ_PHONE_STATE,
             Manifest.permission.ACCESS_COARSE_LOCATION
     })
-    public @Nullable ServiceState getServiceState(boolean renounceFineLocationAccess,
-            boolean renounceCoarseLocationAccess) {
-        return getServiceStateForSubscriber(getSubId(), renounceFineLocationAccess,
-                renounceCoarseLocationAccess);
+    public @Nullable ServiceState getServiceState(@IncludeLocationData int includeLocationData) {
+        return getServiceStateForSubscriber(getSubId(),
+                includeLocationData != INCLUDE_LOCATION_DATA_FINE,
+                includeLocationData == INCLUDE_LOCATION_DATA_NONE);
     }
 
     /**
@@ -13217,7 +13229,7 @@ public class TelephonyManager {
         try {
             ITelephony service = getITelephony();
             if (service != null) {
-                service.setDataEnabledForReason(subId, reason, enabled);
+                service.setDataEnabledForReason(subId, reason, enabled, getOpPackageName());
             } else {
                 throw new IllegalStateException("telephony service is null.");
             }
@@ -16169,11 +16181,60 @@ public class TelephonyManager {
      */
     public void registerTelephonyCallback(@NonNull @CallbackExecutor Executor executor,
             @NonNull TelephonyCallback callback) {
-        registerTelephonyCallback(
-                getRenouncedPermissions().contains(Manifest.permission.ACCESS_FINE_LOCATION),
-                getRenouncedPermissions().contains(Manifest.permission.ACCESS_COARSE_LOCATION),
-                executor, callback);
+        registerTelephonyCallback(getLocationData(), executor, callback);
     }
+
+    private int getLocationData() {
+        boolean renounceCoarseLocation =
+                getRenouncedPermissions().contains(Manifest.permission.ACCESS_COARSE_LOCATION);
+        boolean renounceFineLocation =
+                getRenouncedPermissions().contains(Manifest.permission.ACCESS_FINE_LOCATION);
+        if (renounceCoarseLocation) {
+            return INCLUDE_LOCATION_DATA_NONE;
+        } else if (renounceFineLocation) {
+            return INCLUDE_LOCATION_DATA_COARSE;
+        } else {
+            return INCLUDE_LOCATION_DATA_FINE;
+        }
+    }
+
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = {"INCLUDE_LOCATION_DATA_"}, value = {
+            INCLUDE_LOCATION_DATA_NONE,
+            INCLUDE_LOCATION_DATA_COARSE,
+            INCLUDE_LOCATION_DATA_FINE})
+    public @interface IncludeLocationData {}
+
+    /**
+     * Specifies to not include any location related data.
+     *
+     * Indicates whether the caller would not like to receive
+     * location related information which will be sent if the caller already possess
+     * {@link android.Manifest.permission#ACCESS_COARSE_LOCATION} and do not renounce the
+     * permissions.
+     */
+    public static final int INCLUDE_LOCATION_DATA_NONE = 0;
+
+    /**
+     * Include coarse location data.
+     *
+     * Indicates whether the caller would not like to receive
+     * location related information which will be sent if the caller already possess
+     * {@link android.Manifest.permission#ACCESS_COARSE_LOCATION} and do not renounce the
+     * permissions.
+     */
+    public static final int INCLUDE_LOCATION_DATA_COARSE = 1;
+
+    /**
+     * Include fine location data.
+     *
+     * Indicates whether the caller would not like to receive
+     * location related information which will be sent if the caller already possess
+     * {@link android.Manifest.permission#ACCESS_FINE_LOCATION} and do not renounce the
+     * permissions.
+     */
+    public static final int INCLUDE_LOCATION_DATA_FINE = 2;
 
     /**
      * Registers a callback object to receive notification of changes in specified telephony states.
@@ -16208,17 +16269,12 @@ public class TelephonyManager {
      * apps. To avoid confusion, calling this method supersede renouncing permissions with a
      * custom context.
      *
-     * @param renounceFineLocationAccess Set this to true if the caller would not like to receive
-     * location related information which will be sent if the caller already possess
-     * {@link android.Manifest.permission#ACCESS_FINE_LOCATION} and do not renounce the permissions.
-     * @param renounceCoarseLocationAccess Set this to true if the caller would not like to
-     * receive location related information which will be sent if the caller already possess
-     * {@link Manifest.permission#ACCESS_COARSE_LOCATION} and do not renounce the permissions.
+     * @param includeLocationData Specifies if the caller would like to receive
+     * location related information.
      * @param executor The executor of where the callback will execute.
      * @param callback The {@link TelephonyCallback} object to register.
      */
-    public void registerTelephonyCallback(boolean renounceFineLocationAccess,
-            boolean renounceCoarseLocationAccess,
+    public void registerTelephonyCallback(@IncludeLocationData int includeLocationData,
             @NonNull @CallbackExecutor Executor executor,
             @NonNull TelephonyCallback callback) {
         if (mContext == null) {
@@ -16231,8 +16287,10 @@ public class TelephonyManager {
         mTelephonyRegistryMgr = (TelephonyRegistryManager)
                 mContext.getSystemService(Context.TELEPHONY_REGISTRY_SERVICE);
         if (mTelephonyRegistryMgr != null) {
-            mTelephonyRegistryMgr.registerTelephonyCallback(renounceFineLocationAccess,
-                    renounceCoarseLocationAccess, executor, mSubId, getOpPackageName(),
+            mTelephonyRegistryMgr.registerTelephonyCallback(
+                    includeLocationData != INCLUDE_LOCATION_DATA_FINE,
+                    includeLocationData == INCLUDE_LOCATION_DATA_NONE,
+                    executor, mSubId, getOpPackageName(),
                     getAttributionTag(), callback, getITelephony() != null);
         } else {
             throw new IllegalStateException("telephony service is null.");

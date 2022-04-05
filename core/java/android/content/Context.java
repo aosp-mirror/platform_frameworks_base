@@ -3054,13 +3054,11 @@ public abstract class Context {
      *
      * @param receiver The BroadcastReceiver to handle the broadcast.
      * @param filter Selects the Intent broadcasts to be received.
-     * @param flags Additional options for the receiver. For apps targeting
-     * {@link android.os.Build.VERSION_CODES#TIRAMISU},
-     *              either {@link #RECEIVER_EXPORTED} or
-     * {@link #RECEIVER_NOT_EXPORTED} must be specified if the receiver isn't being registered
-     *              for <a href="{@docRoot}guide/components/broadcasts#system-broadcasts">system
-     *              broadcasts</a> or an exception will be thrown. If
-     *              {@link #RECEIVER_EXPORTED} is specified, a receiver may additionally
+     * @param flags Additional options for the receiver. In a future release, either
+     * {@link #RECEIVER_EXPORTED} or {@link #RECEIVER_NOT_EXPORTED} must be specified if the
+     *             receiver isn't being registered for <a href="{@docRoot}guide/components
+     *              /broadcasts#system-broadcasts">system broadcasts</a> or an exception will be
+     *              thrown. If {@link #RECEIVER_EXPORTED} is specified, a receiver may additionally
      *              specify {@link #RECEIVER_VISIBLE_TO_INSTANT_APPS}. For a complete list of
      *              system broadcast actions, see the BROADCAST_ACTIONS.TXT file in the
      *              Android SDK. If both {@link #RECEIVER_EXPORTED} and
@@ -3137,13 +3135,11 @@ public abstract class Context {
      *      no permission is required.
      * @param scheduler Handler identifying the thread that will receive
      *      the Intent.  If null, the main thread of the process will be used.
-     * @param flags Additional options for the receiver. For apps targeting
-     * {@link android.os.Build.VERSION_CODES#TIRAMISU},
-     *              either {@link #RECEIVER_EXPORTED} or
-     * {@link #RECEIVER_NOT_EXPORTED} must be specified if the receiver isn't being registered
-     *              for <a href="{@docRoot}guide/components/broadcasts#system-broadcasts">system
-     *              broadcasts</a> or an exception will be thrown. If
-     *              {@link #RECEIVER_EXPORTED} is specified, a receiver may additionally
+     * @param flags Additional options for the receiver. In a future release, either
+     * {@link #RECEIVER_EXPORTED} or {@link #RECEIVER_NOT_EXPORTED} must be specified if the
+     *             receiver isn't being registered for <a href="{@docRoot}guide/components
+     *              /broadcasts#system-broadcasts">system broadcasts</a> or an exception will be
+     *              thrown. If {@link #RECEIVER_EXPORTED} is specified, a receiver may additionally
      *              specify {@link #RECEIVER_VISIBLE_TO_INSTANT_APPS}. For a complete list of
      *              system broadcast actions, see the BROADCAST_ACTIONS.TXT file in the
      *              Android SDK. If both {@link #RECEIVER_EXPORTED} and
@@ -3207,13 +3203,11 @@ public abstract class Context {
      *      no permission is required.
      * @param scheduler Handler identifying the thread that will receive
      *      the Intent. If {@code null}, the main thread of the process will be used.
-     * @param flags Additional options for the receiver. For apps targeting
-     * {@link android.os.Build.VERSION_CODES#TIRAMISU},
-     *              either {@link #RECEIVER_EXPORTED} or
-     * {@link #RECEIVER_NOT_EXPORTED} must be specified if the receiver isn't being registered
-     *              for <a href="{@docRoot}guide/components/broadcasts#system-broadcasts">system
-     *              broadcasts</a> or an exception will be thrown. If
-     *              {@link #RECEIVER_EXPORTED} is specified, a receiver may additionally
+     * @param flags Additional options for the receiver. In a future release, either
+     * {@link #RECEIVER_EXPORTED} or {@link #RECEIVER_NOT_EXPORTED} must be specified if the
+     *             receiver isn't being registered for <a href="{@docRoot}guide/components
+     *              /broadcasts#system-broadcasts">system broadcasts</a> or an exception will be
+     *              thrown. If {@link #RECEIVER_EXPORTED} is specified, a receiver may additionally
      *              specify {@link #RECEIVER_VISIBLE_TO_INSTANT_APPS}. For a complete list of
      *              system broadcast actions, see the BROADCAST_ACTIONS.TXT file in the
      *              Android SDK. If both {@link #RECEIVER_EXPORTED} and
@@ -3282,13 +3276,11 @@ public abstract class Context {
      *      no permission is required.
      * @param scheduler Handler identifying the thread that will receive
      *      the Intent.  If null, the main thread of the process will be used.
-     * @param flags Additional options for the receiver. For apps targeting
-     * {@link android.os.Build.VERSION_CODES#TIRAMISU},
-     *              either {@link #RECEIVER_EXPORTED} or
-     * {@link #RECEIVER_NOT_EXPORTED} must be specified if the receiver isn't being registered
-     *              for <a href="{@docRoot}guide/components/broadcasts#system-broadcasts">system
-     *              broadcasts</a> or an exception will be thrown. If
-     *              {@link #RECEIVER_EXPORTED} is specified, a receiver may additionally
+     * @param flags Additional options for the receiver. In a future release, either
+     * {@link #RECEIVER_EXPORTED} or {@link #RECEIVER_NOT_EXPORTED} must be specified if the
+     *             receiver isn't being registered for <a href="{@docRoot}guide/components
+     *              /broadcasts#system-broadcasts">system broadcasts</a> or an exception will be
+     *              thrown. If {@link #RECEIVER_EXPORTED} is specified, a receiver may additionally
      *              specify {@link #RECEIVER_VISIBLE_TO_INSTANT_APPS}. For a complete list of
      *              system broadcast actions, see the BROADCAST_ACTIONS.TXT file in the
      *              Android SDK. If both {@link #RECEIVER_EXPORTED} and

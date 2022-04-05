@@ -214,10 +214,6 @@ public class QSPanelController extends QSPanelControllerBase<QSPanel> {
         return mHost;
     }
 
-    /** Show the device monitoring dialog. */
-    public void showDeviceMonitoringDialog() {
-        mQsSecurityFooter.showDeviceMonitoringDialog();
-    }
 
     /** Update appearance of QSPanel. */
     public void updateResources() {

@@ -533,7 +533,7 @@ class InsetsPolicy {
         }
         if (remoteInsetsControllerControlsSystemBars(focusedWin)) {
             mDisplayContent.mRemoteInsetsControlTarget.topFocusedWindowChanged(
-                    focusedWin.mAttrs.packageName);
+                    focusedWin.mAttrs.packageName, focusedWin.getRequestedVisibilities());
             return mDisplayContent.mRemoteInsetsControlTarget;
         }
         if (mPolicy.areSystemBarsForcedShownLw()) {
@@ -590,7 +590,7 @@ class InsetsPolicy {
         }
         if (remoteInsetsControllerControlsSystemBars(focusedWin)) {
             mDisplayContent.mRemoteInsetsControlTarget.topFocusedWindowChanged(
-                    focusedWin.mAttrs.packageName);
+                    focusedWin.mAttrs.packageName, focusedWin.getRequestedVisibilities());
             return mDisplayContent.mRemoteInsetsControlTarget;
         }
         if (mPolicy.areSystemBarsForcedShownLw()) {

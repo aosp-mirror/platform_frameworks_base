@@ -280,15 +280,26 @@ public class FingerprintService extends SystemService {
 
         @SuppressWarnings("deprecation")
         @Override // Binder call
-        public long authenticate(final IBinder token, final long operationId,
-                final int sensorId, final int userId, final IFingerprintServiceReceiver receiver,
-                final String opPackageName, boolean ignoreEnrollmentState) {
+        public long authenticate(
+                final IBinder token,
+                final long operationId,
+                final int sensorId,
+                final int userId,
+                final IFingerprintServiceReceiver receiver,
+                final String opPackageName,
+                final String attributionTag,
+                boolean ignoreEnrollmentState) {
             final int callingUid = Binder.getCallingUid();
             final int callingPid = Binder.getCallingPid();
             final int callingUserId = UserHandle.getCallingUserId();
 
-            if (!canUseFingerprint(opPackageName, true /* requireForeground */, callingUid,
-                    callingPid, callingUserId)) {
+            if (!canUseFingerprint(
+                    opPackageName,
+                    attributionTag,
+                    true /* requireForeground */,
+                    callingUid,
+                    callingPid,
+                    callingUserId)) {
                 Slog.w(TAG, "Authenticate rejecting package: " + opPackageName);
                 return -1;
             }
@@ -487,16 +498,23 @@ public class FingerprintService extends SystemService {
             provider.startPreparedClient(sensorId, cookie);
         }
 
-
         @Override // Binder call
-        public void cancelAuthentication(final IBinder token, final String opPackageName,
+        public void cancelAuthentication(
+                final IBinder token,
+                final String opPackageName,
+                final String attributionTag,
                 long requestId) {
             final int callingUid = Binder.getCallingUid();
             final int callingPid = Binder.getCallingPid();
             final int callingUserId = UserHandle.getCallingUserId();
 
-            if (!canUseFingerprint(opPackageName, true /* requireForeground */, callingUid,
-                    callingPid, callingUserId)) {
+            if (!canUseFingerprint(
+                    opPackageName,
+                    attributionTag,
+                    true /* requireForeground */,
+                    callingUid,
+                    callingPid,
+                    callingUserId)) {
                 Slog.w(TAG, "cancelAuthentication rejecting package: " + opPackageName);
                 return;
             }
@@ -645,9 +663,13 @@ public class FingerprintService extends SystemService {
         }
 
         @Override // Binder call
-        public boolean isHardwareDetectedDeprecated(String opPackageName) {
-            if (!canUseFingerprint(opPackageName, false /* foregroundOnly */,
-                    Binder.getCallingUid(), Binder.getCallingPid(),
+        public boolean isHardwareDetectedDeprecated(String opPackageName, String attributionTag) {
+            if (!canUseFingerprint(
+                    opPackageName,
+                    attributionTag,
+                    false /* foregroundOnly */,
+                    Binder.getCallingUid(),
+                    Binder.getCallingPid(),
                     UserHandle.getCallingUserId())) {
                 return false;
             }
@@ -696,9 +718,14 @@ public class FingerprintService extends SystemService {
         }
 
         @Override // Binder call
-        public List<Fingerprint> getEnrolledFingerprints(int userId, String opPackageName) {
-            if (!canUseFingerprint(opPackageName, false /* foregroundOnly */,
-                    Binder.getCallingUid(), Binder.getCallingPid(),
+        public List<Fingerprint> getEnrolledFingerprints(
+                int userId, String opPackageName, String attributionTag) {
+            if (!canUseFingerprint(
+                    opPackageName,
+                    attributionTag,
+                    false /* foregroundOnly */,
+                    Binder.getCallingUid(),
+                    Binder.getCallingPid(),
                     UserHandle.getCallingUserId())) {
                 return Collections.emptyList();
             }
@@ -711,9 +738,14 @@ public class FingerprintService extends SystemService {
         }
 
         @Override // Binder call
-        public boolean hasEnrolledFingerprintsDeprecated(int userId, String opPackageName) {
-            if (!canUseFingerprint(opPackageName, false /* foregroundOnly */,
-                    Binder.getCallingUid(), Binder.getCallingPid(),
+        public boolean hasEnrolledFingerprintsDeprecated(
+                int userId, String opPackageName, String attributionTag) {
+            if (!canUseFingerprint(
+                    opPackageName,
+                    attributionTag,
+                    false /* foregroundOnly */,
+                    Binder.getCallingUid(),
+                    Binder.getCallingPid(),
                     UserHandle.getCallingUserId())) {
                 return false;
             }
@@ -1093,12 +1125,15 @@ public class FingerprintService extends SystemService {
         return provider.second.getEnrolledFingerprints(provider.first, userId);
     }
 
-    /**
-     * Checks for public API invocations to ensure that permissions, etc are granted/correct.
-     */
+    /** Checks for public API invocations to ensure that permissions, etc are granted/correct. */
     @SuppressWarnings("BooleanMethodIsAlwaysInverted")
-    private boolean canUseFingerprint(String opPackageName, boolean requireForeground, int uid,
-            int pid, int userId) {
+    private boolean canUseFingerprint(
+            String opPackageName,
+            String attributionTag,
+            boolean requireForeground,
+            int uid,
+            int pid,
+            int userId) {
         if (getContext().checkCallingPermission(USE_FINGERPRINT)
                 != PackageManager.PERMISSION_GRANTED) {
             Utils.checkPermission(getContext(), USE_BIOMETRIC);
@@ -1114,7 +1149,7 @@ public class FingerprintService extends SystemService {
             Slog.w(TAG, "Rejecting " + opPackageName + "; not a current user or profile");
             return false;
         }
-        if (!checkAppOps(uid, opPackageName)) {
+        if (!checkAppOps(uid, opPackageName, attributionTag)) {
             Slog.w(TAG, "Rejecting " + opPackageName + "; permission denied");
             return false;
         }
@@ -1125,12 +1160,13 @@ public class FingerprintService extends SystemService {
         return true;
     }
 
-    private boolean checkAppOps(int uid, String opPackageName) {
+    private boolean checkAppOps(int uid, String opPackageName, String attributionTag) {
         boolean appOpsOk = false;
-        if (mAppOps.noteOp(AppOpsManager.OP_USE_BIOMETRIC, uid, opPackageName)
+        if (mAppOps.noteOp(AppOpsManager.OP_USE_BIOMETRIC, uid, opPackageName, attributionTag, null)
                 == AppOpsManager.MODE_ALLOWED) {
             appOpsOk = true;
-        } else if (mAppOps.noteOp(AppOpsManager.OP_USE_FINGERPRINT, uid, opPackageName)
+        } else if (mAppOps.noteOp(
+                        AppOpsManager.OP_USE_FINGERPRINT, uid, opPackageName, attributionTag, null)
                 == AppOpsManager.MODE_ALLOWED) {
             appOpsOk = true;
         }

@@ -1388,8 +1388,11 @@ public class CentralSurfaces extends CoreStartable implements
      * keyguard.
      */
     private void dispatchPanelExpansionForKeyguardDismiss(float fraction, boolean trackingTouch) {
-        // Things that mean we're not dismissing the keyguard, and should ignore this expansion:
+        // Things that mean we're not swiping to dismiss the keyguard, and should ignore this
+        // expansion:
         // - Keyguard isn't even visible.
+        // - Keyguard is occluded. Expansion changes here are the shade being expanded over the
+        //   occluding activity.
         // - Keyguard is visible, but can't be dismissed (swiping up will show PIN/password prompt).
         // - The SIM is locked, you can't swipe to unlock. If the SIM is locked but there is no
         //   device lock set, canDismissLockScreen returns true even though you should not be able
@@ -1397,6 +1400,7 @@ public class CentralSurfaces extends CoreStartable implements
         // - QS is expanded and we're swiping - swiping up now will hide QS, not dismiss the
         //   keyguard.
         if (!isKeyguardShowing()
+                || isOccluded()
                 || !mKeyguardStateController.canDismissLockScreen()
                 || mKeyguardViewMediator.isAnySimPinSecure()
                 || (mNotificationPanelViewController.isQsExpanded() && trackingTouch)) {
@@ -1438,7 +1442,6 @@ public class CentralSurfaces extends CoreStartable implements
         IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
         filter.addAction(Intent.ACTION_SCREEN_OFF);
-        filter.addAction(DevicePolicyManager.ACTION_SHOW_DEVICE_MONITORING_DIALOG);
         mBroadcastDispatcher.registerReceiver(mBroadcastReceiver, filter, null, UserHandle.ALL);
     }
 
@@ -2628,8 +2631,6 @@ public class CentralSurfaces extends CoreStartable implements
                 }
                 finishBarAnimations();
                 resetUserExpandedStates();
-            } else if (DevicePolicyManager.ACTION_SHOW_DEVICE_MONITORING_DIALOG.equals(action)) {
-                mQSPanelController.showDeviceMonitoringDialog();
             }
             Trace.endSection();
         }

@@ -22,6 +22,16 @@
         <activity
             android:name="com.android.settingslib.users.AvatarPickerActivity"
             android:theme="@style/SudThemeGlifV2.DayNight"/>
+
+        <activity
+            android:name="com.android.settingslib.qrcode.QrCodeScanModeActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.settings.BLUETOOTH_LE_AUDIO_QR_CODE_SCANNER"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+            </intent-filter>
+        </activity>
+
     </application>
 
 </manifest>

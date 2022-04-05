@@ -64,6 +64,7 @@ import android.nfc.NfcAdapter;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.IpcDataCache;
 import android.os.ParcelFileDescriptor;
 import android.os.Parcelable;
 import android.os.PersistableBundle;
@@ -3780,6 +3781,60 @@ public class DevicePolicyManager {
      */
     public static final String EXTRA_RESOURCE_IDS =
             "android.app.extra.RESOURCE_IDS";
+
+    /**
+     * A convenience class that wraps some IpcDataCache methods. Instantiate it with an
+     * API string. Instances can and should be final static. All instances of this class
+     * use the same key for invalidation.
+     */
+    private static class BinderApi {
+        private final static String KEY = "DevicePolicyManager";
+        private final String mApi;
+        BinderApi(String api) {
+            mApi = api;
+        }
+        final String api() {
+            return mApi;
+        }
+        final String key() {
+            return KEY;
+        }
+        final static void invalidate() {
+            IpcDataCache.invalidateCache(IpcDataCache.MODULE_SYSTEM, KEY);
+        }
+        final void disable() {
+            IpcDataCache.disableForCurrentProcess(mApi);
+        }
+    }
+
+    /** @hide */
+    public static void invalidateBinderCaches() {
+        BinderApi.invalidate();
+    }
+
+    /**
+     * A simple wrapper for binder caches in this class. All caches are created with a
+     * maximum of 8 entries, the SYSTEM module, and a cache name that is the same as the api.
+     */
+    private static class BinderCache<Q,R> extends IpcDataCache<Q,R> {
+        BinderCache(BinderApi api, IpcDataCache.QueryHandler<Q,R> handler) {
+            super(8, IpcDataCache.MODULE_SYSTEM, api.key(), api.api(), handler);
+        }
+    }
+
+    /**
+     * Disable all caches in the local process.
+     * @hide
+     */
+    public static void disableLocalProcessCaches() {
+        disableGetKeyguardDisabledFeaturesCache();
+        disableHasDeviceOwnerCache();
+        disableGetProfileOwnerOrDeviceOwnerSupervisionComponentCache();
+        disableIsOrganizationOwnedDeviceWithManagedProfileCache();
+        disableGetDeviceOwnerOrganizationNameCache();
+        disableGetOrganizationNameForUserCache();
+        disableIsNetworkLoggingEnabled();
+    }
 
     /** @hide */
     @NonNull
@@ -8380,17 +8435,57 @@ public class DevicePolicyManager {
         return getKeyguardDisabledFeatures(admin, myUserId());
     }
 
+    // A key into the keyguard cache.
+    private static class KeyguardQuery {
+        private final ComponentName mAdmin;
+        private final int mUserHandle;
+        KeyguardQuery(@Nullable ComponentName admin, int userHandle) {
+            mAdmin = admin;
+            mUserHandle = userHandle;
+        }
+        public boolean equals(Object o) {
+            if (o instanceof KeyguardQuery) {
+                KeyguardQuery r = (KeyguardQuery) o;
+                return Objects.equals(mAdmin, r.mAdmin) && mUserHandle == r.mUserHandle;
+            } else {
+                return false;
+            }
+        }
+        public int hashCode() {
+            return ((mAdmin != null) ? mAdmin.hashCode() : 0) * 13 + mUserHandle;
+        }
+    }
+
+    // The query handler does not cache wildcard user IDs, although they should never
+    // appear in the query.
+    private static final BinderApi sGetKeyguardDisabledFeatures =
+            new BinderApi("getKeyguardDisabledFeatures");
+    private BinderCache<KeyguardQuery, Integer> mGetKeyGuardDisabledFeaturesCache =
+            new BinderCache<>(sGetKeyguardDisabledFeatures,
+                    new IpcDataCache.QueryHandler<KeyguardQuery, Integer>() {
+                        @Override
+                        public Integer apply(KeyguardQuery query) {
+                            try {
+                                return mService.getKeyguardDisabledFeatures(
+                                    query.mAdmin, query.mUserHandle, mParentInstance);
+                            } catch (RemoteException e) {
+                                throw e.rethrowFromSystemServer();
+                            }
+                        }});
+
+    /** @hide */
+    public static void disableGetKeyguardDisabledFeaturesCache() {
+        sGetKeyguardDisabledFeatures.disable();
+    }
+
     /** @hide per-user version */
     @UnsupportedAppUsage
     public int getKeyguardDisabledFeatures(@Nullable ComponentName admin, int userHandle) {
         if (mService != null) {
-            try {
-                return mService.getKeyguardDisabledFeatures(admin, userHandle, mParentInstance);
-            } catch (RemoteException e) {
-                throw e.rethrowFromSystemServer();
-            }
+            return mGetKeyGuardDisabledFeaturesCache.query(new KeyguardQuery(admin, userHandle));
+        } else {
+            return KEYGUARD_DISABLE_FEATURES_NONE;
         }
-        return KEYGUARD_DISABLE_FEATURES_NONE;
     }
 
     /**
@@ -8769,6 +8864,24 @@ public class DevicePolicyManager {
         return name != null ? name.getPackageName() : null;
     }
 
+    private static final BinderApi sHasDeviceOwner =
+            new BinderApi("hasDeviceOwner");
+    private BinderCache<Void, Boolean> mHasDeviceOwnerCache =
+            new BinderCache<>(sHasDeviceOwner,
+                    new IpcDataCache.QueryHandler<Void, Boolean>() {
+                        @Override
+                        public Boolean apply(Void query) {
+                            try {
+                                return mService.hasDeviceOwner();
+                            } catch (RemoteException e) {
+                                throw e.rethrowFromSystemServer();
+                            }
+                        }});
+    /** @hide */
+    public static void disableHasDeviceOwnerCache() {
+        sHasDeviceOwner.disable();
+    }
+
     /**
      * Called by the system to find out whether the device is managed by a Device Owner.
      *
@@ -8781,11 +8894,7 @@ public class DevicePolicyManager {
     @SystemApi
     @SuppressLint("RequiresPermission")
     public boolean isDeviceManaged() {
-        try {
-            return mService.hasDeviceOwner();
-        } catch (RemoteException re) {
-            throw re.rethrowFromSystemServer();
-        }
+        return mHasDeviceOwnerCache.query(null);
     }
 
     /**
@@ -9147,6 +9256,26 @@ public class DevicePolicyManager {
         return null;
     }
 
+    private final static BinderApi sGetProfileOwnerOrDeviceOwnerSupervisionComponent =
+            new BinderApi("getProfileOwnerOrDeviceOwnerSupervisionComponent");
+    private final BinderCache<UserHandle, ComponentName>
+            mGetProfileOwnerOrDeviceOwnerSupervisionComponentCache =
+            new BinderCache(sGetProfileOwnerOrDeviceOwnerSupervisionComponent,
+                    new IpcDataCache.QueryHandler<UserHandle, ComponentName>() {
+                        @Override
+                        public ComponentName apply(UserHandle user) {
+                            try {
+                                return mService.getProfileOwnerOrDeviceOwnerSupervisionComponent(
+                                    user);
+                            } catch (RemoteException re) {
+                                throw re.rethrowFromSystemServer();
+                            }
+                        }});
+    /** @hide */
+    public static void disableGetProfileOwnerOrDeviceOwnerSupervisionComponentCache() {
+        sGetProfileOwnerOrDeviceOwnerSupervisionComponent.disable();
+    }
+
     /**
      * Returns the configured supervision app if it exists and is the device owner or policy owner.
      * @hide
@@ -9154,11 +9283,7 @@ public class DevicePolicyManager {
     public @Nullable ComponentName getProfileOwnerOrDeviceOwnerSupervisionComponent(
             @NonNull UserHandle user) {
         if (mService != null) {
-            try {
-                return mService.getProfileOwnerOrDeviceOwnerSupervisionComponent(user);
-            } catch (RemoteException re) {
-                throw re.rethrowFromSystemServer();
-            }
+            return mGetProfileOwnerOrDeviceOwnerSupervisionComponentCache.query(user);
         }
         return null;
     }
@@ -9204,6 +9329,24 @@ public class DevicePolicyManager {
         return null;
     }
 
+    private final static BinderApi sIsOrganizationOwnedDeviceWithManagedProfile =
+            new BinderApi("isOrganizationOwnedDeviceWithManagedProfile");
+    private final BinderCache<Void, Boolean> mIsOrganizationOwnedDeviceWithManagedProfileCache =
+            new BinderCache(sIsOrganizationOwnedDeviceWithManagedProfile,
+                    new IpcDataCache.QueryHandler<Void, Boolean>() {
+                        @Override
+                        public Boolean apply(Void query) {
+                            try {
+                                return mService.isOrganizationOwnedDeviceWithManagedProfile();
+                            } catch (RemoteException re) {
+                                throw re.rethrowFromSystemServer();
+                            }
+                        }});
+    /** @hide */
+    public static void disableIsOrganizationOwnedDeviceWithManagedProfileCache() {
+        sIsOrganizationOwnedDeviceWithManagedProfile.disable();
+    }
+
     /**
      * Apps can use this method to find out if the device was provisioned as
      * organization-owend device with a managed profile.
@@ -9220,11 +9363,7 @@ public class DevicePolicyManager {
     public boolean isOrganizationOwnedDeviceWithManagedProfile() {
         throwIfParentInstance("isOrganizationOwnedDeviceWithManagedProfile");
         if (mService != null) {
-            try {
-                return mService.isOrganizationOwnedDeviceWithManagedProfile();
-            } catch (RemoteException re) {
-                throw re.rethrowFromSystemServer();
-            }
+            return mIsOrganizationOwnedDeviceWithManagedProfileCache.query(null);
         }
         return false;
     }
@@ -12788,6 +12927,24 @@ public class DevicePolicyManager {
         }
     }
 
+    private final static BinderApi sGetDeviceOwnerOrganizationName =
+            new BinderApi("getDeviceOwnerOrganizationName");
+    private final BinderCache<Void, CharSequence> mGetDeviceOwnerOrganizationNameCache =
+            new BinderCache(sGetDeviceOwnerOrganizationName,
+                    new IpcDataCache.QueryHandler<Void, CharSequence>() {
+                        @Override
+                        public CharSequence apply(Void query) {
+                            try {
+                                return mService.getDeviceOwnerOrganizationName();
+                            } catch (RemoteException re) {
+                                throw re.rethrowFromSystemServer();
+                            }
+                        }});
+    /** @hide */
+    public static void disableGetDeviceOwnerOrganizationNameCache() {
+        sGetDeviceOwnerOrganizationName.disable();
+    }
+
     /**
      * Called by the system to retrieve the name of the organization managing the device.
      *
@@ -12800,11 +12957,25 @@ public class DevicePolicyManager {
     @SystemApi
     @SuppressLint("RequiresPermission")
     public @Nullable CharSequence getDeviceOwnerOrganizationName() {
-        try {
-            return mService.getDeviceOwnerOrganizationName();
-        } catch (RemoteException re) {
-            throw re.rethrowFromSystemServer();
-        }
+        return mGetDeviceOwnerOrganizationNameCache.query(null);
+    }
+
+    private final static BinderApi sGetOrganizationNameForUser =
+            new BinderApi("getOrganizationNameForUser");
+    private final BinderCache<Integer, CharSequence> mGetOrganizationNameForUserCache =
+            new BinderCache(sGetOrganizationNameForUser,
+                    new IpcDataCache.QueryHandler<Integer, CharSequence>() {
+                        @Override
+                        public CharSequence apply(Integer userHandle) {
+                            try {
+                                return mService.getOrganizationNameForUser(userHandle);
+                            } catch (RemoteException re) {
+                                throw re.rethrowFromSystemServer();
+                            }
+                        }});
+    /** @hide */
+    public static void disableGetOrganizationNameForUserCache() {
+        sGetOrganizationNameForUser.disable();
     }
 
     /**
@@ -12816,11 +12987,7 @@ public class DevicePolicyManager {
      * @hide
      */
     public @Nullable CharSequence getOrganizationNameForUser(int userHandle) {
-        try {
-            return mService.getOrganizationNameForUser(userHandle);
-        } catch (RemoteException re) {
-            throw re.rethrowFromSystemServer();
-        }
+        return mGetOrganizationNameForUserCache.query(userHandle);
     }
 
     /**
@@ -13205,6 +13372,25 @@ public class DevicePolicyManager {
         }
     }
 
+    private final static BinderApi sNetworkLoggingApi = new BinderApi("isNetworkLoggingEnabled");
+    private BinderCache<ComponentName, Boolean> mIsNetworkLoggingEnabledCache =
+            new BinderCache<>(sNetworkLoggingApi,
+                    new IpcDataCache.QueryHandler<ComponentName, Boolean>() {
+                        @Override
+                        public Boolean apply(ComponentName admin) {
+                            try {
+                                return mService.isNetworkLoggingEnabled(
+                                    admin, mContext.getPackageName());
+                            } catch (RemoteException re) {
+                                throw re.rethrowFromSystemServer();
+                            }
+                        }});
+
+    /** @hide */
+    public static void disableIsNetworkLoggingEnabled() {
+        sNetworkLoggingApi.disable();
+    }
+
     /**
      * Return whether network logging is enabled by a device owner or profile owner of
      * a managed profile.
@@ -13219,11 +13405,7 @@ public class DevicePolicyManager {
      */
     public boolean isNetworkLoggingEnabled(@Nullable ComponentName admin) {
         throwIfParentInstance("isNetworkLoggingEnabled");
-        try {
-            return mService.isNetworkLoggingEnabled(admin, mContext.getPackageName());
-        } catch (RemoteException re) {
-            throw re.rethrowFromSystemServer();
-        }
+        return mIsNetworkLoggingEnabledCache.query(admin);
     }
 
     /**

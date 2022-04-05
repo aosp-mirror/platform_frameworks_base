@@ -11458,7 +11458,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 // Show the IME, except when selecting in read-only text.
                 final InputMethodManager imm = getInputMethodManager();
                 viewClicked(imm);
-                if (isTextEditable() && mEditor.mShowSoftInputOnFocus && imm != null) {
+                if (isTextEditable() && mEditor.mShowSoftInputOnFocus && imm != null
+                        && !showAutofillDialog()) {
                     imm.showSoftInput(this, 0);
                 }
 
@@ -11474,6 +11475,22 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
 
         return superResult;
+    }
+
+    /**
+     * The fill dialog UI is a more conspicuous and efficient interface than dropdown UI.
+     * If autofill suggestions are available when the user clicks on a field that supports filling
+     * the dialog UI, Autofill will pop up a fill dialog. The dialog will take up a larger area
+     * to display the datasets, so it is easy for users to pay attention to the datasets and
+     * selecting a dataset. The autofill dialog is shown as the bottom sheet, the better
+     * experience is not to show the IME if there is a fill dialog.
+     */
+    private boolean showAutofillDialog() {
+        final AutofillManager afm = mContext.getSystemService(AutofillManager.class);
+        if (afm != null) {
+            return afm.showAutofillDialog(this);
+        }
+        return false;
     }
 
     @Override
@@ -12600,7 +12617,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     if (start >= 0 && start <= end && end <= text.length()) {
                         requestFocusOnNonEditableSelectableText();
                         Selection.setSelection((Spannable) text, start, end);
-                        hideAccessibilitySelectionControllers();
+                        // Make sure selection mode is engaged.
+                        if (mEditor != null) {
+                            mEditor.startSelectionActionModeAsync(false);
+                        }
                         return true;
                     }
                 }
@@ -13743,12 +13763,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             Selection.removeSelection((Spannable) text);
         }
         // Hide all selection controllers used for adjusting selection
-        // since we are doing so explicitly by other means and these
+        // since we are doing so explicitlty by other means and these
         // controllers interact with how selection behaves.
-        hideAccessibilitySelectionControllers();
-    }
-
-    private void hideAccessibilitySelectionControllers() {
         if (mEditor != null) {
             mEditor.hideCursorAndSpanControllers();
             mEditor.stopTextActionMode();

@@ -427,6 +427,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     private boolean mInHeadsUpPinnedMode;
     private boolean mHeadsUpAnimatingAway;
     private int mStatusBarState;
+    private int mUpcomingStatusBarState;
     private int mCachedBackgroundColor;
     private boolean mHeadsUpGoingAwayAnimationsAllowed = true;
     private Runnable mReflingAndAnimateScroll = () -> {
@@ -690,7 +691,8 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
                 mController.hasActiveClearableNotifications(ROWS_ALL);
         boolean showFooterView = (showDismissView || mController.getVisibleNotificationCount() > 0)
                 && mIsCurrentUserSetup  // see: b/193149550
-                && mStatusBarState != StatusBarState.KEYGUARD
+                && !onKeyguard()
+                && mUpcomingStatusBarState != StatusBarState.KEYGUARD
                 // quick settings don't affect notifications when not in full screen
                 && (mQsExpansionFraction != 1 || !mQsFullScreen)
                 && !mScreenOffAnimationController.shouldHideNotificationsFooter()
@@ -1317,14 +1319,15 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         if (mOnStackYChanged != null) {
             mOnStackYChanged.accept(listenerNeedsAnimation);
         }
-        if ((mQsExpansionFraction <= 0 || !mQsFullScreen) && !shouldSkipHeightUpdate()) {
-            final float endHeight = updateStackEndHeight();
+        if (mQsExpansionFraction <= 0 && !shouldSkipHeightUpdate()) {
+            final float endHeight = updateStackEndHeight(
+                    getHeight(), getEmptyBottomMargin(), mTopPadding);
             updateStackHeight(endHeight, fraction);
         }
     }
 
-    private float updateStackEndHeight() {
-        final float stackEndHeight = Math.max(0f, mIntrinsicContentHeight);
+    private float updateStackEndHeight(float height, float bottomMargin, float topPadding) {
+        final float stackEndHeight = Math.max(0f, height - bottomMargin - topPadding);
         mAmbientState.setStackEndHeight(stackEndHeight);
         return stackEndHeight;
     }
@@ -4957,6 +4960,13 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         mAmbientState.setStatusBarState(statusBarState);
         updateSpeedBumpIndex();
         updateDismissBehavior();
+    }
+
+    void setUpcomingStatusBarState(int upcomingStatusBarState) {
+        mUpcomingStatusBarState = upcomingStatusBarState;
+        if (mUpcomingStatusBarState != mStatusBarState) {
+            updateFooter();
+        }
     }
 
     void onStatePostChange(boolean fromShadeLocked) {
