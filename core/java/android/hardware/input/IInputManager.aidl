@@ -38,6 +38,8 @@ import android.view.VerifiedInputEvent;
 
 /** @hide */
 interface IInputManager {
+    // Gets the current VelocityTracker strategy
+    String getVelocityTrackerStrategy();
     // Gets input device information.
     InputDevice getInputDevice(int deviceId);
     int[] getInputDeviceIds();

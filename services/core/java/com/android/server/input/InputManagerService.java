@@ -16,6 +16,7 @@
 
 package com.android.server.input;
 
+import static android.provider.DeviceConfig.NAMESPACE_INPUT_NATIVE_BOOT;
 import static android.view.KeyEvent.KEYCODE_UNKNOWN;
 
 import android.annotation.NonNull;
@@ -160,6 +161,8 @@ public class InputManagerService extends IInputManager.Stub
 
     // Feature flag name for the deep press feature
     private static final String DEEP_PRESS_ENABLED = "deep_press_enabled";
+    // Feature flag name for the strategy to be used in VelocityTracker
+    private static final String VELOCITYTRACKER_STRATEGY_PROPERTY = "velocitytracker_strategy";
 
     private static final int MSG_DELIVER_INPUT_DEVICES_CHANGED = 1;
     private static final int MSG_SWITCH_KEYBOARD_LAYOUT = 2;
@@ -447,6 +450,8 @@ public class InputManagerService extends IInputManager.Stub
     public static final int SW_CAMERA_LENS_COVER_BIT = 1 << SW_CAMERA_LENS_COVER;
     public static final int SW_MUTE_DEVICE_BIT = 1 << SW_MUTE_DEVICE;
 
+    private final String mVelocityTrackerStrategy;
+
     /** Whether to use the dev/input/event or uevent subsystem for the audio jack. */
     final boolean mUseDevInputEventForAudioJack;
 
@@ -466,6 +471,8 @@ public class InputManagerService extends IInputManager.Stub
         mDoubleTouchGestureEnableFile = TextUtils.isEmpty(doubleTouchGestureEnablePath) ? null :
             new File(doubleTouchGestureEnablePath);
 
+        mVelocityTrackerStrategy = DeviceConfig.getProperty(
+                NAMESPACE_INPUT_NATIVE_BOOT, VELOCITYTRACKER_STRATEGY_PROPERTY);
         LocalServices.addService(InputManagerInternal.class, new LocalService());
     }
 
@@ -963,6 +970,11 @@ public class InputManagerService extends IInputManager.Stub
     public VerifiedInputEvent verifyInputEvent(InputEvent event) {
         Objects.requireNonNull(event, "event must not be null");
         return nativeVerifyInputEvent(mPtr, event);
+    }
+
+    @Override // Binder call
+    public String getVelocityTrackerStrategy() {
+        return mVelocityTrackerStrategy;
     }
 
     /**
