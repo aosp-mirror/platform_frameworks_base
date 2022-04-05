@@ -777,6 +777,9 @@ public class PreferencesHelper implements RankingConfig {
             if (r == null) {
                 throw new IllegalArgumentException("Invalid package");
             }
+            if (fromTargetApp) {
+                group.setBlocked(false);
+            }
             final NotificationChannelGroup oldGroup = r.groups.get(group.getId());
             if (oldGroup != null) {
                 group.setChannels(oldGroup.getChannels());
