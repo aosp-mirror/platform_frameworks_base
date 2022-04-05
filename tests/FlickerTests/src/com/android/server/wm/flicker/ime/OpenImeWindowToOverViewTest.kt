@@ -114,7 +114,7 @@ class OpenImeWindowToOverViewTest(private val testSpec: FlickerTestParameter) {
         }
     }
 
-    @Presubmit
+    @FlakyTest(bugId = 228011606)
     @Test
     fun imeLayerIsVisibleAndAssociatedWithAppWidow() {
         testSpec.assertLayersStart {
