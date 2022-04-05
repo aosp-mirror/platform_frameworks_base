@@ -102,12 +102,14 @@ public class NotificationMediaManager implements Dumpable {
             KeyguardStateController.class);
     private final KeyguardBypassController mKeyguardBypassController;
     private static final HashSet<Integer> PAUSED_MEDIA_STATES = new HashSet<>();
+    private static final HashSet<Integer> CONNECTING_MEDIA_STATES = new HashSet<>();
     static {
         PAUSED_MEDIA_STATES.add(PlaybackState.STATE_NONE);
         PAUSED_MEDIA_STATES.add(PlaybackState.STATE_STOPPED);
         PAUSED_MEDIA_STATES.add(PlaybackState.STATE_PAUSED);
         PAUSED_MEDIA_STATES.add(PlaybackState.STATE_ERROR);
-        PAUSED_MEDIA_STATES.add(PlaybackState.STATE_CONNECTING);
+        CONNECTING_MEDIA_STATES.add(PlaybackState.STATE_CONNECTING);
+        CONNECTING_MEDIA_STATES.add(PlaybackState.STATE_BUFFERING);
     }
 
     private final NotificationVisibilityProvider mVisibilityProvider;
@@ -363,7 +365,17 @@ public class NotificationMediaManager implements Dumpable {
      * @return true if playing
      */
     public static boolean isPlayingState(int state) {
-        return !PAUSED_MEDIA_STATES.contains(state);
+        return !PAUSED_MEDIA_STATES.contains(state)
+            && !CONNECTING_MEDIA_STATES.contains(state);
+    }
+
+    /**
+     * Check if a state should be considered as connecting
+     * @param state a PlaybackState
+     * @return true if connecting or buffering
+     */
+    public static boolean isConnectingState(int state) {
+        return CONNECTING_MEDIA_STATES.contains(state);
     }
 
     public void setUpWithPresenter(NotificationPresenter presenter) {
