@@ -139,6 +139,8 @@ constructor(
                 height += spaceNeeded
                 count += 1
             } else {
+                val gapBeforeFirstViewInShelf = current.calculateGapHeight(stack, previous, count)
+                height += gapBeforeFirstViewInShelf
                 height += shelfHeight
                 log { "returning height with shelf -> $height" }
                 return height
@@ -178,7 +180,9 @@ constructor(
         if (visibleIndex != 0) {
             size += notificationPadding
         }
-        size += calculateGapHeight(stack, previousView, visibleIndex)
+        val gapHeight = calculateGapHeight(stack, previousView, visibleIndex)
+        log { "\ti=$visibleIndex gapHeight=$gapHeight"}
+        size += gapHeight
         return size
     }
 

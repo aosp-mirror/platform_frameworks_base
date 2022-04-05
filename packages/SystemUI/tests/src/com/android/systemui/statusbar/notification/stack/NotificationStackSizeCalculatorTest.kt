@@ -22,8 +22,6 @@ import android.view.View.VISIBLE
 import androidx.test.filters.SmallTest
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.statusbar.StatusBarState.KEYGUARD
-import com.android.systemui.statusbar.StatusBarState.SHADE
 import com.android.systemui.statusbar.SysuiStatusBarStateController
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
@@ -142,11 +140,13 @@ class NotificationStackSizeCalculatorTest : SysuiTestCase() {
     }
 
     @Test
-    fun computeHeight_returnsLessThanAvailableSpaceUsedToCalculateMaxNotifications() {
+    fun computeHeight_returnsAtMostSpaceAvailable_withGapBeforeShelf() {
         val rowHeight = ROW_HEIGHT
         val shelfHeight = SHELF_HEIGHT
         val totalSpaceForEachRow = GAP_HEIGHT + rowHeight + NOTIFICATION_PADDING
         val availableSpace = totalSpaceForEachRow * 2
+
+        // All rows in separate sections (default setup).
         val rows =
             listOf(
                 createMockRow(rowHeight),
@@ -155,6 +155,28 @@ class NotificationStackSizeCalculatorTest : SysuiTestCase() {
 
         val maxNotifications = computeMaxKeyguardNotifications(rows, availableSpace, shelfHeight)
         assertThat(maxNotifications).isEqualTo(2)
+
+        val height = sizeCalculator.computeHeight(stackLayout, maxNotifications, SHELF_HEIGHT)
+        assertThat(height).isAtMost(availableSpace + GAP_HEIGHT + SHELF_HEIGHT)
+    }
+
+    @Test
+    fun computeHeight_returnsAtMostSpaceAvailable_noGapBeforeShelf() {
+        val rowHeight = ROW_HEIGHT
+        val shelfHeight = SHELF_HEIGHT
+        val totalSpaceForEachRow = GAP_HEIGHT + rowHeight + NOTIFICATION_PADDING
+        val availableSpace = totalSpaceForEachRow * 1
+
+        // Both rows are in the same section.
+        whenever(stackLayout.calculateGapHeight(nullable(), nullable(), any()))
+                .thenReturn(0f)
+        val rows =
+                listOf(
+                        createMockRow(rowHeight),
+                        createMockRow(rowHeight))
+
+        val maxNotifications = computeMaxKeyguardNotifications(rows, availableSpace, shelfHeight)
+        assertThat(maxNotifications).isEqualTo(1)
 
         val height = sizeCalculator.computeHeight(stackLayout, maxNotifications, SHELF_HEIGHT)
         assertThat(height).isAtMost(availableSpace + SHELF_HEIGHT)
