@@ -19,6 +19,7 @@ package android.app.admin;
 import static com.android.internal.util.function.pooled.PooledLambda.obtainMessage;
 
 import android.Manifest.permission;
+import android.accounts.Account;
 import android.annotation.CallbackExecutor;
 import android.annotation.ColorInt;
 import android.annotation.IntDef;
@@ -149,6 +150,26 @@ public class DevicePolicyManager {
     /** @hide */
     public DevicePolicyManager(Context context, IDevicePolicyManager service) {
         this(context, service, false);
+    }
+
+    /**
+     * Called when a managed profile has been provisioned.
+     *
+     * @throws SecurityException if the caller does not hold
+     * {@link android.Manifest.permission#MANAGE_PROFILE_AND_DEVICE_OWNERS}.
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS)
+    public void finalizeWorkProfileProvisioning(
+            @NonNull UserHandle managedProfileUser, @Nullable Account migratedAccount) {
+        if (mService == null) {
+            throw new IllegalStateException("Could not find DevicePolicyManagerService");
+        }
+        try {
+            mService.finalizeWorkProfileProvisioning(managedProfileUser, migratedAccount);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 
     /** @hide */
