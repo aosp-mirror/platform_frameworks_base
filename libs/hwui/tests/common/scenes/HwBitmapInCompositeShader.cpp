@@ -17,6 +17,7 @@
 #include "TestSceneBase.h"
 #include "utils/Color.h"
 
+#include <SkColorSpace.h>
 #include <SkGradientShader.h>
 #include <SkImagePriv.h>
 #include <ui/PixelFormat.h>

@@ -310,6 +310,11 @@ public class NotificationStackScrollLayoutController {
                 }
 
                 @Override
+                public void onUpcomingStateChanged(int newState) {
+                    mView.setUpcomingStatusBarState(newState);
+                }
+
+                @Override
                 public void onStatePostChange() {
                     mView.updateSensitiveness(mStatusBarStateController.goingToFullShade(),
                             mLockscreenUserManager.isAnyProfilePublicMode());

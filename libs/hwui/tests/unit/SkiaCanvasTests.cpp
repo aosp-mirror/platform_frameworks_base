@@ -18,6 +18,7 @@
 
 #include <hwui/Paint.h>
 #include <SkCanvasStateUtils.h>
+#include <SkColorSpace.h>
 #include <SkPicture.h>
 #include <SkPictureRecorder.h>
 #include <gtest/gtest.h>

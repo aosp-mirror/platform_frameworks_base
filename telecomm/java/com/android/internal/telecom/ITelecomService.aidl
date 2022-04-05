@@ -22,6 +22,7 @@ import android.telecom.TelecomAnalytics;
 import android.telecom.PhoneAccountHandle;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.UserHandle;
 import android.telecom.PhoneAccount;
 
 /**
@@ -378,4 +379,10 @@ interface ITelecomService {
      * @see TelecomServiceImpl#setTestCallDiagnosticService
      */
     void setTestCallDiagnosticService(in String packageName);
+
+    /**
+     * @see TelecomServiceImpl#isInSelfManagedCall
+     */
+    boolean isInSelfManagedCall(String packageName, in UserHandle userHandle,
+        String callingPackage);
 }

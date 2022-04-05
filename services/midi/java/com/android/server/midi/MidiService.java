@@ -685,11 +685,13 @@ public class MidiService extends IMidiManager.Stub {
 
     private boolean hasNonMidiUuids(BluetoothDevice btDevice) {
         ParcelUuid[] uuidParcels = btDevice.getUuids();
-        // The assumption is that these services are indicative of devices that
-        // ARE NOT MIDI devices.
-        for (ParcelUuid parcel : uuidParcels) {
-            if (mNonMidiUUIDs.contains(parcel)) {
-                return true;
+        if (uuidParcels != null) {
+            // The assumption is that these services are indicative of devices that
+            // ARE NOT MIDI devices.
+            for (ParcelUuid parcel : uuidParcels) {
+                if (mNonMidiUUIDs.contains(parcel)) {
+                    return true;
+                }
             }
         }
         return false;
