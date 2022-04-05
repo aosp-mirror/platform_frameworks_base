@@ -660,38 +660,43 @@ public class MediaControlPanel {
             final ImageButton button, MediaAction mediaAction, ConstraintSet collapsedSet,
             ConstraintSet expandedSet, boolean showInCompact) {
 
-        animHandler.unregisterAll();
         if (mediaAction != null) {
-            final Drawable icon = mediaAction.getIcon();
-            button.setImageDrawable(icon);
-            button.setContentDescription(mediaAction.getContentDescription());
-            final Drawable bgDrawable = mediaAction.getBackground();
-            button.setBackground(bgDrawable);
+            if (animHandler.updateRebindId(mediaAction.getRebindId())) {
+                animHandler.unregisterAll();
 
-            animHandler.tryRegister(icon);
-            animHandler.tryRegister(bgDrawable);
+                final Drawable icon = mediaAction.getIcon();
+                button.setImageDrawable(icon);
+                button.setContentDescription(mediaAction.getContentDescription());
+                final Drawable bgDrawable = mediaAction.getBackground();
+                button.setBackground(bgDrawable);
 
-            Runnable action = mediaAction.getAction();
-            if (action == null) {
-                button.setEnabled(false);
-            } else {
-                button.setEnabled(true);
-                button.setOnClickListener(v -> {
-                    if (!mFalsingManager.isFalseTap(FalsingManager.LOW_PENALTY)) {
-                        mLogger.logTapAction(button.getId(), mUid, mPackageName, mInstanceId);
-                        logSmartspaceCardReported(SMARTSPACE_CARD_CLICK_EVENT);
-                        action.run();
+                animHandler.tryRegister(icon);
+                animHandler.tryRegister(bgDrawable);
 
-                        if (icon instanceof Animatable) {
-                            ((Animatable) icon).start();
+                Runnable action = mediaAction.getAction();
+                if (action == null) {
+                    button.setEnabled(false);
+                } else {
+                    button.setEnabled(true);
+                    button.setOnClickListener(v -> {
+                        if (!mFalsingManager.isFalseTap(FalsingManager.LOW_PENALTY)) {
+                            mLogger.logTapAction(button.getId(), mUid, mPackageName, mInstanceId);
+                            mLogger.logTapAction(button.getId(), mUid, mPackageName, mInstanceId);
+                            logSmartspaceCardReported(SMARTSPACE_CARD_CLICK_EVENT);
+                            action.run();
+
+                            if (icon instanceof Animatable) {
+                                ((Animatable) icon).start();
+                            }
+                            if (bgDrawable instanceof Animatable) {
+                                ((Animatable) bgDrawable).start();
+                            }
                         }
-                        if (bgDrawable instanceof Animatable) {
-                            ((Animatable) bgDrawable).start();
-                        }
-                    }
-                });
+                    });
+                }
             }
         } else {
+            animHandler.unregisterAll();
             button.setImageDrawable(null);
             button.setContentDescription(null);
             button.setEnabled(false);
@@ -702,9 +707,29 @@ public class MediaControlPanel {
         setVisibleAndAlpha(expandedSet, button.getId(), mediaAction != null);
     }
 
+    // AnimationBindHandler is responsible for tracking the bound animation state and preventing
+    // jank and conflicts due to media notifications arriving at any time during an animation. It
+    // does this in two parts.
+    //  - Exit animations fired as a result of user input are tracked. When these are running, any
+    //      bind actions are delayed until the animation completes (and then fired in sequence).
+    //  - Continuous animations are tracked using their rebind id. Later calls using the same
+    //      rebind id will be totally ignored to prevent the continuous animation from restarting.
     private static class AnimationBindHandler extends Animatable2.AnimationCallback {
         private ArrayList<Runnable> mOnAnimationsComplete = new ArrayList<>();
         private ArrayList<Animatable2> mRegistrations = new ArrayList<>();
+        private Integer mRebindId = null;
+
+        // This check prevents rebinding to the action button if the identifier has not changed. A
+        // null value is always considered to be changed. This is used to prevent the connecting
+        // animation from rebinding (and restarting) if multiple buffer PlaybackStates are pushed by
+        // an application in a row.
+        public boolean updateRebindId(Integer rebindId) {
+            if (mRebindId == null || rebindId == null || !mRebindId.equals(rebindId)) {
+                mRebindId = rebindId;
+                return true;
+            }
+            return false;
+        }
 
         public void tryRegister(Drawable drawable) {
             if (drawable instanceof Animatable2) {

@@ -2199,6 +2199,8 @@
     <string name="controls_media_button_prev">Previous track</string>
     <!-- Description for button in media controls. Pressing button goes to next track [CHAR_LIMIT=NONE] -->
     <string name="controls_media_button_next">Next track</string>
+    <!-- Description for button in media controls. Used when media is connecting to a remote device (via something like chromecast). Pressing button does nothing [CHAR_LIMIT=NONE] -->
+    <string name="controls_media_button_connecting">Connecting</string>
 
     <!-- Title for Smartspace recommendation card within media controls. The "Play" means the action to play a media [CHAR_LIMIT=10] -->
     <string name="controls_media_smartspace_rec_title">Play</string>
