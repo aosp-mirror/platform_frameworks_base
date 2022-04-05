@@ -1,0 +1,591 @@
+// Copyright (C) 2016 The Android Open Source Project
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+// Build the master framework library.
+
+// READ ME: ########################################################
+//
+// When updating this list of aidl files, consider if that aidl is
+// part of the SDK API.  If it is, also add it to the list in Android.mk
+// that is preprocessed and distributed with the SDK.  This list should
+// not contain any aidl files for parcelables, but the one below should
+// if you intend for 3rd parties to be able to send those objects
+// across process boundaries.
+//
+// READ ME: ########################################################
+
+package {
+    default_applicable_licenses: ["frameworks_base_license"],
+}
+
+// Added automatically by a large-scale-change that took the approach of
+// 'apply every license found to every target'. While this makes sure we respect
+// every license restriction, it may not be entirely correct.
+//
+// e.g. GPL in an MIT project might only apply to the contrib/ directory.
+//
+// Please consider splitting the single license below into multiple licenses,
+// taking care not to lose any license_kind information, and overriding the
+// default license using the 'licenses: [...]' property on targets as needed.
+//
+// For unused files, consider creating a 'fileGroup' with "//visibility:private"
+// to attach the license to, and including a comment whether the files may be
+// used in the current project.
+// See: http://go/android-license-faq
+license {
+    name: "frameworks_base_license",
+    visibility: [":__subpackages__"],
+    license_kinds: [
+        "SPDX-license-identifier-Apache-2.0",
+        "SPDX-license-identifier-BSD",
+        "SPDX-license-identifier-CC-BY",
+        "SPDX-license-identifier-CPL-1.0",
+        "SPDX-license-identifier-GPL",
+        "SPDX-license-identifier-GPL-2.0",
+        "SPDX-license-identifier-MIT",
+        "SPDX-license-identifier-Unicode-DFS",
+        "SPDX-license-identifier-W3C",
+        "legacy_unencumbered",
+    ],
+    license_text: [
+        "NOTICE",
+    ],
+}
+
+filegroup {
+    name: "framework-non-updatable-sources",
+    srcs: [
+        // Java/AIDL sources under frameworks/base
+        ":framework-annotations",
+        ":framework-blobstore-sources",
+        ":framework-core-sources",
+        ":framework-drm-sources",
+        ":framework-graphics-nonupdatable-sources",
+        ":framework-jobscheduler-sources", // jobscheduler is not a module for R
+        ":framework-keystore-sources",
+        ":framework-identity-sources",
+        ":framework-location-sources",
+        ":framework-lowpan-sources",
+        ":framework-mca-effect-sources",
+        ":framework-mca-filterfw-sources",
+        ":framework-mca-filterpacks-sources",
+        ":framework-media-sources",
+        ":framework-mms-sources",
+        ":framework-opengl-sources",
+        ":framework-rs-sources",
+        ":framework-sax-sources",
+        ":framework-telecomm-sources",
+        ":framework-telephony-common-sources",
+        ":framework-telephony-sources",
+        ":framework-vcn-util-sources",
+        ":framework-wifi-annotations",
+        ":framework-wifi-non-updatable-sources",
+        ":PacProcessor-aidl-sources",
+        ":ProxyHandler-aidl-sources",
+        ":net-utils-framework-common-srcs",
+
+        // AIDL from frameworks/base/native/
+        ":platform-compat-native-aidl",
+
+        // AIDL sources from external directories
+        ":android.hardware.security.keymint-V1-java-source",
+        ":android.hardware.security.secureclock-V1-java-source",
+        ":android.security.apc-java-source",
+        ":android.security.authorization-java-source",
+        ":android.security.legacykeystore-java-source",
+        ":android.security.maintenance-java-source",
+        ":android.security.metrics-java-source",
+        ":android.system.keystore2-V1-java-source",
+        ":credstore_aidl",
+        ":dumpstate_aidl",
+        ":framework_native_aidl",
+        ":gatekeeper_aidl",
+        ":gsiservice_aidl",
+        ":idmap2_aidl",
+        ":idmap2_core_aidl",
+        ":incidentcompanion_aidl",
+        ":inputconstants_aidl",
+        ":installd_aidl",
+        ":libaudioclient_aidl",
+        ":libbinder_aidl",
+        ":libbluetooth-binder-aidl",
+        ":libcamera_client_aidl",
+        ":libcamera_client_framework_aidl",
+        ":libupdate_engine_aidl",
+        ":resourcemanager_aidl",
+        ":storaged_aidl",
+        ":vold_aidl",
+        ":deviceproductinfoconstants_aidl",
+
+        // For the generated R.java and Manifest.java
+        ":framework-res{.aapt.srcjar}",
+
+        // etc.
+        ":framework-javastream-protos",
+        ":statslog-framework-java-gen", // FrameworkStatsLog.java
+        ":audio_policy_configuration_V7_0",
+    ],
+}
+
+java_library {
+    name: "framework-updatable-stubs-module_libs_api",
+    static_libs: [
+        "android.net.ipsec.ike.stubs.module_lib",
+        "framework-appsearch.stubs.module_lib",
+        "framework-connectivity.stubs.module_lib",
+        "framework-graphics.stubs.module_lib",
+        "framework-media.stubs.module_lib",
+        "framework-mediaprovider.stubs.module_lib",
+        "framework-permission.stubs.module_lib",
+        "framework-permission-s.stubs.module_lib",
+        "framework-scheduling.stubs.module_lib",
+        "framework-sdkextensions.stubs.module_lib",
+        "framework-statsd.stubs.module_lib",
+        "framework-tethering.stubs.module_lib",
+        "framework-wifi.stubs.module_lib",
+    ],
+    sdk_version: "module_current",
+    visibility: ["//visibility:private"],
+}
+
+java_library {
+    name: "framework-all",
+    installable: false,
+    static_libs: [
+        "android.net.ipsec.ike.impl",
+        "framework-minus-apex",
+        "framework-appsearch.impl",
+        "framework-connectivity.impl",
+        "framework-graphics.impl",
+        "framework-mediaprovider.impl",
+        "framework-permission.impl",
+        "framework-permission-s.impl",
+        "framework-scheduling.impl",
+        "framework-sdkextensions.impl",
+        "framework-statsd.impl",
+        "framework-tethering.impl",
+        "framework-wifi.impl",
+        "updatable-media",
+    ],
+    apex_available: ["//apex_available:platform"],
+    sdk_version: "core_platform",
+    visibility: [
+        // DO NOT ADD ANY MORE ENTRIES TO THIS LIST
+        "//external/robolectric-shadows:__subpackages__",
+        "//frameworks/layoutlib:__subpackages__",
+    ],
+}
+
+// AIDL files under these paths are mixture of public and private ones.
+// They shouldn't be exported across module boundaries.
+java_defaults {
+    name: "framework-aidl-export-defaults",
+    aidl: {
+        export_include_dirs: [
+            "core/java",
+            "drm/java",
+            "graphics/java",
+            "identity/java",
+            "keystore/java",
+            "location/java",
+            "lowpan/java",
+            "media/java",
+            "media/mca/effect/java",
+            "media/mca/filterfw/java",
+            "media/mca/filterpacks/java",
+            "mms/java",
+            "opengl/java",
+            "rs/java",
+            "sax/java",
+            "telecomm/java",
+
+            "apex/media/aidl/stable",
+            // TODO(b/147699819): remove this
+            "telephony/java",
+        ],
+    },
+}
+
+// Collection of classes that are generated from non-Java files that are not listed in
+// framework_srcs. These have no or very limited dependency to the framework.
+java_library {
+    name: "framework-internal-utils",
+    static_libs: [
+        "apex_aidl_interface-java",
+        "packagemanager_aidl-java",
+        "framework-protos",
+        "updatable-driver-protos",
+        "ota_metadata_proto_java",
+        "android.hidl.base-V1.0-java",
+        "android.hardware.cas-V1.0-java",
+        "android.hardware.cas-V1.1-java",
+        "android.hardware.cas-V1.2-java",
+        "android.hardware.contexthub-V1.0-java",
+        "android.hardware.contexthub-V1.1-java",
+        "android.hardware.contexthub-V1.2-java",
+        "android.hardware.gnss-V1.0-java",
+        "android.hardware.gnss-V2.1-java",
+        "android.hardware.health-V1.0-java-constants",
+        "android.hardware.radio-V1.0-java",
+        "android.hardware.radio-V1.1-java",
+        "android.hardware.radio-V1.2-java",
+        "android.hardware.radio-V1.3-java",
+        "android.hardware.radio-V1.4-java",
+        "android.hardware.radio-V1.5-java",
+        "android.hardware.radio-V1.6-java",
+        "android.hardware.radio.data-V1-java",
+        "android.hardware.radio.messaging-V1-java",
+        "android.hardware.radio.modem-V1-java",
+        "android.hardware.radio.network-V1-java",
+        "android.hardware.radio.sim-V1-java",
+        "android.hardware.radio.voice-V1-java",
+        "android.hardware.thermal-V1.0-java-constants",
+        "android.hardware.thermal-V1.0-java",
+        "android.hardware.thermal-V1.1-java",
+        "android.hardware.thermal-V2.0-java",
+        "android.hardware.tv.input-V1.0-java-constants",
+        "android.hardware.tv.tuner-V1.0-java-constants",
+        "android.hardware.tv.tuner-V1.1-java-constants",
+        "android.hardware.usb-V1.0-java-constants",
+        "android.hardware.usb-V1.1-java-constants",
+        "android.hardware.usb-V1.2-java-constants",
+        "android.hardware.usb.gadget-V1.0-java",
+        "android.hardware.usb.gadget-V1.1-java",
+        "android.hardware.usb.gadget-V1.2-java",
+        "android.hardware.vibrator-V1.0-java",
+        "android.hardware.vibrator-V1.1-java",
+        "android.hardware.vibrator-V1.2-java",
+        "android.hardware.vibrator-V1.3-java",
+        "android.hardware.vibrator-V2-java",
+        "android.system.suspend.control.internal-java",
+        "devicepolicyprotosnano",
+
+        "com.android.sysprop.apex",
+        "com.android.sysprop.init",
+        "com.android.sysprop.localization",
+        "PlatformProperties",
+    ],
+    sdk_version: "core_platform",
+    installable: false,
+}
+
+// NOTE: This filegroup is exposed for vendor libraries to depend on and is referenced in
+// documentation. Do not remove without consulting the treble/hidl teams.
+filegroup {
+    name: "framework-jarjar-rules",
+    srcs: ["framework-jarjar-rules.txt"],
+    visibility: ["//visibility:public"],
+}
+
+java_defaults {
+    name: "framework-minus-apex-defaults",
+    defaults: ["framework-aidl-export-defaults"],
+    srcs: [
+        ":framework-non-updatable-sources",
+        "core/java/**/*.logtags",
+    ],
+    aidl: {
+        generate_get_transaction_name: true,
+        local_include_dirs: [
+            "media/aidl",
+        ],
+        include_dirs: [
+            "frameworks/av/aidl",
+            "frameworks/native/libs/permission/aidl",
+            "packages/modules/Connectivity/framework/aidl-export",
+        ],
+    },
+    dxflags: [
+        "--core-library",
+        "--multi-dex",
+    ],
+    jarjar_rules: ":framework-jarjar-rules",
+    javac_shard_size: 150,
+    plugins: [
+        "view-inspector-annotation-processor",
+        "staledataclass-annotation-processor",
+        "error_prone_android_framework",
+    ],
+    required: [
+        "framework-platform-compat-config",
+        // TODO: remove gps_debug and protolog.conf.json when the build system propagates "required" properly.
+        "gps_debug.conf",
+        "icu4j-platform-compat-config",
+        "protolog.conf.json.gz",
+        "services-platform-compat-config",
+        "TeleService-platform-compat-config",
+        "documents-ui-compat-config",
+        "calendar-provider-compat-config",
+    ],
+    libs: [
+        "app-compat-annotations",
+        "ext",
+        "framework-updatable-stubs-module_libs_api",
+        "unsupportedappusage",
+    ],
+    sdk_version: "core_platform",
+    static_libs: [
+        "bouncycastle-repackaged-unbundled",
+        "framework-internal-utils",
+        // If MimeMap ever becomes its own APEX, then this dependency would need to be removed
+        // in favor of an API stubs dependency in java_library "framework" below.
+        "mimemap",
+        "av-types-aidl-java",
+        "tv_tuner_resource_manager_aidl_interface-java",
+        "soundtrigger_middleware-aidl-java",
+        "modules-utils-preconditions",
+        "modules-utils-os",
+        "framework-permission-aidl-java",
+    ],
+}
+
+java_library {
+    name: "framework-minus-apex",
+    defaults: ["framework-minus-apex-defaults"],
+    installable: true,
+    // For backwards compatibility.
+    stem: "framework",
+    apex_available: ["//apex_available:platform"],
+    visibility: [
+        "//frameworks/base",
+        // TODO(b/147128803) remove the below lines
+        "//frameworks/base/apex/appsearch/framework",
+        "//frameworks/base/apex/blobstore/framework",
+        "//frameworks/base/apex/jobscheduler/framework",
+        "//frameworks/base/packages/Tethering/tests/unit",
+        "//packages/modules/Connectivity/Tethering/tests/unit",
+    ],
+    errorprone: {
+        javacflags: [
+            "-Xep:AndroidFrameworkBinderIdentity:ERROR",
+            "-Xep:AndroidFrameworkCompatChange:ERROR",
+            "-Xep:AndroidFrameworkUid:ERROR",
+        ],
+    },
+}
+
+java_library {
+    name: "framework-minus-apex-intdefs",
+    defaults: ["framework-minus-apex-defaults"],
+    plugins: ["intdef-annotation-processor"],
+}
+
+// This "framework" module is NOT installed to the device. It's
+// "framework-minus-apex" that gets installed to the device. Note that
+// the filename is still framework.jar (via the stem property) for
+// compatibility reason. The purpose of this module is to provide
+// framework APIs (both public and private) for bundled apps.
+// "framework-minus-apex" can't be used for the purpose because 1)
+// many apps have already hardcoded the name "framework" and
+// 2) it lacks API symbols from updatable modules - as it's clear from
+// its suffix "-minus-apex".
+java_library {
+    name: "framework",
+    defaults: ["framework-aidl-export-defaults"],
+    installable: false, // this lib is a build-only library
+    static_libs: [
+        "app-compat-annotations",
+        "framework-minus-apex",
+        "framework-appsearch.impl", // TODO(b/146218515): should be removed
+        "framework-updatable-stubs-module_libs_api",
+    ],
+    sdk_version: "core_platform",
+    apex_available: ["//apex_available:platform"],
+}
+
+platform_compat_config {
+    name: "framework-platform-compat-config",
+    src: ":framework-minus-apex",
+}
+
+filegroup {
+    name: "framework-ike-shared-srcs",
+    visibility: ["//packages/modules/IPsec"],
+    srcs: [
+        "core/java/android/net/annotations/PolicyDirection.java",
+        "core/java/com/android/internal/util/HexDump.java",
+        "core/java/com/android/internal/util/WakeupMessage.java",
+        "services/core/java/com/android/server/vcn/util/PersistableBundleUtils.java",
+        "telephony/java/android/telephony/Annotation.java",
+    ],
+}
+
+filegroup {
+    name: "framework-networkstack-shared-srcs",
+    srcs: [
+        // TODO: remove these annotations as soon as we can use andoid.support.annotations.*
+        ":framework-annotations",
+        ":modules-utils-preconditions-srcs",
+        "core/java/android/net/DhcpResults.java",
+        "core/java/android/util/IndentingPrintWriter.java",
+        "core/java/android/util/LocalLog.java",
+        "core/java/com/android/internal/util/HexDump.java",
+        "core/java/com/android/internal/util/IndentingPrintWriter.java",
+        "core/java/com/android/internal/util/IState.java",
+        "core/java/com/android/internal/util/MessageUtils.java",
+        "core/java/com/android/internal/util/RingBufferIndices.java",
+        "core/java/com/android/internal/util/State.java",
+        "core/java/com/android/internal/util/StateMachine.java",
+        "core/java/com/android/internal/util/WakeupMessage.java",
+        "core/java/com/android/internal/util/TokenBucket.java",
+    ],
+}
+
+// Build ext.jar
+// ============================================================
+java_library {
+    name: "ext",
+    installable: true,
+    sdk_version: "core_platform",
+    static_libs: [
+        "libphonenumber-platform",
+        "tagsoup",
+        "rappor",
+    ],
+    dxflags: ["--core-library"],
+}
+
+// utility classes statically linked into framework-wifi and dynamically linked
+// into wifi-service
+java_library {
+    name: "framework-wifi-util-lib",
+    sdk_version: "module_current",
+    min_sdk_version: "30",
+    srcs: [
+        "core/java/com/android/internal/util/AsyncChannel.java",
+        "core/java/com/android/internal/util/AsyncService.java",
+        "core/java/com/android/internal/util/Protocol.java",
+        "telephony/java/android/telephony/Annotation.java",
+        ":net-utils-framework-wifi-common-srcs",
+    ],
+    libs: [
+        "framework-annotations-lib",
+        "framework-connectivity.stubs.module_lib",
+        "unsupportedappusage",
+    ],
+    visibility: [
+        "//frameworks/base/wifi",
+        "//frameworks/base/services/net",
+        "//packages/modules/Wifi/framework",
+    ],
+}
+
+// TODO(b/145644363): move this to under StubLibraries.bp or ApiDocs.bp
+metalava_framework_docs_args = "--manifest $(location core/res/AndroidManifest.xml) " +
+    "--hide-package com.android.server " +
+    "--hide-package android.audio.policy.configuration.V7_0 " +
+    "--error UnhiddenSystemApi " +
+    "--hide RequiresPermission " +
+    "--hide CallbackInterface " +
+    "--hide MissingPermission --hide BroadcastBehavior " +
+    "--hide HiddenSuperclass --hide DeprecationMismatch --hide UnavailableSymbol " +
+    "--hide SdkConstant --hide HiddenTypeParameter --hide Todo --hide Typo " +
+    "--error NoSettingsProvider " +
+    "--force-convert-to-warning-nullability-annotations +*:-android.*:+android.icu.*:-dalvik.* " +
+    "--api-lint-ignore-prefix android.icu. " +
+    "--api-lint-ignore-prefix java. " +
+    "--api-lint-ignore-prefix junit. " +
+    "--api-lint-ignore-prefix org. "
+
+packages_to_document = [
+    "android",
+    "dalvik",
+    "java",
+    "javax",
+    "junit",
+    "org.apache.http",
+    "org.json",
+    "org.w3c.dom",
+    "org.xml.sax",
+    "org.xmlpull",
+]
+
+filegroup {
+    name: "android-non-updatable-stub-sources",
+    srcs: [
+        ":framework-mime-sources", // mimemap builds separately but has no separate droidstubs.
+        ":framework-non-updatable-sources",
+        ":opt-telephony-srcs",
+        ":opt-net-voip-srcs",
+        "core/java/**/*.logtags",
+        "**/package.html",
+    ],
+    visibility: ["//visibility:private"],
+}
+
+// These defaults are used for both the jar stubs and the doc stubs.
+stubs_defaults {
+    name: "android-non-updatable-stubs-defaults",
+    srcs: [":android-non-updatable-stub-sources"],
+    sdk_version: "none",
+    system_modules: "none",
+    java_version: "1.8",
+    arg_files: ["core/res/AndroidManifest.xml"],
+    // TODO(b/147699819): remove below aidl includes.
+    aidl: {
+        local_include_dirs: [
+            "apex/media/aidl/stable",
+            "media/aidl",
+            "telephony/java",
+        ],
+        include_dirs: [
+            "frameworks/av/aidl",
+            "frameworks/native/libs/permission/aidl",
+            "packages/modules/Connectivity/framework/aidl-export",
+        ],
+    },
+    // These are libs from framework-internal-utils that are required (i.e. being referenced)
+    // from framework-non-updatable-sources. Add more here when there's a need.
+    // DO NOT add the entire framework-internal-utils. It might cause unnecessary circular
+    // dependencies gets bigger.
+    libs: [
+        "android.hardware.cas-V1.2-java",
+        "android.hardware.health-V1.0-java-constants",
+        "android.hardware.radio-V1.5-java",
+        "android.hardware.radio-V1.6-java",
+        "android.hardware.thermal-V1.0-java-constants",
+        "android.hardware.thermal-V2.0-java",
+        "android.hardware.tv.input-V1.0-java-constants",
+        "android.hardware.tv.tuner-V1.0-java-constants",
+        "android.hardware.tv.tuner-V1.1-java-constants",
+        "android.hardware.usb-V1.0-java-constants",
+        "android.hardware.usb-V1.1-java-constants",
+        "android.hardware.usb.gadget-V1.0-java",
+        "android.hardware.vibrator-V1.3-java",
+        "framework-protos",
+        "art.module.public.api",
+        // There are a few classes from modules used by the core that
+        // need to be resolved by metalava. We use a prebuilt stub of the
+        // full sdk to ensure we can resolve them. If a new class gets added,
+        // the prebuilts/sdk/current needs to be updated.
+        "sdk_system_current_android",
+        // NOTE: The below can be removed once the prebuilt stub contains IKE.
+        "sdk_system_current_android.net.ipsec.ike",
+    ],
+    filter_packages: packages_to_document,
+    high_mem: true, // Lots of sources => high memory use, see b/170701554
+    installable: false,
+    annotations_enabled: true,
+    previous_api: ":android.api.public.latest",
+    merge_annotations_dirs: ["metalava-manual"],
+    defaults_visibility: ["//visibility:private"],
+    visibility: ["//frameworks/base/api"],
+}
+
+build = [
+    "StubLibraries.bp",
+    "ApiDocs.bp",
+    "ProtoLibraries.bp",
+    "TestProtoLibraries.bp",
+]

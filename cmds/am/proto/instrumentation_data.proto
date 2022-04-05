@@ -1,0 +1,68 @@
+/*
+ * Copyright (C) 2016 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+syntax = "proto2";
+package android.am;
+
+option java_package = "com.android.commands.am";
+
+message ResultsBundleEntry {
+    optional string key = 1;
+
+    optional string value_string = 2;
+    optional sint32 value_int = 3;
+    optional float value_float = 4;
+    optional double value_double = 5;
+    optional sint64 value_long = 6;
+    optional ResultsBundle value_bundle = 7;
+    optional bytes value_bytes = 8;
+}
+
+message ResultsBundle {
+    repeated ResultsBundleEntry entries = 1;
+}
+
+message TestStatus {
+    optional sint32 result_code = 3;
+    optional ResultsBundle results = 4;
+    optional string logcat = 5;
+}
+
+enum SessionStatusCode {
+    /**
+     * The command ran successfully. This does not imply that the tests passed.
+     */
+    SESSION_FINISHED = 0;
+
+    /**
+     * There was an unrecoverable error running the tests.
+     */
+    SESSION_ABORTED = 1;
+}
+
+message SessionStatus {
+    optional SessionStatusCode status_code = 1;
+    optional string error_text = 2;
+    optional sint32 result_code = 3;
+    optional ResultsBundle results = 4;
+}
+
+message Session {
+    repeated TestStatus test_status = 1;
+    optional SessionStatus session_status = 2;
+}
+
+

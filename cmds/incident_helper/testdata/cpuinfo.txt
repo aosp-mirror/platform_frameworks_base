@@ -1,0 +1,15 @@
+Threads: 2038 total,   1 running,2033 sleeping,   0 stopped,   0 zombie
+
+  Mem:   3842668k total,  3761936k used,    80732k free,   220188k buffers
+
+ Swap:   524284k total,    25892k used,   498392k free,  1316952k cached
+
+400%cpu  17%user   0%nice  43%sys 338%idle   0%iow   0%irq   1%sirq   0%host
+
+  PID   TID USER         PR  NI[%CPU]S VIRT  RES PCY CMD             NAME               
+
+
+29438 29438 rootabcdefghij 20 0 57.9 R  14M 3.8M     top test        top
+  916   916 system       18  -2  1.4 S 4.6G 404M  fg system_server   system_server
+   28    28 root         -2   0  1.4 S    0    0  bg rcuc/3          [rcuc/3]
+   27    27 root         RT   0  1.4 S    0    0  ta migration/3     [migration/3]

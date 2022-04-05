@@ -1,0 +1,5 @@
+set noparent
+
+include platform/frameworks/base:/services/core/java/com/android/server/net/OWNERS
+
+per-file SSL*, Uri*, Url* = prb@google.com, dauletz@google.com, narayan@google.com, ngeoffray@google.com

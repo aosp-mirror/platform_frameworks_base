@@ -1,0 +1,223 @@
+// Signature format: 2.0
+package com.android.uiautomator.core {
+
+  @Deprecated public final class Configurator {
+    method @Deprecated public long getActionAcknowledgmentTimeout();
+    method @Deprecated public static com.android.uiautomator.core.Configurator getInstance();
+    method @Deprecated public long getKeyInjectionDelay();
+    method @Deprecated public long getScrollAcknowledgmentTimeout();
+    method @Deprecated public long getWaitForIdleTimeout();
+    method @Deprecated public long getWaitForSelectorTimeout();
+    method @Deprecated public com.android.uiautomator.core.Configurator setActionAcknowledgmentTimeout(long);
+    method @Deprecated public com.android.uiautomator.core.Configurator setKeyInjectionDelay(long);
+    method @Deprecated public com.android.uiautomator.core.Configurator setScrollAcknowledgmentTimeout(long);
+    method @Deprecated public com.android.uiautomator.core.Configurator setWaitForIdleTimeout(long);
+    method @Deprecated public com.android.uiautomator.core.Configurator setWaitForSelectorTimeout(long);
+  }
+
+  @Deprecated public class UiCollection extends com.android.uiautomator.core.UiObject {
+    ctor @Deprecated public UiCollection(com.android.uiautomator.core.UiSelector);
+    method @Deprecated public com.android.uiautomator.core.UiObject getChildByDescription(com.android.uiautomator.core.UiSelector, String) throws com.android.uiautomator.core.UiObjectNotFoundException;
+    method @Deprecated public com.android.uiautomator.core.UiObject getChildByInstance(com.android.uiautomator.core.UiSelector, int) throws com.android.uiautomator.core.UiObjectNotFoundException;
+    method @Deprecated public com.android.uiautomator.core.UiObject getChildByText(com.android.uiautomator.core.UiSelector, String) throws com.android.uiautomator.core.UiObjectNotFoundException;
+    method @Deprecated public int getChildCount(com.android.uiautomator.core.UiSelector);
+  }
+
+  @Deprecated public class UiDevice {
+    method @Deprecated public void clearLastTraversedText();
+    method @Deprecated public boolean click(int, int);
+    method @Deprecated public boolean drag(int, int, int, int, int);
+    method @Deprecated public void dumpWindowHierarchy(String);
+    method @Deprecated public void freezeRotation() throws android.os.RemoteException;
+    method @Deprecated public String getCurrentActivityName();
+    method @Deprecated public String getCurrentPackageName();
+    method @Deprecated public int getDisplayHeight();
+    method @Deprecated public int getDisplayRotation();
+    method @Deprecated public android.graphics.Point getDisplaySizeDp();
+    method @Deprecated public int getDisplayWidth();
+    method @Deprecated public static com.android.uiautomator.core.UiDevice getInstance();
+    method @Deprecated public String getLastTraversedText();
+    method @Deprecated public String getProductName();
+    method @Deprecated public boolean hasAnyWatcherTriggered();
+    method @Deprecated public boolean hasWatcherTriggered(String);
+    method @Deprecated public boolean isNaturalOrientation();
+    method @Deprecated public boolean isScreenOn() throws android.os.RemoteException;
+    method @Deprecated public boolean openNotification();
+    method @Deprecated public boolean openQuickSettings();
+    method @Deprecated public boolean pressBack();
+    method @Deprecated public boolean pressDPadCenter();
+    method @Deprecated public boolean pressDPadDown();
+    method @Deprecated public boolean pressDPadLeft();
+    method @Deprecated public boolean pressDPadRight();
+    method @Deprecated public boolean pressDPadUp();
+    method @Deprecated public boolean pressDelete();
+    method @Deprecated public boolean pressEnter();
+    method @Deprecated public boolean pressHome();
+    method @Deprecated public boolean pressKeyCode(int);
+    method @Deprecated public boolean pressKeyCode(int, int);
+    method @Deprecated public boolean pressMenu();
+    method @Deprecated public boolean pressRecentApps() throws android.os.RemoteException;
+    method @Deprecated public boolean pressSearch();
+    method @Deprecated public void registerWatcher(String, com.android.uiautomator.core.UiWatcher);
+    method @Deprecated public void removeWatcher(String);
+    method @Deprecated public void resetWatcherTriggers();
+    method @Deprecated public void runWatchers();
+    method @Deprecated public void setCompressedLayoutHeirarchy(boolean);
+    method @Deprecated public void setOrientationLeft() throws android.os.RemoteException;
+    method @Deprecated public void setOrientationNatural() throws android.os.RemoteException;
+    method @Deprecated public void setOrientationRight() throws android.os.RemoteException;
+    method @Deprecated public void sleep() throws android.os.RemoteException;
+    method @Deprecated public boolean swipe(int, int, int, int, int);
+    method @Deprecated public boolean swipe(android.graphics.Point[], int);
+    method @Deprecated public boolean takeScreenshot(java.io.File);
+    method @Deprecated public boolean takeScreenshot(java.io.File, float, int);
+    method @Deprecated public void unfreezeRotation() throws android.os.RemoteException;
+    method @Deprecated public void waitForIdle();
+    method @Deprecated public void waitForIdle(long);
+    method @Deprecated public boolean waitForWindowUpdate(String, long);
+    method @Deprecated public void wakeUp() throws android.os.RemoteException;
+  }
+
+  @Deprecated public class UiObject {
+    ctor @Deprecated public UiObject(com.android.uiautomator.core.UiSelector);
+    method @Deprecated public void clearTextField() throws com.android.uiautomator.core.UiObjectNotFoundException;
+    method @Deprecated public boolean click() throws com.android.uiautomator.core.UiObjectNotFoundException;
+    method @Deprecated public boolean clickAndWaitForNewWindow() throws com.android.uiautomator.core.UiObjectNotFoundException;
+    method @Deprecated public boolean clickAndWaitForNewWindow(long) throws com.android.uiautomator.core.UiObjectNotFoundException;
+    method @Deprecated public boolean clickBottomRight() throws com.android.uiautomator.core.UiObjectNotFoundException;
+    method @Deprecated public boolean clickTopLeft() throws com.android.uiautomator.core.UiObjectNotFoundException;
+    method @Deprecated public boolean dragTo(com.android.uiautomator.core.UiObject, int) throws com.android.uiautomator.core.UiObjectNotFoundException;
+    method @Deprecated public boolean dragTo(int, int, int) throws com.android.uiautomator.core.UiObjectNotFoundException;
+    method @Deprecated public boolean exists();
+    method @Deprecated protected android.view.accessibility.AccessibilityNodeInfo findAccessibilityNodeInfo(long);
+    method @Deprecated public android.graphics.Rect getBounds() throws com.android.uiautomator.core.UiObjectNotFoundException;
+    method @Deprecated public com.android.uiautomator.core.UiObject getChild(com.android.uiautomator.core.UiSelector) throws com.android.uiautomator.core.UiObjectNotFoundException;
+    method @Deprecated public int getChildCount() throws com.android.uiautomator.core.UiObjectNotFoundException;
+    method @Deprecated public String getClassName() throws com.android.uiautomator.core.UiObjectNotFoundException;
+    method @Deprecated public String getContentDescription() throws com.android.uiautomator.core.UiObjectNotFoundException;
+    method @Deprecated public com.android.uiautomator.core.UiObject getFromParent(com.android.uiautomator.core.UiSelector) throws com.android.uiautomator.core.UiObjectNotFoundException;
+    method @Deprecated public String getPackageName() throws com.android.uiautomator.core.UiObjectNotFoundException;
+    method @Deprecated public final com.android.uiautomator.core.UiSelector getSelector();
+    method @Deprecated public String getText() throws com.android.uiautomator.core.UiObjectNotFoundException;
+    method @Deprecated public android.graphics.Rect getVisibleBounds() throws com.android.uiautomator.core.UiObjectNotFoundException;
+    method @Deprecated public boolean isCheckable() throws com.android.uiautomator.core.UiObjectNotFoundException;
+    method @Deprecated public boolean isChecked() throws com.android.uiautomator.core.UiObjectNotFoundException;
+    method @Deprecated public boolean isClickable() throws com.android.uiautomator.core.UiObjectNotFoundException;
+    method @Deprecated public boolean isEnabled() throws com.android.uiautomator.core.UiObjectNotFoundException;
+    method @Deprecated public boolean isFocusable() throws com.android.uiautomator.core.UiObjectNotFoundException;
+    method @Deprecated public boolean isFocused() throws com.android.uiautomator.core.UiObjectNotFoundException;
+    method @Deprecated public boolean isLongClickable() throws com.android.uiautomator.core.UiObjectNotFoundException;
+    method @Deprecated public boolean isScrollable() throws com.android.uiautomator.core.UiObjectNotFoundException;
+    method @Deprecated public boolean isSelected() throws com.android.uiautomator.core.UiObjectNotFoundException;
+    method @Deprecated public boolean longClick() throws com.android.uiautomator.core.UiObjectNotFoundException;
+    method @Deprecated public boolean longClickBottomRight() throws com.android.uiautomator.core.UiObjectNotFoundException;
+    method @Deprecated public boolean longClickTopLeft() throws com.android.uiautomator.core.UiObjectNotFoundException;
+    method @Deprecated public boolean performMultiPointerGesture(android.view.MotionEvent.PointerCoords[]...);
+    method @Deprecated public boolean performTwoPointerGesture(android.graphics.Point, android.graphics.Point, android.graphics.Point, android.graphics.Point, int);
+    method @Deprecated public boolean pinchIn(int, int) throws com.android.uiautomator.core.UiObjectNotFoundException;
+    method @Deprecated public boolean pinchOut(int, int) throws com.android.uiautomator.core.UiObjectNotFoundException;
+    method @Deprecated public boolean setText(String) throws com.android.uiautomator.core.UiObjectNotFoundException;
+    method @Deprecated public boolean swipeDown(int) throws com.android.uiautomator.core.UiObjectNotFoundException;
+    method @Deprecated public boolean swipeLeft(int) throws com.android.uiautomator.core.UiObjectNotFoundException;
+    method @Deprecated public boolean swipeRight(int) throws com.android.uiautomator.core.UiObjectNotFoundException;
+    method @Deprecated public boolean swipeUp(int) throws com.android.uiautomator.core.UiObjectNotFoundException;
+    method @Deprecated public boolean waitForExists(long);
+    method @Deprecated public boolean waitUntilGone(long);
+    field @Deprecated protected static final int FINGER_TOUCH_HALF_WIDTH = 20; // 0x14
+    field @Deprecated protected static final int SWIPE_MARGIN_LIMIT = 5; // 0x5
+    field @Deprecated protected static final long WAIT_FOR_EVENT_TMEOUT = 3000L; // 0xbb8L
+    field @Deprecated protected static final long WAIT_FOR_SELECTOR_POLL = 1000L; // 0x3e8L
+    field @Deprecated protected static final long WAIT_FOR_SELECTOR_TIMEOUT = 10000L; // 0x2710L
+    field @Deprecated protected static final long WAIT_FOR_WINDOW_TMEOUT = 5500L; // 0x157cL
+  }
+
+  @Deprecated public class UiObjectNotFoundException extends java.lang.Exception {
+    ctor @Deprecated public UiObjectNotFoundException(String);
+    ctor @Deprecated public UiObjectNotFoundException(String, Throwable);
+    ctor @Deprecated public UiObjectNotFoundException(Throwable);
+  }
+
+  @Deprecated public class UiScrollable extends com.android.uiautomator.core.UiCollection {
+    ctor @Deprecated public UiScrollable(com.android.uiautomator.core.UiSelector);
+    method @Deprecated protected boolean exists(com.android.uiautomator.core.UiSelector);
+    method @Deprecated public boolean flingBackward() throws com.android.uiautomator.core.UiObjectNotFoundException;
+    method @Deprecated public boolean flingForward() throws com.android.uiautomator.core.UiObjectNotFoundException;
+    method @Deprecated public boolean flingToBeginning(int) throws com.android.uiautomator.core.UiObjectNotFoundException;
+    method @Deprecated public boolean flingToEnd(int) throws com.android.uiautomator.core.UiObjectNotFoundException;
+    method @Deprecated public com.android.uiautomator.core.UiObject getChildByDescription(com.android.uiautomator.core.UiSelector, String, boolean) throws com.android.uiautomator.core.UiObjectNotFoundException;
+    method @Deprecated public com.android.uiautomator.core.UiObject getChildByText(com.android.uiautomator.core.UiSelector, String, boolean) throws com.android.uiautomator.core.UiObjectNotFoundException;
+    method @Deprecated public int getMaxSearchSwipes();
+    method @Deprecated public double getSwipeDeadZonePercentage();
+    method @Deprecated public boolean scrollBackward() throws com.android.uiautomator.core.UiObjectNotFoundException;
+    method @Deprecated public boolean scrollBackward(int) throws com.android.uiautomator.core.UiObjectNotFoundException;
+    method @Deprecated public boolean scrollDescriptionIntoView(String) throws com.android.uiautomator.core.UiObjectNotFoundException;
+    method @Deprecated public boolean scrollForward() throws com.android.uiautomator.core.UiObjectNotFoundException;
+    method @Deprecated public boolean scrollForward(int) throws com.android.uiautomator.core.UiObjectNotFoundException;
+    method @Deprecated public boolean scrollIntoView(com.android.uiautomator.core.UiObject) throws com.android.uiautomator.core.UiObjectNotFoundException;
+    method @Deprecated public boolean scrollIntoView(com.android.uiautomator.core.UiSelector) throws com.android.uiautomator.core.UiObjectNotFoundException;
+    method @Deprecated public boolean scrollTextIntoView(String) throws com.android.uiautomator.core.UiObjectNotFoundException;
+    method @Deprecated public boolean scrollToBeginning(int, int) throws com.android.uiautomator.core.UiObjectNotFoundException;
+    method @Deprecated public boolean scrollToBeginning(int) throws com.android.uiautomator.core.UiObjectNotFoundException;
+    method @Deprecated public boolean scrollToEnd(int, int) throws com.android.uiautomator.core.UiObjectNotFoundException;
+    method @Deprecated public boolean scrollToEnd(int) throws com.android.uiautomator.core.UiObjectNotFoundException;
+    method @Deprecated public com.android.uiautomator.core.UiScrollable setAsHorizontalList();
+    method @Deprecated public com.android.uiautomator.core.UiScrollable setAsVerticalList();
+    method @Deprecated public com.android.uiautomator.core.UiScrollable setMaxSearchSwipes(int);
+    method @Deprecated public com.android.uiautomator.core.UiScrollable setSwipeDeadZonePercentage(double);
+  }
+
+  @Deprecated public class UiSelector {
+    ctor @Deprecated public UiSelector();
+    method @Deprecated public com.android.uiautomator.core.UiSelector checkable(boolean);
+    method @Deprecated public com.android.uiautomator.core.UiSelector checked(boolean);
+    method @Deprecated public com.android.uiautomator.core.UiSelector childSelector(com.android.uiautomator.core.UiSelector);
+    method @Deprecated public com.android.uiautomator.core.UiSelector className(String);
+    method @Deprecated public <T> com.android.uiautomator.core.UiSelector className(Class<T>);
+    method @Deprecated public com.android.uiautomator.core.UiSelector classNameMatches(String);
+    method @Deprecated public com.android.uiautomator.core.UiSelector clickable(boolean);
+    method @Deprecated protected com.android.uiautomator.core.UiSelector cloneSelector();
+    method @Deprecated public com.android.uiautomator.core.UiSelector description(String);
+    method @Deprecated public com.android.uiautomator.core.UiSelector descriptionContains(String);
+    method @Deprecated public com.android.uiautomator.core.UiSelector descriptionMatches(String);
+    method @Deprecated public com.android.uiautomator.core.UiSelector descriptionStartsWith(String);
+    method @Deprecated public com.android.uiautomator.core.UiSelector enabled(boolean);
+    method @Deprecated public com.android.uiautomator.core.UiSelector focusable(boolean);
+    method @Deprecated public com.android.uiautomator.core.UiSelector focused(boolean);
+    method @Deprecated public com.android.uiautomator.core.UiSelector fromParent(com.android.uiautomator.core.UiSelector);
+    method @Deprecated public com.android.uiautomator.core.UiSelector index(int);
+    method @Deprecated public com.android.uiautomator.core.UiSelector instance(int);
+    method @Deprecated public com.android.uiautomator.core.UiSelector longClickable(boolean);
+    method @Deprecated public com.android.uiautomator.core.UiSelector packageName(String);
+    method @Deprecated public com.android.uiautomator.core.UiSelector packageNameMatches(String);
+    method @Deprecated public com.android.uiautomator.core.UiSelector resourceId(String);
+    method @Deprecated public com.android.uiautomator.core.UiSelector resourceIdMatches(String);
+    method @Deprecated public com.android.uiautomator.core.UiSelector scrollable(boolean);
+    method @Deprecated public com.android.uiautomator.core.UiSelector selected(boolean);
+    method @Deprecated public com.android.uiautomator.core.UiSelector text(String);
+    method @Deprecated public com.android.uiautomator.core.UiSelector textContains(String);
+    method @Deprecated public com.android.uiautomator.core.UiSelector textMatches(String);
+    method @Deprecated public com.android.uiautomator.core.UiSelector textStartsWith(String);
+  }
+
+  @Deprecated public interface UiWatcher {
+    method @Deprecated public boolean checkForCondition();
+  }
+
+}
+
+package com.android.uiautomator.testrunner {
+
+  @Deprecated public interface IAutomationSupport {
+    method @Deprecated public void sendStatus(int, android.os.Bundle);
+  }
+
+  @Deprecated public class UiAutomatorTestCase extends junit.framework.TestCase {
+    ctor @Deprecated public UiAutomatorTestCase();
+    method @Deprecated public com.android.uiautomator.testrunner.IAutomationSupport getAutomationSupport();
+    method @Deprecated public android.os.Bundle getParams();
+    method @Deprecated public com.android.uiautomator.core.UiDevice getUiDevice();
+    method @Deprecated public void sleep(long);
+  }
+
+}
+

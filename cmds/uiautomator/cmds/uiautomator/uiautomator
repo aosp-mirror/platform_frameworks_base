@@ -1,0 +1,129 @@
+#!/system/bin/sh
+#
+# Copyright (C) 2012 The Android Open Source Project
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+# Script to start "uiautomator" on the device
+#
+# The script does a couple of things:
+# * Use an alternative dalvik cache when running as non-root. Jar file needs
+#   to be dexopt'd to run in Dalvik. For plain jar files, this is done at first
+#   use. shell user does not have write permission to default system Dalvik
+#   cache so we redirect to an alternative cache
+# * special processing for subcommand 'runtest':
+#    * '--nohup' allows process continue to run even if parent process that
+#      started it has already terminated. We parse for this parameter and set
+#      signal trap. This is useful for testing with USB disconnected
+#    * all jar files that the test classes resides in, or dependent on are
+#      provided on command line and exported to CLASSPATH environment variable
+#      before starting the Java code. This offloads the task of class loading
+#      and resolving of cross jar class dependency to Dalvik
+#    * all other subcommand or options are directly passed into Java code for
+#      further parsing
+
+export run_base=/data/local/tmp
+export base=/system
+
+# if not running as root, trick dalvik into using an alternative dex cache
+if [ ${USER_ID} -ne 0 ]; then
+  tmp_cache=${run_base}/dalvik-cache
+
+  if [ ! -d ${tmp_cache} ]; then
+    mkdir -p ${tmp_cache}
+  fi
+
+  export ANDROID_DATA=${run_base}
+fi
+
+# take first parameter as the command
+cmd=${1}
+
+if [ -z "${1}" ]; then
+  cmd="help"
+fi
+
+# strip the command parameter
+if [ -n "${1}" ]; then
+  shift
+fi
+
+CLASSPATH=/system/framework/android.test.runner.jar:${base}/framework/uiautomator.jar
+
+# eventually args will be what get passed down to Java code
+args=
+# we also pass the list of jar files, so we can extract class names for tests
+# if they are not explicitly specified
+jars=
+
+# special case pre-processing for 'runtest' command
+if [ "${cmd}" == "runtest" ]; then
+  # Print deprecation warning
+  echo "Warning: This version of UI Automator is deprecated. New tests should be written using"
+  echo "UI Automator 2.0 which is available as part of the Android Testing Support Library."
+  echo "See https://developer.android.com/training/testing/ui-testing/uiautomator-testing.html"
+  echo "for more details."
+  # first parse the jar paths
+  while [ true ]; do
+    if [ -z "${1}" ] && [ -z "${jars}" ]; then
+      echo "Error: more parameters expected for runtest; please see usage for details"
+      cmd="help"
+      break
+    fi
+    if [ -z "${1}" ]; then
+      break
+    fi
+    jar=${1}
+    if [ "${1:0:1}" = "-" ]; then
+      # we are done with jars, starting with parameters now
+      break
+    fi
+    # if relative path, append the default path prefix
+    if [ "${1:0:1}" != "/" ]; then
+      jar=${run_base}/${1}
+    fi
+    # about to add the file to class path, check if it's valid
+    if [ ! -f ${jar} ]; then
+      echo "Error: ${jar} does not exist"
+      # force to print help message
+      cmd="help"
+      break
+    fi
+    jars=${jars}:${jar}
+    # done processing current arg, moving on
+    shift
+  done
+  # look for --nohup: if found, consume it and trap SIG_HUP, otherwise just
+  # append the arg to args
+  while [ -n "${1}" ]; do
+    if [ "${1}" = "--nohup" ]; then
+      trap "" HUP
+      shift
+    else
+      args="${args} ${1}"
+      shift
+    fi
+  done
+else
+  # if cmd is not 'runtest', just take the rest of the args
+  args=${@}
+fi
+
+args="${cmd} ${args}"
+if [ -n "${jars}" ]; then
+   args="${args} -e jars ${jars}"
+fi
+
+CLASSPATH=${CLASSPATH}:${jars}
+export CLASSPATH
+exec app_process ${base}/bin com.android.commands.uiautomator.Launcher ${args}

@@ -1,0 +1,12 @@
+{
+  "presubmit" : [
+    {
+      "name" : "idmap2_tests"
+    }
+  ],
+  "imports": [
+    {
+      "path": "frameworks/base/services/core/java/com/android/server/om"
+    }
+  ]
+}
