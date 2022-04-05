@@ -842,4 +842,15 @@ public abstract class ActivityManagerInternal {
      * Returns some summary statistics of the current PendingIntent queue - sizes and counts.
      */
     public abstract List<PendingIntentStats> getPendingIntentStats();
+
+    /**
+     * Register the UidObserver for NetworkPolicyManager service.
+     *
+     * This is equivalent to calling
+     * {@link IActivityManager#registerUidObserver(IUidObserver, int, int, String)} but having a
+     * separate method for NetworkPolicyManager service so that it's UidObserver can be called
+     * separately outside the usual UidObserver flow.
+     */
+    public abstract void registerNetworkPolicyUidObserver(@NonNull IUidObserver observer,
+            int which, int cutpoint, @NonNull String callingPackage);
 }

@@ -239,7 +239,7 @@ public class NotificationPanelViewController extends PanelViewController {
 
     private final DozeParameters mDozeParameters;
     private final OnHeightChangedListener mOnHeightChangedListener = new OnHeightChangedListener();
-    private final OnClickListener mOnClickListener = new OnClickListener();
+    private final Runnable mCollapseExpandAction = new CollapseExpandAction();
     private final OnOverscrollTopChangedListener
             mOnOverscrollTopChangedListener =
             new OnOverscrollTopChangedListener();
@@ -1355,9 +1355,11 @@ public class NotificationPanelViewController extends PanelViewController {
         int userSwitcherPreferredY = mStatusBarHeaderHeightKeyguard;
         boolean bypassEnabled = mKeyguardBypassController.getBypassEnabled();
         final boolean hasVisibleNotifications = mNotificationStackScrollLayoutController
-                .getVisibleNotificationCount() != 0 || mMediaDataManager.hasActiveMedia();
+                .getVisibleNotificationCount() != 0
+                || mMediaDataManager.hasActiveMediaOrRecommendation();
         boolean splitShadeWithActiveMedia =
-                mShouldUseSplitNotificationShade && mMediaDataManager.hasActiveMedia();
+                mShouldUseSplitNotificationShade
+                        && mMediaDataManager.hasActiveMediaOrRecommendation();
         boolean shouldAnimateClockChange = mScreenOffAnimationController.shouldAnimateClockChange();
         if ((hasVisibleNotifications && !mShouldUseSplitNotificationShade)
                 || (splitShadeWithActiveMedia && !mDozing)) {
@@ -1424,7 +1426,8 @@ public class NotificationPanelViewController extends PanelViewController {
 
     private void updateKeyguardStatusViewAlignment(boolean animate) {
         boolean hasVisibleNotifications = mNotificationStackScrollLayoutController
-                .getVisibleNotificationCount() != 0 || mMediaDataManager.hasActiveMedia();
+                .getVisibleNotificationCount() != 0
+                || mMediaDataManager.hasActiveMediaOrRecommendation();
         boolean shouldBeCentered = !mShouldUseSplitNotificationShade || !hasVisibleNotifications
                 || mDozing;
         if (mStatusViewCentered != shouldBeCentered) {
@@ -2622,7 +2625,7 @@ public class NotificationPanelViewController extends PanelViewController {
         float endPosition = 0;
         if (pxAmount > 0.0f) {
             if (mNotificationStackScrollLayoutController.getVisibleNotificationCount() == 0
-                    && !mMediaDataManager.hasActiveMedia()) {
+                    && !mMediaDataManager.hasActiveMediaOrRecommendation()) {
                 // No notifications are visible, let's animate to the height of qs instead
                 if (mQs != null) {
                     // Let's interpolate to the header height instead of the top padding,
@@ -3570,7 +3573,7 @@ public class NotificationPanelViewController extends PanelViewController {
         public void onFragmentViewCreated(String tag, Fragment fragment) {
             mQs = (QS) fragment;
             mQs.setPanelView(mHeightListener);
-            mQs.setExpandClickListener(mOnClickListener);
+            mQs.setCollapseExpandAction(mCollapseExpandAction);
             mQs.setHeaderClickable(isQsExpansionEnabled());
             mQs.setOverscrolling(mStackScrollerOverscrolling);
             mQs.setInSplitShade(mShouldUseSplitNotificationShade);
@@ -4213,9 +4216,9 @@ public class NotificationPanelViewController extends PanelViewController {
         }
     }
 
-    private class OnClickListener implements View.OnClickListener {
+    private class CollapseExpandAction implements Runnable {
         @Override
-        public void onClick(View v) {
+        public void run() {
             onQsExpansionStarted();
             if (mQsExpanded) {
                 flingSettings(0 /* vel */, FLING_COLLAPSE, null /* onFinishRunnable */,

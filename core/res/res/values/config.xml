@@ -690,6 +690,11 @@
            will apply, regardless of device state. -->
     <string-array name="config_perDeviceStateRotationLockDefaults" />
 
+    <!-- Dock behavior -->
+
+    <!-- Control whether to start dream immediately upon docking even if the lockscreen is unlocked.
+         This defaults to true to be consistent with historical behavior. -->
+    <bool name="config_startDreamImmediatelyOnDock">true</bool>
 
     <!-- Desk dock behavior -->
 
@@ -2698,40 +2703,9 @@
     <string-array name="config_mobile_tcp_buffers">
     </string-array>
 
-    <!-- Configure tcp buffer sizes per network type in the form:
-         network-type:rmem_min,rmem_def,rmem_max,wmem_min,wmem_def,wmem_max
-
-         The network-type must be a valid DataConfigNetworkType value. If no value is found for the
-         network-type in use, config_tcp_buffers will be used instead.
-    -->
-    <string-array name="config_network_type_tcp_buffers">
-    </string-array>
-
-    <!-- Configure tcp buffer sizes in the form:
-         rmem_min,rmem_def,rmem_max,wmem_min,wmem_def,wmem_max
-         If this is configured as an empty string, the system default will be applied.
-
-         For now this config is used by mobile data only. In the future it should be
-         used by Wi-Fi as well.
-    -->
-    <string name="config_tcp_buffers" translatable="false"></string>
-
     <!-- Configure ethernet tcp buffersizes in the form:
          rmem_min,rmem_def,rmem_max,wmem_min,wmem_def,wmem_max -->
     <string name="config_ethernet_tcp_buffers" translatable="false">524288,1048576,3145728,524288,1048576,2097152</string>
-
-    <!-- What source to use to estimate link upstream and downstream bandwidth capacities.
-         Default is bandwidth_estimator.
-         Values are bandwidth_estimator, carrier_config and modem. -->
-    <string name="config_bandwidthEstimateSource">bandwidth_estimator</string>
-
-    <!-- Whether force to enable telephony new data stack or not -->
-    <bool name="config_force_enable_telephony_new_data_stack">true</bool>
-
-    <!-- Whether to adopt the predefined handover policies for IWLAN.
-         {@see CarrierConfigManager#KEY_IWLAN_HANDOVER_POLICY_STRING_ARRAY}
-    -->
-    <bool name="config_enable_iwlan_handover_policy">true</bool>
 
     <!-- Whether WiFi display is supported by this device.
          There are many prerequisites for this feature to work correctly.
@@ -3312,27 +3286,6 @@
     <!-- String array containing numbers that shouldn't be logged. Country-specific. -->
     <string-array name="unloggable_phone_numbers" />
 
-    <!-- Cellular data service package name to bind to by default. If none is specified in an overlay, an
-         empty string is passed in -->
-    <string name="config_wwan_data_service_package" translatable="false">com.android.phone</string>
-
-    <!-- IWLAN data service package name to bind to by default. If none is specified in an overlay, an
-         empty string is passed in -->
-    <string name="config_wlan_data_service_package" translatable="false"></string>
-
-    <!-- Boolean indicating whether the Iwlan data service supports persistence of iwlan ipsec
-         tunnels across service restart. If iwlan tunnels are not persisted across restart,
-         Framework will clean up dangling data connections when service restarts -->
-    <bool name="config_wlan_data_service_conn_persistence_on_restart">true</bool>
-
-    <!-- Cellular data service class name to bind to by default. If none is specified in an overlay, an
-         empty string is passed in -->
-    <string name="config_wwan_data_service_class" translatable="false"></string>
-
-    <!-- IWLAN data service class name to bind to by default. If none is specified in an overlay, an
-         empty string is passed in -->
-    <string name="config_wlan_data_service_class" translatable="false"></string>
-
     <bool name="config_networkSamplingWakesDevice">true</bool>
 
     <!--From SmsMessage-->
@@ -3431,11 +3384,6 @@
         <item>1</item>    <!-- USAGE_SETTING_VOICE_CENTRIC -->
         <item>2</item>    <!-- USAGE_SETTING_DATA_CENTRIC -->
     </integer-array>
-
-    <!-- When a radio power off request is received, we will delay completing the request until
-         either IMS moves to the deregistered state or the timeout defined by this configuration
-         elapses. If 0, this feature is disabled and we do not delay radio power off requests.-->
-    <integer name="config_delay_for_ims_dereg_millis">0</integer>
 
     <!--Thresholds for LTE dbm in status bar-->
     <integer-array translatable="false" name="config_lteDbmThresholds">
@@ -4400,24 +4348,6 @@
 
     <bool name="config_keepRestrictedProfilesInBackground">true</bool>
 
-    <!-- Cellular network service package name to bind to by default. -->
-    <string name="config_wwan_network_service_package" translatable="false">com.android.phone</string>
-
-    <!-- Cellular network service class name to bind to by default.-->
-    <string name="config_wwan_network_service_class" translatable="false"></string>
-
-    <!-- IWLAN network service package name to bind to by default. If none is specified in an overlay, an
-         empty string is passed in -->
-    <string name="config_wlan_network_service_package" translatable="false"></string>
-
-    <!-- IWLAN network service class name to bind to by default. If none is specified in an overlay, an
-         empty string is passed in -->
-    <string name="config_wlan_network_service_class" translatable="false"></string>
-    <!-- Telephony qualified networks service package name to bind to by default. -->
-    <string name="config_qualified_networks_service_package" translatable="false"></string>
-
-    <!-- Telephony qualified networks service class name to bind to by default. -->
-    <string name="config_qualified_networks_service_class" translatable="false"></string>
     <!-- Wear devices: Controls the radios affected by Activity Mode. -->
     <string-array name="config_wearActivityModeRadios">
         <item>"wifi"</item>

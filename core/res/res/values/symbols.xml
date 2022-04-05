@@ -294,17 +294,6 @@
   <java-symbol type="bool" name="config_enableBurnInProtection" />
   <java-symbol type="bool" name="config_hotswapCapable" />
   <java-symbol type="bool" name="config_mms_content_disposition_support" />
-  <java-symbol type="string" name="config_wwan_network_service_package" />
-  <java-symbol type="string" name="config_wlan_network_service_package" />
-  <java-symbol type="string" name="config_wwan_network_service_class" />
-  <java-symbol type="string" name="config_wlan_network_service_class" />
-  <java-symbol type="bool" name="config_wlan_data_service_conn_persistence_on_restart" />
-  <java-symbol type="string" name="config_wwan_data_service_package" />
-  <java-symbol type="string" name="config_wlan_data_service_package" />
-  <java-symbol type="string" name="config_wwan_data_service_class" />
-  <java-symbol type="string" name="config_wlan_data_service_class" />
-  <java-symbol type="string" name="config_qualified_networks_service_package" />
-  <java-symbol type="string" name="config_qualified_networks_service_class" />
   <java-symbol type="bool" name="config_networkSamplingWakesDevice" />
   <java-symbol type="bool" name="config_showMenuShortcutsWhenKeyboardPresent" />
   <java-symbol type="bool" name="config_sip_wifi_only" />
@@ -472,10 +461,6 @@
   <java-symbol type="integer" name="config_safe_media_volume_usb_mB" />
   <java-symbol type="integer" name="config_mobile_mtu" />
   <java-symbol type="array"   name="config_mobile_tcp_buffers" />
-  <java-symbol type="array"   name="config_network_type_tcp_buffers" />
-  <java-symbol type="string"  name="config_tcp_buffers" />
-  <java-symbol type="bool" name="config_force_enable_telephony_new_data_stack" />
-  <java-symbol type="bool" name="config_enable_iwlan_handover_policy" />
   <java-symbol type="integer" name="config_volte_replacement_rat"/>
   <java-symbol type="integer" name="config_valid_wappush_index" />
   <java-symbol type="integer" name="config_overrideHasPermanentMenuKey" />
@@ -489,10 +474,8 @@
   <java-symbol type="integer" name="config_num_physical_slots" />
   <java-symbol type="integer" name="config_default_cellular_usage_setting" />
   <java-symbol type="array" name="config_supported_cellular_usage_settings" />
-  <java-symbol type="integer" name="config_delay_for_ims_dereg_millis" />
   <java-symbol type="array" name="config_integrityRuleProviderPackages" />
   <java-symbol type="bool" name="config_useAssistantVolume" />
-  <java-symbol type="string" name="config_bandwidthEstimateSource" />
   <java-symbol type="integer" name="config_smartSelectionInitializedTimeoutMillis" />
   <java-symbol type="integer" name="config_smartSelectionInitializingTimeoutMillis" />
   <java-symbol type="integer" name="config_preferKeepClearForFocusDelayMillis" />
@@ -1732,6 +1715,7 @@
   <java-symbol type="attr" name="dialogTitleIconsDecorLayout" />
   <java-symbol type="bool" name="config_allowAllRotations" />
   <java-symbol type="bool" name="config_annoy_dianne" />
+  <java-symbol type="bool" name="config_startDreamImmediatelyOnDock" />
   <java-symbol type="bool" name="config_carDockEnablesAccelerometer" />
   <java-symbol type="bool" name="config_customUserSwitchUi" />
   <java-symbol type="bool" name="config_deskDockEnablesAccelerometer" />
