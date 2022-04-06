@@ -151,6 +151,31 @@ class MediaUiEventLogger @Inject constructor(private val logger: UiEventLogger) 
         }
         logger.log(event)
     }
+
+    fun logRecommendationAdded(packageName: String, instanceId: InstanceId) {
+        logger.logWithInstanceId(MediaUiEvent.MEDIA_RECOMMENDATION_ADDED, 0, packageName,
+            instanceId)
+    }
+
+    fun logRecommendationRemoved(packageName: String, instanceId: InstanceId) {
+        logger.logWithInstanceId(MediaUiEvent.MEDIA_RECOMMENDATION_REMOVED, 0, packageName,
+            instanceId)
+    }
+
+    fun logRecommendationActivated(uid: Int, packageName: String, instanceId: InstanceId) {
+        logger.logWithInstanceId(MediaUiEvent.MEDIA_RECOMMENDATION_ACTIVATED, uid, packageName,
+            instanceId)
+    }
+
+    fun logRecommendationItemTap(packageName: String, instanceId: InstanceId, position: Int) {
+        logger.logWithInstanceIdAndPosition(MediaUiEvent.MEDIA_RECOMMENDATION_ITEM_TAP, 0,
+            packageName, instanceId, position)
+    }
+
+    fun logRecommendationCardTap(packageName: String, instanceId: InstanceId) {
+        logger.logWithInstanceId(MediaUiEvent.MEDIA_RECOMMENDATION_CARD_TAP, 0, packageName,
+            instanceId)
+    }
 }
 
 enum class MediaUiEvent(val metricId: Int) : UiEventLogger.UiEventEnum {
@@ -233,7 +258,22 @@ enum class MediaUiEvent(val metricId: Int) : UiEventLogger.UiEventEnum {
     MEDIA_CAROUSEL_LOCATION_LOCKSCREEN(1039),
 
     @UiEvent(doc = "The media carousel moved to the dream state")
-    MEDIA_CAROUSEL_LOCATION_DREAM(1040);
+    MEDIA_CAROUSEL_LOCATION_DREAM(1040),
+
+    @UiEvent(doc = "A media recommendation card was added to the media carousel")
+    MEDIA_RECOMMENDATION_ADDED(1041),
+
+    @UiEvent(doc = "A media recommendation card was removed from the media carousel")
+    MEDIA_RECOMMENDATION_REMOVED(1042),
+
+    @UiEvent(doc = "An existing media control was made active as a recommendation")
+    MEDIA_RECOMMENDATION_ACTIVATED(1043),
+
+    @UiEvent(doc = "User tapped on an item in a media recommendation card")
+    MEDIA_RECOMMENDATION_ITEM_TAP(1044),
+
+    @UiEvent(doc = "User tapped on a media recommendation card")
+    MEDIA_RECOMMENDATION_CARD_TAP(1045);
 
     override fun getId() = metricId
 }

@@ -17,16 +17,22 @@
 package com.android.systemui.media
 
 import android.app.PendingIntent
+import android.app.smartspace.SmartspaceAction
+import android.content.Context
 import org.mockito.Mockito.`when` as whenever
 import android.content.Intent
+import android.content.pm.ApplicationInfo
+import android.content.pm.PackageManager
 import android.graphics.Color
 import android.graphics.drawable.Animatable2
 import android.graphics.drawable.AnimatedVectorDrawable
 import android.graphics.drawable.GradientDrawable
+import android.graphics.drawable.Icon
 import android.graphics.drawable.RippleDrawable
 import android.media.MediaMetadata
 import android.media.session.MediaSession
 import android.media.session.PlaybackState
+import android.os.Bundle
 import android.os.Handler
 import android.provider.Settings.ACTION_MEDIA_CONTROLS_SETTINGS
 import android.testing.AndroidTestingRunner
@@ -67,6 +73,7 @@ import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.ArgumentMatchers.anyLong
 import org.mockito.Mock
 import org.mockito.Mockito.any
+import org.mockito.Mockito.anyString
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.never
 import org.mockito.Mockito.reset
@@ -107,6 +114,7 @@ public class MediaControlPanelTest : SysuiTestCase() {
     @Mock private lateinit var collapsedSet: ConstraintSet
     @Mock private lateinit var mediaOutputDialogFactory: MediaOutputDialogFactory
     @Mock private lateinit var mediaCarouselController: MediaCarouselController
+    @Mock private lateinit var mediaCarouselScrollHandler: MediaCarouselScrollHandler
     @Mock private lateinit var falsingManager: FalsingManager
     @Mock private lateinit var transitionParent: ViewGroup
     private lateinit var appIcon: ImageView
@@ -145,6 +153,14 @@ public class MediaControlPanelTest : SysuiTestCase() {
     private val clock = FakeSystemClock()
     @Mock private lateinit var logger: MediaUiEventLogger
     @Mock private lateinit var instanceId: InstanceId
+    @Mock private lateinit var packageManager: PackageManager
+    @Mock private lateinit var applicationInfo: ApplicationInfo
+
+    @Mock private lateinit var recommendationViewHolder: RecommendationViewHolder
+    @Mock private lateinit var smartspaceAction: SmartspaceAction
+    private lateinit var smartspaceData: SmartspaceMediaData
+    @Mock private lateinit var coverContainer: ViewGroup
+    private lateinit var coverItem: ImageView
 
     @JvmField @Rule val mockito = MockitoJUnit.rule()
 
@@ -154,6 +170,16 @@ public class MediaControlPanelTest : SysuiTestCase() {
         mainExecutor = FakeExecutor(FakeSystemClock())
         whenever(mediaViewController.expandedLayout).thenReturn(expandedSet)
         whenever(mediaViewController.collapsedLayout).thenReturn(collapsedSet)
+
+        // Set up package manager mocks
+        val icon = context.getDrawable(R.drawable.ic_android)
+        whenever(packageManager.getApplicationIcon(anyString())).thenReturn(icon)
+        whenever(packageManager.getApplicationIcon(any(ApplicationInfo::class.java)))
+            .thenReturn(icon)
+        whenever(packageManager.getApplicationInfo(eq(PACKAGE), anyInt()))
+            .thenReturn(applicationInfo)
+        whenever(packageManager.getApplicationLabel(any())).thenReturn(PACKAGE)
+        context.setMockPackageManager(packageManager)
 
         player = MediaControlPanel(
             context,
@@ -170,7 +196,60 @@ public class MediaControlPanelTest : SysuiTestCase() {
             clock,
             logger
         )
+
+        initMediaViewHolderMocks()
+
+        // Create media session
+        val metadataBuilder = MediaMetadata.Builder().apply {
+            putString(MediaMetadata.METADATA_KEY_ARTIST, SESSION_ARTIST)
+            putString(MediaMetadata.METADATA_KEY_TITLE, SESSION_TITLE)
+        }
+        val playbackBuilder = PlaybackState.Builder().apply {
+            setState(PlaybackState.STATE_PAUSED, 6000L, 1f)
+            setActions(PlaybackState.ACTION_PLAY)
+        }
+        session = MediaSession(context, SESSION_KEY).apply {
+            setMetadata(metadataBuilder.build())
+            setPlaybackState(playbackBuilder.build())
+        }
+        session.setActive(true)
+
+        mediaData = MediaTestUtils.emptyMediaData.copy(
+                backgroundColor = BG_COLOR,
+                artist = ARTIST,
+                song = TITLE,
+                packageName = PACKAGE,
+                token = session.sessionToken,
+                device = device,
+                instanceId = instanceId)
+
+        // Set up recommendation view
+        initRecommendationViewHolderMocks()
+
+        // Set valid recommendation data
+        val extras = Bundle()
+        val intent = Intent().apply {
+            putExtras(extras)
+            setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        }
+        whenever(smartspaceAction.intent).thenReturn(intent)
+        whenever(smartspaceAction.extras).thenReturn(extras)
+        smartspaceData = EMPTY_SMARTSPACE_MEDIA_DATA.copy(
+            packageName = PACKAGE,
+            instanceId = instanceId,
+            recommendations = listOf(smartspaceAction),
+            cardAction = smartspaceAction
+        )
+    }
+
+    /**
+     * Initialize elements in media view holder
+     */
+    private fun initMediaViewHolderMocks() {
         whenever(seekBarViewModel.progress).thenReturn(seekBarData)
+        whenever(mediaCarouselController.mediaCarouselScrollHandler)
+            .thenReturn(mediaCarouselScrollHandler)
+        whenever(mediaCarouselScrollHandler.qsExpanded).thenReturn(false)
 
         // Set up mock views for the players
         appIcon = ImageView(context)
@@ -218,37 +297,6 @@ public class MediaControlPanelTest : SysuiTestCase() {
                         action4.id)
             }
 
-        initMediaViewHolderMocks()
-
-        // Create media session
-        val metadataBuilder = MediaMetadata.Builder().apply {
-            putString(MediaMetadata.METADATA_KEY_ARTIST, SESSION_ARTIST)
-            putString(MediaMetadata.METADATA_KEY_TITLE, SESSION_TITLE)
-        }
-        val playbackBuilder = PlaybackState.Builder().apply {
-            setState(PlaybackState.STATE_PAUSED, 6000L, 1f)
-            setActions(PlaybackState.ACTION_PLAY)
-        }
-        session = MediaSession(context, SESSION_KEY).apply {
-            setMetadata(metadataBuilder.build())
-            setPlaybackState(playbackBuilder.build())
-        }
-        session.setActive(true)
-
-        mediaData = MediaTestUtils.emptyMediaData.copy(
-                backgroundColor = BG_COLOR,
-                artist = ARTIST,
-                song = TITLE,
-                packageName = PACKAGE,
-                token = session.sessionToken,
-                device = device,
-                instanceId = instanceId)
-    }
-
-    /**
-     * Initialize elements in media view holder
-     */
-    private fun initMediaViewHolderMocks() {
         whenever(viewHolder.player).thenReturn(view)
         whenever(viewHolder.appIcon).thenReturn(appIcon)
         whenever(viewHolder.albumView).thenReturn(albumView)
@@ -295,6 +343,38 @@ public class MediaControlPanelTest : SysuiTestCase() {
         whenever(viewHolder.dismissText).thenReturn(dismissText)
 
         whenever(viewHolder.actionsTopBarrier).thenReturn(actionsTopBarrier)
+    }
+
+    /**
+     * Initialize elements for the recommendation view holder
+     */
+    private fun initRecommendationViewHolderMocks() {
+        whenever(recommendationViewHolder.recommendations).thenReturn(view)
+        whenever(recommendationViewHolder.cardIcon).thenReturn(appIcon)
+        whenever(recommendationViewHolder.cardText).thenReturn(titleText)
+
+        // Add a recommendation item
+        coverItem = ImageView(context).also { it.setId(R.id.media_cover1) }
+        whenever(coverContainer.id).thenReturn(R.id.media_cover1_container)
+        whenever(recommendationViewHolder.mediaCoverItems).thenReturn(listOf(coverItem))
+        whenever(recommendationViewHolder.mediaCoverContainers).thenReturn(listOf(coverContainer))
+        whenever(recommendationViewHolder.mediaCoverItemsResIds)
+            .thenReturn(listOf(R.id.media_cover1))
+        whenever(recommendationViewHolder.mediaCoverContainersResIds)
+            .thenReturn(listOf(R.id.media_cover1_container))
+
+        // Long press menu
+        whenever(recommendationViewHolder.settings).thenReturn(settings)
+        whenever(recommendationViewHolder.cancel).thenReturn(cancel)
+        whenever(recommendationViewHolder.dismiss).thenReturn(dismiss)
+
+        val actionIcon = Icon.createWithResource(context, R.drawable.ic_android)
+        whenever(smartspaceAction.icon).thenReturn(actionIcon)
+
+        // Needed for card and item action click
+        val mockContext = mock(Context::class.java)
+        whenever(view.context).thenReturn(mockContext)
+        whenever(coverContainer.context).thenReturn(mockContext)
     }
 
     @After
@@ -879,6 +959,67 @@ public class MediaControlPanelTest : SysuiTestCase() {
         captor.value.invoke()
 
         verify(logger).logSeek(anyInt(), eq(PACKAGE), eq(instanceId))
+    }
+
+    @Test
+    fun recommendation_gutsClosed_longPressOpens() {
+        player.attachRecommendation(recommendationViewHolder)
+        player.bindRecommendation(smartspaceData)
+        whenever(mediaViewController.isGutsVisible).thenReturn(false)
+
+        val captor = ArgumentCaptor.forClass(View.OnLongClickListener::class.java)
+        verify(recommendationViewHolder.recommendations).setOnLongClickListener(captor.capture())
+
+        captor.value.onLongClick(recommendationViewHolder.recommendations)
+        verify(mediaViewController).openGuts()
+        verify(logger).logLongPressOpen(anyInt(), eq(PACKAGE), eq(instanceId))
+    }
+
+    @Test
+    fun recommendation_settingsButtonClick_isLogged() {
+        player.attachRecommendation(recommendationViewHolder)
+        player.bindRecommendation(smartspaceData)
+
+        settings.callOnClick()
+        verify(logger).logLongPressSettings(anyInt(), eq(PACKAGE), eq(instanceId))
+
+        val captor = ArgumentCaptor.forClass(Intent::class.java)
+        verify(activityStarter).startActivity(captor.capture(), eq(true))
+
+        assertThat(captor.value.action).isEqualTo(ACTION_MEDIA_CONTROLS_SETTINGS)
+    }
+
+    @Test
+    fun recommendation_dismissButton_isLogged() {
+        player.attachRecommendation(recommendationViewHolder)
+        player.bindRecommendation(smartspaceData)
+
+        dismiss.callOnClick()
+        verify(logger).logLongPressDismiss(anyInt(), eq(PACKAGE), eq(instanceId))
+    }
+
+    @Test
+    fun recommendation_tapOnCard_isLogged() {
+        val captor = ArgumentCaptor.forClass(View.OnClickListener::class.java)
+        player.attachRecommendation(recommendationViewHolder)
+        player.bindRecommendation(smartspaceData)
+
+        verify(recommendationViewHolder.recommendations).setOnClickListener(captor.capture())
+        captor.value.onClick(recommendationViewHolder.recommendations)
+
+        verify(logger).logRecommendationCardTap(eq(PACKAGE), eq(instanceId))
+    }
+
+    @Test
+    fun recommendation_tapOnItem_isLogged() {
+        val captor = ArgumentCaptor.forClass(View.OnClickListener::class.java)
+        player.attachRecommendation(recommendationViewHolder)
+        player.bindRecommendation(smartspaceData)
+
+        verify(coverContainer).setOnClickListener(captor.capture())
+        captor.value.onClick(recommendationViewHolder.recommendations)
+
+        verify(logger).logRecommendationItemTap(eq(PACKAGE), eq(instanceId), eq(0))
     }
 
     private fun getScrubbingChangeListener(): SeekBarViewModel.ScrubbingChangeListener =
