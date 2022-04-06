@@ -58,7 +58,6 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -1487,7 +1486,7 @@ public class SystemConfig {
             addFeature(PackageManager.FEATURE_IPSEC_TUNNELS, 0);
         }
 
-        if (isFilesystemSupported("erofs")) {
+        if (isErofsSupported()) {
             if (isKernelVersionAtLeast(5, 10)) {
                 addFeature(PackageManager.FEATURE_EROFS, 0);
             } else if (isKernelVersionAtLeast(4, 19)) {
@@ -1865,11 +1864,10 @@ public class SystemConfig {
         return Process.myUid() == Process.SYSTEM_UID;
     }
 
-    private static boolean isFilesystemSupported(String fs) {
+    private static boolean isErofsSupported() {
         try {
-            final byte[] fsTableData = Files.readAllBytes(Paths.get("/proc/filesystems"));
-            final String fsTable = new String(fsTableData, StandardCharsets.UTF_8);
-            return fsTable.contains("\t" + fs + "\n");
+            final Path path = Paths.get("/sys/fs/erofs");
+            return Files.exists(path);
         } catch (Exception e) {
             return false;
         }
