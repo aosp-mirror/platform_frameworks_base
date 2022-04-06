@@ -107,7 +107,9 @@ public class PipController implements PipTransitionController.PipTransitionCallb
     private PipAppOpsListener mAppOpsListener;
     private PipMediaController mMediaController;
     private PipBoundsAlgorithm mPipBoundsAlgorithm;
+    private PipKeepClearAlgorithm mPipKeepClearAlgorithm;
     private PipBoundsState mPipBoundsState;
+    private PipMotionHelper mPipMotionHelper;
     private PipTouchHandler mTouchHandler;
     private PipTransitionController mPipTransitionController;
     private TaskStackListenerImpl mTaskStackListener;
@@ -241,6 +243,10 @@ public class PipController implements PipTransitionController.PipTransitionCallb
                         Set<Rect> unrestricted) {
                     if (mPipBoundsState.getDisplayId() == displayId) {
                         mPipBoundsState.setKeepClearAreas(restricted, unrestricted);
+                        mPipMotionHelper.moveToBounds(mPipKeepClearAlgorithm.adjust(
+                                mPipBoundsState.getBounds(),
+                                mPipBoundsState.getRestrictedKeepClearAreas(),
+                                mPipBoundsState.getUnrestrictedKeepClearAreas()));
                     }
                 }
             };
@@ -293,7 +299,8 @@ public class PipController implements PipTransitionController.PipTransitionCallb
     @Nullable
     public static Pip create(Context context, DisplayController displayController,
             PipAppOpsListener pipAppOpsListener, PipBoundsAlgorithm pipBoundsAlgorithm,
-            PipBoundsState pipBoundsState, PipMediaController pipMediaController,
+            PipKeepClearAlgorithm pipKeepClearAlgorithm, PipBoundsState pipBoundsState,
+            PipMotionHelper pipMotionHelper, PipMediaController pipMediaController,
             PhonePipMenuController phonePipMenuController, PipTaskOrganizer pipTaskOrganizer,
             PipTouchHandler pipTouchHandler, PipTransitionController pipTransitionController,
             WindowManagerShellWrapper windowManagerShellWrapper,
@@ -307,9 +314,9 @@ public class PipController implements PipTransitionController.PipTransitionCallb
         }
 
         return new PipController(context, displayController, pipAppOpsListener, pipBoundsAlgorithm,
-                pipBoundsState, pipMediaController, phonePipMenuController, pipTaskOrganizer,
-                pipTouchHandler, pipTransitionController, windowManagerShellWrapper,
-                taskStackListener, oneHandedController, mainExecutor)
+                pipKeepClearAlgorithm, pipBoundsState, pipMotionHelper, pipMediaController,
+                phonePipMenuController, pipTaskOrganizer,  pipTouchHandler, pipTransitionController,
+                windowManagerShellWrapper, taskStackListener, oneHandedController, mainExecutor)
                 .mImpl;
     }
 
@@ -317,7 +324,9 @@ public class PipController implements PipTransitionController.PipTransitionCallb
             DisplayController displayController,
             PipAppOpsListener pipAppOpsListener,
             PipBoundsAlgorithm pipBoundsAlgorithm,
+            PipKeepClearAlgorithm pipKeepClearAlgorithm,
             @NonNull PipBoundsState pipBoundsState,
+            PipMotionHelper pipMotionHelper,
             PipMediaController pipMediaController,
             PhonePipMenuController phonePipMenuController,
             PipTaskOrganizer pipTaskOrganizer,
@@ -339,7 +348,9 @@ public class PipController implements PipTransitionController.PipTransitionCallb
         mWindowManagerShellWrapper = windowManagerShellWrapper;
         mDisplayController = displayController;
         mPipBoundsAlgorithm = pipBoundsAlgorithm;
+        mPipKeepClearAlgorithm = pipKeepClearAlgorithm;
         mPipBoundsState = pipBoundsState;
+        mPipMotionHelper = pipMotionHelper;
         mPipTaskOrganizer = pipTaskOrganizer;
         mMainExecutor = mainExecutor;
         mMediaController = pipMediaController;
