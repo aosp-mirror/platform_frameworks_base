@@ -681,7 +681,6 @@ public class MediaControlPanel {
                     button.setOnClickListener(v -> {
                         if (!mFalsingManager.isFalseTap(FalsingManager.LOW_PENALTY)) {
                             mLogger.logTapAction(button.getId(), mUid, mPackageName, mInstanceId);
-                            mLogger.logTapAction(button.getId(), mUid, mPackageName, mInstanceId);
                             logSmartspaceCardReported(SMARTSPACE_CARD_CLICK_EVENT);
                             action.run();
 
