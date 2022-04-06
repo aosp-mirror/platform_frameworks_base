@@ -596,8 +596,7 @@
     <string name="guest_reset_guest_dialog_title" msgid="8047270010895437534">"要重設訪客嗎？"</string>
     <string name="guest_remove_guest_dialog_title" msgid="4548511006624088072">"要移除訪客嗎？"</string>
     <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"重設"</string>
-    <!-- no translation found for guest_remove_guest_confirm_button (7858123434954143879) -->
-    <skip />
+    <string name="guest_remove_guest_confirm_button" msgid="7858123434954143879">"移除"</string>
     <string name="guest_resetting" msgid="7822120170191509566">"正在重設訪客…"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"拍照"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"選擇圖片"</string>
@@ -653,10 +652,7 @@
     <string name="turn_screen_on_title" msgid="3266937298097573424">"開啟螢幕"</string>
     <string name="allow_turn_screen_on" msgid="6194845766392742639">"允許開啟螢幕"</string>
     <string name="allow_turn_screen_on_description" msgid="43834403291575164">"允許應用程式開啟螢幕。如果授予這項權限，即使你未明確指示，應用程式也隨時可能會開啟螢幕。"</string>
-    <!-- no translation found for bt_le_audio_scan_qr_code (3521809854780392679) -->
-    <skip />
-    <!-- no translation found for bt_le_audio_scan_qr_code_scanner (4679500020630341107) -->
-    <skip />
-    <!-- no translation found for bt_le_audio_qr_code_is_not_valid_format (6092191081849434734) -->
-    <skip />
+    <string name="bt_le_audio_scan_qr_code" msgid="3521809854780392679">"掃描 QR 圖碼"</string>
+    <string name="bt_le_audio_scan_qr_code_scanner" msgid="4679500020630341107">"如要開始收聽，請將掃描器對準下方的 QR 圖碼"</string>
+    <string name="bt_le_audio_qr_code_is_not_valid_format" msgid="6092191081849434734">"QR 圖碼格式無效"</string>
 </resources>
