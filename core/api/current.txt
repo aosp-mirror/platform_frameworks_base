@@ -10900,7 +10900,7 @@ package android.content {
   }
 
   public static interface SharedPreferences.OnSharedPreferenceChangeListener {
-    method public void onSharedPreferenceChanged(android.content.SharedPreferences, String);
+    method public void onSharedPreferenceChanged(android.content.SharedPreferences, @Nullable String);
   }
 
   public class SyncAdapterType implements android.os.Parcelable {

@@ -68,7 +68,7 @@ public interface SharedPreferences {
          *            {@link android.os.Build.VERSION_CODES#R Android R} or later, will receive
          *            a {@code null} value when preferences are cleared.
          */
-        void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key);
+        void onSharedPreferenceChanged(SharedPreferences sharedPreferences, @Nullable String key);
     }
 
     /**
