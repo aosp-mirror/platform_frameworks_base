@@ -576,7 +576,9 @@ public class BubblesManager implements Dumpable {
             @Override
             public void onEntryRemoved(NotificationEntry entry,
                     @NotifCollection.CancellationReason int reason) {
-                BubblesManager.this.onEntryRemoved(entry);
+                if (reason == REASON_APP_CANCEL || reason == REASON_APP_CANCEL_ALL) {
+                    BubblesManager.this.onEntryRemoved(entry);
+                }
             }
 
             @Override

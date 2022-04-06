@@ -327,23 +327,20 @@
          car setting. -->
     <dimen name="car_qs_header_system_icons_area_height">54dp</dimen>
 
-    <!-- The height of the quick settings footer that holds the user switcher, settings icon,
-         etc. -->
+    <!-- The height of the quick settings footer that holds the pagination dots and edit button -->
     <dimen name="qs_footer_height">48dp</dimen>
 
     <!-- 40dp (circles) + 8dp (circle padding) + 8dp (top) + 4dp (bottom) -->
-    <dimen name="new_footer_height">60dp</dimen>
+    <dimen name="footer_actions_height">60dp</dimen>
 
     <!-- The size of each of the icon buttons in the QS footer -->
     <dimen name="qs_footer_action_button_size">48dp</dimen>
 
     <dimen name="qs_footer_action_corner_radius">20dp</dimen>
 
-    <!-- (48dp - 44dp) / 2 -->
-    <dimen name="qs_footer_action_inset">2dp</dimen>
     <!-- (48dp - 40dp) / 2 -->
-    <dimen name="new_qs_footer_action_inset">4dp</dimen>
-    <dimen name="new_qs_footer_action_inset_negative">-4dp</dimen>
+    <dimen name="qs_footer_action_inset">4dp</dimen>
+    <dimen name="qs_footer_action_inset_negative">-4dp</dimen>
 
     <!-- Margins on each side of QS Footer -->
     <dimen name="qs_footer_margin">2dp</dimen>
@@ -495,7 +492,7 @@
     <dimen name="qs_panel_padding">16dp</dimen>
     <dimen name="qs_dual_tile_padding_horizontal">6dp</dimen>
     <dimen name="qs_panel_elevation">4dp</dimen>
-    <dimen name="qs_panel_padding_bottom">@dimen/new_footer_height</dimen>
+    <dimen name="qs_panel_padding_bottom">@dimen/footer_actions_height</dimen>
     <dimen name="qs_panel_padding_top">48dp</dimen>
 
     <dimen name="qs_data_usage_text_size">14sp</dimen>

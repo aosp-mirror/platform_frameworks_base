@@ -5413,190 +5413,170 @@ public class UserManagerService extends IUserManager.Stub {
         (new Shell()).exec(this, in, out, err, args, callback, resultReceiver);
     }
 
-    private static final String PREFIX_HELP_COMMAND = "  ";
-    private static final String PREFIX_HELP_DESCRIPTION = "    ";
-    private static final String PREFIX_HELP_DESCRIPTION_EXTRA_LINES = "      ";
-
-    private static final String CMD_HELP = "help";
-    private static final String CMD_LIST = "list";
-    private static final String CMD_REPORT_SYSTEM_USER_PACKAGE_ALLOWLIST_PROBLEMS =
-            "report-system-user-package-whitelist-problems";
-
-    private static final String ARG_V = "-v";
-    private static final String ARG_VERBOSE = "--verbose";
-    private static final String ARG_ALL = "--all";
-    private static final String ARG_CRITICAL_ONLY = "--critical-only";
-    private static final String ARG_MODE = "--mode";
-
     private final class Shell extends ShellCommand {
 
-    @Override
-    public void onHelp() {
-        final PrintWriter pw = getOutPrintWriter();
-        pw.printf("User manager (user) commands:\n");
-
-        pw.printf("%s%s\n", PREFIX_HELP_COMMAND, CMD_HELP);
-        pw.printf("%sPrints this help text.\n\n", PREFIX_HELP_DESCRIPTION);
-
-        pw.printf("%s%s [%s] [%s]\n", PREFIX_HELP_COMMAND, CMD_LIST, ARG_V, ARG_ALL);
-        pw.printf("%sPrints all users on the system.\n\n", PREFIX_HELP_DESCRIPTION);
-
-        pw.printf("%s%s [%s | %s] [%s] [%s MODE]\n", PREFIX_HELP_COMMAND,
-                CMD_REPORT_SYSTEM_USER_PACKAGE_ALLOWLIST_PROBLEMS,
-                ARG_V, ARG_VERBOSE, ARG_CRITICAL_ONLY, ARG_MODE);
-
-        pw.printf("%sReports all issues on user-type package allowlist XML files. Options:\n",
-                PREFIX_HELP_DESCRIPTION);
-        pw.printf("%s%s | %s: shows extra info, like number of issues\n",
-                PREFIX_HELP_DESCRIPTION, ARG_V, ARG_VERBOSE);
-        pw.printf("%s%s: show only critical issues, excluding warnings\n",
-                PREFIX_HELP_DESCRIPTION, ARG_CRITICAL_ONLY);
-        pw.printf("%s%s MODE: shows what errors would be if device used mode MODE\n"
-                + "%s(where MODE is the allowlist mode integer as defined by "
-                + "config_userTypePackageWhitelistMode)\n\n",
-                PREFIX_HELP_DESCRIPTION, ARG_MODE, PREFIX_HELP_DESCRIPTION_EXTRA_LINES);
-    }
-
-    @Override
-    public int onCommand(String cmd) {
-        if (cmd == null) {
-            return handleDefaultCommands(cmd);
+        @Override
+        public void onHelp() {
+            final PrintWriter pw = getOutPrintWriter();
+            pw.println("User manager (user) commands:");
+            pw.println("  help");
+            pw.println("    Prints this help text.");
+            pw.println();
+            pw.println("  list [-v | --verbose] [--all]");
+            pw.println("    Prints all users on the system.");
+            pw.println();
+            pw.println("  report-system-user-package-whitelist-problems [-v | --verbose] "
+                    + "[--critical-only] [--mode MODE]");
+            pw.println("    Reports all issues on user-type package allowlist XML files. Options:");
+            pw.println("    -v | --verbose: shows extra info, like number of issues");
+            pw.println("    --critical-only: show only critical issues, excluding warnings");
+            pw.println("    --mode MODE: shows what errors would be if device used mode MODE");
+            pw.println("      (where MODE is the allowlist mode integer as defined by "
+                    + "config_userTypePackageWhitelistMode)");
         }
 
-        try {
-            switch(cmd) {
-                case CMD_LIST:
-                    return runList();
-                case CMD_REPORT_SYSTEM_USER_PACKAGE_ALLOWLIST_PROBLEMS:
-                    return runReportPackageAllowlistProblems();
-                default:
-                    return handleDefaultCommands(cmd);
+        @Override
+        public int onCommand(String cmd) {
+            if (cmd == null) {
+                return handleDefaultCommands(cmd);
             }
-        } catch (RemoteException e) {
-            getOutPrintWriter().println("Remote exception: " + e);
-        }
-        return -1;
-    }
 
-    private int runList() throws RemoteException {
-        final PrintWriter pw = getOutPrintWriter();
-        boolean all = false;
-        boolean verbose = false;
-        String opt;
-        while ((opt = getNextOption()) != null) {
-            switch (opt) {
-                case ARG_V:
-                    verbose = true;
-                    break;
-                case ARG_ALL:
-                    all = true;
-                    break;
-                default:
-                    pw.println("Invalid option: " + opt);
-                    return -1;
+            try {
+                switch(cmd) {
+                    case "list":
+                        return runList();
+                    case "report-system-user-package-whitelist-problems":
+                        return runReportPackageAllowlistProblems();
+                    default:
+                        return handleDefaultCommands(cmd);
+                }
+            } catch (RemoteException e) {
+                getOutPrintWriter().println("Remote exception: " + e);
             }
+            return -1;
         }
-        final IActivityManager am = ActivityManager.getService();
-        final List<UserInfo> users = getUsers(/* excludePartial= */ !all,
-                /* excludingDying=*/ false, /* excludePreCreated= */ !all);
-        if (users == null) {
-            pw.println("Error: couldn't get users");
-            return 1;
-        } else {
-            final int size = users.size();
-            int currentUser = UserHandle.USER_NULL;
-            if (verbose) {
-                pw.printf("%d users:\n\n", size);
-                currentUser = am.getCurrentUser().id;
+
+        private int runList() throws RemoteException {
+            final PrintWriter pw = getOutPrintWriter();
+            boolean all = false;
+            boolean verbose = false;
+            String opt;
+            while ((opt = getNextOption()) != null) {
+                switch (opt) {
+                    case "-v":
+                    case "--verbose":
+                        verbose = true;
+                        break;
+                    case "--all":
+                        all = true;
+                        break;
+                    default:
+                        pw.println("Invalid option: " + opt);
+                        return -1;
+                }
+            }
+            final IActivityManager am = ActivityManager.getService();
+            final List<UserInfo> users = getUsers(/* excludePartial= */ !all,
+                    /* excludeDying= */ false, /* excludePreCreated= */ !all);
+            if (users == null) {
+                pw.println("Error: couldn't get users");
+                return 1;
             } else {
-                // NOTE: the standard "list users" command is used by integration tests and
-                // hence should not be changed. If you need to add more info, use the
-                // verbose option.
-                pw.println("Users:");
-            }
-            for (int i = 0; i < size; i++) {
-                final UserInfo user = users.get(i);
-                final boolean running = am.isUserRunning(user.id, 0);
-                final boolean current = user.id == currentUser;
-                final boolean hasParent = user.profileGroupId != user.id
-                        && user.profileGroupId != UserInfo.NO_PROFILE_GROUP_ID;
+                final int size = users.size();
+                int currentUser = UserHandle.USER_NULL;
                 if (verbose) {
-                    final DevicePolicyManagerInternal dpm = getDevicePolicyManagerInternal();
-                    String deviceOwner = "";
-                    String profileOwner = "";
-                    if (dpm != null) {
-                        final long ident = Binder.clearCallingIdentity();
-                        // NOTE: dpm methods below CANNOT be called while holding the mUsersLock
-                        try {
-                            if (dpm.getDeviceOwnerUserId() == user.id) {
-                                deviceOwner = " (device-owner)";
-                            }
-                            if (dpm.getProfileOwnerAsUser(user.id) != null) {
-                                profileOwner = " (profile-owner)";
-                            }
-                        } finally {
-                            Binder.restoreCallingIdentity(ident);
-                        }
-                    }
-                    pw.printf("%d: id=%d, name=%s, type=%s, flags=%s%s%s%s%s%s%s%s%s\n",
-                            i,
-                            user.id,
-                            user.name,
-                            user.userType.replace("android.os.usertype.", ""),
-                            UserInfo.flagsToString(user.flags),
-                            hasParent ? " (parentId=" + user.profileGroupId + ")" : "",
-                            running ? " (running)" : "",
-                            user.partial ? " (partial)" : "",
-                            user.preCreated ? " (pre-created)" : "",
-                            user.convertedFromPreCreated ? " (converted)" : "",
-                            deviceOwner, profileOwner,
-                            current ? " (current)" : "");
+                    pw.printf("%d users:\n\n", size);
+                    currentUser = am.getCurrentUser().id;
                 } else {
                     // NOTE: the standard "list users" command is used by integration tests and
                     // hence should not be changed. If you need to add more info, use the
                     // verbose option.
-                    pw.printf("\t%s%s\n", user, running ? " running" : "");
+                    pw.println("Users:");
                 }
+                for (int i = 0; i < size; i++) {
+                    final UserInfo user = users.get(i);
+                    final boolean running = am.isUserRunning(user.id, 0);
+                    final boolean current = user.id == currentUser;
+                    final boolean hasParent = user.profileGroupId != user.id
+                            && user.profileGroupId != UserInfo.NO_PROFILE_GROUP_ID;
+                    if (verbose) {
+                        final DevicePolicyManagerInternal dpm = getDevicePolicyManagerInternal();
+                        String deviceOwner = "";
+                        String profileOwner = "";
+                        if (dpm != null) {
+                            final long ident = Binder.clearCallingIdentity();
+                            // NOTE: dpm methods below CANNOT be called while holding the mUsersLock
+                            try {
+                                if (dpm.getDeviceOwnerUserId() == user.id) {
+                                    deviceOwner = " (device-owner)";
+                                }
+                                if (dpm.getProfileOwnerAsUser(user.id) != null) {
+                                    profileOwner = " (profile-owner)";
+                                }
+                            } finally {
+                                Binder.restoreCallingIdentity(ident);
+                            }
+                        }
+                        pw.printf("%d: id=%d, name=%s, type=%s, flags=%s%s%s%s%s%s%s%s%s\n",
+                                i,
+                                user.id,
+                                user.name,
+                                user.userType.replace("android.os.usertype.", ""),
+                                UserInfo.flagsToString(user.flags),
+                                hasParent ? " (parentId=" + user.profileGroupId + ")" : "",
+                                running ? " (running)" : "",
+                                user.partial ? " (partial)" : "",
+                                user.preCreated ? " (pre-created)" : "",
+                                user.convertedFromPreCreated ? " (converted)" : "",
+                                deviceOwner, profileOwner,
+                                current ? " (current)" : "");
+                    } else {
+                        // NOTE: the standard "list users" command is used by integration tests and
+                        // hence should not be changed. If you need to add more info, use the
+                        // verbose option.
+                        pw.printf("\t%s%s\n", user, running ? " running" : "");
+                    }
+                }
+                return 0;
+            }
+        }
+
+        private int runReportPackageAllowlistProblems() {
+            final PrintWriter pw = getOutPrintWriter();
+            boolean verbose = false;
+            boolean criticalOnly = false;
+            int mode = UserSystemPackageInstaller.USER_TYPE_PACKAGE_WHITELIST_MODE_NONE;
+            String opt;
+            while ((opt = getNextOption()) != null) {
+                switch (opt) {
+                    case "-v":
+                    case "--verbose":
+                        verbose = true;
+                        break;
+                    case "--critical-only":
+                        criticalOnly = true;
+                        break;
+                    case "--mode":
+                        mode = Integer.parseInt(getNextArgRequired());
+                        break;
+                    default:
+                        pw.println("Invalid option: " + opt);
+                        return -1;
+                }
+            }
+
+            Slog.d(LOG_TAG, "runReportPackageAllowlistProblems(): verbose=" + verbose
+                    + ", criticalOnly=" + criticalOnly
+                    + ", mode=" + UserSystemPackageInstaller.modeToString(mode));
+
+            try (IndentingPrintWriter ipw = new IndentingPrintWriter(pw, "  ")) {
+                mSystemPackageInstaller.dumpPackageWhitelistProblems(ipw, mode, verbose,
+                        criticalOnly);
             }
             return 0;
         }
-    }
 
-    private int runReportPackageAllowlistProblems() {
-        final PrintWriter pw = getOutPrintWriter();
-        boolean verbose = false;
-        boolean criticalOnly = false;
-        int mode = UserSystemPackageInstaller.USER_TYPE_PACKAGE_WHITELIST_MODE_NONE;
-        String opt;
-        while ((opt = getNextOption()) != null) {
-            switch (opt) {
-                case ARG_V:
-                case ARG_VERBOSE:
-                    verbose = true;
-                    break;
-                case ARG_CRITICAL_ONLY:
-                    criticalOnly = true;
-                    break;
-                case ARG_MODE:
-                    mode = Integer.parseInt(getNextArgRequired());
-                    break;
-                default:
-                    pw.println("Invalid option: " + opt);
-                    return -1;
-            }
-        }
-
-        Slog.d(LOG_TAG, "runReportPackageAllowlistProblems(): verbose=" + verbose
-                + ", criticalOnly=" + criticalOnly
-                + ", mode=" + UserSystemPackageInstaller.modeToString(mode));
-
-        try (IndentingPrintWriter ipw = new IndentingPrintWriter(pw, "  ")) {
-            mSystemPackageInstaller.dumpPackageWhitelistProblems(ipw, mode, verbose,
-                    criticalOnly);
-        }
-        return 0;
-    }
-    }
+    } // class Shell
 
     @Override
     protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {

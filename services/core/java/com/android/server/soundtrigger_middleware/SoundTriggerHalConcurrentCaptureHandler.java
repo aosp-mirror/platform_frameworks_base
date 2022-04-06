@@ -17,7 +17,6 @@
 package com.android.server.soundtrigger_middleware;
 
 import android.annotation.NonNull;
-import android.media.permission.SafeCloseable;
 import android.media.soundtrigger.ModelParameterRange;
 import android.media.soundtrigger.PhraseRecognitionEvent;
 import android.media.soundtrigger.PhraseSoundModel;
@@ -30,6 +29,7 @@ import android.media.soundtrigger.Status;
 import android.os.IBinder;
 
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Queue;
@@ -63,18 +63,24 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class SoundTriggerHalConcurrentCaptureHandler implements ISoundTriggerHal,
         ICaptureStateNotifier.Listener {
-    private final @NonNull ISoundTriggerHal mDelegate;
+    @NonNull private final ISoundTriggerHal mDelegate;
     private GlobalCallback mGlobalCallback;
+    /**
+     * This lock must be held to synchronize forward calls (start/stop/onCaptureStateChange) that
+     * update the mActiveModels set and mCaptureState.
+     * It must not be locked in HAL callbacks to avoid deadlocks.
+     */
+    @NonNull private final Object mStartStopLock = new Object();
 
     /**
      * Information about a model that is currently loaded. This is needed in order to be able to
      * send abort events to its designated callback.
      */
     private static class LoadedModel {
-        final int type;
-        final @NonNull ModelCallback callback;
+        public final int type;
+        @NonNull public final ModelCallback callback;
 
-        private LoadedModel(int type, @NonNull ModelCallback callback) {
+        LoadedModel(int type, @NonNull ModelCallback callback) {
             this.type = type;
             this.callback = callback;
         }
@@ -83,19 +89,19 @@ public class SoundTriggerHalConcurrentCaptureHandler implements ISoundTriggerHal
     /**
      * This map holds the model type for every model that is loaded.
      */
-    private final @NonNull Map<Integer, LoadedModel> mLoadedModels = new ConcurrentHashMap<>();
+    @NonNull private final Map<Integer, LoadedModel> mLoadedModels = new ConcurrentHashMap<>();
 
     /**
      * A set of all models that are currently active.
      * We use this in order to know which models to stop in case of external capture.
      * Used as a lock to synchronize operations that effect activity.
      */
-    private final @NonNull Set<Integer> mActiveModels = new HashSet<>();
+    @NonNull private final Set<Integer> mActiveModels = new HashSet<>();
 
     /**
      * Notifier for changes in capture state.
      */
-    private final @NonNull ICaptureStateNotifier mNotifier;
+    @NonNull private final ICaptureStateNotifier mNotifier;
 
     /**
      * Whether capture is active.
@@ -106,10 +112,10 @@ public class SoundTriggerHalConcurrentCaptureHandler implements ISoundTriggerHal
      * Since we're wrapping the death recipient, we need to keep a translation map for unlinking.
      * Key is the client recipient, value is the wrapper.
      */
-    private final @NonNull Map<IBinder.DeathRecipient, IBinder.DeathRecipient>
+    @NonNull private final Map<IBinder.DeathRecipient, IBinder.DeathRecipient>
             mDeathRecipientMap = new ConcurrentHashMap<>();
 
-    private final @NonNull CallbackThread mCallbackThread = new CallbackThread();
+    @NonNull private final CallbackThread mCallbackThread = new CallbackThread();
 
     public SoundTriggerHalConcurrentCaptureHandler(
             @NonNull ISoundTriggerHal delegate,
@@ -122,20 +128,28 @@ public class SoundTriggerHalConcurrentCaptureHandler implements ISoundTriggerHal
     @Override
     public void startRecognition(int modelHandle, int deviceHandle, int ioHandle,
             RecognitionConfig config) {
-        synchronized (mActiveModels) {
-            if (mCaptureState) {
-                throw new RecoverableException(Status.RESOURCE_CONTENTION);
+        synchronized (mStartStopLock) {
+            synchronized (mActiveModels) {
+                if (mCaptureState) {
+                    throw new RecoverableException(Status.RESOURCE_CONTENTION);
+                }
+                mDelegate.startRecognition(modelHandle, deviceHandle, ioHandle, config);
+                mActiveModels.add(modelHandle);
             }
-            mDelegate.startRecognition(modelHandle, deviceHandle, ioHandle, config);
-            mActiveModels.add(modelHandle);
         }
     }
 
     @Override
     public void stopRecognition(int modelHandle) {
-        synchronized (mActiveModels) {
-            mDelegate.stopRecognition(modelHandle);
-            mActiveModels.remove(modelHandle);
+        synchronized (mStartStopLock) {
+            boolean wasActive;
+            synchronized (mActiveModels) {
+                wasActive = mActiveModels.remove(modelHandle);
+            }
+            if (wasActive) {
+                // Must be done outside of the lock, since it may trigger synchronous callbacks.
+                mDelegate.stopRecognition(modelHandle);
+            }
         }
         // Block until all previous events are delivered. Since this is potentially blocking on
         // upward calls, it must be done outside the lock.
@@ -144,24 +158,35 @@ public class SoundTriggerHalConcurrentCaptureHandler implements ISoundTriggerHal
 
     @Override
     public void onCaptureStateChange(boolean active) {
-        synchronized (mActiveModels) {
+        synchronized (mStartStopLock) {
             if (active) {
-                // Abort all active models. This must be done as one transaction to the event
-                // thread, in order to be able to dedupe events before they are delivered.
-                try (SafeCloseable ignored = mCallbackThread.stallReader()) {
-                    for (int modelHandle : mActiveModels) {
-                        mDelegate.stopRecognition(modelHandle);
-                        LoadedModel model = mLoadedModels.get(modelHandle);
-                        // An abort event must be the last one for its model.
-                        mCallbackThread.pushWithDedupe(modelHandle, true,
-                                () -> notifyAbort(modelHandle, model));
-                    }
-                }
+                abortAllActiveModels();
             } else {
-                mGlobalCallback.onResourcesAvailable();
+                if (mGlobalCallback != null) {
+                    mGlobalCallback.onResourcesAvailable();
+                }
             }
-
             mCaptureState = active;
+        }
+    }
+
+    private void abortAllActiveModels() {
+        while (true) {
+            int toStop;
+            synchronized (mActiveModels) {
+                Iterator<Integer> iterator = mActiveModels.iterator();
+                if (!iterator.hasNext()) {
+                    return;
+                }
+                toStop = iterator.next();
+                mActiveModels.remove(toStop);
+            }
+            // Invoke stop outside of the lock.
+            mDelegate.stopRecognition(toStop);
+
+            LoadedModel model = mLoadedModels.get(toStop);
+            // Queue an abort event (no need to flush).
+            mCallbackThread.push(() -> notifyAbort(toStop, model));
         }
     }
 
@@ -188,23 +213,13 @@ public class SoundTriggerHalConcurrentCaptureHandler implements ISoundTriggerHal
 
     @Override
     public void registerCallback(GlobalCallback callback) {
-        mGlobalCallback = new GlobalCallback() {
-            @Override
-            public void onResourcesAvailable() {
-                mCallbackThread.push(callback::onResourcesAvailable);
-            }
-        };
+        mGlobalCallback = () -> mCallbackThread.push(callback::onResourcesAvailable);
         mDelegate.registerCallback(mGlobalCallback);
     }
 
     @Override
     public void linkToDeath(IBinder.DeathRecipient recipient) {
-        IBinder.DeathRecipient wrapper = new IBinder.DeathRecipient() {
-            @Override
-            public void binderDied() {
-                mCallbackThread.push(() -> recipient.binderDied());
-            }
-        };
+        IBinder.DeathRecipient wrapper = () -> mCallbackThread.push(recipient::binderDied);
         mDelegate.linkToDeath(wrapper);
         mDeathRecipientMap.put(recipient, wrapper);
     }
@@ -215,7 +230,7 @@ public class SoundTriggerHalConcurrentCaptureHandler implements ISoundTriggerHal
     }
 
     private class CallbackWrapper implements ISoundTriggerHal.ModelCallback {
-        private final @NonNull ISoundTriggerHal.ModelCallback mDelegateCallback;
+        @NonNull private final ISoundTriggerHal.ModelCallback mDelegateCallback;
 
         private CallbackWrapper(@NonNull ModelCallback delegateCallback) {
             mDelegateCallback = delegateCallback;
@@ -223,18 +238,36 @@ public class SoundTriggerHalConcurrentCaptureHandler implements ISoundTriggerHal
 
         @Override
         public void recognitionCallback(int modelHandle, RecognitionEvent event) {
-            // A recognition event must be the last one for its model, unless it is a forced one
-            // (those leave the model active).
-            mCallbackThread.pushWithDedupe(modelHandle, !event.recognitionStillActive,
-                    () -> mDelegateCallback.recognitionCallback(modelHandle, event));
+            synchronized (mActiveModels) {
+                if (!mActiveModels.contains(modelHandle)) {
+                    // Discard the event.
+                    return;
+                }
+                if (!event.recognitionStillActive) {
+                    mActiveModels.remove(modelHandle);
+                }
+                // A recognition event must be the last one for its model, unless it indicates that
+                // recognition is still active.
+                mCallbackThread.push(
+                        () -> mDelegateCallback.recognitionCallback(modelHandle, event));
+            }
         }
 
         @Override
         public void phraseRecognitionCallback(int modelHandle, PhraseRecognitionEvent event) {
-            // A recognition event must be the last one for its model, unless it is a forced one
-            // (those leave the model active).
-            mCallbackThread.pushWithDedupe(modelHandle, !event.common.recognitionStillActive,
-                    () -> mDelegateCallback.phraseRecognitionCallback(modelHandle, event));
+            synchronized (mActiveModels) {
+                if (!mActiveModels.contains(modelHandle)) {
+                    // Discard the event.
+                    return;
+                }
+                if (!event.common.recognitionStillActive) {
+                    mActiveModels.remove(modelHandle);
+                }
+                // A recognition event must be the last one for its model, unless it indicates that
+                // recognition is still active.
+                mCallbackThread.push(
+                        () -> mDelegateCallback.phraseRecognitionCallback(modelHandle, event));
+            }
         }
 
         @Override
@@ -254,36 +287,12 @@ public class SoundTriggerHalConcurrentCaptureHandler implements ISoundTriggerHal
      * <ul>
      * <li>Events are processed on a separate thread than the thread that pushed them, in the order
      * they were pushed.
-     * <li>Events can be deduped upon entry to the queue. This is achieved as follows:
-     * <ul>
-     *     <li>Temporarily stall the reader via {@link #stallReader()}.
-     *     <li>Within this scope, push as many events as needed via
-     *     {@link #pushWithDedupe(int, boolean, Runnable)}.
-     *     If an event with the same model handle as the one being pushed is already in the queue
-     *     and has been marked as "lastForModel", the new event will be discarded before entering
-     *     the queue.
-     *     <li>Finally, un-stall the reader by existing the scope.
-     *     <li>Events that do not require deduping can be pushed via {@link #push(Runnable)}.
-     * </ul>
      * <li>Events can be flushed via {@link #flush()}. This will block until all events pushed prior
      * to this call have been fully processed.
      * </ul>
      */
     private static class CallbackThread {
-        private static class Entry {
-            final boolean lastForModel;
-            final int modelHandle;
-            final Runnable runnable;
-
-            private Entry(boolean lastForModel, int modelHandle, Runnable runnable) {
-                this.lastForModel = lastForModel;
-                this.modelHandle = modelHandle;
-                this.runnable = runnable;
-            }
-        }
-
-        private boolean mStallReader = false;
-        private final Queue<Entry> mList = new LinkedList<>();
+        private final Queue<Runnable> mList = new LinkedList<>();
         private int mPushCount = 0;
         private int mProcessedCount = 0;
 
@@ -312,23 +321,11 @@ public class SoundTriggerHalConcurrentCaptureHandler implements ISoundTriggerHal
          * @param runnable The runnable to push.
          */
         void push(Runnable runnable) {
-            pushEntry(new Entry(false, 0, runnable), false);
-        }
-
-
-        /**
-         * Push a new runnable to the queue, with deduping.
-         * If an entry with the same model handle is already in the queue and was designated as
-         * last for model, this one will be discarded.
-         *
-         * @param modelHandle The model handle, used for deduping purposes.
-         * @param lastForModel If true, this entry will be considered the last one for this model
-         *                     and any subsequence calls for this handle (whether lastForModel or
-         *                     not) will be discarded while this entry is in the queue.
-         * @param runnable    The runnable to push.
-         */
-        void pushWithDedupe(int modelHandle, boolean lastForModel, Runnable runnable) {
-            pushEntry(new Entry(lastForModel, modelHandle, runnable), true);
+            synchronized (mList) {
+                mList.add(runnable);
+                mPushCount++;
+                mList.notifyAll();
+            }
         }
 
         /**
@@ -346,45 +343,15 @@ public class SoundTriggerHalConcurrentCaptureHandler implements ISoundTriggerHal
             }
         }
 
-        /**
-         * Creates a scope (using a try-with-resources block), within which events that are pushed
-         * remain queued and processed. This is useful in order to utilize deduping.
-         */
-        SafeCloseable stallReader() {
-            synchronized (mList) {
-                mStallReader = true;
-                return () -> {
-                    synchronized (mList) {
-                        mStallReader = false;
-                        mList.notifyAll();
-                    }
-                };
-            }
-        }
-
-        private void pushEntry(Entry entry, boolean dedupe) {
-            synchronized (mList) {
-                if (dedupe) {
-                    for (Entry existing : mList) {
-                        if (existing.lastForModel && existing.modelHandle == entry.modelHandle) {
-                            return;
-                        }
-                    }
-                }
-                mList.add(entry);
-                mPushCount++;
-                mList.notifyAll();
-            }
-        }
-
         private Runnable pop() throws InterruptedException {
             synchronized (mList) {
-                while (mStallReader || mList.isEmpty()) {
+                while (mList.isEmpty()) {
                     mList.wait();
                 }
-                return mList.remove().runnable;
+                return mList.remove();
             }
         }
+
     }
 
     /** Notify the client that recognition has been aborted. */

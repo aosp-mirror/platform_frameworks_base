@@ -249,6 +249,8 @@ final class InputMonitor {
         inputWindowHandle.setPaused(w.mActivityRecord != null && w.mActivityRecord.paused);
         inputWindowHandle.setWindowToken(w.mClient);
 
+        inputWindowHandle.setName(w.getName());
+
         // Update layout params flags to force the window to be not touch modal. We do this to
         // restrict the window's touchable region to the task even if it requests touches outside
         // its window bounds. An example is a dialog in primary split should get touches outside its

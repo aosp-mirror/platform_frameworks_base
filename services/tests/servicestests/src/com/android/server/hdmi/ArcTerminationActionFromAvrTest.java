@@ -68,7 +68,8 @@ public class ArcTerminationActionFromAvrTest {
         mContextSpy = spy(new ContextWrapper(InstrumentationRegistry.getTargetContext()));
 
         HdmiControlService hdmiControlService =
-                new HdmiControlService(mContextSpy, Collections.emptyList()) {
+                new HdmiControlService(mContextSpy, Collections.emptyList(),
+                        new FakeAudioDeviceVolumeManagerWrapper()) {
                     @Override
                     AudioManager getAudioManager() {
                         return mAudioManager;
