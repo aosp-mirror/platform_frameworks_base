@@ -96,6 +96,7 @@
     <protected-broadcast android:name="android.intent.action.OVERLAY_PRIORITY_CHANGED" />
     <protected-broadcast android:name="android.intent.action.MY_PACKAGE_SUSPENDED" />
     <protected-broadcast android:name="android.intent.action.MY_PACKAGE_UNSUSPENDED" />
+    <protected-broadcast android:name="android.app.action.MANAGED_PROFILE_PROVISIONED" />
 
     <protected-broadcast android:name="android.os.action.POWER_SAVE_MODE_CHANGED" />
     <protected-broadcast android:name="android.os.action.POWER_SAVE_MODE_CHANGING" />
