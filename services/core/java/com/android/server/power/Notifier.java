@@ -64,6 +64,8 @@ import com.android.server.policy.WindowManagerPolicy;
 import com.android.server.statusbar.StatusBarManagerInternal;
 
 import java.io.PrintWriter;
+import java.util.concurrent.Executor;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Sends broadcasts about important power state changes.
@@ -133,6 +135,7 @@ public class Notifier {
     private final DisplayManagerInternal mDisplayManagerInternal;
 
     private final NotifierHandler mHandler;
+    private final Executor mBackgroundExecutor;
     private final Intent mScreenOnIntent;
     private final Intent mScreenOffIntent;
 
@@ -169,9 +172,12 @@ public class Notifier {
     // True if a user activity message should be sent.
     private boolean mUserActivityPending;
 
+    private final AtomicBoolean mIsPlayingChargingStartedFeedback = new AtomicBoolean(false);
+
     public Notifier(Looper looper, Context context, IBatteryStats batteryStats,
             SuspendBlocker suspendBlocker, WindowManagerPolicy policy,
-            FaceDownDetector faceDownDetector, ScreenUndimDetector screenUndimDetector) {
+            FaceDownDetector faceDownDetector, ScreenUndimDetector screenUndimDetector,
+            Executor backgroundExecutor) {
         mContext = context;
         mBatteryStats = batteryStats;
         mAppOps = mContext.getSystemService(AppOpsManager.class);
@@ -188,6 +194,7 @@ public class Notifier {
         mVibrator = mContext.getSystemService(Vibrator.class);
 
         mHandler = new NotifierHandler(looper);
+        mBackgroundExecutor = backgroundExecutor;
         mScreenOnIntent = new Intent(Intent.ACTION_SCREEN_ON);
         mScreenOnIntent.addFlags(
                 Intent.FLAG_RECEIVER_REGISTERED_ONLY | Intent.FLAG_RECEIVER_FOREGROUND
@@ -824,25 +831,36 @@ public class Notifier {
             return;
         }
 
-        // vibrate
-        final boolean vibrate = Settings.Secure.getIntForUser(mContext.getContentResolver(),
-                Settings.Secure.CHARGING_VIBRATION_ENABLED, 1, userId) != 0;
-        if (vibrate) {
-            mVibrator.vibrate(CHARGING_VIBRATION_EFFECT, HARDWARE_FEEDBACK_VIBRATION_ATTRIBUTES);
+        if (!mIsPlayingChargingStartedFeedback.compareAndSet(false, true)) {
+            // there's already a charging started feedback Runnable scheduled to run on the
+            // background thread, so let's not execute another
+            return;
         }
 
-        // play sound
-        final String soundPath = Settings.Global.getString(mContext.getContentResolver(),
-                wireless ? Settings.Global.WIRELESS_CHARGING_STARTED_SOUND
-                        : Settings.Global.CHARGING_STARTED_SOUND);
-        final Uri soundUri = Uri.parse("file://" + soundPath);
-        if (soundUri != null) {
-            final Ringtone sfx = RingtoneManager.getRingtone(mContext, soundUri);
-            if (sfx != null) {
-                sfx.setStreamType(AudioManager.STREAM_SYSTEM);
-                sfx.play();
+        // vibrate & play sound on a background thread
+        mBackgroundExecutor.execute(() -> {
+            // vibrate
+            final boolean vibrate = Settings.Secure.getIntForUser(mContext.getContentResolver(),
+                    Settings.Secure.CHARGING_VIBRATION_ENABLED, 1, userId) != 0;
+            if (vibrate) {
+                mVibrator.vibrate(CHARGING_VIBRATION_EFFECT,
+                        HARDWARE_FEEDBACK_VIBRATION_ATTRIBUTES);
             }
-        }
+
+            // play sound
+            final String soundPath = Settings.Global.getString(mContext.getContentResolver(),
+                    wireless ? Settings.Global.WIRELESS_CHARGING_STARTED_SOUND
+                            : Settings.Global.CHARGING_STARTED_SOUND);
+            final Uri soundUri = Uri.parse("file://" + soundPath);
+            if (soundUri != null) {
+                final Ringtone sfx = RingtoneManager.getRingtone(mContext, soundUri);
+                if (sfx != null) {
+                    sfx.setStreamType(AudioManager.STREAM_SYSTEM);
+                    sfx.play();
+                }
+            }
+            mIsPlayingChargingStartedFeedback.set(false);
+        });
     }
 
     private void showWirelessChargingStarted(int batteryLevel, @UserIdInt int userId) {
