@@ -135,7 +135,7 @@
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="2242167416140740920">"ພິສູດຢືນຢັນໃບໜ້າແລ້ວ"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"ຢືນຢັນແລ້ວ"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"ແຕະຢືນຢັນເພື່ອສຳເລັດ"</string>
-    <!-- no translation found for biometric_dialog_tap_confirm_with_face (7538145860465755864) -->
+    <!-- no translation found for biometric_dialog_tap_confirm_with_face (1092050545851021991) -->
     <skip />
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"ຮັບຮອງຄວາມຖືກຕ້ອງແລ້ວ"</string>
     <string name="biometric_dialog_use_pin" msgid="8385294115283000709">"ໃຊ້ PIN"</string>
@@ -292,24 +292,15 @@
     <string name="sensor_privacy_start_use_mic_dialog_content" msgid="1624701280680913717">"ນີ້ຈະຍົກເລີກການບລັອກການເຂົ້າເຖິງແອັບ ແລະ ບໍລິການທັງໝົດທີ່ອະນຸຍາດໃຫ້ໃຊ້ໄມໂຄຣໂຟນຂອງທ່ານ."</string>
     <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"ນີ້ຈະຍົກເລີກການບລັອກການເຂົ້າເຖິງແອັບ ແລະ ບໍລິການທັງໝົດທີ່ອະນຸຍາດໃຫ້ໃຊ້ກ້ອງຖ່າຍຮູບຂອງທ່ານ."</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_content" msgid="3577642558418404919">"ນີ້ຈະປົດບລັອກການເຂົ້າເຖິງແອັບ ແລະ ບໍລິການທັງໝົດທີ່ອະນຸຍາດໃຫ້ໃຊ້ກ້ອງຖ່າຍຮູບ ຫຼື ໄມໂຄຣໂຟນຂອງທ່ານ."</string>
-    <!-- no translation found for sensor_privacy_start_use_mic_blocked_dialog_title (2640140287496469689) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_start_use_camera_blocked_dialog_title (7398084286822440384) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_start_use_mic_camera_blocked_dialog_title (195236134743281973) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_start_use_mic_blocked_dialog_content (2138318880682877747) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_start_use_camera_blocked_dialog_content (7216015168047965948) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_start_use_mic_camera_blocked_dialog_content (3960837827570483762) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_mic_unblocked_toast_content (306555320557065068) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_camera_unblocked_toast_content (7843105715964332311) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_mic_camera_unblocked_toast_content (7339355093282661115) -->
-    <skip />
+    <string name="sensor_privacy_start_use_mic_blocked_dialog_title" msgid="2640140287496469689">"ໄມໂຄຣໂຟນຖືກບລັອກໄວ້"</string>
+    <string name="sensor_privacy_start_use_camera_blocked_dialog_title" msgid="7398084286822440384">"ກ້ອງຖືກບລັອກໄວ້"</string>
+    <string name="sensor_privacy_start_use_mic_camera_blocked_dialog_title" msgid="195236134743281973">"ບລັອກໄມ ແລະ ກ້ອງຖ່າຍຮູບແລ້ວ"</string>
+    <string name="sensor_privacy_start_use_mic_blocked_dialog_content" msgid="2138318880682877747">"ເພື່ອປົດລັອກ, ໃຫ້ເລື່ອນສະວິດຄວາມເປັນສ່ວນຕົວຢູ່ອຸປະກອນຂອງທ່ານໄປໃສ່ຕຳແໜ່ງເປີດຢູ່ໄມໂຄຣໂຟນເພື່ອອະນຸຍາດສິດເຂົ້າເຖິງໄມໂຄຣໂຟນ. ກະລຸນາອ້າງອີງຄູ່ມືອຸປະກອນເພື່ອຊອກຫາສະວິດຄວາມເປັນສ່ວນຕົວຢູ່ອຸປະກອນຂອງທ່ານ."</string>
+    <string name="sensor_privacy_start_use_camera_blocked_dialog_content" msgid="7216015168047965948">"ເພື່ອປົດລັອກ, ໃຫ້ເລື່ອນສະວິດຄວາມເປັນສ່ວນຕົວຢູ່ອຸປະກອນຂອງທ່ານໄປໃສ່ຕຳແໜ່ງເປີດຢູ່ກ້ອງຖ່າຍຮູບເພື່ອອະນຸຍາດສິດເຂົ້າເຖິງກ້ອງຖ່າຍຮູບ. ກະລຸນາອ້າງອີງຄູ່ມືອຸປະກອນເພື່ອຊອກຫາສະວິດຄວາມເປັນສ່ວນຕົວຢູ່ອຸປະກອນຂອງທ່ານ."</string>
+    <string name="sensor_privacy_start_use_mic_camera_blocked_dialog_content" msgid="3960837827570483762">"ເພື່ອປົດລັອກພວກມັນ, ໃຫ້ເລື່ອນສະວິດຄວາມເປັນສ່ວນຕົວຢູ່ອຸປະກອນຂອງທ່ານໄປໃສ່ຕຳແໜ່ງປົດລັອກເພື່ອອະນຸຍາດສິດເຂົ້າເຖິງ. ກະລຸນາອ້າງອີງຄູ່ມືອຸປະກອນເພື່ອຊອກຫາສະວິດຄວາມເປັນສ່ວນຕົວຢູ່ອຸປະກອນຂອງທ່ານ."</string>
+    <string name="sensor_privacy_mic_unblocked_toast_content" msgid="306555320557065068">"ສາມາດໃຊ້ໄມໂຄຣໂຟນໄດ້"</string>
+    <string name="sensor_privacy_camera_unblocked_toast_content" msgid="7843105715964332311">"ສາມາດໃຊ້ກ້ອງຖ່າຍຮູບໄດ້"</string>
+    <string name="sensor_privacy_mic_camera_unblocked_toast_content" msgid="7339355093282661115">"ສາມາດໃຊ້ໄມໂຄຣໂຟນ ແລະ ກ້ອງຖ່າຍຮູບໄດ້"</string>
     <string name="media_seamless_other_device" msgid="4654849800789196737">"ອຸປະກອນອື່ນໆ"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"ສະຫຼັບພາບຮວມ"</string>
     <string name="zen_priority_introduction" msgid="3159291973383796646">"ທ່ານຈະບໍ່ໄດ້ຮັບການລົບກວນຈາກສຽງ ແລະ ການສັ່ນເຕືອນ, ຍົກເວັ້ນໃນເວລາໂມງປຸກດັງ, ມີການແຈ້ງເຕືອນ ຫຼື ມີສາຍໂທເຂົ້າຈາກຜູ້ໂທທີ່ທ່ານລະບຸໄວ້. ທ່ານອາດຍັງຄົງໄດ້ຍິນຫາກທ່ານເລືອກຫຼິ້ນເພງ, ວິດີໂອ ແລະ ເກມ."</string>
@@ -320,7 +311,10 @@
     <string name="notification_tap_again" msgid="4477318164947497249">"ແຕະ​ອີກ​ຄັ້ງ​ເພື່ອ​ເປີດ"</string>
     <string name="tap_again" msgid="1315420114387908655">"ແຕະອີກເທື່ອໜຶ່ງ"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"ປັດຂຶ້ນເພື່ອເປີດ"</string>
-    <string name="keyguard_unlock_press" msgid="8488350566398524740">"ກົດເພື່ອເປີດ"</string>
+    <!-- no translation found for keyguard_unlock_press (9140109453735019209) -->
+    <skip />
+    <!-- no translation found for keyguard_face_successful_unlock_press (25520941264602588) -->
+    <skip />
     <string name="keyguard_retry" msgid="886802522584053523">"ປັດຂຶ້ນເພື່ອລອງໃໝ່"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"ປົດລັອກເພື່ອໃຊ້ NFC"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"ອຸປະກອນນີ້ເປັນຂອງອົງການທ່ານ"</string>
@@ -788,18 +782,12 @@
     <string name="controls_dialog_ok" msgid="2770230012857881822">"ເພີ່ມ"</string>
     <string name="controls_dialog_message" msgid="342066938390663844">"ແນະນຳໂດຍ <xliff:g id="APP">%s</xliff:g>"</string>
     <string name="controls_tile_locked" msgid="731547768182831938">"ອຸປະກອນຖືກລັອກໄວ້"</string>
-    <!-- no translation found for controls_settings_show_controls_dialog_title (3357852503553809554) -->
-    <skip />
-    <!-- no translation found for controls_settings_show_controls_dialog_message (7666211700524587969) -->
-    <skip />
-    <!-- no translation found for controls_settings_trivial_controls_dialog_title (7593188157655036677) -->
-    <skip />
-    <!-- no translation found for controls_settings_trivial_controls_dialog_message (237183787721917586) -->
-    <skip />
-    <!-- no translation found for controls_settings_dialog_neutral_button (4514446354793124140) -->
-    <skip />
-    <!-- no translation found for controls_settings_dialog_positive_button (436070672551674863) -->
-    <skip />
+    <string name="controls_settings_show_controls_dialog_title" msgid="3357852503553809554">"ສະແດງ ແລະ ຄວບຄຸມອຸປະກອນຈາກໜ້າຈໍລັອກບໍ?"</string>
+    <string name="controls_settings_show_controls_dialog_message" msgid="7666211700524587969">"ທ່ານສາມາດເພີ່ມການຄວບຄຸມສຳລັບອຸປະກອນພາຍນອກຂອງທ່ານໄປໃສ່ໜ້າຈໍລັອກໄດ້.\n\nແອັບອຸປະກອນຂອງທ່ານອາດອະນຸຍາດໃຫ້ທ່ານຄວບຄຸມອຸປະກອນບາງຢ່າງໄດ້ໂດຍບໍ່ຕ້ອງປົດລັອກໂທລະສັບ ຫຼື ແທັບເລັດຂອງທ່ານ.\n\nທ່ານສາມາດປ່ຽນແປງຕອນໃດກໍໄດ້ໃນການຕັ້ງຄ່າ."</string>
+    <string name="controls_settings_trivial_controls_dialog_title" msgid="7593188157655036677">"ຄວບຄຸມອຸປະກອນຈາກໜ້າຈໍລັອກບໍ?"</string>
+    <string name="controls_settings_trivial_controls_dialog_message" msgid="237183787721917586">"ທ່ານສາມາດຄວບຄຸມອຸປະກອນບາງຢ່າງໄດ້ໂດຍບໍ່ຕ້ອງປົດລັອກໂທລະສັບ ຫຼື ແທັບເລັດຂອງທ່ານ.\n\nແອັບອຸປະກອນຂອງທ່ານຈະກຳນົດວ່າອຸປະກອນໃດສາມາດຖືກຄວບຄຸມດ້ວຍວິທີນີ້ໄດ້."</string>
+    <string name="controls_settings_dialog_neutral_button" msgid="4514446354793124140">"ບໍ່, ຂອບໃຈ"</string>
+    <string name="controls_settings_dialog_positive_button" msgid="436070672551674863">"ແມ່ນແລ້ວ"</string>
     <string name="controls_pin_use_alphanumeric" msgid="8478371861023048414">"PIN ປະກອບມີຕົວອັກສອນ ຫຼື ສັນຍາລັກ"</string>
     <string name="controls_pin_verify" msgid="3452778292918877662">"ຢັ້ງຢືນ <xliff:g id="DEVICE">%s</xliff:g>"</string>
     <string name="controls_pin_wrong" msgid="6162694056042164211">"PIN ບໍ່ຖືກຕ້ອງ"</string>
@@ -849,20 +837,13 @@
     <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"ເພື່ອສົ່ງສັນຍານເຊດຊັນນີ້, ກະລຸນາເປີດແອັບ."</string>
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"ແອັບທີ່ບໍ່ຮູ້ຈັກ"</string>
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"ຢຸດການສົ່ງສັນຍານ"</string>
-    <!-- no translation found for media_output_first_broadcast_title (6292237789860753022) -->
-    <skip />
-    <!-- no translation found for media_output_broadcast (3555580945878071543) -->
-    <skip />
-    <!-- no translation found for media_output_first_notify_broadcast_message (6353857724136398494) -->
-    <skip />
-    <!-- no translation found for media_output_broadcasting_message (4150299923404886073) -->
-    <skip />
-    <!-- no translation found for media_output_broadcast_name (8786127091542624618) -->
-    <skip />
-    <!-- no translation found for media_output_broadcast_code (870795639644728542) -->
-    <skip />
-    <!-- no translation found for media_output_broadcast_dialog_save (7910865591430010198) -->
-    <skip />
+    <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"ການອອກອາກາດເຮັດວຽກແນວໃດ"</string>
+    <string name="media_output_broadcast" msgid="3555580945878071543">"ອອກອາກາດ"</string>
+    <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"ຄົນທີ່ຢູ່ໃກ້ທ່ານທີ່ມີອຸປະກອນ Bluetooth ທີ່ເຂົ້າກັນໄດ້ຈະສາມາດຟັງມີເດຍທີ່ທ່ານກຳລັງອອກອາກາດຢູ່ໄດ້"</string>
+    <string name="media_output_broadcasting_message" msgid="4150299923404886073">"ເພື່ອຟັງການອອກອາກາດຂອງທ່ານ, ຄົນທີ່ຢູ່ໃກ້ຄຽງທີ່ມີອຸປະກອນ Bluetooth ທີ່ເຂົ້າກັນໄດ້ຈະສາມາດສະແກນລະຫັດ QR ຂອງທ່ານ ຫຼື ໃຊ້ຊື່ ແລະ ລະຫັດຜ່ານການອອກອາກາດຂອງທ່ານໄດ້"</string>
+    <string name="media_output_broadcast_name" msgid="8786127091542624618">"ຊື່ການອອກອາກາດ"</string>
+    <string name="media_output_broadcast_code" msgid="870795639644728542">"ລະຫັດຜ່ານ"</string>
+    <string name="media_output_broadcast_dialog_save" msgid="7910865591430010198">"ບັນທຶກ"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"ໝາຍເລກສ້າງ"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"ສຳເນົາໝາຍເລກສ້າງໄປໃສ່ຄລິບບອດແລ້ວ."</string>
     <string name="basic_status" msgid="2315371112182658176">"ເປີດການສົນທະນາ"</string>
@@ -939,8 +920,7 @@
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"ແອັບທີ່ນຳໃຊ້ຢູ່"</string>
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"ຢຸດ"</string>
     <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"ຢຸດແລ້ວ"</string>
-    <!-- no translation found for clipboard_edit_text_done (4551887727694022409) -->
-    <skip />
+    <string name="clipboard_edit_text_done" msgid="4551887727694022409">"ແລ້ວໆ"</string>
     <string name="clipboard_overlay_text_copied" msgid="1872624400464891363">"ສຳເນົາແລ້ວ"</string>
     <string name="clipboard_edit_source" msgid="9156488177277788029">"ຈາກ <xliff:g id="APPNAME">%1$s</xliff:g>"</string>
     <string name="clipboard_dismiss_description" msgid="7544573092766945657">"ປິດການສຳເນົາສ່ວນຕິດຕໍ່ຜູ້ໃຊ້ໄວ້"</string>

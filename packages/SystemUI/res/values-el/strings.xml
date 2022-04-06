@@ -35,7 +35,7 @@
     <string name="usb_device_permission_prompt" msgid="4414719028369181772">"Να επιτρέπεται η πρόσβαση της εφαρμογής <xliff:g id="APPLICATION">%1$s</xliff:g> στη συσκευή <xliff:g id="USB_DEVICE">%2$s</xliff:g>;"</string>
     <string name="usb_device_permission_prompt_warn" msgid="2309129784984063656">"Να επιτρέπεται στην εφαρμογή <xliff:g id="APPLICATION">%1$s</xliff:g> να έχει πρόσβαση στη συσκευή <xliff:g id="USB_DEVICE">%2$s</xliff:g>;\nΔεν έχει εκχωρηθεί άδεια εγγραφής σε αυτήν την εφαρμογή, αλλά μέσω αυτής της συσκευής USB θα μπορεί να εγγράφει ήχο."</string>
     <string name="usb_audio_device_permission_prompt_title" msgid="4221351137250093451">"Να επιτρέπεται στην εφαρμογή <xliff:g id="APPLICATION">%1$s</xliff:g> η πρόσβαση στη συσκευή <xliff:g id="USB_DEVICE">%2$s</xliff:g>;"</string>
-    <string name="usb_audio_device_confirm_prompt_title" msgid="8828406516732985696">"Άνοιγμα της εφαρμογής <xliff:g id="APPLICATION">%1$s</xliff:g> για τη διαχείριση της συσκευής <xliff:g id="USB_DEVICE">%2$s</xliff:g>;"</string>
+    <string name="usb_audio_device_confirm_prompt_title" msgid="8828406516732985696">"Άνοιγμα <xliff:g id="APPLICATION">%1$s</xliff:g> για διαχείριση συσκευής <xliff:g id="USB_DEVICE">%2$s</xliff:g>;"</string>
     <string name="usb_audio_device_prompt_warn" msgid="2504972133361130335">"Δεν έχει εκχωρηθεί άδεια εγγραφής σε αυτήν την εφαρμογή, αλλά μέσω αυτής της συσκευής USB θα μπορεί να εγγράφει ήχο. Η χρήση της εφαρμογής <xliff:g id="APPLICATION">%1$s</xliff:g> με αυτήν τη συσκευή μπορεί να σας εμποδίσει να ακούσετε κλήσεις, ειδοποιήσεις και ξυπνητήρια."</string>
     <string name="usb_audio_device_prompt" msgid="7944987408206252949">"Η χρήση της εφαρμογής <xliff:g id="APPLICATION">%1$s</xliff:g> με αυτήν τη συσκευή μπορεί να σας εμποδίσει να ακούσετε κλήσεις, ειδοποιήσεις και ξυπνητήρια."</string>
     <string name="usb_accessory_permission_prompt" msgid="717963550388312123">"Να επιτρέπεται η πρόσβαση της εφαρμογής <xliff:g id="APPLICATION">%1$s</xliff:g> στο αξεσουάρ <xliff:g id="USB_ACCESSORY">%2$s</xliff:g>;"</string>
@@ -135,7 +135,7 @@
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="2242167416140740920">"Έγινε έλεγχος ταυτότητας προσώπου"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"Επιβεβαιώθηκε"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"Πατήστε Επιβεβαίωση για ολοκλήρωση"</string>
-    <!-- no translation found for biometric_dialog_tap_confirm_with_face (7538145860465755864) -->
+    <!-- no translation found for biometric_dialog_tap_confirm_with_face (1092050545851021991) -->
     <skip />
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"Ολοκληρώθηκε ο έλεγχος ταυτότητας"</string>
     <string name="biometric_dialog_use_pin" msgid="8385294115283000709">"Χρήση PIN"</string>
@@ -292,24 +292,15 @@
     <string name="sensor_privacy_start_use_mic_dialog_content" msgid="1624701280680913717">"Με αυτόν τον τρόπο καταργείται ο αποκλεισμός της πρόσβασης για όλες τις εφαρμογές και υπηρεσίες που επιτρέπεται να χρησιμοποιούν το μικρόφωνό σας."</string>
     <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"Με αυτόν τον τρόπο καταργείται ο αποκλεισμός της πρόσβασης για όλες τις εφαρμογές και υπηρεσίες που επιτρέπεται να χρησιμοποιούν την κάμερά σας."</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_content" msgid="3577642558418404919">"Με αυτόν τον τρόπο καταργείται ο αποκλεισμός της πρόσβασης για όλες τις εφαρμογές και υπηρεσίες που επιτρέπεται να χρησιμοποιούν την κάμερα ή το μικρόφωνό σας."</string>
-    <!-- no translation found for sensor_privacy_start_use_mic_blocked_dialog_title (2640140287496469689) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_start_use_camera_blocked_dialog_title (7398084286822440384) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_start_use_mic_camera_blocked_dialog_title (195236134743281973) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_start_use_mic_blocked_dialog_content (2138318880682877747) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_start_use_camera_blocked_dialog_content (7216015168047965948) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_start_use_mic_camera_blocked_dialog_content (3960837827570483762) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_mic_unblocked_toast_content (306555320557065068) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_camera_unblocked_toast_content (7843105715964332311) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_mic_camera_unblocked_toast_content (7339355093282661115) -->
-    <skip />
+    <string name="sensor_privacy_start_use_mic_blocked_dialog_title" msgid="2640140287496469689">"Το μικρόφωνο έχει αποκλειστεί"</string>
+    <string name="sensor_privacy_start_use_camera_blocked_dialog_title" msgid="7398084286822440384">"Η κάμερα έχει αποκλειστεί"</string>
+    <string name="sensor_privacy_start_use_mic_camera_blocked_dialog_title" msgid="195236134743281973">"Το μικρόφωνο και η κάμερά σας έχουν αποκλειστεί"</string>
+    <string name="sensor_privacy_start_use_mic_blocked_dialog_content" msgid="2138318880682877747">"Για την κατάργηση του αποκλεισμού, μετακινήστε τον διακόπτη απορρήτου της συσκευής σας στη θέση ενεργοποίησης για το μικρόφωνο, προκειμένου να επιτρέψετε την πρόσβαση στο μικρόφωνο. Ανατρέξτε στο εγχειρίδιο χρήσης της συσκευής σας για να εντοπίσετε τον διακόπτη απορρήτου στη συσκευή."</string>
+    <string name="sensor_privacy_start_use_camera_blocked_dialog_content" msgid="7216015168047965948">"Για την κατάργηση του αποκλεισμού, μετακινήστε τον διακόπτη απορρήτου της συσκευής σας στη θέση ενεργοποίησης για την κάμερα, προκειμένου να επιτρέψετε την πρόσβαση στην κάμερα. Ανατρέξτε στο εγχειρίδιο χρήσης της συσκευής σας για να εντοπίσετε τον διακόπτη απορρήτου στη συσκευή."</string>
+    <string name="sensor_privacy_start_use_mic_camera_blocked_dialog_content" msgid="3960837827570483762">"Για την κατάργηση του αποκλεισμού τους, μετακινήστε τον διακόπτη απορρήτου της συσκευής σας στη θέση μη αποκλεισμού, προκειμένου να επιτρέψετε την πρόσβαση. Ανατρέξτε στο εγχειρίδιο χρήσης της συσκευής σας για να εντοπίσετε τον διακόπτη απορρήτου στη συσκευή."</string>
+    <string name="sensor_privacy_mic_unblocked_toast_content" msgid="306555320557065068">"Διαθέσιμο μικρόφωνο"</string>
+    <string name="sensor_privacy_camera_unblocked_toast_content" msgid="7843105715964332311">"Διαθέσιμη κάμερα"</string>
+    <string name="sensor_privacy_mic_camera_unblocked_toast_content" msgid="7339355093282661115">"Διαθέσιμη κάμερα και μικρόφωνο"</string>
     <string name="media_seamless_other_device" msgid="4654849800789196737">"Άλλη συσκευή"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"Εναλλαγή επισκόπησης"</string>
     <string name="zen_priority_introduction" msgid="3159291973383796646">"Δεν θα ενοχλείστε από ήχους και δονήσεις, παρά μόνο από ξυπνητήρια, υπενθυμίσεις, συμβάντα και καλούντες που έχετε καθορίσει. Θα εξακολουθείτε να ακούτε όλο το περιεχόμενο που επιλέγετε να αναπαραγάγετε, συμπεριλαμβανομένης της μουσικής, των βίντεο και των παιχνιδιών."</string>
@@ -320,7 +311,10 @@
     <string name="notification_tap_again" msgid="4477318164947497249">"Πατήστε ξανά για να ανοίξετε"</string>
     <string name="tap_again" msgid="1315420114387908655">"Πατήστε ξανά"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"Σύρετε προς τα επάνω για άνοιγμα"</string>
-    <string name="keyguard_unlock_press" msgid="8488350566398524740">"Πατήστε για άνοιγμα"</string>
+    <!-- no translation found for keyguard_unlock_press (9140109453735019209) -->
+    <skip />
+    <!-- no translation found for keyguard_face_successful_unlock_press (25520941264602588) -->
+    <skip />
     <string name="keyguard_retry" msgid="886802522584053523">"Σύρετε προς τα πάνω για να δοκιμάσετε ξανά"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"Ξεκλείδωμα για χρήση του NFC"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"Αυτή η συσκευή ανήκει στον οργανισμό σας."</string>
@@ -843,20 +837,13 @@
     <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"Για μετάδοση της περιόδου σύνδεσης, ανοίξτε την εφαρμογή."</string>
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"Άγνωστη εφαρμογή"</string>
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"Διακοπή μετάδοσης"</string>
-    <!-- no translation found for media_output_first_broadcast_title (6292237789860753022) -->
-    <skip />
-    <!-- no translation found for media_output_broadcast (3555580945878071543) -->
-    <skip />
-    <!-- no translation found for media_output_first_notify_broadcast_message (6353857724136398494) -->
-    <skip />
-    <!-- no translation found for media_output_broadcasting_message (4150299923404886073) -->
-    <skip />
-    <!-- no translation found for media_output_broadcast_name (8786127091542624618) -->
-    <skip />
-    <!-- no translation found for media_output_broadcast_code (870795639644728542) -->
-    <skip />
-    <!-- no translation found for media_output_broadcast_dialog_save (7910865591430010198) -->
-    <skip />
+    <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Πώς λειτουργεί η μετάδοση"</string>
+    <string name="media_output_broadcast" msgid="3555580945878071543">"Μετάδοση"</string>
+    <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"Οι άνθρωποι με συμβατές συσκευές Bluetooth που βρίσκονται κοντά σας μπορούν να ακούσουν το μέσο που μεταδίδετε."</string>
+    <string name="media_output_broadcasting_message" msgid="4150299923404886073">"Για να ακούσουν τη μετάδοσή σας, οι άνθρωποι με συμβατές συσκευές Bluetooth που βρίσκονται σε κοντινή απόσταση μπορούν είτε να σαρώσουν τον κωδικό QR είτε να χρησιμοποιήσουν το όνομα μετάδοσης και τον αντίστοιχο κωδικό πρόσβασης."</string>
+    <string name="media_output_broadcast_name" msgid="8786127091542624618">"Όνομα μετάδοσης"</string>
+    <string name="media_output_broadcast_code" msgid="870795639644728542">"Κωδικός πρόσβασης"</string>
+    <string name="media_output_broadcast_dialog_save" msgid="7910865591430010198">"Αποθήκευση"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"Αριθμός έκδοσης"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"Ο αριθμός έκδοσης αντιγράφηκε στο πρόχειρο."</string>
     <string name="basic_status" msgid="2315371112182658176">"Άνοιγμα συνομιλίας"</string>
