@@ -33,7 +33,7 @@
     <string name="invalid_charger_title" msgid="938685362320735167">"No se puede cargar mediante USB"</string>
     <string name="invalid_charger_text" msgid="2339310107232691577">"Usa el cargador que se incluyó con el dispositivo"</string>
     <string name="battery_low_why" msgid="2056750982959359863">"Configuración"</string>
-    <string name="battery_saver_confirmation_title" msgid="1234998463717398453">"¿Deseas activar Ahorro de batería?"</string>
+    <string name="battery_saver_confirmation_title" msgid="1234998463717398453">"¿Quieres activar el Ahorro de batería?"</string>
     <string name="battery_saver_confirmation_title_generic" msgid="2299231884234959849">"Acerca del Ahorro de batería"</string>
     <string name="battery_saver_confirmation_ok" msgid="5042136476802816494">"Activar"</string>
     <string name="battery_saver_start_action" msgid="4553256017945469937">"Activar el Ahorro de batería"</string>
@@ -100,12 +100,12 @@
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Procesando grabación pantalla"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Notificación constante para una sesión de grabación de pantalla"</string>
     <string name="screenrecord_start_label" msgid="1750350278888217473">"¿Comenzar a grabar?"</string>
-    <string name="screenrecord_description" msgid="1123231719680353736">"Durante la grabación, el sistema Android puede capturar la información sensible que aparezca en la pantalla o que se reproduzca en el dispositivo. Se incluyen contraseñas, información de pago, fotos, mensajes y audio."</string>
+    <string name="screenrecord_description" msgid="1123231719680353736">"Durante la grabación, el sistema Android puede capturar cualquier información sensible que aparezca en la pantalla o que se reproduzca en el dispositivo. Se incluyen contraseñas, información de pago, fotos, mensajes y audio."</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"Grabar audio"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"Audio del dispositivo"</string>
     <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"Sonidos del dispositivo, como música, llamadas y tonos"</string>
     <string name="screenrecord_mic_label" msgid="2111264835791332350">"Micrófono"</string>
-    <string name="screenrecord_device_audio_and_mic_label" msgid="1831323771978646841">"Micrófono y audio del dispositivo"</string>
+    <string name="screenrecord_device_audio_and_mic_label" msgid="1831323771978646841">"Audio del dispositivo y micrófono"</string>
     <string name="screenrecord_start" msgid="330991441575775004">"Iniciar"</string>
     <string name="screenrecord_ongoing_screen_only" msgid="4459670242451527727">"Grabando pantalla"</string>
     <string name="screenrecord_ongoing_screen_and_audio" msgid="5351133763125180920">"Grabando pantalla y audio"</string>

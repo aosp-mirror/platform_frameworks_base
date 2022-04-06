@@ -55,8 +55,8 @@
     <string name="usb_accessory_uri_prompt" msgid="6756649383432542382">"Установлені прогр. не працюють із цим аксесуаром USB. Більше про цей аксесуар: <xliff:g id="URL">%1$s</xliff:g>"</string>
     <string name="title_usb_accessory" msgid="1236358027511638648">"Пристрій USB"</string>
     <string name="label_view" msgid="6815442985276363364">"Переглянути"</string>
-    <string name="always_use_device" msgid="210535878779644679">"Завжди відкривати додаток <xliff:g id="APPLICATION">%1$s</xliff:g>, коли під’єднано такий аксесуар: <xliff:g id="USB_DEVICE">%2$s</xliff:g>"</string>
-    <string name="always_use_accessory" msgid="1977225429341838444">"Завжди відкривати додаток <xliff:g id="APPLICATION">%1$s</xliff:g>, коли під’єднано такий аксесуар: <xliff:g id="USB_ACCESSORY">%2$s</xliff:g>"</string>
+    <string name="always_use_device" msgid="210535878779644679">"Завжди відкривати додаток <xliff:g id="APPLICATION">%1$s</xliff:g>, коли під’єднуться пристрій <xliff:g id="USB_DEVICE">%2$s</xliff:g>"</string>
+    <string name="always_use_accessory" msgid="1977225429341838444">"Завжди відкривати додаток <xliff:g id="APPLICATION">%1$s</xliff:g>, коли під’єднуться пристрій <xliff:g id="USB_ACCESSORY">%2$s</xliff:g>"</string>
     <string name="usb_debugging_title" msgid="8274884945238642726">"Дозволити налагодження USB?"</string>
     <string name="usb_debugging_message" msgid="5794616114463921773">"Цифровий відбиток ключа RSA комп’ютера:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="4003121804294739548">"Завжди дозволяти з цього комп’ютера"</string>

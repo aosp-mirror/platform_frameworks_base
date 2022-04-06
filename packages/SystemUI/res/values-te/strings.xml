@@ -49,9 +49,9 @@
     <string name="usb_device_permission_prompt" msgid="4414719028369181772">"<xliff:g id="USB_DEVICE">%2$s</xliff:g>ని యాక్సెస్ చేయడానికి <xliff:g id="APPLICATION">%1$s</xliff:g>ని అనుమతించాలా?"</string>
     <string name="usb_device_permission_prompt_warn" msgid="2309129784984063656">"<xliff:g id="USB_DEVICE">%2$s</xliff:g>యాక్సెస్ చేయడానికి <xliff:g id="APPLICATION">%1$s</xliff:g>ను అనుమతించాలా?\nఈ యాప్‌నకు రికార్డ్ చేసే అనుమతి మంజూరు చేయబడలేదు, కానీ ఈ USB పరికరం ద్వారా ఆడియోను క్యాప్చర్ చేయగలదు."</string>
     <string name="usb_accessory_permission_prompt" msgid="717963550388312123">"<xliff:g id="USB_ACCESSORY">%2$s</xliff:g>ని యాక్సెస్ చేయడానికి <xliff:g id="APPLICATION">%1$s</xliff:g>ని అనుమతించాలా?"</string>
-    <string name="usb_device_confirm_prompt" msgid="4091711472439910809">"<xliff:g id="USB_DEVICE">%2$s</xliff:g>ని నిర్వహించడానికి <xliff:g id="APPLICATION">%1$s</xliff:g>ని తెరవాలా?"</string>
+    <string name="usb_device_confirm_prompt" msgid="4091711472439910809">"<xliff:g id="USB_DEVICE">%2$s</xliff:g>ని హ్యాండిల్ చేయడానికి <xliff:g id="APPLICATION">%1$s</xliff:g>ని తెరవాలా?"</string>
     <string name="usb_device_confirm_prompt_warn" msgid="990208659736311769">"<xliff:g id="USB_DEVICE">%2$s</xliff:g>ని హ్యాండిల్ చేయడానికి <xliff:g id="APPLICATION">%1$s</xliff:g>ను తెరవాలా?\nఈ యాప్‌కు రికార్డ్ చేసే అనుమతి మంజూరు కాలేదు, అయినా ఈ USB పరికరం ద్వారా ఆడియోను క్యాప్చర్ చేయగలదు."</string>
-    <string name="usb_accessory_confirm_prompt" msgid="5728408382798643421">"<xliff:g id="USB_ACCESSORY">%2$s</xliff:g>ని నిర్వహించడానికి <xliff:g id="APPLICATION">%1$s</xliff:g>ని తెరవాలా?"</string>
+    <string name="usb_accessory_confirm_prompt" msgid="5728408382798643421">"<xliff:g id="USB_ACCESSORY">%2$s</xliff:g>ని హ్యాండిల్ చేయడానికి <xliff:g id="APPLICATION">%1$s</xliff:g>ని తెరవాలా?"</string>
     <string name="usb_accessory_uri_prompt" msgid="6756649383432542382">"ఈ USB ఉపకరణంతో ఇన్‌స్టాల్ చేయబడిన యాప్‌లు ఏవీ పని చేయవు. ఈ ఉపకరణం గురించి <xliff:g id="URL">%1$s</xliff:g>లో మరింత తెలుసుకోండి"</string>
     <string name="title_usb_accessory" msgid="1236358027511638648">"USB ఉపకరణం"</string>
     <string name="label_view" msgid="6815442985276363364">"చూడండి"</string>
@@ -442,8 +442,8 @@
     <string name="expanded_header_battery_not_charging" msgid="809409140358955848">"ఛార్జ్ కావడం లేదు"</string>
     <string name="ssl_ca_cert_warning" msgid="8373011375250324005">"నెట్‌వర్క్\nపర్యవేక్షించబడవచ్చు"</string>
     <string name="description_target_search" msgid="3875069993128855865">"సెర్చ్"</string>
-    <string name="description_direction_up" msgid="3632251507574121434">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> కోసం పైకి స్లైడ్ చేయండి."</string>
-    <string name="description_direction_left" msgid="4762708739096907741">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> కోసం ఎడమవైపుకు స్లైడ్ చేయండి."</string>
+    <string name="description_direction_up" msgid="3632251507574121434">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> కోసం పైకి స్లయిడ్‌ చేయండి."</string>
+    <string name="description_direction_left" msgid="4762708739096907741">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> కోసం ఎడమవైపుకు స్లయిడ్‌ చేయండి."</string>
     <string name="zen_priority_introduction" msgid="3159291973383796646">"మీరు పేర్కొనే అలారాలు, రిమైండర్‌లు, ఈవెంట్‌లు మరియు కాలర్‌ల నుండి మినహా మరే ఇతర ధ్వనులు మరియు వైబ్రేషన్‌లతో మీకు అంతరాయం కలగదు. మీరు ఇప్పటికీ సంగీతం, వీడియోలు మరియు గేమ్‌లతో సహా మీరు ప్లే చేయడానికి ఎంచుకున్నవి ఏవైనా వింటారు."</string>
     <string name="zen_alarms_introduction" msgid="3987266042682300470">"అలారాలు నుండి మినహా మరే ఇతర ధ్వనులు మరియు వైబ్రేషన్‌లతో మీకు అంతరాయం కలగదు. మీరు ఇప్పటికీ సంగీతం, వీడియోలు మరియు గేమ్‌లతో సహా మీరు ప్లే చేయడానికి ఎంచుకున్నవి ఏవైనా వింటారు."</string>
     <string name="zen_priority_customize_button" msgid="4119213187257195047">"అనుకూలంగా మార్చండి"</string>
@@ -1094,7 +1094,7 @@
     <string name="controls_media_smartspace_rec_item_description" msgid="2189271793070870883">"<xliff:g id="APP_LABEL">%3$s</xliff:g> నుండి <xliff:g id="ARTIST_NAME">%2$s</xliff:g> పాడిన <xliff:g id="SONG_NAME">%1$s</xliff:g>‌ను ప్లే చేయండి"</string>
     <string name="controls_media_smartspace_rec_item_no_artist_description" msgid="8703614798636591077">"<xliff:g id="APP_LABEL">%2$s</xliff:g> నుండి <xliff:g id="SONG_NAME">%1$s</xliff:g>‌ను ప్లే చేయండి"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"ఇన్‌యాక్టివ్, యాప్ చెక్ చేయండి"</string>
-    <string name="controls_error_retryable" msgid="864025882878378470">"లోపం, మళ్లీ ప్రయత్నిస్తోంది..."</string>
+    <string name="controls_error_retryable" msgid="864025882878378470">"ఎర్రర్, మళ్లీ ప్రయత్నిస్తోంది..."</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"కనుగొనబడలేదు"</string>
     <string name="controls_error_removed_title" msgid="1207794911208047818">"కంట్రోల్ అందుబాటులో లేదు"</string>
     <string name="controls_error_removed_message" msgid="2885911717034750542">"<xliff:g id="DEVICE">%1$s</xliff:g>ను యాక్సెస్ చేయడం సాధ్యపడలేదు. <xliff:g id="APPLICATION">%2$s</xliff:g> యాప్‌ను తనిఖీ చేసి, కంట్రోల్ ఇప్పటికీ అందుబాటులో ఉందని, యాప్ సెట్టింగ్‌లు మారలేదని నిర్ధారించుకోండి."</string>
