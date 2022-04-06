@@ -596,8 +596,7 @@
     <string name="guest_reset_guest_dialog_title" msgid="8047270010895437534">"Скінуць гасцявы сеанс?"</string>
     <string name="guest_remove_guest_dialog_title" msgid="4548511006624088072">"Выдаліць госця?"</string>
     <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"Скінуць"</string>
-    <!-- no translation found for guest_remove_guest_confirm_button (7858123434954143879) -->
-    <skip />
+    <string name="guest_remove_guest_confirm_button" msgid="7858123434954143879">"Выдаліць"</string>
     <string name="guest_resetting" msgid="7822120170191509566">"Ідзе скід гасцявога сеанса…"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"Зрабіць фота"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"Выбраць відарыс"</string>
@@ -653,10 +652,7 @@
     <string name="turn_screen_on_title" msgid="3266937298097573424">"Уключэнне экрана"</string>
     <string name="allow_turn_screen_on" msgid="6194845766392742639">"Дазволіць уключэнне экрана"</string>
     <string name="allow_turn_screen_on_description" msgid="43834403291575164">"Дазволіць праграме ўключаць экран. З гэтым дазволам праграма зможа ў любы час уключаць экран без вашага яўнага намеру."</string>
-    <!-- no translation found for bt_le_audio_scan_qr_code (3521809854780392679) -->
-    <skip />
-    <!-- no translation found for bt_le_audio_scan_qr_code_scanner (4679500020630341107) -->
-    <skip />
-    <!-- no translation found for bt_le_audio_qr_code_is_not_valid_format (6092191081849434734) -->
-    <skip />
+    <string name="bt_le_audio_scan_qr_code" msgid="3521809854780392679">"Сканіраваць QR-код"</string>
+    <string name="bt_le_audio_scan_qr_code_scanner" msgid="4679500020630341107">"Каб пачаць праслухванне, памясціце ў цэнтр QR-код, які знаходзіцца ўнізе"</string>
+    <string name="bt_le_audio_qr_code_is_not_valid_format" msgid="6092191081849434734">"QR-код мае несапраўдны фармат"</string>
 </resources>

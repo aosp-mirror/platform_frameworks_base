@@ -596,8 +596,7 @@
     <string name="guest_reset_guest_dialog_title" msgid="8047270010895437534">"গেস্ট সেশন রিসেট করবেন?"</string>
     <string name="guest_remove_guest_dialog_title" msgid="4548511006624088072">"অতিথিকে সরাবেন?"</string>
     <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"রিসেট করুন"</string>
-    <!-- no translation found for guest_remove_guest_confirm_button (7858123434954143879) -->
-    <skip />
+    <string name="guest_remove_guest_confirm_button" msgid="7858123434954143879">"সরান"</string>
     <string name="guest_resetting" msgid="7822120170191509566">"গেস্ট সেশন রিসেট করা হচ্ছে..."</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"ফটো তুলুন"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"একটি ইমেজ বেছে নিন"</string>
@@ -653,10 +652,7 @@
     <string name="turn_screen_on_title" msgid="3266937298097573424">"স্ক্রিন চালু করুন"</string>
     <string name="allow_turn_screen_on" msgid="6194845766392742639">"স্ক্রিন চালু করার অনুমতি দিন"</string>
     <string name="allow_turn_screen_on_description" msgid="43834403291575164">"অ্যাপকে স্ক্রিন চালু করার অনুমতি দিন। অনুমতি দেওয়া হলে, অ্যাপ আপনার এক্সপ্লিসিট ইনটেন্ট ছাড়াই যেকোনও সময় স্ক্রিন চালু করতে পারবে।"</string>
-    <!-- no translation found for bt_le_audio_scan_qr_code (3521809854780392679) -->
-    <skip />
-    <!-- no translation found for bt_le_audio_scan_qr_code_scanner (4679500020630341107) -->
-    <skip />
-    <!-- no translation found for bt_le_audio_qr_code_is_not_valid_format (6092191081849434734) -->
-    <skip />
+    <string name="bt_le_audio_scan_qr_code" msgid="3521809854780392679">"QR কোড স্ক্যান করুন"</string>
+    <string name="bt_le_audio_scan_qr_code_scanner" msgid="4679500020630341107">"শোনা শুরু করতে, নিচের QR কোডটি মাঝখানে রাখুন"</string>
+    <string name="bt_le_audio_qr_code_is_not_valid_format" msgid="6092191081849434734">"QR কোডের ফর্ম্যাট সঠিক নয়"</string>
 </resources>
