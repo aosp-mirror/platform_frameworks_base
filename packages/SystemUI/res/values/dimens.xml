@@ -340,6 +340,7 @@
 
     <!-- (48dp - 40dp) / 2 -->
     <dimen name="qs_footer_action_inset">4dp</dimen>
+    <dimen name="qs_footer_actions_bottom_padding">4dp</dimen>
     <dimen name="qs_footer_action_inset_negative">-4dp</dimen>
 
     <!-- Margins on each side of QS Footer -->
