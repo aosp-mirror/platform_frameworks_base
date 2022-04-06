@@ -166,6 +166,7 @@ cc_library_host_static {
     ],
     proto: {
         export_proto_headers: true,
+        type: "full",
     },
     defaults: ["aapt2_defaults"],
 }
