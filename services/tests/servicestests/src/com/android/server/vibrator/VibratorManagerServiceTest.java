@@ -602,10 +602,15 @@ public class VibratorManagerServiceTest {
                 VibrationEffect.EFFECT_HEAVY_CLICK, VibrationEffect.EFFECT_DOUBLE_CLICK);
         VibratorManagerService service = createSystemReadyService();
         mRegisteredPowerModeListener.onLowPowerModeChanged(LOW_POWER_STATE);
+
+        // The haptic feedback should be ignored in low power, but not the ringtone. The end
+        // of the test asserts which actual effects ended up playing.
         vibrate(service, VibrationEffect.get(VibrationEffect.EFFECT_TICK), HAPTIC_FEEDBACK_ATTRS);
         vibrate(service, VibrationEffect.get(VibrationEffect.EFFECT_CLICK), RINGTONE_ATTRS);
         assertTrue(waitUntil(s -> fakeVibrator.getAllEffectSegments().size() == 1,
                 service, TEST_TIMEOUT_MILLIS));
+        // Allow the ringtone to complete, as the other vibrations won't cancel it.
+        assertTrue(waitUntil(s -> !s.isVibrating(1), service, TEST_TIMEOUT_MILLIS));
 
         mRegisteredPowerModeListener.onLowPowerModeChanged(NORMAL_POWER_STATE);
         vibrate(service, VibrationEffect.get(VibrationEffect.EFFECT_HEAVY_CLICK),
@@ -801,6 +806,29 @@ public class VibratorManagerServiceTest {
                 new long[]{10_000, 10_000}, new int[]{128, 255}, -1);
         vibrate(service, alarmEffect, new VibrationAttributes.Builder().setUsage(
                 VibrationAttributes.USAGE_ALARM).build());
+
+        // VibrationThread will start this vibration async, so wait before checking it started.
+        assertTrue(waitUntil(s -> !mVibratorProviders.get(1).getAllEffectSegments().isEmpty(),
+                service, TEST_TIMEOUT_MILLIS));
+
+        vibrate(service, VibrationEffect.get(VibrationEffect.EFFECT_CLICK),
+                HAPTIC_FEEDBACK_ATTRS);
+
+        // Wait before checking it never played a second effect.
+        assertFalse(waitUntil(s -> mVibratorProviders.get(1).getAllEffectSegments().size() > 1,
+                service, /* timeout= */ 50));
+    }
+
+    @Test
+    public void vibrate_withOngoingRingtoneVibration_ignoresEffect() throws Exception {
+        mockVibrators(1);
+        mVibratorProviders.get(1).setCapabilities(IVibrator.CAP_AMPLITUDE_CONTROL);
+        VibratorManagerService service = createSystemReadyService();
+
+        VibrationEffect alarmEffect = VibrationEffect.createWaveform(
+                new long[]{10_000, 10_000}, new int[]{128, 255}, -1);
+        vibrate(service, alarmEffect, new VibrationAttributes.Builder().setUsage(
+                VibrationAttributes.USAGE_RINGTONE).build());
 
         // VibrationThread will start this vibration async, so wait before checking it started.
         assertTrue(waitUntil(s -> !mVibratorProviders.get(1).getAllEffectSegments().isEmpty(),
