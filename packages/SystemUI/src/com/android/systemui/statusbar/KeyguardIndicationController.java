@@ -897,21 +897,8 @@ public class KeyguardIndicationController {
         }
     }
 
-    private void showTryFingerprintMsg(int msgId, String a11yString) {
-        if (mKeyguardUpdateMonitor.isUdfpsSupported()) {
-            // if udfps available, there will always be a tappable affordance to unlock
-            // For example, the lock icon
-            if (mKeyguardBypassController.getUserHasDeviceEntryIntent()) {
-                showBiometricMessage(R.string.keyguard_unlock_press);
-            } else if (msgId == FaceManager.FACE_ERROR_LOCKOUT_PERMANENT) {
-                // since face is locked out, simply show "try fingerprint"
-                showBiometricMessage(R.string.keyguard_try_fingerprint);
-            } else {
-                showBiometricMessage(R.string.keyguard_face_failed_use_fp);
-            }
-        } else {
-            showBiometricMessage(R.string.keyguard_try_fingerprint);
-        }
+    private void showFaceFailedTryFingerprintMsg(int msgId, String a11yString) {
+        showBiometricMessage(R.string.keyguard_face_failed_use_fp);
 
         // Although we suppress face auth errors visually, we still announce them for a11y
         if (!TextUtils.isEmpty(a11yString)) {
@@ -1003,7 +990,7 @@ public class KeyguardIndicationController {
             } else if (mScreenLifecycle.getScreenState() == SCREEN_ON) {
                 if (biometricSourceType == BiometricSourceType.FACE
                         && shouldSuppressFaceMsgAndShowTryFingerprintMsg()) {
-                    showTryFingerprintMsg(msgId, helpString);
+                    showFaceFailedTryFingerprintMsg(msgId, helpString);
                     return;
                 }
                 showBiometricMessage(helpString);
@@ -1023,7 +1010,7 @@ public class KeyguardIndicationController {
                     && shouldSuppressFaceMsgAndShowTryFingerprintMsg()
                     && !mStatusBarKeyguardViewManager.isBouncerShowing()
                     && mScreenLifecycle.getScreenState() == SCREEN_ON) {
-                showTryFingerprintMsg(msgId, errString);
+                showFaceFailedTryFingerprintMsg(msgId, errString);
                 return;
             }
             if (msgId == FaceManager.FACE_ERROR_TIMEOUT) {
@@ -1032,10 +1019,10 @@ public class KeyguardIndicationController {
                 if (!mStatusBarKeyguardViewManager.isBouncerShowing()
                         && mKeyguardUpdateMonitor.isUdfpsEnrolled()
                         && mKeyguardUpdateMonitor.isFingerprintDetectionRunning()) {
-                    showTryFingerprintMsg(msgId, errString);
+                    showFaceFailedTryFingerprintMsg(msgId, errString);
                 } else if (mStatusBarKeyguardViewManager.isShowingAlternateAuth()) {
                     mStatusBarKeyguardViewManager.showBouncerMessage(
-                            mContext.getResources().getString(R.string.keyguard_unlock_press),
+                            mContext.getResources().getString(R.string.keyguard_try_fingerprint),
                             mInitialTextColorState
                     );
                 } else {
