@@ -259,6 +259,7 @@ public class HdmiCecNetwork {
             // The addition of a local device should not notify listeners
             return;
         }
+        mHdmiControlService.checkAndUpdateAbsoluteVolumeControlState();
         if (info.getPhysicalAddress() == HdmiDeviceInfo.PATH_INVALID) {
             // Don't notify listeners of devices that haven't reported their physical address yet
             return;
@@ -383,7 +384,7 @@ public class HdmiCecNetwork {
     final void removeCecDevice(HdmiCecLocalDevice localDevice, int address) {
         assertRunOnServiceThread();
         HdmiDeviceInfo info = removeDeviceInfo(HdmiDeviceInfo.idForCecDevice(address));
-
+        mHdmiControlService.checkAndUpdateAbsoluteVolumeControlState();
         localDevice.mCecMessageCache.flushMessagesFrom(address);
         if (info.getPhysicalAddress() == HdmiDeviceInfo.PATH_INVALID) {
             // Don't notify listeners of devices that haven't reported their physical address yet
@@ -586,6 +587,8 @@ public class HdmiCecNetwork {
                 .build();
 
         updateCecDevice(newDeviceInfo);
+
+        mHdmiControlService.checkAndUpdateAbsoluteVolumeControlState();
     }
 
     @ServiceThreadOnly
@@ -617,6 +620,8 @@ public class HdmiCecNetwork {
                     )
                     .build();
             updateCecDevice(newDeviceInfo);
+
+            mHdmiControlService.checkAndUpdateAbsoluteVolumeControlState();
         }
     }
 

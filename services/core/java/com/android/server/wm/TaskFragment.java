@@ -2262,7 +2262,7 @@ class TaskFragment extends WindowContainer<WindowContainer> {
                 mFragmentToken,
                 mRemoteToken.toWindowContainerToken(),
                 getConfiguration(),
-                getChildCount() == 0,
+                runningActivityCount[0] == 0,
                 runningActivityCount[0],
                 isVisible(),
                 childActivities,

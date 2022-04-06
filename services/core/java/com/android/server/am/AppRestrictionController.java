@@ -1975,6 +1975,9 @@ public final class AppRestrictionController {
         }
         try {
             final PackageInfo pkg = pm.getPackageInfo(packageName, 0 /* flags */);
+            if (pkg == null || pkg.applicationInfo == null) {
+                return FrameworkStatsLog.APP_BACKGROUND_RESTRICTIONS_INFO__TARGET_SDK__SDK_UNKNOWN;
+            }
             final int targetSdk = pkg.applicationInfo.targetSdkVersion;
             if (targetSdk < Build.VERSION_CODES.S) {
                 return FrameworkStatsLog.APP_BACKGROUND_RESTRICTIONS_INFO__TARGET_SDK__SDK_PRE_S;

@@ -2,11 +2,9 @@ package com.android.systemui.qs
 
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
-import android.view.View
 import android.view.ViewGroup
 import android.view.accessibility.AccessibilityNodeInfo
 import android.widget.FrameLayout
-import android.widget.LinearLayout
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.google.common.truth.Truth
@@ -37,8 +35,6 @@ class QuickQSPanelTest : SysuiTestCase() {
             quickQSPanel.initialize()
 
             quickQSPanel.onFinishInflate()
-            quickQSPanel.setSecurityFooter(View(mContext), false)
-            quickQSPanel.setHeaderContainer(LinearLayout(mContext))
             // Provides a parent with non-zero size for QSPanel
             parentView = FrameLayout(mContext).apply {
                 addView(quickQSPanel)
