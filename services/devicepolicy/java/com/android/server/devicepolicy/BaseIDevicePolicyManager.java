@@ -15,7 +15,9 @@
  */
 package com.android.server.devicepolicy;
 
+import android.accounts.Account;
 import android.app.admin.IDevicePolicyManager;
+import android.os.UserHandle;
 
 import com.android.server.SystemService;
 
@@ -55,5 +57,10 @@ abstract class BaseIDevicePolicyManager extends IDevicePolicyManager.Stub {
     abstract void handleStopUser(int userId);
 
     public void clearSystemUpdatePolicyFreezePeriodRecord() {
+    }
+
+    public void finalizeWorkProfileProvisioning(
+            UserHandle managedProfileUser, Account migratedAccount) {
+
     }
 }
