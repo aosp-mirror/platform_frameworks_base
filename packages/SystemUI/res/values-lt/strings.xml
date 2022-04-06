@@ -34,6 +34,10 @@
     <string name="status_bar_settings_auto_rotation" msgid="8329080442278431708">"Automatiškai sukti ekraną"</string>
     <string name="usb_device_permission_prompt" msgid="4414719028369181772">"Leisti „<xliff:g id="APPLICATION">%1$s</xliff:g>“ pasiekti įrenginį (<xliff:g id="USB_DEVICE">%2$s</xliff:g>)?"</string>
     <string name="usb_device_permission_prompt_warn" msgid="2309129784984063656">"Leisti „<xliff:g id="APPLICATION">%1$s</xliff:g>“ pasiekti įrenginį (<xliff:g id="USB_DEVICE">%2$s</xliff:g>)?\nŠiai programai nebuvo suteiktas leidimas įrašyti, bet ji gali užfiksuoti garsą per šį USB įrenginį."</string>
+    <string name="usb_audio_device_permission_prompt_title" msgid="4221351137250093451">"Leisti „<xliff:g id="APPLICATION">%1$s</xliff:g>“ pasiekti įrenginį (<xliff:g id="USB_DEVICE">%2$s</xliff:g>)?"</string>
+    <string name="usb_audio_device_confirm_prompt_title" msgid="8828406516732985696">"Atidaryti „<xliff:g id="APPLICATION">%1$s</xliff:g>“, kad būtų galima tvarkyti įrenginį (<xliff:g id="USB_DEVICE">%2$s</xliff:g>)?"</string>
+    <string name="usb_audio_device_prompt_warn" msgid="2504972133361130335">"Šiai programai nebuvo suteiktas leidimas įrašyti, bet ji gali užfiksuoti garsą per šį USB įrenginį. Naudodami „<xliff:g id="APPLICATION">%1$s</xliff:g>“ šiuo įrenginiu galite negirdėti skambučių, pranešimų ir signalų."</string>
+    <string name="usb_audio_device_prompt" msgid="7944987408206252949">"Naudodami „<xliff:g id="APPLICATION">%1$s</xliff:g>“ šiuo įrenginiu galite negirdėti skambučių, pranešimų ir signalų."</string>
     <string name="usb_accessory_permission_prompt" msgid="717963550388312123">"Leisti „<xliff:g id="APPLICATION">%1$s</xliff:g>“ pasiekti įrenginį (<xliff:g id="USB_ACCESSORY">%2$s</xliff:g>)?"</string>
     <string name="usb_device_confirm_prompt" msgid="4091711472439910809">"Atidaryti „<xliff:g id="APPLICATION">%1$s</xliff:g>“, kad būtų galima tvarkyti įrenginį (<xliff:g id="USB_DEVICE">%2$s</xliff:g>)?"</string>
     <string name="usb_device_confirm_prompt_warn" msgid="990208659736311769">"Atidaryti programą „<xliff:g id="APPLICATION">%1$s</xliff:g>“, kad ji galėtų tvarkyti „<xliff:g id="USB_DEVICE">%2$s</xliff:g>“?\nŠiai programai nebuvo suteiktas leidimas įrašyti, bet ji gali užfiksuoti garsą per šį USB įrenginį."</string>
@@ -131,7 +135,7 @@
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="2242167416140740920">"Veidas autentifikuotas"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"Patvirtinta"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"Paliesk. „Patvirtinti“, kad užbaigtumėte"</string>
-    <string name="biometric_dialog_tap_confirm_with_face" msgid="1597899891472340950">"Atrakinta pagal veidą. Paspauskite, jei norite tęsti."</string>
+    <string name="biometric_dialog_tap_confirm_with_face" msgid="1092050545851021991">"Atrakinta pagal veidą. Pasp. atrak. pikt., kad tęstumėte."</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"Autentifikuota"</string>
     <string name="biometric_dialog_use_pin" msgid="8385294115283000709">"Naudoti PIN kodą"</string>
     <string name="biometric_dialog_use_pattern" msgid="2315593393167211194">"Naudoti atrakinimo piešinį"</string>
@@ -291,6 +295,15 @@
     <string name="sensor_privacy_start_use_mic_dialog_content" msgid="1624701280680913717">"Tai atlikus visų programų ir paslaugų prieigos blokavimas panaikinamas ir joms leidžiama naudoti mikrofoną."</string>
     <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"Tai atlikus visų programų ir paslaugų prieigos blokavimas panaikinamas ir joms leidžiama naudoti fotoaparatą."</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_content" msgid="3577642558418404919">"Tai atlikus visų programų ir paslaugų prieigos blokavimas panaikinamas ir joms leidžiama naudoti fotoaparatą ar mikrofoną."</string>
+    <string name="sensor_privacy_start_use_mic_blocked_dialog_title" msgid="2640140287496469689">"Mikrofonas užblokuotas"</string>
+    <string name="sensor_privacy_start_use_camera_blocked_dialog_title" msgid="7398084286822440384">"Vaizdo kamera užblokuota"</string>
+    <string name="sensor_privacy_start_use_mic_camera_blocked_dialog_title" msgid="195236134743281973">"Mikrofonas ir vaizdo kamera užblokuoti"</string>
+    <string name="sensor_privacy_start_use_mic_blocked_dialog_content" msgid="2138318880682877747">"Jei norite panaikinti blokavimą, įrenginyje nustatykite privatumo jungiklį į padėtį „Mikrofonas įjungtas“ ir leiskite pasiekti mikrofoną. Kad surastumėte privatumo jungiklį įrenginyje, žr. įrenginio vadovą."</string>
+    <string name="sensor_privacy_start_use_camera_blocked_dialog_content" msgid="7216015168047965948">"Jei norite panaikinti blokavimą, įrenginyje nustatykite privatumo jungiklį į padėtį „Vaizdo kamera įjungta“ ir leiskite pasiekti vaizdo kamerą. Kad surastumėte privatumo jungiklį įrenginyje, žr. įrenginio vadovą."</string>
+    <string name="sensor_privacy_start_use_mic_camera_blocked_dialog_content" msgid="3960837827570483762">"Jei norite panaikinti jų blokavimą, įrenginyje nustatykite privatumo jungiklį į blokavimo panaikinimo padėtį ir leiskite prieigą. Kad surastumėte privatumo jungiklį įrenginyje, žr. įrenginio vadovą."</string>
+    <string name="sensor_privacy_mic_unblocked_toast_content" msgid="306555320557065068">"Mikrofonas pasiekiamas"</string>
+    <string name="sensor_privacy_camera_unblocked_toast_content" msgid="7843105715964332311">"Vaizdo kamera pasiekiama"</string>
+    <string name="sensor_privacy_mic_camera_unblocked_toast_content" msgid="7339355093282661115">"Mikrofonas ir vaizdo kamera pasiekiami"</string>
     <string name="media_seamless_other_device" msgid="4654849800789196737">"Kitas įrenginys"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"Perjungti apžvalgą"</string>
     <string name="zen_priority_introduction" msgid="3159291973383796646">"Jūsų netrikdys garsai ir vibravimas, išskyrus nurodytų signalų, priminimų, įvykių ir skambintojų garsus. Vis tiek girdėsite viską, ką pasirinksite leisti, įskaitant muziką, vaizdo įrašus ir žaidimus."</string>
@@ -301,7 +314,8 @@
     <string name="notification_tap_again" msgid="4477318164947497249">"Palieskite dar kartą, kad atidarytumėte"</string>
     <string name="tap_again" msgid="1315420114387908655">"Palieskite dar kartą"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"Perbraukite aukštyn, kad atidarytumėte"</string>
-    <string name="keyguard_unlock_press" msgid="8488350566398524740">"Paspauskite, kad atidarytumėte"</string>
+    <string name="keyguard_unlock_press" msgid="9140109453735019209">"Paspauskite atrakinimo piktogramą, kad atidarytumėte"</string>
+    <string name="keyguard_face_successful_unlock_press" msgid="25520941264602588">"Atrakinta pagal veidą. Pasp. atr. pikt., kad atidarytumėte."</string>
     <string name="keyguard_retry" msgid="886802522584053523">"Jei norite bandyti dar kartą, perbraukite aukštyn"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"Norėdami naudoti NFC, atrakinkite"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"Šis įrenginys priklauso jūsų organizacijai"</string>
@@ -324,7 +338,6 @@
     <string name="keyguard_indication_charging_time_dock" msgid="6150404291427377863">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Įkraunama doke • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> iki visiško įkrovimo"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Perjungti naudotoją"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Bus ištrintos visos šios sesijos programos ir duomenys."</string>
-    <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"Pašalinti"</string>
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"Sveiki sugrįžę, svety!"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"Ar norite tęsti sesiją?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"Pradėti iš naujo"</string>
@@ -778,6 +791,12 @@
     <string name="controls_dialog_ok" msgid="2770230012857881822">"Pridėti"</string>
     <string name="controls_dialog_message" msgid="342066938390663844">"Siūlo „<xliff:g id="APP">%s</xliff:g>“"</string>
     <string name="controls_tile_locked" msgid="731547768182831938">"Įrenginys užrakintas"</string>
+    <string name="controls_settings_show_controls_dialog_title" msgid="3357852503553809554">"Rodyti ir valdyti įrenginius užrakinimo ekrane?"</string>
+    <string name="controls_settings_show_controls_dialog_message" msgid="7666211700524587969">"Galite pridėti išorinių įrenginių valdiklių užrakinimo ekrane.\n\nĮrenginio programoje gali būti leidžiama valdyti tam tikrus įrenginius neatrakinus telefono ar planšetinio kompiuterio.\n\nGalite bet kada pakeisti „Nustatymų“ skiltyje."</string>
+    <string name="controls_settings_trivial_controls_dialog_title" msgid="7593188157655036677">"Valdyti įrenginius užrakinimo ekrane?"</string>
+    <string name="controls_settings_trivial_controls_dialog_message" msgid="237183787721917586">"Galite valdyti tam tikrus išorinius įrenginius neatrakinę telefono ar planšetinio kompiuterio.\n\nĮrenginio programoje nustatoma, kuriuos įrenginius galima valdyti tokiu būdu."</string>
+    <string name="controls_settings_dialog_neutral_button" msgid="4514446354793124140">"Ne, ačiū"</string>
+    <string name="controls_settings_dialog_positive_button" msgid="436070672551674863">"Taip"</string>
     <string name="controls_pin_use_alphanumeric" msgid="8478371861023048414">"PIN kodą sudaro raidės arba simboliai"</string>
     <string name="controls_pin_verify" msgid="3452778292918877662">"<xliff:g id="DEVICE">%s</xliff:g> patvirtinimas"</string>
     <string name="controls_pin_wrong" msgid="6162694056042164211">"Netinkamas PIN kodas"</string>
@@ -787,8 +806,7 @@
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"Perbraukite, kad peržiūrėtumėte daugiau"</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"Įkeliamos rekomendacijos"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"Medija"</string>
-    <!-- no translation found for controls_media_close_session (4780485355795635052) -->
-    <skip />
+    <string name="controls_media_close_session" msgid="4780485355795635052">"Slėpti šį programos „<xliff:g id="APP_NAME">%1$s</xliff:g>“ medijos valdiklį?"</string>
     <string name="controls_media_active_session" msgid="3146882316024153337">"Dabartinio medijos seanso negalima paslėpti."</string>
     <string name="controls_media_dismiss_button" msgid="4485675693008031646">"Slėpti"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"Tęsti"</string>
@@ -828,6 +846,13 @@
     <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"Jei norite perduoti šį seansą, atidarykite programą."</string>
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"Nežinoma programa"</string>
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"Sustabdyti perdavimą"</string>
+    <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Kaip veikia transliacija"</string>
+    <string name="media_output_broadcast" msgid="3555580945878071543">"Transliacija"</string>
+    <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"Netoliese esantys žmonės, turintys suderinamus „Bluetooth“ įrenginius, gali klausyti jūsų transliuojamos medijos"</string>
+    <string name="media_output_broadcasting_message" msgid="4150299923404886073">"Kad galėtų klausyti jūsų transliacijos, netoliese esantys žmonės, turintys suderinamus „Bluetooth“ įrenginius, gali nuskaityti jūsų QR kodą arba naudoti jūsų transliacijos pavadinimą ir slaptažodį."</string>
+    <string name="media_output_broadcast_name" msgid="8786127091542624618">"Transliacijos pavadinimas"</string>
+    <string name="media_output_broadcast_code" msgid="870795639644728542">"Slaptažodis"</string>
+    <string name="media_output_broadcast_dialog_save" msgid="7910865591430010198">"Išsaugoti"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"Versijos numeris"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"Versijos numeris nukopijuotas į iškarpinę."</string>
     <string name="basic_status" msgid="2315371112182658176">"Atidaryti pokalbį"</string>
@@ -906,7 +931,7 @@
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"Aktyvios programos"</string>
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"Sustabdyti"</string>
     <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"Sustabdyta"</string>
-    <string name="clipboard_edit_text_copy" msgid="770856373439969178">"Kopijuoti"</string>
+    <string name="clipboard_edit_text_done" msgid="4551887727694022409">"Atlikta"</string>
     <string name="clipboard_overlay_text_copied" msgid="1872624400464891363">"Nukopijuota"</string>
     <string name="clipboard_edit_source" msgid="9156488177277788029">"Iš „<xliff:g id="APPNAME">%1$s</xliff:g>“"</string>
     <string name="clipboard_dismiss_description" msgid="7544573092766945657">"Atsisakyti kopijavimo NS"</string>
