@@ -426,7 +426,7 @@
     <string name="permdesc_writeCallLog" product="tv" msgid="3934939195095317432">"ઍપને ઇનકમિંગ અને આઉટગોઇંગ કૉલ વિશેના ડેટા સહિત, તમારા Android TV ડિવાઇસના કૉલ લૉગને સંશોધિત કરવાની મંજૂરી આપે છે. દુર્ભાવનાપૂર્ણ ઍપ આનો ઉપયોગ તમારા કૉલ લૉગને કાઢી નાખવા અથવા સંશોધિત કરવા માટે કરી શકે છે."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="5903033505665134802">"એપ્લિકેશનને ઇનકમિંગ અને આઉટગોઇંગ કૉલ્સ વિશેનાં ડેટા સહિત, તમારા ફોનના કૉલ લૉગને સંશોધિત કરવાની મંજૂરી આપે છે. દુર્ભાવનાપૂર્ણ ઍપ્લિકેશનો આનો ઉપયોગ તમારા કૉલ લૉગને કાઢી નાખવા અથવા સંશોધિત માટે કરી શકે છે."</string>
     <string name="permlab_bodySensors" msgid="662918578601619569">"ઍપ ઉપયોગમાં હોય, ત્યારે હૃદયના ધબકારા જેવા બૉડી સેન્સર ડેટાનો ઍક્સેસ કરો"</string>
-    <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"ઍપનો ઉપયોગમાં હોય, ત્યારે ઍપને હૃદયના ધબકારા, તાપમાન અને લોહીમાં ઑક્સિજનની ટકાવારી જેવા બૉડી સેન્સર ડેટાનો ઍક્સેસ કરવાની મંજૂરી આપે છે."</string>
+    <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"ઍપ ઉપયોગમાં હોય, ત્યારે ઍપને હૃદયના ધબકારા, તાપમાન અને લોહીમાં ઑક્સિજનની ટકાવારી જેવા બૉડી સેન્સર ડેટાનો ઍક્સેસ કરવાની મંજૂરી આપે છે."</string>
     <string name="permlab_bodySensors_background" msgid="4912560779957760446">"ઍપ બૅકગ્રાઉન્ડમાં હોય, ત્યારે હૃદયના ધબકારા જેવા બૉડી સેન્સર ડેટાનો ઍક્સેસ કરો"</string>
     <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"ઍપ બૅકગ્રાઉન્ડમાં હોય, ત્યારે ઍપને હૃદયના ધબકારા, તાપમાન અને લોહીમાં ઑક્સિજનની ટકાવારી જેવા બૉડી સેન્સર ડેટાનો ઍક્સેસ કરવાની મંજૂરી આપે છે."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"કૅલેન્ડર ઇવેન્ટ્સ અને વિગતો વાંચો"</string>
@@ -585,7 +585,8 @@
     <string name="biometric_error_generic" msgid="6784371929985434439">"પ્રમાણિત કરવામાં ભૂલ આવી"</string>
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"સ્ક્રીન લૉકનો ઉપયોગ કરો"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"આગળ વધવા માટે તમારું સ્ક્રીન લૉક દાખલ કરો"</string>
-    <string name="fingerprint_acquired_partial" msgid="694598777291084823">"આંશિક ફિંગરપ્રિન્ટ મળી"</string>
+    <!-- no translation found for fingerprint_acquired_partial (4323789264604479684) -->
+    <skip />
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"ફિંગરપ્રિન્ટ પ્રક્રિયા કરી શકાઈ નથી. કૃપા કરીને ફરી પ્રયાસ કરો."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"ફિંગરપ્રિન્ટ સેન્સર સાફ કરો અને ફરી પ્રયાસ કરો"</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"સેન્સર સાફ કરો અને ફરી પ્રયાસ કરો"</string>
@@ -598,7 +599,8 @@
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_error_not_match" msgid="4599441812893438961">"ફિંગરપ્રિન્ટ ઓળખી શકાઈ નથી"</string>
-    <string name="fingerprint_udfps_error_not_match" msgid="4709197752023550709">"સેન્સર પર જોરથી દબાવો"</string>
+    <!-- no translation found for fingerprint_udfps_error_not_match (8236930793223158856) -->
+    <skip />
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"ફિંગરપ્રિન્ટ પ્રમાણિત કરી"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"ચહેરા પ્રમાણિત"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"ચહેરા પ્રમાણિત, કૃપા કરીને કન્ફર્મ કરો"</string>
@@ -1679,7 +1681,6 @@
     <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"ચાલુ"</string>
     <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"બંધ"</string>
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"શું <xliff:g id="SERVICE">%1$s</xliff:g>ને તમારા ડિવાઇસના સંપૂર્ણ નિયંત્રણની મંજૂરી આપીએ?"</string>
-    <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"જો તમે <xliff:g id="SERVICE">%1$s</xliff:g> ચાલુ કરશો, તો તમારું ડિવાઇસ ડેટા એન્ક્રિપ્શનને બહેતર બનાવવા તમારા સ્ક્રીન લૉકનો ઉપયોગ કરશે નહીં."</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"ઍક્સેસિબિલિટી સંબંધિત આવશ્યકતા માટે સહાય કરતી ઍપ માટે સંપૂર્ણ નિયંત્રણ યોગ્ય છે, પણ મોટા ભાગની ઍપ માટે યોગ્ય નથી."</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"જોવા અને નિયંત્રણ માટેની સ્ક્રીન"</string>
     <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"તે સ્ક્રીન પરનું બધું કન્ટેન્ટ વાંચી શકે છે અને કન્ટેન્ટને અન્ય ઍપ પર બતાવી શકે છે."</string>
@@ -2027,10 +2028,10 @@
     <string name="harmful_app_warning_open_anyway" msgid="5963657791740211807">"કોઈપણ રીતે ખોલો"</string>
     <string name="harmful_app_warning_title" msgid="8794823880881113856">"નુકસાનકારક ઍપ મળી આવી છે"</string>
     <string name="log_access_confirmation_title" msgid="2343578467290592708">"<xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g>ને ડિવાઇસનો બધો લૉગ ઍક્સેસ કરવાની મંજૂરી આપવી છે?"</string>
-    <string name="log_access_confirmation_allow" msgid="143157286283302512">"માત્ર આ વખતે"</string>
-    <string name="log_access_confirmation_deny" msgid="7685790957455099845">"મંજૂરી આપશો નહીં"</string>
-    <!-- no translation found for log_access_confirmation_body (6581985716241928135) -->
+    <!-- no translation found for log_access_confirmation_allow (5302517782599389507) -->
     <skip />
+    <string name="log_access_confirmation_deny" msgid="7685790957455099845">"મંજૂરી આપશો નહીં"</string>
+    <string name="log_access_confirmation_body" msgid="6581985716241928135">"તમારા ડિવાઇસ પર થતી કામગીરીને ડિવાઇસ લૉગ રેકોર્ડ કરે છે. ઍપ આ લૉગનો ઉપયોગ સમસ્યાઓ શોધી તેનું નિરાકરણ કરવા માટે કરી શકે છે.\n\nઅમુક લૉગમાં સંવેદનશીલ માહિતી હોઈ શકે, આથી ડિવાઇસનો બધો લૉગ ઍક્સેસ કરવાની મંજૂરી માત્ર તમારી વિશ્વાસપાત્ર ઍપને જ આપો. \n\nતમે આ ઍપને ડિવાઇસનો બધો લૉગ ઍક્સેસ કરવાની મંજૂરી નહીં આપી હોય, તો પણ તે તેના પોતાના લૉગ ઍક્સેસ કરી શકે છે. તમારા ડિવાઇસના નિર્માતા હજુ પણ કદાચ તમારા ડિવાઇસ પર અમુક લૉગ અથવા માહિતી ઍક્સેસ કરી શકે છે. વધુ જાણો"</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"ફરીથી બતાવશો નહીં"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g>એ <xliff:g id="APP_2">%2$s</xliff:g> સ્લાઇસ બતાવવા માગે છે"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"ફેરફાર કરો"</string>
@@ -2260,13 +2261,16 @@
     <string name="ui_translation_accessibility_translated_text" msgid="3197547218178944544">"<xliff:g id="MESSAGE">%1$s</xliff:g>નો અનુવાદ કર્યો."</string>
     <string name="ui_translation_accessibility_translation_finished" msgid="3057830947610088465">"<xliff:g id="FROM_LANGUAGE">%1$s</xliff:g>થી <xliff:g id="TO_LANGUAGE">%2$s</xliff:g>માં સંદેશનો અનુવાદ કરવામાં આવ્યો."</string>
     <string name="notification_channel_abusive_bg_apps" msgid="6092140213264920355">"બૅકગ્રાઉન્ડ પ્રવૃત્તિ"</string>
-    <string name="notification_title_abusive_bg_apps" msgid="344582472797982073">"બૅકગ્રાઉન્ડ પ્રવૃત્તિ"</string>
-    <string name="notification_content_abusive_bg_apps" msgid="5572096708044958249">"<xliff:g id="APP">%1$s</xliff:g> ઍપ બૅકગ્રાઉન્ડમાં ચાલી રહી છે અને અતિશય બૅટરી વાપરી રહી છે. રિવ્યૂ કરવા માટે ટૅપ કરો."</string>
-    <string name="notification_content_long_running_fgs" msgid="8878031652441570178">"<xliff:g id="APP">%1$s</xliff:g> લાંબા સમયથી બૅકગ્રાઉન્ડમાં ચાલી રહી છે. રિવ્યૂ કરવા માટે ટૅપ કરો."</string>
+    <!-- no translation found for notification_title_abusive_bg_apps (3258460527676573815) -->
+    <skip />
+    <!-- no translation found for notification_title_long_running_fgs (8170284286477131587) -->
+    <skip />
+    <!-- no translation found for notification_content_abusive_bg_apps (9180610713603474720) -->
+    <skip />
+    <!-- no translation found for notification_content_long_running_fgs (8258193410039977101) -->
+    <skip />
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"સક્રિય ઍપ ચેક કરો"</string>
-    <!-- no translation found for vdm_camera_access_denied (6102378580971542473) -->
-    <skip />
-    <!-- no translation found for vdm_camera_access_denied (6895968310395249076) -->
-    <skip />
+    <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"તમારા <xliff:g id="DEVICE">%1$s</xliff:g> પરથી ફોનના કૅમેરાનો ઍક્સેસ કરી શકતાં નથી"</string>
+    <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"તમારા <xliff:g id="DEVICE">%1$s</xliff:g> પરથી ટૅબ્લેટના કૅમેરાનો ઍક્સેસ કરી શકતાં નથી"</string>
     <string name="system_locale_title" msgid="3978041860457277638">"સિસ્ટમની ભાષા"</string>
 </resources>

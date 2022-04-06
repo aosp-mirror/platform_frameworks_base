@@ -585,7 +585,7 @@
     <string name="biometric_error_generic" msgid="6784371929985434439">"அங்கீகரிப்பதில் பிழை"</string>
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"திரைப் பூட்டைப் பயன்படுத்து"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"தொடர்வதற்கு உங்கள் திரைப் பூட்டை உள்ளிடுங்கள்"</string>
-    <string name="fingerprint_acquired_partial" msgid="694598777291084823">"பகுதியளவு கைரேகை கண்டறியப்பட்டது"</string>
+    <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"சென்சாரின் மீது நன்றாக அழுத்தவும்"</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"கைரேகையைச் செயலாக்க முடியவில்லை. மீண்டும் முயலவும்."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"கைரேகை சென்சாரைச் சுத்தம் செய்துவிட்டு மீண்டும் முயலவும்"</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"சென்சாரைச் சுத்தம் செய்துவிட்டு மீண்டும் முயலவும்"</string>
@@ -598,7 +598,7 @@
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_error_not_match" msgid="4599441812893438961">"கைரேகை அங்கீகரிக்கப்படவில்லை"</string>
-    <string name="fingerprint_udfps_error_not_match" msgid="4709197752023550709">"சென்சாரின் மீது நன்றாக அழுத்தவும்"</string>
+    <string name="fingerprint_udfps_error_not_match" msgid="8236930793223158856">"கைரேகை அங்கீகரிக்கப்படவில்லை"</string>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"கைரேகை அங்கீகரிக்கப்பட்டது"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"முகம் அங்கீகரிக்கப்பட்டது"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"முகம் அங்கீகரிக்கப்பட்டது. ’உறுதிப்படுத்துக’ என்பதை அழுத்துக"</string>
@@ -1679,7 +1679,6 @@
     <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"ஆன்"</string>
     <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"ஆஃப்"</string>
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"உங்கள் சாதனத்தை முழுமையாகக் கட்டுப்படுத்த <xliff:g id="SERVICE">%1$s</xliff:g> சேவையை அனுமதிக்க வேண்டுமா?"</string>
-    <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"<xliff:g id="SERVICE">%1$s</xliff:g> சேவையை ஆன் செய்தால் தரவு என்க்ரிப்ஷனை மேம்படுத்த சாதனம் திரைப் பூட்டைப் பயன்படுத்தாது."</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"உங்களுக்கு உதவக்கூடிய ஆப்ஸுக்குக் தேவையான அணுகல்தன்மையை அளித்து முழுக் கட்டுப்பாட்டையும் அளிக்கலாம், ஆனால் பெரும்பாலான ஆப்ஸுக்கு இது பொருந்தாது."</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"திரையைப் பார்த்தலும் நிர்வகித்தலும்"</string>
     <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"இந்த அம்சத்தால் திரையில் உள்ள அனைத்தையும் படிக்க முடிவதோடு பிற ஆப்ஸின் மேல் உள்ளடக்கத்தைக் காட்டும்."</string>
@@ -1933,8 +1932,7 @@
     <string name="app_blocked_title" msgid="7353262160455028160">"இந்த ஆப்ஸ் இப்போது கிடைப்பதில்லை"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> ஆப்ஸ் இப்போது கிடைப்பதில்லை."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> இல்லை"</string>
-    <!-- no translation found for app_streaming_blocked_title_for_permission_dialog (4483161748582966785) -->
-    <skip />
+    <string name="app_streaming_blocked_title_for_permission_dialog" msgid="4483161748582966785">"அனுமதி தேவை"</string>
     <string name="app_streaming_blocked_message" product="tv" msgid="4003011766528814377">"தற்போது உங்கள் <xliff:g id="DEVICE">%1$s</xliff:g> சாதனத்தில் இதை அணுக முடியாது. அதற்குப் பதிலாக Android TV சாதனத்தில் பயன்படுத்திப் பாருங்கள்."</string>
     <string name="app_streaming_blocked_message" product="tablet" msgid="4242053045964946062">"தற்போது உங்கள் <xliff:g id="DEVICE">%1$s</xliff:g> சாதனத்தில் இதை அணுக முடியாது. அதற்குப் பதிலாக உங்கள் டேப்லெட்டில் பயன்படுத்திப் பாருங்கள்."</string>
     <string name="app_streaming_blocked_message" product="default" msgid="6159168735030739398">"தற்போது உங்கள் <xliff:g id="DEVICE">%1$s</xliff:g> சாதனத்தில் இதை அணுக முடியாது. அதற்குப் பதிலாக உங்கள் மொபைலில் பயன்படுத்திப் பாருங்கள்."</string>
@@ -2028,10 +2026,9 @@
     <string name="harmful_app_warning_open_anyway" msgid="5963657791740211807">"பரவாயில்லை, திற"</string>
     <string name="harmful_app_warning_title" msgid="8794823880881113856">"தீங்கிழைக்கும் ஆப்ஸ் உள்ளது"</string>
     <string name="log_access_confirmation_title" msgid="2343578467290592708">"சாதனப் பதிவுகள் அனைத்தையும் <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> அணுக அனுமதிக்கவா?"</string>
-    <string name="log_access_confirmation_allow" msgid="143157286283302512">"இப்போது மட்டும்"</string>
+    <string name="log_access_confirmation_allow" msgid="5302517782599389507">"ஒருமுறை அணுகலை அனுமதி"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"அனுமதிக்க வேண்டாம்"</string>
-    <!-- no translation found for log_access_confirmation_body (6581985716241928135) -->
-    <skip />
+    <string name="log_access_confirmation_body" msgid="6581985716241928135">"உங்கள் சாதனத்தில் நடப்பவற்றைச் சாதனப் பதிவுகள் ரெக்கார்டு செய்யும். சிக்கல்களைக் கண்டறிந்து சரிசெய்ய ஆப்ஸ் இந்தப் பதிவுகளைப் பயன்படுத்தலாம்.\n\nபாதுகாக்கப்பட வேண்டிய தகவல்கள் சில பதிவுகளில் இருக்கக்கூடும் என்பதால் சாதனப் பதிவுகள் அனைத்தையும் அணுக நீங்கள் நம்பும் ஆப்ஸை மட்டும் அனுமதிக்கவும். \n\nசாதனப் பதிவுகள் அனைத்தையும் அணுக இந்த ஆப்ஸை அனுமதிக்கவில்லை என்றாலும் அதற்குச் சொந்தமான பதிவுகளை அதனால் அணுக முடியும். சாதன உற்பத்தியாளர் உங்கள் சாதனத்திலுள்ள சில பதிவுகளையோ தகவல்களையோ தொடர்ந்து அணுகக்கூடும். மேலும் அறிக"</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"மீண்டும் காட்டாதே"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_2">%2$s</xliff:g> ஆப்ஸின் விழிப்பூட்டல்களைக் காண்பிக்க, <xliff:g id="APP_0">%1$s</xliff:g> அனுமதி கேட்கிறது"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"திருத்து"</string>
@@ -2261,13 +2258,12 @@
     <string name="ui_translation_accessibility_translated_text" msgid="3197547218178944544">"<xliff:g id="MESSAGE">%1$s</xliff:g> மொழிபெயர்க்கப்பட்டது."</string>
     <string name="ui_translation_accessibility_translation_finished" msgid="3057830947610088465">"<xliff:g id="FROM_LANGUAGE">%1$s</xliff:g> மொழியிலிருந்து <xliff:g id="TO_LANGUAGE">%2$s</xliff:g> மொழிக்கு மெசேஜ் மொழிபெயர்க்கப்பட்டது."</string>
     <string name="notification_channel_abusive_bg_apps" msgid="6092140213264920355">"பின்னணிச் செயல்பாடு"</string>
-    <string name="notification_title_abusive_bg_apps" msgid="344582472797982073">"பின்னணிச் செயல்பாடு"</string>
-    <string name="notification_content_abusive_bg_apps" msgid="5572096708044958249">"<xliff:g id="APP">%1$s</xliff:g> ஆப்ஸ் பின்னணியில் இயங்குவதுடன் பேட்டரியை அதிகமாகப் பயன்படுத்துகிறது. பார்க்க தட்டவும்."</string>
-    <string name="notification_content_long_running_fgs" msgid="8878031652441570178">"<xliff:g id="APP">%1$s</xliff:g> ஆப்ஸ் நீண்ட நேரமாகப் பின்னணியில் இயங்குகிறது. பார்க்க தட்டவும்."</string>
+    <string name="notification_title_abusive_bg_apps" msgid="3258460527676573815">"ஆப்ஸ் பேட்டரியைப் பயன்படுத்துகிறது"</string>
+    <string name="notification_title_long_running_fgs" msgid="8170284286477131587">"ஆப்ஸ் செயல்பாட்டில் உள்ளது"</string>
+    <string name="notification_content_abusive_bg_apps" msgid="9180610713603474720">"<xliff:g id="APP">%1$s</xliff:g> ஆப்ஸ் பேட்டரியைப் பின்னணியில் பயன்படுத்துகிறது. பார்க்க தட்டவும்."</string>
+    <string name="notification_content_long_running_fgs" msgid="8258193410039977101">"<xliff:g id="APP">%1$s</xliff:g> பேட்டரியின் ஆயுளைப் பாதிக்கலாம். செயலிலுள்ள ஆப்ஸைப் பார்க்க தட்டவும்."</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"செயலிலுள்ள ஆப்ஸைப் பாருங்கள்"</string>
-    <!-- no translation found for vdm_camera_access_denied (6102378580971542473) -->
-    <skip />
-    <!-- no translation found for vdm_camera_access_denied (6895968310395249076) -->
-    <skip />
+    <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"உங்கள் <xliff:g id="DEVICE">%1$s</xliff:g> சாதனத்திலிருந்து மொபைலின் கேமராவை அணுக முடியாது"</string>
+    <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"உங்கள் <xliff:g id="DEVICE">%1$s</xliff:g> சாதனத்திலிருந்து டேப்லெட்டின் கேமராவை அணுக முடியாது"</string>
     <string name="system_locale_title" msgid="3978041860457277638">"சிஸ்டம் மொழி"</string>
 </resources>

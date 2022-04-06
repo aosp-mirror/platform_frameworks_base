@@ -587,7 +587,7 @@
     <string name="biometric_error_generic" msgid="6784371929985434439">"Podczas uwierzytelniania wystąpił błąd"</string>
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"Używaj blokady ekranu"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"Użyj blokady ekranu, aby kontynuować"</string>
-    <string name="fingerprint_acquired_partial" msgid="694598777291084823">"Wykryto częściowy odcisk palca"</string>
+    <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"Mocno naciśnij czujnik"</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"Nie udało się przetworzyć odcisku palca. Spróbuj ponownie."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"Wyczyść czytnik linii papilarnych i spróbuj ponownie"</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"Wyczyść czujnik i spróbuj ponownie"</string>
@@ -600,7 +600,7 @@
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_error_not_match" msgid="4599441812893438961">"Nie rozpoznano odcisku palca"</string>
-    <string name="fingerprint_udfps_error_not_match" msgid="4709197752023550709">"Mocno naciśnij czujnik"</string>
+    <string name="fingerprint_udfps_error_not_match" msgid="8236930793223158856">"Nie rozpoznano odcisku palca"</string>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"Uwierzytelniono odciskiem palca"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"Twarz rozpoznana"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"Twarz rozpoznana, kliknij Potwierdź"</string>
@@ -1681,7 +1681,6 @@
     <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"WŁ."</string>
     <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"WYŁ."</string>
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"Pozwolić usłudze <xliff:g id="SERVICE">%1$s</xliff:g> na pełną kontrolę nad urządzeniem?"</string>
-    <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"Jeśli włączysz usługę <xliff:g id="SERVICE">%1$s</xliff:g>, Twoje urządzenie nie będzie korzystać z blokady ekranu, by usprawnić szyfrowanie danych."</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"Pełna kontrola jest odpowiednia dla aplikacji, które pomagają Ci radzić sobie z niepełnosprawnością, ale nie należy jej przyznawać wszystkim aplikacjom."</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Wyświetlaj i kontroluj ekran"</string>
     <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Może odczytywać całą zawartość ekranu i wyświetlać treść nad innymi aplikacjami."</string>
@@ -1935,8 +1934,7 @@
     <string name="app_blocked_title" msgid="7353262160455028160">"Aplikacja jest niedostępna"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"Aplikacja <xliff:g id="APP_NAME">%1$s</xliff:g> jest obecnie niedostępna."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> – brak dostępu"</string>
-    <!-- no translation found for app_streaming_blocked_title_for_permission_dialog (4483161748582966785) -->
-    <skip />
+    <string name="app_streaming_blocked_title_for_permission_dialog" msgid="4483161748582966785">"Wymagane są uprawnienia"</string>
     <string name="app_streaming_blocked_message" product="tv" msgid="4003011766528814377">"W tej chwili nie można z tego skorzystać na urządzeniu <xliff:g id="DEVICE">%1$s</xliff:g>. Użyj urządzenia z Androidem TV."</string>
     <string name="app_streaming_blocked_message" product="tablet" msgid="4242053045964946062">"W tej chwili nie można z tego skorzystać na urządzeniu <xliff:g id="DEVICE">%1$s</xliff:g>. Użyj tabletu."</string>
     <string name="app_streaming_blocked_message" product="default" msgid="6159168735030739398">"W tej chwili nie można z tego skorzystać na urządzeniu <xliff:g id="DEVICE">%1$s</xliff:g>. Użyj telefonu."</string>
@@ -2030,10 +2028,9 @@
     <string name="harmful_app_warning_open_anyway" msgid="5963657791740211807">"OTWÓRZ MIMO TO"</string>
     <string name="harmful_app_warning_title" msgid="8794823880881113856">"Wykryto szkodliwą aplikację"</string>
     <string name="log_access_confirmation_title" msgid="2343578467290592708">"Zezwolić aplikacji <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> na dostęp do wszystkich dzienników urządzenia?"</string>
-    <string name="log_access_confirmation_allow" msgid="143157286283302512">"Tylko tym razem"</string>
+    <string name="log_access_confirmation_allow" msgid="5302517782599389507">"Zezwól na jednorazowy dostęp"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"Nie zezwalaj"</string>
-    <!-- no translation found for log_access_confirmation_body (6581985716241928135) -->
-    <skip />
+    <string name="log_access_confirmation_body" msgid="6581985716241928135">"Dzienniki urządzenia zapisują, co dzieje się na urządzeniu. Aplikacje mogą ich używać do wykrywania i rozwiązywania problemów.\n\nNiektóre dzienniki mogą zawierać poufne dane, dlatego na dostęp do wszystkich dzienników zezwalaj tylko aplikacjom, którym ufasz. \n\nNawet jeśli nie zezwolisz tej aplikacji na dostęp do wszystkich dzienników na urządzeniu, będzie miała dostęp do własnych. Producent urządzenia nadal będzie mógł korzystać z niektórych dzienników na urządzeniu. Więcej informacji"</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"Nie pokazuj ponownie"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"Aplikacja <xliff:g id="APP_0">%1$s</xliff:g> chce pokazywać wycinki z aplikacji <xliff:g id="APP_2">%2$s</xliff:g>"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"Edytuj"</string>
@@ -2263,13 +2260,12 @@
     <string name="ui_translation_accessibility_translated_text" msgid="3197547218178944544">"Przetłumaczono wiadomość: <xliff:g id="MESSAGE">%1$s</xliff:g>."</string>
     <string name="ui_translation_accessibility_translation_finished" msgid="3057830947610088465">"Wiadomość przetłumaczono z języka: <xliff:g id="FROM_LANGUAGE">%1$s</xliff:g> na język: <xliff:g id="TO_LANGUAGE">%2$s</xliff:g>."</string>
     <string name="notification_channel_abusive_bg_apps" msgid="6092140213264920355">"Aktywność w tle"</string>
-    <string name="notification_title_abusive_bg_apps" msgid="344582472797982073">"Aktywność w tle"</string>
-    <string name="notification_content_abusive_bg_apps" msgid="5572096708044958249">"Aplikacja <xliff:g id="APP">%1$s</xliff:g> działa w tle i zużywa baterię. Kliknij, aby sprawdzić."</string>
-    <string name="notification_content_long_running_fgs" msgid="8878031652441570178">"Aplikacja <xliff:g id="APP">%1$s</xliff:g> długo działa w tle. Kliknij, aby sprawdzić."</string>
+    <string name="notification_title_abusive_bg_apps" msgid="3258460527676573815">"Aplikacja używa baterii"</string>
+    <string name="notification_title_long_running_fgs" msgid="8170284286477131587">"Aplikacja jest wciąż aktywna"</string>
+    <string name="notification_content_abusive_bg_apps" msgid="9180610713603474720">"Aplikacja <xliff:g id="APP">%1$s</xliff:g> używa baterii w tle. Kliknij, aby to sprawdzić."</string>
+    <string name="notification_content_long_running_fgs" msgid="8258193410039977101">"Aplikacja <xliff:g id="APP">%1$s</xliff:g> może mieć wpływ na czas pracy na baterii. Kliknij, aby sprawdzić aktywne aplikacje."</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Sprawdź aktywne aplikacje"</string>
-    <!-- no translation found for vdm_camera_access_denied (6102378580971542473) -->
-    <skip />
-    <!-- no translation found for vdm_camera_access_denied (6895968310395249076) -->
-    <skip />
+    <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"Nie można korzystać z aparatu telefonu na urządzeniu <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
+    <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"Nie można korzystać z aparatu tabletu na urządzeniu <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
     <string name="system_locale_title" msgid="3978041860457277638">"Język systemu"</string>
 </resources>
