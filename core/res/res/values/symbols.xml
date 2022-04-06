@@ -393,6 +393,7 @@
   <java-symbol type="bool" name="config_supportsInsecureLockScreen" />
   <java-symbol type="bool" name="config_guestUserEphemeral" />
   <java-symbol type="bool" name="config_guestUserAutoCreated" />
+  <java-symbol type="bool" name="config_guestUserAllowEphemeralStateChange" />
   <java-symbol type="bool" name="config_localDisplaysMirrorContent" />
   <java-symbol type="array" name="config_localPrivateDisplayPorts" />
   <java-symbol type="integer" name="config_defaultDisplayDefaultColorMode" />

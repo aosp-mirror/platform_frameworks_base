@@ -1873,6 +1873,44 @@ public class UserManagerService extends IUserManager.Stub {
     }
 
     @Override
+    public boolean setUserEphemeral(@UserIdInt int userId, boolean enableEphemeral) {
+        checkCreateUsersPermission("update ephemeral user flag");
+        UserData userToUpdate = null;
+        synchronized (mPackagesLock) {
+            synchronized (mUsersLock) {
+                final UserData userData = mUsers.get(userId);
+                if (userData == null) {
+                    Slog.e(LOG_TAG, "User not found for setting ephemeral mode: u" + userId);
+                    return false;
+                }
+                boolean isEphemeralUser = (userData.info.flags & UserInfo.FLAG_EPHEMERAL) != 0;
+                boolean isEphemeralOnCreateUser =
+                        (userData.info.flags & UserInfo.FLAG_EPHEMERAL_ON_CREATE) != 0;
+                // when user is created in ephemeral mode via FLAG_EPHEMERAL
+                // its state cannot be changed to non ephemeral.
+                // FLAG_EPHEMERAL_ON_CREATE is used to keep track of this state
+                if (isEphemeralOnCreateUser && !enableEphemeral) {
+                    Slog.e(LOG_TAG, "Failed to change user state to non-ephemeral for user "
+                            + userId);
+                    return false;
+                }
+                if (isEphemeralUser != enableEphemeral) {
+                    if (enableEphemeral) {
+                        userData.info.flags |= UserInfo.FLAG_EPHEMERAL;
+                    } else {
+                        userData.info.flags &= ~UserInfo.FLAG_EPHEMERAL;
+                    }
+                    userToUpdate = userData;
+                }
+            }
+            if (userToUpdate != null) {
+                writeUserLP(userToUpdate);
+            }
+        }
+        return true;
+    }
+
+    @Override
     public void setUserIcon(@UserIdInt int userId, Bitmap bitmap) {
         try {
             checkManageUsersPermission("update users");
@@ -3977,6 +4015,10 @@ public class UserManagerService extends IUserManager.Stub {
                     // pre-created user is "converted" to a normal user.
                     if (preCreate) {
                         flags &= ~UserInfo.FLAG_EPHEMERAL;
+                    }
+
+                    if ((flags & UserInfo.FLAG_EPHEMERAL) != 0) {
+                        flags |= UserInfo.FLAG_EPHEMERAL_ON_CREATE;
                     }
 
                     userInfo = new UserInfo(userId, name, null, flags, userType);
