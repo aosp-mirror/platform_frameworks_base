@@ -158,16 +158,17 @@ public class LocalePickerWithRegion extends ListFragment implements SearchView.O
             if (appCurrentLocale != null && !isForCountryMode) {
                 mLocaleList.add(appCurrentLocale);
             }
-            filterTheLanguagesNotSupportedInApp(context, appPackageName);
+            mLocaleList = filterTheLanguagesNotSupportedInApp(context, appPackageName);
 
             if (!isForCountryMode) {
-                mLocaleList.add(LocaleStore.getSystemDefaultLocaleInfo());
+                mLocaleList.add(LocaleStore.getSystemDefaultLocaleInfo(appCurrentLocale == null));
             }
         }
         return true;
     }
 
-    private void filterTheLanguagesNotSupportedInApp(Context context, String appPackageName) {
+    private Set<LocaleStore.LocaleInfo> filterTheLanguagesNotSupportedInApp(
+            Context context, String appPackageName) {
         ArrayList<Locale> supportedLocales =
                 AppLocaleStore.getAppSupportedLocales(context, appPackageName);
 
@@ -181,7 +182,7 @@ public class LocalePickerWithRegion extends ListFragment implements SearchView.O
         }
         Log.d(TAG, "mLocaleList after app-supported filter:  " + filteredList.size());
 
-        mLocaleList = filteredList;
+        return filteredList;
     }
 
     private void returnToParentFrame() {
