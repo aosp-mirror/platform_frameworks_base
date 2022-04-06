@@ -3892,6 +3892,11 @@
   <java-symbol type="string" name="zen_upgrade_notification_visd_title" />
   <java-symbol type="string" name="zen_upgrade_notification_visd_content" />
 
+  <java-symbol type="string" name="review_notification_settings_title" />
+  <java-symbol type="string" name="review_notification_settings_text" />
+  <java-symbol type="string" name="review_notification_settings_remind_me_action" />
+  <java-symbol type="string" name="review_notification_settings_dismiss" />
+
   <java-symbol type="string" name="config_managed_provisioning_package" />
 
   <java-symbol type="string" name="notification_app_name_system" />
