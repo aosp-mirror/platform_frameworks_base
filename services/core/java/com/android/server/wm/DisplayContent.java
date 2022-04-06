@@ -1992,7 +1992,8 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         scheduleAnimation();
 
         forAllWindows(w -> {
-            if (w.mHasSurface && !rotateSeamlessly) {
+            if (!w.mHasSurface) return;
+            if (!rotateSeamlessly) {
                 ProtoLog.v(WM_DEBUG_ORIENTATION, "Set mOrientationChanging of %s", w);
                 w.setOrientationChanging(true);
             }

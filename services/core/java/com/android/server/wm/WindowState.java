@@ -3602,6 +3602,10 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         mAnimatingExit = false;
         ProtoLog.d(WM_DEBUG_ANIM, "Clear animatingExit: reason=destroySurface win=%s", this);
 
+        // Clear the flag so the buffer requested for the next new surface won't be dropped by
+        // mistaking the surface size needs to update.
+        mReportOrientationChanged = false;
+
         if (useBLASTSync()) {
             immediatelyNotifyBlastSync();
         }
