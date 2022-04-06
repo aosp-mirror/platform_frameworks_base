@@ -67,7 +67,6 @@ import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.LockscreenShadeTransitionController;
 import com.android.systemui.statusbar.VibratorHelper;
 import com.android.systemui.statusbar.phone.CentralSurfaces;
-import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.statusbar.phone.SystemUIDialogManager;
 import com.android.systemui.statusbar.phone.UnlockedScreenOffAnimationController;
@@ -149,8 +148,6 @@ public class UdfpsControllerTest extends SysuiTestCase {
     private UdfpsHapticsSimulator mUdfpsHapticsSimulator;
     @Mock
     private KeyguardStateController mKeyguardStateController;
-    @Mock
-    private KeyguardBypassController mKeyguardBypassController;
     @Mock
     private DisplayManager mDisplayManager;
     @Mock
@@ -252,7 +249,6 @@ public class UdfpsControllerTest extends SysuiTestCase {
                 mUdfpsHapticsSimulator,
                 Optional.of(mHbmProvider),
                 mKeyguardStateController,
-                mKeyguardBypassController,
                 mDisplayManager,
                 mHandler,
                 mConfigurationController,
@@ -307,75 +303,6 @@ public class UdfpsControllerTest extends SysuiTestCase {
 
         // THEN notify keyguard authenticate to dismiss the keyguard
         verify(mStatusBarKeyguardViewManager).notifyKeyguardAuthenticated(anyBoolean());
-    }
-
-    @Test
-    public void onActionMove_dozing_setDeviceEntryIntent() throws RemoteException {
-        // GIVEN the current animation is UdfpsKeyguardViewController and device IS dozing
-        when(mKeyguardStateController.canDismissLockScreen()).thenReturn(false);
-        when(mUdfpsView.isWithinSensorArea(anyFloat(), anyFloat())).thenReturn(true);
-        when(mUdfpsView.getAnimationViewController()).thenReturn(mUdfpsKeyguardViewController);
-        when(mStatusBarStateController.isDozing()).thenReturn(true);
-
-        // GIVEN that the overlay is showing
-        mOverlayController.showUdfpsOverlay(TEST_REQUEST_ID, TEST_UDFPS_SENSOR_ID,
-                BiometricOverlayConstants.REASON_AUTH_KEYGUARD, mUdfpsOverlayControllerCallback);
-        mFgExecutor.runAllReady();
-
-        // WHEN ACTION_DOWN is received
-        verify(mUdfpsView).setOnTouchListener(mTouchListenerCaptor.capture());
-        MotionEvent moveEvent = MotionEvent.obtain(0, 0, MotionEvent.ACTION_MOVE, 0, 0, 0);
-        mTouchListenerCaptor.getValue().onTouch(mUdfpsView, moveEvent);
-        moveEvent.recycle();
-
-        // THEN device entry intent is never to true b/c device was dozing on touch
-        verify(mKeyguardBypassController, never()).setUserHasDeviceEntryIntent(true);
-    }
-
-    @Test
-    public void onActionMove_onKeyguard_setDeviceEntryIntent() throws RemoteException {
-        // GIVEN the current animation is UdfpsKeyguardViewController and device isn't dozing
-        when(mKeyguardStateController.canDismissLockScreen()).thenReturn(false);
-        when(mUdfpsView.isWithinSensorArea(anyFloat(), anyFloat())).thenReturn(true);
-        when(mUdfpsView.getAnimationViewController()).thenReturn(mUdfpsKeyguardViewController);
-        when(mStatusBarStateController.isDozing()).thenReturn(false);
-
-        // GIVEN that the overlay is showing
-        mOverlayController.showUdfpsOverlay(TEST_REQUEST_ID, TEST_UDFPS_SENSOR_ID,
-                BiometricOverlayConstants.REASON_AUTH_KEYGUARD, mUdfpsOverlayControllerCallback);
-        mFgExecutor.runAllReady();
-
-        // WHEN ACTION_DOWN is received
-        verify(mUdfpsView).setOnTouchListener(mTouchListenerCaptor.capture());
-        MotionEvent moveEvent = MotionEvent.obtain(0, 0, MotionEvent.ACTION_MOVE, 0, 0, 0);
-        mTouchListenerCaptor.getValue().onTouch(mUdfpsView, moveEvent);
-        moveEvent.recycle();
-
-        // THEN device entry intent is set to true
-        verify(mKeyguardBypassController).setUserHasDeviceEntryIntent(true);
-    }
-
-    @Test
-    public void onActionMove_onEnrollment_neverSetDeviceEntryIntent() throws RemoteException {
-        // GIVEN the current animation is UdfpsEnrollViewController
-        when(mKeyguardStateController.canDismissLockScreen()).thenReturn(false);
-        when(mUdfpsView.isWithinSensorArea(anyFloat(), anyFloat())).thenReturn(true);
-        when(mUdfpsView.getAnimationViewController()).thenReturn(
-                (UdfpsAnimationViewController) mock(UdfpsEnrollViewController.class));
-
-        // GIVEN that the overlay is showing
-        mOverlayController.showUdfpsOverlay(TEST_REQUEST_ID, TEST_UDFPS_SENSOR_ID,
-                BiometricOverlayConstants.REASON_ENROLL_ENROLLING, mUdfpsOverlayControllerCallback);
-        mFgExecutor.runAllReady();
-
-        // WHEN ACTION_DOWN is received
-        verify(mUdfpsView).setOnTouchListener(mTouchListenerCaptor.capture());
-        MotionEvent moveEvent = MotionEvent.obtain(0, 0, MotionEvent.ACTION_MOVE, 0, 0, 0);
-        mTouchListenerCaptor.getValue().onTouch(mUdfpsView, moveEvent);
-        moveEvent.recycle();
-
-        // THEN device entry intent is never set
-        verify(mKeyguardBypassController, never()).setUserHasDeviceEntryIntent(anyBoolean());
     }
 
     @Test

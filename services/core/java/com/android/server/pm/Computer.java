@@ -599,4 +599,7 @@ public interface Computer extends PackageDataSnapshot {
     void dumpPackagesProto(@NonNull ProtoOutputStream proto);
 
     void dumpSharedLibrariesProto(@NonNull ProtoOutputStream protoOutputStream);
+
+    @NonNull
+    List<? extends PackageStateInternal> getVolumePackages(@NonNull String volumeUuid);
 }

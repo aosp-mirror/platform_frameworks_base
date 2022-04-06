@@ -20,6 +20,7 @@ import android.app.PendingIntent
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.Icon
 import android.media.session.MediaSession
+import com.android.internal.logging.InstanceId
 import com.android.systemui.R
 
 /** State of a media view. */
@@ -115,7 +116,17 @@ data class MediaData(
     /**
      * Timestamp when this player was last active.
      */
-    var lastActive: Long = 0L
+    var lastActive: Long = 0L,
+
+    /**
+     * Instance ID for logging purposes
+     */
+    val instanceId: InstanceId,
+
+    /**
+     * The UID of the app, used for logging
+     */
+    val appUid: Int
 ) {
     companion object {
         /** Media is playing on the local device */
@@ -173,7 +184,12 @@ data class MediaAction(
     val icon: Drawable?,
     val action: Runnable?,
     val contentDescription: CharSequence?,
-    val background: Drawable?
+    val background: Drawable?,
+
+    // Rebind Id is used to detect identical rebinds and ignore them. It is intended
+    // to prevent continuously looping animations from restarting due to the arrival
+    // of repeated media notifications that are visually identical.
+    val rebindId: Int? = null
 )
 
 /** State of the media device. */

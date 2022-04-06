@@ -19,106 +19,25 @@ package com.android.server.pm
 import android.content.Intent
 import android.content.pm.SuspendDialogInfo
 import android.os.Binder
-import android.os.Build
-import android.os.Bundle
 import android.os.PersistableBundle
-import android.os.UserHandle
-import android.os.UserManager
 import android.util.ArrayMap
 import android.util.SparseArray
-import com.android.server.pm.KnownPackages
 import com.android.server.pm.pkg.PackageStateInternal
-import com.android.server.testutils.TestHandler
 import com.android.server.testutils.any
 import com.android.server.testutils.eq
 import com.android.server.testutils.nullable
 import com.android.server.testutils.whenever
 import com.google.common.truth.Truth.assertThat
-import org.junit.Before
-import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.JUnit4
-import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.anyInt
-import org.mockito.Captor
-import org.mockito.Mock
-import org.mockito.Mockito
 import org.mockito.Mockito.argThat
-import org.mockito.Mockito.spy
 import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
-import org.mockito.MockitoAnnotations
 
 @RunWith(JUnit4::class)
-class SuspendPackageHelperTest {
-
-    companion object {
-        const val TEST_PACKAGE_1 = "com.android.test.package1"
-        const val TEST_PACKAGE_2 = "com.android.test.package2"
-        const val DEVICE_OWNER_PACKAGE = "com.android.test.owner"
-        const val NONEXISTENT_PACKAGE = "com.android.test.nonexistent"
-        const val DEVICE_ADMIN_PACKAGE = "com.android.test.known.device.admin"
-        const val DEFAULT_HOME_PACKAGE = "com.android.test.known.home"
-        const val DIALER_PACKAGE = "com.android.test.known.dialer"
-        const val INSTALLER_PACKAGE = "com.android.test.known.installer"
-        const val UNINSTALLER_PACKAGE = "com.android.test.known.uninstaller"
-        const val VERIFIER_PACKAGE = "com.android.test.known.verifier"
-        const val PERMISSION_CONTROLLER_PACKAGE = "com.android.test.known.permission"
-        const val TEST_USER_ID = 0
-    }
-
-    lateinit var pms: PackageManagerService
-    lateinit var suspendPackageHelper: SuspendPackageHelper
-    lateinit var testHandler: TestHandler
-    lateinit var defaultAppProvider: DefaultAppProvider
-    lateinit var packageSetting1: PackageStateInternal
-    lateinit var packageSetting2: PackageStateInternal
-    lateinit var ownerSetting: PackageStateInternal
-    lateinit var packagesToSuspend: Array<String>
-    lateinit var uidsToSuspend: IntArray
-
-    @Mock
-    lateinit var broadcastHelper: BroadcastHelper
-    @Mock
-    lateinit var protectedPackages: ProtectedPackages
-
-    @Captor
-    lateinit var bundleCaptor: ArgumentCaptor<Bundle>
-
-    @Rule
-    @JvmField
-    val rule = MockSystemRule()
-    var deviceOwnerUid = 0
-
-    @Before
-    @Throws(Exception::class)
-    fun setup() {
-        MockitoAnnotations.initMocks(this)
-        rule.system().stageNominalSystemState()
-        pms = spy(createPackageManagerService(
-            TEST_PACKAGE_1, TEST_PACKAGE_2, DEVICE_OWNER_PACKAGE, DEVICE_ADMIN_PACKAGE,
-            DEFAULT_HOME_PACKAGE, DIALER_PACKAGE, INSTALLER_PACKAGE, UNINSTALLER_PACKAGE,
-            VERIFIER_PACKAGE, PERMISSION_CONTROLLER_PACKAGE))
-        suspendPackageHelper = SuspendPackageHelper(
-            pms, rule.mocks().injector, broadcastHelper, protectedPackages)
-        defaultAppProvider = rule.mocks().defaultAppProvider
-        testHandler = rule.mocks().handler
-        packageSetting1 = pms.snapshotComputer().getPackageStateInternal(TEST_PACKAGE_1)!!
-        packageSetting2 = pms.snapshotComputer().getPackageStateInternal(TEST_PACKAGE_2)!!
-        ownerSetting = pms.snapshotComputer().getPackageStateInternal(DEVICE_OWNER_PACKAGE)!!
-        deviceOwnerUid = UserHandle.getUid(TEST_USER_ID, ownerSetting.appId)
-        packagesToSuspend = arrayOf(TEST_PACKAGE_1, TEST_PACKAGE_2)
-        uidsToSuspend = intArrayOf(packageSetting1.appId, packageSetting2.appId)
-
-        whenever(protectedPackages.getDeviceOwnerOrProfileOwnerPackage(eq(TEST_USER_ID)))
-            .thenReturn(DEVICE_OWNER_PACKAGE)
-        whenever(rule.mocks().userManagerService.hasUserRestriction(
-            eq(UserManager.DISALLOW_APPS_CONTROL), eq(TEST_USER_ID))).thenReturn(true)
-        whenever(rule.mocks().userManagerService.hasUserRestriction(
-            eq(UserManager.DISALLOW_UNINSTALL_APPS), eq(TEST_USER_ID))).thenReturn(true)
-        mockKnownPackages(pms)
-    }
+class SuspendPackageHelperTest : PackageHelperTestBase() {
 
     @Test
     fun setPackagesSuspended() {
@@ -388,7 +307,7 @@ class SuspendPackageHelperTest {
         mockAllowList(packageSetting2, allowList(10001, 10002, 10003))
 
         suspendPackageHelper.sendPackagesSuspendedForUser(pms.snapshotComputer(),
-            Intent.ACTION_PACKAGES_SUSPENDED, packagesToSuspend, uidsToSuspend, TEST_USER_ID)
+            Intent.ACTION_PACKAGES_SUSPENDED, packagesToChange, uidsToChange, TEST_USER_ID)
         testHandler.flush()
         verify(broadcastHelper).sendPackageBroadcast(any(), nullable(), bundleCaptor.capture(),
                 anyInt(), nullable(), nullable(), any(), nullable(), any(), nullable())
@@ -407,7 +326,7 @@ class SuspendPackageHelperTest {
         mockAllowList(packageSetting2, allowList(10001, 10002, 10007))
 
         suspendPackageHelper.sendPackagesSuspendedForUser(pms.snapshotComputer(),
-            Intent.ACTION_PACKAGES_SUSPENDED, packagesToSuspend, uidsToSuspend, TEST_USER_ID)
+            Intent.ACTION_PACKAGES_SUSPENDED, packagesToChange, uidsToChange, TEST_USER_ID)
         testHandler.flush()
         verify(broadcastHelper, times(2)).sendPackageBroadcast(
                 any(), nullable(), bundleCaptor.capture(), anyInt(), nullable(), nullable(), any(),
@@ -430,7 +349,7 @@ class SuspendPackageHelperTest {
         mockAllowList(packageSetting2, null)
 
         suspendPackageHelper.sendPackagesSuspendedForUser(pms.snapshotComputer(),
-            Intent.ACTION_PACKAGES_SUSPENDED, packagesToSuspend, uidsToSuspend, TEST_USER_ID)
+            Intent.ACTION_PACKAGES_SUSPENDED, packagesToChange, uidsToChange, TEST_USER_ID)
         testHandler.flush()
         verify(broadcastHelper, times(2)).sendPackageBroadcast(
                 any(), nullable(), bundleCaptor.capture(), anyInt(), nullable(), nullable(), any(),
@@ -450,7 +369,7 @@ class SuspendPackageHelperTest {
     @Throws(Exception::class)
     fun sendPackagesSuspendModifiedForUser() {
         suspendPackageHelper.sendPackagesSuspendedForUser(pms.snapshotComputer(),
-            Intent.ACTION_PACKAGES_SUSPENSION_CHANGED, packagesToSuspend, uidsToSuspend,
+            Intent.ACTION_PACKAGES_SUSPENSION_CHANGED, packagesToChange, uidsToChange,
             TEST_USER_ID)
         testHandler.flush()
         verify(broadcastHelper).sendPackageBroadcast(
@@ -474,41 +393,5 @@ class SuspendPackageHelperTest {
             any() as ArrayMap<String, out PackageStateInternal>
         ))
             .thenReturn(list)
-    }
-
-    private fun mockKnownPackages(pms: PackageManagerService) {
-        Mockito.doAnswer { it.arguments[0] == DEVICE_ADMIN_PACKAGE }.`when`(pms)
-            .isPackageDeviceAdmin(any(), any())
-        Mockito.doReturn(DEFAULT_HOME_PACKAGE).`when`(defaultAppProvider)
-            .getDefaultHome(eq(TEST_USER_ID))
-        Mockito.doReturn(DIALER_PACKAGE).`when`(defaultAppProvider)
-            .getDefaultDialer(eq(TEST_USER_ID))
-        Mockito.doReturn(arrayOf(INSTALLER_PACKAGE)).`when`(pms).getKnownPackageNamesInternal(
-            any(), eq(KnownPackages.PACKAGE_INSTALLER), eq(TEST_USER_ID))
-        Mockito.doReturn(arrayOf(UNINSTALLER_PACKAGE)).`when`(pms).getKnownPackageNamesInternal(
-            any(), eq(KnownPackages.PACKAGE_UNINSTALLER), eq(TEST_USER_ID))
-        Mockito.doReturn(arrayOf(VERIFIER_PACKAGE)).`when`(pms).getKnownPackageNamesInternal(
-            any(), eq(KnownPackages.PACKAGE_VERIFIER), eq(TEST_USER_ID))
-        Mockito.doReturn(arrayOf(PERMISSION_CONTROLLER_PACKAGE)).`when`(pms)
-            .getKnownPackageNamesInternal(any(),
-                eq(KnownPackages.PACKAGE_PERMISSION_CONTROLLER), eq(TEST_USER_ID))
-    }
-
-    private fun createPackageManagerService(vararg stageExistingPackages: String):
-            PackageManagerService {
-        stageExistingPackages.forEach {
-            rule.system().stageScanExistingPackage(it, 1L,
-                    rule.system().dataAppDirectory)
-        }
-        var pms = PackageManagerService(rule.mocks().injector,
-                false /*coreOnly*/,
-                false /*factoryTest*/,
-                MockSystem.DEFAULT_VERSION_INFO.fingerprint,
-                false /*isEngBuild*/,
-                false /*isUserDebugBuild*/,
-                Build.VERSION_CODES.CUR_DEVELOPMENT,
-                Build.VERSION.INCREMENTAL)
-        rule.system().validateFinalState()
-        return pms
     }
 }

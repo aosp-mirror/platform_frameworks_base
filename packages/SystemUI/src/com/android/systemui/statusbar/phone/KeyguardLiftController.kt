@@ -77,7 +77,7 @@ class KeyguardLiftController @Inject constructor(
     }
 
     private val keyguardUpdateMonitorCallback = object : KeyguardUpdateMonitorCallback() {
-        override fun onKeyguardBouncerChanged(bouncer: Boolean) {
+        override fun onKeyguardBouncerFullyShowingChanged(bouncer: Boolean) {
             bouncerVisible = bouncer
             updateListeningState()
         }

@@ -138,12 +138,8 @@ public class QSContainerImpl extends FrameLayout implements Dumpable {
     }
 
     void updateResources(QSPanelController qsPanelController,
-            QuickStatusBarHeaderController quickStatusBarHeaderController,
-            boolean newFooter) {
-        int bottomPadding = 0;
-        if (newFooter) {
-            bottomPadding = getResources().getDimensionPixelSize(R.dimen.qs_panel_padding_bottom);
-        }
+            QuickStatusBarHeaderController quickStatusBarHeaderController) {
+        int bottomPadding = getResources().getDimensionPixelSize(R.dimen.qs_panel_padding_bottom);
         mQSPanelContainer.setPaddingRelative(
                 mQSPanelContainer.getPaddingStart(),
                 QSUtils.getQsHeaderSystemIconsAreaHeight(mContext),

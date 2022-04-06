@@ -112,6 +112,10 @@ public class Flags {
     public static final ResourceBooleanFlag QS_USER_DETAIL_SHORTCUT =
             new ResourceBooleanFlag(503, R.bool.flag_lockscreen_qs_user_detail_shortcut);
 
+    /**
+     * @deprecated Not needed anymore
+     */
+    @Deprecated
     public static final BooleanFlag NEW_FOOTER = new BooleanFlag(504, true);
 
     public static final BooleanFlag NEW_HEADER = new BooleanFlag(505, false);

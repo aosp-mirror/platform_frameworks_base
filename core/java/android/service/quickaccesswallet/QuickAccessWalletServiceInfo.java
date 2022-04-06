@@ -144,23 +144,20 @@ class QuickAccessWalletServiceInfo {
         private final CharSequence mShortcutShortLabel;
         @Nullable
         private final CharSequence mShortcutLongLabel;
-        private final boolean mUseTargetActivityForQuickAccess;
 
         private static ServiceMetadata empty() {
-            return new ServiceMetadata(null, null, null, null, false);
+            return new ServiceMetadata(null, null, null, null);
         }
 
         private ServiceMetadata(
                 String targetActivity,
                 String settingsActivity,
                 CharSequence shortcutShortLabel,
-                CharSequence shortcutLongLabel,
-                boolean useTargetActivityForQuickAccess) {
+                CharSequence shortcutLongLabel) {
             mTargetActivity = targetActivity;
             mSettingsActivity = settingsActivity;
             mShortcutShortLabel = shortcutShortLabel;
             mShortcutLongLabel = shortcutLongLabel;
-            mUseTargetActivityForQuickAccess = useTargetActivityForQuickAccess;
         }
     }
 
@@ -194,11 +191,8 @@ class QuickAccessWalletServiceInfo {
                             R.styleable.QuickAccessWalletService_shortcutShortLabel);
                     CharSequence shortcutLongLabel = afsAttributes.getText(
                             R.styleable.QuickAccessWalletService_shortcutLongLabel);
-                    boolean useTargetActivityForQuickAccess = afsAttributes.getBoolean(
-                            R.styleable.QuickAccessWalletService_useTargetActivityForQuickAccess,
-                            false);
                     return new ServiceMetadata(targetActivity, settingsActivity, shortcutShortLabel,
-                            shortcutLongLabel, useTargetActivityForQuickAccess);
+                            shortcutLongLabel);
                 } finally {
                     if (afsAttributes != null) {
                         afsAttributes.recycle();
@@ -276,9 +270,5 @@ class QuickAccessWalletServiceInfo {
     @NonNull
     CharSequence getServiceLabel(Context context) {
         return mServiceInfo.loadLabel(context.getPackageManager());
-    }
-
-    boolean getUseTargetActivityForQuickAccess() {
-        return mServiceMetadata.mUseTargetActivityForQuickAccess;
     }
 }

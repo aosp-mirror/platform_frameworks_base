@@ -30,8 +30,11 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.app.AlertDialog;
+import android.app.admin.DevicePolicyManager;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.pm.UserInfo;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.VectorDrawable;
@@ -44,6 +47,7 @@ import android.testing.LayoutInflaterBuilder;
 import android.testing.TestableImageView;
 import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
+import android.testing.ViewUtils;
 import android.text.SpannableStringBuilder;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -53,11 +57,12 @@ import android.widget.TextView;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.animation.DialogLaunchAnimator;
-import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.policy.SecurityController;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -104,7 +109,7 @@ public class QSSecurityFooterTest extends SysuiTestCase {
     @Mock
     private DialogLaunchAnimator mDialogLaunchAnimator;
     @Mock
-    private FeatureFlags mFeatureFlags;
+    private BroadcastDispatcher mBroadcastDispatcher;
 
     private TestableLooper mTestableLooper;
 
@@ -119,7 +124,7 @@ public class QSSecurityFooterTest extends SysuiTestCase {
                 .build().inflate(R.layout.quick_settings_security_footer, null, false);
         mFooter = new QSSecurityFooter(mRootView, mUserTracker, new Handler(looper),
                 mActivityStarter, mSecurityController, mDialogLaunchAnimator, looper,
-                mFeatureFlags);
+                mBroadcastDispatcher);
         mFooterText = mRootView.findViewById(R.id.footer_text);
         mPrimaryFooterIcon = mRootView.findViewById(R.id.primary_footer_icon);
 
@@ -127,6 +132,14 @@ public class QSSecurityFooterTest extends SysuiTestCase {
                 .thenReturn(DEVICE_OWNER_COMPONENT);
         when(mSecurityController.getDeviceOwnerType(DEVICE_OWNER_COMPONENT))
                 .thenReturn(DEVICE_OWNER_TYPE_DEFAULT);
+        ViewUtils.attachView(mRootView);
+
+        mFooter.init();
+    }
+
+    @After
+    public void tearDown() {
+        ViewUtils.detachView(mRootView);
     }
 
     @Test
@@ -769,8 +782,7 @@ public class QSSecurityFooterTest extends SysuiTestCase {
     @Test
     public void testVisibilityListener() {
         final AtomicInteger lastVisibility = new AtomicInteger(-1);
-        VisibilityChangedDispatcher.OnVisibilityChangedListener listener =
-                (VisibilityChangedDispatcher.OnVisibilityChangedListener) lastVisibility::set;
+        VisibilityChangedDispatcher.OnVisibilityChangedListener listener = lastVisibility::set;
 
         mFooter.setOnVisibilityChangedListener(listener);
 
@@ -785,6 +797,28 @@ public class QSSecurityFooterTest extends SysuiTestCase {
         assertEquals(View.GONE, lastVisibility.get());
     }
 
+    @Test
+    public void testBroadcastShowsDialog() {
+        // Setup dialog content
+        when(mSecurityController.isDeviceManaged()).thenReturn(true);
+        when(mSecurityController.getDeviceOwnerOrganizationName())
+                .thenReturn(MANAGING_ORGANIZATION);
+        when(mSecurityController.getDeviceOwnerType(DEVICE_OWNER_COMPONENT))
+                .thenReturn(DEVICE_OWNER_TYPE_FINANCED);
+
+        ArgumentCaptor<BroadcastReceiver> captor = ArgumentCaptor.forClass(BroadcastReceiver.class);
+        verify(mBroadcastDispatcher).registerReceiverWithHandler(captor.capture(), any(), any(),
+                any());
+
+        // Pretend view is not visible temporarily
+        mRootView.onVisibilityAggregated(false);
+        captor.getValue().onReceive(mContext,
+                new Intent(DevicePolicyManager.ACTION_SHOW_DEVICE_MONITORING_DIALOG));
+        mTestableLooper.processAllMessages();
+
+        assertTrue(mFooter.getDialog().isShowing());
+        mFooter.getDialog().dismiss();
+    }
 
     private CharSequence addLink(CharSequence description) {
         final SpannableStringBuilder message = new SpannableStringBuilder();

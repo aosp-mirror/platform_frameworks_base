@@ -19,11 +19,8 @@ package com.android.wm.shell.common;
 import static android.view.Display.DEFAULT_DISPLAY;
 
 import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.notNull;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
@@ -33,6 +30,7 @@ import android.view.IDisplayWindowInsetsController;
 import android.view.IWindowManager;
 import android.view.InsetsSourceControl;
 import android.view.InsetsState;
+import android.view.InsetsVisibilities;
 
 import androidx.test.filters.SmallTest;
 
@@ -42,7 +40,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 import java.util.List;
@@ -99,7 +96,8 @@ public class DisplayInsetsControllerTest {
         mController.addInsetsChangedListener(DEFAULT_DISPLAY, defaultListener);
         mController.addInsetsChangedListener(SECOND_DISPLAY, secondListener);
 
-        mInsetsControllersByDisplayId.get(DEFAULT_DISPLAY).topFocusedWindowChanged(null);
+        mInsetsControllersByDisplayId.get(DEFAULT_DISPLAY).topFocusedWindowChanged(null,
+                new InsetsVisibilities());
         mInsetsControllersByDisplayId.get(DEFAULT_DISPLAY).insetsChanged(null);
         mInsetsControllersByDisplayId.get(DEFAULT_DISPLAY).insetsControlChanged(null, null);
         mInsetsControllersByDisplayId.get(DEFAULT_DISPLAY).showInsets(0, false);
@@ -118,7 +116,8 @@ public class DisplayInsetsControllerTest {
         assertTrue(secondListener.showInsetsCount == 0);
         assertTrue(secondListener.hideInsetsCount == 0);
 
-        mInsetsControllersByDisplayId.get(SECOND_DISPLAY).topFocusedWindowChanged(null);
+        mInsetsControllersByDisplayId.get(SECOND_DISPLAY).topFocusedWindowChanged(null,
+                new InsetsVisibilities());
         mInsetsControllersByDisplayId.get(SECOND_DISPLAY).insetsChanged(null);
         mInsetsControllersByDisplayId.get(SECOND_DISPLAY).insetsControlChanged(null, null);
         mInsetsControllersByDisplayId.get(SECOND_DISPLAY).showInsets(0, false);
@@ -165,7 +164,8 @@ public class DisplayInsetsControllerTest {
         int hideInsetsCount = 0;
 
         @Override
-        public void topFocusedWindowChanged(String packageName) {
+        public void topFocusedWindowChanged(String packageName,
+                InsetsVisibilities requestedVisibilities) {
             topFocusedWindowChangedCount++;
         }
 

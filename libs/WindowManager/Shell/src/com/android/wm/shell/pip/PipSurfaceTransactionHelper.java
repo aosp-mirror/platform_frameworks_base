@@ -206,8 +206,9 @@ public class PipSurfaceTransactionHelper {
      * Operates the shadow radius on a given transaction and leash
      * @return same {@link PipSurfaceTransactionHelper} instance for method chaining
      */
-    public PipSurfaceTransactionHelper shadow(SurfaceControl.Transaction tx, SurfaceControl leash) {
-        tx.setShadowRadius(leash, mShadowRadius);
+    public PipSurfaceTransactionHelper shadow(SurfaceControl.Transaction tx, SurfaceControl leash,
+            boolean applyShadowRadius) {
+        tx.setShadowRadius(leash, applyShadowRadius ? mShadowRadius : 0);
         return this;
     }
 

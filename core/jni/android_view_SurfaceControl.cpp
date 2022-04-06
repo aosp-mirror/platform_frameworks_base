@@ -851,6 +851,14 @@ static void nativeSetDamageRegion(JNIEnv* env, jclass clazz, jlong transactionOb
     transaction->setSurfaceDamageRegion(surfaceControl, region);
 }
 
+static void nativeSetDimmingEnabled(JNIEnv* env, jclass clazz, jlong transactionObj,
+                                    jlong nativeObject, jboolean dimmingEnabled) {
+    auto transaction = reinterpret_cast<SurfaceComposerClient::Transaction*>(transactionObj);
+
+    SurfaceControl* const ctrl = reinterpret_cast<SurfaceControl*>(nativeObject);
+    transaction->setDimmingEnabled(ctrl, dimmingEnabled);
+}
+
 static void nativeSetAlpha(JNIEnv* env, jclass clazz, jlong transactionObj,
         jlong nativeObject, jfloat alpha) {
     auto transaction = reinterpret_cast<SurfaceComposerClient::Transaction*>(transactionObj);
@@ -2095,8 +2103,9 @@ static const JNINativeMethod sSurfaceControlMethods[] = {
             (void*)nativeSetSize },
     {"nativeSetTransparentRegionHint", "(JJLandroid/graphics/Region;)V",
             (void*)nativeSetTransparentRegionHint },
-    { "nativeSetDamageRegion", "(JJLandroid/graphics/Region;)V",
+    {"nativeSetDamageRegion", "(JJLandroid/graphics/Region;)V",
             (void*)nativeSetDamageRegion },
+    {"nativeSetDimmingEnabled", "(JJZ)V", (void*)nativeSetDimmingEnabled },
     {"nativeSetAlpha", "(JJF)V",
             (void*)nativeSetAlpha },
     {"nativeSetColor", "(JJ[F)V",

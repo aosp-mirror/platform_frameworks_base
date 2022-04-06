@@ -136,6 +136,7 @@
             android:layout_height="@dimen/overlay_dismiss_button_tappable_size"
             android:elevation="@dimen/overlay_dismiss_button_elevation"
             android:visibility="gone"
+            android:alpha="0"
             app:layout_constraintStart_toEndOf="@id/clipboard_preview"
             app:layout_constraintEnd_toEndOf="@id/clipboard_preview"
             app:layout_constraintTop_toTopOf="@id/clipboard_preview"

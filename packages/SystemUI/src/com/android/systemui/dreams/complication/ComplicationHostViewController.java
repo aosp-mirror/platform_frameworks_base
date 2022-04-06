@@ -31,6 +31,7 @@ import com.android.systemui.util.ViewController;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -143,5 +144,12 @@ public class ComplicationHostViewController extends ViewController<ConstraintLay
      */
     public View getView() {
         return mView;
+    }
+
+    /**
+     * Gets an unordered list of all the views at a particular position.
+     */
+    public List<View> getViewsAtPosition(@ComplicationLayoutParams.Position int position) {
+        return mLayoutEngine.getViewsAtPosition(position);
     }
 }

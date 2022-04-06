@@ -46,6 +46,7 @@ import android.util.Xml;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.XmlUtils;
+import com.android.modules.utils.build.UnboundedSdkLevel;
 
 import libcore.io.IoUtils;
 import libcore.util.EmptyArray;
@@ -88,8 +89,8 @@ public class SystemConfig {
     private static final int ALLOW_HIDDENAPI_WHITELISTING = 0x040;
     private static final int ALLOW_ASSOCIATIONS = 0x080;
     // ALLOW_OVERRIDE_APP_RESTRICTIONS allows to use "allow-in-power-save-except-idle",
-    // "allow-in-power-save", "allow-in-data-usage-save", "allow-unthrottled-location",
-    // and "allow-ignore-location-settings".
+    // "allow-in-power-save", "allow-in-data-usage-save","allow-unthrottled-location",
+    // "allow-ignore-location-settings" and "allow-adas-location-settings".
     private static final int ALLOW_OVERRIDE_APP_RESTRICTIONS = 0x100;
     private static final int ALLOW_IMPLICIT_BROADCASTS = 0x200;
     private static final int ALLOW_VENDOR_APEX = 0x400;
@@ -126,7 +127,7 @@ public class SystemConfig {
          *
          * <p>0 means not specified.
          */
-        public final int onBootclasspathSince;
+        public final String onBootclasspathSince;
 
         /**
          * SDK version this library was removed from the BOOTCLASSPATH.
@@ -138,7 +139,7 @@ public class SystemConfig {
          *
          * <p>0 means not specified.
          */
-        public final int onBootclasspathBefore;
+        public final String onBootclasspathBefore;
 
         /**
          * Declares whether this library can be safely ignored from <uses-library> tags.
@@ -155,19 +156,19 @@ public class SystemConfig {
         @VisibleForTesting
         public SharedLibraryEntry(String name, String filename, String[] dependencies,
                 boolean isNative) {
-            this(name, filename, dependencies, 0 /* onBootclasspathSince */,
-                    0 /* onBootclasspathBefore */, isNative);
+            this(name, filename, dependencies, null /* onBootclasspathSince */,
+                    null /* onBootclasspathBefore */, isNative);
         }
 
         @VisibleForTesting
         public SharedLibraryEntry(String name, String filename, String[] dependencies,
-                int onBootclasspathSince, int onBootclassPathBefore) {
-            this(name, filename, dependencies, onBootclasspathSince, onBootclassPathBefore,
+                String onBootclasspathSince, String onBootclasspathBefore) {
+            this(name, filename, dependencies, onBootclasspathSince, onBootclasspathBefore,
                     false /* isNative */);
         }
 
         SharedLibraryEntry(String name, String filename, String[] dependencies,
-                int onBootclasspathSince, int onBootclasspathBefore, boolean isNative) {
+                String onBootclasspathSince, String onBootclasspathBefore, boolean isNative) {
             this.name = name;
             this.filename = filename;
             this.dependencies = dependencies;
@@ -175,16 +176,14 @@ public class SystemConfig {
             this.onBootclasspathBefore = onBootclasspathBefore;
             this.isNative = isNative;
 
-            canBeSafelyIgnored = this.onBootclasspathSince != 0
-                    && isSdkAtLeast(this.onBootclasspathSince);
-        }
-
-        private static boolean isSdkAtLeast(int level) {
-            if ("REL".equals(Build.VERSION.CODENAME)) {
-                return Build.VERSION.SDK_INT >= level;
-            }
-            return level == Build.VERSION_CODES.CUR_DEVELOPMENT
-                    || Build.VERSION.SDK_INT >= level;
+            // this entry can be ignored if either:
+            // - onBootclasspathSince is set and we are at or past that SDK
+            // - onBootclasspathBefore is set and we are before that SDK
+            canBeSafelyIgnored =
+                    (this.onBootclasspathSince != null
+                            && UnboundedSdkLevel.isAtLeast(this.onBootclasspathSince))
+                            || (this.onBootclasspathBefore != null
+                            && !UnboundedSdkLevel.isAtLeast(this.onBootclasspathBefore));
         }
     }
 
@@ -233,6 +232,10 @@ public class SystemConfig {
     // These are the packages that are white-listed to be able to run background location
     // without throttling, as read from the configuration files.
     final ArraySet<String> mAllowUnthrottledLocation = new ArraySet<>();
+
+    // These are the packages that are allow-listed to be able to retrieve location when
+    // the location state is driver assistance only.
+    final ArrayMap<String, ArraySet<String>> mAllowAdasSettings = new ArrayMap<>();
 
     // These are the packages that are white-listed to be able to retrieve location even when user
     // location settings are off, for emergency purposes, as read from the configuration files.
@@ -392,6 +395,10 @@ public class SystemConfig {
 
     public ArraySet<String> getAllowUnthrottledLocation() {
         return mAllowUnthrottledLocation;
+    }
+
+    public ArrayMap<String, ArraySet<String>> getAllowAdasLocationSettings() {
+        return mAllowAdasSettings;
     }
 
     public ArrayMap<String, ArraySet<String>> getAllowIgnoreLocationSettings() {
@@ -870,10 +877,8 @@ public class SystemConfig {
                             String lname = parser.getAttributeValue(null, "name");
                             String lfile = parser.getAttributeValue(null, "file");
                             String ldependency = parser.getAttributeValue(null, "dependency");
-                            int minDeviceSdk = XmlUtils.readIntAttribute(parser, "min-device-sdk",
-                                    0);
-                            int maxDeviceSdk = XmlUtils.readIntAttribute(parser, "max-device-sdk",
-                                    0);
+                            String minDeviceSdk = parser.getAttributeValue(null, "min-device-sdk");
+                            String maxDeviceSdk = parser.getAttributeValue(null, "max-device-sdk");
                             if (lname == null) {
                                 Slog.w(TAG, "<" + name + "> without name in " + permFile + " at "
                                         + parser.getPositionDescription());
@@ -881,15 +886,18 @@ public class SystemConfig {
                                 Slog.w(TAG, "<" + name + "> without file in " + permFile + " at "
                                         + parser.getPositionDescription());
                             } else {
-                                boolean allowedMinSdk = minDeviceSdk <= Build.VERSION.SDK_INT;
+                                boolean allowedMinSdk =
+                                        minDeviceSdk == null || UnboundedSdkLevel.isAtLeast(
+                                                minDeviceSdk);
                                 boolean allowedMaxSdk =
-                                        maxDeviceSdk == 0 || maxDeviceSdk >= Build.VERSION.SDK_INT;
+                                        maxDeviceSdk == null || UnboundedSdkLevel.isAtMost(
+                                                maxDeviceSdk);
                                 final boolean exists = new File(lfile).exists();
                                 if (allowedMinSdk && allowedMaxSdk && exists) {
-                                    int bcpSince = XmlUtils.readIntAttribute(parser,
-                                            "on-bootclasspath-since", 0);
-                                    int bcpBefore = XmlUtils.readIntAttribute(parser,
-                                            "on-bootclasspath-before", 0);
+                                    String bcpSince = parser.getAttributeValue(null,
+                                            "on-bootclasspath-since");
+                                    String bcpBefore = parser.getAttributeValue(null,
+                                            "on-bootclasspath-before");
                                     SharedLibraryEntry entry = new SharedLibraryEntry(lname, lfile,
                                             ldependency == null
                                                     ? new String[0] : ldependency.split(":"),
@@ -1001,6 +1009,34 @@ public class SystemConfig {
                                         + permFile + " at " + parser.getPositionDescription());
                             } else {
                                 mAllowUnthrottledLocation.add(pkgname);
+                            }
+                        } else {
+                            logNotAllowedInPartition(name, permFile, parser);
+                        }
+                        XmlUtils.skipCurrentTag(parser);
+                    } break;
+                    case "allow-adas-location-settings" : {
+                        if (allowOverrideAppRestrictions) {
+                            String pkgname = parser.getAttributeValue(null, "package");
+                            String attributionTag = parser.getAttributeValue(null,
+                                    "attributionTag");
+                            if (pkgname == null) {
+                                Slog.w(TAG, "<" + name + "> without package in "
+                                        + permFile + " at " + parser.getPositionDescription());
+                            } else {
+                                ArraySet<String> tags = mAllowAdasSettings.get(pkgname);
+                                if (tags == null || !tags.isEmpty()) {
+                                    if (tags == null) {
+                                        tags = new ArraySet<>(1);
+                                        mAllowAdasSettings.put(pkgname, tags);
+                                    }
+                                    if (!"*".equals(attributionTag)) {
+                                        if ("null".equals(attributionTag)) {
+                                            attributionTag = null;
+                                        }
+                                        tags.add(attributionTag);
+                                    }
+                                }
                             }
                         } else {
                             logNotAllowedInPartition(name, permFile, parser);

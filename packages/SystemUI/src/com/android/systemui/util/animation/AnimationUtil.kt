@@ -37,5 +37,11 @@ class AnimationUtil {
             }
             return (numFrames * 1000f / 60f).roundToLong()
         }
+
+        /**
+         * Convenience extension function for [getMsForFrames], so that we can write `23.frames`
+         */
+        val Int.frames: Long
+            get() = getMsForFrames(this)
     }
 }

@@ -5,3 +5,4 @@ option java_package com.android.dynsystem
 120000 dsu_progress_update (partition_name|3),(installed_bytes|2|5),(total_bytes|2|5),(partition_number|1|5),(total_partition_number|1|5),(total_progress_percentage|1|5)
 120001 dsu_install_complete
 120002 dsu_install_failed (cause|3)
+120003 dsu_install_insufficient_space

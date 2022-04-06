@@ -97,6 +97,7 @@ class UserSwitcherControllerTest : SysuiTestCase() {
     @Mock private lateinit var dialogLaunchAnimator: DialogLaunchAnimator
     private lateinit var testableLooper: TestableLooper
     private lateinit var bgExecutor: FakeExecutor
+    private lateinit var longRunningExecutor: FakeExecutor
     private lateinit var uiExecutor: FakeExecutor
     private lateinit var uiEventLogger: UiEventLoggerFake
     private lateinit var userSwitcherController: UserSwitcherController
@@ -117,6 +118,7 @@ class UserSwitcherControllerTest : SysuiTestCase() {
         MockitoAnnotations.initMocks(this)
         testableLooper = TestableLooper.get(this)
         bgExecutor = FakeExecutor(FakeSystemClock())
+        longRunningExecutor = FakeExecutor(FakeSystemClock())
         uiExecutor = FakeExecutor(FakeSystemClock())
         uiEventLogger = UiEventLoggerFake()
 
@@ -167,6 +169,7 @@ class UserSwitcherControllerTest : SysuiTestCase() {
                 telephonyListenerManager,
                 secureSettings,
                 bgExecutor,
+                longRunningExecutor,
                 uiExecutor,
                 interactionJankMonitor,
                 latencyTracker,

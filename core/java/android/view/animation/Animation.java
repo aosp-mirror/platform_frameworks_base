@@ -196,9 +196,9 @@ public abstract class Animation implements Cloneable {
     private int mZAdjustment;
 
     /**
-     * Desired background color behind animation.
+     * The desired color of the backdrop to show behind the animation.
      */
-    private int mBackgroundColor;
+    private int mBackdropColor;
 
     /**
      * scalefactor to apply to pivot points, etc. during animation. Subclasses retrieve the
@@ -211,10 +211,10 @@ public abstract class Animation implements Cloneable {
 
     /**
      * Whether to show a background behind the windows during the animation.
-     * @see #getShowBackground()
-     * @see #setShowBackground(boolean)
+     * @see #getShowBackdrop()
+     * @see #setShowBackdrop(boolean)
      */
-    private boolean mShowBackground;
+    private boolean mShowBackdrop;
 
     private boolean mMore = true;
     private boolean mOneMoreTime = true;
@@ -265,7 +265,7 @@ public abstract class Animation implements Cloneable {
 
         setZAdjustment(a.getInt(com.android.internal.R.styleable.Animation_zAdjustment, ZORDER_NORMAL));
 
-        setBackgroundColor(a.getInt(com.android.internal.R.styleable.Animation_background, 0));
+        setBackdropColor(a.getInt(com.android.internal.R.styleable.Animation_backdropColor, 0));
 
         setDetachWallpaper(
                 a.getBoolean(com.android.internal.R.styleable.Animation_detachWallpaper, false));
@@ -273,8 +273,8 @@ public abstract class Animation implements Cloneable {
                 a.getBoolean(com.android.internal.R.styleable.Animation_showWallpaper, false));
         setHasRoundedCorners(
                 a.getBoolean(com.android.internal.R.styleable.Animation_hasRoundedCorners, false));
-        setShowBackground(
-                a.getBoolean(com.android.internal.R.styleable.Animation_showBackground, false));
+        setShowBackdrop(
+                a.getBoolean(com.android.internal.R.styleable.Animation_showBackdrop, false));
 
         final int resID = a.getResourceId(com.android.internal.R.styleable.Animation_interpolator, 0);
 
@@ -646,9 +646,12 @@ public abstract class Animation implements Cloneable {
      * @param bg The background color.  If 0, no background.  Currently must
      * be black, with any desired alpha level.
      *
+     * @deprecated None of window animations are running with background color.
+     * @see #setBackdropColor(int) for an alternative.
      */
+    @Deprecated
     public void setBackgroundColor(@ColorInt int bg) {
-        mBackgroundColor = bg;
+        // The background color is not needed any more, do nothing.
     }
 
     /**
@@ -705,21 +708,35 @@ public abstract class Animation implements Cloneable {
     }
 
     /**
-     * If showBackground is {@code true} and this animation is applied on a window, then the windows
+     * If showBackdrop is {@code true} and this animation is applied on a window, then the windows
      * in the animation will animate with the background associated with this window behind them.
      *
-     * The background comes from the {@link android.R.styleable#Theme_colorBackground} that is
-     * applied to this window through its theme.
+     * If no backdrop color is explicitly set, the backdrop's color comes from the
+     * {@link android.R.styleable#Theme_colorBackground} that is applied to this window through its
+     * theme.
      *
-     * If multiple animating windows have showBackground set to {@code true} during an animation,
-     * the top most window with showBackground set to {@code true} and a valid background color
+     * If multiple animating windows have showBackdrop set to {@code true} during an animation,
+     * the top most window with showBackdrop set to {@code true} and a valid background color
      * takes precedence.
      *
-     * @param showBackground Whether to show a background behind the windows during the animation.
-     * @attr ref android.R.styleable#Animation_showBackground
+     * @param showBackdrop Whether to show a background behind the windows during the animation.
+     * @attr ref android.R.styleable#Animation_showBackdrop
      */
-    public void setShowBackground(boolean showBackground) {
-        mShowBackground = showBackground;
+    public void setShowBackdrop(boolean showBackdrop) {
+        mShowBackdrop = showBackdrop;
+    }
+
+    /**
+     * Set the color to use for the backdrop shown behind the animating windows.
+     *
+     * Will only show the backdrop if showBackdrop was set to true.
+     * See {@link #setShowBackdrop(boolean)}.
+     *
+     * @param backdropColor The backdrop color. If 0, the backdrop color will not apply.
+     * @attr ref android.R.styleable#Animation_backdropColor
+     */
+    public void setBackdropColor(@ColorInt int backdropColor) {
+        mBackdropColor = backdropColor;
     }
 
     /**
@@ -822,10 +839,14 @@ public abstract class Animation implements Cloneable {
 
     /**
      * Returns the background color behind the animation.
+     *
+     * @deprecated None of window animations are running with background color.
+     * @see #getBackdropColor() for an alternative.
      */
+    @Deprecated
     @ColorInt
     public int getBackgroundColor() {
-        return mBackgroundColor;
+        return 0;
     }
 
     /**
@@ -869,21 +890,36 @@ public abstract class Animation implements Cloneable {
     }
 
     /**
-     * If showBackground is {@code true} and this animation is applied on a window, then the windows
+     * If showBackdrop is {@code true} and this animation is applied on a window, then the windows
      * in the animation will animate with the background associated with this window behind them.
      *
-     * The background comes from the {@link android.R.styleable#Theme_colorBackground} that is
-     * applied to this window through its theme.
+     * If no backdrop color is explicitly set, the backdrop's color comes from the
+     * {@link android.R.styleable#Theme_colorBackground} that is applied to this window
+     * through its theme.
      *
-     * If multiple animating windows have showBackground set to {@code true} during an animation,
-     * the top most window with showBackground set to {@code true} and a valid background color
+     * If multiple animating windows have showBackdrop set to {@code true} during an animation,
+     * the top most window with showBackdrop set to {@code true} and a valid background color
      * takes precedence.
      *
-     * @return if the background of this window should be shown behind the animating windows.
-     * @attr ref android.R.styleable#Animation_showBackground
+     * @return if a backdrop should be shown behind the animating windows.
+     * @attr ref android.R.styleable#Animation_showBackdrop
      */
-    public boolean getShowBackground() {
-        return mShowBackground;
+    public boolean getShowBackdrop() {
+        return mShowBackdrop;
+    }
+
+    /**
+     * Returns the background color to show behind the animating windows.
+     *
+     * Will only show the background if showBackdrop was set to true.
+     * See {@link #setShowBackdrop(boolean)}.
+     *
+     * @return The backdrop color. If 0, the backdrop color will not apply.
+     * @attr ref android.R.styleable#Animation_backdropColor
+     */
+    @ColorInt
+    public int getBackdropColor() {
+        return mBackdropColor;
     }
 
     /**

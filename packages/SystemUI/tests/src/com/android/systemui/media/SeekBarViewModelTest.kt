@@ -36,6 +36,7 @@ import com.google.common.truth.Truth.assertThat
 import org.junit.After
 import org.junit.Before
 import org.junit.Ignore
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
@@ -46,6 +47,7 @@ import org.mockito.Mockito.mock
 import org.mockito.Mockito.never
 import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
+import org.mockito.junit.MockitoJUnit
 import org.mockito.Mockito.`when` as whenever
 
 @SmallTest
@@ -71,14 +73,14 @@ public class SeekBarViewModelTest : SysuiTestCase() {
     private val token1 = MediaSession.Token(1, null)
     private val token2 = MediaSession.Token(2, null)
 
+    @JvmField @Rule val mockito = MockitoJUnit.rule()
+
     @Before
     fun setUp() {
         fakeExecutor = FakeExecutor(FakeSystemClock())
         viewModel = SeekBarViewModel(FakeRepeatableExecutor(fakeExecutor))
-        viewModel.logSmartspaceClick = { }
-        mockController = mock(MediaController::class.java)
+        viewModel.logSeek = { }
         whenever(mockController.sessionToken).thenReturn(token1)
-        mockTransport = mock(MediaController.TransportControls::class.java)
 
         // LiveData to run synchronously
         ArchTaskExecutor.getInstance().setDelegate(taskExecutor)

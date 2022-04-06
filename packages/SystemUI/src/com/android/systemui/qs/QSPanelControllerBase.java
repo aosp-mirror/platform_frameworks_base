@@ -424,6 +424,14 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
         return mView.getBrightnessView();
     }
 
+    /**
+     * Set a listener to collapse/expand QS.
+     * @param action
+     */
+    public void setCollapseExpandAction(Runnable action) {
+        mView.setCollapseExpandAction(action);
+    }
+
     /** Sets whether we are currently on lock screen. */
     public void setIsOnKeyguard(boolean isOnKeyguard) {
         boolean isOnSplitShadeLockscreen = mShouldUseSplitNotificationShade && isOnKeyguard;

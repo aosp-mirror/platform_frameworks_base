@@ -25,6 +25,7 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.mockito.capture
+import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
@@ -50,9 +51,7 @@ private const val PACKAGE = "PKG"
 private const val SESSION_KEY = "SESSION_KEY"
 private const val SESSION_ARTIST = "SESSION_ARTIST"
 private const val SESSION_TITLE = "SESSION_TITLE"
-private const val USER_ID = 0
 
-private fun <T> eq(value: T): T = Mockito.eq(value) ?: value
 private fun <T> anyObject(): T {
     return Mockito.anyObject<T>()
 }
@@ -96,23 +95,11 @@ class MediaTimeoutListenerTest : SysuiTestCase() {
         }
         session.setActive(true)
 
-        mediaData = MediaData(
-                userId = USER_ID,
-                initialized = true,
-                backgroundColor = 0,
-                app = PACKAGE,
-                appIcon = null,
-                artist = null,
-                song = SESSION_TITLE,
-                artwork = null,
-                actions = emptyList(),
-                actionsToShowInCompact = emptyList(),
-                packageName = PACKAGE,
-                token = session.sessionToken,
-                clickIntent = null,
-                device = null,
-                active = true,
-                resumeAction = null)
+        mediaData = MediaTestUtils.emptyMediaData.copy(
+            app = PACKAGE,
+            packageName = PACKAGE,
+            token = session.sessionToken
+        )
 
         resumeData = mediaData.copy(token = null, active = false, resumption = true)
     }

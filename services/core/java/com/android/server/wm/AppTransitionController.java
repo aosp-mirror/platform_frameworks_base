@@ -653,7 +653,7 @@ public class AppTransitionController {
         final ITaskFragmentOrganizer organizer = findTaskFragmentOrganizer(task);
         final RemoteAnimationDefinition definition = organizer != null
                 ? mDisplayContent.mAtmService.mTaskFragmentOrganizerController
-                    .getRemoteAnimationDefinition(organizer)
+                    .getRemoteAnimationDefinition(organizer, task.mTaskId)
                 : null;
         final RemoteAnimationAdapter adapter = definition != null
                 ? definition.getAdapter(transit, activityTypes)

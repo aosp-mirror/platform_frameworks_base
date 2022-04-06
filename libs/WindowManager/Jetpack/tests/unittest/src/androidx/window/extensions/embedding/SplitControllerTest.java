@@ -31,6 +31,12 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+/**
+ * Test class for {@link SplitController}.
+ *
+ * Build/Install/Run:
+ *  atest WMJetpackUnitTests:SplitController
+ */
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 public class SplitControllerTest {
@@ -46,7 +52,7 @@ public class SplitControllerTest {
 
     @Test
     public void testGetTopActiveContainer() {
-        TaskContainer taskContainer = new TaskContainer();
+        TaskContainer taskContainer = new TaskContainer(TASK_ID);
         // tf3 is finished so is not active.
         TaskFragmentContainer tf3 = mock(TaskFragmentContainer.class);
         doReturn(true).when(tf3).isFinished();

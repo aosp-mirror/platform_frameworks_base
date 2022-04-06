@@ -52,7 +52,7 @@ interface IFingerprintService {
     // permission. This is effectively deprecated, since it only comes through FingerprintManager
     // now. A requestId is returned that can be used to cancel this operation.
     long authenticate(IBinder token, long operationId, int sensorId, int userId,
-            IFingerprintServiceReceiver receiver, String opPackageName,
+            IFingerprintServiceReceiver receiver, String opPackageName, String attributionTag,
             boolean shouldIgnoreEnrollmentState);
 
     // Uses the fingerprint hardware to detect for the presence of a finger, without giving details
@@ -74,7 +74,7 @@ interface IFingerprintService {
     void startPreparedClient(int sensorId, int cookie);
 
     // Cancel authentication for the given requestId.
-    void cancelAuthentication(IBinder token, String opPackageName, long requestId);
+    void cancelAuthentication(IBinder token, String opPackageName, String attributionTag, long requestId);
 
     // Cancel finger detection for the given requestId.
     void cancelFingerprintDetect(IBinder token, String opPackageName, long requestId);
@@ -101,10 +101,10 @@ interface IFingerprintService {
     void rename(int fingerId, int userId, String name);
 
     // Get a list of enrolled fingerprints in the given userId.
-    List<Fingerprint> getEnrolledFingerprints(int userId, String opPackageName);
+    List<Fingerprint> getEnrolledFingerprints(int userId, String opPackageName, String attributionTag);
 
     // Determine if the HAL is loaded and ready. Meant to support the deprecated FingerprintManager APIs
-    boolean isHardwareDetectedDeprecated(String opPackageName);
+    boolean isHardwareDetectedDeprecated(String opPackageName, String attributionTag);
 
     // Determine if the specified HAL is loaded and ready
     boolean isHardwareDetected(int sensorId, String opPackageName);
@@ -116,7 +116,7 @@ interface IFingerprintService {
     void revokeChallenge(IBinder token, int sensorId, int userId, String opPackageName, long challenge);
 
     // Determine if a user has at least one enrolled fingerprint. Meant to support the deprecated FingerprintManager APIs
-    boolean hasEnrolledFingerprintsDeprecated(int userId, String opPackageName);
+    boolean hasEnrolledFingerprintsDeprecated(int userId, String opPackageName, String attributionTag);
 
     // Determine if a user has at least one enrolled fingerprint.
     boolean hasEnrolledFingerprints(int sensorId, int userId, String opPackageName);

@@ -31,9 +31,11 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.hardware.biometrics.BiometricManager;
 import android.hardware.biometrics.common.OperationContext;
 import android.hardware.biometrics.fingerprint.ISession;
 import android.hardware.biometrics.fingerprint.PointerContext;
+import android.hardware.fingerprint.Fingerprint;
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
 import android.hardware.fingerprint.ISidefpsController;
 import android.hardware.fingerprint.IUdfpsOverlayController;
@@ -63,12 +65,14 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 
+import java.util.ArrayList;
 import java.util.function.Consumer;
 
 @Presubmit
 @SmallTest
 public class FingerprintAuthenticationClientTest {
 
+    private static final int SENSOR_ID = 4;
     private static final int USER_ID = 8;
     private static final long OP_ID = 7;
     private static final long REQUEST_ID = 88;
@@ -92,6 +96,8 @@ public class FingerprintAuthenticationClientTest {
     private BiometricLogger mBiometricLogger;
     @Mock
     private BiometricContext mBiometricContext;
+    @Mock
+    private BiometricManager mBiometricManager;
     @Mock
     private LockoutCache mLockoutCache;
     @Mock
@@ -118,6 +124,7 @@ public class FingerprintAuthenticationClientTest {
 
     @Before
     public void setup() {
+        mContext.addMockSystemService(BiometricManager.class, mBiometricManager);
         when(mBiometricLogger.createALSCallback(anyBoolean())).thenAnswer(i ->
                 new CallbackWithProbe<>(mLuxProbe, i.getArgument(0)));
         when(mBiometricContext.updateContext(any(), anyBoolean())).thenAnswer(
@@ -212,6 +219,18 @@ public class FingerprintAuthenticationClientTest {
     }
 
     @Test
+    public void luxProbeWhenFingerDown_unlessDestroyed() throws RemoteException {
+        final FingerprintAuthenticationClient client = createClient();
+        client.start(mCallback);
+        client.onAuthenticated(new Fingerprint("name", 2 /* enrollmentId */, SENSOR_ID),
+                true /* authenticated */, new ArrayList<>());
+        verify(mLuxProbe).destroy();
+
+        client.onAcquired(2, 0);
+        verify(mLuxProbe, never()).enable();
+    }
+
+    @Test
     public void notifyHalWhenContextChanges() throws RemoteException {
         final FingerprintAuthenticationClient client = createClient();
         client.start(mCallback);
@@ -284,6 +303,6 @@ public class FingerprintAuthenticationClientTest {
         true /* isStrongBiometric */,
         null /* taskStackListener */, mLockoutCache,
         mUdfpsOverlayController, mSideFpsController,
-        false /* allowBackgroundAuthentication */, mSensorProps);
+        true /* allowBackgroundAuthentication */, mSensorProps);
     }
 }

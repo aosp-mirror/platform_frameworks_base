@@ -197,7 +197,6 @@ import android.widget.Scroller;
 import android.window.ClientWindowFrames;
 import android.window.OnBackInvokedCallback;
 import android.window.OnBackInvokedDispatcher;
-import android.window.OnBackInvokedDispatcherOwner;
 import android.window.SurfaceSyncer;
 import android.window.WindowOnBackInvokedDispatcher;
 
@@ -240,7 +239,7 @@ import java.util.concurrent.CountDownLatch;
 @SuppressWarnings({"EmptyCatchBlock", "PointlessBooleanExpression"})
 public final class ViewRootImpl implements ViewParent,
         View.AttachInfo.Callbacks, ThreadedRenderer.DrawCallbacks,
-        AttachedSurfaceControl, OnBackInvokedDispatcherOwner {
+        AttachedSurfaceControl {
     private static final String TAG = "ViewRootImpl";
     private static final boolean DBG = false;
     private static final boolean LOCAL_LOGV = false;
@@ -1743,7 +1742,7 @@ public final class ViewRootImpl implements ViewParent,
 
         mForceNextWindowRelayout = forceNextWindowRelayout;
         mPendingAlwaysConsumeSystemBars = args.argi2 != 0;
-        mSyncSeqId = args.argi4;
+        mSyncSeqId = args.argi4 > mSyncSeqId ? args.argi4 : mSyncSeqId;
 
         if (msg == MSG_RESIZED_REPORT) {
             reportNextDraw();
@@ -6408,6 +6407,24 @@ public final class ViewRootImpl implements ViewParent,
                 return FINISH_HANDLED;
             }
 
+            // If the new back dispatch is enabled, intercept KEYCODE_BACK before it reaches the
+            // view tree and invoke the appropriate {@link OnBackInvokedCallback}.
+            if (isBack(event)
+                    && mContext != null
+                    && WindowOnBackInvokedDispatcher.isOnBackInvokedCallbackEnabled(mContext)) {
+                OnBackInvokedCallback topCallback =
+                        getOnBackInvokedDispatcher().getTopCallback();
+                if (event.getAction() == KeyEvent.ACTION_UP) {
+                    if (topCallback != null) {
+                        topCallback.onBackInvoked();
+                        return FINISH_HANDLED;
+                    }
+                } else {
+                    // Drop other actions such as {@link KeyEvent.ACTION_DOWN}.
+                    return FINISH_NOT_HANDLED;
+                }
+            }
+
             // Deliver the key to the view hierarchy.
             if (mView.dispatchKeyEvent(event)) {
                 return FINISH_HANDLED;
@@ -6415,19 +6432,6 @@ public final class ViewRootImpl implements ViewParent,
 
             if (shouldDropInputEvent(q)) {
                 return FINISH_NOT_HANDLED;
-            }
-
-            if (isBack(event)
-                    && mContext != null
-                    && WindowOnBackInvokedDispatcher.isOnBackInvokedCallbackEnabled(mContext)) {
-                // Invoke the appropriate {@link OnBackInvokedCallback} if the new back
-                // navigation should be used, and the key event is not handled by anything else.
-                OnBackInvokedCallback topCallback =
-                        getOnBackInvokedDispatcher().getTopCallback();
-                if (topCallback != null) {
-                    topCallback.onBackInvoked();
-                    return FINISH_HANDLED;
-                }
             }
 
             // This dispatch is for windows that don't have a Window.Callback. Otherwise,
@@ -7987,7 +7991,10 @@ public final class ViewRootImpl implements ViewParent,
                     insetsPending ? WindowManagerGlobal.RELAYOUT_INSETS_PENDING : 0,
                     mTmpFrames, mPendingMergedConfiguration, mSurfaceControl, mTempInsets,
                     mTempControls, mRelayoutBundle);
-            mSyncSeqId = mRelayoutBundle.getInt("seqid");
+            final int maybeSyncSeqId = mRelayoutBundle.getInt("seqid");
+            if (maybeSyncSeqId > 0) {
+                mSyncSeqId = maybeSyncSeqId;
+            }
 
             if (mTranslator != null) {
                 mTranslator.translateRectInScreenToAppWindow(mTmpFrames.frame);
@@ -10736,6 +10743,13 @@ public final class ViewRootImpl implements ViewParent,
         return mOnBackInvokedDispatcher;
     }
 
+    @NonNull
+    @Override
+    public OnBackInvokedDispatcher findOnBackInvokedDispatcherForChild(
+            @NonNull View child, @NonNull View requester) {
+        return getOnBackInvokedDispatcher();
+    }
+
     /**
      * When this ViewRootImpl is added to the window manager, transfers the first
      * {@link OnBackInvokedCallback} to be called to the server.
@@ -10743,7 +10757,7 @@ public final class ViewRootImpl implements ViewParent,
     private void registerBackCallbackOnWindow() {
         if (OnBackInvokedDispatcher.DEBUG) {
             Log.d(OnBackInvokedDispatcher.TAG, TextUtils.formatSimple(
-                    "ViewRootImpl.registerBackCallbackOnWindow. Callback:%s Package:%s "
+                    "ViewRootImpl.registerBackCallbackOnWindow. Dispatcher:%s Package:%s "
                             + "IWindow:%s Session:%s",
                     mOnBackInvokedDispatcher, mBasePackageName, mWindow, mWindowSession));
         }
@@ -10757,20 +10771,13 @@ public final class ViewRootImpl implements ViewParent,
                 KeyCharacterMap.VIRTUAL_KEYBOARD, 0 /* scancode */,
                 KeyEvent.FLAG_FROM_SYSTEM | KeyEvent.FLAG_VIRTUAL_HARD_KEY,
                 InputDevice.SOURCE_KEYBOARD);
-
-        ev.setDisplayId(mContext.getDisplay().getDisplayId());
-        if (mView != null) {
-            mView.dispatchKeyEvent(ev);
-        }
+        enqueueInputEvent(ev);
     }
 
     private void registerCompatOnBackInvokedCallback() {
-        mCompatOnBackInvokedCallback = new OnBackInvokedCallback() {
-            @Override
-            public void onBackInvoked() {
+        mCompatOnBackInvokedCallback = () -> {
                 sendBackKeyEvent(KeyEvent.ACTION_DOWN);
                 sendBackKeyEvent(KeyEvent.ACTION_UP);
-            }
         };
         mOnBackInvokedDispatcher.registerOnBackInvokedCallback(
                 OnBackInvokedDispatcher.PRIORITY_DEFAULT, mCompatOnBackInvokedCallback);

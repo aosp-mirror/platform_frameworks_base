@@ -67,6 +67,7 @@ import org.junit.runner.RunWith;
 @Presubmit
 @RunWith(WindowTestRunner.class)
 public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
+    private static final int TASK_ID = 10;
 
     private TaskFragmentOrganizerController mController;
     private TaskFragmentOrganizer mOrganizer;
@@ -219,13 +220,13 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
     @Test
     public void testRegisterRemoteAnimations() {
         mController.registerOrganizer(mIOrganizer);
-        mController.registerRemoteAnimations(mIOrganizer, mDefinition);
+        mController.registerRemoteAnimations(mIOrganizer, TASK_ID, mDefinition);
 
-        assertEquals(mDefinition, mController.getRemoteAnimationDefinition(mIOrganizer));
+        assertEquals(mDefinition, mController.getRemoteAnimationDefinition(mIOrganizer, TASK_ID));
 
-        mController.unregisterRemoteAnimations(mIOrganizer);
+        mController.unregisterRemoteAnimations(mIOrganizer, TASK_ID);
 
-        assertNull(mController.getRemoteAnimationDefinition(mIOrganizer));
+        assertNull(mController.getRemoteAnimationDefinition(mIOrganizer, TASK_ID));
     }
 
     @Test

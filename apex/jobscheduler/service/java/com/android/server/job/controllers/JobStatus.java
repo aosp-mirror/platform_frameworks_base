@@ -1311,8 +1311,15 @@ public final class JobStatus {
         if (mExpeditedQuotaApproved == state) {
             return false;
         }
+        final boolean wasReady = !state && isReady();
         mExpeditedQuotaApproved = state;
         updateExpeditedDependencies();
+        final boolean isReady = isReady();
+        if (wasReady && !isReady) {
+            mReasonReadyToUnready = JobParameters.STOP_REASON_QUOTA;
+        } else if (!wasReady && isReady) {
+            mReasonReadyToUnready = JobParameters.STOP_REASON_UNDEFINED;
+        }
         return true;
     }
 
@@ -1326,8 +1333,15 @@ public final class JobStatus {
         if (mExpeditedTareApproved == state) {
             return false;
         }
+        final boolean wasReady = !state && isReady();
         mExpeditedTareApproved = state;
         updateExpeditedDependencies();
+        final boolean isReady = isReady();
+        if (wasReady && !isReady) {
+            mReasonReadyToUnready = JobParameters.STOP_REASON_QUOTA;
+        } else if (!wasReady && isReady) {
+            mReasonReadyToUnready = JobParameters.STOP_REASON_UNDEFINED;
+        }
         return true;
     }
 

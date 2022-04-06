@@ -111,12 +111,7 @@ public class BackNavigationTest {
         CountDownLatch backRegisteredLatch = new CountDownLatch(1);
         mScenario.onActivity(activity -> {
             activity.getOnBackInvokedDispatcher().registerOnBackInvokedCallback(
-                    0, new OnBackInvokedCallback() {
-                        @Override
-                        public void onBackInvoked() {
-                            backInvokedLatch.countDown();
-                        }
-                    }
+                    0, backInvokedLatch::countDown
             );
             backRegisteredLatch.countDown();
         });

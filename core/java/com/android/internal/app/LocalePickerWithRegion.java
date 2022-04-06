@@ -264,10 +264,9 @@ public class LocalePickerWithRegion extends ListFragment implements SearchView.O
     }
 
     @Override
-    public void onListItemClick(ListView l, View v, int position, long id) {
-        SuggestedLocaleAdapter adapter = (SuggestedLocaleAdapter) getListAdapter();
+    public void onListItemClick(ListView parent, View v, int position, long id) {
         final LocaleStore.LocaleInfo locale =
-                (LocaleStore.LocaleInfo) adapter.getItem(position);
+                (LocaleStore.LocaleInfo) parent.getAdapter().getItem(position);
         // Special case for resetting the app locale to equal the system locale.
         boolean isSystemLocale = locale.isSystemLocale();
         boolean isRegionLocale = locale.getParent() != null;
@@ -280,7 +279,7 @@ public class LocalePickerWithRegion extends ListFragment implements SearchView.O
         } else {
             LocalePickerWithRegion selector = LocalePickerWithRegion.createCountryPicker(
                     getContext(), mListener, locale, mTranslatedOnly /* translate only */,
-                    adapter.getAppPackageName());
+                    mAppPackageName);
             if (selector != null) {
                 getFragmentManager().beginTransaction()
                         .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)

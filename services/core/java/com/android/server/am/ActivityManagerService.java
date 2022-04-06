@@ -30,6 +30,7 @@ import static android.app.ActivityManager.INSTR_FLAG_DISABLE_ISOLATED_STORAGE;
 import static android.app.ActivityManager.INSTR_FLAG_DISABLE_TEST_API_CHECKS;
 import static android.app.ActivityManager.INSTR_FLAG_NO_RESTART;
 import static android.app.ActivityManager.INTENT_SENDER_ACTIVITY;
+import static android.app.ActivityManager.PROCESS_CAPABILITY_ALL;
 import static android.app.ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND;
 import static android.app.ActivityManager.PROCESS_STATE_NONEXISTENT;
 import static android.app.ActivityManager.PROCESS_STATE_TOP;
@@ -207,7 +208,7 @@ import android.app.usage.UsageStatsManagerInternal;
 import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetManagerInternal;
 import android.compat.annotation.ChangeId;
-import android.compat.annotation.EnabledSince;
+import android.compat.annotation.Disabled;
 import android.content.AttributionSource;
 import android.content.AutofillOptions;
 import android.content.BroadcastReceiver;
@@ -309,7 +310,6 @@ import android.sysprop.InitProperties;
 import android.sysprop.VoldProperties;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
-import android.text.format.DateUtils;
 import android.text.style.SuggestionSpan;
 import android.util.ArrayMap;
 import android.util.ArraySet;
@@ -460,14 +460,6 @@ public class ActivityManagerService extends IActivityManager.Stub
     private static final String SYSTEM_PROPERTY_DEVICE_PROVISIONED =
             "persist.sys.device_provisioned";
 
-    /**
-     * Enabling this flag enforces the requirement for context registered receivers to use one of
-     * {@link Context#RECEIVER_EXPORTED} or {@link Context#RECEIVER_NOT_EXPORTED} for unprotected
-     * broadcasts
-     */
-    private static final boolean ENFORCE_DYNAMIC_RECEIVER_EXPLICIT_EXPORT =
-            SystemProperties.getBoolean("fw.enforce_dynamic_receiver_explicit_export", false);
-
     static final String TAG = TAG_WITH_CLASS_NAME ? "ActivityManagerService" : TAG_AM;
     static final String TAG_BACKUP = TAG + POSTFIX_BACKUP;
     private static final String TAG_BROADCAST = TAG + POSTFIX_BROADCAST;
@@ -584,7 +576,7 @@ public class ActivityManagerService extends IActivityManager.Stub
      * unprotected broadcast in code.
      */
     @ChangeId
-    @EnabledSince(targetSdkVersion = Build.VERSION_CODES.TIRAMISU)
+    @Disabled
     private static final long DYNAMIC_RECEIVER_EXPLICIT_EXPORT_REQUIRED = 161145287L;
 
     /**
@@ -1483,6 +1475,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     final ActivityThread mSystemThread;
 
     final UidObserverController mUidObserverController;
+    private volatile IUidObserver mNetworkPolicyUidObserver;
 
     final AppRestrictionController mAppRestrictionController;
 
@@ -8691,7 +8684,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
     }
 
-    private final ArrayMap<String, long[]> mErrorClusterRecords = new ArrayMap<>();
+    private final DropboxRateLimiter mDropboxRateLimiter = new DropboxRateLimiter();
 
     /**
      * Write a description of an error (crash, WTF, ANR) to the drop box.
@@ -8726,22 +8719,8 @@ public class ActivityManagerService extends IActivityManager.Stub
         final String dropboxTag = processClass(process) + "_" + eventType;
         if (dbox == null || !dbox.isTagEnabled(dropboxTag)) return;
 
-        // Rate-limit how often we're willing to do the heavy lifting below to
-        // collect and record logs; currently 5 logs per 10 second period per eventType.
-        final long now = SystemClock.elapsedRealtime();
-        synchronized (mErrorClusterRecords) {
-            long[] errRecord = mErrorClusterRecords.get(eventType);
-            if (errRecord == null) {
-                errRecord = new long[2]; // [0]: startTime, [1]: count
-                mErrorClusterRecords.put(eventType, errRecord);
-            }
-            if (now - errRecord[0] > 10 * DateUtils.SECOND_IN_MILLIS) {
-                errRecord[0] = now;
-                errRecord[1] = 1L;
-            } else {
-                if (errRecord[1]++ >= 5) return;
-            }
-        }
+        // Check if we should rate limit and abort early if needed.
+        if (mDropboxRateLimiter.shouldRateLimit(eventType, processName)) return;
 
         final StringBuilder sb = new StringBuilder(1024);
         appendDropBoxProcessHeaders(process, processName, sb);
@@ -13068,25 +13047,14 @@ public class ActivityManagerService extends IActivityManager.Stub
                     // sticky broadcast, no flag specified (flag isn't required)
                     flags |= Context.RECEIVER_EXPORTED;
                 } else if (requireExplicitFlagForDynamicReceivers && !explicitExportStateDefined) {
-                    if (ENFORCE_DYNAMIC_RECEIVER_EXPLICIT_EXPORT) {
-                        throw new SecurityException(
-                                callerPackage + ": Targeting T+ (version "
-                                        + Build.VERSION_CODES.TIRAMISU
-                                        + " and above) requires that one of RECEIVER_EXPORTED or "
-                                        + "RECEIVER_NOT_EXPORTED be specified when registering a "
-                                        + "receiver");
-                    } else {
-                        Slog.wtf(TAG,
-                                callerPackage + ": Targeting T+ (version "
-                                        + Build.VERSION_CODES.TIRAMISU
-                                        + " and above) requires that one of RECEIVER_EXPORTED or "
-                                        + "RECEIVER_NOT_EXPORTED be specified when registering a "
-                                        + "receiver");
-                        // Assume default behavior-- flag check is not enforced
-                        flags |= Context.RECEIVER_EXPORTED;
-                    }
-                } else if (!requireExplicitFlagForDynamicReceivers) {
-                    // Change is not enabled, thus not targeting T+. Assume exported.
+                    throw new SecurityException(
+                            callerPackage + ": One of RECEIVER_EXPORTED or "
+                                    + "RECEIVER_NOT_EXPORTED should be specified when a receiver "
+                                    + "isn't being registered exclusively for system broadcasts");
+                    // Assume default behavior-- flag check is not enforced
+                } else if (!requireExplicitFlagForDynamicReceivers && (
+                        (flags & Context.RECEIVER_NOT_EXPORTED) == 0)) {
+                    // Change is not enabled, assume exported unless otherwise specified.
                     flags |= Context.RECEIVER_EXPORTED;
                 }
             } else if ((flags & Context.RECEIVER_NOT_EXPORTED) == 0) {
@@ -17232,17 +17200,17 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         @Override
-        public boolean isUidCurrentlyInstrumented(int uid) {
+        public int getInstrumentationSourceUid(int uid) {
             synchronized (mProcLock) {
                 for (int i = mActiveInstrumentation.size() - 1; i >= 0; i--) {
                     ActiveInstrumentation activeInst = mActiveInstrumentation.get(i);
                     if (!activeInst.mFinished && activeInst.mTargetInfo != null
                             && activeInst.mTargetInfo.uid == uid) {
-                        return true;
+                        return activeInst.mSourceUid;
                     }
                 }
             }
-            return false;
+            return INVALID_UID;
         }
 
         @Override
@@ -17299,6 +17267,19 @@ public class ActivityManagerService extends IActivityManager.Stub
             // workaround can be removed. (b/213288355)
             if (isNewPending && mOomAdjuster != null) { // It can be null in unit test.
                 mOomAdjuster.mCachedAppOptimizer.unfreezeProcess(pid);
+            }
+            // We need to update the network rules for the app coming to the top state so that
+            // it can access network when the device or the app is in a restricted state
+            // (e.g. battery/data saver) but since waiting for updateOomAdj to complete and then
+            // informing NetworkPolicyManager might get delayed, informing the state change as soon
+            // as we know app is going to come to the top state.
+            if (mNetworkPolicyUidObserver != null) {
+                try {
+                    mNetworkPolicyUidObserver.onUidStateChanged(uid, PROCESS_STATE_TOP,
+                            mProcessList.getProcStateSeqCounter(), PROCESS_CAPABILITY_ALL);
+                } catch (RemoteException e) {
+                    // Should not happen; call is within the same process
+                }
             }
         }
 
@@ -17496,6 +17477,14 @@ public class ActivityManagerService extends IActivityManager.Stub
         @Override
         public void restart() {
             ActivityManagerService.this.restart();
+        }
+
+        @Override
+        public void registerNetworkPolicyUidObserver(@NonNull IUidObserver observer,
+                int which, int cutpoint, @NonNull String callingPackage) {
+            mNetworkPolicyUidObserver = observer;
+            mUidObserverController.register(observer, which, cutpoint, callingPackage,
+                    Binder.getCallingUid());
         }
     }
 

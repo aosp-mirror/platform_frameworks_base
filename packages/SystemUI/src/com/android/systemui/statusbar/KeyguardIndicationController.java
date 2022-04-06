@@ -887,7 +887,10 @@ public class KeyguardIndicationController {
             if (mKeyguardUpdateMonitor.isUdfpsSupported()
                     && mKeyguardUpdateMonitor.getUserCanSkipBouncer(
                     KeyguardUpdateMonitor.getCurrentUser())) {
-                showBiometricMessage(mContext.getString(R.string.keyguard_unlock_press));
+                final int stringId = mKeyguardUpdateMonitor.getIsFaceAuthenticated()
+                        ? R.string.keyguard_face_successful_unlock_press
+                        : R.string.keyguard_unlock_press;
+                showBiometricMessage(mContext.getString(stringId));
             } else {
                 showBiometricMessage(mContext.getString(R.string.keyguard_unlock));
             }

@@ -61,7 +61,8 @@ public class DreamOverlayNotificationCountProviderTest extends SysuiTestCase {
 
         final StatusBarNotification[] notifications = {mNotification1};
         when(mNotificationListener.getActiveNotifications()).thenReturn(notifications);
-        mProvider = new DreamOverlayNotificationCountProvider(mNotificationListener);
+        mProvider = new DreamOverlayNotificationCountProvider(
+                mNotificationListener, Runnable::run);
         mProvider.addCallback(mCallback);
     }
 

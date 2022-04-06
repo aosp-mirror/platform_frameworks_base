@@ -16,32 +16,48 @@
 
 package com.android.settingslib.bluetooth;
 
+import static android.bluetooth.BluetoothProfile.CONNECTION_POLICY_ALLOWED;
+import static android.bluetooth.BluetoothProfile.CONNECTION_POLICY_FORBIDDEN;
+
+import android.annotation.CallbackExecutor;
 import android.annotation.NonNull;
 import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothClass;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothLeBroadcastAssistant;
 import android.bluetooth.BluetoothLeBroadcastMetadata;
-import android.bluetooth.BluetoothLeBroadcastReceiveState;
 import android.bluetooth.BluetoothProfile;
 import android.bluetooth.BluetoothProfile.ServiceListener;
 import android.content.Context;
+import android.os.Build;
 import android.util.Log;
 
+import androidx.annotation.RequiresApi;
+
+import com.android.settingslib.R;
+
+import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Executor;
+
 
 /**
  * LocalBluetoothLeBroadcastAssistant provides an interface between the Settings app
  * and the functionality of the local {@link BluetoothLeBroadcastAssistant}.
+ * Use the {@link BluetoothLeBroadcastAssistant.Callback} to get the result callback.
  */
-public class LocalBluetoothLeBroadcastAssistant implements
-        BluetoothLeBroadcastAssistant.Callback {
-
+public class LocalBluetoothLeBroadcastAssistant implements LocalBluetoothProfile {
     private static final String TAG = "LocalBluetoothLeBroadcastAssistant";
     private static final int UNKNOWN_VALUE_PLACEHOLDER = -1;
     private static final boolean DEBUG = BluetoothUtils.D;
 
+    static final String NAME = "LE_AUDIO_BROADCAST_ASSISTANT";
+    // Order of this profile in device profiles list
+    private static final int ORDINAL = 1;
+
     private LocalBluetoothProfileManager mProfileManager;
-    private BluetoothLeBroadcastAssistant mBluetoothLeBroadcastAssistant;
+    private BluetoothLeBroadcastAssistant mService;
+    private final CachedBluetoothDeviceManager mDeviceManager;
     private BluetoothLeBroadcastMetadata mBluetoothLeBroadcastMetadata;
     private BluetoothLeBroadcastMetadata.Builder mBuilder;
     private boolean mIsProfileReady;
@@ -49,30 +65,51 @@ public class LocalBluetoothLeBroadcastAssistant implements
     private final ServiceListener mServiceListener = new ServiceListener() {
         @Override
         public void onServiceConnected(int profile, BluetoothProfile proxy) {
-            if (profile == BluetoothProfile.LE_AUDIO_BROADCAST) {
-                if (DEBUG) {
-                    Log.d(TAG,"Bluetooth service connected");
-                }
-                mBluetoothLeBroadcastAssistant = (BluetoothLeBroadcastAssistant) proxy;
-                mProfileManager.callServiceConnectedListeners();
-                mIsProfileReady = true;
+            if (DEBUG) {
+                Log.d(TAG, "Bluetooth service connected");
             }
+            mService = (BluetoothLeBroadcastAssistant) proxy;
+            // We just bound to the service, so refresh the UI for any connected LeAudio devices.
+            List<BluetoothDevice> deviceList = mService.getConnectedDevices();
+            while (!deviceList.isEmpty()) {
+                BluetoothDevice nextDevice = deviceList.remove(0);
+                CachedBluetoothDevice device = mDeviceManager.findDevice(nextDevice);
+                // we may add a new device here, but generally this should not happen
+                if (device == null) {
+                    if (DEBUG) {
+                        Log.d(TAG, "LocalBluetoothLeBroadcastAssistant found new device: "
+                                + nextDevice);
+                    }
+                    device = mDeviceManager.addDevice(nextDevice);
+                }
+                device.onProfileStateChanged(LocalBluetoothLeBroadcastAssistant.this,
+                        BluetoothProfile.STATE_CONNECTED);
+                device.refresh();
+            }
+
+            mProfileManager.callServiceConnectedListeners();
+            mIsProfileReady = true;
         }
 
         @Override
         public void onServiceDisconnected(int profile) {
-            if (profile == BluetoothProfile.LE_AUDIO_BROADCAST) {
-                if (DEBUG) {
-                    Log.d(TAG,"Bluetooth service disconnected");
-                }
-                mIsProfileReady = false;
+            if (profile != BluetoothProfile.LE_AUDIO_BROADCAST_ASSISTANT) {
+                Log.d(TAG, "The profile is not LE_AUDIO_BROADCAST_ASSISTANT");
+                return;
             }
+            if (DEBUG) {
+                Log.d(TAG, "Bluetooth service disconnected");
+            }
+            mProfileManager.callServiceDisconnectedListeners();
+            mIsProfileReady = false;
         }
     };
 
     public LocalBluetoothLeBroadcastAssistant(Context context,
+            CachedBluetoothDeviceManager deviceManager,
             LocalBluetoothProfileManager profileManager) {
         mProfileManager = profileManager;
+        mDeviceManager = deviceManager;
         BluetoothAdapter.getDefaultAdapter().
                 getProfileProxy(context, mServiceListener,
                         BluetoothProfile.LE_AUDIO_BROADCAST_ASSISTANT);
@@ -90,7 +127,11 @@ public class LocalBluetoothLeBroadcastAssistant implements
      */
     public void addSource(BluetoothDevice sink, BluetoothLeBroadcastMetadata metadata,
             boolean isGroupOp) {
-        mBluetoothLeBroadcastAssistant.addSource(sink, metadata, isGroupOp);
+        if (mService == null) {
+            Log.d(TAG, "The BluetoothLeBroadcastAssistant is null");
+            return;
+        }
+        mService.addSource(sink, metadata, isGroupOp);
     }
 
     /**
@@ -120,13 +161,9 @@ public class LocalBluetoothLeBroadcastAssistant implements
         if (DEBUG) {
             Log.d(TAG, "addSource()");
         }
-        if (mBluetoothLeBroadcastAssistant == null) {
-            Log.d(TAG, "The BluetoothLeBroadcastAssistant is null");
-            return ;
-        }
         buildMetadata(sourceAddressType, presentationDelayMicros, sourceAdvertisingSid, broadcastId,
                 paSyncInterval, isEncrypted, broadcastCode, sourceDevice);
-        mBluetoothLeBroadcastAssistant.addSource(sink, mBluetoothLeBroadcastMetadata, isGroupOp);
+        addSource(sink, mBluetoothLeBroadcastMetadata, isGroupOp);
     }
 
     private void buildMetadata(int sourceAddressType, int presentationDelayMicros,
@@ -147,101 +184,143 @@ public class LocalBluetoothLeBroadcastAssistant implements
         if (DEBUG) {
             Log.d(TAG, "removeSource()");
         }
-        if (mBluetoothLeBroadcastAssistant == null) {
+        if (mService == null) {
             Log.d(TAG, "The BluetoothLeBroadcastAssistant is null");
-            return ;
+            return;
         }
-        mBluetoothLeBroadcastAssistant.removeSource(sink, sourceId);
+        mService.removeSource(sink, sourceId);
     }
 
     public void startSearchingForSources(@NonNull List<android.bluetooth.le.ScanFilter> filters) {
         if (DEBUG) {
             Log.d(TAG, "startSearchingForSources()");
         }
-        if (mBluetoothLeBroadcastAssistant == null) {
+        if (mService == null) {
             Log.d(TAG, "The BluetoothLeBroadcastAssistant is null");
-            return ;
+            return;
         }
-        mBluetoothLeBroadcastAssistant.startSearchingForSources(filters);
+        mService.startSearchingForSources(filters);
     }
 
-    @Override
-    public void onSourceAdded(@NonNull BluetoothDevice sink, int sourceId, int reason) {
-        if (DEBUG) {
-            Log.d(TAG, "onSourceAdded(), reason = " + reason + " , sourceId = " + sourceId);
+    public void registerServiceCallBack(@NonNull @CallbackExecutor Executor executor,
+            @NonNull BluetoothLeBroadcastAssistant.Callback callback) {
+        if (mService == null) {
+            Log.d(TAG, "The BluetoothLeBroadcast is null.");
+            return;
         }
 
+        mService.registerCallback(executor, callback);
     }
 
-    @Override
-    public void onSourceAddFailed(@NonNull BluetoothDevice sink,
-            @NonNull BluetoothLeBroadcastMetadata source, int reason) {
-        if (DEBUG) {
-            Log.d(TAG, "onSourceAddFailed(), reason = " + reason);
+    public void unregisterServiceCallBack(
+            @NonNull BluetoothLeBroadcastAssistant.Callback callback) {
+        if (mService == null) {
+            Log.d(TAG, "The BluetoothLeBroadcast is null.");
+            return;
         }
-    }
 
-    @Override
-    public void onSourceRemoved(@NonNull BluetoothDevice sink, int sourceId, int reason) {
-        if (DEBUG) {
-            Log.d(TAG, "onSourceRemoved(), reason = " + reason + " , sourceId = " + sourceId);
-        }
-    }
-
-    @Override
-    public void onSourceRemoveFailed(@NonNull BluetoothDevice sink, int sourceId, int reason) {
-        if (DEBUG) {
-            Log.d(TAG, "onSourceRemoveFailed(), reason = " + reason + " , sourceId = " + sourceId);
-        }
-    }
-
-    @Override
-    public void onSearchStarted(int reason) {
-        if (DEBUG) {
-            Log.d(TAG, "onSearchStarted(), reason = " + reason);
-        }
-    }
-
-    @Override
-    public void onSearchStartFailed(int reason) {
-        if (DEBUG) {
-            Log.d(TAG, "onSearchStartFailed(), reason = " + reason);
-        }
-    }
-
-    @Override
-    public void onSearchStopped(int reason) {
-        if (DEBUG) {
-            Log.d(TAG, "onSearchStopped(), reason = " + reason);
-        }
-    }
-
-    @Override
-    public void onSearchStopFailed(int reason) {
-        if (DEBUG) {
-            Log.d(TAG, "onSearchStopFailed(), reason = " + reason);
-        }
-    }
-
-    @Override
-    public void onSourceFound(@NonNull BluetoothLeBroadcastMetadata source) {
-    }
-
-    @Override
-    public void onSourceModified(@NonNull BluetoothDevice sink, int sourceId, int reason) {
-    }
-
-    @Override
-    public void onSourceModifyFailed(@NonNull BluetoothDevice sink, int sourceId, int reason) {
-    }
-
-    @Override
-    public void onReceiveStateChanged(@NonNull BluetoothDevice sink, int sourceId,
-            @NonNull BluetoothLeBroadcastReceiveState state) {
+        mService.unregisterCallback(callback);
     }
 
     public boolean isProfileReady() {
         return mIsProfileReady;
     }
 
+    public int getProfileId() {
+        return BluetoothProfile.LE_AUDIO_BROADCAST_ASSISTANT;
+    }
+
+    public boolean accessProfileEnabled() {
+        return false;
+    }
+
+    public boolean isAutoConnectable() {
+        return true;
+    }
+
+    public int getConnectionStatus(BluetoothDevice device) {
+        if (mService == null) {
+            return BluetoothProfile.STATE_DISCONNECTED;
+        }
+        // LE Audio Broadcasts are not connection-oriented.
+        return mService.getConnectionState(device);
+    }
+
+    public List<BluetoothDevice> getConnectedDevices() {
+        if (mService == null) {
+            return new ArrayList<BluetoothDevice>(0);
+        }
+        return mService.getDevicesMatchingConnectionStates(
+                new int[]{BluetoothProfile.STATE_CONNECTED,
+                        BluetoothProfile.STATE_CONNECTING,
+                        BluetoothProfile.STATE_DISCONNECTING});
+    }
+
+    public boolean isEnabled(BluetoothDevice device) {
+        if (mService == null || device == null) {
+            return false;
+        }
+        return mService.getConnectionPolicy(device) > CONNECTION_POLICY_FORBIDDEN;
+    }
+
+    public int getConnectionPolicy(BluetoothDevice device) {
+        if (mService == null || device == null) {
+            return CONNECTION_POLICY_FORBIDDEN;
+        }
+        return mService.getConnectionPolicy(device);
+    }
+
+    public boolean setEnabled(BluetoothDevice device, boolean enabled) {
+        boolean isEnabled = false;
+        if (mService == null || device == null) {
+            return false;
+        }
+        if (enabled) {
+            if (mService.getConnectionPolicy(device) < CONNECTION_POLICY_ALLOWED) {
+                isEnabled = mService.setConnectionPolicy(device, CONNECTION_POLICY_ALLOWED);
+            }
+        } else {
+            isEnabled = mService.setConnectionPolicy(device, CONNECTION_POLICY_FORBIDDEN);
+        }
+
+        return isEnabled;
+    }
+
+    public String toString() {
+        return NAME;
+    }
+
+    public int getOrdinal() {
+        return ORDINAL;
+    }
+
+    public int getNameResource(BluetoothDevice device) {
+        return R.string.summary_empty;
+    }
+
+    public int getSummaryResourceForDevice(BluetoothDevice device) {
+        int state = getConnectionStatus(device);
+        return BluetoothUtils.getConnectionStateSummary(state);
+    }
+
+    public int getDrawableResource(BluetoothClass btClass) {
+        return 0;
+    }
+
+    @RequiresApi(Build.VERSION_CODES.S)
+    protected void finalize() {
+        if (DEBUG) {
+            Log.d(TAG, "finalize()");
+        }
+        if (mService != null) {
+            try {
+                BluetoothAdapter.getDefaultAdapter().closeProfileProxy(
+                        BluetoothProfile.LE_AUDIO_BROADCAST_ASSISTANT,
+                        mService);
+                mService = null;
+            } catch (Throwable t) {
+                Log.w(TAG, "Error cleaning up LeAudio proxy", t);
+            }
+        }
+    }
 }

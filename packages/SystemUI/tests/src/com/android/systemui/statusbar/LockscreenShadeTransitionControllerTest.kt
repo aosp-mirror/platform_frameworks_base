@@ -93,24 +93,34 @@ class LockscreenShadeTransitionControllerTest : SysuiTestCase() {
                 .addOverride(R.bool.config_use_split_notification_shade, false)
         context.getOrCreateTestableResources()
             .addOverride(R.dimen.lockscreen_shade_depth_controller_transition_distance, 100)
-        transitionController = LockscreenShadeTransitionController(
-            statusBarStateController = statusbarStateController,
-            logger = logger,
-            keyguardBypassController = keyguardBypassController,
-            lockScreenUserManager = lockScreenUserManager,
-            falsingCollector = falsingCollector,
-            ambientState = ambientState,
-            mediaHierarchyManager = mediaHierarchyManager,
-            scrimController = scrimController,
-            depthController = depthController,
-            wakefulnessLifecycle = wakefulnessLifecycle,
-            context = context,
-            configurationController = configurationController,
-            falsingManager = falsingManager,
-            dumpManager = dumpManager,
-            splitShadeOverScrollerFactory = { _, _ -> splitShadeOverScroller },
-            singleShadeOverScrollerFactory = { singleShadeOverScroller }
-        )
+        transitionController =
+            LockscreenShadeTransitionController(
+                statusBarStateController = statusbarStateController,
+                logger = logger,
+                keyguardBypassController = keyguardBypassController,
+                lockScreenUserManager = lockScreenUserManager,
+                falsingCollector = falsingCollector,
+                ambientState = ambientState,
+                mediaHierarchyManager = mediaHierarchyManager,
+                depthController = depthController,
+                wakefulnessLifecycle = wakefulnessLifecycle,
+                context = context,
+                configurationController = configurationController,
+                falsingManager = falsingManager,
+                dumpManager = dumpManager,
+                splitShadeOverScrollerFactory = { _, _ -> splitShadeOverScroller },
+                singleShadeOverScrollerFactory = { singleShadeOverScroller },
+                scrimTransitionController =
+                LockscreenShadeScrimTransitionController(
+                    scrimController, context, configurationController, dumpManager),
+                keyguardTransitionControllerFactory = { notificationPanelController ->
+                    LockscreenShadeKeyguardTransitionController(
+                        mediaHierarchyManager,
+                        notificationPanelController,
+                        context,
+                        configurationController,
+                        dumpManager)
+                })
         whenever(nsslController.view).thenReturn(stackscroller)
         whenever(nsslController.expandHelperCallback).thenReturn(expandHelperCallback)
         transitionController.notificationPanelController = notificationPanelController

@@ -32,7 +32,7 @@ class StatusBarNotificationActivityStarterLogger @Inject constructor(
         buffer.log(TAG, DEBUG, {
             str1 = key
         }, {
-            "(1/4) onNotificationClicked: $str1"
+            "(1/5) onNotificationClicked: $str1"
         })
     }
 
@@ -40,7 +40,7 @@ class StatusBarNotificationActivityStarterLogger @Inject constructor(
         buffer.log(TAG, DEBUG, {
             str1 = key
         }, {
-            "(2/4) handleNotificationClickAfterKeyguardDismissed: $str1"
+            "(2/5) handleNotificationClickAfterKeyguardDismissed: $str1"
         })
     }
 
@@ -48,16 +48,25 @@ class StatusBarNotificationActivityStarterLogger @Inject constructor(
         buffer.log(TAG, DEBUG, {
             str1 = key
         }, {
-            "(3/4) handleNotificationClickAfterPanelCollapsed: $str1"
+            "(3/5) handleNotificationClickAfterPanelCollapsed: $str1"
         })
     }
 
-    fun logStartNotificationIntent(key: String, pendingIntent: PendingIntent) {
+    fun logStartNotificationIntent(key: String) {
+        buffer.log(TAG, INFO, {
+            str1 = key
+        }, {
+            "(4/5) startNotificationIntent: $str1"
+        })
+    }
+
+    fun logSendPendingIntent(key: String, pendingIntent: PendingIntent, result: Int) {
         buffer.log(TAG, INFO, {
             str1 = key
             str2 = pendingIntent.intent.toString()
+            int1 = result
         }, {
-            "(4/4) Starting $str2 for notification $str1"
+            "(5/5) Started intent $str2 for notification $str1 with result code $int1"
         })
     }
 

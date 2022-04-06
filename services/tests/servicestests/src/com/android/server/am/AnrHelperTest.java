@@ -70,6 +70,7 @@ public class AnrHelperTest {
         final Context context = getInstrumentation().getTargetContext();
         runWithDexmakerShareClassLoader(() -> {
             mAnrApp = mock(ProcessRecord.class);
+            mAnrApp.mPid = 12345;
             final ProcessErrorStateRecord errorState = mock(ProcessErrorStateRecord.class);
             setFieldValue(ProcessErrorStateRecord.class, errorState, "mProcLock",
                     new ActivityManagerProcLock());
@@ -130,7 +131,6 @@ public class AnrHelperTest {
         }).when(mAnrApp.mErrorState).appNotResponding(anyString(), any(), any(), any(),
                 anyBoolean(), anyString(), anyBoolean());
         final ApplicationInfo appInfo = new ApplicationInfo();
-        mAnrApp.mPid = 12345;
         final Runnable reportAnr = () -> mAnrHelper.appNotResponding(mAnrApp,
                 "activityShortComponentName", appInfo, "parentShortComponentName",
                 null /* parentProcess */, false /* aboveSystem */, "annotation");

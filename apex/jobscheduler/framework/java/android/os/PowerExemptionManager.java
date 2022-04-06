@@ -32,6 +32,8 @@ import android.annotation.SystemService;
 import android.annotation.UserHandleAware;
 import android.content.Context;
 
+import com.android.internal.util.FrameworkStatsLog;
+
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.Collections;
@@ -451,6 +453,62 @@ public class PowerExemptionManager {
     @Retention(RetentionPolicy.SOURCE)
     public @interface ReasonCode {}
 
+    private static final int EXEMPTION_REASON_SYSTEM_UID = FrameworkStatsLog
+            .APP_BACKGROUND_RESTRICTIONS_INFO__EXEMPTION_REASON__REASON_SYSTEM_UID;
+    private static final int EXEMPTION_REASON_ALLOWLISTED_PACKAGE = FrameworkStatsLog
+            .APP_BACKGROUND_RESTRICTIONS_INFO__EXEMPTION_REASON__REASON_ALLOWLISTED_PACKAGE;
+    private static final int EXEMPTION_REASON_COMPANION_DEVICE_MANAGER = FrameworkStatsLog
+            .APP_BACKGROUND_RESTRICTIONS_INFO__EXEMPTION_REASON__REASON_COMPANION_DEVICE_MANAGER;
+    private static final int EXEMPTION_REASON_DEVICE_DEMO_MODE = FrameworkStatsLog
+            .APP_BACKGROUND_RESTRICTIONS_INFO__EXEMPTION_REASON__REASON_DEVICE_DEMO_MODE;
+    private static final int EXEMPTION_REASON_DEVICE_OWNER = FrameworkStatsLog
+            .APP_BACKGROUND_RESTRICTIONS_INFO__EXEMPTION_REASON__REASON_DEVICE_OWNER;
+    private static final int EXEMPTION_REASON_PROFILE_OWNER = FrameworkStatsLog
+            .APP_BACKGROUND_RESTRICTIONS_INFO__EXEMPTION_REASON__REASON_PROFILE_OWNER;
+    private static final int EXEMPTION_REASON_PROC_STATE_PERSISTENT = FrameworkStatsLog
+            .APP_BACKGROUND_RESTRICTIONS_INFO__EXEMPTION_REASON__REASON_PROC_STATE_PERSISTENT;
+    private static final int EXEMPTION_REASON_PROC_STATE_PERSISTENT_UI = FrameworkStatsLog
+            .APP_BACKGROUND_RESTRICTIONS_INFO__EXEMPTION_REASON__REASON_PROC_STATE_PERSISTENT_UI;
+    private static final int EXEMPTION_REASON_OP_ACTIVATE_VPN = FrameworkStatsLog
+            .APP_BACKGROUND_RESTRICTIONS_INFO__EXEMPTION_REASON__REASON_OP_ACTIVATE_VPN;
+    private static final int EXEMPTION_REASON_OP_ACTIVATE_PLATFORM_VPN = FrameworkStatsLog
+            .APP_BACKGROUND_RESTRICTIONS_INFO__EXEMPTION_REASON__REASON_OP_ACTIVATE_PLATFORM_VPN;
+    private static final int EXEMPTION_REASON_SYSTEM_MODULE = FrameworkStatsLog
+            .APP_BACKGROUND_RESTRICTIONS_INFO__EXEMPTION_REASON__REASON_SYSTEM_MODULE;
+    private static final int EXEMPTION_REASON_CARRIER_PRIVILEGED_APP = FrameworkStatsLog
+            .APP_BACKGROUND_RESTRICTIONS_INFO__EXEMPTION_REASON__REASON_CARRIER_PRIVILEGED_APP;
+    private static final int EXEMPTION_REASON_SYSTEM_ALLOW_LISTED = FrameworkStatsLog
+            .APP_BACKGROUND_RESTRICTIONS_INFO__EXEMPTION_REASON__REASON_SYSTEM_ALLOW_LISTED;
+    private static final int EXEMPTION_REASON_ROLE_DIALER = FrameworkStatsLog
+            .APP_BACKGROUND_RESTRICTIONS_INFO__EXEMPTION_REASON__REASON_ROLE_DIALER;
+    private static final int EXEMPTION_REASON_ROLE_EMERGENCY = FrameworkStatsLog
+            .APP_BACKGROUND_RESTRICTIONS_INFO__EXEMPTION_REASON__REASON_ROLE_EMERGENCY;
+    private static final int EXEMPTION_REASON_DENIED = FrameworkStatsLog
+            .APP_BACKGROUND_RESTRICTIONS_INFO__EXEMPTION_REASON__REASON_DENIED;
+    /**
+     * List of exemption reason codes used for statsd logging in AppBackgroundRestrictionsInfo atom.
+     * @hide
+     */
+    @IntDef(prefix = { "EXEMPTION_REASON_" }, value = {
+            EXEMPTION_REASON_SYSTEM_UID,
+            EXEMPTION_REASON_ALLOWLISTED_PACKAGE,
+            EXEMPTION_REASON_COMPANION_DEVICE_MANAGER,
+            EXEMPTION_REASON_DEVICE_DEMO_MODE,
+            EXEMPTION_REASON_DEVICE_OWNER,
+            EXEMPTION_REASON_PROFILE_OWNER,
+            EXEMPTION_REASON_PROC_STATE_PERSISTENT,
+            EXEMPTION_REASON_PROC_STATE_PERSISTENT_UI,
+            EXEMPTION_REASON_OP_ACTIVATE_VPN,
+            EXEMPTION_REASON_OP_ACTIVATE_PLATFORM_VPN,
+            EXEMPTION_REASON_SYSTEM_MODULE,
+            EXEMPTION_REASON_CARRIER_PRIVILEGED_APP,
+            EXEMPTION_REASON_SYSTEM_ALLOW_LISTED,
+            EXEMPTION_REASON_ROLE_DIALER,
+            EXEMPTION_REASON_ROLE_EMERGENCY,
+            EXEMPTION_REASON_DENIED,
+    })
+    public @interface ExemptionReason {}
+
     /**
      * @hide
      */
@@ -614,6 +672,47 @@ public class PowerExemptionManager {
             return REASON_PROC_STATE_BFGS;
         } else {
             return REASON_DENIED;
+        }
+    }
+
+    /**
+     * @hide
+     * @return the reason code mapped to statsd for the AppBackgroundRestrictionsInfo atom.
+     */
+    public static @ExemptionReason int getExemptionReasonForStatsd(@ReasonCode int reasonCode) {
+        switch (reasonCode) {
+            case REASON_SYSTEM_UID:
+                return EXEMPTION_REASON_SYSTEM_UID;
+            case REASON_ALLOWLISTED_PACKAGE:
+                return EXEMPTION_REASON_ALLOWLISTED_PACKAGE;
+            case REASON_COMPANION_DEVICE_MANAGER:
+                return EXEMPTION_REASON_COMPANION_DEVICE_MANAGER;
+            case REASON_DEVICE_DEMO_MODE:
+                return EXEMPTION_REASON_DEVICE_DEMO_MODE;
+            case REASON_DEVICE_OWNER:
+                return EXEMPTION_REASON_DEVICE_OWNER;
+            case REASON_PROFILE_OWNER:
+                return EXEMPTION_REASON_PROFILE_OWNER;
+            case REASON_PROC_STATE_PERSISTENT:
+                return EXEMPTION_REASON_PROC_STATE_PERSISTENT;
+            case REASON_PROC_STATE_PERSISTENT_UI:
+                return EXEMPTION_REASON_PROC_STATE_PERSISTENT_UI;
+            case REASON_OP_ACTIVATE_VPN:
+                return EXEMPTION_REASON_OP_ACTIVATE_VPN;
+            case REASON_OP_ACTIVATE_PLATFORM_VPN:
+                return EXEMPTION_REASON_OP_ACTIVATE_PLATFORM_VPN;
+            case REASON_SYSTEM_MODULE:
+                return EXEMPTION_REASON_SYSTEM_MODULE;
+            case REASON_CARRIER_PRIVILEGED_APP:
+                return EXEMPTION_REASON_CARRIER_PRIVILEGED_APP;
+            case REASON_SYSTEM_ALLOW_LISTED:
+                return EXEMPTION_REASON_SYSTEM_ALLOW_LISTED;
+            case REASON_ROLE_DIALER:
+                return EXEMPTION_REASON_ROLE_DIALER;
+            case REASON_ROLE_EMERGENCY:
+                return EXEMPTION_REASON_ROLE_EMERGENCY;
+            default:
+                return EXEMPTION_REASON_DENIED;
         }
     }
 

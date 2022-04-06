@@ -217,10 +217,9 @@ class Owners {
                 Slog.w(TAG, String.format("User %d has both DO and PO, which is not supported",
                         getDeviceOwnerUserId()));
             }
-            pushToPackageManagerLocked();
+
+            notifyChangeLocked();
             pushToActivityTaskManagerLocked();
-            pushToActivityManagerLocked();
-            pushToAppOpsLocked();
 
             for (ArrayMap.Entry<String, List<String>> entry :
                     mDeviceOwnerProtectedPackages.entrySet()) {
@@ -228,6 +227,21 @@ class Owners {
                         entry.getKey(), entry.getValue());
             }
         }
+    }
+
+    // Notify interested parties that things have changed. This does not notify the
+    // ActivityTaskManager.
+    private void notifyChangeLocked() {
+        pushToDevicePolicyManager();
+        pushToPackageManagerLocked();
+        pushToActivityManagerLocked();
+        pushToAppOpsLocked();
+    }
+
+    private void pushToDevicePolicyManager() {
+        // Not every change here must invalidate the DPM caches, but there is no harm in
+        // invalidating the caches unnecessarily, provided the invalidation is infrequent.
+        DevicePolicyManagerService.invalidateBinderCaches();
     }
 
     private void pushToPackageManagerLocked() {
@@ -344,10 +358,8 @@ class Owners {
             mDeviceOwnerUserId = userId;
 
             mUserManagerInternal.setDeviceManaged(true);
-            pushToPackageManagerLocked();
+            notifyChangeLocked();
             pushToActivityTaskManagerLocked();
-            pushToActivityManagerLocked();
-            pushToAppOpsLocked();
         }
     }
 
@@ -364,10 +376,8 @@ class Owners {
             mDeviceOwnerUserId = UserHandle.USER_NULL;
 
             mUserManagerInternal.setDeviceManaged(false);
-            pushToPackageManagerLocked();
+            notifyChangeLocked();
             pushToActivityTaskManagerLocked();
-            pushToActivityManagerLocked();
-            pushToAppOpsLocked();
         }
     }
 
@@ -378,9 +388,7 @@ class Owners {
                     /* userRestrictionsMigrated =*/ true, /* remoteBugreportUri =*/ null,
                     /* remoteBugreportHash =*/ null, /* isOrganizationOwnedDevice =*/ false));
             mUserManagerInternal.setUserManaged(userId, true);
-            pushToPackageManagerLocked();
-            pushToActivityManagerLocked();
-            pushToAppOpsLocked();
+            notifyChangeLocked();
         }
     }
 
@@ -388,9 +396,7 @@ class Owners {
         synchronized (mLock) {
             mProfileOwners.remove(userId);
             mUserManagerInternal.setUserManaged(userId, false);
-            pushToPackageManagerLocked();
-            pushToActivityManagerLocked();
-            pushToAppOpsLocked();
+            notifyChangeLocked();
         }
     }
 
@@ -402,9 +408,7 @@ class Owners {
                     ownerInfo.remoteBugreportHash, /* isOrganizationOwnedDevice =*/
                     ownerInfo.isOrganizationOwnedDevice);
             mProfileOwners.put(userId, newOwnerInfo);
-            pushToPackageManagerLocked();
-            pushToActivityManagerLocked();
-            pushToAppOpsLocked();
+            notifyChangeLocked();
         }
     }
 
@@ -430,10 +434,8 @@ class Owners {
                 mDeviceOwnerProtectedPackages.put(
                         mDeviceOwner.packageName, previousProtectedPackages);
             }
-            pushToPackageManagerLocked();
+            notifyChangeLocked();
             pushToActivityTaskManagerLocked();
-            pushToActivityManagerLocked();
-            pushToAppOpsLocked();
         }
     }
 
@@ -765,6 +767,7 @@ class Owners {
             if (DEBUG) {
                 Log.d(TAG, "Writing to device owner file");
             }
+            pushToDevicePolicyManager();
             new DeviceOwnerReadWriter().writeToFileLocked();
         }
     }
@@ -774,6 +777,7 @@ class Owners {
             if (DEBUG) {
                 Log.d(TAG, "Writing to profile owner file for user " + userId);
             }
+            pushToDevicePolicyManager();
             new ProfileOwnerReadWriter(userId).writeToFileLocked();
         }
     }

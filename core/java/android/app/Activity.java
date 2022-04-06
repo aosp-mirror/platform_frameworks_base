@@ -148,7 +148,6 @@ import android.widget.Toast;
 import android.widget.Toolbar;
 import android.window.OnBackInvokedCallback;
 import android.window.OnBackInvokedDispatcher;
-import android.window.OnBackInvokedDispatcherOwner;
 import android.window.SplashScreen;
 import android.window.WindowOnBackInvokedDispatcher;
 
@@ -749,8 +748,7 @@ public class Activity extends ContextThemeWrapper
         Window.Callback, KeyEvent.Callback,
         OnCreateContextMenuListener, ComponentCallbacks2,
         Window.OnWindowDismissedCallback,
-        ContentCaptureManager.ContentCaptureClient,
-        OnBackInvokedDispatcherOwner {
+        ContentCaptureManager.ContentCaptureClient {
     private static final String TAG = "Activity";
     private static final boolean DEBUG_LIFECYCLE = false;
 
@@ -1663,12 +1661,7 @@ public class Activity extends ContextThemeWrapper
                 .isOnBackInvokedCallbackEnabled(this);
         if (aheadOfTimeBack) {
             // Add onBackPressed as default back behavior.
-            mDefaultBackCallback = new OnBackInvokedCallback() {
-                @Override
-                public void onBackInvoked() {
-                    navigateBack();
-                }
-            };
+            mDefaultBackCallback = this::navigateBack;
             getOnBackInvokedDispatcher().registerSystemOnBackInvokedCallback(mDefaultBackCallback);
         }
     }
@@ -8998,12 +8991,11 @@ public class Activity extends ContextThemeWrapper
      * @throws IllegalStateException if this Activity is not visual.
      */
     @NonNull
-    @Override
     public OnBackInvokedDispatcher getOnBackInvokedDispatcher() {
         if (mWindow == null) {
             throw new IllegalStateException("OnBackInvokedDispatcher are not available on "
                     + "non-visual activities");
         }
-        return ((OnBackInvokedDispatcherOwner) mWindow).getOnBackInvokedDispatcher();
+        return mWindow.getOnBackInvokedDispatcher();
     }
 }

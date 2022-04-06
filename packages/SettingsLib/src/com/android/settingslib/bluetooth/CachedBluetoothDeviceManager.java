@@ -47,7 +47,7 @@ public class CachedBluetoothDeviceManager {
     CsipDeviceManager mCsipDeviceManager;
     BluetoothDevice mOngoingSetMemberPair;
 
-    CachedBluetoothDeviceManager(Context context, LocalBluetoothManager localBtManager) {
+    public CachedBluetoothDeviceManager(Context context, LocalBluetoothManager localBtManager) {
         mContext = context;
         mBtManager = localBtManager;
         mHearingAidDeviceManager = new HearingAidDeviceManager(localBtManager, mCachedDevices);

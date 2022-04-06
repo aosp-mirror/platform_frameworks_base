@@ -48,6 +48,7 @@ import static android.hardware.usb.UsbPortStatus.DATA_STATUS_DISABLED_FORCE;
 import static android.hardware.usb.UsbPortStatus.DATA_STATUS_DISABLED_DEBUG;
 
 import android.Manifest;
+import android.annotation.CallbackExecutor;
 import android.annotation.CheckResult;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
@@ -65,6 +66,8 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.Executor;
+import java.util.function.Consumer;
 
 /**
  * Represents a physical USB port and describes its characteristics.
@@ -127,9 +130,6 @@ public final class UsbPort {
     })
     @Retention(RetentionPolicy.SOURCE)
     @interface EnableUsbDataStatus{}
-
-    @Retention(RetentionPolicy.SOURCE)
-    @interface ResetUsbPortStatus{}
 
     /**
      * The {@link #enableLimitPowerTransfer} request was successfully completed.
@@ -196,6 +196,42 @@ public final class UsbPort {
      * The {@link #enableUsbDataWhileDocked} request failed due to other reasons.
      */
     public static final int ENABLE_USB_DATA_WHILE_DOCKED_ERROR_OTHER = 5;
+
+    /**
+     * The {@link #resetUsbPort} request was successfully completed.
+     */
+    public static final int RESET_USB_PORT_SUCCESS = 0;
+
+    /**
+     * The {@link #resetUsbPort} request failed due to internal error.
+     */
+    public static final int RESET_USB_PORT_ERROR_INTERNAL = 1;
+
+    /**
+     * The {@link #resetUsbPort} request failed as it's not supported.
+     */
+    public static final int RESET_USB_PORT_ERROR_NOT_SUPPORTED = 2;
+
+    /**
+     * The {@link #resetUsbPort} request failed as port id mismatched.
+     */
+    public static final int RESET_USB_PORT_ERROR_PORT_MISMATCH = 3;
+
+    /**
+     * The {@link #resetUsbPort} request failed due to other reasons.
+     */
+    public static final int RESET_USB_PORT_ERROR_OTHER = 4;
+
+    /** @hide */
+    @IntDef(prefix = { "RESET_USB_PORT_" }, value = {
+            RESET_USB_PORT_SUCCESS,
+            RESET_USB_PORT_ERROR_INTERNAL,
+            RESET_USB_PORT_ERROR_NOT_SUPPORTED,
+            RESET_USB_PORT_ERROR_PORT_MISMATCH,
+            RESET_USB_PORT_ERROR_OTHER
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    @interface ResetUsbPortStatus{}
 
     /** @hide */
     @IntDef(prefix = { "ENABLE_USB_DATA_WHILE_DOCKED_" }, value = {
@@ -324,38 +360,29 @@ public final class UsbPort {
     /**
      * Reset Usb data on the port.
      *
-     * @return       {@link #ENABLE_USB_DATA_SUCCESS} when request completes successfully or
-     *               {@link #ENABLE_USB_DATA_ERROR_INTERNAL} when request fails due to internal
-     *               error or
-     *               {@link ENABLE_USB_DATA_ERROR_NOT_SUPPORTED} when not supported or
-     *               {@link ENABLE_USB_DATA_ERROR_PORT_MISMATCH} when request fails due to port id
-     *               mismatch or
-     *               {@link ENABLE_USB_DATA_ERROR_OTHER} when fails due to other reasons.
+     * @param executor Executor for the callback.
+     * @param consumer A consumer that consumes the reset result.
+     *                 {@link #RESET_USB_PORT_SUCCESS} when request completes
+     *                 successfully or
+     *                 {@link #RESET_USB_PORT_ERROR_INTERNAL} when request
+     *                 fails due to internal error or
+     *                 {@link RESET_USB_PORT_ERROR_NOT_SUPPORTED} when not
+     *                 supported or
+     *                 {@link RESET_USB_PORT_ERROR_PORT_MISMATCH} when request
+     *                 fails due to port id mismatch or
+     *                 {@link RESET_USB_PORT_ERROR_OTHER} when fails due to
+     *                  other reasons.
      */
     @CheckResult
     @RequiresPermission(Manifest.permission.MANAGE_USB)
-    public @ResetUsbPortStatus int resetUsbPort() {
+    public void resetUsbPort(@NonNull @CallbackExecutor Executor executor,
+            @NonNull @ResetUsbPortStatus Consumer<Integer> consumer) {
         // UID is added To minimize operationID overlap between two different packages.
         int operationId = sUsbOperationCount.incrementAndGet() + Binder.getCallingUid();
-        Log.i(TAG, "resetUsbData opId:" + operationId);
+        Log.i(TAG, "resetUsbPort opId:" + operationId);
         UsbOperationInternal opCallback =
-                new UsbOperationInternal(operationId, mId);
-        if (mUsbManager.resetUsbPort(this, operationId, opCallback) == true) {
-            opCallback.waitForOperationComplete();
-        }
-        int result = opCallback.getStatus();
-        switch (result) {
-            case USB_OPERATION_SUCCESS:
-                return ENABLE_USB_DATA_SUCCESS;
-            case USB_OPERATION_ERROR_INTERNAL:
-                return ENABLE_USB_DATA_ERROR_INTERNAL;
-            case USB_OPERATION_ERROR_NOT_SUPPORTED:
-                return ENABLE_USB_DATA_ERROR_NOT_SUPPORTED;
-            case USB_OPERATION_ERROR_PORT_MISMATCH:
-                return ENABLE_USB_DATA_ERROR_PORT_MISMATCH;
-            default:
-                return ENABLE_USB_DATA_ERROR_OTHER;
-        }
+                new UsbOperationInternal(operationId, mId, executor, consumer);
+        mUsbManager.resetUsbPort(this, operationId, opCallback);
     }
 
     /**

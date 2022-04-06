@@ -358,9 +358,7 @@ final class DexOptHelper {
         }
         final long callingId = Binder.clearCallingIdentity();
         try {
-            synchronized (mPm.mInstallLock) {
-                return performDexOptInternalWithDependenciesLI(p, pkgSetting, options);
-            }
+            return performDexOptInternalWithDependenciesLI(p, pkgSetting, options);
         } finally {
             Binder.restoreCallingIdentity(callingId);
         }
@@ -429,20 +427,18 @@ final class DexOptHelper {
             throw new IllegalArgumentException("Unknown package: " + packageName);
         }
 
-        synchronized (mPm.mInstallLock) {
-            Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "dexopt");
+        Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "dexopt");
 
-            // Whoever is calling forceDexOpt wants a compiled package.
-            // Don't use profiles since that may cause compilation to be skipped.
-            final int res = performDexOptInternalWithDependenciesLI(pkg, packageState,
-                    new DexoptOptions(packageName,
-                            getDefaultCompilerFilter(),
-                            DexoptOptions.DEXOPT_FORCE | DexoptOptions.DEXOPT_BOOT_COMPLETE));
+        // Whoever is calling forceDexOpt wants a compiled package.
+        // Don't use profiles since that may cause compilation to be skipped.
+        final int res = performDexOptInternalWithDependenciesLI(pkg, packageState,
+                new DexoptOptions(packageName,
+                        getDefaultCompilerFilter(),
+                        DexoptOptions.DEXOPT_FORCE | DexoptOptions.DEXOPT_BOOT_COMPLETE));
 
-            Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
-            if (res != PackageDexOptimizer.DEX_OPT_PERFORMED) {
-                throw new IllegalStateException("Failed to dexopt: " + res);
-            }
+        Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
+        if (res != PackageDexOptimizer.DEX_OPT_PERFORMED) {
+            throw new IllegalStateException("Failed to dexopt: " + res);
         }
     }
 

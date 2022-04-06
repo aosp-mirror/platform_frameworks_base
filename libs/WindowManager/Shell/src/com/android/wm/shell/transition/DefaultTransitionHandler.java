@@ -437,15 +437,15 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
                     cornerRadius = 0;
                 }
 
-                if (a.getShowBackground()) {
+                if (a.getShowBackdrop()) {
                     if (info.getAnimationOptions().getBackgroundColor() != 0) {
                         // If available use the background color provided through AnimationOptions
                         backgroundColorForTransition =
                                 info.getAnimationOptions().getBackgroundColor();
-                    } else if (a.getBackgroundColor() != 0) {
+                    } else if (a.getBackdropColor() != 0) {
                         // Otherwise fallback on the background color provided through the animation
                         // definition.
-                        backgroundColorForTransition = a.getBackgroundColor();
+                        backgroundColorForTransition = a.getBackdropColor();
                     } else if (change.getBackgroundColor() != 0) {
                         // Otherwise default to the window's background color if provided through
                         // the theme as the background color for the animation - the top most window

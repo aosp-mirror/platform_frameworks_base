@@ -32,6 +32,7 @@ import android.app.admin.DnsEvent;
 import android.app.admin.NetworkEvent;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.IpcDataCache;
 import android.os.Message;
 import android.os.Parcel;
 import android.os.SystemClock;
@@ -56,6 +57,10 @@ public class NetworkEventTest extends DpmTestBase {
 
     @Before
     public void setUp() throws Exception {
+        // Disable caches in this test process. This must happen early, since some of the
+        // following initialization steps invalidate caches.
+        IpcDataCache.disableForTestMode();
+
         mSpiedDpmMockContext = spy(mMockContext);
         mSpiedDpmMockContext.callerPermissions.add(
                 android.Manifest.permission.MANAGE_DEVICE_ADMINS);

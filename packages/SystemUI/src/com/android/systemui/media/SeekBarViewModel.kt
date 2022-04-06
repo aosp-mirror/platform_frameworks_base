@@ -131,7 +131,7 @@ class SeekBarViewModel @Inject constructor(
             }
         }
 
-    lateinit var logSmartspaceClick: () -> Unit
+    lateinit var logSeek: () -> Unit
 
     fun getEnabled() = _data.enabled
 
@@ -175,7 +175,7 @@ class SeekBarViewModel @Inject constructor(
             scrubbing = false
             checkPlaybackPosition()
         } else {
-            logSmartspaceClick()
+            logSeek()
             controller?.transportControls?.seekTo(position)
             // Invalidate the cached playbackState to avoid the thumb jumping back to the previous
             // position.

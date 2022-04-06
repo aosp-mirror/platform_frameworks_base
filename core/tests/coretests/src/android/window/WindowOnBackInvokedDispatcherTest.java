@@ -56,9 +56,9 @@ public class WindowOnBackInvokedDispatcherTest {
     private IWindow mWindow;
     private WindowOnBackInvokedDispatcher mDispatcher;
     @Mock
-    private OnBackInvokedCallback mCallback1;
+    private OnBackAnimationCallback mCallback1;
     @Mock
-    private OnBackInvokedCallback mCallback2;
+    private OnBackAnimationCallback mCallback2;
 
     @Before
     public void setUp() throws Exception {

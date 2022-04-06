@@ -170,7 +170,15 @@ jboolean GnssHal::isSupported() {
 }
 
 void GnssHal::linkToDeath() {
-    // TODO: linkToDeath for AIDL HAL
+    if (gnssHalAidl != nullptr) {
+        gnssHalDeathRecipientAidl = new GnssDeathRecipientAidl();
+        status_t linked = IInterface::asBinder(gnssHalAidl)->linkToDeath(gnssHalDeathRecipientAidl);
+        if (linked != OK) {
+            ALOGE("Unable to link to GNSS AIDL HAL death notification");
+        } else {
+            ALOGD("Successfully linked to GNSS AIDL HAl death notification");
+        }
+    }
 
     if (gnssHal != nullptr) {
         gnssHalDeathRecipient = new GnssDeathRecipient();

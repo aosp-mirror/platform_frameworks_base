@@ -131,7 +131,7 @@ interface IStatusBarService
     // Used to show an error - the dialog will dismiss after a certain amount of time
     void onBiometricError(int modality, int error, int vendorCode);
     // Used to hide the authentication dialog, e.g. when the application cancels authentication
-    void hideAuthenticationDialog();
+    void hideAuthenticationDialog(long requestId);
     // Used to notify the biometric service of events that occur outside of an operation.
     void setBiometicContextListener(in IBiometricContextListener listener);
 

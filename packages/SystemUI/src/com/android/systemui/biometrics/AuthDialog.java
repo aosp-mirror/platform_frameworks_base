@@ -150,6 +150,9 @@ public interface AuthDialog {
      */
     String getOpPackageName();
 
+    /** The requestId of the underlying operation within the framework. */
+    long getRequestId();
+
     /**
      * Animate to credential UI. Typically called after biometric is locked out.
      */

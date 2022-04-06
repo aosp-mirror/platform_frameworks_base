@@ -23,6 +23,7 @@ import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import android.text.TextUtils
 import android.view.View
+import android.view.accessibility.AccessibilityNodeInfo
 import android.widget.TextView
 import androidx.test.filters.SmallTest
 import com.android.systemui.R
@@ -255,6 +256,28 @@ class QSTileViewImplTest : SysuiTestCase() {
         state.state = Tile.STATE_ACTIVE
         tileView.changeState(state)
         assertThat((tileView.secondaryLabel as TextView).text).isEqualTo(onString)
+    }
+
+    @Test
+    fun testCollectionItemInfoHasPosition() {
+        val position = 5
+        tileView.setPosition(position)
+
+        val info = AccessibilityNodeInfo(tileView)
+        tileView.onInitializeAccessibilityNodeInfo(info)
+
+        assertThat(info.collectionItemInfo.rowIndex).isEqualTo(position)
+        assertThat(info.collectionItemInfo.rowSpan).isEqualTo(1)
+        assertThat(info.collectionItemInfo.columnIndex).isEqualTo(0)
+        assertThat(info.collectionItemInfo.columnSpan).isEqualTo(1)
+    }
+
+    @Test
+    fun testCollectionItemInfoNoPosition() {
+        val info = AccessibilityNodeInfo(tileView)
+        tileView.onInitializeAccessibilityNodeInfo(info)
+
+        assertThat(info.collectionItemInfo).isNull()
     }
 
     class FakeTileView(

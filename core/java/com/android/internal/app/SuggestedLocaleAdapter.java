@@ -348,8 +348,4 @@ public class SuggestedLocaleAdapter extends BaseAdapter implements Filterable {
     public Filter getFilter() {
         return new FilterByNativeAndUiNames();
     }
-
-    public String getAppPackageName() {
-        return mAppPackageName;
-    }
 }

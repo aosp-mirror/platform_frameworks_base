@@ -4342,8 +4342,8 @@ public final class Settings implements Watchable, Snappable {
      * Return all {@link PackageSetting} that are actively installed on the
      * given {@link VolumeInfo#fsUuid}.
      */
-    List<PackageSetting> getVolumePackagesLPr(String volumeUuid) {
-        ArrayList<PackageSetting> res = new ArrayList<>();
+    List<? extends PackageStateInternal> getVolumePackagesLPr(String volumeUuid) {
+        ArrayList<PackageStateInternal> res = new ArrayList<>();
         for (int i = 0; i < mPackages.size(); i++) {
             final PackageSetting setting = mPackages.valueAt(i);
             if (Objects.equals(volumeUuid, setting.getVolumeUuid())) {

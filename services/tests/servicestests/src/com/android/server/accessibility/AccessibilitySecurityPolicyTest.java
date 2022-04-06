@@ -573,6 +573,18 @@ public class AccessibilitySecurityPolicyTest {
     }
 
     @Test
+    public void canRegisterService_isExternalService_returnFalse() {
+        final ServiceInfo serviceInfo = new ServiceInfo();
+        serviceInfo.applicationInfo = new ApplicationInfo();
+        serviceInfo.packageName = PACKAGE_NAME;
+        serviceInfo.name = AccessibilitySecurityPolicyTest.class.getSimpleName();
+        serviceInfo.permission = android.Manifest.permission.BIND_ACCESSIBILITY_SERVICE;
+        serviceInfo.flags |= ServiceInfo.FLAG_EXTERNAL_SERVICE;
+
+        assertFalse(mA11ySecurityPolicy.canRegisterService(serviceInfo));
+    }
+
+    @Test
     public void checkAccessibilityAccess_shouldCheckAppOps() {
         final AccessibilityServiceInfo mockServiceInfo = Mockito.mock(
                 AccessibilityServiceInfo.class);

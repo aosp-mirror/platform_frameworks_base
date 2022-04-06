@@ -71,9 +71,16 @@ open class UserBroadcastDispatcher(
         }
     }
 
+    // Used for key in actionsToActionsReceivers
+    internal data class ReceiverProperties(
+        val action: String,
+        val flags: Int,
+        val permission: String?
+    )
+
     // Only modify in BG thread
     @VisibleForTesting
-    internal val actionsToActionsReceivers = ArrayMap<Pair<String, Int>, ActionReceiver>()
+    internal val actionsToActionsReceivers = ArrayMap<ReceiverProperties, ActionReceiver>()
     private val receiverToActions = ArrayMap<BroadcastReceiver, MutableSet<String>>()
 
     @VisibleForTesting
@@ -106,14 +113,20 @@ open class UserBroadcastDispatcher(
                 .addAll(receiverData.filter.actionsIterator()?.asSequence() ?: emptySequence())
         receiverData.filter.actionsIterator().forEach {
             actionsToActionsReceivers
-                    .getOrPut(it to flags, { createActionReceiver(it, flags) })
-                    .addReceiverData(receiverData)
+                .getOrPut(
+                    ReceiverProperties(it, flags, receiverData.permission),
+                    { createActionReceiver(it, receiverData.permission, flags) })
+                .addReceiverData(receiverData)
         }
         logger.logReceiverRegistered(userId, receiverData.receiver, flags)
     }
 
     @VisibleForTesting
-    internal open fun createActionReceiver(action: String, flags: Int): ActionReceiver {
+    internal open fun createActionReceiver(
+        action: String,
+        permission: String?,
+        flags: Int
+    ): ActionReceiver {
         return ActionReceiver(
                 action,
                 userId,
@@ -122,7 +135,7 @@ open class UserBroadcastDispatcher(
                             this,
                             UserHandle.of(userId),
                             it,
-                            null,
+                            permission,
                             bgHandler,
                             flags
                     )
@@ -149,7 +162,7 @@ open class UserBroadcastDispatcher(
         if (DEBUG) Log.w(TAG, "Unregister receiver: $receiver")
         receiverToActions.getOrDefault(receiver, mutableSetOf()).forEach {
             actionsToActionsReceivers.forEach { (key, value) ->
-                if (key.first == it) {
+                if (key.action == it) {
                     value.removeReceiver(receiver)
                 }
             }
@@ -160,9 +173,12 @@ open class UserBroadcastDispatcher(
 
     override fun dump(fd: FileDescriptor, pw: PrintWriter, args: Array<out String>) {
         pw.indentIfPossible {
-            actionsToActionsReceivers.forEach { (actionAndFlags, actionReceiver) ->
-                println("(${actionAndFlags.first}: " +
-                        "${BroadcastDispatcherLogger.flagToString(actionAndFlags.second)}):")
+            actionsToActionsReceivers.forEach { (actionFlagsPerm, actionReceiver) ->
+                println(
+                    "(${actionFlagsPerm.action}: " +
+                        BroadcastDispatcherLogger.flagToString(actionFlagsPerm.flags) +
+                        if (actionFlagsPerm.permission == null) "):"
+                            else ":${actionFlagsPerm.permission}):")
                 actionReceiver.dump(fd, pw, args)
             }
         }

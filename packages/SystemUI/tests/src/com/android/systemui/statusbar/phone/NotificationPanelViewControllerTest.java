@@ -876,7 +876,7 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
     public void testSwitchesToBigClockInSplitShadeOnAod() {
         mStatusBarStateController.setState(KEYGUARD);
         enableSplitShade(/* enabled= */ true);
-        when(mMediaDataManager.hasActiveMedia()).thenReturn(true);
+        when(mMediaDataManager.hasActiveMediaOrRecommendation()).thenReturn(true);
         when(mNotificationStackScrollLayoutController.getVisibleNotificationCount()).thenReturn(2);
         clearInvocations(mKeyguardStatusViewController);
 
@@ -904,7 +904,7 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
         mStatusBarStateController.setState(KEYGUARD);
         enableSplitShade(/* enabled= */ true);
         clearInvocations(mKeyguardStatusViewController);
-        when(mMediaDataManager.hasActiveMedia()).thenReturn(true);
+        when(mMediaDataManager.hasActiveMediaOrRecommendation()).thenReturn(true);
 
         // one notification + media player visible
         when(mNotificationStackScrollLayoutController.getVisibleNotificationCount()).thenReturn(1);
