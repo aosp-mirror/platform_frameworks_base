@@ -119,13 +119,6 @@ final class HotwordDetectionConnection {
     private static final Duration MAX_UPDATE_TIMEOUT_DURATION =
             Duration.ofMillis(MAX_UPDATE_TIMEOUT_MILLIS);
     private static final long RESET_DEBUG_HOTWORD_LOGGING_TIMEOUT_MILLIS = 60 * 60 * 1000; // 1 hour
-    /**
-     * Time after which each HotwordDetectionService process is stopped and replaced by a new one.
-     * 0 indicates no restarts.
-     */
-    private static final int RESTART_PERIOD_SECONDS =
-            DeviceConfig.getInt(DeviceConfig.NAMESPACE_VOICE_INTERACTION,
-                    KEY_RESTART_PERIOD_IN_SECONDS, 0);
     private static final int MAX_ISOLATED_PROCESS_NUMBER = 10;
 
     // Hotword metrics
@@ -150,6 +143,11 @@ final class HotwordDetectionConnection {
     private final @NonNull ServiceConnectionFactory mServiceConnectionFactory;
     private final IHotwordRecognitionStatusCallback mCallback;
     private final int mDetectorType;
+    /**
+     * Time after which each HotwordDetectionService process is stopped and replaced by a new one.
+     * 0 indicates no restarts.
+     */
+    private final int mReStartPeriodSeconds;
 
     final Object mLock;
     final int mVoiceInteractionServiceUid;
@@ -195,6 +193,8 @@ final class HotwordDetectionConnection {
         mUser = userId;
         mCallback = callback;
         mDetectorType = detectorType;
+        mReStartPeriodSeconds = DeviceConfig.getInt(DeviceConfig.NAMESPACE_VOICE_INTERACTION,
+                KEY_RESTART_PERIOD_IN_SECONDS, 0);
         final Intent intent = new Intent(HotwordDetectionService.SERVICE_INTERFACE);
         intent.setComponent(mDetectionComponentName);
         initAudioFlingerLocked();
@@ -206,11 +206,11 @@ final class HotwordDetectionConnection {
         mLastRestartInstant = Instant.now();
         updateStateAfterProcessStart(options, sharedMemory);
 
-        if (RESTART_PERIOD_SECONDS <= 0) {
+        if (mReStartPeriodSeconds <= 0) {
             mCancellationTaskFuture = null;
         } else {
-            // TODO(volnov): we need to be smarter here, e.g. schedule it a bit more often, but wait
-            // until the current session is closed.
+            // TODO: we need to be smarter here, e.g. schedule it a bit more often,
+            //  but wait until the current session is closed.
             mCancellationTaskFuture = mScheduledExecutorService.scheduleAtFixedRate(() -> {
                 Slog.v(TAG, "Time to restart the process, TTL has passed");
                 synchronized (mLock) {
@@ -218,7 +218,7 @@ final class HotwordDetectionConnection {
                     HotwordMetricsLogger.writeServiceRestartEvent(mDetectorType,
                             HOTWORD_DETECTION_SERVICE_RESTARTED__REASON__SCHEDULE);
                 }
-            }, RESTART_PERIOD_SECONDS, RESTART_PERIOD_SECONDS, TimeUnit.SECONDS);
+            }, mReStartPeriodSeconds, mReStartPeriodSeconds, TimeUnit.SECONDS);
         }
     }
 
@@ -787,7 +787,7 @@ final class HotwordDetectionConnection {
     }
 
     public void dump(String prefix, PrintWriter pw) {
-        pw.print(prefix); pw.print("RESTART_PERIOD_SECONDS="); pw.println(RESTART_PERIOD_SECONDS);
+        pw.print(prefix); pw.print("mReStartPeriodSeconds="); pw.println(mReStartPeriodSeconds);
         pw.print(prefix);
         pw.print("mBound=" + mRemoteHotwordDetectionService.isBound());
         pw.print(", mValidatingDspTrigger=" + mValidatingDspTrigger);
