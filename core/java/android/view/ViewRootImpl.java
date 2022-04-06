@@ -1744,7 +1744,7 @@ public final class ViewRootImpl implements ViewParent,
 
         mForceNextWindowRelayout = forceNextWindowRelayout;
         mPendingAlwaysConsumeSystemBars = args.argi2 != 0;
-        mSyncSeqId = args.argi4;
+        mSyncSeqId = args.argi4 > mSyncSeqId ? args.argi4 : mSyncSeqId;
 
         if (msg == MSG_RESIZED_REPORT) {
             reportNextDraw();
@@ -7988,7 +7988,10 @@ public final class ViewRootImpl implements ViewParent,
                     insetsPending ? WindowManagerGlobal.RELAYOUT_INSETS_PENDING : 0,
                     mTmpFrames, mPendingMergedConfiguration, mSurfaceControl, mTempInsets,
                     mTempControls, mRelayoutBundle);
-            mSyncSeqId = mRelayoutBundle.getInt("seqid");
+            final int maybeSyncSeqId = mRelayoutBundle.getInt("seqid");
+            if (maybeSyncSeqId > 0) {
+                mSyncSeqId = maybeSyncSeqId;
+            }
 
             if (mTranslator != null) {
                 mTranslator.translateRectInScreenToAppWindow(mTmpFrames.frame);
