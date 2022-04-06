@@ -77,7 +77,6 @@ import com.android.systemui.navigationbar.buttons.KeyButtonDrawable;
 import com.android.systemui.navigationbar.buttons.NearestTouchFrame;
 import com.android.systemui.navigationbar.buttons.RotationContextButton;
 import com.android.systemui.navigationbar.gestural.EdgeBackGestureHandler;
-import com.android.systemui.recents.OverviewProxyService;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.shared.navigationbar.RegionSamplingHelper;
 import com.android.systemui.shared.rotation.FloatingRotationButton;
@@ -142,7 +141,6 @@ public class NavigationBarView extends FrameLayout {
     private final DeadZone mDeadZone;
     private boolean mDeadZoneConsuming = false;
     private final NavigationBarTransitions mBarTransitions;
-    private final OverviewProxyService mOverviewProxyService;
     @Nullable
     private AutoHideController mAutoHideController;
 
@@ -198,6 +196,9 @@ public class NavigationBarView extends FrameLayout {
      */
     private final boolean mImeCanRenderGesturalNavButtons = canImeRenderGesturalNavButtons();
     private Gefingerpoken mTouchHandler;
+    private boolean mOverviewProxyEnabled;
+    private boolean mShowSwipeUpUi;
+    private UpdateActiveTouchRegionsCallback mUpdateActiveTouchRegionsCallback;
 
     private class NavTransitionListener implements TransitionListener {
         private boolean mBackTransitioning;
@@ -363,8 +364,6 @@ public class NavigationBarView extends FrameLayout {
                 R.drawable.ic_sysbar_rotate_button_cw_start_0,
                 R.drawable.ic_sysbar_rotate_button_cw_start_90,
                 () -> getDisplay().getRotation());
-
-        mOverviewProxyService = Dependency.get(OverviewProxyService.class);
 
         mConfiguration = new Configuration();
         mTmpLastConfiguration = new Configuration();
@@ -562,7 +561,7 @@ public class NavigationBarView extends FrameLayout {
     }
 
     private boolean isQuickStepSwipeUpEnabled() {
-        return mOverviewProxyService.shouldShowSwipeUpUI() && isOverviewEnabled();
+        return mShowSwipeUpUi && isOverviewEnabled();
     }
 
     private void reloadNavIcons() {
@@ -616,8 +615,7 @@ public class NavigationBarView extends FrameLayout {
     }
 
     public KeyButtonDrawable getHomeDrawable() {
-        final boolean quickStepEnabled = mOverviewProxyService.shouldShowSwipeUpUI();
-        KeyButtonDrawable drawable = quickStepEnabled
+        KeyButtonDrawable drawable = mShowSwipeUpUi
                 ? getDrawable(R.drawable.ic_sysbar_home_quick_step)
                 : getDrawable(R.drawable.ic_sysbar_home);
         orientHomeButton(drawable);
@@ -640,7 +638,7 @@ public class NavigationBarView extends FrameLayout {
 
         // Animate the back button's rotation to the new degrees and only in portrait move up the
         // back button to line up with the other buttons
-        float targetY = !mOverviewProxyService.shouldShowSwipeUpUI() && !mIsVertical && useAltBack
+        float targetY = !mShowSwipeUpUi && !mIsVertical && useAltBack
                 ? - getResources().getDimension(R.dimen.navbar_back_button_ime_offset)
                 : 0;
         ObjectAnimator navBarAnimator = ObjectAnimator.ofPropertyValuesHolder(drawable,
@@ -657,8 +655,7 @@ public class NavigationBarView extends FrameLayout {
 
     private @DrawableRes int chooseNavigationIconDrawableRes(@DrawableRes int icon,
             @DrawableRes int quickStepIcon) {
-        final boolean quickStepEnabled = mOverviewProxyService.shouldShowSwipeUpUI();
-        return quickStepEnabled ? quickStepIcon : icon;
+        return mShowSwipeUpUi ? quickStepIcon : icon;
     }
 
     private KeyButtonDrawable getDrawable(@DrawableRes int icon) {
@@ -770,7 +767,7 @@ public class NavigationBarView extends FrameLayout {
         // recents buttons when disconnected from launcher service in screen pinning mode,
         // as they are used for exiting.
         final boolean pinningActive = ActivityManagerWrapper.getInstance().isScreenPinningActive();
-        if (mOverviewProxyService.isEnabled()) {
+        if (mOverviewProxyEnabled) {
             // Force disable recents when not in legacy mode
             disableRecent |= !QuickStepContract.isLegacyMode(mNavBarMode);
             if (pinningActive && !QuickStepContract.isGesturalMode(mNavBarMode)) {
@@ -891,9 +888,14 @@ public class NavigationBarView extends FrameLayout {
         }
     }
 
-    public void updateStates() {
-        final boolean showSwipeUpUI = mOverviewProxyService.shouldShowSwipeUpUI();
+    void onOverviewProxyConnectionChange(boolean enabled, boolean showSwipeUpUi) {
+        mOverviewProxyEnabled = enabled;
+        mShowSwipeUpUi = showSwipeUpUi;
+        updateStates();
+    }
 
+    /** */
+    public void updateStates() {
         if (mNavigationInflaterView != null) {
             // Reinflate the navbar if needed, no-op unless the swipe up state changes
             mNavigationInflaterView.onLikelyDefaultLayoutChange();
@@ -902,9 +904,10 @@ public class NavigationBarView extends FrameLayout {
         updateSlippery();
         reloadNavIcons();
         updateNavButtonIcons();
-        WindowManagerWrapper.getInstance().setNavBarVirtualKeyHapticFeedbackEnabled(!showSwipeUpUI);
+        WindowManagerWrapper.getInstance().setNavBarVirtualKeyHapticFeedbackEnabled(
+                !mShowSwipeUpUi);
         getHomeButton().setAccessibilityDelegate(
-                showSwipeUpUI ? mQuickStepAccessibilityDelegate : null);
+                mShowSwipeUpUi ? mQuickStepAccessibilityDelegate : null);
     }
 
     /**
@@ -1010,9 +1013,14 @@ public class NavigationBarView extends FrameLayout {
      * Notifies the overview service of the active touch regions.
      */
     public void notifyActiveTouchRegions() {
-        mOverviewProxyService.onActiveNavBarRegionChanges(
-                getButtonLocations(true /* includeFloatingButtons */, true /* inScreen */,
-                        true /* useNearestRegion */));
+        if (mUpdateActiveTouchRegionsCallback != null) {
+            mUpdateActiveTouchRegionsCallback.update();
+        }
+    }
+
+    void setUpdateActiveTouchRegionsCallback(UpdateActiveTouchRegionsCallback callback) {
+        mUpdateActiveTouchRegionsCallback = callback;
+        notifyActiveTouchRegions();
     }
 
     private void updateButtonTouchRegionCache() {
@@ -1030,8 +1038,10 @@ public class NavigationBarView extends FrameLayout {
      * @param useNearestRegion Whether to use the nearest region instead of the actual button bounds
      * @return
      */
-    private Region getButtonLocations(boolean includeFloatingButtons, boolean inScreenSpace,
+    Region getButtonLocations(boolean includeFloatingButtons, boolean inScreenSpace,
             boolean useNearestRegion) {
+        // TODO: move this method to NavigationBar.
+        // TODO: don't use member variables for temp storage like mTmpRegion.
         if (useNearestRegion && !inScreenSpace) {
             // We currently don't support getting the nearest region in anything but screen space
             useNearestRegion = false;
@@ -1425,5 +1435,9 @@ public class NavigationBarView extends FrameLayout {
         } else {
             mRegionSamplingHelper.stop();
         }
+    }
+
+    interface UpdateActiveTouchRegionsCallback {
+        void update();
     }
 }
