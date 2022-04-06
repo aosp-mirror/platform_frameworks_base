@@ -2278,7 +2278,8 @@
         android:protectionLevel="signature" />
 
     <!-- Allows bluetooth stack to access files
-         @hide This should only be used by Bluetooth apk.
+         This should only be granted to the Bluetooth apk.
+         @hide @SystemApi(client=android.annotation.SystemApi.Client.MODULE_LIBRARIES)
     -->
     <permission android:name="android.permission.BLUETOOTH_STACK"
         android:protectionLevel="signature" />
