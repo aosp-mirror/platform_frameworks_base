@@ -603,7 +603,7 @@
     <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"Se inhabilitó temporalmente el sensor."</string>
     <string name="fingerprint_error_bad_calibration" msgid="4385512597740168120">"No se puede usar el sensor de huellas dactilares. Consulta a un proveedor de reparaciones."</string>
     <string name="fingerprint_name_template" msgid="8941662088160289778">"Dedo <xliff:g id="FINGERID">%d</xliff:g>"</string>
-    <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"Usar huella digital"</string>
+    <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"Usar huella dactilar"</string>
     <string name="fingerprint_or_screen_lock_app_setting_name" msgid="3501743523487644907">"Usar bloqueo de huella dactilar o pantalla"</string>
     <string name="fingerprint_dialog_default_subtitle" msgid="3879832845486835905">"Utiliza tu huella dactilar para continuar"</string>
     <string name="fingerprint_or_screen_lock_dialog_default_subtitle" msgid="5195808203117992200">"Usa tu huella dactilar o bloqueo de pantalla para continuar"</string>

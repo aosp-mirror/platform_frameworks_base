@@ -219,7 +219,7 @@
     <string name="turn_on_radio" msgid="2961717788170634233">"వైర్‌లెస్‌ను ప్రారంభించండి"</string>
     <string name="turn_off_radio" msgid="7222573978109933360">"వైర్‌లెస్‌ను ఆపివేయండి"</string>
     <string name="screen_lock" msgid="2072642720826409809">"స్క్రీన్ లాక్"</string>
-    <string name="power_off" msgid="4111692782492232778">"పవర్ ఆఫ్ చేయి"</string>
+    <string name="power_off" msgid="4111692782492232778">"పవర్ ఆఫ్ చేయండి"</string>
     <string name="silent_mode_silent" msgid="5079789070221150912">"రింగర్ ఆఫ్‌లో ఉంది"</string>
     <string name="silent_mode_vibrate" msgid="8821830448369552678">"రింగర్ వైబ్రేట్‌లో ఉంది"</string>
     <string name="silent_mode_ring" msgid="6039011004781526678">"రింగర్ ఆన్‌లో ఉంది"</string>
@@ -243,9 +243,9 @@
     <string name="global_actions" product="tv" msgid="3871763739487450369">"Android TV ఎంపికలు"</string>
     <string name="global_actions" product="default" msgid="6410072189971495460">"ఫోన్ ఎంపికలు"</string>
     <string name="global_action_lock" msgid="6949357274257655383">"స్క్రీన్ లాక్"</string>
-    <string name="global_action_power_off" msgid="4404936470711393203">"పవర్ ఆఫ్ చేయి"</string>
+    <string name="global_action_power_off" msgid="4404936470711393203">"పవర్ ఆఫ్ చేయండి"</string>
     <string name="global_action_power_options" msgid="1185286119330160073">"పవర్"</string>
-    <string name="global_action_restart" msgid="4678451019561687074">"రీస్టార్ట్ చేయి"</string>
+    <string name="global_action_restart" msgid="4678451019561687074">"రీస్టార్ట్ చేయండి"</string>
     <string name="global_action_emergency" msgid="1387617624177105088">"ఎమర్జెన్సీ"</string>
     <string name="global_action_bug_report" msgid="5127867163044170003">"బగ్ రిపోర్ట్‌"</string>
     <string name="global_action_logout" msgid="6093581310002476511">"సెషన్‌ను ముగించు"</string>
@@ -253,7 +253,7 @@
     <string name="bugreport_title" msgid="8549990811777373050">"బగ్ రిపోర్ట్‌"</string>
     <string name="bugreport_message" msgid="5212529146119624326">"ఇది ఈమెయిల్‌ మెసేజ్‌ రూపంలో పంపడానికి మీ ప్రస్తుత పరికర స్థితి గురించి సమాచారాన్ని సేకరిస్తుంది. బగ్ రిపోర్ట్‌ను ప్రారంభించడం మొదలుకొని పంపడానికి సిద్ధం చేసే వరకు ఇందుకు కొంత సమయం పడుతుంది; దయచేసి ఓపిక పట్టండి."</string>
     <string name="bugreport_option_interactive_title" msgid="7968287837902871289">"ప్రభావశీల రిపోర్ట్‌"</string>
-    <string name="bugreport_option_interactive_summary" msgid="8493795476325339542">"చాలా సందర్భాల్లో దీన్ని ఉపయోగించండి. ఇది రిపోర్ట్‌ ప్రోగ్రెస్‌ను ట్రాక్ చేయడానికి, సమస్య గురించి మరిన్ని వివరాలను నమోదు చేయడానికి మరియు స్క్రీన్‌షాట్‌లు తీయడానికి మిమ్మల్ని అనుమతిస్తుంది. ఇది నివేదించడానికి ఎక్కువ సమయం పట్టే తక్కువ వినియోగ విభాగాలను విడిచిపెట్టవచ్చు."</string>
+    <string name="bugreport_option_interactive_summary" msgid="8493795476325339542">"చాలా సందర్భాల్లో దీన్ని ఉపయోగించండి. ఇది రిపోర్ట్‌ ప్రోగ్రెస్‌ను ట్రాక్ చేయడానికి, సమస్య గురించి మరిన్ని వివరాలను నమోదు చేయడానికి మరియు స్క్రీన్‌షాట్‌లు తీయడానికి మిమ్మల్ని అనుమతిస్తుంది. ఇది రిపోర్ట్ చేయడానికి ఎక్కువ సమయం పట్టే తక్కువ వినియోగ విభాగాలను విడిచిపెట్టవచ్చు."</string>
     <string name="bugreport_option_full_title" msgid="7681035745950045690">"పూర్తి రిపోర్ట్‌"</string>
     <string name="bugreport_option_full_summary" msgid="1975130009258435885">"మీ పరికరం ప్రతిస్పందనరహితంగా ఉన్నప్పుడు లేదా చాలా నెమ్మదిగా ఉన్నప్పుడు లేదా మీకు అన్ని రిపోర్ట్‌ విభాగాలు అవసరమైనప్పుడు సిస్టమ్‌కి అంతరాయ స్థాయి కనిష్టంగా ఉండేలా చేయడానికి ఈ ఎంపిక ఉపయోగించండి. ఇది మరిన్ని వివరాలను నమోదు చేయడానికి లేదా అదనపు స్క్రీన్‌షాట్‌లు తీయడానికి మిమ్మల్ని అనుమతించదు."</string>
     <plurals name="bugreport_countdown" formatted="false" msgid="3906120379260059206">
@@ -1160,7 +1160,7 @@
     <string name="copy" msgid="5472512047143665218">"కాపీ చేయి"</string>
     <string name="failed_to_copy_to_clipboard" msgid="725919885138539875">"క్లిప్‌బోర్డ్‌కు కాపీ చేయడంలో విఫలమైంది"</string>
     <string name="paste" msgid="461843306215520225">"అతికించు"</string>
-    <string name="paste_as_plain_text" msgid="7664800665823182587">"సాదా వచనం వలె అతికించు"</string>
+    <string name="paste_as_plain_text" msgid="7664800665823182587">"సాదా వచనం లాగా అతికించు"</string>
     <string name="replace" msgid="7842675434546657444">"భర్తీ చేయండి..."</string>
     <string name="delete" msgid="1514113991712129054">"తొలగించు"</string>
     <string name="copyUrl" msgid="6229645005987260230">"URLని కాపీ చేయి"</string>
@@ -1238,7 +1238,7 @@
     <string name="anr_application_process" msgid="4978772139461676184">"<xliff:g id="APPLICATION">%1$s</xliff:g> ప్రతిస్పందించడం లేదు"</string>
     <string name="anr_process" msgid="1664277165911816067">"ప్రాసెస్ <xliff:g id="PROCESS">%1$s</xliff:g> ప్రతిస్పందించడం లేదు"</string>
     <string name="force_close" msgid="9035203496368973803">"సరే"</string>
-    <string name="report" msgid="2149194372340349521">"నివేదించు"</string>
+    <string name="report" msgid="2149194372340349521">"రిపోర్ట్ చేయండి"</string>
     <string name="wait" msgid="7765985809494033348">"వేచి ఉండు"</string>
     <string name="webpage_unresponsive" msgid="7850879412195273433">"పేజీ ప్రతిస్పందించడం లేదు.\n\nమీరు దీన్ని మూసివేయాలనుకుంటున్నారా?"</string>
     <string name="launch_warning_title" msgid="6725456009564953595">"యాప్ దారి మళ్లించబడింది"</string>
@@ -1351,7 +1351,7 @@
     <string name="sim_done_button" msgid="6464250841528410598">"పూర్తయింది"</string>
     <string name="sim_added_title" msgid="7930779986759414595">"సిమ్ కార్డు జోడించబడింది"</string>
     <string name="sim_added_message" msgid="6602906609509958680">"మొబైల్ నెట్‌వర్క్‌ను యాక్సెస్ చేయడానికి మీ పరికరాన్ని పునఃప్రారంభించండి."</string>
-    <string name="sim_restart_button" msgid="8481803851341190038">"రీస్టార్ట్ చేయి"</string>
+    <string name="sim_restart_button" msgid="8481803851341190038">"రీస్టార్ట్ చేయండి"</string>
     <string name="install_carrier_app_notification_title" msgid="5712723402213090102">"మొబైల్ సేవను సక్రియం చేయండి"</string>
     <string name="install_carrier_app_notification_text" msgid="2781317581274192728">"మీ కొత్త SIMని సక్రియం చేయడానికి క్యారియర్ యాప్‌ను డౌన్‌లోడ్ చేయండి"</string>
     <string name="install_carrier_app_notification_text_app_name" msgid="4086877327264106484">"మీ కొత్త SIMని సక్రియం చేయడం కోసం <xliff:g id="APP_NAME">%1$s</xliff:g> యాప్‌ని డౌన్‌లోడ్ చేయండి"</string>
@@ -1549,7 +1549,7 @@
     <string name="number_picker_increment_button" msgid="7621013714795186298">"పెంచు"</string>
     <string name="number_picker_decrement_button" msgid="5116948444762708204">"తగ్గించు"</string>
     <string name="number_picker_increment_scroll_mode" msgid="8403893549806805985">"<xliff:g id="VALUE">%s</xliff:g> తాకి &amp; అలాగే పట్టుకోండి."</string>
-    <string name="number_picker_increment_scroll_action" msgid="8310191318914268271">"పెంచడానికి పైకి మరియు తగ్గించడానికి క్రిందికి స్లైడ్ చేయండి."</string>
+    <string name="number_picker_increment_scroll_action" msgid="8310191318914268271">"పెంచడానికి పైకి మరియు తగ్గించడానికి క్రిందికి స్లయిడ్‌ చేయండి."</string>
     <string name="time_picker_increment_minute_button" msgid="7195870222945784300">"నిమిషాన్ని పెంచు"</string>
     <string name="time_picker_decrement_minute_button" msgid="230925389943411490">"నిమిషాన్ని తగ్గించు"</string>
     <string name="time_picker_increment_hour_button" msgid="3063572723197178242">"గంటను పెంచు"</string>
@@ -1588,7 +1588,7 @@
     <string name="storage_usb_drive" msgid="448030813201444573">"USB డ్రైవ్"</string>
     <string name="storage_usb_drive_label" msgid="6631740655876540521">"<xliff:g id="MANUFACTURER">%s</xliff:g> USB డ్రైవ్"</string>
     <string name="storage_usb" msgid="2391213347883616886">"USB నిల్వ"</string>
-    <string name="extract_edit_menu_button" msgid="63954536535863040">"సవరించు"</string>
+    <string name="extract_edit_menu_button" msgid="63954536535863040">"ఎడిట్ చేయండి"</string>
     <string name="data_usage_warning_title" msgid="9034893717078325845">"డేటా హెచ్చరిక"</string>
     <string name="data_usage_warning_body" msgid="1669325367188029454">"మీరు డేటాలో <xliff:g id="APP">%s</xliff:g> ఉపయోగించారు"</string>
     <string name="data_usage_mobile_limit_title" msgid="3911447354393775241">"మొబైల్ డేటా పరిమితిని చేరుకున్నారు"</string>

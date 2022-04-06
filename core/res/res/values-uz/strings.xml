@@ -324,7 +324,7 @@
     <string name="permgroupdesc_calllog" msgid="2026996642917801803">"telefon chaqiruvlari jurnalini o‘qish va unga yozish"</string>
     <string name="permgrouplab_phone" msgid="570318944091926620">"Telefon"</string>
     <string name="permgroupdesc_phone" msgid="270048070781478204">"telefon qo‘ng‘iroqlarini amalga oshirish va boshqarish"</string>
-    <string name="permgrouplab_sensors" msgid="9134046949784064495">"Tana sezgichlari"</string>
+    <string name="permgrouplab_sensors" msgid="9134046949784064495">"Tana sensorlari"</string>
     <string name="permgroupdesc_sensors" msgid="2610631290633747752">"organizm holati haqidagi sezgich ma’lumotlariga kirish"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="7554282892101587296">"Oynadagi kontentni o‘qiydi"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="6195610527625237661">"Joriy oynadagi kontent mazmunini aniqlaydi."</string>
@@ -424,7 +424,7 @@
     <string name="permdesc_writeCallLog" product="tablet" msgid="2657525794731690397">"Ilovaga planshetingizdagi qo‘ng‘iroq jurnallari, kiruvchi va chiquvchi qo‘ng‘rioqlar haqidagi ma’lumotlarni o‘zgartirishga ruxsat beradi. Zararli ilovalar bundan qo‘ng‘iroqlar jurnalini o‘zgartirish yoki o‘chirish uchun foydalanishi mumkin."</string>
     <string name="permdesc_writeCallLog" product="tv" msgid="3934939195095317432">"Ilovaga Android TV qurilmangizdagi chaqiruvlar jurnali, kirish va chiqish chaqiruvlari haqidagi axborotni oʻzgartirish huquqini beradi. Zararli ilovalar undan chaqiruvlar jurnalini oʻzgartirish yoki oʻchirish uchun foydalanishi mumkin."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="5903033505665134802">"Ilovaga telefoningizdagi qo‘ng‘iroq jurnallari, kiruvchi va chiquvchi qo‘ng‘rioqlar haqidagi ma’lumotlarni o‘zgartirishga ruxsat beradi. Zararli ilovalar bundan qo‘ng‘iroqlar jurnalini o‘zgartirish yoki o‘chirish uchun foydalanishi mumkin."</string>
-    <string name="permlab_bodySensors" msgid="3411035315357380862">"tana sezgichlari (m-n, yurak urishi sensori) ma’lumotlaridan foydalanishga ruxsat"</string>
+    <string name="permlab_bodySensors" msgid="3411035315357380862">"Tana sensorlari (m-n, yurak urishi sensori) axborotlaridan foydalanishga ruxsat"</string>
     <string name="permdesc_bodySensors" product="default" msgid="2365357960407973997">"Ilovaga sezgichlardan olingan jismoniy holatingiz haqidagi ma’lumotlarni, masalan, yurak urishini kuzatish uchun ruxsat beradi."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"Taqvim tadbirlari va tafsilotlarini o‘qish"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"Bu ilova planshetdagi barcha taqvim tadbirlarini o‘qiy olishi hamda taqvim ma’lumotlarini ulashishi yoki saqlashi mumkin."</string>
