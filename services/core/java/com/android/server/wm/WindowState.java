@@ -6125,13 +6125,20 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             applyHere = true;
         }
 
-        for (int i = mDrawHandlers.size() - 1; i >= 0; i--) {
-            DrawHandler h = mDrawHandlers.get(i);
+        final List<DrawHandler> handlersToRemove = new ArrayList<>();
+        // Iterate forwards to ensure we process in the same order
+        // we added.
+        for (int i = 0; i < mDrawHandlers.size(); i++) {
+            final DrawHandler h = mDrawHandlers.get(i);
             if (h.mSeqId <= seqId) {
                 h.mConsumer.accept(t);
-                mDrawHandlers.remove(h);
+                handlersToRemove.add(h);
                 hadHandlers = true;
             }
+        }
+        for (int i = 0; i < handlersToRemove.size(); i++) {
+            final DrawHandler h = handlersToRemove.get(i);
+            mDrawHandlers.remove(h);
         }
 
         if (hadHandlers) {
