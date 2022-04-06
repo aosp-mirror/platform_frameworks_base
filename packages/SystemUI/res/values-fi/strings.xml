@@ -32,13 +32,13 @@
     <string name="usb_device_permission_prompt" msgid="4414719028369181772">"Saako <xliff:g id="APPLICATION">%1$s</xliff:g> käyttöoikeuden (<xliff:g id="USB_DEVICE">%2$s</xliff:g>)?"</string>
     <string name="usb_device_permission_prompt_warn" msgid="2309129784984063656">"Saako <xliff:g id="APPLICATION">%1$s</xliff:g> tämän pääsyoikeuden: <xliff:g id="USB_DEVICE">%2$s</xliff:g>?\nSovellus ei ole saanut tallennuslupaa, mutta voi tallentaa ääntä tämän USB-laitteen avulla."</string>
     <string name="usb_audio_device_permission_prompt_title" msgid="4221351137250093451">"Saako <xliff:g id="APPLICATION">%1$s</xliff:g> pääsyn (<xliff:g id="USB_DEVICE">%2$s</xliff:g>)?"</string>
-    <string name="usb_audio_device_confirm_prompt_title" msgid="8828406516732985696">"Avataanko <xliff:g id="APPLICATION">%1$s</xliff:g>, jotta <xliff:g id="USB_DEVICE">%2$s</xliff:g> voidaan ottaa käyttöön?"</string>
+    <string name="usb_audio_device_confirm_prompt_title" msgid="8828406516732985696">"Avaa <xliff:g id="APPLICATION">%1$s</xliff:g>, jotta <xliff:g id="USB_DEVICE">%2$s</xliff:g> voidaan ottaa käyttöön?"</string>
     <string name="usb_audio_device_prompt_warn" msgid="2504972133361130335">"Sovellus ei ole saanut tallennuslupaa mutta voi tallentaa audiota tämän USB-laitteen avulla. Jos <xliff:g id="APPLICATION">%1$s</xliff:g> on käytössä laitteella, puheluita, ilmoituksia ja herätyksiä ei välttämättä kuulu."</string>
     <string name="usb_audio_device_prompt" msgid="7944987408206252949">"Jos <xliff:g id="APPLICATION">%1$s</xliff:g> on käytössä laitteella, puheluita, ilmoituksia ja herätyksiä ei välttämättä kuulu."</string>
     <string name="usb_accessory_permission_prompt" msgid="717963550388312123">"Saako <xliff:g id="APPLICATION">%1$s</xliff:g> käyttöoikeuden (<xliff:g id="USB_ACCESSORY">%2$s</xliff:g>)?"</string>
-    <string name="usb_device_confirm_prompt" msgid="4091711472439910809">"Avataanko <xliff:g id="APPLICATION">%1$s</xliff:g>, jotta <xliff:g id="USB_DEVICE">%2$s</xliff:g> voidaan ottaa käyttöön?"</string>
+    <string name="usb_device_confirm_prompt" msgid="4091711472439910809">"Avaa <xliff:g id="APPLICATION">%1$s</xliff:g>, jotta <xliff:g id="USB_DEVICE">%2$s</xliff:g> voidaan ottaa käyttöön?"</string>
     <string name="usb_device_confirm_prompt_warn" msgid="990208659736311769">"Avataanko <xliff:g id="APPLICATION">%1$s</xliff:g>, jotta <xliff:g id="USB_DEVICE">%2$s</xliff:g> voidaan ottaa käyttöön?\nSovellus ei ole saanut tallennuslupaa, mutta voi tallentaa ääntä tämän USB-laitteen avulla."</string>
-    <string name="usb_accessory_confirm_prompt" msgid="5728408382798643421">"Avataanko <xliff:g id="APPLICATION">%1$s</xliff:g>, jotta <xliff:g id="USB_ACCESSORY">%2$s</xliff:g> voidaan ottaa käyttöön?"</string>
+    <string name="usb_accessory_confirm_prompt" msgid="5728408382798643421">"Avaa <xliff:g id="APPLICATION">%1$s</xliff:g>, jotta <xliff:g id="USB_ACCESSORY">%2$s</xliff:g> voidaan ottaa käyttöön?"</string>
     <string name="usb_accessory_uri_prompt" msgid="6756649383432542382">"Asennetut sov. eivät toimi tämän USB-laitteen kanssa. Lisätietoja laitteesta: <xliff:g id="URL">%1$s</xliff:g>"</string>
     <string name="title_usb_accessory" msgid="1236358027511638648">"USB-lisälaite"</string>
     <string name="label_view" msgid="6815442985276363364">"Näytä"</string>

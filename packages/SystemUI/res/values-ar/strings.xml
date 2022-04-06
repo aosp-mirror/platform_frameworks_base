@@ -31,19 +31,19 @@
     <string name="status_bar_settings_auto_rotation" msgid="8329080442278431708">"التدوير التلقائي للشاشة"</string>
     <string name="usb_device_permission_prompt" msgid="4414719028369181772">"هل تريد السماح لتطبيق <xliff:g id="APPLICATION">%1$s</xliff:g> بالدخول إلى <xliff:g id="USB_DEVICE">%2$s</xliff:g>؟"</string>
     <string name="usb_device_permission_prompt_warn" msgid="2309129784984063656">"‏هل تريد السماح لتطبيق <xliff:g id="APPLICATION">%1$s</xliff:g> بالدخول إلى <xliff:g id="USB_DEVICE">%2$s</xliff:g>؟\nلم يتم منح هذا التطبيق إذن تسجيل، ولكن يمكنه تسجيل الصوت من خلال جهاز USB هذا."</string>
-    <string name="usb_audio_device_permission_prompt_title" msgid="4221351137250093451">"هل تريد السماح لتطبيق <xliff:g id="APPLICATION">%1$s</xliff:g> بالوصول إلى <xliff:g id="USB_DEVICE">%2$s</xliff:g>؟"</string>
-    <string name="usb_audio_device_confirm_prompt_title" msgid="8828406516732985696">"هل تريد فتح تطبيق <xliff:g id="APPLICATION">%1$s</xliff:g> لإدارة <xliff:g id="USB_DEVICE">%2$s</xliff:g>؟"</string>
+    <string name="usb_audio_device_permission_prompt_title" msgid="4221351137250093451">"هل تريد السماح لتطبيق \"<xliff:g id="APPLICATION">%1$s</xliff:g>\" بالوصول إلى <xliff:g id="USB_DEVICE">%2$s</xliff:g>؟"</string>
+    <string name="usb_audio_device_confirm_prompt_title" msgid="8828406516732985696">"هل تريد فتح تطبيق \"<xliff:g id="APPLICATION">%1$s</xliff:g>\" لإدارة <xliff:g id="USB_DEVICE">%2$s</xliff:g>؟"</string>
     <string name="usb_audio_device_prompt_warn" msgid="2504972133361130335">"‏لم يتم منح هذا التطبيق إذن تسجيل، ولكن يمكنه تسجيل الصوت من خلال جهاز USB هذا. قد يحول استخدام التطبيق <xliff:g id="APPLICATION">%1$s</xliff:g> على هذا الجهاز دون سماع المكالمات والإشعارات والمنبّهات."</string>
     <string name="usb_audio_device_prompt" msgid="7944987408206252949">"قد يحول استخدام التطبيق <xliff:g id="APPLICATION">%1$s</xliff:g> على هذا الجهاز دون سماع المكالمات والإشعارات والمنبّهات."</string>
     <string name="usb_accessory_permission_prompt" msgid="717963550388312123">"هل تريد السماح لتطبيق <xliff:g id="APPLICATION">%1$s</xliff:g> بالدخول إلى <xliff:g id="USB_ACCESSORY">%2$s</xliff:g>؟"</string>
     <string name="usb_device_confirm_prompt" msgid="4091711472439910809">"هل تريد فتح <xliff:g id="APPLICATION">%1$s</xliff:g> للتعامل مع <xliff:g id="USB_DEVICE">%2$s</xliff:g>؟"</string>
     <string name="usb_device_confirm_prompt_warn" msgid="990208659736311769">"‏هل تريد فتح تطبيق <xliff:g id="APPLICATION">%1$s</xliff:g> للتعامل مع <xliff:g id="USB_DEVICE">%2$s</xliff:g>؟\nلم يتم منح هذا التطبيق إذن تسجيل، ولكن يمكنه تسجيل الصوت من خلال جهاز USB هذا."</string>
-    <string name="usb_accessory_confirm_prompt" msgid="5728408382798643421">"هل تريد فتح تطبيق <xliff:g id="APPLICATION">%1$s</xliff:g> للتعامل مع <xliff:g id="USB_ACCESSORY">%2$s</xliff:g>؟"</string>
+    <string name="usb_accessory_confirm_prompt" msgid="5728408382798643421">"هل تريد فتح تطبيق \"<xliff:g id="APPLICATION">%1$s</xliff:g>\" لإدارة <xliff:g id="USB_ACCESSORY">%2$s</xliff:g>؟"</string>
     <string name="usb_accessory_uri_prompt" msgid="6756649383432542382">"‏لا يعمل أي تطبيق مثبت مع ملحق UEB هذا. مزيد من المعلومات عن هذا الملحق على <xliff:g id="URL">%1$s</xliff:g>."</string>
     <string name="title_usb_accessory" msgid="1236358027511638648">"‏ملحق USB"</string>
     <string name="label_view" msgid="6815442985276363364">"عرض"</string>
-    <string name="always_use_device" msgid="210535878779644679">"فتح تطبيق <xliff:g id="APPLICATION">%1$s</xliff:g> دائمًا عند توصيل <xliff:g id="USB_DEVICE">%2$s</xliff:g>"</string>
-    <string name="always_use_accessory" msgid="1977225429341838444">"فتح تطبيق <xliff:g id="APPLICATION">%1$s</xliff:g> دائمًا عند توصيل <xliff:g id="USB_ACCESSORY">%2$s</xliff:g>"</string>
+    <string name="always_use_device" msgid="210535878779644679">"فتح تطبيق \"<xliff:g id="APPLICATION">%1$s</xliff:g>\" دائمًا عند توصيل <xliff:g id="USB_DEVICE">%2$s</xliff:g>"</string>
+    <string name="always_use_accessory" msgid="1977225429341838444">"فتح تطبيق \"<xliff:g id="APPLICATION">%1$s</xliff:g>\" دائمًا عند توصيل <xliff:g id="USB_ACCESSORY">%2$s</xliff:g>"</string>
     <string name="usb_debugging_title" msgid="8274884945238642726">"‏هل تريد السماح بتصحيح أخطاء USB؟"</string>
     <string name="usb_debugging_message" msgid="5794616114463921773">"‏الملف المرجعي الرئيسي لـ RSA في هذا الكمبيوتر هو:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="4003121804294739548">"السماح دائمًا من هذا الكمبيوتر"</string>
@@ -720,7 +720,7 @@
     <string name="mobile_data" msgid="4564407557775397216">"بيانات الجوّال"</string>
     <string name="mobile_data_text_format" msgid="6806501540022589786">"<xliff:g id="ID_1">%1$s</xliff:g> — <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="mobile_carrier_text_format" msgid="8912204177152950766">"<xliff:g id="CARRIER_NAME">%1$s</xliff:g>، <xliff:g id="MOBILE_DATA_TYPE">%2$s</xliff:g>"</string>
-    <string name="wifi_is_off" msgid="5389597396308001471">"‏تم إيقاف شبكة Wi-Fi"</string>
+    <string name="wifi_is_off" msgid="5389597396308001471">"‏شبكة Wi-Fi متوقفة."</string>
     <string name="bt_is_off" msgid="7436344904889461591">"تم إيقاف البلوتوث."</string>
     <string name="dnd_is_off" msgid="3185706903793094463">"تم إيقاف وضع \"عدم الإزعاج\""</string>
     <string name="qs_dnd_prompt_auto_rule" msgid="3535469468310002616">"تم تفعيل وضع \"عدم الإزعاج\" بواسطة قاعدة تلقائية (<xliff:g id="ID_1">%s</xliff:g>)."</string>
@@ -897,7 +897,7 @@
     <string name="non_carrier_network_unavailable" msgid="770049357024492372">"لا تتوفّر شبكات أخرى."</string>
     <string name="all_network_unavailable" msgid="4112774339909373349">"لا تتوفّر أي شبكات."</string>
     <string name="turn_on_wifi" msgid="1308379840799281023">"Wi-Fi"</string>
-    <string name="tap_a_network_to_connect" msgid="1565073330852369558">"انقر على إحدى الشبكات للاتصال بالإنترنت"</string>
+    <string name="tap_a_network_to_connect" msgid="1565073330852369558">"انقر على إحدى الشبكات للاتصال بالإنترنت."</string>
     <string name="unlock_to_view_networks" msgid="5072880496312015676">"فتح القفل لعرض الشبكات"</string>
     <string name="wifi_empty_list_wifi_on" msgid="3864376632067585377">"جارٍ البحث عن شبكات…"</string>
     <string name="wifi_failed_connect_message" msgid="4161863112079000071">"تعذّر الاتصال بالشبكة."</string>
