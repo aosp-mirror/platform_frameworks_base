@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 The Android Open Source Project
+ * Copyright (C) 2022 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,10 +24,8 @@ import android.app.job.JobInfo;
 import android.app.job.JobParameters;
 import android.app.job.JobScheduler;
 import android.app.job.JobService;
-import android.companion.AssociationRequest;
 import android.content.ComponentName;
 import android.content.Context;
-import android.os.AsyncTask;
 import android.util.Slog;
 
 import com.android.server.LocalServices;
@@ -37,26 +35,24 @@ import com.android.server.LocalServices;
  * The job will be executed only if the device is charging and in idle mode due to the application
  * will be killed if association/role are revoked.
  */
-public class AssociationCleanUpService extends JobService {
-    private static final int JOB_ID = AssociationCleanUpService.class.hashCode();
+public class InactiveAssociationsRemovalService extends JobService {
+    private static final int JOB_ID = InactiveAssociationsRemovalService.class.hashCode();
     private static final long ONE_DAY_INTERVAL = DAYS.toMillis(1);
 
     @Override
     public boolean onStartJob(final JobParameters params) {
-        Slog.i(TAG, "Execute the Association CleanUp job");
-        // Special policy for APP_STREAMING role that need to revoke associations if the device
-        // does not connect for 3 months.
-        AsyncTask.execute(() -> {
-            LocalServices.getService(CompanionDeviceManagerServiceInternal.class)
-                    .associationCleanUp(AssociationRequest.DEVICE_PROFILE_APP_STREAMING);
-            jobFinished(params, false);
-        });
+        Slog.i(TAG, "Execute the Association Removal job");
+        // Special policy for selfManaged that need to revoke associations if the device
+        // does not connect for 90 days.
+        LocalServices.getService(CompanionDeviceManagerServiceInternal.class)
+                .removeInactiveSelfManagedAssociations();
+        jobFinished(params, false);
         return true;
     }
 
     @Override
     public boolean onStopJob(final JobParameters params) {
-        Slog.i(TAG, "Association cleanup job stopped; id=" + params.getJobId()
+        Slog.i(TAG, "Association removal job stopped; id=" + params.getJobId()
                 + ", reason="
                 + JobParameters.getInternalReasonCodeDescription(
                 params.getInternalStopReasonCode()));
@@ -64,10 +60,10 @@ public class AssociationCleanUpService extends JobService {
     }
 
     static void schedule(Context context) {
-        Slog.i(TAG, "Scheduling the Association Cleanup job");
+        Slog.i(TAG, "Scheduling the Association Removal job");
         final JobScheduler jobScheduler = context.getSystemService(JobScheduler.class);
         final JobInfo job = new JobInfo.Builder(JOB_ID,
-                new ComponentName(context, AssociationCleanUpService.class))
+                new ComponentName(context, InactiveAssociationsRemovalService.class))
                 .setRequiresCharging(true)
                 .setRequiresDeviceIdle(true)
                 .setPeriodic(ONE_DAY_INTERVAL)
@@ -75,3 +71,4 @@ public class AssociationCleanUpService extends JobService {
         jobScheduler.schedule(job);
     }
 }
+

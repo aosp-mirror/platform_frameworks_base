@@ -18,12 +18,10 @@ package com.android.server.companion;
 
 /**
  * Companion Device Manager Local System Service Interface.
- *
- * @hide Only for use within the system server.
  */
-public abstract class CompanionDeviceManagerServiceInternal {
+interface CompanionDeviceManagerServiceInternal {
     /**
-     * @see CompanionDeviceManagerService#associationCleanUp
+     * @see CompanionDeviceManagerService#removeInactiveSelfManagedAssociations
      */
-    public abstract void associationCleanUp(String profile);
+    void removeInactiveSelfManagedAssociations();
 }
