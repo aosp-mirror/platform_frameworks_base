@@ -2,6 +2,7 @@
 package android {
 
   public static final class Manifest.permission {
+    field public static final String BLUETOOTH_STACK = "android.permission.BLUETOOTH_STACK";
     field public static final String CONTROL_AUTOMOTIVE_GNSS = "android.permission.CONTROL_AUTOMOTIVE_GNSS";
     field public static final String GET_INTENT_SENDER_INTENT = "android.permission.GET_INTENT_SENDER_INTENT";
     field public static final String MAKE_UID_VISIBLE = "android.permission.MAKE_UID_VISIBLE";
@@ -156,12 +157,12 @@ package android.media {
     method public void adjustSuggestedStreamVolumeForUid(int, int, int, @NonNull String, int, int, int);
     method @NonNull public java.util.List<android.bluetooth.BluetoothCodecConfig> getHwOffloadFormatsSupportedForA2dp();
     method @NonNull public java.util.List<android.bluetooth.BluetoothLeAudioCodecConfig> getHwOffloadFormatsSupportedForLeAudio();
-    method @RequiresPermission("android.permission.BLUETOOTH_STACK") public void handleBluetoothActiveDeviceChanged(@Nullable android.bluetooth.BluetoothDevice, @Nullable android.bluetooth.BluetoothDevice, @NonNull android.media.BluetoothProfileConnectionInfo);
-    method @RequiresPermission("android.permission.BLUETOOTH_STACK") public void setA2dpSuspended(boolean);
-    method @RequiresPermission("android.permission.BLUETOOTH_STACK") public void setBluetoothHeadsetProperties(@NonNull String, boolean, boolean);
-    method @RequiresPermission("android.permission.BLUETOOTH_STACK") public void setHfpEnabled(boolean);
-    method @RequiresPermission("android.permission.BLUETOOTH_STACK") public void setHfpSamplingRate(int);
-    method @RequiresPermission("android.permission.BLUETOOTH_STACK") public void setHfpVolume(int);
+    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_STACK) public void handleBluetoothActiveDeviceChanged(@Nullable android.bluetooth.BluetoothDevice, @Nullable android.bluetooth.BluetoothDevice, @NonNull android.media.BluetoothProfileConnectionInfo);
+    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_STACK) public void setA2dpSuspended(boolean);
+    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_STACK) public void setBluetoothHeadsetProperties(@NonNull String, boolean, boolean);
+    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_STACK) public void setHfpEnabled(boolean);
+    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_STACK) public void setHfpSamplingRate(int);
+    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_STACK) public void setHfpVolume(int);
     method public void setStreamVolumeForUid(int, int, int, @NonNull String, int, int, int);
     field public static final int FLAG_FROM_KEY = 4096; // 0x1000
   }
