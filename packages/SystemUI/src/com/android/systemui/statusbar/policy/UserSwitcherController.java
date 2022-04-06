@@ -1215,7 +1215,8 @@ public class UserSwitcherController implements Dumpable {
                 }
                 // Use broadcast instead of ShadeController, as this dialog may have started in
                 // another process and normal dagger bindings are not available
-                mBroadcastSender.closeSystemDialogs();
+                mBroadcastSender.sendBroadcastAsUser(
+                        new Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS), UserHandle.CURRENT);
                 getContext().startActivityAsUser(
                         CreateUserActivity.createIntentForStart(getContext()),
                         mUserTracker.getUserHandle());

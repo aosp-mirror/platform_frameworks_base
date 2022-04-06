@@ -211,7 +211,6 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
                     }
         });
         mHeader = view.findViewById(R.id.header);
-        mQSPanelController.setHeaderContainer(view.findViewById(R.id.header_text_container));
         mFooter = qsFragmentComponent.getQSFooter();
 
         mQSContainerImplController = qsFragmentComponent.getQSContainerImplController();

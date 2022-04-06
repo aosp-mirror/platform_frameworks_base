@@ -18,8 +18,6 @@ package com.android.systemui.qs;
 
 import android.content.res.Configuration;
 
-import com.android.systemui.flags.FeatureFlags;
-import com.android.systemui.flags.Flags;
 import com.android.systemui.qs.dagger.QSScope;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.util.ViewController;
@@ -32,26 +30,23 @@ public class QSContainerImplController extends ViewController<QSContainerImpl> {
     private final QSPanelController mQsPanelController;
     private final QuickStatusBarHeaderController mQuickStatusBarHeaderController;
     private final ConfigurationController mConfigurationController;
-    private final boolean mNewFooter;
 
     private final ConfigurationController.ConfigurationListener mConfigurationListener =
             new ConfigurationController.ConfigurationListener() {
         @Override
         public void onConfigChanged(Configuration newConfig) {
-            mView.updateResources(mQsPanelController, mQuickStatusBarHeaderController, mNewFooter);
+            mView.updateResources(mQsPanelController, mQuickStatusBarHeaderController);
         }
     };
 
     @Inject
     QSContainerImplController(QSContainerImpl view, QSPanelController qsPanelController,
             QuickStatusBarHeaderController quickStatusBarHeaderController,
-            ConfigurationController configurationController,
-            FeatureFlags featureFlags) {
+            ConfigurationController configurationController) {
         super(view);
         mQsPanelController = qsPanelController;
         mQuickStatusBarHeaderController = quickStatusBarHeaderController;
         mConfigurationController = configurationController;
-        mNewFooter = featureFlags.isEnabled(Flags.NEW_FOOTER);
     }
 
     @Override
@@ -65,7 +60,7 @@ public class QSContainerImplController extends ViewController<QSContainerImpl> {
 
     @Override
     protected void onViewAttached() {
-        mView.updateResources(mQsPanelController, mQuickStatusBarHeaderController, mNewFooter);
+        mView.updateResources(mQsPanelController, mQuickStatusBarHeaderController);
         mConfigurationController.addCallback(mConfigurationListener);
     }
 

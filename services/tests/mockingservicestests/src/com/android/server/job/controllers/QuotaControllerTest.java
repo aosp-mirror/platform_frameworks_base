@@ -2164,6 +2164,49 @@ public class QuotaControllerTest {
         }
     }
 
+    @Test
+    public void testIsWithinEJQuotaLocked_TempAllowlisting_Restricted() {
+        setDischarging();
+        JobStatus js = createExpeditedJobStatus("testIsWithinEJQuotaLocked_TempAllowlisting_Restricted", 1);
+        setStandbyBucket(RESTRICTED_INDEX, js);
+        setDeviceConfigLong(QcConstants.KEY_EJ_LIMIT_FREQUENT_MS, 10 * MINUTE_IN_MILLIS);
+        final long now = JobSchedulerService.sElapsedRealtimeClock.millis();
+        mQuotaController.saveTimingSession(SOURCE_USER_ID, SOURCE_PACKAGE,
+                createTimingSession(now - (HOUR_IN_MILLIS), 3 * MINUTE_IN_MILLIS, 5), true);
+        mQuotaController.saveTimingSession(SOURCE_USER_ID, SOURCE_PACKAGE,
+                createTimingSession(now - (30 * MINUTE_IN_MILLIS), 3 * MINUTE_IN_MILLIS, 5), true);
+        mQuotaController.saveTimingSession(SOURCE_USER_ID, SOURCE_PACKAGE,
+                createTimingSession(now - (5 * MINUTE_IN_MILLIS), 4 * MINUTE_IN_MILLIS, 5), true);
+        synchronized (mQuotaController.mLock) {
+            assertFalse(mQuotaController.isWithinEJQuotaLocked(js));
+        }
+
+        setProcessState(ActivityManager.PROCESS_STATE_RECEIVER);
+        final long gracePeriodMs = 15 * SECOND_IN_MILLIS;
+        setDeviceConfigLong(QcConstants.KEY_EJ_GRACE_PERIOD_TEMP_ALLOWLIST_MS, gracePeriodMs);
+        Handler handler = mQuotaController.getHandler();
+        spyOn(handler);
+
+        // The temp allowlist should not enable RESTRICTED apps' to schedule & start EJs if they're
+        // out of quota.
+        mTempAllowlistListener.onAppAdded(mSourceUid);
+        synchronized (mQuotaController.mLock) {
+            assertFalse(mQuotaController.isWithinEJQuotaLocked(js));
+        }
+        advanceElapsedClock(10 * SECOND_IN_MILLIS);
+        mTempAllowlistListener.onAppRemoved(mSourceUid);
+        advanceElapsedClock(10 * SECOND_IN_MILLIS);
+        // Still in grace period
+        synchronized (mQuotaController.mLock) {
+            assertFalse(mQuotaController.isWithinEJQuotaLocked(js));
+        }
+        advanceElapsedClock(6 * SECOND_IN_MILLIS);
+        // Out of grace period.
+        synchronized (mQuotaController.mLock) {
+            assertFalse(mQuotaController.isWithinEJQuotaLocked(js));
+        }
+    }
+
     /**
      * Tests that Timers properly track sessions when an app becomes top and is closed.
      */
@@ -5553,6 +5596,111 @@ public class QuotaControllerTest {
         advanceElapsedClock(10 * SECOND_IN_MILLIS);
         synchronized (mQuotaController.mLock) {
             mQuotaController.maybeStopTrackingJobLocked(job5, job5, true);
+        }
+        expected.add(createTimingSession(start, 10 * SECOND_IN_MILLIS, 1));
+        assertEquals(expected,
+                mQuotaController.getEJTimingSessions(SOURCE_USER_ID, SOURCE_PACKAGE));
+    }
+
+    @Test
+    public void testEJTimerTracking_TempAllowlisting_Restricted() {
+        setDischarging();
+        setProcessState(ActivityManager.PROCESS_STATE_RECEIVER);
+        final long gracePeriodMs = 15 * SECOND_IN_MILLIS;
+        setDeviceConfigLong(QcConstants.KEY_EJ_GRACE_PERIOD_TEMP_ALLOWLIST_MS, gracePeriodMs);
+        Handler handler = mQuotaController.getHandler();
+        spyOn(handler);
+
+        JobStatus job = createExpeditedJobStatus("testEJTimerTracking_TempAllowlisting_Restricted", 1);
+        setStandbyBucket(RESTRICTED_INDEX, job);
+        synchronized (mQuotaController.mLock) {
+            mQuotaController.maybeStartTrackingJobLocked(job, null);
+        }
+        assertNull(mQuotaController.getEJTimingSessions(SOURCE_USER_ID, SOURCE_PACKAGE));
+        List<TimingSession> expected = new ArrayList<>();
+
+        long start = JobSchedulerService.sElapsedRealtimeClock.millis();
+        synchronized (mQuotaController.mLock) {
+            mQuotaController.prepareForExecutionLocked(job);
+        }
+        advanceElapsedClock(10 * SECOND_IN_MILLIS);
+        synchronized (mQuotaController.mLock) {
+            mQuotaController.maybeStopTrackingJobLocked(job, job, true);
+        }
+        expected.add(createTimingSession(start, 10 * SECOND_IN_MILLIS, 1));
+        assertEquals(expected,
+                mQuotaController.getEJTimingSessions(SOURCE_USER_ID, SOURCE_PACKAGE));
+
+        advanceElapsedClock(SECOND_IN_MILLIS);
+
+        // Job starts after app is added to temp allowlist and stops before removal.
+        start = JobSchedulerService.sElapsedRealtimeClock.millis();
+        mTempAllowlistListener.onAppAdded(mSourceUid);
+        synchronized (mQuotaController.mLock) {
+            mQuotaController.maybeStartTrackingJobLocked(job, null);
+            mQuotaController.prepareForExecutionLocked(job);
+        }
+        advanceElapsedClock(10 * SECOND_IN_MILLIS);
+        synchronized (mQuotaController.mLock) {
+            mQuotaController.maybeStopTrackingJobLocked(job, null, false);
+        }
+        expected.add(createTimingSession(start, 10 * SECOND_IN_MILLIS, 1));
+        assertEquals(expected,
+                mQuotaController.getEJTimingSessions(SOURCE_USER_ID, SOURCE_PACKAGE));
+
+        // Job starts after app is added to temp allowlist and stops after removal,
+        // before grace period ends.
+        start = JobSchedulerService.sElapsedRealtimeClock.millis();
+        mTempAllowlistListener.onAppAdded(mSourceUid);
+        synchronized (mQuotaController.mLock) {
+            mQuotaController.maybeStartTrackingJobLocked(job, null);
+            mQuotaController.prepareForExecutionLocked(job);
+        }
+        advanceElapsedClock(10 * SECOND_IN_MILLIS);
+        mTempAllowlistListener.onAppRemoved(mSourceUid);
+        long elapsedGracePeriodMs = 2 * SECOND_IN_MILLIS;
+        advanceElapsedClock(elapsedGracePeriodMs);
+        synchronized (mQuotaController.mLock) {
+            mQuotaController.maybeStopTrackingJobLocked(job, null, false);
+        }
+        expected.add(createTimingSession(start, 12 * SECOND_IN_MILLIS, 1));
+        assertEquals(expected,
+                mQuotaController.getEJTimingSessions(SOURCE_USER_ID, SOURCE_PACKAGE));
+
+        advanceElapsedClock(SECOND_IN_MILLIS);
+        elapsedGracePeriodMs += SECOND_IN_MILLIS;
+
+        // Job starts during grace period and ends after grace period ends
+        start = JobSchedulerService.sElapsedRealtimeClock.millis();
+        synchronized (mQuotaController.mLock) {
+            mQuotaController.maybeStartTrackingJobLocked(job, null);
+            mQuotaController.prepareForExecutionLocked(job);
+        }
+        final long remainingGracePeriod = gracePeriodMs - elapsedGracePeriodMs;
+        advanceElapsedClock(remainingGracePeriod);
+        // Wait for handler to update Timer
+        // Can't directly evaluate the message because for some reason, the captured message returns
+        // the wrong 'what' even though the correct message goes to the handler and the correct
+        // path executes.
+        verify(handler, timeout(gracePeriodMs + 5 * SECOND_IN_MILLIS)).handleMessage(any());
+        advanceElapsedClock(10 * SECOND_IN_MILLIS);
+        expected.add(createTimingSession(start, 10 * SECOND_IN_MILLIS + remainingGracePeriod, 1));
+        synchronized (mQuotaController.mLock) {
+            mQuotaController.maybeStopTrackingJobLocked(job, job, true);
+        }
+        assertEquals(expected,
+                mQuotaController.getEJTimingSessions(SOURCE_USER_ID, SOURCE_PACKAGE));
+
+        // Job starts and runs completely after temp allowlist grace period.
+        advanceElapsedClock(10 * SECOND_IN_MILLIS);
+        start = JobSchedulerService.sElapsedRealtimeClock.millis();
+        synchronized (mQuotaController.mLock) {
+            mQuotaController.maybeStartTrackingJobLocked(job, null);
+            mQuotaController.prepareForExecutionLocked(job);
+        }
+        advanceElapsedClock(10 * SECOND_IN_MILLIS);
+        synchronized (mQuotaController.mLock) {
+            mQuotaController.maybeStopTrackingJobLocked(job, job, true);
         }
         expected.add(createTimingSession(start, 10 * SECOND_IN_MILLIS, 1));
         assertEquals(expected,

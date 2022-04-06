@@ -54,6 +54,7 @@ data class KeyguardFaceListenModel(
     val bouncerFullyShown: Boolean,
     val faceAuthenticated: Boolean,
     val faceDisabled: Boolean,
+    val goingToSleep: Boolean,
     val keyguardAwake: Boolean,
     val keyguardGoingAway: Boolean,
     val listeningForFaceAssistant: Boolean,

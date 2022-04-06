@@ -30,6 +30,7 @@ import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.ImageDecoder
+import android.graphics.drawable.Animatable
 import android.graphics.drawable.Icon
 import android.media.MediaDescription
 import android.media.MediaMetadata
@@ -57,6 +58,7 @@ import com.android.systemui.dump.DumpManager
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.plugins.BcSmartspaceDataPlugin
 import com.android.systemui.statusbar.NotificationMediaManager.isPlayingState
+import com.android.systemui.statusbar.NotificationMediaManager.isConnectingState
 import com.android.systemui.statusbar.notification.row.HybridGroupManager
 import com.android.systemui.tuner.TunerService
 import com.android.systemui.util.Assert
@@ -777,7 +779,20 @@ class MediaDataManager(
         val actions = MediaButton()
         controller.playbackState?.let { state ->
             // First, check for standard actions
-            actions.playOrPause = if (isPlayingState(state.state)) {
+            actions.playOrPause = if (isConnectingState(state.state)) {
+                // Spinner needs to be animating to render anything. Start it here.
+                val drawable = context.getDrawable(
+                        com.android.internal.R.drawable.progress_small_material)
+                (drawable as Animatable).start()
+                MediaAction(
+                    drawable,
+                    null, // no action to perform when clicked
+                    context.getString(R.string.controls_media_button_connecting),
+                    context.getDrawable(R.drawable.ic_media_connecting_container),
+                    // Specify a rebind id to prevent the spinner from restarting on later binds.
+                    com.android.internal.R.drawable.progress_small_material
+                )
+            } else if (isPlayingState(state.state)) {
                 getStandardAction(controller, state.actions, PlaybackState.ACTION_PAUSE)
             } else {
                 getStandardAction(controller, state.actions, PlaybackState.ACTION_PLAY)

@@ -671,7 +671,7 @@ public final class BackgroundRestrictionTest {
             mAppFGSTracker.onForegroundServiceStateChanged(testPkgName, testUid,
                     testPid, true);
             mAppFGSTracker.onForegroundServiceNotificationUpdated(
-                    testPkgName, testUid, notificationId);
+                    testPkgName, testUid, notificationId, false);
             mAppFGSTracker.mNotificationListener.onNotificationPosted(new StatusBarNotification(
                     testPkgName, null, notificationId, null, testUid, testPid,
                     new Notification(), UserHandle.of(testUser), null, mCurrentTimeMillis), null);
@@ -848,7 +848,7 @@ public final class BackgroundRestrictionTest {
 
             // Pretend we have the notification dismissed.
             mAppFGSTracker.onForegroundServiceNotificationUpdated(
-                    testPkgName, testUid, -notificationId);
+                    testPkgName, testUid, notificationId, true);
             clearInvocations(mInjector.getAppStandbyInternal());
             clearInvocations(mInjector.getNotificationManager());
             clearInvocations(mBgRestrictionController);
@@ -885,7 +885,7 @@ public final class BackgroundRestrictionTest {
 
             // Pretend notification is back on.
             mAppFGSTracker.onForegroundServiceNotificationUpdated(
-                    testPkgName, testUid, notificationId);
+                    testPkgName, testUid, notificationId, false);
             // Now we'll prompt the user even it has a FGS with notification.
             bgPromptFgsWithNotiToBgRestricted.set(true);
             clearInvocations(mInjector.getAppStandbyInternal());
@@ -1224,7 +1224,7 @@ public final class BackgroundRestrictionTest {
             mAppFGSTracker.onForegroundServiceStateChanged(testPkgName1, testUid1,
                     testPid1, true);
             mAppFGSTracker.onForegroundServiceNotificationUpdated(
-                    testPkgName1, testUid1, fgsNotificationId);
+                    testPkgName1, testUid1, fgsNotificationId, false);
             mAppFGSTracker.mNotificationListener.onNotificationPosted(new StatusBarNotification(
                     testPkgName1, null, fgsNotificationId, null, testUid1, testPid1,
                     new Notification(), UserHandle.of(testUser1), null, mCurrentTimeMillis), null);
@@ -1235,7 +1235,7 @@ public final class BackgroundRestrictionTest {
 
             // Pretend we have the notification dismissed.
             mAppFGSTracker.onForegroundServiceNotificationUpdated(
-                    testPkgName1, testUid1, -fgsNotificationId);
+                    testPkgName1, testUid1, fgsNotificationId, true);
 
             // Verify we have the notification.
             notificationId = checkNotificationShown(
@@ -1500,7 +1500,7 @@ public final class BackgroundRestrictionTest {
         if (withNotification) {
             final int notificationId = 1000;
             mAppFGSTracker.onForegroundServiceNotificationUpdated(
-                    packageName, uid, notificationId);
+                    packageName, uid, notificationId, false);
             final StatusBarNotification noti = new StatusBarNotification(
                     packageName, null, notificationId, null, uid, pid,
                     new Notification(), UserHandle.of(UserHandle.getUserId(uid)),

@@ -75,7 +75,6 @@ public class QSPanel extends LinearLayout implements Tunable {
     @Nullable
     protected BrightnessSliderController mToggleSliderController;
 
-    private final H mHandler = new H();
     /** Whether or not the QS media player feature is enabled. */
     protected boolean mUsingMediaPlayer;
 
@@ -87,15 +86,8 @@ public class QSPanel extends LinearLayout implements Tunable {
             new ArrayList<>();
 
     @Nullable
-    protected View mFgsManagerFooter;
-    @Nullable
-    protected View mSecurityFooter;
-
-    @Nullable
     protected View mFooter;
 
-    @Nullable
-    private ViewGroup mHeaderContainer;
     @Nullable
     private PageIndicator mFooterPageIndicator;
     private int mContentMarginStart;
@@ -112,7 +104,6 @@ public class QSPanel extends LinearLayout implements Tunable {
     private float mSquishinessFraction = 1f;
     private final ArrayMap<View, Integer> mChildrenLayoutTop = new ArrayMap<>();
     private final Rect mClippingRect = new Rect();
-    private boolean mUseNewFooter = false;
     private ViewGroup mMediaHostView;
     private boolean mShouldMoveMediaOnExpansion = true;
 
@@ -154,10 +145,6 @@ public class QSPanel extends LinearLayout implements Tunable {
             lp = new LayoutParams(LayoutParams.MATCH_PARENT, 0, 1);
             addView(mHorizontalLinearLayout, lp);
         }
-    }
-
-    void setUseNewFooter(boolean useNewFooter) {
-        mUseNewFooter = useNewFooter;
     }
 
     protected void setHorizontalContentContainerClipping() {
@@ -444,27 +431,6 @@ public class QSPanel extends LinearLayout implements Tunable {
         }
     }
 
-    /** Switch the security footer between top and bottom of QS depending on orientation. */
-    public void switchSecurityFooter(boolean shouldUseSplitNotificationShade) {
-        if (mSecurityFooter == null) return;
-
-        if (!shouldUseSplitNotificationShade
-                && mContext.getResources().getConfiguration().orientation
-                == Configuration.ORIENTATION_LANDSCAPE && mHeaderContainer != null) {
-            // Adding the security view to the header, that enables us to avoid scrolling
-            switchToParent(mSecurityFooter, mHeaderContainer, 0);
-        } else {
-            // Add after the footer
-            int index;
-            if (mFgsManagerFooter != null) {
-                index = indexOfChild(mFgsManagerFooter);
-            } else {
-                index = indexOfChild(mFooter);
-            }
-            switchToParent(mSecurityFooter, this, index + 1);
-        }
-    }
-
     private void switchToParent(View child, ViewGroup parent, int index) {
         switchToParent(child, parent, index, getDumpableTag());
     }
@@ -609,36 +575,8 @@ public class QSPanel extends LinearLayout implements Tunable {
         }
     }
 
-    /**
-     * Set the header container of quick settings.
-     */
-    public void setHeaderContainer(@NonNull ViewGroup headerContainer) {
-        mHeaderContainer = headerContainer;
-    }
-
     public boolean isListening() {
         return mListening;
-    }
-
-    /**
-     * Set the security footer view and switch it into the right place
-     * @param view the view in question
-     * @param shouldUseSplitNotificationShade if QS is in split shade mode
-     */
-    public void setSecurityFooter(View view, boolean shouldUseSplitNotificationShade) {
-        mSecurityFooter = view;
-        switchSecurityFooter(shouldUseSplitNotificationShade);
-    }
-
-    /**
-     * Set the fgs manager footer view and switch it into the right place
-     * @param view the view in question
-     */
-    public void setFgsManagerFooter(View view) {
-        mFgsManagerFooter = view;
-        // Add after the footer
-        int index = indexOfChild(mFooter);
-        switchToParent(mFgsManagerFooter, this, index + 1);
     }
 
     protected void setPageMargin(int pageMargin) {

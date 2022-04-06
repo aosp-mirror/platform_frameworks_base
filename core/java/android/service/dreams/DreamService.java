@@ -1038,13 +1038,13 @@ public class DreamService extends Service implements Window.Callback {
         }
         mFinished = true;
 
+        mOverlayConnection.unbind(this);
+
         if (mDreamToken == null) {
             Slog.w(mTag, "Finish was called before the dream was attached.");
             stopSelf();
             return;
         }
-
-        mOverlayConnection.unbind(this);
 
         try {
             // finishSelf will unbind the dream controller from the dream service. This will

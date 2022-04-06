@@ -91,7 +91,8 @@ public class HdmiControlServiceTest {
 
         HdmiCecConfig hdmiCecConfig = new FakeHdmiCecConfig(mContextSpy);
 
-        mHdmiControlServiceSpy = spy(new HdmiControlService(mContextSpy, Collections.emptyList()));
+        mHdmiControlServiceSpy = spy(new HdmiControlService(mContextSpy, Collections.emptyList(),
+                new FakeAudioDeviceVolumeManagerWrapper()));
         doNothing().when(mHdmiControlServiceSpy)
                 .writeStringSystemProperty(anyString(), anyString());
 

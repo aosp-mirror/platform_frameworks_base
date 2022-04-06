@@ -441,12 +441,16 @@ public class PeopleSpaceWidgetManager {
                 Log.d(TAG, "Notification removed, key: " + sbn.getKey());
             }
         }
+        if (DEBUG) Log.d(TAG, "Fetching notifications");
+        Collection<NotificationEntry> notifications = mNotifCollection.getAllNotifs();
         mBgExecutor.execute(
-                () -> updateWidgetsWithNotificationChangedInBackground(sbn, notificationAction));
+                () -> updateWidgetsWithNotificationChangedInBackground(
+                        sbn, notificationAction, notifications));
     }
 
     private void updateWidgetsWithNotificationChangedInBackground(StatusBarNotification sbn,
-            PeopleSpaceUtils.NotificationAction action) {
+            PeopleSpaceUtils.NotificationAction action,
+            Collection<NotificationEntry> notifications) {
         try {
             PeopleTileKey key = new PeopleTileKey(
                     sbn.getShortcutId(), sbn.getUser().getIdentifier(), sbn.getPackageName());
@@ -469,7 +473,7 @@ public class PeopleSpaceWidgetManager {
                     Log.d(TAG, "Widgets by URI to be updated:" + tilesUpdatedByUri.toString());
                 }
                 tilesUpdated.addAll(tilesUpdatedByUri);
-                updateWidgetIdsBasedOnNotifications(tilesUpdated);
+                updateWidgetIdsBasedOnNotifications(tilesUpdated, notifications);
             }
         } catch (Exception e) {
             Log.e(TAG, "Throwing exception: " + e);
@@ -477,15 +481,15 @@ public class PeopleSpaceWidgetManager {
     }
 
     /** Updates {@code widgetIdsToUpdate} with {@code action}. */
-    private void updateWidgetIdsBasedOnNotifications(Set<String> widgetIdsToUpdate) {
+    private void updateWidgetIdsBasedOnNotifications(Set<String> widgetIdsToUpdate,
+            Collection<NotificationEntry> ungroupedNotifications) {
         if (widgetIdsToUpdate.isEmpty()) {
             if (DEBUG) Log.d(TAG, "No widgets to update, returning.");
             return;
         }
         try {
-            if (DEBUG) Log.d(TAG, "Fetching grouped notifications");
             Map<PeopleTileKey, Set<NotificationEntry>> groupedNotifications =
-                    getGroupedConversationNotifications();
+                    groupConversationNotifications(ungroupedNotifications);
 
             widgetIdsToUpdate
                     .stream()
@@ -510,7 +514,7 @@ public class PeopleSpaceWidgetManager {
                     "Augmenting tile from NotificationEntryManager widget: " + key.toString());
         }
         Map<PeopleTileKey, Set<NotificationEntry>> notifications =
-                getGroupedConversationNotifications();
+                groupConversationNotifications(mNotifCollection.getAllNotifs());
         String contactUri = null;
         if (tile.getContactUri() != null) {
             contactUri = tile.getContactUri().toString();
@@ -518,9 +522,10 @@ public class PeopleSpaceWidgetManager {
         return augmentTileFromNotifications(tile, key, contactUri, notifications, appWidgetId);
     }
 
-    /** Returns active and pending notifications grouped by {@link PeopleTileKey}. */
-    public Map<PeopleTileKey, Set<NotificationEntry>> getGroupedConversationNotifications() {
-        Collection<NotificationEntry> notifications = mNotifCollection.getAllNotifs();
+    /** Groups active and pending notifications grouped by {@link PeopleTileKey}. */
+    public Map<PeopleTileKey, Set<NotificationEntry>> groupConversationNotifications(
+            Collection<NotificationEntry> notifications
+    ) {
         if (DEBUG) Log.d(TAG, "Number of total notifications: " + notifications.size());
         Map<PeopleTileKey, Set<NotificationEntry>> groupedNotifications =
                 notifications
