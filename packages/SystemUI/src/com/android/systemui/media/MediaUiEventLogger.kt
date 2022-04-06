@@ -134,6 +134,23 @@ class MediaUiEventLogger @Inject constructor(private val logger: UiEventLogger) 
     fun logOpenOutputSwitcher(uid: Int, packageName: String, instanceId: InstanceId) {
         logger.logWithInstanceId(MediaUiEvent.OPEN_OUTPUT_SWITCHER, uid, packageName, instanceId)
     }
+
+    fun logTapContentView(uid: Int, packageName: String, instanceId: InstanceId) {
+        logger.logWithInstanceId(MediaUiEvent.MEDIA_TAP_CONTENT_VIEW, uid, packageName, instanceId)
+    }
+
+    fun logCarouselPosition(@MediaLocation location: Int) {
+        val event = when (location) {
+            MediaHierarchyManager.LOCATION_QQS -> MediaUiEvent.MEDIA_CAROUSEL_LOCATION_QQS
+            MediaHierarchyManager.LOCATION_QS -> MediaUiEvent.MEDIA_CAROUSEL_LOCATION_QS
+            MediaHierarchyManager.LOCATION_LOCKSCREEN ->
+                MediaUiEvent.MEDIA_CAROUSEL_LOCATION_LOCKSCREEN
+            MediaHierarchyManager.LOCATION_DREAM_OVERLAY ->
+                MediaUiEvent.MEDIA_CAROUSEL_LOCATION_DREAM
+            else -> throw IllegalArgumentException("Unknown media carousel location $location")
+        }
+        logger.log(event)
+    }
 }
 
 enum class MediaUiEvent(val metricId: Int) : UiEventLogger.UiEventEnum {
@@ -161,7 +178,7 @@ enum class MediaUiEvent(val metricId: Int) : UiEventLogger.UiEventEnum {
     @UiEvent(doc = "An existing active media control was converted into resumable media")
     ACTIVE_TO_RESUME(1014),
 
-    @UiEvent(doc = "Media timed out")
+    @UiEvent(doc = "A media control timed out")
     MEDIA_TIMEOUT(1015),
 
     @UiEvent(doc = "A media control was removed from the carousel")
@@ -173,35 +190,50 @@ enum class MediaUiEvent(val metricId: Int) : UiEventLogger.UiEventEnum {
     @UiEvent(doc = "The user swiped away the media carousel")
     DISMISS_SWIPE(1018),
 
-    @UiEvent(doc = "The user opened the long press menu")
+    @UiEvent(doc = "The user long pressed on a media control")
     OPEN_LONG_PRESS(1019),
 
-    @UiEvent(doc = "The user dismissed via long press menu")
+    @UiEvent(doc = "The user dismissed a media control via its long press menu")
     DISMISS_LONG_PRESS(1020),
 
-    @UiEvent(doc = "The user opened settings from long press menu")
+    @UiEvent(doc = "The user opened media settings from a media control's long press menu")
     OPEN_SETTINGS_LONG_PRESS(1021),
 
-    @UiEvent(doc = "The user opened settings from the carousel")
+    @UiEvent(doc = "The user opened media settings from the media carousel")
     OPEN_SETTINGS_CAROUSEL(1022),
 
-    @UiEvent(doc = "The play/pause button was tapped")
+    @UiEvent(doc = "The play/pause button on a media control was tapped")
     TAP_ACTION_PLAY_PAUSE(1023),
 
-    @UiEvent(doc = "The previous button was tapped")
+    @UiEvent(doc = "The previous button on a media control was tapped")
     TAP_ACTION_PREV(1024),
 
-    @UiEvent(doc = "The next button was tapped")
+    @UiEvent(doc = "The next button on a media control was tapped")
     TAP_ACTION_NEXT(1025),
 
-    @UiEvent(doc = "A custom or generic action button was tapped")
+    @UiEvent(doc = "A custom or generic action button on a media control was tapped")
     TAP_ACTION_OTHER(1026),
 
-    @UiEvent(doc = "The user seeked using the seekbar")
+    @UiEvent(doc = "The user seeked on a media control using the seekbar")
     ACTION_SEEK(1027),
 
     @UiEvent(doc = "The user opened the output switcher from a media control")
-    OPEN_OUTPUT_SWITCHER(1028);
+    OPEN_OUTPUT_SWITCHER(1028),
+
+    @UiEvent(doc = "The user tapped on a media control view")
+    MEDIA_TAP_CONTENT_VIEW(1036),
+
+    @UiEvent(doc = "The media carousel moved to QQS")
+    MEDIA_CAROUSEL_LOCATION_QQS(1037),
+
+    @UiEvent(doc = "THe media carousel moved to QS")
+    MEDIA_CAROUSEL_LOCATION_QS(1038),
+
+    @UiEvent(doc = "The media carousel moved to the lockscreen")
+    MEDIA_CAROUSEL_LOCATION_LOCKSCREEN(1039),
+
+    @UiEvent(doc = "The media carousel moved to the dream state")
+    MEDIA_CAROUSEL_LOCATION_DREAM(1040);
 
     override fun getId() = metricId
 }

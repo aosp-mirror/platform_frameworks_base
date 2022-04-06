@@ -1585,10 +1585,10 @@ public final class Display {
             return false;
         }
         final Configuration config = mResources.getConfiguration();
-        // TODO(b/179308296) Temporarily - never report max bounds to only Launcher if the feature
-        // is disabled.
+        // TODO(b/179308296) Temporarily exclude Launcher from being given max bounds, by checking
+        // if the caller is the recents component.
         return config != null && !config.windowConfiguration.getMaxBounds().isEmpty()
-                && (mDisplayInfo.shouldConstrainMetricsForLauncher || !isRecentsComponent());
+                && !isRecentsComponent();
     }
 
     /**

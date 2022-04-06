@@ -2,6 +2,8 @@
 
 Always-on Display (AOD) provides an alternative 'screen-off' experience. Instead, of completely turning the display off, it provides a distraction-free, glanceable experience for the phone in a low-powered mode. In this low-powered mode, the display will have a lower refresh rate and the UI should frequently shift its displayed contents in order to prevent burn-in. The recommended max on-pixel-ratio (OPR) is 5% to reduce battery consumption.
 
+![ss-aod](./imgs/aod.png)
+
 The default doze component controls AOD and is specified by `config_dozeComponent` in the [framework config][1]. SystemUI provides a default Doze Component: [DozeService][2]. [DozeService][2] builds a [DozeMachine][3] with dependencies specified in [DozeModule][4] and configurations in [AmbientDisplayConfiguration][13] and [DozeParameters][14].
 
 Note: The default UI used in AOD shares views with the Lock Screen and does not create its own new views. Once dozing begins, [DozeUI][17] informs SystemUI's [DozeServiceHost][18] that dozing has begun - which sends this signal to relevant SystemUI Lock Screen views to animate accordingly. Within SystemUI, [StatusBarStateController][19] #isDozing and #getDozeAmount can be used to query dozing state.

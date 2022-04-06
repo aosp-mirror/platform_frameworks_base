@@ -312,13 +312,6 @@ public final class DisplayInfo implements Parcelable {
     public float brightnessDefault;
 
     /**
-     * @hide
-     * True if Display#getRealSize and getRealMetrics should be constrained for Launcher, false
-     * otherwise.
-     */
-    public boolean shouldConstrainMetricsForLauncher = false;
-
-    /**
      * The {@link RoundedCorners} if present, otherwise {@code null}.
      */
     @Nullable
@@ -402,7 +395,6 @@ public final class DisplayInfo implements Parcelable {
                 && brightnessMaximum == other.brightnessMaximum
                 && brightnessDefault == other.brightnessDefault
                 && Objects.equals(roundedCorners, other.roundedCorners)
-                && shouldConstrainMetricsForLauncher == other.shouldConstrainMetricsForLauncher
                 && installOrientation == other.installOrientation;
     }
 
@@ -455,7 +447,6 @@ public final class DisplayInfo implements Parcelable {
         brightnessMaximum = other.brightnessMaximum;
         brightnessDefault = other.brightnessDefault;
         roundedCorners = other.roundedCorners;
-        shouldConstrainMetricsForLauncher = other.shouldConstrainMetricsForLauncher;
         installOrientation = other.installOrientation;
     }
 
@@ -514,7 +505,6 @@ public final class DisplayInfo implements Parcelable {
         for (int i = 0; i < numUserDisabledFormats; i++) {
             userDisabledHdrTypes[i] = source.readInt();
         }
-        shouldConstrainMetricsForLauncher = source.readBoolean();
         installOrientation = source.readInt();
     }
 
@@ -571,7 +561,6 @@ public final class DisplayInfo implements Parcelable {
         for (int i = 0; i < userDisabledHdrTypes.length; i++) {
             dest.writeInt(userDisabledHdrTypes[i]);
         }
-        dest.writeBoolean(shouldConstrainMetricsForLauncher);
         dest.writeInt(installOrientation);
     }
 
@@ -829,8 +818,6 @@ public final class DisplayInfo implements Parcelable {
         sb.append(brightnessMaximum);
         sb.append(", brightnessDefault ");
         sb.append(brightnessDefault);
-        sb.append(", shouldConstrainMetricsForLauncher ");
-        sb.append(shouldConstrainMetricsForLauncher);
         sb.append(", installOrientation ");
         sb.append(Surface.rotationToString(installOrientation));
         sb.append("}");

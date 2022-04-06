@@ -75,7 +75,6 @@ import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.Utils;
 import com.android.systemui.util.concurrency.DelayableExecutor;
 
-import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -102,12 +101,14 @@ public class NotificationMediaManager implements Dumpable {
             KeyguardStateController.class);
     private final KeyguardBypassController mKeyguardBypassController;
     private static final HashSet<Integer> PAUSED_MEDIA_STATES = new HashSet<>();
+    private static final HashSet<Integer> CONNECTING_MEDIA_STATES = new HashSet<>();
     static {
         PAUSED_MEDIA_STATES.add(PlaybackState.STATE_NONE);
         PAUSED_MEDIA_STATES.add(PlaybackState.STATE_STOPPED);
         PAUSED_MEDIA_STATES.add(PlaybackState.STATE_PAUSED);
         PAUSED_MEDIA_STATES.add(PlaybackState.STATE_ERROR);
-        PAUSED_MEDIA_STATES.add(PlaybackState.STATE_CONNECTING);
+        CONNECTING_MEDIA_STATES.add(PlaybackState.STATE_CONNECTING);
+        CONNECTING_MEDIA_STATES.add(PlaybackState.STATE_BUFFERING);
     }
 
     private final NotificationVisibilityProvider mVisibilityProvider;
@@ -363,7 +364,17 @@ public class NotificationMediaManager implements Dumpable {
      * @return true if playing
      */
     public static boolean isPlayingState(int state) {
-        return !PAUSED_MEDIA_STATES.contains(state);
+        return !PAUSED_MEDIA_STATES.contains(state)
+            && !CONNECTING_MEDIA_STATES.contains(state);
+    }
+
+    /**
+     * Check if a state should be considered as connecting
+     * @param state a PlaybackState
+     * @return true if connecting or buffering
+     */
+    public static boolean isConnectingState(int state) {
+        return CONNECTING_MEDIA_STATES.contains(state);
     }
 
     public void setUpWithPresenter(NotificationPresenter presenter) {
@@ -514,7 +525,7 @@ public class NotificationMediaManager implements Dumpable {
     }
 
     @Override
-    public void dump(@NonNull FileDescriptor fd, @NonNull PrintWriter pw, @NonNull String[] args) {
+    public void dump(@NonNull PrintWriter pw, @NonNull String[] args) {
         pw.print("    mMediaNotificationKey=");
         pw.println(mMediaNotificationKey);
         pw.print("    mMediaController=");

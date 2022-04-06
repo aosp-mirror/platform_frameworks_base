@@ -69,7 +69,7 @@ public class SystemAudioInitiationActionFromAvrTest {
         Context context = InstrumentationRegistry.getTargetContext();
 
         HdmiControlService hdmiControlService = new HdmiControlService(context,
-                Collections.emptyList()) {
+                Collections.emptyList(), new FakeAudioDeviceVolumeManagerWrapper()) {
                     @Override
                     void sendCecCommand(
                             HdmiCecMessage command, @Nullable SendMessageCallback callback) {

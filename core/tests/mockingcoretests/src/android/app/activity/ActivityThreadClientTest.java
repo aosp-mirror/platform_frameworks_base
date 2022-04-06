@@ -345,7 +345,7 @@ public class ActivityThreadClientTest {
                     null /* pendingResults */, null /* pendingNewIntents */,
                     null /* activityOptions */, true /* isForward */, null /* profilerInfo */,
                     mThread /* client */, null /* asssitToken */, null /* shareableActivityToken */,
-                    false /* launchedFromBubble */);
+                    false /* launchedFromBubble */, null /* taskfragmentToken */);
         }
 
         @Override

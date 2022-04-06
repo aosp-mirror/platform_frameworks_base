@@ -19,14 +19,13 @@ import android.animation.ValueAnimator
 import android.graphics.PointF
 import android.graphics.RectF
 import com.android.systemui.Dumpable
-import com.android.systemui.dump.DumpManager
 import com.android.systemui.animation.Interpolators
+import com.android.systemui.dump.DumpManager
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.statusbar.phone.SystemUIDialogManager
 import com.android.systemui.statusbar.phone.panelstate.PanelExpansionListener
 import com.android.systemui.statusbar.phone.panelstate.PanelExpansionStateManager
 import com.android.systemui.util.ViewController
-import java.io.FileDescriptor
 import java.io.PrintWriter
 
 /**
@@ -128,7 +127,7 @@ abstract class UdfpsAnimationViewController<T : UdfpsAnimationView>(
      */
     private val dumpTag = "$tag ($this)"
 
-    override fun dump(fd: FileDescriptor, pw: PrintWriter, args: Array<String>) {
+    override fun dump(pw: PrintWriter, args: Array<String>) {
         pw.println("mNotificationShadeVisible=$notificationShadeVisible")
         pw.println("shouldPauseAuth()=" + shouldPauseAuth())
         pw.println("isPauseAuth=" + view.isPauseAuth)

@@ -86,7 +86,6 @@ import com.android.systemui.telephony.TelephonyListenerManager;
 import com.android.systemui.user.CreateUserActivity;
 import com.android.systemui.util.settings.SecureSettings;
 
-import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -692,7 +691,7 @@ public class UserSwitcherController implements Dumpable {
     };
 
     @Override
-    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+    public void dump(PrintWriter pw, String[] args) {
         pw.println("UserSwitcherController state:");
         pw.println("  mLastNonGuestUser=" + mLastNonGuestUser);
         pw.print("  mUsers.size="); pw.println(mUsers.size());
@@ -1215,7 +1214,8 @@ public class UserSwitcherController implements Dumpable {
                 }
                 // Use broadcast instead of ShadeController, as this dialog may have started in
                 // another process and normal dagger bindings are not available
-                mBroadcastSender.closeSystemDialogs();
+                mBroadcastSender.sendBroadcastAsUser(
+                        new Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS), UserHandle.CURRENT);
                 getContext().startActivityAsUser(
                         CreateUserActivity.createIntentForStart(getContext()),
                         mUserTracker.getUserHandle());

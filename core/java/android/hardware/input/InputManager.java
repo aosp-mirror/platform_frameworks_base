@@ -45,6 +45,7 @@ import android.os.IVibratorStateListener;
 import android.os.InputEventInjectionSync;
 import android.os.Looper;
 import android.os.Message;
+import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.ServiceManager.ServiceNotFoundException;
@@ -272,8 +273,15 @@ public final class InputManager {
      */
     public static final int SWITCH_STATE_ON = 1;
 
+    private static String sVelocityTrackerStrategy;
+
     private InputManager(IInputManager im) {
         mIm = im;
+        try {
+            sVelocityTrackerStrategy = mIm.getVelocityTrackerStrategy();
+        } catch (RemoteException ex) {
+            Log.w(TAG, "Could not get VelocityTracker strategy: " + ex);
+        }
     }
 
     /**
@@ -323,6 +331,14 @@ public final class InputManager {
             }
             return sInstance;
         }
+    }
+
+    /**
+     * Get the current VelocityTracker strategy. Only works when the system has fully booted up.
+     * @hide
+     */
+    public String getVelocityTrackerStrategy() {
+        return sVelocityTrackerStrategy;
     }
 
     /**
@@ -1107,14 +1123,58 @@ public final class InputManager {
         }
     }
 
+    /**
+     * Injects an input event into the event system, targeting windows owned by the provided uid.
+     *
+     * If a valid targetUid is provided, the system will only consider injecting the input event
+     * into windows owned by the provided uid. If the input event is targeted at a window that is
+     * not owned by the provided uid, input injection will fail and a RemoteException will be
+     * thrown.
+     *
+     * The synchronization mode determines whether the method blocks while waiting for
+     * input injection to proceed.
+     * <p>
+     * Requires the {@link android.Manifest.permission.INJECT_EVENTS} permission.
+     * </p><p>
+     * Make sure you correctly set the event time and input source of the event
+     * before calling this method.
+     * </p>
+     *
+     * @param event The event to inject.
+     * @param mode The synchronization mode.  One of:
+     * {@link android.os.InputEventInjectionSync.NONE},
+     * {@link android.os.InputEventInjectionSync.WAIT_FOR_RESULT}, or
+     * {@link android.os.InputEventInjectionSync.WAIT_FOR_FINISHED}.
+     * @param targetUid The uid to target, or {@link android.os.Process#INVALID_UID} to target all
+     *                 windows.
+     * @return True if input event injection succeeded.
+     *
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.INJECT_EVENTS)
+    public boolean injectInputEvent(InputEvent event, int mode, int targetUid) {
+        if (event == null) {
+            throw new IllegalArgumentException("event must not be null");
+        }
+        if (mode != InputEventInjectionSync.NONE
+                && mode != InputEventInjectionSync.WAIT_FOR_FINISHED
+                && mode != InputEventInjectionSync.WAIT_FOR_RESULT) {
+            throw new IllegalArgumentException("mode is invalid");
+        }
+
+        try {
+            return mIm.injectInputEvent(event, mode, targetUid);
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
 
     /**
      * Injects an input event into the event system on behalf of an application.
      * The synchronization mode determines whether the method blocks while waiting for
      * input injection to proceed.
      * <p>
-     * Requires {@link android.Manifest.permission.INJECT_EVENTS} to inject into
-     * windows that are owned by other applications.
+     * Requires the {@link android.Manifest.permission.INJECT_EVENTS} permission.
      * </p><p>
      * Make sure you correctly set the event time and input source of the event
      * before calling this method.
@@ -1129,22 +1189,10 @@ public final class InputManager {
      *
      * @hide
      */
+    @RequiresPermission(Manifest.permission.INJECT_EVENTS)
     @UnsupportedAppUsage
     public boolean injectInputEvent(InputEvent event, int mode) {
-        if (event == null) {
-            throw new IllegalArgumentException("event must not be null");
-        }
-        if (mode != InputEventInjectionSync.NONE
-                && mode != InputEventInjectionSync.WAIT_FOR_FINISHED
-                && mode != InputEventInjectionSync.WAIT_FOR_RESULT) {
-            throw new IllegalArgumentException("mode is invalid");
-        }
-
-        try {
-            return mIm.injectInputEvent(event, mode);
-        } catch (RemoteException ex) {
-            throw ex.rethrowFromSystemServer();
-        }
+        return injectInputEvent(event, mode, Process.INVALID_UID);
     }
 
     /**
@@ -1423,8 +1471,11 @@ public final class InputManager {
             }
 
             mInputDevices = new SparseArray<InputDevice>();
-            for (int i = 0; i < ids.length; i++) {
-                mInputDevices.put(ids[i], null);
+            // TODO(b/223905476): remove when the rootcause is fixed.
+            if (ids != null) {
+                for (int i = 0; i < ids.length; i++) {
+                    mInputDevices.put(ids[i], null);
+                }
             }
         }
     }

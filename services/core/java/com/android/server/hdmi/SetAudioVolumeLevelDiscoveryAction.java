@@ -122,4 +122,11 @@ public class SetAudioVolumeLevelDiscoveryAction extends HdmiCecFeatureAction {
             return true;
         }
     }
+
+    /**
+     * Returns the logical address of this action's target device.
+     */
+    public int getTargetAddress() {
+        return mTargetAddress;
+    }
 }

@@ -36,7 +36,6 @@ import com.android.settingslib.Utils;
 import com.android.systemui.Dumpable;
 import com.android.systemui.R;
 
-import java.io.FileDescriptor;
 import java.io.PrintWriter;
 
 /**
@@ -217,7 +216,7 @@ public class LockIconView extends FrameLayout implements Dumpable {
     }
 
     @Override
-    public void dump(@NonNull FileDescriptor fd, @NonNull PrintWriter pw, @NonNull String[] args) {
+    public void dump(@NonNull PrintWriter pw, @NonNull String[] args) {
         pw.println("Lock Icon View Parameters:");
         pw.println("    Center in px (x, y)= ("
                 + mLockIconCenter.x + ", " + mLockIconCenter.y + ")");

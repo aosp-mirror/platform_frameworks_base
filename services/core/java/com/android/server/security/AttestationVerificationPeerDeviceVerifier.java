@@ -22,8 +22,10 @@ import static android.security.attestationverification.AttestationVerificationMa
 import static android.security.attestationverification.AttestationVerificationManager.RESULT_SUCCESS;
 import static android.security.attestationverification.AttestationVerificationManager.TYPE_CHALLENGE;
 import static android.security.attestationverification.AttestationVerificationManager.TYPE_PUBLIC_KEY;
+import static android.security.attestationverification.AttestationVerificationManager.localBindingTypeToString;
 
 import static com.android.server.security.AndroidKeystoreAttestationVerificationAttributes.VerifiedBootState.VERIFIED;
+import static com.android.server.security.AndroidKeystoreAttestationVerificationAttributes.fromCertificate;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
@@ -31,6 +33,7 @@ import android.annotation.NonNull;
 import android.content.Context;
 import android.os.Build;
 import android.os.Bundle;
+import android.security.attestationverification.AttestationVerificationManager.LocalBindingType;
 import android.util.Log;
 import android.util.Slog;
 
@@ -40,8 +43,10 @@ import com.android.internal.annotations.VisibleForTesting;
 import org.json.JSONObject;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.security.InvalidAlgorithmParameterException;
 import java.security.cert.CertPath;
 import java.security.cert.CertPathValidator;
 import java.security.cert.CertPathValidatorException;
@@ -65,17 +70,26 @@ import java.util.Objects;
 import java.util.Set;
 
 /**
- * Verifies Android key attestation according to the {@code PROFILE_PEER_DEVICE} profile.
+ * Verifies Android key attestation according to the
+ * {@link android.security.attestationverification.AttestationVerificationManager#PROFILE_PEER_DEVICE PROFILE_PEER_DEVICE}
+ * profile.
  *
- * Trust anchors are vendor-defined via the vendor_required_attestation_certificates.xml resource.
+ * <p>
  * The profile is satisfied by checking all the following:
- * * TrustAnchor match
- * * Certificate validity
- * * Android OS 10 or higher
- * * Hardware backed key store
- * * Verified boot locked
- * * Remote Patch level must be within 1 year of local patch if local patch is less than 1 year old.
+ * <ul>
+ * <li> TrustAnchor match
+ * <li> Certificate validity
+ * <li> Android OS 10 or higher
+ * <li> Hardware backed key store
+ * <li> Verified boot locked
+ * <li> Remote Patch level must be within 1 year of local patch if local patch is less than 1 year
+ * old.
+ * </ul>
  *
+ * <p>
+ * Trust anchors are vendor-defined by populating
+ * {@link R.array#vendor_required_attestation_certificates} string array (defenined in
+ * {@code frameworks/base/core/res/res/values/vendor_required_attestation_certificates.xml}).
  */
 class AttestationVerificationPeerDeviceVerifier {
     private static final String TAG = "AVF";
@@ -87,20 +101,8 @@ class AttestationVerificationPeerDeviceVerifier {
     private final boolean mRevocationEnabled;
     private final LocalDate mTestSystemDate;
     private final LocalDate mTestLocalPatchDate;
-    private CertificateFactory mCertificateFactory;
-    private CertPathValidator mCertPathValidator;
-
-    private static void debugVerboseLog(String str, Throwable t) {
-        if (DEBUG) {
-            Slog.v(TAG, str, t);
-        }
-    }
-
-    private static void debugVerboseLog(String str) {
-        if (DEBUG) {
-            Slog.v(TAG, str);
-        }
-    }
+    private final CertificateFactory mCertificateFactory;
+    private final CertPathValidator mCertPathValidator;
 
     AttestationVerificationPeerDeviceVerifier(@NonNull Context context) throws Exception {
         mContext = Objects.requireNonNull(context);
@@ -128,53 +130,71 @@ class AttestationVerificationPeerDeviceVerifier {
 
     /**
      * Verifies attestation for public key or challenge local binding.
-     *
+     * <p>
      * The attestations must be suitable for {@link java.security.cert.CertificateFactory}
      * The certificates in the attestation provided must be DER-encoded and may be supplied in
      * binary or printable (Base64) encoding. If the certificate is provided in Base64 encoding,
-     * it must be bounded at the beginning by -----BEGIN CERTIFICATE-----, and must be bounded at
-     * the end by -----END CERTIFICATE-----.
+     * it must be bounded at the beginning by {@code -----BEGIN CERTIFICATE-----}, and must be
+     * bounded at the end by {@code -----END CERTIFICATE-----}.
      *
      * @param localBindingType Only {@code TYPE_PUBLIC_KEY} and {@code TYPE_CHALLENGE} supported.
      * @param requirements Only {@code PARAM_PUBLIC_KEY} and {@code PARAM_CHALLENGE} supported.
      * @param attestation Certificates should be DER encoded with leaf certificate appended first.
      */
     int verifyAttestation(
-            int localBindingType, @NonNull Bundle requirements, @NonNull byte[] attestation) {
-        int status = RESULT_FAILURE;
-
+            @LocalBindingType int localBindingType,
+            @NonNull Bundle requirements,
+            @NonNull byte[] attestation) {
         if (mCertificateFactory == null) {
-            debugVerboseLog("Was unable to initialize CertificateFactory onCreate.");
-            return status;
+            debugVerboseLog("Unable to access CertificateFactory");
+            return RESULT_FAILURE;
         }
 
         if (mCertPathValidator == null) {
-            debugVerboseLog("Was unable to initialize CertPathValidator onCreate.");
-            return status;
+            debugVerboseLog("Unable to access CertPathValidator");
+            return RESULT_FAILURE;
         }
 
-        List<X509Certificate> certificates;
+        // Check if the provided local binding type is supported and if the provided requirements
+        // "match" the binding type.
+        if (!validateAttestationParameters(localBindingType, requirements)) {
+            return RESULT_FAILURE;
+        }
+
         try {
-            certificates = getCertificates(attestation);
-        } catch (CertificateException e) {
-            debugVerboseLog("Unable to parse attestation certificates.", e);
-            return status;
-        }
+            // First: parse and validate the certificate chain.
+            final List<X509Certificate> certificateChain = getCertificates(attestation);
+            // (returns void, but throws CertificateException and other similar Exceptions)
+            validateCertificateChain(certificateChain);
 
-        if (certificates.isEmpty()) {
-            debugVerboseLog("Attestation contains no certificates.");
-            return status;
-        }
+            final var leafCertificate = certificateChain.get(0);
+            final var attestationExtension = fromCertificate(leafCertificate);
 
-        X509Certificate leafNode = certificates.get(0);
-        if (validateRequirements(localBindingType, requirements)
-                && validateCertificateChain(certificates)
-                && checkCertificateAttributes(leafNode, localBindingType, requirements)) {
-            status = RESULT_SUCCESS;
-        } else {
-            status = RESULT_FAILURE;
+            // Second: verify if the attestation satisfies the "peer device" porfile.
+            if (!checkAttestationForPeerDeviceProfile(attestationExtension)) {
+                return RESULT_FAILURE;
+            }
+
+            // Third: check if the attestation satisfies local binding requirements.
+            if (!checkLocalBindingRequirements(
+                    leafCertificate, attestationExtension, localBindingType, requirements)) {
+                return RESULT_FAILURE;
+            }
+
+            return RESULT_SUCCESS;
+        } catch (CertificateException | CertPathValidatorException
+                | InvalidAlgorithmParameterException | IOException e) {
+            // Catch all non-RuntimeExpceptions (all of these are thrown by either getCertificates()
+            // or validateCertificateChain() or
+            // AndroidKeystoreAttestationVerificationAttributes.fromCertificate())
+            debugVerboseLog("Unable to parse/validate Android Attestation certificate(s)", e);
+            return RESULT_FAILURE;
+        } catch (RuntimeException e) {
+            // Catch everyting else (RuntimeExpcetions), since we don't want to throw any exceptions
+            // out of this class/method.
+            debugVerboseLog("Unexpected error", e);
+            return RESULT_FAILURE;
         }
-        return status;
     }
 
     @NonNull
@@ -189,14 +209,19 @@ class AttestationVerificationPeerDeviceVerifier {
         return certificates;
     }
 
-    private boolean validateRequirements(int localBindingType, Bundle requirements) {
-        if (requirements.size() != 1) {
-            debugVerboseLog("Requirements does not contain exactly 1 key.");
+    /**
+     * Check if the {@code localBindingType} is supported and if the {@code requirements} contains
+     * the required parameter for the given {@code @LocalBindingType}.
+     */
+    private boolean validateAttestationParameters(
+            @LocalBindingType int localBindingType, @NonNull Bundle requirements) {
+        if (localBindingType != TYPE_PUBLIC_KEY && localBindingType != TYPE_CHALLENGE) {
+            debugVerboseLog("Binding type is not supported: " + localBindingType);
             return false;
         }
 
-        if (localBindingType != TYPE_PUBLIC_KEY && localBindingType != TYPE_CHALLENGE) {
-            debugVerboseLog("Binding type is not supported: " + localBindingType);
+        if (requirements.size() != 1) {
+            debugVerboseLog("Requirements does not contain exactly 1 key.");
             return false;
         }
 
@@ -213,29 +238,25 @@ class AttestationVerificationPeerDeviceVerifier {
         return true;
     }
 
-    private boolean validateCertificateChain(List<X509Certificate> certificates) {
+    private void validateCertificateChain(List<X509Certificate> certificates)
+            throws CertificateException, CertPathValidatorException,
+            InvalidAlgorithmParameterException  {
         if (certificates.size() < 2) {
             debugVerboseLog("Certificate chain less than 2 in size.");
-            return false;
+            throw new CertificateException("Certificate chain less than 2 in size.");
         }
 
-        try {
-            CertPath certificatePath = mCertificateFactory.generateCertPath(certificates);
-            PKIXParameters validationParams = new PKIXParameters(mTrustAnchors);
-            if (mRevocationEnabled) {
-                // Checks Revocation Status List based on
-                // https://developer.android.com/training/articles/security-key-attestation#certificate_status
-                PKIXCertPathChecker checker = new AndroidRevocationStatusListChecker();
-                validationParams.addCertPathChecker(checker);
-            }
-            // Do not use built-in revocation status checker.
-            validationParams.setRevocationEnabled(false);
-            mCertPathValidator.validate(certificatePath, validationParams);
-        } catch (Throwable t) {
-            debugVerboseLog("Invalid certificate chain.", t);
-            return false;
+        CertPath certificatePath = mCertificateFactory.generateCertPath(certificates);
+        PKIXParameters validationParams = new PKIXParameters(mTrustAnchors);
+        if (mRevocationEnabled) {
+            // Checks Revocation Status List based on
+            // https://developer.android.com/training/articles/security-key-attestation#certificate_status
+            PKIXCertPathChecker checker = new AndroidRevocationStatusListChecker();
+            validationParams.addCertPathChecker(checker);
         }
-        return true;
+        // Do not use built-in revocation status checker.
+        validationParams.setRevocationEnabled(false);
+        mCertPathValidator.validate(certificatePath, validationParams);
     }
 
     private Set<TrustAnchor> getTrustAnchors() throws CertPathValidatorException {
@@ -267,18 +288,44 @@ class AttestationVerificationPeerDeviceVerifier {
                 R.array.vendor_required_attestation_certificates);
     }
 
-    private boolean checkCertificateAttributes(
-            X509Certificate leafCertificate, int localBindingType, Bundle requirements) {
-        AndroidKeystoreAttestationVerificationAttributes attestationAttributes;
-        try {
-            attestationAttributes =
-                    AndroidKeystoreAttestationVerificationAttributes.fromCertificate(
-                            leafCertificate);
-        } catch (Throwable t) {
-            debugVerboseLog("Could not get ParsedAttestationAttributes from Certificate.", t);
-            return false;
+    private boolean checkLocalBindingRequirements(
+            @NonNull X509Certificate leafCertificate,
+            @NonNull AndroidKeystoreAttestationVerificationAttributes attestationAttributes,
+            @LocalBindingType int localBindingType,
+            @NonNull Bundle requirements) {
+        switch (localBindingType) {
+            case TYPE_PUBLIC_KEY:
+                // Verify leaf public key matches provided public key.
+                final boolean publicKeyMatches = checkPublicKey(
+                        leafCertificate, requirements.getByteArray(PARAM_PUBLIC_KEY));
+                if (!publicKeyMatches) {
+                    debugVerboseLog(
+                            "Provided public key does not match leaf certificate public key.");
+                    return false;
+                }
+                break;
+
+            case TYPE_CHALLENGE:
+                // Verify challenge matches provided challenge.
+                final boolean attestationChallengeMatches = checkAttestationChallenge(
+                        attestationAttributes, requirements.getByteArray(PARAM_CHALLENGE));
+                if (!attestationChallengeMatches) {
+                    debugVerboseLog(
+                            "Provided challenge does not match leaf certificate challenge.");
+                    return false;
+                }
+                break;
+
+            default:
+                throw new IllegalArgumentException("Unsupported local binding type "
+                        + localBindingTypeToString(localBindingType));
         }
 
+        return true;
+    }
+
+    private boolean checkAttestationForPeerDeviceProfile(
+            @NonNull AndroidKeystoreAttestationVerificationAttributes attestationAttributes) {
         // Checks for support of Keymaster 4.
         if (attestationAttributes.getAttestationVersion() < 3) {
             debugVerboseLog("Attestation version is not at least 3 (Keymaster 4).");
@@ -344,23 +391,20 @@ class AttestationVerificationPeerDeviceVerifier {
             return false;
         }
 
-        // Verify leaf public key matches provided public key.
-        if (localBindingType == TYPE_PUBLIC_KEY
-                && !Arrays.equals(requirements.getByteArray(PARAM_PUBLIC_KEY),
-                                  leafCertificate.getPublicKey().getEncoded())) {
-            debugVerboseLog("Provided public key does not match leaf certificate public key.");
-            return false;
-        }
-
-        // Verify challenge matches provided challenge.
-        if (localBindingType == TYPE_CHALLENGE
-                && !Arrays.equals(requirements.getByteArray(PARAM_CHALLENGE),
-                                  attestationAttributes.getAttestationChallenge().toByteArray())) {
-            debugVerboseLog("Provided challenge does not match leaf certificate challenge.");
-            return false;
-        }
-
         return true;
+    }
+
+    private boolean checkPublicKey(
+            @NonNull Certificate certificate, @NonNull byte[] expectedPublicKey) {
+        final byte[] publicKey = certificate.getPublicKey().getEncoded();
+        return Arrays.equals(publicKey, expectedPublicKey);
+    }
+
+    private boolean checkAttestationChallenge(
+            @NonNull AndroidKeystoreAttestationVerificationAttributes attestationAttributes,
+            @NonNull byte[] expectedChallenge) {
+        final byte[] challenge = attestationAttributes.getAttestationChallenge().toByteArray();
+        return Arrays.equals(challenge, expectedChallenge);
     }
 
     /**
@@ -505,6 +549,18 @@ class AttestationVerificationPeerDeviceVerifier {
         private String getRevocationListUrl() {
             return mContext.getResources().getString(
                     R.string.vendor_required_attestation_revocation_list_url);
+        }
+    }
+
+    private static void debugVerboseLog(String str, Throwable t) {
+        if (DEBUG) {
+            Slog.v(TAG, str, t);
+        }
+    }
+
+    private static void debugVerboseLog(String str) {
+        if (DEBUG) {
+            Slog.v(TAG, str);
         }
     }
 }

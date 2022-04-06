@@ -26,7 +26,6 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.eq
-import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.nullable
 import com.android.systemui.util.mockito.withArgCaptor
 import com.android.systemui.util.settings.SecureSettings
@@ -379,7 +378,7 @@ class FeatureFlagsDebugTest : SysuiTestCase() {
     private fun dumpToString(): String {
         val sw = StringWriter()
         val pw = PrintWriter(sw)
-        mFeatureFlagsDebug.dump(mock(), pw, emptyArray<String>())
+        mFeatureFlagsDebug.dump(pw, emptyArray<String>())
         pw.flush()
         return sw.toString()
     }

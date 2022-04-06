@@ -7,7 +7,6 @@ import com.android.systemui.Dumpable
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.util.LargeScreenUtils
-import java.io.FileDescriptor
 import java.io.PrintWriter
 
 /** An abstract implementation of a class that controls the lockscreen to shade transition. */
@@ -53,7 +52,7 @@ abstract class AbstractLockscreenShadeTransitionController(
 
     protected abstract fun onDragDownAmountChanged(dragDownAmount: Float)
 
-    override fun dump(fd: FileDescriptor, pw: PrintWriter, args: Array<out String>) {
+    override fun dump(pw: PrintWriter, args: Array<out String>) {
         dump(IndentingPrintWriter(pw, /* singleIndent= */ "  "))
     }
 

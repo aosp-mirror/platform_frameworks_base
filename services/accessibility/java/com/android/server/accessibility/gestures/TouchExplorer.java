@@ -45,6 +45,7 @@ import android.content.Context;
 import android.graphics.Region;
 import android.os.Handler;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.util.Slog;
 import android.view.Display;
 import android.view.InputDevice;
@@ -84,11 +85,13 @@ import java.util.List;
 public class TouchExplorer extends BaseEventStreamTransformation
         implements GestureManifold.Listener {
 
-    static final boolean DEBUG = false;
     private static final long LOGGING_FLAGS = FLAGS_GESTURE | FLAGS_INPUT_FILTER;
 
     // Tag for logging received events.
     private static final String LOG_TAG = "TouchExplorer";
+
+    // To enable these logs, run: 'adb shell setprop log.tag.TouchExplorer DEBUG' (requires restart)
+    static final boolean DEBUG = Log.isLoggable(LOG_TAG, Log.DEBUG);
 
     // The maximum of the cosine between the vectors of two moving
     // pointers so they can be considered moving in the same direction.

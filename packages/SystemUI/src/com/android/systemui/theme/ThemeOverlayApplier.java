@@ -36,7 +36,6 @@ import com.android.systemui.dump.DumpManager;
 import com.google.android.collect.Lists;
 import com.google.android.collect.Sets;
 
-import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -278,7 +277,7 @@ public class ThemeOverlayApplier implements Dumpable {
      * @inherit
      */
     @Override
-    public void dump(@NonNull FileDescriptor fd, @NonNull PrintWriter pw, @NonNull String[] args) {
+    public void dump(@NonNull PrintWriter pw, @NonNull String[] args) {
         pw.println("mTargetPackageToCategories=" + mTargetPackageToCategories);
         pw.println("mCategoryToTargetPackage=" + mCategoryToTargetPackage);
     }

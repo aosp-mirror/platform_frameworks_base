@@ -116,7 +116,6 @@ import com.android.systemui.util.Assert;
 
 import com.google.android.collect.Lists;
 
-import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -628,7 +627,8 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
      */
     public void setKeyguardGoingAway(boolean goingAway) {
         mKeyguardGoingAway = goingAway;
-        updateBiometricListeningState(BIOMETRIC_ACTION_UPDATE);
+        // This is set specifically to stop face authentication from running.
+        updateBiometricListeningState(BIOMETRIC_ACTION_STOP);
     }
 
     /**
@@ -1746,7 +1746,8 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                 cb.onFinishedGoingToSleep(arg1);
             }
         }
-        updateBiometricListeningState(BIOMETRIC_ACTION_UPDATE);
+        // This is set specifically to stop face authentication from running.
+        updateBiometricListeningState(BIOMETRIC_ACTION_STOP);
     }
 
     private void handleScreenTurnedOff() {
@@ -1764,7 +1765,12 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                 cb.onDreamingStateChanged(mIsDreaming);
             }
         }
-        updateBiometricListeningState(BIOMETRIC_ACTION_UPDATE);
+        if (mIsDreaming) {
+            updateFingerprintListeningState(BIOMETRIC_ACTION_UPDATE);
+            updateFaceListeningState(BIOMETRIC_ACTION_STOP);
+        } else {
+            updateBiometricListeningState(BIOMETRIC_ACTION_UPDATE);
+        }
     }
 
     private void handleUserInfoChanged(int userId) {
@@ -2477,9 +2483,11 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         boolean strongAuthAllowsScanning = (!isEncryptedOrTimedOut || canBypass
                 && !mBouncerFullyShown);
 
-        // If the device supports face detection (without authentication), allow it to happen
-        // if the device is in lockdown mode. Otherwise, prevent scanning.
+        // If the device supports face detection (without authentication) and bypass is enabled,
+        // allow face scanning to happen if the device is in lockdown mode.
+        // Otherwise, prevent scanning.
         final boolean supportsDetectOnly = !mFaceSensorProperties.isEmpty()
+                && canBypass
                 && mFaceSensorProperties.get(0).supportsFaceDetection;
         if (isLockDown && !supportsDetectOnly) {
             strongAuthAllowsScanning = false;
@@ -2494,8 +2502,11 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         // Only listen if this KeyguardUpdateMonitor belongs to the primary user. There is an
         // instance of KeyguardUpdateMonitor for each user but KeyguardUpdateMonitor is user-aware.
         final boolean shouldListen =
-                (mBouncerFullyShown || mAuthInterruptActive || mOccludingAppRequestingFace
-                        || awakeKeyguard || shouldListenForFaceAssistant
+                (mBouncerFullyShown && !mGoingToSleep
+                        || mAuthInterruptActive
+                        || mOccludingAppRequestingFace
+                        || awakeKeyguard
+                        || shouldListenForFaceAssistant
                         || mAuthController.isUdfpsFingerDown())
                 && !mSwitchingUser && !faceDisabledForUser && becauseCannotSkipBouncer
                 && !mKeyguardGoingAway && biometricEnabledForUser && !mLockIconPressed
@@ -2517,6 +2528,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                         mBouncerFullyShown,
                         faceAuthenticated,
                         faceDisabledForUser,
+                        mGoingToSleep,
                         awakeKeyguard,
                         mKeyguardGoingAway,
                         shouldListenForFaceAssistant,
@@ -3585,7 +3597,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     }
 
     @Override
-    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+    public void dump(PrintWriter pw, String[] args) {
         pw.println("KeyguardUpdateMonitor state:");
         pw.println("  SIM States:");
         for (SimData data : mSimDatas.values()) {

@@ -615,14 +615,22 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
         return null;
     }
 
+    private void updateCallbackIfNecessary() {
+        updateCallbackIfNecessary(true /* deferCallbackUntilAllActivitiesCreated */);
+    }
+
     /**
      * Notifies listeners about changes to split states if necessary.
+     *
+     * @param deferCallbackUntilAllActivitiesCreated boolean to indicate whether the split info
+     *                                               callback should be deferred until all the
+     *                                               organized activities have been created.
      */
-    private void updateCallbackIfNecessary() {
+    private void updateCallbackIfNecessary(boolean deferCallbackUntilAllActivitiesCreated) {
         if (mEmbeddingCallback == null) {
             return;
         }
-        if (!allActivitiesCreated()) {
+        if (deferCallbackUntilAllActivitiesCreated && !allActivitiesCreated()) {
             return;
         }
         List<SplitInfo> currentSplitStates = getActiveSplitStates();
@@ -836,6 +844,36 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
     }
 
     private final class LifecycleCallbacks extends EmptyLifecycleCallbacksAdapter {
+
+        @Override
+        public void onActivityPreCreated(Activity activity, Bundle savedInstanceState) {
+            final IBinder activityToken = activity.getActivityToken();
+            final IBinder initialTaskFragmentToken = ActivityThread.currentActivityThread()
+                    .getActivityClient(activityToken).mInitialTaskFragmentToken;
+            // If the activity is not embedded, then it will not have an initial task fragment token
+            // so no further action is needed.
+            if (initialTaskFragmentToken == null) {
+                return;
+            }
+            for (int i = mTaskContainers.size() - 1; i >= 0; i--) {
+                final List<TaskFragmentContainer> containers = mTaskContainers.valueAt(i)
+                        .mContainers;
+                for (int j = containers.size() - 1; j >= 0; j--) {
+                    final TaskFragmentContainer container = containers.get(j);
+                    if (!container.hasActivity(activityToken)
+                            && container.getTaskFragmentToken().equals(initialTaskFragmentToken)) {
+                        // The onTaskFragmentInfoChanged callback containing this activity has not
+                        // reached the client yet, so add the activity to the pending appeared
+                        // activities and send a split info callback to the client before
+                        // {@link Activity#onCreate} is called.
+                        container.addPendingAppearedActivity(activity);
+                        updateCallbackIfNecessary(
+                                false /* deferCallbackUntilAllActivitiesCreated */);
+                        return;
+                    }
+                }
+            }
+        }
 
         @Override
         public void onActivityPostCreated(Activity activity, Bundle savedInstanceState) {
