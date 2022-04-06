@@ -26,11 +26,9 @@ import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SuppressLint;
 import android.annotation.TestApi;
-import android.app.ActivityThread;
 import android.app.KeyguardManager;
 import android.app.WindowConfiguration;
 import android.compat.annotation.UnsupportedAppUsage;
-import android.content.ComponentName;
 import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
 import android.content.res.Resources;
@@ -52,14 +50,11 @@ import android.util.ArraySet;
 import android.util.DisplayMetrics;
 import android.util.Log;
 
-import com.android.internal.R;
-
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 
 /**
  * Provides information about the size and density of a logical display.
@@ -114,12 +109,6 @@ public final class Display {
     private long mLastCachedAppSizeUpdate;
     private int mCachedAppWidthCompat;
     private int mCachedAppHeightCompat;
-
-    /**
-     * Cache if the application is the recents component.
-     * TODO(b/179308296) Remove once Launcher addresses issue
-     */
-    private Optional<Boolean> mIsRecentsComponent = Optional.empty();
 
     /**
      * The default Display id, which is the id of the primary display assuming there is one.
@@ -1585,36 +1574,7 @@ public final class Display {
             return false;
         }
         final Configuration config = mResources.getConfiguration();
-        // TODO(b/179308296) Temporarily exclude Launcher from being given max bounds, by checking
-        // if the caller is the recents component.
-        return config != null && !config.windowConfiguration.getMaxBounds().isEmpty()
-                && !isRecentsComponent();
-    }
-
-    /**
-     * Returns {@code true} when the calling package is the recents component.
-     * TODO(b/179308296) Remove once Launcher addresses issue
-     */
-    boolean isRecentsComponent() {
-        if (mIsRecentsComponent.isPresent()) {
-            return mIsRecentsComponent.get();
-        }
-        if (mResources == null) {
-            return false;
-        }
-        try {
-            String recentsComponent = mResources.getString(R.string.config_recentsComponentName);
-            if (recentsComponent == null) {
-                return false;
-            }
-            String recentsPackage = ComponentName.unflattenFromString(recentsComponent)
-                    .getPackageName();
-            mIsRecentsComponent = Optional.of(recentsPackage != null
-                    && recentsPackage.equals(ActivityThread.currentPackageName()));
-            return mIsRecentsComponent.get();
-        } catch (Resources.NotFoundException e) {
-            return false;
-        }
+        return config != null && !config.windowConfiguration.getMaxBounds().isEmpty();
     }
 
     /**
