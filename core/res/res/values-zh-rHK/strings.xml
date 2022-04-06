@@ -537,8 +537,8 @@
     <string name="permdesc_bluetooth_scan" product="default" msgid="6540723536925289276">"允許應用程式探索並配對附近的藍牙裝置"</string>
     <string name="permlab_bluetooth_connect" msgid="6657463246355003528">"連接附近的藍牙裝置"</string>
     <string name="permdesc_bluetooth_connect" product="default" msgid="4546016548795544617">"允許應用程式連接已配對的藍牙裝置"</string>
-    <string name="permlab_bluetooth_advertise" msgid="2781147747928853177">"向附近的藍牙裝置宣傳"</string>
-    <string name="permdesc_bluetooth_advertise" product="default" msgid="6085174451034210183">"允許應用程式向附近的藍牙裝置宣傳"</string>
+    <string name="permlab_bluetooth_advertise" msgid="2781147747928853177">"向附近的藍牙裝置顯示此裝置"</string>
+    <string name="permdesc_bluetooth_advertise" product="default" msgid="6085174451034210183">"允許應用程式向附近的藍牙裝置顯示此裝置"</string>
     <string name="permlab_uwb_ranging" msgid="8141915781475770665">"判斷附近超寬頻裝置之間的相對位置"</string>
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"允許應用程式判斷附近超寬頻裝置之間的相對位置"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"由用戶允許授權的 NFC 付款服務資訊"</string>
