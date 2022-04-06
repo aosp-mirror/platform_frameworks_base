@@ -29,6 +29,7 @@ import android.app.Fragment;
 import android.app.StatusBarManager;
 import android.content.Context;
 import android.os.Bundle;
+import android.os.UserHandle;
 import android.provider.Settings;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper.RunWithLooper;
@@ -329,7 +330,8 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
         String str = mContext.getString(com.android.internal.R.string.status_bar_volume);
 
         // GIVEN the setting is ON
-        when(mSecureSettings.getInt(Settings.Secure.STATUS_BAR_SHOW_VIBRATE_ICON, 0))
+        when(mSecureSettings.getIntForUser(Settings.Secure.STATUS_BAR_SHOW_VIBRATE_ICON, 0,
+                UserHandle.USER_CURRENT))
                 .thenReturn(1);
 
         // WHEN CollapsedStatusBarFragment builds the blocklist
