@@ -363,6 +363,7 @@ public class SplashscreenContentDrawer {
         private Drawable[] mFinalIconDrawables;
         private int mFinalIconSize = mIconSize;
         private Consumer<Runnable> mUiThreadInitTask;
+        /** @see #setAllowHandleSolidColor(boolean) **/
         private boolean mAllowHandleSolidColor;
 
         StartingWindowViewBuilder(@NonNull Context context, @NonNull ActivityInfo aInfo) {
@@ -390,6 +391,12 @@ public class SplashscreenContentDrawer {
             return this;
         }
 
+        /**
+         * If true, the application will receive a the
+         * {@link
+         * android.window.SplashScreen.OnExitAnimationListener#onSplashScreenExit(SplashScreenView)}
+         * callback, effectively copying the {@link SplashScreenView} into the client process.
+         */
         StartingWindowViewBuilder setAllowHandleSolidColor(boolean allowHandleSolidColor) {
             mAllowHandleSolidColor = allowHandleSolidColor;
             return this;
