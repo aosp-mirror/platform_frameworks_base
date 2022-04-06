@@ -26,7 +26,7 @@
     <string name="battery_low_percent_format" msgid="4276661262843170964">"Zostáva <xliff:g id="PERCENTAGE">%s</xliff:g>"</string>
     <string name="invalid_charger_title" msgid="938685362320735167">"Nedá sa nabíjať cez USB"</string>
     <string name="invalid_charger_text" msgid="2339310107232691577">"Použite nabíjačku dodanú so zariadením"</string>
-    <string name="battery_saver_confirmation_title" msgid="1234998463717398453">"Zapnúť šetrič batérie?"</string>
+    <string name="battery_saver_confirmation_title" msgid="1234998463717398453">"Chcete zapnúť šetrič batérie?"</string>
     <string name="battery_saver_confirmation_title_generic" msgid="2299231884234959849">"Šetrič batérie"</string>
     <string name="battery_saver_confirmation_ok" msgid="5042136476802816494">"Zapnúť"</string>
     <string name="battery_saver_start_action" msgid="8353766979886287140">"Zapnúť"</string>
@@ -34,8 +34,8 @@
     <string name="status_bar_settings_auto_rotation" msgid="8329080442278431708">"Automatické otočenie obrazovky"</string>
     <string name="usb_device_permission_prompt" msgid="4414719028369181772">"Povoliť aplikácii <xliff:g id="APPLICATION">%1$s</xliff:g> prístup k zariadeniu <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
     <string name="usb_device_permission_prompt_warn" msgid="2309129784984063656">"Povoliť aplikácii <xliff:g id="APPLICATION">%1$s</xliff:g> pristupovať k zariadeniu <xliff:g id="USB_DEVICE">%2$s</xliff:g>?\nTejto aplikácii nebolo udelené povolenie na nahrávanie, môže však snímať zvuk cez toto zariadenie USB."</string>
-    <string name="usb_audio_device_permission_prompt_title" msgid="4221351137250093451">"Chcete povoliť aplikácii <xliff:g id="APPLICATION">%1$s</xliff:g> prístup k zariadeniu <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
-    <string name="usb_audio_device_confirm_prompt_title" msgid="8828406516732985696">"Chcete otvoriť aplikáciu <xliff:g id="APPLICATION">%1$s</xliff:g> na spravovanie zariadenia <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
+    <string name="usb_audio_device_permission_prompt_title" msgid="4221351137250093451">"Povoliť apl. <xliff:g id="APPLICATION">%1$s</xliff:g> prístup k zar. <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
+    <string name="usb_audio_device_confirm_prompt_title" msgid="8828406516732985696">"Otvoriť <xliff:g id="APPLICATION">%1$s</xliff:g> na spravovanie <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
     <string name="usb_audio_device_prompt_warn" msgid="2504972133361130335">"Tejto aplikácii nebolo udelené povolenie na nahrávanie, ale môže nahrávať zvuk cez toto zariadenie USB. Ak budete s týmto zariadením používať aplikáciu <xliff:g id="APPLICATION">%1$s</xliff:g>, nemusíte počuť hovory, upozornenia ani budíky."</string>
     <string name="usb_audio_device_prompt" msgid="7944987408206252949">"Ak budete s týmto zariadením používať aplikáciu <xliff:g id="APPLICATION">%1$s</xliff:g>, nemusíte počuť hovory, upozornenia ani budíky."</string>
     <string name="usb_accessory_permission_prompt" msgid="717963550388312123">"Povoliť aplikácii <xliff:g id="APPLICATION">%1$s</xliff:g> prístup k zariadeniu <xliff:g id="USB_ACCESSORY">%2$s</xliff:g>?"</string>
@@ -135,7 +135,7 @@
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="2242167416140740920">"Tvár bola overená"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"Potvrdené"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"Overenie dokončíte klepnutím na Potvrdiť"</string>
-    <!-- no translation found for biometric_dialog_tap_confirm_with_face (7538145860465755864) -->
+    <!-- no translation found for biometric_dialog_tap_confirm_with_face (1092050545851021991) -->
     <skip />
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"Overené"</string>
     <string name="biometric_dialog_use_pin" msgid="8385294115283000709">"Použiť PIN"</string>
@@ -225,7 +225,7 @@
     <string name="quick_settings_rotation_unlocked_label" msgid="2359922767950346112">"Automatické otáčanie"</string>
     <string name="accessibility_quick_settings_rotation" msgid="4800050198392260738">"Automatické otáčanie obrazovky"</string>
     <string name="quick_settings_location_label" msgid="2621868789013389163">"Poloha"</string>
-    <string name="quick_settings_camera_label" msgid="5612076679385269339">"Prístup k fotoaparátu"</string>
+    <string name="quick_settings_camera_label" msgid="5612076679385269339">"Prístup ku kamere"</string>
     <string name="quick_settings_mic_label" msgid="8392773746295266375">"Prístup k mikrofónu"</string>
     <string name="quick_settings_camera_mic_available" msgid="1453719768420394314">"K dispozícii"</string>
     <string name="quick_settings_camera_mic_blocked" msgid="4710884905006788281">"Blokované"</string>
@@ -296,24 +296,15 @@
     <string name="sensor_privacy_start_use_mic_dialog_content" msgid="1624701280680913717">"Táto akcia odblokuje prístup všetkým aplikáciám a službám, ktoré majú povolené používať mikrofón."</string>
     <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"Táto akcia odblokuje prístup všetkým aplikáciám a službám, ktoré majú povolené používať fotoaparát."</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_content" msgid="3577642558418404919">"Táto akcia odblokuje prístup všetkým aplikáciám a službám, ktoré majú povolené používať fotoaparát alebo mikrofón."</string>
-    <!-- no translation found for sensor_privacy_start_use_mic_blocked_dialog_title (2640140287496469689) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_start_use_camera_blocked_dialog_title (7398084286822440384) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_start_use_mic_camera_blocked_dialog_title (195236134743281973) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_start_use_mic_blocked_dialog_content (2138318880682877747) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_start_use_camera_blocked_dialog_content (7216015168047965948) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_start_use_mic_camera_blocked_dialog_content (3960837827570483762) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_mic_unblocked_toast_content (306555320557065068) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_camera_unblocked_toast_content (7843105715964332311) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_mic_camera_unblocked_toast_content (7339355093282661115) -->
-    <skip />
+    <string name="sensor_privacy_start_use_mic_blocked_dialog_title" msgid="2640140287496469689">"Mikrofón je blokovaný"</string>
+    <string name="sensor_privacy_start_use_camera_blocked_dialog_title" msgid="7398084286822440384">"Kamera je blokovaná"</string>
+    <string name="sensor_privacy_start_use_mic_camera_blocked_dialog_title" msgid="195236134743281973">"Mikrofón a kamera sú blokované"</string>
+    <string name="sensor_privacy_start_use_mic_blocked_dialog_content" msgid="2138318880682877747">"Ak ho chcete odblokovať, posuňte prepínač ochrany súkromia vo svojom zariadení do polohy Mikrofón je zapnutý, čím povolíte prístup k mikrofónu. Prepínač ochrany súkromia v zariadení môžete nájsť pomocou príručky k nemu."</string>
+    <string name="sensor_privacy_start_use_camera_blocked_dialog_content" msgid="7216015168047965948">"Ak ho chcete odblokovať, posuňte prepínač ochrany súkromia vo svojom zariadení do polohy Kamera je zapnutá, čím povolíte prístup ku kamere. Prepínač ochrany súkromia v zariadení môžete nájsť pomocou príručky k nemu."</string>
+    <string name="sensor_privacy_start_use_mic_camera_blocked_dialog_content" msgid="3960837827570483762">"Ak ho chcete odblokovať, posuňte prepínač ochrany súkromia vo svojom zariadení do odblokovanej polohy, čím povolíte prístup. Prepínač ochrany súkromia v zariadení môžete nájsť pomocou príručky k nemu."</string>
+    <string name="sensor_privacy_mic_unblocked_toast_content" msgid="306555320557065068">"Mikrofón je k dispozícii"</string>
+    <string name="sensor_privacy_camera_unblocked_toast_content" msgid="7843105715964332311">"Kamera je k dispozícii"</string>
+    <string name="sensor_privacy_mic_camera_unblocked_toast_content" msgid="7339355093282661115">"Mikrofón a kamera sú k dispozícii"</string>
     <string name="media_seamless_other_device" msgid="4654849800789196737">"Iné zariadenie"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"Prepnúť prehľad"</string>
     <string name="zen_priority_introduction" msgid="3159291973383796646">"Nebudú vás vyrušovať zvuky ani vibrácie, iba budíky, pripomenutia, udalosti a volajúci, ktorých určíte. Budete naďalej počuť všetko, čo sa rozhodnete prehrať, ako napríklad hudbu, videá a hry."</string>
@@ -324,7 +315,10 @@
     <string name="notification_tap_again" msgid="4477318164947497249">"Upozornenie otvoríte opätovným klepnutím"</string>
     <string name="tap_again" msgid="1315420114387908655">"Klepnite znova"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"Otvorte potiahnutím prstom nahor"</string>
-    <string name="keyguard_unlock_press" msgid="8488350566398524740">"Stlačením otvoríte"</string>
+    <!-- no translation found for keyguard_unlock_press (9140109453735019209) -->
+    <skip />
+    <!-- no translation found for keyguard_face_successful_unlock_press (25520941264602588) -->
+    <skip />
     <string name="keyguard_retry" msgid="886802522584053523">"Potiahnutím nahor to skúste znova"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"Ak chcete použiť NFC, odomknite"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"Toto zariadenie patrí vašej organizácii"</string>
@@ -735,7 +729,7 @@
     <string name="auto_saver_title" msgid="6873691178754086596">"Klepnutím naplánujete aktivovanie Šetriča batérie"</string>
     <string name="auto_saver_text" msgid="3214960308353838764">"Zapnite, keď je batéria takmer vybitá"</string>
     <string name="no_auto_saver_action" msgid="7467924389609773835">"Nie, vďaka"</string>
-    <string name="heap_dump_tile_name" msgid="2464189856478823046">"V7pis haldy SysUI"</string>
+    <string name="heap_dump_tile_name" msgid="2464189856478823046">"Výpis haldy SysUI"</string>
     <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8341216022442383954">"Aplikácie používajú zoznam <xliff:g id="TYPES_LIST">%s</xliff:g>."</string>
     <string name="ongoing_privacy_dialog_separator" msgid="1866222499727706187">", "</string>
     <string name="ongoing_privacy_dialog_last_separator" msgid="5615876114268009767">" a "</string>
@@ -788,7 +782,7 @@
     <string name="accessibility_control_change_unfavorite" msgid="6997408061750740327">"odstránite z obľúbených"</string>
     <string name="accessibility_control_move" msgid="8980344493796647792">"Presunúť na pozíciu <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Ovládacie prvky"</string>
-    <string name="controls_favorite_subtitle" msgid="6481675111056961083">"Vyberte ovládanie, ku ktorému chcete mať prístup z rýchlych nastavení"</string>
+    <string name="controls_favorite_subtitle" msgid="6481675111056961083">"Vyberte ovládače, ku ktorému chcete mať prístup z rýchlych nastavení"</string>
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Polohu každého ovládača môžete zmeniť jeho pridržaním a presunutím"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"Všetky ovládače boli odstránené"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"Zmeny neboli uložené"</string>
@@ -855,20 +849,13 @@
     <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"Ak chcete túto reláciu prenášať, otvorte aplikáciu."</string>
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"Neznáma aplikácia"</string>
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"Zastaviť prenos"</string>
-    <!-- no translation found for media_output_first_broadcast_title (6292237789860753022) -->
-    <skip />
-    <!-- no translation found for media_output_broadcast (3555580945878071543) -->
-    <skip />
-    <!-- no translation found for media_output_first_notify_broadcast_message (6353857724136398494) -->
-    <skip />
-    <!-- no translation found for media_output_broadcasting_message (4150299923404886073) -->
-    <skip />
-    <!-- no translation found for media_output_broadcast_name (8786127091542624618) -->
-    <skip />
-    <!-- no translation found for media_output_broadcast_code (870795639644728542) -->
-    <skip />
-    <!-- no translation found for media_output_broadcast_dialog_save (7910865591430010198) -->
-    <skip />
+    <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Ako vysielanie funguje"</string>
+    <string name="media_output_broadcast" msgid="3555580945878071543">"Vysielanie"</string>
+    <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"Ľudia v okolí s kompatibilnými zariadeniami s rozhraním Bluetooth si môžu vypočuť médiá, ktoré vysielate"</string>
+    <string name="media_output_broadcasting_message" msgid="4150299923404886073">"Ľudia v okolí s kompatibilnými zariadeniami s rozhraním Bluetooth si môžu vypočuť vaše vysielanie naskenovaním QR kódu alebo pomocou názvu a hesla tohto vysielania"</string>
+    <string name="media_output_broadcast_name" msgid="8786127091542624618">"Názov vysielania"</string>
+    <string name="media_output_broadcast_code" msgid="870795639644728542">"Heslo"</string>
+    <string name="media_output_broadcast_dialog_save" msgid="7910865591430010198">"Uložiť"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"Číslo zostavy"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"Číslo zostavy bolo skopírované do schránky."</string>
     <string name="basic_status" msgid="2315371112182658176">"Otvorená konverzácia"</string>

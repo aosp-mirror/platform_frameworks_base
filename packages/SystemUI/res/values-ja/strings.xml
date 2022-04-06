@@ -21,8 +21,8 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="4811759950673118541">"システム UI"</string>
     <string name="battery_low_title" msgid="5319680173344341779">"バッテリー セーバーを ON にしますか？"</string>
-    <string name="battery_low_description" msgid="3282977755476423966">"バッテリー残量は <xliff:g id="PERCENTAGE">%s</xliff:g> です。バッテリー セーバーを有効にすると、ダークモードが ON になります。また、バックグラウンド アクティビティが制限され、通知が届くのが遅くなります。"</string>
-    <string name="battery_low_intro" msgid="5148725009653088790">"バッテリー セーバーを有効にすると、ダークモードが ON になります。また、バックグラウンド アクティビティが制限され、通知が届くのが遅くなります。"</string>
+    <string name="battery_low_description" msgid="3282977755476423966">"バッテリー残量は <xliff:g id="PERCENTAGE">%s</xliff:g> です。バッテリー セーバーを ON にすると、ダークモードが ON になります。また、バックグラウンド アクティビティが制限され、通知が届くのが遅くなります。"</string>
+    <string name="battery_low_intro" msgid="5148725009653088790">"バッテリー セーバーを ON にすると、ダークモードが ON になります。また、バックグラウンド アクティビティが制限され、通知が届くのが遅くなります。"</string>
     <string name="battery_low_percent_format" msgid="4276661262843170964">"残量が<xliff:g id="PERCENTAGE">%s</xliff:g>です"</string>
     <string name="invalid_charger_title" msgid="938685362320735167">"USB 経由では充電できません"</string>
     <string name="invalid_charger_text" msgid="2339310107232691577">"デバイスに付属の充電器を使用してください"</string>
@@ -135,7 +135,7 @@
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="2242167416140740920">"顔を認証しました"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"確認しました"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"完了するには [確認] をタップしてください"</string>
-    <!-- no translation found for biometric_dialog_tap_confirm_with_face (7538145860465755864) -->
+    <!-- no translation found for biometric_dialog_tap_confirm_with_face (1092050545851021991) -->
     <skip />
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"認証済み"</string>
     <string name="biometric_dialog_use_pin" msgid="8385294115283000709">"PIN を使用"</string>
@@ -311,7 +311,10 @@
     <string name="notification_tap_again" msgid="4477318164947497249">"開くにはもう一度タップしてください"</string>
     <string name="tap_again" msgid="1315420114387908655">"もう一度タップしてください"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"開くには上にスワイプします"</string>
-    <string name="keyguard_unlock_press" msgid="8488350566398524740">"押すと開きます"</string>
+    <!-- no translation found for keyguard_unlock_press (9140109453735019209) -->
+    <skip />
+    <!-- no translation found for keyguard_face_successful_unlock_press (25520941264602588) -->
+    <skip />
     <string name="keyguard_retry" msgid="886802522584053523">"上にスワイプしてもう一度お試しください"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"NFC を使用するには、ロックを解除してください"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"これは組織が所有するデバイスです"</string>

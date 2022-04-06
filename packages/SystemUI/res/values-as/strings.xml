@@ -135,7 +135,7 @@
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="2242167416140740920">"মুখমণ্ডলৰ বিশ্বাসযোগ্যতা প্ৰমাণীকৰণ কৰা হ’ল"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"নিশ্চিত কৰিলে"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"সম্পূৰ্ণ কৰিবলৈ নিশ্চিত কৰক-ত টিপক"</string>
-    <!-- no translation found for biometric_dialog_tap_confirm_with_face (7538145860465755864) -->
+    <!-- no translation found for biometric_dialog_tap_confirm_with_face (1092050545851021991) -->
     <skip />
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"বিশ্বাসযোগ্যতা প্ৰমাণীকৰণ কৰা হ’ল"</string>
     <string name="biometric_dialog_use_pin" msgid="8385294115283000709">"পিন ব্যৱহাৰ কৰক"</string>
@@ -292,24 +292,15 @@
     <string name="sensor_privacy_start_use_mic_dialog_content" msgid="1624701280680913717">"এইটোৱে আপোনাৰ মাইক্ৰ\'ফ\'ন ব্যৱহাৰ কৰিবলৈ অনুমতি দিয়া আটাইবোৰ এপ্ আৰু সেৱাৰ বাবে এক্সেছ অৱৰোধৰ পৰা আঁতৰায়।"</string>
     <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"এইটোৱে আপোনাৰ কেমেৰা ব্যৱহাৰ কৰিবলৈ অনুমতি দিয়া আটাইবোৰ এপ্ আৰু সেৱাৰ বাবে এক্সেছ অৱৰোধৰ পৰা আঁতৰায়।"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_content" msgid="3577642558418404919">"এইটোৱে আপোনাৰ কেমেৰা অথবা মাইক্ৰ\'ফ\'ন ব্যৱহাৰ কৰিবলৈ অনুমতি দিয়া আটাইবোৰ এপ্ আৰু সেৱাৰ বাবে এক্সেছ অৱৰোধৰ পৰা আঁতৰায়।"</string>
-    <!-- no translation found for sensor_privacy_start_use_mic_blocked_dialog_title (2640140287496469689) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_start_use_camera_blocked_dialog_title (7398084286822440384) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_start_use_mic_camera_blocked_dialog_title (195236134743281973) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_start_use_mic_blocked_dialog_content (2138318880682877747) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_start_use_camera_blocked_dialog_content (7216015168047965948) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_start_use_mic_camera_blocked_dialog_content (3960837827570483762) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_mic_unblocked_toast_content (306555320557065068) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_camera_unblocked_toast_content (7843105715964332311) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_mic_camera_unblocked_toast_content (7339355093282661115) -->
-    <skip />
+    <string name="sensor_privacy_start_use_mic_blocked_dialog_title" msgid="2640140287496469689">"মাইক্ৰ’ফ’ন অৱৰোধ কৰি থোৱা আছে"</string>
+    <string name="sensor_privacy_start_use_camera_blocked_dialog_title" msgid="7398084286822440384">"কেমেৰা অৱৰোধ কৰি থোৱা আছে"</string>
+    <string name="sensor_privacy_start_use_mic_camera_blocked_dialog_title" msgid="195236134743281973">"মাইক আৰু কেমেৰা অৱৰোধ কৰা আছে"</string>
+    <string name="sensor_privacy_start_use_mic_blocked_dialog_content" msgid="2138318880682877747">"অৱৰোধৰ পৰা আঁতৰাবলৈ, মাইক্ৰ’ফ’নৰ এক্সেছ দিবলৈ আপোনাৰ ডিভাইচত গোপনীয়তাৰ ছুইচটো মাইক্ৰ’ফ’ন অন স্থিতিলৈ নিয়ক। আপোনাৰ ডিভাইচত গোপনীয়তাৰ ছুইচটোৰ স্থান জানিবলৈ ডিভাইচৰ মেনুৱেলখন চাওক।"</string>
+    <string name="sensor_privacy_start_use_camera_blocked_dialog_content" msgid="7216015168047965948">"অৱৰোধৰ পৰা আঁতৰাবলৈ, কেমেৰাৰ এক্সেছ দিবলৈ আপোনাৰ ডিভাইচত গোপনীয়তাৰ ছুইচটো কেমেৰা অন স্থিতিলৈ নিয়ক। আপোনাৰ ডিভাইচত গোপনীয়তাৰ ছুইচটোৰ স্থান জানিবলৈ ডিভাইচৰ মেনুৱেলখন চাওক।"</string>
+    <string name="sensor_privacy_start_use_mic_camera_blocked_dialog_content" msgid="3960837827570483762">"সেইবোৰক অৱৰোধৰ পৰা আঁতৰাবলৈ, এক্সেছ অনুমতি দিবলৈ আপোনাৰ ডিভাইচত গোপনীয়তাৰ ছুইচটো অৱৰোধৰ পৰা আঁতৰাবলৈ স্থিতিলৈ নিয়ক। আপোনাৰ ডিভাইচত গোপনীয়তাৰ ছুইচটোৰ স্থান জানিবলৈ ডিভাইচৰ মেনুৱেলখন চাওক।"</string>
+    <string name="sensor_privacy_mic_unblocked_toast_content" msgid="306555320557065068">"মাইক্ৰ’ফ’ন উপলব্ধ"</string>
+    <string name="sensor_privacy_camera_unblocked_toast_content" msgid="7843105715964332311">"কেমেৰা উপলব্ধ"</string>
+    <string name="sensor_privacy_mic_camera_unblocked_toast_content" msgid="7339355093282661115">"মাইক্ৰ’ফ’ন আৰু কেমেৰা উপলব্ধ"</string>
     <string name="media_seamless_other_device" msgid="4654849800789196737">"অন্য ডিভাইচ"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"অৱলোকন ট’গল কৰক"</string>
     <string name="zen_priority_introduction" msgid="3159291973383796646">"আপুনি নিৰ্দিষ্ট কৰা এলাৰ্ম, ৰিমাইণ্ডাৰ, ইভেন্ট আৰু কল কৰোঁতাৰ বাহিৰে আন কোনো শব্দৰ পৰা আপুনি অসুবিধা নাপাব। কিন্তু, সংগীত, ভিডিঅ\' আৰু খেলসমূহকে ধৰি আপুনি প্লে কৰিব খোজা যিকোনো বস্তু তথাপি শুনিব পাৰিব।"</string>
@@ -320,7 +311,10 @@
     <string name="notification_tap_again" msgid="4477318164947497249">"খুলিবলৈ পুনৰাই টিপক"</string>
     <string name="tap_again" msgid="1315420114387908655">"পুনৰ টিপক"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"খুলিবলৈ ওপৰলৈ ছোৱাইপ কৰক"</string>
-    <string name="keyguard_unlock_press" msgid="8488350566398524740">"খুলিবলৈ টিপক"</string>
+    <!-- no translation found for keyguard_unlock_press (9140109453735019209) -->
+    <skip />
+    <!-- no translation found for keyguard_face_successful_unlock_press (25520941264602588) -->
+    <skip />
     <string name="keyguard_retry" msgid="886802522584053523">"পুনৰ চেষ্টা কৰিবলৈ ওপৰলৈ ছোৱাইপ কৰক"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"NFC ব্যৱহাৰ কৰিবলৈ আনলক কৰক"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"এই ডিভাইচটো আপোনাৰ প্ৰতিষ্ঠানৰ"</string>
@@ -843,20 +837,13 @@
     <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"এই ছেশ্বনটো কাষ্ট কৰিবলৈ, অনুগ্ৰহ কৰি এপ্‌টো খোলক"</string>
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"অজ্ঞাত এপ্"</string>
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"কাষ্ট বন্ধ কৰক"</string>
-    <!-- no translation found for media_output_first_broadcast_title (6292237789860753022) -->
-    <skip />
-    <!-- no translation found for media_output_broadcast (3555580945878071543) -->
-    <skip />
-    <!-- no translation found for media_output_first_notify_broadcast_message (6353857724136398494) -->
-    <skip />
-    <!-- no translation found for media_output_broadcasting_message (4150299923404886073) -->
-    <skip />
-    <!-- no translation found for media_output_broadcast_name (8786127091542624618) -->
-    <skip />
-    <!-- no translation found for media_output_broadcast_code (870795639644728542) -->
-    <skip />
-    <!-- no translation found for media_output_broadcast_dialog_save (7910865591430010198) -->
-    <skip />
+    <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"সম্প্ৰচাৰ কৰাটোৱে কেনেকৈ কাম কৰে"</string>
+    <string name="media_output_broadcast" msgid="3555580945878071543">"সম্প্ৰচাৰ"</string>
+    <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"সমিল ব্লুটুথ ডিভাইচৰ সৈতে আপোনাৰ নিকটৱৰ্তী স্থানত থকা লোকসকলে আপুনি সম্প্ৰচাৰ কৰা মিডিয়াটো শুনিব পাৰে"</string>
+    <string name="media_output_broadcasting_message" msgid="4150299923404886073">"আপোনাৰ সম্প্ৰচাৰটো শুনিবলৈ, সমিল ব্লুটুথ ডিভাইচৰ সৈতে আপোনাৰ নিকটৱৰ্তী স্থানত থকা লোকসকলে আপোনাৰ কিউআৰ ক’ড স্কেন কৰিব অথবা আপোনাৰ সম্প্ৰচাৰৰ নাম আৰু পাছৱৰ্ড ব্যৱহাৰ কৰিব পাৰে"</string>
+    <string name="media_output_broadcast_name" msgid="8786127091542624618">"সম্প্ৰচাৰ নাম"</string>
+    <string name="media_output_broadcast_code" msgid="870795639644728542">"পাছৱৰ্ড"</string>
+    <string name="media_output_broadcast_dialog_save" msgid="7910865591430010198">"ছেভ কৰক"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"বিল্ডৰ নম্বৰ"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"ক্লিপব’ৰ্ডলৈ বিল্ডৰ নম্বৰ প্ৰতিলিপি কৰা হ’ল।"</string>
     <string name="basic_status" msgid="2315371112182658176">"বাৰ্তালাপ খোলক"</string>

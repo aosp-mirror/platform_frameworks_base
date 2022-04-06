@@ -135,7 +135,7 @@
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="2242167416140740920">"זיהוי הפנים בוצע"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"יש אישור"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"יש להקיש על \'אישור\' לסיום התהליך"</string>
-    <!-- no translation found for biometric_dialog_tap_confirm_with_face (7538145860465755864) -->
+    <!-- no translation found for biometric_dialog_tap_confirm_with_face (1092050545851021991) -->
     <skip />
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"מאומת"</string>
     <string name="biometric_dialog_use_pin" msgid="8385294115283000709">"שימוש בקוד אימות"</string>
@@ -296,24 +296,15 @@
     <string name="sensor_privacy_start_use_mic_dialog_content" msgid="1624701280680913717">"הפעולה הזו מבטלת את חסימת הגישה של כל האפליקציות והשירותים שמורשים להשתמש במיקרופון."</string>
     <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"הפעולה הזו מבטלת את חסימת הגישה של כל האפליקציות והשירותים שמורשים להשתמש במצלמה."</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_content" msgid="3577642558418404919">"הפעולה הזו מבטלת את חסימת הגישה של כל האפליקציות והשירותים שמורשים להשתמש במצלמה או במיקרופון."</string>
-    <!-- no translation found for sensor_privacy_start_use_mic_blocked_dialog_title (2640140287496469689) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_start_use_camera_blocked_dialog_title (7398084286822440384) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_start_use_mic_camera_blocked_dialog_title (195236134743281973) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_start_use_mic_blocked_dialog_content (2138318880682877747) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_start_use_camera_blocked_dialog_content (7216015168047965948) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_start_use_mic_camera_blocked_dialog_content (3960837827570483762) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_mic_unblocked_toast_content (306555320557065068) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_camera_unblocked_toast_content (7843105715964332311) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_mic_camera_unblocked_toast_content (7339355093282661115) -->
-    <skip />
+    <string name="sensor_privacy_start_use_mic_blocked_dialog_title" msgid="2640140287496469689">"המיקרופון חסום"</string>
+    <string name="sensor_privacy_start_use_camera_blocked_dialog_title" msgid="7398084286822440384">"המצלמה חסומה"</string>
+    <string name="sensor_privacy_start_use_mic_camera_blocked_dialog_title" msgid="195236134743281973">"המיקרופון והמצלמה חסומים"</string>
+    <string name="sensor_privacy_start_use_mic_blocked_dialog_content" msgid="2138318880682877747">"כדי לבטל את החסימה ולאפשר גישה למיקרופון, צריך להעביר את מתג הפרטיות במכשיר למצב \'המיקרופון פועל\'. אפשר להיעזר במדריך של המכשיר כדי לאתר את מתג הפרטיות."</string>
+    <string name="sensor_privacy_start_use_camera_blocked_dialog_content" msgid="7216015168047965948">"כדי לבטל את החסימה ולאפשר גישה למצלמה, צריך להעביר את מתג הפרטיות במכשיר למצב \'המצלמה פועלת\'. אפשר להיעזר במדריך של המכשיר כדי לאתר את מתג הפרטיות."</string>
+    <string name="sensor_privacy_start_use_mic_camera_blocked_dialog_content" msgid="3960837827570483762">"כדי לבטל את החסימה ולאפשר גישה אליהם, צריך להעביר את מתג הפרטיות במכשיר למצב \'החסימה בוטלה\'. אפשר להיעזר במדריך של המכשיר כדי לאתר את מתג הפרטיות."</string>
+    <string name="sensor_privacy_mic_unblocked_toast_content" msgid="306555320557065068">"המיקרופון זמין"</string>
+    <string name="sensor_privacy_camera_unblocked_toast_content" msgid="7843105715964332311">"המצלמה זמינה"</string>
+    <string name="sensor_privacy_mic_camera_unblocked_toast_content" msgid="7339355093282661115">"המיקרופון והמצלמה זמינים"</string>
     <string name="media_seamless_other_device" msgid="4654849800789196737">"מכשיר אחר"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"החלפת מצב של מסכים אחרונים"</string>
     <string name="zen_priority_introduction" msgid="3159291973383796646">"כדי לא להפריע לך, המכשיר לא ירטוט ולא ישמיע שום צליל, חוץ מהתראות, תזכורות, אירועים ושיחות ממתקשרים מסוימים לבחירתך. המצב הזה לא ישפיע על צלילים שהם חלק מתוכן שבחרת להפעיל, כמו מוזיקה, סרטונים ומשחקים."</string>
@@ -324,7 +315,10 @@
     <string name="notification_tap_again" msgid="4477318164947497249">"יש להקיש שוב כדי לפתוח את ההתראה"</string>
     <string name="tap_again" msgid="1315420114387908655">"צריך להקיש פעם נוספת"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"צריך להחליק כדי לפתוח"</string>
-    <string name="keyguard_unlock_press" msgid="8488350566398524740">"יש להקיש כדי לפתוח"</string>
+    <!-- no translation found for keyguard_unlock_press (9140109453735019209) -->
+    <skip />
+    <!-- no translation found for keyguard_face_successful_unlock_press (25520941264602588) -->
+    <skip />
     <string name="keyguard_retry" msgid="886802522584053523">"יש להחליק למעלה כדי לנסות שוב"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"‏יש לבטל את הנעילה כדי להשתמש ב-NFC"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"המכשיר הזה שייך לארגון שלך"</string>
@@ -800,18 +794,12 @@
     <string name="controls_dialog_ok" msgid="2770230012857881822">"הוספה"</string>
     <string name="controls_dialog_message" msgid="342066938390663844">"הוצע על-ידי <xliff:g id="APP">%s</xliff:g>"</string>
     <string name="controls_tile_locked" msgid="731547768182831938">"המכשיר נעול"</string>
-    <!-- no translation found for controls_settings_show_controls_dialog_title (3357852503553809554) -->
-    <skip />
-    <!-- no translation found for controls_settings_show_controls_dialog_message (7666211700524587969) -->
-    <skip />
-    <!-- no translation found for controls_settings_trivial_controls_dialog_title (7593188157655036677) -->
-    <skip />
-    <!-- no translation found for controls_settings_trivial_controls_dialog_message (237183787721917586) -->
-    <skip />
-    <!-- no translation found for controls_settings_dialog_neutral_button (4514446354793124140) -->
-    <skip />
-    <!-- no translation found for controls_settings_dialog_positive_button (436070672551674863) -->
-    <skip />
+    <string name="controls_settings_show_controls_dialog_title" msgid="3357852503553809554">"להציג מכשירים ולאפשר שליטה בהם במסך הנעילה?"</string>
+    <string name="controls_settings_show_controls_dialog_message" msgid="7666211700524587969">"ניתן להוסיף למסך הנעילה אמצעי בקרה למכשירים החיצוניים.\n\nיכול להיות שהאפליקציה של המכשיר תאפשר לך לשלוט בחלק מהמכשירים בלי לבטל את הנעילה של הטלפון או הטאבלט.\n\nאפשר לבצע שינויים בכל שלב בהגדרות."</string>
+    <string name="controls_settings_trivial_controls_dialog_title" msgid="7593188157655036677">"לאפשר שליטה במכשירים במסך הנעילה?"</string>
+    <string name="controls_settings_trivial_controls_dialog_message" msgid="237183787721917586">"אפשר לשלוט בחלק מהמכשירים בלי לבטל את הנעילה של הטלפון או הטאבלט.\n\nהמכשירים שניתן לשלוט בהם באופן הזה נקבעים באפליקציה של המכשיר."</string>
+    <string name="controls_settings_dialog_neutral_button" msgid="4514446354793124140">"לא תודה"</string>
+    <string name="controls_settings_dialog_positive_button" msgid="436070672551674863">"כן"</string>
     <string name="controls_pin_use_alphanumeric" msgid="8478371861023048414">"קוד האימות מכיל אותיות או סמלים"</string>
     <string name="controls_pin_verify" msgid="3452778292918877662">"אימות <xliff:g id="DEVICE">%s</xliff:g>"</string>
     <string name="controls_pin_wrong" msgid="6162694056042164211">"קוד אימות שגוי"</string>
@@ -861,20 +849,13 @@
     <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"‏כדי להעביר (cast) את הסשן הזה, צריך לפתוח את האפליקציה."</string>
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"אפליקציה לא ידועה"</string>
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"‏עצירת ההעברה (casting)"</string>
-    <!-- no translation found for media_output_first_broadcast_title (6292237789860753022) -->
-    <skip />
-    <!-- no translation found for media_output_broadcast (3555580945878071543) -->
-    <skip />
-    <!-- no translation found for media_output_first_notify_broadcast_message (6353857724136398494) -->
-    <skip />
-    <!-- no translation found for media_output_broadcasting_message (4150299923404886073) -->
-    <skip />
-    <!-- no translation found for media_output_broadcast_name (8786127091542624618) -->
-    <skip />
-    <!-- no translation found for media_output_broadcast_code (870795639644728542) -->
-    <skip />
-    <!-- no translation found for media_output_broadcast_dialog_save (7910865591430010198) -->
-    <skip />
+    <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"הסבר על שידורים"</string>
+    <string name="media_output_broadcast" msgid="3555580945878071543">"שידור"</string>
+    <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"‏אנשים בקרבת מקום עם מכשירי Bluetooth תואמים יכולים להאזין למדיה שמשודרת על ידך"</string>
+    <string name="media_output_broadcasting_message" msgid="4150299923404886073">"‏אנשים בקרבת מקום עם מכשירי Bluetooth תואמים יכולים לסרוק את קוד ה‑QR או להשתמש בשם השידור ובסיסמה שלך כדי להאזין לשידור"</string>
+    <string name="media_output_broadcast_name" msgid="8786127091542624618">"שם השידור"</string>
+    <string name="media_output_broadcast_code" msgid="870795639644728542">"סיסמה"</string>
+    <string name="media_output_broadcast_dialog_save" msgid="7910865591430010198">"שמירה"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"‏מספר Build"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"‏מספר ה-Build הועתק ללוח."</string>
     <string name="basic_status" msgid="2315371112182658176">"פתיחת שיחה"</string>
@@ -953,8 +934,7 @@
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"אפליקציות פעילות"</string>
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"עצירה"</string>
     <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"הופסקה"</string>
-    <!-- no translation found for clipboard_edit_text_done (4551887727694022409) -->
-    <skip />
+    <string name="clipboard_edit_text_done" msgid="4551887727694022409">"סיום"</string>
     <string name="clipboard_overlay_text_copied" msgid="1872624400464891363">"הועתק"</string>
     <string name="clipboard_edit_source" msgid="9156488177277788029">"המקור: <xliff:g id="APPNAME">%1$s</xliff:g>"</string>
     <string name="clipboard_dismiss_description" msgid="7544573092766945657">"ביטול של העתקת ממשק המשתמש"</string>
