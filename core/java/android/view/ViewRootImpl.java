@@ -6409,6 +6409,24 @@ public final class ViewRootImpl implements ViewParent,
                 return FINISH_HANDLED;
             }
 
+            // If the new back dispatch is enabled, intercept KEYCODE_BACK before it reaches the
+            // view tree and invoke the appropriate {@link OnBackInvokedCallback}.
+            if (isBack(event)
+                    && mContext != null
+                    && WindowOnBackInvokedDispatcher.isOnBackInvokedCallbackEnabled(mContext)) {
+                OnBackInvokedCallback topCallback =
+                        getOnBackInvokedDispatcher().getTopCallback();
+                if (event.getAction() == KeyEvent.ACTION_UP) {
+                    if (topCallback != null) {
+                        topCallback.onBackInvoked();
+                        return FINISH_HANDLED;
+                    }
+                } else {
+                    // Drop other actions such as {@link KeyEvent.ACTION_DOWN}.
+                    return FINISH_NOT_HANDLED;
+                }
+            }
+
             // Deliver the key to the view hierarchy.
             if (mView.dispatchKeyEvent(event)) {
                 return FINISH_HANDLED;
@@ -6416,19 +6434,6 @@ public final class ViewRootImpl implements ViewParent,
 
             if (shouldDropInputEvent(q)) {
                 return FINISH_NOT_HANDLED;
-            }
-
-            if (isBack(event)
-                    && mContext != null
-                    && WindowOnBackInvokedDispatcher.isOnBackInvokedCallbackEnabled(mContext)) {
-                // Invoke the appropriate {@link OnBackInvokedCallback} if the new back
-                // navigation should be used, and the key event is not handled by anything else.
-                OnBackInvokedCallback topCallback =
-                        getOnBackInvokedDispatcher().getTopCallback();
-                if (topCallback != null) {
-                    topCallback.onBackInvoked();
-                    return FINISH_HANDLED;
-                }
             }
 
             // This dispatch is for windows that don't have a Window.Callback. Otherwise,
@@ -10768,11 +10773,7 @@ public final class ViewRootImpl implements ViewParent,
                 KeyCharacterMap.VIRTUAL_KEYBOARD, 0 /* scancode */,
                 KeyEvent.FLAG_FROM_SYSTEM | KeyEvent.FLAG_VIRTUAL_HARD_KEY,
                 InputDevice.SOURCE_KEYBOARD);
-
-        ev.setDisplayId(mContext.getDisplay().getDisplayId());
-        if (mView != null) {
-            mView.dispatchKeyEvent(ev);
-        }
+        enqueueInputEvent(ev);
     }
 
     private void registerCompatOnBackInvokedCallback() {
