@@ -151,6 +151,8 @@ final class NavigationBarController {
 
         private boolean mDrawLegacyNavigationBarBackground;
 
+        private final Rect mTempRect = new Rect();
+
         Impl(@NonNull InputMethodService inputMethodService) {
             mService = inputMethodService;
         }
@@ -281,13 +283,12 @@ final class NavigationBarController {
                         touchableRegion.set(originalInsets.touchableRegion);
                         break;
                 }
-                final Rect navBarRect = new Rect(decor.getLeft(),
-                        decor.getBottom() - systemInsets.bottom,
+                mTempRect.set(decor.getLeft(), decor.getBottom() - systemInsets.bottom,
                         decor.getRight(), decor.getBottom());
                 if (touchableRegion == null) {
-                    touchableRegion = new Region(navBarRect);
+                    touchableRegion = new Region(mTempRect);
                 } else {
-                    touchableRegion.union(navBarRect);
+                    touchableRegion.union(mTempRect);
                 }
 
                 dest.touchableRegion.set(touchableRegion);
