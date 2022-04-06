@@ -59,6 +59,7 @@ import com.android.systemui.statusbar.phone.fragment.dagger.StatusBarFragmentCom
 import com.android.systemui.statusbar.phone.ongoingcall.OngoingCallController;
 import com.android.systemui.statusbar.phone.panelstate.PanelExpansionStateManager;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
+import com.android.systemui.util.CarrierConfigTracker;
 import com.android.systemui.util.concurrency.FakeExecutor;
 import com.android.systemui.util.settings.SecureSettings;
 import com.android.systemui.util.time.FakeSystemClock;
@@ -90,6 +91,7 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
     private OperatorNameViewController mOperatorNameViewController;
     private SecureSettings mSecureSettings;
     private FakeExecutor mExecutor = new FakeExecutor(new FakeSystemClock());
+    private final CarrierConfigTracker mCarrierConfigTracker = mock(CarrierConfigTracker.class);
 
     @Mock
     private StatusBarFragmentComponent.Factory mStatusBarFragmentComponentFactory;
@@ -373,6 +375,7 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
                 mNetworkController,
                 mStatusBarStateController,
                 mCommandQueue,
+                mCarrierConfigTracker,
                 new CollapsedStatusBarFragmentLogger(
                         new LogBuffer("TEST", 1, 1, mock(LogcatEchoTracker.class)),
                         new DisableFlagsLogger()
