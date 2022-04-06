@@ -522,6 +522,38 @@ class ViewHierarchyAnimatorTest : SysuiTestCase() {
     }
 
     @Test
+    fun cleansUpListenersCorrectly() {
+        val firstChild = View(mContext)
+        firstChild.layoutParams = LinearLayout.LayoutParams(50 /* width */, 100 /* height */)
+        rootView.addView(firstChild)
+        val secondChild = View(mContext)
+        secondChild.layoutParams = LinearLayout.LayoutParams(50 /* width */, 100 /* height */)
+        rootView.addView(secondChild)
+        rootView.measure(
+            View.MeasureSpec.makeMeasureSpec(100, View.MeasureSpec.EXACTLY),
+            View.MeasureSpec.makeMeasureSpec(100, View.MeasureSpec.EXACTLY)
+        )
+        rootView.layout(0 /* l */, 0 /* t */, 100 /* r */, 100 /* b */)
+
+        val success = ViewHierarchyAnimator.animateNextUpdate(rootView)
+        // Change all bounds.
+        rootView.measure(
+            View.MeasureSpec.makeMeasureSpec(150, View.MeasureSpec.EXACTLY),
+            View.MeasureSpec.makeMeasureSpec(100, View.MeasureSpec.EXACTLY)
+        )
+        rootView.layout(0 /* l */, 0 /* t */, 150 /* r */, 100 /* b */)
+
+        assertTrue(success)
+        assertNotNull(rootView.getTag(R.id.tag_layout_listener))
+        assertNotNull(firstChild.getTag(R.id.tag_layout_listener))
+        assertNotNull(secondChild.getTag(R.id.tag_layout_listener))
+        endAnimation(rootView)
+        assertNull(rootView.getTag(R.id.tag_layout_listener))
+        assertNull(firstChild.getTag(R.id.tag_layout_listener))
+        assertNull(secondChild.getTag(R.id.tag_layout_listener))
+    }
+
+    @Test
     fun doesNotAnimateInvisibleViews() {
         rootView.layout(10 /* l */, 10 /* t */, 50 /* r */, 50 /* b */)
 
