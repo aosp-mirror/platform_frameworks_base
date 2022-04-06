@@ -1371,10 +1371,10 @@
     <string name="usb_unsupported_audio_accessory_title" msgid="2335775548086533065">"Detectouse un accesorio de audio analóxico"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="1300168007129796621">"O dispositivo conectado non é compatible con este teléfono. Toca para obter máis información."</string>
     <string name="adb_active_notification_title" msgid="408390247354560331">"Depuración por USB conectada"</string>
-    <string name="adb_active_notification_message" msgid="5617264033476778211">"Toca para desactivar a depuración por USB"</string>
+    <string name="adb_active_notification_message" msgid="5617264033476778211">"Toca e desactiva a depuración por USB"</string>
     <string name="adb_active_notification_message" product="tv" msgid="6624498401272780855">"Selecciona a opción para desactivar a depuración por USB."</string>
     <string name="adbwifi_active_notification_title" msgid="6147343659168302473">"A depuración sen fíos está conectada"</string>
-    <string name="adbwifi_active_notification_message" msgid="930987922852867972">"Toca para desactivar a depuración sen fíos"</string>
+    <string name="adbwifi_active_notification_message" msgid="930987922852867972">"Toca e desactiva a depuración sen fíos"</string>
     <string name="adbwifi_active_notification_message" product="tv" msgid="8633421848366915478">"Selecciona para desactivar a depuración sen fíos."</string>
     <string name="test_harness_mode_notification_title" msgid="2282785860014142511">"Activouse o modo de axente de proba"</string>
     <string name="test_harness_mode_notification_message" msgid="3039123743127958420">"Restablece a configuración de fábrica para desactivar o modo de axente de proba."</string>
