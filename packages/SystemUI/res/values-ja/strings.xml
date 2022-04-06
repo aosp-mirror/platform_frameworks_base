@@ -21,8 +21,8 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="4811759950673118541">"システム UI"</string>
     <string name="battery_low_title" msgid="5319680173344341779">"バッテリー セーバーを ON にしますか？"</string>
-    <string name="battery_low_description" msgid="3282977755476423966">"バッテリー残量は <xliff:g id="PERCENTAGE">%s</xliff:g> です。バッテリー セーバーを有効にすると、ダークモードが ON になります。また、バックグラウンド アクティビティが制限され、通知が届くのが遅くなります。"</string>
-    <string name="battery_low_intro" msgid="5148725009653088790">"バッテリー セーバーを有効にすると、ダークモードが ON になります。また、バックグラウンド アクティビティが制限され、通知が届くのが遅くなります。"</string>
+    <string name="battery_low_description" msgid="3282977755476423966">"バッテリー残量は <xliff:g id="PERCENTAGE">%s</xliff:g> です。バッテリー セーバーを ON にすると、ダークモードが ON になります。また、バックグラウンド アクティビティが制限され、通知が届くのが遅くなります。"</string>
+    <string name="battery_low_intro" msgid="5148725009653088790">"バッテリー セーバーを ON にすると、ダークモードが ON になります。また、バックグラウンド アクティビティが制限され、通知が届くのが遅くなります。"</string>
     <string name="battery_low_percent_format" msgid="4276661262843170964">"残量が<xliff:g id="PERCENTAGE">%s</xliff:g>です"</string>
     <string name="invalid_charger_title" msgid="938685362320735167">"USB 経由では充電できません"</string>
     <string name="invalid_charger_text" msgid="2339310107232691577">"デバイスに付属の充電器を使用してください"</string>
@@ -34,6 +34,10 @@
     <string name="status_bar_settings_auto_rotation" msgid="8329080442278431708">"自動回転画面"</string>
     <string name="usb_device_permission_prompt" msgid="4414719028369181772">"<xliff:g id="APPLICATION">%1$s</xliff:g> に <xliff:g id="USB_DEVICE">%2$s</xliff:g> へのアクセスを許可しますか？"</string>
     <string name="usb_device_permission_prompt_warn" msgid="2309129784984063656">"<xliff:g id="APPLICATION">%1$s</xliff:g> に <xliff:g id="USB_DEVICE">%2$s</xliff:g>へのアクセスを許可しますか？\nこのアプリに録音権限は付与されていませんが、アクセスを許可すると、この USB デバイスから音声を収集できるようになります。"</string>
+    <string name="usb_audio_device_permission_prompt_title" msgid="4221351137250093451">"<xliff:g id="APPLICATION">%1$s</xliff:g> に <xliff:g id="USB_DEVICE">%2$s</xliff:g> へのアクセスを許可しますか？"</string>
+    <string name="usb_audio_device_confirm_prompt_title" msgid="8828406516732985696">"<xliff:g id="APPLICATION">%1$s</xliff:g> を起動して <xliff:g id="USB_DEVICE">%2$s</xliff:g> を処理しますか？"</string>
+    <string name="usb_audio_device_prompt_warn" msgid="2504972133361130335">"このアプリに録音権限は付与されていませんが、この USB デバイスから音声を収集できるようになります。このデバイスで <xliff:g id="APPLICATION">%1$s</xliff:g> を使用すると、着信音、通知音、アラームが鳴らなくなる可能性があります。"</string>
+    <string name="usb_audio_device_prompt" msgid="7944987408206252949">"このデバイスで <xliff:g id="APPLICATION">%1$s</xliff:g> を使用すると、着信音、通知音、アラームが鳴らなくなる可能性があります。"</string>
     <string name="usb_accessory_permission_prompt" msgid="717963550388312123">"<xliff:g id="APPLICATION">%1$s</xliff:g> に <xliff:g id="USB_ACCESSORY">%2$s</xliff:g> へのアクセスを許可しますか？"</string>
     <string name="usb_device_confirm_prompt" msgid="4091711472439910809">"<xliff:g id="APPLICATION">%1$s</xliff:g> を起動して <xliff:g id="USB_DEVICE">%2$s</xliff:g> を処理しますか？"</string>
     <string name="usb_device_confirm_prompt_warn" msgid="990208659736311769">"<xliff:g id="APPLICATION">%1$s</xliff:g> を開いて <xliff:g id="USB_DEVICE">%2$s</xliff:g>を利用しますか？\nこのアプリに録音権限は付与されていませんが、この USB デバイスから音声を収集できるようになります。"</string>
@@ -41,8 +45,8 @@
     <string name="usb_accessory_uri_prompt" msgid="6756649383432542382">"このUSBアクセサリを扱うアプリはインストールされていません。詳細: <xliff:g id="URL">%1$s</xliff:g>"</string>
     <string name="title_usb_accessory" msgid="1236358027511638648">"USBアクセサリ"</string>
     <string name="label_view" msgid="6815442985276363364">"表示"</string>
-    <string name="always_use_device" msgid="210535878779644679">"<xliff:g id="USB_DEVICE">%2$s</xliff:g> を接続したら常に <xliff:g id="APPLICATION">%1$s</xliff:g> を起動する"</string>
-    <string name="always_use_accessory" msgid="1977225429341838444">"<xliff:g id="USB_ACCESSORY">%2$s</xliff:g> を接続したら常に <xliff:g id="APPLICATION">%1$s</xliff:g> を起動する"</string>
+    <string name="always_use_device" msgid="210535878779644679">"<xliff:g id="USB_DEVICE">%2$s</xliff:g> を接続している場合は常に <xliff:g id="APPLICATION">%1$s</xliff:g> を起動する"</string>
+    <string name="always_use_accessory" msgid="1977225429341838444">"<xliff:g id="USB_ACCESSORY">%2$s</xliff:g> を接続している場合は常に <xliff:g id="APPLICATION">%1$s</xliff:g> を起動する"</string>
     <string name="usb_debugging_title" msgid="8274884945238642726">"USB デバッグを許可しますか？"</string>
     <string name="usb_debugging_message" msgid="5794616114463921773">"このパソコンのRSAキーのフィンガープリント:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="4003121804294739548">"このパソコンからの USB デバッグを常に許可する"</string>
@@ -131,7 +135,7 @@
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="2242167416140740920">"顔を認証しました"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"確認しました"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"完了するには [確認] をタップしてください"</string>
-    <string name="biometric_dialog_tap_confirm_with_face" msgid="1597899891472340950">"顔認識でロックを解除しました。押して続行してください。"</string>
+    <string name="biometric_dialog_tap_confirm_with_face" msgid="1092050545851021991">"顔でロック解除しました。ロック解除アイコンを押して続行します。"</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"認証済み"</string>
     <string name="biometric_dialog_use_pin" msgid="8385294115283000709">"PIN を使用"</string>
     <string name="biometric_dialog_use_pattern" msgid="2315593393167211194">"パターンを使用"</string>
@@ -287,6 +291,15 @@
     <string name="sensor_privacy_start_use_mic_dialog_content" msgid="1624701280680913717">"マイクの使用が許可されているすべてのアプリとサービスでアクセスのブロックが解除されます。"</string>
     <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"カメラの使用が許可されているすべてのアプリとサービスでアクセスのブロックが解除されます。"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_content" msgid="3577642558418404919">"カメラやマイクの使用が許可されているすべてのアプリとサービスでアクセスのブロックが解除されます。"</string>
+    <string name="sensor_privacy_start_use_mic_blocked_dialog_title" msgid="2640140287496469689">"マイクがブロックされています"</string>
+    <string name="sensor_privacy_start_use_camera_blocked_dialog_title" msgid="7398084286822440384">"カメラがブロックされています"</string>
+    <string name="sensor_privacy_start_use_mic_camera_blocked_dialog_title" msgid="195236134743281973">"マイクとカメラがブロックされています"</string>
+    <string name="sensor_privacy_start_use_mic_blocked_dialog_content" msgid="2138318880682877747">"ブロックを解除するには、デバイスのプライバシー スイッチをマイクオンの位置に移動し、マイクへのアクセスを許可してください。デバイスのプライバシー スイッチの場所については、デバイスのマニュアルを参照してください。"</string>
+    <string name="sensor_privacy_start_use_camera_blocked_dialog_content" msgid="7216015168047965948">"ブロックを解除するには、デバイスのプライバシー スイッチをカメラオンの位置に移動し、カメラへのアクセスを許可してください。デバイスのプライバシー スイッチの場所については、デバイスのマニュアルを参照してください。"</string>
+    <string name="sensor_privacy_start_use_mic_camera_blocked_dialog_content" msgid="3960837827570483762">"ブロックを解除するには、デバイスのプライバシー スイッチをブロック解除の位置に移動し、アクセスを許可してください。デバイスのプライバシー スイッチの場所については、デバイスのマニュアルを参照してください。"</string>
+    <string name="sensor_privacy_mic_unblocked_toast_content" msgid="306555320557065068">"マイクを利用できます"</string>
+    <string name="sensor_privacy_camera_unblocked_toast_content" msgid="7843105715964332311">"カメラを利用できます"</string>
+    <string name="sensor_privacy_mic_camera_unblocked_toast_content" msgid="7339355093282661115">"マイクとカメラを利用できます"</string>
     <string name="media_seamless_other_device" msgid="4654849800789196737">"その他のデバイス"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"概要を切り替え"</string>
     <string name="zen_priority_introduction" msgid="3159291973383796646">"アラーム、リマインダー、予定、指定した人からの着信以外の音やバイブレーションに煩わされることはありません。音楽、動画、ゲームなど再生対象として選択したコンテンツは引き続き再生されます。"</string>
@@ -297,7 +310,8 @@
     <string name="notification_tap_again" msgid="4477318164947497249">"開くにはもう一度タップしてください"</string>
     <string name="tap_again" msgid="1315420114387908655">"もう一度タップしてください"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"開くには上にスワイプします"</string>
-    <string name="keyguard_unlock_press" msgid="8488350566398524740">"押すと開きます"</string>
+    <string name="keyguard_unlock_press" msgid="9140109453735019209">"ロック解除アイコンを押して開きます"</string>
+    <string name="keyguard_face_successful_unlock_press" msgid="25520941264602588">"顔でロック解除しました。ロック解除アイコンを押して開きます。"</string>
     <string name="keyguard_retry" msgid="886802522584053523">"上にスワイプしてもう一度お試しください"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"NFC を使用するには、ロックを解除してください"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"これは組織が所有するデバイスです"</string>
@@ -320,7 +334,6 @@
     <string name="keyguard_indication_charging_time_dock" msgid="6150404291427377863">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • ホルダーで充電中 • 完了まで <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"ユーザーを切り替える"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"このセッションでのアプリとデータはすべて削除されます。"</string>
-    <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"削除"</string>
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"おかえりなさい、ゲストさん"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"セッションを続行しますか？"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"最初から開始"</string>
@@ -766,6 +779,12 @@
     <string name="controls_dialog_ok" msgid="2770230012857881822">"追加"</string>
     <string name="controls_dialog_message" msgid="342066938390663844">"<xliff:g id="APP">%s</xliff:g> によるおすすめ"</string>
     <string name="controls_tile_locked" msgid="731547768182831938">"デバイス: ロック状態"</string>
+    <string name="controls_settings_show_controls_dialog_title" msgid="3357852503553809554">"ロック画面にデバイスを表示して操作しますか？"</string>
+    <string name="controls_settings_show_controls_dialog_message" msgid="7666211700524587969">"ロック画面に外部デバイスのコントロールを追加できます。\n\nスマートフォンやタブレットのロックを解除しなくても、デバイスアプリによって一部のデバイスを操作できる可能性があります。\n\n設定でいつでも変更できます。"</string>
+    <string name="controls_settings_trivial_controls_dialog_title" msgid="7593188157655036677">"ロック画面でデバイスを操作しますか？"</string>
+    <string name="controls_settings_trivial_controls_dialog_message" msgid="237183787721917586">"スマートフォンやタブレットのロックを解除しなくても一部のデバイスを操作できます。\n\nこの方法でどのデバイスを操作できるかは、デバイスアプリが判断します。"</string>
+    <string name="controls_settings_dialog_neutral_button" msgid="4514446354793124140">"いいえ"</string>
+    <string name="controls_settings_dialog_positive_button" msgid="436070672551674863">"はい"</string>
     <string name="controls_pin_use_alphanumeric" msgid="8478371861023048414">"PIN に英字や記号を含める"</string>
     <string name="controls_pin_verify" msgid="3452778292918877662">"<xliff:g id="DEVICE">%s</xliff:g>の確認"</string>
     <string name="controls_pin_wrong" msgid="6162694056042164211">"PIN が間違っています"</string>
@@ -775,8 +794,7 @@
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"スワイプすると他の構造が表示されます"</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"候補を読み込んでいます"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"メディア"</string>
-    <!-- no translation found for controls_media_close_session (4780485355795635052) -->
-    <skip />
+    <string name="controls_media_close_session" msgid="4780485355795635052">"<xliff:g id="APP_NAME">%1$s</xliff:g> のこのメディア コントロールを非表示にしますか？"</string>
     <string name="controls_media_active_session" msgid="3146882316024153337">"現在のメディア セッションは非表示にできません。"</string>
     <string name="controls_media_dismiss_button" msgid="4485675693008031646">"非表示"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"再開"</string>
@@ -796,8 +814,7 @@
     <string name="media_move_closer_to_end_cast" msgid="6495907340926563656">"ここで再生するには<xliff:g id="DEVICENAME">%1$s</xliff:g>に近づいてください"</string>
     <string name="media_transfer_playing_different_device" msgid="7186806382609785610">"<xliff:g id="DEVICENAME">%1$s</xliff:g>で再生しています"</string>
     <string name="media_transfer_playing_this_device" msgid="1856890686844499172">"このスマートフォンで再生しています"</string>
-    <!-- no translation found for media_transfer_failed (7955354964610603723) -->
-    <skip />
+    <string name="media_transfer_failed" msgid="7955354964610603723">"エラーが発生しました。もう一度お試しください。"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"無効: アプリをご確認ください"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"見つかりませんでした"</string>
     <string name="controls_error_removed_title" msgid="1207794911208047818">"コントロールを使用できません"</string>
@@ -816,6 +833,13 @@
     <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"新しいデバイスとのペア設定"</string>
     <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"このセッションをキャストするには、アプリを開いてください。"</string>
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"不明なアプリ"</string>
+    <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"ブロードキャストの仕組み"</string>
+    <string name="media_output_broadcast" msgid="3555580945878071543">"ブロードキャスト"</string>
+    <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"Bluetooth 対応デバイスを持っている付近のユーザーは、あなたがブロードキャストしているメディアを聴けます"</string>
+    <string name="media_output_broadcasting_message" msgid="4150299923404886073">"Bluetooth 対応デバイスを持っている付近のユーザーは、QR コードをスキャンしたり、ブロードキャストの名前とパスワードを使用したりすることで、あなたのブロードキャストを聴けます。"</string>
+    <string name="media_output_broadcast_name" msgid="8786127091542624618">"ブロードキャストの名前"</string>
+    <string name="media_output_broadcast_code" msgid="870795639644728542">"パスワード"</string>
+    <string name="media_output_broadcast_dialog_save" msgid="7910865591430010198">"保存"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"ビルド番号"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"ビルド番号をクリップボードにコピーしました。"</string>
     <string name="basic_status" msgid="2315371112182658176">"空の会話"</string>
@@ -885,14 +909,14 @@
     <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"タイルを追加しない"</string>
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"ユーザーの選択"</string>
     <plurals name="fgs_manager_footer_label" formatted="false" msgid="9091110396713032871">
-      <item quantity="other">有効なアプリ: <xliff:g id="COUNT_1">%s</xliff:g> 個</item>
-      <item quantity="one">有効なアプリ: <xliff:g id="COUNT_0">%s</xliff:g> 個</item>
+      <item quantity="other">実行中のアプリ: <xliff:g id="COUNT_1">%s</xliff:g> 個</item>
+      <item quantity="one">実行中のアプリ: <xliff:g id="COUNT_0">%s</xliff:g> 個</item>
     </plurals>
     <string name="fgs_dot_content_description" msgid="2865071539464777240">"最新情報"</string>
-    <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"有効なアプリ"</string>
+    <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"実行中のアプリ"</string>
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"停止"</string>
     <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"停止中"</string>
-    <string name="clipboard_edit_text_copy" msgid="770856373439969178">"コピー"</string>
+    <string name="clipboard_edit_text_done" msgid="4551887727694022409">"完了"</string>
     <string name="clipboard_overlay_text_copied" msgid="1872624400464891363">"コピーしました"</string>
     <string name="clipboard_edit_source" msgid="9156488177277788029">"<xliff:g id="APPNAME">%1$s</xliff:g> から"</string>
     <string name="clipboard_dismiss_description" msgid="7544573092766945657">"コピー UI を閉じる"</string>

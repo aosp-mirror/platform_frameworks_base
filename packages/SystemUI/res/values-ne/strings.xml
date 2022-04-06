@@ -26,14 +26,18 @@
     <string name="battery_low_percent_format" msgid="4276661262843170964">"<xliff:g id="PERCENTAGE">%s</xliff:g> बाँकी"</string>
     <string name="invalid_charger_title" msgid="938685362320735167">"USB मार्फत चार्ज गर्न सकिँदैन"</string>
     <string name="invalid_charger_text" msgid="2339310107232691577">"तपाईंको यन्त्रसँगै आएको चार्जर प्रयोग गर्नुहोस्‌"</string>
-    <string name="battery_saver_confirmation_title" msgid="1234998463717398453">"ब्याट्री सेभर सक्रिय गर्ने हो?"</string>
+    <string name="battery_saver_confirmation_title" msgid="1234998463717398453">"ब्याट्री सेभर अन गर्ने हो?"</string>
     <string name="battery_saver_confirmation_title_generic" msgid="2299231884234959849">"ब्याट्री सेभरका बारेमा"</string>
-    <string name="battery_saver_confirmation_ok" msgid="5042136476802816494">"खोल्नुहोस्"</string>
+    <string name="battery_saver_confirmation_ok" msgid="5042136476802816494">"अन गर्नुहोस्"</string>
     <string name="battery_saver_start_action" msgid="8353766979886287140">"अन गर्नुहोस्"</string>
     <string name="battery_saver_dismiss_action" msgid="7199342621040014738">"पर्दैन"</string>
     <string name="status_bar_settings_auto_rotation" msgid="8329080442278431708">"स्वत:घुम्ने स्क्रिन"</string>
     <string name="usb_device_permission_prompt" msgid="4414719028369181772">"<xliff:g id="APPLICATION">%1$s</xliff:g> लाई <xliff:g id="USB_DEVICE">%2$s</xliff:g> माथि पहुँच राख्ने अनुमति दिने हो?"</string>
     <string name="usb_device_permission_prompt_warn" msgid="2309129784984063656">"<xliff:g id="APPLICATION">%1$s</xliff:g> लाई <xliff:g id="USB_DEVICE">%2$s</xliff:g> माथि पहुँच राख्न अनुमति दिने हो?\nयो एपलाई रेकर्ड गर्ने अनुमति प्रदान गरिएको छैन तर यसले USB यन्त्रमार्फत अडियो क्याप्चर गर्न सक्छ।"</string>
+    <string name="usb_audio_device_permission_prompt_title" msgid="4221351137250093451">"<xliff:g id="APPLICATION">%1$s</xliff:g> लाई <xliff:g id="USB_DEVICE">%2$s</xliff:g> प्रयोग गर्ने अनुमति दिने हो?"</string>
+    <string name="usb_audio_device_confirm_prompt_title" msgid="8828406516732985696">"<xliff:g id="USB_DEVICE">%2$s</xliff:g> को व्यवस्थापन गर्न <xliff:g id="APPLICATION">%1$s</xliff:g> खोल्ने हो?"</string>
+    <string name="usb_audio_device_prompt_warn" msgid="2504972133361130335">"यो एपलाई रेकर्ड गर्ने अनुमति दिइएको छैन तर यसले यो USB डिभाइसमार्फत अडियो रेकर्ड गर्न सक्छ। तपाईंले यो डिभाइसमा <xliff:g id="APPLICATION">%1$s</xliff:g> प्रयोग गर्नुभयो भने तपाईंले कल, सूचना र अलार्मको आवाज नसुन्ने सम्भावना हुन्छ।"</string>
+    <string name="usb_audio_device_prompt" msgid="7944987408206252949">"तपाईंले यो डिभाइसमा <xliff:g id="APPLICATION">%1$s</xliff:g> प्रयोग गर्नुभयो भने तपाईंले कल, सूचना र अलार्मको आवाज नसुन्ने सम्भावना हुन्छ।"</string>
     <string name="usb_accessory_permission_prompt" msgid="717963550388312123">"<xliff:g id="APPLICATION">%1$s</xliff:g> लाई <xliff:g id="USB_ACCESSORY">%2$s</xliff:g> माथि पहुँच राख्ने अनुमति दिने हो?"</string>
     <string name="usb_device_confirm_prompt" msgid="4091711472439910809">"<xliff:g id="USB_DEVICE">%2$s</xliff:g> को व्यवस्थापन गर्न <xliff:g id="APPLICATION">%1$s</xliff:g> खोल्ने हो?"</string>
     <string name="usb_device_confirm_prompt_warn" msgid="990208659736311769">"<xliff:g id="APPLICATION">%1$s</xliff:g> लाई <xliff:g id="USB_DEVICE">%2$s</xliff:g> सञ्चालन गर्न खोल्ने हो?\nयो एपलाई रेकर्ड गर्ने अनुमति प्रदान गरिएको छैन तर यसले USB यन्त्रमार्फत अडियो क्याप्चर गर्न सक्छ।"</string>
@@ -131,7 +135,8 @@
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="2242167416140740920">"अनुहार प्रमाणीकरण गरियो"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"पुष्टि भयो"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"पूरा गर्नका लागि पुष्टि गर्नुहोस् नामक विकल्पमा ट्याप गर्नुहोस्"</string>
-    <string name="biometric_dialog_tap_confirm_with_face" msgid="1597899891472340950">"तपाईंको अनुहार प्रयोग गरी अनलक गरियो। जारी राख्न थिच्नुहोस्।"</string>
+    <!-- no translation found for biometric_dialog_tap_confirm_with_face (1092050545851021991) -->
+    <skip />
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"प्रमाणीकरण गरियो"</string>
     <string name="biometric_dialog_use_pin" msgid="8385294115283000709">"PIN प्रयोग गर्नुहोस्"</string>
     <string name="biometric_dialog_use_pattern" msgid="2315593393167211194">"ढाँचा प्रयोग गर्नुहोस्"</string>
@@ -287,6 +292,15 @@
     <string name="sensor_privacy_start_use_mic_dialog_content" msgid="1624701280680913717">"यसो गर्नुभयो भने माइक्रोफोन प्रयोग गर्ने अनुमति दिइएका सबै एप तथा सेवाहरूका लागि सो अनुमति अनब्लक गरिन्छ।"</string>
     <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"यसो गर्नुभयो भने क्यामेरा प्रयोग गर्ने अनुमति दिइएका सबै एप तथा सेवाहरूका लागि सो अनुमति अनब्लक गरिन्छ।"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_content" msgid="3577642558418404919">"यसो गर्नुभयो भने क्यामेरा वा माइक्रोफोन प्रयोग गर्ने अनुमति दिइएका सबै एप तथा सेवाहरूका लागि सो अनुमति अनब्लक गरिन्छ।"</string>
+    <string name="sensor_privacy_start_use_mic_blocked_dialog_title" msgid="2640140287496469689">"माइक्रोफोन ब्लक गरिएको छ"</string>
+    <string name="sensor_privacy_start_use_camera_blocked_dialog_title" msgid="7398084286822440384">"क्यामेरा ब्लक गरिएको छ"</string>
+    <string name="sensor_privacy_start_use_mic_camera_blocked_dialog_title" msgid="195236134743281973">"माइक र क्यामेरा ब्लक गरिएको छ"</string>
+    <string name="sensor_privacy_start_use_mic_blocked_dialog_content" msgid="2138318880682877747">"माइक्रोफोन अनब्लक गर्न आफ्नो डिभाइसको गोपनीयताको स्विच टगल गरी \"माइक्रोफोन अन छ\" बनाएर माइक्रोफोन प्रयोग गर्ने अनुमति दिनुहोस्। आफ्नो डिभाइसमा गोपनीयताको स्विच भेट्टाउन डिभाइसको म्यानुअल हेर्नुहोस्।"</string>
+    <string name="sensor_privacy_start_use_camera_blocked_dialog_content" msgid="7216015168047965948">"क्यामेरा अनब्लक गर्न आफ्नो डिभाइसको गोपनीयताको स्विच टगल गरी \"क्यामेरा अन छ\" बनाएर क्यामेरा प्रयोग गर्ने अनुमति दिनुहोस्। आफ्नो डिभाइसमा गोपनीयताको स्विच भेट्टाउन डिभाइसको म्यानुअल हेर्नुहोस्।"</string>
+    <string name="sensor_privacy_start_use_mic_camera_blocked_dialog_content" msgid="3960837827570483762">"माइक्रोफोन र क्यामेरा अनब्लक गर्न आफ्नो डिभाइसको गोपनीयताको स्विच टगल गरी \"अनब्लक गरिएको छ\" बनाएर माइक्रोफोन र क्यामेरा प्रयोग गर्ने अनुमति दिनुहोस्। आफ्नो डिभाइसमा गोपनीयताको स्विच भेट्टाउन डिभाइसको म्यानुअल हेर्नुहोस्।"</string>
+    <string name="sensor_privacy_mic_unblocked_toast_content" msgid="306555320557065068">"माइक्रोफोन उपलब्ध छ"</string>
+    <string name="sensor_privacy_camera_unblocked_toast_content" msgid="7843105715964332311">"क्यामेरा उपलब्ध छ"</string>
+    <string name="sensor_privacy_mic_camera_unblocked_toast_content" msgid="7339355093282661115">"माइक्रोफोन र क्यामेरा उपलब्ध छन्"</string>
     <string name="media_seamless_other_device" msgid="4654849800789196737">"अर्को डिभाइड"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"परिदृश्य टगल गर्नुहोस्"</string>
     <string name="zen_priority_introduction" msgid="3159291973383796646">"तपाईंलाई अलार्म, रिमाइन्डर, कार्यक्रम र तपाईंले निर्दिष्ट गर्नुभएका कलरहरू बाहेकका ध्वनि र कम्पनहरूले बाधा पुऱ्याउने छैनन्। तपाईंले अझै सङ्गीत, भिडियो र खेलहरू लगायत आफूले प्ले गर्न छनौट गरेका जुनसुकै कुरा सुन्न सक्नुहुनेछ।"</string>
@@ -297,7 +311,10 @@
     <string name="notification_tap_again" msgid="4477318164947497249">"खोल्न पुनः ट्याप गर्नुहोस्"</string>
     <string name="tap_again" msgid="1315420114387908655">"फेरि ट्याप गर्नुहोस्"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"खोल्न माथितिर स्वाइप गर्नुहोस्"</string>
-    <string name="keyguard_unlock_press" msgid="8488350566398524740">"अनलक गर्न प्रेस गर्नुहोस्"</string>
+    <!-- no translation found for keyguard_unlock_press (9140109453735019209) -->
+    <skip />
+    <!-- no translation found for keyguard_face_successful_unlock_press (25520941264602588) -->
+    <skip />
     <string name="keyguard_retry" msgid="886802522584053523">"फेरि प्रयास गर्न माथितिर स्वाइप गर्नुहोस्"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"NFC प्रयोग गर्न स्क्रिन अनलक गर्नुहोस्"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"यो डिभाइस तपाईंको सङ्गठनको स्वामित्वमा छ"</string>
@@ -320,7 +337,6 @@
     <string name="keyguard_indication_charging_time_dock" msgid="6150404291427377863">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • डक चार्ज हुँदै छ • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> मा पूरै चार्ज हुन्छ"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"प्रयोगकर्ता फेर्नुहोस्"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"यो सत्रमा भएका सबै एपहरू र डेटा मेटाइने छ।"</string>
-    <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"हटाउनुहोस्"</string>
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"तपाईंलाई फेरि स्वागत छ, अतिथि"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"तपाईं आफ्नो सत्र जारी गर्न चाहनुहुन्छ?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"सुरु गर्नुहोस्"</string>
@@ -682,7 +698,7 @@
     <string name="mobile_data" msgid="4564407557775397216">"मोबाइल डेटा"</string>
     <string name="mobile_data_text_format" msgid="6806501540022589786">"<xliff:g id="ID_1">%1$s</xliff:g> — <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="mobile_carrier_text_format" msgid="8912204177152950766">"<xliff:g id="CARRIER_NAME">%1$s</xliff:g>, <xliff:g id="MOBILE_DATA_TYPE">%2$s</xliff:g>"</string>
-    <string name="wifi_is_off" msgid="5389597396308001471">"Wi‑Fi निष्क्रिय छ"</string>
+    <string name="wifi_is_off" msgid="5389597396308001471">"Wi‑Fi अफ छ"</string>
     <string name="bt_is_off" msgid="7436344904889461591">"ब्लुटुथ निष्क्रिय छ"</string>
     <string name="dnd_is_off" msgid="3185706903793094463">"बाधा नपुर्‍याउनुहोस् नामक विकल्प निष्क्रिय छ"</string>
     <string name="qs_dnd_prompt_auto_rule" msgid="3535469468310002616">"कुनै स्वचालित नियमले बाधा नपुऱ्याउनुहोस् नामक विकल्पलाई सक्रियो गऱ्यो (<xliff:g id="ID_1">%s</xliff:g>)।"</string>
@@ -701,7 +717,7 @@
     <string name="slice_permission_allow" msgid="6340449521277951123">"अनुमति दिनुहोस्"</string>
     <string name="slice_permission_deny" msgid="6870256451658176895">"अस्वीकार गर्नु…"</string>
     <string name="auto_saver_title" msgid="6873691178754086596">"ब्याट्री सेभरको समयतालिका बनाउन ट्याप गर्नुहोस्"</string>
-    <string name="auto_saver_text" msgid="3214960308353838764">"ब्याट्री सकिने सम्भावना भएमा सक्रिय गर्नुहोस्"</string>
+    <string name="auto_saver_text" msgid="3214960308353838764">"ब्याट्री सकिने सम्भावना भएमा अन गर्नुहोस्"</string>
     <string name="no_auto_saver_action" msgid="7467924389609773835">"पर्दैन धन्यवाद"</string>
     <string name="heap_dump_tile_name" msgid="2464189856478823046">"Dump SysUI Heap"</string>
     <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8341216022442383954">"एपहरूले तपाईंको <xliff:g id="TYPES_LIST">%s</xliff:g> प्रयोग गर्दै छन्‌।"</string>
@@ -766,6 +782,12 @@
     <string name="controls_dialog_ok" msgid="2770230012857881822">"थप्नुहोस्"</string>
     <string name="controls_dialog_message" msgid="342066938390663844">"<xliff:g id="APP">%s</xliff:g> ले सिफारिस गरेको"</string>
     <string name="controls_tile_locked" msgid="731547768182831938">"यन्त्र लक गरिएको छ"</string>
+    <string name="controls_settings_show_controls_dialog_title" msgid="3357852503553809554">"लक स्क्रिनमै डिभाइसहरू देखाउने र लक स्क्रिनबाटै ती डिभाइसहरू नियन्त्रण गर्ने हो?"</string>
+    <string name="controls_settings_show_controls_dialog_message" msgid="7666211700524587969">"तपाईं आफ्ना बाह्य डिभाइसहरूका कन्ट्रोलहरू लक स्क्रिनमा हाल्न सक्नुहुन्छ।\n\nतपाईंको डिभाइसको एपले तपाईंलाई आफ्नो फोन वा ट्याब्लेट अनलक नगरिकनै केही डिभाइसहरू नियन्त्रण गर्ने अनुमति दिन सक्छ।\n\nतपाईं जुनसुकै बेला सेटिङमा गई यी कुराहरू बदल्न सक्नुहुन्छ।"</string>
+    <string name="controls_settings_trivial_controls_dialog_title" msgid="7593188157655036677">"लक स्क्रिनबाटै डिभाइसहरू नियन्त्रण गर्ने हो?"</string>
+    <string name="controls_settings_trivial_controls_dialog_message" msgid="237183787721917586">"तपाईं आफ्नो फोन वा ट्याब्लेट अनलक नगरिकनै केही डिभाइसहरू नियन्त्रण गर्न सक्नुहुन्छ।\n\nतपाईंको डिभाइस एपले यस तरिकाले कुन कुन डिभाइस नियन्त्रण गर्न सकिन्छ भन्ने कुरा निर्धारण गर्छ।"</string>
+    <string name="controls_settings_dialog_neutral_button" msgid="4514446354793124140">"पर्दैन"</string>
+    <string name="controls_settings_dialog_positive_button" msgid="436070672551674863">"अँ"</string>
     <string name="controls_pin_use_alphanumeric" msgid="8478371861023048414">"PIN मा अक्षर वा चिन्हहरू समाविष्ट हुन्छन्"</string>
     <string name="controls_pin_verify" msgid="3452778292918877662">"<xliff:g id="DEVICE">%s</xliff:g> पुष्टि गर्नुहोस्"</string>
     <string name="controls_pin_wrong" msgid="6162694056042164211">"PIN मिलेन"</string>
@@ -775,8 +797,7 @@
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"थप हेर्न स्वाइप गर्नुहोस्"</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"सिफारिसहरू लोड गर्दै"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"मिडिया"</string>
-    <!-- no translation found for controls_media_close_session (4780485355795635052) -->
-    <skip />
+    <string name="controls_media_close_session" msgid="4780485355795635052">"<xliff:g id="APP_NAME">%1$s</xliff:g> का हकमा यो मिडिया कन्ट्रोल लुकाउने हो?"</string>
     <string name="controls_media_active_session" msgid="3146882316024153337">"हालको मिडिया सत्र लुकाउन मिल्दैन।"</string>
     <string name="controls_media_dismiss_button" msgid="4485675693008031646">"लुकाउनुहोस्"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"सुचारु गर्नुहोस्"</string>
@@ -815,6 +836,13 @@
     <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"नयाँ डिभाइस कनेक्ट गर्नुहोस्"</string>
     <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"यो सत्र कास्ट गर्न चाहनुहुन्छ भने कृपया एप खोल्नुहोस्।"</string>
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"अज्ञात एप"</string>
+    <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"प्रसारण गर्ने सुविधाले कसरी काम गर्छ"</string>
+    <string name="media_output_broadcast" msgid="3555580945878071543">"प्रसारण"</string>
+    <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"कम्प्याटिबल ब्लुटुथ डिभाइस भएका नजिकैका मान्छेहरू तपाईंले प्रसारण गरिरहनुभएको मिडिया सुन्न सक्छन्"</string>
+    <string name="media_output_broadcasting_message" msgid="4150299923404886073">"कम्प्याटिबल ब्लुटुथ डिभाइस भएका नजिकैका मान्छेहरू तपाईंको QR कोड स्क्यान गरेर वा तपाईंको प्रसारणको नाम र पासवर्ड हालेर तपाईंको प्रसारण सुन्न सक्छन्"</string>
+    <string name="media_output_broadcast_name" msgid="8786127091542624618">"प्रसारणको नाम"</string>
+    <string name="media_output_broadcast_code" msgid="870795639644728542">"पासवर्ड"</string>
+    <string name="media_output_broadcast_dialog_save" msgid="7910865591430010198">"सेभ गर्नुहोस्"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"बिल्ड नम्बर"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"बिल्ड नम्बर कपी गरी क्लिपबोर्डमा सारियो।"</string>
     <string name="basic_status" msgid="2315371112182658176">"वार्तालाप खोल्नुहोस्"</string>
@@ -891,7 +919,7 @@
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"सक्रिय एपहरू"</string>
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"रोक्नुहोस्"</string>
     <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"रोकिएको छ"</string>
-    <string name="clipboard_edit_text_copy" msgid="770856373439969178">"कपी गर्नुहोस्"</string>
+    <string name="clipboard_edit_text_done" msgid="4551887727694022409">"सम्पन्न भयो"</string>
     <string name="clipboard_overlay_text_copied" msgid="1872624400464891363">"कपी गरियो"</string>
     <string name="clipboard_edit_source" msgid="9156488177277788029">"<xliff:g id="APPNAME">%1$s</xliff:g> बाट"</string>
     <string name="clipboard_dismiss_description" msgid="7544573092766945657">"कपी UI खारेज गर्नुहोस्"</string>

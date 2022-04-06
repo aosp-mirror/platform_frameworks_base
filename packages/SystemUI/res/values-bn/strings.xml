@@ -34,6 +34,10 @@
     <string name="status_bar_settings_auto_rotation" msgid="8329080442278431708">"অটো-রোটেট স্ক্রিন"</string>
     <string name="usb_device_permission_prompt" msgid="4414719028369181772">"<xliff:g id="APPLICATION">%1$s</xliff:g> কে <xliff:g id="USB_DEVICE">%2$s</xliff:g> অ্যাক্সেস করতে দেবেন?"</string>
     <string name="usb_device_permission_prompt_warn" msgid="2309129784984063656">"<xliff:g id="USB_DEVICE">%2$s</xliff:g> অ্যাক্সেস করতে <xliff:g id="APPLICATION">%1$s</xliff:g>-কে কি অনুমতি দেবেন?\nএই অ্যাপকে রেকর্ড করার অনুমতি দেওয়া হয়নি কিন্তু USB ডিভাইসের মাধ্যমে সেটি অডিও রেকর্ড করতে পারে।"</string>
+    <string name="usb_audio_device_permission_prompt_title" msgid="4221351137250093451">"<xliff:g id="USB_DEVICE">%2$s</xliff:g> অ্যাক্সেস করতে <xliff:g id="APPLICATION">%1$s</xliff:g> অ্যাপকে অনুমতি দিতে চান?"</string>
+    <string name="usb_audio_device_confirm_prompt_title" msgid="8828406516732985696">"<xliff:g id="USB_DEVICE">%2$s</xliff:g> ব্যবহার করার জন্য <xliff:g id="APPLICATION">%1$s</xliff:g> চালু করতে চান?"</string>
+    <string name="usb_audio_device_prompt_warn" msgid="2504972133361130335">"এই অ্যাপকে রেকর্ড করার অনুমতি দেওয়া হয়নি কিন্তু USB ডিভাইসের সাহায্যে সেটি অডিও রেকর্ড করতে পারে। <xliff:g id="APPLICATION">%1$s</xliff:g> অ্যাপের ব্যবহার এই ডিভাইসের সাথে করার ফলে হতে পারে কল, বিজ্ঞপ্তি এবং অ্যালার্মের আওয়াজ শোনা যাবে না।"</string>
+    <string name="usb_audio_device_prompt" msgid="7944987408206252949">"<xliff:g id="APPLICATION">%1$s</xliff:g> অ্যাপের ব্যবহার এই ডিভাইসের সাথে করার ফলে হতে পারে কল, বিজ্ঞপ্তি এবং অ্যালার্মের আওয়াজ শোনা যাবে না।"</string>
     <string name="usb_accessory_permission_prompt" msgid="717963550388312123">"<xliff:g id="APPLICATION">%1$s</xliff:g> কে <xliff:g id="USB_ACCESSORY">%2$s</xliff:g> অ্যাক্সেস করতে দেবেন?"</string>
     <string name="usb_device_confirm_prompt" msgid="4091711472439910809">"<xliff:g id="USB_DEVICE">%2$s</xliff:g> ব্যবহার করার জন্য <xliff:g id="APPLICATION">%1$s</xliff:g> চালু করবেন?"</string>
     <string name="usb_device_confirm_prompt_warn" msgid="990208659736311769">"<xliff:g id="USB_DEVICE">%2$s</xliff:g> অ্যাক্সেস করার জন্য <xliff:g id="APPLICATION">%1$s</xliff:g> খুলবেন?\nএই অ্যাপকে রেকর্ড করার অনুমতি দেওয়া হয়নি কিন্তু USB ডিভাইসের মাধ্যমে সেটি অডিও রেকর্ড করতে পারে।"</string>
@@ -131,7 +135,8 @@
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="2242167416140740920">"ফেস যাচাই করা হয়েছে"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"কনফার্ম করা হয়েছে"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"সম্পূর্ণ করতে \'কনফার্ম করুন\' বোতামে ট্যাপ করুন"</string>
-    <string name="biometric_dialog_tap_confirm_with_face" msgid="1597899891472340950">"আপনার মুখ মাধ্যমে আনলক করা হয়েছে। চালিয়ে যেতে প্রেস করুন।"</string>
+    <!-- no translation found for biometric_dialog_tap_confirm_with_face (1092050545851021991) -->
+    <skip />
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"প্রমাণীকৃত"</string>
     <string name="biometric_dialog_use_pin" msgid="8385294115283000709">"পিন ব্যবহার করুন"</string>
     <string name="biometric_dialog_use_pattern" msgid="2315593393167211194">"প্যাটার্ন ব্যবহার করুন"</string>
@@ -287,6 +292,15 @@
     <string name="sensor_privacy_start_use_mic_dialog_content" msgid="1624701280680913717">"এটার জন্য মাইক্রোফোনের অ্যাক্সেস সেই সব অ্যাপ এবং পরিষেবার জন্য আনব্লক হয়ে যাবে, যাতে আপনার মাইক্রোফোন ব্যবহার করার অনুমতি দেওয়া হয়েছে।"</string>
     <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"এটার জন্য ক্যামেরার অ্যাক্সেস সেই সব অ্যাপ এবং পরিষেবার জন্য আনব্লক হয়ে যাবে, যাতে আপনার ক্যামেরা ব্যবহারের অনুমতি দেওয়া হয়েছে।"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_content" msgid="3577642558418404919">"এটার জন্য ক্যামেরা অথবা মাইক্রোফোনের অ্যাক্সেস সেই সব অ্যাপ এবং পরিষেবার জন্য আনব্লক হয়ে যাবে, যাতে আপনার ক্যামেরা অথবা মাইক্রোফোন ব্যবহারের অনুমতি দেওয়া হয়েছে।"</string>
+    <string name="sensor_privacy_start_use_mic_blocked_dialog_title" msgid="2640140287496469689">"মাইক্রোফোন ব্লক করা আছে"</string>
+    <string name="sensor_privacy_start_use_camera_blocked_dialog_title" msgid="7398084286822440384">"ক্যামেরা ব্লক করা আছে"</string>
+    <string name="sensor_privacy_start_use_mic_camera_blocked_dialog_title" msgid="195236134743281973">"মাইক্রোফোন ও ক্যামেরা ব্লক করা আছে"</string>
+    <string name="sensor_privacy_start_use_mic_blocked_dialog_content" msgid="2138318880682877747">"আনব্লক করতে, আপনাকে মাইক্রোফোনের অ্যাক্সেস দিতে হবে। এর জন্য ডিভাইসের প্রাইভেসি সুইচ \'ক্যামেরা চালু আছে\' পজিশনে নিয়ে যান। আপনার ডিভাইসে প্রাইভেসি সুইচ খুঁজে পেতে ডিভাইসের ম্যানুয়ালে রেফার করুন।"</string>
+    <string name="sensor_privacy_start_use_camera_blocked_dialog_content" msgid="7216015168047965948">"আনব্লক করতে, আপনাকে ক্যামেরার অ্যাক্সেস দিতে হবে। এর জন্য ডিভাইসের প্রাইভেসি সুইচ \'ক্যামরো চালু আছে\' পজিশনে নিয়ে যান। আপনার ডিভাইসে প্রাইভেসি সুইচ খুঁজে পেতে ডিভাইসের ম্যানুয়ালে রেফার করুন।"</string>
+    <string name="sensor_privacy_start_use_mic_camera_blocked_dialog_content" msgid="3960837827570483762">"এগুলি আনব্লক করতে, আপনাকে অ্যাক্সেসের অনুমতি দিতে হবে। এর জন্য ডিভাইসের প্রাইভেসি সুইচ \'আনব্লক করুন\' পজিশনে নিয়ে যান। আপনার ডিভাইসে প্রাইভেসি সুইচ খুঁজে পেতে ডিভাইসের ম্যানুয়ালে রেফার করুন।"</string>
+    <string name="sensor_privacy_mic_unblocked_toast_content" msgid="306555320557065068">"মাইক্রোফোন উপলভ্য"</string>
+    <string name="sensor_privacy_camera_unblocked_toast_content" msgid="7843105715964332311">"ক্যামেরা উপলভ্য"</string>
+    <string name="sensor_privacy_mic_camera_unblocked_toast_content" msgid="7339355093282661115">"মাইক্রোফোন ও ক্যামেরা উপলভ্য"</string>
     <string name="media_seamless_other_device" msgid="4654849800789196737">"অন্য ডিভাইস"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"\'এক নজরে\' বৈশিষ্ট্যটি চালু বা বন্ধ করুন"</string>
     <string name="zen_priority_introduction" msgid="3159291973383796646">"অ্যালার্ম, রিমাইন্ডার, ইভেন্ট, এবং আপনার নির্দিষ্ট করে দেওয়া ব্যক্তিদের কল ছাড়া অন্য কোনও আওয়াজ বা ভাইব্রেশন হবে না। তবে সঙ্গীত, ভিডিও, এবং গেম সহ আপনি যা কিছু চালাবেন তার আওয়াজ শুনতে পাবেন।"</string>
@@ -297,7 +311,10 @@
     <string name="notification_tap_again" msgid="4477318164947497249">"খোলার জন্য আবার আলতো চাপুন"</string>
     <string name="tap_again" msgid="1315420114387908655">"আবার ট্যাপ করুন"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"খোলার জন্য উপরে সোয়াইপ করুন"</string>
-    <string name="keyguard_unlock_press" msgid="8488350566398524740">"আনলক করার জন্য প্রেস করুন"</string>
+    <!-- no translation found for keyguard_unlock_press (9140109453735019209) -->
+    <skip />
+    <!-- no translation found for keyguard_face_successful_unlock_press (25520941264602588) -->
+    <skip />
     <string name="keyguard_retry" msgid="886802522584053523">"আবার চেষ্টা করতে উপরের দিকে সোয়াইপ করুন"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"NFC ব্যবহার করতে আনলক করুন"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"এই ডিভাইসটি আপনার প্রতিষ্ঠানের"</string>
@@ -320,7 +337,6 @@
     <string name="keyguard_indication_charging_time_dock" msgid="6150404291427377863">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • চার্জিং ডক • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>-এর মধ্যে সম্পূর্ণ হয়ে যাবে"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"ব্যবহারকারী পাল্টে দিন"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"এই সেশনের সব অ্যাপ ও ডেটা মুছে ফেলা হবে।"</string>
-    <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"সরান"</string>
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"অতিথি, আপনি ফিরে আসায় আপনাকে স্বাগত!"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"আপনি কি আপনার সেশনটি চালিয়ে যেতে চান?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"আবার শুরু করুন"</string>
@@ -766,6 +782,12 @@
     <string name="controls_dialog_ok" msgid="2770230012857881822">"যোগ করুন"</string>
     <string name="controls_dialog_message" msgid="342066938390663844">"<xliff:g id="APP">%s</xliff:g> সাজেস্ট করেছে"</string>
     <string name="controls_tile_locked" msgid="731547768182831938">"ডিভাইস লক করা আছে"</string>
+    <string name="controls_settings_show_controls_dialog_title" msgid="3357852503553809554">"লক স্ক্রিন থেকে ডিভাইস দেখতে এবং নিয়ন্ত্রণ করতে চান?"</string>
+    <string name="controls_settings_show_controls_dialog_message" msgid="7666211700524587969">"লক স্ক্রিনে আপনার বাইরের ডিভাইসের জন্য কন্ট্রোল যোগ করা যাবে।\n\nআপনার ফোন বা ট্যাবলেট আনলক না করেই আপনার ডিভাইস অ্যাপ হয়ত কিছু ডিভাইস নিয়ন্ত্রণ করার সুবিধা দেবে\n\nসেটিংস থেকে যেকোনও সময়ে আপনি পরিবর্তন করতে পারবেন।"</string>
+    <string name="controls_settings_trivial_controls_dialog_title" msgid="7593188157655036677">"লক স্ক্রিন থেকে ডিভাইস নিয়ন্ত্রণ করতে চান?"</string>
+    <string name="controls_settings_trivial_controls_dialog_message" msgid="237183787721917586">"আপনি ফোন বা ট্যাবলেট আনলক না করেই কিছু ডিভাইস নিয়ন্ত্রণ করতে পারবেন।\n\nএইভাবে কোন ডিভাইস নিয়ন্ত্রণ করা হবে সেটি আপনার ডিভাইস অ্যাপ ঠিক করে।"</string>
+    <string name="controls_settings_dialog_neutral_button" msgid="4514446354793124140">"না থাক"</string>
+    <string name="controls_settings_dialog_positive_button" msgid="436070672551674863">"হ্যাঁ"</string>
     <string name="controls_pin_use_alphanumeric" msgid="8478371861023048414">"পিন-এ অক্ষর বা চিহ্ন রয়েছে"</string>
     <string name="controls_pin_verify" msgid="3452778292918877662">"<xliff:g id="DEVICE">%s</xliff:g> যাচাই করুন"</string>
     <string name="controls_pin_wrong" msgid="6162694056042164211">"ভুল পিন"</string>
@@ -775,8 +797,7 @@
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"আরও দেখতে সোয়াইপ করুন"</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"সাজেশন লোড করা হচ্ছে"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"মিডিয়া"</string>
-    <!-- no translation found for controls_media_close_session (4780485355795635052) -->
-    <skip />
+    <string name="controls_media_close_session" msgid="4780485355795635052">"<xliff:g id="APP_NAME">%1$s</xliff:g>-এর মিডিয়া কন্ট্রোল লুকিয়ে রাখতে চান?"</string>
     <string name="controls_media_active_session" msgid="3146882316024153337">"বর্তমান মিডিয়া সেশন লুকিয়ে রাখা যাবে না।"</string>
     <string name="controls_media_dismiss_button" msgid="4485675693008031646">"লুকান"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"আবার চালু করুন"</string>
@@ -815,6 +836,13 @@
     <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"নতুন ডিভাইস পেয়ার করুন"</string>
     <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"এই সেশন কাস্ট করার জন্য, অ্যাপ খুলুন।"</string>
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"অজানা অ্যাপ"</string>
+    <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"ব্রডকাস্ট কীভাবে কাজ করে"</string>
+    <string name="media_output_broadcast" msgid="3555580945878071543">"সম্প্রচার করুন"</string>
+    <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"আশপাশে লোকজন যাদের মানানসই ব্লুটুথ ডিভাইস আছে, তারা আপনার ব্রডকাস্ট করা মিডিয়া শুনতে পারবেন"</string>
+    <string name="media_output_broadcasting_message" msgid="4150299923404886073">"আপনার ব্রডকাস্ট শুনতে, আশপাশে লোকজন যাদের মানানসই ব্লুটুথ ডিভাইস আছে, তারা আপনার QR কোড স্ক্যান করতে অথবা আপনার ব্রডকাস্ট নাম এবং পাসওয়ার্ড ব্যবহার করতে পারবেন"</string>
+    <string name="media_output_broadcast_name" msgid="8786127091542624618">"ব্রডকাস্টের নাম"</string>
+    <string name="media_output_broadcast_code" msgid="870795639644728542">"পাসওয়ার্ড"</string>
+    <string name="media_output_broadcast_dialog_save" msgid="7910865591430010198">"সেভ করুন"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"বিল্ড নম্বর"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"বিল্ড নম্বর ক্লিপবোর্ডে কপি করা হয়েছে।"</string>
     <string name="basic_status" msgid="2315371112182658176">"খোলা কথোপকথন"</string>
@@ -878,7 +906,7 @@
     <string name="see_all_networks" msgid="3773666844913168122">"সবকটি দেখুন"</string>
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"নেটওয়ার্ক বদলাতে ইথারনেট ডিসকানেক্ট করুন"</string>
     <string name="wifi_scan_notify_message" msgid="3753839537448621794">"ডিভাইস সংক্রান্ত অভিজ্ঞতা আরও ভাল করতে, অ্যাপ ও পরিষেবা যেকোনও সময় আপনার ওয়াই-ফাই নেটওয়ার্ক স্ক্যান করতে পারবে, এমনকি ডিভাইসের ওয়াই-ফাই বন্ধ করা থাকলেও। ওয়াই-ফাই স্ক্যানিং সেটিংস থেকে আপনি এটি পরিবর্তন করতে পারবেন। "<annotation id="link">"পরিবর্তন করুন"</annotation></string>
-    <string name="turn_off_airplane_mode" msgid="8425587763226548579">"\'বিমান\' মোড বন্ধ করুন"</string>
+    <string name="turn_off_airplane_mode" msgid="8425587763226548579">"\'বিমান মোড\' বন্ধ করুন"</string>
     <string name="qs_tile_request_dialog_text" msgid="3501359944139877694">"<xliff:g id="APPNAME">%1$s</xliff:g> নিম্নলিখিত টাইল দ্রুত সেটিংস মেনুতে যোগ করতে চায়"</string>
     <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"টাইল যোগ করুন"</string>
     <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"টাইল যোগ করবেন না"</string>
@@ -891,7 +919,7 @@
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"অ্যাক্টিভ অ্যাপ"</string>
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"বন্ধ করুন"</string>
     <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"থামানো হয়েছে"</string>
-    <string name="clipboard_edit_text_copy" msgid="770856373439969178">"কপি করুন"</string>
+    <string name="clipboard_edit_text_done" msgid="4551887727694022409">"হয়ে গেছে"</string>
     <string name="clipboard_overlay_text_copied" msgid="1872624400464891363">"কপি করা হয়েছে"</string>
     <string name="clipboard_edit_source" msgid="9156488177277788029">"<xliff:g id="APPNAME">%1$s</xliff:g> থেকে"</string>
     <string name="clipboard_dismiss_description" msgid="7544573092766945657">"কপি করা UI বাতিল করুন"</string>

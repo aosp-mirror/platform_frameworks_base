@@ -34,6 +34,10 @@
     <string name="status_bar_settings_auto_rotation" msgid="8329080442278431708">"Snúa skjá sjálfkrafa"</string>
     <string name="usb_device_permission_prompt" msgid="4414719028369181772">"Viltu veita <xliff:g id="APPLICATION">%1$s</xliff:g> aðgang að <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
     <string name="usb_device_permission_prompt_warn" msgid="2309129784984063656">"Viltu veita <xliff:g id="APPLICATION">%1$s</xliff:g> aðgang að <xliff:g id="USB_DEVICE">%2$s</xliff:g>?\nÞetta forrit hefur ekki fengið heimild fyrir upptöku en gæti tekið upp hljóð í gegnum þetta USB-tæki."</string>
+    <string name="usb_audio_device_permission_prompt_title" msgid="4221351137250093451">"Viltu veita <xliff:g id="APPLICATION">%1$s</xliff:g> aðgang að <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
+    <string name="usb_audio_device_confirm_prompt_title" msgid="8828406516732985696">"Viltu opna <xliff:g id="APPLICATION">%1$s</xliff:g> til að sjá um <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
+    <string name="usb_audio_device_prompt_warn" msgid="2504972133361130335">"Þetta forrit hefur ekki fengið heimild fyrir upptöku en gæti tekið upp hljóð í gegnum þetta USB-tæki. Notkun <xliff:g id="APPLICATION">%1$s</xliff:g> með þessu tæki getur komið í veg fyrir að símtöl, tilkynningar og viðvaranir heyrist."</string>
+    <string name="usb_audio_device_prompt" msgid="7944987408206252949">"Notkun <xliff:g id="APPLICATION">%1$s</xliff:g> með þessu tæki getur komið í veg fyrir að símtöl, tilkynningar og viðvaranir heyrist."</string>
     <string name="usb_accessory_permission_prompt" msgid="717963550388312123">"Viltu veita <xliff:g id="APPLICATION">%1$s</xliff:g> aðgang að <xliff:g id="USB_ACCESSORY">%2$s</xliff:g>?"</string>
     <string name="usb_device_confirm_prompt" msgid="4091711472439910809">"Viltu opna <xliff:g id="APPLICATION">%1$s</xliff:g> til að sjá um <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
     <string name="usb_device_confirm_prompt_warn" msgid="990208659736311769">"Viltu opna <xliff:g id="APPLICATION">%1$s</xliff:g> til að vinna með <xliff:g id="USB_DEVICE">%2$s</xliff:g>?\nÞetta forrit hefur ekki fengið heimild fyrir upptöku en gæti tekið upp hljóð í gegnum þetta USB-tæki."</string>
@@ -131,7 +135,8 @@
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="2242167416140740920">"Andlit staðfest"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"Staðfest"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"Ýttu á „Staðfesta“ til að ljúka"</string>
-    <string name="biometric_dialog_tap_confirm_with_face" msgid="1597899891472340950">"Opnað með andlitinu á þér. Ýttu til að halda áfram."</string>
+    <!-- no translation found for biometric_dialog_tap_confirm_with_face (1092050545851021991) -->
+    <skip />
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"Auðkennt"</string>
     <string name="biometric_dialog_use_pin" msgid="8385294115283000709">"Nota PIN-númer"</string>
     <string name="biometric_dialog_use_pattern" msgid="2315593393167211194">"Nota mynstur"</string>
@@ -287,6 +292,15 @@
     <string name="sensor_privacy_start_use_mic_dialog_content" msgid="1624701280680913717">"Þetta veitir öllum forritum og þjónustum aðgang að hljóðnemanum þínum."</string>
     <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"Þetta veitir öllum forritum og þjónustum aðgang að myndavélinni þinni."</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_content" msgid="3577642558418404919">"Þetta veitir öllum forritum og þjónustum aðgang að myndavélinni og hljóðnemanum þínum."</string>
+    <string name="sensor_privacy_start_use_mic_blocked_dialog_title" msgid="2640140287496469689">"Lokað er fyrir hljóðnemann"</string>
+    <string name="sensor_privacy_start_use_camera_blocked_dialog_title" msgid="7398084286822440384">"Lokað er fyrir myndavélina"</string>
+    <string name="sensor_privacy_start_use_mic_camera_blocked_dialog_title" msgid="195236134743281973">"Lokað er fyrir hljóðnemann og myndavélina"</string>
+    <string name="sensor_privacy_start_use_mic_blocked_dialog_content" msgid="2138318880682877747">"Þú getur opnað með því að færa persónuverndarrofann á tækinu svo að kveikt sé á hljóðnemanum til að veita aðgang að hljóðnemanum. Skoðaðu handbók tækisins til að finna persónuverndarrofann á tækinu."</string>
+    <string name="sensor_privacy_start_use_camera_blocked_dialog_content" msgid="7216015168047965948">"Þú getur opnað með því að færa persónuverndarrofann á tækinu svo að kveikt sé á myndavélinni til að veita aðgang að myndavélinni. Skoðaðu handbók tækisins til að finna persónuverndarrofann á tækinu."</string>
+    <string name="sensor_privacy_start_use_mic_camera_blocked_dialog_content" msgid="3960837827570483762">"Þú getur opnað með því að færa persónuverndarrofann á tækinu á „opið“ til að veita aðgang að þeim. Skoðaðu handbók tækisins til að finna persónuverndarrofann á tækinu."</string>
+    <string name="sensor_privacy_mic_unblocked_toast_content" msgid="306555320557065068">"Hljóðnemi tiltækur"</string>
+    <string name="sensor_privacy_camera_unblocked_toast_content" msgid="7843105715964332311">"Myndavél tiltæk"</string>
+    <string name="sensor_privacy_mic_camera_unblocked_toast_content" msgid="7339355093282661115">"Hljóðnemi og myndavél tiltæk"</string>
     <string name="media_seamless_other_device" msgid="4654849800789196737">"Annað tæki"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"Kveikja/slökkva á yfirliti"</string>
     <string name="zen_priority_introduction" msgid="3159291973383796646">"Þú verður ekki fyrir truflunum frá hljóðmerkjum og titringi, fyrir utan vekjara, áminningar, viðburði og símtöl frá þeim sem þú leyfir fyrirfram. Þú heyrir áfram í öllu sem þú velur að spila, svo sem tónlist, myndskeiðum og leikjum."</string>
@@ -297,7 +311,10 @@
     <string name="notification_tap_again" msgid="4477318164947497249">"Ýttu aftur til að opna"</string>
     <string name="tap_again" msgid="1315420114387908655">"Ýttu aftur"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"Strjúktu upp til að opna"</string>
-    <string name="keyguard_unlock_press" msgid="8488350566398524740">"Ýttu til að opna"</string>
+    <!-- no translation found for keyguard_unlock_press (9140109453735019209) -->
+    <skip />
+    <!-- no translation found for keyguard_face_successful_unlock_press (25520941264602588) -->
+    <skip />
     <string name="keyguard_retry" msgid="886802522584053523">"Strjúktu upp til að reyna aftur"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"Taktu úr lás til að nota NFC"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"Þetta tæki tilheyrir fyrirtækinu þínu"</string>
@@ -320,7 +337,6 @@
     <string name="keyguard_indication_charging_time_dock" msgid="6150404291427377863">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Hleður í dokku • Full hleðsla eftir <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Skipta um notanda"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Öllum forritum og gögnum í þessari lotu verður eytt."</string>
-    <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"Fjarlægja"</string>
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"Velkominn aftur, gestur!"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"Viltu halda áfram með lotuna?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"Byrja upp á nýtt"</string>
@@ -766,6 +782,12 @@
     <string name="controls_dialog_ok" msgid="2770230012857881822">"Bæta við"</string>
     <string name="controls_dialog_message" msgid="342066938390663844">"Tillaga frá <xliff:g id="APP">%s</xliff:g>"</string>
     <string name="controls_tile_locked" msgid="731547768182831938">"Tækið er læst"</string>
+    <string name="controls_settings_show_controls_dialog_title" msgid="3357852503553809554">"Sjá og stjórna tækjum á lásskjánum?"</string>
+    <string name="controls_settings_show_controls_dialog_message" msgid="7666211700524587969">"Þú getur bætt við stýringum fyrir ytri tæki á lásskjáinn.\n\nForrit tækisins kann að leyfa þér að stjórna sumum tækjum án þess að taka símann eða spjaldtölvuna úr lás.\n\nÞú getur gert breytingar hvenær sem er í stillingunum."</string>
+    <string name="controls_settings_trivial_controls_dialog_title" msgid="7593188157655036677">"Stjórna tækjum á lásskjá?"</string>
+    <string name="controls_settings_trivial_controls_dialog_message" msgid="237183787721917586">"Þú getur stjórnað sumum tækjum án þess að taka símann eða spjaldtölvuna úr lás.\n\nForrit tækisins ákvarðar hvaða tækjum er hægt að stjórna á þennan hátt."</string>
+    <string name="controls_settings_dialog_neutral_button" msgid="4514446354793124140">"Nei, takk"</string>
+    <string name="controls_settings_dialog_positive_button" msgid="436070672551674863">"Já"</string>
     <string name="controls_pin_use_alphanumeric" msgid="8478371861023048414">"PIN inniheldur bókstafi eða tákn"</string>
     <string name="controls_pin_verify" msgid="3452778292918877662">"Staðfesta <xliff:g id="DEVICE">%s</xliff:g>"</string>
     <string name="controls_pin_wrong" msgid="6162694056042164211">"Rangt PIN-númer"</string>
@@ -775,8 +797,7 @@
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"Strjúktu til að sjá meira"</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"Hleður tillögum"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"Margmiðlunarefni"</string>
-    <!-- no translation found for controls_media_close_session (4780485355795635052) -->
-    <skip />
+    <string name="controls_media_close_session" msgid="4780485355795635052">"Fela þessa efnisstýringu fyrir <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="controls_media_active_session" msgid="3146882316024153337">"Ekki tókst að fela opna efnislotu."</string>
     <string name="controls_media_dismiss_button" msgid="4485675693008031646">"Fela"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"Halda áfram"</string>
@@ -796,8 +817,7 @@
     <string name="media_move_closer_to_end_cast" msgid="6495907340926563656">"Færðu tækið nær <xliff:g id="DEVICENAME">%1$s</xliff:g> til að spila hér"</string>
     <string name="media_transfer_playing_different_device" msgid="7186806382609785610">"Í spilun í <xliff:g id="DEVICENAME">%1$s</xliff:g>"</string>
     <string name="media_transfer_playing_this_device" msgid="1856890686844499172">"Í spilun í þessum síma"</string>
-    <!-- no translation found for media_transfer_failed (7955354964610603723) -->
-    <skip />
+    <string name="media_transfer_failed" msgid="7955354964610603723">"Eitthvað fór úrskeiðis. Reyndu aftur."</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"Óvirkt, athugaðu forrit"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"Fannst ekki"</string>
     <string name="controls_error_removed_title" msgid="1207794911208047818">"Stýring er ekki tiltæk"</string>
@@ -816,6 +836,13 @@
     <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"Para nýtt tæki"</string>
     <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"Opnaðu forritið til að senda þessa lotu út."</string>
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"Óþekkt forrit"</string>
+    <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Svona virkar útsending"</string>
+    <string name="media_output_broadcast" msgid="3555580945878071543">"Útsending"</string>
+    <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"Fólk nálægt þér með samhæf Bluetooth-tæki getur hlustað á efnið sem þú sendir út"</string>
+    <string name="media_output_broadcasting_message" msgid="4150299923404886073">"Til að hlusta á útsendinguna þína getur fólk í nágrenninu sem er með samhæf Bluetooth-tæki skannað QR-kóðann þinn eða notað heiti útsendingarinnar og aðgangsorðið"</string>
+    <string name="media_output_broadcast_name" msgid="8786127091542624618">"Heiti útsendingar"</string>
+    <string name="media_output_broadcast_code" msgid="870795639644728542">"Aðgangsorð"</string>
+    <string name="media_output_broadcast_dialog_save" msgid="7910865591430010198">"Vista"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"Útgáfunúmer smíðar"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"Útgáfunúmer smíðar afritað á klippiborð."</string>
     <string name="basic_status" msgid="2315371112182658176">"Opna samtal"</string>
@@ -892,7 +919,7 @@
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"Virk forrit"</string>
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"Stöðva"</string>
     <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"Stöðvað"</string>
-    <string name="clipboard_edit_text_copy" msgid="770856373439969178">"Afrita"</string>
+    <string name="clipboard_edit_text_done" msgid="4551887727694022409">"Lokið"</string>
     <string name="clipboard_overlay_text_copied" msgid="1872624400464891363">"Afritað"</string>
     <string name="clipboard_edit_source" msgid="9156488177277788029">"Frá <xliff:g id="APPNAME">%1$s</xliff:g>"</string>
     <string name="clipboard_dismiss_description" msgid="7544573092766945657">"Loka afriti notendaviðmóts"</string>

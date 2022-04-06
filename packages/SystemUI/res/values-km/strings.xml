@@ -34,6 +34,10 @@
     <string name="status_bar_settings_auto_rotation" msgid="8329080442278431708">"បង្វិល​អេក្រង់​ស្វ័យ​ប្រវត្តិ"</string>
     <string name="usb_device_permission_prompt" msgid="4414719028369181772">"អនុញ្ញាត <xliff:g id="APPLICATION">%1$s</xliff:g> ឱ្យចូលប្រើ <xliff:g id="USB_DEVICE">%2$s</xliff:g> មែនទេ?"</string>
     <string name="usb_device_permission_prompt_warn" msgid="2309129784984063656">"អនុញ្ញាតឱ្យ <xliff:g id="APPLICATION">%1$s</xliff:g> ចូលប្រើ <xliff:g id="USB_DEVICE">%2$s</xliff:g>?\nកម្មវិធីនេះ​មិនទាន់បាន​ទទួលសិទ្ធិ​ថតសំឡេងនៅឡើយទេ ប៉ុន្តែ​អាចថត​សំឡេង​តាមរយៈ​ឧបករណ៍ USB នេះបាន។"</string>
+    <string name="usb_audio_device_permission_prompt_title" msgid="4221351137250093451">"អនុញ្ញាតឱ្យ <xliff:g id="APPLICATION">%1$s</xliff:g> ចូលប្រើ <xliff:g id="USB_DEVICE">%2$s</xliff:g> ឬ?"</string>
+    <string name="usb_audio_device_confirm_prompt_title" msgid="8828406516732985696">"បើក <xliff:g id="APPLICATION">%1$s</xliff:g> ដើម្បីគ្រប់គ្រង <xliff:g id="USB_DEVICE">%2$s</xliff:g> ឬ?"</string>
+    <string name="usb_audio_device_prompt_warn" msgid="2504972133361130335">"កម្មវិធីនេះ​មិនទាន់បាន​ទទួលសិទ្ធិ​ថតសំឡេង​នៅឡើយទេ ប៉ុន្តែអាច​ថតសំឡេង​តាមរយៈ​ឧបករណ៍ USB នេះបាន។ ការប្រើ <xliff:g id="APPLICATION">%1$s</xliff:g> ជាមួយឧបករណ៍នេះអាចនឹងបិទសំឡេងការហៅទូរសព្ទ ការជូនដំណឹង និងម៉ោងរោទ៍។"</string>
+    <string name="usb_audio_device_prompt" msgid="7944987408206252949">"ការប្រើ <xliff:g id="APPLICATION">%1$s</xliff:g> ជាមួយឧបករណ៍នេះអាចនឹងបិទសំឡេងការហៅទូរសព្ទ ការជូនដំណឹង និងម៉ោងរោទ៍។"</string>
     <string name="usb_accessory_permission_prompt" msgid="717963550388312123">"អនុញ្ញាត <xliff:g id="APPLICATION">%1$s</xliff:g> ឱ្យចូលប្រើ <xliff:g id="USB_ACCESSORY">%2$s</xliff:g> មែនទេ?"</string>
     <string name="usb_device_confirm_prompt" msgid="4091711472439910809">"បើក <xliff:g id="APPLICATION">%1$s</xliff:g> ដើម្បីគ្រប់គ្រង <xliff:g id="USB_DEVICE">%2$s</xliff:g> មែនទេ?"</string>
     <string name="usb_device_confirm_prompt_warn" msgid="990208659736311769">"បើក <xliff:g id="APPLICATION">%1$s</xliff:g> ដើម្បីគ្រប់គ្រង <xliff:g id="USB_DEVICE">%2$s</xliff:g>?\nកម្មវិធីនេះ​មិនទាន់បាន​ទទួលសិទ្ធិ​ថតសំឡេង​នៅឡើយទេ ប៉ុន្តែអាច​ថតសំឡេង​តាមរយៈ​ឧបករណ៍ USB នេះ។"</string>
@@ -131,7 +135,7 @@
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="2242167416140740920">"បានផ្ទៀងផ្ទាត់​មុខ"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"បានបញ្ជាក់"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"ចុច \"បញ្ជាក់\" ដើម្បីបញ្ចប់"</string>
-    <string name="biometric_dialog_tap_confirm_with_face" msgid="1597899891472340950">"បានដោះសោ​ដោយប្រើ​មុខរបស់អ្នក។ ចុច ដើម្បីបន្ត។"</string>
+    <string name="biometric_dialog_tap_confirm_with_face" msgid="1092050545851021991">"បានដោះសោ​ដោយប្រើមុខ។ សូមចុចរូបដោះសោ ដើម្បីបន្ត។"</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"បាន​ផ្ទៀងផ្ទាត់"</string>
     <string name="biometric_dialog_use_pin" msgid="8385294115283000709">"ប្រើកូដ PIN"</string>
     <string name="biometric_dialog_use_pattern" msgid="2315593393167211194">"ប្រើ​លំនាំ"</string>
@@ -287,6 +291,15 @@
     <string name="sensor_privacy_start_use_mic_dialog_content" msgid="1624701280680913717">"ការធ្វើបែបនេះ​នឹងឈប់ទប់ស្កាត់​ការចូលប្រើ​សម្រាប់កម្មវិធី និងសេវាកម្ម​ទាំងអស់ ដែលត្រូវបាន​អនុញ្ញាតឱ្យប្រើ​មីក្រូហ្វូនរបស់អ្នក​។"</string>
     <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"ការធ្វើបែបនេះ​នឹងឈប់ទប់ស្កាត់​ការចូលប្រើ​សម្រាប់កម្មវិធី និងសេវាកម្ម​ទាំងអស់ ដែលត្រូវបាន​អនុញ្ញាតឱ្យប្រើ​កាមេរ៉ារបស់អ្នក​។"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_content" msgid="3577642558418404919">"ការធ្វើបែបនេះ​នឹងឈប់ទប់ស្កាត់​ការចូលប្រើ​សម្រាប់កម្មវិធី និងសេវាកម្ម​ទាំងអស់ ដែលត្រូវបាន​អនុញ្ញាតឱ្យប្រើ​កាមេរ៉ា ឬមីក្រូហ្វូនរបស់អ្នក​។"</string>
+    <string name="sensor_privacy_start_use_mic_blocked_dialog_title" msgid="2640140287496469689">"មីក្រូហ្វូន​ត្រូវ​បាន​ទប់ស្កាត់"</string>
+    <string name="sensor_privacy_start_use_camera_blocked_dialog_title" msgid="7398084286822440384">"កាមេរ៉ា​ត្រូវ​បាន​ទប់ស្កាត់"</string>
+    <string name="sensor_privacy_start_use_mic_camera_blocked_dialog_title" msgid="195236134743281973">"កាមេរ៉ា និងមីក្រូហ្វូន​ត្រូវបានទប់ស្កាត់"</string>
+    <string name="sensor_privacy_start_use_mic_blocked_dialog_content" msgid="2138318880682877747">"ដើម្បីឈប់​ទប់ស្កាត់ សូមប្ដូរប៊ូតុងបិទបើក​ឯកជនភាព​នៅលើឧបករណ៍​របស់អ្នក​ទៅទីតាំងបើកមីក្រូហ្វូន ដើម្បីអនុញ្ញាតឱ្យ​ចូលប្រើ​មីក្រូហ្វូន។ សូមមើល​សៀវភៅ​ណែនាំអំពីឧបករណ៍ ដើម្បីរកមើល​ប៊ូតុងបិទបើកឯកជនភាព​នៅលើ​ឧបករណ៍​របស់អ្នក។"</string>
+    <string name="sensor_privacy_start_use_camera_blocked_dialog_content" msgid="7216015168047965948">"ដើម្បីឈប់​ទប់ស្កាត់ សូមប្ដូរ​ប៊ូតុងបិទបើកឯកជនភាព​នៅលើ​ឧបករណ៍របស់អ្នក​ទៅទីតាំងបើក​កាមេរ៉ា ដើម្បីអនុញ្ញាតឱ្យ​ចូលប្រើ​កាមេរ៉ា។ សូមមើល​សៀវភៅ​ណែនាំអំពីឧបករណ៍ ដើម្បីរកមើល​ប៊ូតុងបិទបើកឯកជនភាព​នៅលើ​ឧបករណ៍​របស់អ្នក។"</string>
+    <string name="sensor_privacy_start_use_mic_camera_blocked_dialog_content" msgid="3960837827570483762">"ដើម្បីឈប់​ទប់ស្កាត់កាមេរ៉ានិងមីក្រូហ្វូន សូមប្ដូរ​ប៊ូតុងបិទបើក​ឯកជនភាព​នៅលើឧបករណ៍​របស់អ្នក​ទៅទីតាំងឈប់ទប់ស្កាត់ ដើម្បីអនុញ្ញាតឱ្យ​ចូលប្រើ។ សូមមើល​សៀវភៅ​ណែនាំអំពីឧបករណ៍ ដើម្បីរកមើល​ប៊ូតុងបិទបើកឯកជនភាព​នៅលើ​ឧបករណ៍​របស់អ្នក។"</string>
+    <string name="sensor_privacy_mic_unblocked_toast_content" msgid="306555320557065068">"អាចប្រើមីក្រូហ្វូនបាន"</string>
+    <string name="sensor_privacy_camera_unblocked_toast_content" msgid="7843105715964332311">"អាចប្រើកាមេរ៉ាបាន"</string>
+    <string name="sensor_privacy_mic_camera_unblocked_toast_content" msgid="7339355093282661115">"អាចប្រើកាមេរ៉ា និងមីក្រូហ្វូនបាន"</string>
     <string name="media_seamless_other_device" msgid="4654849800789196737">"ឧបករណ៍ផ្សេងទៀត"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"បិទ/បើក​ទិដ្ឋភាពរួម"</string>
     <string name="zen_priority_introduction" msgid="3159291973383796646">"សំឡេង និងរំញ័រនឹងមិន​រំខានដល់អ្នកឡើយ លើកលែងតែម៉ោងរោទ៍ ការរំលឹក ព្រឹត្តិការណ៍ និងអ្នកហៅទូរសព្ទដែលអ្នកបញ្ជាក់ប៉ុណ្ណោះ។ អ្នកនឹងនៅតែឮសំឡេងសកម្មភាពគ្រប់យ៉ាងដែលអ្នកលេងដដែល រួមទាំងតន្រ្តី វីដេអូ និងហ្គេម។"</string>
@@ -297,7 +310,8 @@
     <string name="notification_tap_again" msgid="4477318164947497249">"ប៉ះ​ម្ដង​ទៀត ដើម្បី​បើក"</string>
     <string name="tap_again" msgid="1315420114387908655">"ចុច​ម្ដងទៀត"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"អូសឡើងលើ​ដើម្បីបើក"</string>
-    <string name="keyguard_unlock_press" msgid="8488350566398524740">"ចុច ដើម្បីបើក"</string>
+    <string name="keyguard_unlock_press" msgid="9140109453735019209">"ចុចរូបដោះសោ ដើម្បីបើក"</string>
+    <string name="keyguard_face_successful_unlock_press" msgid="25520941264602588">"បានដោះសោ​ដោយប្រើមុខ។ សូមចុចរូបដោះសោ ដើម្បីបើក។"</string>
     <string name="keyguard_retry" msgid="886802522584053523">"អូសឡើងលើ ដើម្បី​ព្យាយាម​ម្ដងទៀត"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"ដោះសោ ដើម្បីប្រើ NFC"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"ឧបករណ៍​នេះគឺជា​កម្មសិទ្ធិរបស់​ស្ថាប័ន​អ្នក"</string>
@@ -320,7 +334,6 @@
     <string name="keyguard_indication_charging_time_dock" msgid="6150404291427377863">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • ឧបករណ៍ភ្ជាប់សាកថ្ម • ពេញក្នុងរយៈពេល <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> ទៀត"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"ប្ដូរ​អ្នក​ប្រើ"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"កម្មវិធី និងទិន្នន័យ​ទាំងអស់​ក្នុង​វគ្គ​នេះ​នឹង​ត្រូវ​លុប។"</string>
-    <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"ដកចេញ"</string>
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"សូម​ស្វាគមន៍​ការ​ត្រឡប់​មកវិញ, ភ្ញៀវ!"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"តើ​អ្នក​ចង់​បន្ត​វគ្គ​របស់​អ្នក​ទេ?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"ចាប់ផ្ដើមសាជាថ្មី"</string>
@@ -766,6 +779,12 @@
     <string name="controls_dialog_ok" msgid="2770230012857881822">"បញ្ចូល"</string>
     <string name="controls_dialog_message" msgid="342066938390663844">"បាន​ណែនាំដោយ <xliff:g id="APP">%s</xliff:g>"</string>
     <string name="controls_tile_locked" msgid="731547768182831938">"បានចាក់សោ​ឧបករណ៍"</string>
+    <string name="controls_settings_show_controls_dialog_title" msgid="3357852503553809554">"បង្ហាញ និង​គ្រប់គ្រង​ឧបករណ៍ពី​អេក្រង់ចាក់សោឬ?"</string>
+    <string name="controls_settings_show_controls_dialog_message" msgid="7666211700524587969">"អ្នកអាចបញ្ចូល​ការគ្រប់គ្រង​សម្រាប់ឧបករណ៍​ខាងក្រៅ​របស់អ្នក​ទៅក្នុងអេក្រង់​ចាក់សោបាន។\n\nកម្មវិធី​ឧបករណ៍​របស់អ្នក​អាចអនុញ្ញាតឱ្យអ្នក​គ្រប់គ្រង​ឧបករណ៍​មួយចំនួន ដោយមិនចាំបាច់​ដោះសោ​ទូរសព្ទ ឬ​ថេប្លេត​របស់អ្នក។\n\nអ្នកអាចធ្វើការផ្លាស់ប្ដូរ​បានគ្រប់ពេល​នៅក្នុង​ការកំណត់។"</string>
+    <string name="controls_settings_trivial_controls_dialog_title" msgid="7593188157655036677">"គ្រប់គ្រង​ឧបករណ៍ពី​អេក្រង់ចាក់សោឬ?"</string>
+    <string name="controls_settings_trivial_controls_dialog_message" msgid="237183787721917586">"អ្នកអាចគ្រប់គ្រង​ឧបករណ៍​មួយចំនួន ដោយមិនចាំបាច់​ដោះសោ​ទូរសព្ទ ឬថេប្លេត​របស់អ្នក។\n\nកម្មវិធី​ឧបករណ៍​របស់អ្នក​កំណត់ឧបករណ៍​ដែលអាចត្រូវបានគ្រប់គ្រង​តាមវិធីនេះ។"</string>
+    <string name="controls_settings_dialog_neutral_button" msgid="4514446354793124140">"ទេ អរគុណ"</string>
+    <string name="controls_settings_dialog_positive_button" msgid="436070672551674863">"បាទ/ចាស"</string>
     <string name="controls_pin_use_alphanumeric" msgid="8478371861023048414">"កូដ PIN មាន​អក្សរ ឬនិមិត្តសញ្ញា"</string>
     <string name="controls_pin_verify" msgid="3452778292918877662">"ផ្ទៀងផ្ទាត់ <xliff:g id="DEVICE">%s</xliff:g>"</string>
     <string name="controls_pin_wrong" msgid="6162694056042164211">"កូដ PIN មិន​ត្រឹមត្រូវ​"</string>
@@ -775,8 +794,7 @@
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"អូសដើម្បី​មើលច្រើនទៀត"</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"កំពុងផ្ទុក​ការណែនាំ"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"មេឌៀ"</string>
-    <!-- no translation found for controls_media_close_session (4780485355795635052) -->
-    <skip />
+    <string name="controls_media_close_session" msgid="4780485355795635052">"លាក់ផ្ទាំង​គ្រប់គ្រង​មេឌៀនេះសម្រាប់ <xliff:g id="APP_NAME">%1$s</xliff:g> ឬ?"</string>
     <string name="controls_media_active_session" msgid="3146882316024153337">"មិនអាចលាក់វគ្គមេឌៀបច្ចុប្បន្នបានទេ។"</string>
     <string name="controls_media_dismiss_button" msgid="4485675693008031646">"លាក់"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"បន្ត"</string>
@@ -815,6 +833,13 @@
     <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"ផ្គូផ្គង​ឧបករណ៍ថ្មី"</string>
     <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"ដើម្បីភ្ជាប់វគ្គនេះ សូមបើកកម្មវិធី។"</string>
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"កម្មវិធី​ដែលមិន​ស្គាល់"</string>
+    <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"របៀបដែលការផ្សាយដំណើរការ"</string>
+    <string name="media_output_broadcast" msgid="3555580945878071543">"ការ​ផ្សាយ"</string>
+    <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"មនុស្សនៅជិត​អ្នកដែលមាន​ឧបករណ៍ប៊្លូធូស​ត្រូវគ្នា​អាចស្តាប់​មេឌៀ​ដែលអ្នកកំពុងផ្សាយបាន"</string>
+    <string name="media_output_broadcasting_message" msgid="4150299923404886073">"ដើម្បីស្តាប់​ការផ្សាយ​របស់អ្នក មនុស្សនៅជិត​ដែលមាន​ឧបករណ៍ប៊្លូធូស​ត្រូវគ្នា​អាចស្កេនកូដ QR របស់អ្នក ឬប្រើឈ្មោះ​ការផ្សាយ និងពាក្យសម្ងាត់​របស់អ្នក"</string>
+    <string name="media_output_broadcast_name" msgid="8786127091542624618">"ឈ្មោះការផ្សាយ"</string>
+    <string name="media_output_broadcast_code" msgid="870795639644728542">"ពាក្យសម្ងាត់"</string>
+    <string name="media_output_broadcast_dialog_save" msgid="7910865591430010198">"រក្សាទុក"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"លេខ​កំណែបង្កើត"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"បានចម្លងលេខ​កំណែបង្កើតទៅឃ្លីបបត។"</string>
     <string name="basic_status" msgid="2315371112182658176">"បើកការសន្ទនា"</string>
@@ -891,7 +916,7 @@
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"កម្មវិធីសកម្ម"</string>
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"ឈប់"</string>
     <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"បានឈប់"</string>
-    <string name="clipboard_edit_text_copy" msgid="770856373439969178">"ចម្លង"</string>
+    <string name="clipboard_edit_text_done" msgid="4551887727694022409">"រួចរាល់"</string>
     <string name="clipboard_overlay_text_copied" msgid="1872624400464891363">"បានចម្លង"</string>
     <string name="clipboard_edit_source" msgid="9156488177277788029">"ពី <xliff:g id="APPNAME">%1$s</xliff:g>"</string>
     <string name="clipboard_dismiss_description" msgid="7544573092766945657">"ច្រានចោល UI ចម្លង"</string>
