@@ -596,6 +596,7 @@
     <string name="guest_reset_guest_dialog_title" msgid="8047270010895437534">"Tetapkan semula tetamu?"</string>
     <string name="guest_remove_guest_dialog_title" msgid="4548511006624088072">"Alih keluar tetamu?"</string>
     <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"Tetapkan semula"</string>
+    <string name="guest_remove_guest_confirm_button" msgid="7858123434954143879">"Alih keluar"</string>
     <string name="guest_resetting" msgid="7822120170191509566">"Menetapkan semula tetamu…"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"Ambil foto"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"Pilih imej"</string>
@@ -651,4 +652,7 @@
     <string name="turn_screen_on_title" msgid="3266937298097573424">"Hidupkan skrin"</string>
     <string name="allow_turn_screen_on" msgid="6194845766392742639">"Benarkan menghidupkan skrin"</string>
     <string name="allow_turn_screen_on_description" msgid="43834403291575164">"Benarkan apl menghidupkan skrin. Jika dibenarkan, apl boleh menghidupkan skrin pada bila-bila masa tanpa niat eksplisit anda."</string>
+    <string name="bt_le_audio_scan_qr_code" msgid="3521809854780392679">"Imbas kod QR"</string>
+    <string name="bt_le_audio_scan_qr_code_scanner" msgid="4679500020630341107">"Untuk mula mendengar, pusatkan kod QR di bawah"</string>
+    <string name="bt_le_audio_qr_code_is_not_valid_format" msgid="6092191081849434734">"Kod QR bukan dalam format yang sah"</string>
 </resources>

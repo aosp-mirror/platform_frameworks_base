@@ -596,6 +596,7 @@
     <string name="guest_reset_guest_dialog_title" msgid="8047270010895437534">"Qonaq məlumatı sıfırlansın?"</string>
     <string name="guest_remove_guest_dialog_title" msgid="4548511006624088072">"Qonaq silinsin?"</string>
     <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"Sıfırlayın"</string>
+    <string name="guest_remove_guest_confirm_button" msgid="7858123434954143879">"Silin"</string>
     <string name="guest_resetting" msgid="7822120170191509566">"Qonaq məlumatı sıfırlanır…"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"Foto çəkin"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"Şəkil seçin"</string>
@@ -651,4 +652,7 @@
     <string name="turn_screen_on_title" msgid="3266937298097573424">"Ekranı aktiv etmək"</string>
     <string name="allow_turn_screen_on" msgid="6194845766392742639">"Ekranı aktiv etməyə icazə verin"</string>
     <string name="allow_turn_screen_on_description" msgid="43834403291575164">"Tətbiqin ekranı aktiv etməsinə icazə verin. İcazə verilərsə, tətbiq istənilən vaxt sizə soruşmadan ekranı aktiv edə bilər."</string>
+    <string name="bt_le_audio_scan_qr_code" msgid="3521809854780392679">"QR kodu skanlayın"</string>
+    <string name="bt_le_audio_scan_qr_code_scanner" msgid="4679500020630341107">"Dinləməyə başlamaq üçün aşağıda QR kodu mərkəzə yerləşdirin"</string>
+    <string name="bt_le_audio_qr_code_is_not_valid_format" msgid="6092191081849434734">"QR kodu doğru formatda deyil"</string>
 </resources>

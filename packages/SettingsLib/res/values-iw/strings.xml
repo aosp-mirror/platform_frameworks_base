@@ -109,12 +109,9 @@
     <string name="bluetooth_battery_level" msgid="2893696778200201555">"טעינת הסוללה: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="bluetooth_battery_level_untethered" msgid="4002282355111504349">"שמאל: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> סוללה, ימין: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> סוללה"</string>
     <string name="bluetooth_active_no_battery_level" msgid="4155462233006205630">"פעיל"</string>
-    <!-- no translation found for bluetooth_hearing_aid_left_active (7084887715570971441) -->
-    <skip />
-    <!-- no translation found for bluetooth_hearing_aid_right_active (8574683234077567230) -->
-    <skip />
-    <!-- no translation found for bluetooth_hearing_aid_left_and_right_active (407704460573163973) -->
-    <skip />
+    <string name="bluetooth_hearing_aid_left_active" msgid="7084887715570971441">"פועל: שמאל בלבד"</string>
+    <string name="bluetooth_hearing_aid_right_active" msgid="8574683234077567230">"פועל: ימין בלבד"</string>
+    <string name="bluetooth_hearing_aid_left_and_right_active" msgid="407704460573163973">"פועל: ימין ושמאל"</string>
     <string name="bluetooth_profile_a2dp" msgid="4632426382762851724">"אודיו של מדיה"</string>
     <string name="bluetooth_profile_headset" msgid="5395952236133499331">"שיחות טלפון"</string>
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"העברת קבצים"</string>
@@ -592,27 +589,22 @@
     <string name="add_user_failed" msgid="4809887794313944872">"לא ניתן היה ליצור משתמש חדש"</string>
     <string name="add_guest_failed" msgid="8074548434469843443">"יצירת אורח חדש נכשלה"</string>
     <string name="user_nickname" msgid="262624187455825083">"כינוי"</string>
-    <!-- no translation found for user_add_user (7876449291500212468) -->
-    <skip />
+    <string name="user_add_user" msgid="7876449291500212468">"הוספת משתמש"</string>
     <string name="guest_new_guest" msgid="3482026122932643557">"הוספת אורח"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"הסרת אורח/ת"</string>
     <string name="guest_reset_guest" msgid="6110013010356013758">"איפוס הגלישה כאורח"</string>
     <string name="guest_reset_guest_dialog_title" msgid="8047270010895437534">"לאפס את הגלישה כאורח?"</string>
-    <!-- no translation found for guest_remove_guest_dialog_title (4548511006624088072) -->
-    <skip />
+    <string name="guest_remove_guest_dialog_title" msgid="4548511006624088072">"להסיר את האורח/ת?"</string>
     <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"איפוס"</string>
+    <string name="guest_remove_guest_confirm_button" msgid="7858123434954143879">"הסרה"</string>
     <string name="guest_resetting" msgid="7822120170191509566">"מתבצע איפוס של הגלישה כאורח…"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"צילום תמונה"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"לבחירת תמונה"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"בחירת תמונה"</string>
-    <!-- no translation found for failed_attempts_now_wiping_device (4016329172216428897) -->
-    <skip />
-    <!-- no translation found for failed_attempts_now_wiping_user (469060411789668050) -->
-    <skip />
-    <!-- no translation found for failed_attempts_now_wiping_profile (7626589520888963129) -->
-    <skip />
-    <!-- no translation found for failed_attempts_now_wiping_dialog_dismiss (2749889771223578925) -->
-    <skip />
+    <string name="failed_attempts_now_wiping_device" msgid="4016329172216428897">"נעשו יותר מדי ניסיונות שגויים. הנתונים במכשיר יימחקו."</string>
+    <string name="failed_attempts_now_wiping_user" msgid="469060411789668050">"נעשו יותר מדי ניסיונות שגויים. המשתמש הזה יימחק."</string>
+    <string name="failed_attempts_now_wiping_profile" msgid="7626589520888963129">"נעשו יותר מדי ניסיונות שגויים. פרופיל העבודה והנתונים שמשויכים אליו יימחקו."</string>
+    <string name="failed_attempts_now_wiping_dialog_dismiss" msgid="2749889771223578925">"סגירה"</string>
     <string name="cached_apps_freezer_device_default" msgid="2616594131750144342">"ברירת המחדל של המכשיר"</string>
     <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"מושבת"</string>
     <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"מופעל"</string>
@@ -660,4 +652,7 @@
     <string name="turn_screen_on_title" msgid="3266937298097573424">"הפעלת המסך"</string>
     <string name="allow_turn_screen_on" msgid="6194845766392742639">"הרשאה להפעלת המסך"</string>
     <string name="allow_turn_screen_on_description" msgid="43834403291575164">"הרשאה לאפליקציה להפעיל את המסך. אם מעניקים את ההרשאה, האפליקציה יכולה להפעיל את המסך בכל זמן, גם בלי שמתכוונים לכך במפורש."</string>
+    <string name="bt_le_audio_scan_qr_code" msgid="3521809854780392679">"‏סריקת קוד QR"</string>
+    <string name="bt_le_audio_scan_qr_code_scanner" msgid="4679500020630341107">"‏כדי להתחיל בהאזנה, צריך להציב את קוד ה‑QR במרכז החלון שבהמשך"</string>
+    <string name="bt_le_audio_qr_code_is_not_valid_format" msgid="6092191081849434734">"‏הפורמט של קוד ה‑QR לא תקין"</string>
 </resources>

@@ -518,7 +518,7 @@
     <string name="ims_reg_title" msgid="8197592958123671062">"État d\'enregistrement IMS"</string>
     <string name="ims_reg_status_registered" msgid="884916398194885457">"Enregistré"</string>
     <string name="ims_reg_status_not_registered" msgid="2989287366045704694">"Non enregistré"</string>
-    <string name="status_unavailable" msgid="5279036186589861608">"Non accessible"</string>
+    <string name="status_unavailable" msgid="5279036186589861608">"Non disponible"</string>
     <string name="wifi_status_mac_randomized" msgid="466382542497832189">"Les adresses MAC sont randomisées"</string>
     <string name="wifi_tether_connected_summary" msgid="5282919920463340158">"{count,plural, =0{Aucun appareil connecté}=1{1 appareil connecté}one{# appareil connecté}other{# appareils connectés}}"</string>
     <string name="accessibility_manual_zen_more_time" msgid="5141801092071134235">"Plus longtemps."</string>
@@ -589,27 +589,22 @@
     <string name="add_user_failed" msgid="4809887794313944872">"Impossible de créer un utilisateur"</string>
     <string name="add_guest_failed" msgid="8074548434469843443">"Impossible de créer un nouvel invité"</string>
     <string name="user_nickname" msgid="262624187455825083">"Pseudo"</string>
-    <!-- no translation found for user_add_user (7876449291500212468) -->
-    <skip />
+    <string name="user_add_user" msgid="7876449291500212468">"Ajouter un utilisateur"</string>
     <string name="guest_new_guest" msgid="3482026122932643557">"Ajouter un invité"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"Supprimer l\'invité"</string>
     <string name="guest_reset_guest" msgid="6110013010356013758">"Réinitialiser la session Invité"</string>
     <string name="guest_reset_guest_dialog_title" msgid="8047270010895437534">"Réinitialiser la session Invité?"</string>
-    <!-- no translation found for guest_remove_guest_dialog_title (4548511006624088072) -->
-    <skip />
+    <string name="guest_remove_guest_dialog_title" msgid="4548511006624088072">"Retirer l\'invité?"</string>
     <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"Réinitialiser"</string>
+    <string name="guest_remove_guest_confirm_button" msgid="7858123434954143879">"Retirer"</string>
     <string name="guest_resetting" msgid="7822120170191509566">"Réinitialisation de la session Invité en cours…"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"Prendre une photo"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"Sélectionner une image"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"Sélectionnez une photo"</string>
-    <!-- no translation found for failed_attempts_now_wiping_device (4016329172216428897) -->
-    <skip />
-    <!-- no translation found for failed_attempts_now_wiping_user (469060411789668050) -->
-    <skip />
-    <!-- no translation found for failed_attempts_now_wiping_profile (7626589520888963129) -->
-    <skip />
-    <!-- no translation found for failed_attempts_now_wiping_dialog_dismiss (2749889771223578925) -->
-    <skip />
+    <string name="failed_attempts_now_wiping_device" msgid="4016329172216428897">"Trop de tentatives incorrectes. Les données de cet appareil seront supprimées."</string>
+    <string name="failed_attempts_now_wiping_user" msgid="469060411789668050">"Trop de tentatives incorrectes. Cet utilisateur sera supprimé."</string>
+    <string name="failed_attempts_now_wiping_profile" msgid="7626589520888963129">"Trop de tentatives incorrectes. Ce profil professionnel sera supprimé, y compris ses données."</string>
+    <string name="failed_attempts_now_wiping_dialog_dismiss" msgid="2749889771223578925">"Fermer"</string>
     <string name="cached_apps_freezer_device_default" msgid="2616594131750144342">"Valeur par défaut de l\'appareil"</string>
     <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"Désactivé"</string>
     <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"Activé"</string>
@@ -657,4 +652,10 @@
     <string name="turn_screen_on_title" msgid="3266937298097573424">"Activation de l\'écran"</string>
     <string name="allow_turn_screen_on" msgid="6194845766392742639">"Autoriser l\'activation de l\'écran"</string>
     <string name="allow_turn_screen_on_description" msgid="43834403291575164">"Autorisez une application à activer l\'écran. Lorsque vous accordez cette autorisation, l\'application peut activer l\'écran à tout moment sans votre volonté explicite."</string>
+    <!-- no translation found for bt_le_audio_scan_qr_code (3521809854780392679) -->
+    <skip />
+    <!-- no translation found for bt_le_audio_scan_qr_code_scanner (4679500020630341107) -->
+    <skip />
+    <!-- no translation found for bt_le_audio_qr_code_is_not_valid_format (6092191081849434734) -->
+    <skip />
 </resources>
