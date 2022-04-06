@@ -585,7 +585,7 @@
     <string name="biometric_error_generic" msgid="6784371929985434439">"Error while authenticating"</string>
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"Use screen lock"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"Enter your screen lock to continue"</string>
-    <string name="fingerprint_acquired_partial" msgid="694598777291084823">"Partial fingerprint detected"</string>
+    <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"Press firmly on the sensor"</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"Couldn\'t process fingerprint. Please try again."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"Clean fingerprint sensor and try again"</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"Clean sensor and try again"</string>
@@ -598,7 +598,7 @@
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_error_not_match" msgid="4599441812893438961">"Fingerprint not recognised"</string>
-    <string name="fingerprint_udfps_error_not_match" msgid="4709197752023550709">"Press firmly on the sensor"</string>
+    <string name="fingerprint_udfps_error_not_match" msgid="8236930793223158856">"Fingerprint not recognised"</string>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"Fingerprint authenticated"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"Face authenticated"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"Face authenticated. Please press confirm"</string>
@@ -1679,7 +1679,6 @@
     <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"ON"</string>
     <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"OFF"</string>
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"Allow <xliff:g id="SERVICE">%1$s</xliff:g> to have full control of your device?"</string>
-    <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"If you turn on <xliff:g id="SERVICE">%1$s</xliff:g>, your device won’t use your screen lock to enhance data encryption."</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"Full control is appropriate for apps that help you with accessibility needs, but not for most apps."</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"View and control screen"</string>
     <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"It can read all content on the screen and display content over other apps."</string>
@@ -2027,7 +2026,7 @@
     <string name="harmful_app_warning_open_anyway" msgid="5963657791740211807">"OPEN ANYWAY"</string>
     <string name="harmful_app_warning_title" msgid="8794823880881113856">"Harmful app detected"</string>
     <string name="log_access_confirmation_title" msgid="2343578467290592708">"Allow <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> to access all device logs?"</string>
-    <string name="log_access_confirmation_allow" msgid="143157286283302512">"Only this time"</string>
+    <string name="log_access_confirmation_allow" msgid="5302517782599389507">"Allow one-time access"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"Don’t allow"</string>
     <string name="log_access_confirmation_body" msgid="6581985716241928135">"Device logs record what happens on your device. Apps can use these logs to find and fix issues.\n\nSome logs may contain sensitive info, so only allow apps that you trust to access all device logs. \n\nIf you don’t allow this app to access all device logs, it can still access its own logs. Your device manufacturer may still be able to access some logs or info on your device. Learn more"</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"Don’t show again"</string>
@@ -2259,9 +2258,10 @@
     <string name="ui_translation_accessibility_translated_text" msgid="3197547218178944544">"<xliff:g id="MESSAGE">%1$s</xliff:g> translated."</string>
     <string name="ui_translation_accessibility_translation_finished" msgid="3057830947610088465">"Message translated from <xliff:g id="FROM_LANGUAGE">%1$s</xliff:g> to <xliff:g id="TO_LANGUAGE">%2$s</xliff:g>."</string>
     <string name="notification_channel_abusive_bg_apps" msgid="6092140213264920355">"Background activity"</string>
-    <string name="notification_title_abusive_bg_apps" msgid="344582472797982073">"Background activity"</string>
-    <string name="notification_content_abusive_bg_apps" msgid="5572096708044958249">"<xliff:g id="APP">%1$s</xliff:g> is running in the background and draining battery. Tap to review."</string>
-    <string name="notification_content_long_running_fgs" msgid="8878031652441570178">"<xliff:g id="APP">%1$s</xliff:g> is running in the background for a long time. Tap to review."</string>
+    <string name="notification_title_abusive_bg_apps" msgid="3258460527676573815">"An app is using battery"</string>
+    <string name="notification_title_long_running_fgs" msgid="8170284286477131587">"An app is still active"</string>
+    <string name="notification_content_abusive_bg_apps" msgid="9180610713603474720">"<xliff:g id="APP">%1$s</xliff:g> is using battery in the background. Tap to review."</string>
+    <string name="notification_content_long_running_fgs" msgid="8258193410039977101">"<xliff:g id="APP">%1$s</xliff:g> might affect battery life. Tap to review active apps."</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Check active apps"</string>
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"Can’t access the phone’s camera from your <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"Can’t access the tablet’s camera from your <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
