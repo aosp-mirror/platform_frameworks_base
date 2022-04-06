@@ -108,11 +108,13 @@ public abstract class ActivityInterceptorCallback {
         public final int callingPid;
         public final int callingUid;
         public final ActivityOptions checkedOptions;
+        public final @Nullable Runnable clearOptionsAnimation;
 
         public ActivityInterceptorInfo(int realCallingUid, int realCallingPid, int userId,
                 String callingPackage, String callingFeatureId, Intent intent,
                 ResolveInfo rInfo, ActivityInfo aInfo, String resolvedType, int callingPid,
-                int callingUid, ActivityOptions checkedOptions) {
+                int callingUid, ActivityOptions checkedOptions,
+                @Nullable Runnable clearOptionsAnimation) {
             this.realCallingUid = realCallingUid;
             this.realCallingPid = realCallingPid;
             this.userId = userId;
@@ -125,6 +127,7 @@ public abstract class ActivityInterceptorCallback {
             this.callingPid = callingPid;
             this.callingUid = callingUid;
             this.checkedOptions = checkedOptions;
+            this.clearOptionsAnimation = clearOptionsAnimation;
         }
     }
 

@@ -256,6 +256,10 @@ public final class HintManagerService extends SystemService {
         @Override
         public void onUidCachedChanged(int uid, boolean cached) {
         }
+
+        @Override
+        public void onUidProcAdjChanged(int uid) {
+        }
     }
 
     @VisibleForTesting

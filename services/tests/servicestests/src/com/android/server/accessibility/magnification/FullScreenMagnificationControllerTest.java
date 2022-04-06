@@ -28,6 +28,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
@@ -45,13 +46,16 @@ import android.content.IntentFilter;
 import android.graphics.PointF;
 import android.graphics.Rect;
 import android.graphics.Region;
+import android.hardware.display.DisplayManagerInternal;
 import android.os.Looper;
+import android.view.DisplayInfo;
 import android.view.MagnificationSpec;
 import android.view.accessibility.MagnificationAnimationCallback;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.runner.AndroidJUnit4;
 
+import com.android.server.LocalServices;
 import com.android.server.accessibility.AccessibilityTraceManager;
 import com.android.server.accessibility.test.MessageCapturingHandler;
 import com.android.server.wm.WindowManagerInternal;
@@ -113,6 +117,8 @@ public class FullScreenMagnificationControllerTest {
 
     FullScreenMagnificationController mFullScreenMagnificationController;
 
+    public DisplayManagerInternal mDisplayManagerInternalMock = mock(DisplayManagerInternal.class);
+
     @Before
     public void setUp() {
         Looper looper = InstrumentationRegistry.getContext().getMainLooper();
@@ -124,6 +130,12 @@ public class FullScreenMagnificationControllerTest {
         when(mMockControllerCtx.getHandler()).thenReturn(mMessageCapturingHandler);
         when(mMockControllerCtx.getAnimationDuration()).thenReturn(1000L);
         initMockWindowManager();
+
+        final DisplayInfo displayInfo = new DisplayInfo();
+        displayInfo.logicalDensityDpi = 300;
+        doReturn(displayInfo).when(mDisplayManagerInternalMock).getDisplayInfo(anyInt());
+        LocalServices.removeServiceForTest(DisplayManagerInternal.class);
+        LocalServices.addService(DisplayManagerInternal.class, mDisplayManagerInternalMock);
 
         mFullScreenMagnificationController = new FullScreenMagnificationController(
                 mMockControllerCtx, new Object(), mRequestObserver, mScaleProvider);

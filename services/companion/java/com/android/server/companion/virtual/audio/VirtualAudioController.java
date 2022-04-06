@@ -21,7 +21,8 @@ import static android.media.AudioPlaybackConfiguration.PLAYER_STATE_STARTED;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
-import android.companion.virtual.audio.IAudioSessionCallback;
+import android.companion.virtual.audio.IAudioConfigChangedCallback;
+import android.companion.virtual.audio.IAudioRoutingCallback;
 import android.content.Context;
 import android.media.AudioManager;
 import android.media.AudioPlaybackConfiguration;
@@ -64,9 +65,10 @@ public final class VirtualAudioController implements AudioPlaybackCallback,
     private ArraySet<Integer> mPlayingAppUids = new ArraySet<>();
     private GenericWindowPolicyController mGenericWindowPolicyController;
     private final Object mCallbackLock = new Object();
-    @Nullable
     @GuardedBy("mCallbackLock")
-    private IAudioSessionCallback mCallback;
+    private IAudioRoutingCallback mRoutingCallback;
+    @GuardedBy("mCallbackLock")
+    private IAudioConfigChangedCallback mConfigChangedCallback;
 
     public VirtualAudioController(Context context) {
         mContext = context;
@@ -80,18 +82,22 @@ public final class VirtualAudioController implements AudioPlaybackCallback,
      */
     public void startListening(
             @NonNull GenericWindowPolicyController genericWindowPolicyController,
-            @Nullable IAudioSessionCallback callback) {
+            @NonNull IAudioRoutingCallback routingCallback,
+            @Nullable IAudioConfigChangedCallback configChangedCallback) {
         mGenericWindowPolicyController = genericWindowPolicyController;
         mGenericWindowPolicyController.setRunningAppsChangedListener(/* listener= */ this);
         synchronized (mCallbackLock) {
-            mCallback = callback;
+            mRoutingCallback = routingCallback;
+            mConfigChangedCallback = configChangedCallback;
         }
         synchronized (mLock) {
             mRunningAppUids.clear();
             mPlayingAppUids.clear();
         }
-        mAudioPlaybackDetector.register(/* callback= */ this);
-        mAudioRecordingDetector.register(/* callback= */ this);
+        if (configChangedCallback != null) {
+            mAudioPlaybackDetector.register(/* callback= */ this);
+            mAudioRecordingDetector.register(/* callback= */ this);
+        }
     }
 
     /**
@@ -109,7 +115,8 @@ public final class VirtualAudioController implements AudioPlaybackCallback,
             mGenericWindowPolicyController = null;
         }
         synchronized (mCallbackLock) {
-            mCallback = null;
+            mRoutingCallback = null;
+            mConfigChangedCallback = null;
         }
     }
 
@@ -169,9 +176,9 @@ public final class VirtualAudioController implements AudioPlaybackCallback,
             audioPlaybackConfigurations = findPlaybackConfigurations(configs, mRunningAppUids);
         }
         synchronized (mCallbackLock) {
-            if (mCallback != null) {
+            if (mConfigChangedCallback != null) {
                 try {
-                    mCallback.onPlaybackConfigChanged(audioPlaybackConfigurations);
+                    mConfigChangedCallback.onPlaybackConfigChanged(audioPlaybackConfigurations);
                 } catch (RemoteException e) {
                     Slog.e(TAG, "RemoteException when calling onPlaybackConfigChanged", e);
                 }
@@ -188,9 +195,9 @@ public final class VirtualAudioController implements AudioPlaybackCallback,
             audioRecordingConfigurations = findRecordingConfigurations(configs, mRunningAppUids);
         }
         synchronized (mCallbackLock) {
-            if (mCallback != null) {
+            if (mConfigChangedCallback != null) {
                 try {
-                    mCallback.onRecordingConfigChanged(audioRecordingConfigurations);
+                    mConfigChangedCallback.onRecordingConfigChanged(audioRecordingConfigurations);
                 } catch (RemoteException e) {
                     Slog.e(TAG, "RemoteException when calling onRecordingConfigChanged", e);
                 }
@@ -227,9 +234,9 @@ public final class VirtualAudioController implements AudioPlaybackCallback,
         }
 
         synchronized (mCallbackLock) {
-            if (mCallback != null) {
+            if (mRoutingCallback != null) {
                 try {
-                    mCallback.onAppsNeedingAudioRoutingChanged(runningUids);
+                    mRoutingCallback.onAppsNeedingAudioRoutingChanged(runningUids);
                 } catch (RemoteException e) {
                     Slog.e(TAG, "RemoteException when calling updateReroutingApps", e);
                 }

@@ -486,7 +486,7 @@
 
     <style name="MediaOutputItemInactiveTitle">
         <item name="android:textSize">16sp</item>
-        <item name="android:textColor">@color/media_dialog_inactive_item_main_content</item>
+        <item name="android:textColor">@color/media_dialog_item_main_content</item>
     </style>
 
     <style name="TunerSettings" parent="@android:style/Theme.DeviceDefault.Settings">
@@ -590,6 +590,7 @@
 
     <style name="MediaPlayer.ProgressBar" parent="@android:style/Widget.ProgressBar.Horizontal">
         <item name="android:thumbTint">?android:attr/textColorPrimary</item>
+        <item name="android:progressDrawable">@drawable/media_squiggly_progress</item>
         <item name="android:progressTint">?android:attr/textColorPrimary</item>
         <item name="android:progressBackgroundTint">?android:attr/textColorTertiary</item>
         <item name="android:clickable">true</item>
@@ -615,7 +616,6 @@
            parent="@android:style/Widget.Material.Button.Borderless.Small">
         <item name="android:background">@drawable/qs_media_light_source</item>
         <item name="android:tint">?android:attr/textColorPrimary</item>
-        <item name="android:stateListAnimator">@anim/media_button_state_list_animator</item>
         <item name="android:paddingTop">12dp</item>
         <item name="android:paddingStart">12dp</item>
         <item name="android:paddingEnd">12dp</item>
@@ -628,8 +628,12 @@
         <item name="android:backgroundTint">@color/media_player_solid_button_bg</item>
     </style>
 
+    <style name="MediaPlayer.SessionAction.Secondary" parent="MediaPlayer.SessionAction">
+        <item name="android:stateListAnimator">@anim/media_button_state_list_animator</item>
+    </style>
+
     <style name="MediaPlayer.OutlineButton">
-        <item name="android:background">@drawable/qs_media_button_background</item>
+        <item name="android:background">@drawable/qs_media_outline_button</item>
         <item name="android:textColor">?android:attr/textColorPrimary</item>
         <item name="android:backgroundTint">@color/media_player_outline_button_bg</item>
         <item name="android:fontFamily">@*android:string/config_headlineFontFamilyMedium</item>
@@ -696,6 +700,10 @@
 
     <style name="FloatingOverlay" parent="@android:style/Theme.DeviceDefault.DayNight">
         <item name="overlayButtonTextColor">?android:attr/textColorPrimary</item>
+    </style>
+
+    <style name="EditTextActivityButton" parent="@android:style/Widget.DeviceDefault.Button.Colored">
+        <item name="android:textColor">?android:attr/textColorPrimary</item>
     </style>
 
     <!-- Clipboard overlay's edit text activity. -->
@@ -950,6 +958,16 @@
         <item name="android:textAlignment">center</item>
     </style>
 
+    <!-- We explicitly overload this because we don't have control over the style or layout for
+         the cast dialog items, as it's in `@android:layout/media_route_list_item. -->
+    <style name="TextAppearance.CastItem" parent="@android:style/TextAppearance.DeviceDefault.Medium">
+        <item name="android:fontFamily">@*android:string/config_headlineFontFamily</item>
+    </style>
+
+    <style name="Theme.SystemUI.Dialog.Cast">
+        <item name="android:textAppearanceMedium">@style/TextAppearance.CastItem</item>
+    </style>
+    <!-- ************************************************************************************* -->
 
     <style name="Widget" />
     <style name="Widget.Dialog" />
@@ -1062,5 +1080,81 @@
     <style name="FgsManagerAppDuration">
         <item name="android:fontFamily">?android:attr/textAppearanceSmall</item>
         <item name="android:textDirection">locale</item>
+    </style>
+
+    <style name="BroadcastDialog">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_gravity">start|center_vertical</item>
+    </style>
+
+    <style name="BroadcastDialog.InfoItem">
+        <item name="android:layout_width">@dimen/media_output_broadcast_info_item_width</item>
+        <item name="android:layout_height">@dimen/media_output_broadcast_info_item_height</item>
+        <item name="android:clickable">false</item>
+        <item name="android:gravity">start|center_vertical</item>
+    </style>
+
+    <style name="BroadcastDialog.InfoItem.Title">
+        <item name="android:layout_height">@dimen/media_output_broadcast_info_title_height</item>
+        <item name="android:textAppearance">@style/TextAppearance.BroadcastDialog</item>
+    </style>
+
+    <style name="BroadcastDialog.InfoItem.Summary">
+        <item name="android:layout_height">@dimen/media_output_broadcast_info_summary_height</item>
+        <item name="android:textAppearance">@style/TextAppearance.BroadcastDialog.Secondary</item>
+    </style>
+
+    <style name="BroadcastDialog.InfoItem.Edit">
+        <item name="android:layout_width">@dimen/media_output_broadcast_info_edit</item>
+        <item name="android:layout_height">@dimen/media_output_broadcast_info_edit</item>
+        <item name="android:background">?android:attr/selectableItemBackground</item>
+        <item name="android:clickable">true</item>
+        <item name="android:focusable">true</item>
+        <item name="android:src">@*android:drawable/ic_mode_edit</item>
+        <item name="android:tint">?android:attr/textColorPrimary</item>
+    </style>
+
+    <style name="BroadcastDialog.Divider">
+        <item name="android:background">?android:attr/textColorSecondary</item>
+    </style>
+
+    <style name="BroadcastDialog.Divider.Horizontal">
+        <item name="android:layout_width">348dp</item>
+        <item name="android:layout_height">1dp</item>
+        <item name="android:layout_gravity">center_horizontal</item>
+    </style>
+
+
+    <style name="BroadcastDialog.Divider.Vertical">
+        <item name="android:layout_width">1dp</item>
+        <item name="android:layout_height">28dp</item>
+        <item name="android:layout_marginEnd">30dp</item>
+    </style>
+
+    <style name="TextAppearance.BroadcastDialog">
+        <item name="android:fontFamily">@*android:string/config_headlineFontFamily</item>
+        <item name="android:textSize">16sp</item>
+        <item name="android:textColor">?android:attr/textColorPrimary</item>
+        <item name="android:textDirection">locale</item>
+    </style>
+
+    <style name="TextAppearance.BroadcastDialog.Secondary">
+        <item name="android:textSize">14sp</item>
+        <item name="android:textColor">?android:attr/textColorSecondary</item>
+    </style>
+
+    <!-- Dream Overlay Complication UI styles -->
+    <style name="clock_subtitle">
+        <item name="android:textSize">@dimen/dream_overlay_complication_clock_subtitle_text_size
+        </item>
+        <item name="android:paddingHorizontal">@dimen/dream_overlay_complication_shadow_padding
+        </item>
+        <item name="android:fontFamily">@*android:string/config_headlineFontFamily</item>
+        <item name="android:textColor">@android:color/white</item>
+        <item name="android:gravity">center_horizontal</item>
+        <item name="android:ellipsize">none</item>
+        <item name="android:shadowColor">@color/keyguard_shadow_color</item>
+        <item name="android:shadowRadius">?attr/shadowRadius</item>
     </style>
 </resources>

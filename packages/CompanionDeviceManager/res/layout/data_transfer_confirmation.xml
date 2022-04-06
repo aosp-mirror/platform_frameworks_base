@@ -15,58 +15,41 @@
   ~ limitations under the License.
   -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:id="@+id/activity_confirmation"
-              android:layout_width="match_parent"
-              android:layout_height="wrap_content"
-              android:background="@drawable/dialog_background"
-              android:elevation="16dp"
-              android:maxHeight="400dp"
-              android:orientation="vertical"
-              android:padding="18dp"
-              android:layout_gravity="center">
+              android:id="@+id/data_transfer_confirmation"
+              style="@style/ContainerLayout">
 
     <!-- Do NOT change the ID of the root LinearLayout above: it's referenced in CTS tests. -->
 
-    <TextView
+    <LinearLayout style="@style/Description">
+        <TextView
             android:id="@+id/title"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center"
-            android:paddingHorizontal="12dp"
-            style="@*android:style/TextAppearance.Widget.Toolbar.Title"/>
+            style="@style/DescriptionTitle" />
 
-    <TextView
+        <TextView
             android:id="@+id/summary"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:layout_marginBottom="12dp"
-            android:gravity="center"
-            android:textColor="?android:attr/textColorSecondary"
-            android:textSize="14sp" />
+            style="@style/DescriptionSummary" />
+
+    </LinearLayout>
 
     <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="end">
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:layout_marginTop="16dp">
 
         <!-- Do NOT change the IDs of the buttons: they are referenced in CTS tests. -->
 
         <Button
-                android:id="@+id/btn_negative"
-                style="@android:style/Widget.Material.Button.Borderless.Colored"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/consent_no"
-                android:textColor="?android:attr/textColorSecondary" />
+            android:id="@+id/btn_positive"
+            style="@style/PositiveButton"
+            android:text="@string/consent_yes" />
 
         <Button
-                android:id="@+id/btn_positive"
-                style="@android:style/Widget.Material.Button.Borderless.Colored"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/consent_yes" />
+            android:id="@+id/btn_negative"
+            android:layout_marginBottom="12dp"
+            style="@style/NegativeButton"
+            android:text="@string/consent_no" />
 
     </LinearLayout>
 

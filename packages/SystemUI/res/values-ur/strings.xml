@@ -20,19 +20,17 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="4811759950673118541">"‏سسٹم UI"</string>
-    <!-- no translation found for battery_low_title (5319680173344341779) -->
-    <skip />
-    <!-- no translation found for battery_low_description (3282977755476423966) -->
-    <skip />
-    <!-- no translation found for battery_low_intro (5148725009653088790) -->
-    <skip />
+    <string name="battery_low_title" msgid="5319680173344341779">"بیٹری سیور آن کریں؟"</string>
+    <string name="battery_low_description" msgid="3282977755476423966">"آپ کے پاس <xliff:g id="PERCENTAGE">%s</xliff:g> بیٹری باقی ہے۔ بیٹری سیور گہری تھیم کو آن، پس منظر کی سرگرمی کو محدود اور اطلاعات میں تاخیر کرتی ہے۔"</string>
+    <string name="battery_low_intro" msgid="5148725009653088790">"بیٹری سیور گہری تھیم کو آن، پس منظر کی سرگرمی کو محدود اور اطلاعات میں تاخیر کرتی ہے۔"</string>
     <string name="battery_low_percent_format" msgid="4276661262843170964">"<xliff:g id="PERCENTAGE">%s</xliff:g> باقی ہے"</string>
     <string name="invalid_charger_title" msgid="938685362320735167">"‏USB کے ذریعے چارج نہیں کر سکتے"</string>
     <string name="invalid_charger_text" msgid="2339310107232691577">"اپنے آلہ کے ساتھ ملنے والے چارجر کا استعمال کریں"</string>
     <string name="battery_saver_confirmation_title" msgid="1234998463717398453">"بیٹری سیور آن کریں؟"</string>
     <string name="battery_saver_confirmation_title_generic" msgid="2299231884234959849">"بیٹری سیور کے بارے میں"</string>
     <string name="battery_saver_confirmation_ok" msgid="5042136476802816494">"آن کریں"</string>
-    <string name="battery_saver_start_action" msgid="4553256017945469937">"بیٹری سیور آن کریں"</string>
+    <string name="battery_saver_start_action" msgid="8353766979886287140">"آن کریں"</string>
+    <string name="battery_saver_dismiss_action" msgid="7199342621040014738">"نہیں شکریہ"</string>
     <string name="status_bar_settings_auto_rotation" msgid="8329080442278431708">"سکرین کو خودکار طور پر گھمائیں"</string>
     <string name="usb_device_permission_prompt" msgid="4414719028369181772">"<xliff:g id="APPLICATION">%1$s</xliff:g> کو <xliff:g id="USB_DEVICE">%2$s</xliff:g> تک رسائی حاصل کرنے کی اجازت دیں؟"</string>
     <string name="usb_device_permission_prompt_warn" msgid="2309129784984063656">"‏<xliff:g id="APPLICATION">%1$s</xliff:g> کو <xliff:g id="USB_DEVICE">%2$s</xliff:g> تک رسائی دیں؟\nاس ایپ کو ریکارڈ کی اجازت عطا نہیں کی گئی ہے مگر اس USB آلہ سے کیپچر کر سکتے ہیں۔"</string>
@@ -133,8 +131,7 @@
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="2242167416140740920">"چہرے کی تصدیق ہو گئی"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"تصدیق شدہ"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"مکمل کرنے کیلئے \'تصدیق کریں\' تھپتھپائیں"</string>
-    <!-- no translation found for biometric_dialog_tap_confirm_with_face (1597899891472340950) -->
-    <skip />
+    <string name="biometric_dialog_tap_confirm_with_face" msgid="1597899891472340950">"آپ کے چہرے سے غیر مقفل کیا گیا جاری رکھنے کے لیے دبائیں"</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"تصدیق کردہ"</string>
     <string name="biometric_dialog_use_pin" msgid="8385294115283000709">"‏PIN استعمال کریں"</string>
     <string name="biometric_dialog_use_pattern" msgid="2315593393167211194">"پیٹرن کا استعمال کریں"</string>
@@ -154,10 +151,6 @@
     <string name="biometric_dialog_last_pattern_attempt_before_wipe_profile" msgid="6045224069529284686">"اگر آپ نے اگلی کوشش میں غلط پیٹرن درج کیا تو آپ کی دفتری پروفائل اور اس کا ڈیٹا حذف کر دیا جائے گا۔"</string>
     <string name="biometric_dialog_last_pin_attempt_before_wipe_profile" msgid="545567685899091757">"‏اگر آپ نے اگلی کوشش میں غلط PIN درج کیا تو آپ کی دفتری پروفائل اور اس کا ڈیٹا حذف کر دیا جائے گا۔"</string>
     <string name="biometric_dialog_last_password_attempt_before_wipe_profile" msgid="8538032972389729253">"اگر آپ نے اگلی کوشش میں غلط پاس ورڈ درج کیا تو آپ کی دفتری پروفائل اور اس کا ڈیٹا حذف کر دیا جائے گا۔"</string>
-    <string name="biometric_dialog_failed_attempts_now_wiping_device" msgid="6585503524026243042">"بہت زیادہ غلط کوششیں۔ اس آلے کا ڈیٹا حذف کر دیا جائے گا۔"</string>
-    <string name="biometric_dialog_failed_attempts_now_wiping_user" msgid="7015008539146949115">"بہت زیادہ غلط کوششیں۔ اس صارف کو حذف کر دیا جائے گا۔"</string>
-    <string name="biometric_dialog_failed_attempts_now_wiping_profile" msgid="5239378521440749682">"بہت زیادہ غلط کوششیں۔ یہ دفتری پروفائل اور اس کا ڈیٹا حذف کر دیا جائے گا۔"</string>
-    <string name="biometric_dialog_now_wiping_dialog_dismiss" msgid="7189432882125106154">"برخاست کریں"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"فنگر پرنٹ سینسر پر ٹچ کریں"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="4465698996175640549">"فنگر پرنٹ آئیکن"</string>
     <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"چہرے کی شناخت نہیں ہو سکی۔ اس کے بجائے فنگر پرنٹ استعمال کریں۔"</string>
@@ -326,17 +319,12 @@
     <string name="keyguard_indication_charging_time_slowly" msgid="301936949731705417">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • آہستہ چارج ہو رہا ہے • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> میں مکمل"</string>
     <string name="keyguard_indication_charging_time_dock" msgid="6150404291427377863">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • ڈاک چارج ہو رہا ہے • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> میں مکمل"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"صارف سوئچ کریں"</string>
-    <string name="user_add_user" msgid="4336657383006913022">"صارف کو شامل کریں"</string>
-    <string name="user_new_user_name" msgid="2019166282704195789">"نیا صارف"</string>
-    <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"مہمان کو ہٹائیں؟"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"اس سیشن میں موجود سبھی ایپس اور ڈیٹا کو حذف کر دیا جائے گا۔"</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"ہٹائیں"</string>
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"مہمان، پھر سے خوش آمدید!"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"کیا آپ اپنا سیشن جاری رکھنا چاہتے ہیں؟"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"دوبارہ شروع کریں"</string>
     <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"ہاں، جاری رکھیں"</string>
-    <string name="user_add_user_title" msgid="4172327541504825032">"نیا صارف شامل کریں؟"</string>
-    <string name="user_add_user_message_short" msgid="2599370307878014791">"جب آپ ایک نیا صارف شامل کرتے ہیں تو اس شخص کو اپنی جگہ کو ترتیب دینے کی ضرورت ہوتی ہے۔\n\nکوئی بھی صارف دیگر سبھی صارفین کیلئے ایپس کو اپ ڈیٹ کر سکتا ہے۔"</string>
     <string name="user_limit_reached_title" msgid="2429229448830346057">"صارف کی حد مکمل ہو گئی"</string>
     <plurals name="user_limit_reached_message" formatted="false" msgid="2573535787802908398">
       <item quantity="other">صرف <xliff:g id="COUNT">%d</xliff:g> صارفین بنائے جا سکتے ہیں۔</item>
@@ -462,8 +450,7 @@
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"استعمال کرنے کے لیے غیر مقفل کریں"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"آپ کے کارڈز حاصل کرنے میں ایک مسئلہ درپیش تھا، براہ کرم بعد میں دوبارہ کوشش کریں"</string>
     <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"مقفل اسکرین کی ترتیبات"</string>
-    <string name="qr_code_scanner_title" msgid="5660820608548306581">"‏QR کوڈ"</string>
-    <string name="qr_code_scanner_description" msgid="7937603775306661863">"اسکین کرنے کے لیے تھپتھپائیں"</string>
+    <string name="qr_code_scanner_title" msgid="5290201053875420785">"‏QR کوڈ اسکین کریں"</string>
     <string name="status_bar_work" msgid="5238641949837091056">"دفتری پروفائل"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"ہوائی جہاز وضع"</string>
     <string name="zen_alarm_warning" msgid="7844303238486849503">"آپ کو <xliff:g id="WHEN">%1$s</xliff:g> بجے اپنا اگلا الارم سنائی نہیں دے گا"</string>
@@ -788,9 +775,10 @@
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"مزید دیکھنے کیلئے سوائپ کریں"</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"تجاویز لوڈ ہو رہی ہیں"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"میڈیا"</string>
-    <string name="controls_media_close_session" msgid="1193000643003066508">"اس میڈیا سیشن کو چھپائیں؟"</string>
+    <!-- no translation found for controls_media_close_session (4780485355795635052) -->
+    <skip />
     <string name="controls_media_active_session" msgid="3146882316024153337">"میڈیا کے موجودہ سیشن کو چھپایا نہیں جا سکتا۔"</string>
-    <string name="controls_media_dismiss_button" msgid="9081375542265132213">"برخاست کریں"</string>
+    <string name="controls_media_dismiss_button" msgid="4485675693008031646">"چھپائیں"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"دوبارہ شروع کریں"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"ترتیبات"</string>
     <string name="controls_media_playing_item_description" msgid="4531853311504359098">"<xliff:g id="APP_LABEL">%3$s</xliff:g> سے <xliff:g id="ARTIST_NAME">%2$s</xliff:g> کا <xliff:g id="SONG_NAME">%1$s</xliff:g> چل رہا ہے"</string>
@@ -808,7 +796,7 @@
     <string name="media_move_closer_to_end_cast" msgid="6495907340926563656">"یہاں چلانے کے ليے <xliff:g id="DEVICENAME">%1$s</xliff:g> کے قریب جائیں"</string>
     <string name="media_transfer_playing_different_device" msgid="7186806382609785610">"<xliff:g id="DEVICENAME">%1$s</xliff:g> پر چل رہا ہے"</string>
     <string name="media_transfer_playing_this_device" msgid="1856890686844499172">"اس فون پر چل رہا ہے"</string>
-    <string name="media_transfer_failed" msgid="2640354446629980227">"کچھ غلط ہو گیا"</string>
+    <string name="media_transfer_failed" msgid="7955354964610603723">"کچھ غلط ہوگیا۔ پھر کوشش کریں۔"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"غیر فعال، ایپ چیک کریں"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"نہیں ملا"</string>
     <string name="controls_error_removed_title" msgid="1207794911208047818">"کنٹرول دستیاب نہیں ہے"</string>
@@ -827,6 +815,7 @@
     <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"نئے آلہ کا جوڑا بنائیں"</string>
     <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"اس سیشن کو کاسٹ کرنے کیلئے، براہ کرم ایپ کھولیں۔"</string>
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"نامعلوم ایپ"</string>
+    <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"کاسٹ کرنا بند کریں"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"بلڈ نمبر"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"بلڈ نمبر کلپ بورڈ میں کاپی ہو گیا۔"</string>
     <string name="basic_status" msgid="2315371112182658176">"گفتگو کھولیں"</string>
@@ -916,7 +905,6 @@
     <string name="dream_overlay_status_bar_wifi_off" msgid="4497069245055003582">"‏Wi-Fi دستیاب نہیں ہے"</string>
     <string name="dream_overlay_status_bar_priority_mode" msgid="5428462123314728739">"ترجیحی وضع"</string>
     <string name="dream_overlay_status_bar_alarm_set" msgid="566707328356590886">"الارم سیٹ ہوگیا"</string>
-    <string name="dream_overlay_status_bar_assistant_guest_mode_enabled" msgid="3715897096012469615">"اسسٹنٹ مہمان وضع فعال ہے"</string>
     <string name="dream_overlay_status_bar_camera_mic_off" msgid="3199425257833773569">"کیمرا اور مائیک آف ہیں"</string>
     <string name="dream_overlay_status_bar_notification_indicator" msgid="8091389255691081711">"{count,plural, =1{# اطلاع}other{# اطلاعات}}"</string>
 </resources>

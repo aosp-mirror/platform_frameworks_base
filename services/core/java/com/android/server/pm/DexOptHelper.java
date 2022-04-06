@@ -266,8 +266,9 @@ final class DexOptHelper {
             return;
         }
 
+        final Computer snapshot = mPm.snapshotComputer();
         List<PackageStateInternal> pkgSettings =
-                getPackagesForDexopt(mPm.getPackageStates().values(), mPm);
+                getPackagesForDexopt(snapshot.getPackageStates().values(), mPm);
 
         List<AndroidPackage> pkgs = new ArrayList<>(pkgSettings.size());
         for (int index = 0; index < pkgSettings.size(); index++) {
@@ -282,17 +283,19 @@ final class DexOptHelper {
         final int elapsedTimeSeconds =
                 (int) TimeUnit.NANOSECONDS.toSeconds(System.nanoTime() - startTime);
 
+        final Computer newSnapshot = mPm.snapshotComputer();
+
         MetricsLogger.histogram(mPm.mContext, "opt_dialog_num_dexopted", stats[0]);
         MetricsLogger.histogram(mPm.mContext, "opt_dialog_num_skipped", stats[1]);
         MetricsLogger.histogram(mPm.mContext, "opt_dialog_num_failed", stats[2]);
-        MetricsLogger.histogram(
-                mPm.mContext, "opt_dialog_num_total", getOptimizablePackages().size());
+        MetricsLogger.histogram(mPm.mContext, "opt_dialog_num_total",
+                getOptimizablePackages(newSnapshot).size());
         MetricsLogger.histogram(mPm.mContext, "opt_dialog_time_s", elapsedTimeSeconds);
     }
 
-    public ArraySet<String> getOptimizablePackages() {
-        ArraySet<String> pkgs = new ArraySet<>();
-        mPm.forEachPackageState(packageState -> {
+    public List<String> getOptimizablePackages(@NonNull Computer snapshot) {
+        ArrayList<String> pkgs = new ArrayList<>();
+        mPm.forEachPackageState(snapshot, packageState -> {
             final AndroidPackage pkg = packageState.getPkg();
             if (pkg != null && mPm.mPackageDexOptimizer.canOptimizePackage(pkg)) {
                 pkgs.add(packageState.getPackageName());
@@ -302,10 +305,10 @@ final class DexOptHelper {
     }
 
     /*package*/ boolean performDexOpt(DexoptOptions options) {
-        if (mPm.getInstantAppPackageName(Binder.getCallingUid()) != null) {
+        final Computer snapshot = mPm.snapshotComputer();
+        if (snapshot.getInstantAppPackageName(Binder.getCallingUid()) != null) {
             return false;
-        } else if (mPm.mIPackageManager.isInstantApp(options.getPackageName(),
-                UserHandle.getCallingUserId())) {
+        } else if (snapshot.isInstantApp(options.getPackageName(), UserHandle.getCallingUserId())) {
             return false;
         }
 
@@ -355,9 +358,7 @@ final class DexOptHelper {
         }
         final long callingId = Binder.clearCallingIdentity();
         try {
-            synchronized (mPm.mInstallLock) {
-                return performDexOptInternalWithDependenciesLI(p, pkgSetting, options);
-            }
+            return performDexOptInternalWithDependenciesLI(p, pkgSetting, options);
         } finally {
             Binder.restoreCallingIdentity(callingId);
         }
@@ -417,29 +418,27 @@ final class DexOptHelper {
                 mPm.getDexManager().getPackageUseInfoOrDefault(p.getPackageName()), options);
     }
 
-    public void forceDexOpt(String packageName) {
+    public void forceDexOpt(@NonNull Computer snapshot, String packageName) {
         PackageManagerServiceUtils.enforceSystemOrRoot("forceDexOpt");
 
-        final PackageStateInternal packageState = mPm.getPackageStateInternal(packageName);
+        final PackageStateInternal packageState = snapshot.getPackageStateInternal(packageName);
         final AndroidPackage pkg = packageState == null ? null : packageState.getPkg();
         if (packageState == null || pkg == null) {
             throw new IllegalArgumentException("Unknown package: " + packageName);
         }
 
-        synchronized (mPm.mInstallLock) {
-            Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "dexopt");
+        Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "dexopt");
 
-            // Whoever is calling forceDexOpt wants a compiled package.
-            // Don't use profiles since that may cause compilation to be skipped.
-            final int res = performDexOptInternalWithDependenciesLI(pkg, packageState,
-                    new DexoptOptions(packageName,
-                            getDefaultCompilerFilter(),
-                            DexoptOptions.DEXOPT_FORCE | DexoptOptions.DEXOPT_BOOT_COMPLETE));
+        // Whoever is calling forceDexOpt wants a compiled package.
+        // Don't use profiles since that may cause compilation to be skipped.
+        final int res = performDexOptInternalWithDependenciesLI(pkg, packageState,
+                new DexoptOptions(packageName,
+                        getDefaultCompilerFilter(),
+                        DexoptOptions.DEXOPT_FORCE | DexoptOptions.DEXOPT_BOOT_COMPLETE));
 
-            Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
-            if (res != PackageDexOptimizer.DEX_OPT_PERFORMED) {
-                throw new IllegalStateException("Failed to dexopt: " + res);
-            }
+        Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
+        if (res != PackageDexOptimizer.DEX_OPT_PERFORMED) {
+            throw new IllegalStateException("Failed to dexopt: " + res);
         }
     }
 
@@ -485,19 +484,21 @@ final class DexOptHelper {
 
         ArrayList<PackageStateInternal> sortTemp = new ArrayList<>(remainingPkgSettings.size());
 
+        final Computer snapshot = packageManagerService.snapshotComputer();
+
         // Give priority to core apps.
-        applyPackageFilter(pkgSetting -> pkgSetting.getPkg().isCoreApp(), result,
+        applyPackageFilter(snapshot, pkgSetting -> pkgSetting.getPkg().isCoreApp(), result,
                 remainingPkgSettings, sortTemp, packageManagerService);
 
         // Give priority to system apps that listen for pre boot complete.
         Intent intent = new Intent(Intent.ACTION_PRE_BOOT_COMPLETED);
         final ArraySet<String> pkgNames = getPackageNamesForIntent(intent, UserHandle.USER_SYSTEM);
-        applyPackageFilter(pkgSetting -> pkgNames.contains(pkgSetting.getPackageName()), result,
+        applyPackageFilter(snapshot, pkgSetting -> pkgNames.contains(pkgSetting.getPackageName()), result,
                 remainingPkgSettings, sortTemp, packageManagerService);
 
         // Give priority to apps used by other apps.
         DexManager dexManager = packageManagerService.getDexManager();
-        applyPackageFilter(pkgSetting ->
+        applyPackageFilter(snapshot, pkgSetting ->
                         dexManager.getPackageUseInfoOrDefault(pkgSetting.getPackageName())
                                 .isAnyCodePathUsedByOtherApps(),
                 result, remainingPkgSettings, sortTemp, packageManagerService);
@@ -535,7 +536,7 @@ final class DexOptHelper {
             // No historical info. Take all.
             remainingPredicate = pkgSetting -> true;
         }
-        applyPackageFilter(remainingPredicate, result, remainingPkgSettings, sortTemp,
+        applyPackageFilter(snapshot, remainingPredicate, result, remainingPkgSettings, sortTemp,
                 packageManagerService);
 
         if (debug) {
@@ -550,7 +551,7 @@ final class DexOptHelper {
     // package will be removed from {@code packages} and added to {@code result} with its
     // dependencies. If usage data is available, the positive packages will be sorted by usage
     // data (with {@code sortTemp} as temporary storage).
-    private static void applyPackageFilter(
+    private static void applyPackageFilter(@NonNull Computer snapshot,
             Predicate<PackageStateInternal> filter,
             Collection<PackageStateInternal> result,
             Collection<PackageStateInternal> packages,
@@ -568,8 +569,7 @@ final class DexOptHelper {
         for (PackageStateInternal pkgSetting : sortTemp) {
             result.add(pkgSetting);
 
-            List<PackageStateInternal> deps =
-                    packageManagerService.findSharedNonSystemLibraries(pkgSetting);
+            List<PackageStateInternal> deps = snapshot.findSharedNonSystemLibraries(pkgSetting);
             if (!deps.isEmpty()) {
                 deps.removeAll(result);
                 result.addAll(deps);

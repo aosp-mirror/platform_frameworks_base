@@ -122,11 +122,12 @@ public final class DsmccResponse extends BroadcastInfoResponse implements Parcel
         mBiopMessageType = BIOP_MESSAGE_TYPE_STREAM;
         mFileDescriptor = null;
         mChildList = null;
-        mEventIds = eventIds;
-        mEventNames = eventNames;
-        if (mEventIds.length != eventNames.length) {
+        if (!((eventIds != null && eventNames != null && eventIds.length == eventNames.length)
+                || (eventIds == null && eventNames == null))) {
             throw new IllegalStateException("The size of eventIds and eventNames must be equal");
         }
+        mEventIds = eventIds;
+        mEventNames = eventNames;
     }
 
     private DsmccResponse(@NonNull Parcel source) {
@@ -137,10 +138,13 @@ public final class DsmccResponse extends BroadcastInfoResponse implements Parcel
             case BIOP_MESSAGE_TYPE_SERVICE_GATEWAY:
             case BIOP_MESSAGE_TYPE_DIRECTORY:
                 int childNum = source.readInt();
-                mChildList = new ArrayList<>();
-                for (int i = 0; i < childNum; i++) {
-                    mChildList.add(source.readString());
-                }
+                if (childNum > 0) {
+                    mChildList = new ArrayList<>();
+                    for (int i = 0; i < childNum; i++) {
+                        mChildList.add(source.readString());
+                    }
+                } else
+                    mChildList = null;
                 mFileDescriptor = null;
                 mEventIds = null;
                 mEventNames = null;
@@ -153,11 +157,16 @@ public final class DsmccResponse extends BroadcastInfoResponse implements Parcel
                 break;
             case BIOP_MESSAGE_TYPE_STREAM:
                 int eventNum = source.readInt();
-                mEventIds = new int[eventNum];
-                mEventNames = new String[eventNum];
-                for (int i = 0; i < eventNum; i++) {
-                    mEventIds[i] = source.readInt();
-                    mEventNames[i] = source.readString();
+                if (eventNum > 0) {
+                    mEventIds = new int[eventNum];
+                    mEventNames = new String[eventNum];
+                    for (int i = 0; i < eventNum; i++) {
+                        mEventIds[i] = source.readInt();
+                        mEventNames[i] = source.readString();
+                    }
+                } else {
+                    mEventIds = null;
+                    mEventNames = null;
                 }
                 mChildList = null;
                 mFileDescriptor = null;
@@ -196,7 +205,7 @@ public final class DsmccResponse extends BroadcastInfoResponse implements Parcel
                 && !mBiopMessageType.equals(BIOP_MESSAGE_TYPE_SERVICE_GATEWAY)) {
             throw new IllegalStateException("Not directory object");
         }
-        return new ArrayList<String>(mChildList);
+        return mChildList != null ? new ArrayList<String>(mChildList) : new ArrayList<String>();
     }
 
     /**
@@ -207,7 +216,7 @@ public final class DsmccResponse extends BroadcastInfoResponse implements Parcel
         if (!mBiopMessageType.equals(BIOP_MESSAGE_TYPE_STREAM)) {
             throw new IllegalStateException("Not stream event object");
         }
-        return mEventIds;
+        return mEventIds != null ? mEventIds : new int[0];
     }
 
     /**
@@ -218,7 +227,7 @@ public final class DsmccResponse extends BroadcastInfoResponse implements Parcel
         if (!mBiopMessageType.equals(BIOP_MESSAGE_TYPE_STREAM)) {
             throw new IllegalStateException("Not stream event object");
         }
-        return mEventNames;
+        return mEventNames != null ? mEventNames : new String[0];
     }
 
     @Override
@@ -233,20 +242,26 @@ public final class DsmccResponse extends BroadcastInfoResponse implements Parcel
         switch (mBiopMessageType) {
             case BIOP_MESSAGE_TYPE_SERVICE_GATEWAY:
             case BIOP_MESSAGE_TYPE_DIRECTORY:
-                dest.writeInt(mChildList.size());
-                for (String child : mChildList) {
-                    dest.writeString(child);
-                }
+                if (mChildList != null && mChildList.size() > 0) {
+                    dest.writeInt(mChildList.size());
+                    for (String child : mChildList) {
+                        dest.writeString(child);
+                    }
+                } else
+                    dest.writeInt(0);
                 break;
             case BIOP_MESSAGE_TYPE_FILE:
                 dest.writeFileDescriptor(mFileDescriptor.getFileDescriptor());
                 break;
             case BIOP_MESSAGE_TYPE_STREAM:
-                dest.writeInt(mEventIds.length);
-                for (int i = 0; i < mEventIds.length; i++) {
-                    dest.writeInt(mEventIds[i]);
-                    dest.writeString(mEventNames[i]);
-                }
+                if (mEventIds != null && mEventIds.length > 0) {
+                    dest.writeInt(mEventIds.length);
+                    for (int i = 0; i < mEventIds.length; i++) {
+                        dest.writeInt(mEventIds[i]);
+                        dest.writeString(mEventNames[i]);
+                    }
+                } else
+                    dest.writeInt(0);
                 break;
             default:
                 throw new IllegalStateException("unexpected BIOP message type");

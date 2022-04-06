@@ -441,11 +441,6 @@ public final class JobStatus {
     /** The reason a job most recently went from ready to not ready. */
     private int mReasonReadyToUnready = JobParameters.STOP_REASON_UNDEFINED;
 
-    /** Provide a handle to the service that this job will be run on. */
-    public int getServiceToken() {
-        return callingUid;
-    }
-
     /**
      * Core constructor for JobStatus instances.  All other ctors funnel down to this one.
      *
@@ -1316,8 +1311,15 @@ public final class JobStatus {
         if (mExpeditedQuotaApproved == state) {
             return false;
         }
+        final boolean wasReady = !state && isReady();
         mExpeditedQuotaApproved = state;
         updateExpeditedDependencies();
+        final boolean isReady = isReady();
+        if (wasReady && !isReady) {
+            mReasonReadyToUnready = JobParameters.STOP_REASON_QUOTA;
+        } else if (!wasReady && isReady) {
+            mReasonReadyToUnready = JobParameters.STOP_REASON_UNDEFINED;
+        }
         return true;
     }
 
@@ -1331,8 +1333,15 @@ public final class JobStatus {
         if (mExpeditedTareApproved == state) {
             return false;
         }
+        final boolean wasReady = !state && isReady();
         mExpeditedTareApproved = state;
         updateExpeditedDependencies();
+        final boolean isReady = isReady();
+        if (wasReady && !isReady) {
+            mReasonReadyToUnready = JobParameters.STOP_REASON_QUOTA;
+        } else if (!wasReady && isReady) {
+            mReasonReadyToUnready = JobParameters.STOP_REASON_UNDEFINED;
+        }
         return true;
     }
 

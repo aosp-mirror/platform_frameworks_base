@@ -39,7 +39,7 @@ public class CantAddAccountActivity extends Activity {
         setContentView(R.layout.app_not_authorized);
 
         TextView view = findViewById(R.id.description);
-        String text = getSystemService(DevicePolicyManager.class).getString(
+        String text = getSystemService(DevicePolicyManager.class).getResources().getString(
                 CANT_ADD_ACCOUNT_MESSAGE,
                 () -> getString(R.string.error_message_change_not_allowed));
         view.setText(text);

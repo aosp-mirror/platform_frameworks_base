@@ -171,16 +171,15 @@ final class AmbientContextManagerPerUserService extends
                 return;
             }
 
-            // Remove any existing intent and unregister for this package before adding a new one.
+            // Remove any existing PendingIntent for this package.
             String callingPackage = pendingIntent.getCreatorPackage();
             PendingIntent duplicatePendingIntent = findExistingRequestByPackage(callingPackage);
             if (duplicatePendingIntent != null) {
-                Slog.d(TAG, "Unregister duplicate request from " + callingPackage);
-                onUnregisterObserver(callingPackage);
+                Slog.d(TAG, "Replace duplicate request from " + callingPackage);
                 mExistingPendingIntents.remove(duplicatePendingIntent);
             }
 
-            // Register new package and add request to mExistingRequests
+            // Register package and add pendingIntent to mExistingPendingIntents
             startDetection(request, callingPackage, createDetectionResultRemoteCallback(),
                     getServerStatusCallback(clientStatusCallback));
             mExistingPendingIntents.add(pendingIntent);
@@ -218,9 +217,13 @@ final class AmbientContextManagerPerUserService extends
             RemoteCallback detectionResultCallback, RemoteCallback statusCallback) {
         Slog.d(TAG, "Requested detection of " + request.getEventTypes());
         synchronized (mLock) {
-            ensureRemoteServiceInitiated();
-            mRemoteService.startDetection(request, callingPackage, detectionResultCallback,
-                    statusCallback);
+            if (setUpServiceIfNeeded()) {
+                ensureRemoteServiceInitiated();
+                mRemoteService.startDetection(request, callingPackage, detectionResultCallback,
+                        statusCallback);
+            } else {
+                Slog.w(TAG, "No valid component found for AmbientContextDetectionService");
+            }
         }
     }
 
@@ -372,8 +375,10 @@ final class AmbientContextManagerPerUserService extends
     void stopDetection(String packageName) {
         Slog.d(TAG, "Stop detection for " + packageName);
         synchronized (mLock) {
-            ensureRemoteServiceInitiated();
-            mRemoteService.stopDetection(packageName);
+            if (mComponentName != null) {
+                ensureRemoteServiceInitiated();
+                mRemoteService.stopDetection(packageName);
+            }
         }
     }
 

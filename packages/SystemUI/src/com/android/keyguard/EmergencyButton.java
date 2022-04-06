@@ -96,7 +96,7 @@ public class EmergencyButton extends Button {
      **/
     public void reloadColors() {
         int color = Utils.getColorAttrDefaultColor(getContext(),
-                android.R.attr.textColorPrimaryInverse);
+                com.android.internal.R.attr.textColorOnAccent);
         setTextColor(color);
         setBackground(getContext()
                 .getDrawable(com.android.systemui.R.drawable.kg_emergency_button_background));

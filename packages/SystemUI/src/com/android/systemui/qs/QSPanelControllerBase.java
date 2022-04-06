@@ -37,7 +37,7 @@ import com.android.systemui.plugins.qs.QSTileView;
 import com.android.systemui.qs.customize.QSCustomizerController;
 import com.android.systemui.qs.external.CustomTile;
 import com.android.systemui.qs.logging.QSLogger;
-import com.android.systemui.util.Utils;
+import com.android.systemui.util.LargeScreenUtils;
 import com.android.systemui.util.ViewController;
 import com.android.systemui.util.animation.DisappearParameters;
 
@@ -88,7 +88,7 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
                 @Override
                 public void onConfigurationChange(Configuration newConfig) {
                     mShouldUseSplitNotificationShade =
-                            Utils.shouldUseSplitNotificationShade(getResources());
+                            LargeScreenUtils.shouldUseSplitNotificationShade(getResources());
                     onConfigurationChanged();
                     if (newConfig.orientation != mLastOrientation) {
                         mLastOrientation = newConfig.orientation;
@@ -133,7 +133,7 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
         mQSLogger = qsLogger;
         mDumpManager = dumpManager;
         mShouldUseSplitNotificationShade =
-                Utils.shouldUseSplitNotificationShade(getResources());
+                LargeScreenUtils.shouldUseSplitNotificationShade(getResources());
     }
 
     @Override
@@ -217,7 +217,12 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
     /** */
     public void refreshAllTiles() {
         for (QSPanelControllerBase.TileRecord r : mRecords) {
-            r.tile.refreshState();
+            if (!r.tile.isListening()) {
+                // Only refresh tiles that were not already in the listening state. Tiles that are
+                // already listening is as if they are already expanded (for example, tiles that
+                // are both in QQS and QS).
+                r.tile.refreshState();
+            }
         }
     }
 
@@ -417,6 +422,14 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
     @Nullable
     public View getBrightnessView() {
         return mView.getBrightnessView();
+    }
+
+    /**
+     * Set a listener to collapse/expand QS.
+     * @param action
+     */
+    public void setCollapseExpandAction(Runnable action) {
+        mView.setCollapseExpandAction(action);
     }
 
     /** Sets whether we are currently on lock screen. */

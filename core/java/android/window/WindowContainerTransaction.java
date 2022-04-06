@@ -269,6 +269,20 @@ public final class WindowContainerTransaction implements Parcelable {
     }
 
     /**
+     * Used in conjunction with a shell-transition call (usually finishTransition). This is
+     * basically a message to the transition system that a particular task should NOT go into
+     * PIP even though it normally would. This is to deal with some edge-case situations where
+     * Recents will "commit" the transition to go home, but then not actually go-home.
+     * @hide
+     */
+    @NonNull
+    public WindowContainerTransaction setDoNotPip(@NonNull WindowContainerToken container) {
+        Change chg = getOrCreateChange(container.asBinder());
+        chg.mChangeMask |= Change.CHANGE_FORCE_NO_PIP;
+        return this;
+    }
+
+    /**
      * Reparents a container into another one. The effect of a {@code null} parent can vary. For
      * example, reparenting a stack to {@code null} will reparent it to its display.
      *
@@ -790,6 +804,7 @@ public final class WindowContainerTransaction implements Parcelable {
         public static final int CHANGE_HIDDEN = 1 << 3;
         public static final int CHANGE_BOUNDS_TRANSACTION_RECT = 1 << 4;
         public static final int CHANGE_IGNORE_ORIENTATION_REQUEST = 1 << 5;
+        public static final int CHANGE_FORCE_NO_PIP = 1 << 6;
 
         private final Configuration mConfiguration = new Configuration();
         private boolean mFocusable = true;

@@ -27,7 +27,7 @@
     </shape>
   </item>
   <!-- When an item is selected, this layer will show a ring around the icon -->
-  <item>
+  <item android:id="@+id/ring">
     <shape android:shape="oval">
        <stroke
            android:width="@dimen/user_switcher_icon_selected_width"
@@ -35,7 +35,7 @@
     </shape>
   </item>
   <!-- Where the user drawable/bitmap will be placed -->
-  <item
+  <item android:id="@+id/user_avatar"
       android:drawable="@drawable/user_avatar_bg"
       android:width="@dimen/bouncer_user_switcher_icon_size"
       android:height="@dimen/bouncer_user_switcher_icon_size"

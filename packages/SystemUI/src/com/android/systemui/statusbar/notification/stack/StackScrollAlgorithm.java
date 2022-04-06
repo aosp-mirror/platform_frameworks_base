@@ -192,6 +192,7 @@ public class StackScrollAlgorithm {
         float clipStart = 0;
         int childCount = algorithmState.visibleChildren.size();
         boolean firstHeadsUp = true;
+        float firstHeadsUpEnd = 0;
         for (int i = 0; i < childCount; i++) {
             ExpandableView child = algorithmState.visibleChildren.get(i);
             ExpandableViewState state = child.getViewState();
@@ -202,17 +203,19 @@ public class StackScrollAlgorithm {
             float newHeight = state.height;
             float newNotificationEnd = newYTranslation + newHeight;
             boolean isHeadsUp = (child instanceof ExpandableNotificationRow) && child.isPinned();
-            final boolean shadeClosedWithHUN =
-                    ambientState.isShadeOpening() && !ambientState.isShadeExpanded();
             if (mClipNotificationScrollToTop
-                    && (!state.inShelf || (isHeadsUp && !firstHeadsUp))
-                    && newYTranslation < clipStart
-                    && shadeClosedWithHUN) {
-                // The previous view is overlapping on top, clip!
-                float overlapAmount = clipStart - newYTranslation;
-                state.clipTopAmount = (int) overlapAmount;
+                    && ((isHeadsUp && !firstHeadsUp) || child.isHeadsUpAnimatingAway())
+                    && newNotificationEnd > firstHeadsUpEnd
+                    && !ambientState.isShadeExpanded()) {
+                // The bottom of this view is peeking out from under the previous view.
+                // Clip the part that is peeking out.
+                float overlapAmount = newNotificationEnd - firstHeadsUpEnd;
+                state.clipBottomAmount = (int) overlapAmount;
             } else {
-                state.clipTopAmount = 0;
+                state.clipBottomAmount = 0;
+            }
+            if (firstHeadsUp) {
+                firstHeadsUpEnd = newNotificationEnd;
             }
             if (isHeadsUp) {
                 firstHeadsUp = false;
@@ -637,8 +640,6 @@ public class StackScrollAlgorithm {
                     // Ensure that a headsUp doesn't vertically extend further than the heads-up at
                     // the top most z-position
                     childState.height = row.getIntrinsicHeight();
-                    childState.yTranslation = Math.min(topState.yTranslation + topState.height
-                            - childState.height, childState.yTranslation);
                 }
 
                 // heads up notification show and this row is the top entry of heads up

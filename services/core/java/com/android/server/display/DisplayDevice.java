@@ -131,7 +131,7 @@ abstract class DisplayDevice {
      * Only used for mirroring started from MediaProjection.
      */
     @Nullable
-    public Point getDisplaySurfaceDefaultSize() {
+    public Point getDisplaySurfaceDefaultSizeLocked() {
         return null;
     }
 

@@ -476,6 +476,24 @@ public class VibrationSettingsTest {
     }
 
     @Test
+    public void shouldIgnoreVibration_updateTriggeredAfterInternalRingerModeChanged() {
+        // Vibrating settings on are overruled by ringer mode.
+        setUserSetting(Settings.System.HAPTIC_FEEDBACK_ENABLED, 1);
+        setUserSetting(Settings.System.VIBRATE_WHEN_RINGING, 1);
+        setUserSetting(Settings.System.APPLY_RAMPING_RINGER, 1);
+        setRingerMode(AudioManager.RINGER_MODE_NORMAL);
+
+        assertVibrationNotIgnoredForUsage(USAGE_RINGTONE);
+
+        // Testing the broadcast flow manually.
+        mAudioManager.setRingerModeInternal(AudioManager.RINGER_MODE_SILENT);
+        mVibrationSettings.mSettingChangeReceiver.onReceive(mContextSpy,
+                new Intent(AudioManager.INTERNAL_RINGER_MODE_CHANGED_ACTION));
+
+        assertVibrationIgnoredForUsage(USAGE_RINGTONE, Vibration.Status.IGNORED_FOR_RINGER_MODE);
+    }
+
+    @Test
     public void shouldVibrateInputDevices_returnsSettingsValue() {
         setUserSetting(Settings.System.VIBRATE_INPUT_DEVICES, 1);
         assertTrue(mVibrationSettings.shouldVibrateInputDevices());
@@ -577,7 +595,7 @@ public class VibrationSettingsTest {
         Settings.System.putIntForUser(mContextSpy.getContentResolver(),
                 Settings.System.RING_VIBRATION_INTENSITY, VIBRATION_INTENSITY_LOW,
                 UserHandle.USER_CURRENT);
-        mVibrationSettings.mUserReceiver.onReceive(mContextSpy,
+        mVibrationSettings.mSettingChangeReceiver.onReceive(mContextSpy,
                 new Intent(Intent.ACTION_USER_SWITCHED));
         assertEquals(VIBRATION_INTENSITY_LOW,
                 mVibrationSettings.getCurrentIntensity(USAGE_RINGTONE));
@@ -587,7 +605,7 @@ public class VibrationSettingsTest {
     public void getCurrentIntensity_noHardwareFeedbackValueUsesHapticFeedbackValue() {
         setDefaultIntensity(USAGE_HARDWARE_FEEDBACK, VIBRATION_INTENSITY_MEDIUM);
         setUserSetting(Settings.System.HAPTIC_FEEDBACK_INTENSITY, VIBRATION_INTENSITY_OFF);
-        mVibrationSettings.updateSettings();
+        mVibrationSettings.update();
         assertEquals(VIBRATION_INTENSITY_OFF, mVibrationSettings.getCurrentIntensity(USAGE_TOUCH));
         // If haptic feedback is off, fallback to default value.
         assertEquals(VIBRATION_INTENSITY_MEDIUM,
@@ -596,7 +614,7 @@ public class VibrationSettingsTest {
                 mVibrationSettings.getCurrentIntensity(USAGE_PHYSICAL_EMULATION));
 
         setUserSetting(Settings.System.HAPTIC_FEEDBACK_INTENSITY, VIBRATION_INTENSITY_HIGH);
-        mVibrationSettings.updateSettings();
+        mVibrationSettings.update();
         assertEquals(VIBRATION_INTENSITY_HIGH,
                 mVibrationSettings.getCurrentIntensity(USAGE_TOUCH));
         // If haptic feedback is on, fallback to that value.
@@ -633,7 +651,7 @@ public class VibrationSettingsTest {
                 mVibrationSettings.shouldIgnoreVibration(UID,
                         new VibrationAttributes.Builder()
                                 .setUsage(usage)
-                                .setFlags(flags, VibrationAttributes.FLAG_ALL_SUPPORTED)
+                                .setFlags(flags)
                                 .build()));
     }
 
@@ -654,18 +672,19 @@ public class VibrationSettingsTest {
         Settings.System.putStringForUser(
                 mContextSpy.getContentResolver(), settingName, null, UserHandle.USER_CURRENT);
         // FakeSettingsProvider doesn't support testing triggering ContentObserver yet.
-        mVibrationSettings.updateSettings();
+        mVibrationSettings.update();
     }
 
     private void setUserSetting(String settingName, int value) {
         Settings.System.putIntForUser(
                 mContextSpy.getContentResolver(), settingName, value, UserHandle.USER_CURRENT);
         // FakeSettingsProvider doesn't support testing triggering ContentObserver yet.
-        mVibrationSettings.updateSettings();
+        mVibrationSettings.update();
     }
 
     private void setRingerMode(int ringerMode) {
         mAudioManager.setRingerModeInternal(ringerMode);
         assertEquals(ringerMode, mAudioManager.getRingerModeInternal());
+        mVibrationSettings.update();
     }
 }

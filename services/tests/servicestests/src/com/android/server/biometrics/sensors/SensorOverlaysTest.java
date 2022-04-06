@@ -21,6 +21,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import android.hardware.biometrics.BiometricOverlayConstants;
 import android.hardware.fingerprint.ISidefpsController;
@@ -29,6 +30,7 @@ import android.platform.test.annotations.Presubmit;
 
 import androidx.test.filters.SmallTest;
 
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -43,12 +45,19 @@ import java.util.List;
 public class SensorOverlaysTest {
 
     private static final int SENSOR_ID = 11;
+    private static final long REQUEST_ID = 8;
 
     @Rule public final MockitoRule mockito = MockitoJUnit.rule();
 
     @Mock private IUdfpsOverlayController mUdfpsOverlayController;
     @Mock private ISidefpsController mSidefpsController;
     @Mock private AcquisitionClient<?> mAcquisitionClient;
+
+    @Before
+    public void setup() {
+        when(mAcquisitionClient.getRequestId()).thenReturn(REQUEST_ID);
+        when(mAcquisitionClient.hasRequestId()).thenReturn(true);
+    }
 
     @Test
     public void noopWhenBothNull() {
@@ -92,7 +101,8 @@ public class SensorOverlaysTest {
         sensorOverlays.show(SENSOR_ID, reason, mAcquisitionClient);
 
         if (udfps != null) {
-            verify(mUdfpsOverlayController).showUdfpsOverlay(eq(SENSOR_ID), eq(reason), any());
+            verify(mUdfpsOverlayController).showUdfpsOverlay(
+                    eq(REQUEST_ID), eq(SENSOR_ID), eq(reason), any());
         }
         if (sidefps != null) {
             verify(mSidefpsController).show(eq(SENSOR_ID), eq(reason));

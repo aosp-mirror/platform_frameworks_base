@@ -226,10 +226,7 @@ public class NotificationShelf extends ActivatableNotificationView implements
                 ? MathUtils.lerp(shortestWidth, getWidth(), fractionToShade)
                 : getWidth();
         ActivatableNotificationView anv = (ActivatableNotificationView) this;
-        NotificationBackgroundView bg = anv.getBackgroundNormal();
-        if (bg != null) {
-            anv.getBackgroundNormal().setActualWidth((int) actualWidth);
-        }
+        anv.setBackgroundWidth((int) actualWidth);
         if (mShelfIcons != null) {
             mShelfIcons.setActualLayoutWidth((int) actualWidth);
         }
@@ -597,16 +594,13 @@ public class NotificationShelf extends ActivatableNotificationView implements
         } else {
             shouldClipOwnTop = view.showingPulsing();
         }
-        if (viewEnd > notificationClipEnd && !shouldClipOwnTop
-                && (mAmbientState.isShadeExpanded() || !isPinned)) {
-            int clipBottomAmount = (int) (viewEnd - notificationClipEnd);
-            if (isPinned) {
-                clipBottomAmount = Math.min(view.getIntrinsicHeight() - view.getCollapsedHeight(),
-                        clipBottomAmount);
+        if (!isPinned) {
+            if (viewEnd > notificationClipEnd && !shouldClipOwnTop) {
+                int clipBottomAmount = (int) (viewEnd - notificationClipEnd);
+                view.setClipBottomAmount(clipBottomAmount);
+            } else {
+                view.setClipBottomAmount(0);
             }
-            view.setClipBottomAmount(clipBottomAmount);
-        } else {
-            view.setClipBottomAmount(0);
         }
         if (shouldClipOwnTop) {
             return (int) (viewEnd - getTranslationY());

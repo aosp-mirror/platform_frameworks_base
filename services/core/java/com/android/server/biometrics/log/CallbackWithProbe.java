@@ -46,7 +46,7 @@ public class CallbackWithProbe<T extends Probe> implements ClientMonitorCallback
 
     @Override
     public void onClientFinished(@NonNull BaseClientMonitor clientMonitor, boolean success) {
-        mProbe.disable();
+        mProbe.destroy();
     }
 
     @NonNull

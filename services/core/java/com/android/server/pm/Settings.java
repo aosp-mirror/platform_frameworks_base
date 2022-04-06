@@ -40,7 +40,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
-import android.content.pm.ComponentInfo;
 import android.content.pm.IntentFilterVerificationInfo;
 import android.content.pm.PackageInstaller;
 import android.content.pm.PackageManager;
@@ -63,7 +62,6 @@ import android.os.Handler;
 import android.os.Message;
 import android.os.PatternMatcher;
 import android.os.PersistableBundle;
-import android.os.Process;
 import android.os.SELinux;
 import android.os.SystemClock;
 import android.os.Trace;
@@ -113,11 +111,9 @@ import com.android.server.pm.permission.LegacyPermissionState.PermissionState;
 import com.android.server.pm.pkg.PackageStateInternal;
 import com.android.server.pm.pkg.PackageUserState;
 import com.android.server.pm.pkg.PackageUserStateInternal;
-import com.android.server.pm.pkg.PackageUserStateUtils;
 import com.android.server.pm.pkg.SuspendParams;
 import com.android.server.pm.pkg.component.ParsedComponent;
 import com.android.server.pm.pkg.component.ParsedIntentInfo;
-import com.android.server.pm.pkg.component.ParsedMainComponent;
 import com.android.server.pm.pkg.component.ParsedPermission;
 import com.android.server.pm.pkg.component.ParsedProcess;
 import com.android.server.pm.pkg.parsing.PackageInfoWithoutStateUtils;
@@ -411,8 +407,6 @@ public final class Settings implements Watchable, Snappable {
         int[] excludedUserIds;
     }
 
-    private static int mFirstAvailableUid = Process.FIRST_APPLICATION_UID;
-
     /** Map from volume UUID to {@link VersionInfo} */
     @Watched
     private final WatchedArrayMap<String, VersionInfo> mVersion = new WatchedArrayMap<>();
@@ -475,10 +469,8 @@ public final class Settings implements Watchable, Snappable {
 
     @Watched
     final WatchedArrayMap<String, SharedUserSetting> mSharedUsers = new WatchedArrayMap<>();
-    @Watched
-    private final WatchedArrayList<SettingBase> mAppIds;
-    @Watched
-    private final WatchedSparseArray<SettingBase> mOtherAppIds;
+    @Watched(manual = true)
+    private final AppIdSettingMap mAppIds;
 
     // For reading/writing settings file.
     @Watched
@@ -568,7 +560,6 @@ public final class Settings implements Watchable, Snappable {
         mCrossProfileIntentResolvers.registerObserver(mObserver);
         mSharedUsers.registerObserver(mObserver);
         mAppIds.registerObserver(mObserver);
-        mOtherAppIds.registerObserver(mObserver);
         mRenamedPackages.registerObserver(mObserver);
         mNextAppLinkGeneration.registerObserver(mObserver);
         mDefaultBrowserApp.registerObserver(mObserver);
@@ -594,8 +585,7 @@ public final class Settings implements Watchable, Snappable {
 
         mLock = new PackageManagerTracedLock();
         mPackages.putAll(pkgSettings);
-        mAppIds = new WatchedArrayList<>();
-        mOtherAppIds = new WatchedSparseArray<>();
+        mAppIds = new AppIdSettingMap();
         mSystemDir = null;
         mPermissions = null;
         mRuntimePermissionsPersistence = null;
@@ -631,8 +621,7 @@ public final class Settings implements Watchable, Snappable {
         mKeySetManagerService = new KeySetManagerService(mPackages);
 
         mLock = lock;
-        mAppIds = new WatchedArrayList<>();
-        mOtherAppIds = new WatchedSparseArray<>();
+        mAppIds = new AppIdSettingMap();
         mPermissions = new LegacyPermissionSettings(lock);
         mRuntimePermissionsPersistence = new RuntimePermissionPersistence(
                 runtimePermissionsPersistence, new Consumer<Integer>() {
@@ -713,7 +702,6 @@ public final class Settings implements Watchable, Snappable {
                 mCrossProfileIntentResolvers, r.mCrossProfileIntentResolvers);
         mSharedUsers.snapshot(r.mSharedUsers);
         mAppIds = r.mAppIds.snapshot();
-        mOtherAppIds = r.mOtherAppIds.snapshot();
         WatchedArrayList.snapshot(
                 mPastSignatures, r.mPastSignatures);
         WatchedArrayMap.snapshot(
@@ -785,7 +773,7 @@ public final class Settings implements Watchable, Snappable {
         SharedUserSetting s = mSharedUsers.get(name);
         if (s == null && create) {
             s = new SharedUserSetting(name, pkgFlags, pkgPrivateFlags);
-            s.mAppId = acquireAndRegisterNewAppIdLPw(s);
+            s.mAppId = mAppIds.acquireAndRegisterNewAppId(s);
             if (s.mAppId < 0) {
                 // < 0 means we couldn't assign a userid; throw exception
                 throw new PackageManagerException(INSTALL_FAILED_INSUFFICIENT_STORAGE,
@@ -893,7 +881,7 @@ public final class Settings implements Watchable, Snappable {
                 pkgPrivateFlags, 0 /*userId*/, usesSdkLibraries, usesSdkLibrariesVersions,
                 usesStaticLibraries, usesStaticLibrariesVersions, mimeGroups, domainSetId);
         p.setAppId(uid);
-        if (registerExistingAppIdLPw(uid, p, name)) {
+        if (mAppIds.registerExistingAppId(uid, p, name)) {
             mPackages.put(name, p);
             return p;
         }
@@ -912,7 +900,7 @@ public final class Settings implements Watchable, Snappable {
         }
         s = new SharedUserSetting(name, pkgFlags, pkgPrivateFlags);
         s.mAppId = uid;
-        if (registerExistingAppIdLPw(uid, s, name)) {
+        if (mAppIds.registerExistingAppId(uid, s, name)) {
             mSharedUsers.put(name, s);
             return s;
         }
@@ -1213,11 +1201,11 @@ public final class Settings implements Watchable, Snappable {
         final boolean createdNew;
         if (p.getAppId() == 0 || forceNew) {
             // Assign new user ID
-            p.setAppId(acquireAndRegisterNewAppIdLPw(p));
+            p.setAppId(mAppIds.acquireAndRegisterNewAppId(p));
             createdNew = true;
         } else {
             // Add new setting to list of user IDs
-            createdNew = registerExistingAppIdLPw(p.getAppId(), p, p.getPackageName());
+            createdNew = mAppIds.registerExistingAppId(p.getAppId(), p, p.getPackageName());
         }
         if (p.getAppId() < 0) {
             PackageManagerService.reportSettingsProblem(Log.WARN,
@@ -1278,7 +1266,8 @@ public final class Settings implements Watchable, Snappable {
     // Utility method that adds a PackageSetting to mPackages and
     // completes updating the shared user attributes and any restored
     // app link verification state
-    private void addPackageSettingLPw(PackageSetting p, SharedUserSetting sharedUser) {
+    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PRIVATE)
+    void addPackageSettingLPw(PackageSetting p, SharedUserSetting sharedUser) {
         mPackages.put(p.getPackageName(), p);
         if (sharedUser != null) {
             SharedUserSetting existingSharedUserSetting = getSharedUserSettingLPr(p);
@@ -1301,16 +1290,16 @@ public final class Settings implements Watchable, Snappable {
             p.setAppId(sharedUser.mAppId);
         }
 
-        // If the we know about this user id, we have to update it as it
+        // If we know about this user id, we have to update it as it
         // has to point to the same PackageSetting instance as the package.
         Object userIdPs = getSettingLPr(p.getAppId());
         if (sharedUser == null) {
             if (userIdPs != null && userIdPs != p) {
-                replaceAppIdLPw(p.getAppId(), p);
+                mAppIds.replaceSetting(p.getAppId(), p);
             }
         } else {
             if (userIdPs != null && userIdPs != sharedUser) {
-                replaceAppIdLPw(p.getAppId(), sharedUser);
+                mAppIds.replaceSetting(p.getAppId(), sharedUser);
             }
         }
     }
@@ -1359,79 +1348,22 @@ public final class Settings implements Watchable, Snappable {
         mInstallerPackages.remove(packageName);
     }
 
-    /** Returns true if the requested AppID was valid and not already registered. */
-    private boolean registerExistingAppIdLPw(int appId, SettingBase obj, Object name) {
-        if (appId > Process.LAST_APPLICATION_UID) {
-            return false;
-        }
-
-        if (appId >= Process.FIRST_APPLICATION_UID) {
-            int size = mAppIds.size();
-            final int index = appId - Process.FIRST_APPLICATION_UID;
-            // fill the array until our index becomes valid
-            while (index >= size) {
-                mAppIds.add(null);
-                size++;
-            }
-            if (mAppIds.get(index) != null) {
-                PackageManagerService.reportSettingsProblem(Log.WARN,
-                        "Adding duplicate app id: " + appId
-                        + " name=" + name);
-                return false;
-            }
-            mAppIds.set(index, obj);
-        } else {
-            if (mOtherAppIds.get(appId) != null) {
-                PackageManagerService.reportSettingsProblem(Log.WARN,
-                        "Adding duplicate shared id: " + appId
-                                + " name=" + name);
-                return false;
-            }
-            mOtherAppIds.put(appId, obj);
-        }
-        return true;
-    }
-
     /** Gets the setting associated with the provided App ID */
     public SettingBase getSettingLPr(int appId) {
-        if (appId >= Process.FIRST_APPLICATION_UID) {
-            final int size = mAppIds.size();
-            final int index = appId - Process.FIRST_APPLICATION_UID;
-            return index < size ? mAppIds.get(index) : null;
-        } else {
-            return mOtherAppIds.get(appId);
-        }
+        return mAppIds.getSetting(appId);
     }
 
     /** Unregisters the provided app ID. */
     void removeAppIdLPw(int appId) {
-        if (appId >= Process.FIRST_APPLICATION_UID) {
-            final int size = mAppIds.size();
-            final int index = appId - Process.FIRST_APPLICATION_UID;
-            if (index < size) mAppIds.set(index, null);
-        } else {
-            mOtherAppIds.remove(appId);
-        }
-        setFirstAvailableUid(appId + 1);
+        mAppIds.removeSetting(appId);
     }
-
-    private void replaceAppIdLPw(int appId, SettingBase obj) {
-        if (appId >= Process.FIRST_APPLICATION_UID) {
-            final int size = mAppIds.size();
-            final int index = appId - Process.FIRST_APPLICATION_UID;
-            if (index < size) mAppIds.set(index, obj);
-        } else {
-            mOtherAppIds.put(appId, obj);
-        }
-    }
-
     /**
      * Transparently convert a SharedUserSetting into PackageSettings without changing appId.
      * The sharedUser passed to this method has to be {@link SharedUserSetting#isSingleUser()}.
      */
     void convertSharedUserSettingsLPw(SharedUserSetting sharedUser) {
         final PackageSetting ps = sharedUser.getPackageSettings().valueAt(0);
-        replaceAppIdLPw(sharedUser.getAppId(), ps);
+        mAppIds.replaceSetting(sharedUser.getAppId(), ps);
 
         // Unlink the SharedUserSetting
         ps.setSharedUserAppId(INVALID_UID);
@@ -4295,33 +4227,6 @@ public final class Settings implements Watchable, Snappable {
         }
     }
 
-    // This should be called (at least) whenever an application is removed
-    private void setFirstAvailableUid(int uid) {
-        if (uid > mFirstAvailableUid) {
-            mFirstAvailableUid = uid;
-        }
-    }
-
-    /** Returns a new AppID or -1 if we could not find an available AppID to assign */
-    private int acquireAndRegisterNewAppIdLPw(SettingBase obj) {
-        // Let's be stupidly inefficient for now...
-        final int size = mAppIds.size();
-        for (int i = mFirstAvailableUid - Process.FIRST_APPLICATION_UID; i < size; i++) {
-            if (mAppIds.get(i) == null) {
-                mAppIds.set(i, obj);
-                return Process.FIRST_APPLICATION_UID + i;
-            }
-        }
-
-        // None left?
-        if (size > (Process.LAST_APPLICATION_UID - Process.FIRST_APPLICATION_UID)) {
-            return -1;
-        }
-
-        mAppIds.add(obj);
-        return Process.FIRST_APPLICATION_UID + size;
-    }
-
     public VerifierDeviceIdentity getVerifierDeviceIdentityLPw(@NonNull Computer computer) {
         if (mVerifierDeviceIdentity == null) {
             mVerifierDeviceIdentity = VerifierDeviceIdentity.generate();
@@ -4352,33 +4257,6 @@ public final class Settings implements Watchable, Snappable {
             return null;
         }
         return getDisabledSystemPkgLPr(enabledPackageSetting.getPackageName());
-    }
-
-    boolean isEnabledAndMatchLPr(ComponentInfo componentInfo, long flags, int userId) {
-        final PackageSetting ps = mPackages.get(componentInfo.packageName);
-        if (ps == null) return false;
-
-        final PackageUserStateInternal userState = ps.readUserState(userId);
-        return PackageUserStateUtils.isMatch(userState, componentInfo, flags);
-    }
-
-    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
-    public boolean isEnabledAndMatchLPr(AndroidPackage pkg, ParsedMainComponent component,
-            long flags, int userId) {
-        final PackageSetting ps = mPackages.get(component.getPackageName());
-        if (ps == null) return false;
-
-        final PackageUserStateInternal userState = ps.readUserState(userId);
-        return PackageUserStateUtils.isMatch(userState, pkg.isSystem(), pkg.isEnabled(), component,
-                flags);
-    }
-
-    boolean isOrphaned(String packageName) {
-        final PackageSetting pkg = mPackages.get(packageName);
-        if (pkg == null) {
-            throw new IllegalArgumentException("Unknown package: " + packageName);
-        }
-        return pkg.getInstallSource().isOrphaned;
     }
 
     int getApplicationEnabledSettingLPr(String packageName, int userId)
@@ -4464,8 +4342,8 @@ public final class Settings implements Watchable, Snappable {
      * Return all {@link PackageSetting} that are actively installed on the
      * given {@link VolumeInfo#fsUuid}.
      */
-    List<PackageSetting> getVolumePackagesLPr(String volumeUuid) {
-        ArrayList<PackageSetting> res = new ArrayList<>();
+    List<? extends PackageStateInternal> getVolumePackagesLPr(String volumeUuid) {
+        ArrayList<PackageStateInternal> res = new ArrayList<>();
         for (int i = 0; i < mPackages.size(); i++) {
             final PackageSetting setting = mPackages.valueAt(i);
             if (Objects.equals(volumeUuid, setting.getVolumeUuid())) {

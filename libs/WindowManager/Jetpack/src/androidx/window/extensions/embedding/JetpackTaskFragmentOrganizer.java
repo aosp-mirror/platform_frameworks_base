@@ -35,6 +35,8 @@ import android.window.WindowContainerTransaction;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.android.internal.annotations.VisibleForTesting;
+
 import java.util.Map;
 import java.util.concurrent.Executor;
 
@@ -56,7 +58,8 @@ class JetpackTaskFragmentOrganizer extends TaskFragmentOrganizer {
     final Map<IBinder, Configuration> mFragmentParentConfigs = new ArrayMap<>();
 
     private final TaskFragmentCallback mCallback;
-    private TaskFragmentAnimationController mAnimationController;
+    @VisibleForTesting
+    TaskFragmentAnimationController mAnimationController;
 
     /**
      * Callback that notifies the controller about changes to task fragments.
@@ -80,21 +83,25 @@ class JetpackTaskFragmentOrganizer extends TaskFragmentOrganizer {
 
     @Override
     public void unregisterOrganizer() {
-        stopOverrideSplitAnimation();
-        mAnimationController = null;
+        if (mAnimationController != null) {
+            mAnimationController.unregisterAllRemoteAnimations();
+            mAnimationController = null;
+        }
         super.unregisterOrganizer();
     }
 
-    void startOverrideSplitAnimation() {
+    /** Overrides the animation if the transition is on the given Task. */
+    void startOverrideSplitAnimation(int taskId) {
         if (mAnimationController == null) {
             mAnimationController = new TaskFragmentAnimationController(this);
         }
-        mAnimationController.registerRemoteAnimations();
+        mAnimationController.registerRemoteAnimations(taskId);
     }
 
-    void stopOverrideSplitAnimation() {
+    /** No longer overrides the animation if the transition is on the given Task. */
+    void stopOverrideSplitAnimation(int taskId) {
         if (mAnimationController != null) {
-            mAnimationController.unregisterRemoteAnimations();
+            mAnimationController.unregisterRemoteAnimations(taskId);
         }
     }
 

@@ -1617,14 +1617,17 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
             final int providerCount = mProviders.size();
             for (int i = 0; i < providerCount; i++) {
                 Provider provider = mProviders.get(i);
-                AppWidgetProviderInfo info = provider.getInfoLocked(mContext);
                 final String providerPackageName = provider.id.componentName.getPackageName();
 
-                // Ignore an invalid provider, one not matching the filter,
-                // or one that isn't in the given package, if any.
-                boolean inPackage = packageName == null
-                        || providerPackageName.equals(packageName);
-                if (provider.zombie || (info.widgetCategory & categoryFilter) == 0 || !inPackage) {
+                // Ignore an invalid provider or one that isn't in the given package, if any.
+                boolean inPackage = packageName == null || providerPackageName.equals(packageName);
+                if (provider.zombie || !inPackage) {
+                    continue;
+                }
+
+                // Ignore the ones not matching the filter.
+                AppWidgetProviderInfo info = provider.getInfoLocked(mContext);
+                if ((info.widgetCategory & categoryFilter) == 0) {
                     continue;
                 }
 

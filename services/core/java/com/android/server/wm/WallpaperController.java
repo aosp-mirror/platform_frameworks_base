@@ -132,7 +132,12 @@ class WallpaperController {
                 return false;
             }
         } else {
-            if (w.mActivityRecord != null && !w.mActivityRecord.isVisibleRequested()) {
+            final ActivityRecord ar = w.mActivityRecord;
+            final TransitionController tc = w.mTransitionController;
+            // The animating window can still be visible on screen if it is in transition, so we
+            // should check whether this window can be wallpaper target even when visibleRequested
+            // is false.
+            if (ar != null && !ar.isVisibleRequested() && !tc.inTransition(ar)) {
                 // An activity that is not going to remain visible shouldn't be the target.
                 return false;
             }
@@ -157,14 +162,17 @@ class WallpaperController {
                 & TRANSIT_FLAG_KEYGUARD_GOING_AWAY_WITH_WALLPAPER) != 0);
 
         boolean needsShowWhenLockedWallpaper = false;
-        if ((w.mAttrs.flags & FLAG_SHOW_WHEN_LOCKED) != 0
-                && mService.mPolicy.isKeyguardLocked()
-                && (mService.mPolicy.isKeyguardOccluded()
-                || mService.mPolicy.isKeyguardUnoccluding())) {
-            // The lowest show when locked window decides whether we need to put the wallpaper
-            // behind.
-            needsShowWhenLockedWallpaper = !isFullscreen(w.mAttrs)
-                    || (w.mActivityRecord != null && !w.mActivityRecord.fillsParent());
+        if ((w.mAttrs.flags & FLAG_SHOW_WHEN_LOCKED) != 0 && mService.mPolicy.isKeyguardLocked()) {
+            final TransitionController tc = w.mTransitionController;
+            final boolean isInTransition = tc.isShellTransitionsEnabled()
+                    && tc.inTransition(w);
+            if (mService.mPolicy.isKeyguardOccluded() || mService.mPolicy.isKeyguardUnoccluding()
+                    || isInTransition) {
+                // The lowest show when locked window decides whether we need to put the wallpaper
+                // behind.
+                needsShowWhenLockedWallpaper = !isFullscreen(w.mAttrs)
+                        || (w.mActivityRecord != null && !w.mActivityRecord.fillsParent());
+            }
         }
 
         if (keyguardGoingAwayWithWallpaper || needsShowWhenLockedWallpaper) {
@@ -286,6 +294,11 @@ class WallpaperController {
     void hideWallpapers(final WindowState winGoingAway) {
         if (mWallpaperTarget != null
                 && (mWallpaperTarget != winGoingAway || mPrevWallpaperTarget != null)) {
+            return;
+        }
+        if (mFindResults.useTopWallpaperAsTarget) {
+            // wallpaper target is going away but there has request to use top wallpaper
+            // Keep wallpaper visible.
             return;
         }
         for (int i = mWallpaperTokens.size() - 1; i >= 0; i--) {

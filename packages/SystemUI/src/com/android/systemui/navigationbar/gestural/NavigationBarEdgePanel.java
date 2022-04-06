@@ -51,6 +51,7 @@ import androidx.dynamicanimation.animation.FloatPropertyCompat;
 import androidx.dynamicanimation.animation.SpringAnimation;
 import androidx.dynamicanimation.animation.SpringForce;
 
+import com.android.internal.util.LatencyTracker;
 import com.android.settingslib.Utils;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
@@ -176,6 +177,7 @@ public class NavigationBarEdgePanel extends View implements NavigationEdgeBackPl
     private final ValueAnimator mArrowDisappearAnimation;
     private final SpringForce mRegularTranslationSpring;
     private final SpringForce mTriggerBackSpring;
+    private final LatencyTracker mLatencyTracker;
 
     private VelocityTracker mVelocityTracker;
     private boolean mIsDark = false;
@@ -225,6 +227,7 @@ public class NavigationBarEdgePanel extends View implements NavigationEdgeBackPl
     private float mDisappearAmount;
     private long mVibrationTime;
     private int mScreenSize;
+    private boolean mTrackingBackArrowLatency = false;
 
     private final Handler mHandler = new Handler();
     private final Runnable mFailsafeRunnable = this::onFailsafe;
@@ -283,7 +286,7 @@ public class NavigationBarEdgePanel extends View implements NavigationEdgeBackPl
     private BackAnimation mBackAnimation;
 
     public NavigationBarEdgePanel(Context context,
-            BackAnimation backAnimation) {
+            BackAnimation backAnimation, LatencyTracker latencyTracker) {
         super(context);
 
         mWindowManager = context.getSystemService(WindowManager.class);
@@ -357,9 +360,7 @@ public class NavigationBarEdgePanel extends View implements NavigationEdgeBackPl
                 .getDimension(R.dimen.navigation_edge_action_drag_threshold);
         mSwipeProgressThreshold = context.getResources()
                 .getDimension(R.dimen.navigation_edge_action_progress_threshold);
-        if (mBackAnimation != null) {
-            mBackAnimation.setSwipeThresholds(mSwipeTriggerThreshold, mSwipeProgressThreshold);
-        }
+        initializeBackAnimation();
 
         setVisibility(GONE);
         Executor backgroundExecutor = Dependency.get(Dependency.BACKGROUND_EXECUTOR);
@@ -383,10 +384,18 @@ public class NavigationBarEdgePanel extends View implements NavigationEdgeBackPl
                 }, backgroundExecutor);
         mRegionSamplingHelper.setWindowVisible(true);
         mShowProtection = !isPrimaryDisplay;
+        mLatencyTracker = latencyTracker;
     }
 
     public void setBackAnimation(BackAnimation backAnimation) {
         mBackAnimation = backAnimation;
+        initializeBackAnimation();
+    }
+
+    private void initializeBackAnimation() {
+        if (mBackAnimation != null) {
+            mBackAnimation.setSwipeThresholds(mSwipeTriggerThreshold, mSwipeProgressThreshold);
+        }
     }
 
     @Override
@@ -476,7 +485,9 @@ public class NavigationBarEdgePanel extends View implements NavigationEdgeBackPl
     public void onMotionEvent(MotionEvent event) {
         if (mBackAnimation != null) {
             mBackAnimation.onBackMotion(
-                    event, mIsLeftPanel ? BackEvent.EDGE_LEFT : BackEvent.EDGE_RIGHT);
+                    event,
+                    event.getActionMasked(),
+                    mIsLeftPanel ? BackEvent.EDGE_LEFT : BackEvent.EDGE_RIGHT);
         }
         if (mVelocityTracker == null) {
             mVelocityTracker = VelocityTracker.obtain();
@@ -492,6 +503,8 @@ public class NavigationBarEdgePanel extends View implements NavigationEdgeBackPl
                 updatePosition(event.getY());
                 mRegionSamplingHelper.start(mSamplingRect);
                 mWindowManager.updateViewLayout(this, mLayoutParams);
+                mLatencyTracker.onActionStart(LatencyTracker.ACTION_SHOW_BACK_ARROW);
+                mTrackingBackArrowLatency = true;
                 break;
             case MotionEvent.ACTION_MOVE:
                 handleMoveEvent(event);
@@ -547,6 +560,10 @@ public class NavigationBarEdgePanel extends View implements NavigationEdgeBackPl
 
         canvas.drawPath(arrowPath, mPaint);
         canvas.restore();
+        if (mTrackingBackArrowLatency) {
+            mLatencyTracker.onActionEnd(LatencyTracker.ACTION_SHOW_BACK_ARROW);
+            mTrackingBackArrowLatency = false;
+        }
     }
 
     @Override

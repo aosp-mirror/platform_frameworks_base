@@ -85,6 +85,7 @@ import com.android.systemui.wmshell.BubblesManager;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -188,10 +189,11 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
         when(mNotifPipelineFlags.isNewPipelineEnabled()).thenReturn(false);
         when(mOnUserInteractionCallback.getGroupSummaryToDismiss(mNotificationRow.getEntry()))
                 .thenReturn(null);
-        when(mVisibilityProvider.obtain(anyString(), anyBoolean())).thenAnswer(
-                invocation-> NotificationVisibility.obtain(invocation.getArgument(0), 0, 1, false));
-        when(mVisibilityProvider.obtain(any(NotificationEntry.class), anyBoolean())).thenAnswer(
-                invocation-> NotificationVisibility.obtain(
+        when(mVisibilityProvider.obtain(anyString(), anyBoolean()))
+                .thenAnswer(invocation -> NotificationVisibility.obtain(
+                        invocation.getArgument(0), 0, 1, false));
+        when(mVisibilityProvider.obtain(any(NotificationEntry.class), anyBoolean()))
+                .thenAnswer(invocation -> NotificationVisibility.obtain(
                         invocation.<NotificationEntry>getArgument(0).getKey(), 0, 1, false));
 
         HeadsUpManagerPhone headsUpManager = mock(HeadsUpManagerPhone.class);
@@ -431,10 +433,27 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
     }
 
     @Test
-    public void testNotifActivityStarterEventSourceFinishEvent_postPanelCollapse() {
+    public void testNotifActivityStarterEventSourceFinishEvent_postPanelCollapse()
+            throws Exception {
         NotifActivityLaunchEvents.Listener listener =
                 mock(NotifActivityLaunchEvents.Listener.class);
         mLaunchEventsEmitter.registerListener(listener);
+        mNotificationActivityStarter
+                .onNotificationClicked(mNotificationRow.getEntry().getSbn(), mNotificationRow);
+        ArgumentCaptor<ActivityLaunchAnimator.Controller> controllerCaptor =
+                ArgumentCaptor.forClass(ActivityLaunchAnimator.Controller.class);
+        verify(mActivityLaunchAnimator).startPendingIntentWithAnimation(
+                controllerCaptor.capture(), anyBoolean(), any(), any());
+        controllerCaptor.getValue().onIntentStarted(false);
+        verify(listener).onFinishLaunchNotifActivity(mNotificationRow.getEntry());
+    }
+
+    @Test
+    public void testNotifActivityStarterEventSourceFinishEvent_postPanelCollapse_noAnimate() {
+        NotifActivityLaunchEvents.Listener listener =
+                mock(NotifActivityLaunchEvents.Listener.class);
+        mLaunchEventsEmitter.registerListener(listener);
+        when(mCentralSurfaces.shouldAnimateLaunch(anyBoolean())).thenReturn(false);
         mNotificationActivityStarter
                 .onNotificationClicked(mNotificationRow.getEntry().getSbn(), mNotificationRow);
         verify(listener).onFinishLaunchNotifActivity(mNotificationRow.getEntry());

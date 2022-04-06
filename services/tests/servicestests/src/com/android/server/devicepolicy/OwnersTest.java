@@ -24,6 +24,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Mockito.verify;
 
 import android.content.ComponentName;
+import android.os.IpcDataCache;
 import android.os.UserHandle;
 import android.test.suitebuilder.annotation.SmallTest;
 
@@ -33,6 +34,7 @@ import com.android.server.devicepolicy.DevicePolicyManagerServiceTestable.Owners
 
 import com.google.android.collect.Lists;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -52,6 +54,13 @@ public class OwnersTest extends DpmTestBase {
 
     private static final List<String> DEVICE_OWNER_PROTECTED_PACKAGES =
             Lists.newArrayList("package_1", "package_2");
+
+    @Before
+    public void setUp() throws Exception {
+        // Disable caches in this test process. This must happen early, since some of the
+        // following initialization steps invalidate caches.
+        IpcDataCache.disableForTestMode();
+    }
 
     @Test
     public void testUpgrade01() throws Exception {

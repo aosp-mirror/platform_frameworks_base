@@ -33,6 +33,7 @@ import android.view.IInputFilter;
 import android.view.IRemoteAnimationFinishedCallback;
 import android.view.IWindow;
 import android.view.InputChannel;
+import android.view.InputWindowHandle;
 import android.view.MagnificationSpec;
 import android.view.RemoteAnimationTarget;
 import android.view.SurfaceControl;
@@ -853,4 +854,26 @@ public abstract class WindowManagerInternal {
      * support handwriting (Scribe) by the IME.
      */
     public abstract SurfaceControl getHandwritingSurfaceForDisplay(int displayId);
+
+    /**
+     * Replaces the touchable region of the provided input surface with the crop of the window with
+     * the provided token. This method will associate the inputSurface with a copy of
+     * the given inputWindowHandle, where the copy is configured using
+     * {@link InputWindowHandle#replaceTouchableRegionWithCrop(SurfaceControl)} with the surface
+     * of the provided windowToken.
+     *
+     * This is a no-op if windowToken is not valid or the window is not found.
+     *
+     * This does not change any other properties of the inputSurface.
+     *
+     * This method exists to avoid leaking the window's SurfaceControl outside WindowManagerService.
+     *
+     * @param inputSurface The surface for which the touchable region should be set.
+     * @param inputWindowHandle The {@link InputWindowHandle} for the input surface.
+     * @param windowToken The window whose bounds should be used as the touchable region for the
+     *                    inputSurface.
+     */
+    public abstract void replaceInputSurfaceTouchableRegionWithWindowCrop(
+            @NonNull SurfaceControl inputSurface, @NonNull InputWindowHandle inputWindowHandle,
+            @NonNull IBinder windowToken);
 }

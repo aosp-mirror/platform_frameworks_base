@@ -126,7 +126,7 @@ public class AuthContainerView extends LinearLayout
         int[] mSensorIds;
         boolean mSkipIntro;
         long mOperationId;
-        long mRequestId;
+        long mRequestId = -1;
         boolean mSkipAnimation = false;
         @BiometricMultiSensorMode int mMultiSensorConfig = BIOMETRIC_MULTI_SENSOR_DEFAULT;
     }
@@ -599,6 +599,11 @@ public class AuthContainerView extends LinearLayout
     }
 
     @Override
+    public long getRequestId() {
+        return mConfig.mRequestId;
+    }
+
+    @Override
     public void animateToCredentialUI() {
         mBiometricView.startTransitionToCredentialUI();
     }
@@ -678,13 +683,20 @@ public class AuthContainerView extends LinearLayout
             return;
         }
         mContainerState = STATE_GONE;
-        mWindowManager.removeView(this);
+        if (isAttachedToWindow()) {
+            mWindowManager.removeView(this);
+        }
     }
 
     private void onDialogAnimatedIn() {
         if (mContainerState == STATE_PENDING_DISMISS) {
             Log.d(TAG, "onDialogAnimatedIn(): mPendingDismissDialog=true, dismissing now");
             animateAway(AuthDialogCallback.DISMISSED_USER_CANCELED);
+            return;
+        }
+        if (mContainerState == STATE_ANIMATING_OUT || mContainerState == STATE_GONE) {
+            Log.d(TAG, "onDialogAnimatedIn(): ignore, already animating out or gone - state: "
+                    + mContainerState);
             return;
         }
         mContainerState = STATE_SHOWING;

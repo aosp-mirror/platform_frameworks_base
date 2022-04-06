@@ -56,6 +56,7 @@ import android.transition.TransitionManager;
 import android.util.Pair;
 import android.view.View.OnApplyWindowInsetsListener;
 import android.view.accessibility.AccessibilityEvent;
+import android.window.OnBackInvokedDispatcher;
 
 import java.util.Collections;
 import java.util.List;
@@ -2797,5 +2798,13 @@ public abstract class Window {
      */
     public @Nullable AttachedSurfaceControl getRootSurfaceControl() {
         return null;
+    }
+
+    /**
+     * Returns the {@link OnBackInvokedDispatcher} instance associated with this window.
+     */
+    @NonNull
+    public OnBackInvokedDispatcher getOnBackInvokedDispatcher() {
+        throw new RuntimeException("Not implemented. Must override in a subclass.");
     }
 }

@@ -75,6 +75,7 @@ import android.net.RouteInfo;
 import android.net.UidRangeParcel;
 import android.net.UnderlyingNetworkInfo;
 import android.net.VpnManager;
+import android.net.VpnProfileState;
 import android.net.VpnService;
 import android.net.VpnTransportInfo;
 import android.net.ipsec.ike.ChildSessionCallback;
@@ -2691,6 +2692,9 @@ public class Vpn {
                         return; // VPN has been shut down.
                     }
 
+                    // Clear mInterface to prevent Ikev2VpnRunner being cleared when
+                    // interfaceRemoved() is called.
+                    mInterface = null;
                     // Without MOBIKE, we have no way to seamlessly migrate. Close on old
                     // (non-default) network, and start the new one.
                     resetIkeState();
@@ -3436,6 +3440,45 @@ public class Vpn {
         if (isCurrentIkev2VpnLocked(packageName)) {
             prepareInternal(VpnConfig.LEGACY_VPN);
         }
+    }
+
+    private @VpnProfileState.State int getStateFromLegacyState(int legacyState) {
+        switch (legacyState) {
+            case LegacyVpnInfo.STATE_CONNECTING:
+                return VpnProfileState.STATE_CONNECTING;
+            case LegacyVpnInfo.STATE_CONNECTED:
+                return VpnProfileState.STATE_CONNECTED;
+            case LegacyVpnInfo.STATE_DISCONNECTED:
+                return VpnProfileState.STATE_DISCONNECTED;
+            case LegacyVpnInfo.STATE_FAILED:
+                return VpnProfileState.STATE_FAILED;
+            default:
+                Log.wtf(TAG, "Unhandled state " + legacyState
+                        + ", treat it as STATE_DISCONNECTED");
+                return VpnProfileState.STATE_DISCONNECTED;
+        }
+    }
+
+    private VpnProfileState makeVpnProfileState() {
+        // TODO: mSessionKey will be moved to Ikev2VpnRunner once aosp/2007077 is merged, so after
+        //  merging aosp/2007077, here should check Ikev2VpnRunner is null or not. Session key will
+        //  be null if Ikev2VpnRunner is null.
+        return new VpnProfileState(getStateFromLegacyState(mLegacyState), mSessionKey, mAlwaysOn,
+                mLockdown);
+    }
+
+    /**
+     * Retrieve the VpnProfileState for the profile provisioned by the given package.
+     *
+     * @return the VpnProfileState with current information, or null if there was no profile
+     *         provisioned by the given package.
+     */
+    @Nullable
+    public synchronized VpnProfileState getProvisionedVpnProfileState(
+            @NonNull String packageName) {
+        requireNonNull(packageName, "No package name provided");
+        enforceNotRestrictedUser();
+        return isCurrentIkev2VpnLocked(packageName) ? makeVpnProfileState() : null;
     }
 
     /**

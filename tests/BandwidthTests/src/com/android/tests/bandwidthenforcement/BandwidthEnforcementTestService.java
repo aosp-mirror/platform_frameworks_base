@@ -24,6 +24,8 @@ import android.net.SntpClient;
 import android.os.Environment;
 import android.util.Log;
 
+import libcore.io.Streams;
+
 import java.io.BufferedWriter;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -36,8 +38,6 @@ import java.net.HttpURLConnection;
 import java.net.InetAddress;
 import java.net.URL;
 import java.util.Random;
-
-import libcore.io.Streams;
 
 /*
  * Test Service that tries to connect to the web via different methods and outputs the results to
@@ -146,7 +146,7 @@ public class BandwidthEnforcementTestService extends IntentService {
         final ConnectivityManager mCM = context.getSystemService(ConnectivityManager.class);
         final Network network = mCM.getActiveNetwork();
 
-        if (client.requestTime("0.pool.ntp.org", 10000, network)) {
+        if (client.requestTime("0.pool.ntp.org", SntpClient.STANDARD_NTP_PORT, 10000, network)) {
             return true;
         }
         return false;

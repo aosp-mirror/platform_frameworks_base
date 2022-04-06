@@ -18,6 +18,7 @@ package com.android.server.am;
 
 import static android.app.ActivityManager.RESTRICTION_LEVEL_ADAPTIVE_BUCKET;
 import static android.app.ActivityManager.RESTRICTION_LEVEL_RESTRICTED_BUCKET;
+import static android.app.ActivityManager.RESTRICTION_LEVEL_UNKNOWN;
 import static android.app.usage.UsageStatsManager.REASON_MAIN_FORCED_BY_SYSTEM;
 import static android.app.usage.UsageStatsManager.REASON_MAIN_USAGE;
 import static android.app.usage.UsageStatsManager.REASON_SUB_FORCED_SYSTEM_FLAG_ABUSE;
@@ -295,11 +296,19 @@ abstract class BaseAppStateTimeSlotEventsTracker
         }
 
         @Override
-        public @RestrictionLevel int getProposedRestrictionLevel(String packageName, int uid) {
+        @RestrictionLevel
+        public int getProposedRestrictionLevel(String packageName, int uid,
+                @RestrictionLevel int maxLevel) {
             synchronized (mLock) {
-                return mExcessiveEventPkgs.get(packageName, uid) == null
+                final int level = mExcessiveEventPkgs.get(packageName, uid) == null
                         ? RESTRICTION_LEVEL_ADAPTIVE_BUCKET
                         : RESTRICTION_LEVEL_RESTRICTED_BUCKET;
+                if (maxLevel > RESTRICTION_LEVEL_RESTRICTED_BUCKET) {
+                    return level;
+                } else if (maxLevel == RESTRICTION_LEVEL_RESTRICTED_BUCKET) {
+                    return RESTRICTION_LEVEL_ADAPTIVE_BUCKET;
+                }
+                return RESTRICTION_LEVEL_UNKNOWN;
             }
         }
 

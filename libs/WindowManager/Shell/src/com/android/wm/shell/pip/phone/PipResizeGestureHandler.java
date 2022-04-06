@@ -625,7 +625,7 @@ public class PipResizeGestureHandler {
 
     class PipResizeInputEventReceiver extends BatchedInputEventReceiver {
         PipResizeInputEventReceiver(InputChannel channel, Looper looper) {
-            super(channel, looper, Choreographer.getSfInstance());
+            super(channel, looper, Choreographer.getInstance());
         }
 
         public void onInputEvent(InputEvent event) {

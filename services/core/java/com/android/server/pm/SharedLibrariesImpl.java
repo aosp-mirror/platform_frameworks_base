@@ -741,9 +741,11 @@ public final class SharedLibrariesImpl implements SharedLibrariesRead, Watchable
         }
         SharedLibraryInfo libraryInfo = versionedLib.valueAt(libIdx);
 
+        final Computer snapshot = mPm.snapshotComputer();
+
         // Remove the shared library overlays from its dependent packages.
         for (int currentUserId : mPm.mUserManager.getUserIds()) {
-            final List<VersionedPackage> dependents = mPm.getPackagesUsingSharedLibrary(
+            final List<VersionedPackage> dependents = snapshot.getPackagesUsingSharedLibrary(
                     libraryInfo, 0, Process.SYSTEM_UID, currentUserId);
             if (dependents == null) {
                 continue;

@@ -24,4 +24,5 @@
     <string name="pip_move" msgid="1544227837964635439">"Mou pantalla en pantalla"</string>
     <string name="pip_expand" msgid="7605396312689038178">"Desplega pantalla en pantalla"</string>
     <string name="pip_collapse" msgid="5732233773786896094">"Replega pantalla en pantalla"</string>
+    <string name="pip_edu_text" msgid="3672999496647508701">" Prem dos cops "<annotation icon="home_icon">" INICI "</annotation>" per accedir als controls"</string>
 </resources>

@@ -16,6 +16,8 @@
 
 package com.android.server.autofill;
 
+import static android.service.autofill.FillEventHistory.Event.NO_SAVE_UI_REASON_NONE;
+import static android.service.autofill.FillEventHistory.Event.UI_TYPE_INLINE;
 import static android.service.autofill.FillRequest.FLAG_MANUAL_REQUEST;
 import static android.view.autofill.AutofillManager.ACTION_START_SESSION;
 import static android.view.autofill.AutofillManager.FLAG_ADD_CLIENT_ENABLED;
@@ -816,12 +818,13 @@ final class AutofillManagerServiceImpl
     /**
      * Updates the last fill response when a dataset is shown.
      */
-    void logDatasetShown(int sessionId, @Nullable Bundle clientState) {
+    void logDatasetShown(int sessionId, @Nullable Bundle clientState, int presentationType) {
         synchronized (mLock) {
             if (isValidEventLocked("logDatasetShown", sessionId)) {
                 mEventHistory.addEvent(
                         new Event(Event.TYPE_DATASETS_SHOWN, null, clientState, null, null, null,
-                                null, null, null, null, null));
+                                null, null, null, null, null, NO_SAVE_UI_REASON_NONE,
+                                presentationType));
             }
         }
     }
@@ -858,9 +861,12 @@ final class AutofillManagerServiceImpl
                     || mAugmentedAutofillEventHistory.getSessionId() != sessionId) {
                 return;
             }
+            // Augmented Autofill only logs for inline now, so set UI_TYPE_INLINE here.
+            // Ideally should not hardcode here and should also log for menu presentation.
             mAugmentedAutofillEventHistory.addEvent(
                     new Event(Event.TYPE_DATASETS_SHOWN, null, clientState, null, null, null,
-                            null, null, null, null, null));
+                            null, null, null, null, null, NO_SAVE_UI_REASON_NONE,
+                            UI_TYPE_INLINE));
 
         }
     }

@@ -24,6 +24,7 @@ import android.opengl.EGLSync;
 import android.os.Parcel;
 import android.os.ParcelFileDescriptor;
 import android.os.Parcelable;
+import android.os.SystemClock;
 
 import libcore.util.NativeAllocationRegistry;
 
@@ -99,6 +100,21 @@ public final class SyncFence implements AutoCloseable, Parcelable {
         }
         if (fileDescriptor != null) {
             mNativePtr = nCreate(fileDescriptor.getInt$());
+            mCloser = sRegistry.registerNativeAllocation(this, mNativePtr);
+        } else {
+            mCloser = () -> {};
+        }
+    }
+
+    /**
+     * Creates a SyncFence from a libui Fence*
+     * DOES NOT TAKE AN ADDITIONAL REFERENCE, the caller must incref if it intends to retain
+     * ownership (eg, when using sp<Fence>)
+     * @hide
+     */
+    public SyncFence(long nativeFencePtr) {
+        mNativePtr = nativeFencePtr;
+        if (nativeFencePtr != 0) {
             mCloser = sRegistry.registerNativeAllocation(this, mNativePtr);
         } else {
             mCloser = () -> {};
@@ -194,7 +210,9 @@ public final class SyncFence implements AutoCloseable, Parcelable {
     }
 
     /**
-     * Returns the time that the fence signaled in the CLOCK_MONOTONIC time domain.
+     * Returns the time in nanoseconds that the fence signaled in the CLOCK_MONOTONIC time domain.
+     * This corresponds to {@link System#nanoTime()} but may also be compared to
+     * {@link SystemClock#uptimeMillis()} after adjusting for milliseconds vs. nanoseconds.
      *
      * If the fence isn't valid, that is if {@link #isValid()} is false, then this returns
      * {@link #SIGNAL_TIME_INVALID}. Similarly, if an error occurs while trying to access the

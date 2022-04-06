@@ -19,7 +19,7 @@ package com.android.server.wm;
 import static android.app.ActivityManager.PROCESS_STATE_NONEXISTENT;
 
 import android.app.ActivityManager.ProcessState;
-import android.util.SparseArray;
+import android.util.SparseIntArray;
 
 import java.io.PrintWriter;
 
@@ -29,15 +29,14 @@ import java.io.PrintWriter;
  * adjustment) or getting state from window manager (background start check).
  */
 class MirrorActiveUids {
-    private final SparseArray<UidRecord> mUidStates = new SparseArray<>();
+    /** Uid -> process state. */
+    private final SparseIntArray mUidStates = new SparseIntArray();
+
+    /** Uid -> number of non-app visible windows belong to the uid. */
+    private final SparseIntArray mNumNonAppVisibleWindowMap = new SparseIntArray();
 
     synchronized void onUidActive(int uid, int procState) {
-        UidRecord r = mUidStates.get(uid);
-        if (r == null) {
-            r = new UidRecord();
-            mUidStates.put(uid, r);
-        }
-        r.mProcState = procState;
+        mUidStates.put(uid, procState);
     }
 
     synchronized void onUidInactive(int uid) {
@@ -45,22 +44,28 @@ class MirrorActiveUids {
     }
 
     synchronized void onUidProcStateChanged(int uid, int procState) {
-        final UidRecord r = mUidStates.get(uid);
-        if (r != null) {
-            r.mProcState = procState;
+        final int index = mUidStates.indexOfKey(uid);
+        if (index >= 0) {
+            mUidStates.setValueAt(index, procState);
         }
     }
 
     synchronized @ProcessState int getUidState(int uid) {
-        final UidRecord r = mUidStates.get(uid);
-        return r != null ? r.mProcState : PROCESS_STATE_NONEXISTENT;
+        return mUidStates.get(uid, PROCESS_STATE_NONEXISTENT);
     }
 
     /** Called when the surface of non-application (exclude toast) window is shown or hidden. */
     synchronized void onNonAppSurfaceVisibilityChanged(int uid, boolean visible) {
-        final UidRecord r = mUidStates.get(uid);
-        if (r != null) {
-            r.mNumNonAppVisibleWindow += visible ? 1 : -1;
+        final int index = mNumNonAppVisibleWindowMap.indexOfKey(uid);
+        if (index >= 0) {
+            final int num = mNumNonAppVisibleWindowMap.valueAt(index) + (visible ? 1 : -1);
+            if (num > 0) {
+                mNumNonAppVisibleWindowMap.setValueAt(index, num);
+            } else {
+                mNumNonAppVisibleWindowMap.removeAt(index);
+            }
+        } else if (visible) {
+            mNumNonAppVisibleWindowMap.append(uid, 1);
         }
     }
 
@@ -70,23 +75,15 @@ class MirrorActiveUids {
      * {@link VisibleActivityProcessTracker}.
      */
     synchronized boolean hasNonAppVisibleWindow(int uid) {
-        final UidRecord r = mUidStates.get(uid);
-        return r != null && r.mNumNonAppVisibleWindow > 0;
+        return mNumNonAppVisibleWindowMap.get(uid) > 0;
     }
 
     synchronized void dump(PrintWriter pw, String prefix) {
-        pw.print(prefix + "NumNonAppVisibleWindowByUid:[");
-        for (int i = mUidStates.size() - 1; i >= 0; i--) {
-            final UidRecord r = mUidStates.valueAt(i);
-            if (r.mNumNonAppVisibleWindow > 0) {
-                pw.print(" " + mUidStates.keyAt(i) + ":" + r.mNumNonAppVisibleWindow);
-            }
+        pw.print(prefix + "NumNonAppVisibleWindowUidMap:[");
+        for (int i = mNumNonAppVisibleWindowMap.size() - 1; i >= 0; i--) {
+            pw.print(" " + mNumNonAppVisibleWindowMap.keyAt(i) + ":"
+                    + mNumNonAppVisibleWindowMap.valueAt(i));
         }
         pw.println("]");
-    }
-
-    private static final class UidRecord {
-        @ProcessState int mProcState;
-        int mNumNonAppVisibleWindow;
     }
 }

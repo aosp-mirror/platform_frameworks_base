@@ -987,7 +987,8 @@ public final class RemoteInputConnectionImpl extends IInputContext.Stub {
             Log.w(TAG, "requestCursorAnchorInfo on inactive InputConnection");
             return false;
         }
-        if (mParentInputMethodManager.getDisplayId() != imeDisplayId) {
+        if (mParentInputMethodManager.getDisplayId() != imeDisplayId
+                && !mParentInputMethodManager.hasVirtualDisplayToScreenMatrix()) {
             // requestCursorUpdates() is not currently supported across displays.
             return false;
         }

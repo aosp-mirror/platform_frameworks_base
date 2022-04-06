@@ -26,10 +26,12 @@ import android.content.pm.ResolveInfo;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.pm.Computer;
+import com.android.server.pm.DumpState;
 import com.android.server.pm.pkg.component.ParsedActivity;
 import com.android.server.pm.pkg.component.ParsedProvider;
 import com.android.server.pm.pkg.component.ParsedService;
 
+import java.io.PrintWriter;
 import java.util.List;
 
 public interface ComponentResolverApi {
@@ -97,4 +99,21 @@ public interface ComponentResolverApi {
 
     void querySyncProviders(@NonNull Computer computer, @NonNull List<String> outNames,
             @NonNull List<ProviderInfo> outInfo, boolean safeMode, @UserIdInt int userId);
+
+    void dumpActivityResolvers(@NonNull PrintWriter pw, @NonNull DumpState dumpState,
+            @NonNull String packageName);
+
+    void dumpProviderResolvers(@NonNull PrintWriter pw, @NonNull DumpState dumpState,
+            @NonNull String packageName);
+
+    void dumpReceiverResolvers(@NonNull PrintWriter pw, @NonNull DumpState dumpState,
+            @NonNull String packageName);
+
+    void dumpServiceResolvers(@NonNull PrintWriter pw, @NonNull DumpState dumpState,
+            @NonNull String packageName);
+
+    void dumpContentProviders(@NonNull Computer computer, @NonNull PrintWriter pw,
+            @NonNull DumpState dumpState, @NonNull String packageName);
+
+    void dumpServicePermissions(@NonNull PrintWriter pw, @NonNull DumpState dumpState);
 }

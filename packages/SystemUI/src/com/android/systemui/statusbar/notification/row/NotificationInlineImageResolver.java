@@ -31,7 +31,6 @@ import com.android.internal.widget.ImageResolver;
 import com.android.internal.widget.LocalImageResolver;
 import com.android.internal.widget.MessagingMessage;
 
-import java.io.IOException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -111,30 +110,30 @@ public class NotificationInlineImageResolver implements ImageResolver {
      * To resolve image from specified uri directly. If the resulting image is larger than the
      * maximum allowed size, scale it down.
      * @param uri Uri of the image.
-     * @return Drawable of the image.
-     * @throws IOException Throws if failed at resolving the image.
+     * @return Drawable of the image, or null if unable to load.
      */
-    Drawable resolveImage(Uri uri) throws IOException {
-        return LocalImageResolver.resolveImage(uri, mContext, mMaxImageWidth, mMaxImageHeight);
+    Drawable resolveImage(Uri uri) {
+        try {
+            return LocalImageResolver.resolveImage(uri, mContext, mMaxImageWidth, mMaxImageHeight);
+        } catch (Exception ex) {
+            // Catch general Exception because ContentResolver can re-throw arbitrary Exception
+            // from remote process as a RuntimeException. See: Parcel#readException
+            Log.d(TAG, "resolveImage: Can't load image from " + uri, ex);
+        }
+        return null;
     }
 
     @Override
     public Drawable loadImage(Uri uri) {
-        Drawable result = null;
-        try {
-            if (hasCache()) {
-                // if the uri isn't currently cached, try caching it first
-                if (!mImageCache.hasEntry(uri)) {
-                    mImageCache.preload((uri));
-                }
-                result = mImageCache.get(uri);
-            } else {
-                result = resolveImage(uri);
-            }
-        } catch (IOException | SecurityException ex) {
-            Log.d(TAG, "loadImage: Can't load image from " + uri, ex);
+        return hasCache() ? loadImageFromCache(uri) : resolveImage(uri);
+    }
+
+    private Drawable loadImageFromCache(Uri uri) {
+        // if the uri isn't currently cached, try caching it first
+        if (!mImageCache.hasEntry(uri)) {
+            mImageCache.preload((uri));
         }
-        return result;
+        return mImageCache.get(uri);
     }
 
     /**

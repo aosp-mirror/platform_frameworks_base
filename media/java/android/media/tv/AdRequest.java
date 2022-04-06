@@ -163,7 +163,11 @@ public final class AdRequest implements Parcelable {
 
     /**
      * Gets the metadata of the media file.
-     * <p>This includes additional information the TV input needs to play the AD media.
+     *
+     * <p>This includes additional information the TV input needs to play the AD media. This may
+     * include fields in {@link android.media.MediaFormat} like
+     * {@link android.media.MediaFormat#KEY_SAMPLE_RATE}, or integrity information like SHA. What
+     * data is included depends on the format of the media file.
      *
      * @return The metadata of the media file. Can be an empty bundle for
      *         {@link #REQUEST_TYPE_STOP}.

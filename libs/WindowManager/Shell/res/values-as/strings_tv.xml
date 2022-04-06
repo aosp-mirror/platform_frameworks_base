@@ -24,4 +24,5 @@
     <string name="pip_move" msgid="1544227837964635439">"পিপ স্থানান্তৰ কৰক"</string>
     <string name="pip_expand" msgid="7605396312689038178">"পিপ বিস্তাৰ কৰক"</string>
     <string name="pip_collapse" msgid="5732233773786896094">"পিপ সংকোচন কৰক"</string>
+    <string name="pip_edu_text" msgid="3672999496647508701">" নিয়ন্ত্ৰণৰ বাবে "<annotation icon="home_icon">" গৃহপৃষ্ঠা "</annotation>" বুটামত দুবাৰ হেঁচক"</string>
 </resources>

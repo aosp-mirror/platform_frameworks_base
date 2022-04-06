@@ -188,7 +188,7 @@ class ActivityStartInterceptor {
         final SparseArray<ActivityInterceptorCallback> callbacks =
                 mService.getActivityInterceptorCallbacks();
         final ActivityInterceptorCallback.ActivityInterceptorInfo interceptorInfo =
-                getInterceptorInfo();
+                getInterceptorInfo(null /* clearOptionsAnimation */);
 
         for (int i = 0; i < callbacks.size(); i++) {
             final ActivityInterceptorCallback callback = callbacks.valueAt(i);
@@ -406,20 +406,22 @@ class ActivityStartInterceptor {
     /**
      * Called when an activity is successfully launched.
      */
-    void onActivityLaunched(TaskInfo taskInfo, ActivityInfo activityInfo) {
+    void onActivityLaunched(TaskInfo taskInfo, ActivityRecord r) {
         final SparseArray<ActivityInterceptorCallback> callbacks =
                 mService.getActivityInterceptorCallbacks();
-        ActivityInterceptorCallback.ActivityInterceptorInfo info = getInterceptorInfo();
+        ActivityInterceptorCallback.ActivityInterceptorInfo info = getInterceptorInfo(
+                r::clearOptionsAnimationForSiblings);
         for (int i = 0; i < callbacks.size(); i++) {
             final ActivityInterceptorCallback callback = callbacks.valueAt(i);
-            callback.onActivityLaunched(taskInfo, activityInfo, info);
+            callback.onActivityLaunched(taskInfo, r.info, info);
         }
     }
 
-    private ActivityInterceptorCallback.ActivityInterceptorInfo getInterceptorInfo() {
+    private ActivityInterceptorCallback.ActivityInterceptorInfo getInterceptorInfo(
+            @Nullable Runnable clearOptionsAnimation) {
         return new ActivityInterceptorCallback.ActivityInterceptorInfo(mRealCallingUid,
                 mRealCallingPid, mUserId, mCallingPackage, mCallingFeatureId, mIntent,
                 mRInfo, mAInfo, mResolvedType, mCallingPid, mCallingUid,
-                mActivityOptions);
+                mActivityOptions, clearOptionsAnimation);
     }
 }

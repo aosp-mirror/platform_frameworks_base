@@ -1209,7 +1209,9 @@ public final class UiAutomation {
      * @see android.view.WindowAnimationFrameStats
      * @see #getWindowAnimationFrameStats()
      * @see android.R.styleable#WindowAnimation
-     * @deprecated animation-frames are no-longer used.
+     * @deprecated animation-frames are no-longer used. Use Shared
+     *         <a href="https://perfetto.dev/docs/data-sources/frametimeline">FrameTimeline</a>
+     *         jank metrics instead.
      */
     @Deprecated
     public void clearWindowAnimationFrameStats() {

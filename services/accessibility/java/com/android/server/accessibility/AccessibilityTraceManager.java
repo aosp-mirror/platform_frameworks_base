@@ -50,7 +50,7 @@ public class AccessibilityTraceManager implements AccessibilityTrace {
     private final AccessibilityManagerService mService;
     private final Object mA11yMSLock;
 
-    private long mEnabledLoggingFlags;
+    private volatile long mEnabledLoggingFlags;
 
     private static AccessibilityTraceManager sInstance = null;
 
@@ -77,34 +77,28 @@ public class AccessibilityTraceManager implements AccessibilityTrace {
 
     @Override
     public boolean isA11yTracingEnabled() {
-        synchronized (mA11yMSLock) {
-            return mEnabledLoggingFlags != FLAGS_LOGGING_NONE;
-        }
+        return mEnabledLoggingFlags != FLAGS_LOGGING_NONE;
     }
 
     @Override
     public boolean isA11yTracingEnabledForTypes(long typeIdFlags) {
-        synchronized (mA11yMSLock) {
-            return ((typeIdFlags & mEnabledLoggingFlags) != FLAGS_LOGGING_NONE);
-        }
+        return ((typeIdFlags & mEnabledLoggingFlags) != FLAGS_LOGGING_NONE);
     }
 
     @Override
     public int getTraceStateForAccessibilityManagerClientState() {
         int state = 0x0;
-        synchronized (mA11yMSLock) {
-            if (isA11yTracingEnabledForTypes(FLAGS_ACCESSIBILITY_INTERACTION_CONNECTION)) {
-                state |= STATE_FLAG_TRACE_A11Y_INTERACTION_CONNECTION_ENABLED;
-            }
-            if (isA11yTracingEnabledForTypes(FLAGS_ACCESSIBILITY_INTERACTION_CONNECTION_CALLBACK)) {
-                state |= STATE_FLAG_TRACE_A11Y_INTERACTION_CONNECTION_CB_ENABLED;
-            }
-            if (isA11yTracingEnabledForTypes(FLAGS_ACCESSIBILITY_INTERACTION_CLIENT)) {
-                state |= STATE_FLAG_TRACE_A11Y_INTERACTION_CLIENT_ENABLED;
-            }
-            if (isA11yTracingEnabledForTypes(FLAGS_ACCESSIBILITY_SERVICE)) {
-                state |= STATE_FLAG_TRACE_A11Y_SERVICE_ENABLED;
-            }
+        if (isA11yTracingEnabledForTypes(FLAGS_ACCESSIBILITY_INTERACTION_CONNECTION)) {
+            state |= STATE_FLAG_TRACE_A11Y_INTERACTION_CONNECTION_ENABLED;
+        }
+        if (isA11yTracingEnabledForTypes(FLAGS_ACCESSIBILITY_INTERACTION_CONNECTION_CALLBACK)) {
+            state |= STATE_FLAG_TRACE_A11Y_INTERACTION_CONNECTION_CB_ENABLED;
+        }
+        if (isA11yTracingEnabledForTypes(FLAGS_ACCESSIBILITY_INTERACTION_CLIENT)) {
+            state |= STATE_FLAG_TRACE_A11Y_INTERACTION_CLIENT_ENABLED;
+        }
+        if (isA11yTracingEnabledForTypes(FLAGS_ACCESSIBILITY_SERVICE)) {
+            state |= STATE_FLAG_TRACE_A11Y_SERVICE_ENABLED;
         }
         return state;
     }
@@ -116,11 +110,11 @@ public class AccessibilityTraceManager implements AccessibilityTrace {
             return;
         }
 
-        synchronized (mA11yMSLock) {
-            long oldEnabled = mEnabledLoggingFlags;
-            mEnabledLoggingFlags = loggingTypes;
+        long oldEnabled = mEnabledLoggingFlags;
+        mEnabledLoggingFlags = loggingTypes;
 
-            if (needToNotifyClients(oldEnabled)) {
+        if (needToNotifyClients(oldEnabled)) {
+            synchronized (mA11yMSLock) {
                 mService.scheduleUpdateClientsIfNeededLocked(mService.getCurrentUserState());
             }
         }
@@ -130,14 +124,14 @@ public class AccessibilityTraceManager implements AccessibilityTrace {
 
     @Override
     public void stopTrace() {
-        boolean stop = false;
-        synchronized (mA11yMSLock) {
-            stop = isA11yTracingEnabled();
+        boolean stop;
+        stop = isA11yTracingEnabled();
 
-            long oldEnabled = mEnabledLoggingFlags;
-            mEnabledLoggingFlags = FLAGS_LOGGING_NONE;
+        long oldEnabled = mEnabledLoggingFlags;
+        mEnabledLoggingFlags = FLAGS_LOGGING_NONE;
 
-            if (needToNotifyClients(oldEnabled)) {
+        if (needToNotifyClients(oldEnabled)) {
+            synchronized (mA11yMSLock) {
                 mService.scheduleUpdateClientsIfNeededLocked(mService.getCurrentUserState());
             }
         }

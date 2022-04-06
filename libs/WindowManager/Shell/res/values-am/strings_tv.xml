@@ -24,4 +24,5 @@
     <string name="pip_move" msgid="1544227837964635439">"ፒአይፒ ውሰድ"</string>
     <string name="pip_expand" msgid="7605396312689038178">"ፒአይፒን ዘርጋ"</string>
     <string name="pip_collapse" msgid="5732233773786896094">"ፒአይፒን ሰብስብ"</string>
+    <string name="pip_edu_text" msgid="3672999496647508701">" ለመቆጣጠሪያዎች "<annotation icon="home_icon">"መነሻ"</annotation>"ን ሁለቴ ይጫኑ"</string>
 </resources>

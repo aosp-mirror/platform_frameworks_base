@@ -18,6 +18,7 @@ package com.android.server.wm;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.WindowConfiguration;
 import android.content.pm.ActivityInfo;
 import android.os.UserHandle;
 import android.util.ArraySet;
@@ -63,13 +64,14 @@ class DisplayWindowPolicyControllerHelper {
     }
 
     /**
-     * @see DisplayWindowPolicyController#canContainActivities(List)
+     * @see DisplayWindowPolicyController#canContainActivities(List, int)
      */
-    public boolean canContainActivities(@NonNull List<ActivityInfo> activities) {
+    public boolean canContainActivities(@NonNull List<ActivityInfo> activities,
+            @WindowConfiguration.WindowingMode int windowingMode) {
         if (mDisplayWindowPolicyController == null) {
             return true;
         }
-        return mDisplayWindowPolicyController.canContainActivities(activities);
+        return mDisplayWindowPolicyController.canContainActivities(activities, windowingMode);
     }
 
     /**
@@ -124,6 +126,17 @@ class DisplayWindowPolicyControllerHelper {
             mRunningUid = runningUids;
             mDisplayWindowPolicyController.onRunningAppsChanged(runningUids);
         }
+    }
+
+    /**
+     * @see DisplayWindowPolicyController#isWindowingModeSupported(int)
+     */
+    public final boolean isWindowingModeSupported(
+            @WindowConfiguration.WindowingMode int windowingMode) {
+        if (mDisplayWindowPolicyController == null) {
+            return true;
+        }
+        return mDisplayWindowPolicyController.isWindowingModeSupported(windowingMode);
     }
 
     void dump(String prefix, PrintWriter pw) {

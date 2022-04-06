@@ -60,4 +60,9 @@ public class ActivityOptions {
     public static final ComponentName DIALOG_THEMED_ACTIVITY_COMPONENT_NAME =
             new ComponentName(FLICKER_APP_PACKAGE,
                     FLICKER_APP_PACKAGE + ".DialogThemedActivity");
+
+    public static final String PORTRAIT_ONLY_ACTIVITY_LAUNCHER_NAME = "PortraitOnlyActivity";
+    public static final ComponentName PORTRAIT_ONLY_ACTIVITY_COMPONENT_NAME =
+            new ComponentName(FLICKER_APP_PACKAGE,
+                    FLICKER_APP_PACKAGE + ".PortraitOnlyActivity");
 }

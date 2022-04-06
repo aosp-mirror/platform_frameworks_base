@@ -40,7 +40,8 @@ import android.app.admin.DevicePolicyManager;
 import android.companion.AssociationInfo;
 import android.companion.virtual.IVirtualDeviceActivityListener;
 import android.companion.virtual.VirtualDeviceParams;
-import android.companion.virtual.audio.IAudioSessionCallback;
+import android.companion.virtual.audio.IAudioConfigChangedCallback;
+import android.companion.virtual.audio.IAudioRoutingCallback;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.graphics.Point;
@@ -115,7 +116,9 @@ public class VirtualDeviceManagerServiceTest {
     IThermalService mIThermalServiceMock;
     private PowerManager mPowerManager;
     @Mock
-    private IAudioSessionCallback mCallback;
+    private IAudioRoutingCallback mRoutingCallback;
+    @Mock
+    private IAudioConfigChangedCallback mConfigChangedCallback;
 
     @Before
     public void setUp() {
@@ -258,7 +261,8 @@ public class VirtualDeviceManagerServiceTest {
     @Test
     public void onAudioSessionStarting_noDisplay_failsSecurityException() {
         assertThrows(SecurityException.class,
-                () -> mDeviceImpl.onAudioSessionStarting(DISPLAY_ID, mCallback));
+                () -> mDeviceImpl.onAudioSessionStarting(
+                        DISPLAY_ID, mRoutingCallback, mConfigChangedCallback));
     }
 
     @Test
@@ -300,7 +304,8 @@ public class VirtualDeviceManagerServiceTest {
         doCallRealMethod().when(mContext).enforceCallingOrSelfPermission(
                 eq(Manifest.permission.CREATE_VIRTUAL_DEVICE), anyString());
         assertThrows(SecurityException.class,
-                () -> mDeviceImpl.onAudioSessionStarting(DISPLAY_ID, mCallback));
+                () -> mDeviceImpl.onAudioSessionStarting(
+                        DISPLAY_ID, mRoutingCallback, mConfigChangedCallback));
     }
 
     @Test
@@ -347,7 +352,7 @@ public class VirtualDeviceManagerServiceTest {
     public void onAudioSessionStarting_hasVirtualAudioController() {
         mDeviceImpl.onVirtualDisplayCreatedLocked(DISPLAY_ID);
 
-        mDeviceImpl.onAudioSessionStarting(DISPLAY_ID, mCallback);
+        mDeviceImpl.onAudioSessionStarting(DISPLAY_ID, mRoutingCallback, mConfigChangedCallback);
 
         assertThat(mDeviceImpl.getVirtualAudioControllerForTesting()).isNotNull();
     }
@@ -355,7 +360,7 @@ public class VirtualDeviceManagerServiceTest {
     @Test
     public void onAudioSessionEnded_noVirtualAudioController() {
         mDeviceImpl.onVirtualDisplayCreatedLocked(DISPLAY_ID);
-        mDeviceImpl.onAudioSessionStarting(DISPLAY_ID, mCallback);
+        mDeviceImpl.onAudioSessionStarting(DISPLAY_ID, mRoutingCallback, mConfigChangedCallback);
 
         mDeviceImpl.onAudioSessionEnded();
 
@@ -365,7 +370,7 @@ public class VirtualDeviceManagerServiceTest {
     @Test
     public void close_cleanVirtualAudioController() {
         mDeviceImpl.onVirtualDisplayCreatedLocked(DISPLAY_ID);
-        mDeviceImpl.onAudioSessionStarting(DISPLAY_ID, mCallback);
+        mDeviceImpl.onAudioSessionStarting(DISPLAY_ID, mRoutingCallback, mConfigChangedCallback);
 
         mDeviceImpl.close();
 

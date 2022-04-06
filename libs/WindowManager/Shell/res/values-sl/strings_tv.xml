@@ -24,4 +24,5 @@
     <string name="pip_move" msgid="1544227837964635439">"Premakni sliko v sliki"</string>
     <string name="pip_expand" msgid="7605396312689038178">"Razširi sliko v sliki"</string>
     <string name="pip_collapse" msgid="5732233773786896094">"Strni sliko v sliki"</string>
+    <string name="pip_edu_text" msgid="3672999496647508701">" Za kontrolnike dvakrat pritisnite gumb za "<annotation icon="home_icon">" ZAČETNI ZASLON "</annotation></string>
 </resources>

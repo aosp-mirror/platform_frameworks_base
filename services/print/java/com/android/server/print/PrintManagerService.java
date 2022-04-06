@@ -370,6 +370,33 @@ public final class PrintManagerService extends SystemService {
         }
 
         @Override
+        public boolean isPrintServiceEnabled(ComponentName service, int userId) {
+            final String[] packages = mContext.getPackageManager().getPackagesForUid(
+                    Binder.getCallingUid());
+            boolean matchCalling = false;
+            for (int i = 0; i < packages.length; i++) {
+                if (packages[i].equals(service.getPackageName())) {
+                    matchCalling = true;
+                    break;
+                }
+            }
+            if (!matchCalling) {
+                // Do not reveal any information about other package services.
+                throw new SecurityException("PrintService does not share UID with caller.");
+            }
+            final int resolvedUserId = resolveCallingUserEnforcingPermissions(userId);
+            final UserState userState;
+            synchronized (mLock) {
+                // Only the current group members can check print services.
+                if (resolveCallingProfileParentLocked(resolvedUserId) != getCurrentUserId()) {
+                    return false;
+                }
+                userState = getOrCreateUserStateLocked(resolvedUserId, false);
+            }
+            return userState.isPrintServiceEnabled(service);
+        }
+
+        @Override
         public List<RecommendationInfo> getPrintServiceRecommendations(int userId) {
             mContext.enforceCallingOrSelfPermission(
                     android.Manifest.permission.READ_PRINT_SERVICE_RECOMMENDATIONS, null);

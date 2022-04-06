@@ -39,7 +39,6 @@ import android.window.WindowContainerTransaction;
 
 import androidx.annotation.NonNull;
 
-import com.android.internal.R;
 import com.android.launcher3.icons.IconProvider;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.common.SurfaceUtils;
@@ -108,12 +107,7 @@ class StageTaskListener implements ShellTaskOrganizer.TaskListener {
         mSurfaceSession = surfaceSession;
         mIconProvider = iconProvider;
         mStageTaskUnfoldController = stageTaskUnfoldController;
-
-        // No need to create root task if the device is using legacy split screen.
-        // TODO(b/199236198): Remove this check after totally deprecated legacy split.
-        if (!context.getResources().getBoolean(R.bool.config_useLegacySplit)) {
-            taskOrganizer.createRootTask(displayId, WINDOWING_MODE_MULTI_WINDOW, this);
-        }
+        taskOrganizer.createRootTask(displayId, WINDOWING_MODE_MULTI_WINDOW, this);
     }
 
     int getChildCount() {
@@ -122,6 +116,20 @@ class StageTaskListener implements ShellTaskOrganizer.TaskListener {
 
     boolean containsTask(int taskId) {
         return mChildrenTaskInfo.contains(taskId);
+    }
+
+    boolean containsToken(WindowContainerToken token) {
+        if (token.equals(mRootTaskInfo.token)) {
+            return true;
+        }
+
+        for (int i = mChildrenTaskInfo.size() - 1; i >= 0; --i) {
+            if (token.equals(mChildrenTaskInfo.valueAt(i).token)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**
@@ -173,7 +181,7 @@ class StageTaskListener implements ShellTaskOrganizer.TaskListener {
     @Override
     @CallSuper
     public void onTaskAppeared(ActivityManager.RunningTaskInfo taskInfo, SurfaceControl leash) {
-        if (mRootTaskInfo == null && !taskInfo.hasParentTask()) {
+        if (mRootTaskInfo == null) {
             mRootLeash = leash;
             mRootTaskInfo = taskInfo;
             mSplitDecorManager = new SplitDecorManager(
@@ -305,9 +313,9 @@ class StageTaskListener implements ShellTaskOrganizer.TaskListener {
         }
     }
 
-    void onResized(Rect newBounds, SurfaceControl.Transaction t) {
+    void onResized(SurfaceControl.Transaction t) {
         if (mSplitDecorManager != null) {
-            mSplitDecorManager.onResized(newBounds, t);
+            mSplitDecorManager.onResized(t);
         }
     }
 
@@ -318,11 +326,6 @@ class StageTaskListener implements ShellTaskOrganizer.TaskListener {
                 .setBounds(task.token, null);
 
         wct.reparent(task.token, mRootTaskInfo.token, true /* onTop*/);
-    }
-
-    void moveToTop(WindowContainerTransaction wct) {
-        final WindowContainerToken rootToken = mRootTaskInfo.token;
-        wct.reorder(rootToken, true /* onTop */);
     }
 
     void reorderChild(int taskId, boolean onTop, WindowContainerTransaction wct) {
@@ -338,10 +341,6 @@ class StageTaskListener implements ShellTaskOrganizer.TaskListener {
             final ActivityManager.RunningTaskInfo taskInfo = mChildrenTaskInfo.valueAt(i);
             wct.reparent(taskInfo.token, null /* parent */, false /* onTop */);
         }
-    }
-
-    void setVisibility(boolean visible, WindowContainerTransaction wct) {
-        wct.reorder(mRootTaskInfo.token, visible /* onTop */);
     }
 
     void onSplitScreenListenerRegistered(SplitScreen.SplitScreenListener listener,

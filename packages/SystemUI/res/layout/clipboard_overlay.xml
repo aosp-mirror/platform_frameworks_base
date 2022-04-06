@@ -16,7 +16,9 @@
   -->
 <FrameLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:androidprv="http://schemas.android.com/apk/prv/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:theme="@style/FloatingOverlay"
     android:alpha="0"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
@@ -26,9 +28,8 @@
         android:layout_width="match_parent"
         android:layout_gravity="bottom"
         android:src="@drawable/overlay_actions_background_protection"/>
-    <com.android.systemui.clipboardoverlay.DraggableConstraintLayout
+    <com.android.systemui.screenshot.DraggableConstraintLayout
         android:id="@+id/clipboard_ui"
-        android:theme="@style/FloatingOverlay"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
         <ImageView
@@ -118,7 +119,8 @@
                       android:autoSizeTextType="uniform"
                       android:autoSizeMinTextSize="10sp"
                       android:autoSizeMaxTextSize="200sp"
-                      android:textColor="?android:attr/textColorPrimary"
+                      android:textColor="?attr/overlayButtonTextColor"
+                      android:background="?androidprv:attr/colorAccentSecondary"
                       android:layout_width="@dimen/clipboard_preview_size"
                       android:layout_height="@dimen/clipboard_preview_size"/>
             <ImageView
@@ -134,6 +136,7 @@
             android:layout_height="@dimen/overlay_dismiss_button_tappable_size"
             android:elevation="@dimen/overlay_dismiss_button_elevation"
             android:visibility="gone"
+            android:alpha="0"
             app:layout_constraintStart_toEndOf="@id/clipboard_preview"
             app:layout_constraintEnd_toEndOf="@id/clipboard_preview"
             app:layout_constraintTop_toTopOf="@id/clipboard_preview"
@@ -146,5 +149,5 @@
                 android:layout_margin="@dimen/overlay_dismiss_button_margin"
                 android:src="@drawable/overlay_cancel"/>
         </FrameLayout>
-    </com.android.systemui.clipboardoverlay.DraggableConstraintLayout>
+    </com.android.systemui.screenshot.DraggableConstraintLayout>
 </FrameLayout>

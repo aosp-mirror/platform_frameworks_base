@@ -17,6 +17,7 @@
 package com.android.systemui.broadcast
 
 import android.content.BroadcastReceiver
+import android.content.Context
 import android.content.IntentFilter
 import android.os.Handler
 import android.os.Looper
@@ -45,7 +46,8 @@ class FakeBroadcastDispatcher(
         filter: IntentFilter,
         handler: Handler,
         user: UserHandle,
-        flags: Int
+        @Context.RegisterReceiverFlags flags: Int,
+        permission: String?
     ) {
         registeredReceivers.add(receiver)
     }
@@ -55,7 +57,8 @@ class FakeBroadcastDispatcher(
         filter: IntentFilter,
         executor: Executor?,
         user: UserHandle?,
-        flags: Int
+        @Context.RegisterReceiverFlags flags: Int,
+        permission: String?
     ) {
         registeredReceivers.add(receiver)
     }

@@ -17,6 +17,7 @@
 package android.media.projection;
 
 import android.media.projection.IMediaProjectionCallback;
+import android.window.WindowContainerToken;
 
 /** {@hide} */
 interface IMediaProjection {
@@ -28,4 +29,16 @@ interface IMediaProjection {
     int applyVirtualDisplayFlags(int flags);
     void registerCallback(IMediaProjectionCallback callback);
     void unregisterCallback(IMediaProjectionCallback callback);
+
+    /**
+     * Returns the {@link android.window.WindowContainerToken} identifying the task to record, or
+     * {@code null} if there is none.
+     */
+    WindowContainerToken getTaskRecordingWindowContainerToken();
+
+    /**
+     * Updates the {@link android.window.WindowContainerToken} identifying the task to record, or
+     * {@code null} if there is none.
+     */
+    void setTaskRecordingWindowContainerToken(in WindowContainerToken token);
 }

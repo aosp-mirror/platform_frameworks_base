@@ -22,6 +22,7 @@ import android.os.BatteryUsageStats;
 import android.os.BatteryUsageStatsQuery;
 import android.os.Handler;
 import android.util.AtomicFile;
+import android.util.Log;
 import android.util.LongArray;
 import android.util.Slog;
 import android.util.TypedXmlPullParser;
@@ -47,6 +48,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 import java.util.TreeMap;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * A storage mechanism for BatteryUsageStats snapshots.
@@ -73,6 +75,8 @@ public class BatteryUsageStatsStore {
     private boolean mSystemReady;
     private final File mStoreDir;
     private final File mLockFile;
+    private final ReentrantLock mFileLock = new ReentrantLock();
+    private FileLock mJvmLock;
     private final AtomicFile mConfigFile;
     private final long mMaxStorageBytes;
     private final Handler mHandler;
@@ -120,11 +124,11 @@ public class BatteryUsageStatsStore {
     }
 
     private void storeBatteryUsageStats(BatteryUsageStats stats) {
-        try (FileLock lock = lockSnapshotDirectory()) {
+        lockSnapshotDirectory();
+        try {
             if (!mStoreDir.exists()) {
                 if (!mStoreDir.mkdirs()) {
-                    Slog.e(TAG,
-                            "Could not create a directory for battery usage stats snapshots");
+                    Slog.e(TAG, "Could not create a directory for battery usage stats snapshots");
                     return;
                 }
             }
@@ -136,8 +140,8 @@ public class BatteryUsageStatsStore {
             }
 
             removeOldSnapshotsLocked();
-        } catch (IOException e) {
-            Slog.e(TAG, "Cannot lock battery usage stats directory", e);
+        } finally {
+            unlockSnapshotDirectory();
         }
     }
 
@@ -147,7 +151,8 @@ public class BatteryUsageStatsStore {
      */
     public long[] listBatteryUsageStatsTimestamps() {
         LongArray timestamps = new LongArray(100);
-        try (FileLock lock = lockSnapshotDirectory()) {
+        lockSnapshotDirectory();
+        try {
             for (File file : mStoreDir.listFiles()) {
                 String fileName = file.getName();
                 if (fileName.endsWith(SNAPSHOT_FILE_EXTENSION)) {
@@ -161,8 +166,8 @@ public class BatteryUsageStatsStore {
                     }
                 }
             }
-        } catch (IOException e) {
-            Slog.e(TAG, "Cannot lock battery usage stats directory", e);
+        } finally {
+            unlockSnapshotDirectory();
         }
         return timestamps.toArray();
     }
@@ -173,15 +178,16 @@ public class BatteryUsageStatsStore {
      */
     @Nullable
     public BatteryUsageStats loadBatteryUsageStats(long timestamp) {
-        try (FileLock lock = lockSnapshotDirectory()) {
+        lockSnapshotDirectory();
+        try {
             File file = makeSnapshotFilename(timestamp);
             try {
                 return readXmlFileLocked(file);
             } catch (Exception e) {
                 Slog.e(TAG, "Cannot read battery usage stats", e);
             }
-        } catch (IOException e) {
-            Slog.e(TAG, "Cannot lock battery usage stats directory", e);
+        } finally {
+            unlockSnapshotDirectory();
         }
         return null;
     }
@@ -192,7 +198,8 @@ public class BatteryUsageStatsStore {
      */
     public void setLastBatteryUsageStatsBeforeResetAtomPullTimestamp(long timestamp) {
         Properties props = new Properties();
-        try (FileLock lock = lockSnapshotDirectory()) {
+        lockSnapshotDirectory();
+        try {
             try (InputStream in = mConfigFile.openRead()) {
                 props.load(in);
             } catch (IOException e) {
@@ -209,8 +216,8 @@ public class BatteryUsageStatsStore {
                 mConfigFile.failWrite(out);
                 Slog.e(TAG, "Cannot save config file " + mConfigFile, e);
             }
-        } catch (IOException e) {
-            Slog.e(TAG, "Cannot lock battery usage stats directory", e);
+        } finally {
+            unlockSnapshotDirectory();
         }
     }
 
@@ -220,23 +227,41 @@ public class BatteryUsageStatsStore {
      */
     public long getLastBatteryUsageStatsBeforeResetAtomPullTimestamp() {
         Properties props = new Properties();
-        try (FileLock lock = lockSnapshotDirectory()) {
+        lockSnapshotDirectory();
+        try {
             try (InputStream in = mConfigFile.openRead()) {
                 props.load(in);
             } catch (IOException e) {
                 Slog.e(TAG, "Cannot load config file " + mConfigFile, e);
             }
-        } catch (IOException e) {
-            Slog.e(TAG, "Cannot lock battery usage stats directory", e);
+        } finally {
+            unlockSnapshotDirectory();
         }
         return Long.parseLong(
                 props.getProperty(BATTERY_USAGE_STATS_BEFORE_RESET_TIMESTAMP_PROPERTY, "0"));
     }
 
-    private FileLock lockSnapshotDirectory() throws IOException {
-        mLockFile.getParentFile().mkdirs();
-        mLockFile.createNewFile();
-        return FileChannel.open(mLockFile.toPath(), StandardOpenOption.WRITE).lock();
+    private void lockSnapshotDirectory() {
+        mFileLock.lock();
+
+        // Lock the directory from access by other JVMs
+        try {
+            mLockFile.getParentFile().mkdirs();
+            mLockFile.createNewFile();
+            mJvmLock = FileChannel.open(mLockFile.toPath(), StandardOpenOption.WRITE).lock();
+        } catch (IOException e) {
+            Log.e(TAG, "Cannot lock snapshot directory", e);
+        }
+    }
+
+    private void unlockSnapshotDirectory() {
+        try {
+            mJvmLock.close();
+        } catch (IOException e) {
+            Log.e(TAG, "Cannot unlock snapshot directory", e);
+        } finally {
+            mFileLock.unlock();
+        }
     }
 
     /**

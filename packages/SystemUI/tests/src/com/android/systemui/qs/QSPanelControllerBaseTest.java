@@ -46,6 +46,7 @@ import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.media.MediaHost;
+import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.plugins.qs.QSTileView;
 import com.android.systemui.qs.customize.QSCustomizerController;
 import com.android.systemui.qs.logging.QSLogger;
@@ -62,6 +63,7 @@ import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.Collections;
+import java.util.List;
 
 @RunWith(AndroidTestingRunner.class)
 @RunWithLooper
@@ -88,6 +90,8 @@ public class QSPanelControllerBaseTest extends SysuiTestCase {
     private DumpManager mDumpManager = new DumpManager();
     @Mock
     QSTileImpl mQSTile;
+    @Mock
+    QSTile mOtherTile;
     @Mock
     QSTileView mQSTileView;
     @Mock
@@ -279,5 +283,18 @@ public class QSPanelControllerBaseTest extends SysuiTestCase {
         // Then the layout changes back
         assertThat(mController.shouldUseHorizontalLayout()).isFalse();
         verify(mHorizontalLayoutListener, times(2)).run();
+    }
+
+    @Test
+    public void testRefreshAllTilesDoesntRefreshListeningTiles() {
+        when(mQSTileHost.getTiles()).thenReturn(List.of(mQSTile, mOtherTile));
+        mController.setTiles();
+
+        when(mQSTile.isListening()).thenReturn(false);
+        when(mOtherTile.isListening()).thenReturn(true);
+
+        mController.refreshAllTiles();
+        verify(mQSTile).refreshState();
+        verify(mOtherTile, never()).refreshState();
     }
 }

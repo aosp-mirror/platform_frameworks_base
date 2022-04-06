@@ -22,6 +22,7 @@ import android.annotation.AnyThread;
 import android.annotation.Nullable;
 import android.annotation.UiThread;
 import android.hardware.input.InputManagerInternal;
+import android.os.IBinder;
 import android.os.Looper;
 import android.util.Slog;
 import android.view.BatchedInputEventReceiver;
@@ -90,7 +91,7 @@ final class HandwritingModeController {
      * InputEventReceiver that batches events according to the current thread's Choreographer.
      */
     @UiThread
-    void initializeHandwritingSpy(int displayId) {
+    void initializeHandwritingSpy(int displayId, IBinder focusedWindowToken) {
         // When resetting, reuse resources if we are reinitializing on the same display.
         reset(displayId == mCurrentDisplayId);
         mCurrentDisplayId = displayId;
@@ -110,8 +111,16 @@ final class HandwritingModeController {
             Slog.e(TAG, "Failed to create input surface");
             return;
         }
-        mHandwritingSurface =
-                new HandwritingEventReceiverSurface(name, displayId, surface, channel);
+
+        mHandwritingSurface = new HandwritingEventReceiverSurface(
+                name, displayId, surface, channel);
+
+        // Configure the handwriting window to receive events over the focused window's bounds.
+        mWindowManagerInternal.replaceInputSurfaceTouchableRegionWithWindowCrop(
+                mHandwritingSurface.getSurface(),
+                mHandwritingSurface.getInputWindowHandle(),
+                focusedWindowToken);
+
         // Use a dup of the input channel so that event processing can be paused by disposing the
         // event receiver without causing a fd hangup.
         mHandwritingEventReceiver = new BatchedInputEventReceiver.SimpleBatchedInputEventReceiver(
@@ -125,6 +134,10 @@ final class HandwritingModeController {
             return OptionalInt.empty();
         }
         return OptionalInt.of(mCurrentRequestId);
+    }
+
+    boolean isStylusGestureOngoing() {
+        return mRecordingGesture;
     }
 
     /**
@@ -143,6 +156,10 @@ final class HandwritingModeController {
         }
         if (requestId != mCurrentRequestId) {
             Slog.e(TAG, "Cannot start handwriting session: Invalid request id: " + requestId);
+            return null;
+        }
+        if (!mRecordingGesture) {
+            Slog.e(TAG, "Cannot start handwriting session: No stylus gesture is being recorded.");
             return null;
         }
         Objects.requireNonNull(mHandwritingEventReceiver,
@@ -231,7 +248,7 @@ final class HandwritingModeController {
             mInkWindowInitRunnable = null;
         }
 
-        if (action == MotionEvent.ACTION_UP) {
+        if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL) {
             mRecordingGesture = false;
             mHandwritingBuffer.clear();
             return;

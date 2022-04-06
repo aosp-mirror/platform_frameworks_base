@@ -1118,6 +1118,11 @@ public final class MediaRouter2 {
     private List<MediaRoute2Info> filterRoutesWithIndividualPreference(
             List<MediaRoute2Info> routes, RouteDiscoveryPreference discoveryPreference) {
         List<MediaRoute2Info> filteredRoutes = new ArrayList<>();
+        if (isSystemRouter()) {
+            // Individual discovery preferences do not apply for the system router.
+            filteredRoutes.addAll(routes);
+            return filteredRoutes;
+        }
         for (MediaRoute2Info route : routes) {
             if (!route.hasAnyFeatures(discoveryPreference.getPreferredFeatures())) {
                 continue;

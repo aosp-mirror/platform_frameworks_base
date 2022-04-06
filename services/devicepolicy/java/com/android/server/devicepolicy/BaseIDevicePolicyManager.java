@@ -15,6 +15,7 @@
  */
 package com.android.server.devicepolicy;
 
+import android.accounts.Account;
 import android.annotation.NonNull;
 import android.annotation.UserIdInt;
 import android.app.admin.DevicePolicyDrawableResource;
@@ -30,6 +31,7 @@ import android.util.Slog;
 
 import com.android.server.SystemService;
 
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -138,6 +140,11 @@ abstract class BaseIDevicePolicyManager extends IDevicePolicyManager.Stub {
         return null;
     }
 
+    public void finalizeWorkProfileProvisioning(
+            UserHandle managedProfileUser, Account migratedAccount) {
+
+    }
+
     public void provisionFullyManagedDevice(
             FullyManagedDeviceProvisioningParams provisioningParams, String callerPackage) {
     }
@@ -171,7 +178,7 @@ abstract class BaseIDevicePolicyManager extends IDevicePolicyManager.Stub {
     public void setDrawables(@NonNull List<DevicePolicyDrawableResource> drawables){}
 
     @Override
-    public void resetDrawables(@NonNull String[] drawableIds){}
+    public void resetDrawables(@NonNull List<String> drawableIds){}
 
     @Override
     public ParcelableResource getDrawable(
@@ -183,10 +190,20 @@ abstract class BaseIDevicePolicyManager extends IDevicePolicyManager.Stub {
     public void setStrings(@NonNull List<DevicePolicyStringResource> strings){}
 
     @Override
-    public void resetStrings(String[] stringIds){}
+    public void resetStrings(@NonNull List<String> stringIds){}
 
     @Override
     public ParcelableResource getString(String stringId) {
         return null;
+    }
+
+    @Override
+    public boolean shouldAllowBypassingDevicePolicyManagementRoleQualification() {
+        return false;
+    }
+
+    @Override
+    public List<UserHandle> getPolicyManagedProfiles(UserHandle userHandle) {
+        return Collections.emptyList();
     }
 }

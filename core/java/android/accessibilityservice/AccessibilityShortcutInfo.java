@@ -169,10 +169,6 @@ public final class AccessibilityShortcutInfo {
             mIntroResId = asAttributes.getResourceId(
                     com.android.internal.R.styleable.AccessibilityShortcutTarget_intro, 0);
             asAttributes.recycle();
-
-            if ((mDescriptionResId == 0 && mHtmlDescriptionRes == 0) || mSummaryResId == 0) {
-                throw new XmlPullParserException("No description or summary in meta-data");
-            }
         } catch (PackageManager.NameNotFoundException e) {
             throw new XmlPullParserException("Unable to create context for: "
                     + mActivityInfo.packageName);

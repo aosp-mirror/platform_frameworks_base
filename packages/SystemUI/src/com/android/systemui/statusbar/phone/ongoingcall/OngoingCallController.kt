@@ -394,6 +394,7 @@ class OngoingCallController @Inject constructor(
         override fun onUidActive(uid: Int) {}
         override fun onUidIdle(uid: Int, disabled: Boolean) {}
         override fun onUidCachedChanged(uid: Int, cached: Boolean) {}
+        override fun onUidProcAdjChanged(uid: Int) {}
     }
 }
 

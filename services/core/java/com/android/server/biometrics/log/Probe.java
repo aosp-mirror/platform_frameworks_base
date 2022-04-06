@@ -27,4 +27,6 @@ public interface Probe {
     void enable();
     /** Stop sampling data. */
     void disable();
+    /** Same as {@link #disable()} and ignores all future calls to this probe. */
+    void destroy();
 }

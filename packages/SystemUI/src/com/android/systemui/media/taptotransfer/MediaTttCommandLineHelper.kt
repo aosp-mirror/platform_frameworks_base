@@ -66,11 +66,14 @@ class MediaTttCommandLineHelper @Inject constructor(
                     as StatusBarManager
             val routeInfo = MediaRoute2Info.Builder("id", args[0])
                     .addFeature("feature")
-                    .setPackageName(TEST_PACKAGE_NAME)
-                    .build()
+            val useAppIcon = !(args.size >= 3 && args[2] == "useAppIcon=false")
+            if (useAppIcon) {
+                routeInfo.setPackageName(TEST_PACKAGE_NAME)
+            }
+
             statusBarManager.updateMediaTapToTransferSenderDisplay(
-                    displayState,
-                    routeInfo,
+                displayState,
+                routeInfo.build(),
                 getUndoExecutor(displayState),
                 getUndoCallback(displayState)
             )
@@ -106,7 +109,8 @@ class MediaTttCommandLineHelper @Inject constructor(
         }
 
         override fun help(pw: PrintWriter) {
-            pw.println("Usage: adb shell cmd statusbar $SENDER_COMMAND <deviceName> <chipState>")
+            pw.println("Usage: adb shell cmd statusbar $SENDER_COMMAND " +
+                    "<deviceName> <chipState> useAppIcon=[true|false]")
         }
     }
 
@@ -128,19 +132,22 @@ class MediaTttCommandLineHelper @Inject constructor(
                     as StatusBarManager
             val routeInfo = MediaRoute2Info.Builder("id", "Test Name")
                 .addFeature("feature")
-                .setPackageName(TEST_PACKAGE_NAME)
-                .build()
+            val useAppIcon = !(args.size >= 2 && args[1] == "useAppIcon=false")
+            if (useAppIcon) {
+                routeInfo.setPackageName(TEST_PACKAGE_NAME)
+            }
 
             statusBarManager.updateMediaTapToTransferReceiverDisplay(
                     displayState,
-                    routeInfo,
+                    routeInfo.build(),
                     null,
                     null
                 )
         }
 
         override fun help(pw: PrintWriter) {
-            pw.println("Usage: adb shell cmd statusbar $RECEIVER_COMMAND <chipState>")
+            pw.println("Usage: adb shell cmd statusbar $RECEIVER_COMMAND " +
+                    "<chipState> useAppIcon=[true|false]")
         }
     }
 }

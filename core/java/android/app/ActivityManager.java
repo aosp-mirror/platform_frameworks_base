@@ -22,6 +22,7 @@ import static android.content.Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_RESIZEABLE;
 
 import android.Manifest;
+import android.annotation.ColorInt;
 import android.annotation.DrawableRes;
 import android.annotation.IntDef;
 import android.annotation.IntRange;
@@ -185,6 +186,11 @@ public class ActivityManager {
      * @hide
      */
     public static final int INSTR_FLAG_ALWAYS_CHECK_SIGNATURE = 1 << 4;
+    /**
+     * Instrument Sdk Sandbox process that corresponds to the target package.
+     * @hide
+     */
+    public static final int INSTR_FLAG_INSTRUMENT_SDK_SANDBOX = 1 << 5;
 
     static final class UidObserver extends IUidObserver.Stub {
         final OnUidImportanceListener mListener;
@@ -215,6 +221,9 @@ public class ActivityManager {
         }
 
         @Override public void onUidCachedChanged(int uid, boolean cached) {
+        }
+
+        @Override public void onUidProcAdjChanged(int uid) {
         }
     }
 
@@ -819,6 +828,9 @@ public class ActivityManager {
     /** @hide Flag for registerUidObserver: report uid capability has changed. */
     public static final int UID_OBSERVER_CAPABILITY = 1<<5;
 
+    /** @hide Flag for registerUidObserver: report pid oom adj has changed. */
+    public static final int UID_OBSERVER_PROC_OOM_ADJ = 1 << 6;
+
     /** @hide Mode for {@link IActivityManager#isAppStartModeDisabled}: normal free-to-run operation. */
     public static final int APP_START_MODE_NORMAL = 0;
 
@@ -1264,6 +1276,104 @@ public class ActivityManager {
         private int mMinWidth;
         private int mMinHeight;
 
+        /**
+         * Provides a convenient way to set the fields of a {@link TaskDescription} when creating a
+         * new instance.
+         */
+        public static final class Builder {
+            /**
+             * Default values for the TaskDescription
+             */
+            @Nullable
+            private String mLabel = null;
+            @DrawableRes
+            private int mIconRes = Resources.ID_NULL;
+            private int mPrimaryColor = 0;
+            private int mBackgroundColor = 0;
+            private int mStatusBarColor = 0;
+            private int mNavigationBarColor = 0;
+
+            /**
+             * Set the label to use in the TaskDescription.
+             * @param label A label and description of the current state of this activity.
+             * @return The same instance of the builder.
+             */
+            @NonNull
+            public Builder setLabel(@Nullable String label) {
+                this.mLabel = label;
+                return this;
+            }
+
+            /**
+             * Set the drawable resource of the icon to use in the TaskDescription.
+             * @param iconRes A drawable resource of an icon that represents the current state of
+             *                this activity.
+             * @return The same instance of the builder.
+             */
+            @NonNull
+            public Builder setIcon(@DrawableRes int iconRes) {
+                this.mIconRes = iconRes;
+                return this;
+            }
+
+            /**
+             * Set the primary color to use in the TaskDescription.
+             * @param color A color to override the theme's primary color. The color must be opaque.
+             * @return The same instance of the builder.
+             */
+            @NonNull
+            public Builder setPrimaryColor(@ColorInt int color) {
+                this.mPrimaryColor = color;
+                return this;
+            }
+
+            /**
+             * Set the background color to use in the TaskDescription.
+             * @param color A color to override the theme's background color. The color must be
+             *              opaque.
+             * @return The same instance of the builder.
+             */
+            @NonNull
+            public Builder setBackgroundColor(@ColorInt int color) {
+                this.mBackgroundColor = color;
+                return this;
+            }
+
+            /**
+             * Set the status bar color to use in the TaskDescription.
+             * @param color A color to override the theme's status bar color.
+             * @return The same instance of the builder.
+             */
+            @NonNull
+            public Builder setStatusBarColor(@ColorInt int color) {
+                this.mStatusBarColor = color;
+                return this;
+            }
+
+            /**
+             * Set the navigation bar color to use in the TaskDescription.
+             * @param color A color to override the theme's navigation bar color.
+             * @return The same instance of the builder.
+             */
+            @NonNull
+            public Builder setNavigationBarColor(@ColorInt int color) {
+                this.mNavigationBarColor = color;
+                return this;
+            }
+
+            /**
+             * Build the TaskDescription.
+             * @return the TaskDescription object.
+             */
+            @NonNull
+            public TaskDescription build() {
+                final Icon icon = mIconRes == Resources.ID_NULL ? null :
+                        Icon.createWithResource(ActivityThread.currentPackageName(), mIconRes);
+                return new TaskDescription(mLabel, icon, mPrimaryColor, mBackgroundColor,
+                        mStatusBarColor, mNavigationBarColor, false, false, RESIZE_MODE_RESIZEABLE,
+                        -1, -1, 0);
+            }
+        }
 
         /**
          * Creates the TaskDescription to the specified values.
@@ -1273,7 +1383,10 @@ public class ActivityManager {
          *                activity.
          * @param colorPrimary A color to override the theme's primary color.  This color must be
          *                     opaque.
+         *
+         * @deprecated Use {@link Builder} instead.
          */
+        @Deprecated
         public TaskDescription(String label, @DrawableRes int iconRes, int colorPrimary) {
             this(label, Icon.createWithResource(ActivityThread.currentPackageName(), iconRes),
                     colorPrimary, 0, 0, 0, false, false, RESIZE_MODE_RESIZEABLE, -1, -1, 0);
@@ -1288,7 +1401,10 @@ public class ActivityManager {
          * @param label A label and description of the current state of this activity.
          * @param iconRes A drawable resource of an icon that represents the current state of this
          *                activity.
+         *
+         * @deprecated Use {@link Builder} instead.
          */
+        @Deprecated
         public TaskDescription(String label, @DrawableRes int iconRes) {
             this(label, Icon.createWithResource(ActivityThread.currentPackageName(), iconRes),
                     0, 0, 0, 0, false, false, RESIZE_MODE_RESIZEABLE, -1, -1, 0);
@@ -1298,14 +1414,20 @@ public class ActivityManager {
          * Creates the TaskDescription to the specified values.
          *
          * @param label A label and description of the current state of this activity.
+         *
+         * @deprecated Use {@link Builder} instead.
          */
+        @Deprecated
         public TaskDescription(String label) {
             this(label, null, 0, 0, 0, 0, false, false, RESIZE_MODE_RESIZEABLE, -1, -1, 0);
         }
 
         /**
          * Creates an empty TaskDescription.
+         *
+         * @deprecated Use {@link Builder} instead.
          */
+        @Deprecated
         public TaskDescription() {
             this(null, null, 0, 0, 0, 0, false, false, RESIZE_MODE_RESIZEABLE, -1, -1, 0);
         }
@@ -1317,7 +1439,8 @@ public class ActivityManager {
          * @param icon An icon that represents the current state of this task.
          * @param colorPrimary A color to override the theme's primary color.  This color must be
          *                     opaque.
-         * @deprecated use TaskDescription constructor with icon resource instead
+         *
+         * @deprecated Use {@link Builder} instead.
          */
         @Deprecated
         public TaskDescription(String label, Bitmap icon, int colorPrimary) {
@@ -1333,7 +1456,8 @@ public class ActivityManager {
          *
          * @param label A label and description of the current state of this activity.
          * @param icon An icon that represents the current state of this activity.
-         * @deprecated use TaskDescription constructor with icon resource instead
+         *
+         * @deprecated Use {@link Builder} instead.
          */
         @Deprecated
         public TaskDescription(String label, Bitmap icon) {
@@ -1635,15 +1759,15 @@ public class ActivityManager {
         /**
          * @return The color override on the theme's primary color.
          */
+        @ColorInt
         public int getPrimaryColor() {
             return mColorPrimary;
         }
 
         /**
-         * @return The background color.
-         * @hide
+         * @return The color override on the theme's background color.
          */
-        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
+        @ColorInt
         public int getBackgroundColor() {
             return mColorBackground;
         }
@@ -1657,15 +1781,17 @@ public class ActivityManager {
         }
 
         /**
-         * @hide
+         * @return The color override on the theme's status bar color.
          */
+        @ColorInt
         public int getStatusBarColor() {
             return mStatusBarColor;
         }
 
         /**
-         * @hide
+         * @return The color override on the theme's navigation bar color.
          */
+        @ColorInt
         public int getNavigationBarColor() {
             return mNavigationBarColor;
         }
@@ -4355,23 +4481,6 @@ public class ActivityManager {
     }
 
     /**
-     * Logs out current current foreground user by switching to the system user and stopping the
-     * user being switched from.
-     * @hide
-     */
-    public static void logoutCurrentUser() {
-        int currentUser = ActivityManager.getCurrentUser();
-        if (currentUser != UserHandle.USER_SYSTEM) {
-            try {
-                getService().switchUser(UserHandle.USER_SYSTEM);
-                getService().stopUser(currentUser, /* force= */ false, null);
-            } catch (RemoteException e) {
-                e.rethrowFromSystemServer();
-            }
-        }
-    }
-
-    /**
      * Stops the given {@code userId}.
      *
      * @hide
@@ -4784,6 +4893,11 @@ public class ActivityManager {
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
+    }
+
+    /** @hide */
+    public static boolean isProcStateConsideredInteraction(@ProcessState int procState) {
+        return (procState <= PROCESS_STATE_TOP || procState == PROCESS_STATE_BOUND_TOP);
     }
 
     /** @hide */

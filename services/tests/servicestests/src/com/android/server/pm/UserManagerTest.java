@@ -316,7 +316,8 @@ public final class UserManagerTest {
                 asHandle(currentUser));
         try {
             assertThat(mUserManager.removeUserWhenPossible(user1.getUserHandle(),
-                    /* overrideDevicePolicy= */ false)).isEqualTo(UserManager.REMOVE_RESULT_ERROR);
+                    /* overrideDevicePolicy= */ false))
+                            .isEqualTo(UserManager.REMOVE_RESULT_ERROR_USER_RESTRICTION);
         } finally {
             mUserManager.setUserRestriction(UserManager.DISALLOW_REMOVE_USER, /* value= */ false,
                     asHandle(currentUser));
@@ -353,7 +354,8 @@ public final class UserManagerTest {
     @Test
     public void testRemoveUserWhenPossible_systemUserReturnsError() throws Exception {
         assertThat(mUserManager.removeUserWhenPossible(UserHandle.SYSTEM,
-                /* overrideDevicePolicy= */ false)).isEqualTo(UserManager.REMOVE_RESULT_ERROR);
+                /* overrideDevicePolicy= */ false))
+                        .isEqualTo(UserManager.REMOVE_RESULT_ERROR_SYSTEM_USER);
 
         assertThat(hasUser(UserHandle.USER_SYSTEM)).isTrue();
     }
@@ -363,7 +365,8 @@ public final class UserManagerTest {
     public void testRemoveUserWhenPossible_invalidUserReturnsError() throws Exception {
         assertThat(hasUser(Integer.MAX_VALUE)).isFalse();
         assertThat(mUserManager.removeUserWhenPossible(UserHandle.of(Integer.MAX_VALUE),
-                /* overrideDevicePolicy= */ false)).isEqualTo(UserManager.REMOVE_RESULT_ERROR);
+                /* overrideDevicePolicy= */ false))
+                        .isEqualTo(UserManager.REMOVE_RESULT_ERROR_USER_NOT_FOUND);
     }
 
     @MediumTest

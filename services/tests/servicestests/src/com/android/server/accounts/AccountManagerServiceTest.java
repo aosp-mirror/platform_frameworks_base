@@ -35,6 +35,7 @@ import android.accounts.AccountManagerInternal;
 import android.accounts.CantAddAccountActivity;
 import android.accounts.IAccountManagerResponse;
 import android.app.AppOpsManager;
+import android.app.PropertyInvalidatedCache;
 import android.app.INotificationManager;
 import android.app.admin.DevicePolicyManager;
 import android.app.admin.DevicePolicyManagerInternal;
@@ -131,6 +132,8 @@ public class AccountManagerServiceTest extends AndroidTestCase {
     @Override
     protected void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
+
+        PropertyInvalidatedCache.disableForTestMode();
 
         when(mMockPackageManager.checkSignatures(anyInt(), anyInt()))
                     .thenReturn(PackageManager.SIGNATURE_MATCH);

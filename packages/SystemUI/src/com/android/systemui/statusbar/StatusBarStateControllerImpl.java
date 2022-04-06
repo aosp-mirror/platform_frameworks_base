@@ -174,8 +174,19 @@ public class StatusBarStateControllerImpl implements
         if (state > MAX_STATE || state < MIN_STATE) {
             throw new IllegalArgumentException("Invalid state " + state);
         }
-        if (!force && state == mState) {
+
+        // Unless we're explicitly asked to force the state change, don't apply the new state if
+        // it's identical to both the current and upcoming states, since that should not be
+        // necessary.
+        if (!force && state == mState && state == mUpcomingState) {
             return false;
+        }
+
+        if (state != mUpcomingState) {
+            Log.d(TAG, "setState: requested state " + StatusBarState.toString(state)
+                    + "!= upcomingState: " + StatusBarState.toString(mUpcomingState) + ". "
+                    + "This usually means the status bar state transition was interrupted before "
+                    + "the upcoming state could be applied.");
         }
 
         // Record the to-be mState and mLastState
@@ -194,7 +205,7 @@ public class StatusBarStateControllerImpl implements
             }
             mLastState = mState;
             mState = state;
-            mUpcomingState = state;
+            updateUpcomingState(mState);
             mUiEventLogger.log(StatusBarStateEvent.fromState(mState));
             Trace.instantForTrack(Trace.TRACE_TAG_APP, "UI Events", "StatusBarState " + tag);
             for (RankedListener rl : new ArrayList<>(mListeners)) {
@@ -212,8 +223,18 @@ public class StatusBarStateControllerImpl implements
 
     @Override
     public void setUpcomingState(int nextState) {
-        mUpcomingState = nextState;
-        recordHistoricalState(mUpcomingState /* newState */, mState /* lastState */, true);
+        recordHistoricalState(nextState /* newState */, mState /* lastState */, true);
+        updateUpcomingState(nextState);
+
+    }
+
+    private void updateUpcomingState(int upcomingState) {
+        if (mUpcomingState != upcomingState) {
+            mUpcomingState = upcomingState;
+            for (RankedListener rl : new ArrayList<>(mListeners)) {
+                rl.mListener.onUpcomingStateChanged(mUpcomingState);
+            }
+        }
     }
 
     @Override
@@ -508,7 +529,7 @@ public class StatusBarStateControllerImpl implements
      * Returns String readable state of status bar from {@link StatusBarState}
      */
     public static String describe(int state) {
-        return StatusBarState.toShortString(state);
+        return StatusBarState.toString(state);
     }
 
     @Override

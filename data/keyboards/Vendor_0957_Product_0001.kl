@@ -44,6 +44,8 @@ key 10    9
 key 11    0
 
 # custom keys
+key usage 0x000c019C    PROFILE_SWITCH
+key usage 0x000c01A2    ALL_APPS
 key usage 0x000c01BB    TV_INPUT
 key usage 0x000c022A    BOOKMARK
 key usage 0x000c0096    SETTINGS
@@ -53,6 +55,7 @@ key usage 0x000c0089    TV
 key usage 0x000c009C    CHANNEL_UP
 key usage 0x000c009D    CHANNEL_DOWN
 key usage 0x000c00CD    MEDIA_PLAY_PAUSE
+key usage 0x000c00B2    MEDIA_RECORD
 key usage 0x000c00B4    MEDIA_SKIP_BACKWARD
 key usage 0x000c00B3    MEDIA_SKIP_FORWARD
 key usage 0x000c0226    MEDIA_STOP
@@ -62,6 +65,7 @@ key usage 0x000c0078    BUTTON_4     WAKE #Netflix
 key usage 0x000c0079    BUTTON_6     WAKE #Disney+
 key usage 0x000c007A    BUTTON_7     WAKE #HBOmax
 
+key usage 0x00070037    PERIOD
 key usage 0x000c01BD    INFO
 key usage 0x000c0061    CAPTIONS
 key usage 0x000c0185    TV_TELETEXT

@@ -114,12 +114,13 @@ class AuthRippleControllerTest : SysuiTestCase() {
     }
 
     @Test
-    fun testFingerprintTrigger_Ripple() {
+    fun testFingerprintTrigger_KeyguardVisible_Ripple() {
         // GIVEN fp exists, keyguard is visible, user doesn't need strong auth
         val fpsLocation = PointF(5f, 5f)
         `when`(authController.fingerprintSensorLocation).thenReturn(fpsLocation)
         controller.onViewAttached()
         `when`(keyguardUpdateMonitor.isKeyguardVisible).thenReturn(true)
+        `when`(keyguardUpdateMonitor.isDreaming).thenReturn(false)
         `when`(keyguardUpdateMonitor.userNeedsStrongAuth()).thenReturn(false)
 
         // WHEN fingerprint authenticated
@@ -136,7 +137,30 @@ class AuthRippleControllerTest : SysuiTestCase() {
     }
 
     @Test
-    fun testFingerprintTrigger_KeyguardNotVisible_NoRipple() {
+    fun testFingerprintTrigger_Dreaming_Ripple() {
+        // GIVEN fp exists, keyguard is visible, user doesn't need strong auth
+        val fpsLocation = PointF(5f, 5f)
+        `when`(authController.fingerprintSensorLocation).thenReturn(fpsLocation)
+        controller.onViewAttached()
+        `when`(keyguardUpdateMonitor.isKeyguardVisible).thenReturn(false)
+        `when`(keyguardUpdateMonitor.isDreaming).thenReturn(true)
+        `when`(keyguardUpdateMonitor.userNeedsStrongAuth()).thenReturn(false)
+
+        // WHEN fingerprint authenticated
+        val captor = ArgumentCaptor.forClass(KeyguardUpdateMonitorCallback::class.java)
+        verify(keyguardUpdateMonitor).registerCallback(captor.capture())
+        captor.value.onBiometricAuthenticated(
+                0 /* userId */,
+                BiometricSourceType.FINGERPRINT /* type */,
+                false /* isStrongBiometric */)
+
+        // THEN update sensor location and show ripple
+        verify(rippleView).setFingerprintSensorLocation(fpsLocation, -1f)
+        verify(rippleView).startUnlockedRipple(any())
+    }
+
+    @Test
+    fun testFingerprintTrigger_KeyguardNotVisible_NotDreaming_NoRipple() {
         // GIVEN fp exists & user doesn't need strong auth
         val fpsLocation = PointF(5f, 5f)
         `when`(authController.udfpsSensorLocation).thenReturn(fpsLocation)
@@ -145,6 +169,7 @@ class AuthRippleControllerTest : SysuiTestCase() {
 
         // WHEN keyguard is NOT visible & fingerprint authenticated
         `when`(keyguardUpdateMonitor.isKeyguardVisible).thenReturn(false)
+        `when`(keyguardUpdateMonitor.isDreaming).thenReturn(false)
         val captor = ArgumentCaptor.forClass(KeyguardUpdateMonitorCallback::class.java)
         verify(keyguardUpdateMonitor).registerCallback(captor.capture())
         captor.value.onBiometricAuthenticated(
@@ -274,7 +299,7 @@ class AuthRippleControllerTest : SysuiTestCase() {
         `when`(keyguardUpdateMonitor.isKeyguardVisible).thenReturn(true)
         `when`(biometricUnlockController.isWakeAndUnlock).thenReturn(true)
 
-        controller.showRipple(BiometricSourceType.FINGERPRINT)
+        controller.showUnlockRipple(BiometricSourceType.FINGERPRINT)
         assertTrue("reveal didn't start on keyguardFadingAway",
             controller.startLightRevealScrimOnKeyguardFadingAway)
         `when`(keyguardStateController.isKeyguardFadingAway).thenReturn(true)

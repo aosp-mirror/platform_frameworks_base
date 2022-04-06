@@ -41,7 +41,8 @@ data class ReceiverData(
     val receiver: BroadcastReceiver,
     val filter: IntentFilter,
     val executor: Executor,
-    val user: UserHandle
+    val user: UserHandle,
+    val permission: String? = null
 )
 
 private const val MSG_ADD_RECEIVER = 0
@@ -60,6 +61,8 @@ private const val DEBUG = true
  * Use only for IntentFilters with actions and optionally categories. It does not support,
  * permissions, schemes, data types, data authorities or priority different than 0.
  * Cannot be used for getting sticky broadcasts (either as return of registering or as re-delivery).
+ * Broadcast handling may be asynchronous *without* calling goAsync(), as it's running within sysui
+ * and doesn't need to worry about being killed.
  */
 open class BroadcastDispatcher constructor (
     private val context: Context,
@@ -94,16 +97,18 @@ open class BroadcastDispatcher constructor (
      *
      */
     @Deprecated(message = "Replacing Handler for Executor in SystemUI",
-            replaceWith = ReplaceWith("registerReceiver(receiver, filter, executor, user)"))
+        replaceWith = ReplaceWith("registerReceiver(receiver, filter, executor, user, permission)")
+    )
     @JvmOverloads
     open fun registerReceiverWithHandler(
         receiver: BroadcastReceiver,
         filter: IntentFilter,
         handler: Handler,
         user: UserHandle = context.user,
-        @Context.RegisterReceiverFlags flags: Int = Context.RECEIVER_EXPORTED
+        @Context.RegisterReceiverFlags flags: Int = Context.RECEIVER_EXPORTED,
+        permission: String? = null
     ) {
-        registerReceiver(receiver, filter, HandlerExecutor(handler), user, flags)
+        registerReceiver(receiver, filter, HandlerExecutor(handler), user, flags, permission)
     }
 
     /**
@@ -128,15 +133,17 @@ open class BroadcastDispatcher constructor (
         filter: IntentFilter,
         executor: Executor? = null,
         user: UserHandle? = null,
-        @Context.RegisterReceiverFlags flags: Int = Context.RECEIVER_EXPORTED
+        @Context.RegisterReceiverFlags flags: Int = Context.RECEIVER_EXPORTED,
+        permission: String? = null,
     ) {
         checkFilter(filter)
         val data = ReceiverData(
                 receiver,
                 filter,
                 executor ?: context.mainExecutor,
-                user ?: context.user
-        )
+                user ?: context.user,
+                permission
+            )
         this.handler
                 .obtainMessage(MSG_ADD_RECEIVER, flags, 0, data)
                 .sendToTarget()

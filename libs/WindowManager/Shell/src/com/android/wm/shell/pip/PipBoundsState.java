@@ -55,11 +55,15 @@ public class PipBoundsState {
     public static final int STASH_TYPE_NONE = 0;
     public static final int STASH_TYPE_LEFT = 1;
     public static final int STASH_TYPE_RIGHT = 2;
+    public static final int STASH_TYPE_BOTTOM = 3;
+    public static final int STASH_TYPE_TOP = 4;
 
     @IntDef(prefix = { "STASH_TYPE_" }, value =  {
             STASH_TYPE_NONE,
             STASH_TYPE_LEFT,
-            STASH_TYPE_RIGHT
+            STASH_TYPE_RIGHT,
+            STASH_TYPE_BOTTOM,
+            STASH_TYPE_TOP
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface StashType {}

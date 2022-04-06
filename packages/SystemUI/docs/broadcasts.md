@@ -21,6 +21,7 @@ The dispatcher supports `BroadcastReceiver` dynamic subscriptions in the followi
 * The `IntentFilter` may or may not contain categories.
 * The `IntentFilter` **does not** contain data types, data schemes, data authorities or data paths.
 * The broadcast **is not** gated behind a permission.
+* The broadcast **is not** ordered and doesn't need to set result data.
 
 Additionally, the dispatcher supports the following:
 
@@ -107,3 +108,8 @@ fun unregisterReceiverForUser(BroadcastReceiver, UserHandle)
 ```
 
 Unregistering can be done even if the `BroadcastReceiver` has never been registered with `BroadcastDispatcher`. In that case, it is a No-Op.
+
+### A note on goAsync()
+
+If you're processing a broadcast in a background thread, you shouldn't call `goAsync()` and
+`finish()`. The system will keep sysui alive regardless, so it isn't needed.

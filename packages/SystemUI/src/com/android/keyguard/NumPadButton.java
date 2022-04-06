@@ -19,6 +19,8 @@ import android.content.Context;
 import android.content.res.ColorStateList;
 import android.content.res.Configuration;
 import android.content.res.TypedArray;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.VectorDrawable;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
@@ -37,8 +39,14 @@ public class NumPadButton extends AlphaOptimizedImageButton {
     public NumPadButton(Context context, AttributeSet attrs) {
         super(context, attrs);
 
-        mAnimator = new NumPadAnimator(context, getBackground().mutate(),
-                attrs.getStyleAttribute());
+        Drawable background = getBackground();
+        if (background instanceof GradientDrawable) {
+            mAnimator = new NumPadAnimator(context, background.mutate(),
+                    attrs.getStyleAttribute());
+        } else {
+            mAnimator = null;
+        }
+
     }
 
     @Override

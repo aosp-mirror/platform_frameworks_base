@@ -17,6 +17,7 @@ package com.android.systemui.qs.customize;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.res.Resources;
+import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
@@ -277,7 +278,9 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
         final Context context = parent.getContext();
         LayoutInflater inflater = LayoutInflater.from(context);
         if (viewType == TYPE_HEADER) {
-            return new Holder(inflater.inflate(R.layout.qs_customize_header, parent, false));
+            View v = inflater.inflate(R.layout.qs_customize_header, parent, false);
+            v.setMinimumHeight(calculateHeaderMinHeight(context));
+            return new Holder(v);
         }
         if (viewType == TYPE_DIVIDER) {
             return new Holder(inflater.inflate(R.layout.qs_customize_tile_divider, parent, false));
@@ -835,4 +838,26 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
             super.clearView(recyclerView, viewHolder);
         }
     };
+
+    private static int calculateHeaderMinHeight(Context context) {
+        Resources res = context.getResources();
+        // style used in qs_customize_header.xml for the Toolbar
+        TypedArray toolbarStyle = context.obtainStyledAttributes(
+                R.style.QSCustomizeToolbar, com.android.internal.R.styleable.Toolbar);
+        int buttonStyle = toolbarStyle.getResourceId(
+                com.android.internal.R.styleable.Toolbar_navigationButtonStyle, 0);
+        toolbarStyle.recycle();
+        int buttonMinWidth = 0;
+        if (buttonStyle != 0) {
+            TypedArray t = context.obtainStyledAttributes(buttonStyle, android.R.styleable.View);
+            buttonMinWidth = t.getDimensionPixelSize(android.R.styleable.View_minWidth, 0);
+            t.recycle();
+        }
+        return res.getDimensionPixelSize(R.dimen.qs_panel_padding_top)
+                + res.getDimensionPixelSize(R.dimen.brightness_mirror_height)
+                + res.getDimensionPixelSize(R.dimen.qs_brightness_margin_top)
+                + res.getDimensionPixelSize(R.dimen.qs_brightness_margin_bottom)
+                - buttonMinWidth
+                - res.getDimensionPixelSize(R.dimen.qs_tile_margin_top_bottom);
+    }
 }

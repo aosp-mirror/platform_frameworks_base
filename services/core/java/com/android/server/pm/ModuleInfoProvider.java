@@ -16,6 +16,7 @@
 
 package com.android.server.pm;
 
+import android.annotation.NonNull;
 import android.content.Context;
 import android.content.pm.IPackageManager;
 import android.content.pm.ModuleInfo;
@@ -25,6 +26,7 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Resources;
 import android.content.res.XmlResourceParser;
 import android.os.RemoteException;
+import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.text.TextUtils;
 import android.util.ArrayMap;
@@ -58,7 +60,7 @@ public class ModuleInfoProvider {
     private static final String MODULE_METADATA_KEY = "android.content.pm.MODULE_METADATA";
 
     private final Context mContext;
-    private final IPackageManager mPackageManager;
+    private IPackageManager mPackageManager;
     private final ApexManager mApexManager;
     private final Map<String, ModuleInfo> mModuleInfo;
 
@@ -66,9 +68,8 @@ public class ModuleInfoProvider {
     private volatile boolean mMetadataLoaded;
     private volatile String mPackageName;
 
-    ModuleInfoProvider(Context context, IPackageManager packageManager) {
+    ModuleInfoProvider(Context context) {
         mContext = context;
-        mPackageManager = packageManager;
         mApexManager = ApexManager.getInstance();
         mModuleInfo = new ArrayMap<>();
     }
@@ -77,10 +78,18 @@ public class ModuleInfoProvider {
     public ModuleInfoProvider(
             XmlResourceParser metadata, Resources resources, ApexManager apexManager) {
         mContext = null;
-        mPackageManager = null;
         mApexManager = apexManager;
         mModuleInfo = new ArrayMap<>();
         loadModuleMetadata(metadata, resources);
+    }
+
+    @NonNull
+    private IPackageManager getPackageManager() {
+        if (mPackageManager == null) {
+            mPackageManager = IPackageManager.Stub.asInterface(
+                    ServiceManager.getService("package"));
+        }
+        return mPackageManager;
     }
 
     /** Called by the {@code PackageManager} when it has completed its boot sequence */
@@ -95,7 +104,7 @@ public class ModuleInfoProvider {
         final Resources packageResources;
         final PackageInfo pi;
         try {
-            pi = mPackageManager.getPackageInfo(mPackageName,
+            pi =  getPackageManager().getPackageInfo(mPackageName,
                 PackageManager.GET_META_DATA, UserHandle.USER_SYSTEM);
 
             Context packageContext = mContext.createPackageContext(mPackageName, 0);
@@ -183,7 +192,7 @@ public class ModuleInfoProvider {
 
         List<PackageInfo> allPackages;
         try {
-            allPackages = mPackageManager.getInstalledPackages(
+            allPackages =  getPackageManager().getInstalledPackages(
                     flags | PackageManager.MATCH_APEX, UserHandle.getCallingUserId()).getList();
         } catch (RemoteException e) {
             Slog.w(TAG, "Unable to retrieve all package names", e);

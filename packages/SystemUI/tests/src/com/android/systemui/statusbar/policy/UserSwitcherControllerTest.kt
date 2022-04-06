@@ -41,6 +41,7 @@ import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.animation.DialogLaunchAnimator
 import com.android.systemui.broadcast.BroadcastDispatcher
+import com.android.systemui.broadcast.BroadcastSender
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.plugins.FalsingManager
@@ -83,6 +84,7 @@ class UserSwitcherControllerTest : SysuiTestCase() {
     @Mock private lateinit var userManager: UserManager
     @Mock private lateinit var activityStarter: ActivityStarter
     @Mock private lateinit var broadcastDispatcher: BroadcastDispatcher
+    @Mock private lateinit var broadcastSender: BroadcastSender
     @Mock private lateinit var telephonyListenerManager: TelephonyListenerManager
     @Mock private lateinit var secureSettings: SecureSettings
     @Mock private lateinit var falsingManager: FalsingManager
@@ -95,6 +97,7 @@ class UserSwitcherControllerTest : SysuiTestCase() {
     @Mock private lateinit var dialogLaunchAnimator: DialogLaunchAnimator
     private lateinit var testableLooper: TestableLooper
     private lateinit var bgExecutor: FakeExecutor
+    private lateinit var longRunningExecutor: FakeExecutor
     private lateinit var uiExecutor: FakeExecutor
     private lateinit var uiEventLogger: UiEventLoggerFake
     private lateinit var userSwitcherController: UserSwitcherController
@@ -115,6 +118,7 @@ class UserSwitcherControllerTest : SysuiTestCase() {
         MockitoAnnotations.initMocks(this)
         testableLooper = TestableLooper.get(this)
         bgExecutor = FakeExecutor(FakeSystemClock())
+        longRunningExecutor = FakeExecutor(FakeSystemClock())
         uiExecutor = FakeExecutor(FakeSystemClock())
         uiEventLogger = UiEventLoggerFake()
 
@@ -159,11 +163,13 @@ class UserSwitcherControllerTest : SysuiTestCase() {
                 handler,
                 activityStarter,
                 broadcastDispatcher,
+                broadcastSender,
                 uiEventLogger,
                 falsingManager,
                 telephonyListenerManager,
                 secureSettings,
                 bgExecutor,
+                longRunningExecutor,
                 uiExecutor,
                 interactionJankMonitor,
                 latencyTracker,

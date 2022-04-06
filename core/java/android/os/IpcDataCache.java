@@ -16,12 +16,12 @@
 
 package android.os;
 
-import android.app.PropertyInvalidatedCache;
-import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.StringDef;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
+import android.app.PropertyInvalidatedCache;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -267,6 +267,25 @@ public class IpcDataCache<Query, Result> extends PropertyInvalidatedCache<Query,
     };
 
     /**
+     * The list of cache namespaces.  Each namespace corresponds to an sepolicy domain.  A
+     * namespace is owned by a single process, although a single process can have more
+     * than one namespace (system_server, as an example).
+     * @hide
+     */
+    @StringDef(
+        prefix = { "MODULE_"
+        },
+        value = {
+            MODULE_TEST,
+            MODULE_SYSTEM,
+            MODULE_BLUETOOTH,
+            MODULE_TELEPHONY
+        }
+    )
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface IpcDataCacheModule { }
+
+    /**
      * The module used for unit tests and cts tests.  It is expected that no process in
      * the system has permissions to write properties with this module.
      * @hide
@@ -304,7 +323,8 @@ public class IpcDataCache<Query, Result> extends PropertyInvalidatedCache<Query,
      */
     @SystemApi(client=SystemApi.Client.MODULE_LIBRARIES)
     @TestApi
-    public IpcDataCache(int maxEntries, @NonNull String module, @NonNull String api,
+    public IpcDataCache(int maxEntries, @NonNull @IpcDataCacheModule String module,
+            @NonNull String api,
             @NonNull String cacheName, @NonNull QueryHandler<Query, Result> computer) {
         super(maxEntries, module, api, cacheName, computer);
     }
@@ -358,7 +378,8 @@ public class IpcDataCache<Query, Result> extends PropertyInvalidatedCache<Query,
      */
     @SystemApi(client=SystemApi.Client.MODULE_LIBRARIES)
     @TestApi
-    public static void invalidateCache(@NonNull String module, @NonNull String api) {
+    public static void invalidateCache(@NonNull @IpcDataCacheModule String module,
+            @NonNull String api) {
         PropertyInvalidatedCache.invalidateCache(module, api);
     }
 }

@@ -37,13 +37,11 @@ import android.content.pm.ActivityInfo;
 import android.content.res.ColorStateList;
 import android.content.res.Configuration;
 import android.content.res.Resources;
-import android.content.res.TypedArray;
 import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.PixelFormat;
-import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.hardware.display.DisplayManager;
@@ -53,14 +51,12 @@ import android.os.Handler;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.provider.Settings.Secure;
-import android.util.DisplayMetrics;
-import android.util.DisplayUtils;
 import android.util.Log;
+import android.util.Size;
 import android.view.DisplayCutout;
 import android.view.DisplayCutout.BoundsPosition;
 import android.view.Gravity;
 import android.view.LayoutInflater;
-import android.view.RoundedCorners;
 import android.view.View;
 import android.view.View.OnLayoutChangeListener;
 import android.view.ViewGroup;
@@ -81,6 +77,7 @@ import com.android.systemui.decor.DecorProviderFactory;
 import com.android.systemui.decor.DecorProviderKt;
 import com.android.systemui.decor.OverlayWindow;
 import com.android.systemui.decor.PrivacyDotDecorProviderFactory;
+import com.android.systemui.decor.RoundedCornerResDelegate;
 import com.android.systemui.qs.SettingObserver;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.events.PrivacyDotViewController;
@@ -139,30 +136,22 @@ public class ScreenDecorations extends CoreStartable implements Tunable , Dumpab
     // corners. for now it is only supposed when reading the intrinsic size from the drawables with
     // mIsRoundedCornerMultipleRadius is set
     @VisibleForTesting
-    protected Point mRoundedDefault = new Point(0, 0);
-    @VisibleForTesting
-    protected Point mRoundedDefaultTop = new Point(0, 0);
-    @VisibleForTesting
-    protected Point mRoundedDefaultBottom = new Point(0, 0);
+    protected RoundedCornerResDelegate mRoundedCornerResDelegate;
     @VisibleForTesting
     protected OverlayWindow[] mOverlays = null;
+    @VisibleForTesting
     @Nullable
-    private DisplayCutoutView[] mCutoutViews;
+    DisplayCutoutView[] mCutoutViews;
     @VisibleForTesting
     ViewGroup mScreenDecorHwcWindow;
     @VisibleForTesting
     ScreenDecorHwcLayer mScreenDecorHwcLayer;
-    private float mDensity;
     private WindowManager mWindowManager;
     private int mRotation;
     private SettingObserver mColorInversionSetting;
     private DelayableExecutor mExecutor;
     private Handler mHandler;
     boolean mPendingRotationChange;
-    private boolean mIsRoundedCornerMultipleRadius;
-    private Drawable mRoundedCornerDrawable;
-    private Drawable mRoundedCornerDrawableTop;
-    private Drawable mRoundedCornerDrawableBottom;
     @VisibleForTesting
     String mDisplayUniqueId;
     private int mTintColor = Color.BLACK;
@@ -302,7 +291,8 @@ public class ScreenDecorations extends CoreStartable implements Tunable , Dumpab
     private void startOnScreenDecorationsThread() {
         mRotation = mContext.getDisplay().getRotation();
         mDisplayUniqueId = mContext.getDisplay().getUniqueId();
-        mIsRoundedCornerMultipleRadius = isRoundedCornerMultipleRadius(mContext, mDisplayUniqueId);
+        mRoundedCornerResDelegate = new RoundedCornerResDelegate(mContext.getResources(),
+                mDisplayUniqueId);
         mWindowManager = mContext.getSystemService(WindowManager.class);
         mDisplayManager = mContext.getSystemService(DisplayManager.class);
         mHwcScreenDecorationSupport = mContext.getDisplay().getDisplayDecorationSupport();
@@ -359,8 +349,7 @@ public class ScreenDecorations extends CoreStartable implements Tunable , Dumpab
                 final String newUniqueId = mContext.getDisplay().getUniqueId();
                 if (!Objects.equals(newUniqueId, mDisplayUniqueId)) {
                     mDisplayUniqueId = newUniqueId;
-                    mIsRoundedCornerMultipleRadius =
-                            isRoundedCornerMultipleRadius(mContext, mDisplayUniqueId);
+                    mRoundedCornerResDelegate.reloadAll(newUniqueId);
                     final DisplayDecorationSupport newScreenDecorationSupport =
                             mContext.getDisplay().getDisplayDecorationSupport();
                     // When the value of mSupportHwcScreenDecoration is changed, re-setup the whole
@@ -372,6 +361,16 @@ public class ScreenDecorations extends CoreStartable implements Tunable , Dumpab
                         return;
                     }
                     updateRoundedCornerDrawable();
+                }
+                if (mCutoutViews != null) {
+                    final int size = mCutoutViews.length;
+                    for (int i = 0; i < size; i++) {
+                        final DisplayCutoutView cutoutView = mCutoutViews[i];
+                        if (cutoutView == null) {
+                            continue;
+                        }
+                        cutoutView.onDisplayChanged(displayId);
+                    }
                 }
                 if (mScreenDecorHwcLayer != null) {
                     mScreenDecorHwcLayer.onDisplayChanged(displayId);
@@ -457,9 +456,6 @@ public class ScreenDecorations extends CoreStartable implements Tunable , Dumpab
             if (mIsRegistered) {
                 return;
             }
-            DisplayMetrics metrics = new DisplayMetrics();
-            mContext.getDisplay().getMetrics(metrics);
-            mDensity = metrics.density;
 
             mMainExecutor.execute(() -> mTunerService.addTunable(this, SIZE));
 
@@ -606,8 +602,8 @@ public class ScreenDecorations extends CoreStartable implements Tunable , Dumpab
         mScreenDecorHwcWindow.addView(mScreenDecorHwcLayer, new FrameLayout.LayoutParams(
                 MATCH_PARENT, MATCH_PARENT, Gravity.TOP | Gravity.START));
         mWindowManager.addView(mScreenDecorHwcWindow, getHwcWindowLayoutParams());
-        updateRoundedCornerSize(mRoundedDefault, mRoundedDefaultTop, mRoundedDefaultBottom);
-        updateRoundedCornerImageView();
+        updateHwLayerRoundedCornerSize();
+        updateHwLayerRoundedCornerDrawable();
         mScreenDecorHwcWindow.getViewTreeObserver().addOnPreDrawListener(
                 new ValidatingPreDrawListener(mScreenDecorHwcWindow));
     }
@@ -640,7 +636,9 @@ public class ScreenDecorations extends CoreStartable implements Tunable , Dumpab
         // update rounded corner view rotation
         updateRoundedCornerView(pos, R.id.left, cutout);
         updateRoundedCornerView(pos, R.id.right, cutout);
-        updateRoundedCornerSize(mRoundedDefault, mRoundedDefaultTop, mRoundedDefaultBottom);
+        updateRoundedCornerSize(
+                mRoundedCornerResDelegate.getTopRoundedSize(),
+                mRoundedCornerResDelegate.getBottomRoundedSize());
         updateRoundedCornerImageView();
 
         // update cutout view rotation
@@ -844,7 +842,6 @@ public class ScreenDecorations extends CoreStartable implements Tunable , Dumpab
     public void dump(@NonNull FileDescriptor fd, @NonNull PrintWriter pw, @NonNull String[] args) {
         pw.println("ScreenDecorations state:");
         pw.println("  DEBUG_DISABLE_SCREEN_DECORATIONS:" + DEBUG_DISABLE_SCREEN_DECORATIONS);
-        pw.println("  mIsRoundedCornerMultipleRadius:" + mIsRoundedCornerMultipleRadius);
         pw.println("  mIsPrivacyDotEnabled:" + isPrivacyDotEnabled());
         pw.println("  mPendingRotationChange:" + mPendingRotationChange);
         if (mHwcScreenDecorationSupport != null) {
@@ -862,16 +859,12 @@ public class ScreenDecorations extends CoreStartable implements Tunable , Dumpab
         } else {
             pw.println("  mScreenDecorHwcLayer: null");
         }
-        pw.println("  mRoundedDefault(x,y)=(" + mRoundedDefault.x + "," + mRoundedDefault.y + ")");
-        pw.println("  mRoundedDefaultTop(x,y)=(" + mRoundedDefaultTop.x + "," + mRoundedDefaultTop.y
-                + ")");
-        pw.println("  mRoundedDefaultBottom(x,y)=(" + mRoundedDefaultBottom.x + ","
-                + mRoundedDefaultBottom.y + ")");
         pw.println("  mOverlays(left,top,right,bottom)=("
                 + (mOverlays != null && mOverlays[BOUNDS_POSITION_LEFT] != null) + ","
                 + (mOverlays != null && mOverlays[BOUNDS_POSITION_TOP] != null) + ","
                 + (mOverlays != null && mOverlays[BOUNDS_POSITION_RIGHT] != null) + ","
                 + (mOverlays != null && mOverlays[BOUNDS_POSITION_BOTTOM] != null) + ")");
+        mRoundedCornerResDelegate.dump(fd, pw, args);
     }
 
     private void updateOrientation() {
@@ -912,117 +905,16 @@ public class ScreenDecorations extends CoreStartable implements Tunable , Dumpab
         // upgrading all of the configs to contain (width, height) pairs. Instead assume that a
         // device configured using the single integer config value is okay with drawing the corners
         // as a square
-        final int newRoundedDefault = RoundedCorners.getRoundedCornerRadius(
-                mContext.getResources(), mDisplayUniqueId);
-        final int newRoundedDefaultTop = RoundedCorners.getRoundedCornerTopRadius(
-                mContext.getResources(), mDisplayUniqueId);
-        final int newRoundedDefaultBottom = RoundedCorners.getRoundedCornerBottomRadius(
-                mContext.getResources(), mDisplayUniqueId);
+        final Size oldRoundedDefaultTop = mRoundedCornerResDelegate.getTopRoundedSize();
+        final Size oldRoundedDefaultBottom = mRoundedCornerResDelegate.getBottomRoundedSize();
+        mRoundedCornerResDelegate.reloadAll(mDisplayUniqueId);
+        final Size newRoundedDefaultTop = mRoundedCornerResDelegate.getTopRoundedSize();
+        final Size newRoundedDefaultBottom = mRoundedCornerResDelegate.getBottomRoundedSize();
 
-        final boolean changed = mRoundedDefault.x != newRoundedDefault
-                        || mRoundedDefaultTop.x != newRoundedDefaultTop
-                        || mRoundedDefaultBottom.x != newRoundedDefaultBottom;
-
-        if (changed) {
-            // If config_roundedCornerMultipleRadius set as true, ScreenDecorations respect the
-            // (width, height) size of drawable/rounded.xml instead of rounded_corner_radius
-            if (mIsRoundedCornerMultipleRadius) {
-                mRoundedDefault.set(mRoundedCornerDrawable.getIntrinsicWidth(),
-                        mRoundedCornerDrawable.getIntrinsicHeight());
-                mRoundedDefaultTop.set(mRoundedCornerDrawableTop.getIntrinsicWidth(),
-                        mRoundedCornerDrawableTop.getIntrinsicHeight());
-                mRoundedDefaultBottom.set(mRoundedCornerDrawableBottom.getIntrinsicWidth(),
-                        mRoundedCornerDrawableBottom.getIntrinsicHeight());
-            } else {
-                mRoundedDefault.set(newRoundedDefault, newRoundedDefault);
-                mRoundedDefaultTop.set(newRoundedDefaultTop, newRoundedDefaultTop);
-                mRoundedDefaultBottom.set(newRoundedDefaultBottom, newRoundedDefaultBottom);
-            }
+        if (oldRoundedDefaultTop.getWidth() != newRoundedDefaultTop.getWidth()
+                || oldRoundedDefaultBottom.getWidth() != newRoundedDefaultBottom.getWidth()) {
             onTuningChanged(SIZE, null);
         }
-    }
-
-    /**
-     * Gets whether the rounded corners are multiple radii for current display.
-     *
-     * Loads the default config {@link R.bool#config_roundedCornerMultipleRadius} if
-     * {@link com.android.internal.R.array#config_displayUniqueIdArray} is not set.
-     */
-    private static boolean isRoundedCornerMultipleRadius(Context context, String displayUniqueId) {
-        final Resources res = context.getResources();
-        final int index = DisplayUtils.getDisplayUniqueIdConfigIndex(res, displayUniqueId);
-        final TypedArray array = res.obtainTypedArray(
-                R.array.config_roundedCornerMultipleRadiusArray);
-        boolean isMultipleRadius;
-        if (index >= 0 && index < array.length()) {
-            isMultipleRadius = array.getBoolean(index, false);
-        } else {
-            isMultipleRadius = res.getBoolean(R.bool.config_roundedCornerMultipleRadius);
-        }
-        array.recycle();
-        return isMultipleRadius;
-    }
-
-    /**
-     * Gets the rounded corner drawable for current display.
-     *
-     * Loads the default config {@link R.drawable#rounded} if
-     * {@link com.android.internal.R.array#config_displayUniqueIdArray} is not set.
-     */
-    private static Drawable getRoundedCornerDrawable(Context context, String displayUniqueId) {
-        final Resources res = context.getResources();
-        final int index = DisplayUtils.getDisplayUniqueIdConfigIndex(res, displayUniqueId);
-        final TypedArray array = res.obtainTypedArray(R.array.config_roundedCornerDrawableArray);
-        Drawable drawable;
-        if (index >= 0 && index < array.length()) {
-            drawable = array.getDrawable(index);
-        } else {
-            drawable = context.getDrawable(R.drawable.rounded);
-        }
-        array.recycle();
-        return drawable;
-    }
-
-    /**
-     * Gets the rounded corner top drawable for current display.
-     *
-     * Loads the default config {@link R.drawable#rounded_corner_top} if
-     * {@link com.android.internal.R.array#config_displayUniqueIdArray} is not set.
-     */
-    private static Drawable getRoundedCornerTopDrawable(Context context, String displayUniqueId) {
-        final Resources res = context.getResources();
-        final int index = DisplayUtils.getDisplayUniqueIdConfigIndex(res, displayUniqueId);
-        final TypedArray array = res.obtainTypedArray(R.array.config_roundedCornerTopDrawableArray);
-        Drawable drawable;
-        if (index >= 0 && index < array.length()) {
-            drawable = array.getDrawable(index);
-        } else {
-            drawable = context.getDrawable(R.drawable.rounded_corner_top);
-        }
-        array.recycle();
-        return drawable;
-    }
-
-    /**
-     * Gets the rounded corner bottom drawable for current display.
-     *
-     * Loads the default config {@link R.drawable#rounded_corner_bottom} if
-     * {@link com.android.internal.R.array#config_displayUniqueIdArray} is not set.
-     */
-    private static Drawable getRoundedCornerBottomDrawable(
-            Context context, String displayUniqueId) {
-        final Resources res = context.getResources();
-        final int index = DisplayUtils.getDisplayUniqueIdConfigIndex(res, displayUniqueId);
-        final TypedArray array = res.obtainTypedArray(
-                R.array.config_roundedCornerBottomDrawableArray);
-        Drawable drawable;
-        if (index >= 0 && index < array.length()) {
-            drawable = array.getDrawable(index);
-        } else {
-            drawable = context.getDrawable(R.drawable.rounded_corner_bottom);
-        }
-        array.recycle();
-        return drawable;
     }
 
     private void updateRoundedCornerView(@BoundsPosition int pos, int id,
@@ -1085,10 +977,9 @@ public class ScreenDecorations extends CoreStartable implements Tunable , Dumpab
         }
     }
     private boolean hasRoundedCorners() {
-        return mRoundedDefault.x > 0
-                || mRoundedDefaultBottom.x > 0
-                || mRoundedDefaultTop.x > 0
-                || mIsRoundedCornerMultipleRadius;
+        return mRoundedCornerResDelegate.getBottomRoundedSize().getWidth() > 0
+                || mRoundedCornerResDelegate.getTopRoundedSize().getWidth() > 0
+                || mRoundedCornerResDelegate.isMultipleRadius();
     }
 
     private boolean isDefaultShownOverlayPos(@BoundsPosition int pos,
@@ -1154,33 +1045,37 @@ public class ScreenDecorations extends CoreStartable implements Tunable , Dumpab
         mExecutor.execute(() -> {
             if (mOverlays == null) return;
             if (SIZE.equals(key)) {
-                Point size = mRoundedDefault;
-                Point sizeTop = mRoundedDefaultTop;
-                Point sizeBottom = mRoundedDefaultBottom;
+                boolean hasReloadRoundedCornerRes = false;
                 if (newValue != null) {
                     try {
-                        int s = (int) (Integer.parseInt(newValue) * mDensity);
-                        size = new Point(s, s);
+                        mRoundedCornerResDelegate.updateTuningSizeFactor(
+                                Integer.parseInt(newValue));
+                        hasReloadRoundedCornerRes = true;
                     } catch (Exception e) {
                     }
                 }
-                updateRoundedCornerSize(size, sizeTop, sizeBottom);
+
+                // When onTuningChanged() is not called through updateRoundedCornerRadii(),
+                // we need to reload rounded corner res to prevent incorrect dimen
+                if (!hasReloadRoundedCornerRes) {
+                    mRoundedCornerResDelegate.reloadAll(mDisplayUniqueId);
+                }
+
+                updateRoundedCornerSize(
+                        mRoundedCornerResDelegate.getTopRoundedSize(),
+                        mRoundedCornerResDelegate.getBottomRoundedSize());
             }
         });
     }
 
     private void updateRoundedCornerDrawable() {
-        mRoundedCornerDrawable = getRoundedCornerDrawable(mContext, mDisplayUniqueId);
-        mRoundedCornerDrawableTop = getRoundedCornerTopDrawable(mContext, mDisplayUniqueId);
-        mRoundedCornerDrawableBottom = getRoundedCornerBottomDrawable(mContext, mDisplayUniqueId);
+        mRoundedCornerResDelegate.reloadAll(mDisplayUniqueId);
         updateRoundedCornerImageView();
     }
 
     private void updateRoundedCornerImageView() {
-        final Drawable top = mRoundedCornerDrawableTop != null
-                ? mRoundedCornerDrawableTop : mRoundedCornerDrawable;
-        final Drawable bottom = mRoundedCornerDrawableBottom != null
-                ? mRoundedCornerDrawableBottom : mRoundedCornerDrawable;
+        final Drawable top = mRoundedCornerResDelegate.getTopRoundedDrawable();
+        final Drawable bottom = mRoundedCornerResDelegate.getBottomRoundedDrawable();
 
         if (mScreenDecorHwcLayer != null) {
             mScreenDecorHwcLayer.updateRoundedCornerDrawable(top, bottom);
@@ -1205,6 +1100,20 @@ public class ScreenDecorations extends CoreStartable implements Tunable , Dumpab
         }
     }
 
+    private void updateHwLayerRoundedCornerDrawable() {
+        if (mScreenDecorHwcLayer == null) {
+            return;
+        }
+
+        final Drawable topDrawable = mRoundedCornerResDelegate.getTopRoundedDrawable();
+        final Drawable bottomDrawable = mRoundedCornerResDelegate.getBottomRoundedDrawable();
+
+        if (topDrawable == null || bottomDrawable == null) {
+            return;
+        }
+        mScreenDecorHwcLayer.updateRoundedCornerDrawable(topDrawable, bottomDrawable);
+    }
+
     @VisibleForTesting
     boolean isTopRoundedCorner(@BoundsPosition int pos, int id) {
         switch (pos) {
@@ -1224,19 +1133,21 @@ public class ScreenDecorations extends CoreStartable implements Tunable , Dumpab
         }
     }
 
-    private void updateRoundedCornerSize(
-            Point sizeDefault,
-            Point sizeTop,
-            Point sizeBottom) {
-        if (sizeTop.x == 0) {
-            sizeTop = sizeDefault;
-        }
-        if (sizeBottom.x == 0) {
-            sizeBottom = sizeDefault;
+    private void updateHwLayerRoundedCornerSize() {
+        if (mScreenDecorHwcLayer == null) {
+            return;
         }
 
+        final int topWidth = mRoundedCornerResDelegate.getTopRoundedSize().getWidth();
+        final int bottomWidth = mRoundedCornerResDelegate.getBottomRoundedSize().getWidth();
+
+        mScreenDecorHwcLayer.updateRoundedCornerSize(topWidth, bottomWidth);
+    }
+
+    private void updateRoundedCornerSize(Size sizeTop, Size sizeBottom) {
+
         if (mScreenDecorHwcLayer != null) {
-            mScreenDecorHwcLayer.updateRoundedCornerSize(sizeTop.x, sizeBottom.x);
+            mScreenDecorHwcLayer.updateRoundedCornerSize(sizeTop.getWidth(), sizeBottom.getWidth());
             return;
         }
 
@@ -1256,10 +1167,10 @@ public class ScreenDecorations extends CoreStartable implements Tunable , Dumpab
     }
 
     @VisibleForTesting
-    protected void setSize(View view, Point pixelSize) {
+    protected void setSize(View view, Size pixelSize) {
         LayoutParams params = view.getLayoutParams();
-        params.width = pixelSize.x;
-        params.height = pixelSize.y;
+        params.width = pixelSize.getWidth();
+        params.height = pixelSize.getHeight();
         view.setLayoutParams(params);
     }
 

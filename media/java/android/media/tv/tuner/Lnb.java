@@ -167,10 +167,10 @@ public class Lnb implements AutoCloseable {
 
     private Lnb() {}
 
-    void setCallbackAndOwner(Executor executor, @Nullable LnbCallback callback, Tuner tuner) {
+    void setCallbackAndOwner(Tuner tuner, Executor executor, @Nullable LnbCallback callback) {
         synchronized (mCallbackLock) {
             if (callback != null && executor != null) {
-                addCallback(callback, executor);
+                addCallback(executor, callback);
             }
         }
         setOwner(tuner);
@@ -179,12 +179,12 @@ public class Lnb implements AutoCloseable {
     /**
      * Adds LnbCallback
      *
-     * @param callback the callback to receive notifications from LNB.
      * @param executor the executor on which callback will be invoked. Cannot be null.
+     * @param callback the callback to receive notifications from LNB.
      */
-    public void addCallback(@NonNull  LnbCallback callback, @NonNull Executor executor) {
-        Objects.requireNonNull(callback, "callback must not be null");
+    public void addCallback(@NonNull Executor executor, @NonNull LnbCallback callback) {
         Objects.requireNonNull(executor, "executor must not be null");
+        Objects.requireNonNull(callback, "callback must not be null");
         synchronized (mCallbackLock) {
             mCallbackMap.put(callback, executor);
         }

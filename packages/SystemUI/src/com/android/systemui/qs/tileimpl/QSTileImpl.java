@@ -331,6 +331,11 @@ public abstract class QSTileImpl<TState extends State> implements QSTile, Lifecy
         refreshState(null);
     }
 
+    @Override
+    public final boolean isListening() {
+        return getLifecycle().getCurrentState().isAtLeast(RESUMED);
+    }
+
     protected final void refreshState(@Nullable Object arg) {
         mHandler.obtainMessage(H.REFRESH_STATE, arg).sendToTarget();
     }
@@ -416,7 +421,7 @@ public abstract class QSTileImpl<TState extends State> implements QSTile, Lifecy
     @Nullable
     public abstract Intent getLongClickIntent();
 
-    protected void handleRefreshState(@Nullable Object arg) {
+    protected final void handleRefreshState(@Nullable Object arg) {
         handleUpdateState(mTmpState, arg);
         boolean changed = mTmpState.copyTo(mState);
         if (mReadyState == READY_STATE_READYING) {

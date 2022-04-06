@@ -70,7 +70,8 @@ public class MmsManager {
             }
 
             iMms.sendMessage(subId, ActivityThread.currentPackageName(), contentUri,
-                    locationUrl, configOverrides, sentIntent, messageId);
+                    locationUrl, configOverrides, sentIntent, messageId,
+                    mContext.getAttributionTag());
         } catch (RemoteException e) {
             // Ignore it
         }
@@ -102,7 +103,7 @@ public class MmsManager {
             }
             iMms.downloadMessage(subId, ActivityThread.currentPackageName(),
                     locationUrl, contentUri, configOverrides, downloadedIntent,
-                    messageId);
+                    messageId, mContext.getAttributionTag());
         } catch (RemoteException e) {
             // Ignore it
         }

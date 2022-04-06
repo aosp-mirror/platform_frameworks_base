@@ -41,25 +41,26 @@ import static android.app.admin.DevicePolicyResources.Strings.SystemUi.QS_MSG_PE
 import static android.app.admin.DevicePolicyResources.Strings.SystemUi.QS_MSG_WORK_PROFILE_MONITORING;
 import static android.app.admin.DevicePolicyResources.Strings.SystemUi.QS_MSG_WORK_PROFILE_NAMED_VPN;
 import static android.app.admin.DevicePolicyResources.Strings.SystemUi.QS_MSG_WORK_PROFILE_NETWORK;
-import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
-import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 
 import static com.android.systemui.qs.dagger.QSFragmentModule.QS_SECURITY_FOOTER_VIEW;
 
 import android.app.AlertDialog;
+import android.app.Dialog;
 import android.app.admin.DeviceAdminInfo;
 import android.app.admin.DevicePolicyEventLogger;
 import android.app.admin.DevicePolicyManager;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.UserInfo;
-import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
 import android.text.SpannableStringBuilder;
@@ -69,7 +70,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -81,15 +81,15 @@ import com.android.internal.util.FrameworkStatsLog;
 import com.android.systemui.FontSizeUtils;
 import com.android.systemui.R;
 import com.android.systemui.animation.DialogLaunchAnimator;
+import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
-import com.android.systemui.flags.FeatureFlags;
-import com.android.systemui.flags.Flags;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.qs.dagger.QSScope;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.phone.SystemUIDialog;
 import com.android.systemui.statusbar.policy.SecurityController;
+import com.android.systemui.util.ViewController;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -97,13 +97,13 @@ import javax.inject.Inject;
 import javax.inject.Named;
 
 @QSScope
-class QSSecurityFooter implements OnClickListener, DialogInterface.OnClickListener,
+class QSSecurityFooter extends ViewController<View>
+        implements OnClickListener, DialogInterface.OnClickListener,
         VisibilityChangedDispatcher {
     protected static final String TAG = "QSSecurityFooter";
     protected static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
     private static final boolean DEBUG_FORCE_VISIBLE = false;
 
-    private final View mRootView;
     private final TextView mFooterText;
     private final ImageView mPrimaryFooterIcon;
     private final Context mContext;
@@ -114,14 +114,12 @@ class QSSecurityFooter implements OnClickListener, DialogInterface.OnClickListen
     private final Handler mMainHandler;
     private final UserTracker mUserTracker;
     private final DialogLaunchAnimator mDialogLaunchAnimator;
+    private final BroadcastDispatcher mBroadcastDispatcher;
 
     private final AtomicBoolean mShouldUseSettingsButton = new AtomicBoolean(false);
 
     private AlertDialog mDialog;
     protected H mHandler;
-
-    // Does it move between footer and header? Remove this once all the flagging is removed
-    private final boolean mNewQsFooter;
 
     private boolean mIsVisible;
     @Nullable
@@ -133,15 +131,24 @@ class QSSecurityFooter implements OnClickListener, DialogInterface.OnClickListen
     @Nullable
     private VisibilityChangedDispatcher.OnVisibilityChangedListener mVisibilityChangedListener;
 
+    private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (intent.getAction().equals(
+                    DevicePolicyManager.ACTION_SHOW_DEVICE_MONITORING_DIALOG)) {
+                showDeviceMonitoringDialog();
+            }
+        }
+    };
+
     @Inject
     QSSecurityFooter(@Named(QS_SECURITY_FOOTER_VIEW) View rootView,
             UserTracker userTracker, @Main Handler mainHandler, ActivityStarter activityStarter,
             SecurityController securityController, DialogLaunchAnimator dialogLaunchAnimator,
-            @Background Looper bgLooper, FeatureFlags featureFlags) {
-        mRootView = rootView;
-        mRootView.setOnClickListener(this);
-        mFooterText = mRootView.findViewById(R.id.footer_text);
-        mPrimaryFooterIcon = mRootView.findViewById(R.id.primary_footer_icon);
+            @Background Looper bgLooper, BroadcastDispatcher broadcastDispatcher) {
+        super(rootView);
+        mFooterText = mView.findViewById(R.id.footer_text);
+        mPrimaryFooterIcon = mView.findViewById(R.id.primary_footer_icon);
         mFooterIconId = R.drawable.ic_info_outline;
         mContext = rootView.getContext();
         mDpm = rootView.getContext().getSystemService(DevicePolicyManager.class);
@@ -151,7 +158,22 @@ class QSSecurityFooter implements OnClickListener, DialogInterface.OnClickListen
         mHandler = new H(bgLooper);
         mUserTracker = userTracker;
         mDialogLaunchAnimator = dialogLaunchAnimator;
-        mNewQsFooter = featureFlags.isEnabled(Flags.NEW_FOOTER);
+        mBroadcastDispatcher = broadcastDispatcher;
+    }
+
+    @Override
+    protected void onViewAttached() {
+        // Use background handler, as it's the same thread that handleClick is called on.
+        mBroadcastDispatcher.registerReceiverWithHandler(mReceiver,
+                new IntentFilter(DevicePolicyManager.ACTION_SHOW_DEVICE_MONITORING_DIALOG),
+                mHandler, UserHandle.ALL);
+        mView.setOnClickListener(this);
+    }
+
+    @Override
+    protected void onViewDetached() {
+        mBroadcastDispatcher.unregisterReceiver(mReceiver);
+        mView.setOnClickListener(null);
     }
 
     public void setListening(boolean listening) {
@@ -173,29 +195,17 @@ class QSSecurityFooter implements OnClickListener, DialogInterface.OnClickListen
         FontSizeUtils.updateFontSize(mFooterText, R.dimen.qs_tile_text_size);
         Resources r = mContext.getResources();
 
-        if (!mNewQsFooter) {
-            mFooterText.setMaxLines(r.getInteger(R.integer.qs_security_footer_maxLines));
-
-            int bottomMargin = r.getDimensionPixelSize(R.dimen.qs_footers_margin_bottom);
-            ViewGroup.MarginLayoutParams lp =
-                    (ViewGroup.MarginLayoutParams) mRootView.getLayoutParams();
-            lp.bottomMargin = bottomMargin;
-            lp.width = r.getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT
-                    ? MATCH_PARENT : WRAP_CONTENT;
-            mRootView.setLayoutParams(lp);
-        }
-
         int padding = r.getDimensionPixelSize(R.dimen.qs_footer_padding);
-        mRootView.setPaddingRelative(padding, padding, padding, padding);
-        mRootView.setBackground(mContext.getDrawable(R.drawable.qs_security_footer_background));
+        mView.setPaddingRelative(padding, 0, padding, 0);
+        mView.setBackground(mContext.getDrawable(R.drawable.qs_security_footer_background));
     }
 
     public View getView() {
-        return mRootView;
+        return mView;
     }
 
     public boolean hasFooter() {
-        return mRootView.getVisibility() != View.GONE;
+        return mView.getVisibility() != View.GONE;
     }
 
     @Override
@@ -252,11 +262,11 @@ class QSSecurityFooter implements OnClickListener, DialogInterface.OnClickListen
         // b) a specific work policy set but the work profile is turned off.
         if (mIsVisible && isProfileOwnerOfOrganizationOwnedDevice
                 && (!hasDisclosableWorkProfilePolicy || !isWorkProfileOn)) {
-            mRootView.setClickable(false);
-            mRootView.findViewById(R.id.footer_icon).setVisibility(View.GONE);
+            mView.setClickable(false);
+            mView.findViewById(R.id.footer_icon).setVisibility(View.GONE);
         } else {
-            mRootView.setClickable(true);
-            mRootView.findViewById(R.id.footer_icon).setVisibility(View.VISIBLE);
+            mView.setClickable(true);
+            mView.findViewById(R.id.footer_icon).setVisibility(View.VISIBLE);
         }
         // Update the string
         mFooterTextContent = getFooterText(isDeviceManaged, hasWorkProfile,
@@ -325,12 +335,12 @@ class QSSecurityFooter implements OnClickListener, DialogInterface.OnClickListen
 
     private String getManagedDeviceMonitoringText(CharSequence organizationName) {
         if (organizationName == null) {
-            return mDpm.getString(
+            return mDpm.getResources().getString(
                     QS_MSG_MANAGEMENT_MONITORING,
                     () -> mContext.getString(
                             R.string.quick_settings_disclosure_management_monitoring));
         }
-        return mDpm.getString(
+        return mDpm.getResources().getString(
                 QS_MSG_NAMED_MANAGEMENT_MONITORING,
                 () -> mContext.getString(
                         R.string.quick_settings_disclosure_named_management_monitoring,
@@ -342,12 +352,12 @@ class QSSecurityFooter implements OnClickListener, DialogInterface.OnClickListen
             String vpnName, String vpnNameWorkProfile, CharSequence organizationName) {
         if (vpnName != null && vpnNameWorkProfile != null) {
             if (organizationName == null) {
-                return mDpm.getString(
+                return mDpm.getResources().getString(
                         QS_MSG_MANAGEMENT_MULTIPLE_VPNS,
                         () -> mContext.getString(
                                 R.string.quick_settings_disclosure_management_vpns));
             }
-            return mDpm.getString(
+            return mDpm.getResources().getString(
                     QS_MSG_NAMED_MANAGEMENT_MULTIPLE_VPNS,
                     () -> mContext.getString(
                             R.string.quick_settings_disclosure_named_management_vpns,
@@ -356,14 +366,14 @@ class QSSecurityFooter implements OnClickListener, DialogInterface.OnClickListen
         }
         String name = vpnName != null ? vpnName : vpnNameWorkProfile;
         if (organizationName == null) {
-            return mDpm.getString(
+            return mDpm.getResources().getString(
                     QS_MSG_MANAGEMENT_NAMED_VPN,
                     () -> mContext.getString(
                             R.string.quick_settings_disclosure_management_named_vpn,
                             name),
                     name);
         }
-        return mDpm.getString(
+        return mDpm.getResources().getString(
                 QS_MSG_NAMED_MANAGEMENT_NAMED_VPN,
                 () -> mContext.getString(
                         R.string.quick_settings_disclosure_named_management_named_vpn,
@@ -375,7 +385,7 @@ class QSSecurityFooter implements OnClickListener, DialogInterface.OnClickListen
 
     private String getMangedDeviceGeneralText(CharSequence organizationName) {
         if (organizationName == null) {
-            return mDpm.getString(
+            return mDpm.getResources().getString(
                     QS_MSG_MANAGEMENT,
                     () -> mContext.getString(
                             R.string.quick_settings_disclosure_management));
@@ -385,7 +395,7 @@ class QSSecurityFooter implements OnClickListener, DialogInterface.OnClickListen
                     R.string.quick_settings_financed_disclosure_named_management,
                     organizationName);
         } else {
-            return mDpm.getString(
+            return mDpm.getResources().getString(
                     QS_MSG_NAMED_MANAGEMENT,
                     () -> mContext.getString(
                             R.string.quick_settings_disclosure_named_management,
@@ -419,12 +429,12 @@ class QSSecurityFooter implements OnClickListener, DialogInterface.OnClickListen
             CharSequence workProfileOrganizationName, boolean isWorkProfileOn) {
         if (hasCACertsInWorkProfile && isWorkProfileOn) {
             if (workProfileOrganizationName == null) {
-                return mDpm.getString(
+                return mDpm.getResources().getString(
                         QS_MSG_WORK_PROFILE_MONITORING,
                         () -> mContext.getString(
                                 R.string.quick_settings_disclosure_managed_profile_monitoring));
             }
-            return mDpm.getString(
+            return mDpm.getResources().getString(
                     QS_MSG_NAMED_WORK_PROFILE_MONITORING,
                     () -> mContext.getString(
                             R.string.quick_settings_disclosure_named_managed_profile_monitoring,
@@ -443,7 +453,7 @@ class QSSecurityFooter implements OnClickListener, DialogInterface.OnClickListen
             return mContext.getString(R.string.quick_settings_disclosure_vpns);
         }
         if (vpnNameWorkProfile != null && isWorkProfileOn) {
-            return mDpm.getString(
+            return mDpm.getResources().getString(
                     QS_MSG_WORK_PROFILE_NAMED_VPN,
                     () -> mContext.getString(
                             R.string.quick_settings_disclosure_managed_profile_named_vpn,
@@ -452,7 +462,7 @@ class QSSecurityFooter implements OnClickListener, DialogInterface.OnClickListen
         }
         if (vpnName != null) {
             if (hasWorkProfile) {
-                return mDpm.getString(
+                return mDpm.getResources().getString(
                         QS_MSG_PERSONAL_PROFILE_NAMED_VPN,
                         () -> mContext.getString(
                                 R.string.quick_settings_disclosure_personal_profile_named_vpn,
@@ -466,7 +476,7 @@ class QSSecurityFooter implements OnClickListener, DialogInterface.OnClickListen
     }
 
     private String getManagedProfileNetworkActivityText() {
-        return mDpm.getString(
+        return mDpm.getResources().getString(
                 QS_MSG_WORK_PROFILE_NETWORK,
                 () -> mContext.getString(
                         R.string.quick_settings_disclosure_managed_profile_network_activity));
@@ -493,9 +503,17 @@ class QSSecurityFooter implements OnClickListener, DialogInterface.OnClickListen
                     this);
 
             mDialog.setView(view);
-
-            mDialogLaunchAnimator.showFromView(mDialog, mRootView);
+            if (mView.isAggregatedVisible()) {
+                mDialogLaunchAnimator.showFromView(mDialog, mView);
+            } else {
+                mDialog.show();
+            }
         });
+    }
+
+    @VisibleForTesting
+    Dialog getDialog() {
+        return mDialog;
     }
 
     @VisibleForTesting
@@ -634,7 +652,7 @@ class QSSecurityFooter implements OnClickListener, DialogInterface.OnClickListen
 
     @VisibleForTesting
     String getSettingsButton() {
-        return mDpm.getString(
+        return mDpm.getResources().getString(
                 QS_DIALOG_VIEW_POLICIES,
                 () -> mContext.getString(R.string.monitoring_button_view_policies));
     }
@@ -662,7 +680,7 @@ class QSSecurityFooter implements OnClickListener, DialogInterface.OnClickListen
                 return mContext.getString(R.string.monitoring_financed_description_named_management,
                         organizationName, organizationName);
             } else {
-                return mDpm.getString(
+                return mDpm.getResources().getString(
                         QS_DIALOG_NAMED_MANAGEMENT,
                         () -> mContext.getString(
                                 R.string.monitoring_description_named_management,
@@ -670,7 +688,7 @@ class QSSecurityFooter implements OnClickListener, DialogInterface.OnClickListen
                         organizationName);
             }
         }
-        return mDpm.getString(
+        return mDpm.getResources().getString(
                 QS_DIALOG_MANAGEMENT,
                 () -> mContext.getString(R.string.monitoring_description_management));
     }
@@ -680,13 +698,13 @@ class QSSecurityFooter implements OnClickListener, DialogInterface.OnClickListen
             boolean hasCACertsInWorkProfile) {
         if (!(hasCACerts || hasCACertsInWorkProfile)) return null;
         if (isDeviceManaged) {
-            return mDpm.getString(
+            return mDpm.getResources().getString(
                     QS_DIALOG_MANAGEMENT_CA_CERT,
                     () -> mContext.getString(
                             R.string.monitoring_description_management_ca_certificate));
         }
         if (hasCACertsInWorkProfile) {
-            return mDpm.getString(
+            return mDpm.getResources().getString(
                     QS_DIALOG_WORK_PROFILE_CA_CERT,
                     () -> mContext.getString(
                             R.string.monitoring_description_managed_profile_ca_certificate));
@@ -699,12 +717,12 @@ class QSSecurityFooter implements OnClickListener, DialogInterface.OnClickListen
             boolean isNetworkLoggingEnabled) {
         if (!isNetworkLoggingEnabled) return null;
         if (isDeviceManaged) {
-            return mDpm.getString(
+            return mDpm.getResources().getString(
                     QS_DIALOG_MANAGEMENT_NETWORK,
                     () -> mContext.getString(
                             R.string.monitoring_description_management_network_logging));
         } else {
-            return mDpm.getString(
+            return mDpm.getResources().getString(
                     QS_DIALOG_WORK_PROFILE_NETWORK,
                     () -> mContext.getString(
                             R.string.monitoring_description_managed_profile_network_logging));
@@ -718,7 +736,7 @@ class QSSecurityFooter implements OnClickListener, DialogInterface.OnClickListen
         final SpannableStringBuilder message = new SpannableStringBuilder();
         if (isDeviceManaged) {
             if (vpnName != null && vpnNameWorkProfile != null) {
-                String namedVpns = mDpm.getString(
+                String namedVpns = mDpm.getResources().getString(
                         QS_DIALOG_MANAGEMENT_TWO_NAMED_VPN,
                         () -> mContext.getString(
                                 R.string.monitoring_description_two_named_vpns,
@@ -727,7 +745,7 @@ class QSSecurityFooter implements OnClickListener, DialogInterface.OnClickListen
                 message.append(namedVpns);
             } else {
                 String name = vpnName != null ? vpnName : vpnNameWorkProfile;
-                String namedVp = mDpm.getString(
+                String namedVp = mDpm.getResources().getString(
                         QS_DIALOG_MANAGEMENT_NAMED_VPN,
                         () -> mContext.getString(R.string.monitoring_description_named_vpn, name),
                         name);
@@ -735,7 +753,7 @@ class QSSecurityFooter implements OnClickListener, DialogInterface.OnClickListen
             }
         } else {
             if (vpnName != null && vpnNameWorkProfile != null) {
-                String namedVpns = mDpm.getString(
+                String namedVpns = mDpm.getResources().getString(
                         QS_DIALOG_MANAGEMENT_TWO_NAMED_VPN,
                         () -> mContext.getString(
                                 R.string.monitoring_description_two_named_vpns,
@@ -743,7 +761,7 @@ class QSSecurityFooter implements OnClickListener, DialogInterface.OnClickListen
                         vpnName, vpnNameWorkProfile);
                 message.append(namedVpns);
             } else if (vpnNameWorkProfile != null) {
-                String namedVpn = mDpm.getString(
+                String namedVpn = mDpm.getResources().getString(
                         QS_DIALOG_WORK_PROFILE_NAMED_VPN,
                         () -> mContext.getString(
                                 R.string.monitoring_description_managed_profile_named_vpn,
@@ -751,7 +769,7 @@ class QSSecurityFooter implements OnClickListener, DialogInterface.OnClickListen
                         vpnNameWorkProfile);
                 message.append(namedVpn);
             } else if (hasWorkProfile) {
-                String namedVpn = mDpm.getString(
+                String namedVpn = mDpm.getResources().getString(
                         QS_DIALOG_PERSONAL_PROFILE_NAMED_VPN,
                         () -> mContext.getString(
                                 R.string.monitoring_description_personal_profile_named_vpn,
@@ -775,7 +793,7 @@ class QSSecurityFooter implements OnClickListener, DialogInterface.OnClickListen
             return mContext.getString(R.string.monitoring_title_financed_device,
                     deviceOwnerOrganization);
         } else {
-            return mDpm.getString(
+            return mDpm.getResources().getString(
                     QS_DIALOG_MANAGEMENT_TITLE,
                     () -> mContext.getString(R.string.monitoring_title_device_owned));
         }
@@ -805,9 +823,9 @@ class QSSecurityFooter implements OnClickListener, DialogInterface.OnClickListen
             if (mFooterTextContent != null) {
                 mFooterText.setText(mFooterTextContent);
             }
-            mRootView.setVisibility(mIsVisible || DEBUG_FORCE_VISIBLE ? View.VISIBLE : View.GONE);
+            mView.setVisibility(mIsVisible || DEBUG_FORCE_VISIBLE ? View.VISIBLE : View.GONE);
             if (mVisibilityChangedListener != null) {
-                mVisibilityChangedListener.onVisibilityChanged(mRootView.getVisibility());
+                mVisibilityChangedListener.onVisibilityChanged(mView.getVisibility());
             }
         }
     };

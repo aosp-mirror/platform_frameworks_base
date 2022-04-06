@@ -31,6 +31,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.nullable;
+import static org.mockito.Mockito.mock;
 
 import android.annotation.Nullable;
 import android.app.ActivityManagerInternal;
@@ -350,7 +351,7 @@ public class ActivityStartInterceptorTest {
         assertEquals(1, mActivityInterceptorCallbacks.size());
         final ActivityInterceptorCallback callback = mActivityInterceptorCallbacks.valueAt(0);
         spyOn(callback);
-        mInterceptor.onActivityLaunched(null, null);
+        mInterceptor.onActivityLaunched(null, mock(ActivityRecord.class));
 
         verify(callback, times(1)).onActivityLaunched(any(), any(), any());
     }

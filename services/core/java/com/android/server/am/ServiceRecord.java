@@ -24,6 +24,7 @@ import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_FOREGROUND_
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.IApplicationThread;
 import android.app.Notification;
@@ -96,6 +97,8 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
     final long createRealTime;  // when this service was created
     final boolean isSdkSandbox; // whether this is a sdk sandbox service
     final int sdkSandboxClientAppUid; // the app uid for which this sdk sandbox service is running
+    final String sdkSandboxClientAppPackage; // the app package for which this sdk sandbox service
+                                             // is running
     final ArrayMap<Intent.FilterComparison, IntentBindRecord> bindings
             = new ArrayMap<Intent.FilterComparison, IntentBindRecord>();
                             // All active bindings to the service.
@@ -138,6 +141,12 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
     long destroyTime;       // time at which destory was initiated.
     int pendingConnectionGroup;        // To be filled in to ProcessRecord once it connects
     int pendingConnectionImportance;   // To be filled in to ProcessRecord once it connects
+
+    /**
+     * The last time (in uptime timebase) a bind request was made with BIND_ALMOST_PERCEPTIBLE for
+     * this service while on TOP.
+     */
+    long lastTopAlmostPerceptibleBindRequestUptimeMs;
 
     // any current binding to this service has BIND_ALLOW_BACKGROUND_ACTIVITY_STARTS flag?
     private boolean mIsAllowedBgActivityStartsByBinding;
@@ -573,13 +582,14 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
             Intent.FilterComparison intent, ServiceInfo sInfo, boolean callerIsFg,
             Runnable restarter) {
         this(ams, name, instanceName, definingPackageName, definingUid, intent, sInfo, callerIsFg,
-                restarter, null, 0);
+                restarter, null, 0, null);
     }
 
     ServiceRecord(ActivityManagerService ams, ComponentName name,
             ComponentName instanceName, String definingPackageName, int definingUid,
             Intent.FilterComparison intent, ServiceInfo sInfo, boolean callerIsFg,
-            Runnable restarter, String sdkSandboxProcessName, int sdkSandboxClientAppUid) {
+            Runnable restarter, String sdkSandboxProcessName, int sdkSandboxClientAppUid,
+            String sdkSandboxClientAppPackage) {
         this.ams = ams;
         this.name = name;
         this.instanceName = instanceName;
@@ -590,8 +600,9 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
         serviceInfo = sInfo;
         appInfo = sInfo.applicationInfo;
         packageName = sInfo.applicationInfo.packageName;
-        isSdkSandbox = sdkSandboxProcessName != null;
+        this.isSdkSandbox = sdkSandboxProcessName != null;
         this.sdkSandboxClientAppUid = sdkSandboxClientAppUid;
+        this.sdkSandboxClientAppPackage = sdkSandboxClientAppPackage;
         if ((sInfo.flags & ServiceInfo.FLAG_ISOLATED_PROCESS) != 0) {
             processName = sInfo.processName + ":" + instanceName.getClassName();
         } else if (sdkSandboxProcessName != null) {
@@ -709,6 +720,7 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
         }
     }
 
+    @NonNull
     ArrayMap<IBinder, ArrayList<ConnectionRecord>> getConnections() {
         return connections;
     }
@@ -1100,7 +1112,7 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
                         foregroundNoti = localForegroundNoti; // save it for amending next time
 
                         signalForegroundServiceNotification(packageName, appInfo.uid,
-                                localForegroundId);
+                                localForegroundId, false /* canceling */);
 
                     } catch (RuntimeException e) {
                         Slog.w(TAG, "Error showing notification for service", e);
@@ -1135,17 +1147,18 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
                 } catch (RuntimeException e) {
                     Slog.w(TAG, "Error canceling notification for service", e);
                 }
-                signalForegroundServiceNotification(packageName, appInfo.uid, -localForegroundId);
+                signalForegroundServiceNotification(packageName, appInfo.uid, localForegroundId,
+                        true /* canceling */);
             }
         });
     }
 
     private void signalForegroundServiceNotification(String packageName, int uid,
-            int foregroundId) {
+            int foregroundId, boolean canceling) {
         synchronized (ams) {
             for (int i = ams.mForegroundServiceStateListeners.size() - 1; i >= 0; i--) {
                 ams.mForegroundServiceStateListeners.get(i).onForegroundServiceNotificationUpdated(
-                        packageName, appInfo.uid, foregroundId);
+                        packageName, appInfo.uid, foregroundId, canceling);
             }
         }
     }

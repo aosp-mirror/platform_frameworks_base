@@ -61,6 +61,7 @@ import android.os.ServiceManager;
 import android.os.UserManager;
 import android.os.Vibrator;
 import android.permission.PermissionManager;
+import android.safetycenter.SafetyCenterManager;
 import android.service.dreams.DreamService;
 import android.service.dreams.IDreamManager;
 import android.telecom.TelecomManager;
@@ -476,4 +477,11 @@ public class FrameworkServicesModule {
     static SmartspaceManager provideSmartspaceManager(Context context) {
         return context.getSystemService(SmartspaceManager.class);
     }
+
+    @Provides
+    @Singleton
+    static SafetyCenterManager provideSafetyCenterManager(Context context) {
+        return context.getSystemService(SafetyCenterManager.class);
+    }
+
 }

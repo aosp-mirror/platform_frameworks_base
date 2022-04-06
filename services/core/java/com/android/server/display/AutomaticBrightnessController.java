@@ -535,11 +535,11 @@ class AutomaticBrightnessController {
         pw.println("  Idle mode active=" + mCurrentBrightnessMapper.isForIdleMode());
 
         pw.println();
-        pw.println("  mActiveMapper=");
-        mInteractiveModeBrightnessMapper.dump(pw);
+        pw.println("  mInteractiveMapper=");
+        mInteractiveModeBrightnessMapper.dump(pw, mHbmController.getNormalBrightnessMax());
         if (mIdleModeBrightnessMapper != null) {
             pw.println("  mIdleMapper=");
-            mIdleModeBrightnessMapper.dump(pw);
+            mIdleModeBrightnessMapper.dump(pw, mHbmController.getNormalBrightnessMax());
         }
 
         pw.println();

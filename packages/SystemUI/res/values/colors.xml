@@ -137,8 +137,11 @@
     <!-- UDFPS colors -->
     <color name="udfps_enroll_icon">#7DA7F1</color>
     <color name="udfps_moving_target_fill">#475670</color>
+    <!-- 50% of udfps_moving_target_fill-->
+    <color name="udfps_moving_target_fill_error">#80475670</color>
     <color name="udfps_enroll_progress">#7DA7F1</color>
-    <color name="udfps_enroll_progress_help">#ffEE675C</color>
+    <color name="udfps_enroll_progress_help">#607DA7F1</color>
+    <color name="udfps_enroll_progress_help_with_talkback">#FFEE675C</color>
 
     <!-- Floating overlay actions -->
     <color name="overlay_button_ripple">#1f000000</color>
@@ -176,10 +179,12 @@
 
     <!-- media output dialog-->
     <color name="media_dialog_background" android:lstar="98">@color/material_dynamic_neutral90</color>
-    <color name="media_dialog_active_item_main_content">@color/material_dynamic_primary10</color>
-    <color name="media_dialog_inactive_item_main_content">@color/material_dynamic_primary40</color>
-    <color name="media_dialog_item_status">@color/material_dynamic_primary10</color>
+    <color name="media_dialog_item_main_content">@color/material_dynamic_primary20</color>
     <color name="media_dialog_item_background">@color/material_dynamic_secondary95</color>
+    <color name="media_dialog_connected_item_background">@color/material_dynamic_primary90</color>
+    <color name="media_dialog_seekbar_progress">@color/material_dynamic_secondary40</color>
+    <color name="media_dialog_button_background">@color/material_dynamic_primary40</color>
+    <color name="media_dialog_solid_button_text">@color/material_dynamic_neutral95</color>
 
     <!-- controls -->
     <color name="control_primary_text">#E6FFFFFF</color>

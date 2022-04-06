@@ -27,6 +27,7 @@ import static android.net.NetworkStats.TAG_NONE;
 import static android.telephony.SubscriptionManager.INVALID_SUBSCRIPTION_ID;
 
 import android.annotation.NonNull;
+import android.annotation.StringDef;
 import android.annotation.SystemApi;
 import android.net.NetworkIdentity;
 import android.net.NetworkStatsCollection;
@@ -47,6 +48,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.net.ProtocolException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -75,6 +78,15 @@ public class NetworkStatsDataMigrationUtils {
      * Prefix of the files which are used to store per uid tagged traffic statistics.
      */
     public static final String PREFIX_UID_TAG = "uid_tag";
+
+    /** @hide */
+    @StringDef(prefix = {"PREFIX_"}, value = {
+        PREFIX_XT,
+        PREFIX_UID,
+        PREFIX_UID_TAG,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface Prefix {}
 
     private static final HashMap<String, String> sPrefixLegacyFileNameMap =
             new HashMap<String, String>() {{
@@ -141,13 +153,13 @@ public class NetworkStatsDataMigrationUtils {
 
     // Get /data/system/netstats_*.bin legacy files. Does not check for existence.
     @NonNull
-    private static File getLegacyBinFileForPrefix(@NonNull String prefix) {
+    private static File getLegacyBinFileForPrefix(@NonNull @Prefix String prefix) {
         return new File(getPlatformSystemDir(), sPrefixLegacyFileNameMap.get(prefix));
     }
 
     // List /data/system/netstats/[xt|uid|uid_tag].<start>-<end> legacy files.
     @NonNull
-    private static ArrayList<File> getPlatformFileListForPrefix(@NonNull String prefix) {
+    private static ArrayList<File> getPlatformFileListForPrefix(@NonNull @Prefix String prefix) {
         final ArrayList<File> list = new ArrayList<>();
         final File platformFiles = new File(getPlatformBaseDir(), "netstats");
         if (platformFiles.exists()) {
@@ -207,7 +219,7 @@ public class NetworkStatsDataMigrationUtils {
      */
     @NonNull
     public static NetworkStatsCollection readPlatformCollection(
-            @NonNull String prefix, long bucketDuration) throws IOException {
+            @NonNull @Prefix String prefix, long bucketDuration) throws IOException {
         final NetworkStatsCollection.Builder builder =
                 new NetworkStatsCollection.Builder(bucketDuration);
 

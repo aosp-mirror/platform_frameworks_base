@@ -89,6 +89,7 @@ public class DozeScreenBrightness extends BroadcastReceiver implements DozeMachi
     private boolean mPaused = false;
     private boolean mScreenOff = false;
     private int mLastSensorValue = -1;
+    private DozeMachine.State mState = DozeMachine.State.UNINITIALIZED;
 
     /**
      * Debug value used for emulating various display brightness buckets:
@@ -135,6 +136,7 @@ public class DozeScreenBrightness extends BroadcastReceiver implements DozeMachi
 
     @Override
     public void transitionTo(DozeMachine.State oldState, DozeMachine.State newState) {
+        mState = newState;
         switch (newState) {
             case INITIALIZED:
                 resetBrightnessToDefault();
@@ -145,6 +147,7 @@ public class DozeScreenBrightness extends BroadcastReceiver implements DozeMachi
                 setLightSensorEnabled(true);
                 break;
             case DOZE:
+            case DOZE_AOD_PAUSED:
                 setLightSensorEnabled(false);
                 resetBrightnessToDefault();
                 break;
@@ -262,8 +265,9 @@ public class DozeScreenBrightness extends BroadcastReceiver implements DozeMachi
      */
     private int clampToDimBrightnessForScreenOff(int brightness) {
         final boolean screenTurningOff =
-                mDozeParameters.shouldClampToDimBrightness()
-                        || mWakefulnessLifecycle.getWakefulness() == WAKEFULNESS_GOING_TO_SLEEP;
+                (mDozeParameters.shouldClampToDimBrightness()
+                        || mWakefulnessLifecycle.getWakefulness() == WAKEFULNESS_GOING_TO_SLEEP)
+                && mState == DozeMachine.State.INITIALIZED;
         if (screenTurningOff
                 && mWakefulnessLifecycle.getLastSleepReason() == GO_TO_SLEEP_REASON_TIMEOUT) {
             return Math.max(

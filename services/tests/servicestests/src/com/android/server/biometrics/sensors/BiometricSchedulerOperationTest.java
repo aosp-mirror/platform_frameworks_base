@@ -72,9 +72,11 @@ public class BiometricSchedulerOperationTest {
     @Mock
     private ClientMonitorCallback mClientCallback;
     @Mock
+    private ClientMonitorCallback mOnStartCallback;
+    @Mock
     private FakeHal mHal;
     @Captor
-    ArgumentCaptor<ClientMonitorCallback> mStartCallback;
+    ArgumentCaptor<ClientMonitorCallback> mStartedCallbackCaptor;
 
     private Handler mHandler;
     private BiometricSchedulerOperation mOperation;
@@ -91,17 +93,17 @@ public class BiometricSchedulerOperationTest {
         when(mClientMonitor.getCookie()).thenReturn(cookie);
         when(mClientMonitor.getFreshDaemon()).thenReturn(mHal);
 
-        assertThat(mOperation.isReadyToStart()).isEqualTo(cookie);
+        assertThat(mOperation.isReadyToStart(mOnStartCallback)).isEqualTo(cookie);
         assertThat(mOperation.isStarted()).isFalse();
         assertThat(mOperation.isCanceling()).isFalse();
         assertThat(mOperation.isFinished()).isFalse();
+        verify(mClientMonitor).waitForCookie(any());
 
-        final boolean started = mOperation.startWithCookie(
-                mock(ClientMonitorCallback.class), cookie);
+        final boolean started = mOperation.startWithCookie(mOnStartCallback, cookie);
 
         assertThat(started).isTrue();
-        verify(mClientMonitor).start(mStartCallback.capture());
-        mStartCallback.getValue().onClientStarted(mClientMonitor);
+        verify(mClientMonitor).start(mStartedCallbackCaptor.capture());
+        mStartedCallbackCaptor.getValue().onClientStarted(mClientMonitor);
         assertThat(mOperation.isStarted()).isTrue();
     }
 
@@ -112,14 +114,15 @@ public class BiometricSchedulerOperationTest {
         when(mClientMonitor.getCookie()).thenReturn(goodCookie);
         when(mClientMonitor.getFreshDaemon()).thenReturn(mHal);
 
-        assertThat(mOperation.isReadyToStart()).isEqualTo(goodCookie);
-        final boolean started = mOperation.startWithCookie(
-                mock(ClientMonitorCallback.class), badCookie);
+        assertThat(mOperation.isReadyToStart(mOnStartCallback)).isEqualTo(goodCookie);
+        final boolean started = mOperation.startWithCookie(mOnStartCallback, badCookie);
 
         assertThat(started).isFalse();
         assertThat(mOperation.isStarted()).isFalse();
         assertThat(mOperation.isCanceling()).isFalse();
         assertThat(mOperation.isFinished()).isFalse();
+        verify(mClientMonitor).waitForCookie(any());
+        verify(mClientMonitor, never()).start(any());
     }
 
     @Test
@@ -127,26 +130,25 @@ public class BiometricSchedulerOperationTest {
         when(mClientMonitor.getCookie()).thenReturn(0);
         when(mClientMonitor.getFreshDaemon()).thenReturn(mHal);
 
-        final ClientMonitorCallback cb = mock(ClientMonitorCallback.class);
-        mOperation.start(cb);
-        verify(mClientMonitor).start(mStartCallback.capture());
-        mStartCallback.getValue().onClientStarted(mClientMonitor);
+        mOperation.start(mOnStartCallback);
+        verify(mClientMonitor).start(mStartedCallbackCaptor.capture());
+        mStartedCallbackCaptor.getValue().onClientStarted(mClientMonitor);
 
         assertThat(mOperation.isStarted()).isTrue();
         assertThat(mOperation.isCanceling()).isFalse();
         assertThat(mOperation.isFinished()).isFalse();
 
         verify(mClientCallback).onClientStarted(eq(mClientMonitor));
-        verify(cb).onClientStarted(eq(mClientMonitor));
+        verify(mOnStartCallback).onClientStarted(eq(mClientMonitor));
         verify(mClientCallback, never()).onClientFinished(any(), anyBoolean());
-        verify(cb, never()).onClientFinished(any(), anyBoolean());
+        verify(mOnStartCallback, never()).onClientFinished(any(), anyBoolean());
 
-        mStartCallback.getValue().onClientFinished(mClientMonitor, true);
+        mStartedCallbackCaptor.getValue().onClientFinished(mClientMonitor, true);
 
         assertThat(mOperation.isFinished()).isTrue();
         assertThat(mOperation.isCanceling()).isFalse();
         verify(mClientMonitor).destroy();
-        verify(cb).onClientFinished(eq(mClientMonitor), eq(true));
+        verify(mOnStartCallback).onClientFinished(eq(mClientMonitor), eq(true));
     }
 
     @Test
@@ -154,8 +156,7 @@ public class BiometricSchedulerOperationTest {
         when(mClientMonitor.getCookie()).thenReturn(0);
         when(mClientMonitor.getFreshDaemon()).thenReturn(null);
 
-        final ClientMonitorCallback cb = mock(ClientMonitorCallback.class);
-        mOperation.start(cb);
+        mOperation.start(mOnStartCallback);
         verify(mClientMonitor, never()).start(any());
 
         assertThat(mOperation.isStarted()).isFalse();
@@ -163,9 +164,9 @@ public class BiometricSchedulerOperationTest {
         assertThat(mOperation.isFinished()).isTrue();
 
         verify(mClientCallback, never()).onClientStarted(eq(mClientMonitor));
-        verify(cb, never()).onClientStarted(eq(mClientMonitor));
+        verify(mOnStartCallback, never()).onClientStarted(eq(mClientMonitor));
         verify(mClientCallback).onClientFinished(eq(mClientMonitor), eq(false));
-        verify(cb).onClientFinished(eq(mClientMonitor), eq(false));
+        verify(mOnStartCallback).onClientFinished(eq(mClientMonitor), eq(false));
     }
 
     @Test
@@ -179,7 +180,7 @@ public class BiometricSchedulerOperationTest {
     public void cannotRestart() {
         when(mClientMonitor.getFreshDaemon()).thenReturn(mHal);
 
-        mOperation.start(mock(ClientMonitorCallback.class));
+        mOperation.start(mOnStartCallback);
 
         assertThrows(IllegalStateException.class,
                 () -> mOperation.start(mock(ClientMonitorCallback.class)));
@@ -202,7 +203,7 @@ public class BiometricSchedulerOperationTest {
     public void cannotAbortRunning() {
         when(mClientMonitor.getFreshDaemon()).thenReturn(mHal);
 
-        mOperation.start(mock(ClientMonitorCallback.class));
+        mOperation.start(mOnStartCallback);
 
         assertThrows(IllegalStateException.class, () -> mOperation.abort());
     }
@@ -211,11 +212,10 @@ public class BiometricSchedulerOperationTest {
     public void cancel() {
         when(mClientMonitor.getFreshDaemon()).thenReturn(mHal);
 
-        final ClientMonitorCallback startCb = mock(ClientMonitorCallback.class);
         final ClientMonitorCallback cancelCb = mock(ClientMonitorCallback.class);
-        mOperation.start(startCb);
-        verify(mClientMonitor).start(mStartCallback.capture());
-        mStartCallback.getValue().onClientStarted(mClientMonitor);
+        mOperation.start(mOnStartCallback);
+        verify(mClientMonitor).start(mStartedCallbackCaptor.capture());
+        mStartedCallbackCaptor.getValue().onClientStarted(mClientMonitor);
         mOperation.cancel(mHandler, cancelCb);
 
         assertThat(mOperation.isCanceling()).isTrue();
@@ -223,7 +223,7 @@ public class BiometricSchedulerOperationTest {
         verify(mClientMonitor, never()).cancelWithoutStarting(any());
         verify(mClientMonitor, never()).destroy();
 
-        mStartCallback.getValue().onClientFinished(mClientMonitor, true);
+        mStartedCallbackCaptor.getValue().onClientFinished(mClientMonitor, true);
 
         assertThat(mOperation.isFinished()).isTrue();
         assertThat(mOperation.isCanceling()).isFalse();
@@ -315,12 +315,10 @@ public class BiometricSchedulerOperationTest {
     private void cancelWatchdog(boolean start) {
         when(mClientMonitor.getFreshDaemon()).thenReturn(mHal);
 
-        final ClientMonitorCallback opStartCallback = mock(ClientMonitorCallback.class);
-        mOperation.start(opStartCallback);
+        mOperation.start(mOnStartCallback);
         if (start) {
-            verify(mClientMonitor).start(mStartCallback.capture());
-            mStartCallback.getValue().onClientStarted(mClientMonitor);
-            verify(opStartCallback).onClientStarted(eq(mClientMonitor));
+            verify(mClientMonitor).start(mStartedCallbackCaptor.capture());
+            mStartedCallbackCaptor.getValue().onClientStarted(mClientMonitor);
         }
         mOperation.cancel(mHandler, mock(ClientMonitorCallback.class));
 
@@ -331,7 +329,7 @@ public class BiometricSchedulerOperationTest {
 
         assertThat(mOperation.isFinished()).isTrue();
         assertThat(mOperation.isCanceling()).isFalse();
-        verify(opStartCallback).onClientFinished(eq(mClientMonitor), eq(false));
+        verify(mOnStartCallback).onClientFinished(eq(mClientMonitor), eq(false));
         verify(mClientMonitor).destroy();
     }
 }

@@ -19,14 +19,20 @@ package com.android.internal.util;
 import static android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_MANAGED;
 import static android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.anyInt;
+import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.pm.UserInfo;
@@ -50,6 +56,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 
 @RunWith(AndroidJUnit4.class)
 @SmallTest
@@ -162,6 +169,16 @@ public class LockPatternUtilsTest {
         long testHandle = 100L;
         mLockPatternUtils.isWeakEscrowTokenValid(testHandle, testToken, testUserId);
         verify(ils).isWeakEscrowTokenValid(eq(testHandle), eq(testToken), eq(testUserId));
+    }
+
+    @Test
+    public void testGetEnabledTrustAgentsNotNull() throws RemoteException {
+        int testUserId = 10;
+        ILockSettings ils = createTestLockSettings();
+        when(ils.getString(anyString(), any(), anyInt())).thenReturn("");
+        List<ComponentName> trustAgents = mLockPatternUtils.getEnabledTrustAgents(testUserId);
+        assertNotNull(trustAgents);
+        assertEquals(0, trustAgents.size());
     }
 
     private ILockSettings createTestLockSettings() {

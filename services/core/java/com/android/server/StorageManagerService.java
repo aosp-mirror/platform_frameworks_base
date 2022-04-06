@@ -38,7 +38,6 @@ import static android.os.ParcelFileDescriptor.MODE_READ_WRITE;
 import static android.os.storage.OnObbStateChangeListener.ERROR_ALREADY_MOUNTED;
 import static android.os.storage.OnObbStateChangeListener.ERROR_COULD_NOT_MOUNT;
 import static android.os.storage.OnObbStateChangeListener.ERROR_COULD_NOT_UNMOUNT;
-import static android.os.storage.OnObbStateChangeListener.ERROR_INTERNAL;
 import static android.os.storage.OnObbStateChangeListener.ERROR_NOT_MOUNTED;
 import static android.os.storage.OnObbStateChangeListener.ERROR_PERMISSION_DENIED;
 import static android.os.storage.OnObbStateChangeListener.MOUNTED;
@@ -75,7 +74,6 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.ProviderInfo;
 import android.content.pm.UserInfo;
-import android.content.res.Configuration;
 import android.content.res.ObbInfo;
 import android.database.ContentObserver;
 import android.net.Uri;
@@ -124,13 +122,13 @@ import android.provider.Downloads;
 import android.provider.MediaStore;
 import android.provider.Settings;
 import android.service.storage.ExternalStorageService;
-import android.sysprop.VoldProperties;
 import android.text.TextUtils;
 import android.text.format.DateUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.AtomicFile;
 import android.util.DataUnit;
+import android.util.EventLog;
 import android.util.Log;
 import android.util.Pair;
 import android.util.Slog;
@@ -339,13 +337,15 @@ class StorageManagerService extends IStorageManager.Stub
 
     @Nullable public static String sMediaStoreAuthorityProcessName;
 
-    // Run period in hour for smart idle maintenance
-    static final int SMART_IDLE_MAINT_PERIOD = 1;
+    // Smart idle maintenance running period in minute
+    static volatile int sSmartIdleMaintPeriod = 60;
 
     private final AtomicFile mSettingsFile;
-    private final AtomicFile mHourlyWriteFile;
+    private final AtomicFile mWriteRecordFile;
 
-    private static final int MAX_HOURLY_WRITE_RECORDS = 72;
+    // 72 hours (3 days)
+    private static final int MAX_PERIOD_WRITE_RECORD = 72 * 60;
+    private volatile int mMaxWriteRecords;
 
     /**
      * Default config values for smart idle maintenance
@@ -353,6 +353,10 @@ class StorageManagerService extends IStorageManager.Stub
      */
     // Decide whether smart idle maintenance is enabled or not
     private static final boolean DEFAULT_SMART_IDLE_MAINT_ENABLED = false;
+    // Run period in minute for smart idle maintenance
+    private static final int DEFAULT_SMART_IDLE_MAINT_PERIOD = 60;
+    private static final int MIN_SMART_IDLE_MAINT_PERIOD = 10;
+    private static final int MAX_SMART_IDLE_MAINT_PERIOD = 24 * 60;
     // Storage lifetime percentage threshold to decide to turn off the feature
     private static final int DEFAULT_LIFETIME_PERCENT_THRESHOLD = 70;
     // Minimum required number of dirty + free segments to trigger GC
@@ -375,8 +379,8 @@ class StorageManagerService extends IStorageManager.Stub
     private volatile boolean mNeedGC;
 
     private volatile boolean mPassedLifetimeThresh;
-    // Tracking storage hourly write amounts
-    private volatile int[] mStorageHourlyWrites;
+    // Tracking storage write amounts in one period
+    private volatile int[] mStorageWriteRecords;
 
     /**
      * <em>Never</em> hold the lock while performing downcalls into vold, since
@@ -600,12 +604,6 @@ class StorageManagerService extends IStorageManager.Stub
         }
     }
 
-    /** List of crypto types.
-      * These must match CRYPT_TYPE_XXX in cryptfs.h AND their
-      * corresponding commands in CommandListener.cpp */
-    public static final String[] CRYPTO_TYPES
-        = { "password", "default", "pattern", "pin" };
-
     private final Context mContext;
     private final ContentResolver mResolver;
 
@@ -623,18 +621,6 @@ class StorageManagerService extends IStorageManager.Stub
 
     private final Callbacks mCallbacks;
     private final LockPatternUtils mLockPatternUtils;
-
-    /**
-     * The size of the crypto algorithm key in bits for OBB files. Currently
-     * Twofish is used which takes 128-bit keys.
-     */
-    private static final int CRYPTO_ALGORITHM_KEY_SIZE = 128;
-
-    /**
-     * The number of times to run SHA1 in the PBKDF2 function for OBB files.
-     * 1024 is reasonably secure and not too slow.
-     */
-    private static final int PBKDF2_HASH_ROUNDS = 1024;
 
     private static final String ANR_DELAY_MILLIS_DEVICE_CONFIG_KEY =
             "anr_delay_millis";
@@ -950,7 +936,7 @@ class StorageManagerService extends IStorageManager.Stub
 
     private void handleSystemReady() {
         if (prepareSmartIdleMaint()) {
-            SmartStorageMaintIdler.scheduleSmartIdlePass(mContext, SMART_IDLE_MAINT_PERIOD);
+            SmartStorageMaintIdler.scheduleSmartIdlePass(mContext, sSmartIdleMaintPeriod);
         }
 
         // Start scheduling nominally-daily fstrim operations
@@ -1407,39 +1393,6 @@ class StorageManagerService extends IStorageManager.Stub
     private void handleDaemonConnected() {
         initIfBootedAndConnected();
         resetIfBootedAndConnected();
-
-        // On an encrypted device we can't see system properties yet, so pull
-        // the system locale out of the mount service.
-        if ("".equals(VoldProperties.encrypt_progress().orElse(""))) {
-            copyLocaleFromMountService();
-        }
-    }
-
-    private void copyLocaleFromMountService() {
-        String systemLocale;
-        try {
-            systemLocale = getField(StorageManager.SYSTEM_LOCALE_KEY);
-        } catch (RemoteException e) {
-            return;
-        }
-        if (TextUtils.isEmpty(systemLocale)) {
-            return;
-        }
-
-        Slog.d(TAG, "Got locale " + systemLocale + " from mount service");
-        Locale locale = Locale.forLanguageTag(systemLocale);
-        Configuration config = new Configuration();
-        config.setLocale(locale);
-        try {
-            ActivityManager.getService().updatePersistentConfigurationWithAttribution(config,
-                    mContext.getOpPackageName(), mContext.getAttributionTag());
-        } catch (RemoteException e) {
-            Slog.e(TAG, "Error setting system locale from mount service", e);
-        }
-
-        // Temporary workaround for http://b/17945169.
-        Slog.d(TAG, "Setting system properties to " + systemLocale + " from mount service");
-        SystemProperties.set("persist.sys.locale", locale.toLanguageTag());
     }
 
     private final IVoldListener mListener = new IVoldListener.Stub() {
@@ -2004,10 +1957,19 @@ class StorageManagerService extends IStorageManager.Stub
 
         mSettingsFile = new AtomicFile(
                 new File(Environment.getDataSystemDirectory(), "storage.xml"), "storage-settings");
-        mHourlyWriteFile = new AtomicFile(
-                new File(Environment.getDataSystemDirectory(), "storage-hourly-writes"));
+        mWriteRecordFile = new AtomicFile(
+                new File(Environment.getDataSystemDirectory(), "storage-write-records"));
 
-        mStorageHourlyWrites = new int[MAX_HOURLY_WRITE_RECORDS];
+        sSmartIdleMaintPeriod = DeviceConfig.getInt(DeviceConfig.NAMESPACE_STORAGE_NATIVE_BOOT,
+            "smart_idle_maint_period", DEFAULT_SMART_IDLE_MAINT_PERIOD);
+        if (sSmartIdleMaintPeriod < MIN_SMART_IDLE_MAINT_PERIOD) {
+            sSmartIdleMaintPeriod = MIN_SMART_IDLE_MAINT_PERIOD;
+        } else if (sSmartIdleMaintPeriod > MAX_SMART_IDLE_MAINT_PERIOD) {
+            sSmartIdleMaintPeriod = MAX_SMART_IDLE_MAINT_PERIOD;
+        }
+
+        mMaxWriteRecords = MAX_PERIOD_WRITE_RECORD / sSmartIdleMaintPeriod;
+        mStorageWriteRecords = new int[mMaxWriteRecords];
 
         synchronized (mLock) {
             readSettingsLocked();
@@ -2170,15 +2132,19 @@ class StorageManagerService extends IStorageManager.Stub
             }
         }
 
-        PackageMonitor monitor = new PackageMonitor() {
+        if (mPackageMonitorsForUser.get(userId) == null) {
+            PackageMonitor monitor = new PackageMonitor() {
                 @Override
                 public void onPackageRemoved(String packageName, int uid) {
                     updateLegacyStorageApps(packageName, uid, false);
                 }
             };
-        // TODO(b/149391976): Use different handler?
-        monitor.register(mContext, user, true, mHandler);
-        mPackageMonitorsForUser.put(userId, monitor);
+            // TODO(b/149391976): Use different handler?
+            monitor.register(mContext, user, true, mHandler);
+            mPackageMonitorsForUser.put(userId, monitor);
+        } else {
+            Slog.w(TAG, "PackageMonitor is already registered for: " + userId);
+        }
     }
 
     private static long getLastAccessTime(AppOpsManager manager,
@@ -2750,7 +2716,7 @@ class StorageManagerService extends IStorageManager.Stub
             // maintenance to avoid the conflict
             mNeedGC = false;
 
-            loadStorageHourlyWrites();
+            loadStorageWriteRecords();
             try {
                 mVold.refreshLatestWrite();
             } catch (Exception e) {
@@ -2766,13 +2732,17 @@ class StorageManagerService extends IStorageManager.Stub
         return mPassedLifetimeThresh;
     }
 
-    private void loadStorageHourlyWrites() {
+    private void loadStorageWriteRecords() {
         FileInputStream fis = null;
 
         try {
-            fis = mHourlyWriteFile.openRead();
+            fis = mWriteRecordFile.openRead();
             ObjectInputStream ois = new ObjectInputStream(fis);
-            mStorageHourlyWrites = (int[])ois.readObject();
+
+            int periodValue = ois.readInt();
+            if (periodValue == sSmartIdleMaintPeriod) {
+                mStorageWriteRecords = (int[]) ois.readObject();
+            }
         } catch (FileNotFoundException e) {
             // Missing data is okay, probably first boot
         } catch (Exception e) {
@@ -2782,24 +2752,26 @@ class StorageManagerService extends IStorageManager.Stub
         }
     }
 
-    private int getAverageHourlyWrite() {
-        return Arrays.stream(mStorageHourlyWrites).sum() / MAX_HOURLY_WRITE_RECORDS;
+    private int getAverageWriteAmount() {
+        return Arrays.stream(mStorageWriteRecords).sum() / mMaxWriteRecords;
     }
 
-    private void updateStorageHourlyWrites(int latestWrite) {
+    private void updateStorageWriteRecords(int latestWrite) {
         FileOutputStream fos = null;
 
-        System.arraycopy(mStorageHourlyWrites,0, mStorageHourlyWrites, 1,
-                     MAX_HOURLY_WRITE_RECORDS - 1);
-        mStorageHourlyWrites[0] = latestWrite;
+        System.arraycopy(mStorageWriteRecords, 0, mStorageWriteRecords, 1,
+                     mMaxWriteRecords - 1);
+        mStorageWriteRecords[0] = latestWrite;
         try {
-            fos = mHourlyWriteFile.startWrite();
+            fos = mWriteRecordFile.startWrite();
             ObjectOutputStream oos = new ObjectOutputStream(fos);
-            oos.writeObject(mStorageHourlyWrites);
-            mHourlyWriteFile.finishWrite(fos);
+
+            oos.writeInt(sSmartIdleMaintPeriod);
+            oos.writeObject(mStorageWriteRecords);
+            mWriteRecordFile.finishWrite(fos);
         } catch (IOException e) {
             if (fos != null) {
-                mHourlyWriteFile.failWrite(fos);
+                mWriteRecordFile.failWrite(fos);
             }
         }
     }
@@ -2863,22 +2835,23 @@ class StorageManagerService extends IStorageManager.Stub
                     return;
                 }
 
-                int latestHourlyWrite = mVold.getWriteAmount();
-                if (latestHourlyWrite == -1) {
-                    Slog.w(TAG, "Failed to get storage hourly write");
+                int latestWrite = mVold.getWriteAmount();
+                if (latestWrite == -1) {
+                    Slog.w(TAG, "Failed to get storage write record");
                     return;
                 }
 
-                updateStorageHourlyWrites(latestHourlyWrite);
-                int avgHourlyWrite = getAverageHourlyWrite();
+                updateStorageWriteRecords(latestWrite);
+                int avgWriteAmount = getAverageWriteAmount();
 
-                Slog.i(TAG, "Set smart idle maintenance: " + "latest hourly write: " +
-                            latestHourlyWrite + ", average hourly write: " + avgHourlyWrite +
+                Slog.i(TAG, "Set smart idle maintenance: " + "latest write amount: " +
+                            latestWrite + ", average write amount: " + avgWriteAmount +
                             ", min segment threshold: " + mMinSegmentsThreshold +
                             ", dirty reclaim rate: " + mDirtyReclaimRate +
-                            ", segment reclaim weight:" + mSegmentReclaimWeight);
-                mVold.setGCUrgentPace(avgHourlyWrite, mMinSegmentsThreshold, mDirtyReclaimRate,
-                                      mSegmentReclaimWeight);
+                            ", segment reclaim weight: " + mSegmentReclaimWeight +
+                            ", period: " + sSmartIdleMaintPeriod);
+                mVold.setGCUrgentPace(avgWriteAmount, mMinSegmentsThreshold, mDirtyReclaimRate,
+                                      mSegmentReclaimWeight, sSmartIdleMaintPeriod);
             } else {
                 Slog.i(TAG, "Skipping smart idle maintenance - block based checkpoint in progress");
             }
@@ -3164,220 +3137,6 @@ class StorageManagerService extends IStorageManager.Stub
         }
     }
 
-    @Override
-    public int getEncryptionState() {
-        mContext.enforceCallingOrSelfPermission(Manifest.permission.CRYPT_KEEPER,
-                "no permission to access the crypt keeper");
-
-        try {
-            return mVold.fdeComplete();
-        } catch (Exception e) {
-            Slog.wtf(TAG, e);
-            return StorageManager.ENCRYPTION_STATE_ERROR_UNKNOWN;
-        }
-    }
-
-    @Override
-    public int decryptStorage(String password) {
-        mContext.enforceCallingOrSelfPermission(Manifest.permission.CRYPT_KEEPER,
-                "no permission to access the crypt keeper");
-
-        if (TextUtils.isEmpty(password)) {
-            throw new IllegalArgumentException("password cannot be empty");
-        }
-
-        if (DEBUG_EVENTS) {
-            Slog.i(TAG, "decrypting storage...");
-        }
-
-        try {
-            mVold.fdeCheckPassword(password);
-            mHandler.postDelayed(() -> {
-                try {
-                    mVold.fdeRestart();
-                } catch (Exception e) {
-                    Slog.wtf(TAG, e);
-                }
-            }, DateUtils.SECOND_IN_MILLIS);
-            return 0;
-        } catch (ServiceSpecificException e) {
-            Slog.e(TAG, "fdeCheckPassword failed", e);
-            return e.errorCode;
-        } catch (Exception e) {
-            Slog.wtf(TAG, e);
-            return StorageManager.ENCRYPTION_STATE_ERROR_UNKNOWN;
-        }
-    }
-
-    @Override
-    public int encryptStorage(int type, String password) {
-        mContext.enforceCallingOrSelfPermission(Manifest.permission.CRYPT_KEEPER,
-            "no permission to access the crypt keeper");
-
-        if (type == StorageManager.CRYPT_TYPE_DEFAULT) {
-            password = "";
-        } else if (TextUtils.isEmpty(password)) {
-            throw new IllegalArgumentException("password cannot be empty");
-        }
-
-        if (DEBUG_EVENTS) {
-            Slog.i(TAG, "encrypting storage...");
-        }
-
-        try {
-            mVold.fdeEnable(type, password, 0);
-        } catch (Exception e) {
-            Slog.wtf(TAG, e);
-            return -1;
-        }
-
-        return 0;
-    }
-
-    /** Set the password for encrypting the main key.
-     *  @param type One of the CRYPTO_TYPE_XXX consts defined in StorageManager.
-     *  @param password The password to set.
-     */
-    @Override
-    public int changeEncryptionPassword(int type, String password) {
-        mContext.enforceCallingOrSelfPermission(Manifest.permission.CRYPT_KEEPER,
-            "no permission to access the crypt keeper");
-
-        if (StorageManager.isFileEncryptedNativeOnly()) {
-            // Not supported on FBE devices
-            return -1;
-        }
-
-        if (type == StorageManager.CRYPT_TYPE_DEFAULT) {
-            password = "";
-        } else if (TextUtils.isEmpty(password)) {
-            throw new IllegalArgumentException("password cannot be empty");
-        }
-
-        if (DEBUG_EVENTS) {
-            Slog.i(TAG, "changing encryption password...");
-        }
-
-        try {
-            mVold.fdeChangePassword(type, password);
-            return 0;
-        } catch (Exception e) {
-            Slog.wtf(TAG, e);
-            return -1;
-        }
-    }
-
-    /**
-     * Validate a user-supplied password string with cryptfs
-     */
-    @Override
-    public int verifyEncryptionPassword(String password) throws RemoteException {
-        // Only the system process is permitted to validate passwords
-        if (Binder.getCallingUid() != android.os.Process.SYSTEM_UID) {
-            throw new SecurityException("no permission to access the crypt keeper");
-        }
-
-        mContext.enforceCallingOrSelfPermission(Manifest.permission.CRYPT_KEEPER,
-            "no permission to access the crypt keeper");
-
-        if (TextUtils.isEmpty(password)) {
-            throw new IllegalArgumentException("password cannot be empty");
-        }
-
-        if (DEBUG_EVENTS) {
-            Slog.i(TAG, "validating encryption password...");
-        }
-
-        try {
-            mVold.fdeVerifyPassword(password);
-            return 0;
-        } catch (Exception e) {
-            Slog.wtf(TAG, e);
-            return -1;
-        }
-    }
-
-    /**
-     * Get the type of encryption used to encrypt the main key.
-     * @return The type, one of the CRYPT_TYPE_XXX consts from StorageManager.
-     */
-    @Override
-    public int getPasswordType() {
-        mContext.enforceCallingOrSelfPermission(Manifest.permission.CRYPT_KEEPER,
-            "no permission to access the crypt keeper");
-
-        try {
-            return mVold.fdeGetPasswordType();
-        } catch (Exception e) {
-            Slog.wtf(TAG, e);
-            return -1;
-        }
-    }
-
-    /**
-     * Set a field in the crypto header.
-     * @param field field to set
-     * @param contents contents to set in field
-     */
-    @Override
-    public void setField(String field, String contents) throws RemoteException {
-        mContext.enforceCallingOrSelfPermission(Manifest.permission.CRYPT_KEEPER,
-            "no permission to access the crypt keeper");
-
-        if (!StorageManager.isBlockEncrypted()) {
-            // Only supported on FDE devices
-            return;
-        }
-
-        try {
-            mVold.fdeSetField(field, contents);
-            return;
-        } catch (Exception e) {
-            Slog.wtf(TAG, e);
-            return;
-        }
-    }
-
-    /**
-     * Gets a field from the crypto header.
-     * @param field field to get
-     * @return contents of field
-     */
-    @Override
-    public String getField(String field) throws RemoteException {
-        mContext.enforceCallingOrSelfPermission(Manifest.permission.CRYPT_KEEPER,
-            "no permission to access the crypt keeper");
-
-        if (!StorageManager.isBlockEncrypted()) {
-            // Only supported on FDE devices
-            return null;
-        }
-
-        try {
-            return mVold.fdeGetField(field);
-        } catch (Exception e) {
-            Slog.wtf(TAG, e);
-            return null;
-        }
-    }
-
-    /**
-     * Is userdata convertible to file based encryption?
-     * @return non zero for convertible
-     */
-    @Override
-    public boolean isConvertibleToFBE() throws RemoteException {
-        mContext.enforceCallingOrSelfPermission(Manifest.permission.CRYPT_KEEPER,
-            "no permission to access the crypt keeper");
-
-        try {
-            return mVold.isConvertibleToFbe();
-        } catch (Exception e) {
-            Slog.wtf(TAG, e);
-            return false;
-        }
-    }
-
     /**
      * Check whether the device supports filesystem checkpointing.
      *
@@ -3440,33 +3199,6 @@ class StorageManagerService extends IStorageManager.Stub
         }
 
         mVold.abortChanges(message, retry);
-    }
-
-    @Override
-    public String getPassword() throws RemoteException {
-        mContext.enforceCallingOrSelfPermission(Manifest.permission.CRYPT_KEEPER,
-                "only keyguard can retrieve password");
-
-        try {
-            return mVold.fdeGetPassword();
-        } catch (Exception e) {
-            Slog.wtf(TAG, e);
-            return null;
-        }
-    }
-
-    @Override
-    public void clearPassword() throws RemoteException {
-        mContext.enforceCallingOrSelfPermission(Manifest.permission.CRYPT_KEEPER,
-                "only keyguard can clear password");
-
-        try {
-            mVold.fdeClearPassword();
-            return;
-        } catch (Exception e) {
-            Slog.wtf(TAG, e);
-            return;
-        }
     }
 
     @Override
@@ -3671,6 +3403,7 @@ class StorageManagerService extends IStorageManager.Stub
                 }
             }
         } catch (Exception e) {
+            EventLog.writeEvent(0x534e4554, "224585613", -1, "");
             Slog.wtf(TAG, e);
             // Make sure to re-throw this exception; we must not ignore failure
             // to prepare the user storage as it could indicate that encryption

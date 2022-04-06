@@ -63,8 +63,6 @@ import static com.android.server.wm.TaskFragmentProto.DISPLAY_ID;
 import static com.android.server.wm.TaskFragmentProto.MIN_HEIGHT;
 import static com.android.server.wm.TaskFragmentProto.MIN_WIDTH;
 import static com.android.server.wm.TaskFragmentProto.WINDOW_CONTAINER;
-import static com.android.server.wm.WindowContainer.AnimationFlags.CHILDREN;
-import static com.android.server.wm.WindowContainer.AnimationFlags.TRANSITION;
 import static com.android.server.wm.WindowContainerChildProto.TASK_FRAGMENT;
 
 import android.annotation.IntDef;
@@ -242,7 +240,7 @@ class TaskFragment extends WindowContainer<WindowContainer> {
 
     /** Client assigned unique token for this TaskFragment if this is created by an organizer. */
     @Nullable
-    private IBinder mFragmentToken;
+    private final IBinder mFragmentToken;
 
     /**
      * Whether to delay the last activity of TaskFragment being immediately removed while finishing.
@@ -407,6 +405,12 @@ class TaskFragment extends WindowContainer<WindowContainer> {
             Slog.d(TAG, "setResumedActivity taskFrag:" + this + " + from: "
                     + mResumedActivity + " to:" + r + " reason:" + reason);
         }
+
+        if (r != null && mResumedActivity == null) {
+            // Task is becoming active.
+            getTask().touchActiveTime();
+        }
+
         final ActivityRecord prevR = mResumedActivity;
         mResumedActivity = r;
         mTaskSupervisor.updateTopResumedActivityIfNeeded();
@@ -520,7 +524,16 @@ class TaskFragment extends WindowContainer<WindowContainer> {
                 || isAllowedToEmbedActivityInTrustedMode(a);
     }
 
+    /**
+     * Checks if the organized task fragment is allowed to embed activity in untrusted mode.
+     */
     boolean isAllowedToEmbedActivityInUntrustedMode(@NonNull ActivityRecord a) {
+        final WindowContainer parent = getParent();
+        if (parent == null || !parent.getBounds().contains(getBounds())) {
+            // Without full trust between the host and the embedded activity, we don't allow
+            // TaskFragment to have bounds outside of the parent bounds.
+            return false;
+        }
         return (a.info.flags & FLAG_ALLOW_UNTRUSTED_ACTIVITY_EMBEDDING)
                 == FLAG_ALLOW_UNTRUSTED_ACTIVITY_EMBEDDING;
     }
@@ -1461,7 +1474,8 @@ class TaskFragment extends WindowContainer<WindowContainer> {
             // next activity.
             final boolean lastResumedCanPip = prev.checkEnterPictureInPictureState(
                     "shouldAutoPipWhilePausing", userLeaving);
-            if (lastResumedCanPip && prev.pictureInPictureArgs.isAutoEnterEnabled()) {
+            if (userLeaving && lastResumedCanPip
+                    && prev.pictureInPictureArgs.isAutoEnterEnabled()) {
                 shouldAutoPip = true;
             } else if (!lastResumedCanPip) {
                 // If the flag RESUME_WHILE_PAUSING is set, then continue to schedule the previous
@@ -1811,8 +1825,6 @@ class TaskFragment extends WindowContainer<WindowContainer> {
             return false;
         }
         if (tda == null) {
-            Slog.w(TAG, "Can't find TaskDisplayArea to determine support for multi"
-                    + " window. Task id=" + getTaskId() + " attached=" + isAttached());
             return false;
         }
         if (!getTask().isResizeable() && !tda.supportsNonResizableMultiWindow()) {
@@ -2250,7 +2262,7 @@ class TaskFragment extends WindowContainer<WindowContainer> {
                 mFragmentToken,
                 mRemoteToken.toWindowContainerToken(),
                 getConfiguration(),
-                getChildCount() == 0,
+                runningActivityCount[0] == 0,
                 runningActivityCount[0],
                 isVisible(),
                 childActivities,
@@ -2304,6 +2316,10 @@ class TaskFragment extends WindowContainer<WindowContainer> {
         mMinHeight = minHeight;
     }
 
+    boolean shouldRemoveSelfOnLastChildRemoval() {
+        return !mCreatedByOrganizer || mIsRemovalRequested;
+    }
+
     @Override
     void removeChild(WindowContainer child) {
         removeChild(child, true /* removeSelfIfPossible */);
@@ -2319,7 +2335,7 @@ class TaskFragment extends WindowContainer<WindowContainer> {
                 mBackScreenshots.remove(r.mActivityComponent.flattenToString());
             }
         }
-        if (removeSelfIfPossible && (!mCreatedByOrganizer || mIsRemovalRequested) && !hasChild()) {
+        if (removeSelfIfPossible && shouldRemoveSelfOnLastChildRemoval() && !hasChild()) {
             removeImmediately("removeLastChild " + child);
         }
     }
@@ -2337,13 +2353,18 @@ class TaskFragment extends WindowContainer<WindowContainer> {
             return;
         }
         mIsRemovalRequested = true;
-        forAllActivities(r -> {
-            if (withTransition) {
+        // The task order may be changed by finishIfPossible() for adjusting focus if there are
+        // nested tasks, so add all activities into a list to avoid missed removals.
+        final ArrayList<ActivityRecord> removingActivities = new ArrayList<>();
+        forAllActivities((Consumer<ActivityRecord>) removingActivities::add);
+        for (int i = removingActivities.size() - 1; i >= 0; --i) {
+            final ActivityRecord r = removingActivities.get(i);
+            if (withTransition && r.isVisible()) {
                 r.finishIfPossible(reason, false /* oomAdj */);
             } else {
                 r.destroyIfPossible(reason);
             }
-        });
+        }
     }
 
     void setDelayLastActivityRemoval(boolean delay) {
@@ -2361,8 +2382,7 @@ class TaskFragment extends WindowContainer<WindowContainer> {
         if (!hasChild()) {
             return false;
         }
-        return isAnimating(TRANSITION | CHILDREN, WindowState.EXIT_ANIMATING_TYPES)
-                || inTransition();
+        return isExitAnimationRunningSelfOrChild() || inTransition();
     }
 
     @Override
@@ -2383,8 +2403,16 @@ class TaskFragment extends WindowContainer<WindowContainer> {
     void removeImmediately() {
         mIsRemovalRequested = false;
         resetAdjacentTaskFragment();
+        cleanUp();
         super.removeImmediately();
         sendTaskFragmentVanished();
+    }
+
+    /** Called on remove to cleanup. */
+    private void cleanUp() {
+        if (mIsEmbedded) {
+            mAtmService.mWindowOrganizerController.cleanUpEmbeddedTaskFragment(this);
+        }
     }
 
     @Override
@@ -2410,7 +2438,7 @@ class TaskFragment extends WindowContainer<WindowContainer> {
         // Bounds need to be relative, as the dim layer is a child.
         final Rect dimBounds = getBounds();
         dimBounds.offsetTo(0 /* newLeft */, 0 /* newTop */);
-        if (mDimmer.updateDims(getPendingTransaction(), dimBounds)) {
+        if (mDimmer.updateDims(getSyncTransaction(), dimBounds)) {
             scheduleAnimation();
         }
     }

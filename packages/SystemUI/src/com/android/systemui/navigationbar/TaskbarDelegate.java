@@ -309,6 +309,10 @@ public class TaskbarDelegate implements CommandQueue.Callbacks,
                 .commitUpdate(mDisplayId);
     }
 
+    boolean isOverviewEnabled() {
+        return (mSysUiState.getFlags() & View.STATUS_BAR_DISABLE_RECENT) == 0;
+    }
+
     private void updateAssistantAvailability(boolean assistantAvailable) {
         if (mOverviewProxyService.getProxy() == null) {
             return;

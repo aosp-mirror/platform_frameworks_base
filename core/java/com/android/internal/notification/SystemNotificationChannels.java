@@ -221,7 +221,7 @@ public class SystemNotificationChannels {
 
     private static String getDeviceAdminNotificationChannelName(Context context) {
         DevicePolicyManager dpm = context.getSystemService(DevicePolicyManager.class);
-        return dpm.getString(NOTIFICATION_CHANNEL_DEVICE_ADMIN,
+        return dpm.getResources().getString(NOTIFICATION_CHANNEL_DEVICE_ADMIN,
                 () -> context.getString(R.string.notification_channel_device_admin));
     }
 

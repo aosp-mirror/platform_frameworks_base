@@ -24,21 +24,29 @@ public final class KernelAllocationStats {
 
     /** Process dma-buf stats. */
     public static final class ProcessDmabuf {
+        public final int uid;
+        public final String processName;
+        public final int oomScore;
+
         /** Size of buffers retained by the process. */
         public final int retainedSizeKb;
         /** Number of buffers retained by the process. */
         public final int retainedBuffersCount;
-        /** Size of buffers mapped to the address space. */
-        public final int mappedSizeKb;
-        /** Count of buffers mapped to the address space. */
-        public final int mappedBuffersCount;
+        /** Size of buffers shared with Surface Flinger. */
+        public final int surfaceFlingerSizeKb;
+        /** Count of buffers shared with Surface Flinger. */
+        public final int surfaceFlingerCount;
 
-        ProcessDmabuf(int retainedSizeKb, int retainedBuffersCount,
-                int mappedSizeKb, int mappedBuffersCount) {
+        ProcessDmabuf(int uid, String processName, int oomScore, int retainedSizeKb,
+                int retainedBuffersCount, int surfaceFlingerSizeKb,
+                int surfaceFlingerCount) {
+            this.uid = uid;
+            this.processName = processName;
+            this.oomScore = oomScore;
             this.retainedSizeKb = retainedSizeKb;
             this.retainedBuffersCount = retainedBuffersCount;
-            this.mappedSizeKb = mappedSizeKb;
-            this.mappedBuffersCount = mappedBuffersCount;
+            this.surfaceFlingerSizeKb = surfaceFlingerSizeKb;
+            this.surfaceFlingerCount = surfaceFlingerCount;
         }
     }
 
@@ -47,7 +55,7 @@ public final class KernelAllocationStats {
      * stats could not be read.
      */
     @Nullable
-    public static native ProcessDmabuf getDmabufAllocations(int pid);
+    public static native ProcessDmabuf[] getDmabufAllocations();
 
     /** Pid to gpu memory size. */
     public static final class ProcessGpuMem {

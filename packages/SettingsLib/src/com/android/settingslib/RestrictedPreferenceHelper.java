@@ -30,10 +30,10 @@ import android.util.AttributeSet;
 import android.util.TypedValue;
 import android.widget.TextView;
 
+import androidx.annotation.RequiresApi;
+import androidx.core.os.BuildCompat;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceViewHolder;
-
-import com.android.internal.util.Preconditions;
 
 /**
  * Helper class for managing settings preferences that can be disabled
@@ -42,8 +42,8 @@ import com.android.internal.util.Preconditions;
 public class RestrictedPreferenceHelper {
     private final Context mContext;
     private final Preference mPreference;
-    final String packageName;
-    final int uid;
+    String packageName;
+    int uid;
 
     private boolean mDisabledByAdmin;
     private EnforcedAdmin mEnforcedAdmin;
@@ -105,11 +105,9 @@ public class RestrictedPreferenceHelper {
         if (mDisabledSummary) {
             final TextView summaryView = (TextView) holder.findViewById(android.R.id.summary);
             if (summaryView != null) {
-                final CharSequence disabledText = mContext
-                        .getSystemService(DevicePolicyManager.class)
-                        .getString(CONTROLLED_BY_ADMIN_SUMMARY,
-                                () -> summaryView.getContext().getString(
-                                        R.string.disabled_by_admin_summary_text));
+                final CharSequence disabledText = BuildCompat.isAtLeastT()
+                        ? getDisabledByAdminUpdatableString()
+                        : mContext.getString(R.string.disabled_by_admin_summary_text);
                 if (mDisabledByAdmin) {
                     summaryView.setText(disabledText);
                 } else if (mDisabledByAppOps) {
@@ -120,6 +118,13 @@ public class RestrictedPreferenceHelper {
                 }
             }
         }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
+    private String getDisabledByAdminUpdatableString() {
+        return mContext.getSystemService(DevicePolicyManager.class).getResources().getString(
+                CONTROLLED_BY_ADMIN_SUMMARY,
+                () -> mContext.getString(R.string.disabled_by_admin_summary_text));
     }
 
     public void useAdminDisabledSummary(boolean useSummary) {
@@ -217,6 +222,11 @@ public class RestrictedPreferenceHelper {
 
     public boolean isDisabledByAppOps() {
         return mDisabledByAppOps;
+    }
+
+    public void updatePackageDetails(String packageName, int uid) {
+        this.packageName = packageName;
+        this.uid = uid;
     }
 
     private void updateDisabledState() {

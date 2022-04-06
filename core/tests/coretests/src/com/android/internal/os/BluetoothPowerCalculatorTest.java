@@ -145,10 +145,14 @@ public class BluetoothPowerCalculatorTest {
         final BatteryConsumer.Key fgs = uidConsumer.getKey(
                 BatteryConsumer.POWER_COMPONENT_BLUETOOTH,
                 BatteryConsumer.PROCESS_STATE_FOREGROUND_SERVICE);
+        final BatteryConsumer.Key cached = uidConsumer.getKey(
+                BatteryConsumer.POWER_COMPONENT_BLUETOOTH,
+                BatteryConsumer.PROCESS_STATE_CACHED);
 
         assertThat(uidConsumer.getConsumedPower(foreground)).isWithin(PRECISION).of(0.081);
         assertThat(uidConsumer.getConsumedPower(background)).isWithin(PRECISION).of(0.0416666);
         assertThat(uidConsumer.getConsumedPower(fgs)).isWithin(PRECISION).of(0);
+        assertThat(uidConsumer.getConsumedPower(cached)).isWithin(PRECISION).of(0);
     }
 
     @Test
@@ -261,10 +265,14 @@ public class BluetoothPowerCalculatorTest {
         final BatteryConsumer.Key fgs = uidConsumer.getKey(
                 BatteryConsumer.POWER_COMPONENT_BLUETOOTH,
                 BatteryConsumer.PROCESS_STATE_FOREGROUND_SERVICE);
+        final BatteryConsumer.Key cached = uidConsumer.getKey(
+                BatteryConsumer.POWER_COMPONENT_BLUETOOTH,
+                BatteryConsumer.PROCESS_STATE_CACHED);
 
         assertThat(uidConsumer.getConsumedPower(foreground)).isWithin(PRECISION).of(0.4965352);
         assertThat(uidConsumer.getConsumedPower(background)).isWithin(PRECISION).of(0.3255208);
         assertThat(uidConsumer.getConsumedPower(fgs)).isWithin(PRECISION).of(0);
+        assertThat(uidConsumer.getConsumedPower(cached)).isWithin(PRECISION).of(0);
     }
 
 

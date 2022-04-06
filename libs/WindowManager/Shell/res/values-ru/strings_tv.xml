@@ -24,4 +24,5 @@
     <string name="pip_move" msgid="1544227837964635439">"Переместить PIP"</string>
     <string name="pip_expand" msgid="7605396312689038178">"Развернуть PIP"</string>
     <string name="pip_collapse" msgid="5732233773786896094">"Свернуть PIP"</string>
+    <string name="pip_edu_text" msgid="3672999496647508701">" Элементы управления: дважды нажмите "<annotation icon="home_icon">" кнопку главного экрана "</annotation></string>
 </resources>

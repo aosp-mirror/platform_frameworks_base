@@ -35,27 +35,11 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
+import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 import javax.inject.Provider
-import org.mockito.Mockito.`when` as whenever
 
-private val DATA = MediaData(
-    userId = -1,
-    initialized = false,
-    backgroundColor = 0,
-    app = null,
-    appIcon = null,
-    artist = null,
-    song = null,
-    artwork = null,
-    actions = emptyList(),
-    actionsToShowInCompact = emptyList(),
-    packageName = "INVALID",
-    token = null,
-    clickIntent = null,
-    device = null,
-    active = true,
-    resumeAction = null)
+private val DATA = MediaTestUtils.emptyMediaData
 
 private val SMARTSPACE_KEY = "smartspace"
 
@@ -68,6 +52,7 @@ class MediaCarouselControllerTest : SysuiTestCase() {
     @Mock lateinit var panel: MediaControlPanel
     @Mock lateinit var visualStabilityProvider: VisualStabilityProvider
     @Mock lateinit var mediaHostStatesManager: MediaHostStatesManager
+    @Mock lateinit var mediaHostState: MediaHostState
     @Mock lateinit var activityStarter: ActivityStarter
     @Mock @Main private lateinit var executor: DelayableExecutor
     @Mock lateinit var mediaDataManager: MediaDataManager
@@ -75,7 +60,7 @@ class MediaCarouselControllerTest : SysuiTestCase() {
     @Mock lateinit var falsingCollector: FalsingCollector
     @Mock lateinit var falsingManager: FalsingManager
     @Mock lateinit var dumpManager: DumpManager
-    @Mock lateinit var mediaFlags: MediaFlags
+    @Mock lateinit var logger: MediaUiEventLogger
 
     private val clock = FakeSystemClock()
     private lateinit var mediaCarouselController: MediaCarouselController
@@ -83,7 +68,6 @@ class MediaCarouselControllerTest : SysuiTestCase() {
     @Before
     fun setup() {
         MockitoAnnotations.initMocks(this)
-        whenever(mediaFlags.areMediaSessionActionsEnabled()).thenReturn(true)
         mediaCarouselController = MediaCarouselController(
             context,
             mediaControlPanelFactory,
@@ -97,7 +81,7 @@ class MediaCarouselControllerTest : SysuiTestCase() {
             falsingCollector,
             falsingManager,
             dumpManager,
-            mediaFlags
+            logger
         )
 
         MediaPlayerData.clear()
@@ -159,7 +143,7 @@ class MediaCarouselControllerTest : SysuiTestCase() {
         expected.forEach {
             clock.setCurrentTimeMillis(it.third)
             MediaPlayerData.addMediaPlayer(it.first, it.second.copy(notificationKey = it.first),
-                panel, clock)
+                panel, clock, isSsReactivated = false)
         }
 
         for ((index, key) in MediaPlayerData.playerKeys().withIndex()) {
@@ -190,5 +174,55 @@ class MediaCarouselControllerTest : SysuiTestCase() {
         // Then it should be shown at the end of the carousel
         val size = MediaPlayerData.playerKeys().size
         assertTrue(MediaPlayerData.playerKeys().elementAt(size - 1).isSsMediaRec)
+    }
+
+    @Test
+    fun testSwipeDismiss_logged() {
+        mediaCarouselController.mediaCarouselScrollHandler.dismissCallback.invoke()
+
+        verify(logger).logSwipeDismiss()
+    }
+
+    @Test
+    fun testSettingsButton_logged() {
+        mediaCarouselController.settingsButton.callOnClick()
+
+        verify(logger).logCarouselSettings()
+    }
+
+    @Test
+    fun testLocationChangeQs_logged() {
+        mediaCarouselController.onDesiredLocationChanged(
+            MediaHierarchyManager.LOCATION_QS,
+            mediaHostState,
+            animate = false)
+        verify(logger).logCarouselPosition(MediaHierarchyManager.LOCATION_QS)
+    }
+
+    @Test
+    fun testLocationChangeQqs_logged() {
+        mediaCarouselController.onDesiredLocationChanged(
+            MediaHierarchyManager.LOCATION_QQS,
+            mediaHostState,
+            animate = false)
+        verify(logger).logCarouselPosition(MediaHierarchyManager.LOCATION_QQS)
+    }
+
+    @Test
+    fun testLocationChangeLockscreen_logged() {
+        mediaCarouselController.onDesiredLocationChanged(
+            MediaHierarchyManager.LOCATION_LOCKSCREEN,
+            mediaHostState,
+            animate = false)
+        verify(logger).logCarouselPosition(MediaHierarchyManager.LOCATION_LOCKSCREEN)
+    }
+
+    @Test
+    fun testLocationChangeDream_logged() {
+        mediaCarouselController.onDesiredLocationChanged(
+            MediaHierarchyManager.LOCATION_DREAM_OVERLAY,
+            mediaHostState,
+            animate = false)
+        verify(logger).logCarouselPosition(MediaHierarchyManager.LOCATION_DREAM_OVERLAY)
     }
 }

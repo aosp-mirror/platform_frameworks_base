@@ -16,10 +16,8 @@
 
 package com.android.systemui.keyguard.dagger;
 
-import android.annotation.Nullable;
 import android.app.trust.TrustManager;
 import android.content.Context;
-import android.content.pm.PackageManager;
 import android.os.PowerManager;
 
 import com.android.internal.jank.InteractionJankMonitor;
@@ -44,18 +42,14 @@ import com.android.systemui.keyguard.DismissCallbackRegistry;
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
 import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.navigationbar.NavigationModeController;
-import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.NotificationShadeDepthController;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
-import com.android.systemui.statusbar.phone.CentralSurfaces;
 import com.android.systemui.statusbar.phone.DozeParameters;
-import com.android.systemui.statusbar.phone.KeyguardLiftController;
 import com.android.systemui.statusbar.phone.ScreenOffAnimationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
 import com.android.systemui.util.DeviceConfigProxy;
-import com.android.systemui.util.sensors.AsyncSensorManager;
 
 import java.util.concurrent.Executor;
 
@@ -132,21 +126,5 @@ public class KeyguardModule {
                 dreamOverlayStateController,
                 notificationShadeWindowController,
                 activityLaunchAnimator);
-    }
-
-    @SysUISingleton
-    @Provides
-    @Nullable
-    static KeyguardLiftController provideKeyguardLiftController(
-            Context context,
-            StatusBarStateController statusBarStateController,
-            AsyncSensorManager asyncSensorManager,
-            KeyguardUpdateMonitor keyguardUpdateMonitor,
-            DumpManager dumpManager) {
-        if (!context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_FACE)) {
-            return null;
-        }
-        return new KeyguardLiftController(statusBarStateController, asyncSensorManager,
-                keyguardUpdateMonitor, dumpManager);
     }
 }

@@ -56,7 +56,11 @@ public class BlockedAppStreamingActivity extends AlertActivity {
 
         CharSequence streamedDeviceName = intent.getCharSequenceExtra(EXTRA_STREAMED_DEVICE);
         if (!TextUtils.isEmpty(streamedDeviceName)) {
-            mAlertParams.mTitle = getString(R.string.app_streaming_blocked_title, appLabel);
+            mAlertParams.mTitle =
+                    TextUtils.equals(activityInfo.packageName,
+                        getPackageManager().getPermissionControllerPackageName())
+                            ? getString(R.string.app_streaming_blocked_title_for_permission_dialog)
+                            : getString(R.string.app_streaming_blocked_title, appLabel);
             mAlertParams.mMessage =
                     getString(R.string.app_streaming_blocked_message, streamedDeviceName);
         } else {

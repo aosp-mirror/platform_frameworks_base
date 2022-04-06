@@ -71,7 +71,6 @@ import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
@@ -222,8 +221,10 @@ public class MultipathPolicyTracker {
                         "Can't get TelephonyManager for subId %d", mSubId));
             }
 
-            subscriberId = Objects.requireNonNull(tele.getSubscriberId(),
-                    "Null subscriber Id for subId " + mSubId);
+            subscriberId = tele.getSubscriberId();
+            if (subscriberId == null) {
+                throw new IllegalStateException("Null subscriber Id for subId " + mSubId);
+            }
             mNetworkTemplate = new NetworkTemplate.Builder(NetworkTemplate.MATCH_MOBILE)
                     .setSubscriberIds(Set.of(subscriberId))
                     .setMeteredness(NetworkStats.METERED_YES)

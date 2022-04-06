@@ -293,6 +293,14 @@ public class KeyguardIndicationController {
         }
     }
 
+    /**
+     * Cleanup
+     */
+    public void destroy() {
+        mHandler.removeCallbacksAndMessages(null);
+        mBroadcastDispatcher.unregisterReceiver(mBroadcastReceiver);
+    }
+
     private void handleAlignStateChanged(int alignState) {
         String alignmentIndication = "";
         if (alignState == DockManager.ALIGN_STATE_POOR) {
@@ -374,7 +382,7 @@ public class KeyguardIndicationController {
     private CharSequence getDisclosureText(@Nullable CharSequence organizationName) {
         final Resources packageResources = mContext.getResources();
         if (organizationName == null) {
-            return mDevicePolicyManager.getString(
+            return mDevicePolicyManager.getResources().getString(
                     KEYGUARD_MANAGEMENT_DISCLOSURE,
                     () -> packageResources.getString(R.string.do_disclosure_generic));
         } else if (mDevicePolicyManager.isDeviceManaged()
@@ -384,7 +392,7 @@ public class KeyguardIndicationController {
             return packageResources.getString(R.string.do_financed_disclosure_with_name,
                     organizationName);
         } else {
-            return mDevicePolicyManager.getString(
+            return mDevicePolicyManager.getResources().getString(
                     KEYGUARD_MANAGEMENT_DISCLOSURE,
                     () -> packageResources.getString(
                             R.string.do_disclosure_with_name, organizationName),
@@ -567,13 +575,7 @@ public class KeyguardIndicationController {
                                     return;
                                 }
                                 int currentUserId = KeyguardUpdateMonitor.getCurrentUser();
-                                try {
-                                    mIActivityManager.switchUser(UserHandle.USER_SYSTEM);
-                                    mIActivityManager.stopUser(currentUserId, true /* force */,
-                                            null);
-                                } catch (RemoteException re) {
-                                    Log.e(TAG, "Failed to logout user", re);
-                                }
+                                mDevicePolicyManager.logoutUser();
                             })
                             .build(),
                     false);
@@ -885,7 +887,10 @@ public class KeyguardIndicationController {
             if (mKeyguardUpdateMonitor.isUdfpsSupported()
                     && mKeyguardUpdateMonitor.getUserCanSkipBouncer(
                     KeyguardUpdateMonitor.getCurrentUser())) {
-                showBiometricMessage(mContext.getString(R.string.keyguard_unlock_press));
+                final int stringId = mKeyguardUpdateMonitor.getIsFaceAuthenticated()
+                        ? R.string.keyguard_face_successful_unlock_press
+                        : R.string.keyguard_unlock_press;
+                showBiometricMessage(mContext.getString(stringId));
             } else {
                 showBiometricMessage(mContext.getString(R.string.keyguard_unlock));
             }

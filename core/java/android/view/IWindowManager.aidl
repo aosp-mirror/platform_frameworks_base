@@ -677,17 +677,6 @@ interface IWindowManager
     void setDisplayImePolicy(int displayId, int imePolicy);
 
     /**
-     * Waits for transactions to get applied before injecting input, optionally waiting for
-     * animations to complete. This includes waiting for the input windows to get sent to
-     * InputManager.
-     *
-     * This is needed for testing since the system add windows and injects input
-     * quick enough that the windows don't have time to get sent to InputManager.
-     */
-    boolean injectInputAfterTransactionsApplied(in InputEvent ev, int mode,
-            boolean waitForAnimations);
-
-    /**
      * Waits until input information has been sent from WindowManager to native InputManager,
      * optionally waiting for animations to complete.
      *

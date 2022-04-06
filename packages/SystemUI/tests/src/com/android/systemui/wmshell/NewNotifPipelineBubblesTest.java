@@ -59,6 +59,7 @@ import android.service.notification.NotificationListenerService;
 import android.service.notification.ZenModeConfig;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
+import android.view.View;
 import android.view.WindowManager;
 
 import androidx.test.filters.SmallTest;
@@ -85,6 +86,7 @@ import com.android.systemui.statusbar.notification.collection.legacy.Notificatio
 import com.android.systemui.statusbar.notification.collection.notifcollection.CommonNotifCollection;
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener;
 import com.android.systemui.statusbar.notification.collection.render.NotificationVisibilityProvider;
+import com.android.systemui.statusbar.notification.interruption.KeyguardNotificationVisibilityProvider;
 import com.android.systemui.statusbar.notification.interruption.NotificationInterruptLogger;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.NotificationTestHelper;
@@ -309,7 +311,9 @@ public class NewNotifPipelineBubblesTest extends SysuiTestCase {
                         mock(BatteryController.class),
                         mock(HeadsUpManager.class),
                         mock(NotificationInterruptLogger.class),
-                        mock(Handler.class)
+                        mock(Handler.class),
+                        mock(NotifPipelineFlags.class),
+                        mock(KeyguardNotificationVisibilityProvider.class)
                 );
         when(mNotifPipelineFlags.isNewPipelineEnabled()).thenReturn(true);
         when(mShellTaskOrganizer.getExecutor()).thenReturn(syncExecutor);
@@ -339,7 +343,7 @@ public class NewNotifPipelineBubblesTest extends SysuiTestCase {
                 mContext,
                 mBubbleController.asBubbles(),
                 mNotificationShadeWindowController,
-                mStatusBarStateController,
+                mock(KeyguardStateController.class),
                 mShadeController,
                 mConfigurationController,
                 mStatusBarService,
@@ -803,7 +807,7 @@ public class NewNotifPipelineBubblesTest extends SysuiTestCase {
         assertTrue(mBubbleController.hasBubbles());
 
         // Removes the notification
-        mEntryListener.onEntryRemoved(mRow, 0);
+        mEntryListener.onEntryRemoved(mRow, REASON_APP_CANCEL);
         assertFalse(mBubbleController.hasBubbles());
     }
 
@@ -934,7 +938,7 @@ public class NewNotifPipelineBubblesTest extends SysuiTestCase {
         mBubblesManager.handleDismissalInterception(groupSummary.getEntry());
 
         // WHEN the summary is cancelled by the app
-        mEntryListener.onEntryRemoved(groupSummary.getEntry(), 0);
+        mEntryListener.onEntryRemoved(groupSummary.getEntry(), REASON_APP_CANCEL);
 
         // THEN the summary and its children are removed from bubble data
         assertFalse(mBubbleData.hasBubbleInStackWithKey(groupedBubble.getEntry().getKey()));
@@ -1242,6 +1246,23 @@ public class NewNotifPipelineBubblesTest extends SysuiTestCase {
         Intent i = new Intent(Intent.ACTION_SCREEN_OFF);
         mBroadcastReceiverArgumentCaptor.getValue().onReceive(mContext, i);
         assertStackCollapsed();
+    }
+
+    @Test
+    public void testOnStatusBarStateChanged() {
+        mBubbleController.updateBubble(mBubbleEntry);
+        mBubbleData.setExpanded(true);
+        assertStackExpanded();
+        BubbleStackView stackView = mBubbleController.getStackView();
+        assertThat(stackView.getVisibility()).isEqualTo(View.VISIBLE);
+
+        mBubbleController.onStatusBarStateChanged(false);
+
+        assertStackCollapsed();
+        assertThat(stackView.getVisibility()).isEqualTo(View.INVISIBLE);
+
+        mBubbleController.onStatusBarStateChanged(true);
+        assertThat(stackView.getVisibility()).isEqualTo(View.VISIBLE);
     }
 
     /**

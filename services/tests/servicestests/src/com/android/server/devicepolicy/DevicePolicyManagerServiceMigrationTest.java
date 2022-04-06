@@ -40,6 +40,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.IpcDataCache;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.platform.test.annotations.Presubmit;
@@ -74,6 +75,10 @@ public class DevicePolicyManagerServiceMigrationTest extends DpmTestBase {
 
     @Before
     public void setUp() throws Exception {
+
+        // Disable caches in this test process. This must happen early, since some of the
+        // following initialization steps invalidate caches.
+        IpcDataCache.disableForTestMode();
 
         mContext = getContext();
 

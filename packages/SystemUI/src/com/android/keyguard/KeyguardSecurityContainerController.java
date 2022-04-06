@@ -233,6 +233,13 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
                     mSecurityViewFlipperController.reloadColors();
                 }
             };
+    private final KeyguardUpdateMonitorCallback mKeyguardUpdateMonitorCallback =
+            new KeyguardUpdateMonitorCallback() {
+        @Override
+        public void onDevicePolicyManagerStateChanged() {
+            showPrimarySecurityScreen(false);
+        }
+    };
 
     private KeyguardSecurityContainerController(KeyguardSecurityContainer view,
             AdminSecondaryLockScreenController.Factory adminSecondaryLockScreenControllerFactory,
@@ -279,6 +286,7 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
 
     @Override
     protected void onViewAttached() {
+        mUpdateMonitor.registerCallback(mKeyguardUpdateMonitorCallback);
         mView.setSwipeListener(mSwipeListener);
         mView.addMotionEventListener(mGlobalTouchListener);
         mConfigurationController.addCallback(mConfigurationListener);
@@ -286,6 +294,7 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
 
     @Override
     protected void onViewDetached() {
+        mUpdateMonitor.removeCallback(mKeyguardUpdateMonitorCallback);
         mConfigurationController.removeCallback(mConfigurationListener);
         mView.removeMotionEventListener(mGlobalTouchListener);
     }

@@ -27,6 +27,7 @@ import android.os.CreateAppDataArgs;
 import android.os.CreateAppDataResult;
 import android.os.IBinder;
 import android.os.IInstalld;
+import android.os.ReconcileSdkDataArgs;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.storage.CrateMetadata;
@@ -87,6 +88,14 @@ public class Installer extends SystemService {
      * the profiles are empty.
      */
     public static final int PROFILE_ANALYSIS_DONT_OPTIMIZE_EMPTY_PROFILES = 3;
+
+    /**
+     * The results of {@code getOdexVisibility}. See
+     * {@link #getOdexVisibility(String, String, String)} for details.
+     */
+    public static final int ODEX_NOT_FOUND = 0;
+    public static final int ODEX_IS_PUBLIC = 1;
+    public static final int ODEX_IS_PRIVATE = 2;
 
 
     public static final int FLAG_STORAGE_DE = IInstalld.FLAG_STORAGE_DE;
@@ -215,6 +224,21 @@ public class Installer extends SystemService {
         return result;
     }
 
+    static ReconcileSdkDataArgs buildReconcileSdkDataArgs(String uuid, String packageName,
+            List<String> subDirNames, int userId, int appId,
+            String seInfo, int flags) {
+        final ReconcileSdkDataArgs args = new ReconcileSdkDataArgs();
+        args.uuid = uuid;
+        args.packageName = packageName;
+        args.subDirNames = subDirNames;
+        args.userId = userId;
+        args.appId = appId;
+        args.previousAppId = 0;
+        args.seInfo = seInfo;
+        args.flags = flags;
+        return args;
+    }
+
     public @NonNull CreateAppDataResult createAppData(@NonNull CreateAppDataArgs args)
             throws InstallerException {
         if (!checkBeforeRemote()) {
@@ -243,6 +267,32 @@ public class Installer extends SystemService {
         try {
             return mInstalld.createAppDataBatched(args);
         } catch (Exception e) {
+            throw InstallerException.from(e);
+        }
+    }
+
+    void reconcileSdkData(@NonNull ReconcileSdkDataArgs args)
+            throws InstallerException {
+        if (!checkBeforeRemote()) {
+            return;
+        }
+        try {
+            mInstalld.reconcileSdkData(args);
+        } catch (Exception e) {
+            throw InstallerException.from(e);
+        }
+    }
+
+    /**
+     * Sets in Installd that it is first boot after data wipe
+     */
+    public void setFirstBoot() throws InstallerException {
+        if (!checkBeforeRemote()) {
+            return;
+        }
+        try {
+            mInstalld.setFirstBoot();
+        } catch (RemoteException e) {
             throw InstallerException.from(e);
         }
     }
@@ -642,6 +692,20 @@ public class Installer extends SystemService {
         }
     }
 
+    /**
+     * Deletes the reference profile with the given name of the given package.
+     * @throws InstallerException if the deletion fails.
+     */
+    public void deleteReferenceProfile(String packageName, String profileName)
+            throws InstallerException {
+        if (!checkBeforeRemote()) return;
+        try {
+            mInstalld.deleteReferenceProfile(packageName, profileName);
+        } catch (Exception e) {
+            throw InstallerException.from(e);
+        }
+    }
+
     public void createUserData(String uuid, int userId, int userSerial, int flags)
             throws InstallerException {
         if (!checkBeforeRemote()) return;
@@ -838,6 +902,15 @@ public class Installer extends SystemService {
         }
     }
 
+    /**
+     * Prepares the app profile for the package at the given path:
+     * <ul>
+     *   <li>Creates the current profile for the given user ID, unless the user ID is
+     *     {@code UserHandle.USER_NULL}.</li>
+     *   <li>Merges the profile from the dex metadata file (if present) into the reference
+     *     profile.</li>
+     * </ul>
+     */
     public boolean prepareAppProfile(String pkg, @UserIdInt int userId, @AppIdInt int appId,
             String profileName, String codePath, String dexMetadataPath) throws InstallerException {
         if (!checkBeforeRemote()) return false;
@@ -985,6 +1058,33 @@ public class Installer extends SystemService {
             return mInstalld.compileLayouts(apkPath, packageName, outDexFile, uid);
         } catch (RemoteException e) {
             return false;
+        }
+    }
+
+    /**
+     * Returns the visibility of the optimized artifacts.
+     *
+     * @param packageName name of the package.
+     * @param apkPath path to the APK.
+     * @param instructionSet instruction set of the optimized artifacts.
+     * @param outputPath path to the directory that contains the optimized artifacts (i.e., the
+     *   directory that {@link #dexopt} outputs to).
+     *
+     * @return {@link #ODEX_NOT_FOUND} if the optimized artifacts are not found, or
+     *   {@link #ODEX_IS_PUBLIC} if the optimized artifacts are accessible by all apps, or
+     *   {@link #ODEX_IS_PRIVATE} if the optimized artifacts are only accessible by this app.
+     *
+     * @throws InstallerException if failed to get the visibility of the optimized artifacts.
+     */
+    public int getOdexVisibility(String packageName, String apkPath, String instructionSet,
+            String outputPath) throws InstallerException {
+        if (!checkBeforeRemote()) return -1;
+        BlockGuard.getVmPolicy().onPathAccess(apkPath);
+        BlockGuard.getVmPolicy().onPathAccess(outputPath);
+        try {
+            return mInstalld.getOdexVisibility(packageName, apkPath, instructionSet, outputPath);
+        } catch (Exception e) {
+            throw InstallerException.from(e);
         }
     }
 

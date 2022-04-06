@@ -1,6 +1,4 @@
-# Bug component: 20868
+set noparent
 
-rgreenwalt@google.com
-tgunn@google.com
-refuhoo@google.com
-amitmahajan@google.com
+file:platform/frameworks/base:/telephony/java/android/service/euicc/OWNERS
+

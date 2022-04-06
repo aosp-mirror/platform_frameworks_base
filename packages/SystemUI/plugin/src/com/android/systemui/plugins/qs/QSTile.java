@@ -39,7 +39,7 @@ import java.util.function.Supplier;
 @DependsOn(target = Icon.class)
 @DependsOn(target = State.class)
 public interface QSTile {
-    int VERSION = 3;
+    int VERSION = 4;
 
     String getTileSpec();
 
@@ -113,6 +113,12 @@ public interface QSTile {
     default boolean isTileReady() {
         return false;
     }
+
+    /**
+     * Return whether the tile is set to its listening state and therefore receiving updates and
+     * refreshes from controllers
+     */
+    boolean isListening();
 
     @ProvidesInterface(version = Callback.VERSION)
     interface Callback {

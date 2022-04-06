@@ -32,6 +32,7 @@ import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.os.UserManager;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.pm.UserManagerService;
 
 import java.io.PrintWriter;
@@ -261,11 +262,21 @@ public abstract class SystemService {
         public @interface EventTypesFlag {
         }
 
-        private @EventTypesFlag int mEventType;
+        private final @EventTypesFlag int mEventType;
 
         /** @hide */
         UserCompletedEventType(@EventTypesFlag int eventType) {
             mEventType = eventType;
+        }
+
+        /**
+         * Creates a new instance of {@link UserCompletedEventType}.
+         * @hide
+         */
+        @VisibleForTesting
+        public static UserCompletedEventType newUserCompletedEventTypeForTest(
+                @EventTypesFlag int eventType) {
+            return new UserCompletedEventType(eventType);
         }
 
         /** Returns whether one of the events is {@link #onUserStarting}. */

@@ -992,6 +992,9 @@ public final class AccessibilityInteractionController {
                     // Unchecked cast - an app that puts other objects in this bundle with this
                     // key will crash.
                     RectF textLocation = ((RectF) textLocations[i]);
+                    if (textLocation == null) {
+                        continue;
+                    }
                     textLocation.scale(applicationScale);
                     if (spec != null) {
                         textLocation.scale(spec.scale);

@@ -21,6 +21,7 @@ import static com.android.internal.util.function.pooled.PooledLambda.obtainMessa
 import android.accounts.Account;
 import android.annotation.MainThread;
 import android.annotation.NonNull;
+import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -171,8 +172,17 @@ public abstract class AbstractThreadedSyncAdapter {
     }
 
     private class ISyncAdapterImpl extends ISyncAdapter.Stub {
+        private void enforceCallerSystem() {
+            final long callingUid = Binder.getCallingUid();
+            if (callingUid != Process.SYSTEM_UID) {
+                android.util.EventLog.writeEvent(0x534e4554, "203229608", -1, "");
+                return;
+            }
+        }
+
         @Override
         public void onUnsyncableAccount(ISyncAdapterUnsyncableAccountCallback cb) {
+            enforceCallerSystem();
             Handler.getMain().sendMessage(obtainMessage(
                     AbstractThreadedSyncAdapter::handleOnUnsyncableAccount,
                     AbstractThreadedSyncAdapter.this, cb));
@@ -187,6 +197,8 @@ public abstract class AbstractThreadedSyncAdapter {
                 }
                 Log.d(TAG, "startSync() start " + authority + " " + account + " " + extras);
             }
+            enforceCallerSystem();
+
             try {
                 final SyncContext syncContextClient = new SyncContext(syncContext);
 
@@ -242,6 +254,7 @@ public abstract class AbstractThreadedSyncAdapter {
 
         @Override
         public void cancelSync(ISyncContext syncContext) {
+            enforceCallerSystem();
             try {
                 // synchronize to make sure that mSyncThreads doesn't change between when we
                 // check it and when we use it

@@ -73,6 +73,7 @@ import com.android.systemui.statusbar.notification.collection.render.Notificatio
 import com.android.systemui.statusbar.notification.init.NotificationsController;
 import com.android.systemui.statusbar.notification.init.NotificationsControllerImpl;
 import com.android.systemui.statusbar.notification.init.NotificationsControllerStub;
+import com.android.systemui.statusbar.notification.interruption.KeyguardNotificationVisibilityProviderModule;
 import com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProvider;
 import com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProviderImpl;
 import com.android.systemui.statusbar.notification.logging.NotificationLogger;
@@ -107,9 +108,10 @@ import dagger.Provides;
  */
 @Module(includes = {
         CoordinatorsModule.class,
+        KeyguardNotificationVisibilityProviderModule.class,
         NotifActivityLaunchEventsModule.class,
-        NotifPipelineChoreographerModule.class,
         NotifPanelEventsModule.class,
+        NotifPipelineChoreographerModule.class,
         NotificationSectionHeadersModule.class,
 })
 public interface NotificationsModule {

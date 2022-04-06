@@ -180,22 +180,22 @@ public final class ProcessList {
     // OOM adjustments for processes in various states:
 
     // Uninitialized value for any major or minor adj fields
-    static final int INVALID_ADJ = -10000;
+    public static final int INVALID_ADJ = -10000;
 
     // Adjustment used in certain places where we don't know it yet.
     // (Generally this is something that is going to be cached, but we
     // don't know the exact value in the cached range to assign yet.)
-    static final int UNKNOWN_ADJ = 1001;
+    public static final int UNKNOWN_ADJ = 1001;
 
     // This is a process only hosting activities that are not visible,
     // so it can be killed without any disruption.
-    static final int CACHED_APP_MAX_ADJ = 999;
-    static final int CACHED_APP_MIN_ADJ = 900;
+    public static final int CACHED_APP_MAX_ADJ = 999;
+    public static final int CACHED_APP_MIN_ADJ = 900;
 
     // This is the oom_adj level that we allow to die first. This cannot be equal to
     // CACHED_APP_MAX_ADJ unless processes are actively being assigned an oom_score_adj of
     // CACHED_APP_MAX_ADJ.
-    static final int CACHED_APP_LMK_FIRST_ADJ = 950;
+    public static final int CACHED_APP_LMK_FIRST_ADJ = 950;
 
     // Number of levels we have available for different service connection group importance
     // levels.
@@ -203,7 +203,7 @@ public final class ProcessList {
 
     // The B list of SERVICE_ADJ -- these are the old and decrepit
     // services that aren't as shiny and interesting as the ones in the A list.
-    static final int SERVICE_B_ADJ = 800;
+    public static final int SERVICE_B_ADJ = 800;
 
     // This is the process of the previous application that the user was in.
     // This process is kept above other things, because it is very common to
@@ -211,68 +211,68 @@ public final class ProcessList {
     // task switch (toggling between the two top recent apps) as well as normal
     // UI flow such as clicking on a URI in the e-mail app to view in the browser,
     // and then pressing back to return to e-mail.
-    static final int PREVIOUS_APP_ADJ = 700;
+    public static final int PREVIOUS_APP_ADJ = 700;
 
     // This is a process holding the home application -- we want to try
     // avoiding killing it, even if it would normally be in the background,
     // because the user interacts with it so much.
-    static final int HOME_APP_ADJ = 600;
+    public static final int HOME_APP_ADJ = 600;
 
     // This is a process holding an application service -- killing it will not
     // have much of an impact as far as the user is concerned.
-    static final int SERVICE_ADJ = 500;
+    public static final int SERVICE_ADJ = 500;
 
     // This is a process with a heavy-weight application.  It is in the
     // background, but we want to try to avoid killing it.  Value set in
     // system/rootdir/init.rc on startup.
-    static final int HEAVY_WEIGHT_APP_ADJ = 400;
+    public static final int HEAVY_WEIGHT_APP_ADJ = 400;
 
     // This is a process currently hosting a backup operation.  Killing it
     // is not entirely fatal but is generally a bad idea.
-    static final int BACKUP_APP_ADJ = 300;
+    public static final int BACKUP_APP_ADJ = 300;
 
     // This is a process bound by the system (or other app) that's more important than services but
     // not so perceptible that it affects the user immediately if killed.
-    static final int PERCEPTIBLE_LOW_APP_ADJ = 250;
+    public static final int PERCEPTIBLE_LOW_APP_ADJ = 250;
 
     // This is a process hosting services that are not perceptible to the user but the
     // client (system) binding to it requested to treat it as if it is perceptible and avoid killing
     // it if possible.
-    static final int PERCEPTIBLE_MEDIUM_APP_ADJ = 225;
+    public static final int PERCEPTIBLE_MEDIUM_APP_ADJ = 225;
 
     // This is a process only hosting components that are perceptible to the
     // user, and we really want to avoid killing them, but they are not
     // immediately visible. An example is background music playback.
-    static final int PERCEPTIBLE_APP_ADJ = 200;
+    public static final int PERCEPTIBLE_APP_ADJ = 200;
 
     // This is a process only hosting activities that are visible to the
     // user, so we'd prefer they don't disappear.
-    static final int VISIBLE_APP_ADJ = 100;
+    public static final int VISIBLE_APP_ADJ = 100;
     static final int VISIBLE_APP_LAYER_MAX = PERCEPTIBLE_APP_ADJ - VISIBLE_APP_ADJ - 1;
 
     // This is a process that was recently TOP and moved to FGS. Continue to treat it almost
     // like a foreground app for a while.
     // @see TOP_TO_FGS_GRACE_PERIOD
-    static final int PERCEPTIBLE_RECENT_FOREGROUND_APP_ADJ = 50;
+    public static final int PERCEPTIBLE_RECENT_FOREGROUND_APP_ADJ = 50;
 
     // This is the process running the current foreground app.  We'd really
     // rather not kill it!
-    static final int FOREGROUND_APP_ADJ = 0;
+    public static final int FOREGROUND_APP_ADJ = 0;
 
     // This is a process that the system or a persistent process has bound to,
     // and indicated it is important.
-    static final int PERSISTENT_SERVICE_ADJ = -700;
+    public static final int PERSISTENT_SERVICE_ADJ = -700;
 
     // This is a system persistent process, such as telephony.  Definitely
     // don't want to kill it, but doing so is not completely fatal.
-    static final int PERSISTENT_PROC_ADJ = -800;
+    public static final int PERSISTENT_PROC_ADJ = -800;
 
     // The system process runs at the default adjustment.
-    static final int SYSTEM_ADJ = -900;
+    public static final int SYSTEM_ADJ = -900;
 
     // Special code for native processes that are not being managed by the system (so
     // don't have an oom adj assigned by the system).
-    static final int NATIVE_ADJ = -1000;
+    public static final int NATIVE_ADJ = -1000;
 
     // Memory pages are 4K.
     static final int PAGE_SIZE = 4 * 1024;
@@ -423,9 +423,8 @@ public final class ProcessList {
      * Having a global counter ensures that seq numbers are monotonically increasing for a
      * particular uid even when the uidRecord is re-created.
      */
-    @GuardedBy("mService")
     @VisibleForTesting
-    long mProcStateSeqCounter = 0;
+    volatile long mProcStateSeqCounter = 0;
 
     /**
      * A global counter for generating sequence numbers to uniquely identify pending process starts.
@@ -1718,8 +1717,16 @@ public final class ProcessList {
             int runtimeFlags = 0;
 
             boolean debuggableFlag = (app.info.flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0;
-            if (!debuggableFlag && app.isSdkSandbox) {
-                debuggableFlag = isAppForSdkSandboxDebuggable(app);
+            boolean isProfileableByShell = app.info.isProfileableByShell();
+            boolean isProfileable = app.info.isProfileable();
+
+            if (app.isSdkSandbox) {
+                ApplicationInfo clientInfo = app.getClientInfoForSdkSandbox();
+                if (clientInfo != null) {
+                    debuggableFlag |= (clientInfo.flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0;
+                    isProfileableByShell |= clientInfo.isProfileableByShell();
+                    isProfileable |= clientInfo.isProfileable();
+                }
             }
 
             if (debuggableFlag) {
@@ -1741,10 +1748,10 @@ public final class ProcessList {
             if ((app.info.flags & ApplicationInfo.FLAG_VM_SAFE_MODE) != 0 || mService.mSafeMode) {
                 runtimeFlags |= Zygote.DEBUG_ENABLE_SAFEMODE;
             }
-            if ((app.info.privateFlags & ApplicationInfo.PRIVATE_FLAG_PROFILEABLE_BY_SHELL) != 0) {
+            if (isProfileableByShell) {
                 runtimeFlags |= Zygote.PROFILE_FROM_SHELL;
             }
-            if (app.info.isProfileable()) {
+            if (isProfileable) {
                 runtimeFlags |= Zygote.PROFILEABLE;
             }
             if ("1".equals(SystemProperties.get("debug.checkjni"))) {
@@ -1812,7 +1819,7 @@ public final class ProcessList {
             }
 
             String invokeWith = null;
-            if ((app.info.flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0) {
+            if (debuggableFlag) {
                 // Debuggable apps may include a wrapper script with their library directory.
                 String wrapperFileName = app.info.nativeLibraryDir + "/wrap.sh";
                 StrictMode.ThreadPolicy oldPolicy = StrictMode.allowThreadDiskReads();
@@ -1887,24 +1894,6 @@ public final class ProcessList {
         }
     }
 
-    /** Return true if the client app for the SDK sandbox process is debuggable. */
-    private boolean isAppForSdkSandboxDebuggable(ProcessRecord sandboxProcess) {
-        // TODO (b/221004701) use client app process name
-        final int appUid = Process.getAppUidForSdkSandboxUid(sandboxProcess.uid);
-        IPackageManager pm = mService.getPackageManager();
-        try {
-            String[] packages = pm.getPackagesForUid(appUid);
-            for (String aPackage : packages) {
-                ApplicationInfo i = pm.getApplicationInfo(aPackage, 0, sandboxProcess.userId);
-                if ((i.flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0) {
-                    return true;
-                }
-            }
-        } catch (RemoteException e) {
-            // shouldn't happen
-        }
-        return false;
-    }
 
     @GuardedBy("mService")
     boolean startProcessLocked(HostingRecord hostingRecord, String entryPoint, ProcessRecord app,
@@ -2365,7 +2354,7 @@ public final class ProcessList {
     ProcessRecord startProcessLocked(String processName, ApplicationInfo info,
             boolean knownToBeDead, int intentFlags, HostingRecord hostingRecord,
             int zygotePolicyFlags, boolean allowWhileBooting, boolean isolated, int isolatedUid,
-            boolean isSdkSandbox, int sdkSandboxUid,
+            boolean isSdkSandbox, int sdkSandboxUid, String sdkSandboxClientAppPackage,
             String abiOverride, String entryPoint, String[] entryPointArgs, Runnable crashHandler) {
         long startTime = SystemClock.uptimeMillis();
         ProcessRecord app;
@@ -2460,7 +2449,7 @@ public final class ProcessList {
         if (app == null) {
             checkSlow(startTime, "startProcess: creating new process record");
             app = newProcessRecordLocked(info, processName, isolated, isolatedUid, isSdkSandbox,
-                    sdkSandboxUid, hostingRecord);
+                    sdkSandboxUid, sdkSandboxClientAppPackage, hostingRecord);
             if (app == null) {
                 Slog.w(TAG, "Failed making new process record for "
                         + processName + "/" + info.uid + " isolated=" + isolated);
@@ -2956,7 +2945,7 @@ public final class ProcessList {
     @GuardedBy("mService")
     ProcessRecord newProcessRecordLocked(ApplicationInfo info, String customProcess,
             boolean isolated, int isolatedUid, boolean isSdkSandbox, int sdkSandboxUid,
-            HostingRecord hostingRecord) {
+            String sdkSandboxClientAppPackage, HostingRecord hostingRecord) {
         String proc = customProcess != null ? customProcess : info.processName;
         final int userId = UserHandle.getUserId(info.uid);
         int uid = info.uid;
@@ -2992,6 +2981,7 @@ public final class ProcessList {
                     FrameworkStatsLog.ISOLATED_UID_CHANGED__EVENT__CREATED);
         }
         final ProcessRecord r = new ProcessRecord(mService, info, proc, uid,
+                sdkSandboxClientAppPackage,
                 hostingRecord.getDefiningUid(), hostingRecord.getDefiningProcessName());
         final ProcessStateRecord state = r.mState;
 
@@ -3040,7 +3030,7 @@ public final class ProcessList {
                             Slog.i(TAG_UID_OBSERVERS, "No more processes in " + uidRecord);
                         }
                         mService.enqueueUidChangeLocked(uidRecord, -1,
-                                UidRecord.CHANGE_GONE);
+                                UidRecord.CHANGE_GONE | UidRecord.CHANGE_PROCSTATE);
                         EventLogTags.writeAmUidStopped(uid);
                         mActiveUids.remove(uid);
                         mService.mFgsStartTempAllowList.removeUid(record.info.uid);
@@ -4869,6 +4859,10 @@ public final class ProcessList {
         }
     }
 
+    long getProcStateSeqCounter() {
+        return mProcStateSeqCounter;
+    }
+
     /**
      * Create a server socket in system_server, zygote will connect to it
      * in order to send unsolicited messages to system_server.
@@ -5391,6 +5385,10 @@ public final class ProcessList {
 
         @Override
         public void onUidCachedChanged(int uid, boolean cached) {
+        }
+
+        @Override
+        public void onUidProcAdjChanged(int uid) {
         }
     };
 }

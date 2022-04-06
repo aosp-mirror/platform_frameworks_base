@@ -89,7 +89,7 @@ public class KeyButtonView extends ImageView implements ButtonInterface {
     public KeyButtonView(Context context, AttributeSet attrs) {
         super(context, attrs);
 
-        // TODO(b/205803355): Figure out better place to set this.
+        // TODO(b/215443343): Figure out better place to set this.
         switch (getId()) {
             case com.android.internal.R.id.input_method_nav_back:
                 mCode = KEYCODE_BACK;
@@ -200,8 +200,8 @@ public class KeyButtonView extends ImageView implements ButtonInterface {
                 postDelayed(mCheckLongPress, ViewConfiguration.getLongPressTimeout());
                 break;
             case MotionEvent.ACTION_MOVE:
-                x = (int)ev.getRawX();
-                y = (int)ev.getRawY();
+                x = (int) ev.getRawX();
+                y = (int) ev.getRawY();
 
                 float slop = getQuickStepTouchSlopPx(getContext());
                 if (Math.abs(x - mTouchDownX) > slop || Math.abs(y - mTouchDownY) > slop) {
@@ -272,23 +272,24 @@ public class KeyButtonView extends ImageView implements ButtonInterface {
                 : KeyButtonRipple.Type.ROUNDED_RECT);
     }
 
+    @Override
     public void playSoundEffect(int soundConstant) {
         if (!mPlaySounds) return;
         mAudioManager.playSoundEffect(soundConstant);
     }
 
-    public void sendEvent(int action, int flags) {
+    private void sendEvent(int action, int flags) {
         sendEvent(action, flags, SystemClock.uptimeMillis());
     }
 
     private void sendEvent(int action, int flags, long when) {
         if (mCode == KeyEvent.KEYCODE_BACK && flags != KeyEvent.FLAG_LONG_PRESS) {
             if (action == MotionEvent.ACTION_UP) {
-                // TODO(b/205803355): Implement notifyBackAction();
+                // TODO(b/215443343): Implement notifyBackAction();
             }
         }
 
-        // TODO(b/205803355): Consolidate this logic to somewhere else.
+        // TODO(b/215443343): Consolidate this logic to somewhere else.
         if (mContext instanceof InputMethodService) {
             final int repeatCount = (flags & KeyEvent.FLAG_LONG_PRESS) != 0 ? 1 : 0;
             final KeyEvent ev = new KeyEvent(mDownTime, when, action, mCode, repeatCount,
@@ -309,8 +310,8 @@ public class KeyButtonView extends ImageView implements ButtonInterface {
             switch (action) {
                 case KeyEvent.ACTION_DOWN:
                     handled = ims.onKeyDown(ev.getKeyCode(), ev);
-                    mTracking = handled && ev.getRepeatCount() == 0 &&
-                            (ev.getFlags() & KeyEvent.FLAG_START_TRACKING) != 0;
+                    mTracking = handled && ev.getRepeatCount() == 0
+                            && (ev.getFlags() & KeyEvent.FLAG_START_TRACKING) != 0;
                     break;
                 case KeyEvent.ACTION_UP:
                     handled = ims.onKeyUp(ev.getKeyCode(), ev);

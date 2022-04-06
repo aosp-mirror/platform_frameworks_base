@@ -149,4 +149,25 @@ public class TaskFragmentTest extends WindowTestsBase {
         assertEquals(false, info.isEmpty());
         assertEquals(activity.token, info.getActivities().get(0));
     }
+
+    @Test
+    public void testActivityVisibilityBehindTranslucentTaskFragment() {
+        // Having an activity covered by a translucent TaskFragment:
+        // Task
+        //   - TaskFragment
+        //      - Activity (Translucent)
+        //   - Activity
+        ActivityRecord translucentActivity = new ActivityBuilder(mAtm)
+                .setUid(DEFAULT_TASK_FRAGMENT_ORGANIZER_UID).build();
+        mTaskFragment.addChild(translucentActivity);
+        doReturn(true).when(mTaskFragment).isTranslucent(any());
+
+        ActivityRecord activityBelow = new ActivityBuilder(mAtm).build();
+        mTaskFragment.getTask().addChild(activityBelow, 0);
+
+        // Ensure the activity below is visible
+        mTaskFragment.getTask().ensureActivitiesVisible(null /* starting */, 0 /* configChanges */,
+                false /* preserveWindows */);
+        assertEquals(true, activityBelow.isVisibleRequested());
+    }
 }

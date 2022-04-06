@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 The Android Open Source Project
+ * Copyright 2021 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +32,6 @@ oneway interface ITvInteractiveAppService {
     void unregisterCallback(in ITvInteractiveAppServiceCallback callback);
     void createSession(in InputChannel channel, in ITvInteractiveAppSessionCallback callback,
             in String iAppServiceId, int type);
-    void prepare(int type);
     void registerAppLinkInfo(in AppLinkInfo info);
     void unregisterAppLinkInfo(in AppLinkInfo info);
     void sendAppLinkCommand(in Bundle command);

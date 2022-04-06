@@ -294,8 +294,8 @@ final class NavigationBarController {
                 dest.setTouchableInsets(
                         ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_REGION);
 
-                // TODO(b/205803355): See if we can use View#OnLayoutChangeListener().
-                // TODO(b/205803355): See if we can replace DecorView#mNavigationColorViewState.view
+                // TODO(b/215443343): See if we can use View#OnLayoutChangeListener().
+                // TODO(b/215443343): See if we can replace DecorView#mNavigationColorViewState.view
                 boolean zOrderChanged = false;
                 if (decor instanceof ViewGroup) {
                     ViewGroup decorGroup = (ViewGroup) decor;

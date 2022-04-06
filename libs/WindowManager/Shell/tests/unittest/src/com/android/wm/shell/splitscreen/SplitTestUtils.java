@@ -16,22 +16,18 @@
 
 package com.android.wm.shell.splitscreen;
 
-import static android.view.Display.DEFAULT_DISPLAY;
-import static android.window.DisplayAreaOrganizer.FEATURE_DEFAULT_TASK_CONTAINER;
-
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 
+import android.app.ActivityManager;
 import android.content.Context;
 import android.graphics.Rect;
 import android.view.SurfaceControl;
-import android.window.DisplayAreaInfo;
-import android.window.IWindowContainerToken;
-import android.window.WindowContainerToken;
+import android.view.SurfaceSession;
 
 import com.android.dx.mockito.inline.extended.ExtendedMockito;
-import com.android.wm.shell.RootTaskDisplayAreaOrganizer;
 import com.android.wm.shell.ShellTaskOrganizer;
+import com.android.wm.shell.TestRunningTaskInfoBuilder;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayImeController;
 import com.android.wm.shell.common.DisplayInsetsController;
@@ -68,26 +64,24 @@ public class SplitTestUtils {
     }
 
     static class TestStageCoordinator extends StageCoordinator {
-        final DisplayAreaInfo mDisplayAreaInfo;
+        final ActivityManager.RunningTaskInfo mRootTask;
+        final SurfaceControl mRootLeash;
 
         TestStageCoordinator(Context context, int displayId, SyncTransactionQueue syncQueue,
-                RootTaskDisplayAreaOrganizer rootTDAOrganizer, ShellTaskOrganizer taskOrganizer,
-                MainStage mainStage, SideStage sideStage, DisplayController displayController,
-                DisplayImeController imeController, DisplayInsetsController insetsController,
-                SplitLayout splitLayout, Transitions transitions, TransactionPool transactionPool,
-                SplitscreenEventLogger logger,
-                Optional<RecentTasksController> recentTasks,
+                ShellTaskOrganizer taskOrganizer, MainStage mainStage, SideStage sideStage,
+                DisplayController displayController, DisplayImeController imeController,
+                DisplayInsetsController insetsController, SplitLayout splitLayout,
+                Transitions transitions, TransactionPool transactionPool,
+                SplitscreenEventLogger logger, Optional<RecentTasksController> recentTasks,
                 Provider<Optional<StageTaskUnfoldController>> unfoldController) {
-            super(context, displayId, syncQueue, rootTDAOrganizer, taskOrganizer, mainStage,
+            super(context, displayId, syncQueue, taskOrganizer, mainStage,
                     sideStage, displayController, imeController, insetsController, splitLayout,
                     transitions, transactionPool, logger, recentTasks, unfoldController);
 
-            // Prepare default TaskDisplayArea for testing.
-            mDisplayAreaInfo = new DisplayAreaInfo(
-                    new WindowContainerToken(new IWindowContainerToken.Default()),
-                    DEFAULT_DISPLAY,
-                    FEATURE_DEFAULT_TASK_CONTAINER);
-            this.onDisplayAreaAppeared(mDisplayAreaInfo);
+            // Prepare root task for testing.
+            mRootTask = new TestRunningTaskInfoBuilder().build();
+            mRootLeash = new SurfaceControl.Builder(new SurfaceSession()).setName("test").build();
+            onTaskAppeared(mRootTask, mRootLeash);
         }
     }
 }

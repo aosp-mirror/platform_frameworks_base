@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 The Android Open Source Project
+ * Copyright 2021 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,6 +42,8 @@ oneway interface ITvInteractiveAppSession {
     void sendStreamVolume(float volume);
     void sendTrackInfoList(in List<TvTrackInfo> tracks);
     void sendCurrentTvInputId(in String inputId);
+    void sendSigningResult(in String signingId, in byte[] result);
+    void notifyError(in String errMsg, in Bundle params);
     void release();
     void notifyTuned(in Uri channelUri);
     void notifyTrackSelected(int type, in String trackId);

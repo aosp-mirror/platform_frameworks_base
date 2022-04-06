@@ -145,6 +145,14 @@ final class LetterboxUiController {
             return;
         }
         updateRoundedCorners(w);
+        // If there is another main window that is not an application-starting window, we should
+        // update rounded corners for it as well, to avoid flickering rounded corners.
+        final WindowState nonStartingAppW = mActivityRecord.findMainWindow(
+                /* includeStartingApp= */ false);
+        if (nonStartingAppW != null && nonStartingAppW != w) {
+            updateRoundedCorners(nonStartingAppW);
+        }
+
         updateWallpaperForLetterbox(w);
         if (shouldShowLetterboxUi(w)) {
             if (mLetterbox == null) {

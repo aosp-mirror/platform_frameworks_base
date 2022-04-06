@@ -115,7 +115,7 @@ final class ResolveIntentHelper {
             if (!mUserManager.exists(userId)) return null;
             final int callingUid = Binder.getCallingUid();
             flags = computer.updateFlagsForResolve(flags, userId, filterCallingUid, resolveForStart,
-                    computer.isImplicitImageCaptureIntentAndNotSetByDpcLocked(intent, userId,
+                    computer.isImplicitImageCaptureIntentAndNotSetByDpc(intent, userId,
                             resolvedType, flags));
             computer.enforceCrossUserPermission(callingUid, userId, false /*requireFullPermission*/,
                     false /*checkShell*/, "resolve intent");
@@ -170,9 +170,9 @@ final class ResolveIntentHelper {
                 }
                 // If we have saved a preference for a preferred activity for
                 // this Intent, use that.
-                ResolveInfo ri = mPreferredActivityHelper.findPreferredActivityNotLocked(intent,
-                        resolvedType, flags, query, true, false, debug, userId,
-                        queryMayBeFiltered);
+                ResolveInfo ri = mPreferredActivityHelper.findPreferredActivityNotLocked(computer,
+                        intent, resolvedType, flags, query, true, false, debug,
+                        userId, queryMayBeFiltered);
                 if (ri != null) {
                     return ri;
                 }
@@ -317,7 +317,7 @@ final class ResolveIntentHelper {
         final String instantAppPkgName = computer.getInstantAppPackageName(filterCallingUid);
         flags = computer.updateFlagsForResolve(flags, userId, filterCallingUid,
                 false /*includeInstantApps*/,
-                computer.isImplicitImageCaptureIntentAndNotSetByDpcLocked(intent, userId,
+                computer.isImplicitImageCaptureIntentAndNotSetByDpc(intent, userId,
                         resolvedType, flags));
         Intent originalIntent = null;
         ComponentName comp = intent.getComponent();
@@ -562,7 +562,7 @@ final class ResolveIntentHelper {
         final int callingUid = Binder.getCallingUid();
         flags = computer.updateFlagsForResolve(flags, userId, callingUid,
                 false /*includeInstantApps*/,
-                computer.isImplicitImageCaptureIntentAndNotSetByDpcLocked(intent, userId,
+                computer.isImplicitImageCaptureIntentAndNotSetByDpc(intent, userId,
                         resolvedType, flags));
         computer.enforceCrossUserPermission(callingUid, userId, false /*requireFullPermission*/,
                 false /*checkShell*/, "query intent activity options");

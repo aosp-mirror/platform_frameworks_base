@@ -60,6 +60,11 @@ public final class AppTargetEvent implements Parcelable {
      */
     public static final int ACTION_UNPIN = 4;
 
+    /**
+     * Event type constant indicating an app target has been un-dismissed.
+     */
+    public static final int ACTION_UNDISMISS = 5;
+
     private final AppTarget mTarget;
     private final String mLocation;
     private final int mAction;

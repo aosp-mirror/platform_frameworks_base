@@ -23,7 +23,6 @@ import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import android.testing.ViewUtils
 import android.view.LayoutInflater
-import android.view.Surface
 import androidx.test.filters.SmallTest
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
@@ -37,7 +36,6 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
-import org.mockito.Mockito.anyInt
 import org.mockito.Mockito.never
 import org.mockito.Mockito.nullable
 import org.mockito.Mockito.verify
@@ -148,7 +146,7 @@ class UdfpsViewTest : SysuiTestCase() {
         view.startIllumination(onDone)
 
         val illuminator = withArgCaptor<Runnable> {
-            verify(hbmProvider).enableHbm(anyInt(), nullable(Surface::class.java), capture())
+            verify(hbmProvider).enableHbm(capture())
         }
 
         assertThat(view.isIlluminationRequested).isTrue()

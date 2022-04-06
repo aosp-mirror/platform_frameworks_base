@@ -788,7 +788,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     private Layout mLayout;
     private boolean mLocalesChanged = false;
     private int mTextSizeUnit = -1;
-    private LineBreakConfig mLineBreakConfig = new LineBreakConfig();
+    private int mLineBreakStyle = DEFAULT_LINE_BREAK_STYLE;
+    private int mLineBreakWordStyle = DEFAULT_LINE_BREAK_WORD_STYLE;
 
     // This is used to reflect the current user preference for changing font weight and making text
     // more bold.
@@ -1457,13 +1458,12 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     break;
 
                 case com.android.internal.R.styleable.TextView_lineBreakStyle:
-                    mLineBreakConfig.setLineBreakStyle(
-                            a.getInt(attr, LineBreakConfig.LINE_BREAK_STYLE_NONE));
+                    mLineBreakStyle = a.getInt(attr, LineBreakConfig.LINE_BREAK_STYLE_NONE);
                     break;
 
                 case com.android.internal.R.styleable.TextView_lineBreakWordStyle:
-                    mLineBreakConfig.setLineBreakWordStyle(
-                            a.getInt(attr, LineBreakConfig.LINE_BREAK_WORD_STYLE_NONE));
+                    mLineBreakWordStyle = a.getInt(attr,
+                            LineBreakConfig.LINE_BREAK_WORD_STYLE_NONE);
                     break;
 
                 case com.android.internal.R.styleable.TextView_autoSizeTextType:
@@ -4301,13 +4301,12 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             @LineBreakConfig.LineBreakStyle int lineBreakStyle,
             @LineBreakConfig.LineBreakWordStyle int lineBreakWordStyle) {
         boolean updated = false;
-        if (isLineBreakStyleSpecified && mLineBreakConfig.getLineBreakStyle() != lineBreakStyle) {
-            mLineBreakConfig.setLineBreakStyle(lineBreakStyle);
+        if (isLineBreakStyleSpecified && mLineBreakStyle != lineBreakStyle) {
+            mLineBreakStyle = lineBreakStyle;
             updated = true;
         }
-        if (isLineBreakWordStyleSpecified
-                && mLineBreakConfig.getLineBreakWordStyle() != lineBreakWordStyle) {
-            mLineBreakConfig.setLineBreakWordStyle(lineBreakWordStyle);
+        if (isLineBreakWordStyleSpecified && mLineBreakWordStyle != lineBreakWordStyle) {
+            mLineBreakWordStyle = lineBreakWordStyle;
             updated = true;
         }
         if (updated && mLayout != null) {
@@ -4871,50 +4870,72 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     /**
-     * Sets line break configuration indicates which strategy needs to be used when calculating the
-     * text wrapping.
-     * <P>
-     * There are two types of line break rules that can be configured at the same time. One is
-     * line break style(lb) and the other is line break word style(lw). The line break style
-     * affects rule-based breaking. The line break word style affects dictionary-based breaking
-     * and provide phrase-based breaking opportunities. There are several types for the
-     * line break style:
+     * Set the line break style for text wrapping.
+     *
+     * The line break style to indicates the line break strategies can be used when
+     * calculating the text wrapping. The line break style affects rule-based breaking. It
+     * specifies the strictness of line-breaking rules.
+     * There are several types for the line break style:
      * {@link LineBreakConfig#LINE_BREAK_STYLE_LOOSE},
      * {@link LineBreakConfig#LINE_BREAK_STYLE_NORMAL} and
-     * {@link LineBreakConfig#LINE_BREAK_STYLE_STRICT}.
-     * The type for the line break word style is
-     * {@link LineBreakConfig#LINE_BREAK_WORD_STYLE_PHRASE}.
-     * The default values of the line break style and the line break word style are
-     * {@link LineBreakConfig#LINE_BREAK_STYLE_NONE} and
-     * {@link LineBreakConfig#LINE_BREAK_WORD_STYLE_NONE} respectively, indicating that no line
-     * breaking rules are specified.
-     * See <a href="https://drafts.csswg.org/css-text/#line-break-property">
+     * {@link LineBreakConfig#LINE_BREAK_STYLE_STRICT}. The default values of the line break style
+     * is {@link LineBreakConfig#LINE_BREAK_STYLE_NONE}, indicating no breaking rule is specified.
+     * See <a href="https://www.w3.org/TR/css-text-3/#line-break-property">
      *         the line-break property</a>
      *
-     * @param lineBreakConfig the line break config for text wrapping.
+     * @param lineBreakStyle the line break style for the text.
      */
-    public void setLineBreakConfig(@NonNull LineBreakConfig lineBreakConfig) {
-        Objects.requireNonNull(lineBreakConfig);
-        if (mLineBreakConfig.equals(lineBreakConfig)) {
-            return;
-        }
-        mLineBreakConfig.set(lineBreakConfig);
-        if (mLayout != null) {
-            nullLayouts();
-            requestLayout();
-            invalidate();
+    public void setLineBreakStyle(@LineBreakConfig.LineBreakStyle int lineBreakStyle) {
+        if (mLineBreakStyle != lineBreakStyle) {
+            mLineBreakStyle = lineBreakStyle;
+            if (mLayout != null) {
+                nullLayouts();
+                requestLayout();
+                invalidate();
+            }
         }
     }
 
     /**
-     * Get the current line break configuration for text wrapping.
+     * Set the line break word style for text wrapping.
      *
-     * @return the current line break configuration to be used for text wrapping.
+     * The line break word style affects dictionary-based breaking and provide phrase-based
+     * breaking opportunities. The type for the line break word style is
+     * {@link LineBreakConfig#LINE_BREAK_WORD_STYLE_PHRASE}. The default values of the line break
+     * word style is {@link LineBreakConfig#LINE_BREAK_WORD_STYLE_NONE}, indicating no breaking rule
+     * is specified.
+     * See <a href="https://www.w3.org/TR/css-text-3/#word-break-property">
+     *         the word-break property</a>
+     *
+     * @param lineBreakWordStyle the line break word style for the tet
      */
-    public @NonNull LineBreakConfig getLineBreakConfig() {
-        LineBreakConfig lbConfig = new LineBreakConfig();
-        lbConfig.set(mLineBreakConfig);
-        return lbConfig;
+    public void setLineBreakWordStyle(@LineBreakConfig.LineBreakWordStyle int lineBreakWordStyle) {
+        if (mLineBreakWordStyle != lineBreakWordStyle) {
+            mLineBreakWordStyle = lineBreakWordStyle;
+            if (mLayout != null) {
+                nullLayouts();
+                requestLayout();
+                invalidate();
+            }
+        }
+    }
+
+    /**
+     * Get the current line break style for text wrapping.
+     *
+     * @return the current line break style to be used for text wrapping.
+     */
+    public @LineBreakConfig.LineBreakStyle int getLineBreakStyle() {
+        return mLineBreakStyle;
+    }
+
+    /**
+     * Get the current line word break style for text wrapping.
+     *
+     * @return the current line break word style to be used for text wrapping.
+     */
+    public @LineBreakConfig.LineBreakWordStyle int getLineBreakWordStyle() {
+        return mLineBreakWordStyle;
     }
 
     /**
@@ -4924,7 +4945,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * @see PrecomputedText
      */
     public @NonNull PrecomputedText.Params getTextMetricsParams() {
-        return new PrecomputedText.Params(new TextPaint(mTextPaint), mLineBreakConfig,
+        return new PrecomputedText.Params(new TextPaint(mTextPaint),
+                LineBreakConfig.getLineBreakConfig(mLineBreakStyle, mLineBreakWordStyle),
                 getTextDirectionHeuristic(),
                 mBreakStrategy, mHyphenationFrequency);
     }
@@ -4941,13 +4963,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         mTextDir = params.getTextDirection();
         mBreakStrategy = params.getBreakStrategy();
         mHyphenationFrequency = params.getHyphenationFrequency();
-        if (params.getLineBreakConfig() != null) {
-            mLineBreakConfig.set(params.getLineBreakConfig());
-        } else {
-            // Set default value if the line break config in the PrecomputedText.Params is null.
-            mLineBreakConfig.setLineBreakStyle(DEFAULT_LINE_BREAK_STYLE);
-            mLineBreakConfig.setLineBreakWordStyle(DEFAULT_LINE_BREAK_WORD_STYLE);
-        }
+        LineBreakConfig lineBreakConfig = params.getLineBreakConfig();
+        mLineBreakStyle = lineBreakConfig.getLineBreakStyle();
+        mLineBreakWordStyle = lineBreakConfig.getLineBreakWordStyle();
         if (mLayout != null) {
             nullLayouts();
             requestLayout();
@@ -6486,7 +6504,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             }
             final @PrecomputedText.Params.CheckResultUsableResult int checkResult =
                     precomputed.getParams().checkResultUsable(getPaint(), mTextDir, mBreakStrategy,
-                            mHyphenationFrequency, mLineBreakConfig);
+                            mHyphenationFrequency, LineBreakConfig.getLineBreakConfig(
+                                    mLineBreakStyle, mLineBreakWordStyle));
             switch (checkResult) {
                 case PrecomputedText.Params.UNUSABLE:
                     throw new IllegalArgumentException(
@@ -9383,7 +9402,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                         .setHyphenationFrequency(mHyphenationFrequency)
                         .setJustificationMode(mJustificationMode)
                         .setMaxLines(mMaxMode == LINES ? mMaximum : Integer.MAX_VALUE)
-                        .setLineBreakConfig(mLineBreakConfig);
+                        .setLineBreakConfig(LineBreakConfig.getLineBreakConfig(
+                                mLineBreakStyle, mLineBreakWordStyle));
                 if (shouldEllipsize) {
                     builder.setEllipsize(mEllipsize)
                             .setEllipsizedWidth(ellipsisWidth);
@@ -9498,7 +9518,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     .setHyphenationFrequency(mHyphenationFrequency)
                     .setJustificationMode(mJustificationMode)
                     .setMaxLines(mMaxMode == LINES ? mMaximum : Integer.MAX_VALUE)
-                    .setLineBreakConfig(mLineBreakConfig);
+                    .setLineBreakConfig(LineBreakConfig.getLineBreakConfig(
+                            mLineBreakStyle, mLineBreakWordStyle));
             if (shouldEllipsize) {
                 builder.setEllipsize(effectiveEllipsize)
                         .setEllipsizedWidth(ellipsisWidth);
@@ -9866,7 +9887,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 .setJustificationMode(getJustificationMode())
                 .setMaxLines(mMaxMode == LINES ? mMaximum : Integer.MAX_VALUE)
                 .setTextDirection(getTextDirectionHeuristic())
-                .setLineBreakConfig(mLineBreakConfig);
+                .setLineBreakConfig(LineBreakConfig.getLineBreakConfig(
+                        mLineBreakStyle, mLineBreakWordStyle));
 
         final StaticLayout layout = layoutBuilder.build();
 
@@ -11436,7 +11458,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 // Show the IME, except when selecting in read-only text.
                 final InputMethodManager imm = getInputMethodManager();
                 viewClicked(imm);
-                if (isTextEditable() && mEditor.mShowSoftInputOnFocus && imm != null) {
+                if (isTextEditable() && mEditor.mShowSoftInputOnFocus && imm != null
+                        && !showAutofillDialog()) {
                     imm.showSoftInput(this, 0);
                 }
 
@@ -11452,6 +11475,22 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
 
         return superResult;
+    }
+
+    /**
+     * The fill dialog UI is a more conspicuous and efficient interface than dropdown UI.
+     * If autofill suggestions are available when the user clicks on a field that supports filling
+     * the dialog UI, Autofill will pop up a fill dialog. The dialog will take up a larger area
+     * to display the datasets, so it is easy for users to pay attention to the datasets and
+     * selecting a dataset. The autofill dialog is shown as the bottom sheet, the better
+     * experience is not to show the IME if there is a fill dialog.
+     */
+    private boolean showAutofillDialog() {
+        final AutofillManager afm = mContext.getSystemService(AutofillManager.class);
+        if (afm != null) {
+            return afm.showAutofillDialog(this);
+        }
+        return false;
     }
 
     @Override
@@ -12341,9 +12380,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
 
         // A view should not be exposed as clickable/long-clickable to a service because of a
-        // LinkMovementMethod.
+        // LinkMovementMethod or because it has selectable and non-editable text.
         if ((info.isClickable() || info.isLongClickable())
-                && mMovement instanceof LinkMovementMethod) {
+                && (mMovement instanceof LinkMovementMethod
+                || (isTextSelectable() && !isTextEditable()))) {
             if (!hasOnClickListeners()) {
                 info.setClickable(false);
                 info.removeAction(AccessibilityNodeInfo.AccessibilityAction.ACTION_CLICK);
@@ -12575,6 +12615,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                         return true;
                     }
                     if (start >= 0 && start <= end && end <= text.length()) {
+                        requestFocusOnNonEditableSelectableText();
                         Selection.setSelection((Spannable) text, start, end);
                         // Make sure selection mode is engaged.
                         if (mEditor != null) {
@@ -12673,6 +12714,18 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         return handled;
     }
 
+    private void requestFocusOnNonEditableSelectableText() {
+        if (!isTextEditable() && isTextSelectable()) {
+            if (!isEnabled()) {
+                return;
+            }
+
+            if (isFocusable() && !isFocused()) {
+                requestFocus();
+            }
+        }
+    }
+
     private boolean hasSpannableText() {
         return mText != null && mText instanceof Spannable;
     }
@@ -12701,9 +12754,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     /**
      * Returns the text that should be exposed to accessibility services.
      * <p>
-     * This approximates what is displayed visually. If the user has specified
-     * that accessibility services should speak passwords, this method will
-     * bypass any password transformation method and return unobscured text.
+     * This approximates what is displayed visually.
      *
      * @return the text that should be exposed to accessibility services, may
      *         be {@code null} if no text is set
@@ -13679,6 +13730,13 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      */
     public boolean isAccessibilitySelectionExtendable() {
         return true;
+    }
+
+    /**
+     * @hide
+     */
+    public void prepareForExtendedAccessibilitySelection() {
+        requestFocusOnNonEditableSelectableText();
     }
 
     /**

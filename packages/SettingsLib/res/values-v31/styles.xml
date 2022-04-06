@@ -15,7 +15,8 @@
   limitations under the License.
   -->
 <resources>
-    <style name="SettingsLibTabsTextAppearance" parent="@android:style/TextAppearance.DeviceDefault.Widget.ActionBar.Title">
+    <style name="SettingsLibTabsTextAppearance"
+           parent="@android:style/TextAppearance.DeviceDefault.Widget.ActionBar.Title">
         <item name="android:textSize">16sp</item>
     </style>
 
@@ -25,6 +26,7 @@
         <item name="android:layout_height">48dp</item>
         <item name="android:layout_marginStart">?android:attr/listPreferredItemPaddingStart</item>
         <item name="android:layout_marginEnd">?android:attr/listPreferredItemPaddingEnd</item>
+        <item name="tabMaxWidth">0dp</item>
         <item name="tabGravity">fill</item>
         <item name="tabBackground">@drawable/settingslib_tabs_background</item>
         <item name="tabIndicator">@drawable/settingslib_tabs_indicator_background</item>

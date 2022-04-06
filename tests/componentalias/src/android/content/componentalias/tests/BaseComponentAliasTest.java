@@ -37,7 +37,7 @@ public class BaseComponentAliasTest {
     protected static final Context sContext = InstrumentationRegistry.getTargetContext();
 
     protected static final DeviceConfigStateHelper sDeviceConfig = new DeviceConfigStateHelper(
-            DeviceConfig.NAMESPACE_ACTIVITY_MANAGER);
+            DeviceConfig.NAMESPACE_ACTIVITY_MANAGER_COMPONENT_ALIAS);
     @Before
     public void enableComponentAliasWithCompatFlag() throws Exception {
         Assume.assumeTrue(Build.isDebuggable());

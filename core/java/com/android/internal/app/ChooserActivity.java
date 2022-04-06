@@ -28,7 +28,6 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.Activity;
 import android.app.ActivityManager;
-import android.app.ActivityTaskManager;
 import android.app.SharedElementCallback;
 import android.app.prediction.AppPredictionContext;
 import android.app.prediction.AppPredictionManager;
@@ -71,11 +70,9 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
-import android.os.IBinder;
 import android.os.Message;
 import android.os.Parcelable;
 import android.os.PatternMatcher;
-import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.UserHandle;
 import android.os.UserManager;
@@ -107,7 +104,6 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.Space;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
@@ -156,18 +152,6 @@ public class ChooserActivity extends ResolverActivity implements
         SelectableTargetInfoCommunicator {
     private static final String TAG = "ChooserActivity";
 
-    /**
-     * Whether this chooser is operating in "headless springboard" mode (as determined during
-     * onCreate). In this mode, our activity sits in the background and waits for the new
-     * "unbundled" chooser to handle the Sharesheet experience; the system ChooserActivity is
-     * responsible only for providing the startActivityAsCaller permission token and keeping it
-     * valid for the life of the unbundled delegate activity.
-     *
-     * TODO: when the unbundled chooser is fully launched, the system-side "springboard" can use a
-     * simpler implementation that doesn't inherit from ResolverActivity.
-     */
-    private boolean mIsHeadlessSpringboardActivity;
-
     private AppPredictor mPersonalAppPredictor;
     private AppPredictor mWorkAppPredictor;
     private boolean mShouldDisplayLandscape;
@@ -183,16 +167,6 @@ public class ChooserActivity extends ResolverActivity implements
     public static final String EXTRA_PRIVATE_RETAIN_IN_ON_STOP
             = "com.android.internal.app.ChooserActivity.EXTRA_PRIVATE_RETAIN_IN_ON_STOP";
 
-    /**
-     * Boolean extra added to "unbundled Sharesheet" delegation intents to signal whether the app
-     * prediction service is available. Our query of the service <em>availability</em> depends on
-     * privileges that are only available in the system, even though the service itself would then
-     * be available to the unbundled component. For now, we just include the query result as part of
-     * the handover intent.
-     * TODO: investigate whether the privileged query is necessary to determine the availability.
-     */
-    public static final String EXTRA_IS_APP_PREDICTION_SERVICE_AVAILABLE =
-            "com.android.internal.app.ChooserActivity.EXTRA_IS_APP_PREDICTION_SERVICE_AVAILABLE";
 
     /**
      * Transition name for the first image preview.
@@ -262,11 +236,6 @@ public class ChooserActivity extends ResolverActivity implements
     private static final int NO_DIRECT_SHARE_ANIM_IN_MILLIS = 200;
 
     private static final float DIRECT_SHARE_EXPANSION_RATE = 0.78f;
-
-    private boolean mEnableChooserDelegate =
-            DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_SYSTEMUI,
-                    SystemUiDeviceConfigFlags.USE_DELEGATE_CHOOSER,
-                    false);
 
     private static final int DEFAULT_SALT_EXPIRATION_DAYS = 7;
     private int mMaxHashSaltDays = DeviceConfig.getInt(DeviceConfig.NAMESPACE_SYSTEMUI,
@@ -534,12 +503,6 @@ public class ChooserActivity extends ResolverActivity implements
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        if (handOverToDelegateChooser()) {
-            super_onCreate(savedInstanceState);
-            mIsHeadlessSpringboardActivity = true;
-            return;
-        }
-
         final long intentReceivedTime = System.currentTimeMillis();
         getChooserActivityLogger().logSharesheetTriggered();
         // This is the only place this value is being set. Effectively final.
@@ -753,64 +716,6 @@ public class ChooserActivity extends ResolverActivity implements
             }
         });
         postponeEnterTransition();
-    }
-
-    private boolean handOverToDelegateChooser() {
-        // Check the explicit classname so that we don't interfere with the flow of any subclasses.
-        if (!this.getClass().getName().equals("com.android.internal.app.ChooserActivity")
-                || !mEnableChooserDelegate) {
-            return false;
-        }
-
-        try {
-            Intent delegationIntent = new Intent();
-            final ComponentName delegateActivity = ComponentName.unflattenFromString(
-                    Resources.getSystem().getString(R.string.config_chooserActivity));
-            IBinder permissionToken = ActivityTaskManager.getService()
-                    .requestStartActivityPermissionToken(delegateActivity);
-            delegationIntent.setComponent(delegateActivity);
-            delegationIntent.putExtra(Intent.EXTRA_INTENT, getIntent());
-            delegationIntent.putExtra(ActivityTaskManager.EXTRA_PERMISSION_TOKEN, permissionToken);
-            delegationIntent.addFlags(Intent.FLAG_ACTIVITY_PREVIOUS_IS_TOP);
-
-            // Don't close until the delegate finishes, or the token will be invalidated.
-            mAwaitingDelegateResponse = true;
-            startActivityForResult(delegationIntent, REQUEST_CODE_RETURN_FROM_DELEGATE_CHOOSER);
-            return true;
-        } catch (RemoteException e) {
-            Log.e(TAG, e.toString());
-        }
-        return false;
-    }
-
-    @Override
-    protected void onRestart() {
-        if (mIsHeadlessSpringboardActivity) {
-            super_onRestart();
-            return;
-        }
-
-        super.onRestart();
-    }
-
-    @Override
-    protected void onSaveInstanceState(Bundle outState) {
-        if (mIsHeadlessSpringboardActivity) {
-            super_onSaveInstanceState(outState);
-            return;
-        }
-
-        super.onSaveInstanceState(outState);
-    }
-
-    @Override
-    protected void onRestoreInstanceState(Bundle savedInstanceState) {
-        if (mIsHeadlessSpringboardActivity) {
-            super_onRestoreInstanceState(savedInstanceState);
-            return;
-        }
-
-        super.onRestoreInstanceState(savedInstanceState);
     }
 
     @Override
@@ -1054,7 +959,6 @@ public class ChooserActivity extends ResolverActivity implements
             ClipboardManager clipboardManager = (ClipboardManager) getSystemService(
                     Context.CLIPBOARD_SERVICE);
             clipboardManager.setPrimaryClipAsPackage(clipData, getReferrerPackageName());
-            Toast.makeText(getApplicationContext(), R.string.copied, Toast.LENGTH_SHORT).show();
 
             // Log share completion via copy
             LogMaker targetLogMaker = new LogMaker(
@@ -1071,12 +975,13 @@ public class ChooserActivity extends ResolverActivity implements
     }
 
     @Override
-    public void onConfigurationChanged(Configuration newConfig) {
-        if (mIsHeadlessSpringboardActivity) {
-            super_onConfigurationChanged(newConfig);
-            return;
-        }
+    protected void onResume() {
+        super.onResume();
+        Log.d(TAG, "onResume: " + getComponentName().flattenToShortString());
+    }
 
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
         ViewPager viewPager = findViewById(R.id.profile_pager);
         if (viewPager.isLayoutRtl()) {
@@ -1249,9 +1154,7 @@ public class ChooserActivity extends ResolverActivity implements
                             -1);
                     // Action bar is user-independent, always start as primary
                     safelyStartActivityAsUser(ti, getPersonalProfileUserHandle());
-                    if (!mAwaitingDelegateResponse) {
-                        finish();
-                    }
+                    finish();
                 }
         );
         b.setId(R.id.chooser_nearby_button);
@@ -1273,9 +1176,7 @@ public class ChooserActivity extends ResolverActivity implements
                             -1);
                     // Action bar is user-independent, always start as primary
                     safelyStartActivityAsUser(ti, getPersonalProfileUserHandle());
-                    if (!mAwaitingDelegateResponse) {
-                        finish();
-                    }
+                    finish();
                 }
         );
         b.setId(R.id.chooser_edit_button);
@@ -1628,10 +1529,6 @@ public class ChooserActivity extends ResolverActivity implements
     @Override
     protected void onDestroy() {
         super.onDestroy();
-
-        if (mIsHeadlessSpringboardActivity) {
-            return;
-        }
 
         if (mRefinementResultReceiver != null) {
             mRefinementResultReceiver.destroy();
@@ -2326,9 +2223,7 @@ public class ChooserActivity extends ResolverActivity implements
             TargetInfo clonedTarget = selectedTarget.cloneFilledIn(matchingIntent, 0);
             if (super.onTargetSelected(clonedTarget, false)) {
                 updateModelAndChooserCounts(clonedTarget);
-                if (!mAwaitingDelegateResponse) {
-                    finish();
-                }
+                finish();
                 return;
             }
         }

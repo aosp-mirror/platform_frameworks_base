@@ -781,7 +781,11 @@ interface IPackageManager {
 
     boolean isAutoRevokeWhitelisted(String packageName);
 
-    void grantImplicitAccess(int queryingUid, String visibleAuthority);
+    void makeProviderVisible(int recipientAppId, String visibleAuthority);
+
+    @JavaPassthrough(annotation = "@android.annotation.RequiresPermission(android.Manifest"
+            + ".permission.MAKE_UID_VISIBLE)")
+    void makeUidVisible(int recipientAppId, int visibleUid);
 
     IBinder getHoldLockToken();
 

@@ -16,6 +16,7 @@
 
 package com.android.systemui.media
 
+import org.mockito.Mockito.`when` as whenever
 import android.graphics.Rect
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
@@ -54,7 +55,6 @@ import org.mockito.Mockito.clearInvocations
 import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
 import org.mockito.junit.MockitoJUnit
-import org.mockito.Mockito.`when` as whenever
 
 @SmallTest
 @RunWith(AndroidTestingRunner::class)
@@ -117,9 +117,9 @@ class MediaHierarchyManagerTest : SysuiTestCase() {
                 dreamOverlayStateController)
         verify(wakefulnessLifecycle).addObserver(wakefullnessObserver.capture())
         verify(statusBarStateController).addCallback(statusBarCallback.capture())
-        setupHost(lockHost, MediaHierarchyManager.LOCATION_LOCKSCREEN)
-        setupHost(qsHost, MediaHierarchyManager.LOCATION_QS)
-        setupHost(qqsHost, MediaHierarchyManager.LOCATION_QQS)
+        setupHost(lockHost, MediaHierarchyManager.LOCATION_LOCKSCREEN, LOCKSCREEN_TOP)
+        setupHost(qsHost, MediaHierarchyManager.LOCATION_QS, QS_TOP)
+        setupHost(qqsHost, MediaHierarchyManager.LOCATION_QQS, QQS_TOP)
         `when`(statusBarStateController.state).thenReturn(StatusBarState.SHADE)
         `when`(mediaCarouselController.mediaCarouselScrollHandler)
                 .thenReturn(mediaCarouselScrollHandler)
@@ -130,9 +130,9 @@ class MediaHierarchyManagerTest : SysuiTestCase() {
         clearInvocations(mediaCarouselController)
     }
 
-    private fun setupHost(host: MediaHost, location: Int) {
+    private fun setupHost(host: MediaHost, location: Int, top: Int) {
         `when`(host.location).thenReturn(location)
-        `when`(host.currentBounds).thenReturn(Rect())
+        `when`(host.currentBounds).thenReturn(Rect(0, top, 0, top))
         `when`(host.hostView).thenReturn(uniqueObjectHostView)
         `when`(host.visible).thenReturn(true)
         mediaHiearchyManager.register(host)
@@ -223,6 +223,18 @@ class MediaHierarchyManagerTest : SysuiTestCase() {
     }
 
     @Test
+    fun calculateTransformationType_onLockSplitShade_goingToFullShade_mediaInvisible_returnsFade() {
+        enableSplitShade()
+        goToLockscreen()
+        expandQS()
+        whenever(lockHost.visible).thenReturn(false)
+        mediaHiearchyManager.setTransitionToFullShadeAmount(10000f)
+
+        val transformType = mediaHiearchyManager.calculateTransformationType()
+        assertThat(transformType).isEqualTo(MediaHierarchyManager.TRANSFORMATION_TYPE_FADE)
+    }
+
+    @Test
     fun calculateTransformationType_onLockShade_inSplitShade_notExpanding_returnsFade() {
         enableSplitShade()
         goToLockscreen()
@@ -257,6 +269,42 @@ class MediaHierarchyManagerTest : SysuiTestCase() {
         verify(mediaCarouselController).closeGuts()
     }
 
+    @Test
+    fun getGuidedTransformationTranslationY_notInGuidedTransformation_returnsNegativeNumber() {
+        assertThat(mediaHiearchyManager.getGuidedTransformationTranslationY()).isLessThan(0)
+    }
+
+    @Test
+    fun getGuidedTransformationTranslationY_inGuidedTransformation_returnsCurrentTranslation() {
+        enterGuidedTransformation()
+
+        val expectedTranslation = LOCKSCREEN_TOP - QS_TOP
+        assertThat(mediaHiearchyManager.getGuidedTransformationTranslationY())
+                .isEqualTo(expectedTranslation)
+    }
+
+    @Test
+    fun isCurrentlyInGuidedTransformation_hostsVisible_returnsTrue() {
+        goToLockscreen()
+        enterGuidedTransformation()
+        whenever(lockHost.visible).thenReturn(true)
+        whenever(qsHost.visible).thenReturn(true)
+        whenever(qqsHost.visible).thenReturn(true)
+
+        assertThat(mediaHiearchyManager.isCurrentlyInGuidedTransformation()).isTrue()
+    }
+
+    @Test
+    fun isCurrentlyInGuidedTransformation_hostNotVisible_returnsTrue() {
+        goToLockscreen()
+        enterGuidedTransformation()
+        whenever(lockHost.visible).thenReturn(false)
+        whenever(qsHost.visible).thenReturn(true)
+        whenever(qqsHost.visible).thenReturn(true)
+
+        assertThat(mediaHiearchyManager.isCurrentlyInGuidedTransformation()).isFalse()
+    }
+
     private fun enableSplitShade() {
         context.getOrCreateTestableResources().addOverride(
             R.bool.config_use_split_notification_shade, true
@@ -283,5 +331,17 @@ class MediaHierarchyManagerTest : SysuiTestCase() {
 
     private fun expandQS() {
         mediaHiearchyManager.qsExpansion = 1.0f
+    }
+
+    private fun enterGuidedTransformation() {
+        mediaHiearchyManager.qsExpansion = 1.0f
+        goToLockscreen()
+        mediaHiearchyManager.setTransitionToFullShadeAmount(123f)
+    }
+
+    companion object {
+        private const val QQS_TOP = 123
+        private const val QS_TOP = 456
+        private const val LOCKSCREEN_TOP = 789
     }
 }

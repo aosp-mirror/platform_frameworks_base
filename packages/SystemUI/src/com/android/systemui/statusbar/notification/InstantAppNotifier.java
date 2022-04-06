@@ -16,11 +16,9 @@
 
 package com.android.systemui.statusbar.notification;
 
-import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
-import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -179,25 +177,6 @@ public class InstantAppNotifier extends CoreStartable
                                         new UserHandle(v.second));
                             });
                 });
-    }
-
-    /**
-     * Posts an instant app notification if the top activity of the primary container in the
-     * splitted screen is an instant app and the corresponding instant app notification is not
-     * posted yet. If the notification already exists, this method removes it from {@code
-     * notifs} in the arguments.
-     */
-    private void checkAndPostForPrimaryScreen(
-            @NonNull ArraySet<Pair<String, Integer>> notifs,
-            @NonNull NotificationManager noMan,
-            @NonNull IPackageManager pm) {
-        try {
-            final RootTaskInfo info = ActivityTaskManager.getService().getRootTaskInfo(
-                    WINDOWING_MODE_SPLIT_SCREEN_PRIMARY, ACTIVITY_TYPE_UNDEFINED);
-            checkAndPostForStack(info, notifs, noMan, pm);
-        } catch (RemoteException e) {
-            e.rethrowFromSystemServer();
-        }
     }
 
     /**

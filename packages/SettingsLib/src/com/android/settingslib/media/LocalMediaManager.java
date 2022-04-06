@@ -28,6 +28,7 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import androidx.annotation.IntDef;
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 
@@ -63,12 +64,14 @@ public class LocalMediaManager implements BluetoothCallback {
     @IntDef({MediaDeviceState.STATE_CONNECTED,
             MediaDeviceState.STATE_CONNECTING,
             MediaDeviceState.STATE_DISCONNECTED,
-            MediaDeviceState.STATE_CONNECTING_FAILED})
+            MediaDeviceState.STATE_CONNECTING_FAILED,
+            MediaDeviceState.STATE_SELECTED})
     public @interface MediaDeviceState {
         int STATE_CONNECTED = 0;
         int STATE_CONNECTING = 1;
         int STATE_DISCONNECTED = 2;
         int STATE_CONNECTING_FAILED = 3;
+        int STATE_SELECTED = 4;
     }
 
     private final Collection<DeviceCallback> mCallbacks = new CopyOnWriteArrayList<>();
@@ -237,13 +240,24 @@ public class LocalMediaManager implements BluetoothCallback {
 
     /**
      * Dispatch a change in the about-to-connect device. See
-     * {@link DeviceCallback#onAboutToConnectDeviceChanged} for more information.
+     * {@link DeviceCallback#onAboutToConnectDeviceAdded} for more information.
      */
-    public void dispatchAboutToConnectDeviceChanged(
-            @Nullable String deviceName,
+    public void dispatchAboutToConnectDeviceAdded(
+            @NonNull String deviceAddress,
+            @NonNull String deviceName,
             @Nullable Drawable deviceIcon) {
         for (DeviceCallback callback : getCallbacks()) {
-            callback.onAboutToConnectDeviceChanged(deviceName, deviceIcon);
+            callback.onAboutToConnectDeviceAdded(deviceAddress, deviceName, deviceIcon);
+        }
+    }
+
+    /**
+     * Dispatch a change in the about-to-connect device. See
+     * {@link DeviceCallback#onAboutToConnectDeviceRemoved} for more information.
+     */
+    public void dispatchAboutToConnectDeviceRemoved() {
+        for (DeviceCallback callback : getCallbacks()) {
+            callback.onAboutToConnectDeviceRemoved();
         }
     }
 
@@ -703,13 +717,27 @@ public class LocalMediaManager implements BluetoothCallback {
          * connect imminently and should be displayed as the current device in the media player.
          * See [AudioManager.muteAwaitConnection] for more details.
          *
-         * @param deviceName the name of the device (displayed to the user).
-         * @param deviceIcon the icon that should be used with the device.
+         * The information in the most recent callback should override information from any previous
+         * callbacks.
+         *
+         * @param deviceAddress the address of the device. {@see AudioDeviceAttributes.address}.
+         *                      If present, we'll use this address to fetch the full information
+         *                      about the device (if we can find that information).
+         * @param deviceName the name of the device (displayed to the user). Used as a backup in
+         *                   case using deviceAddress doesn't work.
+         * @param deviceIcon the icon that should be used with the device. Used as a backup in case
+         *                   using deviceAddress doesn't work.
          */
-        default void onAboutToConnectDeviceChanged(
-                @Nullable String deviceName,
+        default void onAboutToConnectDeviceAdded(
+                @NonNull String deviceAddress,
+                @NonNull String deviceName,
                 @Nullable Drawable deviceIcon
         ) {}
+
+        /**
+         * Callback for notifying that we no longer have an about-to-connect device.
+         */
+        default void onAboutToConnectDeviceRemoved() {}
     }
 
     /**

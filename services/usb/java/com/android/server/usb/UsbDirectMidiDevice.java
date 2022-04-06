@@ -84,7 +84,7 @@ public final class UsbDirectMidiDevice implements Closeable {
     private final Object mLock = new Object();
     private boolean mIsOpen;
 
-    private final UsbMidiPacketConverter mUsbMidiPacketConverter = new UsbMidiPacketConverter();
+    private UsbMidiPacketConverter mUsbMidiPacketConverter;
 
     private final MidiDeviceServer.Callback mCallback = new MidiDeviceServer.Callback() {
 
@@ -264,6 +264,11 @@ public final class UsbDirectMidiDevice implements Closeable {
         Log.d(TAG, "openLocked()");
         UsbManager manager = mContext.getSystemService(UsbManager.class);
 
+        // Converting from raw MIDI to USB MIDI is not thread-safe.
+        // UsbMidiPacketConverter creates a converter from raw MIDI
+        // to USB MIDI for each USB output.
+        mUsbMidiPacketConverter = new UsbMidiPacketConverter(mNumOutputs);
+
         mUsbDeviceConnections = new ArrayList<UsbDeviceConnection>(mUsbInterfaces.size());
         mInputUsbEndpoints = new ArrayList<ArrayList<UsbEndpoint>>(mUsbInterfaces.size());
         mOutputUsbEndpoints = new ArrayList<ArrayList<UsbEndpoint>>(mUsbInterfaces.size());
@@ -415,7 +420,7 @@ public final class UsbDirectMidiDevice implements Closeable {
                             } else {
                                 convertedArray =
                                         mUsbMidiPacketConverter.rawMidiToUsbMidi(
-                                                 event.data, event.count);
+                                                 event.data, event.count, portFinal);
                             }
 
                             if (DEBUG) {
@@ -517,6 +522,8 @@ public final class UsbDirectMidiDevice implements Closeable {
         mUsbDeviceConnections = null;
         mInputUsbEndpoints = null;
         mOutputUsbEndpoints = null;
+
+        mUsbMidiPacketConverter = null;
 
         mIsOpen = false;
     }

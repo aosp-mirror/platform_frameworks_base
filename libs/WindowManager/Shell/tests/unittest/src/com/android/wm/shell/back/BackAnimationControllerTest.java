@@ -16,10 +16,16 @@
 
 package com.android.wm.shell.back;
 
+import static android.window.BackNavigationInfo.KEY_TRIGGER_BACK;
+
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
 import android.app.IActivityTaskManager;
@@ -44,6 +50,7 @@ import com.android.wm.shell.TestShellExecutor;
 import com.android.wm.shell.common.ShellExecutor;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -78,6 +85,7 @@ public class BackAnimationControllerTest {
         MockitoAnnotations.initMocks(this);
         mController = new BackAnimationController(
                 mShellExecutor, mTransaction, mActivityTaskManager, mContext);
+        mController.setEnableAnimations(true);
     }
 
     private void createNavigationInfo(RemoteAnimationTarget topAnimationTarget,
@@ -99,6 +107,14 @@ public class BackAnimationControllerTest {
         }
     }
 
+    private void createNavigationInfo(BackNavigationInfo.Builder builder) {
+        try {
+            doReturn(builder.build()).when(mActivityTaskManager).startBackNavigation();
+        } catch (RemoteException ex) {
+            ex.rethrowFromSystemServer();
+        }
+    }
+
     RemoteAnimationTarget createAnimationTarget() {
         SurfaceControl topWindowLeash = new SurfaceControl();
         return new RemoteAnimationTarget(-1, RemoteAnimationTarget.MODE_CLOSING, topWindowLeash,
@@ -107,7 +123,20 @@ public class BackAnimationControllerTest {
                 true, null, null, null, false, -1);
     }
 
+    private void triggerBackGesture() {
+        MotionEvent event = MotionEvent.obtain(0, 0, MotionEvent.ACTION_DOWN, 0, 0, 0);
+        mController.onMotionEvent(event, event.getAction(), BackEvent.EDGE_LEFT);
+
+        event = MotionEvent.obtain(10, 0, MotionEvent.ACTION_MOVE, 100, 100, 0);
+        mController.onMotionEvent(event, event.getAction(), BackEvent.EDGE_LEFT);
+
+        mController.setTriggerBack(true);
+        event = MotionEvent.obtain(10, 0, MotionEvent.ACTION_UP, 100, 100, 0);
+        mController.onMotionEvent(event, event.getAction(), BackEvent.EDGE_LEFT);
+    }
+
     @Test
+    @Ignore("b/207481538")
     public void crossActivity_screenshotAttachedAndVisible() {
         SurfaceControl screenshotSurface = new SurfaceControl();
         HardwareBuffer hardwareBuffer = mock(HardwareBuffer.class);
@@ -115,6 +144,7 @@ public class BackAnimationControllerTest {
                 BackNavigationInfo.TYPE_CROSS_ACTIVITY);
         mController.onMotionEvent(
                 MotionEvent.obtain(0, 0, MotionEvent.ACTION_DOWN, 0, 0, 0),
+                MotionEvent.ACTION_DOWN,
                 BackEvent.EDGE_LEFT);
         verify(mTransaction).setBuffer(screenshotSurface, hardwareBuffer);
         verify(mTransaction).setVisibility(screenshotSurface, true);
@@ -130,12 +160,35 @@ public class BackAnimationControllerTest {
                 BackNavigationInfo.TYPE_CROSS_ACTIVITY);
         mController.onMotionEvent(
                 MotionEvent.obtain(0, 0, MotionEvent.ACTION_DOWN, 0, 0, 0),
+                MotionEvent.ACTION_DOWN,
                 BackEvent.EDGE_LEFT);
         mController.onMotionEvent(
                 MotionEvent.obtain(10, 0, MotionEvent.ACTION_MOVE, 100, 100, 0),
+                MotionEvent.ACTION_MOVE,
                 BackEvent.EDGE_LEFT);
-        verify(mTransaction).setPosition(animationTarget.leash, 100, 100);
+        // b/207481538, we check that the surface is not moved for now, we can re-enable this once
+        // we implement the animation
+        verify(mTransaction, never()).setScale(eq(screenshotSurface), anyInt(), anyInt());
+        verify(mTransaction, never()).setPosition(animationTarget.leash, 100, 100);
         verify(mTransaction, atLeastOnce()).apply();
+    }
+
+    @Test
+    public void verifyAnimationFinishes() {
+        RemoteAnimationTarget animationTarget = createAnimationTarget();
+        boolean[] backNavigationDone = new boolean[]{false};
+        boolean[] triggerBack = new boolean[]{false};
+        createNavigationInfo(new BackNavigationInfo.Builder()
+                .setDepartingAnimationTarget(animationTarget)
+                .setType(BackNavigationInfo.TYPE_CROSS_ACTIVITY)
+                .setOnBackNavigationDone(
+                        new RemoteCallback(result -> {
+                            backNavigationDone[0] = true;
+                            triggerBack[0] = result.getBoolean(KEY_TRIGGER_BACK);
+                        })));
+        triggerBackGesture();
+        assertTrue("Navigation Done callback not called", backNavigationDone[0]);
+        assertTrue("TriggerBack should have been true", triggerBack[0]);
     }
 
     @Test
@@ -148,12 +201,14 @@ public class BackAnimationControllerTest {
         // Check that back start is dispatched.
         mController.onMotionEvent(
                 MotionEvent.obtain(0, 0, MotionEvent.ACTION_DOWN, 0, 0, 0),
+                MotionEvent.ACTION_DOWN,
                 BackEvent.EDGE_LEFT);
         verify(mIOnBackInvokedCallback).onBackStarted();
 
         // Check that back progress is dispatched.
         mController.onMotionEvent(
                 MotionEvent.obtain(10, 0, MotionEvent.ACTION_MOVE, 100, 100, 0),
+                MotionEvent.ACTION_MOVE,
                 BackEvent.EDGE_LEFT);
         ArgumentCaptor<BackEvent> backEventCaptor = ArgumentCaptor.forClass(BackEvent.class);
         verify(mIOnBackInvokedCallback).onBackProgressed(backEventCaptor.capture());
@@ -163,6 +218,7 @@ public class BackAnimationControllerTest {
         mController.setTriggerBack(true);   // Fake trigger back
         mController.onMotionEvent(
                 MotionEvent.obtain(0, 0, MotionEvent.ACTION_UP, 0, 0, 0),
+                MotionEvent.ACTION_UP,
                 BackEvent.EDGE_LEFT);
         verify(mIOnBackInvokedCallback).onBackInvoked();
     }

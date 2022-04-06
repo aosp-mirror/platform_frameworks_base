@@ -42,6 +42,7 @@ import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.common.annotations.ExternalThread;
 import com.android.wm.shell.compatui.CompatUIWindowManager.CompatUIHintsState;
 import com.android.wm.shell.compatui.letterboxedu.LetterboxEduWindowManager;
+import com.android.wm.shell.transition.Transitions;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -49,6 +50,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
+
+import dagger.Lazy;
 
 /**
  * Controller to show/update compat UI components on Tasks based on whether the foreground
@@ -102,6 +105,7 @@ public class CompatUIController implements OnDisplaysChangedListener,
     private final DisplayImeController mImeController;
     private final SyncTransactionQueue mSyncQueue;
     private final ShellExecutor mMainExecutor;
+    private final Lazy<Transitions> mTransitionsLazy;
     private final CompatUIImpl mImpl = new CompatUIImpl();
 
     private CompatUICallback mCallback;
@@ -118,13 +122,15 @@ public class CompatUIController implements OnDisplaysChangedListener,
             DisplayInsetsController displayInsetsController,
             DisplayImeController imeController,
             SyncTransactionQueue syncQueue,
-            ShellExecutor mainExecutor) {
+            ShellExecutor mainExecutor,
+            Lazy<Transitions> transitionsLazy) {
         mContext = context;
         mDisplayController = displayController;
         mDisplayInsetsController = displayInsetsController;
         mImeController = imeController;
         mSyncQueue = syncQueue;
         mMainExecutor = mainExecutor;
+        mTransitionsLazy = transitionsLazy;
         mDisplayController.addDisplayWindowListener(this);
         mImeController.addPositionProcessor(this);
         mCompatUIHintsState = new CompatUIHintsState();
@@ -302,6 +308,7 @@ public class CompatUIController implements OnDisplaysChangedListener,
             ShellTaskOrganizer.TaskListener taskListener) {
         return new LetterboxEduWindowManager(context, taskInfo,
                 mSyncQueue, taskListener, mDisplayController.getDisplayLayout(taskInfo.displayId),
+                mTransitionsLazy.get(),
                 this::onLetterboxEduDismissed);
     }
 

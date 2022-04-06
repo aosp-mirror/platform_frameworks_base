@@ -47,6 +47,7 @@ import android.widget.TextView;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.systemui.R;
+import com.android.systemui.util.LargeScreenUtils;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -814,7 +815,7 @@ public class AuthBiometricView extends LinearLayout {
     }
 
     private boolean isLargeDisplay() {
-        return com.android.systemui.util.Utils.shouldUseSplitNotificationShade(getResources());
+        return LargeScreenUtils.shouldUseSplitNotificationShade(getResources());
     }
 
     @Override

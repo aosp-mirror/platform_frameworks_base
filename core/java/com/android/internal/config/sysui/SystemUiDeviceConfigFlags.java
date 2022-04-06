@@ -514,9 +514,10 @@ public final class SystemUiDeviceConfigFlags {
             "is_nearby_share_first_target_in_ranked_app";
 
     /**
-     * (boolean) Whether to enable the new unbundled "delegate chooser" implementation.
+     * (boolean) Whether to enable the new unbundled sharesheet
+     * (com.android.intentresolver.ChooserActivity).
      */
-    public static final String USE_DELEGATE_CHOOSER = "use_delegate_chooser";
+    public static final String USE_UNBUNDLED_SHARESHEET = "use_unbundled_sharesheet";
 
     /**
      * (string) Name of the default QR code scanner activity. On the eligible devices this activity

@@ -23,7 +23,7 @@
 #include <android_runtime/AndroidRuntime.h>
 #include <android_runtime/Log.h>
 #include <binder/IPCThreadState.h>
-#include <ftl/cast.h>
+#include <ftl/flags.h>
 #include <gui/SurfaceControl.h>
 #include <gui/WindowInfo.h>
 #include <nativehelper/JNIHelp.h>
@@ -151,7 +151,7 @@ bool NativeInputWindowHandle::updateInfo() {
         env->DeleteLocalRef(regionObj);
     }
 
-    const auto flags = Flags<WindowInfo::Flag>(
+    const auto flags = ftl::Flags<WindowInfo::Flag>(
             env->GetIntField(obj, gInputWindowHandleClassInfo.layoutParamsFlags));
     const auto type = static_cast<WindowInfo::Type>(
             env->GetIntField(obj, gInputWindowHandleClassInfo.layoutParamsType));

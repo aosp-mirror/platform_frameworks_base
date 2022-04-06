@@ -24,4 +24,5 @@
     <string name="pip_move" msgid="1544227837964635439">"ຍ້າຍ PIP"</string>
     <string name="pip_expand" msgid="7605396312689038178">"ຂະຫຍາຍ PIP"</string>
     <string name="pip_collapse" msgid="5732233773786896094">"ຫຍໍ້ PIP ລົງ"</string>
+    <string name="pip_edu_text" msgid="3672999496647508701">" ກົດ "<annotation icon="home_icon">" HOME "</annotation>" ສອງເທື່ອສຳລັບການຄວບຄຸມ"</string>
 </resources>

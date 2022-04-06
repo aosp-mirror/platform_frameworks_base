@@ -185,7 +185,7 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
         super.dump(fd, pw, args);
         pw.println("mShowingUdfpsBouncer=" + mShowingUdfpsBouncer);
         pw.println("mFaceDetectRunning=" + mFaceDetectRunning);
-        pw.println("mStatusBarState=" + StatusBarState.toShortString(mStatusBarState));
+        pw.println("mStatusBarState=" + StatusBarState.toString(mStatusBarState));
         pw.println("mQsExpanded=" + mQsExpanded);
         pw.println("mIsBouncerVisible=" + mIsBouncerVisible);
         pw.println("mInputBouncerHiddenAmount=" + mInputBouncerHiddenAmount);

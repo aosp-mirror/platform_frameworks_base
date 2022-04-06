@@ -20,5 +20,7 @@
     <dimen name="status_bar_icon_padding">1dp</dimen>
 
     <dimen name="controls_padding_horizontal">75dp</dimen>
+
+    <dimen name="large_screen_shade_header_height">56dp</dimen>
 </resources>
 

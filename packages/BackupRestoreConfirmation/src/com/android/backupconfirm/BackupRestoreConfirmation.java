@@ -27,8 +27,6 @@ import android.os.Handler;
 import android.os.Message;
 import android.os.RemoteException;
 import android.os.ServiceManager;
-import android.os.storage.IStorageManager;
-import android.os.storage.StorageManager;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Slog;
@@ -66,10 +64,8 @@ public class BackupRestoreConfirmation extends Activity {
 
     Handler mHandler;
     IBackupManager mBackupManager;
-    IStorageManager mStorageManager;
     FullObserver mObserver;
     int mToken;
-    boolean mIsEncrypted;
     boolean mDidAcknowledge;
     String mAction;
 
@@ -144,7 +140,6 @@ public class BackupRestoreConfirmation extends Activity {
         }
 
         mBackupManager = IBackupManager.Stub.asInterface(ServiceManager.getService(Context.BACKUP_SERVICE));
-        mStorageManager = IStorageManager.Stub.asInterface(ServiceManager.getService("mount"));
 
         mHandler = new ObserverHandler(getApplicationContext());
         final Object oldObserver = getLastNonConfigurationInstance();
@@ -248,20 +243,13 @@ public class BackupRestoreConfirmation extends Activity {
             mDenyButton.setEnabled(!mDidAcknowledge);
         }
 
-        // We vary the password prompt depending on whether one is predefined, and whether
-        // the device is encrypted.
-        mIsEncrypted = deviceIsEncrypted();
+        // We vary the password prompt depending on whether one is predefined.
         if (!haveBackupPassword()) {
             curPwDesc.setVisibility(View.GONE);
             mCurPassword.setVisibility(View.GONE);
             if (layoutId == R.layout.confirm_backup) {
                 TextView encPwDesc = findViewById(R.id.enc_password_desc);
-                if (mIsEncrypted) {
-                    encPwDesc.setText(R.string.backup_enc_password_required);
-                    monitorEncryptionPassword();
-                } else {
-                    encPwDesc.setText(R.string.backup_enc_password_optional);
-                }
+                encPwDesc.setText(R.string.backup_enc_password_optional);
             }
         }
     }
@@ -309,20 +297,6 @@ public class BackupRestoreConfirmation extends Activity {
             } catch (RemoteException e) {
                 // TODO: bail gracefully if we can't contact the backup manager
             }
-        }
-    }
-
-    boolean deviceIsEncrypted() {
-        try {
-            return mStorageManager.getEncryptionState()
-                     != StorageManager.ENCRYPTION_STATE_NONE
-                && mStorageManager.getPasswordType()
-                     != StorageManager.CRYPT_TYPE_DEFAULT;
-        } catch (Exception e) {
-            // If we can't talk to the storagemanager service we have a serious problem; fail
-            // "secure" i.e. assuming that the device is encrypted.
-            Slog.e(TAG, "Unable to communicate with storagemanager service: " + e.getMessage());
-            return true;
         }
     }
 

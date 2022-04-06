@@ -97,6 +97,9 @@ public class RecentsAnimationController implements DeathRecipient {
      */
     private static final long LATENCY_TRACKER_LOG_DELAY_MS = 300;
 
+    // Constant for a yet-to-be-calculated {@link RemoteAnimationTarget#Mode} state
+    private static final int MODE_UNKNOWN = -1;
+
     public static final int REORDER_KEEP_IN_PLACE = 0;
     public static final int REORDER_MOVE_TO_TOP = 1;
     public static final int REORDER_MOVE_TO_ORIGINAL_POSITION = 2;
@@ -281,6 +284,7 @@ public class RecentsAnimationController implements DeathRecipient {
                             task.setCanAffectSystemUiFlags(behindSystemBars);
                         }
                     }
+                    InputMethodManagerInternal.get().maybeFinishStylusHandwriting();
                     if (!behindSystemBars) {
                         // Hiding IME if IME window is not attached to app.
                         // Since some windowing mode is not proper to snapshot Task with IME window
@@ -553,10 +557,6 @@ public class RecentsAnimationController implements DeathRecipient {
 
             mPendingStart = false;
 
-            // Perform layout if it was scheduled before to make sure that we get correct content
-            // insets for the target app window after a rotation
-            mDisplayContent.performLayout(false /* initial */, false /* updateInputWindows */);
-
             final Rect contentInsets;
             final WindowState targetAppMainWindow = getTargetAppMainWindow();
             if (targetAppMainWindow != null) {
@@ -707,7 +707,8 @@ public class RecentsAnimationController implements DeathRecipient {
             if (isAnimatingTask(task) || skipAnimation(task)) {
                 return;
             }
-            final RemoteAnimationTarget target = createTaskRemoteAnimation(task, finishedCallback);
+            final RemoteAnimationTarget target = createTaskRemoteAnimation(task, MODE_OPENING,
+                    finishedCallback);
             if (target == null) {
                 return;
             }
@@ -728,7 +729,7 @@ public class RecentsAnimationController implements DeathRecipient {
         }
     }
 
-    private RemoteAnimationTarget createTaskRemoteAnimation(Task task,
+    private RemoteAnimationTarget createTaskRemoteAnimation(Task task, int mode,
             OnAnimationFinishedCallback finishedCallback) {
         final SparseBooleanArray recentTaskIds =
                 mService.mAtmService.getRecentTasks().getRecentTaskIds();
@@ -740,7 +741,7 @@ public class RecentsAnimationController implements DeathRecipient {
         TaskAnimationAdapter adapter = addAnimation(task,
                 !recentTaskIds.get(taskId), true /* hidden */, finishedCallback);
         mPendingNewTaskTargets.add(taskId);
-        return adapter.createRemoteAnimationTarget(taskId);
+        return adapter.createRemoteAnimationTarget(taskId, mode);
     }
 
     void logRecentsAnimationStartTime(int durationMs) {
@@ -776,7 +777,7 @@ public class RecentsAnimationController implements DeathRecipient {
         for (int i = mPendingAnimations.size() - 1; i >= 0; i--) {
             final TaskAnimationAdapter taskAdapter = mPendingAnimations.get(i);
             final RemoteAnimationTarget target =
-                    taskAdapter.createRemoteAnimationTarget(INVALID_TASK_ID);
+                    taskAdapter.createRemoteAnimationTarget(INVALID_TASK_ID, MODE_UNKNOWN);
             if (target != null) {
                 targets.add(target);
             } else {
@@ -1199,8 +1200,11 @@ public class RecentsAnimationController implements DeathRecipient {
          *                       some cases where we are animating root tasks but need need leaf
          *                       ids for identification. If this is INVALID (-1), then mTaskId
          *                       will be used.
+         * @param overrideMode overrides the target's mode. If this is -1, the mode will be
+         *                     calculated relative to going to the target activity (ie. OPENING if
+         *                     this is the target task, CLOSING otherwise).
          */
-        RemoteAnimationTarget createRemoteAnimationTarget(int overrideTaskId) {
+        RemoteAnimationTarget createRemoteAnimationTarget(int overrideTaskId, int overrideMode) {
             final ActivityRecord topApp = mTask.getTopVisibleActivity();
             final WindowState mainWindow = topApp != null
                     ? topApp.findMainWindow()
@@ -1211,9 +1215,11 @@ public class RecentsAnimationController implements DeathRecipient {
             final Rect insets = mainWindow.getInsetsStateWithVisibilityOverride().calculateInsets(
                     mBounds, Type.systemBars(), false /* ignoreVisibility */).toRect();
             InsetUtils.addInsets(insets, mainWindow.mActivityRecord.getLetterboxInsets());
-            final int mode = topApp.getActivityType() == mTargetActivityType
-                    ? MODE_OPENING
-                    : MODE_CLOSING;
+            final int mode = overrideMode != MODE_UNKNOWN
+                    ? overrideMode
+                    : topApp.getActivityType() == mTargetActivityType
+                            ? MODE_OPENING
+                            : MODE_CLOSING;
             if (overrideTaskId < 0) {
                 overrideTaskId = mTask.mTaskId;
             }

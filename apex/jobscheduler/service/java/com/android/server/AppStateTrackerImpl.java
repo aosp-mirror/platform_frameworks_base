@@ -767,6 +767,10 @@ public class AppStateTrackerImpl implements AppStateTracker {
         @Override
         public void onUidCachedChanged(int uid, boolean cached) {
         }
+
+        @Override
+        public void onUidProcAdjChanged(int uid) {
+        }
     }
 
     private final class AppOpsWatcher extends IAppOpsCallback.Stub {

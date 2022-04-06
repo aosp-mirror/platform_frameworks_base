@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <!--
   ~ Copyright (C) 2022 The Android Open Source Project
   ~
@@ -21,7 +22,10 @@
     android:layout_height="wrap_content"
     android:orientation="horizontal"
     android:layout_gravity="center"
-    android:layout_marginBottom="16dp"
+    android:paddingTop="24dp"
+    android:paddingBottom="4dp"
+    android:paddingLeft="24dp"
+    android:paddingRight="24dp"
     android:visibility="gone" >
 
     <ImageView
@@ -39,10 +43,9 @@
 
     <ImageButton
         android:id="@+id/vendor_header_button"
-        style="?android:attr/actionOverflowButtonStyle"
+        android:background="@drawable/ic_info"
         android:layout_width="31dp"
         android:layout_height="32dp"
-        android:layout_marginLeft="100dp"
         android:layout_alignParentRight="true" />
 
 </RelativeLayout>

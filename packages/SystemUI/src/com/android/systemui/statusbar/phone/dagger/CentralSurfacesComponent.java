@@ -31,10 +31,10 @@ import com.android.systemui.statusbar.notification.stack.NotificationListContain
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutListContainerModule;
 import com.android.systemui.statusbar.phone.CentralSurfacesCommandQueueCallbacks;
+import com.android.systemui.statusbar.phone.LargeScreenShadeHeaderController;
 import com.android.systemui.statusbar.phone.NotificationPanelViewController;
 import com.android.systemui.statusbar.phone.NotificationShadeWindowView;
 import com.android.systemui.statusbar.phone.NotificationShadeWindowViewController;
-import com.android.systemui.statusbar.phone.SplitShadeHeaderController;
 import com.android.systemui.statusbar.phone.StatusBarHeadsUpChangeListener;
 import com.android.systemui.statusbar.phone.StatusBarNotificationActivityStarterModule;
 import com.android.systemui.statusbar.phone.StatusBarNotificationPresenterModule;
@@ -133,9 +133,9 @@ public interface CentralSurfacesComponent {
     CentralSurfacesCommandQueueCallbacks getCentralSurfacesCommandQueueCallbacks();
 
     /**
-     * Creates a SplitShadeHeaderController.
+     * Creates a {@link LargeScreenShadeHeaderController}.
      */
-    SplitShadeHeaderController getSplitShadeHeaderController();
+    LargeScreenShadeHeaderController getLargeScreenShadeHeaderController();
 
     /**
      * Creates a new {@link CollapsedStatusBarFragment} each time it's called. See

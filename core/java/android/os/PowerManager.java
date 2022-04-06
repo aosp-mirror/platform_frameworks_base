@@ -566,7 +566,8 @@ public final class PowerManager {
             WAKE_REASON_HDMI,
             WAKE_REASON_DISPLAY_GROUP_ADDED,
             WAKE_REASON_DISPLAY_GROUP_TURNED_ON,
-            WAKE_REASON_UNFOLD_DEVICE
+            WAKE_REASON_UNFOLD_DEVICE,
+            WAKE_REASON_DREAM_FINISHED
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface WakeReason{}
@@ -673,6 +674,12 @@ public final class PowerManager {
     public static final int WAKE_REASON_UNFOLD_DEVICE = 12;
 
     /**
+     * Wake up reason code: Waking the device due to the dream finishing.
+     * @hide
+     */
+    public static final int WAKE_REASON_DREAM_FINISHED = 13;
+
+    /**
      * Convert the wake reason to a string for debugging purposes.
      * @hide
      */
@@ -691,6 +698,7 @@ public final class PowerManager {
             case WAKE_REASON_DISPLAY_GROUP_ADDED: return "WAKE_REASON_DISPLAY_GROUP_ADDED";
             case WAKE_REASON_DISPLAY_GROUP_TURNED_ON: return "WAKE_REASON_DISPLAY_GROUP_TURNED_ON";
             case WAKE_REASON_UNFOLD_DEVICE: return "WAKE_REASON_UNFOLD_DEVICE";
+            case WAKE_REASON_DREAM_FINISHED: return "WAKE_REASON_DREAM_FINISHED";
             default: return Integer.toString(wakeReason);
         }
     }

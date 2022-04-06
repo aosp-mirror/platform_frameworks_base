@@ -24,4 +24,5 @@
     <string name="pip_move" msgid="1544227837964635439">"移动画中画窗口"</string>
     <string name="pip_expand" msgid="7605396312689038178">"展开 PIP"</string>
     <string name="pip_collapse" msgid="5732233773786896094">"收起 PIP"</string>
+    <string name="pip_edu_text" msgid="3672999496647508701">" 按两次"<annotation icon="home_icon">"主屏幕"</annotation>"按钮可查看相关控件"</string>
 </resources>

@@ -17,7 +17,6 @@
 package com.android.server.wm.flicker.launch
 
 import androidx.test.filters.FlakyTest
-import android.platform.test.annotations.Postsubmit
 import android.platform.test.annotations.Presubmit
 import android.platform.test.annotations.RequiresDevice
 import android.view.Surface
@@ -28,10 +27,7 @@ import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.annotation.Group1
 import com.android.server.wm.flicker.helpers.NonResizeableAppHelper
 import com.android.server.wm.flicker.helpers.WindowUtils
-import com.android.server.wm.flicker.helpers.isShellTransitionsEnabled
 import com.android.server.wm.traces.common.FlickerComponentName
-import org.junit.Assume
-import org.junit.Before
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -65,16 +61,11 @@ open class OpenAppNonResizeableTest(testSpec: FlickerTestParameter)
     override val testApp = NonResizeableAppHelper(instrumentation)
     private val colorFadComponent = FlickerComponentName("", "ColorFade BLAST#")
 
-    @Before
-    open fun before() {
-        Assume.assumeFalse(isShellTransitionsEnabled)
-    }
-
     /**
      * Checks that the nav bar layer starts invisible, becomes visible during unlocking animation
      * and remains visible at the end
      */
-    @Postsubmit
+    @FlakyTest(bugId = 227083463)
     @Test
     fun navBarLayerVisibilityChanges() {
         testSpec.assertLayers {
@@ -99,7 +90,7 @@ open class OpenAppNonResizeableTest(testSpec: FlickerTestParameter)
      * Checks that the nav bar starts the transition invisible, then becomes visible during
      * the unlocking animation and remains visible at the end of the transition
      */
-    @Postsubmit
+    @Presubmit
     @Test
     fun navBarWindowsVisibilityChanges() {
         testSpec.assertWm {

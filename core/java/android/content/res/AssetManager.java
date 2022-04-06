@@ -79,6 +79,13 @@ public final class AssetManager implements AutoCloseable {
     @GuardedBy("sSync") private static ArraySet<ApkAssets> sSystemApkAssetsSet;
 
     /**
+     * Cookie value to use when the actual cookie is unknown. This value tells the system to search
+     * all the ApkAssets for the asset.
+     * @hide
+     */
+    public static final int COOKIE_UNKNOWN = -1;
+
+    /**
      * Mode for {@link #open(String, int)}: no specific information about how
      * data will be accessed.
      */

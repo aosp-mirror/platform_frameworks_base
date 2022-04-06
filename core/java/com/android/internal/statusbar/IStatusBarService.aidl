@@ -91,7 +91,7 @@ interface IStatusBarService
     void onBubbleNotificationSuppressionChanged(String key, boolean isNotifSuppressed, boolean isBubbleSuppressed);
     void hideCurrentInputMethodForBubbles();
     void grantInlineReplyUriPermission(String key, in Uri uri, in UserHandle user, String packageName);
-    void clearInlineReplyUriPermissions(String key);
+    oneway void clearInlineReplyUriPermissions(String key);
     void onNotificationFeedbackReceived(String key, in Bundle feedback);
 
     void onGlobalActionsShown();
@@ -131,7 +131,7 @@ interface IStatusBarService
     // Used to show an error - the dialog will dismiss after a certain amount of time
     void onBiometricError(int modality, int error, int vendorCode);
     // Used to hide the authentication dialog, e.g. when the application cancels authentication
-    void hideAuthenticationDialog();
+    void hideAuthenticationDialog(long requestId);
     // Used to notify the biometric service of events that occur outside of an operation.
     void setBiometicContextListener(in IBiometricContextListener listener);
 
@@ -170,6 +170,11 @@ interface IStatusBarService
      * display.
      */
     void suppressAmbientDisplay(boolean suppress);
+
+    /**
+     * Send a request to SystemUI to put a given active tile in listening state
+     */
+    void requestTileServiceListeningState(in ComponentName componentName, int userId);
 
     void requestAddTile(in ComponentName componentName, in CharSequence label, in Icon icon, int userId, in IAddTileResultCallback callback);
     void cancelRequestAddTile(in String packageName);

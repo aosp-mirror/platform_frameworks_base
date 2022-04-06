@@ -20,19 +20,17 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="4811759950673118541">"Sistēmas UI"</string>
-    <!-- no translation found for battery_low_title (5319680173344341779) -->
-    <skip />
-    <!-- no translation found for battery_low_description (3282977755476423966) -->
-    <skip />
-    <!-- no translation found for battery_low_intro (5148725009653088790) -->
-    <skip />
+    <string name="battery_low_title" msgid="5319680173344341779">"Vai ieslēgt akumulatora enerģijas taupīšanas režīmu?"</string>
+    <string name="battery_low_description" msgid="3282977755476423966">"Atlikušais akumulatora uzlādes līmenis: <xliff:g id="PERCENTAGE">%s</xliff:g>. Akumulatora enerģijas taupīšanas režīmā tiek ieslēgts tumšais motīvs, ierobežotas darbības fonā un aizkavēti paziņojumi."</string>
+    <string name="battery_low_intro" msgid="5148725009653088790">"Akumulatora enerģijas taupīšanas režīmā tiek ieslēgts tumšais motīvs, ierobežotas darbības fonā un aizkavēti paziņojumi."</string>
     <string name="battery_low_percent_format" msgid="4276661262843170964">"Atlikuši <xliff:g id="PERCENTAGE">%s</xliff:g>"</string>
     <string name="invalid_charger_title" msgid="938685362320735167">"Nevar veikt uzlādi, izmantojot USB"</string>
     <string name="invalid_charger_text" msgid="2339310107232691577">"Izmantojiet ierīces komplektācijā iekļauto lādētāju"</string>
     <string name="battery_saver_confirmation_title" msgid="1234998463717398453">"Vai ieslēgt akumulatora enerģijas taupīšanas režīmu?"</string>
     <string name="battery_saver_confirmation_title_generic" msgid="2299231884234959849">"Par akumulatora enerģijas taupīšanas režīmu"</string>
     <string name="battery_saver_confirmation_ok" msgid="5042136476802816494">"Ieslēgt"</string>
-    <string name="battery_saver_start_action" msgid="4553256017945469937">"Ieslēgt akumulatora enerģijas taupīšanas režīmu"</string>
+    <string name="battery_saver_start_action" msgid="8353766979886287140">"Ieslēgt"</string>
+    <string name="battery_saver_dismiss_action" msgid="7199342621040014738">"Nē, paldies"</string>
     <string name="status_bar_settings_auto_rotation" msgid="8329080442278431708">"Automātiska ekrāna pagriešana"</string>
     <string name="usb_device_permission_prompt" msgid="4414719028369181772">"Vai atļaut lietotnei <xliff:g id="APPLICATION">%1$s</xliff:g> piekļūt šai ierīcei: <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
     <string name="usb_device_permission_prompt_warn" msgid="2309129784984063656">"Vai atļaut lietotnei <xliff:g id="APPLICATION">%1$s</xliff:g> piekļūt ierīcei “<xliff:g id="USB_DEVICE">%2$s</xliff:g>”?\nŠai lietotnei nav piešķirta ierakstīšanas atļauja, taču tā varētu tvert audio, izmantojot šo USB ierīci."</string>
@@ -116,7 +114,7 @@
     <string name="accessibility_phone_button" msgid="4256353121703100427">"Tālruņa numurs"</string>
     <string name="accessibility_voice_assist_button" msgid="6497706615649754510">"Balss palīgs"</string>
     <string name="accessibility_wallet_button" msgid="1458258783460555507">"Maks"</string>
-    <string name="accessibility_qr_code_scanner_button" msgid="7521277927692910795">"Ātrās atbildes koda skeneris"</string>
+    <string name="accessibility_qr_code_scanner_button" msgid="7521277927692910795">"Kvadrātkoda skeneris"</string>
     <string name="accessibility_unlock_button" msgid="122785427241471085">"Atbloķēt"</string>
     <string name="accessibility_lock_icon" msgid="661492842417875775">"Ierīce ir bloķēta"</string>
     <string name="accessibility_scanning_face" msgid="3093828357921541387">"Sejas skenēšana"</string>
@@ -133,8 +131,7 @@
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="2242167416140740920">"Seja autentificēta"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"Apstiprināts"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"Lai pabeigtu, pieskarieties Apstiprināt"</string>
-    <!-- no translation found for biometric_dialog_tap_confirm_with_face (1597899891472340950) -->
-    <skip />
+    <string name="biometric_dialog_tap_confirm_with_face" msgid="1597899891472340950">"Sākta autorizācija pēc sejas. Nospiediet, lai turpinātu."</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"Autentifikācija veikta"</string>
     <string name="biometric_dialog_use_pin" msgid="8385294115283000709">"Izmantot PIN"</string>
     <string name="biometric_dialog_use_pattern" msgid="2315593393167211194">"Izmantot kombināciju"</string>
@@ -154,10 +151,6 @@
     <string name="biometric_dialog_last_pattern_attempt_before_wipe_profile" msgid="6045224069529284686">"Ja nākamajā mēģinājumā ievadīsiet nepareizu kombināciju, jūsu darba profils un ar to saistītie dati tiks dzēsti."</string>
     <string name="biometric_dialog_last_pin_attempt_before_wipe_profile" msgid="545567685899091757">"Ja nākamajā mēģinājumā ievadīsiet nepareizu PIN, jūsu darba profils un ar to saistītie dati tiks dzēsti."</string>
     <string name="biometric_dialog_last_password_attempt_before_wipe_profile" msgid="8538032972389729253">"Ja nākamajā mēģinājumā ievadīsiet nepareizu paroli, jūsu darba profils un ar to saistītie dati tiks dzēsti."</string>
-    <string name="biometric_dialog_failed_attempts_now_wiping_device" msgid="6585503524026243042">"Pārāk daudz neveiksmīgu mēģinājumu. Dati šajā ierīcē tiks dzēsti."</string>
-    <string name="biometric_dialog_failed_attempts_now_wiping_user" msgid="7015008539146949115">"Pārāk daudz neveiksmīgu mēģinājumu. Šis lietotājs tiks dzēsts."</string>
-    <string name="biometric_dialog_failed_attempts_now_wiping_profile" msgid="5239378521440749682">"Pārāk daudz neveiksmīgu mēģinājumu. Šis darba profils un ar to saistītie dati tiks dzēsti."</string>
-    <string name="biometric_dialog_now_wiping_dialog_dismiss" msgid="7189432882125106154">"Nerādīt"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"Pieskarieties pirksta nospieduma sensoram"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="4465698996175640549">"Pirksta nospieduma ikona"</string>
     <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"Nevar atpazīt seju. Lietojiet pirksta nospiedumu."</string>
@@ -328,17 +321,12 @@
     <string name="keyguard_indication_charging_time_slowly" msgid="301936949731705417">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Lēnā uzlāde • Laiks līdz pilnai uzlādei: <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
     <string name="keyguard_indication_charging_time_dock" msgid="6150404291427377863">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Notiek uzlāde dokā • Līdz pilnai uzlādei atlicis: <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Mainīt lietotāju"</string>
-    <string name="user_add_user" msgid="4336657383006913022">"Lietotāja pievienošana"</string>
-    <string name="user_new_user_name" msgid="2019166282704195789">"Jauns lietotājs"</string>
-    <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"Vai noņemt viesi?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Tiks dzēstas visas šīs sesijas lietotnes un dati."</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"Noņemt"</string>
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"Laipni lūdzam atpakaļ, viesi!"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"Vai vēlaties turpināt savu sesiju?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"Sākt no sākuma"</string>
     <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"Jā, turpināt"</string>
-    <string name="user_add_user_title" msgid="4172327541504825032">"Vai pievienot jaunu lietotāju?"</string>
-    <string name="user_add_user_message_short" msgid="2599370307878014791">"Kad pievienosiet jaunu lietotāju, viņam būs jāizveido savs profils.\n\nIkviens lietotājs var atjaunināt lietotnes citu lietotāju vietā."</string>
     <string name="user_limit_reached_title" msgid="2429229448830346057">"Sasniegts lietotāju ierobežojums"</string>
     <plurals name="user_limit_reached_message" formatted="false" msgid="2573535787802908398">
       <item quantity="zero">Varat pievienot ne vairāk kā <xliff:g id="COUNT">%d</xliff:g> lietotājus.</item>
@@ -465,8 +453,7 @@
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"Lai izmantotu, atbloķējiet ekrānu"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"Ienesot jūsu kartes, radās problēma. Lūdzu, vēlāk mēģiniet vēlreiz."</string>
     <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"Bloķēšanas ekrāna iestatījumi"</string>
-    <string name="qr_code_scanner_title" msgid="5660820608548306581">"Ātrās atbildes kods"</string>
-    <string name="qr_code_scanner_description" msgid="7937603775306661863">"Pieskarieties, lai skenētu"</string>
+    <string name="qr_code_scanner_title" msgid="5290201053875420785">"Kvadrātkoda skenēšana"</string>
     <string name="status_bar_work" msgid="5238641949837091056">"Darba profils"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"Lidojuma režīms"</string>
     <string name="zen_alarm_warning" msgid="7844303238486849503">"Nākamais signāls (<xliff:g id="WHEN">%1$s</xliff:g>) netiks atskaņots."</string>
@@ -794,9 +781,10 @@
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"Velciet, lai skatītu citus vienumus"</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"Notiek ieteikumu ielāde"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"Multivide"</string>
-    <string name="controls_media_close_session" msgid="1193000643003066508">"Vai paslēpt šo multivides sesiju?"</string>
+    <!-- no translation found for controls_media_close_session (4780485355795635052) -->
+    <skip />
     <string name="controls_media_active_session" msgid="3146882316024153337">"Pašreizējo multivides sesiju nevar paslēpt."</string>
-    <string name="controls_media_dismiss_button" msgid="9081375542265132213">"Nerādīt"</string>
+    <string name="controls_media_dismiss_button" msgid="4485675693008031646">"Paslēpt"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"Atsākt"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"Iestatījumi"</string>
     <string name="controls_media_playing_item_description" msgid="4531853311504359098">"Tiek atskaņots fails “<xliff:g id="SONG_NAME">%1$s</xliff:g>” (izpildītājs: <xliff:g id="ARTIST_NAME">%2$s</xliff:g>) no lietotnes <xliff:g id="APP_LABEL">%3$s</xliff:g>."</string>
@@ -814,7 +802,7 @@
     <string name="media_move_closer_to_end_cast" msgid="6495907340926563656">"Pārvietojieties tuvāk ierīcei “<xliff:g id="DEVICENAME">%1$s</xliff:g>”, lai atskaņotu šeit"</string>
     <string name="media_transfer_playing_different_device" msgid="7186806382609785610">"Notiek atskaņošana ierīcē <xliff:g id="DEVICENAME">%1$s</xliff:g>."</string>
     <string name="media_transfer_playing_this_device" msgid="1856890686844499172">"Notiek atskaņošana šajā tālrunī"</string>
-    <string name="media_transfer_failed" msgid="2640354446629980227">"Radās problēma"</string>
+    <string name="media_transfer_failed" msgid="7955354964610603723">"Radās kļūda. Mēģiniet vēlreiz."</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"Neaktīva, pārbaudiet lietotni"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"Netika atrasta"</string>
     <string name="controls_error_removed_title" msgid="1207794911208047818">"Vadīkla nav pieejama"</string>
@@ -833,6 +821,7 @@
     <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"Savienošana pārī ar jaunu ierīci"</string>
     <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"Lai apraidītu šo sesiju, lūdzu, atveriet lietotni."</string>
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"Nezināma lietotne"</string>
+    <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"Apturēt apraidi"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"Versijas numurs"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"Versijas numurs ir kopēts starpliktuvē."</string>
     <string name="basic_status" msgid="2315371112182658176">"Atvērt sarunu"</string>
@@ -923,8 +912,6 @@
     <string name="dream_overlay_status_bar_wifi_off" msgid="4497069245055003582">"Wi‑Fi nav pieejams"</string>
     <string name="dream_overlay_status_bar_priority_mode" msgid="5428462123314728739">"Prioritātes režīms"</string>
     <string name="dream_overlay_status_bar_alarm_set" msgid="566707328356590886">"Signāls ir iestatīts"</string>
-    <string name="dream_overlay_status_bar_assistant_guest_mode_enabled" msgid="3715897096012469615">"Asistenta viesa režīms ir iespējots"</string>
     <string name="dream_overlay_status_bar_camera_mic_off" msgid="3199425257833773569">"Kamera un mikrofons ir izslēgti"</string>
-    <!-- no translation found for dream_overlay_status_bar_notification_indicator (8091389255691081711) -->
-    <skip />
+    <string name="dream_overlay_status_bar_notification_indicator" msgid="8091389255691081711">"{count,plural, =1{# paziņojums}zero{# paziņojumu}one{# paziņojums}other{# paziņojumi}}"</string>
 </resources>

@@ -28,8 +28,8 @@ import java.util.List;
  * {@link OnBackInvokedDispatcher} only used to hold callbacks while an actual
  * dispatcher becomes available. <b>It does not dispatch the back events</b>.
  * <p>
- * Once the actual {@link OnBackInvokedDispatcherOwner} becomes available,
- * {@link #setActualDispatcherOwner(OnBackInvokedDispatcherOwner)} needs to
+ * Once the actual {@link OnBackInvokedDispatcher} becomes available,
+ * {@link #setActualDispatcher(OnBackInvokedDispatcher)} needs to
  * be called and this {@link ProxyOnBackInvokedDispatcher} will pass the callback registrations
  * onto it.
  * <p>
@@ -44,18 +44,18 @@ public class ProxyOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
     /**
      * List of pair representing an {@link OnBackInvokedCallback} and its associated priority.
      *
-     * @see OnBackInvokedDispatcher#registerOnBackInvokedCallback(OnBackInvokedCallback, int)
+     * @see OnBackInvokedDispatcher#registerOnBackInvokedCallback(int, OnBackInvokedCallback)
      */
     private final List<Pair<OnBackInvokedCallback, Integer>> mCallbacks = new ArrayList<>();
     private final Object mLock = new Object();
-    private OnBackInvokedDispatcherOwner mActualDispatcherOwner = null;
+    private OnBackInvokedDispatcher mActualDispatcher = null;
 
     @Override
     public void registerOnBackInvokedCallback(
-            @NonNull OnBackInvokedCallback callback, int priority) {
+            int priority, @NonNull OnBackInvokedCallback callback) {
         if (DEBUG) {
-            Log.v(TAG, String.format("Pending register %s. Actual=%s", callback,
-                    mActualDispatcherOwner));
+            Log.v(TAG, String.format("Proxy register %s. mActualDispatcher=%s", callback,
+                    mActualDispatcher));
         }
         if (priority < 0) {
             throw new IllegalArgumentException("Application registered OnBackInvokedCallback "
@@ -73,14 +73,13 @@ public class ProxyOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
     public void unregisterOnBackInvokedCallback(
             @NonNull OnBackInvokedCallback callback) {
         if (DEBUG) {
-            Log.v(TAG, String.format("Pending unregister %s. Actual=%s", callback,
-                    mActualDispatcherOwner));
+            Log.v(TAG, String.format("Proxy unregister %s. Actual=%s", callback,
+                    mActualDispatcher));
         }
         synchronized (mLock) {
             mCallbacks.removeIf((p) -> p.first.equals(callback));
-            if (mActualDispatcherOwner != null) {
-                mActualDispatcherOwner.getOnBackInvokedDispatcher().unregisterOnBackInvokedCallback(
-                        callback);
+            if (mActualDispatcher != null) {
+                mActualDispatcher.unregisterOnBackInvokedCallback(callback);
             }
         }
     }
@@ -89,9 +88,8 @@ public class ProxyOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
             @NonNull OnBackInvokedCallback callback, int priority) {
         synchronized (mLock) {
             mCallbacks.add(Pair.create(callback, priority));
-            if (mActualDispatcherOwner != null) {
-                mActualDispatcherOwner.getOnBackInvokedDispatcher().registerOnBackInvokedCallback(
-                        callback, priority);
+            if (mActualDispatcher != null) {
+                mActualDispatcher.registerOnBackInvokedCallback(priority, callback);
             }
         }
     }
@@ -103,34 +101,30 @@ public class ProxyOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
      * proxy dispatcher.
      */
     private void transferCallbacksToDispatcher() {
-        if (mActualDispatcherOwner == null) {
+        if (mActualDispatcher == null) {
             return;
         }
-        OnBackInvokedDispatcher dispatcher =
-                mActualDispatcherOwner.getOnBackInvokedDispatcher();
         if (DEBUG) {
-            Log.v(TAG, String.format("Pending transferring %d callbacks to %s", mCallbacks.size(),
-                    dispatcher));
+            Log.v(TAG, String.format("Proxy transferring %d callbacks to %s", mCallbacks.size(),
+                    mActualDispatcher));
         }
         for (Pair<OnBackInvokedCallback, Integer> callbackPair : mCallbacks) {
             int priority = callbackPair.second;
             if (priority >= 0) {
-                dispatcher.registerOnBackInvokedCallback(callbackPair.first, priority);
+                mActualDispatcher.registerOnBackInvokedCallback(priority, callbackPair.first);
             } else {
-                dispatcher.registerSystemOnBackInvokedCallback(callbackPair.first);
+                mActualDispatcher.registerSystemOnBackInvokedCallback(callbackPair.first);
             }
         }
         mCallbacks.clear();
     }
 
     private void clearCallbacksOnDispatcher() {
-        if (mActualDispatcherOwner == null) {
+        if (mActualDispatcher == null) {
             return;
         }
-        OnBackInvokedDispatcher onBackInvokedDispatcher =
-                mActualDispatcherOwner.getOnBackInvokedDispatcher();
         for (Pair<OnBackInvokedCallback, Integer> callback : mCallbacks) {
-            onBackInvokedDispatcher.unregisterOnBackInvokedCallback(callback.first);
+            mActualDispatcher.unregisterOnBackInvokedCallback(callback.first);
         }
     }
 
@@ -138,13 +132,13 @@ public class ProxyOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
      * Resets this {@link ProxyOnBackInvokedDispatcher} so it loses track of the currently
      * registered callbacks.
      * <p>
-     * Using this method means that when setting a new {@link OnBackInvokedDispatcherOwner}, the
+     * Using this method means that when setting a new {@link OnBackInvokedDispatcher}, the
      * callbacks registered on the old one won't be removed from it and won't be registered on
      * the new one.
      */
     public void reset() {
         if (DEBUG) {
-            Log.v(TAG, "Pending reset callbacks");
+            Log.v(TAG, "Proxy: reset callbacks");
         }
         synchronized (mLock) {
             mCallbacks.clear();
@@ -152,28 +146,26 @@ public class ProxyOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
     }
 
     /**
-     * Sets the actual {@link OnBackInvokedDispatcherOwner} that will provides the
-     * {@link OnBackInvokedDispatcher} onto which the callbacks will be registered.
+     * Sets the actual {@link OnBackInvokedDispatcher} onto which the callbacks will be registered.
      * <p>
-     * If any dispatcher owner was already present, all the callbacks that were added via this
+     * If any dispatcher was already present, all the callbacks that were added via this
      * {@link ProxyOnBackInvokedDispatcher} will be unregistered from the old one and registered
      * on the new one if it is not null.
      * <p>
      * If you do not wish for the previously registered callbacks to be reassigned to the new
      * dispatcher, {@link #reset} must be called beforehand.
      */
-    public void setActualDispatcherOwner(
-            @Nullable OnBackInvokedDispatcherOwner actualDispatcherOwner) {
+    public void setActualDispatcher(@Nullable OnBackInvokedDispatcher actualDispatcher) {
         if (DEBUG) {
-            Log.v(TAG, String.format("Pending setActual %s. Current %s",
-                            actualDispatcherOwner, mActualDispatcherOwner));
+            Log.v(TAG, String.format("Proxy setActual %s. Current %s",
+                            actualDispatcher, mActualDispatcher));
         }
         synchronized (mLock) {
-            if (actualDispatcherOwner == mActualDispatcherOwner) {
+            if (actualDispatcher == mActualDispatcher) {
                 return;
             }
             clearCallbacksOnDispatcher();
-            mActualDispatcherOwner = actualDispatcherOwner;
+            mActualDispatcher = actualDispatcher;
             transferCallbacksToDispatcher();
         }
     }

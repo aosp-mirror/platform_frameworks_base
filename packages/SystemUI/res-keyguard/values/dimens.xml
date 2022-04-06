@@ -129,4 +129,7 @@
     <dimen name="user_switcher_icon_selected_width">8dp</dimen>
     <dimen name="user_switcher_fullscreen_button_text_size">14sp</dimen>
     <dimen name="user_switcher_fullscreen_button_padding">12dp</dimen>
+
+    <!-- Translation y for appear animation -->
+    <dimen name="keyguard_host_view_translation_y">80dp</dimen>
 </resources>

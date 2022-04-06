@@ -562,14 +562,15 @@ public abstract class ActivityManagerInternal {
     public abstract void unregisterProcessObserver(IProcessObserver processObserver);
 
     /**
-     * Checks if there is an unfinished instrumentation that targets the given uid.
+     * Gets the uid of the instrumentation source if there is an unfinished instrumentation that
+     * targets the given uid.
      *
      * @param uid The uid to be checked for
      *
-     * @return True, if there is an instrumentation whose target application uid matches the given
-     * uid, false otherwise
+     * @return the uid of the instrumentation source, if there is an instrumentation whose target
+     * application uid matches the given uid, and {@link android.os.Process#INVALID_UID} otherwise.
      */
-    public abstract boolean isUidCurrentlyInstrumented(int uid);
+    public abstract int getInstrumentationSourceUid(int uid);
 
     /** Is this a device owner app? */
     public abstract boolean isDeviceOwner(int uid);
@@ -630,8 +631,9 @@ public abstract class ActivityManagerInternal {
     /**
      * Delete uid from the ActivityManagerService PendingStartActivityUids list.
      * @param uid uid
+     * @param nowElapsed starting time of updateOomAdj
      */
-    public abstract void deletePendingTopUid(int uid);
+    public abstract void deletePendingTopUid(int uid, long nowElapsed);
 
     /**
      * Is the uid in ActivityManagerService PendingStartActivityUids list?
@@ -682,6 +684,11 @@ public abstract class ActivityManagerInternal {
      * Return the temp allowlist type when server push messaging is over the quota.
      */
     public abstract @TempAllowListType int getPushMessagingOverQuotaBehavior();
+
+    /**
+     * Return the startForeground() grace period after calling startForegroundService().
+     */
+    public abstract int getServiceStartForegroundTimeout();
 
     /**
      * Returns the capability of the given uid
@@ -785,10 +792,11 @@ public abstract class ActivityManagerInternal {
          *
          * @param packageName The package name of the process.
          * @param uid The UID of the process.
-         * @param foregroundId The current foreground service notification ID, a negative value
-         *                     means this notification is being removed.
+         * @param foregroundId The current foreground service notification ID.
+         * @param canceling The given notification is being canceled.
          */
-        void onForegroundServiceNotificationUpdated(String packageName, int uid, int foregroundId);
+        void onForegroundServiceNotificationUpdated(String packageName, int uid, int foregroundId,
+                boolean canceling);
     }
 
     /**
@@ -836,4 +844,15 @@ public abstract class ActivityManagerInternal {
      * Returns some summary statistics of the current PendingIntent queue - sizes and counts.
      */
     public abstract List<PendingIntentStats> getPendingIntentStats();
+
+    /**
+     * Register the UidObserver for NetworkPolicyManager service.
+     *
+     * This is equivalent to calling
+     * {@link IActivityManager#registerUidObserver(IUidObserver, int, int, String)} but having a
+     * separate method for NetworkPolicyManager service so that it's UidObserver can be called
+     * separately outside the usual UidObserver flow.
+     */
+    public abstract void registerNetworkPolicyUidObserver(@NonNull IUidObserver observer,
+            int which, int cutpoint, @NonNull String callingPackage);
 }

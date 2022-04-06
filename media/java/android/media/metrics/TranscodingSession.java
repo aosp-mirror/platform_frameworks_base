@@ -59,5 +59,6 @@ public final class TranscodingSession implements AutoCloseable {
 
     @Override
     public void close() {
+        mManager.releaseSessionId(mLogSessionId.getStringId());
     }
 }

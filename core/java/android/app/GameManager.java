@@ -191,9 +191,24 @@ public final class GameManager {
      */
     @TestApi
     @RequiresPermission(Manifest.permission.MANAGE_GAME_MODE)
-    public @GameMode boolean isAngleEnabled(@NonNull String packageName) {
+    public boolean isAngleEnabled(@NonNull String packageName) {
         try {
             return mService.isAngleEnabled(packageName, mContext.getUserId());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Set up the automatic power boost if appropriate.
+     *
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.MANAGE_GAME_MODE)
+    public void notifyGraphicsEnvironmentSetup() {
+        try {
+            mService.notifyGraphicsEnvironmentSetup(
+                    mContext.getPackageName(), mContext.getUserId());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

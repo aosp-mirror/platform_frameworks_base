@@ -231,6 +231,26 @@ class SplitScreenTransitions {
 
     void onFinish(WindowContainerTransaction wct, WindowContainerTransactionCallback wctCB) {
         if (!mAnimations.isEmpty()) return;
+        if (mAnimatingTransition == mPendingEnter) {
+            mPendingEnter = null;
+        }
+        if (mPendingDismiss != null && mPendingDismiss.mTransition == mAnimatingTransition) {
+            mPendingDismiss = null;
+        }
+        if (mAnimatingTransition == mPendingRecent) {
+            // If the clean-up wct is null when finishing recent transition, it indicates it's
+            // returning to home and thus no need to reorder tasks.
+            final boolean returnToHome = wct == null;
+            if (returnToHome) {
+                wct = new WindowContainerTransaction();
+            }
+            mStageCoordinator.onRecentTransitionFinished(returnToHome, wct, mFinishTransaction);
+            mPendingRecent = null;
+        }
+        mPendingRemoteHandler = null;
+        mActiveRemoteHandler = null;
+        mAnimatingTransition = null;
+
         mOnFinish.run();
         if (mFinishTransaction != null) {
             mFinishTransaction.apply();
@@ -241,22 +261,6 @@ class SplitScreenTransitions {
             mFinishCallback.onTransitionFinished(wct /* wct */, wctCB /* wctCB */);
             mFinishCallback = null;
         }
-        if (mAnimatingTransition == mPendingEnter) {
-            mPendingEnter = null;
-        }
-        if (mPendingDismiss != null && mPendingDismiss.mTransition == mAnimatingTransition) {
-            mPendingDismiss = null;
-        }
-        if (mAnimatingTransition == mPendingRecent) {
-            // If the wct is not null while finishing recent transition, it indicates it's not
-            // dismissing split and thus need to reorder split task so they can be on top again.
-            final boolean dismissSplit = wct == null;
-            mStageCoordinator.finishRecentAnimation(dismissSplit);
-            mPendingRecent = null;
-        }
-        mPendingRemoteHandler = null;
-        mActiveRemoteHandler = null;
-        mAnimatingTransition = null;
     }
 
     // TODO(shell-transitions): real animations

@@ -15,6 +15,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.animation.Interpolator;
 import android.view.animation.OvershootInterpolator;
 import android.widget.Scroller;
@@ -550,6 +551,51 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
         mScroller.startScroll(getScrollX(), getScrollY(), isLayoutRtl() ? -dx  : dx, 0,
             REVEAL_SCROLL_DURATION_MILLIS);
         postInvalidateOnAnimation();
+    }
+
+    private int sanitizePageAction(int action) {
+        int pageLeftId = AccessibilityNodeInfo.AccessibilityAction.ACTION_PAGE_LEFT.getId();
+        int pageRightId = AccessibilityNodeInfo.AccessibilityAction.ACTION_PAGE_RIGHT.getId();
+        if (action == pageLeftId || action == pageRightId) {
+            if (!isLayoutRtl()) {
+                if (action == pageLeftId) {
+                    return AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD;
+                } else {
+                    return AccessibilityNodeInfo.ACTION_SCROLL_FORWARD;
+                }
+            } else {
+                if (action == pageLeftId) {
+                    return AccessibilityNodeInfo.ACTION_SCROLL_FORWARD;
+                } else {
+                    return AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD;
+                }
+            }
+        }
+        return action;
+    }
+
+    @Override
+    public boolean performAccessibilityAction(int action, Bundle arguments) {
+        action = sanitizePageAction(action);
+        boolean performed = super.performAccessibilityAction(action, arguments);
+        if (performed && (action == AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD
+                || action == AccessibilityNodeInfo.ACTION_SCROLL_FORWARD)) {
+            requestAccessibilityFocus();
+        }
+        return performed;
+    }
+
+    @Override
+    public void onInitializeAccessibilityNodeInfoInternal(AccessibilityNodeInfo info) {
+        super.onInitializeAccessibilityNodeInfoInternal(info);
+        // getCurrentItem does not respect RTL, so it works well together with page actions that
+        // use left/right positioning.
+        if (getCurrentItem() != 0) {
+            info.addAction(AccessibilityNodeInfo.AccessibilityAction.ACTION_PAGE_LEFT);
+        }
+        if (getCurrentItem() != mPages.size() - 1) {
+            info.addAction(AccessibilityNodeInfo.AccessibilityAction.ACTION_PAGE_RIGHT);
+        }
     }
 
     private static Animator setupBounceAnimator(View view, int ordinal) {

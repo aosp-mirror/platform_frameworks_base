@@ -690,6 +690,11 @@
            will apply, regardless of device state. -->
     <string-array name="config_perDeviceStateRotationLockDefaults" />
 
+    <!-- Dock behavior -->
+
+    <!-- Control whether to start dream immediately upon docking even if the lockscreen is unlocked.
+         This defaults to true to be consistent with historical behavior. -->
+    <bool name="config_startDreamImmediatelyOnDock">true</bool>
 
     <!-- Desk dock behavior -->
 
@@ -1371,10 +1376,6 @@
          that can be set by the user. -->
     <integer name="config_screenBrightnessDoze">1</integer>
     <item name="config_screenBrightnessDozeFloat" format="float" type="dimen">0.0</item>
-
-    <!-- Delay that allows some content to arrive at the display before switching
-         from DOZE to ON. -->
-    <integer name="config_wakeUpDelayDoze">0</integer>
 
     <!-- Whether or not to skip the initial brightness ramps when the display transitions to
          STATE_ON. Setting this to true will skip the brightness ramp to the last stored active
@@ -2335,7 +2336,7 @@
     <!-- Remote server that can provide NTP responses. -->
     <string translatable="false" name="config_ntpServer">time.android.com</string>
     <!-- Normal polling frequency in milliseconds -->
-    <integer name="config_ntpPollingInterval">86400000</integer>
+    <integer name="config_ntpPollingInterval">64800000</integer>
     <!-- Try-again polling interval in milliseconds, in case the network request failed -->
     <integer name="config_ntpPollingIntervalShorter">60000</integer>
     <!-- Number of times to try again with the shorter interval, before backing
@@ -2402,6 +2403,9 @@
     <integer name="config_dreamsBatteryLevelDrainCutoff">5</integer>
     <!-- Limit of how long the device can remain unlocked due to attention checking.  -->
     <integer name="config_attentionMaximumExtension">900000</integer> <!-- 15 minutes.  -->
+
+    <!-- The prefix of dream component names that are loggable. If empty, logs "other" for all. -->
+    <string name ="config_loggable_dream_prefix" translatable="false"></string>
 
     <!-- ComponentName of a dream to show whenever the system would otherwise have
          gone to sleep.  When the PowerManager is asked to go to sleep, it will instead
@@ -2693,37 +2697,15 @@
          rat-name:rmem_min,rmem_def,rmem_max,wmem_min,wmem_def,wmem_max
          If no value is found for the rat-name in use, the system default will be applied.
 
-         This is deprecated. Please use config_tcp_buffers.
+         This is deprecated. Please use config_mobile_tcp_buffers for rat-based TCP buffers sizes or
+         config_tcp_buffers for rat-independent TCP buffer sizes.
     -->
     <string-array name="config_mobile_tcp_buffers">
     </string-array>
 
-    <!-- Configure tcp buffer sizes in the form:
-         rmem_min,rmem_def,rmem_max,wmem_min,wmem_def,wmem_max
-         If this is configured as an empty string, the system default will be applied.
-
-         For now this config is used by mobile data only. In the future it should be
-         used by Wi-Fi as well.
-
-         Note that starting from Android 13, the TCP buffer size is fixed after boot up, and should
-         never be changed based on carriers or the network types. The value should be configured
-         appropriately based on the device's memory and performance. It is recommended to use lower
-         values if the device has low memory or doesn't support high-speed network such like LTE,
-         NR, or Wifi.
-    -->
-    <string name="config_tcp_buffers" translatable="false"></string>
-
     <!-- Configure ethernet tcp buffersizes in the form:
          rmem_min,rmem_def,rmem_max,wmem_min,wmem_def,wmem_max -->
     <string name="config_ethernet_tcp_buffers" translatable="false">524288,1048576,3145728,524288,1048576,2097152</string>
-
-    <!-- What source to use to estimate link upstream and downstream bandwidth capacities.
-         Default is bandwidth_estimator.
-         Values are bandwidth_estimator, carrier_config and modem. -->
-    <string name="config_bandwidthEstimateSource">bandwidth_estimator</string>
-
-    <!-- Whether force to enable telephony new data stack or not -->
-    <bool name="config_force_enable_telephony_new_data_stack">false</bool>
 
     <!-- Whether WiFi display is supported by this device.
          There are many prerequisites for this feature to work correctly.
@@ -2931,8 +2913,8 @@
     <!-- Apps that are authorized to access shared accounts, overridden by product overlays -->
     <string name="config_appsAuthorizedForSharedAccounts" translatable="false">;com.android.settings;</string>
 
-    <!-- Settings intelligence package name -->
-    <string name="config_settingsIntelligencePackageName" translatable="false">
+    <!-- System settings intelligence package name -->
+    <string name="config_systemSettingsIntelligence" translatable="false">
         com.android.settings.intelligence
     </string>
 
@@ -2963,6 +2945,11 @@
      the currently focused view is a text editor. -->
     <bool name="config_preventImeStartupUnlessTextEditor">false</bool>
 
+    <!-- These IMEs are known not to behave well when evicted from memory and thus are exempt
+         from the IME startup prevention behavior that is enabled by
+         config_preventImeStartupUnlessTextEditor. -->
+    <string-array name="config_nonPreemptibleInputMethods" translatable="false" />
+
     <!-- The list of classes that should be added to the notification ranking pipeline.
      See {@link com.android.server.notification.NotificationSignalExtractor}
       If you add a new extractor to this list make sure to update
@@ -2987,6 +2974,12 @@
         <item>com.android.server.notification.CriticalNotificationExtractor</item>
 
     </string-array>
+
+    <!-- When migrating notification settings into the permission framework, whether all existing
+         apps should be marked as 'user-set' (true) or whether only the apps that have explicitly
+         modified notification settings should be marked as 'user-set' (false). Users will not see
+         system generated permission prompts for 'user-set' apps. -->
+    <bool name="config_notificationForceUserSetOnUpgrade">true</bool>
 
     <!-- Default Gravity setting for the system Toast view. Equivalent to: Gravity.CENTER_HORIZONTAL | Gravity.BOTTOM -->
     <integer name="config_toastDefaultGravity">0x00000051</integer>
@@ -3293,27 +3286,6 @@
     <!-- String array containing numbers that shouldn't be logged. Country-specific. -->
     <string-array name="unloggable_phone_numbers" />
 
-    <!-- Cellular data service package name to bind to by default. If none is specified in an overlay, an
-         empty string is passed in -->
-    <string name="config_wwan_data_service_package" translatable="false">com.android.phone</string>
-
-    <!-- IWLAN data service package name to bind to by default. If none is specified in an overlay, an
-         empty string is passed in -->
-    <string name="config_wlan_data_service_package" translatable="false"></string>
-
-    <!-- Boolean indicating whether the Iwlan data service supports persistence of iwlan ipsec
-         tunnels across service restart. If iwlan tunnels are not persisted across restart,
-         Framework will clean up dangling data connections when service restarts -->
-    <bool name="config_wlan_data_service_conn_persistence_on_restart">true</bool>
-
-    <!-- Cellular data service class name to bind to by default. If none is specified in an overlay, an
-         empty string is passed in -->
-    <string name="config_wwan_data_service_class" translatable="false"></string>
-
-    <!-- IWLAN data service class name to bind to by default. If none is specified in an overlay, an
-         empty string is passed in -->
-    <string name="config_wlan_data_service_class" translatable="false"></string>
-
     <bool name="config_networkSamplingWakesDevice">true</bool>
 
     <!--From SmsMessage-->
@@ -3412,11 +3384,6 @@
         <item>1</item>    <!-- USAGE_SETTING_VOICE_CENTRIC -->
         <item>2</item>    <!-- USAGE_SETTING_DATA_CENTRIC -->
     </integer-array>
-
-    <!-- When a radio power off request is received, we will delay completing the request until
-         either IMS moves to the deregistered state or the timeout defined by this configuration
-         elapses. If 0, this feature is disabled and we do not delay radio power off requests.-->
-    <integer name="config_delay_for_ims_dereg_millis">0</integer>
 
     <!--Thresholds for LTE dbm in status bar-->
     <integer-array translatable="false" name="config_lteDbmThresholds">
@@ -4090,12 +4057,6 @@
     <!-- Intent extra key for the event code int array while requesting ambient context consent. -->
     <string translatable="false" name="config_ambientContextEventArrayExtraKey"></string>
 
-    <!-- The component name for the system-wide captions service.
-         This service must be trusted, as it controls part of the UI of the volume bar.
-         Example: "com.android.captions/.SystemCaptionsService"
-    -->
-    <string name="config_defaultSystemCaptionsService" translatable="false"></string>
-
     <!-- The component name for the system-wide captions manager service.
          This service must be trusted, as the system binds to it and keeps it running.
          Example: "com.android.captions/.SystemCaptionsManagerService"
@@ -4387,24 +4348,6 @@
 
     <bool name="config_keepRestrictedProfilesInBackground">true</bool>
 
-    <!-- Cellular network service package name to bind to by default. -->
-    <string name="config_wwan_network_service_package" translatable="false">com.android.phone</string>
-
-    <!-- Cellular network service class name to bind to by default.-->
-    <string name="config_wwan_network_service_class" translatable="false"></string>
-
-    <!-- IWLAN network service package name to bind to by default. If none is specified in an overlay, an
-         empty string is passed in -->
-    <string name="config_wlan_network_service_package" translatable="false"></string>
-
-    <!-- IWLAN network service class name to bind to by default. If none is specified in an overlay, an
-         empty string is passed in -->
-    <string name="config_wlan_network_service_class" translatable="false"></string>
-    <!-- Telephony qualified networks service package name to bind to by default. -->
-    <string name="config_qualified_networks_service_package" translatable="false"></string>
-
-    <!-- Telephony qualified networks service class name to bind to by default. -->
-    <string name="config_qualified_networks_service_class" translatable="false"></string>
     <!-- Wear devices: Controls the radios affected by Activity Mode. -->
     <string-array name="config_wearActivityModeRadios">
         <item>"wifi"</item>
@@ -4851,6 +4794,7 @@
         <item>0.25</item>
         <item>0.5</item>
         <item>0.75</item>
+        <item>0.875</item>
     </string-array>
 
     <!-- Messages that should not be shown to the user during face auth enrollment. This should be
@@ -5735,13 +5679,13 @@
         exceeds the threshold, it'll be moved to restricted standby bucket. The value must be
         one of or combination of the definitions in AppBatteryPolicy.
     -->
-    <integer name="config_bg_current_drain_types_to_restricted_bucket">4</integer>
+    <integer name="config_bg_current_drain_types_to_restricted_bucket">20</integer>
 
     <!-- The types of battery drain we're checking on each app; if the sum of the battery drain
         exceeds the threshold, it'll be moved to background restricted level. The value must be
         one of or combination of the definitions in AppBatteryPolicy.
     -->
-    <integer name="config_bg_current_drain_types_to_bg_restricted">12</integer>
+    <integer name="config_bg_current_drain_types_to_bg_restricted">28</integer>
 
     <!-- The power usage components we're monitoring. Must one of the definition in BatteryConsumer.
     -->
@@ -5789,11 +5733,21 @@
     <!-- The types of state where we'll exempt its battery usage during that state.
          The state here must be one or a combination of STATE_TYPE_* in BaseAppStateTracker.
     -->
-    <integer name="config_bg_current_drain_exempted_types">9</integer>
+    <integer name="config_bg_current_drain_exempted_types">25</integer>
 
     <!-- The behavior when an app has the permission ACCESS_BACKGROUND_LOCATION granted,
          whether or not the system will use a higher threshold towards its background battery usage
          because of it.
     -->
     <bool name="config_bg_current_drain_high_threshold_by_bg_location">false</bool>
+
+    <!-- Start safety protection resources to be overlaid -->
+
+    <!-- Safety protection icon to be overlaid -->
+    <item name="ic_safety_protection" type="drawable">@null</item>
+
+    <!-- Display text for safety protection to be overlaid. This is translatable -->
+    <string name="safety_protection_display_text"></string>
+
+    <!-- End safety protection resources to be overlaid -->
 </resources>

@@ -84,11 +84,14 @@ final class BroadcastRecord extends Binder {
     boolean deferred;
     int splitCount;         // refcount for result callback, when split
     int splitToken;         // identifier for cross-BroadcastRecord refcount
+    long enqueueTime;       // uptimeMillis when the broadcast was enqueued
+    long enqueueRealTime;   // elapsedRealtime when the broadcast was enqueued
     long enqueueClockTime;  // the clock time the broadcast was enqueued
     long dispatchTime;      // when dispatch started on this set of receivers
+    long dispatchRealTime;  // elapsedRealtime when the broadcast was dispatched
     long dispatchClockTime; // the clock time the dispatch started
     long receiverTime;      // when current receiver started for timeouts.
-    long finishTime;        // when we finished the broadcast.
+    long finishTime;        // when we finished the current receiver.
     boolean timeoutExempt;  // true if this broadcast is not subject to receiver timeouts
     int resultCode;         // current result code value.
     String resultData;      // current result data value.
@@ -169,7 +172,7 @@ final class BroadcastRecord extends Binder {
         pw.print(prefix); pw.print("dispatchTime=");
                 TimeUtils.formatDuration(dispatchTime, now, pw);
                 pw.print(" (");
-                TimeUtils.formatDuration(dispatchClockTime-enqueueClockTime, pw);
+                TimeUtils.formatDuration(dispatchTime - enqueueTime, pw);
                 pw.print(" since enq)");
         if (finishTime != 0) {
             pw.print(" finishTime="); TimeUtils.formatDuration(finishTime, now, pw);
@@ -324,8 +327,11 @@ final class BroadcastRecord extends Binder {
         delivery = from.delivery;
         duration = from.duration;
         resultTo = from.resultTo;
+        enqueueTime = from.enqueueTime;
+        enqueueRealTime = from.enqueueRealTime;
         enqueueClockTime = from.enqueueClockTime;
         dispatchTime = from.dispatchTime;
+        dispatchRealTime = from.dispatchRealTime;
         dispatchClockTime = from.dispatchClockTime;
         receiverTime = from.receiverTime;
         finishTime = from.finishTime;
@@ -378,7 +384,9 @@ final class BroadcastRecord extends Binder {
                 requiredPermissions, excludedPermissions, appOp, options, splitReceivers, resultTo,
                 resultCode, resultData, resultExtras, ordered, sticky, initialSticky, userId,
                 allowBackgroundActivityStarts, mBackgroundActivityStartsToken, timeoutExempt);
-
+        split.enqueueTime = this.enqueueTime;
+        split.enqueueRealTime = this.enqueueRealTime;
+        split.enqueueClockTime = this.enqueueClockTime;
         split.splitToken = this.splitToken;
         return split;
     }
@@ -448,9 +456,11 @@ final class BroadcastRecord extends Binder {
             final BroadcastRecord br = new BroadcastRecord(queue, intent, callerApp, callerPackage,
                     callerFeatureId, callingPid, callingUid, callerInstantApp, resolvedType,
                     requiredPermissions, excludedPermissions, appOp, options,
-                    uid2receiverList.valueAt(i), resultTo,
+                    uid2receiverList.valueAt(i), null /* _resultTo */,
                     resultCode, resultData, resultExtras, ordered, sticky, initialSticky, userId,
                     allowBackgroundActivityStarts, mBackgroundActivityStartsToken, timeoutExempt);
+            br.enqueueTime = this.enqueueTime;
+            br.enqueueRealTime = this.enqueueRealTime;
             br.enqueueClockTime = this.enqueueClockTime;
             ret.put(uid2receiverList.keyAt(i), br);
         }

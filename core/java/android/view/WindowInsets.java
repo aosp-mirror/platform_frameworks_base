@@ -517,6 +517,13 @@ public final class WindowInsets {
     /**
      * Returns the {@link Rect} of the maximum bounds of the system privacy indicator, for the
      * current orientation, in relative coordinates, or null if the bounds have not been loaded yet.
+     * <p>
+     * The privacy indicator bounds are determined by SystemUI, and subsequently loaded once the
+     * StatusBar window has been created and attached. The bounds for all rotations are calculated
+     * and loaded at once, and this value is only expected to ever change on display or font scale
+     * changes. As long as there is a StatusBar window, this value should not be expected to be
+     * null.
+     * <p>
      * The privacy indicator shows over apps when an app uses the microphone or camera permissions,
      * while an app is in immersive mode.
      *

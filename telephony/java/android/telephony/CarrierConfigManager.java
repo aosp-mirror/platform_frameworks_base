@@ -504,7 +504,12 @@ public class CarrierConfigManager {
     /** Control whether users can choose a network operator. */
     public static final String KEY_OPERATOR_SELECTION_EXPAND_BOOL = "operator_selection_expand_bool";
 
-    /** Used in Cellular Network Settings for preferred network type. */
+    /**
+     * Used in the Preferred Network Types menu to determine if the 2G option is displayed.
+     * Value defaults to false as of Android T to discourage the use of insecure 2G protocols.
+     *
+     * @see #KEY_HIDE_ENABLE_2G
+     */
     public static final String KEY_PREFER_2G_BOOL = "prefer_2g_bool";
 
     /**
@@ -4374,12 +4379,14 @@ public class CarrierConfigManager {
      * The data stall recovery timers array in milliseconds, each element is the delay before
      * performining next recovery action.
      *
-     * The default value of timers array are: [180000ms, 180000ms, 180000ms] (3 minutes)
+     * The default value of timers array are: [180000ms, 180000ms, 180000ms, 180000ms] (3 minutes)
      * Array[0]: It's the timer between RECOVERY_ACTION GET_DATA_CALL_LIST and CLEANUP, if data
      * stall symptom still occurred, it will perform next recovery action after 180000ms.
-     * Array[1]: It's the timer between RECOVERY_ACTION CLEANUP and RADIO_RESTART, if data stall
+     * Array[1]: It's the timer between RECOVERY_ACTION CLEANUP and RE-REGISTER, if data stall
      * symptom still occurred, it will perform next recovery action after 180000ms.
-     * Array[2]: It's the timer between RECOVERY_ACTION RADIO_RESTART and RESET_MODEM, if data stall
+     * Array[2]: It's the timer between RECOVERY_ACTION RE-REGISTER and RADIO_RESTART, if data stall
+     * symptom still occurred, it will perform next recovery action after 180000ms.
+     * Array[3]: It's the timer between RECOVERY_ACTION RADIO_RESTART and RESET_MODEM, if data stall
      * symptom still occurred, it will perform next recovery action after 180000ms.
      *
      * See the {@code RECOVERY_ACTION_*} constants in
@@ -4399,7 +4406,7 @@ public class CarrierConfigManager {
      * RECOVERY_ACTION_CLEANUP to true, then it can be ignored to speed up the recovery
      * action procedure.
      *
-     * The default value of boolean array are: [false, false, false, false]
+     * The default value of boolean array are: [false, false, true, false, false]
      * Array[0]: When performing the recovery action, we can use this boolean value to determine
      * if we need to perform RECOVERY_ACTION_GET_DATA_CALL_LIST.
      * Array[1]: If data stall symptom still occurred, we can use this boolean value to determine
@@ -4409,8 +4416,10 @@ public class CarrierConfigManager {
      * variable of action RECOVERY_ACTION_CLEANUP to true, then it can be ignored to speed up the
      * recovery action procedure.
      * Array[2]: If data stall symptom still occurred, we can use this boolean value to determine
-     * if we need to perform RECOVERY_ACTION_RADIO_RESTART.
+     * if we need to perform RE-REGISTER.
      * Array[3]: If data stall symptom still occurred, we can use this boolean value to determine
+     * if we need to perform RECOVERY_ACTION_RADIO_RESTART.
+     * Array[4]: If data stall symptom still occurred, we can use this boolean value to determine
      * if we need to perform RECOVERY_ACTION_MODEM_RESET.
      *
      * See the {@code RECOVERY_ACTION_*} constants in
@@ -4749,10 +4758,14 @@ public class CarrierConfigManager {
      * Either omit this key or pass a value of
      * {@link SubscriptionManager#USAGE_SETTING_UNKNOWN unknown} to preserve the current setting.
      *
+     * <p>Devices that support configuration of the cellular usage setting, including devices
+     * with HAL capability to set the cellular usage setting, must honor this setting accordingly.
+     *
      * {@link SubscriptionManager#USAGE_SETTING_DEFAULT default},
      * {@link SubscriptionManager#USAGE_SETTING_VOICE_CENTRIC voice-centric},
      * or {@link SubscriptionManager#USAGE_SETTING_DATA_CENTRIC data-centric}.
      * {@see SubscriptionInfo#getUsageSetting}
+     *
      */
     public static final String KEY_CELLULAR_USAGE_SETTING_INT =
             "cellular_usage_setting_int";
@@ -8488,8 +8501,9 @@ public class CarrierConfigManager {
      *     <item value="source=GERAN|UTRAN, target:IWLAN, type=disallowed"/>
      *     <!-- Handover from IWLAN to 3G/4G/5G is not allowed if the device is roaming. -->
      *     <item value="source=IWLAN, target=UTRAN|EUTRAN|NGRAN, roaming=true, type=disallowed"/>
-     *     <!-- Handover from 4G to IWLAN is not allowed -->
-     *     <item value="source=EUTRAN, target=IWLAN, type=disallowed"/>
+     *     <!-- Handover from 4G to IWLAN is not allowed if the device has capability in either IMS
+     *     or EIMS-->
+     *     <item value="source=EUTRAN, target=IWLAN, type=disallowed, capabilities=IMS|EIMS"/>
      *     <!-- Handover is always allowed in any condition. -->
      *     <item value="source=GERAN|UTRAN|EUTRAN|NGRAN|IWLAN,
      *         target=GERAN|UTRAN|EUTRAN|NGRAN|IWLAN, type=allowed"/>
@@ -8594,7 +8608,7 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_IGNORE_SIM_NETWORK_LOCKED_EVENTS_BOOL, false);
         sDefaults.putBoolean(KEY_MDN_IS_ADDITIONAL_VOICEMAIL_NUMBER_BOOL, false);
         sDefaults.putBoolean(KEY_OPERATOR_SELECTION_EXPAND_BOOL, true);
-        sDefaults.putBoolean(KEY_PREFER_2G_BOOL, true);
+        sDefaults.putBoolean(KEY_PREFER_2G_BOOL, false);
         sDefaults.putBoolean(KEY_4G_ONLY_BOOL, false);
         sDefaults.putBoolean(KEY_SHOW_APN_SETTING_CDMA_BOOL, false);
         sDefaults.putBoolean(KEY_SHOW_CDMA_CHOICES_BOOL, false);
@@ -9149,9 +9163,9 @@ public class CarrierConfigManager {
                 SubscriptionManager.USAGE_SETTING_UNKNOWN);
         // Default data stall recovery configurations.
         sDefaults.putLongArray(KEY_DATA_STALL_RECOVERY_TIMERS_LONG_ARRAY,
-                new long[] {180000, 180000, 180000});
+                new long[] {180000, 180000, 180000, 180000});
         sDefaults.putBooleanArray(KEY_DATA_STALL_RECOVERY_SHOULD_SKIP_BOOL_ARRAY,
-                new boolean[] {false, false, false, false});
+                new boolean[] {false, false, true, false, false});
     }
 
     /**
@@ -9493,42 +9507,26 @@ public class CarrierConfigManager {
     private void addConfig(String key, Object value, PersistableBundle configs) {
         if (value instanceof String) {
             configs.putString(key, (String) value);
-        }
-
-        if (value instanceof String[]) {
+        } else if (value instanceof String[]) {
             configs.putStringArray(key, (String[]) value);
-        }
-
-        if (value instanceof Integer) {
+        } else if (value instanceof Integer) {
             configs.putInt(key, (Integer) value);
-        }
-
-        if (value instanceof Long) {
+        } else if (value instanceof Long) {
             configs.putLong(key, (Long) value);
-        }
-
-        if (value instanceof Double) {
+        } else if (value instanceof Double) {
             configs.putDouble(key, (Double) value);
-        }
-
-        if (value instanceof Boolean) {
+        } else if (value instanceof Boolean) {
             configs.putBoolean(key, (Boolean) value);
-        }
-
-        if (value instanceof int[]) {
+        } else if (value instanceof int[]) {
             configs.putIntArray(key, (int[]) value);
-        }
-
-        if (value instanceof double[]) {
+        } else if (value instanceof double[]) {
             configs.putDoubleArray(key, (double[]) value);
-        }
-
-        if (value instanceof boolean[]) {
+        } else if (value instanceof boolean[]) {
             configs.putBooleanArray(key, (boolean[]) value);
-        }
-
-        if (value instanceof long[]) {
+        } else if (value instanceof long[]) {
             configs.putLongArray(key, (long[]) value);
+        } else if (value instanceof PersistableBundle) {
+            configs.putPersistableBundle(key, (PersistableBundle) value);
         }
     }
 }

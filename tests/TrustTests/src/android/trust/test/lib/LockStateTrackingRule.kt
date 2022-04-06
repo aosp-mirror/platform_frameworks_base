@@ -22,7 +22,6 @@ import android.content.Context
 import android.util.Log
 import android.view.WindowManagerGlobal
 import androidx.test.core.app.ApplicationProvider.getApplicationContext
-import com.google.common.truth.Truth.assertThat
 import org.junit.rules.TestRule
 import org.junit.runner.Description
 import org.junit.runners.model.Statement
@@ -52,8 +51,14 @@ class LockStateTrackingRule : TestRule {
         }
     }
 
-    fun assertLocked() = assertThat(lockState.locked).isTrue()
-    fun assertUnlocked() = assertThat(lockState.locked).isFalse()
+    fun assertLocked() {
+        wait("un-locked per TrustListener") { lockState.locked == true }
+        wait("keyguard lock") { windowManager.isKeyguardLocked }
+    }
+
+    fun assertUnlocked() {
+        wait("locked per TrustListener") { lockState.locked == false }
+    }
 
     inner class Listener : TrustListener {
         override fun onTrustChanged(

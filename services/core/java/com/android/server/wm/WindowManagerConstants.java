@@ -91,12 +91,6 @@ final class WindowManagerConstants {
         updateSystemGestureExcludedByPreQStickyImmersive();
     }
 
-    @VisibleForTesting
-    void dispose() {
-        mDeviceConfig.removeOnPropertiesChangedListener(mListenerAndroid);
-        mDeviceConfig.removeOnPropertiesChangedListener(mListenerWindowManager);
-    }
-
     private void onAndroidPropertiesChanged(DeviceConfig.Properties properties) {
         synchronized (mGlobalLock) {
             boolean updateSystemGestureExclusionLimit = false;

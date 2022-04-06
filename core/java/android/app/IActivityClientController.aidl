@@ -88,7 +88,7 @@ interface IActivityClientController {
 
     boolean enterPictureInPictureMode(in IBinder token, in PictureInPictureParams params);
     void setPictureInPictureParams(in IBinder token, in PictureInPictureParams params);
-    oneway void setPreferDockBigOverlays(in IBinder token, in boolean preferDockBigOverlays);
+    oneway void setShouldDockBigOverlays(in IBinder token, in boolean shouldDockBigOverlays);
     void toggleFreeformWindowingMode(in IBinder token);
 
     oneway void startLockTaskModeByToken(in IBinder token);

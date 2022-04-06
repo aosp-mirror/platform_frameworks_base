@@ -19,8 +19,8 @@
     <target_preparer class="com.android.tradefed.targetprep.RootTargetPreparer" />
 
     <target_preparer class="com.android.tradefed.targetprep.RunCommandTargetPreparer">
-        <option name="run-command" value="adb shell settings put secure show_ime_with_hard_keyboard 1" />
-        <option name="teardown-command" value="adb shell settings delete secure show_ime_with_hard_keyboard" />
+        <option name="run-command" value="settings put secure show_ime_with_hard_keyboard 1" />
+        <option name="teardown-command" value="settings delete secure show_ime_with_hard_keyboard" />
     </target_preparer>
 
     <target_preparer class="com.android.tradefed.targetprep.suite.SuiteApkInstaller">

@@ -26,6 +26,7 @@ import android.app.ActivityManagerInternal.BindServiceEventListener;
 import android.content.Context;
 
 import com.android.server.am.AppBindServiceEventsTracker.AppBindServiceEventsPolicy;
+import com.android.server.am.AppRestrictionController.TrackerType;
 import com.android.server.am.BaseAppStateTimeSlotEventsTracker.SimpleAppStateTimeslotEvents;
 import com.android.server.am.BaseAppStateTracker.Injector;
 
@@ -56,6 +57,11 @@ final class AppBindServiceEventsTracker extends BaseAppStateTimeSlotEventsTracke
         if (mInjector.getPolicy().isEnabled()) {
             onNewEvent(packageName, uid);
         }
+    }
+
+    @Override
+    @TrackerType int getType() {
+        return AppRestrictionController.TRACKER_TYPE_BIND_SERVICE_EVENTS;
     }
 
     @Override

@@ -21,8 +21,8 @@
     android:id="@+id/qs_media_controls"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:clipChildren="false"
-    android:clipToPadding="false"
+    android:clipChildren="true"
+    android:clipToPadding="true"
     android:gravity="center_horizontal|fill_vertical"
     android:forceHasOverlappingRendering="false"
     android:background="@drawable/qs_media_background"
@@ -44,12 +44,21 @@
         android:background="@drawable/qs_media_scrim"
         />
 
+    <!-- Guideline for output switcher -->
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/center_vertical_guideline"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="vertical"
         app:layout_constraintGuide_percent="0.6" />
+
+    <!-- Guideline for action buttons (collapsed view only) -->
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/action_button_guideline"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:orientation="vertical"
+        app:layout_constraintGuide_end="@dimen/qs_media_session_collapsed_guideline" />
 
     <!-- App icon -->
     <com.android.internal.widget.CachingIconView
@@ -118,15 +127,7 @@
         android:singleLine="true"
         android:textSize="16sp"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
-        android:layout_marginStart="@dimen/qs_media_padding"
-        android:layout_marginEnd="@dimen/qs_media_padding"
-        app:layout_constrainedWidth="true"
-        app:layout_constraintTop_toBottomOf="@id/icon"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toStartOf="@id/actionPlayPause"
-        app:layout_constraintHorizontal_bias="0" />
+        android:layout_height="wrap_content" />
 
     <!-- Artist name -->
     <TextView
@@ -136,15 +137,7 @@
         style="@style/MediaPlayer.Subtitle"
         android:textSize="14sp"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="@dimen/qs_media_padding"
-        app:layout_constrainedWidth="true"
-        android:layout_marginTop="1dp"
-        app:layout_constraintTop_toBottomOf="@id/header_title"
-        app:layout_constraintStart_toStartOf="@id/header_title"
-        app:layout_constraintEnd_toStartOf="@id/actionPlayPause"
-        app:layout_constraintBottom_toBottomOf="@id/actionPlayPause"
-        app:layout_constraintHorizontal_bias="0" />
+        android:layout_height="wrap_content" />
 
     <ImageButton
         android:id="@+id/actionPlayPause"
@@ -152,21 +145,52 @@
         android:layout_width="48dp"
         android:layout_height="48dp"
         android:layout_marginStart="@dimen/qs_media_padding"
-        android:layout_marginEnd="@dimen/qs_media_padding"
-        android:layout_marginTop="0dp"
-        android:layout_marginBottom="0dp" />
+        android:layout_marginEnd="@dimen/qs_media_padding" />
 
+    <!-- See comment in media_session_collapsed.xml for how these barriers are used -->
+    <androidx.constraintlayout.widget.Barrier
+        android:id="@+id/media_action_barrier"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:orientation="vertical"
+        app:layout_constraintTop_toBottomOf="@id/header_title"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:barrierDirection="start"
+        app:constraint_referenced_ids="actionPrev,media_progress_bar,actionNext,action0,action1,action2,action3,action4"
+        />
+    <androidx.constraintlayout.widget.Barrier
+        android:id="@+id/media_action_barrier_end"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:orientation="vertical"
+        app:layout_constraintTop_toBottomOf="@id/media_seamless"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:barrierDirection="end"
+        app:constraint_referenced_ids="actionPrev,media_progress_bar,actionNext,action0,action1,action2,action3,action4"
+        app:layout_constraintStart_toStartOf="parent"
+        />
+
+    <androidx.constraintlayout.widget.Barrier
+        android:id="@+id/media_action_barrier_top"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:barrierDirection="top"
+        app:constraint_referenced_ids="actionPrev,media_progress_bar,actionNext,action0,action1,action2,action3,action4"
+        />
+
+    <!-- Button visibility will be controlled in code -->
     <ImageButton
         android:id="@+id/actionPrev"
-        style="@style/MediaPlayer.SessionAction"
+        style="@style/MediaPlayer.SessionAction.Secondary"
         android:layout_width="48dp"
         android:layout_height="48dp"
         android:layout_marginStart="4dp"
         android:layout_marginEnd="0dp"
-        android:layout_marginBottom="0dp"
+        android:layout_marginBottom="@dimen/qs_media_padding"
         android:layout_marginTop="0dp"
-        app:layout_constraintHorizontal_bias="1"
-        app:layout_constraintHorizontal_chainStyle="packed" />
+        />
 
     <!-- Seek Bar -->
     <!-- As per Material Design on Bidirectionality, this is forced to LTR in code -->
@@ -174,52 +198,81 @@
         android:id="@+id/media_progress_bar"
         style="@style/MediaPlayer.ProgressBar"
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
+        android:layout_height="48dp"
         android:paddingTop="@dimen/qs_media_session_enabled_seekbar_vertical_padding"
         android:paddingBottom="12dp"
         android:maxHeight="@dimen/qs_media_enabled_seekbar_height"
         android:splitTrack="false"
-        android:layout_marginBottom="0dp"
+        android:layout_marginBottom="@dimen/qs_media_padding"
         android:layout_marginTop="0dp"
         android:layout_marginStart="0dp"
         android:layout_marginEnd="0dp" />
 
     <ImageButton
         android:id="@+id/actionNext"
-        style="@style/MediaPlayer.SessionAction"
+        style="@style/MediaPlayer.SessionAction.Secondary"
         android:layout_width="48dp"
         android:layout_height="48dp"
         android:layout_marginStart="0dp"
         android:layout_marginEnd="@dimen/qs_media_action_spacing"
-        android:layout_marginBottom="0dp"
+        android:layout_marginBottom="@dimen/qs_media_padding"
         android:layout_marginTop="0dp" />
 
     <ImageButton
-        android:id="@+id/actionStart"
-        style="@style/MediaPlayer.SessionAction"
+        android:id="@+id/action0"
+        style="@style/MediaPlayer.SessionAction.Secondary"
         android:layout_width="48dp"
         android:layout_height="48dp"
         android:layout_marginStart="@dimen/qs_media_action_spacing"
         android:layout_marginEnd="@dimen/qs_media_action_spacing"
-        android:layout_marginBottom="0dp"
-        android:layout_marginTop="0dp" />
+        android:layout_marginBottom="@dimen/qs_media_padding"
+        android:layout_marginTop="0dp"/>
 
     <ImageButton
-        android:id="@+id/actionEnd"
-        style="@style/MediaPlayer.SessionAction"
+        android:id="@+id/action1"
+        style="@style/MediaPlayer.SessionAction.Secondary"
         android:layout_width="48dp"
         android:layout_height="48dp"
         android:layout_marginStart="@dimen/qs_media_action_spacing"
         android:layout_marginEnd="4dp"
-        android:layout_marginBottom="0dp"
-        android:layout_marginTop="0dp"
-        app:layout_constraintHorizontal_chainStyle="packed" />
+        android:layout_marginBottom="@dimen/qs_media_padding"
+        android:layout_marginTop="0dp" />
+
+    <ImageButton
+        android:id="@+id/action2"
+        style="@style/MediaPlayer.SessionAction.Secondary"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_marginStart="@dimen/qs_media_action_spacing"
+        android:layout_marginEnd="4dp"
+        android:layout_marginBottom="@dimen/qs_media_padding"
+        android:layout_marginTop="0dp" />
+
+    <ImageButton
+        android:id="@+id/action3"
+        style="@style/MediaPlayer.SessionAction.Secondary"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_marginStart="@dimen/qs_media_action_spacing"
+        android:layout_marginEnd="4dp"
+        android:layout_marginBottom="@dimen/qs_media_padding"
+        android:layout_marginTop="0dp" />
+
+    <ImageButton
+        android:id="@+id/action4"
+        style="@style/MediaPlayer.SessionAction.Secondary"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_marginStart="@dimen/qs_media_action_spacing"
+        android:layout_marginEnd="4dp"
+        android:layout_marginBottom="@dimen/qs_media_padding"
+        android:layout_marginTop="0dp" />
 
     <!-- Long press menu -->
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/qs_media_padding"
+        android:layout_marginTop="0dp"
         android:layout_marginStart="@dimen/qs_media_padding"
         android:layout_marginEnd="@dimen/qs_media_padding"
         android:id="@+id/remove_text"
@@ -229,15 +282,31 @@
         android:marqueeRepeatLimit="marquee_forever"
         android:text="@string/controls_media_close_session"
         android:gravity="center_horizontal|top"
-        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/settings"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintBottom_toTopOf="@id/cancel" />
 
-    <FrameLayout
+    <ImageButton
         android:id="@+id/settings"
-        android:background="@drawable/qs_media_light_source"
+        android:src="@drawable/ic_settings"
         android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:layout_marginEnd="4dp"
+        android:background="@drawable/qs_media_light_source"
+        android:contentDescription="@string/controls_media_settings_button"
+        android:layout_gravity="top"
+        app:layout_constraintWidth_min="@dimen/min_clickable_item_size"
+        app:layout_constraintHeight_min="@dimen/min_clickable_item_size"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+    </ImageButton>
+
+    <FrameLayout
+        android:id="@+id/dismiss"
+        android:background="@drawable/qs_media_light_source"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="@dimen/qs_media_padding"
         android:layout_marginEnd="@dimen/qs_media_action_spacing"
@@ -245,48 +314,24 @@
         app:layout_constrainedWidth="true"
         app:layout_constraintWidth_min="@dimen/min_clickable_item_size"
         app:layout_constraintHeight_min="@dimen/min_clickable_item_size"
-        app:layout_constraintHorizontal_chainStyle="spread_inside"
+        app:layout_constraintHorizontal_chainStyle="packed"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toStartOf="@id/cancel"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintTop_toBottomOf="@id/remove_text">
         <TextView
-            android:id="@+id/settings_text"
+            android:id="@+id/dismiss_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center|bottom"
-            style="@style/MediaPlayer.OutlineButton"
-            android:text="@string/controls_media_settings_button" />
+            android:layout_gravity="center|top"
+            style="@style/MediaPlayer.SolidButton"
+            android:background="@drawable/qs_media_solid_button"
+            android:text="@string/controls_media_dismiss_button" />
     </FrameLayout>
-
     <FrameLayout
         android:id="@+id/cancel"
         android:background="@drawable/qs_media_light_source"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="@dimen/qs_media_action_spacing"
-        android:layout_marginEnd="@dimen/qs_media_action_spacing"
-        android:layout_marginBottom="@dimen/qs_media_padding"
-        app:layout_constrainedWidth="true"
-        app:layout_constraintWidth_min="@dimen/min_clickable_item_size"
-        app:layout_constraintHeight_min="@dimen/min_clickable_item_size"
-        app:layout_constraintStart_toEndOf="@id/settings"
-        app:layout_constraintEnd_toStartOf="@id/dismiss"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/remove_text">
-        <TextView
-            android:id="@+id/cancel_text"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center|bottom"
-            style="@style/MediaPlayer.OutlineButton"
-            android:text="@string/cancel" />
-    </FrameLayout>
-
-    <FrameLayout
-        android:id="@+id/dismiss"
-        android:background="@drawable/qs_media_light_source"
-        android:layout_width="0dp"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="@dimen/qs_media_action_spacing"
         android:layout_marginEnd="@dimen/qs_media_padding"
@@ -294,16 +339,16 @@
         app:layout_constrainedWidth="true"
         app:layout_constraintWidth_min="@dimen/min_clickable_item_size"
         app:layout_constraintHeight_min="@dimen/min_clickable_item_size"
-        app:layout_constraintStart_toEndOf="@id/cancel"
+        app:layout_constraintStart_toEndOf="@id/dismiss"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintTop_toBottomOf="@id/remove_text">
         <TextView
-            android:id="@+id/dismiss_text"
+            android:id="@+id/cancel_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center|bottom"
+            android:layout_gravity="center|top"
             style="@style/MediaPlayer.OutlineButton"
-            android:text="@string/controls_media_dismiss_button" />
+            android:text="@string/cancel" />
     </FrameLayout>
 </com.android.systemui.util.animation.TransitionLayout>

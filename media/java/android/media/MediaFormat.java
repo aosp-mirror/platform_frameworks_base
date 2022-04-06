@@ -359,6 +359,42 @@ public final class MediaFormat {
     public static final String KEY_HEIGHT = "height";
 
     /**
+     * A key describing the bottom-coordinate (y) of the crop rectangle.
+     * This is the bottom-most row included in the crop frame,
+     * where row indices start at 0.
+     * Additional information on the crop rectangle semantics can be found at
+     * {@link android.media.MediaCodec}.
+     */
+    public static final String KEY_CROP_BOTTOM = "crop-bottom";
+
+    /**
+     * A key describing the left-coordinate (x) of the crop rectangle.
+     * This is the left-most column included in the crop frame,
+     * where column indices start at 0.
+     * Additional information on the crop rectangle semantics can be found at
+     * {@link android.media.MediaCodec}.
+     */
+    public static final String KEY_CROP_LEFT = "crop-left";
+
+    /**
+     * A key describing the right-coordinate (x) of the crop rectangle.
+     * This is the right-most column included in the crop frame,
+     * where column indices start at 0.
+     * Additional information on the crop rectangle semantics can be found at
+     * {@link android.media.MediaCodec}.
+     */
+    public static final String KEY_CROP_RIGHT = "crop-right";
+
+    /**
+     * A key describing the top-coordinate (y) of the crop rectangle.
+     * This is the top-most row included in the crop frame,
+     * where row indices start at 0.
+     * Additional information on the crop rectangle semantics can be found at
+     * {@link android.media.MediaCodec}.
+     */
+    public static final String KEY_CROP_TOP = "crop-top";
+
+    /**
      * A key describing the maximum expected width of the content in a video
      * decoder format, in case there are resolution changes in the video content.
      * The associated value is an integer
@@ -793,8 +829,11 @@ public final class MediaFormat {
      * By default, the decoder will output the same number of channels as present in the encoded
      * stream, if supported. Set this value to limit the number of output channels, and use
      * the downmix information in the stream, if available.
-     * <p>Values larger than the number of channels in the content to decode are ignored.
+     * <p>Values larger than the number of channels in the content to decode behave just
+     * like the actual channel count of the content (e.g. passing 99 for the decoding of 5.1 content
+     * will behave like using 6).
      * <p>This key is only used during decoding.
+     * @deprecated Use the non-AAC-specific key {@link #KEY_MAX_OUTPUT_CHANNEL_COUNT} instead
      */
     public static final String KEY_AAC_MAX_OUTPUT_CHANNEL_COUNT = "aac-max-output-channel_count";
 

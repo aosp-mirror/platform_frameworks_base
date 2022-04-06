@@ -118,6 +118,7 @@ final class Constants {
             MESSAGE_SYSTEM_AUDIO_MODE_REQUEST,
             MESSAGE_GIVE_AUDIO_STATUS,
             MESSAGE_SET_SYSTEM_AUDIO_MODE,
+            MESSAGE_SET_AUDIO_VOLUME_LEVEL,
             MESSAGE_REPORT_AUDIO_STATUS,
             MESSAGE_GIVE_SYSTEM_AUDIO_MODE_STATUS,
             MESSAGE_SYSTEM_AUDIO_MODE_STATUS,
@@ -197,9 +198,9 @@ final class Constants {
     static final int MESSAGE_SYSTEM_AUDIO_MODE_REQUEST = 0x70;
     static final int MESSAGE_GIVE_AUDIO_STATUS = 0x71;
     static final int MESSAGE_SET_SYSTEM_AUDIO_MODE = 0x72;
+    static final int MESSAGE_SET_AUDIO_VOLUME_LEVEL = 0x73;
     static final int MESSAGE_REPORT_AUDIO_STATUS = 0x7A;
     static final int MESSAGE_GIVE_SYSTEM_AUDIO_MODE_STATUS = 0x7D;
-    static final int MESSAGE_SET_AUDIO_VOLUME_LEVEL = 0x73;
     static final int MESSAGE_SYSTEM_AUDIO_MODE_STATUS = 0x7E;
     static final int MESSAGE_ROUTING_CHANGE = 0x80;
     static final int MESSAGE_ROUTING_INFORMATION = 0x81;

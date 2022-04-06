@@ -45,6 +45,7 @@ import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Pair;
 import android.util.SparseArray;
+import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
@@ -58,10 +59,6 @@ import com.android.server.utils.WatchedLongSparseArray;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
 import java.util.List;
 import java.util.Set;
 
@@ -92,92 +89,69 @@ import java.util.Set;
  * and other managers (like PermissionManager) mean deadlock is possible.  On the
  * other hand, not overriding in {@link ComputerLocked} may leave a function walking
  * unstable data.
- *
- * To coax developers to consider such issues carefully, all methods in
- * {@link Computer} must be annotated with <code>@LiveImplementation(override =
- * MANDATORY)</code> or <code>LiveImplementation(locked = NOT_ALLOWED)</code>.  A unit
- * test verifies the annotation and that the annotation corresponds to the code in
- * {@link ComputerEngine} and {@link ComputerLocked}.
  */
 @VisibleForTesting(visibility = VisibleForTesting.Visibility.PRIVATE)
 public interface Computer extends PackageDataSnapshot {
 
     /**
-     * Every method must be annotated.
-     */
-    @Target({ ElementType.METHOD })
-    @Retention(RetentionPolicy.RUNTIME)
-    @interface LiveImplementation {
-        // A Computer method must be annotated with one of the following values:
-        //   MANDATORY - the method must be overridden in ComputerEngineLive.  The
-        //     format of the override is a call to the super method, wrapped in a
-        //     synchronization block.
-        //   NOT_ALLOWED - the method may not appear in the live computer.  It must
-        //     be final in the ComputerEngine.
-        int MANDATORY = 1;
-        int NOT_ALLOWED = 2;
-        int override() default MANDATORY;
-        String rationale() default "";
-    }
-
-    /**
      * Administrative statistics: record that the snapshot has been used.  Every call
      * to use() increments the usage counter.
      */
-    @Computer.LiveImplementation(override = Computer.LiveImplementation.NOT_ALLOWED)
     default void use() {
     }
     /**
      * Fetch the snapshot usage counter.
      * @return The number of times this snapshot was used.
      */
-    @Computer.LiveImplementation(override = Computer.LiveImplementation.NOT_ALLOWED)
     default int getUsed() {
         return 0;
     }
-    @Computer.LiveImplementation(override = Computer.LiveImplementation.NOT_ALLOWED)
     @NonNull List<ResolveInfo> queryIntentActivitiesInternal(Intent intent, String resolvedType,
             @PackageManager.ResolveInfoFlagsBits long flags,
             @PackageManagerInternal.PrivateResolveFlags long privateResolveFlags,
             int filterCallingUid, int userId, boolean resolveForStart, boolean allowDynamicSplits);
-    @Computer.LiveImplementation(override = Computer.LiveImplementation.NOT_ALLOWED)
     @NonNull List<ResolveInfo> queryIntentActivitiesInternal(Intent intent, String resolvedType,
             long flags, int userId);
-    @Computer.LiveImplementation(override = Computer.LiveImplementation.NOT_ALLOWED)
     @NonNull List<ResolveInfo> queryIntentServicesInternal(Intent intent, String resolvedType,
             long flags, int userId, int callingUid, boolean includeInstantApps);
-    @Computer.LiveImplementation(override = Computer.LiveImplementation.MANDATORY)
     @NonNull QueryIntentActivitiesResult queryIntentActivitiesInternalBody(Intent intent,
             String resolvedType, long flags, int filterCallingUid, int userId,
             boolean resolveForStart, boolean allowDynamicSplits, String pkgName,
             String instantAppPkgName);
-    @Computer.LiveImplementation(override = Computer.LiveImplementation.NOT_ALLOWED)
     ActivityInfo getActivityInfo(ComponentName component, long flags, int userId);
-    @Computer.LiveImplementation(override = Computer.LiveImplementation.NOT_ALLOWED)
+
+    /**
+     * Important: The provided filterCallingUid is used exclusively to filter out activities
+     * that can be seen based on user state. It's typically the original caller uid prior
+     * to clearing. Because it can only be provided by trusted code, its value can be
+     * trusted and will be used as-is; unlike userId which will be validated by this method.
+     */
     ActivityInfo getActivityInfoInternal(ComponentName component, long flags,
             int filterCallingUid, int userId);
-    @Computer.LiveImplementation(override = Computer.LiveImplementation.MANDATORY)
     AndroidPackage getPackage(String packageName);
-    @Computer.LiveImplementation(override = Computer.LiveImplementation.MANDATORY)
     AndroidPackage getPackage(int uid);
-    @Computer.LiveImplementation(override = Computer.LiveImplementation.NOT_ALLOWED)
     ApplicationInfo generateApplicationInfoFromSettings(String packageName, long flags,
             int filterCallingUid, int userId);
-    @Computer.LiveImplementation(override = Computer.LiveImplementation.NOT_ALLOWED)
     ApplicationInfo getApplicationInfo(String packageName, long flags, int userId);
-    @Computer.LiveImplementation(override = Computer.LiveImplementation.NOT_ALLOWED)
+
+    /**
+     * Important: The provided filterCallingUid is used exclusively to filter out applications
+     * that can be seen based on user state. It's typically the original caller uid prior
+     * to clearing. Because it can only be provided by trusted code, its value can be
+     * trusted and will be used as-is; unlike userId which will be validated by this method.
+     */
     ApplicationInfo getApplicationInfoInternal(String packageName, long flags,
             int filterCallingUid, int userId);
-    @Computer.LiveImplementation(override = Computer.LiveImplementation.NOT_ALLOWED)
+
+    /**
+     * Report the 'Home' activity which is currently set as "always use this one". If non is set
+     * then reports the most likely home activity or null if there are more than one.
+     */
     ComponentName getDefaultHomeActivity(int userId);
-    @Computer.LiveImplementation(override = Computer.LiveImplementation.NOT_ALLOWED)
     ComponentName getHomeActivitiesAsUser(List<ResolveInfo> allHomeCandidates, int userId);
-    @Computer.LiveImplementation(override = Computer.LiveImplementation.NOT_ALLOWED)
     CrossProfileDomainInfo getCrossProfileDomainPreferredLpr(Intent intent, String resolvedType,
             long flags, int sourceUserId, int parentUserId);
-    @Computer.LiveImplementation(override = Computer.LiveImplementation.NOT_ALLOWED)
     Intent getHomeIntent();
-    @Computer.LiveImplementation(override = Computer.LiveImplementation.NOT_ALLOWED)
     List<CrossProfileIntentFilter> getMatchingCrossProfileIntentFilters(Intent intent,
             String resolvedType, int userId);
 
@@ -192,15 +166,11 @@ public interface Computer extends PackageDataSnapshot {
      * @param intent
      * @return A filtered list of resolved activities.
      */
-    @Computer.LiveImplementation(override = Computer.LiveImplementation.NOT_ALLOWED)
     List<ResolveInfo> applyPostResolutionFilter(@NonNull List<ResolveInfo> resolveInfos,
             String ephemeralPkgName, boolean allowDynamicSplits, int filterCallingUid,
             boolean resolveForStart, int userId, Intent intent);
-    @Computer.LiveImplementation(override = Computer.LiveImplementation.NOT_ALLOWED)
     PackageInfo generatePackageInfo(PackageStateInternal ps, long flags, int userId);
-    @Computer.LiveImplementation(override = Computer.LiveImplementation.NOT_ALLOWED)
     PackageInfo getPackageInfo(String packageName, long flags, int userId);
-    @Computer.LiveImplementation(override = Computer.LiveImplementation.NOT_ALLOWED)
     PackageInfo getPackageInfoInternal(String packageName, long versionCode, long flags,
             int filterCallingUid, int userId);
 
@@ -209,79 +179,69 @@ public interface Computer extends PackageDataSnapshot {
      * known {@link PackageState} instances without a {@link PackageState#getAndroidPackage()}
      * will not be represented.
      */
-    @Computer.LiveImplementation(override = Computer.LiveImplementation.MANDATORY)
     String[] getAllAvailablePackageNames();
 
-    @Computer.LiveImplementation(override = Computer.LiveImplementation.NOT_ALLOWED)
     PackageStateInternal getPackageStateInternal(String packageName);
-    @Computer.LiveImplementation(override = Computer.LiveImplementation.MANDATORY)
     PackageStateInternal getPackageStateInternal(String packageName, int callingUid);
-    @Computer.LiveImplementation(override = Computer.LiveImplementation.MANDATORY)
-    @Nullable PackageState getPackageStateCopied(@NonNull String packageName);
-    @Computer.LiveImplementation(override = Computer.LiveImplementation.NOT_ALLOWED)
     ParceledListSlice<PackageInfo> getInstalledPackages(long flags, int userId);
-    @Computer.LiveImplementation(override = Computer.LiveImplementation.NOT_ALLOWED)
     ResolveInfo createForwardingResolveInfoUnchecked(WatchedIntentFilter filter,
             int sourceUserId, int targetUserId);
-    @Computer.LiveImplementation(override = Computer.LiveImplementation.NOT_ALLOWED)
     ServiceInfo getServiceInfo(ComponentName component, long flags, int userId);
-    @Computer.LiveImplementation(override = Computer.LiveImplementation.NOT_ALLOWED)
     SharedLibraryInfo getSharedLibraryInfo(String name, long version);
-    @Computer.LiveImplementation(override = Computer.LiveImplementation.MANDATORY)
     String getInstantAppPackageName(int callingUid);
-    @Computer.LiveImplementation(override = Computer.LiveImplementation.NOT_ALLOWED)
     String resolveExternalPackageName(AndroidPackage pkg);
-    @Computer.LiveImplementation(override = Computer.LiveImplementation.NOT_ALLOWED)
     String resolveInternalPackageName(String packageName, long versionCode);
-    @Computer.LiveImplementation(override = Computer.LiveImplementation.NOT_ALLOWED)
     String[] getPackagesForUid(int uid);
-    @Computer.LiveImplementation(override = Computer.LiveImplementation.NOT_ALLOWED)
     UserInfo getProfileParent(int userId);
-    @Computer.LiveImplementation(override = Computer.LiveImplementation.NOT_ALLOWED)
     boolean canViewInstantApps(int callingUid, int userId);
-    @Computer.LiveImplementation(override = Computer.LiveImplementation.NOT_ALLOWED)
     boolean filterSharedLibPackage(@Nullable PackageStateInternal ps, int uid, int userId,
             long flags);
-    @Computer.LiveImplementation(override = Computer.LiveImplementation.NOT_ALLOWED)
     boolean isCallerSameApp(String packageName, int uid);
-    @Computer.LiveImplementation(override = Computer.LiveImplementation.NOT_ALLOWED)
     boolean isComponentVisibleToInstantApp(@Nullable ComponentName component);
-    @Computer.LiveImplementation(override = Computer.LiveImplementation.NOT_ALLOWED)
     boolean isComponentVisibleToInstantApp(@Nullable ComponentName component,
             @PackageManager.ComponentType int type);
-    @Computer.LiveImplementation(override = Computer.LiveImplementation.NOT_ALLOWED)
-    boolean isImplicitImageCaptureIntentAndNotSetByDpcLocked(Intent intent, int userId,
+
+    /**
+     * From Android R, camera intents have to match system apps. The only exception to this is if
+     * the DPC has set the camera persistent preferred activity. This case was introduced
+     * because it is important that the DPC has the ability to set both system and non-system
+     * camera persistent preferred activities.
+     *
+     * @return {@code true} if the intent is a camera intent and the persistent preferred
+     * activity was not set by the DPC.
+     */
+    boolean isImplicitImageCaptureIntentAndNotSetByDpc(Intent intent, int userId,
             String resolvedType, long flags);
-    @Computer.LiveImplementation(override = Computer.LiveImplementation.NOT_ALLOWED)
     boolean isInstantApp(String packageName, int userId);
-    @Computer.LiveImplementation(override = Computer.LiveImplementation.NOT_ALLOWED)
     boolean isInstantAppInternal(String packageName, @UserIdInt int userId, int callingUid);
-    @Computer.LiveImplementation(override = Computer.LiveImplementation.NOT_ALLOWED)
     boolean isSameProfileGroup(@UserIdInt int callerUserId, @UserIdInt int userId);
-    @Computer.LiveImplementation(override = Computer.LiveImplementation.NOT_ALLOWED)
     boolean shouldFilterApplication(@Nullable PackageStateInternal ps, int callingUid,
             @Nullable ComponentName component, @PackageManager.ComponentType int componentType,
             int userId);
-    @Computer.LiveImplementation(override = Computer.LiveImplementation.NOT_ALLOWED)
     boolean shouldFilterApplication(@Nullable PackageStateInternal ps, int callingUid,
             int userId);
-    @Computer.LiveImplementation(override = Computer.LiveImplementation.NOT_ALLOWED)
     boolean shouldFilterApplication(@NonNull SharedUserSetting sus, int callingUid,
             int userId);
-    @Computer.LiveImplementation(override = Computer.LiveImplementation.NOT_ALLOWED)
     int checkUidPermission(String permName, int uid);
-    @Computer.LiveImplementation(override = Computer.LiveImplementation.MANDATORY)
     int getPackageUidInternal(String packageName, long flags, int userId, int callingUid);
-    @Computer.LiveImplementation(override = Computer.LiveImplementation.NOT_ALLOWED)
     long updateFlagsForApplication(long flags, int userId);
-    @Computer.LiveImplementation(override = Computer.LiveImplementation.NOT_ALLOWED)
     long updateFlagsForComponent(long flags, int userId);
-    @Computer.LiveImplementation(override = Computer.LiveImplementation.NOT_ALLOWED)
     long updateFlagsForPackage(long flags, int userId);
-    @Computer.LiveImplementation(override = Computer.LiveImplementation.NOT_ALLOWED)
+
+    /**
+     * Update given flags when being used to request {@link ResolveInfo}.
+     * <p>Instant apps are resolved specially, depending upon context. Minimally,
+     * {@code}flags{@code} must have the {@link PackageManager#MATCH_INSTANT}
+     * flag set. However, this flag is only honoured in three circumstances:
+     * <ul>
+     * <li>when called from a system process</li>
+     * <li>when the caller holds the permission {@code android.permission.ACCESS_INSTANT_APPS}</li>
+     * <li>when resolution occurs to start an activity with a {@code android.intent.action.VIEW}
+     * action and a {@code android.intent.category.BROWSABLE} category</li>
+     * </ul>
+     */
     long updateFlagsForResolve(long flags, int userId, int callingUid, boolean wantInstantApps,
             boolean isImplicitImageCaptureIntentAndNotSetByDpc);
-    @Computer.LiveImplementation(override = Computer.LiveImplementation.NOT_ALLOWED)
     long updateFlagsForResolve(long flags, int userId, int callingUid, boolean wantInstantApps,
             boolean onlyExposedExplicitly, boolean isImplicitImageCaptureIntentAndNotSetByDpc);
 
@@ -299,117 +259,99 @@ public interface Computer extends PackageDataSnapshot {
      * @param checkShell whether to prevent shell from access if there's a debugging restriction
      * @param message the message to log on security exception
      */
-    @Computer.LiveImplementation(override = Computer.LiveImplementation.NOT_ALLOWED)
     void enforceCrossUserOrProfilePermission(int callingUid, @UserIdInt int userId,
             boolean requireFullPermission, boolean checkShell, String message);
-    @Computer.LiveImplementation(override = Computer.LiveImplementation.NOT_ALLOWED)
+
+    /**
+     * Enforces the request is from the system or an app that has INTERACT_ACROSS_USERS
+     * or INTERACT_ACROSS_USERS_FULL permissions, if the {@code userId} is not for the caller.
+     *
+     * @param checkShell whether to prevent shell from access if there's a debugging restriction
+     * @param message the message to log on security exception
+     */
     void enforceCrossUserPermission(int callingUid, @UserIdInt int userId,
             boolean requireFullPermission, boolean checkShell, String message);
-    @Computer.LiveImplementation(override = Computer.LiveImplementation.NOT_ALLOWED)
     void enforceCrossUserPermission(int callingUid, @UserIdInt int userId,
             boolean requireFullPermission, boolean checkShell,
             boolean requirePermissionWhenSameUser, String message);
-    @Computer.LiveImplementation(override = Computer.LiveImplementation.MANDATORY)
     SigningDetails getSigningDetails(@NonNull String packageName);
-    @Computer.LiveImplementation(override = Computer.LiveImplementation.MANDATORY)
     SigningDetails getSigningDetails(int uid);
-    @Computer.LiveImplementation(override = Computer.LiveImplementation.MANDATORY)
     boolean filterAppAccess(AndroidPackage pkg, int callingUid, int userId);
-    @Computer.LiveImplementation(override = Computer.LiveImplementation.MANDATORY)
     boolean filterAppAccess(String packageName, int callingUid, int userId);
-    @Computer.LiveImplementation(override = Computer.LiveImplementation.MANDATORY)
     boolean filterAppAccess(int uid, int callingUid);
-    @Computer.LiveImplementation(override = Computer.LiveImplementation.MANDATORY)
     void dump(int type, FileDescriptor fd, PrintWriter pw, DumpState dumpState);
-    @Computer.LiveImplementation(override = Computer.LiveImplementation.NOT_ALLOWED)
     PackageManagerService.FindPreferredActivityBodyResult findPreferredActivityInternal(
             Intent intent, String resolvedType, long flags, List<ResolveInfo> query, boolean always,
             boolean removeMatches, boolean debug, int userId, boolean queryMayBeFiltered);
-    @Computer.LiveImplementation(override = Computer.LiveImplementation.NOT_ALLOWED)
-    ResolveInfo findPersistentPreferredActivityLP(Intent intent, String resolvedType, long flags,
+    ResolveInfo findPersistentPreferredActivity(Intent intent, String resolvedType, long flags,
             List<ResolveInfo> query, boolean debug, int userId);
 
-    @Computer.LiveImplementation(override = LiveImplementation.MANDATORY)
     PreferredIntentResolver getPreferredActivities(@UserIdInt int userId);
 
-    @Computer.LiveImplementation(override = LiveImplementation.MANDATORY)
     @NonNull
     ArrayMap<String, ? extends PackageStateInternal> getPackageStates();
 
-    @Computer.LiveImplementation(override = LiveImplementation.MANDATORY)
     @Nullable
     String getRenamedPackage(@NonNull String packageName);
 
     /**
      * @return set of packages to notify
      */
-    @Computer.LiveImplementation(override = LiveImplementation.MANDATORY)
     @NonNull
     ArraySet<String> getNotifyPackagesForReplacedReceived(@NonNull String[] packages);
 
-    @Computer.LiveImplementation(override = LiveImplementation.MANDATORY)
     @PackageManagerService.PackageStartability
     int getPackageStartability(boolean safeMode, @NonNull String packageName, int callingUid,
             @UserIdInt int userId);
 
-    @Computer.LiveImplementation(override = LiveImplementation.MANDATORY)
     boolean isPackageAvailable(String packageName, @UserIdInt int userId);
 
-    @Computer.LiveImplementation(override = LiveImplementation.MANDATORY)
     @NonNull
     String[] currentToCanonicalPackageNames(@NonNull String[] names);
 
-    @Computer.LiveImplementation(override = LiveImplementation.MANDATORY)
     @NonNull
     String[] canonicalToCurrentPackageNames(@NonNull String[] names);
 
-    @Computer.LiveImplementation(override = LiveImplementation.MANDATORY)
     @NonNull
     int[] getPackageGids(@NonNull String packageName,
             @PackageManager.PackageInfoFlagsBits long flags, @UserIdInt int userId);
 
-    @Computer.LiveImplementation(override = LiveImplementation.MANDATORY)
     int getTargetSdkVersion(@NonNull String packageName);
 
-    @Computer.LiveImplementation(override = LiveImplementation.MANDATORY)
     boolean activitySupportsIntent(@NonNull ComponentName resolveComponentName,
             @NonNull ComponentName component, @NonNull Intent intent, String resolvedType);
 
-    @Computer.LiveImplementation(override = LiveImplementation.MANDATORY)
     @Nullable
     ActivityInfo getReceiverInfo(@NonNull ComponentName component,
             @PackageManager.ComponentInfoFlagsBits long flags, @UserIdInt int userId);
 
-    @Computer.LiveImplementation(override = LiveImplementation.MANDATORY)
     @Nullable
     ParceledListSlice<SharedLibraryInfo> getSharedLibraries(@NonNull String packageName,
             @PackageManager.PackageInfoFlagsBits long flags, @UserIdInt int userId);
 
-    @Computer.LiveImplementation(override = LiveImplementation.MANDATORY)
     boolean canRequestPackageInstalls(@NonNull String packageName, int callingUid,
             int userId, boolean throwIfPermNotDeclared);
 
-    @Computer.LiveImplementation(override = LiveImplementation.NOT_ALLOWED)
+    /**
+     * Returns true if the system or user is explicitly preventing an otherwise valid installer to
+     * complete an install. This includes checks like unknown sources and user restrictions.
+     */
     boolean isInstallDisabledForPackage(@NonNull String packageName, int uid,
             @UserIdInt int userId);
 
-    @Computer.LiveImplementation(override = LiveImplementation.MANDATORY)
     @Nullable
     List<VersionedPackage> getPackagesUsingSharedLibrary(@NonNull SharedLibraryInfo libInfo,
             @PackageManager.PackageInfoFlagsBits long flags, int callingUid, @UserIdInt int userId);
 
-    @Computer.LiveImplementation(override = LiveImplementation.MANDATORY)
     @Nullable
     ParceledListSlice<SharedLibraryInfo> getDeclaredSharedLibraries(
             @NonNull String packageName, @PackageManager.PackageInfoFlagsBits long flags,
             @UserIdInt int userId);
 
-    @Computer.LiveImplementation(override = LiveImplementation.MANDATORY)
     @Nullable
     ProviderInfo getProviderInfo(@NonNull ComponentName component,
             @PackageManager.ComponentInfoFlagsBits long flags, @UserIdInt int userId);
 
-    @Computer.LiveImplementation(override = LiveImplementation.MANDATORY)
     @Nullable
     String[] getSystemSharedLibraryNames();
 
@@ -417,136 +359,103 @@ public interface Computer extends PackageDataSnapshot {
      * @return the state if the given package has a state and isn't filtered by visibility.
      * Provides no guarantee that the package is in any usable state.
      */
-    @Computer.LiveImplementation(override = LiveImplementation.MANDATORY)
     @Nullable
     PackageStateInternal getPackageStateFiltered(@NonNull String packageName, int callingUid,
             @UserIdInt int userId);
 
-    @Computer.LiveImplementation(override = LiveImplementation.MANDATORY)
     int checkSignatures(@NonNull String pkg1, @NonNull String pkg2);
 
-    @Computer.LiveImplementation(override = LiveImplementation.MANDATORY)
     int checkUidSignatures(int uid1, int uid2);
 
-    @Computer.LiveImplementation(override = LiveImplementation.MANDATORY)
     boolean hasSigningCertificate(@NonNull String packageName, @NonNull byte[] certificate,
             @PackageManager.CertificateInputType int type);
 
-    @Computer.LiveImplementation(override = LiveImplementation.MANDATORY)
     boolean hasUidSigningCertificate(int uid, @NonNull byte[] certificate,
             @PackageManager.CertificateInputType int type);
 
-    @Computer.LiveImplementation(override = LiveImplementation.MANDATORY)
     @NonNull
     List<String> getAllPackages();
 
-    @Computer.LiveImplementation(override = LiveImplementation.MANDATORY)
     @Nullable
     String getNameForUid(int uid);
 
-    @Computer.LiveImplementation(override = LiveImplementation.MANDATORY)
     @Nullable
     String[] getNamesForUids(@NonNull int[] uids);
 
-    @Computer.LiveImplementation(override = LiveImplementation.MANDATORY)
     int getUidForSharedUser(@NonNull String sharedUserName);
 
-    @Computer.LiveImplementation(override = LiveImplementation.MANDATORY)
     int getFlagsForUid(int uid);
 
-    @Computer.LiveImplementation(override = LiveImplementation.MANDATORY)
     int getPrivateFlagsForUid(int uid);
 
-    @Computer.LiveImplementation(override = LiveImplementation.MANDATORY)
     boolean isUidPrivileged(int uid);
 
-    @Computer.LiveImplementation(override = LiveImplementation.MANDATORY)
     @NonNull
     String[] getAppOpPermissionPackages(@NonNull String permissionName);
 
-    @Computer.LiveImplementation(override = LiveImplementation.MANDATORY)
     @NonNull
     ParceledListSlice<PackageInfo> getPackagesHoldingPermissions(@NonNull String[] permissions,
             @PackageManager.PackageInfoFlagsBits long flags, @UserIdInt int userId);
 
-    @Computer.LiveImplementation(override = LiveImplementation.MANDATORY)
     @NonNull
     List<ApplicationInfo> getInstalledApplications(
             @PackageManager.ApplicationInfoFlagsBits long flags, @UserIdInt int userId,
             int callingUid);
 
-    @Computer.LiveImplementation(override = LiveImplementation.MANDATORY)
     @Nullable
     ProviderInfo resolveContentProvider(@NonNull String name,
             @PackageManager.ResolveInfoFlagsBits long flags, @UserIdInt int userId, int callingUid);
 
-    @Computer.LiveImplementation(override = LiveImplementation.MANDATORY)
     @Nullable
     ProviderInfo getGrantImplicitAccessProviderInfo(int recipientUid,
             @NonNull String visibleAuthority);
 
-    @Computer.LiveImplementation(override = LiveImplementation.MANDATORY)
     void querySyncProviders(boolean safeMode, @NonNull List<String> outNames,
             @NonNull List<ProviderInfo> outInfo);
 
-    @Computer.LiveImplementation(override = LiveImplementation.MANDATORY)
     @NonNull
     ParceledListSlice<ProviderInfo> queryContentProviders(@Nullable String processName, int uid,
             @PackageManager.ComponentInfoFlagsBits long flags, @Nullable String metaDataKey);
 
-    @Computer.LiveImplementation(override = LiveImplementation.MANDATORY)
     @Nullable
     InstrumentationInfo getInstrumentationInfo(@NonNull ComponentName component, int flags);
 
-    @Computer.LiveImplementation(override = LiveImplementation.MANDATORY)
     @NonNull
     ParceledListSlice<InstrumentationInfo> queryInstrumentation(
             @NonNull String targetPackage, int flags);
 
-    @Computer.LiveImplementation(override = LiveImplementation.MANDATORY)
     @NonNull
     List<PackageStateInternal> findSharedNonSystemLibraries(
             @NonNull PackageStateInternal pkgSetting);
 
-    @Computer.LiveImplementation(override = LiveImplementation.MANDATORY)
     boolean getApplicationHiddenSettingAsUser(@NonNull String packageName, @UserIdInt int userId);
 
-    @Computer.LiveImplementation(override = LiveImplementation.MANDATORY)
     boolean isPackageSuspendedForUser(@NonNull String packageName, @UserIdInt int userId);
 
-    @Computer.LiveImplementation(override = LiveImplementation.MANDATORY)
     boolean isSuspendingAnyPackages(@NonNull String suspendingPackage, @UserIdInt int userId);
 
-    @Computer.LiveImplementation(override = LiveImplementation.MANDATORY)
     @NonNull
     ParceledListSlice<IntentFilter> getAllIntentFilters(@NonNull String packageName);
 
-    @Computer.LiveImplementation(override = LiveImplementation.MANDATORY)
     boolean getBlockUninstallForUser(@NonNull String packageName, @UserIdInt int userId);
 
-    @Computer.LiveImplementation(override = LiveImplementation.MANDATORY)
     @Nullable
     SparseArray<int[]> getBroadcastAllowList(@NonNull String packageName, @UserIdInt int[] userIds,
             boolean isInstantApp);
 
-    @Computer.LiveImplementation(override = LiveImplementation.MANDATORY)
     @Nullable
     String getInstallerPackageName(@NonNull String packageName);
 
-    @Computer.LiveImplementation(override = LiveImplementation.MANDATORY)
     @Nullable
     InstallSourceInfo getInstallSourceInfo(@NonNull String packageName);
 
-    @Computer.LiveImplementation(override = LiveImplementation.MANDATORY)
     @PackageManager.EnabledState
     int getApplicationEnabledSetting(@NonNull String packageName, @UserIdInt int userId);
 
-    @Computer.LiveImplementation(override = LiveImplementation.MANDATORY)
     @PackageManager.EnabledState
     int getComponentEnabledSetting(@NonNull ComponentName component, int callingUid,
             @UserIdInt int userId);
 
-    @Computer.LiveImplementation(override = LiveImplementation.MANDATORY)
     @PackageManager.EnabledState
     int getComponentEnabledSettingInternal(@NonNull ComponentName component, int callingUid,
             @UserIdInt int userId);
@@ -557,25 +466,19 @@ public interface Computer extends PackageDataSnapshot {
      * are all effectively enabled for the given component. Or if the component cannot be found,
      * returns false.
      */
-    @Computer.LiveImplementation(override = LiveImplementation.MANDATORY)
     boolean isComponentEffectivelyEnabled(@NonNull ComponentInfo componentInfo,
             @UserIdInt int userId);
 
-    @Computer.LiveImplementation(override = LiveImplementation.MANDATORY)
     @Nullable
     KeySet getKeySetByAlias(@NonNull String packageName, @NonNull String alias);
 
-    @Computer.LiveImplementation(override = LiveImplementation.MANDATORY)
     @Nullable
     KeySet getSigningKeySet(@NonNull String packageName);
 
-    @Computer.LiveImplementation(override = LiveImplementation.MANDATORY)
     boolean isPackageSignedByKeySet(@NonNull String packageName, @NonNull KeySet ks);
 
-    @Computer.LiveImplementation(override = LiveImplementation.MANDATORY)
     boolean isPackageSignedByKeySetExactly(@NonNull String packageName, @NonNull KeySet ks);
 
-    @Computer.LiveImplementation(override = LiveImplementation.MANDATORY)
     @Nullable
     int[] getVisibilityAllowList(@NonNull String packageName, @UserIdInt int userId);
 
@@ -585,49 +488,37 @@ public interface Computer extends PackageDataSnapshot {
      * package visibility filtering is enabled on it. If the UID is part of a shared user ID,
      * return {@code true} if any one application belongs to the shared user ID meets the criteria.
      */
-    @Computer.LiveImplementation(override = LiveImplementation.MANDATORY)
     boolean canQueryPackage(int callingUid, @Nullable String targetPackageName);
 
-    @Computer.LiveImplementation(override = LiveImplementation.MANDATORY)
     int getPackageUid(@NonNull String packageName, @PackageManager.PackageInfoFlagsBits long flags,
             @UserIdInt int userId);
 
-    @Computer.LiveImplementation(override = LiveImplementation.MANDATORY)
     boolean canAccessComponent(int callingUid, @NonNull ComponentName component,
             @UserIdInt int userId);
 
-    @Computer.LiveImplementation(override = LiveImplementation.MANDATORY)
     boolean isCallerInstallerOfRecord(@NonNull AndroidPackage pkg, int callingUid);
 
-    @Computer.LiveImplementation(override = LiveImplementation.MANDATORY)
     @PackageManager.InstallReason
     int getInstallReason(@NonNull String packageName, @UserIdInt int userId);
 
-    @Computer.LiveImplementation(override = LiveImplementation.MANDATORY)
     boolean canPackageQuery(@NonNull String sourcePackageName, @NonNull String targetPackageName,
             @UserIdInt int userId);
 
-    @Computer.LiveImplementation(override = LiveImplementation.MANDATORY)
     boolean canForwardTo(@NonNull Intent intent, @Nullable String resolvedType,
             @UserIdInt int sourceUserId, @UserIdInt int targetUserId);
 
-    @Computer.LiveImplementation(override = LiveImplementation.MANDATORY)
     @NonNull
     List<ApplicationInfo> getPersistentApplications(boolean safeMode, int flags);
 
-    @Computer.LiveImplementation(override = LiveImplementation.MANDATORY)
     @NonNull
     SparseArray<String> getAppsWithSharedUserIds();
 
-    @Computer.LiveImplementation(override = LiveImplementation.MANDATORY)
     @NonNull
     String[] getSharedUserPackagesForPackage(@NonNull String packageName, @UserIdInt int userId);
 
-    @Computer.LiveImplementation(override = LiveImplementation.MANDATORY)
     @NonNull
     Set<String> getUnusedPackages(long downgradeTimeThresholdMillis);
 
-    @Computer.LiveImplementation(override = LiveImplementation.MANDATORY)
     @Nullable
     CharSequence getHarmfulAppWarning(@NonNull String packageName, @UserIdInt int userId);
 
@@ -638,55 +529,77 @@ public interface Computer extends PackageDataSnapshot {
      *
      * @return The filtered packages
      */
-    @Computer.LiveImplementation(override = LiveImplementation.MANDATORY)
     @NonNull
     String[] filterOnlySystemPackages(@Nullable String... pkgNames);
 
     // The methods in this block should be removed once SettingBase is interface snapshotted
-    @Computer.LiveImplementation(override = LiveImplementation.MANDATORY)
     @NonNull
     List<AndroidPackage> getPackagesForAppId(int appId);
 
-    @Computer.LiveImplementation(override = LiveImplementation.MANDATORY)
     int getUidTargetSdkVersion(int uid);
 
     /**
      * @see PackageManagerInternal#getProcessesForUid(int)
      */
-    @Computer.LiveImplementation(override = LiveImplementation.MANDATORY)
     @Nullable
     ArrayMap<String, ProcessInfo> getProcessesForUid(int uid);
     // End block
 
-    @Computer.LiveImplementation(override = LiveImplementation.MANDATORY)
     boolean getBlockUninstall(@UserIdInt int userId, @NonNull String packageName);
 
-    @Computer.LiveImplementation(override = LiveImplementation.MANDATORY)
     @NonNull
     WatchedArrayMap<String, WatchedLongSparseArray<SharedLibraryInfo>> getSharedLibraries();
 
 
-    @Computer.LiveImplementation(override = LiveImplementation.MANDATORY)
     @Nullable
     Pair<PackageStateInternal, SharedUserApi> getPackageOrSharedUser(int appId);
 
-    @Computer.LiveImplementation(override = LiveImplementation.MANDATORY)
     @Nullable
     SharedUserApi getSharedUser(int sharedUserAppIde);
 
-    @Computer.LiveImplementation(override = LiveImplementation.MANDATORY)
     @NonNull
     ArraySet<PackageStateInternal> getSharedUserPackages(int sharedUserAppId);
 
-    @Computer.LiveImplementation(override = LiveImplementation.MANDATORY)
     @NonNull
     ComponentResolverApi getComponentResolver();
 
-    @Computer.LiveImplementation(override = LiveImplementation.MANDATORY)
     @Nullable
     PackageStateInternal getDisabledSystemPackage(@NonNull String packageName);
 
-    @Computer.LiveImplementation(override = LiveImplementation.MANDATORY)
     @Nullable
     ResolveInfo getInstantAppInstallerInfo();
+
+    @NonNull
+    WatchedArrayMap<String, Integer> getFrozenPackages();
+
+    /**
+     * Verify that given package is currently frozen.
+     */
+    void checkPackageFrozen(@NonNull String packageName);
+
+    @Nullable
+    ComponentName getInstantAppInstallerComponent();
+
+    void dumpPermissions(@NonNull PrintWriter pw, @NonNull String packageName,
+            @NonNull ArraySet<String> permissionNames, @NonNull DumpState dumpState);
+
+    void dumpPackages(PrintWriter pw, @NonNull String packageName,
+            @NonNull ArraySet<String> permissionNames, @NonNull DumpState dumpState,
+            boolean checkin);
+
+    void dumpKeySet(@NonNull PrintWriter pw, @NonNull String packageName,
+            @NonNull DumpState dumpState);
+
+    void dumpSharedUsers(@NonNull PrintWriter pw, @NonNull String packageName,
+            @NonNull ArraySet<String> permissionNames,
+            @NonNull DumpState dumpState, boolean checkin);
+
+    void dumpSharedUsersProto(@NonNull ProtoOutputStream proto);
+
+    void dumpPackagesProto(@NonNull ProtoOutputStream proto);
+
+    void dumpSharedLibrariesProto(@NonNull ProtoOutputStream protoOutputStream);
+
+    @NonNull
+    List<? extends PackageStateInternal> getVolumePackages(@NonNull String volumeUuid);
 }

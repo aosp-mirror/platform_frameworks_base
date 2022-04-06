@@ -128,9 +128,11 @@ import java.util.Base64;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.WeakHashMap;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
@@ -144,6 +146,10 @@ class PackageManagerShellCommand extends ShellCommand {
     private final static String ART_PROFILE_SNAPSHOT_DEBUG_LOCATION = "/data/misc/profman/";
     private static final int DEFAULT_STAGED_READY_TIMEOUT_MS = 60 * 1000;
     private static final String TAG = "PackageManagerShellCommand";
+    private static final Set<String> UNSUPPORTED_INSTALL_CMD_OPTS = Set.of(
+            "--multi-package"
+    );
+    private static final Set<String> UNSUPPORTED_SESSION_CREATE_OPTS = Collections.emptySet();
 
     final IPackageManager mInterface;
     final LegacyPermissionManagerInternal mLegacyPermissionManager;
@@ -183,6 +189,8 @@ class PackageManagerShellCommand extends ShellCommand {
                     return runDump();
                 case "list":
                     return runList();
+                case "gc":
+                    return runGc();
                 case "resolve-activity":
                     return runResolveActivity();
                 case "query-activities":
@@ -682,6 +690,13 @@ class PackageManagerShellCommand extends ShellCommand {
         return -1;
     }
 
+    private int runGc() throws RemoteException {
+        Runtime.getRuntime().gc();
+        final PrintWriter pw = getOutPrintWriter();
+        pw.println("Ok");
+        return 0;
+    }
+
     private int runListFeatures() throws RemoteException {
         final PrintWriter pw = getOutPrintWriter();
         final List<FeatureInfo> list = mInterface.getSystemAvailableFeatures().getList();
@@ -815,7 +830,7 @@ class PackageManagerShellCommand extends ShellCommand {
         boolean showVersionCode = false;
         boolean listApexOnly = false;
         int uid = -1;
-        int userId = UserHandle.USER_SYSTEM;
+        int defaultUserId = UserHandle.USER_ALL;
         try {
             String opt;
             while ((opt = getNextOption()) != null) {
@@ -859,7 +874,7 @@ class PackageManagerShellCommand extends ShellCommand {
                         listApexOnly = true;
                         break;
                     case "--user":
-                        userId = UserHandle.parseUserArg(getNextArgRequired());
+                        defaultUserId = UserHandle.parseUserArg(getNextArgRequired());
                         break;
                     case "--uid":
                         showUid = true;
@@ -877,84 +892,104 @@ class PackageManagerShellCommand extends ShellCommand {
 
         final String filter = getNextArg();
 
-        if (userId == UserHandle.USER_ALL) {
-            getFlags |= PackageManager.MATCH_KNOWN_PACKAGES;
+        int[] userIds = {defaultUserId};
+        if (defaultUserId == UserHandle.USER_ALL) {
+            final UserManagerInternal umi = LocalServices.getService(UserManagerInternal.class);
+            userIds = umi.getUserIds();
         }
         if (showSdks) {
             getFlags |= PackageManager.MATCH_STATIC_SHARED_AND_SDK_LIBRARIES;
         }
-        final int translatedUserId =
-                translateUserId(userId, UserHandle.USER_SYSTEM, "runListPackages");
-        @SuppressWarnings("unchecked")
-        final ParceledListSlice<PackageInfo> slice =
-                mInterface.getInstalledPackages(getFlags, translatedUserId);
-        final List<PackageInfo> packages = slice.getList();
 
-        final int count = packages.size();
-        for (int p = 0; p < count; p++) {
-            final PackageInfo info = packages.get(p);
-            if (filter != null && !info.packageName.contains(filter)) {
-                continue;
-            }
-            final boolean isApex = info.isApex;
-            if (uid != -1 && !isApex && info.applicationInfo.uid != uid) {
-                continue;
-            }
+        // Build a map of packages to a list of corresponding uids. Keys are strings containing
+        // the sdk or package name along with optional additional information based on opt.
+        final Map<String, List<String>> out = new HashMap<>();
+        for (int userId : userIds) {
+            final int translatedUserId =
+                    translateUserId(userId, UserHandle.USER_SYSTEM, "runListPackages");
+            @SuppressWarnings("unchecked") final ParceledListSlice<PackageInfo> slice =
+                    mInterface.getInstalledPackages(getFlags, translatedUserId);
+            final List<PackageInfo> packages = slice.getList();
 
-            final boolean isSystem = !isApex &&
-                    (info.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0;
-            final boolean isEnabled = !isApex && info.applicationInfo.enabled;
-            if ((listDisabled && isEnabled) ||
-                    (listEnabled && !isEnabled) ||
-                    (listSystem && !isSystem) ||
-                    (listThirdParty && isSystem) ||
-                    (listApexOnly && !isApex)) {
-                continue;
-            }
-
-            String name = null;
-            if (showSdks) {
-                final ParceledListSlice<SharedLibraryInfo> libsSlice =
-                        mInterface.getDeclaredSharedLibraries(info.packageName, getFlags, userId);
-                if (libsSlice == null) {
+            final int count = packages.size();
+            for (int p = 0; p < count; p++) {
+                final PackageInfo info = packages.get(p);
+                final StringBuilder stringBuilder = new StringBuilder();
+                if (filter != null && !info.packageName.contains(filter)) {
                     continue;
                 }
-                final List<SharedLibraryInfo> libs = libsSlice.getList();
-                for (int l = 0, lsize = libs.size(); l < lsize; ++l) {
-                    SharedLibraryInfo lib = libs.get(l);
-                    if (lib.getType() == SharedLibraryInfo.TYPE_SDK_PACKAGE) {
-                        name = lib.getName() + ":" + lib.getLongVersion();
-                        break;
+                final boolean isApex = info.isApex;
+                if (uid != -1 && !isApex && info.applicationInfo.uid != uid) {
+                    continue;
+                }
+
+                final boolean isSystem = !isApex
+                        && (info.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0;
+                final boolean isEnabled = !isApex && info.applicationInfo.enabled;
+                if ((listDisabled && isEnabled)
+                        || (listEnabled && !isEnabled)
+                        || (listSystem && !isSystem)
+                        || (listThirdParty && isSystem)
+                        || (listApexOnly && !isApex)) {
+                    continue;
+                }
+
+                String name = null;
+                if (showSdks) {
+                    final ParceledListSlice<SharedLibraryInfo> libsSlice =
+                            mInterface.getDeclaredSharedLibraries(
+                                info.packageName, getFlags, userId
+                            );
+                    if (libsSlice == null) {
+                        continue;
+                    }
+                    final List<SharedLibraryInfo> libs = libsSlice.getList();
+                    for (int l = 0, lsize = libs.size(); l < lsize; ++l) {
+                        SharedLibraryInfo lib = libs.get(l);
+                        if (lib.getType() == SharedLibraryInfo.TYPE_SDK_PACKAGE) {
+                            name = lib.getName() + ":" + lib.getLongVersion();
+                            break;
+                        }
+                    }
+                    if (name == null) {
+                        continue;
+                    }
+                } else {
+                    name = info.packageName;
+                }
+
+                stringBuilder.append(prefix);
+                if (showSourceDir) {
+                    stringBuilder.append(info.applicationInfo.sourceDir);
+                    stringBuilder.append("=");
+                }
+                stringBuilder.append(name);
+                if (showVersionCode) {
+                    stringBuilder.append(" versionCode:");
+                    if (info.applicationInfo != null) {
+                        stringBuilder.append(info.applicationInfo.longVersionCode);
+                    } else {
+                        stringBuilder.append(info.getLongVersionCode());
                     }
                 }
-                if (name == null) {
-                    continue;
+                if (listInstaller) {
+                    stringBuilder.append("  installer=");
+                    stringBuilder.append(mInterface.getInstallerPackageName(info.packageName));
                 }
-            } else {
-                name = info.packageName;
-            }
-
-            pw.print(prefix);
-            if (showSourceDir) {
-                pw.print(info.applicationInfo.sourceDir);
-                pw.print("=");
-            }
-            pw.print(name);
-            if (showVersionCode) {
-                pw.print(" versionCode:");
-                if (info.applicationInfo != null) {
-                    pw.print(info.applicationInfo.longVersionCode);
-                } else {
-                    pw.print(info.getLongVersionCode());
+                List<String> uids = out.computeIfAbsent(
+                        stringBuilder.toString(), k -> new ArrayList<>()
+                );
+                if (showUid && !isApex) {
+                    uids.add(String.valueOf(info.applicationInfo.uid));
                 }
             }
-            if (listInstaller) {
-                pw.print("  installer=");
-                pw.print(mInterface.getInstallerPackageName(info.packageName));
-            }
-            if (showUid && !isApex) {
+        }
+        for (Map.Entry<String, List<String>> entry : out.entrySet()) {
+            pw.print(entry.getKey());
+            List<String> uids = entry.getValue();
+            if (!uids.isEmpty()) {
                 pw.print(" uid:");
-                pw.print(info.applicationInfo.uid);
+                pw.print(String.join(",", uids));
             }
             pw.println();
         }
@@ -1330,7 +1365,7 @@ class PackageManagerShellCommand extends ShellCommand {
     }
 
     private int runStreamingInstall() throws RemoteException {
-        final InstallParams params = makeInstallParams();
+        final InstallParams params = makeInstallParams(UNSUPPORTED_INSTALL_CMD_OPTS);
         if (params.sessionParams.dataLoaderParams == null) {
             params.sessionParams.setDataLoaderParams(
                     PackageManagerShellCommandDataLoader.getStreamingDataLoaderParams(this));
@@ -1339,7 +1374,7 @@ class PackageManagerShellCommand extends ShellCommand {
     }
 
     private int runIncrementalInstall() throws RemoteException {
-        final InstallParams params = makeInstallParams();
+        final InstallParams params = makeInstallParams(UNSUPPORTED_INSTALL_CMD_OPTS);
         if (params.sessionParams.dataLoaderParams == null) {
             params.sessionParams.setDataLoaderParams(
                     PackageManagerShellCommandDataLoader.getIncrementalDataLoaderParams(this));
@@ -1348,7 +1383,7 @@ class PackageManagerShellCommand extends ShellCommand {
     }
 
     private int runInstall() throws RemoteException {
-        return doRunInstall(makeInstallParams());
+        return doRunInstall(makeInstallParams(UNSUPPORTED_INSTALL_CMD_OPTS));
     }
 
     private int doRunInstall(final InstallParams params) throws RemoteException {
@@ -1500,7 +1535,7 @@ class PackageManagerShellCommand extends ShellCommand {
 
     private int runInstallCreate() throws RemoteException {
         final PrintWriter pw = getOutPrintWriter();
-        final InstallParams installParams = makeInstallParams();
+        final InstallParams installParams = makeInstallParams(UNSUPPORTED_SESSION_CREATE_OPTS);
         final int sessionId = doCreateSession(installParams.sessionParams,
                 installParams.installerPackageName, installParams.userId);
 
@@ -2535,8 +2570,10 @@ class PackageManagerShellCommand extends ShellCommand {
             privAppPermissions = SystemConfig.getInstance()
                     .getSystemExtPrivAppPermissions(pkg);
         } else if (isApexApp(pkg)) {
+            final String apexName = ApexManager.getInstance().getApexModuleNameForPackageName(
+                    getApexPackageNameContainingPackage(pkg));
             privAppPermissions = SystemConfig.getInstance()
-                    .getApexPrivAppPermissions(getApexPackageNameContainingPackage(pkg), pkg);
+                    .getApexPrivAppPermissions(apexName, pkg);
         } else {
             privAppPermissions = SystemConfig.getInstance().getPrivAppPermissions(pkg);
         }
@@ -2562,8 +2599,10 @@ class PackageManagerShellCommand extends ShellCommand {
             privAppPermissions = SystemConfig.getInstance()
                     .getSystemExtPrivAppDenyPermissions(pkg);
         } else if (isApexApp(pkg)) {
+            final String apexName = ApexManager.getInstance().getApexModuleNameForPackageName(
+                    getApexPackageNameContainingPackage(pkg));
             privAppPermissions = SystemConfig.getInstance()
-                    .getApexPrivAppDenyPermissions(getApexPackageNameContainingPackage(pkg), pkg);
+                    .getApexPrivAppDenyPermissions(apexName, pkg);
         } else {
             privAppPermissions = SystemConfig.getInstance().getPrivAppDenyPermissions(pkg);
         }
@@ -2657,7 +2696,8 @@ class PackageManagerShellCommand extends ShellCommand {
         while ((opt = getNextOption()) != null) {
             String newUserType = null;
             if ("--profileOf".equals(opt)) {
-                userId = UserHandle.parseUserArg(getNextArgRequired());
+                userId = translateUserId(UserHandle.parseUserArg(getNextArgRequired()),
+                            UserHandle.USER_ALL, "runCreateUser");
             } else if ("--managed".equals(opt)) {
                 newUserType = UserManager.USER_TYPE_PROFILE_MANAGED;
             } else if ("--restricted".equals(opt)) {
@@ -2896,7 +2936,7 @@ class PackageManagerShellCommand extends ShellCommand {
         long stagedReadyTimeoutMs = DEFAULT_STAGED_READY_TIMEOUT_MS;
     }
 
-    private InstallParams makeInstallParams() {
+    private InstallParams makeInstallParams(Set<String> unsupportedOptions) {
         final SessionParams sessionParams = new SessionParams(SessionParams.MODE_FULL_INSTALL);
         final InstallParams params = new InstallParams();
 
@@ -2910,6 +2950,9 @@ class PackageManagerShellCommand extends ShellCommand {
         boolean replaceExisting = true;
         boolean forceNonStaged = false;
         while ((opt = getNextOption()) != null) {
+            if (unsupportedOptions.contains(opt)) {
+                throw new IllegalArgumentException("Unsupported option " + opt);
+            }
             switch (opt) {
                 case "-r": // ignore
                     break;
@@ -3651,7 +3694,7 @@ class PackageManagerShellCommand extends ShellCommand {
             }
             List<PermissionInfo> ps = mPermissionManager
                     .queryPermissionsByGroup(groupList.get(i), 0 /*flags*/);
-            final int count = ps.size();
+            final int count = (ps == null ? 0 : ps.size());
             boolean first = true;
             for (int p = 0 ; p < count ; p++) {
                 PermissionInfo pi = ps.get(p);
@@ -3817,7 +3860,7 @@ class PackageManagerShellCommand extends ShellCommand {
         pw.println("       [--user USER_ID] INTENT");
         pw.println("    Prints all broadcast receivers that can handle the given INTENT.");
         pw.println("");
-        pw.println("  install [-rtfdgw] [-i PACKAGE] [--user USER_ID|all|current]");
+        pw.println("  install [-rtfdg] [-i PACKAGE] [--user USER_ID|all|current]");
         pw.println("       [-p INHERIT_PACKAGE] [--install-location 0/1/2]");
         pw.println("       [--install-reason 0/1/2/3/4] [--originating-uri URI]");
         pw.println("       [--referrer URI] [--abi ABI_NAME] [--force-sdk]");

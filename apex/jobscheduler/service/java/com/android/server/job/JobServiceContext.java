@@ -433,6 +433,10 @@ public final class JobServiceContext implements ServiceConnection {
         mPreferredUid = NO_PREFERRED_UID;
     }
 
+    int getId() {
+        return hashCode();
+    }
+
     long getExecutionStartTimeElapsed() {
         return mExecutionStartTimeElapsed;
     }
@@ -747,7 +751,8 @@ public final class JobServiceContext implements ServiceConnection {
             }
         }
         mParams.setStopReason(stopReasonCode, internalStopReasonCode, debugReason);
-        if (internalStopReasonCode == JobParameters.INTERNAL_STOP_REASON_PREEMPT) {
+        if (stopReasonCode == JobParameters.STOP_REASON_PREEMPT) {
+            // Only preserve the UID when we're preempting the job for another one of the same UID.
             mPreferredUid = mRunningJob != null ? mRunningJob.getUid() : NO_PREFERRED_UID;
         }
         handleCancelLocked(debugReason);

@@ -54,7 +54,7 @@ public class MediaProjectionPermissionActivity extends Activity
     private int mUid;
     private IMediaProjectionManager mService;
 
-    private SystemUIDialog mDialog;
+    private AlertDialog mDialog;
 
     @Override
     public void onCreate(Bundle icicle) {
@@ -141,13 +141,18 @@ public class MediaProjectionPermissionActivity extends Activity
             dialogTitle = getString(R.string.media_projection_dialog_title, appName);
         }
 
-        mDialog = new SystemUIDialog(this);
-        mDialog.setTitle(dialogTitle);
-        mDialog.setIcon(R.drawable.ic_media_projection_permission);
-        mDialog.setMessage(dialogText);
-        mDialog.setPositiveButton(R.string.media_projection_action_text, this);
-        mDialog.setNeutralButton(android.R.string.cancel, this);
-        mDialog.setOnCancelListener(this);
+        mDialog = new AlertDialog.Builder(this, R.style.Theme_SystemUI_Dialog)
+                .setTitle(dialogTitle)
+                .setIcon(R.drawable.ic_media_projection_permission)
+                .setMessage(dialogText)
+                .setPositiveButton(R.string.media_projection_action_text, this)
+                .setNeutralButton(android.R.string.cancel, this)
+                .setOnCancelListener(this)
+                .create();
+
+        SystemUIDialog.registerDismissListener(mDialog);
+        SystemUIDialog.applyFlags(mDialog);
+        SystemUIDialog.setDialogSize(mDialog);
 
         mDialog.create();
         mDialog.getButton(DialogInterface.BUTTON_POSITIVE).setFilterTouchesWhenObscured(true);
@@ -186,7 +191,7 @@ public class MediaProjectionPermissionActivity extends Activity
     private Intent getMediaProjectionIntent(int uid, String packageName)
             throws RemoteException {
         IMediaProjection projection = mService.createProjection(uid, packageName,
-                 MediaProjectionManager.TYPE_SCREEN_CAPTURE, false /* permanentGrant */);
+                MediaProjectionManager.TYPE_SCREEN_CAPTURE, false /* permanentGrant */);
         Intent intent = new Intent();
         intent.putExtra(MediaProjectionManager.EXTRA_MEDIA_PROJECTION, projection.asBinder());
         return intent;

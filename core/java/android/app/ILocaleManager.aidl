@@ -40,4 +40,9 @@ import android.os.LocaleList;
       */
      LocaleList getApplicationLocales(String packageName, int userId);
 
+     /**
+       * Returns the current system locales.
+       */
+     LocaleList getSystemLocales();
+
  }

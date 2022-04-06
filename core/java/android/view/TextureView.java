@@ -41,6 +41,43 @@ import android.util.Log;
  * <p>TextureView can only be used in a hardware accelerated window. When
  * rendered in software, TextureView will draw nothing.</p>
  *
+ * <p><b>TextureView vs. SurfaceView Capabilities</b></p>
+
+ * <p>
+ *   <table>
+ *     <tr>
+ *       <th>&nbsp;</th>
+ *       <th style="text-align: center;">TextureView</th>
+ *       <th style="text-align: center;">SurfaceView</th>
+ *     </tr>
+ *     <tr>
+ *       <td>Supports alpha</td>
+ *       <td style="text-align: center;">X</td>
+ *       <td style="text-align: center;">&nbsp;</td>
+ *     </tr>
+ *     <tr>
+ *       <td>Supports rotations</td>
+ *       <td style="text-align: center;">X</td>
+ *       <td style="text-align: center;">&nbsp;</td>
+ *     </tr>
+ *     <tr>
+ *       <td>Supports clipping</td>
+ *       <td style="text-align: center;">X</td>
+ *       <td style="text-align: center;">&nbsp;</td>
+ *     </tr>
+ *     <tr>
+ *       <td>HDR support</td>
+ *       <td style="text-align: center;">Limited (on Android T+)</td>
+ *       <td style="text-align: center;">Full</td>
+ *     </tr>
+ *     <tr>
+ *       <td>Renders DRM content</td>
+ *       <td style="text-align: center;">&nbsp;</td>
+ *       <td style="text-align: center;">X</td>
+ *     </tr>
+ *   </table>
+ * </p>
+ *
  * <p>Unlike {@link SurfaceView}, TextureView does not create a separate
  * window but behaves as a regular View. This key difference allows a
  * TextureView to have translucency, arbitrary rotations, and complex
@@ -51,8 +88,8 @@ import android.util.Log;
  * hierarchy is that it may have slower performance than
  * SurfaceView. TextureView contents must be copied, internally, from the
  * underlying surface into the view displaying those contents. For
- * that reason, SurfaceView is recommended as a more general solution
- * to problems requiring rendering to surfaces.</p>
+ * that reason, <b>SurfaceView is recommended as a more general solution
+ * to problems requiring rendering to surfaces.</b></p>
  *
  * <p>Using a TextureView is simple: all you need to do is get its
  * {@link SurfaceTexture}. The {@link SurfaceTexture} can then be used to

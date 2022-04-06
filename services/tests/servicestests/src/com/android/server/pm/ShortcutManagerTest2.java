@@ -16,7 +16,6 @@
 package com.android.server.pm;
 
 import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils.assertBundlesEqual;
-import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils.assertEmpty;
 import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils.assertExpectException;
 import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils.assertWith;
 import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils.list;
@@ -37,6 +36,8 @@ import android.app.Person;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.LocusId;
+import android.content.pm.Capability;
+import android.content.pm.CapabilityParams;
 import android.content.pm.ShortcutInfo;
 import android.content.res.Resources;
 import android.graphics.BitmapFactory;
@@ -258,10 +259,15 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
                 .setLongLived(true)
                 .setExtras(pb)
                 .setStartingTheme(android.R.style.Theme_Black_NoTitleBar_Fullscreen)
-                .addCapabilityBinding("action.intent.START_EXERCISE",
-                        "exercise.type", list("running", "jogging"))
-                .addCapabilityBinding("action.intent.START_EXERCISE",
-                        "exercise.duration", list("10m"))
+                .addCapabilityBinding(
+                        new Capability.Builder("action.intent.START_EXERCISE").build(),
+                        new CapabilityParams.Builder("exercise.type", "running")
+                                .addAlias("jogging")
+                                .build())
+                .addCapabilityBinding(
+                        new Capability.Builder("action.intent.START_EXERCISE").build(),
+                        new CapabilityParams.Builder("exercise.duration", "10m")
+                                .build())
                 .build();
         si.addFlags(ShortcutInfo.FLAG_PINNED);
         si.setBitmapPath("abc");
@@ -299,13 +305,14 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
         assertEquals(null, si.getDisabledMessageResName());
         assertEquals("android:style/Theme.Black.NoTitleBar.Fullscreen",
                 si.getStartingThemeResName());
-        assertTrue(si.hasCapability("action.intent.START_EXERCISE"));
-        assertFalse(si.hasCapability(""));
-        assertFalse(si.hasCapability("random"));
-        assertEquals(list("running", "jogging"), si.getCapabilityParameterValues(
-                "action.intent.START_EXERCISE", "exercise.type"));
-        assertEmpty(si.getCapabilityParameterValues("action.intent.START_EXERCISE", ""));
-        assertEmpty(si.getCapabilityParameterValues("action.intent.START_EXERCISE", "random"));
+        assertEquals(list(new Capability.Builder("action.intent.START_EXERCISE").build()),
+                si.getCapabilities());
+        assertEquals(list(
+                        new CapabilityParams.Builder("exercise.type", "running")
+                                .addAlias("jogging").build(),
+                        new CapabilityParams.Builder("exercise.duration", "10m").build()),
+                si.getCapabilityParams(
+                        new Capability.Builder("action.intent.START_EXERCISE").build()));
     }
 
     public void testShortcutInfoParcel_resId() {
@@ -959,10 +966,15 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
                 .setRank(123)
                 .setExtras(pb)
                 .setLocusId(new LocusId("1.2.3.4.5"))
-                .addCapabilityBinding("action.intent.START_EXERCISE",
-                        "exercise.type", list("running", "jogging"))
-                .addCapabilityBinding("action.intent.START_EXERCISE",
-                        "exercise.duration", list("10m"))
+                .addCapabilityBinding(
+                        new Capability.Builder("action.intent.START_EXERCISE").build(),
+                        new CapabilityParams.Builder("exercise.type", "running")
+                                .addAlias("jogging")
+                                .build())
+                .addCapabilityBinding(
+                        new Capability.Builder("action.intent.START_EXERCISE").build(),
+                        new CapabilityParams.Builder("exercise.duration", "10m")
+                                .build())
                 .build();
         sorig.setTimestamp(mInjectedCurrentTimeMillis);
 
@@ -1024,13 +1036,14 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
         assertNull(si.getIconUri());
         assertTrue(si.getLastChangedTimestamp() < now);
 
-        assertTrue(si.hasCapability("action.intent.START_EXERCISE"));
-        assertFalse(si.hasCapability(""));
-        assertFalse(si.hasCapability("random"));
-        assertEquals(list("running", "jogging"), si.getCapabilityParameterValues(
-                "action.intent.START_EXERCISE", "exercise.type"));
-        assertEmpty(si.getCapabilityParameterValues("action.intent.START_EXERCISE", ""));
-        assertEmpty(si.getCapabilityParameterValues("action.intent.START_EXERCISE", "random"));
+        assertEquals(list(new Capability.Builder("action.intent.START_EXERCISE").build()),
+                si.getCapabilities());
+        assertEquals(list(
+                        new CapabilityParams.Builder("exercise.type", "running")
+                                .addAlias("jogging").build(),
+                        new CapabilityParams.Builder("exercise.duration", "10m").build()),
+                si.getCapabilityParams(
+                        new Capability.Builder("action.intent.START_EXERCISE").build()));
 
         // Make sure ranks are saved too.  Because of the auto-adjusting, we need two shortcuts
         // to test it.

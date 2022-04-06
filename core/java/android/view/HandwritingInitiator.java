@@ -55,10 +55,10 @@ public class HandwritingInitiator {
      */
     private final int mTouchSlop;
     /**
-     * The timeout used to distinguish tap from handwriting. If the stylus doesn't move before this
-     * timeout, it's not considered as handwriting.
+     * The timeout used to distinguish tap or long click from handwriting. If the stylus doesn't
+     * move before this timeout, it's not considered as handwriting.
      */
-    private final long mTapTimeoutInMillis;
+    private final long mHandwritingTimeoutInMillis;
 
     private State mState = new State();
     private final HandwritingAreaTracker mHandwritingAreasTracker = new HandwritingAreaTracker();
@@ -90,7 +90,7 @@ public class HandwritingInitiator {
     public HandwritingInitiator(@NonNull ViewConfiguration viewConfiguration,
             @NonNull InputMethodManager inputMethodManager) {
         mTouchSlop = viewConfiguration.getScaledTouchSlop();
-        mTapTimeoutInMillis = ViewConfiguration.getTapTimeout();
+        mHandwritingTimeoutInMillis = ViewConfiguration.getLongPressTimeout();
         mImm = inputMethodManager;
     }
 
@@ -145,7 +145,7 @@ public class HandwritingInitiator {
 
                 final long timeElapsed =
                         motionEvent.getEventTime() - mState.mStylusDownTimeInMillis;
-                if (timeElapsed > mTapTimeoutInMillis) {
+                if (timeElapsed > mHandwritingTimeoutInMillis) {
                     reset();
                     return;
                 }
@@ -249,19 +249,19 @@ public class HandwritingInitiator {
             return;
         }
 
-        Rect handwritingArea = getViewHandwritingArea(connectedView);
-        if (handwritingArea != null) {
-            if (contains(handwritingArea, mState.mStylusDownX, mState.mStylusDownY)) {
-                startHandwriting(connectedView);
-            }
+        final Rect handwritingArea = getViewHandwritingArea(connectedView);
+        if (contains(handwritingArea, mState.mStylusDownX, mState.mStylusDownY)) {
+            startHandwriting(connectedView);
+        } else {
+            reset();
         }
-        reset();
     }
 
     /** For test only. */
     @VisibleForTesting
     public void startHandwriting(@NonNull View view) {
         mImm.startStylusHandwriting(view);
+        reset();
     }
 
     /**
@@ -287,7 +287,7 @@ public class HandwritingInitiator {
         final View connectedView = getConnectedView();
         if (connectedView != null && connectedView.isAutoHandwritingEnabled()) {
             final Rect handwritingArea = getViewHandwritingArea(connectedView);
-            if (handwritingArea != null && contains(handwritingArea, x, y)) {
+            if (contains(handwritingArea, x, y)) {
                 return connectedView;
             }
         }
@@ -298,8 +298,7 @@ public class HandwritingInitiator {
         for (HandwritableViewInfo viewInfo : handwritableViewInfos) {
             final View view = viewInfo.getView();
             if (!view.isAutoHandwritingEnabled()) continue;
-            final Rect rect = viewInfo.getHandwritingArea();
-            if (rect != null && contains(rect, x, y)) {
+            if (contains(viewInfo.getHandwritingArea(), x, y)) {
                 return viewInfo.getView();
             }
         }
@@ -315,12 +314,15 @@ public class HandwritingInitiator {
     private static Rect getViewHandwritingArea(@NonNull View view) {
         final ViewParent viewParent = view.getParent();
         if (viewParent != null && view.isAttachedToWindow() && view.isAggregatedVisible()) {
-            Rect handwritingArea = view.getHandwritingArea();
-            if (handwritingArea == null) {
-                handwritingArea = new Rect(0, 0, view.getWidth(), view.getHeight());
+            final Rect localHandwritingArea = view.getHandwritingArea();
+            final Rect globalHandwritingArea = new Rect();
+            if (localHandwritingArea != null) {
+                globalHandwritingArea.set(localHandwritingArea);
+            } else {
+                globalHandwritingArea.set(0, 0, view.getWidth(), view.getHeight());
             }
-            if (viewParent.getChildVisibleRect(view, handwritingArea, null)) {
-                return handwritingArea;
+            if (viewParent.getChildVisibleRect(view, globalHandwritingArea, null)) {
+                return globalHandwritingArea;
             }
         }
         return null;
@@ -329,7 +331,8 @@ public class HandwritingInitiator {
     /**
      * Return true if the (x, y) is inside by the given {@link Rect}.
      */
-    private boolean contains(@NonNull Rect rect, float x, float y) {
+    private boolean contains(@Nullable Rect rect, float x, float y) {
+        if (rect == null) return false;
         return x >= rect.left && x < rect.right && y >= rect.top && y < rect.bottom;
     }
 
@@ -481,17 +484,18 @@ public class HandwritingInitiator {
             if (!mIsDirty) {
                 return true;
             }
-            final Rect localRect = view.getHandwritingArea();
-            if (localRect == null) {
+            final Rect handwritingArea = view.getHandwritingArea();
+            if (handwritingArea == null) {
                 return false;
             }
 
             ViewParent parent = view.getParent();
             if (parent != null) {
-                final Rect newRect = new Rect(localRect);
-                if (parent.getChildVisibleRect(view, newRect, null /* offset */)) {
-                    mHandwritingArea = newRect;
-                } else {
+                if (mHandwritingArea == null) {
+                    mHandwritingArea = new Rect();
+                }
+                mHandwritingArea.set(handwritingArea);
+                if (!parent.getChildVisibleRect(view, mHandwritingArea, null /* offset */)) {
                     mHandwritingArea = null;
                 }
             }

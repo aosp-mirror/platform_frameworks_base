@@ -242,13 +242,17 @@ public class BatteryUsageStatsPulledTest {
                 BatteryConsumer.PROCESS_STATE_BACKGROUND);
         final BatteryConsumer.Key keyFgs = uidBuilder.getKey(BatteryConsumer.POWER_COMPONENT_CPU,
                 BatteryConsumer.PROCESS_STATE_FOREGROUND_SERVICE);
+        final BatteryConsumer.Key keyCached = uidBuilder.getKey(BatteryConsumer.POWER_COMPONENT_CPU,
+                BatteryConsumer.PROCESS_STATE_CACHED);
 
         uidBuilder.setConsumedPower(keyFg, 9100, BatteryConsumer.POWER_MODEL_POWER_PROFILE)
                 .setUsageDurationMillis(keyFg, 8100)
                 .setConsumedPower(keyBg, 9200, BatteryConsumer.POWER_MODEL_MEASURED_ENERGY)
                 .setUsageDurationMillis(keyBg, 8200)
                 .setConsumedPower(keyFgs, 9300, BatteryConsumer.POWER_MODEL_MEASURED_ENERGY)
-                .setUsageDurationMillis(keyFgs, 8300);
+                .setUsageDurationMillis(keyFgs, 8300)
+                .setConsumedPower(keyCached, 9400, BatteryConsumer.POWER_MODEL_MEASURED_ENERGY)
+                .setUsageDurationMillis(keyFgs, 8400);
 
         builder.getOrCreateUidBatteryConsumerBuilder(batteryStatsUid1)
                 .setPackageWithHighestDrain("myPackage1")

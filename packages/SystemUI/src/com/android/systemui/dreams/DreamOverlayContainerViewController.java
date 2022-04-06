@@ -16,20 +16,31 @@
 
 package com.android.systemui.dreams;
 
+import static com.android.keyguard.BouncerPanelExpansionCalculator.getBackScrimScaledExpansion;
+import static com.android.keyguard.BouncerPanelExpansionCalculator.getDreamAlphaScaledExpansion;
+import static com.android.keyguard.BouncerPanelExpansionCalculator.getDreamYPositionScaledExpansion;
 import static com.android.systemui.doze.util.BurnInHelperKt.getBurnInOffset;
+import static com.android.systemui.dreams.complication.ComplicationLayoutParams.POSITION_BOTTOM;
+import static com.android.systemui.dreams.complication.ComplicationLayoutParams.POSITION_TOP;
 
+import android.content.res.Resources;
 import android.os.Handler;
 import android.util.MathUtils;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.R;
+import com.android.systemui.animation.Interpolators;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dreams.complication.ComplicationHostViewController;
 import com.android.systemui.dreams.dagger.DreamOverlayComponent;
 import com.android.systemui.dreams.dagger.DreamOverlayModule;
+import com.android.systemui.statusbar.BlurUtils;
+import com.android.systemui.statusbar.phone.KeyguardBouncer;
+import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.util.ViewController;
+
+import java.util.Arrays;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -39,10 +50,9 @@ import javax.inject.Named;
  */
 @DreamOverlayComponent.DreamOverlayScope
 public class DreamOverlayContainerViewController extends ViewController<DreamOverlayContainerView> {
-    // The height of the area at the top of the dream overlay to allow dragging down the
-    // notifications shade.
-    private final int mDreamOverlayNotificationsDragAreaHeight;
     private final DreamOverlayStatusBarViewController mStatusBarViewController;
+    private final StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
+    private final BlurUtils mBlurUtils;
 
     private final ComplicationHostViewController mComplicationHostViewController;
 
@@ -62,8 +72,51 @@ public class DreamOverlayContainerViewController extends ViewController<DreamOve
 
     // Main thread handler used to schedule periodic tasks (e.g. burn-in protection updates).
     private final Handler mHandler;
+    private final int mDreamOverlayMaxTranslationY;
 
     private long mJitterStartTimeMillis;
+
+    private boolean mBouncerAnimating;
+
+    private final KeyguardBouncer.BouncerExpansionCallback mBouncerExpansionCallback =
+            new KeyguardBouncer.BouncerExpansionCallback() {
+
+                @Override
+                public void onStartingToShow() {
+                    mBouncerAnimating = true;
+                }
+
+                @Override
+                public void onStartingToHide() {
+                    mBouncerAnimating = true;
+                }
+
+                @Override
+                public void onFullyHidden() {
+                    mBouncerAnimating = false;
+                }
+
+                @Override
+                public void onFullyShown() {
+                    mBouncerAnimating = false;
+                }
+
+                @Override
+                public void onExpansionChanged(float bouncerHideAmount) {
+                    if (mBouncerAnimating) {
+                        updateTransitionState(bouncerHideAmount);
+                    }
+                }
+
+                @Override
+                public void onVisibilityChanged(boolean isVisible) {
+                    // The bouncer may be hidden abruptly without triggering onExpansionChanged.
+                    // In this case, we should reset the transition state.
+                    if (!isVisible) {
+                        updateTransitionState(1f);
+                    }
+                }
+            };
 
     @Inject
     public DreamOverlayContainerViewController(
@@ -71,7 +124,10 @@ public class DreamOverlayContainerViewController extends ViewController<DreamOve
             ComplicationHostViewController complicationHostViewController,
             @Named(DreamOverlayModule.DREAM_OVERLAY_CONTENT_VIEW) ViewGroup contentView,
             DreamOverlayStatusBarViewController statusBarViewController,
+            StatusBarKeyguardViewManager statusBarKeyguardViewManager,
+            BlurUtils blurUtils,
             @Main Handler handler,
+            @Main Resources resources,
             @Named(DreamOverlayModule.MAX_BURN_IN_OFFSET) int maxBurnInOffset,
             @Named(DreamOverlayModule.BURN_IN_PROTECTION_UPDATE_INTERVAL) long
                     burnInProtectionUpdateInterval,
@@ -79,11 +135,12 @@ public class DreamOverlayContainerViewController extends ViewController<DreamOve
         super(containerView);
         mDreamOverlayContentView = contentView;
         mStatusBarViewController = statusBarViewController;
-        mDreamOverlayNotificationsDragAreaHeight =
-                mView.getResources().getDimensionPixelSize(
-                        R.dimen.dream_overlay_notifications_drag_area_height);
+        mStatusBarKeyguardViewManager = statusBarKeyguardViewManager;
+        mBlurUtils = blurUtils;
 
         mComplicationHostViewController = complicationHostViewController;
+        mDreamOverlayMaxTranslationY = resources.getDimensionPixelSize(
+                R.dimen.dream_overlay_y_offset);
         final View view = mComplicationHostViewController.getView();
 
         mDreamOverlayContentView.addView(view,
@@ -106,20 +163,23 @@ public class DreamOverlayContainerViewController extends ViewController<DreamOve
     protected void onViewAttached() {
         mJitterStartTimeMillis = System.currentTimeMillis();
         mHandler.postDelayed(this::updateBurnInOffsets, mBurnInProtectionUpdateInterval);
+        final KeyguardBouncer bouncer = mStatusBarKeyguardViewManager.getBouncer();
+        if (bouncer != null) {
+            bouncer.addBouncerExpansionCallback(mBouncerExpansionCallback);
+        }
     }
 
     @Override
     protected void onViewDetached() {
         mHandler.removeCallbacks(this::updateBurnInOffsets);
+        final KeyguardBouncer bouncer = mStatusBarKeyguardViewManager.getBouncer();
+        if (bouncer != null) {
+            bouncer.removeBouncerExpansionCallback(mBouncerExpansionCallback);
+        }
     }
 
     View getContainerView() {
         return mView;
-    }
-
-    @VisibleForTesting
-    int getDreamOverlayNotificationsDragAreaHeight() {
-        return mDreamOverlayNotificationsDragAreaHeight;
     }
 
     private void updateBurnInOffsets() {
@@ -143,5 +203,33 @@ public class DreamOverlayContainerViewController extends ViewController<DreamOve
         mView.setTranslationY(burnInOffsetY);
 
         mHandler.postDelayed(this::updateBurnInOffsets, mBurnInProtectionUpdateInterval);
+    }
+
+    private void updateTransitionState(float bouncerHideAmount) {
+        for (int position : Arrays.asList(POSITION_TOP, POSITION_BOTTOM)) {
+            final float alpha = getAlpha(position, bouncerHideAmount);
+            final float translationY = getTranslationY(position, bouncerHideAmount);
+            mComplicationHostViewController.getViewsAtPosition(position).forEach(v -> {
+                v.setAlpha(alpha);
+                v.setTranslationY(translationY);
+            });
+        }
+
+        mBlurUtils.applyBlur(mView.getViewRootImpl(),
+                (int) mBlurUtils.blurRadiusOfRatio(
+                        1 - getBackScrimScaledExpansion(bouncerHideAmount)), false);
+    }
+
+    private static float getAlpha(int position, float expansion) {
+        return Interpolators.LINEAR_OUT_SLOW_IN.getInterpolation(
+                position == POSITION_TOP ? getDreamAlphaScaledExpansion(expansion)
+                        : getBackScrimScaledExpansion(expansion + 0.03f));
+    }
+
+    private float getTranslationY(int position, float expansion) {
+        final float fraction = Interpolators.LINEAR_OUT_SLOW_IN.getInterpolation(
+                position == POSITION_TOP ? getDreamYPositionScaledExpansion(expansion)
+                        : getBackScrimScaledExpansion(expansion + 0.03f));
+        return MathUtils.lerp(-mDreamOverlayMaxTranslationY, 0, fraction);
     }
 }

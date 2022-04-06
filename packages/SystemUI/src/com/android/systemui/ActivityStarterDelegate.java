@@ -16,6 +16,7 @@ package com.android.systemui;
 
 import android.app.PendingIntent;
 import android.content.Intent;
+import android.os.UserHandle;
 import android.view.View;
 
 import androidx.annotation.Nullable;
@@ -97,6 +98,15 @@ public class ActivityStarterDelegate implements ActivityStarter {
         mActualStarterOptionalLazy.get().ifPresent(
                 starter -> starter.startActivity(intent, dismissShade, animationController,
                     showOverLockscreenWhenLocked));
+    }
+
+    @Override
+    public void startActivity(Intent intent, boolean dismissShade,
+            @Nullable ActivityLaunchAnimator.Controller animationController,
+            boolean showOverLockscreenWhenLocked, UserHandle userHandle) {
+        mActualStarterOptionalLazy.get().ifPresent(
+                starter -> starter.startActivity(intent, dismissShade, animationController,
+                    showOverLockscreenWhenLocked, userHandle));
     }
 
     @Override

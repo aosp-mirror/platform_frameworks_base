@@ -24,4 +24,5 @@
     <string name="pip_move" msgid="1544227837964635439">"PIPను తరలించండి"</string>
     <string name="pip_expand" msgid="7605396312689038178">"PIPని విస్తరించండి"</string>
     <string name="pip_collapse" msgid="5732233773786896094">"PIPని కుదించండి"</string>
+    <string name="pip_edu_text" msgid="3672999496647508701">" కంట్రోల్స్ కోసం "<annotation icon="home_icon">" HOME "</annotation>" బటన్ రెండుసార్లు నొక్కండి"</string>
 </resources>

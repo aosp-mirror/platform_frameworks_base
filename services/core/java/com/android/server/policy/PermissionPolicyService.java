@@ -17,10 +17,13 @@
 package com.android.server.policy;
 
 import static android.Manifest.permission.POST_NOTIFICATIONS;
+import static android.app.ActivityOptions.ANIM_REMOTE_ANIMATION;
 import static android.app.AppOpsManager.MODE_ALLOWED;
 import static android.app.AppOpsManager.MODE_FOREGROUND;
 import static android.app.AppOpsManager.MODE_IGNORED;
 import static android.app.AppOpsManager.OP_NONE;
+import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
+import static android.content.Intent.FLAG_ACTIVITY_NO_USER_ACTION;
 import static android.content.pm.PackageManager.ACTION_REQUEST_PERMISSIONS;
 import static android.content.pm.PackageManager.ACTION_REQUEST_PERMISSIONS_FOR_OTHER;
 import static android.content.pm.PackageManager.FLAG_PERMISSION_APPLY_RESTRICTION;
@@ -56,8 +59,6 @@ import android.content.pm.PackageManagerInternal.PackageListObserver;
 import android.content.pm.PermissionInfo;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -91,6 +92,7 @@ import com.android.server.pm.permission.PermissionManagerServiceInternal;
 import com.android.server.policy.PermissionPolicyInternal.OnInitializedCallback;
 import com.android.server.utils.TimingsTraceAndSlog;
 import com.android.server.wm.ActivityInterceptorCallback;
+import com.android.server.wm.ActivityInterceptorCallback.ActivityInterceptorInfo;
 import com.android.server.wm.ActivityTaskManagerInternal;
 
 import java.util.ArrayList;
@@ -113,7 +115,6 @@ public final class PermissionPolicyService extends SystemService {
     private static final String SYSTEM_PKG = "android";
     private static final boolean DEBUG = false;
     private static final long USER_SENSITIVE_UPDATE_DELAY_MS = 60000;
-    private static final long ACTIVITY_START_DELAY_MS = 200;
 
     private final Object mLock = new Object();
 
@@ -154,8 +155,8 @@ public final class PermissionPolicyService extends SystemService {
     private List<String> mAppOpPermissions;
 
     private Context mContext;
-    private Handler mHandler;
     private PackageManagerInternal mPackageManagerInternal;
+    private PermissionManagerServiceInternal mPermissionManagerInternal;
     private NotificationManagerInternal mNotificationManager;
     private final KeyguardManager mKeyguardManager;
     private final PackageManager mPackageManager;
@@ -164,7 +165,6 @@ public final class PermissionPolicyService extends SystemService {
         super(context);
 
         mContext = context;
-        mHandler = new Handler(Looper.getMainLooper());
         mPackageManager = context.getPackageManager();
         mKeyguardManager = context.getSystemService(KeyguardManager.class);
         LocalServices.addService(PermissionPolicyInternal.class, new Internal());
@@ -174,7 +174,7 @@ public final class PermissionPolicyService extends SystemService {
     public void onStart() {
         mPackageManagerInternal = LocalServices.getService(
                 PackageManagerInternal.class);
-        PermissionManagerServiceInternal permissionManagerInternal = LocalServices.getService(
+        mPermissionManagerInternal = LocalServices.getService(
                 PermissionManagerServiceInternal.class);
         final IAppOpsService appOpsService = IAppOpsService.Stub.asInterface(
                 ServiceManager.getService(Context.APP_OPS_SERVICE));
@@ -206,7 +206,7 @@ public final class PermissionPolicyService extends SystemService {
             }
         });
 
-        permissionManagerInternal.addOnRuntimePermissionStateChangedListener(
+        mPermissionManagerInternal.addOnRuntimePermissionStateChangedListener(
                 this::synchronizePackagePermissionsAndAppOpsAsyncForUser);
 
         mAppOpsCallback = new IAppOpsCallback.Stub() {
@@ -218,7 +218,7 @@ public final class PermissionPolicyService extends SystemService {
         };
 
         final ArrayList<PermissionInfo> dangerousPerms =
-                permissionManagerInternal.getAllPermissionsWithProtection(
+                mPermissionManagerInternal.getAllPermissionsWithProtection(
                         PermissionInfo.PROTECTION_DANGEROUS);
         try {
             int numDangerousPerms = dangerousPerms.size();
@@ -243,7 +243,7 @@ public final class PermissionPolicyService extends SystemService {
         }
 
         final List<PermissionInfo> appOpPermissionInfos =
-                permissionManagerInternal.getAllPermissionsWithProtectionFlags(
+                mPermissionManagerInternal.getAllPermissionsWithProtectionFlags(
                         PermissionInfo.PROTECTION_FLAG_APPOP);
         mAppOpPermissions = new ArrayList<>();
         final int appOpPermissionInfosSize = appOpPermissionInfos.size();
@@ -1069,7 +1069,7 @@ public final class PermissionPolicyService extends SystemService {
                             clearNotificationReviewFlagsIfNeeded(activityInfo.packageName, user);
                         } else {
                             showNotificationPromptIfNeeded(activityInfo.packageName,
-                                    taskInfo.userId, taskInfo.taskId);
+                                    taskInfo.userId, taskInfo.taskId, info);
                         }
                     }
                 };
@@ -1100,15 +1100,21 @@ public final class PermissionPolicyService extends SystemService {
             return true;
         }
 
+        @Override
         public void showNotificationPromptIfNeeded(@NonNull String packageName, int userId,
                 int taskId) {
+            showNotificationPromptIfNeeded(packageName, userId, taskId, null /* info */);
+        }
+
+        void showNotificationPromptIfNeeded(@NonNull String packageName, int userId,
+                int taskId, @Nullable ActivityInterceptorInfo info) {
             UserHandle user = UserHandle.of(userId);
             if (packageName == null || taskId == ActivityTaskManager.INVALID_TASK_ID
                     || !shouldForceShowNotificationPermissionRequest(packageName, user)) {
                 return;
             }
 
-            launchNotificationPermissionRequestDialog(packageName, user, taskId);
+            launchNotificationPermissionRequestDialog(packageName, user, taskId, info);
         }
 
         @Override
@@ -1177,19 +1183,34 @@ public final class PermissionPolicyService extends SystemService {
         }
 
         private void launchNotificationPermissionRequestDialog(String pkgName, UserHandle user,
-                int taskId) {
+                int taskId, @Nullable ActivityInterceptorInfo info) {
             Intent grantPermission = mPackageManager
                     .buildRequestPermissionsIntent(new String[] { POST_NOTIFICATIONS });
+            // Prevent the front-most activity entering pip due to overlay activity started on top.
+            grantPermission.addFlags(FLAG_ACTIVITY_NEW_TASK | FLAG_ACTIVITY_NO_USER_ACTION);
             grantPermission.setAction(
                     ACTION_REQUEST_PERMISSIONS_FOR_OTHER);
             grantPermission.putExtra(Intent.EXTRA_PACKAGE_NAME, pkgName);
 
-            ActivityOptions options = new ActivityOptions(new Bundle());
+            final boolean remoteAnimation = info != null && info.checkedOptions != null
+                    && info.checkedOptions.getAnimationType() == ANIM_REMOTE_ANIMATION
+                    && info.clearOptionsAnimation != null;
+            ActivityOptions options = remoteAnimation ? ActivityOptions.makeRemoteAnimation(
+                        info.checkedOptions.getRemoteAnimationAdapter(),
+                        info.checkedOptions.getRemoteTransition())
+                    : new ActivityOptions(new Bundle());
             options.setTaskOverlay(true, false);
             options.setLaunchTaskId(taskId);
+            if (remoteAnimation) {
+                // Remote animation set on the intercepted activity will be handled by the grant
+                // permission activity, which is launched below. So we need to clear remote
+                // animation from the intercepted activity and its siblings to prevent duplication.
+                // This should trigger ActivityRecord#clearOptionsAnimationForSiblings for the
+                // intercepted activity.
+                info.clearOptionsAnimation.run();
+            }
             try {
-                mHandler.postDelayed(() -> mContext.startActivityAsUser(
-                        grantPermission, options.toBundle(), user), ACTIVITY_START_DELAY_MS);
+                mContext.startActivityAsUser(grantPermission, options.toBundle(), user);
             } catch (Exception e) {
                 Log.e(LOG_TAG, "couldn't start grant permission dialog"
                         + "for other package " + pkgName, e);
@@ -1283,10 +1304,12 @@ public final class PermissionPolicyService extends SystemService {
             }
             boolean hasCreatedNotificationChannels = mNotificationManager
                     .getNumNotificationChannelsForPackage(pkgName, uid, true) > 0;
+            boolean granted = mPermissionManagerInternal.checkUidPermission(uid, POST_NOTIFICATIONS)
+                    == PackageManager.PERMISSION_GRANTED;
             int flags = mPackageManager.getPermissionFlags(POST_NOTIFICATIONS, pkgName, user);
             boolean explicitlySet = (flags & PermissionManager.EXPLICIT_SET_FLAGS) != 0;
             boolean needsReview = (flags & FLAG_PERMISSION_REVIEW_REQUIRED) != 0;
-            return hasCreatedNotificationChannels && (needsReview || !explicitlySet);
+            return !granted && hasCreatedNotificationChannels && (needsReview || !explicitlySet);
         }
     }
 }

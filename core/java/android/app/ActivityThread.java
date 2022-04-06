@@ -536,6 +536,9 @@ public final class ActivityThread extends ClientTransactionHandler
         // A reusable token for other purposes, e.g. content capture, translation. It shouldn't be
         // used without security checks
         public IBinder shareableActivityToken;
+        // The token of the initial TaskFragment that embedded this activity. Do not rely on it
+        // after creation because the activity could be reparented.
+        @Nullable public IBinder mInitialTaskFragmentToken;
         int ident;
         @UnsupportedAppUsage
         Intent intent;
@@ -618,7 +621,8 @@ public final class ActivityThread extends ClientTransactionHandler
                 PersistableBundle persistentState, List<ResultInfo> pendingResults,
                 List<ReferrerIntent> pendingNewIntents, ActivityOptions activityOptions,
                 boolean isForward, ProfilerInfo profilerInfo, ClientTransactionHandler client,
-                IBinder assistToken, IBinder shareableActivityToken, boolean launchedFromBubble) {
+                IBinder assistToken, IBinder shareableActivityToken, boolean launchedFromBubble,
+                IBinder initialTaskFragmentToken) {
             this.token = token;
             this.assistToken = assistToken;
             this.shareableActivityToken = shareableActivityToken;
@@ -639,6 +643,7 @@ public final class ActivityThread extends ClientTransactionHandler
                     compatInfo);
             mActivityOptions = activityOptions;
             mLaunchedFromBubble = launchedFromBubble;
+            mInitialTaskFragmentToken = initialTaskFragmentToken;
             init();
         }
 
@@ -868,6 +873,7 @@ public final class ActivityThread extends ClientTransactionHandler
         String processName;
         @UnsupportedAppUsage
         ApplicationInfo appInfo;
+        String sdkSandboxClientAppPackage;
         @UnsupportedAppUsage
         List<ProviderInfo> providers;
         ComponentName instrumentationName;
@@ -1113,9 +1119,9 @@ public final class ActivityThread extends ClientTransactionHandler
 
         @Override
         public final void bindApplication(String processName, ApplicationInfo appInfo,
-                ProviderInfoList providerList, ComponentName instrumentationName,
-                ProfilerInfo profilerInfo, Bundle instrumentationArgs,
-                IInstrumentationWatcher instrumentationWatcher,
+                String sdkSandboxClientAppPackage, ProviderInfoList providerList,
+                ComponentName instrumentationName, ProfilerInfo profilerInfo,
+                Bundle instrumentationArgs, IInstrumentationWatcher instrumentationWatcher,
                 IUiAutomationConnection instrumentationUiConnection, int debugMode,
                 boolean enableBinderTracking, boolean trackAllocation,
                 boolean isRestrictedBackupMode, boolean persistent, Configuration config,
@@ -1155,6 +1161,7 @@ public final class ActivityThread extends ClientTransactionHandler
             AppBindData data = new AppBindData();
             data.processName = processName;
             data.appInfo = appInfo;
+            data.sdkSandboxClientAppPackage = sdkSandboxClientAppPackage;
             data.providers = providerList.getList();
             data.instrumentationName = instrumentationName;
             data.instrumentationArgs = instrumentationArgs;
@@ -3587,7 +3594,7 @@ public final class ActivityThread extends ClientTransactionHandler
         }
 
         try {
-            Application app = r.packageInfo.makeApplication(false, mInstrumentation);
+            Application app = r.packageInfo.makeApplicationInner(false, mInstrumentation);
 
             if (localLOGV) Slog.v(TAG, "Performing launch of " + r);
             if (localLOGV) Slog.v(
@@ -4286,7 +4293,7 @@ public final class ActivityThread extends ClientTransactionHandler
         BroadcastReceiver receiver;
         ContextImpl context;
         try {
-            app = packageInfo.makeApplication(false, mInstrumentation);
+            app = packageInfo.makeApplicationInner(false, mInstrumentation);
             context = (ContextImpl) app.getBaseContext();
             if (data.info.splitName != null) {
                 context = (ContextImpl) context.createContextForSplit(data.info.splitName);
@@ -4475,7 +4482,7 @@ public final class ActivityThread extends ClientTransactionHandler
         try {
             if (localLOGV) Slog.v(TAG, "Creating service " + data.info.name);
 
-            Application app = packageInfo.makeApplication(false, mInstrumentation);
+            Application app = packageInfo.makeApplicationInner(false, mInstrumentation);
 
             final java.lang.ClassLoader cl;
             if (data.info.splitName != null) {
@@ -5883,19 +5890,17 @@ public final class ActivityThread extends ClientTransactionHandler
         final boolean movedToDifferentDisplay = isDifferentDisplay(activity.getDisplayId(),
                 displayId);
         final Configuration currentConfig = activity.mCurrentConfig;
-        final int diff = (currentConfig == null) ? 0xffffffff
-                : currentConfig.diffPublicOnly(newConfig);
+        final int diff = currentConfig.diffPublicOnly(newConfig);
         final boolean hasPublicConfigChange = diff != 0;
+        final ActivityClientRecord r = getActivityClient(activityToken);
         // TODO(b/173090263): Use diff instead after the improvement of AssetManager and
         // ResourcesImpl constructions.
         final boolean shouldUpdateResources = hasPublicConfigChange
                 || shouldUpdateResources(activityToken, currentConfig, newConfig, amOverrideConfig,
                 movedToDifferentDisplay, hasPublicConfigChange);
-        final boolean shouldReportChange = hasPublicConfigChange
-                // If this activity doesn't handle any of the config changes, then don't bother
-                // calling onConfigurationChanged. Otherwise, report to the activity for the
-                // changes.
-                && (~activity.mActivityInfo.getRealConfigChanged() & diff) == 0;
+        final boolean shouldReportChange = shouldReportChange(diff, currentConfig, newConfig,
+                r != null ? r.mSizeConfigurations : null,
+                activity.mActivityInfo.getRealConfigChanged());
         // Nothing significant, don't proceed with updating and reporting.
         if (!shouldUpdateResources) {
             return null;
@@ -5940,6 +5945,40 @@ public final class ActivityThread extends ClientTransactionHandler
         }
 
         return configToReport;
+    }
+
+    /**
+     * Returns {@code true} if {@link Activity#onConfigurationChanged(Configuration)} should be
+     * dispatched.
+     *
+     * @param publicDiff Usually computed by {@link Configuration#diffPublicOnly(Configuration)}.
+     *                   This parameter is to prevent we compute it again.
+     * @param currentConfig The current configuration cached in {@link Activity#mCurrentConfig}.
+     *                      It is {@code null} before the first config update from the server side.
+     * @param newConfig The updated {@link Configuration}
+     * @param sizeBuckets The Activity's {@link SizeConfigurationBuckets} if not {@code null}
+     * @param handledConfigChanges Bit mask of configuration changes that the activity can handle
+     * @return {@code true} if the config change should be reported to the Activity
+     */
+    @VisibleForTesting
+    public static boolean shouldReportChange(int publicDiff, @Nullable Configuration currentConfig,
+            @NonNull Configuration newConfig, @Nullable SizeConfigurationBuckets sizeBuckets,
+            int handledConfigChanges) {
+        // Don't report the change if there's no public diff between current and new config.
+        if (publicDiff == 0) {
+            return false;
+        }
+        final int diffWithBucket = SizeConfigurationBuckets.filterDiff(publicDiff, currentConfig,
+                newConfig, sizeBuckets);
+        // Compare to the diff which filter the change without crossing size buckets with
+        // {@code handledConfigChanges}. The small changes should not block Activity to receive
+        // its handled config updates. Also, if Activity handles all small changes, we should
+        // dispatch the updated config to it.
+        final int diff = diffWithBucket != 0 ? diffWithBucket : publicDiff;
+        // If this activity doesn't handle any of the config changes, then don't bother
+        // calling onConfigurationChanged. Otherwise, report to the activity for the
+        // changes.
+        return (~handledConfigChanges & diff) == 0;
     }
 
     public final void applyConfigurationToResources(Configuration config) {
@@ -6536,6 +6575,9 @@ public final class ActivityThread extends ClientTransactionHandler
         }
 
         data.info = getPackageInfoNoCheck(data.appInfo, data.compatInfo);
+        if (data.sdkSandboxClientAppPackage != null) {
+            data.info.setSdkSandboxStorage(data.sdkSandboxClientAppPackage);
+        }
 
         if (agent != null) {
             handleAttachAgent(agent, data.info);
@@ -6695,7 +6737,7 @@ public final class ActivityThread extends ClientTransactionHandler
         try {
             // If the app is being launched for full backup or restore, bring it up in
             // a restricted environment with the base application class.
-            app = data.info.makeApplication(data.restrictedBackupMode, null);
+            app = data.info.makeApplicationInner(data.restrictedBackupMode, null);
 
             // Propagate autofill compat state
             app.setAutofillOptions(data.autofillOptions);
@@ -7565,7 +7607,7 @@ public final class ActivityThread extends ClientTransactionHandler
                 mInstrumentation.basicInit(this);
                 ContextImpl context = ContextImpl.createAppContext(
                         this, getSystemContext().mPackageInfo);
-                mInitialApplication = context.mPackageInfo.makeApplication(true, null);
+                mInitialApplication = context.mPackageInfo.makeApplicationInner(true, null);
                 mInitialApplication.onCreate();
             } catch (Exception e) {
                 throw new RuntimeException(

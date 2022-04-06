@@ -231,7 +231,7 @@ public class DreamService extends Service implements Window.Callback {
      * The default value for whether to show complications on the overlay.
      * @hide
      */
-    public static final boolean DEFAULT_SHOW_COMPLICATIONS = true;
+    public static final boolean DEFAULT_SHOW_COMPLICATIONS = false;
 
     private final IDreamManager mDreamManager;
     private final Handler mHandler = new Handler(Looper.getMainLooper());
@@ -1038,13 +1038,13 @@ public class DreamService extends Service implements Window.Callback {
         }
         mFinished = true;
 
+        mOverlayConnection.unbind(this);
+
         if (mDreamToken == null) {
             Slog.w(mTag, "Finish was called before the dream was attached.");
             stopSelf();
             return;
         }
-
-        mOverlayConnection.unbind(this);
 
         try {
             // finishSelf will unbind the dream controller from the dream service. This will
@@ -1341,7 +1341,9 @@ public class DreamService extends Service implements Window.Callback {
                     public void onViewDetachedFromWindow(View v) {
                         if (mActivity == null || !mActivity.isChangingConfigurations()) {
                             // Only stop the dream if the view is not detached by relaunching
-                            // activity for configuration changes.
+                            // activity for configuration changes. It is important to also clear
+                            // the window reference in order to fully release the DreamActivity.
+                            mWindow = null;
                             mActivity = null;
                             finish();
                         }

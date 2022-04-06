@@ -24,4 +24,5 @@
     <string name="pip_move" msgid="1544227837964635439">"PIP ගෙන යන්න"</string>
     <string name="pip_expand" msgid="7605396312689038178">"PIP දිග හරින්න"</string>
     <string name="pip_collapse" msgid="5732233773786896094">"PIP හකුළන්න"</string>
+    <string name="pip_edu_text" msgid="3672999496647508701">" පාලන සඳහා "<annotation icon="home_icon">" මුල් පිටුව "</annotation>" දෙවරක් ඔබන්න"</string>
 </resources>

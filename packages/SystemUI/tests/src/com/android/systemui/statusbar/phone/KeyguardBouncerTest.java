@@ -16,6 +16,9 @@
 
 package com.android.systemui.statusbar.phone;
 
+import static com.android.systemui.statusbar.phone.KeyguardBouncer.EXPANSION_HIDDEN;
+import static com.android.systemui.statusbar.phone.KeyguardBouncer.EXPANSION_VISIBLE;
+
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -24,9 +27,11 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.verifyZeroInteractions;
@@ -53,6 +58,7 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.classifier.FalsingCollector;
 import com.android.systemui.keyguard.DismissCallbackRegistry;
 import com.android.systemui.plugins.ActivityStarter.OnDismissAction;
+import com.android.systemui.statusbar.phone.KeyguardBouncer.BouncerExpansionCallback;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 
 import org.junit.Assert;
@@ -62,6 +68,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 
@@ -79,7 +86,7 @@ public class KeyguardBouncerTest extends SysuiTestCase {
     @Mock
     private KeyguardHostViewController mKeyguardHostViewController;
     @Mock
-    private KeyguardBouncer.BouncerExpansionCallback mExpansionCallback;
+    private BouncerExpansionCallback mExpansionCallback;
     @Mock
     private KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     @Mock
@@ -197,11 +204,11 @@ public class KeyguardBouncerTest extends SysuiTestCase {
         mBouncer.ensureView();
         mBouncer.setExpansion(0.5f);
 
-        mBouncer.setExpansion(KeyguardBouncer.EXPANSION_HIDDEN);
+        mBouncer.setExpansion(EXPANSION_HIDDEN);
         verify(mFalsingCollector).onBouncerHidden();
         verify(mExpansionCallback).onFullyHidden();
 
-        mBouncer.setExpansion(KeyguardBouncer.EXPANSION_VISIBLE);
+        mBouncer.setExpansion(EXPANSION_VISIBLE);
         verify(mFalsingCollector).onBouncerShown();
         verify(mExpansionCallback).onFullyShown();
 
@@ -410,11 +417,11 @@ public class KeyguardBouncerTest extends SysuiTestCase {
     @Test
     public void testInTransit_whenTranslation() {
         mBouncer.show(true);
-        mBouncer.setExpansion(KeyguardBouncer.EXPANSION_HIDDEN);
+        mBouncer.setExpansion(EXPANSION_HIDDEN);
         assertThat(mBouncer.inTransit()).isFalse();
         mBouncer.setExpansion(0.5f);
         assertThat(mBouncer.inTransit()).isTrue();
-        mBouncer.setExpansion(KeyguardBouncer.EXPANSION_VISIBLE);
+        mBouncer.setExpansion(EXPANSION_VISIBLE);
         assertThat(mBouncer.inTransit()).isFalse();
     }
 
@@ -434,5 +441,38 @@ public class KeyguardBouncerTest extends SysuiTestCase {
         mBouncer.updateKeyguardPosition(1.0f);
 
         verify(mKeyguardHostViewController).updateKeyguardPosition(1.0f);
+    }
+
+    @Test
+    public void testExpansion_notifiesCallback() {
+        mBouncer.ensureView();
+        mBouncer.setExpansion(0.5f);
+
+        final BouncerExpansionCallback callback = mock(BouncerExpansionCallback.class);
+        mBouncer.addBouncerExpansionCallback(callback);
+
+        mBouncer.setExpansion(EXPANSION_HIDDEN);
+        verify(callback).onFullyHidden();
+        verify(callback).onExpansionChanged(EXPANSION_HIDDEN);
+
+        Mockito.clearInvocations(callback);
+        mBouncer.setExpansion(EXPANSION_VISIBLE);
+        verify(callback).onFullyShown();
+        verify(callback).onExpansionChanged(EXPANSION_VISIBLE);
+
+        Mockito.clearInvocations(callback);
+        float bouncerHideAmount = 0.9f;
+        // Ensure the callback only triggers once despite multiple calls to setExpansion
+        // with the same value.
+        mBouncer.setExpansion(bouncerHideAmount);
+        mBouncer.setExpansion(bouncerHideAmount);
+        verify(callback, times(1)).onStartingToHide();
+        verify(callback, times(1)).onExpansionChanged(bouncerHideAmount);
+
+        Mockito.clearInvocations(callback);
+        mBouncer.removeBouncerExpansionCallback(callback);
+        bouncerHideAmount = 0.5f;
+        mBouncer.setExpansion(bouncerHideAmount);
+        verify(callback, never()).onExpansionChanged(bouncerHideAmount);
     }
 }

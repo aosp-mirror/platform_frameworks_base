@@ -116,6 +116,8 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
     private float mLastReportedAnimatorScale;
     private String mPackageName;
     private String mRelayoutTag;
+    private String mUpdateViewVisibilityTag;
+    private String mUpdateWindowLayoutTag;
     private final InsetsVisibilities mDummyRequestedVisibilities = new InsetsVisibilities();
     private final InsetsSourceControl[] mDummyControls =  new InsetsSourceControl[0];
     final boolean mSetsUnrestrictedKeepClearAreas;
@@ -223,6 +225,27 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
     }
 
     @Override
+    public int updateVisibility(IWindow client, WindowManager.LayoutParams attrs,
+            int viewVisibility, MergedConfiguration outMergedConfiguration,
+            SurfaceControl outSurfaceControl, InsetsState outInsetsState,
+            InsetsSourceControl[] outActiveControls) {
+        Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, mUpdateViewVisibilityTag);
+        int res = mService.updateViewVisibility(this, client, attrs, viewVisibility,
+                outMergedConfiguration, outSurfaceControl, outInsetsState, outActiveControls);
+        Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
+        return res;
+    }
+
+    @Override
+    public void updateLayout(IWindow window, WindowManager.LayoutParams attrs, int flags,
+            ClientWindowFrames clientFrames, int requestedWidth, int requestedHeight) {
+        Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, mUpdateWindowLayoutTag);
+        mService.updateWindowLayout(this, window, attrs, flags, clientFrames, requestedWidth,
+                requestedHeight);
+        Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
+    }
+
+    @Override
     public void prepareToReplaceWindows(IBinder appToken, boolean childrenOnly) {
         mService.setWillReplaceWindows(appToken, childrenOnly);
     }
@@ -232,14 +255,14 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
             int requestedWidth, int requestedHeight, int viewFlags, int flags,
             ClientWindowFrames outFrames, MergedConfiguration mergedConfiguration,
             SurfaceControl outSurfaceControl, InsetsState outInsetsState,
-            InsetsSourceControl[] outActiveControls) {
+            InsetsSourceControl[] outActiveControls, Bundle outSyncSeqIdBundle) {
         if (false) Slog.d(TAG_WM, ">>>>>> ENTERED relayout from "
                 + Binder.getCallingPid());
         Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, mRelayoutTag);
         int res = mService.relayoutWindow(this, window, attrs,
                 requestedWidth, requestedHeight, viewFlags, flags,
                 outFrames, mergedConfiguration, outSurfaceControl, outInsetsState,
-                outActiveControls);
+                outActiveControls, outSyncSeqIdBundle);
         Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
         if (false) Slog.d(TAG_WM, "<<<<<< EXITING relayout to "
                 + Binder.getCallingPid());
@@ -265,9 +288,9 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
 
     @Override
     public void finishDrawing(IWindow window,
-            @Nullable SurfaceControl.Transaction postDrawTransaction) {
+            @Nullable SurfaceControl.Transaction postDrawTransaction, int seqId) {
         if (DEBUG) Slog.v(TAG_WM, "IWindow finishDrawing called for " + window);
-        mService.finishDrawingWindow(this, window, postDrawTransaction);
+        mService.finishDrawingWindow(this, window, postDrawTransaction, seqId);
     }
 
     @Override
@@ -689,6 +712,8 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
             if (wpc != null) {
                 mPackageName = wpc.mInfo.packageName;
                 mRelayoutTag = "relayoutWindow: " + mPackageName;
+                mUpdateViewVisibilityTag = "updateVisibility: " + mPackageName;
+                mUpdateWindowLayoutTag = "updateLayout: " + mPackageName;
             } else {
                 Slog.e(TAG_WM, "Unknown process pid=" + mPid);
             }
@@ -915,12 +940,13 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
     public void setOnBackInvokedCallback(
             IWindow window,
             IOnBackInvokedCallback onBackInvokedCallback,
-            @OnBackInvokedDispatcher.Priority int priority) throws RemoteException {
+            @OnBackInvokedDispatcher.Priority int priority) {
         synchronized (mService.mGlobalLock) {
             WindowState windowState = mService.windowForClientLocked(this, window, false);
             if (windowState == null) {
                 Slog.e(TAG_WM,
-                        "setOnBackInvokedCallback(): Can't find window state for window:" + window);
+                        "setOnBackInvokedCallback(): No window state for package:"
+                                + mPackageName);
             } else {
                 windowState.setOnBackInvokedCallback(onBackInvokedCallback, priority);
             }

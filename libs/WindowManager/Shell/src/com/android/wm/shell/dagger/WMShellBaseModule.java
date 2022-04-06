@@ -68,6 +68,7 @@ import com.android.wm.shell.fullscreen.FullscreenTaskListener;
 import com.android.wm.shell.fullscreen.FullscreenUnfoldController;
 import com.android.wm.shell.hidedisplaycutout.HideDisplayCutout;
 import com.android.wm.shell.hidedisplaycutout.HideDisplayCutoutController;
+import com.android.wm.shell.kidsmode.KidsModeTaskOrganizer;
 import com.android.wm.shell.legacysplitscreen.LegacySplitScreen;
 import com.android.wm.shell.legacysplitscreen.LegacySplitScreenController;
 import com.android.wm.shell.onehanded.OneHanded;
@@ -91,10 +92,12 @@ import com.android.wm.shell.tasksurfacehelper.TaskSurfaceHelperController;
 import com.android.wm.shell.transition.ShellTransitions;
 import com.android.wm.shell.transition.Transitions;
 import com.android.wm.shell.unfold.ShellUnfoldProgressProvider;
+import com.android.wm.shell.unfold.UnfoldTransitionHandler;
 
 import java.util.Optional;
 
 import dagger.BindsOptionalOf;
+import dagger.Lazy;
 import dagger.Module;
 import dagger.Provides;
 
@@ -184,7 +187,21 @@ public abstract class WMShellBaseModule {
 
     @WMSingleton
     @Provides
-    static Optional<CompatUI> provideCompatUI(CompatUIController compatUIController) {
+    static KidsModeTaskOrganizer provideKidsModeTaskOrganizer(
+            @ShellMainThread ShellExecutor mainExecutor,
+            @ShellMainThread Handler mainHandler,
+            Context context,
+            SyncTransactionQueue syncTransactionQueue,
+            DisplayController displayController,
+            DisplayInsetsController displayInsetsController,
+            Optional<RecentTasksController> recentTasksOptional
+    ) {
+        return new KidsModeTaskOrganizer(mainExecutor, mainHandler, context, syncTransactionQueue,
+                displayController, displayInsetsController, recentTasksOptional);
+    }
+
+    @WMSingleton
+    @Provides static Optional<CompatUI> provideCompatUI(CompatUIController compatUIController) {
         return Optional.of(compatUIController.asCompatUI());
     }
 
@@ -193,9 +210,9 @@ public abstract class WMShellBaseModule {
     static CompatUIController provideCompatUIController(Context context,
             DisplayController displayController, DisplayInsetsController displayInsetsController,
             DisplayImeController imeController, SyncTransactionQueue syncQueue,
-            @ShellMainThread ShellExecutor mainExecutor) {
+            @ShellMainThread ShellExecutor mainExecutor, Lazy<Transitions> transitionsLazy) {
         return new CompatUIController(context, displayController, displayInsetsController,
-                imeController, syncQueue, mainExecutor);
+                imeController, syncQueue, mainExecutor, transitionsLazy);
     }
 
     @WMSingleton
@@ -307,6 +324,21 @@ public abstract class WMShellBaseModule {
         if (progressProvider.isPresent()
                 && progressProvider.get() != ShellUnfoldProgressProvider.NO_PROVIDER) {
             return fullscreenUnfoldController;
+        }
+        return Optional.empty();
+    }
+
+    @WMSingleton
+    @Provides
+    static Optional<UnfoldTransitionHandler> provideUnfoldTransitionHandler(
+            Optional<ShellUnfoldProgressProvider> progressProvider,
+            TransactionPool transactionPool,
+            Transitions transitions,
+            @ShellMainThread ShellExecutor executor) {
+        if (progressProvider.isPresent()) {
+            return Optional.of(
+                    new UnfoldTransitionHandler(progressProvider.get(), transactionPool, executor,
+                            transitions));
         }
         return Optional.empty();
     }
@@ -637,12 +669,14 @@ public abstract class WMShellBaseModule {
             DisplayInsetsController displayInsetsController,
             DragAndDropController dragAndDropController,
             ShellTaskOrganizer shellTaskOrganizer,
+            KidsModeTaskOrganizer kidsModeTaskOrganizer,
             Optional<BubbleController> bubblesOptional,
             Optional<SplitScreenController> splitScreenOptional,
             Optional<AppPairsController> appPairsOptional,
             Optional<PipTouchHandler> pipTouchHandlerOptional,
             FullscreenTaskListener fullscreenTaskListener,
             Optional<FullscreenUnfoldController> appUnfoldTransitionController,
+            Optional<UnfoldTransitionHandler> unfoldTransitionHandler,
             Optional<FreeformTaskListener> freeformTaskListener,
             Optional<RecentTasksController> recentTasksOptional,
             Transitions transitions,
@@ -653,12 +687,14 @@ public abstract class WMShellBaseModule {
                 displayInsetsController,
                 dragAndDropController,
                 shellTaskOrganizer,
+                kidsModeTaskOrganizer,
                 bubblesOptional,
                 splitScreenOptional,
                 appPairsOptional,
                 pipTouchHandlerOptional,
                 fullscreenTaskListener,
                 appUnfoldTransitionController,
+                unfoldTransitionHandler,
                 freeformTaskListener,
                 recentTasksOptional,
                 transitions,
@@ -680,6 +716,7 @@ public abstract class WMShellBaseModule {
     @Provides
     static ShellCommandHandlerImpl provideShellCommandHandlerImpl(
             ShellTaskOrganizer shellTaskOrganizer,
+            KidsModeTaskOrganizer kidsModeTaskOrganizer,
             Optional<LegacySplitScreenController> legacySplitScreenOptional,
             Optional<SplitScreenController> splitScreenOptional,
             Optional<Pip> pipOptional,
@@ -688,7 +725,7 @@ public abstract class WMShellBaseModule {
             Optional<AppPairsController> appPairsOptional,
             Optional<RecentTasksController> recentTasksOptional,
             @ShellMainThread ShellExecutor mainExecutor) {
-        return new ShellCommandHandlerImpl(shellTaskOrganizer,
+        return new ShellCommandHandlerImpl(shellTaskOrganizer, kidsModeTaskOrganizer,
                 legacySplitScreenOptional, splitScreenOptional, pipOptional, oneHandedOptional,
                 hideDisplayCutout, appPairsOptional, recentTasksOptional, mainExecutor);
     }

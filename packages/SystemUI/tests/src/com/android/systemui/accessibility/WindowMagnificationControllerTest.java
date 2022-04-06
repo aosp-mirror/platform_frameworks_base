@@ -80,6 +80,7 @@ import com.android.systemui.utils.os.FakeHandler;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Answers;
@@ -172,15 +173,24 @@ public class WindowMagnificationControllerTest extends SysuiTestCase {
 
     @Test
     public void enableWindowMagnification_notifySourceBoundsChanged() {
-        mInstrumentation.runOnMainSync(() -> {
-            mWindowMagnificationController.enableWindowMagnification(Float.NaN, Float.NaN,
-                    Float.NaN, /* magnificationFrameOffsetRatioX= */ 0,
-                    /* magnificationFrameOffsetRatioY= */ 0, null);
-        });
+        mInstrumentation.runOnMainSync(
+                () -> mWindowMagnificationController.enableWindowMagnification(Float.NaN, Float.NaN,
+                        Float.NaN, /* magnificationFrameOffsetRatioX= */ 0,
+                /* magnificationFrameOffsetRatioY= */ 0, null));
 
         // Waits for the surface created
         verify(mWindowMagnifierCallback, timeout(LAYOUT_CHANGE_TIMEOUT_MS)).onSourceBoundsChanged(
                 (eq(mContext.getDisplayId())), any());
+    }
+
+    @Test
+    public void enableWindowMagnification_disabled_notifySourceBoundsChanged() {
+        enableWindowMagnification_notifySourceBoundsChanged();
+        mInstrumentation.runOnMainSync(
+                () -> mWindowMagnificationController.deleteWindowMagnification(null));
+        Mockito.reset(mWindowMagnifierCallback);
+
+        enableWindowMagnification_notifySourceBoundsChanged();
     }
 
     @Test
@@ -293,6 +303,7 @@ public class WindowMagnificationControllerTest extends SysuiTestCase {
         verify(mSfVsyncFrameProvider, atLeastOnce()).postFrameCallback(any());
     }
 
+    @Ignore("b/224717753")
     @Test
     public void moveWindowMagnifierToPositionWithAnimation_expectedValuesAndInvokeCallback()
             throws InterruptedException {
@@ -327,6 +338,7 @@ public class WindowMagnificationControllerTest extends SysuiTestCase {
         assertEquals(mWindowMagnificationController.getCenterY(), targetCenterY, 0);
     }
 
+    @Ignore("b/224717753")
     @Test
     public void moveWindowMagnifierToPositionMultipleTimes_expectedValuesAndInvokeCallback()
             throws InterruptedException {

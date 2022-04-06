@@ -67,9 +67,14 @@ class FeatureFlagsDebugTest : SysuiTestCase() {
     private lateinit var mBroadcastReceiver: BroadcastReceiver
     private lateinit var mClearCacheAction: Consumer<Int>
 
+    private val teamfoodableFlagA = BooleanFlag(500, false, true)
+    private val teamfoodableFlagB = BooleanFlag(501, true, true)
+
     @Before
     fun setup() {
         MockitoAnnotations.initMocks(this)
+        mFlagMap.put(teamfoodableFlagA.id, teamfoodableFlagA)
+        mFlagMap.put(teamfoodableFlagB.id, teamfoodableFlagB)
         mFeatureFlagsDebug = FeatureFlagsDebug(
             mFlagManager,
             mMockContext,
@@ -77,7 +82,7 @@ class FeatureFlagsDebugTest : SysuiTestCase() {
             mSystemProperties,
             mResources,
             mDumpManager,
-            { mFlagMap },
+            mFlagMap,
             mBarService
         )
         verify(mFlagManager).onSettingsChangedAction = any()
@@ -93,12 +98,50 @@ class FeatureFlagsDebugTest : SysuiTestCase() {
 
     @Test
     fun testReadBooleanFlag() {
+        // Remember that the TEAMFOOD flag is id#1 and has special behavior.
         whenever(mFlagManager.readFlagValue<Boolean>(eq(3), any())).thenReturn(true)
         whenever(mFlagManager.readFlagValue<Boolean>(eq(4), any())).thenReturn(false)
-        assertThat(mFeatureFlagsDebug.isEnabled(BooleanFlag(1, false))).isFalse()
         assertThat(mFeatureFlagsDebug.isEnabled(BooleanFlag(2, true))).isTrue()
         assertThat(mFeatureFlagsDebug.isEnabled(BooleanFlag(3, false))).isTrue()
         assertThat(mFeatureFlagsDebug.isEnabled(BooleanFlag(4, true))).isFalse()
+        assertThat(mFeatureFlagsDebug.isEnabled(BooleanFlag(5, false))).isFalse()
+    }
+
+    @Test
+    fun testTeamFoodFlag_False() {
+        whenever(mFlagManager.readFlagValue<Boolean>(eq(1), any())).thenReturn(false)
+        assertThat(mFeatureFlagsDebug.isEnabled(teamfoodableFlagA)).isFalse()
+        assertThat(mFeatureFlagsDebug.isEnabled(teamfoodableFlagB)).isTrue()
+
+        // Regular boolean flags should still test the same.
+        // Only our teamfoodableFlag should change.
+        testReadBooleanFlag()
+    }
+
+    @Test
+    fun testTeamFoodFlag_True() {
+        whenever(mFlagManager.readFlagValue<Boolean>(eq(1), any())).thenReturn(true)
+        assertThat(mFeatureFlagsDebug.isEnabled(teamfoodableFlagA)).isTrue()
+        assertThat(mFeatureFlagsDebug.isEnabled(teamfoodableFlagB)).isTrue()
+
+        // Regular boolean flags should still test the same.
+        // Only our teamfoodableFlag should change.
+        testReadBooleanFlag()
+    }
+
+    @Test
+    fun testTeamFoodFlag_Overridden() {
+        whenever(mFlagManager.readFlagValue<Boolean>(eq(teamfoodableFlagA.id), any()))
+                .thenReturn(true)
+        whenever(mFlagManager.readFlagValue<Boolean>(eq(teamfoodableFlagB.id), any()))
+                .thenReturn(false)
+        whenever(mFlagManager.readFlagValue<Boolean>(eq(1), any())).thenReturn(true)
+        assertThat(mFeatureFlagsDebug.isEnabled(teamfoodableFlagA)).isTrue()
+        assertThat(mFeatureFlagsDebug.isEnabled(teamfoodableFlagB)).isFalse()
+
+        // Regular boolean flags should still test the same.
+        // Only our teamfoodableFlag should change.
+        testReadBooleanFlag()
     }
 
     @Test

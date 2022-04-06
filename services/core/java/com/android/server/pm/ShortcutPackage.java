@@ -19,11 +19,13 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.Person;
+import android.app.appsearch.AppSearchBatchResult;
 import android.app.appsearch.AppSearchManager;
 import android.app.appsearch.AppSearchResult;
 import android.app.appsearch.AppSearchSession;
+import android.app.appsearch.BatchResultCallback;
+import android.app.appsearch.GenericDocument;
 import android.app.appsearch.GetByDocumentIdRequest;
-import android.app.appsearch.PackageIdentifier;
 import android.app.appsearch.PutDocumentsRequest;
 import android.app.appsearch.RemoveByDocumentIdRequest;
 import android.app.appsearch.ReportUsageRequest;
@@ -181,11 +183,6 @@ class ShortcutPackage extends ShortcutPackageItem {
     private final ArrayList<ShareTargetInfo> mShareTargets = new ArrayList<>(0);
 
     /**
-     * All external packages that have gained access to the shortcuts from this package
-     */
-    private final Map<String, PackageIdentifier> mPackageIdentifiers = new ArrayMap<>(0);
-
-    /**
      * # of times the package has called rate-limited APIs.
      */
     private int mApiCallCount;
@@ -341,7 +338,7 @@ class ShortcutPackage extends ShortcutPackageItem {
 
     public void ensureAllShortcutsVisibleToLauncher(@NonNull List<ShortcutInfo> shortcuts) {
         for (ShortcutInfo shortcut : shortcuts) {
-            if (!shortcut.isIncludedIn(ShortcutInfo.SURFACE_LAUNCHER)) {
+            if (shortcut.isExcludedFromSurfaces(ShortcutInfo.SURFACE_LAUNCHER)) {
                 throw new IllegalArgumentException("Shortcut ID=" + shortcut.getId()
                         + " is hidden from launcher and may not be manipulated via APIs");
             }
@@ -402,7 +399,7 @@ class ShortcutPackage extends ShortcutPackageItem {
                     & (ShortcutInfo.FLAG_PINNED | ShortcutInfo.FLAG_CACHED_ALL));
         }
 
-        if (!newShortcut.isIncludedIn(ShortcutInfo.SURFACE_LAUNCHER)) {
+        if (newShortcut.isExcludedFromSurfaces(ShortcutInfo.SURFACE_LAUNCHER)) {
             if (isAppSearchEnabled()) {
                 synchronized (mLock) {
                     mTransientShortcuts.put(newShortcut.getId(), newShortcut);
@@ -480,7 +477,7 @@ class ShortcutPackage extends ShortcutPackageItem {
                     & (ShortcutInfo.FLAG_PINNED | ShortcutInfo.FLAG_CACHED_ALL));
         }
 
-        if (!newShortcut.isIncludedIn(ShortcutInfo.SURFACE_LAUNCHER)) {
+        if (newShortcut.isExcludedFromSurfaces(ShortcutInfo.SURFACE_LAUNCHER)) {
             if (isAppSearchEnabled()) {
                 synchronized (mLock) {
                     mTransientShortcuts.put(newShortcut.getId(), newShortcut);
@@ -1172,7 +1169,7 @@ class ShortcutPackage extends ShortcutPackageItem {
 
         // This will send a notification to the launcher, and also save .
         // TODO: List changed and removed manifest shortcuts and pass to packageShortcutsChanged()
-        s.packageShortcutsChanged(getPackageName(), getPackageUserId(), null, null);
+        s.packageShortcutsChanged(this, null, null);
 
         return true;
     }
@@ -1449,7 +1446,7 @@ class ShortcutPackage extends ShortcutPackageItem {
             });
         }
         if (!CollectionUtils.isEmpty(changedShortcuts)) {
-            s.packageShortcutsChanged(getPackageName(), getPackageUserId(), changedShortcuts, null);
+            s.packageShortcutsChanged(this, changedShortcuts, null);
         }
     }
 
@@ -1827,9 +1824,9 @@ class ShortcutPackage extends ShortcutPackageItem {
             ShortcutService.writeTagExtra(out, TAG_EXTRAS, si.getExtras());
 
             final Map<String, Map<String, List<String>>> capabilityBindings =
-                    si.getCapabilityBindings();
+                    si.getCapabilityBindingsInternal();
             if (capabilityBindings != null && !capabilityBindings.isEmpty()) {
-                XmlUtils.writeMapXml(si.getCapabilityBindings(), NAME_CAPABILITY, out);
+                XmlUtils.writeMapXml(capabilityBindings, NAME_CAPABILITY, out);
             }
         }
 
@@ -2313,14 +2310,15 @@ class ShortcutPackage extends ShortcutPackageItem {
         }
         SetSchemaRequest.Builder schemaBuilder = new SetSchemaRequest.Builder()
                 .addSchemas(AppSearchShortcutPerson.SCHEMA, AppSearchShortcutInfo.SCHEMA)
-                .setForceOverride(true);
-        for (PackageIdentifier pi : mPackageIdentifiers.values()) {
-            schemaBuilder = schemaBuilder
-                    .setSchemaTypeVisibilityForPackage(
-                            AppSearchShortcutPerson.SCHEMA_TYPE, true, pi)
-                    .setSchemaTypeVisibilityForPackage(
-                            AppSearchShortcutInfo.SCHEMA_TYPE, true, pi);
-        }
+                .setForceOverride(true)
+                .addRequiredPermissionsForSchemaTypeVisibility(AppSearchShortcutInfo.SCHEMA_TYPE,
+                        Collections.singleton(SetSchemaRequest.READ_HOME_APP_SEARCH_DATA))
+                .addRequiredPermissionsForSchemaTypeVisibility(AppSearchShortcutInfo.SCHEMA_TYPE,
+                        Collections.singleton(SetSchemaRequest.READ_ASSISTANT_APP_SEARCH_DATA))
+                .addRequiredPermissionsForSchemaTypeVisibility(AppSearchShortcutPerson.SCHEMA_TYPE,
+                        Collections.singleton(SetSchemaRequest.READ_HOME_APP_SEARCH_DATA))
+                .addRequiredPermissionsForSchemaTypeVisibility(AppSearchShortcutPerson.SCHEMA_TYPE,
+                        Collections.singleton(SetSchemaRequest.READ_ASSISTANT_APP_SEARCH_DATA));
         final AndroidFuture<AppSearchSession> future = new AndroidFuture<>();
         session.setSchema(
                 schemaBuilder.build(), mExecutor, mShortcutUser.mExecutor, result -> {
@@ -2384,14 +2382,24 @@ class ShortcutPackage extends ShortcutPackageItem {
         }
         runAsSystem(() -> fromAppSearch().thenAccept(session -> {
             session.getByDocumentId(new GetByDocumentIdRequest.Builder(getPackageName())
-                    .addIds(ids).build(), mShortcutUser.mExecutor, result -> {
-                    final List<ShortcutInfo> ret = result.getSuccesses().values()
-                            .stream().map(doc ->
-                                    ShortcutInfo.createFromGenericDocument(
-                                            mShortcutUser.getUserId(), doc))
-                            .collect(Collectors.toList());
-                    cb.accept(ret);
-                });
+                            .addIds(ids).build(), mShortcutUser.mExecutor,
+                    new BatchResultCallback<String, GenericDocument>() {
+                        @Override
+                        public void onResult(
+                                @NonNull AppSearchBatchResult<String, GenericDocument> result) {
+                            final List<ShortcutInfo> ret = result.getSuccesses().values()
+                                    .stream().map(doc ->
+                                            ShortcutInfo.createFromGenericDocument(
+                                                    mShortcutUser.getUserId(), doc))
+                                    .collect(Collectors.toList());
+                            cb.accept(ret);
+                        }
+                        @Override
+                        public void onSystemError(
+                                @Nullable Throwable throwable) {
+                            Slog.d(TAG, "Error retrieving shortcuts", throwable);
+                        }
+                    });
         }));
     }
 
@@ -2407,14 +2415,23 @@ class ShortcutPackage extends ShortcutPackageItem {
         runAsSystem(() -> fromAppSearch().thenAccept(session ->
                 session.remove(
                         new RemoveByDocumentIdRequest.Builder(getPackageName()).addIds(ids).build(),
-                        mShortcutUser.mExecutor, result -> {
-                            if (!result.isSuccess()) {
-                                final Map<String, AppSearchResult<Void>> failures =
-                                        result.getFailures();
-                                for (String key : failures.keySet()) {
-                                    Slog.e(TAG, "Failed deleting " + key + ", error message:"
-                                            + failures.get(key).getErrorMessage());
+                        mShortcutUser.mExecutor,
+                        new BatchResultCallback<String, Void>() {
+                            @Override
+                            public void onResult(
+                                    @NonNull AppSearchBatchResult<String, Void> result) {
+                                if (!result.isSuccess()) {
+                                    final Map<String, AppSearchResult<Void>> failures =
+                                            result.getFailures();
+                                    for (String key : failures.keySet()) {
+                                        Slog.e(TAG, "Failed deleting " + key + ", error message:"
+                                                + failures.get(key).getErrorMessage());
+                                    }
                                 }
+                            }
+                            @Override
+                            public void onSystemError(@Nullable Throwable throwable) {
+                                Slog.e(TAG, "Error removing shortcuts", throwable);
                             }
                         })));
     }
@@ -2452,11 +2469,19 @@ class ShortcutPackage extends ShortcutPackageItem {
                                     AppSearchShortcutInfo.toGenericDocuments(shortcuts))
                             .build(),
                     mShortcutUser.mExecutor,
-                    result -> {
-                        if (!result.isSuccess()) {
-                            for (AppSearchResult<Void> k : result.getFailures().values()) {
-                                Slog.e(TAG, k.getErrorMessage());
+                    new BatchResultCallback<String, Void>() {
+                        @Override
+                        public void onResult(
+                                @NonNull AppSearchBatchResult<String, Void> result) {
+                            if (!result.isSuccess()) {
+                                for (AppSearchResult<Void> k : result.getFailures().values()) {
+                                    Slog.e(TAG, k.getErrorMessage());
+                                }
                             }
+                        }
+                        @Override
+                        public void onSystemError(@Nullable Throwable throwable) {
+                            Slog.d(TAG, "Error persisting shortcuts", throwable);
                         }
                     });
         }));

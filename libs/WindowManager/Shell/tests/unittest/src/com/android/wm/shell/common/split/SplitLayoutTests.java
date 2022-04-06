@@ -16,7 +16,6 @@
 
 package com.android.wm.shell.common.split;
 
-import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -84,10 +83,6 @@ public class SplitLayoutTests extends ShellTestCase {
 
         // Verify it returns true if new config won't affect split layout.
         assertThat(mSplitLayout.updateConfiguration(config)).isFalse();
-
-        // Verify updateConfiguration returns true if the orientation changed.
-        config.orientation = ORIENTATION_LANDSCAPE;
-        assertThat(mSplitLayout.updateConfiguration(config)).isTrue();
 
         // Verify updateConfiguration returns true if it rotated.
         config.windowConfiguration.setRotation(1);

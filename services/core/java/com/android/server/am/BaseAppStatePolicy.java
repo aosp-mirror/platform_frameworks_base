@@ -87,9 +87,11 @@ public abstract class BaseAppStatePolicy<T extends BaseAppStateTracker> {
     }
 
     /**
-     * @return The proposed background restriction policy for the given package/uid.
+     * @return The proposed background restriction policy for the given package/uid,
+     *         the returned level should be capped at {@code maxLevel} (exclusive).
      */
-    public @RestrictionLevel int getProposedRestrictionLevel(String packageName, int uid) {
+    public @RestrictionLevel int getProposedRestrictionLevel(String packageName, int uid,
+            @RestrictionLevel int maxLevel) {
         return RESTRICTION_LEVEL_UNKNOWN;
     }
 

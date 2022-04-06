@@ -565,10 +565,17 @@ public class SyntheticPasswordManager {
         return response[0];
     }
 
-    public void removeUser(int userId) {
+    public void removeUser(IGateKeeperService gatekeeper, int userId) {
         for (long handle : mStorage.listSyntheticPasswordHandlesForUser(SP_BLOB_NAME, userId)) {
             destroyWeaverSlot(handle, userId);
             destroySPBlobKey(getKeyName(handle));
+        }
+        // Remove potential persistent state (in RPMB), to prevent them from accumulating and
+        // causing problems.
+        try {
+            gatekeeper.clearSecureUserId(fakeUid(userId));
+        } catch (RemoteException ignore) {
+            Slog.w(TAG, "Failed to clear SID from gatekeeper");
         }
     }
 

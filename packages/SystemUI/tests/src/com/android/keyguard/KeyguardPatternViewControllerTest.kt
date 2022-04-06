@@ -88,6 +88,6 @@ class KeyguardPatternViewControllerTest : SysuiTestCase() {
     fun onPause_clearsTextField() {
         mKeyguardPatternViewController.init()
         mKeyguardPatternViewController.onPause()
-        verify(mKeyguardMessageAreaController).setMessage(R.string.keyguard_enter_your_pattern)
+        verify(mKeyguardMessageAreaController).setMessage("")
     }
 }

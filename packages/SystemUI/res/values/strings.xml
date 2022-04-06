@@ -87,6 +87,18 @@
     <!-- Checkbox label for USB device dialogs with warning text for USB device dialogs.  [CHAR LIMIT=200]-->
     <string name="usb_device_permission_prompt_warn">Allow <xliff:g id="application" example= "Usb Mega Player">%1$s</xliff:g> to access <xliff:g id="usb_device" example="USB Headphones">%2$s</xliff:g>?\nThis app has not been granted record permission but could capture audio through this USB device.</string>
 
+    <!-- USB audio device permission dialog title.  [CHAR LIMIT=200]-->
+    <string name="usb_audio_device_permission_prompt_title">Allow <xliff:g id="application" example= "Usb Mega Player">%1$s</xliff:g> to access <xliff:g id="usb_device" example="USB Headphones">%2$s</xliff:g>?</string>
+
+    <!-- USB audio device confirm dialog title.  [CHAR LIMIT=200]-->
+    <string name="usb_audio_device_confirm_prompt_title">Open <xliff:g id="application" example= "Usb Mega Player">%1$s</xliff:g> to handle <xliff:g id="usb_device" example="USB Headphones">%2$s</xliff:g>?</string>
+
+    <!-- Checkbox label for USB audio device dialogs with warning text for USB audio device dialogs.  [CHAR LIMIT=NONE]-->
+    <string name="usb_audio_device_prompt_warn">This app has not been granted record permission but could capture audio through this USB device. Using <xliff:g id="application" example= "Usb Mega Player">%1$s</xliff:g> with this device might prevent hearing calls, notifications and alarms.</string>
+
+    <!-- Prompt for the USB audio device permission dialog [CHAR LIMIT=NONE] -->
+    <string name="usb_audio_device_prompt">Using <xliff:g id="application" example= "Usb Mega Player">%1$s</xliff:g> with this device might prevent hearing calls, notifications and alarms.</string>
+
     <!-- Prompt for the USB accessory permission dialog [CHAR LIMIT=80] -->
     <string name="usb_accessory_permission_prompt">Allow <xliff:g id="application" example= "Usb Mega Player">%1$s</xliff:g> to access <xliff:g id="usb_accessory"  example="USB Dock">%2$s</xliff:g>?</string>
 
@@ -326,7 +338,7 @@
     <!-- Message shown when a biometric is authenticated, waiting for the user to confirm authentication [CHAR LIMIT=40]-->
     <string name="biometric_dialog_tap_confirm">Tap Confirm to complete</string>
     <!-- Message shown when a biometric has authenticated with a user's face and is waiting for the user to confirm authentication [CHAR LIMIT=60]-->
-    <string name="biometric_dialog_tap_confirm_with_face">Unlocked by your face. Press to continue.</string>
+    <string name="biometric_dialog_tap_confirm_with_face">Unlocked by face. Press the unlock icon to continue.</string>
     <!-- Talkback string when a biometric is authenticated [CHAR LIMIT=NONE] -->
     <string name="biometric_dialog_authenticated">Authenticated</string>
 
@@ -367,15 +379,6 @@
     <string name="biometric_dialog_last_pin_attempt_before_wipe_profile">If you enter an incorrect PIN on the next attempt, your work profile and its data will be deleted.</string>
     <!-- Content of a dialog shown when the user only has one attempt left to provide the correct password before the work profile is removed. [CHAR LIMIT=NONE] -->
     <string name="biometric_dialog_last_password_attempt_before_wipe_profile">If you enter an incorrect password on the next attempt, your work profile and its data will be deleted.</string>
-
-    <!-- Content of a dialog shown when the user has failed to provide the device lock too many times and the device is wiped. [CHAR LIMIT=NONE] -->
-    <string name="biometric_dialog_failed_attempts_now_wiping_device">Too many incorrect attempts. This device\u2019s data will be deleted.</string>
-    <!-- Content of a dialog shown when the user has failed to provide the user lock too many times and the user is removed. [CHAR LIMIT=NONE] -->
-    <string name="biometric_dialog_failed_attempts_now_wiping_user">Too many incorrect attempts. This user will be deleted.</string>
-    <!-- Content of a dialog shown when the user has failed to provide the work lock too many times and the work profile is removed. [CHAR LIMIT=NONE] -->
-    <string name="biometric_dialog_failed_attempts_now_wiping_profile">Too many incorrect attempts. This work profile and its data will be deleted.</string>
-    <!-- Button label to dismiss the dialog telling the user the device, user, or work profile has been wiped. [CHAR LIMIT=40] -->
-    <string name="biometric_dialog_now_wiping_dialog_dismiss">Dismiss</string>
 
     <!-- Message shown when the system-provided fingerprint dialog is shown, asking for authentication -->
     <string name="fingerprint_dialog_touch_sensor">Touch the fingerprint sensor</string>
@@ -717,15 +720,51 @@
     <string name="sensor_privacy_start_use_mic_dialog_title">Unblock device microphone?</string>
     <!--- Title of dialog triggered if the camera is disabled but an app tried to access it. [CHAR LIMIT=150] -->
     <string name="sensor_privacy_start_use_camera_dialog_title">Unblock device camera?</string>
-    <!--- Title of dialog triggered if the camera is disabled but an app tried to access it. [CHAR LIMIT=150] -->
+    <!--- Title of dialog triggered if both microphone and camera are disabled but an app tried to access them. [CHAR LIMIT=150] -->
     <string name="sensor_privacy_start_use_mic_camera_dialog_title">Unblock device camera and microphone?</string>
 
     <!--- Content of dialog triggered if the microphone is disabled but an app tried to access it. [CHAR LIMIT=NONE] -->
     <string name="sensor_privacy_start_use_mic_dialog_content">This unblocks access for all apps and services allowed to use your microphone.</string>
     <!--- Content of dialog triggered if the camera is disabled but an app tried to access it. [CHAR LIMIT=NONE] -->
     <string name="sensor_privacy_start_use_camera_dialog_content">This unblocks access for all apps and services allowed to use your camera.</string>
-    <!--- Content of dialog triggered if the camera is disabled but an app tried to access it. [CHAR LIMIT=NONE] -->
+    <!--- Title of dialog triggered if both microphone and camera are disabled but an app tried to access them. [CHAR LIMIT=150] -->
     <string name="sensor_privacy_start_use_mic_camera_dialog_content">This unblocks access for all apps and services allowed to use your camera or microphone.</string>
+
+    <!--- Title of dialog triggered if the microphone is blocked by a hardware privacy switch but an app tried to access it. [CHAR LIMIT=150] -->
+    <string name="sensor_privacy_start_use_mic_blocked_dialog_title">Microphone is blocked</string>
+    <!--- Title of dialog triggered if the camera is blocked by a hardware privacy switch but an app tried to access it. [CHAR LIMIT=150] -->
+    <string name="sensor_privacy_start_use_camera_blocked_dialog_title">Camera is blocked</string>
+    <!--- Title of dialog triggered if both microphone and camera are blocked by a hardware privacy switch but an app tried to access them. [CHAR LIMIT=150] -->
+    <string name="sensor_privacy_start_use_mic_camera_blocked_dialog_title">The mic &amp; camera are blocked</string>
+
+    <!--- Content of dialog triggered if the microphone is disabled by HW toggle but an app tried to access it. [CHAR LIMIT=NONE] -->
+    <string name="sensor_privacy_start_use_mic_blocked_dialog_content">
+        To unblock, move the privacy switch on your device to the microphone on position to allow
+        microphone access. Refer to the device manual to locate the privacy switch on your device.
+    </string>
+    <!--- Content of dialog triggered if the camera is disabled by HW toggle but an app tried to access it. [CHAR LIMIT=NONE] -->
+    <string name="sensor_privacy_start_use_camera_blocked_dialog_content">
+        To unblock, move the privacy switch on your device to the camera on position to allow camera
+        access. Refer to the device manual to locate the privacy switch on your device.
+    </string>
+    <!--- Content of dialog triggered if the camera is disabled by HW toggle but an app tried to access it. [CHAR LIMIT=NONE] -->
+    <string name="sensor_privacy_start_use_mic_camera_blocked_dialog_content">
+        To unblock them, move the privacy switch on your device to the unblocked position to allow
+        access. Refer to the device manual to locate the privacy switch on your device.
+    </string>
+
+    <!--- Content of toast triggered if the microphone privacy is unblocked while the HW toggle privacy dialog was shown. [CHAR LIMIT=NONE] -->
+    <string name="sensor_privacy_mic_unblocked_toast_content">
+        Microphone available
+    </string>
+    <!--- Content of toast triggered if the camera privacy is unblocked while the HW toggle privacy dialog was shown. [CHAR LIMIT=NONE] -->
+    <string name="sensor_privacy_camera_unblocked_toast_content">
+        Camera available
+    </string>
+    <!--- Content of toast triggered if both mic and camera privacy is unblocked while the HW toggle privacy dialog was shown. [CHAR LIMIT=NONE] -->
+    <string name="sensor_privacy_mic_camera_unblocked_toast_content">
+        Microphone and camera available
+    </string>
 
     <!-- Default name for the media device shown in the output switcher when the name is not available [CHAR LIMIT=30] -->
     <string name="media_seamless_other_device">Other device</string>
@@ -757,8 +796,11 @@
     <!-- Message shown when lock screen is tapped or face authentication fails. [CHAR LIMIT=60] -->
     <string name="keyguard_unlock">Swipe up to open</string>
 
-    <!-- Message shown when lock screen is tapped or face authentication fails. Provides extra instructions for how the user can enter their device (unlock or proceed to home) [CHAR LIMIT=60] -->
-    <string name="keyguard_unlock_press">Press to open</string>
+    <!-- Message shown when lock screen is unlocked (ie: by trust agent) and the user taps the empty space on the lock screen and UDFPS is supported. Provides extra instructions for how the user can enter their device [CHAR LIMIT=60] -->
+    <string name="keyguard_unlock_press">Press the unlock icon to open</string>
+
+    <!-- Message shown when non-bypass face authentication succeeds and UDFPS is supported. Provides extra instructions for how the user can enter their device [CHAR LIMIT=60] -->
+    <string name="keyguard_face_successful_unlock_press">Unlocked by face. Press the unlock icon to open.</string>
 
     <!-- Message shown when face authentication fails and the pin pad is visible. [CHAR LIMIT=60] -->
     <string name="keyguard_retry">Swipe up to try again</string>
@@ -831,20 +873,8 @@
 
     <!-- Accessibility label for the button that opens the quick contact of the user. -->
 
-    <!-- Label for the adding a new user in the user switcher [CHAR LIMIT=35] -->
-    <string name="user_add_user">Add user</string>
-
-    <!-- Name for a freshly added user [CHAR LIMIT=30] -->
-    <string name="user_new_user_name">New user</string>
-
-    <!-- Title of the confirmation dialog when exiting guest session [CHAR LIMIT=NONE] -->
-    <string name="guest_exit_guest_dialog_title">Remove guest?</string>
-
     <!-- Message of the confirmation dialog when exiting guest session [CHAR LIMIT=NONE] -->
     <string name="guest_exit_guest_dialog_message">All apps and data in this session will be deleted.</string>
-
-    <!-- Label for button in confirmation dialog when exiting guest session [CHAR LIMIT=35] -->
-    <string name="guest_exit_guest_dialog_remove">Remove</string>
 
     <!-- Title of the notification when resuming an existing guest session [CHAR LIMIT=NONE] -->
     <string name="guest_wipe_session_title">Welcome back, guest!</string>
@@ -857,12 +887,6 @@
 
     <!-- Notification when resuming an existing guest session: Action that continues with the current session [CHAR LIMIT=35] -->
     <string name="guest_wipe_session_dontwipe">Yes, continue</string>
-
-    <!-- Title for add user confirmation dialog [CHAR LIMIT=30] -->
-    <string name="user_add_user_title" msgid="2108112641783146007">Add new user?</string>
-
-    <!-- Message for add user confirmation dialog - short version. [CHAR LIMIT=none] -->
-    <string name="user_add_user_message_short" msgid="1511354412249044381">When you add a new user, that person needs to set up their space.\n\nAny user can update apps for all other users. </string>
 
     <!-- Title for the dialog that lets users know that the maximum allowed number of users on the device has been reached. [CHAR LIMIT=35]-->
     <string name="user_limit_reached_title">User limit reached</string>
@@ -1193,10 +1217,7 @@
     <string name="wallet_lockscreen_settings_label">Lock screen settings</string>
 
     <!-- QR Code Scanner label, title [CHAR LIMIT=32] -->
-    <string name="qr_code_scanner_title">QR code</string>
-
-    <!-- QR Code Scanner description [CHAR LIMIT=NONE] -->
-    <string name="qr_code_scanner_description">Tap to scan</string>
+    <string name="qr_code_scanner_title">Scan QR code</string>
 
     <!-- Name of the work status bar icon. -->
     <string name="status_bar_work">Work profile</string>
@@ -2120,6 +2141,19 @@
     <!-- Controls tile secondary label when device is locked and user does not want access to controls from lockscreen [CHAR LIMIT=20] -->
     <string name="controls_tile_locked">Device locked</string>
 
+    <!-- Title of the dialog to show and control devices from lock screen [CHAR LIMIT=NONE] -->
+    <string name="controls_settings_show_controls_dialog_title">Show and control devices from lock screen?</string>
+    <!-- Message of the dialog to show and control devices from lock screen [CHAR LIMIT=NONE] -->
+    <string name="controls_settings_show_controls_dialog_message">You can add controls for your external devices to the lock screen.\n\nYour device app may allow you to control some devices without unlocking your phone or tablet.\n\nYou can make changes any time in Settings.</string>
+    <!-- Title of the dialog to control certain devices from lock screen without auth [CHAR LIMIT=NONE] -->
+    <string name="controls_settings_trivial_controls_dialog_title">Control devices from lock screen?</string>
+    <!-- Message of the dialog to control certain devices from lock screen without auth [CHAR LIMIT=NONE] -->
+    <string name="controls_settings_trivial_controls_dialog_message">You can control some devices without unlocking your phone or tablet.\n\nYour device app determines which devices can be controlled in this way.</string>
+    <!-- Neutral button title of the controls dialog [CHAR LIMIT=NONE] -->
+    <string name="controls_settings_dialog_neutral_button">No thanks</string>
+    <!-- Positive button title of the controls dialog  [CHAR LIMIT=NONE] -->
+    <string name="controls_settings_dialog_positive_button">Yes</string>
+
     <!-- Controls PIN entry dialog, switch to alphanumeric keyboard [CHAR LIMIT=100] -->
     <string name="controls_pin_use_alphanumeric">PIN contains letters or symbols</string>
     <!-- Controls PIN entry dialog, title [CHAR LIMIT=30] -->
@@ -2143,11 +2177,11 @@
     <!-- Title for media controls [CHAR_LIMIT=50] -->
     <string name="controls_media_title">Media</string>
     <!-- Explanation for closing controls associated with a specific media session [CHAR_LIMIT=50] -->
-    <string name="controls_media_close_session">Hide this media session?</string>
+    <string name="controls_media_close_session">Hide this media control for <xliff:g id="app_name" example="YouTube Music">%1$s</xliff:g>?</string>
     <!-- Explanation that controls associated with a specific media session are active [CHAR_LIMIT=50] -->
     <string name="controls_media_active_session">The current media session cannot be hidden.</string>
     <!-- Label for a button that will hide media controls [CHAR_LIMIT=30] -->
-    <string name="controls_media_dismiss_button">Dismiss</string>
+    <string name="controls_media_dismiss_button">Hide</string>
     <!-- Label for button to resume media playback [CHAR_LIMIT=NONE] -->
     <string name="controls_media_resume">Resume</string>
     <!-- Label for button to go to media control settings screen [CHAR_LIMIT=30] -->
@@ -2165,6 +2199,8 @@
     <string name="controls_media_button_prev">Previous track</string>
     <!-- Description for button in media controls. Pressing button goes to next track [CHAR_LIMIT=NONE] -->
     <string name="controls_media_button_next">Next track</string>
+    <!-- Description for button in media controls. Used when media is connecting to a remote device (via something like chromecast). Pressing button does nothing [CHAR_LIMIT=NONE] -->
+    <string name="controls_media_button_connecting">Connecting</string>
 
     <!-- Title for Smartspace recommendation card within media controls. The "Play" means the action to play a media [CHAR_LIMIT=10] -->
     <string name="controls_media_smartspace_rec_title">Play</string>
@@ -2187,7 +2223,7 @@
     <!-- Text informing the user that their media is now playing on this device. [CHAR LIMIT=50] -->
     <string name="media_transfer_playing_this_device">Playing on this phone</string>
     <!-- Text informing the user that the media transfer has failed because something went wrong. [CHAR LIMIT=50] -->
-    <string name="media_transfer_failed">Something went wrong</string>
+    <string name="media_transfer_failed">Something went wrong. Try again.</string>
 
     <!-- Error message indicating that a control timed out while waiting for an update [CHAR_LIMIT=30] -->
     <string name="controls_error_timeout">Inactive, check app</string>
@@ -2229,6 +2265,21 @@
     <!-- Button text for stopping casting [CHAR LIMIT=60] -->
     <string name="media_output_dialog_button_stop_casting">Stop casting</string>
 
+    <!-- Media Output Broadcast Dialog -->
+    <!-- Title for Broadcast First Notify Dialog [CHAR LIMIT=60] -->
+    <string name="media_output_first_broadcast_title">How broadcasting works</string>
+    <!-- Title for Broadcast Notify Dialog [CHAR LIMIT=60] -->
+    <string name="media_output_broadcast">Broadcast</string>
+    <!-- Message for notifying the user about the Broadcast at first launch [CHAR LIMIT=NONE] -->
+    <string name="media_output_first_notify_broadcast_message">People near you with compatible Bluetooth devices can listen to the media you\'re broadcasting</string>
+    <!-- Message for Broadcasting information and QR code [CHAR LIMIT=NONE] -->
+    <string name="media_output_broadcasting_message">To listen to your broadcast, people nearby with compatible Bluetooth devices can scan your QR code or use your broadcast name and password</string>
+    <!-- Title for Broadcast Name [CHAR LIMIT=60] -->
+    <string name="media_output_broadcast_name">Broadcast Name</string>
+    <!-- Title for Broadcast Code(Password) [CHAR LIMIT=60] -->
+    <string name="media_output_broadcast_code">Password</string>
+    <!-- Button for change broadcast name and broadcast code [CHAR LIMIT=60] -->
+    <string name="media_output_broadcast_dialog_save">Save</string>
 
     <!-- Label for clip data when copying the build number off QS [CHAR LIMIT=NONE]-->
     <string name="build_number_clip_data_label">Build number</string>
@@ -2399,8 +2450,8 @@
     <!-- Label of the button to stop an app from running but the app is already stopped and the button is disabled [CHAR LIMIT=12]-->
     <string name="fgs_manager_app_item_stop_button_stopped_label">Stopped</string>
 
-    <!-- Label for button to copy edited text back to the clipboard [CHAR LIMIT=20] -->
-    <string name="clipboard_edit_text_copy">Copy</string>
+    <!-- Label for button to finish and copy edited text back to the clipboard [CHAR LIMIT=20] -->
+    <string name="clipboard_edit_text_done">Done</string>
     <!-- Text informing user that content has been copied to the system clipboard [CHAR LIMIT=NONE] -->
     <string name="clipboard_overlay_text_copied">Copied</string>
     <!-- Text informing user where text being edited was copied from [CHAR LIMIT=NONE] -->

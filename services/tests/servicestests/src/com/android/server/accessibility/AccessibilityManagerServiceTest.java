@@ -28,6 +28,8 @@ import static com.android.internal.accessibility.AccessibilityShortcutController
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.doCallRealMethod;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -61,10 +63,12 @@ import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
 
 import com.android.compatibility.common.util.TestUtils;
+import com.android.internal.compat.IPlatformCompat;
 import com.android.server.LocalServices;
 import com.android.server.accessibility.AccessibilityManagerService.AccessibilityDisplayListener;
 import com.android.server.accessibility.magnification.FullScreenMagnificationController;
 import com.android.server.accessibility.magnification.MagnificationController;
+import com.android.server.accessibility.magnification.MagnificationProcessor;
 import com.android.server.accessibility.magnification.WindowMagnificationManager;
 import com.android.server.accessibility.test.MessageCapturingHandler;
 import com.android.server.pm.UserManagerInternal;
@@ -185,7 +189,7 @@ public class AccessibilityManagerServiceTest {
         mA11yms.mUserStates.put(mA11yms.getCurrentUserIdLocked(), userState);
     }
 
-    private void setupAccessibilityServiceConnection() {
+    private void setupAccessibilityServiceConnection(int serviceInfoFlag) {
         final AccessibilityUserState userState = mA11yms.mUserStates.get(
                 mA11yms.getCurrentUserIdLocked());
         when(mMockServiceInfo.getResolveInfo()).thenReturn(mMockResolveInfo);
@@ -193,7 +197,12 @@ public class AccessibilityManagerServiceTest {
         mMockResolveInfo.serviceInfo.applicationInfo = mock(ApplicationInfo.class);
 
         when(mMockBinder.queryLocalInterface(any())).thenReturn(mMockServiceClient);
+        when(mMockSystemSupport.getKeyEventDispatcher()).thenReturn(mock(KeyEventDispatcher.class));
+        when(mMockSystemSupport.getMagnificationProcessor()).thenReturn(
+                mock(MagnificationProcessor.class));
         mTestableContext.addMockService(COMPONENT_NAME, mMockBinder);
+
+        mMockServiceInfo.flags = serviceInfoFlag;
         mAccessibilityServiceConnection = new AccessibilityServiceConnection(
                 userState,
                 mTestableContext,
@@ -256,7 +265,7 @@ public class AccessibilityManagerServiceTest {
     @SmallTest
     @Test
     public void testOnSystemActionsChanged() throws Exception {
-        setupAccessibilityServiceConnection();
+        setupAccessibilityServiceConnection(0);
         final AccessibilityUserState userState = mA11yms.mUserStates.get(
                 mA11yms.getCurrentUserIdLocked());
 
@@ -376,13 +385,36 @@ public class AccessibilityManagerServiceTest {
     @SmallTest
     @Test
     public void testOnClientChange_boundServiceCanControlMagnification_requestConnection() {
-        setupAccessibilityServiceConnection();
+        setupAccessibilityServiceConnection(0);
         when(mMockSecurityPolicy.canControlMagnification(any())).thenReturn(true);
 
         // Invokes client change to trigger onUserStateChanged.
         mA11yms.onClientChangeLocked(/* serviceInfoChanged= */false);
 
         verify(mMockWindowMagnificationMgr).requestConnection(true);
+    }
+
+    @Test
+    public void testUnbindIme_whenServiceUnbinds() {
+        setupAccessibilityServiceConnection(AccessibilityServiceInfo.FLAG_INPUT_METHOD_EDITOR);
+        mAccessibilityServiceConnection.unbindLocked();
+        verify(mMockSystemSupport, atLeastOnce()).unbindImeLocked(mAccessibilityServiceConnection);
+    }
+
+    @Test
+    public void testUnbindIme_whenServiceCrashed() {
+        setupAccessibilityServiceConnection(AccessibilityServiceInfo.FLAG_INPUT_METHOD_EDITOR);
+        mAccessibilityServiceConnection.binderDied();
+        verify(mMockSystemSupport).unbindImeLocked(mAccessibilityServiceConnection);
+    }
+
+    @Test
+    public void testUnbindIme_whenServiceStopsRequestingIme() {
+        setupAccessibilityServiceConnection(AccessibilityServiceInfo.FLAG_INPUT_METHOD_EDITOR);
+        doCallRealMethod().when(mMockServiceInfo).updateDynamicallyConfigurableProperties(
+                any(IPlatformCompat.class), any(AccessibilityServiceInfo.class));
+        mAccessibilityServiceConnection.setServiceInfo(new AccessibilityServiceInfo());
+        verify(mMockSystemSupport).unbindImeLocked(mAccessibilityServiceConnection);
     }
 
     public static class FakeInputFilter extends AccessibilityInputFilter {

@@ -319,9 +319,10 @@ public class DozeLog implements Dumpable {
     /**
      * Appends the doze state that was suppressed to the doze event log
      * @param suppressedState The {@link DozeMachine.State} that was suppressed
+     * @param reason what suppressed always on
      */
-    public void traceAlwaysOnSuppressed(DozeMachine.State suppressedState) {
-        mLogger.logAlwaysOnSuppressed(suppressedState);
+    public void traceAlwaysOnSuppressed(DozeMachine.State suppressedState, String reason) {
+        mLogger.logAlwaysOnSuppressed(suppressedState, reason);
     }
 
     /**
@@ -395,8 +396,8 @@ public class DozeLog implements Dumpable {
         }
 
         @Override
-        public void onKeyguardBouncerChanged(boolean bouncer) {
-            traceKeyguardBouncerChanged(bouncer);
+        public void onKeyguardBouncerFullyShowingChanged(boolean fullyShowing) {
+            traceKeyguardBouncerChanged(fullyShowing);
         }
 
         @Override

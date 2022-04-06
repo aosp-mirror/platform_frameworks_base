@@ -26,12 +26,9 @@ import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.LAUNCHER_COMPONENT
 import com.android.server.wm.flicker.annotation.Group1
 import com.android.server.wm.flicker.dsl.FlickerBuilder
-import com.android.server.wm.flicker.helpers.isShellTransitionsEnabled
 import com.android.server.wm.flicker.helpers.reopenAppFromOverview
 import com.android.server.wm.flicker.helpers.setRotation
 import com.android.server.wm.traces.common.WindowManagerConditionsFactory
-import org.junit.Assume.assumeFalse
-import org.junit.Before
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -64,10 +61,6 @@ import org.junit.runners.Parameterized
 @Group1
 open class OpenAppFromOverviewTest(testSpec: FlickerTestParameter)
     : OpenAppFromLauncherTransition(testSpec) {
-    @Before
-    open fun before() {
-        assumeFalse(isShellTransitionsEnabled)
-    }
 
     /**
      * Defines the transition used to run the test
@@ -135,7 +128,7 @@ open class OpenAppFromOverviewTest(testSpec: FlickerTestParameter)
     override fun appLayerBecomesVisible() = super.appLayerBecomesVisible_warmStart()
 
     /** {@inheritDoc} */
-    @FlakyTest(bugId = 218624176)
+    @Presubmit
     @Test
     override fun appWindowBecomesVisible() = super.appWindowBecomesVisible_warmStart()
 

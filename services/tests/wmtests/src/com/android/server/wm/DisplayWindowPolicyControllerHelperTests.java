@@ -16,13 +16,18 @@
 
 package com.android.server.wm;
 
+import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
+import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
+
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyInt;
 
+import android.app.WindowConfiguration;
 import android.content.ComponentName;
 import android.content.pm.ActivityInfo;
 import android.os.UserHandle;
@@ -37,6 +42,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * Tests for the {@link DisplayWindowPolicyControllerHelper} class.
@@ -113,6 +119,39 @@ public class DisplayWindowPolicyControllerHelperTests extends WindowTestsBase {
         return activity;
     }
 
+    @Test
+    public void testIsWindowingModeSupported_noController_returnTrueForAnyWindowingMode() {
+        doReturn(null).when(mWm.mDisplayManagerInternal)
+                .getDisplayWindowPolicyController(anyInt());
+        mSecondaryDisplay = createNewDisplay();
+        assertFalse(mSecondaryDisplay.mDwpcHelper.hasController());
+
+        assertTrue(mSecondaryDisplay.mDwpcHelper.isWindowingModeSupported(WINDOWING_MODE_PINNED));
+        assertTrue(
+                mSecondaryDisplay.mDwpcHelper.isWindowingModeSupported(WINDOWING_MODE_FULLSCREEN));
+    }
+
+    @Test
+    public void testIsWindowingModeSupported_withoutSettingSupportedMode_returnFalse() {
+        assertFalse(mSecondaryDisplay.mDwpcHelper.isWindowingModeSupported(WINDOWING_MODE_PINNED));
+    }
+
+    @Test
+    public void testIsWindowingModeSupported_withoutSupportedMode_defaultSupportFullScreen() {
+        assertTrue(
+                mSecondaryDisplay.mDwpcHelper.isWindowingModeSupported(WINDOWING_MODE_FULLSCREEN));
+    }
+
+    @Test
+    public void testIsWindowingModeSupported_setPinnedMode_returnTrue() {
+        Set<Integer> supportedWindowingMode = new ArraySet<>();
+        supportedWindowingMode.add(WINDOWING_MODE_PINNED);
+
+        mDwpc.setSupportedWindowingModes(supportedWindowingMode);
+
+        assertTrue(mSecondaryDisplay.mDwpcHelper.isWindowingModeSupported(WINDOWING_MODE_PINNED));
+    }
+
     private class TestDisplayWindowPolicyController extends DisplayWindowPolicyController {
 
         ComponentName mTopActivity = null;
@@ -120,7 +159,8 @@ public class DisplayWindowPolicyControllerHelperTests extends WindowTestsBase {
         ArraySet<Integer> mRunningUids = new ArraySet<>();
 
         @Override
-        public boolean canContainActivities(@NonNull List<ActivityInfo> activities) {
+        public boolean canContainActivities(@NonNull List<ActivityInfo> activities,
+                @WindowConfiguration.WindowingMode int windowingMode) {
             return false;
         }
 

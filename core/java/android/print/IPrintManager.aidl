@@ -91,6 +91,15 @@ interface IPrintManager {
     void setPrintServiceEnabled(in ComponentName service, boolean isEnabled, int userId);
 
     /**
+     * Checks whether the given print service is enabled.
+     *
+     * @param service the service to check
+     * @param userId the id of the user requesting the check
+     * @return whether the given print service is enabled
+     */
+    boolean isPrintServiceEnabled(in ComponentName service, int userId);
+
+    /**
      * Listen for changes to the print service recommendations.
      *
      * @param listener the listener to add

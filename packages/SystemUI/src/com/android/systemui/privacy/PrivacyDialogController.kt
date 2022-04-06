@@ -150,24 +150,27 @@ class PrivacyDialogController(
         packageName: String,
         userId: Int,
         permGroupName: CharSequence,
-        attributionTag: CharSequence?
+        attributionTag: CharSequence?,
+        isAttributionSupported: Boolean
     ): Intent
     {
         lateinit var intent: Intent
-        if (attributionTag != null) {
+        if (attributionTag != null && isAttributionSupported) {
             intent = Intent(Intent.ACTION_MANAGE_PERMISSION_USAGE)
             intent.setPackage(packageName)
             intent.putExtra(Intent.EXTRA_PERMISSION_GROUP_NAME, permGroupName.toString())
             intent.putExtra(Intent.EXTRA_ATTRIBUTION_TAGS, arrayOf(attributionTag.toString()))
             intent.putExtra(Intent.EXTRA_SHOWING_ATTRIBUTION, true)
             val resolveInfo = packageManager.resolveActivity(
-                intent, PackageManager.ResolveInfoFlags.of(0))
-                ?: return getDefaultManageAppPermissionsIntent(packageName, userId)
-            intent.component = ComponentName(packageName, resolveInfo.activityInfo.name)
-            return intent
-        } else {
-            return getDefaultManageAppPermissionsIntent(packageName, userId)
+                    intent, PackageManager.ResolveInfoFlags.of(0))
+            if (resolveInfo != null && resolveInfo.activityInfo != null &&
+                    resolveInfo.activityInfo.permission ==
+                    android.Manifest.permission.START_VIEW_PERMISSION_USAGE) {
+                intent.component = ComponentName(packageName, resolveInfo.activityInfo.name)
+                return intent
+            }
         }
+        return getDefaultManageAppPermissionsIntent(packageName, userId)
     }
 
     fun getDefaultManageAppPermissionsIntent(packageName: String, userId: Int): Intent {
@@ -226,9 +229,15 @@ class PrivacyDialogController(
                                 userInfo?.isManagedProfile ?: false,
                                 it.isPhoneCall,
                                 it.permissionGroupName,
-                                getManagePermissionIntent(it.packageName, userId,
-                                    it.permissionGroupName,
-                                it.attributionTag)
+                                getManagePermissionIntent(
+                                        it.packageName,
+                                        userId,
+                                        it.permissionGroupName,
+                                        it.attributionTag,
+                                        // attributionLabel is set only when subattribution policies
+                                        // are supported and satisfied
+                                        it.attributionLabel != null
+                                )
                         )
                     }
                 } else {

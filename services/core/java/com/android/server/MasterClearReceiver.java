@@ -131,7 +131,7 @@ public class MasterClearReceiver extends BroadcastReceiver {
         final UserManager userManager = context.getSystemService(UserManager.class);
         final int result = userManager.removeUserWhenPossible(
                 UserHandle.of(userId), /* overrideDevicePolicy= */ false);
-        if (result == UserManager.REMOVE_RESULT_ERROR) {
+        if (!UserManager.isRemoveResultSuccessful(result)) {
             Slogf.e(TAG, "Can't remove user %d", userId);
             return false;
         }
@@ -169,7 +169,7 @@ public class MasterClearReceiver extends BroadcastReceiver {
 
     private String getWorkProfileDeletedTitle(Context context) {
         final DevicePolicyManager dpm = context.getSystemService(DevicePolicyManager.class);
-        return dpm.getString(WORK_PROFILE_DELETED_TITLE,
+        return dpm.getResources().getString(WORK_PROFILE_DELETED_TITLE,
                 () -> context.getString(R.string.work_profile_deleted));
     }
 

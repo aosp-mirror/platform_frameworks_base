@@ -28,6 +28,7 @@ import static org.xmlpull.v1.XmlPullParser.END_DOCUMENT;
 import static org.xmlpull.v1.XmlPullParser.START_TAG;
 
 import android.content.pm.PackageInstaller;
+import android.content.pm.PackageManager;
 import android.platform.test.annotations.Presubmit;
 import android.util.AtomicFile;
 import android.util.Slog;
@@ -197,7 +198,7 @@ public class PackageInstallerSessionTest {
                 /* isFailed */ false,
                 /* isApplied */false,
                 /* stagedSessionErrorCode */
-                PackageInstaller.SessionInfo.SESSION_VERIFICATION_FAILED,
+                PackageManager.INSTALL_FAILED_VERIFICATION_FAILURE,
                 /* stagedSessionErrorMessage */ "some error");
     }
 

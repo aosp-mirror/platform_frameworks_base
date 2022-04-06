@@ -33,6 +33,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.UserHandle;
 import android.provider.Settings;
+import android.provider.Settings.Secure;
 import android.view.View;
 import android.view.WindowInsets;
 import android.view.accessibility.AccessibilityManager;
@@ -72,6 +73,7 @@ import dagger.Lazy;
  */
 @SysUISingleton
 public final class NavBarHelper implements
+        AccessibilityManager.AccessibilityServicesStateChangeListener,
         AccessibilityButtonModeObserver.ModeChangedListener,
         AccessibilityButtonTargetsObserver.TargetsChangedListener,
         OverviewProxyService.OverviewProxyListener, NavigationModeController.ModeChangedListener,
@@ -123,8 +125,7 @@ public final class NavBarHelper implements
         mCentralSurfacesOptionalLazy = centralSurfacesOptionalLazy;
         mUserTracker = userTracker;
         mSystemActions = systemActions;
-        accessibilityManager.addAccessibilityServicesStateChangeListener(
-                accessibilityManager1 -> NavBarHelper.this.dispatchA11yEventUpdate());
+        accessibilityManager.addAccessibilityServicesStateChangeListener(this);
         mAccessibilityButtonModeObserver = accessibilityButtonModeObserver;
         mAccessibilityButtonTargetsObserver = accessibilityButtonTargetsObserver;
 
@@ -146,6 +147,7 @@ public final class NavBarHelper implements
                 Settings.Secure.getUriFor(Settings.Secure.ASSIST_TOUCH_GESTURE_ENABLED),
                 false, mAssistContentObserver, UserHandle.USER_ALL);
         updateAssistantAvailability();
+        updateA11yState();
     }
 
     public void destroy() {
@@ -178,6 +180,12 @@ public final class NavBarHelper implements
     }
 
     @Override
+    public void onAccessibilityServicesStateChanged(AccessibilityManager manager) {
+        dispatchA11yEventUpdate();
+        updateA11yState();
+    }
+
+    @Override
     public void onAccessibilityButtonModeChanged(int mode) {
         updateA11yState();
         dispatchA11yEventUpdate();
@@ -190,7 +198,9 @@ public final class NavBarHelper implements
     }
 
     /**
-     * Updates the current accessibility button state.
+     * Updates the current accessibility button state. The accessibility button state is only
+     * used for {@link Secure#ACCESSIBILITY_BUTTON_MODE_NAVIGATION_BAR} and
+     * {@link Secure#ACCESSIBILITY_BUTTON_MODE_GESTURE}, otherwise it is reset to 0.
      */
     private void updateA11yState() {
         final int prevState = mA11yButtonState;
@@ -213,6 +223,9 @@ public final class NavBarHelper implements
             final int requestingServices = a11yButtonTargets.size();
 
             clickable = requestingServices >= 1;
+
+            // `longClickable` is used to determine whether to pop up the accessibility chooser
+            // dialog or not, and it’s also only for multiple services.
             longClickable = requestingServices >= 2;
             mA11yButtonState = (clickable ? SYSUI_STATE_A11Y_BUTTON_CLICKABLE : 0)
                     | (longClickable ? SYSUI_STATE_A11Y_BUTTON_LONG_CLICKABLE : 0);
@@ -237,11 +250,13 @@ public final class NavBarHelper implements
     }
 
     /**
-     * See {@link QuickStepContract#SYSUI_STATE_A11Y_BUTTON_CLICKABLE} and
-     * {@link QuickStepContract#SYSUI_STATE_A11Y_BUTTON_LONG_CLICKABLE}
+     * Gets the accessibility button state based on the {@link Secure#ACCESSIBILITY_BUTTON_MODE}.
      *
-     * @return the a11y button clickable and long_clickable states, or 0 if there is no
-     *         a11y button in the navbar
+     * @return the accessibility button state:
+     * 0 = disable state
+     * 16 = {@link QuickStepContract#SYSUI_STATE_A11Y_BUTTON_CLICKABLE}
+     * 48 = the combination of {@link QuickStepContract#SYSUI_STATE_A11Y_BUTTON_CLICKABLE} and
+     * {@link QuickStepContract#SYSUI_STATE_A11Y_BUTTON_LONG_CLICKABLE}
      */
     public int getA11yButtonState() {
         return mA11yButtonState;

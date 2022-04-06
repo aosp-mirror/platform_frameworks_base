@@ -19,17 +19,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:layout_gravity="center_vertical|end"
-    android:paddingTop="@dimen/status_bar_padding_top"
-    android:paddingEnd="8dp"
+    android:clipChildren="false"
+    android:clipToPadding="false"
     >
-
-    <ImageView
-        android:id="@+id/dot_view"
-        android:layout_width="10dp"
-        android:layout_height="10dp"
-        android:layout_gravity="center_vertical|end"
-        android:src="@drawable/system_animation_ongoing_dot"
-        android:visibility="invisible"
-        />
-
 </FrameLayout>

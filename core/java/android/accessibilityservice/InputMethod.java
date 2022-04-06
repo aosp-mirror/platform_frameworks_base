@@ -67,7 +67,11 @@ public class InputMethod {
     private InputConnection mStartedInputConnection;
     private EditorInfo mInputEditorInfo;
 
-    protected InputMethod(@NonNull AccessibilityService service) {
+    /**
+     * Creates a new InputMethod instance for the given <code>service</code>, so that the
+     * accessibility service can control editing.
+     */
+    public InputMethod(@NonNull AccessibilityService service) {
         mService = service;
     }
 

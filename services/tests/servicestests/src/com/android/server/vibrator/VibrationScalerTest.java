@@ -277,6 +277,6 @@ public class VibrationScalerTest {
         Settings.System.putIntForUser(
                 mContextSpy.getContentResolver(), settingName, value, UserHandle.USER_CURRENT);
         // FakeSettingsProvider don't support testing triggering ContentObserver yet.
-        mVibrationSettings.updateSettings();
+        mVibrationSettings.update();
     }
 }

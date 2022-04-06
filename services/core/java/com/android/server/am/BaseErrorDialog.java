@@ -16,6 +16,8 @@
 
 package com.android.server.am;
 
+import static android.content.Context.RECEIVER_EXPORTED;
+
 import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -34,6 +36,7 @@ public class BaseErrorDialog extends AlertDialog {
     private static final int DISABLE_BUTTONS = 1;
 
     private boolean mConsuming = true;
+    private BroadcastReceiver mReceiver;
 
     public BaseErrorDialog(Context context) {
         super(context, com.android.internal.R.style.Theme_DeviceDefault_Dialog_AppError);
@@ -52,14 +55,33 @@ public class BaseErrorDialog extends AlertDialog {
         super.onStart();
         mHandler.sendEmptyMessage(DISABLE_BUTTONS);
         mHandler.sendMessageDelayed(mHandler.obtainMessage(ENABLE_BUTTONS), 1000);
-        getContext().registerReceiver(mReceiver,
-                new IntentFilter(Intent.ACTION_CLOSE_SYSTEM_DIALOGS), Context.RECEIVER_EXPORTED);
+        if (mReceiver == null) {
+            mReceiver = new BroadcastReceiver() {
+                @Override
+                public void onReceive(Context context, Intent intent) {
+                    if (Intent.ACTION_CLOSE_SYSTEM_DIALOGS.equals(intent.getAction())) {
+                        closeDialog();
+                    }
+                }
+            };
+            getContext().registerReceiver(mReceiver,
+                    new IntentFilter(Intent.ACTION_CLOSE_SYSTEM_DIALOGS), RECEIVER_EXPORTED);
+        }
     }
 
     @Override
     protected void onStop() {
         super.onStop();
-        getContext().unregisterReceiver(mReceiver);
+        if (mReceiver != null) {
+            try {
+                getContext().unregisterReceiver(mReceiver);
+            } catch (IllegalArgumentException e) {
+                // Receiver not registered exception.
+                android.util.Slog.e("BaseErrorDialog",
+                        "unregisterReceiver threw exception: " + e.getMessage());
+            }
+            mReceiver = null;
+        }
     }
 
     public boolean dispatchKeyEvent(KeyEvent event) {
@@ -107,13 +129,4 @@ public class BaseErrorDialog extends AlertDialog {
             dismiss();
         }
     }
-
-    private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            if (Intent.ACTION_CLOSE_SYSTEM_DIALOGS.equals(intent.getAction())) {
-                closeDialog();
-            }
-        }
-    };
 }

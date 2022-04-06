@@ -31,6 +31,7 @@ import android.app.ActivityManager.RunningTaskInfo;
 import android.app.WindowConfiguration;
 import android.content.Intent;
 import android.content.pm.ParceledListSlice;
+import android.graphics.Rect;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.Parcel;
@@ -67,7 +68,8 @@ import java.util.function.Consumer;
 class TaskOrganizerController extends ITaskOrganizerController.Stub {
     private static final String TAG = "TaskOrganizerController";
 
-    private class DeathRecipient implements IBinder.DeathRecipient {
+    @VisibleForTesting
+    class DeathRecipient implements IBinder.DeathRecipient {
         ITaskOrganizer mTaskOrganizer;
 
         DeathRecipient(ITaskOrganizer organizer) {
@@ -77,7 +79,7 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
         @Override
         public void binderDied() {
             synchronized (mGlobalLock) {
-                final TaskOrganizerState state = mTaskOrganizerStates.remove(
+                final TaskOrganizerState state = mTaskOrganizerStates.get(
                         mTaskOrganizer.asBinder());
                 if (state != null) {
                     state.dispose();
@@ -170,7 +172,8 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
         }
     }
 
-    private class TaskOrganizerState {
+    @VisibleForTesting
+    class TaskOrganizerState {
         private final TaskOrganizerCallbacks mOrganizer;
         private final DeathRecipient mDeathRecipient;
         private final ArrayList<Task> mOrganizedTasks = new ArrayList<>();
@@ -189,6 +192,11 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
                 Slog.e(TAG, "TaskOrganizer failed to register death recipient");
             }
             mUid = uid;
+        }
+
+        @VisibleForTesting
+        DeathRecipient getDeathRecipient() {
+            return mDeathRecipient;
         }
 
         /**
@@ -243,7 +251,13 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
             // possible.
             while (!mOrganizedTasks.isEmpty()) {
                 final Task t = mOrganizedTasks.get(0);
-                t.updateTaskOrganizerState(true /* forceUpdate */);
+                if (t.mCreatedByOrganizer) {
+                    // The tasks created by this organizer should ideally be deleted when this
+                    // organizer is disposed off to avoid inconsistent behavior.
+                    t.removeImmediately();
+                } else {
+                    t.updateTaskOrganizerState(true /* forceUpdate */);
+                }
                 if (mOrganizedTasks.contains(t)) {
                     // updateTaskOrganizerState should remove the task from the list, but still
                     // check it again to avoid while-loop isn't terminate.
@@ -265,7 +279,7 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
 
             // Remove organizer state after removing tasks so we get a chance to send
             // onTaskVanished.
-            mTaskOrganizerStates.remove(asBinder());
+            mTaskOrganizerStates.remove(mOrganizer.getBinder());
         }
 
         void unlinkDeath() {
@@ -467,10 +481,12 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
         }
     }
 
-    static SurfaceControl applyStartingWindowAnimation(WindowContainer window) {
+    static SurfaceControl applyStartingWindowAnimation(WindowState window) {
+        final SurfaceControl.Transaction t = window.getPendingTransaction();
+        final Rect mainFrame = window.getRelativeFrame();
         final StartingWindowAnimationAdaptor adaptor = new StartingWindowAnimationAdaptor();
-        window.startAnimation(window.getPendingTransaction(), adaptor, false,
-                ANIMATION_TYPE_STARTING_REVEAL);
+        window.startAnimation(t, adaptor, false, ANIMATION_TYPE_STARTING_REVEAL);
+        t.setPosition(adaptor.mAnimationLeash, mainFrame.left, mainFrame.top);
         return adaptor.mAnimationLeash;
     }
 
@@ -523,8 +539,6 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
                     final SurfaceControl.Transaction t = mainWindow.getPendingTransaction();
                     removalInfo.windowAnimationLeash = applyStartingWindowAnimation(mainWindow);
                     removalInfo.mainFrame = mainWindow.getRelativeFrame();
-                    t.setPosition(removalInfo.windowAnimationLeash,
-                            removalInfo.mainFrame.left, removalInfo.mainFrame.top);
                 }
             }
         }
@@ -596,7 +610,7 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
     private void onTaskVanishedInternal(ITaskOrganizer organizer, Task task) {
         for (int i = mPendingTaskEvents.size() - 1; i >= 0; i--) {
             PendingTaskEvent entry = mPendingTaskEvents.get(i);
-            if (task.mTaskId == entry.mTask.mTaskId) {
+            if (task.mTaskId == entry.mTask.mTaskId && entry.mTaskOrg == organizer) {
                 // This task is vanished so remove all pending event of it.
                 mPendingTaskEvents.remove(i);
                 if (entry.mEventType == PendingTaskEvent.EVENT_APPEARED) {
@@ -693,9 +707,16 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
                     }
                     break;
                 case PendingTaskEvent.EVENT_VANISHED:
-                    state = mTaskOrganizerStates.get(event.mTaskOrg.asBinder());
-                    if (state != null) {
-                        state.mOrganizer.onTaskVanished(task);
+                    // TaskOrganizerState cannot be used here because it might have already been
+                    // removed.
+                    // The state is removed when an organizer dies or is unregistered. In order to
+                    // send the pending vanished task events, the mTaskOrg from event is used.
+                    // These events should not ideally be sent and will be removed as part of
+                    // b/224812558.
+                    try {
+                        event.mTaskOrg.onTaskVanished(task.getTaskInfo());
+                    } catch (RemoteException ex) {
+                        Slog.e(TAG, "Exception sending onTaskVanished callback", ex);
                     }
                     mLastSentTaskInfos.remove(task);
                     break;
@@ -800,17 +821,24 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
         final long origId = Binder.clearCallingIdentity();
         try {
             synchronized (mGlobalLock) {
-                DisplayContent dc = mService.mWindowManager.mRoot
+                final DisplayContent dc = mService.mWindowManager.mRoot
                         .getDisplayContent(displayId);
-                if (dc == null || dc.getImeTarget(IME_TARGET_LAYERING) == null) {
+                if (dc == null) {
                     return null;
                 }
+
+                final InsetsControlTarget imeLayeringTarget = dc.getImeTarget(IME_TARGET_LAYERING);
+                if (imeLayeringTarget == null || imeLayeringTarget.getWindow() == null) {
+                    return null;
+                }
+
                 // Avoid WindowState#getRootTask() so we don't attribute system windows to a task.
-                final Task task = dc.getImeTarget(IME_TARGET_LAYERING).getWindow().getTask();
+                final Task task = imeLayeringTarget.getWindow().getTask();
                 if (task == null) {
                     return null;
                 }
-                return task.getRootTask().mRemoteToken.toWindowContainerToken();
+
+                return task.mRemoteToken.toWindowContainerToken();
             }
         } finally {
             Binder.restoreCallingIdentity(origId);
@@ -1037,5 +1065,10 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
 
         }
         pw.println();
+    }
+
+    @VisibleForTesting
+    TaskOrganizerState getTaskOrganizerState(IBinder taskOrganizer) {
+        return mTaskOrganizerStates.get(taskOrganizer);
     }
 }

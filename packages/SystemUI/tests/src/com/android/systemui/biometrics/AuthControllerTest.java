@@ -20,6 +20,8 @@ import static android.hardware.biometrics.BiometricAuthenticator.TYPE_FINGERPRIN
 import static android.hardware.biometrics.BiometricManager.Authenticators;
 import static android.hardware.biometrics.BiometricManager.BIOMETRIC_MULTI_SENSOR_FINGERPRINT_AND_FACE;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNull;
 
@@ -82,7 +84,6 @@ import com.android.systemui.util.concurrency.Execution;
 import com.android.systemui.util.concurrency.FakeExecution;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -100,11 +101,12 @@ import java.util.Random;
 
 import javax.inject.Provider;
 
-@Ignore
 @RunWith(AndroidTestingRunner.class)
 @RunWithLooper
 @SmallTest
 public class AuthControllerTest extends SysuiTestCase {
+
+    private static final long REQUEST_ID = 22;
 
     @Rule
     public final MockitoRule mMockitoRule = MockitoJUnit.rule();
@@ -174,6 +176,9 @@ public class AuthControllerTest extends SysuiTestCase {
 
         when(mDialog1.isAllowDeviceCredentials()).thenReturn(false);
         when(mDialog2.isAllowDeviceCredentials()).thenReturn(false);
+
+        when(mDialog1.getRequestId()).thenReturn(REQUEST_ID);
+        when(mDialog2.getRequestId()).thenReturn(REQUEST_ID);
 
         when(mFingerprintManager.isHardwareDetected()).thenReturn(true);
 
@@ -484,7 +489,12 @@ public class AuthControllerTest extends SysuiTestCase {
     @Test
     public void testHideAuthenticationDialog_invokesDismissFromSystemServer() {
         showDialog(new int[] {1} /* sensorIds */, false /* credentialAllowed */);
-        mAuthController.hideAuthenticationDialog();
+
+        mAuthController.hideAuthenticationDialog(REQUEST_ID + 1);
+        verify(mDialog1, never()).dismissFromSystemServer();
+        assertThat(mAuthController.mCurrentDialog).isSameInstanceAs(mDialog1);
+
+        mAuthController.hideAuthenticationDialog(REQUEST_ID);
         verify(mDialog1).dismissFromSystemServer();
 
         // In this case, BiometricService sends the error to the client immediately, without
@@ -514,7 +524,7 @@ public class AuthControllerTest extends SysuiTestCase {
                 eq(BiometricPrompt.DISMISSED_REASON_CREDENTIAL_CONFIRMED),
                 AdditionalMatchers.aryEq(credentialAttestation));
 
-        mAuthController.hideAuthenticationDialog();
+        mAuthController.hideAuthenticationDialog(REQUEST_ID);
     }
 
     @Test
@@ -650,7 +660,7 @@ public class AuthControllerTest extends SysuiTestCase {
 
         verify(mDisplayManager).registerDisplayListener(any(), eq(mHandler));
 
-        mAuthController.hideAuthenticationDialog();
+        mAuthController.hideAuthenticationDialog(REQUEST_ID);
         verify(mDisplayManager).unregisterDisplayListener(any());
     }
 
@@ -706,7 +716,7 @@ public class AuthControllerTest extends SysuiTestCase {
                 0 /* userId */,
                 0 /* operationId */,
                 "testPackage",
-                1 /* requestId */,
+                REQUEST_ID,
                 BIOMETRIC_MULTI_SENSOR_FINGERPRINT_AND_FACE);
     }
 

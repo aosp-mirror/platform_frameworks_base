@@ -63,6 +63,7 @@ import static com.android.server.am.ProcessList.UNKNOWN_ADJ;
 import static com.android.server.am.ProcessList.VISIBLE_APP_ADJ;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.AdditionalAnswers.answer;
 import static org.mockito.Mockito.any;
@@ -444,7 +445,7 @@ public class MockingOomAdjusterTests {
 
     @SuppressWarnings("GuardedBy")
     @Test
-    public void testUpdateOomAdj_DoOne_PerceptibleRecent() {
+    public void testUpdateOomAdj_DoOne_PerceptibleRecent_FgService() {
         ProcessRecord app = spy(makeDefaultProcessRecord(MOCKAPP_PID, MOCKAPP_UID,
                 MOCKAPP_PROCESSNAME, MOCKAPP_PACKAGENAME, true));
         app.mServices.setHasForegroundServices(true, 0);
@@ -456,6 +457,70 @@ public class MockingOomAdjusterTests {
                 PERCEPTIBLE_RECENT_FOREGROUND_APP_ADJ, SCHED_GROUP_DEFAULT);
     }
 
+    @SuppressWarnings("GuardedBy")
+    @Test
+    public void testUpdateOomAdj_DoOne_PerceptibleRecent_AlmostPerceptibleService() {
+        // Grace period allows the adjustment.
+        {
+            ProcessRecord system = spy(makeDefaultProcessRecord(MOCKAPP_PID, MOCKAPP_UID,
+                    MOCKAPP_PROCESSNAME, MOCKAPP_PACKAGENAME, true));
+            ProcessRecord app = spy(makeDefaultProcessRecord(MOCKAPP2_PID, MOCKAPP2_UID,
+                    MOCKAPP2_PROCESSNAME, MOCKAPP2_PACKAGENAME, true));
+            long nowUptime = SystemClock.uptimeMillis();
+            app.mState.setLastTopTime(nowUptime);
+            // Simulate the system starting and binding to a service in the app.
+            ServiceRecord s = bindService(app, system,
+                    null, Context.BIND_ALMOST_PERCEPTIBLE, mock(IBinder.class));
+            s.lastTopAlmostPerceptibleBindRequestUptimeMs = nowUptime;
+            s.getConnections().clear();
+            app.mServices.updateHasTopStartedAlmostPerceptibleServices();
+            sService.mWakefulness.set(PowerManagerInternal.WAKEFULNESS_AWAKE);
+            sService.mOomAdjuster.updateOomAdjLocked(app, OomAdjuster.OOM_ADJ_REASON_NONE);
+
+            assertEquals(PERCEPTIBLE_RECENT_FOREGROUND_APP_ADJ, app.mState.getSetAdj());
+        }
+
+        // Out of grace period but valid binding allows the adjustment.
+        {
+            ProcessRecord system = spy(makeDefaultProcessRecord(MOCKAPP_PID, MOCKAPP_UID,
+                    MOCKAPP_PROCESSNAME, MOCKAPP_PACKAGENAME, true));
+            ProcessRecord app = spy(makeDefaultProcessRecord(MOCKAPP2_PID, MOCKAPP2_UID,
+                    MOCKAPP2_PROCESSNAME, MOCKAPP2_PACKAGENAME, true));
+            long nowUptime = SystemClock.uptimeMillis();
+            app.mState.setLastTopTime(nowUptime);
+            // Simulate the system starting and binding to a service in the app.
+            ServiceRecord s = bindService(app, system,
+                    null, Context.BIND_ALMOST_PERCEPTIBLE, mock(IBinder.class));
+            s.lastTopAlmostPerceptibleBindRequestUptimeMs =
+                    nowUptime - 2 * sService.mConstants.mServiceBindAlmostPerceptibleTimeoutMs;
+            app.mServices.updateHasTopStartedAlmostPerceptibleServices();
+            sService.mWakefulness.set(PowerManagerInternal.WAKEFULNESS_AWAKE);
+            sService.mOomAdjuster.updateOomAdjLocked(app, OomAdjuster.OOM_ADJ_REASON_NONE);
+
+            assertEquals(PERCEPTIBLE_RECENT_FOREGROUND_APP_ADJ, app.mState.getSetAdj());
+        }
+
+        // Out of grace period and no valid binding so no adjustment.
+        {
+            ProcessRecord system = spy(makeDefaultProcessRecord(MOCKAPP_PID, MOCKAPP_UID,
+                    MOCKAPP_PROCESSNAME, MOCKAPP_PACKAGENAME, true));
+            ProcessRecord app = spy(makeDefaultProcessRecord(MOCKAPP2_PID, MOCKAPP2_UID,
+                    MOCKAPP2_PROCESSNAME, MOCKAPP2_PACKAGENAME, true));
+            long nowUptime = SystemClock.uptimeMillis();
+            app.mState.setLastTopTime(nowUptime);
+            // Simulate the system starting and binding to a service in the app.
+            ServiceRecord s = bindService(app, system,
+                    null, Context.BIND_ALMOST_PERCEPTIBLE, mock(IBinder.class));
+            s.lastTopAlmostPerceptibleBindRequestUptimeMs =
+                    nowUptime - 2 * sService.mConstants.mServiceBindAlmostPerceptibleTimeoutMs;
+            s.getConnections().clear();
+            app.mServices.updateHasTopStartedAlmostPerceptibleServices();
+            sService.mWakefulness.set(PowerManagerInternal.WAKEFULNESS_AWAKE);
+            sService.mOomAdjuster.updateOomAdjLocked(app, OomAdjuster.OOM_ADJ_REASON_NONE);
+
+            assertNotEquals(PERCEPTIBLE_RECENT_FOREGROUND_APP_ADJ, app.mState.getSetAdj());
+        }
+    }
     @SuppressWarnings("GuardedBy")
     @Test
     public void testUpdateOomAdj_DoOne_Toast() {

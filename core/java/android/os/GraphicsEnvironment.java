@@ -157,6 +157,13 @@ public class GraphicsEnvironment {
             }
         }
         Trace.traceEnd(Trace.TRACE_TAG_GRAPHICS);
+
+        Trace.traceBegin(Trace.TRACE_TAG_GRAPHICS, "notifyGraphicsEnvironmentSetup");
+        if (mGameManager != null
+                && appInfoWithMetaData.category == ApplicationInfo.CATEGORY_GAME) {
+            mGameManager.notifyGraphicsEnvironmentSetup();
+        }
+        Trace.traceEnd(Trace.TRACE_TAG_GRAPHICS);
     }
 
     /**

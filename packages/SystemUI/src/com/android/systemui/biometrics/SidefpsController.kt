@@ -33,6 +33,8 @@ import android.hardware.fingerprint.FingerprintSensorPropertiesInternal
 import android.hardware.fingerprint.ISidefpsController
 import android.os.Handler
 import android.util.Log
+import android.view.View.AccessibilityDelegate
+import android.view.accessibility.AccessibilityEvent
 import android.view.Display
 import android.view.Gravity
 import android.view.LayoutInflater
@@ -181,6 +183,23 @@ class SidefpsController @Inject constructor(
         }
         lottie.addOverlayDynamicColor(context)
 
+        /**
+         * Intercepts TYPE_WINDOW_STATE_CHANGED accessibility event, preventing Talkback from
+         * speaking @string/accessibility_fingerprint_label twice when sensor location indicator
+         * is in focus
+         */
+        view.setAccessibilityDelegate(object : AccessibilityDelegate() {
+            override fun dispatchPopulateAccessibilityEvent(
+                host: View,
+                event: AccessibilityEvent
+            ): Boolean {
+                return if (event.getEventType() === AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) {
+                    true
+                } else {
+                    super.dispatchPopulateAccessibilityEvent(host, event)
+                }
+            }
+        })
         return view
     }
 
