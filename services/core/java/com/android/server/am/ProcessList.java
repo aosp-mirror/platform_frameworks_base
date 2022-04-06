@@ -2207,16 +2207,25 @@ public final class ProcessList {
             Map<String, Pair<String, Long>> allowlistedAppDataInfoMap;
             boolean bindMountAppStorageDirs = false;
             boolean bindMountAppsData = mAppDataIsolationEnabled
-                    && (UserHandle.isApp(app.uid) || UserHandle.isIsolated(app.uid))
+                    && (UserHandle.isApp(app.uid) || UserHandle.isIsolated(app.uid)
+                        || app.isSdkSandbox)
                     && mPlatformCompat.isChangeEnabled(APP_DATA_DIRECTORY_ISOLATION, app.info);
 
             // Get all packages belongs to the same shared uid. sharedPackages is empty array
             // if it doesn't have shared uid.
             final PackageManagerInternal pmInt = mService.getPackageManagerInternal();
-            final String[] sharedPackages = pmInt.getSharedUserPackagesForPackage(
-                    app.info.packageName, app.userId);
-            final String[] targetPackagesList = sharedPackages.length == 0
-                    ? new String[]{app.info.packageName} : sharedPackages;
+
+            // In the case of sdk sandbox, the pkgDataInfoMap of only the client app associated with
+            // the sandbox is required to handle app visibility restrictions for the sandbox.
+            final String[] targetPackagesList;
+            if (app.isSdkSandbox) {
+                targetPackagesList = new String[]{app.sdkSandboxClientAppPackage};
+            } else {
+                final String[] sharedPackages = pmInt.getSharedUserPackagesForPackage(
+                        app.info.packageName, app.userId);
+                targetPackagesList = sharedPackages.length == 0
+                        ? new String[]{app.info.packageName} : sharedPackages;
+            }
 
             final boolean hasAppStorage = hasAppStorage(pmInt, app.info.packageName);
 
@@ -2242,7 +2251,7 @@ public final class ProcessList {
                 bindMountAppsData = false;
             }
 
-            if (!hasAppStorage) {
+            if (!hasAppStorage && !app.isSdkSandbox) {
                 bindMountAppsData = false;
                 pkgDataInfoMap = null;
                 allowlistedAppDataInfoMap = null;
