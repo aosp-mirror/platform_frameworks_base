@@ -425,9 +425,9 @@
     <string name="permdesc_writeCallLog" product="tablet" msgid="2657525794731690397">"Permet à l\'application de lire le journal d\'appels de votre tablette, y compris les données relatives aux appels entrants et sortants. Des applications malveillantes peuvent utiliser cette fonctionnalité pour effacer ou modifier votre journal d\'appels."</string>
     <string name="permdesc_writeCallLog" product="tv" msgid="3934939195095317432">"Permet à l\'application de lire le journal d\'appels de votre appareil Android TV, y compris les données sur les appels entrants et sortants. Des applications malveillantes peuvent utiliser cette fonctionnalité pour effacer ou modifier votre journal d\'appels."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="5903033505665134802">"Permet à l\'application de lire le journal d\'appels de votre téléphone, y compris les données relatives aux appels entrants et sortants. Des applications malveillantes peuvent utiliser cette fonctionnalité pour effacer ou modifier votre journal d\'appels."</string>
-    <string name="permlab_bodySensors" msgid="662918578601619569">"Accéder aux données de capteurs corporels (comme fréquence cardiaque) pendant utilisation"</string>
+    <string name="permlab_bodySensors" msgid="662918578601619569">"Accéder aux données de capteurs corporels (comme le pouls) pendant l\'utilisation"</string>
     <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"Permet à l\'appli d\'accéder aux données des capteurs corporels (fréquence cardiaque, température, taux d\'oxygène dans le sang, etc.) quand l\'appli est en cours d\'utilisation."</string>
-    <string name="permlab_bodySensors_background" msgid="4912560779957760446">"Accéder aux données de capteurs corporels (comme fréquence cardiaque) quand en arrière-plan"</string>
+    <string name="permlab_bodySensors_background" msgid="4912560779957760446">"Accéder aux données de capteurs corporels (comme le pouls) en arrière-plan"</string>
     <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"Permet à l\'appli d\'accéder aux données des capteurs corporels (fréquence cardiaque, température, taux d\'oxygène dans le sang, etc.) quand l\'appli est en arrière-plan."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"Lire les événements d\'agenda et les détails associés"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"Cette application peut lire tous les événements d\'agenda enregistrés sur votre tablette et partager ou enregistrer vos données d\'agenda."</string>
@@ -585,7 +585,8 @@
     <string name="biometric_error_generic" msgid="6784371929985434439">"Erreur d\'authentification"</string>
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"Utiliser verrouillage écran"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"Utilisez le verrouillage de l\'écran pour continuer"</string>
-    <string name="fingerprint_acquired_partial" msgid="694598777291084823">"Empreinte partielle détectée"</string>
+    <!-- no translation found for fingerprint_acquired_partial (4323789264604479684) -->
+    <skip />
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"Impossible de reconnaître l\'empreinte digitale. Veuillez réessayer."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"Nettoyez le lecteur d\'empreinte digitale et réessayez"</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"Nettoyez le lecteur et réessayez"</string>
@@ -598,7 +599,8 @@
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_error_not_match" msgid="4599441812893438961">"Empreinte digitale non reconnue"</string>
-    <string name="fingerprint_udfps_error_not_match" msgid="4709197752023550709">"Appuyez bien sur le lecteur"</string>
+    <!-- no translation found for fingerprint_udfps_error_not_match (8236930793223158856) -->
+    <skip />
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"Empreinte digitale authentifiée"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"Visage authentifié"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"Visage authentifié, veuillez appuyer sur \"Confirmer\""</string>
@@ -1679,7 +1681,6 @@
     <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"ACTIVÉE"</string>
     <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"DÉSACTIVÉE"</string>
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"Accorder le contrôle total de votre appareil à <xliff:g id="SERVICE">%1$s</xliff:g> ?"</string>
-    <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"Si vous activez <xliff:g id="SERVICE">%1$s</xliff:g>, votre appareil n\'utilisera pas le verrouillage de l\'écran pour améliorer le chiffrement des données."</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"Le contrôle total convient aux applications qui répondent à vos besoins d\'accessibilité. Il ne convient pas à la plupart des autres applications."</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Afficher et contrôler l\'écran"</string>
     <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Le service peut lire l\'intégralité du contenu à l\'écran et afficher du contenu par-dessus d\'autres applications."</string>
@@ -1852,7 +1853,7 @@
     <string name="confirm_battery_saver" msgid="5247976246208245754">"OK"</string>
     <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"L\'économiseur de batterie active le thème sombre et limite ou désactive les activités en arrière-plan ainsi que certains effets visuels, fonctionnalités et connexions réseau."</string>
     <string name="battery_saver_description" msgid="8518809702138617167">"L\'économiseur de batterie active le thème sombre et limite ou désactive les activités en arrière-plan ainsi que certains effets visuels, fonctionnalités et connexions réseau."</string>
-    <string name="data_saver_description" msgid="4995164271550590517">"Pour réduire la consommation des données, l\'Économiseur de données empêche certaines applis d\'envoyer ou de recevoir des données en arrière-plan. Les applis que vous utiliserez pourront toujours accéder aux données, mais le feront moins fréquemment. Par exemple, les images pourront ne pas s\'afficher tant que vous n\'aurez pas appuyé pas dessus."</string>
+    <string name="data_saver_description" msgid="4995164271550590517">"Pour réduire la consommation des données, l\'Économiseur de données empêche certaines applis d\'envoyer ou de recevoir des données en arrière-plan. Les applis que vous utiliserez pourront toujours accéder aux données, mais le feront moins fréquemment. Par exemple, les images pourront ne pas s\'afficher tant que vous n\'aurez pas appuyé dessus."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Activer l\'Économiseur de données ?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Activer"</string>
     <string name="zen_mode_duration_minutes_summary" msgid="4555514757230849789">"{count,plural, =1{Pendant 1 minute (jusqu\'à {formattedTime})}one{Pendant # minute (jusqu\'à {formattedTime})}other{Pendant # minutes (jusqu\'à {formattedTime})}}"</string>
@@ -1933,8 +1934,7 @@
     <string name="app_blocked_title" msgid="7353262160455028160">"Application non disponible"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> n\'est pas disponible pour le moment."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> indisponible"</string>
-    <!-- no translation found for app_streaming_blocked_title_for_permission_dialog (4483161748582966785) -->
-    <skip />
+    <string name="app_streaming_blocked_title_for_permission_dialog" msgid="4483161748582966785">"Autorisation nécessaire"</string>
     <string name="app_streaming_blocked_message" product="tv" msgid="4003011766528814377">"Actuellement, vous ne pouvez pas accéder à cette application sur votre <xliff:g id="DEVICE">%1$s</xliff:g>. Essayez plutôt d\'y accéder sur votre appareil Android TV."</string>
     <string name="app_streaming_blocked_message" product="tablet" msgid="4242053045964946062">"Actuellement, vous ne pouvez pas accéder à cette application sur votre <xliff:g id="DEVICE">%1$s</xliff:g>. Essayez plutôt d\'y accéder sur votre tablette."</string>
     <string name="app_streaming_blocked_message" product="default" msgid="6159168735030739398">"Actuellement, vous ne pouvez pas accéder à cette application sur votre <xliff:g id="DEVICE">%1$s</xliff:g>. Essayez plutôt d\'y accéder sur votre téléphone."</string>
@@ -2028,10 +2028,10 @@
     <string name="harmful_app_warning_open_anyway" msgid="5963657791740211807">"OUVRIR QUAND MÊME"</string>
     <string name="harmful_app_warning_title" msgid="8794823880881113856">"Application dangereuse détectée"</string>
     <string name="log_access_confirmation_title" msgid="2343578467290592708">"Autoriser <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> à accéder à tous les journaux de l\'appareil ?"</string>
-    <string name="log_access_confirmation_allow" msgid="143157286283302512">"Cette fois seulement"</string>
-    <string name="log_access_confirmation_deny" msgid="7685790957455099845">"Ne pas autoriser"</string>
-    <!-- no translation found for log_access_confirmation_body (6581985716241928135) -->
+    <!-- no translation found for log_access_confirmation_allow (5302517782599389507) -->
     <skip />
+    <string name="log_access_confirmation_deny" msgid="7685790957455099845">"Ne pas autoriser"</string>
+    <string name="log_access_confirmation_body" msgid="6581985716241928135">"Les journaux enregistrent ce qui se passe sur votre appareil. Les applis peuvent les utiliser pour rechercher et résoudre les problèmes.\n\nCertains journaux pouvant contenir des infos sensibles, autorisez uniquement les applis de confiance à accéder à tous les journaux de l\'appareil. \n\nSi vous refusez à cette appli l\'accès à tous les journaux de l\'appareil, elle a quand même accès aux siens. Le fabricant de l\'appareil peut accéder à certains journaux ou certaines infos sur votre appareil. En savoir plus"</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"Ne plus afficher"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g> souhaite afficher des éléments de <xliff:g id="APP_2">%2$s</xliff:g>"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"Modifier"</string>
@@ -2261,13 +2261,16 @@
     <string name="ui_translation_accessibility_translated_text" msgid="3197547218178944544">"<xliff:g id="MESSAGE">%1$s</xliff:g> traduit."</string>
     <string name="ui_translation_accessibility_translation_finished" msgid="3057830947610088465">"Message en <xliff:g id="FROM_LANGUAGE">%1$s</xliff:g> traduit en <xliff:g id="TO_LANGUAGE">%2$s</xliff:g>."</string>
     <string name="notification_channel_abusive_bg_apps" msgid="6092140213264920355">"Activité en arrière-plan"</string>
-    <string name="notification_title_abusive_bg_apps" msgid="344582472797982073">"Activité en arrière-plan"</string>
-    <string name="notification_content_abusive_bg_apps" msgid="5572096708044958249">"<xliff:g id="APP">%1$s</xliff:g> s\'exécute en arrière-plan et décharge la batterie. Appuyez ici pour en savoir plus."</string>
-    <string name="notification_content_long_running_fgs" msgid="8878031652441570178">"<xliff:g id="APP">%1$s</xliff:g> s\'exécute en arrière-plan depuis longtemps. Appuyez ici pour en savoir plus."</string>
+    <!-- no translation found for notification_title_abusive_bg_apps (3258460527676573815) -->
+    <skip />
+    <!-- no translation found for notification_title_long_running_fgs (8170284286477131587) -->
+    <skip />
+    <!-- no translation found for notification_content_abusive_bg_apps (9180610713603474720) -->
+    <skip />
+    <!-- no translation found for notification_content_long_running_fgs (8258193410039977101) -->
+    <skip />
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Vérifier les applis actives"</string>
-    <!-- no translation found for vdm_camera_access_denied (6102378580971542473) -->
-    <skip />
-    <!-- no translation found for vdm_camera_access_denied (6895968310395249076) -->
-    <skip />
+    <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"Impossible d\'accéder à l\'appareil photo du téléphone depuis votre <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
+    <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"Impossible d\'accéder à l\'appareil photo de la tablette depuis votre <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
     <string name="system_locale_title" msgid="3978041860457277638">"Langue du système"</string>
 </resources>
