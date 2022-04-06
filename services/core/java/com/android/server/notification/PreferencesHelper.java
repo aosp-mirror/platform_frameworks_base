@@ -96,6 +96,10 @@ public class PreferencesHelper implements RankingConfig {
     private final int XML_VERSION;
     /** What version to check to do the upgrade for bubbles. */
     private static final int XML_VERSION_BUBBLES_UPGRADE = 1;
+    /** The first xml version with notification permissions enabled. */
+    private static final int XML_VERSION_NOTIF_PERMISSION = 3;
+    /** The first xml version that notifies users to review their notification permissions */
+    private static final int XML_VERSION_REVIEW_PERMISSIONS_NOTIFICATION = 4;
     @VisibleForTesting
     static final int UNKNOWN_UID = UserHandle.USER_NULL;
     private static final String NON_BLOCKABLE_CHANNEL_DELIM = ":";
@@ -206,7 +210,7 @@ public class PreferencesHelper implements RankingConfig {
         mStatsEventBuilderFactory = statsEventBuilderFactory;
 
         if (mPermissionHelper.isMigrationEnabled()) {
-            XML_VERSION = 3;
+            XML_VERSION = 4;
         } else {
             XML_VERSION = 2;
         }
@@ -226,8 +230,16 @@ public class PreferencesHelper implements RankingConfig {
 
         final int xmlVersion = parser.getAttributeInt(null, ATT_VERSION, -1);
         boolean upgradeForBubbles = xmlVersion == XML_VERSION_BUBBLES_UPGRADE;
-        boolean migrateToPermission =
-                (xmlVersion < XML_VERSION) && mPermissionHelper.isMigrationEnabled();
+        boolean migrateToPermission = (xmlVersion < XML_VERSION_NOTIF_PERMISSION)
+                && mPermissionHelper.isMigrationEnabled();
+        if (xmlVersion < XML_VERSION_REVIEW_PERMISSIONS_NOTIFICATION) {
+            // make a note that we should show the notification at some point.
+            // it shouldn't be possible for the user to already have seen it, as the XML version
+            // would be newer then.
+            Settings.Global.putInt(mContext.getContentResolver(),
+                    Settings.Global.REVIEW_PERMISSIONS_NOTIFICATION_STATE,
+                    NotificationManagerService.REVIEW_NOTIF_STATE_SHOULD_SHOW);
+        }
         ArrayList<PermissionHelper.PackagePermission> pkgPerms = new ArrayList<>();
         synchronized (mPackagePreferences) {
             while ((type = parser.next()) != XmlPullParser.END_DOCUMENT) {

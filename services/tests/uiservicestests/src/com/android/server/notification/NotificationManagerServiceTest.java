@@ -198,6 +198,7 @@ import com.android.internal.app.IAppOpsService;
 import com.android.internal.config.sysui.SystemUiDeviceConfigFlags;
 import com.android.internal.logging.InstanceIdSequence;
 import com.android.internal.logging.InstanceIdSequenceFake;
+import com.android.internal.messages.nano.SystemMessageProto;
 import com.android.internal.statusbar.NotificationVisibility;
 import com.android.server.DeviceIdleInternal;
 import com.android.server.LocalServices;
@@ -303,6 +304,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     ActivityManagerInternal mAmi;
     @Mock
     private Looper mMainLooper;
+    @Mock
+    private NotificationManager mMockNm;
 
     @Mock
     IIntentSender pi1;
@@ -405,6 +408,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         LocalServices.removeServiceForTest(PermissionPolicyInternal.class);
         LocalServices.addService(PermissionPolicyInternal.class, mPermissionPolicyInternal);
         mContext.addMockSystemService(Context.ALARM_SERVICE, mAlarmManager);
+        mContext.addMockSystemService(NotificationManager.class, mMockNm);
 
         doNothing().when(mContext).sendBroadcastAsUser(any(), any(), any());
 
@@ -9293,5 +9297,78 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
         // the notifyPostedLocked function is called twice.
         verify(mListeners, times(2)).notifyPostedLocked(any(), any());
+    }
+
+    @Test
+    public void testMaybeShowReviewPermissionsNotification_unknown() {
+        // Set up various possible states of the settings int and confirm whether or not the
+        // notification is shown as expected
+
+        // Initial state: default/unknown setting, make sure nothing happens
+        Settings.Global.putInt(mContext.getContentResolver(),
+                Settings.Global.REVIEW_PERMISSIONS_NOTIFICATION_STATE,
+                NotificationManagerService.REVIEW_NOTIF_STATE_UNKNOWN);
+        mService.maybeShowInitialReviewPermissionsNotification();
+        verify(mMockNm, never()).notify(anyString(), anyInt(), any(Notification.class));
+    }
+
+    @Test
+    public void testMaybeShowReviewPermissionsNotification_shouldShow() {
+        // If state is SHOULD_SHOW, it ... should show
+        Settings.Global.putInt(mContext.getContentResolver(),
+                Settings.Global.REVIEW_PERMISSIONS_NOTIFICATION_STATE,
+                NotificationManagerService.REVIEW_NOTIF_STATE_SHOULD_SHOW);
+        mService.maybeShowInitialReviewPermissionsNotification();
+        verify(mMockNm, times(1)).notify(eq(NotificationManagerService.TAG),
+                eq(SystemMessageProto.SystemMessage.NOTE_REVIEW_NOTIFICATION_PERMISSIONS),
+                any(Notification.class));
+    }
+
+    @Test
+    public void testMaybeShowReviewPermissionsNotification_alreadyShown() {
+        // If state is either USER_INTERACTED or DISMISSED, we should not show this on boot
+        Settings.Global.putInt(mContext.getContentResolver(),
+                Settings.Global.REVIEW_PERMISSIONS_NOTIFICATION_STATE,
+                NotificationManagerService.REVIEW_NOTIF_STATE_USER_INTERACTED);
+        mService.maybeShowInitialReviewPermissionsNotification();
+
+        Settings.Global.putInt(mContext.getContentResolver(),
+                Settings.Global.REVIEW_PERMISSIONS_NOTIFICATION_STATE,
+                NotificationManagerService.REVIEW_NOTIF_STATE_DISMISSED);
+        mService.maybeShowInitialReviewPermissionsNotification();
+
+        verify(mMockNm, never()).notify(anyString(), anyInt(), any(Notification.class));
+    }
+
+    @Test
+    public void testMaybeShowReviewPermissionsNotification_reshown() {
+        // If we have re-shown the notification and the user did not subsequently interacted with
+        // it, then make sure we show when trying on boot
+        Settings.Global.putInt(mContext.getContentResolver(),
+                Settings.Global.REVIEW_PERMISSIONS_NOTIFICATION_STATE,
+                NotificationManagerService.REVIEW_NOTIF_STATE_RESHOWN);
+        mService.maybeShowInitialReviewPermissionsNotification();
+        verify(mMockNm, times(1)).notify(eq(NotificationManagerService.TAG),
+                eq(SystemMessageProto.SystemMessage.NOTE_REVIEW_NOTIFICATION_PERMISSIONS),
+                any(Notification.class));
+    }
+
+    @Test
+    public void testRescheduledReviewPermissionsNotification() {
+        // when rescheduled, the notification goes through the NotificationManagerInternal service
+        // this call doesn't need to know anything about previously scheduled state -- if called,
+        // it should send the notification & write the appropriate int to Settings
+        mInternalService.sendReviewPermissionsNotification();
+
+        // Notification should be sent
+        verify(mMockNm, times(1)).notify(eq(NotificationManagerService.TAG),
+                eq(SystemMessageProto.SystemMessage.NOTE_REVIEW_NOTIFICATION_PERMISSIONS),
+                any(Notification.class));
+
+        // write STATE_RESHOWN to settings
+        assertEquals(NotificationManagerService.REVIEW_NOTIF_STATE_RESHOWN,
+                Settings.Global.getInt(mContext.getContentResolver(),
+                        Settings.Global.REVIEW_PERMISSIONS_NOTIFICATION_STATE,
+                        NotificationManagerService.REVIEW_NOTIF_STATE_UNKNOWN));
     }
 }

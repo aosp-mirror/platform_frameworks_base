@@ -289,6 +289,11 @@ public class PreferencesHelperTest extends UiServiceTestCase {
                 .setUsage(AudioAttributes.USAGE_NOTIFICATION_RINGTONE)
                 .setFlags(AudioAttributes.FLAG_AUDIBILITY_ENFORCED)
                 .build();
+
+        // make sure that the settings for review notification permissions are unset to begin with
+        Settings.Global.putInt(mContext.getContentResolver(),
+                Settings.Global.REVIEW_PERMISSIONS_NOTIFICATION_STATE,
+                NotificationManagerService.REVIEW_NOTIF_STATE_UNKNOWN);
     }
 
     private ByteArrayOutputStream writeXmlAndPurge(
@@ -656,6 +661,13 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         verify(mPermissionHelper).setNotificationPermission(nMr1Expected);
         verify(mPermissionHelper).setNotificationPermission(oExpected);
         verify(mPermissionHelper).setNotificationPermission(pExpected);
+
+        // verify that we also write a state for review_permissions_notification to eventually
+        // show a notification
+        assertEquals(NotificationManagerService.REVIEW_NOTIF_STATE_SHOULD_SHOW,
+                Settings.Global.getInt(mContext.getContentResolver(),
+                        Settings.Global.REVIEW_PERMISSIONS_NOTIFICATION_STATE,
+                        NotificationManagerService.REVIEW_NOTIF_STATE_UNKNOWN));
     }
 
     @Test
@@ -738,7 +750,7 @@ public class PreferencesHelperTest extends UiServiceTestCase {
     }
 
     @Test
-    public void testReadXml_newXml_noMigration() throws Exception {
+    public void testReadXml_newXml_noMigration_showPermissionNotification() throws Exception {
         when(mPermissionHelper.isMigrationEnabled()).thenReturn(true);
         mHelper = new PreferencesHelper(getContext(), mPm, mHandler, mMockZenModeHelper,
                 mPermissionHelper, mLogger, mAppOpsManager, mStatsEventBuilderFactory);
@@ -786,6 +798,70 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         compareChannels(idp, mHelper.getNotificationChannel(PKG_P, UID_P, idp.getId(), false));
 
         verify(mPermissionHelper, never()).setNotificationPermission(any());
+
+        // verify that we do, however, write a state for review_permissions_notification to
+        // eventually show a notification, since this XML version is older than the notification
+        assertEquals(NotificationManagerService.REVIEW_NOTIF_STATE_SHOULD_SHOW,
+                Settings.Global.getInt(mContext.getContentResolver(),
+                        Settings.Global.REVIEW_PERMISSIONS_NOTIFICATION_STATE,
+                        NotificationManagerService.REVIEW_NOTIF_STATE_UNKNOWN));
+    }
+
+    @Test
+    public void testReadXml_newXml_noMigration_noPermissionNotification() throws Exception {
+        when(mPermissionHelper.isMigrationEnabled()).thenReturn(true);
+        mHelper = new PreferencesHelper(getContext(), mPm, mHandler, mMockZenModeHelper,
+                mPermissionHelper, mLogger, mAppOpsManager, mStatsEventBuilderFactory);
+
+        String xml = "<ranking version=\"4\">\n"
+                + "<package name=\"" + PKG_N_MR1 + "\" show_badge=\"true\">\n"
+                + "<channel id=\"idn\" name=\"name\" importance=\"2\"/>\n"
+                + "<channel id=\"miscellaneous\" name=\"Uncategorized\" />\n"
+                + "</package>\n"
+                + "<package name=\"" + PKG_O + "\" >\n"
+                + "<channel id=\"ido\" name=\"name2\" importance=\"2\" show_badge=\"true\"/>\n"
+                + "</package>\n"
+                + "<package name=\"" + PKG_P + "\" >\n"
+                + "<channel id=\"idp\" name=\"name3\" importance=\"4\" locked=\"2\" />\n"
+                + "</package>\n"
+                + "</ranking>\n";
+        NotificationChannel idn = new NotificationChannel("idn", "name", IMPORTANCE_LOW);
+        idn.setSound(null, new AudioAttributes.Builder()
+                .setUsage(USAGE_NOTIFICATION)
+                .setContentType(CONTENT_TYPE_SONIFICATION)
+                .setFlags(0)
+                .build());
+        idn.setShowBadge(false);
+        NotificationChannel ido = new NotificationChannel("ido", "name2", IMPORTANCE_LOW);
+        ido.setShowBadge(true);
+        ido.setSound(null, new AudioAttributes.Builder()
+                .setUsage(USAGE_NOTIFICATION)
+                .setContentType(CONTENT_TYPE_SONIFICATION)
+                .setFlags(0)
+                .build());
+        NotificationChannel idp = new NotificationChannel("idp", "name3", IMPORTANCE_HIGH);
+        idp.lockFields(2);
+        idp.setSound(null, new AudioAttributes.Builder()
+                .setUsage(USAGE_NOTIFICATION)
+                .setContentType(CONTENT_TYPE_SONIFICATION)
+                .setFlags(0)
+                .build());
+
+        loadByteArrayXml(xml.getBytes(), true, USER_SYSTEM);
+
+        assertTrue(mHelper.canShowBadge(PKG_N_MR1, UID_N_MR1));
+
+        assertEquals(idn, mHelper.getNotificationChannel(PKG_N_MR1, UID_N_MR1, idn.getId(), false));
+        compareChannels(ido, mHelper.getNotificationChannel(PKG_O, UID_O, ido.getId(), false));
+        compareChannels(idp, mHelper.getNotificationChannel(PKG_P, UID_P, idp.getId(), false));
+
+        verify(mPermissionHelper, never()).setNotificationPermission(any());
+
+        // this XML is new enough, we should not be attempting to show a notification or anything
+        assertEquals(NotificationManagerService.REVIEW_NOTIF_STATE_UNKNOWN,
+                Settings.Global.getInt(mContext.getContentResolver(),
+                        Settings.Global.REVIEW_PERMISSIONS_NOTIFICATION_STATE,
+                        NotificationManagerService.REVIEW_NOTIF_STATE_UNKNOWN));
     }
 
     @Test
@@ -903,7 +979,7 @@ public class PreferencesHelperTest extends UiServiceTestCase {
 
         ByteArrayOutputStream baos = writeXmlAndPurge(
                 PKG_N_MR1, UID_N_MR1, false, USER_SYSTEM);
-        String expected = "<ranking version=\"3\">\n"
+        String expected = "<ranking version=\"4\">\n"
                 + "<package name=\"com.example.o\" show_badge=\"true\" "
                 + "app_user_locked_fields=\"0\" sent_invalid_msg=\"false\" "
                 + "sent_valid_msg=\"false\" user_demote_msg_app=\"false\" uid=\"1111\">\n"
@@ -984,7 +1060,7 @@ public class PreferencesHelperTest extends UiServiceTestCase {
 
         ByteArrayOutputStream baos = writeXmlAndPurge(
                 PKG_N_MR1, UID_N_MR1, true, USER_SYSTEM);
-        String expected = "<ranking version=\"3\">\n"
+        String expected = "<ranking version=\"4\">\n"
                 // Importance 0 because off in permissionhelper
                 + "<package name=\"com.example.o\" importance=\"0\" show_badge=\"true\" "
                 + "app_user_locked_fields=\"0\" sent_invalid_msg=\"false\" "
@@ -1067,7 +1143,7 @@ public class PreferencesHelperTest extends UiServiceTestCase {
 
         ByteArrayOutputStream baos = writeXmlAndPurge(
                 PKG_N_MR1, UID_N_MR1, true, USER_SYSTEM);
-        String expected = "<ranking version=\"3\">\n"
+        String expected = "<ranking version=\"4\">\n"
                 // Importance 0 because off in permissionhelper
                 + "<package name=\"com.example.o\" importance=\"0\" show_badge=\"true\" "
                 + "app_user_locked_fields=\"0\" sent_invalid_msg=\"false\" "
@@ -1121,7 +1197,7 @@ public class PreferencesHelperTest extends UiServiceTestCase {
 
         ByteArrayOutputStream baos = writeXmlAndPurge(
                 PKG_N_MR1, UID_N_MR1, true, USER_SYSTEM);
-        String expected = "<ranking version=\"3\">\n"
+        String expected = "<ranking version=\"4\">\n"
                 // Packages that exist solely in permissionhelper
                 + "<package name=\"" + PKG_P + "\" importance=\"3\" />\n"
                 + "<package name=\"" + PKG_O + "\" importance=\"0\" />\n"
