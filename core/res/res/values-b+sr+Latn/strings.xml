@@ -218,7 +218,7 @@
     <string name="turn_on_radio" msgid="2961717788170634233">"Uključi bežični signal"</string>
     <string name="turn_off_radio" msgid="7222573978109933360">"Isključi bežični signal"</string>
     <string name="screen_lock" msgid="2072642720826409809">"Zaključaj ekran"</string>
-    <string name="power_off" msgid="4111692782492232778">"Isključi"</string>
+    <string name="power_off" msgid="4111692782492232778">"Ugasi"</string>
     <string name="silent_mode_silent" msgid="5079789070221150912">"Zvono je isključeno"</string>
     <string name="silent_mode_vibrate" msgid="8821830448369552678">"Vibracija zvona"</string>
     <string name="silent_mode_ring" msgid="6039011004781526678">"Zvono je uključeno"</string>
@@ -242,7 +242,7 @@
     <string name="global_actions" product="tv" msgid="3871763739487450369">"Opcije Android TV-a"</string>
     <string name="global_actions" product="default" msgid="6410072189971495460">"Opcije telefona"</string>
     <string name="global_action_lock" msgid="6949357274257655383">"Zaključaj ekran"</string>
-    <string name="global_action_power_off" msgid="4404936470711393203">"Isključi"</string>
+    <string name="global_action_power_off" msgid="4404936470711393203">"Ugasi"</string>
     <string name="global_action_power_options" msgid="1185286119330160073">"Napajanje"</string>
     <string name="global_action_restart" msgid="4678451019561687074">"Restartuj"</string>
     <string name="global_action_emergency" msgid="1387617624177105088">"Hitan poziv"</string>
@@ -586,7 +586,7 @@
     <string name="biometric_error_generic" msgid="6784371929985434439">"Greška pri potvrdi identiteta"</string>
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"Koristite zaključavanje ekrana"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"Upotrebite zaključavanje ekrana da biste nastavili"</string>
-    <string name="fingerprint_acquired_partial" msgid="694598777291084823">"Otkriven je delimičan otisak prsta"</string>
+    <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"Jako pritisnite senzor"</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"Nije uspela obrada otiska prsta. Probajte ponovo."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"Obrišite senzor za otisak prsta i probajte ponovo"</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"Obrišite senzor i probajte ponovo"</string>
@@ -599,7 +599,7 @@
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_error_not_match" msgid="4599441812893438961">"Otisak prsta nije prepoznat"</string>
-    <string name="fingerprint_udfps_error_not_match" msgid="4709197752023550709">"Jako pritisnite senzor"</string>
+    <string name="fingerprint_udfps_error_not_match" msgid="8236930793223158856">"Otisak prsta nije prepoznat"</string>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"Otisak prsta je potvrđen"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"Lice je potvrđeno"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"Lice je potvrđeno. Pritisnite Potvrdi"</string>
@@ -1680,7 +1680,6 @@
     <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"UKLJUČENO"</string>
     <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"ISKLJUČENO"</string>
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"Želite li da dozvolite da usluga <xliff:g id="SERVICE">%1$s</xliff:g> ima potpunu kontrolu nad uređajem?"</string>
-    <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"Ako uključite uslugu <xliff:g id="SERVICE">%1$s</xliff:g>, uređaj neće koristiti zaključavanje ekrana da bi poboljšao šifrovanje podataka."</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"Potpuna kontrola je primerena za aplikacije koje vam pomažu kod usluga pristupačnosti, ali ne i za većinu aplikacija."</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Pregledaj i kontroliši ekran"</string>
     <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Može da čita sav sadržaj na ekranu i prikazuje ga u drugim aplikacijama."</string>
@@ -2028,10 +2027,9 @@
     <string name="harmful_app_warning_open_anyway" msgid="5963657791740211807">"IPAK OTVORI"</string>
     <string name="harmful_app_warning_title" msgid="8794823880881113856">"Otkrivena je štetna aplikacija"</string>
     <string name="log_access_confirmation_title" msgid="2343578467290592708">"Želite da dozvolite aplikaciji <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> da pristupa svim evidencijama uređaja?"</string>
-    <string name="log_access_confirmation_allow" msgid="143157286283302512">"Samo ovaj put"</string>
+    <string name="log_access_confirmation_allow" msgid="5302517782599389507">"Dozvoli jednokratan pristup"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"Ne dozvoli"</string>
-    <!-- no translation found for log_access_confirmation_body (6581985716241928135) -->
-    <skip />
+    <string name="log_access_confirmation_body" msgid="6581985716241928135">"Evidencije uređaja registruju šta se dešava na uređaju. Aplikacije mogu da koriste te evidencije da bi pronašle i rešile probleme.\n\nNeke evidencije mogu da sadrže osetljive informacije, pa pristup svim evidencijama uređaja treba da dozvoljavate samo aplikacijama u koje imate poverenja. \n\nAko ne dozvolite ovoj aplikaciji da pristupa svim evidencijama uređaja, ona i dalje može da pristupa sopstvenim evidencijama. Proizvođač uređaja će možda i dalje moći da pristupa nekim evidencijama ili informacijama na uređaju. Saznajte više"</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"Ne prikazuj ponovo"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"Aplikacija <xliff:g id="APP_0">%1$s</xliff:g> želi da prikazuje isečke iz aplikacije <xliff:g id="APP_2">%2$s</xliff:g>"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"Izmeni"</string>
@@ -2261,13 +2259,12 @@
     <string name="ui_translation_accessibility_translated_text" msgid="3197547218178944544">"<xliff:g id="MESSAGE">%1$s</xliff:g> Prevedeno."</string>
     <string name="ui_translation_accessibility_translation_finished" msgid="3057830947610088465">"Poruka je prevedena sa jezika <xliff:g id="FROM_LANGUAGE">%1$s</xliff:g> na <xliff:g id="TO_LANGUAGE">%2$s</xliff:g>."</string>
     <string name="notification_channel_abusive_bg_apps" msgid="6092140213264920355">"Aktivnost u pozadini"</string>
-    <string name="notification_title_abusive_bg_apps" msgid="344582472797982073">"Aktivnost u pozadini"</string>
-    <string name="notification_content_abusive_bg_apps" msgid="5572096708044958249">"Aplikacija <xliff:g id="APP">%1$s</xliff:g> troši bateriju u pozadini. Dodirnite da biste pregledali."</string>
-    <string name="notification_content_long_running_fgs" msgid="8878031652441570178">"Aplikacija <xliff:g id="APP">%1$s</xliff:g> je predugo pokrenuta u pozadini. Dodirnite da biste pregledali."</string>
+    <string name="notification_title_abusive_bg_apps" msgid="3258460527676573815">"Aplikacija koristi bateriju"</string>
+    <string name="notification_title_long_running_fgs" msgid="8170284286477131587">"Aplikacija je i dalje aktivna"</string>
+    <string name="notification_content_abusive_bg_apps" msgid="9180610713603474720">"<xliff:g id="APP">%1$s</xliff:g> koristi bateriju u pozadini. Dodirnite da biste pregledali."</string>
+    <string name="notification_content_long_running_fgs" msgid="8258193410039977101">"<xliff:g id="APP">%1$s</xliff:g> može da utiče na trajanje baterije. Dodirnite da biste pregledali aktivne aplikacije."</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Proverite aktivne aplikacije"</string>
-    <!-- no translation found for vdm_camera_access_denied (6102378580971542473) -->
-    <skip />
-    <!-- no translation found for vdm_camera_access_denied (6895968310395249076) -->
-    <skip />
+    <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"Ne može da se pristupi kameri telefona sa <xliff:g id="DEVICE">%1$s</xliff:g> uređaja"</string>
+    <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"Ne može da se pristupi kameri tableta sa <xliff:g id="DEVICE">%1$s</xliff:g> uređaja"</string>
     <string name="system_locale_title" msgid="3978041860457277638">"Jezik sistema"</string>
 </resources>

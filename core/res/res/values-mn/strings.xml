@@ -585,7 +585,7 @@
     <string name="biometric_error_generic" msgid="6784371929985434439">"Баталгаажуулахад алдаа гарлаа"</string>
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"Дэлгэцийн түгжээг ашиглах"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"Үргэлжлүүлэхийн тулд дэлгэцийн түгжээгээ оруулна уу"</string>
-    <string name="fingerprint_acquired_partial" msgid="694598777291084823">"Хэсэгчилсэн хурууны хээ илэрлээ"</string>
+    <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"Мэдрэгч дээр чанга дарна уу"</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"Хурууны хээ боловсруулж чадахгүй байна. Дахин оролдоно уу."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"Хурууны хээ мэдрэгчийг цэвэрлээд, дахин оролдоно уу"</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"Мэдрэгчийг цэвэрлээд, дахин оролдоно уу"</string>
@@ -598,7 +598,7 @@
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_error_not_match" msgid="4599441812893438961">"Хурууны хээг таньсангүй"</string>
-    <string name="fingerprint_udfps_error_not_match" msgid="4709197752023550709">"Мэдрэгч дээр чанга дарна уу"</string>
+    <string name="fingerprint_udfps_error_not_match" msgid="8236930793223158856">"Хурууны хээг таньсангүй"</string>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"Хурууны хээг нотолсон"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"Царайг баталгаажууллаа"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"Царайг баталгаажууллаа. Баталгаажуулах товчлуурыг дарна уу"</string>
@@ -1679,7 +1679,6 @@
     <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"ИДЭВХТЭЙ"</string>
     <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"ИДЭВХГҮЙ"</string>
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"<xliff:g id="SERVICE">%1$s</xliff:g>-д таны төхөөрөмжийг бүрэн хянахыг зөвшөөрөх үү?"</string>
-    <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"Хэрэв та <xliff:g id="SERVICE">%1$s</xliff:g>-г асаавал таны төхөөрөмж өгөгдлийн шифрлэлтийг сайжруулахын тулд таны дэлгэцийн түгжээг ашиглахгүй."</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"Бүрэн хянах нь таны хандалтын үйлчилгээний шаардлагад тусалдаг аппуудад тохиромжтой боловч ихэнх аппад тохиромжгүй байдаг."</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Дэлгэцийг харах ба хянах"</string>
     <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Энэ нь дэлгэц дээрх бүх контентыг унших болон контентыг бусад аппад харуулах боломжтой."</string>
@@ -1852,7 +1851,7 @@
     <string name="confirm_battery_saver" msgid="5247976246208245754">"ОК"</string>
     <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"Батарей хэмнэгч нь Бараан загварыг асааж, дэвсгэрийн үйл ажиллагаа, зарим визуал эффект, тодорхой онцлогууд болон зарим сүлжээний холболтыг хязгаарлах эсвэл унтраана."</string>
     <string name="battery_saver_description" msgid="8518809702138617167">"Батарей хэмнэгч нь Бараан загварыг асааж, дэвсгэрийн үйл ажиллагаа, зарим визуал эффект, тодорхой онцлогууд болон зарим сүлжээний холболтыг хязгаарлах эсвэл унтраана."</string>
-    <string name="data_saver_description" msgid="4995164271550590517">"Дата ашиглалтыг багасгахын тулд дата хэмнэгч нь ар талд ажиллаж буй зарим апп-н өгөгдлийг илгээх болон авахаас сэргийлдэг. Таны одоогийн ашиглаж буй апп нь өгөгдөлд хандах боломжтой хэдий ч тогтмол хандахгүй. Энэ нь жишээлбэл зургийг товших хүртэл харагдахгүй гэсэн үг юм."</string>
+    <string name="data_saver_description" msgid="4995164271550590517">"Дата ашиглалтыг багасгахын тулд дата хэмнэгч нь ар талд ажиллаж буй зарим аппын өгөгдлийг илгээх болон авахаас сэргийлдэг. Таны одоогийн ашиглаж буй апп нь өгөгдөлд хандах боломжтой хэдий ч тогтмол хандахгүй. Энэ нь жишээлбэл зургийг товших хүртэл харагдахгүй гэсэн үг юм."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Дата хэмнэгчийг асаах уу?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Асаах"</string>
     <string name="zen_mode_duration_minutes_summary" msgid="4555514757230849789">"{count,plural, =1{Нэг минутын турш ({formattedTime} хүртэл)}other{# минутын турш ({formattedTime} хүртэл)}}"</string>
@@ -2027,7 +2026,7 @@
     <string name="harmful_app_warning_open_anyway" msgid="5963657791740211807">"ЯМАР Ч ТОХИОЛДОЛД НЭЭХ"</string>
     <string name="harmful_app_warning_title" msgid="8794823880881113856">"Аюултай апп олдсон"</string>
     <string name="log_access_confirmation_title" msgid="2343578467290592708">"<xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g>-д төхөөрөмжийн бүх логт хандахыг зөвшөөрөх үү?"</string>
-    <string name="log_access_confirmation_allow" msgid="143157286283302512">"Зөвхөн энэ удаа"</string>
+    <string name="log_access_confirmation_allow" msgid="5302517782599389507">"Нэг удаагийн хандалтыг зөвшөөрнө үү"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"Бүү зөвшөөр"</string>
     <string name="log_access_confirmation_body" msgid="6581985716241928135">"Төхөөрөмжийн лог нь таны төхөөрөмж дээр юу болж байгааг бичдэг. Аппууд эдгээр логийг асуудлыг олох болон засахад ашиглах боломжтой.\n\nЗарим лог эмзэг мэдээлэл агуулж байж магадгүй тул та зөвхөн итгэдэг аппууддаа төхөөрөмжийн бүх логт хандахыг зөвшөөрнө үү. \n\nХэрэв та энэ аппад төхөөрөмжийн бүх логт хандахыг зөвшөөрөхгүй бол энэ нь өөрийн логт хандах боломжтой хэвээр байх болно. Tаны төхөөрөмж үйлдвэрлэгч таны төхөөрөмж дээрх зарим лог эсвэл мэдээлэлд хандах боломжтой хэвээр байж магадгүй. Нэмэлт мэдээлэл авах"</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"Дахиж бүү харуул"</string>
@@ -2259,9 +2258,10 @@
     <string name="ui_translation_accessibility_translated_text" msgid="3197547218178944544">"<xliff:g id="MESSAGE">%1$s</xliff:g> Орчуулсан."</string>
     <string name="ui_translation_accessibility_translation_finished" msgid="3057830947610088465">"Мессежийг <xliff:g id="FROM_LANGUAGE">%1$s</xliff:g>-с <xliff:g id="TO_LANGUAGE">%2$s</xliff:g> руу орчуулсан."</string>
     <string name="notification_channel_abusive_bg_apps" msgid="6092140213264920355">"Дэвсгэрийн үйл ажиллагаа"</string>
-    <string name="notification_title_abusive_bg_apps" msgid="344582472797982073">"Дэвсгэрийн үйл ажиллагаа"</string>
-    <string name="notification_content_abusive_bg_apps" msgid="5572096708044958249">"<xliff:g id="APP">%1$s</xliff:g> дэвсгэрт ажиллаж байгаа бөгөөд батарейг дуусгаж байна. Хянахын тулд товшино уу."</string>
-    <string name="notification_content_long_running_fgs" msgid="8878031652441570178">"<xliff:g id="APP">%1$s</xliff:g> дэвсгэрт удаан хугацааны турш ажиллаж байна. Хянахын тулд товшино уу."</string>
+    <string name="notification_title_abusive_bg_apps" msgid="3258460527676573815">"Апп батарейг ашиглаж байна"</string>
+    <string name="notification_title_long_running_fgs" msgid="8170284286477131587">"Апп идэвхтэй хэвээр байна"</string>
+    <string name="notification_content_abusive_bg_apps" msgid="9180610713603474720">"Ард <xliff:g id="APP">%1$s</xliff:g> батарейг ашиглаж байна. Хянахын тулд товшино уу."</string>
+    <string name="notification_content_long_running_fgs" msgid="8258193410039977101">"<xliff:g id="APP">%1$s</xliff:g> батарейн ажиллах хугацаанд нөлөөлж болзошгүй. Идэвхтэй аппыг хянахын тулд товшино уу."</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Идэвхтэй аппуудыг шалгах"</string>
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"Таны <xliff:g id="DEVICE">%1$s</xliff:g>-с утасны камерт хандах боломжгүй"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"Таны <xliff:g id="DEVICE">%1$s</xliff:g>-с таблетын камерт хандах боломжгүй"</string>
