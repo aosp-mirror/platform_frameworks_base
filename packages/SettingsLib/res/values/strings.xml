@@ -1604,4 +1604,11 @@
     <string name="bt_le_audio_broadcast_dialog_switch_app">Broadcast <xliff:g id="switchApp" example="App Name 2">%1$s</xliff:g></string>
     <!-- [CHAR LIMIT=NONE] Le audio broadcast dialog, different output. -->
     <string name="bt_le_audio_broadcast_dialog_different_output">Change output</string>
+
+    <!-- Developer setting: enable animations when a back gesture is executed [CHAR LIMIT=50] -->
+    <string name="back_navigation_animation">Predictive back animations</string>
+    <!-- Developer setting: enable animations when a back gesture is executed [CHAR LIMIT=150] -->
+    <string name="back_navigation_animation_summary">Enable system animations for predictive back.</string>
+    <!-- Developer setting: enable animations when a back gesture is executed, full explanation[CHAR LIMIT=NONE] -->
+    <string name="back_navigation_animation_dialog">This setting enables system animations for predictive gesture animation. It requires setting per-app "enableOnBackInvokedCallback" to true in the manifest file.</string>
 </resources>
