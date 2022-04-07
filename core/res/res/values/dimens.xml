@@ -779,6 +779,10 @@
     <dimen name="notification_left_icon_start">@dimen/notification_icon_circle_start</dimen>
     <!-- The alpha of a disabled notification button -->
     <item type="dimen" format="float" name="notification_action_disabled_alpha">0.5</item>
+    <!-- The maximum size of Person avatar image in MessagingStyle notifications.
+         This is bigger than displayed because listeners can use it for other displays
+         e.g. wearables. -->
+    <dimen name="notification_person_icon_max_size">144dp</dimen>
 
     <!-- The maximum size of the small notification icon on low memory devices. -->
     <dimen name="notification_small_icon_size_low_ram">@dimen/notification_small_icon_size</dimen>
@@ -792,6 +796,10 @@
     <dimen name="notification_big_picture_max_width_low_ram">294dp</dimen>
     <!-- The size of the right icon image when on low ram -->
     <dimen name="notification_right_icon_size_low_ram">@dimen/notification_right_icon_size</dimen>
+    <!-- The maximum size of Person avatar image in MessagingStyle notifications.
+     This is bigger than displayed because listeners can use it for other displays
+     e.g. wearables. -->
+    <dimen name="notification_person_icon_max_size_low_ram">96dp</dimen>
     <!-- The maximum size of the grayscale icon -->
     <dimen name="notification_grayscale_icon_max_size">256dp</dimen>
 
