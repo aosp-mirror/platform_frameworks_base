@@ -34,8 +34,12 @@
     <string name="status_bar_settings_auto_rotation" msgid="8329080442278431708">"ဖန်သားပြင် အလိုအလျောက်လှည့်ရန်"</string>
     <string name="usb_device_permission_prompt" msgid="4414719028369181772">"<xliff:g id="USB_DEVICE">%2$s</xliff:g> အား ဝင်သုံးရန် <xliff:g id="APPLICATION">%1$s</xliff:g> ကို ခွင့်ပြုပါသလား။"</string>
     <string name="usb_device_permission_prompt_warn" msgid="2309129784984063656">"<xliff:g id="APPLICATION">%1$s</xliff:g> အား <xliff:g id="USB_DEVICE">%2$s</xliff:g> ကို သုံးခွင့်ပြုမလား။\nဤအက်ပ်ကို အသံဖမ်းခွင့် ပေးမထားသော်လည်း ၎င်းသည် ဤ USB စက်ပစ္စည်းမှတစ်ဆင့် အသံများကို ဖမ်းယူနိုင်ပါသည်။"</string>
+    <string name="usb_audio_device_permission_prompt_title" msgid="4221351137250093451">"<xliff:g id="USB_DEVICE">%2$s</xliff:g> ဝင်သုံးရန် <xliff:g id="APPLICATION">%1$s</xliff:g> ကို ခွင့်ပြုမလား။"</string>
+    <string name="usb_audio_device_confirm_prompt_title" msgid="8828406516732985696">"<xliff:g id="USB_DEVICE">%2$s</xliff:g> ဆောင်ရွက်ရန် <xliff:g id="APPLICATION">%1$s</xliff:g> ကို ဖွင့်လိုပါသလား။"</string>
+    <string name="usb_audio_device_prompt_warn" msgid="2504972133361130335">"ဤအက်ပ်ကို အသံဖမ်းခွင့် ပေးမထားသော်လည်း ၎င်းသည် ဤ USB စက်ပစ္စည်းမှတစ်ဆင့် အသံများကို ဖမ်းယူနိုင်ပါသည်။ ဤစက်ဖြင့် <xliff:g id="APPLICATION">%1$s</xliff:g> အသုံးပြုခြင်းက ဖုန်းအဝင်၊ အကြောင်းကြားချက်နှင့် နှိုးစက်သံ မကြားခြင်းများ ဖြစ်စေနိုင်သည်။"</string>
+    <string name="usb_audio_device_prompt" msgid="7944987408206252949">"ဤစက်ဖြင့် <xliff:g id="APPLICATION">%1$s</xliff:g> အသုံးပြုခြင်းက ဖုန်းအဝင်၊ အကြောင်းကြားချက်နှင့် နှိုးစက်သံ မကြားခြင်းများ ဖြစ်စေနိုင်သည်။"</string>
     <string name="usb_accessory_permission_prompt" msgid="717963550388312123">"<xliff:g id="USB_ACCESSORY">%2$s</xliff:g> အား ဝင်သုံးရန် <xliff:g id="APPLICATION">%1$s</xliff:g> ကို ခွင့်ပြုပါသလား။"</string>
-    <string name="usb_device_confirm_prompt" msgid="4091711472439910809">"<xliff:g id="USB_DEVICE">%2$s</xliff:g> ဆောင်ရွက်ရန် <xliff:g id="APPLICATION">%1$s</xliff:g> ကို ဖွင့်လိုပါသလား။"</string>
+    <string name="usb_device_confirm_prompt" msgid="4091711472439910809">"<xliff:g id="USB_DEVICE">%2$s</xliff:g> စီမံရန် <xliff:g id="APPLICATION">%1$s</xliff:g> ကို ဖွင့်လိုပါသလား။"</string>
     <string name="usb_device_confirm_prompt_warn" msgid="990208659736311769">"<xliff:g id="USB_DEVICE">%2$s</xliff:g> ကို သုံးရန် <xliff:g id="APPLICATION">%1$s</xliff:g> ကို ဖွင့်မလား။\nဤအက်ပ်ကို အသံဖမ်းခွင့် ပေးမထားသော်လည်း ၎င်းသည် ဤ USB စက်ပစ္စည်းမှတစ်ဆင့် အသံများကို ဖမ်းယူနိုင်ပါသည်။"</string>
     <string name="usb_accessory_confirm_prompt" msgid="5728408382798643421">"<xliff:g id="USB_ACCESSORY">%2$s</xliff:g> ဆောင်ရွက်ရန် <xliff:g id="APPLICATION">%1$s</xliff:g> ကို ဖွင့်လိုပါသလား။"</string>
     <string name="usb_accessory_uri_prompt" msgid="6756649383432542382">"ဒီUSBပစ္စည်းနှင့်ဘယ်အပ်ပလီကေးရှင်းမှ အလုပ်မလုပ်ပါ။ ပိုမိုသိရန် <xliff:g id="URL">%1$s</xliff:g>တွင် လေ့လာပါ"</string>
@@ -88,7 +92,7 @@
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"ဖန်သားပြင်ရိုက်ကူးနေသည်"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"ဖန်သားပြင် ရိုက်ကူးသည့် စက်ရှင်အတွက် ဆက်တိုက်လာနေသော အကြောင်းကြားချက်"</string>
     <string name="screenrecord_start_label" msgid="1750350278888217473">"စတင် ရိုက်ကူးမလား။"</string>
-    <string name="screenrecord_description" msgid="1123231719680353736">"ရိုက်ကူးနေစဉ်အတွင်း Android စနစ်သည် သင့်မျက်နှာပြင်ပေါ်တွင် မြင်နိုင်သော သို့မဟုတ် သင့်စက်ပစ္စည်းတွင် ဖွင့်ထားသော အရေးကြီးသည့် အချက်အလက်မှန်သမျှကို ရိုက်ကူးနိုင်သည်။ ၎င်းတွင် စကားဝှက်များ၊ ငွေပေးချေမှု အချက်အလက်၊ ဓာတ်ပုံများ၊ မက်ဆေ့ဂျ်များနှင့် အသံများ ပါဝင်သည်။"</string>
+    <string name="screenrecord_description" msgid="1123231719680353736">"ရိုက်ကူးနေစဉ်အတွင်း Android စနစ်သည် သင့်ဖန်သားပြင်ပေါ်တွင် မြင်နိုင်သော (သို့) သင့်စက်ပစ္စည်းတွင် ဖွင့်ထားသော အရေးကြီးသည့် အချက်အလက်များကို ရိုက်ယူနိုင်သည်။ ၎င်းတွင် စကားဝှက်၊ ငွေပေးချေမှု အချက်အလက်၊ ဓာတ်ပုံ၊ မက်ဆေ့ဂျ်နှင့် အသံများ ပါဝင်သည်။"</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"အသံဖမ်းရန်"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"စက်ပစ္စည်းအသံ"</string>
     <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"သီချင်း၊ ဖုန်းခေါ်ဆိုမှုနှင့် ဖုန်းမြည်သံကဲ့သို့ သင့်စက်ပစ္စည်းမှ အသံ"</string>
@@ -131,7 +135,8 @@
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="2242167416140740920">"မျက်နှာ အထောက်အထားစိစစ်ပြီးပြီ"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"အတည်ပြုပြီးပြီ"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"အပြီးသတ်ရန်အတွက် \'အတည်ပြုရန်\' ကို တို့ပါ"</string>
-    <string name="biometric_dialog_tap_confirm_with_face" msgid="1597899891472340950">"သင့်မျက်နှာဖြင့် ဖွင့်သည်။ ရှေ့ဆက်ရန် နှိပ်ပါ။"</string>
+    <!-- no translation found for biometric_dialog_tap_confirm_with_face (1092050545851021991) -->
+    <skip />
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"အထောက်အထားစိစစ်ပြီးပြီ"</string>
     <string name="biometric_dialog_use_pin" msgid="8385294115283000709">"ပင်နံပါတ်သုံးရန်"</string>
     <string name="biometric_dialog_use_pattern" msgid="2315593393167211194">"ပုံစံကို သုံးရန်"</string>
@@ -287,6 +292,15 @@
     <string name="sensor_privacy_start_use_mic_dialog_content" msgid="1624701280680913717">"၎င်းက သင့်မိုက်ခရိုဖုန်းသုံးရန် ခွင့်ပြုထားသော အက်ပ်နှင့် ဝန်ဆောင်မှုအားလုံးအတွက် သုံးခွင့်ကို ပြန်ဖွင့်ပေးသည်။"</string>
     <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"၎င်းက သင့်ကင်မရာသုံးရန် ခွင့်ပြုထားသော အက်ပ်နှင့် ဝန်ဆောင်မှုအားလုံးအတွက် သုံးခွင့်ကို ပြန်ဖွင့်ပေးသည်။"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_content" msgid="3577642558418404919">"၎င်းက သင့်ကင်မရာ (သို့) မိုက်ခရိုဖုန်းသုံးရန် ခွင့်ပြုထားသော အက်ပ်နှင့် ဝန်ဆောင်မှုအားလုံးအတွက် သုံးခွင့်ကို ပြန်ဖွင့်ပေးသည်။"</string>
+    <string name="sensor_privacy_start_use_mic_blocked_dialog_title" msgid="2640140287496469689">"မိုက်ခရိုဖုန်းကို ပိတ်ထားသည်"</string>
+    <string name="sensor_privacy_start_use_camera_blocked_dialog_title" msgid="7398084286822440384">"ကင်မရာကို ပိတ်ထားသည်"</string>
+    <string name="sensor_privacy_start_use_mic_camera_blocked_dialog_title" msgid="195236134743281973">"မိုက်နှင့်ကင်မရာကို ပိတ်ထားသည်"</string>
+    <string name="sensor_privacy_start_use_mic_blocked_dialog_content" msgid="2138318880682877747">"ပြန်ဖွင့်ရန်အတွက် မိုက်ခရိုဖုန်းသုံးခွင့်ပေးရန် သင့်စက်ပေါ်ရှိ ကိုယ်ရေးအချက်အလက်လုံခြုံမှု ခလုတ်ကို မိုက်ခရိုဖုန်းဖွင့်သည့် အနေအထားသို့ ရွှေ့ရမည်။ သင့်စက်ပေါ်ရှိ ကိုယ်ရေးအချက်အလက်လုံခြုံမှု ခလုတ်ရှာရန် စက်ပစ္စည်းလက်စွဲစာအုပ်ကို ကိုးကားနိုင်သည်။"</string>
+    <string name="sensor_privacy_start_use_camera_blocked_dialog_content" msgid="7216015168047965948">"ပြန်ဖွင့်ရန်အတွက် ကင်မရာသုံးခွင့်ပေးရန် သင့်စက်ပေါ်ရှိ ကိုယ်ရေးအချက်အလက်လုံခြုံမှု ခလုတ်ကို ကင်မရာဖွင့်သည့် အနေအထားသို့ ရွှေ့ရမည်။ သင့်စက်ပေါ်ရှိ ကိုယ်ရေးအချက်အလက်လုံခြုံမှု ခလုတ်ရှာရန် စက်ပစ္စည်းလက်စွဲစာအုပ်ကို ကိုးကားနိုင်သည်။"</string>
+    <string name="sensor_privacy_start_use_mic_camera_blocked_dialog_content" msgid="3960837827570483762">"၎င်းတို့ပြန်ဖွင့်ရန်အတွက် သုံးခွင့်ပေးရန် သင့်စက်ပေါ်ရှိ ကိုယ်ရေးအချက်အလက်လုံခြုံမှု ခလုတ်ကို ပြန်ဖွင့်သည့် အနေအထားသို့ ရွှေ့ရမည်။ သင့်စက်ပေါ်ရှိ ကိုယ်ရေးအချက်အလက်လုံခြုံမှု ခလုတ်ရှာရန် စက်ပစ္စည်းလက်စွဲစာအုပ်ကို ကိုးကားနိုင်သည်။"</string>
+    <string name="sensor_privacy_mic_unblocked_toast_content" msgid="306555320557065068">"မိုက်ခရိုဖုန်း သုံးနိုင်သည်"</string>
+    <string name="sensor_privacy_camera_unblocked_toast_content" msgid="7843105715964332311">"ကင်မရာ သုံးနိုင်သည်"</string>
+    <string name="sensor_privacy_mic_camera_unblocked_toast_content" msgid="7339355093282661115">"မိုက်ခရိုဖုန်းနှင့် ကင်မရာ သုံးနိုင်သည်"</string>
     <string name="media_seamless_other_device" msgid="4654849800789196737">"အခြားစက်ပစ္စည်း"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"ဖွင့်၊ ပိတ် အနှစ်ချုပ်"</string>
     <string name="zen_priority_introduction" msgid="3159291973383796646">"နှိုးစက်သံ၊ သတိပေးချက်အသံများ၊ ပွဲစဉ်သတိပေးသံများနှင့် သင်ခွင့်ပြုထားသူများထံမှ ဖုန်းခေါ်မှုများမှလွဲ၍ အခြားအသံများနှင့် တုန်ခါမှုများက သင့်ကို အနှောင့်အယှက်ပြုမည် မဟုတ်ပါ။ သို့သော်လည်း သီချင်း၊ ဗီဒီယိုနှင့် ဂိမ်းများအပါအဝင် သင်ကရွေးချယ်ဖွင့်ထားသည့် အရာတိုင်း၏ အသံကိုမူ ကြားနေရဆဲဖြစ်ပါလိမ့်မည်။"</string>
@@ -297,7 +311,10 @@
     <string name="notification_tap_again" msgid="4477318164947497249">"ဖွင့်ရန် ထပ်ပြီး ပုတ်ပါ"</string>
     <string name="tap_again" msgid="1315420114387908655">"ထပ်တို့ပါ"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"ဖွင့်ရန် အပေါ်သို့ပွတ်ဆွဲပါ"</string>
-    <string name="keyguard_unlock_press" msgid="8488350566398524740">"ဖွင့်ရန် နှိပ်ပါ"</string>
+    <!-- no translation found for keyguard_unlock_press (9140109453735019209) -->
+    <skip />
+    <!-- no translation found for keyguard_face_successful_unlock_press (25520941264602588) -->
+    <skip />
     <string name="keyguard_retry" msgid="886802522584053523">"ထပ်စမ်းကြည့်ရန် အပေါ်သို့ပွတ်ဆွဲပါ"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"NFC ကို အသုံးပြုရန် လော့ခ်ဖွင့်ပါ"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"ဤစက်ကို သင့်အဖွဲ့အစည်းက ပိုင်ဆိုင်သည်"</string>
@@ -320,7 +337,6 @@
     <string name="keyguard_indication_charging_time_dock" msgid="6150404291427377863">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • အားသွင်းအထိုင် • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> တွင် ပြည့်မည်"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"အသုံးပြုသူကို ပြောင်းလဲရန်"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"ဒီချိတ်ဆက်မှု ထဲက အက်ပ်များ အားလုံး နှင့် ဒေတာကို ဖျက်ပစ်မည်။"</string>
-    <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"ဖယ်ထုတ်ပါ"</string>
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"ဧည့်သည်ကို ပြန်လည် ကြိုဆိုပါသည်။"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"သင်၏ စက်ရှင်ကို ဆက်လုပ်လိုပါသလား။"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"ပြန်စပါ"</string>
@@ -766,6 +782,12 @@
     <string name="controls_dialog_ok" msgid="2770230012857881822">"ထည့်ရန်"</string>
     <string name="controls_dialog_message" msgid="342066938390663844">"<xliff:g id="APP">%s</xliff:g> က အကြံပြုထားသည်"</string>
     <string name="controls_tile_locked" msgid="731547768182831938">"စက်ကိုလော့ခ်ချထားသည်"</string>
+    <string name="controls_settings_show_controls_dialog_title" msgid="3357852503553809554">"လော့ခ်မျက်နှာပြင်တွင် စက်ပစ္စည်းများကြည့်ရှုပြီး ထိန်းချုပ်မလား။"</string>
+    <string name="controls_settings_show_controls_dialog_message" msgid="7666211700524587969">"လော့ခ်မျက်နှာပြင်တွင် ပြင်ပစက်များအတွက် ထိန်းချုပ်မှုများ ထည့်နိုင်သည်။\n\nသင့်စက်ပစ္စည်းအက်ပ်က အချို့စက်များကို ဖုန်း (သို့) တက်ဘလက် လော့ခ်ဖွင့်ရန်မလိုဘဲ သုံးခွင့်ပေးနိုင်သည်။\n\nဆက်တင်များ၌ အချိန်မရွေး ပြောင်းလဲပြင်ဆင်နိုင်သည်။"</string>
+    <string name="controls_settings_trivial_controls_dialog_title" msgid="7593188157655036677">"လော့ခ်မျက်နှာပြင်တွင် စက်ပစ္စည်းများ ထိန်းချုပ်မလား။"</string>
+    <string name="controls_settings_trivial_controls_dialog_message" msgid="237183787721917586">"အချို့စက်များကို ဖုန်း (သို့) တက်ဘလက် လော့ခ်ဖွင့်ရန်မလိုဘဲ ထိန်းချုပ်နိုင်သည်။\n\nဤနည်းလမ်းအတိုင်း ထိန်းချုပ်နိုင်မည့်စက်များကို သင့်စက်ပစ္စည်းအက်ပ်က ဆုံးဖြတ်သည်။"</string>
+    <string name="controls_settings_dialog_neutral_button" msgid="4514446354793124140">"မလိုပါ"</string>
+    <string name="controls_settings_dialog_positive_button" msgid="436070672551674863">"Yes"</string>
     <string name="controls_pin_use_alphanumeric" msgid="8478371861023048414">"ပင်နံပါတ်တွင် စာလုံး သို့မဟုတ် သင်္ကေတများပါဝင်သည်"</string>
     <string name="controls_pin_verify" msgid="3452778292918877662">"<xliff:g id="DEVICE">%s</xliff:g> ကို အတည်ပြုခြင်း"</string>
     <string name="controls_pin_wrong" msgid="6162694056042164211">"ပင်နံပါတ် မှားနေသည်"</string>
@@ -775,8 +797,7 @@
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"ပိုကြည့်ရန် ပွတ်ဆွဲပါ"</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"အကြံပြုချက်များ ဖွင့်နေသည်"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"မီဒီယာ"</string>
-    <!-- no translation found for controls_media_close_session (4780485355795635052) -->
-    <skip />
+    <string name="controls_media_close_session" msgid="4780485355795635052">"<xliff:g id="APP_NAME">%1$s</xliff:g> ၏ ဤမီဒီယာ ထိန်းချုပ်ကိရိယာကို ဖျောက်ထားမလား။"</string>
     <string name="controls_media_active_session" msgid="3146882316024153337">"လက်ရှိ မီဒီယာစက်ရှင်ကို ဝှက်၍မရပါ။"</string>
     <string name="controls_media_dismiss_button" msgid="4485675693008031646">"ဖျောက်ထားမည်"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"ဆက်လုပ်ရန်"</string>
@@ -816,6 +837,13 @@
     <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"အက်ပ်ဖွင့်ပြီး ဤစက်ရှင်ကို ကာစ်လုပ်နိုင်သည်။"</string>
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"အမည်မသိ အက်ပ်"</string>
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"ကာစ် ရပ်ရန်"</string>
+    <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"ထုတ်လွှင့်မှုဆောင်ရွက်ပုံ"</string>
+    <string name="media_output_broadcast" msgid="3555580945878071543">"ထုတ်လွှင့်ခြင်း"</string>
+    <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"အနီးရှိတွဲသုံးနိုင်သော ဘလူးတုသ်သုံးစက် အသုံးပြုသူများက သင်ထုတ်လွှင့်နေသော မီဒီယာကို နားဆင်နိုင်သည်"</string>
+    <string name="media_output_broadcasting_message" msgid="4150299923404886073">"သင်၏ထုတ်လွှင့်မှုကို နားဆင်ရန် အနီးရှိတွဲသုံးနိုင်သော ဘလူးတုသ်သုံးစက် အသုံးပြုသူများက သင်၏ QR ကုဒ်ကို ရှာနိုင်သည် (သို့) သင်၏ထုတ်လွှင့်မှုအမည်နှင့် စကားဝှက်ကို သုံးနိုင်သည်"</string>
+    <string name="media_output_broadcast_name" msgid="8786127091542624618">"ထုတ်လွှင့်မှုအမည်"</string>
+    <string name="media_output_broadcast_code" msgid="870795639644728542">"စကားဝှက်"</string>
+    <string name="media_output_broadcast_dialog_save" msgid="7910865591430010198">"သိမ်းရန်"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"တည်ဆောက်မှုနံပါတ်"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"တည်ဆောက်မှုနံပါတ်ကို ကလစ်ဘုတ်သို့ မိတ္တူကူးပြီးပါပြီ။"</string>
     <string name="basic_status" msgid="2315371112182658176">"စကားဝိုင်းကို ဖွင့်ရန်"</string>
@@ -892,7 +920,7 @@
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"ပွင့်နေသည့်အက်ပ်များ"</string>
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"ရပ်ရန်"</string>
     <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"ရပ်ထားသည်"</string>
-    <string name="clipboard_edit_text_copy" msgid="770856373439969178">"မိတ္တူကူးရန်"</string>
+    <string name="clipboard_edit_text_done" msgid="4551887727694022409">"ပြီးပြီ"</string>
     <string name="clipboard_overlay_text_copied" msgid="1872624400464891363">"ကူးပြီးပါပြီ"</string>
     <string name="clipboard_edit_source" msgid="9156488177277788029">"<xliff:g id="APPNAME">%1$s</xliff:g> ထံမှ"</string>
     <string name="clipboard_dismiss_description" msgid="7544573092766945657">"UI မိတ္တူမကူးတော့ရန်"</string>
