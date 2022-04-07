@@ -540,8 +540,13 @@ public class ComputerEngine implements Computer {
                                 && ((!matchInstantApp && !isCallerInstantApp && isTargetInstantApp)
                                 || (matchVisibleToInstantAppOnly && isCallerInstantApp
                                 && isTargetHiddenFromInstantApp));
+                final boolean resolveForStartNonExported = resolveForStart
+                                && !ai.exported
+                                && !isCallerSameApp(pkgName, filterCallingUid);
                 final boolean blockNormalResolution =
-                        !resolveForStart && !isTargetInstantApp && !isCallerInstantApp
+                        (!resolveForStart || resolveForStartNonExported)
+                                && !isTargetInstantApp
+                                && !isCallerInstantApp
                                 && shouldFilterApplication(
                                 getPackageStateInternal(ai.applicationInfo.packageName,
                                         Process.SYSTEM_UID), filterCallingUid, userId);
