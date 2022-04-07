@@ -30,9 +30,8 @@ import android.util.Slog;
 import android.util.Spline;
 import android.view.DisplayAddress;
 
-import com.android.internal.annotations.VisibleForTesting;
-
 import com.android.internal.R;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.display.BrightnessSynchronizer;
 import com.android.server.display.config.BrightnessThresholds;
 import com.android.server.display.config.BrightnessThrottlingMap;
@@ -75,7 +74,7 @@ import javax.xml.datatype.DatatypeConfigurationException;
  *  <pre>
  *  {@code
  *    <displayConfiguration>
- *      <densityMap>
+ *      <densityMapping>
  *        <density>
  *          <height>480</height>
  *          <width>720</width>
@@ -96,7 +95,7 @@ import javax.xml.datatype.DatatypeConfigurationException;
  *          <width>3840</width>
  *          <density>640</density>
  *        </density>
- *      </densityMap>
+ *      </densityMapping>
  *
  *      <screenBrightnessMap>
  *        <point>
