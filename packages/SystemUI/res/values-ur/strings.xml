@@ -35,13 +35,13 @@
     <string name="usb_device_permission_prompt" msgid="4414719028369181772">"<xliff:g id="APPLICATION">%1$s</xliff:g> کو <xliff:g id="USB_DEVICE">%2$s</xliff:g> تک رسائی حاصل کرنے کی اجازت دیں؟"</string>
     <string name="usb_device_permission_prompt_warn" msgid="2309129784984063656">"‏<xliff:g id="APPLICATION">%1$s</xliff:g> کو <xliff:g id="USB_DEVICE">%2$s</xliff:g> تک رسائی دیں؟\nاس ایپ کو ریکارڈ کی اجازت عطا نہیں کی گئی ہے مگر اس USB آلہ سے کیپچر کر سکتے ہیں۔"</string>
     <string name="usb_audio_device_permission_prompt_title" msgid="4221351137250093451">"<xliff:g id="APPLICATION">%1$s</xliff:g> کو <xliff:g id="USB_DEVICE">%2$s</xliff:g> تک رسائی حاصل کرنے کی اجازت دیں؟"</string>
-    <string name="usb_audio_device_confirm_prompt_title" msgid="8828406516732985696">"<xliff:g id="USB_DEVICE">%2$s</xliff:g> ہینڈل کرنے کیلئے <xliff:g id="APPLICATION">%1$s</xliff:g> کھولیں؟"</string>
+    <string name="usb_audio_device_confirm_prompt_title" msgid="8828406516732985696">"‫<xliff:g id="USB_DEVICE">%2$s</xliff:g> ہینڈل کرنے کیلئے <xliff:g id="APPLICATION">%1$s</xliff:g> کھولیں؟"</string>
     <string name="usb_audio_device_prompt_warn" msgid="2504972133361130335">"‏اس ایپ کو ریکارڈ کرنے کی اجازت عطا نہیں کی گئی ہے مگر اس USB آلہ کے ذریعے آڈیو کیپچر کر سکتی ہے۔ اس آلہ پر <xliff:g id="APPLICATION">%1$s</xliff:g> کا استعمال آپ کو کالز، اطلاعات اور الارمز سننے سے روک سکتا ہے۔"</string>
     <string name="usb_audio_device_prompt" msgid="7944987408206252949">"اس آلہ پر <xliff:g id="APPLICATION">%1$s</xliff:g> کا استعمال آپ کو کالز، اطلاعات اور الارمز سننے سے روک سکتا ہے۔"</string>
     <string name="usb_accessory_permission_prompt" msgid="717963550388312123">"<xliff:g id="APPLICATION">%1$s</xliff:g> کو <xliff:g id="USB_ACCESSORY">%2$s</xliff:g> تک رسائی حاصل کرنے کی اجازت دیں؟"</string>
     <string name="usb_device_confirm_prompt" msgid="4091711472439910809">"<xliff:g id="USB_DEVICE">%2$s</xliff:g> ہینڈل کرنے کیلئے <xliff:g id="APPLICATION">%1$s</xliff:g> کھولیں؟"</string>
     <string name="usb_device_confirm_prompt_warn" msgid="990208659736311769">"‏<xliff:g id="USB_DEVICE">%2$s</xliff:g> کو ہینڈل کرنے کے ليے <xliff:g id="APPLICATION">%1$s</xliff:g> کھولیں؟ \nاس ایپ کو ریکارڈ کی اجازت عطا نہیں کی گئی ہے مگر اس USB آلہ سے کیپچر کر سکتے ہیں۔"</string>
-    <string name="usb_accessory_confirm_prompt" msgid="5728408382798643421">"<xliff:g id="USB_ACCESSORY">%2$s</xliff:g> ہینڈل کرنے کیلئے <xliff:g id="APPLICATION">%1$s</xliff:g> کھولیں؟"</string>
+    <string name="usb_accessory_confirm_prompt" msgid="5728408382798643421">"‫<xliff:g id="USB_ACCESSORY">%2$s</xliff:g> ہینڈل کرنے کیلئے <xliff:g id="APPLICATION">%1$s</xliff:g> کھولیں؟"</string>
     <string name="usb_accessory_uri_prompt" msgid="6756649383432542382">"‏اس USB لوازم کے ساتھ کوئی انسٹال کردہ ایپس کام نہیں کرتی ہیں۔ <xliff:g id="URL">%1$s</xliff:g> پر مزید جانیں"</string>
     <string name="title_usb_accessory" msgid="1236358027511638648">"‏USB لوازم"</string>
     <string name="label_view" msgid="6815442985276363364">"دیکھیں"</string>
@@ -135,7 +135,7 @@
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="2242167416140740920">"چہرے کی تصدیق ہو گئی"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"تصدیق شدہ"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"مکمل کرنے کیلئے \'تصدیق کریں\' تھپتھپائیں"</string>
-    <!-- no translation found for biometric_dialog_tap_confirm_with_face (7538145860465755864) -->
+    <!-- no translation found for biometric_dialog_tap_confirm_with_face (1092050545851021991) -->
     <skip />
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"تصدیق کردہ"</string>
     <string name="biometric_dialog_use_pin" msgid="8385294115283000709">"‏PIN استعمال کریں"</string>
@@ -292,24 +292,15 @@
     <string name="sensor_privacy_start_use_mic_dialog_content" msgid="1624701280680913717">"اس سے آپ کا مائیکروفون استعمال کرنے کے لیے اجازت یافتہ سبھی ایپس اور سروسز کے لیے رسائی غیر مسدود ہو جاتی ہے۔"</string>
     <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"اس سے آپ کا کیمرا استعمال کرنے کے لیے اجازت یافتہ سبھی ایپس اور سروسز کے لیے رسائی غیر مسدود ہو جاتی ہے۔"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_content" msgid="3577642558418404919">"اس سے آپ کا کیمرا یا مائیکروفون استعمال کرنے کے لیے اجازت یافتہ سبھی ایپس اور سروسز کے لیے رسائی غیر مسدود ہو جاتی ہے۔"</string>
-    <!-- no translation found for sensor_privacy_start_use_mic_blocked_dialog_title (2640140287496469689) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_start_use_camera_blocked_dialog_title (7398084286822440384) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_start_use_mic_camera_blocked_dialog_title (195236134743281973) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_start_use_mic_blocked_dialog_content (2138318880682877747) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_start_use_camera_blocked_dialog_content (7216015168047965948) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_start_use_mic_camera_blocked_dialog_content (3960837827570483762) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_mic_unblocked_toast_content (306555320557065068) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_camera_unblocked_toast_content (7843105715964332311) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_mic_camera_unblocked_toast_content (7339355093282661115) -->
-    <skip />
+    <string name="sensor_privacy_start_use_mic_blocked_dialog_title" msgid="2640140287496469689">"مائیکروفون مسدود ہے"</string>
+    <string name="sensor_privacy_start_use_camera_blocked_dialog_title" msgid="7398084286822440384">"کیمرا مسدود ہے"</string>
+    <string name="sensor_privacy_start_use_mic_camera_blocked_dialog_title" msgid="195236134743281973">"مائیک اور کیمرا مسدود ہیں"</string>
+    <string name="sensor_privacy_start_use_mic_blocked_dialog_content" msgid="2138318880682877747">"غیر مسدود کرنے کے لیے، کیمرا تک رسائی کی اجازت دینے کے لیے اپنے آلے پر رازداری سوئچ کو مائیکروفون آن ہے وضع پر لے جائیں۔ اپنے آلے پر رازداری سوئچ کا پتہ لگانے کے لیے آلہ کے مینوئل سے رجوع کریں۔"</string>
+    <string name="sensor_privacy_start_use_camera_blocked_dialog_content" msgid="7216015168047965948">"غیر مسدود کرنے کے لیے، کیمرا تک رسائی کی اجازت دینے کے لیے اپنے آلے پر رازداری سوئچ کو کیمرا آن ہے وضع پر لے جائیں۔ اپنے آلے پر رازداری سوئچ کا پتہ لگانے کے لیے آلہ کے مینوئل سے رجوع کریں۔"</string>
+    <string name="sensor_privacy_start_use_mic_camera_blocked_dialog_content" msgid="3960837827570483762">"انہیں غیر مسدود کرنے کے لیے، رسائی کی اجازت دینے کے لیے اپنے آلے پر رازداری سوئچ کو غیر مسدود کریں وضع پر لے جائیں۔ اپنے آلے پر رازداری سوئچ کا پتہ لگانے کے لیے آلہ کے مینوئل سے رجوع کریں۔"</string>
+    <string name="sensor_privacy_mic_unblocked_toast_content" msgid="306555320557065068">"مائیکروفون دستیاب ہے"</string>
+    <string name="sensor_privacy_camera_unblocked_toast_content" msgid="7843105715964332311">"کیمرا دستیاب ہے"</string>
+    <string name="sensor_privacy_mic_camera_unblocked_toast_content" msgid="7339355093282661115">"مائیکروفون اور کیمرا دستیاب ہیں"</string>
     <string name="media_seamless_other_device" msgid="4654849800789196737">"دوسرا آلہ"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"مجموعی جائزہ ٹوگل کریں"</string>
     <string name="zen_priority_introduction" msgid="3159291973383796646">"الارمز، یاددہانیوں، ایونٹس اور آپ کے متعین کردہ کالرز کے علاوہ، آپ آوازوں اور وائبریشنز سے ڈسٹرب نہیں ہوں گے۔ موسیقی، ویڈیوز اور گیمز سمیت آپ ابھی بھی ہر وہ چیز سنیں گے جسے چلانے کا آپ انتخاب کرتے ہیں۔"</string>
@@ -320,7 +311,10 @@
     <string name="notification_tap_again" msgid="4477318164947497249">"کھولنے کیلئے دوبارہ تھپتھپائیں"</string>
     <string name="tap_again" msgid="1315420114387908655">"دوبارہ تھپتھپائیں"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"کھولنے کے لیے اوپر سوائپ کريں"</string>
-    <string name="keyguard_unlock_press" msgid="8488350566398524740">"کھولنے کے لیے دبائیں"</string>
+    <!-- no translation found for keyguard_unlock_press (9140109453735019209) -->
+    <skip />
+    <!-- no translation found for keyguard_face_successful_unlock_press (25520941264602588) -->
+    <skip />
     <string name="keyguard_retry" msgid="886802522584053523">"دوبارہ کوشش کرنے کے لیے اوپر سوائپ کريں"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"‏NFC استعمال کرنے کیلئے غیر مقفل کریں"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"یہ آلہ آپ کی تنظیم کا ہے"</string>
@@ -788,18 +782,12 @@
     <string name="controls_dialog_ok" msgid="2770230012857881822">"شامل کریں"</string>
     <string name="controls_dialog_message" msgid="342066938390663844">"<xliff:g id="APP">%s</xliff:g> کی طرف سے تجویز کردہ"</string>
     <string name="controls_tile_locked" msgid="731547768182831938">"آلہ مقفل کر دیا گیا"</string>
-    <!-- no translation found for controls_settings_show_controls_dialog_title (3357852503553809554) -->
-    <skip />
-    <!-- no translation found for controls_settings_show_controls_dialog_message (7666211700524587969) -->
-    <skip />
-    <!-- no translation found for controls_settings_trivial_controls_dialog_title (7593188157655036677) -->
-    <skip />
-    <!-- no translation found for controls_settings_trivial_controls_dialog_message (237183787721917586) -->
-    <skip />
-    <!-- no translation found for controls_settings_dialog_neutral_button (4514446354793124140) -->
-    <skip />
-    <!-- no translation found for controls_settings_dialog_positive_button (436070672551674863) -->
-    <skip />
+    <string name="controls_settings_show_controls_dialog_title" msgid="3357852503553809554">"لاک اسکرین سے آلات دکھائیں اور کنٹرول کریں؟"</string>
+    <string name="controls_settings_show_controls_dialog_message" msgid="7666211700524587969">"آپ اپنے بیرونی آلات کے لیے لاک اسکرین پر کنٹرولز شامل کر سکتے ہیں۔\n\nآپ کے آلے کی ایپ آپ کو اپنے فون یا ٹیبلیٹ کو غیر مقفل کیے بغیر کچھ آلات کو کنٹرول کرنے کی اجازت دے سکتی ہے۔\n\nآپ ترتیبات میں کسی بھی وقت تبدیلیاں کر سکتے ہیں۔"</string>
+    <string name="controls_settings_trivial_controls_dialog_title" msgid="7593188157655036677">"لاک اسکرین سے آلات کو کنٹرول کریں؟"</string>
+    <string name="controls_settings_trivial_controls_dialog_message" msgid="237183787721917586">"آپ اپنے فون یا ٹیبلیٹ کو غیر مقفل کیے بغیر کچھ آلات کو کنٹرول کر سکتے ہیں۔\n\nآپ کے آلے کی ایپ اس بات کا تعین کرتی ہے کہ اس طرح کن آلات کو کنٹرول کیا جا سکتا ہے۔"</string>
+    <string name="controls_settings_dialog_neutral_button" msgid="4514446354793124140">"نہیں شکریہ"</string>
+    <string name="controls_settings_dialog_positive_button" msgid="436070672551674863">"ہاں"</string>
     <string name="controls_pin_use_alphanumeric" msgid="8478371861023048414">"‏PIN میں حروف یا علامات شامل ہیں"</string>
     <string name="controls_pin_verify" msgid="3452778292918877662">"‫<xliff:g id="DEVICE">%s</xliff:g> کی تصدیق کریں"</string>
     <string name="controls_pin_wrong" msgid="6162694056042164211">"‏غلط PIN"</string>
@@ -849,20 +837,13 @@
     <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"اس سیشن کو کاسٹ کرنے کیلئے، براہ کرم ایپ کھولیں۔"</string>
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"نامعلوم ایپ"</string>
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"کاسٹ کرنا بند کریں"</string>
-    <!-- no translation found for media_output_first_broadcast_title (6292237789860753022) -->
-    <skip />
-    <!-- no translation found for media_output_broadcast (3555580945878071543) -->
-    <skip />
-    <!-- no translation found for media_output_first_notify_broadcast_message (6353857724136398494) -->
-    <skip />
-    <!-- no translation found for media_output_broadcasting_message (4150299923404886073) -->
-    <skip />
-    <!-- no translation found for media_output_broadcast_name (8786127091542624618) -->
-    <skip />
-    <!-- no translation found for media_output_broadcast_code (870795639644728542) -->
-    <skip />
-    <!-- no translation found for media_output_broadcast_dialog_save (7910865591430010198) -->
-    <skip />
+    <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"براڈکاسٹنگ کیسے کام کرتا ہے"</string>
+    <string name="media_output_broadcast" msgid="3555580945878071543">"براڈکاسٹ"</string>
+    <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"موافق بلوٹوتھ آلات کے ساتھ آپ کے قریبی لوگ آپ کے نشر کردہ میڈیا کو سن سکتے ہیں"</string>
+    <string name="media_output_broadcasting_message" msgid="4150299923404886073">"‏آپ کا براڈکاسٹ سننے کے لیے، موافق بلوٹوتھ آلات کے ساتھ قریبی لوگ آپ کا QR کوڈ اسکین کر سکتے ہیں یا آپ کے براڈکاسٹ کا نام اور پاس ورڈ استعمال کر سکتے ہیں"</string>
+    <string name="media_output_broadcast_name" msgid="8786127091542624618">"براڈکاسٹ کا نام"</string>
+    <string name="media_output_broadcast_code" msgid="870795639644728542">"پاس ورڈ"</string>
+    <string name="media_output_broadcast_dialog_save" msgid="7910865591430010198">"محفوظ کریں"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"بلڈ نمبر"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"بلڈ نمبر کلپ بورڈ میں کاپی ہو گیا۔"</string>
     <string name="basic_status" msgid="2315371112182658176">"گفتگو کھولیں"</string>
@@ -939,8 +920,7 @@
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"فعال ایپس"</string>
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"روکیں"</string>
     <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"رکی ہوئی ہے"</string>
-    <!-- no translation found for clipboard_edit_text_done (4551887727694022409) -->
-    <skip />
+    <string name="clipboard_edit_text_done" msgid="4551887727694022409">"ہو گیا"</string>
     <string name="clipboard_overlay_text_copied" msgid="1872624400464891363">"کاپی کر دیا گیا ہے"</string>
     <string name="clipboard_edit_source" msgid="9156488177277788029">"<xliff:g id="APPNAME">%1$s</xliff:g> سے"</string>
     <string name="clipboard_dismiss_description" msgid="7544573092766945657">"‏کاپی شدہ UI کو برخاست کریں"</string>

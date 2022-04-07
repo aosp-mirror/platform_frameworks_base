@@ -135,7 +135,7 @@
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="2242167416140740920">"Na-authenticate ang mukha"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"Nakumpirma"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"I-tap ang Kumpirmahin para kumpletuhin"</string>
-    <!-- no translation found for biometric_dialog_tap_confirm_with_face (7538145860465755864) -->
+    <!-- no translation found for biometric_dialog_tap_confirm_with_face (1092050545851021991) -->
     <skip />
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"Na-authenticate"</string>
     <string name="biometric_dialog_use_pin" msgid="8385294115283000709">"Gumamit ng PIN"</string>
@@ -311,7 +311,10 @@
     <string name="notification_tap_again" msgid="4477318164947497249">"I-tap ulit upang buksan"</string>
     <string name="tap_again" msgid="1315420114387908655">"I-tap ulit"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"Mag-swipe pataas para buksan"</string>
-    <string name="keyguard_unlock_press" msgid="8488350566398524740">"Pindutin para buksan"</string>
+    <!-- no translation found for keyguard_unlock_press (9140109453735019209) -->
+    <skip />
+    <!-- no translation found for keyguard_face_successful_unlock_press (25520941264602588) -->
+    <skip />
     <string name="keyguard_retry" msgid="886802522584053523">"Mag-swipe pataas para subukan ulit"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"I-unlock para magamit ang NFC"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"Pagmamay-ari ng iyong organisasyon ang device na ito"</string>

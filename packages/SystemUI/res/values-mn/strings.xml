@@ -135,7 +135,7 @@
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="2242167416140740920">"Царайг баталгаажууллаа"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"Баталгаажсан"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"Дуусгахын тулд баталгаажуулахыг товших"</string>
-    <!-- no translation found for biometric_dialog_tap_confirm_with_face (7538145860465755864) -->
+    <!-- no translation found for biometric_dialog_tap_confirm_with_face (1092050545851021991) -->
     <skip />
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"Баталгаажуулагдсан"</string>
     <string name="biometric_dialog_use_pin" msgid="8385294115283000709">"ПИН ашиглах"</string>
@@ -292,24 +292,15 @@
     <string name="sensor_privacy_start_use_mic_dialog_content" msgid="1624701280680913717">"Энэ нь таны микрофоныг ашиглах зөвшөөрөлтэй бүх апп болон үйлчилгээний хандалтыг блокоос гаргана."</string>
     <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"Энэ нь таны камерыг ашиглах зөвшөөрөлтэй бүх апп болон үйлчилгээний хандалтыг блокоос гаргана."</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_content" msgid="3577642558418404919">"Энэ нь таны камер эсвэл микрофоныг ашиглах зөвшөөрөлтэй бүх апп болон үйлчилгээний хандалтыг блокоос гаргана."</string>
-    <!-- no translation found for sensor_privacy_start_use_mic_blocked_dialog_title (2640140287496469689) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_start_use_camera_blocked_dialog_title (7398084286822440384) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_start_use_mic_camera_blocked_dialog_title (195236134743281973) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_start_use_mic_blocked_dialog_content (2138318880682877747) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_start_use_camera_blocked_dialog_content (7216015168047965948) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_start_use_mic_camera_blocked_dialog_content (3960837827570483762) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_mic_unblocked_toast_content (306555320557065068) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_camera_unblocked_toast_content (7843105715964332311) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_mic_camera_unblocked_toast_content (7339355093282661115) -->
-    <skip />
+    <string name="sensor_privacy_start_use_mic_blocked_dialog_title" msgid="2640140287496469689">"Микрофоныг блоклосон байна"</string>
+    <string name="sensor_privacy_start_use_camera_blocked_dialog_title" msgid="7398084286822440384">"Камерыг блоклосон байна"</string>
+    <string name="sensor_privacy_start_use_mic_camera_blocked_dialog_title" msgid="195236134743281973">"Микрофон &amp; камерыг блоклосон"</string>
+    <string name="sensor_privacy_start_use_mic_blocked_dialog_content" msgid="2138318880682877747">"Блокоос гаргахын тулд төхөөрөмжийнхөө нууцлалын сэлгүүрийг микрофоныг асаах байрлал руу зөөж, микрофонд хандахыг зөвшөөрнө үү. Төхөөрөмжийнхөө нууцлалын сэлгүүрийн байрлалыг илрүүлэхийн тулд төхөөрөмжийн гарыг авлагыг уншина уу."</string>
+    <string name="sensor_privacy_start_use_camera_blocked_dialog_content" msgid="7216015168047965948">"Блокоос гаргахын тулд төхөөрөмжийнхөө нууцлалын сэлгүүрийг камерыг асаах байрлал руу зөөж, камерт хандахыг зөвшөөрнө үү. Төхөөрөмжийнхөө нууцлалын сэлгүүрийн байрлалыг илрүүлэхийн тулд төхөөрөмжийн гарыг авлагыг уншина уу."</string>
+    <string name="sensor_privacy_start_use_mic_camera_blocked_dialog_content" msgid="3960837827570483762">"Тэдгээрийг блокоос гаргахын тулд төхөөрөмжийнхөө нууцлалын сэлгүүрийг блокоос гаргах байрлал руу зөөж, хандахыг зөвшөөрнө үү. Төхөөрөмжийнхөө нууцлалын сэлгүүрийн байрлалыг илрүүлэхийн тулд төхөөрөмжийн гарыг авлагыг уншина уу."</string>
+    <string name="sensor_privacy_mic_unblocked_toast_content" msgid="306555320557065068">"Микрофон боломжтой байна"</string>
+    <string name="sensor_privacy_camera_unblocked_toast_content" msgid="7843105715964332311">"Камер боломжтой байна"</string>
+    <string name="sensor_privacy_mic_camera_unblocked_toast_content" msgid="7339355093282661115">"Микрофон болон камер боломжтой байна"</string>
     <string name="media_seamless_other_device" msgid="4654849800789196737">"Бусад төхөөрөмж"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"Тоймыг асаах/унтраах"</string>
     <string name="zen_priority_introduction" msgid="3159291973383796646">"Танд сэрүүлэг, сануулга, арга хэмжээ, таны сонгосон дуудлага илгээгчээс бусад дуу, чичиргээ саад болохгүй. Та хөгжим, видео, тоглоом зэрэг тоглуулахыг хүссэн бүх зүйлээ сонсох боломжтой хэвээр байна."</string>
@@ -320,7 +311,10 @@
     <string name="notification_tap_again" msgid="4477318164947497249">"Нээхийн тулд дахин товшино уу"</string>
     <string name="tap_again" msgid="1315420114387908655">"Дaхин товшино уу"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"Нээхийн тулд дээш шударна уу"</string>
-    <string name="keyguard_unlock_press" msgid="8488350566398524740">"Нээхийн тулд дарна уу"</string>
+    <!-- no translation found for keyguard_unlock_press (9140109453735019209) -->
+    <skip />
+    <!-- no translation found for keyguard_face_successful_unlock_press (25520941264602588) -->
+    <skip />
     <string name="keyguard_retry" msgid="886802522584053523">"Дахин оролдохын тулд дээш шударна уу"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"NFC-г ашиглахын тулд түгжээг тайлна уу"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"Энэ төхөөрөмж танай байгууллагад харьяалагддаг"</string>
@@ -843,20 +837,13 @@
     <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"Энэ үйл явдлыг дамжуулахын тулд аппыг нээнэ үү."</string>
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"Үл мэдэгдэх апп"</string>
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"Дамжуулахыг зогсоох"</string>
-    <!-- no translation found for media_output_first_broadcast_title (6292237789860753022) -->
-    <skip />
-    <!-- no translation found for media_output_broadcast (3555580945878071543) -->
-    <skip />
-    <!-- no translation found for media_output_first_notify_broadcast_message (6353857724136398494) -->
-    <skip />
-    <!-- no translation found for media_output_broadcasting_message (4150299923404886073) -->
-    <skip />
-    <!-- no translation found for media_output_broadcast_name (8786127091542624618) -->
-    <skip />
-    <!-- no translation found for media_output_broadcast_code (870795639644728542) -->
-    <skip />
-    <!-- no translation found for media_output_broadcast_dialog_save (7910865591430010198) -->
-    <skip />
+    <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Нэвтрүүлэлт хэрхэн ажилладаг вэ?"</string>
+    <string name="media_output_broadcast" msgid="3555580945878071543">"Нэвтрүүлэлт"</string>
+    <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"Тохиромжтой Bluetooth төхөөрөмжүүдтэй таны ойролцоох хүмүүс таны нэвтрүүлж буй медиаг сонсох боломжтой"</string>
+    <string name="media_output_broadcasting_message" msgid="4150299923404886073">"Таны нэвтрүүлэлтийг сонсохын тулд тохиромжтой Bluetooth төхөөрөмжүүдтэй ойролцоох хүмүүс таны QR кодыг скан хийх эсвэл нэвтрүүлэлтийн тань нэр болон нууц үгийг ашиглах боломжтой"</string>
+    <string name="media_output_broadcast_name" msgid="8786127091542624618">"Нэвтрүүлэлтийн нэр"</string>
+    <string name="media_output_broadcast_code" msgid="870795639644728542">"Нууц үг"</string>
+    <string name="media_output_broadcast_dialog_save" msgid="7910865591430010198">"Хадгалах"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"Хийцийн дугаар"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"Хийцийн дугаарыг түр санах ойд хуулсан."</string>
     <string name="basic_status" msgid="2315371112182658176">"Харилцан яриаг нээх"</string>

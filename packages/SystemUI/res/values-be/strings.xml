@@ -26,7 +26,7 @@
     <string name="battery_low_percent_format" msgid="4276661262843170964">"Засталося <xliff:g id="PERCENTAGE">%s</xliff:g>"</string>
     <string name="invalid_charger_title" msgid="938685362320735167">"Не ўдалося выканаць зарадку праз USB"</string>
     <string name="invalid_charger_text" msgid="2339310107232691577">"Выкарыстоўвайце зараднае прыстасаванне з камплекта прылады"</string>
-    <string name="battery_saver_confirmation_title" msgid="1234998463717398453">"Уключыць рэжым эканоміі зараду?"</string>
+    <string name="battery_saver_confirmation_title" msgid="1234998463717398453">"Уключыць рэжым энергазберажэння?"</string>
     <string name="battery_saver_confirmation_title_generic" msgid="2299231884234959849">"Інфармацыя пра рэжым эканоміі зараду"</string>
     <string name="battery_saver_confirmation_ok" msgid="5042136476802816494">"Уключыць"</string>
     <string name="battery_saver_start_action" msgid="8353766979886287140">"Уключыць"</string>
@@ -135,7 +135,7 @@
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="2242167416140740920">"Твар распазнаны"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"Пацверджана"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"Націсніце \"Пацвердзіць\", каб завяршыць"</string>
-    <!-- no translation found for biometric_dialog_tap_confirm_with_face (7538145860465755864) -->
+    <!-- no translation found for biometric_dialog_tap_confirm_with_face (1092050545851021991) -->
     <skip />
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"Распазнана"</string>
     <string name="biometric_dialog_use_pin" msgid="8385294115283000709">"Увесці PIN-код"</string>
@@ -296,24 +296,15 @@
     <string name="sensor_privacy_start_use_mic_dialog_content" msgid="1624701280680913717">"Доступ адкрыецца для ўсіх праграм і сэрвісаў, якім дазволена выкарыстоўваць мікрафон."</string>
     <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"Доступ адкрыецца для ўсіх праграм і сэрвісаў, якім дазволена выкарыстоўваць камеру."</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_content" msgid="3577642558418404919">"Доступ адкрыецца для ўсіх праграм і сэрвісаў, якім дазволена выкарыстоўваць камеру ці мікрафон."</string>
-    <!-- no translation found for sensor_privacy_start_use_mic_blocked_dialog_title (2640140287496469689) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_start_use_camera_blocked_dialog_title (7398084286822440384) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_start_use_mic_camera_blocked_dialog_title (195236134743281973) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_start_use_mic_blocked_dialog_content (2138318880682877747) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_start_use_camera_blocked_dialog_content (7216015168047965948) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_start_use_mic_camera_blocked_dialog_content (3960837827570483762) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_mic_unblocked_toast_content (306555320557065068) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_camera_unblocked_toast_content (7843105715964332311) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_mic_camera_unblocked_toast_content (7339355093282661115) -->
-    <skip />
+    <string name="sensor_privacy_start_use_mic_blocked_dialog_title" msgid="2640140287496469689">"Мікрафон заблакіраваны"</string>
+    <string name="sensor_privacy_start_use_camera_blocked_dialog_title" msgid="7398084286822440384">"Камера заблакіравана"</string>
+    <string name="sensor_privacy_start_use_mic_camera_blocked_dialog_title" msgid="195236134743281973">"Мікрафон і камера заблакіраваны"</string>
+    <string name="sensor_privacy_start_use_mic_blocked_dialog_content" msgid="2138318880682877747">"Каб атрымаць доступ да мікрафона, перавядзіце на прыладзе пераключальнік прыватнасці ў становішча \"мікрафон уключаны\". Інфармацыю пра размяшчэнне пераключальніка прыватнасці вы знойдзеце ў дапаможніку па выкарыстанні прылады."</string>
+    <string name="sensor_privacy_start_use_camera_blocked_dialog_content" msgid="7216015168047965948">"Каб атрымаць доступ да камеры, перавядзіце на прыладзе пераключальнік прыватнасці ў становішча \"камера ўключана\". Інфармацыю пра размяшчэнне пераключальніка прыватнасці вы знойдзеце ў дапаможніку па выкарыстанні прылады."</string>
+    <string name="sensor_privacy_start_use_mic_camera_blocked_dialog_content" msgid="3960837827570483762">"Каб атрымаць доступ, перавядзіце на прыладзе пераключальнік прыватнасці ў становішча \"разблакіравана\". Інфармацыю пра размяшчэнне пераключальніка прыватнасці вы знойдзеце ў дапаможніку па выкарыстанні прылады."</string>
+    <string name="sensor_privacy_mic_unblocked_toast_content" msgid="306555320557065068">"Мікрафон можна выкарыстоўваць"</string>
+    <string name="sensor_privacy_camera_unblocked_toast_content" msgid="7843105715964332311">"Камеру можна выкарыстоўваць"</string>
+    <string name="sensor_privacy_mic_camera_unblocked_toast_content" msgid="7339355093282661115">"Мікрафон і камеру можна выкарыстоўваць"</string>
     <string name="media_seamless_other_device" msgid="4654849800789196737">"Іншая прылада"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"Уключыць/выключыць агляд"</string>
     <string name="zen_priority_introduction" msgid="3159291973383796646">"Вас не будуць турбаваць гукі і вібрацыя, за выключэннем будзільнікаў, напамінаў, падзей і выбраных вамі абанентаў. Вы будзеце чуць усё, што ўключыце, у тым ліку музыку, відэа і гульні."</string>
@@ -324,7 +315,10 @@
     <string name="notification_tap_again" msgid="4477318164947497249">"Дакраніцеся яшчэ раз, каб адкрыць"</string>
     <string name="tap_again" msgid="1315420114387908655">"Націсніце яшчэ раз"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"Каб адкрыць, прагарніце ўверх"</string>
-    <string name="keyguard_unlock_press" msgid="8488350566398524740">"Націсніце, каб адкрыць"</string>
+    <!-- no translation found for keyguard_unlock_press (9140109453735019209) -->
+    <skip />
+    <!-- no translation found for keyguard_face_successful_unlock_press (25520941264602588) -->
+    <skip />
     <string name="keyguard_retry" msgid="886802522584053523">"Прагартайце ўверх, каб паўтарыць спробу"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"Разблакіруйце, каб выкарыстоўваць NFC"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"Гэта прылада належыць вашай арганізацыі"</string>
@@ -421,7 +415,7 @@
     <string name="zen_mode_and_condition" msgid="5043165189511223718">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
     <string name="accessibility_volume_settings" msgid="1458961116951564784">"Налады гуку"</string>
     <string name="volume_odi_captions_tip" msgid="8825655463280990941">"Аўтаматычныя субцітры"</string>
-    <string name="accessibility_volume_close_odi_captions_tip" msgid="8924753283621160480">"Падказка \"Схавайце цітры\""</string>
+    <string name="accessibility_volume_close_odi_captions_tip" msgid="8924753283621160480">"Закрыць падказку пра субцітры"</string>
     <string name="volume_odi_captions_content_description" msgid="4172765742046013630">"Накладанне субцітраў"</string>
     <string name="volume_odi_captions_hint_enable" msgid="2073091194012843195">"уключыць"</string>
     <string name="volume_odi_captions_hint_disable" msgid="2518846326748183407">"адключыць"</string>
@@ -800,18 +794,12 @@
     <string name="controls_dialog_ok" msgid="2770230012857881822">"Дадаць"</string>
     <string name="controls_dialog_message" msgid="342066938390663844">"Прапанавана праграмай \"<xliff:g id="APP">%s</xliff:g>\""</string>
     <string name="controls_tile_locked" msgid="731547768182831938">"Прылада блакіравана"</string>
-    <!-- no translation found for controls_settings_show_controls_dialog_title (3357852503553809554) -->
-    <skip />
-    <!-- no translation found for controls_settings_show_controls_dialog_message (7666211700524587969) -->
-    <skip />
-    <!-- no translation found for controls_settings_trivial_controls_dialog_title (7593188157655036677) -->
-    <skip />
-    <!-- no translation found for controls_settings_trivial_controls_dialog_message (237183787721917586) -->
-    <skip />
-    <!-- no translation found for controls_settings_dialog_neutral_button (4514446354793124140) -->
-    <skip />
-    <!-- no translation found for controls_settings_dialog_positive_button (436070672551674863) -->
-    <skip />
+    <string name="controls_settings_show_controls_dialog_title" msgid="3357852503553809554">"Паказваць прылады і кіраваць імі з экрана блакіроўкі?"</string>
+    <string name="controls_settings_show_controls_dialog_message" msgid="7666211700524587969">"Вы можаце дадаць на экран блакіроўкі элементы кіравання знешнімі прыладамі.\n\nДзякуючы праграме на вашай прыладзе вы можаце кіраваць некаторымі прыладамі без разблакіроўкі тэлефона ці планшэта.\n\nУнесці змяненні можна ў любы час у Наладах."</string>
+    <string name="controls_settings_trivial_controls_dialog_title" msgid="7593188157655036677">"Кіраваць прыладамі з экрана блакіроўкі?"</string>
+    <string name="controls_settings_trivial_controls_dialog_message" msgid="237183787721917586">"Вы можаце кіраваць некаторымі прыладамі без разблакіроўкі тэлефона ці планшэта.\n\nПраграма на вашай прыладзе вызначае, якімі прыладамі можна кіраваць такім спосабам."</string>
+    <string name="controls_settings_dialog_neutral_button" msgid="4514446354793124140">"Не, дзякуй"</string>
+    <string name="controls_settings_dialog_positive_button" msgid="436070672551674863">"Так"</string>
     <string name="controls_pin_use_alphanumeric" msgid="8478371861023048414">"PIN-код складаецца з літар або знакаў"</string>
     <string name="controls_pin_verify" msgid="3452778292918877662">"Спраўдзіце прыладу \"<xliff:g id="DEVICE">%s</xliff:g>\""</string>
     <string name="controls_pin_wrong" msgid="6162694056042164211">"Няправільны PIN-код"</string>
@@ -861,20 +849,13 @@
     <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"Для трансляцыі гэтага сеанса адкрыйце праграму."</string>
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"Невядомая праграма"</string>
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"Спыніць трансляцыю"</string>
-    <!-- no translation found for media_output_first_broadcast_title (6292237789860753022) -->
-    <skip />
-    <!-- no translation found for media_output_broadcast (3555580945878071543) -->
-    <skip />
-    <!-- no translation found for media_output_first_notify_broadcast_message (6353857724136398494) -->
-    <skip />
-    <!-- no translation found for media_output_broadcasting_message (4150299923404886073) -->
-    <skip />
-    <!-- no translation found for media_output_broadcast_name (8786127091542624618) -->
-    <skip />
-    <!-- no translation found for media_output_broadcast_code (870795639644728542) -->
-    <skip />
-    <!-- no translation found for media_output_broadcast_dialog_save (7910865591430010198) -->
-    <skip />
+    <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Як адбываецца трансляцыя"</string>
+    <string name="media_output_broadcast" msgid="3555580945878071543">"Трансляцыя"</string>
+    <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"Людзі паблізу, у якіх ёсць прылады з Bluetooth, змогуць праслухваць мультымедыйнае змесціва, якое вы трансліруеце"</string>
+    <string name="media_output_broadcasting_message" msgid="4150299923404886073">"Каб слухаць трансляцыю, людзі паблізу, у якіх ёсць сумяшчальныя прылады з Bluetooth, могуць адсканіраваць ваш QR-код або скарыстаць назву і пароль трансляцыі"</string>
+    <string name="media_output_broadcast_name" msgid="8786127091542624618">"Назва трансляцыі"</string>
+    <string name="media_output_broadcast_code" msgid="870795639644728542">"Пароль"</string>
+    <string name="media_output_broadcast_dialog_save" msgid="7910865591430010198">"Захаваць"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"Нумар зборкі"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"Нумар зборкі скапіраваны ў буфер абмену."</string>
     <string name="basic_status" msgid="2315371112182658176">"Адкрытая размова"</string>
@@ -953,8 +934,7 @@
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"Актыўныя праграмы"</string>
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"Спыніць"</string>
     <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"Спынена"</string>
-    <!-- no translation found for clipboard_edit_text_done (4551887727694022409) -->
-    <skip />
+    <string name="clipboard_edit_text_done" msgid="4551887727694022409">"Гатова"</string>
     <string name="clipboard_overlay_text_copied" msgid="1872624400464891363">"Скапіравана"</string>
     <string name="clipboard_edit_source" msgid="9156488177277788029">"З праграмы \"<xliff:g id="APPNAME">%1$s</xliff:g>\""</string>
     <string name="clipboard_dismiss_description" msgid="7544573092766945657">"Закрыць інтэрфейс капіравання"</string>

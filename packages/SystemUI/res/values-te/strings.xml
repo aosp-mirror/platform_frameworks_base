@@ -35,13 +35,13 @@
     <string name="usb_device_permission_prompt" msgid="4414719028369181772">"<xliff:g id="USB_DEVICE">%2$s</xliff:g>ని యాక్సెస్ చేయడానికి <xliff:g id="APPLICATION">%1$s</xliff:g>ని అనుమతించాలా?"</string>
     <string name="usb_device_permission_prompt_warn" msgid="2309129784984063656">"<xliff:g id="USB_DEVICE">%2$s</xliff:g>యాక్సెస్ చేయడానికి <xliff:g id="APPLICATION">%1$s</xliff:g>ను అనుమతించాలా?\nఈ యాప్‌నకు రికార్డ్ చేసే అనుమతి మంజూరు చేయబడలేదు, కానీ ఈ USB పరికరం ద్వారా ఆడియోను క్యాప్చర్ చేయగలదు."</string>
     <string name="usb_audio_device_permission_prompt_title" msgid="4221351137250093451">"<xliff:g id="USB_DEVICE">%2$s</xliff:g>‌ను యాక్సెస్ చేయడానికి <xliff:g id="APPLICATION">%1$s</xliff:g>‌ను అనుమతించాలా?"</string>
-    <string name="usb_audio_device_confirm_prompt_title" msgid="8828406516732985696">"<xliff:g id="USB_DEVICE">%2$s</xliff:g>‌ను నిర్వహించడానికి <xliff:g id="APPLICATION">%1$s</xliff:g>‌ను తెరవాలా?"</string>
+    <string name="usb_audio_device_confirm_prompt_title" msgid="8828406516732985696">"<xliff:g id="USB_DEVICE">%2$s</xliff:g>‌ను హ్యాండిల్ చేయడానికి <xliff:g id="APPLICATION">%1$s</xliff:g>‌ను తెరవాలా?"</string>
     <string name="usb_audio_device_prompt_warn" msgid="2504972133361130335">"ఈ యాప్‌నకు రికార్డ్ చేసే అనుమతి మంజూరు కాలేదు, అయినా ఈ USB పరికరం ద్వారా ఆడియోను క్యాప్చర్ చేయగలదు. ఈ పరికరంలో <xliff:g id="APPLICATION">%1$s</xliff:g>‌ను ఉపయోగించడం వలన కాల్స్, నోటిఫికేషన్‌లు, అలారంలను వినబడనీయకుండా నివారించవచ్చు."</string>
     <string name="usb_audio_device_prompt" msgid="7944987408206252949">"ఈ పరికరంలో <xliff:g id="APPLICATION">%1$s</xliff:g>‌ను ఉపయోగించడం వలన కాల్స్, నోటిఫికేషన్‌లు, అలారంలను వినబడనీయకుండా నివారించవచ్చు."</string>
     <string name="usb_accessory_permission_prompt" msgid="717963550388312123">"<xliff:g id="USB_ACCESSORY">%2$s</xliff:g>ని యాక్సెస్ చేయడానికి <xliff:g id="APPLICATION">%1$s</xliff:g>ని అనుమతించాలా?"</string>
-    <string name="usb_device_confirm_prompt" msgid="4091711472439910809">"<xliff:g id="USB_DEVICE">%2$s</xliff:g>ని నిర్వహించడానికి <xliff:g id="APPLICATION">%1$s</xliff:g>ని తెరవాలా?"</string>
+    <string name="usb_device_confirm_prompt" msgid="4091711472439910809">"<xliff:g id="USB_DEVICE">%2$s</xliff:g>ని హ్యాండిల్ చేయడానికి <xliff:g id="APPLICATION">%1$s</xliff:g>ని తెరవాలా?"</string>
     <string name="usb_device_confirm_prompt_warn" msgid="990208659736311769">"<xliff:g id="USB_DEVICE">%2$s</xliff:g>ని హ్యాండిల్ చేయడానికి <xliff:g id="APPLICATION">%1$s</xliff:g>ను తెరవాలా?\nఈ యాప్‌కు రికార్డ్ చేసే అనుమతి మంజూరు కాలేదు, అయినా ఈ USB పరికరం ద్వారా ఆడియోను క్యాప్చర్ చేయగలదు."</string>
-    <string name="usb_accessory_confirm_prompt" msgid="5728408382798643421">"<xliff:g id="USB_ACCESSORY">%2$s</xliff:g>ని నిర్వహించడానికి <xliff:g id="APPLICATION">%1$s</xliff:g>ని తెరవాలా?"</string>
+    <string name="usb_accessory_confirm_prompt" msgid="5728408382798643421">"<xliff:g id="USB_ACCESSORY">%2$s</xliff:g>ని హ్యాండిల్ చేయడానికి <xliff:g id="APPLICATION">%1$s</xliff:g>ని తెరవాలా?"</string>
     <string name="usb_accessory_uri_prompt" msgid="6756649383432542382">"ఈ USB ఉపకరణంతో ఇన్‌స్టాల్ చేయబడిన యాప్‌లు ఏవీ పని చేయవు. ఈ ఉపకరణం గురించి <xliff:g id="URL">%1$s</xliff:g>లో మరింత తెలుసుకోండి"</string>
     <string name="title_usb_accessory" msgid="1236358027511638648">"USB ఉపకరణం"</string>
     <string name="label_view" msgid="6815442985276363364">"చూడండి"</string>
@@ -135,7 +135,7 @@
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="2242167416140740920">"ముఖం ప్రామాణీకరించబడింది"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"నిర్ధారించబడింది"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"పూర్తి చేయడానికి \"నిర్ధారించు\" నొక్కండి"</string>
-    <!-- no translation found for biometric_dialog_tap_confirm_with_face (7538145860465755864) -->
+    <!-- no translation found for biometric_dialog_tap_confirm_with_face (1092050545851021991) -->
     <skip />
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"ప్రామాణీకరించబడింది"</string>
     <string name="biometric_dialog_use_pin" msgid="8385294115283000709">"పిన్‌ను ఉపయోగించు"</string>
@@ -292,24 +292,15 @@
     <string name="sensor_privacy_start_use_mic_dialog_content" msgid="1624701280680913717">"మీ మైక్రోఫోన్‌ను ఉపయోగించడానికి అనుమతి పొందిన అన్ని యాప్‌లు, సర్వీస్‌లకు యాక్సెస్‌ను ఇది అన్‌బ్లాక్ చేస్తుంది."</string>
     <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"ఇది, మీ కెమెరాను ఉపయోగించడానికి అనుమతి పొందిన అన్ని యాప్‌లకు, సర్వీస్‌లకు యాక్సెస్‌ను అన్‌బ్లాక్ చేస్తుంది."</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_content" msgid="3577642558418404919">"ఇది, మీ కెమెరాను లేదా మైక్రోఫోన్‌ను ఉపయోగించడానికి అనుమతి పొందిన అన్ని యాప్‌లకు, సర్వీస్‌లకు యాక్సెస్‌ను అన్‌బ్లాక్ చేస్తుంది."</string>
-    <!-- no translation found for sensor_privacy_start_use_mic_blocked_dialog_title (2640140287496469689) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_start_use_camera_blocked_dialog_title (7398084286822440384) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_start_use_mic_camera_blocked_dialog_title (195236134743281973) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_start_use_mic_blocked_dialog_content (2138318880682877747) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_start_use_camera_blocked_dialog_content (7216015168047965948) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_start_use_mic_camera_blocked_dialog_content (3960837827570483762) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_mic_unblocked_toast_content (306555320557065068) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_camera_unblocked_toast_content (7843105715964332311) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_mic_camera_unblocked_toast_content (7339355093282661115) -->
-    <skip />
+    <string name="sensor_privacy_start_use_mic_blocked_dialog_title" msgid="2640140287496469689">"మైక్రోఫోన్ బ్లాక్ చేయబడింది"</string>
+    <string name="sensor_privacy_start_use_camera_blocked_dialog_title" msgid="7398084286822440384">"కెమెరా బ్లాక్ చేయబడింది"</string>
+    <string name="sensor_privacy_start_use_mic_camera_blocked_dialog_title" msgid="195236134743281973">"మైక్ &amp; కెమెరా బ్లాక్ చేయబడ్డాయి"</string>
+    <string name="sensor_privacy_start_use_mic_blocked_dialog_content" msgid="2138318880682877747">"అన్‌బ్లాక్ చేయడానికి, మైక్రోఫోన్ యాక్సెస్‌ను అనుమతించడానికి మీ పరికరంలోని గోప్యతా స్విచ్‌ను మైక్రోఫోన్‌ను ఆన్ చేయండి స్థానానికి తరలించండి. మీ పరికరంలో గోప్యతా స్విచ్‌ను గుర్తించడానికి పరికర మాన్యువల్‌ని చూడండి."</string>
+    <string name="sensor_privacy_start_use_camera_blocked_dialog_content" msgid="7216015168047965948">"అన్‌బ్లాక్ చేయడానికి, కెమెరా యాక్సెస్‌ను అనుమతించడానికి మీ పరికరంలోని గోప్యతా స్విచ్‌ను కెమెరాను ఆన్ చేయండి స్థానంలోకి తరలించండి. మీ పరికరంలో గోప్యతా స్విచ్‌ను గుర్తించడానికి పరికర మాన్యువల్‌ని చూడండి."</string>
+    <string name="sensor_privacy_start_use_mic_camera_blocked_dialog_content" msgid="3960837827570483762">"వాటిని అన్‌బ్లాక్ చేయడానికి, యాక్సెస్‌ని అనుమతించడానికి మీ పరికరంలోని గోప్యతా స్విచ్‌ను అన్‌బ్లాక్ చేయబడింది స్థానానికి తరలించండి. మీ పరికరంలో గోప్యతా స్విచ్‌ను గుర్తించడానికి పరికర మాన్యువల్‌ని చూడండి."</string>
+    <string name="sensor_privacy_mic_unblocked_toast_content" msgid="306555320557065068">"మైక్రోఫోన్ అందుబాటులో ఉంది"</string>
+    <string name="sensor_privacy_camera_unblocked_toast_content" msgid="7843105715964332311">"కెమెరా అందుబాటులో ఉంది"</string>
+    <string name="sensor_privacy_mic_camera_unblocked_toast_content" msgid="7339355093282661115">"మైక్రోఫోన్, అలాగే కెమెరా అందుబాటులో ఉంది"</string>
     <string name="media_seamless_other_device" msgid="4654849800789196737">"ఇతర పరికరం"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"స్థూలదృష్టిని టోగుల్ చేయి"</string>
     <string name="zen_priority_introduction" msgid="3159291973383796646">"మీరు పేర్కొనే అలారాలు, రిమైండర్‌లు, ఈవెంట్‌లు మరియు కాలర్‌ల నుండి మినహా మరే ఇతర ధ్వనులు మరియు వైబ్రేషన్‌లతో మీకు అంతరాయం కలగదు. మీరు ఇప్పటికీ సంగీతం, వీడియోలు మరియు గేమ్‌లతో సహా మీరు ప్లే చేయడానికి ఎంచుకున్నవి ఏవైనా వింటారు."</string>
@@ -320,7 +311,10 @@
     <string name="notification_tap_again" msgid="4477318164947497249">"తెరవడానికి మళ్లీ నొక్కండి"</string>
     <string name="tap_again" msgid="1315420114387908655">"మళ్లీ ట్యాప్ చేయండి"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"తెరవడానికి, పైకి స్వైప్ చేయండి"</string>
-    <string name="keyguard_unlock_press" msgid="8488350566398524740">"తెరవడానికి నొక్కండి"</string>
+    <!-- no translation found for keyguard_unlock_press (9140109453735019209) -->
+    <skip />
+    <!-- no translation found for keyguard_face_successful_unlock_press (25520941264602588) -->
+    <skip />
     <string name="keyguard_retry" msgid="886802522584053523">"మళ్ళీ ప్రయత్నించడానికి పైకి స్వైప్ చేయండి"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"NFCని ఉపయోగించడానికి అన్‌లాక్ చేయండి"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"ఈ పరికరం మీ సంస్థకు చెందినది"</string>
@@ -788,18 +782,12 @@
     <string name="controls_dialog_ok" msgid="2770230012857881822">"జోడించండి"</string>
     <string name="controls_dialog_message" msgid="342066938390663844">"<xliff:g id="APP">%s</xliff:g> ద్వారా సూచించబడింది"</string>
     <string name="controls_tile_locked" msgid="731547768182831938">"పరికరంలాక్ చేయబడింది"</string>
-    <!-- no translation found for controls_settings_show_controls_dialog_title (3357852503553809554) -->
-    <skip />
-    <!-- no translation found for controls_settings_show_controls_dialog_message (7666211700524587969) -->
-    <skip />
-    <!-- no translation found for controls_settings_trivial_controls_dialog_title (7593188157655036677) -->
-    <skip />
-    <!-- no translation found for controls_settings_trivial_controls_dialog_message (237183787721917586) -->
-    <skip />
-    <!-- no translation found for controls_settings_dialog_neutral_button (4514446354793124140) -->
-    <skip />
-    <!-- no translation found for controls_settings_dialog_positive_button (436070672551674863) -->
-    <skip />
+    <string name="controls_settings_show_controls_dialog_title" msgid="3357852503553809554">"లాక్ స్క్రీన్ నుండి పరికరాలను చూపించాలా, కంట్రోల్ చేయాలా?"</string>
+    <string name="controls_settings_show_controls_dialog_message" msgid="7666211700524587969">"మీరు లాక్ స్క్రీన్‌కు మీ బాహ్య పరికరాల కోసం కంట్రోల్స్‌ను జోడించవచ్చు.\n\nమీ ఫోన్ లేదా టాబ్లెట్‌ను అన్‌లాక్ చేయకుండానే కొన్ని పరికరాలను కంట్రోల్ చేయడానికి మీ పరికర యాప్ మిమ్మల్ని అనుమతించవచ్చు.\n\nమీరు సెట్టింగ్‌లలో ఎప్పుడైనా మార్పులు చేయవచ్చు."</string>
+    <string name="controls_settings_trivial_controls_dialog_title" msgid="7593188157655036677">"లాక్ స్క్రీన్ నుండి పరికరాలను కంట్రోల్ చేయాలా?"</string>
+    <string name="controls_settings_trivial_controls_dialog_message" msgid="237183787721917586">"మీరు మీ ఫోన్ లేదా టాబ్లెట్‌ను అన్‌లాక్ చేయకుండానే కొన్ని పరికరాలను కంట్రోల్ చేయవచ్చు.\n\nమీ పరికర యాప్ \'ఈ విధంగా ఏ పరికరాలను కంట్రోల్ చేయవచ్చు\' అని నిర్ణయిస్తుంది."</string>
+    <string name="controls_settings_dialog_neutral_button" msgid="4514446354793124140">"వద్దు, ధన్యవాదాలు"</string>
+    <string name="controls_settings_dialog_positive_button" msgid="436070672551674863">"అవును"</string>
     <string name="controls_pin_use_alphanumeric" msgid="8478371861023048414">"పిన్ అక్షరాలను లేదా చిహ్నాలను కలిగి ఉంది"</string>
     <string name="controls_pin_verify" msgid="3452778292918877662">"<xliff:g id="DEVICE">%s</xliff:g>ను వెరిఫై చేయండి"</string>
     <string name="controls_pin_wrong" msgid="6162694056042164211">"పిన్ తప్పు"</string>
@@ -849,20 +837,13 @@
     <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"ఈ సెషన్‌ను ప్రసారం చేయడానికి, దయచేసి యాప్‌ను తెరవండి."</string>
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"తెలియని యాప్"</string>
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"ప్రసారాన్ని ఆపివేయండి"</string>
-    <!-- no translation found for media_output_first_broadcast_title (6292237789860753022) -->
-    <skip />
-    <!-- no translation found for media_output_broadcast (3555580945878071543) -->
-    <skip />
-    <!-- no translation found for media_output_first_notify_broadcast_message (6353857724136398494) -->
-    <skip />
-    <!-- no translation found for media_output_broadcasting_message (4150299923404886073) -->
-    <skip />
-    <!-- no translation found for media_output_broadcast_name (8786127091542624618) -->
-    <skip />
-    <!-- no translation found for media_output_broadcast_code (870795639644728542) -->
-    <skip />
-    <!-- no translation found for media_output_broadcast_dialog_save (7910865591430010198) -->
-    <skip />
+    <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"ప్రసారం కావడం అనేది ఎలా పని చేస్తుంది"</string>
+    <string name="media_output_broadcast" msgid="3555580945878071543">"ప్రసారం"</string>
+    <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"మీకు సమీపంలో ఉన్న వ్యక్తులు అనుకూలత ఉన్న బ్లూటూత్ పరికరాలతో మీరు ప్రసారం చేస్తున్న మీడియాను వినగలరు"</string>
+    <string name="media_output_broadcasting_message" msgid="4150299923404886073">"మీ ప్రసారాన్ని వినడానికి, సమీపంలోని వ్యక్తులు అనుకూలత ఉన్న బ్లూటూత్ పరికరాలతో మీ QR కోడ్‌ను స్కాన్ చేయవచ్చు లేదా మీ ప్రసారం పేరు, పాస్‌వర్డ్‌ను ఉపయోగించవచ్చు"</string>
+    <string name="media_output_broadcast_name" msgid="8786127091542624618">"ప్రసారం పేరు"</string>
+    <string name="media_output_broadcast_code" msgid="870795639644728542">"పాస్‌‌వర్డ్"</string>
+    <string name="media_output_broadcast_dialog_save" msgid="7910865591430010198">"సేవ్ చేయండి"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"బిల్డ్ నంబర్"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"బిల్డ్ నంబర్, క్లిప్‌బోర్డ్‌కు కాపీ చేయబడింది."</string>
     <string name="basic_status" msgid="2315371112182658176">"సంభాషణను తెరవండి"</string>
@@ -939,8 +920,7 @@
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"యాక్టివ్‌గా ఉన్న యాప్‌లు"</string>
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"ఆపివేయండి"</string>
     <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"ఆపివేయబడింది"</string>
-    <!-- no translation found for clipboard_edit_text_done (4551887727694022409) -->
-    <skip />
+    <string name="clipboard_edit_text_done" msgid="4551887727694022409">"పూర్తయింది"</string>
     <string name="clipboard_overlay_text_copied" msgid="1872624400464891363">"కాపీ అయింది"</string>
     <string name="clipboard_edit_source" msgid="9156488177277788029">"<xliff:g id="APPNAME">%1$s</xliff:g> నుండి"</string>
     <string name="clipboard_dismiss_description" msgid="7544573092766945657">"కాపీ UIని విస్మరించండి"</string>

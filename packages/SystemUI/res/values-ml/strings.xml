@@ -135,8 +135,7 @@
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="2242167416140740920">"മുഖം പരിശോധിച്ചുറപ്പിച്ചു"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"സ്ഥിരീകരിച്ചു"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"പൂർത്തിയാക്കാൻ സ്ഥിരീകരിക്കുക ടാപ്പ് ചെയ്യൂ"</string>
-    <!-- no translation found for biometric_dialog_tap_confirm_with_face (7538145860465755864) -->
-    <skip />
+    <string name="biometric_dialog_tap_confirm_with_face" msgid="1092050545851021991">"മുഖം ഉപയോഗിച്ച് അൺലോക്ക് ചെയ്‌തു. തുടരാൻ അൺലോക്ക് ഐക്കൺ അമർത്തുക."</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"പരിശോധിച്ചുറപ്പിച്ചു"</string>
     <string name="biometric_dialog_use_pin" msgid="8385294115283000709">"പിൻ ഉപയോഗിക്കുക"</string>
     <string name="biometric_dialog_use_pattern" msgid="2315593393167211194">"പാറ്റേൺ ഉപയോഗിക്കുക"</string>
@@ -292,24 +291,15 @@
     <string name="sensor_privacy_start_use_mic_dialog_content" msgid="1624701280680913717">"നിങ്ങളുടെ മൈക്രോഫോൺ ഉപയോഗിക്കാൻ അനുവദിച്ചിരിക്കുന്ന എല്ലാ ആപ്പുകൾക്കും സേവനങ്ങൾക്കുമുള്ള ആക്‌സസ് ഇത് അൺബ്ലോക്ക് ചെയ്യുന്നു."</string>
     <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"നിങ്ങളുടെ ക്യാമറ ഉപയോഗിക്കാൻ അനുവദിച്ചിരിക്കുന്ന എല്ലാ ആപ്പുകൾക്കും സേവനങ്ങൾക്കുമുള്ള ആക്‌സസ് ഇത് അൺബ്ലോക്ക് ചെയ്യുന്നു."</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_content" msgid="3577642558418404919">"നിങ്ങളുടെ ക്യാമറയോ മൈക്രോഫോണോ ഉപയോഗിക്കാൻ അനുവദിച്ചിരിക്കുന്ന എല്ലാ ആപ്പുകൾക്കും സേവനങ്ങൾക്കുമുള്ള ആക്‌സസ് ഇത് അൺബ്ലോക്ക് ചെയ്യുന്നു."</string>
-    <!-- no translation found for sensor_privacy_start_use_mic_blocked_dialog_title (2640140287496469689) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_start_use_camera_blocked_dialog_title (7398084286822440384) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_start_use_mic_camera_blocked_dialog_title (195236134743281973) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_start_use_mic_blocked_dialog_content (2138318880682877747) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_start_use_camera_blocked_dialog_content (7216015168047965948) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_start_use_mic_camera_blocked_dialog_content (3960837827570483762) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_mic_unblocked_toast_content (306555320557065068) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_camera_unblocked_toast_content (7843105715964332311) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_mic_camera_unblocked_toast_content (7339355093282661115) -->
-    <skip />
+    <string name="sensor_privacy_start_use_mic_blocked_dialog_title" msgid="2640140287496469689">"മൈക്രോഫോൺ ബ്ലോക്ക് ചെയ്തിരിക്കുന്നു"</string>
+    <string name="sensor_privacy_start_use_camera_blocked_dialog_title" msgid="7398084286822440384">"ക്യാമറ ബ്ലോക്ക് ചെയ്തിരിക്കുന്നു"</string>
+    <string name="sensor_privacy_start_use_mic_camera_blocked_dialog_title" msgid="195236134743281973">"മൈക്കും ക്യാമറയും ബ്ലോക്ക് ചെയ്തിരിക്കുന്നു"</string>
+    <string name="sensor_privacy_start_use_mic_blocked_dialog_content" msgid="2138318880682877747">"അൺബ്ലോക്ക് ചെയ്യാൻ, മൈക്രോഫോൺ ആക്സസ് അനുവദിക്കുന്നതിന്, മൈക്രോഫോൺ ഓണാണ് എന്ന സ്ഥാനത്തേക്ക് നിങ്ങളുടെ ഉപകരണത്തിലെ സ്വകാര്യത മാറ്റുക. നിങ്ങളുടെ ഉപകരണത്തിലെ സ്വകാര്യതാ സ്വിച്ച് കണ്ടെത്താൻ ഉപകരണ മാന്വൽ പരിശോധിക്കുക."</string>
+    <string name="sensor_privacy_start_use_camera_blocked_dialog_content" msgid="7216015168047965948">"അൺബ്ലോക്ക് ചെയ്യാൻ, ക്യാമറാ ആക്സസ് അനുവദിക്കുന്നതിന്, ക്യാമറ ഓണാണ് എന്ന സ്ഥാനത്തേക്ക് നിങ്ങളുടെ ഉപകരണത്തിലെ സ്വകാര്യത മാറ്റുക. നിങ്ങളുടെ ഉപകരണത്തിലെ സ്വകാര്യതാ സ്വിച്ച് കണ്ടെത്താൻ ഉപകരണ മാന്വൽ പരിശോധിക്കുക."</string>
+    <string name="sensor_privacy_start_use_mic_camera_blocked_dialog_content" msgid="3960837827570483762">"അവ അൺബ്ലോക്ക് ചെയ്യാൻ, ആക്സസ് അനുവദിക്കുന്നതിന്, അൺബ്ലോക്ക് ചെയ്തു എന്ന സ്ഥാനത്തേക്ക് നിങ്ങളുടെ ഉപകരണത്തിലെ സ്വകാര്യത മാറ്റുക. നിങ്ങളുടെ ഉപകരണത്തിലെ സ്വകാര്യതാ സ്വിച്ച് കണ്ടെത്താൻ ഉപകരണ മാന്വൽ പരിശോധിക്കുക."</string>
+    <string name="sensor_privacy_mic_unblocked_toast_content" msgid="306555320557065068">"മൈക്രോഫോൺ ലഭ്യമാണ്"</string>
+    <string name="sensor_privacy_camera_unblocked_toast_content" msgid="7843105715964332311">"ക്യാമറ ലഭ്യമാണ്"</string>
+    <string name="sensor_privacy_mic_camera_unblocked_toast_content" msgid="7339355093282661115">"മൈക്രോഫോണും ക്യാമറയും ലഭ്യമാണ്"</string>
     <string name="media_seamless_other_device" msgid="4654849800789196737">"മറ്റ് ഉപകരണം"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"അവലോകനം മാറ്റുക"</string>
     <string name="zen_priority_introduction" msgid="3159291973383796646">"നിങ്ങൾ സജ്ജീകരിച്ച അലാറങ്ങൾ, റിമൈൻഡറുകൾ, ഇവന്റുകൾ, കോളർമാർ എന്നിവയിൽ നിന്നുള്ള ശബ്‌ദങ്ങളും വൈബ്രേഷനുകളുമൊഴികെ മറ്റൊന്നും നിങ്ങളെ ശല്യപ്പെടുത്തുകയില്ല. സംഗീതം, വീഡിയോകൾ, ഗെയിമുകൾ എന്നിവയുൾപ്പെടെ പ്ലേ ചെയ്യുന്നതെന്തും നിങ്ങൾക്ക് ‌തുടർന്നും കേൾക്കാൻ കഴിയും."</string>
@@ -320,7 +310,8 @@
     <string name="notification_tap_again" msgid="4477318164947497249">"തുറക്കുന്നതിന് വീണ്ടും ടാപ്പുചെയ്യുക"</string>
     <string name="tap_again" msgid="1315420114387908655">"വീണ്ടും ടാപ്പ് ചെയ്യുക"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"തുറക്കാൻ മുകളിലോട്ട് സ്വൈപ്പ് ചെയ്യുക"</string>
-    <string name="keyguard_unlock_press" msgid="8488350566398524740">"തുറക്കാൻ അമർത്തുക"</string>
+    <string name="keyguard_unlock_press" msgid="9140109453735019209">"തുറക്കാൻ അൺലോക്ക് ഐക്കൺ അമർത്തുക"</string>
+    <string name="keyguard_face_successful_unlock_press" msgid="25520941264602588">"മുഖം ഉപയോഗിച്ച് അൺലോക്ക് ചെയ്‌തു. തുറക്കാൻ അൺലോക്ക് ഐക്കൺ അമർത്തുക."</string>
     <string name="keyguard_retry" msgid="886802522584053523">"വീണ്ടും ശ്രമിക്കാൻ മുകളിലേക്ക് സ്വൈപ്പ് ചെയ്യുക"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"NFC ഉപയോഗിക്കാൻ അൺലോക്ക് ചെയ്യുക"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"ഈ ഉപകരണം നിങ്ങളുടെ സ്ഥാപനത്തിന്റേതാണ്"</string>
@@ -843,20 +834,13 @@
     <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"ഈ സെഷൻ കാസ്റ്റ് ചെയ്യാൻ, ആപ്പ് തുറക്കുക."</string>
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"അജ്ഞാതമായ ആപ്പ്"</string>
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"കാസ്റ്റ് ചെയ്യുന്നത് നിർത്തുക"</string>
-    <!-- no translation found for media_output_first_broadcast_title (6292237789860753022) -->
-    <skip />
-    <!-- no translation found for media_output_broadcast (3555580945878071543) -->
-    <skip />
-    <!-- no translation found for media_output_first_notify_broadcast_message (6353857724136398494) -->
-    <skip />
-    <!-- no translation found for media_output_broadcasting_message (4150299923404886073) -->
-    <skip />
-    <!-- no translation found for media_output_broadcast_name (8786127091542624618) -->
-    <skip />
-    <!-- no translation found for media_output_broadcast_code (870795639644728542) -->
-    <skip />
-    <!-- no translation found for media_output_broadcast_dialog_save (7910865591430010198) -->
-    <skip />
+    <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"ബ്രോഡ്‌കാസ്‌റ്റ് എങ്ങനെയാണ് പ്രവർത്തിക്കുന്നത്"</string>
+    <string name="media_output_broadcast" msgid="3555580945878071543">"ബ്രോഡ്‌കാസ്റ്റ്"</string>
+    <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"അനുയോജ്യമായ Bluetooth ഉപകരണങ്ങളോടെ സമീപമുള്ള ആളുകൾക്ക് നിങ്ങൾ ബ്രോഡ്‌കാസ്‌റ്റ് ചെയ്യുന്ന മീഡിയ കേൾക്കാനാകും"</string>
+    <string name="media_output_broadcasting_message" msgid="4150299923404886073">"നിങ്ങളുടെ ബ്രോഡ്‌കാസ്‌റ്റ് കേൾക്കാൻ, അനുയോജ്യമായ Bluetooth ഉപകരണങ്ങളോടെ സമീപമുള്ള ആളുകൾക്ക് നിങ്ങളുടെ QR കോഡ് സ്കാൻ ചെയ്യുകയോ നിങ്ങളുടെ ബ്രോഡ്‌കാസ്‌റ്റിന്റെ പേരും പാസ്‌വേഡും ഉപയോഗിക്കുകയോ ചെയ്യാം"</string>
+    <string name="media_output_broadcast_name" msgid="8786127091542624618">"ബ്രോഡ്‌കാസ്‌റ്റിന്റെ പേര്"</string>
+    <string name="media_output_broadcast_code" msgid="870795639644728542">"പാസ്‌വേഡ്"</string>
+    <string name="media_output_broadcast_dialog_save" msgid="7910865591430010198">"സംരക്ഷിക്കുക"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"ബിൽഡ് നമ്പർ"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"ക്ലിപ്പ്ബോർഡിലേക്ക് ബിൽഡ് നമ്പർ പകർത്തി."</string>
     <string name="basic_status" msgid="2315371112182658176">"സംഭാഷണം തുറക്കുക"</string>
