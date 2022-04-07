@@ -186,7 +186,7 @@ public class LocaleManagerService extends SystemService {
             userId = mActivityManagerInternal.handleIncomingUser(
                     Binder.getCallingPid(), Binder.getCallingUid(), userId,
                     false /* allowAll */, ActivityManagerInternal.ALLOW_NON_FULL,
-                    "setApplicationLocales", appPackageName);
+                    "setApplicationLocales", /* callerPackage= */ null);
 
             // This function handles two types of set operations:
             // 1.) A normal, non-privileged app setting its own locale.
@@ -355,7 +355,7 @@ public class LocaleManagerService extends SystemService {
         userId = mActivityManagerInternal.handleIncomingUser(
                 Binder.getCallingPid(), Binder.getCallingUid(), userId,
                 false /* allowAll */, ActivityManagerInternal.ALLOW_NON_FULL,
-                "getApplicationLocales", appPackageName);
+                "getApplicationLocales", /* callerPackage= */ null);
 
         // This function handles three types of query operations:
         // 1.) A normal, non-privileged app querying its own locale.
