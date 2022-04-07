@@ -585,7 +585,7 @@
     <string name="biometric_error_generic" msgid="6784371929985434439">"আসোঁৱাহৰ বিশ্বাসযোগ্যতা প্ৰমাণীকৰণ কৰি থকা হৈছে"</string>
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"স্ক্ৰীন ল\'ক ব্যৱহাৰ কৰক"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"অব্যাহত ৰাখিবলৈ আপোনাৰ স্ক্ৰীন লক দিয়ক"</string>
-    <string name="fingerprint_acquired_partial" msgid="694598777291084823">"আংশিক ফিংগাৰপ্ৰিণ্ট চিনাক্ত কৰা হৈছে"</string>
+    <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"ছেন্সৰটোত ভালকৈ টিপক"</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"ফিগাৰপ্ৰিণ্টৰ প্ৰক্ৰিয়া সম্পাদন কৰিবপৰা নগ\'ল। অনুগ্ৰহ কৰি আকৌ চেষ্টা কৰক৷"</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"ফিংগাৰপ্ৰিণ্ট ছেন্সৰটো মচি পুনৰ চেষ্টা কৰক"</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"ছেন্সৰটো মচি পুনৰ চেষ্টা কৰক"</string>
@@ -598,7 +598,7 @@
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_error_not_match" msgid="4599441812893438961">"ফিংগাৰপ্ৰিণ্ট চিনাক্ত কৰিব পৰা নাই"</string>
-    <string name="fingerprint_udfps_error_not_match" msgid="4709197752023550709">"ছেন্সৰটোত ভালকৈ টিপক"</string>
+    <string name="fingerprint_udfps_error_not_match" msgid="8236930793223158856">"ফিংগাৰপ্ৰিণ্ট চিনাক্ত কৰিব পৰা নাই"</string>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"ফিংগাৰপ্ৰিণ্টৰ সত্যাপন কৰা হ’ল"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"মুখমণ্ডলৰ বিশ্বাসযোগ্যতা প্ৰমাণীকৰণ কৰা হ’ল"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"মুখমণ্ডলৰ বিশ্বাসযোগ্যতা প্ৰমাণীকৰণ কৰা হ’ল, অনুগ্ৰহ কৰি ‘নিশ্চিত কৰক’ বুটামটো টিপক"</string>
@@ -1451,12 +1451,6 @@
     <string name="permdesc_requestIgnoreBatteryOptimizations" msgid="634260656917874356">"কোনো এপক সেই এপ্‌টোৰ বাবে বেটাৰী অপ্টিমাইজেশ্বন উপেক্ষা কৰিবলৈ অনুমতি বিচাৰিবলৈ দিয়ে।"</string>
     <string name="permlab_queryAllPackages" msgid="2928450604653281650">"আটাইবোৰ পেকেজত প্ৰশ্ন সোধক"</string>
     <string name="permdesc_queryAllPackages" msgid="5339069855520996010">"এপক আটাইবোৰ ইনষ্টল কৰি থোৱা পেকেজ চাবলৈ দিয়ে।"</string>
-    <string name="permlab_accessAdServicesTopics" msgid="6687112022940098945">"AdServices Topics API এক্সেছ কৰে"</string>
-    <string name="permdesc_accessAdServicesTopics" msgid="6011532458156465929">"এটা এপ্লিকেশ্বনক AdServices Topics API এক্সেছ কৰিবলৈ অনুমতি দিয়ে।"</string>
-    <string name="permlab_accessAdServicesAttribution" msgid="3268942271128309354">"AdServices Attribution API এক্সেছ কৰে"</string>
-    <string name="permdesc_accessAdServicesAttribution" msgid="577482544832578288">"এটা এপ্লিকেশ্বনক AdServices Attribution API এক্সেছ কৰিবলৈ অনুমতি দিয়ে।"</string>
-    <string name="permlab_accessAdServicesCustomAudiences" msgid="7249286630514600684">"AdServices Custom Audiences API এক্সেছ কৰে"</string>
-    <string name="permdesc_accessAdServicesCustomAudiences" msgid="645526926477180315">"এটা এপ্লিকেশ্বনক AdServices Custom Audiences API এক্সেছ কৰিবলৈ অনুমতি দিয়ে।"</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1842872462124648678">"জুম নিয়ন্ত্ৰণ কৰিবলৈ দুবাৰ টিপক"</string>
     <string name="gadget_host_error_inflating" msgid="2449961590495198720">"ৱিজেট যোগ কৰিব পৰা নগ\'ল।"</string>
     <string name="ime_action_go" msgid="5536744546326495436">"যাওক"</string>
@@ -1685,7 +1679,6 @@
     <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"অন কৰা আছে"</string>
     <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"অফ কৰা আছে"</string>
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"<xliff:g id="SERVICE">%1$s</xliff:g>ক আপোনাৰ ডিভাইচটোৰ সম্পূর্ণ নিয়ন্ত্ৰণ দিবনে?"</string>
-    <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"যদি আপুনি <xliff:g id="SERVICE">%1$s</xliff:g> অন কৰে, তেন্তে আপোনাৰ ডিভাইচটোৱে ডেটা এনক্ৰিপশ্বনৰ গুণগত মান উন্নত কৰিবলৈ স্ক্ৰীন লক ব্যৱহাৰ নকৰে।"</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"আপোনাক সাধ্য সুবিধাৰ প্ৰয়োজনসমূহৰ জৰিয়তে সহায় কৰা এপ্‌সমূহৰ বাবে সম্পূর্ণ নিয়ন্ত্ৰণৰ সুবিধাটো সঠিক যদিও অধিকাংশ এপৰ বাবে এয়া সঠিক নহয়।"</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"চাওক আৰু স্ক্ৰীন নিয়ন্ত্ৰণ কৰক"</string>
     <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"ই স্ক্ৰীনত থকা আটাইখিনি সমল পঢ়িব পাৰে আৰু অন্য এপ্‌সমূহৰ ওপৰত সমল প্ৰদর্শন কৰিব পাৰে।"</string>
@@ -1939,6 +1932,7 @@
     <string name="app_blocked_title" msgid="7353262160455028160">"এপ্‌টো উপলব্ধ নহয়"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"এই মুহূৰ্তত <xliff:g id="APP_NAME">%1$s</xliff:g> উপলব্ধ নহয়।"</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> উপলব্ধ নহয়"</string>
+    <string name="app_streaming_blocked_title_for_permission_dialog" msgid="4483161748582966785">"অনুমতিৰ প্ৰয়োজন"</string>
     <string name="app_streaming_blocked_message" product="tv" msgid="4003011766528814377">"এইটো এতিয়া আপোনাৰ <xliff:g id="DEVICE">%1$s</xliff:g>ত এক্সেছ কৰিব পৰা নাযায়। তাৰ পৰিৱৰ্তে আপোনাৰ Android TVত চেষ্টা কৰি চাওক।"</string>
     <string name="app_streaming_blocked_message" product="tablet" msgid="4242053045964946062">"এইটো এতিয়া আপোনাৰ <xliff:g id="DEVICE">%1$s</xliff:g>ত এক্সেছ কৰিব পৰা নাযায়। তাৰ পৰিৱৰ্তে আপোনাৰ টেবলেটটোত চেষ্টা কৰি চাওক।"</string>
     <string name="app_streaming_blocked_message" product="default" msgid="6159168735030739398">"এইটো এতিয়া আপোনাৰ <xliff:g id="DEVICE">%1$s</xliff:g>ত এক্সেছ কৰিব পৰা নাযায়। তাৰ পৰিৱৰ্তে আপোনাৰ ফ’নত চেষ্টা কৰি চাওক।"</string>
@@ -2032,9 +2026,9 @@
     <string name="harmful_app_warning_open_anyway" msgid="5963657791740211807">"যিহ\'লেও খোলক"</string>
     <string name="harmful_app_warning_title" msgid="8794823880881113856">"ক্ষতিকাৰক এপ্‌ চিনাক্ত কৰা হৈছে"</string>
     <string name="log_access_confirmation_title" msgid="2343578467290592708">"<xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g>ক আটাইবোৰ ডিভাইচৰ লগ এক্সেছ কৰাৰ অনুমতি প্ৰদান কৰিবনে?"</string>
-    <string name="log_access_confirmation_allow" msgid="143157286283302512">"কেৱল এইবাৰৰ বাবে"</string>
+    <string name="log_access_confirmation_allow" msgid="5302517782599389507">"কেৱল এবাৰ এক্সেছ কৰাৰ অনুমতি দিয়ক"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"অনুমতি নিদিব"</string>
-    <string name="log_access_confirmation_body" msgid="4483075525611652922">"আপোনাৰ ডিভাইচত কি কি ঘটে সেয়া ডিভাইচ লগে ৰেকৰ্ড কৰে। এপে সমস্যা বিচাৰিবলৈ আৰু সমাধান কৰিবলৈ এইসমূহ লগ ব্যৱহাৰ কৰিব পাৰে।\n\nকিছুমান লগত সংবেদনশীল তথ্য থাকিব পাৰে, গতিকে কেৱল আপুনি বিশ্বাস কৰা এপকহে আটাইবোৰ ডিভাইচ লগৰ এক্সেছৰ অনুমতি দিয়া উচিত। \n\nআপুনি যদি এই এপ্‌টোক আটাইবোৰ ডিভাইচৰ লগ এক্সেছ কৰাৰ অনুমতি নিদিয়ে, তেতিয়াও ই নিজৰ লগসমূহ এক্সেছ কৰিব পাৰিব আৰু আপোনাৰ ডিভাইচৰ নিৰ্মাতাই আপোনাৰ ডিভাইচটোত কিছু লগ অথবা তথ্য এক্সেছ কৰিবলৈ সক্ষম হ’ব। অধিক জানক"</string>
+    <string name="log_access_confirmation_body" msgid="6581985716241928135">"আপোনাৰ ডিভাইচত কি কি ঘটে সেয়া ডিভাইচ লগে ৰেকৰ্ড কৰে। এপ্‌সমূহে সমস্যা বিচাৰিবলৈ আৰু সমাধান কৰিবলৈ এই লগসমূহ ব্যৱহাৰ কৰিব পাৰে।\n\nকিছুমান লগত সংবেদনশীল তথ্য থাকিব পাৰে, গতিকে কেৱল আপুনি বিশ্বাস কৰা এপকহে আটাইবোৰ ডিভাইচ লগ এক্সেছ কৰাৰ অনুমতি দিয়ক। \n\nআপুনি যদি এই এপ্‌টোক আটাইবোৰ ডিভাইচ লগ এক্সেছ কৰাৰ অনুমতি নিদিয়ে, তথাপিও ই নিজৰ লগসমূহ এক্সেছ কৰিব পাৰিব। আপোনাৰ ডিভাইচৰ নিৰ্মাতাই তথাপিও হয়তো আপোনাৰ ডিভাইচটোত থকা কিছু লগ অথবা তথ্য এক্সেছ কৰিব পাৰিব। অধিক জানক"</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"পুনৰ নেদেখুৱাব"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g>এ <xliff:g id="APP_2">%2$s</xliff:g>ৰ অংশ দেখুওৱাব খুজিছে"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"সম্পাদনা কৰক"</string>
@@ -2264,11 +2258,12 @@
     <string name="ui_translation_accessibility_translated_text" msgid="3197547218178944544">"<xliff:g id="MESSAGE">%1$s</xliff:g> অনুবাদ কৰা হ’ল।"</string>
     <string name="ui_translation_accessibility_translation_finished" msgid="3057830947610088465">"বাৰ্তাটো <xliff:g id="FROM_LANGUAGE">%1$s</xliff:g>ৰ পৰা <xliff:g id="TO_LANGUAGE">%2$s</xliff:g>লৈ অনুবাদ কৰা হ’ল।"</string>
     <string name="notification_channel_abusive_bg_apps" msgid="6092140213264920355">"নেপথ্যত চলি থকা কাৰ্যকলাপ"</string>
-    <string name="notification_title_abusive_bg_apps" msgid="344582472797982073">"নেপথ্যত চলি থকা কাৰ্যকলাপ"</string>
-    <string name="notification_content_abusive_bg_apps" msgid="5572096708044958249">"<xliff:g id="APP">%1$s</xliff:g> নেপথ্যত চলি আছে আৰু অত্যধিক বেটাৰী খৰচ কৰিছে। পৰ্যালোচনা কৰিবলৈ টিপক।"</string>
-    <string name="notification_content_long_running_fgs" msgid="8878031652441570178">"<xliff:g id="APP">%1$s</xliff:g> নেপথ্যত দীৰ্ঘ সময় ধৰি চলি আছে। পৰ্যালোচনা কৰিবলৈ টিপক।"</string>
+    <string name="notification_title_abusive_bg_apps" msgid="3258460527676573815">"এটা এপে বেটাৰী ব্যৱহাৰ কৰি আছে"</string>
+    <string name="notification_title_long_running_fgs" msgid="8170284286477131587">"এটা এপ্ এতিয়াও সক্ৰিয় হৈ আছে"</string>
+    <string name="notification_content_abusive_bg_apps" msgid="9180610713603474720">"<xliff:g id="APP">%1$s</xliff:g>এ নেপথ্যত বেটাৰী ব্যৱহাৰ কৰি আছে। পৰ্যালোচনা কৰিবলৈ টিপক।"</string>
+    <string name="notification_content_long_running_fgs" msgid="8258193410039977101">"<xliff:g id="APP">%1$s</xliff:g>এ বেটাৰীৰ জীৱনকালৰ ওপৰত প্ৰভাৱ পেলাব পাৰে। সক্ৰিয় এপ্ পৰ্যালোচনা কৰিবলৈ টিপক।"</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"সক্ৰিয় এপ্‌সমূহ পৰীক্ষা কৰক"</string>
-    <string name="vdm_camera_access_denied" msgid="6345652513729130490">"এইটো ডিভাইচৰ পৰা কেমেৰা এক্সেছ কৰিব নোৱাৰি"</string>
-    <!-- no translation found for system_locale_title (3978041860457277638) -->
-    <skip />
+    <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"আপোনাৰ <xliff:g id="DEVICE">%1$s</xliff:g>ৰ পৰা ফ’নটোৰ কেমেৰা এক্সেছ কৰিব নোৱাৰি"</string>
+    <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"আপোনাৰ <xliff:g id="DEVICE">%1$s</xliff:g>ৰ পৰা টেবলেটটোৰ কেমেৰা এক্সেছ কৰিব নোৱাৰি"</string>
+    <string name="system_locale_title" msgid="3978041860457277638">"ছিষ্টেমৰ ভাষা"</string>
 </resources>

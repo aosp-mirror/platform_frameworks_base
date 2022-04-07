@@ -585,7 +585,7 @@
     <string name="biometric_error_generic" msgid="6784371929985434439">"Аутентификация катасы"</string>
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"Экран кулпусун колдонуу"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"Улантуу үчүн экрандын кулпусун киргизиңиз"</string>
-    <string name="fingerprint_acquired_partial" msgid="694598777291084823">"Манжа изи жарым-жартылай аныкталды"</string>
+    <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"Сенсорду катуу басыңыз"</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"Манжа изи иштелбей койду. Кайталап көрүңүз."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"Манжа изинин сенсорун тазалап, кайра аракет кылыңыз"</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"Сенсорду тазалап, кайра аракет кылыңыз"</string>
@@ -598,7 +598,7 @@
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_error_not_match" msgid="4599441812893438961">"Манжа изи таанылган жок"</string>
-    <string name="fingerprint_udfps_error_not_match" msgid="4709197752023550709">"Сенсорду катуу басыңыз"</string>
+    <string name="fingerprint_udfps_error_not_match" msgid="8236930793223158856">"Манжа изи таанылган жок"</string>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"Манжа изи текшерилди"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"Жүздүн аныктыгы текшерилди"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"Жүздүн аныктыгы текшерилди, эми \"Ырастоону\" басыңыз"</string>
@@ -1451,12 +1451,6 @@
     <string name="permdesc_requestIgnoreBatteryOptimizations" msgid="634260656917874356">"Колдонмо батареянын кубатын керектегенден мурун уруксат суралсын."</string>
     <string name="permlab_queryAllPackages" msgid="2928450604653281650">"бардык топтомдор боюнча сурам жөнөтүү"</string>
     <string name="permdesc_queryAllPackages" msgid="5339069855520996010">"Колдонмо бардык орнотулган топтомдорду көрөт."</string>
-    <string name="permlab_accessAdServicesTopics" msgid="6687112022940098945">"AdServices Topics API\'син колдонуу мүмкүнчүлүгү"</string>
-    <string name="permdesc_accessAdServicesTopics" msgid="6011532458156465929">"Колдонмого AdServices Topics API\'син колдонууга мүмкүнчүлүк берет."</string>
-    <string name="permlab_accessAdServicesAttribution" msgid="3268942271128309354">"AdServices Attribution API\'лерин колдонуу мүмкүнчүлүгү"</string>
-    <string name="permdesc_accessAdServicesAttribution" msgid="577482544832578288">"Колдонмого AdServices Attribution API\'лерин колдонууга мүмкүнчүлүк берет."</string>
-    <string name="permlab_accessAdServicesCustomAudiences" msgid="7249286630514600684">"AdServices Custom Audiences API\'син колдонуу мүмкүнчүлүгү"</string>
-    <string name="permdesc_accessAdServicesCustomAudiences" msgid="645526926477180315">"Колдонмого AdServices Custom Audiences API\'син колдонууга мүмкүнчүлүк берет."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1842872462124648678">"Масштабдын параметрлерин өзгөртүү үчүн бул жерди эки жолу басыңыз."</string>
     <string name="gadget_host_error_inflating" msgid="2449961590495198720">"Виджетти кошуу мүмкүн болбоду."</string>
     <string name="ime_action_go" msgid="5536744546326495436">"Өтүү"</string>
@@ -1685,7 +1679,6 @@
     <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"КҮЙҮК"</string>
     <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"ӨЧҮК"</string>
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"<xliff:g id="SERVICE">%1$s</xliff:g> кызматына түзмөгүңүздү толугу менен көзөмөлдөөгө уруксат бересизби?"</string>
-    <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"Эгер <xliff:g id="SERVICE">%1$s</xliff:g> күйгүзүлсө, түзмөгүңүз маалыматтарды шифрлөөнү күчтөндүрүү үчүн экраныңыздын кулпусун пайдаланбайт."</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"Толук көзөмөл атайын мүмкүнчүлүктөрдү пайдаланууга керек, бирок калган көпчүлүк колдонмолорго кереги жок."</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Экранды көрүп, көзөмөлдөө"</string>
     <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Кызмат экрандагы нерселерди окуп, материалды башка колдонмолордун үстүнөн көрсөтөт."</string>
@@ -1939,6 +1932,7 @@
     <string name="app_blocked_title" msgid="7353262160455028160">"Колдонмо учурда жеткиликсиз"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> учурда жеткиликсиз"</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> жеткиликсиз"</string>
+    <string name="app_streaming_blocked_title_for_permission_dialog" msgid="4483161748582966785">"Уруксат керек"</string>
     <string name="app_streaming_blocked_message" product="tv" msgid="4003011766528814377">"Учурда буга <xliff:g id="DEVICE">%1$s</xliff:g> түзмөгүңүздөн кире албайсыз. Android TV түзмөгүңүздөн аракет кылып көрүңүз."</string>
     <string name="app_streaming_blocked_message" product="tablet" msgid="4242053045964946062">"Учурда буга <xliff:g id="DEVICE">%1$s</xliff:g> түзмөгүңүздөн кире албайсыз. Планшетиңизден кирип көрүңүз."</string>
     <string name="app_streaming_blocked_message" product="default" msgid="6159168735030739398">"Учурда буга <xliff:g id="DEVICE">%1$s</xliff:g> түзмөгүңүздөн кире албайсыз. Анын ордуна телефондон кирип көрүңүз."</string>
@@ -2032,9 +2026,9 @@
     <string name="harmful_app_warning_open_anyway" msgid="5963657791740211807">"БААРЫ БИР АЧЫЛСЫН"</string>
     <string name="harmful_app_warning_title" msgid="8794823880881113856">"Зыянкеч колдонмо аныкталды"</string>
     <string name="log_access_confirmation_title" msgid="2343578467290592708">"<xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> колдонмосуна түзмөктөгү бардык таржымалдарды колдонууга уруксат бересизби?"</string>
-    <string name="log_access_confirmation_allow" msgid="143157286283302512">"Ушул жолу гана"</string>
+    <string name="log_access_confirmation_allow" msgid="5302517782599389507">"Бир жолу кирүүгө уруксат берүү"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"Уруксат берилбесин"</string>
-    <string name="log_access_confirmation_body" msgid="4483075525611652922">"Түзмөктө аткарылган бардык аракеттер түзмөктүн таржымалдарында сакталып калат. Колдонмолор бул таржымалдарды колдонуп, маселелерди оңдошот.\n\nАйрым таржымалдарда купуя маалымат болушу мүмкүн, андыктан түзмөктөгү бардык таржымалдарды ишенимдүү колдонмолорго гана пайдаланууга уруксат бериңиз. \n\nЭгер бул колдонмого түзмөктөгү айрым таржымалдарга кирүүгө тыюу салсаңыз, ал өзүнүн таржымалдарын пайдалана берет. Ал эми түзмөктү өндүрүүчү түзмөгүңүздөгү айрым таржымалдарды же маалыматты көрө берет. Кененирээк"</string>
+    <string name="log_access_confirmation_body" msgid="6581985716241928135">"Түзмөктө аткарылган бардык аракеттер түзмөктүн таржымалдарында сакталып калат. Колдонмолор бул таржымалдарды колдонуп, маселелерди оңдошот.\n\nАйрым таржымалдарда купуя маалымат болушу мүмкүн, андыктан түзмөктөгү бардык таржымалдарды ишенимдүү колдонмолорго гана пайдаланууга уруксат бериңиз. \n\nЭгер бул колдонмого түзмөктөгү айрым таржымалдарга кирүүгө тыюу салсаңыз, ал өзүнүн таржымалдарын пайдалана берет. Түзмөктү өндүрүүчү түзмөгүңүздөгү айрым таржымалдарды же маалыматты көрө берет. Кеңири маалымат"</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"Экинчи көрүнбөсүн"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g> колдонмосу <xliff:g id="APP_2">%2$s</xliff:g> үлгүлөрүн көрсөткөнү жатат"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"Түзөтүү"</string>
@@ -2264,11 +2258,12 @@
     <string name="ui_translation_accessibility_translated_text" msgid="3197547218178944544">"Билдирүү (<xliff:g id="MESSAGE">%1$s</xliff:g>) которулду."</string>
     <string name="ui_translation_accessibility_translation_finished" msgid="3057830947610088465">"Билдирүү <xliff:g id="FROM_LANGUAGE">%1$s</xliff:g> тилинен <xliff:g id="TO_LANGUAGE">%2$s</xliff:g> тилине которулду."</string>
     <string name="notification_channel_abusive_bg_apps" msgid="6092140213264920355">"Фондогу активдүүлүк"</string>
-    <string name="notification_title_abusive_bg_apps" msgid="344582472797982073">"Фондогу активдүүлүк"</string>
-    <string name="notification_content_abusive_bg_apps" msgid="5572096708044958249">"<xliff:g id="APP">%1$s</xliff:g> фондо иштеп, батареяны отургузуп жатат. Көрүү үчүн таптап коюңуз."</string>
-    <string name="notification_content_long_running_fgs" msgid="8878031652441570178">"<xliff:g id="APP">%1$s</xliff:g> колдонмосу көп убакыттан бери фондо иштеп жатат. Көрүү үчүн таптап коюңуз."</string>
+    <string name="notification_title_abusive_bg_apps" msgid="3258460527676573815">"Колдонмо батареяны сарптоодо"</string>
+    <string name="notification_title_long_running_fgs" msgid="8170284286477131587">"Колдонмо дагы эле иштеп жатат"</string>
+    <string name="notification_content_abusive_bg_apps" msgid="9180610713603474720">"<xliff:g id="APP">%1$s</xliff:g> батареяны фондо колдонуп жатат. Көрүү үчүн таптап коюңуз."</string>
+    <string name="notification_content_long_running_fgs" msgid="8258193410039977101">"<xliff:g id="APP">%1$s</xliff:g> батареянын кубатынын мөөнөтүн азайтышы мүмкүн. Жигердүү колдонмолорду көрүү үчүн таптап коюңуз."</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Жигердүү колдонмолорду карап чыгуу"</string>
-    <string name="vdm_camera_access_denied" msgid="6345652513729130490">"Бул түзмөктөгү камераны колдонууга болбойт"</string>
-    <!-- no translation found for system_locale_title (3978041860457277638) -->
-    <skip />
+    <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"<xliff:g id="DEVICE">%1$s</xliff:g> түзмөгүңүздөн телефондун камерасына мүмкүнчүлүк жок"</string>
+    <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"<xliff:g id="DEVICE">%1$s</xliff:g> түзмөгүңүздөн планшетиңиздин камерасына мүмкүнчүлүк жок"</string>
+    <string name="system_locale_title" msgid="3978041860457277638">"Тутумдун тили"</string>
 </resources>

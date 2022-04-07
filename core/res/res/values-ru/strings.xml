@@ -427,14 +427,10 @@
     <string name="permdesc_writeCallLog" product="tablet" msgid="2657525794731690397">"Приложение сможет вносить изменения в список вызовов планшетного ПК и данные о входящих и исходящих звонках. Вредоносные приложения смогут воспользоваться этим для удаления или изменения информации о звонках."</string>
     <string name="permdesc_writeCallLog" product="tv" msgid="3934939195095317432">"Приложение сможет изменять список вызовов и данные о входящих и исходящих звонках на устройстве Android TV. Вредоносные программы смогут воспользоваться этим для удаления или изменения информации о звонках."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="5903033505665134802">"Приложение сможет вносить изменения в список вызовов телефона и данные о входящих и исходящих звонках. Вредоносные приложения смогут воспользоваться этим для удаления или изменения информации о звонках."</string>
-    <!-- no translation found for permlab_bodySensors (662918578601619569) -->
-    <skip />
-    <!-- no translation found for permdesc_bodySensors (7652650410295512140) -->
-    <skip />
-    <!-- no translation found for permlab_bodySensors_background (4912560779957760446) -->
-    <skip />
-    <!-- no translation found for permdesc_bodySensors_background (8870726027557749417) -->
-    <skip />
+    <string name="permlab_bodySensors" msgid="662918578601619569">"Доступ к данным нательных датчиков, когда приложение используется"</string>
+    <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"Когда приложение используется, это разрешение предоставляет ему доступ к данным нательных датчиков (например, пульсу, температуре, уровню кислорода в крови)."</string>
+    <string name="permlab_bodySensors_background" msgid="4912560779957760446">"Доступ к данным нательных датчиков, когда приложение работает в фоновом режиме"</string>
+    <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"Когда приложение работает в фоновом режиме, это разрешение предоставляет ему доступ к данным нательных датчиков (например, пульсу, температуре, уровню кислорода в крови)."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"Чтение мероприятий и данных"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"Приложение может считывать, отправлять и сохранять информацию о мероприятиях в календаре планшета."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"Приложение может считывать, отправлять и сохранять информацию о мероприятиях в календаре устройства Android TV."</string>
@@ -591,7 +587,7 @@
     <string name="biometric_error_generic" msgid="6784371929985434439">"Ошибка аутентификации."</string>
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"Использовать блокировку экрана"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"Чтобы продолжить, разблокируйте экран."</string>
-    <string name="fingerprint_acquired_partial" msgid="694598777291084823">"Отсканирована только часть отпечатка."</string>
+    <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"Плотно прижмите палец к сканеру."</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"Не удалось распознать отпечаток. Повторите попытку."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"Очистите сканер отпечатков пальцев и повторите попытку."</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"Очистите сканер и повторите попытку."</string>
@@ -604,7 +600,7 @@
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_error_not_match" msgid="4599441812893438961">"Отпечаток не распознан."</string>
-    <string name="fingerprint_udfps_error_not_match" msgid="4709197752023550709">"Плотно прижмите палец к сканеру."</string>
+    <string name="fingerprint_udfps_error_not_match" msgid="8236930793223158856">"Отпечаток не распознан."</string>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"Отпечаток пальца проверен"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"Лицо распознано"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"Лицо распознано, нажмите кнопку \"Подтвердить\""</string>
@@ -695,10 +691,8 @@
     <string name="permdesc_readMediaAudio" msgid="5299772574434619399">"Приложение сможет считывать аудиофайлы из общего хранилища."</string>
     <string name="permlab_readMediaVideo" msgid="7768003311260655007">"считывание видеофайлов из общего хранилища"</string>
     <string name="permdesc_readMediaVideo" msgid="3846400073770403528">"Приложение сможет считывать видеофайлы из общего хранилища."</string>
-    <!-- no translation found for permlab_readMediaImages (4057590631020986789) -->
-    <skip />
-    <!-- no translation found for permdesc_readMediaImages (5836219373138469259) -->
-    <skip />
+    <string name="permlab_readMediaImages" msgid="4057590631020986789">"считывание изображений из общего хранилища"</string>
+    <string name="permdesc_readMediaImages" msgid="5836219373138469259">"Приложение сможет считывать изображения из общего хранилища."</string>
     <string name="permlab_sdcardWrite" msgid="4863021819671416668">"Изменение или удаление данных на общем накопителе"</string>
     <string name="permdesc_sdcardWrite" msgid="8376047679331387102">"Приложение сможет записывать данные на общий накопитель."</string>
     <string name="permlab_use_sip" msgid="8250774565189337477">"Входящие и исходящие вызовы SIP"</string>
@@ -1459,12 +1453,6 @@
     <string name="permdesc_requestIgnoreBatteryOptimizations" msgid="634260656917874356">"Разрешает приложению игнорировать ограничение на расход заряда батареи."</string>
     <string name="permlab_queryAllPackages" msgid="2928450604653281650">"Запрос информации обо всех пакетах"</string>
     <string name="permdesc_queryAllPackages" msgid="5339069855520996010">"Приложение сможет просматривать все установленные пакеты."</string>
-    <string name="permlab_accessAdServicesTopics" msgid="6687112022940098945">"доступ к AdServices Topics API"</string>
-    <string name="permdesc_accessAdServicesTopics" msgid="6011532458156465929">"Приложение сможет получать доступ к AdServices Topics API."</string>
-    <string name="permlab_accessAdServicesAttribution" msgid="3268942271128309354">"доступ к AdServices Attribution API"</string>
-    <string name="permdesc_accessAdServicesAttribution" msgid="577482544832578288">"Приложение сможет получать доступ к AdServices Attribution API."</string>
-    <string name="permlab_accessAdServicesCustomAudiences" msgid="7249286630514600684">"доступ к AdServices Custom Audiences API"</string>
-    <string name="permdesc_accessAdServicesCustomAudiences" msgid="645526926477180315">"Приложение сможет получать доступ к AdServices Custom Audiences API."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1842872462124648678">"Нажмите дважды для изменения масштаба"</string>
     <string name="gadget_host_error_inflating" msgid="2449961590495198720">"Не удалось добавить виджет."</string>
     <string name="ime_action_go" msgid="5536744546326495436">"Выбрать"</string>
@@ -1693,7 +1681,6 @@
     <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"Включено"</string>
     <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"Выключено"</string>
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"Предоставить сервису \"<xliff:g id="SERVICE">%1$s</xliff:g>\" полный контроль над устройством?"</string>
-    <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"Если включить сервис \"<xliff:g id="SERVICE">%1$s</xliff:g>\", устройство не будет использовать блокировку экрана для защиты данных."</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"Полный контроль нужен приложениям для реализации специальных возможностей и не нужен большинству остальных."</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Просмотр и контроль экрана"</string>
     <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Сервис может просматривать весь контент на экране и отображать контент поверх других приложений"</string>
@@ -1947,6 +1934,7 @@
     <string name="app_blocked_title" msgid="7353262160455028160">"Приложение недоступно"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"Приложение \"<xliff:g id="APP_NAME">%1$s</xliff:g>\" сейчас недоступно."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"Недоступно: <xliff:g id="ACTIVITY">%1$s</xliff:g>"</string>
+    <string name="app_streaming_blocked_title_for_permission_dialog" msgid="4483161748582966785">"Требуется разрешение"</string>
     <string name="app_streaming_blocked_message" product="tv" msgid="4003011766528814377">"Эта функция пока недоступна на устройстве <xliff:g id="DEVICE">%1$s</xliff:g>. Используйте Android TV."</string>
     <string name="app_streaming_blocked_message" product="tablet" msgid="4242053045964946062">"Эта функция пока недоступна на устройстве <xliff:g id="DEVICE">%1$s</xliff:g>. Используйте планшет."</string>
     <string name="app_streaming_blocked_message" product="default" msgid="6159168735030739398">"Эта функция пока недоступна на устройстве <xliff:g id="DEVICE">%1$s</xliff:g>. Используйте телефон."</string>
@@ -2040,10 +2028,9 @@
     <string name="harmful_app_warning_open_anyway" msgid="5963657791740211807">"ОТКРЫТЬ"</string>
     <string name="harmful_app_warning_title" msgid="8794823880881113856">"Обнаружено вредоносное приложение"</string>
     <string name="log_access_confirmation_title" msgid="2343578467290592708">"Разрешить приложению \"<xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g>\" доступ ко всем журналам устройства?"</string>
-    <string name="log_access_confirmation_allow" msgid="143157286283302512">"Только в этот раз"</string>
+    <string name="log_access_confirmation_allow" msgid="5302517782599389507">"Разрешить разовый доступ"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"Запретить"</string>
-    <!-- no translation found for log_access_confirmation_body (4483075525611652922) -->
-    <skip />
+    <string name="log_access_confirmation_body" msgid="6581985716241928135">"В журналы записывается информация о том, что происходит на устройстве. Приложения могут использовать их, чтобы находить и устранять неполадки.\n\nТак как некоторые журналы могут содержать конфиденциальную информацию, доступ ко всем журналам следует предоставлять только тем приложениям, которым вы доверяете. \n\nЕсли вы не предоставите такой доступ этому приложению, оно по-прежнему сможет просматривать свои журналы. Не исключено, что некоторые журналы или сведения на вашем устройстве будут по-прежнему доступны его производителю. Подробнее"</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"Больше не показывать"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"Приложение \"<xliff:g id="APP_0">%1$s</xliff:g>\" запрашивает разрешение на показ фрагментов приложения \"<xliff:g id="APP_2">%2$s</xliff:g>\"."</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"Изменить"</string>
@@ -2273,11 +2260,12 @@
     <string name="ui_translation_accessibility_translated_text" msgid="3197547218178944544">"Сообщение \"<xliff:g id="MESSAGE">%1$s</xliff:g>\" переведено."</string>
     <string name="ui_translation_accessibility_translation_finished" msgid="3057830947610088465">"Сообщение переведено на <xliff:g id="TO_LANGUAGE">%2$s</xliff:g>. Язык оригинала: <xliff:g id="FROM_LANGUAGE">%1$s</xliff:g>."</string>
     <string name="notification_channel_abusive_bg_apps" msgid="6092140213264920355">"Работа в фоновом режиме"</string>
-    <string name="notification_title_abusive_bg_apps" msgid="344582472797982073">"Работа в фоновом режиме"</string>
-    <string name="notification_content_abusive_bg_apps" msgid="5572096708044958249">"Приложение \"<xliff:g id="APP">%1$s</xliff:g>\" работает в фоновом режиме и расходует заряд батареи. Нажмите, чтобы узнать подробности."</string>
-    <string name="notification_content_long_running_fgs" msgid="8878031652441570178">"Приложение \"<xliff:g id="APP">%1$s</xliff:g>\" работает в фоновом режиме уже длительное время. Нажмите, чтобы узнать подробности."</string>
+    <string name="notification_title_abusive_bg_apps" msgid="3258460527676573815">"Приложение расходует заряд батареи"</string>
+    <string name="notification_title_long_running_fgs" msgid="8170284286477131587">"Приложение все ещё активно"</string>
+    <string name="notification_content_abusive_bg_apps" msgid="9180610713603474720">"Приложение \"<xliff:g id="APP">%1$s</xliff:g>\" расходует заряд батареи в фоновом режиме. Нажмите, чтобы узнать подробности."</string>
+    <string name="notification_content_long_running_fgs" msgid="8258193410039977101">"Приложение \"<xliff:g id="APP">%1$s</xliff:g>\" может влиять на время работы батареи. Нажмите, чтобы увидеть активные приложения."</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Проверить активные приложения"</string>
-    <string name="vdm_camera_access_denied" msgid="6345652513729130490">"Камера на этом устройстве недоступна."</string>
-    <!-- no translation found for system_locale_title (3978041860457277638) -->
-    <skip />
+    <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"У устройства \"<xliff:g id="DEVICE">%1$s</xliff:g>\" нет доступа к камере телефона."</string>
+    <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"У устройства \"<xliff:g id="DEVICE">%1$s</xliff:g>\" нет доступа к камере планшета."</string>
+    <string name="system_locale_title" msgid="3978041860457277638">"Язык системы"</string>
 </resources>

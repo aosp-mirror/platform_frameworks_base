@@ -585,7 +585,7 @@
     <string name="biometric_error_generic" msgid="6784371929985434439">"Erro ao autenticar."</string>
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"Utilizar o bloqueio de ecrã"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"Introduza o bloqueio de ecrã para continuar"</string>
-    <string name="fingerprint_acquired_partial" msgid="694598777291084823">"Impressão digital parcial detetada"</string>
+    <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"Prima firmemente o sensor"</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"Não foi possível processar a impressão digital. Tente novamente."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"Limpe o sensor de impressões digitais e tente novamente"</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"Limpe o sensor e tente novamente"</string>
@@ -598,7 +598,7 @@
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_error_not_match" msgid="4599441812893438961">"Impressão digital não reconhecida"</string>
-    <string name="fingerprint_udfps_error_not_match" msgid="4709197752023550709">"Prima firmemente o sensor"</string>
+    <string name="fingerprint_udfps_error_not_match" msgid="8236930793223158856">"Impressão digital não reconhecida"</string>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"A impressão digital foi autenticada."</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"Rosto autenticado."</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"Rosto autenticado. Prima Confirmar."</string>
@@ -1451,12 +1451,6 @@
     <string name="permdesc_requestIgnoreBatteryOptimizations" msgid="634260656917874356">"Permite que uma app solicite autorização para ignorar as otimizações da bateria para a mesma."</string>
     <string name="permlab_queryAllPackages" msgid="2928450604653281650">"consultar todos os pacotes"</string>
     <string name="permdesc_queryAllPackages" msgid="5339069855520996010">"Permite a uma app ver todos os pacotes instalados."</string>
-    <string name="permlab_accessAdServicesTopics" msgid="6687112022940098945">"aceder à API AdServices Topics"</string>
-    <string name="permdesc_accessAdServicesTopics" msgid="6011532458156465929">"Permite a uma aplicação aceder à API AdServices Topics."</string>
-    <string name="permlab_accessAdServicesAttribution" msgid="3268942271128309354">"aceder às APIs AdServices Attribution"</string>
-    <string name="permdesc_accessAdServicesAttribution" msgid="577482544832578288">"Permite a uma aplicação aceder às APIs AdServices Attribution."</string>
-    <string name="permlab_accessAdServicesCustomAudiences" msgid="7249286630514600684">"aceder à API AdServices Custom Audiences"</string>
-    <string name="permdesc_accessAdServicesCustomAudiences" msgid="645526926477180315">"Permite a uma aplicação aceder à API AdServices Custom Audiences."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1842872462124648678">"Tocar duas vezes para controlar o zoom"</string>
     <string name="gadget_host_error_inflating" msgid="2449961590495198720">"Não foi possível adicionar widget."</string>
     <string name="ime_action_go" msgid="5536744546326495436">"Ir"</string>
@@ -1685,7 +1679,6 @@
     <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"ATIVADO"</string>
     <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"DESATIVADO"</string>
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"Permitir que o serviço <xliff:g id="SERVICE">%1$s</xliff:g> tenha controlo total sobre o seu dispositivo?"</string>
-    <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"Se ativar o serviço <xliff:g id="SERVICE">%1$s</xliff:g>, o dispositivo não utilizará o bloqueio de ecrã para otimizar a encriptação de dados."</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"O controlo total é adequado para aplicações que ajudam nas necessidades de acessibilidade, mas não para a maioria das apps."</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Ver e controlar o ecrã"</string>
     <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Pode ler todo o conteúdo do ecrã e sobrepor conteúdo a outras aplicações."</string>
@@ -1859,7 +1852,7 @@
     <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"A Poupança de bateria ativa o tema escuro e limita ou desativa a atividade em segundo plano, alguns efeitos visuais, determinadas funcionalidades e algumas ligações de rede."</string>
     <string name="battery_saver_description" msgid="8518809702138617167">"A Poupança de bateria ativa o tema escuro e limita ou desativa a atividade em segundo plano, alguns efeitos visuais, determinadas funcionalidades e algumas ligações de rede."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Para ajudar a reduzir a utilização de dados, a Poupança de dados impede que algumas apps enviem ou recebam dados em segundo plano. Uma determinada app que esteja a utilizar atualmente pode aceder aos dados, mas é possível que o faça com menos frequência. Isto pode significar, por exemplo, que as imagens não são apresentadas até que toque nas mesmas."</string>
-    <string name="data_saver_enable_title" msgid="7080620065745260137">"Pretende ativar a Poupança de dados?"</string>
+    <string name="data_saver_enable_title" msgid="7080620065745260137">"Ativar a Poupança de dados?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Ativar"</string>
     <string name="zen_mode_duration_minutes_summary" msgid="4555514757230849789">"{count,plural, =1{Durante um minuto (até à[s] {formattedTime})}other{Durante # minutos (até à[s] {formattedTime})}}"</string>
     <string name="zen_mode_duration_minutes_summary_short" msgid="1187553788355486950">"{count,plural, =1{Durante 1 min (até à[s] {formattedTime})}other{Durante # min (até à[s] {formattedTime})}}"</string>
@@ -1939,6 +1932,7 @@
     <string name="app_blocked_title" msgid="7353262160455028160">"A app não está disponível"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"De momento, a app <xliff:g id="APP_NAME">%1$s</xliff:g> não está disponível."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> indisponível"</string>
+    <string name="app_streaming_blocked_title_for_permission_dialog" msgid="4483161748582966785">"Autorização necessária"</string>
     <string name="app_streaming_blocked_message" product="tv" msgid="4003011766528814377">"De momento, não é possível aceder a esta app no seu <xliff:g id="DEVICE">%1$s</xliff:g>. Em alternativa, experimente no dispositivo Android TV."</string>
     <string name="app_streaming_blocked_message" product="tablet" msgid="4242053045964946062">"De momento, não é possível aceder a esta app no seu <xliff:g id="DEVICE">%1$s</xliff:g>. Em alternativa, experimente no tablet."</string>
     <string name="app_streaming_blocked_message" product="default" msgid="6159168735030739398">"De momento, não é possível aceder a esta app no seu <xliff:g id="DEVICE">%1$s</xliff:g>. Em alternativa, experimente no telemóvel."</string>
@@ -2032,9 +2026,9 @@
     <string name="harmful_app_warning_open_anyway" msgid="5963657791740211807">"ABRIR MESMO ASSIM"</string>
     <string name="harmful_app_warning_title" msgid="8794823880881113856">"Aplicação prejudicial detetada"</string>
     <string name="log_access_confirmation_title" msgid="2343578467290592708">"Permitir que a app <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> aceda a todos os registos do dispositivo?"</string>
-    <string name="log_access_confirmation_allow" msgid="143157286283302512">"Apenas desta vez"</string>
+    <string name="log_access_confirmation_allow" msgid="5302517782599389507">"Permitir acesso único"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"Não permitir"</string>
-    <string name="log_access_confirmation_body" msgid="4483075525611652922">"Os registos do dispositivo documentam o que ocorre no seu dispositivo. As apps podem usar esses registos para detetar e corrigir problemas.\n\nAlguns registos podem conter informações confidenciais, pelo que o acesso a todos os registos do dispositivo deve apenas ser permitido às apps nas quais confia. \n\nSe não permitir o acesso desta app a todos os registos do dispositivo, a mesma pode ainda assim aceder aos seus próprios registos e o fabricante do dispositivo pode continuar a aceder a alguns registos ou informações no seu dispositivo. Saiba mais"</string>
+    <string name="log_access_confirmation_body" msgid="6581985716241928135">"Os registos do dispositivo documentam o que ocorre no seu dispositivo. As apps podem usar esses registos para detetar e corrigir problemas.\n\nAlguns registos podem conter informações confidenciais, pelo que o acesso a todos os registos do dispositivo deve apenas ser permitido às apps nas quais confia. \n\nSe não permitir o acesso desta app a todos os registos do dispositivo, a mesma pode ainda assim aceder aos próprios registos. O fabricante do dispositivo pode continuar a aceder a alguns registos ou informações no seu dispositivo. Saiba mais"</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"Não mostrar de novo"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"A app <xliff:g id="APP_0">%1$s</xliff:g> pretende mostrar partes da app <xliff:g id="APP_2">%2$s</xliff:g>."</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"Editar"</string>
@@ -2264,11 +2258,12 @@
     <string name="ui_translation_accessibility_translated_text" msgid="3197547218178944544">"Mensagem <xliff:g id="MESSAGE">%1$s</xliff:g> traduzida."</string>
     <string name="ui_translation_accessibility_translation_finished" msgid="3057830947610088465">"Mensagem traduzida de <xliff:g id="FROM_LANGUAGE">%1$s</xliff:g> para <xliff:g id="TO_LANGUAGE">%2$s</xliff:g>."</string>
     <string name="notification_channel_abusive_bg_apps" msgid="6092140213264920355">"Atividade em segundo plano"</string>
-    <string name="notification_title_abusive_bg_apps" msgid="344582472797982073">"Atividade em segundo plano"</string>
-    <string name="notification_content_abusive_bg_apps" msgid="5572096708044958249">"<xliff:g id="APP">%1$s</xliff:g> está a ser executada em 2.º plano e a consumir muita bateria. Toque para analisar."</string>
-    <string name="notification_content_long_running_fgs" msgid="8878031652441570178">"A app <xliff:g id="APP">%1$s</xliff:g> está a ser executada em segundo plano há muito tempo. Toque para analisar."</string>
+    <string name="notification_title_abusive_bg_apps" msgid="3258460527676573815">"Uma app está a consumir bateria"</string>
+    <string name="notification_title_long_running_fgs" msgid="8170284286477131587">"Uma app ainda está ativa"</string>
+    <string name="notification_content_abusive_bg_apps" msgid="9180610713603474720">"A app <xliff:g id="APP">%1$s</xliff:g> está a consumir bateria em segundo plano. Toque para rever."</string>
+    <string name="notification_content_long_running_fgs" msgid="8258193410039977101">"A app <xliff:g id="APP">%1$s</xliff:g> pode afetar a autonomia da bateria. Toque para rever as apps ativas."</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Verificar apps ativas"</string>
-    <string name="vdm_camera_access_denied" msgid="6345652513729130490">"Não é possível aceder à câmara a partir deste dispositivo"</string>
-    <!-- no translation found for system_locale_title (3978041860457277638) -->
-    <skip />
+    <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"Não é possível aceder à câmara do telemóvel a partir do dispositivo <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
+    <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"Não é possível aceder à câmara do tablet a partir do dispositivo <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
+    <string name="system_locale_title" msgid="3978041860457277638">"Idioma do sistema"</string>
 </resources>
