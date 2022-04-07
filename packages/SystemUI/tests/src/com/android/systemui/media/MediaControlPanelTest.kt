@@ -105,6 +105,7 @@ public class MediaControlPanelTest : SysuiTestCase() {
     @Mock private lateinit var mediaOutputDialogFactory: MediaOutputDialogFactory
     @Mock private lateinit var mediaCarouselController: MediaCarouselController
     @Mock private lateinit var falsingManager: FalsingManager
+    @Mock private lateinit var transitionParent: ViewGroup
     private lateinit var appIcon: ImageView
     private lateinit var albumView: ImageView
     private lateinit var titleText: TextView
@@ -241,6 +242,10 @@ public class MediaControlPanelTest : SysuiTestCase() {
         whenever(viewHolder.seamlessIcon).thenReturn(seamlessIcon)
         whenever(viewHolder.seamlessText).thenReturn(seamlessText)
         whenever(viewHolder.seekBar).thenReturn(seekBar)
+
+        // Transition View
+        whenever(view.parent).thenReturn(transitionParent)
+        whenever(view.rootView).thenReturn(transitionParent)
 
         // Action buttons
         whenever(viewHolder.actionPlayPause).thenReturn(actionPlayPause)
