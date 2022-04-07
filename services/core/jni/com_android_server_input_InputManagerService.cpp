@@ -1854,12 +1854,13 @@ static jboolean nativeTransferTouchFocus(JNIEnv* env, jobject nativeImplObj,
     }
 }
 
-static jboolean nativeTransferTouch(JNIEnv* env, jobject nativeImplObj,
-                                    jobject destChannelTokenObj) {
+static jboolean nativeTransferTouch(JNIEnv* env, jobject nativeImplObj, jobject destChannelTokenObj,
+                                    jint displayId) {
     sp<IBinder> destChannelToken = ibinderForJavaObject(env, destChannelTokenObj);
 
     NativeInputManager* im = getNativeInputManager(env, nativeImplObj);
-    if (im->getInputManager()->getDispatcher().transferTouch(destChannelToken)) {
+    if (im->getInputManager()->getDispatcher().transferTouch(destChannelToken,
+                                                             static_cast<int32_t>(displayId))) {
         return JNI_TRUE;
     } else {
         return JNI_FALSE;
@@ -2355,7 +2356,7 @@ static const JNINativeMethod gInputManagerMethods[] = {
         {"setSystemUiLightsOut", "(Z)V", (void*)nativeSetSystemUiLightsOut},
         {"transferTouchFocus", "(Landroid/os/IBinder;Landroid/os/IBinder;Z)Z",
          (void*)nativeTransferTouchFocus},
-        {"transferTouch", "(Landroid/os/IBinder;)Z", (void*)nativeTransferTouch},
+        {"transferTouch", "(Landroid/os/IBinder;I)Z", (void*)nativeTransferTouch},
         {"setPointerSpeed", "(I)V", (void*)nativeSetPointerSpeed},
         {"setPointerAcceleration", "(F)V", (void*)nativeSetPointerAcceleration},
         {"setShowTouches", "(Z)V", (void*)nativeSetShowTouches},
