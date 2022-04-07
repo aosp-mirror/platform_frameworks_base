@@ -6,7 +6,6 @@ import com.android.internal.logging.MetricsLogger
 import com.android.internal.logging.UiEventLogger
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.dump.DumpManager
-import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.media.MediaHost
 import com.android.systemui.media.MediaHostState
 import com.android.systemui.plugins.FalsingManager
@@ -35,8 +34,6 @@ import org.mockito.Mockito.`when` as whenever
 class QSPanelControllerTest : SysuiTestCase() {
 
     @Mock private lateinit var qsPanel: QSPanel
-    @Mock private lateinit var qsFgsManagerFooter: QSFgsManagerFooter
-    @Mock private lateinit var qsSecurityFooter: QSSecurityFooter
     @Mock private lateinit var tunerService: TunerService
     @Mock private lateinit var qsTileHost: QSTileHost
     @Mock private lateinit var qsCustomizerController: QSCustomizerController
@@ -50,7 +47,6 @@ class QSPanelControllerTest : SysuiTestCase() {
     @Mock private lateinit var brightnessSlider: BrightnessSliderController
     @Mock private lateinit var brightnessSliderFactory: BrightnessSliderController.Factory
     @Mock private lateinit var falsingManager: FalsingManager
-    @Mock private lateinit var featureFlags: FeatureFlags
     @Mock private lateinit var mediaHost: MediaHost
     @Mock private lateinit var tile: QSTile
     @Mock private lateinit var otherTile: QSTile
@@ -69,8 +65,6 @@ class QSPanelControllerTest : SysuiTestCase() {
 
         controller = QSPanelController(
             qsPanel,
-            qsFgsManagerFooter,
-            qsSecurityFooter,
             tunerService,
             qsTileHost,
             qsCustomizerController,
@@ -84,7 +78,6 @@ class QSPanelControllerTest : SysuiTestCase() {
             brightnessControllerFactory,
             brightnessSliderFactory,
             falsingManager,
-            featureFlags,
             statusBarKeyguardViewManager
         )
     }

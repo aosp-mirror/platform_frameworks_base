@@ -48,6 +48,7 @@ import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.Mockito.anyInt
 import org.mockito.Mockito.eq
+import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
 import org.mockito.junit.MockitoJUnit
 import org.mockito.Mockito.`when` as whenever
@@ -81,8 +82,29 @@ class AuthContainerViewTest : SysuiTestCase() {
     }
 
     @Test
+    fun testNotifiesAnimatedIn() {
+        initializeContainer()
+        verify(callback).onDialogAnimatedIn()
+    }
+
+    @Test
+    fun testIgnoresAnimatedInWhenDismissed() {
+        val container = initializeContainer(addToView = false)
+        container.dismissFromSystemServer()
+        waitForIdleSync()
+
+        verify(callback, never()).onDialogAnimatedIn()
+
+        container.addToView()
+        waitForIdleSync()
+
+        // attaching the view resets the state and allows this to happen again
+        verify(callback).onDialogAnimatedIn()
+    }
+
+    @Test
     fun testActionAuthenticated_sendsDismissedAuthenticated() {
-        val container = initializeContainer(BiometricManager.Authenticators.BIOMETRIC_WEAK)
+        val container = initializeContainer()
         container.mBiometricCallback.onAction(
             AuthBiometricView.Callback.ACTION_AUTHENTICATED
         )
@@ -97,7 +119,7 @@ class AuthContainerViewTest : SysuiTestCase() {
 
     @Test
     fun testActionUserCanceled_sendsDismissedUserCanceled() {
-        val container = initializeContainer(BiometricManager.Authenticators.BIOMETRIC_WEAK)
+        val container = initializeContainer()
         container.mBiometricCallback.onAction(
             AuthBiometricView.Callback.ACTION_USER_CANCELED
         )
@@ -115,7 +137,7 @@ class AuthContainerViewTest : SysuiTestCase() {
 
     @Test
     fun testActionButtonNegative_sendsDismissedButtonNegative() {
-        val container = initializeContainer(BiometricManager.Authenticators.BIOMETRIC_WEAK)
+        val container = initializeContainer()
         container.mBiometricCallback.onAction(
             AuthBiometricView.Callback.ACTION_BUTTON_NEGATIVE
         )
@@ -141,7 +163,7 @@ class AuthContainerViewTest : SysuiTestCase() {
 
     @Test
     fun testActionError_sendsDismissedError() {
-        val container = initializeContainer(BiometricManager.Authenticators.BIOMETRIC_WEAK)
+        val container = initializeContainer()
         authContainer!!.mBiometricCallback.onAction(
             AuthBiometricView.Callback.ACTION_ERROR
         )
@@ -183,7 +205,7 @@ class AuthContainerViewTest : SysuiTestCase() {
 
     @Test
     fun testShowBiometricUI() {
-        val container = initializeContainer(BiometricManager.Authenticators.BIOMETRIC_WEAK)
+        val container = initializeContainer()
 
         waitForIdleSync()
 
@@ -252,7 +274,10 @@ class AuthContainerViewTest : SysuiTestCase() {
         assertThat((layoutParams.fitInsetsTypes and WindowInsets.Type.ime()) == 0).isTrue()
     }
 
-    private fun initializeContainer(authenticators: Int): TestAuthContainerView {
+    private fun initializeContainer(
+        authenticators: Int = BiometricManager.Authenticators.BIOMETRIC_WEAK,
+        addToView: Boolean = true
+    ): TestAuthContainerView {
         val config = AuthContainerView.Config()
         config.mContext = mContext
         config.mCallback = callback
@@ -291,7 +316,11 @@ class AuthContainerViewTest : SysuiTestCase() {
             lockPatternUtils,
             Handler(TestableLooper.get(this).looper)
         )
-        ViewUtils.attachView(authContainer)
+
+        if (addToView) {
+            authContainer!!.addToView()
+        }
+
         return authContainer!!
     }
 
@@ -315,6 +344,12 @@ class AuthContainerViewTest : SysuiTestCase() {
     override fun waitForIdleSync() {
         TestableLooper.get(this).processAllMessages()
         super.waitForIdleSync()
+    }
+
+    private fun AuthContainerView.addToView() {
+        ViewUtils.attachView(this)
+        waitForIdleSync()
+        assertThat(isAttachedToWindow).isTrue()
     }
 }
 

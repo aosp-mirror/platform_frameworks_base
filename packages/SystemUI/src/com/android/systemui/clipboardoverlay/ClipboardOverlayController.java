@@ -31,6 +31,8 @@ import static java.util.Objects.requireNonNull;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
+import android.animation.AnimatorSet;
+import android.animation.TimeInterpolator;
 import android.animation.ValueAnimator;
 import android.annotation.MainThread;
 import android.app.RemoteAction;
@@ -55,6 +57,7 @@ import android.os.Looper;
 import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.util.MathUtils;
 import android.util.Size;
 import android.view.Display;
 import android.view.DisplayCutout;
@@ -68,6 +71,8 @@ import android.view.ViewTreeObserver;
 import android.view.WindowInsets;
 import android.view.WindowManager;
 import android.view.accessibility.AccessibilityManager;
+import android.view.animation.LinearInterpolator;
+import android.view.animation.PathInterpolator;
 import android.view.textclassifier.TextClassification;
 import android.view.textclassifier.TextClassificationManager;
 import android.view.textclassifier.TextClassifier;
@@ -119,6 +124,7 @@ public class ClipboardOverlayController {
 
     private final FrameLayout mContainer;
     private final DraggableConstraintLayout mView;
+    private final View mClipboardPreview;
     private final ImageView mImagePreview;
     private final TextView mTextPreview;
     private final View mPreviewBorder;
@@ -177,6 +183,7 @@ public class ClipboardOverlayController {
         mActionContainerBackground =
                 requireNonNull(mView.findViewById(R.id.actions_container_background));
         mActionContainer = requireNonNull(mView.findViewById(R.id.actions));
+        mClipboardPreview = requireNonNull(mView.findViewById(R.id.clipboard_preview));
         mImagePreview = requireNonNull(mView.findViewById(R.id.image_preview));
         mTextPreview = requireNonNull(mView.findViewById(R.id.text_preview));
         mPreviewBorder = requireNonNull(mView.findViewById(R.id.preview_border));
@@ -197,7 +204,7 @@ public class ClipboardOverlayController {
                     @Override
                     public void onAnimationStart(Animator animation) {
                         super.onAnimationStart(animation);
-                        mContainer.animate().alpha(0).start();
+                        mContainer.animate().alpha(0).setDuration(animation.getDuration()).start();
                     }
                 });
             }
@@ -294,6 +301,7 @@ public class ClipboardOverlayController {
                 animateOut();
             });
             mRemoteCopyChip.setAlpha(1f);
+            mActionContainerBackground.setVisibility(View.VISIBLE);
         } else {
             mRemoteCopyChip.setVisibility(View.GONE);
         }
@@ -410,6 +418,7 @@ public class ClipboardOverlayController {
     private void showEditableText(CharSequence text) {
         showTextPreview(text);
         mEditChip.setVisibility(View.VISIBLE);
+        mActionContainerBackground.setVisibility(View.VISIBLE);
         mEditChip.setAlpha(1f);
         mEditChip.setContentDescription(
                 mContext.getString(R.string.clipboard_edit_text_description));
@@ -422,6 +431,7 @@ public class ClipboardOverlayController {
         mTextPreview.setVisibility(View.GONE);
         mImagePreview.setVisibility(View.VISIBLE);
         mEditChip.setAlpha(1f);
+        mActionContainerBackground.setVisibility(View.VISIBLE);
         ContentResolver resolver = mContext.getContentResolver();
         try {
             int size = mContext.getResources().getDimensionPixelSize(R.dimen.overlay_x_scale);
@@ -453,36 +463,75 @@ public class ClipboardOverlayController {
     }
 
     private void animateIn() {
+        if (mAccessibilityManager.isEnabled()) {
+            mDismissButton.setVisibility(View.VISIBLE);
+        }
         getEnterAnimation().start();
     }
 
     private void animateOut() {
-        mView.dismiss();
+        Animator anim = getExitAnimation();
+        anim.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                super.onAnimationEnd(animation);
+                hideImmediate();
+            }
+        });
+        anim.start();
     }
 
-    private ValueAnimator getEnterAnimation() {
-        ValueAnimator anim = ValueAnimator.ofFloat(0, 1);
+    private Animator getEnterAnimation() {
+        TimeInterpolator linearInterpolator = new LinearInterpolator();
+        TimeInterpolator scaleInterpolator = new PathInterpolator(0, 0, 0, 1f);
+        AnimatorSet enterAnim = new AnimatorSet();
 
-        mContainer.setAlpha(0);
-        mDismissButton.setVisibility(View.GONE);
-        final View previewBorder = requireNonNull(mView.findViewById(R.id.preview_border));
-        final View actionBackground = requireNonNull(
-                mView.findViewById(R.id.actions_container_background));
-        mImagePreview.setVisibility(View.VISIBLE);
-        mActionContainerBackground.setVisibility(View.VISIBLE);
-        if (mAccessibilityManager.isEnabled()) {
-            mDismissButton.setVisibility(View.VISIBLE);
-        }
-
-        anim.addUpdateListener(animation -> {
+        ValueAnimator rootAnim = ValueAnimator.ofFloat(0, 1);
+        rootAnim.setInterpolator(linearInterpolator);
+        rootAnim.setDuration(66);
+        rootAnim.addUpdateListener(animation -> {
             mContainer.setAlpha(animation.getAnimatedFraction());
-            float scale = 0.6f + 0.4f * animation.getAnimatedFraction();
-            mView.setPivotY(mView.getHeight() - previewBorder.getHeight() / 2f);
-            mView.setPivotX(actionBackground.getWidth() / 2f);
-            mView.setScaleX(scale);
-            mView.setScaleY(scale);
         });
-        anim.addListener(new AnimatorListenerAdapter() {
+
+        ValueAnimator scaleAnim = ValueAnimator.ofFloat(0, 1);
+        scaleAnim.setInterpolator(scaleInterpolator);
+        scaleAnim.setDuration(333);
+        scaleAnim.addUpdateListener(animation -> {
+            float previewScale = MathUtils.lerp(.9f, 1f, animation.getAnimatedFraction());
+            mClipboardPreview.setScaleX(previewScale);
+            mClipboardPreview.setScaleY(previewScale);
+            mPreviewBorder.setScaleX(previewScale);
+            mPreviewBorder.setScaleY(previewScale);
+
+            float pivotX = mClipboardPreview.getWidth() / 2f + mClipboardPreview.getX();
+            mActionContainerBackground.setPivotX(pivotX - mActionContainerBackground.getX());
+            mActionContainer.setPivotX(pivotX - ((View) mActionContainer.getParent()).getX());
+            float actionsScaleX = MathUtils.lerp(.7f, 1f, animation.getAnimatedFraction());
+            float actionsScaleY = MathUtils.lerp(.9f, 1f, animation.getAnimatedFraction());
+            mActionContainer.setScaleX(actionsScaleX);
+            mActionContainer.setScaleY(actionsScaleY);
+            mActionContainerBackground.setScaleX(actionsScaleX);
+            mActionContainerBackground.setScaleY(actionsScaleY);
+        });
+
+        ValueAnimator alphaAnim = ValueAnimator.ofFloat(0, 1);
+        alphaAnim.setInterpolator(linearInterpolator);
+        alphaAnim.setDuration(283);
+        alphaAnim.addUpdateListener(animation -> {
+            float alpha = animation.getAnimatedFraction();
+            mClipboardPreview.setAlpha(alpha);
+            mPreviewBorder.setAlpha(alpha);
+            mDismissButton.setAlpha(alpha);
+            mActionContainer.setAlpha(alpha);
+        });
+
+        mActionContainer.setAlpha(0);
+        mPreviewBorder.setAlpha(0);
+        mClipboardPreview.setAlpha(0);
+        enterAnim.play(rootAnim).with(scaleAnim);
+        enterAnim.play(alphaAnim).after(50).after(rootAnim);
+
+        enterAnim.addListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationEnd(Animator animation) {
                 super.onAnimationEnd(animation);
@@ -490,7 +539,56 @@ public class ClipboardOverlayController {
                 mTimeoutHandler.resetTimeout();
             }
         });
-        return anim;
+        return enterAnim;
+    }
+
+    private Animator getExitAnimation() {
+        TimeInterpolator linearInterpolator = new LinearInterpolator();
+        TimeInterpolator scaleInterpolator = new PathInterpolator(.3f, 0, 1f, 1f);
+        AnimatorSet exitAnim = new AnimatorSet();
+
+        ValueAnimator rootAnim = ValueAnimator.ofFloat(0, 1);
+        rootAnim.setInterpolator(linearInterpolator);
+        rootAnim.setDuration(100);
+        rootAnim.addUpdateListener(animation -> {
+            mContainer.setAlpha(1 - animation.getAnimatedFraction());
+        });
+
+        ValueAnimator scaleAnim = ValueAnimator.ofFloat(0, 1);
+        scaleAnim.setInterpolator(scaleInterpolator);
+        scaleAnim.setDuration(250);
+        scaleAnim.addUpdateListener(animation -> {
+            float previewScale = MathUtils.lerp(1f, .9f, animation.getAnimatedFraction());
+            mClipboardPreview.setScaleX(previewScale);
+            mClipboardPreview.setScaleY(previewScale);
+            mPreviewBorder.setScaleX(previewScale);
+            mPreviewBorder.setScaleY(previewScale);
+
+            float pivotX = mClipboardPreview.getWidth() / 2f + mClipboardPreview.getX();
+            mActionContainerBackground.setPivotX(pivotX - mActionContainerBackground.getX());
+            mActionContainer.setPivotX(pivotX - ((View) mActionContainer.getParent()).getX());
+            float actionScaleX = MathUtils.lerp(1f, .8f, animation.getAnimatedFraction());
+            float actionScaleY = MathUtils.lerp(1f, .9f, animation.getAnimatedFraction());
+            mActionContainer.setScaleX(actionScaleX);
+            mActionContainer.setScaleY(actionScaleY);
+            mActionContainerBackground.setScaleX(actionScaleX);
+            mActionContainerBackground.setScaleY(actionScaleY);
+        });
+
+        ValueAnimator alphaAnim = ValueAnimator.ofFloat(0, 1);
+        alphaAnim.setInterpolator(linearInterpolator);
+        alphaAnim.setDuration(166);
+        alphaAnim.addUpdateListener(animation -> {
+            float alpha = 1 - animation.getAnimatedFraction();
+            mClipboardPreview.setAlpha(alpha);
+            mPreviewBorder.setAlpha(alpha);
+            mDismissButton.setAlpha(alpha);
+            mActionContainer.setAlpha(alpha);
+        });
+
+        exitAnim.play(alphaAnim).with(scaleAnim);
+        exitAnim.play(rootAnim).after(150).after(alphaAnim);
+        return exitAnim;
     }
 
     private void hideImmediate() {

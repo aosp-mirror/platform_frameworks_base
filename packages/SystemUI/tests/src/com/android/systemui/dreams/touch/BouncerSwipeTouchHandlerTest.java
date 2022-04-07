@@ -169,7 +169,7 @@ public class BouncerSwipeTouchHandlerTest extends SysuiTestCase {
      * Makes sure swiping up when bouncer initially showing doesn't change the expansion amount.
      */
     @Test
-    public void testSwipeUp_whenBouncerInitiallyShowing_keepsExpansionAtZero() {
+    public void testSwipeUp_whenBouncerInitiallyShowing_doesNotSetExpansion() {
         when(mCentralSurfaces.isBouncerShowing()).thenReturn(true);
 
         mTouchHandler.onSessionStart(mTouchSession);
@@ -191,21 +191,15 @@ public class BouncerSwipeTouchHandlerTest extends SysuiTestCase {
         assertThat(gestureListener.onScroll(event1, event2, 0, distanceY))
                 .isTrue();
 
-        // Ensure only called once
-        verify(mStatusBarKeyguardViewManager)
+        verify(mStatusBarKeyguardViewManager, never())
                 .onPanelExpansionChanged(anyFloat(), anyBoolean(), anyBoolean());
-
-        // TODO(b/227348372): update the logic and also this test.
-        // Ensure the expansion is kept at 0.
-        verify(mStatusBarKeyguardViewManager).onPanelExpansionChanged(eq(0f), eq(false),
-                eq(true));
     }
 
     /**
      * Makes sure swiping down when bouncer initially hidden doesn't change the expansion amount.
      */
     @Test
-    public void testSwipeDown_whenBouncerInitiallyHidden_keepsExpansionAtOne() {
+    public void testSwipeDown_whenBouncerInitiallyHidden_doesNotSetExpansion() {
         mTouchHandler.onSessionStart(mTouchSession);
         ArgumentCaptor<GestureDetector.OnGestureListener> gestureListenerCaptor =
                 ArgumentCaptor.forClass(GestureDetector.OnGestureListener.class);
@@ -225,14 +219,8 @@ public class BouncerSwipeTouchHandlerTest extends SysuiTestCase {
         assertThat(gestureListener.onScroll(event1, event2, 0, distanceY))
                 .isTrue();
 
-        // Ensure only called once
-        verify(mStatusBarKeyguardViewManager)
+        verify(mStatusBarKeyguardViewManager, never())
                 .onPanelExpansionChanged(anyFloat(), anyBoolean(), anyBoolean());
-
-        // TODO(b/227348372): update the logic and also this test.
-        // Ensure the expansion is kept at 1.
-        verify(mStatusBarKeyguardViewManager).onPanelExpansionChanged(eq(1f), eq(false),
-                eq(true));
     }
 
     /**

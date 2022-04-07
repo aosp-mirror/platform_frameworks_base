@@ -594,16 +594,13 @@ public class NotificationShelf extends ActivatableNotificationView implements
         } else {
             shouldClipOwnTop = view.showingPulsing();
         }
-        if (viewEnd > notificationClipEnd && !shouldClipOwnTop
-                && (mAmbientState.isShadeExpanded() || !isPinned)) {
-            int clipBottomAmount = (int) (viewEnd - notificationClipEnd);
-            if (isPinned) {
-                clipBottomAmount = Math.min(view.getIntrinsicHeight() - view.getCollapsedHeight(),
-                        clipBottomAmount);
+        if (!isPinned) {
+            if (viewEnd > notificationClipEnd && !shouldClipOwnTop) {
+                int clipBottomAmount = (int) (viewEnd - notificationClipEnd);
+                view.setClipBottomAmount(clipBottomAmount);
+            } else {
+                view.setClipBottomAmount(0);
             }
-            view.setClipBottomAmount(clipBottomAmount);
-        } else {
-            view.setClipBottomAmount(0);
         }
         if (shouldClipOwnTop) {
             return (int) (viewEnd - getTranslationY());

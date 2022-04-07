@@ -16,6 +16,7 @@
 
 package com.android.systemui.media
 
+import android.app.PendingIntent
 import org.mockito.Mockito.`when` as whenever
 import android.content.Intent
 import android.graphics.Color
@@ -104,6 +105,7 @@ public class MediaControlPanelTest : SysuiTestCase() {
     @Mock private lateinit var mediaOutputDialogFactory: MediaOutputDialogFactory
     @Mock private lateinit var mediaCarouselController: MediaCarouselController
     @Mock private lateinit var falsingManager: FalsingManager
+    @Mock private lateinit var transitionParent: ViewGroup
     private lateinit var appIcon: ImageView
     private lateinit var albumView: ImageView
     private lateinit var titleText: TextView
@@ -240,6 +242,10 @@ public class MediaControlPanelTest : SysuiTestCase() {
         whenever(viewHolder.seamlessIcon).thenReturn(seamlessIcon)
         whenever(viewHolder.seamlessText).thenReturn(seamlessText)
         whenever(viewHolder.seekBar).thenReturn(seekBar)
+
+        // Transition View
+        whenever(view.parent).thenReturn(transitionParent)
+        whenever(view.rootView).thenReturn(transitionParent)
 
         // Action buttons
         whenever(viewHolder.actionPlayPause).thenReturn(actionPlayPause)
@@ -746,6 +752,20 @@ public class MediaControlPanelTest : SysuiTestCase() {
         seamless.callOnClick()
 
         verify(logger).logOpenOutputSwitcher(anyInt(), eq(PACKAGE), eq(instanceId))
+    }
+
+    @Test
+    fun tapContentView_isLogged() {
+        val pendingIntent = mock(PendingIntent::class.java)
+        val captor = ArgumentCaptor.forClass(View.OnClickListener::class.java)
+        val data = mediaData.copy(clickIntent = pendingIntent)
+        player.attachPlayer(viewHolder)
+        player.bindPlayer(data, KEY)
+        verify(viewHolder.player).setOnClickListener(captor.capture())
+
+        captor.value.onClick(viewHolder.player)
+
+        verify(logger).logTapContentView(anyInt(), eq(PACKAGE), eq(instanceId))
     }
 
     @Test

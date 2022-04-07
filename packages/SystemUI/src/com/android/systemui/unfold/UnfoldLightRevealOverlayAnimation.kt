@@ -155,21 +155,22 @@ constructor(
             newRoot.relayout(params) { transaction ->
                 val vsyncId = Choreographer.getSfInstance().vsyncId
 
-                backgroundExecutor.execute {
-                    // Apply the transaction that contains the first frame of the overlay
-                    // synchronously and apply another empty transaction with
-                    // 'vsyncId + 1' to make sure that it is actually displayed on
-                    // the screen. The second transaction is necessary to remove the screen blocker
-                    // (turn on the brightness) only when the content is actually visible as it
-                    // might be presented only in the next frame.
-                    // See b/197538198
-                    transaction.setFrameTimelineVsync(vsyncId).apply(/* sync */ true)
+                // Apply the transaction that contains the first frame of the overlay and apply
+                // another empty transaction with 'vsyncId + 1' to make sure that it is actually
+                // displayed on the screen. The second transaction is necessary to remove the screen
+                // blocker (turn on the brightness) only when the content is actually visible as it
+                // might be presented only in the next frame.
+                // See b/197538198
+                transaction
+                    .setFrameTimelineVsync(vsyncId)
+                    .apply()
 
-                    transaction.setFrameTimelineVsync(vsyncId + 1).apply(/* sync */ true)
-
-                    Trace.endAsyncSection("UnfoldLightRevealOverlayAnimation#relayout", 0)
-                    callback.run()
-                }
+                transaction.setFrameTimelineVsync(vsyncId + 1)
+                    .addTransactionCommittedListener(backgroundExecutor) {
+                        Trace.endAsyncSection("UnfoldLightRevealOverlayAnimation#relayout", 0)
+                        callback.run()
+                    }
+                    .apply()
             }
         }
 

@@ -2098,7 +2098,6 @@ public class DisplayModeDirector {
 
     private class UdfpsObserver extends IUdfpsHbmListener.Stub {
         private final SparseBooleanArray mLocalHbmEnabled = new SparseBooleanArray();
-        private final SparseBooleanArray mGlobalHbmEnabled = new SparseBooleanArray();
 
         public void observe() {
             StatusBarManagerInternal statusBar =
@@ -2109,39 +2108,27 @@ public class DisplayModeDirector {
         }
 
         @Override
-        public void onHbmEnabled(int hbmType, int displayId) {
+        public void onHbmEnabled(int displayId) {
             synchronized (mLock) {
-                updateHbmStateLocked(hbmType, displayId, true /*enabled*/);
+                updateHbmStateLocked(displayId, true /*enabled*/);
             }
         }
 
         @Override
-        public void onHbmDisabled(int hbmType, int displayId) {
+        public void onHbmDisabled(int displayId) {
             synchronized (mLock) {
-                updateHbmStateLocked(hbmType, displayId, false /*enabled*/);
+                updateHbmStateLocked(displayId, false /*enabled*/);
             }
         }
 
-        private void updateHbmStateLocked(int hbmType, int displayId, boolean enabled) {
-            switch (hbmType) {
-                case UdfpsObserver.LOCAL_HBM:
-                    mLocalHbmEnabled.put(displayId, enabled);
-                    break;
-                case UdfpsObserver.GLOBAL_HBM:
-                    mGlobalHbmEnabled.put(displayId, enabled);
-                    break;
-                default:
-                    Slog.w(TAG, "Unknown HBM type reported. Ignoring.");
-                    return;
-            }
+        private void updateHbmStateLocked(int displayId, boolean enabled) {
+            mLocalHbmEnabled.put(displayId, enabled);
             updateVoteLocked(displayId);
         }
 
         private void updateVoteLocked(int displayId) {
             final Vote vote;
-            if (mGlobalHbmEnabled.get(displayId)) {
-                vote = Vote.forRefreshRates(60f, 60f);
-            } else if (mLocalHbmEnabled.get(displayId)) {
+            if (mLocalHbmEnabled.get(displayId)) {
                 Display.Mode[] modes = mSupportedModesByDisplay.get(displayId);
                 float maxRefreshRate = 0f;
                 for (Display.Mode mode : modes) {
@@ -2165,13 +2152,6 @@ public class DisplayModeDirector {
                 final String enabled = mLocalHbmEnabled.valueAt(i) ? "enabled" : "disabled";
                 pw.println("      Display " + displayId + ": " + enabled);
             }
-            pw.println("    mGlobalHbmEnabled: ");
-            for (int i = 0; i < mGlobalHbmEnabled.size(); i++) {
-                final int displayId = mGlobalHbmEnabled.keyAt(i);
-                final String enabled = mGlobalHbmEnabled.valueAt(i) ? "enabled" : "disabled";
-                pw.println("      Display " + displayId + ": " + enabled);
-            }
-
         }
     }
 

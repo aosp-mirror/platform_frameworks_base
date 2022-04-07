@@ -23,6 +23,7 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.app.Fragment;
@@ -302,6 +303,16 @@ public class QSFragmentTest extends SysuiBaseFragmentTest {
 
         int qsAbsoluteBottom = top + height;
         assertThat(mQsFragmentView.getY()).isEqualTo(-qsAbsoluteBottom);
+    }
+
+    @Test
+    public void setCollapseExpandAction_passedToControllers() {
+        Runnable action = () -> {};
+        QSFragment fragment = resumeAndGetFragment();
+        fragment.setCollapseExpandAction(action);
+
+        verify(mQSPanelController).setCollapseExpandAction(action);
+        verify(mQuickQSPanelController).setCollapseExpandAction(action);
     }
 
     @Override

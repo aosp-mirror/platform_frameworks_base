@@ -52,6 +52,7 @@ import android.util.TimeUtils;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.os.SomeArgs;
 import com.android.server.am.AppFGSTracker.AppFGSPolicy;
 import com.android.server.am.AppFGSTracker.PackageDurations;
 import com.android.server.am.AppRestrictionController.TrackerType;
@@ -112,9 +113,14 @@ final class AppFGSTracker extends BaseAppStateDurationsTracker<AppFGSPolicy, Pac
 
     @Override
     public void onForegroundServiceNotificationUpdated(String packageName, int uid,
-            int foregroundId) {
-        mHandler.obtainMessage(MyHandler.MSG_FOREGROUND_SERVICES_NOTIFICATION_UPDATED,
-                uid, foregroundId, packageName).sendToTarget();
+            int foregroundId, boolean canceling) {
+        final SomeArgs args = SomeArgs.obtain();
+        args.argi1 = uid;
+        args.argi2 = foregroundId;
+        args.arg1 = packageName;
+        args.arg2 = canceling ? Boolean.TRUE : Boolean.FALSE;
+        mHandler.obtainMessage(MyHandler.MSG_FOREGROUND_SERVICES_NOTIFICATION_UPDATED, args)
+                .sendToTarget();
     }
 
     private static class MyHandler extends Handler {
@@ -149,8 +155,10 @@ final class AppFGSTracker extends BaseAppStateDurationsTracker<AppFGSPolicy, Pac
                             (String) msg.obj, msg.arg1, msg.arg2);
                     break;
                 case MSG_FOREGROUND_SERVICES_NOTIFICATION_UPDATED:
+                    final SomeArgs args = (SomeArgs) msg.obj;
                     mTracker.handleForegroundServiceNotificationUpdated(
-                            (String) msg.obj, msg.arg1, msg.arg2);
+                            (String) args.arg1, args.argi1, args.argi2, (Boolean) args.arg2);
+                    args.recycle();
                     break;
                 case MSG_CHECK_LONG_RUNNING_FGS:
                     mTracker.checkLongRunningFgs();
@@ -241,18 +249,18 @@ final class AppFGSTracker extends BaseAppStateDurationsTracker<AppFGSPolicy, Pac
     }
 
     private void handleForegroundServiceNotificationUpdated(String packageName, int uid,
-            int notificationId) {
+            int notificationId, boolean canceling) {
         synchronized (mLock) {
             SparseBooleanArray notificationIDs = mFGSNotificationIDs.get(uid, packageName);
-            if (notificationId > 0) {
+            if (!canceling) {
                 if (notificationIDs == null) {
                     notificationIDs = new SparseBooleanArray();
                     mFGSNotificationIDs.put(uid, packageName, notificationIDs);
                 }
                 notificationIDs.put(notificationId, false);
-            } else if (notificationId < 0) {
+            } else {
                 if (notificationIDs != null) {
-                    final int indexOfKey = notificationIDs.indexOfKey(-notificationId);
+                    final int indexOfKey = notificationIDs.indexOfKey(notificationId);
                     if (indexOfKey >= 0) {
                         final boolean wasVisible = notificationIDs.valueAt(indexOfKey);
                         notificationIDs.removeAt(indexOfKey);

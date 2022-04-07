@@ -15,8 +15,11 @@
  */
 package com.android.settingslib.wifi;
 
+import static android.os.UserManager.DISALLOW_CHANGE_WIFI_STATE;
+
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
@@ -50,6 +53,8 @@ public class WifiEnterpriseRestrictionUtilsTest {
         mContext = spy(ApplicationProvider.getApplicationContext());
         when(mContext.getSystemService(UserManager.class)).thenReturn(mUserManager);
         when(mUserManager.getUserRestrictions()).thenReturn(mBundle);
+        ReflectionHelpers.setStaticField(
+                Build.VERSION.class, "SDK_INT", Build.VERSION_CODES.TIRAMISU);
     }
 
     @Test
@@ -128,5 +133,42 @@ public class WifiEnterpriseRestrictionUtilsTest {
         when(mBundle.getBoolean(UserManager.DISALLOW_ADD_WIFI_CONFIG)).thenReturn(false);
 
         assertThat(WifiEnterpriseRestrictionUtils.isAddWifiConfigAllowed(mContext)).isTrue();
+    }
+
+    @Test
+    public void isChangeWifiStateAllowed_hasDisallowRestriction_shouldReturnFalse() {
+        when(mUserManager.hasUserRestriction(DISALLOW_CHANGE_WIFI_STATE)).thenReturn(true);
+
+        assertThat(WifiEnterpriseRestrictionUtils.isChangeWifiStateAllowed(mContext)).isFalse();
+    }
+
+    @Test
+    public void isChangeWifiStateAllowed_hasNoDisallowRestriction_shouldReturnTrue() {
+        when(mUserManager.hasUserRestriction(DISALLOW_CHANGE_WIFI_STATE)).thenReturn(false);
+
+        assertThat(WifiEnterpriseRestrictionUtils.isChangeWifiStateAllowed(mContext)).isTrue();
+    }
+
+    @Test
+    public void hasUserRestrictionFromT_setSDKForS_shouldReturnTrue() {
+        ReflectionHelpers.setStaticField(Build.VERSION.class, "SDK_INT", Build.VERSION_CODES.S);
+
+        assertThat(WifiEnterpriseRestrictionUtils.hasUserRestrictionFromT(mContext, "key"))
+                .isFalse();
+    }
+
+    @Test
+    public void hasUserRestrictionFromT_setSDKForT_shouldReturnHasUserRestriction() {
+        ReflectionHelpers.setStaticField(
+                Build.VERSION.class, "SDK_INT", Build.VERSION_CODES.TIRAMISU);
+        when(mUserManager.hasUserRestriction(anyString())).thenReturn(false);
+
+        assertThat(WifiEnterpriseRestrictionUtils.hasUserRestrictionFromT(mContext, "key"))
+                .isFalse();
+
+        when(mUserManager.hasUserRestriction(anyString())).thenReturn(true);
+
+        assertThat(WifiEnterpriseRestrictionUtils.hasUserRestrictionFromT(mContext, "key"))
+                .isTrue();
     }
 }

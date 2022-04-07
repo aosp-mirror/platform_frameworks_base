@@ -2601,6 +2601,33 @@ public class TelecomManager {
     }
 
     /**
+     * Determines whether there are any ongoing {@link PhoneAccount#CAPABILITY_SELF_MANAGED}
+     * calls for a given {@code packageName} and {@code userHandle}.
+     *
+     * @param packageName the package name of the app to check calls for.
+     * @param userHandle the user handle on which to check for calls.
+     * @return {@code true} if there are ongoing calls, {@code false} otherwise.
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    public boolean isInSelfManagedCall(@NonNull String packageName,
+            @NonNull UserHandle userHandle) {
+        ITelecomService service = getTelecomService();
+        if (service != null) {
+            try {
+                return service.isInSelfManagedCall(packageName, userHandle,
+                        mContext.getOpPackageName());
+            } catch (RemoteException e) {
+                Log.e(TAG, "RemoteException isInSelfManagedCall: " + e);
+                e.rethrowFromSystemServer();
+                return false;
+            }
+        } else {
+            throw new IllegalStateException("Telecom service is not present");
+        }
+    }
+
+    /**
      * Handles {@link Intent#ACTION_CALL} intents trampolined from UserCallActivity.
      * @param intent The {@link Intent#ACTION_CALL} intent to handle.
      * @param callingPackageProxy The original package that called this before it was trampolined.

@@ -360,9 +360,7 @@ public class NavigationBarEdgePanel extends View implements NavigationEdgeBackPl
                 .getDimension(R.dimen.navigation_edge_action_drag_threshold);
         mSwipeProgressThreshold = context.getResources()
                 .getDimension(R.dimen.navigation_edge_action_progress_threshold);
-        if (mBackAnimation != null) {
-            mBackAnimation.setSwipeThresholds(mSwipeTriggerThreshold, mSwipeProgressThreshold);
-        }
+        initializeBackAnimation();
 
         setVisibility(GONE);
         Executor backgroundExecutor = Dependency.get(Dependency.BACKGROUND_EXECUTOR);
@@ -391,6 +389,13 @@ public class NavigationBarEdgePanel extends View implements NavigationEdgeBackPl
 
     public void setBackAnimation(BackAnimation backAnimation) {
         mBackAnimation = backAnimation;
+        initializeBackAnimation();
+    }
+
+    private void initializeBackAnimation() {
+        if (mBackAnimation != null) {
+            mBackAnimation.setSwipeThresholds(mSwipeTriggerThreshold, mSwipeProgressThreshold);
+        }
     }
 
     @Override

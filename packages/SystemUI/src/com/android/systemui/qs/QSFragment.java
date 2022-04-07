@@ -31,7 +31,6 @@ import android.util.Log;
 import android.view.ContextThemeWrapper;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 
@@ -212,7 +211,6 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
                     }
         });
         mHeader = view.findViewById(R.id.header);
-        mQSPanelController.setHeaderContainer(view.findViewById(R.id.header_text_container));
         mFooter = qsFragmentComponent.getQSFooter();
 
         mQSContainerImplController = qsFragmentComponent.getQSContainerImplController();
@@ -717,8 +715,9 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
     }
 
     @Override
-    public void setExpandClickListener(OnClickListener onClickListener) {
-        mFooter.setExpandClickListener(onClickListener);
+    public void setCollapseExpandAction(Runnable action) {
+        mQSPanelController.setCollapseExpandAction(action);
+        mQuickQSPanelController.setCollapseExpandAction(action);
     }
 
     @Override

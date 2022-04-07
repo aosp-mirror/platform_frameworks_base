@@ -2606,11 +2606,17 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                     return;
                 }
 
+                // Remove immediately if there is display transition because the animation is
+                // usually unnoticeable (e.g. covered by rotation animation) and the animation
+                // bounds could be inconsistent, such as depending on when the window applies
+                // its draw transaction with new rotation.
+                final boolean allowExitAnimation = !getDisplayContent().inTransition();
+
                 if (wasVisible) {
                     final int transit = (!startingWindow) ? TRANSIT_EXIT : TRANSIT_PREVIEW_DONE;
 
                     // Try starting an animation.
-                    if (mWinAnimator.applyAnimationLocked(transit, false)) {
+                    if (allowExitAnimation && mWinAnimator.applyAnimationLocked(transit, false)) {
                         ProtoLog.v(WM_DEBUG_ANIM,
                                 "Set animatingExit: reason=remove/applyAnimation win=%s", this);
                         mAnimatingExit = true;
@@ -2624,7 +2630,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                         mWmService.mAccessibilityController.onWindowTransition(this, transit);
                     }
                 }
-                final boolean isAnimating = mAnimatingExit || isExitAnimationRunningSelfOrParent();
+                final boolean isAnimating = allowExitAnimation
+                        && (mAnimatingExit || isExitAnimationRunningSelfOrParent());
                 final boolean lastWindowIsStartingWindow = startingWindow && mActivityRecord != null
                         && mActivityRecord.isLastWindow(this);
                 // We delay the removal of a window if it has a showing surface that can be used to run
@@ -3601,6 +3608,10 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         // if the surface is saved, to outside world the surface is still NO_SURFACE.)
         mAnimatingExit = false;
         ProtoLog.d(WM_DEBUG_ANIM, "Clear animatingExit: reason=destroySurface win=%s", this);
+
+        // Clear the flag so the buffer requested for the next new surface won't be dropped by
+        // mistaking the surface size needs to update.
+        mReportOrientationChanged = false;
 
         if (useBLASTSync()) {
             immediatelyNotifyBlastSync();
@@ -5284,12 +5295,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         if (mControllableInsetProvider != null) {
             return;
         }
-        if (getDisplayContent().inTransition()) {
-            // Skip because the animation is usually unnoticeable (e.g. covered by rotation
-            // animation) and the animation bounds could be inconsistent, such as depending
-            // on when the window applies its draw transaction with new rotation.
-            return;
-        }
 
         final DisplayInfo displayInfo = getDisplayInfo();
         anim.initialize(mWindowFrames.mFrame.width(), mWindowFrames.mFrame.height(),
@@ -6125,13 +6130,20 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             applyHere = true;
         }
 
-        for (int i = mDrawHandlers.size() - 1; i >= 0; i--) {
-            DrawHandler h = mDrawHandlers.get(i);
+        final List<DrawHandler> handlersToRemove = new ArrayList<>();
+        // Iterate forwards to ensure we process in the same order
+        // we added.
+        for (int i = 0; i < mDrawHandlers.size(); i++) {
+            final DrawHandler h = mDrawHandlers.get(i);
             if (h.mSeqId <= seqId) {
                 h.mConsumer.accept(t);
-                mDrawHandlers.remove(h);
+                handlersToRemove.add(h);
                 hadHandlers = true;
             }
+        }
+        for (int i = 0; i < handlersToRemove.size(); i++) {
+            final DrawHandler h = handlersToRemove.get(i);
+            mDrawHandlers.remove(h);
         }
 
         if (hadHandlers) {

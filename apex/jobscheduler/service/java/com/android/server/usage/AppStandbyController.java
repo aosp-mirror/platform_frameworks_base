@@ -281,7 +281,7 @@ public class AppStandbyController
     private static final long NETWORK_SCORER_CACHE_DURATION_MILLIS = 5000L;
 
     // Cache the device provisioning package queried from resource config_deviceProvisioningPackage.
-    // Note that there is no synchronization on this method which is okay since in the worst case
+    // Note that there is no synchronization on this variable which is okay since in the worst case
     // scenario, they might be a few extra reads from resources.
     private String mCachedDeviceProvisioningPackage = null;
 
@@ -394,7 +394,7 @@ public class AppStandbyController
     private boolean mAllowRestrictedBucket;
 
     private volatile boolean mAppIdleEnabled;
-    private boolean mIsCharging;
+    private volatile boolean mIsCharging;
     private boolean mSystemServicesReady = false;
     // There was a system update, defaults need to be initialized after services are ready
     private boolean mPendingInitializeDefaults;
@@ -721,12 +721,10 @@ public class AppStandbyController
 
     @VisibleForTesting
     void setChargingState(boolean isCharging) {
-        synchronized (mAppIdleLock) {
-            if (mIsCharging != isCharging) {
-                if (DEBUG) Slog.d(TAG, "Setting mIsCharging to " + isCharging);
-                mIsCharging = isCharging;
-                postParoleStateChanged();
-            }
+        if (mIsCharging != isCharging) {
+            if (DEBUG) Slog.d(TAG, "Setting mIsCharging to " + isCharging);
+            mIsCharging = isCharging;
+            postParoleStateChanged();
         }
     }
 
@@ -1340,16 +1338,12 @@ public class AppStandbyController
     @Override
     public boolean isAppIdleFiltered(String packageName, int appId, int userId,
             long elapsedRealtime) {
-        if (getAppMinBucket(packageName, appId, userId) < AppIdleHistory.IDLE_BUCKET_CUTOFF) {
+        if (!mAppIdleEnabled || mIsCharging) {
             return false;
-        } else {
-            synchronized (mAppIdleLock) {
-                if (!mAppIdleEnabled || mIsCharging) {
-                    return false;
-                }
-            }
-            return isAppIdleUnfiltered(packageName, userId, elapsedRealtime);
         }
+
+        return isAppIdleUnfiltered(packageName, userId, elapsedRealtime)
+                && getAppMinBucket(packageName, appId, userId) >= AppIdleHistory.IDLE_BUCKET_CUTOFF;
     }
 
     static boolean isUserUsage(int reason) {
@@ -1803,7 +1797,7 @@ public class AppStandbyController
         }
     }
 
-    private boolean isActiveNetworkScorer(String packageName) {
+    private boolean isActiveNetworkScorer(@NonNull String packageName) {
         // Validity of network scorer cache is limited to a few seconds. Fetch it again
         // if longer since query.
         // This is a temporary optimization until there's a callback mechanism for changes to network scorer.
@@ -1813,7 +1807,7 @@ public class AppStandbyController
             mCachedNetworkScorer = mInjector.getActiveNetworkScorer();
             mCachedNetworkScorerAtMillis = now;
         }
-        return packageName != null && packageName.equals(mCachedNetworkScorer);
+        return packageName.equals(mCachedNetworkScorer);
     }
 
     private void informListeners(String packageName, int userId, int bucket, int reason,
@@ -2322,8 +2316,8 @@ public class AppStandbyController
          * Returns {@code true} if the supplied package is the wellbeing app. Otherwise,
          * returns {@code false}.
          */
-        boolean isWellbeingPackage(String packageName) {
-            return mWellbeingApp != null && mWellbeingApp.equals(packageName);
+        boolean isWellbeingPackage(@NonNull String packageName) {
+            return packageName.equals(mWellbeingApp);
         }
 
         boolean hasExactAlarmPermission(String packageName, int uid) {

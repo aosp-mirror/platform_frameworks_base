@@ -281,9 +281,12 @@ public class LocaleStore {
      * The "system default" is special case for per-app picker. Intentionally keep the locale
      * empty to let activity know "system default" been selected.
      */
-    public static LocaleInfo getSystemDefaultLocaleInfo() {
+    public static LocaleInfo getSystemDefaultLocaleInfo(boolean hasAppLanguage) {
         LocaleInfo systemDefaultInfo = new LocaleInfo("");
         systemDefaultInfo.mSuggestionFlags |= LocaleInfo.SUGGESTION_TYPE_SYSTEM_LANGUAGE;
+        if (hasAppLanguage) {
+            systemDefaultInfo.mSuggestionFlags |= LocaleInfo.SUGGESTION_TYPE_CURRENT;
+        }
         systemDefaultInfo.mIsTranslated = true;
         return systemDefaultInfo;
     }

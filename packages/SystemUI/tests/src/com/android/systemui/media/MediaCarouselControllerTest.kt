@@ -52,6 +52,7 @@ class MediaCarouselControllerTest : SysuiTestCase() {
     @Mock lateinit var panel: MediaControlPanel
     @Mock lateinit var visualStabilityProvider: VisualStabilityProvider
     @Mock lateinit var mediaHostStatesManager: MediaHostStatesManager
+    @Mock lateinit var mediaHostState: MediaHostState
     @Mock lateinit var activityStarter: ActivityStarter
     @Mock @Main private lateinit var executor: DelayableExecutor
     @Mock lateinit var mediaDataManager: MediaDataManager
@@ -187,5 +188,41 @@ class MediaCarouselControllerTest : SysuiTestCase() {
         mediaCarouselController.settingsButton.callOnClick()
 
         verify(logger).logCarouselSettings()
+    }
+
+    @Test
+    fun testLocationChangeQs_logged() {
+        mediaCarouselController.onDesiredLocationChanged(
+            MediaHierarchyManager.LOCATION_QS,
+            mediaHostState,
+            animate = false)
+        verify(logger).logCarouselPosition(MediaHierarchyManager.LOCATION_QS)
+    }
+
+    @Test
+    fun testLocationChangeQqs_logged() {
+        mediaCarouselController.onDesiredLocationChanged(
+            MediaHierarchyManager.LOCATION_QQS,
+            mediaHostState,
+            animate = false)
+        verify(logger).logCarouselPosition(MediaHierarchyManager.LOCATION_QQS)
+    }
+
+    @Test
+    fun testLocationChangeLockscreen_logged() {
+        mediaCarouselController.onDesiredLocationChanged(
+            MediaHierarchyManager.LOCATION_LOCKSCREEN,
+            mediaHostState,
+            animate = false)
+        verify(logger).logCarouselPosition(MediaHierarchyManager.LOCATION_LOCKSCREEN)
+    }
+
+    @Test
+    fun testLocationChangeDream_logged() {
+        mediaCarouselController.onDesiredLocationChanged(
+            MediaHierarchyManager.LOCATION_DREAM_OVERLAY,
+            mediaHostState,
+            animate = false)
+        verify(logger).logCarouselPosition(MediaHierarchyManager.LOCATION_DREAM_OVERLAY)
     }
 }

@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar.policy;
 
 import android.annotation.Nullable;
+import android.view.View;
 
 import com.android.systemui.Dumpable;
 import com.android.systemui.demomode.DemoMode;
@@ -24,6 +25,7 @@ import com.android.systemui.statusbar.policy.BatteryController.BatteryStateChang
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.lang.ref.WeakReference;
 
 public interface BatteryController extends DemoMode, Dumpable,
         CallbackController<BatteryStateChangeCallback> {
@@ -35,7 +37,32 @@ public interface BatteryController extends DemoMode, Dumpable,
     /**
      * Sets if the current device is in power save mode.
      */
-    void setPowerSaveMode(boolean powerSave);
+    default void setPowerSaveMode(boolean powerSave) {
+        setPowerSaveMode(powerSave, null);
+    }
+
+    /**
+     * Sets if the current device is in power save mode.
+     *
+     * Can pass the view that triggered the request.
+     */
+    void setPowerSaveMode(boolean powerSave, @Nullable View view);
+
+    /**
+     * Gets a reference to the last view used when called {@link #setPowerSaveMode}.
+     */
+    @Nullable
+    default WeakReference<View> getLastPowerSaverStartView() {
+        return null;
+    }
+
+    /**
+     * Clears the last view used when called {@link #setPowerSaveMode}.
+     *
+     * Immediately after calling this, a call to {@link #getLastPowerSaverStartView()} should return
+     * {@code null}.
+     */
+    default void clearLastPowerSaverStartView() {}
 
     /**
      * Returns {@code true} if the device is currently plugged in.

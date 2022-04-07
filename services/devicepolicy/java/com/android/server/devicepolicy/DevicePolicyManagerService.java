@@ -13354,8 +13354,12 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 if (receivers.isEmpty()) {
                     return;
                 }
-                packageIntent.addFlags(Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND);
-                mContext.sendBroadcastAsUser(packageIntent, userHandle);
+                for (ResolveInfo receiver : receivers) {
+                    final Intent componentIntent = new Intent(packageIntent)
+                            .setComponent(receiver.getComponentInfo().getComponentName())
+                            .addFlags(Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND);
+                    mContext.sendBroadcastAsUser(componentIntent, userHandle);
+                }
             } catch (RemoteException ex) {
                 Slogf.w(LOG_TAG, "Cannot get list of broadcast receivers for %s because: %s.",
                         intent.getAction(), ex);
