@@ -506,7 +506,7 @@ public abstract class ApexManager {
          * @return {@code true} if this package is active, {@code false} otherwise.
          */
         private static boolean isActive(PackageInfo packageInfo) {
-            return (packageInfo.applicationInfo.flags & ApplicationInfo.FLAG_INSTALLED) != 0;
+            return packageInfo.isActiveApex;
         }
 
         /**
@@ -1153,7 +1153,7 @@ public abstract class ApexManager {
                 // Installation was successful, time to update mAllPackagesCache
                 synchronized (mLock) {
                     if (isFactory(existingApexPkg)) {
-                        existingApexPkg.applicationInfo.flags &= ~ApplicationInfo.FLAG_INSTALLED;
+                        existingApexPkg.isActiveApex = false;
                         mAllPackagesCache.add(finalApexPkg);
                     } else {
                         for (int i = 0, size = mAllPackagesCache.size(); i < size; i++) {

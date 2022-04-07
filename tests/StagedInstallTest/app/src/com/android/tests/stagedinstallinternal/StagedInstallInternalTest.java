@@ -472,7 +472,8 @@ public class StagedInstallInternalTest {
             assertThat(apex.getLongVersionCode()).isEqualTo(1);
             assertThat(apex.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM)
                     .isEqualTo(ApplicationInfo.FLAG_SYSTEM);
-            assertThat(apex.applicationInfo.flags & ApplicationInfo.FLAG_INSTALLED).isEqualTo(0);
+            assertThat(apex.applicationInfo.flags & ApplicationInfo.FLAG_INSTALLED)
+                    .isEqualTo(ApplicationInfo.FLAG_INSTALLED);
             assertThat(apex.applicationInfo.sourceDir).startsWith("/system/apex");
         }
 
@@ -495,7 +496,8 @@ public class StagedInstallInternalTest {
             assertThat(apex.getLongVersionCode()).isEqualTo(1);
             assertThat(apex.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM)
                     .isEqualTo(ApplicationInfo.FLAG_SYSTEM);
-            assertThat(apex.applicationInfo.flags & ApplicationInfo.FLAG_INSTALLED).isEqualTo(0);
+            assertThat(apex.applicationInfo.flags & ApplicationInfo.FLAG_INSTALLED)
+                    .isEqualTo(ApplicationInfo.FLAG_INSTALLED);
             assertThat(apex.applicationInfo.sourceDir).startsWith("/system/apex");
         }
     }

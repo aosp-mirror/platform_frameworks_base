@@ -397,7 +397,8 @@ public class ApexManagerTest {
         assertThat(factoryInfo.applicationInfo.longVersionCode).isEqualTo(1);
         assertThat(factoryInfo.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM)
             .isEqualTo(ApplicationInfo.FLAG_SYSTEM);
-        assertThat(factoryInfo.applicationInfo.flags & ApplicationInfo.FLAG_INSTALLED).isEqualTo(0);
+        assertThat(factoryInfo.applicationInfo.flags & ApplicationInfo.FLAG_INSTALLED)
+                .isEqualTo(ApplicationInfo.FLAG_INSTALLED);
     }
 
     @Test
@@ -436,7 +437,8 @@ public class ApexManagerTest {
         assertThat(factoryInfo.applicationInfo.longVersionCode).isEqualTo(1);
         assertThat(factoryInfo.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM)
             .isEqualTo(ApplicationInfo.FLAG_SYSTEM);
-        assertThat(factoryInfo.applicationInfo.flags & ApplicationInfo.FLAG_INSTALLED).isEqualTo(0);
+        assertThat(factoryInfo.applicationInfo.flags & ApplicationInfo.FLAG_INSTALLED)
+                .isEqualTo(ApplicationInfo.FLAG_INSTALLED);
     }
 
     @Test
