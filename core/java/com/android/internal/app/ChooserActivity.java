@@ -1719,29 +1719,48 @@ public class ChooserActivity extends ResolverActivity implements
         return getIntent().getBooleanExtra(Intent.EXTRA_AUTO_LAUNCH_SINGLE_CHOICE, true);
     }
 
-    private void showTargetDetails(DisplayResolveInfo ti) {
-        if (ti == null) return;
+    private void showTargetDetails(TargetInfo targetInfo) {
+        if (targetInfo == null) return;
 
         ArrayList<DisplayResolveInfo> targetList;
+        ChooserTargetActionsDialogFragment fragment = new ChooserTargetActionsDialogFragment();
+        Bundle bundle = new Bundle();
 
-        // For multiple targets, include info on all targets
-        if (ti instanceof MultiDisplayResolveInfo) {
-            MultiDisplayResolveInfo mti = (MultiDisplayResolveInfo) ti;
+        if (targetInfo instanceof SelectableTargetInfo) {
+            SelectableTargetInfo selectableTargetInfo = (SelectableTargetInfo) targetInfo;
+            if (selectableTargetInfo.getDisplayResolveInfo() == null
+                    || selectableTargetInfo.getChooserTarget() == null) {
+                Log.e(TAG, "displayResolveInfo or chooserTarget in selectableTargetInfo are null");
+                return;
+            }
+            targetList = new ArrayList<>();
+            targetList.add(selectableTargetInfo.getDisplayResolveInfo());
+            bundle.putString(ChooserTargetActionsDialogFragment.SHORTCUT_ID_KEY,
+                    selectableTargetInfo.getChooserTarget().getIntentExtras().getString(
+                            Intent.EXTRA_SHORTCUT_ID));
+            bundle.putBoolean(ChooserTargetActionsDialogFragment.IS_SHORTCUT_PINNED_KEY,
+                    selectableTargetInfo.isPinned());
+            bundle.putParcelable(ChooserTargetActionsDialogFragment.INTENT_FILTER_KEY,
+                    getTargetIntentFilter());
+            if (selectableTargetInfo.getDisplayLabel() != null) {
+                bundle.putString(ChooserTargetActionsDialogFragment.SHORTCUT_TITLE_KEY,
+                        selectableTargetInfo.getDisplayLabel().toString());
+            }
+        } else if (targetInfo instanceof MultiDisplayResolveInfo) {
+            // For multiple targets, include info on all targets
+            MultiDisplayResolveInfo mti = (MultiDisplayResolveInfo) targetInfo;
             targetList = mti.getTargets();
         } else {
             targetList = new ArrayList<DisplayResolveInfo>();
-            targetList.add(ti);
+            targetList.add((DisplayResolveInfo) targetInfo);
         }
-
-        ChooserTargetActionsDialogFragment f = new ChooserTargetActionsDialogFragment();
-        Bundle b = new Bundle();
-        b.putParcelable(ChooserTargetActionsDialogFragment.USER_HANDLE_KEY,
+        bundle.putParcelable(ChooserTargetActionsDialogFragment.USER_HANDLE_KEY,
                 mChooserMultiProfilePagerAdapter.getCurrentUserHandle());
-        b.putParcelableArrayList(ChooserTargetActionsDialogFragment.TARGET_INFOS_KEY,
+        bundle.putParcelableArrayList(ChooserTargetActionsDialogFragment.TARGET_INFOS_KEY,
                 targetList);
-        f.setArguments(b);
+        fragment.setArguments(bundle);
 
-        f.show(getFragmentManager(), TARGET_DETAILS_FRAGMENT_TAG);
+        fragment.show(getFragmentManager(), TARGET_DETAILS_FRAGMENT_TAG);
     }
 
     private void modifyTargetIntent(Intent in) {
@@ -2969,8 +2988,10 @@ public class ChooserActivity extends ResolverActivity implements
     private boolean shouldShowTargetDetails(TargetInfo ti) {
         ComponentName nearbyShare = getNearbySharingComponent();
         //  Suppress target details for nearby share to hide pin/unpin action
-        return !(nearbyShare != null && nearbyShare.equals(ti.getResolvedComponentName())
-                && shouldNearbyShareBeFirstInRankedRow());
+        boolean isNearbyShare = nearbyShare != null && nearbyShare.equals(
+                ti.getResolvedComponentName()) && shouldNearbyShareBeFirstInRankedRow();
+        return ti instanceof SelectableTargetInfo
+                || (ti instanceof DisplayResolveInfo && !isNearbyShare);
     }
 
     /**
@@ -3067,8 +3088,6 @@ public class ChooserActivity extends ResolverActivity implements
         private DirectShareViewHolder mDirectShareViewHolder;
         private int mChooserTargetWidth = 0;
         private boolean mShowAzLabelIfPoss;
-
-        private boolean mHideContentPreview = false;
         private boolean mLayoutRequested = false;
 
         private int mFooterHeight = 0;
@@ -3139,7 +3158,6 @@ public class ChooserActivity extends ResolverActivity implements
          * personal and work tabs.
          */
         public void hideContentPreview() {
-            mHideContentPreview = true;
             mLayoutRequested = true;
             notifyDataSetChanged();
         }
@@ -3329,18 +3347,15 @@ public class ChooserActivity extends ResolverActivity implements
                     }
                 });
 
-                // Direct Share targets should not show any menu
-                if (!isDirectShare) {
-                    v.setOnLongClickListener(v1 -> {
-                        final TargetInfo ti = mChooserListAdapter.targetInfoForPosition(
-                                holder.getItemIndex(column), true);
-                        // This should always be the case for non-DS targets, check for validity
-                        if (ti instanceof DisplayResolveInfo && shouldShowTargetDetails(ti)) {
-                            showTargetDetails((DisplayResolveInfo) ti);
-                        }
-                        return true;
-                    });
-                }
+                // Show menu for both direct share and app share targets after long click.
+                v.setOnLongClickListener(v1 -> {
+                    TargetInfo ti = mChooserListAdapter.targetInfoForPosition(
+                            holder.getItemIndex(column), true);
+                    if (shouldShowTargetDetails(ti)) {
+                        showTargetDetails(ti);
+                    }
+                    return true;
+                });
 
                 holder.addView(i, v);
 

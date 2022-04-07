@@ -64,6 +64,7 @@ public final class SelectableTargetInfo implements ChooserTargetInfo {
     private Drawable mDisplayIcon;
     private final Intent mFillInIntent;
     private final int mFillInFlags;
+    private final boolean mIsPinned;
     private final float mModifiedScore;
     private boolean mIsSuspended = false;
 
@@ -77,6 +78,7 @@ public final class SelectableTargetInfo implements ChooserTargetInfo {
         mModifiedScore = modifiedScore;
         mPm = mContext.getPackageManager();
         mSelectableTargetInfoCommunicator = selectableTargetInfoComunicator;
+        mIsPinned = shortcutInfo != null && shortcutInfo.isPinned();
         if (sourceInfo != null) {
             final ResolveInfo ri = sourceInfo.getResolveInfo();
             if (ri != null) {
@@ -120,6 +122,7 @@ public final class SelectableTargetInfo implements ChooserTargetInfo {
         mFillInIntent = fillInIntent;
         mFillInFlags = flags;
         mModifiedScore = other.mModifiedScore;
+        mIsPinned = other.mIsPinned;
 
         mDisplayLabel = sanitizeDisplayLabel(mChooserTarget.getTitle());
     }
@@ -291,7 +294,7 @@ public final class SelectableTargetInfo implements ChooserTargetInfo {
 
     @Override
     public boolean isPinned() {
-        return mSourceInfo != null && mSourceInfo.isPinned();
+        return mIsPinned;
     }
 
     /**
