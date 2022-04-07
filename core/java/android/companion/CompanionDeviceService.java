@@ -166,6 +166,9 @@ public abstract class CompanionDeviceService extends Service {
      * <p>Calling app must declare uses-permission
      * {@link android.Manifest.permission#DELIVER_COMPANION_MESSAGES}</p>
      *
+     * <p>You need to start the service before calling this method, otherwise the system can't
+     * get the context and the dispatch would fail.</p>
+     *
      * <p>Note 1: messageId was assigned by the system, and sender should send the messageId along
      * with the message to the receiver. messageId will later be used for verification purpose.
      * Misusing the messageId will result in no action.</p>
@@ -184,6 +187,10 @@ public abstract class CompanionDeviceService extends Service {
     public final void dispatchMessageToSystem(int messageId, int associationId,
             @NonNull byte[] message)
             throws DeviceNotAssociatedException {
+        if (getBaseContext() == null) {
+            Log.e(LOG_TAG, "Dispatch failed. Start your service before calling this method.");
+            return;
+        }
         CompanionDeviceManager companionDeviceManager =
                 getSystemService(CompanionDeviceManager.class);
         if (companionDeviceManager != null) {

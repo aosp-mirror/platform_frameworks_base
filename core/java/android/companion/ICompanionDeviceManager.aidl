@@ -75,5 +75,5 @@ interface ICompanionDeviceManager {
     PendingIntent buildPermissionTransferUserConsentIntent(String callingPackage, int userId,
         int associationId);
 
-    void startSystemDataTransfer(int userId, int associationId);
+    void startSystemDataTransfer(String packageName, int userId, int associationId);
 }
