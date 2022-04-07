@@ -43,7 +43,6 @@ import com.android.systemui.statusbar.policy.ConfigurationController.Configurati
 import com.android.systemui.tuner.TunerService;
 import com.android.systemui.tuner.TunerService.Tunable;
 
-import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -425,7 +424,7 @@ public class StatusBarIconControllerImpl extends StatusBarIconList implements Tu
 
     /** */
     @Override
-    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+    public void dump(PrintWriter pw, String[] args) {
         pw.println(TAG + " state:");
         for (IconManager manager : mIconGroups) {
             if (manager.shouldLog()) {

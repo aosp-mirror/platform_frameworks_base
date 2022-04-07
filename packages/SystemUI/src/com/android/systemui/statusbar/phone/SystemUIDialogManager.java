@@ -22,7 +22,6 @@ import com.android.systemui.Dumpable;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dump.DumpManager;
 
-import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.HashSet;
 import java.util.Set;
@@ -96,7 +95,7 @@ public class SystemUIDialogManager implements Dumpable {
     }
 
     @Override
-    public void dump(@NonNull FileDescriptor fd, @NonNull PrintWriter pw, @NonNull String[] args) {
+    public void dump(@NonNull PrintWriter pw, @NonNull String[] args) {
         pw.println("listeners:");
         for (Listener listener : mListeners) {
             pw.println("\t" + listener);

@@ -127,7 +127,7 @@ public class WakefulnessLifecycleTest extends SysuiTestCase {
 
     @Test
     public void dump() throws Exception {
-        mWakefulness.dump(null, new PrintWriter(new ByteArrayOutputStream()), new String[0]);
+        mWakefulness.dump(new PrintWriter(new ByteArrayOutputStream()), new String[0]);
     }
 
     @Test(expected = NullPointerException.class)

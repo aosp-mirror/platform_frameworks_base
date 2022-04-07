@@ -73,7 +73,6 @@ import com.android.systemui.statusbar.phone.LightBarTransitionsController;
 import com.android.wm.shell.back.BackAnimation;
 import com.android.wm.shell.pip.Pip;
 
-import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.Optional;
 import java.util.function.Consumer;
@@ -487,7 +486,7 @@ public class TaskbarDelegate implements CommandQueue.Callbacks,
     }
 
     @Override
-    public void dump(@NonNull FileDescriptor fd, @NonNull PrintWriter pw, @NonNull String[] args) {
+    public void dump(@NonNull PrintWriter pw, @NonNull String[] args) {
         pw.println("TaskbarDelegate (displayId=" + mDisplayId + "):");
         pw.println("  mNavigationIconHints=" + mNavigationIconHints);
         pw.println("  mNavigationMode=" + mNavigationMode);

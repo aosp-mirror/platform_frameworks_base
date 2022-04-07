@@ -54,7 +54,6 @@ import com.android.systemui.tuner.TunerService;
 import com.android.systemui.unfold.FoldAodAnimationController;
 import com.android.systemui.unfold.SysUIUnfoldComponent;
 
-import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.HashSet;
 import java.util.Optional;
@@ -447,7 +446,7 @@ public class DozeParameters implements
     }
 
     @Override
-    public void dump(@NonNull FileDescriptor fd, @NonNull PrintWriter pw, @NonNull String[] args) {
+    public void dump(@NonNull PrintWriter pw, @NonNull String[] args) {
         pw.print("getAlwaysOn(): "); pw.println(getAlwaysOn());
         pw.print("getDisplayStateSupported(): "); pw.println(getDisplayStateSupported());
         pw.print("getPulseDuration(): "); pw.println(getPulseDuration());
