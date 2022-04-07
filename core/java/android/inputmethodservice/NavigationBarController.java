@@ -259,23 +259,22 @@ final class NavigationBarController {
                 switch (originalInsets.touchableInsets) {
                     case ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_FRAME:
                         if (inputFrame.getVisibility() == View.VISIBLE) {
-                            touchableRegion = new Region(inputFrame.getLeft(),
-                                    inputFrame.getTop(), inputFrame.getRight(),
-                                    inputFrame.getBottom());
+                            inputFrame.getBoundsOnScreen(mTempRect);
+                            touchableRegion = new Region(mTempRect);
                         }
                         break;
                     case ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_CONTENT:
                         if (inputFrame.getVisibility() == View.VISIBLE) {
-                            touchableRegion = new Region(inputFrame.getLeft(),
-                                    originalInsets.contentTopInsets, inputFrame.getRight(),
-                                    inputFrame.getBottom());
+                            inputFrame.getBoundsOnScreen(mTempRect);
+                            mTempRect.top = originalInsets.contentTopInsets;
+                            touchableRegion = new Region(mTempRect);
                         }
                         break;
                     case ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_VISIBLE:
                         if (inputFrame.getVisibility() == View.VISIBLE) {
-                            touchableRegion = new Region(inputFrame.getLeft(),
-                                    originalInsets.visibleTopInsets, inputFrame.getRight(),
-                                    inputFrame.getBottom());
+                            inputFrame.getBoundsOnScreen(mTempRect);
+                            mTempRect.top = originalInsets.visibleTopInsets;
+                            touchableRegion = new Region(mTempRect);
                         }
                         break;
                     case ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_REGION:
@@ -283,6 +282,7 @@ final class NavigationBarController {
                         touchableRegion.set(originalInsets.touchableRegion);
                         break;
                 }
+                // Hereafter "mTempRect" means a navigation bar rect.
                 mTempRect.set(decor.getLeft(), decor.getBottom() - systemInsets.bottom,
                         decor.getRight(), decor.getBottom());
                 if (touchableRegion == null) {
