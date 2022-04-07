@@ -425,7 +425,7 @@
     <string name="permdesc_writeCallLog" product="tablet" msgid="2657525794731690397">"Cho phép ứng dụng sửa đổi nhật ký cuộc gọi trên máy tính bảng của bạn, bao gồm dữ liệu về các cuộc gọi đến và gọi đi. Các ứng dụng độc hại có thể sử dụng quyền này để xóa hoặc sửa đổi nhật ký cuộc gọi của bạn."</string>
     <string name="permdesc_writeCallLog" product="tv" msgid="3934939195095317432">"Cho phép ứng dụng sửa đổi nhật ký cuộc gọi trên thiết bị Android TV, bao gồm cả dữ liệu về cuộc gọi đến và cuộc gọi đi. Các ứng dụng độc hại có thể sử dụng quyền này để xóa hoặc sửa đổi nhật ký cuộc gọi của bạn."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="5903033505665134802">"Cho phép ứng dụng sửa đổi nhật ký cuộc gọi trên điện thoại của bạn, bao gồm dữ liệu về các cuộc gọi đến và gọi đi. Các ứng dụng độc hại có thể sử dụng quyền này để xóa hoặc sửa đổi nhật ký cuộc gọi của bạn."</string>
-    <string name="permlab_bodySensors" msgid="662918578601619569">"Truy cập vào dữ liệu cảm biến cơ thể khi đang dùng, chẳng hạn như nhịp tim"</string>
+    <string name="permlab_bodySensors" msgid="662918578601619569">"Truy cập vào dữ liệu cảm biến cơ thể khi đang được sử dụng, chẳng hạn như nhịp tim"</string>
     <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"Cho phép ứng dụng truy cập vào dữ liệu cảm biến cơ thể khi đang dùng, chẳng hạn như nhịp tim, thân nhiệt và tỷ lệ phần trăm oxy trong máu."</string>
     <string name="permlab_bodySensors_background" msgid="4912560779957760446">"Truy cập vào dữ liệu cảm biến cơ thể khi ở chế độ nền, chẳng hạn như nhịp tim"</string>
     <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"Cho phép ứng dụng truy cập vào dữ liệu cảm biến cơ thể khi ở chế độ nền, chẳng hạn như nhịp tim, thân nhiệt và tỷ lệ phần trăm oxy trong máu."</string>
@@ -585,7 +585,8 @@
     <string name="biometric_error_generic" msgid="6784371929985434439">"Lỗi khi xác thực"</string>
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"Dùng phương thức khóa màn hình"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"Hãy nhập phương thức khóa màn hình của bạn để tiếp tục"</string>
-    <string name="fingerprint_acquired_partial" msgid="694598777291084823">"Phát hiện thấy một phần vân tay"</string>
+    <!-- no translation found for fingerprint_acquired_partial (4323789264604479684) -->
+    <skip />
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"Không thể xử lý vân tay. Vui lòng thử lại."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"Hãy vệ sinh cảm biến vân tay rồi thử lại"</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"Vệ sinh cảm biến rồi thử lại"</string>
@@ -598,7 +599,8 @@
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_error_not_match" msgid="4599441812893438961">"Không nhận dạng được vân tay"</string>
-    <string name="fingerprint_udfps_error_not_match" msgid="4709197752023550709">"Nhấn chắc trên cảm biến"</string>
+    <!-- no translation found for fingerprint_udfps_error_not_match (8236930793223158856) -->
+    <skip />
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"Đã xác thực vân tay"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"Đã xác thực khuôn mặt"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"Đã xác thực khuôn mặt, vui lòng nhấn để xác nhận"</string>
@@ -1614,7 +1616,7 @@
     <string name="media_route_button_content_description" msgid="2299223698196869956">"Truyền"</string>
     <string name="media_route_chooser_title" msgid="6646594924991269208">"Kết nối với thiết bị"</string>
     <string name="media_route_chooser_title_for_remote_display" msgid="3105906508794326446">"Truyền màn hình tới thiết bị"</string>
-    <string name="media_route_chooser_searching" msgid="6119673534251329535">"Đang tìm kiếm thiết bị…"</string>
+    <string name="media_route_chooser_searching" msgid="6119673534251329535">"Đang tìm thiết bị…"</string>
     <string name="media_route_chooser_extended_settings" msgid="2506352159381327741">"Cài đặt"</string>
     <string name="media_route_controller_disconnect" msgid="7362617572732576959">"Ngắt kết nối"</string>
     <string name="media_route_status_scanning" msgid="8045156315309594482">"Đang quét..."</string>
@@ -1679,7 +1681,6 @@
     <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"ĐANG BẬT"</string>
     <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"ĐANG TẮT"</string>
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"Cho phép <xliff:g id="SERVICE">%1$s</xliff:g> toàn quyền kiểm soát thiết bị của bạn?"</string>
-    <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"Nếu bạn bật <xliff:g id="SERVICE">%1$s</xliff:g>, thiết bị của bạn sẽ không dùng phương thức khóa màn hình để tăng cường mã hóa dữ liệu."</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"Bạn chỉ nên cấp toàn quyền kiểm soát cho những ứng dụng trợ giúp mình khi cần hỗ trợ tiếp cận, chứ không nên cấp cho hầu hết các ứng dụng."</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Xem và điều khiển màn hình"</string>
     <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Dịch vụ này có thể đọc toàn bộ nội dung trên màn hình và hiển thị nội dung trên các ứng dụng khác."</string>
@@ -2027,10 +2028,10 @@
     <string name="harmful_app_warning_open_anyway" msgid="5963657791740211807">"VẪN MỞ"</string>
     <string name="harmful_app_warning_title" msgid="8794823880881113856">"Đã phát hiện ứng dụng độc hại"</string>
     <string name="log_access_confirmation_title" msgid="2343578467290592708">"Cho phép <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> truy cập vào tất cả các nhật ký thiết bị?"</string>
-    <string name="log_access_confirmation_allow" msgid="143157286283302512">"Chỉ lần này"</string>
-    <string name="log_access_confirmation_deny" msgid="7685790957455099845">"Không cho phép"</string>
-    <!-- no translation found for log_access_confirmation_body (6581985716241928135) -->
+    <!-- no translation found for log_access_confirmation_allow (5302517782599389507) -->
     <skip />
+    <string name="log_access_confirmation_deny" msgid="7685790957455099845">"Không cho phép"</string>
+    <string name="log_access_confirmation_body" msgid="6581985716241928135">"Nhật ký thiết bị ghi lại những hoạt động diễn ra trên thiết bị. Các ứng dụng có thể dùng nhật ký này để tìm và khắc phục sự cố.\n\nMột số nhật ký có thể chứa thông tin nhạy cảm, vì vậy, bạn chỉ nên cấp quyền truy cập vào mọi nhật ký trên thiết bị cho những ứng dụng mà mình tin cậy. \n\nNếu bạn không cho phép ứng dụng này truy cập vào mọi nhật ký trên thiết bị, thì ứng dụng vẫn có thể truy cập vào nhật ký của chính nó. Nhà sản xuất thiết bị vẫn có thể truy cập vào một số nhật ký hoặc thông tin trên thiết bị của bạn. Tìm hiểu thêm"</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"Không hiện lại"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g> muốn hiển thị các lát của <xliff:g id="APP_2">%2$s</xliff:g>"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"Chỉnh sửa"</string>
@@ -2260,13 +2261,16 @@
     <string name="ui_translation_accessibility_translated_text" msgid="3197547218178944544">"Đã dịch <xliff:g id="MESSAGE">%1$s</xliff:g>."</string>
     <string name="ui_translation_accessibility_translation_finished" msgid="3057830947610088465">"Đã dịch thông báo từ <xliff:g id="FROM_LANGUAGE">%1$s</xliff:g> sang <xliff:g id="TO_LANGUAGE">%2$s</xliff:g>."</string>
     <string name="notification_channel_abusive_bg_apps" msgid="6092140213264920355">"Hoạt động trong nền"</string>
-    <string name="notification_title_abusive_bg_apps" msgid="344582472797982073">"Hoạt động trong nền"</string>
-    <string name="notification_content_abusive_bg_apps" msgid="5572096708044958249">"<xliff:g id="APP">%1$s</xliff:g> đang chạy trong nền và làm tiêu hao pin. Nhấn để xem."</string>
-    <string name="notification_content_long_running_fgs" msgid="8878031652441570178">"<xliff:g id="APP">%1$s</xliff:g> đang chạy trong nền trong thời gian dài. Nhấn để xem lại."</string>
+    <!-- no translation found for notification_title_abusive_bg_apps (3258460527676573815) -->
+    <skip />
+    <!-- no translation found for notification_title_long_running_fgs (8170284286477131587) -->
+    <skip />
+    <!-- no translation found for notification_content_abusive_bg_apps (9180610713603474720) -->
+    <skip />
+    <!-- no translation found for notification_content_long_running_fgs (8258193410039977101) -->
+    <skip />
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Xem các ứng dụng đang hoạt động"</string>
-    <!-- no translation found for vdm_camera_access_denied (6102378580971542473) -->
-    <skip />
-    <!-- no translation found for vdm_camera_access_denied (6895968310395249076) -->
-    <skip />
+    <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"Không truy cập được vào máy ảnh trên điện thoại từ <xliff:g id="DEVICE">%1$s</xliff:g> của bạn"</string>
+    <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"Không truy cập được vào máy ảnh trên máy tính bảng từ <xliff:g id="DEVICE">%1$s</xliff:g> của bạn"</string>
     <string name="system_locale_title" msgid="3978041860457277638">"Ngôn ngữ hệ thống"</string>
 </resources>
