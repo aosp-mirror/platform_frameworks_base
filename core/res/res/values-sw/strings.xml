@@ -424,7 +424,7 @@
     <string name="permdesc_writeCallLog" product="tablet" msgid="2657525794731690397">"Huruhusu programu kurekebisha rajisi ya kompyuta kibao yako, ikiwa ni pamoja na simu zinazoingia na kutoka. Huenda programu hasidi zikatumia hii ili kufuta au kurekebisha rajisi ya simu yako."</string>
     <string name="permdesc_writeCallLog" product="tv" msgid="3934939195095317432">"Huruhusu programu irekebishe kumbukumbu za simu ya kifaa chako cha Android TV, ikiwa ni pamoja na data kuhusu simu zinazoingia na simu unazopiga. Huenda programu hasidi zikatumia ruhusa hii ili kufuta au kurekebisha kumbukumbu zako za simu."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="5903033505665134802">"Huruhusu programu kurekebisha rajisi ya simu yako, ikiwa ni pamoja na simu zinazoingia na kutoka. Huenda programu hasidi zikatumia hii ili kufuta au kurekebisha rajisi ya simu yako."</string>
-    <string name="permlab_bodySensors" msgid="3411035315357380862">"fikia vitambua shughuli za mwili (kama vifuatiliaji vya mapigo ya moyo)"</string>
+    <string name="permlab_bodySensors" msgid="3411035315357380862">"kufikia vitambuzi vya shughuli za mwili (kama vifuatiliaji vya mapigo ya moyo)"</string>
     <string name="permdesc_bodySensors" product="default" msgid="2365357960407973997">"Huruhusu programu kufikia data kutoka vihisi vinavyofuatilia hali yako ya kimwili, kama vile mapigo ya moyo."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"Soma matukio na maelezo ya kalenda"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"Programu hii inaweza kusoma matukio yote ya kalenda yaliyohifadhiwa kwenye kompyuta yako kibao na kushiriki au kuhifadhi data yako ya kalenda."</string>
