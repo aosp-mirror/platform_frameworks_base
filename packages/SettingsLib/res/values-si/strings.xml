@@ -596,8 +596,7 @@
     <string name="guest_reset_guest_dialog_title" msgid="8047270010895437534">"අමුත්තා යළි සකසන්නද?"</string>
     <string name="guest_remove_guest_dialog_title" msgid="4548511006624088072">"අමුත්තා ඉවත් කරන්නද?"</string>
     <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"යළි සකසන්න"</string>
-    <!-- no translation found for guest_remove_guest_confirm_button (7858123434954143879) -->
-    <skip />
+    <string name="guest_remove_guest_confirm_button" msgid="7858123434954143879">"ඉවත් කරන්න"</string>
     <string name="guest_resetting" msgid="7822120170191509566">"අමුත්තා යළි සකසමින්…"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"ඡායාරූපයක් ගන්න"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"රූපයක් තෝරන්න"</string>
@@ -653,10 +652,7 @@
     <string name="turn_screen_on_title" msgid="3266937298097573424">"තිරය ක්‍රියාත්මක කරන්න"</string>
     <string name="allow_turn_screen_on" msgid="6194845766392742639">"තිරය ක්‍රියාත්මක කිරීමට ඉඩ දෙන්න"</string>
     <string name="allow_turn_screen_on_description" msgid="43834403291575164">"යෙදුමකට තිරය ක්‍රියාත්මක කිරීමට ඉඩ දෙන්න. ඉඩ දුනහොත්, යෙදුම ඔබගේ පැහැදිලි අභිප්‍රායෙන් තොරව ඕනෑම වේලාවක තිරය ක්‍රියාත්මක කළ හැකිය."</string>
-    <!-- no translation found for bt_le_audio_scan_qr_code (3521809854780392679) -->
-    <skip />
-    <!-- no translation found for bt_le_audio_scan_qr_code_scanner (4679500020630341107) -->
-    <skip />
-    <!-- no translation found for bt_le_audio_qr_code_is_not_valid_format (6092191081849434734) -->
-    <skip />
+    <string name="bt_le_audio_scan_qr_code" msgid="3521809854780392679">"QR කේතය ස්කෑන් කරන්න"</string>
+    <string name="bt_le_audio_scan_qr_code_scanner" msgid="4679500020630341107">"සවන් දීම ආරම්භ කිරීමට, පහත QR කේතය මධ්‍යගත කරන්න"</string>
+    <string name="bt_le_audio_qr_code_is_not_valid_format" msgid="6092191081849434734">"QR කේතය වලංගු ආකෘතියක් නොවේ"</string>
 </resources>
