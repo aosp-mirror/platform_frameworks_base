@@ -2086,7 +2086,7 @@
 
     <!-- @SystemApi @hide Allows applications to register network factory or agent -->
     <permission android:name="android.permission.NETWORK_FACTORY"
-                android:protectionLevel="signature" />
+                android:protectionLevel="signature|role" />
 
     <!-- @SystemApi @hide Allows applications to access network stats provider -->
     <permission android:name="android.permission.NETWORK_STATS_PROVIDER"
@@ -2275,13 +2275,13 @@
          @hide
     -->
     <permission android:name="android.permission.BLUETOOTH_MAP"
-        android:protectionLevel="signature" />
+        android:protectionLevel="signature|role" />
 
     <!-- Allows bluetooth stack to access files
          @hide This should only be used by Bluetooth apk.
     -->
     <permission android:name="android.permission.BLUETOOTH_STACK"
-        android:protectionLevel="signature" />
+        android:protectionLevel="signature|role" />
 
     <!-- Allows uhid write access for creating virtual input devices
          @hide
@@ -2552,7 +2552,7 @@
     <!-- Allows access to configure network interfaces, configure/use IPSec, etc.
          @hide -->
     <permission android:name="android.permission.NET_ADMIN"
-        android:protectionLevel="signature" />
+        android:protectionLevel="signature|role" />
 
     <!-- Allows registration for remote audio playback. @hide -->
     <permission android:name="android.permission.REMOTE_AUDIO_PLAYBACK"
@@ -2676,7 +2676,7 @@
     <!-- Allows listen permission to always reported system signal strength.
          @hide Used internally. -->
     <permission android:name="android.permission.LISTEN_ALWAYS_REPORTED_SIGNAL_STRENGTH"
-        android:protectionLevel="signature" />
+        android:protectionLevel="signature|role" />
 
     <!-- @SystemApi Protects the ability to register any PhoneAccount with
          PhoneAccount#CAPABILITY_SIM_SUBSCRIPTION. This capability indicates that the PhoneAccount
@@ -3911,7 +3911,7 @@
          Not for use by third party apps.
          @hide -->
     <permission android:name="android.permission.MANAGE_APP_OPS_MODES"
-        android:protectionLevel="signature|installer|verifier" />
+        android:protectionLevel="signature|installer|verifier|role" />
 
     <!-- @SystemApi Allows an application to open windows that are for use by parts
          of the system user interface.
@@ -4792,7 +4792,7 @@
     <!-- Allows an application to manage the companion devices.
          @hide -->
     <permission android:name="android.permission.MANAGE_COMPANION_DEVICES"
-                android:protectionLevel="signature" />
+                android:protectionLevel="signature|role" />
 
     <!-- Allows an application to subscribe to notifications about the presence status change
          of their associated companion device
@@ -5041,7 +5041,7 @@
     <!-- @TestApi Allows an application to query audio related state.
          @hide -->
     <permission android:name="android.permission.QUERY_AUDIO_STATE"
-                android:protectionLevel="signature" />
+                android:protectionLevel="signature|role" />
 
     <!-- Allows an application to modify what effects are applied to all audio
          (matching certain criteria) from any application.
@@ -5114,7 +5114,7 @@
         @hide
     -->
    <permission android:name="android.permission.DEVICE_POWER"
-        android:protectionLevel="signature" />
+        android:protectionLevel="signature|role" />
 
     <!-- Allows toggling battery saver on the system.
          Superseded by DEVICE_POWER permission. @hide @SystemApi
@@ -5140,7 +5140,7 @@
 
    <!-- @hide Allows low-level access to tun tap driver -->
     <permission android:name="android.permission.NET_TUNNELING"
-        android:protectionLevel="signature" />
+        android:protectionLevel="signature|role" />
 
     <!-- Run as a manufacturer test application, running as the root user.
          Only available when the device is running in manufacturer test mode.
