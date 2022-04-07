@@ -90,7 +90,11 @@ public interface NativeInputManagerService {
     boolean transferTouchFocus(IBinder fromChannelToken, IBinder toChannelToken,
             boolean isDragDrop);
 
-    boolean transferTouch(IBinder destChannelToken);
+    /**
+     * Transfer the current touch gesture to the window identified by 'destChannelToken' positioned
+     * on display with id 'displayId'.
+     */
+    boolean transferTouch(IBinder destChannelToken, int displayId);
 
     void setPointerSpeed(int speed);
 
@@ -263,7 +267,7 @@ public interface NativeInputManagerService {
                 boolean isDragDrop);
 
         @Override
-        public native boolean transferTouch(IBinder destChannelToken);
+        public native boolean transferTouch(IBinder destChannelToken, int displayId);
 
         @Override
         public native void setPointerSpeed(int speed);

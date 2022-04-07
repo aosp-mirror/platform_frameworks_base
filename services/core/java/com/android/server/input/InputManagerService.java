@@ -658,10 +658,10 @@ public class InputManagerService extends IInputManager.Stub
      * gesture
      * @return True if the transfer succeeded, false if there was no active touch gesture happening
      */
-    public boolean transferTouch(IBinder destChannelToken) {
+    public boolean transferTouch(IBinder destChannelToken, int displayId) {
         // TODO(b/162194035): Replace this with a SPY window
         Objects.requireNonNull(destChannelToken, "destChannelToken must not be null");
-        return mNative.transferTouch(destChannelToken);
+        return mNative.transferTouch(destChannelToken, displayId);
     }
 
     /**
