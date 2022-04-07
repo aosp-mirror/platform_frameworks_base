@@ -60,6 +60,7 @@ import com.android.systemui.animation.ActivityLaunchAnimator;
 import com.android.systemui.animation.GhostedViewLaunchAnimatorController;
 import com.android.systemui.broadcast.BroadcastSender;
 import com.android.systemui.dagger.qualifiers.Background;
+import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.media.dialog.MediaOutputDialogFactory;
 import com.android.systemui.monet.ColorScheme;
 import com.android.systemui.plugins.ActivityStarter;
@@ -108,6 +109,13 @@ public class MediaControlPanel {
             R.id.actionNext
     );
 
+    // Buttons that should get hidden when we're scrubbing (they will be replaced with the views
+    // showing scrubbing time)
+    private static final List<Integer> SEMANTIC_ACTIONS_HIDE_WHEN_SCRUBBING = List.of(
+            R.id.actionPrev,
+            R.id.actionNext
+    );
+
     // Buttons to show in small player when using semantic actions
     private static final List<Integer> SEMANTIC_ACTIONS_ALL = List.of(
             R.id.actionPlayPause,
@@ -120,6 +128,7 @@ public class MediaControlPanel {
     private final SeekBarViewModel mSeekBarViewModel;
     private SeekBarObserver mSeekBarObserver;
     protected final Executor mBackgroundExecutor;
+    private final Executor mMainExecutor;
     private final ActivityStarter mActivityStarter;
     private final BroadcastSender mBroadcastSender;
 
@@ -127,6 +136,7 @@ public class MediaControlPanel {
     private MediaViewHolder mMediaViewHolder;
     private RecommendationViewHolder mRecommendationViewHolder;
     private String mKey;
+    private MediaData mMediaData;
     private MediaViewController mMediaViewController;
     private MediaSession.Token mToken;
     private MediaController mController;
@@ -147,14 +157,23 @@ public class MediaControlPanel {
     protected int mSmartspaceId = -1;
     private String mPackageName;
 
+    private boolean mIsScrubbing = false;
+
+    private final SeekBarViewModel.ScrubbingChangeListener mScrubbingChangeListener =
+            this::setIsScrubbing;
+
     /**
      * Initialize a new control panel
      *
      * @param backgroundExecutor background executor, used for processing artwork
+     * @param mainExecutor main thread executor, used if we receive callbacks on the background
+     *                     thread that then trigger UI changes.
      * @param activityStarter    activity starter
      */
     @Inject
-    public MediaControlPanel(Context context, @Background Executor backgroundExecutor,
+    public MediaControlPanel(Context context,
+            @Background Executor backgroundExecutor,
+            @Main Executor mainExecutor,
             ActivityStarter activityStarter, BroadcastSender broadcastSender,
             MediaViewController mediaViewController, SeekBarViewModel seekBarViewModel,
             Lazy<MediaDataManager> lazyMediaDataManager,
@@ -163,6 +182,7 @@ public class MediaControlPanel {
             FalsingManager falsingManager, SystemClock systemClock, MediaUiEventLogger logger) {
         mContext = context;
         mBackgroundExecutor = backgroundExecutor;
+        mMainExecutor = mainExecutor;
         mActivityStarter = activityStarter;
         mBroadcastSender = broadcastSender;
         mSeekBarViewModel = seekBarViewModel;
@@ -186,6 +206,7 @@ public class MediaControlPanel {
     public void onDestroy() {
         if (mSeekBarObserver != null) {
             mSeekBarViewModel.getProgress().removeObserver(mSeekBarObserver);
+            mSeekBarViewModel.removeScrubbingChangeListener(mScrubbingChangeListener);
         }
         mSeekBarViewModel.onDestroy();
         mMediaViewController.onDestroy();
@@ -232,6 +253,19 @@ public class MediaControlPanel {
         mSeekBarViewModel.setListening(listening);
     }
 
+    /** Sets whether the user is touching the seek bar to change the track position. */
+    public void setIsScrubbing(boolean isScrubbing) {
+        if (mMediaData == null || mMediaData.getSemanticActions() == null) {
+            return;
+        }
+        if (isScrubbing == this.mIsScrubbing) {
+            return;
+        }
+        this.mIsScrubbing = isScrubbing;
+        mMainExecutor.execute(() ->
+                updateDisplayForScrubbingChange(mMediaData.getSemanticActions()));
+    }
+
     /**
      * Get the context
      *
@@ -249,6 +283,7 @@ public class MediaControlPanel {
         mSeekBarObserver = new SeekBarObserver(vh);
         mSeekBarViewModel.getProgress().observeForever(mSeekBarObserver);
         mSeekBarViewModel.attachTouchHandlers(vh.getSeekBar());
+        mSeekBarViewModel.setScrubbingChangeListener(mScrubbingChangeListener);
         mMediaViewController.attach(player, MediaViewController.TYPE.PLAYER);
 
         vh.getPlayer().setOnLongClickListener(v -> {
@@ -307,6 +342,7 @@ public class MediaControlPanel {
             return;
         }
         mKey = key;
+        mMediaData = data;
         MediaSession.Token token = data.getToken();
         mPackageName = data.getPackageName();
         mUid = data.getAppUid();
@@ -361,6 +397,7 @@ public class MediaControlPanel {
         bindOutputSwitcherChip(data);
         bindLongPressMenu(data);
         bindActionButtons(data);
+        bindScrubbingTime(data);
         bindArtworkAndColors(data);
 
         // TODO: We don't need to refresh this state constantly, only if the state actually changed
@@ -544,6 +581,8 @@ public class MediaControlPanel {
         seekbar.getThumb().setTintList(textColorList);
         seekbar.setProgressTintList(textColorList);
         seekbar.setProgressBackgroundTintList(ColorStateList.valueOf(textTertiary));
+        mMediaViewHolder.getScrubbingElapsedTimeView().setTextColor(textColorList);
+        mMediaViewHolder.getScrubbingTotalTimeView().setTextColor(textColorList);
 
         // Action buttons
         mMediaViewHolder.getActionPlayPause().setBackgroundTintList(accentColorList);
@@ -589,10 +628,9 @@ public class MediaControlPanel {
             }
 
             for (int id : SEMANTIC_ACTIONS_ALL) {
-                boolean showInCompact = SEMANTIC_ACTIONS_COMPACT.contains(id);
                 ImageButton button = mMediaViewHolder.getAction(id);
                 MediaAction action = semanticActions.getActionById(id);
-                setSemanticButton(button, action, collapsedSet, expandedSet, showInCompact);
+                setSemanticButton(button, action);
             }
         } else {
             // Hide buttons that only appear for semantic actions
@@ -607,12 +645,21 @@ public class MediaControlPanel {
             int i = 0;
             for (; i < actions.size(); i++) {
                 boolean showInCompact = actionsWhenCollapsed.contains(i);
-                setSemanticButton(genericButtons[i], actions.get(i),  collapsedSet,
-                        expandedSet, showInCompact);
+                setGenericButton(
+                        genericButtons[i],
+                        actions.get(i),
+                        collapsedSet,
+                        expandedSet,
+                        showInCompact);
             }
             for (; i < 5; i++) {
                 // Hide any unused buttons
-                setSemanticButton(genericButtons[i], null,  collapsedSet, expandedSet, false);
+                setGenericButton(
+                        genericButtons[i],
+                        /* mediaAction= */ null,
+                        collapsedSet,
+                        expandedSet,
+                        /* showInCompact= */ false);
             }
         }
         expandedSet.setVisibility(R.id.media_progress_bar, getSeekBarVisibility());
@@ -640,8 +687,19 @@ public class MediaControlPanel {
         return false;
     }
 
-    private void setSemanticButton(final ImageButton button, MediaAction mediaAction,
-            ConstraintSet collapsedSet, ConstraintSet expandedSet, boolean showInCompact) {
+    private void setGenericButton(
+            final ImageButton button,
+            @Nullable MediaAction mediaAction,
+            ConstraintSet collapsedSet,
+            ConstraintSet expandedSet,
+            boolean showInCompact) {
+        bindButtonCommon(button, mediaAction);
+        boolean visible = mediaAction != null;
+        setVisibleAndAlpha(expandedSet, button.getId(), visible);
+        setVisibleAndAlpha(collapsedSet, button.getId(), visible && showInCompact);
+    }
+
+    private void setSemanticButton(final ImageButton button, @Nullable MediaAction mediaAction) {
         AnimationBindHandler animHandler;
         if (button.getTag() == null) {
             animHandler = new AnimationBindHandler();
@@ -651,59 +709,105 @@ public class MediaControlPanel {
         }
 
         animHandler.tryExecute(() -> {
-            bindSemanticButton(animHandler, button, mediaAction,
-                               collapsedSet, expandedSet, showInCompact);
+            bindButtonWithAnimations(button, mediaAction, animHandler);
+            setSemanticButtonVisibleAndAlpha(button.getId(), mediaAction);
         });
     }
 
-    private void bindSemanticButton(final AnimationBindHandler animHandler,
-            final ImageButton button, MediaAction mediaAction, ConstraintSet collapsedSet,
-            ConstraintSet expandedSet, boolean showInCompact) {
-
+    private void bindButtonWithAnimations(
+            final ImageButton button,
+            @Nullable MediaAction mediaAction,
+            @NonNull AnimationBindHandler animHandler) {
         if (mediaAction != null) {
             if (animHandler.updateRebindId(mediaAction.getRebindId())) {
                 animHandler.unregisterAll();
-
-                final Drawable icon = mediaAction.getIcon();
-                button.setImageDrawable(icon);
-                button.setContentDescription(mediaAction.getContentDescription());
-                final Drawable bgDrawable = mediaAction.getBackground();
-                button.setBackground(bgDrawable);
-
-                animHandler.tryRegister(icon);
-                animHandler.tryRegister(bgDrawable);
-
-                Runnable action = mediaAction.getAction();
-                if (action == null) {
-                    button.setEnabled(false);
-                } else {
-                    button.setEnabled(true);
-                    button.setOnClickListener(v -> {
-                        if (!mFalsingManager.isFalseTap(FalsingManager.LOW_PENALTY)) {
-                            mLogger.logTapAction(button.getId(), mUid, mPackageName, mInstanceId);
-                            logSmartspaceCardReported(SMARTSPACE_CARD_CLICK_EVENT);
-                            action.run();
-
-                            if (icon instanceof Animatable) {
-                                ((Animatable) icon).start();
-                            }
-                            if (bgDrawable instanceof Animatable) {
-                                ((Animatable) bgDrawable).start();
-                            }
-                        }
-                    });
-                }
+                animHandler.tryRegister(mediaAction.getIcon());
+                animHandler.tryRegister(mediaAction.getBackground());
+                bindButtonCommon(button, mediaAction);
             }
         } else {
             animHandler.unregisterAll();
-            button.setImageDrawable(null);
-            button.setContentDescription(null);
-            button.setEnabled(false);
-            button.setBackground(null);
+            clearButton(button);
         }
+    }
 
-        setVisibleAndAlpha(collapsedSet, button.getId(), mediaAction != null && showInCompact);
-        setVisibleAndAlpha(expandedSet, button.getId(), mediaAction != null);
+    private void bindButtonCommon(final ImageButton button, @Nullable MediaAction mediaAction) {
+        if (mediaAction != null) {
+            final Drawable icon = mediaAction.getIcon();
+            button.setImageDrawable(icon);
+            button.setContentDescription(mediaAction.getContentDescription());
+            final Drawable bgDrawable = mediaAction.getBackground();
+            button.setBackground(bgDrawable);
+
+            Runnable action = mediaAction.getAction();
+            if (action == null) {
+                button.setEnabled(false);
+            } else {
+                button.setEnabled(true);
+                button.setOnClickListener(v -> {
+                    if (!mFalsingManager.isFalseTap(FalsingManager.LOW_PENALTY)) {
+                        mLogger.logTapAction(button.getId(), mUid, mPackageName, mInstanceId);
+                        logSmartspaceCardReported(SMARTSPACE_CARD_CLICK_EVENT);
+                        action.run();
+
+                        if (icon instanceof Animatable) {
+                            ((Animatable) icon).start();
+                        }
+                        if (bgDrawable instanceof Animatable) {
+                            ((Animatable) bgDrawable).start();
+                        }
+                    }
+                });
+            }
+        } else {
+            clearButton(button);
+        }
+    }
+
+    private void clearButton(final ImageButton button) {
+        button.setImageDrawable(null);
+        button.setContentDescription(null);
+        button.setEnabled(false);
+        button.setBackground(null);
+    }
+
+    private void setSemanticButtonVisibleAndAlpha(
+            int buttonId,
+            MediaAction mediaAction) {
+        ConstraintSet collapsedSet = mMediaViewController.getCollapsedLayout();
+        ConstraintSet expandedSet = mMediaViewController.getExpandedLayout();
+        boolean showInCompact = SEMANTIC_ACTIONS_COMPACT.contains(buttonId);
+        boolean hideWhenScrubbing = SEMANTIC_ACTIONS_HIDE_WHEN_SCRUBBING.contains(buttonId);
+        boolean shouldBeHiddenDueToScrubbing = hideWhenScrubbing && mIsScrubbing;
+        boolean visible = mediaAction != null && !shouldBeHiddenDueToScrubbing;
+
+        setVisibleAndAlpha(expandedSet, buttonId, visible);
+        setVisibleAndAlpha(collapsedSet, buttonId, visible && showInCompact);
+    }
+
+    /** Updates all the views that might change due to a scrubbing state change. */
+    // TODO(b/209656742): Handle scenarios where actionPrev and/or actionNext aren't active.
+    private void updateDisplayForScrubbingChange(@NonNull MediaButton semanticActions) {
+        // Update visibilities of the scrubbing time views and the scrubbing-dependent buttons.
+        bindScrubbingTime(mMediaData);
+        SEMANTIC_ACTIONS_HIDE_WHEN_SCRUBBING.forEach((id) ->
+                setSemanticButtonVisibleAndAlpha(id, semanticActions.getActionById(id)));
+        // Trigger a state refresh so that we immediately update visibilities.
+        mMediaViewController.refreshState();
+    }
+
+    private void bindScrubbingTime(MediaData data) {
+        ConstraintSet expandedSet = mMediaViewController.getExpandedLayout();
+        ConstraintSet collapsedSet = mMediaViewController.getCollapsedLayout();
+        int elapsedTimeId = mMediaViewHolder.getScrubbingElapsedTimeView().getId();
+        int totalTimeId = mMediaViewHolder.getScrubbingTotalTimeView().getId();
+
+        boolean visible = data.getSemanticActions() != null && mIsScrubbing;
+        setVisibleAndAlpha(expandedSet, elapsedTimeId, visible);
+        setVisibleAndAlpha(expandedSet, totalTimeId, visible);
+        // Never show in collapsed
+        setVisibleAndAlpha(collapsedSet, elapsedTimeId, false);
+        setVisibleAndAlpha(collapsedSet, totalTimeId, false);
     }
 
     // AnimationBindHandler is responsible for tracking the bound animation state and preventing
