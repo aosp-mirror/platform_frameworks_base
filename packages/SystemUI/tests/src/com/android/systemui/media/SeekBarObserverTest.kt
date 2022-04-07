@@ -46,8 +46,8 @@ class SeekBarObserverTest : SysuiTestCase() {
     @Mock private lateinit var mockHolder: MediaViewHolder
     @Mock private lateinit var mockSquigglyProgress: SquigglyProgress
     private lateinit var seekBarView: SeekBar
-    private lateinit var elapsedTimeView: TextView
-    private lateinit var totalTimeView: TextView
+    private lateinit var scrubbingElapsedTimeView: TextView
+    private lateinit var scrubbingTotalTimeView: TextView
 
     @JvmField @Rule val mockitoRule = MockitoJUnit.rule()
 
@@ -60,9 +60,11 @@ class SeekBarObserverTest : SysuiTestCase() {
 
         seekBarView = SeekBar(context)
         seekBarView.progressDrawable = mockSquigglyProgress
-        elapsedTimeView = TextView(context)
-        totalTimeView = TextView(context)
+        scrubbingElapsedTimeView = TextView(context)
+        scrubbingTotalTimeView = TextView(context)
         whenever(mockHolder.seekBar).thenReturn(seekBarView)
+        whenever(mockHolder.scrubbingElapsedTimeView).thenReturn(scrubbingElapsedTimeView)
+        whenever(mockHolder.scrubbingTotalTimeView).thenReturn(scrubbingTotalTimeView)
 
         observer = SeekBarObserver(mockHolder)
     }
@@ -166,5 +168,25 @@ class SeekBarObserverTest : SysuiTestCase() {
         observer.onChanged(data)
         // THEN progress drawable is not animating
         verify(mockSquigglyProgress).animate = false
+    }
+
+    @Test
+    fun seekBarProgress_enabled_timeViewsHaveTime() {
+        val data = SeekBarViewModel.Progress(enabled = true, true, true, false, 3000, 120000)
+
+        observer.onChanged(data)
+
+        assertThat(scrubbingElapsedTimeView.text).isEqualTo("00:03")
+        assertThat(scrubbingTotalTimeView.text).isEqualTo("02:00")
+    }
+
+    @Test
+    fun seekBarProgress_disabled_timeViewsEmpty() {
+        val data = SeekBarViewModel.Progress(enabled = false, true, true, false, 3000, 120000)
+
+        observer.onChanged(data)
+
+        assertThat(scrubbingElapsedTimeView.text).isEqualTo("")
+        assertThat(scrubbingTotalTimeView.text).isEqualTo("")
     }
 }
