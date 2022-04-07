@@ -162,6 +162,17 @@ public class Flags {
     public static final SysPropBooleanFlag WM_ENABLE_SHELL_TRANSITIONS =
             new SysPropBooleanFlag(1100, "persist.wm.debug.shell_transit", false);
 
+    // 1200 - predictive back
+    @Keep
+    public static final SysPropBooleanFlag WM_ENABLE_PREDICTIVE_BACK = new SysPropBooleanFlag(
+            1200, "persist.wm.debug.predictive_back", true);
+    @Keep
+    public static final SysPropBooleanFlag WM_ENABLE_PREDICTIVE_BACK_ANIM = new SysPropBooleanFlag(
+            1201, "persist.wm.debug.predictive_back_anim", false);
+    @Keep
+    public static final SysPropBooleanFlag WM_ALWAYS_ENFORCE_PREDICTIVE_BACK =
+            new SysPropBooleanFlag(1202, "persist.wm.debug.predictive_back_always_enforce", false);
+
     // Pay no attention to the reflection behind the curtain.
     // ========================== Curtain ==========================
     // |                                                           |
