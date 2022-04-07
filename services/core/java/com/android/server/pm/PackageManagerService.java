@@ -676,6 +676,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
     private final ModuleInfoProvider mModuleInfoProvider;
 
     final ApexManager mApexManager;
+    final ApexPackageInfo mApexPackageInfo;
 
     final PackageManagerServiceInjector mInjector;
 
@@ -1605,6 +1606,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         mSharedLibraries = injector.getSharedLibrariesImpl();
 
         mApexManager = testParams.apexManager;
+        mApexPackageInfo = new ApexPackageInfo();
         mArtManagerService = testParams.artManagerService;
         mAvailableFeatures = testParams.availableFeatures;
         mBackgroundDexOptService = testParams.backgroundDexOptService;
@@ -1808,6 +1810,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         mProtectedPackages = new ProtectedPackages(mContext);
 
         mApexManager = injector.getApexManager();
+        mApexPackageInfo = new ApexPackageInfo();
         mAppsFilter = mInjector.getAppsFilter();
 
         mInstantAppRegistry = new InstantAppRegistry(mContext, mPermissionManager,
@@ -1825,8 +1828,8 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         mAppDataHelper = new AppDataHelper(this);
         mInstallPackageHelper = new InstallPackageHelper(this, mAppDataHelper);
         mRemovePackageHelper = new RemovePackageHelper(this, mAppDataHelper);
-        mInitAppsHelper = new InitAppsHelper(this, mApexManager, mInstallPackageHelper,
-                mInjector.getSystemPartitions());
+        mInitAppsHelper = new InitAppsHelper(this, mApexManager, mApexPackageInfo,
+                mInstallPackageHelper, mInjector.getSystemPartitions());
         mDeletePackageHelper = new DeletePackageHelper(this, mRemovePackageHelper,
                 mAppDataHelper);
         mSharedLibraries.setDeletePackageHelper(mDeletePackageHelper);
@@ -5955,7 +5958,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
             synchronized (mProtectedBroadcasts) {
                 protectedBroadcasts = new ArraySet<>(mProtectedBroadcasts);
             }
-            new DumpHelper(mPermissionManager, mApexManager, mStorageEventHelper,
+            new DumpHelper(mPermissionManager, mApexManager, mApexPackageInfo, mStorageEventHelper,
                     mDomainVerificationManager, mInstallerService, mRequiredVerifierPackage,
                     knownPackages, mChangedPackagesTracker, availableFeatures, protectedBroadcasts,
                     getPerUidReadTimeouts(snapshot)
@@ -6052,6 +6055,12 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         @Override
         protected ApexManager getApexManager() {
             return mApexManager;
+        }
+
+        @NonNull
+        @Override
+        protected ApexPackageInfo getApexPackageInfo() {
+            return mApexPackageInfo;
         }
 
         @NonNull
@@ -6322,7 +6331,8 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                 return;
             }
             final ApexManager am = PackageManagerService.this.mApexManager;
-            PackageInfo activePackage = am.getPackageInfo(packageName,
+            final ApexPackageInfo api = PackageManagerService.this.mApexPackageInfo;
+            PackageInfo activePackage = api.getPackageInfo(packageName,
                     ApexManager.MATCH_ACTIVE_PACKAGE);
             if (activePackage == null) {
                 adapter.onPackageDeleted(packageName, PackageManager.DELETE_FAILED_ABORTED,

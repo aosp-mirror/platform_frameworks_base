@@ -89,16 +89,17 @@ public class ApexManagerTest {
 
     @Test
     public void testGetPackageInfo_setFlagsMatchActivePackage() throws RemoteException {
-        when(mApexService.getAllPackages()).thenReturn(createApexInfoForTestPkg(true, false));
-        mApexManager.scanApexPackagesTraced(mPackageParser2,
-                ParallelPackageParser.makeExecutorService());
-        final PackageInfo activePkgPi = mApexManager.getPackageInfo(TEST_APEX_PKG,
+        ApexInfo[] apexInfo = createApexInfoForTestPkg(true, false);
+        ApexPackageInfo apexPackageInfo = new ApexPackageInfo();
+        apexPackageInfo.scanApexPackages(
+                apexInfo, mPackageParser2, ParallelPackageParser.makeExecutorService());
+        final PackageInfo activePkgPi = apexPackageInfo.getPackageInfo(TEST_APEX_PKG,
                 ApexManager.MATCH_ACTIVE_PACKAGE);
 
         assertThat(activePkgPi).isNotNull();
         assertThat(activePkgPi.packageName).contains(TEST_APEX_PKG);
 
-        final PackageInfo factoryPkgPi = mApexManager.getPackageInfo(TEST_APEX_PKG,
+        final PackageInfo factoryPkgPi = apexPackageInfo.getPackageInfo(TEST_APEX_PKG,
                 ApexManager.MATCH_FACTORY_PACKAGE);
 
         assertThat(factoryPkgPi).isNull();
@@ -106,16 +107,17 @@ public class ApexManagerTest {
 
     @Test
     public void testGetPackageInfo_setFlagsMatchFactoryPackage() throws RemoteException {
-        when(mApexService.getAllPackages()).thenReturn(createApexInfoForTestPkg(false, true));
-        mApexManager.scanApexPackagesTraced(mPackageParser2,
-                ParallelPackageParser.makeExecutorService());
-        PackageInfo factoryPkgPi = mApexManager.getPackageInfo(TEST_APEX_PKG,
+        ApexInfo[] apexInfo = createApexInfoForTestPkg(false, true);
+        ApexPackageInfo apexPackageInfo = new ApexPackageInfo();
+        apexPackageInfo.scanApexPackages(
+                apexInfo, mPackageParser2, ParallelPackageParser.makeExecutorService());
+        PackageInfo factoryPkgPi = apexPackageInfo.getPackageInfo(TEST_APEX_PKG,
                 ApexManager.MATCH_FACTORY_PACKAGE);
 
         assertThat(factoryPkgPi).isNotNull();
         assertThat(factoryPkgPi.packageName).contains(TEST_APEX_PKG);
 
-        final PackageInfo activePkgPi = mApexManager.getPackageInfo(TEST_APEX_PKG,
+        final PackageInfo activePkgPi = apexPackageInfo.getPackageInfo(TEST_APEX_PKG,
                 ApexManager.MATCH_ACTIVE_PACKAGE);
 
         assertThat(activePkgPi).isNull();
@@ -123,23 +125,26 @@ public class ApexManagerTest {
 
     @Test
     public void testGetPackageInfo_setFlagsNone() throws RemoteException {
-        when(mApexService.getAllPackages()).thenReturn(createApexInfoForTestPkg(false, true));
-        mApexManager.scanApexPackagesTraced(mPackageParser2,
-                ParallelPackageParser.makeExecutorService());
+        ApexInfo[] apexInfo = createApexInfoForTestPkg(false, true);
+        ApexPackageInfo apexPackageInfo = new ApexPackageInfo();
+        apexPackageInfo.scanApexPackages(
+                apexInfo, mPackageParser2, ParallelPackageParser.makeExecutorService());
 
-        assertThat(mApexManager.getPackageInfo(TEST_APEX_PKG, 0)).isNull();
+        assertThat(apexPackageInfo.getPackageInfo(TEST_APEX_PKG, 0)).isNull();
     }
 
     @Test
     public void testGetApexSystemServices() throws RemoteException {
-        when(mApexService.getAllPackages()).thenReturn(new ApexInfo[] {
+        ApexInfo[] apexInfo = new ApexInfo[] {
                 createApexInfoForTestPkg(false, true, 1),
                 // only active apex reports apex-system-service
                 createApexInfoForTestPkg(true, false, 2),
-        });
+        };
 
-        mApexManager.scanApexPackagesTraced(mPackageParser2,
-                ParallelPackageParser.makeExecutorService());
+        ApexPackageInfo apexPackageInfo = new ApexPackageInfo();
+        List<ApexManager.ScanResult> scanResults = apexPackageInfo.scanApexPackages(
+                apexInfo, mPackageParser2, ParallelPackageParser.makeExecutorService());
+        mApexManager.notifyScanResult(scanResults);
 
         List<ApexSystemServiceInfo> services = mApexManager.getApexSystemServices();
         assertThat(services).hasSize(1);
@@ -149,65 +154,72 @@ public class ApexManagerTest {
 
     @Test
     public void testGetActivePackages() throws RemoteException {
-        when(mApexService.getAllPackages()).thenReturn(createApexInfoForTestPkg(true, true));
-        mApexManager.scanApexPackagesTraced(mPackageParser2,
-                ParallelPackageParser.makeExecutorService());
+        ApexInfo[] apexInfo = createApexInfoForTestPkg(true, true);
+        ApexPackageInfo apexPackageInfo = new ApexPackageInfo();
+        apexPackageInfo.scanApexPackages(
+                apexInfo, mPackageParser2, ParallelPackageParser.makeExecutorService());
 
-        assertThat(mApexManager.getActivePackages()).isNotEmpty();
+        assertThat(apexPackageInfo.getActivePackages()).isNotEmpty();
     }
 
     @Test
     public void testGetActivePackages_noneActivePackages() throws RemoteException {
-        when(mApexService.getAllPackages()).thenReturn(createApexInfoForTestPkg(false, true));
-        mApexManager.scanApexPackagesTraced(mPackageParser2,
-                ParallelPackageParser.makeExecutorService());
+        ApexInfo[] apexInfo = createApexInfoForTestPkg(false, true);
+        ApexPackageInfo apexPackageInfo = new ApexPackageInfo();
+        apexPackageInfo.scanApexPackages(
+                apexInfo, mPackageParser2, ParallelPackageParser.makeExecutorService());
 
-        assertThat(mApexManager.getActivePackages()).isEmpty();
+        assertThat(apexPackageInfo.getActivePackages()).isEmpty();
     }
 
     @Test
     public void testGetFactoryPackages() throws RemoteException {
-        when(mApexService.getAllPackages()).thenReturn(createApexInfoForTestPkg(false, true));
-        mApexManager.scanApexPackagesTraced(mPackageParser2,
-                ParallelPackageParser.makeExecutorService());
+        ApexInfo [] apexInfo = createApexInfoForTestPkg(false, true);
+        ApexPackageInfo apexPackageInfo = new ApexPackageInfo();
+        apexPackageInfo.scanApexPackages(
+                apexInfo, mPackageParser2, ParallelPackageParser.makeExecutorService());
 
-        assertThat(mApexManager.getFactoryPackages()).isNotEmpty();
+        assertThat(apexPackageInfo.getFactoryPackages()).isNotEmpty();
     }
 
     @Test
     public void testGetFactoryPackages_noneFactoryPackages() throws RemoteException {
-        when(mApexService.getAllPackages()).thenReturn(createApexInfoForTestPkg(true, false));
-        mApexManager.scanApexPackagesTraced(mPackageParser2,
-                ParallelPackageParser.makeExecutorService());
+        ApexInfo[] apexInfo = createApexInfoForTestPkg(true, false);
+        ApexPackageInfo apexPackageInfo = new ApexPackageInfo();
+        apexPackageInfo.scanApexPackages(
+                apexInfo, mPackageParser2, ParallelPackageParser.makeExecutorService());
 
-        assertThat(mApexManager.getFactoryPackages()).isEmpty();
+        assertThat(apexPackageInfo.getFactoryPackages()).isEmpty();
     }
 
     @Test
     public void testGetInactivePackages() throws RemoteException {
-        when(mApexService.getAllPackages()).thenReturn(createApexInfoForTestPkg(false, true));
-        mApexManager.scanApexPackagesTraced(mPackageParser2,
-                ParallelPackageParser.makeExecutorService());
+        ApexInfo[] apexInfo = createApexInfoForTestPkg(false, true);
+        ApexPackageInfo apexPackageInfo = new ApexPackageInfo();
+        apexPackageInfo.scanApexPackages(
+                apexInfo, mPackageParser2, ParallelPackageParser.makeExecutorService());
 
-        assertThat(mApexManager.getInactivePackages()).isNotEmpty();
+        assertThat(apexPackageInfo.getInactivePackages()).isNotEmpty();
     }
 
     @Test
     public void testGetInactivePackages_noneInactivePackages() throws RemoteException {
-        when(mApexService.getAllPackages()).thenReturn(createApexInfoForTestPkg(true, false));
-        mApexManager.scanApexPackagesTraced(mPackageParser2,
-                ParallelPackageParser.makeExecutorService());
+        ApexInfo[] apexInfo = createApexInfoForTestPkg(true, false);
+        ApexPackageInfo apexPackageInfo = new ApexPackageInfo();
+        apexPackageInfo.scanApexPackages(
+                apexInfo, mPackageParser2, ParallelPackageParser.makeExecutorService());
 
-        assertThat(mApexManager.getInactivePackages()).isEmpty();
+        assertThat(apexPackageInfo.getInactivePackages()).isEmpty();
     }
 
     @Test
     public void testIsApexPackage() throws RemoteException {
-        when(mApexService.getAllPackages()).thenReturn(createApexInfoForTestPkg(false, true));
-        mApexManager.scanApexPackagesTraced(mPackageParser2,
-                ParallelPackageParser.makeExecutorService());
+        ApexInfo[] apexInfo = createApexInfoForTestPkg(false, true);
+        ApexPackageInfo apexPackageInfo = new ApexPackageInfo();
+        apexPackageInfo.scanApexPackages(
+                apexInfo, mPackageParser2, ParallelPackageParser.makeExecutorService());
 
-        assertThat(mApexManager.isApexPackage(TEST_APEX_PKG)).isTrue();
+        assertThat(apexPackageInfo.isApexPackage(TEST_APEX_PKG)).isTrue();
     }
 
     @Test
@@ -317,9 +329,11 @@ public class ApexManagerTest {
         final ApexManager.ActiveApexInfo activeApex = mApexManager.getActiveApexInfos().get(0);
         assertThat(activeApex.apexModuleName).isEqualTo(TEST_APEX_PKG);
 
-        when(mApexService.getAllPackages()).thenReturn(createApexInfoForTestPkg(true, true));
-        mApexManager.scanApexPackagesTraced(mPackageParser2,
-                ParallelPackageParser.makeExecutorService());
+        ApexInfo[] apexInfo = createApexInfoForTestPkg(true, true);
+        ApexPackageInfo apexPackageInfo = new ApexPackageInfo();
+        List<ApexManager.ScanResult> scanResults = apexPackageInfo.scanApexPackages(
+                apexInfo, mPackageParser2, ParallelPackageParser.makeExecutorService());
+        mApexManager.notifyScanResult(scanResults);
 
         assertThat(mApexManager.getApkInApexInstallError(activeApex.apexModuleName)).isNull();
         mApexManager.reportErrorWithApkInApex(activeApex.apexDirectory.getAbsolutePath(),
@@ -344,9 +358,11 @@ public class ApexManagerTest {
         when(fakeApkInApex.getBaseApkPath()).thenReturn("/apex/" + TEST_APEX_PKG + "randomSuffix");
         when(fakeApkInApex.getPackageName()).thenReturn("randomPackageName");
 
-        when(mApexService.getAllPackages()).thenReturn(createApexInfoForTestPkg(true, true));
-        mApexManager.scanApexPackagesTraced(mPackageParser2,
-                ParallelPackageParser.makeExecutorService());
+        ApexInfo[] apexInfo = createApexInfoForTestPkg(true, true);
+        ApexPackageInfo apexPackageInfo = new ApexPackageInfo();
+        List<ApexManager.ScanResult> scanResults = apexPackageInfo.scanApexPackages(
+                apexInfo, mPackageParser2, ParallelPackageParser.makeExecutorService());
+        mApexManager.notifyScanResult(scanResults);
 
         assertThat(mApexManager.getApksInApex(activeApex.apexModuleName)).isEmpty();
         mApexManager.registerApkInApex(fakeApkInApex);
@@ -355,13 +371,14 @@ public class ApexManagerTest {
 
     @Test
     public void testInstallPackageFailsToInstallNewApex() throws Exception {
-        when(mApexService.getAllPackages()).thenReturn(createApexInfoForTestPkg(true, false));
-        mApexManager.scanApexPackagesTraced(mPackageParser2,
-                ParallelPackageParser.makeExecutorService());
+        ApexInfo[] apexInfo = createApexInfoForTestPkg(true, false);
+        ApexPackageInfo apexPackageInfo = new ApexPackageInfo();
+        apexPackageInfo.scanApexPackages(
+                apexInfo, mPackageParser2, ParallelPackageParser.makeExecutorService());
 
         File apex = extractResource("test.apex_rebootless_v1", "test.rebootless_apex_v1.apex");
         PackageManagerException e = expectThrows(PackageManagerException.class,
-                () -> mApexManager.installPackage(apex, mPackageParser2));
+                () -> mApexManager.installPackage(apex, mPackageParser2, apexPackageInfo));
         assertThat(e).hasMessageThat().contains("It is forbidden to install new APEX packages");
     }
 
@@ -370,9 +387,10 @@ public class ApexManagerTest {
         ApexInfo activeApexInfo = createApexInfo("test.apex_rebootless", 1, /* isActive= */ true,
                 /* isFactory= */ true, extractResource("test.apex_rebootless_v1",
                   "test.rebootless_apex_v1.apex"));
-        when(mApexService.getAllPackages()).thenReturn(new ApexInfo[]{activeApexInfo});
-        mApexManager.scanApexPackagesTraced(mPackageParser2,
-                ParallelPackageParser.makeExecutorService());
+        ApexInfo[] apexInfo = new ApexInfo[]{activeApexInfo};
+        ApexPackageInfo apexPackageInfo = new ApexPackageInfo();
+        apexPackageInfo.scanApexPackages(
+                apexInfo, mPackageParser2, ParallelPackageParser.makeExecutorService());
 
         File finalApex = extractResource("test.rebootles_apex_v2", "test.rebootless_apex_v2.apex");
         ApexInfo newApexInfo = createApexInfo("test.apex_rebootless", 2, /* isActive= */ true,
@@ -380,9 +398,9 @@ public class ApexManagerTest {
         when(mApexService.installAndActivatePackage(anyString())).thenReturn(newApexInfo);
 
         File installedApex = extractResource("installed", "test.rebootless_apex_v2.apex");
-        mApexManager.installPackage(installedApex, mPackageParser2);
+        mApexManager.installPackage(installedApex, mPackageParser2, apexPackageInfo);
 
-        PackageInfo newInfo = mApexManager.getPackageInfo("test.apex.rebootless",
+        PackageInfo newInfo = apexPackageInfo.getPackageInfo("test.apex.rebootless",
                 ApexManager.MATCH_ACTIVE_PACKAGE);
         assertThat(newInfo.applicationInfo.sourceDir).isEqualTo(finalApex.getAbsolutePath());
         assertThat(newInfo.applicationInfo.longVersionCode).isEqualTo(2);
@@ -391,7 +409,7 @@ public class ApexManagerTest {
         assertThat(newInfo.applicationInfo.flags & ApplicationInfo.FLAG_INSTALLED)
             .isEqualTo(ApplicationInfo.FLAG_INSTALLED);
 
-        PackageInfo factoryInfo = mApexManager.getPackageInfo("test.apex.rebootless",
+        PackageInfo factoryInfo = apexPackageInfo.getPackageInfo("test.apex.rebootless",
                 ApexManager.MATCH_FACTORY_PACKAGE);
         assertThat(factoryInfo.applicationInfo.sourceDir).isEqualTo(activeApexInfo.modulePath);
         assertThat(factoryInfo.applicationInfo.longVersionCode).isEqualTo(1);
@@ -409,10 +427,10 @@ public class ApexManagerTest {
         ApexInfo activeApexInfo = createApexInfo("test.apex_rebootless", 1, /* isActive= */ true,
                 /* isFactory= */ false, extractResource("test.apex.rebootless@1",
                   "test.rebootless_apex_v1.apex"));
-        when(mApexService.getAllPackages())
-                .thenReturn(new ApexInfo[]{factoryApexInfo, activeApexInfo});
-        mApexManager.scanApexPackagesTraced(mPackageParser2,
-                ParallelPackageParser.makeExecutorService());
+        ApexInfo[] apexInfo = new ApexInfo[]{factoryApexInfo, activeApexInfo};
+        ApexPackageInfo apexPackageInfo = new ApexPackageInfo();
+        apexPackageInfo.scanApexPackages(
+                apexInfo, mPackageParser2, ParallelPackageParser.makeExecutorService());
 
         File finalApex = extractResource("test.rebootles_apex_v2", "test.rebootless_apex_v2.apex");
         ApexInfo newApexInfo = createApexInfo("test.apex_rebootless", 2, /* isActive= */ true,
@@ -420,9 +438,9 @@ public class ApexManagerTest {
         when(mApexService.installAndActivatePackage(anyString())).thenReturn(newApexInfo);
 
         File installedApex = extractResource("installed", "test.rebootless_apex_v2.apex");
-        mApexManager.installPackage(installedApex, mPackageParser2);
+        mApexManager.installPackage(installedApex, mPackageParser2, apexPackageInfo);
 
-        PackageInfo newInfo = mApexManager.getPackageInfo("test.apex.rebootless",
+        PackageInfo newInfo = apexPackageInfo.getPackageInfo("test.apex.rebootless",
                 ApexManager.MATCH_ACTIVE_PACKAGE);
         assertThat(newInfo.applicationInfo.sourceDir).isEqualTo(finalApex.getAbsolutePath());
         assertThat(newInfo.applicationInfo.longVersionCode).isEqualTo(2);
@@ -431,7 +449,7 @@ public class ApexManagerTest {
         assertThat(newInfo.applicationInfo.flags & ApplicationInfo.FLAG_INSTALLED)
             .isEqualTo(ApplicationInfo.FLAG_INSTALLED);
 
-        PackageInfo factoryInfo = mApexManager.getPackageInfo("test.apex.rebootless",
+        PackageInfo factoryInfo = apexPackageInfo.getPackageInfo("test.apex.rebootless",
                 ApexManager.MATCH_FACTORY_PACKAGE);
         assertThat(factoryInfo.applicationInfo.sourceDir).isEqualTo(factoryApexInfo.modulePath);
         assertThat(factoryInfo.applicationInfo.longVersionCode).isEqualTo(1);
@@ -446,9 +464,10 @@ public class ApexManagerTest {
         ApexInfo activeApexInfo = createApexInfo("test.apex_rebootless", 1, /* isActive= */ true,
                 /* isFactory= */ false, extractResource("test.apex_rebootless_v1",
                   "test.rebootless_apex_v1.apex"));
-        when(mApexService.getAllPackages()).thenReturn(new ApexInfo[]{activeApexInfo});
-        mApexManager.scanApexPackagesTraced(mPackageParser2,
-                ParallelPackageParser.makeExecutorService());
+        ApexInfo[] apexInfo = new ApexInfo[]{activeApexInfo};
+        ApexPackageInfo apexPackageInfo = new ApexPackageInfo();
+        apexPackageInfo.scanApexPackages(
+                apexInfo, mPackageParser2, ParallelPackageParser.makeExecutorService());
 
         when(mApexService.installAndActivatePackage(anyString())).thenThrow(
                 new RuntimeException("install failed :("));
@@ -456,7 +475,7 @@ public class ApexManagerTest {
         File installedApex = extractResource("test.apex_rebootless_v1",
                 "test.rebootless_apex_v1.apex");
         assertThrows(PackageManagerException.class,
-                () -> mApexManager.installPackage(installedApex, mPackageParser2));
+                () -> mApexManager.installPackage(installedApex, mPackageParser2, apexPackageInfo));
     }
 
     @Test
@@ -464,14 +483,15 @@ public class ApexManagerTest {
         File activeApex = extractResource("shim_v1", "com.android.apex.cts.shim.apex");
         ApexInfo activeApexInfo = createApexInfo("com.android.apex.cts.shim", 1,
                 /* isActive= */ true, /* isFactory= */ false, activeApex);
-        when(mApexService.getAllPackages()).thenReturn(new ApexInfo[]{activeApexInfo});
-        mApexManager.scanApexPackagesTraced(mPackageParser2,
-                ParallelPackageParser.makeExecutorService());
+        ApexInfo[] apexInfo = new ApexInfo[]{activeApexInfo};
+        ApexPackageInfo apexPackageInfo = new ApexPackageInfo();
+        apexPackageInfo.scanApexPackages(
+                apexInfo, mPackageParser2, ParallelPackageParser.makeExecutorService());
 
         File installedApex = extractResource("shim_different_certificate",
                 "com.android.apex.cts.shim.v2_different_certificate.apex");
         PackageManagerException e = expectThrows(PackageManagerException.class,
-                () -> mApexManager.installPackage(installedApex, mPackageParser2));
+                () -> mApexManager.installPackage(installedApex, mPackageParser2, apexPackageInfo));
         assertThat(e).hasMessageThat().contains("APK container signature of ");
         assertThat(e).hasMessageThat().contains(
                 "is not compatible with currently installed on device");
@@ -482,14 +502,15 @@ public class ApexManagerTest {
         File activeApex = extractResource("shim_v1", "com.android.apex.cts.shim.apex");
         ApexInfo activeApexInfo = createApexInfo("com.android.apex.cts.shim", 1,
                 /* isActive= */ true, /* isFactory= */ false, activeApex);
-        when(mApexService.getAllPackages()).thenReturn(new ApexInfo[]{activeApexInfo});
-        mApexManager.scanApexPackagesTraced(mPackageParser2,
-                ParallelPackageParser.makeExecutorService());
+        ApexInfo[] apexInfo = new ApexInfo[]{activeApexInfo};
+        ApexPackageInfo apexPackageInfo = new ApexPackageInfo();
+        apexPackageInfo.scanApexPackages(
+                apexInfo, mPackageParser2, ParallelPackageParser.makeExecutorService());
 
         File installedApex = extractResource("shim_unsigned_apk_container",
                 "com.android.apex.cts.shim.v2_unsigned_apk_container.apex");
         PackageManagerException e = expectThrows(PackageManagerException.class,
-                () -> mApexManager.installPackage(installedApex, mPackageParser2));
+                () -> mApexManager.installPackage(installedApex, mPackageParser2, apexPackageInfo));
         assertThat(e).hasMessageThat().contains("Failed to collect certificates from ");
     }
 
@@ -499,9 +520,10 @@ public class ApexManagerTest {
 
         ApexInfo[] apexInfo = createApexInfoForTestPkg(true, false);
         apexInfo[0].moduleName = moduleName;
-        when(mApexService.getAllPackages()).thenReturn(apexInfo);
-        mApexManager.scanApexPackagesTraced(mPackageParser2,
-                ParallelPackageParser.makeExecutorService());
+        ApexPackageInfo apexPackageInfo = new ApexPackageInfo();
+        List<ApexManager.ScanResult> scanResults = apexPackageInfo.scanApexPackages(
+                apexInfo, mPackageParser2, ParallelPackageParser.makeExecutorService());
+        mApexManager.notifyScanResult(scanResults);
 
         assertThat(mApexManager.getActivePackageNameForApexModuleName(moduleName))
                 .isEqualTo(TEST_APEX_PKG);

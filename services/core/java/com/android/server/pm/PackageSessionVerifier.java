@@ -356,7 +356,7 @@ final class PackageSessionVerifier {
         final SigningDetails newSigningDetails = newResult.getResult();
 
         // Get signing details of the existing package
-        final PackageInfo existingApexPkg = mApexManager.getPackageInfo(packageName,
+        final PackageInfo existingApexPkg = mPm.mApexPackageInfo.getPackageInfo(packageName,
                 ApexManager.MATCH_ACTIVE_PACKAGE);
         if (existingApexPkg == null) {
             // This should never happen, because submitSessionToApexService ensures that no new

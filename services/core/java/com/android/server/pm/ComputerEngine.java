@@ -397,6 +397,7 @@ public class ComputerEngine implements Computer {
     private final UserManagerService mUserManager;
     private final PermissionManagerServiceInternal mPermissionManager;
     private final ApexManager mApexManager;
+    private final ApexPackageInfo mApexPackageInfo;
     private final PackageManagerServiceInjector mInjector;
     private final ComponentResolverApi mComponentResolver;
     private final InstantAppResolverConnection mInstantAppResolverConnection;
@@ -450,6 +451,7 @@ public class ComputerEngine implements Computer {
         mContext = args.service.mContext;
         mInjector = args.service.mInjector;
         mApexManager = args.service.mApexManager;
+        mApexPackageInfo = args.service.mApexPackageInfo;
         mInstantAppResolverConnection = args.service.mInstantAppResolverConnection;
         mDefaultAppProvider = args.service.getDefaultAppProvider();
         mDomainVerificationManager = args.service.mDomainVerificationManager;
@@ -999,7 +1001,7 @@ public class ComputerEngine implements Computer {
             if ((flags & PackageManager.MATCH_SYSTEM_ONLY) != 0) {
                 apexFlags = ApexManager.MATCH_FACTORY_PACKAGE;
             }
-            final PackageInfo pi = mApexManager.getPackageInfo(packageName, apexFlags);
+            final PackageInfo pi = mApexPackageInfo.getPackageInfo(packageName, apexFlags);
             if (pi == null) {
                 return null;
             }
@@ -1696,7 +1698,7 @@ public class ComputerEngine implements Computer {
         if (matchFactoryOnly) {
             // Instant app filtering for APEX modules is ignored
             if ((flags & MATCH_APEX) != 0) {
-                return mApexManager.getPackageInfo(packageName,
+                return mApexPackageInfo.getPackageInfo(packageName,
                         ApexManager.MATCH_FACTORY_PACKAGE);
             }
             final PackageStateInternal ps = mSettings.getDisabledSystemPkg(packageName);
@@ -1741,7 +1743,7 @@ public class ComputerEngine implements Computer {
             return generatePackageInfo(ps, flags, userId);
         }
         if ((flags & MATCH_APEX) != 0) {
-            return mApexManager.getPackageInfo(packageName, ApexManager.MATCH_ACTIVE_PACKAGE);
+            return mApexPackageInfo.getPackageInfo(packageName, ApexManager.MATCH_ACTIVE_PACKAGE);
         }
         return null;
     }
@@ -1837,9 +1839,9 @@ public class ComputerEngine implements Computer {
         }
         if (listApex) {
             if (listFactory) {
-                list.addAll(mApexManager.getFactoryPackages());
+                list.addAll(mApexPackageInfo.getFactoryPackages());
             } else {
-                list.addAll(mApexManager.getActivePackages());
+                list.addAll(mApexPackageInfo.getActivePackages());
             }
         }
         return new ParceledListSlice<>(list);
@@ -5062,7 +5064,7 @@ public class ComputerEngine implements Computer {
         final PackageStateInternal ps = mSettings.getPackage(packageName);
 
         // Installer info for Apex is not stored in PackageManager
-        if (ps == null && mApexManager.isApexPackage(packageName)) {
+        if (ps == null && mApexPackageInfo.isApexPackage(packageName)) {
             return InstallSource.EMPTY;
         }
 
