@@ -427,7 +427,7 @@
     <string name="permdesc_writeCallLog" product="default" msgid="5903033505665134802">"Membenarkan apl untuk mengubah suai panggilan telefon anda, termasuk data tentang panggilan masuk dan keluar. Apl hasad boleh menggunakannya untuk memadam atau mengubah suai log panggilan anda."</string>
     <string name="permlab_bodySensors" msgid="662918578601619569">"Akses data penderia tubuh, seperti kadar denyut jantung, semasa digunakan"</string>
     <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"Membenarkan apl mengakses data penderia tubuh, seperti kadar denyut jantung, suhu dan peratusan oksigen darah, semasa apl digunakan."</string>
-    <string name="permlab_bodySensors_background" msgid="4912560779957760446">"Akses data penderia tubuh, seperti kadar denyut jantung, semasa berjalan di latar belakang"</string>
+    <string name="permlab_bodySensors_background" msgid="4912560779957760446">"Akses data penderia tubuh, seperti kadar denyut jantung, semasa di latar"</string>
     <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"Membenarkan apl mengakses data penderia tubuh, seperti kadar denyut jantung, suhu dan peratusan oksigen darah, semasa apl berjalan di latar belakang."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"Baca acara dan butiran kalendar"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"Apl ini boleh membaca semua acara kalendar yang disimpan pada tablet anda dan berkongsi atau menyimpan data kalendar anda."</string>
@@ -585,7 +585,7 @@
     <string name="biometric_error_generic" msgid="6784371929985434439">"Ralat semasa membuat pengesahan"</string>
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"Gunakan kunci skrin"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"Masukkan kunci skrin untuk teruskan"</string>
-    <string name="fingerprint_acquired_partial" msgid="694598777291084823">"Cap jari separa dikesan"</string>
+    <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"Tekan dengan kuat pada penderia"</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"Tidak dapat memproses cap jari. Sila cuba lagi."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"Bersihkan penderia cap jari dan cuba lagi"</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"Bersihkan penderia dan cuba lagi"</string>
@@ -598,7 +598,7 @@
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_error_not_match" msgid="4599441812893438961">"Cap jari tidak dikenali"</string>
-    <string name="fingerprint_udfps_error_not_match" msgid="4709197752023550709">"Tekan dengan kuat pada penderia"</string>
+    <string name="fingerprint_udfps_error_not_match" msgid="8236930793223158856">"Cap jari tidak dikenali"</string>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"Cap jari disahkan"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"Wajah disahkan"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"Wajah disahkan, sila tekan sahkan"</string>
@@ -1613,7 +1613,7 @@
     <string name="wireless_display_route_description" msgid="8297563323032966831">"Paparan wayarles"</string>
     <string name="media_route_button_content_description" msgid="2299223698196869956">"Hantar"</string>
     <string name="media_route_chooser_title" msgid="6646594924991269208">"Sambung ke peranti"</string>
-    <string name="media_route_chooser_title_for_remote_display" msgid="3105906508794326446">"Hantar skrin ke peranti"</string>
+    <string name="media_route_chooser_title_for_remote_display" msgid="3105906508794326446">"Hantar skrin kepada peranti"</string>
     <string name="media_route_chooser_searching" msgid="6119673534251329535">"Mencari peranti..."</string>
     <string name="media_route_chooser_extended_settings" msgid="2506352159381327741">"Tetapan"</string>
     <string name="media_route_controller_disconnect" msgid="7362617572732576959">"Putuskan sambungan"</string>
@@ -1679,7 +1679,6 @@
     <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"HIDUP"</string>
     <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"MATI"</string>
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"Benarkan <xliff:g id="SERVICE">%1$s</xliff:g> mempunyai kawalan penuh atas peranti anda?"</string>
-    <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"Jika anda menghidupkan <xliff:g id="SERVICE">%1$s</xliff:g>, peranti anda tidak akan menggunakan kunci skrin anda untuk meningkatkan penyulitan data."</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"Kawalan penuh sesuai untuk apl yang membantu anda dengan keperluan kebolehaksesan tetapi bukan untuk kebanyakan apl."</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Melihat dan mengawal skrin"</string>
     <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Ciri ini boleh membaca semua kandungan pada skrin dan memaparkan kandungan di atas apl lain."</string>
@@ -2027,10 +2026,9 @@
     <string name="harmful_app_warning_open_anyway" msgid="5963657791740211807">"BUKA JUGA"</string>
     <string name="harmful_app_warning_title" msgid="8794823880881113856">"Apl berbahaya dikesan"</string>
     <string name="log_access_confirmation_title" msgid="2343578467290592708">"Benarkan <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> mengakses semua log peranti?"</string>
-    <string name="log_access_confirmation_allow" msgid="143157286283302512">"Kali ini sahaja"</string>
+    <string name="log_access_confirmation_allow" msgid="5302517782599389507">"Benarkan akses sekali"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"Jangan benarkan"</string>
-    <!-- no translation found for log_access_confirmation_body (6581985716241928135) -->
-    <skip />
+    <string name="log_access_confirmation_body" msgid="6581985716241928135">"Log peranti merekodkan perkara yang berlaku pada peranti anda. Apl dapat menggunakan log ini untuk menemukan dan membetulkan isu.\n\nSesetengah log mungkin mengandungi maklumat sensitif, jadi benarkan apl yang anda percaya sahaja untuk mengakses semua log peranti. \n\nJika anda tidak membenarkan apl ini mengakses semua log peranti, apl masih boleh mengakses log sendiri. Pengilang peranti anda mungkin masih boleh mengakses sesetengah log atau maklumat pada peranti anda. Ketahui lebih lanjut"</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"Jangan tunjuk lagi"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g> mahu menunjukkan <xliff:g id="APP_2">%2$s</xliff:g> hirisan"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"Edit"</string>
@@ -2260,13 +2258,12 @@
     <string name="ui_translation_accessibility_translated_text" msgid="3197547218178944544">"<xliff:g id="MESSAGE">%1$s</xliff:g> Diterjemahkan."</string>
     <string name="ui_translation_accessibility_translation_finished" msgid="3057830947610088465">"Mesej diterjemahkan daripada <xliff:g id="FROM_LANGUAGE">%1$s</xliff:g> kepada <xliff:g id="TO_LANGUAGE">%2$s</xliff:g>."</string>
     <string name="notification_channel_abusive_bg_apps" msgid="6092140213264920355">"Aktiviti Latar Belakang"</string>
-    <string name="notification_title_abusive_bg_apps" msgid="344582472797982073">"Aktiviti Latar Belakang"</string>
-    <string name="notification_content_abusive_bg_apps" msgid="5572096708044958249">"<xliff:g id="APP">%1$s</xliff:g> dijalankan di latar belakang dan melemahkan bateri. Ketik untuk semak."</string>
-    <string name="notification_content_long_running_fgs" msgid="8878031652441570178">"<xliff:g id="APP">%1$s</xliff:g>sedang berjalan di latar belakang untuk masa yang lama. Ketik untuk menyemak."</string>
+    <string name="notification_title_abusive_bg_apps" msgid="3258460527676573815">"Apl sedang menggunakan bateri"</string>
+    <string name="notification_title_long_running_fgs" msgid="8170284286477131587">"Apl masih aktif"</string>
+    <string name="notification_content_abusive_bg_apps" msgid="9180610713603474720">"<xliff:g id="APP">%1$s</xliff:g> sedang menggunakan bateri pada latar. Ketik untuk menyemak."</string>
+    <string name="notification_content_long_running_fgs" msgid="8258193410039977101">"<xliff:g id="APP">%1$s</xliff:g> mungkin menjejaskan hayat bateri. Ketik untuk menyemak apl aktif."</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Semak apl aktif"</string>
-    <!-- no translation found for vdm_camera_access_denied (6102378580971542473) -->
-    <skip />
-    <!-- no translation found for vdm_camera_access_denied (6895968310395249076) -->
-    <skip />
+    <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"Tidak dapat mengakses kamera telefon daripada <xliff:g id="DEVICE">%1$s</xliff:g> anda"</string>
+    <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"Tidak dapat mengakses kamera tablet daripada <xliff:g id="DEVICE">%1$s</xliff:g> anda"</string>
     <string name="system_locale_title" msgid="3978041860457277638">"Bahasa sistem"</string>
 </resources>

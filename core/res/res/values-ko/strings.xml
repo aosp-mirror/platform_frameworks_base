@@ -323,7 +323,7 @@
     <string name="permgroupdesc_calllog" msgid="2026996642917801803">"통화 기록 읽고 쓰기"</string>
     <string name="permgrouplab_phone" msgid="570318944091926620">"전화"</string>
     <string name="permgroupdesc_phone" msgid="270048070781478204">"전화 걸기 및 관리"</string>
-    <string name="permgrouplab_sensors" msgid="9134046949784064495">"신체 센서"</string>
+    <string name="permgrouplab_sensors" msgid="9134046949784064495">"생체 신호 센서"</string>
     <string name="permgroupdesc_sensors" msgid="2610631290633747752">"생체 신호에 관한 센서 데이터에 액세스"</string>
     <string name="permgrouplab_notifications" msgid="5472972361980668884">"알림"</string>
     <string name="permgroupdesc_notifications" msgid="4608679556801506580">"알림 표시"</string>
@@ -585,7 +585,8 @@
     <string name="biometric_error_generic" msgid="6784371929985434439">"인증 오류"</string>
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"화면 잠금 사용"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"계속하려면 화면 잠금용 사용자 인증 정보를 입력하세요"</string>
-    <string name="fingerprint_acquired_partial" msgid="694598777291084823">"지문의 일부만 감지됨"</string>
+    <!-- no translation found for fingerprint_acquired_partial (4323789264604479684) -->
+    <skip />
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"지문을 인식할 수 없습니다. 다시 시도해 주세요."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"지문 센서를 닦은 후 다시 시도해 보세요."</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"센서를 닦은 후 다시 시도해 보세요."</string>
@@ -598,7 +599,8 @@
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_error_not_match" msgid="4599441812893438961">"지문이 인식되지 않습니다."</string>
-    <string name="fingerprint_udfps_error_not_match" msgid="4709197752023550709">"센서 위에 손가락을 좀 더 오래 올려놓으세요."</string>
+    <!-- no translation found for fingerprint_udfps_error_not_match (8236930793223158856) -->
+    <skip />
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"지문이 인증됨"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"얼굴이 인증되었습니다"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"얼굴이 인증되었습니다. 확인을 누르세요"</string>
@@ -1679,7 +1681,6 @@
     <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"사용"</string>
     <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"사용 안함"</string>
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"<xliff:g id="SERVICE">%1$s</xliff:g>에서 기기를 완전히 제어하도록 허용하시겠습니까?"</string>
-    <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"<xliff:g id="SERVICE">%1$s</xliff:g>을(를) 사용 설정하면 기기에서 데이터 암호화를 개선하기 위해 화면 잠금을 사용하지 않습니다."</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"접근성 관련 지원을 제공하는 앱에는 완벽한 제어권을 부여하는 것이 좋으나, 대부분의 앱에는 적합하지 않습니다."</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"화면 확인 및 제어"</string>
     <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"화면에 표시된 모든 콘텐츠를 읽고 다른 앱 위에 콘텐츠를 표시할 수 있습니다."</string>
@@ -1850,8 +1851,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"관리자에 의해 업데이트되었습니다."</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"관리자에 의해 삭제되었습니다."</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"확인"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"절전 기능은 어두운 테마를 사용 설정하고 백그라운드 활동, 일부 시각 효과, 특정 기능 및 일부 네트워크 연결을 제한하거나 사용 중지합니다."</string>
-    <string name="battery_saver_description" msgid="8518809702138617167">"절전 기능은 어두운 테마를 사용 설정하고 백그라운드 활동, 일부 시각 효과, 특정 기능 및 일부 네트워크 연결을 제한하거나 사용 중지합니다."</string>
+    <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"절전 모드는 어두운 테마를 사용하고 백그라운드 활동, 일부 시각 효과, 특정 기능 및 일부 네트워크 연결을 제한하거나 사용 중지합니다."</string>
+    <string name="battery_saver_description" msgid="8518809702138617167">"절전 모드는 어두운 테마를 사용하고 백그라운드 활동, 일부 시각 효과, 특정 기능 및 일부 네트워크 연결을 제한하거나 사용 중지합니다."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"데이터 사용량을 줄이기 위해 데이터 절약 모드는 일부 앱이 백그라운드에서 데이터를 전송하거나 수신하지 못하도록 합니다. 현재 사용 중인 앱에서 데이터에 액세스할 수 있지만 빈도가 줄어듭니다. 예를 들면, 이미지를 탭하기 전에는 이미지가 표시되지 않습니다."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"데이터 절약 모드를 사용 설정하시겠습니까?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"사용 설정"</string>
@@ -1933,8 +1934,7 @@
     <string name="app_blocked_title" msgid="7353262160455028160">"앱을 사용할 수 없습니다"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"현재 <xliff:g id="APP_NAME">%1$s</xliff:g> 앱을 사용할 수 없습니다."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> 사용할 수 없음"</string>
-    <!-- no translation found for app_streaming_blocked_title_for_permission_dialog (4483161748582966785) -->
-    <skip />
+    <string name="app_streaming_blocked_title_for_permission_dialog" msgid="4483161748582966785">"권한이 필요함"</string>
     <string name="app_streaming_blocked_message" product="tv" msgid="4003011766528814377">"현재 <xliff:g id="DEVICE">%1$s</xliff:g>에서 액세스할 수 없습니다. 대신 Android TV 기기에서 시도해 보세요."</string>
     <string name="app_streaming_blocked_message" product="tablet" msgid="4242053045964946062">"현재 <xliff:g id="DEVICE">%1$s</xliff:g>에서 액세스할 수 없습니다. 대신 태블릿에서 시도해 보세요."</string>
     <string name="app_streaming_blocked_message" product="default" msgid="6159168735030739398">"현재 <xliff:g id="DEVICE">%1$s</xliff:g>에서 액세스할 수 없습니다. 대신 스마트폰에서 시도해 보세요."</string>
@@ -2028,10 +2028,10 @@
     <string name="harmful_app_warning_open_anyway" msgid="5963657791740211807">"열기"</string>
     <string name="harmful_app_warning_title" msgid="8794823880881113856">"유해한 앱 감지됨"</string>
     <string name="log_access_confirmation_title" msgid="2343578467290592708">"<xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g>에서 모든 기기에 액세스하도록 허용하시겠습니까?"</string>
-    <string name="log_access_confirmation_allow" msgid="143157286283302512">"이번만 허용"</string>
-    <string name="log_access_confirmation_deny" msgid="7685790957455099845">"허용 안함"</string>
-    <!-- no translation found for log_access_confirmation_body (6581985716241928135) -->
+    <!-- no translation found for log_access_confirmation_allow (5302517782599389507) -->
     <skip />
+    <string name="log_access_confirmation_deny" msgid="7685790957455099845">"허용 안함"</string>
+    <string name="log_access_confirmation_body" msgid="6581985716241928135">"기기 로그에 기기에서 발생한 상황이 기록됩니다. 앱은 문제를 찾고 해결하는 데 이 로그를 사용할 수 있습니다.\n\n일부 로그는 민감한 정보를 포함할 수 있으므로 신뢰할 수 있는 앱만 모든 기기 로그에 액세스하도록 허용하세요. \n\n앱에 전체 기기 로그에 대한 액세스 권한을 부여하지 않아도 앱이 자체 로그에는 액세스할 수 있습니다. 기기 제조업체에서 일부 로그 또는 기기 내 정보에 액세스할 수도 있습니다. 자세히 알아보기"</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"다시 표시 안함"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g>에서 <xliff:g id="APP_2">%2$s</xliff:g>의 슬라이스를 표시하려고 합니다"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"수정"</string>
@@ -2261,13 +2261,16 @@
     <string name="ui_translation_accessibility_translated_text" msgid="3197547218178944544">"다음 메시지가 번역되었습니다. <xliff:g id="MESSAGE">%1$s</xliff:g>"</string>
     <string name="ui_translation_accessibility_translation_finished" msgid="3057830947610088465">"메시지가 <xliff:g id="FROM_LANGUAGE">%1$s</xliff:g>에서 <xliff:g id="TO_LANGUAGE">%2$s</xliff:g>로 번역되었습니다."</string>
     <string name="notification_channel_abusive_bg_apps" msgid="6092140213264920355">"백그라운드 활동"</string>
-    <string name="notification_title_abusive_bg_apps" msgid="344582472797982073">"백그라운드 활동"</string>
-    <string name="notification_content_abusive_bg_apps" msgid="5572096708044958249">"<xliff:g id="APP">%1$s</xliff:g> 앱이 백그라운드에서 실행 중이며 배터리를 소모하고 있습니다. 확인하려면 탭하세요."</string>
-    <string name="notification_content_long_running_fgs" msgid="8878031652441570178">"<xliff:g id="APP">%1$s</xliff:g> 앱이 백그라운드에서 오랫동안 실행 중입니다. 확인하려면 탭하세요."</string>
+    <!-- no translation found for notification_title_abusive_bg_apps (3258460527676573815) -->
+    <skip />
+    <!-- no translation found for notification_title_long_running_fgs (8170284286477131587) -->
+    <skip />
+    <!-- no translation found for notification_content_abusive_bg_apps (9180610713603474720) -->
+    <skip />
+    <!-- no translation found for notification_content_long_running_fgs (8258193410039977101) -->
+    <skip />
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"활성 상태의 앱 확인"</string>
-    <!-- no translation found for vdm_camera_access_denied (6102378580971542473) -->
-    <skip />
-    <!-- no translation found for vdm_camera_access_denied (6895968310395249076) -->
-    <skip />
+    <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"사용자의 <xliff:g id="DEVICE">%1$s</xliff:g>에서 휴대전화 카메라에 액세스할 수 없습니다."</string>
+    <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"사용자의 <xliff:g id="DEVICE">%1$s</xliff:g>에서 태블릿 카메라에 액세스할 수 없습니다."</string>
     <string name="system_locale_title" msgid="3978041860457277638">"시스템 언어"</string>
 </resources>

@@ -585,7 +585,8 @@
     <string name="biometric_error_generic" msgid="6784371929985434439">"Չհաջողվեց նույնականացնել"</string>
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"Էկրանի կողպում"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"Շարունակելու համար ապակողպեք էկրանը"</string>
-    <string name="fingerprint_acquired_partial" msgid="694598777291084823">"Մատնահետքն ամբողջությամբ չի սկանավորվել"</string>
+    <!-- no translation found for fingerprint_acquired_partial (4323789264604479684) -->
+    <skip />
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"Չհաջողվեց մշակել մատնահետքը: Նորից փորձեք:"</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"Մաքրեք մատնահետքերի սկաները և նորից փորձեք"</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"Մաքրեք սկաները և նորից փորձեք"</string>
@@ -598,7 +599,8 @@
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_error_not_match" msgid="4599441812893438961">"Մատնահետքը չի ճանաչվել"</string>
-    <string name="fingerprint_udfps_error_not_match" msgid="4709197752023550709">"Մատը ուժեղ սեղմեք սկաների վրա"</string>
+    <!-- no translation found for fingerprint_udfps_error_not_match (8236930793223158856) -->
+    <skip />
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"Մատնահետքը նույնականացվեց"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"Դեմքը ճանաչվեց"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"Դեմքը ճանաչվեց: Սեղմեք «Հաստատել»:"</string>
@@ -1679,7 +1681,6 @@
     <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"ՄԻԱՑՎԱԾ"</string>
     <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"ԱՆՋԱՏՎԱԾ"</string>
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"Թույլատրե՞լ <xliff:g id="SERVICE">%1$s</xliff:g> ծառայությանը կառավարել ձեր սարքը"</string>
-    <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"Եթե միացնեք <xliff:g id="SERVICE">%1$s</xliff:g> ծառայությունը, ձեր սարքը չի օգտագործի էկրանի կողպումը՝ տվյալների գաղտնագրումը բարելավելու համար:"</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"Ամբողջական վերահսկումն անհրաժեշտ է միայն այն հավելվածներին, որոնք օգնում են ձեզ հատուկ գործառույթներից օգտվելիս։"</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Դիտել և կառավարել էկրանը"</string>
     <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Կարող է կարդալ էկրանի ողջ բովանդակությունը և ցուցադրել բովանդակություն այլ հավելվածների վրայից։"</string>
@@ -1933,8 +1934,7 @@
     <string name="app_blocked_title" msgid="7353262160455028160">"Հավելվածը հասանելի չէ"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> հավելվածն այս պահին հասանելի չէ։"</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g>՝ անհասանելի է"</string>
-    <!-- no translation found for app_streaming_blocked_title_for_permission_dialog (4483161748582966785) -->
-    <skip />
+    <string name="app_streaming_blocked_title_for_permission_dialog" msgid="4483161748582966785">"Անհրաժեշտ է թույլտվություն"</string>
     <string name="app_streaming_blocked_message" product="tv" msgid="4003011766528814377">"Այս պահին հնարավոր չէ բացել հավելվածը <xliff:g id="DEVICE">%1$s</xliff:g> սարքում։ Փորձեք Android TV սարքում։"</string>
     <string name="app_streaming_blocked_message" product="tablet" msgid="4242053045964946062">"Այս պահին հնարավոր չէ բացել հավելվածը <xliff:g id="DEVICE">%1$s</xliff:g> սարքում։ Փորձեք ձեր պլանշետում։"</string>
     <string name="app_streaming_blocked_message" product="default" msgid="6159168735030739398">"Այս պահին հնարավոր չէ բացել հավելվածը <xliff:g id="DEVICE">%1$s</xliff:g> սարքում։ Փորձեք ձեր հեռախոսում։"</string>
@@ -2028,10 +2028,10 @@
     <string name="harmful_app_warning_open_anyway" msgid="5963657791740211807">"ԲԱՑԵԼ"</string>
     <string name="harmful_app_warning_title" msgid="8794823880881113856">"Հայտնաբերվել է վնասաբեր հավելված"</string>
     <string name="log_access_confirmation_title" msgid="2343578467290592708">"Հասանելի դարձնե՞լ <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> հավելվածին սարքի բոլոր մատյանները"</string>
-    <string name="log_access_confirmation_allow" msgid="143157286283302512">"Միայն այս անգամ"</string>
-    <string name="log_access_confirmation_deny" msgid="7685790957455099845">"Չթույլատրել"</string>
-    <!-- no translation found for log_access_confirmation_body (6581985716241928135) -->
+    <!-- no translation found for log_access_confirmation_allow (5302517782599389507) -->
     <skip />
+    <string name="log_access_confirmation_deny" msgid="7685790957455099845">"Չթույլատրել"</string>
+    <string name="log_access_confirmation_body" msgid="6581985716241928135">"Այն, ինչ տեղի է ունենում ձեր սարքում, գրանցվում է սարքի մատյաններում։ Հավելվածները կարող են դրանք օգտագործել անսարքությունները հայտնաբերելու և վերացնելու նպատակով։\n\nՔանի որ որոշ մատյաններ անձնական տեղեկություններ են պարունակում, խորհուրդ ենք տալիս հասանելի դարձնել ձեր սարքի բոլոր մատյանները միայն այն հավելվածներին, որոնց վստահում եք։ \n\nԵթե այս հավելվածին նման թույլտվություն չեք տվել, դրան նախկինի պես հասանելի կլինեն իր մատյանները։ Հնարավոր է՝ ձեր սարքի արտադրողին ևս հասանելի լինեն սարքի որոշ մատյաններ և տեղեկություններ։ Իմանալ ավելին"</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"Այլևս ցույց չտալ"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g> հավելվածն ուզում է ցուցադրել հատվածներ <xliff:g id="APP_2">%2$s</xliff:g> հավելվածից"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"Փոփոխել"</string>
@@ -2261,13 +2261,16 @@
     <string name="ui_translation_accessibility_translated_text" msgid="3197547218178944544">"«<xliff:g id="MESSAGE">%1$s</xliff:g>» հաղորդագրությունը թարգմանված է։"</string>
     <string name="ui_translation_accessibility_translation_finished" msgid="3057830947610088465">"Հաղորդագրությունը <xliff:g id="FROM_LANGUAGE">%1$s</xliff:g>ից թարգմանվել է <xliff:g id="TO_LANGUAGE">%2$s</xliff:g>։"</string>
     <string name="notification_channel_abusive_bg_apps" msgid="6092140213264920355">"Ակտիվ հավելվածներ ֆոնային ռեժիմում"</string>
-    <string name="notification_title_abusive_bg_apps" msgid="344582472797982073">"Ակտիվ հավելվածներ ֆոնային ռեժիմում"</string>
-    <string name="notification_content_abusive_bg_apps" msgid="5572096708044958249">"<xliff:g id="APP">%1$s</xliff:g>-ն աշխատում է ֆոնային ռեժիմում և սպառում է մարտկոցը։ Հպեք՝ դիտելու համար։"</string>
-    <string name="notification_content_long_running_fgs" msgid="8878031652441570178">"<xliff:g id="APP">%1$s</xliff:g> հավելվածը երկար ժամանակ աշխատում է ֆոնային ռեժիմում։ Հպեք՝ դիտելու համար։"</string>
+    <!-- no translation found for notification_title_abusive_bg_apps (3258460527676573815) -->
+    <skip />
+    <!-- no translation found for notification_title_long_running_fgs (8170284286477131587) -->
+    <skip />
+    <!-- no translation found for notification_content_abusive_bg_apps (9180610713603474720) -->
+    <skip />
+    <!-- no translation found for notification_content_long_running_fgs (8258193410039977101) -->
+    <skip />
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Ստուգել ակտիվ հավելվածները"</string>
-    <!-- no translation found for vdm_camera_access_denied (6102378580971542473) -->
-    <skip />
-    <!-- no translation found for vdm_camera_access_denied (6895968310395249076) -->
-    <skip />
+    <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"Հնարավոր չէ օգտագործել հեռախոսի տեսախցիկը ձեր <xliff:g id="DEVICE">%1$s</xliff:g> սարքից"</string>
+    <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"Հնարավոր չէ օգտագործել պլանշետի տեսախցիկը ձեր <xliff:g id="DEVICE">%1$s</xliff:g> սարքից"</string>
     <string name="system_locale_title" msgid="3978041860457277638">"Համակարգի լեզու"</string>
 </resources>
