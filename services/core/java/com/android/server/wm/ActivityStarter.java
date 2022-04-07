@@ -1935,6 +1935,14 @@ class ActivityStarter {
         } else if (mSourceRecord != null) {
             return mSourceRecord.getTask();
         } else if (mInTask != null) {
+            // The task is specified from AppTaskImpl, so it may not be attached yet.
+            if (!mInTask.isAttached()) {
+                // Clear reuse task so it can find a proper parent to add the task.
+                if (mReuseTask == mInTask) {
+                    mReuseTask = null;
+                }
+                return getOrCreateRootTask(mStartActivity, mLaunchFlags, mInTask, mOptions);
+            }
             return mInTask;
         } else {
             final Task rootTask = getOrCreateRootTask(mStartActivity, mLaunchFlags, null /* task */,
