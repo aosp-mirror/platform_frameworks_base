@@ -277,6 +277,17 @@ class MediaTttChipControllerSenderTest : SysuiTestCase() {
     }
 
     @Test
+    fun commandQueueCallback_invalidStateParam_noChipShown() {
+        commandQueueCallback.updateMediaTapToTransferSenderDisplay(
+            100,
+            routeInfo,
+            null
+        )
+
+        verify(windowManager, never()).addView(any(), any())
+    }
+
+    @Test
     fun receivesNewStateFromCommandQueue_isLogged() {
         commandQueueCallback.updateMediaTapToTransferSenderDisplay(
             StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_ALMOST_CLOSE_TO_START_CAST,
