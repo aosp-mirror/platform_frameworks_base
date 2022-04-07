@@ -129,16 +129,16 @@ genrule {
     out: ["com/android/internal/util/FrameworkStatsLog.java"],
 }
 
+// Library that provides functionality to log UiEvents in framework space.
+// If this functionality is needed outside the framework, the interfaces library
+// can be re-used and a local implementation is needed.
 java_library {
     name: "uieventloggerlib",
     srcs: [
-        "com/android/internal/logging/UiEvent.java",
-        "com/android/internal/logging/UiEventLogger.java",
         "com/android/internal/logging/UiEventLoggerImpl.java",
-        "com/android/internal/logging/InstanceId.java",
-        "com/android/internal/logging/InstanceIdSequence.java",
         ":statslog-framework-java-gen",
     ],
+    static_libs: ["modules-utils-uieventlogger-interface"],
 }
 
 filegroup {
