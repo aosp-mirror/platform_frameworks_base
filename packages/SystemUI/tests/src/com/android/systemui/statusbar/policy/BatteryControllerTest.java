@@ -67,7 +67,7 @@ public class BatteryControllerTest extends SysuiTestCase {
     private MockitoSession mMockitoSession;
 
     @Before
-    public void setUp() {
+    public void setUp() throws IllegalStateException {
         MockitoAnnotations.initMocks(this);
         mMockitoSession = mockitoSession()
                 .initMocks(this)
@@ -81,6 +81,7 @@ public class BatteryControllerTest extends SysuiTestCase {
                 mDemoModeController,
                 new Handler(),
                 new Handler());
+        // Can throw if updateEstimate is called on the main thread
         mBatteryController.init();
     }
 
@@ -184,5 +185,15 @@ public class BatteryControllerTest extends SysuiTestCase {
         mBatteryController.clearLastPowerSaverStartView();
 
         Assert.assertNull(mBatteryController.getLastPowerSaverStartView());
+    }
+
+    @Test
+    public void testBatteryEstimateFetch_doesNotThrow() throws IllegalStateException {
+        mBatteryController.getEstimatedTimeRemainingString(
+                (String estimate) -> {
+                    // don't care about the result
+                });
+        TestableLooper.get(this).processAllMessages();
+        // Should not throw an exception
     }
 }
