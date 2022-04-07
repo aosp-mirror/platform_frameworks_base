@@ -100,7 +100,6 @@ import com.android.wm.shell.onehanded.OneHandedController;
 import com.android.wm.shell.onehanded.OneHandedTransitionCallback;
 import com.android.wm.shell.pip.PinnedStackListenerForwarder;
 
-import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -1424,12 +1423,12 @@ public class BubbleController {
     /**
      * Description of current bubble state.
      */
-    private void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+    private void dump(PrintWriter pw, String[] args) {
         pw.println("BubbleController state:");
-        mBubbleData.dump(fd, pw, args);
+        mBubbleData.dump(pw, args);
         pw.println();
         if (mStackView != null) {
-            mStackView.dump(fd, pw, args);
+            mStackView.dump(pw, args);
         }
         pw.println();
     }
@@ -1790,10 +1789,10 @@ public class BubbleController {
         }
 
         @Override
-        public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+        public void dump(PrintWriter pw, String[] args) {
             try {
                 mMainExecutor.executeBlocking(() -> {
-                    BubbleController.this.dump(fd, pw, args);
+                    BubbleController.this.dump(pw, args);
                     mCachedState.dump(pw);
                 });
             } catch (InterruptedException e) {

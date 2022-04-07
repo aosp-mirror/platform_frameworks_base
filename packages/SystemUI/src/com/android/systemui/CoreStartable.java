@@ -23,7 +23,6 @@ import androidx.annotation.NonNull;
 
 import com.android.internal.annotations.VisibleForTesting;
 
-import java.io.FileDescriptor;
 import java.io.PrintWriter;
 
 /**
@@ -46,7 +45,7 @@ public abstract class CoreStartable implements Dumpable {
     }
 
     @Override
-    public void dump(@NonNull FileDescriptor fd, @NonNull PrintWriter pw, @NonNull String[] args) {
+    public void dump(@NonNull PrintWriter pw, @NonNull String[] args) {
     }
 
     @VisibleForTesting

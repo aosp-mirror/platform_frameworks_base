@@ -69,7 +69,6 @@ import com.android.systemui.qs.QSHost;
 import com.android.systemui.qs.SideLabelTileLayout;
 import com.android.systemui.qs.logging.QSLogger;
 
-import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 
@@ -735,7 +734,7 @@ public abstract class QSTileImpl<TState extends State> implements QSTile, Lifecy
      * This may be used for CTS testing of tiles.
      */
     @Override
-    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+    public void dump(PrintWriter pw, String[] args) {
         pw.println(this.getClass().getSimpleName() + ":");
         pw.print("    "); pw.println(getState().toString());
     }

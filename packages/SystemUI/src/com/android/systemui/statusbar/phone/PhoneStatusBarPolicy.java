@@ -672,7 +672,7 @@ public class PhoneStatusBarPolicy
             if (item == null /* b/124234367 */) {
                 Log.e(TAG, "updatePrivacyItems - null item found");
                 StringWriter out = new StringWriter();
-                mPrivacyItemController.dump(null, new PrintWriter(out), null);
+                mPrivacyItemController.dump(new PrintWriter(out), null);
                 // Throw so we can look into this
                 throw new NullPointerException(out.toString());
             }

@@ -40,7 +40,6 @@ import com.android.internal.util.FrameworkStatsLog;
 import com.android.wm.shell.R;
 import com.android.wm.shell.bubbles.Bubbles.DismissReason;
 
-import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -1080,7 +1079,7 @@ public class BubbleData {
     /**
      * Description of current bubble data state.
      */
-    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+    public void dump(PrintWriter pw, String[] args) {
         pw.print("selected: ");
         pw.println(mSelectedBubble != null
                 ? mSelectedBubble.getKey()
@@ -1091,13 +1090,13 @@ public class BubbleData {
         pw.print("stack bubble count:    ");
         pw.println(mBubbles.size());
         for (Bubble bubble : mBubbles) {
-            bubble.dump(fd, pw, args);
+            bubble.dump(pw, args);
         }
 
         pw.print("overflow bubble count:    ");
         pw.println(mOverflowBubbles.size());
         for (Bubble bubble : mOverflowBubbles) {
-            bubble.dump(fd, pw, args);
+            bubble.dump(pw, args);
         }
 
         pw.print("summaryKeys: ");
