@@ -24,7 +24,6 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.anyBoolean;
 import static org.mockito.Mockito.argThat;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.eq;
@@ -107,7 +106,7 @@ public class WindowDecorationTests extends ShellTestCase {
         mMockSurfaceControlFinishT = createMockSurfaceControlTransaction();
 
         doReturn(mMockSurfaceControlViewHost).when(mMockSurfaceControlViewHostFactory)
-                .create(any(), any(), any(), anyBoolean());
+                .create(any(), any(), any());
     }
 
     @Test
@@ -148,8 +147,7 @@ public class WindowDecorationTests extends ShellTestCase {
 
         verify(decorContainerSurfaceBuilder, never()).build();
         verify(taskBackgroundSurfaceBuilder, never()).build();
-        verify(mMockSurfaceControlViewHostFactory, never())
-                .create(any(), any(), any(), anyBoolean());
+        verify(mMockSurfaceControlViewHostFactory, never()).create(any(), any(), any());
 
         verify(mMockSurfaceControlFinishT).hide(taskSurface);
 
@@ -207,8 +205,7 @@ public class WindowDecorationTests extends ShellTestCase {
         verify(mMockSurfaceControlStartT).setLayer(taskBackgroundSurface, -1);
         verify(mMockSurfaceControlStartT).show(taskBackgroundSurface);
 
-        verify(mMockSurfaceControlViewHostFactory)
-                .create(any(), eq(defaultDisplay), any(), anyBoolean());
+        verify(mMockSurfaceControlViewHostFactory).create(any(), eq(defaultDisplay), any());
         verify(mMockSurfaceControlViewHost)
                 .setView(same(mMockView),
                         argThat(lp -> lp.height == 64
@@ -326,8 +323,7 @@ public class WindowDecorationTests extends ShellTestCase {
         verify(mMockDisplayController).removeDisplayWindowListener(same(listener));
 
         assertThat(mRelayoutResult.mRootView).isSameInstanceAs(mMockView);
-        verify(mMockSurfaceControlViewHostFactory)
-                .create(any(), eq(mockDisplay), any(), anyBoolean());
+        verify(mMockSurfaceControlViewHostFactory).create(any(), eq(mockDisplay), any());
         verify(mMockSurfaceControlViewHost).setView(same(mMockView), any());
     }
 

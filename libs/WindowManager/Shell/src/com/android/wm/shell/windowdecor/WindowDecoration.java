@@ -248,7 +248,7 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
         lp.setTrustedOverlay();
         if (mViewHost == null) {
             mViewHost = mSurfaceControlViewHostFactory.create(mDecorWindowContext, mDisplay,
-                    mCaptionWindowManager, true);
+                    mCaptionWindowManager);
             mViewHost.setView(outResult.mRootView, lp);
         } else {
             mViewHost.relayout(lp);
@@ -345,9 +345,8 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
     }
 
     interface SurfaceControlViewHostFactory {
-        default SurfaceControlViewHost create(
-                Context c, Display d, WindowlessWindowManager wmm, boolean useSfChoreographer) {
-            return new SurfaceControlViewHost(c, d, wmm, useSfChoreographer);
+        default SurfaceControlViewHost create(Context c, Display d, WindowlessWindowManager wmm) {
+            return new SurfaceControlViewHost(c, d, wmm);
         }
     }
 }
