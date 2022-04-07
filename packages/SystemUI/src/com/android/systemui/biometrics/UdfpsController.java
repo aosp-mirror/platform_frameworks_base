@@ -376,7 +376,6 @@ public class UdfpsController implements DozeReceiver {
                 boolean withinSensorArea =
                         isWithinSensorArea(udfpsView, event.getX(), event.getY(), fromUdfpsView);
                 if (withinSensorArea) {
-                    mLatencyTracker.onActionStart(LatencyTracker.ACTION_UDFPS_ILLUMINATE);
                     Trace.beginAsyncSection("UdfpsController.e2e.onPointerDown", 0);
                     Log.v(TAG, "onTouch | action down");
                     // The pointer that causes ACTION_DOWN is always at index 0.
@@ -792,6 +791,7 @@ public class UdfpsController implements DozeReceiver {
                     + " current: " + mOverlay.getRequestId());
             return;
         }
+        mLatencyTracker.onActionStart(LatencyTracker.ACTION_UDFPS_ILLUMINATE);
 
         if (!mOnFingerDown) {
             playStartHaptic();
@@ -806,11 +806,9 @@ public class UdfpsController implements DozeReceiver {
 
         final UdfpsView view = mOverlay.getOverlayView();
         if (view != null) {
-            Trace.beginAsyncSection("UdfpsController.e2e.startIllumination", 0);
             view.startIllumination(() -> {
                 mFingerprintManager.onUiReady(requestId, mSensorProps.sensorId);
                 mLatencyTracker.onActionEnd(LatencyTracker.ACTION_UDFPS_ILLUMINATE);
-                Trace.endAsyncSection("UdfpsController.e2e.startIllumination", 0);
             });
         }
 
