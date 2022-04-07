@@ -947,6 +947,15 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
         verify(mKeyguardStatusBarViewController).setAlpha(statusBarAlpha);
     }
 
+    @Test
+    public void testQsToBeImmediatelyExpandedInSplitShade() {
+        enableSplitShade(/* enabled= */ true);
+
+        mNotificationPanelViewController.onTrackingStarted();
+
+        assertThat(mNotificationPanelViewController.mQsExpandImmediate).isTrue();
+    }
+
     private void triggerPositionClockAndNotifications() {
         mNotificationPanelViewController.closeQs();
     }
