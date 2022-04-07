@@ -34,6 +34,7 @@ import com.google.common.truth.Truth.assertThat
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
+import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.Mock
 import org.mockito.Mockito.anyBoolean
 import org.mockito.Mockito.anyString
@@ -321,7 +322,7 @@ class FeatureFlagsDebugTest : SysuiTestCase() {
         inOrder(mFlagManager, mSecureSettings).apply {
             verify(mFlagManager, times(numReads)).readFlagValue(eq(id), any<FlagSerializer<*>>())
             verify(mFlagManager).idToSettingsKey(eq(id))
-            verify(mSecureSettings).putString(eq("key-$id"), eq(data))
+            verify(mSecureSettings).putStringForUser(eq("key-$id"), eq(data), anyInt())
             verify(mFlagManager).dispatchListenersAndMaybeRestart(eq(id), any())
         }.verifyNoMoreInteractions()
         verifyNoMoreInteractions(mFlagManager, mSecureSettings)
