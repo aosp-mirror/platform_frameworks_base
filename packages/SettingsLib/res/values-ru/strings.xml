@@ -589,27 +589,22 @@
     <string name="add_user_failed" msgid="4809887794313944872">"Не удалось создать пользователя"</string>
     <string name="add_guest_failed" msgid="8074548434469843443">"Не удалось создать гостя."</string>
     <string name="user_nickname" msgid="262624187455825083">"Псевдоним"</string>
-    <!-- no translation found for user_add_user (7876449291500212468) -->
-    <skip />
+    <string name="user_add_user" msgid="7876449291500212468">"Добавить пользователя"</string>
     <string name="guest_new_guest" msgid="3482026122932643557">"Добавить гостя"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"Удалить аккаунт гостя"</string>
     <string name="guest_reset_guest" msgid="6110013010356013758">"Сбросить гостевой сеанс"</string>
     <string name="guest_reset_guest_dialog_title" msgid="8047270010895437534">"Сбросить гостевой сеанс?"</string>
-    <!-- no translation found for guest_remove_guest_dialog_title (4548511006624088072) -->
-    <skip />
+    <string name="guest_remove_guest_dialog_title" msgid="4548511006624088072">"Удалить гостя?"</string>
     <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"Сбросить"</string>
+    <string name="guest_remove_guest_confirm_button" msgid="7858123434954143879">"Удалить"</string>
     <string name="guest_resetting" msgid="7822120170191509566">"Сброс гостевого сеанса…"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"Сделать снимок"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"Выбрать фото"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"Выбрать фотографию"</string>
-    <!-- no translation found for failed_attempts_now_wiping_device (4016329172216428897) -->
-    <skip />
-    <!-- no translation found for failed_attempts_now_wiping_user (469060411789668050) -->
-    <skip />
-    <!-- no translation found for failed_attempts_now_wiping_profile (7626589520888963129) -->
-    <skip />
-    <!-- no translation found for failed_attempts_now_wiping_dialog_dismiss (2749889771223578925) -->
-    <skip />
+    <string name="failed_attempts_now_wiping_device" msgid="4016329172216428897">"Слишком много неудачных попыток. С устройства будут удалены все данные."</string>
+    <string name="failed_attempts_now_wiping_user" msgid="469060411789668050">"Слишком много неудачных попыток. Этот пользователь будет удален."</string>
+    <string name="failed_attempts_now_wiping_profile" msgid="7626589520888963129">"Слишком много неудачных попыток. Этот рабочий профиль и его данные будут удалены."</string>
+    <string name="failed_attempts_now_wiping_dialog_dismiss" msgid="2749889771223578925">"Закрыть"</string>
     <string name="cached_apps_freezer_device_default" msgid="2616594131750144342">"Вариант по умолчанию"</string>
     <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"Отключено"</string>
     <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"Включено"</string>
@@ -657,4 +652,7 @@
     <string name="turn_screen_on_title" msgid="3266937298097573424">"Включение экрана"</string>
     <string name="allow_turn_screen_on" msgid="6194845766392742639">"Разрешить приложению включать экран"</string>
     <string name="allow_turn_screen_on_description" msgid="43834403291575164">"Приложение сможет в любое время включать экран без явного согласия с вашей стороны"</string>
+    <string name="bt_le_audio_scan_qr_code" msgid="3521809854780392679">"Сканирование QR-кода"</string>
+    <string name="bt_le_audio_scan_qr_code_scanner" msgid="4679500020630341107">"Чтобы прослушать, поместите QR-код в центр"</string>
+    <string name="bt_le_audio_qr_code_is_not_valid_format" msgid="6092191081849434734">"Недопустимый формат QR-кода"</string>
 </resources>

@@ -589,27 +589,22 @@
     <string name="add_user_failed" msgid="4809887794313944872">"ନୂଆ ଉପଯୋଗକର୍ତ୍ତା ତିଆରି କରିବାକୁ ବିଫଳ ହେଲା"</string>
     <string name="add_guest_failed" msgid="8074548434469843443">"ଜଣେ ନୂଆ ଅତିଥି ତିଆରି କରିବାରେ ବିଫଳ ହୋଇଛି"</string>
     <string name="user_nickname" msgid="262624187455825083">"ଡାକନାମ"</string>
-    <!-- no translation found for user_add_user (7876449291500212468) -->
-    <skip />
+    <string name="user_add_user" msgid="7876449291500212468">"ଉପଯୋଗକର୍ତ୍ତା ଯୋଗ କରନ୍ତୁ"</string>
     <string name="guest_new_guest" msgid="3482026122932643557">"ଅତିଥି ଯୋଗ କରନ୍ତୁ"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"ଅତିଥିଙ୍କୁ କାଢ଼ି ଦିଅନ୍ତୁ"</string>
     <string name="guest_reset_guest" msgid="6110013010356013758">"ଅତିଥି ସେସନକୁ ରିସେଟ୍ କରନ୍ତୁ"</string>
     <string name="guest_reset_guest_dialog_title" msgid="8047270010895437534">"ଅତିଥି ସେସନକୁ ରିସେଟ୍ କରିବେ?"</string>
-    <!-- no translation found for guest_remove_guest_dialog_title (4548511006624088072) -->
-    <skip />
+    <string name="guest_remove_guest_dialog_title" msgid="4548511006624088072">"ଅତିଥିଙ୍କୁ କାଢ଼ିବେ?"</string>
     <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"ରିସେଟ୍ କରନ୍ତୁ"</string>
+    <string name="guest_remove_guest_confirm_button" msgid="7858123434954143879">"କାଢ଼ି ଦିଅନ୍ତୁ"</string>
     <string name="guest_resetting" msgid="7822120170191509566">"ଅତିଥି ସେସନକୁ ରିସେଟ୍ କରାଯାଉଛି…"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"ଗୋଟିଏ ଫଟୋ ଉଠାନ୍ତୁ"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"ଏକ ଛବି ବାଛନ୍ତୁ"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"ଫଟୋ ବାଛନ୍ତୁ"</string>
-    <!-- no translation found for failed_attempts_now_wiping_device (4016329172216428897) -->
-    <skip />
-    <!-- no translation found for failed_attempts_now_wiping_user (469060411789668050) -->
-    <skip />
-    <!-- no translation found for failed_attempts_now_wiping_profile (7626589520888963129) -->
-    <skip />
-    <!-- no translation found for failed_attempts_now_wiping_dialog_dismiss (2749889771223578925) -->
-    <skip />
+    <string name="failed_attempts_now_wiping_device" msgid="4016329172216428897">"ଅନେକଗୁଡ଼ିଏ ଭୁଲ ପ୍ରଚେଷ୍ଟା। ଏହି ଡିଭାଇସର ଡାଟା ଡିଲିଟ ହୋଇଯିବ।"</string>
+    <string name="failed_attempts_now_wiping_user" msgid="469060411789668050">"ଅନେକଗୁଡ଼ିଏ ଭୁଲ ପ୍ରଚେଷ୍ଟା। ଏହି ଉପଯୋଗକର୍ତ୍ତାଙ୍କୁ ଡିଲିଟ କରିଦିଆଯିବ।"</string>
+    <string name="failed_attempts_now_wiping_profile" msgid="7626589520888963129">"ଅନେକଗୁଡ଼ିଏ ଭୁଲ ପ୍ରଚେଷ୍ଟା। ଏହି ୱାର୍କ ପ୍ରୋଫାଇଲ ଏବଂ ଏହାର ଡାଟା ଡିଲିଟ ହୋଇଯିବ।"</string>
+    <string name="failed_attempts_now_wiping_dialog_dismiss" msgid="2749889771223578925">"ଖାରଜ କରନ୍ତୁ"</string>
     <string name="cached_apps_freezer_device_default" msgid="2616594131750144342">"ଡିଭାଇସ୍ ଡିଫଲ୍ଟ"</string>
     <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"ଅକ୍ଷମ କରାଯାଇଛି"</string>
     <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"ସକ୍ଷମ କରାଯାଇଛି"</string>
@@ -657,4 +652,7 @@
     <string name="turn_screen_on_title" msgid="3266937298097573424">"ସ୍କ୍ରିନକୁ ଚାଲୁ କରନ୍ତୁ"</string>
     <string name="allow_turn_screen_on" msgid="6194845766392742639">"ସ୍କ୍ରିନକୁ ଚାଲୁ କରିବା ପାଇଁ ଅନୁମତି ଦିଅନ୍ତୁ"</string>
     <string name="allow_turn_screen_on_description" msgid="43834403291575164">"ସ୍କ୍ରିନକୁ ଚାଲୁ କରିବା ପାଇଁ ଏକ ଆପକୁ ଅନୁମତି ଦିଅନ୍ତୁ। ଯଦି ଅନୁମତି ଦିଆଯାଏ, ତେବେ ଆପଟି ଆପଣଙ୍କ ସ୍ପଷ୍ଟ ଇଣ୍ଟେଣ୍ଟ ବିନା ଯେ କୌଣସି ସମୟରେ ସ୍କ୍ରିନକୁ ଚାଲୁ କରିପାରେ।"</string>
+    <string name="bt_le_audio_scan_qr_code" msgid="3521809854780392679">"QR କୋଡ ସ୍କାନ କରନ୍ତୁ"</string>
+    <string name="bt_le_audio_scan_qr_code_scanner" msgid="4679500020630341107">"ଶୁଣିବା ଆରମ୍ଭ କରିବା ପାଇଁ, ନିମ୍ନରେ ଥିବା QR କୋଡକୁ କେନ୍ଦ୍ରରେ ରଖନ୍ତୁ"</string>
+    <string name="bt_le_audio_qr_code_is_not_valid_format" msgid="6092191081849434734">"QR କୋଡ ଏକ ବୈଧ ଫର୍ମାଟ ନୁହେଁ"</string>
 </resources>

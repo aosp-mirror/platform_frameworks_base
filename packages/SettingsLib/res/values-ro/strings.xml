@@ -596,6 +596,7 @@
     <string name="guest_reset_guest_dialog_title" msgid="8047270010895437534">"Resetați invitatul?"</string>
     <string name="guest_remove_guest_dialog_title" msgid="4548511006624088072">"Excludeți invitatul?"</string>
     <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"Resetați"</string>
+    <string name="guest_remove_guest_confirm_button" msgid="7858123434954143879">"Eliminați"</string>
     <string name="guest_resetting" msgid="7822120170191509566">"Se resetează invitatul…"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"Faceți o fotografie"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"Alegeți o imagine"</string>
@@ -651,4 +652,7 @@
     <string name="turn_screen_on_title" msgid="3266937298097573424">"Activați ecranul"</string>
     <string name="allow_turn_screen_on" msgid="6194845766392742639">"Permiteți activarea ecranului"</string>
     <string name="allow_turn_screen_on_description" msgid="43834403291575164">"Permiteți unei aplicații să activeze ecranul. Dacă acordați permisiunea, aplicația poate să activeze oricând ecranul, fără intenția dvs. explicită."</string>
+    <string name="bt_le_audio_scan_qr_code" msgid="3521809854780392679">"Scanați codul QR"</string>
+    <string name="bt_le_audio_scan_qr_code_scanner" msgid="4679500020630341107">"Pentru a începe să ascultați, centrați codul QR de mai jos"</string>
+    <string name="bt_le_audio_qr_code_is_not_valid_format" msgid="6092191081849434734">"Codul QR nu are un format valid"</string>
 </resources>
