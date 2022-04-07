@@ -2769,17 +2769,16 @@ public final class ViewRootImpl implements ViewParent,
             dispatchApplyInsets(host);
         }
 
+        if (mFirst) {
+            // make sure touch mode code executes by setting cached value
+            // to opposite of the added touch mode.
+            mAttachInfo.mInTouchMode = !mAddedTouchMode;
+            ensureTouchModeLocally(mAddedTouchMode);
+        }
+
         boolean layoutRequested = mLayoutRequested && (!mStopped || mReportNextDraw);
         if (layoutRequested) {
-
-            final Resources res = mView.getContext().getResources();
-
-            if (mFirst) {
-                // make sure touch mode code executes by setting cached value
-                // to opposite of the added touch mode.
-                mAttachInfo.mInTouchMode = !mAddedTouchMode;
-                ensureTouchModeLocally(mAddedTouchMode);
-            } else {
+            if (!mFirst) {
                 if (lp.width == ViewGroup.LayoutParams.WRAP_CONTENT
                         || lp.height == ViewGroup.LayoutParams.WRAP_CONTENT) {
                     windowSizeMayChange = true;
@@ -2799,7 +2798,7 @@ public final class ViewRootImpl implements ViewParent,
             }
 
             // Ask host how big it wants to be
-            windowSizeMayChange |= measureHierarchy(host, lp, res,
+            windowSizeMayChange |= measureHierarchy(host, lp, mView.getContext().getResources(),
                     desiredWindowWidth, desiredWindowHeight);
         }
 
