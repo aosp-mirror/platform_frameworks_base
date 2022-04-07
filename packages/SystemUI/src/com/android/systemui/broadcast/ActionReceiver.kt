@@ -24,7 +24,6 @@ import android.util.ArraySet
 import com.android.systemui.Dumpable
 import com.android.systemui.broadcast.logging.BroadcastDispatcherLogger
 import com.android.systemui.util.indentIfPossible
-import java.io.FileDescriptor
 import java.io.PrintWriter
 import java.util.concurrent.Executor
 import java.util.concurrent.atomic.AtomicInteger
@@ -118,7 +117,7 @@ class ActionReceiver(
         }
     }
 
-    override fun dump(fd: FileDescriptor, pw: PrintWriter, args: Array<out String>) {
+    override fun dump(pw: PrintWriter, args: Array<out String>) {
         pw.indentIfPossible {
             println("Registered: $registered")
             println("Receivers:")

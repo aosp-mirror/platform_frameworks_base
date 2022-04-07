@@ -120,6 +120,6 @@ public class SystemUIService extends Service {
                     DumpHandler.PRIORITY_ARG_CRITICAL};
         }
 
-        mDumpHandler.dump(fd, pw, massagedArgs);
+        mDumpHandler.dump(pw, massagedArgs);
     }
 }

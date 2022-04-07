@@ -67,7 +67,6 @@ import com.android.systemui.statusbar.notification.stack.NotificationPriorityBuc
 import com.android.systemui.util.Assert;
 import com.android.systemui.util.time.SystemClock;
 
-import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -1363,7 +1362,7 @@ public class ShadeListBuilder implements Dumpable {
     }
 
     @Override
-    public void dump(@NonNull FileDescriptor fd, PrintWriter pw, @NonNull String[] args) {
+    public void dump(PrintWriter pw, @NonNull String[] args) {
         pw.println("\t" + TAG + " shade notifications:");
         if (getShadeList().size() == 0) {
             pw.println("\t\t None");
