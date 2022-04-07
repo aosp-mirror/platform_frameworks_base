@@ -1,20 +1,6 @@
 {
   "presubmit": [
     {
-      "name": "CtsContentTestCases",
-      "options": [
-        {
-          "include-filter": "android.content.pm.cts.PackageManagerShellCommandTest"
-        },
-        {
-          "include-filter": "android.content.pm.cts.PackageManagerShellCommandIncrementalTest"
-        },
-        {
-          "include-filter": "android.content.pm.cts.ChecksumsTest"
-        }
-      ]
-    },
-    {
       "name": "CtsPackageManagerStatsHostTestCases",
       "options": [
         {
@@ -29,6 +15,20 @@
   "presubmit-large": [
     {
       "name": "CtsInstalledLoadingProgressHostTests"
+    },
+    {
+      "name": "CtsContentTestCases",
+      "options": [
+        {
+          "include-filter": "android.content.pm.cts.PackageManagerShellCommandTest"
+        },
+        {
+          "include-filter": "android.content.pm.cts.PackageManagerShellCommandIncrementalTest"
+        },
+        {
+          "include-filter": "android.content.pm.cts.ChecksumsTest"
+        }
+      ]
     }
   ]
 }

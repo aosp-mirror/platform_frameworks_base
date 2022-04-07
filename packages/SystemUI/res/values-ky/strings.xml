@@ -51,11 +51,11 @@
     <string name="usb_accessory_permission_prompt" msgid="717963550388312123">"<xliff:g id="APPLICATION">%1$s</xliff:g> колдонмосу <xliff:g id="USB_ACCESSORY">%2$s</xliff:g> кабелин колдоно берсинби?"</string>
     <string name="usb_device_confirm_prompt" msgid="4091711472439910809">"<xliff:g id="USB_DEVICE">%2$s</xliff:g> түзмөгүнө туташуу үчүн <xliff:g id="APPLICATION">%1$s</xliff:g> колдонмосу ачылсынбы?"</string>
     <string name="usb_device_confirm_prompt_warn" msgid="990208659736311769">"<xliff:g id="USB_DEVICE">%2$s</xliff:g> кабелине туташуу үчүн <xliff:g id="APPLICATION">%1$s</xliff:g> ачылсынбы?\nБул колдонмонун жаздырууга уруксаты жок, бирок бул USB түзмөгү аркылуу аудиону жаздыра алат."</string>
-    <string name="usb_accessory_confirm_prompt" msgid="5728408382798643421">"<xliff:g id="USB_ACCESSORY">%2$s</xliff:g> кабелине туташуу үчүн <xliff:g id="APPLICATION">%1$s</xliff:g> колдонмосу ачылсынбы?"</string>
+    <string name="usb_accessory_confirm_prompt" msgid="5728408382798643421">"<xliff:g id="USB_ACCESSORY">%2$s</xliff:g> колдонуу үчүн <xliff:g id="APPLICATION">%1$s</xliff:g> колдонмосун ачасызбы?"</string>
     <string name="usb_accessory_uri_prompt" msgid="6756649383432542382">"Эч бир орнотулган колдонмо USB аксессуар м-н иштебейт. Кенен маалыматтар: <xliff:g id="URL">%1$s</xliff:g>"</string>
     <string name="title_usb_accessory" msgid="1236358027511638648">"USB шайманы"</string>
     <string name="label_view" msgid="6815442985276363364">"Карап көрүү"</string>
-    <string name="always_use_device" msgid="210535878779644679">"<xliff:g id="USB_DEVICE">%2$s</xliff:g> туташып турганда, <xliff:g id="APPLICATION">%1$s</xliff:g> ар дайым ачык болун"</string>
+    <string name="always_use_device" msgid="210535878779644679">"<xliff:g id="USB_DEVICE">%2$s</xliff:g> туташып турганда, <xliff:g id="APPLICATION">%1$s</xliff:g> ар дайым ачык болсун"</string>
     <string name="always_use_accessory" msgid="1977225429341838444">"<xliff:g id="USB_ACCESSORY">%2$s</xliff:g> туташып турганда, <xliff:g id="APPLICATION">%1$s</xliff:g> ар дайым ачык болсун"</string>
     <string name="usb_debugging_title" msgid="8274884945238642726">"USB аркылуу жөндөөгө уруксат берилсинби?"</string>
     <string name="usb_debugging_message" msgid="5794616114463921773">"Компүтердин RSA ачкычынын контролдук суммасы:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
@@ -100,7 +100,7 @@
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Экрандан жаздырылып алынган видео иштетилүүдө"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Экранды жаздыруу сеансы боюнча учурдагы билдирме"</string>
     <string name="screenrecord_start_label" msgid="1750350278888217473">"Жаздырып баштайсызбы?"</string>
-    <string name="screenrecord_description" msgid="1123231719680353736">"Жаздыруу учурунда Android системасы экраныңызда көрүнүп турган жана түзмөктө ойноп жаткан бардык купуя маалыматты жаздырып алат. Буга сырсөздөр, төлөм маалыматы, сүрөттөр, билдирүүлөр жана аудио файлдар кирет."</string>
+    <string name="screenrecord_description" msgid="1123231719680353736">"Сырсөздөр, төлөм маалыматы, сүрөттөр, билдирүүлөр жана аудиофайлдар сыяктуу экраныңызда көрүнүп турган жана түзмөктө ойноп жаткан бардык купуя маалымат жазылып калат."</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"Аудио жаздыруу"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"Түзмөктөгү аудиолор"</string>
     <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"Музыка, чалуулар жана шыңгырлар сыяктуу түзмөгүңүздөгү добуштар"</string>
@@ -893,7 +893,7 @@
     <string name="left_icon" msgid="5036278531966897006">"¨Солго¨ сүрөтчөсү"</string>
     <string name="right_icon" msgid="1103955040645237425">"¨Оңго¨ сүрөтчөсү"</string>
     <string name="drag_to_add_tiles" msgid="8933270127508303672">"Керектүү элементтерди сүйрөп келиңиз"</string>
-    <string name="drag_to_rearrange_tiles" msgid="2143204300089638620">"Элементтердин иретин өзгөртүү үчүн кармап туруп, сүйрөңүз"</string>
+    <string name="drag_to_rearrange_tiles" msgid="2143204300089638620">"Иретин өзгөртүү үчүн кармап туруп, сүйрөңүз"</string>
     <string name="drag_to_remove_tiles" msgid="4682194717573850385">"Өчүрүү үчүн бул жерге сүйрөңүз"</string>
     <string name="drag_to_remove_disabled" msgid="933046987838658850">"Сизге жок дегенде <xliff:g id="MIN_NUM_TILES">%1$d</xliff:g> мозаика керек"</string>
     <string name="qs_edit" msgid="5583565172803472437">"Түзөтүү"</string>
@@ -1111,7 +1111,7 @@
     <string name="media_output_dialog_multiple_devices" msgid="1093771040315422350">"<xliff:g id="COUNT">%1$d</xliff:g> түзмөк тандалды"</string>
     <string name="media_output_dialog_disconnected" msgid="1834473104836986046">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> (ажыратылды)"</string>
     <string name="media_output_dialog_connect_failed" msgid="3225190634236259010">"Байланышпай койду. Кайталоо."</string>
-    <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"Жаңы түзмөктү жупташтыруу"</string>
+    <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"Жаңы түзмөк кошуу"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"Курама номери"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"Курама номери алмашуу буферине көчүрүлдү."</string>
     <string name="basic_status" msgid="2315371112182658176">"Ачык сүйлөшүү"</string>

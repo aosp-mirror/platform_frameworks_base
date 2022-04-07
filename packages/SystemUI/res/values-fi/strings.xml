@@ -49,9 +49,9 @@
     <string name="usb_device_permission_prompt" msgid="4414719028369181772">"Saako <xliff:g id="APPLICATION">%1$s</xliff:g> käyttöoikeuden (<xliff:g id="USB_DEVICE">%2$s</xliff:g>)?"</string>
     <string name="usb_device_permission_prompt_warn" msgid="2309129784984063656">"Saako <xliff:g id="APPLICATION">%1$s</xliff:g> tämän pääsyoikeuden: <xliff:g id="USB_DEVICE">%2$s</xliff:g>?\nSovellus ei ole saanut tallennuslupaa, mutta voi tallentaa ääntä tämän USB-laitteen avulla."</string>
     <string name="usb_accessory_permission_prompt" msgid="717963550388312123">"Saako <xliff:g id="APPLICATION">%1$s</xliff:g> käyttöoikeuden (<xliff:g id="USB_ACCESSORY">%2$s</xliff:g>)?"</string>
-    <string name="usb_device_confirm_prompt" msgid="4091711472439910809">"Avataanko <xliff:g id="APPLICATION">%1$s</xliff:g>, jotta <xliff:g id="USB_DEVICE">%2$s</xliff:g> voidaan ottaa käyttöön?"</string>
+    <string name="usb_device_confirm_prompt" msgid="4091711472439910809">"Avaa <xliff:g id="APPLICATION">%1$s</xliff:g>, jotta <xliff:g id="USB_DEVICE">%2$s</xliff:g> voidaan ottaa käyttöön?"</string>
     <string name="usb_device_confirm_prompt_warn" msgid="990208659736311769">"Avataanko <xliff:g id="APPLICATION">%1$s</xliff:g>, jotta <xliff:g id="USB_DEVICE">%2$s</xliff:g> voidaan ottaa käyttöön?\nSovellus ei ole saanut tallennuslupaa, mutta voi tallentaa ääntä tämän USB-laitteen avulla."</string>
-    <string name="usb_accessory_confirm_prompt" msgid="5728408382798643421">"Avataanko <xliff:g id="APPLICATION">%1$s</xliff:g>, jotta <xliff:g id="USB_ACCESSORY">%2$s</xliff:g> voidaan ottaa käyttöön?"</string>
+    <string name="usb_accessory_confirm_prompt" msgid="5728408382798643421">"Avaa <xliff:g id="APPLICATION">%1$s</xliff:g>, jotta <xliff:g id="USB_ACCESSORY">%2$s</xliff:g> voidaan ottaa käyttöön?"</string>
     <string name="usb_accessory_uri_prompt" msgid="6756649383432542382">"Asennetut sov. eivät toimi tämän USB-laitteen kanssa. Lisätietoja laitteesta: <xliff:g id="URL">%1$s</xliff:g>"</string>
     <string name="title_usb_accessory" msgid="1236358027511638648">"USB-lisälaite"</string>
     <string name="label_view" msgid="6815442985276363364">"Näytä"</string>
@@ -129,7 +129,7 @@
     <string name="accessibility_back" msgid="6530104400086152611">"Takaisin"</string>
     <string name="accessibility_home" msgid="5430449841237966217">"Aloitus"</string>
     <string name="accessibility_menu" msgid="2701163794470513040">"Valikko"</string>
-    <string name="accessibility_accessibility_button" msgid="4089042473497107709">"Esteettömyys"</string>
+    <string name="accessibility_accessibility_button" msgid="4089042473497107709">"Saavutettavuus"</string>
     <string name="accessibility_rotate_button" msgid="1238584767612362586">"Näytön kääntäminen"</string>
     <string name="accessibility_recent" msgid="901641734769533575">"Viimeisimmät"</string>
     <string name="accessibility_search_light" msgid="524741790416076988">"Haku"</string>
@@ -972,7 +972,7 @@
     <string name="instant_apps_message_with_help" msgid="1816952263531203932">"Sovellus avattiin ilman asennusta. Katso lisätietoja napauttamalla."</string>
     <string name="app_info" msgid="5153758994129963243">"Sovelluksen tiedot"</string>
     <string name="go_to_web" msgid="636673528981366511">"Siirry selaimeen"</string>
-    <string name="mobile_data" msgid="4564407557775397216">"Mobiilitiedonsiirto"</string>
+    <string name="mobile_data" msgid="4564407557775397216">"Mobiilidata"</string>
     <string name="mobile_data_text_format" msgid="6806501540022589786">"<xliff:g id="ID_1">%1$s</xliff:g> – <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="mobile_carrier_text_format" msgid="8912204177152950766">"<xliff:g id="CARRIER_NAME">%1$s</xliff:g>, <xliff:g id="MOBILE_DATA_TYPE">%2$s</xliff:g>"</string>
     <string name="wifi_is_off" msgid="5389597396308001471">"Wi-Fi on pois päältä"</string>
