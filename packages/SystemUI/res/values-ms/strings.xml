@@ -21,7 +21,7 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="4811759950673118541">"UI Sistem"</string>
     <string name="battery_low_title" msgid="5319680173344341779">"Hidupkan Penjimat Bateri?"</string>
-    <string name="battery_low_description" msgid="3282977755476423966">"Anda mempunyai <xliff:g id="PERCENTAGE">%s</xliff:g> baki bateri. Penjimat Bateri menghidupkan Tema gelap, mengehadkan aktiviti latar dan menangguhkan pemberitahuan."</string>
+    <string name="battery_low_description" msgid="3282977755476423966">"Paras bateri anda ialah <xliff:g id="PERCENTAGE">%s</xliff:g>. Penjimat Bateri menghidupkan Tema gelap, mengehadkan aktiviti latar dan menangguhkan pemberitahuan."</string>
     <string name="battery_low_intro" msgid="5148725009653088790">"Penjimat Bateri menghidupkan Tema gelap, mengehadkan aktiviti latar dan menangguhkan pemberitahuan."</string>
     <string name="battery_low_percent_format" msgid="4276661262843170964">"<xliff:g id="PERCENTAGE">%s</xliff:g> yang tinggal"</string>
     <string name="invalid_charger_title" msgid="938685362320735167">"Tidak dapat mengecas melalui USB"</string>
@@ -34,6 +34,10 @@
     <string name="status_bar_settings_auto_rotation" msgid="8329080442278431708">"Autoputar skrin"</string>
     <string name="usb_device_permission_prompt" msgid="4414719028369181772">"Benarkan <xliff:g id="APPLICATION">%1$s</xliff:g> mengakses <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
     <string name="usb_device_permission_prompt_warn" msgid="2309129784984063656">"Benarkan <xliff:g id="APPLICATION">%1$s</xliff:g> mengakses <xliff:g id="USB_DEVICE">%2$s</xliff:g>?\nApl ini belum diberikan kebenaran merakam tetapi dapat merakam audio melalui peranti USB ini."</string>
+    <string name="usb_audio_device_permission_prompt_title" msgid="4221351137250093451">"Benarkan <xliff:g id="APPLICATION">%1$s</xliff:g> mengakses <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
+    <string name="usb_audio_device_confirm_prompt_title" msgid="8828406516732985696">"Buka <xliff:g id="APPLICATION">%1$s</xliff:g> untuk mengendalikan <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
+    <string name="usb_audio_device_prompt_warn" msgid="2504972133361130335">"Apl ini belum diberikan kebenaran merakam tetapi dapat merakam audio melalui peranti USB ini. Tindakan menggunakan <xliff:g id="APPLICATION">%1$s</xliff:g> dengan peranti ini mungkin menghalang anda daripada mendengar panggilan, pemberitahuan dan penggera."</string>
+    <string name="usb_audio_device_prompt" msgid="7944987408206252949">"Tindakan menggunakan <xliff:g id="APPLICATION">%1$s</xliff:g> dengan peranti ini mungkin menghalang anda daripada mendengar panggilan, pemberitahuan dan penggera."</string>
     <string name="usb_accessory_permission_prompt" msgid="717963550388312123">"Benarkan <xliff:g id="APPLICATION">%1$s</xliff:g> mengakses <xliff:g id="USB_ACCESSORY">%2$s</xliff:g>?"</string>
     <string name="usb_device_confirm_prompt" msgid="4091711472439910809">"Buka <xliff:g id="APPLICATION">%1$s</xliff:g> untuk mengendalikan <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
     <string name="usb_device_confirm_prompt_warn" msgid="990208659736311769">"Buka <xliff:g id="APPLICATION">%1$s</xliff:g> untuk mengendalikan <xliff:g id="USB_DEVICE">%2$s</xliff:g>?\nApl ini belum diberikan kebenaran merakam tetapi dapat merakam audio melalui peranti USB ini."</string>
@@ -131,7 +135,8 @@
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="2242167416140740920">"Wajah disahkan"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"Disahkan"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"Ketik Sahkan untuk menyelesaikan"</string>
-    <string name="biometric_dialog_tap_confirm_with_face" msgid="1597899891472340950">"Dibuka kunci oleh wajah anda. Tekan untuk meneruskan."</string>
+    <!-- no translation found for biometric_dialog_tap_confirm_with_face (1092050545851021991) -->
+    <skip />
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"Disahkan"</string>
     <string name="biometric_dialog_use_pin" msgid="8385294115283000709">"Gunakan PIN"</string>
     <string name="biometric_dialog_use_pattern" msgid="2315593393167211194">"Gunakan corak"</string>
@@ -287,6 +292,15 @@
     <string name="sensor_privacy_start_use_mic_dialog_content" msgid="1624701280680913717">"Tindakan ini menyahsekat akses bagi semua apl dan perkhidmatan yang dibenarkan untuk menggunakan mikrofon anda."</string>
     <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"Tindakan ini menyahsekat akses bagi semua apl dan perkhidmatan yang dibenarkan untuk menggunakan kamera anda."</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_content" msgid="3577642558418404919">"Tindakan ini menyahsekat akses bagi semua apl dan perkhidmatan yang dibenarkan untuk menggunakan kamera atau mikrofon anda."</string>
+    <string name="sensor_privacy_start_use_mic_blocked_dialog_title" msgid="2640140287496469689">"Mikrofon disekat"</string>
+    <string name="sensor_privacy_start_use_camera_blocked_dialog_title" msgid="7398084286822440384">"Kamera disekat"</string>
+    <string name="sensor_privacy_start_use_mic_camera_blocked_dialog_title" msgid="195236134743281973">"Mikrofon &amp; kamera disekat"</string>
+    <string name="sensor_privacy_start_use_mic_blocked_dialog_content" msgid="2138318880682877747">"Untuk nyahsekat, gerakkan suis privasi pada peranti anda kepada mikrofon di kedudukan untuk membenarkan akses mikrofon. Rujuk manual peranti untuk mencari suis privasi pada peranti anda."</string>
+    <string name="sensor_privacy_start_use_camera_blocked_dialog_content" msgid="7216015168047965948">"Untuk nyahsekat, gerakkan suis privasi pada peranti anda kepada kamera di kedudukan untuk membenarkan akses kamera. Rujuk manual peranti untuk mencari suis privasi pada peranti anda."</string>
+    <string name="sensor_privacy_start_use_mic_camera_blocked_dialog_content" msgid="3960837827570483762">"Untuk nyahsekat mikrofon, gerakkan suis privasi pada peranti anda ke kedudukan yang dinyahsekat untuk membenarkan akses. Rujuk manual peranti untuk mencari suis privasi pada peranti anda."</string>
+    <string name="sensor_privacy_mic_unblocked_toast_content" msgid="306555320557065068">"Mikrofon tersedia"</string>
+    <string name="sensor_privacy_camera_unblocked_toast_content" msgid="7843105715964332311">"Kamera tersedia"</string>
+    <string name="sensor_privacy_mic_camera_unblocked_toast_content" msgid="7339355093282661115">"Mikrofon dan kamera tersedia"</string>
     <string name="media_seamless_other_device" msgid="4654849800789196737">"Peranti lain"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"Togol Ikhtisar"</string>
     <string name="zen_priority_introduction" msgid="3159291973383796646">"Anda tidak akan diganggu oleh bunyi dan getaran, kecuali daripada penggera, peringatan, acara dan pemanggil yang anda tetapkan. Anda masih mendengar item lain yang anda pilih untuk dimainkan termasuk muzik, video dan permainan."</string>
@@ -297,7 +311,10 @@
     <string name="notification_tap_again" msgid="4477318164947497249">"Ketik lagi untuk membuka"</string>
     <string name="tap_again" msgid="1315420114387908655">"Ketik sekali lagi"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"Leret ke atas untuk buka"</string>
-    <string name="keyguard_unlock_press" msgid="8488350566398524740">"Tekan untuk buka"</string>
+    <!-- no translation found for keyguard_unlock_press (9140109453735019209) -->
+    <skip />
+    <!-- no translation found for keyguard_face_successful_unlock_press (25520941264602588) -->
+    <skip />
     <string name="keyguard_retry" msgid="886802522584053523">"Leret ke atas untuk mencuba lagi"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"Buka kunci untuk menggunakan NFC"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"Peranti ini milik organisasi anda"</string>
@@ -320,7 +337,6 @@
     <string name="keyguard_indication_charging_time_dock" msgid="6150404291427377863">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Mengecas dengan Dok • Penuh dalam masa <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Tukar pengguna"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Semua apl dan data dalam sesi ini akan dipadam."</string>
-    <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"Alih keluar"</string>
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"Selamat kembali, tetamu!"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"Adakah anda ingin meneruskan sesi anda?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"Mulakan semula"</string>
@@ -766,6 +782,12 @@
     <string name="controls_dialog_ok" msgid="2770230012857881822">"Tambah"</string>
     <string name="controls_dialog_message" msgid="342066938390663844">"Dicadangkan oleh <xliff:g id="APP">%s</xliff:g>"</string>
     <string name="controls_tile_locked" msgid="731547768182831938">"Peranti dikunci"</string>
+    <string name="controls_settings_show_controls_dialog_title" msgid="3357852503553809554">"Tunjukkan dan kawal peranti daripada skrin kunci?"</string>
+    <string name="controls_settings_show_controls_dialog_message" msgid="7666211700524587969">"Anda boleh menambah kawalan untuk peranti luaran anda pada skrin kunci.\n\nApl peranti anda mungkin membenarkan anda mengawal sesetengah peranti tanpa membuka kunci telefon atau tablet anda.\n\nAnda boleh membuat perubahan pada bila-bila masa dalam Tetapan."</string>
+    <string name="controls_settings_trivial_controls_dialog_title" msgid="7593188157655036677">"Kawal peranti daripada skrin kunci?"</string>
+    <string name="controls_settings_trivial_controls_dialog_message" msgid="237183787721917586">"Anda boleh mengawal sesetengah peranti tanpa membuka kunci telefon atau tablet anda.\n\nApl peranti anda menentukan peranti yang boleh dikawal dengan cara ini."</string>
+    <string name="controls_settings_dialog_neutral_button" msgid="4514446354793124140">"Tidak perlu"</string>
+    <string name="controls_settings_dialog_positive_button" msgid="436070672551674863">"Ya"</string>
     <string name="controls_pin_use_alphanumeric" msgid="8478371861023048414">"PIN mengandungi huruf atau simbol"</string>
     <string name="controls_pin_verify" msgid="3452778292918877662">"Sahkan <xliff:g id="DEVICE">%s</xliff:g>"</string>
     <string name="controls_pin_wrong" msgid="6162694056042164211">"PIN salah"</string>
@@ -775,8 +797,7 @@
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"Leret untuk melihat selanjutnya"</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"Memuatkan cadangan"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"Media"</string>
-    <!-- no translation found for controls_media_close_session (4780485355795635052) -->
-    <skip />
+    <string name="controls_media_close_session" msgid="4780485355795635052">"Sembunyikan kawalan media ini untuk <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="controls_media_active_session" msgid="3146882316024153337">"Sesi media semasa tidak dapat disembunyikan."</string>
     <string name="controls_media_dismiss_button" msgid="4485675693008031646">"Sembunyikan"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"Sambung semula"</string>
@@ -816,6 +837,13 @@
     <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"Untuk menghantar sesi ini, sila buka apl."</string>
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"Apl yang tidak diketahui"</string>
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"Berhenti menghantar"</string>
+    <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Cara siaran berfungsi"</string>
+    <string name="media_output_broadcast" msgid="3555580945878071543">"Siarkan"</string>
+    <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"Orang berdekatan anda dengan peranti Bluetooth yang serasi boleh mendengar media yang sedang anda siarkan"</string>
+    <string name="media_output_broadcasting_message" msgid="4150299923404886073">"Untuk mendengar siaran anda, orang berdekatan dengan peranti Bluetooth yang serasi boleh mengimbas kod QR anda atau menggunakan nama siaran dan kata laluan anda"</string>
+    <string name="media_output_broadcast_name" msgid="8786127091542624618">"Nama Siaran"</string>
+    <string name="media_output_broadcast_code" msgid="870795639644728542">"Kata Laluan"</string>
+    <string name="media_output_broadcast_dialog_save" msgid="7910865591430010198">"Simpan"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"Nombor binaan"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"Nombor binaan disalin ke papan keratan."</string>
     <string name="basic_status" msgid="2315371112182658176">"Buka perbualan"</string>
@@ -892,7 +920,7 @@
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"Apl aktif"</string>
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"Berhenti"</string>
     <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"Dihentikan"</string>
-    <string name="clipboard_edit_text_copy" msgid="770856373439969178">"Salin"</string>
+    <string name="clipboard_edit_text_done" msgid="4551887727694022409">"Selesai"</string>
     <string name="clipboard_overlay_text_copied" msgid="1872624400464891363">"Disalin"</string>
     <string name="clipboard_edit_source" msgid="9156488177277788029">"Daripada <xliff:g id="APPNAME">%1$s</xliff:g>"</string>
     <string name="clipboard_dismiss_description" msgid="7544573092766945657">"Ketepikan penyalinan UI"</string>
