@@ -722,6 +722,11 @@ abstract class PackageManagerInternalBase extends PackageManagerInternal {
         return snapshot().getSharedUser(sharedUserAppId);
     }
 
+    @Override
+    public boolean isUidPrivileged(int uid) {
+        return snapshot().isUidPrivileged(uid);
+    }
+
     @NonNull
     @Override
     @Deprecated
