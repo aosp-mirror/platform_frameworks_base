@@ -324,6 +324,42 @@ public class SeekBarViewModelTest : SysuiTestCase() {
     }
 
     @Test
+    fun seekStarted_listenerNotified() {
+        var isScrubbing: Boolean? = null
+        val listener = object : SeekBarViewModel.ScrubbingChangeListener {
+            override fun onScrubbingChanged(scrubbing: Boolean) {
+                isScrubbing = scrubbing
+            }
+        }
+        viewModel.setScrubbingChangeListener(listener)
+
+        viewModel.onSeekStarting()
+        fakeExecutor.runAllReady()
+
+        assertThat(isScrubbing).isTrue()
+    }
+
+    @Test
+    fun seekEnded_listenerNotified() {
+        var isScrubbing: Boolean? = null
+        val listener = object : SeekBarViewModel.ScrubbingChangeListener {
+            override fun onScrubbingChanged(scrubbing: Boolean) {
+                isScrubbing = scrubbing
+            }
+        }
+        viewModel.setScrubbingChangeListener(listener)
+
+        // Start seeking
+        viewModel.onSeekStarting()
+        fakeExecutor.runAllReady()
+        // End seeking
+        viewModel.onSeek(15L)
+        fakeExecutor.runAllReady()
+
+        assertThat(isScrubbing).isFalse()
+    }
+
+    @Test
     @Ignore
     fun onProgressChangedFromUser() {
         // WHEN user starts dragging the seek bar

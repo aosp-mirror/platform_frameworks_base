@@ -53,6 +53,7 @@ import com.android.systemui.util.animation.TransitionLayout
 import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.mockito.KotlinArgumentCaptor
 import com.android.systemui.util.mockito.eq
+import com.android.systemui.util.mockito.withArgCaptor
 import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
 import dagger.Lazy
@@ -68,6 +69,7 @@ import org.mockito.Mock
 import org.mockito.Mockito.any
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.never
+import org.mockito.Mockito.reset
 import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
 import org.mockito.junit.MockitoJUnit
@@ -91,6 +93,7 @@ public class MediaControlPanelTest : SysuiTestCase() {
     private lateinit var player: MediaControlPanel
 
     private lateinit var bgExecutor: FakeExecutor
+    private lateinit var mainExecutor: FakeExecutor
     @Mock private lateinit var activityStarter: ActivityStarter
     @Mock private lateinit var broadcastSender: BroadcastSender
 
@@ -116,8 +119,6 @@ public class MediaControlPanelTest : SysuiTestCase() {
     private lateinit var seamlessIcon: ImageView
     private lateinit var seamlessText: TextView
     private lateinit var seekBar: SeekBar
-    private lateinit var elapsedTimeView: TextView
-    private lateinit var totalTimeView: TextView
     private lateinit var action0: ImageButton
     private lateinit var action1: ImageButton
     private lateinit var action2: ImageButton
@@ -126,6 +127,8 @@ public class MediaControlPanelTest : SysuiTestCase() {
     private lateinit var actionPlayPause: ImageButton
     private lateinit var actionNext: ImageButton
     private lateinit var actionPrev: ImageButton
+    private lateinit var scrubbingElapsedTimeView: TextView
+    private lateinit var scrubbingTotalTimeView: TextView
     private lateinit var actionsTopBarrier: Barrier
     @Mock private lateinit var longPressText: TextView
     @Mock private lateinit var handler: Handler
@@ -148,12 +151,25 @@ public class MediaControlPanelTest : SysuiTestCase() {
     @Before
     fun setUp() {
         bgExecutor = FakeExecutor(FakeSystemClock())
+        mainExecutor = FakeExecutor(FakeSystemClock())
         whenever(mediaViewController.expandedLayout).thenReturn(expandedSet)
         whenever(mediaViewController.collapsedLayout).thenReturn(collapsedSet)
 
-        player = MediaControlPanel(context, bgExecutor, activityStarter, broadcastSender,
-            mediaViewController, seekBarViewModel, Lazy { mediaDataManager },
-            mediaOutputDialogFactory, mediaCarouselController, falsingManager, clock, logger)
+        player = MediaControlPanel(
+            context,
+            bgExecutor,
+            mainExecutor,
+            activityStarter,
+            broadcastSender,
+            mediaViewController,
+            seekBarViewModel,
+            Lazy { mediaDataManager },
+            mediaOutputDialogFactory,
+            mediaCarouselController,
+            falsingManager,
+            clock,
+            logger
+        )
         whenever(seekBarViewModel.progress).thenReturn(seekBarData)
 
         // Set up mock views for the players
@@ -167,8 +183,6 @@ public class MediaControlPanelTest : SysuiTestCase() {
         seamlessIcon = ImageView(context)
         seamlessText = TextView(context)
         seekBar = SeekBar(context)
-        elapsedTimeView = TextView(context)
-        totalTimeView = TextView(context)
         settings = ImageButton(context)
         cancel = View(context)
         cancelText = TextView(context)
@@ -184,6 +198,10 @@ public class MediaControlPanelTest : SysuiTestCase() {
         actionPlayPause = ImageButton(context).also { it.setId(R.id.actionPlayPause) }
         actionPrev = ImageButton(context).also { it.setId(R.id.actionPrev) }
         actionNext = ImageButton(context).also { it.setId(R.id.actionNext) }
+        scrubbingElapsedTimeView =
+            TextView(context).also { it.setId(R.id.media_scrubbing_elapsed_time) }
+        scrubbingTotalTimeView =
+            TextView(context).also { it.setId(R.id.media_scrubbing_total_time) }
 
         actionsTopBarrier =
             Barrier(context).also {
@@ -242,6 +260,8 @@ public class MediaControlPanelTest : SysuiTestCase() {
         whenever(viewHolder.seamlessIcon).thenReturn(seamlessIcon)
         whenever(viewHolder.seamlessText).thenReturn(seamlessText)
         whenever(viewHolder.seekBar).thenReturn(seekBar)
+        whenever(viewHolder.scrubbingElapsedTimeView).thenReturn(scrubbingElapsedTimeView)
+        whenever(viewHolder.scrubbingTotalTimeView).thenReturn(scrubbingTotalTimeView)
 
         // Transition View
         whenever(view.parent).thenReturn(transitionParent)
@@ -363,6 +383,86 @@ public class MediaControlPanelTest : SysuiTestCase() {
         player.bindPlayer(state, PACKAGE)
 
         verify(expandedSet).setVisibility(R.id.media_progress_bar, ConstraintSet.INVISIBLE)
+    }
+
+    @Test
+    fun bind_notScrubbing_scrubbingViewsGone() {
+        val icon = context.getDrawable(android.R.drawable.ic_media_play)
+        val semanticActions = MediaButton(
+            prevOrCustom = MediaAction(icon, {}, "prev", null),
+            nextOrCustom = MediaAction(icon, {}, "next", null),
+        )
+        val state = mediaData.copy(semanticActions = semanticActions)
+
+        player.attachPlayer(viewHolder)
+        player.bindPlayer(state, PACKAGE)
+
+        verify(expandedSet).setVisibility(R.id.media_scrubbing_elapsed_time, ConstraintSet.GONE)
+        verify(expandedSet).setVisibility(R.id.media_scrubbing_total_time, ConstraintSet.GONE)
+    }
+
+    @Test
+    fun setIsScrubbing_noSemanticActions_viewsNotChanged() {
+        val state = mediaData.copy(semanticActions = null)
+        player.attachPlayer(viewHolder)
+        player.bindPlayer(state, PACKAGE)
+        reset(expandedSet)
+
+        val listener = getScrubbingChangeListener()
+
+        listener.onScrubbingChanged(true)
+        mainExecutor.runAllReady()
+
+        verify(expandedSet, never()).setVisibility(eq(R.id.media_scrubbing_elapsed_time), anyInt())
+        verify(expandedSet, never()).setVisibility(eq(R.id.media_scrubbing_total_time), anyInt())
+    }
+
+    @Test
+    fun setIsScrubbing_true_scrubbingViewsShownAndPrevNextHiddenOnlyInExpanded() {
+        val icon = context.getDrawable(android.R.drawable.ic_media_play)
+        val semanticActions = MediaButton(
+            prevOrCustom = MediaAction(icon, {}, "prev", null),
+            nextOrCustom = MediaAction(icon, {}, "next", null),
+        )
+        val state = mediaData.copy(semanticActions = semanticActions)
+        player.attachPlayer(viewHolder)
+        player.bindPlayer(state, PACKAGE)
+        reset(expandedSet)
+
+        getScrubbingChangeListener().onScrubbingChanged(true)
+        mainExecutor.runAllReady()
+
+        // Only in expanded, we should show the scrubbing times and hide prev+next
+        verify(expandedSet).setVisibility(R.id.media_scrubbing_elapsed_time, ConstraintSet.VISIBLE)
+        verify(expandedSet).setVisibility(R.id.media_scrubbing_total_time, ConstraintSet.VISIBLE)
+        verify(expandedSet).setVisibility(R.id.actionPrev, ConstraintSet.GONE)
+        verify(expandedSet).setVisibility(R.id.actionNext, ConstraintSet.GONE)
+    }
+
+    @Test
+    fun setIsScrubbing_trueThenFalse_scrubbingTimeGoneAtEnd() {
+        val icon = context.getDrawable(android.R.drawable.ic_media_play)
+        val semanticActions = MediaButton(
+            prevOrCustom = MediaAction(icon, {}, "prev", null),
+            nextOrCustom = MediaAction(icon, {}, "next", null),
+        )
+        val state = mediaData.copy(semanticActions = semanticActions)
+
+        player.attachPlayer(viewHolder)
+        player.bindPlayer(state, PACKAGE)
+
+        getScrubbingChangeListener().onScrubbingChanged(true)
+        mainExecutor.runAllReady()
+        reset(expandedSet)
+
+        getScrubbingChangeListener().onScrubbingChanged(false)
+        mainExecutor.runAllReady()
+
+        // Only in expanded, we should hide the scrubbing times and show prev+next
+        verify(expandedSet).setVisibility(R.id.media_scrubbing_elapsed_time, ConstraintSet.GONE)
+        verify(expandedSet).setVisibility(R.id.media_scrubbing_total_time, ConstraintSet.GONE)
+        verify(expandedSet).setVisibility(R.id.actionPrev, ConstraintSet.VISIBLE)
+        verify(expandedSet).setVisibility(R.id.actionNext, ConstraintSet.VISIBLE)
     }
 
     @Test
@@ -780,4 +880,7 @@ public class MediaControlPanelTest : SysuiTestCase() {
 
         verify(logger).logSeek(anyInt(), eq(PACKAGE), eq(instanceId))
     }
+
+    private fun getScrubbingChangeListener(): SeekBarViewModel.ScrubbingChangeListener =
+        withArgCaptor { verify(seekBarViewModel).setScrubbingChangeListener(capture()) }
 }
