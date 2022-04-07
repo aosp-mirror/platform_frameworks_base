@@ -33,9 +33,9 @@
     <string name="invalid_charger_title" msgid="938685362320735167">"USB मार्फत चार्ज गर्न सकिँदैन"</string>
     <string name="invalid_charger_text" msgid="2339310107232691577">"तपाईंको यन्त्रसँगै आएको चार्जर प्रयोग गर्नुहोस्‌"</string>
     <string name="battery_low_why" msgid="2056750982959359863">"सेटिङहरू"</string>
-    <string name="battery_saver_confirmation_title" msgid="1234998463717398453">"ब्याट्री सेभर सक्रिय गर्ने हो?"</string>
+    <string name="battery_saver_confirmation_title" msgid="1234998463717398453">"ब्याट्री सेभर अन गर्ने हो?"</string>
     <string name="battery_saver_confirmation_title_generic" msgid="2299231884234959849">"ब्याट्री सेभरका बारेमा"</string>
-    <string name="battery_saver_confirmation_ok" msgid="5042136476802816494">"खोल्नुहोस्"</string>
+    <string name="battery_saver_confirmation_ok" msgid="5042136476802816494">"अन गर्नुहोस्"</string>
     <string name="battery_saver_start_action" msgid="4553256017945469937">"ब्याट्री सेभर सक्रिय गर्नुहोस्"</string>
     <string name="status_bar_settings_settings_button" msgid="534331565185171556">"सेटिङहरू"</string>
     <string name="status_bar_settings_wifi_button" msgid="7243072479837270946">"Wi-Fi"</string>
