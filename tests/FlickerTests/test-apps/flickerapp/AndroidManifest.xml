@@ -119,5 +119,16 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
+        <activity android:name=".ImeEditorPopupDialogActivity"
+            android:taskAffinity="com.android.server.wm.flicker.testapp.ImeEditorPopupDialogActivity"
+            android:configChanges="orientation|screenSize"
+            android:theme="@style/CutoutShortEdges"
+            android:label="ImeEditorPopupDialogActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity>
     </application>
 </manifest>

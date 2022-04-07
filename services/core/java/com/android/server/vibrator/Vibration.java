@@ -66,6 +66,7 @@ final class Vibration {
         IGNORED_FOR_ONGOING,
         IGNORED_FOR_POWER,
         IGNORED_FOR_RINGER_MODE,
+        IGNORED_FOR_RINGTONE,
         IGNORED_FOR_SETTINGS,
         IGNORED_SUPERSEDED,
     }

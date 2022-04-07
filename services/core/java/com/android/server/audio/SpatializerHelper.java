@@ -327,15 +327,29 @@ public class SpatializerHelper {
             setDispatchAvailableState(false);
         }
 
-        if (able && enabledAvailable.first) {
+        boolean enabled = able && enabledAvailable.first;
+        if (enabled) {
             loglogi("Enabling Spatial Audio since enabled for media device:"
                     + ROUTING_DEVICES[0]);
         } else {
             loglogi("Disabling Spatial Audio since disabled for media device:"
                     + ROUTING_DEVICES[0]);
         }
-        setDispatchFeatureEnabledState(able && enabledAvailable.first,
-                "onRoutingUpdated");
+        if (mSpat != null) {
+            byte level = enabled ? (byte) Spatializer.SPATIALIZER_IMMERSIVE_LEVEL_MULTICHANNEL
+                    : (byte) Spatializer.SPATIALIZER_IMMERSIVE_LEVEL_NONE;
+            loglogi("Setting spatialization level to: " + level);
+            try {
+                mSpat.setLevel(level);
+            } catch (RemoteException e) {
+                Log.e(TAG, "Can't set spatializer level", e);
+                mState = STATE_NOT_SUPPORTED;
+                mCapableSpatLevel = Spatializer.SPATIALIZER_IMMERSIVE_LEVEL_NONE;
+                enabled = false;
+            }
+        }
+
+        setDispatchFeatureEnabledState(enabled, "onRoutingUpdated");
 
         if (mDesiredHeadTrackingMode != Spatializer.HEAD_TRACKING_MODE_UNSUPPORTED
                 && mDesiredHeadTrackingMode != Spatializer.HEAD_TRACKING_MODE_DISABLED) {
@@ -635,7 +649,6 @@ public class SpatializerHelper {
                 init(true);
             }
             setSpatializerEnabledInt(true);
-            onRoutingUpdated();
         } else {
             setSpatializerEnabledInt(false);
         }
@@ -657,6 +670,7 @@ public class SpatializerHelper {
             case STATE_DISABLED_AVAILABLE:
                 if (enabled) {
                     createSpat();
+                    onRoutingUpdated();
                     break;
                 } else {
                     // already in disabled state
@@ -823,14 +837,13 @@ public class SpatializerHelper {
             mSpatHeadTrackingCallback = new SpatializerHeadTrackingCallback();
             mSpat = AudioSystem.getSpatializer(mSpatCallback);
             try {
-                mSpat.setLevel((byte) Spatializer.SPATIALIZER_IMMERSIVE_LEVEL_MULTICHANNEL);
                 mIsHeadTrackingSupported = mSpat.isHeadTrackingSupported();
                 //TODO: register heatracking callback only when sensors are registered
                 if (mIsHeadTrackingSupported) {
                     mSpat.registerHeadTrackingCallback(mSpatHeadTrackingCallback);
                 }
             } catch (RemoteException e) {
-                Log.e(TAG, "Can't set spatializer level", e);
+                Log.e(TAG, "Can't configure head tracking", e);
                 mState = STATE_NOT_SUPPORTED;
                 mCapableSpatLevel = Spatializer.SPATIALIZER_IMMERSIVE_LEVEL_NONE;
             }
