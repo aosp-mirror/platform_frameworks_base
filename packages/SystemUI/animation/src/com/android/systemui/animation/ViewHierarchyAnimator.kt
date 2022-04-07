@@ -156,17 +156,7 @@ class ViewHierarchyAnimator {
          * Any animations already in progress continue until their natural conclusion.
          */
         fun stopAnimating(rootView: View) {
-            val listener = rootView.getTag(R.id.tag_layout_listener)
-            if (listener != null && listener is View.OnLayoutChangeListener) {
-                rootView.setTag(R.id.tag_layout_listener, null /* tag */)
-                rootView.removeOnLayoutChangeListener(listener)
-            }
-
-            if (rootView is ViewGroup) {
-                for (i in 0 until rootView.childCount) {
-                    stopAnimating(rootView.getChildAt(i))
-                }
-            }
+            recursivelyRemoveListener(rootView)
         }
 
         /**
@@ -462,6 +452,20 @@ class ViewHierarchyAnimator {
             }
         }
 
+        private fun recursivelyRemoveListener(view: View) {
+            val listener = view.getTag(R.id.tag_layout_listener)
+            if (listener != null && listener is View.OnLayoutChangeListener) {
+                view.setTag(R.id.tag_layout_listener, null /* tag */)
+                view.removeOnLayoutChangeListener(listener)
+            }
+
+            if (view is ViewGroup) {
+                for (i in 0 until view.childCount) {
+                    recursivelyRemoveListener(view.getChildAt(i))
+                }
+            }
+        }
+
         private fun getBound(view: View, bound: Bound): Int? {
             return view.getTag(bound.overrideTag) as? Int
         }
@@ -513,11 +517,10 @@ class ViewHierarchyAnimator {
                     // When an animation is cancelled, a new one might be taking over. We shouldn't
                     // unregister the listener yet.
                     if (ephemeral && !cancelled) {
-                        val listener = view.getTag(R.id.tag_layout_listener)
-                        if (listener != null && listener is View.OnLayoutChangeListener) {
-                            view.setTag(R.id.tag_layout_listener, null /* tag */)
-                            view.removeOnLayoutChangeListener(listener)
-                        }
+                        // The duration is the same for the whole hierarchy, so it's safe to remove
+                        // the listener recursively. We do this because some descendant views might
+                        // not change bounds, and therefore not animate and leak the listener.
+                        recursivelyRemoveListener(view)
                     }
                 }
 
