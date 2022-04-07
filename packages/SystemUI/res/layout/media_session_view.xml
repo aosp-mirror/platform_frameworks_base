@@ -157,7 +157,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:barrierDirection="start"
-        app:constraint_referenced_ids="actionPrev,media_progress_bar,actionNext,action0,action1,action2,action3,action4"
+        app:constraint_referenced_ids="actionPrev,media_scrubbing_elapsed_time,media_progress_bar,actionNext,media_scrubbing_total_time,action0,action1,action2,action3,action4"
         />
     <androidx.constraintlayout.widget.Barrier
         android:id="@+id/media_action_barrier_end"
@@ -167,7 +167,7 @@
         app:layout_constraintTop_toBottomOf="@id/media_seamless"
         app:layout_constraintBottom_toBottomOf="parent"
         app:barrierDirection="end"
-        app:constraint_referenced_ids="actionPrev,media_progress_bar,actionNext,action0,action1,action2,action3,action4"
+        app:constraint_referenced_ids="actionPrev,media_scrubbing_elapsed_time,media_progress_bar,actionNext,media_scrubbing_total_time,action0,action1,action2,action3,action4"
         app:layout_constraintStart_toStartOf="parent"
         />
 
@@ -177,7 +177,7 @@
         android:layout_height="0dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:barrierDirection="top"
-        app:constraint_referenced_ids="actionPrev,media_progress_bar,actionNext,action0,action1,action2,action3,action4"
+        app:constraint_referenced_ids="actionPrev,media_scrubbing_elapsed_time,media_progress_bar,actionNext,media_scrubbing_total_time,action0,action1,action2,action3,action4"
         />
 
     <!-- Button visibility will be controlled in code -->
@@ -190,6 +190,22 @@
         android:layout_marginEnd="0dp"
         android:layout_marginBottom="@dimen/qs_media_padding"
         android:layout_marginTop="0dp"
+        />
+
+    <!-- Elapsed time, shown only when scrubbing -->
+    <!-- The space to the left of the progress bar will either be actionPrev or
+         media_scrubbing_elapsed_time, so they use the same layout constraints. Visibilities of
+         elements are controlled in code. -->
+    <TextView
+        android:id="@+id/media_scrubbing_elapsed_time"
+        style="@style/MediaPlayer.ScrubbingTime"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_marginStart="4dp"
+        android:layout_marginEnd="0dp"
+        android:layout_marginBottom="@dimen/qs_media_padding"
+        android:layout_marginTop="0dp"
+        android:visibility="gone"
         />
 
     <!-- Seek Bar -->
@@ -217,6 +233,22 @@
         android:layout_marginEnd="@dimen/qs_media_action_spacing"
         android:layout_marginBottom="@dimen/qs_media_padding"
         android:layout_marginTop="0dp" />
+
+    <!-- Total time, shown only when scrubbing -->
+    <!-- The space to the right of the progress bar will either be actionNext or
+         media_scrubbing_total_time, so they use the same layout constraints. Visibilities of
+         elements are controlled in code. -->
+    <TextView
+        android:id="@+id/media_scrubbing_total_time"
+        style="@style/MediaPlayer.ScrubbingTime"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_marginStart="0dp"
+        android:layout_marginEnd="@dimen/qs_media_action_spacing"
+        android:layout_marginBottom="@dimen/qs_media_padding"
+        android:layout_marginTop="0dp"
+        android:visibility="gone"
+        />
 
     <ImageButton
         android:id="@+id/action0"

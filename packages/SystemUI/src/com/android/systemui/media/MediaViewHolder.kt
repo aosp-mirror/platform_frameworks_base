@@ -50,8 +50,11 @@ class MediaViewHolder constructor(itemView: View) {
 
     // Seekbar views
     val seekBar = itemView.requireViewById<SeekBar>(R.id.media_progress_bar)
-    open val elapsedTimeView: TextView? = null
-    open val totalTimeView: TextView? = null
+    // These views are only shown while the user is actively scrubbing
+    val scrubbingElapsedTimeView: TextView =
+        itemView.requireViewById(R.id.media_scrubbing_elapsed_time)
+    val scrubbingTotalTimeView: TextView =
+        itemView.requireViewById(R.id.media_scrubbing_total_time)
 
     // Settings screen
     val longPressText = itemView.requireViewById<TextView>(R.id.remove_text)
@@ -165,7 +168,9 @@ class MediaViewHolder constructor(itemView: View) {
                 R.id.action2,
                 R.id.action3,
                 R.id.action4,
-                R.id.icon
+                R.id.icon,
+                R.id.media_scrubbing_elapsed_time,
+                R.id.media_scrubbing_total_time
         )
         val gutsIds = setOf(
                 R.id.remove_text,
