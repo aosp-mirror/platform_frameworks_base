@@ -29,6 +29,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.platform.test.annotations.RootPermissionTest;
+import android.platform.test.rule.UnlockScreenRule;
 import android.view.WindowInsets;
 import android.view.WindowInsetsAnimation;
 import android.view.inputmethod.InputMethodManager;
@@ -39,6 +40,7 @@ import androidx.annotation.Nullable;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.platform.app.InstrumentationRegistry;
 
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -49,6 +51,9 @@ import java.util.List;
 public final class ImeOpenCloseStressTest {
 
     private static final int NUM_TEST_ITERATIONS = 10;
+
+    @Rule
+    public UnlockScreenRule mUnlockScreenRule = new UnlockScreenRule();
 
     @Test
     public void test() {
