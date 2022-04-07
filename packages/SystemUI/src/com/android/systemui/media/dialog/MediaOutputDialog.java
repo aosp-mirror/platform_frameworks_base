@@ -88,8 +88,11 @@ public class MediaOutputDialog extends MediaOutputBaseDialog {
 
     @Override
     int getStopButtonVisibility() {
-        boolean isActiveRemoteDevice = mMediaOutputController.isActiveRemoteDevice(
-                mMediaOutputController.getCurrentConnectedMediaDevice());
+        boolean isActiveRemoteDevice = false;
+        if (mMediaOutputController.getCurrentConnectedMediaDevice() != null) {
+            isActiveRemoteDevice = mMediaOutputController.isActiveRemoteDevice(
+                    mMediaOutputController.getCurrentConnectedMediaDevice());
+        }
         boolean isBroadCastSupported = isBroadcastSupported();
 
         return (isActiveRemoteDevice || isBroadCastSupported) ? View.VISIBLE : View.GONE;
