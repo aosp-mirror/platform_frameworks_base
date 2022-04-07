@@ -34,6 +34,10 @@
     <string name="status_bar_settings_auto_rotation" msgid="8329080442278431708">"ეკრანის ავტოროტაცია"</string>
     <string name="usb_device_permission_prompt" msgid="4414719028369181772">"მიეცეს <xliff:g id="APPLICATION">%1$s</xliff:g>-ს <xliff:g id="USB_DEVICE">%2$s</xliff:g>-ზე წვდომის უფლება?"</string>
     <string name="usb_device_permission_prompt_warn" msgid="2309129784984063656">"დართავთ <xliff:g id="APPLICATION">%1$s</xliff:g>-ს <xliff:g id="USB_DEVICE">%2$s</xliff:g>-ზე წვდომის ნებას?\nამ აპს არ აქვს მინიჭებული ჩაწერის ნებართვა, მაგრამ შეუძლია ჩაიწეროს აუდიო ამ USB მოწყობილობის მეშვეობით."</string>
+    <string name="usb_audio_device_permission_prompt_title" msgid="4221351137250093451">"მიენიჭოს <xliff:g id="APPLICATION">%1$s</xliff:g>-ს <xliff:g id="USB_DEVICE">%2$s</xliff:g>-ზე წვდომა?"</string>
+    <string name="usb_audio_device_confirm_prompt_title" msgid="8828406516732985696">"გაიხსნას <xliff:g id="APPLICATION">%1$s</xliff:g>, <xliff:g id="USB_DEVICE">%2$s</xliff:g>-ის გამოსაყენებლად?"</string>
+    <string name="usb_audio_device_prompt_warn" msgid="2504972133361130335">"ამ აპს არ აქვს მინიჭებული ჩაწერის ნებართვა, მაგრამ შეუძლია ჩაიწეროს აუდიო ამ USB მოწყობილობის მეშვეობით. ამ მოწყობილობაზე <xliff:g id="APPLICATION">%1$s</xliff:g>-ის გამოყენებამ შეიძლება ზარების, შეტყობინებებისა და მაღვიძარის ხმა გამორთოს."</string>
+    <string name="usb_audio_device_prompt" msgid="7944987408206252949">"ამ მოწყობილობაზე <xliff:g id="APPLICATION">%1$s</xliff:g>-ის გამოყენებამ შეიძლება ზარების, შეტყობინებებისა და მაღვიძარის ხმა გამორთოს."</string>
     <string name="usb_accessory_permission_prompt" msgid="717963550388312123">"მიეცეს <xliff:g id="APPLICATION">%1$s</xliff:g>-ს <xliff:g id="USB_ACCESSORY">%2$s</xliff:g>-ზე წვდომის უფლება?"</string>
     <string name="usb_device_confirm_prompt" msgid="4091711472439910809">"გსურთ, გახსნათ <xliff:g id="APPLICATION">%1$s</xliff:g>, <xliff:g id="USB_DEVICE">%2$s</xliff:g>-ის გამოსაყენებლად?"</string>
     <string name="usb_device_confirm_prompt_warn" msgid="990208659736311769">"გახსნით <xliff:g id="APPLICATION">%1$s</xliff:g>-ს <xliff:g id="USB_DEVICE">%2$s</xliff:g>-ის გამოსაყენებლად?\nამ აპს არ აქვს მინიჭებული ჩაწერის ნებართვა, მაგრამ შეუძლია ჩაიწეროს აუდიო ამ USB მოწყობილობის მეშვეობით."</string>
@@ -131,7 +135,7 @@
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="2242167416140740920">"სახის ამოცნობილია"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"დადასტურებული"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"დასასრულებლად შეეხეთ „დადასტურებას“"</string>
-    <string name="biometric_dialog_tap_confirm_with_face" msgid="1597899891472340950">"განბლოკილია თქვენი სახით. დააჭირეთ გასაგრძელებლად."</string>
+    <string name="biometric_dialog_tap_confirm_with_face" msgid="1092050545851021991">"განიბლოკა სახით. გასაგრძელებლად დააჭირეთ განბლოკვის ხატულას."</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"ავტორიზებულია"</string>
     <string name="biometric_dialog_use_pin" msgid="8385294115283000709">"PIN-კოდის გამოყენება"</string>
     <string name="biometric_dialog_use_pattern" msgid="2315593393167211194">"ნიმუშის გამოყენება"</string>
@@ -287,6 +291,15 @@
     <string name="sensor_privacy_start_use_mic_dialog_content" msgid="1624701280680913717">"ამ მოქმედების მეშვეობით განიბლოკება ყველა აპსა და მომსახურებაზე წვდომა, რომელთაც აქვთ თქვენი მიკროფონის გამოყენების უფლება."</string>
     <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"ამ მოქმედების მეშვეობით განიბლოკება ყველა აპსა და მომსახურებაზე წვდომა, რომელთაც აქვთ თქვენი კამერის გამოყენების უფლება."</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_content" msgid="3577642558418404919">"ამ მოქმედების მეშვეობით განიბლოკება ყველა აპსა და მომსახურებაზე წვდომა, რომელთაც აქვთ თქვენი კამერის ან მიკროფონის გამოყენების უფლება."</string>
+    <string name="sensor_privacy_start_use_mic_blocked_dialog_title" msgid="2640140287496469689">"მიკროფონი დაბლოკილია"</string>
+    <string name="sensor_privacy_start_use_camera_blocked_dialog_title" msgid="7398084286822440384">"კამერა დაბლოკილია"</string>
+    <string name="sensor_privacy_start_use_mic_camera_blocked_dialog_title" msgid="195236134743281973">"მიკროფონი &amp; კამერა დაბლოკილია"</string>
+    <string name="sensor_privacy_start_use_mic_blocked_dialog_content" msgid="2138318880682877747">"განსაბლოკად თქვენი მოწყობილობის კონფიდენციალურობის ჩამრთველი გადაიტანეთ მიკროფონთან ისეთ პოზიციაზე, რომ შეიძლებოდეს მიკროფონზე წვდომა. კონფიდენციალურობის ჩამრთველის მისაგნებად გამოიყენეთ თქვენი მოწყობილობის სახელმძღვანელო."</string>
+    <string name="sensor_privacy_start_use_camera_blocked_dialog_content" msgid="7216015168047965948">"განსაბლოკად თქვენი მოწყობილობის კონფიდენციალურობის ჩამრთველი გადაიტანეთ კამერასთან ისეთ პოზიციაზე, რომ შეიძლებოდეს კამერაზე წვდომა. კონფიდენციალურობის ჩამრთველის მისაგნებად გამოიყენეთ თქვენი მოწყობილობის სახელმძღვანელო."</string>
+    <string name="sensor_privacy_start_use_mic_camera_blocked_dialog_content" msgid="3960837827570483762">"განსაბლოკად თქვენი მოწყობილობის კონფიდენციალურობის ჩამრთველი გადაიტანეთ განბლოკვის პოზიციაში ისე, რომ შეიძლებოდეს წვდომა. კონფიდენციალურობის ჩამრთველის მისაგნებად გამოიყენეთ თქვენი მოწყობილობის სახელმძღვანელო."</string>
+    <string name="sensor_privacy_mic_unblocked_toast_content" msgid="306555320557065068">"მიკროფონი ხელმისაწვდომია"</string>
+    <string name="sensor_privacy_camera_unblocked_toast_content" msgid="7843105715964332311">"კამერა ხელმისაწვდომია"</string>
+    <string name="sensor_privacy_mic_camera_unblocked_toast_content" msgid="7339355093282661115">"მიკროფონი და კამერა ხელმისაწვდომია"</string>
     <string name="media_seamless_other_device" msgid="4654849800789196737">"სხვა მოწყობილობა"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"მიმოხილვის გადართვა"</string>
     <string name="zen_priority_introduction" msgid="3159291973383796646">"თქვენ მიერ მითითებული მაღვიძარების, შეხსენებების, მოვლენებისა და ზარების გარდა, არავითარი ხმა და ვიბრაცია არ შეგაწუხებთ. თქვენ მაინც შეძლებთ სასურველი კონტენტის, მაგალითად, მუსიკის, ვიდეოებისა და თამაშების აუდიოს მოსმენა."</string>
@@ -297,7 +310,8 @@
     <string name="notification_tap_again" msgid="4477318164947497249">"შეეხეთ ისევ გასახსნელად"</string>
     <string name="tap_again" msgid="1315420114387908655">"შეეხეთ ხელახლა"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"გასახსნელად გადაფურცლეთ ზემოთ"</string>
-    <string name="keyguard_unlock_press" msgid="8488350566398524740">"დააჭირეთ გასახსნელად"</string>
+    <string name="keyguard_unlock_press" msgid="9140109453735019209">"გასახსნელად დააჭირეთ განბლოკვის ხატულას"</string>
+    <string name="keyguard_face_successful_unlock_press" msgid="25520941264602588">"განიბლოკა სახით. გასახსნელად დააჭირეთ განბლოკვის ხატულას."</string>
     <string name="keyguard_retry" msgid="886802522584053523">"ხელახლა საცდელად გადაფურცლეთ ზემოთ"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"განბლოკეთ NFC-ის გამოსაყენებლად"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"ამ მოწყობილობას ფლობს თქვენი ორგანიზაცია"</string>
@@ -320,7 +334,6 @@
     <string name="keyguard_indication_charging_time_dock" msgid="6150404291427377863">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • დამტენი სამაგრი • დატენამდე დარჩა <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"მომხმარებლის გადართვა"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"ამ სესიის ყველა აპი და მონაცემი წაიშლება."</string>
-    <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"ამოშლა"</string>
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"სტუმარო, გვიხარია, რომ დაბრუნდით!"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"გსურთ, თქვენი სესიის გაგრძელება?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"ხელახლა დაწყება"</string>
@@ -766,6 +779,12 @@
     <string name="controls_dialog_ok" msgid="2770230012857881822">"დამატება"</string>
     <string name="controls_dialog_message" msgid="342066938390663844">"შემოთავაზებულია <xliff:g id="APP">%s</xliff:g>-ის მიერ"</string>
     <string name="controls_tile_locked" msgid="731547768182831938">"მოწყობილ. ჩაკეტილია"</string>
+    <string name="controls_settings_show_controls_dialog_title" msgid="3357852503553809554">"გსურთ მოწყობილობების ჩვენება და მართვა ჩაკეტილი ეკრანიდან?"</string>
+    <string name="controls_settings_show_controls_dialog_message" msgid="7666211700524587969">"შეგიძლიათ დაამატოთ მართვის საშუალებები გარე მოწყობილობებისთვის, ჩაკეტილ ეკრანზე.\n\nთქვენი მოწყობილობის აპმა შეიძლება მოგცეთ საშუალება, მართოთ ზოგიერთი მოწყობილობა თქვენი ტელეფონის ან ტაბლეტის განბლოკვის გარეშე.\n\nცვლილებების შეტანა ნებისმიერ დროს შეგიძლიათ პარამეტრებიდან."</string>
+    <string name="controls_settings_trivial_controls_dialog_title" msgid="7593188157655036677">"გსურთ მოწყობილობების მართვა ჩაკეტილი ეკრანიდან?"</string>
+    <string name="controls_settings_trivial_controls_dialog_message" msgid="237183787721917586">"შეგიძლიათ ზოგიერთი მოწყობილობის მართვა ტელეფონის ან ტაბლეტის განბლოკვის გარეშე.\n\nთქვენი მოწყობილობის აპი განსაზღვრავს, რომელი მოწყობილობა იმართება ამგვარად."</string>
+    <string name="controls_settings_dialog_neutral_button" msgid="4514446354793124140">"არა, გმადლობთ"</string>
+    <string name="controls_settings_dialog_positive_button" msgid="436070672551674863">"დიახ"</string>
     <string name="controls_pin_use_alphanumeric" msgid="8478371861023048414">"PIN-კოდი შეიცავს ასოებს ან სიმბოლოებს"</string>
     <string name="controls_pin_verify" msgid="3452778292918877662">"დაადასტურეთ <xliff:g id="DEVICE">%s</xliff:g>"</string>
     <string name="controls_pin_wrong" msgid="6162694056042164211">"PIN-კოდი არასწორია"</string>
@@ -775,8 +794,7 @@
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"გადაფურცლეთ მეტის სანახავად"</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"მიმდინარეობს რეკომენდაციების ჩატვირთვა"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"მედია"</string>
-    <!-- no translation found for controls_media_close_session (4780485355795635052) -->
-    <skip />
+    <string name="controls_media_close_session" msgid="4780485355795635052">"დაიმალოს მედიის ეს კონტროლერი <xliff:g id="APP_NAME">%1$s</xliff:g> აპში?"</string>
     <string name="controls_media_active_session" msgid="3146882316024153337">"მედიის მიმდინარე სესიის დამალვა შეუძლებელია."</string>
     <string name="controls_media_dismiss_button" msgid="4485675693008031646">"დამალვა"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"გაგრძელება"</string>
@@ -815,6 +833,13 @@
     <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"ახალი მოწყობილობის დაწყვილება"</string>
     <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"ამ სესიის ტრანსლირებისთვის გახსენით აპი."</string>
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"უცნობი აპი"</string>
+    <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"ტრანსლირების მუშაობის პრინციპი"</string>
+    <string name="media_output_broadcast" msgid="3555580945878071543">"ტრანსლაცია"</string>
+    <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"თქვენთან ახლოს მყოფ ხალხს თავსებადი Bluetooth მოწყობილობით შეუძლიათ თქვენ მიერ ტრანსლირებული მედიის მოსმენა"</string>
+    <string name="media_output_broadcasting_message" msgid="4150299923404886073">"თქვენი ტრანსლაციის მოსასმენად ახლომახლო მყოფ ხალხს შეუძლია თავსებადი Bluetooth მოწყობილობებით თქვენი QR კოდის დასკანირება ან ტრანსლაციის სახელისა და პაროლის გამოყენება"</string>
+    <string name="media_output_broadcast_name" msgid="8786127091542624618">"ტრანსლაციის სახელი"</string>
+    <string name="media_output_broadcast_code" msgid="870795639644728542">"პაროლი"</string>
+    <string name="media_output_broadcast_dialog_save" msgid="7910865591430010198">"შენახვა"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"ანაწყობის ნომერი"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"ანაწყობის ნომერი დაკოპირებულია გაცვლის ბუფერში."</string>
     <string name="basic_status" msgid="2315371112182658176">"მიმოწერის გახსნა"</string>
@@ -891,7 +916,7 @@
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"აქტიური აპები"</string>
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"შეწყვეტა"</string>
     <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"შეწყვეტილია"</string>
-    <string name="clipboard_edit_text_copy" msgid="770856373439969178">"კოპირება"</string>
+    <string name="clipboard_edit_text_done" msgid="4551887727694022409">"მზადაა"</string>
     <string name="clipboard_overlay_text_copied" msgid="1872624400464891363">"კოპირებულია"</string>
     <string name="clipboard_edit_source" msgid="9156488177277788029">"<xliff:g id="APPNAME">%1$s</xliff:g>-დან"</string>
     <string name="clipboard_dismiss_description" msgid="7544573092766945657">"მომხმარებლის ინტერფეისის ასლის გაუქმება"</string>

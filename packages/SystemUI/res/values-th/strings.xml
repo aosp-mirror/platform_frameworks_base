@@ -34,6 +34,10 @@
     <string name="status_bar_settings_auto_rotation" msgid="8329080442278431708">"หมุนหน้าจออัตโนมัติ"</string>
     <string name="usb_device_permission_prompt" msgid="4414719028369181772">"อนุญาตให้ <xliff:g id="APPLICATION">%1$s</xliff:g> เข้าถึง <xliff:g id="USB_DEVICE">%2$s</xliff:g> ไหม"</string>
     <string name="usb_device_permission_prompt_warn" msgid="2309129784984063656">"อนุญาตให้ <xliff:g id="APPLICATION">%1$s</xliff:g> เข้าถึง <xliff:g id="USB_DEVICE">%2$s</xliff:g> ไหม\nแอปนี้ไม่ได้รับอนุญาตให้อัดเสียงแต่จะอัดเสียงผ่านอุปกรณ์ USB นี้ได้"</string>
+    <string name="usb_audio_device_permission_prompt_title" msgid="4221351137250093451">"อนุญาตให้ <xliff:g id="APPLICATION">%1$s</xliff:g> เข้าถึง <xliff:g id="USB_DEVICE">%2$s</xliff:g> ใช่ไหม"</string>
+    <string name="usb_audio_device_confirm_prompt_title" msgid="8828406516732985696">"เปิด <xliff:g id="APPLICATION">%1$s</xliff:g> เพื่อจัดการ <xliff:g id="USB_DEVICE">%2$s</xliff:g> ใช่ไหม"</string>
+    <string name="usb_audio_device_prompt_warn" msgid="2504972133361130335">"แอปนี้ไม่ได้รับอนุญาตให้อัดเสียงแต่จะอัดเสียงผ่านอุปกรณ์ USB นี้ได้ การใช้ <xliff:g id="APPLICATION">%1$s</xliff:g> กับอุปกรณ์นี้อาจทำให้คุณไม่ได้ยินเสียงสายเรียกเข้า การแจ้งเตือน และการปลุก"</string>
+    <string name="usb_audio_device_prompt" msgid="7944987408206252949">"การใช้ <xliff:g id="APPLICATION">%1$s</xliff:g> กับอุปกรณ์นี้อาจทำให้คุณไม่ได้ยินเสียงสายเรียกเข้า การแจ้งเตือน และการปลุก"</string>
     <string name="usb_accessory_permission_prompt" msgid="717963550388312123">"อนุญาตให้ <xliff:g id="APPLICATION">%1$s</xliff:g> เข้าถึง <xliff:g id="USB_ACCESSORY">%2$s</xliff:g> ไหม"</string>
     <string name="usb_device_confirm_prompt" msgid="4091711472439910809">"เปิด <xliff:g id="APPLICATION">%1$s</xliff:g> เพื่อจัดการ <xliff:g id="USB_DEVICE">%2$s</xliff:g> ไหม"</string>
     <string name="usb_device_confirm_prompt_warn" msgid="990208659736311769">"เปิด <xliff:g id="APPLICATION">%1$s</xliff:g> เพื่อจัดการ <xliff:g id="USB_DEVICE">%2$s</xliff:g> ใช่ไหม\nแอปนี้ไม่ได้รับอนุญาตให้อัดเสียงแต่จะอัดเสียงผ่านอุปกรณ์ USB นี้ได้"</string>
@@ -131,7 +135,8 @@
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="2242167416140740920">"ตรวจสอบสิทธิ์ใบหน้าแล้ว"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"ยืนยันแล้ว"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"แตะยืนยันเพื่อดำเนินการให้เสร็จสมบูรณ์"</string>
-    <string name="biometric_dialog_tap_confirm_with_face" msgid="1597899891472340950">"ปลดล็อกโดยใช้ใบหน้าแล้ว กดเพื่อดำเนินการต่อ"</string>
+    <!-- no translation found for biometric_dialog_tap_confirm_with_face (1092050545851021991) -->
+    <skip />
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"ตรวจสอบสิทธิ์แล้ว"</string>
     <string name="biometric_dialog_use_pin" msgid="8385294115283000709">"ใช้ PIN"</string>
     <string name="biometric_dialog_use_pattern" msgid="2315593393167211194">"ใช้รูปแบบ"</string>
@@ -287,6 +292,15 @@
     <string name="sensor_privacy_start_use_mic_dialog_content" msgid="1624701280680913717">"การดำเนินการนี้จะเลิกบล็อกสิทธิ์เข้าถึงของแอปและบริการทั้งหมดที่ได้รับอนุญาตให้ใช้ไมโครโฟนของคุณ"</string>
     <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"การดำเนินการนี้จะเลิกบล็อกสิทธิ์เข้าถึงของแอปและบริการทั้งหมดที่ได้รับอนุญาตให้ใช้กล้องของคุณ"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_content" msgid="3577642558418404919">"การดำเนินการนี้จะเลิกบล็อกสิทธิ์เข้าถึงของแอปและบริการทั้งหมดที่ได้รับอนุญาตให้ใช้กล้องหรือไมโครโฟนของคุณ"</string>
+    <string name="sensor_privacy_start_use_mic_blocked_dialog_title" msgid="2640140287496469689">"ไมโครโฟนถูกบล็อก"</string>
+    <string name="sensor_privacy_start_use_camera_blocked_dialog_title" msgid="7398084286822440384">"กล้องถูกบล็อก"</string>
+    <string name="sensor_privacy_start_use_mic_camera_blocked_dialog_title" msgid="195236134743281973">"ไมโครโฟนและกล้องถูกบล็อก"</string>
+    <string name="sensor_privacy_start_use_mic_blocked_dialog_content" msgid="2138318880682877747">"หากต้องการเลิกบล็อก ให้สลับสวิตช์ความเป็นส่วนตัวบนอุปกรณ์ไปที่ตำแหน่งเปิดไมโครโฟน เพื่อให้สิทธิ์การเข้าถึงไมโครโฟน ดูตำแหน่งสวิตช์ความเป็นส่วนตัวบนอุปกรณ์ของคุณได้ในคู่มืออุปกรณ์"</string>
+    <string name="sensor_privacy_start_use_camera_blocked_dialog_content" msgid="7216015168047965948">"หากต้องการเลิกบล็อก ให้สลับสวิตช์ความเป็นส่วนตัวบนอุปกรณ์ไปที่ตำแหน่งเปิดกล้อง เพื่อให้สิทธิ์การเข้าถึงกล้อง ดูตำแหน่งสวิตช์ความเป็นส่วนตัวบนอุปกรณ์ของคุณได้ในคู่มืออุปกรณ์"</string>
+    <string name="sensor_privacy_start_use_mic_camera_blocked_dialog_content" msgid="3960837827570483762">"หากต้องการเลิกบล็อก ให้สลับสวิตช์ความเป็นส่วนตัวบนอุปกรณ์ไปที่ตำแหน่งเลิกบล็อก เพื่อให้สิทธิ์การเข้าถึง ดูตำแหน่งสวิตช์ความเป็นส่วนตัวบนอุปกรณ์ของคุณได้ในคู่มืออุปกรณ์"</string>
+    <string name="sensor_privacy_mic_unblocked_toast_content" msgid="306555320557065068">"ใช้งานไมโครโฟนได้"</string>
+    <string name="sensor_privacy_camera_unblocked_toast_content" msgid="7843105715964332311">"ใช้งานกล้องได้"</string>
+    <string name="sensor_privacy_mic_camera_unblocked_toast_content" msgid="7339355093282661115">"ใช้งานไมโครโฟนและกล้องได้"</string>
     <string name="media_seamless_other_device" msgid="4654849800789196737">"อุปกรณ์อื่น"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"สลับภาพรวม"</string>
     <string name="zen_priority_introduction" msgid="3159291973383796646">"คุณจะไม่ถูกรบกวนจากเสียงและการสั่น ยกเว้นเสียงนาฬิกาปลุก การช่วยเตือน กิจกรรม และผู้โทรที่ระบุไว้ คุณจะยังคงได้ยินสิ่งที่คุณเลือกเล่น เช่น เพลง วิดีโอ และเกม"</string>
@@ -297,7 +311,10 @@
     <string name="notification_tap_again" msgid="4477318164947497249">"แตะอีกครั้งเพื่อเปิด"</string>
     <string name="tap_again" msgid="1315420114387908655">"แตะอีกครั้ง"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"เลื่อนขึ้นเพื่อเปิด"</string>
-    <string name="keyguard_unlock_press" msgid="8488350566398524740">"กดเพื่อเปิด"</string>
+    <!-- no translation found for keyguard_unlock_press (9140109453735019209) -->
+    <skip />
+    <!-- no translation found for keyguard_face_successful_unlock_press (25520941264602588) -->
+    <skip />
     <string name="keyguard_retry" msgid="886802522584053523">"เลื่อนขึ้นเพื่อลองอีกครั้ง"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"ปลดล็อกเพื่อใช้ NFC"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"องค์กรของคุณเป็นเจ้าของอุปกรณ์นี้"</string>
@@ -320,7 +337,6 @@
     <string name="keyguard_indication_charging_time_dock" msgid="6150404291427377863">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • กำลังชาร์จบนแท่นชาร์จ • จะเต็มในอีก <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"สลับผู้ใช้"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"ระบบจะลบแอปและข้อมูลทั้งหมดในเซสชันนี้"</string>
-    <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"นำออก"</string>
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"ยินดีต้อนรับผู้เข้าร่วมกลับมาอีกครั้ง"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"คุณต้องการอยู่ในเซสชันต่อไปไหม"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"เริ่มต้นใหม่"</string>
@@ -766,6 +782,12 @@
     <string name="controls_dialog_ok" msgid="2770230012857881822">"เพิ่ม"</string>
     <string name="controls_dialog_message" msgid="342066938390663844">"แนะนำโดย <xliff:g id="APP">%s</xliff:g>"</string>
     <string name="controls_tile_locked" msgid="731547768182831938">"อุปกรณ์ถูกล็อก"</string>
+    <string name="controls_settings_show_controls_dialog_title" msgid="3357852503553809554">"แสดงและควบคุมอุปกรณ์จากหน้าจอล็อกไหม"</string>
+    <string name="controls_settings_show_controls_dialog_message" msgid="7666211700524587969">"คุณเพิ่มการควบคุมอุปกรณ์ภายนอกลงในหน้าจอล็อกได้\n\nแอปของอุปกรณ์อาจอนุญาตให้คุณควบคุมอุปกรณ์บางอย่างได้โดยไม่ต้องปลดล็อกโทรศัพท์หรือแท็บเล็ต\n\nคุณเปลี่ยนแปลงได้ทุกเมื่อในการตั้งค่า"</string>
+    <string name="controls_settings_trivial_controls_dialog_title" msgid="7593188157655036677">"ควบคุมอุปกรณ์จากหน้าจอล็อกไหม"</string>
+    <string name="controls_settings_trivial_controls_dialog_message" msgid="237183787721917586">"คุณควบคุมอุปกรณ์บางอย่างได้โดยไม่ต้องปลดล็อกโทรศัพท์หรือแท็บเล็ต\n\nแอปของอุปกรณ์จะระบุอุปกรณ์ที่สามารถควบคุมด้วยวิธีนี้ได้"</string>
+    <string name="controls_settings_dialog_neutral_button" msgid="4514446354793124140">"ไม่เป็นไร"</string>
+    <string name="controls_settings_dialog_positive_button" msgid="436070672551674863">"มี"</string>
     <string name="controls_pin_use_alphanumeric" msgid="8478371861023048414">"PIN ประกอบด้วยตัวอักษรหรือสัญลักษณ์"</string>
     <string name="controls_pin_verify" msgid="3452778292918877662">"ยืนยัน <xliff:g id="DEVICE">%s</xliff:g>"</string>
     <string name="controls_pin_wrong" msgid="6162694056042164211">"PIN ไม่ถูกต้อง"</string>
@@ -775,8 +797,7 @@
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"เลื่อนเพื่อดูเพิ่มเติม"</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"กำลังโหลดคำแนะนำ"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"สื่อ"</string>
-    <!-- no translation found for controls_media_close_session (4780485355795635052) -->
-    <skip />
+    <string name="controls_media_close_session" msgid="4780485355795635052">"ซ่อนตัวควบคุมสื่อนี้สำหรับ <xliff:g id="APP_NAME">%1$s</xliff:g> ไหม"</string>
     <string name="controls_media_active_session" msgid="3146882316024153337">"ซ่อนเซสชันสื่อในปัจจุบันไม่ได้"</string>
     <string name="controls_media_dismiss_button" msgid="4485675693008031646">"ซ่อน"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"เล่นต่อ"</string>
@@ -815,6 +836,13 @@
     <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"จับคู่อุปกรณ์ใหม่"</string>
     <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"โปรดเปิดแอปหากต้องการแคสต์เซสชันนี้"</string>
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"แอปที่ไม่รู้จัก"</string>
+    <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"วิธีการทำงานของการออกอากาศ"</string>
+    <string name="media_output_broadcast" msgid="3555580945878071543">"ประกาศ"</string>
+    <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"ผู้ที่อยู่ใกล้คุณและมีอุปกรณ์บลูทูธที่รองรับสามารถรับฟังสื่อที่คุณกำลังออกอากาศได้"</string>
+    <string name="media_output_broadcasting_message" msgid="4150299923404886073">"ผู้คนในบริเวณใกล้เคียงที่มีอุปกรณ์บลูทูธที่รองรับสามารถสแกนคิวอาร์โค้ดหรือใช้ชื่อการออกอากาศและรหัสผ่านของคุณเพื่อรับฟังการออกอากาศได้"</string>
+    <string name="media_output_broadcast_name" msgid="8786127091542624618">"ชื่อการออกอากาศ"</string>
+    <string name="media_output_broadcast_code" msgid="870795639644728542">"รหัสผ่าน"</string>
+    <string name="media_output_broadcast_dialog_save" msgid="7910865591430010198">"บันทึก"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"หมายเลขบิลด์"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"คัดลอกหมายเลขบิลด์ไปยังคลิปบอร์ดแล้ว"</string>
     <string name="basic_status" msgid="2315371112182658176">"เปิดการสนทนา"</string>
@@ -891,7 +919,7 @@
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"แอปที่ใช้งานอยู่"</string>
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"หยุด"</string>
     <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"หยุดแล้ว"</string>
-    <string name="clipboard_edit_text_copy" msgid="770856373439969178">"คัดลอก"</string>
+    <string name="clipboard_edit_text_done" msgid="4551887727694022409">"เสร็จ"</string>
     <string name="clipboard_overlay_text_copied" msgid="1872624400464891363">"คัดลอกแล้ว"</string>
     <string name="clipboard_edit_source" msgid="9156488177277788029">"จาก <xliff:g id="APPNAME">%1$s</xliff:g>"</string>
     <string name="clipboard_dismiss_description" msgid="7544573092766945657">"ปิด UI การคัดลอก"</string>

@@ -26,7 +26,7 @@
     <string name="battery_low_percent_format" msgid="4276661262843170964">"Queda un <xliff:g id="PERCENTAGE">%s</xliff:g> de batería."</string>
     <string name="invalid_charger_title" msgid="938685362320735167">"No se puede cargar mediante USB"</string>
     <string name="invalid_charger_text" msgid="2339310107232691577">"Usa el cargador que se incluyó con el dispositivo"</string>
-    <string name="battery_saver_confirmation_title" msgid="1234998463717398453">"¿Deseas activar Ahorro de batería?"</string>
+    <string name="battery_saver_confirmation_title" msgid="1234998463717398453">"¿Quieres activar el Ahorro de batería?"</string>
     <string name="battery_saver_confirmation_title_generic" msgid="2299231884234959849">"Acerca del Ahorro de batería"</string>
     <string name="battery_saver_confirmation_ok" msgid="5042136476802816494">"Activar"</string>
     <string name="battery_saver_start_action" msgid="8353766979886287140">"Activar"</string>
@@ -34,6 +34,10 @@
     <string name="status_bar_settings_auto_rotation" msgid="8329080442278431708">"Girar la pantalla automáticamente"</string>
     <string name="usb_device_permission_prompt" msgid="4414719028369181772">"¿Deseas permitir que <xliff:g id="APPLICATION">%1$s</xliff:g> acceda a <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
     <string name="usb_device_permission_prompt_warn" msgid="2309129784984063656">"¿Quieres permitir que <xliff:g id="APPLICATION">%1$s</xliff:g> acceda a <xliff:g id="USB_DEVICE">%2$s</xliff:g>?\nLa app no tiene permiso para grabar, pero podría capturar audio mediante este dispositivo USB."</string>
+    <string name="usb_audio_device_permission_prompt_title" msgid="4221351137250093451">"¿Deseas permitir que <xliff:g id="APPLICATION">%1$s</xliff:g> acceda a <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
+    <string name="usb_audio_device_confirm_prompt_title" msgid="8828406516732985696">"¿Deseas abrir <xliff:g id="APPLICATION">%1$s</xliff:g> para usar <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
+    <string name="usb_audio_device_prompt_warn" msgid="2504972133361130335">"Aunque no se le otorgó permiso de grabación a esta app, puede capturar audio con este dispositivo USB. Es posible que el uso de <xliff:g id="APPLICATION">%1$s</xliff:g> en este dispositivo impida escuchar llamadas, notificaciones y alarmas."</string>
+    <string name="usb_audio_device_prompt" msgid="7944987408206252949">"Es posible que el uso de <xliff:g id="APPLICATION">%1$s</xliff:g> en este dispositivo impida escuchar llamadas, notificaciones y alarmas."</string>
     <string name="usb_accessory_permission_prompt" msgid="717963550388312123">"¿Deseas permitir que <xliff:g id="APPLICATION">%1$s</xliff:g> acceda a <xliff:g id="USB_ACCESSORY">%2$s</xliff:g>?"</string>
     <string name="usb_device_confirm_prompt" msgid="4091711472439910809">"¿Deseas abrir <xliff:g id="APPLICATION">%1$s</xliff:g> para usar <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
     <string name="usb_device_confirm_prompt_warn" msgid="990208659736311769">"¿Quieres abrir <xliff:g id="APPLICATION">%1$s</xliff:g> para administrar <xliff:g id="USB_DEVICE">%2$s</xliff:g>?\nLa app no tiene permiso para grabar, pero puede capturar audio mediante este dispositivo USB."</string>
@@ -88,12 +92,12 @@
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Procesando grabación pantalla"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Notificación constante para una sesión de grabación de pantalla"</string>
     <string name="screenrecord_start_label" msgid="1750350278888217473">"¿Comenzar a grabar?"</string>
-    <string name="screenrecord_description" msgid="1123231719680353736">"Durante la grabación, el sistema Android puede capturar la información sensible que aparezca en la pantalla o que se reproduzca en el dispositivo. Se incluyen contraseñas, información de pago, fotos, mensajes y audio."</string>
+    <string name="screenrecord_description" msgid="1123231719680353736">"Durante la grabación, el sistema Android puede capturar cualquier información sensible que aparezca en la pantalla o que se reproduzca en el dispositivo. Se incluyen contraseñas, información de pago, fotos, mensajes y audio."</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"Grabar audio"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"Audio del dispositivo"</string>
     <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"Sonidos del dispositivo, como música, llamadas y tonos"</string>
     <string name="screenrecord_mic_label" msgid="2111264835791332350">"Micrófono"</string>
-    <string name="screenrecord_device_audio_and_mic_label" msgid="1831323771978646841">"Micrófono y audio del dispositivo"</string>
+    <string name="screenrecord_device_audio_and_mic_label" msgid="1831323771978646841">"Audio del dispositivo y micrófono"</string>
     <string name="screenrecord_start" msgid="330991441575775004">"Iniciar"</string>
     <string name="screenrecord_ongoing_screen_only" msgid="4459670242451527727">"Grabando pantalla"</string>
     <string name="screenrecord_ongoing_screen_and_audio" msgid="5351133763125180920">"Grabando pantalla y audio"</string>
@@ -131,7 +135,8 @@
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="2242167416140740920">"Se autenticó el rostro"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"Confirmado"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"Presiona Confirmar para completar"</string>
-    <string name="biometric_dialog_tap_confirm_with_face" msgid="1597899891472340950">"Disp. desbloqueado con rostro. Presiona para continuar."</string>
+    <!-- no translation found for biometric_dialog_tap_confirm_with_face (1092050545851021991) -->
+    <skip />
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"Autenticado"</string>
     <string name="biometric_dialog_use_pin" msgid="8385294115283000709">"Usar PIN"</string>
     <string name="biometric_dialog_use_pattern" msgid="2315593393167211194">"Usar patrón"</string>
@@ -287,6 +292,15 @@
     <string name="sensor_privacy_start_use_mic_dialog_content" msgid="1624701280680913717">"Esta acción desbloquea el acceso para todos los servicios y las apps que tengan permitido usar el micrófono."</string>
     <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"Esta acción desbloquea el acceso para todos los servicios y las apps que tengan permitido usar la cámara."</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_content" msgid="3577642558418404919">"Esta acción permite que todas las aplicaciones y servicios que tengan permiso puedan usar la cámara o el micrófono."</string>
+    <string name="sensor_privacy_start_use_mic_blocked_dialog_title" msgid="2640140287496469689">"El micrófono está bloqueado"</string>
+    <string name="sensor_privacy_start_use_camera_blocked_dialog_title" msgid="7398084286822440384">"La cámara está bloqueada"</string>
+    <string name="sensor_privacy_start_use_mic_camera_blocked_dialog_title" msgid="195236134743281973">"El micrófono y la cámara están bloqueados"</string>
+    <string name="sensor_privacy_start_use_mic_blocked_dialog_content" msgid="2138318880682877747">"Para desbloquearlo, mueve el interruptor de privacidad del dispositivo a la posición de micrófono activado a fin de permitir el acceso al micrófono. Consulta el manual del dispositivo para encontrar el interruptor de privacidad."</string>
+    <string name="sensor_privacy_start_use_camera_blocked_dialog_content" msgid="7216015168047965948">"Para desbloquearla, mueve el interruptor de privacidad del dispositivo a la posición de cámara activada a fin de permitir el acceso a la cámara. Consulta el manual del dispositivo para encontrar el interruptor de privacidad."</string>
+    <string name="sensor_privacy_start_use_mic_camera_blocked_dialog_content" msgid="3960837827570483762">"Para desbloquearlos, mueve el interruptor de privacidad del dispositivo a la posición de desactivados a fin de permitir el acceso. Consulta el manual del dispositivo para encontrar el interruptor de privacidad."</string>
+    <string name="sensor_privacy_mic_unblocked_toast_content" msgid="306555320557065068">"Micrófono disponible"</string>
+    <string name="sensor_privacy_camera_unblocked_toast_content" msgid="7843105715964332311">"Cámara disponible"</string>
+    <string name="sensor_privacy_mic_camera_unblocked_toast_content" msgid="7339355093282661115">"Micrófono y cámara disponibles"</string>
     <string name="media_seamless_other_device" msgid="4654849800789196737">"Otro dispositivo"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"Ocultar o mostrar Recientes"</string>
     <string name="zen_priority_introduction" msgid="3159291973383796646">"No te molestarán los sonidos ni las vibraciones, excepto las alarmas, los recordatorios, los eventos y las llamadas de los emisores que especifiques. Podrás escuchar el contenido que reproduzcas, como música, videos y juegos."</string>
@@ -297,7 +311,10 @@
     <string name="notification_tap_again" msgid="4477318164947497249">"Presiona de nuevo para abrir"</string>
     <string name="tap_again" msgid="1315420114387908655">"Presiona otra vez"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"Desliza el dedo hacia arriba para abrir"</string>
-    <string name="keyguard_unlock_press" msgid="8488350566398524740">"Presiona para abrir"</string>
+    <!-- no translation found for keyguard_unlock_press (9140109453735019209) -->
+    <skip />
+    <!-- no translation found for keyguard_face_successful_unlock_press (25520941264602588) -->
+    <skip />
     <string name="keyguard_retry" msgid="886802522584053523">"Desliza el dedo hacia arriba para volver a intentarlo"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"Desbloquea el dispositivo para usar NFC"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"Este dispositivo pertenece a tu organización"</string>
@@ -320,7 +337,6 @@
     <string name="keyguard_indication_charging_time_dock" msgid="6150404291427377863">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Conectado y cargando • Carga completa en <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Cambiar usuario"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Se eliminarán las aplicaciones y los datos de esta sesión."</string>
-    <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"Quitar"</string>
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"¡Hola de nuevo, invitado!"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"¿Quieres retomar la sesión?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"Volver a empezar"</string>
@@ -766,6 +782,12 @@
     <string name="controls_dialog_ok" msgid="2770230012857881822">"Agregar"</string>
     <string name="controls_dialog_message" msgid="342066938390663844">"Sugerido por <xliff:g id="APP">%s</xliff:g>"</string>
     <string name="controls_tile_locked" msgid="731547768182831938">"Dispos. bloqueado"</string>
+    <string name="controls_settings_show_controls_dialog_title" msgid="3357852503553809554">"¿Quieres mostrar y controlar dispositivos desde la pantalla de bloqueo?"</string>
+    <string name="controls_settings_show_controls_dialog_message" msgid="7666211700524587969">"Puedes agregar controles para dispositivos externos a la pantalla de bloqueo.\n\nLa app de tu dispositivo podría permitirte controlar algunos dispositivos sin desbloquear el teléfono o la tablet.\n\nPuedes realizar cambios en cualquier momento en Configuración."</string>
+    <string name="controls_settings_trivial_controls_dialog_title" msgid="7593188157655036677">"¿Quieres controlar dispositivos desde la pantalla de bloqueo?"</string>
+    <string name="controls_settings_trivial_controls_dialog_message" msgid="237183787721917586">"Puedes controlar algunos dispositivos sin desbloquear el teléfono o la tablet.\n\nLa app de tu dispositivo determina los que se pueden controlar de esa manera."</string>
+    <string name="controls_settings_dialog_neutral_button" msgid="4514446354793124140">"No, gracias"</string>
+    <string name="controls_settings_dialog_positive_button" msgid="436070672551674863">"Sí"</string>
     <string name="controls_pin_use_alphanumeric" msgid="8478371861023048414">"El PIN contiene letras o símbolos"</string>
     <string name="controls_pin_verify" msgid="3452778292918877662">"Verificar <xliff:g id="DEVICE">%s</xliff:g>"</string>
     <string name="controls_pin_wrong" msgid="6162694056042164211">"PIN incorrecto"</string>
@@ -775,8 +797,7 @@
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"Desliza el dedo para ver más elementos"</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"Cargando recomendaciones"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"Contenido multimedia"</string>
-    <!-- no translation found for controls_media_close_session (4780485355795635052) -->
-    <skip />
+    <string name="controls_media_close_session" msgid="4780485355795635052">"¿Quieres ocultar este control multimedia para <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="controls_media_active_session" msgid="3146882316024153337">"No se puede ocultar la sesión multimedia actual."</string>
     <string name="controls_media_dismiss_button" msgid="4485675693008031646">"Ocultar"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"Reanudar"</string>
@@ -796,8 +817,7 @@
     <string name="media_move_closer_to_end_cast" msgid="6495907340926563656">"Acércate a <xliff:g id="DEVICENAME">%1$s</xliff:g> para reproducir aquí"</string>
     <string name="media_transfer_playing_different_device" msgid="7186806382609785610">"Reproduciendo en <xliff:g id="DEVICENAME">%1$s</xliff:g>"</string>
     <string name="media_transfer_playing_this_device" msgid="1856890686844499172">"Reproduciendo en este teléfono"</string>
-    <!-- no translation found for media_transfer_failed (7955354964610603723) -->
-    <skip />
+    <string name="media_transfer_failed" msgid="7955354964610603723">"Se produjo un error. Vuelve a intentarlo."</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"Inactivo. Verifica la app"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"No se encontró"</string>
     <string name="controls_error_removed_title" msgid="1207794911208047818">"El control no está disponible"</string>
@@ -816,6 +836,13 @@
     <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"Vincular dispositivo nuevo"</string>
     <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"Para transmitir esta sesión, abre la app"</string>
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"App desconocida"</string>
+    <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Cómo funciona la transmisión"</string>
+    <string name="media_output_broadcast" msgid="3555580945878071543">"Transmisión"</string>
+    <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"Las personas cercanas con dispositivos Bluetooth compatibles pueden escuchar el contenido multimedia que transmites"</string>
+    <string name="media_output_broadcasting_message" msgid="4150299923404886073">"Para escuchar la transmisión, las personas cercanas con dispositivos Bluetooth compatibles pueden escanear tu código QR o usar tu nombre y contraseña de transmisión"</string>
+    <string name="media_output_broadcast_name" msgid="8786127091542624618">"Nombre de transmisión"</string>
+    <string name="media_output_broadcast_code" msgid="870795639644728542">"Contraseña"</string>
+    <string name="media_output_broadcast_dialog_save" msgid="7910865591430010198">"Guardar"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"Número de compilación"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"Se copió el número de compilación en el portapapeles."</string>
     <string name="basic_status" msgid="2315371112182658176">"Conversación abierta"</string>
@@ -892,7 +919,7 @@
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"Apps activas"</string>
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"Detener"</string>
     <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"Detenida"</string>
-    <string name="clipboard_edit_text_copy" msgid="770856373439969178">"Copiar"</string>
+    <string name="clipboard_edit_text_done" msgid="4551887727694022409">"Listo"</string>
     <string name="clipboard_overlay_text_copied" msgid="1872624400464891363">"Se copió"</string>
     <string name="clipboard_edit_source" msgid="9156488177277788029">"De <xliff:g id="APPNAME">%1$s</xliff:g>"</string>
     <string name="clipboard_dismiss_description" msgid="7544573092766945657">"Descartar la copia de la IU"</string>

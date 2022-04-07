@@ -22,7 +22,7 @@
     <string name="app_label" msgid="4811759950673118541">"میانای کاربر سیستم"</string>
     <string name="battery_low_title" msgid="5319680173344341779">"«بهینه‌سازی باتری» روشن شود؟"</string>
     <string name="battery_low_description" msgid="3282977755476423966">"<xliff:g id="PERCENTAGE">%s</xliff:g> از باتری‌تان باقی مانده است. «بهینه‌سازی باتری» زمینه تیره را روشن می‌کند، فعالیت‌های پس‌زمینه را محدود می‌کند، و اعلان‌ها را به‌تأخیر می‌اندازد."</string>
-    <string name="battery_low_intro" msgid="5148725009653088790">"«بهینه‌سازی باتری» زمینه تیره را روشن می‌کند، فعالیت‌های پس‌زمینه را محدود می‌کند، و اعلان‌ها را به‌تأخیر می‌اندازد."</string>
+    <string name="battery_low_intro" msgid="5148725009653088790">"«بهینه‌سازی باتری» زمینه «تیره» را روشن می‌کند، فعالیت‌های پس‌زمینه را محدود می‌کند، و اعلان‌ها را به‌تأخیر می‌اندازد."</string>
     <string name="battery_low_percent_format" msgid="4276661262843170964">"<xliff:g id="PERCENTAGE">%s</xliff:g> باقی مانده است"</string>
     <string name="invalid_charger_title" msgid="938685362320735167">"‏ازطریق USB شارژ نمی‌شود"</string>
     <string name="invalid_charger_text" msgid="2339310107232691577">"از شارژر ارائه‌شده با دستگاه استفاده کنید"</string>
@@ -34,6 +34,10 @@
     <string name="status_bar_settings_auto_rotation" msgid="8329080442278431708">"چرخش خودکار صفحه"</string>
     <string name="usb_device_permission_prompt" msgid="4414719028369181772">"به <xliff:g id="APPLICATION">%1$s</xliff:g> برای دسترسی به <xliff:g id="USB_DEVICE">%2$s</xliff:g> اجازه داده شود؟"</string>
     <string name="usb_device_permission_prompt_warn" msgid="2309129784984063656">"‏به <xliff:g id="APPLICATION">%1$s</xliff:g> اجازه می‌دهید به <xliff:g id="USB_DEVICE">%2$s</xliff:g>دسترسی داشته باشد؟\nمجوز ضبط به این برنامه داده نشده است اما می‌تواند صدا را ازطریق این دستگاه USB ضبط کند."</string>
+    <string name="usb_audio_device_permission_prompt_title" msgid="4221351137250093451">"به <xliff:g id="APPLICATION">%1$s</xliff:g> اجازه دسترسی به <xliff:g id="USB_DEVICE">%2$s</xliff:g> داده شود؟"</string>
+    <string name="usb_audio_device_confirm_prompt_title" msgid="8828406516732985696">"<xliff:g id="APPLICATION">%1$s</xliff:g> برای استفاده از <xliff:g id="USB_DEVICE">%2$s</xliff:g> باز شود؟"</string>
+    <string name="usb_audio_device_prompt_warn" msgid="2504972133361130335">"‏اجازه ضبط به این برنامه داده نشده است اما می‌تواند صدا را ازطریق این دستگاه USB ضبط کند. استفاده از <xliff:g id="APPLICATION">%1$s</xliff:g> با این دستگاه می‌تواند مانع از شنیدن تماس‌ها، اعلان‌ها، و زنگ‌های ساعت شود."</string>
+    <string name="usb_audio_device_prompt" msgid="7944987408206252949">"استفاده از <xliff:g id="APPLICATION">%1$s</xliff:g> با این دستگاه می‌تواند مانع از شنیدن تماس‌ها، اعلان‌ها، و زنگ‌های ساعت شود."</string>
     <string name="usb_accessory_permission_prompt" msgid="717963550388312123">"به <xliff:g id="APPLICATION">%1$s</xliff:g> برای دسترسی به <xliff:g id="USB_ACCESSORY">%2$s</xliff:g> اجازه داده شود؟"</string>
     <string name="usb_device_confirm_prompt" msgid="4091711472439910809">"برای استفاده از <xliff:g id="USB_DEVICE">%2$s</xliff:g>، <xliff:g id="APPLICATION">%1$s</xliff:g> باز شود؟"</string>
     <string name="usb_device_confirm_prompt_warn" msgid="990208659736311769">"‏<xliff:g id="APPLICATION">%1$s</xliff:g> برای رسیدگی به <xliff:g id="USB_DEVICE">%2$s</xliff:g> باز شود؟\nمجوز ضبط به این برنامه داده نشده است اما می‌تواند صدا را ازطریق این دستگاه USB ضبط کند."</string>
@@ -131,7 +135,8 @@
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="2242167416140740920">"چهره اصالت‌سنجی شد"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"تأیید شد"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"برای تکمیل، روی تأیید ضربه بزنید"</string>
-    <string name="biometric_dialog_tap_confirm_with_face" msgid="1597899891472340950">"قفل با چهره‌تان باز شد. برای ادامه دادن، فشار دهید."</string>
+    <!-- no translation found for biometric_dialog_tap_confirm_with_face (1092050545851021991) -->
+    <skip />
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"راستی‌آزمایی‌شده"</string>
     <string name="biometric_dialog_use_pin" msgid="8385294115283000709">"استفاده از پین"</string>
     <string name="biometric_dialog_use_pattern" msgid="2315593393167211194">"استفاده از الگو"</string>
@@ -287,6 +292,15 @@
     <string name="sensor_privacy_start_use_mic_dialog_content" msgid="1624701280680913717">"با این کار دسترسی برای همه برنامه‌ها و سرویس‌هایی که مجاز هستند از میکروفونتان استفاده کنند لغو انسداد می‌شود."</string>
     <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"با این کار دسترسی برای همه برنامه‌ها و سرویس‌هایی که مجاز هستند از دوربینتان استفاده کنند لغو انسداد می‌شود."</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_content" msgid="3577642558418404919">"با این کار دسترسی برای همه برنامه‌ها و دستگاه‌هایی که مجاز هستند از دوربین یا میکروفونتان استفاده کنند لغو انسداد می‌شود."</string>
+    <string name="sensor_privacy_start_use_mic_blocked_dialog_title" msgid="2640140287496469689">"میکروفن مسدود شده است"</string>
+    <string name="sensor_privacy_start_use_camera_blocked_dialog_title" msgid="7398084286822440384">"دوربین مسدود شده است"</string>
+    <string name="sensor_privacy_start_use_mic_camera_blocked_dialog_title" msgid="195236134743281973">"میکروفون و دوربین مسدود شده‌اند"</string>
+    <string name="sensor_privacy_start_use_mic_blocked_dialog_content" msgid="2138318880682877747">"برای لغو انسداد، کلید حریم‌خصوصی روی دستگاه را به موقعیت میکروفون روشن ببرید تا دسترسی به میکروفون مجاز شود. برای پیدا کردن کلید حریم‌خصوصی روی دستگاه، به دفترچه راهنمای دستگاه مراجعه کنید."</string>
+    <string name="sensor_privacy_start_use_camera_blocked_dialog_content" msgid="7216015168047965948">"برای لغو انسداد، کلید حریم‌خصوصی روی دستگاه را به موقعیت دوربین روشن ببرید تا دسترسی به دوربین مجاز شود. برای پیدا کردن کلید حریم‌خصوصی روی دستگاه، به دفترچه راهنمای دستگاه مراجعه کنید."</string>
+    <string name="sensor_privacy_start_use_mic_camera_blocked_dialog_content" msgid="3960837827570483762">"برای لغو انسداد آن، کلید حریم‌خصوصی روی دستگاه را به موقعیت لغو انسداد ببرید تا دسترسی مجاز شود. برای پیدا کردن کلید حریم‌خصوصی روی دستگاه، به دفترچه راهنمای دستگاه مراجعه کنید."</string>
+    <string name="sensor_privacy_mic_unblocked_toast_content" msgid="306555320557065068">"میکروفون دردسترس است"</string>
+    <string name="sensor_privacy_camera_unblocked_toast_content" msgid="7843105715964332311">"دوربین دردسترس است"</string>
+    <string name="sensor_privacy_mic_camera_unblocked_toast_content" msgid="7339355093282661115">"میکروفون و دوربین دردسترس‌اند"</string>
     <string name="media_seamless_other_device" msgid="4654849800789196737">"دستگاه دیگر"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"تغییر وضعیت نمای کلی"</string>
     <string name="zen_priority_introduction" msgid="3159291973383796646">"به‌جز هشدارها، یادآوری‌ها، رویدادها و تماس‌گیرندگانی که خودتان مشخص می‌کنید، هیچ صدا و لرزشی نخواهید داشت. همچنان صدای مواردی را که پخش می‌کنید می‌شنوید (ازجمله صدای موسیقی، ویدیو و بازی)."</string>
@@ -297,7 +311,10 @@
     <string name="notification_tap_again" msgid="4477318164947497249">"دوباره ضربه بزنید تا باز شود"</string>
     <string name="tap_again" msgid="1315420114387908655">"دوباره ضربه بزنید"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"برای باز کردن، انگشتتان را تند به‌بالا بکشید"</string>
-    <string name="keyguard_unlock_press" msgid="8488350566398524740">"برای باز کردن فشار دهید"</string>
+    <!-- no translation found for keyguard_unlock_press (9140109453735019209) -->
+    <skip />
+    <!-- no translation found for keyguard_face_successful_unlock_press (25520941264602588) -->
+    <skip />
     <string name="keyguard_retry" msgid="886802522584053523">"برای امتحان مجدد، انگشتتان را تند به‌بالا بکشید"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"‏برای استفاده از NFC، قفل را باز کنید"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"این دستگاه به سازمان شما تعلق دارد"</string>
@@ -320,7 +337,6 @@
     <string name="keyguard_indication_charging_time_dock" msgid="6150404291427377863">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • پایه شارژ • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> تا شارژ کامل"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"تغییر کاربر"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"همه برنامه‌ها و داده‌های این جلسه حذف خواهد شد."</string>
-    <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"حذف"</string>
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"مهمان گرامی، بازگشتتان را خوش آمد می‌گوییم!"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"آیا می‌خواهید جلسه‌تان را ادامه دهید؟"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"شروع مجدد"</string>
@@ -766,6 +782,12 @@
     <string name="controls_dialog_ok" msgid="2770230012857881822">"افزودن"</string>
     <string name="controls_dialog_message" msgid="342066938390663844">"پیشنهاد <xliff:g id="APP">%s</xliff:g>"</string>
     <string name="controls_tile_locked" msgid="731547768182831938">"دستگاه قفل است"</string>
+    <string name="controls_settings_show_controls_dialog_title" msgid="3357852503553809554">"امکان دیدن و کنترل دستگاه‌ها از صفحه قفل وجود داشته باشد؟"</string>
+    <string name="controls_settings_show_controls_dialog_message" msgid="7666211700524587969">"می‌توانید کنترل‌هایی برای دستگاه‌های خارجی به صفحه قفل اضافه کنید.\n\nبرنامه دستگاهتان ممکن است به شما اجازه دهد بعضی‌از دستگاه‌ها را بدون باز کردن قفل تلفن یا رایانه لوحی‌تان کنترل کنید.\n\nهرزمان بخواهید می‌توانید در «تنظیمات» تغییراتی اعمال کنید."</string>
+    <string name="controls_settings_trivial_controls_dialog_title" msgid="7593188157655036677">"امکان کنترل دستگاه‌ها از صفحه قفل وجود داشته باشد؟"</string>
+    <string name="controls_settings_trivial_controls_dialog_message" msgid="237183787721917586">"می‌توانید بعضی‌از دستگاه‌ها را بدون باز کردن قفل تلفن یا رایانه لوحی‌تان کنترل کنید.\n\nبرنامه دستگاهتان تعیین می‌کند کدام دستگاه‌ها را می‌توان به این روش کنترل کرد."</string>
+    <string name="controls_settings_dialog_neutral_button" msgid="4514446354793124140">"نه متشکرم"</string>
+    <string name="controls_settings_dialog_positive_button" msgid="436070672551674863">"بله"</string>
     <string name="controls_pin_use_alphanumeric" msgid="8478371861023048414">"پین شامل حروف یا نماد است"</string>
     <string name="controls_pin_verify" msgid="3452778292918877662">"تأیید <xliff:g id="DEVICE">%s</xliff:g>"</string>
     <string name="controls_pin_wrong" msgid="6162694056042164211">"پین اشتباه است"</string>
@@ -775,8 +797,7 @@
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"برای دیدن موارد بیشتر، تند بکشید"</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"درحال بار کردن توصیه‌ها"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"رسانه"</string>
-    <!-- no translation found for controls_media_close_session (4780485355795635052) -->
-    <skip />
+    <string name="controls_media_close_session" msgid="4780485355795635052">"این کنترل رسانه برای <xliff:g id="APP_NAME">%1$s</xliff:g> پنهان شود؟"</string>
     <string name="controls_media_active_session" msgid="3146882316024153337">"جلسه رسانه کنونی نمی‌تواند پنهان شود."</string>
     <string name="controls_media_dismiss_button" msgid="4485675693008031646">"پنهان کردن"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"ازسرگیری"</string>
@@ -815,6 +836,13 @@
     <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"مرتبط کردن دستگاه جدید"</string>
     <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"برای ارسال محتوای این جلسه، لطفاً برنامه را باز کنید."</string>
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"برنامه ناشناس"</string>
+    <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"همه‌فرتستی چطور کار می‌کند"</string>
+    <string name="media_output_broadcast" msgid="3555580945878071543">"همه‌فرستی"</string>
+    <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"‏افرادی که در اطرافتان دستگاه‌های Bluetooth سازگار دارند می‌توانند به رسانه‌ای که همه‌فرستی می‌کنید گوش کنند"</string>
+    <string name="media_output_broadcasting_message" msgid="4150299923404886073">"‏افرادی که در اطرافتان دستگاه Bluetooth سازگار دارند می‌توانند با اسکن کردن کد QR شما یا بااستفاده از نام و گذرواژه همه‌فرستی‌تان به آن گوش دهند"</string>
+    <string name="media_output_broadcast_name" msgid="8786127091542624618">"نام همه‌فرستی"</string>
+    <string name="media_output_broadcast_code" msgid="870795639644728542">"گذرواژه"</string>
+    <string name="media_output_broadcast_dialog_save" msgid="7910865591430010198">"ذخیره کردن"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"شماره ساخت"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"شماره ساخت در بریده‌دان کپی شد."</string>
     <string name="basic_status" msgid="2315371112182658176">"باز کردن مکالمه"</string>
@@ -891,7 +919,7 @@
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"برنامه‌های فعال"</string>
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"متوقف کردن"</string>
     <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"متوقف شده"</string>
-    <string name="clipboard_edit_text_copy" msgid="770856373439969178">"کپی کردن"</string>
+    <string name="clipboard_edit_text_done" msgid="4551887727694022409">"تمام"</string>
     <string name="clipboard_overlay_text_copied" msgid="1872624400464891363">"کپی شد"</string>
     <string name="clipboard_edit_source" msgid="9156488177277788029">"از <xliff:g id="APPNAME">%1$s</xliff:g>"</string>
     <string name="clipboard_dismiss_description" msgid="7544573092766945657">"رد کردن رابط کاربری کپی کردن"</string>

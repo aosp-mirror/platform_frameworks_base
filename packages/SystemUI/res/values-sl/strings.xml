@@ -34,14 +34,18 @@
     <string name="status_bar_settings_auto_rotation" msgid="8329080442278431708">"Samodejno zasukaj zaslon"</string>
     <string name="usb_device_permission_prompt" msgid="4414719028369181772">"Ali aplikaciji <xliff:g id="APPLICATION">%1$s</xliff:g> dovolite dostop do dodatka USB <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
     <string name="usb_device_permission_prompt_warn" msgid="2309129784984063656">"Ali aplikaciji <xliff:g id="APPLICATION">%1$s</xliff:g> dovolite dostop do naprave <xliff:g id="USB_DEVICE">%2$s</xliff:g>?\nTa aplikacija sicer nima dovoljenja za snemanje, vendar bi lahko zajemala zvok prek te naprave USB."</string>
+    <string name="usb_audio_device_permission_prompt_title" msgid="4221351137250093451">"Dovolite aplikaciji <xliff:g id="APPLICATION">%1$s</xliff:g> dostop do naprave <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
+    <string name="usb_audio_device_confirm_prompt_title" msgid="8828406516732985696">"Želite odpreti <xliff:g id="APPLICATION">%1$s</xliff:g> za upravljanje naprave <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
+    <string name="usb_audio_device_prompt_warn" msgid="2504972133361130335">"Ta aplikacija sicer nima dovoljenja za snemanje, vendar bi lahko zajemala zvok prek te naprave USB. Uporaba aplikacije <xliff:g id="APPLICATION">%1$s</xliff:g> s to napravo lahko povzroči, da boste preslišali klice, obvestila in alarme."</string>
+    <string name="usb_audio_device_prompt" msgid="7944987408206252949">"Uporaba aplikacije <xliff:g id="APPLICATION">%1$s</xliff:g> s to napravo lahko povzroči, da boste preslišali klice, obvestila in alarme."</string>
     <string name="usb_accessory_permission_prompt" msgid="717963550388312123">"Ali aplikaciji <xliff:g id="APPLICATION">%1$s</xliff:g> dovolite dostop do dodatka USB <xliff:g id="USB_ACCESSORY">%2$s</xliff:g>?"</string>
-    <string name="usb_device_confirm_prompt" msgid="4091711472439910809">"Želite odpreti aplikacijo <xliff:g id="APPLICATION">%1$s</xliff:g> za upravljanje dodatka USB <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
+    <string name="usb_device_confirm_prompt" msgid="4091711472439910809">"Želite odpreti <xliff:g id="APPLICATION">%1$s</xliff:g> za upravljanje naprave <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
     <string name="usb_device_confirm_prompt_warn" msgid="990208659736311769">"Želite odpreti aplikacijo <xliff:g id="APPLICATION">%1$s</xliff:g> za upravljanje naprave <xliff:g id="USB_DEVICE">%2$s</xliff:g>?\nTa aplikacija sicer nima dovoljenja za snemanje, vendar bi lahko zajemala zvok prek te naprave USB."</string>
-    <string name="usb_accessory_confirm_prompt" msgid="5728408382798643421">"Želite odpreti aplikacijo <xliff:g id="APPLICATION">%1$s</xliff:g> za upravljanje dodatka USB <xliff:g id="USB_ACCESSORY">%2$s</xliff:g>?"</string>
+    <string name="usb_accessory_confirm_prompt" msgid="5728408382798643421">"Želite odpreti <xliff:g id="APPLICATION">%1$s</xliff:g> za upravljanje dodatka <xliff:g id="USB_ACCESSORY">%2$s</xliff:g>?"</string>
     <string name="usb_accessory_uri_prompt" msgid="6756649383432542382">"Namešč. prog. ne delujejo s tem dodatkom USB. Več o tem dodatku preberite na <xliff:g id="URL">%1$s</xliff:g>"</string>
     <string name="title_usb_accessory" msgid="1236358027511638648">"Dodatek USB"</string>
     <string name="label_view" msgid="6815442985276363364">"Prikaži"</string>
-    <string name="always_use_device" msgid="210535878779644679">"Ko je dodatek <xliff:g id="USB_DEVICE">%2$s</xliff:g> povezan, vedno odpri aplikacijo <xliff:g id="APPLICATION">%1$s</xliff:g>"</string>
+    <string name="always_use_device" msgid="210535878779644679">"Ko je naprava <xliff:g id="USB_DEVICE">%2$s</xliff:g> povezana, vedno odpri aplikacijo <xliff:g id="APPLICATION">%1$s</xliff:g>"</string>
     <string name="always_use_accessory" msgid="1977225429341838444">"Ko je dodatek <xliff:g id="USB_ACCESSORY">%2$s</xliff:g> povezan, vedno odpri aplikacijo <xliff:g id="APPLICATION">%1$s</xliff:g>"</string>
     <string name="usb_debugging_title" msgid="8274884945238642726">"Ali dovolite odpravljanje težav prek USB?"</string>
     <string name="usb_debugging_message" msgid="5794616114463921773">"Računalnikov prstni odtis ključa RSA je:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
@@ -131,7 +135,8 @@
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="2242167416140740920">"Pristnost obraza je potrjena"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"Potrjeno"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"Za dokončanje se dotaknite »Potrdite«"</string>
-    <string name="biometric_dialog_tap_confirm_with_face" msgid="1597899891472340950">"Odklenili ste z obrazom. Pritisnite za nadaljevanje."</string>
+    <!-- no translation found for biometric_dialog_tap_confirm_with_face (1092050545851021991) -->
+    <skip />
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"Preverjena pristnost"</string>
     <string name="biometric_dialog_use_pin" msgid="8385294115283000709">"Uporabi kodo PIN"</string>
     <string name="biometric_dialog_use_pattern" msgid="2315593393167211194">"Uporabi vzorec"</string>
@@ -291,6 +296,15 @@
     <string name="sensor_privacy_start_use_mic_dialog_content" msgid="1624701280680913717">"S tem boste odblokirali dostop za vse aplikacije in storitve, ki imajo dovoljenje za uporabo mikrofona."</string>
     <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"S tem boste odblokirali dostop za vse aplikacije in storitve, ki imajo dovoljenje za uporabo fotoaparata."</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_content" msgid="3577642558418404919">"S tem boste odblokirali dostop za vse aplikacije in storitve, ki imajo dovoljenje za uporabo fotoaparata ali mikrofona."</string>
+    <string name="sensor_privacy_start_use_mic_blocked_dialog_title" msgid="2640140287496469689">"Mikrofon je blokiran"</string>
+    <string name="sensor_privacy_start_use_camera_blocked_dialog_title" msgid="7398084286822440384">"Kamera je blokirana"</string>
+    <string name="sensor_privacy_start_use_mic_camera_blocked_dialog_title" msgid="195236134743281973">"Mikrofon in kamera sta blokirana"</string>
+    <string name="sensor_privacy_start_use_mic_blocked_dialog_content" msgid="2138318880682877747">"Če ga želite odblokirati, dovolite dostop do mikrofona tako, da pri njem premaknete stikalo za zasebnost v napravi v vklopljen položaj. V priročniku za napravo si oglejte, kje v napravi je stikalo za zasebnost."</string>
+    <string name="sensor_privacy_start_use_camera_blocked_dialog_content" msgid="7216015168047965948">"Če jo želite odblokirati, dovolite dostop do kamere tako, da pri njej premaknete stikalo za zasebnost v napravi v vklopljen položaj. V priročniku za napravo si oglejte, kje v napravi je stikalo za zasebnost."</string>
+    <string name="sensor_privacy_start_use_mic_camera_blocked_dialog_content" msgid="3960837827570483762">"Če ju želite odblokirati, dovolite dostop tako, da premaknete stikalo za zasebnost v napravi v odblokiran položaj. V priročniku za napravo si oglejte, kje v napravi je stikalo za zasebnost."</string>
+    <string name="sensor_privacy_mic_unblocked_toast_content" msgid="306555320557065068">"Mikrofon je na voljo"</string>
+    <string name="sensor_privacy_camera_unblocked_toast_content" msgid="7843105715964332311">"Kamera je na voljo"</string>
+    <string name="sensor_privacy_mic_camera_unblocked_toast_content" msgid="7339355093282661115">"Mikrofon in kamera sta na voljo"</string>
     <string name="media_seamless_other_device" msgid="4654849800789196737">"Druga naprava"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"Vklop/izklop pregleda"</string>
     <string name="zen_priority_introduction" msgid="3159291973383796646">"Ne bodo vas motili zvoki ali vibriranje, razen v primeru alarmov, opomnikov, dogodkov in klicateljev, ki jih določite. Še vedno pa boste slišali vse, kar se boste odločili predvajati, vključno z glasbo, videoposnetki in igrami."</string>
@@ -301,7 +315,10 @@
     <string name="notification_tap_again" msgid="4477318164947497249">"Znova se dotaknite, da odprete"</string>
     <string name="tap_again" msgid="1315420114387908655">"Znova se dotaknite možnosti"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"Povlecite navzgor, da odprete"</string>
-    <string name="keyguard_unlock_press" msgid="8488350566398524740">"Pritisnite, če želite odpreti."</string>
+    <!-- no translation found for keyguard_unlock_press (9140109453735019209) -->
+    <skip />
+    <!-- no translation found for keyguard_face_successful_unlock_press (25520941264602588) -->
+    <skip />
     <string name="keyguard_retry" msgid="886802522584053523">"Povlecite navzgor za vnovičen poskus"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"Odklenite napravo, če želite uporabljati NFC."</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"Ta naprava pripada vaši organizaciji"</string>
@@ -324,7 +341,6 @@
     <string name="keyguard_indication_charging_time_dock" msgid="6150404291427377863">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Polnjenje na nosilcu • Polno čez <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Preklop med uporabniki"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Vse aplikacije in podatki v tej seji bodo izbrisani."</string>
-    <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"Odstrani"</string>
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"Znova pozdravljeni, gost!"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"Želite nadaljevati sejo?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"Začni znova"</string>
@@ -447,7 +463,7 @@
     <string name="enable_demo_mode" msgid="3180345364745966431">"Omogočanje predstavitvenega načina"</string>
     <string name="show_demo_mode" msgid="3677956462273059726">"Prikaz predstavitvenega načina"</string>
     <string name="status_bar_ethernet" msgid="5690979758988647484">"Ethernet"</string>
-    <string name="status_bar_alarm" msgid="87160847643623352">"Opozorilo"</string>
+    <string name="status_bar_alarm" msgid="87160847643623352">"Alarm"</string>
     <string name="wallet_title" msgid="5369767670735827105">"Denarnica"</string>
     <string name="wallet_empty_state_label" msgid="7776761245237530394">"Nastavite možnost hitrejšega in varnejšega plačevanja s telefonom."</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"Prikaži vse"</string>
@@ -692,7 +708,7 @@
     <string name="mobile_data" msgid="4564407557775397216">"Mobilni podatki"</string>
     <string name="mobile_data_text_format" msgid="6806501540022589786">"<xliff:g id="ID_1">%1$s</xliff:g> – <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="mobile_carrier_text_format" msgid="8912204177152950766">"<xliff:g id="CARRIER_NAME">%1$s</xliff:g>, <xliff:g id="MOBILE_DATA_TYPE">%2$s</xliff:g>"</string>
-    <string name="wifi_is_off" msgid="5389597396308001471">"Wi-Fi je izklopljen"</string>
+    <string name="wifi_is_off" msgid="5389597396308001471">"Wi-Fi je izklopljen."</string>
     <string name="bt_is_off" msgid="7436344904889461591">"Bluetooth je izklopljen"</string>
     <string name="dnd_is_off" msgid="3185706903793094463">"Način »ne moti« je izklopljen"</string>
     <string name="qs_dnd_prompt_auto_rule" msgid="3535469468310002616">"Samodejno pravilo (<xliff:g id="ID_1">%s</xliff:g>) je vklopilo način »ne moti«."</string>
@@ -778,6 +794,12 @@
     <string name="controls_dialog_ok" msgid="2770230012857881822">"Dodaj"</string>
     <string name="controls_dialog_message" msgid="342066938390663844">"Predlagala aplikacija <xliff:g id="APP">%s</xliff:g>"</string>
     <string name="controls_tile_locked" msgid="731547768182831938">"Naprava je zaklenjena"</string>
+    <string name="controls_settings_show_controls_dialog_title" msgid="3357852503553809554">"Želite prikazati in upravljati naprave na zaklenjenem zaslonu?"</string>
+    <string name="controls_settings_show_controls_dialog_message" msgid="7666211700524587969">"Kontrolnike za zunanje naprave lahko dodate na zaklenjen zaslon.\n\nAplikacija v napravi vam bo morda omogočala upravljanje nekaterih naprav brez odklepanja telefona ali tabličnega računalnika.\n\nTe spremembe lahko kadar koli izvedete v nastavitvah."</string>
+    <string name="controls_settings_trivial_controls_dialog_title" msgid="7593188157655036677">"Želite upravljati naprave na zaklenjenem zaslonu?"</string>
+    <string name="controls_settings_trivial_controls_dialog_message" msgid="237183787721917586">"Nekatere naprave lahko upravljate brez odklepanja telefona ali tabličnega računalnika.\n\nAplikacija v napravi določa, katere naprave je mogoče upravljati na ta način."</string>
+    <string name="controls_settings_dialog_neutral_button" msgid="4514446354793124140">"Ne, hvala"</string>
+    <string name="controls_settings_dialog_positive_button" msgid="436070672551674863">"Da"</string>
     <string name="controls_pin_use_alphanumeric" msgid="8478371861023048414">"Koda PIN vsebuje črke ali simbole"</string>
     <string name="controls_pin_verify" msgid="3452778292918877662">"Preverjanje naprave <xliff:g id="DEVICE">%s</xliff:g>"</string>
     <string name="controls_pin_wrong" msgid="6162694056042164211">"Napačna koda PIN"</string>
@@ -787,8 +809,7 @@
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"Če si želite ogledati več, povlecite"</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"Nalaganje priporočil"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"Predstavnost"</string>
-    <!-- no translation found for controls_media_close_session (4780485355795635052) -->
-    <skip />
+    <string name="controls_media_close_session" msgid="4780485355795635052">"Želite skriti ta nadzor predstavnosti za apl. <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="controls_media_active_session" msgid="3146882316024153337">"Trenutne seje predstavnosti ni mogoče skriti."</string>
     <string name="controls_media_dismiss_button" msgid="4485675693008031646">"Skrij"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"Nadaljuj"</string>
@@ -827,6 +848,13 @@
     <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"Seznanitev nove naprave"</string>
     <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"Če želite predvajati to sejo, odprite aplikacijo."</string>
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"Neznana aplikacija"</string>
+    <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Kako deluje oddajanje"</string>
+    <string name="media_output_broadcast" msgid="3555580945878071543">"Oddajanje"</string>
+    <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"Osebe v bližini z združljivo napravo Bluetooth lahko poslušajo predstavnost, ki jo oddajate."</string>
+    <string name="media_output_broadcasting_message" msgid="4150299923404886073">"Če želijo poslušati vaše oddajanje, lahko osebe v bližini z združljivo napravo Bluetooth optično preberejo kodo QR ali uporabijo ime oddajanja in geslo."</string>
+    <string name="media_output_broadcast_name" msgid="8786127091542624618">"Ime oddajanja"</string>
+    <string name="media_output_broadcast_code" msgid="870795639644728542">"Geslo"</string>
+    <string name="media_output_broadcast_dialog_save" msgid="7910865591430010198">"Shrani"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"Delovna različica"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"Delovna različica je bila kopirana v odložišče."</string>
     <string name="basic_status" msgid="2315371112182658176">"Odprt pogovor"</string>
@@ -905,7 +933,7 @@
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"Aktivne aplikacije"</string>
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"Ustavi"</string>
     <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"Ustavljeno"</string>
-    <string name="clipboard_edit_text_copy" msgid="770856373439969178">"Kopiraj"</string>
+    <string name="clipboard_edit_text_done" msgid="4551887727694022409">"Končano"</string>
     <string name="clipboard_overlay_text_copied" msgid="1872624400464891363">"Kopirano"</string>
     <string name="clipboard_edit_source" msgid="9156488177277788029">"Iz aplikacije <xliff:g id="APPNAME">%1$s</xliff:g>"</string>
     <string name="clipboard_dismiss_description" msgid="7544573092766945657">"Opusti kopiranje uporabniškega vmesnika"</string>
