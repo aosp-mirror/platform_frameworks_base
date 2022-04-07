@@ -24,6 +24,8 @@ import android.util.Log;
 
 import androidx.annotation.ChecksSdkIntAtLeast;
 
+import com.android.internal.annotations.VisibleForTesting;
+
 /* Utility class is to confirm the Wi-Fi function is available by enterprise restriction */
 public class WifiEnterpriseRestrictionUtils {
     private static final String TAG = "WifiEntResUtils";
@@ -74,6 +76,26 @@ public class WifiEnterpriseRestrictionUtils {
             return false;
         }
         return true;
+    }
+
+    /**
+     * Confirm Wi-Fi state is allowed to change to whether user restriction is set
+     *
+     * @param context A context
+     * @return whether the device is permitted to change Wi-Fi state
+     */
+    public static boolean isChangeWifiStateAllowed(Context context) {
+        if (!hasUserRestrictionFromT(context, UserManager.DISALLOW_CHANGE_WIFI_STATE)) return true;
+        Log.w(TAG, "WI-FI state isn't allowed to change due to user restriction.");
+        return false;
+    }
+
+    @VisibleForTesting
+    static boolean hasUserRestrictionFromT(Context context, String restrictionKey) {
+        if (!isAtLeastT()) return false;
+        final UserManager userManager = context.getSystemService(UserManager.class);
+        if (userManager == null) return false;
+        return userManager.hasUserRestriction(restrictionKey);
     }
 
     @ChecksSdkIntAtLeast(api=Build.VERSION_CODES.TIRAMISU)
