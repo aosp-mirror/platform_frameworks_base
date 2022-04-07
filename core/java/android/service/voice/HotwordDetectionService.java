@@ -39,6 +39,7 @@ import android.os.ParcelFileDescriptor;
 import android.os.PersistableBundle;
 import android.os.RemoteException;
 import android.os.SharedMemory;
+import android.speech.IRecognitionServiceManager;
 import android.util.Log;
 import android.view.contentcapture.ContentCaptureManager;
 import android.view.contentcapture.IContentCaptureManager;
@@ -127,6 +128,8 @@ public abstract class HotwordDetectionService extends Service {
 
     @Nullable
     private ContentCaptureManager mContentCaptureManager;
+    @Nullable
+    private IRecognitionServiceManager mIRecognitionServiceManager;
 
     private final IHotwordDetectionService mInterface = new IHotwordDetectionService.Stub() {
         @Override
@@ -196,6 +199,11 @@ public abstract class HotwordDetectionService extends Service {
         }
 
         @Override
+        public void updateRecognitionServiceManager(IRecognitionServiceManager manager) {
+            mIRecognitionServiceManager = manager;
+        }
+
+        @Override
         public void ping(IRemoteCallback callback) throws RemoteException {
             callback.sendResult(null);
         }
@@ -222,6 +230,9 @@ public abstract class HotwordDetectionService extends Service {
     public @Nullable Object getSystemService(@ServiceName @NonNull String name) {
         if (Context.CONTENT_CAPTURE_MANAGER_SERVICE.equals(name)) {
             return mContentCaptureManager;
+        } else if (Context.SPEECH_RECOGNITION_SERVICE.equals(name)
+                && mIRecognitionServiceManager != null) {
+            return mIRecognitionServiceManager.asBinder();
         } else {
             return super.getSystemService(name);
         }

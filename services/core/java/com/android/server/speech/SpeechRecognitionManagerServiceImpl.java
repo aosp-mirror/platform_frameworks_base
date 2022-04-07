@@ -28,6 +28,7 @@ import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.os.Binder;
 import android.os.IBinder;
+import android.os.Process;
 import android.os.RemoteException;
 import android.permission.PermissionManager;
 import android.speech.IRecognitionListener;
@@ -101,6 +102,12 @@ final class SpeechRecognitionManagerServiceImpl extends
         ComponentName serviceComponent = componentName;
         if (onDevice) {
             serviceComponent = getOnDeviceComponentNameLocked();
+        }
+
+        if (!onDevice && Process.isIsolated(Binder.getCallingUid())) {
+            Slog.w(TAG, "Isolated process can only start on device speech recognizer.");
+            tryRespondWithError(callback, SpeechRecognizer.ERROR_CLIENT);
+            return;
         }
 
         if (serviceComponent == null) {
