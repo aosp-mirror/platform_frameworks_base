@@ -16,7 +16,6 @@
 
 package com.android.wm.shell.dagger;
 
-import android.animation.AnimationHandler;
 import android.content.Context;
 import android.content.pm.LauncherApps;
 import android.os.Handler;
@@ -42,7 +41,6 @@ import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.common.SystemWindows;
 import com.android.wm.shell.common.TaskStackListenerImpl;
 import com.android.wm.shell.common.TransactionPool;
-import com.android.wm.shell.common.annotations.ChoreographerSfVsync;
 import com.android.wm.shell.common.annotations.ShellMainThread;
 import com.android.wm.shell.freeform.FreeformTaskListener;
 import com.android.wm.shell.fullscreen.FullscreenUnfoldController;
@@ -182,11 +180,10 @@ public class WMShellModule {
             DisplayImeController displayImeController, TransactionPool transactionPool,
             ShellTaskOrganizer shellTaskOrganizer, SyncTransactionQueue syncQueue,
             TaskStackListenerImpl taskStackListener, Transitions transitions,
-            @ShellMainThread ShellExecutor mainExecutor,
-            @ChoreographerSfVsync AnimationHandler sfVsyncAnimationHandler) {
+            @ShellMainThread ShellExecutor mainExecutor) {
         return new LegacySplitScreenController(context, displayController, systemWindows,
                 displayImeController, transactionPool, shellTaskOrganizer, syncQueue,
-                taskStackListener, transitions, mainExecutor, sfVsyncAnimationHandler);
+                taskStackListener, transitions, mainExecutor);
     }
 
     @WMSingleton
