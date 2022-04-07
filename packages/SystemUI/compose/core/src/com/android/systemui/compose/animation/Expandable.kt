@@ -20,6 +20,7 @@ import android.content.Context
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewGroupOverlay
+import android.view.ViewRootImpl
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Spacer
@@ -63,7 +64,9 @@ import androidx.lifecycle.ViewTreeLifecycleOwner
 import androidx.lifecycle.ViewTreeViewModelStoreOwner
 import androidx.savedstate.findViewTreeSavedStateRegistryOwner
 import androidx.savedstate.setViewTreeSavedStateRegistryOwner
+import com.android.internal.jank.InteractionJankMonitor
 import com.android.systemui.animation.ActivityLaunchAnimator
+import com.android.systemui.animation.DialogLaunchAnimator
 import com.android.systemui.animation.LaunchAnimator
 import kotlin.math.min
 import kotlin.math.roundToInt
@@ -73,7 +76,8 @@ interface ExpandableController {
     /** Create an [ActivityLaunchAnimator.Controller] to animate into an Activity. */
     fun forActivity(): ActivityLaunchAnimator.Controller
 
-    // TODO(b/230830644): Add forDialog(): DialogLaunchAnimator.Controller
+    /** Create a [DialogLaunchAnimator.Controller] to animate into a Dialog. */
+    fun forDialog(): DialogLaunchAnimator.Controller
 }
 
 /**
@@ -124,6 +128,7 @@ fun Expandable(
 
     val animatorState = remember { mutableStateOf<LaunchAnimator.State?>(null) }
     var overlay by remember { mutableStateOf<ViewGroupOverlay?>(null) }
+    var isDialogShowing by remember { mutableStateOf(false) }
     var currentComposeViewInOverlay by remember { mutableStateOf<View?>(null) }
     var boundsInComposeViewRoot by remember { mutableStateOf(Rect.Zero) }
     val thisExpandableSize by remember { derivedStateOf { boundsInComposeViewRoot.size } }
@@ -244,9 +249,74 @@ fun Expandable(
         }
     }
 
+    // Whether this composable is still composed. We only do the dialog exit animation if this is
+    // true.
+    var isComposed by remember { mutableStateOf(true) }
+    DisposableEffect(Unit) { onDispose { isComposed = false } }
+
+    /** Create a [DialogLaunchAnimator.Controller] that can be used to animate dialogs. */
+    val identity = remember { Object() }
+    fun dialogController(): DialogLaunchAnimator.Controller {
+        return object : DialogLaunchAnimator.Controller {
+            override val viewRoot: ViewRootImpl = composeViewRoot.viewRootImpl
+            override val sourceIdentity: Any = identity
+
+            override fun startDrawingInOverlayOf(viewGroup: ViewGroup) {
+                val newOverlay = viewGroup.overlay as ViewGroupOverlay
+                if (newOverlay != overlay) {
+                    overlay = newOverlay
+                }
+            }
+
+            override fun stopDrawingInOverlay() {
+                if (overlay != null) {
+                    overlay = null
+                }
+            }
+
+            override fun createLaunchController(): LaunchAnimator.Controller {
+                val delegate = launchController()
+                return object : LaunchAnimator.Controller by delegate {
+                    override fun onLaunchAnimationEnd(isExpandingFullyAbove: Boolean) {
+                        delegate.onLaunchAnimationEnd(isExpandingFullyAbove)
+
+                        // Make sure we don't draw this expandable when the dialog is showing.
+                        isDialogShowing = true
+                    }
+                }
+            }
+
+            override fun createExitController(): LaunchAnimator.Controller {
+                val delegate = launchController()
+                return object : LaunchAnimator.Controller by delegate {
+                    override fun onLaunchAnimationEnd(isExpandingFullyAbove: Boolean) {
+                        delegate.onLaunchAnimationEnd(isExpandingFullyAbove)
+                        isDialogShowing = false
+                    }
+                }
+            }
+
+            override fun shouldAnimateExit(): Boolean = isComposed
+
+            override fun onExitAnimationCancelled() {
+                isDialogShowing = false
+            }
+
+            override fun jankConfigurationBuilder(
+                cuj: Int
+            ): InteractionJankMonitor.Configuration.Builder? {
+                // TODO(b/252723237): Add support for jank monitoring when animating from a
+                // Composable.
+                return null
+            }
+        }
+    }
+
     val controller =
         object : ExpandableController {
             override fun forActivity(): ActivityLaunchAnimator.Controller = activityController()
+
+            override fun forDialog(): DialogLaunchAnimator.Controller = dialogController()
         }
 
     // Make sure we don't read animatorState directly here to avoid recomposition every time the
@@ -280,6 +350,13 @@ fun Expandable(
                 { currentComposeViewInOverlay = it },
                 density,
             )
+        }
+        isDialogShowing -> {
+            Box(
+                modifier
+                    .drawWithContent { /* Don't draw anything when the dialog is shown. */}
+                    .onGloballyPositioned { boundsInComposeViewRoot = it.boundsInRoot() }
+            ) { wrappedContent(controller) }
         }
         else -> {
             Box(
