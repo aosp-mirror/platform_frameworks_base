@@ -1373,6 +1373,9 @@
     <!-- Notification: Control panel: Label that displays when the app's notifications cannot be blocked. -->
     <string name="notification_unblockable_desc">These notifications can\'t be modified.</string>
 
+    <!-- Notification: Control panel: Label that displays when a notification cannot be blocked because it's attached to a phone/voip call. -->
+    <string name="notification_unblockable_call_desc">Call notifications can\'t be modified.</string>
+
     <!-- Notification: Control panel: label that displays when viewing settings for a group of notifications posted to multiple channels. -->
     <string name="notification_multichannel_desc">This group of notifications cannot be configured here</string>
 
