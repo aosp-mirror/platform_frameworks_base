@@ -16,6 +16,7 @@
 
 package com.android.server.wm;
 
+import static android.app.ActivityManager.START_ABORTED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 
@@ -26,6 +27,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.Mockito.mock;
 
 import android.app.WindowConfiguration;
 import android.content.ComponentName;
@@ -45,13 +47,13 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * Tests for the {@link DisplayWindowPolicyControllerHelper} class.
+ * Tests for the {@link DisplayWindowPolicyController} class.
  *
  * Build/Install/Run:
- *  atest WmTests:DisplayWindowPolicyControllerHelperTests
+ *  atest WmTests:DisplayWindowPolicyControllerTests
  */
 @RunWith(WindowTestRunner.class)
-public class DisplayWindowPolicyControllerHelperTests extends WindowTestsBase {
+public class DisplayWindowPolicyControllerTests extends WindowTestsBase {
     private static final int TEST_USER_0_ID = 0;
     private static final int TEST_USER_1_ID = 10;
 
@@ -152,7 +154,50 @@ public class DisplayWindowPolicyControllerHelperTests extends WindowTestsBase {
         assertTrue(mSecondaryDisplay.mDwpcHelper.isWindowingModeSupported(WINDOWING_MODE_PINNED));
     }
 
+    @Test
+    public void testInterestedWindowFlags() {
+        final int fakeFlag1 = 0x00000010;
+        final int fakeFlag2 = 0x00000100;
+        final int fakeSystemFlag1 = 0x00000010;
+        final int fakeSystemFlag2 = 0x00000100;
+
+        mDwpc.setInterestedWindowFlags(fakeFlag1, fakeSystemFlag1);
+
+        assertTrue(mDwpc.isInterestedWindowFlags(fakeFlag1, fakeSystemFlag1));
+        assertTrue(mDwpc.isInterestedWindowFlags(fakeFlag1, fakeSystemFlag2));
+        assertTrue(mDwpc.isInterestedWindowFlags(fakeFlag2, fakeSystemFlag1));
+        assertFalse(mDwpc.isInterestedWindowFlags(fakeFlag2, fakeSystemFlag2));
+    }
+
+    @Test
+    public void testCanContainActivities() {
+        ActivityStarter starter = new ActivityStarter(mock(ActivityStartController.class), mAtm,
+                mSupervisor, mock(ActivityStartInterceptor.class));
+        final Task task = new TaskBuilder(mSupervisor).setDisplay(mSecondaryDisplay).build();
+        final ActivityRecord sourceRecord = new ActivityBuilder(mAtm).setTask(task).build();
+        final ActivityRecord disallowedRecord =
+                new ActivityBuilder(mAtm).setComponent(mDwpc.DISALLOWED_ACTIVITY).build();
+
+        int result = starter.startActivityInner(
+                disallowedRecord,
+                sourceRecord,
+                /* voiceSession */null,
+                /* voiceInteractor */ null,
+                /* startFlags */ 0,
+                /* doResume */true,
+                /* options */null,
+                /* inTask */null,
+                /* inTaskFragment */ null,
+                /* restrictedBgActivity */false,
+                /* intentGrants */null);
+
+        assertEquals(result, START_ABORTED);
+    }
+
     private class TestDisplayWindowPolicyController extends DisplayWindowPolicyController {
+
+        public ComponentName DISALLOWED_ACTIVITY =
+                new ComponentName("fake.package", "DisallowedActivity");
 
         ComponentName mTopActivity = null;
         int mTopActivityUid = UserHandle.USER_NULL;
@@ -161,7 +206,14 @@ public class DisplayWindowPolicyControllerHelperTests extends WindowTestsBase {
         @Override
         public boolean canContainActivities(@NonNull List<ActivityInfo> activities,
                 @WindowConfiguration.WindowingMode int windowingMode) {
-            return false;
+            final int activityCount = activities.size();
+            for (int i = 0; i < activityCount; i++) {
+                final ActivityInfo aInfo = activities.get(i);
+                if (aInfo.getComponentName().equals(DISALLOWED_ACTIVITY)) {
+                    return false;
+                }
+            }
+            return true;
         }
 
         @Override
