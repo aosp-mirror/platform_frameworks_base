@@ -1201,6 +1201,20 @@ public class DisplayContentTests extends WindowTestsBase {
                 dc.computeImeControlTarget());
     }
 
+    @UseTestDisplay(addWindows = W_INPUT_METHOD)
+    @Test
+    public void testImeSecureFlagGetUpdatedAfterImeInputTarget() {
+        // Verify IME window can get up-to-date secure flag update when the IME input target
+        // set before setCanScreenshot called.
+        final WindowState app = createWindow(null, TYPE_APPLICATION, "app");
+        SurfaceControl.Transaction t = mDisplayContent.mInputMethodWindow.getPendingTransaction();
+        spyOn(t);
+        mDisplayContent.setImeInputTarget(app);
+        mDisplayContent.mInputMethodWindow.setCanScreenshot(t, false /* canScreenshot */);
+
+        verify(t).setSecure(eq(mDisplayContent.mInputMethodWindow.mSurfaceControl), eq(true));
+    }
+
     @UseTestDisplay(addWindows = W_ACTIVITY)
     @Test
     public void testComputeImeControlTarget_notMatchParentBounds() throws Exception {
