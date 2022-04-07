@@ -43,6 +43,7 @@ import android.os.ShellCallback;
 import android.util.Slog;
 import android.util.SparseArray;
 
+import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.DumpUtils;
@@ -59,7 +60,9 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Optional;
+import java.util.Set;
 import java.util.WeakHashMap;
 
 /**
@@ -139,6 +142,8 @@ public final class DeviceStateManagerService extends SystemService {
     @GuardedBy("mLock")
     private final SparseArray<ProcessRecord> mProcessRecords = new SparseArray<>();
 
+    private Set<Integer> mDeviceStatesAvailableForAppRequests;
+
     public DeviceStateManagerService(@NonNull Context context) {
         this(context, DeviceStatePolicy.Provider
                 .fromResources(context.getResources())
@@ -164,6 +169,10 @@ public final class DeviceStateManagerService extends SystemService {
     public void onStart() {
         publishBinderService(Context.DEVICE_STATE_SERVICE, mBinderService);
         publishLocalService(DeviceStateManagerInternal.class, new LocalService());
+
+        synchronized (mLock) {
+            readStatesAvailableForRequestFromApps();
+        }
     }
 
     @VisibleForTesting
@@ -626,19 +635,76 @@ public final class DeviceStateManagerService extends SystemService {
 
     /**
      * Allow top processes to request or cancel a device state change. If the calling process ID is
-     * not the top app, then check if this process holds the CONTROL_DEVICE_STATE permission.
-     * @param callingPid
+     * not the top app, then check if this process holds the
+     * {@link android.Manifest.permission.CONTROL_DEVICE_STATE} permission. If the calling process
+     * is the top app, check to verify they are requesting a state we've deemed to be able to be
+     * available for an app process to request. States that can be requested are based around
+     * features that we've created that require specific device state overrides.
+     * @param callingPid Process ID that is requesting this state change
+     * @param state state that is being requested.
      */
-    private void checkCanControlDeviceState(int callingPid) {
-        // Allow top processes to request a device state change
-        // If the calling process ID is not the top app, then we check if this process
-        // holds a permission to CONTROL_DEVICE_STATE
+    private void assertCanRequestDeviceState(int callingPid, int state) {
+        final WindowProcessController topApp = mActivityTaskManagerInternal.getTopApp();
+        if (topApp == null || topApp.getPid() != callingPid
+                || !isStateAvailableForAppRequests(state)) {
+            getContext().enforceCallingOrSelfPermission(CONTROL_DEVICE_STATE,
+                    "Permission required to request device state, "
+                            + "or the call must come from the top app "
+                            + "and be a device state that is available for apps to request.");
+        }
+    }
+
+    /**
+     * Checks if the process can control the device state. If the calling process ID is
+     * not the top app, then check if this process holds the CONTROL_DEVICE_STATE permission.
+     *
+     * @param callingPid Process ID that is requesting this state change
+     */
+    private void assertCanControlDeviceState(int callingPid) {
         final WindowProcessController topApp = mActivityTaskManagerInternal.getTopApp();
         if (topApp == null || topApp.getPid() != callingPid) {
             getContext().enforceCallingOrSelfPermission(CONTROL_DEVICE_STATE,
                     "Permission required to request device state, "
-                            + "or the call must come from the top focused app.");
+                            + "or the call must come from the top app.");
         }
+    }
+
+    private boolean isStateAvailableForAppRequests(int state) {
+        synchronized (mLock) {
+            return mDeviceStatesAvailableForAppRequests.contains(state);
+        }
+    }
+
+    /**
+     * Adds device state values that are available to be requested by the top level app.
+     */
+    @GuardedBy("mLock")
+    private void readStatesAvailableForRequestFromApps() {
+        mDeviceStatesAvailableForAppRequests = new HashSet<>();
+        String[] availableAppStatesConfigIdentifiers = getContext().getResources()
+                .getStringArray(R.array.config_deviceStatesAvailableForAppRequests);
+        for (int i = 0; i < availableAppStatesConfigIdentifiers.length; i++) {
+            String identifierToFetch = availableAppStatesConfigIdentifiers[i];
+            int configValueIdentifier = getContext().getResources()
+                    .getIdentifier(identifierToFetch, "integer", "android");
+            int state = getContext().getResources().getInteger(configValueIdentifier);
+            if (isValidState(state)) {
+                mDeviceStatesAvailableForAppRequests.add(state);
+            } else {
+                Slog.e(TAG, "Invalid device state was found in the configuration file. State id: "
+                        + state);
+            }
+        }
+    }
+
+    @GuardedBy("mLock")
+    private boolean isValidState(int state) {
+        for (int i = 0; i < mDeviceStates.size(); i++) {
+            if (state == mDeviceStates.valueAt(i).getIdentifier()) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private final class DeviceStateProviderListener implements DeviceStateProvider.Listener {
@@ -777,7 +843,7 @@ public final class DeviceStateManagerService extends SystemService {
             // Allow top processes to request a device state change
             // If the calling process ID is not the top app, then we check if this process
             // holds a permission to CONTROL_DEVICE_STATE
-            checkCanControlDeviceState(callingPid);
+            assertCanRequestDeviceState(callingPid, state);
 
             if (token == null) {
                 throw new IllegalArgumentException("Request token must not be null.");
@@ -797,7 +863,7 @@ public final class DeviceStateManagerService extends SystemService {
             // Allow top processes to cancel a device state change
             // If the calling process ID is not the top app, then we check if this process
             // holds a permission to CONTROL_DEVICE_STATE
-            checkCanControlDeviceState(callingPid);
+            assertCanControlDeviceState(callingPid);
 
             final long callingIdentity = Binder.clearCallingIdentity();
             try {
