@@ -1428,6 +1428,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                         /** log stem triple press telemetry if it's a talkback enabled event */
                         logStemTriplePressAccessibilityTelemetry(componentName);
                     }
+                    performHapticFeedback(HapticFeedbackConstants.CONFIRM, /* always = */ false,
+                        /* reason = */ "Stem primary - Triple Press - Toggle Accessibility");
                     /** Toggle talkback end */
                 }
                 break;
