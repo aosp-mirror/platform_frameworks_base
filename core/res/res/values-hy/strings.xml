@@ -901,7 +901,7 @@
     <string name="lockscreen_transport_next_description" msgid="2931509904881099919">"Հաջորդը"</string>
     <string name="lockscreen_transport_pause_description" msgid="6705284702135372494">"Դադարեցնել"</string>
     <string name="lockscreen_transport_play_description" msgid="106868788691652733">"Նվագարկել"</string>
-    <string name="lockscreen_transport_stop_description" msgid="1449552232598355348">"Դադարեցնել"</string>
+    <string name="lockscreen_transport_stop_description" msgid="1449552232598355348">"Կանգնեցնել"</string>
     <string name="lockscreen_transport_rew_description" msgid="7680106856221622779">"Հետ փաթաթել"</string>
     <string name="lockscreen_transport_ffw_description" msgid="4763794746640196772">"Արագ առաջ անցնել"</string>
     <string name="emergency_calls_only" msgid="3057351206678279851">"Միայն շտապ կանչեր"</string>
