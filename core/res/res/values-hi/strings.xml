@@ -337,7 +337,7 @@
     <string name="capability_title_canPerformGestures" msgid="9106545062106728987">"जेस्चर करें"</string>
     <string name="capability_desc_canPerformGestures" msgid="6619457251067929726">"इस सेवा के ज़रिए टैप, स्वाइप, पिंच और बाकी जेस्चर किए जा सकते हैं."</string>
     <string name="capability_title_canCaptureFingerprintGestures" msgid="1189053104594608091">"फ़िंगरप्रिंट जेस्चर"</string>
-    <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"डिवाइस के फ़िंगरप्रिंट सेंसर पर किए गए हाथ के जेस्चर (स्पर्श) कैप्चर किए जा सकते हैं."</string>
+    <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"डिवाइस के फ़िंगरप्रिंट सेंसर पर किए गए हाथ के जेस्चर कैप्चर किए जा सकते हैं."</string>
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"स्क्रीनशॉट लें"</string>
     <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"डिसप्ले का स्क्रीनशॉट लिया जा सकता है."</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"स्टेटस बार को अक्षम करें या बदलें"</string>
