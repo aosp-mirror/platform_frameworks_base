@@ -170,8 +170,8 @@ public final class SQLiteConnectionPool implements Closeable {
         // If timeout is set, setup idle connection handler
         // In case of MAX_VALUE - idle connections are never closed
         if (mConfiguration.idleConnectionTimeoutMs != Long.MAX_VALUE) {
-            setupIdleConnectionHandler(Looper.getMainLooper(),
-                    mConfiguration.idleConnectionTimeoutMs);
+            setupIdleConnectionHandler(
+                    Looper.getMainLooper(), mConfiguration.idleConnectionTimeoutMs, null);
         }
     }
 
@@ -425,7 +425,7 @@ public final class SQLiteConnectionPool implements Closeable {
                     mAvailablePrimaryConnection = connection;
                 }
                 wakeConnectionWaitersLocked();
-            } else if (mAvailableNonPrimaryConnections.size() >= mMaxConnectionPoolSize - 1) {
+            } else if (mAvailableNonPrimaryConnections.size() >= mMaxConnectionPoolSize) {
                 closeConnectionAndLogExceptionsLocked(connection);
             } else {
                 if (recycleConnectionLocked(connection, status)) {
@@ -454,6 +454,11 @@ public final class SQLiteConnectionPool implements Closeable {
             return false;
         }
         return true;
+    }
+
+    @VisibleForTesting
+    public boolean hasAnyAvailableNonPrimaryConnection() {
+        return mAvailableNonPrimaryConnections.size() > 0;
     }
 
     /**
@@ -1061,9 +1066,11 @@ public final class SQLiteConnectionPool implements Closeable {
      * Set up the handler based on the provided looper and timeout.
      */
     @VisibleForTesting
-    public void setupIdleConnectionHandler(Looper looper, long timeoutMs) {
+    public void setupIdleConnectionHandler(
+            Looper looper, long timeoutMs, Runnable onAllConnectionsIdle) {
         synchronized (mLock) {
-            mIdleConnectionHandler = new IdleConnectionHandler(looper, timeoutMs);
+            mIdleConnectionHandler =
+                    new IdleConnectionHandler(looper, timeoutMs, onAllConnectionsIdle);
         }
     }
 
@@ -1228,10 +1235,12 @@ public final class SQLiteConnectionPool implements Closeable {
 
     private class IdleConnectionHandler extends Handler {
         private final long mTimeout;
+        private final Runnable mOnAllConnectionsIdle;
 
-        IdleConnectionHandler(Looper looper, long timeout) {
+        IdleConnectionHandler(Looper looper, long timeout, Runnable onAllConnectionsIdle) {
             super(looper);
             mTimeout = timeout;
+            this.mOnAllConnectionsIdle = onAllConnectionsIdle;
         }
 
         @Override
@@ -1246,6 +1255,9 @@ public final class SQLiteConnectionPool implements Closeable {
                         Log.d(TAG, "Closed idle connection " + mConfiguration.label + " " + msg.what
                                 + " after " + mTimeout);
                     }
+                }
+                if (mOnAllConnectionsIdle != null) {
+                    mOnAllConnectionsIdle.run();
                 }
             }
         }
