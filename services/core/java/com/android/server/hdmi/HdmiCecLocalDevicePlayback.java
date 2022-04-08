@@ -306,16 +306,23 @@ public class HdmiCecLocalDevicePlayback extends HdmiCecLocalDeviceSource {
     @Override
     @ServiceThreadOnly
     protected void onInitializeCecComplete(int initiatedBy) {
-        if (initiatedBy == HdmiControlService.INITIATED_BY_SCREEN_ON) {
-            oneTouchPlay(new IHdmiControlCallback.Stub() {
-                @Override
-                public void onComplete(int result) {
-                    if (result != HdmiControlManager.RESULT_SUCCESS) {
-                        Slog.w(TAG, "Failed to complete One Touch Play. result=" + result);
-                    }
-                }
-            });
+        if (initiatedBy != HdmiControlService.INITIATED_BY_SCREEN_ON) {
+            return;
         }
+        @HdmiControlManager.PowerControlMode
+        String powerControlMode = mService.getHdmiCecConfig().getStringValue(
+                HdmiControlManager.CEC_SETTING_NAME_POWER_CONTROL_MODE);
+        if (powerControlMode.equals(HdmiControlManager.POWER_CONTROL_MODE_NONE)) {
+            return;
+        }
+        oneTouchPlay(new IHdmiControlCallback.Stub() {
+            @Override
+            public void onComplete(int result) {
+                if (result != HdmiControlManager.RESULT_SUCCESS) {
+                    Slog.w(TAG, "Failed to complete One Touch Play. result=" + result);
+                }
+            }
+        });
     }
 
     @Override
