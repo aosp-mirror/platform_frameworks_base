@@ -589,27 +589,22 @@
     <string name="add_user_failed" msgid="4809887794313944872">"새 사용자를 만들지 못함"</string>
     <string name="add_guest_failed" msgid="8074548434469843443">"새 게스트 생성 실패"</string>
     <string name="user_nickname" msgid="262624187455825083">"닉네임"</string>
-    <!-- no translation found for user_add_user (7876449291500212468) -->
-    <skip />
+    <string name="user_add_user" msgid="7876449291500212468">"사용자 추가"</string>
     <string name="guest_new_guest" msgid="3482026122932643557">"게스트 추가"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"게스트 삭제"</string>
     <string name="guest_reset_guest" msgid="6110013010356013758">"게스트 재설정"</string>
     <string name="guest_reset_guest_dialog_title" msgid="8047270010895437534">"게스트를 재설정하시겠습니까?"</string>
-    <!-- no translation found for guest_remove_guest_dialog_title (4548511006624088072) -->
-    <skip />
+    <string name="guest_remove_guest_dialog_title" msgid="4548511006624088072">"게스트를 삭제하시겠습니까?"</string>
     <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"재설정"</string>
+    <string name="guest_remove_guest_confirm_button" msgid="7858123434954143879">"삭제"</string>
     <string name="guest_resetting" msgid="7822120170191509566">"게스트 재설정 중…"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"사진 찍기"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"이미지 선택"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"사진 선택"</string>
-    <!-- no translation found for failed_attempts_now_wiping_device (4016329172216428897) -->
-    <skip />
-    <!-- no translation found for failed_attempts_now_wiping_user (469060411789668050) -->
-    <skip />
-    <!-- no translation found for failed_attempts_now_wiping_profile (7626589520888963129) -->
-    <skip />
-    <!-- no translation found for failed_attempts_now_wiping_dialog_dismiss (2749889771223578925) -->
-    <skip />
+    <string name="failed_attempts_now_wiping_device" msgid="4016329172216428897">"잘못된 시도 횟수가 너무 많습니다. 이 기기의 데이터가 삭제됩니다."</string>
+    <string name="failed_attempts_now_wiping_user" msgid="469060411789668050">"잘못된 시도 횟수가 너무 많습니다. 이 사용자가 삭제됩니다."</string>
+    <string name="failed_attempts_now_wiping_profile" msgid="7626589520888963129">"잘못된 시도 횟수가 너무 많습니다. 이 직장 프로필 및 관련 데이터가 삭제됩니다."</string>
+    <string name="failed_attempts_now_wiping_dialog_dismiss" msgid="2749889771223578925">"닫기"</string>
     <string name="cached_apps_freezer_device_default" msgid="2616594131750144342">"기기 기본값"</string>
     <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"사용 중지됨"</string>
     <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"사용 설정됨"</string>
@@ -657,4 +652,7 @@
     <string name="turn_screen_on_title" msgid="3266937298097573424">"화면 켜기"</string>
     <string name="allow_turn_screen_on" msgid="6194845766392742639">"화면 켜기 허용"</string>
     <string name="allow_turn_screen_on_description" msgid="43834403291575164">"앱에서 화면을 켜도록 허용합니다. 권한이 부여된 경우 앱에서 명시적 인텐트 없이 언제든지 화면을 켤 수 있습니다."</string>
+    <string name="bt_le_audio_scan_qr_code" msgid="3521809854780392679">"QR 코드 스캔"</string>
+    <string name="bt_le_audio_scan_qr_code_scanner" msgid="4679500020630341107">"아래의 QR 코드가 스캐너 가운데에 오도록 맞춘 다음 듣기를 시작하세요"</string>
+    <string name="bt_le_audio_qr_code_is_not_valid_format" msgid="6092191081849434734">"QR 코드의 형식이 유효하지 않습니다."</string>
 </resources>

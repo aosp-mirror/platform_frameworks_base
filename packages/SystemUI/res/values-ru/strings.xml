@@ -34,6 +34,10 @@
     <string name="status_bar_settings_auto_rotation" msgid="8329080442278431708">"Автоповорот экрана"</string>
     <string name="usb_device_permission_prompt" msgid="4414719028369181772">"Предоставить приложению \"<xliff:g id="APPLICATION">%1$s</xliff:g>\" доступ к устройству \"<xliff:g id="USB_DEVICE">%2$s</xliff:g>\"?"</string>
     <string name="usb_device_permission_prompt_warn" msgid="2309129784984063656">"Предоставить приложению \"<xliff:g id="APPLICATION">%1$s</xliff:g>\" доступ к устройству \"<xliff:g id="USB_DEVICE">%2$s</xliff:g>\"?\nПриложению не разрешено вести запись, однако с помощью этого USB-устройства оно может записывать звук."</string>
+    <string name="usb_audio_device_permission_prompt_title" msgid="4221351137250093451">"Разрешить приложению \"<xliff:g id="APPLICATION">%1$s</xliff:g>\" доступ к устройству \"<xliff:g id="USB_DEVICE">%2$s</xliff:g>\"?"</string>
+    <string name="usb_audio_device_confirm_prompt_title" msgid="8828406516732985696">"Открыть приложение \"<xliff:g id="APPLICATION">%1$s</xliff:g>\" для управления устройством \"<xliff:g id="USB_DEVICE">%2$s</xliff:g>\"?"</string>
+    <string name="usb_audio_device_prompt_warn" msgid="2504972133361130335">"Приложению не разрешено вести запись, однако оно может записывать аудио с помощью этого USB-устройства. Во время использования приложения \"<xliff:g id="APPLICATION">%1$s</xliff:g>\" с этим устройством вы можете не услышать звуков уведомлений, звонков и будильников."</string>
+    <string name="usb_audio_device_prompt" msgid="7944987408206252949">"Во время использования приложения \"<xliff:g id="APPLICATION">%1$s</xliff:g>\" с этим устройством вы можете не услышать звуков уведомлений, звонков и будильников."</string>
     <string name="usb_accessory_permission_prompt" msgid="717963550388312123">"Предоставить приложению \"<xliff:g id="APPLICATION">%1$s</xliff:g>\" доступ к устройству \"<xliff:g id="USB_ACCESSORY">%2$s</xliff:g>\"?"</string>
     <string name="usb_device_confirm_prompt" msgid="4091711472439910809">"Открыть приложение \"<xliff:g id="APPLICATION">%1$s</xliff:g>\" для управления устройством \"<xliff:g id="USB_DEVICE">%2$s</xliff:g>\"?"</string>
     <string name="usb_device_confirm_prompt_warn" msgid="990208659736311769">"Открыть приложение \"<xliff:g id="APPLICATION">%1$s</xliff:g>\" для использования устройства \"<xliff:g id="USB_DEVICE">%2$s</xliff:g>\"?\nПриложению не разрешено вести запись, однако с помощью этого USB-устройства оно может записывать звук."</string>
@@ -131,7 +135,8 @@
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="2242167416140740920">"Лицо распознано"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"Подтверждено"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"Нажмите \"Подтвердить\""</string>
-    <string name="biometric_dialog_tap_confirm_with_face" msgid="1597899891472340950">"Сработало распознавание лица. Нажмите, чтобы продолжить."</string>
+    <!-- no translation found for biometric_dialog_tap_confirm_with_face (1092050545851021991) -->
+    <skip />
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"Аутентификация выполнена"</string>
     <string name="biometric_dialog_use_pin" msgid="8385294115283000709">"PIN-код"</string>
     <string name="biometric_dialog_use_pattern" msgid="2315593393167211194">"Использовать графический ключ"</string>
@@ -291,6 +296,15 @@
     <string name="sensor_privacy_start_use_mic_dialog_content" msgid="1624701280680913717">"Будет снята блокировка доступа для всех приложений и сервисов с разрешением на использование микрофона."</string>
     <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"Будет снята блокировка доступа для всех приложений и сервисов с разрешением на использование камеры."</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_content" msgid="3577642558418404919">"Будет снята блокировка доступа для всех приложений и сервисов с разрешением на использование камеры или микрофона."</string>
+    <string name="sensor_privacy_start_use_mic_blocked_dialog_title" msgid="2640140287496469689">"Микрофон заблокирован"</string>
+    <string name="sensor_privacy_start_use_camera_blocked_dialog_title" msgid="7398084286822440384">"Камера заблокирована"</string>
+    <string name="sensor_privacy_start_use_mic_camera_blocked_dialog_title" msgid="195236134743281973">"Микрофон и камера заблокированы"</string>
+    <string name="sensor_privacy_start_use_mic_blocked_dialog_content" msgid="2138318880682877747">"Чтобы разблокировать микрофон, установите защитный переключатель на вашем устройстве в положение \"Вкл.\". Расположение переключателя должно быть указано в инструкции к устройству."</string>
+    <string name="sensor_privacy_start_use_camera_blocked_dialog_content" msgid="7216015168047965948">"Чтобы разблокировать камеру, установите защитный переключатель на вашем устройстве в положение \"Вкл\". Расположение переключателя должно быть указано в инструкции к устройству."</string>
+    <string name="sensor_privacy_start_use_mic_camera_blocked_dialog_content" msgid="3960837827570483762">"Для разблокировки установите защитный переключатель на вашем устройстве в положение \"Вкл.\". Расположение переключателя должно быть указано в инструкции к устройству."</string>
+    <string name="sensor_privacy_mic_unblocked_toast_content" msgid="306555320557065068">"Микрофон готов."</string>
+    <string name="sensor_privacy_camera_unblocked_toast_content" msgid="7843105715964332311">"Камера готова."</string>
+    <string name="sensor_privacy_mic_camera_unblocked_toast_content" msgid="7339355093282661115">"Микрофон и камера готовы."</string>
     <string name="media_seamless_other_device" msgid="4654849800789196737">"Другое устройство"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"Переключить режим обзора"</string>
     <string name="zen_priority_introduction" msgid="3159291973383796646">"Вас не будут отвлекать звуки и вибрация, за исключением сигналов будильника, напоминаний, уведомлений о мероприятиях и звонков от помеченных контактов. Вы по-прежнему будете слышать включенную вами музыку, видео, игры и т. д."</string>
@@ -301,7 +315,10 @@
     <string name="notification_tap_again" msgid="4477318164947497249">"Нажмите ещё раз, чтобы открыть"</string>
     <string name="tap_again" msgid="1315420114387908655">"Нажмите ещё раз"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"Проведите вверх, чтобы открыть"</string>
-    <string name="keyguard_unlock_press" msgid="8488350566398524740">"Нажмите, чтобы открыть."</string>
+    <!-- no translation found for keyguard_unlock_press (9140109453735019209) -->
+    <skip />
+    <!-- no translation found for keyguard_face_successful_unlock_press (25520941264602588) -->
+    <skip />
     <string name="keyguard_retry" msgid="886802522584053523">"Чтобы повторить попытку, проведите вверх"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"Чтобы использовать NFC, разблокируйте устройство."</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"Это устройство принадлежит вашей организации"</string>
@@ -324,7 +341,6 @@
     <string name="keyguard_indication_charging_time_dock" msgid="6150404291427377863">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Зарядка от док-станции • Ещё <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Сменить пользователя."</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Все приложения и данные этого профиля будут удалены."</string>
-    <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"Удалить"</string>
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"Рады видеть вас снова!"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"Продолжить сеанс?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"Начать заново"</string>
@@ -340,7 +356,7 @@
     <string name="user_remove_user_message" msgid="6702834122128031833">"Все приложения и данные этого пользователя будут удалены."</string>
     <string name="user_remove_user_remove" msgid="8387386066949061256">"Удалить"</string>
     <string name="media_projection_dialog_text" msgid="1755705274910034772">"Во время записи или трансляции у приложения \"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>\" будет доступ ко всей информации, которая видна на экране или воспроизводится с устройства, в том числе к паролям, сведениям о платежах, фотографиям, сообщениям и прослушиваемым аудиозаписям."</string>
-    <string name="media_projection_dialog_service_text" msgid="958000992162214611">"Во время записи или трансляции у сервиса, предоставляющего эту функцию, будет доступ ко всей информации, которая видна на экране или проигрывается на устройстве, включая пароли, сведения о платежах, фотографии, сообщения и воспроизводимые звуки."</string>
+    <string name="media_projection_dialog_service_text" msgid="958000992162214611">"Во время записи или трансляции у сервиса, предоставляющего эту функцию, будет доступ ко всей информации, которая видна на экране или воспроизводится на устройстве, включая пароли, сведения о платежах, фотографии, сообщения и звуки."</string>
     <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"Начать запись или трансляцию?"</string>
     <string name="media_projection_dialog_title" msgid="3316063622495360646">"Начать запись или трансляцию через приложение \"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>\"?"</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"Очистить все"</string>
@@ -778,6 +794,12 @@
     <string name="controls_dialog_ok" msgid="2770230012857881822">"Добавить"</string>
     <string name="controls_dialog_message" msgid="342066938390663844">"Предложено приложением \"<xliff:g id="APP">%s</xliff:g>\""</string>
     <string name="controls_tile_locked" msgid="731547768182831938">"Устройство заблокировано"</string>
+    <string name="controls_settings_show_controls_dialog_title" msgid="3357852503553809554">"Разрешить показывать устройства и управлять ими на заблокированном экране?"</string>
+    <string name="controls_settings_show_controls_dialog_message" msgid="7666211700524587969">"Вы можете добавить элементы управления внешними устройствами на заблокированный экран.\n\nПриложение на вашем устройстве может разрешать управление некоторыми устройствами с заблокированного экрана.\n\nИзменить параметры можно в любое время в настройках."</string>
+    <string name="controls_settings_trivial_controls_dialog_title" msgid="7593188157655036677">"Управлять устройствами на заблокированном экране?"</string>
+    <string name="controls_settings_trivial_controls_dialog_message" msgid="237183787721917586">"Вы можете управлять некоторыми устройствами с заблокированного телефона или планшета.\n\nКакими именно устройствами можно управлять, зависит от приложения на вашем устройстве."</string>
+    <string name="controls_settings_dialog_neutral_button" msgid="4514446354793124140">"Не сейчас"</string>
+    <string name="controls_settings_dialog_positive_button" msgid="436070672551674863">"Да"</string>
     <string name="controls_pin_use_alphanumeric" msgid="8478371861023048414">"PIN-код содержит буквы или символы"</string>
     <string name="controls_pin_verify" msgid="3452778292918877662">"Подтвердите устройство \"<xliff:g id="DEVICE">%s</xliff:g>\""</string>
     <string name="controls_pin_wrong" msgid="6162694056042164211">"Неверный PIN-код"</string>
@@ -787,8 +809,7 @@
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"Проведите по экрану, чтобы увидеть больше"</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"Загрузка рекомендаций…"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"Медиа"</string>
-    <!-- no translation found for controls_media_close_session (4780485355795635052) -->
-    <skip />
+    <string name="controls_media_close_session" msgid="4780485355795635052">"Скрыть этот элемент управления в приложении \"<xliff:g id="APP_NAME">%1$s</xliff:g>\"?"</string>
     <string name="controls_media_active_session" msgid="3146882316024153337">"Этот мультимедийный сеанс невозможно скрыть."</string>
     <string name="controls_media_dismiss_button" msgid="4485675693008031646">"Скрыть"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"Возобновить"</string>
@@ -828,6 +849,13 @@
     <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"Чтобы начать трансляцию сеанса, откройте приложение"</string>
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"Неизвестное приложение"</string>
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"Остановить трансляцию"</string>
+    <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Как работают трансляции"</string>
+    <string name="media_output_broadcast" msgid="3555580945878071543">"Трансляция"</string>
+    <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"Находящиеся рядом с вами люди с совместимыми устройствами Bluetooth могут слушать медиафайлы, которые вы транслируете."</string>
+    <string name="media_output_broadcasting_message" msgid="4150299923404886073">"Чтобы подключиться к вашей трансляции, пользователи с совместимыми устройствами Bluetooth могут отсканировать ваш QR-код или ввести название и пароль трансляции"</string>
+    <string name="media_output_broadcast_name" msgid="8786127091542624618">"Название трансляции"</string>
+    <string name="media_output_broadcast_code" msgid="870795639644728542">"Пароль"</string>
+    <string name="media_output_broadcast_dialog_save" msgid="7910865591430010198">"Сохранить"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"Номер сборки"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"Номер сборки скопирован в буфер обмена."</string>
     <string name="basic_status" msgid="2315371112182658176">"Открытый чат"</string>
@@ -906,7 +934,7 @@
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"Активные приложения"</string>
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"Остановить"</string>
     <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"Остановлено"</string>
-    <string name="clipboard_edit_text_copy" msgid="770856373439969178">"Копировать"</string>
+    <string name="clipboard_edit_text_done" msgid="4551887727694022409">"Готово"</string>
     <string name="clipboard_overlay_text_copied" msgid="1872624400464891363">"Скопировано."</string>
     <string name="clipboard_edit_source" msgid="9156488177277788029">"Из приложения \"<xliff:g id="APPNAME">%1$s</xliff:g>\""</string>
     <string name="clipboard_dismiss_description" msgid="7544573092766945657">"Закрыть меню копирования"</string>

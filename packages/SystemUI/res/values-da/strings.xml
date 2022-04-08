@@ -34,6 +34,10 @@
     <string name="status_bar_settings_auto_rotation" msgid="8329080442278431708">"Roter skærm automatisk"</string>
     <string name="usb_device_permission_prompt" msgid="4414719028369181772">"Vil du give <xliff:g id="APPLICATION">%1$s</xliff:g> adgang til <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
     <string name="usb_device_permission_prompt_warn" msgid="2309129784984063656">"Vil du give <xliff:g id="APPLICATION">%1$s</xliff:g> adgang til <xliff:g id="USB_DEVICE">%2$s</xliff:g>?\nDenne app har ikke fået tilladelse til at optage, men optager muligvis lyd via denne USB-enhed."</string>
+    <string name="usb_audio_device_permission_prompt_title" msgid="4221351137250093451">"Vil du give <xliff:g id="APPLICATION">%1$s</xliff:g> adgang til <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
+    <string name="usb_audio_device_confirm_prompt_title" msgid="8828406516732985696">"Vil du åbne <xliff:g id="APPLICATION">%1$s</xliff:g> til håndtering af <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
+    <string name="usb_audio_device_prompt_warn" msgid="2504972133361130335">"Denne app har ikke fået tilladelse til at optage, men optager muligvis lyd via denne USB-enhed. Hvis du bruger <xliff:g id="APPLICATION">%1$s</xliff:g> med denne enhed, kan du muligvis ikke høre opkald, notifikationer og alarmer."</string>
+    <string name="usb_audio_device_prompt" msgid="7944987408206252949">"Hvis du bruger <xliff:g id="APPLICATION">%1$s</xliff:g> med denne enhed, kan du muligvis ikke høre opkald, notifikationer og alarmer."</string>
     <string name="usb_accessory_permission_prompt" msgid="717963550388312123">"Vil du give <xliff:g id="APPLICATION">%1$s</xliff:g> adgang til <xliff:g id="USB_ACCESSORY">%2$s</xliff:g>?"</string>
     <string name="usb_device_confirm_prompt" msgid="4091711472439910809">"Vil du åbne <xliff:g id="APPLICATION">%1$s</xliff:g> til håndtering af <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
     <string name="usb_device_confirm_prompt_warn" msgid="990208659736311769">"Vil du åbne <xliff:g id="APPLICATION">%1$s</xliff:g> for at håndtere <xliff:g id="USB_DEVICE">%2$s</xliff:g>?\nDenne app har ikke fået tilladelse til at optage, men optager muligvis lyd via denne USB-enhed."</string>
@@ -131,7 +135,8 @@
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="2242167416140740920">"Ansigtet er godkendt"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"Bekræftet"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"Tryk på Bekræft for at udføre"</string>
-    <string name="biometric_dialog_tap_confirm_with_face" msgid="1597899891472340950">"Låst op med ansigtsgenkendelse. Tryk for at fortsætte."</string>
+    <!-- no translation found for biometric_dialog_tap_confirm_with_face (1092050545851021991) -->
+    <skip />
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"Godkendt"</string>
     <string name="biometric_dialog_use_pin" msgid="8385294115283000709">"Brug pinkode"</string>
     <string name="biometric_dialog_use_pattern" msgid="2315593393167211194">"Brug mønster"</string>
@@ -287,6 +292,15 @@
     <string name="sensor_privacy_start_use_mic_dialog_content" msgid="1624701280680913717">"Dette fjerner adgangsblokeringen for alle apps og tjenester, der har tilladelse til at bruge din mikrofon."</string>
     <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"Dette fjerner adgangsblokeringen for alle apps og tjenester, der har tilladelse til at bruge dit kamera."</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_content" msgid="3577642558418404919">"Dette fjerner adgangsblokeringen for alle apps og tjenester, der har tilladelse til at bruge dit kamera eller din mikrofon."</string>
+    <string name="sensor_privacy_start_use_mic_blocked_dialog_title" msgid="2640140287496469689">"Mikrofonen er blokeret"</string>
+    <string name="sensor_privacy_start_use_camera_blocked_dialog_title" msgid="7398084286822440384">"Kameraet er blokeret"</string>
+    <string name="sensor_privacy_start_use_mic_camera_blocked_dialog_title" msgid="195236134743281973">"Mikrofonen og kameraet er blokeret"</string>
+    <string name="sensor_privacy_start_use_mic_blocked_dialog_content" msgid="2138318880682877747">"Du kan fjerne blokeringen ved at slå kontakten for privatliv til på din enhed, så mikrofonen får adgang. Gå til enhedens manual for at finde kontakten for privatliv på din enhed."</string>
+    <string name="sensor_privacy_start_use_camera_blocked_dialog_content" msgid="7216015168047965948">"Du kan fjerne blokeringen ved at slå kontakten for privatliv til på din enhed, så kameraet får adgang. Gå til enhedens manual for at finde kontakten for privatliv på din enhed."</string>
+    <string name="sensor_privacy_start_use_mic_camera_blocked_dialog_content" msgid="3960837827570483762">"Du kan fjerne blokeringen af dem ved at slå kontakten for privatliv til på din enhed, så de får adgang. Gå til enhedens manual for at finde kontakten for privatliv på din enhed."</string>
+    <string name="sensor_privacy_mic_unblocked_toast_content" msgid="306555320557065068">"Mikrofon kan benyttes"</string>
+    <string name="sensor_privacy_camera_unblocked_toast_content" msgid="7843105715964332311">"Kamera kan benyttes"</string>
+    <string name="sensor_privacy_mic_camera_unblocked_toast_content" msgid="7339355093282661115">"Mikrofon og kamera kan benyttes"</string>
     <string name="media_seamless_other_device" msgid="4654849800789196737">"Anden enhed"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"Slå Oversigt til/fra"</string>
     <string name="zen_priority_introduction" msgid="3159291973383796646">"Du bliver ikke forstyrret af lyde eller vibrationer, undtagen fra alarmer, påmindelser, begivenheder og opkald fra udvalgte personer, du selv angiver. Du kan stadig høre alt, du vælger at afspille, f.eks. musik, videoer og spil."</string>
@@ -297,7 +311,10 @@
     <string name="notification_tap_again" msgid="4477318164947497249">"Tryk igen for at åbne"</string>
     <string name="tap_again" msgid="1315420114387908655">"Tryk igen"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"Stryg opad for at åbne"</string>
-    <string name="keyguard_unlock_press" msgid="8488350566398524740">"Tryk for at åbne"</string>
+    <!-- no translation found for keyguard_unlock_press (9140109453735019209) -->
+    <skip />
+    <!-- no translation found for keyguard_face_successful_unlock_press (25520941264602588) -->
+    <skip />
     <string name="keyguard_retry" msgid="886802522584053523">"Stryg opad for at prøve igen"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"Lås op for at bruge NFC"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"Denne enhed tilhører din organisation"</string>
@@ -320,7 +337,6 @@
     <string name="keyguard_indication_charging_time_dock" msgid="6150404291427377863">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Oplader i dockingstation • Fuldt opladet om <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Skift bruger"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Alle apps og data i denne session slettes."</string>
-    <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"Fjern"</string>
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"Velkommen tilbage, gæst!"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"Vil du fortsætte din session?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"Start forfra"</string>
@@ -766,6 +782,12 @@
     <string name="controls_dialog_ok" msgid="2770230012857881822">"Tilføj"</string>
     <string name="controls_dialog_message" msgid="342066938390663844">"Foreslået af <xliff:g id="APP">%s</xliff:g>"</string>
     <string name="controls_tile_locked" msgid="731547768182831938">"Enheden er låst"</string>
+    <string name="controls_settings_show_controls_dialog_title" msgid="3357852503553809554">"Vil du se og styre enheder via låseskærmen?"</string>
+    <string name="controls_settings_show_controls_dialog_message" msgid="7666211700524587969">"Du kan tilføje styringselementer til dine eksterne enheder på låseskærmen.\n\nMed din enhedsapp kan du muligvis styre visse enheder uden at låse op for din telefon eller tablet.\n\nDu kan til enhver tid foretage ændringer i Indstillinger."</string>
+    <string name="controls_settings_trivial_controls_dialog_title" msgid="7593188157655036677">"Vil du styre enheder via låseskærmen?"</string>
+    <string name="controls_settings_trivial_controls_dialog_message" msgid="237183787721917586">"Du kan styre visse enheder uden at låse op for din telefon eller tablet.\n\nDin enhedsapp bestemmer, hvilke enheder der kan styres på denne måde."</string>
+    <string name="controls_settings_dialog_neutral_button" msgid="4514446354793124140">"Nej tak"</string>
+    <string name="controls_settings_dialog_positive_button" msgid="436070672551674863">"Ja"</string>
     <string name="controls_pin_use_alphanumeric" msgid="8478371861023048414">"Pinkoden indeholder bogstaver eller symboler"</string>
     <string name="controls_pin_verify" msgid="3452778292918877662">"Bekræft <xliff:g id="DEVICE">%s</xliff:g>"</string>
     <string name="controls_pin_wrong" msgid="6162694056042164211">"Forkert pinkode"</string>
@@ -815,6 +837,13 @@
     <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"Åbn appen for at caste denne session."</string>
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"Ukendt app"</string>
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"Stop med at caste"</string>
+    <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Sådan fungerer udsendelser"</string>
+    <string name="media_output_broadcast" msgid="3555580945878071543">"Udsendelse"</string>
+    <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"Personer i nærheden, som har kompatible Bluetooth-enheder, kan lytte til det medie, du udsender"</string>
+    <string name="media_output_broadcasting_message" msgid="4150299923404886073">"Personer i nærheden, som har kompatible Bluetooth-enheder, kan lytte til din udsendelse ved at scanne din QR-kode eller bruge navnet på og adgangskoden til din udsendelse"</string>
+    <string name="media_output_broadcast_name" msgid="8786127091542624618">"Navn på udsendelse"</string>
+    <string name="media_output_broadcast_code" msgid="870795639644728542">"Adgangskode"</string>
+    <string name="media_output_broadcast_dialog_save" msgid="7910865591430010198">"Gem"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"Buildnummer"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"Buildnummeret blev kopieret til udklipsholderen."</string>
     <string name="basic_status" msgid="2315371112182658176">"Åben samtale"</string>
@@ -891,7 +920,7 @@
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"Aktive apps"</string>
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"Stop"</string>
     <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"Stoppet"</string>
-    <string name="clipboard_edit_text_copy" msgid="770856373439969178">"Kopiér"</string>
+    <string name="clipboard_edit_text_done" msgid="4551887727694022409">"Udfør"</string>
     <string name="clipboard_overlay_text_copied" msgid="1872624400464891363">"Kopieret"</string>
     <string name="clipboard_edit_source" msgid="9156488177277788029">"Fra <xliff:g id="APPNAME">%1$s</xliff:g>"</string>
     <string name="clipboard_dismiss_description" msgid="7544573092766945657">"Luk brugerfladen for kopi"</string>
