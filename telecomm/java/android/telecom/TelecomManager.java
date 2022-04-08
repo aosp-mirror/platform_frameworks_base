@@ -1444,9 +1444,14 @@ public class TelecomManager {
      * when placing calls. The user may still need to enable the {@link PhoneAccount} within
      * the phone app settings before the account is usable.
      * <p>
+     * Note: Each package is limited to 10 {@link PhoneAccount} registrations.
+     * <p>
      * A {@link SecurityException} will be thrown if an app tries to register a
      * {@link PhoneAccountHandle} where the package name specified within
      * {@link PhoneAccountHandle#getComponentName()} does not match the package name of the app.
+     * <p>
+     * A {@link IllegalArgumentException} will be thrown if an app tries to register a
+     * {@link PhoneAccount} when the upper bound limit, 10, has already been reached.
      *
      * @param account The complete {@link PhoneAccount}.
      */
