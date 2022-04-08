@@ -522,7 +522,8 @@
                   android:launchMode="singleTop"
                   android:permission="android.permission.MANAGE_SENSOR_PRIVACY"
                   android:theme="@style/Theme.SystemUI.Dialog.Alert"
-                  android:finishOnCloseSystemDialogs="true">
+                  android:finishOnCloseSystemDialogs="true"
+                  android:showForAllUsers="true">
         </activity>
 
         <!-- started from SensoryPrivacyService -->
@@ -531,7 +532,8 @@
                   android:launchMode="singleTop"
                   android:permission="android.permission.MANAGE_SENSOR_PRIVACY"
                   android:theme="@style/BottomSheet"
-                  android:finishOnCloseSystemDialogs="true">
+                  android:finishOnCloseSystemDialogs="true"
+                  android:showForAllUsers="true">
         </activity>
 
 
