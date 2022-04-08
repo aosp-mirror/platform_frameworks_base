@@ -75,6 +75,10 @@ public final class NotificationTest {
     @Rule
     public UnlockScreenRule mUnlockScreenRule = new UnlockScreenRule();
 
+    @Rule
+    public ScreenCaptureRule mScreenCaptureRule =
+            new ScreenCaptureRule("/sdcard/InputMethodStressTest");
+
     private Context mContext;
     private NotificationManager mNotificationManager;
     private UiDevice mUiDevice;
