@@ -32341,9 +32341,6 @@ package android.os {
     method public static android.os.VibrationEffect createWaveform(long[], int[], int);
     method public int describeContents();
     method @NonNull public static android.os.VibrationEffect.Composition startComposition();
-    method @NonNull public static android.os.VibrationEffect.WaveformBuilder startWaveform();
-    method @NonNull public static android.os.VibrationEffect.WaveformBuilder startWaveform(@NonNull android.os.VibrationEffect.VibrationParameter);
-    method @NonNull public static android.os.VibrationEffect.WaveformBuilder startWaveform(@NonNull android.os.VibrationEffect.VibrationParameter, @NonNull android.os.VibrationEffect.VibrationParameter);
     field @NonNull public static final android.os.Parcelable.Creator<android.os.VibrationEffect> CREATOR;
     field public static final int DEFAULT_AMPLITUDE = -1; // 0xffffffff
     field public static final int EFFECT_CLICK = 0; // 0x0
@@ -32353,13 +32350,10 @@ package android.os {
   }
 
   public static final class VibrationEffect.Composition {
-    method @NonNull public android.os.VibrationEffect.Composition addEffect(@NonNull android.os.VibrationEffect);
-    method @NonNull public android.os.VibrationEffect.Composition addOffDuration(@NonNull java.time.Duration);
     method @NonNull public android.os.VibrationEffect.Composition addPrimitive(int);
     method @NonNull public android.os.VibrationEffect.Composition addPrimitive(int, @FloatRange(from=0.0f, to=1.0f) float);
     method @NonNull public android.os.VibrationEffect.Composition addPrimitive(int, @FloatRange(from=0.0f, to=1.0f) float, @IntRange(from=0) int);
     method @NonNull public android.os.VibrationEffect compose();
-    method @NonNull public android.os.VibrationEffect.Composition repeatEffectIndefinitely(@NonNull android.os.VibrationEffect);
     field public static final int PRIMITIVE_CLICK = 1; // 0x1
     field public static final int PRIMITIVE_LOW_TICK = 8; // 0x8
     field public static final int PRIMITIVE_QUICK_FALL = 6; // 0x6
@@ -32370,34 +32364,15 @@ package android.os {
     field public static final int PRIMITIVE_TICK = 7; // 0x7
   }
 
-  public static final class VibrationEffect.Composition.UnreachableAfterRepeatingIndefinitelyException extends java.lang.IllegalStateException {
-  }
-
-  public static class VibrationEffect.VibrationParameter {
-    method @NonNull public static android.os.VibrationEffect.VibrationParameter targetAmplitude(@FloatRange(from=0, to=1) float);
-    method @NonNull public static android.os.VibrationEffect.VibrationParameter targetFrequency(@FloatRange(from=1) float);
-  }
-
-  public static final class VibrationEffect.WaveformBuilder {
-    method @NonNull public android.os.VibrationEffect.WaveformBuilder addSustain(@NonNull java.time.Duration);
-    method @NonNull public android.os.VibrationEffect.WaveformBuilder addTransition(@NonNull java.time.Duration, @NonNull android.os.VibrationEffect.VibrationParameter);
-    method @NonNull public android.os.VibrationEffect.WaveformBuilder addTransition(@NonNull java.time.Duration, @NonNull android.os.VibrationEffect.VibrationParameter, @NonNull android.os.VibrationEffect.VibrationParameter);
-    method @NonNull public android.os.VibrationEffect build();
-  }
-
   public abstract class Vibrator {
     method public final int areAllEffectsSupported(@NonNull int...);
     method public final boolean areAllPrimitivesSupported(@NonNull int...);
     method @NonNull public int[] areEffectsSupported(@NonNull int...);
     method @NonNull public boolean[] arePrimitivesSupported(@NonNull int...);
     method @RequiresPermission(android.Manifest.permission.VIBRATE) public abstract void cancel();
-    method @Nullable public android.os.vibrator.VibratorFrequencyProfile getFrequencyProfile();
     method public int getId();
     method @NonNull public int[] getPrimitiveDurations(@NonNull int...);
-    method public float getQFactor();
-    method public float getResonantFrequency();
     method public abstract boolean hasAmplitudeControl();
-    method public boolean hasFrequencyControl();
     method public abstract boolean hasVibrator();
     method @Deprecated @RequiresPermission(android.Manifest.permission.VIBRATE) public void vibrate(long);
     method @Deprecated @RequiresPermission(android.Manifest.permission.VIBRATE) public void vibrate(long, android.media.AudioAttributes);
@@ -32721,17 +32696,6 @@ package android.os.strictmode {
   }
 
   public final class WebViewMethodCalledOnWrongThreadViolation extends android.os.strictmode.Violation {
-  }
-
-}
-
-package android.os.vibrator {
-
-  public final class VibratorFrequencyProfile {
-    method public float getMaxAmplitudeMeasurementInterval();
-    method @FloatRange(from=0, to=1) @NonNull public float[] getMaxAmplitudeMeasurements();
-    method public float getMaxFrequency();
-    method public float getMinFrequency();
   }
 
 }
