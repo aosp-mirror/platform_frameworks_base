@@ -1077,6 +1077,10 @@
         <item name="android:textDirection">locale</item>
     </style>
 
+    <style name="FgsManagerAppLabel" parent="TextAppearance.Dialog.Body">
+        <item name="android:textDirection">locale</item>
+    </style>
+
     <style name="FgsManagerAppDuration">
         <item name="android:fontFamily">?android:attr/textAppearanceSmall</item>
         <item name="android:textDirection">locale</item>
