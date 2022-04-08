@@ -665,6 +665,15 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
                 mSurfaceControlTransactionFactory.getTransaction();
         tx.setAlpha(mLeash, 0f);
         tx.apply();
+
+        // When entering PiP this transaction will be applied within WindowContainerTransaction and
+        // ensure that the PiP has rounded corners.
+        final SurfaceControl.Transaction boundsChangeTx =
+                mSurfaceControlTransactionFactory.getTransaction();
+        mSurfaceTransactionHelper
+                .crop(boundsChangeTx, mLeash, destinationBounds)
+                .round(boundsChangeTx, mLeash, true /* applyCornerRadius */);
+
         mPipTransitionState.setTransitionState(PipTransitionState.ENTRY_SCHEDULED);
         applyEnterPipSyncTransaction(destinationBounds, () -> {
             mPipAnimationController
@@ -677,7 +686,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
             // mState is set right after the animation is kicked off to block any resize
             // requests such as offsetPip that may have been called prior to the transition.
             mPipTransitionState.setTransitionState(PipTransitionState.ENTERING_PIP);
-        }, null /* boundsChangeTransaction */);
+        }, boundsChangeTx);
     }
 
     private void onEndOfSwipePipToHomeTransition() {
