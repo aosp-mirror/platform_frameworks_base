@@ -1181,7 +1181,7 @@ public class Instrumentation {
 
             // Direct the injected event into windows owned by the instrumentation target.
             InputManager.getInstance().injectInputEvent(
-                    event, InputManager.INJECT_INPUT_EVENT_MODE_WAIT_FOR_RESULT, Process.myUid());
+                    event, InputManager.INJECT_INPUT_EVENT_MODE_WAIT_FOR_FINISH, Process.myUid());
 
             if (syncAfter) {
                 WindowManagerGlobal.getWindowManagerService()
