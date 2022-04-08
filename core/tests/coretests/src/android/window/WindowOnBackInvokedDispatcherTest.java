@@ -16,6 +16,7 @@
 
 package android.window;
 
+import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
@@ -73,24 +74,23 @@ public class WindowOnBackInvokedDispatcherTest {
 
     @Test
     public void propagatesTopCallback_samePriority() throws RemoteException {
-        ArgumentCaptor<IOnBackInvokedCallback> captor =
-                ArgumentCaptor.forClass(IOnBackInvokedCallback.class);
+        ArgumentCaptor<OnBackInvokedCallbackInfo> captor =
+                ArgumentCaptor.forClass(OnBackInvokedCallbackInfo.class);
 
         mDispatcher.registerOnBackInvokedCallback(
                 OnBackInvokedDispatcher.PRIORITY_DEFAULT, mCallback1);
         mDispatcher.registerOnBackInvokedCallback(
                 OnBackInvokedDispatcher.PRIORITY_DEFAULT, mCallback2);
 
-        verify(mWindowSession, times(2)).setOnBackInvokedCallback(
+        verify(mWindowSession, times(2)).setOnBackInvokedCallbackInfo(
                 Mockito.eq(mWindow),
-                captor.capture(),
-                Mockito.eq(OnBackInvokedDispatcher.PRIORITY_DEFAULT));
-        captor.getAllValues().get(0).onBackStarted();
+                captor.capture());
+        captor.getAllValues().get(0).getCallback().onBackStarted();
         waitForIdle();
         verify(mCallback1).onBackStarted();
         verifyZeroInteractions(mCallback2);
 
-        captor.getAllValues().get(1).onBackStarted();
+        captor.getAllValues().get(1).getCallback().onBackStarted();
         waitForIdle();
         verify(mCallback2).onBackStarted();
         verifyNoMoreInteractions(mCallback1);
@@ -98,19 +98,19 @@ public class WindowOnBackInvokedDispatcherTest {
 
     @Test
     public void propagatesTopCallback_differentPriority() throws RemoteException {
-        ArgumentCaptor<IOnBackInvokedCallback> captor =
-                ArgumentCaptor.forClass(IOnBackInvokedCallback.class);
+        ArgumentCaptor<OnBackInvokedCallbackInfo> captor =
+                ArgumentCaptor.forClass(OnBackInvokedCallbackInfo.class);
 
         mDispatcher.registerOnBackInvokedCallback(
                 OnBackInvokedDispatcher.PRIORITY_OVERLAY, mCallback1);
         mDispatcher.registerOnBackInvokedCallback(
                 OnBackInvokedDispatcher.PRIORITY_DEFAULT, mCallback2);
 
-        verify(mWindowSession).setOnBackInvokedCallback(
-                Mockito.eq(mWindow), captor.capture(),
-                Mockito.eq(OnBackInvokedDispatcher.PRIORITY_OVERLAY));
+        verify(mWindowSession).setOnBackInvokedCallbackInfo(
+                Mockito.eq(mWindow), captor.capture());
         verifyNoMoreInteractions(mWindowSession);
-        captor.getValue().onBackStarted();
+        assertEquals(captor.getValue().getPriority(), OnBackInvokedDispatcher.PRIORITY_OVERLAY);
+        captor.getValue().getCallback().onBackStarted();
         waitForIdle();
         verify(mCallback1).onBackStarted();
     }
@@ -127,17 +127,14 @@ public class WindowOnBackInvokedDispatcherTest {
         verifyZeroInteractions(mWindowSession);
 
         mDispatcher.unregisterOnBackInvokedCallback(mCallback2);
-        verify(mWindowSession).setOnBackInvokedCallback(
-                Mockito.eq(mWindow),
-                isNull(),
-                Mockito.eq(OnBackInvokedDispatcher.PRIORITY_DEFAULT));
+        verify(mWindowSession).setOnBackInvokedCallbackInfo(Mockito.eq(mWindow), isNull());
     }
 
 
     @Test
     public void propagatesTopCallback_sameInstanceAddedTwice() throws RemoteException {
-        ArgumentCaptor<IOnBackInvokedCallback> captor =
-                ArgumentCaptor.forClass(IOnBackInvokedCallback.class);
+        ArgumentCaptor<OnBackInvokedCallbackInfo> captor =
+                ArgumentCaptor.forClass(OnBackInvokedCallbackInfo.class);
 
         mDispatcher.registerOnBackInvokedCallback(OnBackInvokedDispatcher.PRIORITY_OVERLAY,
                 mCallback1
@@ -150,11 +147,8 @@ public class WindowOnBackInvokedDispatcherTest {
         reset(mWindowSession);
         mDispatcher.registerOnBackInvokedCallback(
                 OnBackInvokedDispatcher.PRIORITY_OVERLAY, mCallback2);
-        verify(mWindowSession).setOnBackInvokedCallback(
-                Mockito.eq(mWindow),
-                captor.capture(),
-                Mockito.eq(OnBackInvokedDispatcher.PRIORITY_OVERLAY));
-        captor.getValue().onBackStarted();
+        verify(mWindowSession).setOnBackInvokedCallbackInfo(Mockito.eq(mWindow), captor.capture());
+        captor.getValue().getCallback().onBackStarted();
         waitForIdle();
         verify(mCallback2).onBackStarted();
     }
