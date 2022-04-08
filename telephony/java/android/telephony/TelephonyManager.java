@@ -3227,8 +3227,10 @@ public class TelephonyManager {
                 return "LTE_CA";
             case NETWORK_TYPE_NR:
                 return "NR";
-            default:
+            case NETWORK_TYPE_UNKNOWN:
                 return "UNKNOWN";
+            default:
+                return "UNKNOWN(" + type + ")";
         }
     }
 
