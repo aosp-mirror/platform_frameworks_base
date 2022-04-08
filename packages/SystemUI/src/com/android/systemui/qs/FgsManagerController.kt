@@ -229,6 +229,10 @@ class FgsManagerController @Inject constructor(
         synchronized(lock) {
             if (dialog == null) {
 
+                runningServiceTokens.keys.forEach {
+                    it.updateUiControl()
+                }
+
                 val dialog = SystemUIDialog(context)
                 dialog.setTitle(R.string.fgs_manager_dialog_title)
 
@@ -397,10 +401,20 @@ class FgsManagerController @Inject constructor(
         val userId: Int,
         val packageName: String
     ) {
-        val uiControl: UIControl by lazy {
-            val uid = packageManager.getPackageUidAsUser(packageName, userId)
+        val uid by lazy { packageManager.getPackageUidAsUser(packageName, userId) }
 
-            when (activityManager.getBackgroundRestrictionExemptionReason(uid)) {
+        private var uiControlInitialized = false
+        var uiControl: UIControl = UIControl.NORMAL
+            get() {
+                if (!uiControlInitialized) {
+                    updateUiControl()
+                }
+                return field
+            }
+            private set
+
+        fun updateUiControl() {
+            uiControl = when (activityManager.getBackgroundRestrictionExemptionReason(uid)) {
                 PowerExemptionManager.REASON_SYSTEM_UID,
                 PowerExemptionManager.REASON_DEVICE_DEMO_MODE -> UIControl.HIDE_ENTRY
 
@@ -413,6 +427,7 @@ class FgsManagerController @Inject constructor(
                 PowerExemptionManager.REASON_SYSTEM_MODULE -> UIControl.HIDE_BUTTON
                 else -> UIControl.NORMAL
             }
+            uiControlInitialized = true
         }
 
         override fun equals(other: Any?): Boolean {
