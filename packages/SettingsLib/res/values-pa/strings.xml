@@ -589,27 +589,22 @@
     <string name="add_user_failed" msgid="4809887794313944872">"ਨਵਾਂ ਵਰਤੋਂਕਾਰ ਬਣਾਉਣਾ ਅਸਫਲ ਰਿਹਾ"</string>
     <string name="add_guest_failed" msgid="8074548434469843443">"ਨਵਾਂ ਮਹਿਮਾਨ ਪ੍ਰੋਫਾਈਲ ਬਣਾਉਣਾ ਅਸਫਲ ਰਿਹਾ"</string>
     <string name="user_nickname" msgid="262624187455825083">"ਉਪਨਾਮ"</string>
-    <!-- no translation found for user_add_user (7876449291500212468) -->
-    <skip />
+    <string name="user_add_user" msgid="7876449291500212468">"ਵਰਤੋਂਕਾਰ ਨੂੰ ਸ਼ਾਮਲ ਕਰੋ"</string>
     <string name="guest_new_guest" msgid="3482026122932643557">"ਮਹਿਮਾਨ ਸ਼ਾਮਲ ਕਰੋ"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"ਮਹਿਮਾਨ ਹਟਾਓ"</string>
     <string name="guest_reset_guest" msgid="6110013010356013758">"ਮਹਿਮਾਨ ਸੈਸ਼ਨ ਨੂੰ ਰੀਸੈੱਟ ਕਰੋ"</string>
     <string name="guest_reset_guest_dialog_title" msgid="8047270010895437534">"ਕੀ ਮਹਿਮਾਨ ਨੂੰ ਰੀਸੈੱਟ ਕਰਨਾ ਹੈ?"</string>
-    <!-- no translation found for guest_remove_guest_dialog_title (4548511006624088072) -->
-    <skip />
+    <string name="guest_remove_guest_dialog_title" msgid="4548511006624088072">"ਕੀ ਮਹਿਮਾਨ ਨੂੰ ਹਟਾਉਣਾ ਹੈ?"</string>
     <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"ਰੀਸੈੱਟ ਕਰੋ"</string>
+    <string name="guest_remove_guest_confirm_button" msgid="7858123434954143879">"ਹਟਾਓ"</string>
     <string name="guest_resetting" msgid="7822120170191509566">"ਮਹਿਮਾਨ ਨੂੰ ਰੀਸੈੱਟ ਕੀਤਾ ਜਾ ਰਿਹਾ ਹੈ…"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"ਇੱਕ ਫ਼ੋਟੋ ਖਿੱਚੋ"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"ਕੋਈ ਚਿੱਤਰ ਚੁਣੋ"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"ਫ਼ੋਟੋ ਚੁਣੋ"</string>
-    <!-- no translation found for failed_attempts_now_wiping_device (4016329172216428897) -->
-    <skip />
-    <!-- no translation found for failed_attempts_now_wiping_user (469060411789668050) -->
-    <skip />
-    <!-- no translation found for failed_attempts_now_wiping_profile (7626589520888963129) -->
-    <skip />
-    <!-- no translation found for failed_attempts_now_wiping_dialog_dismiss (2749889771223578925) -->
-    <skip />
+    <string name="failed_attempts_now_wiping_device" msgid="4016329172216428897">"ਬਹੁਤ ਸਾਰੀਆਂ ਗਲਤ ਕੋਸ਼ਿਸ਼ਾਂ। ਇਸ ਡੀਵਾਈਸ ਦਾ ਡਾਟਾ ਮਿਟਾ ਦਿੱਤਾ ਜਾਵੇਗਾ।"</string>
+    <string name="failed_attempts_now_wiping_user" msgid="469060411789668050">"ਬਹੁਤ ਸਾਰੀਆਂ ਗਲਤ ਕੋਸ਼ਿਸ਼ਾਂ। ਇਸ ਵਰਤੋਂਕਾਰ ਨੂੰ ਮਿਟਾ ਦਿੱਤਾ ਜਾਵੇਗਾ।"</string>
+    <string name="failed_attempts_now_wiping_profile" msgid="7626589520888963129">"ਬਹੁਤ ਸਾਰੀਆਂ ਗਲਤ ਕੋਸ਼ਿਸ਼ਾਂ। ਇਹ ਕਾਰਜ ਪ੍ਰੋਫਾਈਲ ਅਤੇ ਇਸਦਾ ਡਾਟਾ ਮਿਟਾ ਦਿੱਤਾ ਜਾਵੇਗਾ।"</string>
+    <string name="failed_attempts_now_wiping_dialog_dismiss" msgid="2749889771223578925">"ਖਾਰਜ ਕਰੋ"</string>
     <string name="cached_apps_freezer_device_default" msgid="2616594131750144342">"ਡੀਵਾਈਸ ਪੂਰਵ-ਨਿਰਧਾਰਿਤ"</string>
     <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"ਬੰਦ ਕੀਤਾ ਗਿਆ"</string>
     <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"ਚਾਲੂ ਕੀਤਾ ਗਿਆ"</string>
@@ -657,4 +652,7 @@
     <string name="turn_screen_on_title" msgid="3266937298097573424">"ਸਕ੍ਰੀਨ ਚਾਲੂ ਕਰੋ"</string>
     <string name="allow_turn_screen_on" msgid="6194845766392742639">"ਸਕ੍ਰੀਨ ਚਾਲੂ ਕਰਨ ਦਿਓ"</string>
     <string name="allow_turn_screen_on_description" msgid="43834403291575164">"ਐਪ ਨੂੰ ਸਕ੍ਰੀਨ ਚਾਲੂ ਕਰਨ ਦਿਓ। ਜੇ ਇਜਾਜ਼ਤ ਦਿੱਤੀ ਜਾਂਦੀ ਹੈ, ਤਾਂ ਐਪ ਕਿਸੇ ਵੀ ਸਮੇਂ ਸਕ੍ਰੀਨ ਨੂੰ ਚਾਲੂ ਕਰ ਸਕਦੀ ਹੈ, ਭਾਵੇਂ ਤੁਹਾਨੂੰ ਇਸਦੀ ਲੋੜ ਨਾ ਹੋਵੇ।"</string>
+    <string name="bt_le_audio_scan_qr_code" msgid="3521809854780392679">"QR ਕੋਡ ਸਕੈਨ ਕਰੋ"</string>
+    <string name="bt_le_audio_scan_qr_code_scanner" msgid="4679500020630341107">"ਸੁਣਨਾ ਸ਼ੁਰੂ ਕਰਨ ਲਈ, ਹੇਠਾਂ ਦਿੱਤੇ QR ਕੋਡ ਨੂੰ ਕੇਂਦਰ ਵਿੱਚ ਰੱਖੋ"</string>
+    <string name="bt_le_audio_qr_code_is_not_valid_format" msgid="6092191081849434734">"QR ਕੋਡ ਦਾ ਫਾਰਮੈਟ ਵੈਧ ਨਹੀਂ ਹੈ"</string>
 </resources>

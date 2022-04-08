@@ -4754,7 +4754,11 @@
   <java-symbol type="drawable" name="ic_swap_horiz" />
   <java-symbol type="bool" name="config_notificationForceUserSetOnUpgrade" />
 
+  <!-- For app language picker -->
   <java-symbol type="string" name="system_locale_title" />
   <java-symbol type="layout" name="app_language_picker_system_default" />
+  <java-symbol type="layout" name="app_language_picker_system_current" />
+  <java-symbol type="layout" name="app_language_picker_current_locale_item" />
   <java-symbol type="id" name="system_locale_subtitle" />
+  <java-symbol type="id" name="language_picker_item" />
 </resources>

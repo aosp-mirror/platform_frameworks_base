@@ -16,6 +16,8 @@
 
 package com.android.internal.app;
 
+import static com.android.internal.app.AppLocaleStore.AppLocaleResult.LocaleStatus;
+
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.app.ListFragment;
@@ -158,30 +160,39 @@ public class LocalePickerWithRegion extends ListFragment implements SearchView.O
             if (appCurrentLocale != null && !isForCountryMode) {
                 mLocaleList.add(appCurrentLocale);
             }
-            filterTheLanguagesNotSupportedInApp(context, appPackageName);
 
-            if (!isForCountryMode) {
-                mLocaleList.add(LocaleStore.getSystemDefaultLocaleInfo());
+            AppLocaleStore.AppLocaleResult result =
+                    AppLocaleStore.getAppSupportedLocales(context, appPackageName);
+            boolean shouldShowList =
+                    result.mLocaleStatus == LocaleStatus.GET_SUPPORTED_LANGUAGE_FROM_LOCAL_CONFIG
+                    || result.mLocaleStatus == LocaleStatus.GET_SUPPORTED_LANGUAGE_FROM_ASSET;
+
+            mLocaleList = filterTheLanguagesNotSupportedInApp(
+                    shouldShowList, result.mAppSupportedLocales);
+
+            // Add "system language"
+            if (!isForCountryMode && shouldShowList) {
+                mLocaleList.add(LocaleStore.getSystemDefaultLocaleInfo(appCurrentLocale == null));
             }
         }
         return true;
     }
 
-    private void filterTheLanguagesNotSupportedInApp(Context context, String appPackageName) {
-        ArrayList<Locale> supportedLocales =
-                AppLocaleStore.getAppSupportedLocales(context, appPackageName);
-
+    private Set<LocaleStore.LocaleInfo> filterTheLanguagesNotSupportedInApp(
+            boolean shouldShowList, ArrayList<Locale> supportedLocales) {
         Set<LocaleStore.LocaleInfo> filteredList = new HashSet<>();
-        for(LocaleStore.LocaleInfo li: mLocaleList) {
-            for(Locale l: supportedLocales) {
-                if(LocaleList.matchesLanguageAndScript(li.getLocale(), l)) {
-                    filteredList.add(li);
+        if (shouldShowList) {
+            for(LocaleStore.LocaleInfo li: mLocaleList) {
+                for(Locale l: supportedLocales) {
+                    if(LocaleList.matchesLanguageAndScript(li.getLocale(), l)) {
+                        filteredList.add(li);
+                    }
                 }
             }
+            Log.d(TAG, "mLocaleList after app-supported filter:  " + filteredList.size());
         }
-        Log.d(TAG, "mLocaleList after app-supported filter:  " + filteredList.size());
 
-        mLocaleList = filteredList;
+        return filteredList;
     }
 
     private void returnToParentFrame() {

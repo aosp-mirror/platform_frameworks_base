@@ -32,10 +32,14 @@
     <string name="battery_saver_start_action" msgid="8353766979886287140">"Укључи"</string>
     <string name="battery_saver_dismiss_action" msgid="7199342621040014738">"Не, хвала"</string>
     <string name="status_bar_settings_auto_rotation" msgid="8329080442278431708">"Аутоматско ротирање екрана"</string>
-    <string name="usb_device_permission_prompt" msgid="4414719028369181772">"Желите ли да дозволите да <xliff:g id="APPLICATION">%1$s</xliff:g> приступа уређају <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
+    <string name="usb_device_permission_prompt" msgid="4414719028369181772">"Дозвољавате да <xliff:g id="APPLICATION">%1$s</xliff:g> приступа уређају <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
     <string name="usb_device_permission_prompt_warn" msgid="2309129784984063656">"Желите ли да дозволите да <xliff:g id="APPLICATION">%1$s</xliff:g> приступа уређају <xliff:g id="USB_DEVICE">%2$s</xliff:g>?\nОва апликација нема дозволу за снимање, али би могла да снима звук помоћу овог USB уређаја."</string>
-    <string name="usb_accessory_permission_prompt" msgid="717963550388312123">"Желите ли да дозволите да <xliff:g id="APPLICATION">%1$s</xliff:g> приступа уређају <xliff:g id="USB_ACCESSORY">%2$s</xliff:g>?"</string>
-    <string name="usb_device_confirm_prompt" msgid="4091711472439910809">"Желите ли да отворите апликацију <xliff:g id="APPLICATION">%1$s</xliff:g> да бисте користили уређај <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
+    <string name="usb_audio_device_permission_prompt_title" msgid="4221351137250093451">"Дозвољавате да <xliff:g id="APPLICATION">%1$s</xliff:g> приступа уређају <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
+    <string name="usb_audio_device_confirm_prompt_title" msgid="8828406516732985696">"Желите ли да отворите апликацију <xliff:g id="APPLICATION">%1$s</xliff:g> да бисте користили уређај <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
+    <string name="usb_audio_device_prompt_warn" msgid="2504972133361130335">"Ова апликација нема дозволу за снимање, али би могла да снима звук помоћу овог USB уређаја. Ако користите апликацију <xliff:g id="APPLICATION">%1$s</xliff:g> са овим уређајем, можда нећете чути позиве, обавештења и аларме."</string>
+    <string name="usb_audio_device_prompt" msgid="7944987408206252949">"Ако користите апликацију <xliff:g id="APPLICATION">%1$s</xliff:g> са овим уређајем, можда нећете чути позиве, обавештења и аларме."</string>
+    <string name="usb_accessory_permission_prompt" msgid="717963550388312123">"Дозвољавате да <xliff:g id="APPLICATION">%1$s</xliff:g> приступа уређају <xliff:g id="USB_ACCESSORY">%2$s</xliff:g>?"</string>
+    <string name="usb_device_confirm_prompt" msgid="4091711472439910809">"Желите да отворите <xliff:g id="APPLICATION">%1$s</xliff:g> да бисте користили <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
     <string name="usb_device_confirm_prompt_warn" msgid="990208659736311769">"Желите ли да отворите апликацију <xliff:g id="APPLICATION">%1$s</xliff:g> ради руковања уређајем <xliff:g id="USB_DEVICE">%2$s</xliff:g>?\nОва апликација нема дозволу за снимање, али би могла да снима звук помоћу овог USB уређаја."</string>
     <string name="usb_accessory_confirm_prompt" msgid="5728408382798643421">"Желите ли да отворите апликацију <xliff:g id="APPLICATION">%1$s</xliff:g> да бисте користили уређај <xliff:g id="USB_ACCESSORY">%2$s</xliff:g>?"</string>
     <string name="usb_accessory_uri_prompt" msgid="6756649383432542382">"Инсталиране апликације не функционишу са овим USB помоћним уређајем. Сазнајте више о њему на адреси <xliff:g id="URL">%1$s</xliff:g>"</string>
@@ -131,7 +135,8 @@
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="2242167416140740920">"Лице је потврђено"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"Потврђено"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"Додирните Потврди да бисте завршили"</string>
-    <string name="biometric_dialog_tap_confirm_with_face" msgid="1597899891472340950">"Откључали сте лицем. Притисните да бисте наставили."</string>
+    <!-- no translation found for biometric_dialog_tap_confirm_with_face (1092050545851021991) -->
+    <skip />
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"Идентитет је потврђен"</string>
     <string name="biometric_dialog_use_pin" msgid="8385294115283000709">"Користите PIN"</string>
     <string name="biometric_dialog_use_pattern" msgid="2315593393167211194">"Користите шаблон"</string>
@@ -289,6 +294,15 @@
     <string name="sensor_privacy_start_use_mic_dialog_content" msgid="1624701280680913717">"Овим ће се одблокирати приступ за све апликације и услуге које имају дозволу за коришћење микрофона."</string>
     <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"Овим ће се одблокирати приступ за све апликације и услуге које имају дозволу за коришћење камере."</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_content" msgid="3577642558418404919">"Овим ће се одблокирати приступ за све апликације и услуге које имају дозволу за коришћење камере или микрофона."</string>
+    <string name="sensor_privacy_start_use_mic_blocked_dialog_title" msgid="2640140287496469689">"Микрофон је блокиран"</string>
+    <string name="sensor_privacy_start_use_camera_blocked_dialog_title" msgid="7398084286822440384">"Камера је блокирана"</string>
+    <string name="sensor_privacy_start_use_mic_camera_blocked_dialog_title" msgid="195236134743281973">"Микрофон и камера су блокирани"</string>
+    <string name="sensor_privacy_start_use_mic_blocked_dialog_content" msgid="2138318880682877747">"Да бисте одблокирали, померите прекидач за приватност на уређају на позицију укључено за микрофон како бисте омогућили приступ микрофону. Погледајте приручник за уређај да бисте пронашли прекидач за приватност на уређају."</string>
+    <string name="sensor_privacy_start_use_camera_blocked_dialog_content" msgid="7216015168047965948">"Да бисте одблокирали, померите прекидач за приватност на уређају на позицију укључено за камеру како бисте омогућили приступ камери. Погледајте приручник за уређај да бисте пронашли прекидач за приватност на уређају."</string>
+    <string name="sensor_privacy_start_use_mic_camera_blocked_dialog_content" msgid="3960837827570483762">"Да бисте их одблокирали, померите прекидач за приватност на уређају на позицију одблокирано како бисте омогућили приступ. Погледајте приручник за уређај да бисте пронашли прекидач за приватност на уређају."</string>
+    <string name="sensor_privacy_mic_unblocked_toast_content" msgid="306555320557065068">"Микрофон је доступан"</string>
+    <string name="sensor_privacy_camera_unblocked_toast_content" msgid="7843105715964332311">"Камера је доступна"</string>
+    <string name="sensor_privacy_mic_camera_unblocked_toast_content" msgid="7339355093282661115">"Микрофон и камера су доступни"</string>
     <string name="media_seamless_other_device" msgid="4654849800789196737">"Други уређај"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"Укључи/искључи преглед"</string>
     <string name="zen_priority_introduction" msgid="3159291973383796646">"Неће вас узнемиравати звукови и вибрације осим за аларме, подсетнике, догађаје и позиваоце које наведете. И даље ћете чути све што одаберете да пустите, укључујући музику, видео снимке и игре."</string>
@@ -299,7 +313,10 @@
     <string name="notification_tap_again" msgid="4477318164947497249">"Додирните поново да бисте отворили"</string>
     <string name="tap_again" msgid="1315420114387908655">"Додирните поново"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"Превуците нагоре да бисте отворили"</string>
-    <string name="keyguard_unlock_press" msgid="8488350566398524740">"Притисните да бисте отворили"</string>
+    <!-- no translation found for keyguard_unlock_press (9140109453735019209) -->
+    <skip />
+    <!-- no translation found for keyguard_face_successful_unlock_press (25520941264602588) -->
+    <skip />
     <string name="keyguard_retry" msgid="886802522584053523">"Превуците нагоре да бисте пробали поново"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"Откључајте да бисте користили NFC"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"Овај уређај припада организацији"</string>
@@ -322,7 +339,6 @@
     <string name="keyguard_indication_charging_time_dock" msgid="6150404291427377863">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Базна станица за пуњење • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> до краја пуњења"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Замени корисника"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Све апликације и подаци у овој сесији ће бити избрисани."</string>
-    <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"Уклони"</string>
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"Добро дошли назад, госте!"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"Желите ли да наставите сесију?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"Почни из почетка"</string>
@@ -772,6 +788,12 @@
     <string name="controls_dialog_ok" msgid="2770230012857881822">"Додај"</string>
     <string name="controls_dialog_message" msgid="342066938390663844">"Предлаже <xliff:g id="APP">%s</xliff:g>"</string>
     <string name="controls_tile_locked" msgid="731547768182831938">"Уређај је закључан"</string>
+    <string name="controls_settings_show_controls_dialog_title" msgid="3357852503553809554">"Желите ли да приказујете и контролишете уређаје са закључаног екрана?"</string>
+    <string name="controls_settings_show_controls_dialog_message" msgid="7666211700524587969">"Можете да додате контроле за спољне уређаје на закључани екран.\n\nАпликација на уређају може да вам омогући да контролишете неке уређаје без откључавања телефона или таблета.\n\nТо можете да промените кад год желите у Подешавањима."</string>
+    <string name="controls_settings_trivial_controls_dialog_title" msgid="7593188157655036677">"Желите ли да контролишете уређаје са закључаног екрана?"</string>
+    <string name="controls_settings_trivial_controls_dialog_message" msgid="237183787721917586">"Неке уређаје можете да контролишете без откључавања телефона или таблета.\n\nАпликација на уређају одређује који уређаји могу да се контролишу на овај начин."</string>
+    <string name="controls_settings_dialog_neutral_button" msgid="4514446354793124140">"Не, хвала"</string>
+    <string name="controls_settings_dialog_positive_button" msgid="436070672551674863">"Да"</string>
     <string name="controls_pin_use_alphanumeric" msgid="8478371861023048414">"PIN садржи слова или симболе"</string>
     <string name="controls_pin_verify" msgid="3452778292918877662">"Верификујте: <xliff:g id="DEVICE">%s</xliff:g>"</string>
     <string name="controls_pin_wrong" msgid="6162694056042164211">"Погрешан PIN"</string>
@@ -781,8 +803,7 @@
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"Превуците да бисте видели још"</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"Учитавају се препоруке"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"Медији"</string>
-    <!-- no translation found for controls_media_close_session (4780485355795635052) -->
-    <skip />
+    <string name="controls_media_close_session" msgid="4780485355795635052">"Желите ли да сакријете ову контролу за медије за: <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="controls_media_active_session" msgid="3146882316024153337">"Актуелна сесија медија не може да буде сакривена."</string>
     <string name="controls_media_dismiss_button" msgid="4485675693008031646">"Сакриј"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"Настави"</string>
@@ -822,6 +843,13 @@
     <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"Да бисте пребацивали ову сесију, отворите апликацију."</string>
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"Непозната апликација"</string>
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"Заустави пребацивање"</string>
+    <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Како функционише емитовање"</string>
+    <string name="media_output_broadcast" msgid="3555580945878071543">"Емитовање"</string>
+    <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"Људи у близини са компатибилним Bluetooth уређајима могу да слушају медијски садржај који емитујете"</string>
+    <string name="media_output_broadcasting_message" msgid="4150299923404886073">"Да би слушали емитовање, људи у близини са компатибилним Bluetooth уређајима могу да скенирају QR кôд или да користе назив и лозинку емитовања"</string>
+    <string name="media_output_broadcast_name" msgid="8786127091542624618">"Назив емитовања"</string>
+    <string name="media_output_broadcast_code" msgid="870795639644728542">"Лозинка"</string>
+    <string name="media_output_broadcast_dialog_save" msgid="7910865591430010198">"Сачувај"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"Број верзије"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"Број верзије је копиран у привремену меморију."</string>
     <string name="basic_status" msgid="2315371112182658176">"Отворите конверзацију"</string>
@@ -899,7 +927,7 @@
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"Активне апликације"</string>
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"Заустави"</string>
     <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"Заустављено"</string>
-    <string name="clipboard_edit_text_copy" msgid="770856373439969178">"Копирај"</string>
+    <string name="clipboard_edit_text_done" msgid="4551887727694022409">"Готово"</string>
     <string name="clipboard_overlay_text_copied" msgid="1872624400464891363">"Копирано је"</string>
     <string name="clipboard_edit_source" msgid="9156488177277788029">"Из: <xliff:g id="APPNAME">%1$s</xliff:g>"</string>
     <string name="clipboard_dismiss_description" msgid="7544573092766945657">"Одбаци копирање корисничког интерфејса"</string>

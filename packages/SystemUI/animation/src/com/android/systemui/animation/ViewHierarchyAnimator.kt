@@ -37,7 +37,6 @@ class ViewHierarchyAnimator {
         private const val DEFAULT_DURATION = 500L
         private val DEFAULT_INTERPOLATOR = Interpolators.STANDARD
         private val DEFAULT_ADDITION_INTERPOLATOR = Interpolators.STANDARD_DECELERATE
-        private val DEFAULT_BOUNDS = setOf(Bound.LEFT, Bound.TOP, Bound.RIGHT, Bound.BOTTOM)
 
         /** The properties used to animate the view bounds. */
         private val PROPERTIES = mapOf(
@@ -61,8 +60,7 @@ class ViewHierarchyAnimator {
 
         /**
          * Instruct the animator to watch for changes to the layout of [rootView] and its children
-         * and animate them. The animation can be limited to a subset of [bounds]. It uses the
-         * given [interpolator] and [duration].
+         * and animate them. It uses the given [interpolator] and [duration].
          *
          * If a new layout change happens while an animation is already in progress, the animation
          * is updated to continue from the current values to the new end state.
@@ -74,40 +72,31 @@ class ViewHierarchyAnimator {
          *
          * Returns true if the [rootView] is already visible and will be animated, false otherwise.
          * To animate the addition of a view, see [animateAddition].
-         *
-         * TODO(b/221418522): remove the ability to select which bounds to animate and always
-         * animate all of them.
          */
         @JvmOverloads
         fun animate(
             rootView: View,
-            bounds: Set<Bound> = DEFAULT_BOUNDS,
             interpolator: Interpolator = DEFAULT_INTERPOLATOR,
             duration: Long = DEFAULT_DURATION
         ): Boolean {
-            return animate(rootView, bounds, interpolator, duration, ephemeral = false)
+            return animate(rootView, interpolator, duration, ephemeral = false)
         }
 
         /**
          * Like [animate], but only takes effect on the next layout update, then unregisters itself
          * once the first animation is complete.
-         *
-         * TODO(b/221418522): remove the ability to select which bounds to animate and always
-         * animate all of them.
          */
         @JvmOverloads
         fun animateNextUpdate(
             rootView: View,
-            bounds: Set<Bound> = DEFAULT_BOUNDS,
             interpolator: Interpolator = DEFAULT_INTERPOLATOR,
             duration: Long = DEFAULT_DURATION
         ): Boolean {
-            return animate(rootView, bounds, interpolator, duration, ephemeral = true)
+            return animate(rootView, interpolator, duration, ephemeral = true)
         }
 
         private fun animate(
             rootView: View,
-            bounds: Set<Bound>,
             interpolator: Interpolator,
             duration: Long,
             ephemeral: Boolean
@@ -123,26 +112,24 @@ class ViewHierarchyAnimator {
                 return false
             }
 
-            val listener = createUpdateListener(bounds, interpolator, duration, ephemeral)
+            val listener = createUpdateListener(interpolator, duration, ephemeral)
             recursivelyAddListener(rootView, listener)
             return true
         }
 
         /**
          * Returns a new [View.OnLayoutChangeListener] that when called triggers a layout animation
-         * for the specified [bounds], using [interpolator] and [duration].
+         * using [interpolator] and [duration].
          *
          * If [ephemeral] is true, the listener is unregistered after the first animation. Otherwise
          * it keeps listening for further updates.
          */
         private fun createUpdateListener(
-            bounds: Set<Bound>,
             interpolator: Interpolator,
             duration: Long,
             ephemeral: Boolean
         ): View.OnLayoutChangeListener {
             return createListener(
-                bounds,
                 interpolator,
                 duration,
                 ephemeral
@@ -156,17 +143,7 @@ class ViewHierarchyAnimator {
          * Any animations already in progress continue until their natural conclusion.
          */
         fun stopAnimating(rootView: View) {
-            val listener = rootView.getTag(R.id.tag_layout_listener)
-            if (listener != null && listener is View.OnLayoutChangeListener) {
-                rootView.setTag(R.id.tag_layout_listener, null /* tag */)
-                rootView.removeOnLayoutChangeListener(listener)
-            }
-
-            if (rootView is ViewGroup) {
-                for (i in 0 until rootView.childCount) {
-                    stopAnimating(rootView.getChildAt(i))
-                }
-            }
+            recursivelyRemoveListener(rootView)
         }
 
         /**
@@ -224,7 +201,6 @@ class ViewHierarchyAnimator {
             ignorePreviousValues: Boolean
         ): View.OnLayoutChangeListener {
             return createListener(
-                DEFAULT_BOUNDS,
                 interpolator,
                 duration,
                 ephemeral = true,
@@ -235,7 +211,7 @@ class ViewHierarchyAnimator {
 
         /**
          * Returns a new [View.OnLayoutChangeListener] that when called triggers a layout animation
-         * for the specified [bounds], using [interpolator] and [duration].
+         * using [interpolator] and [duration].
          *
          * If [ephemeral] is true, the listener is unregistered after the first animation. Otherwise
          * it keeps listening for further updates.
@@ -244,7 +220,6 @@ class ViewHierarchyAnimator {
          * [ignorePreviousValues] controls whether the previous values should be taken into account.
          */
         private fun createListener(
-            bounds: Set<Bound>,
             interpolator: Interpolator,
             duration: Long,
             ephemeral: Boolean,
@@ -300,10 +275,11 @@ class ViewHierarchyAnimator {
                     )
 
                     val boundsToAnimate = mutableSetOf<Bound>()
-                    bounds.forEach { bound ->
-                        if (endValues.getValue(bound) != startValues.getValue(bound)) {
-                            boundsToAnimate.add(bound)
-                        }
+                    if (startValues.getValue(Bound.LEFT) != left) boundsToAnimate.add(Bound.LEFT)
+                    if (startValues.getValue(Bound.TOP) != top) boundsToAnimate.add(Bound.TOP)
+                    if (startValues.getValue(Bound.RIGHT) != right) boundsToAnimate.add(Bound.RIGHT)
+                    if (startValues.getValue(Bound.BOTTOM) != bottom) {
+                        boundsToAnimate.add(Bound.BOTTOM)
                     }
 
                     if (boundsToAnimate.isNotEmpty()) {
@@ -462,6 +438,20 @@ class ViewHierarchyAnimator {
             }
         }
 
+        private fun recursivelyRemoveListener(view: View) {
+            val listener = view.getTag(R.id.tag_layout_listener)
+            if (listener != null && listener is View.OnLayoutChangeListener) {
+                view.setTag(R.id.tag_layout_listener, null /* tag */)
+                view.removeOnLayoutChangeListener(listener)
+            }
+
+            if (view is ViewGroup) {
+                for (i in 0 until view.childCount) {
+                    recursivelyRemoveListener(view.getChildAt(i))
+                }
+            }
+        }
+
         private fun getBound(view: View, bound: Bound): Int? {
             return view.getTag(bound.overrideTag) as? Int
         }
@@ -513,11 +503,10 @@ class ViewHierarchyAnimator {
                     // When an animation is cancelled, a new one might be taking over. We shouldn't
                     // unregister the listener yet.
                     if (ephemeral && !cancelled) {
-                        val listener = view.getTag(R.id.tag_layout_listener)
-                        if (listener != null && listener is View.OnLayoutChangeListener) {
-                            view.setTag(R.id.tag_layout_listener, null /* tag */)
-                            view.removeOnLayoutChangeListener(listener)
-                        }
+                        // The duration is the same for the whole hierarchy, so it's safe to remove
+                        // the listener recursively. We do this because some descendant views might
+                        // not change bounds, and therefore not animate and leak the listener.
+                        recursivelyRemoveListener(view)
                     }
                 }
 
@@ -538,8 +527,7 @@ class ViewHierarchyAnimator {
         CENTER, LEFT, TOP_LEFT, TOP, TOP_RIGHT, RIGHT, BOTTOM_RIGHT, BOTTOM, BOTTOM_LEFT
     }
 
-    // TODO(b/221418522): make this private once it can't be passed as an arg anymore.
-    enum class Bound(val label: String, val overrideTag: Int) {
+    private enum class Bound(val label: String, val overrideTag: Int) {
         LEFT("left", R.id.tag_override_left) {
             override fun setValue(view: View, value: Int) {
                 view.left = value

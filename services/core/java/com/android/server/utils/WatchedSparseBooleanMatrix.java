@@ -18,6 +18,7 @@ package com.android.server.utils;
 
 import static com.android.internal.annotations.VisibleForTesting.Visibility.PRIVATE;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.Size;
 
@@ -168,12 +169,19 @@ public class WatchedSparseBooleanMatrix extends WatchableImpl implements Snappab
      * A copy constructor that can be used for snapshotting.
      */
     private WatchedSparseBooleanMatrix(WatchedSparseBooleanMatrix r) {
-        mOrder = r.mOrder;
-        mSize = r.mSize;
-        mKeys = r.mKeys.clone();
-        mMap = r.mMap.clone();
-        mInUse = r.mInUse.clone();
-        mValues = r.mValues.clone();
+        copyFrom(r);
+    }
+
+    /**
+     * Copy from src to this.
+     */
+    public void copyFrom(@NonNull WatchedSparseBooleanMatrix src) {
+        mOrder = src.mOrder;
+        mSize = src.mSize;
+        mKeys = src.mKeys.clone();
+        mMap = src.mMap.clone();
+        mInUse = src.mInUse.clone();
+        mValues = src.mValues.clone();
     }
 
     /**
