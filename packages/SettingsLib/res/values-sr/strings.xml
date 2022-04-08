@@ -448,7 +448,7 @@
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"Протаномалија (црвено-зелено)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"Тританомалија (плаво-жуто)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"Корекција боја"</string>
-    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1522101114585266455">"Корекција боја може да буде корисна када желите:to:&lt;br/&gt; &lt;ol&gt; &lt;li&gt;&amp;nbsp;да прецизније видите боје&lt;/li&gt; &lt;li&gt;&amp;nbsp;да уклоните боје како бисте се фокусирали&lt;/li&gt; &lt;/ol&gt;"</string>
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1522101114585266455">"Корекција боја може да буде корисна када желите:&lt;br/&gt; &lt;ol&gt; &lt;li&gt;&amp;nbsp;Прецизније да видите боје&lt;/li&gt; &lt;li&gt;&amp;nbsp;Да уклоните боје како бисте се фокусирали&lt;/li&gt; &lt;/ol&gt;"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"Замењује га <xliff:g id="TITLE">%1$s</xliff:g>"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g>–<xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
     <string name="power_remaining_duration_only" msgid="8264199158671531431">"Преостало је око <xliff:g id="TIME_REMAINING">%1$s</xliff:g>"</string>
@@ -596,6 +596,7 @@
     <string name="guest_reset_guest_dialog_title" msgid="8047270010895437534">"Желите ли да ресетујете сесију госта?"</string>
     <string name="guest_remove_guest_dialog_title" msgid="4548511006624088072">"Желите ли да уклоните госта?"</string>
     <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"Ресетуј"</string>
+    <string name="guest_remove_guest_confirm_button" msgid="7858123434954143879">"Уклони"</string>
     <string name="guest_resetting" msgid="7822120170191509566">"Сесија госта се ресетује…"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"Сликај"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"Одабери слику"</string>
@@ -651,4 +652,7 @@
     <string name="turn_screen_on_title" msgid="3266937298097573424">"Укључите екран"</string>
     <string name="allow_turn_screen_on" msgid="6194845766392742639">"Дозволи укључивање екрана"</string>
     <string name="allow_turn_screen_on_description" msgid="43834403291575164">"Дозвољава апликацији да укључи екран. Ако се омогући, апликација може да укључи екран у било ком тренутку без ваше експлицитне намере."</string>
+    <string name="bt_le_audio_scan_qr_code" msgid="3521809854780392679">"Скенирајте QR кôд"</string>
+    <string name="bt_le_audio_scan_qr_code_scanner" msgid="4679500020630341107">"Да бисте почели да слушате, центрирајте QR кôд испод"</string>
+    <string name="bt_le_audio_qr_code_is_not_valid_format" msgid="6092191081849434734">"QR кôд није у важећем формату"</string>
 </resources>

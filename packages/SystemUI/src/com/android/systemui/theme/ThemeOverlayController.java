@@ -306,8 +306,9 @@ public class ThemeOverlayController extends CoreStartable implements Dumpable {
                     Log.d(TAG, "Updating theme setting from "
                             + overlayPackageJson + " to " + jsonObject.toString());
                 }
-                mSecureSettings.putString(Settings.Secure.THEME_CUSTOMIZATION_OVERLAY_PACKAGES,
-                        jsonObject.toString());
+                mSecureSettings.putStringForUser(
+                        Settings.Secure.THEME_CUSTOMIZATION_OVERLAY_PACKAGES,
+                        jsonObject.toString(), UserHandle.USER_CURRENT);
             }
         } catch (JSONException e) {
             Log.i(TAG, "Failed to parse THEME_CUSTOMIZATION_OVERLAY_PACKAGES.", e);

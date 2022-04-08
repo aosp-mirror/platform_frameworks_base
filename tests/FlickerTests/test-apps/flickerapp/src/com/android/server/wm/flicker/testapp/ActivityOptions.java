@@ -56,6 +56,7 @@ public class ActivityOptions {
     public static final ComponentName LAUNCH_NEW_TASK_ACTIVITY_COMPONENT_NAME =
             new ComponentName(FLICKER_APP_PACKAGE,
                     FLICKER_APP_PACKAGE + ".LaunchNewTaskActivity");
+
     public static final String DIALOG_THEMED_ACTIVITY = "DialogThemedActivity";
     public static final ComponentName DIALOG_THEMED_ACTIVITY_COMPONENT_NAME =
             new ComponentName(FLICKER_APP_PACKAGE,
@@ -65,4 +66,10 @@ public class ActivityOptions {
     public static final ComponentName PORTRAIT_ONLY_ACTIVITY_COMPONENT_NAME =
             new ComponentName(FLICKER_APP_PACKAGE,
                     FLICKER_APP_PACKAGE + ".PortraitOnlyActivity");
+
+    public static final String EDITOR_POPUP_DIALOG_ACTIVITY_LAUNCHER_NAME =
+            "ImeEditorPopupDialogActivity";
+    public static final ComponentName EDITOR_POPUP_DIALOG_ACTIVITY_COMPONENT_NAME =
+            new ComponentName(FLICKER_APP_PACKAGE,
+                    FLICKER_APP_PACKAGE + ".ImeEditorPopupDialogActivity");
 }

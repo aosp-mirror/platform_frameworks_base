@@ -23,43 +23,73 @@ import android.content.IntentFilter;
 import android.os.PersistableBundle;
 import android.telephony.CarrierConfigManager;
 import android.telephony.SubscriptionManager;
+import android.util.ArraySet;
 import android.util.SparseBooleanArray;
 
+import androidx.annotation.NonNull;
+
+import com.android.internal.telephony.TelephonyIntents;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.SysUISingleton;
+import com.android.systemui.statusbar.policy.CallbackController;
+
+import java.util.Set;
 
 import javax.inject.Inject;
 
 /**
- * Tracks the Carrier Config values.
+ * Tracks CarrierConfigs for each subId, as well as the default configuration. CarrierConfigurations
+ * do not trigger a device configuration event, so any UI that relies on carrier configurations must
+ * register with the tracker to get proper updates.
+ *
+ * The tracker also listens for `TelephonyIntents.ACTION_DEFAULT_DATA_SUBSCRIPTION_CHANGED`
+ *
+ * @see CarrierConfigChangedListener to listen for updates
  */
 @SysUISingleton
-public class CarrierConfigTracker extends BroadcastReceiver {
+public class CarrierConfigTracker
+        extends BroadcastReceiver
+        implements CallbackController<CarrierConfigTracker.CarrierConfigChangedListener> {
     private final SparseBooleanArray mCallStrengthConfigs = new SparseBooleanArray();
     private final SparseBooleanArray mNoCallingConfigs = new SparseBooleanArray();
     private final SparseBooleanArray mCarrierProvisionsWifiMergedNetworks =
             new SparseBooleanArray();
+    private final SparseBooleanArray mShowOperatorNameConfigs = new SparseBooleanArray();
     private final CarrierConfigManager mCarrierConfigManager;
+    private final Set<CarrierConfigChangedListener> mListeners = new ArraySet<>();
+    private final Set<DefaultDataSubscriptionChangedListener> mDataListeners =
+            new ArraySet<>();
     private boolean mDefaultCallStrengthConfigLoaded;
     private boolean mDefaultCallStrengthConfig;
     private boolean mDefaultNoCallingConfigLoaded;
     private boolean mDefaultNoCallingConfig;
     private boolean mDefaultCarrierProvisionsWifiMergedNetworksLoaded;
     private boolean mDefaultCarrierProvisionsWifiMergedNetworks;
+    private boolean mDefaultShowOperatorNameConfigLoaded;
+    private boolean mDefaultShowOperatorNameConfig;
 
     @Inject
-    public CarrierConfigTracker(Context context, BroadcastDispatcher broadcastDispatcher) {
-        mCarrierConfigManager = context.getSystemService(CarrierConfigManager.class);
-        broadcastDispatcher.registerReceiver(
-                this, new IntentFilter(CarrierConfigManager.ACTION_CARRIER_CONFIG_CHANGED));
+    public CarrierConfigTracker(
+            CarrierConfigManager carrierConfigManager,
+            BroadcastDispatcher broadcastDispatcher) {
+        mCarrierConfigManager = carrierConfigManager;
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(CarrierConfigManager.ACTION_CARRIER_CONFIG_CHANGED);
+        filter.addAction(TelephonyIntents.ACTION_DEFAULT_DATA_SUBSCRIPTION_CHANGED);
+        broadcastDispatcher.registerReceiver(this, filter);
     }
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        if (!CarrierConfigManager.ACTION_CARRIER_CONFIG_CHANGED.equals(intent.getAction())) {
-            return;
+        String action = intent.getAction();
+        if (CarrierConfigManager.ACTION_CARRIER_CONFIG_CHANGED.equals(action)) {
+            updateFromNewCarrierConfig(intent);
+        } else if (TelephonyIntents.ACTION_DEFAULT_DATA_SUBSCRIPTION_CHANGED.equals(action)) {
+            updateDefaultDataSubscription(intent);
         }
+    }
 
+    private void updateFromNewCarrierConfig(Intent intent) {
         final int subId = intent.getIntExtra(
                 CarrierConfigManager.EXTRA_SUBSCRIPTION_INDEX,
                 SubscriptionManager.INVALID_SUBSCRIPTION_ID);
@@ -83,6 +113,29 @@ public class CarrierConfigTracker extends BroadcastReceiver {
         synchronized (mCarrierProvisionsWifiMergedNetworks) {
             mCarrierProvisionsWifiMergedNetworks.put(subId, config.getBoolean(
                     CarrierConfigManager.KEY_CARRIER_PROVISIONS_WIFI_MERGED_NETWORKS_BOOL));
+        }
+        synchronized (mShowOperatorNameConfigs) {
+            mShowOperatorNameConfigs.put(subId, config.getBoolean(
+                    CarrierConfigManager.KEY_SHOW_OPERATOR_NAME_IN_STATUSBAR_BOOL));
+        }
+
+        notifyCarrierConfigChanged();
+    }
+
+    private void updateDefaultDataSubscription(Intent intent) {
+        int subId = intent.getIntExtra(SubscriptionManager.EXTRA_SUBSCRIPTION_INDEX, -1);
+        notifyDefaultDataSubscriptionChanged(subId);
+    }
+
+    private void notifyCarrierConfigChanged() {
+        for (CarrierConfigChangedListener l : mListeners) {
+            l.onCarrierConfigChanged();
+        }
+    }
+
+    private void notifyDefaultDataSubscriptionChanged(int subId) {
+        for (DefaultDataSubscriptionChangedListener l : mDataListeners) {
+            l.onDefaultSubscriptionChanged(subId);
         }
     }
 
@@ -138,5 +191,74 @@ public class CarrierConfigTracker extends BroadcastReceiver {
             mDefaultCarrierProvisionsWifiMergedNetworksLoaded = true;
         }
         return mDefaultCarrierProvisionsWifiMergedNetworks;
+    }
+
+    /**
+     * Returns the KEY_SHOW_OPERATOR_NAME_IN_STATUSBAR_BOOL value for the default config
+     */
+    public boolean getShowOperatorNameInStatusBarConfigDefault() {
+        if (!mDefaultShowOperatorNameConfigLoaded) {
+            mDefaultShowOperatorNameConfig = CarrierConfigManager.getDefaultConfig().getBoolean(
+                    CarrierConfigManager.KEY_SHOW_OPERATOR_NAME_IN_STATUSBAR_BOOL);
+            mDefaultShowOperatorNameConfigLoaded = true;
+        }
+
+        return mDefaultShowOperatorNameConfig;
+    }
+
+    /**
+     * Returns the KEY_SHOW_OPERATOR_NAME_IN_STATUSBAR_BOOL value for the given subId, or the
+     * default value if no override exists
+     *
+     * @param subId the subscription id for which to query the config
+     */
+    public boolean getShowOperatorNameInStatusBarConfig(int subId) {
+        if (mShowOperatorNameConfigs.indexOfKey(subId) >= 0) {
+            return mShowOperatorNameConfigs.get(subId);
+        } else {
+            return getShowOperatorNameInStatusBarConfigDefault();
+        }
+    }
+
+    @Override
+    public void addCallback(@NonNull CarrierConfigChangedListener listener) {
+        mListeners.add(listener);
+    }
+
+    @Override
+    public void removeCallback(@NonNull CarrierConfigChangedListener listener) {
+        mListeners.remove(listener);
+    }
+
+    /** */
+    public void addDefaultDataSubscriptionChangedListener(
+            @NonNull DefaultDataSubscriptionChangedListener listener) {
+        mDataListeners.add(listener);
+    }
+
+    /** */
+    public void removeDataSubscriptionChangedListener(
+            DefaultDataSubscriptionChangedListener listener) {
+        mDataListeners.remove(listener);
+    }
+
+    /**
+     * Called when carrier config changes
+     */
+    public interface CarrierConfigChangedListener {
+        /** */
+        void onCarrierConfigChanged();
+    }
+
+    /**
+     * Called when the default data subscription changes. Listeners may want to query
+     * subId-dependent configuration values when this event happens
+     */
+    public interface DefaultDataSubscriptionChangedListener {
+        /**
+         * @param subId the new default data subscription id per
+         * {@link SubscriptionManager.EXTRA_SUBSCRIPTION_INDEX}
+         */
+        void onDefaultSubscriptionChanged(int subId);
     }
 }
