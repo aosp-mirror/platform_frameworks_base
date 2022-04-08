@@ -85,7 +85,7 @@
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"સ્ક્રીન રેકૉર્ડિંગ ચાલુ છે"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"સ્ક્રીન રેકોર્ડિંગ સત્ર માટે ચાલુ નોટિફિકેશન"</string>
     <string name="screenrecord_start_label" msgid="1750350278888217473">"રેકોર્ડિંગ શરૂ કરીએ?"</string>
-    <string name="screenrecord_description" msgid="1123231719680353736">"રેકોર્ડ કરતી વખતે, Android System તમારી સ્ક્રીન પર દેખાતી હોય અથવા તમારા ડિવાઇસ પર ચલાવવામાં આવતી હોય તેવી કોઈપણ સંવેદનશીલ માહિતીને કૅપ્ચર કરી શકે છે. આમાં પાસવર્ડ, ચુકવણીની માહિતી, ફોટા, સંદેશા અને ઑડિયોનો સમાવેશ થાય છે."</string>
+    <string name="screenrecord_description" msgid="1123231719680353736">"રેકોર્ડ કરતી વખતે, Android System તમારી સ્ક્રીન પર દેખાતી હોય અથવા તમારા ડિવાઇસ પર ચલાવવામાં આવતી હોય તેવી કોઈપણ સંવેદનશીલ માહિતીને કૅપ્ચર કરી શકે છે. આમાં પાસવર્ડ, ચુકવણીની માહિતી, ફોટા, મેસેજ અને ઑડિયોનો સમાવેશ થાય છે."</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"ઑડિયો રેકોર્ડ કરો"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"ડિવાઇસનો ઑડિયો"</string>
     <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"મ્યુઝિક, કૉલ અને રિંગટોન જેવા તમારા ડિવાઇસના સાઉન્ડ"</string>
@@ -268,7 +268,7 @@
       <item quantity="one">%d ઉપકરણ</item>
       <item quantity="other">%d ઉપકરણો</item>
     </plurals>
-    <string name="quick_settings_flashlight_label" msgid="4904634272006284185">"ફ્લેશલાઇટ"</string>
+    <string name="quick_settings_flashlight_label" msgid="4904634272006284185">"ફ્લૅશલાઇટ"</string>
     <string name="quick_settings_flashlight_camera_in_use" msgid="4820591564526512571">"કૅમેરાનો ઉપયોગ થાય છે"</string>
     <string name="quick_settings_cellular_detail_title" msgid="792977203299358893">"મોબાઇલ ડેટા"</string>
     <string name="quick_settings_cellular_detail_data_usage" msgid="6105969068871138427">"ડેટા વપરાશ"</string>
@@ -352,7 +352,7 @@
     <string name="user_remove_user_message" msgid="6702834122128031833">"આ વપરાશકર્તાની તમામ ઍપ્લિકેશનો અને ડેટા કાઢી નાખવામાં આવશે."</string>
     <string name="user_remove_user_remove" msgid="8387386066949061256">"કાઢી નાખો"</string>
     <string name="media_projection_dialog_text" msgid="1755705274910034772">"રેકોર્ડ અથવા કાસ્ટ કરતી વખતે, <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>ને તમારી સ્ક્રીન પર દેખાતી હોય અથવા તમારા ડિવાઇસ પર ચલાવવામાં આવતી હોય તેવી બધી માહિતીનો ઍક્સેસ હશે. આમાં પાસવર્ડ, ચુકવણીની વિગતો, ફોટા, સંદેશા અને તમે ચલાવો છો તે ઑડિયો જેવી માહિતીનો સમાવેશ થાય છે."</string>
-    <string name="media_projection_dialog_service_text" msgid="958000992162214611">"રેકોર્ડ અથવા કાસ્ટ કરતી વખતે, આ સુવિધા આપતી સેવાને તમારી સ્ક્રીન પર દેખાતી હોય અથવા તમારા ડિવાઇસ પર ચલાવવામાં આવતી હોય તેવી બધી માહિતીનો ઍક્સેસ હશે. આમાં પાસવર્ડ, ચુકવણીની વિગતો, ફોટા, સંદેશા અને તમે ચલાવો છો તે ઑડિયો જેવી માહિતીનો સમાવેશ થાય છે."</string>
+    <string name="media_projection_dialog_service_text" msgid="958000992162214611">"રેકોર્ડ અથવા કાસ્ટ કરતી વખતે, આ સુવિધા આપતી સેવાને તમારી સ્ક્રીન પર દેખાતી હોય અથવા તમારા ડિવાઇસ પર ચલાવવામાં આવતી હોય તેવી બધી માહિતીનો ઍક્સેસ હશે. આમાં પાસવર્ડ, ચુકવણીની વિગતો, ફોટા, મેસેજ અને તમે ચલાવો છો તે ઑડિયો જેવી માહિતીનો સમાવેશ થાય છે."</string>
     <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"શું રેકોર્ડ અથવા કાસ્ટ કરવાનું શરૂ કરીએ?"</string>
     <string name="media_projection_dialog_title" msgid="3316063622495360646">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> વડે રેકોર્ડ અથવા કાસ્ટ કરવાનું શરૂ કરીએ?"</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"બધુ સાફ કરો"</string>

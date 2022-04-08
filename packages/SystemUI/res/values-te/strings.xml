@@ -32,13 +32,13 @@
     <string name="usb_device_permission_prompt" msgid="4414719028369181772">"<xliff:g id="USB_DEVICE">%2$s</xliff:g>ని యాక్సెస్ చేయడానికి <xliff:g id="APPLICATION">%1$s</xliff:g>ని అనుమతించాలా?"</string>
     <string name="usb_device_permission_prompt_warn" msgid="2309129784984063656">"<xliff:g id="USB_DEVICE">%2$s</xliff:g>యాక్సెస్ చేయడానికి <xliff:g id="APPLICATION">%1$s</xliff:g>ను అనుమతించాలా?\nఈ యాప్‌నకు రికార్డ్ చేసే అనుమతి మంజూరు చేయబడలేదు, కానీ ఈ USB పరికరం ద్వారా ఆడియోను క్యాప్చర్ చేయగలదు."</string>
     <string name="usb_audio_device_permission_prompt_title" msgid="4221351137250093451">"<xliff:g id="USB_DEVICE">%2$s</xliff:g>‌ను యాక్సెస్ చేయడానికి <xliff:g id="APPLICATION">%1$s</xliff:g>‌ను అనుమతించాలా?"</string>
-    <string name="usb_audio_device_confirm_prompt_title" msgid="8828406516732985696">"<xliff:g id="USB_DEVICE">%2$s</xliff:g>‌ను నిర్వహించడానికి <xliff:g id="APPLICATION">%1$s</xliff:g>‌ను తెరవాలా?"</string>
+    <string name="usb_audio_device_confirm_prompt_title" msgid="8828406516732985696">"<xliff:g id="USB_DEVICE">%2$s</xliff:g>‌ను హ్యాండిల్ చేయడానికి <xliff:g id="APPLICATION">%1$s</xliff:g>‌ను తెరవాలా?"</string>
     <string name="usb_audio_device_prompt_warn" msgid="2504972133361130335">"ఈ యాప్‌నకు రికార్డ్ చేసే అనుమతి మంజూరు కాలేదు, అయినా ఈ USB పరికరం ద్వారా ఆడియోను క్యాప్చర్ చేయగలదు. ఈ పరికరంలో <xliff:g id="APPLICATION">%1$s</xliff:g>‌ను ఉపయోగించడం వలన కాల్స్, నోటిఫికేషన్‌లు, అలారంలను వినబడనీయకుండా నివారించవచ్చు."</string>
     <string name="usb_audio_device_prompt" msgid="7944987408206252949">"ఈ పరికరంలో <xliff:g id="APPLICATION">%1$s</xliff:g>‌ను ఉపయోగించడం వలన కాల్స్, నోటిఫికేషన్‌లు, అలారంలను వినబడనీయకుండా నివారించవచ్చు."</string>
     <string name="usb_accessory_permission_prompt" msgid="717963550388312123">"<xliff:g id="USB_ACCESSORY">%2$s</xliff:g>ని యాక్సెస్ చేయడానికి <xliff:g id="APPLICATION">%1$s</xliff:g>ని అనుమతించాలా?"</string>
-    <string name="usb_device_confirm_prompt" msgid="4091711472439910809">"<xliff:g id="USB_DEVICE">%2$s</xliff:g>ని నిర్వహించడానికి <xliff:g id="APPLICATION">%1$s</xliff:g>ని తెరవాలా?"</string>
+    <string name="usb_device_confirm_prompt" msgid="4091711472439910809">"<xliff:g id="USB_DEVICE">%2$s</xliff:g>ని హ్యాండిల్ చేయడానికి <xliff:g id="APPLICATION">%1$s</xliff:g>ని తెరవాలా?"</string>
     <string name="usb_device_confirm_prompt_warn" msgid="990208659736311769">"<xliff:g id="USB_DEVICE">%2$s</xliff:g>ని హ్యాండిల్ చేయడానికి <xliff:g id="APPLICATION">%1$s</xliff:g>ను తెరవాలా?\nఈ యాప్‌కు రికార్డ్ చేసే అనుమతి మంజూరు కాలేదు, అయినా ఈ USB పరికరం ద్వారా ఆడియోను క్యాప్చర్ చేయగలదు."</string>
-    <string name="usb_accessory_confirm_prompt" msgid="5728408382798643421">"<xliff:g id="USB_ACCESSORY">%2$s</xliff:g>ని నిర్వహించడానికి <xliff:g id="APPLICATION">%1$s</xliff:g>ని తెరవాలా?"</string>
+    <string name="usb_accessory_confirm_prompt" msgid="5728408382798643421">"<xliff:g id="USB_ACCESSORY">%2$s</xliff:g>ని హ్యాండిల్ చేయడానికి <xliff:g id="APPLICATION">%1$s</xliff:g>ని తెరవాలా?"</string>
     <string name="usb_accessory_uri_prompt" msgid="6756649383432542382">"ఈ USB ఉపకరణంతో ఇన్‌స్టాల్ చేయబడిన యాప్‌లు ఏవీ పని చేయవు. ఈ ఉపకరణం గురించి <xliff:g id="URL">%1$s</xliff:g>లో మరింత తెలుసుకోండి"</string>
     <string name="title_usb_accessory" msgid="1236358027511638648">"USB ఉపకరణం"</string>
     <string name="label_view" msgid="6815442985276363364">"చూడండి"</string>
@@ -771,7 +771,7 @@
     <string name="accessibility_control_move" msgid="8980344493796647792">"<xliff:g id="NUMBER">%d</xliff:g> పొజిషన్‌కు తరలించండి"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"నియంత్రణలు"</string>
     <string name="controls_favorite_subtitle" msgid="6481675111056961083">"త్వరిత సెట్టింగ్‌ల నుండి యాక్సెస్ చేయడానికి కంట్రోల్స్‌ను ఎంచుకోండి"</string>
-    <string name="controls_favorite_rearrange" msgid="5616952398043063519">"కంట్రోల్స్ క్రమం మార్చడానికి దేనినైనా పట్టుకుని, లాగి వదిలేయండి"</string>
+    <string name="controls_favorite_rearrange" msgid="5616952398043063519">"కంట్రోల్స్ క్రమం మార్చడానికి దేన్నయినా పట్టుకుని, లాగి వదలండి"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"అన్ని కంట్రోల్స్ తీసివేయబడ్డాయి"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"మార్పులు సేవ్ చేయబడలేదు"</string>
     <string name="controls_favorite_see_other_apps" msgid="7709087332255283460">"ఇతర యాప్‌లను చూడండి"</string>

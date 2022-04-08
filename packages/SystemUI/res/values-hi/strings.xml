@@ -24,7 +24,7 @@
     <string name="battery_low_percent_format" msgid="4276661262843170964">"<xliff:g id="PERCENTAGE">%s</xliff:g> शेष"</string>
     <string name="invalid_charger_title" msgid="938685362320735167">"यूएसबी के ज़रिए चार्ज नहीं किया जा सकता"</string>
     <string name="invalid_charger_text" msgid="2339310107232691577">"अपने डिवाइस के साथ मिलने वाले चार्जर का इस्तेमाल करें"</string>
-    <string name="battery_saver_confirmation_title" msgid="1234998463717398453">"क्या आप बैटरी सेवर चालू करना चाहते हैं?"</string>
+    <string name="battery_saver_confirmation_title" msgid="1234998463717398453">"क्या आपको बैटरी सेवर चालू करना है?"</string>
     <string name="battery_saver_confirmation_title_generic" msgid="2299231884234959849">"बैटरी सेवर के बारे में"</string>
     <string name="battery_saver_confirmation_ok" msgid="5042136476802816494">"चालू करें"</string>
     <string name="battery_saver_start_action" msgid="4553256017945469937">"बैटरी सेवर चालू करें"</string>
@@ -84,7 +84,7 @@
     <string name="screenrecord_name" msgid="2596401223859996572">"स्क्रीन रिकॉर्डर"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"स्क्रीन रिकॉर्डिंग को प्रोसेस किया जा रहा है"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"स्क्रीन रिकॉर्ड सेशन के लिए जारी सूचना"</string>
-    <string name="screenrecord_start_label" msgid="1750350278888217473">"रिकॉर्डिंग शुरू करना चाहते हैं?"</string>
+    <string name="screenrecord_start_label" msgid="1750350278888217473">"क्या आपको रिकॉर्डिंग शुरू करनी है?"</string>
     <string name="screenrecord_description" msgid="1123231719680353736">"रिकॉर्ड करते समय, Android सिस्टम आपकी स्क्रीन पर दिखने वाली या चलाई जाने वाली संवेदनशील जानकारी को कैप्चर कर सकता है. इसमें पासवर्ड, पैसे चुकाने से जुड़ी जानकारी, फ़ोटो, मैसेज, और ऑडियो शामिल हैं."</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"ऑडियो रिकॉर्ड करें"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"डिवाइस ऑडियो"</string>
@@ -232,7 +232,7 @@
     <string name="quick_settings_bluetooth_secondary_label_input" msgid="3887552721233148132">"इनपुट"</string>
     <string name="quick_settings_bluetooth_secondary_label_hearing_aids" msgid="3003338571871392293">"कान की मशीन"</string>
     <string name="quick_settings_bluetooth_secondary_label_transient" msgid="3882884317600669650">"ब्लूटूथ चालू हो रहा है…"</string>
-    <string name="quick_settings_rotation_unlocked_label" msgid="2359922767950346112">"स्क्रीन का अपने-आप दिशा बदलना"</string>
+    <string name="quick_settings_rotation_unlocked_label" msgid="2359922767950346112">"ऑटो-रोटेट"</string>
     <string name="accessibility_quick_settings_rotation" msgid="4800050198392260738">"स्क्रीन का अपने-आप दिशा बदलना (ऑटो-रोटेट)"</string>
     <string name="quick_settings_location_label" msgid="2621868789013389163">"जगह"</string>
     <string name="quick_settings_camera_label" msgid="5612076679385269339">"कैमरे का ऐक्सेस"</string>
@@ -247,7 +247,7 @@
     <string name="quick_settings_networks_unavailable" msgid="1167847013337940082">"नेटवर्क उपलब्ध नहीं हैं"</string>
     <string name="quick_settings_wifi_detail_empty_text" msgid="483130889414601732">"कोई भी वाई-फ़ाई नेटवर्क उपलब्‍ध नहीं है"</string>
     <string name="quick_settings_wifi_secondary_label_transient" msgid="7501659015509357887">"वाई-फ़ाई चालू हो रहा है…"</string>
-    <string name="quick_settings_cast_title" msgid="2279220930629235211">"स्क्रीन कास्ट करना"</string>
+    <string name="quick_settings_cast_title" msgid="2279220930629235211">"स्क्रीन कास्ट"</string>
     <string name="quick_settings_casting" msgid="1435880708719268055">"कास्टिंग"</string>
     <string name="quick_settings_cast_device_default_name" msgid="6988469571141331700">"अनाम डिवाइस"</string>
     <string name="quick_settings_cast_detail_empty_text" msgid="2846282280014617785">"कोई डिवाइस उपलब्ध नहीं"</string>
@@ -352,7 +352,7 @@
     <string name="user_remove_user_message" msgid="6702834122128031833">"इस उपयोगकर्ता के सभी ऐप और डेटा को हटा दिया जाएगा."</string>
     <string name="user_remove_user_remove" msgid="8387386066949061256">"हटाएं"</string>
     <string name="media_projection_dialog_text" msgid="1755705274910034772">"रिकॉर्ड या कास्ट करते समय, <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> आपकी स्क्रीन पर दिख रही या आपके डिवाइस पर चलाई जा रही जानकारी ऐक्सेस कर सकता है. इसमें पासवर्ड, पैसे चुकाने का ब्यौरा, फ़ोटो, मैसेज, और चलाए गए ऑडियो जैसी जानकारी शामिल है."</string>
-    <string name="media_projection_dialog_service_text" msgid="958000992162214611">"रिकॉर्ड या कास्ट करते समय, वह सेवा जो यह फ़ंक्शन उपलब्ध कराती है, आपके डिवाइस पर चलाई जा रही या स्क्रीन पर दिख रही जानकारी को ऐक्सेस कर सकती है. इसमें पासवर्ड, पैसे चुकाने का ब्यौरा, फ़ोटो, मैसेज, और चलाए गए ऑडियो जैसी जानकारी शामिल है."</string>
+    <string name="media_projection_dialog_service_text" msgid="958000992162214611">"इस फ़ंक्शन को उपलब्ध कराने वाली सेवा, रिकॉर्ड या कास्ट करते समय, आपकी स्क्रीन पर दिखने वाली या चलाई जाने वाली जानकारी को ऐक्सेस कर सकती है. इसमें पासवर्ड, पैसे चुकाने से जुड़ी जानकारी, फ़ोटो, मैसेज, और चलाए जाने वाले ऑडियो शामिल हैं."</string>
     <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"रिकॉर्डिंग या कास्ट करना शुरू करें?"</string>
     <string name="media_projection_dialog_title" msgid="3316063622495360646">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> का इस्तेमाल करके रिकॉर्ड और कास्ट करना शुरू करें?"</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"सभी को हटाएं"</string>
@@ -770,7 +770,7 @@
     <string name="accessibility_control_change_unfavorite" msgid="6997408061750740327">"पसंदीदा से हटाएं"</string>
     <string name="accessibility_control_move" msgid="8980344493796647792">"इसे <xliff:g id="NUMBER">%d</xliff:g> नंबर पर ले जाएं"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"कंट्राेल"</string>
-    <string name="controls_favorite_subtitle" msgid="6481675111056961083">"उन कंट्रोल को चुनें जिन्हें फटाफट सेटिंग से ऐक्सेस करना चाहते हैं"</string>
+    <string name="controls_favorite_subtitle" msgid="6481675111056961083">"उन कंट्रोल को चुनें जिन्हें फटाफट सेटिंग से ऐक्सेस करना है"</string>
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"कंट्रोल का क्रम बदलने के लिए उन्हें दबाकर रखें और खींचें"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"सभी कंट्रोल हटा दिए गए"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"बदलाव सेव नहीं किए गए"</string>
@@ -824,7 +824,7 @@
     <string name="select_conversation_title" msgid="6716364118095089519">"बातचीत विजेट"</string>
     <string name="select_conversation_text" msgid="3376048251434956013">"किसी बातचीत को होम स्क्रीन पर जोड़ने के लिए, उस बातचीत पर टैप करें"</string>
     <string name="no_conversations_text" msgid="5354115541282395015">"हाल ही में हुई बातचीत यहां दिखेंगी"</string>
-    <string name="priority_conversations" msgid="3967482288896653039">"प्राथमिकता वाली बातचीत"</string>
+    <string name="priority_conversations" msgid="3967482288896653039">"अहम बातचीत"</string>
     <string name="recent_conversations" msgid="8531874684782574622">"हाल ही में की गई बातचीत"</string>
     <string name="days_timestamp" msgid="5821854736213214331">"<xliff:g id="DURATION">%1$s</xliff:g> दिन पहले"</string>
     <string name="one_week_timestamp" msgid="4925600765473875590">"एक हफ़्ता पहले"</string>

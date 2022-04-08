@@ -700,7 +700,7 @@
     <string name="mobile_data" msgid="4564407557775397216">"Dữ liệu di động"</string>
     <string name="mobile_data_text_format" msgid="6806501540022589786">"<xliff:g id="ID_1">%1$s</xliff:g> — <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="mobile_carrier_text_format" msgid="8912204177152950766">"<xliff:g id="CARRIER_NAME">%1$s</xliff:g>, <xliff:g id="MOBILE_DATA_TYPE">%2$s</xliff:g>"</string>
-    <string name="wifi_is_off" msgid="5389597396308001471">"Wi-Fi tắt"</string>
+    <string name="wifi_is_off" msgid="5389597396308001471">"Wi-Fi đang tắt"</string>
     <string name="bt_is_off" msgid="7436344904889461591">"Bluetooth tắt"</string>
     <string name="dnd_is_off" msgid="3185706903793094463">"Không làm phiền tắt"</string>
     <string name="qs_dnd_prompt_auto_rule" msgid="3535469468310002616">"Không làm phiền đã được một quy tắc tự động (<xliff:g id="ID_1">%s</xliff:g>) bật."</string>

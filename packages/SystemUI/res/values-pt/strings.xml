@@ -24,7 +24,7 @@
     <string name="battery_low_percent_format" msgid="4276661262843170964">"<xliff:g id="PERCENTAGE">%s</xliff:g> restantes"</string>
     <string name="invalid_charger_title" msgid="938685362320735167">"Não é possível carregar via USB"</string>
     <string name="invalid_charger_text" msgid="2339310107232691577">"Usar o carregador que acompanha o dispositivo"</string>
-    <string name="battery_saver_confirmation_title" msgid="1234998463717398453">"Ativar \"Economia de bateria\"?"</string>
+    <string name="battery_saver_confirmation_title" msgid="1234998463717398453">"Ativar a Economia de bateria?"</string>
     <string name="battery_saver_confirmation_title_generic" msgid="2299231884234959849">"Sobre a Economia de bateria"</string>
     <string name="battery_saver_confirmation_ok" msgid="5042136476802816494">"Ativar"</string>
     <string name="battery_saver_start_action" msgid="4553256017945469937">"Ativar a Economia de bateria"</string>
@@ -620,7 +620,7 @@
     <string name="left_icon" msgid="5036278531966897006">"Ícone à esquerda"</string>
     <string name="right_icon" msgid="1103955040645237425">"Ícone à direita"</string>
     <string name="drag_to_add_tiles" msgid="8933270127508303672">"Mantenha pressionado e arraste para adicionar blocos"</string>
-    <string name="drag_to_rearrange_tiles" msgid="2143204300089638620">"Mantenha pressionado e arraste para reorganizar os blocos"</string>
+    <string name="drag_to_rearrange_tiles" msgid="2143204300089638620">"Mantenha o bloco pressionado e arraste para reorganizar"</string>
     <string name="drag_to_remove_tiles" msgid="4682194717573850385">"Arraste aqui para remover"</string>
     <string name="drag_to_remove_disabled" msgid="933046987838658850">"É preciso haver pelo menos <xliff:g id="MIN_NUM_TILES">%1$d</xliff:g> blocos"</string>
     <string name="qs_edit" msgid="5583565172803472437">"Editar"</string>

@@ -31,8 +31,8 @@
     <string name="status_bar_settings_auto_rotation" msgid="8329080442278431708">"หมุนหน้าจออัตโนมัติ"</string>
     <string name="usb_device_permission_prompt" msgid="4414719028369181772">"อนุญาตให้ <xliff:g id="APPLICATION">%1$s</xliff:g> เข้าถึง <xliff:g id="USB_DEVICE">%2$s</xliff:g> ไหม"</string>
     <string name="usb_device_permission_prompt_warn" msgid="2309129784984063656">"อนุญาตให้ <xliff:g id="APPLICATION">%1$s</xliff:g> เข้าถึง <xliff:g id="USB_DEVICE">%2$s</xliff:g> ไหม\nแอปนี้ไม่ได้รับอนุญาตให้อัดเสียงแต่จะอัดเสียงผ่านอุปกรณ์ USB นี้ได้"</string>
-    <string name="usb_audio_device_permission_prompt_title" msgid="4221351137250093451">"อนุญาตให้ <xliff:g id="APPLICATION">%1$s</xliff:g> เข้าถึง<xliff:g id="USB_DEVICE">%2$s</xliff:g> ใช่ไหม"</string>
-    <string name="usb_audio_device_confirm_prompt_title" msgid="8828406516732985696">"เปิด <xliff:g id="APPLICATION">%1$s</xliff:g> เพื่อจัดการ<xliff:g id="USB_DEVICE">%2$s</xliff:g> ใช่ไหม"</string>
+    <string name="usb_audio_device_permission_prompt_title" msgid="4221351137250093451">"อนุญาตให้ <xliff:g id="APPLICATION">%1$s</xliff:g> เข้าถึง <xliff:g id="USB_DEVICE">%2$s</xliff:g> ใช่ไหม"</string>
+    <string name="usb_audio_device_confirm_prompt_title" msgid="8828406516732985696">"เปิด <xliff:g id="APPLICATION">%1$s</xliff:g> เพื่อจัดการ <xliff:g id="USB_DEVICE">%2$s</xliff:g> ใช่ไหม"</string>
     <string name="usb_audio_device_prompt_warn" msgid="2504972133361130335">"แอปนี้ไม่ได้รับอนุญาตให้อัดเสียงแต่จะอัดเสียงผ่านอุปกรณ์ USB นี้ได้ การใช้ <xliff:g id="APPLICATION">%1$s</xliff:g> กับอุปกรณ์นี้อาจทำให้คุณไม่ได้ยินเสียงสายเรียกเข้า การแจ้งเตือน และการปลุก"</string>
     <string name="usb_audio_device_prompt" msgid="7944987408206252949">"การใช้ <xliff:g id="APPLICATION">%1$s</xliff:g> กับอุปกรณ์นี้อาจทำให้คุณไม่ได้ยินเสียงสายเรียกเข้า การแจ้งเตือน และการปลุก"</string>
     <string name="usb_accessory_permission_prompt" msgid="717963550388312123">"อนุญาตให้ <xliff:g id="APPLICATION">%1$s</xliff:g> เข้าถึง <xliff:g id="USB_ACCESSORY">%2$s</xliff:g> ไหม"</string>
