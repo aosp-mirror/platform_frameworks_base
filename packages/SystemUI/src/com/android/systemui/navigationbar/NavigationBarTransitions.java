@@ -32,9 +32,11 @@ import android.view.View;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.navigationbar.buttons.ButtonDispatcher;
+import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.phone.BarTransitions;
 import com.android.systemui.statusbar.phone.LightBarTransitionsController;
+import com.android.systemui.statusbar.policy.KeyguardStateController;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -83,7 +85,11 @@ public final class NavigationBarTransitions extends BarTransitions implements
         super(view, R.drawable.nav_background);
         mView = view;
         mLightTransitionsController = new LightBarTransitionsController(
-                view.getContext(), this, commandQueue);
+                view.getContext(),
+                this,
+                commandQueue,
+                Dependency.get(KeyguardStateController.class),
+                Dependency.get(StatusBarStateController.class));
         mAllowAutoDimWallpaperNotVisible = view.getContext().getResources()
                 .getBoolean(R.bool.config_navigation_bar_enable_auto_dim_no_visible_wallpaper);
         mDarkIntensityListeners = new ArrayList();
