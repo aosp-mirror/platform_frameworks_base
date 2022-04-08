@@ -249,6 +249,7 @@ cc_defaults {
         "apex/android_matrix.cpp",
         "apex/android_paint.cpp",
         "apex/android_region.cpp",
+        "apex/properties.cpp",
     ],
 
     header_libs: ["android_graphics_apex_headers"],

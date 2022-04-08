@@ -24,7 +24,9 @@
 
 #include <memory>
 
+#include <aidl/android/hardware/graphics/common/PixelFormat.h>
 #include <android-base/chrono_utils.h>
+#include <android/graphics/properties.h>
 #include <android/graphics/region.h>
 #include <android/gui/BnScreenCaptureListener.h>
 #include <android/hardware/display/IDeviceProductInfoConstants.h>
@@ -1885,6 +1887,11 @@ static jobject nativeGetDisplayDecorationSupport(JNIEnv* env, jclass clazz,
     }
     const auto support = SurfaceComposerClient::getDisplayDecorationSupport(displayToken);
     if (!support) {
+        return nullptr;
+    }
+
+    using aidl::android::hardware::graphics::common::PixelFormat;
+    if (support.value().format == PixelFormat::R_8 && !hwui_uses_vulkan()) {
         return nullptr;
     }
 
