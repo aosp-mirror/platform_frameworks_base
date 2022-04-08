@@ -41,6 +41,7 @@ import android.util.Slog;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.content.PackageMonitor;
 import com.android.internal.os.BackgroundThread;
+import com.android.server.FgThread;
 import com.android.server.LocalServices;
 import com.android.server.compat.CompatChange;
 import com.android.server.compat.PlatformCompat;
@@ -53,17 +54,23 @@ import java.util.function.Supplier;
 /**
  * Manages and handles component aliases, which is an experimental feature.
  *
- * For now, this is an experimental feature to evaluate feasibility, so the implementation is
+ * NOTE: THIS CLASS IS PURELY EXPERIMENTAL AND WILL BE REMOVED IN FUTURE ANDROID VERSIONS.
+ * DO NOT USE IT.
+ *
+ * "Component alias" allows an android manifest component (for now only broadcasts and services)
+ * to be defined in one android package while having the implementation in a different package.
+ *
+ * When/if this becomes a real feature, it will be most likely implemented very differently,
+ * which is why this shouldn't be used.
+ *
+ * For now, because this is an experimental feature to evaluate feasibility, the implementation is
  * "quick & dirty". For example, to define aliases, we use a regular intent filter and meta-data
  * in the manifest, instead of adding proper tags/attributes to AndroidManifest.xml.
  *
- * Because it's an experimental feature, it can't be enabled on a user build.
+ * This feature is disabled by default.
  *
- * Also, for now, aliases can be defined across any packages, but in the final version, there'll
- * be restrictions:
- * - We probably should only allow either privileged or preinstalled apps.
- * - Aliases can only be defined across packages that are atomically installed, and signed with the
- *   same key.
+ * Also, for now, aliases can be defined across packages with different certificates, but
+ * in a final version this will most likely be tightened.
  */
 public class ComponentAliasResolver {
     private static final String TAG = "ComponentAliasResolver";
@@ -172,12 +179,17 @@ public class ComponentAliasResolver {
                         USE_EXPERIMENTAL_COMPONENT_ALIAS, "android", UserHandle.USER_SYSTEM));
             if (enabled != mEnabled) {
                 Slog.i(TAG, (enabled ? "Enabling" : "Disabling") + " component aliases...");
-                if (enabled) {
-                    mPackageMonitor.register(mAm.mContext, UserHandle.ALL,
-                            /* externalStorage= */ false, BackgroundThread.getHandler());
-                } else {
-                    mPackageMonitor.unregister();
-                }
+                FgThread.getHandler().post(() -> {
+                    // Registering/unregistering a receiver internally takes the AM lock, but AM
+                    // calls into this class while holding the AM lock. So do it on a handler to
+                    // avoid deadlocks.
+                    if (enabled) {
+                        mPackageMonitor.register(mAm.mContext, UserHandle.ALL,
+                                /* externalStorage= */ false, BackgroundThread.getHandler());
+                    } else {
+                        mPackageMonitor.unregister();
+                    }
+                });
             }
             mEnabled = enabled;
             mEnabledByDeviceConfig = enabledByDeviceConfig;
