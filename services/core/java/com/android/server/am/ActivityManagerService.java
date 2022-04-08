@@ -15257,7 +15257,6 @@ public class ActivityManagerService extends IActivityManager.Stub
                 uid, change, procState, procStateSeq, capability, ephemeral);
         if (uidRec != null) {
             uidRec.setLastReportedChange(enqueuedChange);
-            uidRec.updateLastDispatchedProcStateSeq(enqueuedChange);
         }
 
         // Directly update the power manager, since we sit on top of it and it is critical
@@ -16523,18 +16522,13 @@ public class ActivityManagerService extends IActivityManager.Stub
                     return;
                 }
                 record.lastNetworkUpdatedProcStateSeq = procStateSeq;
-                if (record.curProcStateSeq > procStateSeq) {
-                    if (DEBUG_NETWORK) {
-                        Slog.d(TAG_NETWORK, "No need to handle older seq no., Uid: " + uid
-                                + ", curProcstateSeq: " + record.curProcStateSeq
-                                + ", procStateSeq: " + procStateSeq);
-                    }
-                    return;
-                }
-                if (record.waitingForNetwork) {
+                if (record.procStateSeqWaitingForNetwork != 0
+                        && procStateSeq >= record.procStateSeqWaitingForNetwork) {
                     if (DEBUG_NETWORK) {
                         Slog.d(TAG_NETWORK, "Notifying all blocking threads for uid: " + uid
-                                + ", procStateSeq: " + procStateSeq);
+                                + ", procStateSeq: " + procStateSeq
+                                + ", procStateSeqWaitingForNetwork: "
+                                + record.procStateSeqWaitingForNetwork);
                     }
                     record.networkStateLock.notifyAll();
                 }
@@ -17279,7 +17273,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             if (mNetworkPolicyUidObserver != null) {
                 try {
                     mNetworkPolicyUidObserver.onUidStateChanged(uid, PROCESS_STATE_TOP,
-                            mProcessList.getProcStateSeqCounter(), PROCESS_CAPABILITY_ALL);
+                            mProcessList.getNextProcStateSeq(), PROCESS_CAPABILITY_ALL);
                 } catch (RemoteException e) {
                     // Should not happen; call is within the same process
                 }
@@ -17568,23 +17562,6 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
         }
         synchronized (record.networkStateLock) {
-            if (record.lastDispatchedProcStateSeq < procStateSeq) {
-                if (DEBUG_NETWORK) {
-                    Slog.d(TAG_NETWORK, "Uid state change for seq no. " + procStateSeq + " is not "
-                            + "dispatched to NPMS yet, so don't wait. Uid: " + callingUid
-                            + " lastProcStateSeqDispatchedToObservers: "
-                            + record.lastDispatchedProcStateSeq);
-                }
-                return;
-            }
-            if (record.curProcStateSeq > procStateSeq) {
-                if (DEBUG_NETWORK) {
-                    Slog.d(TAG_NETWORK, "Ignore the wait requests for older seq numbers. Uid: "
-                            + callingUid + ", curProcStateSeq: " + record.curProcStateSeq
-                            + ", procStateSeq: " + procStateSeq);
-                }
-                return;
-            }
             if (record.lastNetworkUpdatedProcStateSeq >= procStateSeq) {
                 if (DEBUG_NETWORK) {
                     Slog.d(TAG_NETWORK, "Network rules have been already updated for seq no. "
@@ -17600,9 +17577,9 @@ public class ActivityManagerService extends IActivityManager.Stub
                         + " Uid: " + callingUid + " procStateSeq: " + procStateSeq);
                 }
                 final long startTime = SystemClock.uptimeMillis();
-                record.waitingForNetwork = true;
+                record.procStateSeqWaitingForNetwork = procStateSeq;
                 record.networkStateLock.wait(mWaitForNetworkTimeoutMs);
-                record.waitingForNetwork = false;
+                record.procStateSeqWaitingForNetwork = 0;
                 final long totalTime = SystemClock.uptimeMillis() - startTime;
                 if (totalTime >= mWaitForNetworkTimeoutMs || DEBUG_NETWORK) {
                     Slog.w(TAG_NETWORK, "Total time waited for network rules to get updated: "
