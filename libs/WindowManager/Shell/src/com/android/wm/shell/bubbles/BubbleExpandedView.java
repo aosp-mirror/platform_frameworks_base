@@ -112,6 +112,7 @@ public class BubbleExpandedView extends LinearLayout {
     private ShapeDrawable mRightPointer;
     private float mCornerRadius = 0f;
     private int mBackgroundColorFloating;
+    private boolean mUsingMaxHeight;
 
     @Nullable private Bubble mBubble;
     private PendingIntent mPendingIntent;
@@ -621,6 +622,13 @@ public class BubbleExpandedView extends LinearLayout {
         return prevWasIntentBased != newIsIntentBased;
     }
 
+    /**
+     * Whether the bubble is using all available height to display or not.
+     */
+    public boolean isUsingMaxHeight() {
+        return mUsingMaxHeight;
+    }
+
     void updateHeight() {
         if (mExpandedViewContainerLocation == null) {
             return;
@@ -632,6 +640,7 @@ public class BubbleExpandedView extends LinearLayout {
             float height = desiredHeight == MAX_HEIGHT
                     ? maxHeight
                     : Math.min(desiredHeight, maxHeight);
+            mUsingMaxHeight = height == maxHeight;
             FrameLayout.LayoutParams lp = mIsOverflow
                     ? (FrameLayout.LayoutParams) mOverflowView.getLayoutParams()
                     : (FrameLayout.LayoutParams) mTaskView.getLayoutParams();
