@@ -1871,6 +1871,9 @@ package android.os {
     method public static android.os.VibrationEffect get(int, boolean);
     method @Nullable public static android.os.VibrationEffect get(android.net.Uri, android.content.Context);
     method public abstract long getDuration();
+    method @NonNull public static android.os.VibrationEffect.WaveformBuilder startWaveform();
+    method @NonNull public static android.os.VibrationEffect.WaveformBuilder startWaveform(@NonNull android.os.VibrationEffect.VibrationParameter);
+    method @NonNull public static android.os.VibrationEffect.WaveformBuilder startWaveform(@NonNull android.os.VibrationEffect.VibrationParameter, @NonNull android.os.VibrationEffect.VibrationParameter);
     field public static final int EFFECT_POP = 4; // 0x4
     field public static final int EFFECT_STRENGTH_LIGHT = 0; // 0x0
     field public static final int EFFECT_STRENGTH_MEDIUM = 1; // 0x1
@@ -1888,8 +1891,33 @@ package android.os {
     field @NonNull public static final android.os.Parcelable.Creator<android.os.VibrationEffect.Composed> CREATOR;
   }
 
+  public static final class VibrationEffect.Composition {
+    method @NonNull public android.os.VibrationEffect.Composition addEffect(@NonNull android.os.VibrationEffect);
+    method @NonNull public android.os.VibrationEffect.Composition addOffDuration(@NonNull java.time.Duration);
+    method @NonNull public android.os.VibrationEffect.Composition repeatEffectIndefinitely(@NonNull android.os.VibrationEffect);
+  }
+
+  public static final class VibrationEffect.Composition.UnreachableAfterRepeatingIndefinitelyException extends java.lang.IllegalStateException {
+  }
+
+  public static class VibrationEffect.VibrationParameter {
+    method @NonNull public static android.os.VibrationEffect.VibrationParameter targetAmplitude(@FloatRange(from=0, to=1) float);
+    method @NonNull public static android.os.VibrationEffect.VibrationParameter targetFrequency(@FloatRange(from=1) float);
+  }
+
+  public static final class VibrationEffect.WaveformBuilder {
+    method @NonNull public android.os.VibrationEffect.WaveformBuilder addSustain(@NonNull java.time.Duration);
+    method @NonNull public android.os.VibrationEffect.WaveformBuilder addTransition(@NonNull java.time.Duration, @NonNull android.os.VibrationEffect.VibrationParameter);
+    method @NonNull public android.os.VibrationEffect.WaveformBuilder addTransition(@NonNull java.time.Duration, @NonNull android.os.VibrationEffect.VibrationParameter, @NonNull android.os.VibrationEffect.VibrationParameter);
+    method @NonNull public android.os.VibrationEffect build();
+  }
+
   public abstract class Vibrator {
     method public int getDefaultVibrationIntensity(int);
+    method @Nullable public android.os.vibrator.VibratorFrequencyProfile getFrequencyProfile();
+    method public float getQFactor();
+    method public float getResonantFrequency();
+    method public boolean hasFrequencyControl();
     field public static final int VIBRATION_INTENSITY_HIGH = 3; // 0x3
     field public static final int VIBRATION_INTENSITY_LOW = 1; // 0x1
     field public static final int VIBRATION_INTENSITY_MEDIUM = 2; // 0x2
@@ -2072,6 +2100,13 @@ package android.os.vibrator {
   public abstract class VibrationEffectSegment implements android.os.Parcelable {
     method public abstract long getDuration();
     field @NonNull public static final android.os.Parcelable.Creator<android.os.vibrator.VibrationEffectSegment> CREATOR;
+  }
+
+  public final class VibratorFrequencyProfile {
+    method public float getMaxAmplitudeMeasurementInterval();
+    method @FloatRange(from=0, to=1) @NonNull public float[] getMaxAmplitudeMeasurements();
+    method public float getMaxFrequency();
+    method public float getMinFrequency();
   }
 
 }
