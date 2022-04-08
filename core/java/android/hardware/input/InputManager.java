@@ -346,6 +346,7 @@ public final class InputManager {
      * @param id The device id.
      * @return The input device or null if not found.
      */
+    @Nullable
     public InputDevice getInputDevice(int id) {
         synchronized (mInputDevicesLock) {
             populateInputDevicesLocked();
