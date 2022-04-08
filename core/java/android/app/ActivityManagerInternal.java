@@ -562,15 +562,14 @@ public abstract class ActivityManagerInternal {
     public abstract void unregisterProcessObserver(IProcessObserver processObserver);
 
     /**
-     * Gets the uid of the instrumentation source if there is an unfinished instrumentation that
-     * targets the given uid.
+     * Checks if there is an unfinished instrumentation that targets the given uid.
      *
      * @param uid The uid to be checked for
      *
-     * @return the uid of the instrumentation source, if there is an instrumentation whose target
-     * application uid matches the given uid, and {@link android.os.Process#INVALID_UID} otherwise.
+     * @return True, if there is an instrumentation whose target application uid matches the given
+     * uid, false otherwise
      */
-    public abstract int getInstrumentationSourceUid(int uid);
+    public abstract boolean isUidCurrentlyInstrumented(int uid);
 
     /** Is this a device owner app? */
     public abstract boolean isDeviceOwner(int uid);
