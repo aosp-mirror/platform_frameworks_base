@@ -602,7 +602,7 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
 
     void onTaskVanished(ITaskOrganizer organizer, Task task) {
         final TaskOrganizerState state = mTaskOrganizerStates.get(organizer.asBinder());
-        if (state != null && state.removeTask(task, false /* removeFromSystem */)) {
+        if (state != null && state.removeTask(task, task.mRemoveWithTaskOrganizer)) {
             onTaskVanishedInternal(organizer, task);
         }
     }
