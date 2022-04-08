@@ -228,7 +228,8 @@ class MediaCarouselController @Inject constructor(
                                 it.mUid,
                                 surfaces = intArrayOf(
                                         SysUiStatsLog.SMART_SPACE_CARD_REPORTED__DISPLAY_SURFACE__SHADE,
-                                        SysUiStatsLog.SMART_SPACE_CARD_REPORTED__DISPLAY_SURFACE__LOCKSCREEN),
+                                        SysUiStatsLog.SMART_SPACE_CARD_REPORTED__DISPLAY_SURFACE__LOCKSCREEN,
+                                        SysUiStatsLog.SMART_SPACE_CARD_REPORTED__DISPLAY_SURFACE__DREAM_OVERLAY),
                                 rank = MediaPlayerData.getMediaPlayerIndex(key))
                         /* ktlint-disable max-line-length */
                     }
@@ -251,7 +252,8 @@ class MediaCarouselController @Inject constructor(
                                     it.mUid,
                                     surfaces = intArrayOf(
                                             SysUiStatsLog.SMART_SPACE_CARD_REPORTED__DISPLAY_SURFACE__SHADE,
-                                            SysUiStatsLog.SMART_SPACE_CARD_REPORTED__DISPLAY_SURFACE__LOCKSCREEN),
+                                            SysUiStatsLog.SMART_SPACE_CARD_REPORTED__DISPLAY_SURFACE__LOCKSCREEN,
+                                            SysUiStatsLog.SMART_SPACE_CARD_REPORTED__DISPLAY_SURFACE__DREAM_OVERLAY),
                                     rank = index,
                                     receivedLatencyMillis = receivedSmartspaceCardLatency)
                             /* ktlint-disable max-line-length */
@@ -307,7 +309,8 @@ class MediaCarouselController @Inject constructor(
                                         it.mUid,
                                         surfaces = intArrayOf(
                                                 SysUiStatsLog.SMART_SPACE_CARD_REPORTED__DISPLAY_SURFACE__SHADE,
-                                                SysUiStatsLog.SMART_SPACE_CARD_REPORTED__DISPLAY_SURFACE__LOCKSCREEN),
+                                                SysUiStatsLog.SMART_SPACE_CARD_REPORTED__DISPLAY_SURFACE__LOCKSCREEN,
+                                                SysUiStatsLog.SMART_SPACE_CARD_REPORTED__DISPLAY_SURFACE__DREAM_OVERLAY),
                                         rank = index,
                                         receivedLatencyMillis = (systemClock.currentTimeMillis() - data.headphoneConnectionTimeMillis).toInt())
                                 /* ktlint-disable max-line-length */
@@ -322,7 +325,8 @@ class MediaCarouselController @Inject constructor(
                                 it.mUid,
                                 surfaces = intArrayOf(
                                         SysUiStatsLog.SMART_SPACE_CARD_REPORTED__DISPLAY_SURFACE__SHADE,
-                                        SysUiStatsLog.SMART_SPACE_CARD_REPORTED__DISPLAY_SURFACE__LOCKSCREEN),
+                                        SysUiStatsLog.SMART_SPACE_CARD_REPORTED__DISPLAY_SURFACE__LOCKSCREEN,
+                                        SysUiStatsLog.SMART_SPACE_CARD_REPORTED__DISPLAY_SURFACE__DREAM_OVERLAY),
                                 rank = MediaPlayerData.getMediaPlayerIndex(key),
                                 receivedLatencyMillis = (systemClock.currentTimeMillis() - data.headphoneConnectionTimeMillis).toInt())
                         /* ktlint-disable max-line-length */
