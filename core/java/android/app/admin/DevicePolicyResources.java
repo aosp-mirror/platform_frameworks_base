@@ -1173,7 +1173,62 @@ public final class DevicePolicyResources {
             /**
              * Header for items under the personal user
              */
-            public static final String PERSONAL_CATEGORY_HEADER = PREFIX + "category_personal";
+            public static final String PERSONAL_CATEGORY_HEADER = PREFIX + "CATEGORY_PERSONAL";
+
+            /**
+             * Text to indicate work notification content will be shown on the lockscreen.
+             */
+            public static final String LOCK_SCREEN_SHOW_WORK_NOTIFICATION_CONTENT =
+                    PREFIX + "LOCK_SCREEN_SHOW_WORK_NOTIFICATION_CONTENT";
+
+            /**
+             * Text to indicate work notification content will be shown on the lockscreen.
+             */
+            public static final String LOCK_SCREEN_HIDE_WORK_NOTIFICATION_CONTENT =
+                    PREFIX + "LOCK_SCREEN_HIDE_WORK_NOTIFICATION_CONTENT";
+
+            /**
+             * Text for toggle to enable auto-sycing personal data
+             */
+            public static final String AUTO_SYNC_PERSONAL_DATA = PREFIX
+                    + "AUTO_SYNC_PERSONAL_DATA";
+
+            /**
+             * Text for toggle to enable auto-sycing work data
+             */
+            public static final String AUTO_SYNC_WORK_DATA = PREFIX
+                    + "AUTO_SYNC_WORK_DATA";
+
+            /**
+             * Summary for "More security settings" section when a work profile is on the device.
+             */
+            public static final String MORE_SECURITY_SETTINGS_WORK_PROFILE_SUMMARY = PREFIX
+                    + "MORE_SECURITY_SETTINGS_WORK_PROFILE_SUMMARY";
+
+            /**
+             * Title for screen asking the user to choose a type of screen lock (such as a pattern,
+             * PIN, or password) that they need to enter to use their work apps
+             */
+            public static final String LOCK_SETTINGS_NEW_PROFILE_LOCK_TITLE = PREFIX
+                    + "LOCK_SETTINGS_NEW_PROFILE_LOCK_TITLE";
+
+            /**
+             * Title for section listing information that can be seen by organization
+             */
+            public static final String INFORMATION_SEEN_BY_ORGANIZATION_TITLE = PREFIX
+                    + "information_seen_by_organization_title";
+
+            /**
+             * Title for section listing changes made by the organization.
+             */
+            public static final String CHANGES_BY_ORGANIZATION_TITLE =
+                    PREFIX + "CHANGES_BY_ORGANIZATION_TITLE";
+
+            /**
+             * Footer for enterprise privacy screen.
+             */
+            public static final String ENTERPRISE_PRIVACY_FOOTER =
+                    PREFIX + "ENTERPRISE_PRIVACY_FOOTER";
         }
 
         /**
