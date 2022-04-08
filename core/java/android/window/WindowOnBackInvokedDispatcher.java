@@ -161,11 +161,12 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
         }
         try {
             if (callback == null) {
-                mWindowSession.setOnBackInvokedCallback(mWindow, null, PRIORITY_DEFAULT);
+                mWindowSession.setOnBackInvokedCallbackInfo(mWindow, null);
             } else {
                 int priority = mAllCallbacks.get(callback);
-                mWindowSession.setOnBackInvokedCallback(
-                        mWindow, new OnBackInvokedCallbackWrapper(callback), priority);
+                mWindowSession.setOnBackInvokedCallbackInfo(
+                        mWindow, new OnBackInvokedCallbackInfo(
+                                new OnBackInvokedCallbackWrapper(callback), priority));
             }
             if (DEBUG && callback == null) {
                 Log.d(TAG, TextUtils.formatSimple("setTopOnBackInvokedCallback(null) Callers:%s",
