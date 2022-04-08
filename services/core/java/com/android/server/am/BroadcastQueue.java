@@ -1918,7 +1918,7 @@ public final class BroadcastQueue {
                             + " completeLatency:" + completeLatency
                             + " dispatchRealLatency:" + dispatchRealLatency
                             + " completeRealLatency:" + completeRealLatency
-                            + " receiversSize:" + r.receivers.size()
+                            + " receiversSize:" + numReceivers
                             + " userId:" + r.userId
                             + " userType:" + (userInfo != null? userInfo.userType : null));
             FrameworkStatsLog.write(
