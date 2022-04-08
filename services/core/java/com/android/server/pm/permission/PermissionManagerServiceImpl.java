@@ -47,7 +47,6 @@ import static android.os.Trace.TRACE_TAG_PACKAGE_MANAGER;
 import static android.permission.PermissionManager.KILL_APP_REASON_GIDS_CHANGED;
 import static android.permission.PermissionManager.KILL_APP_REASON_PERMISSIONS_REVOKED;
 
-import static com.android.server.pm.ApexManager.MATCH_ACTIVE_PACKAGE;
 import static com.android.server.pm.PackageManagerService.DEBUG_INSTALL;
 import static com.android.server.pm.PackageManagerService.DEBUG_PACKAGE_SCANNING;
 import static com.android.server.pm.PackageManagerService.DEBUG_PERMISSIONS;
@@ -3240,9 +3239,7 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
         }
         // Only enforce the allowlist on boot
         if (!mSystemReady) {
-            final boolean isInUpdatedApex = containingApexPackageName != null
-                    && !apexManager.isFactory(apexManager.getPackageInfo(containingApexPackageName,
-                    MATCH_ACTIVE_PACKAGE));
+            final boolean isInUpdatedApex = packageSetting.isApkInUpdatedApex();
             // Apps that are in updated apexs' do not need to be allowlisted
             if (!isInUpdatedApex) {
                 Slog.w(TAG, "Privileged permission " + permissionName + " for package "
