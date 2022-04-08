@@ -3285,7 +3285,13 @@
 
   <java-symbol type="string" name="app_streaming_blocked_title" />
   <java-symbol type="string" name="app_streaming_blocked_title_for_permission_dialog" />
+  <java-symbol type="string" name="app_streaming_blocked_title_for_camera_dialog" />
+  <java-symbol type="string" name="app_streaming_blocked_title_for_fingerprint_dialog" />
+  <java-symbol type="string" name="app_streaming_blocked_title_for_microphone_dialog" />
+  <java-symbol type="string" name="app_streaming_blocked_title_for_settings_dialog" />
   <java-symbol type="string" name="app_streaming_blocked_message" />
+  <java-symbol type="string" name="app_streaming_blocked_message_for_permission_dialog" />
+  <java-symbol type="string" name="app_streaming_blocked_message_for_fingerprint_dialog" />
 
   <!-- Used internally for assistant to launch activity transitions -->
   <java-symbol type="id" name="cross_task_transition" />
