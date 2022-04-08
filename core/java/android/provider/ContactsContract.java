@@ -4337,6 +4337,20 @@ public final class ContactsContract {
         public static final int CARRIER_PRESENCE_VT_CAPABLE = 0x01;
 
         /**
+         * A reference to indicate whether phone account migration process is pending.
+         *
+         * Before Android 13, {@link PhoneAccountHandle#getId()} returns the ICCID for Telephony
+         * PhoneAccountHandle. Starting from Android 13, {@link PhoneAccountHandle#getId()} returns
+         * the Subscription ID for Telephony PhoneAccountHandle. A phone account migration process
+         * is to ensure this PhoneAccountHandle migration process cross the Android versions in
+         * the ContactsContract database.
+         *
+         * <p>Type: INTEGER</p>
+         * @hide
+         */
+        String IS_PHONE_ACCOUNT_MIGRATION_PENDING = "is_preferred_phone_account_migration_pending";
+
+        /**
          * The flattened {@link android.content.ComponentName} of a  {@link
          * android.telecom.PhoneAccountHandle} that is the preferred {@code PhoneAccountHandle} to
          * call the contact with.
