@@ -501,18 +501,6 @@ public class MockSystemServices {
         public boolean isFileBasedEncryptionEnabled() {
             return false;
         }
-
-        public boolean isNonDefaultBlockEncrypted() {
-            return false;
-        }
-
-        public boolean isEncrypted() {
-            return false;
-        }
-
-        public boolean isEncryptable() {
-            return false;
-        }
     }
 
     // We have to keep track of broadcast receivers registered for a given intent ourselves as the
