@@ -70,7 +70,7 @@ public interface NativeInputManagerService {
 
     void setBlockUntrustedTouchesMode(int mode);
 
-    int injectInputEvent(InputEvent event, boolean injectIntoUid, int uid, int syncMode,
+    int injectInputEvent(InputEvent event, int pid, int uid, int syncMode,
             int timeoutMillis, int policyFlags);
 
     VerifiedInputEvent verifyInputEvent(InputEvent event);
@@ -237,8 +237,7 @@ public interface NativeInputManagerService {
         public native void setBlockUntrustedTouchesMode(int mode);
 
         @Override
-        public native int injectInputEvent(InputEvent event, boolean injectIntoUid, int uid,
-                int syncMode,
+        public native int injectInputEvent(InputEvent event, int pid, int uid, int syncMode,
                 int timeoutMillis, int policyFlags);
 
         @Override
