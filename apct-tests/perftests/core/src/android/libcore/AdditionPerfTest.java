@@ -37,79 +37,71 @@ public class AdditionPerfTest {
     public PerfStatusReporter mPerfStatusReporter = new PerfStatusReporter();
 
     @Test
-    public int timeAddConstantToLocalInt() {
+    public void timeAddConstantToLocalInt() {
         BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         int result = 0;
         while (state.keepRunning()) {
             result += 123;
         }
-        return result;
     }
     @Test
-    public int timeAddTwoLocalInts() {
+    public void timeAddTwoLocalInts() {
         BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         int result = 0;
         int constant = 123;
         while (state.keepRunning()) {
             result += constant;
         }
-        return result;
     }
     @Test
-    public long timeAddConstantToLocalLong() {
+    public void timeAddConstantToLocalLong() {
         BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         long result = 0;
         while (state.keepRunning()) {
             result += 123L;
         }
-        return result;
     }
     @Test
-    public long timeAddTwoLocalLongs() {
+    public void timeAddTwoLocalLongs() {
         BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         long result = 0;
         long constant = 123L;
         while (state.keepRunning()) {
             result += constant;
         }
-        return result;
     }
     @Test
-    public float timeAddConstantToLocalFloat() {
+    public void timeAddConstantToLocalFloat() {
         BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         float result = 0.0f;
         while (state.keepRunning()) {
             result += 123.0f;
         }
-        return result;
     }
     @Test
-    public float timeAddTwoLocalFloats() {
+    public void timeAddTwoLocalFloats() {
         BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         float result = 0.0f;
         float constant = 123.0f;
         while (state.keepRunning()) {
             result += constant;
         }
-        return result;
     }
     @Test
-    public double timeAddConstantToLocalDouble() {
+    public void timeAddConstantToLocalDouble() {
         BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         double result = 0.0;
         while (state.keepRunning()) {
             result += 123.0;
         }
-        return result;
     }
     @Test
-    public double timeAddTwoLocalDoubles() {
+    public void timeAddTwoLocalDoubles() {
         BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         double result = 0.0;
         double constant = 123.0;
         while (state.keepRunning()) {
             result += constant;
         }
-        return result;
     }
 }
