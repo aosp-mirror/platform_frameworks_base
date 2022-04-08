@@ -683,6 +683,7 @@ package android.content {
     ctor public AttributionSource(int, @Nullable String, @Nullable String);
     ctor public AttributionSource(int, @Nullable String, @Nullable String, @NonNull android.os.IBinder);
     ctor public AttributionSource(int, @Nullable String, @Nullable String, @Nullable java.util.Set<java.lang.String>, @Nullable android.content.AttributionSource);
+    method public void enforceCallingPid();
   }
 
   public final class AutofillOptions implements android.os.Parcelable {
