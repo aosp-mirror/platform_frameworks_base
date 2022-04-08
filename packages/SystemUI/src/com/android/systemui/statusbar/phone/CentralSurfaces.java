@@ -1707,7 +1707,7 @@ public class CentralSurfaces extends CoreStartable implements
             @Nullable ActivityLaunchAnimator.Controller animationController,
             boolean showOverLockscreenWhenLocked) {
         startActivity(intent, dismissShade, animationController, showOverLockscreenWhenLocked,
-                UserHandle.CURRENT);
+                getActivityUserHandle(intent));
     }
 
     @Override
@@ -1794,7 +1794,7 @@ public class CentralSurfaces extends CoreStartable implements
     public void startActivity(Intent intent, boolean dismissShade, Callback callback) {
         startActivityDismissingKeyguard(intent, false, dismissShade,
                 false /* disallowEnterPictureInPictureWhileLaunching */, callback, 0,
-                null /* animationController */, UserHandle.CURRENT);
+                null /* animationController */, getActivityUserHandle(intent));
     }
 
     public void setQsExpanded(boolean expanded) {
@@ -2424,7 +2424,7 @@ public class CentralSurfaces extends CoreStartable implements
             boolean dismissShade, int flags) {
         startActivityDismissingKeyguard(intent, onlyProvisioned, dismissShade,
                 false /* disallowEnterPictureInPictureWhileLaunching */, null /* callback */,
-                flags, null /* animationController */, UserHandle.CURRENT);
+                flags, null /* animationController */, getActivityUserHandle(intent));
     }
 
     public void startActivityDismissingKeyguard(final Intent intent, boolean onlyProvisioned,
@@ -2867,7 +2867,7 @@ public class CentralSurfaces extends CoreStartable implements
                                 null /* callback */,
                                 0 /* flags */,
                                 animationController,
-                                UserHandle.CURRENT),
+                                getActivityUserHandle(intent)),
                 delay);
     }
 
@@ -3599,7 +3599,8 @@ public class CentralSurfaces extends CoreStartable implements
                 mLaunchEmergencyActionWhenFinishedWaking = false;
                 Intent emergencyIntent = getEmergencyActionIntent();
                 if (emergencyIntent != null) {
-                    mContext.startActivityAsUser(emergencyIntent, UserHandle.CURRENT);
+                    mContext.startActivityAsUser(emergencyIntent,
+                            getActivityUserHandle(emergencyIntent));
                 }
             }
             updateScrimController();
@@ -4500,4 +4501,20 @@ public class CentralSurfaces extends CoreStartable implements
         @Override
         public void dispatchDemoCommand(String command, Bundle args) { }
     };
+
+    /**
+     *  Determines what UserHandle to use when launching an activity.
+     *
+     *  We want to ensure that activities that are launched within the systemui process should be
+     *  launched as user of the current process.
+     * @param intent
+     * @return UserHandle
+     */
+    private UserHandle getActivityUserHandle(Intent intent) {
+        if (intent.getComponent() != null
+                && mContext.getPackageName().equals(intent.getComponent().getPackageName())) {
+            return new UserHandle(UserHandle.myUserId());
+        }
+        return UserHandle.CURRENT;
+    }
 }
