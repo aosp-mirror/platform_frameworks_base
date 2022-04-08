@@ -843,18 +843,23 @@ class MediaDataManager(
     }
 
     /**
-     * Get a [MediaAction] representing one of
-     * - [PlaybackState.ACTION_PLAY]
-     * - [PlaybackState.ACTION_PAUSE]
-     * - [PlaybackState.ACTION_SKIP_TO_PREVIOUS]
-     * - [PlaybackState.ACTION_SKIP_TO_NEXT]
+     * Create a [MediaAction] for a given action and media session
+     *
+     * @param controller MediaController for the session
+     * @param stateActions The actions included with the session's [PlaybackState]
+     * @param action A [PlaybackState.Actions] value representing what action to generate. One of:
+     *      [PlaybackState.ACTION_PLAY]
+     *      [PlaybackState.ACTION_PAUSE]
+     *      [PlaybackState.ACTION_SKIP_TO_PREVIOUS]
+     *      [PlaybackState.ACTION_SKIP_TO_NEXT]
+     * @return A [MediaAction] with correct values set, or null if the state doesn't support it
      */
     private fun getStandardAction(
         controller: MediaController,
         stateActions: Long,
-        action: Long
+        @PlaybackState.Actions action: Long
     ): MediaAction? {
-        if (stateActions and action == 0L) {
+        if (!includesAction(stateActions, action)) {
             return null
         }
 
@@ -893,6 +898,17 @@ class MediaDataManager(
             }
             else -> null
         }
+    }
+
+    /**
+     * Check whether the actions from a [PlaybackState] include a specific action
+     */
+    private fun includesAction(stateActions: Long, @PlaybackState.Actions action: Long): Boolean {
+        if ((action == PlaybackState.ACTION_PLAY || action == PlaybackState.ACTION_PAUSE) &&
+                (stateActions and PlaybackState.ACTION_PLAY_PAUSE > 0L)) {
+            return true
+        }
+        return (stateActions and action != 0L)
     }
 
     /**
