@@ -26,6 +26,7 @@ import static com.android.server.pm.PackageManagerService.PLATFORM_PACKAGE_NAME;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
+import android.app.ActivityOptions;
 import android.app.AlarmManager;
 import android.app.AppGlobals;
 import android.app.AppOpsManager;
@@ -970,13 +971,16 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
             intent.setComponent(provider.getInfoLocked(mContext).configure);
             intent.setFlags(secureFlags);
 
+            final ActivityOptions options = ActivityOptions.makeBasic();
+            options.setIgnorePendingIntentCreatorForegroundState(true);
+
             // All right, create the sender.
             final long identity = Binder.clearCallingIdentity();
             try {
                 return PendingIntent.getActivityAsUser(
                         mContext, 0, intent, PendingIntent.FLAG_ONE_SHOT
                                 | PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_CANCEL_CURRENT,
-                                null, new UserHandle(provider.getUserId()))
+                                options.toBundle(), new UserHandle(provider.getUserId()))
                         .getIntentSender();
             } finally {
                 Binder.restoreCallingIdentity(identity);
