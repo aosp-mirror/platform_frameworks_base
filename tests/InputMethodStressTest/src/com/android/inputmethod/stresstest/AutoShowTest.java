@@ -29,6 +29,7 @@ import android.app.Instrumentation;
 import android.content.Intent;
 import android.os.Bundle;
 import android.platform.test.annotations.RootPermissionTest;
+import android.platform.test.rule.UnlockScreenRule;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 
@@ -36,12 +37,16 @@ import androidx.annotation.Nullable;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.platform.app.InstrumentationRegistry;
 
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 @RootPermissionTest
 @RunWith(AndroidJUnit4.class)
 public final class AutoShowTest {
+
+    @Rule
+    public UnlockScreenRule mUnlockScreenRule = new UnlockScreenRule();
 
     @Test
     public void autoShow() {
