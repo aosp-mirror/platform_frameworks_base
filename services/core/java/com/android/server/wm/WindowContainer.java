@@ -3181,6 +3181,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         mLastLayer = -1;
         mWmService.mSurfaceAnimationRunner.onAnimationLeashLost(mAnimationLeash, t);
         mAnimationLeash = null;
+        mNeedsZBoost = false;
         reassignLayer(t);
         updateSurfacePosition(t);
     }
