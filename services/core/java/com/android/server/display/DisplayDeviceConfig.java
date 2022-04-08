@@ -74,7 +74,7 @@ import javax.xml.datatype.DatatypeConfigurationException;
  *  <pre>
  *  {@code
  *    <displayConfiguration>
- *      <densityMap>
+ *      <densityMapping>
  *        <density>
  *          <height>480</height>
  *          <width>720</width>
@@ -95,7 +95,7 @@ import javax.xml.datatype.DatatypeConfigurationException;
  *          <width>3840</width>
  *          <density>640</density>
  *        </density>
- *      </densityMap>
+ *      </densityMapping>
  *
  *      <screenBrightnessMap>
  *        <point>
