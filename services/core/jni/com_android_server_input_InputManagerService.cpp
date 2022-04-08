@@ -114,6 +114,7 @@ static struct {
     jmethodID interceptMotionBeforeQueueingNonInteractive;
     jmethodID interceptKeyBeforeDispatching;
     jmethodID dispatchUnhandledKey;
+    jmethodID checkInjectEventsPermission;
     jmethodID onPointerDownOutsideFocus;
     jmethodID getVirtualKeyQuietTimeMillis;
     jmethodID getExcludedDeviceNames;
@@ -340,6 +341,7 @@ public:
     bool dispatchUnhandledKey(const sp<IBinder>& token, const KeyEvent* keyEvent,
                               uint32_t policyFlags, KeyEvent* outFallbackKeyEvent) override;
     void pokeUserActivity(nsecs_t eventTime, int32_t eventType, int32_t displayId) override;
+    bool checkInjectEventsPermissionNonReentrant(int32_t injectorPid, int32_t injectorUid) override;
     void onPointerDownOutsideFocus(const sp<IBinder>& touchedToken) override;
     void setPointerCapture(const PointerCaptureRequest& request) override;
     void notifyDropWindow(const sp<IBinder>& token, float x, float y) override;
@@ -1377,6 +1379,19 @@ void NativeInputManager::pokeUserActivity(nsecs_t eventTime, int32_t eventType, 
     android_server_PowerManagerService_userActivity(eventTime, eventType, displayId);
 }
 
+bool NativeInputManager::checkInjectEventsPermissionNonReentrant(int32_t injectorPid,
+                                                                 int32_t injectorUid) {
+    ATRACE_CALL();
+    JNIEnv* env = jniEnv();
+    jboolean result =
+            env->CallBooleanMethod(mServiceObj, gServiceClassInfo.checkInjectEventsPermission,
+                                   injectorPid, injectorUid);
+    if (checkAndClearExceptionFromCallback(env, "checkInjectEventsPermission")) {
+        result = false;
+    }
+    return result;
+}
+
 void NativeInputManager::onPointerDownOutsideFocus(const sp<IBinder>& touchedToken) {
     ATRACE_CALL();
     JNIEnv* env = jniEnv();
@@ -1705,11 +1720,10 @@ static void nativeSetBlockUntrustedTouchesMode(JNIEnv* env, jobject nativeImplOb
 }
 
 static jint nativeInjectInputEvent(JNIEnv* env, jobject nativeImplObj, jobject inputEventObj,
-                                   jboolean injectIntoUid, jint uid, jint syncMode,
+                                   jint injectorPid, jint injectorUid, jint syncMode,
                                    jint timeoutMillis, jint policyFlags) {
     NativeInputManager* im = getNativeInputManager(env, nativeImplObj);
 
-    const std::optional<int32_t> targetUid = injectIntoUid ? std::make_optional(uid) : std::nullopt;
     // static_cast is safe because the value was already checked at the Java layer
     InputEventInjectionSync mode = static_cast<InputEventInjectionSync>(syncMode);
 
@@ -1722,7 +1736,8 @@ static jint nativeInjectInputEvent(JNIEnv* env, jobject nativeImplObj, jobject i
         }
 
         const InputEventInjectionResult result =
-                im->getInputManager()->getDispatcher().injectInputEvent(&keyEvent, targetUid, mode,
+                im->getInputManager()->getDispatcher().injectInputEvent(&keyEvent, injectorPid,
+                                                                        injectorUid, mode,
                                                                         std::chrono::milliseconds(
                                                                                 timeoutMillis),
                                                                         uint32_t(policyFlags));
@@ -1735,8 +1750,8 @@ static jint nativeInjectInputEvent(JNIEnv* env, jobject nativeImplObj, jobject i
         }
 
         const InputEventInjectionResult result =
-                im->getInputManager()->getDispatcher().injectInputEvent(motionEvent, targetUid,
-                                                                        mode,
+                im->getInputManager()->getDispatcher().injectInputEvent(motionEvent, injectorPid,
+                                                                        injectorUid, mode,
                                                                         std::chrono::milliseconds(
                                                                                 timeoutMillis),
                                                                         uint32_t(policyFlags));
@@ -2343,7 +2358,7 @@ static const JNINativeMethod gInputManagerMethods[] = {
         {"setMaximumObscuringOpacityForTouch", "(F)V",
          (void*)nativeSetMaximumObscuringOpacityForTouch},
         {"setBlockUntrustedTouchesMode", "(I)V", (void*)nativeSetBlockUntrustedTouchesMode},
-        {"injectInputEvent", "(Landroid/view/InputEvent;ZIIII)I", (void*)nativeInjectInputEvent},
+        {"injectInputEvent", "(Landroid/view/InputEvent;IIIII)I", (void*)nativeInjectInputEvent},
         {"verifyInputEvent", "(Landroid/view/InputEvent;)Landroid/view/VerifiedInputEvent;",
          (void*)nativeVerifyInputEvent},
         {"toggleCapsLock", "(I)V", (void*)nativeToggleCapsLock},
@@ -2489,6 +2504,9 @@ int register_android_server_InputManager(JNIEnv* env) {
     GET_METHOD_ID(gServiceClassInfo.dispatchUnhandledKey, clazz,
             "dispatchUnhandledKey",
             "(Landroid/os/IBinder;Landroid/view/KeyEvent;I)Landroid/view/KeyEvent;");
+
+    GET_METHOD_ID(gServiceClassInfo.checkInjectEventsPermission, clazz,
+                  "checkInjectEventsPermission", "(II)Z");
 
     GET_METHOD_ID(gServiceClassInfo.onPointerDownOutsideFocus, clazz,
             "onPointerDownOutsideFocus", "(Landroid/os/IBinder;)V");
