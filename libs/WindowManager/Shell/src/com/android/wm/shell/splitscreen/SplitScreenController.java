@@ -377,7 +377,8 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
                     return;
                 }
 
-                mStageCoordinator.updateSurfaceBounds(null /* layout */, t);
+                mStageCoordinator.updateSurfaceBounds(null /* layout */, t,
+                        false /* applyResizingOffset */);
                 for (int i = 0; i < apps.length; ++i) {
                     if (apps[i].mode == MODE_OPENING) {
                         t.show(apps[i].leash);

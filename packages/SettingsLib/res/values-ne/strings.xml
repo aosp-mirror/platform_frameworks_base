@@ -510,7 +510,7 @@
     <string name="retail_demo_reset_message" msgid="5392824901108195463">"डेमो मोडमा फ्याक्ट्री रिसेट गर्न पासवर्ड प्रविष्टि गर्नुहोस्"</string>
     <string name="retail_demo_reset_next" msgid="3688129033843885362">"अर्को"</string>
     <string name="retail_demo_reset_title" msgid="1866911701095959800">"पासवर्ड आवश्यक छ"</string>
-    <string name="active_input_method_subtypes" msgid="4232680535471633046">"आगत विधिहरू सक्रिय गर्नुहोस्"</string>
+    <string name="active_input_method_subtypes" msgid="4232680535471633046">"आगत विधिहरू अन गर्नुहोस्"</string>
     <string name="use_system_language_to_select_input_method_subtypes" msgid="4865195835541387040">"सिष्टममा भएका भाषा प्रयोग गरियोस्"</string>
     <string name="failed_to_open_app_settings_toast" msgid="764897252657692092">"<xliff:g id="SPELL_APPLICATION_NAME">%1$s</xliff:g>का लागि सेटिङहरू खोल्न विफल भयो।"</string>
     <string name="ime_security_warning" msgid="6547562217880551450">"यस इनपुट विधिले तपाईँले टाइप गर्नुहुने सम्पूर्ण पाठ बटु्ल्न सक्छ, व्यक्तिगत डेटा जस्तै पासवर्ड र क्रेडिट कार्ड नम्बर लगायतका। यो <xliff:g id="IME_APPLICATION_NAME">%1$s</xliff:g> अनुप्रयोगबाट आउँदछ। यो इनपुट विधि प्रयोग गर्ने हो?"</string>
@@ -531,8 +531,8 @@
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"घडी तथा रिमाइन्डरहरू"</string>
     <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"यो एपलाई अलार्म सेट गर्ने र समयमै पूरा गर्नु पर्ने कारबाहीहरूको रुटिन बनाउने अनुमति दिनुहोस्। यो अनुमति दिइएको छ भने यो एप ब्याकग्राउन्डमा चल्छ र धेरै ब्याट्री खपत हुन्छ।\n\nयो अनुमति दिइएको छैन भने सेट गरिएका अलार्म बज्दैनन् र यो एपले तय गरेका गतिविधि चल्दैनन्।"</string>
     <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"समयतालिका, अलार्म, रिमाइन्डर, घडी"</string>
-    <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"सक्रिय गर्नुहोस्"</string>
-    <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"बाधा नपुऱ्याउनुहोस् नामक मोडलाई सक्रिय गर्नुहोस्"</string>
+    <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"अन गर्नुहोस्"</string>
+    <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"बाधा नपुऱ्याउनुहोस् नामक मोडलाई अन गर्नुहोस्"</string>
     <string name="zen_mode_settings_summary_off" msgid="3832876036123504076">"कहिल्यै होइन"</string>
     <string name="zen_interruption_level_priority" msgid="5392140786447823299">"प्राथमिकता दिइएको मात्र"</string>
     <string name="zen_mode_and_condition" msgid="8877086090066332516">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>। <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
@@ -547,7 +547,7 @@
     <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"यो फोन"</string>
     <string name="media_transfer_this_device_name" product="tablet" msgid="3714653244000242800">"यो ट्याब्लेट"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"यो फोन"</string>
-    <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"जोड्ने क्रममा समस्या भयो। यन्त्रलाई निष्क्रिय पारेर फेरि सक्रिय गर्नुहोस्"</string>
+    <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"जोड्ने क्रममा समस्या भयो। यन्त्रलाई निष्क्रिय पारेर फेरि अन गर्नुहोस्"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"तारयुक्त अडियो यन्त्र"</string>
     <string name="help_label" msgid="3528360748637781274">"मद्दत र प्रतिक्रिया"</string>
     <string name="storage_category" msgid="2287342585424631813">"भण्डारण"</string>
@@ -589,27 +589,22 @@
     <string name="add_user_failed" msgid="4809887794313944872">"नयाँ प्रयोगकर्ता सिर्जना गर्न सकिएन"</string>
     <string name="add_guest_failed" msgid="8074548434469843443">"नयाँ अतिथि बनाउन सकिएन"</string>
     <string name="user_nickname" msgid="262624187455825083">"उपनाम"</string>
-    <!-- no translation found for user_add_user (7876449291500212468) -->
-    <skip />
+    <string name="user_add_user" msgid="7876449291500212468">"प्रयोगकर्ता थप्नुहोस्"</string>
     <string name="guest_new_guest" msgid="3482026122932643557">"अतिथि थप्नुहोस्"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"अतिथि हटाउनुहोस्"</string>
     <string name="guest_reset_guest" msgid="6110013010356013758">"अतिथि सत्र रिसेट गर्नुहोस्"</string>
     <string name="guest_reset_guest_dialog_title" msgid="8047270010895437534">"अतिथिका रूपमा ब्राउज गर्ने सेसन रिसेट गर्ने हो?"</string>
-    <!-- no translation found for guest_remove_guest_dialog_title (4548511006624088072) -->
-    <skip />
+    <string name="guest_remove_guest_dialog_title" msgid="4548511006624088072">"यी अतिथि हटाउने हो?"</string>
     <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"रिसेट गर्नुहोस्"</string>
+    <string name="guest_remove_guest_confirm_button" msgid="7858123434954143879">"हटाउनुहोस्"</string>
     <string name="guest_resetting" msgid="7822120170191509566">"अतिथिका रूपमा ब्राउज गर्ने सेसन रिसेट गरिँदै छ…"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"फोटो खिच्नुहोस्"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"कुनै फोटो छनौट गर्नुहोस्"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"फोटो चयन गर्नुहोस्"</string>
-    <!-- no translation found for failed_attempts_now_wiping_device (4016329172216428897) -->
-    <skip />
-    <!-- no translation found for failed_attempts_now_wiping_user (469060411789668050) -->
-    <skip />
-    <!-- no translation found for failed_attempts_now_wiping_profile (7626589520888963129) -->
-    <skip />
-    <!-- no translation found for failed_attempts_now_wiping_dialog_dismiss (2749889771223578925) -->
-    <skip />
+    <string name="failed_attempts_now_wiping_device" msgid="4016329172216428897">"धेरै पटक गलत तरिकाले अनलक गर्ने प्रयास गरियो। यो डिभाइसमा भएको डेटा मेटाइने छ।"</string>
+    <string name="failed_attempts_now_wiping_user" msgid="469060411789668050">"धेरै पटक गलत तरिकाले अनलक गर्ने प्रयास गरियो। यो प्रयोगकर्ता मेटाइने छ।"</string>
+    <string name="failed_attempts_now_wiping_profile" msgid="7626589520888963129">"धेरै पटक गलत तरिकाले अनलक गर्ने प्रयास गरियो। यो कार्य प्रोफाइल र यसमा भएको डेटा मेटाइने छ।"</string>
+    <string name="failed_attempts_now_wiping_dialog_dismiss" msgid="2749889771223578925">"हटाउनुहोस्"</string>
     <string name="cached_apps_freezer_device_default" msgid="2616594131750144342">"डिफल्ट डिभाइस"</string>
     <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"असक्षम पारिएको छ"</string>
     <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"सक्षम पारिएको छ"</string>
@@ -657,4 +652,7 @@
     <string name="turn_screen_on_title" msgid="3266937298097573424">"स्क्रिन अन गर्नुहोस्"</string>
     <string name="allow_turn_screen_on" msgid="6194845766392742639">"स्क्रिन अन गर्ने अनुमति दिइयोस्"</string>
     <string name="allow_turn_screen_on_description" msgid="43834403291575164">"कुनै एपलाई स्क्रिन अन गर्ने अनुमति दिइयोस्। यो अनुमति दिइएका खण्डमा तपाईंले अन गर्न नखोजेका बेलामा पनि एपले जुनसुकै बेला स्क्रिन अन गर्न सक्छ।"</string>
+    <string name="bt_le_audio_scan_qr_code" msgid="3521809854780392679">"QR कोड स्क्यान गर्नुहोस्"</string>
+    <string name="bt_le_audio_scan_qr_code_scanner" msgid="4679500020630341107">"अडियो सुन्न तलको QR कोडलाई केन्द्र भागमा पार्नुहोस्"</string>
+    <string name="bt_le_audio_qr_code_is_not_valid_format" msgid="6092191081849434734">"QR कोडको फर्म्याट वैध छैन"</string>
 </resources>

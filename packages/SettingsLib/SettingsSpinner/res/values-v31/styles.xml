@@ -17,7 +17,8 @@
 
 <resources>
     <style name="SettingsSpinnerTitleBar">
-        <item name="android:textAppearance">?android:attr/textAppearanceButton</item>
+        <item name="android:textAppearance">@android:style/TextAppearance.DeviceDefault.Medium</item>
+        <item name="android:textSize">16sp</item>
         <item name="android:textColor">@color/settingslib_spinner_title_color</item>
         <item name="android:maxLines">1</item>
         <item name="android:ellipsize">marquee</item>
@@ -29,7 +30,8 @@
     </style>
 
     <style name="SettingsSpinnerDropdown">
-        <item name="android:textAppearance">?android:attr/textAppearanceButton</item>
+        <item name="android:textAppearance">@android:style/TextAppearance.DeviceDefault.Medium</item>
+        <item name="android:textSize">16sp</item>
         <item name="android:textColor">@color/settingslib_spinner_dropdown_color</item>
         <item name="android:maxLines">1</item>
         <item name="android:ellipsize">marquee</item>

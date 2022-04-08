@@ -341,8 +341,7 @@ public class SystemUIApplication extends Application implements
 
         // TODO(b/217567642): replace com.android.systemui.dump.Dumpable by
         // com.android.util.Dumpable and get rid of the intermediate lambda
-        mDumpManager.registerDumpable(dumpable.getDumpableName(),
-                (fd, pw, args) -> dumpable.dump(pw, args));
+        mDumpManager.registerDumpable(dumpable.getDumpableName(), dumpable::dump);
         return true;
     }
 

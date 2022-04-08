@@ -1992,7 +1992,8 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         scheduleAnimation();
 
         forAllWindows(w -> {
-            if (w.mHasSurface && !rotateSeamlessly) {
+            if (!w.mHasSurface) return;
+            if (!rotateSeamlessly) {
                 ProtoLog.v(WM_DEBUG_ORIENTATION, "Set mOrientationChanging of %s", w);
                 w.setOrientationChanging(true);
             }
@@ -4047,10 +4048,18 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     @VisibleForTesting
     void setImeInputTarget(InputTarget target) {
         mImeInputTarget = target;
-        boolean canScreenshot = mImeInputTarget == null || mImeInputTarget.canScreenshotIme();
-        if (mImeWindowsContainer.setCanScreenshot(canScreenshot)) {
+        if (refreshImeSecureFlag(getPendingTransaction())) {
             mWmService.requestTraversal();
         }
+    }
+
+    /**
+     * Re-check the IME target's SECURE flag since it's possible to have changed after the target
+     * was set.
+     */
+    boolean refreshImeSecureFlag(Transaction t) {
+        boolean canScreenshot = mImeInputTarget == null || mImeInputTarget.canScreenshotIme();
+        return mImeWindowsContainer.setCanScreenshot(t, canScreenshot);
     }
 
     @VisibleForTesting

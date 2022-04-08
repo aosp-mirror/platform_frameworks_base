@@ -149,7 +149,7 @@ public class Flags {
     /***************************************/
     // 900 - media
     public static final BooleanFlag MEDIA_TAP_TO_TRANSFER = new BooleanFlag(900, true);
-    public static final BooleanFlag MEDIA_SESSION_ACTIONS = new BooleanFlag(901, false);
+    public static final BooleanFlag MEDIA_SESSION_ACTIONS = new BooleanFlag(901, true);
     public static final BooleanFlag MEDIA_NEARBY_DEVICES = new BooleanFlag(903, true);
     public static final BooleanFlag MEDIA_MUTE_AWAIT = new BooleanFlag(904, true);
 
@@ -161,6 +161,17 @@ public class Flags {
     @Keep
     public static final SysPropBooleanFlag WM_ENABLE_SHELL_TRANSITIONS =
             new SysPropBooleanFlag(1100, "persist.wm.debug.shell_transit", false);
+
+    // 1200 - predictive back
+    @Keep
+    public static final SysPropBooleanFlag WM_ENABLE_PREDICTIVE_BACK = new SysPropBooleanFlag(
+            1200, "persist.wm.debug.predictive_back", true);
+    @Keep
+    public static final SysPropBooleanFlag WM_ENABLE_PREDICTIVE_BACK_ANIM = new SysPropBooleanFlag(
+            1201, "persist.wm.debug.predictive_back_anim", false);
+    @Keep
+    public static final SysPropBooleanFlag WM_ALWAYS_ENFORCE_PREDICTIVE_BACK =
+            new SysPropBooleanFlag(1202, "persist.wm.debug.predictive_back_always_enforce", false);
 
     // Pay no attention to the reflection behind the curtain.
     // ========================== Curtain ==========================

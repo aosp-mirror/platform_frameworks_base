@@ -587,7 +587,7 @@
     <string name="biometric_error_generic" msgid="6784371929985434439">"Autentifikuojant įvyko klaida"</string>
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"Naudoti ekrano užraktą"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"Jei norite tęsti, įveskite ekrano užraktą"</string>
-    <string name="fingerprint_acquired_partial" msgid="694598777291084823">"Aptiktas dalinis kontrolinis kodas"</string>
+    <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"Tvirtai paspauskite jutiklį"</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"Nepavyko apdoroti piršto antspaudo. Bandykite dar kartą."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"Nuvalykite kontrolinio kodo jutiklį ir bandykite dar kartą"</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"Nuvalykite jutiklį ir bandykite dar kartą"</string>
@@ -600,7 +600,7 @@
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_error_not_match" msgid="4599441812893438961">"Kontrolinis kodas neatpažintas"</string>
-    <string name="fingerprint_udfps_error_not_match" msgid="4709197752023550709">"Tvirtai paspauskite jutiklį"</string>
+    <string name="fingerprint_udfps_error_not_match" msgid="8236930793223158856">"Kontrolinis kodas neatpažintas"</string>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"Piršto antspaudas autentifikuotas"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"Veidas autentifikuotas"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"Veidas autentifikuotas, paspauskite patvirtinimo mygtuką"</string>
@@ -1681,7 +1681,6 @@
     <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"ĮJUNGTA"</string>
     <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"IŠJUNGTA"</string>
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"Leisti „<xliff:g id="SERVICE">%1$s</xliff:g>“ valdyti visas įrenginio funkcijas?"</string>
-    <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"Jei įjungsite „<xliff:g id="SERVICE">%1$s</xliff:g>“, įrenginyje nebus naudojamas ekrano užraktas siekiant patobulinti duomenų šifruotę."</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"Galimybę valdyti visas funkcijas patariama suteikti programoms, kurios padeda specialiųjų poreikių turintiems asmenims, bet ne daugumai programų."</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Ekrano peržiūra ir valdymas"</string>
     <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Naudojant šį ekrano valdiklį galima skaityti visą ekrane rodomą turinį ir rodyti turinį virš kitų programų."</string>
@@ -1935,8 +1934,7 @@
     <string name="app_blocked_title" msgid="7353262160455028160">"Programa nepasiekiama."</string>
     <string name="app_blocked_message" msgid="542972921087873023">"Programa „<xliff:g id="APP_NAME">%1$s</xliff:g>“ šiuo metu nepasiekiama."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"„<xliff:g id="ACTIVITY">%1$s</xliff:g>“ nepasiekiama"</string>
-    <!-- no translation found for app_streaming_blocked_title_for_permission_dialog (4483161748582966785) -->
-    <skip />
+    <string name="app_streaming_blocked_title_for_permission_dialog" msgid="4483161748582966785">"Reikalingas leidimas"</string>
     <string name="app_streaming_blocked_message" product="tv" msgid="4003011766528814377">"Šįkart nepavyksta pasiekti programos iš jūsų „<xliff:g id="DEVICE">%1$s</xliff:g>“. Pabandykite naudoti „Android TV“ įrenginį."</string>
     <string name="app_streaming_blocked_message" product="tablet" msgid="4242053045964946062">"Šįkart nepavyksta pasiekti programos iš jūsų „<xliff:g id="DEVICE">%1$s</xliff:g>“. Pabandykite naudoti planšetinį kompiuterį."</string>
     <string name="app_streaming_blocked_message" product="default" msgid="6159168735030739398">"Šįkart nepavyksta pasiekti programos iš jūsų „<xliff:g id="DEVICE">%1$s</xliff:g>“. Pabandykite naudoti telefoną."</string>
@@ -2030,10 +2028,9 @@
     <string name="harmful_app_warning_open_anyway" msgid="5963657791740211807">"VIS TIEK ATIDARYTI"</string>
     <string name="harmful_app_warning_title" msgid="8794823880881113856">"Aptikta žalinga programa"</string>
     <string name="log_access_confirmation_title" msgid="2343578467290592708">"Leisti „<xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g>“ pasiekti visus įrenginio žurnalus?"</string>
-    <string name="log_access_confirmation_allow" msgid="143157286283302512">"Tik šį kartą"</string>
+    <string name="log_access_confirmation_allow" msgid="5302517782599389507">"Leisti vienkartinę prieigą"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"Neleisti"</string>
-    <!-- no translation found for log_access_confirmation_body (6581985716241928135) -->
-    <skip />
+    <string name="log_access_confirmation_body" msgid="6581985716241928135">"Įrenginyje įrašoma, kas įvyksta jūsų įrenginyje. Programos gali naudoti šiuos žurnalus, kad surastų ir išspręstų problemas.\n\nKai kuriuose žurnaluose gali būti neskelbtinos informacijos, todėl visus įrenginio žurnalus leiskite pasiekti tik programoms, kuriomis pasitikite. \n\nJei neleisite šiai programai pasiekti visų įrenginio žurnalų, ji vis tiek galės pasiekti savo žurnalus. Įrenginio gamintojui vis tiek gali būti leidžiama pasiekti tam tikrus žurnalus ar informaciją jūsų įrenginyje. Sužinokite daugiau"</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"Daugiau neberodyti"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"„<xliff:g id="APP_0">%1$s</xliff:g>“ nori rodyti „<xliff:g id="APP_2">%2$s</xliff:g>“ fragmentus"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"Redaguoti"</string>
@@ -2263,13 +2260,12 @@
     <string name="ui_translation_accessibility_translated_text" msgid="3197547218178944544">"Pranešimas „<xliff:g id="MESSAGE">%1$s</xliff:g>“ išverstas."</string>
     <string name="ui_translation_accessibility_translation_finished" msgid="3057830947610088465">"Pranešimas išverstas iš <xliff:g id="FROM_LANGUAGE">%1$s</xliff:g> į <xliff:g id="TO_LANGUAGE">%2$s</xliff:g>."</string>
     <string name="notification_channel_abusive_bg_apps" msgid="6092140213264920355">"Veikla fone"</string>
-    <string name="notification_title_abusive_bg_apps" msgid="344582472797982073">"Veikla fone"</string>
-    <string name="notification_content_abusive_bg_apps" msgid="5572096708044958249">"„<xliff:g id="APP">%1$s</xliff:g>“ veikia fone ir eikvoja akumuliatoriaus energiją. Palieskite ir peržiūrėkite."</string>
-    <string name="notification_content_long_running_fgs" msgid="8878031652441570178">"„<xliff:g id="APP">%1$s</xliff:g>“ ilgą laiką veikia fone. Palieskite ir peržiūrėkite."</string>
+    <string name="notification_title_abusive_bg_apps" msgid="3258460527676573815">"Programa eikvoja akumuliatoriaus energiją"</string>
+    <string name="notification_title_long_running_fgs" msgid="8170284286477131587">"Programa vis dar aktyvi"</string>
+    <string name="notification_content_abusive_bg_apps" msgid="9180610713603474720">"Programa „<xliff:g id="APP">%1$s</xliff:g>“ eikvoja akumuliatoriaus energiją fone. Palieskite ir peržiūrėkite."</string>
+    <string name="notification_content_long_running_fgs" msgid="8258193410039977101">"Programa „<xliff:g id="APP">%1$s</xliff:g>“ gali turėti įtakos akumuliatoriaus veikimo laikui. Palieskite ir peržiūrėkite aktyvias programas."</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Peržiūrėkite aktyvias programas"</string>
-    <!-- no translation found for vdm_camera_access_denied (6102378580971542473) -->
-    <skip />
-    <!-- no translation found for vdm_camera_access_denied (6895968310395249076) -->
-    <skip />
+    <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"Nepavyko pasiekti telefono fotoaparato iš „<xliff:g id="DEVICE">%1$s</xliff:g>“"</string>
+    <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"Nepavyko pasiekti planšetinio kompiuterio fotoaparato iš „<xliff:g id="DEVICE">%1$s</xliff:g>“"</string>
     <string name="system_locale_title" msgid="3978041860457277638">"Sistemos kalba"</string>
 </resources>

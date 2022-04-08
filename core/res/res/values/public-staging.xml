@@ -184,6 +184,8 @@
     <public name="safety_protection_display_text" />
     <!-- @hide @SystemApi -->
     <public name="config_systemSettingsIntelligence" />
+    <!-- @hide -->
+    <public name="config_systemBluetoothStack" />
   </staging-public-group>
 
   <staging-public-group type="dimen" first-id="0x01db0000">

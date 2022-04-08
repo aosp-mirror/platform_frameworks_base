@@ -327,7 +327,8 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
     private final OverviewProxyListener mOverviewProxyListener = new OverviewProxyListener() {
         @Override
         public void onConnectionChanged(boolean isConnected) {
-            mView.updateStates();
+            mView.onOverviewProxyConnectionChange(
+                    mOverviewProxyService.isEnabled(), mOverviewProxyService.shouldShowSwipeUpUI());
             updateScreenPinningGestures();
         }
 
@@ -557,11 +558,10 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
 
     @Override
     public void onInit() {
-        // TODO: A great deal of this code should probalby live in onViewAttached.
+        // TODO: A great deal of this code should probably live in onViewAttached.
         // It should also has corresponding cleanup in onViewDetached.
         mView.setTouchHandler(mTouchHandler);
         mView.setNavBarMode(mNavBarMode);
-
         mView.updateRotationButton();
 
         mView.setVisibility(
@@ -637,6 +637,12 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
         mView.setWindowVisible(isNavBarWindowVisible());
         mView.setBehavior(mBehavior);
         mView.setNavBarMode(mNavBarMode);
+        mView.setUpdateActiveTouchRegionsCallback(
+                () -> mOverviewProxyService.onActiveNavBarRegionChanges(
+                        mView.getButtonLocations(
+                                true /* includeFloatingButtons */,
+                                true /* inScreen */,
+                                true /* useNearestRegion */)));
 
         mNavBarHelper.registerNavTaskStateUpdater(mNavbarTaskbarStateUpdater);
 
@@ -697,6 +703,7 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
         final RotationButtonController rotationButtonController =
                 mView.getRotationButtonController();
         rotationButtonController.setRotationCallback(null);
+        mView.setUpdateActiveTouchRegionsCallback(null);
         mView.getBarTransitions().destroy();
         mView.getLightTransitionsController().destroy(mContext);
         mOverviewProxyService.removeCallback(mOverviewProxyListener);
