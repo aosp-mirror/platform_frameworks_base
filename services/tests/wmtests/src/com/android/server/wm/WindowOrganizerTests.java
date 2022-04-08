@@ -247,6 +247,42 @@ public class WindowOrganizerTests extends WindowTestsBase {
     }
 
     @Test
+    public void testRemoveWithOrganizerRemovesTask() throws RemoteException {
+        final ITaskOrganizer organizer = registerMockOrganizer();
+        final Task rootTask = createRootTask();
+        final Task task = createTask(rootTask);
+        rootTask.mRemoveWithTaskOrganizer = true;
+
+        mWm.mAtmService.mTaskOrganizerController.dispatchPendingEvents();
+        verify(organizer).onTaskAppeared(any(RunningTaskInfo.class), any(SurfaceControl.class));
+        assertTrue(rootTask.isOrganized());
+
+        spyOn(mWm.mAtmService);
+        rootTask.setTaskOrganizer(null);
+        mWm.mAtmService.mTaskOrganizerController.dispatchPendingEvents();
+
+        verify(mWm.mAtmService).removeTask(eq(rootTask.mTaskId));
+    }
+
+    @Test
+    public void testNoRemoveWithOrganizerNoRemoveTask() throws RemoteException {
+        final ITaskOrganizer organizer = registerMockOrganizer();
+        final Task rootTask = createRootTask();
+        final Task task = createTask(rootTask);
+        rootTask.mRemoveWithTaskOrganizer = false;
+
+        mWm.mAtmService.mTaskOrganizerController.dispatchPendingEvents();
+        verify(organizer).onTaskAppeared(any(RunningTaskInfo.class), any(SurfaceControl.class));
+        assertTrue(rootTask.isOrganized());
+
+        spyOn(mWm.mAtmService);
+        rootTask.setTaskOrganizer(null);
+        mWm.mAtmService.mTaskOrganizerController.dispatchPendingEvents();
+
+        verify(mWm.mAtmService, never()).removeTask(eq(rootTask.mTaskId));
+    }
+
+    @Test
     public void testUnregisterOrganizer() throws RemoteException {
         final ITaskOrganizer organizer = registerMockOrganizer();
         final Task rootTask = createRootTask();
