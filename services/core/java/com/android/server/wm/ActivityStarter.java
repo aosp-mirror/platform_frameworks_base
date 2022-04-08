@@ -135,7 +135,6 @@ import com.android.server.wm.LaunchParamsController.LaunchParams;
 
 import java.io.PrintWriter;
 import java.text.DateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 
 /**
@@ -2046,12 +2045,13 @@ class ActivityStarter {
             final DisplayContent displayContent = mRootWindowContainer.getDisplayContentOrCreate(
                     mPreferredTaskDisplayArea.getDisplayId());
             if (displayContent != null && displayContent.mDwpcHelper.hasController()) {
-                final ArrayList<ActivityInfo> activities = new ArrayList<>();
-                activities.add(r.info);
                 final int targetWindowingMode = (targetTask != null)
                         ? targetTask.getWindowingMode() : displayContent.getWindowingMode();
+                final int launchingFromDisplayId =
+                        mSourceRecord != null ? mSourceRecord.getDisplayId() : DEFAULT_DISPLAY;
                 if (!displayContent.mDwpcHelper
-                        .canContainActivities(activities, targetWindowingMode)) {
+                        .canActivityBeLaunched(r.info, targetWindowingMode, launchingFromDisplayId,
+                          newTask)) {
                     Slog.w(TAG, "Abort to launch " + r.info.getComponentName()
                             + " on display area " + mPreferredTaskDisplayArea);
                     return START_ABORTED;
