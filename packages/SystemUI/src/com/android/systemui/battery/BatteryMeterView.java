@@ -53,7 +53,6 @@ import com.android.systemui.plugins.DarkIconDispatcher;
 import com.android.systemui.plugins.DarkIconDispatcher.DarkReceiver;
 import com.android.systemui.statusbar.policy.BatteryController;
 
-import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.text.NumberFormat;
@@ -392,7 +391,7 @@ public class BatteryMeterView extends LinearLayout implements DarkReceiver {
         }
     }
 
-    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+    public void dump(PrintWriter pw, String[] args) {
         String powerSave = mDrawable == null ? null : mDrawable.getPowerSaveEnabled() + "";
         CharSequence percent = mBatteryPercentView == null ? null : mBatteryPercentView.getText();
         pw.println("  BatteryMeterView:");

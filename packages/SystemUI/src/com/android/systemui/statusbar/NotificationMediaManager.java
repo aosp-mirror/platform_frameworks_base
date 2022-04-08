@@ -75,7 +75,6 @@ import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.Utils;
 import com.android.systemui.util.concurrency.DelayableExecutor;
 
-import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -526,7 +525,7 @@ public class NotificationMediaManager implements Dumpable {
     }
 
     @Override
-    public void dump(@NonNull FileDescriptor fd, @NonNull PrintWriter pw, @NonNull String[] args) {
+    public void dump(@NonNull PrintWriter pw, @NonNull String[] args) {
         pw.print("    mMediaNotificationKey=");
         pw.println(mMediaNotificationKey);
         pw.print("    mMediaController=");

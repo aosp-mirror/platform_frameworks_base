@@ -64,7 +64,6 @@ import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.wm.shell.back.BackAnimation;
 import com.android.wm.shell.pip.Pip;
 
-import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.Optional;
 
@@ -443,7 +442,7 @@ public class NavigationBarController implements
     }
 
     @Override
-    public void dump(@NonNull FileDescriptor fd, @NonNull PrintWriter pw, @NonNull String[] args) {
+    public void dump(@NonNull PrintWriter pw, @NonNull String[] args) {
         for (int i = 0; i < mNavigationBars.size(); i++) {
             if (i > 0) {
                 pw.println();

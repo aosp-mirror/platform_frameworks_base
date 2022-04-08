@@ -248,7 +248,6 @@ import com.android.wm.shell.bubbles.Bubbles;
 import com.android.wm.shell.startingsurface.SplashscreenContentDrawer;
 import com.android.wm.shell.startingsurface.StartingSurface;
 
-import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.List;
@@ -2263,7 +2262,7 @@ public class CentralSurfaces extends CoreStartable implements
     }
 
     @Override
-    public void dump(FileDescriptor fd, PrintWriter pwOriginal, String[] args) {
+    public void dump(PrintWriter pwOriginal, String[] args) {
         IndentingPrintWriter pw = DumpUtilsKt.asIndenting(pwOriginal);
         synchronized (mQueueLock) {
             pw.println("Current Status Bar state:");
@@ -2285,13 +2284,13 @@ public class CentralSurfaces extends CoreStartable implements
 
         pw.println("  ShadeWindowView: ");
         if (mNotificationShadeWindowViewController != null) {
-            mNotificationShadeWindowViewController.dump(fd, pw, args);
+            mNotificationShadeWindowViewController.dump(pw, args);
             dumpBarTransitions(pw, "PhoneStatusBarTransitions", mStatusBarTransitions);
         }
 
         pw.println("  mMediaManager: ");
         if (mMediaManager != null) {
-            mMediaManager.dump(fd, pw, args);
+            mMediaManager.dump(pw, args);
         }
 
         pw.println("  Panels: ");
@@ -2300,14 +2299,14 @@ public class CentralSurfaces extends CoreStartable implements
                     + mNotificationPanelViewController.getView() + " params="
                     + mNotificationPanelViewController.getView().getLayoutParams().debug(""));
             pw.print  ("      ");
-            mNotificationPanelViewController.dump(fd, pw, args);
+            mNotificationPanelViewController.dump(pw, args);
         }
         pw.println("  mStackScroller: ");
         if (mStackScroller != null) {
             // Double indent until we rewrite the rest of this dump()
             pw.increaseIndent();
             pw.increaseIndent();
-            mStackScroller.dump(fd, pw, args);
+            mStackScroller.dump(pw, args);
             pw.decreaseIndent();
             pw.decreaseIndent();
         }
@@ -2322,11 +2321,11 @@ public class CentralSurfaces extends CoreStartable implements
         pw.println("    light wallpaper theme: " + lightWpTheme);
 
         if (mKeyguardIndicationController != null) {
-            mKeyguardIndicationController.dump(fd, pw, args);
+            mKeyguardIndicationController.dump(pw, args);
         }
 
         if (mScrimController != null) {
-            mScrimController.dump(fd, pw, args);
+            mScrimController.dump(pw, args);
         }
 
         if (mLightRevealScrim != null) {
@@ -2340,27 +2339,27 @@ public class CentralSurfaces extends CoreStartable implements
             mStatusBarKeyguardViewManager.dump(pw);
         }
 
-        mNotificationsController.dump(fd, pw, args, DUMPTRUCK);
+        mNotificationsController.dump(pw, args, DUMPTRUCK);
 
         if (DEBUG_GESTURES) {
             pw.print("  status bar gestures: ");
-            mGestureRec.dump(fd, pw, args);
+            mGestureRec.dump(pw, args);
         }
 
         if (mHeadsUpManager != null) {
-            mHeadsUpManager.dump(fd, pw, args);
+            mHeadsUpManager.dump(pw, args);
         } else {
             pw.println("  mHeadsUpManager: null");
         }
 
         if (mStatusBarTouchableRegionManager != null) {
-            mStatusBarTouchableRegionManager.dump(fd, pw, args);
+            mStatusBarTouchableRegionManager.dump(pw, args);
         } else {
             pw.println("  mStatusBarTouchableRegionManager: null");
         }
 
         if (mLightBarController != null) {
-            mLightBarController.dump(fd, pw, args);
+            mLightBarController.dump(pw, args);
         }
 
         pw.println("SharedPreferences:");

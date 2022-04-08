@@ -46,7 +46,6 @@ import com.android.systemui.demomode.DemoModeController;
 import com.android.systemui.power.EnhancedEstimates;
 import com.android.systemui.util.Assert;
 
-import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -140,7 +139,7 @@ public class BatteryControllerImpl extends BroadcastReceiver implements BatteryC
     }
 
     @Override
-    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+    public void dump(PrintWriter pw, String[] args) {
         pw.println("BatteryController state:");
         pw.print("  mLevel="); pw.println(mLevel);
         pw.print("  mPluggedIn="); pw.println(mPluggedIn);

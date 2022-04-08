@@ -66,7 +66,6 @@ import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.ViewController;
 import com.android.systemui.util.concurrency.DelayableExecutor;
 
-import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.Objects;
 
@@ -377,7 +376,7 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
     }
 
     @Override
-    public void dump(@NonNull FileDescriptor fd, @NonNull PrintWriter pw, @NonNull String[] args) {
+    public void dump(@NonNull PrintWriter pw, @NonNull String[] args) {
         pw.println("mUdfpsSupported: " + mUdfpsSupported);
         pw.println("mUdfpsEnrolled: " + mUdfpsEnrolled);
         pw.println("mIsKeyguardShowing: " + mIsKeyguardShowing);
@@ -399,7 +398,7 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
         pw.println("  mInterpolatedDarkAmount: " + mInterpolatedDarkAmount);
 
         if (mView != null) {
-            mView.dump(fd, pw, args);
+            mView.dump(pw, args);
         }
     }
 
