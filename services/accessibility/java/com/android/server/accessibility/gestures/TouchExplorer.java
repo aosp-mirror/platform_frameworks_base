@@ -1332,13 +1332,28 @@ public class TouchExplorer extends BaseEventStreamTransformation
         if (mState.isServiceDetectingGestures() && mState.isTouchInteracting()) {
             // Cancel without deleting events.
             mHandler.removeCallbacks(mSendHoverEnterAndMoveDelayed);
-            final int pointerId = mReceivedPointerTracker.getPrimaryPointerId();
+            int pointerId = mReceivedPointerTracker.getPrimaryPointerId();
+            if (pointerId == INVALID_POINTER_ID) {
+                MotionEvent event = mState.getLastReceivedEvent();
+                if (event != null) {
+                    // Use the first pointer of the most recent event.
+                    pointerId = event.getPointerId(0);
+                }
+            }
+            if (pointerId == INVALID_POINTER_ID) {
+                Slog.e(LOG_TAG, "Unable to find a valid pointer for touch exploration.");
+                return;
+            }
             final int pointerIdBits = (1 << pointerId);
             final int policyFlags = mState.getLastReceivedPolicyFlags();
             mSendHoverEnterAndMoveDelayed.setPointerIdBits(pointerIdBits);
             mSendHoverEnterAndMoveDelayed.setPolicyFlags(policyFlags);
             mSendHoverEnterAndMoveDelayed.run();
             mSendHoverEnterAndMoveDelayed.clear();
+            if (mReceivedPointerTracker.getReceivedPointerDownCount() == 0) {
+                // We need to send hover exit because there will be no future ACTION_UP
+                sendHoverExitAndTouchExplorationGestureEndIfNeeded(policyFlags);
+            }
         }
     }
 
