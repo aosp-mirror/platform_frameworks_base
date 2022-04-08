@@ -140,6 +140,17 @@ public class SmsMessage extends SmsMessageBase {
         return (mProtocolIdentifier == 0x40);
     }
 
+    public static SmsMessage newFromCDS(byte[] pdu) {
+        try {
+            SmsMessage msg = new SmsMessage();
+            msg.parsePdu(pdu);
+            return msg;
+        } catch (RuntimeException ex) {
+            Rlog.e(LOG_TAG, "CDS SMS PDU parsing failed: ", ex);
+            return null;
+        }
+    }
+
     /**
      * Creates an SmsMessage from an SMS EF record.
      *
