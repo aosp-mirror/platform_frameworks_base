@@ -24,6 +24,8 @@ import static org.junit.Assert.assertTrue;
 
 import android.content.Context;
 import android.hardware.display.BrightnessConfiguration;
+import android.os.Handler;
+import android.os.test.TestLooper;
 import android.util.Pair;
 
 import androidx.test.InstrumentationRegistry;
@@ -47,11 +49,14 @@ import java.nio.charset.StandardCharsets;
 public class PersistentDataStoreTest {
     private PersistentDataStore mDataStore;
     private TestInjector mInjector;
+    private TestLooper mTestLooper;
 
     @Before
     public void setUp() {
         mInjector = new TestInjector();
-        mDataStore = new PersistentDataStore(mInjector);
+        mTestLooper = new TestLooper();
+        Handler handler = new Handler(mTestLooper.getLooper());
+        mDataStore = new PersistentDataStore(mInjector, handler);
     }
 
     @Test
@@ -147,7 +152,7 @@ public class PersistentDataStoreTest {
     }
 
     @Test
-    public void testStoreAndReloadOfDisplayBrightnessConfigurations() {
+    public void testStoreAndReloadOfDisplayBrightnessConfigurations() throws InterruptedException {
         final String uniqueDisplayId = "test:123";
         int userSerial = 0;
         String packageName = "pdsTestPackage";
@@ -178,6 +183,7 @@ public class PersistentDataStoreTest {
         final ByteArrayOutputStream baos = new ByteArrayOutputStream();
         mInjector.setWriteStream(baos);
         mDataStore.saveIfNeeded();
+        mTestLooper.dispatchAll();
         assertTrue(mInjector.wasWriteSuccessful());
         TestInjector newInjector = new TestInjector();
         PersistentDataStore newDataStore = new PersistentDataStore(newInjector);
@@ -222,7 +228,7 @@ public class PersistentDataStoreTest {
     }
 
     @Test
-    public void testStoreAndReloadOfBrightnessConfigurations() {
+    public void testStoreAndReloadOfBrightnessConfigurations() throws InterruptedException {
         final float[] lux = { 0f, 10f };
         final float[] nits = {1f, 100f };
         final BrightnessConfiguration config = new BrightnessConfiguration.Builder(lux, nits)
@@ -238,6 +244,7 @@ public class PersistentDataStoreTest {
         final ByteArrayOutputStream baos = new ByteArrayOutputStream();
         mInjector.setWriteStream(baos);
         mDataStore.saveIfNeeded();
+        mTestLooper.dispatchAll();
         assertTrue(mInjector.wasWriteSuccessful());
 
         TestInjector newInjector = new TestInjector();
