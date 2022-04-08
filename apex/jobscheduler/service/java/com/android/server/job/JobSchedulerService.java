@@ -1745,7 +1745,13 @@ public class JobSchedulerService extends com.android.server.SystemService
 
         // Remove from store as well as controllers.
         final boolean removed = mJobs.remove(jobStatus, removeFromPersisted);
-        if (removed && mReadyToRock) {
+        if (!removed) {
+            // We never create JobStatus objects for the express purpose of removing them, and this
+            // method is only ever called for jobs that were saved in the JobStore at some point,
+            // so if we can't find it, something went seriously wrong.
+            Slog.wtfStack(TAG, "Job didn't exist in JobStore");
+        }
+        if (mReadyToRock) {
             for (int i = 0; i < mControllers.size(); i++) {
                 StateController controller = mControllers.get(i);
                 controller.maybeStopTrackingJobLocked(jobStatus, incomingJob, false);
