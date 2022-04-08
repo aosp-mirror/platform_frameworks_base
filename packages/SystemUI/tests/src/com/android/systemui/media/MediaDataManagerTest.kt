@@ -18,6 +18,7 @@ import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper.RunWithLooper
 import androidx.media.utils.MediaConstants
 import androidx.test.filters.SmallTest
+import com.android.internal.logging.InstanceId
 import com.android.systemui.InstanceIdSequenceFake
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
@@ -46,6 +47,7 @@ import org.mockito.Mockito
 import org.mockito.Mockito.never
 import org.mockito.Mockito.reset
 import org.mockito.Mockito.verify
+import org.mockito.Mockito.verifyNoMoreInteractions
 import org.mockito.junit.MockitoJUnit
 import org.mockito.Mockito.`when` as whenever
 
@@ -451,11 +453,22 @@ class MediaDataManagerTest : SysuiTestCase() {
     @Test
     fun testOnSmartspaceMediaDataLoaded_hasNewValidMediaTarget_callsListener() {
         smartspaceMediaDataProvider.onTargetsAvailable(listOf(mediaSmartspaceTarget))
+        verify(logger).getNewInstanceId()
+        val instanceId = instanceIdSequence.lastInstanceId
+
         verify(listener).onSmartspaceMediaDataLoaded(
             eq(KEY_MEDIA_SMARTSPACE),
-            eq(SmartspaceMediaData(KEY_MEDIA_SMARTSPACE, true /* isActive */, true /*isValid */,
-                PACKAGE_NAME, mediaSmartspaceBaseAction, listOf(mediaRecommendationItem),
-                DISMISS_INTENT, 0, 1234L)),
+            eq(SmartspaceMediaData(
+                targetId = KEY_MEDIA_SMARTSPACE,
+                isActive = true,
+                isValid = true,
+                packageName = PACKAGE_NAME,
+                cardAction = mediaSmartspaceBaseAction,
+                recommendations = listOf(mediaRecommendationItem),
+                dismissIntent = DISMISS_INTENT,
+                backgroundColor = 0,
+                headphoneConnectionTimeMillis = 1234L,
+                instanceId = InstanceId.fakeInstanceId(instanceId))),
             eq(false))
     }
 
@@ -463,12 +476,18 @@ class MediaDataManagerTest : SysuiTestCase() {
     fun testOnSmartspaceMediaDataLoaded_hasNewInvalidMediaTarget_callsListener() {
         whenever(mediaSmartspaceTarget.iconGrid).thenReturn(listOf())
         smartspaceMediaDataProvider.onTargetsAvailable(listOf(mediaSmartspaceTarget))
+        verify(logger).getNewInstanceId()
+        val instanceId = instanceIdSequence.lastInstanceId
+
         verify(listener).onSmartspaceMediaDataLoaded(
             eq(KEY_MEDIA_SMARTSPACE),
-            eq(EMPTY_SMARTSPACE_MEDIA_DATA
-                .copy(targetId = KEY_MEDIA_SMARTSPACE, isActive = true,
-                    isValid = false, dismissIntent = DISMISS_INTENT,
-                headphoneConnectionTimeMillis = 1234L)),
+            eq(EMPTY_SMARTSPACE_MEDIA_DATA.copy(
+                targetId = KEY_MEDIA_SMARTSPACE,
+                isActive = true,
+                isValid = false,
+                dismissIntent = DISMISS_INTENT,
+                headphoneConnectionTimeMillis = 1234L,
+                instanceId = InstanceId.fakeInstanceId(instanceId))),
             eq(false))
     }
 
@@ -483,18 +502,25 @@ class MediaDataManagerTest : SysuiTestCase() {
         whenever(mediaSmartspaceTarget.iconGrid).thenReturn(listOf())
 
         smartspaceMediaDataProvider.onTargetsAvailable(listOf(mediaSmartspaceTarget))
+        verify(logger).getNewInstanceId()
+        val instanceId = instanceIdSequence.lastInstanceId
 
         verify(listener).onSmartspaceMediaDataLoaded(
             eq(KEY_MEDIA_SMARTSPACE),
-            eq(EMPTY_SMARTSPACE_MEDIA_DATA
-                .copy(targetId = KEY_MEDIA_SMARTSPACE, isActive = true,
-                    isValid = false, dismissIntent = null, headphoneConnectionTimeMillis = 1234L)),
+            eq(EMPTY_SMARTSPACE_MEDIA_DATA.copy(
+                targetId = KEY_MEDIA_SMARTSPACE,
+                isActive = true,
+                isValid = false,
+                dismissIntent = null,
+                headphoneConnectionTimeMillis = 1234L,
+                instanceId = InstanceId.fakeInstanceId(instanceId))),
             eq(false))
     }
 
     @Test
     fun testOnSmartspaceMediaDataLoaded_hasNoneMediaTarget_notCallsListener() {
         smartspaceMediaDataProvider.onTargetsAvailable(listOf())
+        verify(logger, never()).getNewInstanceId()
         verify(listener, never())
                 .onSmartspaceMediaDataLoaded(anyObject(), anyObject(), anyBoolean())
     }
@@ -502,11 +528,14 @@ class MediaDataManagerTest : SysuiTestCase() {
     @Test
     fun testOnSmartspaceMediaDataLoaded_hasNoneMediaTarget_callsRemoveListener() {
         smartspaceMediaDataProvider.onTargetsAvailable(listOf(mediaSmartspaceTarget))
+        verify(logger).getNewInstanceId()
+
         smartspaceMediaDataProvider.onTargetsAvailable(listOf())
         foregroundExecutor.advanceClockToLast()
         foregroundExecutor.runAllReady()
 
         verify(listener).onSmartspaceMediaDataRemoved(eq(KEY_MEDIA_SMARTSPACE), eq(false))
+        verifyNoMoreInteractions(logger)
     }
 
     @Test
