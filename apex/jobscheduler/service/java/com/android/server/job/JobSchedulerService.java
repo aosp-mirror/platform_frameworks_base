@@ -1387,6 +1387,7 @@ public class JobSchedulerService extends com.android.server.SystemService
         if (mPendingJobQueue.remove(cancelled)) {
             mJobPackageTracker.noteNonpending(cancelled);
         }
+        mChangedJobList.remove(cancelled);
         // Cancel if running.
         mConcurrencyManager.stopJobOnServiceContextLocked(
                 cancelled, reason, internalReasonCode, debugReason);
