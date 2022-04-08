@@ -17,17 +17,14 @@ package android.view.contentcapture;
 
 import static com.google.common.truth.Truth.assertThat;
 
-import android.app.assist.ActivityId;
 import android.content.ComponentName;
-import android.os.Binder;
-import android.os.IBinder;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
 /**
- * Unit test for {@link ContentCaptureContext}.
+ * Unit test for {@link ContentCaptureEvent}.
  *
  * <p>To run it:
  * {@code atest FrameworksCoreTests:android.view.contentcapture.ContentCaptureContextTest}
@@ -38,17 +35,13 @@ public class ContentCaptureContextTest {
     @Test
     public void testConstructorAdditionalFlags() {
         final ComponentName componentName = new ComponentName("component", "name");
-        final IBinder token = new Binder();
         final ContentCaptureContext ctx = new ContentCaptureContext(/* clientContext= */ null,
-                new ActivityId(/* taskId= */ 666, token), componentName, /* displayId= */
-                42, /* flags= */ 1);
+                componentName, /* taskId= */ 666, /* displayId= */ 42, /* flags= */ 1);
         final ContentCaptureContext newCtx = new ContentCaptureContext(ctx, /* extraFlags= */ 2);
         assertThat(newCtx.getFlags()).isEqualTo(3);
+
         assertThat(newCtx.getActivityComponent()).isEqualTo(componentName);
-        ActivityId activityId = newCtx.getActivityId();
-        assertThat(activityId).isNotNull();
-        assertThat(activityId.getTaskId()).isEqualTo(666);
-        assertThat(activityId.getToken()).isEqualTo(token);
+        assertThat(newCtx.getTaskId()).isEqualTo(666);
         assertThat(newCtx.getDisplayId()).isEqualTo(42);
         assertThat(newCtx.getExtras()).isNull();
         assertThat(newCtx.getLocusId()).isNull();

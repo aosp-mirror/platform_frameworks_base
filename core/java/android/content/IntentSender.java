@@ -16,9 +16,7 @@
 
 package android.content;
 
-import android.annotation.Nullable;
 import android.app.ActivityManager;
-import android.app.ActivityManager.PendingIntentInfo;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Bundle;
 import android.os.Handler;
@@ -28,6 +26,7 @@ import android.os.Parcelable;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.util.AndroidException;
+
 
 /**
  * A description of an Intent and target action to perform with it.
@@ -60,9 +59,6 @@ public class IntentSender implements Parcelable {
     @UnsupportedAppUsage
     private final IIntentSender mTarget;
     IBinder mWhitelistToken;
-
-    // cached pending intent information
-    private @Nullable PendingIntentInfo mCachedInfo;
 
     /**
      * Exception thrown when trying to send through a PendingIntent that
@@ -213,7 +209,13 @@ public class IntentSender implements Parcelable {
      */
     @Deprecated
     public String getTargetPackage() {
-        return getCreatorPackage();
+        try {
+            return ActivityManager.getService()
+                .getPackageForIntentSender(mTarget);
+        } catch (RemoteException e) {
+            // Should never happen.
+            return null;
+        }
     }
 
     /**
@@ -226,7 +228,13 @@ public class IntentSender implements Parcelable {
      * none associated with it.
      */
     public String getCreatorPackage() {
-        return getCachedInfo().getCreatorPackage();
+        try {
+            return ActivityManager.getService()
+                .getPackageForIntentSender(mTarget);
+        } catch (RemoteException e) {
+            // Should never happen.
+            return null;
+        }
     }
 
     /**
@@ -239,7 +247,13 @@ public class IntentSender implements Parcelable {
      * none associated with it.
      */
     public int getCreatorUid() {
-        return getCachedInfo().getCreatorUid();
+        try {
+            return ActivityManager.getService()
+                .getUidForIntentSender(mTarget);
+        } catch (RemoteException e) {
+            // Should never happen.
+            return -1;
+        }
     }
 
     /**
@@ -254,8 +268,14 @@ public class IntentSender implements Parcelable {
      * none associated with it.
      */
     public UserHandle getCreatorUserHandle() {
-        int uid = getCachedInfo().getCreatorUid();
-        return uid > 0 ? new UserHandle(UserHandle.getUserId(uid)) : null;
+        try {
+            int uid = ActivityManager.getService()
+                .getUidForIntentSender(mTarget);
+            return uid > 0 ? new UserHandle(UserHandle.getUserId(uid)) : null;
+        } catch (RemoteException e) {
+            // Should never happen.
+            return null;
+        }
     }
 
     /**
@@ -264,7 +284,7 @@ public class IntentSender implements Parcelable {
      * same package.
      */
     @Override
-    public boolean equals(@Nullable Object otherObj) {
+    public boolean equals(Object otherObj) {
         if (otherObj instanceof IntentSender) {
             return mTarget.asBinder().equals(((IntentSender)otherObj)
                     .mTarget.asBinder());
@@ -363,17 +383,5 @@ public class IntentSender implements Parcelable {
     /** @hide */
     public IntentSender(IBinder target) {
         mTarget = IIntentSender.Stub.asInterface(target);
-    }
-
-    private PendingIntentInfo getCachedInfo() {
-        if (mCachedInfo == null) {
-            try {
-                mCachedInfo = ActivityManager.getService().getInfoForIntentSender(mTarget);
-            } catch (RemoteException e) {
-                throw e.rethrowFromSystemServer();
-            }
-        }
-
-        return mCachedInfo;
     }
 }

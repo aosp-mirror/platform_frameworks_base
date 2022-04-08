@@ -17,7 +17,6 @@
 package android.media;
 
 import android.compat.annotation.UnsupportedAppUsage;
-import android.os.Build;
 
 /**
  * The AudioHandle is used by the audio framework implementation to
@@ -29,7 +28,7 @@ class AudioHandle {
     @UnsupportedAppUsage
     private final int mId;
 
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     AudioHandle(int id) {
         mId = id;
     }

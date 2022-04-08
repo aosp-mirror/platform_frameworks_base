@@ -34,7 +34,7 @@ import java.util.Set;
 
 public class StatusBarSwitch extends SwitchPreference implements Tunable {
 
-    private Set<String> mHideList;
+    private Set<String> mBlacklist;
 
     public StatusBarSwitch(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -43,7 +43,7 @@ public class StatusBarSwitch extends SwitchPreference implements Tunable {
     @Override
     public void onAttached() {
         super.onAttached();
-        Dependency.get(TunerService.class).addTunable(this, StatusBarIconController.ICON_HIDE_LIST);
+        Dependency.get(TunerService.class).addTunable(this, StatusBarIconController.ICON_BLACKLIST);
     }
 
     @Override
@@ -54,35 +54,35 @@ public class StatusBarSwitch extends SwitchPreference implements Tunable {
 
     @Override
     public void onTuningChanged(String key, String newValue) {
-        if (!StatusBarIconController.ICON_HIDE_LIST.equals(key)) {
+        if (!StatusBarIconController.ICON_BLACKLIST.equals(key)) {
             return;
         }
-        mHideList = StatusBarIconController.getIconHideList(getContext(), newValue);
-        setChecked(!mHideList.contains(getKey()));
+        mBlacklist = StatusBarIconController.getIconBlacklist(getContext(), newValue);
+        setChecked(!mBlacklist.contains(getKey()));
     }
 
     @Override
     protected boolean persistBoolean(boolean value) {
         if (!value) {
-            // If not enabled add to hideList.
-            if (!mHideList.contains(getKey())) {
+            // If not enabled add to blacklist.
+            if (!mBlacklist.contains(getKey())) {
                 MetricsLogger.action(getContext(), MetricsEvent.TUNER_STATUS_BAR_DISABLE,
                         getKey());
-                mHideList.add(getKey());
-                setList(mHideList);
+                mBlacklist.add(getKey());
+                setList(mBlacklist);
             }
         } else {
-            if (mHideList.remove(getKey())) {
+            if (mBlacklist.remove(getKey())) {
                 MetricsLogger.action(getContext(), MetricsEvent.TUNER_STATUS_BAR_ENABLE, getKey());
-                setList(mHideList);
+                setList(mBlacklist);
             }
         }
         return true;
     }
 
-    private void setList(Set<String> hideList) {
+    private void setList(Set<String> blacklist) {
         ContentResolver contentResolver = getContext().getContentResolver();
-        Settings.Secure.putStringForUser(contentResolver, StatusBarIconController.ICON_HIDE_LIST,
-                TextUtils.join(",", hideList), ActivityManager.getCurrentUser());
+        Settings.Secure.putStringForUser(contentResolver, StatusBarIconController.ICON_BLACKLIST,
+                TextUtils.join(",", blacklist), ActivityManager.getCurrentUser());
     }
 }

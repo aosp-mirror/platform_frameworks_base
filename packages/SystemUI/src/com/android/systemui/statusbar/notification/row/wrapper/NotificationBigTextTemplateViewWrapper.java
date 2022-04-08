@@ -37,7 +37,7 @@ public class NotificationBigTextTemplateViewWrapper extends NotificationTemplate
     }
 
     private void resolveViews(StatusBarNotification notification) {
-        mBigtext = mView.findViewById(com.android.internal.R.id.big_text);
+        mBigtext = (ImageFloatingTextView) mView.findViewById(com.android.internal.R.id.big_text);
     }
 
     @Override

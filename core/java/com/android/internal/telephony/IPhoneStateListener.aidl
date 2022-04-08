@@ -21,10 +21,8 @@ import android.telephony.CallAttributes;
 import android.telephony.CellIdentity;
 import android.telephony.CellInfo;
 import android.telephony.DataConnectionRealTimeInfo;
-import android.telephony.LinkCapacityEstimate;
 import android.telephony.TelephonyDisplayInfo;
 import android.telephony.PhoneCapability;
-import android.telephony.PhysicalChannelConfig;
 import android.telephony.PreciseCallState;
 import android.telephony.PreciseDataConnectionState;
 import android.telephony.ServiceState;
@@ -43,8 +41,7 @@ oneway interface IPhoneStateListener {
 
     // Uses CellIdentity which is Parcelable here; will convert to CellLocation in client.
     void onCellLocationChanged(in CellIdentity location);
-    void onLegacyCallStateChanged(int state, String incomingNumber);
-    void onCallStateChanged(int state);
+    void onCallStateChanged(int state, String incomingNumber);
     void onDataConnectionStateChanged(int state, int networkType);
     void onDataActivity(int direction);
     void onSignalStrengthsChanged(in SignalStrength signalStrength);
@@ -64,15 +61,11 @@ oneway interface IPhoneStateListener {
     void onRadioPowerStateChanged(in int state);
     void onCallAttributesChanged(in CallAttributes callAttributes);
     void onEmergencyNumberListChanged(in Map emergencyNumberList);
-    void onOutgoingEmergencyCall(in EmergencyNumber placedEmergencyNumber, int subscriptionId);
-    void onOutgoingEmergencySms(in EmergencyNumber sentEmergencyNumber, int subscriptionId);
+    void onOutgoingEmergencyCall(in EmergencyNumber placedEmergencyNumber);
+    void onOutgoingEmergencySms(in EmergencyNumber sentEmergencyNumber);
     void onCallDisconnectCauseChanged(in int disconnectCause, in int preciseDisconnectCause);
     void onImsCallDisconnectCauseChanged(in ImsReasonInfo imsReasonInfo);
     void onRegistrationFailed(in CellIdentity cellIdentity,
              String chosenPlmn, int domain, int causeCode, int additionalCauseCode);
     void onBarringInfoChanged(in BarringInfo barringInfo);
-    void onPhysicalChannelConfigChanged(in List<PhysicalChannelConfig> configs);
-    void onDataEnabledChanged(boolean enabled, int reason);
-    void onAllowedNetworkTypesChanged(in int reason, in long allowedNetworkType);
-    void onLinkCapacityEstimateChanged(in List<LinkCapacityEstimate> linkCapacityEstimateList);
 }

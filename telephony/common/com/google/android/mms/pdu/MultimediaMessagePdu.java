@@ -18,7 +18,6 @@
 package com.google.android.mms.pdu;
 
 import android.compat.annotation.UnsupportedAppUsage;
-import android.os.Build;
 
 import com.google.android.mms.InvalidHeaderValueException;
 
@@ -117,7 +116,7 @@ public class MultimediaMessagePdu extends GenericPdu{
      * @param value the value
      * @throws NullPointerException if the value is null.
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public void addTo(EncodedStringValue value) {
         mPduHeaders.appendEncodedStringValue(value, PduHeaders.TO);
     }
@@ -138,7 +137,7 @@ public class MultimediaMessagePdu extends GenericPdu{
      * @param value the value
      * @throws InvalidHeaderValueException if the value is invalid.
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public void setPriority(int value) throws InvalidHeaderValueException {
         mPduHeaders.setOctet(value, PduHeaders.PRIORITY);
     }
@@ -158,7 +157,7 @@ public class MultimediaMessagePdu extends GenericPdu{
      *
      * @param value the value
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public void setDate(long value) {
         mPduHeaders.setLongInteger(value, PduHeaders.DATE);
     }

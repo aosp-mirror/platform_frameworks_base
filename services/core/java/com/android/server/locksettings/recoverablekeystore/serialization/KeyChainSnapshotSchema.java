@@ -22,6 +22,8 @@ package com.android.server.locksettings.recoverablekeystore.serialization;
 class KeyChainSnapshotSchema {
     static final String NAMESPACE = null;
 
+    static final String OUTPUT_ENCODING = "UTF-8";
+
     static final String CERTIFICATE_FACTORY_TYPE = "X.509";
     static final String CERT_PATH_ENCODING = "PkiPath";
 

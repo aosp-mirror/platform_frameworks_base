@@ -29,7 +29,7 @@ interface IWallpaperManagerService extends IWallpaperManager, IBinder {
     void onBootPhase(int phase);
 
     /**
-     * @see com.android.server.SystemService#onUserUnlocking
+     * @see com.android.server.SystemService#onUnlockUser(int)
      */
     void onUnlockUser(final int userId);
 }

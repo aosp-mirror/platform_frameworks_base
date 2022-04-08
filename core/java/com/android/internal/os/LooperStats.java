@@ -40,7 +40,6 @@ public class LooperStats implements Looper.Observer {
     public static final String DEBUG_ENTRY_PREFIX = "__DEBUG_";
     private static final int SESSION_POOL_SIZE = 50;
     private static final boolean DISABLED_SCREEN_STATE_TRACKING_VALUE = false;
-    public static final boolean DEFAULT_IGNORE_BATTERY_STATUS = false;
 
     @GuardedBy("mLock")
     private final SparseArray<Entry> mEntries = new SparseArray<>(512);
@@ -57,7 +56,6 @@ public class LooperStats implements Looper.Observer {
     private long mStartElapsedTime = SystemClock.elapsedRealtime();
     private boolean mAddDebugEntries = false;
     private boolean mTrackScreenInteractive = false;
-    private boolean mIgnoreBatteryStatus = DEFAULT_IGNORE_BATTERY_STATUS;
 
     public LooperStats(int samplingInterval, int entriesSizeCap) {
         this.mSamplingInterval = samplingInterval;
@@ -141,16 +139,8 @@ public class LooperStats implements Looper.Observer {
     }
 
     private boolean deviceStateAllowsCollection() {
-        if (mIgnoreBatteryStatus) {
-            return true;
-        }
-        if (mDeviceState == null) {
-            return false;
-        }
-        if (mDeviceState.isCharging()) {
-            return false;
-        }
-        return true;
+        // Do not collect data if on charger or the state is not set.
+        return mDeviceState != null && !mDeviceState.isCharging();
     }
 
     /** Returns an array of {@link ExportedEntry entries} with the aggregated statistics. */
@@ -233,10 +223,6 @@ public class LooperStats implements Looper.Observer {
 
     public void setTrackScreenInteractive(boolean enabled) {
         mTrackScreenInteractive = enabled;
-    }
-
-    public void setIgnoreBatteryStatus(boolean ignore) {
-        mIgnoreBatteryStatus = ignore;
     }
 
     @Nullable

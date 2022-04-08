@@ -25,11 +25,11 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import androidx.annotation.VisibleForTesting;
-
 import com.android.settingslib.Utils;
 import com.android.settingslib.graph.SignalDrawable;
+import com.android.systemui.DualToneHandler;
 import com.android.systemui.R;
+import com.android.systemui.qs.QuickStatusBarHeader;
 
 import java.util.Objects;
 
@@ -39,10 +39,10 @@ public class QSCarrier extends LinearLayout {
     private TextView mCarrierText;
     private ImageView mMobileSignal;
     private ImageView mMobileRoaming;
-    private View mSpacer;
+    private DualToneHandler mDualToneHandler;
+    private ColorStateList mColorForegroundStateList;
+    private float mColorForegroundIntensity;
     private CellSignalState mLastSignalState;
-    private boolean mProviderModelInitialized = false;
-    private boolean mIsSingleCarrier;
 
     public QSCarrier(Context context) {
         super(context);
@@ -63,64 +63,51 @@ public class QSCarrier extends LinearLayout {
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
+        mDualToneHandler = new DualToneHandler(getContext());
         mMobileGroup = findViewById(R.id.mobile_combo);
-        mMobileRoaming = findViewById(R.id.mobile_roaming);
         mMobileSignal = findViewById(R.id.mobile_signal);
+        mMobileRoaming = findViewById(R.id.mobile_roaming);
         mCarrierText = findViewById(R.id.qs_carrier_text);
-        mSpacer = findViewById(R.id.spacer);
+
+        mMobileSignal.setImageDrawable(new SignalDrawable(mContext));
+
+        int colorForeground = Utils.getColorAttrDefaultColor(mContext,
+                android.R.attr.colorForeground);
+        mColorForegroundStateList = ColorStateList.valueOf(colorForeground);
+        mColorForegroundIntensity = QuickStatusBarHeader.getColorIntensity(colorForeground);
     }
 
     /**
      * Update the state of this view
      * @param state the current state of the signal for this view
-     * @param isSingleCarrier whether there is a single carrier being shown in the container
      * @return true if the state was actually changed
      */
-    public boolean updateState(CellSignalState state, boolean isSingleCarrier) {
-        if (Objects.equals(state, mLastSignalState) && isSingleCarrier == mIsSingleCarrier) {
-            return false;
-        }
+    public boolean updateState(CellSignalState state) {
+        if (Objects.equals(state, mLastSignalState)) return false;
         mLastSignalState = state;
-        mIsSingleCarrier = isSingleCarrier;
-        final boolean visible = state.visible && !isSingleCarrier;
-        mMobileGroup.setVisibility(visible ? View.VISIBLE : View.GONE);
-        mSpacer.setVisibility(isSingleCarrier ? View.VISIBLE : View.GONE);
-        if (visible) {
+        mMobileGroup.setVisibility(state.visible ? View.VISIBLE : View.GONE);
+        if (state.visible) {
             mMobileRoaming.setVisibility(state.roaming ? View.VISIBLE : View.GONE);
-            ColorStateList colorStateList = Utils.getColorAttr(mContext,
-                    android.R.attr.textColorPrimary);
+            ColorStateList colorStateList = ColorStateList.valueOf(
+                    mDualToneHandler.getSingleColor(mColorForegroundIntensity));
             mMobileRoaming.setImageTintList(colorStateList);
             mMobileSignal.setImageTintList(colorStateList);
+            mMobileSignal.setImageLevel(state.mobileSignalIconId);
 
-            if (state.providerModelBehavior) {
-                if (!mProviderModelInitialized) {
-                    mProviderModelInitialized = true;
-                    mMobileSignal.setImageDrawable(
-                            mContext.getDrawable(R.drawable.ic_qs_no_calling_sms));
-                }
-                mMobileSignal.setImageDrawable(mContext.getDrawable(state.mobileSignalIconId));
-                mMobileSignal.setContentDescription(state.contentDescription);
-            } else {
-                if (!mProviderModelInitialized) {
-                    mProviderModelInitialized = true;
-                    mMobileSignal.setImageDrawable(new SignalDrawable(mContext));
-                }
-                mMobileSignal.setImageLevel(state.mobileSignalIconId);
-                StringBuilder contentDescription = new StringBuilder();
-                if (state.contentDescription != null) {
-                    contentDescription.append(state.contentDescription).append(", ");
-                }
-                if (state.roaming) {
-                    contentDescription
-                            .append(mContext.getString(R.string.data_connection_roaming))
-                            .append(", ");
-                }
-                // TODO: show mobile data off/no internet text for 5 seconds before carrier text
-                if (hasValidTypeContentDescription(state.typeContentDescription)) {
-                    contentDescription.append(state.typeContentDescription);
-                }
-                mMobileSignal.setContentDescription(contentDescription);
+            StringBuilder contentDescription = new StringBuilder();
+            if (state.contentDescription != null) {
+                contentDescription.append(state.contentDescription).append(", ");
             }
+            if (state.roaming) {
+                contentDescription
+                        .append(mContext.getString(R.string.data_connection_roaming))
+                        .append(", ");
+            }
+            // TODO: show mobile data off/no internet text for 5 seconds before carrier text
+            if (hasValidTypeContentDescription(state.typeContentDescription)) {
+                contentDescription.append(state.typeContentDescription);
+            }
+            mMobileSignal.setContentDescription(contentDescription);
         }
         return true;
     }
@@ -129,16 +116,9 @@ public class QSCarrier extends LinearLayout {
         return TextUtils.equals(typeContentDescription,
                 mContext.getString(R.string.data_connection_no_internet))
                 || TextUtils.equals(typeContentDescription,
-                mContext.getString(
-                        com.android.settingslib.R.string.cell_data_off_content_description))
+                mContext.getString(R.string.cell_data_off_content_description))
                 || TextUtils.equals(typeContentDescription,
-                mContext.getString(
-                        com.android.settingslib.R.string.not_default_data_content_description));
-    }
-
-    @VisibleForTesting
-    View getRSSIView() {
-        return mMobileGroup;
+                mContext.getString(R.string.not_default_data_content_description));
     }
 
     public void setCarrierText(CharSequence text) {

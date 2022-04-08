@@ -259,11 +259,6 @@ class DatePickerCalendarDelegate extends DatePicker.AbstractDatePickerDelegate {
             }
 
             mCurrentDate.set(Calendar.YEAR, year);
-            if (mCurrentDate.compareTo(mMinDate) < 0) {
-                mCurrentDate.setTimeInMillis(mMinDate.getTimeInMillis());
-            } else if (mCurrentDate.compareTo(mMaxDate) > 0) {
-                mCurrentDate.setTimeInMillis(mMaxDate.getTimeInMillis());
-            }
             onDateChanged(true, true);
 
             // Automatically switch to day picker.

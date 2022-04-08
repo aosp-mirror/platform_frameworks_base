@@ -30,13 +30,10 @@ public interface RankingConfig {
     boolean canShowBadge(String packageName, int uid);
     boolean badgingEnabled(UserHandle userHandle);
     int getBubblePreference(String packageName, int uid);
-    /** Returns true when the bubbles feature is enabled for this user. */
-    boolean bubblesEnabled(UserHandle userHandle);
+    boolean bubblesEnabled();
     /** Returns true when feature is enabled that shows media notifications in quick settings. */
     boolean isMediaNotificationFilteringEnabled();
     boolean isGroupBlocked(String packageName, int uid, String groupId);
-    boolean canShowNotificationsOnLockscreen(int userId);
-    boolean canShowPrivateNotificationsOnLockScreen(int userId);
 
     Collection<NotificationChannelGroup> getNotificationChannelGroups(String pkg,
             int uid);
@@ -53,7 +50,7 @@ public interface RankingConfig {
     NotificationChannel getConversationNotificationChannel(String pkg, int uid, String channelId,
             String conversationId, boolean returnParentIfNoConversationChannel,
             boolean includeDeleted);
-    boolean deleteNotificationChannel(String pkg, int uid, String channelId);
+    void deleteNotificationChannel(String pkg, int uid, String channelId);
     void permanentlyDeleteNotificationChannel(String pkg, int uid, String channelId);
     void permanentlyDeleteNotificationChannels(String pkg, int uid);
     ParceledListSlice<NotificationChannel> getNotificationChannels(String pkg, int uid,

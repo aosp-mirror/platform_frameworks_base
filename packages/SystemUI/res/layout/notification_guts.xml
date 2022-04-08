@@ -22,4 +22,5 @@
     android:focusable="true"
     android:id="@+id/notification_guts"
     android:visibility="gone"
-    android:gravity="top|start"/>
+    android:gravity="top|start"
+    android:theme="@*android:style/Theme.DeviceDefault.Light"/>

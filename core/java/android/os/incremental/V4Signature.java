@@ -31,7 +31,7 @@ import java.nio.ByteOrder;
 
 /**
  * V4 signature fields.
- * Keep in sync with APKSig authoritative copy.
+ * Keep in sync with APKSig master copy.
  * @hide
  */
 public class V4Signature {
@@ -40,8 +40,6 @@ public class V4Signature {
 
     public static final int HASHING_ALGORITHM_SHA256 = 1;
     public static final byte LOG2_BLOCK_SIZE_4096_BYTES = 12;
-
-    public static final int INCFS_MAX_SIGNATURE_SIZE = 8096;  // incrementalfs.h
 
     /**
      * IncFS hashing data.
@@ -161,7 +159,7 @@ public class V4Signature {
      *
      * @param fileSize - size of the signed file (APK)
      */
-    public static byte[] getSignedData(long fileSize, HashingInfo hashingInfo,
+    public static byte[] getSigningData(long fileSize, HashingInfo hashingInfo,
             SigningInfo signingInfo) {
         final int size =
                 4/*size*/ + 8/*fileSize*/ + 4/*hash_algorithm*/ + 1/*log2_blocksize*/ + bytesSize(
@@ -193,12 +191,8 @@ public class V4Signature {
 
     private static V4Signature readFrom(InputStream stream) throws IOException {
         final int version = readIntLE(stream);
-        int maxSize = INCFS_MAX_SIGNATURE_SIZE;
-        final byte[] hashingInfo = readBytes(stream, maxSize);
-        if (hashingInfo != null) {
-            maxSize -= hashingInfo.length;
-        }
-        final byte[] signingInfo = readBytes(stream, maxSize);
+        final byte[] hashingInfo = readBytes(stream);
+        final byte[] signingInfo = readBytes(stream);
         return new V4Signature(version, hashingInfo, signingInfo);
     }
 
@@ -237,13 +231,9 @@ public class V4Signature {
         stream.write(buffer);
     }
 
-    private static byte[] readBytes(InputStream stream, int maxSize) throws IOException {
+    private static byte[] readBytes(InputStream stream) throws IOException {
         try {
             final int size = readIntLE(stream);
-            if (size > maxSize) {
-                throw new IOException(
-                        "Signature is too long. Max allowed is " + INCFS_MAX_SIGNATURE_SIZE);
-            }
             final byte[] bytes = new byte[size];
             readFully(stream, bytes);
             return bytes;

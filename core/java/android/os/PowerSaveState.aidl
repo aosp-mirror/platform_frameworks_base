@@ -16,4 +16,4 @@
 
 package android.os;
 
-parcelable PowerSaveState cpp_header "android/PowerSaveState.h";
+parcelable PowerSaveState;

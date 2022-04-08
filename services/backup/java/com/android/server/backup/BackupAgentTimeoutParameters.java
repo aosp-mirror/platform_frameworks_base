@@ -19,7 +19,6 @@ package com.android.server.backup;
 
 import android.content.ContentResolver;
 import android.os.Handler;
-import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.KeyValueListParser;
 import android.util.KeyValueSettingObserver;
@@ -54,16 +53,8 @@ public class BackupAgentTimeoutParameters extends KeyValueSettingObserver {
             "restore_agent_timeout_millis";
 
     @VisibleForTesting
-    public static final String SETTING_RESTORE_SYSTEM_AGENT_TIMEOUT_MILLIS =
-            "restore_system_agent_timeout_millis";
-
-    @VisibleForTesting
     public static final String SETTING_RESTORE_AGENT_FINISHED_TIMEOUT_MILLIS =
             "restore_agent_finished_timeout_millis";
-
-    @VisibleForTesting
-    public static final String SETTING_RESTORE_SESSION_TIMEOUT_MILLIS =
-            "restore_session_timeout_millis";
 
     @VisibleForTesting
     public static final String SETTING_QUOTA_EXCEEDED_TIMEOUT_MILLIS =
@@ -80,13 +71,8 @@ public class BackupAgentTimeoutParameters extends KeyValueSettingObserver {
 
     @VisibleForTesting public static final long DEFAULT_RESTORE_AGENT_TIMEOUT_MILLIS = 60 * 1000;
 
-    @VisibleForTesting public static final long DEFAULT_RESTORE_SYSTEM_AGENT_TIMEOUT_MILLIS =
-            180 * 1000;
-
     @VisibleForTesting
     public static final long DEFAULT_RESTORE_AGENT_FINISHED_TIMEOUT_MILLIS = 30 * 1000;
-
-    @VisibleForTesting public static final long DEFAULT_RESTORE_SESSION_TIMEOUT_MILLIS = 60 * 1000;
 
     @VisibleForTesting
     public static final long DEFAULT_QUOTA_EXCEEDED_TIMEOUT_MILLIS = 3 * 1000;
@@ -102,12 +88,6 @@ public class BackupAgentTimeoutParameters extends KeyValueSettingObserver {
 
     @GuardedBy("mLock")
     private long mRestoreAgentTimeoutMillis;
-
-    @GuardedBy("mLock")
-    private long mRestoreSystemAgentTimeoutMillis;
-
-    @GuardedBy("mLock")
-    private long mRestoreSessionTimeoutMillis;
 
     @GuardedBy("mLock")
     private long mRestoreAgentFinishedTimeoutMillis;
@@ -143,18 +123,10 @@ public class BackupAgentTimeoutParameters extends KeyValueSettingObserver {
                     parser.getLong(
                             SETTING_RESTORE_AGENT_TIMEOUT_MILLIS,
                             DEFAULT_RESTORE_AGENT_TIMEOUT_MILLIS);
-            mRestoreSystemAgentTimeoutMillis =
-                    parser.getLong(
-                            SETTING_RESTORE_SYSTEM_AGENT_TIMEOUT_MILLIS,
-                            DEFAULT_RESTORE_SYSTEM_AGENT_TIMEOUT_MILLIS);
             mRestoreAgentFinishedTimeoutMillis =
                     parser.getLong(
                             SETTING_RESTORE_AGENT_FINISHED_TIMEOUT_MILLIS,
                             DEFAULT_RESTORE_AGENT_FINISHED_TIMEOUT_MILLIS);
-            mRestoreSessionTimeoutMillis =
-                    parser.getLong(
-                            SETTING_RESTORE_SESSION_TIMEOUT_MILLIS,
-                            DEFAULT_RESTORE_SESSION_TIMEOUT_MILLIS);
             mQuotaExceededTimeoutMillis =
                     parser.getLong(
                             SETTING_QUOTA_EXCEEDED_TIMEOUT_MILLIS,
@@ -180,20 +152,9 @@ public class BackupAgentTimeoutParameters extends KeyValueSettingObserver {
         }
     }
 
-    /**
-     * @param applicationUid UID of the application for which to get restore timeout
-     * @return restore timeout in milliseconds
-     */
-    public long getRestoreAgentTimeoutMillis(int applicationUid) {
+    public long getRestoreAgentTimeoutMillis() {
         synchronized (mLock) {
-            return UserHandle.isCore(applicationUid) ? mRestoreSystemAgentTimeoutMillis :
-                    mRestoreAgentTimeoutMillis;
-        }
-    }
-
-    public long getRestoreSessionTimeoutMillis() {
-        synchronized (mLock) {
-            return mRestoreSessionTimeoutMillis;
+            return mRestoreAgentTimeoutMillis;
         }
     }
 

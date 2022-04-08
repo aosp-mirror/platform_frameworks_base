@@ -38,7 +38,6 @@ public class SyncRtSurfaceTransactionApplier {
     public static final int FLAG_CORNER_RADIUS = 1 << 4;
     public static final int FLAG_BACKGROUND_BLUR_RADIUS = 1 << 5;
     public static final int FLAG_VISIBILITY = 1 << 6;
-    public static final int FLAG_TRANSACTION = 1 << 7;
 
     private SurfaceControl mTargetSc;
     private final ViewRootImpl mTargetViewRootImpl;
@@ -54,21 +53,20 @@ public class SyncRtSurfaceTransactionApplier {
     /**
      * Schedules applying surface parameters on the next frame.
      *
-     * @param params The surface parameters to apply.
+     * @param params The surface parameters to apply. DO NOT MODIFY the list after passing into
+     *               this method to avoid synchronization issues.
      */
     public void scheduleApply(final SurfaceParams... params) {
         if (mTargetViewRootImpl == null) {
             return;
         }
-        mTargetSc = mTargetViewRootImpl.getSurfaceControl();
-        final Transaction t = new Transaction();
-        applyParams(t, params);
-
+        mTargetSc = mTargetViewRootImpl.getRenderSurfaceControl();
         mTargetViewRootImpl.registerRtFrameCallback(frame -> {
             if (mTargetSc == null || !mTargetSc.isValid()) {
                 return;
             }
-            applyTransaction(t, frame);
+            Transaction t = new Transaction();
+            applyParams(t, frame, params);
         });
 
         // Make sure a frame gets scheduled.
@@ -79,29 +77,22 @@ public class SyncRtSurfaceTransactionApplier {
      * Applies surface parameters on the next frame.
      * @param t transaction to apply all parameters in.
      * @param frame frame to synchronize to. Set -1 when sync is not required.
-     * @param params The surface parameters to apply.
+     * @param params The surface parameters to apply. DO NOT MODIFY the list after passing into
+     *               this method to avoid synchronization issues.
      */
-     void applyParams(Transaction t, final SurfaceParams... params) {
+     void applyParams(Transaction t, long frame, final SurfaceParams... params) {
         for (int i = params.length - 1; i >= 0; i--) {
             SurfaceParams surfaceParams = params[i];
             SurfaceControl surface = surfaceParams.surface;
+            if (frame > 0) {
+                t.deferTransactionUntil(surface, mTargetSc, frame);
+            }
             applyParams(t, surfaceParams, mTmpFloat9);
         }
-    }
-
-    void applyTransaction(Transaction t, long frame) {
-        if (mTargetViewRootImpl != null) {
-            mTargetViewRootImpl.mergeWithNextTransaction(t, frame);
-        } else {
-            t.apply();
-        }
+        t.apply();
     }
 
     public static void applyParams(Transaction t, SurfaceParams params, float[] tmpFloat9) {
-        if ((params.flags & FLAG_TRANSACTION) != 0) {
-            t.merge(params.mergeTransaction);
-        }
-
         if ((params.flags & FLAG_MATRIX) != 0) {
             t.setMatrix(params.surface, params.matrix, tmpFloat9);
         }
@@ -170,7 +161,6 @@ public class SyncRtSurfaceTransactionApplier {
             Rect windowCrop;
             int layer;
             boolean visible;
-            Transaction mergeTransaction;
 
             /**
              * @param surface The surface to modify.
@@ -194,7 +184,7 @@ public class SyncRtSurfaceTransactionApplier {
              * @return this Builder
              */
             public Builder withMatrix(Matrix matrix) {
-                this.matrix = new Matrix(matrix);
+                this.matrix = matrix;
                 flags |= FLAG_MATRIX;
                 return this;
             }
@@ -204,7 +194,7 @@ public class SyncRtSurfaceTransactionApplier {
              * @return this Builder
              */
             public Builder withWindowCrop(Rect windowCrop) {
-                this.windowCrop = new Rect(windowCrop);
+                this.windowCrop = windowCrop;
                 flags |= FLAG_WINDOW_CROP;
                 return this;
             }
@@ -250,38 +240,26 @@ public class SyncRtSurfaceTransactionApplier {
             }
 
             /**
-             * @param mergeTransaction The transaction to apply to the surface. Note this is applied
-             *                         first before all the other properties.
-             * @return this Builder
-             */
-            public Builder withMergeTransaction(Transaction mergeTransaction) {
-                this.mergeTransaction = mergeTransaction;
-                flags |= FLAG_TRANSACTION;
-                return this;
-            }
-
-            /**
              * @return a new SurfaceParams instance
              */
             public SurfaceParams build() {
                 return new SurfaceParams(surface, flags, alpha, matrix, windowCrop, layer,
-                        cornerRadius, backgroundBlurRadius, visible, mergeTransaction);
+                        cornerRadius, backgroundBlurRadius, visible);
             }
         }
 
         private SurfaceParams(SurfaceControl surface, int params, float alpha, Matrix matrix,
-                Rect windowCrop, int layer, float cornerRadius,
-                int backgroundBlurRadius, boolean visible, Transaction mergeTransaction) {
+                Rect windowCrop, int layer, float cornerRadius, int backgroundBlurRadius,
+                boolean visible) {
             this.flags = params;
             this.surface = surface;
             this.alpha = alpha;
-            this.matrix = matrix;
-            this.windowCrop = windowCrop;
+            this.matrix = new Matrix(matrix);
+            this.windowCrop = new Rect(windowCrop);
             this.layer = layer;
             this.cornerRadius = cornerRadius;
             this.backgroundBlurRadius = backgroundBlurRadius;
             this.visible = visible;
-            this.mergeTransaction = mergeTransaction;
         }
 
         private final int flags;
@@ -308,7 +286,5 @@ public class SyncRtSurfaceTransactionApplier {
         public final int layer;
 
         public final boolean visible;
-
-        public final Transaction mergeTransaction;
     }
 }

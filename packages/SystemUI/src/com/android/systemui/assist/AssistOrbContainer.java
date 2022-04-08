@@ -22,8 +22,8 @@ import android.util.AttributeSet;
 import android.view.View;
 import android.widget.FrameLayout;
 
+import com.android.systemui.Interpolators;
 import com.android.systemui.R;
-import com.android.systemui.animation.Interpolators;
 
 public class AssistOrbContainer extends FrameLayout {
 
@@ -55,17 +55,14 @@ public class AssistOrbContainer extends FrameLayout {
         mOrb = (AssistOrbView) findViewById(R.id.assist_orb);
     }
 
-    public void show(final boolean show, boolean animate, Runnable onDone) {
+    public void show(final boolean show, boolean animate) {
         if (show) {
             if (getVisibility() != View.VISIBLE) {
                 setVisibility(View.VISIBLE);
                 if (animate) {
-                    startEnterAnimation(onDone);
+                    startEnterAnimation();
                 } else {
                     reset();
-                    if (onDone != null) {
-                        onDone.run();
-                    }
                 }
             }
         } else {
@@ -75,16 +72,10 @@ public class AssistOrbContainer extends FrameLayout {
                     public void run() {
                         mAnimatingOut = false;
                         setVisibility(View.GONE);
-                        if (onDone != null) {
-                            onDone.run();
-                        }
                     }
                 });
             } else {
                 setVisibility(View.GONE);
-                if (onDone != null) {
-                    onDone.run();
-                }
             }
         }
     }
@@ -96,7 +87,7 @@ public class AssistOrbContainer extends FrameLayout {
         mNavbarScrim.setAlpha(1f);
     }
 
-    private void startEnterAnimation(Runnable onDone) {
+    private void startEnterAnimation() {
         if (mAnimatingOut) {
             return;
         }
@@ -115,8 +106,7 @@ public class AssistOrbContainer extends FrameLayout {
                         .alpha(1f)
                         .setDuration(300)
                         .setStartDelay(0)
-                        .setInterpolator(Interpolators.LINEAR_OUT_SLOW_IN)
-                        .withEndAction(onDone);
+                        .setInterpolator(Interpolators.LINEAR_OUT_SLOW_IN);
             }
         });
     }

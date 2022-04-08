@@ -173,9 +173,8 @@ public class WebViewClient {
      * when accessing private data or the view system.
      *
      * <p class="note"><b>Note:</b> When Safe Browsing is enabled, these URLs still undergo Safe
-     * Browsing checks. If this is undesired, you can use {@link WebView#setSafeBrowsingWhitelist}
-     * to skip Safe Browsing checks for that host or dismiss the warning in {@link
-     * #onSafeBrowsingHit} by calling {@link SafeBrowsingResponse#proceed}.
+     * Browsing checks. If this is undesired, whitelist the URL with {@link
+     * WebView#setSafeBrowsingWhitelist} or ignore the warning with {@link #onSafeBrowsingHit}.
      *
      * @param view The {@link android.webkit.WebView} that is requesting the
      *             resource.
@@ -212,9 +211,8 @@ public class WebViewClient {
      * when accessing private data or the view system.
      *
      * <p class="note"><b>Note:</b> When Safe Browsing is enabled, these URLs still undergo Safe
-     * Browsing checks. If this is undesired, you can use {@link WebView#setSafeBrowsingWhitelist}
-     * to skip Safe Browsing checks for that host or dismiss the warning in {@link
-     * #onSafeBrowsingHit} by calling {@link SafeBrowsingResponse#proceed}.
+     * Browsing checks. If this is undesired, whitelist the URL with {@link
+     * WebView#setSafeBrowsingWhitelist} or ignore the warning with {@link #onSafeBrowsingHit}.
      *
      * @param view The {@link android.webkit.WebView} that is requesting the
      *             resource.

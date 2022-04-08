@@ -67,7 +67,7 @@ public:
         mBg = createBitmapNode(canvas, 0xFF9C27B0, 0, 0, width, height);
         canvas.drawRenderNode(mBg.get());
 
-        canvas.enableZ(true);
+        canvas.insertReorderBarrier(true);
         mSingleBitmap = mAllocator(dp(160), dp(120), kRGBA_8888_SkColorType,
                                    [](SkBitmap& skBitmap) { skBitmap.eraseColor(0xFF0000FF); });
 
@@ -80,7 +80,7 @@ public:
                 mCards.push_back(card);
             }
         }
-        canvas.enableZ(false);
+        canvas.insertReorderBarrier(false);
     }
 
     void doFrame(int frameNr) override {
@@ -210,7 +210,7 @@ private:
                                                     overlay->stagingProperties().getHeight(),
                                                     overlay.get()));
             canvas->drawColor((curFrame % 150) << 24, SkBlendMode::kSrcOver);
-            canvas->finishRecording(overlay.get());
+            overlay->setStagingDisplayList(canvas->finishRecording());
             cardcanvas->drawRenderNode(overlay.get());
         } else {
             // re-recording image node's canvas, animating ColorFilter
@@ -223,11 +223,11 @@ private:
             paint.setColorFilter(filter);
             sk_sp<Bitmap> bitmap = mCachedBitmaps[ci];
             canvas->drawBitmap(*bitmap, 0, 0, &paint);
-            canvas->finishRecording(image.get());
+            image->setStagingDisplayList(canvas->finishRecording());
             cardcanvas->drawRenderNode(image.get());
         }
 
-        cardcanvas->finishRecording(card.get());
+        card->setStagingDisplayList(cardcanvas->finishRecording());
     }
 };
 

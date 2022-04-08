@@ -26,7 +26,6 @@ import androidx.test.filters.SmallTest
 import com.android.settingslib.applications.ServiceListing
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.controls.ControlsServiceInfo
-import com.android.systemui.settings.UserTracker
 import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.time.FakeSystemClock
 import org.junit.After
@@ -67,8 +66,6 @@ class ControlsListingControllerImplTest : SysuiTestCase() {
     private lateinit var serviceInfo: ServiceInfo
     @Mock
     private lateinit var serviceInfo2: ServiceInfo
-    @Mock(stubOnly = true)
-    private lateinit var userTracker: UserTracker
 
     private var componentName = ComponentName("pkg1", "class1")
     private var componentName2 = ComponentName("pkg2", "class2")
@@ -89,7 +86,6 @@ class ControlsListingControllerImplTest : SysuiTestCase() {
 
         `when`(serviceInfo.componentName).thenReturn(componentName)
         `when`(serviceInfo2.componentName).thenReturn(componentName2)
-        `when`(userTracker.userId).thenReturn(user)
 
         val wrapper = object : ContextWrapper(mContext) {
             override fun createContextAsUser(user: UserHandle, flags: Int): Context {
@@ -97,7 +93,7 @@ class ControlsListingControllerImplTest : SysuiTestCase() {
             }
         }
 
-        controller = ControlsListingControllerImpl(wrapper, executor, { mockSL }, userTracker)
+        controller = ControlsListingControllerImpl(wrapper, executor, { mockSL })
         verify(mockSL).addCallback(capture(serviceListingCallbackCaptor))
     }
 
@@ -125,7 +121,7 @@ class ControlsListingControllerImplTest : SysuiTestCase() {
         `when`(mockServiceListing.reload()).then {
             callback?.onServicesReloaded(listOf(serviceInfo))
         }
-        ControlsListingControllerImpl(mContext, exec, { mockServiceListing }, userTracker)
+        ControlsListingControllerImpl(mContext, exec, { mockServiceListing })
     }
 
     @Test

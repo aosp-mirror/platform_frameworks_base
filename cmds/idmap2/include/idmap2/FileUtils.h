@@ -17,17 +17,28 @@
 #ifndef IDMAP2_INCLUDE_IDMAP2_FILEUTILS_H_
 #define IDMAP2_INCLUDE_IDMAP2_FILEUTILS_H_
 
-#include <random>
+#include <sys/types.h>
+
+#include <functional>
+#include <memory>
 #include <string>
+#include <vector>
 
 namespace android::idmap2::utils {
 
 constexpr const char* kIdmapCacheDir = "/data/resource-cache";
 constexpr const mode_t kIdmapFilePermissionMask = 0133;  // u=rw,g=r,o=r
 
-bool UidHasWriteAccessToPath(uid_t uid, const std::string& path);
+typedef std::function<bool(unsigned char type /* DT_* from dirent.h */, const std::string& path)>
+    FindFilesPredicate;
+std::unique_ptr<std::vector<std::string>> FindFiles(const std::string& root, bool recurse,
+                                                    const FindFilesPredicate& predicate);
 
-std::string RandomStringForPath(size_t length);
+std::unique_ptr<std::string> ReadFile(int fd);
+
+std::unique_ptr<std::string> ReadFile(const std::string& path);
+
+bool UidHasWriteAccessToPath(uid_t uid, const std::string& path);
 
 }  // namespace android::idmap2::utils
 

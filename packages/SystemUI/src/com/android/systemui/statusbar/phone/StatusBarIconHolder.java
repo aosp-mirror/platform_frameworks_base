@@ -22,7 +22,6 @@ import android.graphics.drawable.Icon;
 import android.os.UserHandle;
 
 import com.android.internal.statusbar.StatusBarIcon;
-import com.android.systemui.statusbar.phone.StatusBarSignalPolicy.CallIndicatorIconState;
 import com.android.systemui.statusbar.phone.StatusBarSignalPolicy.MobileIconState;
 import com.android.systemui.statusbar.phone.StatusBarSignalPolicy.WifiIconState;
 
@@ -39,10 +38,7 @@ public class StatusBarIconHolder {
     private MobileIconState mMobileState;
     private int mType = TYPE_ICON;
     private int mTag = 0;
-
-    private StatusBarIconHolder() {
-
-    }
+    private boolean mVisible = true;
 
     public static StatusBarIconHolder fromIcon(StatusBarIcon icon) {
         StatusBarIconHolder wrapper = new StatusBarIconHolder();
@@ -51,10 +47,7 @@ public class StatusBarIconHolder {
         return wrapper;
     }
 
-    /** */
-    public static StatusBarIconHolder fromResId(
-            Context context,
-            int resId,
+    public static StatusBarIconHolder fromResId(Context context, int resId,
             CharSequence contentDescription) {
         StatusBarIconHolder holder = new StatusBarIconHolder();
         holder.mIcon = new StatusBarIcon(UserHandle.SYSTEM, context.getPackageName(),
@@ -62,7 +55,6 @@ public class StatusBarIconHolder {
         return holder;
     }
 
-    /** */
     public static StatusBarIconHolder fromWifiIconState(WifiIconState state) {
         StatusBarIconHolder holder = new StatusBarIconHolder();
         holder.mWifiState = state;
@@ -70,27 +62,10 @@ public class StatusBarIconHolder {
         return holder;
     }
 
-    /** */
     public static StatusBarIconHolder fromMobileIconState(MobileIconState state) {
         StatusBarIconHolder holder = new StatusBarIconHolder();
         holder.mMobileState = state;
         holder.mType = TYPE_MOBILE;
-        holder.mTag = state.subId;
-        return holder;
-    }
-
-    /**
-     * Creates a new StatusBarIconHolder from a CallIndicatorIconState.
-     */
-    public static StatusBarIconHolder fromCallIndicatorState(
-            Context context,
-            CallIndicatorIconState state) {
-        StatusBarIconHolder holder = new StatusBarIconHolder();
-        int resId = state.isNoCalling ? state.noCallingResId : state.callStrengthResId;
-        String contentDescription = state.isNoCalling
-                ? state.noCallingDescription : state.callStrengthDescription;
-        holder.mIcon = new StatusBarIcon(UserHandle.SYSTEM, context.getPackageName(),
-                Icon.createWithResource(context, resId), 0, 0, contentDescription);
         holder.mTag = state.subId;
         return holder;
     }
@@ -102,10 +77,6 @@ public class StatusBarIconHolder {
     @Nullable
     public StatusBarIcon getIcon() {
         return mIcon;
-    }
-
-    public void setIcon(StatusBarIcon icon) {
-        mIcon = icon;
     }
 
     @Nullable

@@ -59,10 +59,9 @@ message AlarmManagerServiceDumpProto {
     // Time since the last wakeup was set.
     optional int64 time_since_last_wakeup_set_ms = 15;
     optional int64 time_change_event_count = 16;
-    // The current set of user exempted apps for device idle mode, meaning
+    // The current set of user whitelisted apps for device idle mode, meaning
     // these are allowed to freely schedule alarms. These are app IDs, not UIDs.
-    // This field is currently unused.
-    repeated int32 device_idle_user_exempt_app_ids = 17;
+    repeated int32 device_idle_user_whitelist_app_ids = 17;
 
     repeated AlarmClockMetadataProto next_alarm_clock_metadata = 18;
 
@@ -144,8 +143,6 @@ message AlarmManagerServiceDumpProto {
 
     repeated IdleDispatchEntryProto allow_while_idle_dispatches = 40;
     repeated WakeupEventProto recent_wakeup_history = 41;
-
-    repeated AlarmProto pending_alarms = 42;
 }
 
 // This is a soft wrapper for alarm clock information. It is not representative

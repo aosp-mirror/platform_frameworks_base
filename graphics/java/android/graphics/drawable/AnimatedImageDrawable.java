@@ -19,6 +19,7 @@ package android.graphics.drawable;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.res.AssetFileDescriptor;
 import android.content.res.Resources;
 import android.content.res.Resources.Theme;
@@ -562,18 +563,12 @@ public class AnimatedImageDrawable extends Drawable implements Animatable2 {
      *  callback, so no need to post.
      */
     @SuppressWarnings("unused")
+    @UnsupportedAppUsage
     private void onAnimationEnd() {
         if (mAnimationCallbacks != null) {
             for (Animatable2.AnimationCallback callback : mAnimationCallbacks) {
                 callback.onAnimationEnd(this);
             }
-        }
-    }
-
-    @Override
-    protected void onBoundsChange(Rect bounds) {
-        if (mState.mNativePtr != 0) {
-            nSetBounds(mState.mNativePtr, bounds);
         }
     }
 
@@ -608,6 +603,4 @@ public class AnimatedImageDrawable extends Drawable implements Animatable2 {
     private static native long nNativeByteSize(long nativePtr);
     @FastNative
     private static native void nSetMirrored(long nativePtr, boolean mirror);
-    @FastNative
-    private static native void nSetBounds(long nativePtr, Rect rect);
 }

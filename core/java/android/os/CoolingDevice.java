@@ -18,7 +18,6 @@ package android.os;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.hardware.thermal.V2_0.CoolingType;
 
 import com.android.internal.util.Preconditions;
@@ -129,7 +128,7 @@ public final class CoolingDevice implements Parcelable {
     }
 
     @Override
-    public boolean equals(@Nullable Object o) {
+    public boolean equals(Object o) {
         if (!(o instanceof CoolingDevice)) {
             return false;
         }

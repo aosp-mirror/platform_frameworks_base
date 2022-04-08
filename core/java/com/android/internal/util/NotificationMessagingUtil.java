@@ -26,7 +26,7 @@ import android.os.Looper;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.service.notification.StatusBarNotification;
-import android.util.SparseArray;
+import android.util.ArrayMap;
 
 import java.util.Collection;
 import java.util.Objects;
@@ -39,7 +39,7 @@ public class NotificationMessagingUtil {
 
     private static final String DEFAULT_SMS_APP_SETTING = Settings.Secure.SMS_DEFAULT_APPLICATION;
     private final Context mContext;
-    private SparseArray<String> mDefaultSmsApp = new SparseArray<>();
+    private ArrayMap<Integer, String> mDefaultSmsApp = new ArrayMap<>();
 
     public NotificationMessagingUtil(Context context) {
         mContext = context;
@@ -86,7 +86,8 @@ public class NotificationMessagingUtil {
     };
 
     private boolean hasMessagingStyle(StatusBarNotification sbn) {
-        return sbn.getNotification().isStyle(Notification.MessagingStyle.class);
+        Class<? extends Notification.Style> style = sbn.getNotification().getNotificationStyle();
+        return Notification.MessagingStyle.class.equals(style);
     }
 
     private boolean isCategoryMessage(StatusBarNotification sbn) {

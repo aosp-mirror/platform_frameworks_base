@@ -34,7 +34,7 @@ import android.util.Log;
 import android.util.proto.ProtoOutputStream;
 import android.view.Choreographer;
 
-import com.android.internal.protolog.ProtoLogImpl;
+import com.android.server.protolog.ProtoLogImpl;
 import com.android.internal.util.TraceBuffer;
 
 import java.io.File;
@@ -114,6 +114,15 @@ class WindowTracing {
      * @param pw Print writer
      */
     void stopTrace(@Nullable PrintWriter pw) {
+        stopTrace(pw, true /* writeToFile */);
+    }
+
+    /**
+     * Stops the trace
+     * @param pw Print writer
+     * @param writeToFile If the current buffer should be written to disk or not
+     */
+    void stopTrace(@Nullable PrintWriter pw, boolean writeToFile) {
         if (IS_USER) {
             logAndPrintln(pw, "Error: Tracing is not supported on user builds.");
             return;
@@ -126,35 +135,12 @@ class WindowTracing {
                 logAndPrintln(pw, "ERROR: tracing was re-enabled while waiting for flush.");
                 throw new IllegalStateException("tracing enabled while waiting for flush.");
             }
-            writeTraceToFileLocked();
-            logAndPrintln(pw, "Trace written to " + mTraceFile + ".");
-        }
-        ProtoLogImpl.getSingleInstance().stopProtoLog(pw, true);
-    }
-
-    /**
-     * Stops the trace and write the current buffer to disk then restart, if it's already running.
-     * @param pw Print writer
-     */
-    void saveForBugreport(@Nullable PrintWriter pw) {
-        if (IS_USER) {
-            logAndPrintln(pw, "Error: Tracing is not supported on user builds.");
-            return;
-        }
-        synchronized (mEnabledLock) {
-            if (!mEnabled) {
-                return;
+            if (writeToFile) {
+                writeTraceToFileLocked();
+                logAndPrintln(pw, "Trace written to " + mTraceFile + ".");
             }
-            mEnabled = mEnabledLockFree = false;
-            logAndPrintln(pw, "Stop tracing to " + mTraceFile + ". Waiting for traces to flush.");
-            writeTraceToFileLocked();
-            logAndPrintln(pw, "Trace written to " + mTraceFile + ".");
-            ProtoLogImpl.getSingleInstance().stopProtoLog(pw, true);
-            logAndPrintln(pw, "Start tracing to " + mTraceFile + ".");
-            mBuffer.resetBuffer();
-            mEnabled = mEnabledLockFree = true;
-            ProtoLogImpl.getSingleInstance().startProtoLog(pw);
         }
+        ProtoLogImpl.getSingleInstance().stopProtoLog(pw, writeToFile);
     }
 
     private void setLogLevel(@WindowTraceLogLevel int logLevel, PrintWriter pw) {
@@ -202,9 +188,6 @@ class WindowTracing {
             case "stop":
                 stopTrace(pw);
                 return 0;
-            case "save-for-bugreport":
-                saveForBugreport(pw);
-                return 0;
             case "status":
                 logAndPrintln(pw, getStatus());
                 return 0;
@@ -247,7 +230,6 @@ class WindowTracing {
                 pw.println("Window manager trace options:");
                 pw.println("  start: Start logging");
                 pw.println("  stop: Stop logging");
-                pw.println("  save-for-bugreport: Save logging data to file if it's running.");
                 pw.println("  frame: Log trace once per frame");
                 pw.println("  transaction: Log each transaction");
                 pw.println("  size: Set the maximum log size (in KB)");
@@ -332,6 +314,19 @@ class WindowTracing {
         } finally {
             Trace.traceEnd(Trace.TRACE_TAG_WINDOW_MANAGER);
         }
+    }
+
+    /**
+     * Writes the trace buffer to new file for the bugreport.
+     *
+     * This method is synchronized with {@code #startTrace(PrintWriter)} and
+     * {@link #stopTrace(PrintWriter)}.
+     */
+    void writeTraceToFile() {
+        synchronized (mEnabledLock) {
+            writeTraceToFileLocked();
+        }
+        ProtoLogImpl.getSingleInstance().writeProtoLogToFile();
     }
 
     private void logAndPrintln(@Nullable PrintWriter pw, String msg) {

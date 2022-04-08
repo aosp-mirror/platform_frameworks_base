@@ -148,7 +148,7 @@ import java.util.Objects;
                 accountEvictor = new Evictor();
             }
             accountEvictor.add(k);
-            mAccountEvictors.put(k.account, accountEvictor);
+            mAccountEvictors.put(k.account, tokenEvictor);
 
             // Only cache the token once we can remove it directly or by account.
             put(k, v);

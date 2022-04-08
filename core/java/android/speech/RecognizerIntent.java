@@ -16,6 +16,8 @@
 
 package android.speech;
 
+import java.util.ArrayList;
+
 import android.app.Activity;
 import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
@@ -25,8 +27,6 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.os.Bundle;
-
-import java.util.ArrayList;
 
 /**
  * Constants for supporting speech recognition through starting an {@link Intent}
@@ -39,14 +39,7 @@ public class RecognizerIntent {
      * is set by anyone but the system process, it should be overridden by the voice search
      * implementation.
      */
-    public static final String EXTRA_CALLING_PACKAGE = "calling_package";
-
-    /**
-     * The extra key used in an intent which is providing an already opened audio source for the
-     * RecognitionService to use. Data should be a URI to an audio resource.
-     */
-    public static final String EXTRA_AUDIO_INJECT_SOURCE =
-            "android.speech.extra.AUDIO_INJECT_SOURCE";
+    public final static String EXTRA_CALLING_PACKAGE = "calling_package";
 
     private RecognizerIntent() {
         // Not for instantiating.

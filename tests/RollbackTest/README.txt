@@ -9,10 +9,10 @@ StagedRollbackTest
   - device driven test for staged rollbacks.
 
 TestApp
-  - source for fake apks used in testing.
+  - source for dummy apks used in testing.
 
 TestApex
-  - source for fake apex modules used in testing.
+  - source for dummy apex modules used in testing.
 
 Running the tests
 =================

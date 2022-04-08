@@ -28,10 +28,6 @@ import org.hamcrest.Matchers;
 import org.junit.Assert;
 import org.junit.Test;
 
-/**
- * Build/Install/Run:
- *  atest WmTests:DisplayAreaProviderTest
- */
 @Presubmit
 public class DisplayAreaProviderTest {
 
@@ -81,7 +77,7 @@ public class DisplayAreaProviderTest {
 
         @Override
         public DisplayAreaPolicy instantiate(WindowManagerService wmService, DisplayContent content,
-                RootDisplayArea root, DisplayArea.Tokens imeContainer) {
+                DisplayArea.Root root, DisplayArea<? extends WindowContainer> imeContainer) {
             throw new RuntimeException("test stub");
         }
     }

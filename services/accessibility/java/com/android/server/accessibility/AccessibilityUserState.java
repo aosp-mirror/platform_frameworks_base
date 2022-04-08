@@ -22,7 +22,6 @@ import static android.accessibilityservice.AccessibilityService.SHOW_MODE_HARD_K
 import static android.accessibilityservice.AccessibilityService.SHOW_MODE_HIDDEN;
 import static android.accessibilityservice.AccessibilityService.SHOW_MODE_IGNORE_HARD_KEYBOARD;
 import static android.accessibilityservice.AccessibilityService.SHOW_MODE_MASK;
-import static android.provider.Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN;
 import static android.view.accessibility.AccessibilityManager.ACCESSIBILITY_BUTTON;
 import static android.view.accessibility.AccessibilityManager.ACCESSIBILITY_SHORTCUT_KEY;
 import static android.view.accessibility.AccessibilityManager.ShortcutType;
@@ -45,13 +44,11 @@ import android.util.Slog;
 import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.IAccessibilityManagerClient;
 
-import com.android.internal.R;
 import com.android.internal.accessibility.AccessibilityShortcutController;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -112,42 +109,16 @@ class AccessibilityUserState {
     private boolean mIsTouchExplorationEnabled;
     private boolean mServiceHandlesDoubleTap;
     private boolean mRequestMultiFingerGestures;
-    private boolean mRequestTwoFingerPassthrough;
-    private boolean mSendMotionEventsEnabled;
     private int mUserInteractiveUiTimeout;
     private int mUserNonInteractiveUiTimeout;
     private int mNonInteractiveUiTimeout = 0;
     private int mInteractiveUiTimeout = 0;
     private int mLastSentClientState = -1;
 
-    /** {@code true} if the device config supports magnification area. */
-    private final boolean mSupportMagnificationArea;
-    // The magnification mode of default display.
-    private int mMagnificationMode = ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN;
-    // The magnification capabilities used to know magnification mode could be switched.
-    private int mMagnificationCapabilities = ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN;
-
-    /** The stroke width of the focus rectangle in pixels */
-    private int mFocusStrokeWidth;
-    /** The color of the focus rectangle */
-    private int mFocusColor;
-    // The default value of the focus stroke width.
-    private final int mFocusStrokeWidthDefaultValue;
-    // The default value of the focus color.
-    private final int mFocusColorDefaultValue;
-
     private Context mContext;
 
     @SoftKeyboardShowMode
     private int mSoftKeyboardShowMode = SHOW_MODE_AUTO;
-
-    boolean isValidMagnificationModeLocked() {
-        if (!mSupportMagnificationArea
-                && mMagnificationMode == Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW) {
-            return false;
-        }
-        return (mMagnificationCapabilities & mMagnificationMode) != 0;
-    }
 
     interface ServiceInfoChangeListener {
         void onServiceInfoChangedLocked(AccessibilityUserState userState);
@@ -158,14 +129,6 @@ class AccessibilityUserState {
         mUserId = userId;
         mContext = context;
         mServiceInfoChangeListener = serviceInfoChangeListener;
-        mFocusStrokeWidthDefaultValue = mContext.getResources().getDimensionPixelSize(
-                R.dimen.accessibility_focus_highlight_stroke_width);
-        mFocusColorDefaultValue = mContext.getResources().getColor(
-                R.color.accessibility_focus_highlight_color);
-        mFocusStrokeWidth = mFocusStrokeWidthDefaultValue;
-        mFocusColor = mFocusColorDefaultValue;
-        mSupportMagnificationArea = mContext.getResources().getBoolean(
-                R.bool.config_magnification_area);
     }
 
     boolean isHandlingAccessibilityEventsLocked() {
@@ -197,15 +160,10 @@ class AccessibilityUserState {
         mIsTouchExplorationEnabled = false;
         mServiceHandlesDoubleTap = false;
         mRequestMultiFingerGestures = false;
-        mRequestTwoFingerPassthrough = false;
-        mSendMotionEventsEnabled = false;
         mIsDisplayMagnificationEnabled = false;
         mIsAutoclickEnabled = false;
         mUserNonInteractiveUiTimeout = 0;
         mUserInteractiveUiTimeout = 0;
-        mMagnificationMode = ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN;
-        mFocusStrokeWidth = mFocusStrokeWidthDefaultValue;
-        mFocusColor = mFocusColorDefaultValue;
     }
 
     void addServiceLocked(AccessibilityServiceConnection serviceConnection) {
@@ -392,7 +350,7 @@ class AccessibilityUserState {
         return mBoundServices;
     }
 
-    int getClientStateLocked(boolean isUiAutomationRunning, boolean isTracingEnabled) {
+    int getClientStateLocked(boolean isUiAutomationRunning) {
         int clientState = 0;
         final boolean a11yEnabled = isUiAutomationRunning
                 || isHandlingAccessibilityEventsLocked();
@@ -407,9 +365,6 @@ class AccessibilityUserState {
         }
         if (mIsTextHighContrastEnabled) {
             clientState |= AccessibilityManager.STATE_FLAG_HIGH_TEXT_CONTRAST_ENABLED;
-        }
-        if (isTracingEnabled) {
-            clientState |= AccessibilityManager.STATE_FLAG_ACCESSIBILITY_TRACING_ENABLED;
         }
         return clientState;
     }
@@ -491,18 +446,12 @@ class AccessibilityUserState {
                 .append(String.valueOf(mServiceHandlesDoubleTap));
         pw.append(", requestMultiFingerGestures=")
                 .append(String.valueOf(mRequestMultiFingerGestures));
-        pw.append(", requestTwoFingerPassthrough=")
-                .append(String.valueOf(mRequestTwoFingerPassthrough));
-        pw.append(", sendMotionEventsEnabled").append(String.valueOf(mSendMotionEventsEnabled));
         pw.append(", displayMagnificationEnabled=").append(String.valueOf(
                 mIsDisplayMagnificationEnabled));
         pw.append(", autoclickEnabled=").append(String.valueOf(mIsAutoclickEnabled));
         pw.append(", nonInteractiveUiTimeout=").append(String.valueOf(mNonInteractiveUiTimeout));
         pw.append(", interactiveUiTimeout=").append(String.valueOf(mInteractiveUiTimeout));
         pw.append(", installedServiceCount=").append(String.valueOf(mInstalledServices.size()));
-        pw.append(", magnificationMode=").append(String.valueOf(mMagnificationMode));
-        pw.append(", magnificationCapabilities=")
-                .append(String.valueOf(mMagnificationCapabilities));
         pw.append("}");
         pw.println();
         pw.append("     shortcut key:{");
@@ -574,15 +523,6 @@ class AccessibilityUserState {
                 pw.append(componentName.toShortString());
             }
         }
-        pw.println("}");
-        pw.println("     Client list info:{");
-        mUserClients.dump(pw, "          Client list ");
-        pw.println("          Registered clients:{");
-        for (int i = 0; i < mUserClients.getRegisteredCallbackCount(); i++) {
-            AccessibilityManagerService.Client client = (AccessibilityManagerService.Client)
-                    mUserClients.getRegisteredCallbackCookie(i);
-            pw.append(Arrays.toString(client.mPackageNames));
-        }
         pw.println("}]");
     }
 
@@ -632,50 +572,6 @@ class AccessibilityUserState {
     public boolean isShortcutMagnificationEnabledLocked() {
         return mAccessibilityShortcutKeyTargets.contains(MAGNIFICATION_CONTROLLER_NAME)
                 || mAccessibilityButtonTargets.contains(MAGNIFICATION_CONTROLLER_NAME);
-    }
-
-    /**
-     * Gets the magnification mode of default display.
-     * @return magnification mode
-     *
-     * @see Settings.Secure#ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN
-     * @see Settings.Secure#ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW
-     */
-    public int getMagnificationModeLocked() {
-        return mMagnificationMode;
-    }
-
-
-    /**
-     * Gets the magnification capabilities setting of current user.
-     *
-     * @return magnification capabilities
-     *
-     * @see Settings.Secure#ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN
-     * @see Settings.Secure#ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW
-     * @see Settings.Secure#ACCESSIBILITY_MAGNIFICATION_MODE_ALL
-     */
-    int getMagnificationCapabilitiesLocked() {
-        return mMagnificationCapabilities;
-    }
-
-    /**
-     * Sets the magnification capabilities from Settings value.
-     *
-     * @see Settings.Secure#ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN
-     * @see Settings.Secure#ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW
-     * @see Settings.Secure#ACCESSIBILITY_MAGNIFICATION_MODE_ALL
-     */
-    public void setMagnificationCapabilitiesLocked(int capabilities) {
-        mMagnificationCapabilities = capabilities;
-    }
-
-    /**
-     * Sets the magnification mode of default display.
-     * @param mode The magnification mode.
-     */
-    public void setMagnificationModeLocked(int mode) {
-        mMagnificationMode = mode;
     }
 
     /**
@@ -837,21 +733,6 @@ class AccessibilityUserState {
     public void setMultiFingerGesturesLocked(boolean enabled) {
         mRequestMultiFingerGestures = enabled;
     }
-    public boolean isTwoFingerPassthroughEnabledLocked() {
-        return mRequestTwoFingerPassthrough;
-    }
-
-    public void setTwoFingerPassthroughLocked(boolean enabled) {
-        mRequestTwoFingerPassthrough = enabled;
-    }
-
-    public boolean isSendMotionEventsEnabled() {
-        return mSendMotionEventsEnabled;
-    }
-
-    public void setSendMotionEventsEnabled(boolean mode) {
-        mSendMotionEventsEnabled = mode;
-    }
 
     public int getUserInteractiveUiTimeoutLocked() {
         return mUserInteractiveUiTimeout;
@@ -919,32 +800,5 @@ class AccessibilityUserState {
             }
         }
         return false;
-    }
-
-    /**
-     * Gets the stroke width of the focus rectangle.
-     * @return The stroke width.
-     */
-    public int getFocusStrokeWidthLocked() {
-        return mFocusStrokeWidth;
-    }
-
-    /**
-     * Gets the color of the focus rectangle.
-     * @return The color.
-     */
-    public int getFocusColorLocked() {
-        return mFocusColor;
-    }
-
-    /**
-     * Sets the stroke width and color of the focus rectangle.
-     *
-     * @param strokeWidth The strokeWidth of the focus rectangle.
-     * @param color The color of the focus rectangle.
-     */
-    public void setFocusAppearanceLocked(int strokeWidth, int color) {
-        mFocusStrokeWidth = strokeWidth;
-        mFocusColor = color;
     }
 }

@@ -47,7 +47,6 @@ import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.AsyncTask;
-import android.os.Binder;
 import android.os.BugreportManager;
 import android.os.BugreportManager.BugreportCallback;
 import android.os.BugreportManager.BugreportCallback.BugreportErrorCode;
@@ -187,7 +186,7 @@ public class BugreportProgressService extends Service {
     static final int SCREENSHOT_DELAY_SECONDS = 3;
 
     /** System property where dumpstate stores last triggered bugreport id */
-    static final String PROPERTY_LAST_ID = "dumpstate.last_id";
+    private static final String PROPERTY_LAST_ID = "dumpstate.last_id";
 
     private static final String BUGREPORT_SERVICE = "bugreport";
 
@@ -234,7 +233,7 @@ public class BugreportProgressService extends Service {
 
     private File mBugreportsDir;
 
-    @VisibleForTesting BugreportManager mBugreportManager;
+    private BugreportManager mBugreportManager;
 
     /**
      * id of the notification used to set service on foreground.
@@ -248,11 +247,6 @@ public class BugreportProgressService extends Service {
      * access.
      */
     private boolean mTakingScreenshot;
-
-    /**
-     * The delay timeout before taking a screenshot.
-     */
-    @VisibleForTesting int mScreenshotDelaySec = SCREENSHOT_DELAY_SECONDS;
 
     @GuardedBy("sNotificationBundle")
     private static final Bundle sNotificationBundle = new Bundle();
@@ -288,7 +282,6 @@ public class BugreportProgressService extends Service {
                         mContext.getString(R.string.bugreport_notification_channel),
                         isTv(this) ? NotificationManager.IMPORTANCE_DEFAULT
                                 : NotificationManager.IMPORTANCE_LOW));
-        mBugreportManager = mContext.getSystemService(BugreportManager.class);
     }
 
     @Override
@@ -312,7 +305,7 @@ public class BugreportProgressService extends Service {
 
     @Override
     public IBinder onBind(Intent intent) {
-        return new LocalBinder();
+        return null;
     }
 
     @Override
@@ -380,19 +373,10 @@ public class BugreportProgressService extends Service {
         public void onFinished() {
             mInfo.renameBugreportFile();
             mInfo.renameScreenshots();
-            if (mInfo.bugreportFile.length() == 0) {
-                Log.e(TAG, "Bugreport file empty. File path = " + mInfo.bugreportFile);
-                onError(BUGREPORT_ERROR_RUNTIME);
-                return;
-            }
             synchronized (mLock) {
                 sendBugreportFinishedBroadcastLocked();
-                mMainThreadHandler.post(() -> mInfoDialog.onBugreportFinished(mInfo));
             }
         }
-
-        @Override
-        public void onEarlyReportFinished() {}
 
         /**
          * Reads bugreport id and links it to the bugreport info to track a bugreport that is in
@@ -413,6 +397,10 @@ public class BugreportProgressService extends Service {
         @GuardedBy("mLock")
         private void sendBugreportFinishedBroadcastLocked() {
             final String bugreportFilePath = mInfo.bugreportFile.getAbsolutePath();
+            if (mInfo.bugreportFile.length() == 0) {
+                Log.e(TAG, "Bugreport file empty. File path = " + bugreportFilePath);
+                return;
+            }
             if (mInfo.type == BugreportParams.BUGREPORT_MODE_REMOTE) {
                 sendRemoteBugreportFinishedBroadcast(mContext, bugreportFilePath,
                         mInfo.bugreportFile);
@@ -515,14 +503,14 @@ public class BugreportProgressService extends Service {
             }
 
             if (msg.what != MSG_SERVICE_COMMAND) {
-                // Confidence check.
+                // Sanity check.
                 Log.e(TAG, "Invalid message type: " + msg.what);
                 return;
             }
 
             // At this point it's handling onStartCommand(), with the intent passed as an Extra.
             if (!(msg.obj instanceof Intent)) {
-                // Confidence check.
+                // Sanity check.
                 Log.wtf(TAG, "handleMessage(): invalid msg.obj type: " + msg.obj);
                 return;
             }
@@ -618,21 +606,12 @@ public class BugreportProgressService extends Service {
 
         BugreportInfo info = new BugreportInfo(mContext, baseName, name,
                 shareTitle, shareDescription, bugreportType, mBugreportsDir);
-        synchronized (mLock) {
-            if (info.bugreportFile.exists()) {
-                Log.e(TAG, "Failed to start bugreport generation, the requested bugreport file "
-                        + info.bugreportFile + " already exists");
-                return;
-            }
-            info.createBugreportFile();
-        }
         ParcelFileDescriptor bugreportFd = info.getBugreportFd();
         if (bugreportFd == null) {
             Log.e(TAG, "Failed to start bugreport generation as "
                     + " bugreport parcel file descriptor is null.");
             return;
         }
-        info.createScreenshotFile(mBugreportsDir);
         ParcelFileDescriptor screenshotFd = null;
         if (isDefaultScreenshotRequired(bugreportType, /* hasScreenshotButton= */ !mIsTv)) {
             screenshotFd = info.getDefaultScreenshotFd();
@@ -645,6 +624,8 @@ public class BugreportProgressService extends Service {
             }
         }
 
+        mBugreportManager = (BugreportManager) mContext.getSystemService(
+                Context.BUGREPORT_SERVICE);
         final Executor executor = ActivityThread.currentActivityThread().getExecutor();
 
         Log.i(TAG, "bugreport type = " + bugreportType
@@ -750,20 +731,18 @@ public class BugreportProgressService extends Service {
             final Intent infoIntent = new Intent(mContext, BugreportProgressService.class);
             infoIntent.setAction(INTENT_BUGREPORT_INFO_LAUNCH);
             infoIntent.putExtra(EXTRA_ID, info.id);
-            // Simple notification action button clicks are immutable
             final PendingIntent infoPendingIntent =
                     PendingIntent.getService(mContext, info.id, infoIntent,
-                    PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+                    PendingIntent.FLAG_UPDATE_CURRENT);
             final Action infoAction = new Action.Builder(null,
                     mContext.getString(R.string.bugreport_info_action),
                     infoPendingIntent).build();
             final Intent screenshotIntent = new Intent(mContext, BugreportProgressService.class);
             screenshotIntent.setAction(INTENT_BUGREPORT_SCREENSHOT);
             screenshotIntent.putExtra(EXTRA_ID, info.id);
-            // Simple notification action button clicks are immutable
             PendingIntent screenshotPendingIntent = mTakingScreenshot ? null : PendingIntent
                     .getService(mContext, info.id, screenshotIntent,
-                            PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+                            PendingIntent.FLAG_UPDATE_CURRENT);
             final Action screenshotAction = new Action.Builder(null,
                     mContext.getString(R.string.bugreport_screenshot_action),
                     screenshotPendingIntent).build();
@@ -805,7 +784,7 @@ public class BugreportProgressService extends Service {
         intent.setClass(context, BugreportProgressService.class);
         intent.putExtra(EXTRA_ID, info.id);
         return PendingIntent.getService(context, info.id, intent,
-                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+                PendingIntent.FLAG_UPDATE_CURRENT);
     }
 
     /**
@@ -906,12 +885,12 @@ public class BugreportProgressService extends Service {
         collapseNotificationBar();
         final String msg = mContext.getResources()
                 .getQuantityString(com.android.internal.R.plurals.bugreport_countdown,
-                        mScreenshotDelaySec, mScreenshotDelaySec);
+                        SCREENSHOT_DELAY_SECONDS, SCREENSHOT_DELAY_SECONDS);
         Log.i(TAG, msg);
         // Show a toast just once, otherwise it might be captured in the screenshot.
         Toast.makeText(mContext, msg, Toast.LENGTH_SHORT).show();
 
-        takeScreenshot(id, mScreenshotDelaySec);
+        takeScreenshot(id, SCREENSHOT_DELAY_SECONDS);
     }
 
     /**
@@ -1265,8 +1244,7 @@ public class BugreportProgressService extends Service {
                 .setTicker(title)
                 .setContentText(content)
                 .setContentIntent(PendingIntent.getService(mContext, info.id, shareIntent,
-                        PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE))
-                .setOnlyAlertOnce(false)
+                        PendingIntent.FLAG_UPDATE_CURRENT))
                 .setDeleteIntent(newCancelIntent(mContext, info));
 
         if (!TextUtils.isEmpty(info.getName())) {
@@ -1306,7 +1284,6 @@ public class BugreportProgressService extends Service {
                 .setLocalOnly(true)
                 .setColor(context.getColor(
                         com.android.internal.R.color.system_notification_accent_color))
-                .setOnlyAlertOnce(true)
                 .extend(new Notification.TvExtender());
     }
 
@@ -1641,16 +1618,6 @@ public class BugreportProgressService extends Service {
     }
 
     /**
-     * A local binder with interface to return an instance of BugreportProgressService for the
-     * purpose of testing.
-     */
-    final class LocalBinder extends Binder {
-        @VisibleForTesting BugreportProgressService getService() {
-            return BugreportProgressService.this;
-        }
-    }
-
-    /**
      * Helper class encapsulating the UI elements and logic used to display a dialog where user
      * can change the details of a bugreport.
      */
@@ -1776,22 +1743,6 @@ public class BugreportProgressService extends Service {
                 Log.v(TAG, "changed invalid name '" + name + "' to '" + safeName + "'");
                 name = safeName.toString();
                 mInfoName.setText(name);
-            }
-        }
-
-        /**
-         * Notifies the dialog that the bugreport has finished so it disables the {@code name}
-         * field.
-         * <p>Once the bugreport is finished dumpstate has already generated the final files, so
-         * changing the name would have no effect.
-         */
-        void onBugreportFinished(BugreportInfo info) {
-            if (mId == info.id && mInfoName != null) {
-                mInfoName.setEnabled(false);
-                mInfoName.setText(null);
-                if (!TextUtils.isEmpty(info.getName())) {
-                    mInfoName.setText(info.getName());
-                }
             }
         }
 
@@ -1929,10 +1880,12 @@ public class BugreportProgressService extends Service {
             this.shareDescription = shareDescription == null ? "" : shareDescription;
             this.type = type;
             this.baseName = baseName;
-            this.bugreportFile = new File(bugreportsDir, getFileName(this, ".zip"));
+            createBugreportFile(bugreportsDir);
+            createScreenshotFile(bugreportsDir);
         }
 
-        void createBugreportFile() {
+        void createBugreportFile(File bugreportsDir) {
+            bugreportFile = new File(bugreportsDir, getFileName(this, ".zip"));
             createReadWriteFile(bugreportFile);
         }
 
@@ -2037,21 +1990,12 @@ public class BugreportProgressService extends Service {
                 Log.i(TAG, "Deleting empty bugreport file: " + bugreportFile);
                 bugreportFile.delete();
             }
-            deleteEmptyScreenshots();
-        }
-
-        /**
-         * Deletes empty screenshot files.
-         */
-        private void deleteEmptyScreenshots() {
-            screenshotFiles.removeIf(file -> {
-                final long length = file.length();
-                if (length == 0) {
+            for (File file : screenshotFiles) {
+                if (file.length() == 0) {
                     Log.i(TAG, "Deleting empty screenshot file: " + file);
                     file.delete();
                 }
-                return length == 0;
-            });
+            }
         }
 
         /**
@@ -2059,8 +2003,7 @@ public class BugreportProgressService extends Service {
          * {@code initialName} if user has changed it.
          */
         void renameScreenshots() {
-            deleteEmptyScreenshots();
-            if (TextUtils.isEmpty(name) || screenshotFiles.isEmpty()) {
+            if (TextUtils.isEmpty(name)) {
                 return;
             }
             final List<File> renamedFiles = new ArrayList<>(screenshotFiles.size());
@@ -2079,7 +2022,7 @@ public class BugreportProgressService extends Service {
                 if (newFile.length() > 0) {
                     renamedFiles.add(newFile);
                 } else if (newFile.delete()) {
-                    Log.d(TAG, "screenshot file: " + newFile + " deleted successfully.");
+                    Log.d(TAG, "screenshot file: " + newFile + "deleted successfully.");
                 }
             }
             screenshotFiles = renamedFiles;
@@ -2148,10 +2091,8 @@ public class BugreportProgressService extends Service {
             name = in.readString();
             initialName = in.readString();
             title = in.readString();
-            shareTitle = in.readString();
             description = in.readString();
             progress.set(in.readInt());
-            lastProgress.set(in.readInt());
             lastUpdate.set(in.readLong());
             formattedLastUpdate = in.readString();
             bugreportFile = readFile(in);
@@ -2162,10 +2103,9 @@ public class BugreportProgressService extends Service {
             }
 
             finished.set(in.readInt() == 1);
-            addingDetailsToZip = in.readBoolean();
-            addedDetailsToZip = in.readBoolean();
             screenshotCounter = in.readInt();
             shareDescription = in.readString();
+            shareTitle = in.readString();
             type = in.readInt();
         }
 
@@ -2176,10 +2116,8 @@ public class BugreportProgressService extends Service {
             dest.writeString(name);
             dest.writeString(initialName);
             dest.writeString(title);
-            dest.writeString(shareTitle);
             dest.writeString(description);
             dest.writeInt(progress.intValue());
-            dest.writeInt(lastProgress.intValue());
             dest.writeLong(lastUpdate.longValue());
             dest.writeString(getFormattedLastUpdate());
             writeFile(dest, bugreportFile);
@@ -2190,10 +2128,9 @@ public class BugreportProgressService extends Service {
             }
 
             dest.writeInt(finished.get() ? 1 : 0);
-            dest.writeBoolean(addingDetailsToZip);
-            dest.writeBoolean(addedDetailsToZip);
             dest.writeInt(screenshotCounter);
             dest.writeString(shareDescription);
+            dest.writeString(shareTitle);
             dest.writeInt(type);
         }
 

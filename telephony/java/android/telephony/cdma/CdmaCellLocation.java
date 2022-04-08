@@ -23,10 +23,7 @@ import android.telephony.CellLocation;
 
 /**
  * Represents the cell location on a CDMA phone.
- *
- * @deprecated use {@link android.telephony.CellIdentity CellIdentity}.
  */
-@Deprecated
 public class CdmaCellLocation extends CellLocation {
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private int mBaseStationId = -1;

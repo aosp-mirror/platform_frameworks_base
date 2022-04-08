@@ -18,7 +18,9 @@ package com.android.internal.widget;
 
 import android.content.Context;
 import android.graphics.Rect;
+import android.os.RemoteException;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.View;
@@ -70,6 +72,7 @@ import java.util.ArrayList;
  */
 public class DecorCaptionView extends ViewGroup implements View.OnTouchListener,
         GestureDetector.OnGestureListener {
+    private final static String TAG = "DecorCaptionView";
     private PhoneWindow mOwner = null;
     private boolean mShow = false;
 
@@ -324,7 +327,11 @@ public class DecorCaptionView extends ViewGroup implements View.OnTouchListener,
     private void toggleFreeformWindowingMode() {
         Window.WindowControllerCallback callback = mOwner.getWindowControllerCallback();
         if (callback != null) {
-            callback.toggleFreeformWindowingMode();
+            try {
+                callback.toggleFreeformWindowingMode();
+            } catch (RemoteException ex) {
+                Log.e(TAG, "Cannot change task workspace.");
+            }
         }
     }
 

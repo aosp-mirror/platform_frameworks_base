@@ -24,6 +24,7 @@ import static com.android.internal.app.ResolverActivity.EXTRA_SELECTED_PROFILE;
 import android.annotation.Nullable;
 import android.annotation.StringRes;
 import android.app.Activity;
+import android.app.ActivityTaskManager;
 import android.app.ActivityThread;
 import android.app.AppGlobals;
 import android.app.admin.DevicePolicyManager;
@@ -37,7 +38,6 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.pm.UserInfo;
 import android.metrics.LogMaker;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.os.UserHandle;
@@ -64,7 +64,7 @@ import java.util.concurrent.Executors;
  * be passed in and out of a managed profile.
  */
 public class IntentForwarderActivity extends Activity  {
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public static String TAG = "IntentForwarderActivity";
 
     public static String FORWARD_INTENT_TO_PARENT
@@ -198,8 +198,18 @@ public class IntentForwarderActivity extends Activity  {
                     /* ignoreTargetSecurity= */ false,
                     userId);
         } catch (RuntimeException e) {
-            Slog.wtf(TAG, "Unable to launch as UID " + getLaunchedFromUid() + " package "
-                    + getLaunchedFromPackage() + ", while running in "
+            int launchedFromUid = -1;
+            String launchedFromPackage = "?";
+            try {
+                launchedFromUid = ActivityTaskManager.getService().getLaunchedFromUid(
+                        getActivityToken());
+                launchedFromPackage = ActivityTaskManager.getService()
+                        .getLaunchedFromPackage(getActivityToken());
+            } catch (RemoteException ignored) {
+            }
+
+            Slog.wtf(TAG, "Unable to launch as UID " + launchedFromUid + " package "
+                    + launchedFromPackage + ", while running in "
                     + ActivityThread.currentProcessName(), e);
         }
     }

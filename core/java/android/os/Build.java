@@ -18,7 +18,6 @@ package android.os;
 
 import android.Manifest;
 import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SuppressAutoDoc;
 import android.annotation.SystemApi;
@@ -27,8 +26,6 @@ import android.app.ActivityThread;
 import android.app.Application;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
-import android.sysprop.DeviceProperties;
-import android.sysprop.SocProperties;
 import android.sysprop.TelephonyProperties;
 import android.text.TextUtils;
 import android.util.Slog;
@@ -90,14 +87,6 @@ public class Build {
     /** The end-user-visible name for the end product. */
     public static final String MODEL = getString("ro.product.model");
 
-    /** The manufacturer of the device's primary system-on-chip. */
-    @NonNull
-    public static final String SOC_MANUFACTURER = SocProperties.soc_manufacturer().orElse(UNKNOWN);
-
-    /** The model name of the device's primary system-on-chip. */
-    @NonNull
-    public static final String SOC_MODEL = SocProperties.soc_model().orElse(UNKNOWN);
-
     /** The system bootloader version number. */
     public static final String BOOTLOADER = getString("ro.bootloader");
 
@@ -117,35 +106,12 @@ public class Build {
     public static final String HARDWARE = getString("ro.hardware");
 
     /**
-     * The SKU of the hardware (from the kernel command line).
-     *
-     * <p>The SKU is reported by the bootloader to configure system software features.
-     * If no value is supplied by the bootloader, this is reported as {@link #UNKNOWN}.
-
-     */
-    @NonNull
-    public static final String SKU = getString("ro.boot.hardware.sku");
-
-    /**
-     * The SKU of the device as set by the original design manufacturer (ODM).
-     *
-     * <p>This is a runtime-initialized property set during startup to configure device
-     * services. If no value is set, this is reported as {@link #UNKNOWN}.
-     *
-     * <p>The ODM SKU may have multiple variants for the same system SKU in case a manufacturer
-     * produces variants of the same design. For example, the same build may be released with
-     * variations in physical keyboard and/or display hardware, each with a different ODM SKU.
-     */
-    @NonNull
-    public static final String ODM_SKU = getString("ro.boot.product.hardware.sku");
-
-    /**
      * Whether this build was for an emulator device.
      * @hide
      */
     @UnsupportedAppUsage
     @TestApi
-    public static final boolean IS_EMULATOR = getString("ro.boot.qemu").equals("1");
+    public static final boolean IS_EMULATOR = getString("ro.kernel.qemu").equals("1");
 
     /**
      * A hardware serial number, if available. Alphanumeric only, case-insensitive.
@@ -174,13 +140,15 @@ public class Build {
      * <ul>
      *     <li>If the calling app has been granted the READ_PRIVILEGED_PHONE_STATE permission; this
      *     is a privileged permission that can only be granted to apps preloaded on the device.
+     *     <li>If the calling app is the device or profile owner and has been granted the
+     *     {@link Manifest.permission#READ_PHONE_STATE} permission. The profile owner is an app that
+     *     owns a managed profile on the device; for more details see <a
+     *     href="https://developer.android.com/work/managed-profiles">Work profiles</a>.
+     *     Profile owner access is deprecated and will be removed in a future release.
      *     <li>If the calling app has carrier privileges (see {@link
      *     android.telephony.TelephonyManager#hasCarrierPrivileges}) on any active subscription.
      *     <li>If the calling app is the default SMS role holder (see {@link
      *     android.app.role.RoleManager#isRoleHeld(String)}).
-     *     <li>If the calling app is the device owner of a fully-managed device, a profile
-     *     owner of an organization-owned device, or their delegates (see {@link
-     *     android.app.admin.DevicePolicyManager#getEnrollmentSpecificId()}).
      * </ul>
      *
      * <p>If the calling app does not meet one of these requirements then this method will behave
@@ -302,19 +270,6 @@ public class Build {
                 "ro.build.version.security_patch", "");
 
         /**
-         * The media performance class of the device or 0 if none.
-         * <p>
-         * If this value is not <code>0</code>, the device conforms to the media performance class
-         * definition of the SDK version of this value. This value never changes while a device is
-         * booted, but it may increase when the hardware manufacturer provides an OTA update.
-         * <p>
-         * Possible non-zero values are defined in {@link Build.VERSION_CODES} starting with
-         * {@link Build.VERSION_CODES#R}.
-         */
-        public static final int MEDIA_PERFORMANCE_CLASS =
-                DeviceProperties.media_performance_class().orElse(0);
-
-        /**
          * The user-visible SDK version of the framework in its raw String
          * representation; use {@link #SDK_INT} instead.
          *
@@ -344,9 +299,8 @@ public class Build {
          * @see #SDK_INT
          * @hide
          */
-        @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
         @TestApi
-        public static final int DEVICE_INITIAL_SDK_INT = SystemProperties
+        public static final int FIRST_SDK_INT = SystemProperties
                 .getInt("ro.product.first_api_level", 0);
 
         /**
@@ -437,34 +391,26 @@ public class Build {
          * Magic version number for a current development build, which has
          * not yet turned into an official release.
          */
-        // This must match VMRuntime.SDK_VERSION_CUR_DEVELOPMENT.
-        public static final int CUR_DEVELOPMENT = 10000;
+        public static final int CUR_DEVELOPMENT = VMRuntime.SDK_VERSION_CUR_DEVELOPMENT;
 
         /**
-         * The original, first, version of Android.  Yay!
-         *
-         * <p>Released publicly as Android 1.0 in September 2008.
+         * October 2008: The original, first, version of Android.  Yay!
          */
         public static final int BASE = 1;
 
         /**
-         * First Android update.
-         *
-         * <p>Released publicly as Android 1.1 in February 2009.
+         * February 2009: First Android update, officially called 1.1.
          */
         public static final int BASE_1_1 = 2;
 
         /**
-         * C.
-         *
-         * <p>Released publicly as Android 1.5 in April 2009.
+         * May 2009: Android 1.5.
          */
         public static final int CUPCAKE = 3;
 
         /**
-         * D.
+         * September 2009: Android 1.6.
          *
-         * <p>Released publicly as Android 1.6 in September 2009.
          * <p>Applications targeting this or a later release will get these
          * new changes in behavior:</p>
          * <ul>
@@ -488,9 +434,8 @@ public class Build {
         public static final int DONUT = 4;
 
         /**
-         * E.
+         * November 2009: Android 2.0
          *
-         * <p>Released publicly as Android 2.0 in October 2009.
          * <p>Applications targeting this or a later release will get these
          * new changes in behavior:</p>
          * <ul>
@@ -509,30 +454,23 @@ public class Build {
         public static final int ECLAIR = 5;
 
         /**
-         * E incremental update.
-         *
-         * <p>Released publicly as Android 2.0.1 in December 2009.
+         * December 2009: Android 2.0.1
          */
         public static final int ECLAIR_0_1 = 6;
 
         /**
-         * E MR1.
-         *
-         * <p>Released publicly as Android 2.1 in January 2010.
+         * January 2010: Android 2.1
          */
         public static final int ECLAIR_MR1 = 7;
 
         /**
-         * F.
-         *
-         * <p>Released publicly as Android 2.2 in May 2010.
+         * June 2010: Android 2.2
          */
         public static final int FROYO = 8;
 
         /**
-         * G.
+         * November 2010: Android 2.3
          *
-         * <p>Released publicly as Android 2.3 in December 2010.
          * <p>Applications targeting this or a later release will get these
          * new changes in behavior:</p>
          * <ul>
@@ -543,16 +481,13 @@ public class Build {
         public static final int GINGERBREAD = 9;
 
         /**
-         * G MR1.
-         *
-         * <p>Released publicly as Android 2.3.3 in February 2011.
+         * February 2011: Android 2.3.3.
          */
         public static final int GINGERBREAD_MR1 = 10;
 
         /**
-         * H.
+         * February 2011: Android 3.0.
          *
-         * <p>Released publicly as Android 3.0 in February 2011.
          * <p>Applications targeting this or a later release will get these
          * new changes in behavior:</p>
          * <ul>
@@ -591,16 +526,13 @@ public class Build {
         public static final int HONEYCOMB = 11;
 
         /**
-         * H MR1.
-         *
-         * <p>Released publicly as Android 3.1 in May 2011.
+         * May 2011: Android 3.1.
          */
         public static final int HONEYCOMB_MR1 = 12;
 
         /**
-         * H MR2.
+         * June 2011: Android 3.2.
          *
-         * <p>Released publicly as Android 3.2 in July 2011.
          * <p>Update to Honeycomb MR1 to support 7 inch tablets, improve
          * screen compatibility mode, etc.</p>
          *
@@ -647,9 +579,8 @@ public class Build {
         public static final int HONEYCOMB_MR2 = 13;
 
         /**
-         * I.
+         * October 2011: Android 4.0.
          *
-         * <p>Released publicly as Android 4.0 in October 2011.
          * <p>Applications targeting this or a later release will get these
          * new changes in behavior:</p>
          * <ul>
@@ -694,16 +625,13 @@ public class Build {
         public static final int ICE_CREAM_SANDWICH = 14;
 
         /**
-         * I MR1.
-         *
-         * <p>Released publicly as Android 4.03 in December 2011.
+         * December 2011: Android 4.0.3.
          */
         public static final int ICE_CREAM_SANDWICH_MR1 = 15;
 
         /**
-         * J.
+         * June 2012: Android 4.1.
          *
-         * <p>Released publicly as Android 4.1 in July 2012.
          * <p>Applications targeting this or a later release will get these
          * new changes in behavior:</p>
          * <ul>
@@ -745,9 +673,8 @@ public class Build {
         public static final int JELLY_BEAN = 16;
 
         /**
-         * J MR1.
+         * November 2012: Android 4.2, Moar jelly beans!
          *
-         * <p>Released publicly as Android 4.2 in November 2012.
          * <p>Applications targeting this or a later release will get these
          * new changes in behavior:</p>
          * <ul>
@@ -766,16 +693,13 @@ public class Build {
         public static final int JELLY_BEAN_MR1 = 17;
 
         /**
-         * J MR2.
-         *
-         * <p>Released publicly as Android 4.3 in July 2013.
+         * July 2013: Android 4.3, the revenge of the beans.
          */
         public static final int JELLY_BEAN_MR2 = 18;
 
         /**
-         * K.
+         * October 2013: Android 4.4, KitKat, another tasty treat.
          *
-         * <p>Released publicly as Android 4.4 in October 2013.
          * <p>Applications targeting this or a later release will get these
          * new changes in behavior. For more information about this release, see the
          * <a href="/about/versions/kitkat/">Android KitKat overview</a>.</p>
@@ -807,9 +731,8 @@ public class Build {
         public static final int KITKAT = 19;
 
         /**
-         * K for watches.
+         * June 2014: Android 4.4W. KitKat for watches, snacks on the run.
          *
-         * <p>Released publicly as Android 4.4W in June 2014.
          * <p>Applications targeting this or a later release will get these
          * new changes in behavior:</p>
          * <ul>
@@ -826,9 +749,8 @@ public class Build {
         public static final int L = 21;
 
         /**
-         * L.
+         * November 2014: Lollipop.  A flat one with beautiful shadows.  But still tasty.
          *
-         * <p>Released publicly as Android 5.0 in November 2014.
          * <p>Applications targeting this or a later release will get these
          * new changes in behavior.  For more information about this release, see the
          * <a href="/about/versions/lollipop/">Android Lollipop overview</a>.</p>
@@ -859,18 +781,15 @@ public class Build {
         public static final int LOLLIPOP = 21;
 
         /**
-         * L MR1.
-         *
-         * <p>Released publicly as Android 5.1 in March 2015.
-         * <p>For more information about this release, see the
+         * March 2015: Lollipop with an extra sugar coating on the outside!
+         * For more information about this release, see the
          * <a href="/about/versions/android-5.1">Android 5.1 APIs</a>.
          */
         public static final int LOLLIPOP_MR1 = 22;
 
         /**
-         * M.
+         * M is for Marshmallow!
          *
-         * <p>Released publicly as Android 6.0 in October 2015.
          * <p>Applications targeting this or a later release will get these
          * new changes in behavior. For more information about this release, see the
          * <a href="/about/versions/marshmallow/">Android 6.0 Marshmallow overview</a>.</p>
@@ -901,9 +820,8 @@ public class Build {
         public static final int M = 23;
 
         /**
-         * N.
+         * N is for Nougat.
          *
-         * <p>Released publicly as Android 7.0 in August 2016.
          * <p>Applications targeting this or a later release will get these
          * new changes in behavior. For more information about this release, see
          * the <a href="/about/versions/nougat/">Android Nougat overview</a>.</p>
@@ -956,10 +874,7 @@ public class Build {
         public static final int N = 24;
 
         /**
-         * N MR1.
-         *
-         * <p>Released publicly as Android 7.1 in October 2016.
-         * <p>For more information about this release, see
+         * N MR1: Nougat++. For more information about this release, see
          * <a href="/about/versions/nougat/android-7.1">Android 7.1 for
          * Developers</a>.
          */
@@ -968,7 +883,6 @@ public class Build {
         /**
          * O.
          *
-         * <p>Released publicly as Android 8.0 in August 2017.
          * <p>Applications targeting this or a later release will get these
          * new changes in behavior. For more information about this release, see
          * the <a href="/about/versions/oreo/">Android Oreo overview</a>.</p>
@@ -1059,7 +973,6 @@ public class Build {
         /**
          * O MR1.
          *
-         * <p>Released publicly as Android 8.1 in December 2017.
          * <p>Applications targeting this or a later release will get these
          * new changes in behavior. For more information about this release, see
          * <a href="/about/versions/oreo/android-8.1">Android 8.1 features and
@@ -1077,7 +990,6 @@ public class Build {
         /**
          * P.
          *
-         * <p>Released publicly as Android 9 in August 2018.
          * <p>Applications targeting this or a later release will get these
          * new changes in behavior. For more information about this release, see the
          * <a href="/about/versions/pie/">Android 9 Pie overview</a>.</p>
@@ -1095,7 +1007,6 @@ public class Build {
         /**
          * Q.
          *
-         * <p>Released publicly as Android 10 in September 2019.
          * <p>Applications targeting this or a later release will get these new changes in behavior.
          * For more information about this release, see the
          * <a href="/about/versions/10">Android 10 overview</a>.</p>
@@ -1111,7 +1022,6 @@ public class Build {
         /**
          * R.
          *
-         * <p>Released publicly as Android 11 in September 2020.
          * <p>Applications targeting this or a later release will get these new changes in behavior.
          * For more information about this release, see the
          * <a href="/about/versions/11">Android 11 overview</a>.</p>
@@ -1125,11 +1035,6 @@ public class Build {
          *
          */
         public static final int R = 30;
-
-        /**
-         * S.
-         */
-        public static final int S = 31;
     }
 
     /** The type of build, like "user" or "eng". */
@@ -1176,18 +1081,6 @@ public class Build {
             }
         }
     }
-
-    /**
-     * A multiplier for various timeouts on the system.
-     *
-     * The intent is that products targeting software emulators that are orders of magnitude slower
-     * than real hardware may set this to a large number. On real devices and hardware-accelerated
-     * virtualized devices this should not be set.
-     *
-     * @hide
-     */
-    public static final int HW_TIMEOUT_MULTIPLIER =
-        SystemProperties.getInt("ro.hw_timeout_multiplier", 1);
 
     /**
      * True if Treble is enabled and required for this device.
@@ -1311,7 +1204,7 @@ public class Build {
         }
 
         @Override
-        public boolean equals(@Nullable Object o) {
+        public boolean equals(Object o) {
             if (!(o instanceof Partition)) {
                 return false;
             }
@@ -1361,30 +1254,12 @@ public class Build {
     public static final String HOST = getString("ro.build.host");
 
     /**
-     * Returns true if the device is running a debuggable build such as "userdebug" or "eng".
-     *
-     * Debuggable builds allow users to gain root access via local shell, attach debuggers to any
-     * application regardless of whether they have the "debuggable" attribute set, or downgrade
-     * selinux into "permissive" mode in particular.
+     * Returns true if we are running a debug build such as "user-debug" or "eng".
      * @hide
      */
     @UnsupportedAppUsage
     public static final boolean IS_DEBUGGABLE =
             SystemProperties.getInt("ro.debuggable", 0) == 1;
-
-    /**
-     * Returns true if the device is running a debuggable build such as "userdebug" or "eng".
-     *
-     * Debuggable builds allow users to gain root access via local shell, attach debuggers to any
-     * application regardless of whether they have the "debuggable" attribute set, or downgrade
-     * selinux into "permissive" mode in particular.
-     * @hide
-     */
-    @TestApi
-    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
-    public static boolean isDebuggable() {
-        return IS_DEBUGGABLE;
-    }
 
     /** {@hide} */
     public static final boolean IS_ENG = "eng".equals(TYPE);

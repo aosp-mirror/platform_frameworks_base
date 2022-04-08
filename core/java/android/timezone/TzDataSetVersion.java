@@ -17,9 +17,7 @@
 package android.timezone;
 
 import android.annotation.NonNull;
-import android.annotation.Nullable;
 
-import com.android.i18n.timezone.TimeZoneDataFiles;
 import com.android.internal.annotations.VisibleForTesting;
 
 import java.io.IOException;
@@ -52,14 +50,14 @@ public final class TzDataSetVersion {
      * Returns the major tz data format version supported by this device.
      */
     public static int currentFormatMajorVersion() {
-        return com.android.i18n.timezone.TzDataSetVersion.currentFormatMajorVersion();
+        return libcore.timezone.TzDataSetVersion.currentFormatMajorVersion();
     }
 
     /**
      * Returns the minor tz data format version supported by this device.
      */
     public static int currentFormatMinorVersion() {
-        return com.android.i18n.timezone.TzDataSetVersion.currentFormatMinorVersion();
+        return libcore.timezone.TzDataSetVersion.currentFormatMinorVersion();
     }
 
     /**
@@ -67,7 +65,7 @@ public final class TzDataSetVersion {
      * with the current system image, and set of active modules.
      */
     public static boolean isCompatibleWithThisDevice(TzDataSetVersion tzDataSetVersion) {
-        return com.android.i18n.timezone.TzDataSetVersion.isCompatibleWithThisDevice(
+        return libcore.timezone.TzDataSetVersion.isCompatibleWithThisDevice(
                 tzDataSetVersion.mDelegate);
     }
 
@@ -77,8 +75,9 @@ public final class TzDataSetVersion {
     @NonNull
     public static TzDataSetVersion read() throws IOException, TzDataSetException {
         try {
-            return new TzDataSetVersion(TimeZoneDataFiles.readTimeZoneModuleVersion());
-        } catch (com.android.i18n.timezone.TzDataSetVersion.TzDataSetException e) {
+            return new TzDataSetVersion(
+                    libcore.timezone.TzDataSetVersion.readTimeZoneModuleVersion());
+        } catch (libcore.timezone.TzDataSetVersion.TzDataSetException e) {
             throw new TzDataSetException(e.getMessage(), e);
         }
     }
@@ -101,9 +100,9 @@ public final class TzDataSetVersion {
     }
 
     @NonNull
-    private final com.android.i18n.timezone.TzDataSetVersion mDelegate;
+    private final libcore.timezone.TzDataSetVersion mDelegate;
 
-    private TzDataSetVersion(@NonNull com.android.i18n.timezone.TzDataSetVersion delegate) {
+    private TzDataSetVersion(@NonNull libcore.timezone.TzDataSetVersion delegate) {
         mDelegate = Objects.requireNonNull(delegate);
     }
 
@@ -129,7 +128,7 @@ public final class TzDataSetVersion {
     }
 
     @Override
-    public boolean equals(@Nullable Object o) {
+    public boolean equals(Object o) {
         if (this == o) {
             return true;
         }

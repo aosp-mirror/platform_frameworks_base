@@ -17,27 +17,22 @@
 package com.android.systemui.screenrecord;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.content.Intent;
-import android.os.RemoteException;
 import android.testing.AndroidTestingRunner;
 
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.plugins.ActivityStarter;
-import com.android.systemui.settings.UserContextProvider;
-import com.android.systemui.statusbar.phone.KeyguardDismissUtil;
+import com.android.systemui.settings.CurrentUserContextTracker;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -46,7 +41,6 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
-import java.io.IOException;
 import java.util.concurrent.Executor;
 
 @RunWith(AndroidTestingRunner.class)
@@ -66,13 +60,7 @@ public class RecordingServiceTest extends SysuiTestCase {
     @Mock
     private Executor mExecutor;
     @Mock
-    private UserContextProvider mUserContextTracker;
-    private KeyguardDismissUtil mKeyguardDismissUtil = new KeyguardDismissUtil() {
-        public void executeWhenUnlocked(ActivityStarter.OnDismissAction action,
-                boolean requiresShadeOpen) {
-            action.onDismiss();
-        }
-    };
+    private CurrentUserContextTracker mUserContextTracker;
 
     private RecordingService mRecordingService;
 
@@ -80,7 +68,7 @@ public class RecordingServiceTest extends SysuiTestCase {
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
         mRecordingService = Mockito.spy(new RecordingService(mController, mExecutor, mUiEventLogger,
-                mNotificationManager, mUserContextTracker, mKeyguardDismissUtil));
+                mNotificationManager, mUserContextTracker));
 
         // Return actual context info
         doReturn(mContext).when(mRecordingService).getApplicationContext();
@@ -92,14 +80,11 @@ public class RecordingServiceTest extends SysuiTestCase {
         doNothing().when(mRecordingService).createRecordingNotification();
         doReturn(mNotification).when(mRecordingService).createProcessingNotification();
         doReturn(mNotification).when(mRecordingService).createSaveNotification(any());
-        doNothing().when(mRecordingService).createErrorNotification();
-        doNothing().when(mRecordingService).showErrorToast(anyInt());
-        doNothing().when(mRecordingService).stopForeground(anyBoolean());
 
         doNothing().when(mRecordingService).startForeground(anyInt(), any());
         doReturn(mScreenMediaRecorder).when(mRecordingService).getRecorder();
 
-        doReturn(mContext).when(mUserContextTracker).getUserContext();
+        doReturn(mContext).when(mUserContextTracker).getCurrentUserContext();
     }
 
     @Test
@@ -130,17 +115,5 @@ public class RecordingServiceTest extends SysuiTestCase {
         verify(mUiEventLogger, times(1))
                 .log(Events.ScreenRecordEvent.SCREEN_RECORD_END_NOTIFICATION);
         verify(mUiEventLogger, times(0)).log(Events.ScreenRecordEvent.SCREEN_RECORD_END_QS_TILE);
-    }
-
-    @Test
-    public void testErrorUpdatesState() throws IOException, RemoteException {
-        // When the screen recording does not start properly
-        doThrow(new RuntimeException("fail")).when(mScreenMediaRecorder).start();
-
-        Intent startIntent = RecordingService.getStartIntent(mContext, 0, 0, false);
-        mRecordingService.onStartCommand(startIntent, 0, 0);
-
-        // Then the state is set to not recording
-        verify(mController).updateState(false);
     }
 }

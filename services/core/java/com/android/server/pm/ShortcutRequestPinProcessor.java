@@ -254,8 +254,7 @@ class ShortcutRequestPinProcessor {
         // Next, validate the incoming shortcut, etc.
         final PinItemRequest request;
         if (inShortcut != null) {
-            request = requestPinShortcutLocked(inShortcut, resultIntent,
-                    confirmActivity.first.getPackageName(), confirmActivity.second);
+            request = requestPinShortcutLocked(inShortcut, resultIntent, confirmActivity);
         } else {
             int launcherUid = mService.injectGetPackageUid(
                     confirmActivity.first.getPackageName(), launcherUserId);
@@ -276,7 +275,7 @@ class ShortcutRequestPinProcessor {
     public Intent createShortcutResultIntent(@NonNull ShortcutInfo inShortcut, int userId) {
         // Find the default launcher activity
         final int launcherUserId = mService.getParentOrSelfUserId(userId);
-        final String defaultLauncher = mService.getDefaultLauncher(launcherUserId);
+        final ComponentName defaultLauncher = mService.getDefaultLauncher(launcherUserId);
         if (defaultLauncher == null) {
             Log.e(TAG, "Default launcher not found.");
             return null;
@@ -287,8 +286,8 @@ class ShortcutRequestPinProcessor {
         mService.throwIfUserLockedL(launcherUserId);
 
         // Next, validate the incoming shortcut, etc.
-        final PinItemRequest request = requestPinShortcutLocked(inShortcut, null, defaultLauncher,
-                launcherUserId);
+        final PinItemRequest request = requestPinShortcutLocked(inShortcut, null,
+                Pair.create(defaultLauncher, launcherUserId));
         return new Intent().putExtra(LauncherApps.EXTRA_PIN_ITEM_REQUEST, request);
     }
 
@@ -297,7 +296,7 @@ class ShortcutRequestPinProcessor {
      */
     @NonNull
     private PinItemRequest requestPinShortcutLocked(ShortcutInfo inShortcut,
-            IntentSender resultIntentOriginal, String launcherPackage, int launcherUserId) {
+            IntentSender resultIntentOriginal, Pair<ComponentName, Integer> confirmActivity) {
         final ShortcutPackage ps = mService.getPackageShortcutsForPublisherLocked(
                 inShortcut.getPackage(), inShortcut.getUserId());
 
@@ -314,6 +313,8 @@ class ShortcutRequestPinProcessor {
 
         // This is the shortcut that'll be sent to the launcher.
         final ShortcutInfo shortcutForLauncher;
+        final String launcherPackage = confirmActivity.first.getPackageName();
+        final int launcherUserId = confirmActivity.second;
 
         IntentSender resultIntentToSend = resultIntentOriginal;
 
@@ -418,14 +419,14 @@ class ShortcutRequestPinProcessor {
             int callingUserId, int requestType) {
         // Find the default launcher.
         final int launcherUserId = mService.getParentOrSelfUserId(callingUserId);
-        final String defaultLauncher = mService.getDefaultLauncher(launcherUserId);
+        final ComponentName defaultLauncher = mService.getDefaultLauncher(launcherUserId);
 
         if (defaultLauncher == null) {
             Log.e(TAG, "Default launcher not found.");
             return null;
         }
         final ComponentName activity = mService.injectGetPinConfirmationActivity(
-                defaultLauncher, launcherUserId, requestType);
+                defaultLauncher.getPackageName(), launcherUserId, requestType);
         return (activity == null) ? null : Pair.create(activity, launcherUserId);
     }
 
@@ -496,7 +497,7 @@ class ShortcutRequestPinProcessor {
                     Slog.d(TAG, "Temporarily adding " + shortcutId + " as dynamic");
                 }
                 // Add as a dynamic shortcut.  In order for a shortcut to be dynamic, it must
-                // have a target activity, so we set a placeholder here.  It's later removed
+                // have a target activity, so we set a dummy here.  It's later removed
                 // in deleteDynamicWithId().
                 if (original.getActivity() == null) {
                     original.setActivity(mService.getDummyMainActivity(appPackageName));

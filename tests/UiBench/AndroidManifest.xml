@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="utf-8"?>
 <!--
   ~ Copyright (C) 2015 The Android Open Source Project
   ~
@@ -14,304 +13,303 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License
   -->
-
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-     xmlns:tools="http://schemas.android.com/tools"
-     package="com.android.test.uibench">
+    xmlns:tools="http://schemas.android.com/tools"
+    package="com.android.test.uibench">
 
-    <application android:allowBackup="false"
-         android:theme="@style/Theme.AppCompat.Light.DarkActionBar"
-         tools:ignore="MissingApplicationIcon">
-        <uses-library android:name="android.test.runner"/>
+    <application
+        android:allowBackup="false"
+        android:theme="@style/Theme.AppCompat.Light.DarkActionBar"
+        tools:ignore="MissingApplicationIcon">
+        <uses-library android:name="android.test.runner" />
 
         <!-- Root navigation activity -->
-        <activity android:name=".MainActivity"
-             android:label="UiBench"
-             android:exported="true">
+        <activity
+            android:name=".MainActivity"
+            android:label="UiBench">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
-                <category android:name="android.intent.category.DEFAULT"/>
-                <category android:name="android.intent.category.LAUNCHER"/>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
 
         <!-- General -->
-        <activity android:name=".DialogListActivity"
-             android:label="General/Dialog List"
-             android:exported="true">
+        <activity
+            android:name=".DialogListActivity"
+            android:label="General/Dialog List" >
             <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
-                <category android:name="com.android.test.uibench.TEST"/>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="com.android.test.uibench.TEST" />
             </intent-filter>
         </activity>
-        <activity android:name=".GlTextureViewActivity"
-             android:label="General/GL TextureView"
-             android:exported="true">
+        <activity
+            android:name=".GlTextureViewActivity"
+            android:label="General/GL TextureView" >
             <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
-                <category android:name="com.android.test.uibench.TEST"/>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="com.android.test.uibench.TEST" />
             </intent-filter>
         </activity>
-        <activity android:name=".FullscreenOverdrawActivity"
-             android:label="General/Fullscreen Overdraw"
-             android:exported="true">
+        <activity
+            android:name=".FullscreenOverdrawActivity"
+            android:label="General/Fullscreen Overdraw" >
             <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
-                <category android:name="com.android.test.uibench.TEST"/>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="com.android.test.uibench.TEST" />
             </intent-filter>
         </activity>
-        <activity android:name=".InvalidateActivity"
-             android:label="General/Invalidate"
-             android:exported="true">
+        <activity
+            android:name=".InvalidateActivity"
+            android:label="General/Invalidate" >
             <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
-                <category android:name="com.android.test.uibench.TEST"/>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="com.android.test.uibench.TEST" />
             </intent-filter>
         </activity>
-        <activity android:name=".InvalidateTreeActivity"
-             android:label="General/Invalidate Tree"
-             android:exported="true">
+        <activity
+            android:name=".InvalidateTreeActivity"
+            android:label="General/Invalidate Tree" >
             <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
-                <category android:name="com.android.test.uibench.TEST"/>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="com.android.test.uibench.TEST" />
             </intent-filter>
         </activity>
-        <activity android:name=".ResizeHWLayerActivity"
-             android:label="General/Resize HW Layer"
-             android:exported="true">
+        <activity
+            android:name=".ResizeHWLayerActivity"
+            android:label="General/Resize HW Layer" >
             <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
-                <category android:name="com.android.test.uibench.TEST"/>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="com.android.test.uibench.TEST" />
             </intent-filter>
         </activity>
-        <activity android:name=".TrivialAnimationActivity"
-             android:label="General/Trivial Animation"
-             android:exported="true">
+        <activity
+            android:name=".TrivialAnimationActivity"
+            android:label="General/Trivial Animation" >
             <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
-                <category android:name="com.android.test.uibench.TEST"/>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="com.android.test.uibench.TEST" />
             </intent-filter>
         </activity>
-        <activity android:name=".TrivialAnimationActivityWideGamut"
-             android:label="General/Trivial Animation (Wide Gamut)"
-             android:colorMode="wideColorGamut"
-             android:exported="true">
+        <activity
+            android:name=".TrivialAnimationActivityWideGamut"
+            android:label="General/Trivial Animation (Wide Gamut)"
+            android:colorMode="wideColorGamut">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
-                <category android:name="com.android.test.uibench.TEST"/>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="com.android.test.uibench.TEST" />
             </intent-filter>
         </activity>
-        <activity android:name=".TrivialListActivity"
-             android:label="General/Trivial ListView"
-             android:exported="true">
+        <activity
+            android:name=".TrivialListActivity"
+            android:label="General/Trivial ListView" >
             <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
-                <category android:name="com.android.test.uibench.TEST"/>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="com.android.test.uibench.TEST" />
             </intent-filter>
         </activity>
-        <activity android:name=".FadingEdgeListActivity"
-             android:label="General/Fading Edge ListView"
-             android:exported="true">
+        <activity
+            android:name=".FadingEdgeListActivity"
+            android:label="General/Fading Edge ListView" >
             <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
-                <category android:name="com.android.test.uibench.TEST"/>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="com.android.test.uibench.TEST" />
             </intent-filter>
         </activity>
-        <activity android:name=".SaveLayerInterleaveActivity"
-             android:label="General/SaveLayer Animation"
-             android:exported="true">
+        <activity
+            android:name=".SaveLayerInterleaveActivity"
+            android:label="General/SaveLayer Animation" >
             <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
-                <category android:name="com.android.test.uibench.TEST"/>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="com.android.test.uibench.TEST" />
             </intent-filter>
         </activity>
-        <activity android:name=".ClippedListActivity"
-             android:label="General/Clipped ListView"
-             android:theme="@style/NoActionBar"
-             android:exported="true">
+        <activity
+            android:name=".ClippedListActivity"
+            android:label="General/Clipped ListView"
+            android:theme="@style/NoActionBar">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
-                <category android:name="com.android.test.uibench.TEST"/>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="com.android.test.uibench.TEST" />
             </intent-filter>
         </activity>
-        <activity android:name=".TrivialRecyclerViewActivity"
-             android:label="General/Trivial RecyclerView"
-             android:exported="true">
+        <activity
+            android:name=".TrivialRecyclerViewActivity"
+            android:label="General/Trivial RecyclerView" >
             <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
-                <category android:name="com.android.test.uibench.TEST"/>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="com.android.test.uibench.TEST" />
             </intent-filter>
         </activity>
-        <activity android:name=".SlowBindRecyclerViewActivity"
-             android:label="General/Slow Bind RecyclerView"
-             android:exported="true">
+        <activity
+            android:name=".SlowBindRecyclerViewActivity"
+            android:label="General/Slow Bind RecyclerView" >
             <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
-                <category android:name="com.android.test.uibench.TEST"/>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="com.android.test.uibench.TEST" />
             </intent-filter>
         </activity>
-        <activity android:name=".SlowNestedRecyclerViewActivity"
-             android:label="General/Slow Nested RecyclerView"
-             android:exported="true">
+        <activity
+            android:name=".SlowNestedRecyclerViewActivity"
+            android:label="General/Slow Nested RecyclerView" >
             <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
-                <category android:name="com.android.test.uibench.TEST"/>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="com.android.test.uibench.TEST" />
             </intent-filter>
         </activity>
-        <activity android:name=".ActivityTransition"
-             android:label="Transitions/Activity Transition"
-             android:exported="true">
+        <activity
+            android:name=".ActivityTransition"
+            android:label="Transitions/Activity Transition" >
             <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
-                <category android:name="com.android.test.uibench.TEST"/>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="com.android.test.uibench.TEST" />
             </intent-filter>
         </activity>
-        <activity android:name=".ActivityTransitionDetails"
-             android:label="Transitions/Activity Transition "
-             android:exported="true">
+        <activity
+            android:name=".ActivityTransitionDetails"
+            android:label="Transitions/Activity Transition " >
             <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
+                <action android:name="android.intent.action.MAIN" />
                 <!-- Part of ActivityTransition test above, so not in TEST category -->
             </intent-filter>
         </activity>
 
         <!-- Rendering -->
-        <activity android:name=".BitmapUploadActivity"
-             android:label="Rendering/Bitmap Upload"
-             android:exported="true">
+        <activity
+            android:name=".BitmapUploadActivity"
+            android:label="Rendering/Bitmap Upload" >
             <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
-                <category android:name="com.android.test.uibench.TEST"/>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="com.android.test.uibench.TEST" />
             </intent-filter>
         </activity>
-        <activity android:name=".ShadowGridActivity"
-             android:label="Rendering/Shadow Grid"
-             android:exported="true">
+        <activity
+            android:name=".ShadowGridActivity"
+            android:label="Rendering/Shadow Grid" >
             <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
-                <category android:name="com.android.test.uibench.TEST"/>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="com.android.test.uibench.TEST" />
             </intent-filter>
         </activity>
-        <activity android:name=".RenderingJitter"
-             android:label="Rendering/Jitter"
-             android:exported="true">
+        <activity
+            android:name=".RenderingJitter"
+            android:label="Rendering/Jitter" >
             <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
-                <category android:name="com.android.test.uibench.TEST"/>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="com.android.test.uibench.TEST" />
             </intent-filter>
         </activity>
 
         <!-- Inflation -->
-        <activity android:name=".InflatingListActivity"
-             android:label="Inflation/Inflating ListView"
-             android:exported="true">
+        <activity
+            android:name=".InflatingListActivity"
+            android:label="Inflation/Inflating ListView" >
             <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
-                <category android:name="com.android.test.uibench.TEST"/>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="com.android.test.uibench.TEST" />
             </intent-filter>
         </activity>
 
-        <activity-alias android:name=".InflatingEmojiListActivity"
-             android:label="Inflation/Inflating ListView with Emoji"
-             android:targetActivity=".InflatingListActivity"
-             android:exported="true">
+        <activity-alias
+            android:name=".InflatingEmojiListActivity"
+            android:label="Inflation/Inflating ListView with Emoji"
+            android:targetActivity=".InflatingListActivity">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
-                <category android:name="com.android.test.uibench.TEST"/>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="com.android.test.uibench.TEST" />
             </intent-filter>
         </activity-alias>
 
-        <activity-alias android:name=".InflatingHanListActivity"
-             android:label="Inflation/Inflating ListView with Han Characters"
-             android:targetActivity=".InflatingListActivity"
-             android:exported="true">
+        <activity-alias
+            android:name=".InflatingHanListActivity"
+            android:label="Inflation/Inflating ListView with Han Characters"
+            android:targetActivity=".InflatingListActivity">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
-                <category android:name="com.android.test.uibench.TEST"/>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="com.android.test.uibench.TEST" />
             </intent-filter>
         </activity-alias>
 
-        <activity-alias android:name=".InflatingLongStringListActivity"
-             android:label="Inflation/Inflating ListView with long string"
-             android:targetActivity=".InflatingListActivity"
-             android:exported="true">
+        <activity-alias
+            android:name=".InflatingLongStringListActivity"
+            android:label="Inflation/Inflating ListView with long string"
+            android:targetActivity=".InflatingListActivity">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
-                <category android:name="com.android.test.uibench.TEST"/>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="com.android.test.uibench.TEST" />
             </intent-filter>
         </activity-alias>
 
         <!-- Text -->
-        <activity android:name=".EditTextTypeActivity"
-             android:label="Text/EditText Typing"
-             android:exported="true">
+        <activity
+            android:name=".EditTextTypeActivity"
+            android:label="Text/EditText Typing" >
             <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
-                <category android:name="com.android.test.uibench.TEST"/>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="com.android.test.uibench.TEST" />
             </intent-filter>
         </activity>
-        <activity android:name=".TextCacheLowHitrateActivity"
-             android:label="Text/Layout Cache Low Hitrate"
-             android:exported="true">
+        <activity
+            android:name=".TextCacheLowHitrateActivity"
+            android:label="Text/Layout Cache Low Hitrate" >
             <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
-                <category android:name="com.android.test.uibench.TEST"/>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="com.android.test.uibench.TEST" />
             </intent-filter>
         </activity>
-        <activity android:name=".TextCacheHighHitrateActivity"
-             android:label="Text/Layout Cache High Hitrate"
-             android:exported="true">
+        <activity
+            android:name=".TextCacheHighHitrateActivity"
+            android:label="Text/Layout Cache High Hitrate" >
             <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
-                <category android:name="com.android.test.uibench.TEST"/>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="com.android.test.uibench.TEST" />
             </intent-filter>
         </activity>
 
         <!-- WebView -->
-        <activity android:name=".ScrollableWebViewActivity"
-             android:label="WebView/Scrollable WebView"
-             android:exported="true">
+        <activity
+                android:name=".ScrollableWebViewActivity"
+                android:label="WebView/Scrollable WebView" >
             <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
-                <category android:name="com.android.test.uibench.TEST"/>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="com.android.test.uibench.TEST" />
             </intent-filter>
         </activity>
 
         <!-- Navigation Drawer -->
-        <activity android:name=".NavigationDrawerActivity"
-             android:label="Navigation Drawer Activity"
-             android:theme="@style/NoActionBar"
-             android:exported="true">
+        <activity
+            android:name=".NavigationDrawerActivity"
+            android:label="Navigation Drawer Activity"
+            android:theme="@style/NoActionBar">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
-                <category android:name="com.android.test.uibench.TEST"/>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="com.android.test.uibench.TEST" />
             </intent-filter>
         </activity>
 
         <!-- Notification Shade -->
-        <activity android:name=".NotificationShadeActivity"
-             android:label="Notification Shade"
-             android:exported="true">
+        <activity
+            android:name=".NotificationShadeActivity"
+            android:label="Notification Shade">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
-                <category android:name="com.android.test.uibench.TEST"/>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="com.android.test.uibench.TEST" />
             </intent-filter>
         </activity>
 
-        <activity android:name=".leanback.BrowseActivity"
-             android:theme="@style/Theme.Leanback.Browse"
-             android:label="Leanback/Browse Fragment"
-             android:exported="true">
+        <activity
+            android:name=".leanback.BrowseActivity"
+            android:theme="@style/Theme.Leanback.Browse"
+            android:label="Leanback/Browse Fragment" >
             <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
-                <category android:name="com.android.test.uibench.TEST"/>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="com.android.test.uibench.TEST" />
             </intent-filter>
         </activity>
 
         <activity
             android:name="WindowInsetsControllerActivity"
-            android:label="WindowInsetsControllerActivity"
-            android:exported="true">
+            android:label="WindowInsetsControllerActivity" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="com.android.test.uibench.TEST" />

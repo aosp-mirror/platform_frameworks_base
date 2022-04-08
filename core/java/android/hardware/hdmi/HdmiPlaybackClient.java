@@ -84,6 +84,7 @@ public final class HdmiPlaybackClient extends HdmiClient {
      *         of the result
      */
     public void oneTouchPlay(OneTouchPlayCallback callback) {
+        // TODO: Use PendingResult.
         try {
             mService.oneTouchPlay(getCallbackWrapper(callback));
         } catch (RemoteException e) {

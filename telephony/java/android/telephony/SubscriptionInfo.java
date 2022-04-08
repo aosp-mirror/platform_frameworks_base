@@ -16,8 +16,6 @@
 
 package android.telephony;
 
-import static android.text.TextUtils.formatSimple;
-
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.compat.annotation.UnsupportedAppUsage;
@@ -32,7 +30,6 @@ import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
 import android.graphics.Rect;
 import android.graphics.Typeface;
-import android.os.Build;
 import android.os.Parcel;
 import android.os.ParcelUuid;
 import android.os.Parcelable;
@@ -151,14 +148,13 @@ public class SubscriptionInfo implements Parcelable {
 
     /**
      * The access rules for this subscription, if it is embedded and defines any.
-     * This does not include access rules for non-embedded subscriptions.
      */
     @Nullable
     private UiccAccessRule[] mNativeAccessRules;
 
     /**
      * The carrier certificates for this subscription that are saved in carrier configs.
-     * This does not include access rules from the Uicc, whether embedded or non-embedded.
+     * The other carrier certificates are embedded on Uicc and stored as part of mNativeAccessRules.
      */
     @Nullable
     private UiccAccessRule[] mCarrierConfigAccessRules;
@@ -311,8 +307,8 @@ public class SubscriptionInfo implements Parcelable {
     /**
      * Returns the ICC ID.
      *
-     * Starting with API level 29 Security Patch 2021-04-05, returns the ICC ID if the calling app
-     * has been granted the READ_PRIVILEGED_PHONE_STATE permission, has carrier privileges (see
+     * Starting with API level 30, returns the ICC ID if the calling app has been granted the
+     * READ_PRIVILEGED_PHONE_STATE permission, has carrier privileges (see
      * {@link TelephonyManager#hasCarrierPrivileges}), or is a device owner or profile owner that
      * has been granted the READ_PHONE_STATE permission. The profile owner is an app that owns a
      * managed profile on the device; for more details see <a
@@ -358,7 +354,7 @@ public class SubscriptionInfo implements Parcelable {
      * Sets the name displayed to the user that identifies this subscription
      * @hide
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public void setDisplayName(CharSequence name) {
         this.mDisplayName = name;
     }
@@ -383,7 +379,7 @@ public class SubscriptionInfo implements Parcelable {
      * NAME_SOURCE_USER_INPUT.
      * @hide
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public int getNameSource() {
         return this.mNameSource;
     }
@@ -427,7 +423,7 @@ public class SubscriptionInfo implements Parcelable {
         // Set text size scaled by density
         paint.setTextSize(TEXT_SIZE * metrics.density);
         // Convert sim slot index to localized string
-        final String index = formatSimple("%d", mSimSlotIndex + 1);
+        final String index = String.format("%d", mSimSlotIndex + 1);
         final Rect textBound = new Rect();
         paint.getTextBounds(index, 0, 1, textBound);
         final float xOffset = (width / 2.f) - textBound.centerX();
@@ -450,7 +446,7 @@ public class SubscriptionInfo implements Parcelable {
      * Sets the color displayed to the user that identifies this subscription
      * @hide
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public void setIconTint(int iconTint) {
         this.mIconTint = iconTint;
     }
@@ -672,6 +668,7 @@ public class SubscriptionInfo implements Parcelable {
      * is authorized to manage this subscription.
      * TODO and fix it properly in R / master: either deprecate this and have 3 APIs
      *  native + carrier + all, or have this return all by default.
+     * @throws UnsupportedOperationException if this subscription is not embedded.
      * @hide
      */
     @SystemApi
@@ -699,8 +696,8 @@ public class SubscriptionInfo implements Parcelable {
     /**
      * Returns the card string of the SIM card which contains the subscription.
      *
-     * Starting with API level 29 Security Patch 2021-04-05, returns the card string if the calling
-     * app has been granted the READ_PRIVILEGED_PHONE_STATE permission, has carrier privileges (see
+     * Starting with API level 30, returns the card string if the calling app has been granted the
+     * READ_PRIVILEGED_PHONE_STATE permission, has carrier privileges (see
      * {@link TelephonyManager#hasCarrierPrivileges}), or is a device owner or profile owner that
      * has been granted the READ_PHONE_STATE permission. The profile owner is an app that owns a
      * managed profile on the device; for more details see <a

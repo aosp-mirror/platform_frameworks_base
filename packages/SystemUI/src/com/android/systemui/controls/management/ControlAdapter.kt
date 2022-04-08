@@ -72,13 +72,8 @@ class ControlAdapter(
             TYPE_CONTROL -> {
                 ControlHolder(
                     layoutInflater.inflate(R.layout.controls_base_item, parent, false).apply {
-                        (layoutParams as ViewGroup.MarginLayoutParams).apply {
+                        layoutParams.apply {
                             width = ViewGroup.LayoutParams.MATCH_PARENT
-                            // Reset margins as they will be set through the decoration
-                            topMargin = 0
-                            bottomMargin = 0
-                            leftMargin = 0
-                            rightMargin = 0
                         }
                         elevation = this@ControlAdapter.elevation
                         background = parent.context.getDrawable(
@@ -263,7 +258,6 @@ internal class ControlHolder(
         val context = itemView.context
         val fg = context.getResources().getColorStateList(ri.foreground, context.getTheme())
 
-        icon.imageTintList = null
         ci.customIcon?.let {
             icon.setImageIcon(it)
         } ?: run {
@@ -392,7 +386,7 @@ class MarginItemDecorator(
         val type = parent.adapter?.getItemViewType(position)
         if (type == ControlAdapter.TYPE_CONTROL) {
             outRect.apply {
-                top = topMargin * 2 // Use double margin, as we are not setting bottom
+                top = topMargin
                 left = sideMargins
                 right = sideMargins
                 bottom = 0

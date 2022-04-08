@@ -294,7 +294,7 @@ public class AmbientBrightnessStatsTrackerTest {
         AmbientBrightnessStatsTracker statsTracker = getTestStatsTracker();
         ArrayList<AmbientBrightnessDayStats> userStats;
         float[] expectedStats;
-        // Generate some placeholder data
+        // Generate some dummy data
         // Data: very old which should not be read
         statsTracker.start();
         statsTracker.add(0, 0.05f);

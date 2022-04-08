@@ -90,7 +90,7 @@ public class AccessPointPreference extends Preference {
         return frictionSld != null ? (StateListDrawable) frictionSld.getDrawable(0) : null;
     }
 
-    // Used for fake pref.
+    // Used for dummy pref.
     public AccessPointPreference(Context context, AttributeSet attrs) {
         super(context, attrs);
         mFrictionSld = null;
@@ -142,7 +142,7 @@ public class AccessPointPreference extends Preference {
     public void onBindViewHolder(final PreferenceViewHolder view) {
         super.onBindViewHolder(view);
         if (mAccessPoint == null) {
-            // Used for fake pref.
+            // Used for dummy pref.
             return;
         }
         Drawable drawable = getIcon();

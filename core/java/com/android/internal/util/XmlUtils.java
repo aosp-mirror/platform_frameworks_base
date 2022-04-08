@@ -16,7 +16,6 @@
 
 package com.android.internal.util;
 
-import android.annotation.NonNull;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.CompressFormat;
@@ -25,8 +24,6 @@ import android.net.Uri;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.Base64;
-import android.util.TypedXmlPullParser;
-import android.util.TypedXmlSerializer;
 import android.util.Xml;
 
 import libcore.util.HexEncoding;
@@ -51,211 +48,8 @@ import java.util.Set;
 
 /** {@hide} */
 public class XmlUtils {
+
     private static final String STRING_ARRAY_SEPARATOR = ":";
-
-    @SuppressWarnings("AndroidFrameworkEfficientXml")
-    private static class ForcedTypedXmlSerializer extends XmlSerializerWrapper
-            implements TypedXmlSerializer {
-        public ForcedTypedXmlSerializer(XmlSerializer wrapped) {
-            super(wrapped);
-        }
-
-        @Override
-        public XmlSerializer attributeInterned(String namespace, String name, String value)
-                throws IOException {
-            return attribute(namespace, name, value);
-        }
-
-        @Override
-        public XmlSerializer attributeBytesHex(String namespace, String name, byte[] value)
-                throws IOException {
-            return attribute(namespace, name, HexDump.toHexString(value));
-        }
-
-        @Override
-        public XmlSerializer attributeBytesBase64(String namespace, String name, byte[] value)
-                throws IOException {
-            return attribute(namespace, name, Base64.encodeToString(value, Base64.NO_WRAP));
-        }
-
-        @Override
-        public XmlSerializer attributeInt(String namespace, String name, int value)
-                throws IOException {
-            return attribute(namespace, name, Integer.toString(value));
-        }
-
-        @Override
-        public XmlSerializer attributeIntHex(String namespace, String name, int value)
-                throws IOException {
-            return attribute(namespace, name, Integer.toString(value, 16));
-        }
-
-        @Override
-        public XmlSerializer attributeLong(String namespace, String name, long value)
-                throws IOException {
-            return attribute(namespace, name, Long.toString(value));
-        }
-
-        @Override
-        public XmlSerializer attributeLongHex(String namespace, String name, long value)
-                throws IOException {
-            return attribute(namespace, name, Long.toString(value, 16));
-        }
-
-        @Override
-        public XmlSerializer attributeFloat(String namespace, String name, float value)
-                throws IOException {
-            return attribute(namespace, name, Float.toString(value));
-        }
-
-        @Override
-        public XmlSerializer attributeDouble(String namespace, String name, double value)
-                throws IOException {
-            return attribute(namespace, name, Double.toString(value));
-        }
-
-        @Override
-        public XmlSerializer attributeBoolean(String namespace, String name, boolean value)
-                throws IOException {
-            return attribute(namespace, name, Boolean.toString(value));
-        }
-    }
-
-    /**
-     * Return a specialization of the given {@link XmlSerializer} which has
-     * explicit methods to support consistent and efficient conversion of
-     * primitive data types.
-     */
-    public static @NonNull TypedXmlSerializer makeTyped(@NonNull XmlSerializer xml) {
-        if (xml instanceof TypedXmlSerializer) {
-            return (TypedXmlSerializer) xml;
-        } else {
-            return new ForcedTypedXmlSerializer(xml);
-        }
-    }
-
-    @SuppressWarnings("AndroidFrameworkEfficientXml")
-    private static class ForcedTypedXmlPullParser extends XmlPullParserWrapper
-            implements TypedXmlPullParser {
-        public ForcedTypedXmlPullParser(XmlPullParser wrapped) {
-            super(wrapped);
-        }
-
-        @Override
-        public byte[] getAttributeBytesHex(int index)
-                throws XmlPullParserException {
-            try {
-                return HexDump.hexStringToByteArray(getAttributeValue(index));
-            } catch (Exception e) {
-                throw new XmlPullParserException(
-                        "Invalid attribute " + getAttributeName(index) + ": " + e);
-            }
-        }
-
-        @Override
-        public byte[] getAttributeBytesBase64(int index)
-                throws XmlPullParserException {
-            try {
-                return Base64.decode(getAttributeValue(index), Base64.NO_WRAP);
-            } catch (Exception e) {
-                throw new XmlPullParserException(
-                        "Invalid attribute " + getAttributeName(index) + ": " + e);
-            }
-        }
-
-        @Override
-        public int getAttributeInt(int index)
-                throws XmlPullParserException {
-            try {
-                return Integer.parseInt(getAttributeValue(index));
-            } catch (Exception e) {
-                throw new XmlPullParserException(
-                        "Invalid attribute " + getAttributeName(index) + ": " + e);
-            }
-        }
-
-        @Override
-        public int getAttributeIntHex(int index)
-                throws XmlPullParserException {
-            try {
-                return Integer.parseInt(getAttributeValue(index), 16);
-            } catch (Exception e) {
-                throw new XmlPullParserException(
-                        "Invalid attribute " + getAttributeName(index) + ": " + e);
-            }
-        }
-
-        @Override
-        public long getAttributeLong(int index)
-                throws XmlPullParserException {
-            try {
-                return Long.parseLong(getAttributeValue(index));
-            } catch (Exception e) {
-                throw new XmlPullParserException(
-                        "Invalid attribute " + getAttributeName(index) + ": " + e);
-            }
-        }
-
-        @Override
-        public long getAttributeLongHex(int index)
-                throws XmlPullParserException {
-            try {
-                return Long.parseLong(getAttributeValue(index), 16);
-            } catch (Exception e) {
-                throw new XmlPullParserException(
-                        "Invalid attribute " + getAttributeName(index) + ": " + e);
-            }
-        }
-
-        @Override
-        public float getAttributeFloat(int index)
-                throws XmlPullParserException {
-            try {
-                return Float.parseFloat(getAttributeValue(index));
-            } catch (Exception e) {
-                throw new XmlPullParserException(
-                        "Invalid attribute " + getAttributeName(index) + ": " + e);
-            }
-        }
-
-        @Override
-        public double getAttributeDouble(int index)
-                throws XmlPullParserException {
-            try {
-                return Double.parseDouble(getAttributeValue(index));
-            } catch (Exception e) {
-                throw new XmlPullParserException(
-                        "Invalid attribute " + getAttributeName(index) + ": " + e);
-            }
-        }
-
-        @Override
-        public boolean getAttributeBoolean(int index)
-                throws XmlPullParserException {
-            final String value = getAttributeValue(index);
-            if ("true".equalsIgnoreCase(value)) {
-                return true;
-            } else if ("false".equalsIgnoreCase(value)) {
-                return false;
-            } else {
-                throw new XmlPullParserException(
-                        "Invalid attribute " + getAttributeName(index) + ": " + value);
-            }
-        }
-    }
-
-    /**
-     * Return a specialization of the given {@link XmlPullParser} which has
-     * explicit methods to support consistent and efficient conversion of
-     * primitive data types.
-     */
-    public static @NonNull TypedXmlPullParser makeTyped(@NonNull XmlPullParser xml) {
-        if (xml instanceof TypedXmlPullParser) {
-            return (TypedXmlPullParser) xml;
-        } else {
-            return new ForcedTypedXmlPullParser(xml);
-        }
-    }
 
     @UnsupportedAppUsage
     public static void skipCurrentTag(XmlPullParser parser)
@@ -400,7 +194,7 @@ public class XmlUtils {
     @UnsupportedAppUsage
     public static final void writeMapXml(Map val, OutputStream out)
             throws XmlPullParserException, java.io.IOException {
-        TypedXmlSerializer serializer = Xml.newFastSerializer();
+        XmlSerializer serializer = new FastXmlSerializer();
         serializer.setOutput(out, StandardCharsets.UTF_8.name());
         serializer.startDocument(null, true);
         serializer.setFeature("http://xmlpull.org/v1/doc/features.html#indent-output", true);
@@ -423,7 +217,7 @@ public class XmlUtils {
     public static final void writeListXml(List val, OutputStream out)
     throws XmlPullParserException, java.io.IOException
     {
-        TypedXmlSerializer serializer = Xml.newFastSerializer();
+        XmlSerializer serializer = Xml.newSerializer();
         serializer.setOutput(out, StandardCharsets.UTF_8.name());
         serializer.startDocument(null, true);
         serializer.setFeature("http://xmlpull.org/v1/doc/features.html#indent-output", true);
@@ -445,7 +239,7 @@ public class XmlUtils {
      * @see #writeValueXml
      * @see #readMapXml
      */
-    public static final void writeMapXml(Map val, String name, TypedXmlSerializer out)
+    public static final void writeMapXml(Map val, String name, XmlSerializer out)
             throws XmlPullParserException, java.io.IOException {
         writeMapXml(val, name, out, null);
     }
@@ -467,7 +261,7 @@ public class XmlUtils {
      *
      * @hide
      */
-    public static final void writeMapXml(Map val, String name, TypedXmlSerializer out,
+    public static final void writeMapXml(Map val, String name, XmlSerializer out,
             WriteMapCallback callback) throws XmlPullParserException, java.io.IOException {
 
         if (val == null) {
@@ -501,7 +295,7 @@ public class XmlUtils {
      *
      * @hide
      */
-    public static final void writeMapXml(Map val, TypedXmlSerializer out,
+    public static final void writeMapXml(Map val, XmlSerializer out,
             WriteMapCallback callback) throws XmlPullParserException, java.io.IOException {
         if (val == null) {
             return;
@@ -530,7 +324,7 @@ public class XmlUtils {
      * @see #writeValueXml
      * @see #readListXml
      */
-    public static final void writeListXml(List val, String name, TypedXmlSerializer out)
+    public static final void writeListXml(List val, String name, XmlSerializer out)
     throws XmlPullParserException, java.io.IOException
     {
         if (val == null) {
@@ -554,7 +348,7 @@ public class XmlUtils {
         out.endTag(null, "list");
     }
     
-    public static final void writeSetXml(Set val, String name, TypedXmlSerializer out)
+    public static final void writeSetXml(Set val, String name, XmlSerializer out)
             throws XmlPullParserException, java.io.IOException {
         if (val == null) {
             out.startTag(null, "null");
@@ -587,7 +381,7 @@ public class XmlUtils {
      * @see #writeValueXml
      */
     public static final void writeByteArrayXml(byte[] val, String name,
-            TypedXmlSerializer out)
+            XmlSerializer out)
             throws XmlPullParserException, java.io.IOException {
 
         if (val == null) {
@@ -602,7 +396,7 @@ public class XmlUtils {
         }
 
         final int N = val.length;
-        out.attributeInt(null, "num", N);
+        out.attribute(null, "num", Integer.toString(N));
 
         out.text(HexEncoding.encodeToString(val).toLowerCase());
 
@@ -623,7 +417,7 @@ public class XmlUtils {
      * @see #readThisIntArrayXml
      */
     public static final void writeIntArrayXml(int[] val, String name,
-            TypedXmlSerializer out)
+            XmlSerializer out)
             throws XmlPullParserException, java.io.IOException {
 
         if (val == null) {
@@ -638,11 +432,11 @@ public class XmlUtils {
         }
 
         final int N = val.length;
-        out.attributeInt(null, "num", N);
+        out.attribute(null, "num", Integer.toString(N));
 
         for (int i=0; i<N; i++) {
             out.startTag(null, "item");
-            out.attributeInt(null, "value", val[i]);
+            out.attribute(null, "value", Integer.toString(val[i]));
             out.endTag(null, "item");
         }
 
@@ -662,7 +456,7 @@ public class XmlUtils {
      * @see #writeValueXml
      * @see #readThisIntArrayXml
      */
-    public static final void writeLongArrayXml(long[] val, String name, TypedXmlSerializer out)
+    public static final void writeLongArrayXml(long[] val, String name, XmlSerializer out)
             throws XmlPullParserException, java.io.IOException {
 
         if (val == null) {
@@ -677,11 +471,11 @@ public class XmlUtils {
         }
 
         final int N = val.length;
-        out.attributeInt(null, "num", N);
+        out.attribute(null, "num", Integer.toString(N));
 
         for (int i=0; i<N; i++) {
             out.startTag(null, "item");
-            out.attributeLong(null, "value", val[i]);
+            out.attribute(null, "value", Long.toString(val[i]));
             out.endTag(null, "item");
         }
 
@@ -701,7 +495,7 @@ public class XmlUtils {
      * @see #writeValueXml
      * @see #readThisIntArrayXml
      */
-    public static final void writeDoubleArrayXml(double[] val, String name, TypedXmlSerializer out)
+    public static final void writeDoubleArrayXml(double[] val, String name, XmlSerializer out)
             throws XmlPullParserException, java.io.IOException {
 
         if (val == null) {
@@ -716,11 +510,11 @@ public class XmlUtils {
         }
 
         final int N = val.length;
-        out.attributeInt(null, "num", N);
+        out.attribute(null, "num", Integer.toString(N));
 
         for (int i=0; i<N; i++) {
             out.startTag(null, "item");
-            out.attributeDouble(null, "value", val[i]);
+            out.attribute(null, "value", Double.toString(val[i]));
             out.endTag(null, "item");
         }
 
@@ -740,7 +534,7 @@ public class XmlUtils {
      * @see #writeValueXml
      * @see #readThisIntArrayXml
      */
-    public static final void writeStringArrayXml(String[] val, String name, TypedXmlSerializer out)
+    public static final void writeStringArrayXml(String[] val, String name, XmlSerializer out)
             throws XmlPullParserException, java.io.IOException {
 
         if (val == null) {
@@ -755,7 +549,7 @@ public class XmlUtils {
         }
 
         final int N = val.length;
-        out.attributeInt(null, "num", N);
+        out.attribute(null, "num", Integer.toString(N));
 
         for (int i=0; i<N; i++) {
             out.startTag(null, "item");
@@ -779,8 +573,8 @@ public class XmlUtils {
      * @see #writeValueXml
      * @see #readThisIntArrayXml
      */
-    public static final void writeBooleanArrayXml(boolean[] val, String name,
-            TypedXmlSerializer out) throws XmlPullParserException, java.io.IOException {
+    public static final void writeBooleanArrayXml(boolean[] val, String name, XmlSerializer out)
+            throws XmlPullParserException, java.io.IOException {
 
         if (val == null) {
             out.startTag(null, "null");
@@ -794,21 +588,15 @@ public class XmlUtils {
         }
 
         final int N = val.length;
-        out.attributeInt(null, "num", N);
+        out.attribute(null, "num", Integer.toString(N));
 
         for (int i=0; i<N; i++) {
             out.startTag(null, "item");
-            out.attributeBoolean(null, "value", val[i]);
+            out.attribute(null, "value", Boolean.toString(val[i]));
             out.endTag(null, "item");
         }
 
         out.endTag(null, "boolean-array");
-    }
-
-    @Deprecated
-    public static final void writeValueXml(Object v, String name, XmlSerializer out)
-            throws XmlPullParserException, java.io.IOException {
-        writeValueXml(v, name, XmlUtils.makeTyped(out));
     }
 
     /**
@@ -827,7 +615,7 @@ public class XmlUtils {
      * @see #writeListXml
      * @see #readValueXml
      */
-    public static final void writeValueXml(Object v, String name, TypedXmlSerializer out)
+    public static final void writeValueXml(Object v, String name, XmlSerializer out)
             throws XmlPullParserException, java.io.IOException {
         writeValueXml(v, name, out, null);
     }
@@ -849,8 +637,9 @@ public class XmlUtils {
      * @see #writeListXml
      * @see #readValueXml
      */
-    private static final void writeValueXml(Object v, String name, TypedXmlSerializer out,
+    private static final void writeValueXml(Object v, String name, XmlSerializer out,
             WriteMapCallback callback)  throws XmlPullParserException, java.io.IOException {
+        String typeStr;
         if (v == null) {
             out.startTag(null, "null");
             if (name != null) {
@@ -867,40 +656,15 @@ public class XmlUtils {
             out.endTag(null, "string");
             return;
         } else if (v instanceof Integer) {
-            out.startTag(null, "int");
-            if (name != null) {
-                out.attribute(null, "name", name);
-            }
-            out.attributeInt(null, "value", (int) v);
-            out.endTag(null, "int");
+            typeStr = "int";
         } else if (v instanceof Long) {
-            out.startTag(null, "long");
-            if (name != null) {
-                out.attribute(null, "name", name);
-            }
-            out.attributeLong(null, "value", (long) v);
-            out.endTag(null, "long");
+            typeStr = "long";
         } else if (v instanceof Float) {
-            out.startTag(null, "float");
-            if (name != null) {
-                out.attribute(null, "name", name);
-            }
-            out.attributeFloat(null, "value", (float) v);
-            out.endTag(null, "float");
+            typeStr = "float";
         } else if (v instanceof Double) {
-            out.startTag(null, "double");
-            if (name != null) {
-                out.attribute(null, "name", name);
-            }
-            out.attributeDouble(null, "value", (double) v);
-            out.endTag(null, "double");
+            typeStr = "double";
         } else if (v instanceof Boolean) {
-            out.startTag(null, "boolean");
-            if (name != null) {
-                out.attribute(null, "name", name);
-            }
-            out.attributeBoolean(null, "value", (boolean) v);
-            out.endTag(null, "boolean");
+            typeStr = "boolean";
         } else if (v instanceof byte[]) {
             writeByteArrayXml((byte[])v, name, out);
             return;
@@ -945,6 +709,13 @@ public class XmlUtils {
         } else {
             throw new RuntimeException("writeValueXml: unable to write value " + v);
         }
+
+        out.startTag(null, typeStr);
+        if (name != null) {
+            out.attribute(null, "name", name);
+        }
+        out.attribute(null, "value", v.toString());
+        out.endTag(null, typeStr);
     }
 
     /**
@@ -963,8 +734,9 @@ public class XmlUtils {
     @SuppressWarnings("unchecked")
     @UnsupportedAppUsage
     public static final HashMap<String, ?> readMapXml(InputStream in)
-            throws XmlPullParserException, java.io.IOException {
-        TypedXmlPullParser parser = Xml.newFastPullParser();
+    throws XmlPullParserException, java.io.IOException
+    {
+        XmlPullParser   parser = Xml.newPullParser();
         parser.setInput(in, StandardCharsets.UTF_8.name());
         return (HashMap<String, ?>) readValueXml(parser, new String[1]);
     }
@@ -983,8 +755,9 @@ public class XmlUtils {
      * @see #writeListXml
      */
     public static final ArrayList readListXml(InputStream in)
-            throws XmlPullParserException, java.io.IOException {
-        TypedXmlPullParser parser = Xml.newFastPullParser();
+    throws XmlPullParserException, java.io.IOException
+    {
+        XmlPullParser   parser = Xml.newPullParser();
         parser.setInput(in, StandardCharsets.UTF_8.name());
         return (ArrayList)readValueXml(parser, new String[1]);
     }
@@ -1007,8 +780,8 @@ public class XmlUtils {
      */
     public static final HashSet readSetXml(InputStream in)
             throws XmlPullParserException, java.io.IOException {
-        TypedXmlPullParser parser = Xml.newFastPullParser();
-        parser.setInput(in, StandardCharsets.UTF_8.name());
+        XmlPullParser parser = Xml.newPullParser();
+        parser.setInput(in, null);
         return (HashSet) readValueXml(parser, new String[1]);
     }
 
@@ -1026,7 +799,7 @@ public class XmlUtils {
      *
      * @see #readMapXml
      */
-    public static final HashMap<String, ?> readThisMapXml(TypedXmlPullParser parser, String endTag,
+    public static final HashMap<String, ?> readThisMapXml(XmlPullParser parser, String endTag,
             String[] name) throws XmlPullParserException, java.io.IOException {
         return readThisMapXml(parser, endTag, name, null);
     }
@@ -1046,9 +819,10 @@ public class XmlUtils {
      * @see #readMapXml
      * @hide
      */
-    public static final HashMap<String, ?> readThisMapXml(TypedXmlPullParser parser, String endTag,
+    public static final HashMap<String, ?> readThisMapXml(XmlPullParser parser, String endTag,
             String[] name, ReadMapCallback callback)
-            throws XmlPullParserException, java.io.IOException {
+            throws XmlPullParserException, java.io.IOException
+    {
         HashMap<String, Object> map = new HashMap<String, Object>();
 
         int eventType = parser.getEventType();
@@ -1074,9 +848,10 @@ public class XmlUtils {
      * Like {@link #readThisMapXml}, but returns an ArrayMap instead of HashMap.
      * @hide
      */
-    public static final ArrayMap<String, ?> readThisArrayMapXml(TypedXmlPullParser parser,
-            String endTag, String[] name, ReadMapCallback callback)
-            throws XmlPullParserException, java.io.IOException {
+    public static final ArrayMap<String, ?> readThisArrayMapXml(XmlPullParser parser, String endTag,
+            String[] name, ReadMapCallback callback)
+            throws XmlPullParserException, java.io.IOException
+    {
         ArrayMap<String, Object> map = new ArrayMap<>();
 
         int eventType = parser.getEventType();
@@ -1112,7 +887,7 @@ public class XmlUtils {
      *
      * @see #readListXml
      */
-    public static final ArrayList readThisListXml(TypedXmlPullParser parser, String endTag,
+    public static final ArrayList readThisListXml(XmlPullParser parser, String endTag,
             String[] name) throws XmlPullParserException, java.io.IOException {
         return readThisListXml(parser, endTag, name, null, false);
     }
@@ -1131,7 +906,7 @@ public class XmlUtils {
      *
      * @see #readListXml
      */
-    private static final ArrayList readThisListXml(TypedXmlPullParser parser, String endTag,
+    private static final ArrayList readThisListXml(XmlPullParser parser, String endTag,
             String[] name, ReadMapCallback callback, boolean arrayMap)
             throws XmlPullParserException, java.io.IOException {
         ArrayList list = new ArrayList();
@@ -1173,8 +948,8 @@ public class XmlUtils {
      *
      * @see #readSetXml
      */
-    public static final HashSet readThisSetXml(TypedXmlPullParser parser, String endTag,
-            String[] name) throws XmlPullParserException, java.io.IOException {
+    public static final HashSet readThisSetXml(XmlPullParser parser, String endTag, String[] name)
+            throws XmlPullParserException, java.io.IOException {
         return readThisSetXml(parser, endTag, name, null, false);
     }
 
@@ -1196,8 +971,8 @@ public class XmlUtils {
      * @see #readSetXml
      * @hide
      */
-    private static final HashSet readThisSetXml(TypedXmlPullParser parser, String endTag,
-            String[] name, ReadMapCallback callback, boolean arrayMap)
+    private static final HashSet readThisSetXml(XmlPullParser parser, String endTag, String[] name,
+            ReadMapCallback callback, boolean arrayMap)
             throws XmlPullParserException, java.io.IOException {
         HashSet set = new HashSet();
         
@@ -1235,11 +1010,20 @@ public class XmlUtils {
      *
      * @see #writeByteArrayXml
      */
-    public static final byte[] readThisByteArrayXml(TypedXmlPullParser parser,
+    public static final byte[] readThisByteArrayXml(XmlPullParser parser,
             String endTag, String[] name)
             throws XmlPullParserException, java.io.IOException {
 
-        int num = parser.getAttributeInt(null, "num");
+        int num;
+        try {
+            num = Integer.parseInt(parser.getAttributeValue(null, "num"));
+        } catch (NullPointerException e) {
+            throw new XmlPullParserException(
+                    "Need num attribute in byte-array");
+        } catch (NumberFormatException e) {
+            throw new XmlPullParserException(
+                    "Not a number in num attribute in byte-array");
+        }
 
         // 0 len byte array does not have a text in the XML tag. So, initialize to 0 len array.
         // For all other array lens, HexEncoding.decode() below overrides the array.
@@ -1286,11 +1070,20 @@ public class XmlUtils {
      *
      * @see #readListXml
      */
-    public static final int[] readThisIntArrayXml(TypedXmlPullParser parser,
+    public static final int[] readThisIntArrayXml(XmlPullParser parser,
             String endTag, String[] name)
             throws XmlPullParserException, java.io.IOException {
 
-        int num = parser.getAttributeInt(null, "num");
+        int num;
+        try {
+            num = Integer.parseInt(parser.getAttributeValue(null, "num"));
+        } catch (NullPointerException e) {
+            throw new XmlPullParserException(
+                    "Need num attribute in int-array");
+        } catch (NumberFormatException e) {
+            throw new XmlPullParserException(
+                    "Not a number in num attribute in int-array");
+        }
         parser.next();
 
         int[] array = new int[num];
@@ -1300,7 +1093,16 @@ public class XmlUtils {
         do {
             if (eventType == parser.START_TAG) {
                 if (parser.getName().equals("item")) {
-                    array[i] = parser.getAttributeInt(null, "value");
+                    try {
+                        array[i] = Integer.parseInt(
+                                parser.getAttributeValue(null, "value"));
+                    } catch (NullPointerException e) {
+                        throw new XmlPullParserException(
+                                "Need value attribute in item");
+                    } catch (NumberFormatException e) {
+                        throw new XmlPullParserException(
+                                "Not a number in value attribute in item");
+                    }
                 } else {
                     throw new XmlPullParserException(
                             "Expected item tag at: " + parser.getName());
@@ -1337,11 +1139,18 @@ public class XmlUtils {
      *
      * @see #readListXml
      */
-    public static final long[] readThisLongArrayXml(TypedXmlPullParser parser,
+    public static final long[] readThisLongArrayXml(XmlPullParser parser,
             String endTag, String[] name)
             throws XmlPullParserException, java.io.IOException {
 
-        int num = parser.getAttributeInt(null, "num");
+        int num;
+        try {
+            num = Integer.parseInt(parser.getAttributeValue(null, "num"));
+        } catch (NullPointerException e) {
+            throw new XmlPullParserException("Need num attribute in long-array");
+        } catch (NumberFormatException e) {
+            throw new XmlPullParserException("Not a number in num attribute in long-array");
+        }
         parser.next();
 
         long[] array = new long[num];
@@ -1351,7 +1160,13 @@ public class XmlUtils {
         do {
             if (eventType == parser.START_TAG) {
                 if (parser.getName().equals("item")) {
-                    array[i] = parser.getAttributeLong(null, "value");
+                    try {
+                        array[i] = Long.parseLong(parser.getAttributeValue(null, "value"));
+                    } catch (NullPointerException e) {
+                        throw new XmlPullParserException("Need value attribute in item");
+                    } catch (NumberFormatException e) {
+                        throw new XmlPullParserException("Not a number in value attribute in item");
+                    }
                 } else {
                     throw new XmlPullParserException("Expected item tag at: " + parser.getName());
                 }
@@ -1385,10 +1200,17 @@ public class XmlUtils {
      *
      * @see #readListXml
      */
-    public static final double[] readThisDoubleArrayXml(TypedXmlPullParser parser, String endTag,
+    public static final double[] readThisDoubleArrayXml(XmlPullParser parser, String endTag,
             String[] name) throws XmlPullParserException, java.io.IOException {
 
-        int num = parser.getAttributeInt(null, "num");
+        int num;
+        try {
+            num = Integer.parseInt(parser.getAttributeValue(null, "num"));
+        } catch (NullPointerException e) {
+            throw new XmlPullParserException("Need num attribute in double-array");
+        } catch (NumberFormatException e) {
+            throw new XmlPullParserException("Not a number in num attribute in double-array");
+        }
         parser.next();
 
         double[] array = new double[num];
@@ -1398,7 +1220,13 @@ public class XmlUtils {
         do {
             if (eventType == parser.START_TAG) {
                 if (parser.getName().equals("item")) {
-                    array[i] = parser.getAttributeDouble(null, "value");
+                    try {
+                        array[i] = Double.parseDouble(parser.getAttributeValue(null, "value"));
+                    } catch (NullPointerException e) {
+                        throw new XmlPullParserException("Need value attribute in item");
+                    } catch (NumberFormatException e) {
+                        throw new XmlPullParserException("Not a number in value attribute in item");
+                    }
                 } else {
                     throw new XmlPullParserException("Expected item tag at: " + parser.getName());
                 }
@@ -1432,10 +1260,17 @@ public class XmlUtils {
      *
      * @see #readListXml
      */
-    public static final String[] readThisStringArrayXml(TypedXmlPullParser parser, String endTag,
+    public static final String[] readThisStringArrayXml(XmlPullParser parser, String endTag,
             String[] name) throws XmlPullParserException, java.io.IOException {
 
-        int num = parser.getAttributeInt(null, "num");
+        int num;
+        try {
+            num = Integer.parseInt(parser.getAttributeValue(null, "num"));
+        } catch (NullPointerException e) {
+            throw new XmlPullParserException("Need num attribute in string-array");
+        } catch (NumberFormatException e) {
+            throw new XmlPullParserException("Not a number in num attribute in string-array");
+        }
         parser.next();
 
         String[] array = new String[num];
@@ -1445,7 +1280,13 @@ public class XmlUtils {
         do {
             if (eventType == parser.START_TAG) {
                 if (parser.getName().equals("item")) {
-                    array[i] = parser.getAttributeValue(null, "value");
+                    try {
+                        array[i] = parser.getAttributeValue(null, "value");
+                    } catch (NullPointerException e) {
+                        throw new XmlPullParserException("Need value attribute in item");
+                    } catch (NumberFormatException e) {
+                        throw new XmlPullParserException("Not a number in value attribute in item");
+                    }
                 } else {
                     throw new XmlPullParserException("Expected item tag at: " + parser.getName());
                 }
@@ -1479,10 +1320,17 @@ public class XmlUtils {
      *
      * @see #readListXml
      */
-    public static final boolean[] readThisBooleanArrayXml(TypedXmlPullParser parser, String endTag,
+    public static final boolean[] readThisBooleanArrayXml(XmlPullParser parser, String endTag,
             String[] name) throws XmlPullParserException, java.io.IOException {
 
-        int num = parser.getAttributeInt(null, "num");
+        int num;
+        try {
+            num = Integer.parseInt(parser.getAttributeValue(null, "num"));
+        } catch (NullPointerException e) {
+            throw new XmlPullParserException("Need num attribute in string-array");
+        } catch (NumberFormatException e) {
+            throw new XmlPullParserException("Not a number in num attribute in string-array");
+        }
         parser.next();
 
         boolean[] array = new boolean[num];
@@ -1492,7 +1340,13 @@ public class XmlUtils {
         do {
             if (eventType == parser.START_TAG) {
                 if (parser.getName().equals("item")) {
-                    array[i] = parser.getAttributeBoolean(null, "value");
+                    try {
+                        array[i] = Boolean.parseBoolean(parser.getAttributeValue(null, "value"));
+                    } catch (NullPointerException e) {
+                        throw new XmlPullParserException("Need value attribute in item");
+                    } catch (NumberFormatException e) {
+                        throw new XmlPullParserException("Not a number in value attribute in item");
+                    }
                 } else {
                     throw new XmlPullParserException("Expected item tag at: " + parser.getName());
                 }
@@ -1528,7 +1382,7 @@ public class XmlUtils {
      * @see #readListXml
      * @see #writeValueXml
      */
-    public static final Object readValueXml(TypedXmlPullParser parser, String[] name)
+    public static final Object readValueXml(XmlPullParser parser, String[] name)
     throws XmlPullParserException, java.io.IOException
     {
         int eventType = parser.getEventType();
@@ -1549,7 +1403,7 @@ public class XmlUtils {
             "Unexpected end of document");
     }
 
-    private static final Object readThisValueXml(TypedXmlPullParser parser, String[] name,
+    private static final Object readThisValueXml(XmlPullParser parser, String[] name,
             ReadMapCallback callback, boolean arrayMap)
             throws XmlPullParserException, java.io.IOException {
         final String valueName = parser.getAttributeValue(null, "name");
@@ -1562,19 +1416,19 @@ public class XmlUtils {
         if (tagName.equals("null")) {
             res = null;
         } else if (tagName.equals("string")) {
-            final StringBuilder value = new StringBuilder();
+            String value = "";
             int eventType;
             while ((eventType = parser.next()) != parser.END_DOCUMENT) {
                 if (eventType == parser.END_TAG) {
                     if (parser.getName().equals("string")) {
                         name[0] = valueName;
                         //System.out.println("Returning value for " + valueName + ": " + value);
-                        return value.toString();
+                        return value;
                     }
                     throw new XmlPullParserException(
                         "Unexpected end tag in <string>: " + parser.getName());
                 } else if (eventType == parser.TEXT) {
-                    value.append(parser.getText());
+                    value += parser.getText();
                 } else if (eventType == parser.START_TAG) {
                     throw new XmlPullParserException(
                         "Unexpected start tag in <string>: " + parser.getName());
@@ -1665,20 +1519,28 @@ public class XmlUtils {
             "Unexpected end of document in <" + tagName + ">");
     }
 
-    private static final Object readThisPrimitiveValueXml(TypedXmlPullParser parser, String tagName)
-            throws XmlPullParserException, java.io.IOException {
-        if (tagName.equals("int")) {
-            return parser.getAttributeInt(null, "value");
-        } else if (tagName.equals("long")) {
-            return parser.getAttributeLong(null, "value");
-        } else if (tagName.equals("float")) {
-            return parser.getAttributeFloat(null, "value");
-        } else if (tagName.equals("double")) {
-            return parser.getAttributeDouble(null, "value");
-        } else if (tagName.equals("boolean")) {
-            return parser.getAttributeBoolean(null, "value");
-        } else {
-            return null;
+    private static final Object readThisPrimitiveValueXml(XmlPullParser parser, String tagName)
+    throws XmlPullParserException, java.io.IOException
+    {
+        try {
+            if (tagName.equals("int")) {
+                return Integer.parseInt(parser.getAttributeValue(null, "value"));
+            } else if (tagName.equals("long")) {
+                return Long.valueOf(parser.getAttributeValue(null, "value"));
+            } else if (tagName.equals("float")) {
+                return new Float(parser.getAttributeValue(null, "value"));
+            } else if (tagName.equals("double")) {
+                return new Double(parser.getAttributeValue(null, "value"));
+            } else if (tagName.equals("boolean")) {
+                return Boolean.valueOf(parser.getAttributeValue(null, "value"));
+            } else {
+                return null;
+            }
+        } catch (NullPointerException e) {
+            throw new XmlPullParserException("Need value attribute in <" + tagName + ">");
+        } catch (NumberFormatException e) {
+            throw new XmlPullParserException(
+                    "Not a number in value attribute in <" + tagName + ">");
         }
     }
 
@@ -1726,11 +1588,7 @@ public class XmlUtils {
         }
     }
 
-    @SuppressWarnings("AndroidFrameworkEfficientXml")
     public static int readIntAttribute(XmlPullParser in, String name, int defaultValue) {
-        if (in instanceof TypedXmlPullParser) {
-            return ((TypedXmlPullParser) in).getAttributeInt(null, name, defaultValue);
-        }
         final String value = in.getAttributeValue(null, name);
         if (TextUtils.isEmpty(value)) {
             return defaultValue;
@@ -1742,15 +1600,7 @@ public class XmlUtils {
         }
     }
 
-    @SuppressWarnings("AndroidFrameworkEfficientXml")
     public static int readIntAttribute(XmlPullParser in, String name) throws IOException {
-        if (in instanceof TypedXmlPullParser) {
-            try {
-                return ((TypedXmlPullParser) in).getAttributeInt(null, name);
-            } catch (XmlPullParserException e) {
-                throw new ProtocolException(e.getMessage());
-            }
-        }
         final String value = in.getAttributeValue(null, name);
         try {
             return Integer.parseInt(value);
@@ -1759,21 +1609,12 @@ public class XmlUtils {
         }
     }
 
-    @SuppressWarnings("AndroidFrameworkEfficientXml")
     public static void writeIntAttribute(XmlSerializer out, String name, int value)
             throws IOException {
-        if (out instanceof TypedXmlSerializer) {
-            ((TypedXmlSerializer) out).attributeInt(null, name, value);
-            return;
-        }
         out.attribute(null, name, Integer.toString(value));
     }
 
-    @SuppressWarnings("AndroidFrameworkEfficientXml")
     public static long readLongAttribute(XmlPullParser in, String name, long defaultValue) {
-        if (in instanceof TypedXmlPullParser) {
-            return ((TypedXmlPullParser) in).getAttributeLong(null, name, defaultValue);
-        }
         final String value = in.getAttributeValue(null, name);
         if (TextUtils.isEmpty(value)) {
             return defaultValue;
@@ -1785,15 +1626,7 @@ public class XmlUtils {
         }
     }
 
-    @SuppressWarnings("AndroidFrameworkEfficientXml")
     public static long readLongAttribute(XmlPullParser in, String name) throws IOException {
-        if (in instanceof TypedXmlPullParser) {
-            try {
-                return ((TypedXmlPullParser) in).getAttributeLong(null, name);
-            } catch (XmlPullParserException e) {
-                throw new ProtocolException(e.getMessage());
-            }
-        }
         final String value = in.getAttributeValue(null, name);
         try {
             return Long.parseLong(value);
@@ -1802,25 +1635,12 @@ public class XmlUtils {
         }
     }
 
-    @SuppressWarnings("AndroidFrameworkEfficientXml")
     public static void writeLongAttribute(XmlSerializer out, String name, long value)
             throws IOException {
-        if (out instanceof TypedXmlSerializer) {
-            ((TypedXmlSerializer) out).attributeLong(null, name, value);
-            return;
-        }
         out.attribute(null, name, Long.toString(value));
     }
 
-    @SuppressWarnings("AndroidFrameworkEfficientXml")
     public static float readFloatAttribute(XmlPullParser in, String name) throws IOException {
-        if (in instanceof TypedXmlPullParser) {
-            try {
-                return ((TypedXmlPullParser) in).getAttributeFloat(null, name);
-            } catch (XmlPullParserException e) {
-                throw new ProtocolException(e.getMessage());
-            }
-        }
         final String value = in.getAttributeValue(null, name);
         try {
             return Float.parseFloat(value);
@@ -1829,27 +1649,18 @@ public class XmlUtils {
         }
     }
 
-    @SuppressWarnings("AndroidFrameworkEfficientXml")
     public static void writeFloatAttribute(XmlSerializer out, String name, float value)
             throws IOException {
-        if (out instanceof TypedXmlSerializer) {
-            ((TypedXmlSerializer) out).attributeFloat(null, name, value);
-            return;
-        }
         out.attribute(null, name, Float.toString(value));
     }
 
-    @SuppressWarnings("AndroidFrameworkEfficientXml")
     public static boolean readBooleanAttribute(XmlPullParser in, String name) {
-        return readBooleanAttribute(in, name, false);
+        final String value = in.getAttributeValue(null, name);
+        return Boolean.parseBoolean(value);
     }
 
-    @SuppressWarnings("AndroidFrameworkEfficientXml")
     public static boolean readBooleanAttribute(XmlPullParser in, String name,
             boolean defaultValue) {
-        if (in instanceof TypedXmlPullParser) {
-            return ((TypedXmlPullParser) in).getAttributeBoolean(null, name, defaultValue);
-        }
         final String value = in.getAttributeValue(null, name);
         if (TextUtils.isEmpty(value)) {
             return defaultValue;
@@ -1858,13 +1669,8 @@ public class XmlUtils {
         }
     }
 
-    @SuppressWarnings("AndroidFrameworkEfficientXml")
     public static void writeBooleanAttribute(XmlSerializer out, String name, boolean value)
             throws IOException {
-        if (out instanceof TypedXmlSerializer) {
-            ((TypedXmlSerializer) out).attributeBoolean(null, name, value);
-            return;
-        }
         out.attribute(null, name, Boolean.toString(value));
     }
 
@@ -1891,15 +1697,7 @@ public class XmlUtils {
         }
     }
 
-    @SuppressWarnings("AndroidFrameworkEfficientXml")
     public static byte[] readByteArrayAttribute(XmlPullParser in, String name) {
-        if (in instanceof TypedXmlPullParser) {
-            try {
-                return ((TypedXmlPullParser) in).getAttributeBytesBase64(null, name);
-            } catch (XmlPullParserException e) {
-                return null;
-            }
-        }
         final String value = in.getAttributeValue(null, name);
         if (!TextUtils.isEmpty(value)) {
             return Base64.decode(value, Base64.DEFAULT);
@@ -1908,14 +1706,9 @@ public class XmlUtils {
         }
     }
 
-    @SuppressWarnings("AndroidFrameworkEfficientXml")
     public static void writeByteArrayAttribute(XmlSerializer out, String name, byte[] value)
             throws IOException {
         if (value != null) {
-            if (out instanceof TypedXmlSerializer) {
-                ((TypedXmlSerializer) out).attributeBytesBase64(null, name, value);
-                return;
-            }
             out.attribute(null, name, Base64.encodeToString(value, Base64.DEFAULT));
         }
     }
@@ -1953,7 +1746,7 @@ public class XmlUtils {
          * @throws IOException on XmlSerializer serialization errors.
          * @hide
          */
-         public void writeUnknownObject(Object v, String name, TypedXmlSerializer out)
+         public void writeUnknownObject(Object v, String name, XmlSerializer out)
                  throws XmlPullParserException, IOException;
     }
 
@@ -1970,7 +1763,7 @@ public class XmlUtils {
          * @throws IOException on XmlPullParser serialization errors.
          * @hide
          */
-        public Object readThisUnknownObjectXml(TypedXmlPullParser in, String tag)
+        public Object readThisUnknownObjectXml(XmlPullParser in, String tag)
                 throws XmlPullParserException, IOException;
     }
 }

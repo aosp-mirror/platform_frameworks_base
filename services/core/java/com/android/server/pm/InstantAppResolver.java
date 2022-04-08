@@ -380,7 +380,7 @@ public abstract class InstantAppResolver {
                 sanitizeIntent(request.origIntent),
                 // This must only expose the secured version of the host
                 request.hostDigestPrefixSecure,
-                UserHandle.of(request.userId),
+                UserHandle.getUserHandleForUid(request.userId),
                 request.isRequesterInstantApp,
                 request.token
         );

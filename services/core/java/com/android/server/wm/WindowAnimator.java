@@ -16,7 +16,7 @@
 
 package com.android.server.wm;
 
-import static com.android.internal.protolog.ProtoLogGroup.WM_SHOW_TRANSACTIONS;
+import static com.android.server.wm.ProtoLogGroup.WM_SHOW_TRANSACTIONS;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_ALL;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_APP_TRANSITION;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_RECENTS;
@@ -26,6 +26,7 @@ import static com.android.server.wm.WindowContainer.AnimationFlags.TRANSITION;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_WINDOW_TRACE;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
+import static com.android.server.wm.WindowSurfacePlacer.SET_ORIENTATION_CHANGE_COMPLETE;
 
 import android.content.Context;
 import android.os.Trace;
@@ -35,8 +36,8 @@ import android.util.TimeUtils;
 import android.view.Choreographer;
 import android.view.SurfaceControl;
 
-import com.android.internal.protolog.common.ProtoLog;
 import com.android.server.policy.WindowManagerPolicy;
+import com.android.server.protolog.common.ProtoLog;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -67,6 +68,7 @@ public class WindowAnimator {
     Object mLastWindowFreezeSource;
 
     SparseArray<DisplayContentsAnimator> mDisplayContentsAnimators = new SparseArray<>(2);
+
     private boolean mInitialized = false;
 
     // When set to true the animator will go over all windows after an animation frame is posted and
@@ -102,8 +104,7 @@ public class WindowAnimator {
         mAnimationFrameCallback = frameTimeNs -> {
             synchronized (mService.mGlobalLock) {
                 mAnimationFrameCallbackScheduled = false;
-                final long vsyncId = mChoreographer.getVsyncId();
-                animate(frameTimeNs, vsyncId);
+                animate(frameTimeNs);
                 if (mNotifyWhenNoAnimation && !mLastRootAnimating) {
                     mService.mGlobalLock.notifyAll();
                 }
@@ -125,7 +126,7 @@ public class WindowAnimator {
         mInitialized = true;
     }
 
-    private void animate(long frameTimeNs, long vsyncId) {
+    private void animate(long frameTimeNs) {
         if (!mInitialized) {
             return;
         }
@@ -133,10 +134,8 @@ public class WindowAnimator {
         // Schedule next frame already such that back-pressure happens continuously.
         scheduleAnimation();
 
-        final RootWindowContainer root = mService.mRoot;
         mCurrentTime = frameTimeNs / TimeUtils.NANOS_PER_MS;
-        mBulkUpdateParams = 0;
-        root.mOrientationChangeComplete = true;
+        mBulkUpdateParams = SET_ORIENTATION_CHANGE_COMPLETE;
         if (DEBUG_WINDOW_TRACE) {
             Slog.i(TAG, "!!! animate: entry time=" + mCurrentTime);
         }
@@ -144,15 +143,12 @@ public class WindowAnimator {
         ProtoLog.i(WM_SHOW_TRANSACTIONS, ">>> OPEN TRANSACTION animate");
         mService.openSurfaceTransaction();
         try {
-            // Remove all deferred displays, tasks, and activities.
-            root.handleCompleteDeferredRemoval();
-
             final AccessibilityController accessibilityController =
                     mService.mAccessibilityController;
             final int numDisplays = mDisplayContentsAnimators.size();
             for (int i = 0; i < numDisplays; i++) {
                 final int displayId = mDisplayContentsAnimators.keyAt(i);
-                final DisplayContent dc = root.getDisplayContent(displayId);
+                final DisplayContent dc = mService.mRoot.getDisplayContent(displayId);
                 // Update animations of all applications, including those associated with
                 // exiting/removed apps.
                 dc.updateWindowsForAnimator();
@@ -161,11 +157,11 @@ public class WindowAnimator {
 
             for (int i = 0; i < numDisplays; i++) {
                 final int displayId = mDisplayContentsAnimators.keyAt(i);
-                final DisplayContent dc = root.getDisplayContent(displayId);
+                final DisplayContent dc = mService.mRoot.getDisplayContent(displayId);
 
                 dc.checkAppWindowsReadyToShow();
                 if (accessibilityController != null) {
-                    accessibilityController.drawMagnifiedRegionBorderIfNeeded(displayId,
+                    accessibilityController.drawMagnifiedRegionBorderIfNeededLocked(displayId,
                             mTransaction);
                 }
             }
@@ -180,14 +176,13 @@ public class WindowAnimator {
             Slog.wtf(TAG, "Unhandled exception in Window Manager", e);
         }
 
-        final boolean hasPendingLayoutChanges = root.hasPendingLayoutChanges(this);
-        final boolean doRequest = (mBulkUpdateParams != 0 || root.mOrientationChangeComplete)
-                && root.copyAnimToLayoutParams();
+        final boolean hasPendingLayoutChanges = mService.mRoot.hasPendingLayoutChanges(this);
+        final boolean doRequest = mBulkUpdateParams != 0 && mService.mRoot.copyAnimToLayoutParams();
         if (hasPendingLayoutChanges || doRequest) {
             mService.mWindowPlacerLocked.requestTraversal();
         }
 
-        final boolean rootAnimating = root.isAnimating(TRANSITION | CHILDREN /* flags */,
+        final boolean rootAnimating = mService.mRoot.isAnimating(TRANSITION | CHILDREN /* flags */,
                 ANIMATION_TYPE_ALL /* typesToCheck */);
         if (rootAnimating && !mLastRootAnimating) {
             Trace.asyncTraceBegin(Trace.TRACE_TAG_WINDOW_MANAGER, "animating", 0);
@@ -199,7 +194,7 @@ public class WindowAnimator {
         mLastRootAnimating = rootAnimating;
 
         final boolean runningExpensiveAnimations =
-                root.isAnimating(TRANSITION | CHILDREN /* flags */,
+                mService.mRoot.isAnimating(TRANSITION | CHILDREN /* flags */,
                         ANIMATION_TYPE_APP_TRANSITION | ANIMATION_TYPE_SCREEN_ROTATION
                                 | ANIMATION_TYPE_RECENTS /* typesToCheck */);
         if (runningExpensiveAnimations && !mRunningExpensiveAnimations) {
@@ -218,11 +213,12 @@ public class WindowAnimator {
         ProtoLog.i(WM_SHOW_TRANSACTIONS, "<<< CLOSE TRANSACTION animate");
 
         if (mRemoveReplacedWindows) {
-            root.removeReplacedWindows();
+            mService.mRoot.removeReplacedWindows();
             mRemoveReplacedWindows = false;
         }
 
-        mService.mAtmService.mTaskOrganizerController.dispatchPendingEvents();
+        mService.destroyPreservedSurfaceLocked();
+
         executeAfterPrepareSurfacesRunnables();
 
         if (DEBUG_WINDOW_TRACE) {
@@ -237,8 +233,8 @@ public class WindowAnimator {
         if ((bulkUpdateParams & WindowSurfacePlacer.SET_UPDATE_ROTATION) != 0) {
             builder.append(" UPDATE_ROTATION");
         }
-        if ((bulkUpdateParams & WindowSurfacePlacer.SET_WALLPAPER_ACTION_PENDING) != 0) {
-            builder.append(" SET_WALLPAPER_ACTION_PENDING");
+        if ((bulkUpdateParams & WindowSurfacePlacer.SET_ORIENTATION_CHANGE_COMPLETE) != 0) {
+            builder.append(" ORIENTATION_CHANGE_COMPLETE");
         }
         return builder.toString();
     }

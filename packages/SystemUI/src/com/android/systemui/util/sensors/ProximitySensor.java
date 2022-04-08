@@ -16,128 +16,94 @@
 
 package com.android.systemui.util.sensors;
 
+import android.content.res.Resources;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.systemui.R;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.util.concurrency.DelayableExecutor;
-import com.android.systemui.util.concurrency.Execution;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 
 import javax.inject.Inject;
 
 /**
- * Wrapper around SensorManager customized for the Proximity sensor.
- *
- * The ProximitySensor supports the concept of a primary and a
- * secondary hardware sensor. The primary sensor is used for a first
- * pass check if the phone covered. When triggered, it then checks
- * the secondary sensor for confirmation (if there is one). It does
- * not send a proximity event until the secondary sensor confirms (or
- * rejects) the reading. The secondary sensor is, in fact, the source
- * of truth.
- *
- * This is necessary as sometimes keeping the secondary sensor on for
- * extends periods is undesirable. It may, however, result in increased
- * latency for proximity readings.
- *
- * Phones should configure this via a config.xml overlay. If no
- * proximity sensor is set (primary or secondary) we fall back to the
- * default Sensor.TYPE_PROXIMITY. If proximity_sensor_type is set in
- * config.xml, that will be used as the primary sensor. If
- * proximity_sensor_secondary_type is set, that will function as the
- * secondary sensor. If no secondary is set, only the primary will be
- * used.
+ * Simple wrapper around SensorManager customized for the Proximity sensor.
  */
-public class ProximitySensor implements ThresholdSensor {
+public class ProximitySensor {
     private static final String TAG = "ProxSensor";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
-    private static final long SECONDARY_PING_INTERVAL_MS = 5000;
 
-    private final ThresholdSensor mPrimaryThresholdSensor;
-    private final ThresholdSensor mSecondaryThresholdSensor;
-    private final DelayableExecutor mDelayableExecutor;
-    private final Execution mExecution;
-    private final List<ThresholdSensor.Listener> mListeners = new ArrayList<>();
+    private final Sensor mSensor;
+    private final AsyncSensorManager mSensorManager;
+    private final float mThreshold;
+    private List<ProximitySensorListener> mListeners = new ArrayList<>();
     private String mTag = null;
+    @VisibleForTesting ProximityEvent mLastEvent;
+    private int mSensorDelay = SensorManager.SENSOR_DELAY_NORMAL;
     @VisibleForTesting protected boolean mPaused;
-    private ThresholdSensorEvent mLastPrimaryEvent;
-    @VisibleForTesting
-    ThresholdSensorEvent mLastEvent;
     private boolean mRegistered;
     private final AtomicBoolean mAlerting = new AtomicBoolean();
-    private Runnable mCancelSecondaryRunnable;
-    private boolean mInitializedListeners = false;
-    private boolean mSecondarySafe = false;
 
-    private final ThresholdSensor.Listener mPrimaryEventListener = this::onPrimarySensorEvent;
-
-    private final ThresholdSensor.Listener mSecondaryEventListener =
-            new ThresholdSensor.Listener() {
+    private SensorEventListener mSensorEventListener = new SensorEventListener() {
         @Override
-        public void onThresholdCrossed(ThresholdSensorEvent event) {
-            // If we no longer have a "below" signal and the secondary sensor is not
-            // considered "safe", then we need to turn it off.
-            if (!mSecondarySafe
-                    && (mLastPrimaryEvent == null
-                    || !mLastPrimaryEvent.getBelow()
-                    || !event.getBelow())) {
-                mSecondaryThresholdSensor.pause();
-                if (mLastPrimaryEvent == null || !mLastPrimaryEvent.getBelow()) {
-                    // Only check the secondary as long as the primary thinks we're near.
-                    mCancelSecondaryRunnable = null;
-                    return;
-                } else {
-                    // Check this sensor again in a moment.
-                    mCancelSecondaryRunnable = mDelayableExecutor.executeDelayed(
-                            mSecondaryThresholdSensor::resume, SECONDARY_PING_INTERVAL_MS);
-                }
-            }
-            logDebug("Secondary sensor event: " + event.getBelow() + ".");
+        public synchronized void onSensorChanged(SensorEvent event) {
+            onSensorEvent(event);
+        }
 
-            if (!mPaused) {
-                onSensorEvent(event);
-            }
+        @Override
+        public void onAccuracyChanged(Sensor sensor, int accuracy) {
         }
     };
 
     @Inject
-    public ProximitySensor(
-            @PrimaryProxSensor ThresholdSensor primary,
-            @SecondaryProxSensor ThresholdSensor  secondary,
-            @Main DelayableExecutor delayableExecutor,
-            Execution execution) {
-        mPrimaryThresholdSensor = primary;
-        mSecondaryThresholdSensor = secondary;
-        mDelayableExecutor = delayableExecutor;
-        mExecution = execution;
+    public ProximitySensor(@Main Resources resources,
+            AsyncSensorManager sensorManager) {
+        mSensorManager = sensorManager;
+
+        Sensor sensor = findCustomProxSensor(resources);
+        float threshold = 0;
+        if (sensor != null) {
+            try {
+                threshold = getCustomProxThreshold(resources);
+            } catch (IllegalStateException e) {
+                Log.e(TAG, "Can not load custom proximity sensor.", e);
+                sensor = null;
+            }
+        }
+        if (sensor == null) {
+            sensor = sensorManager.getDefaultSensor(Sensor.TYPE_PROXIMITY);
+            if (sensor != null) {
+                threshold = sensor.getMaximumRange();
+            }
+        }
+
+        mThreshold = threshold;
+
+        mSensor = sensor;
     }
 
-    @Override
     public void setTag(String tag) {
         mTag = tag;
-        mPrimaryThresholdSensor.setTag(tag + ":primary");
-        mSecondaryThresholdSensor.setTag(tag + ":secondary");
     }
 
-    @Override
-    public void setDelay(int delay) {
-        mExecution.assertIsMainThread();
-        mPrimaryThresholdSensor.setDelay(delay);
-        mSecondaryThresholdSensor.setDelay(delay);
+    public void setSensorDelay(int sensorDelay) {
+        mSensorDelay = sensorDelay;
     }
 
     /**
      * Unregister with the {@link SensorManager} without unsetting listeners on this object.
      */
-    @Override
     public void pause() {
-        mExecution.assertIsMainThread();
         mPaused = true;
         unregisterInternal();
     }
@@ -145,25 +111,39 @@ public class ProximitySensor implements ThresholdSensor {
     /**
      * Register with the {@link SensorManager}. No-op if no listeners are registered on this object.
      */
-    @Override
     public void resume() {
-        mExecution.assertIsMainThread();
         mPaused = false;
         registerInternal();
     }
+    /**
+     * Returns a brightness sensor that can be used for proximity purposes.
+     */
+    private Sensor findCustomProxSensor(Resources resources) {
+        String sensorType = resources.getString(R.string.proximity_sensor_type);
+        if (sensorType.isEmpty()) {
+            return null;
+        }
+
+        List<Sensor> sensorList = mSensorManager.getSensorList(Sensor.TYPE_ALL);
+        Sensor sensor = null;
+        for (Sensor s : sensorList) {
+            if (sensorType.equals(s.getStringType())) {
+                sensor = s;
+                break;
+            }
+        }
+
+        return sensor;
+    }
 
     /**
-     * Sets that it is safe to leave the secondary sensor on indefinitely.
-     *
-     * The secondary sensor will be turned on if there are any registered listeners, regardless
-     * of what is reported by the primary sensor.
+     * Returns a threshold value that can be used along with {@link #findCustomProxSensor}
      */
-    public void setSecondarySafe(boolean safe) {
-        mSecondarySafe = safe;
-        if (!mSecondarySafe) {
-            mSecondaryThresholdSensor.pause();
-        } else {
-            mSecondaryThresholdSensor.resume();
+    private float getCustomProxThreshold(Resources resources) {
+        try {
+            return resources.getFloat(R.dimen.proximity_sensor_threshold);
+        } catch (Resources.NotFoundException e) {
+            throw new IllegalStateException("R.dimen.proximity_sensor_threshold must be set.");
         }
     }
 
@@ -177,48 +157,38 @@ public class ProximitySensor implements ThresholdSensor {
     /**
      * Returns {@code false} if a Proximity sensor is not available.
      */
-    @Override
-    public boolean isLoaded() {
-        return mPrimaryThresholdSensor.isLoaded();
+    public boolean getSensorAvailable() {
+        return mSensor != null;
     }
 
     /**
      * Add a listener.
      *
      * Registers itself with the {@link SensorManager} if this is the first listener
-     * added. If the ProximitySensor is paused, it will be registered when resumed.
+     * added. If a cool down is currently running, the sensor will be registered when it is over.
      */
-    @Override
-    public void register(ThresholdSensor.Listener listener) {
-        mExecution.assertIsMainThread();
-        if (!isLoaded()) {
-            return;
+    public boolean register(ProximitySensorListener listener) {
+        if (!getSensorAvailable()) {
+            return false;
         }
 
         if (mListeners.contains(listener)) {
-            logDebug("ProxListener registered multiple times: " + listener);
+            Log.d(TAG, "ProxListener registered multiple times: " + listener);
         } else {
             mListeners.add(listener);
         }
         registerInternal();
+
+        return true;
     }
 
     protected void registerInternal() {
-        mExecution.assertIsMainThread();
         if (mRegistered || mPaused || mListeners.isEmpty()) {
             return;
         }
-        if (!mInitializedListeners) {
-            mPrimaryThresholdSensor.register(mPrimaryEventListener);
-            if (!mSecondarySafe) {
-                mSecondaryThresholdSensor.pause();
-            }
-            mSecondaryThresholdSensor.register(mSecondaryEventListener);
-            mInitializedListeners = true;
-        }
         logDebug("Registering sensor listener");
-        mPrimaryThresholdSensor.resume();
         mRegistered = true;
+        mSensorManager.registerListener(mSensorEventListener, mSensor, mSensorDelay);
     }
 
     /**
@@ -227,9 +197,7 @@ public class ProximitySensor implements ThresholdSensor {
      * If all listeners are removed from an instance of this class,
      * it will unregister itself with the SensorManager.
      */
-    @Override
-    public void unregister(ThresholdSensor.Listener listener) {
-        mExecution.assertIsMainThread();
+    public void unregister(ProximitySensorListener listener) {
         mListeners.remove(listener);
         if (mListeners.size() == 0) {
             unregisterInternal();
@@ -237,94 +205,40 @@ public class ProximitySensor implements ThresholdSensor {
     }
 
     protected void unregisterInternal() {
-        mExecution.assertIsMainThread();
         if (!mRegistered) {
             return;
         }
         logDebug("unregistering sensor listener");
-        mPrimaryThresholdSensor.pause();
-        mSecondaryThresholdSensor.pause();
-        if (mCancelSecondaryRunnable != null) {
-            mCancelSecondaryRunnable.run();
-            mCancelSecondaryRunnable = null;
-        }
-        mLastPrimaryEvent = null;  // Forget what we know.
-        mLastEvent = null;
+        mSensorManager.unregisterListener(mSensorEventListener);
         mRegistered = false;
     }
 
     public Boolean isNear() {
-        return isLoaded() && mLastEvent != null ? mLastEvent.getBelow() : null;
+        return getSensorAvailable() && mLastEvent != null ? mLastEvent.getNear() : null;
     }
 
     /** Update all listeners with the last value this class received from the sensor. */
     public void alertListeners() {
-        mExecution.assertIsMainThread();
         if (mAlerting.getAndSet(true)) {
             return;
         }
-        if (mLastEvent != null) {
-            ThresholdSensorEvent lastEvent = mLastEvent;  // Listeners can null out mLastEvent.
-            List<ThresholdSensor.Listener> listeners = new ArrayList<>(mListeners);
-            listeners.forEach(proximitySensorListener ->
-                    proximitySensorListener.onThresholdCrossed(lastEvent));
-        }
 
+        List<ProximitySensorListener> listeners = new ArrayList<>(mListeners);
+        listeners.forEach(proximitySensorListener ->
+                proximitySensorListener.onSensorEvent(mLastEvent));
         mAlerting.set(false);
     }
 
-    private void onPrimarySensorEvent(ThresholdSensorEvent event) {
-        mExecution.assertIsMainThread();
-        if (mLastPrimaryEvent != null && event.getBelow() == mLastPrimaryEvent.getBelow()) {
-            return;
-        }
-
-        mLastPrimaryEvent = event;
-
-        if (mSecondarySafe && mSecondaryThresholdSensor.isLoaded()) {
-            logDebug("Primary sensor reported " + (event.getBelow() ? "near" : "far")
-                    + ". Checking secondary.");
-            if (mCancelSecondaryRunnable == null) {
-                mSecondaryThresholdSensor.resume();
-            }
-            return;
-        }
-
-
-        if (!mSecondaryThresholdSensor.isLoaded()) {  // No secondary
-            logDebug("Primary sensor event: " + event.getBelow() + ". No secondary.");
-            onSensorEvent(event);
-        } else if (event.getBelow()) {  // Covered? Check secondary.
-            logDebug("Primary sensor event: " + event.getBelow() + ". Checking secondary.");
-            if (mCancelSecondaryRunnable != null) {
-                mCancelSecondaryRunnable.run();
-            }
-            mSecondaryThresholdSensor.resume();
-        } else {  // Uncovered. Report immediately.
-            onSensorEvent(event);
-        }
-    }
-
-    private void onSensorEvent(ThresholdSensorEvent event) {
-        mExecution.assertIsMainThread();
-        if (mLastEvent != null && event.getBelow() == mLastEvent.getBelow()) {
-            return;
-        }
-
-        if (!mSecondarySafe && !event.getBelow()) {
-            mSecondaryThresholdSensor.pause();
-        }
-
-        mLastEvent = event;
+    private void onSensorEvent(SensorEvent event) {
+        boolean near = event.values[0] < mThreshold;
+        mLastEvent = new ProximityEvent(near, event.timestamp);
         alertListeners();
     }
 
     @Override
     public String toString() {
-        return String.format("{registered=%s, paused=%s, near=%s, primarySensor=%s, "
-                + "secondarySensor=%s secondarySafe=%s}",
-                isRegistered(), mPaused, isNear(), mPrimaryThresholdSensor,
-                mSecondaryThresholdSensor, mSecondarySafe);
+        return String.format("{registered=%s, paused=%s, near=%s, sensor=%s}",
+                isRegistered(), mPaused, isNear(), mSensor);
     }
 
     /**
@@ -335,7 +249,7 @@ public class ProximitySensor implements ThresholdSensor {
         private final ProximitySensor mSensor;
         private final DelayableExecutor mDelayableExecutor;
         private List<Consumer<Boolean>> mCallbacks = new ArrayList<>();
-        private final ThresholdSensor.Listener mListener;
+        private final ProximitySensor.ProximitySensorListener mListener;
         private final AtomicBoolean mRegistered = new AtomicBoolean();
 
         @Inject
@@ -354,16 +268,15 @@ public class ProximitySensor implements ThresholdSensor {
         @Override
         public void run() {
             unregister();
-            onProximityEvent(null);
+            mSensor.alertListeners();
         }
 
         /**
          * Query the proximity sensor, timing out if no result.
          */
         public void check(long timeoutMs, Consumer<Boolean> callback) {
-            if (!mSensor.isLoaded()) {
+            if (!mSensor.getSensorAvailable()) {
                 callback.accept(null);
-                return;
             }
             mCallbacks.add(callback);
             if (!mRegistered.getAndSet(true)) {
@@ -377,15 +290,52 @@ public class ProximitySensor implements ThresholdSensor {
             mRegistered.set(false);
         }
 
-        private void onProximityEvent(ThresholdSensorEvent proximityEvent) {
+        private void onProximityEvent(ProximityEvent proximityEvent) {
             mCallbacks.forEach(
                     booleanConsumer ->
                             booleanConsumer.accept(
-                                    proximityEvent == null ? null : proximityEvent.getBelow()));
+                                    proximityEvent == null ? null : proximityEvent.getNear()));
             mCallbacks.clear();
             unregister();
             mRegistered.set(false);
         }
+    }
+
+    /** Implement to be notified of ProximityEvents. */
+    public interface ProximitySensorListener {
+        /** Called when the ProximitySensor changes. */
+        void onSensorEvent(ProximityEvent proximityEvent);
+    }
+
+    /**
+     * Returned when the near/far state of a {@link ProximitySensor} changes.
+     */
+    public static class ProximityEvent {
+        private final boolean mNear;
+        private final long mTimestampNs;
+
+        public ProximityEvent(boolean near, long timestampNs) {
+            mNear = near;
+            mTimestampNs = timestampNs;
+        }
+
+        public boolean getNear() {
+            return mNear;
+        }
+
+        public long getTimestampNs() {
+            return mTimestampNs;
+        }
+
+        public long getTimestampMs() {
+            return mTimestampNs / 1000000;
+        }
+
+        @Override
+        public String toString() {
+            return String.format((Locale) null, "{near=%s, timestamp_ns=%d}", mNear, mTimestampNs);
+        }
+
     }
 
     private void logDebug(String msg) {

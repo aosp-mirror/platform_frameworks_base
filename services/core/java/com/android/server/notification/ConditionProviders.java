@@ -21,11 +21,9 @@ import android.app.NotificationManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.IPackageManager;
-import android.content.pm.ServiceInfo;
 import android.net.Uri;
 import android.os.IBinder;
 import android.os.IInterface;
-import android.os.Process;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.provider.Settings;
@@ -36,11 +34,12 @@ import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Slog;
-import android.util.TypedXmlSerializer;
 
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.notification.NotificationManagerService.DumpFilter;
+
+import org.xmlpull.v1.XmlSerializer;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -77,8 +76,8 @@ public class ConditionProviders extends ManagedServices {
     public void addSystemProvider(SystemConditionProviderService service) {
         mSystemConditionProviders.add(service);
         service.attachBase(mContext);
-        registerSystemService(service.asInterface(), service.getComponent(), UserHandle.USER_SYSTEM,
-                Process.SYSTEM_UID);
+        registerSystemService(
+                service.asInterface(), service.getComponent(), UserHandle.USER_SYSTEM);
     }
 
     public Iterable<SystemConditionProviderService> getSystemProviders() {
@@ -111,7 +110,7 @@ public class ConditionProviders extends ManagedServices {
     }
 
     @Override
-    void writeDefaults(TypedXmlSerializer out) throws IOException {
+    void writeDefaults(XmlSerializer out) throws IOException {
         synchronized (mDefaultsLock) {
             String defaults = String.join(ENABLED_SERVICES_SEPARATOR, mDefaultPackages);
             out.attribute(null, ATT_DEFAULTS, defaults);
@@ -123,7 +122,7 @@ public class ConditionProviders extends ManagedServices {
         final Config c = new Config();
         c.caption = "condition provider";
         c.serviceInterface = ConditionProviderService.SERVICE_INTERFACE;
-        c.secureSettingName = null;
+        c.secureSettingName = Settings.Secure.ENABLED_NOTIFICATION_POLICY_ACCESS_PACKAGES;
         c.xmlTag = TAG_ENABLED_DND_APPS;
         c.secondarySettingName = Settings.Secure.ENABLED_NOTIFICATION_LISTENERS;
         c.bindPermission = android.Manifest.permission.BIND_CONDITION_PROVIDER_SERVICE;
@@ -194,11 +193,6 @@ public class ConditionProviders extends ManagedServices {
         if (mCallback != null) {
             mCallback.onServiceAdded(info.component);
         }
-    }
-
-    @Override
-    protected void ensureFilters(ServiceInfo si, int userId) {
-        // nothing to filter
     }
 
     @Override

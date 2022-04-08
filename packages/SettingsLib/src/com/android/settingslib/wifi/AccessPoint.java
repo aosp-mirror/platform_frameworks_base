@@ -116,16 +116,6 @@ public class AccessPoint implements Comparable<AccessPoint> {
      */
     public static final int HIGHER_FREQ_5GHZ = 5900;
 
-    /**
-     * Lower bound on the 60 GHz (802.11ad) WIGIG channels
-     */
-    public static final int LOWER_FREQ_60GHZ = 58320;
-
-    /**
-     * Upper bound on the 60 GHz (802.11ad) WIGIG channels
-     */
-    public static final int HIGHER_FREQ_60GHZ = 70200;
-
     /** The key which identifies this AccessPoint grouping. */
     private String mKey;
 
@@ -223,8 +213,7 @@ public class AccessPoint implements Comparable<AccessPoint> {
     public static final int SECURITY_OWE = 4;
     public static final int SECURITY_SAE = 5;
     public static final int SECURITY_EAP_SUITE_B = 6;
-    public static final int SECURITY_EAP_WPA3_ENTERPRISE = 7;
-    public static final int SECURITY_MAX_VAL = 8; // Has to be the last
+    public static final int SECURITY_MAX_VAL = 7; // Has to be the last
 
     private static final int PSK_UNKNOWN = 0;
     private static final int PSK_WPA = 1;

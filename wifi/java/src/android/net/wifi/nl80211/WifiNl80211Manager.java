@@ -20,7 +20,6 @@ import android.annotation.CallbackExecutor;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.app.AlarmManager;
@@ -29,7 +28,6 @@ import android.net.wifi.SoftApInfo;
 import android.net.wifi.WifiAnnotations;
 import android.net.wifi.WifiScanner;
 import android.os.Binder;
-import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -92,16 +90,11 @@ public class WifiNl80211Manager {
      */
     public static final int SCAN_TYPE_PNO_SCAN = 1;
 
-    // Extra scanning parameter used to enable 6Ghz RNR (Reduced Neighbour Support).
-    public static final String SCANNING_PARAM_ENABLE_6GHZ_RNR =
-            "android.net.wifi.nl80211.SCANNING_PARAM_ENABLE_6GHZ_RNR";
-
     private AlarmManager mAlarmManager;
     private Handler mEventHandler;
 
     // Cached wificond binder handlers.
     private IWificond mWificond;
-    private WificondEventHandler mWificondEventHandler = new WificondEventHandler();
     private HashMap<String, IClientInterface> mClientInterfaces = new HashMap<>();
     private HashMap<String, IApInterface> mApInterfaces = new HashMap<>();
     private HashMap<String, IWifiScannerImpl> mWificondScanners = new HashMap<>();
@@ -113,18 +106,6 @@ public class WifiNl80211Manager {
      * Ensures that no more than one sendMgmtFrame operation runs concurrently.
      */
     private AtomicBoolean mSendMgmtFrameInProgress = new AtomicBoolean(false);
-
-    /**
-     * Interface used to listen country code event
-     */
-    public interface CountryCodeChangedListener {
-        /**
-         * Called when country code changed.
-         *
-         * @param countryCode An ISO-3166-alpha2 country code which is 2-Character alphanumeric.
-         */
-        void onCountryCodeChanged(@NonNull String countryCode);
-    }
 
     /**
      * Interface used when waiting for scans to be completed (with results).
@@ -160,46 +141,6 @@ public class WifiNl80211Manager {
         void onPnoRequestFailed();
     }
 
-    /** @hide */
-    @VisibleForTesting
-    public class WificondEventHandler extends IWificondEventCallback.Stub {
-        private Map<CountryCodeChangedListener, Executor> mCountryCodeChangedListenerHolder =
-                new HashMap<>();
-
-        /**
-         * Register CountryCodeChangedListener with pid.
-         *
-         * @param executor The Executor on which to execute the callbacks.
-         * @param listener listener for country code changed events.
-         */
-        public void registerCountryCodeChangedListener(Executor executor,
-                CountryCodeChangedListener listener) {
-            mCountryCodeChangedListenerHolder.put(listener, executor);
-        }
-
-        /**
-         * Unregister CountryCodeChangedListener with pid.
-         *
-         * @param listener listener which registered country code changed events.
-         */
-        public void unregisterCountryCodeChangedListener(CountryCodeChangedListener listener) {
-            mCountryCodeChangedListenerHolder.remove(listener);
-        }
-
-        @Override
-        public void OnRegDomainChanged(String countryCode) {
-            Log.d(TAG, "OnRegDomainChanged " + countryCode);
-            final long token = Binder.clearCallingIdentity();
-            try {
-                mCountryCodeChangedListenerHolder.forEach((listener, executor) -> {
-                    executor.execute(() -> listener.onCountryCodeChanged(countryCode));
-                });
-            } finally {
-                Binder.restoreCallingIdentity(token);
-            }
-        }
-    }
-
     private class ScanEventHandler extends IScanEvent.Stub {
         private Executor mExecutor;
         private ScanEventCallback mCallback;
@@ -212,23 +153,15 @@ public class WifiNl80211Manager {
         @Override
         public void OnScanResultReady() {
             Log.d(TAG, "Scan result ready event");
-            final long token = Binder.clearCallingIdentity();
-            try {
-                mExecutor.execute(() -> mCallback.onScanResultReady());
-            } finally {
-                Binder.restoreCallingIdentity(token);
-            }
+            Binder.clearCallingIdentity();
+            mExecutor.execute(() -> mCallback.onScanResultReady());
         }
 
         @Override
         public void OnScanFailed() {
             Log.d(TAG, "Scan failed event");
-            final long token = Binder.clearCallingIdentity();
-            try {
-                mExecutor.execute(() -> mCallback.onScanFailed());
-            } finally {
-                Binder.restoreCallingIdentity(token);
-            }
+            Binder.clearCallingIdentity();
+            mExecutor.execute(() -> mCallback.onScanFailed());
         }
     }
 
@@ -290,11 +223,7 @@ public class WifiNl80211Manager {
     /**
      * Callbacks for SoftAp interface registered using
      * {@link #registerApCallback(String, Executor, SoftApCallback)}.
-     *
-     * @deprecated The usage is replaced by vendor HAL
-     * {@code android.hardware.wifi.hostapd.V1_3.IHostapdCallback}.
      */
-    @Deprecated
     public interface SoftApCallback {
         /**
          * Invoked when there is a fatal failure and the SoftAp is shutdown.
@@ -400,12 +329,6 @@ public class WifiNl80211Manager {
         mWificond = wificond;
     }
 
-    /** @hide */
-    @VisibleForTesting
-    public WificondEventHandler getWificondEventHandler() {
-        return mWificondEventHandler;
-    }
-
     private class PnoScanEventHandler extends IPnoScanEvent.Stub {
         private Executor mExecutor;
         private ScanEventCallback mCallback;
@@ -418,23 +341,15 @@ public class WifiNl80211Manager {
         @Override
         public void OnPnoNetworkFound() {
             Log.d(TAG, "Pno scan result event");
-            final long token = Binder.clearCallingIdentity();
-            try {
-                mExecutor.execute(() -> mCallback.onScanResultReady());
-            } finally {
-                Binder.restoreCallingIdentity(token);
-            }
+            Binder.clearCallingIdentity();
+            mExecutor.execute(() -> mCallback.onScanResultReady());
         }
 
         @Override
         public void OnPnoScanFailed() {
             Log.d(TAG, "Pno Scan failed event");
-            final long token = Binder.clearCallingIdentity();
-            try {
-                mExecutor.execute(() -> mCallback.onScanFailed());
-            } finally {
-                Binder.restoreCallingIdentity(token);
-            }
+            Binder.clearCallingIdentity();
+            mExecutor.execute(() -> mCallback.onScanFailed());
         }
     }
 
@@ -457,24 +372,15 @@ public class WifiNl80211Manager {
                         + client.getMacAddress() + " isConnected: " + isConnected);
             }
 
-            final long token = Binder.clearCallingIdentity();
-            try {
-                mExecutor.execute(
-                        () -> mSoftApListener.onConnectedClientsChanged(client, isConnected));
-            } finally {
-                Binder.restoreCallingIdentity(token);
-            }
+            Binder.clearCallingIdentity();
+            mExecutor.execute(() -> mSoftApListener.onConnectedClientsChanged(client, isConnected));
         }
 
         @Override
         public void onSoftApChannelSwitched(int frequency, int bandwidth) {
-            final long token = Binder.clearCallingIdentity();
-            try {
-                mExecutor.execute(() -> mSoftApListener.onSoftApChannelSwitched(frequency,
-                        toFrameworkBandwidth(bandwidth)));
-            } finally {
-                Binder.restoreCallingIdentity(token);
-            }
+            Binder.clearCallingIdentity();
+            mExecutor.execute(() -> mSoftApListener.onSoftApChannelSwitched(frequency,
+                    toFrameworkBandwidth(bandwidth)));
         }
 
         private @WifiAnnotations.Bandwidth int toFrameworkBandwidth(int bandwidth) {
@@ -527,12 +433,8 @@ public class WifiNl80211Manager {
                 if (mVerboseLoggingEnabled) {
                     Log.e(TAG, "Timed out waiting for ACK");
                 }
-                final long token = Binder.clearCallingIdentity();
-                try {
-                    mExecutor.execute(() -> mCallback.onFailure(SEND_MGMT_FRAME_ERROR_TIMEOUT));
-                } finally {
-                    Binder.restoreCallingIdentity(token);
-                }
+                Binder.clearCallingIdentity();
+                mExecutor.execute(() -> mCallback.onFailure(SEND_MGMT_FRAME_ERROR_TIMEOUT));
             });
             mWasCalled = false;
 
@@ -547,12 +449,8 @@ public class WifiNl80211Manager {
             // post to main thread
             mEventHandler.post(() -> runIfFirstCall(() -> {
                 mAlarmManager.cancel(mTimeoutCallback);
-                final long token = Binder.clearCallingIdentity();
-                try {
-                    mExecutor.execute(() -> mCallback.onAck(elapsedTimeMs));
-                } finally {
-                    Binder.restoreCallingIdentity(token);
-                }
+                Binder.clearCallingIdentity();
+                mExecutor.execute(() -> mCallback.onAck(elapsedTimeMs));
             }));
         }
 
@@ -562,12 +460,8 @@ public class WifiNl80211Manager {
             // post to main thread
             mEventHandler.post(() -> runIfFirstCall(() -> {
                 mAlarmManager.cancel(mTimeoutCallback);
-                final long token = Binder.clearCallingIdentity();
-                try {
-                    mExecutor.execute(() -> mCallback.onFailure(reason));
-                } finally {
-                    Binder.restoreCallingIdentity(token);
-                }
+                Binder.clearCallingIdentity();
+                mExecutor.execute(() -> mCallback.onFailure(reason));
             }));
         }
     }
@@ -633,7 +527,6 @@ public class WifiNl80211Manager {
         }
         try {
             mWificond.asBinder().linkToDeath(() -> binderDied(), 0);
-            mWificond.registerWificondEventCallback(mWificondEventHandler);
         } catch (RemoteException e) {
             Log.e(TAG, "Failed to register death notification for wificond");
             // The remote has already died.
@@ -654,7 +547,7 @@ public class WifiNl80211Manager {
     public boolean setupInterfaceForClientMode(@NonNull String ifaceName,
             @NonNull @CallbackExecutor Executor executor,
             @NonNull ScanEventCallback scanCallback, @NonNull ScanEventCallback pnoScanCallback) {
-        Log.d(TAG, "Setting up interface for client mode: " + ifaceName);
+        Log.d(TAG, "Setting up interface for client mode");
         if (!retrieveWificondAndRegisterForDeath()) {
             return false;
         }
@@ -712,7 +605,7 @@ public class WifiNl80211Manager {
      */
     public boolean tearDownClientInterface(@NonNull String ifaceName) {
         if (getClientInterface(ifaceName) == null) {
-            Log.e(TAG, "No valid wificond client interface handler for iface=" + ifaceName);
+            Log.e(TAG, "No valid wificond client interface handler");
             return false;
         }
         try {
@@ -727,7 +620,7 @@ public class WifiNl80211Manager {
         }
 
         if (mWificond == null) {
-            Log.e(TAG, "tearDownClientInterface: mWificond binder is null! Did wificond die?");
+            Log.e(TAG, "Reference to wifiCond is null");
             return false;
         }
 
@@ -757,7 +650,7 @@ public class WifiNl80211Manager {
      * @return true on success.
      */
     public boolean setupInterfaceForSoftApMode(@NonNull String ifaceName) {
-        Log.d(TAG, "Setting up interface for soft ap mode for iface=" + ifaceName);
+        Log.d(TAG, "Setting up interface for soft ap mode");
         if (!retrieveWificondAndRegisterForDeath()) {
             return false;
         }
@@ -791,12 +684,12 @@ public class WifiNl80211Manager {
      */
     public boolean tearDownSoftApInterface(@NonNull String ifaceName) {
         if (getApInterface(ifaceName) == null) {
-            Log.e(TAG, "No valid wificond ap interface handler for iface=" + ifaceName);
+            Log.e(TAG, "No valid wificond ap interface handler");
             return false;
         }
 
         if (mWificond == null) {
-            Log.e(TAG, "tearDownSoftApInterface: mWificond binder is null! Did wificond die?");
+            Log.e(TAG, "Reference to wifiCond is null");
             return false;
         }
 
@@ -863,7 +756,7 @@ public class WifiNl80211Manager {
     @Nullable public SignalPollResult signalPoll(@NonNull String ifaceName) {
         IClientInterface iface = getClientInterface(ifaceName);
         if (iface == null) {
-            Log.e(TAG, "No valid wificond client interface handler for iface=" + ifaceName);
+            Log.e(TAG, "No valid wificond client interface handler");
             return null;
         }
 
@@ -894,7 +787,7 @@ public class WifiNl80211Manager {
     @Nullable public TxPacketCounters getTxPacketCounters(@NonNull String ifaceName) {
         IClientInterface iface = getClientInterface(ifaceName);
         if (iface == null) {
-            Log.e(TAG, "No valid wificond client interface handler for iface=" + ifaceName);
+            Log.e(TAG, "No valid wificond client interface handler");
             return null;
         }
 
@@ -937,7 +830,7 @@ public class WifiNl80211Manager {
             @ScanResultType int scanType) {
         IWifiScannerImpl scannerImpl = getScannerImpl(ifaceName);
         if (scannerImpl == null) {
-            Log.e(TAG, "No valid wificond scanner interface handler for iface=" + ifaceName);
+            Log.e(TAG, "No valid wificond scanner interface handler");
             return new ArrayList<>();
         }
         List<NativeScanResult> results = null;
@@ -977,15 +870,6 @@ public class WifiNl80211Manager {
     }
 
     /**
-     * @deprecated replaced by {@link #startScan(String, int, Set, List, Bundle)}
-     **/
-    @Deprecated
-    public boolean startScan(@NonNull String ifaceName, @WifiAnnotations.ScanType int scanType,
-            @Nullable Set<Integer> freqs, @Nullable List<byte[]> hiddenNetworkSSIDs) {
-        return startScan(ifaceName, scanType, freqs, hiddenNetworkSSIDs, null);
-    }
-
-    /**
      * Start a scan using the specified parameters. A scan is an asynchronous operation. The
      * result of the operation is returned in the {@link ScanEventCallback} registered when
      * setting up an interface using
@@ -1004,17 +888,14 @@ public class WifiNl80211Manager {
      * @param freqs list of frequencies to scan for, if null scan all supported channels.
      * @param hiddenNetworkSSIDs List of hidden networks to be scanned for, a null indicates that
      *                           no hidden frequencies will be scanned for.
-     * @param extraScanningParams bundle of extra scanning parameters.
      * @return Returns true on success, false on failure (e.g. when called before the interface
      * has been set up).
      */
     public boolean startScan(@NonNull String ifaceName, @WifiAnnotations.ScanType int scanType,
-            @SuppressLint("NullableCollection") @Nullable Set<Integer> freqs,
-            @SuppressLint("NullableCollection") @Nullable List<byte[]> hiddenNetworkSSIDs,
-            @SuppressLint("NullableCollection") @Nullable Bundle extraScanningParams) {
+            @Nullable Set<Integer> freqs, @Nullable List<byte[]> hiddenNetworkSSIDs) {
         IWifiScannerImpl scannerImpl = getScannerImpl(ifaceName);
         if (scannerImpl == null) {
-            Log.e(TAG, "No valid wificond scanner interface handler for iface=" + ifaceName);
+            Log.e(TAG, "No valid wificond scanner interface handler");
             return false;
         }
         SingleScanSettings settings = new SingleScanSettings();
@@ -1026,9 +907,6 @@ public class WifiNl80211Manager {
         }
         settings.channelSettings  = new ArrayList<>();
         settings.hiddenNetworks  = new ArrayList<>();
-        if (extraScanningParams != null) {
-            settings.enable6GhzRnr = extraScanningParams.getBoolean(SCANNING_PARAM_ENABLE_6GHZ_RNR);
-        }
 
         if (freqs != null) {
             for (Integer freq : freqs) {
@@ -1083,7 +961,7 @@ public class WifiNl80211Manager {
             @NonNull PnoScanRequestCallback callback) {
         IWifiScannerImpl scannerImpl = getScannerImpl(ifaceName);
         if (scannerImpl == null) {
-            Log.e(TAG, "No valid wificond scanner interface handler for iface=" + ifaceName);
+            Log.e(TAG, "No valid wificond scanner interface handler");
             return false;
         }
 
@@ -1121,7 +999,7 @@ public class WifiNl80211Manager {
     public boolean stopPnoScan(@NonNull String ifaceName) {
         IWifiScannerImpl scannerImpl = getScannerImpl(ifaceName);
         if (scannerImpl == null) {
-            Log.e(TAG, "No valid wificond scanner interface handler for iface=" + ifaceName);
+            Log.e(TAG, "No valid wificond scanner interface handler");
             return false;
         }
         try {
@@ -1146,7 +1024,7 @@ public class WifiNl80211Manager {
     public void abortScan(@NonNull String ifaceName) {
         IWifiScannerImpl scannerImpl = getScannerImpl(ifaceName);
         if (scannerImpl == null) {
-            Log.e(TAG, "No valid wificond scanner interface handler for iface=" + ifaceName);
+            Log.e(TAG, "No valid wificond scanner interface handler");
             return;
         }
         try {
@@ -1166,13 +1044,12 @@ public class WifiNl80211Manager {
      * {@link WifiScanner#WIFI_BAND_5_GHZ},
      * {@link WifiScanner#WIFI_BAND_5_GHZ_DFS_ONLY},
      * {@link WifiScanner#WIFI_BAND_6_GHZ}
-     * {@link WifiScanner.WIFI_BAND_60_GHZ}
      * @return frequencies vector of valid frequencies (MHz), or an empty array for error.
      * @throws IllegalArgumentException if band is not recognized.
      */
     public @NonNull int[] getChannelsMhzForBand(@WifiAnnotations.WifiBandBasic int band) {
         if (mWificond == null) {
-            Log.e(TAG, "getChannelsMhzForBand: mWificond binder is null! Did wificond die?");
+            Log.e(TAG, "No valid wificond scanner interface handler");
             return new int[0];
         }
         int[] result = null;
@@ -1189,9 +1066,6 @@ public class WifiNl80211Manager {
                     break;
                 case WifiScanner.WIFI_BAND_6_GHZ:
                     result = mWificond.getAvailable6gChannels();
-                    break;
-                case WifiScanner.WIFI_BAND_60_GHZ:
-                    result = mWificond.getAvailable60gChannels();
                     break;
                 default:
                     throw new IllegalArgumentException("unsupported band " + band);
@@ -1222,7 +1096,7 @@ public class WifiNl80211Manager {
      */
     @Nullable public DeviceWiphyCapabilities getDeviceWiphyCapabilities(@NonNull String ifaceName) {
         if (mWificond == null) {
-            Log.e(TAG, "getDeviceWiphyCapabilities: mWificond binder is null! Did wificond die?");
+            Log.e(TAG, "Can not query for device wiphy capabilities at this time");
             return null;
         }
 
@@ -1231,34 +1105,6 @@ public class WifiNl80211Manager {
         } catch (RemoteException e) {
             return null;
         }
-    }
-
-    /**
-     * Register the provided listener for country code event.
-     *
-     * @param executor The Executor on which to execute the callbacks.
-     * @param listener listener for country code changed events.
-     * @return true on success, false on failure.
-     */
-    public boolean registerCountryCodeChangedListener(@NonNull @CallbackExecutor Executor executor,
-            @NonNull CountryCodeChangedListener listener) {
-        if (!retrieveWificondAndRegisterForDeath()) {
-            return false;
-        }
-        Log.d(TAG, "registerCountryCodeEventListener called");
-        mWificondEventHandler.registerCountryCodeChangedListener(executor, listener);
-        return true;
-    }
-
-
-    /**
-     * Unregister CountryCodeChangedListener with pid.
-     *
-     * @param listener listener which registered country code changed events.
-     */
-    public void unregisterCountryCodeChangedListener(@NonNull CountryCodeChangedListener listener) {
-        Log.d(TAG, "unregisterCountryCodeEventListener called");
-        mWificondEventHandler.unregisterCountryCodeChangedListener(listener);
     }
 
     /**
@@ -1275,17 +1121,13 @@ public class WifiNl80211Manager {
      * @param callback Callback for AP events.
      * @return true on success, false on failure (e.g. when called on an interface which has not
      * been set up).
-     *
-     * @deprecated The usage is replaced by vendor HAL
-     * {@code android.hardware.wifi.hostapd.V1_3.IHostapdCallback}.
      */
-    @Deprecated
     public boolean registerApCallback(@NonNull String ifaceName,
             @NonNull @CallbackExecutor Executor executor,
             @NonNull SoftApCallback callback) {
         IApInterface iface = getApInterface(ifaceName);
         if (iface == null) {
-            Log.e(TAG, "No valid ap interface handler for iface=" + ifaceName);
+            Log.e(TAG, "No valid ap interface handler");
             return false;
         }
 
@@ -1343,7 +1185,7 @@ public class WifiNl80211Manager {
         // TODO (b/112029045) validate mcs
         IClientInterface clientInterface = getClientInterface(ifaceName);
         if (clientInterface == null) {
-            Log.e(TAG, "No valid wificond client interface handler for iface=" + ifaceName);
+            Log.e(TAG, "No valid wificond client interface handler");
             executor.execute(() -> callback.onFailure(SEND_MGMT_FRAME_ERROR_UNKNOWN));
             return;
         }

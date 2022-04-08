@@ -22,17 +22,12 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
 import static android.view.InsetsController.ANIMATION_TYPE_HIDE;
 import static android.view.InsetsController.ANIMATION_TYPE_SHOW;
-import static android.view.InsetsController.LAYOUT_INSETS_DURING_ANIMATION_HIDDEN;
-import static android.view.InsetsController.LAYOUT_INSETS_DURING_ANIMATION_SHOWN;
-import static android.view.InsetsState.ITYPE_IME;
 import static android.view.InsetsState.ITYPE_NAVIGATION_BAR;
 import static android.view.InsetsState.ITYPE_STATUS_BAR;
 import static android.view.SyncRtSurfaceTransactionApplier.applyParams;
-import static android.view.WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_FORCE_SHOW_STATUS_BAR;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_STATUS_FORCE_SHOW_NAVIGATION;
 
-import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.StatusBarManager;
 import android.util.IntArray;
@@ -41,18 +36,17 @@ import android.view.InsetsAnimationControlCallbacks;
 import android.view.InsetsAnimationControlImpl;
 import android.view.InsetsAnimationControlRunner;
 import android.view.InsetsController;
-import android.view.InsetsSource;
 import android.view.InsetsSourceControl;
 import android.view.InsetsState;
 import android.view.InsetsState.InternalInsetsType;
 import android.view.SurfaceControl;
 import android.view.SyncRtSurfaceTransactionApplier;
+import android.view.ViewRootImpl;
+import android.view.WindowInsets.Type.InsetsType;
 import android.view.WindowInsetsAnimation;
 import android.view.WindowInsetsAnimation.Bounds;
 import android.view.WindowInsetsAnimationControlListener;
-import android.view.WindowManager;
 
-import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.DisplayThread;
 
@@ -103,30 +97,12 @@ class InsetsPolicy {
     private BarWindow mStatusBar = new BarWindow(StatusBarManager.WINDOW_STATUS_BAR);
     private BarWindow mNavBar = new BarWindow(StatusBarManager.WINDOW_NAVIGATION_BAR);
     private boolean mAnimatingShown;
-    /**
-     * Let remote insets controller control system bars regardless of other settings.
-     */
-    private boolean mRemoteInsetsControllerControlsSystemBars;
     private final float[] mTmpFloat9 = new float[9];
 
     InsetsPolicy(InsetsStateController stateController, DisplayContent displayContent) {
         mStateController = stateController;
         mDisplayContent = displayContent;
         mPolicy = displayContent.getDisplayPolicy();
-        mRemoteInsetsControllerControlsSystemBars = mPolicy.getContext().getResources().getBoolean(
-                R.bool.config_remoteInsetsControllerControlsSystemBars);
-    }
-
-    boolean getRemoteInsetsControllerControlsSystemBars() {
-        return mRemoteInsetsControllerControlsSystemBars;
-    }
-
-    /**
-     * Used only for testing.
-     */
-    @VisibleForTesting
-    void setRemoteInsetsControllerControlsSystemBars(boolean controlsSystemBars) {
-        mRemoteInsetsControllerControlsSystemBars = controlsSystemBars;
     }
 
     /** Updates the target which can control system bars. */
@@ -144,8 +120,12 @@ class InsetsPolicy {
                 getFakeControlTarget(focusedWin, statusControlTarget),
                 navControlTarget,
                 getFakeControlTarget(focusedWin, navControlTarget));
+        if (ViewRootImpl.sNewInsetsMode != ViewRootImpl.NEW_INSETS_MODE_FULL) {
+            return;
+        }
         mStatusBar.updateVisibility(statusControlTarget, ITYPE_STATUS_BAR);
         mNavBar.updateVisibility(navControlTarget, ITYPE_NAVIGATION_BAR);
+        mPolicy.updateHideNavInputEventReceiver();
     }
 
     boolean isHidden(@InternalInsetsType int type) {
@@ -153,13 +133,15 @@ class InsetsPolicy {
         return provider != null && provider.hasWindow() && !provider.getSource().isVisible();
     }
 
-    void showTransient(@InternalInsetsType int[] types) {
+    @InsetsType int showTransient(IntArray types) {
+        @InsetsType int showingTransientTypes = 0;
         boolean changed = false;
-        for (int i = types.length - 1; i >= 0; i--) {
-            final @InternalInsetsType int type = types[i];
+        for (int i = types.size() - 1; i >= 0; i--) {
+            final int type = types.get(i);
             if (!isHidden(type)) {
                 continue;
             }
+            showingTransientTypes |= InsetsState.toPublicType(type);
             if (mShowingTransientTypes.indexOf(type) != -1) {
                 continue;
             }
@@ -177,28 +159,32 @@ class InsetsPolicy {
             // animation frame which will be triggered if a new leash is created.
             mDisplayContent.mWmService.mAnimator.getChoreographer().postFrameCallback(time -> {
                 synchronized (mDisplayContent.mWmService.mGlobalLock) {
-                    startAnimation(true /* show */, null /* callback */);
+                    final InsetsState state = new InsetsState(mStateController.getRawInsetsState());
+                    startAnimation(true /* show */, () -> {
+                        synchronized (mDisplayContent.mWmService.mGlobalLock) {
+                            mStateController.notifyInsetsChanged();
+                        }
+                    }, state);
+                    mStateController.onInsetsModified(mDummyControlTarget, state);
                 }
             });
         }
+        return showingTransientTypes;
     }
 
     void hideTransient() {
         if (mShowingTransientTypes.size() == 0) {
             return;
         }
+        InsetsState state = new InsetsState(mStateController.getRawInsetsState());
         startAnimation(false /* show */, () -> {
             synchronized (mDisplayContent.mWmService.mGlobalLock) {
-                for (int i = mShowingTransientTypes.size() - 1; i >= 0; i--) {
-                    // We are about to clear mShowingTransientTypes, we don't want the transient bar
-                    // can cause insets on the client. Restore the client visibility.
-                    final @InternalInsetsType int type = mShowingTransientTypes.get(i);
-                    mStateController.getSourceProvider(type).setClientVisible(false);
-                }
                 mShowingTransientTypes.clear();
+                mStateController.notifyInsetsChanged();
                 updateBarControlTarget(mFocusedWin);
             }
-        });
+        }, state);
+        mStateController.onInsetsModified(mDummyControlTarget, state);
     }
 
     boolean isTransient(@InternalInsetsType int type) {
@@ -206,99 +192,38 @@ class InsetsPolicy {
     }
 
     /**
-     * @see InsetsStateController#getInsetsForWindow
+     * @see InsetsStateController#getInsetsForDispatch
      */
-    InsetsState getInsetsForWindow(WindowState target) {
-        final InsetsState originalState = mStateController.getInsetsForWindow(target);
-        final InsetsState state = adjustVisibilityForTransientTypes(originalState);
-        return adjustVisibilityForIme(target, state, state == originalState);
-    }
-
-    /**
-     * @see InsetsStateController#getInsetsForWindowMetrics
-     */
-    InsetsState getInsetsForWindowMetrics(@NonNull WindowManager.LayoutParams attrs) {
-        final InsetsState originalState = mStateController.getInsetsForWindowMetrics(attrs);
-        return adjustVisibilityForTransientTypes(originalState);
-    }
-
-    private InsetsState adjustVisibilityForTransientTypes(InsetsState originalState) {
+    InsetsState getInsetsForDispatch(WindowState target) {
+        InsetsState originalState = mStateController.getInsetsForDispatch(target);
         InsetsState state = originalState;
         for (int i = mShowingTransientTypes.size() - 1; i >= 0; i--) {
-            final @InternalInsetsType int type = mShowingTransientTypes.get(i);
-            final InsetsSource originalSource = state.peekSource(type);
-            if (originalSource != null && originalSource.isVisible()) {
-                if (state == originalState) {
-                    // The source will be modified, create a non-deep copy to store the new one.
-                    state = new InsetsState(originalState);
-                }
-                // Replace the source with a copy in invisible state.
-                final InsetsSource source = new InsetsSource(originalSource);
-                source.setVisible(false);
-                state.addSource(source);
-            }
+            state = new InsetsState(state);
+            state.setSourceVisible(mShowingTransientTypes.get(i), false);
         }
         return state;
     }
 
-    private InsetsState adjustVisibilityForIme(WindowState w, InsetsState originalState,
-            boolean copyState) {
-        if (w.mIsImWindow) {
-            // Navigation bar insets is always visible to IME.
-            final InsetsSource originalNavSource = originalState.peekSource(ITYPE_NAVIGATION_BAR);
-            if (originalNavSource != null && !originalNavSource.isVisible()) {
-                final InsetsState state = copyState ? new InsetsState(originalState)
-                        : originalState;
-                final InsetsSource navSource = new InsetsSource(originalNavSource);
-                navSource.setVisible(true);
-                state.addSource(navSource);
-                return state;
-            }
-        } else if (w.mActivityRecord != null && w.mActivityRecord.mImeInsetsFrozenUntilStartInput) {
-            // During switching tasks with gestural navigation, if the IME is attached to
-            // one app window on that time, even the next app window is behind the IME window,
-            // conceptually the window should not receive the IME insets if the next window is
-            // not eligible IME requester and ready to show IME on top of it.
-            final boolean shouldImeAttachedToApp = mDisplayContent.shouldImeAttachedToApp();
-            final InsetsSource originalImeSource = originalState.peekSource(ITYPE_IME);
-
-            if (shouldImeAttachedToApp && originalImeSource != null) {
-                final boolean imeVisibility =
-                        w.mActivityRecord.mLastImeShown || w.getRequestedVisibility(ITYPE_IME);
-                final InsetsState state = copyState ? new InsetsState(originalState)
-                        : originalState;
-                final InsetsSource imeSource = new InsetsSource(originalImeSource);
-                imeSource.setVisible(imeVisibility);
-                state.addSource(imeSource);
-                return state;
-            }
-        }
-        return originalState;
-    }
-
-    void onInsetsModified(InsetsControlTarget caller) {
-        mStateController.onInsetsModified(caller);
-        checkAbortTransient(caller);
+    void onInsetsModified(WindowState windowState, InsetsState state) {
+        mStateController.onInsetsModified(windowState, state);
+        checkAbortTransient(windowState, state);
         updateBarControlTarget(mFocusedWin);
     }
 
     /**
-     * Called when a control target modified the insets state. If the target set a insets source to
-     * visible while it is shown transiently, we need to abort the transient state. While IME is
-     * requested visible, we also need to abort the transient state of navigation bar if it is shown
-     * transiently.
+     * Called when a window modified the insets state. If the window set a insets source to visible
+     * while it is shown transiently, we need to abort the transient state.
      *
-     * @param caller who changed the insets state.
+     * @param windowState who changed the insets state.
+     * @param state the modified insets state.
      */
-    private void checkAbortTransient(InsetsControlTarget caller) {
+    private void checkAbortTransient(WindowState windowState, InsetsState state) {
         if (mShowingTransientTypes.size() != 0) {
-            final IntArray abortTypes = new IntArray();
-            final boolean imeRequestedVisible = caller.getRequestedVisibility(ITYPE_IME);
+            IntArray abortTypes = new IntArray();
             for (int i = mShowingTransientTypes.size() - 1; i >= 0; i--) {
-                final @InternalInsetsType int type = mShowingTransientTypes.get(i);
-                if ((mStateController.isFakeTarget(type, caller)
-                                && caller.getRequestedVisibility(type))
-                        || (type == ITYPE_NAVIGATION_BAR && imeRequestedVisible)) {
+                final int type = mShowingTransientTypes.get(i);
+                if (mStateController.isFakeTarget(type, windowState)
+                        && state.getSource(type).isVisible()) {
                     mShowingTransientTypes.remove(i);
                     abortTypes.add(type);
                 }
@@ -310,14 +235,11 @@ class InsetsPolicy {
         }
     }
 
-    /**
-     * If the caller is not {@link #updateBarControlTarget}, it should call
-     * updateBarControlTarget(mFocusedWin) after this invocation.
-     */
     private void abortTransient() {
         mPolicy.getStatusBarManagerInternal().abortTransient(mDisplayContent.getDisplayId(),
                 mShowingTransientTypes.toArray());
         mShowingTransientTypes.clear();
+        updateBarControlTarget(mFocusedWin);
     }
 
     private @Nullable InsetsControlTarget getFakeControlTarget(@Nullable WindowState focused,
@@ -330,15 +252,9 @@ class InsetsPolicy {
         if (mShowingTransientTypes.indexOf(ITYPE_STATUS_BAR) != -1) {
             return mDummyControlTarget;
         }
-        final WindowState notificationShade = mPolicy.getNotificationShade();
-        if (focusedWin == notificationShade) {
+        if (focusedWin == mPolicy.getNotificationShade()) {
             // Notification shade has control anyways, no reason to force anything.
             return focusedWin;
-        }
-        if (remoteInsetsControllerControlsSystemBars(focusedWin)) {
-            mDisplayContent.mRemoteInsetsControlTarget.topFocusedWindowChanged(
-                    focusedWin.mAttrs.packageName);
-            return mDisplayContent.mRemoteInsetsControlTarget;
         }
         if (forceShowsSystemBarsForWindowingMode) {
             // Status bar is forcibly shown for the windowing mode which is a steady state.
@@ -352,43 +268,22 @@ class InsetsPolicy {
             // fake control to the client, so that it can re-show the bar during this scenario.
             return mDummyControlTarget;
         }
-        if (!canBeTopFullscreenOpaqueWindow(focusedWin) && mPolicy.topAppHidesStatusBar()
-                && (notificationShade == null || !notificationShade.canReceiveKeys())) {
+        if (mPolicy.topAppHidesStatusBar()) {
             // Non-fullscreen focused window should not break the state that the top-fullscreen-app
-            // window hides status bar, unless the notification shade can receive keys.
+            // window hides status bar.
             return mPolicy.getTopFullscreenOpaqueWindow();
         }
         return focusedWin;
     }
 
-    private static boolean canBeTopFullscreenOpaqueWindow(@Nullable WindowState win) {
-        // The condition doesn't use WindowState#canAffectSystemUiFlags because the window may
-        // haven't drawn or committed the visibility.
-        final boolean nonAttachedAppWindow = win != null
-                && win.mAttrs.type >= WindowManager.LayoutParams.FIRST_APPLICATION_WINDOW
-                && win.mAttrs.type <= WindowManager.LayoutParams.LAST_APPLICATION_WINDOW;
-        return nonAttachedAppWindow && win.mAttrs.isFullscreen() && !win.isFullyTransparent()
-                && !win.inMultiWindowMode();
-    }
-
     private @Nullable InsetsControlTarget getNavControlTarget(@Nullable WindowState focusedWin,
             boolean forceShowsSystemBarsForWindowingMode) {
-        final WindowState imeWin = mDisplayContent.mInputMethodWindow;
-        if (imeWin != null && imeWin.isVisible()) {
-            // Force showing navigation bar while IME is visible.
-            return null;
-        }
         if (mShowingTransientTypes.indexOf(ITYPE_NAVIGATION_BAR) != -1) {
             return mDummyControlTarget;
         }
         if (focusedWin == mPolicy.getNotificationShade()) {
             // Notification shade has control anyways, no reason to force anything.
             return focusedWin;
-        }
-        if (remoteInsetsControllerControlsSystemBars(focusedWin)) {
-            mDisplayContent.mRemoteInsetsControlTarget.topFocusedWindowChanged(
-                    focusedWin.mAttrs.packageName);
-            return mDisplayContent.mRemoteInsetsControlTarget;
         }
         if (forceShowsSystemBarsForWindowingMode) {
             // Navigation bar is forcibly shown for the windowing mode which is a steady state.
@@ -405,28 +300,6 @@ class InsetsPolicy {
         return focusedWin;
     }
 
-    /**
-     * Determines whether the remote insets controller should take control of system bars for all
-     * windows.
-     */
-    boolean remoteInsetsControllerControlsSystemBars(@Nullable WindowState focusedWin) {
-        if (focusedWin == null) {
-            return false;
-        }
-        if (!mRemoteInsetsControllerControlsSystemBars) {
-            return false;
-        }
-        if (mDisplayContent == null || mDisplayContent.mRemoteInsetsControlTarget == null) {
-            // No remote insets control target to take control of insets.
-            return false;
-        }
-        // If necessary, auto can control application windows when
-        // config_remoteInsetsControllerControlsSystemBars is set to true. This is useful in cases
-        // where we want to dictate system bar inset state for applications.
-        return focusedWin.getAttrs().type >= WindowManager.LayoutParams.FIRST_APPLICATION_WINDOW
-                && focusedWin.getAttrs().type <= WindowManager.LayoutParams.LAST_APPLICATION_WINDOW;
-    }
-
     private boolean forceShowsStatusBarTransiently() {
         final WindowState win = mPolicy.getStatusBar();
         return win != null && (win.mAttrs.privateFlags & PRIVATE_FLAG_FORCE_SHOW_STATUS_BAR) != 0;
@@ -439,25 +312,28 @@ class InsetsPolicy {
     }
 
     private boolean forceShowsSystemBarsForWindowingMode() {
-        final boolean isDockedRootTaskVisible = mDisplayContent.getDefaultTaskDisplayArea()
-                .isRootTaskVisible(WINDOWING_MODE_SPLIT_SCREEN_PRIMARY);
-        final boolean isFreeformRootTaskVisible = mDisplayContent.getDefaultTaskDisplayArea()
-                .isRootTaskVisible(WINDOWING_MODE_FREEFORM);
+        final boolean isDockedStackVisible = mDisplayContent.getDefaultTaskDisplayArea()
+                .isStackVisible(WINDOWING_MODE_SPLIT_SCREEN_PRIMARY);
+        final boolean isFreeformStackVisible = mDisplayContent.getDefaultTaskDisplayArea()
+                .isStackVisible(WINDOWING_MODE_FREEFORM);
         final boolean isResizing = mDisplayContent.getDockedDividerController().isResizing();
 
-        // We need to force system bars when the docked root task is visible, when the freeform
-        // root task is visible but also when we are resizing for the transitions when docked
-        // root task visibility changes.
-        return isDockedRootTaskVisible || isFreeformRootTaskVisible || isResizing;
+        // We need to force system bars when the docked stack is visible, when the freeform stack
+        // is visible but also when we are resizing for the transitions when docked stack
+        // visibility changes.
+        return isDockedStackVisible
+                || isFreeformStackVisible
+                || isResizing
+                || mPolicy.getForceShowSystemBars();
     }
 
     @VisibleForTesting
-    void startAnimation(boolean show, Runnable callback) {
+    void startAnimation(boolean show, Runnable callback, InsetsState state) {
         int typesReady = 0;
         final SparseArray<InsetsSourceControl> controls = new SparseArray<>();
         final IntArray showingTransientTypes = mShowingTransientTypes;
         for (int i = showingTransientTypes.size() - 1; i >= 0; i--) {
-            final @InternalInsetsType int type = showingTransientTypes.get(i);
+            int type = showingTransientTypes.get(i);
             InsetsSourceProvider provider = mStateController.getSourceProvider(type);
             InsetsSourceControl control = provider.getControl(mDummyControlTarget);
             if (control == null || control.getLeash() == null) {
@@ -465,6 +341,7 @@ class InsetsPolicy {
             }
             typesReady |= InsetsState.toPublicType(type);
             controls.put(control.getType(), new InsetsSourceControl(control));
+            state.setSourceVisible(type, show);
         }
         controlAnimationUnchecked(typesReady, controls, show, callback);
     }
@@ -486,9 +363,12 @@ class InsetsPolicy {
             mId = id;
         }
 
-        private void updateVisibility(@Nullable InsetsControlTarget controlTarget,
+        private void updateVisibility(InsetsControlTarget controlTarget,
                 @InternalInsetsType int type) {
-            setVisible(controlTarget == null || controlTarget.getRequestedVisibility(type));
+            final WindowState controllingWin =
+                    controlTarget instanceof WindowState ? (WindowState) controlTarget : null;
+            setVisible(controllingWin == null
+                    || controllingWin.getRequestedInsetsState().getSourceOrDefaultVisibility(type));
         }
 
         private void setVisible(boolean visible) {
@@ -507,8 +387,10 @@ class InsetsPolicy {
         InsetsPolicyAnimationControlCallbacks mControlCallbacks;
 
         InsetsPolicyAnimationControlListener(boolean show, Runnable finishCallback, int types) {
-            super(show, false /* hasCallbacks */, types, BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE,
-                    false /* disable */, 0 /* floatingImeBottomInsets */);
+
+            super(show, false /* hasCallbacks */, types, false /* disable */,
+                    (int) (mDisplayContent.getDisplayMetrics().density * FLOATING_IME_BOTTOM_INSET
+                            + 0.5f));
             mFinishCallback = finishCallback;
             mControlCallbacks = new InsetsPolicyAnimationControlCallbacks(this);
         }
@@ -516,9 +398,7 @@ class InsetsPolicy {
         @Override
         protected void onAnimationFinish() {
             super.onAnimationFinish();
-            if (mFinishCallback != null) {
-                DisplayThread.getHandler().post(mFinishCallback);
-            }
+            DisplayThread.getHandler().post(mFinishCallback);
         }
 
         private class InsetsPolicyAnimationControlCallbacks implements
@@ -538,17 +418,11 @@ class InsetsPolicy {
                 }
                 mAnimatingShown = show;
 
-                final InsetsState state = getInsetsForWindow(mFocusedWin);
-
-                // We are about to playing the default animation. Passing a null frame indicates
-                // the controlled types should be animated regardless of the frame.
                 mAnimationControl = new InsetsAnimationControlImpl(controls,
-                        null /* frame */, state, mListener, typesReady, this,
-                        mListener.getDurationMs(), getInsetsInterpolator(),
-                        show ? ANIMATION_TYPE_SHOW : ANIMATION_TYPE_HIDE, show
-                                ? LAYOUT_INSETS_DURING_ANIMATION_SHOWN
-                                : LAYOUT_INSETS_DURING_ANIMATION_HIDDEN,
-                        null /* translator */);
+                        mFocusedWin.getDisplayContent().getBounds(), getState(),
+                        mListener, typesReady, this, mListener.getDurationMs(),
+                        InsetsController.SYSTEM_BARS_INTERPOLATOR,
+                        show ? ANIMATION_TYPE_SHOW : ANIMATION_TYPE_HIDE);
                 SurfaceAnimationThread.getHandler().post(
                         () -> mListener.onReady(mAnimationControl, typesReady));
             }
@@ -556,7 +430,8 @@ class InsetsPolicy {
             /** Called on SurfaceAnimationThread without global WM lock held. */
             @Override
             public void scheduleApplyChangeInsets(InsetsAnimationControlRunner runner) {
-                if (mAnimationControl.applyChangeInsets(null /* outState */)) {
+                InsetsState state = getState();
+                if (mAnimationControl.applyChangeInsets(state)) {
                     mAnimationControl.finish(mAnimatingShown);
                 }
             }
@@ -565,6 +440,20 @@ class InsetsPolicy {
             public void notifyFinished(InsetsAnimationControlRunner runner, boolean shown) {
                 // Nothing's needed here. Finish steps is handled in the listener
                 // onAnimationFinished callback.
+            }
+
+            /**
+             * This method will return a state with fullscreen frame override. No need to make copy
+             * after getting state from this method.
+             * @return The client insets state with full display frame override.
+             */
+            private InsetsState getState() {
+                // To animate the transient animation correctly, we need to let the state hold
+                // the full display frame.
+                InsetsState overrideState = new InsetsState(mFocusedWin.getRequestedInsetsState(),
+                        true);
+                overrideState.setDisplayFrame(mFocusedWin.getDisplayContent().getBounds());
+                return overrideState;
             }
 
             /** Called on SurfaceAnimationThread without global WM lock held. */

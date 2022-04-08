@@ -25,7 +25,7 @@ import android.telephony.ImsiEncryptionInfo;
 interface IPhoneSubInfo {
 
     /** @deprecated Use {@link #getDeviceIdWithFeature(String, String) instead */
-    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
+    @UnsupportedAppUsage
     String getDeviceId(String callingPackage);
 
     /**
@@ -216,6 +216,5 @@ interface IPhoneSubInfo {
      * @param data authentication challenge data
      * @return challenge response
      */
-    String getIccSimChallengeResponse(int subId, int appType, int authType, String data,
-            String callingPackage, String callingFeatureId);
+    String getIccSimChallengeResponse(int subId, int appType, int authType, String data);
 }

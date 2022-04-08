@@ -23,8 +23,8 @@
 #include <gui/Surface.h>
 #include <gui/SurfaceComposerClient.h>
 #include <gui/SurfaceControl.h>
-#include <ui/DisplayMode.h>
-#include <ui/StaticDisplayInfo.h>
+#include <ui/DisplayConfig.h>
+#include <ui/DisplayInfo.h>
 #include <utils/Looper.h>
 
 #include <atomic>
@@ -36,11 +36,11 @@ namespace android {
 namespace uirenderer {
 namespace test {
 
-const ui::StaticDisplayInfo& getDisplayInfo();
-const ui::DisplayMode& getActiveDisplayMode();
+const DisplayInfo& getDisplayInfo();
+const DisplayConfig& getActiveDisplayConfig();
 
 inline const ui::Size& getActiveDisplayResolution() {
-    return getActiveDisplayMode().resolution;
+    return getActiveDisplayConfig().resolution;
 }
 
 class TestContext {

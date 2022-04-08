@@ -19,7 +19,8 @@ package com.android.systemui.util.animation
 import android.animation.ValueAnimator
 import android.graphics.PointF
 import android.util.MathUtils
-import com.android.systemui.animation.Interpolators
+import com.android.internal.R.attr.width
+import com.android.systemui.Interpolators
 
 /**
  * The fraction after which we start fading in when going from a gone widget to a visible one

@@ -27,20 +27,17 @@ import android.view.MotionEvent;
 
 import androidx.test.filters.SmallTest;
 
-import com.android.keyguard.LockIconViewController;
 import com.android.systemui.R;
 import com.android.systemui.SystemUIFactory;
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.classifier.FalsingCollectorFake;
+import com.android.systemui.classifier.FalsingManagerFake;
 import com.android.systemui.dock.DockManager;
 import com.android.systemui.doze.DozeLog;
 import com.android.systemui.shared.plugins.PluginManager;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.DragDownHelper;
-import com.android.systemui.statusbar.LockscreenShadeTransitionController;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationShadeDepthController;
-import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.PulseExpansionHandler;
 import com.android.systemui.statusbar.SuperStatusBarViewFactory;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
@@ -48,7 +45,6 @@ import com.android.systemui.statusbar.notification.DynamicPrivacyController;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
-import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.tuner.TunerService;
 import com.android.systemui.util.InjectionInflationController;
@@ -88,10 +84,6 @@ public class NotificationShadeWindowViewTest extends SysuiTestCase {
     @Mock private NotificationShadeDepthController mNotificationShadeDepthController;
     @Mock private SuperStatusBarViewFactory mStatusBarViewFactory;
     @Mock private NotificationShadeWindowController mNotificationShadeWindowController;
-    @Mock private NotificationStackScrollLayoutController mNotificationStackScrollLayoutController;
-    @Mock private StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
-    @Mock private LockscreenShadeTransitionController mLockscreenShadeTransitionController;
-    @Mock private LockIconViewController mLockIconViewController;
 
     @Before
     public void setUp() {
@@ -108,15 +100,12 @@ public class NotificationShadeWindowViewTest extends SysuiTestCase {
 
         mController = new NotificationShadeWindowViewController(
                 new InjectionInflationController(
-                        SystemUIFactory.getInstance()
-                                .getSysUIComponent()
-                                .createViewInstanceCreatorFactory()),
+                        SystemUIFactory.getInstance().getRootComponent()),
                 mCoordinator,
                 mPulseExpansionHandler,
                 mDynamicPrivacyController,
                 mBypassController,
-                mLockscreenShadeTransitionController,
-                new FalsingCollectorFake(),
+                new FalsingManagerFake(),
                 mPluginManager,
                 mTunerService,
                 mNotificationLockScreenUserManager,
@@ -131,13 +120,11 @@ public class NotificationShadeWindowViewTest extends SysuiTestCase {
                 mNotificationShadeDepthController,
                 mView,
                 mNotificationPanelViewController,
-                mStatusBarViewFactory,
-                mNotificationStackScrollLayoutController,
-                mStatusBarKeyguardViewManager,
-                mLockIconViewController);
+                mStatusBarViewFactory);
         mController.setupExpandedStatusBar();
         mController.setService(mStatusBar, mNotificationShadeWindowController);
         mController.setDragDownHelper(mDragDownHelper);
+
     }
 
     @Test

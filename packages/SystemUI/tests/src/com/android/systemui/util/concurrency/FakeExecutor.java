@@ -27,7 +27,6 @@ public class FakeExecutor implements DelayableExecutor {
     private final FakeSystemClock mClock;
     private PriorityQueue<QueuedRunnable> mQueuedRunnables = new PriorityQueue<>();
     private boolean mIgnoreClockUpdates;
-    private boolean mExecuting;
 
     /**
      * Initializes a fake executor.
@@ -57,9 +56,7 @@ public class FakeExecutor implements DelayableExecutor {
      */
     public boolean runNextReady() {
         if (!mQueuedRunnables.isEmpty() && mQueuedRunnables.peek().mWhen <= mClock.uptimeMillis()) {
-            mExecuting = true;
             mQueuedRunnables.poll().mRunnable.run();
-            mExecuting = false;
             return true;
         }
 
@@ -163,10 +160,6 @@ public class FakeExecutor implements DelayableExecutor {
     @Override
     public void execute(Runnable command) {
         executeDelayed(command, 0);
-    }
-
-    public boolean isExecuting() {
-        return mExecuting;
     }
 
     /**

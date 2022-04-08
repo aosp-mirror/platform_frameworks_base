@@ -50,8 +50,7 @@ public class TestJobActivity extends Activity {
                 final int jobId = intent.getIntExtra(EXTRA_JOB_ID_KEY, hashCode());
                 JobInfo.Builder jobBuilder = new JobInfo.Builder(jobId, jobServiceComponent)
                         .setBackoffCriteria(JOB_INITIAL_BACKOFF, JobInfo.BACKOFF_POLICY_LINEAR)
-                        .setMinimumLatency(JOB_MINIMUM_LATENCY)
-                        .setOverrideDeadline(JOB_MINIMUM_LATENCY);
+                        .setMinimumLatency(JOB_MINIMUM_LATENCY);
                 final int result = jobScheduler.schedule(jobBuilder.build());
                 if (result != JobScheduler.RESULT_SUCCESS) {
                     Log.e(TAG, "Could not schedule job " + jobId);

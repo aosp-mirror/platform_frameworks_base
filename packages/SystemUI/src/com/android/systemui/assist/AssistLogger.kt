@@ -28,16 +28,17 @@ import com.android.internal.util.FrameworkStatsLog
 import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.systemui.assist.AssistantInvocationEvent.Companion.deviceStateFromLegacyDeviceState
 import com.android.systemui.assist.AssistantInvocationEvent.Companion.eventFromLegacyInvocationType
-import com.android.systemui.dagger.SysUISingleton
 import javax.inject.Inject
+import javax.inject.Singleton
 
 /** Class for reporting events related to Assistant sessions. */
-@SysUISingleton
+@Singleton
 open class AssistLogger @Inject constructor(
     protected val context: Context,
     protected val uiEventLogger: UiEventLogger,
     private val assistUtils: AssistUtils,
-    private val phoneStateMonitor: PhoneStateMonitor
+    private val phoneStateMonitor: PhoneStateMonitor,
+    private val assistHandleBehaviorController: AssistHandleBehaviorController
 ) {
 
     private val instanceIdSequence = InstanceIdSequence(INSTANCE_ID_MAX)
@@ -81,7 +82,7 @@ open class AssistLogger @Inject constructor(
                 assistComponentFinal.flattenToString(),
                 getOrCreateInstanceId().id,
                 deviceStateFinal,
-                false)
+                assistHandleBehaviorController.areHandlesShowing())
         reportAssistantInvocationExtraData()
     }
 

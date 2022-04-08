@@ -62,7 +62,7 @@ public class PendingIntentPerfTest {
             state.resumeTiming();
 
             final PendingIntent pendingIntent = PendingIntent.getActivity(mContext, 0, mIntent,
-                    PendingIntent.FLAG_MUTABLE_UNAUDITED);
+                    0);
 
             state.pauseTiming();
             pendingIntent.cancel();
@@ -80,11 +80,11 @@ public class PendingIntentPerfTest {
         while (state.keepRunning()) {
             state.pauseTiming();
             final PendingIntent previousPendingIntent = PendingIntent.getActivity(mContext, 0,
-                    mIntent, PendingIntent.FLAG_MUTABLE_UNAUDITED);
+                    mIntent, 0);
             state.resumeTiming();
 
             final PendingIntent pendingIntent = PendingIntent.getActivity(mContext, 0, mIntent,
-                    PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_MUTABLE_UNAUDITED);
+                    PendingIntent.FLAG_CANCEL_CURRENT);
 
             state.pauseTiming();
             pendingIntent.cancel();
@@ -102,11 +102,11 @@ public class PendingIntentPerfTest {
         while (state.keepRunning()) {
             state.pauseTiming();
             final PendingIntent previousPendingIntent = PendingIntent.getActivity(mContext, 0,
-                    mIntent, PendingIntent.FLAG_MUTABLE_UNAUDITED);
+                    mIntent, 0);
             state.resumeTiming();
 
             final PendingIntent pendingIntent = PendingIntent.getActivity(mContext, 0, mIntent,
-                    PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_MUTABLE_UNAUDITED);
+                    PendingIntent.FLAG_UPDATE_CURRENT);
 
             state.pauseTiming();
             previousPendingIntent.cancel();
@@ -124,7 +124,7 @@ public class PendingIntentPerfTest {
         while (state.keepRunning()) {
             state.pauseTiming();
             final PendingIntent pendingIntent = PendingIntent.getActivity(mContext, 0,
-                    mIntent, PendingIntent.FLAG_MUTABLE_UNAUDITED);
+                    mIntent, 0);
             state.resumeTiming();
 
             pendingIntent.cancel();

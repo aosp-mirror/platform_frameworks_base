@@ -98,10 +98,8 @@ class StaleDataclassProcessor: AbstractProcessor() {
 
     private fun elemToString(elem: Element): String {
         return buildString {
-            append(elem.modifiers.joinToString(" ") { it.name.toLowerCase() })
-            append(" ")
-            append(elem.annotationMirrors.joinToString(" ", transform = { annotationToString(it) }))
-            append(" ")
+            append(elem.modifiers.joinToString(" ") { it.name.toLowerCase() }).append(" ")
+            append(elem.annotationMirrors.joinToString(" ")).append(" ")
             if (elem is Symbol) {
                 if (elem.type is Type.MethodType) {
                     append((elem.type as Type.MethodType).returnType)
@@ -111,14 +109,6 @@ class StaleDataclassProcessor: AbstractProcessor() {
                 append(" ")
             }
             append(elem)
-        }
-    }
-
-    private fun annotationToString(ann: AnnotationMirror): String {
-        return if (ann.annotationType.toString().startsWith("com.android.internal.util.DataClass")) {
-            ann.toString()
-        } else {
-            ann.toString().substringBefore("(")
         }
     }
 

@@ -81,7 +81,6 @@ public final class BitmapUtil {
         HardwareBuffer buffer = bundle.getParcelable(KEY_BUFFER);
         ParcelableColorSpace colorSpace = bundle.getParcelable(KEY_COLOR_SPACE);
 
-        return Bitmap.wrapHardwareBuffer(Objects.requireNonNull(buffer),
-                colorSpace.getColorSpace());
+        return Bitmap.wrapHardwareBuffer(Objects.requireNonNull(buffer), colorSpace);
     }
 }

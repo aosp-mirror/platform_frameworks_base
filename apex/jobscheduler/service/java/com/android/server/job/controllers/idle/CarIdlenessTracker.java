@@ -30,12 +30,6 @@ import com.android.server.job.StateControllerProto;
 
 import java.io.PrintWriter;
 
-/**
- * CarIdlenessTracker determines that a car is in idle state when 1) garage mode is started, or
- * 2) screen is off and idle maintenance is triggered.
- * If idleness is forced or garage mode is running, the car is considered idle regardless of screen
- * on/off.
- */
 public final class CarIdlenessTracker extends BroadcastReceiver implements IdlenessTracker {
     private static final String TAG = "JobScheduler.CarIdlenessTracker";
     private static final boolean DEBUG = JobSchedulerService.DEBUG
@@ -54,7 +48,6 @@ public final class CarIdlenessTracker extends BroadcastReceiver implements Idlen
     private boolean mIdle;
     private boolean mGarageModeOn;
     private boolean mForced;
-    private boolean mScreenOn;
     private IdlenessListener mIdleListener;
 
     public CarIdlenessTracker() {
@@ -63,7 +56,6 @@ public final class CarIdlenessTracker extends BroadcastReceiver implements Idlen
         mIdle = false;
         mGarageModeOn = false;
         mForced = false;
-        mScreenOn = true;
     }
 
     @Override
@@ -79,7 +71,6 @@ public final class CarIdlenessTracker extends BroadcastReceiver implements Idlen
 
         // Screen state
         filter.addAction(Intent.ACTION_SCREEN_ON);
-        filter.addAction(Intent.ACTION_SCREEN_OFF);
 
         // State of GarageMode
         filter.addAction(ACTION_GARAGE_MODE_ON);
@@ -97,8 +88,6 @@ public final class CarIdlenessTracker extends BroadcastReceiver implements Idlen
     public void dump(PrintWriter pw) {
         pw.print("  mIdle: "); pw.println(mIdle);
         pw.print("  mGarageModeOn: "); pw.println(mGarageModeOn);
-        pw.print("  mForced: "); pw.println(mForced);
-        pw.print("  mScreenOn: "); pw.println(mScreenOn);
     }
 
     @Override
@@ -132,9 +121,6 @@ public final class CarIdlenessTracker extends BroadcastReceiver implements Idlen
         } else if (action.equals(Intent.ACTION_SCREEN_ON)) {
             logIfDebug("Screen is on...");
             handleScreenOn();
-        } else if (action.equals(intent.ACTION_SCREEN_OFF)) {
-            logIfDebug("Screen is off...");
-            mScreenOn = false;
         } else if (action.equals(ACTION_GARAGE_MODE_ON)) {
             logIfDebug("GarageMode is on...");
             mGarageModeOn = true;
@@ -146,10 +132,10 @@ public final class CarIdlenessTracker extends BroadcastReceiver implements Idlen
         } else if (action.equals(ActivityManagerService.ACTION_TRIGGER_IDLE)) {
             if (!mGarageModeOn) {
                 logIfDebug("Idle trigger fired...");
-                triggerIdleness();
+                triggerIdlenessOnce();
             } else {
-                logIfDebug("TRIGGER_IDLE received but not changing state; mIdle="
-                        + mIdle + " mGarageModeOn=" + mGarageModeOn);
+                logIfDebug("TRIGGER_IDLE received but not changing state; idle="
+                        + mIdle + " screen=" + mGarageModeOn);
             }
         }
     }
@@ -172,24 +158,20 @@ public final class CarIdlenessTracker extends BroadcastReceiver implements Idlen
         }
     }
 
-    private void triggerIdleness() {
+    private void triggerIdlenessOnce() {
         // This is simply triggering idleness once until some constraint will switch it back off
         if (mIdle) {
             // Already in idle state. Nothing to do
             logIfDebug("Device is already idle");
-        } else if (!mScreenOn) {
+        } else {
             // Going idle once
-            logIfDebug("Device is going idle");
+            logIfDebug("Device is going idle once");
             mIdle = true;
             mIdleListener.reportNewIdleState(mIdle);
-        } else {
-            logIfDebug("TRIGGER_IDLE received but not changing state: mIdle = " + mIdle
-                    + ", mScreenOn = " + mScreenOn);
         }
     }
 
     private void handleScreenOn() {
-        mScreenOn = true;
         if (mForced || mGarageModeOn) {
             // Even though screen is on, the device remains idle
             logIfDebug("Screen is on, but device cannot exit idle");
@@ -197,7 +179,6 @@ public final class CarIdlenessTracker extends BroadcastReceiver implements Idlen
             // Exiting idle
             logIfDebug("Device is exiting idle");
             mIdle = false;
-            mIdleListener.reportNewIdleState(mIdle);
         } else {
             // Already in non-idle state. Nothing to do
             logIfDebug("Device is already non-idle");

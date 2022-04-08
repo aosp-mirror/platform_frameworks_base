@@ -18,9 +18,6 @@ package com.android.systemui.statusbar.policy;
 import android.content.Context;
 import android.net.NetworkCapabilities;
 
-import com.android.settingslib.AccessibilityContentDescriptions;
-import com.android.settingslib.SignalIcon.IconGroup;
-import com.android.settingslib.SignalIcon.State;
 import com.android.systemui.statusbar.policy.NetworkController.IconState;
 import com.android.systemui.statusbar.policy.NetworkController.SignalCallback;
 
@@ -28,7 +25,7 @@ import java.util.BitSet;
 
 
 public class EthernetSignalController extends
-        SignalController<State, IconGroup> {
+        SignalController<SignalController.State, SignalController.IconGroup> {
 
     public EthernetSignalController(Context context,
             CallbackHandler callbackHandler, NetworkControllerImpl networkController) {
@@ -53,22 +50,14 @@ public class EthernetSignalController extends
     public void notifyListeners(SignalCallback callback) {
         boolean ethernetVisible = mCurrentState.connected;
         String contentDescription = getTextIfExists(getContentDescription()).toString();
+
         // TODO: wire up data transfer using WifiSignalPoller.
         callback.setEthernetIndicators(new IconState(ethernetVisible, getCurrentIconId(),
                 contentDescription));
     }
 
     @Override
-    public int getContentDescription() {
-        if (mCurrentState.connected) {
-            return getIcons().contentDesc[1];
-        } else {
-            return getIcons().discContentDesc;
-        }
-    }
-
-    @Override
-    public State cleanState() {
-        return new State();
+    public SignalController.State cleanState() {
+        return new SignalController.State();
     }
 }

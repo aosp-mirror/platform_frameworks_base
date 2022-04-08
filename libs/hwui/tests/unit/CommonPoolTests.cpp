@@ -54,9 +54,7 @@ TEST(DISABLED_CommonPool, threadCount) {
     EXPECT_EQ(0, threads.count(gettid()));
 }
 
-// Disabled since this is flaky. This isn't a necessarily useful functional test, so being
-// disabled isn't that significant. However it may be good to resurrect this somehow.
-TEST(CommonPool, DISABLED_singleThread) {
+TEST(CommonPool, singleThread) {
     std::mutex mutex;
     std::condition_variable fence;
     bool isProcessing = false;

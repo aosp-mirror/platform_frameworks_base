@@ -16,7 +16,6 @@
 
 #include "SkiaOpenGLPipeline.h"
 
-#include <gui/TraceUtils.h>
 #include "DeferredLayerUpdater.h"
 #include "LayerDrawable.h"
 #include "LightingInfo.h"
@@ -28,6 +27,7 @@
 #include "renderthread/EglManager.h"
 #include "renderthread/Frame.h"
 #include "utils/GLUtils.h"
+#include "utils/TraceUtils.h"
 
 #include <GLES3/gl3.h>
 
@@ -75,9 +75,7 @@ bool SkiaOpenGLPipeline::draw(const Frame& frame, const SkRect& screenDirty, con
                               bool opaque, const LightInfo& lightInfo,
                               const std::vector<sp<RenderNode>>& renderNodes,
                               FrameInfoVisualizer* profiler) {
-    if (!isCapturingSkp()) {
-        mEglManager.damageFrame(frame, dirty);
-    }
+    mEglManager.damageFrame(frame, dirty);
 
     SkColorType colorType = getSurfaceColorType();
     // setup surface for fbo0
@@ -89,8 +87,6 @@ bool SkiaOpenGLPipeline::draw(const Frame& frame, const SkRect& screenDirty, con
         // Note: The default preference of pixel format is RGBA_8888, when other
         // pixel format is available, we should branch out and do more check.
         fboInfo.fFormat = GL_RGBA8;
-    } else if (colorType == kRGBA_1010102_SkColorType) {
-        fboInfo.fFormat = GL_RGB10_A2;
     } else {
         LOG_ALWAYS_FATAL("Unsupported color type.");
     }
@@ -107,6 +103,7 @@ bool SkiaOpenGLPipeline::draw(const Frame& frame, const SkRect& screenDirty, con
     LightingInfo::updateLighting(lightGeometry, lightInfo);
     renderFrame(*layerUpdateQueue, dirty, renderNodes, opaque, contentDrawBounds, surface,
                 SkMatrix::I());
+    layerUpdateQueue->clear();
 
     // Draw visual debugging features
     if (CC_UNLIKELY(Properties::showDirtyRegions ||
@@ -114,13 +111,8 @@ bool SkiaOpenGLPipeline::draw(const Frame& frame, const SkRect& screenDirty, con
         SkCanvas* profileCanvas = surface->getCanvas();
         SkiaProfileRenderer profileRenderer(profileCanvas);
         profiler->draw(profileRenderer);
+        profileCanvas->flush();
     }
-
-    {
-        ATRACE_NAME("flush commands");
-        surface->flushAndSubmit();
-    }
-    layerUpdateQueue->clear();
 
     // Log memory statistics
     if (CC_UNLIKELY(Properties::debugLevel != kDebugDisabled)) {

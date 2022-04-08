@@ -21,19 +21,18 @@ import com.android.internal.compat.IOverrideValidator;
 import java.util.Map;
 
 parcelable CompatibilityChangeConfig;
-parcelable CompatibilityOverrideConfig;
-parcelable CompatibilityOverridesToRemoveConfig;
 parcelable CompatibilityChangeInfo;
+
 /**
  * Platform private API for talking with the PlatformCompat service.
  *
- * <p>Should be used for gating and logging from non-app processes.
- *
- * <p>Note: for app processes please use {@code android.compat.Compatibility} API.
+ * <p> Should be used for gating and logging from non-app processes.
+ * For app processes please use android.compat.Compatibility API.
  *
  * {@hide}
  */
-interface IPlatformCompat {
+interface IPlatformCompat
+{
 
     /**
      * Reports that a compatibility change is affecting an app process now.
@@ -41,9 +40,8 @@ interface IPlatformCompat {
      * <p>Note: for changes that are gated using {@link #isChangeEnabled(long, ApplicationInfo)},
      * you do not need to call this API directly. The change will be reported for you.
      *
-     * @param changeId the ID of the compatibility change taking effect
-     * @param appInfo  representing the affected app
-     * @throws SecurityException if logging is not allowed
+     * @param changeId The ID of the compatibility change taking effect.
+     * @param appInfo  Representing the affected app.
      */
     void reportChange(long changeId, in ApplicationInfo appInfo);
 
@@ -53,12 +51,11 @@ interface IPlatformCompat {
      * <p>Note: for changes that are gated using {@link #isChangeEnabled(long, String)},
      * you do not need to call this API directly. The change will be reported for you.
      *
-     * @param changeId    the ID of the compatibility change taking effect
-     * @param userId      the ID of the user that the operation is done for
-     * @param packageName the package name of the app in question
-     * @throws SecurityException if logging is not allowed
+     * @param changeId    The ID of the compatibility change taking effect.
+     * @param userId      The ID of the user that the operation is done for.
+     * @param packageName The package name of the app in question.
      */
-    void reportChangeByPackageName(long changeId, in String packageName, int userId);
+     void reportChangeByPackageName(long changeId, in String packageName, int userId);
 
     /**
      * Reports that a compatibility change is affecting an app process now.
@@ -66,14 +63,13 @@ interface IPlatformCompat {
      * <p>Note: for changes that are gated using {@link #isChangeEnabled(long, int)},
      * you do not need to call this API directly. The change will be reported for you.
      *
-     * @param changeId the ID of the compatibility change taking effect
-     * @param uid      the UID of the app in question
-     * @throws SecurityException if logging is not allowed
+     * @param changeId The ID of the compatibility change taking effect.
+     * @param uid      The UID of the app in question.
      */
     void reportChangeByUid(long changeId, int uid);
 
     /**
-     * Queries if a given compatibility change is enabled for an app process. This method should
+     * Query if a given compatibility change is enabled for an app process. This method should
      * be called when implementing functionality on behalf of the affected app.
      *
      * <p>If this method returns {@code true}, the calling code should implement the compatibility
@@ -83,15 +79,14 @@ interface IPlatformCompat {
      * <p>It will also report the change as {@link #reportChange(long, ApplicationInfo)} would, so
      * there is no need to call that method directly.
      *
-     * @param changeId the ID of the compatibility change in question
-     * @param appInfo  representing the app in question
-     * @return {@code true} if the change is enabled for the current app
-     * @throws SecurityException if logging or reading compat confis is not allowed
+     * @param changeId The ID of the compatibility change in question.
+     * @param appInfo  Representing the app in question.
+     * @return {@code true} if the change is enabled for the current app.
      */
     boolean isChangeEnabled(long changeId, in ApplicationInfo appInfo);
 
     /**
-     * Queries if a given compatibility change is enabled for an app process. This method should
+     * Query if a given compatibility change is enabled for an app process. This method should
      * be called when implementing functionality on behalf of the affected app.
      *
      * <p>Same as {@link #isChangeEnabled(long, ApplicationInfo)}, except it receives a package name
@@ -107,16 +102,15 @@ interface IPlatformCompat {
      * <p>It will also report the change as {@link #reportChange(long, String)} would, so there is
      * no need to call that method directly.
      *
-     * @param changeId    the ID of the compatibility change in question
-     * @param packageName the package name of the app in question
-     * @param userId      the ID of the user that the operation is done for
-     * @return {@code true} if the change is enabled for the current app
-     * @throws SecurityException if logging or reading compat confis is not allowed
+     * @param changeId    The ID of the compatibility change in question.
+     * @param packageName The package name of the app in question.
+     * @param userId      The ID of the user that the operation is done for.
+     * @return {@code true} if the change is enabled for the current app.
      */
     boolean isChangeEnabledByPackageName(long changeId, in String packageName, int userId);
 
     /**
-     * Queries if a given compatibility change is enabled for an app process. This method should
+     * Query if a given compatibility change is enabled for an app process. This method should
      * be called when implementing functionality on behalf of the affected app.
      *
      * <p>Same as {@link #isChangeEnabled(long, ApplicationInfo)}, except it receives a uid
@@ -133,173 +127,110 @@ interface IPlatformCompat {
      * <p>It will also report the change as {@link #reportChange(long, int)} would, so there is
      * no need to call that method directly.
      *
-     * @param changeId the ID of the compatibility change in question
-     * @param uid      the UID of the app in question
-     * @return {@code true} if the change is enabled for the current app
-     * @throws SecurityException if logging or reading compat confis is not allowed
+     * @param changeId The ID of the compatibility change in question.
+     * @param uid      The UID of the app in question.
+     * @return {@code true} if the change is enabled for the current app.
      */
     boolean isChangeEnabledByUid(long changeId, int uid);
 
     /**
-     * Adds overrides to compatibility changes.
+     * Add overrides to compatibility changes. Kills the app to allow the changes to take effect.
      *
-     * <p>Kills the app to allow the changes to take effect.
+     * @param overrides Parcelable containing the compat change overrides to be applied.
+     * @param packageName The package name of the app whose changes will be overridden.
      *
-     * @param overrides   parcelable containing the compat change overrides to be applied
-     * @param packageName the package name of the app whose changes will be overridden
-     * @throws SecurityException if overriding changes is not permitted
      */
     void setOverrides(in CompatibilityChangeConfig overrides, in String packageName);
 
     /**
-     * Adds overrides to compatibility changes on release builds.
+     * Add overrides to compatibility changes. Doesn't kill the app, to be only used in tests.
      *
-     * <p>The caller to this API needs to hold
-     * {@code android.permission.OVERRIDE_COMPAT_CHANGE_CONFIG_ON_RELEASE_BUILD} and all change ids
-     * in {@code overrides} need to annotated with {@link android.compat.annotation.Overridable}.
+     * @param overrides Parcelable containing the compat change overrides to be applied.
+     * @param packageName The package name of the app whose changes will be overridden.
      *
-     * A release build in this definition means that {@link android.os.Build#IS_DEBUGGABLE} needs to
-     * be {@code false}.
-     *
-     * <p>Note that this does not kill the app, and therefore overrides read from the app process
-     * will not be updated. Overrides read from the system process do take effect.
-     *
-     * @param overrides   parcelable containing the compat change overrides to be applied
-     * @param packageName the package name of the app whose changes will be overridden
-     * @throws SecurityException if overriding changes is not permitted
-     */
-    void putOverridesOnReleaseBuilds(in CompatibilityOverrideConfig overrides, in String packageName);
-
-    /**
-     * Adds overrides to compatibility changes.
-     *
-     * <p>Does not kill the app, to be only used in tests.
-     *
-     * @param overrides   parcelable containing the compat change overrides to be applied
-     * @param packageName the package name of the app whose changes will be overridden
-     * @throws SecurityException if overriding changes is not permitted.
      */
     void setOverridesForTest(in CompatibilityChangeConfig overrides, in String packageName);
 
     /**
-     * Restores the default behaviour for the given change and app.
+     * Removes an override previously added via {@link #setOverrides(CompatibilityChangeConfig,
+     * String)}. This restores the default behaviour for the given change and app, once any app
+     * processes have been restarted.
+     * Kills the app to allow the changes to take effect.
      *
-     * <p>Kills the app to allow the changes to take effect.
-     *
-     * @param changeId    the ID of the change that was overridden
-     * @param packageName the app package name that was overridden
-     * @return {@code true} if an override existed
-     * @throws SecurityException if overriding changes is not permitted
+     * @param changeId    The ID of the change that was overridden.
+     * @param packageName The app package name that was overridden.
+     * @return {@code true} if an override existed;
      */
     boolean clearOverride(long changeId, String packageName);
 
     /**
-     * Restores the default behaviour for the given change and app.
+     * Enable all compatibility changes which have enabledAfterTargetSdk ==
+     * {@param targetSdkVersion} for an app, subject to the policy. Kills the app to allow the
+     * changes to take effect.
      *
-     * <p>Does not kill the app; to be only used in tests.
-     *
-     * @param changeId    the ID of the change that was overridden
-     * @param packageName the app package name that was overridden
-     * @return {@code true} if an override existed
-     * @throws SecurityException if overriding changes is not permitted
-     */
-    boolean clearOverrideForTest(long changeId, String packageName);
-
-    /**
-     * Restores the default behaviour for compatibility changes on release builds.
-     *
-     * <p>The caller to this API needs to hold
-     * {@code android.permission.OVERRIDE_COMPAT_CHANGE_CONFIG_ON_RELEASE_BUILD} and all change ids
-     * in {@code overridesToRemove} need to annotated with
-     * {@link android.compat.annotation.Overridable}.
-     *
-     * A release build in this definition means that {@link android.os.Build#IS_DEBUGGABLE} needs to
-     * be {@code false}.
-     *
-     * <p>Note that this does not kill the app, and therefore overrides read from the app process
-     * will not be updated. Overrides read from the system process do take effect.
-     *
-     * @param overridesToRemove   parcelable containing the compat change overrides to be removed
-     * @param packageName         the package name of the app whose changes will be restored to the
-     *                            default behaviour
-     * @throws SecurityException if overriding changes is not permitted
-     */
-    void removeOverridesOnReleaseBuilds(in CompatibilityOverridesToRemoveConfig overridesToRemove, in String packageName);
-
-    /**
-     * Enables all compatibility changes that have enabledSinceTargetSdk ==
-     * {@param targetSdkVersion} for an app, subject to the policy.
-     *
-     * <p>Kills the app to allow the changes to take effect.
-     *
-     * @param packageName      The package name of the app whose compatibility changes will be
-     *                         enabled.
+     * @param packageName The package name of the app whose compatibility changes will be enabled.
      * @param targetSdkVersion The targetSdkVersion for filtering the changes to be enabled.
+     *
      * @return The number of changes that were enabled.
-     * @throws SecurityException if overriding changes is not permitted.
      */
     int enableTargetSdkChanges(in String packageName, int targetSdkVersion);
 
     /**
-     * Disables all compatibility changes that have enabledAfterTargetSdk ==
-     * {@param targetSdkVersion} for an app, subject to the policy.
+     * Disable all compatibility changes which have enabledAfterTargetSdk ==
+     * {@param targetSdkVersion} for an app, subject to the policy. Kills the app to allow the
+     * changes to take effect.
      *
-     * <p>Kills the app to allow the changes to take effect.
+     * @param packageName The package name of the app whose compatibility changes will be disabled.
+     * @param targetSdkVersion The targetSdkVersion for filtering the changes to be disabled.
      *
-     * @param packageName      the package name of the app whose compatibility changes will be
-     *                         disabled
-     * @param targetSdkVersion the targetSdkVersion for filtering the changes to be disabled
-     * @return the number of changes that were disabled
-     * @throws SecurityException if overriding changes is not permitted.
+     * @return The number of changes that were disabled.
      */
     int disableTargetSdkChanges(in String packageName, int targetSdkVersion);
 
     /**
-     * Restores the default behaviour for the given app.
+     * Revert overrides to compatibility changes. Kills the app to allow the changes to take effect.
      *
-     * <p>Kills the app to allow the changes to take effect.
+     * @param packageName The package name of the app whose overrides will be cleared.
      *
-     * @param packageName the package name of the app whose overrides will be cleared
-     * @throws SecurityException if overriding changes is not permitted
      */
     void clearOverrides(in String packageName);
 
     /**
-     * Restores the default behaviour for the given app.
+     * Revert overrides to compatibility changes. Doesn't kill the app, to be only used in tests.
      *
-     * <p>Does not kill the app; to be only used in tests.
+     * @param packageName The package name of the app whose overrides will be cleared.
      *
-     * @param packageName the package name of the app whose overrides will be cleared
-     * @throws SecurityException if overriding changes is not permitted
      */
     void clearOverridesForTest(in String packageName);
+
 
     /**
      * Get configs for an application.
      *
-     * @param appInfo the application whose config will be returned
-     * @return a {@link CompatibilityChangeConfig}, representing whether a change is enabled for
-     * the given app or not
+     * @param appInfo The application whose config will be returned.
+     *
+     * @return A {@link CompatibilityChangeConfig}, representing whether a change is enabled for
+     *         the given app or not.
      */
     CompatibilityChangeConfig getAppConfig(in ApplicationInfo appInfo);
 
     /**
      * List all compatibility changes.
      *
-     * @return an array of {@link CompatibilityChangeInfo} known to the service
+     * @return An array of {@link CompatChangeInfo} known to the service.
      */
     CompatibilityChangeInfo[] listAllChanges();
 
     /**
-     * List the compatibility changes that should be present in the UI.
-     * Filters out certain changes like e.g. logging only.
-     *
-     * @return an array of {@link CompatibilityChangeInfo}
-     */
+    * List the compatibility changes that should be present in the UI.
+    * Filters out certain changes like e.g. logging only.
+    *
+    * @return An array of {@link CompatChangeInfo}.
+    */
     CompatibilityChangeInfo[] listUIChanges();
 
     /**
-     * Gets an instance that can determine whether a changeid can be overridden for a package name.
+     * Get an instance that can determine whether a changeid can be overridden for a package name.
      */
     IOverrideValidator getOverrideValidator();
 }

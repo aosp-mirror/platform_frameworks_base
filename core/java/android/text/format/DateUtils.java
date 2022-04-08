@@ -20,14 +20,16 @@ import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
-import android.icu.text.DateFormatSymbols;
 import android.icu.text.MeasureFormat;
 import android.icu.text.MeasureFormat.FormatWidth;
 import android.icu.util.Measure;
 import android.icu.util.MeasureUnit;
-import android.os.Build;
 
 import com.android.internal.R;
+
+import libcore.icu.DateIntervalFormat;
+import libcore.icu.LocaleData;
+import libcore.icu.RelativeDateTimeFormatter;
 
 import java.io.IOException;
 import java.time.Instant;
@@ -203,23 +205,17 @@ public class DateUtils
      */
     @Deprecated
     public static String getDayOfWeekString(int dayOfWeek, int abbrev) {
-        DateFormatSymbols dfs = DateFormatSymbols.getInstance();
-        final int width;
+        LocaleData d = LocaleData.get(Locale.getDefault());
+        String[] names;
         switch (abbrev) {
-            case LENGTH_LONG:
-                width = DateFormatSymbols.WIDE;
-                break;
-            case LENGTH_SHORTEST:
-                width = DateFormatSymbols.NARROW;
-                break;
-            case LENGTH_MEDIUM:
-            case LENGTH_SHORT:   // TODO
-            case LENGTH_SHORTER: // TODO
-            default:
-                width = DateFormatSymbols.ABBREVIATED;
-                break;
+            case LENGTH_LONG:       names = d.longWeekdayNames;  break;
+            case LENGTH_MEDIUM:     names = d.shortWeekdayNames; break;
+            case LENGTH_SHORT:      names = d.shortWeekdayNames; break; // TODO
+            case LENGTH_SHORTER:    names = d.shortWeekdayNames; break; // TODO
+            case LENGTH_SHORTEST:   names = d.tinyWeekdayNames;  break;
+            default:                names = d.shortWeekdayNames; break;
         }
-        return dfs.getWeekdays(DateFormatSymbols.FORMAT, width)[dayOfWeek];
+        return names[dayOfWeek];
     }
 
     /**
@@ -231,8 +227,7 @@ public class DateUtils
      */
     @Deprecated
     public static String getAMPMString(int ampm) {
-        String[] amPm = DateFormat.getIcuDateFormatSymbols(Locale.getDefault()).getAmPmStrings();
-        return amPm[ampm - Calendar.AM];
+        return LocaleData.get(Locale.getDefault()).amPm[ampm - Calendar.AM];
     }
 
     /**
@@ -248,23 +243,17 @@ public class DateUtils
      */
     @Deprecated
     public static String getMonthString(int month, int abbrev) {
-        DateFormatSymbols dfs = DateFormat.getIcuDateFormatSymbols(Locale.getDefault());
-        final int width;
+        LocaleData d = LocaleData.get(Locale.getDefault());
+        String[] names;
         switch (abbrev) {
-            case LENGTH_LONG:
-                width = DateFormatSymbols.WIDE;
-                break;
-            case LENGTH_SHORTEST:
-                width = DateFormatSymbols.NARROW;
-                break;
-            case LENGTH_MEDIUM:
-            case LENGTH_SHORT:
-            case LENGTH_SHORTER:
-            default:
-                width = DateFormatSymbols.ABBREVIATED;
-                break;
+            case LENGTH_LONG:       names = d.longMonthNames;  break;
+            case LENGTH_MEDIUM:     names = d.shortMonthNames; break;
+            case LENGTH_SHORT:      names = d.shortMonthNames; break;
+            case LENGTH_SHORTER:    names = d.shortMonthNames; break;
+            case LENGTH_SHORTEST:   names = d.tinyMonthNames;  break;
+            default:                names = d.shortMonthNames; break;
         }
-        return dfs.getMonths(DateFormatSymbols.FORMAT, width)[month];
+        return names[month];
     }
 
     /**
@@ -396,7 +385,7 @@ public class DateUtils
      * the briefest form available (e.g. "2h").
      * @hide
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public static CharSequence formatDuration(long millis, int abbrev) {
         final FormatWidth width;
         switch (abbrev) {

@@ -19,7 +19,6 @@ import android.hardware.hdmi.HdmiDeviceInfo;
 import android.util.Slog;
 
 import com.android.server.hdmi.HdmiCecLocalDevice.ActiveSource;
-
 import java.io.UnsupportedEncodingException;
 
 /**
@@ -165,8 +164,7 @@ final class NewDeviceAction extends HdmiCecFeatureAction {
 
     private void addDeviceInfo() {
         // The device should be in the device list with default information.
-        if (!localDevice().mService.getHdmiCecNetwork().isInDeviceList(mDeviceLogicalAddress,
-                mDevicePhysicalAddress)) {
+        if (!tv().isInDeviceList(mDeviceLogicalAddress, mDevicePhysicalAddress)) {
             Slog.w(TAG, String.format("Device not found (%02x, %04x)",
                     mDeviceLogicalAddress, mDevicePhysicalAddress));
             return;
@@ -178,13 +176,13 @@ final class NewDeviceAction extends HdmiCecFeatureAction {
                 mDeviceLogicalAddress, mDevicePhysicalAddress,
                 tv().getPortId(mDevicePhysicalAddress),
                 mDeviceType, mVendorId, mDisplayName);
-        localDevice().mService.getHdmiCecNetwork().addCecDevice(deviceInfo);
+        tv().addCecDevice(deviceInfo);
 
         // Consume CEC messages we already got for this newly found device.
         tv().processDelayedMessages(mDeviceLogicalAddress);
 
-        if (HdmiUtils.isEligibleAddressForDevice(HdmiDeviceInfo.DEVICE_AUDIO_SYSTEM,
-                mDeviceLogicalAddress)) {
+        if (HdmiUtils.getTypeFromAddress(mDeviceLogicalAddress)
+                == HdmiDeviceInfo.DEVICE_AUDIO_SYSTEM) {
             tv().onNewAvrAdded(deviceInfo);
         }
     }

@@ -16,17 +16,14 @@
 
 #pragma once
 
-#include <utils/Mutex.h>
 #include <utils/Log.h>
 #include <utils/RefBase.h>
-
-#include <ui/FatVector.h>
 
 #include "FrameInfo.h"
 #include "FrameMetricsObserver.h"
 
 #include <string.h>
-#include <mutex>
+#include <vector>
 
 namespace android {
 namespace uirenderer {
@@ -35,13 +32,9 @@ class FrameMetricsReporter {
 public:
     FrameMetricsReporter() {}
 
-    void addObserver(FrameMetricsObserver* observer) {
-        std::lock_guard lock(mObserversLock);
-        mObservers.push_back(observer);
-    }
+    void addObserver(FrameMetricsObserver* observer) { mObservers.push_back(observer); }
 
     bool removeObserver(FrameMetricsObserver* observer) {
-        std::lock_guard lock(mObserversLock);
         for (size_t i = 0; i < mObservers.size(); i++) {
             if (mObservers[i].get() == observer) {
                 mObservers.erase(mObservers.begin() + i);
@@ -51,39 +44,16 @@ public:
         return false;
     }
 
-    bool hasObservers() {
-        std::lock_guard lock(mObserversLock);
-        return mObservers.size() > 0;
-    }
+    bool hasObservers() { return mObservers.size() > 0; }
 
-    /**
-     * Notify observers about the metrics contained in 'stats'.
-     * If an observer is waiting for present time, notify when 'stats' has present time.
-     *
-     * If an observer does not want present time, only notify when 'hasPresentTime' is false.
-     * Never notify both types of observers from the same callback, because the callback with
-     * 'hasPresentTime' is sent at a different time than the one without.
-     */
-    void reportFrameMetrics(const int64_t* stats, bool hasPresentTime) {
-        FatVector<sp<FrameMetricsObserver>, 10> copy;
-        {
-            std::lock_guard lock(mObserversLock);
-            copy.reserve(mObservers.size());
-            for (size_t i = 0; i < mObservers.size(); i++) {
-                const bool wantsPresentTime = mObservers[i]->waitForPresentTime();
-                if (hasPresentTime == wantsPresentTime) {
-                    copy.push_back(mObservers[i]);
-                }
-            }
-        }
-        for (size_t i = 0; i < copy.size(); i++) {
-            copy[i]->notify(stats);
+    void reportFrameMetrics(const int64_t* stats) {
+        for (size_t i = 0; i < mObservers.size(); i++) {
+            mObservers[i]->notify(stats);
         }
     }
 
 private:
-    FatVector<sp<FrameMetricsObserver>, 10> mObservers GUARDED_BY(mObserversLock);
-    std::mutex mObserversLock;
+    std::vector<sp<FrameMetricsObserver> > mObservers;
 };
 
 }  // namespace uirenderer

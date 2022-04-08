@@ -16,20 +16,17 @@
 
 package com.android.systemui.util.sensors;
 
-import static com.google.common.truth.Truth.assertThat;
-
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
+import android.os.Handler;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.util.Assert;
 import com.android.systemui.util.concurrency.FakeExecutor;
 import com.android.systemui.util.time.FakeSystemClock;
 
@@ -53,10 +50,9 @@ public class ProximityCheckTest extends SysuiTestCase {
 
     @Before
     public void setUp() throws Exception {
-        Assert.setTestableLooper(TestableLooper.get(this).getLooper());
-        FakeThresholdSensor thresholdSensor = new FakeThresholdSensor();
-        thresholdSensor.setLoaded(true);
-        mFakeProximitySensor = new FakeProximitySensor(thresholdSensor, null, mFakeExecutor);
+        AsyncSensorManager asyncSensorManager =
+                new AsyncSensorManager(new FakeSensorManager(mContext), null, new Handler());
+        mFakeProximitySensor = new FakeProximitySensor(mContext.getResources(), asyncSensorManager);
 
         mProximityCheck = new ProximitySensor.ProximityCheck(mFakeProximitySensor, mFakeExecutor);
     }
@@ -67,7 +63,7 @@ public class ProximityCheckTest extends SysuiTestCase {
 
         assertNull(mTestableCallback.mLastResult);
 
-        mFakeProximitySensor.setLastEvent(new ProximitySensor.ThresholdSensorEvent(true, 0));
+        mFakeProximitySensor.setLastEvent(new ProximitySensor.ProximityEvent(true, 0));
         mFakeProximitySensor.alertListeners();
 
         assertTrue(mTestableCallback.mLastResult);
@@ -83,38 +79,13 @@ public class ProximityCheckTest extends SysuiTestCase {
         mFakeExecutor.runAllReady();
 
         assertFalse(mFakeProximitySensor.isRegistered());
-        assertEquals(1, mTestableCallback.mNumCalls);
-        assertNull(mTestableCallback.mLastResult);
-    }
-
-    @Test
-    public void testNotLoaded() {
-        mFakeProximitySensor.setSensorAvailable(false);
-
-        assertThat(mTestableCallback.mLastResult).isNull();
-        assertThat(mTestableCallback.mNumCalls).isEqualTo(0);
-
-        mProximityCheck.check(100, mTestableCallback);
-
-        assertThat(mTestableCallback.mLastResult).isNull();
-        assertThat(mTestableCallback.mNumCalls).isEqualTo(1);
-
-        mFakeProximitySensor.setSensorAvailable(true);
-
-        mProximityCheck.check(100, mTestableCallback);
-
-        mFakeProximitySensor.setLastEvent(new ProximitySensor.ThresholdSensorEvent(true, 0));
-        mFakeProximitySensor.alertListeners();
-
-        assertThat(mTestableCallback.mLastResult).isNotNull();
-        assertThat(mTestableCallback.mNumCalls).isEqualTo(2);
     }
 
     @Test
     public void testProxDoesntCancelOthers() {
         assertFalse(mFakeProximitySensor.isRegistered());
         // We don't need our "other" listener to do anything. Just ensure our sensor is registered.
-        ThresholdSensor.Listener emptyListener = event -> { };
+        ProximitySensor.ProximitySensorListener emptyListener = event -> { };
         mFakeProximitySensor.register(emptyListener);
         assertTrue(mFakeProximitySensor.isRegistered());
 
@@ -123,7 +94,7 @@ public class ProximityCheckTest extends SysuiTestCase {
 
         assertNull(mTestableCallback.mLastResult);
 
-        mFakeProximitySensor.setLastEvent(new ProximitySensor.ThresholdSensorEvent(true, 0));
+        mFakeProximitySensor.setLastEvent(new ProximitySensor.ProximityEvent(true, 0));
         mFakeProximitySensor.alertListeners();
 
         assertTrue(mTestableCallback.mLastResult);
@@ -138,12 +109,9 @@ public class ProximityCheckTest extends SysuiTestCase {
 
     private static class TestableCallback implements Consumer<Boolean> {
         Boolean mLastResult;
-        int mNumCalls = 0;
-
         @Override
         public void accept(Boolean result) {
             mLastResult = result;
-            mNumCalls++;
         }
     }
 }

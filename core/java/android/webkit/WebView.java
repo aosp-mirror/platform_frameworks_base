@@ -45,7 +45,6 @@ import android.os.StrictMode;
 import android.print.PrintDocumentAdapter;
 import android.util.AttributeSet;
 import android.util.Log;
-import android.util.LongSparseArray;
 import android.util.SparseArray;
 import android.view.DragEvent;
 import android.view.KeyEvent;
@@ -56,20 +55,14 @@ import android.view.ViewGroup;
 import android.view.ViewHierarchyEncoder;
 import android.view.ViewStructure;
 import android.view.ViewTreeObserver;
-import android.view.WindowInsets;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.accessibility.AccessibilityNodeProvider;
-import android.view.autofill.AutofillId;
 import android.view.autofill.AutofillValue;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputConnection;
 import android.view.inspector.InspectableProperty;
 import android.view.textclassifier.TextClassifier;
-import android.view.translation.TranslationCapability;
-import android.view.translation.TranslationSpec.DataFormat;
-import android.view.translation.ViewTranslationRequest;
-import android.view.translation.ViewTranslationResponse;
 import android.widget.AbsoluteLayout;
 
 import java.io.BufferedWriter;
@@ -79,7 +72,6 @@ import java.lang.annotation.RetentionPolicy;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Executor;
-import java.util.function.Consumer;
 
 /**
  * A View that displays web pages.
@@ -119,7 +111,7 @@ public class WebView extends AbsoluteLayout
     // Throwing an exception for incorrect thread usage if the
     // build target is JB MR2 or newer. Defaults to false, and is
     // set in the WebView constructor.
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     private static volatile boolean sEnforceThreadChecking = false;
 
     /**
@@ -414,7 +406,7 @@ public class WebView extends AbsoluteLayout
      * @hide
      */
     @SuppressWarnings("deprecation")  // for super() call into deprecated base class constructor.
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     protected WebView(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr,
             int defStyleRes, @Nullable Map<String, Object> javaScriptInterfaces,
             boolean privateBrowsing) {
@@ -711,20 +703,18 @@ public class WebView extends AbsoluteLayout
         return mProvider.restoreState(inState);
     }
 
-   /**
-     * Loads the given URL with additional HTTP headers, specified as a map from
-     * name to value. Note that if this map contains any of the headers that are
-     * set by default by this WebView, such as those controlling caching, accept
-     * types or the User-Agent, their values may be overridden by this WebView's
-     * defaults.
-     * <p>
-     * Some older WebView implementations require {@code additionalHttpHeaders}
-     * to be mutable.
+    /**
+     * Loads the given URL with the specified additional HTTP headers.
      * <p>
      * Also see compatibility note on {@link #evaluateJavascript}.
      *
      * @param url the URL of the resource to load
-     * @param additionalHttpHeaders map with additional headers
+     * @param additionalHttpHeaders the additional headers to be used in the
+     *            HTTP request for this URL, specified as a map from name to
+     *            value. Note that if this map contains any of the headers
+     *            that are set by default by this WebView, such as those
+     *            controlling caching, accept types or the User-Agent, their
+     *            values may be overridden by this WebView's defaults.
      */
     public void loadUrl(@NonNull String url, @NonNull Map<String, String> additionalHttpHeaders) {
         checkThread();
@@ -1520,7 +1510,7 @@ public class WebView extends AbsoluteLayout
      *
      * @param hosts the list of hosts
      * @param callback will be called with {@code true} if hosts are successfully added to the
-     * allowlist. It will be called with {@code false} if any hosts are malformed. The callback
+     * whitelist. It will be called with {@code false} if any hosts are malformed. The callback
      * will be run on the UI thread
      */
     public static void setSafeBrowsingWhitelist(@NonNull List<String> hosts,
@@ -2459,14 +2449,6 @@ public class WebView extends AbsoluteLayout
             WebView.super.startActivityForResult(intent, requestCode);
         }
 
-        /**
-         * @see View#onApplyWindowInsets(WindowInsets)
-         */
-        @Nullable
-        public WindowInsets super_onApplyWindowInsets(@Nullable WindowInsets insets) {
-            return WebView.super.onApplyWindowInsets(insets);
-        }
-
         // ---- Access to non-public methods ----
         public void overScrollBy(int deltaX, int deltaY,
                 int scrollX, int scrollY,
@@ -2594,7 +2576,7 @@ public class WebView extends AbsoluteLayout
         return WebViewFactory.getProvider();
     }
 
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     private final Looper mWebViewThread = Looper.myLooper();
 
     @UnsupportedAppUsage
@@ -2861,31 +2843,6 @@ public class WebView extends AbsoluteLayout
         return mProvider.getViewDelegate().isVisibleToUserForAutofill(virtualId);
     }
 
-    @Override
-    @Nullable
-    public void onCreateVirtualViewTranslationRequests(@NonNull long[] virtualIds,
-            @NonNull @DataFormat int[] supportedFormats,
-            @NonNull Consumer<ViewTranslationRequest> requestsCollector) {
-        mProvider.getViewDelegate().onCreateVirtualViewTranslationRequests(virtualIds,
-                supportedFormats, requestsCollector);
-    }
-
-    @Override
-    public void dispatchCreateViewTranslationRequest(@NonNull Map<AutofillId, long[]> viewIds,
-            @NonNull @DataFormat int[] supportedFormats,
-            @Nullable TranslationCapability capability,
-            @NonNull List<ViewTranslationRequest> requests) {
-        super.dispatchCreateViewTranslationRequest(viewIds, supportedFormats, capability, requests);
-        mProvider.getViewDelegate().dispatchCreateViewTranslationRequest(viewIds, supportedFormats,
-                capability, requests);
-    }
-
-    @Override
-    public void onVirtualViewTranslationResponses(
-            @NonNull LongSparseArray<ViewTranslationResponse> response) {
-        mProvider.getViewDelegate().onVirtualViewTranslationResponses(response);
-    }
-
     /** @hide */
     @Override
     public void onInitializeAccessibilityNodeInfoInternal(AccessibilityNodeInfo info) {
@@ -3120,12 +3077,5 @@ public class WebView extends AbsoluteLayout
         encoder.addProperty("webview:title", mProvider.getTitle());
         encoder.addProperty("webview:url", mProvider.getUrl());
         encoder.addProperty("webview:originalUrl", mProvider.getOriginalUrl());
-    }
-
-    @Override
-    public WindowInsets onApplyWindowInsets(WindowInsets insets) {
-        WindowInsets result = mProvider.getViewDelegate().onApplyWindowInsets(insets);
-        if (result == null) return super.onApplyWindowInsets(insets);
-        return result;
     }
 }

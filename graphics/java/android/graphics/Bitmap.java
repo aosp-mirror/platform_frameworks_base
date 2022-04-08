@@ -23,6 +23,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.WorkerThread;
 import android.compat.annotation.UnsupportedAppUsage;
+import android.content.res.ResourcesImpl;
 import android.hardware.HardwareBuffer;
 import android.os.Build;
 import android.os.Parcel;
@@ -39,7 +40,6 @@ import dalvik.annotation.optimization.CriticalNative;
 import libcore.util.NativeAllocationRegistry;
 
 import java.io.OutputStream;
-import java.lang.ref.WeakReference;
 import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
@@ -80,20 +80,26 @@ public final class Bitmap implements Parcelable {
 
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 123769491)
     private byte[] mNinePatchChunk; // may be null
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     private NinePatch.InsetStruct mNinePatchInsets; // may be null
     @UnsupportedAppUsage
     private int mWidth;
     @UnsupportedAppUsage
     private int mHeight;
-    private WeakReference<HardwareBuffer> mHardwareBuffer;
     private boolean mRecycled;
 
     private ColorSpace mColorSpace;
 
-    /*package*/ int mDensity = getDefaultDensity();
+    /** @hide */
+    public int mDensity = getDefaultDensity();
 
     private static volatile int sDefaultDensity = -1;
+
+    /** @hide Used only when ResourcesImpl.TRACE_FOR_DETAILED_PRELOAD is true. */
+    public static volatile int sPreloadTracingNumInstantiatedBitmaps;
+
+    /** @hide Used only when ResourcesImpl.TRACE_FOR_DETAILED_PRELOAD is true. */
+    public static volatile long sPreloadTracingTotalBitmapsSize;
 
     /**
      * For backwards compatibility, allows the app layer to change the default
@@ -158,14 +164,17 @@ public final class Bitmap implements Parcelable {
                     Bitmap.class.getClassLoader(), nativeGetNativeFinalizer(), allocationByteCount);
         }
         registry.registerNativeAllocation(this, nativeBitmap);
+
+        if (ResourcesImpl.TRACE_FOR_DETAILED_PRELOAD) {
+            sPreloadTracingNumInstantiatedBitmaps++;
+            long nativeSize = NATIVE_ALLOCATION_SIZE + allocationByteCount;
+            sPreloadTracingTotalBitmapsSize += nativeSize;
+        }
     }
 
     /**
      * Return the pointer to the native object.
-     *
      * @hide
-     * Must be public for access from android.graphics.pdf,
-     * but must not be called from outside the UI module.
      */
     public long getNativeInstance() {
         return mNativePtr;
@@ -176,7 +185,7 @@ public final class Bitmap implements Parcelable {
      * width/height values
      */
     @SuppressWarnings("unused") // called from JNI
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     void reinit(int width, int height, boolean requestPremultiplied) {
         mWidth = width;
         mHeight = height;
@@ -344,9 +353,11 @@ public final class Bitmap implements Parcelable {
      * Sets the nine patch chunk.
      *
      * @param chunk The definition of the nine patch
+     *
+     * @hide
      */
     @UnsupportedAppUsage
-    private void setNinePatchChunk(byte[] chunk) {
+    public void setNinePatchChunk(byte[] chunk) {
         mNinePatchChunk = chunk;
     }
 
@@ -366,7 +377,6 @@ public final class Bitmap implements Parcelable {
             nativeRecycle(mNativePtr);
             mNinePatchChunk = null;
             mRecycled = true;
-            mHardwareBuffer = null;
         }
     }
 
@@ -686,12 +696,12 @@ public final class Bitmap implements Parcelable {
 
     /**
      * Creates a new immutable bitmap backed by ashmem which can efficiently
-     * be passed between processes.
+     * be passed between processes. The bitmap is assumed to be in the sRGB
+     * color space.
      *
      * @hide
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R,
-            publicAlternatives = "Use {@link #asShared()} instead")
+    @UnsupportedAppUsage
     public Bitmap createAshmemBitmap() {
         checkRecycled("Can't copy a recycled bitmap");
         noteHardwareBitmapSlowCall();
@@ -704,21 +714,22 @@ public final class Bitmap implements Parcelable {
     }
 
     /**
-     * Return an immutable bitmap backed by shared memory which can be
-     * efficiently passed between processes via Parcelable.
+     * Creates a new immutable bitmap backed by ashmem which can efficiently
+     * be passed between processes. The bitmap is assumed to be in the sRGB
+     * color space.
      *
-     * <p>If this bitmap already meets these criteria it will return itself.
+     * @hide
      */
-    @NonNull
-    public Bitmap asShared() {
-        if (nativeIsBackedByAshmem(mNativePtr) && nativeIsImmutable(mNativePtr)) {
-            return this;
+    @UnsupportedAppUsage
+    public Bitmap createAshmemBitmap(Config config) {
+        checkRecycled("Can't copy a recycled bitmap");
+        noteHardwareBitmapSlowCall();
+        Bitmap b = nativeCopyAshmemConfig(mNativePtr, config.nativeInt);
+        if (b != null) {
+            b.setPremultiplied(mRequestPremultiplied);
+            b.mDensity = mDensity;
         }
-        Bitmap shared = createAshmemBitmap();
-        if (shared == null) {
-            throw new RuntimeException("Failed to create shared Bitmap!");
-        }
-        return shared;
+        return b;
     }
 
     /**
@@ -748,12 +759,19 @@ public final class Bitmap implements Parcelable {
         if (colorSpace == null) {
             colorSpace = ColorSpace.get(ColorSpace.Named.SRGB);
         }
-        Bitmap bitmap = nativeWrapHardwareBufferBitmap(hardwareBuffer,
-                colorSpace.getNativeInstance());
-        if (bitmap != null) {
-            bitmap.mHardwareBuffer = new WeakReference<HardwareBuffer>(hardwareBuffer);
+        return nativeWrapHardwareBufferBitmap(hardwareBuffer, colorSpace.getNativeInstance());
+    }
+
+    /**
+     * Utility method to create a hardware backed bitmap using the graphics buffer.
+     * @hide
+     */
+    @Nullable
+    public static Bitmap wrapHardwareBuffer(@NonNull GraphicBuffer graphicBuffer,
+            @Nullable ColorSpace colorSpace) {
+        try (HardwareBuffer hb = HardwareBuffer.createFromGraphicBuffer(graphicBuffer)) {
+            return wrapHardwareBuffer(hb, colorSpace);
         }
-        return bitmap;
     }
 
     /**
@@ -1322,10 +1340,7 @@ public final class Bitmap implements Parcelable {
      * Populates a rectangle with the bitmap's optical insets.
      *
      * @param outInsets Rect to populate with optical insets
-     *
      * @hide
-     * Must be public for access from android.graphics.drawable,
-     * but must not be called from outside the UI module.
      */
     public void getOpticalInsets(@NonNull Rect outInsets) {
         if (mNinePatchInsets == null) {
@@ -1335,11 +1350,7 @@ public final class Bitmap implements Parcelable {
         }
     }
 
-    /**
-     * @hide
-     * Must be public for access from android.graphics.drawable,
-     * but must not be called from outside the UI module.
-     */
+    /** @hide */
     public NinePatch.InsetStruct getNinePatchInsets() {
         return mNinePatchInsets;
     }
@@ -1445,8 +1456,10 @@ public final class Bitmap implements Parcelable {
      * to {@link #reconfigure(int, int, Config)}, {@link #setPixel(int, int, int)},
      * {@link #setPixels(int[], int, int, int, int, int, int)} and {@link #eraseColor(int)} will
      * fail and throw an IllegalStateException.
+     *
+     * @hide
      */
-    private void setImmutable() {
+    public void setImmutable() {
         if (isMutable()) {
             nativeSetImmutable(mNativePtr);
         }
@@ -1590,8 +1603,6 @@ public final class Bitmap implements Parcelable {
 
     /**
      * @hide
-     * Must be public for access from android.graphics.drawable,
-     * but must not be called from outside the UI module.
      */
     @UnsupportedAppUsage
     static public int scaleFromDensity(int size, int sdensity, int tdensity) {
@@ -2219,26 +2230,30 @@ public final class Bitmap implements Parcelable {
     }
 
     /**
+     * @return {@link GraphicBuffer} which is internally used by hardware bitmap
+     *
+     * Note: the GraphicBuffer does *not* have an associated {@link ColorSpace}.
+     * To render this object the same as its rendered with this Bitmap, you
+     * should also call {@link getColorSpace}.
+     *
+     * @hide
+     */
+    @UnsupportedAppUsage
+    public GraphicBuffer createGraphicBufferHandle() {
+        return GraphicBuffer.createFromHardwareBuffer(getHardwareBuffer());
+    }
+
+    /**
      * @return {@link HardwareBuffer} which is internally used by hardware bitmap
      *
      * Note: the HardwareBuffer does *not* have an associated {@link ColorSpace}.
      * To render this object the same as its rendered with this Bitmap, you
-     * should also call {@link #getColorSpace()}.</p>
+     * should also call {@link getColorSpace}.
      *
-     * Must not be modified while a wrapped Bitmap is accessing it. Doing so will
-     * result in undefined behavior.</p>
-     *
-     * @throws IllegalStateException if the bitmap's config is not {@link Config#HARDWARE}
-     * or if the bitmap has been recycled.
+     * @hide
      */
-    public @NonNull HardwareBuffer getHardwareBuffer() {
-        checkRecycled("Can't getHardwareBuffer from a recycled bitmap");
-        HardwareBuffer hardwareBuffer = mHardwareBuffer == null ? null : mHardwareBuffer.get();
-        if (hardwareBuffer == null || hardwareBuffer.isClosed()) {
-            hardwareBuffer = nativeGetHardwareBuffer(mNativePtr);
-            mHardwareBuffer = new WeakReference<HardwareBuffer>(hardwareBuffer);
-        }
-        return hardwareBuffer;
+    public HardwareBuffer getHardwareBuffer() {
+        return nativeGetHardwareBuffer(mNativePtr);
     }
 
     //////////// native methods
@@ -2317,7 +2332,4 @@ public final class Bitmap implements Parcelable {
 
     @CriticalNative
     private static native boolean nativeIsImmutable(long nativePtr);
-
-    @CriticalNative
-    private static native boolean nativeIsBackedByAshmem(long nativePtr);
 }

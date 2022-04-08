@@ -21,6 +21,7 @@ import android.content.Context;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.security.GateKeeper;
+import android.security.keystore.AndroidKeyStoreSecretKey;
 import android.security.keystore.KeyPermanentlyInvalidatedException;
 import android.security.keystore.KeyProperties;
 import android.security.keystore.KeyProtection;
@@ -66,7 +67,7 @@ import javax.crypto.spec.GCMParameterSpec;
  * @hide
  */
 public class PlatformKeyManager {
-    static final int MIN_GENERATION_ID_FOR_UNLOCKED_DEVICE_REQUIRED = 1001000;
+    static final int MIN_GENERATION_ID_FOR_UNLOCKED_DEVICE_REQUIRED = 1000000;
 
     private static final String TAG = "PlatformKeyManager";
     private static final String KEY_ALGORITHM = "AES";
@@ -84,6 +85,8 @@ public class PlatformKeyManager {
     private final Context mContext;
     private final KeyStoreProxy mKeyStore;
     private final RecoverableKeyStoreDb mDatabase;
+
+    private static final String ANDROID_KEY_STORE_PROVIDER = "AndroidKeyStore";
 
     /**
      * A new instance operating on behalf of {@code userId}, storing its prefs in the location
@@ -236,7 +239,7 @@ public class PlatformKeyManager {
         if (!isKeyLoaded(userId, generationId)) {
             throw new UnrecoverableKeyException("KeyStore doesn't contain key " + alias);
         }
-        SecretKey key = (SecretKey) mKeyStore.getKey(
+        AndroidKeyStoreSecretKey key = (AndroidKeyStoreSecretKey) mKeyStore.getKey(
                 alias, /*password=*/ null);
         return new PlatformEncryptionKey(generationId, key);
     }
@@ -288,7 +291,7 @@ public class PlatformKeyManager {
         if (!isKeyLoaded(userId, generationId)) {
             throw new UnrecoverableKeyException("KeyStore doesn't contain key " + alias);
         }
-        SecretKey key = (SecretKey) mKeyStore.getKey(
+        AndroidKeyStoreSecretKey key = (AndroidKeyStoreSecretKey) mKeyStore.getKey(
                 alias, /*password=*/ null);
         return new PlatformDecryptionKey(generationId, key);
     }
@@ -431,7 +434,21 @@ public class PlatformKeyManager {
         if (userId ==  UserHandle.USER_SYSTEM) {
             decryptionKeyProtection.setUnlockedDeviceRequired(true);
         } else {
-            // Don't set protection params to prevent losing key.
+            // With setUnlockedDeviceRequired, KeyStore thinks that device is locked .
+            decryptionKeyProtection.setUserAuthenticationRequired(true);
+            decryptionKeyProtection.setUserAuthenticationValidityDurationSeconds(
+                            USER_AUTHENTICATION_VALIDITY_DURATION_SECONDS);
+            // Bind decryption key to secondary profile lock screen secret.
+            long secureUserId = getGateKeeperService().getSecureUserId(userId);
+            // TODO(b/124095438): Propagate this failure instead of silently failing.
+            if (secureUserId == GateKeeper.INVALID_SECURE_USER_ID) {
+                Log.e(TAG, "No SID available for user " + userId);
+                return;
+            }
+            decryptionKeyProtection
+                    .setBoundToSpecificSecureUserId(secureUserId)
+                    // Ignore caller uid which always belongs to the primary profile.
+                    .setCriticalToDeviceEncryption(true);
         }
         // Store decryption key first since it is more likely to fail.
         mKeyStore.setEntry(
@@ -469,7 +486,7 @@ public class PlatformKeyManager {
      * @throws KeyStoreException if there was a problem getting or initializing the key store.
      */
     private static KeyStore getAndLoadAndroidKeyStore() throws KeyStoreException {
-        KeyStore keyStore = KeyStore.getInstance(KeyStoreProxyImpl.ANDROID_KEY_STORE_PROVIDER);
+        KeyStore keyStore = KeyStore.getInstance(ANDROID_KEY_STORE_PROVIDER);
         try {
             keyStore.load(/*param=*/ null);
         } catch (CertificateException | IOException | NoSuchAlgorithmException e) {

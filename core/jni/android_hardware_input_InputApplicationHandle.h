@@ -29,17 +29,18 @@ namespace android {
 class NativeInputApplicationHandle : public InputApplicationHandle {
 public:
     explicit NativeInputApplicationHandle(jweak objWeak);
-    ~NativeInputApplicationHandle() override;
+    virtual ~NativeInputApplicationHandle();
 
     jobject getInputApplicationHandleObjLocalRef(JNIEnv* env);
 
-    bool updateInfo() override;
+    virtual bool updateInfo();
 
 private:
     jweak mObjWeak;
 };
 
-extern std::shared_ptr<InputApplicationHandle> android_view_InputApplicationHandle_getHandle(
+
+extern sp<InputApplicationHandle> android_view_InputApplicationHandle_getHandle(
         JNIEnv* env, jobject inputApplicationHandleObj);
 
 } // namespace android

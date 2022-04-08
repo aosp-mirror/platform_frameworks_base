@@ -29,7 +29,7 @@ namespace skiapipeline {
  */
 class DumpOpsCanvas : public SkCanvas {
 public:
-    DumpOpsCanvas(std::ostream& output, int level, const SkiaDisplayList& displayList)
+    DumpOpsCanvas(std::ostream& output, int level, SkiaDisplayList& displayList)
             : mOutput(output)
             , mLevel(level)
             , mDisplayList(displayList)
@@ -86,18 +86,22 @@ protected:
         mOutput << mIdent << "drawTextBlob" << std::endl;
     }
 
-    void onDrawImage2(const SkImage*, SkScalar dx, SkScalar dy, const SkSamplingOptions&,
-                      const SkPaint*) override {
+    void onDrawImage(const SkImage*, SkScalar dx, SkScalar dy, const SkPaint*) override {
         mOutput << mIdent << "drawImage" << std::endl;
     }
 
-    void onDrawImageRect2(const SkImage*, const SkRect&, const SkRect&, const SkSamplingOptions&,
-                          const SkPaint*, SrcRectConstraint) override {
+    void onDrawImageNine(const SkImage*, const SkIRect& center, const SkRect& dst,
+                         const SkPaint*) override {
+        mOutput << mIdent << "drawImageNine" << std::endl;
+    }
+
+    void onDrawImageRect(const SkImage*, const SkRect*, const SkRect&, const SkPaint*,
+                         SrcRectConstraint) override {
         mOutput << mIdent << "drawImageRect" << std::endl;
     }
 
-    void onDrawImageLattice2(const SkImage*, const Lattice& lattice, const SkRect& dst,
-                             SkFilterMode, const SkPaint*) override {
+    void onDrawImageLattice(const SkImage*, const Lattice& lattice, const SkRect& dst,
+                            const SkPaint*) override {
         mOutput << mIdent << "drawImageLattice" << std::endl;
     }
 
@@ -127,7 +131,7 @@ protected:
     }
 
 private:
-    const RenderNodeDrawable* getRenderNodeDrawable(SkDrawable* drawable) {
+    RenderNodeDrawable* getRenderNodeDrawable(SkDrawable* drawable) {
         for (auto& child : mDisplayList.mChildNodes) {
             if (drawable == &child) {
                 return &child;
@@ -147,7 +151,7 @@ private:
 
     std::ostream& mOutput;
     int mLevel;
-    const SkiaDisplayList& mDisplayList;
+    SkiaDisplayList& mDisplayList;
     std::string mIdent;
 };
 

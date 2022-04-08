@@ -24,7 +24,6 @@ import android.annotation.StyleRes;
 import android.app.Person;
 import android.content.Context;
 import android.content.res.ColorStateList;
-import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.Point;
 import android.graphics.Rect;
@@ -110,10 +109,7 @@ public class MessagingGroup extends LinearLayout implements MessagingLinearLayou
     private boolean mIsInConversation = true;
     private ViewGroup mMessagingIconContainer;
     private int mConversationContentStart;
-    private int mNonConversationContentStart;
-    private int mNonConversationPaddingStart;
-    private int mConversationAvatarSize;
-    private int mNonConversationAvatarSize;
+    private int mNonConversationMarginEnd;
     private int mNotificationTextMarginTop;
 
     public MessagingGroup(@NonNull Context context) {
@@ -145,21 +141,16 @@ public class MessagingGroup extends LinearLayout implements MessagingLinearLayou
         mMessagingIconContainer = findViewById(R.id.message_icon_container);
         mContentContainer = findViewById(R.id.messaging_group_content_container);
         mSendingSpinnerContainer = findViewById(R.id.messaging_group_sending_progress_container);
-        Resources res = getResources();
-        DisplayMetrics displayMetrics = res.getDisplayMetrics();
+        DisplayMetrics displayMetrics = getResources().getDisplayMetrics();
         mDisplaySize.x = displayMetrics.widthPixels;
         mDisplaySize.y = displayMetrics.heightPixels;
-        mSenderTextPaddingSingleLine = res.getDimensionPixelSize(
+        mSenderTextPaddingSingleLine = getResources().getDimensionPixelSize(
                 R.dimen.messaging_group_singleline_sender_padding_end);
-        mConversationContentStart = res.getDimensionPixelSize(R.dimen.conversation_content_start);
-        mNonConversationContentStart = res.getDimensionPixelSize(
-                R.dimen.notification_content_margin_start);
-        mNonConversationPaddingStart = res.getDimensionPixelSize(
-                R.dimen.messaging_layout_icon_padding_start);
-        mConversationAvatarSize = res.getDimensionPixelSize(R.dimen.messaging_avatar_size);
-        mNonConversationAvatarSize = res.getDimensionPixelSize(
-                R.dimen.notification_icon_circle_size);
-        mNotificationTextMarginTop = res.getDimensionPixelSize(
+        mConversationContentStart = getResources().getDimensionPixelSize(
+                R.dimen.conversation_content_start);
+        mNonConversationMarginEnd = getResources().getDimensionPixelSize(
+                R.dimen.messaging_layout_margin_end);
+        mNotificationTextMarginTop = getResources().getDimensionPixelSize(
                 R.dimen.notification_text_margin_top);
     }
 
@@ -705,18 +696,10 @@ public class MessagingGroup extends LinearLayout implements MessagingLinearLayou
             mIsInConversation = isInConversation;
             MarginLayoutParams layoutParams =
                     (MarginLayoutParams) mMessagingIconContainer.getLayoutParams();
-            layoutParams.width = mIsInConversation
-                    ? mConversationContentStart
-                    : mNonConversationContentStart;
+            layoutParams.width = mIsInConversation ? mConversationContentStart
+                    : ViewPager.LayoutParams.WRAP_CONTENT;
+            layoutParams.setMarginEnd(mIsInConversation ? 0 : mNonConversationMarginEnd);
             mMessagingIconContainer.setLayoutParams(layoutParams);
-            int imagePaddingStart = isInConversation ? 0 : mNonConversationPaddingStart;
-            mMessagingIconContainer.setPaddingRelative(imagePaddingStart, 0, 0, 0);
-
-            ViewGroup.LayoutParams avatarLayoutParams = mAvatarView.getLayoutParams();
-            int size = mIsInConversation ? mConversationAvatarSize : mNonConversationAvatarSize;
-            avatarLayoutParams.height = size;
-            avatarLayoutParams.width = size;
-            mAvatarView.setLayoutParams(avatarLayoutParams);
         }
     }
 

@@ -27,9 +27,6 @@ import android.view.WindowManager.LayoutParams;
 
 import com.android.settingslib.applications.InterestingConfigChanges;
 import com.android.systemui.Dependency;
-import com.android.systemui.dagger.SysUISingleton;
-import com.android.systemui.demomode.DemoMode;
-import com.android.systemui.demomode.DemoModeController;
 import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.PluginDependencyProvider;
@@ -41,15 +38,14 @@ import com.android.systemui.tuner.TunerService;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.List;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 
 /**
  * Implementation of VolumeComponent backed by the new volume dialog.
  */
-@SysUISingleton
+@Singleton
 public class VolumeDialogComponent implements VolumeComponent, TunerService.Tunable,
         VolumeDialogControllerImpl.UserActivityListener{
 
@@ -76,11 +72,8 @@ public class VolumeDialogComponent implements VolumeComponent, TunerService.Tuna
     );
 
     @Inject
-    public VolumeDialogComponent(
-            Context context,
-            KeyguardViewMediator keyguardViewMediator,
-            VolumeDialogControllerImpl volumeDialogController,
-            DemoModeController demoModeController) {
+    public VolumeDialogComponent(Context context, KeyguardViewMediator keyguardViewMediator,
+            VolumeDialogControllerImpl volumeDialogController) {
         mContext = context;
         mKeyguardViewMediator = keyguardViewMediator;
         mController = volumeDialogController;
@@ -101,7 +94,6 @@ public class VolumeDialogComponent implements VolumeComponent, TunerService.Tuna
         applyConfiguration();
         Dependency.get(TunerService.class).addTunable(this, VOLUME_DOWN_SILENT, VOLUME_UP_SILENT,
                 VOLUME_SILENT_DO_NOT_DISTURB);
-        demoModeController.addCallback(this);
     }
 
     protected VolumeDialog createDefault() {
@@ -169,13 +161,6 @@ public class VolumeDialogComponent implements VolumeComponent, TunerService.Tuna
     @Override
     public void dispatchDemoCommand(String command, Bundle args) {
         // noop
-    }
-
-    @Override
-    public List<String> demoCommands() {
-        List<String> s = new ArrayList<>();
-        s.add(DemoMode.COMMAND_VOLUME);
-        return s;
     }
 
     @Override

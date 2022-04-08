@@ -19,7 +19,6 @@ import android.content.res.Configuration;
 import android.os.Handler;
 import android.util.ArrayMap;
 
-import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.plugins.Plugin;
 import com.android.systemui.plugins.PluginListener;
 import com.android.systemui.shared.plugins.PluginManager;
@@ -35,10 +34,11 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 
 /**
  */
-@SysUISingleton
+@Singleton
 public class ExtensionControllerImpl implements ExtensionController {
 
     public static final int SORT_ORDER_PLUGIN  = 0;

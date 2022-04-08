@@ -45,10 +45,4 @@ interface IColorDisplayManager {
 
     boolean isDisplayWhiteBalanceEnabled();
     boolean setDisplayWhiteBalanceEnabled(boolean enabled);
-
-    boolean isReduceBrightColorsActivated();
-    boolean setReduceBrightColorsActivated(boolean activated);
-    int getReduceBrightColorsStrength();
-    boolean setReduceBrightColorsStrength(int strength);
-    float getReduceBrightColorsOffsetFactor();
 }

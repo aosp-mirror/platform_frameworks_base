@@ -36,7 +36,6 @@
     <string name="wifi_no_internet_no_reconnect" msgid="821591791066497347">"ઑટોમૅટિક રીતે કનેક્ટ કરશે નહીં"</string>
     <string name="wifi_no_internet" msgid="1774198889176926299">"કોઈ ઇન્ટરનેટ ઍક્સેસ નથી"</string>
     <string name="saved_network" msgid="7143698034077223645">"<xliff:g id="NAME">%1$s</xliff:g> દ્વારા સચવાયું"</string>
-    <string name="connected_to_metered_access_point" msgid="9179693207918156341">"મીટર્ડ (ડેટા નિયંત્રણ) નેટવર્ક સાથે કનેક્ટેડ છે"</string>
     <string name="connected_via_network_scorer" msgid="7665725527352893558">"%1$s દ્વારા સ્વત: કનેક્ટ થયેલ"</string>
     <string name="connected_via_network_scorer_default" msgid="7973529709744526285">"નેટવર્ક રેટિંગ પ્રદાતા દ્વારા ઑટોમૅટિક રીતે કનેક્ટ થયું"</string>
     <string name="connected_via_passpoint" msgid="7735442932429075684">"%1$s દ્વારા કનેક્ટ થયેલ"</string>
@@ -252,12 +251,13 @@
     <string name="wifi_display_certification" msgid="1805579519992520381">"વાયરલેસ ડિસ્પ્લે પ્રમાણન"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"વાઇ-ફાઇ વર્બોઝ લૉગિંગ ચાલુ કરો"</string>
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"વાઇ-ફાઇ સ્કૅનની ક્ષમતા મર્યાદિત કરવી"</string>
-    <string name="wifi_enhanced_mac_randomization" msgid="882650208573834301">"વાઇ-ફાઇ માટે સતત બદલાતું MAC રેન્ડમાઇઝેશન"</string>
+    <string name="wifi_enhanced_mac_randomization" msgid="5437378364995776979">"MAC રેન્ડમાઇઝ કરવામાં વાઇ-ફાઇનો ઉપયોગ"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"મોબાઇલ ડેટા હંમેશાં સક્રિય"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"ટિથરિંગ માટે હાર્ડવેર ગતિવૃદ્ધિ"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"નામ વિનાના બ્લૂટૂથ ડિવાઇસ બતાવો"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="1452342324349203434">"ચોક્કસ વૉલ્યૂમને બંધ કરો"</string>
     <string name="bluetooth_enable_gabeldorsche" msgid="9131730396242883416">"Gabeldorsche ચાલુ કરો"</string>
+    <string name="enhanced_connectivity" msgid="7201127377781666804">"વિસ્તૃત કનેક્ટિવિટી"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="1710571610177659127">"બ્લૂટૂથ AVRCP વર્ઝન"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7846922290083709633">"બ્લૂટૂથ AVRCP વર્ઝન પસંદ કરો"</string>
     <string name="bluetooth_select_map_version_string" msgid="526308145174175327">"બ્લૂટૂથ MAP વર્ઝન"</string>
@@ -353,7 +353,6 @@
     <string name="debug_layout_summary" msgid="8825829038287321978">"ક્લિપ બાઉન્ડ, હાંસિયાં વગેરે બતાવો."</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"RTL લેઆઉટ દિશા નિર્દેશની ફરજ પાડો"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"તમામ લૉકેલ માટે સ્ક્રીન લેઆઉટ દિશા નિર્દેશને RTLની ફરજ પાડો"</string>
-    <string name="window_blurs" msgid="6831008984828425106">"વિન્ડો-લેવલને ઝાંખું કરવાની સુવિધા ચાલુ કરો"</string>
     <string name="force_msaa" msgid="4081288296137775550">"4x MSAAને ફરજ પાડો"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"OpenGL ES 2.0 ઍપમાં 4x MSAA ચાલુ કરો"</string>
     <string name="show_non_rect_clip" msgid="7499758654867881817">"બિન-લંબચોરસ ક્લિપ કામગીરી ડીબગ કરો"</string>
@@ -401,12 +400,6 @@
     <string name="inactive_app_inactive_summary" msgid="3161222402614236260">"નિષ્ક્રિય. ટોગલ કરવા માટે ટૅપ કરો."</string>
     <string name="inactive_app_active_summary" msgid="8047630990208722344">"સક્રિય. ટોગલ કરવા માટે ટૅપ કરો."</string>
     <string name="standby_bucket_summary" msgid="5128193447550429600">"ઍપ સ્ટૅન્ડબાયની સ્થિતિ:<xliff:g id="BUCKET"> %s</xliff:g>"</string>
-    <string name="transcode_settings_title" msgid="2581975870429850549">"મીડિયાનું ફૉર્મેટ બદલવાની પ્રક્રિયાના સેટિંગ"</string>
-    <string name="transcode_user_control" msgid="6176368544817731314">"ફૉર્મેટ બદલવાની પ્રક્રિયાના ડિફૉલ્ટ સેટિંગ ઓવરરાઇડ કરો"</string>
-    <string name="transcode_enable_all" msgid="2411165920039166710">"ફૉર્મેટ બદલવાની પ્રક્રિયા ચાલુ કરો"</string>
-    <string name="transcode_default" msgid="3784803084573509491">"ધારો કે ઍપ આધુનિક ફૉર્મેટ પર કામ કરે છે"</string>
-    <string name="transcode_notification" msgid="5560515979793436168">"ફૉર્મેટ બદલવાની પ્રક્રિયાના નોટિફિકેશન બતાવો"</string>
-    <string name="transcode_disable_cache" msgid="3160069309377467045">"ફૉર્મેટ બદલવાની પ્રક્રિયાની કૅશ મેમરી બંધ કરો"</string>
     <string name="runningservices_settings_title" msgid="6460099290493086515">"ચાલુ સેવાઓ"</string>
     <string name="runningservices_settings_summary" msgid="1046080643262665743">"હાલમાં ચાલતી સેવાઓ જુઓ અને નિયંત્રિત કરો"</string>
     <string name="select_webview_provider_title" msgid="3917815648099445503">"WebView અમલીકરણ"</string>
@@ -426,7 +419,7 @@
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"પ્રોટેનોમલી (લાલ-લીલો)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"ટ્રાઇટેનોમલી(વાદળી-પીળો)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"રંગ સુધારણા"</string>
-    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="2333641630205214702">"તમારા ડિવાઇસ પર રંગો કેવી રીતે બતાવવામાં આવે તેની ગોઠવણી કરો. આ ત્યારે સહાયરૂપ થઈ શકે છે જ્યારે તમારે:&lt;br/&gt;&lt;br/&gt; &lt;ol&gt; &lt;li&gt;&amp;nbsp;રંગો વધુ યોગ્ય રીતે જોવા હોય&lt;/li&gt; &lt;li&gt;&amp;nbsp;તમને ફોકસ કરવામાં સહાયતા રહે તે માટે રંગો કાઢી નાખવા હોય&lt;/li&gt; &lt;/ol&gt;"</string>
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1284746051652993443">"રંગ સુધારણા તમને તમારા ડિવાઇસ પર રંગો કેવી રીતે બતાવવામાં આવે તેની ગોઠવણી કરવાની મંજૂરી આપે છે"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"<xliff:g id="TITLE">%1$s</xliff:g> દ્વારા ઓવરરાઇડ થયું"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> - <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
     <string name="power_remaining_duration_only" msgid="8264199158671531431">"લગભગ <xliff:g id="TIME_REMAINING">%1$s</xliff:g> બાકી છે"</string>
@@ -452,17 +445,15 @@
     <string name="power_remaining_duration_shutdown_imminent" product="tablet" msgid="7703677921000858479">"ટૅબ્લેટ થોડીક જ વારમાં બંધ થઈ શકે છે (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_remaining_duration_shutdown_imminent" product="device" msgid="4374784375644214578">"ડિવાઇસ થોડીક જ વારમાં બંધ થઈ શકે છે (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
-    <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"પૂર્ણ ચાર્જ થવામાં <xliff:g id="TIME">%1$s</xliff:g> બાકી છે"</string>
-    <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> - પૂર્ણ ચાર્જ થવામાં <xliff:g id="TIME">%2$s</xliff:g> બાકી છે"</string>
-    <string name="power_charging_limited" msgid="7956120998372505295">"<xliff:g id="LEVEL">%1$s</xliff:g> - ચાર્જિંગ હંગામીરૂપે પ્રતિબંધિત કરવામાં આવ્યું છે"</string>
+    <string name="power_remaining_charging_duration_only" msgid="7415639699283965818">"ચાર્જ થવામાં <xliff:g id="TIME">%1$s</xliff:g> બાકી છે"</string>
+    <string name="power_charging_duration" msgid="5005740040558984057">"<xliff:g id="LEVEL">%1$s</xliff:g> - ચાર્જ થવા માટે <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"અજાણ્યું"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"ચાર્જ થઈ રહ્યું છે"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"ઝડપથી ચાર્જ થાય છે"</string>
     <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"ધીમેથી ચાર્જ થાય છે"</string>
-    <string name="battery_info_status_charging_wireless" msgid="8924722966861282197">"વાયરલેસથી ચાર્જિંગ"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"ચાર્જ થઈ રહ્યું નથી"</string>
-    <string name="battery_info_status_not_charging" msgid="3371084153747234837">"કનેક્ટ કરેલું છે, પણ ચાર્જ થઈ રહ્યું નથી"</string>
-    <string name="battery_info_status_full" msgid="1339002294876531312">"ચાર્જ થયું"</string>
+    <string name="battery_info_status_not_charging" msgid="8330015078868707899">"પ્લગ ઇન કરેલ, હમણાં ચાર્જ કરી શકતા નથી"</string>
+    <string name="battery_info_status_full" msgid="4443168946046847468">"પૂર્ણ"</string>
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"વ્યવસ્થાપક દ્વારા નિયંત્રિત"</string>
     <string name="disabled" msgid="8017887509554714950">"અક્ષમ કર્યો"</string>
     <string name="external_source_trusted" msgid="1146522036773132905">"મંજૂરી છે"</string>
@@ -504,11 +495,6 @@
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"ઓછો સમય."</string>
     <string name="cancel" msgid="5665114069455378395">"રદ કરો"</string>
     <string name="okay" msgid="949938843324579502">"ઓકે"</string>
-    <string name="alarms_and_reminders_label" msgid="6918395649731424294">"અલાર્મ અને રિમાઇન્ડર"</string>
-    <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"અલાર્મ અને રિમાન્ડરના સેટિંગની મંજૂરી આપો"</string>
-    <string name="alarms_and_reminders_title" msgid="8819933264635406032">"અલાર્મ અને રિમાઇન્ડર"</string>
-    <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"આ ઍપને અલાર્મ સેટ કરવા અને સમય પ્રતિ સંવેદનશીલ ક્રિયાઓ શેડ્યૂલ કરવા માટે મંજૂરી આપો. આ ઍપને બૅકગ્રાઉન્ડમાં ચાલવા દે છે, જેને કારણે બૅટરીનો વધુ વપરાશ થઈ શકે છે.\n\nજો આ પરવાનગી બંધ હોય, તો આ ઍપ દ્વારા શેડ્યૂલ કરવામાં આવેલા વર્તમાન અલાર્મ અને સમય આધારિત ઇવેન્ટ કામ કરશે નહીં."</string>
-    <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"શેડ્યૂલ, અલાર્મ, રિમાઇન્ડર, ઘડિયાળ"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"ચાલુ કરો"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"ખલેલ પાડશો નહીં ચાલુ કરો"</string>
     <string name="zen_mode_settings_summary_off" msgid="3832876036123504076">"ક્યારેય નહીં"</string>
@@ -523,7 +509,6 @@
     <string name="zen_mode_forever" msgid="3339224497605461291">"તમે બંધ ન કરો ત્યાં સુધી"</string>
     <string name="time_unit_just_now" msgid="3006134267292728099">"હમણાં જ"</string>
     <string name="media_transfer_this_device_name" msgid="2716555073132169240">"ફોન સ્પીકર"</string>
-    <string name="media_transfer_this_phone" msgid="7194341457812151531">"આ ફોન"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"કનેક્ટ કરવામાં સમસ્યા આવી રહી છે. ડિવાઇસને બંધ કરીને ફરી ચાલુ કરો"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"વાયરવાળો ઑડિયો ડિવાઇસ"</string>
     <string name="help_label" msgid="3528360748637781274">"સહાય અને પ્રતિસાદ"</string>
@@ -561,51 +546,12 @@
     <string name="user_need_lock_message" msgid="4311424336209509301">"તમે પ્રતિબંધિત પ્રોફાઇલ બનાવી શકો તે પહેલાં, તમારે તમારી ઍપ્લિકેશનો અને વ્યક્તિગત ડેટાની સુરક્ષા માટે એક લૉક સ્ક્રીન સેટ કરવાની જરૂર પડશે."</string>
     <string name="user_set_lock_button" msgid="1427128184982594856">"લૉક સેટ કરો"</string>
     <string name="user_switch_to_user" msgid="6975428297154968543">"<xliff:g id="USER_NAME">%s</xliff:g> પર સ્વિચ કરો"</string>
-    <string name="creating_new_user_dialog_message" msgid="7232880257538970375">"નવા વપરાશકર્તા બનાવી રહ્યાં છીએ…"</string>
-    <string name="add_user_failed" msgid="4809887794313944872">"નવો વપરાશકર્તા બનાવવામાં નિષ્ફળ"</string>
-    <string name="user_nickname" msgid="262624187455825083">"ઉપનામ"</string>
     <string name="guest_new_guest" msgid="3482026122932643557">"અતિથિ ઉમેરો"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"અતિથિને કાઢી નાખો"</string>
-    <string name="guest_reset_guest" msgid="6110013010356013758">"અતિથિને રીસેટ કરો"</string>
     <string name="guest_nickname" msgid="6332276931583337261">"અતિથિ"</string>
-    <string name="guest_reset_guest_dialog_title" msgid="8047270010895437534">"અતિથિને રીસેટ કરીએ?"</string>
-    <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"રીસેટ કરો"</string>
-    <string name="guest_resetting" msgid="7822120170191509566">"અતિથિને રીસેટ કરી રહ્યાં છીએ…"</string>
-    <string name="user_image_take_photo" msgid="467512954561638530">"ફોટો લો"</string>
-    <string name="user_image_choose_photo" msgid="1363820919146782908">"છબી પસંદ કરો"</string>
-    <string name="user_image_photo_selector" msgid="433658323306627093">"ફોટો પસંદ કરો"</string>
     <string name="cached_apps_freezer_device_default" msgid="2616594131750144342">"ડિવાઇસ ડિફૉલ્ટ"</string>
     <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"બંધ છે"</string>
     <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"ચાલુ છે"</string>
     <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"આ ફેરફારને લાગુ કરવા માટે તમારા ડિવાઇસને રીબૂટ કરવાની જરૂર છે. હમણાં જ રીબૂટ કરો કે રદ કરો."</string>
     <string name="media_transfer_wired_usb_device_name" msgid="7699141088423210903">"વાયરવાળો હૅડફોન"</string>
-    <string name="wifi_hotspot_switch_on_text" msgid="9212273118217786155">"ચાલુ"</string>
-    <string name="wifi_hotspot_switch_off_text" msgid="7245567251496959764">"બંધ"</string>
-    <string name="carrier_network_change_mode" msgid="4257621815706644026">"કૅરીઅર નેટવર્કમાં ફેરફાર થઈ રહ્યો છે"</string>
-    <string name="data_connection_3g" msgid="931852552688157407">"3G"</string>
-    <string name="data_connection_edge" msgid="4625509456544797637">"EDGE"</string>
-    <string name="data_connection_cdma" msgid="9098161966701934334">"1X"</string>
-    <string name="data_connection_gprs" msgid="1251945769006770189">"GPRS"</string>
-    <string name="data_connection_3_5g" msgid="4298721462047921400">"H"</string>
-    <string name="data_connection_3_5g_plus" msgid="6683055858295918170">"H+"</string>
-    <string name="data_connection_4g" msgid="2581705503356752044">"4G"</string>
-    <string name="data_connection_4g_plus" msgid="5194902328408751020">"4G+"</string>
-    <string name="data_connection_lte" msgid="7675461204366364124">"LTE"</string>
-    <string name="data_connection_lte_plus" msgid="6643158654804916653">"LTE+"</string>
-    <string name="data_connection_carrier_wifi" msgid="8932949159370130465">"W+"</string>
-    <string name="cell_data_off_content_description" msgid="2280700839891636498">"મોબાઇલ ડેટા બંધ છે"</string>
-    <string name="not_default_data_content_description" msgid="6517068332106592887">"ડેટાનો ઉપયોગ કરવાનું સેટ કર્યું નથી"</string>
-    <string name="accessibility_no_phone" msgid="2687419663127582503">"કોઈ ફોન નથી."</string>
-    <string name="accessibility_phone_one_bar" msgid="5719721147018970063">"ફોન એક બાર."</string>
-    <string name="accessibility_phone_two_bars" msgid="2531458337458953263">"ફોન બે બાર."</string>
-    <string name="accessibility_phone_three_bars" msgid="1523967995996696619">"ફોન ત્રણ બાર."</string>
-    <string name="accessibility_phone_signal_full" msgid="4302338883816077134">"પૂર્ણ ફોન સિગ્નલ."</string>
-    <string name="accessibility_no_data" msgid="4563181886936931008">"કોઈ ડેટા નથી."</string>
-    <string name="accessibility_data_one_bar" msgid="6892888138070752480">"ડેટા એક બાર."</string>
-    <string name="accessibility_data_two_bars" msgid="9202641507241802499">"ડેટા બે બાર."</string>
-    <string name="accessibility_data_three_bars" msgid="2813876214466722413">"ડેટા ત્રણ બાર."</string>
-    <string name="accessibility_data_signal_full" msgid="1808301899314382337">"ડેટા સિગ્નલ પૂર્ણ."</string>
-    <string name="accessibility_ethernet_disconnected" msgid="2832501530856497489">"ઇથરનેટ ડિસ્કનેક્ટ થયું."</string>
-    <string name="accessibility_ethernet_connected" msgid="6175942685957461563">"ઇથરનેટ."</string>
-    <string name="accessibility_no_calling" msgid="3540827068323895748">"કોઈ કૉલિંગ નહીં."</string>
 </resources>

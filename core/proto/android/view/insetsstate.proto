@@ -16,9 +16,8 @@
 
 syntax = "proto2";
 
-import "frameworks/base/core/proto/android/graphics/rect.proto";
-import "frameworks/base/core/proto/android/view/displaycutout.proto";
 import "frameworks/base/core/proto/android/view/insetssource.proto";
+import "frameworks/base/core/proto/android/graphics/rect.proto";
 
 package android.view;
 
@@ -30,5 +29,4 @@ option java_multiple_files = true;
 message InsetsStateProto {
     repeated InsetsSourceProto sources = 1;
     optional .android.graphics.RectProto display_frame = 2;
-    optional DisplayCutoutProto display_cutout = 3;
 }

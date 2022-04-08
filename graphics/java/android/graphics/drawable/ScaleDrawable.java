@@ -25,7 +25,6 @@ import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
-import android.os.Build;
 import android.util.AttributeSet;
 import android.util.TypedValue;
 import android.view.Gravity;
@@ -68,7 +67,7 @@ public class ScaleDrawable extends DrawableWrapper {
 
     private final Rect mTmpRect = new Rect();
 
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     private ScaleState mState;
 
     ScaleDrawable() {

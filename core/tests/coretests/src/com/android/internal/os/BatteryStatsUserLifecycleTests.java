@@ -78,7 +78,6 @@ public class BatteryStatsUserLifecycleTests {
     }
 
     @Test
-    @SkipPresubmit("b/180015146")
     public void testNoCpuDataForRemovedUser() throws Exception {
         mIam.startUserInBackground(mTestUserId);
         waitUntilTrue("No uids for started user " + mTestUserId,

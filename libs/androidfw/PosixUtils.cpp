@@ -72,8 +72,7 @@ std::unique_ptr<ProcResult> ExecuteBinary(const std::vector<std::string>& argv) 
     argv0[i] = argv[i].c_str();
   }
   argv0[argv.size()] = nullptr;
-  int pid = fork();
-  switch (pid) {
+  switch (fork()) {
     case -1: // error
       free(argv0);
       PLOG(ERROR) << "fork";
@@ -105,10 +104,8 @@ std::unique_ptr<ProcResult> ExecuteBinary(const std::vector<std::string>& argv) 
       close(stdout[1]);
       close(stderr[1]);
       int status;
-      waitpid(pid, &status, 0);
+      wait(&status);
       if (!WIFEXITED(status)) {
-          close(stdout[0]);
-          close(stderr[0]);
           return nullptr;
       }
       std::unique_ptr<ProcResult> result(new ProcResult());

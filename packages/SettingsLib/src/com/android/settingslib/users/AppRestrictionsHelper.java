@@ -135,7 +135,7 @@ public class AppRestrictionsHelper {
                 // Ignore
             }
         } else {
-            // Denylist all other apps, system or downloaded
+            // Blacklist all other apps, system or downloaded
             try {
                 ApplicationInfo info = mIPm.getApplicationInfo(packageName, 0, userId);
                 if (info != null) {
@@ -258,11 +258,11 @@ public class AppRestrictionsHelper {
             }
         }
 
-        // Establish primary/secondary relationship for entries that share a package name
+        // Establish master/slave relationship for entries that share a package name
         HashMap<String,SelectableAppInfo> packageMap = new HashMap<String,SelectableAppInfo>();
         for (SelectableAppInfo info : mVisibleApps) {
             if (packageMap.containsKey(info.packageName)) {
-                info.primaryEntry = packageMap.get(info.packageName);
+                info.masterEntry = packageMap.get(info.packageName);
             } else {
                 packageMap.put(info.packageName, info);
             }
@@ -366,12 +366,12 @@ public class AppRestrictionsHelper {
         public CharSequence appName;
         public CharSequence activityName;
         public Drawable icon;
-        public SelectableAppInfo primaryEntry;
+        public SelectableAppInfo masterEntry;
 
         @Override
         public String toString() {
             return packageName + ": appName=" + appName + "; activityName=" + activityName
-                    + "; icon=" + icon + "; primaryEntry=" + primaryEntry;
+                    + "; icon=" + icon + "; masterEntry=" + masterEntry;
         }
     }
 

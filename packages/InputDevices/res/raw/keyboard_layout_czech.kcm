@@ -13,7 +13,7 @@
 # limitations under the License.
 
 #
-# Czech (EU - qwertz) keyboard layout.
+# Czech (EU - qwerty) keyboard layout.
 #
 
 type OVERLAY
@@ -159,9 +159,9 @@ key T {
 }
 
 key Y {
-    label:                              'Z'
-    base:                               'z'
-    shift, capslock:                    'Z'
+    label:                              'Y'
+    base:                               'y'
+    shift, capslock:                    'Y'
 }
 
 key U {
@@ -297,9 +297,9 @@ key PLUS {
 }
 
 key Z {
-    label:                              'Y'
-    base:                               'y'
-    shift, capslock:                    'Y'
+    label:                              'Z'
+    base:                               'z'
+    shift, capslock:                    'Z'
 }
 
 key X {

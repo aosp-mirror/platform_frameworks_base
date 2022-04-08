@@ -318,7 +318,7 @@ public class AutofillIdTest {
 
         try {
             // Write to parcel
-            parcel.setDataPosition(0); // Validity Check
+            parcel.setDataPosition(0); // Sanity / paranoid check
             id.writeToParcel(parcel, 0);
 
             // Read from parcel

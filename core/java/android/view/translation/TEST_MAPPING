@@ -1,7 +1,0 @@
-{
- "imports": [
-    {
-      "path": "frameworks/base/services/translation/java/com/android/server/translation"
-    }
-  ]
-}

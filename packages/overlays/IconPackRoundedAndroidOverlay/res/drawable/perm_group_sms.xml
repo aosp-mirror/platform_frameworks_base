@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+   Copyright (C) 2019 The Android Open Source Project
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:height="24dp"
+    android:tint="?android:attr/colorControlNormal"
+    android:viewportHeight="24"
+    android:viewportWidth="24"
+    android:width="24dp" >
+    <path
+        android:fillColor="@android:color/white"
+        android:pathData="M20,4.5c0.28,0,0.5,0.22,0.5,0.5v12c0,0.28-0.22,0.5-0.5,0.5H6H5.38l-0.44,0.44L3.5,19.38V5c0-0.28,0.22-0.5,0.5-0.5H20 M20,3H4C2.9,3,2,3.9,2,5v15.59c0,0.6,0.49,1,1.01,1c0.25,0,0.5-0.09,0.7-0.29L6,19h14c1.1,0,2-0.9,2-2V5C22,3.9,21.1,3,20,3L20,3z" />
+    <path
+        android:fillColor="@android:color/white"
+        android:pathData="M 12 10 C 12.5522847498 10 13 10.4477152502 13 11 C 13 11.5522847498 12.5522847498 12 12 12 C 11.4477152502 12 11 11.5522847498 11 11 C 11 10.4477152502 11.4477152502 10 12 10 Z" />
+    <path
+        android:fillColor="@android:color/white"
+        android:pathData="M 8 10 C 8.55228474983 10 9 10.4477152502 9 11 C 9 11.5522847498 8.55228474983 12 8 12 C 7.44771525017 12 7 11.5522847498 7 11 C 7 10.4477152502 7.44771525017 10 8 10 Z" />
+    <path
+        android:fillColor="@android:color/white"
+        android:pathData="M 16 10 C 16.5522847498 10 17 10.4477152502 17 11 C 17 11.5522847498 16.5522847498 12 16 12 C 15.4477152502 12 15 11.5522847498 15 11 C 15 10.4477152502 15.4477152502 10 16 10 Z" />
+</vector>

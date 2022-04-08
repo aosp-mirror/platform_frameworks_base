@@ -16,7 +16,6 @@
 
 package android.net;
 
-import android.annotation.Nullable;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -206,7 +205,7 @@ public class NetworkPolicy implements Parcelable, Comparable<NetworkPolicy> {
     }
 
     @Override
-    public boolean equals(@Nullable Object obj) {
+    public boolean equals(Object obj) {
         if (obj instanceof NetworkPolicy) {
             final NetworkPolicy other = (NetworkPolicy) obj;
             return warningBytes == other.warningBytes

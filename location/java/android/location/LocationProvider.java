@@ -16,18 +16,23 @@
 
 package android.location;
 
-import android.annotation.Nullable;
-import android.location.provider.ProviderProperties;
+
+import com.android.internal.location.ProviderProperties;
 
 /**
- * Information about the properties of a location provider.
+ * An abstract superclass for location providers.  A location provider
+ * provides periodic reports on the geographical location of the
+ * device.
  *
- * @deprecated This class is incapable of representing unknown provider properties and may return
- * incorrect results on the rare occasion when a provider's properties are unknown. Prefer using
- * {@link LocationManager#getProviderProperties(String)} to retrieve {@link ProviderProperties}
- * instead.
+ * <p> Each provider has a set of criteria under which it may be used;
+ * for example, some providers require GPS hardware and visibility to
+ * a number of satellites; others require the use of the cellular
+ * radio, or access to a specific carrier's network, or to the
+ * internet.  They may also have different battery consumption
+ * characteristics or monetary costs to the user.  The {@link
+ * Criteria} class allows providers to be selected based on
+ * user-specified criteria.
  */
-@Deprecated
 public class LocationProvider {
 
     /**
@@ -49,9 +54,9 @@ public class LocationProvider {
     public static final int AVAILABLE = 2;
 
     private final String mName;
-    private final @Nullable ProviderProperties mProperties;
+    private final ProviderProperties mProperties;
 
-    LocationProvider(String name, @Nullable ProviderProperties properties) {
+    LocationProvider(String name, ProviderProperties properties) {
         mName = name;
         mProperties = properties;
     }
@@ -87,23 +92,23 @@ public class LocationProvider {
         }
 
         if (criteria.getAccuracy() != Criteria.NO_REQUIREMENT &&
-                criteria.getAccuracy() < properties.getAccuracy()) {
+                criteria.getAccuracy() < properties.mAccuracy) {
             return false;
         }
         if (criteria.getPowerRequirement() != Criteria.NO_REQUIREMENT &&
-                criteria.getPowerRequirement() < properties.getPowerUsage()) {
+                criteria.getPowerRequirement() < properties.mPowerRequirement) {
             return false;
         }
-        if (criteria.isAltitudeRequired() && !properties.hasAltitudeSupport()) {
+        if (criteria.isAltitudeRequired() && !properties.mSupportsAltitude) {
             return false;
         }
-        if (criteria.isSpeedRequired() && !properties.hasSpeedSupport()) {
+        if (criteria.isSpeedRequired() && !properties.mSupportsSpeed) {
             return false;
         }
-        if (criteria.isBearingRequired() && !properties.hasBearingSupport()) {
+        if (criteria.isBearingRequired() && !properties.mSupportsBearing) {
             return false;
         }
-        if (!criteria.isCostAllowed() && properties.hasMonetaryCost()) {
+        if (!criteria.isCostAllowed() && properties.mHasMonetaryCost) {
             return false;
         }
         return true;
@@ -114,11 +119,7 @@ public class LocationProvider {
      * data network (e.g., the Internet), false otherwise.
      */
     public boolean requiresNetwork() {
-        if (mProperties == null) {
-            return false;
-        } else {
-            return mProperties.hasNetworkRequirement();
-        }
+        return mProperties.mRequiresNetwork;
     }
 
     /**
@@ -127,11 +128,7 @@ public class LocationProvider {
      * otherwise.
      */
     public boolean requiresSatellite() {
-        if (mProperties == null) {
-            return false;
-        } else {
-            return mProperties.hasSatelliteRequirement();
-        }
+        return mProperties.mRequiresSatellite;
     }
 
     /**
@@ -140,11 +137,7 @@ public class LocationProvider {
      * otherwise.
      */
     public boolean requiresCell() {
-        if (mProperties == null) {
-            return false;
-        } else {
-            return mProperties.hasCellRequirement();
-        }
+        return mProperties.mRequiresCell;
     }
 
     /**
@@ -153,11 +146,7 @@ public class LocationProvider {
      * each provider to give accurate information.
      */
     public boolean hasMonetaryCost() {
-        if (mProperties == null) {
-            return false;
-        } else {
-            return mProperties.hasMonetaryCost();
-        }
+        return mProperties.mHasMonetaryCost;
     }
 
     /**
@@ -167,11 +156,7 @@ public class LocationProvider {
      * should return true.
      */
     public boolean supportsAltitude() {
-        if (mProperties == null) {
-            return false;
-        } else {
-            return mProperties.hasAltitudeSupport();
-        }
+        return mProperties.mSupportsAltitude;
     }
 
     /**
@@ -181,11 +166,7 @@ public class LocationProvider {
      * should return true.
      */
     public boolean supportsSpeed() {
-        if (mProperties == null) {
-            return false;
-        } else {
-            return mProperties.hasSpeedSupport();
-        }
+        return mProperties.mSupportsSpeed;
     }
 
     /**
@@ -195,34 +176,27 @@ public class LocationProvider {
      * should return true.
      */
     public boolean supportsBearing() {
-        if (mProperties == null) {
-            return false;
-        } else {
-            return mProperties.hasBearingSupport();
-        }
+        return mProperties.mSupportsBearing;
     }
 
     /**
-     * Returns the power requirement for this provider, one of the ProviderProperties.POWER_USAGE_*
-     * constants.
+     * Returns the power requirement for this provider.
+     *
+     * @return the power requirement for this provider, as one of the
+     * constants Criteria.POWER_REQUIREMENT_*.
      */
     public int getPowerRequirement() {
-        if (mProperties == null) {
-            return ProviderProperties.POWER_USAGE_HIGH;
-        } else {
-            return mProperties.getPowerUsage();
-        }
+        return mProperties.mPowerRequirement;
     }
 
     /**
-     * Returns the rough accuracy of this provider, one of the ProviderProperties.ACCURACY_*
-     * constants.
+     * Returns a constant describing horizontal accuracy of this provider.
+     * If the provider returns finer grain or exact location,
+     * {@link Criteria#ACCURACY_FINE} is returned, otherwise if the
+     * location is only approximate then {@link Criteria#ACCURACY_COARSE}
+     * is returned.
      */
     public int getAccuracy() {
-        if (mProperties == null) {
-            return ProviderProperties.ACCURACY_COARSE;
-        } else {
-            return mProperties.getAccuracy();
-        }
+        return mProperties.mAccuracy;
     }
 }

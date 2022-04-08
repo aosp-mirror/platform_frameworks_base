@@ -133,14 +133,12 @@ class XmlNamespaceRemover : public IXmlResourceConsumer {
 // Once an XmlResource is processed by this linker, it is ready to be flattened.
 class XmlReferenceLinker : public IXmlResourceConsumer {
  public:
-  explicit XmlReferenceLinker(ResourceTable* table) : table_(table) {
-  }
+  XmlReferenceLinker() = default;
 
   bool Consume(IAaptContext* context, xml::XmlResource* resource) override;
 
  private:
   DISALLOW_COPY_AND_ASSIGN(XmlReferenceLinker);
-  ResourceTable* table_;
 };
 
 }  // namespace aapt

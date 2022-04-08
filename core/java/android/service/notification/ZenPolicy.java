@@ -18,7 +18,6 @@ package android.service.notification;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.os.Parcel;
@@ -951,7 +950,7 @@ public final class ZenPolicy implements Parcelable {
     }
 
     @Override
-    public boolean equals(@Nullable Object o) {
+    public boolean equals(Object o) {
         if (!(o instanceof ZenPolicy)) return false;
         if (o == this) return true;
         final ZenPolicy other = (ZenPolicy) o;

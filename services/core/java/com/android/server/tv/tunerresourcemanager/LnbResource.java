@@ -29,7 +29,7 @@ public final class LnbResource extends TunerResourceBasic {
 
     @Override
     public String toString() {
-        return "LnbResource[handle=" + this.mHandle
+        return "LnbResource[id=" + this.mId
                 + ", isInUse=" + this.mIsInUse + ", ownerClientId=" + this.mOwnerClientId + "]";
     }
 
@@ -38,8 +38,8 @@ public final class LnbResource extends TunerResourceBasic {
      */
     public static class Builder extends TunerResourceBasic.Builder {
 
-        Builder(int handle) {
-            super(handle);
+        Builder(int id) {
+            super(id);
         }
 
         /**

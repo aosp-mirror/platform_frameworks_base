@@ -34,7 +34,6 @@ import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
 import android.graphics.Rect;
 import android.graphics.Shader;
-import android.os.Build;
 import android.os.Trace;
 import android.util.ArrayMap;
 import android.util.AttributeSet;
@@ -84,10 +83,10 @@ import java.util.Stack;
  * <dd>Defines the name of this vector drawable.</dd>
  * <dt><code>android:width</code></dt>
  * <dd>Used to define the intrinsic width of the drawable.
- * This supports all the dimension units, normally specified with dp.</dd>
+ * This support all the dimension units, normally specified with dp.</dd>
  * <dt><code>android:height</code></dt>
- * <dd>Used to define the intrinsic height of the drawable.
- * This supports all the dimension units, normally specified with dp.</dd>
+ * <dd>Used to define the intrinsic height the drawable.
+ * This support all the dimension units, normally specified with dp.</dd>
  * <dt><code>android:viewportWidth</code></dt>
  * <dd>Used to define the width of the viewport space. Viewport is basically
  * the virtual canvas where the paths are drawn on.</dd>
@@ -325,7 +324,7 @@ public class VectorDrawable extends Drawable {
 
     private VectorDrawableState mVectorState;
 
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     private PorterDuffColorFilter mTintFilter;
 
     private BlendModeColorFilter mBlendModeColorFilter;
@@ -507,6 +506,7 @@ public class VectorDrawable extends Drawable {
         return super.isStateful() || (mVectorState != null && mVectorState.isStateful());
     }
 
+    /** @hide */
     @Override
     public boolean hasFocusStateSpecified() {
         return mVectorState != null && mVectorState.hasFocusStateSpecified();

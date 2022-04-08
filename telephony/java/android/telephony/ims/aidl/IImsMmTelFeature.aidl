@@ -21,7 +21,6 @@ import android.telephony.ims.aidl.IImsMmTelListener;
 import android.telephony.ims.aidl.IImsSmsListener;
 import android.telephony.ims.aidl.IImsCapabilityCallback;
 import android.telephony.ims.feature.CapabilityChangeRequest;
-import android.telephony.ims.RtpHeaderExtensionType;
 
 import android.telephony.ims.ImsCallProfile;
 import com.android.ims.internal.IImsCallSession;
@@ -29,8 +28,6 @@ import com.android.ims.internal.IImsEcbm;
 import com.android.ims.internal.IImsMultiEndpoint;
 import com.android.ims.internal.IImsRegistrationListener;
 import com.android.ims.internal.IImsUt;
-
-import java.util.List;
 
 /**
  * See MmTelFeature for more information.
@@ -40,7 +37,6 @@ interface IImsMmTelFeature {
     void setListener(IImsMmTelListener l);
     int getFeatureState();
     ImsCallProfile createCallProfile(int callSessionType, int callType);
-    void changeOfferedRtpHeaderExtensionTypes(in List<RtpHeaderExtensionType> types);
     IImsCallSession createCallSession(in ImsCallProfile profile);
     int shouldProcessCall(in String[] uris);
     IImsUt getUtInterface();

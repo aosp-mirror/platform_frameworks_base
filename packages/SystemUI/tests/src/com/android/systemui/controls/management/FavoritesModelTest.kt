@@ -22,7 +22,6 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.controls.ControlInterface
-import com.android.systemui.controls.CustomIconCache
 import com.android.systemui.controls.controller.ControlInfo
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.eq
@@ -58,8 +57,6 @@ class FavoritesModelTest : SysuiTestCase() {
     private lateinit var callback: FavoritesModel.FavoritesModelCallback
     @Mock
     private lateinit var adapter: RecyclerView.Adapter<*>
-    @Mock
-    private lateinit var customIconCache: CustomIconCache
     private lateinit var model: FavoritesModel
     private lateinit var dividerWrapper: DividerWrapper
 
@@ -67,7 +64,7 @@ class FavoritesModelTest : SysuiTestCase() {
     fun setUp() {
         MockitoAnnotations.initMocks(this)
 
-        model = FavoritesModel(customIconCache, TEST_COMPONENT, INITIAL_FAVORITES, callback)
+        model = FavoritesModel(TEST_COMPONENT, INITIAL_FAVORITES, callback)
         model.attachAdapter(adapter)
         dividerWrapper = model.elements.first { it is DividerWrapper } as DividerWrapper
     }
@@ -92,7 +89,7 @@ class FavoritesModelTest : SysuiTestCase() {
     @Test
     fun testInitialElements() {
         val expected = INITIAL_FAVORITES.map {
-            ControlInfoWrapper(TEST_COMPONENT, it, true, customIconCache::retrieve)
+            ControlInfoWrapper(TEST_COMPONENT, it, true)
         } + DividerWrapper()
         assertEquals(expected, model.elements)
     }
@@ -288,14 +285,6 @@ class FavoritesModelTest : SysuiTestCase() {
         verify(adapter, never()).notifyItemChanged(anyInt(), any(Any::class.java))
 
         verify(callback).onFirstChange()
-    }
-
-    @Test
-    fun testCacheCalledWhenGettingCustomIcon() {
-        val wrapper = model.elements[0] as ControlInfoWrapper
-        wrapper.customIcon
-
-        verify(customIconCache).retrieve(TEST_COMPONENT, wrapper.controlId)
     }
 
     private fun getDividerPosition(): Int = model.elements.indexOf(dividerWrapper)

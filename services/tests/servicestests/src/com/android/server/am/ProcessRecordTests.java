@@ -42,8 +42,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
+import java.util.Collections;
 
 /**
  * Build/Install/Run:
@@ -56,7 +55,6 @@ public class ProcessRecordTests {
     private static ActivityManagerService sService;
 
     private ProcessRecord mProcessRecord;
-    private ProcessErrorStateRecord mProcessErrorState;
 
     @BeforeClass
     public static void setUpOnce() throws Exception {
@@ -69,13 +67,6 @@ public class ProcessRecordTests {
             sService.mActivityTaskManager = new ActivityTaskManagerService(sContext);
             sService.mActivityTaskManager.initialize(null, null, sContext.getMainLooper());
             sService.mAtmInternal = sService.mActivityTaskManager.getAtmInternal();
-            final AppProfiler profiler = mock(AppProfiler.class);
-            setFieldValue(AppProfiler.class, profiler, "mProfilerLock", new Object());
-            setFieldValue(ActivityManagerService.class, sService, "mAppProfiler", profiler);
-            setFieldValue(ActivityManagerService.class, sService, "mProcLock",
-                    new ActivityManagerProcLock());
-            final ProcessList processList = new ProcessList();
-            setFieldValue(ActivityManagerService.class, sService, "mProcessList", processList);
         });
 
         // Avoid NPE when initializing {@link ProcessRecord#mWindowProcessController}.
@@ -83,18 +74,6 @@ public class ProcessRecordTests {
         LocalServices.addService(PackageManagerInternal.class, packageManagerInternal);
         final ComponentName sysUiName = new ComponentName(sContext.getPackageName(), "test");
         doReturn(sysUiName).when(packageManagerInternal).getSystemUiServiceComponent();
-    }
-
-    private static <T> void setFieldValue(Class clazz, Object obj, String fieldName, T val) {
-        try {
-            Field field = clazz.getDeclaredField(fieldName);
-            field.setAccessible(true);
-            Field mfield = Field.class.getDeclaredField("accessFlags");
-            mfield.setAccessible(true);
-            mfield.setInt(field, mfield.getInt(field) & ~(Modifier.FINAL | Modifier.PRIVATE));
-            field.set(obj, val);
-        } catch (NoSuchFieldException | IllegalAccessException e) {
-        }
     }
 
     @AfterClass
@@ -106,12 +85,12 @@ public class ProcessRecordTests {
     public void setUpProcess() throws Exception {
         // Need to run with dexmaker share class loader to mock package private class.
         runWithDexmakerShareClassLoader(() -> {
-            mProcessRecord = new ProcessRecord(sService, sContext.getApplicationInfo(),
-                    "name", 12345);
-            mProcessErrorState = spy(mProcessRecord.mErrorState);
-            doNothing().when(mProcessErrorState).startAppProblemLSP();
-            doReturn(false).when(mProcessErrorState).isSilentAnr();
-            doReturn(false).when(mProcessErrorState).isMonitorCpuUsage();
+            mProcessRecord = spy(new ProcessRecord(sService, sContext.getApplicationInfo(),
+                    "name", 12345));
+            doNothing().when(mProcessRecord).startAppProblemLocked();
+            doReturn(false).when(mProcessRecord).isSilentAnr();
+            doReturn(false).when(mProcessRecord).isMonitorCpuUsage();
+            doReturn(Collections.emptyList()).when(mProcessRecord).getLruProcessList();
         });
     }
 
@@ -122,10 +101,10 @@ public class ProcessRecordTests {
      */
     @Test
     public void testProcessDefaultAnrRelatedStatus() {
-        assertFalse(mProcessErrorState.isNotResponding());
-        assertFalse(mProcessErrorState.isCrashing());
-        assertFalse(mProcessRecord.isKilledByAm());
-        assertFalse(mProcessRecord.isKilled());
+        assertFalse(mProcessRecord.isNotResponding());
+        assertFalse(mProcessRecord.isCrashing());
+        assertFalse(mProcessRecord.killedByAm);
+        assertFalse(mProcessRecord.killed);
     }
 
     /**
@@ -133,12 +112,12 @@ public class ProcessRecordTests {
      */
     @Test
     public void testAnrWhenCrash() {
-        mProcessErrorState.setCrashing(true);
-        assertTrue(mProcessErrorState.isCrashing());
-        appNotResponding(mProcessErrorState, "Test ANR when crash");
-        assertFalse(mProcessErrorState.isNotResponding());
-        assertFalse(mProcessRecord.isKilledByAm());
-        assertFalse(mProcessRecord.isKilled());
+        mProcessRecord.setCrashing(true);
+        assertTrue(mProcessRecord.isCrashing());
+        appNotResponding(mProcessRecord, "Test ANR when crash");
+        assertFalse(mProcessRecord.isNotResponding());
+        assertFalse(mProcessRecord.killedByAm);
+        assertFalse(mProcessRecord.killed);
     }
 
     /**
@@ -146,11 +125,11 @@ public class ProcessRecordTests {
      */
     @Test
     public void testAnrWhenKilledByAm() {
-        mProcessRecord.setKilledByAm(true);
-        appNotResponding(mProcessErrorState, "Test ANR when killed by AM");
-        assertFalse(mProcessErrorState.isNotResponding());
-        assertFalse(mProcessErrorState.isCrashing());
-        assertFalse(mProcessRecord.isKilled());
+        mProcessRecord.killedByAm = true;
+        appNotResponding(mProcessRecord, "Test ANR when killed by AM");
+        assertFalse(mProcessRecord.isNotResponding());
+        assertFalse(mProcessRecord.isCrashing());
+        assertFalse(mProcessRecord.killed);
     }
 
     /**
@@ -158,11 +137,11 @@ public class ProcessRecordTests {
      */
     @Test
     public void testAnrWhenKilled() {
-        mProcessRecord.setKilled(true);
-        appNotResponding(mProcessErrorState, "Test ANR when killed");
-        assertFalse(mProcessErrorState.isNotResponding());
-        assertFalse(mProcessErrorState.isCrashing());
-        assertFalse(mProcessRecord.isKilledByAm());
+        mProcessRecord.killed = true;
+        appNotResponding(mProcessRecord, "Test ANR when killed");
+        assertFalse(mProcessRecord.isNotResponding());
+        assertFalse(mProcessRecord.isCrashing());
+        assertFalse(mProcessRecord.killedByAm);
     }
 
     /**
@@ -171,11 +150,11 @@ public class ProcessRecordTests {
      */
     @Test
     public void testNonSilentAnr() {
-        appNotResponding(mProcessErrorState, "Test non-silent ANR");
-        assertTrue(mProcessErrorState.isNotResponding());
-        assertFalse(mProcessErrorState.isCrashing());
-        assertFalse(mProcessRecord.isKilledByAm());
-        assertFalse(mProcessRecord.isKilled());
+        appNotResponding(mProcessRecord, "Test non-silent ANR");
+        assertTrue(mProcessRecord.isNotResponding());
+        assertFalse(mProcessRecord.isCrashing());
+        assertFalse(mProcessRecord.killedByAm);
+        assertFalse(mProcessRecord.killed);
     }
 
     /**
@@ -185,17 +164,16 @@ public class ProcessRecordTests {
     @Test
     public void testSilentAnr() {
         // Silent Anr will run through even without a parent process, and directly killed by AM.
-        doReturn(true).when(mProcessErrorState).isSilentAnr();
-        appNotResponding(mProcessErrorState, "Test silent ANR");
-        assertTrue(mProcessErrorState.isNotResponding());
-        assertFalse(mProcessErrorState.isCrashing());
-        assertTrue(mProcessRecord.isKilledByAm());
-        assertTrue(mProcessRecord.isKilled());
+        doReturn(true).when(mProcessRecord).isSilentAnr();
+        appNotResponding(mProcessRecord, "Test silent ANR");
+        assertTrue(mProcessRecord.isNotResponding());
+        assertFalse(mProcessRecord.isCrashing());
+        assertTrue(mProcessRecord.killedByAm);
+        assertTrue(mProcessRecord.killed);
     }
 
-    private static void appNotResponding(ProcessErrorStateRecord processErrorState,
-            String annotation) {
-        processErrorState.appNotResponding(null /* activityShortComponentName */, null /* aInfo */,
+    private static void appNotResponding(ProcessRecord processRecord, String annotation) {
+        processRecord.appNotResponding(null /* activityShortComponentName */, null /* aInfo */,
                 null /* parentShortComponentName */, null /* parentProcess */,
                 false /* aboveSystem */, annotation, false /* onlyDumpSelf */);
     }

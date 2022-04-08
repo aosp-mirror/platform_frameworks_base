@@ -18,15 +18,12 @@ package com.android.internal.telephony.cdma.sms;
 
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.res.Resources;
-import android.os.Build;
 import android.telephony.SmsCbCmasInfo;
 import android.telephony.cdma.CdmaSmsCbProgramData;
 import android.telephony.cdma.CdmaSmsCbProgramResults;
-import android.text.TextUtils;
 
 import com.android.internal.telephony.GsmAlphabet;
 import com.android.internal.telephony.GsmAlphabet.TextEncodingDetails;
-import com.android.internal.telephony.Sms7BitEncodingTranslator;
 import com.android.internal.telephony.SmsConstants;
 import com.android.internal.telephony.SmsHeader;
 import com.android.internal.telephony.SmsMessageBase;
@@ -36,7 +33,6 @@ import com.android.internal.util.BitwiseOutputStream;
 import com.android.telephony.Rlog;
 
 import java.io.ByteArrayOutputStream;
-import java.time.DateTimeException;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -317,16 +313,10 @@ public final class BearerData {
         }
 
         public long toMillis() {
-            try {
-                LocalDateTime localDateTime =
-                        LocalDateTime.of(year, monthOrdinal, monthDay, hour, minute, second);
-                Instant instant =
-                        localDateTime.toInstant(mZoneId.getRules().getOffset(localDateTime));
-                return instant.toEpochMilli();
-            } catch (DateTimeException ex) {
-                Rlog.e(LOG_TAG, "Invalid timestamp", ex);
-            }
-            return 0;
+            LocalDateTime localDateTime =
+                    LocalDateTime.of(year, monthOrdinal, monthDay, hour, minute, second);
+            Instant instant = localDateTime.toInstant(mZoneId.getRules().getOffset(localDateTime));
+            return instant.toEpochMilli();
         }
 
 
@@ -550,17 +540,8 @@ public final class BearerData {
      */
     public static TextEncodingDetails calcTextEncodingDetails(CharSequence msg,
             boolean force7BitEncoding, boolean isEntireMsg) {
-        CharSequence newMsg = null;
-        Resources r = Resources.getSystem();
-        if (r.getBoolean(com.android.internal.R.bool.config_sms_force_7bit_encoding)) {
-            newMsg = Sms7BitEncodingTranslator.translate(msg, true /* isCdmaFormat */);
-        }
-        if (TextUtils.isEmpty(newMsg)) {
-            newMsg = msg;
-        }
-
         TextEncodingDetails ted;
-        int septets = countAsciiSeptets(newMsg, force7BitEncoding);
+        int septets = countAsciiSeptets(msg, force7BitEncoding);
         if (septets != -1 && septets <= SmsConstants.MAX_USER_DATA_SEPTETS) {
             ted = new TextEncodingDetails();
             ted.msgCount = 1;
@@ -1101,7 +1082,7 @@ public final class BearerData {
             bData.hasUserDataHeader = (inStream.read(1) == 1);
             inStream.skip(3);
         }
-        if ((!decodeSuccess) || (paramBits > 0)) {
+        if ((! decodeSuccess) || (paramBits > 0)) {
             Rlog.d(LOG_TAG, "MESSAGE_IDENTIFIER decode " +
                       (decodeSuccess ? "succeeded" : "failed") +
                       " (extra bits = " + paramBits + ")");
@@ -1470,7 +1451,7 @@ public final class BearerData {
             bData.reportReq      = (inStream.read(1) == 1);
             inStream.skip(4);
         }
-        if ((!decodeSuccess) || (paramBits > 0)) {
+        if ((! decodeSuccess) || (paramBits > 0)) {
             Rlog.d(LOG_TAG, "REPLY_OPTION decode " +
                       (decodeSuccess ? "succeeded" : "failed") +
                       " (extra bits = " + paramBits + ")");
@@ -1489,7 +1470,7 @@ public final class BearerData {
             decodeSuccess = true;
             bData.numberOfMessages = IccUtils.cdmaBcdByteToInt((byte)inStream.read(8));
         }
-        if ((!decodeSuccess) || (paramBits > 0)) {
+        if ((! decodeSuccess) || (paramBits > 0)) {
             Rlog.d(LOG_TAG, "NUMBER_OF_MESSAGES decode " +
                       (decodeSuccess ? "succeeded" : "failed") +
                       " (extra bits = " + paramBits + ")");
@@ -1508,7 +1489,7 @@ public final class BearerData {
             decodeSuccess = true;
             bData.depositIndex = (inStream.read(8) << 8) | inStream.read(8);
         }
-        if ((!decodeSuccess) || (paramBits > 0)) {
+        if ((! decodeSuccess) || (paramBits > 0)) {
             Rlog.d(LOG_TAG, "MESSAGE_DEPOSIT_INDEX decode " +
                       (decodeSuccess ? "succeeded" : "failed") +
                       " (extra bits = " + paramBits + ")");
@@ -1595,7 +1576,7 @@ public final class BearerData {
             bData.errorClass = inStream.read(2);
             bData.messageStatus = inStream.read(6);
         }
-        if ((!decodeSuccess) || (paramBits > 0)) {
+        if ((! decodeSuccess) || (paramBits > 0)) {
             Rlog.d(LOG_TAG, "MESSAGE_STATUS decode " +
                       (decodeSuccess ? "succeeded" : "failed") +
                       " (extra bits = " + paramBits + ")");
@@ -1615,7 +1596,7 @@ public final class BearerData {
             decodeSuccess = true;
             bData.msgCenterTimeStamp = TimeStamp.fromByteArray(inStream.readByteArray(6 * 8));
         }
-        if ((!decodeSuccess) || (paramBits > 0)) {
+        if ((! decodeSuccess) || (paramBits > 0)) {
             Rlog.d(LOG_TAG, "MESSAGE_CENTER_TIME_STAMP decode " +
                       (decodeSuccess ? "succeeded" : "failed") +
                       " (extra bits = " + paramBits + ")");
@@ -1634,7 +1615,7 @@ public final class BearerData {
             decodeSuccess = true;
             bData.validityPeriodAbsolute = TimeStamp.fromByteArray(inStream.readByteArray(6 * 8));
         }
-        if ((!decodeSuccess) || (paramBits > 0)) {
+        if ((! decodeSuccess) || (paramBits > 0)) {
             Rlog.d(LOG_TAG, "VALIDITY_PERIOD_ABSOLUTE decode " +
                       (decodeSuccess ? "succeeded" : "failed") +
                       " (extra bits = " + paramBits + ")");
@@ -1654,7 +1635,7 @@ public final class BearerData {
             bData.deferredDeliveryTimeAbsolute = TimeStamp.fromByteArray(
                     inStream.readByteArray(6 * 8));
         }
-        if ((!decodeSuccess) || (paramBits > 0)) {
+        if ((! decodeSuccess) || (paramBits > 0)) {
             Rlog.d(LOG_TAG, "DEFERRED_DELIVERY_TIME_ABSOLUTE decode " +
                       (decodeSuccess ? "succeeded" : "failed") +
                       " (extra bits = " + paramBits + ")");
@@ -1673,7 +1654,7 @@ public final class BearerData {
             decodeSuccess = true;
             bData.deferredDeliveryTimeRelative = inStream.read(8);
         }
-        if ((!decodeSuccess) || (paramBits > 0)) {
+        if ((! decodeSuccess) || (paramBits > 0)) {
             Rlog.d(LOG_TAG, "VALIDITY_PERIOD_RELATIVE decode " +
                       (decodeSuccess ? "succeeded" : "failed") +
                       " (extra bits = " + paramBits + ")");
@@ -1693,7 +1674,7 @@ public final class BearerData {
             decodeSuccess = true;
             bData.validityPeriodRelative = inStream.read(8);
         }
-        if ((!decodeSuccess) || (paramBits > 0)) {
+        if ((! decodeSuccess) || (paramBits > 0)) {
             Rlog.d(LOG_TAG, "DEFERRED_DELIVERY_TIME_RELATIVE decode " +
                       (decodeSuccess ? "succeeded" : "failed") +
                       " (extra bits = " + paramBits + ")");
@@ -1714,7 +1695,7 @@ public final class BearerData {
             bData.privacy = inStream.read(2);
             inStream.skip(6);
         }
-        if ((!decodeSuccess) || (paramBits > 0)) {
+        if ((! decodeSuccess) || (paramBits > 0)) {
             Rlog.d(LOG_TAG, "PRIVACY_INDICATOR decode " +
                       (decodeSuccess ? "succeeded" : "failed") +
                       " (extra bits = " + paramBits + ")");
@@ -1734,7 +1715,7 @@ public final class BearerData {
             decodeSuccess = true;
             bData.language = inStream.read(8);
         }
-        if ((!decodeSuccess) || (paramBits > 0)) {
+        if ((! decodeSuccess) || (paramBits > 0)) {
             Rlog.d(LOG_TAG, "LANGUAGE_INDICATOR decode " +
                       (decodeSuccess ? "succeeded" : "failed") +
                       " (extra bits = " + paramBits + ")");
@@ -1755,7 +1736,7 @@ public final class BearerData {
             bData.displayMode = inStream.read(2);
             inStream.skip(6);
         }
-        if ((!decodeSuccess) || (paramBits > 0)) {
+        if ((! decodeSuccess) || (paramBits > 0)) {
             Rlog.d(LOG_TAG, "DISPLAY_MODE decode " +
                       (decodeSuccess ? "succeeded" : "failed") +
                       " (extra bits = " + paramBits + ")");
@@ -1776,7 +1757,7 @@ public final class BearerData {
             bData.priority = inStream.read(2);
             inStream.skip(6);
         }
-        if ((!decodeSuccess) || (paramBits > 0)) {
+        if ((! decodeSuccess) || (paramBits > 0)) {
             Rlog.d(LOG_TAG, "PRIORITY_INDICATOR decode " +
                       (decodeSuccess ? "succeeded" : "failed") +
                       " (extra bits = " + paramBits + ")");
@@ -1797,7 +1778,7 @@ public final class BearerData {
             bData.alert = inStream.read(2);
             inStream.skip(6);
         }
-        if ((!decodeSuccess) || (paramBits > 0)) {
+        if ((! decodeSuccess) || (paramBits > 0)) {
             Rlog.d(LOG_TAG, "ALERT_ON_MESSAGE_DELIVERY decode " +
                       (decodeSuccess ? "succeeded" : "failed") +
                       " (extra bits = " + paramBits + ")");
@@ -1817,7 +1798,7 @@ public final class BearerData {
             decodeSuccess = true;
             bData.userResponseCode = inStream.read(8);
         }
-        if ((!decodeSuccess) || (paramBits > 0)) {
+        if ((! decodeSuccess) || (paramBits > 0)) {
             Rlog.d(LOG_TAG, "USER_RESPONSE_CODE decode " +
                       (decodeSuccess ? "succeeded" : "failed") +
                       " (extra bits = " + paramBits + ")");
@@ -1879,7 +1860,7 @@ public final class BearerData {
             decodeSuccess = true;
         }
 
-        if ((!decodeSuccess) || (paramBits > 0)) {
+        if ((! decodeSuccess) || (paramBits > 0)) {
             Rlog.d(LOG_TAG, "SERVICE_CATEGORY_PROGRAM_DATA decode " +
                       (decodeSuccess ? "succeeded" : "failed") +
                       " (extra bits = " + paramBits + ')');
@@ -1920,7 +1901,7 @@ public final class BearerData {
      * @return the number of bits to read from the stream
      * @throws CodingException if the specified encoding is not supported
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     private static int getBitsForNumFields(int msgEncoding, int numFields)
             throws CodingException {
         switch (msgEncoding) {

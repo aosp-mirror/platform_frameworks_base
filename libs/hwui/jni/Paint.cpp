@@ -25,6 +25,7 @@
 #include <nativehelper/ScopedUtfChars.h>
 #include <nativehelper/ScopedPrimitiveArray.h>
 
+#include "SkBlurDrawLooper.h"
 #include "SkColorFilter.h"
 #include "SkFont.h"
 #include "SkFontMetrics.h"
@@ -38,7 +39,6 @@
 #include "unicode/ushape.h"
 #include "utils/Blur.h"
 
-#include <hwui/BlurDrawLooper.h>
 #include <hwui/MinikinSkia.h>
 #include <hwui/MinikinUtils.h>
 #include <hwui/Paint.h>
@@ -55,6 +55,20 @@
 #include <vector>
 
 namespace android {
+
+struct JMetricsID {
+    jfieldID    top;
+    jfieldID    ascent;
+    jfieldID    descent;
+    jfieldID    bottom;
+    jfieldID    leading;
+};
+
+static jclass   gFontMetrics_class;
+static JMetricsID gFontMetrics_fieldID;
+
+static jclass   gFontMetricsInt_class;
+static JMetricsID gFontMetricsInt_fieldID;
 
 static void getPosTextPath(const SkFont& font, const uint16_t glyphs[], int count,
                            const SkPoint pos[], SkPath* dst) {
@@ -339,13 +353,18 @@ namespace PaintGlue {
     }
 
     static void doTextBounds(JNIEnv* env, const jchar* text, int count, jobject bounds,
-            const Paint& paint, const Typeface* typeface, jint bidiFlagsInt) {
+            const Paint& paint, const Typeface* typeface, jint bidiFlags) {
         SkRect  r;
         SkIRect ir;
 
+        minikin::Layout layout = MinikinUtils::doLayout(&paint,
+                static_cast<minikin::Bidi>(bidiFlags), typeface,
+                text, count,  // text buffer
+                0, count,  // draw range
+                0, count,  // context range
+                nullptr);
         minikin::MinikinRect rect;
-        minikin::Bidi bidiFlags = static_cast<minikin::Bidi>(bidiFlagsInt);
-        MinikinUtils::getBounds(&paint, bidiFlags, typeface, text, count, &rect);
+        layout.getBounds(&rect);
         r.fLeft = rect.mLeft;
         r.fTop = rect.mTop;
         r.fRight = rect.mRight;
@@ -596,14 +615,35 @@ namespace PaintGlue {
     static jfloat getFontMetrics(JNIEnv* env, jobject, jlong paintHandle, jobject metricsObj) {
         SkFontMetrics metrics;
         SkScalar spacing = getMetricsInternal(paintHandle, &metrics);
-        GraphicsJNI::set_metrics(env, metricsObj, metrics);
+
+        if (metricsObj) {
+            SkASSERT(env->IsInstanceOf(metricsObj, gFontMetrics_class));
+            env->SetFloatField(metricsObj, gFontMetrics_fieldID.top, SkScalarToFloat(metrics.fTop));
+            env->SetFloatField(metricsObj, gFontMetrics_fieldID.ascent, SkScalarToFloat(metrics.fAscent));
+            env->SetFloatField(metricsObj, gFontMetrics_fieldID.descent, SkScalarToFloat(metrics.fDescent));
+            env->SetFloatField(metricsObj, gFontMetrics_fieldID.bottom, SkScalarToFloat(metrics.fBottom));
+            env->SetFloatField(metricsObj, gFontMetrics_fieldID.leading, SkScalarToFloat(metrics.fLeading));
+        }
         return SkScalarToFloat(spacing);
     }
 
     static jint getFontMetricsInt(JNIEnv* env, jobject, jlong paintHandle, jobject metricsObj) {
         SkFontMetrics metrics;
+
         getMetricsInternal(paintHandle, &metrics);
-        return GraphicsJNI::set_metrics_int(env, metricsObj, metrics);
+        int ascent = SkScalarRoundToInt(metrics.fAscent);
+        int descent = SkScalarRoundToInt(metrics.fDescent);
+        int leading = SkScalarRoundToInt(metrics.fLeading);
+
+        if (metricsObj) {
+            SkASSERT(env->IsInstanceOf(metricsObj, gFontMetricsInt_class));
+            env->SetIntField(metricsObj, gFontMetricsInt_fieldID.top, SkScalarFloorToInt(metrics.fTop));
+            env->SetIntField(metricsObj, gFontMetricsInt_fieldID.ascent, ascent);
+            env->SetIntField(metricsObj, gFontMetricsInt_fieldID.descent, descent);
+            env->SetIntField(metricsObj, gFontMetricsInt_fieldID.bottom, SkScalarCeilToInt(metrics.fBottom));
+            env->SetIntField(metricsObj, gFontMetricsInt_fieldID.leading, leading);
+        }
+        return descent - ascent + leading;
     }
 
 
@@ -964,13 +1004,13 @@ namespace PaintGlue {
         }
         else {
             SkScalar sigma = android::uirenderer::Blur::convertRadiusToSigma(radius);
-            paint->setLooper(BlurDrawLooper::Make(color, cs.get(), sigma, {dx, dy}));
+            paint->setLooper(SkBlurDrawLooper::Make(color, cs.get(), sigma, dx, dy));
         }
     }
 
     static jboolean hasShadowLayer(CRITICAL_JNI_PARAMS_COMMA jlong paintHandle) {
         Paint* paint = reinterpret_cast<Paint*>(paintHandle);
-        return paint->getLooper() != nullptr;
+        return paint->getLooper() && paint->getLooper()->asABlurShadow(nullptr);
     }
 
     static jboolean equalsForTextMeasurement(CRITICAL_JNI_PARAMS_COMMA jlong lPaint, jlong rPaint) {
@@ -1095,6 +1135,24 @@ static const JNINativeMethod methods[] = {
 };
 
 int register_android_graphics_Paint(JNIEnv* env) {
+    gFontMetrics_class = FindClassOrDie(env, "android/graphics/Paint$FontMetrics");
+    gFontMetrics_class = MakeGlobalRefOrDie(env, gFontMetrics_class);
+
+    gFontMetrics_fieldID.top = GetFieldIDOrDie(env, gFontMetrics_class, "top", "F");
+    gFontMetrics_fieldID.ascent = GetFieldIDOrDie(env, gFontMetrics_class, "ascent", "F");
+    gFontMetrics_fieldID.descent = GetFieldIDOrDie(env, gFontMetrics_class, "descent", "F");
+    gFontMetrics_fieldID.bottom = GetFieldIDOrDie(env, gFontMetrics_class, "bottom", "F");
+    gFontMetrics_fieldID.leading = GetFieldIDOrDie(env, gFontMetrics_class, "leading", "F");
+
+    gFontMetricsInt_class = FindClassOrDie(env, "android/graphics/Paint$FontMetricsInt");
+    gFontMetricsInt_class = MakeGlobalRefOrDie(env, gFontMetricsInt_class);
+
+    gFontMetricsInt_fieldID.top = GetFieldIDOrDie(env, gFontMetricsInt_class, "top", "I");
+    gFontMetricsInt_fieldID.ascent = GetFieldIDOrDie(env, gFontMetricsInt_class, "ascent", "I");
+    gFontMetricsInt_fieldID.descent = GetFieldIDOrDie(env, gFontMetricsInt_class, "descent", "I");
+    gFontMetricsInt_fieldID.bottom = GetFieldIDOrDie(env, gFontMetricsInt_class, "bottom", "I");
+    gFontMetricsInt_fieldID.leading = GetFieldIDOrDie(env, gFontMetricsInt_class, "leading", "I");
+
     return RegisterMethodsOrDie(env, "android/graphics/Paint", methods, NELEM(methods));
 }
 

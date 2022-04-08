@@ -53,7 +53,6 @@ public class TouchAnimator {
     }
 
     public void setPosition(float fraction) {
-        if (Float.isNaN(fraction)) return;
         float t = MathUtils.constrain((fraction - mStartDelay) / mSpan, 0, 1);
         if (mInterpolator != null) {
             t = mInterpolator.getInterpolation(t);

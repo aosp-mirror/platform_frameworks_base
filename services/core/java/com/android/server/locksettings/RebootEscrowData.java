@@ -16,14 +16,22 @@
 
 package com.android.server.locksettings;
 
+import com.android.internal.util.Preconditions;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.util.Objects;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 
-import javax.crypto.SecretKey;
+import javax.crypto.BadPaddingException;
+import javax.crypto.Cipher;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
+import javax.crypto.spec.IvParameterSpec;
 
 /**
  * Holds the data necessary to complete a reboot escrow of the Synthetic Password.
@@ -33,29 +41,32 @@ class RebootEscrowData {
      * This is the current version of the escrow data format. This should be incremented if the
      * format on disk is changed.
      */
-    private static final int CURRENT_VERSION = 2;
+    private static final int CURRENT_VERSION = 1;
 
-    /**
-    * This is the legacy version of the escrow data format for R builds. The escrow data is only
-    * encrypted by the escrow key, without additional wrap of another key from keystore.
-    */
-    private static final int LEGACY_SINGLE_ENCRYPTED_VERSION = 1;
+    /** The algorithm used for the encryption of the key blob. */
+    private static final String CIPHER_ALGO = "AES/GCM/NoPadding";
 
-    private RebootEscrowData(byte spVersion, byte[] syntheticPassword, byte[] blob,
+    private RebootEscrowData(byte spVersion, byte[] iv, byte[] syntheticPassword, byte[] blob,
             RebootEscrowKey key) {
         mSpVersion = spVersion;
+        mIv = iv;
         mSyntheticPassword = syntheticPassword;
         mBlob = blob;
         mKey = key;
     }
 
     private final byte mSpVersion;
+    private final byte[] mIv;
     private final byte[] mSyntheticPassword;
     private final byte[] mBlob;
     private final RebootEscrowKey mKey;
 
     public byte getSpVersion() {
         return mSpVersion;
+    }
+
+    public byte[] getIv() {
+        return mIv;
     }
 
     public byte[] getSyntheticPassword() {
@@ -70,59 +81,76 @@ class RebootEscrowData {
         return mKey;
     }
 
-    private static byte[] decryptBlobCurrentVersion(SecretKey kk, RebootEscrowKey ks,
-            DataInputStream dis) throws IOException {
-        if (kk == null) {
-            throw new IOException("Failed to find wrapper key in keystore, cannot decrypt the"
-                    + " escrow data");
-        }
-
-        // Decrypt the blob with the key from keystore first, then decrypt again with the reboot
-        // escrow key.
-        byte[] ksEncryptedBlob = AesEncryptionUtil.decrypt(kk, dis);
-        return AesEncryptionUtil.decrypt(ks.getKey(), ksEncryptedBlob);
-    }
-
-    static RebootEscrowData fromEncryptedData(RebootEscrowKey ks, byte[] blob, SecretKey kk)
+    static RebootEscrowData fromEncryptedData(RebootEscrowKey key, byte[] blob)
             throws IOException {
-        Objects.requireNonNull(ks);
-        Objects.requireNonNull(blob);
+        Preconditions.checkNotNull(key);
+        Preconditions.checkNotNull(blob);
 
         DataInputStream dis = new DataInputStream(new ByteArrayInputStream(blob));
         int version = dis.readInt();
-        byte spVersion = dis.readByte();
-        switch (version) {
-            case CURRENT_VERSION: {
-                byte[] syntheticPassword = decryptBlobCurrentVersion(kk, ks, dis);
-                return new RebootEscrowData(spVersion, syntheticPassword, blob, ks);
-            }
-            case LEGACY_SINGLE_ENCRYPTED_VERSION: {
-                // Decrypt the blob with the escrow key directly.
-                byte[] syntheticPassword = AesEncryptionUtil.decrypt(ks.getKey(), dis);
-                return new RebootEscrowData(spVersion, syntheticPassword, blob, ks);
-            }
-            default:
-                throw new IOException("Unsupported version " + version);
+        if (version != CURRENT_VERSION) {
+            throw new IOException("Unsupported version " + version);
         }
+
+        byte spVersion = dis.readByte();
+
+        int ivSize = dis.readInt();
+        if (ivSize < 0 || ivSize > 32) {
+            throw new IOException("IV out of range: " + ivSize);
+        }
+        byte[] iv = new byte[ivSize];
+        dis.readFully(iv);
+
+        int cipherTextSize = dis.readInt();
+        if (cipherTextSize < 0) {
+            throw new IOException("Invalid cipher text size: " + cipherTextSize);
+        }
+
+        byte[] cipherText = new byte[cipherTextSize];
+        dis.readFully(cipherText);
+
+        final byte[] syntheticPassword;
+        try {
+            Cipher c = Cipher.getInstance(CIPHER_ALGO);
+            c.init(Cipher.DECRYPT_MODE, key.getKey(), new IvParameterSpec(iv));
+            syntheticPassword = c.doFinal(cipherText);
+        } catch (NoSuchAlgorithmException | InvalidKeyException | BadPaddingException
+                | IllegalBlockSizeException | NoSuchPaddingException
+                | InvalidAlgorithmParameterException e) {
+            throw new IOException("Could not decrypt ciphertext", e);
+        }
+
+        return new RebootEscrowData(spVersion, iv, syntheticPassword, blob, key);
     }
 
-    static RebootEscrowData fromSyntheticPassword(RebootEscrowKey ks, byte spVersion,
-            byte[] syntheticPassword, SecretKey kk)
+    static RebootEscrowData fromSyntheticPassword(RebootEscrowKey key, byte spVersion,
+            byte[] syntheticPassword)
             throws IOException {
-        Objects.requireNonNull(syntheticPassword);
-
-        // Encrypt synthetic password with the escrow key first; then encrypt the blob again with
-        // the key from keystore.
-        byte[] ksEncryptedBlob = AesEncryptionUtil.encrypt(ks.getKey(), syntheticPassword);
-        byte[] kkEncryptedBlob = AesEncryptionUtil.encrypt(kk, ksEncryptedBlob);
+        Preconditions.checkNotNull(syntheticPassword);
 
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         DataOutputStream dos = new DataOutputStream(bos);
 
+        final byte[] cipherText;
+        final byte[] iv;
+        try {
+            Cipher cipher = Cipher.getInstance(CIPHER_ALGO);
+            cipher.init(Cipher.ENCRYPT_MODE, key.getKey());
+            cipherText = cipher.doFinal(syntheticPassword);
+            iv = cipher.getIV();
+        } catch (NoSuchAlgorithmException | BadPaddingException | IllegalBlockSizeException
+                | NoSuchPaddingException | InvalidKeyException e) {
+            throw new IOException("Could not encrypt reboot escrow data", e);
+        }
+
         dos.writeInt(CURRENT_VERSION);
         dos.writeByte(spVersion);
-        dos.write(kkEncryptedBlob);
+        dos.writeInt(iv.length);
+        dos.write(iv);
+        dos.writeInt(cipherText.length);
+        dos.write(cipherText);
 
-        return new RebootEscrowData(spVersion, syntheticPassword, bos.toByteArray(), ks);
+        return new RebootEscrowData(spVersion, iv, syntheticPassword, bos.toByteArray(),
+                key);
     }
 }

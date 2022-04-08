@@ -42,16 +42,13 @@ TEST(SkiaDisplayList, reset) {
     {
         SkiaRecordingCanvas canvas{nullptr, 1, 1};
         canvas.drawColor(0, SkBlendMode::kSrc);
-        skiaDL = canvas.finishRecording();
+        skiaDL.reset(canvas.finishRecording());
     }
 
     SkCanvas dummyCanvas;
     RenderNodeDrawable drawable(nullptr, &dummyCanvas);
     skiaDL->mChildNodes.emplace_back(nullptr, &dummyCanvas);
-    int functor1 = WebViewFunctor_create(
-            nullptr, TestUtils::createMockFunctor(RenderMode::OpenGL_ES), RenderMode::OpenGL_ES);
-    GLFunctorDrawable functorDrawable{functor1, &dummyCanvas};
-    WebViewFunctor_release(functor1);
+    GLFunctorDrawable functorDrawable(nullptr, nullptr, &dummyCanvas);
     skiaDL->mChildFunctors.push_back(&functorDrawable);
     skiaDL->mMutableImages.push_back(nullptr);
     skiaDL->appendVD(nullptr);
@@ -84,7 +81,7 @@ TEST(SkiaDisplayList, reuseDisplayList) {
 
     // attach a displayList for reuse
     SkiaDisplayList skiaDL;
-    ASSERT_TRUE(skiaDL.reuseDisplayList(renderNode.get()));
+    ASSERT_TRUE(skiaDL.reuseDisplayList(renderNode.get(), nullptr));
 
     // detach the list that you just attempted to reuse
     availableList = renderNode->detachAvailableList();
@@ -100,13 +97,16 @@ TEST(SkiaDisplayList, syncContexts) {
     SkiaDisplayList skiaDL;
 
     SkCanvas dummyCanvas;
+    TestUtils::MockFunctor functor;
+    GLFunctorDrawable functorDrawable(&functor, nullptr, &dummyCanvas);
+    skiaDL.mChildFunctors.push_back(&functorDrawable);
 
-    int functor1 = WebViewFunctor_create(
+    int functor2 = WebViewFunctor_create(
             nullptr, TestUtils::createMockFunctor(RenderMode::OpenGL_ES), RenderMode::OpenGL_ES);
-    auto& counts = TestUtils::countsForFunctor(functor1);
+    auto& counts = TestUtils::countsForFunctor(functor2);
     skiaDL.mChildFunctors.push_back(
-            skiaDL.allocateDrawable<GLFunctorDrawable>(functor1, &dummyCanvas));
-    WebViewFunctor_release(functor1);
+            skiaDL.allocateDrawable<GLFunctorDrawable>(functor2, &dummyCanvas));
+    WebViewFunctor_release(functor2);
 
     SkRect bounds = SkRect::MakeWH(200, 200);
     VectorDrawableRoot vectorDrawable(new VectorDrawable::Group());
@@ -120,6 +120,7 @@ TEST(SkiaDisplayList, syncContexts) {
         });
     });
 
+    EXPECT_EQ(functor.getLastMode(), DrawGlInfo::kModeSync);
     EXPECT_EQ(counts.sync, 1);
     EXPECT_EQ(counts.destroyed, 0);
     EXPECT_EQ(vectorDrawable.mutateProperties()->getBounds(), bounds);
@@ -263,10 +264,10 @@ RENDERTHREAD_SKIA_PIPELINE_TEST(SkiaDisplayList, prepareListAndChildren_vdOffscr
     }
 
     // Another way to be offscreen: a matrix from the draw call.
-    for (const SkMatrix translate : { SkMatrix::Translate(width, 0),
-                                      SkMatrix::Translate(0, height),
-                                      SkMatrix::Translate(-width, 0),
-                                      SkMatrix::Translate(0, -height)}) {
+    for (const SkMatrix translate : { SkMatrix::MakeTrans(width, 0),
+                                      SkMatrix::MakeTrans(0, height),
+                                      SkMatrix::MakeTrans(-width, 0),
+                                      SkMatrix::MakeTrans(0, -height)}) {
         SkiaDisplayList skiaDL;
         VectorDrawableRoot dirtyVD(new VectorDrawable::Group());
         dirtyVD.mutateProperties()->setBounds(bounds);
@@ -291,7 +292,7 @@ RENDERTHREAD_SKIA_PIPELINE_TEST(SkiaDisplayList, prepareListAndChildren_vdOffscr
         SkiaDisplayList skiaDL;
         VectorDrawableRoot dirtyVD(new VectorDrawable::Group());
         dirtyVD.mutateProperties()->setBounds(bounds);
-        SkMatrix translate = SkMatrix::Translate(50, 50);
+        SkMatrix translate = SkMatrix::MakeTrans(50, 50);
         skiaDL.appendVD(&dirtyVD, translate);
 
         ASSERT_TRUE(dirtyVD.isDirty());

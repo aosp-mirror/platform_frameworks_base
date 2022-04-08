@@ -23,7 +23,6 @@ import static org.mockito.Mockito.withSettings;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.ProviderInfo;
 import android.net.Uri;
-import android.os.UserHandle;
 
 import androidx.test.runner.AndroidJUnit4;
 
@@ -86,12 +85,5 @@ public class ContentProviderTest {
         assertEquals(Uri.parse("content://com.example/foo/bar?foo=b//ar#foo=b//ar"),
                 mCp.validateIncomingUri(
                         Uri.parse("content://com.example/foo/bar?foo=b//ar#foo=b//ar")));
-    }
-
-    @Test
-    public void testCreateContentUriForUser() {
-        Uri uri = Uri.parse("content://com.example/foo/bar");
-        Uri expectedUri = Uri.parse("content://7@com.example/foo/bar");
-        assertEquals(expectedUri, ContentProvider.createContentUriForUser(uri, UserHandle.of(7)));
     }
 }

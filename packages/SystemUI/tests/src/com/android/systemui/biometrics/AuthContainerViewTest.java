@@ -32,15 +32,11 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import android.annotation.Nullable;
 import android.content.Context;
+import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricConstants;
-import android.hardware.biometrics.ComponentInfoInternal;
-import android.hardware.biometrics.PromptInfo;
-import android.hardware.biometrics.SensorProperties;
-import android.hardware.face.FaceSensorPropertiesInternal;
-import android.hardware.fingerprint.FingerprintSensorProperties;
-import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
+import android.hardware.biometrics.BiometricPrompt;
+import android.os.Bundle;
 import android.os.IBinder;
 import android.os.UserManager;
 import android.test.suitebuilder.annotation.SmallTest;
@@ -62,9 +58,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @RunWith(AndroidTestingRunner.class)
 @RunWithLooper
@@ -211,20 +204,10 @@ public class AuthContainerViewTest extends SysuiTestCase {
     }
 
     @Test
-    public void testOnDialogAnimatedIn_sendsCancelReason_whenPendingDismiss() {
-        initializeContainer(Authenticators.BIOMETRIC_WEAK);
-        mAuthContainer.mContainerState = AuthContainerView.STATE_PENDING_DISMISS;
-        mAuthContainer.onDialogAnimatedIn();
-        verify(mCallback).onDismissed(
-                eq(AuthDialogCallback.DISMISSED_USER_CANCELED),
-                eq(null) /* credentialAttestation */);
-    }
-
-    @Test
     public void testLayoutParams_hasSecureWindowFlag() {
         final IBinder windowToken = mock(IBinder.class);
         final WindowManager.LayoutParams layoutParams =
-                AuthContainerView.getLayoutParams(windowToken, "");
+                AuthContainerView.getLayoutParams(windowToken);
         assertTrue((layoutParams.flags & WindowManager.LayoutParams.FLAG_SECURE) != 0);
     }
 
@@ -232,7 +215,7 @@ public class AuthContainerViewTest extends SysuiTestCase {
     public void testLayoutParams_excludesImeInsets() {
         final IBinder windowToken = mock(IBinder.class);
         final WindowManager.LayoutParams layoutParams =
-                AuthContainerView.getLayoutParams(windowToken, "");
+                AuthContainerView.getLayoutParams(windowToken);
         assertTrue((layoutParams.getFitInsetsTypes() & WindowInsets.Type.ime()) == 0);
     }
 
@@ -240,38 +223,18 @@ public class AuthContainerViewTest extends SysuiTestCase {
         AuthContainerView.Config config = new AuthContainerView.Config();
         config.mContext = mContext;
         config.mCallback = mCallback;
-        config.mSensorIds = new int[] {0};
-        config.mCredentialAllowed = false;
+        config.mModalityMask |= BiometricAuthenticator.TYPE_FINGERPRINT;
 
-        PromptInfo promptInfo = new PromptInfo();
-        promptInfo.setAuthenticators(authenticators);
-        config.mPromptInfo = promptInfo;
+        Bundle bundle = new Bundle();
+        bundle.putInt(BiometricPrompt.KEY_AUTHENTICATORS_ALLOWED, authenticators);
+        config.mBiometricPromptBundle = bundle;
 
-        final List<FingerprintSensorPropertiesInternal> fpProps = new ArrayList<>();
-
-        final List<ComponentInfoInternal> componentInfo = new ArrayList<>();
-        componentInfo.add(new ComponentInfoInternal("faceSensor" /* componentId */,
-                "vendor/model/revision" /* hardwareVersion */, "1.01" /* firmwareVersion */,
-                "00000001" /* serialNumber */, "" /* softwareVersion */));
-        componentInfo.add(new ComponentInfoInternal("matchingAlgorithm" /* componentId */,
-                "" /* hardwareVersion */, "" /* firmwareVersion */, "" /* serialNumber */,
-                "vendor/version/revision" /* softwareVersion */));
-
-        fpProps.add(new FingerprintSensorPropertiesInternal(0,
-                SensorProperties.STRENGTH_STRONG,
-                5 /* maxEnrollmentsPerUser */,
-                componentInfo,
-                FingerprintSensorProperties.TYPE_REAR,
-                false /* resetLockoutRequiresHardwareAuthToken */));
-        mAuthContainer = new TestableAuthContainer(config, fpProps, null /* faceProps */);
+        mAuthContainer = new TestableAuthContainer(config);
     }
 
     private class TestableAuthContainer extends AuthContainerView {
-        TestableAuthContainer(AuthContainerView.Config config,
-                @Nullable List<FingerprintSensorPropertiesInternal> fpProps,
-                @Nullable List<FaceSensorPropertiesInternal> faceProps) {
-
-            super(config, new MockInjector(), fpProps, faceProps);
+        TestableAuthContainer(AuthContainerView.Config config) {
+            super(config, new MockInjector());
         }
 
         @Override

@@ -16,17 +16,14 @@
 
 package com.android.systemui.biometrics;
 
-import android.annotation.IntDef;
-import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.app.AlertDialog;
 import android.app.admin.DevicePolicyManager;
 import android.content.Context;
 import android.content.pm.UserInfo;
 import android.graphics.drawable.Drawable;
 import android.hardware.biometrics.BiometricPrompt;
-import android.hardware.biometrics.PromptInfo;
 import android.os.AsyncTask;
+import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.Handler;
 import android.os.Looper;
@@ -41,12 +38,14 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import androidx.annotation.IntDef;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
 
 import com.android.internal.widget.LockPatternUtils;
-import com.android.internal.widget.VerifyCredentialResponse;
+import com.android.systemui.Interpolators;
 import com.android.systemui.R;
-import com.android.systemui.animation.Interpolators;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -73,7 +72,7 @@ public abstract class AuthCredentialView extends LinearLayout {
     private final UserManager mUserManager;
     private final DevicePolicyManager mDevicePolicyManager;
 
-    private PromptInfo mPromptInfo;
+    private Bundle mBiometricPromptBundle;
     private AuthPanelController mPanelController;
     private boolean mShouldAnimatePanel;
     private boolean mShouldAnimateContents;
@@ -194,8 +193,8 @@ public abstract class AuthCredentialView extends LinearLayout {
         mCallback = callback;
     }
 
-    void setPromptInfo(PromptInfo promptInfo) {
-        mPromptInfo = promptInfo;
+    void setBiometricPromptBundle(Bundle bundle) {
+        mBiometricPromptBundle = bundle;
     }
 
     void setPanelController(AuthPanelController panelController, boolean animatePanel) {
@@ -215,10 +214,10 @@ public abstract class AuthCredentialView extends LinearLayout {
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
 
-        final CharSequence title = getTitle(mPromptInfo);
+        final CharSequence title = getTitle(mBiometricPromptBundle);
         setText(mTitleView, title);
-        setTextOrHide(mSubtitleView, getSubtitle(mPromptInfo));
-        setTextOrHide(mDescriptionView, getDescription(mPromptInfo));
+        setTextOrHide(mSubtitleView, getSubtitle(mBiometricPromptBundle));
+        setTextOrHide(mDescriptionView, getDescription(mBiometricPromptBundle));
         announceForAccessibility(title);
 
         if (mIconView != null) {
@@ -284,20 +283,14 @@ public abstract class AuthCredentialView extends LinearLayout {
 
     protected void onErrorTimeoutFinish() {}
 
-    protected void onCredentialVerified(@NonNull VerifyCredentialResponse response, int timeoutMs) {
-        if (response.isMatched()) {
+    protected void onCredentialVerified(byte[] attestation, int timeoutMs) {
+
+        final boolean matched = attestation != null;
+
+        if (matched) {
             mClearErrorRunnable.run();
             mLockPatternUtils.userPresent(mEffectiveUserId);
-
-            // The response passed into this method contains the Gatekeeper Password. We still
-            // have to request Gatekeeper to create a Hardware Auth Token with the
-            // Gatekeeper Password and Challenge (keystore operationId in this case)
-            final long pwHandle = response.getGatekeeperPasswordHandle();
-            final VerifyCredentialResponse gkResponse = mLockPatternUtils
-                    .verifyGatekeeperPasswordHandle(pwHandle, mOperationId, mEffectiveUserId);
-
-            mCallback.onCredentialMatched(gkResponse.getGatekeeperHAT());
-            mLockPatternUtils.removeGatekeeperPasswordHandle(pwHandle);
+            mCallback.onCredentialMatched(attestation);
         } else {
             if (timeoutMs > 0) {
                 mHandler.removeCallbacks(mClearErrorRunnable);
@@ -471,20 +464,26 @@ public abstract class AuthCredentialView extends LinearLayout {
     }
 
     @Nullable
-    private static CharSequence getTitle(@NonNull PromptInfo promptInfo) {
-        final CharSequence credentialTitle = promptInfo.getDeviceCredentialTitle();
-        return credentialTitle != null ? credentialTitle : promptInfo.getTitle();
+    private static CharSequence getTitle(@NonNull Bundle bundle) {
+        final CharSequence credentialTitle =
+                bundle.getCharSequence(BiometricPrompt.KEY_DEVICE_CREDENTIAL_TITLE);
+        return credentialTitle != null ? credentialTitle
+                : bundle.getCharSequence(BiometricPrompt.KEY_TITLE);
     }
 
     @Nullable
-    private static CharSequence getSubtitle(@NonNull PromptInfo promptInfo) {
-        final CharSequence credentialSubtitle = promptInfo.getDeviceCredentialSubtitle();
-        return credentialSubtitle != null ? credentialSubtitle : promptInfo.getSubtitle();
+    private static CharSequence getSubtitle(@NonNull Bundle bundle) {
+        final CharSequence credentialSubtitle =
+                bundle.getCharSequence(BiometricPrompt.KEY_DEVICE_CREDENTIAL_SUBTITLE);
+        return credentialSubtitle != null ? credentialSubtitle
+                : bundle.getCharSequence(BiometricPrompt.KEY_SUBTITLE);
     }
 
     @Nullable
-    private static CharSequence getDescription(@NonNull PromptInfo promptInfo) {
-        final CharSequence credentialDescription = promptInfo.getDeviceCredentialDescription();
-        return credentialDescription != null ? credentialDescription : promptInfo.getDescription();
+    private static CharSequence getDescription(@NonNull Bundle bundle) {
+        final CharSequence credentialDescription =
+                bundle.getCharSequence(BiometricPrompt.KEY_DEVICE_CREDENTIAL_DESCRIPTION);
+        return credentialDescription != null ? credentialDescription
+                : bundle.getCharSequence(BiometricPrompt.KEY_DESCRIPTION);
     }
 }

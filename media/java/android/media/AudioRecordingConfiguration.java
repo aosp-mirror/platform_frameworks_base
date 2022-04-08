@@ -23,7 +23,6 @@ import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.media.audiofx.AudioEffect;
-import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Log;
@@ -223,7 +222,7 @@ public final class AudioRecordingConfiguration implements Parcelable {
      * <br>When called without the permission, the result is an empty string.
      * @return the package name
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public String getClientPackageName() { return mClientPackageName; }
 
     /**
@@ -262,8 +261,14 @@ public final class AudioRecordingConfiguration implements Parcelable {
                 final AudioPortConfig[] sources = patch.sources();
                 if ((sources != null) && (sources.length > 0)) {
                     // not supporting multiple sources, so just look at the first source
-                    int devId = sources[0].port().id();
-                    return AudioManager.getDeviceForPortId(devId, AudioManager.GET_DEVICES_INPUTS);
+                    final int devId = sources[0].port().id();
+                    final AudioDeviceInfo[] devices =
+                            AudioManager.getDevicesStatic(AudioManager.GET_DEVICES_INPUTS);
+                    for (int j = 0; j < devices.length; j++) {
+                        if (devices[j].getId() == devId) {
+                            return devices[j];
+                        }
+                    }
                 }
                 // patch handle is unique, there won't be another with the same handle
                 break;

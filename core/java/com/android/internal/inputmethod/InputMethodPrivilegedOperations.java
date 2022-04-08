@@ -18,18 +18,16 @@ package com.android.internal.inputmethod;
 
 import android.annotation.AnyThread;
 import android.annotation.DrawableRes;
-import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.net.Uri;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Log;
 import android.view.View;
+import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodSubtype;
 
 import com.android.internal.annotations.GuardedBy;
-
-import java.util.Objects;
 
 /**
  * A utility class to take care of boilerplate code around IPCs.
@@ -50,7 +48,7 @@ public final class InputMethodPrivilegedOperations {
          * @param privOps Binder interface to be set
          */
         @AnyThread
-        public synchronized void set(@NonNull IInputMethodPrivilegedOperations privOps) {
+        public synchronized void set(IInputMethodPrivilegedOperations privOps) {
             if (mPrivOps != null) {
                 throw new IllegalStateException(
                         "IInputMethodPrivilegedOperations must be set at most once."
@@ -93,13 +91,12 @@ public final class InputMethodPrivilegedOperations {
      * @param privOps Binder interface to be set
      */
     @AnyThread
-    public void set(@NonNull IInputMethodPrivilegedOperations privOps) {
-        Objects.requireNonNull(privOps, "privOps must not be null");
+    public void set(IInputMethodPrivilegedOperations privOps) {
         mOps.set(privOps);
     }
 
     /**
-     * Calls {@link IInputMethodPrivilegedOperations#setImeWindowStatusAsync(int, int}.
+     * Calls {@link IInputMethodPrivilegedOperations#setImeWindowStatus(int, int)}.
      *
      * @param vis visibility flags
      * @param backDisposition disposition flags
@@ -110,39 +107,38 @@ public final class InputMethodPrivilegedOperations {
      * @see android.inputmethodservice.InputMethodService#BACK_DISPOSITION_ADJUST_NOTHING
      */
     @AnyThread
-    public void setImeWindowStatusAsync(int vis, int backDisposition) {
+    public void setImeWindowStatus(int vis, int backDisposition) {
         final IInputMethodPrivilegedOperations ops = mOps.getAndWarnIfNull();
         if (ops == null) {
             return;
         }
         try {
-            ops.setImeWindowStatusAsync(vis, backDisposition);
+            ops.setImeWindowStatus(vis, backDisposition);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
     }
 
     /**
-     * Calls {@link IInputMethodPrivilegedOperations#reportStartInputAsync(IBinder)}.
+     * Calls {@link IInputMethodPrivilegedOperations#reportStartInput(IBinder)}.
      *
      * @param startInputToken {@link IBinder} token to distinguish startInput session
      */
     @AnyThread
-    public void reportStartInputAsync(IBinder startInputToken) {
+    public void reportStartInput(IBinder startInputToken) {
         final IInputMethodPrivilegedOperations ops = mOps.getAndWarnIfNull();
         if (ops == null) {
             return;
         }
         try {
-            ops.reportStartInputAsync(startInputToken);
+            ops.reportStartInput(startInputToken);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
     }
 
     /**
-     * Calls {@link IInputMethodPrivilegedOperations#createInputContentUriToken(Uri, String,
-     * IIInputContentUriTokenResultCallback)}.
+     * Calls {@link IInputMethodPrivilegedOperations#createInputContentUriToken(Uri, String)}.
      *
      * @param contentUri Content URI to which a temporary read permission should be granted
      * @param packageName Indicates what package needs to have a temporary read permission
@@ -156,10 +152,7 @@ public final class InputMethodPrivilegedOperations {
             return null;
         }
         try {
-            final Completable.IInputContentUriToken value =
-                    Completable.createIInputContentUriToken();
-            ops.createInputContentUriToken(contentUri, packageName, ResultCallbacks.of(value));
-            return Completable.getResult(value);
+            return ops.createInputContentUriToken(contentUri, packageName);
         } catch (RemoteException e) {
             // For historical reasons, this error was silently ignored.
             // Note that the caller already logs error so we do not need additional Log.e() here.
@@ -169,44 +162,44 @@ public final class InputMethodPrivilegedOperations {
     }
 
     /**
-     * Calls {@link IInputMethodPrivilegedOperations#reportFullscreenModeAsync(boolean)}.
+     * Calls {@link IInputMethodPrivilegedOperations#reportFullscreenMode(boolean)}.
      *
      * @param fullscreen {@code true} if the IME enters full screen mode
      */
     @AnyThread
-    public void reportFullscreenModeAsync(boolean fullscreen) {
+    public void reportFullscreenMode(boolean fullscreen) {
         final IInputMethodPrivilegedOperations ops = mOps.getAndWarnIfNull();
         if (ops == null) {
             return;
         }
         try {
-            ops.reportFullscreenModeAsync(fullscreen);
+            ops.reportFullscreenMode(fullscreen);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
     }
 
     /**
-     * Calls {@link IInputMethodPrivilegedOperations#updateStatusIconAsync(String, int)}.
+     * Calls {@link IInputMethodPrivilegedOperations#updateStatusIcon(String, int)}.
      *
      * @param packageName package name from which the status icon should be loaded
      * @param iconResId resource ID of the icon to be loaded
      */
     @AnyThread
-    public void updateStatusIconAsync(String packageName, @DrawableRes int iconResId) {
+    public void updateStatusIcon(String packageName, @DrawableRes int iconResId) {
         final IInputMethodPrivilegedOperations ops = mOps.getAndWarnIfNull();
         if (ops == null) {
             return;
         }
         try {
-            ops.updateStatusIconAsync(packageName, iconResId);
+            ops.updateStatusIcon(packageName, iconResId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
     }
 
     /**
-     * Calls {@link IInputMethodPrivilegedOperations#setInputMethod(String, IVoidResultCallback)}.
+     * Calls {@link IInputMethodPrivilegedOperations#setInputMethod(String)}.
      *
      * @param id IME ID of the IME to switch to
      * @see android.view.inputmethod.InputMethodInfo#getId()
@@ -218,9 +211,7 @@ public final class InputMethodPrivilegedOperations {
             return;
         }
         try {
-            final Completable.Void value = Completable.createVoid();
-            ops.setInputMethod(id, ResultCallbacks.of(value));
-            Completable.getResult(value);
+            ops.setInputMethod(id);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -228,7 +219,7 @@ public final class InputMethodPrivilegedOperations {
 
     /**
      * Calls {@link IInputMethodPrivilegedOperations#setInputMethodAndSubtype(String,
-     * InputMethodSubtype, IVoidResultCallback)}
+     * InputMethodSubtype)}
      *
      * @param id IME ID of the IME to switch to
      * @param subtype {@link InputMethodSubtype} to switch to
@@ -241,16 +232,14 @@ public final class InputMethodPrivilegedOperations {
             return;
         }
         try {
-            final Completable.Void value = Completable.createVoid();
-            ops.setInputMethodAndSubtype(id, subtype, ResultCallbacks.of(value));
-            Completable.getResult(value);
+            ops.setInputMethodAndSubtype(id, subtype);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
     }
 
     /**
-     * Calls {@link IInputMethodPrivilegedOperations#hideMySoftInput(int, IVoidResultCallback)}
+     * Calls {@link IInputMethodPrivilegedOperations#hideMySoftInput(int)}
      *
      * @param flags additional operating flags
      * @see android.view.inputmethod.InputMethodManager#HIDE_IMPLICIT_ONLY
@@ -263,16 +252,14 @@ public final class InputMethodPrivilegedOperations {
             return;
         }
         try {
-            final Completable.Void value = Completable.createVoid();
-            ops.hideMySoftInput(flags, ResultCallbacks.of(value));
-            Completable.getResult(value);
+            ops.hideMySoftInput(flags);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
     }
 
     /**
-     * Calls {@link IInputMethodPrivilegedOperations#showMySoftInput(int, IVoidResultCallback)}
+     * Calls {@link IInputMethodPrivilegedOperations#showMySoftInput(int)}
      *
      * @param flags additional operating flags
      * @see android.view.inputmethod.InputMethodManager#SHOW_IMPLICIT
@@ -285,17 +272,14 @@ public final class InputMethodPrivilegedOperations {
             return;
         }
         try {
-            final Completable.Void value = Completable.createVoid();
-            ops.showMySoftInput(flags, ResultCallbacks.of(value));
-            Completable.getResult(value);
+            ops.showMySoftInput(flags);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
     }
 
     /**
-     * Calls {@link IInputMethodPrivilegedOperations#switchToPreviousInputMethod(
-     * IBooleanResultCallback)}
+     * Calls {@link IInputMethodPrivilegedOperations#switchToPreviousInputMethod()}
      *
      * @return {@code true} if handled
      */
@@ -306,17 +290,14 @@ public final class InputMethodPrivilegedOperations {
             return false;
         }
         try {
-            final Completable.Boolean value = Completable.createBoolean();
-            ops.switchToPreviousInputMethod(ResultCallbacks.of(value));
-            return Completable.getResult(value);
+            return ops.switchToPreviousInputMethod();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
     }
 
     /**
-     * Calls {@link IInputMethodPrivilegedOperations#switchToNextInputMethod(boolean,
-     * IBooleanResultCallback)}
+     * Calls {@link IInputMethodPrivilegedOperations#switchToNextInputMethod(boolean)}
      *
      * @param onlyCurrentIme {@code true} to switch to a {@link InputMethodSubtype} within the same
      *                       IME
@@ -329,17 +310,14 @@ public final class InputMethodPrivilegedOperations {
             return false;
         }
         try {
-            final Completable.Boolean value = Completable.createBoolean();
-            ops.switchToNextInputMethod(onlyCurrentIme, ResultCallbacks.of(value));
-            return Completable.getResult(value);
+            return ops.switchToNextInputMethod(onlyCurrentIme);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
     }
 
     /**
-     * Calls {@link IInputMethodPrivilegedOperations#shouldOfferSwitchingToNextInputMethod(
-     * IBooleanResultCallback)}
+     * Calls {@link IInputMethodPrivilegedOperations#shouldOfferSwitchingToNextInputMethod()}
      *
      * @return {@code true} if the IEM should offer a way to globally switch IME
      */
@@ -350,47 +328,63 @@ public final class InputMethodPrivilegedOperations {
             return false;
         }
         try {
-            final Completable.Boolean value = Completable.createBoolean();
-            ops.shouldOfferSwitchingToNextInputMethod(ResultCallbacks.of(value));
-            return Completable.getResult(value);
+            return ops.shouldOfferSwitchingToNextInputMethod();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
     }
 
     /**
-     * Calls {@link IInputMethodPrivilegedOperations#notifyUserActionAsync()}
+     * Calls {@link IInputMethodPrivilegedOperations#notifyUserAction()}
      */
     @AnyThread
-    public void notifyUserActionAsync() {
+    public void notifyUserAction() {
         final IInputMethodPrivilegedOperations ops = mOps.getAndWarnIfNull();
         if (ops == null) {
             return;
         }
         try {
-            ops.notifyUserActionAsync();
+            ops.notifyUserAction();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
     }
 
     /**
-     * Calls {@link IInputMethodPrivilegedOperations#applyImeVisibilityAsync(IBinder, boolean)}.
+     * Calls {@link IInputMethodPrivilegedOperations#reportPreRendered(info)}.
      *
-     * @param showOrHideInputToken placeholder token that maps to window requesting
+     * @param info {@link EditorInfo} of the currently rendered {@link TextView}.
+     */
+    @AnyThread
+    public void reportPreRendered(EditorInfo info) {
+        final IInputMethodPrivilegedOperations ops = mOps.getAndWarnIfNull();
+        if (ops == null) {
+            return;
+        }
+        try {
+            ops.reportPreRendered(info);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Calls {@link IInputMethodPrivilegedOperations#applyImeVisibility(IBinder, boolean)}.
+     *
+     * @param showOrHideInputToken dummy token that maps to window requesting
      *        {@link android.view.inputmethod.InputMethodManager#showSoftInput(View, int)} or
      *        {@link android.view.inputmethod.InputMethodManager#hideSoftInputFromWindow
      *        (IBinder, int)}
      * @param setVisible {@code true} to set IME visible, else hidden.
      */
     @AnyThread
-    public void applyImeVisibilityAsync(IBinder showOrHideInputToken, boolean setVisible) {
+    public void applyImeVisibility(IBinder showOrHideInputToken, boolean setVisible) {
         final IInputMethodPrivilegedOperations ops = mOps.getAndWarnIfNull();
         if (ops == null) {
             return;
         }
         try {
-            ops.applyImeVisibilityAsync(showOrHideInputToken, setVisible);
+            ops.applyImeVisibility(showOrHideInputToken, setVisible);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

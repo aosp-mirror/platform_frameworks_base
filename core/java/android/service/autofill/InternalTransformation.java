@@ -45,7 +45,6 @@ public abstract class InternalTransformation implements Transformation, Parcelab
      * @param template the {@link RemoteViews presentation template}.
      * @param childViewId resource id of the child view inside the template.
      */
-    @SuppressWarnings("HiddenAbstractMethod")
     abstract void apply(@NonNull ValueFinder finder, @NonNull RemoteViews template,
             int childViewId) throws Exception;
 

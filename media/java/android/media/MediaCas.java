@@ -20,6 +20,7 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.TestApi;
+import android.app.ActivityManager;
 import android.content.Context;
 import android.hardware.cas.V1_0.HidlCasPluginDescriptor;
 import android.hardware.cas.V1_0.ICas;
@@ -361,34 +362,28 @@ public final class MediaCas implements AutoCloseable {
         @Override
         public void onEvent(int event, int arg, @Nullable ArrayList<Byte> data)
                 throws RemoteException {
-            if (mEventHandler != null) {
-                mEventHandler.sendMessage(mEventHandler.obtainMessage(
+            mEventHandler.sendMessage(mEventHandler.obtainMessage(
                     EventHandler.MSG_CAS_EVENT, event, arg, data));
-            }
         }
         @Override
         public void onSessionEvent(@NonNull ArrayList<Byte> sessionId,
                 int event, int arg, @Nullable ArrayList<Byte> data)
                 throws RemoteException {
-            if (mEventHandler != null) {
-                Message msg = mEventHandler.obtainMessage();
-                msg.what = EventHandler.MSG_CAS_SESSION_EVENT;
-                msg.arg1 = event;
-                msg.arg2 = arg;
-                Bundle bundle = new Bundle();
-                bundle.putByteArray(EventHandler.SESSION_KEY, toBytes(sessionId));
-                bundle.putByteArray(EventHandler.DATA_KEY, toBytes(data));
-                msg.setData(bundle);
-                mEventHandler.sendMessage(msg);
-            }
+            Message msg = mEventHandler.obtainMessage();
+            msg.what = EventHandler.MSG_CAS_SESSION_EVENT;
+            msg.arg1 = event;
+            msg.arg2 = arg;
+            Bundle bundle = new Bundle();
+            bundle.putByteArray(EventHandler.SESSION_KEY, toBytes(sessionId));
+            bundle.putByteArray(EventHandler.DATA_KEY, toBytes(data));
+            msg.setData(bundle);
+            mEventHandler.sendMessage(msg);
         }
         @Override
         public void onStatusUpdate(byte status, int arg)
                 throws RemoteException {
-            if (mEventHandler != null) {
-                mEventHandler.sendMessage(mEventHandler.obtainMessage(
+            mEventHandler.sendMessage(mEventHandler.obtainMessage(
                     EventHandler.MSG_CAS_STATUS_EVENT, status, arg));
-            }
         }
     };
 
@@ -675,10 +670,18 @@ public final class MediaCas implements AutoCloseable {
         return null;
     }
 
-    private void createPlugin(int casSystemId) throws UnsupportedCasException {
+    /**
+     * Instantiate a CA system of the specified system id.
+     *
+     * @param CA_system_id The system id of the CA system.
+     *
+     * @throws UnsupportedCasException if the device does not support the
+     * specified CA system.
+     */
+    public MediaCas(int CA_system_id) throws UnsupportedCasException {
         try {
-            mCasSystemId = casSystemId;
-            mUserId = Process.myUid();
+            mCasSystemId = CA_system_id;
+            mUserId = ActivityManager.getCurrentUser();
             IMediaCasService service = getService();
             android.hardware.cas.V1_2.IMediaCasService serviceV12 =
                     android.hardware.cas.V1_2.IMediaCasService.castFrom(service);
@@ -687,16 +690,16 @@ public final class MediaCas implements AutoCloseable {
                     android.hardware.cas.V1_1.IMediaCasService.castFrom(service);
                 if (serviceV11 == null) {
                     Log.d(TAG, "Used cas@1_0 interface to create plugin");
-                    mICas = service.createPlugin(casSystemId, mBinder);
+                    mICas = service.createPlugin(CA_system_id, mBinder);
                 } else {
                     Log.d(TAG, "Used cas@1.1 interface to create plugin");
-                    mICas = mICasV11 = serviceV11.createPluginExt(casSystemId, mBinder);
+                    mICas = mICasV11 = serviceV11.createPluginExt(CA_system_id, mBinder);
                 }
             } else {
                 Log.d(TAG, "Used cas@1.2 interface to create plugin");
                 mICas = mICasV11 = mICasV12 =
                     android.hardware.cas.V1_2.ICas
-                        .castFrom(serviceV12.createPluginExt(casSystemId, mBinder));
+                    .castFrom(serviceV12.createPluginExt(CA_system_id, mBinder));
             }
         } catch(Exception e) {
             Log.e(TAG, "Failed to create plugin: " + e);
@@ -704,36 +707,9 @@ public final class MediaCas implements AutoCloseable {
         } finally {
             if (mICas == null) {
                 throw new UnsupportedCasException(
-                    "Unsupported casSystemId " + casSystemId);
+                        "Unsupported CA_system_id " + CA_system_id);
             }
         }
-    }
-
-    private void registerClient(@NonNull Context context,
-            @Nullable String tvInputServiceSessionId,  @PriorityHintUseCaseType int priorityHint)  {
-
-        mTunerResourceManager = (TunerResourceManager)
-            context.getSystemService(Context.TV_TUNER_RESOURCE_MGR_SERVICE);
-        if (mTunerResourceManager != null) {
-            int[] clientId = new int[1];
-            ResourceClientProfile profile = new ResourceClientProfile();
-            profile.tvInputSessionId = tvInputServiceSessionId;
-            profile.useCase = priorityHint;
-            mTunerResourceManager.registerClientProfile(
-                    profile, context.getMainExecutor(), mResourceListener, clientId);
-            mClientId = clientId[0];
-        }
-    }
-    /**
-     * Instantiate a CA system of the specified system id.
-     *
-     * @param casSystemId The system id of the CA system.
-     *
-     * @throws UnsupportedCasException if the device does not support the
-     * specified CA system.
-     */
-    public MediaCas(int casSystemId) throws UnsupportedCasException {
-        createPlugin(casSystemId);
     }
 
     /**
@@ -751,35 +727,19 @@ public final class MediaCas implements AutoCloseable {
     public MediaCas(@NonNull Context context, int casSystemId,
             @Nullable String tvInputServiceSessionId,
             @PriorityHintUseCaseType int priorityHint) throws UnsupportedCasException {
+        this(casSystemId);
+
         Objects.requireNonNull(context, "context must not be null");
-        createPlugin(casSystemId);
-        registerClient(context, tvInputServiceSessionId, priorityHint);
-    }
-    /**
-     * Instantiate a CA system of the specified system id with EvenListener.
-     *
-     * @param context the context of the caller.
-     * @param casSystemId The system id of the CA system.
-     * @param tvInputServiceSessionId The Id of the session opened in TV Input Service (TIS)
-     *        {@link android.media.tv.TvInputService#onCreateSession(String, String)}
-     * @param priorityHint priority hint from the use case type for new created CAS system.
-     * @param listener the event listener to be set.
-     * @param handler the handler whose looper the event listener will be called on.
-     * If handler is null, we'll try to use current thread's looper, or the main
-     * looper. If neither are available, an internal thread will be created instead.
-     *
-     * @throws UnsupportedCasException if the device does not support the
-     * specified CA system.
-     */
-    public MediaCas(@NonNull Context context, int casSystemId,
-            @Nullable String tvInputServiceSessionId,
-            @PriorityHintUseCaseType int priorityHint,
-            @Nullable Handler handler, @Nullable EventListener listener)
-            throws UnsupportedCasException {
-        Objects.requireNonNull(context, "context must not be null");
-        setEventListener(listener, handler);
-        createPlugin(casSystemId);
-        registerClient(context, tvInputServiceSessionId, priorityHint);
+        mTunerResourceManager = (TunerResourceManager)
+                context.getSystemService(Context.TV_TUNER_RESOURCE_MGR_SERVICE);
+        if (mTunerResourceManager != null) {
+            int[] clientId = new int[1];
+            ResourceClientProfile profile =
+                    new ResourceClientProfile(tvInputServiceSessionId, priorityHint);
+            mTunerResourceManager.registerClientProfile(
+                    profile, context.getMainExecutor(), mResourceListener, clientId);
+            mClientId = clientId[0];
+        }
     }
 
     IHwBinder getBinder() {
@@ -922,9 +882,7 @@ public final class MediaCas implements AutoCloseable {
         int[] sessionResourceHandle = new int[1];
         sessionResourceHandle[0] = -1;
         if (mTunerResourceManager != null) {
-            CasSessionRequest casSessionRequest = new CasSessionRequest();
-            casSessionRequest.clientId = mClientId;
-            casSessionRequest.casSystemId = mCasSystemId;
+            CasSessionRequest casSessionRequest = new CasSessionRequest(mClientId, mCasSystemId);
             if (!mTunerResourceManager
                     .requestCasSession(casSessionRequest, sessionResourceHandle)) {
                 throw new MediaCasException.InsufficientResourceException(

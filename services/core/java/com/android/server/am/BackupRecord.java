@@ -16,8 +16,6 @@
 
 package com.android.server.am;
 
-import android.app.backup.BackupManager;
-import android.app.backup.BackupManager.OperationType;
 import android.content.pm.ApplicationInfo;
 
 /** @hide */
@@ -32,16 +30,14 @@ final class BackupRecord {
     final ApplicationInfo appInfo;         // information about BackupAgent's app
     final int userId;                      // user for which backup is performed
     final int backupMode;                  // full backup / incremental / restore
-    @OperationType  final int operationType; // see BackupManager#OperationType
     ProcessRecord app;                     // where this agent is running or null
 
     // ----- Implementation -----
 
-    BackupRecord(ApplicationInfo _appInfo, int _backupMode, int _userId, int _operationType) {
+    BackupRecord(ApplicationInfo _appInfo, int _backupMode, int _userId) {
         appInfo = _appInfo;
         backupMode = _backupMode;
         userId = _userId;
-        operationType = _operationType;
     }
 
     public String toString() {

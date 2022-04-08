@@ -21,7 +21,6 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.util.Log;
-import android.util.SparseArray;
 
 import java.io.File;
 import java.lang.annotation.Retention;
@@ -102,9 +101,7 @@ public abstract class FileObserver {
     private static final String LOG_TAG = "FileObserver";
 
     private static class ObserverThread extends Thread {
-        /** Temporarily retained; appears to be missing UnsupportedAppUsage annotation */
         private HashMap<Integer, WeakReference> m_observers = new HashMap<Integer, WeakReference>();
-        private SparseArray<WeakReference> mRealObservers = new SparseArray<>();
         private int m_fd;
 
         public ObserverThread() {
@@ -130,10 +127,10 @@ public abstract class FileObserver {
 
             final WeakReference<FileObserver> fileObserverWeakReference =
                     new WeakReference<>(observer);
-            synchronized (mRealObservers) {
+            synchronized (m_observers) {
                 for (int wfd : wfds) {
                     if (wfd >= 0) {
-                        mRealObservers.put(wfd, fileObserverWeakReference);
+                        m_observers.put(wfd, fileObserverWeakReference);
                     }
                 }
             }
@@ -145,17 +142,17 @@ public abstract class FileObserver {
             stopWatching(m_fd, descriptors);
         }
 
-        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+        @UnsupportedAppUsage
         public void onEvent(int wfd, @NotifyEventType int mask, String path) {
             // look up our observer, fixing up the map if necessary...
             FileObserver observer = null;
 
-            synchronized (mRealObservers) {
-                WeakReference weak = mRealObservers.get(wfd);
+            synchronized (m_observers) {
+                WeakReference weak = m_observers.get(wfd);
                 if (weak != null) {  // can happen with lots of events from a dead wfd
                     observer = (FileObserver) weak.get();
                     if (observer == null) {
-                        mRealObservers.remove(wfd);
+                        m_observers.remove(wfd);
                     }
                 }
             }

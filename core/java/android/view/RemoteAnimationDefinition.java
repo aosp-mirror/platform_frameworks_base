@@ -19,6 +19,7 @@ package android.view;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 
 import android.annotation.Nullable;
+import android.app.WindowConfiguration;
 import android.app.WindowConfiguration.ActivityType;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.os.IBinder;
@@ -28,7 +29,7 @@ import android.os.RemoteException;
 import android.util.ArraySet;
 import android.util.Slog;
 import android.util.SparseArray;
-import android.view.WindowManager.TransitionOldType;
+import android.view.WindowManager.TransitionType;
 
 /**
  * Defines which animation types should be overridden by which remote animation.
@@ -47,13 +48,13 @@ public class RemoteAnimationDefinition implements Parcelable {
     /**
      * Registers a remote animation for a specific transition.
      *
-     * @param transition The old transition type. Must be one of WindowManager.TRANSIT_OLD_* values.
+     * @param transition The transition type. Must be one of WindowManager.TRANSIT_* values.
      * @param activityTypeFilter The remote animation only runs if an activity with type of this
      *                           parameter is involved in the transition.
      * @param adapter The adapter that described how to run the remote animation.
      */
     @UnsupportedAppUsage
-    public void addRemoteAnimation(@TransitionOldType int transition,
+    public void addRemoteAnimation(@TransitionType int transition,
             @ActivityType int activityTypeFilter, RemoteAnimationAdapter adapter) {
         mTransitionAnimationMap.put(transition,
                 new RemoteAnimationAdapterEntry(adapter, activityTypeFilter));
@@ -63,37 +64,35 @@ public class RemoteAnimationDefinition implements Parcelable {
      * Registers a remote animation for a specific transition without defining an activity type
      * filter.
      *
-     * @param transition The old transition type. Must be one of WindowManager.TRANSIT_OLD_* values.
+     * @param transition The transition type. Must be one of WindowManager.TRANSIT_* values.
      * @param adapter The adapter that described how to run the remote animation.
      */
     @UnsupportedAppUsage
-    public void addRemoteAnimation(@TransitionOldType int transition,
-            RemoteAnimationAdapter adapter) {
+    public void addRemoteAnimation(@TransitionType int transition, RemoteAnimationAdapter adapter) {
         addRemoteAnimation(transition, ACTIVITY_TYPE_UNDEFINED, adapter);
     }
 
     /**
      * Checks whether a remote animation for specific transition is defined.
      *
-     * @param transition The old transition type. Must be one of WindowManager.TRANSIT_OLD_* values.
+     * @param transition The transition type. Must be one of WindowManager.TRANSIT_* values.
      * @param activityTypes The set of activity types of activities that are involved in the
      *                      transition. Will be used for filtering.
      * @return Whether this definition has defined a remote animation for the specified transition.
      */
-    public boolean hasTransition(@TransitionOldType int transition,
-            ArraySet<Integer> activityTypes) {
+    public boolean hasTransition(@TransitionType int transition, ArraySet<Integer> activityTypes) {
         return getAdapter(transition, activityTypes) != null;
     }
 
     /**
      * Retrieves the remote animation for a specific transition.
      *
-     * @param transition The old transition type. Must be one of WindowManager.TRANSIT_OLD_* values.
+     * @param transition The transition type. Must be one of WindowManager.TRANSIT_* values.
      * @param activityTypes The set of activity types of activities that are involved in the
      *                      transition. Will be used for filtering.
      * @return The remote animation adapter for the specified transition.
      */
-    public @Nullable RemoteAnimationAdapter getAdapter(@TransitionOldType int transition,
+    public @Nullable RemoteAnimationAdapter getAdapter(@TransitionType int transition,
             ArraySet<Integer> activityTypes) {
         final RemoteAnimationAdapterEntry entry = mTransitionAnimationMap.get(transition);
         if (entry == null) {
@@ -184,13 +183,13 @@ public class RemoteAnimationDefinition implements Parcelable {
         }
 
         private RemoteAnimationAdapterEntry(Parcel in) {
-            adapter = in.readTypedObject(RemoteAnimationAdapter.CREATOR);
+            adapter = in.readParcelable(RemoteAnimationAdapter.class.getClassLoader());
             activityTypeFilter = in.readInt();
         }
 
         @Override
         public void writeToParcel(Parcel dest, int flags) {
-            dest.writeTypedObject(adapter, flags);
+            dest.writeParcelable(adapter, flags);
             dest.writeInt(activityTypeFilter);
         }
 

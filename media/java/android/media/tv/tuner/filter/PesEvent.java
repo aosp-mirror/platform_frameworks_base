@@ -16,7 +16,6 @@
 
 package android.media.tv.tuner.filter;
 
-import android.annotation.IntRange;
 import android.annotation.SystemApi;
 
 /**
@@ -54,7 +53,6 @@ public class PesEvent extends FilterEvent {
     /**
      * Gets MPU sequence number of filtered data.
      */
-    @IntRange(from = 0)
     public int getMpuSequenceNumber() {
         return mMpuSequenceNumber;
     }

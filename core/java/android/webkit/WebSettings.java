@@ -268,7 +268,6 @@ public abstract class WebSettings {
      * @deprecated This method is now obsolete.
      * @hide Since API level {@link android.os.Build.VERSION_CODES#JELLY_BEAN_MR1}
      */
-    @SuppressWarnings("HiddenAbstractMethod")
     @SystemApi
     @Deprecated
     public abstract void setNavDump(boolean enabled);
@@ -281,7 +280,6 @@ public abstract class WebSettings {
      * @deprecated This method is now obsolete.
      * @hide Since API level {@link android.os.Build.VERSION_CODES#JELLY_BEAN_MR1}
      */
-    @SuppressWarnings("HiddenAbstractMethod")
     @SystemApi
     @Deprecated
     public abstract boolean getNavDump();
@@ -459,7 +457,6 @@ public abstract class WebSettings {
      * @deprecated This method is now obsolete.
      * @hide Since API level {@link android.os.Build.VERSION_CODES#JELLY_BEAN_MR1}
      */
-    @SuppressWarnings("HiddenAbstractMethod")
     @SystemApi
     @Deprecated
     public abstract  void setUseWebViewBackgroundForOverscrollBackground(boolean view);
@@ -472,7 +469,6 @@ public abstract class WebSettings {
      * @deprecated This method is now obsolete.
      * @hide Since API level {@link android.os.Build.VERSION_CODES#JELLY_BEAN_MR1}
      */
-    @SuppressWarnings("HiddenAbstractMethod")
     @SystemApi
     @Deprecated
     public abstract  boolean getUseWebViewBackgroundForOverscrollBackground();
@@ -538,7 +534,6 @@ public abstract class WebSettings {
      * Developers should access this via {@link CookieManager#setShouldAcceptThirdPartyCookies}.
      * @hide Internal API.
      */
-    @SuppressWarnings("HiddenAbstractMethod")
     @SystemApi
     public abstract void setAcceptThirdPartyCookies(boolean accept);
 
@@ -547,7 +542,6 @@ public abstract class WebSettings {
      * Developers should access this via {@link CookieManager#getShouldAcceptThirdPartyCookies}.
      * @hide Internal API
      */
-    @SuppressWarnings("HiddenAbstractMethod")
     @SystemApi
     public abstract boolean getAcceptThirdPartyCookies();
 
@@ -675,7 +669,6 @@ public abstract class WebSettings {
      * @deprecated Please use {@link #setUserAgentString} instead.
      * @hide Since API level {@link android.os.Build.VERSION_CODES#JELLY_BEAN_MR1}
      */
-    @SuppressWarnings("HiddenAbstractMethod")
     @SystemApi
     @Deprecated
     public abstract void setUserAgent(int ua);
@@ -694,7 +687,6 @@ public abstract class WebSettings {
      * @deprecated Please use {@link #getUserAgentString} instead.
      * @hide Since API level {@link android.os.Build.VERSION_CODES#JELLY_BEAN_MR1}
      */
-    @SuppressWarnings("HiddenAbstractMethod")
     @SystemApi
     @Deprecated
     public abstract int getUserAgent();
@@ -1058,7 +1050,6 @@ public abstract class WebSettings {
      *             {@link #setPluginState}
      * @hide Since API level {@link android.os.Build.VERSION_CODES#JELLY_BEAN_MR2}
      */
-    @SuppressWarnings("HiddenAbstractMethod")
     @SystemApi
     @Deprecated
     public abstract void setPluginsEnabled(boolean flag);
@@ -1268,7 +1259,6 @@ public abstract class WebSettings {
      * @deprecated This method has been replaced by {@link #getPluginState}
      * @hide Since API level {@link android.os.Build.VERSION_CODES#JELLY_BEAN_MR2}
      */
-    @SuppressWarnings("HiddenAbstractMethod")
     @SystemApi
     @Deprecated
     public abstract boolean getPluginsEnabled();
@@ -1455,7 +1445,6 @@ public abstract class WebSettings {
      * WebView.
      * @hide
      */
-    @SuppressWarnings("HiddenAbstractMethod")
     @SystemApi
     public abstract void setVideoOverlayForEmbeddedEncryptedVideoEnabled(boolean flag);
 
@@ -1466,7 +1455,6 @@ public abstract class WebSettings {
      * @see #setVideoOverlayForEmbeddedEncryptedVideoEnabled
      * @hide
      */
-    @SuppressWarnings("HiddenAbstractMethod")
     @SystemApi
     public abstract boolean getVideoOverlayForEmbeddedEncryptedVideoEnabled();
 

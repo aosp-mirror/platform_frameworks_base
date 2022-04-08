@@ -15,23 +15,22 @@
  */
 
 #include "VkInteropFunctorDrawable.h"
+#include <private/hwui/DrawGlInfo.h>
 
-#include <EGL/egl.h>
+#include <utils/Color.h>
+#include <utils/Trace.h>
+#include <utils/TraceUtils.h>
+#include <thread>
+#include "renderthread/EglManager.h"
+#include "thread/ThreadBase.h"
+#include "utils/TimeUtils.h"
+
 #include <EGL/eglext.h>
 #include <GLES2/gl2.h>
 #include <GLES2/gl2ext.h>
 #include <GLES3/gl3.h>
-#include <gui/TraceUtils.h>
-#include <private/hwui/DrawGlInfo.h>
-#include <utils/Color.h>
+
 #include <utils/GLUtils.h>
-#include <utils/Trace.h>
-
-#include <thread>
-
-#include "renderthread/EglManager.h"
-#include "thread/ThreadBase.h"
-#include "utils/TimeUtils.h"
 
 namespace android {
 namespace uirenderer {
@@ -67,7 +66,7 @@ void VkInteropFunctorDrawable::vkInvokeFunctor(Functor* functor) {
 void VkInteropFunctorDrawable::onDraw(SkCanvas* canvas) {
     ATRACE_CALL();
 
-    if (canvas->recordingContext() == nullptr) {
+    if (canvas->getGrContext() == nullptr) {
         SkDEBUGF(("Attempting to draw VkInteropFunctor into an unsupported surface"));
         return;
     }
@@ -76,23 +75,20 @@ void VkInteropFunctorDrawable::onDraw(SkCanvas* canvas) {
 
     SkImageInfo surfaceInfo = canvas->imageInfo();
 
-    if (mFrameBuffer == nullptr || mFBInfo != surfaceInfo) {
+    if (!mFrameBuffer.get() || mFBInfo != surfaceInfo) {
         // Buffer will be used as an OpenGL ES render target.
-        AHardwareBuffer_Desc desc = {
-                .width = static_cast<uint32_t>(surfaceInfo.width()),
-                .height = static_cast<uint32_t>(surfaceInfo.height()),
-                .layers = 1,
-                .format = ColorTypeToBufferFormat(surfaceInfo.colorType()),
-                .usage = AHARDWAREBUFFER_USAGE_CPU_READ_NEVER |
-                         AHARDWAREBUFFER_USAGE_CPU_WRITE_NEVER |
-                         AHARDWAREBUFFER_USAGE_GPU_SAMPLED_IMAGE |
-                         AHARDWAREBUFFER_USAGE_GPU_FRAMEBUFFER,
-        };
-
-        mFrameBuffer = allocateAHardwareBuffer(desc);
-
-        if (!mFrameBuffer) {
-            ALOGW("VkInteropFunctorDrawable::onDraw() failed in AHardwareBuffer_allocate()");
+        mFrameBuffer = new GraphicBuffer(
+                // TODO: try to reduce the size of the buffer: possibly by using clip bounds.
+                static_cast<uint32_t>(surfaceInfo.width()),
+                static_cast<uint32_t>(surfaceInfo.height()),
+                ColorTypeToPixelFormat(surfaceInfo.colorType()),
+                GraphicBuffer::USAGE_HW_TEXTURE | GraphicBuffer::USAGE_SW_WRITE_NEVER |
+                        GraphicBuffer::USAGE_SW_READ_NEVER | GraphicBuffer::USAGE_HW_RENDER,
+                std::string("VkInteropFunctorDrawable::onDraw pid [") + std::to_string(getpid()) +
+                        "]");
+        status_t error = mFrameBuffer->initCheck();
+        if (error < 0) {
+            ALOGW("VkInteropFunctorDrawable::onDraw() failed in GraphicBuffer.create()");
             return;
         }
 
@@ -110,7 +106,7 @@ void VkInteropFunctorDrawable::onDraw(SkCanvas* canvas) {
                             uirenderer::renderthread::EglManager::eglErrorString());
         // We use an EGLImage to access the content of the GraphicBuffer
         // The EGL image is later bound to a 2D texture
-        const EGLClientBuffer clientBuffer = eglGetNativeClientBufferANDROID(mFrameBuffer.get());
+        EGLClientBuffer clientBuffer = (EGLClientBuffer)mFrameBuffer->getNativeBuffer();
         AutoEglImage autoImage(display, clientBuffer);
         if (autoImage.image == EGL_NO_IMAGE_KHR) {
             ALOGW("Could not create EGL image, err =%s",
@@ -125,7 +121,7 @@ void VkInteropFunctorDrawable::onDraw(SkCanvas* canvas) {
         glBindTexture(GL_TEXTURE_2D, 0);
 
         DrawGlInfo info;
-        SkM44 mat4(canvas->getLocalToDevice());
+        SkM44 mat4(canvas->experimental_getLocalToDevice());
         SkIRect clipBounds = canvas->getDeviceClipBounds();
 
         info.clipLeft = clipBounds.fLeft;
@@ -155,7 +151,11 @@ void VkInteropFunctorDrawable::onDraw(SkCanvas* canvas) {
         glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
-        mWebViewHandle->drawGl(info);
+        if (mAnyFunctor.index() == 0) {
+            std::get<0>(mAnyFunctor).handle->drawGl(info);
+        } else {
+            (*(std::get<1>(mAnyFunctor).functor))(DrawGlInfo::kModeDraw, &info);
+        }
 
         EGLSyncKHR glDrawFinishedFence =
                 eglCreateSyncKHR(eglGetCurrentDisplay(), EGL_SYNC_FENCE_KHR, NULL);
@@ -179,11 +179,20 @@ void VkInteropFunctorDrawable::onDraw(SkCanvas* canvas) {
     // drawing into the offscreen surface, so we need to reset it here.
     canvas->resetMatrix();
 
-    auto functorImage = SkImage::MakeFromAHardwareBuffer(mFrameBuffer.get(), kPremul_SkAlphaType,
-                                                         canvas->imageInfo().refColorSpace(),
-                                                         kBottomLeft_GrSurfaceOrigin);
-    canvas->drawImage(functorImage, 0, 0, SkSamplingOptions(), &paint);
+    auto functorImage = SkImage::MakeFromAHardwareBuffer(
+            reinterpret_cast<AHardwareBuffer*>(mFrameBuffer.get()), kPremul_SkAlphaType,
+            canvas->imageInfo().refColorSpace(), kBottomLeft_GrSurfaceOrigin);
+    canvas->drawImage(functorImage, 0, 0, &paint);
     canvas->restore();
+}
+
+VkInteropFunctorDrawable::~VkInteropFunctorDrawable() {
+    if (auto lp = std::get_if<LegacyFunctor>(&mAnyFunctor)) {
+        if (lp->listener) {
+            ScopedDrawRequest _drawRequest{};
+            lp->listener->onGlFunctorReleased(lp->functor);
+        }
+    }
 }
 
 void VkInteropFunctorDrawable::syncFunctor(const WebViewSyncData& data) const {

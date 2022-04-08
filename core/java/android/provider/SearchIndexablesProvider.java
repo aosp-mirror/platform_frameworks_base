@@ -100,7 +100,7 @@ public abstract class SearchIndexablesProvider extends ContentProvider {
         mMatcher.addURI(mAuthority, SearchIndexablesContract.DYNAMIC_INDEXABLES_RAW_PATH,
                 MATCH_DYNAMIC_RAW_CODE);
 
-        // Validity check our setup
+        // Sanity check our setup
         if (!info.exported) {
             throw new SecurityException("Provider must be exported");
         }

@@ -45,8 +45,7 @@ public class CompoundFormulaTest {
                         CompoundFormula.AND, Arrays.asList(ATOMIC_FORMULA_1, ATOMIC_FORMULA_2));
 
         assertThat(compoundFormula.getConnector()).isEqualTo(CompoundFormula.AND);
-        assertThat(compoundFormula.getFormulas())
-                .containsAtLeast(ATOMIC_FORMULA_1, ATOMIC_FORMULA_2);
+        assertThat(compoundFormula.getFormulas()).containsAllOf(ATOMIC_FORMULA_1, ATOMIC_FORMULA_2);
     }
 
     @Test
@@ -283,7 +282,7 @@ public class CompoundFormulaTest {
         assertThat(compoundFormula.isInstallerFormula()).isTrue();
     }
 
-    /** Returns a builder with all fields filled with some placeholder data. */
+    /** Returns a builder with all fields filled with some dummy data. */
     private AppInstallMetadata.Builder getAppInstallMetadataBuilder() {
         return new AppInstallMetadata.Builder()
                 .setPackageName("abc")

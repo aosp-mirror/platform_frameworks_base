@@ -92,7 +92,7 @@ public class RadioAccessFamily implements Parcelable {
      * {@link TelephonyManager.NetworkTypeBitMask}. It's a bit mask value to represent the support
      *                          type.
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public RadioAccessFamily(int phoneId, int radioAccessFamily) {
         mPhoneId = phoneId;
         mRadioAccessFamily = radioAccessFamily;
@@ -103,7 +103,7 @@ public class RadioAccessFamily implements Parcelable {
      *
      * @return phone ID
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public int getPhoneId() {
         return mPhoneId;
     }
@@ -113,7 +113,7 @@ public class RadioAccessFamily implements Parcelable {
      *
      * @return radio access family
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public @TelephonyManager.NetworkTypeBitMask int getRadioAccessFamily() {
         return mRadioAccessFamily;
     }
@@ -168,7 +168,7 @@ public class RadioAccessFamily implements Parcelable {
         }
     };
 
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     @TelephonyManager.NetworkTypeBitMask
     public static int getRafFromNetworkType(@PrefNetworkMode int type) {
         switch (type) {

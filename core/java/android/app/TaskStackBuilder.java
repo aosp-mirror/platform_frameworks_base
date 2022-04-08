@@ -264,7 +264,6 @@ public class TaskStackBuilder {
      *
      * @return The obtained PendingIntent
      */
-    @SuppressWarnings("AndroidFrameworkPendingIntentMutability")
     public PendingIntent getPendingIntent(int requestCode, @PendingIntent.Flags int flags,
             Bundle options) {
         if (mIntents.isEmpty()) {
@@ -279,7 +278,6 @@ public class TaskStackBuilder {
     /**
      * @hide
      */
-    @SuppressWarnings("AndroidFrameworkPendingIntentMutability")
     public PendingIntent getPendingIntent(int requestCode, int flags, Bundle options,
             UserHandle user) {
         if (mIntents.isEmpty()) {

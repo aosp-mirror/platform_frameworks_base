@@ -18,12 +18,11 @@
 #define CACHEMANAGER_H
 
 #ifdef __ANDROID__ // Layoutlib does not support hardware acceleration
-#include <GrDirectContext.h>
+#include <GrContext.h>
 #endif
 #include <SkSurface.h>
 #include <utils/String8.h>
 #include <vector>
-#include "utils/TimeUtils.h"
 
 namespace android {
 
@@ -48,13 +47,10 @@ public:
     void trimMemory(TrimMemoryMode mode);
     void trimStaleResources();
     void dumpMemoryUsage(String8& log, const RenderState* renderState = nullptr);
-    void getMemoryUsage(size_t* cpuUsage, size_t* gpuUsage);
 
     size_t getCacheSize() const { return mMaxResourceBytes; }
     size_t getBackgroundCacheSize() const { return mBackgroundResourceBytes; }
     void onFrameCompleted();
-
-    void performDeferredCleanup(nsecs_t cleanupOlderThanMillis);
 
 private:
     friend class RenderThread;
@@ -62,13 +58,13 @@ private:
     explicit CacheManager();
 
 #ifdef __ANDROID__ // Layoutlib does not support hardware acceleration
-    void reset(sk_sp<GrDirectContext> grContext);
+    void reset(sk_sp<GrContext> grContext);
 #endif
     void destroy();
 
     const size_t mMaxSurfaceArea;
 #ifdef __ANDROID__ // Layoutlib does not support hardware acceleration
-    sk_sp<GrDirectContext> mGrContext;
+    sk_sp<GrContext> mGrContext;
 #endif
 
     const size_t mMaxResourceBytes;

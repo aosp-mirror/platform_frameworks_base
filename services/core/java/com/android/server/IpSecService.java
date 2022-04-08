@@ -29,10 +29,8 @@ import android.annotation.NonNull;
 import android.app.AppOpsManager;
 import android.content.Context;
 import android.content.pm.PackageManager;
-import android.net.ConnectivityManager;
 import android.net.IIpSecService;
 import android.net.INetd;
-import android.net.InetAddresses;
 import android.net.IpSecAlgorithm;
 import android.net.IpSecConfig;
 import android.net.IpSecManager;
@@ -42,14 +40,14 @@ import android.net.IpSecTransformResponse;
 import android.net.IpSecTunnelInterfaceResponse;
 import android.net.IpSecUdpEncapResponse;
 import android.net.LinkAddress;
-import android.net.LinkProperties;
 import android.net.Network;
+import android.net.NetworkUtils;
 import android.net.TrafficStats;
 import android.net.util.NetdService;
 import android.os.Binder;
 import android.os.IBinder;
+import android.os.INetworkManagementService;
 import android.os.ParcelFileDescriptor;
-import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceSpecificException;
 import android.system.ErrnoException;
@@ -57,7 +55,6 @@ import android.system.Os;
 import android.system.OsConstants;
 import android.text.TextUtils;
 import android.util.Log;
-import android.util.Range;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
@@ -65,8 +62,6 @@ import android.util.SparseBooleanArray;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.Preconditions;
-import com.android.net.module.util.NetdUtils;
-import com.android.net.module.util.PermissionUtils;
 
 import libcore.io.IoUtils;
 
@@ -119,6 +114,9 @@ public class IpSecService extends IIpSecService.Stub {
 
     /* Binder context for this service */
     private final Context mContext;
+
+    /* NetworkManager instance */
+    private final INetworkManagementService mNetworkManager;
 
     /**
      * The next non-repeating global ID for tracking resources between users, this service, and
@@ -468,7 +466,8 @@ public class IpSecService extends IIpSecService.Stub {
 
         /** Safety method; guards against access of other user's UserRecords */
         private void checkCallerUid(int uid) {
-            if (uid != Binder.getCallingUid() && Process.SYSTEM_UID != Binder.getCallingUid()) {
+            if (uid != Binder.getCallingUid()
+                    && android.os.Process.SYSTEM_UID != Binder.getCallingUid()) {
                 throw new SecurityException("Attempted access of unowned resources");
             }
         }
@@ -758,9 +757,13 @@ public class IpSecService extends IIpSecService.Stub {
         }
     }
 
+    // These values have been reserved in NetIdManager
+    @VisibleForTesting static final int TUN_INTF_NETID_START = 0xFC00;
+
+    public static final int TUN_INTF_NETID_RANGE = 0x0400;
+
     private final SparseBooleanArray mTunnelNetIds = new SparseBooleanArray();
-    final Range<Integer> mNetIdRange = ConnectivityManager.getIpSecNetIdRange();
-    private int mNextTunnelNetId = mNetIdRange.getLower();
+    private int mNextTunnelNetIdIndex = 0;
 
     /**
      * Reserves a netId within the range of netIds allocated for IPsec tunnel interfaces
@@ -773,13 +776,11 @@ public class IpSecService extends IIpSecService.Stub {
      */
     @VisibleForTesting
     int reserveNetId() {
-        final int range = mNetIdRange.getUpper() - mNetIdRange.getLower() + 1;
         synchronized (mTunnelNetIds) {
-            for (int i = 0; i < range; i++) {
-                final int netId = mNextTunnelNetId;
-                if (++mNextTunnelNetId > mNetIdRange.getUpper()) {
-                    mNextTunnelNetId = mNetIdRange.getLower();
-                }
+            for (int i = 0; i < TUN_INTF_NETID_RANGE; i++) {
+                int index = mNextTunnelNetIdIndex;
+                int netId = index + TUN_INTF_NETID_START;
+                if (++mNextTunnelNetIdIndex >= TUN_INTF_NETID_RANGE) mNextTunnelNetIdIndex = 0;
                 if (!mTunnelNetIds.get(netId)) {
                     mTunnelNetIds.put(netId, true);
                     return netId;
@@ -796,15 +797,9 @@ public class IpSecService extends IIpSecService.Stub {
         }
     }
 
-    /**
-     * Tracks an tunnel interface, and manages cleanup paths.
-     *
-     * <p>This class is not thread-safe, and expects that that users of this class will ensure
-     * synchronization and thread safety by holding the IpSecService.this instance lock
-     */
-    @VisibleForTesting
-    final class TunnelInterfaceRecord extends OwnedResourceRecord {
+    private final class TunnelInterfaceRecord extends OwnedResourceRecord {
         private final String mInterfaceName;
+        private final Network mUnderlyingNetwork;
 
         // outer addresses
         private final String mLocalAddress;
@@ -814,8 +809,6 @@ public class IpSecService extends IIpSecService.Stub {
         private final int mOkey;
 
         private final int mIfId;
-
-        private Network mUnderlyingNetwork;
 
         TunnelInterfaceRecord(
                 int resourceId,
@@ -877,20 +870,12 @@ public class IpSecService extends IIpSecService.Stub {
             releaseNetId(mOkey);
         }
 
-        @GuardedBy("IpSecService.this")
-        public void setUnderlyingNetwork(Network underlyingNetwork) {
-            // When #applyTunnelModeTransform is called, this new underlying network will be used to
-            // update the output mark of the input transform.
-            mUnderlyingNetwork = underlyingNetwork;
-        }
-
-        @GuardedBy("IpSecService.this")
-        public Network getUnderlyingNetwork() {
-            return mUnderlyingNetwork;
-        }
-
         public String getInterfaceName() {
             return mInterfaceName;
+        }
+
+        public Network getUnderlyingNetwork() {
+            return mUnderlyingNetwork;
         }
 
         /** Returns the local, outer address for the tunnelInterface */
@@ -1011,13 +996,13 @@ public class IpSecService extends IIpSecService.Stub {
      *
      * @param context Binder context for this service
      */
-    private IpSecService(Context context) {
-        this(context, IpSecServiceConfiguration.GETSRVINSTANCE);
+    private IpSecService(Context context, INetworkManagementService networkManager) {
+        this(context, networkManager, IpSecServiceConfiguration.GETSRVINSTANCE);
     }
 
-    static IpSecService create(Context context)
+    static IpSecService create(Context context, INetworkManagementService networkManager)
             throws InterruptedException {
-        final IpSecService service = new IpSecService(context);
+        final IpSecService service = new IpSecService(context, networkManager);
         service.connectNativeNetdService();
         return service;
     }
@@ -1031,9 +1016,11 @@ public class IpSecService extends IIpSecService.Stub {
 
     /** @hide */
     @VisibleForTesting
-    public IpSecService(Context context, IpSecServiceConfiguration config) {
+    public IpSecService(Context context, INetworkManagementService networkManager,
+            IpSecServiceConfiguration config) {
         this(
                 context,
+                networkManager,
                 config,
                 (fd, uid) -> {
                     try {
@@ -1047,9 +1034,10 @@ public class IpSecService extends IIpSecService.Stub {
 
     /** @hide */
     @VisibleForTesting
-    public IpSecService(Context context, IpSecServiceConfiguration config,
-            UidFdTagger uidFdTagger) {
+    public IpSecService(Context context, INetworkManagementService networkManager,
+            IpSecServiceConfiguration config, UidFdTagger uidFdTagger) {
         mContext = context;
+        mNetworkManager = Objects.requireNonNull(networkManager);
         mSrvConfig = config;
         mUidFdTagger = uidFdTagger;
     }
@@ -1095,7 +1083,7 @@ public class IpSecService extends IIpSecService.Stub {
             throw new IllegalArgumentException("Unspecified address");
         }
 
-        InetAddress checkAddr = InetAddresses.parseNumericAddress(inetAddress);
+        InetAddress checkAddr = NetworkUtils.numericToInetAddress(inetAddress);
 
         if (checkAddr.isAnyLocalAddress()) {
             throw new IllegalArgumentException("Inappropriate wildcard address: " + inetAddress);
@@ -1106,14 +1094,10 @@ public class IpSecService extends IIpSecService.Stub {
      * Checks the user-provided direction field and throws an IllegalArgumentException if it is not
      * DIRECTION_IN or DIRECTION_OUT
      */
-    private void checkDirection(int direction) {
+    private static void checkDirection(int direction) {
         switch (direction) {
             case IpSecManager.DIRECTION_OUT:
             case IpSecManager.DIRECTION_IN:
-                return;
-            case IpSecManager.DIRECTION_FWD:
-                // Only NETWORK_STACK or MAINLINE_NETWORK_STACK allowed to use forward policies
-                PermissionUtils.enforceNetworkStackPermission(mContext);
                 return;
         }
         throw new IllegalArgumentException("Invalid Direction: " + direction);
@@ -1333,7 +1317,7 @@ public class IpSecService extends IIpSecService.Stub {
             netd.ipSecAddTunnelInterface(intfName, localAddr, remoteAddr, ikey, okey, resourceId);
 
             Binder.withCleanCallingIdentity(() -> {
-                NetdUtils.setInterfaceUp(netd, intfName);
+                mNetworkManager.setInterfaceUp(intfName);
             });
 
             for (int selAddrFamily : ADDRESS_FAMILIES) {
@@ -1352,26 +1336,6 @@ public class IpSecService extends IIpSecService.Stub {
                         callerUid,
                         selAddrFamily,
                         IpSecManager.DIRECTION_IN,
-                        remoteAddr,
-                        localAddr,
-                        0,
-                        ikey,
-                        0xffffffff,
-                        resourceId);
-
-                // Add a forwarding policy on the tunnel interface. In order to support forwarding
-                // the IpSecTunnelInterface must have a forwarding policy matching the incoming SA.
-                //
-                // Unless a IpSecTransform is also applied against this interface in DIRECTION_FWD,
-                // forwarding will be blocked by default (as would be the case if this policy was
-                // absent).
-                //
-                // This is necessary only on the tunnel interface, and not any the interface to
-                // which traffic will be forwarded to.
-                netd.ipSecAddSecurityPolicy(
-                        callerUid,
-                        selAddrFamily,
-                        IpSecManager.DIRECTION_FWD,
                         remoteAddr,
                         localAddr,
                         0,
@@ -1465,34 +1429,6 @@ public class IpSecService extends IIpSecService.Stub {
         }
     }
 
-    /** Set TunnelInterface to use a specific underlying network. */
-    @Override
-    public synchronized void setNetworkForTunnelInterface(
-            int tunnelResourceId, Network underlyingNetwork, String callingPackage) {
-        enforceTunnelFeatureAndPermissions(callingPackage);
-        Objects.requireNonNull(underlyingNetwork, "No underlying network was specified");
-
-        final UserRecord userRecord = mUserResourceTracker.getUserRecord(Binder.getCallingUid());
-
-        // Get tunnelInterface record; if no such interface is found, will throw
-        // IllegalArgumentException. userRecord.mTunnelInterfaceRecords is never null
-        final TunnelInterfaceRecord tunnelInterfaceInfo =
-                userRecord.mTunnelInterfaceRecords.getResourceOrThrow(tunnelResourceId);
-
-        final ConnectivityManager connectivityManager =
-                mContext.getSystemService(ConnectivityManager.class);
-        final LinkProperties lp = connectivityManager.getLinkProperties(underlyingNetwork);
-        if (tunnelInterfaceInfo.getInterfaceName().equals(lp.getInterfaceName())) {
-            throw new IllegalArgumentException(
-                    "Underlying network cannot be the network being exposed by this tunnel");
-        }
-
-        // It is meaningless to check if the network exists or is valid because the network might
-        // disconnect at any time after it passes the check.
-
-        tunnelInterfaceInfo.setUnderlyingNetwork(underlyingNetwork);
-    }
-
     /**
      * Delete a TunnelInterface that has been been allocated by and registered with the system
      * server
@@ -1531,7 +1467,7 @@ public class IpSecService extends IIpSecService.Stub {
 
     private int getFamily(String inetAddress) {
         int family = AF_UNSPEC;
-        InetAddress checkAddress = InetAddresses.parseNumericAddress(inetAddress);
+        InetAddress checkAddress = NetworkUtils.numericToInetAddress(inetAddress);
         if (checkAddress instanceof Inet4Address) {
             family = AF_INET;
         } else if (checkAddress instanceof Inet6Address) {
@@ -1541,7 +1477,7 @@ public class IpSecService extends IIpSecService.Stub {
     }
 
     /**
-     * Checks an IpSecConfig parcel to ensure that the contents are valid and throws an
+     * Checks an IpSecConfig parcel to ensure that the contents are sane and throws an
      * IllegalArgumentException if they are not.
      */
     private void checkIpSecConfig(IpSecConfig config) {
@@ -1676,7 +1612,7 @@ public class IpSecService extends IIpSecService.Stub {
                         c.getMode(),
                         c.getSourceAddress(),
                         c.getDestinationAddress(),
-                        (c.getNetwork() != null) ? c.getNetwork().getNetId() : 0,
+                        (c.getNetwork() != null) ? c.getNetwork().netId : 0,
                         spiRecord.getSpi(),
                         c.getMarkValue(),
                         c.getMarkMask(),
@@ -1845,7 +1781,7 @@ public class IpSecService extends IIpSecService.Stub {
         int mark =
                 (direction == IpSecManager.DIRECTION_OUT)
                         ? tunnelInterfaceInfo.getOkey()
-                        : tunnelInterfaceInfo.getIkey(); // Ikey also used for FWD policies
+                        : tunnelInterfaceInfo.getIkey();
 
         try {
             // Default to using the invalid SPI of 0 for inbound SAs. This allows policies to skip

@@ -17,15 +17,9 @@ package com.android.systemui.statusbar.policy;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.spy;
-
 import android.app.ActivityManager;
 import android.app.PendingIntent;
 import android.app.RemoteInput;
-import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ShortcutManager;
@@ -42,12 +36,9 @@ import android.widget.ImageButton;
 
 import androidx.test.filters.SmallTest;
 
-import com.android.internal.logging.UiEventLogger;
-import com.android.internal.logging.testing.UiEventLoggerFake;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.RemoteInputController;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.NotificationTestHelper;
@@ -78,7 +69,6 @@ public class RemoteInputViewTest extends SysuiTestCase {
     @Mock private RemoteInputQuickSettingsDisabler mRemoteInputQuickSettingsDisabler;
     @Mock private LightBarController mLightBarController;
     private BlockingQueueIntentReceiver mReceiver;
-    private final UiEventLoggerFake mUiEventLoggerFake = new UiEventLoggerFake();
     private RemoteInputView mView;
 
     @Before
@@ -90,8 +80,6 @@ public class RemoteInputViewTest extends SysuiTestCase {
                 mRemoteInputQuickSettingsDisabler);
         mDependency.injectTestDependency(LightBarController.class,
                 mLightBarController);
-        mDependency.injectTestDependency(UiEventLogger.class, mUiEventLoggerFake);
-        mDependency.injectMockDependency(NotificationRemoteInputManager.class);
 
         mReceiver = new BlockingQueueIntentReceiver();
         mContext.registerReceiver(mReceiver, new IntentFilter(TEST_ACTION), null,
@@ -108,7 +96,7 @@ public class RemoteInputViewTest extends SysuiTestCase {
 
     private void setTestPendingIntent(RemoteInputView view) {
         PendingIntent pendingIntent = PendingIntent.getBroadcast(mContext, 0,
-                new Intent(TEST_ACTION), PendingIntent.FLAG_MUTABLE);
+                new Intent(TEST_ACTION), 0);
         RemoteInput input = new RemoteInput.Builder(TEST_RESULT_KEY).build();
 
         view.setPendingIntent(pendingIntent);
@@ -142,18 +130,8 @@ public class RemoteInputViewTest extends SysuiTestCase {
 
     private UserHandle getTargetInputMethodUser(UserHandle fromUser, UserHandle toUser)
             throws Exception {
-        /**
-         * RemoteInputView, Icon, and Bubble have the situation need to handle the other user.
-         * SystemUI cross multiple user but this test(com.android.systemui.tests) doesn't cross
-         * multiple user. It needs some of mocking multiple user environment to ensure the
-         * createContextAsUser without throwing IllegalStateException.
-         */
-        Context contextSpy = spy(mContext);
-        doReturn(contextSpy).when(contextSpy).createContextAsUser(any(), anyInt());
-        doReturn(toUser.getIdentifier()).when(contextSpy).getUserId();
-
         NotificationTestHelper helper = new NotificationTestHelper(
-                contextSpy,
+                mContext,
                 mDependency,
                 TestableLooper.get(this));
         ExpandableNotificationRow row = helper.createRow(
@@ -208,34 +186,5 @@ public class RemoteInputViewTest extends SysuiTestCase {
         view.setOnVisibilityChangedListener(null);
         view.setVisibility(View.INVISIBLE);
         view.setVisibility(View.VISIBLE);
-    }
-
-    @Test
-    public void testUiEventLogging_openAndSend() throws Exception {
-        NotificationTestHelper helper = new NotificationTestHelper(
-                mContext,
-                mDependency,
-                TestableLooper.get(this));
-        ExpandableNotificationRow row = helper.createRow();
-        RemoteInputView view = RemoteInputView.inflate(mContext, null, row.getEntry(), mController);
-
-        setTestPendingIntent(view);
-
-        // Open view, send a reply
-        view.focus();
-        EditText editText = view.findViewById(R.id.remote_input_text);
-        editText.setText(TEST_REPLY);
-        ImageButton sendButton = view.findViewById(R.id.remote_input_send);
-        sendButton.performClick();
-
-        mReceiver.waitForIntent();
-
-        assertEquals(2, mUiEventLoggerFake.numLogs());
-        assertEquals(
-                RemoteInputView.NotificationRemoteInputEvent.NOTIFICATION_REMOTE_INPUT_OPEN.getId(),
-                mUiEventLoggerFake.eventId(0));
-        assertEquals(
-                RemoteInputView.NotificationRemoteInputEvent.NOTIFICATION_REMOTE_INPUT_SEND.getId(),
-                mUiEventLoggerFake.eventId(1));
     }
 }

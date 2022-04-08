@@ -9,7 +9,6 @@ import android.annotation.SystemService;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.content.Context;
-import android.os.Build;
 import android.os.RemoteException;
 import android.service.vr.IPersistentVrStateCallbacks;
 import android.service.vr.IVrManager;
@@ -52,7 +51,7 @@ public class VrManager {
         }
     }
 
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     private final IVrManager mService;
     private Map<VrStateCallback, CallbackEntry> mCallbackMap = new ArrayMap<>();
 

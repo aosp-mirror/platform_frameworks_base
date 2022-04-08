@@ -20,7 +20,6 @@ import android.accessibilityservice.IAccessibilityServiceConnection;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.compat.annotation.UnsupportedAppUsage;
-import android.content.Context;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
@@ -40,7 +39,6 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -85,8 +83,6 @@ public final class AccessibilityInteractionClient
 
     public static final int NO_ID = -1;
 
-    public static final String CALL_STACK = "call_stack";
-
     private static final String LOG_TAG = "AccessibilityInteractionClient";
 
     private static final boolean DEBUG = false;
@@ -117,10 +113,7 @@ public final class AccessibilityInteractionClient
 
     private final Object mInstanceLock = new Object();
 
-    private final AccessibilityManager  mAccessibilityManager;
-
     private volatile int mInteractionId = -1;
-    private volatile int mCallingUid = Process.INVALID_UID;
 
     private AccessibilityNodeInfo mFindAccessibilityNodeInfoResult;
 
@@ -130,14 +123,10 @@ public final class AccessibilityInteractionClient
 
     private Message mSameThreadMessage;
 
-    private int mInteractionIdWaitingForPrefetchResult = -1;
-    private int mConnectionIdWaitingForPrefetchResult;
-    private String[] mPackageNamesForNextPrefetchResult;
-
     /**
      * @return The client for the current thread.
      */
-    @UnsupportedAppUsage()
+    @UnsupportedAppUsage
     public static AccessibilityInteractionClient getInstance() {
         final long threadId = Thread.currentThread().getId();
         return getInstanceForThread(threadId);
@@ -156,37 +145,6 @@ public final class AccessibilityInteractionClient
             AccessibilityInteractionClient client = sClients.get(threadId);
             if (client == null) {
                 client = new AccessibilityInteractionClient();
-                sClients.put(threadId, client);
-            }
-            return client;
-        }
-    }
-
-    /**
-     * @return The client for the current thread.
-     */
-    public static AccessibilityInteractionClient getInstance(Context context) {
-        final long threadId = Thread.currentThread().getId();
-        if (context != null) {
-            return getInstanceForThread(threadId, context);
-        }
-        return getInstanceForThread(threadId);
-    }
-
-    /**
-     * <strong>Note:</strong> We keep one instance per interrogating thread since
-     * the instance contains state which can lead to undesired thread interleavings.
-     * We do not have a thread local variable since other threads should be able to
-     * look up the correct client knowing a thread id. See ViewRootImpl for details.
-     *
-     * @return The client for a given <code>threadId</code>.
-     */
-    public static AccessibilityInteractionClient getInstanceForThread(
-            long threadId, Context context) {
-        synchronized (sStaticLock) {
-            AccessibilityInteractionClient client = sClients.get(threadId);
-            if (client == null) {
-                client = new AccessibilityInteractionClient(context);
                 sClients.put(threadId, client);
             }
             return client;
@@ -239,11 +197,6 @@ public final class AccessibilityInteractionClient
 
     private AccessibilityInteractionClient() {
         /* reducing constructor visibility */
-        mAccessibilityManager = null;
-    }
-
-    private AccessibilityInteractionClient(Context context) {
-        mAccessibilityManager = context.getSystemService(AccessibilityManager.class);
     }
 
     /**
@@ -252,7 +205,7 @@ public final class AccessibilityInteractionClient
      *
      * @param message The message.
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public void setSameThreadMessage(Message message) {
         synchronized (mInstanceLock) {
             mSameThreadMessage = message;
@@ -488,8 +441,8 @@ public final class AccessibilityInteractionClient
                     prefetchFlags &= ~AccessibilityNodeInfo.FLAG_PREFETCH_MASK;
                 }
                 final int interactionId = mInteractionIdCounter.getAndIncrement();
-                final String[] packageNames;
                 final long identityToken = Binder.clearCallingIdentity();
+                final String[] packageNames;
                 try {
                     packageNames = connection.findAccessibilityNodeInfoByAccessibilityId(
                             accessibilityWindowId, accessibilityNodeId, interactionId, this,
@@ -498,27 +451,16 @@ public final class AccessibilityInteractionClient
                     Binder.restoreCallingIdentity(identityToken);
                 }
                 if (packageNames != null) {
-                    AccessibilityNodeInfo info =
-                            getFindAccessibilityNodeInfoResultAndClear(interactionId);
-                    if (mAccessibilityManager != null
-                            && mAccessibilityManager.isAccessibilityTracingEnabled()) {
-                        logTrace(connection, "findAccessibilityNodeInfoByAccessibilityId",
-                                "InteractionId:" + interactionId + ";Result: " + info
-                                        + ";connectionId=" + connectionId
-                                        + ";accessibilityWindowId="
-                                        + accessibilityWindowId + ";accessibilityNodeId="
-                                        + accessibilityNodeId + ";bypassCache=" + bypassCache
-                                        + ";prefetchFlags=" + prefetchFlags
-                                        + ";arguments=" + arguments);
-                    }
-                    if ((prefetchFlags & AccessibilityNodeInfo.FLAG_PREFETCH_MASK) != 0
-                            && info != null) {
-                        setInteractionWaitingForPrefetchResult(interactionId, connectionId,
-                                packageNames);
-                    }
-                    finalizeAndCacheAccessibilityNodeInfo(info, connectionId,
+                    List<AccessibilityNodeInfo> infos = getFindAccessibilityNodeInfosResultAndClear(
+                            interactionId);
+                    finalizeAndCacheAccessibilityNodeInfos(infos, connectionId,
                             bypassCache, packageNames);
-                    return info;
+                    if (infos != null && !infos.isEmpty()) {
+                        for (int i = 1; i < infos.size(); i++) {
+                            infos.get(i).recycle();
+                        }
+                        return infos.get(0);
+                    }
                 }
             } else {
                 if (DEBUG) {
@@ -530,15 +472,6 @@ public final class AccessibilityInteractionClient
                     + " findAccessibilityNodeInfoByAccessibilityId", re);
         }
         return null;
-    }
-
-    private void setInteractionWaitingForPrefetchResult(int interactionId, int connectionId,
-            String[] packageNames) {
-        synchronized (mInstanceLock) {
-            mInteractionIdWaitingForPrefetchResult = interactionId;
-            mConnectionIdWaitingForPrefetchResult = connectionId;
-            mPackageNamesForNextPrefetchResult = packageNames;
-        }
     }
 
     private static String idToString(int accessibilityWindowId, long accessibilityNodeId) {
@@ -568,8 +501,8 @@ public final class AccessibilityInteractionClient
             IAccessibilityServiceConnection connection = getConnection(connectionId);
             if (connection != null) {
                 final int interactionId = mInteractionIdCounter.getAndIncrement();
-                final String[] packageNames;
                 final long identityToken = Binder.clearCallingIdentity();
+                final String[] packageNames;
                 try {
                     packageNames = connection.findAccessibilityNodeInfosByViewId(
                             accessibilityWindowId, accessibilityNodeId, viewId, interactionId, this,
@@ -581,14 +514,6 @@ public final class AccessibilityInteractionClient
                 if (packageNames != null) {
                     List<AccessibilityNodeInfo> infos = getFindAccessibilityNodeInfosResultAndClear(
                             interactionId);
-                    if (mAccessibilityManager != null
-                            && mAccessibilityManager.isAccessibilityTracingEnabled()) {
-                        logTrace(connection, "findAccessibilityNodeInfosByViewId", "InteractionId="
-                                + interactionId + ":Result: " + infos + ";connectionId="
-                                + connectionId + ";accessibilityWindowId=" + accessibilityWindowId
-                                + ";accessibilityNodeId=" + accessibilityNodeId + ";viewId="
-                                + viewId);
-                    }
                     if (infos != null) {
                         finalizeAndCacheAccessibilityNodeInfos(infos, connectionId,
                                 false, packageNames);
@@ -630,8 +555,8 @@ public final class AccessibilityInteractionClient
             IAccessibilityServiceConnection connection = getConnection(connectionId);
             if (connection != null) {
                 final int interactionId = mInteractionIdCounter.getAndIncrement();
-                final String[] packageNames;
                 final long identityToken = Binder.clearCallingIdentity();
+                final String[] packageNames;
                 try {
                     packageNames = connection.findAccessibilityNodeInfosByText(
                             accessibilityWindowId, accessibilityNodeId, text, interactionId, this,
@@ -643,13 +568,6 @@ public final class AccessibilityInteractionClient
                 if (packageNames != null) {
                     List<AccessibilityNodeInfo> infos = getFindAccessibilityNodeInfosResultAndClear(
                             interactionId);
-                    if (mAccessibilityManager != null
-                            && mAccessibilityManager.isAccessibilityTracingEnabled()) {
-                        logTrace(connection, "findAccessibilityNodeInfosByText", "InteractionId="
-                                + interactionId + ":Result: " + infos + ";connectionId="
-                                + connectionId + ";accessibilityWindowId=" + accessibilityWindowId
-                                + ";accessibilityNodeId=" + accessibilityNodeId + ";text=" + text);
-                    }
                     if (infos != null) {
                         finalizeAndCacheAccessibilityNodeInfos(infos, connectionId,
                                 false, packageNames);
@@ -690,8 +608,8 @@ public final class AccessibilityInteractionClient
             IAccessibilityServiceConnection connection = getConnection(connectionId);
             if (connection != null) {
                 final int interactionId = mInteractionIdCounter.getAndIncrement();
-                final String[] packageNames;
                 final long identityToken = Binder.clearCallingIdentity();
+                final String[] packageNames;
                 try {
                     packageNames = connection.findFocus(accessibilityWindowId,
                             accessibilityNodeId, focusType, interactionId, this,
@@ -703,14 +621,6 @@ public final class AccessibilityInteractionClient
                 if (packageNames != null) {
                     AccessibilityNodeInfo info = getFindAccessibilityNodeInfoResultAndClear(
                             interactionId);
-                    if (mAccessibilityManager != null
-                            && mAccessibilityManager.isAccessibilityTracingEnabled()) {
-                        logTrace(connection, "findFocus", "InteractionId=" + interactionId
-                                + ":Result: " + info + ";connectionId=" + connectionId
-                                + ";accessibilityWindowId=" + accessibilityWindowId
-                                + ";accessibilityNodeId=" + accessibilityNodeId + ";focusType="
-                                + focusType);
-                    }
                     finalizeAndCacheAccessibilityNodeInfo(info, connectionId, false, packageNames);
                     return info;
                 }
@@ -747,8 +657,8 @@ public final class AccessibilityInteractionClient
             IAccessibilityServiceConnection connection = getConnection(connectionId);
             if (connection != null) {
                 final int interactionId = mInteractionIdCounter.getAndIncrement();
-                final String[] packageNames;
                 final long identityToken = Binder.clearCallingIdentity();
+                final String[] packageNames;
                 try {
                     packageNames = connection.focusSearch(accessibilityWindowId,
                             accessibilityNodeId, direction, interactionId, this,
@@ -761,14 +671,6 @@ public final class AccessibilityInteractionClient
                     AccessibilityNodeInfo info = getFindAccessibilityNodeInfoResultAndClear(
                             interactionId);
                     finalizeAndCacheAccessibilityNodeInfo(info, connectionId, false, packageNames);
-                    if (mAccessibilityManager != null
-                            && mAccessibilityManager.isAccessibilityTracingEnabled()) {
-                        logTrace(connection, "focusSearch", "InteractionId=" + interactionId
-                                + ":Result: " + info + ";connectionId=" + connectionId
-                                + ";accessibilityWindowId=" + accessibilityWindowId
-                                + ";accessibilityNodeId=" + accessibilityNodeId + ";direction="
-                                + direction);
-                    }
                     return info;
                 }
             } else {
@@ -803,8 +705,8 @@ public final class AccessibilityInteractionClient
             IAccessibilityServiceConnection connection = getConnection(connectionId);
             if (connection != null) {
                 final int interactionId = mInteractionIdCounter.getAndIncrement();
-                final boolean success;
                 final long identityToken = Binder.clearCallingIdentity();
+                final boolean success;
                 try {
                     success = connection.performAccessibilityAction(
                             accessibilityWindowId, accessibilityNodeId, action, arguments,
@@ -814,17 +716,7 @@ public final class AccessibilityInteractionClient
                 }
 
                 if (success) {
-                    final boolean result =
-                            getPerformAccessibilityActionResultAndClear(interactionId);
-                    if (mAccessibilityManager != null
-                            && mAccessibilityManager.isAccessibilityTracingEnabled()) {
-                        logTrace(connection, "performAccessibilityAction", "InteractionId="
-                                + interactionId + ":Result: " + result + ";connectionId="
-                                + connectionId + ";accessibilityWindowId=" + accessibilityWindowId
-                                + ";accessibilityNodeId=" + accessibilityNodeId + ";action="
-                                + action + ";arguments=" + arguments);
-                    }
-                    return result;
+                    return getPerformAccessibilityActionResultAndClear(interactionId);
                 }
             } else {
                 if (DEBUG) {
@@ -837,10 +729,7 @@ public final class AccessibilityInteractionClient
         return false;
     }
 
-    /**
-     * Clears the accessibility cache.
-     */
-    @UnsupportedAppUsage()
+    @UnsupportedAppUsage
     public void clearCache() {
         sAccessibilityCache.clear();
     }
@@ -885,7 +774,6 @@ public final class AccessibilityInteractionClient
             if (interactionId > mInteractionId) {
                 mFindAccessibilityNodeInfoResult = info;
                 mInteractionId = interactionId;
-                mCallingUid = Binder.getCallingUid();
             }
             mInstanceLock.notifyAll();
         }
@@ -935,57 +823,8 @@ public final class AccessibilityInteractionClient
                     mFindAccessibilityNodeInfosResult = Collections.emptyList();
                 }
                 mInteractionId = interactionId;
-                mCallingUid = Binder.getCallingUid();
             }
             mInstanceLock.notifyAll();
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void setPrefetchAccessibilityNodeInfoResult(@NonNull List<AccessibilityNodeInfo> infos,
-                                                       int interactionId) {
-        int interactionIdWaitingForPrefetchResultCopy = -1;
-        int connectionIdWaitingForPrefetchResultCopy = -1;
-        String[] packageNamesForNextPrefetchResultCopy = null;
-
-        if (infos.isEmpty()) {
-            return;
-        }
-
-        synchronized (mInstanceLock) {
-            if (mInteractionIdWaitingForPrefetchResult == interactionId) {
-                interactionIdWaitingForPrefetchResultCopy = mInteractionIdWaitingForPrefetchResult;
-                connectionIdWaitingForPrefetchResultCopy =
-                        mConnectionIdWaitingForPrefetchResult;
-                if (mPackageNamesForNextPrefetchResult != null) {
-                    packageNamesForNextPrefetchResultCopy =
-                            new String[mPackageNamesForNextPrefetchResult.length];
-                    for (int i = 0; i < mPackageNamesForNextPrefetchResult.length; i++) {
-                        packageNamesForNextPrefetchResultCopy[i] =
-                                mPackageNamesForNextPrefetchResult[i];
-                    }
-                }
-            }
-        }
-
-        if (interactionIdWaitingForPrefetchResultCopy == interactionId) {
-            finalizeAndCacheAccessibilityNodeInfos(
-                    infos, connectionIdWaitingForPrefetchResultCopy, false,
-                    packageNamesForNextPrefetchResultCopy);
-            if (mAccessibilityManager != null
-                    && mAccessibilityManager.isAccessibilityTracingEnabled()) {
-                logTrace(getConnection(connectionIdWaitingForPrefetchResultCopy),
-                        "setPrefetchAccessibilityNodeInfoResult",
-                        "InteractionId:" + interactionId + ";Result: " + infos
-                                + ";connectionId=" + connectionIdWaitingForPrefetchResultCopy,
-                        Binder.getCallingUid());
-            }
-        } else if (DEBUG) {
-            Log.w(LOG_TAG, "Prefetching for interaction with id " + interactionId + " dropped "
-                    + infos.size() + " nodes");
         }
     }
 
@@ -1012,7 +851,6 @@ public final class AccessibilityInteractionClient
             if (interactionId > mInteractionId) {
                 mPerformAccessibilityActionResult = succeeded;
                 mInteractionId = interactionId;
-                mCallingUid = Binder.getCallingUid();
             }
             mInstanceLock.notifyAll();
         }
@@ -1220,26 +1058,5 @@ public final class AccessibilityInteractionClient
             }
         }
         return true;
-    }
-
-    private void logTrace(
-            IAccessibilityServiceConnection connection, String method, String params,
-            int callingUid) {
-        try {
-            Bundle b = new Bundle();
-            ArrayList<StackTraceElement> callStack = new ArrayList<StackTraceElement>(
-                    Arrays.asList(Thread.currentThread().getStackTrace()));
-            b.putSerializable(CALL_STACK, callStack);
-            connection.logTrace(SystemClock.elapsedRealtimeNanos(),
-                    LOG_TAG + ".callback for " + method, params, Process.myPid(),
-                    Thread.currentThread().getId(), callingUid, b);
-        } catch (RemoteException e) {
-            Log.e(LOG_TAG, "Failed to log trace. " + e);
-        }
-    }
-
-    private void logTrace(
-            IAccessibilityServiceConnection connection, String method, String params) {
-        logTrace(connection, method, params, mCallingUid);
     }
 }

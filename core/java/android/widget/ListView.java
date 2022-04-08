@@ -73,7 +73,7 @@ import java.util.function.Predicate;
 /**
  * <p>Displays a vertically-scrollable collection of views, where each view is positioned
  * immediatelybelow the previous view in the list.  For a more modern, flexible, and performant
- * approach to displaying lists, use {@link androidx.recyclerview.widget.RecyclerView}.</p>
+ * approach to displaying lists, use {@link android.support.v7.widget.RecyclerView}.</p>
  *
  * <p>To display a list, you can include a list view in your layout XML file:</p>
  *
@@ -1979,7 +1979,7 @@ public class ListView extends AbsListView {
     }
 
     @Override
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     boolean trackMotionScroll(int deltaY, int incrementalDeltaY) {
         final boolean result = super.trackMotionScroll(deltaY, incrementalDeltaY);
         removeUnusedFixedViews(mHeaderViewInfos);
@@ -4028,7 +4028,7 @@ public class ListView extends AbsListView {
     }
 
     @Override
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     int getHeightForPosition(int position) {
         final int height = super.getHeightForPosition(position);
         if (shouldAdjustHeightForDivider(position)) {

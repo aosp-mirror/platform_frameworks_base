@@ -21,7 +21,6 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.Size;
 import android.compat.annotation.UnsupportedAppUsage;
-import android.os.Build;
 
 import dalvik.annotation.optimization.CriticalNative;
 import dalvik.annotation.optimization.FastNative;
@@ -49,12 +48,12 @@ public class Path {
     /**
      * @hide
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public boolean isSimplePath = true;
     /**
      * @hide
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public Region rects;
     private Direction mLastDirection = null;
 
@@ -714,7 +713,7 @@ public class Path {
      */
     public void addPath(@NonNull Path src, @NonNull Matrix matrix) {
         if (!src.isSimplePath) isSimplePath = false;
-        nAddPath(mNativePath, src.mNativePath, matrix.ni());
+        nAddPath(mNativePath, src.mNativePath, matrix.native_instance);
     }
 
     /**
@@ -778,7 +777,7 @@ public class Path {
             dst.isSimplePath = false;
             dstNative = dst.mNativePath;
         }
-        nTransform(mNativePath, matrix.ni(), dstNative);
+        nTransform(mNativePath, matrix.native_instance, dstNative);
     }
 
     /**
@@ -788,7 +787,7 @@ public class Path {
      */
     public void transform(@NonNull Matrix matrix) {
         isSimplePath = false;
-        nTransform(mNativePath, matrix.ni());
+        nTransform(mNativePath, matrix.native_instance);
     }
 
     /** @hide */

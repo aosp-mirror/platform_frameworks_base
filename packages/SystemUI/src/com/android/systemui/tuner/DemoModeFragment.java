@@ -15,10 +15,14 @@
  */
 package com.android.systemui.tuner;
 
-import android.annotation.SuppressLint;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
+import android.database.ContentObserver;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
+import android.provider.Settings;
 import android.view.MenuItem;
 
 import androidx.preference.Preference;
@@ -29,12 +33,12 @@ import androidx.preference.SwitchPreference;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
+import com.android.systemui.DemoMode;
 import com.android.systemui.R;
-import com.android.systemui.demomode.DemoMode;
-import com.android.systemui.demomode.DemoModeAvailabilityTracker;
-import com.android.systemui.demomode.DemoModeController;
 
 public class DemoModeFragment extends PreferenceFragment implements OnPreferenceChangeListener {
+
+    private static final String DEMO_MODE_ON = "sysui_tuner_demo_on";
 
     private static final String[] STATUS_ICONS = {
         "volume",
@@ -53,17 +57,6 @@ public class DemoModeFragment extends PreferenceFragment implements OnPreference
     private SwitchPreference mEnabledSwitch;
     private SwitchPreference mOnSwitch;
 
-    private DemoModeController mDemoModeController;
-    private Tracker mDemoModeTracker;
-
-    // We are the only ones who ever call this constructor, so don't worry about the warning
-    @SuppressLint("ValidFragment")
-    public DemoModeFragment(DemoModeController demoModeController) {
-        super();
-        mDemoModeController = demoModeController;
-    }
-
-
     @Override
     public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
         Context context = getContext();
@@ -80,11 +73,13 @@ public class DemoModeFragment extends PreferenceFragment implements OnPreference
         screen.addPreference(mOnSwitch);
         setPreferenceScreen(screen);
 
-        mDemoModeTracker = new Tracker(context);
-        mDemoModeTracker.startTracking();
         updateDemoModeEnabled();
         updateDemoModeOn();
-
+        ContentResolver contentResolver = getContext().getContentResolver();
+        contentResolver.registerContentObserver(Settings.Global.getUriFor(
+                DemoMode.DEMO_MODE_ALLOWED), false, mDemoModeObserver);
+        contentResolver.registerContentObserver(Settings.Global.getUriFor(DEMO_MODE_ON), false,
+                mDemoModeObserver);
         setHasOptionsMenu(true);
     }
 
@@ -112,17 +107,21 @@ public class DemoModeFragment extends PreferenceFragment implements OnPreference
 
     @Override
     public void onDestroy() {
-        mDemoModeTracker.stopTracking();
+        getContext().getContentResolver().unregisterContentObserver(mDemoModeObserver);
         super.onDestroy();
     }
 
     private void updateDemoModeEnabled() {
-        mEnabledSwitch.setChecked(mDemoModeTracker.isDemoModeAvailable());
-        mOnSwitch.setEnabled(mDemoModeTracker.isDemoModeAvailable());
+        boolean enabled = Settings.Global.getInt(getContext().getContentResolver(),
+                DemoMode.DEMO_MODE_ALLOWED, 0) != 0;
+        mEnabledSwitch.setChecked(enabled);
+        mOnSwitch.setEnabled(enabled);
     }
 
     private void updateDemoModeOn() {
-        mOnSwitch.setChecked(mDemoModeTracker.isInDemoMode());
+        boolean enabled = Settings.Global.getInt(getContext().getContentResolver(),
+                DEMO_MODE_ON, 0) != 0;
+        mOnSwitch.setChecked(enabled);
     }
 
     @Override
@@ -135,7 +134,7 @@ public class DemoModeFragment extends PreferenceFragment implements OnPreference
                 stopDemoMode();
             }
             MetricsLogger.action(getContext(), MetricsEvent.TUNER_DEMO_MODE_ENABLED, enabled);
-            mDemoModeController.requestSetDemoModeAllowed(enabled);
+            setGlobal(DemoMode.DEMO_MODE_ALLOWED, enabled ? 1 : 0);
         } else if (preference == mOnSwitch) {
             MetricsLogger.action(getContext(), MetricsEvent.TUNER_DEMO_MODE_ON, enabled);
             if (enabled) {
@@ -152,11 +151,11 @@ public class DemoModeFragment extends PreferenceFragment implements OnPreference
     private void startDemoMode() {
         Intent intent = new Intent(DemoMode.ACTION_DEMO);
 
-        mDemoModeController.requestStartDemoMode();
+        intent.putExtra(DemoMode.EXTRA_COMMAND, DemoMode.COMMAND_ENTER);
+        getContext().sendBroadcast(intent);
 
         intent.putExtra(DemoMode.EXTRA_COMMAND, DemoMode.COMMAND_CLOCK);
 
-        //TODO: everything below should move to DemoModeController, or some `initialState` command
         String demoTime = "1010"; // 10:10, a classic choice of horologists
         try {
             String[] versionParts = android.os.Build.VERSION.RELEASE_OR_CODENAME.split("\\.");
@@ -195,31 +194,25 @@ public class DemoModeFragment extends PreferenceFragment implements OnPreference
         intent.putExtra("visible", "false");
         getContext().sendBroadcast(intent);
 
+        setGlobal(DEMO_MODE_ON, 1);
     }
 
     private void stopDemoMode() {
-        mDemoModeController.requestFinishDemoMode();
+        Intent intent = new Intent(DemoMode.ACTION_DEMO);
+        intent.putExtra(DemoMode.EXTRA_COMMAND, DemoMode.COMMAND_EXIT);
+        getContext().sendBroadcast(intent);
+        setGlobal(DEMO_MODE_ON, 0);
     }
 
-    private class Tracker extends DemoModeAvailabilityTracker {
-        Tracker(Context context) {
-            super(context);
-        }
+    private void setGlobal(String key, int value) {
+        Settings.Global.putInt(getContext().getContentResolver(), key, value);
+    }
 
-        @Override
-        public void onDemoModeAvailabilityChanged() {
+    private final ContentObserver mDemoModeObserver =
+            new ContentObserver(new Handler(Looper.getMainLooper())) {
+        public void onChange(boolean selfChange) {
             updateDemoModeEnabled();
             updateDemoModeOn();
-        }
-
-        @Override
-        public void onDemoModeStarted() {
-            updateDemoModeOn();
-        }
-
-        @Override
-        public void onDemoModeFinished() {
-            updateDemoModeOn();
-        }
+        };
     };
 }

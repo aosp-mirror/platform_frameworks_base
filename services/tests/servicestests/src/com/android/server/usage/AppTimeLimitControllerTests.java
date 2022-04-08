@@ -21,21 +21,13 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 
-import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.app.usage.UsageStatsManagerInternal;
 import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.UserHandle;
 
-import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.LargeTest;
 import androidx.test.runner.AndroidJUnit4;
 
@@ -43,9 +35,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -100,11 +89,9 @@ public class AppTimeLimitControllerTests {
 
     private AppTimeLimitController mController;
 
-    @Mock private AlarmManager mMockAlarmManager;
-
     private HandlerThread mThread;
 
-    private long mElapsedTime;
+    private long mUptimeMillis;
 
     AppTimeLimitController.TimeLimitCallbackListener mListener =
             new AppTimeLimitController.TimeLimitCallbackListener() {
@@ -125,17 +112,12 @@ public class AppTimeLimitControllerTests {
     class MyAppTimeLimitController extends AppTimeLimitController {
         MyAppTimeLimitController(AppTimeLimitController.TimeLimitCallbackListener listener,
                 Looper looper) {
-            super(InstrumentationRegistry.getContext(), listener, looper);
+            super(listener, looper);
         }
 
         @Override
-        protected AlarmManager getAlarmManager() {
-            return mMockAlarmManager;
-        }
-
-        @Override
-        protected long getElapsedRealtime() {
-            return mElapsedTime;
+        protected long getUptimeMillis() {
+            return mUptimeMillis;
         }
 
         @Override
@@ -164,8 +146,6 @@ public class AppTimeLimitControllerTests {
         mThread = new HandlerThread("Test");
         mThread.start();
         mController = new MyAppTimeLimitController(mListener, mThread.getLooper());
-
-        MockitoAnnotations.initMocks(this);
     }
 
     @After
@@ -506,14 +486,9 @@ public class AppTimeLimitControllerTests {
         setTime(6_000L);
         assertTrue(mLimitReachedLatch.await(6_000L, TimeUnit.MILLISECONDS));
         stopUsage(PKG_SOC1);
-        final ArgumentCaptor<AlarmManager.OnAlarmListener> onAlarmListenerArgumentCaptor =
-                ArgumentCaptor.forClass(AlarmManager.OnAlarmListener.class);
-        verify(mMockAlarmManager).setExact(eq(AlarmManager.ELAPSED_REALTIME), anyLong(),
-                anyString(), onAlarmListenerArgumentCaptor.capture(), any());
         // Usage has stopped, Session should end in a second. Verify session end occurs in a second
         // (+/- 100ms, which is hopefully not too slim a margin)
         assertFalse(mSessionEndLatch.await(900L, TimeUnit.MILLISECONDS));
-        onAlarmListenerArgumentCaptor.getValue().onAlarm();
         assertTrue(mSessionEndLatch.await(200L, TimeUnit.MILLISECONDS));
         // Verify that the observer was not removed
         assertTrue(hasUsageSessionObserver(UID, OBS_ID1));
@@ -622,14 +597,9 @@ public class AppTimeLimitControllerTests {
         // Should call back by 11 seconds (6 earlier + 5 now)
         assertTrue(mLimitReachedLatch.await(5_000L, TimeUnit.MILLISECONDS));
         stopUsage(PKG_SOC1);
-        final ArgumentCaptor<AlarmManager.OnAlarmListener> onAlarmListenerArgumentCaptor =
-                ArgumentCaptor.forClass(AlarmManager.OnAlarmListener.class);
-        verify(mMockAlarmManager).setExact(eq(AlarmManager.ELAPSED_REALTIME), anyLong(),
-                anyString(), onAlarmListenerArgumentCaptor.capture(), any());
         // Usage has stopped, Session should end in a second. Verify session end occurs in a second
         // (+/- 100ms, which is hopefully not too slim a margin)
         assertFalse(mSessionEndLatch.await(900L, TimeUnit.MILLISECONDS));
-        onAlarmListenerArgumentCaptor.getValue().onAlarm();
         assertTrue(mSessionEndLatch.await(200L, TimeUnit.MILLISECONDS));
         // Verify that the observer was removed
         assertTrue(hasUsageSessionObserver(UID, OBS_ID1));
@@ -879,14 +849,9 @@ public class AppTimeLimitControllerTests {
         setTime(12_000L);
         assertTrue(mLimitReachedLatch.await(1_000L, TimeUnit.MILLISECONDS));
         stopUsage(PKG_SOC1);
-        final ArgumentCaptor<AlarmManager.OnAlarmListener> onAlarmListenerArgumentCaptor =
-                ArgumentCaptor.forClass(AlarmManager.OnAlarmListener.class);
-        verify(mMockAlarmManager).setExact(eq(AlarmManager.ELAPSED_REALTIME), anyLong(),
-                anyString(), onAlarmListenerArgumentCaptor.capture(), any());
         // Usage has stopped, Session should end in 2 seconds. Verify session end occurs
         // (+/- 100ms, which is hopefully not too slim a margin)
         assertFalse(mSessionEndLatch.await(1_900L, TimeUnit.MILLISECONDS));
-        onAlarmListenerArgumentCaptor.getValue().onAlarm();
         assertTrue(mSessionEndLatch.await(200L, TimeUnit.MILLISECONDS));
         // Verify that the observer was not removed
         assertTrue(hasUsageSessionObserver(UID, OBS_ID1));
@@ -917,14 +882,9 @@ public class AppTimeLimitControllerTests {
         setTime(18_000L);
         assertTrue(mLimitReachedLatch.await(2000L, TimeUnit.MILLISECONDS));
         stopUsage(PKG_SOC1);
-        final ArgumentCaptor<AlarmManager.OnAlarmListener> onAlarmListenerArgumentCaptor =
-                ArgumentCaptor.forClass(AlarmManager.OnAlarmListener.class);
-        verify(mMockAlarmManager).setExact(eq(AlarmManager.ELAPSED_REALTIME), anyLong(),
-                anyString(), onAlarmListenerArgumentCaptor.capture(), any());
         // Usage has stopped, Session should end in 2 seconds. Verify session end occurs
         // (+/- 100ms, which is hopefully not too slim a margin)
         assertFalse(mSessionEndLatch.await(900L, TimeUnit.MILLISECONDS));
-        onAlarmListenerArgumentCaptor.getValue().onAlarm();
         assertTrue(mSessionEndLatch.await(200L, TimeUnit.MILLISECONDS));
         // Verify that the observer was not removed
         assertTrue(hasUsageSessionObserver(UID, OBS_ID1));
@@ -943,14 +903,9 @@ public class AppTimeLimitControllerTests {
         setTime(11_000L);
         assertTrue(mLimitReachedLatch.await(2_000L, TimeUnit.MILLISECONDS));
         stopUsage(PKG_SOC1);
-        final ArgumentCaptor<AlarmManager.OnAlarmListener> onAlarmListenerArgumentCaptor =
-                ArgumentCaptor.forClass(AlarmManager.OnAlarmListener.class);
-        verify(mMockAlarmManager).setExact(eq(AlarmManager.ELAPSED_REALTIME), anyLong(),
-                anyString(), onAlarmListenerArgumentCaptor.capture(), any());
         // Usage has stopped, Session should end in 1 seconds. Verify session end occurs
         // (+/- 100ms, which is hopefully not too slim a margin)
         assertFalse(mSessionEndLatch.await(900L, TimeUnit.MILLISECONDS));
-        onAlarmListenerArgumentCaptor.getValue().onAlarm();
         assertTrue(mSessionEndLatch.await(200L, TimeUnit.MILLISECONDS));
 
         // Rearm the countdown latches
@@ -966,10 +921,7 @@ public class AppTimeLimitControllerTests {
         setTime(31_000L);
         assertTrue(mLimitReachedLatch.await(2_000L, TimeUnit.MILLISECONDS));
         stopUsage(PKG_SOC1);
-        verify(mMockAlarmManager, times(2)).setExact(eq(AlarmManager.ELAPSED_REALTIME), anyLong(),
-                anyString(), onAlarmListenerArgumentCaptor.capture(), any());
         assertFalse(mSessionEndLatch.await(900L, TimeUnit.MILLISECONDS));
-        onAlarmListenerArgumentCaptor.getValue().onAlarm();
         assertTrue(mSessionEndLatch.await(200L, TimeUnit.MILLISECONDS));
         assertTrue(hasUsageSessionObserver(UID, OBS_ID1));
     }
@@ -1156,6 +1108,6 @@ public class AppTimeLimitControllerTests {
     }
 
     private void setTime(long time) {
-        mElapsedTime = time;
+        mUptimeMillis = time;
     }
 }

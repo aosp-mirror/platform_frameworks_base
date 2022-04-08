@@ -15,33 +15,33 @@
  */
 package com.android.server.devicepolicy;
 
-import static com.google.common.truth.Truth.assertThat;
-
+import android.test.AndroidTestCase;
 import android.test.suitebuilder.annotation.SmallTest;
-
-import org.junit.Test;
 
 /**
  * Test for {@link DevicePolicyConstants}.
  *
- * <p>Run this test with:
- *
- * {@code atest FrameworksServicesTests:com.android.server.devicepolicy.DevicePolicyConstantsTest}
+ m FrameworksServicesTests &&
+ adb install \
+ -r ${ANDROID_PRODUCT_OUT}/data/app/FrameworksServicesTests/FrameworksServicesTests.apk &&
+ adb shell am instrument -e class com.android.server.devicepolicy.DevicePolicyConstantsTest \
+ -w com.android.frameworks.servicestests
+
+
+ -w com.android.frameworks.servicestests/androidx.test.runner.AndroidJUnitRunner
  */
 @SmallTest
-public class DevicePolicyConstantsTest {
+public class DevicePolicyConstantsTest extends AndroidTestCase {
     private static final String TAG = "DevicePolicyConstantsTest";
 
-    @Test
     public void testDefaultValues() throws Exception {
         final DevicePolicyConstants constants = DevicePolicyConstants.loadFromString("");
 
-        assertThat(constants.DAS_DIED_SERVICE_RECONNECT_BACKOFF_SEC).isEqualTo(1 * 60 * 60);
-        assertThat(constants.DAS_DIED_SERVICE_RECONNECT_MAX_BACKOFF_SEC).isEqualTo(24 * 60 * 60);
-        assertThat(constants.DAS_DIED_SERVICE_RECONNECT_BACKOFF_INCREASE).isWithin(1.0e-10).of(2.0);
+        assertEquals(1 * 60 * 60, constants.DAS_DIED_SERVICE_RECONNECT_BACKOFF_SEC);
+        assertEquals(24 * 60 * 60, constants.DAS_DIED_SERVICE_RECONNECT_MAX_BACKOFF_SEC);
+        assertEquals(2.0, constants.DAS_DIED_SERVICE_RECONNECT_BACKOFF_INCREASE);
     }
 
-    @Test
     public void testCustomValues() throws Exception {
         final DevicePolicyConstants constants = DevicePolicyConstants.loadFromString(
                 "das_died_service_reconnect_backoff_sec=10,"
@@ -49,13 +49,11 @@ public class DevicePolicyConstantsTest {
                 + "das_died_service_reconnect_max_backoff_sec=15"
         );
 
-        assertThat(constants.DAS_DIED_SERVICE_RECONNECT_BACKOFF_SEC).isEqualTo(10);
-        assertThat(constants.DAS_DIED_SERVICE_RECONNECT_MAX_BACKOFF_SEC).isEqualTo(15);
-        assertThat(constants.DAS_DIED_SERVICE_RECONNECT_BACKOFF_INCREASE).isWithin(1.0e-10)
-                .of(1.25);
+        assertEquals(10, constants.DAS_DIED_SERVICE_RECONNECT_BACKOFF_SEC);
+        assertEquals(15, constants.DAS_DIED_SERVICE_RECONNECT_MAX_BACKOFF_SEC);
+        assertEquals(1.25, constants.DAS_DIED_SERVICE_RECONNECT_BACKOFF_INCREASE);
     }
 
-    @Test
     public void testMinMax() throws Exception {
         final DevicePolicyConstants constants = DevicePolicyConstants.loadFromString(
                 "das_died_service_reconnect_backoff_sec=3,"
@@ -63,8 +61,8 @@ public class DevicePolicyConstantsTest {
                         + "das_died_service_reconnect_max_backoff_sec=1"
         );
 
-        assertThat(constants.DAS_DIED_SERVICE_RECONNECT_BACKOFF_SEC).isEqualTo(5);
-        assertThat(constants.DAS_DIED_SERVICE_RECONNECT_MAX_BACKOFF_SEC).isEqualTo(5);
-        assertThat(constants.DAS_DIED_SERVICE_RECONNECT_BACKOFF_INCREASE).isWithin(1.0e-10).of(1.0);
+        assertEquals(5, constants.DAS_DIED_SERVICE_RECONNECT_BACKOFF_SEC);
+        assertEquals(5, constants.DAS_DIED_SERVICE_RECONNECT_MAX_BACKOFF_SEC);
+        assertEquals(1.0, constants.DAS_DIED_SERVICE_RECONNECT_BACKOFF_INCREASE);
     }
 }

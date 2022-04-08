@@ -22,18 +22,17 @@ import android.provider.DeviceConfig;
 
 import androidx.annotation.Nullable;
 
-import com.android.systemui.dagger.SysUISingleton;
-
 import java.util.concurrent.Executor;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 
 /**
  * Wrapper class for retrieving System UI device configuration values.
  *
  * Can be mocked in tests for ease of testing the effects of particular values.
  */
-@SysUISingleton
+@Singleton
 public class DeviceConfigHelper {
 
     @Inject

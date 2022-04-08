@@ -37,6 +37,7 @@ import android.platform.test.annotations.Presubmit;
 import android.util.DisplayMetrics;
 import android.util.Log;
 
+import androidx.test.filters.FlakyTest;
 import androidx.test.filters.SmallTest;
 
 import org.junit.After;
@@ -76,8 +77,11 @@ public class TaskPositionerTests extends WindowTestsBase {
         mMinVisibleHeight = dipToPixel(MINIMUM_VISIBLE_HEIGHT_IN_DP, dm);
         removeGlobalMinSizeRestriction();
 
-        final ActivityRecord activity = new ActivityBuilder(mAtm)
-                .setCreateTask(true)
+        final ActivityStack stack = createTaskStackOnDisplay(mDisplayContent);
+        final ActivityRecord activity = new ActivityTestsBase.ActivityBuilder(stack.mAtmService)
+                .setStack(stack)
+                // In real case, there is no additional level for freeform mode.
+                .setCreateTask(false)
                 .build();
         final WindowState win = createWindow(null, TYPE_BASE_APPLICATION, activity, "window");
         mPositioner = new TaskPositioner(mWm);

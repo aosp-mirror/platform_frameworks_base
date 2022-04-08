@@ -111,18 +111,17 @@ public class PackageDexUsage extends AbstractStatsBase<Void> {
      * @param dexPath the path of the dex files being loaded
      * @param ownerUserId the user id which runs the code loading the dex files
      * @param loaderIsa the ISA of the app loading the dex files
+     * @param isUsedByOtherApps whether or not this dex file was not loaded by its owning package
      * @param primaryOrSplit whether or not the dex file is a primary/split dex. True indicates
      *        the file is either primary or a split. False indicates the file is secondary dex.
      * @param loadingPackageName the package performing the load. Recorded only if it is different
      *        than {@param owningPackageName}.
-     * @param overwriteCLC if true, the class loader context will be overwritten instead of being
-     *        merged
      * @return true if the dex load constitutes new information, or false if this information
      *         has been seen before.
      */
     /* package */ boolean record(String owningPackageName, String dexPath, int ownerUserId,
             String loaderIsa, boolean primaryOrSplit,
-            String loadingPackageName, String classLoaderContext, boolean overwriteCLC) {
+            String loadingPackageName, String classLoaderContext) {
         if (!PackageManagerServiceUtils.checkISA(loaderIsa)) {
             throw new IllegalArgumentException("loaderIsa " + loaderIsa + " is unsupported");
         }
@@ -194,7 +193,7 @@ public class PackageDexUsage extends AbstractStatsBase<Void> {
                         }
                         // Merge the information into the existing data.
                         // Returns true if there was an update.
-                        return existingData.merge(newData, overwriteCLC) || updateLoadingPackages;
+                        return existingData.merge(newData) || updateLoadingPackages;
                     }
                 }
             }
@@ -810,16 +809,14 @@ public class PackageDexUsage extends AbstractStatsBase<Void> {
             mLoadingPackages = new HashSet<>(other.mLoadingPackages);
         }
 
-        private boolean merge(DexUseInfo dexUseInfo, boolean overwriteCLC) {
+        private boolean merge(DexUseInfo dexUseInfo) {
             boolean oldIsUsedByOtherApps = mIsUsedByOtherApps;
             mIsUsedByOtherApps = mIsUsedByOtherApps || dexUseInfo.mIsUsedByOtherApps;
             boolean updateIsas = mLoaderIsas.addAll(dexUseInfo.mLoaderIsas);
             boolean updateLoadingPackages = mLoadingPackages.addAll(dexUseInfo.mLoadingPackages);
 
             String oldClassLoaderContext = mClassLoaderContext;
-            if (overwriteCLC) {
-                mClassLoaderContext = dexUseInfo.mClassLoaderContext;
-            } else if (isUnsupportedContext(mClassLoaderContext)) {
+            if (isUnsupportedContext(mClassLoaderContext)) {
                 mClassLoaderContext = dexUseInfo.mClassLoaderContext;
             } else if (!Objects.equals(mClassLoaderContext, dexUseInfo.mClassLoaderContext)) {
                 // We detected a context change.

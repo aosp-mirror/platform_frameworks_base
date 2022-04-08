@@ -532,7 +532,7 @@ public class ApplicationsState {
                                         mStats.getCacheQuotaBytes(
                                                 entry.info.storageUuid.toString(), entry.info.uid);
                                 final PackageStats legacy = new PackageStats(packageName, userId);
-                                legacy.codeSize = stats.getAppBytes();
+                                legacy.codeSize = stats.getCodeBytes();
                                 legacy.dataSize = stats.getDataBytes();
                                 legacy.cacheSize = Math.min(stats.getCacheBytes(), cacheQuota);
                                 try {
@@ -1300,7 +1300,7 @@ public class ApplicationsState {
                                                 final PackageStats legacy = new PackageStats(
                                                         mCurComputingSizePkg,
                                                         mCurComputingSizeUserId);
-                                                legacy.codeSize = stats.getAppBytes();
+                                                legacy.codeSize = stats.getCodeBytes();
                                                 legacy.dataSize = stats.getDataBytes();
                                                 legacy.cacheSize = stats.getCacheBytes();
                                                 try {
@@ -1494,13 +1494,6 @@ public class ApplicationsState {
                 removeUser(intent.getIntExtra(Intent.EXTRA_USER_HANDLE, UserHandle.USER_NULL));
             }
         }
-    }
-
-    /**
-     * Whether the packages for the  user have been initialized.
-     */
-    public boolean isUserAdded(int userId) {
-        return mEntriesMap.contains(userId);
     }
 
     public interface Callbacks {
@@ -2027,7 +2020,6 @@ public class ApplicationsState {
                 }
             };
 
-    /* For the Storage Settings which shows category of app types. */
     public static final AppFilter FILTER_OTHER_APPS =
             new AppFilter() {
                 @Override
@@ -2043,23 +2035,6 @@ public class ApplicationsState {
                                         || FILTER_GAMES.filterApp(entry)
                                         || FILTER_MOVIES.filterApp(entry)
                                         || FILTER_PHOTOS.filterApp(entry);
-                    }
-                    return !isCategorized;
-                }
-            };
-
-    /* For the Storage Settings which shows category of file types. */
-    public static final AppFilter FILTER_APPS_EXCEPT_GAMES =
-            new AppFilter() {
-                @Override
-                public void init() {
-                }
-
-                @Override
-                public boolean filterApp(AppEntry entry) {
-                    boolean isCategorized;
-                    synchronized (entry) {
-                        isCategorized = FILTER_GAMES.filterApp(entry);
                     }
                     return !isCategorized;
                 }

@@ -34,8 +34,6 @@
 
 package javax.obex;
 
-import android.util.Log;
-
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -45,6 +43,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
 
+import android.util.Log;
 
 /**
  * This class defines a set of helper methods for the implementation of Obex.
@@ -1084,12 +1083,11 @@ public final class ObexHelper {
     }
 
     private static int validateMaxPacketSize(int size) {
-        if (VDBG && (size > MAX_PACKET_SIZE_INT)) {
-            Log.w(TAG, "The packet size supported for the connection (" + size + ") is larger"
-                    + " than the configured OBEX packet size: " + MAX_PACKET_SIZE_INT);
-        }
-        if (size != -1 && size < MAX_PACKET_SIZE_INT) {
-            if (size < LOWER_LIMIT_MAX_PACKET_SIZE) {
+        if(VDBG && (size > MAX_PACKET_SIZE_INT)) Log.w(TAG,
+                "The packet size supported for the connection (" + size + ") is larger"
+                + " than the configured OBEX packet size: " + MAX_PACKET_SIZE_INT);
+        if(size != -1) {
+            if(size < LOWER_LIMIT_MAX_PACKET_SIZE) {
                 throw new IllegalArgumentException(size + " is less that the lower limit: "
                         + LOWER_LIMIT_MAX_PACKET_SIZE);
             }

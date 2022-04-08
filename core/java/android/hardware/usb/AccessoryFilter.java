@@ -17,7 +17,6 @@
 package android.hardware.usb;
 
 import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.service.usb.UsbAccessoryFilterProto;
 
 import com.android.internal.util.dump.DualDumpOutputStream;
@@ -102,7 +101,7 @@ public class AccessoryFilter {
     public boolean matches(UsbAccessory acc) {
         if (mManufacturer != null && !acc.getManufacturer().equals(mManufacturer)) return false;
         if (mModel != null && !acc.getModel().equals(mModel)) return false;
-        return !(mVersion != null && !mVersion.equals(acc.getVersion()));
+        return !(mVersion != null && !acc.getVersion().equals(mVersion));
     }
 
     /**
@@ -121,7 +120,7 @@ public class AccessoryFilter {
     }
 
     @Override
-    public boolean equals(@Nullable Object obj) {
+    public boolean equals(Object obj) {
         // can't compare if we have wildcard strings
         if (mManufacturer == null || mModel == null || mVersion == null) {
             return false;

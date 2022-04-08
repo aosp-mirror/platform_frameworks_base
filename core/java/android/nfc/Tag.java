@@ -29,7 +29,6 @@ import android.nfc.tech.NfcBarcode;
 import android.nfc.tech.NfcF;
 import android.nfc.tech.NfcV;
 import android.nfc.tech.TagTechnology;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -112,7 +111,7 @@ import java.util.HashMap;
  * <p>
  */
 public final class Tag implements Parcelable {
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     final byte[] mId;
     final int[] mTechList;
     final String[] mTechStringList;

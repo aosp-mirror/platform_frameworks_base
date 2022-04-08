@@ -17,7 +17,6 @@
 package android.net;
 
 import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -32,6 +31,17 @@ import android.os.Parcelable;
  */
 @SystemApi
 public final class MatchAllNetworkSpecifier extends NetworkSpecifier implements Parcelable {
+    /**
+     * Utility method which verifies that the ns argument is not a MatchAllNetworkSpecifier and
+     * throws an IllegalArgumentException if it is.
+     * @hide
+     */
+    public static void checkNotMatchAllNetworkSpecifier(NetworkSpecifier ns) {
+        if (ns instanceof MatchAllNetworkSpecifier) {
+            throw new IllegalArgumentException("A MatchAllNetworkSpecifier is not permitted");
+        }
+    }
+
     /** @hide */
     @Override
     public boolean canBeSatisfiedBy(NetworkSpecifier other) {
@@ -45,7 +55,7 @@ public final class MatchAllNetworkSpecifier extends NetworkSpecifier implements 
     }
 
     @Override
-    public boolean equals(@Nullable Object o) {
+    public boolean equals(Object o) {
         return o instanceof MatchAllNetworkSpecifier;
     }
 

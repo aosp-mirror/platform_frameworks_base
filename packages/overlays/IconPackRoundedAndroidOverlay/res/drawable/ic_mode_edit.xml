@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+   Copyright (C) 2019 The Android Open Source Project
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:height="24dp"
+    android:tint="?android:attr/colorControlNormal"
+    android:viewportHeight="24"
+    android:viewportWidth="24"
+    android:width="24dp" >
+    <group
+        android:translateX="3.000000"
+        android:translateY="3.000000" >
+        <path
+            android:fillColor="@android:color/white"
+            android:fillType="evenOdd"
+            android:pathData="M14.971,4.992 L13.092,3.115 L14.499,1.707 L16.38,3.583 L14.971,4.992 Z M3.38,16.588 L1.501,16.592 L1.502,14.708 L12.031,4.176 L13.91,6.054 L3.38,16.588 Z M17.794,2.874 L15.205,0.292 C15.01,0.097 14.755,0 14.499,0 C14.243,0 13.987,0.098 13.792,0.293 L0.295,13.794 C0.108,13.981 0.002,14.236 0.002,14.5 L-1.42108547e-14,17.594 C-1.42108547e-14,17.87 0.224,18.094 0.5,18.094 L0.501,18.094 L3.589,18.088 C3.854,18.087 4.107,17.982 4.294,17.795 L17.795,4.289 C18.185,3.898 18.185,3.264 17.794,2.874 L17.794,2.874 Z"
+            android:strokeWidth="1" />
+    </group>
+</vector>

@@ -16,6 +16,8 @@
 
 package com.android.server.rollback;
 
+import static android.os.UserHandle.USER_SYSTEM;
+
 import static com.android.server.rollback.Rollback.rollbackStateFromString;
 
 import android.annotation.NonNull;
@@ -24,14 +26,12 @@ import android.content.pm.VersionedPackage;
 import android.content.rollback.PackageRollbackInfo;
 import android.content.rollback.PackageRollbackInfo.RestoreInfo;
 import android.content.rollback.RollbackInfo;
-import android.os.SystemProperties;
-import android.os.UserHandle;
-import android.system.ErrnoException;
-import android.system.Os;
-import android.util.AtomicFile;
+import android.util.IntArray;
 import android.util.Slog;
 import android.util.SparseIntArray;
+import android.util.SparseLongArray;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 
 import libcore.io.IoUtils;
@@ -41,7 +41,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.file.Files;
@@ -71,21 +70,21 @@ class RollbackStore {
     //
     // * XXX, YYY are the rollbackIds for the corresponding rollbacks.
     // * rollback.json contains all relevant metadata for the rollback.
+    //
+    // TODO: Use AtomicFile for all the .json files?
     private final File mRollbackDataDir;
-    private final File mRollbackHistoryDir;
 
-    RollbackStore(File rollbackDataDir, File rollbackHistoryDir) {
+    RollbackStore(File rollbackDataDir) {
         mRollbackDataDir = rollbackDataDir;
-        mRollbackHistoryDir = rollbackHistoryDir;
     }
 
     /**
      * Reads the rollbacks from persistent storage.
      */
-    private static List<Rollback> loadRollbacks(File rollbackDataDir) {
+    List<Rollback> loadRollbacks() {
         List<Rollback> rollbacks = new ArrayList<>();
-        rollbackDataDir.mkdirs();
-        for (File rollbackDir : rollbackDataDir.listFiles()) {
+        mRollbackDataDir.mkdirs();
+        for (File rollbackDir : mRollbackDataDir.listFiles()) {
             if (rollbackDir.isDirectory()) {
                 try {
                     rollbacks.add(loadRollback(rollbackDir));
@@ -98,34 +97,30 @@ class RollbackStore {
         return rollbacks;
     }
 
-    List<Rollback> loadRollbacks() {
-        return loadRollbacks(mRollbackDataDir);
-    }
-
-    List<Rollback> loadHistorialRollbacks() {
-        return loadRollbacks(mRollbackHistoryDir);
-    }
-
     /**
-     * Converts a {@code JSONArray} of integers to a {@code List<Integer>}.
+     * Converts an {@code JSONArray} of integers to an {@code IntArray}.
      */
-    private static @NonNull List<Integer> toIntList(@NonNull JSONArray jsonArray)
+    private static @NonNull IntArray convertToIntArray(@NonNull JSONArray jsonArray)
             throws JSONException {
-        final List<Integer> ret = new ArrayList<>();
-        for (int i = 0; i < jsonArray.length(); ++i) {
-            ret.add(jsonArray.getInt(i));
+        if (jsonArray.length() == 0) {
+            return new IntArray();
         }
 
-        return ret;
+        final int[] ret = new int[jsonArray.length()];
+        for (int i = 0; i < ret.length; ++i) {
+            ret[i] = jsonArray.getInt(i);
+        }
+
+        return IntArray.wrap(ret);
     }
 
     /**
-     * Converts a {@code List<Integer>} into a {@code JSONArray} of integers.
+     * Converts an {@code IntArray} into an {@code JSONArray} of integers.
      */
-    private static @NonNull JSONArray fromIntList(@NonNull List<Integer> list) {
+    private static @NonNull JSONArray convertToJsonArray(@NonNull IntArray intArray) {
         JSONArray jsonArray = new JSONArray();
-        for (int i = 0; i < list.size(); ++i) {
-            jsonArray.put(list.get(i));
+        for (int i = 0; i < intArray.size(); ++i) {
+            jsonArray.put(intArray.get(i));
         }
 
         return jsonArray;
@@ -158,6 +153,28 @@ class RollbackStore {
         }
 
         return restoreInfos;
+    }
+
+    private static @NonNull JSONArray ceSnapshotInodesToJson(
+            @NonNull SparseLongArray ceSnapshotInodes) throws JSONException {
+        JSONArray array = new JSONArray();
+        for (int i = 0; i < ceSnapshotInodes.size(); i++) {
+            JSONObject entryJson = new JSONObject();
+            entryJson.put("userId", ceSnapshotInodes.keyAt(i));
+            entryJson.put("ceSnapshotInode", ceSnapshotInodes.valueAt(i));
+            array.put(entryJson);
+        }
+        return array;
+    }
+
+    private static @NonNull SparseLongArray ceSnapshotInodesFromJson(JSONArray json)
+            throws JSONException {
+        SparseLongArray ceSnapshotInodes = new SparseLongArray(json.length());
+        for (int i = 0; i < json.length(); i++) {
+            JSONObject entry = json.getJSONObject(i);
+            ceSnapshotInodes.append(entry.getInt("userId"), entry.getLong("ceSnapshotInode"));
+        }
+        return ceSnapshotInodes;
     }
 
     private static @NonNull JSONArray extensionVersionsToJson(
@@ -228,15 +245,6 @@ class RollbackStore {
                 packageSessionIds, extensionVersions);
     }
 
-    private static boolean isLinkPossible(File oldFile, File newFile) {
-        try {
-            return Os.stat(oldFile.getAbsolutePath()).st_dev
-                    == Os.stat(newFile.getAbsolutePath()).st_dev;
-        } catch (ErrnoException ignore) {
-            return false;
-        }
-    }
-
     /**
      * Creates a backup copy of an apk or apex for a package.
      * For packages containing splits, this method should be called for each
@@ -249,32 +257,8 @@ class RollbackStore {
         targetDir.mkdirs();
         File targetFile = new File(targetDir, sourceFile.getName());
 
-        boolean fallbackToCopy = !isLinkPossible(sourceFile, targetFile);
-        if (!fallbackToCopy) {
-            try {
-                // Create a hard link to avoid copy
-                // TODO(b/168562373)
-                // Linking between non-encrypted and encrypted is not supported and we have
-                // encrypted /data/rollback and non-encrypted /data/apex/active. For now this works
-                // because we happen to store encrypted files under /data/apex/active which is no
-                // longer the case when compressed apex rolls out. We have to handle this case in
-                // order not to fall back to copy.
-                Os.link(sourceFile.getAbsolutePath(), targetFile.getAbsolutePath());
-            } catch (ErrnoException e) {
-                boolean isRollbackTest =
-                        SystemProperties.getBoolean("persist.rollback.is_test", false);
-                if (isRollbackTest) {
-                    throw new IOException(e);
-                } else {
-                    fallbackToCopy = true;
-                }
-            }
-        }
-
-        if (fallbackToCopy) {
-            // Fall back to copy if hardlink can't be created
-            Files.copy(sourceFile.toPath(), targetFile.toPath());
-        }
+        // TODO: Copy by hard link instead to save on cpu and storage space?
+        Files.copy(sourceFile.toPath(), targetFile.toPath());
     }
 
     /**
@@ -304,50 +288,27 @@ class RollbackStore {
     /**
      * Saves the given rollback to persistent storage.
      */
-    private static void saveRollback(Rollback rollback, File backDir) {
-        FileOutputStream fos = null;
-        AtomicFile file = new AtomicFile(new File(backDir, "rollback.json"));
+    @GuardedBy("rollback.mLock")
+    static void saveRollback(Rollback rollback) {
         try {
-            backDir.mkdirs();
             JSONObject dataJson = new JSONObject();
             dataJson.put("info", rollbackInfoToJson(rollback.info));
             dataJson.put("timestamp", rollback.getTimestamp().toString());
             dataJson.put("stagedSessionId", rollback.getStagedSessionId());
             dataJson.put("state", rollback.getStateAsString());
-            dataJson.put("stateDescription", rollback.getStateDescription());
+            dataJson.put("apkSessionId", rollback.getApkSessionId());
             dataJson.put("restoreUserDataInProgress", rollback.isRestoreUserDataInProgress());
             dataJson.put("userId", rollback.getUserId());
             dataJson.putOpt("installerPackageName", rollback.getInstallerPackageName());
             dataJson.putOpt(
                     "extensionVersions", extensionVersionsToJson(rollback.getExtensionVersions()));
 
-            fos = file.startWrite();
-            PrintWriter pw = new PrintWriter(fos);
+            PrintWriter pw = new PrintWriter(new File(rollback.getBackupDir(), "rollback.json"));
             pw.println(dataJson.toString());
             pw.close();
-            file.finishWrite(fos);
         } catch (JSONException | IOException e) {
             Slog.e(TAG, "Unable to save rollback for: " + rollback.info.getRollbackId(), e);
-            if (fos != null) {
-                file.failWrite(fos);
-            }
         }
-    }
-
-    static void saveRollback(Rollback rollback) {
-        saveRollback(rollback, rollback.getBackupDir());
-    }
-
-    /**
-     * Saves the rollback to $mRollbackHistoryDir/ROLLBACKID-HEX for debugging purpose.
-     */
-    void saveRollbackToHistory(Rollback rollback) {
-        // The same id might be allocated to different historical rollbacks.
-        // Let's add a suffix to avoid naming collision.
-        String suffix = Long.toHexString(rollback.getTimestamp().getEpochSecond());
-        String dirName = Integer.toString(rollback.info.getRollbackId());
-        File backupDir = new File(mRollbackHistoryDir, dirName + "-" + suffix);
-        saveRollback(rollback, backupDir);
     }
 
     /**
@@ -382,9 +343,9 @@ class RollbackStore {
                 Instant.parse(dataJson.getString("timestamp")),
                 dataJson.getInt("stagedSessionId"),
                 rollbackStateFromString(dataJson.getString("state")),
-                dataJson.optString("stateDescription"),
+                dataJson.getInt("apkSessionId"),
                 dataJson.getBoolean("restoreUserDataInProgress"),
-                dataJson.optInt("userId", UserHandle.SYSTEM.getIdentifier()),
+                dataJson.optInt("userId", USER_SYSTEM),
                 dataJson.optString("installerPackageName", ""),
                 extensionVersionsFromJson(dataJson.optJSONArray("extensionVersions")));
     }
@@ -407,17 +368,18 @@ class RollbackStore {
         json.put("versionRolledBackFrom", toJson(info.getVersionRolledBackFrom()));
         json.put("versionRolledBackTo", toJson(info.getVersionRolledBackTo()));
 
-        List<Integer> pendingBackups = info.getPendingBackups();
+        IntArray pendingBackups = info.getPendingBackups();
         List<RestoreInfo> pendingRestores = info.getPendingRestores();
-        List<Integer> snapshottedUsers = info.getSnapshottedUsers();
-        json.put("pendingBackups", fromIntList(pendingBackups));
+        IntArray snapshottedUsers = info.getSnapshottedUsers();
+        json.put("pendingBackups", convertToJsonArray(pendingBackups));
         json.put("pendingRestores", convertToJsonArray(pendingRestores));
 
         json.put("isApex", info.isApex());
         json.put("isApkInApex", info.isApkInApex());
 
         // Field is named 'installedUsers' for legacy reasons.
-        json.put("installedUsers", fromIntList(snapshottedUsers));
+        json.put("installedUsers", convertToJsonArray(snapshottedUsers));
+        json.put("ceSnapshotInodes", ceSnapshotInodesToJson(info.getCeSnapshotInodes()));
 
         json.put("rollbackDataPolicy", info.getRollbackDataPolicy());
 
@@ -431,7 +393,7 @@ class RollbackStore {
         VersionedPackage versionRolledBackTo = versionedPackageFromJson(
                 json.getJSONObject("versionRolledBackTo"));
 
-        final List<Integer> pendingBackups = toIntList(
+        final IntArray pendingBackups = convertToIntArray(
                 json.getJSONArray("pendingBackups"));
         final ArrayList<RestoreInfo> pendingRestores = convertToRestoreInfoArray(
                 json.getJSONArray("pendingRestores"));
@@ -440,7 +402,9 @@ class RollbackStore {
         final boolean isApkInApex = json.getBoolean("isApkInApex");
 
         // Field is named 'installedUsers' for legacy reasons.
-        final List<Integer> snapshottedUsers = toIntList(json.getJSONArray("installedUsers"));
+        final IntArray snapshottedUsers = convertToIntArray(json.getJSONArray("installedUsers"));
+        final SparseLongArray ceSnapshotInodes = ceSnapshotInodesFromJson(
+                json.getJSONArray("ceSnapshotInodes"));
 
         // Backward compatibility: no such field for old versions.
         final int rollbackDataPolicy = json.optInt("rollbackDataPolicy",
@@ -448,7 +412,7 @@ class RollbackStore {
 
         return new PackageRollbackInfo(versionRolledBackFrom, versionRolledBackTo,
                 pendingBackups, pendingRestores, isApex, isApkInApex, snapshottedUsers,
-                rollbackDataPolicy);
+                ceSnapshotInodes, rollbackDataPolicy);
     }
 
     private static JSONArray versionedPackagesToJson(List<VersionedPackage> packages)

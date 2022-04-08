@@ -16,7 +16,6 @@
 
 package android.hardware.display;
 
-import android.annotation.Nullable;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -136,7 +135,7 @@ public final class WifiDisplay implements Parcelable {
     }
 
     @Override
-    public boolean equals(@Nullable Object o) {
+    public boolean equals(Object o) {
         return o instanceof WifiDisplay && equals((WifiDisplay)o);
     }
 

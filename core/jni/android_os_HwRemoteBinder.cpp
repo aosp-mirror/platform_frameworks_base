@@ -269,9 +269,22 @@ jobject JHwRemoteBinder::NewObject(
     return obj;
 }
 
-JHwRemoteBinder::JHwRemoteBinder(JNIEnv* env, jobject /* thiz */,
-                                 const sp<hardware::IBinder>& binder)
-      : mBinder(binder), mDeathRecipientList(new HwBinderDeathRecipientList()) {}
+JHwRemoteBinder::JHwRemoteBinder(
+        JNIEnv *env, jobject thiz, const sp<hardware::IBinder> &binder)
+    : mBinder(binder) {
+    mDeathRecipientList = new HwBinderDeathRecipientList();
+    jclass clazz = env->GetObjectClass(thiz);
+    CHECK(clazz != NULL);
+
+    mObject = env->NewWeakGlobalRef(thiz);
+}
+
+JHwRemoteBinder::~JHwRemoteBinder() {
+    JNIEnv *env = AndroidRuntime::getJNIEnv();
+
+    env->DeleteWeakGlobalRef(mObject);
+    mObject = NULL;
+}
 
 sp<hardware::IBinder> JHwRemoteBinder::getBinder() const {
     return mBinder;

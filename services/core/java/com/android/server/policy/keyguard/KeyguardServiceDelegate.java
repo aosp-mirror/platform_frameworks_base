@@ -15,7 +15,6 @@ import android.content.res.Resources;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
-import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.util.Log;
@@ -29,7 +28,6 @@ import com.android.internal.policy.IKeyguardExitCallback;
 import com.android.internal.policy.IKeyguardService;
 import com.android.server.UiThread;
 import com.android.server.policy.WindowManagerPolicy.OnKeyguardExitResult;
-import com.android.server.wm.WindowManagerService;
 
 import java.io.PrintWriter;
 
@@ -178,8 +176,7 @@ public class KeyguardServiceDelegate {
                 // This is used to hide the scrim once keyguard displays.
                 if (mKeyguardState.interactiveState == INTERACTIVE_STATE_AWAKE
                         || mKeyguardState.interactiveState == INTERACTIVE_STATE_WAKING) {
-                    mKeyguardService.onStartedWakingUp(PowerManager.WAKE_REASON_UNKNOWN,
-                            false /* cameraGestureTriggered */);
+                    mKeyguardService.onStartedWakingUp();
                 }
                 if (mKeyguardState.interactiveState == INTERACTIVE_STATE_AWAKE) {
                     mKeyguardService.onFinishedWakingUp();
@@ -259,13 +256,8 @@ public class KeyguardServiceDelegate {
         }
     }
 
-    /**
-     * @deprecated Notify occlude status change via remote animation.
-     */
-    @Deprecated
     public void setOccluded(boolean isOccluded, boolean animate) {
-        if (!WindowManagerService.sEnableRemoteKeyguardOccludeAnimation
-                && mKeyguardService != null) {
+        if (mKeyguardService != null) {
             if (DEBUG) Log.v(TAG, "setOccluded(" + isOccluded + ") animate=" + animate);
             mKeyguardService.setOccluded(isOccluded, animate);
         }
@@ -299,11 +291,10 @@ public class KeyguardServiceDelegate {
         mKeyguardState.dreaming = false;
     }
 
-    public void onStartedWakingUp(
-            @PowerManager.WakeReason int pmWakeReason, boolean cameraGestureTriggered) {
+    public void onStartedWakingUp() {
         if (mKeyguardService != null) {
             if (DEBUG) Log.v(TAG, "onStartedWakingUp()");
-            mKeyguardService.onStartedWakingUp(pmWakeReason, cameraGestureTriggered);
+            mKeyguardService.onStartedWakingUp();
         }
         mKeyguardState.interactiveState = INTERACTIVE_STATE_WAKING;
     }
@@ -354,19 +345,17 @@ public class KeyguardServiceDelegate {
         mKeyguardState.screenState = SCREEN_STATE_ON;
     }
 
-    public void onStartedGoingToSleep(@PowerManager.GoToSleepReason int pmSleepReason) {
+    public void onStartedGoingToSleep(int why) {
         if (mKeyguardService != null) {
-            mKeyguardService.onStartedGoingToSleep(pmSleepReason);
+            mKeyguardService.onStartedGoingToSleep(why);
         }
-        mKeyguardState.offReason =
-                WindowManagerPolicyConstants.translateSleepReasonToOffReason(pmSleepReason);
+        mKeyguardState.offReason = why;
         mKeyguardState.interactiveState = INTERACTIVE_STATE_GOING_TO_SLEEP;
     }
 
-    public void onFinishedGoingToSleep(
-            @PowerManager.GoToSleepReason int pmSleepReason, boolean cameraGestureTriggered) {
+    public void onFinishedGoingToSleep(int why, boolean cameraGestureTriggered) {
         if (mKeyguardService != null) {
-            mKeyguardService.onFinishedGoingToSleep(pmSleepReason, cameraGestureTriggered);
+            mKeyguardService.onFinishedGoingToSleep(why, cameraGestureTriggered);
         }
         mKeyguardState.interactiveState = INTERACTIVE_STATE_SLEEP;
     }
@@ -406,8 +395,7 @@ public class KeyguardServiceDelegate {
     }
 
     public void startKeyguardExitAnimation(long startTime, long fadeoutDuration) {
-        if (!WindowManagerService.sEnableRemoteKeyguardGoingAwayAnimation
-                && mKeyguardService != null) {
+        if (mKeyguardService != null) {
             mKeyguardService.startKeyguardExitAnimation(startTime, fadeoutDuration);
         }
     }

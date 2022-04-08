@@ -28,11 +28,10 @@ import static androidx.test.espresso.matcher.ViewMatchers.withId;
 import static androidx.test.espresso.matcher.ViewMatchers.withTagValue;
 import static androidx.test.espresso.matcher.ViewMatchers.withText;
 
-import static com.android.internal.widget.FloatingToolbar.MenuItemRepr;
-
 import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.is;
 
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -159,8 +158,8 @@ public class FloatingToolbarEspressoUtils {
             public void describeTo(Description description) {}
 
             private void collectMenuItemIds(View view) {
-                if (view.getTag() instanceof MenuItemRepr) {
-                    menuItemIds.add(((MenuItemRepr) view.getTag()).itemId);
+                if (view.getTag() instanceof MenuItem) {
+                    menuItemIds.add(((MenuItem) view.getTag()).getItemId());
                 } else if (view instanceof ViewGroup) {
                     ViewGroup viewGroup = (ViewGroup) view;
                     for (int i = 0; i < viewGroup.getChildCount(); i++) {
@@ -179,8 +178,8 @@ public class FloatingToolbarEspressoUtils {
      */
     public static void assertFloatingToolbarDoesNotContainItem(String itemLabel) {
         final Predicate<View> hasMenuItemLabel = view ->
-                view.getTag() instanceof MenuItemRepr
-                        && itemLabel.equals(((MenuItemRepr) view.getTag()).title);
+                view.getTag() instanceof MenuItem
+                        && itemLabel.equals(((MenuItem) view.getTag()).getTitle().toString());
         assertFloatingToolbarMenuItem(hasMenuItemLabel, false);
     }
 
@@ -192,8 +191,8 @@ public class FloatingToolbarEspressoUtils {
      */
     public static void assertFloatingToolbarDoesNotContainItem(final int menuItemId) {
         final Predicate<View> hasMenuItemId = view ->
-                view.getTag() instanceof MenuItemRepr
-                        && ((MenuItemRepr) view.getTag()).itemId == menuItemId;
+                view.getTag() instanceof MenuItem
+                        && ((MenuItem) view.getTag()).getItemId() == menuItemId;
         assertFloatingToolbarMenuItem(hasMenuItemId, false);
     }
 

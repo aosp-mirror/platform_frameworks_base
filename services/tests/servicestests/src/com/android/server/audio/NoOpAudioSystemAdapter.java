@@ -21,8 +21,6 @@ import android.media.AudioDeviceAttributes;
 import android.media.AudioSystem;
 import android.util.Log;
 
-import java.util.List;
-
 /**
  * Provides an adapter for AudioSystem that does nothing.
  * Overridden methods can be configured.
@@ -68,30 +66,13 @@ public class NoOpAudioSystemAdapter extends AudioSystemAdapter {
     }
 
     @Override
-    public int setDevicesRoleForStrategy(int strategy, int role,
-            @NonNull List<AudioDeviceAttributes> devices) {
+    public int setPreferredDeviceForStrategy(int strategy,
+            @NonNull AudioDeviceAttributes device) {
         return AudioSystem.AUDIO_STATUS_OK;
     }
 
     @Override
-    public int removeDevicesRoleForStrategy(int strategy, int role) {
-        return AudioSystem.AUDIO_STATUS_OK;
-    }
-
-    @Override
-    public int setDevicesRoleForCapturePreset(int capturePreset, int role,
-                                              @NonNull List<AudioDeviceAttributes> devices) {
-        return AudioSystem.AUDIO_STATUS_OK;
-    }
-
-    @Override
-    public int removeDevicesRoleForCapturePreset(
-            int capturePreset, int role, @NonNull List<AudioDeviceAttributes> devicesToRemove) {
-        return AudioSystem.AUDIO_STATUS_OK;
-    }
-
-    @Override
-    public int clearDevicesRoleForCapturePreset(int capturePreset, int role) {
+    public int removePreferredDeviceForStrategy(int strategy) {
         return AudioSystem.AUDIO_STATUS_OK;
     }
 

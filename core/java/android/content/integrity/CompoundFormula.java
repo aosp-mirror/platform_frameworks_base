@@ -20,7 +20,6 @@ import static com.android.internal.util.Preconditions.checkArgument;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -84,7 +83,7 @@ public final class CompoundFormula extends IntegrityFormula implements Parcelabl
      */
     public CompoundFormula(@Connector int connector, List<IntegrityFormula> formulas) {
         checkArgument(
-                isValidConnector(connector), "Unknown connector: %d", connector);
+                isValidConnector(connector), String.format("Unknown connector: %d", connector));
         validateFormulas(connector, formulas);
         this.mConnector = connector;
         this.mFormulas = Collections.unmodifiableList(formulas);
@@ -93,7 +92,7 @@ public final class CompoundFormula extends IntegrityFormula implements Parcelabl
     CompoundFormula(Parcel in) {
         mConnector = in.readInt();
         int length = in.readInt();
-        checkArgument(length >= 0, "Must have non-negative length. Got %d", length);
+        checkArgument(length >= 0, "Must have non-negative length. Got " + length);
         mFormulas = new ArrayList<>(length);
         for (int i = 0; i < length; i++) {
             mFormulas.add(IntegrityFormula.readFromParcel(in));
@@ -159,7 +158,7 @@ public final class CompoundFormula extends IntegrityFormula implements Parcelabl
     }
 
     @Override
-    public boolean equals(@Nullable Object o) {
+    public boolean equals(Object o) {
         if (this == o) {
             return true;
         }
@@ -196,14 +195,16 @@ public final class CompoundFormula extends IntegrityFormula implements Parcelabl
             case OR:
                 checkArgument(
                         formulas.size() >= 2,
-                        "Connector %s must have at least 2 formulas",
-                        connectorToString(connector));
+                        String.format(
+                                "Connector %s must have at least 2 formulas",
+                                connectorToString(connector)));
                 break;
             case NOT:
                 checkArgument(
                         formulas.size() == 1,
-                        "Connector %s must have 1 formula only",
-                        connectorToString(connector));
+                        String.format(
+                                "Connector %s must have 1 formula only",
+                                connectorToString(connector)));
                 break;
         }
     }

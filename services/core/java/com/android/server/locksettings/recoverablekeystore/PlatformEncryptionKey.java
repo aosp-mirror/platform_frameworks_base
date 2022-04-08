@@ -16,7 +16,7 @@
 
 package com.android.server.locksettings.recoverablekeystore;
 
-import javax.crypto.SecretKey;
+import android.security.keystore.AndroidKeyStoreSecretKey;
 
 /**
  * Private key stored in AndroidKeyStore. Used to wrap recoverable keys before writing them to disk.
@@ -33,7 +33,7 @@ import javax.crypto.SecretKey;
 public class PlatformEncryptionKey {
 
     private final int mGenerationId;
-    private final SecretKey mKey;
+    private final AndroidKeyStoreSecretKey mKey;
 
     /**
      * A new instance.
@@ -41,7 +41,7 @@ public class PlatformEncryptionKey {
      * @param generationId The generation ID of the key.
      * @param key The secret key handle. Can be used to encrypt WITHOUT requiring screen unlock.
      */
-    public PlatformEncryptionKey(int generationId, SecretKey key) {
+    public PlatformEncryptionKey(int generationId, AndroidKeyStoreSecretKey key) {
         mGenerationId = generationId;
         mKey = key;
     }
@@ -56,7 +56,7 @@ public class PlatformEncryptionKey {
     /**
      * Returns the actual key, which can only be used to encrypt.
      */
-    public SecretKey getKey() {
+    public AndroidKeyStoreSecretKey getKey() {
         return mKey;
     }
 }

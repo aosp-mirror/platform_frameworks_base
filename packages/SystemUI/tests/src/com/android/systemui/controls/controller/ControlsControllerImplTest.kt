@@ -24,6 +24,7 @@ import android.content.ContextWrapper
 import android.content.Intent
 import android.content.pm.ServiceInfo
 import android.os.UserHandle
+import android.provider.Settings
 import android.service.controls.Control
 import android.service.controls.DeviceTypes
 import android.service.controls.actions.ControlAction
@@ -37,7 +38,6 @@ import com.android.systemui.controls.ControlsServiceInfo
 import com.android.systemui.controls.management.ControlsListingController
 import com.android.systemui.controls.ui.ControlsUiController
 import com.android.systemui.dump.DumpManager
-import com.android.systemui.settings.UserTracker
 import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.time.FakeSystemClock
 import org.junit.After
@@ -82,8 +82,6 @@ class ControlsControllerImplTest : SysuiTestCase() {
     private lateinit var broadcastDispatcher: BroadcastDispatcher
     @Mock
     private lateinit var listingController: ControlsListingController
-    @Mock(stubOnly = true)
-    private lateinit var userTracker: UserTracker
 
     @Captor
     private lateinit var structureInfoCaptor: ArgumentCaptor<StructureInfo>
@@ -140,7 +138,10 @@ class ControlsControllerImplTest : SysuiTestCase() {
     fun setUp() {
         MockitoAnnotations.initMocks(this)
 
-        `when`(userTracker.userHandle).thenReturn(UserHandle.of(user))
+        Settings.Secure.putInt(mContext.contentResolver,
+                ControlsControllerImpl.CONTROLS_AVAILABLE, 1)
+        Settings.Secure.putIntForUser(mContext.contentResolver,
+                ControlsControllerImpl.CONTROLS_AVAILABLE, 1, otherUser)
 
         delayableExecutor = FakeExecutor(FakeSystemClock())
 
@@ -161,11 +162,11 @@ class ControlsControllerImplTest : SysuiTestCase() {
                 listingController,
                 broadcastDispatcher,
                 Optional.of(persistenceWrapper),
-                mock(DumpManager::class.java),
-                userTracker
+                mock(DumpManager::class.java)
         )
         controller.auxiliaryPersistenceWrapper = auxiliaryPersistenceWrapper
 
+        assertTrue(controller.available)
         verify(broadcastDispatcher).registerReceiver(
                 capture(broadcastReceiverCaptor), any(), any(), eq(UserHandle.ALL))
 
@@ -216,8 +217,7 @@ class ControlsControllerImplTest : SysuiTestCase() {
                 listingController,
                 broadcastDispatcher,
                 Optional.of(persistenceWrapper),
-                mock(DumpManager::class.java),
-                userTracker
+                mock(DumpManager::class.java)
         )
         assertEquals(listOf(TEST_STRUCTURE_INFO), controller_other.getFavorites())
     }
@@ -520,6 +520,58 @@ class ControlsControllerImplTest : SysuiTestCase() {
         verify(listingController).changeUser(UserHandle.of(otherUser))
         assertTrue(controller.getFavorites().isEmpty())
         assertEquals(otherUser, controller.currentUserId)
+        assertTrue(controller.available)
+    }
+
+    @Test
+    fun testDisableFeature_notAvailable() {
+        Settings.Secure.putIntForUser(mContext.contentResolver,
+                ControlsControllerImpl.CONTROLS_AVAILABLE, 0, user)
+        controller.settingObserver.onChange(false, listOf(ControlsControllerImpl.URI), 0, 0)
+        assertFalse(controller.available)
+    }
+
+    @Test
+    fun testDisableFeature_clearFavorites() {
+        controller.replaceFavoritesForStructure(TEST_STRUCTURE_INFO)
+        delayableExecutor.runAllReady()
+
+        assertFalse(controller.getFavorites().isEmpty())
+
+        Settings.Secure.putIntForUser(mContext.contentResolver,
+                ControlsControllerImpl.CONTROLS_AVAILABLE, 0, user)
+        controller.settingObserver.onChange(false, listOf(ControlsControllerImpl.URI), 0, user)
+        assertTrue(controller.getFavorites().isEmpty())
+    }
+
+    @Test
+    fun testDisableFeature_noChangeForNotCurrentUser() {
+        controller.replaceFavoritesForStructure(TEST_STRUCTURE_INFO)
+        delayableExecutor.runAllReady()
+
+        Settings.Secure.putIntForUser(mContext.contentResolver,
+                ControlsControllerImpl.CONTROLS_AVAILABLE, 0, otherUser)
+        controller.settingObserver.onChange(false, listOf(ControlsControllerImpl.URI), 0, otherUser)
+
+        assertTrue(controller.available)
+        assertFalse(controller.getFavorites().isEmpty())
+    }
+
+    @Test
+    fun testCorrectUserSettingOnUserChange() {
+        Settings.Secure.putIntForUser(mContext.contentResolver,
+                ControlsControllerImpl.CONTROLS_AVAILABLE, 0, otherUser)
+
+        val intent = Intent(Intent.ACTION_USER_SWITCHED).apply {
+            putExtra(Intent.EXTRA_USER_HANDLE, otherUser)
+        }
+        val pendingResult = mock(BroadcastReceiver.PendingResult::class.java)
+        `when`(pendingResult.sendingUserId).thenReturn(otherUser)
+        broadcastReceiverCaptor.value.pendingResult = pendingResult
+
+        broadcastReceiverCaptor.value.onReceive(mContext, intent)
+
+        assertFalse(controller.available)
     }
 
     @Test

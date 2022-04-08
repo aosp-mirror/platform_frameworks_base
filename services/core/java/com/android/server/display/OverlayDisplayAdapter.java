@@ -281,8 +281,7 @@ final class OverlayDisplayAdapter extends DisplayAdapter {
                 List<OverlayMode> modes, int activeMode, int defaultMode,
                 float refreshRate, long presentationDeadlineNanos,
                 OverlayFlags flags, int state, SurfaceTexture surfaceTexture, int number) {
-            super(OverlayDisplayAdapter.this, displayToken, UNIQUE_ID_PREFIX + number,
-                    getContext());
+            super(OverlayDisplayAdapter.this, displayToken, UNIQUE_ID_PREFIX + number);
             mName = name;
             mRefreshRate = refreshRate;
             mDisplayPresentationDeadlineNanos = presentationDeadlineNanos;

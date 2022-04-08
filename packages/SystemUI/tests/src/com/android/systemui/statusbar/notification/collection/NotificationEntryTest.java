@@ -233,8 +233,7 @@ public class NotificationEntryTest extends SysuiTestCase {
         return new Notification.Action.Builder(
                 Icon.createWithResource(getContext(), android.R.drawable.sym_def_app_icon),
                 title,
-                PendingIntent.getBroadcast(getContext(), 0, new Intent("Action"),
-                    PendingIntent.FLAG_IMMUTABLE))
+                PendingIntent.getBroadcast(getContext(), 0, new Intent("Action"), 0))
                 .setContextual(true)
                 .build();
     }
@@ -243,8 +242,7 @@ public class NotificationEntryTest extends SysuiTestCase {
         return new Notification.Action.Builder(
                 Icon.createWithResource(getContext(), android.R.drawable.sym_def_app_icon),
                 title,
-                PendingIntent.getBroadcast(getContext(), 0, new Intent("Action"),
-                    PendingIntent.FLAG_IMMUTABLE)).build();
+                PendingIntent.getBroadcast(getContext(), 0, new Intent("Action"), 0)).build();
     }
 
     private ArrayList<Notification.Action> createActions(String... titles) {

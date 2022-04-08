@@ -17,8 +17,6 @@
 package com.android.server.wm;
 
 import android.inputmethodservice.InputMethodService;
-import android.view.InsetsState;
-import android.view.InsetsState.InternalInsetsType;
 import android.view.WindowInsets.Type.InsetsType;
 
 /**
@@ -37,13 +35,6 @@ interface InsetsControlTarget {
      */
     default WindowState getWindow() {
         return null;
-    }
-
-    /**
-     * @return The requested visibility of this target.
-     */
-    default boolean getRequestedVisibility(@InternalInsetsType int type) {
-        return InsetsState.getDefaultVisibility(type);
     }
 
     /**

@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (c) 2018 The Android Open Source Project
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~      http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <!-- String to represent lowest setting of an HVAC system [CHAR LIMIT=10]-->
+    <string name="hvac_min_text">Min</string>
+    <!-- String to represent largest setting of an HVAC system [CHAR LIMIT=10]-->
+    <string name="hvac_max_text">Max</string>
+    <!-- Text for voice recognition toast. [CHAR LIMIT=60] -->
+    <string name="voice_recognition_toast">Voice recognition now handled by connected Bluetooth device</string>
+    <!-- Name of Guest Profile. [CHAR LIMIT=35] -->
+    <string name="car_guest">Guest</string>
+    <!-- Title for button that starts a guest session. [CHAR LIMIT=35] -->
+    <string name="start_guest_session">Guest</string>
+    <!-- Title for button that  adds a new user. [CHAR LIMIT=30] -->
+    <string name="car_add_user">Add User</string>
+    <!-- Default name of the new user created. [CHAR LIMIT=30] -->
+    <string name="car_new_user">New User</string>
+    <!-- Message to inform user that creation of new user requires that user to set up their space. [CHAR LIMIT=100] -->
+    <string name="user_add_user_message_setup">When you add a new user, that person needs to set up their space.</string>
+    <!-- Message to inform user that the newly created user will have permissions to update apps for all other users. [CHAR LIMIT=100] -->
+    <string name="user_add_user_message_update">Any user can update apps for all other users.</string>
+    <!-- Message to inform user that the new user profile is loading. [CHAR LIMIT=20] -->
+    <string name="car_loading_profile">Loading</string>
+    <!-- Message to inform user that the new user profile is loading with additional information on the previous and the next user. [CHAR LIMIT=100] -->
+    <string name="car_loading_profile_developer_message">Loading user (from <xliff:g id="from_user" example="10">%1$d</xliff:g> to <xliff:g id="to_user" example="12">%2$d</xliff:g>)</string>
+</resources>

@@ -20,9 +20,6 @@ import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
 
-import static org.mockito.Mockito.CALLS_REAL_METHODS;
-import static org.mockito.Mockito.mock;
-
 import android.util.Log;
 
 import androidx.test.runner.AndroidJUnit4;
@@ -76,9 +73,8 @@ public class SntpClientTest {
 
     @Before
     public void setUp() throws Exception {
-        // A mock network has NETID_UNSET, which allows the test to run, with a loopback server,
-        // even w/o external networking.
-        mNetwork = mock(Network.class, CALLS_REAL_METHODS);
+        // NETID_UNSET allows the test to run, with a loopback server, even w/o external networking
+        mNetwork = new Network(ConnectivityManager.NETID_UNSET);
         mServer = new SntpTestServer();
         mClient = new SntpClient();
     }

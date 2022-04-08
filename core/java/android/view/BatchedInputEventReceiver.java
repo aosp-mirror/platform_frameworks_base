@@ -24,8 +24,7 @@ import android.os.Looper;
  * @hide
  */
 public class BatchedInputEventReceiver extends InputEventReceiver {
-    private Choreographer mChoreographer;
-    private boolean mBatchingEnabled;
+    Choreographer mChoreographer;
     private boolean mBatchedInputScheduled;
 
     @UnsupportedAppUsage
@@ -33,35 +32,17 @@ public class BatchedInputEventReceiver extends InputEventReceiver {
             InputChannel inputChannel, Looper looper, Choreographer choreographer) {
         super(inputChannel, looper);
         mChoreographer = choreographer;
-        mBatchingEnabled = true;
     }
 
     @Override
     public void onBatchedInputEventPending(int source) {
-        if (mBatchingEnabled) {
-            scheduleBatchedInput();
-        } else {
-            consumeBatchedInputEvents(-1);
-        }
+        scheduleBatchedInput();
     }
 
     @Override
     public void dispose() {
         unscheduleBatchedInput();
-        consumeBatchedInputEvents(-1);
         super.dispose();
-    }
-
-    /**
-     * Sets whether to enable batching on this input event receiver.
-     * @hide
-     */
-    public void setBatchingEnabled(boolean batchingEnabled) {
-        mBatchingEnabled = batchingEnabled;
-        if (!batchingEnabled) {
-            unscheduleBatchedInput();
-            consumeBatchedInputEvents(-1);
-        }
     }
 
     void doConsumeBatchedInput(long frameTimeNanos) {

@@ -163,8 +163,7 @@ public class RingtonePlayer extends SystemUI {
         }
 
         @Override
-        public void setPlaybackProperties(IBinder token, float volume, boolean looping,
-                boolean hapticGeneratorEnabled) {
+        public void setPlaybackProperties(IBinder token, float volume, boolean looping) {
             Client client;
             synchronized (mClients) {
                 client = mClients.get(token);
@@ -172,7 +171,6 @@ public class RingtonePlayer extends SystemUI {
             if (client != null) {
                 client.mRingtone.setVolume(volume);
                 client.mRingtone.setLooping(looping);
-                client.mRingtone.setHapticGeneratorEnabled(hapticGeneratorEnabled);
             }
             // else no client for token when setting playback properties but will be set at play()
         }

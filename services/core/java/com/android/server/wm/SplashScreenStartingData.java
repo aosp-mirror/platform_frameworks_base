@@ -38,8 +38,8 @@ class SplashScreenStartingData extends StartingData {
 
     SplashScreenStartingData(WindowManagerService service, String pkg, int theme,
             CompatibilityInfo compatInfo, CharSequence nonLocalizedLabel, int labelRes, int icon,
-            int logo, int windowFlags, Configuration mergedOverrideConfiguration, int typeParams) {
-        super(service, typeParams);
+            int logo, int windowFlags, Configuration mergedOverrideConfiguration) {
+        super(service);
         mPkg = pkg;
         mTheme = theme;
         mCompatInfo = compatInfo;
@@ -53,14 +53,8 @@ class SplashScreenStartingData extends StartingData {
 
     @Override
     StartingSurface createStartingSurface(ActivityRecord activity) {
-        return mService.mStartingSurfaceController.createSplashScreenStartingSurface(
-                activity, mPkg, mTheme, mCompatInfo, mNonLocalizedLabel, mLabelRes, mIcon,
-                mLogo, mWindowFlags, mMergedOverrideConfiguration,
-                activity.getDisplayContent().getDisplayId());
-    }
-
-    @Override
-    boolean needRevealAnimation() {
-        return true;
+        return mService.mPolicy.addSplashScreen(activity.token, mPkg, mTheme, mCompatInfo,
+                mNonLocalizedLabel, mLabelRes, mIcon, mLogo, mWindowFlags,
+                mMergedOverrideConfiguration, activity.getDisplayContent().getDisplayId());
     }
 }

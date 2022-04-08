@@ -18,11 +18,7 @@ package com.android.internal.util;
 
 import static org.junit.Assert.assertArrayEquals;
 
-import android.util.TypedXmlPullParser;
-import android.util.TypedXmlSerializer;
 import android.util.Xml;
-
-import junit.framework.TestCase;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -30,6 +26,11 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
+
+import junit.framework.TestCase;
+
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlSerializer;
 
 public class XmlUtilsTest extends TestCase {
 
@@ -51,14 +52,14 @@ public class XmlUtilsTest extends TestCase {
         byte[] testByteArray = {0x1 , 0xa, 0xb, 0x9, 0x34, (byte) 0xaa, (byte) 0xba, (byte) 0x99};
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream(1024);
-        TypedXmlSerializer serializer = Xml.newFastSerializer();
+        XmlSerializer serializer = new FastXmlSerializer();
         serializer.setOutput(baos, StandardCharsets.UTF_8.name());
         serializer.startDocument(null, true);
         XmlUtils.writeValueXml(testByteArray,  "testByteArray", serializer);
         serializer.endDocument();
 
         InputStream bais = new ByteArrayInputStream(baos.toByteArray());
-        TypedXmlPullParser pullParser = Xml.newFastPullParser();
+        XmlPullParser pullParser = Xml.newPullParser();
         pullParser.setInput(bais, StandardCharsets.UTF_8.name());
         String[] name = new String[1];
         byte[] testByteArrayDeserialized = (byte[]) XmlUtils.readValueXml(pullParser, name);

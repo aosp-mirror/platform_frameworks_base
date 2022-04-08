@@ -38,7 +38,7 @@ public class InternalGroupCallCallback extends IGroupCallCallback.Stub {
             return;
         }
 
-        final long token = Binder.clearCallingIdentity();
+        long token = Binder.clearCallingIdentity();
         try {
             mExecutor.execute(new Runnable() {
                 @Override
@@ -57,7 +57,7 @@ public class InternalGroupCallCallback extends IGroupCallCallback.Stub {
             return;
         }
 
-        final long token = Binder.clearCallingIdentity();
+        long token = Binder.clearCallingIdentity();
         try {
             mExecutor.execute(new Runnable() {
                 @Override
@@ -76,7 +76,7 @@ public class InternalGroupCallCallback extends IGroupCallCallback.Stub {
             return;
         }
 
-        final long token = Binder.clearCallingIdentity();
+        long token = Binder.clearCallingIdentity();
         try {
             mExecutor.execute(new Runnable() {
                 @Override

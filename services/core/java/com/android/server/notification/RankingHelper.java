@@ -15,8 +15,6 @@
  */
 package com.android.server.notification;
 
-import static android.text.TextUtils.formatSimple;
-
 import android.annotation.NonNull;
 import android.app.NotificationManager;
 import android.content.Context;
@@ -140,7 +138,7 @@ public class RankingHelper {
 
                 boolean isGroupSummary = record.getNotification().isGroupSummary();
                 record.setGlobalSortKey(
-                        formatSimple("crtcl=0x%04x:intrsv=%c:grnk=0x%04x:gsmry=%c:%s:rnk=0x%04x",
+                        String.format("crtcl=0x%04x:intrsv=%c:grnk=0x%04x:gsmry=%c:%s:rnk=0x%04x",
                         record.getCriticality(),
                         record.isRecentlyIntrusive()
                                 && record.getImportance() > NotificationManager.IMPORTANCE_MIN

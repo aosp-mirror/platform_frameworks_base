@@ -16,11 +16,8 @@
 
 package android.bluetooth.le;
 
-import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.bluetooth.BluetoothDevice;
-import android.content.Attributable;
-import android.content.AttributionSource;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -29,7 +26,7 @@ import java.util.Objects;
 /**
  * ScanResult for Bluetooth LE scan.
  */
-public final class ScanResult implements Parcelable, Attributable {
+public final class ScanResult implements Parcelable {
 
     /**
      * For chained advertisements, inidcates tha the data contained in this
@@ -198,11 +195,6 @@ public final class ScanResult implements Parcelable, Attributable {
         return 0;
     }
 
-    /** {@hide} */
-    public void setAttributionSource(@NonNull AttributionSource attributionSource) {
-        Attributable.setAttributionSource(mDevice, attributionSource);
-    }
-
     /**
      * Returns the remote Bluetooth device identified by the Bluetooth device address.
      */
@@ -317,7 +309,7 @@ public final class ScanResult implements Parcelable, Attributable {
     }
 
     @Override
-    public boolean equals(@Nullable Object obj) {
+    public boolean equals(Object obj) {
         if (this == obj) {
             return true;
         }

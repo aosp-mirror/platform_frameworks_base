@@ -18,9 +18,7 @@ package com.android.server.wm;
 
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
-import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
-import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECONDARY;
 import static android.view.Display.INVALID_DISPLAY;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.any;
@@ -31,9 +29,9 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.eq;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.never;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spy;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.times;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
-import static com.android.server.wm.ActivityStarter.Request;
 import static com.android.server.wm.LaunchParamsController.LaunchParamsModifier.PHASE_BOUNDS;
 import static com.android.server.wm.LaunchParamsController.LaunchParamsModifier.RESULT_CONTINUE;
 import static com.android.server.wm.LaunchParamsController.LaunchParamsModifier.RESULT_DONE;
@@ -70,14 +68,14 @@ import java.util.Map;
 @MediumTest
 @Presubmit
 @RunWith(WindowTestRunner.class)
-public class LaunchParamsControllerTests extends WindowTestsBase {
+public class LaunchParamsControllerTests extends ActivityTestsBase {
     private LaunchParamsController mController;
     private TestLaunchParamsPersister mPersister;
 
     @Before
     public void setUp() throws Exception {
         mPersister = new TestLaunchParamsPersister();
-        mController = new LaunchParamsController(mAtm, mPersister);
+        mController = new LaunchParamsController(mService, mPersister);
     }
 
     /**
@@ -89,16 +87,15 @@ public class LaunchParamsControllerTests extends WindowTestsBase {
                 positioner = mock(LaunchParamsModifier.class);
         mController.registerModifier(positioner);
 
-        final ActivityRecord record = new ActivityBuilder(mAtm).build();
-        final ActivityRecord source = new ActivityBuilder(mAtm).build();
+        final ActivityRecord record = new ActivityBuilder(mService).build();
+        final ActivityRecord source = new ActivityBuilder(mService).build();
         final WindowLayout layout = new WindowLayout(0, 0, 0, 0, 0, 0, 0);
         final ActivityOptions options = mock(ActivityOptions.class);
-        final Request request = new Request();
 
-        mController.calculate(record.getTask(), layout, record, source, options, request,
-                PHASE_BOUNDS, new LaunchParams());
+        mController.calculate(record.getTask(), layout, record, source, options, PHASE_BOUNDS,
+                new LaunchParams());
         verify(positioner, times(1)).onCalculate(eq(record.getTask()), eq(layout), eq(record),
-                eq(source), eq(options), eq(request), anyInt(), any(), any());
+                eq(source), eq(options), anyInt(), any(), any());
     }
 
     /**
@@ -111,7 +108,7 @@ public class LaunchParamsControllerTests extends WindowTestsBase {
 
         final ComponentName name = new ComponentName("com.android.foo", ".BarActivity");
         final int userId = 0;
-        final ActivityRecord activity = new ActivityBuilder(mAtm).setComponent(name)
+        final ActivityRecord activity = new ActivityBuilder(mService).setComponent(name)
                 .setUid(userId).build();
         final LaunchParams expected = new LaunchParams();
         expected.mPreferredTaskDisplayArea = mock(TaskDisplayArea.class);
@@ -121,9 +118,9 @@ public class LaunchParamsControllerTests extends WindowTestsBase {
         mPersister.putLaunchParams(userId, name, expected);
 
         mController.calculate(activity.getTask(), null /*layout*/, activity, null /*source*/,
-                null /*options*/, null /*request*/, PHASE_BOUNDS, new LaunchParams());
-        verify(positioner, times(1)).onCalculate(any(), any(), any(), any(), any(), any(),
-                anyInt(), eq(expected), any());
+                null /*options*/, PHASE_BOUNDS, new LaunchParams());
+        verify(positioner, times(1)).onCalculate(any(), any(), any(), any(), any(), anyInt(),
+                eq(expected), any());
     }
 
     /**
@@ -134,17 +131,16 @@ public class LaunchParamsControllerTests extends WindowTestsBase {
         final LaunchParamsModifier
                 ignoredPositioner = mock(LaunchParamsModifier.class);
         final LaunchParamsModifier earlyExitPositioner =
-                (task, layout, activity, source, options, phase, currentParams, outParams, request)
+                (task, layout, activity, source, options, phase, currentParams, outParams)
                         -> RESULT_DONE;
 
         mController.registerModifier(ignoredPositioner);
         mController.registerModifier(earlyExitPositioner);
 
         mController.calculate(null /*task*/, null /*layout*/, null /*activity*/,
-                null /*source*/, null /*options*/, null /*request*/,
-                PHASE_BOUNDS, new LaunchParams());
-        verify(ignoredPositioner, never()).onCalculate(any(), any(), any(), any(), any(), any(),
-                anyInt(), any(), any());
+                null /*source*/, null /*options*/, PHASE_BOUNDS, new LaunchParams());
+        verify(ignoredPositioner, never()).onCalculate(any(), any(), any(), any(), any(), anyInt(),
+                any(), any());
     }
 
     /**
@@ -160,22 +156,20 @@ public class LaunchParamsControllerTests extends WindowTestsBase {
         mController.registerModifier(firstPositioner);
 
         mController.calculate(null /*task*/, null /*layout*/, null /*activity*/,
-                null /*source*/, null /*options*/, null /*request*/, PHASE_BOUNDS,
-                new LaunchParams());
-        verify(firstPositioner, times(1)).onCalculate(any(), any(), any(), any(), any(), any(),
-                anyInt(), any(), any());
+                null /*source*/, null /*options*/, PHASE_BOUNDS, new LaunchParams());
+        verify(firstPositioner, times(1)).onCalculate(any(), any(), any(), any(), any(), anyInt(),
+                any(), any());
 
         final LaunchParamsModifier secondPositioner = spy(earlyExitPositioner);
 
         mController.registerModifier(secondPositioner);
 
         mController.calculate(null /*task*/, null /*layout*/, null /*activity*/,
-                null /*source*/, null /*options*/, null /*request*/, PHASE_BOUNDS,
-                new LaunchParams());
-        verify(firstPositioner, times(1)).onCalculate(any(), any(), any(), any(), any(), any(),
-                anyInt(), any(), any());
-        verify(secondPositioner, times(1)).onCalculate(any(), any(), any(), any(), any(), any(),
-                anyInt(), any(), any());
+                null /*source*/, null /*options*/, PHASE_BOUNDS, new LaunchParams());
+        verify(firstPositioner, times(1)).onCalculate(any(), any(), any(), any(), any(), anyInt(),
+                any(), any());
+        verify(secondPositioner, times(1)).onCalculate(any(), any(), any(), any(), any(), anyInt(),
+                any(), any());
     }
 
     /**
@@ -197,10 +191,10 @@ public class LaunchParamsControllerTests extends WindowTestsBase {
         mController.registerModifier(positioner2);
 
         mController.calculate(null /*task*/, null /*layout*/, null /*activity*/, null /*source*/,
-                null /*options*/, null /*request*/, PHASE_BOUNDS, new LaunchParams());
+                null /*options*/, PHASE_BOUNDS, new LaunchParams());
 
-        verify(positioner1, times(1)).onCalculate(any(), any(), any(), any(), any(), any(),
-                anyInt(), eq(positioner2.getLaunchParams()), any());
+        verify(positioner1, times(1)).onCalculate(any(), any(), any(), any(), any(), anyInt(),
+                eq(positioner2.getLaunchParams()), any());
     }
 
     /**
@@ -223,7 +217,7 @@ public class LaunchParamsControllerTests extends WindowTestsBase {
         final LaunchParams result = new LaunchParams();
 
         mController.calculate(null /*task*/, null /*layout*/, null /*activity*/, null /*source*/,
-                null /*options*/, null /*request*/, PHASE_BOUNDS, result);
+                null /*options*/, PHASE_BOUNDS, result);
 
         assertEquals(result, positioner2.getLaunchParams());
     }
@@ -234,28 +228,28 @@ public class LaunchParamsControllerTests extends WindowTestsBase {
     @Test
     public void testVrPreferredDisplay() {
         final TestDisplayContent vrDisplay = createNewDisplayContent();
-        mAtm.mVr2dDisplayId = vrDisplay.mDisplayId;
+        mService.mVr2dDisplayId = vrDisplay.mDisplayId;
 
         final LaunchParams result = new LaunchParams();
-        final ActivityRecord vrActivity = new ActivityBuilder(mAtm).build();
+        final ActivityRecord vrActivity = new ActivityBuilder(mService).build();
         vrActivity.requestedVrComponent = vrActivity.mActivityComponent;
 
         // VR activities should always land on default display.
         mController.calculate(null /*task*/, null /*layout*/, vrActivity /*activity*/,
-                null /*source*/, null /*options*/, null/*request*/, PHASE_BOUNDS, result);
+                null /*source*/, null /*options*/, PHASE_BOUNDS, result);
         assertEquals(mRootWindowContainer.getDefaultTaskDisplayArea(),
                 result.mPreferredTaskDisplayArea);
 
         // Otherwise, always lands on VR 2D display.
-        final ActivityRecord vr2dActivity = new ActivityBuilder(mAtm).build();
+        final ActivityRecord vr2dActivity = new ActivityBuilder(mService).build();
         mController.calculate(null /*task*/, null /*layout*/, vr2dActivity /*activity*/,
-                null /*source*/, null /*options*/, null /*request*/, PHASE_BOUNDS, result);
+                null /*source*/, null /*options*/, PHASE_BOUNDS, result);
         assertEquals(vrDisplay.getDefaultTaskDisplayArea(), result.mPreferredTaskDisplayArea);
         mController.calculate(null /*task*/, null /*layout*/, null /*activity*/, null /*source*/,
-                null /*options*/, null /*request*/, PHASE_BOUNDS, result);
+                null /*options*/, PHASE_BOUNDS, result);
         assertEquals(vrDisplay.getDefaultTaskDisplayArea(), result.mPreferredTaskDisplayArea);
 
-        mAtm.mVr2dDisplayId = INVALID_DISPLAY;
+        mService.mVr2dDisplayId = INVALID_DISPLAY;
     }
 
 
@@ -268,15 +262,15 @@ public class LaunchParamsControllerTests extends WindowTestsBase {
         final LaunchParamsModifier positioner = mock(LaunchParamsModifier.class);
         mController.registerModifier(positioner);
 
-        final ActivityRecord record = new ActivityBuilder(mAtm).build();
-        final ActivityRecord source = new ActivityBuilder(mAtm).build();
+        final ActivityRecord record = new ActivityBuilder(mService).build();
+        final ActivityRecord source = new ActivityBuilder(mService).build();
         final WindowLayout layout = new WindowLayout(0, 0, 0, 0, 0, 0, 0);
         final ActivityOptions options = mock(ActivityOptions.class);
 
-        mController.calculate(record.getTask(), layout, record, source, options, null/*request*/,
-                PHASE_BOUNDS, new LaunchParams());
+        mController.calculate(record.getTask(), layout, record, source, options, PHASE_BOUNDS,
+                new LaunchParams());
         verify(positioner, times(1)).onCalculate(eq(record.getTask()), eq(layout), eq(record),
-                eq(source), eq(options), any(), eq(PHASE_BOUNDS), any(), any());
+                eq(source), eq(options), eq(PHASE_BOUNDS), any(), any());
     }
 
     /**
@@ -290,15 +284,15 @@ public class LaunchParamsControllerTests extends WindowTestsBase {
         final TaskDisplayArea preferredTaskDisplayArea = display.getDefaultTaskDisplayArea();
         params.mPreferredTaskDisplayArea = preferredTaskDisplayArea;
         final InstrumentedPositioner positioner = new InstrumentedPositioner(RESULT_DONE, params);
-        final Task task = new TaskBuilder(mAtm.mTaskSupervisor).build();
+        final Task task = new TaskBuilder(mService.mStackSupervisor).build();
 
         mController.registerModifier(positioner);
 
-        doNothing().when(mRootWindowContainer).moveRootTaskToTaskDisplayArea(anyInt(), any(),
+        doNothing().when(mRootWindowContainer).moveStackToTaskDisplayArea(anyInt(), any(),
                 anyBoolean());
         mController.layoutTask(task, null /* windowLayout */);
-        verify(mRootWindowContainer, times(1)).moveRootTaskToTaskDisplayArea(
-                eq(task.getRootTaskId()), eq(preferredTaskDisplayArea), anyBoolean());
+        verify(mRootWindowContainer, times(1)).moveStackToTaskDisplayArea(eq(task.getRootTaskId()),
+                eq(preferredTaskDisplayArea), anyBoolean());
     }
 
     /**
@@ -311,40 +305,17 @@ public class LaunchParamsControllerTests extends WindowTestsBase {
         final int windowingMode = WINDOWING_MODE_FREEFORM;
         params.mWindowingMode = windowingMode;
         final InstrumentedPositioner positioner = new InstrumentedPositioner(RESULT_DONE, params);
-        final Task task = new TaskBuilder(mAtm.mTaskSupervisor).build();
+        final Task task = new TaskBuilder(mService.mStackSupervisor).build();
 
         mController.registerModifier(positioner);
 
-        final int beforeWindowMode = task.getRootTask().getWindowingMode();
+        final int beforeWindowMode = task.getStack().getWindowingMode();
         assertNotEquals(windowingMode, beforeWindowMode);
 
         mController.layoutTask(task, null /* windowLayout */);
 
-        final int afterWindowMode = task.getRootTask().getWindowingMode();
+        final int afterWindowMode = task.getStack().getWindowingMode();
         assertEquals(windowingMode, afterWindowMode);
-    }
-
-    /**
-     * Ensures that {@link LaunchParamsModifier} doesn't alter non-root tasks' windowingMode.
-     */
-    @Test
-    public void testLayoutNonRootTaskWindowingModeChange() {
-        final LaunchParams params = new LaunchParams();
-        final int windowingMode = WINDOWING_MODE_FREEFORM;
-        params.mWindowingMode = windowingMode;
-        final InstrumentedPositioner positioner = new InstrumentedPositioner(RESULT_DONE, params);
-        final Task task = new TaskBuilder(mAtm.mTaskSupervisor).setCreateParentTask(true).build();
-        task.getRootTask().setWindowingMode(WINDOWING_MODE_SPLIT_SCREEN_SECONDARY);
-
-        mController.registerModifier(positioner);
-
-        final int beforeWindowMode = task.getWindowingMode();
-        assertNotEquals(windowingMode, beforeWindowMode);
-
-        mController.layoutTask(task, null /* windowLayout */);
-
-        final int afterWindowMode = task.getWindowingMode();
-        assertEquals(afterWindowMode, beforeWindowMode);
     }
 
     /**
@@ -359,7 +330,7 @@ public class LaunchParamsControllerTests extends WindowTestsBase {
         params.mWindowingMode = WINDOWING_MODE_FREEFORM;
         params.mBounds.set(expected);
         final InstrumentedPositioner positioner = new InstrumentedPositioner(RESULT_DONE, params);
-        final Task task = new TaskBuilder(mAtm.mTaskSupervisor).build();
+        final Task task = new TaskBuilder(mService.mStackSupervisor).build();
 
         mController.registerModifier(positioner);
 
@@ -369,29 +340,6 @@ public class LaunchParamsControllerTests extends WindowTestsBase {
 
         // Task will make adjustments to requested bounds. We only need to guarantee that the
         // reuqested bounds are expected.
-        assertEquals(expected, task.getRequestedOverrideBounds());
-    }
-
-    /**
-     * Ensures that {@link LaunchParamsModifier} requests specifying bounds during
-     * layout are honored if window is in multiwindow mode.
-     */
-    @Test
-    public void testLayoutTaskBoundsChangeMultiWindow() {
-        final Rect expected = new Rect(10, 20, 30, 40);
-
-        final LaunchParams params = new LaunchParams();
-        params.mWindowingMode = WINDOWING_MODE_MULTI_WINDOW;
-        params.mBounds.set(expected);
-        final InstrumentedPositioner positioner = new InstrumentedPositioner(RESULT_DONE, params);
-        final Task task = new TaskBuilder(mAtm.mTaskSupervisor).build();
-
-        mController.registerModifier(positioner);
-
-        assertNotEquals(expected, task.getBounds());
-
-        mController.layoutTask(task, null /* windowLayout */);
-
         assertEquals(expected, task.getRequestedOverrideBounds());
     }
 
@@ -407,7 +355,7 @@ public class LaunchParamsControllerTests extends WindowTestsBase {
         params.mWindowingMode = WINDOWING_MODE_FULLSCREEN;
         params.mBounds.set(expected);
         final InstrumentedPositioner positioner = new InstrumentedPositioner(RESULT_DONE, params);
-        final Task task = new TaskBuilder(mAtm.mTaskSupervisor).build();
+        final Task task = new TaskBuilder(mService.mStackSupervisor).build();
 
         mController.registerModifier(positioner);
 
@@ -431,8 +379,8 @@ public class LaunchParamsControllerTests extends WindowTestsBase {
 
         @Override
         public int onCalculate(Task task, WindowLayout layout, ActivityRecord activity,
-                ActivityRecord source, ActivityOptions options, Request request, int phase,
-                LaunchParams currentParams, LaunchParams outParams) {
+                   ActivityRecord source, ActivityOptions options, int phase,
+                   LaunchParams currentParams, LaunchParams outParams) {
             outParams.set(mParams);
             return mReturnVal;
         }
@@ -513,6 +461,12 @@ public class LaunchParamsControllerTests extends WindowTestsBase {
     }
 
     private TestDisplayContent createNewDisplayContent() {
-        return addNewDisplayContentAt(DisplayContent.POSITION_TOP);
+        final TestDisplayContent display = addNewDisplayContentAt(DisplayContent.POSITION_TOP);
+        spyOn(display.mDisplayContent.mDisplayFrames);
+
+        // We didn't set up the overall environment for this test, so we need to mute the side
+        // effect of layout passes that loosen the stable frame.
+        doNothing().when(display.mDisplayContent.mDisplayFrames).onBeginLayout();
+        return display;
     }
 }

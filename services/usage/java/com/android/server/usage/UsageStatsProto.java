@@ -147,10 +147,6 @@ final class UsageStatsProto {
                     stats.mTotalTimeVisible = proto.readLong(
                             IntervalStatsProto.UsageStats.TOTAL_TIME_VISIBLE_MS);
                     break;
-                case (int) IntervalStatsProto.UsageStats.LAST_TIME_COMPONENT_USED_MS:
-                    stats.mLastTimeComponentUsed = statsOut.beginTime + proto.readLong(
-                            IntervalStatsProto.UsageStats.LAST_TIME_COMPONENT_USED_MS);
-                    break;
             }
         }
         proto.end(token);
@@ -349,9 +345,6 @@ final class UsageStatsProto {
                 usageStats.mLastTimeVisible, stats.beginTime);
         proto.write(IntervalStatsProto.UsageStats.TOTAL_TIME_VISIBLE_MS,
                 usageStats.mTotalTimeVisible);
-        UsageStatsProtoV2.writeOffsetTimestamp(proto,
-                IntervalStatsProto.UsageStats.LAST_TIME_COMPONENT_USED_MS,
-                usageStats.mLastTimeComponentUsed, stats.beginTime);
         proto.write(IntervalStatsProto.UsageStats.APP_LAUNCH_COUNT, usageStats.mAppLaunchCount);
         try {
             writeChooserCounts(proto, usageStats);

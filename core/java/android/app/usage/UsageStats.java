@@ -20,7 +20,6 @@ import static android.app.usage.UsageEvents.Event.ACTIVITY_DESTROYED;
 import static android.app.usage.UsageEvents.Event.ACTIVITY_PAUSED;
 import static android.app.usage.UsageEvents.Event.ACTIVITY_RESUMED;
 import static android.app.usage.UsageEvents.Event.ACTIVITY_STOPPED;
-import static android.app.usage.UsageEvents.Event.APP_COMPONENT_USED;
 import static android.app.usage.UsageEvents.Event.CONTINUING_FOREGROUND_SERVICE;
 import static android.app.usage.UsageEvents.Event.DEVICE_SHUTDOWN;
 import static android.app.usage.UsageEvents.Event.END_OF_DAY;
@@ -30,11 +29,7 @@ import static android.app.usage.UsageEvents.Event.FOREGROUND_SERVICE_STOP;
 import static android.app.usage.UsageEvents.Event.ROLLOVER_FOREGROUND_SERVICE;
 import static android.app.usage.UsageEvents.Event.USER_INTERACTION;
 
-import android.annotation.CurrentTimeMillisLong;
-import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.annotation.SystemApi;
-import android.annotation.TestApi;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Build;
 import android.os.Bundle;
@@ -113,15 +108,6 @@ public final class UsageStats implements Parcelable {
     public long mTotalTimeForegroundServiceUsed;
 
     /**
-     * Last time this package's component is used by a client package, measured in milliseconds
-     * since the epoch. Note that component usage is only reported in certain cases (e.g. broadcast
-     * receiver, service, content provider).
-     * See {@link UsageEvents.Event#APP_COMPONENT_USED}
-     * @hide
-     */
-    public long mLastTimeComponentUsed;
-
-    /**
      * {@hide}
      */
     @UnsupportedAppUsage
@@ -169,7 +155,6 @@ public final class UsageStats implements Parcelable {
     /**
      * {@hide}
      */
-    @TestApi
     public UsageStats() {
     }
 
@@ -179,7 +164,6 @@ public final class UsageStats implements Parcelable {
         mEndTimeStamp = stats.mEndTimeStamp;
         mLastTimeUsed = stats.mLastTimeUsed;
         mLastTimeVisible = stats.mLastTimeVisible;
-        mLastTimeComponentUsed = stats.mLastTimeComponentUsed;
         mLastTimeForegroundServiceUsed = stats.mLastTimeForegroundServiceUsed;
         mTotalTimeInForeground = stats.mTotalTimeInForeground;
         mTotalTimeVisible = stats.mTotalTimeVisible;
@@ -245,8 +229,7 @@ public final class UsageStats implements Parcelable {
     }
 
     /**
-     * Get the total time this package spent in the foreground, measured in milliseconds. When in
-     * the foreground, the user is actively interacting with the app.
+     * Get the total time this package spent in the foreground, measured in milliseconds.
      */
     public long getTotalTimeInForeground() {
         return mTotalTimeInForeground;
@@ -254,8 +237,6 @@ public final class UsageStats implements Parcelable {
 
     /**
      * Get the total time this package's activity is visible in the UI, measured in milliseconds.
-     * Note: An app may be visible but not considered foreground. Apps in the foreground must be
-     * visible, so visible time includes time in the foreground.
      */
     public long getTotalTimeVisible() {
         return mTotalTimeVisible;
@@ -276,20 +257,6 @@ public final class UsageStats implements Parcelable {
      */
     public long getTotalTimeForegroundServiceUsed() {
         return mTotalTimeForegroundServiceUsed;
-    }
-
-    /**
-     * Get the last time this package's component was used by a client package, measured in
-     * milliseconds since the epoch. Note that component usage is only reported for component
-     * bindings (e.g. broadcast receiver, service, content provider) and only when such a binding
-     * would cause an app to leave the stopped state.
-     * See {@link UsageEvents.Event#APP_COMPONENT_USED}
-     * @hide
-     */
-    @SystemApi
-    @CurrentTimeMillisLong
-    public long getLastTimeAnyComponentUsed() {
-        return mLastTimeComponentUsed;
     }
 
     /**
@@ -351,7 +318,6 @@ public final class UsageStats implements Parcelable {
             mergeEventMap(mForegroundServices, right.mForegroundServices);
             mLastTimeUsed = Math.max(mLastTimeUsed, right.mLastTimeUsed);
             mLastTimeVisible = Math.max(mLastTimeVisible, right.mLastTimeVisible);
-            mLastTimeComponentUsed = Math.max(mLastTimeComponentUsed, right.mLastTimeComponentUsed);
             mLastTimeForegroundServiceUsed = Math.max(mLastTimeForegroundServiceUsed,
                     right.mLastTimeForegroundServiceUsed);
         }
@@ -627,9 +593,6 @@ public final class UsageStats implements Parcelable {
                     mLastTimeVisible = timeStamp;
                 }
                 break;
-            case APP_COMPONENT_USED:
-                mLastTimeComponentUsed = timeStamp;
-                break;
             default:
                 break;
         }
@@ -652,7 +615,6 @@ public final class UsageStats implements Parcelable {
         dest.writeLong(mEndTimeStamp);
         dest.writeLong(mLastTimeUsed);
         dest.writeLong(mLastTimeVisible);
-        dest.writeLong(mLastTimeComponentUsed);
         dest.writeLong(mLastTimeForegroundServiceUsed);
         dest.writeLong(mTotalTimeInForeground);
         dest.writeLong(mTotalTimeVisible);
@@ -707,7 +669,6 @@ public final class UsageStats implements Parcelable {
             stats.mEndTimeStamp = in.readLong();
             stats.mLastTimeUsed = in.readLong();
             stats.mLastTimeVisible = in.readLong();
-            stats.mLastTimeComponentUsed = in.readLong();
             stats.mLastTimeForegroundServiceUsed = in.readLong();
             stats.mTotalTimeInForeground = in.readLong();
             stats.mTotalTimeVisible = in.readLong();
@@ -762,48 +723,4 @@ public final class UsageStats implements Parcelable {
             return new UsageStats[size];
         }
     };
-
-    /** @hide */
-    // This class is used by the mainline test suite, so we have to keep these APIs around across
-    // releases. Consider making this class public to help external developers to write tests as
-    // well.
-    @TestApi
-    public static final class Builder {
-        private final UsageStats mUsageStats = new UsageStats();
-
-        @NonNull
-        public UsageStats build() {
-            return mUsageStats;
-        }
-
-        @NonNull
-        public Builder setPackageName(@Nullable String packageName) {
-            mUsageStats.mPackageName = packageName;
-            return this;
-        }
-
-        @NonNull
-        public Builder setFirstTimeStamp(long firstTimeStamp) {
-            mUsageStats.mBeginTimeStamp = firstTimeStamp;
-            return this;
-        }
-
-        @NonNull
-        public Builder setLastTimeStamp(long lastTimeStamp) {
-            mUsageStats.mEndTimeStamp = lastTimeStamp;
-            return this;
-        }
-
-        @NonNull
-        public Builder setTotalTimeInForeground(long totalTimeInForeground) {
-            mUsageStats.mTotalTimeInForeground = totalTimeInForeground;
-            return this;
-        }
-
-        @NonNull
-        public Builder setLastTimeUsed(long lastTimeUsed) {
-            mUsageStats.mLastTimeUsed = lastTimeUsed;
-            return this;
-        }
-    }
 }

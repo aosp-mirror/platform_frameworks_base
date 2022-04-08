@@ -20,13 +20,14 @@ import android.content.ContentResolver;
 import android.os.Build;
 import android.os.Looper;
 
-import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
+import com.android.systemui.dump.DumpManager;
 import com.android.systemui.log.LogBuffer;
-import com.android.systemui.log.LogBufferFactory;
 import com.android.systemui.log.LogcatEchoTracker;
 import com.android.systemui.log.LogcatEchoTrackerDebug;
 import com.android.systemui.log.LogcatEchoTrackerProd;
+
+import javax.inject.Singleton;
 
 import dagger.Module;
 import dagger.Provides;
@@ -38,71 +39,79 @@ import dagger.Provides;
 public class LogModule {
     /** Provides a logging buffer for doze-related logs. */
     @Provides
-    @SysUISingleton
+    @Singleton
     @DozeLog
-    public static LogBuffer provideDozeLogBuffer(LogBufferFactory factory) {
-        return factory.create("DozeLog", 100);
+    public static LogBuffer provideDozeLogBuffer(
+            LogcatEchoTracker bufferFilter,
+            DumpManager dumpManager) {
+        LogBuffer buffer = new LogBuffer("DozeLog", 100, 10, bufferFilter);
+        buffer.attach(dumpManager);
+        return buffer;
     }
 
     /** Provides a logging buffer for all logs related to the data layer of notifications. */
     @Provides
-    @SysUISingleton
+    @Singleton
     @NotificationLog
-    public static LogBuffer provideNotificationsLogBuffer(LogBufferFactory factory) {
-        return factory.create("NotifLog", 1000);
+    public static LogBuffer provideNotificationsLogBuffer(
+            LogcatEchoTracker bufferFilter,
+            DumpManager dumpManager) {
+        LogBuffer buffer = new LogBuffer("NotifLog", 1000, 10, bufferFilter);
+        buffer.attach(dumpManager);
+        return buffer;
     }
 
     /** Provides a logging buffer for all logs related to managing notification sections. */
     @Provides
-    @SysUISingleton
+    @Singleton
     @NotificationSectionLog
-    public static LogBuffer provideNotificationSectionLogBuffer(LogBufferFactory factory) {
-        return factory.create("NotifSectionLog", 1000);
+    public static LogBuffer provideNotificationSectionLogBuffer(
+            LogcatEchoTracker bufferFilter,
+            DumpManager dumpManager) {
+        LogBuffer buffer = new LogBuffer("NotifSectionLog", 1000, 10, bufferFilter);
+        buffer.attach(dumpManager);
+        return buffer;
     }
 
     /** Provides a logging buffer for all logs related to the data layer of notifications. */
     @Provides
-    @SysUISingleton
+    @Singleton
     @NotifInteractionLog
-    public static LogBuffer provideNotifInteractionLogBuffer(LogBufferFactory factory) {
-        return factory.create("NotifInteractionLog", 50);
+    public static LogBuffer provideNotifInteractionLogBuffer(
+            LogcatEchoTracker echoTracker,
+            DumpManager dumpManager) {
+        LogBuffer buffer = new LogBuffer("NotifInteractionLog", 50, 10, echoTracker);
+        buffer.attach(dumpManager);
+        return buffer;
     }
 
     /** Provides a logging buffer for all logs related to Quick Settings. */
     @Provides
-    @SysUISingleton
+    @Singleton
     @QSLog
-    public static LogBuffer provideQuickSettingsLogBuffer(LogBufferFactory factory) {
-        return factory.create("QSLog", 500);
+    public static LogBuffer provideQuickSettingsLogBuffer(
+            LogcatEchoTracker bufferFilter,
+            DumpManager dumpManager) {
+        LogBuffer buffer = new LogBuffer("QSLog", 500, 10, bufferFilter);
+        buffer.attach(dumpManager);
+        return buffer;
     }
 
     /** Provides a logging buffer for {@link com.android.systemui.broadcast.BroadcastDispatcher} */
     @Provides
-    @SysUISingleton
+    @Singleton
     @BroadcastDispatcherLog
-    public static LogBuffer provideBroadcastDispatcherLogBuffer(LogBufferFactory factory) {
-        return factory.create("BroadcastDispatcherLog", 500);
-    }
-
-    /** Provides a logging buffer for all logs related to Toasts shown by SystemUI. */
-    @Provides
-    @SysUISingleton
-    @ToastLog
-    public static LogBuffer provideToastLogBuffer(LogBufferFactory factory) {
-        return factory.create("ToastLog", 50);
-    }
-
-    /** Provides a logging buffer for all logs related to privacy indicators in SystemUI. */
-    @Provides
-    @SysUISingleton
-    @PrivacyLog
-    public static LogBuffer providePrivacyLogBuffer(LogBufferFactory factory) {
-        return factory.create("PrivacyLog", 100);
+    public static LogBuffer provideBroadcastDispatcherLogBuffer(
+            LogcatEchoTracker bufferFilter,
+            DumpManager dumpManager) {
+        LogBuffer buffer = new LogBuffer("BroadcastDispatcherLog", 500, 10, bufferFilter);
+        buffer.attach(dumpManager);
+        return buffer;
     }
 
     /** Allows logging buffers to be tweaked via adb on debug builds but not on prod builds. */
     @Provides
-    @SysUISingleton
+    @Singleton
     public static LogcatEchoTracker provideLogcatEchoTracker(
             ContentResolver contentResolver,
             @Main Looper looper) {

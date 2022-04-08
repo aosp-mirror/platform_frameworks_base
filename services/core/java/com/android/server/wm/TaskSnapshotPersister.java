@@ -23,11 +23,12 @@ import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
 import android.annotation.NonNull;
 import android.annotation.TestApi;
-import android.window.TaskSnapshot;
+import android.app.ActivityManager.TaskSnapshot;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
 import android.os.Process;
 import android.os.SystemClock;
+import android.os.UserManagerInternal;
 import android.util.ArraySet;
 import android.util.AtomicFile;
 import android.util.Slog;
@@ -35,7 +36,6 @@ import android.util.Slog;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.LocalServices;
-import com.android.server.pm.UserManagerInternal;
 import com.android.server.wm.nano.WindowManagerProtos.TaskSnapshotProto;
 
 import java.io.File;
@@ -382,7 +382,7 @@ class TaskSnapshotPersister {
             proto.insetBottom = mSnapshot.getContentInsets().bottom;
             proto.isRealSnapshot = mSnapshot.isRealSnapshot();
             proto.windowingMode = mSnapshot.getWindowingMode();
-            proto.appearance = mSnapshot.getAppearance();
+            proto.systemUiVisibility = mSnapshot.getSystemUiVisibility();
             proto.isTranslucent = mSnapshot.isTranslucent();
             proto.topActivityComponent = mSnapshot.getTopActivityComponent().flattenToString();
             proto.id = mSnapshot.getId();
@@ -404,7 +404,7 @@ class TaskSnapshotPersister {
 
         boolean writeBuffer() {
             final Bitmap bitmap = Bitmap.wrapHardwareBuffer(
-                    mSnapshot.getHardwareBuffer(), mSnapshot.getColorSpace());
+                    mSnapshot.getSnapshot(), mSnapshot.getColorSpace());
             if (bitmap == null) {
                 Slog.e(TAG, "Invalid task snapshot hw bitmap");
                 return false;

@@ -52,12 +52,12 @@ public final class TimeDetectorImpl implements TimeDetector {
     }
 
     @Override
-    public boolean suggestManualTime(@NonNull ManualTimeSuggestion timeSuggestion) {
+    public void suggestManualTime(@NonNull ManualTimeSuggestion timeSuggestion) {
         if (DEBUG) {
             Log.d(TAG, "suggestManualTime called: " + timeSuggestion);
         }
         try {
-            return mITimeDetectorService.suggestManualTime(timeSuggestion);
+            mITimeDetectorService.suggestManualTime(timeSuggestion);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -70,18 +70,6 @@ public final class TimeDetectorImpl implements TimeDetector {
         }
         try {
             mITimeDetectorService.suggestNetworkTime(timeSuggestion);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
-    @Override
-    public void suggestGnssTime(GnssTimeSuggestion timeSuggestion) {
-        if (DEBUG) {
-            Log.d(TAG, "suggestGnssTime called: " + timeSuggestion);
-        }
-        try {
-            mITimeDetectorService.suggestGnssTime(timeSuggestion);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

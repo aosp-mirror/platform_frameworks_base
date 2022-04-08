@@ -17,7 +17,6 @@
 package android.os;
 
 import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.media.AudioAttributes;
 import android.util.Slog;
 
@@ -138,7 +137,7 @@ public class ExternalVibration implements Parcelable {
     }
 
     @Override
-    public boolean equals(@Nullable Object o) {
+    public boolean equals(Object o) {
         if (o == null || !(o instanceof ExternalVibration)) {
             return false;
         }

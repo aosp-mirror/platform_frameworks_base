@@ -49,12 +49,6 @@ bool LayerProperties::setColorFilter(SkColorFilter* filter) {
     return true;
 }
 
-bool LayerProperties::setImageFilter(SkImageFilter* imageFilter) {
-    if(mImageFilter.get() == imageFilter) return false;
-    mImageFilter = sk_ref_sp(imageFilter);
-    return true;
-}
-
 bool LayerProperties::setFromPaint(const SkPaint* paint) {
     bool changed = false;
     changed |= setAlpha(static_cast<uint8_t>(PaintUtils::getAlphaDirect(paint)));
@@ -69,8 +63,6 @@ LayerProperties& LayerProperties::operator=(const LayerProperties& other) {
     setAlpha(other.alpha());
     setXferMode(other.xferMode());
     setColorFilter(other.getColorFilter());
-    setImageFilter(other.getImageFilter());
-    mStretchEffect = other.mStretchEffect;
     return *this;
 }
 

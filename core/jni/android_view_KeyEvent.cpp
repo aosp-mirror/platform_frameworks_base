@@ -20,7 +20,6 @@
 
 #include <android_runtime/AndroidRuntime.h>
 #include <android_runtime/Log.h>
-#include <attestation/HmacKeyManager.h>
 #include <input/Input.h>
 #include <nativehelper/ScopedPrimitiveArray.h>
 #include <nativehelper/ScopedUtfChars.h>

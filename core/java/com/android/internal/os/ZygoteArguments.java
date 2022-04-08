@@ -16,8 +16,8 @@
 
 package com.android.internal.os;
 
-import java.io.EOFException;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 /**
  * Handles argument parsing for args related to the zygote spawner.
@@ -192,10 +192,10 @@ class ZygoteArguments {
     boolean mBootCompleted;
 
     /**
-     * Exemptions from API deny-listing. These are sent to the pre-forked zygote at boot time, or
-     * when they change, via --set-api-denylist-exemptions.
+     * Exemptions from API blacklisting. These are sent to the pre-forked zygote at boot time, or
+     * when they change, via --set-api-blacklist-exemptions.
      */
-    String[] mApiDenylistExemptions;
+    String[] mApiBlacklistExemptions;
 
     /**
      * Sampling rate for logging hidden API accesses to the event log. This is sent to the
@@ -227,10 +227,10 @@ class ZygoteArguments {
     String[] mPkgDataInfoList;
 
     /**
-     * A list that stores all allowlisted app data info: volume uuid and inode.
+     * A list that stores all whitelisted app data info: volume uuid and inode.
      * Null if it does need to do app data isolation.
      */
-    String[] mAllowlistedDataInfoList;
+    String[] mWhitelistedDataInfoList;
 
     /**
      * @see Zygote#BIND_MOUNT_APP_STORAGE_DIRS
@@ -245,34 +245,20 @@ class ZygoteArguments {
     /**
      * Constructs instance and parses args
      *
-     * @param args zygote command-line args as ZygoteCommandBuffer, positioned after argument count.
+     * @param args zygote command-line args
      */
-    private ZygoteArguments(ZygoteCommandBuffer args, int argCount)
-            throws IllegalArgumentException, EOFException {
-        parseArgs(args, argCount);
-    }
-
-    /**
-     * Return a new ZygoteArguments reflecting the contents of the given ZygoteCommandBuffer. Return
-     * null if the ZygoteCommandBuffer was positioned at EOF. Assumes the buffer is initially
-     * positioned at the beginning of the command.
-     */
-    public static ZygoteArguments getInstance(ZygoteCommandBuffer args)
-            throws IllegalArgumentException, EOFException {
-        int argCount = args.getCount();
-        return argCount == 0 ? null : new ZygoteArguments(args, argCount);
+    ZygoteArguments(String[] args) throws IllegalArgumentException {
+        parseArgs(args);
     }
 
     /**
      * Parses the commandline arguments intended for the Zygote spawner (such as "--setuid=" and
-     * "--setgid=") and creates an array containing the remaining args. Return false if we were
-     * at EOF.
+     * "--setgid=") and creates an array containing the remaining args.
      *
      * Per security review bug #1112214, duplicate args are disallowed in critical cases to make
      * injection harder.
      */
-    private void parseArgs(ZygoteCommandBuffer args, int argCount)
-            throws IllegalArgumentException, EOFException {
+    private void parseArgs(String[] args) throws IllegalArgumentException {
         /*
          * See android.os.ZygoteProcess.zygoteSendArgsAndGetResult()
          * Presently the wire format to the zygote process is:
@@ -283,13 +269,13 @@ class ZygoteArguments {
          * the child or -1 on failure.
          */
 
-        String unprocessedArg = null;
-        int curArg = 0;  // Index of arg
-        boolean seenRuntimeArgs = false;
-        boolean expectRuntimeArgs = true;
+        int curArg = 0;
 
-        for ( /* curArg */ ; curArg < argCount; ++curArg) {
-            String arg = args.nextArg();
+        boolean seenRuntimeArgs = false;
+
+        boolean expectRuntimeArgs = true;
+        for ( /* curArg */ ; curArg < args.length; curArg++) {
+            String arg = args[curArg];
 
             if (arg.equals("--")) {
                 curArg++;
@@ -381,8 +367,7 @@ class ZygoteArguments {
                         "Duplicate arg specified");
                 }
                 try {
-                    ++curArg;
-                    mInvokeWith = args.nextArg();
+                    mInvokeWith = args[++curArg];
                 } catch (IndexOutOfBoundsException ex) {
                     throw new IllegalArgumentException(
                         "--invoke-with requires argument");
@@ -395,8 +380,16 @@ class ZygoteArguments {
                 mNiceName = getAssignmentValue(arg);
             } else if (arg.equals("--mount-external-default")) {
                 mMountExternal = Zygote.MOUNT_EXTERNAL_DEFAULT;
-            } else if (arg.equals("--mount-external-installer")) {
+            } else if (arg.equals("--mount-external-read")) {
+                mMountExternal = Zygote.MOUNT_EXTERNAL_READ;
+            } else if (arg.equals("--mount-external-write")) {
+                mMountExternal = Zygote.MOUNT_EXTERNAL_WRITE;
+            } else if (arg.equals("--mount-external-full")) {
+                mMountExternal = Zygote.MOUNT_EXTERNAL_FULL;
+            }  else if (arg.equals("--mount-external-installer")) {
                 mMountExternal = Zygote.MOUNT_EXTERNAL_INSTALLER;
+            }  else if (arg.equals("--mount-external-legacy")) {
+                mMountExternal = Zygote.MOUNT_EXTERNAL_LEGACY;
             } else if (arg.equals("--mount-external-pass-through")) {
                 mMountExternal = Zygote.MOUNT_EXTERNAL_PASS_THROUGH;
             } else if (arg.equals("--mount-external-android-writable")) {
@@ -412,27 +405,22 @@ class ZygoteArguments {
             } else if (arg.startsWith("--app-data-dir=")) {
                 mAppDataDir = getAssignmentValue(arg);
             } else if (arg.equals("--preload-app")) {
-                ++curArg;
-                mPreloadApp = args.nextArg();
+                mPreloadApp = args[++curArg];
             } else if (arg.equals("--preload-package")) {
-                curArg += 4;
-                mPreloadPackage = args.nextArg();
-                mPreloadPackageLibs = args.nextArg();
-                mPreloadPackageLibFileName = args.nextArg();
-                mPreloadPackageCacheKey = args.nextArg();
+                mPreloadPackage = args[++curArg];
+                mPreloadPackageLibs = args[++curArg];
+                mPreloadPackageLibFileName = args[++curArg];
+                mPreloadPackageCacheKey = args[++curArg];
             } else if (arg.equals("--preload-default")) {
                 mPreloadDefault = true;
                 expectRuntimeArgs = false;
             } else if (arg.equals("--start-child-zygote")) {
                 mStartChildZygote = true;
-            } else if (arg.equals("--set-api-denylist-exemptions")) {
+            } else if (arg.equals("--set-api-blacklist-exemptions")) {
                 // consume all remaining args; this is a stand-alone command, never included
                 // with the regular fork command.
-                mApiDenylistExemptions = new String[argCount - curArg - 1];
-                ++curArg;
-                for (int i = 0; curArg < argCount; ++curArg, ++i) {
-                    mApiDenylistExemptions[i] = args.nextArg();
-                }
+                mApiBlacklistExemptions = Arrays.copyOfRange(args, curArg + 1, args.length);
+                curArg = args.length;
                 expectRuntimeArgs = false;
             } else if (arg.startsWith("--hidden-api-log-sampling-rate=")) {
                 String rateStr = getAssignmentValue(arg);
@@ -475,53 +463,42 @@ class ZygoteArguments {
                 }
             } else if (arg.startsWith(Zygote.PKG_DATA_INFO_MAP)) {
                 mPkgDataInfoList = getAssignmentList(arg);
-            } else if (arg.startsWith(Zygote.ALLOWLISTED_DATA_INFO_MAP)) {
-                mAllowlistedDataInfoList = getAssignmentList(arg);
+            } else if (arg.startsWith(Zygote.WHITELISTED_DATA_INFO_MAP)) {
+                mWhitelistedDataInfoList = getAssignmentList(arg);
             } else if (arg.equals(Zygote.BIND_MOUNT_APP_STORAGE_DIRS)) {
                 mBindMountAppStorageDirs = true;
             } else if (arg.equals(Zygote.BIND_MOUNT_APP_DATA_DIRS)) {
                 mBindMountAppDataDirs = true;
             } else {
-                unprocessedArg = arg;
                 break;
             }
         }
-        // curArg is the index of the first unprocessed argument. That argument is either referenced
-        // by unprocessedArg or not read yet.
 
         if (mBootCompleted) {
-            if (argCount > curArg) {
+            if (args.length - curArg > 0) {
                 throw new IllegalArgumentException("Unexpected arguments after --boot-completed");
             }
         } else if (mAbiListQuery || mPidQuery) {
-            if (argCount > curArg) {
+            if (args.length - curArg > 0) {
                 throw new IllegalArgumentException("Unexpected arguments after --query-abi-list.");
             }
         } else if (mPreloadPackage != null) {
-            if (argCount > curArg) {
+            if (args.length - curArg > 0) {
                 throw new IllegalArgumentException(
                     "Unexpected arguments after --preload-package.");
             }
         } else if (mPreloadApp != null) {
-            if (argCount > curArg) {
+            if (args.length - curArg > 0) {
                 throw new IllegalArgumentException(
                     "Unexpected arguments after --preload-app.");
             }
         } else if (expectRuntimeArgs) {
             if (!seenRuntimeArgs) {
-                throw new IllegalArgumentException("Unexpected argument : "
-                    + (unprocessedArg == null ? args.nextArg() : unprocessedArg));
+                throw new IllegalArgumentException("Unexpected argument : " + args[curArg]);
             }
 
-            mRemainingArgs = new String[argCount - curArg];
-            int i = 0;
-            if (unprocessedArg != null) {
-                mRemainingArgs[0] = unprocessedArg;
-                ++i;
-            }
-            for (; i < argCount - curArg; ++i) {
-                mRemainingArgs[i] = args.nextArg();
-            }
+            mRemainingArgs = new String[args.length - curArg];
+            System.arraycopy(args, curArg, mRemainingArgs, 0, mRemainingArgs.length);
         }
 
         if (mStartChildZygote) {

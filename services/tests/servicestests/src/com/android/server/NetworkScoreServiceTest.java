@@ -72,7 +72,7 @@ import androidx.test.filters.MediumTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.server.devicepolicy.MockUtils;
-import com.android.server.pm.permission.LegacyPermissionManagerInternal;
+import com.android.server.pm.permission.PermissionManagerServiceInternal;
 
 import com.google.android.collect.Lists;
 
@@ -133,10 +133,10 @@ public class NetworkScoreServiceTest {
     @Mock private UnaryOperator<List<ScoredNetwork>> mScanResultsFilter;
     @Mock private WifiInfo mWifiInfo;
     @Mock private NetworkScoreService.ScoringServiceConnection mServiceConnection;
-    @Mock private LegacyPermissionManagerInternal mPermissionManagerInternal;
+    @Mock private PermissionManagerServiceInternal mPermissionManagerInternal;
     @Captor private ArgumentCaptor<List<ScoredNetwork>> mScoredNetworkCaptor;
-    @Captor private ArgumentCaptor<LegacyPermissionManagerInternal.PackagesProvider>
-            mPackagesProviderCaptor;
+    @Captor private
+    ArgumentCaptor<PermissionManagerServiceInternal.PackagesProvider> mPackagesProviderCaptor;
 
     private ContentResolver mContentResolver;
     private NetworkScoreService mNetworkScoreService;
@@ -165,7 +165,7 @@ public class NetworkScoreServiceTest {
         mHandlerThread = new HandlerThread("NetworkScoreServiceTest");
         mHandlerThread.start();
         LocalServices.addService(
-                LegacyPermissionManagerInternal.class, mPermissionManagerInternal);
+                PermissionManagerServiceInternal.class, mPermissionManagerInternal);
         mNetworkScoreService = new NetworkScoreService(mContext, mNetworkScorerAppManager,
                 networkScorerAppData -> mServiceConnection, mHandlerThread.getLooper());
         WifiConfiguration configuration = new WifiConfiguration();
@@ -191,7 +191,7 @@ public class NetworkScoreServiceTest {
     @After
     public void tearDown() throws Exception {
         mHandlerThread.quitSafely();
-        LocalServices.removeServiceForTest(LegacyPermissionManagerInternal.class);
+        LocalServices.removeServiceForTest(PermissionManagerServiceInternal.class);
     }
 
     @Test

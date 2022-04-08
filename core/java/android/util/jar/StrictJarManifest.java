@@ -17,10 +17,6 @@
 
 package android.util.jar;
 
-import android.annotation.Nullable;
-
-import libcore.io.Streams;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -33,6 +29,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.jar.Attributes;
+import libcore.io.Streams;
 
 /**
  * The {@code StrictJarManifest} class is used to obtain attribute information for a
@@ -222,7 +219,7 @@ public class StrictJarManifest implements Cloneable {
      * @return {@code true} if the manifests are equal, {@code false} otherwise
      */
     @Override
-    public boolean equals(@Nullable Object o) {
+    public boolean equals(Object o) {
         if (o == null) {
             return false;
         }

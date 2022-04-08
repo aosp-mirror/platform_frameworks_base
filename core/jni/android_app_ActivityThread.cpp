@@ -15,7 +15,7 @@
  */
 
 #include "jni.h"
-#include <nativehelper/JNIPlatformHelp.h>
+#include <nativehelper/JNIHelp.h>
 
 #include "core_jni_helpers.h"
 #include <unistd.h>

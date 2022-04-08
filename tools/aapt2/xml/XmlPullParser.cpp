@@ -177,10 +177,6 @@ const std::string& XmlPullParser::element_name() const {
   return event_queue_.front().data2;
 }
 
-const std::vector<XmlPullParser::PackageDecl>& XmlPullParser::package_decls() const {
-  return package_aliases_;
-}
-
 XmlPullParser::const_iterator XmlPullParser::begin_attributes() const {
   return event_queue_.front().attributes.begin();
 }

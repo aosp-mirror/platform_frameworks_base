@@ -353,11 +353,9 @@ public class ServiceState implements Parcelable {
     private int mChannelNumber;
     private int[] mCellBandwidths = new int[0];
 
-    /**
-     *  ARFCN stands for Absolute Radio Frequency Channel Number. This field is current used for
-     *  LTE where it represents the boost for EARFCN (Reference: 3GPP TS 36.104 5.4.3) and for NR
-     *  where it's for NR ARFCN (Reference: 3GPP TS 36.108) */
-    private int mArfcnRsrpBoost = 0;
+    /* EARFCN stands for E-UTRA Absolute Radio Frequency Channel Number,
+     * Reference: 3GPP TS 36.104 5.4.3 */
+    private int mLteEarfcnRsrpBoost = 0;
 
     private final List<NetworkRegistrationInfo> mNetworkRegistrationInfos = new ArrayList<>();
 
@@ -441,7 +439,7 @@ public class ServiceState implements Parcelable {
         mChannelNumber = s.mChannelNumber;
         mCellBandwidths = s.mCellBandwidths == null ? null :
                 Arrays.copyOf(s.mCellBandwidths, s.mCellBandwidths.length);
-        mArfcnRsrpBoost = s.mArfcnRsrpBoost;
+        mLteEarfcnRsrpBoost = s.mLteEarfcnRsrpBoost;
         synchronized (mNetworkRegistrationInfos) {
             mNetworkRegistrationInfos.clear();
             mNetworkRegistrationInfos.addAll(s.getNetworkRegistrationInfoList());
@@ -475,7 +473,7 @@ public class ServiceState implements Parcelable {
         mCdmaEriIconIndex = in.readInt();
         mCdmaEriIconMode = in.readInt();
         mIsEmergencyOnly = in.readInt() != 0;
-        mArfcnRsrpBoost = in.readInt();
+        mLteEarfcnRsrpBoost = in.readInt();
         synchronized (mNetworkRegistrationInfos) {
             in.readList(mNetworkRegistrationInfos, NetworkRegistrationInfo.class.getClassLoader());
         }
@@ -503,7 +501,7 @@ public class ServiceState implements Parcelable {
         out.writeInt(mCdmaEriIconIndex);
         out.writeInt(mCdmaEriIconMode);
         out.writeInt(mIsEmergencyOnly ? 1 : 0);
-        out.writeInt(mArfcnRsrpBoost);
+        out.writeInt(mLteEarfcnRsrpBoost);
         synchronized (mNetworkRegistrationInfos) {
             out.writeList(mNetworkRegistrationInfos);
         }
@@ -566,7 +564,6 @@ public class ServiceState implements Parcelable {
      * @hide
      */
     @UnsupportedAppUsage
-    @TestApi
     public int getDataRegState() {
         return mDataRegState;
     }
@@ -758,11 +755,6 @@ public class ServiceState implements Parcelable {
      * In GSM/UMTS, long format can be up to 16 characters long.
      * In CDMA, returns the ERI text, if set. Otherwise, returns the ONS.
      *
-     * Require at least {@link android.Manifest.permission#ACCESS_FINE_LOCATION} or
-     * {@link android.Manifest.permission#ACCESS_COARSE_LOCATION}. Otherwise return null if the
-     * caller does not hold neither {@link android.Manifest.permission#ACCESS_FINE_LOCATION} nor
-     * {@link android.Manifest.permission#ACCESS_COARSE_LOCATION}.
-     *
      * @return long name of operator, null if unregistered or unknown
      */
     public String getOperatorAlphaLong() {
@@ -771,12 +763,6 @@ public class ServiceState implements Parcelable {
 
     /**
      * Get current registered voice network operator name in long alphanumeric format.
-     *
-     * Require at least {@link android.Manifest.permission#ACCESS_FINE_LOCATION} or
-     * {@link android.Manifest.permission#ACCESS_COARSE_LOCATION}. Otherwise return null if the
-     * caller does not hold neither {@link android.Manifest.permission#ACCESS_FINE_LOCATION} nor
-     * {@link android.Manifest.permission#ACCESS_COARSE_LOCATION}.
-     *
      * @return long name of operator
      * @hide
      */
@@ -791,11 +777,6 @@ public class ServiceState implements Parcelable {
      *
      * In GSM/UMTS, short format can be up to 8 characters long.
      *
-     * Require at least {@link android.Manifest.permission#ACCESS_FINE_LOCATION} or
-     * {@link android.Manifest.permission#ACCESS_COARSE_LOCATION}. Otherwise return null if the
-     * caller does not hold neither {@link android.Manifest.permission#ACCESS_FINE_LOCATION} nor
-     * {@link android.Manifest.permission#ACCESS_COARSE_LOCATION}.
-     *
      * @return short name of operator, null if unregistered or unknown
      */
     public String getOperatorAlphaShort() {
@@ -804,12 +785,6 @@ public class ServiceState implements Parcelable {
 
     /**
      * Get current registered voice network operator name in short alphanumeric format.
-     *
-     * Require at least {@link android.Manifest.permission#ACCESS_FINE_LOCATION} or
-     * {@link android.Manifest.permission#ACCESS_COARSE_LOCATION}. Otherwise return null if the
-     * caller does not have neither {@link android.Manifest.permission#ACCESS_FINE_LOCATION} nor
-     * {@link android.Manifest.permission#ACCESS_COARSE_LOCATION}.
-     *
      * @return short name of operator, null if unregistered or unknown
      * @hide
      */
@@ -821,12 +796,6 @@ public class ServiceState implements Parcelable {
 
     /**
      * Get current registered data network operator name in short alphanumeric format.
-     *
-     * Require at least {@link android.Manifest.permission#ACCESS_FINE_LOCATION} or
-     * {@link android.Manifest.permission#ACCESS_COARSE_LOCATION}. Otherwise return null if the
-     * caller does not have neither {@link android.Manifest.permission#ACCESS_FINE_LOCATION} nor
-     * {@link android.Manifest.permission#ACCESS_COARSE_LOCATION}.
-     *
      * @return short name of operator, null if unregistered or unknown
      * @hide
      */
@@ -839,11 +808,6 @@ public class ServiceState implements Parcelable {
     /**
      * Get current registered operator name in long alphanumeric format if
      * available or short otherwise.
-     *
-     * Require at least {@link android.Manifest.permission#ACCESS_FINE_LOCATION} or
-     * {@link android.Manifest.permission#ACCESS_COARSE_LOCATION}. Otherwise return null if the
-     * caller does not hold neither {@link android.Manifest.permission#ACCESS_FINE_LOCATION} nor
-     * {@link android.Manifest.permission#ACCESS_COARSE_LOCATION}.
      *
      * @see #getOperatorAlphaLong
      * @see #getOperatorAlphaShort
@@ -865,11 +829,6 @@ public class ServiceState implements Parcelable {
      * In GSM/UMTS, numeric format is 3 digit country code plus 2 or 3 digit
      * network code.
      *
-     * Require at least {@link android.Manifest.permission#ACCESS_FINE_LOCATION} or
-     * {@link android.Manifest.permission#ACCESS_COARSE_LOCATION}. Otherwise return null if the
-     * caller does not hold neither {@link android.Manifest.permission#ACCESS_FINE_LOCATION} nor
-     * {@link android.Manifest.permission#ACCESS_COARSE_LOCATION}.
-     *
      * @return numeric format of operator, null if unregistered or unknown
      */
     /*
@@ -882,12 +841,6 @@ public class ServiceState implements Parcelable {
 
     /**
      * Get current registered voice network operator numeric id.
-     *
-     * Require at least {@link android.Manifest.permission#ACCESS_FINE_LOCATION} or
-     * {@link android.Manifest.permission#ACCESS_COARSE_LOCATION}. Otherwise return null if the
-     * caller does not hold neither {@link android.Manifest.permission#ACCESS_FINE_LOCATION} nor
-     * {@link android.Manifest.permission#ACCESS_COARSE_LOCATION}.
-     *
      * @return numeric format of operator, null if unregistered or unknown
      * @hide
      */
@@ -898,12 +851,6 @@ public class ServiceState implements Parcelable {
 
     /**
      * Get current registered data network operator numeric id.
-     *
-     * Require at least {@link android.Manifest.permission#ACCESS_FINE_LOCATION} or
-     * {@link android.Manifest.permission#ACCESS_COARSE_LOCATION}. Otherwise return null if the
-     * caller does not hold neither {@link android.Manifest.permission#ACCESS_FINE_LOCATION} nor
-     * {@link android.Manifest.permission#ACCESS_COARSE_LOCATION}.
-     *
      * @return numeric format of operator, null if unregistered or unknown
      * @hide
      */
@@ -942,7 +889,7 @@ public class ServiceState implements Parcelable {
                     mCdmaEriIconIndex,
                     mCdmaEriIconMode,
                     mIsEmergencyOnly,
-                    mArfcnRsrpBoost,
+                    mLteEarfcnRsrpBoost,
                     mNetworkRegistrationInfos,
                     mNrFrequencyRange,
                     mOperatorAlphaLongRaw,
@@ -1009,7 +956,7 @@ public class ServiceState implements Parcelable {
      *
      * @hide
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public static String rilRadioTechnologyToString(int rt) {
         String rtString;
 
@@ -1153,10 +1100,9 @@ public class ServiceState implements Parcelable {
                     .append(", mCdmaDefaultRoamingIndicator=").append(mCdmaDefaultRoamingIndicator)
                     .append(", mIsEmergencyOnly=").append(mIsEmergencyOnly)
                     .append(", isUsingCarrierAggregation=").append(isUsingCarrierAggregation())
-                    .append(", mArfcnRsrpBoost=").append(mArfcnRsrpBoost)
+                    .append(", mLteEarfcnRsrpBoost=").append(mLteEarfcnRsrpBoost)
                     .append(", mNetworkRegistrationInfos=").append(mNetworkRegistrationInfos)
-                    .append(", mNrFrequencyRange=").append(Build.IS_DEBUGGABLE
-                            ? mNrFrequencyRange : FREQUENCY_RANGE_UNKNOWN)
+                    .append(", mNrFrequencyRange=").append(mNrFrequencyRange)
                     .append(", mOperatorAlphaLongRaw=").append(mOperatorAlphaLongRaw)
                     .append(", mOperatorAlphaShortRaw=").append(mOperatorAlphaShortRaw)
                     .append(", mIsDataRoamingFromRegistration=")
@@ -1184,7 +1130,7 @@ public class ServiceState implements Parcelable {
         mCdmaEriIconIndex = -1;
         mCdmaEriIconMode = -1;
         mIsEmergencyOnly = false;
-        mArfcnRsrpBoost = 0;
+        mLteEarfcnRsrpBoost = 0;
         mNrFrequencyRange = FREQUENCY_RANGE_UNKNOWN;
         synchronized (mNetworkRegistrationInfos) {
             mNetworkRegistrationInfos.clear();
@@ -1221,7 +1167,7 @@ public class ServiceState implements Parcelable {
     }
 
     /** @hide */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public void setVoiceRegState(int state) {
         mVoiceRegState = state;
         if (DBG) Rlog.d(LOG_TAG, "[ServiceState] setVoiceRegState=" + mVoiceRegState);
@@ -1252,7 +1198,7 @@ public class ServiceState implements Parcelable {
     }
 
     /** @hide */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public void setVoiceRoaming(boolean roaming) {
         setVoiceRoamingType(roaming ? ROAMING_TYPE_UNKNOWN : ROAMING_TYPE_NOT_ROAMING);
     }
@@ -1273,7 +1219,7 @@ public class ServiceState implements Parcelable {
     }
 
     /** @hide */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public void setDataRoaming(boolean dataRoaming) {
         setDataRoamingType(dataRoaming ? ROAMING_TYPE_UNKNOWN : ROAMING_TYPE_NOT_ROAMING);
     }
@@ -1345,7 +1291,7 @@ public class ServiceState implements Parcelable {
      *
      * @hide
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public void setOperatorAlphaLong(@Nullable String longName) {
         mOperatorAlphaLong = longName;
     }
@@ -1416,7 +1362,7 @@ public class ServiceState implements Parcelable {
         m.putBoolean("emergencyOnly", mIsEmergencyOnly);
         m.putBoolean("isDataRoamingFromRegistration", getDataRoamingFromRegistration());
         m.putBoolean("isUsingCarrierAggregation", isUsingCarrierAggregation());
-        m.putInt("ArfcnRsrpBoost", mArfcnRsrpBoost);
+        m.putInt("LteEarfcnRsrpBoost", mLteEarfcnRsrpBoost);
         m.putInt("ChannelNumber", mChannelNumber);
         m.putIntArray("CellBandwidths", mCellBandwidths);
         m.putInt("mNrFrequencyRange", mNrFrequencyRange);
@@ -1466,14 +1412,29 @@ public class ServiceState implements Parcelable {
 
     /** @hide */
     public boolean isUsingCarrierAggregation() {
-        if (getCellBandwidths().length > 1) return true;
-
-        synchronized (mNetworkRegistrationInfos) {
-            for (NetworkRegistrationInfo nri : mNetworkRegistrationInfos) {
-                if (nri.isUsingCarrierAggregation()) return true;
+        boolean isUsingCa = false;
+        NetworkRegistrationInfo nri = getNetworkRegistrationInfo(
+                NetworkRegistrationInfo.DOMAIN_PS, AccessNetworkConstants.TRANSPORT_TYPE_WWAN);
+        if (nri != null) {
+            DataSpecificRegistrationInfo dsri = nri.getDataSpecificInfo();
+            if (dsri != null) {
+                isUsingCa = dsri.isUsingCarrierAggregation();
             }
         }
-        return false;
+        return isUsingCa || getCellBandwidths().length > 1;
+    }
+
+    /** @hide */
+    public void setIsUsingCarrierAggregation(boolean ca) {
+        NetworkRegistrationInfo nri = getNetworkRegistrationInfo(
+                NetworkRegistrationInfo.DOMAIN_PS, AccessNetworkConstants.TRANSPORT_TYPE_WWAN);
+        if (nri != null) {
+            DataSpecificRegistrationInfo dsri = nri.getDataSpecificInfo();
+            if (dsri != null) {
+                dsri.setIsUsingCarrierAggregation(ca);
+                addNetworkRegistrationInfo(nri);
+            }
+        }
     }
 
     /**
@@ -1507,13 +1468,13 @@ public class ServiceState implements Parcelable {
     }
 
     /** @hide */
-    public int getArfcnRsrpBoost() {
-        return mArfcnRsrpBoost;
+    public int getLteEarfcnRsrpBoost() {
+        return mLteEarfcnRsrpBoost;
     }
 
     /** @hide */
-    public void setArfcnRsrpBoost(int arfcnRsrpBoost) {
-        mArfcnRsrpBoost = arfcnRsrpBoost;
+    public void setLteEarfcnRsrpBoost(int LteEarfcnRsrpBoost) {
+        mLteEarfcnRsrpBoost = LteEarfcnRsrpBoost;
     }
 
     /** @hide */
@@ -1530,7 +1491,7 @@ public class ServiceState implements Parcelable {
     }
 
     /** @hide */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public int getRilVoiceRadioTechnology() {
         NetworkRegistrationInfo wwanRegInfo = getNetworkRegistrationInfo(
                 NetworkRegistrationInfo.DOMAIN_CS, AccessNetworkConstants.TRANSPORT_TYPE_WWAN);
@@ -1540,7 +1501,7 @@ public class ServiceState implements Parcelable {
         return RIL_RADIO_TECHNOLOGY_UNKNOWN;
     }
     /** @hide */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public int getRilDataRadioTechnology() {
         return networkTypeToRilRadioTechnology(getDataNetworkType());
     }
@@ -1817,7 +1778,7 @@ public class ServiceState implements Parcelable {
     }
 
     /** @hide */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public static boolean bitmaskHasTech(int bearerBitmask, int radioTech) {
         if (bearerBitmask == 0) {
             return true;
@@ -1903,7 +1864,7 @@ public class ServiceState implements Parcelable {
      * voice SS. The voice SS is only used if it is IN_SERVICE (otherwise the base SS is returned).
      * @hide
      * */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public static ServiceState mergeServiceStates(ServiceState baseSs, ServiceState voiceSs) {
         if (voiceSs.mVoiceRegState != STATE_IN_SERVICE) {
             return baseSs;
@@ -2163,24 +2124,5 @@ public class ServiceState implements Parcelable {
             return true;
         }
         return false;
-    }
-
-    /**
-     * The frequency range is valid or not.
-     *
-     * @param frequencyRange The frequency range {@link FrequencyRange}.
-     * @return {@code true} if valid, {@code false} otherwise.
-     *
-     * @hide
-     */
-    public static boolean isFrequencyRangeValid(int frequencyRange) {
-        if (frequencyRange == FREQUENCY_RANGE_LOW
-                || frequencyRange == FREQUENCY_RANGE_MID
-                || frequencyRange == FREQUENCY_RANGE_HIGH
-                || frequencyRange == FREQUENCY_RANGE_MMWAVE) {
-            return true;
-        } else {
-            return false;
-        }
     }
 }

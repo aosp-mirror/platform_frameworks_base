@@ -16,26 +16,23 @@
 
 #include "HardwareBitmapUploader.h"
 
-#include <EGL/egl.h>
-#include <EGL/eglext.h>
-#include <GLES2/gl2.h>
-#include <GLES2/gl2ext.h>
-#include <GLES3/gl3.h>
-#include <GrDirectContext.h>
-#include <SkCanvas.h>
-#include <SkImage.h>
-#include <gui/TraceUtils.h>
-#include <utils/GLUtils.h>
-#include <utils/NdkUtils.h>
-#include <utils/Trace.h>
-
-#include <thread>
-
 #include "hwui/Bitmap.h"
 #include "renderthread/EglManager.h"
 #include "renderthread/VulkanManager.h"
 #include "thread/ThreadBase.h"
 #include "utils/TimeUtils.h"
+
+#include <EGL/eglext.h>
+#include <GLES2/gl2.h>
+#include <GLES2/gl2ext.h>
+#include <GLES3/gl3.h>
+#include <GrContext.h>
+#include <SkCanvas.h>
+#include <SkImage.h>
+#include <utils/GLUtils.h>
+#include <utils/Trace.h>
+#include <utils/TraceUtils.h>
+#include <thread>
 
 namespace android::uirenderer {
 
@@ -45,7 +42,7 @@ class AHBUploader;
 static sp<AHBUploader> sUploader = nullptr;
 
 struct FormatInfo {
-    AHardwareBuffer_Format bufferFormat;
+    PixelFormat pixelFormat;
     GLint format, type;
     VkFormat vkFormat;
     bool isSupported = false;
@@ -55,6 +52,12 @@ struct FormatInfo {
 class AHBUploader : public RefBase {
 public:
     virtual ~AHBUploader() {}
+
+    // Called to start creation of the Vulkan and EGL contexts on another thread before we actually
+    // need to do an upload.
+    void initialize() {
+        onInitialize();
+    }
 
     void destroy() {
         std::lock_guard _lock{mLock};
@@ -68,10 +71,10 @@ public:
     }
 
     bool uploadHardwareBitmap(const SkBitmap& bitmap, const FormatInfo& format,
-                              AHardwareBuffer* ahb) {
+                              sp<GraphicBuffer> graphicBuffer) {
         ATRACE_CALL();
         beginUpload();
-        bool result = onUploadHardwareBitmap(bitmap, format, ahb);
+        bool result = onUploadHardwareBitmap(bitmap, format, graphicBuffer);
         endUpload();
         return result;
     }
@@ -85,11 +88,12 @@ protected:
     sp<ThreadBase> mUploadThread = nullptr;
 
 private:
+    virtual void onInitialize() = 0;
     virtual void onIdle() = 0;
     virtual void onDestroy() = 0;
 
     virtual bool onUploadHardwareBitmap(const SkBitmap& bitmap, const FormatInfo& format,
-                                        AHardwareBuffer* ahb) = 0;
+                                        sp<GraphicBuffer> graphicBuffer) = 0;
     virtual void onBeginUpload() = 0;
 
     bool shouldTimeOutLocked() {
@@ -134,6 +138,7 @@ private:
 
 class EGLUploader : public AHBUploader {
 private:
+    void onInitialize() override {}
     void onDestroy() override {
         mEglManager.destroy();
     }
@@ -160,16 +165,16 @@ private:
     }
 
     bool onUploadHardwareBitmap(const SkBitmap& bitmap, const FormatInfo& format,
-                                AHardwareBuffer* ahb) override {
+                                sp<GraphicBuffer> graphicBuffer) override {
         ATRACE_CALL();
 
         EGLDisplay display = getUploadEglDisplay();
 
         LOG_ALWAYS_FATAL_IF(display == EGL_NO_DISPLAY, "Failed to get EGL_DEFAULT_DISPLAY! err=%s",
                             uirenderer::renderthread::EglManager::eglErrorString());
-        // We use an EGLImage to access the content of the buffer
+        // We use an EGLImage to access the content of the GraphicBuffer
         // The EGL image is later bound to a 2D texture
-        const EGLClientBuffer clientBuffer = eglGetNativeClientBufferANDROID(ahb);
+        EGLClientBuffer clientBuffer = (EGLClientBuffer)graphicBuffer->getNativeBuffer();
         AutoEglImage autoImage(display, clientBuffer);
         if (autoImage.image == EGL_NO_IMAGE_KHR) {
             ALOGW("Could not create EGL image, err =%s",
@@ -223,67 +228,62 @@ private:
 
 class VkUploader : public AHBUploader {
 private:
-    void onDestroy() override {
-        std::lock_guard _lock{mVkLock};
-        mGrContext.reset();
-        mVulkanManagerStrong.clear();
-    }
-    void onIdle() override {
-        onDestroy();
-    }
-
-    void onBeginUpload() override {}
-
-    bool onUploadHardwareBitmap(const SkBitmap& bitmap, const FormatInfo& format,
-                                AHardwareBuffer* ahb) override {
-        bool uploadSucceeded = false;
-        mUploadThread->queue().runSync([this, &uploadSucceeded, bitmap, ahb]() {
-          ATRACE_CALL();
-          std::lock_guard _lock{mVkLock};
-
-          renderthread::VulkanManager* vkManager = getVulkanManager();
-          if (!vkManager->hasVkContext()) {
-              LOG_ALWAYS_FATAL_IF(mGrContext,
-                                  "GrContext exists with no VulkanManager for vulkan uploads");
-              vkManager->initialize();
-          }
-
-          if (!mGrContext) {
-              GrContextOptions options;
-              mGrContext = vkManager->createContext(options,
-                      renderthread::VulkanManager::ContextType::kUploadThread);
-              LOG_ALWAYS_FATAL_IF(!mGrContext, "failed to create GrContext for vulkan uploads");
-              this->postIdleTimeoutCheck();
-          }
-
-          sk_sp<SkImage> image =
-              SkImage::MakeFromAHardwareBufferWithData(mGrContext.get(), bitmap.pixmap(), ahb);
-          mGrContext->submit(true);
-
-          uploadSucceeded = (image.get() != nullptr);
-        });
-        return uploadSucceeded;
-    }
-
-    /* must be called on the upload thread after the vkLock has been acquired  */
-    renderthread::VulkanManager* getVulkanManager() {
-        if (!mVulkanManagerStrong) {
-            mVulkanManagerStrong = mVulkanManagerWeak.promote();
-
-            // create a new manager if we couldn't promote the weak ref
-            if (!mVulkanManagerStrong) {
-                mVulkanManagerStrong = renderthread::VulkanManager::getInstance();
-                mGrContext.reset();
-                mVulkanManagerWeak = mVulkanManagerStrong;
-            }
+    void onInitialize() override {
+        std::lock_guard _lock{mLock};
+        if (!mUploadThread) {
+            mUploadThread = new ThreadBase{};
+        }
+        if (!mUploadThread->isRunning()) {
+            mUploadThread->start("GrallocUploadThread");
         }
 
-        return mVulkanManagerStrong.get();
+        mUploadThread->queue().post([this]() {
+            std::lock_guard _lock{mVkLock};
+            if (!mVulkanManager.hasVkContext()) {
+                mVulkanManager.initialize();
+            }
+        });
+    }
+    void onDestroy() override {
+        mGrContext.reset();
+        mVulkanManager.destroy();
+    }
+    void onIdle() override {
+        mGrContext.reset();
     }
 
-    sk_sp<GrDirectContext> mGrContext;
-    sp<renderthread::VulkanManager> mVulkanManagerStrong;
-    wp<renderthread::VulkanManager> mVulkanManagerWeak;
+    void onBeginUpload() override {
+        {
+            std::lock_guard _lock{mVkLock};
+            if (!mVulkanManager.hasVkContext()) {
+                LOG_ALWAYS_FATAL_IF(mGrContext,
+                    "GrContext exists with no VulkanManager for vulkan uploads");
+                mUploadThread->queue().runSync([this]() {
+                    mVulkanManager.initialize();
+                });
+            }
+        }
+        if (!mGrContext) {
+            GrContextOptions options;
+            mGrContext = mVulkanManager.createContext(options);
+            LOG_ALWAYS_FATAL_IF(!mGrContext, "failed to create GrContext for vulkan uploads");
+            this->postIdleTimeoutCheck();
+        }
+    }
+
+    bool onUploadHardwareBitmap(const SkBitmap& bitmap, const FormatInfo& format,
+                                sp<GraphicBuffer> graphicBuffer) override {
+        ATRACE_CALL();
+
+        std::lock_guard _lock{mLock};
+
+        sk_sp<SkImage> image = SkImage::MakeFromAHardwareBufferWithData(mGrContext.get(),
+            bitmap.pixmap(), reinterpret_cast<AHardwareBuffer*>(graphicBuffer.get()));
+        return (image.get() != nullptr);
+    }
+
+    sk_sp<GrContext> mGrContext;
+    renderthread::VulkanManager mVulkanManager;
     std::mutex mVkLock;
 };
 
@@ -294,17 +294,13 @@ bool HardwareBitmapUploader::hasFP16Support() {
     // Gralloc shouldn't let us create a USAGE_HW_TEXTURE if GLES is unable to consume it, so
     // we don't need to double-check the GLES version/extension.
     std::call_once(sOnce, []() {
-        AHardwareBuffer_Desc desc = {
-                .width = 1,
-                .height = 1,
-                .layers = 1,
-                .format = AHARDWAREBUFFER_FORMAT_R16G16B16A16_FLOAT,
-                .usage = AHARDWAREBUFFER_USAGE_CPU_READ_NEVER |
-                         AHARDWAREBUFFER_USAGE_CPU_WRITE_NEVER |
-                         AHARDWAREBUFFER_USAGE_GPU_SAMPLED_IMAGE,
-        };
-        UniqueAHardwareBuffer buffer = allocateAHardwareBuffer(desc);
-        hasFP16Support = buffer != nullptr;
+        sp<GraphicBuffer> buffer = new GraphicBuffer(1, 1, PIXEL_FORMAT_RGBA_FP16,
+                                                     GraphicBuffer::USAGE_HW_TEXTURE |
+                                                             GraphicBuffer::USAGE_SW_WRITE_NEVER |
+                                                             GraphicBuffer::USAGE_SW_READ_NEVER,
+                                                     "tempFp16Buffer");
+        status_t error = buffer->initCheck();
+        hasFP16Support = !error;
     });
 
     return hasFP16Support;
@@ -318,7 +314,7 @@ static FormatInfo determineFormat(const SkBitmap& skBitmap, bool usingGL) {
             [[fallthrough]];
         // ARGB_4444 is upconverted to RGBA_8888
         case kARGB_4444_SkColorType:
-            formatInfo.bufferFormat = AHARDWAREBUFFER_FORMAT_R8G8B8A8_UNORM;
+            formatInfo.pixelFormat = PIXEL_FORMAT_RGBA_8888;
             formatInfo.format = GL_RGBA;
             formatInfo.type = GL_UNSIGNED_BYTE;
             formatInfo.vkFormat = VK_FORMAT_R8G8B8A8_UNORM;
@@ -327,25 +323,25 @@ static FormatInfo determineFormat(const SkBitmap& skBitmap, bool usingGL) {
             formatInfo.isSupported = HardwareBitmapUploader::hasFP16Support();
             if (formatInfo.isSupported) {
                 formatInfo.type = GL_HALF_FLOAT;
-                formatInfo.bufferFormat = AHARDWAREBUFFER_FORMAT_R16G16B16A16_FLOAT;
+                formatInfo.pixelFormat = PIXEL_FORMAT_RGBA_FP16;
                 formatInfo.vkFormat = VK_FORMAT_R16G16B16A16_SFLOAT;
             } else {
                 formatInfo.type = GL_UNSIGNED_BYTE;
-                formatInfo.bufferFormat = AHARDWAREBUFFER_FORMAT_R8G8B8A8_UNORM;
+                formatInfo.pixelFormat = PIXEL_FORMAT_RGBA_8888;
                 formatInfo.vkFormat = VK_FORMAT_R8G8B8A8_UNORM;
             }
             formatInfo.format = GL_RGBA;
             break;
         case kRGB_565_SkColorType:
             formatInfo.isSupported = true;
-            formatInfo.bufferFormat = AHARDWAREBUFFER_FORMAT_R5G6B5_UNORM;
+            formatInfo.pixelFormat = PIXEL_FORMAT_RGB_565;
             formatInfo.format = GL_RGB;
             formatInfo.type = GL_UNSIGNED_SHORT_5_6_5;
             formatInfo.vkFormat = VK_FORMAT_R5G6B5_UNORM_PACK16;
             break;
         case kGray_8_SkColorType:
             formatInfo.isSupported = usingGL;
-            formatInfo.bufferFormat = AHARDWAREBUFFER_FORMAT_R8G8B8A8_UNORM;
+            formatInfo.pixelFormat = PIXEL_FORMAT_RGBA_8888;
             formatInfo.format = GL_LUMINANCE;
             formatInfo.type = GL_UNSIGNED_BYTE;
             formatInfo.vkFormat = VK_FORMAT_R8G8B8A8_UNORM;
@@ -362,8 +358,13 @@ static SkBitmap makeHwCompatible(const FormatInfo& format, const SkBitmap& sourc
         return source;
     } else {
         SkBitmap bitmap;
-        bitmap.allocPixels(source.info().makeColorType(kN32_SkColorType));
-        bitmap.writePixels(source.pixmap());
+        const SkImageInfo& info = source.info();
+        bitmap.allocPixels(info.makeColorType(kN32_SkColorType));
+
+        SkCanvas canvas(bitmap);
+        canvas.drawColor(0);
+        canvas.drawBitmap(source, 0.0f, 0.0f, nullptr);
+
         return bitmap;
     }
 }
@@ -393,33 +394,35 @@ sk_sp<Bitmap> HardwareBitmapUploader::allocateHardwareBitmap(const SkBitmap& sou
     }
 
     SkBitmap bitmap = makeHwCompatible(format, sourceBitmap);
-    AHardwareBuffer_Desc desc = {
-            .width = static_cast<uint32_t>(bitmap.width()),
-            .height = static_cast<uint32_t>(bitmap.height()),
-            .layers = 1,
-            .format = format.bufferFormat,
-            .usage = AHARDWAREBUFFER_USAGE_CPU_READ_NEVER | AHARDWAREBUFFER_USAGE_CPU_WRITE_NEVER |
-                     AHARDWAREBUFFER_USAGE_GPU_SAMPLED_IMAGE,
-    };
-    UniqueAHardwareBuffer ahb = allocateAHardwareBuffer(desc);
-    if (!ahb) {
-        ALOGW("allocateHardwareBitmap() failed in AHardwareBuffer_allocate()");
+    sp<GraphicBuffer> buffer = new GraphicBuffer(
+            static_cast<uint32_t>(bitmap.width()), static_cast<uint32_t>(bitmap.height()),
+            format.pixelFormat,
+            GraphicBuffer::USAGE_HW_TEXTURE | GraphicBuffer::USAGE_SW_WRITE_NEVER |
+                    GraphicBuffer::USAGE_SW_READ_NEVER,
+            std::string("Bitmap::allocateHardwareBitmap pid [") + std::to_string(getpid()) +
+                    "]");
+
+    status_t error = buffer->initCheck();
+    if (error < 0) {
+        ALOGW("createGraphicBuffer() failed in GraphicBuffer.create()");
         return nullptr;
-    };
+    }
 
     createUploader(usingGL);
 
-    if (!sUploader->uploadHardwareBitmap(bitmap, format, ahb.get())) {
+    if (!sUploader->uploadHardwareBitmap(bitmap, format, buffer)) {
         return nullptr;
     }
-    return Bitmap::createFrom(ahb.get(), bitmap.colorType(), bitmap.refColorSpace(),
-                              bitmap.alphaType(), Bitmap::computePalette(bitmap));
+    return Bitmap::createFrom(buffer->toAHardwareBuffer(), bitmap.colorType(),
+                              bitmap.refColorSpace(), bitmap.alphaType(),
+			      Bitmap::computePalette(bitmap));
 }
 
 void HardwareBitmapUploader::initialize() {
     bool usingGL = uirenderer::Properties::getRenderPipelineType() ==
             uirenderer::RenderPipelineType::SkiaGL;
     createUploader(usingGL);
+    sUploader->initialize();
 }
 
 void HardwareBitmapUploader::terminate() {

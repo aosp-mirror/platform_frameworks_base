@@ -28,7 +28,7 @@ import java.util.Arrays;
  *
  * @hide
  */
-public final class AppCompatCallbacks implements Compatibility.BehaviorChangeDelegate {
+public final class AppCompatCallbacks extends Compatibility.Callbacks {
     private final long[] mDisabledChanges;
     private final ChangeReporter mChangeReporter;
 
@@ -38,7 +38,7 @@ public final class AppCompatCallbacks implements Compatibility.BehaviorChangeDel
      * @param disabledChanges Set of compatibility changes that are disabled for this process.
      */
     public static void install(long[] disabledChanges) {
-        Compatibility.setBehaviorChangeDelegate(new AppCompatCallbacks(disabledChanges));
+        Compatibility.setCallbacks(new AppCompatCallbacks(disabledChanges));
     }
 
     private AppCompatCallbacks(long[] disabledChanges) {
@@ -48,11 +48,11 @@ public final class AppCompatCallbacks implements Compatibility.BehaviorChangeDel
                 ChangeReporter.SOURCE_APP_PROCESS);
     }
 
-    public void onChangeReported(long changeId) {
+    protected void reportChange(long changeId) {
         reportChange(changeId, ChangeReporter.STATE_LOGGED);
     }
 
-    public boolean isChangeEnabled(long changeId) {
+    protected boolean isChangeEnabled(long changeId) {
         if (Arrays.binarySearch(mDisabledChanges, changeId) < 0) {
             // Not present in the disabled array
             reportChange(changeId, ChangeReporter.STATE_ENABLED);

@@ -594,7 +594,6 @@ public final class RecordingActivityMonitor implements AudioSystem.AudioRecordin
         private final int mSession;
         private final int mSource;
         private final String mPackName;
-        private final boolean mSilenced;
 
         RecordingEvent(int event, int riid, AudioRecordingConfiguration config) {
             mRecEvent = event;
@@ -604,13 +603,11 @@ public final class RecordingActivityMonitor implements AudioSystem.AudioRecordin
                 mSession = config.getClientAudioSessionId();
                 mSource = config.getClientAudioSource();
                 mPackName = config.getClientPackageName();
-                mSilenced = config.isClientSilenced();
             } else {
                 mClientUid = -1;
                 mSession = -1;
                 mSource = -1;
                 mPackName = null;
-                mSilenced = false;
             }
         }
 
@@ -636,7 +633,6 @@ public final class RecordingActivityMonitor implements AudioSystem.AudioRecordin
                     .append(" uid:").append(mClientUid)
                     .append(" session:").append(mSession)
                     .append(" src:").append(MediaRecorder.toLogFriendlyAudioSource(mSource))
-                    .append(mSilenced ? " silenced" : " not silenced")
                     .append(mPackName == null ? "" : " pack:" + mPackName).toString();
         }
     }

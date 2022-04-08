@@ -21,37 +21,42 @@ import android.view.LayoutInflater;
 import android.view.ViewGroup;
 
 import com.android.systemui.R;
-import com.android.systemui.dagger.SysUISingleton;
-import com.android.systemui.statusbar.notification.row.dagger.NotificationShelfComponent;
+import com.android.systemui.statusbar.notification.row.dagger.NotificationRowComponent;
+import com.android.systemui.statusbar.phone.LockIcon;
+import com.android.systemui.statusbar.phone.LockscreenLockIconController;
 import com.android.systemui.statusbar.phone.NotificationPanelView;
 import com.android.systemui.statusbar.phone.NotificationShadeWindowView;
 import com.android.systemui.statusbar.phone.StatusBarWindowView;
 import com.android.systemui.util.InjectionInflationController;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 
 /**
  * Creates a single instance of super_status_bar and super_notification_shade that can be shared
  * across various system ui objects.
  */
-@SysUISingleton
+@Singleton
 public class SuperStatusBarViewFactory {
 
     private final Context mContext;
     private final InjectionInflationController mInjectionInflationController;
-    private final NotificationShelfComponent.Builder mNotificationShelfComponentBuilder;
+    private final NotificationRowComponent.Builder mNotificationRowComponentBuilder;
+    private final LockscreenLockIconController mLockIconController;
 
     private NotificationShadeWindowView mNotificationShadeWindowView;
     private StatusBarWindowView mStatusBarWindowView;
-    private NotificationShelfController mNotificationShelfController;
+    private NotificationShelf mNotificationShelf;
 
     @Inject
     public SuperStatusBarViewFactory(Context context,
             InjectionInflationController injectionInflationController,
-            NotificationShelfComponent.Builder notificationShelfComponentBuilder) {
+            NotificationRowComponent.Builder notificationRowComponentBuilder,
+            LockscreenLockIconController lockIconController) {
         mContext = context;
         mInjectionInflationController = injectionInflationController;
-        mNotificationShelfComponentBuilder = notificationShelfComponentBuilder;
+        mNotificationRowComponentBuilder = notificationRowComponentBuilder;
+        mLockIconController = lockIconController;
     }
 
     /**
@@ -71,6 +76,10 @@ public class SuperStatusBarViewFactory {
         if (mNotificationShadeWindowView == null) {
             throw new IllegalStateException(
                     "R.layout.super_notification_shade could not be properly inflated");
+        }
+        LockIcon lockIcon = mNotificationShadeWindowView.findViewById(R.id.lock_icon);
+        if (lockIcon != null) {
+            mLockIconController.attach(lockIcon);
         }
 
         return mNotificationShadeWindowView;
@@ -105,27 +114,25 @@ public class SuperStatusBarViewFactory {
      *                  isn't immediately attached, but the layout params of this view is used
      *                  during inflation.
      */
-    public NotificationShelfController getNotificationShelfController(ViewGroup container) {
-        if (mNotificationShelfController != null) {
-            return mNotificationShelfController;
+    public NotificationShelf getNotificationShelf(ViewGroup container) {
+        if (mNotificationShelf != null) {
+            return mNotificationShelf;
         }
 
-        NotificationShelf view = (NotificationShelf) LayoutInflater.from(mContext)
-                .inflate(R.layout.status_bar_notification_shelf, container, /* attachToRoot= */
-                        false);
+        mNotificationShelf = (NotificationShelf) mInjectionInflationController.injectable(
+                LayoutInflater.from(mContext)).inflate(R.layout.status_bar_notification_shelf,
+                container, /* attachToRoot= */ false);
 
-        if (view == null) {
+        NotificationRowComponent component = mNotificationRowComponentBuilder
+                .activatableNotificationView(mNotificationShelf)
+                .build();
+        component.getActivatableNotificationViewController().init();
+
+        if (mNotificationShelf == null) {
             throw new IllegalStateException(
                     "R.layout.status_bar_notification_shelf could not be properly inflated");
         }
-
-        NotificationShelfComponent component = mNotificationShelfComponentBuilder
-                .notificationShelf(view)
-                .build();
-        mNotificationShelfController = component.getNotificationShelfController();
-        mNotificationShelfController.init();
-
-        return mNotificationShelfController;
+        return mNotificationShelf;
     }
 
     public NotificationPanelView getNotificationPanelView() {

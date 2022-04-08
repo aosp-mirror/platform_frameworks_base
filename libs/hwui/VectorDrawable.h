@@ -97,7 +97,7 @@ private:
     bool* mStagingDirty;
 };
 
-class Node {
+class ANDROID_API Node {
 public:
     class Properties {
     public:
@@ -127,9 +127,9 @@ protected:
     PropertyChangedListener* mPropertyChangedListener = nullptr;
 };
 
-class Path : public Node {
+class ANDROID_API Path : public Node {
 public:
-    struct Data {
+    struct ANDROID_API Data {
         std::vector<char> verbs;
         std::vector<size_t> verbSizes;
         std::vector<float> points;
@@ -200,7 +200,7 @@ private:
     bool mStagingPropertiesDirty = true;
 };
 
-class FullPath : public Path {
+class ANDROID_API FullPath : public Path {
 public:
     class FullPathProperties : public Properties {
     public:
@@ -369,7 +369,7 @@ private:
     bool mAntiAlias = true;
 };
 
-class ClipPath : public Path {
+class ANDROID_API ClipPath : public Path {
 public:
     ClipPath(const ClipPath& path) : Path(path) {}
     ClipPath(const char* path, size_t strLength) : Path(path, strLength) {}
@@ -378,7 +378,7 @@ public:
     virtual void setAntiAlias(bool aa) {}
 };
 
-class Group : public Node {
+class ANDROID_API Group : public Node {
 public:
     class GroupProperties : public Properties {
     public:
@@ -498,7 +498,7 @@ private:
     std::vector<std::unique_ptr<Node> > mChildren;
 };
 
-class Tree : public VirtualLightRefBase {
+class ANDROID_API Tree : public VirtualLightRefBase {
 public:
     explicit Tree(Group* rootNode) : mRootNode(rootNode) {
         mRootNode->setPropertyChangedListener(&mPropertyChangedListener);

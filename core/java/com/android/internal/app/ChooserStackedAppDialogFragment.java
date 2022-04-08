@@ -20,7 +20,6 @@ package com.android.internal.app;
 import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
-import android.os.Bundle;
 import android.os.UserHandle;
 
 import com.android.internal.app.chooser.DisplayResolveInfo;
@@ -33,26 +32,17 @@ import com.android.internal.app.chooser.MultiDisplayResolveInfo;
 public class ChooserStackedAppDialogFragment extends ChooserTargetActionsDialogFragment
         implements DialogInterface.OnClickListener {
 
-    static final String WHICH_KEY = "which_key";
-    static final String MULTI_DRI_KEY = "multi_dri_key";
-
     private MultiDisplayResolveInfo mMultiDisplayResolveInfo;
     private int mParentWhich;
 
-    public ChooserStackedAppDialogFragment() {}
-
-    void setStateFromBundle(Bundle b) {
-        mMultiDisplayResolveInfo = (MultiDisplayResolveInfo) b.get(MULTI_DRI_KEY);
-        mTargetInfos = mMultiDisplayResolveInfo.getTargets();
-        mUserHandle = (UserHandle) b.get(USER_HANDLE_KEY);
-        mParentWhich = b.getInt(WHICH_KEY);
+    public ChooserStackedAppDialogFragment() {
     }
 
-    @Override
-    public void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-        outState.putInt(WHICH_KEY, mParentWhich);
-        outState.putParcelable(MULTI_DRI_KEY, mMultiDisplayResolveInfo);
+    public ChooserStackedAppDialogFragment(MultiDisplayResolveInfo targets,
+            int parentWhich, UserHandle userHandle) {
+        super(targets.getTargets(), userHandle);
+        mMultiDisplayResolveInfo = targets;
+        mParentWhich = parentWhich;
     }
 
     @Override
@@ -63,7 +53,6 @@ public class ChooserStackedAppDialogFragment extends ChooserTargetActionsDialogF
 
     @Override
     protected Drawable getItemIcon(DisplayResolveInfo dri) {
-
         // Show no icon for the group disambig dialog, null hides the imageview
         return null;
     }

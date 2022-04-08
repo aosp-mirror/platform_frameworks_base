@@ -18,7 +18,6 @@
 #define _ANDROID_HARDWARE_HARDWAREBUFFER_H
 
 #include <android/hardware_buffer.h>
-#include <ui/GraphicBuffer.h>
 
 #include "jni.h"
 
@@ -26,10 +25,6 @@ namespace android {
 
 /* Gets the underlying AHardwareBuffer for a HardwareBuffer. */
 extern AHardwareBuffer* android_hardware_HardwareBuffer_getNativeHardwareBuffer(
-        JNIEnv* env, jobject hardwareBufferObj);
-
-/* Gets the underlying GraphicBuffer for a HardwareBuffer. */
-extern GraphicBuffer* android_hardware_HardwareBuffer_getNativeGraphicBuffer(
         JNIEnv* env, jobject hardwareBufferObj);
 
 /* Returns a HardwareBuffer wrapper for the underlying AHardwareBuffer. */

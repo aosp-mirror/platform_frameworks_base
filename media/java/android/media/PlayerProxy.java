@@ -143,8 +143,7 @@ public class PlayerProxy {
             @NonNull VolumeShaper.Configuration configuration,
             @NonNull VolumeShaper.Operation operation) {
         try {
-            mConf.getIPlayer().applyVolumeShaper(configuration.toParcelable(),
-                    operation.toParcelable());
+            mConf.getIPlayer().applyVolumeShaper(configuration, operation);
         } catch (NullPointerException|RemoteException e) {
             throw new IllegalStateException(
                     "No player to proxy for applyVolumeShaper operation,"

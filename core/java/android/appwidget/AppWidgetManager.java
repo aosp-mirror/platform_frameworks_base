@@ -23,8 +23,6 @@ import android.annotation.RequiresFeature;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.SystemService;
-import android.annotation.TestApi;
-import android.annotation.UserIdInt;
 import android.app.IServiceConnection;
 import android.app.PendingIntent;
 import android.compat.annotation.UnsupportedAppUsage;
@@ -36,7 +34,6 @@ import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.ShortcutInfo;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.RemoteException;
@@ -217,12 +214,6 @@ public class AppWidgetManager {
      * widget instance.
      */
     public static final String OPTION_APPWIDGET_MAX_HEIGHT = "appWidgetMaxHeight";
-
-    /**
-     * A bundle extra ({@code List<SizeF>}) that contains the list of possible sizes, in dips, a
-     * widget instance can take.
-     */
-    public static final String OPTION_APPWIDGET_SIZES = "appWidgetSizes";
 
     /**
      * A bundle extra that hints to the AppWidgetProvider the category of host that owns this
@@ -952,7 +943,7 @@ public class AppWidgetManager {
      *
      * @hide
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public void bindAppWidgetId(int appWidgetId, ComponentName provider, Bundle options) {
         if (mService == null) {
             return;
@@ -962,9 +953,6 @@ public class AppWidgetManager {
 
     /**
      * Set the component for a given appWidgetId.
-     *
-     * If successful, the app widget provider will receive a {@link #ACTION_APPWIDGET_UPDATE}
-     * broadcast.
      *
      * <p class="note">You need the BIND_APPWIDGET permission or the user must have enabled binding
      *         widgets always for your component. Should be used by apps that host widgets; if this
@@ -985,9 +973,6 @@ public class AppWidgetManager {
 
     /**
      * Set the component for a given appWidgetId.
-     *
-     * If successful, the app widget provider will receive a {@link #ACTION_APPWIDGET_UPDATE}
-     * broadcast.
      *
      * <p class="note">You need the BIND_APPWIDGET permission or the user must have enabled binding
      *         widgets always for your component. Should be used by apps that host widgets; if this
@@ -1012,10 +997,6 @@ public class AppWidgetManager {
 
     /**
      * Set the provider for a given appWidgetId if the caller has a permission.
-     *
-     * If successful, the app widget provider will receive a {@link #ACTION_APPWIDGET_UPDATE}
-     * broadcast.
-     *
      * <p>
      * <strong>Note:</strong> You need the {@link android.Manifest.permission#BIND_APPWIDGET}
      * permission or the user must have enabled binding widgets always for your component.
@@ -1107,9 +1088,7 @@ public class AppWidgetManager {
      *
      * @hide
      */
-    @TestApi
-    public void setBindAppWidgetPermission(
-            @NonNull String packageName, @UserIdInt int userId, boolean permission) {
+    public void setBindAppWidgetPermission(String packageName, int userId, boolean permission) {
         if (mService == null) {
             return;
         }
@@ -1135,7 +1114,7 @@ public class AppWidgetManager {
      * @see Context#getServiceDispatcher(ServiceConnection, Handler, int)
      * @hide
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public boolean bindRemoteViewsService(Context context, int appWidgetId, Intent intent,
             IServiceConnection connection, @Context.BindServiceFlags int flags) {
         if (mService == null) {

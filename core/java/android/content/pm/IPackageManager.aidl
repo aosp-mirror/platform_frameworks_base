@@ -27,7 +27,6 @@ import android.content.pm.InstantAppInfo;
 import android.content.pm.FeatureInfo;
 import android.content.pm.IDexModuleRegisterCallback;
 import android.content.pm.InstallSourceInfo;
-import android.content.pm.IOnChecksumsReadyListener;
 import android.content.pm.IPackageInstaller;
 import android.content.pm.IPackageDeleteObserver;
 import android.content.pm.IPackageDeleteObserver2;
@@ -39,7 +38,6 @@ import android.content.pm.InstrumentationInfo;
 import android.content.pm.KeySet;
 import android.content.pm.ModuleInfo;
 import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.ProviderInfo;
 import android.content.pm.PermissionGroupInfo;
@@ -66,7 +64,7 @@ import android.content.IntentSender;
  */
 interface IPackageManager {
     void checkPackageStartable(String packageName, int userId);
-    @UnsupportedAppUsage(trackingBug = 171933273)
+    @UnsupportedAppUsage
     boolean isPackageAvailable(String packageName, int userId);
     @UnsupportedAppUsage
     PackageInfo getPackageInfo(String packageName, int flags, int userId);
@@ -83,11 +81,6 @@ interface IPackageManager {
 
     @UnsupportedAppUsage
     ApplicationInfo getApplicationInfo(String packageName, int flags ,int userId);
-
-    /**
-     * @return the target SDK for the given package name, or -1 if it cannot be retrieved
-     */
-    int getTargetSdkVersion(String packageName);
 
     @UnsupportedAppUsage
     ActivityInfo getActivityInfo(in ComponentName className, int flags, int userId);
@@ -139,7 +132,7 @@ interface IPackageManager {
 
     boolean canForwardTo(in Intent intent, String resolvedType, int sourceUserId, int targetUserId);
 
-    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
+    @UnsupportedAppUsage
     ParceledListSlice queryIntentActivities(in Intent intent,
             String resolvedType, int flags, int userId);
 
@@ -184,7 +177,7 @@ interface IPackageManager {
      * limit that kicks in when flags are included that bloat up the data
      * returned.
      */
-    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
+    @UnsupportedAppUsage
     ParceledListSlice getInstalledApplications(int flags, int userId);
 
     /**
@@ -205,7 +198,7 @@ interface IPackageManager {
      * @param outInfo Filled in with a list of the ProviderInfo for each
      *                name in 'outNames'.
      */
-    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
+    @UnsupportedAppUsage
     void querySyncProviders(inout List<String> outNames,
             inout List<ProviderInfo> outInfo);
 
@@ -216,7 +209,7 @@ interface IPackageManager {
     InstrumentationInfo getInstrumentationInfo(
             in ComponentName className, int flags);
 
-    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
+    @UnsupportedAppUsage
     ParceledListSlice queryInstrumentation(
             String targetPackage, int flags);
 
@@ -268,7 +261,7 @@ interface IPackageManager {
             in IntentFilter filter, int match, in ComponentName activity);
 
     void addPreferredActivity(in IntentFilter filter, int match,
-            in ComponentName[] set, in ComponentName activity, int userId, boolean removeExisting);
+            in ComponentName[] set, in ComponentName activity, int userId);
 
     @UnsupportedAppUsage
     void replacePreferredActivity(in IntentFilter filter, int match,
@@ -310,8 +303,8 @@ interface IPackageManager {
     void restorePreferredActivities(in byte[] backup, int userId);
     byte[] getDefaultAppsBackup(int userId);
     void restoreDefaultApps(in byte[] backup, int userId);
-    byte[] getDomainVerificationBackup(int userId);
-    void restoreDomainVerification(in byte[] backup, int userId);
+    byte[] getIntentFilterVerificationBackup(int userId);
+    void restoreIntentFilterVerification(in byte[] backup, int userId);
 
     /**
      * Report the set of 'Home' activity candidates, plus (if any) which of them
@@ -380,7 +373,8 @@ interface IPackageManager {
     /**
      * Logs process start information (including APK hash) to the security log.
      */
-    void logAppProcessStartIfNeeded(String packageName, String processName, int uid, String seinfo, String apkFile, int pid);
+    void logAppProcessStartIfNeeded(String processName, int uid, String seinfo, String apkFile,
+            int pid);
 
     /**
      * As per {@link android.content.pm.PackageManager#flushPackageRestrictionsAsUser}.
@@ -586,6 +580,11 @@ interface IPackageManager {
             String targetCompilerFilter, boolean force);
 
     /**
+    * Ask the package manager to compile layouts in the given package.
+    */
+    boolean compileLayouts(String packageName);
+
+    /**
      * Ask the package manager to dump profiles associated with a package.
      */
     void dumpProfiles(String packageName);
@@ -623,13 +622,9 @@ interface IPackageManager {
     void verifyPendingInstall(int id, int verificationCode);
     void extendVerificationTimeout(int id, int verificationCodeAtTimeout, long millisecondsToDelay);
 
-    /** @deprecated */
     void verifyIntentFilter(int id, int verificationCode, in List<String> failedDomains);
-    /** @deprecated */
     int getIntentVerificationStatus(String packageName, int userId);
-    /** @deprecated */
     boolean updateIntentVerificationStatus(String packageName, int status, int userId);
-    /** @deprecated */
     ParceledListSlice getIntentFilterVerifications(String packageName);
     ParceledListSlice getAllIntentFilters(String packageName);
 
@@ -650,7 +645,7 @@ interface IPackageManager {
     void setSystemAppHiddenUntilInstalled(String packageName, boolean hidden);
     boolean setSystemAppInstallState(String packageName, boolean installed, int userId);
 
-    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
+    @UnsupportedAppUsage
     IPackageInstaller getPackageInstaller();
 
     boolean setBlockUninstallForUser(String packageName, boolean blockUninstall, int userId);
@@ -662,7 +657,7 @@ interface IPackageManager {
     boolean isPackageSignedByKeySet(String packageName, in KeySet ks);
     boolean isPackageSignedByKeySetExactly(String packageName, in KeySet ks);
 
-    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
+    @UnsupportedAppUsage
     String getPermissionControllerPackageName();
 
     ParceledListSlice getInstantApps(int userId);
@@ -679,9 +674,9 @@ interface IPackageManager {
      */
     void setUpdateAvailable(String packageName, boolean updateAvaialble);
 
-    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
+    @UnsupportedAppUsage
     String getServicesSystemSharedLibraryPackageName();
-    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
+    @UnsupportedAppUsage
     String getSharedSystemSharedLibraryPackageName();
 
     ChangedPackages getChangedPackages(int sequenceNumber, int userId);
@@ -722,8 +717,6 @@ interface IPackageManager {
 
     String getAttentionServicePackageName();
 
-    String getRotationResolverPackageName();
-
     String getWellbeingPackageName();
 
     String getAppPredictionServicePackageName();
@@ -750,8 +743,6 @@ interface IPackageManager {
 
     void notifyPackagesReplacedReceived(in String[] packages);
 
-    void requestChecksums(in String packageName, boolean includeSplits, int optional, int required, in List trustedInstallers, in IOnChecksumsReadyListener onChecksumsReadyListener, int userId);
-
     //------------------------------------------------------------------------
     //
     // The following binder interfaces have been moved to IPermissionManager
@@ -761,7 +752,7 @@ interface IPackageManager {
     //------------------------------------------------------------------------
     // We need to keep these in IPackageManager for app compatibility
     //------------------------------------------------------------------------
-    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
+    @UnsupportedAppUsage
     String[] getAppOpPermissionPackages(String permissionName);
 
     @UnsupportedAppUsage
@@ -776,10 +767,10 @@ interface IPackageManager {
     @UnsupportedAppUsage
     void removePermission(String name);
 
-    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
+    @UnsupportedAppUsage
     int checkPermission(String permName, String pkgName, int userId);
 
-    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
+    @UnsupportedAppUsage
     void grantRuntimePermission(String packageName, String permissionName, int userId);
 
     //------------------------------------------------------------------------
@@ -791,22 +782,7 @@ interface IPackageManager {
 
     void setMimeGroup(String packageName, String group, in List<String> mimeTypes);
 
-    String getSplashScreenTheme(String packageName, int userId);
-
-    void setSplashScreenTheme(String packageName, String themeName, int userId);
-
     List<String> getMimeGroup(String packageName, String group);
 
     boolean isAutoRevokeWhitelisted(String packageName);
-
-    void grantImplicitAccess(int queryingUid, String visibleAuthority);
-
-    IBinder getHoldLockToken();
-
-    void holdLock(in IBinder token, in int durationMs);
-
-    PackageManager.Property getProperty(String propertyName, String packageName, String className);
-    ParceledListSlice queryProperty(String propertyName, int componentType);
-
-    void setKeepUninstalledPackages(in List<String> packageList);
 }

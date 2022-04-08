@@ -21,26 +21,22 @@ import static com.android.systemui.statusbar.notification.collection.listbuilder
 import static com.android.systemui.statusbar.notification.collection.listbuilder.PipelineState.STATE_FINALIZE_FILTERING;
 import static com.android.systemui.statusbar.notification.collection.listbuilder.PipelineState.STATE_FINALIZING;
 import static com.android.systemui.statusbar.notification.collection.listbuilder.PipelineState.STATE_GROUPING;
-import static com.android.systemui.statusbar.notification.collection.listbuilder.PipelineState.STATE_GROUP_STABILIZING;
 import static com.android.systemui.statusbar.notification.collection.listbuilder.PipelineState.STATE_IDLE;
 import static com.android.systemui.statusbar.notification.collection.listbuilder.PipelineState.STATE_PRE_GROUP_FILTERING;
 import static com.android.systemui.statusbar.notification.collection.listbuilder.PipelineState.STATE_RESETTING;
 import static com.android.systemui.statusbar.notification.collection.listbuilder.PipelineState.STATE_SORTING;
 import static com.android.systemui.statusbar.notification.collection.listbuilder.PipelineState.STATE_TRANSFORMING;
 
-import static java.util.Objects.requireNonNull;
-
 import android.annotation.MainThread;
 import android.annotation.Nullable;
 import android.util.ArrayMap;
+import android.util.Pair;
 
 import androidx.annotation.NonNull;
 
 import com.android.systemui.Dumpable;
-import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.statusbar.NotificationInteractionTracker;
-import com.android.systemui.statusbar.notification.collection.listbuilder.NotifSection;
 import com.android.systemui.statusbar.notification.collection.listbuilder.OnBeforeFinalizeFilterListener;
 import com.android.systemui.statusbar.notification.collection.listbuilder.OnBeforeRenderListListener;
 import com.android.systemui.statusbar.notification.collection.listbuilder.OnBeforeSortListener;
@@ -50,9 +46,7 @@ import com.android.systemui.statusbar.notification.collection.listbuilder.ShadeL
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifComparator;
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifFilter;
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifPromoter;
-import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifSectioner;
-import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifStabilityManager;
-import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.Pluggable;
+import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifSection;
 import com.android.systemui.statusbar.notification.collection.notifcollection.CollectionReadyForBuildListener;
 import com.android.systemui.util.Assert;
 import com.android.systemui.util.time.SystemClock;
@@ -68,6 +62,7 @@ import java.util.Map;
 import java.util.Objects;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 
 /**
  * The second half of {@link NotifPipeline}. Sits downstream of the NotifCollection and transforms
@@ -75,7 +70,7 @@ import javax.inject.Inject;
  * notifications that are currently present in the notification shade.
  */
 @MainThread
-@SysUISingleton
+@Singleton
 public class ShadeListBuilder implements Dumpable {
     private final SystemClock mSystemClock;
     private final ShadeListBuilderLogger mLogger;
@@ -94,7 +89,6 @@ public class ShadeListBuilder implements Dumpable {
     private final List<NotifFilter> mNotifFinalizeFilters = new ArrayList<>();
     private final List<NotifComparator> mNotifComparators = new ArrayList<>();
     private final List<NotifSection> mNotifSections = new ArrayList<>();
-    @Nullable private NotifStabilityManager mNotifStabilityManager;
 
     private final List<OnBeforeTransformGroupsListener> mOnBeforeTransformGroupsListeners =
             new ArrayList<>();
@@ -114,15 +108,12 @@ public class ShadeListBuilder implements Dumpable {
             SystemClock systemClock,
             ShadeListBuilderLogger logger,
             DumpManager dumpManager,
-            NotificationInteractionTracker interactionTracker
-    ) {
+            NotificationInteractionTracker interactionTracker) {
         Assert.isMainThread();
         mSystemClock = systemClock;
         mLogger = logger;
         mInteractionTracker = interactionTracker;
         dumpManager.registerDumpable(TAG, this);
-
-        setSectioners(Collections.emptyList());
     }
 
     /**
@@ -197,33 +188,15 @@ public class ShadeListBuilder implements Dumpable {
         promoter.setInvalidationListener(this::onPromoterInvalidated);
     }
 
-    void setSectioners(List<NotifSectioner> sectioners) {
+    void setSections(List<NotifSection> sections) {
         Assert.isMainThread();
         mPipelineState.requireState(STATE_IDLE);
 
         mNotifSections.clear();
-        for (NotifSectioner sectioner : sectioners) {
-            mNotifSections.add(new NotifSection(sectioner, mNotifSections.size()));
-            sectioner.setInvalidationListener(this::onNotifSectionInvalidated);
+        for (NotifSection section : sections) {
+            mNotifSections.add(section);
+            section.setInvalidationListener(this::onNotifSectionInvalidated);
         }
-
-        mNotifSections.add(new NotifSection(DEFAULT_SECTIONER, mNotifSections.size()));
-    }
-
-    void setNotifStabilityManager(NotifStabilityManager notifStabilityManager) {
-        Assert.isMainThread();
-        mPipelineState.requireState(STATE_IDLE);
-
-        if (mNotifStabilityManager != null) {
-            throw new IllegalStateException(
-                    "Attempting to set the NotifStabilityManager more than once. There should "
-                            + "only be one visual stability manager. Manager is being set by "
-                            + mNotifStabilityManager.getName() + " and "
-                            + notifStabilityManager.getName());
-        }
-
-        mNotifStabilityManager = notifStabilityManager;
-        mNotifStabilityManager.setInvalidationListener(this::onReorderingAllowedInvalidated);
     }
 
     void setComparators(List<NotifComparator> comparators) {
@@ -263,16 +236,6 @@ public class ShadeListBuilder implements Dumpable {
         rebuildListIfBefore(STATE_PRE_GROUP_FILTERING);
     }
 
-    private void onReorderingAllowedInvalidated(NotifStabilityManager stabilityManager) {
-        Assert.isMainThread();
-
-        mLogger.logReorderingAllowedInvalidated(
-                stabilityManager.getName(),
-                mPipelineState.getState());
-
-        rebuildListIfBefore(STATE_GROUPING);
-    }
-
     private void onPromoterInvalidated(NotifPromoter promoter) {
         Assert.isMainThread();
 
@@ -281,7 +244,7 @@ public class ShadeListBuilder implements Dumpable {
         rebuildListIfBefore(STATE_TRANSFORMING);
     }
 
-    private void onNotifSectionInvalidated(NotifSectioner section) {
+    private void onNotifSectionInvalidated(NotifSection section) {
         Assert.isMainThread();
 
         mLogger.logNotifSectionInvalidated(section.getName(), mPipelineState.getState());
@@ -321,7 +284,6 @@ public class ShadeListBuilder implements Dumpable {
         // Step 1: Reset notification states
         mPipelineState.incrementTo(STATE_RESETTING);
         resetNotifs();
-        onBeginRun();
 
         // Step 2: Filter out any notifications that shouldn't be shown right now
         mPipelineState.incrementTo(STATE_PRE_GROUP_FILTERING);
@@ -339,10 +301,6 @@ public class ShadeListBuilder implements Dumpable {
         mPipelineState.incrementTo(STATE_TRANSFORMING);
         promoteNotifs(mNotifList);
         pruneIncompleteGroups(mNotifList);
-
-        // Step 4.5: Reassign/revert any groups to maintain visual stability
-        mPipelineState.incrementTo(STATE_GROUP_STABILIZING);
-        stabilizeGroupingNotifs(mNotifList);
 
         // Step 5: Sort
         // Assign each top-level entry a section, then sort the list by section and then within
@@ -363,7 +321,6 @@ public class ShadeListBuilder implements Dumpable {
         mPipelineState.incrementTo(STATE_FINALIZING);
         logChanges();
         freeEmptyGroups();
-        cleanupPluggables();
 
         // Step 8: Dispatch the new list, first to any listeners and then to the view layer
         dispatchOnBeforeRenderList(mReadOnlyNotifList);
@@ -464,7 +421,7 @@ public class ShadeListBuilder implements Dumpable {
 
                 GroupEntry group = mGroups.get(topLevelKey);
                 if (group == null) {
-                    group = new GroupEntry(topLevelKey, mSystemClock.uptimeMillis());
+                    group = new GroupEntry(topLevelKey);
                     group.mFirstAddedIteration = mIterationCount;
                     mGroups.put(topLevelKey, group);
                 }
@@ -513,66 +470,6 @@ public class ShadeListBuilder implements Dumpable {
         }
     }
 
-    private void stabilizeGroupingNotifs(List<ListEntry> topLevelList) {
-        if (mNotifStabilityManager == null) {
-            return;
-        }
-
-        for (int i = 0; i < topLevelList.size(); i++) {
-            final ListEntry tle = topLevelList.get(i);
-            if (tle instanceof GroupEntry) {
-                // maybe put children back into their old group (including moving back to top-level)
-                GroupEntry groupEntry = (GroupEntry) tle;
-                List<NotificationEntry> children = groupEntry.getRawChildren();
-                for (int j = 0; j < groupEntry.getChildren().size(); j++) {
-                    if (maybeSuppressGroupChange(children.get(j), topLevelList)) {
-                        // child was put back into its previous group, so we remove it from this
-                        // group
-                        children.remove(j);
-                        j--;
-                    }
-                }
-            } else {
-                // maybe put top-level-entries back into their previous groups
-                if (maybeSuppressGroupChange(tle.getRepresentativeEntry(), topLevelList)) {
-                    // entry was put back into its previous group, so we remove it from the list of
-                    // top-level-entries
-                    topLevelList.remove(i);
-                    i--;
-                }
-            }
-        }
-    }
-
-    /**
-     * Returns true if the group change was suppressed, else false
-     */
-    private boolean maybeSuppressGroupChange(NotificationEntry entry, List<ListEntry> out) {
-        if (!entry.wasAttachedInPreviousPass()) {
-            return false; // new entries are allowed
-        }
-
-        final GroupEntry prevParent = entry.getPreviousAttachState().getParent();
-        final GroupEntry assignedParent = entry.getParent();
-        if (prevParent != assignedParent
-                && !mNotifStabilityManager.isGroupChangeAllowed(entry.getRepresentativeEntry())) {
-            entry.getAttachState().getSuppressedChanges().setParent(assignedParent);
-            entry.setParent(prevParent);
-            if (prevParent == ROOT_ENTRY) {
-                out.add(entry);
-            } else if (prevParent != null) {
-                prevParent.addChild(entry);
-                if (!mGroups.containsKey(prevParent.getKey())) {
-                    mGroups.put(prevParent.getKey(), prevParent);
-                }
-            }
-
-            return true;
-        }
-
-        return false;
-    }
-
     private void promoteNotifs(List<ListEntry> list) {
         for (int i = 0; i < list.size(); i++) {
             final ListEntry tle = list.get(i);
@@ -615,17 +512,6 @@ public class ShadeListBuilder implements Dumpable {
 
                 } else if (group.getSummary() == null
                         || children.size() < MIN_CHILDREN_FOR_GROUP) {
-
-                    if (group.getSummary() != null
-                            && group.wasAttachedInPreviousPass()
-                            && mNotifStabilityManager != null
-                            && !mNotifStabilityManager.isGroupChangeAllowed(group.getSummary())) {
-                        // if this group was previously attached and group changes aren't
-                        // allowed, keep it around until group changes are allowed again
-                        group.getAttachState().getSuppressedChanges().setWasPruneSuppressed(true);
-                        continue;
-                    }
-
                     // If the group doesn't provide a summary or is too small, ignore it and add
                     // its children (if any) directly to top-level.
 
@@ -707,6 +593,7 @@ public class ShadeListBuilder implements Dumpable {
      */
     private void annulAddition(ListEntry entry) {
         entry.setParent(null);
+        entry.getAttachState().setSectionIndex(-1);
         entry.getAttachState().setSection(null);
         entry.getAttachState().setPromoter(null);
         if (entry.mFirstAddedIteration == mIterationCount) {
@@ -717,11 +604,12 @@ public class ShadeListBuilder implements Dumpable {
     private void sortList() {
         // Assign sections to top-level elements and sort their children
         for (ListEntry entry : mNotifList) {
-            NotifSection section = applySections(entry);
+            Pair<NotifSection, Integer> sectionWithIndex = applySections(entry);
             if (entry instanceof GroupEntry) {
                 GroupEntry parent = (GroupEntry) entry;
                 for (NotificationEntry child : parent.getChildren()) {
-                    child.getAttachState().setSection(section);
+                    child.getAttachState().setSection(sectionWithIndex.first);
+                    child.getAttachState().setSectionIndex(sectionWithIndex.second);
                 }
                 parent.sortChildren(sChildComparator);
             }
@@ -760,24 +648,9 @@ public class ShadeListBuilder implements Dumpable {
                 mLogger.logParentChanged(mIterationCount, prev.getParent(), curr.getParent());
             }
 
-            if (curr.getSuppressedChanges().getParent() != null) {
-                mLogger.logParentChangeSuppressed(
-                        mIterationCount,
-                        curr.getSuppressedChanges().getParent(),
-                        curr.getParent());
-            }
-
-            if (curr.getSuppressedChanges().getWasPruneSuppressed()) {
-                mLogger.logGroupPruningSuppressed(
-                        mIterationCount,
-                        curr.getParent());
-            }
-
             if (curr.getExcludingFilter() != prev.getExcludingFilter()) {
                 mLogger.logFilterChanged(
-                        mIterationCount,
-                        prev.getExcludingFilter(),
-                        curr.getExcludingFilter());
+                        mIterationCount, prev.getExcludingFilter(), curr.getExcludingFilter());
             }
 
             // When something gets detached, its promoter and section are always set to null, so
@@ -786,59 +659,23 @@ public class ShadeListBuilder implements Dumpable {
 
             if (!wasDetached && curr.getPromoter() != prev.getPromoter()) {
                 mLogger.logPromoterChanged(
-                        mIterationCount,
-                        prev.getPromoter(),
-                        curr.getPromoter());
+                        mIterationCount, prev.getPromoter(), curr.getPromoter());
             }
 
             if (!wasDetached && curr.getSection() != prev.getSection()) {
                 mLogger.logSectionChanged(
                         mIterationCount,
                         prev.getSection(),
-                        curr.getSection());
+                        prev.getSectionIndex(),
+                        curr.getSection(),
+                        curr.getSectionIndex());
             }
-
-            if (curr.getSuppressedChanges().getSection() != null) {
-                mLogger.logSectionChangeSuppressed(
-                        mIterationCount,
-                        curr.getSuppressedChanges().getSection(),
-                        curr.getSection());
-            }
-        }
-    }
-
-    private void onBeginRun() {
-        if (mNotifStabilityManager != null) {
-            mNotifStabilityManager.onBeginRun();
-        }
-    }
-
-    private void cleanupPluggables() {
-        callOnCleanup(mNotifPreGroupFilters);
-        callOnCleanup(mNotifPromoters);
-        callOnCleanup(mNotifFinalizeFilters);
-        callOnCleanup(mNotifComparators);
-
-        for (int i = 0; i < mNotifSections.size(); i++) {
-            mNotifSections.get(i).getSectioner().onCleanup();
-        }
-
-        if (mNotifStabilityManager != null) {
-            callOnCleanup(List.of(mNotifStabilityManager));
-        }
-    }
-
-    private void callOnCleanup(List<? extends Pluggable<?>> pluggables) {
-        for (int i = 0; i < pluggables.size(); i++) {
-            pluggables.get(i).onCleanup();
         }
     }
 
     private final Comparator<ListEntry> mTopLevelComparator = (o1, o2) -> {
 
-        int cmp = Integer.compare(
-                requireNonNull(o1.getSection()).getIndex(),
-                requireNonNull(o2.getSection()).getIndex());
+        int cmp = Integer.compare(o1.getSection(), o2.getSection());
 
         if (cmp == 0) {
             for (int i = 0; i < mNotifComparators.size(); i++) {
@@ -916,41 +753,25 @@ public class ShadeListBuilder implements Dumpable {
         return null;
     }
 
-    private NotifSection applySections(ListEntry entry) {
-        final NotifSection newSection = findSection(entry);
-        final ListAttachState prevAttachState = entry.getPreviousAttachState();
+    private Pair<NotifSection, Integer> applySections(ListEntry entry) {
+        final Pair<NotifSection, Integer> sectionWithIndex = findSection(entry);
+        final NotifSection section = sectionWithIndex.first;
+        final Integer sectionIndex = sectionWithIndex.second;
 
-        NotifSection finalSection = newSection;
+        entry.getAttachState().setSection(section);
+        entry.getAttachState().setSectionIndex(sectionIndex);
 
-        // have we seen this entry before and are we changing its section?
-        if (mNotifStabilityManager != null
-                && entry.wasAttachedInPreviousPass()
-                && newSection != prevAttachState.getSection()) {
-
-            // are section changes allowed?
-            if (!mNotifStabilityManager.isSectionChangeAllowed(entry.getRepresentativeEntry())) {
-                // record the section that we wanted to change to
-                entry.getAttachState().getSuppressedChanges().setSection(newSection);
-
-                // keep the previous section
-                finalSection = prevAttachState.getSection();
-            }
-        }
-
-        entry.getAttachState().setSection(finalSection);
-
-        return finalSection;
+        return sectionWithIndex;
     }
 
-    @NonNull
-    private NotifSection findSection(ListEntry entry) {
+    private Pair<NotifSection, Integer> findSection(ListEntry entry) {
         for (int i = 0; i < mNotifSections.size(); i++) {
-            NotifSection section = mNotifSections.get(i);
-            if (section.getSectioner().isInSection(entry)) {
-                return section;
+            NotifSection sectioner = mNotifSections.get(i);
+            if (sectioner.isInSection(entry)) {
+                return new Pair<>(sectioner, i);
             }
         }
-        throw new RuntimeException("Missing default sectioner!");
+        return new Pair<>(sDefaultSection, mNotifSections.size());
     }
 
     private void rebuildListIfBefore(@PipelineState.StateName int state) {
@@ -1020,15 +841,15 @@ public class ShadeListBuilder implements Dumpable {
         void onRenderList(@NonNull List<ListEntry> entries);
     }
 
-    private static final NotifSectioner DEFAULT_SECTIONER =
-            new NotifSectioner("UnknownSection") {
+    private static final NotifSection sDefaultSection =
+            new NotifSection("DefaultSection") {
                 @Override
                 public boolean isInSection(ListEntry entry) {
                     return true;
                 }
             };
 
-    private static final int MIN_CHILDREN_FOR_GROUP = 2;
+    private static final String TAG = "NotifListBuilderImpl";
 
-    private static final String TAG = "ShadeListBuilder";
+    private static final int MIN_CHILDREN_FOR_GROUP = 2;
 }

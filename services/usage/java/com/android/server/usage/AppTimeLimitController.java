@@ -17,10 +17,8 @@
 package com.android.server.usage;
 
 import android.annotation.UserIdInt;
-import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.app.usage.UsageStatsManagerInternal;
-import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -59,10 +57,6 @@ public class AppTimeLimitController {
     private final Lock mLock = new Lock();
 
     private final MyHandler mHandler;
-
-    private final Context mContext;
-
-    private AlarmManager mAlarmManager;
 
     private TimeLimitCallbackListener mListener;
 
@@ -313,7 +307,7 @@ public class AppTimeLimitController {
                 }
             } else {
                 if (mActives > mObserved.length) {
-                    // Try to get to a valid state and log the issue
+                    // Try to get to a sane state and log the issue
                     mActives = mObserved.length;
                     final UserData user = mUserRef.get();
                     if (user == null) return;
@@ -340,7 +334,7 @@ public class AppTimeLimitController {
                 cancelCheckTimeoutLocked(this);
             } else {
                 if (mActives < 0) {
-                    // Try to get to a valid state and log the issue
+                    // Try to get to a sane state and log the issue
                     mActives = 0;
                     final UserData user = mUserRef.get();
                     if (user == null) return;
@@ -440,7 +434,7 @@ public class AppTimeLimitController {
         }
     }
 
-    class SessionUsageGroup extends UsageGroup implements AlarmManager.OnAlarmListener {
+    class SessionUsageGroup extends UsageGroup {
         private long mNewSessionThresholdMs;
         private PendingIntent mSessionEndCallback;
 
@@ -472,7 +466,7 @@ public class AppTimeLimitController {
                     // New session has started, clear usage time.
                     mUsageTimeMs = 0;
                 }
-                getAlarmManager().cancel(this);
+                AppTimeLimitController.this.cancelInformSessionEndListener(this);
             }
             super.noteUsageStart(startTimeMs, currentTimeMs);
         }
@@ -485,9 +479,10 @@ public class AppTimeLimitController {
                 if (mUsageTimeMs >= mTimeLimitMs) {
                     // Usage has ended. Schedule the session end callback to be triggered once
                     // the new session threshold has been reached
-                    getAlarmManager().setExact(AlarmManager.ELAPSED_REALTIME,
-                            getElapsedRealtime() + mNewSessionThresholdMs, TAG, this, mHandler);
+                    AppTimeLimitController.this.postInformSessionEndListenerLocked(this,
+                            mNewSessionThresholdMs);
                 }
+
             }
         }
 
@@ -500,13 +495,6 @@ public class AppTimeLimitController {
                                        user.userId,
                                        mUsageTimeMs,
                                        mSessionEndCallback);
-            }
-        }
-
-        @Override
-        public void onAlarm() {
-            synchronized (mLock) {
-                onSessionEnd();
             }
         }
 
@@ -548,16 +536,18 @@ public class AppTimeLimitController {
         long getUsageRemaining() {
             // If there is currently an active session, account for its usage
             if (mActives > 0) {
-                return mTimeLimitMs - mUsageTimeMs - (getElapsedRealtime() - mLastKnownUsageTimeMs);
+                return mTimeLimitMs - mUsageTimeMs - (getUptimeMillis() - mLastKnownUsageTimeMs);
             } else {
                 return mTimeLimitMs - mUsageTimeMs;
             }
         }
     }
 
+
     private class MyHandler extends Handler {
         static final int MSG_CHECK_TIMEOUT = 1;
         static final int MSG_INFORM_LIMIT_REACHED_LISTENER = 2;
+        static final int MSG_INFORM_SESSION_END = 3;
 
         MyHandler(Looper looper) {
             super(looper);
@@ -568,12 +558,17 @@ public class AppTimeLimitController {
             switch (msg.what) {
                 case MSG_CHECK_TIMEOUT:
                     synchronized (mLock) {
-                        ((UsageGroup) msg.obj).checkTimeout(getElapsedRealtime());
+                        ((UsageGroup) msg.obj).checkTimeout(getUptimeMillis());
                     }
                     break;
                 case MSG_INFORM_LIMIT_REACHED_LISTENER:
                     synchronized (mLock) {
                         ((UsageGroup) msg.obj).onLimitReached();
+                    }
+                    break;
+                case MSG_INFORM_SESSION_END:
+                    synchronized (mLock) {
+                        ((SessionUsageGroup) msg.obj).onSessionEnd();
                     }
                     break;
                 default:
@@ -583,26 +578,15 @@ public class AppTimeLimitController {
         }
     }
 
-    public AppTimeLimitController(Context context, TimeLimitCallbackListener listener,
-            Looper looper) {
-        mContext = context;
+    public AppTimeLimitController(TimeLimitCallbackListener listener, Looper looper) {
         mHandler = new MyHandler(looper);
         mListener = listener;
     }
 
     /** Overrideable by a test */
     @VisibleForTesting
-    protected AlarmManager getAlarmManager() {
-        if (mAlarmManager == null) {
-            mAlarmManager = mContext.getSystemService(AlarmManager.class);
-        }
-        return mAlarmManager;
-    }
-
-    /** Overrideable by a test */
-    @VisibleForTesting
-    protected long getElapsedRealtime() {
-        return SystemClock.elapsedRealtime();
+    protected long getUptimeMillis() {
+        return SystemClock.uptimeMillis();
     }
 
     /** Overrideable for testing purposes */
@@ -776,7 +760,7 @@ public class AppTimeLimitController {
             }
 
             user.addUsageGroup(group);
-            noteActiveLocked(user, group, getElapsedRealtime());
+            noteActiveLocked(user, group, getUptimeMillis());
         }
     }
 
@@ -829,7 +813,7 @@ public class AppTimeLimitController {
             observerApp.sessionUsageGroups.append(observerId, group);
 
             user.addUsageGroup(group);
-            noteActiveLocked(user, group, getElapsedRealtime());
+            noteActiveLocked(user, group, getUptimeMillis());
         }
     }
 
@@ -885,7 +869,7 @@ public class AppTimeLimitController {
             }
 
             user.addUsageGroup(group);
-            noteActiveLocked(user, group, getElapsedRealtime());
+            noteActiveLocked(user, group, getUptimeMillis());
         }
     }
 
@@ -930,7 +914,7 @@ public class AppTimeLimitController {
                     return;
                 }
             }
-            final long currentTime = getElapsedRealtime();
+            final long currentTime = getUptimeMillis();
 
             user.currentlyActive.put(name, ONE);
 
@@ -980,7 +964,7 @@ public class AppTimeLimitController {
             }
 
             user.currentlyActive.removeAt(index);
-            final long currentTime = getElapsedRealtime();
+            final long currentTime = getUptimeMillis();
 
             // Check if any of the groups need to watch for this entity
             ArrayList<UsageGroup> groups = user.observedMap.get(name);
@@ -999,6 +983,18 @@ public class AppTimeLimitController {
     private void postInformLimitReachedListenerLocked(UsageGroup group) {
         mHandler.sendMessage(mHandler.obtainMessage(MyHandler.MSG_INFORM_LIMIT_REACHED_LISTENER,
                 group));
+    }
+
+    @GuardedBy("mLock")
+    private void postInformSessionEndListenerLocked(SessionUsageGroup group, long timeout) {
+        mHandler.sendMessageDelayed(
+                mHandler.obtainMessage(MyHandler.MSG_INFORM_SESSION_END, group),
+                timeout);
+    }
+
+    @GuardedBy("mLock")
+    private void cancelInformSessionEndListener(SessionUsageGroup group) {
+        mHandler.removeMessages(MyHandler.MSG_INFORM_SESSION_END, group);
     }
 
     @GuardedBy("mLock")

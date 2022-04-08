@@ -24,10 +24,11 @@ import android.os.IInterface;
 import android.os.RemoteException;
 import android.util.ArrayMap;
 import android.util.ArraySet;
-import android.util.IndentingPrintWriter;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
+
+import java.io.PrintWriter;
 
 /**
  * Multiplexes multiple binder death recipients on the same binder objects, so that at the native
@@ -62,10 +63,6 @@ public class BinderDeathDispatcher<T extends IInterface> {
 
         @Override
         public void binderDied() {
-        }
-
-        @Override
-        public void binderDied(IBinder who) {
             final ArraySet<DeathRecipient> copy;
             synchronized (mLock) {
                 copy = mRecipients;
@@ -80,7 +77,7 @@ public class BinderDeathDispatcher<T extends IInterface> {
             // Let's call it without holding the lock.
             final int size = copy.size();
             for (int i = 0; i < size; i++) {
-                copy.valueAt(i).binderDied(who);
+                copy.valueAt(i).binderDied();
             }
         }
     }
@@ -127,12 +124,13 @@ public class BinderDeathDispatcher<T extends IInterface> {
         }
     }
 
-    /** Dump stats useful for debugging. Can be used from dump() methods of client services. */
-    public void dump(IndentingPrintWriter pw) {
+    public void dump(PrintWriter pw, String indent) {
         synchronized (mLock) {
+            pw.print(indent);
             pw.print("# of watched binders: ");
             pw.println(mTargets.size());
 
+            pw.print(indent);
             pw.print("# of death recipients: ");
             int n = 0;
             for (RecipientsInfo info : mTargets.values()) {

@@ -25,12 +25,12 @@ import com.android.server.pm.parsing.pkg.AndroidPackage;
 
 import java.io.File;
 import java.util.Map;
-import java.util.UUID;
 
 public class PackageSettingBuilder {
     private String mName;
     private String mRealName;
     private String mCodePath;
+    private String mResourcePath;
     private String mLegacyNativeLibraryPathString;
     private String mPrimaryCpuAbiString;
     private String mSecondaryCpuAbiString;
@@ -39,16 +39,15 @@ public class PackageSettingBuilder {
     private int mPkgFlags;
     private int mPrivateFlags;
     private int mSharedUserId;
-    private String mVolumeUuid;
-    private int mAppId;
-    private SparseArray<PackageUserState> mUserStates = new SparseArray<>();
-    private AndroidPackage mPkg;
-    private InstallSource mInstallSource;
     private String[] mUsesStaticLibraries;
     private long[] mUsesStaticLibrariesVersions;
     private Map<String, ArraySet<String>> mMimeGroups;
+    private String mVolumeUuid;
+    private SparseArray<PackageUserState> mUserStates = new SparseArray<>();
+    private AndroidPackage mPkg;
+    private int mAppId;
+    private InstallSource mInstallSource;
     private PackageParser.SigningDetails mSigningDetails;
-    private UUID mDomainSetId = UUID.randomUUID();
 
     public PackageSettingBuilder setPackage(AndroidPackage pkg) {
         this.mPkg = pkg;
@@ -72,6 +71,11 @@ public class PackageSettingBuilder {
 
     public PackageSettingBuilder setCodePath(String codePath) {
         this.mCodePath = codePath;
+        return this;
+    }
+
+    public PackageSettingBuilder setResourcePath(String resourcePath) {
+        this.mResourcePath = resourcePath;
         return this;
     }
 
@@ -145,14 +149,6 @@ public class PackageSettingBuilder {
         return this;
     }
 
-    public PackageSettingBuilder setInstallState(int userId, boolean installed) {
-        if (mUserStates.indexOfKey(userId) < 0) {
-            mUserStates.put(userId, new PackageUserState());
-        }
-        mUserStates.get(userId).installed = installed;
-        return this;
-    }
-
     public PackageSettingBuilder setInstallSource(InstallSource installSource) {
         mInstallSource = installSource;
         return this;
@@ -164,17 +160,12 @@ public class PackageSettingBuilder {
         return this;
     }
 
-    public PackageSettingBuilder setDomainSetId(UUID domainSetId) {
-        mDomainSetId = domainSetId;
-        return this;
-    }
-
     public PackageSetting build() {
         final PackageSetting packageSetting = new PackageSetting(mName, mRealName,
-                new File(mCodePath), mLegacyNativeLibraryPathString, mPrimaryCpuAbiString,
-                mSecondaryCpuAbiString, mCpuAbiOverrideString, mPVersionCode, mPkgFlags,
-                mPrivateFlags, mSharedUserId, mUsesStaticLibraries, mUsesStaticLibrariesVersions,
-                mMimeGroups, mDomainSetId);
+                new File(mCodePath), new File(mResourcePath),
+                mLegacyNativeLibraryPathString, mPrimaryCpuAbiString, mSecondaryCpuAbiString,
+                mCpuAbiOverrideString, mPVersionCode, mPkgFlags, mPrivateFlags, mSharedUserId,
+                mUsesStaticLibraries, mUsesStaticLibrariesVersions, mMimeGroups);
         packageSetting.signatures = mSigningDetails != null
                 ? new PackageSignatures(mSigningDetails)
                 : new PackageSignatures();
@@ -188,5 +179,6 @@ public class PackageSettingBuilder {
             packageSetting.setUserState(mUserStates.keyAt(i), mUserStates.valueAt(i));
         }
         return packageSetting;
+
     }
 }

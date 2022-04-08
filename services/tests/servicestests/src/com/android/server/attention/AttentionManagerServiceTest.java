@@ -29,6 +29,7 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 
 import android.attention.AttentionManagerInternal.AttentionCallbackInternal;
@@ -49,6 +50,7 @@ import com.android.server.attention.AttentionManagerService.AttentionCheck;
 import com.android.server.attention.AttentionManagerService.AttentionCheckCache;
 import com.android.server.attention.AttentionManagerService.AttentionCheckCacheBuffer;
 import com.android.server.attention.AttentionManagerService.AttentionHandler;
+import com.android.server.attention.AttentionManagerService.UserState;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -62,11 +64,14 @@ import org.mockito.MockitoAnnotations;
 @SmallTest
 public class AttentionManagerServiceTest {
     private AttentionManagerService mSpyAttentionManager;
+    private UserState mSpyUserState;
     private final int mTimeout = 1000;
     @Mock
     private AttentionCallbackInternal mMockAttentionCallbackInternal;
     @Mock
     private AttentionHandler mMockHandler;
+    @Mock
+    private IAttentionCallback mMockIAttentionCallback;
     @Mock
     private IPowerManager mMockIPowerManager;
     @Mock
@@ -86,37 +91,48 @@ public class AttentionManagerServiceTest {
 
         Object mLock = new Object();
         // setup a spy on attention manager
-        AttentionManagerService attentionManager = new AttentionManagerService(
+        AttentionManagerService mAttentionManager = new AttentionManagerService(
                 mContext,
                 mPowerManager,
                 mLock,
                 mMockHandler);
-        mSpyAttentionManager = Mockito.spy(attentionManager);
+        mSpyAttentionManager = Mockito.spy(mAttentionManager);
         // setup a spy on user state
         ComponentName componentName = new ComponentName("a", "b");
         mSpyAttentionManager.mComponentName = componentName;
+        UserState mUserState = new UserState(0,
+                mContext,
+                mLock,
+                mMockHandler,
+                componentName);
+        mUserState.mService = new MockIAttentionService();
+        mSpyUserState = spy(mUserState);
+    }
 
-        AttentionCheck attentionCheck = new AttentionCheck(mMockAttentionCallbackInternal,
-                mSpyAttentionManager);
-        mSpyAttentionManager.mCurrentAttentionCheck = attentionCheck;
-        mSpyAttentionManager.mService = new MockIAttentionService();
+    @Test
+    public void testCancelAttentionCheck_noCrashWhenNoUserStateLocked() {
+        mSpyAttentionManager.cancelAttentionCheck(null);
     }
 
     @Test
     public void testCancelAttentionCheck_noCrashWhenCallbackMismatched() {
-        assertThat(mMockAttentionCallbackInternal).isNotNull();
+        mSpyUserState.mCurrentAttentionCheck =
+                new AttentionCheck(mMockAttentionCallbackInternal, mMockIAttentionCallback);
+        doReturn(mSpyUserState).when(mSpyAttentionManager).peekCurrentUserStateLocked();
         mSpyAttentionManager.cancelAttentionCheck(null);
     }
 
     @Test
     public void testCancelAttentionCheck_cancelCallbackWhenMatched() {
+        mSpyUserState.mCurrentAttentionCheck =
+                new AttentionCheck(mMockAttentionCallbackInternal, mMockIAttentionCallback);
+        doReturn(mSpyUserState).when(mSpyAttentionManager).peekCurrentUserStateLocked();
         mSpyAttentionManager.cancelAttentionCheck(mMockAttentionCallbackInternal);
-        verify(mSpyAttentionManager).cancel();
+        verify(mSpyAttentionManager).cancel(any());
     }
 
     @Test
     public void testCheckAttention_returnFalseWhenPowerManagerNotInteract() throws RemoteException {
-        mSpyAttentionManager.mIsServiceEnabled = true;
         doReturn(false).when(mMockIPowerManager).isInteractive();
         AttentionCallbackInternal callback = Mockito.mock(AttentionCallbackInternal.class);
         assertThat(mSpyAttentionManager.checkAttention(mTimeout, callback)).isFalse();
@@ -124,15 +140,21 @@ public class AttentionManagerServiceTest {
 
     @Test
     public void testCheckAttention_callOnSuccess() throws RemoteException {
-        mSpyAttentionManager.mIsServiceEnabled = true;
-        doReturn(true).when(mSpyAttentionManager).isServiceAvailable();
+        doReturn(true).when(mSpyAttentionManager).isServiceEnabled();
         doReturn(true).when(mMockIPowerManager).isInteractive();
+        doReturn(mSpyUserState).when(mSpyAttentionManager).getOrCreateCurrentUserStateLocked();
         doNothing().when(mSpyAttentionManager).freeIfInactiveLocked();
-        mSpyAttentionManager.mCurrentAttentionCheck = null;
 
         AttentionCallbackInternal callback = Mockito.mock(AttentionCallbackInternal.class);
         mSpyAttentionManager.checkAttention(mTimeout, callback);
         verify(callback).onSuccess(anyInt(), anyLong());
+    }
+
+    @Test
+    public void testOnSwitchUser_noCrashCurrentServiceIsNull() {
+        final int userId = 10;
+        mSpyAttentionManager.getOrCreateUserStateLocked(userId);
+        mSpyAttentionManager.onSwitchUser(userId);
     }
 
     @Test

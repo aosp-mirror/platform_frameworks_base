@@ -25,7 +25,6 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.AppGlobals;
-import android.content.ClipData;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -74,9 +73,8 @@ final class RemoteAugmentedAutofillService
     private final int mRequestTimeoutMs;
     private final ComponentName mComponentName;
     private final RemoteAugmentedAutofillServiceCallbacks mCallbacks;
-    private final AutofillUriGrantsManager mUriGrantsManager;
 
-    RemoteAugmentedAutofillService(Context context, int serviceUid, ComponentName serviceName,
+    RemoteAugmentedAutofillService(Context context, ComponentName serviceName,
             int userId, RemoteAugmentedAutofillServiceCallbacks callbacks,
             boolean bindInstantServiceAllowed, boolean verbose, int idleUnbindTimeoutMs,
             int requestTimeoutMs) {
@@ -88,7 +86,6 @@ final class RemoteAugmentedAutofillService
         mRequestTimeoutMs = requestTimeoutMs;
         mComponentName = serviceName;
         mCallbacks = callbacks;
-        mUriGrantsManager = new AutofillUriGrantsManager(serviceUid);
 
         // Bind right away.
         connect();
@@ -123,10 +120,6 @@ final class RemoteAugmentedAutofillService
         return mComponentName;
     }
 
-    public AutofillUriGrantsManager getAutofillUriGrantsManager() {
-        return mUriGrantsManager;
-    }
-
     @Override // from ServiceConnector.Impl
     protected void onServiceConnectionStatusChanged(
             IAugmentedAutofillService service, boolean connected) {
@@ -151,8 +144,8 @@ final class RemoteAugmentedAutofillService
      * Called by {@link Session} to request augmented autofill.
      */
     public void onRequestAutofillLocked(int sessionId, @NonNull IAutoFillManagerClient client,
-            int taskId, @NonNull ComponentName activityComponent, @NonNull IBinder activityToken,
-            @NonNull AutofillId focusedId, @Nullable AutofillValue focusedValue,
+            int taskId, @NonNull ComponentName activityComponent, @NonNull AutofillId focusedId,
+            @Nullable AutofillValue focusedValue,
             @Nullable InlineSuggestionsRequest inlineSuggestionsRequest,
             @Nullable Function<InlineFillUi, Boolean> inlineSuggestionsCallback,
             @NonNull Runnable onErrorCallback,
@@ -179,9 +172,8 @@ final class RemoteAugmentedAutofillService
                                     maybeRequestShowInlineSuggestions(sessionId,
                                             inlineSuggestionsRequest, inlineSuggestionsData,
                                             clientState, focusedId, focusedValue,
-                                            inlineSuggestionsCallback, client, onErrorCallback,
-                                            remoteRenderService, userId,
-                                            activityComponent, activityToken);
+                                            inlineSuggestionsCallback,
+                                            client, onErrorCallback, remoteRenderService, userId);
                                     if (!showingFillWindow) {
                                         requestAutofill.complete(null);
                                     }
@@ -252,8 +244,7 @@ final class RemoteAugmentedAutofillService
             @Nullable Function<InlineFillUi, Boolean> inlineSuggestionsCallback,
             @NonNull IAutoFillManagerClient client, @NonNull Runnable onErrorCallback,
             @Nullable RemoteInlineSuggestionRenderService remoteRenderService,
-            int userId,
-            @NonNull ComponentName targetActivity, @NonNull IBinder targetActivityToken) {
+            int userId) {
         if (inlineSuggestionsData == null || inlineSuggestionsData.isEmpty()
                 || inlineSuggestionsCallback == null || request == null
                 || remoteRenderService == null) {
@@ -270,13 +261,9 @@ final class RemoteAugmentedAutofillService
                 focusedValue != null && focusedValue.isText()
                         ? focusedValue.getTextValue().toString() : null;
 
-        final InlineFillUi.InlineFillUiInfo inlineFillUiInfo =
-                new InlineFillUi.InlineFillUiInfo(request, focusedId, filterText,
-                        remoteRenderService, userId, sessionId);
-
         final InlineFillUi inlineFillUi =
                 InlineFillUi.forAugmentedAutofill(
-                        inlineFillUiInfo, inlineSuggestionsData,
+                        request, inlineSuggestionsData, focusedId, filterText,
                         new InlineFillUi.InlineSuggestionUiCallback() {
                             @Override
                             public void autofill(Dataset dataset, int datasetIndex) {
@@ -305,31 +292,11 @@ final class RemoteAugmentedAutofillService
                                         dataset.getId(), clientState);
                                 try {
                                     final ArrayList<AutofillId> fieldIds = dataset.getFieldIds();
-                                    final ClipData content = dataset.getFieldContent();
-                                    if (content != null) {
-                                        mUriGrantsManager.grantUriPermissions(targetActivity,
-                                                targetActivityToken, userId, content);
-                                        final AutofillId fieldId = fieldIds.get(0);
-                                        if (sDebug) {
-                                            Slog.d(TAG, "Calling client autofillContent(): "
-                                                    + "id=" + fieldId + ", content=" + content);
-                                        }
-                                        client.autofillContent(sessionId, fieldId, content);
-                                    } else {
-                                        final int size = fieldIds.size();
-                                        final boolean hideHighlight = size == 1
-                                                && fieldIds.get(0).equals(focusedId);
-                                        if (sDebug) {
-                                            Slog.d(TAG, "Calling client autofill(): "
-                                                    + "ids=" + fieldIds
-                                                    + ", values=" + dataset.getFieldValues());
-                                        }
-                                        client.autofill(
-                                                sessionId,
-                                                fieldIds,
-                                                dataset.getFieldValues(),
-                                                hideHighlight);
-                                    }
+                                    final int size = fieldIds.size();
+                                    final boolean hideHighlight = size == 1
+                                            && fieldIds.get(0).equals(focusedId);
+                                    client.autofill(sessionId, fieldIds, dataset.getFieldValues(),
+                                            hideHighlight);
                                     inlineSuggestionsCallback.apply(
                                             InlineFillUi.emptyUi(focusedId));
                                 } catch (RemoteException e) {
@@ -338,24 +305,15 @@ final class RemoteAugmentedAutofillService
                             }
 
                             @Override
-                            public void authenticate(int requestId, int datasetIndex) {
-                                Slog.e(TAG, "authenticate not implemented for augmented autofill");
-                            }
-
-                            @Override
-                            public void startIntentSender(IntentSender intentSender) {
+                            public void startIntentSender(IntentSender intentSender,
+                                    Intent intent) {
                                 try {
-                                    client.startIntentSender(intentSender, new Intent());
+                                    client.startIntentSender(intentSender, intent);
                                 } catch (RemoteException e) {
                                     Slog.w(TAG, "RemoteException starting intent sender");
                                 }
                             }
-
-                            @Override
-                            public void onError() {
-                                onErrorCallback.run();
-                            }
-                        });
+                        }, onErrorCallback, remoteRenderService, userId, sessionId);
 
         if (inlineSuggestionsCallback.apply(inlineFillUi)) {
             mCallbacks.logAugmentedAutofillShown(sessionId, clientState);

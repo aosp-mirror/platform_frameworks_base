@@ -16,7 +16,6 @@
 
 package android.app.servertransaction;
 
-import android.annotation.Nullable;
 import android.app.ClientTransactionHandler;
 import android.content.res.Configuration;
 import android.os.IBinder;
@@ -91,7 +90,7 @@ public class ConfigurationChangeItem extends ClientTransactionItem {
     };
 
     @Override
-    public boolean equals(@Nullable Object o) {
+    public boolean equals(Object o) {
         if (this == o) {
             return true;
         }

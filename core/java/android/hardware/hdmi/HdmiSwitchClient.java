@@ -103,7 +103,10 @@ public class HdmiSwitchClient extends HdmiClient {
      * Selects a CEC logical device to be a new active source.
      *
      * @param logicalAddress logical address of the device to select
-     * @param listener       listener to get the result with
+     * @param executor executor to allow the develper to specify the thread upon which the listeners
+     *     will be invoked
+     * @param listener listener to get the result with
+     *
      * @hide
      */
     public void selectDevice(
@@ -130,8 +133,11 @@ public class HdmiSwitchClient extends HdmiClient {
     /**
      * Selects a HDMI port to be a new route path.
      *
-     * @param portId   HDMI port to select
+     * @param portId HDMI port to select
+     * @param executor executor to allow the develper to specify the thread upon which the listeners
+     *     will be invoked
      * @param listener listener to get the result with
+     *
      * @hide
      */
     @SystemApi

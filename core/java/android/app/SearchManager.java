@@ -31,7 +31,6 @@ import android.content.res.Configuration;
 import android.database.Cursor;
 import android.graphics.Rect;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.RemoteException;
@@ -522,7 +521,7 @@ public class SearchManager
 
     /**
      * This means that context is voice, and therefore the SearchDialog should
-     * continue showing the microphone until the user indicates that they do
+     * continue showing the microphone until the user indicates that he/she does
      * not want to re-speak (e.g. by typing).
      *
      * @hide
@@ -779,7 +778,7 @@ public class SearchManager
      *
      * @hide
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public boolean isVisible() {
         return mSearchDialog == null? false : mSearchDialog.isShowing();
     }

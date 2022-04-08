@@ -18,13 +18,15 @@ package com.android.server.input;
 
 import android.text.TextUtils;
 import android.util.Slog;
-import android.util.TypedXmlPullParser;
 import android.util.Xml;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.XmlUtils;
 
+import org.xmlpull.v1.XmlPullParser;
+
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -36,8 +38,9 @@ class ConfigurationProcessor {
 
     static List<String> processExcludedDeviceNames(InputStream xml) throws Exception {
         List<String> names = new ArrayList<>();
-        {
-            TypedXmlPullParser parser = Xml.resolvePullParser(xml);
+        try (InputStreamReader confReader = new InputStreamReader(xml)) {
+            XmlPullParser parser = Xml.newPullParser();
+            parser.setInput(confReader);
             XmlUtils.beginDocument(parser, "devices");
             while (true) {
                 XmlUtils.nextElement(parser);
@@ -87,8 +90,9 @@ class ConfigurationProcessor {
     static Map<String, Integer> processInputPortAssociations(InputStream xml)
             throws Exception {
         Map<String, Integer> associations = new HashMap<String, Integer>();
-        {
-            TypedXmlPullParser parser = Xml.resolvePullParser(xml);
+        try (InputStreamReader confReader = new InputStreamReader(xml)) {
+            XmlPullParser parser = Xml.newPullParser();
+            parser.setInput(confReader);
             XmlUtils.beginDocument(parser, "ports");
 
             while (true) {

@@ -49,7 +49,10 @@ import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.EventLogTags;
 import com.android.server.SystemService;
+import com.android.server.pm.InstructionSets;
 import com.android.server.pm.PackageManagerService;
+
+import dalvik.system.VMRuntime;
 
 import java.io.File;
 import java.io.FileDescriptor;
@@ -211,7 +214,7 @@ public class DeviceStorageMonitorService extends SystemService {
                 newLevel = State.LEVEL_FULL;
             } else if (usableBytes <= lowBytes) {
                 newLevel = State.LEVEL_LOW;
-            } else if (StorageManager.UUID_DEFAULT.equals(uuid)
+            } else if (StorageManager.UUID_DEFAULT.equals(uuid) && !isBootImageOnDisk()
                     && usableBytes < BOOT_IMAGE_STORAGE_REQUIREMENT) {
                 newLevel = State.LEVEL_LOW;
             } else {
@@ -256,6 +259,15 @@ public class DeviceStorageMonitorService extends SystemService {
                 }
             }
         };
+    }
+
+    private static boolean isBootImageOnDisk() {
+        for (String instructionSet : InstructionSets.getAllDexCodeInstructionSets()) {
+            if (!VMRuntime.isBootClassPathOnDisk(instructionSet)) {
+                return false;
+            }
+        }
+        return true;
     }
 
     @Override
@@ -469,11 +481,18 @@ public class DeviceStorageMonitorService extends SystemService {
             final CharSequence title = context.getText(
                     com.android.internal.R.string.low_internal_storage_view_title);
 
-            final CharSequence details = context.getText(
-                    com.android.internal.R.string.low_internal_storage_view_text);
+            final CharSequence details;
+            if (StorageManager.UUID_DEFAULT.equals(uuid)) {
+                details = context.getText(isBootImageOnDisk()
+                        ? com.android.internal.R.string.low_internal_storage_view_text
+                        : com.android.internal.R.string.low_internal_storage_view_text_no_boot);
+            } else {
+                details = context.getText(
+                        com.android.internal.R.string.low_internal_storage_view_text);
+            }
 
-            PendingIntent intent = PendingIntent.getActivityAsUser(context, 0, lowMemIntent,
-                    PendingIntent.FLAG_IMMUTABLE, null, UserHandle.CURRENT);
+            PendingIntent intent = PendingIntent.getActivityAsUser(context, 0, lowMemIntent, 0,
+                    null, UserHandle.CURRENT);
             Notification notification =
                     new Notification.Builder(context, SystemNotificationChannels.ALERTS)
                             .setSmallIcon(com.android.internal.R.drawable.stat_notify_disk_full)

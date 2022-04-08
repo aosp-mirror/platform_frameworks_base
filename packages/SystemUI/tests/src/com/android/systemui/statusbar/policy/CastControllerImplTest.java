@@ -17,7 +17,6 @@ import android.testing.TestableLooper;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.dump.DumpManager;
 import com.android.systemui.statusbar.policy.CastController.Callback;
 
 import org.junit.Before;
@@ -52,7 +51,7 @@ public class CastControllerImplTest extends SysuiTestCase {
         mContext.addMockSystemService(MediaProjectionManager.class, mMediaProjectionManager);
         when(mMediaProjectionManager.getActiveProjectionInfo()).thenReturn(mProjection);
 
-        mController = new CastControllerImpl(mContext, mock(DumpManager.class));
+        mController = new CastControllerImpl(mContext);
     }
 
     @Test

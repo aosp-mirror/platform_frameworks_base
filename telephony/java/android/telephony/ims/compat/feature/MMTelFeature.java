@@ -18,7 +18,6 @@ package android.telephony.ims.compat.feature;
 
 import android.app.PendingIntent;
 import android.compat.annotation.UnsupportedAppUsage;
-import android.os.Build;
 import android.os.Message;
 import android.os.RemoteException;
 import android.telephony.ims.ImsCallProfile;
@@ -49,7 +48,7 @@ public class MMTelFeature extends ImsFeature {
     // Lock for feature synchronization
     private final Object mLock = new Object();
 
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public MMTelFeature() {
     }
 

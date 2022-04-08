@@ -55,25 +55,12 @@ public final class ActivityEvent implements Parcelable {
      */
     public static final int TYPE_ACTIVITY_DESTROYED = Event.ACTIVITY_DESTROYED;
 
-    /**
-     * TODO: change to public field.
-     * The activity was started.
-     *
-     * <p>There are some reason, ACTIVITY_START cannot be added into UsageStats. We don't depend on
-     * UsageEvents for Activity start.
-     * </p>
-     *
-     * @hide
-     */
-    public static final int TYPE_ACTIVITY_STARTED = 10000;
-
     /** @hide */
     @IntDef(prefix = { "TYPE_" }, value = {
             TYPE_ACTIVITY_RESUMED,
             TYPE_ACTIVITY_PAUSED,
             TYPE_ACTIVITY_STOPPED,
-            TYPE_ACTIVITY_DESTROYED,
-            TYPE_ACTIVITY_STARTED
+            TYPE_ACTIVITY_DESTROYED
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ActivityEventType{}
@@ -99,8 +86,7 @@ public final class ActivityEvent implements Parcelable {
      * Gets the event type.
      *
      * @return either {@link #TYPE_ACTIVITY_RESUMED}, {@value #TYPE_ACTIVITY_PAUSED},
-     * {@value #TYPE_ACTIVITY_STOPPED}, {@value #TYPE_ACTIVITY_DESTROYED} or 10000 if the Activity
-     * was started.
+     * {@value #TYPE_ACTIVITY_STOPPED}, or {@value #TYPE_ACTIVITY_DESTROYED}.
      */
     @ActivityEventType
     public int getEventType() {
@@ -118,8 +104,6 @@ public final class ActivityEvent implements Parcelable {
                 return "ACTIVITY_STOPPED";
             case TYPE_ACTIVITY_DESTROYED:
                 return "ACTIVITY_DESTROYED";
-            case TYPE_ACTIVITY_STARTED:
-                return "ACTIVITY_STARTED";
             default:
                 return "UKNOWN_TYPE: " + type;
         }

@@ -16,6 +16,7 @@
 
 package android.app.admin;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.content.ComponentName;
@@ -37,36 +38,36 @@ import java.util.Set;
 public abstract class DevicePolicyManagerInternal {
 
     /**
-     * Listener for changes in the allowlisted packages to show cross-profile
+     * Listener for changes in the white-listed packages to show cross-profile
      * widgets.
      */
     public interface OnCrossProfileWidgetProvidersChangeListener {
 
         /**
-         * Called when the allowlisted packages to show cross-profile widgets
+         * Called when the white-listed packages to show cross-profile widgets
          * have changed for a given user.
          *
-         * @param profileId The profile for which the allowlisted packages changed.
-         * @param packages The allowlisted packages.
+         * @param profileId The profile for which the white-listed packages changed.
+         * @param packages The white-listed packages.
          */
         public void onCrossProfileWidgetProvidersChanged(int profileId, List<String> packages);
     }
 
     /**
-     * Gets the packages whose widget providers are allowlisted to be
+     * Gets the packages whose widget providers are white-listed to be
      * available in the parent user.
      *
      * <p>This takes the DPMS lock.  DO NOT call from PM/UM/AM with their lock held.
      *
      * @param profileId The profile id.
      * @return The list of packages if such or empty list if there are
-     *    no allowlisted packages or the profile id is not a managed
+     *    no white-listed packages or the profile id is not a managed
      *    profile.
      */
     public abstract List<String> getCrossProfileWidgetProviders(int profileId);
 
     /**
-     * Adds a listener for changes in the allowlisted packages to show
+     * Adds a listener for changes in the white-listed packages to show
      * cross-profile app widgets.
      *
      * <p>This takes the DPMS lock.  DO NOT call from PM/UM/AM with their lock held.
@@ -77,24 +78,23 @@ public abstract class DevicePolicyManagerInternal {
             OnCrossProfileWidgetProvidersChangeListener listener);
 
     /**
-     * Checks if an app with given uid is an active device owner of its user.
-     *
-     * <p>This takes the DPMS lock.  DO NOT call from PM/UM/AM with their lock held.
-     *
-     * @param uid App uid.
-     * @return true if the uid is an active device owner.
+     * @param userHandle the handle of the user whose profile owner is being fetched.
+     * @return the configured supervision app if it exists and is the device owner or policy owner.
      */
-    public abstract boolean isActiveDeviceOwner(int uid);
+    public abstract @Nullable ComponentName getProfileOwnerOrDeviceOwnerSupervisionComponent(
+            @NonNull UserHandle userHandle);
 
     /**
-     * Checks if an app with given uid is an active profile owner of its user.
+     * Checks if an app with given uid is an active device admin of its user and has the policy
+     * specified.
      *
      * <p>This takes the DPMS lock.  DO NOT call from PM/UM/AM with their lock held.
      *
      * @param uid App uid.
-     * @return true if the uid is an active profile owner.
+     * @param reqPolicy Required policy, for policies see {@link DevicePolicyManager}.
+     * @return true if the uid is an active admin with the given policy.
      */
-    public abstract boolean isActiveProfileOwner(int uid);
+    public abstract boolean isActiveAdminWithPolicy(int uid, int reqPolicy);
 
     /**
      * Checks if an app with given uid is the active supervision admin.
@@ -190,7 +190,7 @@ public abstract class DevicePolicyManagerInternal {
      * {@link com.android.internal.R.array#vendor_cross_profile_apps}.</li>
      * </ul>
      *
-     * @return the combined set of allowlisted package names set via
+     * @return the combined set of whitelisted package names set via
      * {@link DevicePolicyManager#setCrossProfilePackages(ComponentName, Set)} and
      * {@link com.android.internal.R.array#cross_profile_apps} and
      * {@link com.android.internal.R.array#vendor_cross_profile_apps}
@@ -230,29 +230,5 @@ public abstract class DevicePolicyManagerInternal {
     /**
      * Returns the profile owner component for the given user, or {@code null} if there is not one.
      */
-    @Nullable
-    public abstract ComponentName getProfileOwnerAsUser(@UserIdInt int userId);
-
-    /**
-     * Returns the user id of the device owner, or {@link UserHandle#USER_NULL} if there is not one.
-     */
-    @UserIdInt
-    public abstract int getDeviceOwnerUserId();
-
-    /**
-     * Returns whether the given package is a device owner or a profile owner in the calling user.
-     */
-    public abstract boolean isDeviceOrProfileOwnerInCallingUser(String packageName);
-
-    /**
-     * Returns whether this class supports being deferred the responsibility for resetting the given
-     * op.
-     */
-    public abstract boolean supportsResetOp(int op);
-
-    /**
-     * Resets the given op across the profile group of the given user for the given package. Assumes
-     * {@link #supportsResetOp(int)} is true.
-     */
-    public abstract void resetOp(int op, String packageName, @UserIdInt int userId);
+    public abstract ComponentName getProfileOwnerAsUser(int userHandle);
 }

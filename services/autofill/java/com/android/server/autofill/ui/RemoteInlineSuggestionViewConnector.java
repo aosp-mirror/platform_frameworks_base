@@ -57,20 +57,24 @@ final class RemoteInlineSuggestionViewConnector {
     private final Consumer<IntentSender> mStartIntentSenderFromClientApp;
 
     RemoteInlineSuggestionViewConnector(
-            @NonNull InlineFillUi.InlineFillUiInfo inlineFillUiInfo,
+            @Nullable RemoteInlineSuggestionRenderService remoteRenderService,
+            int userId, int sessionId,
             @NonNull InlinePresentation inlinePresentation,
+            @Nullable IBinder hostInputToken,
+            int displayId,
             @NonNull Runnable onAutofillCallback,
-            @NonNull InlineFillUi.InlineSuggestionUiCallback uiCallback) {
-        mRemoteRenderService = inlineFillUiInfo.mRemoteRenderService;
+            @NonNull Runnable onErrorCallback,
+            @NonNull Consumer<IntentSender> startIntentSenderFromClientApp) {
+        mRemoteRenderService = remoteRenderService;
         mInlinePresentation = inlinePresentation;
-        mHostInputToken = inlineFillUiInfo.mInlineRequest.getHostInputToken();
-        mDisplayId = inlineFillUiInfo.mInlineRequest.getHostDisplayId();
-        mUserId = inlineFillUiInfo.mUserId;
-        mSessionId = inlineFillUiInfo.mSessionId;
+        mHostInputToken = hostInputToken;
+        mDisplayId = displayId;
+        mUserId = userId;
+        mSessionId = sessionId;
 
         mOnAutofillCallback = onAutofillCallback;
-        mOnErrorCallback = uiCallback::onError;
-        mStartIntentSenderFromClientApp = uiCallback::startIntentSender;
+        mOnErrorCallback = onErrorCallback;
+        mStartIntentSenderFromClientApp = startIntentSenderFromClientApp;
     }
 
     /**

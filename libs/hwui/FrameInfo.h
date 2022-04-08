@@ -21,28 +21,24 @@
 #include <cutils/compiler.h>
 #include <utils/Timers.h>
 
-#include <array>
 #include <memory.h>
 #include <string>
 
 namespace android {
 namespace uirenderer {
 
-static constexpr size_t UI_THREAD_FRAME_INFO_SIZE = 12;
+#define UI_THREAD_FRAME_INFO_SIZE 9
 
 enum class FrameInfoIndex {
     Flags = 0,
-    FrameTimelineVsyncId,
     IntendedVsync,
     Vsync,
-    InputEventId,
+    OldestInputEvent,
+    NewestInputEvent,
     HandleInputStart,
     AnimationStart,
     PerformTraversalsStart,
     DrawStart,
-    FrameDeadline,
-    FrameStartTime,
-    FrameInterval,
     // End of UI frame info
 
     SyncQueued,
@@ -56,45 +52,30 @@ enum class FrameInfoIndex {
     QueueBufferDuration,
 
     GpuCompleted,
-    SwapBuffersCompleted,
-    DisplayPresentTime,
 
     // Must be the last value!
     // Also must be kept in sync with FrameMetrics.java#FRAME_STATS_COUNT
     NumIndexes
 };
 
-extern const std::array<const char*, static_cast<int>(FrameInfoIndex::NumIndexes)> FrameInfoNames;
+extern const std::string FrameInfoNames[];
 
 namespace FrameInfoFlags {
 enum {
-    WindowVisibilityChanged = 1 << 0,
+    WindowLayoutChanged = 1 << 0,
     RTAnimation = 1 << 1,
     SurfaceCanvas = 1 << 2,
     SkippedFrame = 1 << 3,
 };
 };
 
-class UiFrameInfoBuilder {
+class ANDROID_API UiFrameInfoBuilder {
 public:
-    static constexpr int64_t INVALID_VSYNC_ID = -1;
-    static constexpr int64_t UNKNOWN_DEADLINE = std::numeric_limits<int64_t>::max();
-    static constexpr int64_t UNKNOWN_FRAME_INTERVAL = -1;
-
-
     explicit UiFrameInfoBuilder(int64_t* buffer) : mBuffer(buffer) {
         memset(mBuffer, 0, UI_THREAD_FRAME_INFO_SIZE * sizeof(int64_t));
-        set(FrameInfoIndex::FrameTimelineVsyncId) = INVALID_VSYNC_ID;
-        // The struct is zeroed by memset above. That also sets FrameInfoIndex::InputEventId to
-        // equal android::os::IInputConstants::INVALID_INPUT_EVENT_ID == 0.
-        // Therefore, we can skip setting the value for InputEventId here. If the value for
-        // INVALID_INPUT_EVENT_ID changes, this code would have to be updated, as well.
-        set(FrameInfoIndex::FrameDeadline) = std::numeric_limits<int64_t>::max();
     }
 
-    UiFrameInfoBuilder& setVsync(nsecs_t vsyncTime, nsecs_t intendedVsync,
-                                 int64_t vsyncId, int64_t frameDeadline, nsecs_t frameInterval) {
-        set(FrameInfoIndex::FrameTimelineVsyncId) = vsyncId;
+    UiFrameInfoBuilder& setVsync(nsecs_t vsyncTime, nsecs_t intendedVsync) {
         set(FrameInfoIndex::Vsync) = vsyncTime;
         set(FrameInfoIndex::IntendedVsync) = intendedVsync;
         // Pretend the other fields are all at vsync, too, so that naive
@@ -103,8 +84,6 @@ public:
         set(FrameInfoIndex::AnimationStart) = vsyncTime;
         set(FrameInfoIndex::PerformTraversalsStart) = vsyncTime;
         set(FrameInfoIndex::DrawStart) = vsyncTime;
-        set(FrameInfoIndex::FrameDeadline) = frameDeadline;
-        set(FrameInfoIndex::FrameInterval) = frameInterval;
         return *this;
     }
 
@@ -130,10 +109,6 @@ public:
     }
 
     void markSwapBuffers() { set(FrameInfoIndex::SwapBuffers) = systemTime(SYSTEM_TIME_MONOTONIC); }
-
-    void markSwapBuffersCompleted() {
-        set(FrameInfoIndex::SwapBuffersCompleted) = systemTime(SYSTEM_TIME_MONOTONIC);
-    }
 
     void markFrameCompleted() { set(FrameInfoIndex::FrameCompleted) = systemTime(SYSTEM_TIME_MONOTONIC); }
 

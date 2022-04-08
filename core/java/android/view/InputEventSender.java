@@ -17,7 +17,6 @@
 package android.view;
 
 import android.compat.annotation.UnsupportedAppUsage;
-import android.os.Build;
 import android.os.Looper;
 import android.os.MessageQueue;
 import android.util.Log;
@@ -112,16 +111,6 @@ public abstract class InputEventSender {
     }
 
     /**
-     * Called when timeline is sent to the publisher.
-     *
-     * @param inputEventId The id of the input event that caused the frame being reported
-     * @param gpuCompletedTime The time when the frame left the app process
-     * @param presentTime The time when the frame was presented on screen
-     */
-    public void onTimelineReported(int inputEventId, long gpuCompletedTime, long presentTime) {
-    }
-
-    /**
      * Sends an input event.
      * Must be called on the same Looper thread to which the sender is attached.
      *
@@ -149,15 +138,8 @@ public abstract class InputEventSender {
 
     // Called from native code.
     @SuppressWarnings("unused")
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     private void dispatchInputEventFinished(int seq, boolean handled) {
         onInputEventFinished(seq, handled);
-    }
-
-    // Called from native code.
-    @SuppressWarnings("unused")
-    private void dispatchTimelineReported(
-            int inputEventId, long gpuCompletedTime, long presentTime) {
-        onTimelineReported(inputEventId, gpuCompletedTime, presentTime);
     }
 }

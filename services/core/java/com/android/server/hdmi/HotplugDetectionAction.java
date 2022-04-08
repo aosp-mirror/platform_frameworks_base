@@ -148,8 +148,7 @@ final class HotplugDetectionAction extends HdmiCecFeatureAction {
     }
 
     private void checkHotplug(List<Integer> ackedAddress, boolean audioOnly) {
-        BitSet currentInfos = infoListToBitSet(
-                localDevice().mService.getHdmiCecNetwork().getDeviceInfoList(false), audioOnly);
+        BitSet currentInfos = infoListToBitSet(tv().getDeviceInfoList(false), audioOnly);
         BitSet polledResult = addressListToBitSet(ackedAddress);
 
         // At first, check removed devices.
@@ -226,11 +225,11 @@ final class HotplugDetectionAction extends HdmiCecFeatureAction {
         mayCancelOneTouchRecord(removedAddress);
         mayDisableSystemAudioAndARC(removedAddress);
 
-        localDevice().mService.getHdmiCecNetwork().removeCecDevice(localDevice(), removedAddress);
+        tv().removeCecDevice(removedAddress);
     }
 
     private void mayChangeRoutingPath(int address) {
-        HdmiDeviceInfo info = localDevice().mService.getHdmiCecNetwork().getCecDeviceInfo(address);
+        HdmiDeviceInfo info = tv().getCecDeviceInfo(address);
         if (info != null) {
             tv().handleRemoveActiveRoutingPath(info.getPhysicalAddress());
         }
@@ -259,7 +258,7 @@ final class HotplugDetectionAction extends HdmiCecFeatureAction {
     }
 
     private void mayDisableSystemAudioAndARC(int address) {
-        if (!HdmiUtils.isEligibleAddressForDevice(HdmiDeviceInfo.DEVICE_AUDIO_SYSTEM, address)) {
+        if (HdmiUtils.getTypeFromAddress(address) != HdmiDeviceInfo.DEVICE_AUDIO_SYSTEM) {
             return;
         }
 

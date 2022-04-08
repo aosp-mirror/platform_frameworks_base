@@ -17,7 +17,6 @@
 //#define LOG_NDEBUG 0
 #define LOG_TAG "SoundPool::Stream"
 #include <utils/Log.h>
-#include <android/content/AttributionSourceState.h>
 
 #include "Stream.h"
 
@@ -318,8 +317,7 @@ void Stream::play_l(const std::shared_ptr<Sound>& sound, int32_t nextStreamID,
             // audio track while the new one is being started and avoids processing them with
             // wrong audio audio buffer size  (mAudioBufferSize)
             auto toggle = mToggle ^ 1;
-            // NOLINTNEXTLINE(performance-no-int-to-ptr)
-            void* userData = reinterpret_cast<void*>((uintptr_t)this | toggle);
+            void* userData = (void*)((uintptr_t)this | toggle);
             audio_channel_mask_t soundChannelMask = sound->getChannelMask();
             // When sound contains a valid channel mask, use it as is.
             // Otherwise, use stream count to calculate channel mask.
@@ -328,18 +326,13 @@ void Stream::play_l(const std::shared_ptr<Sound>& sound, int32_t nextStreamID,
 
             // do not create a new audio track if current track is compatible with sound parameters
 
-            android::content::AttributionSourceState attributionSource;
-            attributionSource.packageName = mStreamManager->getOpPackageName();
-            attributionSource.token = sp<BBinder>::make();
-            // TODO b/182469354 make consistent with AudioRecord, add util for native source
             newTrack = new AudioTrack(streamType, sampleRate, sound->getFormat(),
                     channelMask, sound->getIMemory(), AUDIO_OUTPUT_FLAG_FAST,
                     staticCallback, userData,
                     0 /*default notification frames*/, AUDIO_SESSION_ALLOCATE,
                     AudioTrack::TRANSFER_DEFAULT,
-                    nullptr /*offloadInfo*/, attributionSource,
-                    mStreamManager->getAttributes(),
-                    false /*doNotReconnect*/, 1.0f /*maxRequiredSpeed*/);
+                    nullptr /*offloadInfo*/, -1 /*uid*/, -1 /*pid*/,
+                    mStreamManager->getAttributes());
             // Set caller name so it can be logged in destructor.
             // MediaMetricsConstants.h: AMEDIAMETRICS_PROP_CALLERNAME_VALUE_SOUNDPOOL
             newTrack->setCallerName("soundpool");
@@ -391,7 +384,6 @@ exit:
 void Stream::staticCallback(int event, void* user, void* info)
 {
     const auto userAsInt = (uintptr_t)user;
-    // NOLINTNEXTLINE(performance-no-int-to-ptr)
     auto stream = reinterpret_cast<Stream*>(userAsInt & ~1);
     stream->callback(event, info, int(userAsInt & 1), 0 /* tries */);
 }

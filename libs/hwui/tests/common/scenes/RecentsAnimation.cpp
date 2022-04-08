@@ -36,7 +36,7 @@ public:
         int cardsize = std::min(width, height) - dp(64);
 
         renderer.drawColor(Color::White, SkBlendMode::kSrcOver);
-        renderer.enableZ(true);
+        renderer.insertReorderBarrier(true);
 
         int x = dp(32);
         for (int i = 0; i < 4; i++) {
@@ -52,7 +52,7 @@ public:
             mCards.push_back(card);
         }
 
-        renderer.enableZ(false);
+        renderer.insertReorderBarrier(false);
     }
 
     void doFrame(int frameNr) override {

@@ -53,9 +53,6 @@ public class NtpTimeHelperTest {
     private NtpTimeHelper mNtpTimeHelper;
     private CountDownLatch mCountDownLatch;
 
-    /**
-     * Initialize mocks and setup NtpTimeHelper with a callback and CountDownLatch.
-     */
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
@@ -70,9 +67,6 @@ public class NtpTimeHelperTest {
                 callback, mMockNtpTrustedTime);
     }
 
-    /**
-     * Verify that cached time is returned if cached age is low.
-     */
     @Test
     public void handleInjectNtpTime_cachedAgeLow_injectTime() throws InterruptedException {
         NtpTrustedTime.TimeResult result = mock(NtpTrustedTime.TimeResult.class);
@@ -86,9 +80,6 @@ public class NtpTimeHelperTest {
         assertThat(mCountDownLatch.await(2, TimeUnit.SECONDS)).isTrue();
     }
 
-    /**
-     * Verify that failed inject time and delayed inject time are handled properly.
-     */
     @Test
     public void handleInjectNtpTime_injectTimeFailed_injectTimeDelayed()
             throws InterruptedException {

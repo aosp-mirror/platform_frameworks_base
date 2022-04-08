@@ -31,6 +31,7 @@ import android.os.Binder;
 import android.os.Handler;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.os.UserManagerInternal;
 import android.provider.Settings;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -42,7 +43,6 @@ import com.android.internal.infra.AbstractRemoteService;
 import com.android.internal.os.BackgroundThread;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
-import com.android.server.pm.UserManagerInternal;
 
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
@@ -70,7 +70,7 @@ import java.util.Objects;
  * <p>See {@code com.android.server.autofill.AutofillManagerService} for a concrete
  * (no pun intended) example of how to use it.
  *
- * @param <M> "main" service class.
+ * @param <M> "master" service class.
  * @param <S> "real" service class.
  *
  * @hide
@@ -299,16 +299,16 @@ public abstract class AbstractMasterSystemService<M extends AbstractMasterSystem
     }
 
     @Override // from SystemService
-    public void onUserUnlocking(@NonNull TargetUser user) {
+    public void onUnlockUser(int userId) {
         synchronized (mLock) {
-            updateCachedServiceLocked(user.getUserIdentifier());
+            updateCachedServiceLocked(userId);
         }
     }
 
     @Override // from SystemService
-    public void onUserStopped(@NonNull TargetUser user) {
+    public void onCleanupUser(int userId) {
         synchronized (mLock) {
-            removeCachedServiceLocked(user.getUserIdentifier());
+            removeCachedServiceLocked(userId);
         }
     }
 
@@ -371,9 +371,6 @@ public abstract class AbstractMasterSystemService<M extends AbstractMasterSystem
             int durationMs) {
         Slog.i(mTag, "setTemporaryService(" + userId + ") to " + componentName + " for "
                 + durationMs + "ms");
-        if (mServiceNameResolver == null) {
-            return;
-        }
         enforceCallingPermissionForManagement();
 
         Objects.requireNonNull(componentName);
@@ -407,9 +404,6 @@ public abstract class AbstractMasterSystemService<M extends AbstractMasterSystem
         enforceCallingPermissionForManagement();
 
         synchronized (mLock) {
-            if (mServiceNameResolver == null) {
-                return false;
-            }
             final boolean changed = mServiceNameResolver.setDefaultServiceEnabled(userId, enabled);
             if (!changed) {
                 if (verbose) {
@@ -439,10 +433,6 @@ public abstract class AbstractMasterSystemService<M extends AbstractMasterSystem
      */
     public final boolean isDefaultServiceEnabled(@UserIdInt int userId) {
         enforceCallingPermissionForManagement();
-
-        if (mServiceNameResolver == null) {
-            return false;
-        }
 
         synchronized (mLock) {
             return mServiceNameResolver.isDefaultServiceEnabled(userId);
@@ -744,7 +734,7 @@ public abstract class AbstractMasterSystemService<M extends AbstractMasterSystem
      *
      * @throws SecurityException when it's not...
      */
-    protected void assertCalledByPackageOwner(@NonNull String packageName) {
+    protected final void assertCalledByPackageOwner(@NonNull String packageName) {
         Objects.requireNonNull(packageName);
         final int uid = Binder.getCallingUid();
         final String[] packages = getContext().getPackageManager().getPackagesForUid(uid);
@@ -958,7 +948,7 @@ public abstract class AbstractMasterSystemService<M extends AbstractMasterSystem
                         if (debug) {
                             Slog.d(mTag, "Eagerly recreating service for user " + userId);
                         }
-                        updateCachedServiceLocked(userId);
+                        getServiceForUserLocked(userId);
                     }
                 }
                 onServicePackageRestartedLocked(userId);
@@ -967,10 +957,6 @@ public abstract class AbstractMasterSystemService<M extends AbstractMasterSystem
             @Override
             public void onPackageModified(String packageName) {
                 if (verbose) Slog.v(mTag, "onPackageModified(): " + packageName);
-
-                if (mServiceNameResolver == null) {
-                    return;
-                }
 
                 final int userId = getChangingUserId();
                 final String serviceName = mServiceNameResolver.getDefaultServiceName(userId);
@@ -1052,9 +1038,6 @@ public abstract class AbstractMasterSystemService<M extends AbstractMasterSystem
         public void onChange(boolean selfChange, Uri uri, @UserIdInt int userId) {
             if (verbose) Slog.v(mTag, "onChange(): uri=" + uri + ", userId=" + userId);
             final String property = uri.getLastPathSegment();
-            if (property == null) {
-                return;
-            }
             if (property.equals(getServiceSettingsProperty())
                     || property.equals(Settings.Secure.USER_SETUP_COMPLETE)) {
                 synchronized (mLock) {

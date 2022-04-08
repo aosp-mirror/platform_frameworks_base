@@ -31,13 +31,12 @@
 
 #include <sstream>
 
-#include <gui/TraceUtils.h>
 #include "LightingInfo.h"
 #include "VectorDrawable.h"
 #include "thread/CommonPool.h"
 #include "tools/SkSharingProc.h"
-#include "utils/Color.h"
 #include "utils/String8.h"
+#include "utils/TraceUtils.h"
 
 using namespace android::uirenderer::renderthread;
 
@@ -59,10 +58,6 @@ void SkiaPipeline::onDestroyHardwareResources() {
 }
 
 bool SkiaPipeline::pinImages(std::vector<SkImage*>& mutableImages) {
-    if (!mRenderThread.getGrContext()) {
-        ALOGD("Trying to pin an image with an invalid GrContext");
-        return false;
-    }
     for (SkImage* image : mutableImages) {
         if (SkImage_pinAsTexture(image, mRenderThread.getGrContext())) {
             mPinnedImages.emplace_back(sk_ref_sp(image));
@@ -90,7 +85,7 @@ void SkiaPipeline::renderLayers(const LightGeometry& lightGeometry,
 }
 
 void SkiaPipeline::renderLayersImpl(const LayerUpdateQueue& layers, bool opaque) {
-    sk_sp<GrDirectContext> cachedContext;
+    sk_sp<GrContext> cachedContext;
 
     // Render all layers that need to be updated, in order.
     for (size_t i = 0; i < layers.entries().size(); i++) {
@@ -102,7 +97,7 @@ void SkiaPipeline::renderLayersImpl(const LayerUpdateQueue& layers, bool opaque)
             continue;
         }
         SkASSERT(layerNode->getLayerSurface());
-        SkiaDisplayList* displayList = layerNode->getDisplayList().asSkiaDl();
+        SkiaDisplayList* displayList = (SkiaDisplayList*)layerNode->getDisplayList();
         if (!displayList || displayList->isEmpty()) {
             ALOGE("%p drawLayers(%s) : missing drawable", layerNode, layerNode->getName());
             return;
@@ -146,12 +141,11 @@ void SkiaPipeline::renderLayersImpl(const LayerUpdateQueue& layers, bool opaque)
 
         // cache the current context so that we can defer flushing it until
         // either all the layers have been rendered or the context changes
-        GrDirectContext* currentContext =
-            GrAsDirectContext(layerNode->getLayerSurface()->getCanvas()->recordingContext());
+        GrContext* currentContext = layerNode->getLayerSurface()->getCanvas()->getGrContext();
         if (cachedContext.get() != currentContext) {
             if (cachedContext.get()) {
                 ATRACE_NAME("flush layers (context changed)");
-                cachedContext->flushAndSubmit();
+                cachedContext->flush();
             }
             cachedContext.reset(SkSafeRef(currentContext));
         }
@@ -159,7 +153,7 @@ void SkiaPipeline::renderLayersImpl(const LayerUpdateQueue& layers, bool opaque)
 
     if (cachedContext.get()) {
         ATRACE_NAME("flush layers");
-        cachedContext->flushAndSubmit();
+        cachedContext->flush();
     }
 }
 
@@ -206,17 +200,13 @@ bool SkiaPipeline::createOrUpdateLayer(RenderNode* node, const DamageAccumulator
 }
 
 void SkiaPipeline::prepareToDraw(const RenderThread& thread, Bitmap* bitmap) {
-    GrDirectContext* context = thread.getGrContext();
-    if (context && !bitmap->isHardware()) {
+    GrContext* context = thread.getGrContext();
+    if (context) {
         ATRACE_FORMAT("Bitmap#prepareToDraw %dx%d", bitmap->width(), bitmap->height());
         auto image = bitmap->makeImage();
-        if (image.get()) {
+        if (image.get() && !bitmap->isHardware()) {
             SkImage_pinAsTexture(image.get(), context);
             SkImage_unpinAsTexture(image.get(), context);
-            // A submit is necessary as there may not be a frame coming soon, so without a call
-            // to submit these texture uploads can just sit in the queue building up until
-            // we run out of RAM
-            context->flushAndSubmit();
         }
     }
 }
@@ -284,10 +274,7 @@ bool SkiaPipeline::setupMultiFrameCapture() {
         // we need to keep it until after mMultiPic.close()
         // procs is passed as a pointer, but just as a method of having an optional default.
         // procs doesn't need to outlive this Make call.
-        mMultiPic = SkMakeMultiPictureDocument(mOpenMultiPicStream.get(), &procs,
-            [sharingCtx = mSerialContext.get()](const SkPicture* pic) {
-                    SkSharingSerialContext::collectNonTextureImagesFromPicture(pic, sharingCtx);
-            });
+        mMultiPic = SkMakeMultiPictureDocument(mOpenMultiPicStream.get(), &procs);
         return true;
     } else {
         ALOGE("Could not open \"%s\" for writing.", mCapturedFile.c_str());
@@ -299,7 +286,7 @@ bool SkiaPipeline::setupMultiFrameCapture() {
 
 // recurse through the rendernode's children, add any nodes which are layers to the queue.
 static void collectLayers(RenderNode* node, LayerUpdateQueue* layers) {
-    SkiaDisplayList* dl = node->getDisplayList().asSkiaDl();
+    SkiaDisplayList* dl = (SkiaDisplayList*)node->getDisplayList();
     if (dl) {
         const auto& prop = node->properties();
         if (node->hasLayer()) {
@@ -428,7 +415,7 @@ void SkiaPipeline::endCapture(SkSurface* surface) {
                 procs.fTypefaceProc = [](SkTypeface* tf, void* ctx){
                     return tf->serialize(SkTypeface::SerializeBehavior::kDoIncludeData);
                 };
-                auto data = picture->serialize(&procs);
+                auto data = picture->serialize();
                 savePictureAsync(data, mCapturedFile);
                 mCaptureSequence = 0;
                 mCaptureMode = CaptureMode::None;
@@ -462,6 +449,9 @@ void SkiaPipeline::renderFrame(const LayerUpdateQueue& layers, const SkRect& cli
         renderOverdraw(clip, nodes, contentDrawBounds, surface, preTransform);
     }
 
+    ATRACE_NAME("flush commands");
+    surface->getCanvas()->flush();
+
     Properties::skpCaptureEnabled = previousSkpEnabled;
 }
 
@@ -478,7 +468,8 @@ void SkiaPipeline::renderFrameImpl(const SkRect& clip,
                                    const SkMatrix& preTransform) {
     SkAutoCanvasRestore saver(canvas, true);
     auto clipRestriction = preTransform.mapRect(clip).roundOut();
-    if (CC_UNLIKELY(isCapturingSkp())) {
+    if (CC_UNLIKELY(mCaptureMode == CaptureMode::SingleFrameSKP
+         || mCaptureMode == CaptureMode::MultiFrameSKP)) {
         canvas->drawAnnotation(SkRect::Make(clipRestriction), "AndroidDeviceClipRestriction",
             nullptr);
     } else {
@@ -596,23 +587,14 @@ void SkiaPipeline::dumpResourceCacheUsage() const {
 
 void SkiaPipeline::setSurfaceColorProperties(ColorMode colorMode) {
     mColorMode = colorMode;
-    switch (colorMode) {
-        case ColorMode::Default:
-            mSurfaceColorType = SkColorType::kN32_SkColorType;
-            mSurfaceColorSpace = SkColorSpace::MakeSRGB();
-            break;
-        case ColorMode::WideColorGamut:
-            mSurfaceColorType = DeviceInfo::get()->getWideColorType();
-            mSurfaceColorSpace = DeviceInfo::get()->getWideColorSpace();
-            break;
-        case ColorMode::Hdr:
-            mSurfaceColorType = SkColorType::kRGBA_F16_SkColorType;
-            mSurfaceColorSpace = SkColorSpace::MakeRGB(GetPQSkTransferFunction(), SkNamedGamut::kRec2020);
-            break;
-        case ColorMode::Hdr10:
-            mSurfaceColorType = SkColorType::kRGBA_1010102_SkColorType;
-            mSurfaceColorSpace = SkColorSpace::MakeRGB(GetPQSkTransferFunction(), SkNamedGamut::kRec2020);
-            break;
+    if (colorMode == ColorMode::SRGB) {
+        mSurfaceColorType = SkColorType::kN32_SkColorType;
+        mSurfaceColorSpace = SkColorSpace::MakeSRGB();
+    } else if (colorMode == ColorMode::WideColorGamut) {
+        mSurfaceColorType = DeviceInfo::get()->getWideColorType();
+        mSurfaceColorSpace = DeviceInfo::get()->getWideColorSpace();
+    } else {
+        LOG_ALWAYS_FATAL("Unreachable: unsupported color mode.");
     }
 }
 
@@ -660,7 +642,7 @@ void SkiaPipeline::renderOverdraw(const SkRect& clip,
     SkPaint paint;
     const SkColor* colors = kOverdrawColors[static_cast<int>(Properties::overdrawColorSet)];
     paint.setColorFilter(SkOverdrawColorFilter::MakeWithSkColors(colors));
-    surface->getCanvas()->drawImage(counts.get(), 0.0f, 0.0f, SkSamplingOptions(), &paint);
+    surface->getCanvas()->drawImage(counts.get(), 0.0f, 0.0f, &paint);
 }
 
 } /* namespace skiapipeline */

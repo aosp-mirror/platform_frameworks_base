@@ -21,6 +21,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.net.ConnectivityManager;
 import android.provider.Settings;
 import android.telephony.SubscriptionInfo;
 import android.telephony.TelephonyManager;
@@ -94,7 +95,8 @@ public class EmergencyCryptkeeperText extends TextView {
     }
 
     public void update() {
-        boolean hasMobile = mContext.getSystemService(TelephonyManager.class).isDataCapable();
+        boolean hasMobile = ConnectivityManager.from(mContext)
+                .isNetworkSupported(ConnectivityManager.TYPE_MOBILE);
         boolean airplaneMode = (Settings.Global.getInt(mContext.getContentResolver(),
                 Settings.Global.AIRPLANE_MODE_ON, 0) == 1);
 

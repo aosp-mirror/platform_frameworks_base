@@ -97,21 +97,11 @@ class PackageParsingPerfTest {
     private val state: BenchmarkState get() = perfStatusReporter.benchmarkState
     private val apks: List<File> get() = params.apks
 
-    private fun safeParse(parser: ParallelParser<*>, file: File) {
-        try {
-            parser.parse(file)
-        } catch (e: Exception) {
-            // ignore
-        }
-    }
-
     @Test
     fun sequentialNoCache() {
         params.cacheDirToParser(null).use { parser ->
             while (state.keepRunning()) {
-                apks.forEach {
-                    safeParse(parser, it)
-                }
+                apks.forEach { parser.parse(it) }
             }
         }
     }
@@ -120,10 +110,10 @@ class PackageParsingPerfTest {
     fun sequentialCached() {
         params.cacheDirToParser(testFolder.newFolder()).use { parser ->
             // Fill the cache
-            apks.forEach { safeParse(parser, it) }
+            apks.forEach { parser.parse(it) }
 
             while (state.keepRunning()) {
-                apks.forEach { safeParse(parser, it) }
+                apks.forEach { parser.parse(it) }
             }
         }
     }
@@ -142,7 +132,7 @@ class PackageParsingPerfTest {
     fun parallelCached() {
         params.cacheDirToParser(testFolder.newFolder()).use { parser ->
             // Fill the cache
-            apks.forEach { safeParse(parser, it) }
+            apks.forEach { parser.parse(it) }
 
             while (state.keepRunning()) {
                 apks.forEach { parser.submit(it) }
@@ -159,15 +149,7 @@ class PackageParsingPerfTest {
             PARALLEL_MAX_THREADS, "package-parsing-test",
             Process.THREAD_PRIORITY_FOREGROUND)
 
-        fun submit(file: File) {
-                service.submit {
-                    try {
-                        queue.put(parse(file))
-                    } catch (e: Exception) {
-                        queue.put(e)
-                    }
-                }
-        }
+        fun submit(file: File) = service.submit { queue.put(parse(file)) }
 
         fun take() = queue.poll(QUEUE_POLL_TIMEOUT_SECONDS, TimeUnit.SECONDS)
 
@@ -196,17 +178,17 @@ class PackageParsingPerfTest {
             // For testing, just disable enforcement to avoid hooking up to compat framework
             ParseTypeImpl(ParseInput.Callback { _, _, _ -> false })
         }
-        val parser = ParsingPackageUtils(false, null, null, emptyList(),
+        val parser = ParsingPackageUtils(false, null, null,
             object : ParsingPackageUtils.Callback {
                 override fun hasFeature(feature: String) = true
 
                 override fun startParsingPackage(
                     packageName: String,
-                    baseApkPath: String,
-                    path: String,
+                    baseCodePath: String,
+                    codePath: String,
                     manifestArray: TypedArray,
                     isCoreApp: Boolean
-                ) = ParsingPackageImpl(packageName, baseApkPath, path, manifestArray)
+                ) = ParsingPackageImpl(packageName, baseCodePath, codePath, manifestArray)
             })
 
         override fun parseImpl(file: File) =

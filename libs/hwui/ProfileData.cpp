@@ -24,8 +24,7 @@ namespace uirenderer {
 
 static const char* JANK_TYPE_NAMES[] = {
         "Missed Vsync",        "High input latency",       "Slow UI thread",
-        "Slow bitmap uploads", "Slow issue draw commands", "Frame deadline missed",
-        "Frame deadline missed (legacy)"};
+        "Slow bitmap uploads", "Slow issue draw commands", "Frame deadline missed"};
 
 // The bucketing algorithm controls so to speak
 // If a frame is <= to this it goes in bucket 0
@@ -95,8 +94,6 @@ void ProfileData::mergeWith(const ProfileData& other) {
     }
     mJankFrameCount >>= divider;
     mJankFrameCount += other.mJankFrameCount;
-    mJankLegacyFrameCount >>= divider;
-    mJankLegacyFrameCount += other.mJankLegacyFrameCount;
     mTotalFrameCount >>= divider;
     mTotalFrameCount += other.mTotalFrameCount;
     if (mStatStartTime > other.mStatStartTime || mStatStartTime == 0) {
@@ -115,9 +112,6 @@ void ProfileData::dump(int fd) const {
     dprintf(fd, "\nJanky frames: %u (%.2f%%)", mJankFrameCount,
             mTotalFrameCount == 0 ? 0.0f
                                   : (float)mJankFrameCount / (float)mTotalFrameCount * 100.0f);
-    dprintf(fd, "\nJanky frames (legacy): %u (%.2f%%)", mJankLegacyFrameCount, mTotalFrameCount == 0
-            ? 0.0f
-            : (float)mJankLegacyFrameCount / (float)mTotalFrameCount * 100.0f);
     dprintf(fd, "\n50th percentile: %ums", findPercentile(50));
     dprintf(fd, "\n90th percentile: %ums", findPercentile(90));
     dprintf(fd, "\n95th percentile: %ums", findPercentile(95));
@@ -164,7 +158,6 @@ void ProfileData::reset() {
     mSlowFrameCounts.fill(0);
     mTotalFrameCount = 0;
     mJankFrameCount = 0;
-    mJankLegacyFrameCount = 0;
     mStatStartTime = systemTime(SYSTEM_TIME_MONOTONIC);
     mPipelineType = Properties::getRenderPipelineType();
 }

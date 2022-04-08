@@ -31,22 +31,21 @@ interface IDeviceIdleController {
     String[] getSystemPowerWhitelistExceptIdle();
     String[] getSystemPowerWhitelist();
     String[] getUserPowerWhitelist();
-    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
+    @UnsupportedAppUsage
     String[] getFullPowerWhitelistExceptIdle();
     String[] getFullPowerWhitelist();
     int[] getAppIdWhitelistExceptIdle();
     int[] getAppIdWhitelist();
     int[] getAppIdUserWhitelist();
-    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
+    @UnsupportedAppUsage
     int[] getAppIdTempWhitelist();
     boolean isPowerSaveWhitelistExceptIdleApp(String name);
     boolean isPowerSaveWhitelistApp(String name);
-    @UnsupportedAppUsage(maxTargetSdk = 30,
-     publicAlternatives = "Use SystemApi {@code PowerExemptionManager#addToTemporaryAllowList(String, int, int, String)}.")
-    void addPowerSaveTempWhitelistApp(String name, long duration, int userId, int reasonCode, String reason);
-    long addPowerSaveTempWhitelistAppForMms(String name, int userId, int reasonCode, String reason);
-    long addPowerSaveTempWhitelistAppForSms(String name, int userId, int reasonCode, String reason);
-    long whitelistAppTemporarily(String name, int userId, int reasonCode, String reason);
+    @UnsupportedAppUsage
+    void addPowerSaveTempWhitelistApp(String name, long duration, int userId, String reason);
+    long addPowerSaveTempWhitelistAppForMms(String name, int userId, String reason);
+    long addPowerSaveTempWhitelistAppForSms(String name, int userId, String reason);
+    long whitelistAppTemporarily(String name, int userId, String reason);
     void exitIdle(String reason);
     int setPreIdleTimeoutMode(int Mode);
     void resetPreIdleTimeoutMode();

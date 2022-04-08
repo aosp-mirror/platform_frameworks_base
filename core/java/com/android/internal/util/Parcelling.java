@@ -27,7 +27,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.UUID;
 import java.util.regex.Pattern;
 
 /**
@@ -290,20 +289,6 @@ public interface Parcelling<T> {
             public Pattern unparcel(Parcel source) {
                 String s = source.readString();
                 return s == null ? null : Pattern.compile(s);
-            }
-        }
-
-        class ForUUID implements Parcelling<UUID> {
-
-            @Override
-            public void parcel(UUID item, Parcel dest, int parcelFlags) {
-                dest.writeString(item == null ? null : item.toString());
-            }
-
-            @Override
-            public UUID unparcel(Parcel source) {
-                String string = source.readString();
-                return string == null ? null : UUID.fromString(string);
             }
         }
     }

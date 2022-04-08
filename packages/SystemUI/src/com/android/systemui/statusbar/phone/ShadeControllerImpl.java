@@ -17,27 +17,26 @@
 package com.android.systemui.statusbar.phone;
 
 import android.util.Log;
+import android.view.View;
 import android.view.ViewTreeObserver;
 import android.view.WindowManager;
 
 import com.android.systemui.assist.AssistManager;
-import com.android.systemui.dagger.SysUISingleton;
+import com.android.systemui.bubbles.BubbleController;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.NotificationPresenter;
-import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.StatusBarState;
-import com.android.wm.shell.bubbles.Bubbles;
 
 import java.util.ArrayList;
-import java.util.Optional;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 
 import dagger.Lazy;
 
 /** An implementation of {@link com.android.systemui.statusbar.phone.ShadeController}. */
-@SysUISingleton
+@Singleton
 public class ShadeControllerImpl implements ShadeController {
 
     private static final String TAG = "ShadeControllerImpl";
@@ -50,7 +49,7 @@ public class ShadeControllerImpl implements ShadeController {
     private final int mDisplayId;
     protected final Lazy<StatusBar> mStatusBarLazy;
     private final Lazy<AssistManager> mAssistManagerLazy;
-    private final Optional<Bubbles> mBubblesOptional;
+    private final Lazy<BubbleController> mBubbleControllerLazy;
 
     private final ArrayList<Runnable> mPostCollapseRunnables = new ArrayList<>();
 
@@ -63,7 +62,7 @@ public class ShadeControllerImpl implements ShadeController {
             WindowManager windowManager,
             Lazy<StatusBar> statusBarLazy,
             Lazy<AssistManager> assistManagerLazy,
-            Optional<Bubbles> bubblesOptional
+            Lazy<BubbleController> bubbleControllerLazy
     ) {
         mCommandQueue = commandQueue;
         mStatusBarStateController = statusBarStateController;
@@ -73,7 +72,7 @@ public class ShadeControllerImpl implements ShadeController {
         // TODO: Remove circular reference to StatusBar when possible.
         mStatusBarLazy = statusBarLazy;
         mAssistManagerLazy = assistManagerLazy;
-        mBubblesOptional = bubblesOptional;
+        mBubbleControllerLazy = bubbleControllerLazy;
     }
 
     @Override
@@ -133,8 +132,8 @@ public class ShadeControllerImpl implements ShadeController {
 
             getStatusBar().getNotificationShadeWindowViewController().cancelExpandHelper();
             getStatusBarView().collapsePanel(true /* animate */, delayed, speedUpFactor);
-        } else if (mBubblesOptional.isPresent()) {
-            mBubblesOptional.get().collapseStack();
+        } else {
+            mBubbleControllerLazy.get().collapseStack();
         }
     }
 
@@ -178,6 +177,12 @@ public class ShadeControllerImpl implements ShadeController {
             clonedList.get(i).run();
         }
         mStatusBarKeyguardViewManager.readyForKeyguardDone();
+    }
+
+    @Override
+    public void goToLockedShade(View startingChild) {
+        // TODO: Move this code out of StatusBar into ShadeController.
+        getStatusBar().goToLockedShade(startingChild);
     }
 
     @Override

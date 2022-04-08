@@ -4,7 +4,7 @@
       "name": "CtsMediaParserTestCases"
     },
     {
-      "name": "CtsMediaParserHostSideTestCases"
+      "name": "CtsMediaParserHostTestCases"
     }
   ]
 }

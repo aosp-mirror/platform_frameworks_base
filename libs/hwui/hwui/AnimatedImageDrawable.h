@@ -44,7 +44,7 @@ public:
  * This class can be drawn into Canvas.h and maintains the state needed to drive
  * the animation from the RenderThread.
  */
-class AnimatedImageDrawable : public SkDrawable {
+class ANDROID_API AnimatedImageDrawable : public SkDrawable {
 public:
     // bytesUsed includes the approximate sizes of the SkAnimatedImage and the SkPictures in the
     // Snapshots.
@@ -67,10 +67,9 @@ public:
         mStagingProperties.mColorFilter = filter;
     }
     void setStagingMirrored(bool mirrored) { mStagingProperties.mMirrored = mirrored; }
-    void setStagingBounds(const SkRect& bounds) { mStagingProperties.mBounds = bounds; }
     void syncProperties();
 
-    SkRect onGetBounds() override;
+    virtual SkRect onGetBounds() override { return mSkAnimatedImage->getBounds(); }
 
     // Draw to software canvas, and return time to next draw.
     // 0 means the animation is not running.
@@ -110,7 +109,7 @@ public:
     size_t byteSize() const { return sizeof(*this) + mBytesUsed; }
 
 protected:
-    void onDraw(SkCanvas* canvas) override;
+    virtual void onDraw(SkCanvas* canvas) override;
 
 private:
     sk_sp<SkAnimatedImage> mSkAnimatedImage;
@@ -146,7 +145,6 @@ private:
         int mAlpha = SK_AlphaOPAQUE;
         sk_sp<SkColorFilter> mColorFilter;
         bool mMirrored = false;
-        SkRect mBounds;
 
         Properties() = default;
         Properties(Properties&) = default;

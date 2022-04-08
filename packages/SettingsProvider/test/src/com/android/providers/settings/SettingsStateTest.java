@@ -17,13 +17,15 @@ package com.android.providers.settings;
 
 import android.os.Looper;
 import android.test.AndroidTestCase;
-import android.util.TypedXmlSerializer;
 import android.util.Xml;
+
+import org.xmlpull.v1.XmlSerializer;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.PrintStream;
+import java.nio.charset.StandardCharsets;
 
 public class SettingsStateTest extends AndroidTestCase {
     public static final String CRAZY_STRING =
@@ -91,7 +93,9 @@ public class SettingsStateTest extends AndroidTestCase {
     public void testWriteReadNoCrash() throws Exception {
         ByteArrayOutputStream os = new ByteArrayOutputStream();
 
-        TypedXmlSerializer serializer = Xml.resolveSerializer(os);
+        XmlSerializer serializer = Xml.newSerializer();
+        serializer.setOutput(os, StandardCharsets.UTF_8.name());
+        serializer.setFeature("http://xmlpull.org/v1/doc/features.html#indent-output", true);
         serializer.startDocument(null, true);
 
         for (int ch = 0; ch < 0x10000; ch++) {
@@ -114,12 +118,12 @@ public class SettingsStateTest extends AndroidTestCase {
                 serializer, "1", "k", "v", null, null, null, false, false);
     }
 
-    private void checkWriteSingleSetting(TypedXmlSerializer serializer, String key, String value)
+    private void checkWriteSingleSetting(XmlSerializer serializer, String key, String value)
             throws Exception {
         checkWriteSingleSetting(key + "/" + value, serializer, key, value);
     }
 
-    private void checkWriteSingleSetting(String msg, TypedXmlSerializer serializer,
+    private void checkWriteSingleSetting(String msg, XmlSerializer serializer,
             String key, String value) throws Exception {
         // Make sure the XML serializer won't crash.
         SettingsState.writeSingleSetting(

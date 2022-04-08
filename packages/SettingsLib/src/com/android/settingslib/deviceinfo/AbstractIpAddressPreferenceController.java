@@ -18,7 +18,6 @@ package com.android.settingslib.deviceinfo;
 
 import android.content.Context;
 import android.net.ConnectivityManager;
-import android.net.LinkAddress;
 import android.net.LinkProperties;
 import android.net.wifi.WifiManager;
 
@@ -29,6 +28,7 @@ import androidx.preference.PreferenceScreen;
 import com.android.settingslib.R;
 import com.android.settingslib.core.lifecycle.Lifecycle;
 
+import java.net.InetAddress;
 import java.util.Iterator;
 
 /**
@@ -93,19 +93,19 @@ public abstract class AbstractIpAddressPreferenceController
      * @return the formatted and newline-separated IP addresses, or null if none.
      */
     private static String getDefaultIpAddresses(ConnectivityManager cm) {
-        LinkProperties prop = cm.getLinkProperties(cm.getActiveNetwork());
+        LinkProperties prop = cm.getActiveLinkProperties();
         return formatIpAddresses(prop);
     }
 
     private static String formatIpAddresses(LinkProperties prop) {
         if (prop == null) return null;
-        Iterator<LinkAddress> iter = prop.getAllLinkAddresses().iterator();
+        Iterator<InetAddress> iter = prop.getAllAddresses().iterator();
         // If there are no entries, return null
         if (!iter.hasNext()) return null;
         // Concatenate all available addresses, newline separated
         StringBuilder addresses = new StringBuilder();
         while (iter.hasNext()) {
-            addresses.append(iter.next().getAddress().getHostAddress());
+            addresses.append(iter.next().getHostAddress());
             if (iter.hasNext()) addresses.append("\n");
         }
         return addresses.toString();

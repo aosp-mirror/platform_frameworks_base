@@ -46,17 +46,16 @@ import java.util.function.Consumer;
 @RunWith(WindowTestRunner.class)
 public class WindowContainerTraversalTests extends WindowTestsBase {
 
-    @UseTestDisplay(addWindows = { W_DOCK_DIVIDER, W_INPUT_METHOD })
     @Test
     public void testDockedDividerPosition() {
-        final WindowState splitScreenWindow = createWindow(null,
+        final WindowState splitScreenWindow = createWindowOnStack(null,
                 WINDOWING_MODE_SPLIT_SCREEN_PRIMARY, ACTIVITY_TYPE_STANDARD, TYPE_BASE_APPLICATION,
                 mDisplayContent, "splitScreenWindow");
-        final WindowState splitScreenSecondaryWindow = createWindow(null,
+        final WindowState splitScreenSecondaryWindow = createWindowOnStack(null,
                 WINDOWING_MODE_SPLIT_SCREEN_SECONDARY, ACTIVITY_TYPE_STANDARD,
                 TYPE_BASE_APPLICATION, mDisplayContent, "splitScreenSecondaryWindow");
 
-        mDisplayContent.setImeLayeringTarget(splitScreenWindow);
+        mDisplayContent.mInputMethodTarget = splitScreenWindow;
 
         Consumer<WindowState> c = mock(Consumer.class);
         mDisplayContent.forAllWindows(c, false);

@@ -21,9 +21,9 @@ import android.util.ArrayMap;
 import android.view.View;
 
 import com.android.systemui.Dumpable;
-import com.android.systemui.dagger.SysUISingleton;
+import com.android.systemui.dagger.SystemUIRootComponent;
 import com.android.systemui.qs.QSFragment;
-import com.android.systemui.statusbar.phone.CollapsedStatusBarFragment;
+import com.android.systemui.statusbar.phone.NavigationBarFragment;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 
 import java.io.FileDescriptor;
@@ -32,6 +32,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 
 import dagger.Subcomponent;
 
@@ -39,7 +40,7 @@ import dagger.Subcomponent;
  * Holds a map of root views to FragmentHostStates and generates them as needed.
  * Also dispatches the configuration changes to all current FragmentHostStates.
  */
-@SysUISingleton
+@Singleton
 public class FragmentService implements Dumpable {
 
     private static final String TAG = "FragmentService";
@@ -60,9 +61,9 @@ public class FragmentService implements Dumpable {
             };
 
     @Inject
-    public FragmentService(FragmentCreator.Factory fragmentCreatorFactory,
+    public FragmentService(SystemUIRootComponent rootComponent,
             ConfigurationController configurationController) {
-        mFragmentCreator = fragmentCreatorFactory.build();
+        mFragmentCreator = rootComponent.createFragmentCreator();
         initInjectionMap();
         configurationController.addCallback(mConfigurationListener);
     }
@@ -120,18 +121,14 @@ public class FragmentService implements Dumpable {
      */
     @Subcomponent
     public interface FragmentCreator {
-        /** Factory for creating a FragmentCreator. */
-        @Subcomponent.Factory
-        interface Factory {
-            FragmentCreator build();
-        }
+        /**
+         * Inject a NavigationBarFragment.
+         */
+        NavigationBarFragment createNavigationBarFragment();
         /**
          * Inject a QSFragment.
          */
         QSFragment createQSFragment();
-
-        /** Inject a CollapsedStatusBarFragment. */
-        CollapsedStatusBarFragment createCollapsedStatusBarFragment();
     }
 
     private class FragmentHostState {

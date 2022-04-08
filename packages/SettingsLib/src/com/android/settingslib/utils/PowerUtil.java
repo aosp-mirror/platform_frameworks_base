@@ -41,7 +41,6 @@ public class PowerUtil {
     private static final long ONE_DAY_MILLIS = TimeUnit.DAYS.toMillis(1);
     private static final long TWO_DAYS_MILLIS = TimeUnit.DAYS.toMillis(2);
     private static final long ONE_HOUR_MILLIS = TimeUnit.HOURS.toMillis(1);
-    private static final long ONE_MIN_MILLIS = TimeUnit.MINUTES.toMillis(1);
 
     /**
      * This method produces the text used in various places throughout the system to describe the
@@ -64,7 +63,7 @@ public class PowerUtil {
                 // show a less than 15 min remaining warning if appropriate
                 CharSequence timeString = StringUtil.formatElapsedTime(context,
                         FIFTEEN_MINUTES_MILLIS,
-                        false /* withSeconds */, false /* collapseTimeUnit */);
+                        false /* withSeconds */);
                 return getUnderFifteenString(context, timeString, percentageString);
             } else if (drainTimeMs >= TWO_DAYS_MILLIS) {
                 // just say more than two day if over 48 hours
@@ -152,7 +151,7 @@ public class PowerUtil {
         final long roundedTimeMs = roundTimeToNearestThreshold(drainTimeMs, ONE_HOUR_MILLIS);
         CharSequence timeString = StringUtil.formatElapsedTime(context,
                 roundedTimeMs,
-                false /* withSeconds */, true /* collapseTimeUnit */);
+                false /* withSeconds */);
 
         if (TextUtils.isEmpty(percentageString)) {
             int id = basedOnUsage
@@ -171,7 +170,7 @@ public class PowerUtil {
             int resId) {
         final long roundedTimeMs = roundTimeToNearestThreshold(drainTimeMs, ONE_HOUR_MILLIS);
         CharSequence timeString = StringUtil.formatElapsedTime(context, roundedTimeMs,
-                false /* withSeconds */, false /* collapseTimeUnit */);
+                false /* withSeconds */);
 
         return context.getString(resId, timeString);
     }
@@ -194,18 +193,17 @@ public class PowerUtil {
     private static String getRegularTimeRemainingString(Context context, long drainTimeMs,
             String percentageString, boolean basedOnUsage) {
 
-        CharSequence timeString = StringUtil.formatElapsedTime(context,
-                drainTimeMs, false /* withSeconds */, true /* collapseTimeUnit */);
+        CharSequence timeString = getDateTimeStringFromMs(context, drainTimeMs);
 
         if (TextUtils.isEmpty(percentageString)) {
             int id = basedOnUsage
-                    ? R.string.power_remaining_duration_only_enhanced
-                    : R.string.power_remaining_duration_only;
+                    ? R.string.power_discharge_by_only_enhanced
+                    : R.string.power_discharge_by_only;
             return context.getString(id, timeString);
         } else {
             int id = basedOnUsage
-                    ? R.string.power_discharging_duration_enhanced
-                    : R.string.power_discharging_duration;
+                    ? R.string.power_discharge_by_enhanced
+                    : R.string.power_discharge_by;
             return context.getString(id, timeString, percentageString);
         }
     }

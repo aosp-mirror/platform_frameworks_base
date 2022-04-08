@@ -36,7 +36,6 @@
     <string name="wifi_no_internet_no_reconnect" msgid="821591791066497347">"នឹងមិនភ្ជាប់ដោយស្វ័យប្រវត្តិទេ"</string>
     <string name="wifi_no_internet" msgid="1774198889176926299">"មិនមាន​ការតភ្ជាប់​អ៊ីនធឺណិតទេ"</string>
     <string name="saved_network" msgid="7143698034077223645">"បានរក្សាទុកដោយ <xliff:g id="NAME">%1$s</xliff:g>"</string>
-    <string name="connected_to_metered_access_point" msgid="9179693207918156341">"បានភ្ជាប់ទៅ​បណ្ដាញដែលផ្អែកតាមទិន្នន័យដែលប្រើ"</string>
     <string name="connected_via_network_scorer" msgid="7665725527352893558">"បានភ្ជាប់ដោយស្វ័យប្រវត្តិតាមរយៈ %1$s"</string>
     <string name="connected_via_network_scorer_default" msgid="7973529709744526285">"បានភ្ជាប់​ដោយស្វ័យប្រវត្តិ​តាម​រយៈក្រុមហ៊ុនផ្តល់​ការ​វាយ​តម្លៃលើ​បណ្តាញ"</string>
     <string name="connected_via_passpoint" msgid="7735442932429075684">"បានភ្ជាប់តាមរយៈ %1$s"</string>
@@ -252,12 +251,13 @@
     <string name="wifi_display_certification" msgid="1805579519992520381">"សេចក្តីបញ្ជាក់ការបង្ហាញ​ឥត​ខ្សែ"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"បើក​កំណត់ហេតុ​រៀបរាប់​ Wi-Fi"</string>
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"ការពន្យឺតការស្កេន Wi‑Fi"</string>
-    <string name="wifi_enhanced_mac_randomization" msgid="882650208573834301">"ការតម្រៀប MAC ដែលមិនមានលក្ខណៈជាប់លាប់តាមលំដាប់​ចៃដន្យនៃ Wi‑Fi"</string>
+    <string name="wifi_enhanced_mac_randomization" msgid="5437378364995776979">"ការប្រើ MAC ចៃដន្យដែលកែលម្អតាម Wi-Fi"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"ទិន្នន័យទូរសព្ទចល័តដំណើរការជានិច្ច"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"ការ​ពន្លឿនល្បឿនភ្ជាប់ដោយប្រើហាតវែរ"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"បង្ហាញ​ឧបករណ៍​ប្ល៊ូធូស​គ្មានឈ្មោះ"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="1452342324349203434">"បិទកម្រិតសំឡេងលឺខ្លាំង"</string>
     <string name="bluetooth_enable_gabeldorsche" msgid="9131730396242883416">"បើក Gabeldorsche"</string>
+    <string name="enhanced_connectivity" msgid="7201127377781666804">"ការតភ្ជាប់​ដែលបានធ្វើឱ្យប្រសើរឡើង"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="1710571610177659127">"កំណែប្ល៊ូធូស AVRCP"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7846922290083709633">"ជ្រើសរើសកំណែប្ល៊ូធូស AVRCP"</string>
     <string name="bluetooth_select_map_version_string" msgid="526308145174175327">"កំណែ​ប៊្លូធូស MAP"</string>
@@ -353,7 +353,6 @@
     <string name="debug_layout_summary" msgid="8825829038287321978">"បង្ហាញ​ការ​ភ្ជាប់​អត្ថបទ​សម្រង់ រឹម ។ល។"</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"បង្ខំ​ទិស​ប្លង់ RTL"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"ប្តូរទិស​ប្លង់​អេក្រង់​ទៅជា RTL សម្រាប់​គ្រប់ភាសា​ទាំងអស់"</string>
-    <string name="window_blurs" msgid="6831008984828425106">"អនុញ្ញាតភាពព្រាលកម្រិតវិនដូ"</string>
     <string name="force_msaa" msgid="4081288296137775550">"បង្ខំ 4x MSAA"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"បើក 4x MSAA ក្នុង​កម្មវិធី OpenGL ES 2.0"</string>
     <string name="show_non_rect_clip" msgid="7499758654867881817">"កែ​ប្រតិបត្តិការ​​​ផ្នែកដកចេញដែលមិនមាន​រាង​ចតុកោណកែង"</string>
@@ -401,12 +400,6 @@
     <string name="inactive_app_inactive_summary" msgid="3161222402614236260">"សកម្ម។ ប៉ះដើម្បីបិទ/បើក។"</string>
     <string name="inactive_app_active_summary" msgid="8047630990208722344">"សកម្ម។ ប៉ះដើម្បីបិទ/បើក។"</string>
     <string name="standby_bucket_summary" msgid="5128193447550429600">"ស្ថាន​ភាព​មុខងារ​ផ្អាក​ដំណើរការ​កម្មវិធី៖<xliff:g id="BUCKET"> %s</xliff:g>"</string>
-    <string name="transcode_settings_title" msgid="2581975870429850549">"ការកំណត់​ការបំប្លែង​កូដមេឌៀ"</string>
-    <string name="transcode_user_control" msgid="6176368544817731314">"លុបពីលើលំនាំដើម​នៃការបំប្លែងកូដ"</string>
-    <string name="transcode_enable_all" msgid="2411165920039166710">"បើក​ការបំប្លែងកូដ"</string>
-    <string name="transcode_default" msgid="3784803084573509491">"សន្មតថាកម្មវិធី​អាចប្រើ​ទម្រង់ទំនើបបាន"</string>
-    <string name="transcode_notification" msgid="5560515979793436168">"បង្ហាញការជូនដំណឹង​អំពីការបំប្លែងកូដ"</string>
-    <string name="transcode_disable_cache" msgid="3160069309377467045">"បិទ​ឃ្លាំងបម្រុង​សម្រាប់​ការបំប្លែងកូដ"</string>
     <string name="runningservices_settings_title" msgid="6460099290493086515">"សេវាកម្ម​កំពុង​ដំណើរការ"</string>
     <string name="runningservices_settings_summary" msgid="1046080643262665743">"មើល និង​គ្រប់គ្រង​សេវាកម្ម​កំពុង​ដំណើរការ​បច្ចុប្បន្ន"</string>
     <string name="select_webview_provider_title" msgid="3917815648099445503">"ការអនុវត្ត WebView"</string>
@@ -426,7 +419,7 @@
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"Protanomaly (ក្រហម​ពណ៌​បៃតង​)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"Tritanomaly (ពណ៌​ខៀវ​-លឿង​)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"ការ​កែ​ពណ៌"</string>
-    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="2333641630205214702">"កែតម្រូវ​របៀបដែលពណ៌​បង្ហាញនៅលើ​ឧបករណ៍​របស់អ្នក។ ចំណុចនេះ​អាចមានប្រយោជន៍ នៅពេលដែល​អ្នកចង់៖&lt;br/&gt;&lt;br/&gt; &lt;ol&gt; &lt;li&gt;&amp;nbsp;មើលឃើញពណ៌​កាន់តែត្រឹមត្រូវ&lt;/li&gt; &lt;li&gt;&amp;nbsp;លុបពណ៌ ដើម្បីជួយអ្នក​ក្នុងការផ្ដោតអារម្មណ៍&lt;/li&gt; &lt;/ol&gt;"</string>
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1284746051652993443">"ការកែតម្រូវ​ពណ៌​អនុញ្ញាតឱ្យ​អ្នក​កែតម្រូវ​របៀប​បង្ហាញ​ពណ៌​នៅលើ​ឧបករណ៍​របស់អ្នក"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"បដិសេធ​ដោយ <xliff:g id="TITLE">%1$s</xliff:g>"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> - <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
     <string name="power_remaining_duration_only" msgid="8264199158671531431">"នៅសល់​ប្រហែល <xliff:g id="TIME_REMAINING">%1$s</xliff:g> ទៀត"</string>
@@ -452,17 +445,15 @@
     <string name="power_remaining_duration_shutdown_imminent" product="tablet" msgid="7703677921000858479">"ថេប្លេត​អាចនឹង​បិទក្នុង​ពេលបន្តិច​ទៀត (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_remaining_duration_shutdown_imminent" product="device" msgid="4374784375644214578">"ឧបករណ៍​អាចនឹង​បិទក្នុង​ពេលបន្តិច​ទៀត (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
-    <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"<xliff:g id="TIME">%1$s</xliff:g> ទៀតទើបពេញ"</string>
-    <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> - នៅសល់ <xliff:g id="TIME">%2$s</xliff:g> ទៀតទើបពេញ"</string>
-    <string name="power_charging_limited" msgid="7956120998372505295">"<xliff:g id="LEVEL">%1$s</xliff:g> - បានដាក់កម្រិត​ការសាកថ្ម​ជាបណ្ដោះអាសន្ន"</string>
+    <string name="power_remaining_charging_duration_only" msgid="7415639699283965818">"<xliff:g id="TIME">%1$s</xliff:g> ទៀតទើបសាកថ្មពេញ"</string>
+    <string name="power_charging_duration" msgid="5005740040558984057">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> ទៀតទើប​សាកថ្មពេញ"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"មិន​ស្គាល់"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"កំពុងសាក​ថ្ម"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"កំពុងសាកថ្មយ៉ាងឆាប់រហ័ស"</string>
     <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"កំពុង​សាកថ្មយឺត"</string>
-    <string name="battery_info_status_charging_wireless" msgid="8924722966861282197">"កំពុង​សាកថ្ម​ឥតខ្សែ"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"មិនកំពុង​សាក​ថ្ម"</string>
-    <string name="battery_info_status_not_charging" msgid="3371084153747234837">"បានភ្ជាប់ មិនកំពុង​សាកថ្ម"</string>
-    <string name="battery_info_status_full" msgid="1339002294876531312">"បាន​សាក​ថ្មពេញ"</string>
+    <string name="battery_info_status_not_charging" msgid="8330015078868707899">"ដោត​សាកថ្ម​រួចហើយ ប៉ុន្តែ​​សាកថ្ម​មិន​ចូលទេឥឡូវនេះ"</string>
+    <string name="battery_info_status_full" msgid="4443168946046847468">"ពេញ"</string>
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"គ្រប់គ្រងដោយអ្នកគ្រប់គ្រង"</string>
     <string name="disabled" msgid="8017887509554714950">"បិទ"</string>
     <string name="external_source_trusted" msgid="1146522036773132905">"បាន​អនុញ្ញាត"</string>
@@ -504,11 +495,6 @@
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"រយៈពេល​តិច​ជាង។"</string>
     <string name="cancel" msgid="5665114069455378395">"បោះ​បង់​"</string>
     <string name="okay" msgid="949938843324579502">"យល់ព្រម"</string>
-    <string name="alarms_and_reminders_label" msgid="6918395649731424294">"ម៉ោងរោទ៍ និងការរំលឹក"</string>
-    <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"អនុញ្ញាតឱ្យ​កំណត់​ម៉ោងរោទ៍ និង​ការរំលឹក"</string>
-    <string name="alarms_and_reminders_title" msgid="8819933264635406032">"ម៉ោងរោទ៍ និង​ការរំលឹក"</string>
-    <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"អនុញ្ញាតឱ្យ​កម្មវិធីនេះ​កំណត់ម៉ោងរោទ៍ និងកំណត់កាលវិភាគសកម្មភាពដែលតម្រូវឱ្យទាន់ពេលវេលា។ ការធ្វើបែបនេះអនុញ្ញាតឱ្យកម្មវិធីនេះដំណើរការនៅផ្ទៃខាងក្រោយ ដែលអាចប្រើថ្មច្រើនជាងមុន។\n\nប្រសិនបើបិទការអនុញ្ញាតនេះ ម៉ោងរោទ៍ដែលមានស្រាប់ និងព្រឹត្តិការណ៍ផ្អែកលើពេលវេលាដែលកំណត់ដោយកម្មវិធីនេះ​នឹងមិនដំណើរការទេ។"</string>
-    <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"កាលវិភាគ ម៉ោងរោទ៍ ការរំលឹក នាឡិកា"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"បើក"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"បើកមុខងារកុំរំខាន"</string>
     <string name="zen_mode_settings_summary_off" msgid="3832876036123504076">"កុំឱ្យសោះ"</string>
@@ -523,7 +509,6 @@
     <string name="zen_mode_forever" msgid="3339224497605461291">"រហូតទាល់តែ​អ្នកបិទ"</string>
     <string name="time_unit_just_now" msgid="3006134267292728099">"អម្បាញ់មិញ"</string>
     <string name="media_transfer_this_device_name" msgid="2716555073132169240">"ឧបករណ៍​បំពង​សំឡេង​ទូរសព្ទ"</string>
-    <string name="media_transfer_this_phone" msgid="7194341457812151531">"ទូរសព្ទនេះ"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"មាន​បញ្ហា​ក្នុងការ​ភ្ជាប់។ បិទ រួច​បើក​ឧបករណ៍​វិញ"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"ឧបករណ៍​សំឡេងប្រើខ្សែ"</string>
     <string name="help_label" msgid="3528360748637781274">"ជំនួយ និងមតិកែលម្អ"</string>
@@ -561,51 +546,12 @@
     <string name="user_need_lock_message" msgid="4311424336209509301">"មុន​ពេល​អ្នក​អាច​បង្កើត​ប្រវត្តិ​រូប​បាន​ដាក់​កម្រិត អ្នក​ត្រូវ​រៀបចំ​ការ​ចាក់​សោ​អេក្រង់ ដើម្បី​ការពារ​កម្មវិធី និង​ទិន្នន័យ​ផ្ទាល់ខ្លួន​របស់​អ្នក។"</string>
     <string name="user_set_lock_button" msgid="1427128184982594856">"កំណត់​ការ​ចាក់​សោ"</string>
     <string name="user_switch_to_user" msgid="6975428297154968543">"ប្ដូរទៅ <xliff:g id="USER_NAME">%s</xliff:g>"</string>
-    <string name="creating_new_user_dialog_message" msgid="7232880257538970375">"កំពុងបង្កើត​អ្នកប្រើប្រាស់ថ្មី…"</string>
-    <string name="add_user_failed" msgid="4809887794313944872">"មិន​អាច​បង្កើត​អ្នកប្រើប្រាស់ថ្មី​បានទេ"</string>
-    <string name="user_nickname" msgid="262624187455825083">"ឈ្មោះ​ហៅក្រៅ"</string>
     <string name="guest_new_guest" msgid="3482026122932643557">"បញ្ចូល​ភ្ញៀវ"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"ដកភ្ញៀវចេញ"</string>
-    <string name="guest_reset_guest" msgid="6110013010356013758">"កំណត់​ភ្ញៀវឡើង​វិញ"</string>
     <string name="guest_nickname" msgid="6332276931583337261">"ភ្ញៀវ"</string>
-    <string name="guest_reset_guest_dialog_title" msgid="8047270010895437534">"កំណត់​ភ្ញៀវឡើង​វិញឬ?"</string>
-    <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"កំណត់​ឡើងវិញ"</string>
-    <string name="guest_resetting" msgid="7822120170191509566">"កំពុងកំណត់​ភ្ញៀវឡើងវិញ…"</string>
-    <string name="user_image_take_photo" msgid="467512954561638530">"ថតរូប"</string>
-    <string name="user_image_choose_photo" msgid="1363820919146782908">"ជ្រើសរើស​រូបភាព"</string>
-    <string name="user_image_photo_selector" msgid="433658323306627093">"ជ្រើសរើស​​រូបថត"</string>
     <string name="cached_apps_freezer_device_default" msgid="2616594131750144342">"លំនាំដើម​របស់ឧបករណ៍"</string>
     <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"បានបិទ"</string>
     <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"បានបើក"</string>
     <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"ត្រូវតែ​ចាប់ផ្ដើម​ឧបករណ៍​របស់អ្នក​ឡើងវិញ ដើម្បីឱ្យ​ការផ្លាស់ប្ដូរ​នេះ​មានប្រសិទ្ធភាព។ ចាប់ផ្ដើមឡើងវិញ​ឥឡូវនេះ ឬ​បោះបង់​។"</string>
     <string name="media_transfer_wired_usb_device_name" msgid="7699141088423210903">"កាស​មានខ្សែ"</string>
-    <string name="wifi_hotspot_switch_on_text" msgid="9212273118217786155">"បើក"</string>
-    <string name="wifi_hotspot_switch_off_text" msgid="7245567251496959764">"បិទ"</string>
-    <string name="carrier_network_change_mode" msgid="4257621815706644026">"បណ្តាញ​ក្រុមហ៊ុនសេវាទូរសព្ទ​កំពុងផ្លាស់ប្តូរ"</string>
-    <string name="data_connection_3g" msgid="931852552688157407">"3G"</string>
-    <string name="data_connection_edge" msgid="4625509456544797637">"EDGE"</string>
-    <string name="data_connection_cdma" msgid="9098161966701934334">"1X"</string>
-    <string name="data_connection_gprs" msgid="1251945769006770189">"GPRS"</string>
-    <string name="data_connection_3_5g" msgid="4298721462047921400">"H"</string>
-    <string name="data_connection_3_5g_plus" msgid="6683055858295918170">"H+"</string>
-    <string name="data_connection_4g" msgid="2581705503356752044">"4G"</string>
-    <string name="data_connection_4g_plus" msgid="5194902328408751020">"4G+"</string>
-    <string name="data_connection_lte" msgid="7675461204366364124">"LTE"</string>
-    <string name="data_connection_lte_plus" msgid="6643158654804916653">"LTE+"</string>
-    <string name="data_connection_carrier_wifi" msgid="8932949159370130465">"W+"</string>
-    <string name="cell_data_off_content_description" msgid="2280700839891636498">"ទិន្នន័យ​ទូរសព្ទចល័ត​បានបិទ"</string>
-    <string name="not_default_data_content_description" msgid="6517068332106592887">"មិនបានកំណត់​ឱ្យប្រើ​ទិន្នន័យ​ទេ"</string>
-    <string name="accessibility_no_phone" msgid="2687419663127582503">"គ្មាន​ទូរស័ព្ទ។"</string>
-    <string name="accessibility_phone_one_bar" msgid="5719721147018970063">"សេវា​ទូរស័ព្ទ​មួយ​កាំ។"</string>
-    <string name="accessibility_phone_two_bars" msgid="2531458337458953263">"សេវា​ទូរស័ព្ទ​ពីរ​កាំ។"</string>
-    <string name="accessibility_phone_three_bars" msgid="1523967995996696619">"សេវា​ទូរស័ព្ទ​បី​កាំ​។"</string>
-    <string name="accessibility_phone_signal_full" msgid="4302338883816077134">"សេវា​ទូរស័ព្ទ​ពេញ។"</string>
-    <string name="accessibility_no_data" msgid="4563181886936931008">"គ្មាន​ទិន្នន័យ​។"</string>
-    <string name="accessibility_data_one_bar" msgid="6892888138070752480">"ទិន្នន័យ​មួយ​​កាំ។"</string>
-    <string name="accessibility_data_two_bars" msgid="9202641507241802499">"ទិន្នន័យ​ពីរ​​កាំ។"</string>
-    <string name="accessibility_data_three_bars" msgid="2813876214466722413">"ទិន្នន័យ​បី​កាំ។"</string>
-    <string name="accessibility_data_signal_full" msgid="1808301899314382337">"សញ្ញា​ទិន្នន័យ​ពេញ។"</string>
-    <string name="accessibility_ethernet_disconnected" msgid="2832501530856497489">"បានផ្តាច់អ៊ីសឺរណិត។"</string>
-    <string name="accessibility_ethernet_connected" msgid="6175942685957461563">"អ៊ីសឺរណិត។"</string>
-    <string name="accessibility_no_calling" msgid="3540827068323895748">"គ្មាន​ការហៅ​ទូរសព្ទទេ​។"</string>
 </resources>

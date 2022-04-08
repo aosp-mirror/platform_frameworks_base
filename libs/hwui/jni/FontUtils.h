@@ -19,7 +19,6 @@
 
 #include <jni.h>
 #include <memory>
-#include <utility>
 
 #include <minikin/Font.h>
 
@@ -35,8 +34,8 @@ struct FontFamilyWrapper {
 };
 
 struct FontWrapper {
-  explicit FontWrapper(std::shared_ptr<minikin::Font>&& font) : font(font) {}
-  std::shared_ptr<minikin::Font> font;
+  FontWrapper(minikin::Font&& font) : font(std::move(font)) {}
+  minikin::Font font;
 };
 
 // Utility wrapper for java.util.List

@@ -16,8 +16,6 @@
 
 package android.util.apk;
 
-import android.annotation.Nullable;
-
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
 import java.util.Arrays;
@@ -41,7 +39,7 @@ class VerbatimX509Certificate extends WrappedX509Certificate {
     }
 
     @Override
-    public boolean equals(@Nullable Object o) {
+    public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof VerbatimX509Certificate)) return false;
 

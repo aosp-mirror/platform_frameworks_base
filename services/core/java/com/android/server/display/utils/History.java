@@ -83,7 +83,7 @@ public class History {
      * @return The buffer as string.
      */
     public String toString() {
-        StringBuilder sb = new StringBuilder();
+        StringBuffer sb = new StringBuffer();
         sb.append("[");
         for (int i = 0; i < mCount; i++) {
             final int index = (mStart + i) % mSize;

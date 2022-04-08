@@ -22,8 +22,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
-import android.app.IWallpaperManager;
-import android.os.PowerManager;
 import android.testing.AndroidTestingRunner;
 
 import androidx.test.filters.SmallTest;
@@ -44,26 +42,23 @@ public class WakefulnessLifecycleTest extends SysuiTestCase {
     private WakefulnessLifecycle mWakefulness;
     private WakefulnessLifecycle.Observer mWakefulnessObserver;
 
-    private IWallpaperManager mWallpaperManager;
-
     @Before
     public void setUp() throws Exception {
-        mWallpaperManager = mock(IWallpaperManager.class);
-        mWakefulness = new WakefulnessLifecycle(mContext, mWallpaperManager);
+        mWakefulness = new WakefulnessLifecycle();
         mWakefulnessObserver = mock(WakefulnessLifecycle.Observer.class);
         mWakefulness.addObserver(mWakefulnessObserver);
     }
 
     @Test
     public void baseState() throws Exception {
-        assertEquals(WakefulnessLifecycle.WAKEFULNESS_AWAKE, mWakefulness.getWakefulness());
+        assertEquals(WakefulnessLifecycle.WAKEFULNESS_ASLEEP, mWakefulness.getWakefulness());
 
         verifyNoMoreInteractions(mWakefulnessObserver);
     }
 
     @Test
     public void dispatchStartedWakingUp() throws Exception {
-        mWakefulness.dispatchStartedWakingUp(PowerManager.WAKE_REASON_UNKNOWN);
+        mWakefulness.dispatchStartedWakingUp();
 
         assertEquals(WakefulnessLifecycle.WAKEFULNESS_WAKING, mWakefulness.getWakefulness());
 
@@ -72,7 +67,7 @@ public class WakefulnessLifecycleTest extends SysuiTestCase {
 
     @Test
     public void dispatchFinishedWakingUp() throws Exception {
-        mWakefulness.dispatchStartedWakingUp(PowerManager.WAKE_REASON_UNKNOWN);
+        mWakefulness.dispatchStartedWakingUp();
         mWakefulness.dispatchFinishedWakingUp();
 
         assertEquals(WakefulnessLifecycle.WAKEFULNESS_AWAKE, mWakefulness.getWakefulness());
@@ -82,9 +77,9 @@ public class WakefulnessLifecycleTest extends SysuiTestCase {
 
     @Test
     public void dispatchStartedGoingToSleep() throws Exception {
-        mWakefulness.dispatchStartedWakingUp(PowerManager.WAKE_REASON_UNKNOWN);
+        mWakefulness.dispatchStartedWakingUp();
         mWakefulness.dispatchFinishedWakingUp();
-        mWakefulness.dispatchStartedGoingToSleep(PowerManager.GO_TO_SLEEP_REASON_MIN);
+        mWakefulness.dispatchStartedGoingToSleep();
 
         assertEquals(WakefulnessLifecycle.WAKEFULNESS_GOING_TO_SLEEP,
                 mWakefulness.getWakefulness());
@@ -94,9 +89,9 @@ public class WakefulnessLifecycleTest extends SysuiTestCase {
 
     @Test
     public void dispatchFinishedGoingToSleep() throws Exception {
-        mWakefulness.dispatchStartedWakingUp(PowerManager.WAKE_REASON_UNKNOWN);
+        mWakefulness.dispatchStartedWakingUp();
         mWakefulness.dispatchFinishedWakingUp();
-        mWakefulness.dispatchStartedGoingToSleep(PowerManager.GO_TO_SLEEP_REASON_MIN);
+        mWakefulness.dispatchStartedGoingToSleep();
         mWakefulness.dispatchFinishedGoingToSleep();
 
         assertEquals(WakefulnessLifecycle.WAKEFULNESS_ASLEEP,
@@ -107,12 +102,12 @@ public class WakefulnessLifecycleTest extends SysuiTestCase {
 
     @Test
     public void doesNotDispatchTwice() throws Exception {
-        mWakefulness.dispatchStartedWakingUp(PowerManager.WAKE_REASON_UNKNOWN);
-        mWakefulness.dispatchStartedWakingUp(PowerManager.WAKE_REASON_UNKNOWN);
+        mWakefulness.dispatchStartedWakingUp();
+        mWakefulness.dispatchStartedWakingUp();
         mWakefulness.dispatchFinishedWakingUp();
         mWakefulness.dispatchFinishedWakingUp();
-        mWakefulness.dispatchStartedGoingToSleep(PowerManager.GO_TO_SLEEP_REASON_MIN);
-        mWakefulness.dispatchStartedGoingToSleep(PowerManager.GO_TO_SLEEP_REASON_MIN);
+        mWakefulness.dispatchStartedGoingToSleep();
+        mWakefulness.dispatchStartedGoingToSleep();
         mWakefulness.dispatchFinishedGoingToSleep();
         mWakefulness.dispatchFinishedGoingToSleep();
 
@@ -127,8 +122,4 @@ public class WakefulnessLifecycleTest extends SysuiTestCase {
         mWakefulness.dump(null, new PrintWriter(new ByteArrayOutputStream()), new String[0]);
     }
 
-    @Test(expected = NullPointerException.class)
-    public void throwNPEOnNullObserver() {
-        mWakefulness.addObserver(null);
-    }
 }

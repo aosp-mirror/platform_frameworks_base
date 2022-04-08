@@ -1,15 +1,5 @@
 {
-  "presubmit-large": [
-    {
-      "name": "StagedInstallInternalTest",
-      "options": [
-        {
-          "exclude-annotation": "android.platform.test.annotations.LargeTest"
-        }
-      ]
-    }
-  ],
-  "postsubmit": [
+  "presubmit": [
     {
       "name": "StagedInstallInternalTest"
     }

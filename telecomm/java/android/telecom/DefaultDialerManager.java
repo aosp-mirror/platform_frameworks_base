@@ -74,7 +74,7 @@ public class DefaultDialerManager {
      * */
     public static boolean setDefaultDialerApplication(Context context, String packageName,
             int user) {
-        final long identity = Binder.clearCallingIdentity();
+        long identity = Binder.clearCallingIdentity();
         try {
             CompletableFuture<Void> future = new CompletableFuture<>();
             Consumer<Boolean> callback = successful -> {
@@ -128,7 +128,7 @@ public class DefaultDialerManager {
      * @hide
      * */
     public static String getDefaultDialerApplication(Context context, int user) {
-        final long identity = Binder.clearCallingIdentity();
+        long identity = Binder.clearCallingIdentity();
         try {
             return CollectionUtils.firstOrNull(context.getSystemService(RoleManager.class)
                     .getRoleHoldersAsUser(RoleManager.ROLE_DIALER, UserHandle.of(user)));

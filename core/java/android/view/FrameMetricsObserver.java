@@ -45,8 +45,7 @@ public class FrameMetricsObserver
         mWindow = new WeakReference<>(window);
         mListener = listener;
         mFrameMetrics = new FrameMetrics();
-        mObserver = new HardwareRendererObserver(this,  mFrameMetrics.mTimingData, handler,
-                false /*waitForPresentTime*/);
+        mObserver = new HardwareRendererObserver(this,  mFrameMetrics.mTimingData, handler);
     }
 
     /**

@@ -75,7 +75,6 @@ public abstract class WebIconDatabase {
 
     /** {@hide}
      */
-    @SuppressWarnings("HiddenAbstractMethod")
     @SystemApi
     public abstract void bulkRequestIconForPageUrl(ContentResolver cr, String where,
             IconListener listener);

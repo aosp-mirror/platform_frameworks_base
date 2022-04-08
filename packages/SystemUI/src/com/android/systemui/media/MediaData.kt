@@ -31,9 +31,9 @@ data class MediaData(
      */
     val app: String?,
     /**
-     * App icon shown on player.
+     * Icon shown on player, close to app name.
      */
-    val appIcon: Icon?,
+    val appIcon: Drawable?,
     /**
      * Artist name.
      */
@@ -82,10 +82,6 @@ data class MediaData(
      */
     var resumeAction: Runnable?,
     /**
-     * Local or remote playback
-     */
-    var isLocalSession: Boolean = true,
-    /**
      * Indicates that this player is a resumption player (ie. It only shows a play actions which
      * will start the app and start playing).
      */
@@ -94,27 +90,12 @@ data class MediaData(
      * Notification key for cancelling a media player after a timeout (when not using resumption.)
      */
     val notificationKey: String? = null,
-    var hasCheckedForResume: Boolean = false,
-
-    /**
-     * If apps do not report PlaybackState, set as null to imply 'undetermined'
-     */
-    val isPlaying: Boolean? = null,
-
-    /**
-     * Set from the notification and used as fallback when PlaybackState cannot be determined
-     */
-    val isClearable: Boolean = true,
-
-    /**
-     * Timestamp when this player was last active.
-     */
-    var lastActive: Long = 0L
+    var hasCheckedForResume: Boolean = false
 )
 
 /** State of a media action. */
 data class MediaAction(
-    val icon: Icon?,
+    val drawable: Drawable?,
     val action: Runnable?,
     val contentDescription: CharSequence?
 )

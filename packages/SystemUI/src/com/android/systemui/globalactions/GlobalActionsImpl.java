@@ -30,13 +30,17 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.android.internal.R;
+import com.android.internal.colorextraction.drawable.ScrimDrawable;
+import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.settingslib.Utils;
+import com.android.systemui.Dependency;
 import com.android.systemui.plugins.GlobalActions;
-import com.android.systemui.scrim.ScrimDrawable;
+import com.android.systemui.plugins.GlobalActionsPanelPlugin;
 import com.android.systemui.statusbar.BlurUtils;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.phone.ScrimController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
+import com.android.systemui.statusbar.policy.ExtensionController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 
 import javax.inject.Inject;
@@ -46,26 +50,29 @@ import dagger.Lazy;
 public class GlobalActionsImpl implements GlobalActions, CommandQueue.Callbacks {
 
     private final Context mContext;
-    private final Lazy<GlobalActionsDialogLite> mGlobalActionsDialogLazy;
+    private final Lazy<GlobalActionsDialog> mGlobalActionsDialogLazy;
     private final KeyguardStateController mKeyguardStateController;
     private final DeviceProvisionedController mDeviceProvisionedController;
+    private final ExtensionController.Extension<GlobalActionsPanelPlugin> mWalletPluginProvider;
     private final BlurUtils mBlurUtils;
     private final CommandQueue mCommandQueue;
-    private GlobalActionsDialogLite mGlobalActionsDialog;
+    private GlobalActionsDialog mGlobalActionsDialog;
     private boolean mDisabled;
 
     @Inject
     public GlobalActionsImpl(Context context, CommandQueue commandQueue,
-            Lazy<GlobalActionsDialogLite> globalActionsDialogLazy, BlurUtils blurUtils,
-            KeyguardStateController keyguardStateController,
-            DeviceProvisionedController deviceProvisionedController) {
+            Lazy<GlobalActionsDialog> globalActionsDialogLazy, BlurUtils blurUtils) {
         mContext = context;
         mGlobalActionsDialogLazy = globalActionsDialogLazy;
-        mKeyguardStateController = keyguardStateController;
-        mDeviceProvisionedController = deviceProvisionedController;
+        mKeyguardStateController = Dependency.get(KeyguardStateController.class);
+        mDeviceProvisionedController = Dependency.get(DeviceProvisionedController.class);
         mCommandQueue = commandQueue;
         mBlurUtils = blurUtils;
         mCommandQueue.addCallback(this);
+        mWalletPluginProvider = Dependency.get(ExtensionController.class)
+                .newExtension(GlobalActionsPanelPlugin.class)
+                .withPlugin(GlobalActionsPanelPlugin.class)
+                .build();
     }
 
     @Override
@@ -82,7 +89,9 @@ public class GlobalActionsImpl implements GlobalActions, CommandQueue.Callbacks 
         if (mDisabled) return;
         mGlobalActionsDialog = mGlobalActionsDialogLazy.get();
         mGlobalActionsDialog.showOrHideDialog(mKeyguardStateController.isShowing(),
-                mDeviceProvisionedController.isDeviceProvisioned());
+                mDeviceProvisionedController.isDeviceProvisioned(),
+                mWalletPluginProvider.get());
+        Dependency.get(KeyguardUpdateMonitor.class).requestFaceAuth();
     }
 
     @Override
@@ -94,10 +103,9 @@ public class GlobalActionsImpl implements GlobalActions, CommandQueue.Callbacks 
 
         d.setOnShowListener(dialog -> {
             if (mBlurUtils.supportsBlursOnWindows()) {
-                int backgroundAlpha = (int) (ScrimController.BUSY_SCRIM_ALPHA * 255);
-                background.setAlpha(backgroundAlpha);
+                background.setAlpha((int) (ScrimController.BLUR_SCRIM_ALPHA * 255));
                 mBlurUtils.applyBlur(d.getWindow().getDecorView().getViewRootImpl(),
-                        (int) mBlurUtils.blurRadiusOfRatio(1), backgroundAlpha == 255);
+                        mBlurUtils.blurRadiusOfRatio(1));
             } else {
                 float backgroundAlpha = mContext.getResources().getFloat(
                         com.android.systemui.R.dimen.shutdown_scrim_behind_alpha);
@@ -132,14 +140,8 @@ public class GlobalActionsImpl implements GlobalActions, CommandQueue.Callbacks 
         d.setContentView(R.layout.shutdown_dialog);
         d.setCancelable(false);
 
-        int color;
-        if (mBlurUtils.supportsBlursOnWindows()) {
-            color = Utils.getColorAttrDefaultColor(mContext,
-                    com.android.systemui.R.attr.wallpaperTextColor);
-        } else {
-            color = mContext.getResources().getColor(
-                    com.android.systemui.R.color.global_actions_shutdown_ui_text);
-        }
+        int color = Utils.getColorAttrDefaultColor(mContext,
+                com.android.systemui.R.attr.wallpaperTextColor);
 
         ProgressBar bar = d.findViewById(R.id.progress);
         bar.getIndeterminateDrawable().setTint(color);

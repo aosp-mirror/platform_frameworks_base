@@ -30,7 +30,6 @@ import static android.app.admin.PasswordMetrics.validatePasswordMetrics;
 import static com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_NONE;
 import static com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_PASSWORD;
 import static com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_PATTERN;
-import static com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_PIN;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -94,8 +93,8 @@ public class PasswordMetricsTest {
 
     @Test
     public void testComputeForPassword_metrics() {
-        final PasswordMetrics metrics = PasswordMetrics.computeForPasswordOrPin(
-                "6B~0z1Z3*8A".getBytes(), /* isPin */ false);
+        final PasswordMetrics metrics =
+                PasswordMetrics.computeForPassword("6B~0z1Z3*8A".getBytes());
         assertEquals(11, metrics.length);
         assertEquals(4, metrics.letters);
         assertEquals(3, metrics.upperCase);
@@ -134,71 +133,61 @@ public class PasswordMetricsTest {
     @Test
     public void testDetermineComplexity_lowNumeric() {
         assertEquals(PASSWORD_COMPLEXITY_LOW,
-                PasswordMetrics.computeForPasswordOrPin("1234".getBytes(),
-                        /* isPin */true).determineComplexity());
+                PasswordMetrics.computeForPassword("1234".getBytes()).determineComplexity());
     }
 
     @Test
     public void testDetermineComplexity_lowNumericComplex() {
         assertEquals(PASSWORD_COMPLEXITY_LOW,
-                PasswordMetrics.computeForPasswordOrPin("124".getBytes(),
-                        /* isPin */ true).determineComplexity());
+                PasswordMetrics.computeForPassword("124".getBytes()).determineComplexity());
     }
 
     @Test
     public void testDetermineComplexity_lowAlphabetic() {
         assertEquals(PASSWORD_COMPLEXITY_LOW,
-                PasswordMetrics.computeForPasswordOrPin("a!".getBytes(),
-                        /* isPin */ false).determineComplexity());
+                PasswordMetrics.computeForPassword("a!".getBytes()).determineComplexity());
     }
 
     @Test
     public void testDetermineComplexity_lowAlphanumeric() {
         assertEquals(PASSWORD_COMPLEXITY_LOW,
-                PasswordMetrics.computeForPasswordOrPin("a!1".getBytes(),
-                        /* isPin */ false).determineComplexity());
+                PasswordMetrics.computeForPassword("a!1".getBytes()).determineComplexity());
     }
 
     @Test
     public void testDetermineComplexity_mediumNumericComplex() {
         assertEquals(PASSWORD_COMPLEXITY_MEDIUM,
-                PasswordMetrics.computeForPasswordOrPin("1238".getBytes(),
-                        /* isPin */ true).determineComplexity());
+                PasswordMetrics.computeForPassword("1238".getBytes()).determineComplexity());
     }
 
     @Test
     public void testDetermineComplexity_mediumAlphabetic() {
         assertEquals(PASSWORD_COMPLEXITY_MEDIUM,
-                PasswordMetrics.computeForPasswordOrPin("ab!c".getBytes(),
-                        /* isPin */ false).determineComplexity());
+                PasswordMetrics.computeForPassword("ab!c".getBytes()).determineComplexity());
     }
 
     @Test
     public void testDetermineComplexity_mediumAlphanumeric() {
         assertEquals(PASSWORD_COMPLEXITY_MEDIUM,
-                PasswordMetrics.computeForPasswordOrPin("ab!1".getBytes(),
-                        /* isPin */ false).determineComplexity());
+                PasswordMetrics.computeForPassword("ab!1".getBytes()).determineComplexity());
     }
 
     @Test
     public void testDetermineComplexity_highNumericComplex() {
         assertEquals(PASSWORD_COMPLEXITY_HIGH,
-                PasswordMetrics.computeForPasswordOrPin("12389647!".getBytes(),
-                        /* isPin */ true).determineComplexity());
+                PasswordMetrics.computeForPassword("12389647!".getBytes()).determineComplexity());
     }
 
     @Test
     public void testDetermineComplexity_highAlphabetic() {
         assertEquals(PASSWORD_COMPLEXITY_HIGH,
-                PasswordMetrics.computeForPasswordOrPin("alphabetic!".getBytes(),
-                        /* isPin */ false).determineComplexity());
+                PasswordMetrics.computeForPassword("alphabetic!".getBytes()).determineComplexity());
     }
 
     @Test
     public void testDetermineComplexity_highAlphanumeric() {
-        assertEquals(PASSWORD_COMPLEXITY_HIGH,
-                PasswordMetrics.computeForPasswordOrPin("alphanumeric123!".getBytes(),
-                        /* isPin */ false).determineComplexity());
+        assertEquals(PASSWORD_COMPLEXITY_HIGH, PasswordMetrics.computeForPassword(
+                "alphanumeric123!".getBytes()).determineComplexity());
     }
 
     @Test
@@ -285,42 +274,33 @@ public class PasswordMetricsTest {
         PasswordMetrics none = new PasswordMetrics(CREDENTIAL_TYPE_NONE);
         PasswordMetrics pattern = new PasswordMetrics(CREDENTIAL_TYPE_PATTERN);
         PasswordMetrics password = new PasswordMetrics(CREDENTIAL_TYPE_PASSWORD);
-        PasswordMetrics pin = new PasswordMetrics(CREDENTIAL_TYPE_PIN);
 
         // To pass minimal length check.
         password.length = 4;
-        pin.length = 4;
 
         // No errors expected, credential is of stronger or equal type.
         assertValidationErrors(
-                validatePasswordMetrics(none, PASSWORD_COMPLEXITY_NONE, none));
+                validatePasswordMetrics(none, PASSWORD_COMPLEXITY_NONE, false, none));
         assertValidationErrors(
-                validatePasswordMetrics(none, PASSWORD_COMPLEXITY_NONE, pattern));
+                validatePasswordMetrics(none, PASSWORD_COMPLEXITY_NONE, false, pattern));
         assertValidationErrors(
-                validatePasswordMetrics(none, PASSWORD_COMPLEXITY_NONE, password));
+                validatePasswordMetrics(none, PASSWORD_COMPLEXITY_NONE, false, password));
         assertValidationErrors(
-                validatePasswordMetrics(none, PASSWORD_COMPLEXITY_NONE, pin));
+                validatePasswordMetrics(pattern, PASSWORD_COMPLEXITY_NONE, false, pattern));
         assertValidationErrors(
-                validatePasswordMetrics(pattern, PASSWORD_COMPLEXITY_NONE, pattern));
+                validatePasswordMetrics(pattern, PASSWORD_COMPLEXITY_NONE, false, password));
         assertValidationErrors(
-                validatePasswordMetrics(pattern, PASSWORD_COMPLEXITY_NONE, password));
-        assertValidationErrors(
-                validatePasswordMetrics(password, PASSWORD_COMPLEXITY_NONE, password));
-        assertValidationErrors(
-                validatePasswordMetrics(pin, PASSWORD_COMPLEXITY_NONE, pin));
+                validatePasswordMetrics(password, PASSWORD_COMPLEXITY_NONE, false, password));
 
         // Now actual credential type is weaker than required:
         assertValidationErrors(
-                validatePasswordMetrics(pattern, PASSWORD_COMPLEXITY_NONE, none),
+                validatePasswordMetrics(pattern, PASSWORD_COMPLEXITY_NONE, false, none),
                 PasswordValidationError.WEAK_CREDENTIAL_TYPE, 0);
         assertValidationErrors(
-                validatePasswordMetrics(password, PASSWORD_COMPLEXITY_NONE, none),
+                validatePasswordMetrics(password, PASSWORD_COMPLEXITY_NONE, false, none),
                 PasswordValidationError.WEAK_CREDENTIAL_TYPE, 0);
         assertValidationErrors(
-                validatePasswordMetrics(password, PASSWORD_COMPLEXITY_NONE, pattern),
-                PasswordValidationError.WEAK_CREDENTIAL_TYPE, 0);
-        assertValidationErrors(
-                validatePasswordMetrics(password, PASSWORD_COMPLEXITY_NONE, pin),
+                validatePasswordMetrics(password, PASSWORD_COMPLEXITY_NONE, false, pattern),
                 PasswordValidationError.WEAK_CREDENTIAL_TYPE, 0);
     }
 

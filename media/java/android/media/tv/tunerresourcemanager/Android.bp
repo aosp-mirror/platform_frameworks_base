@@ -1,37 +1,17 @@
-package {
-    // See: http://go/android-license-faq
-    // A large-scale-change added 'default_applicable_licenses' to import
-    // all of the 'license_kinds' from "frameworks_base_license"
-    // to get the below license kinds:
-    //   SPDX-license-identifier-Apache-2.0
-    default_applicable_licenses: ["frameworks_base_license"],
-}
-
 filegroup {
-    name: "framework-media-tv-tunerresourcemanager-sources-aidl",
+    name: "framework-media-tv-tunerresourcemanager-sources",
     srcs: [
-        "aidl/android/media/tv/tunerresourcemanager/*.aidl",
+        "*.java",
+        "*.aidl",
     ],
-    path: "aidl",
+    path: ".",
 }
 
-aidl_interface {
-    name: "tv_tuner_resource_manager_aidl_interface",
-    unstable: true,
-    local_include_dir: "aidl",
-    backend: {
-        java: {
-            enabled: true,
-        },
-        cpp: {
-            enabled: true,
-        },
-        ndk: {
-            enabled: true,
-        },
-    },
-    srcs: [
-        ":framework-media-tv-tunerresourcemanager-sources-aidl",
+java_library {
+    name: "framework-media-tv-trm-sources",
+    srcs: [":framework-media-tv-tunerresourcemanager-sources"],
+    installable: true,
+    visibility: [
+        "//frameworks/base",
     ],
-    imports: ["tv_tuner_frontend_info_aidl_interface"],
 }

@@ -93,8 +93,6 @@ public class InattentiveSleepWarningView extends FrameLayout {
         setAlpha(1f);
         setVisibility(View.VISIBLE);
         mWindowManager.addView(this, getLayoutParams(mWindowToken));
-        announceForAccessibility(
-                getContext().getString(R.string.inattentive_sleep_warning_message));
     }
 
     /**

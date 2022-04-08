@@ -72,7 +72,6 @@ import com.android.internal.util.Preconditions;
 import com.android.internal.util.dump.DualDumpOutputStream;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
-import com.android.server.SystemService.TargetUser;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -102,13 +101,13 @@ public final class PrintManagerService extends SystemService {
     }
 
     @Override
-    public void onUserUnlocking(@NonNull TargetUser user) {
-        mPrintManagerImpl.handleUserUnlocked(user.getUserIdentifier());
+    public void onUnlockUser(int userHandle) {
+        mPrintManagerImpl.handleUserUnlocked(userHandle);
     }
 
     @Override
-    public void onUserStopping(@NonNull TargetUser user) {
-        mPrintManagerImpl.handleUserStopped(user.getUserIdentifier());
+    public void onStopUser(int userHandle) {
+        mPrintManagerImpl.handleUserStopped(userHandle);
     }
 
     class PrintManagerImpl extends IPrintManager.Stub {

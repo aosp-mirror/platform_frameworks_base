@@ -18,7 +18,11 @@ package com.android.server.accessibility.gestures;
 
 import static android.view.MotionEvent.INVALID_POINTER_ID;
 
+import static com.android.server.accessibility.gestures.GestureUtils.MM_PER_CM;
 import static com.android.server.accessibility.gestures.GestureUtils.getActionIndex;
+import static com.android.server.accessibility.gestures.Swipe.GESTURE_CONFIRM_CM;
+import static com.android.server.accessibility.gestures.Swipe.MAX_TIME_TO_CONTINUE_SWIPE_MS;
+import static com.android.server.accessibility.gestures.Swipe.MAX_TIME_TO_START_SWIPE_MS;
 import static com.android.server.accessibility.gestures.TouchExplorer.DEBUG;
 
 import android.content.Context;
@@ -26,6 +30,7 @@ import android.graphics.PointF;
 import android.os.Handler;
 import android.util.DisplayMetrics;
 import android.util.Slog;
+import android.util.TypedValue;
 import android.view.MotionEvent;
 import android.view.ViewConfiguration;
 
@@ -44,6 +49,9 @@ class MultiFingerSwipe extends GestureMatcher {
     public static final int RIGHT = 1;
     public static final int UP = 2;
     public static final int DOWN = 3;
+    // This is the calculated movement threshold used track if the user is still
+    // moving their finger.
+    private final float mGestureDetectionThresholdPixels;
 
     // Buffer for storing points for gesture detection.
     private final ArrayList<PointF>[] mStrokeBuffers;
@@ -85,7 +93,10 @@ class MultiFingerSwipe extends GestureMatcher {
         mStrokeBuffers = new ArrayList[mTargetFingerCount];
         mDirection = direction;
         DisplayMetrics displayMetrics = context.getResources().getDisplayMetrics();
-        // Calculate gesture sampling interval.
+        mGestureDetectionThresholdPixels =
+                TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_MM, MM_PER_CM, displayMetrics)
+                        * GESTURE_CONFIRM_CM;
+        // Calculate minimum gesture velocity
         final float pixelsPerCmX = displayMetrics.xdpi / GestureUtils.CM_PER_INCH;
         final float pixelsPerCmY = displayMetrics.ydpi / GestureUtils.CM_PER_INCH;
         mMinPixelsBetweenSamplesX = MIN_CM_BETWEEN_SAMPLES * pixelsPerCmX;
@@ -95,7 +106,7 @@ class MultiFingerSwipe extends GestureMatcher {
     }
 
     @Override
-    public void clear() {
+    protected void clear() {
         mTargetFingerCountReached = false;
         mCurrentFingerCount = 0;
         for (int i = 0; i < mTargetFingerCount; ++i) {
@@ -139,6 +150,7 @@ class MultiFingerSwipe extends GestureMatcher {
             return;
         }
         mPointerIds[pointerIndex] = pointerId;
+        cancelAfterPauseThreshold(event, rawEvent, policyFlags);
         if (Float.isNaN(mBase[pointerIndex].x) && Float.isNaN(mBase[pointerIndex].y)) {
             final float x = rawEvent.getX(actionIndex);
             final float y = rawEvent.getY(actionIndex);
@@ -185,6 +197,7 @@ class MultiFingerSwipe extends GestureMatcher {
             return;
         }
         mPointerIds[pointerIndex] = pointerId;
+        cancelAfterPauseThreshold(event, rawEvent, policyFlags);
         if (Float.isNaN(mBase[pointerIndex].x) && Float.isNaN(mBase[pointerIndex].y)) {
             final float x = rawEvent.getX(actionIndex);
             final float y = rawEvent.getY(actionIndex);
@@ -273,42 +286,65 @@ class MultiFingerSwipe extends GestureMatcher {
                             Math.abs(x - mBase[pointerIndex].x),
                             Math.abs(y - mBase[pointerIndex].y));
             if (DEBUG) {
-                Slog.d(getGestureName(), "moveDelta:" + moveDelta);
+                Slog.d(
+                        getGestureName(),
+                        "moveDelta:"
+                                + Double.toString(moveDelta)
+                                + " mGestureDetectionThreshold: "
+                                + Float.toString(mGestureDetectionThresholdPixels));
             }
             if (getState() == STATE_CLEAR) {
-                if (moveDelta < (mTargetFingerCount * mTouchSlop)) {
+                if (moveDelta < mTouchSlop) {
                     // This still counts as a touch not a swipe.
                     continue;
+                } else if (mStrokeBuffers[pointerIndex].size() == 0) {
+                    // First, make sure we have the right number of fingers down.
+                    if (mCurrentFingerCount != mTargetFingerCount) {
+                        cancelGesture(event, rawEvent, policyFlags);
+                        return;
+                    }
+                    // Then, make sure the pointer is going in the right direction.
+                    int direction =
+                            toDirection(x - mBase[pointerIndex].x, y - mBase[pointerIndex].y);
+                    if (direction != mDirection) {
+                        cancelGesture(event, rawEvent, policyFlags);
+                        return;
+                    } else {
+                        // This is confirmed to be some kind of swipe so start tracking points.
+                        cancelAfterPauseThreshold(event, rawEvent, policyFlags);
+                        for (int i = 0; i < mTargetFingerCount; ++i) {
+                            mStrokeBuffers[i].add(new PointF(mBase[i]));
+                        }
+                    }
                 }
-                // First, make sure we have the right number of fingers down.
-                if (mCurrentFingerCount != mTargetFingerCount) {
-                    cancelGesture(event, rawEvent, policyFlags);
-                    return;
+                if (moveDelta > mGestureDetectionThresholdPixels) {
+                    // Try to cancel if the finger starts to go the wrong way.
+                    // Note that this only works because this matcher assumes one direction.
+                    int direction =
+                            toDirection(x - mBase[pointerIndex].x, y - mBase[pointerIndex].y);
+                    if (direction != mDirection) {
+                        cancelGesture(event, rawEvent, policyFlags);
+                        return;
+                    }
+                    // If the pointer has moved more than the threshold,
+                    // update the stored values.
+                    mBase[pointerIndex].x = x;
+                    mBase[pointerIndex].y = y;
+                    mPreviousGesturePoint[pointerIndex].x = x;
+                    mPreviousGesturePoint[pointerIndex].y = y;
+                    if (getState() == STATE_CLEAR) {
+                        startGesture(event, rawEvent, policyFlags);
+                        cancelAfterPauseThreshold(event, rawEvent, policyFlags);
+                    }
                 }
-                // Then, make sure the pointer is going in the right direction.
-                int direction = toDirection(x - mBase[pointerIndex].x, y - mBase[pointerIndex].y);
-                if (direction != mDirection) {
-                    cancelGesture(event, rawEvent, policyFlags);
-                    return;
-                }
-                // This is confirmed to be some kind of swipe so start tracking points.
-                startGesture(event, rawEvent, policyFlags);
-                for (int i = 0; i < mTargetFingerCount; ++i) {
-                    mStrokeBuffers[i].add(new PointF(mBase[i]));
-                }
-            } else if (getState() == STATE_GESTURE_STARTED) {
-                // Cancel if the finger starts to go the wrong way.
-                // Note that this only works because this matcher assumes one direction.
-                int direction = toDirection(x - mBase[pointerIndex].x, y - mBase[pointerIndex].y);
-                if (direction != mDirection) {
-                    cancelGesture(event, rawEvent, policyFlags);
-                    return;
-                }
+            }
+            if (getState() == STATE_GESTURE_STARTED) {
                 if (dX >= mMinPixelsBetweenSamplesX || dY >= mMinPixelsBetweenSamplesY) {
                     // Sample every 2.5 MM in order to guard against minor variations in path.
                     mPreviousGesturePoint[pointerIndex].x = x;
                     mPreviousGesturePoint[pointerIndex].y = y;
                     mStrokeBuffers[pointerIndex].add(new PointF(x, y));
+                    cancelAfterPauseThreshold(event, rawEvent, policyFlags);
                 }
             }
         }
@@ -342,6 +378,24 @@ class MultiFingerSwipe extends GestureMatcher {
         recognizeGesture(event, rawEvent, policyFlags);
     }
 
+    /**
+     * queues a transition to STATE_GESTURE_CANCEL based on the current state. If we have
+     * transitioned to STATE_GESTURE_STARTED the delay is longer.
+     */
+    private void cancelAfterPauseThreshold(
+            MotionEvent event, MotionEvent rawEvent, int policyFlags) {
+        cancelPendingTransitions();
+        switch (getState()) {
+            case STATE_CLEAR:
+                cancelAfter(MAX_TIME_TO_START_SWIPE_MS, event, rawEvent, policyFlags);
+                break;
+            case STATE_GESTURE_STARTED:
+                cancelAfter(MAX_TIME_TO_CONTINUE_SWIPE_MS, event, rawEvent, policyFlags);
+                break;
+            default:
+                break;
+        }
+    }
     /**
      * Looks at the sequence of motions in mStrokeBuffer, classifies the gesture, then transitions
      * to the complete or cancel state depending on the result.
@@ -435,7 +489,7 @@ class MultiFingerSwipe extends GestureMatcher {
     }
 
     @Override
-    protected String getGestureName() {
+    String getGestureName() {
         StringBuilder builder = new StringBuilder();
         builder.append(mTargetFingerCount).append("-finger ");
         builder.append("Swipe ").append(directionToString(mDirection));
@@ -448,6 +502,8 @@ class MultiFingerSwipe extends GestureMatcher {
         if (getState() != STATE_GESTURE_CANCELED) {
             builder.append(", mBase: ")
                     .append(mBase.toString())
+                    .append(", mGestureDetectionThreshold:")
+                    .append(mGestureDetectionThresholdPixels)
                     .append(", mMinPixelsBetweenSamplesX:")
                     .append(mMinPixelsBetweenSamplesX)
                     .append(", mMinPixelsBetweenSamplesY:")

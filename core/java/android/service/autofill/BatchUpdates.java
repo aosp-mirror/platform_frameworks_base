@@ -117,7 +117,7 @@ public final class BatchUpdates implements Parcelable {
         public Builder transformChild(int id, @NonNull Transformation transformation) {
             throwIfDestroyed();
             Preconditions.checkArgument((transformation instanceof InternalTransformation),
-                    "not provided by Android System: %s", transformation);
+                    "not provided by Android System: " + transformation);
             if (mTransformations == null) {
                 mTransformations = new ArrayList<>();
             }

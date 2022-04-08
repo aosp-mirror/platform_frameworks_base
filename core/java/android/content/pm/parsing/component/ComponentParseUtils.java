@@ -16,22 +16,22 @@
 
 package android.content.pm.parsing.component;
 
-import static android.content.pm.parsing.ParsingPackageUtils.validateName;
-
 import android.annotation.AttrRes;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Intent;
+import android.content.pm.PackageParser;
 import android.content.pm.PackageUserState;
 import android.content.pm.parsing.ParsingPackage;
-import android.content.pm.parsing.ParsingPackageUtils;
 import android.content.pm.parsing.ParsingUtils;
-import android.content.pm.parsing.result.ParseInput;
-import android.content.pm.parsing.result.ParseResult;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.content.res.XmlResourceParser;
 import android.text.TextUtils;
+
+import android.content.pm.parsing.ParsingPackageUtils;
+import android.content.pm.parsing.result.ParseInput;
+import android.content.pm.parsing.result.ParseResult;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -40,6 +40,8 @@ import java.io.IOException;
 
 /** @hide */
 public class ComponentParseUtils {
+
+    private static final String TAG = ParsingPackageUtils.TAG;
 
     public static boolean isImplicitlyExposedIntent(ParsedIntentInfo intentInfo) {
         return intentInfo.hasCategory(Intent.CATEGORY_BROWSABLE)
@@ -77,7 +79,7 @@ public class ComponentParseUtils {
     @NonNull
     public static ParseResult<String> buildProcessName(@NonNull String pkg, String defProc,
             CharSequence procSeq, int flags, String[] separateProcesses, ParseInput input) {
-        if ((flags & ParsingPackageUtils.PARSE_IGNORE_PROCESSES) != 0 && !"system".contentEquals(
+        if ((flags & PackageParser.PARSE_IGNORE_PROCESSES) != 0 && !"system".contentEquals(
                 procSeq)) {
             return input.success(defProc != null ? defProc : pkg);
         }
@@ -120,19 +122,17 @@ public class ComponentParseUtils {
                         + ": must be at least two characters");
             }
             String subName = proc.substring(1);
-            final ParseResult<?> nameResult = validateName(input, subName, false, false);
-            if (nameResult.isError()) {
+            String nameError = PackageParser.validateName(subName, false, false);
+            if (nameError != null) {
                 return input.error("Invalid " + type + " name " + proc + " in package " + pkg
-                        + ": " + nameResult.getErrorMessage());
+                        + ": " + nameError);
             }
             return input.success(pkg + proc);
         }
-        if (!"system".equals(proc)) {
-            final ParseResult<?> nameResult = validateName(input, proc, true, false);
-            if (nameResult.isError()) {
-                return input.error("Invalid " + type + " name " + proc + " in package " + pkg
-                        + ": " + nameResult.getErrorMessage());
-            }
+        String nameError = PackageParser.validateName(proc, true, false);
+        if (nameError != null && !"system".equals(proc)) {
+            return input.error("Invalid " + type + " name " + proc + " in package " + pkg
+                    + ": " + nameError);
         }
         return input.success(proc);
     }

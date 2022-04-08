@@ -438,12 +438,6 @@ public final class MediaRouterService extends IMediaRouterService.Stub
 
     // Binder call
     @Override
-    public void enforceMediaContentControlPermission() {
-        mService2.enforceMediaContentControlPermission();
-    }
-
-    // Binder call
-    @Override
     public List<MediaRoute2Info> getSystemRoutes() {
         return mService2.getSystemRoutes();
     }
@@ -546,18 +540,6 @@ public final class MediaRouterService extends IMediaRouterService.Stub
     @Override
     public void unregisterManager(IMediaRouter2Manager manager) {
         mService2.unregisterManager(manager);
-    }
-
-    // Binder call
-    @Override
-    public void startScan(IMediaRouter2Manager manager) {
-        mService2.startScan(manager);
-    }
-
-    // Binder call
-    @Override
-    public void stopScan(IMediaRouter2Manager manager) {
-        mService2.stopScan(manager);
     }
 
     // Binder call
@@ -728,7 +710,7 @@ public final class MediaRouterService extends IMediaRouterService.Stub
         clientRecord.mGroupId = groupId;
         if (groupId != null) {
             userRecord.addToGroup(groupId, clientRecord);
-            userRecord.mHandler.obtainMessage(UserHandler.MSG_NOTIFY_GROUP_ROUTE_SELECTED, groupId)
+            userRecord.mHandler.obtainMessage(UserHandler.MSG_UPDATE_SELECTED_ROUTE, groupId)
                 .sendToTarget();
         }
     }
@@ -809,7 +791,7 @@ public final class MediaRouterService extends IMediaRouterService.Stub
                         if (group != null) {
                             group.mSelectedRouteId = routeId;
                             clientRecord.mUserRecord.mHandler.obtainMessage(
-                                UserHandler.MSG_NOTIFY_GROUP_ROUTE_SELECTED, clientRecord.mGroupId)
+                                UserHandler.MSG_UPDATE_SELECTED_ROUTE, clientRecord.mGroupId)
                                 .sendToTarget();
                         }
                     }
@@ -907,8 +889,6 @@ public final class MediaRouterService extends IMediaRouterService.Stub
                     mActiveBluetoothDevice = btDevice;
                     mGlobalBluetoothA2dpOn = btDevice != null;
                     if (wasA2dpOn != mGlobalBluetoothA2dpOn) {
-                        Slog.d(TAG, "GlobalBluetoothA2dpOn is changed to '"
-                                + mGlobalBluetoothA2dpOn + "'");
                         UserRecord userRecord = mUserRecords.get(mCurrentUserId);
                         if (userRecord != null) {
                             for (ClientRecord cr : userRecord.mClientRecords) {
@@ -1081,7 +1061,7 @@ public final class MediaRouterService extends IMediaRouterService.Stub
         public static final int MSG_REQUEST_UPDATE_VOLUME = 7;
         private static final int MSG_UPDATE_CLIENT_STATE = 8;
         private static final int MSG_CONNECTION_TIMED_OUT = 9;
-        private static final int MSG_NOTIFY_GROUP_ROUTE_SELECTED = 10;
+        private static final int MSG_UPDATE_SELECTED_ROUTE = 10;
 
         private static final int TIMEOUT_REASON_NOT_AVAILABLE = 1;
         private static final int TIMEOUT_REASON_CONNECTION_LOST = 2;
@@ -1158,8 +1138,8 @@ public final class MediaRouterService extends IMediaRouterService.Stub
                     connectionTimedOut();
                     break;
                 }
-                case MSG_NOTIFY_GROUP_ROUTE_SELECTED: {
-                    notifyGroupRouteSelected((String) msg.obj);
+                case MSG_UPDATE_SELECTED_ROUTE: {
+                    updateSelectedRoute((String) msg.obj);
                     break;
                 }
             }
@@ -1485,9 +1465,9 @@ public final class MediaRouterService extends IMediaRouterService.Stub
             }
         }
 
-        private void notifyGroupRouteSelected(String groupId) {
+        private void updateSelectedRoute(String groupId) {
             try {
-                String selectedRouteId;
+                String selectedRouteId = null;
                 synchronized (mService.mLock) {
                     ClientGroup group = mUserRecord.mClientGroupMap.get(groupId);
                     if (group == null) {
@@ -1506,7 +1486,7 @@ public final class MediaRouterService extends IMediaRouterService.Stub
                 final int count = mTempClients.size();
                 for (int i = 0; i < count; i++) {
                     try {
-                        mTempClients.get(i).onGroupRouteSelected(selectedRouteId);
+                        mTempClients.get(i).onSelectedRouteChanged(selectedRouteId);
                     } catch (RemoteException ex) {
                         Slog.w(TAG, "Failed to call onSelectedRouteChanged. Client probably died.");
                     }

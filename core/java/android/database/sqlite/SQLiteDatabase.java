@@ -31,7 +31,6 @@ import android.database.DatabaseUtils;
 import android.database.DefaultDatabaseErrorHandler;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDebug.DbStats;
-import android.os.Build;
 import android.os.CancellationSignal;
 import android.os.Looper;
 import android.os.OperationCanceledException;
@@ -104,7 +103,7 @@ public final class SQLiteDatabase extends SQLiteClosable {
     // Thread-local for database sessions that belong to this database.
     // Each thread has its own database session.
     // INVARIANT: Immutable.
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     private final ThreadLocal<SQLiteSession> mThreadSession = ThreadLocal
             .withInitial(this::createSession);
 
@@ -220,7 +219,7 @@ public final class SQLiteDatabase extends SQLiteClosable {
      * even a pathological LIKE or GLOB pattern of 50000 bytes relatively quickly.
      * The denial of service problem only comes into play when the pattern length gets
      * into millions of bytes. Nevertheless, since most useful LIKE or GLOB patterns
-     * are at most a few dozen bytes in length, cautious application developers may
+     * are at most a few dozen bytes in length, paranoid application developers may
      * want to reduce this parameter to something in the range of a few hundred
      * if they know that external users are able to generate arbitrary patterns.
      */
@@ -1693,7 +1692,7 @@ public final class SQLiteDatabase extends SQLiteClosable {
                     sql.append((i > 0) ? ",?" : "?");
                 }
             } else {
-                sql.append(nullColumnHack).append(") VALUES (NULL");
+                sql.append(nullColumnHack + ") VALUES (NULL");
             }
             sql.append(')');
 
@@ -2675,7 +2674,7 @@ public final class SQLiteDatabase extends SQLiteClosable {
                         "lookasideSlotSize cannot be negative");
                 Preconditions.checkArgument(
                         (slotSize > 0 && slotCount > 0) || (slotCount == 0 && slotSize == 0),
-                        "Invalid configuration: %d, %d", slotSize, slotCount);
+                        "Invalid configuration: " + slotSize + ", " + slotCount);
 
                 mLookasideSlotSize = slotSize;
                 mLookasideSlotCount = slotCount;

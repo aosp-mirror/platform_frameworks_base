@@ -71,38 +71,37 @@ public class BubbleExtractor implements NotificationSignalExtractor {
             return null;
         }
 
-        boolean notifCanPresentAsBubble = canPresentAsBubble(record)
+        int bubblePreference =
+                mConfig.getBubblePreference(
+                        record.getSbn().getPackageName(), record.getSbn().getUid());
+        NotificationChannel recordChannel = record.getChannel();
+        boolean canPresentAsBubble = canPresentAsBubble(record)
                 && !mActivityManager.isLowRamDevice()
                 && record.isConversation()
                 && record.getShortcutInfo() != null
                 && (record.getNotification().flags & FLAG_FOREGROUND_SERVICE) == 0;
 
-        boolean userEnabledBubbles = mConfig.bubblesEnabled(record.getUser());
-        int appPreference =
-                mConfig.getBubblePreference(
-                        record.getSbn().getPackageName(), record.getSbn().getUid());
-        NotificationChannel recordChannel = record.getChannel();
-        if (!userEnabledBubbles
-                || appPreference == BUBBLE_PREFERENCE_NONE
-                || !notifCanPresentAsBubble) {
+        if (!mConfig.bubblesEnabled()
+                || bubblePreference == BUBBLE_PREFERENCE_NONE
+                || !canPresentAsBubble) {
             record.setAllowBubble(false);
-            if (!notifCanPresentAsBubble) {
+            if (!canPresentAsBubble) {
                 // clear out bubble metadata since it can't be used
                 record.getNotification().setBubbleMetadata(null);
             }
         } else if (recordChannel == null) {
             // the app is allowed but there's no channel to check
             record.setAllowBubble(true);
-        } else if (appPreference == BUBBLE_PREFERENCE_ALL) {
+        } else if (bubblePreference == BUBBLE_PREFERENCE_ALL) {
             record.setAllowBubble(recordChannel.getAllowBubbles() != ALLOW_BUBBLE_OFF);
-        } else if (appPreference == BUBBLE_PREFERENCE_SELECTED) {
+        } else if (bubblePreference == BUBBLE_PREFERENCE_SELECTED) {
             record.setAllowBubble(recordChannel.canBubble());
         }
         if (DBG) {
             Slog.d(TAG, "record: " + record.getKey()
-                    + " appPref: " + appPreference
+                    + " appPref: " + bubblePreference
                     + " canBubble: " + record.canBubble()
-                    + " canPresentAsBubble: " + notifCanPresentAsBubble
+                    + " canPresentAsBubble: " + canPresentAsBubble
                     + " flagRemoved: " + record.isFlagBubbleRemoved());
         }
 
@@ -167,20 +166,20 @@ public class BubbleExtractor implements NotificationSignalExtractor {
             // TODO: check the shortcut intent / ensure it can show in activity view
             return true;
         }
-        return canLaunchInTaskView(mContext, metadata.getIntent(), pkg);
+        return canLaunchInActivityView(mContext, metadata.getIntent(), pkg);
     }
 
     /**
      * Whether an intent is properly configured to display in an {@link
-     * com.android.wm.shell.TaskView} for bubbling.
+     * android.app.ActivityView} for bubbling.
      *
      * @param context       the context to use.
      * @param pendingIntent the pending intent of the bubble.
      * @param packageName   the notification package name for this bubble.
      */
-    // Keep checks in sync with BubbleController#canLaunchInTaskView.
+    // Keep checks in sync with BubbleController#canLaunchInActivityView.
     @VisibleForTesting
-    protected boolean canLaunchInTaskView(Context context, PendingIntent pendingIntent,
+    protected boolean canLaunchInActivityView(Context context, PendingIntent pendingIntent,
             String packageName) {
         if (pendingIntent == null) {
             Slog.w(TAG, "Unable to create bubble -- no intent");

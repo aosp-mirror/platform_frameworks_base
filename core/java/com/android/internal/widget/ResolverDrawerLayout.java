@@ -464,7 +464,11 @@ public class ResolverDrawerLayout extends ViewGroup {
                             smoothScrollTo(mCollapsibleHeight + mUncollapsibleHeight, yvel);
                             mDismissOnScrollerFinished = true;
                         } else {
-                            scrollNestedScrollableChildBackToTop();
+                            if (isNestedListChildScrolled()) {
+                                mNestedListChild.smoothScrollToPosition(0);
+                            } else if (isNestedRecyclerChildScrolled()) {
+                                mNestedRecyclerChild.smoothScrollToPosition(0);
+                            }
                             smoothScrollTo(yvel < 0 ? 0 : mCollapsibleHeight, yvel);
                         }
                     }
@@ -487,17 +491,6 @@ public class ResolverDrawerLayout extends ViewGroup {
         }
 
         return handled;
-    }
-
-    /**
-     * Scroll nested scrollable child back to top if it has been scrolled.
-     */
-    public void scrollNestedScrollableChildBackToTop() {
-        if (isNestedListChildScrolled()) {
-            mNestedListChild.smoothScrollToPosition(0);
-        } else if (isNestedRecyclerChildScrolled()) {
-            mNestedRecyclerChild.smoothScrollToPosition(0);
-        }
     }
 
     private void onSecondaryPointerUp(MotionEvent ev) {

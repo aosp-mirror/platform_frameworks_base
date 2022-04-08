@@ -16,7 +16,6 @@
 
 package com.android.server.am;
 
-import android.app.IApplicationThread;
 import android.content.ComponentName;
 import android.content.ComponentName.WithComponentName;
 import android.os.Binder;
@@ -24,7 +23,6 @@ import android.os.RemoteException;
 import android.os.UserHandle;
 import android.util.Slog;
 import android.util.SparseArray;
-
 import com.android.internal.os.TransferPipe;
 import com.android.internal.util.CollectionUtils;
 import com.android.internal.util.DumpUtils;
@@ -374,11 +372,10 @@ public final class ProviderMap {
      */
     private void dumpProvider(String prefix, FileDescriptor fd, PrintWriter pw,
             final ContentProviderRecord r, String[] args, boolean dumpAll) {
-        final IApplicationThread thread = r.proc != null ? r.proc.getThread() : null;
         for (String s: args) {
             if (!dumpAll && s.contains("--proto")) {
-                if (thread != null) {
-                    dumpToTransferPipe(null , fd, pw, r, thread, args);
+                if (r.proc != null && r.proc.thread != null) {
+                    dumpToTransferPipe(null , fd, pw, r, args);
                 }
                 return;
             }
@@ -389,7 +386,7 @@ public final class ProviderMap {
             pw.print(r);
             pw.print(" pid=");
             if (r.proc != null) {
-                pw.println(r.proc.getPid());
+                pw.println(r.proc.pid);
             } else {
                 pw.println("(not running)");
             }
@@ -397,10 +394,10 @@ public final class ProviderMap {
                 r.dump(pw, innerPrefix, true);
             }
         }
-        if (thread != null) {
+        if (r.proc != null && r.proc.thread != null) {
             pw.println("    Client:");
             pw.flush();
-            dumpToTransferPipe("      ", fd, pw, r, thread, args);
+            dumpToTransferPipe("      ", fd, pw, r, args);
         }
     }
 
@@ -423,9 +420,8 @@ public final class ProviderMap {
         // Only dump the first provider, since we are dumping in proto format
         for (int i = 0; i < providers.size(); i++) {
             final ContentProviderRecord r = providers.get(i);
-            IApplicationThread thread;
-            if (r.proc != null && (thread = r.proc.getThread()) != null) {
-                dumpToTransferPipe(null, fd, pw, r, thread, newArgs);
+            if (r.proc != null && r.proc.thread != null) {
+                dumpToTransferPipe(null, fd, pw, r, newArgs);
                 return true;
             }
         }
@@ -437,11 +433,11 @@ public final class ProviderMap {
      * any meta string (e.g., provider info, indentation) written to the file descriptor.
      */
     private void dumpToTransferPipe(String prefix, FileDescriptor fd, PrintWriter pw,
-            final ContentProviderRecord r, final IApplicationThread thread, String[] args) {
+            final ContentProviderRecord r, String[] args) {
         try {
             TransferPipe tp = new TransferPipe();
             try {
-                thread.dumpProvider(
+                r.proc.thread.dumpProvider(
                     tp.getWriteFd(), r.provider.asBinder(), args);
                 tp.setBufferPrefix(prefix);
                 // Short timeout, since blocking here can

@@ -45,7 +45,6 @@ public class TestJobService extends JobService {
         Intent reportJobStopIntent = new Intent(ACTION_JOB_STOPPED);
         reportJobStopIntent.putExtra(JOB_PARAMS_EXTRA_KEY, params);
         sendBroadcast(reportJobStopIntent);
-        // Deadline constraint is dropped on reschedule, so it's more reliable to use a new job.
-        return false;
+        return true;
     }
 }

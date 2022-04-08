@@ -17,7 +17,6 @@
 package android.media;
 
 import android.bluetooth.BluetoothDevice;
-import android.content.ComponentName;
 import android.media.AudioAttributes;
 import android.media.AudioDeviceAttributes;
 import android.media.AudioFocusInfo;
@@ -25,15 +24,12 @@ import android.media.AudioPlaybackConfiguration;
 import android.media.AudioRecordingConfiguration;
 import android.media.AudioRoutesInfo;
 import android.media.IAudioFocusDispatcher;
-import android.media.IAudioModeDispatcher;
 import android.media.IAudioRoutesObserver;
 import android.media.IAudioServerStateDispatcher;
-import android.media.ICapturePresetDevicesRoleDispatcher;
-import android.media.ICommunicationDeviceDispatcher;
 import android.media.IPlaybackConfigDispatcher;
 import android.media.IRecordingConfigDispatcher;
 import android.media.IRingtonePlayer;
-import android.media.IStrategyPreferredDevicesDispatcher;
+import android.media.IStrategyPreferredDeviceDispatcher;
 import android.media.IVolumeController;
 import android.media.IVolumeController;
 import android.media.PlayerBase;
@@ -44,7 +40,6 @@ import android.media.audiopolicy.AudioVolumeGroup;
 import android.media.audiopolicy.IAudioPolicyCallback;
 import android.media.projection.IMediaProjection;
 import android.net.Uri;
-import android.os.UserHandle;
 import android.view.KeyEvent;
 
 /**
@@ -64,7 +59,7 @@ interface IAudioService {
 
     oneway void playerAttributes(in int piid, in AudioAttributes attr);
 
-    oneway void playerEvent(in int piid, in int event, in int deviceId);
+    oneway void playerEvent(in int piid, in int event);
 
     oneway void releasePlayer(in int piid);
 
@@ -74,8 +69,6 @@ interface IAudioService {
 
     oneway void releaseRecorder(in int riid);
 
-    oneway void playerSessionId(in int piid, in int sessionId);
-
     // Java-only methods below.
 
     oneway void adjustSuggestedStreamVolume(int direction, int suggestedStreamType, int flags,
@@ -83,7 +76,7 @@ interface IAudioService {
 
     void adjustStreamVolume(int streamType, int direction, int flags, String callingPackage);
 
-    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
+    @UnsupportedAppUsage
     void setStreamVolume(int streamType, int index, int flags, String callingPackage);
 
     oneway void handleVolumeKey(in KeyEvent event, boolean isOnTv,
@@ -158,18 +151,6 @@ interface IAudioService {
     oneway void unloadSoundEffects();
 
     oneway void reloadAudioSettings();
-
-    Map getSurroundFormats();
-
-    List getReportedSurroundFormats();
-
-    boolean setSurroundFormatEnabled(int audioFormat, boolean enabled);
-
-    boolean isSurroundFormatEnabled(int audioFormat);
-
-    boolean setEncodedSurroundMode(int mode);
-
-    int getEncodedSurroundMode(int targetSdkVersion);
 
     oneway void avrcpSupportsAbsoluteVolume(String address, boolean support);
 
@@ -298,11 +279,11 @@ interface IAudioService {
 
     boolean isCallScreeningModeSupported();
 
-    int setPreferredDevicesForStrategy(in int strategy, in List<AudioDeviceAttributes> device);
+    int setPreferredDeviceForStrategy(in int strategy, in AudioDeviceAttributes device);
 
-    int removePreferredDevicesForStrategy(in int strategy);
+    int removePreferredDeviceForStrategy(in int strategy);
 
-    List<AudioDeviceAttributes> getPreferredDevicesForStrategy(in int strategy);
+    AudioDeviceAttributes getPreferredDeviceForStrategy(in int strategy);
 
     List<AudioDeviceAttributes> getDevicesForAttributes(in AudioAttributes attributes);
 
@@ -310,10 +291,10 @@ interface IAudioService {
 
     int getAllowedCapturePolicy();
 
-    void registerStrategyPreferredDevicesDispatcher(IStrategyPreferredDevicesDispatcher dispatcher);
+    void registerStrategyPreferredDeviceDispatcher(IStrategyPreferredDeviceDispatcher dispatcher);
 
-    oneway void unregisterStrategyPreferredDevicesDispatcher(
-            IStrategyPreferredDevicesDispatcher dispatcher);
+    oneway void unregisterStrategyPreferredDeviceDispatcher(
+            IStrategyPreferredDeviceDispatcher dispatcher);
 
     oneway void setRttEnabled(in boolean rttEnabled);
 
@@ -326,70 +307,4 @@ interface IAudioService {
     // code via IAudioManager.h need to be added to the top section.
 
     oneway void setMultiAudioFocusEnabled(in boolean enabled);
-
-    int setPreferredDevicesForCapturePreset(
-            in int capturePreset, in List<AudioDeviceAttributes> devices);
-
-    int clearPreferredDevicesForCapturePreset(in int capturePreset);
-
-    List<AudioDeviceAttributes> getPreferredDevicesForCapturePreset(in int capturePreset);
-
-    void registerCapturePresetDevicesRoleDispatcher(ICapturePresetDevicesRoleDispatcher dispatcher);
-
-    oneway void unregisterCapturePresetDevicesRoleDispatcher(
-            ICapturePresetDevicesRoleDispatcher dispatcher);
-
-    oneway void adjustStreamVolumeForUid(int streamType, int direction, int flags,
-            in String packageName, int uid, int pid, in UserHandle userHandle,
-            int targetSdkVersion);
-
-    oneway void adjustSuggestedStreamVolumeForUid(int streamType, int direction, int flags,
-            in String packageName, int uid, int pid, in UserHandle userHandle,
-            int targetSdkVersion);
-
-    oneway void setStreamVolumeForUid(int streamType, int direction, int flags,
-            in String packageName, int uid, int pid, in UserHandle userHandle,
-            int targetSdkVersion);
-
-    boolean isMusicActive(in boolean remotely);
-
-    int getDevicesForStream(in int streamType);
-
-    int[] getAvailableCommunicationDeviceIds();
-
-    boolean setCommunicationDevice(IBinder cb, int portId);
-
-    int getCommunicationDevice();
-
-    void registerCommunicationDeviceDispatcher(ICommunicationDeviceDispatcher dispatcher);
-
-    oneway void unregisterCommunicationDeviceDispatcher(
-            ICommunicationDeviceDispatcher dispatcher);
-
-    boolean areNavigationRepeatSoundEffectsEnabled();
-
-    oneway void setNavigationRepeatSoundEffectsEnabled(boolean enabled);
-
-    boolean isHomeSoundEffectEnabled();
-
-    oneway void setHomeSoundEffectEnabled(boolean enabled);
-
-    boolean setAdditionalOutputDeviceDelay(in AudioDeviceAttributes device, long delayMillis);
-
-    long getAdditionalOutputDeviceDelay(in AudioDeviceAttributes device);
-
-    long getMaxAdditionalOutputDeviceDelay(in AudioDeviceAttributes device);
-
-    int requestAudioFocusForTest(in AudioAttributes aa, int durationHint, IBinder cb,
-            in IAudioFocusDispatcher fd, in String clientId, in String callingPackageName,
-            int uid, int sdk);
-
-    int abandonAudioFocusForTest(in IAudioFocusDispatcher fd, in String clientId,
-            in AudioAttributes aa, in String callingPackageName);
-
-    long getFadeOutDurationOnFocusLossMillis(in AudioAttributes aa);
-
-    void registerModeDispatcher(IAudioModeDispatcher dispatcher);
-
-    oneway void unregisterModeDispatcher(IAudioModeDispatcher dispatcher);
 }

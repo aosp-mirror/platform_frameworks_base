@@ -164,7 +164,7 @@ public class SparseLongArray implements Cloneable {
     }
 
     /**
-     * Returns the number of key-value mappings that this SparseLongArray
+     * Returns the number of key-value mappings that this SparseIntArray
      * currently stores.
      */
     public int size() {
@@ -246,7 +246,7 @@ public class SparseLongArray implements Cloneable {
     }
 
     /**
-     * Removes all key-value mappings from this SparseLongArray.
+     * Removes all key-value mappings from this SparseIntArray.
      */
     public void clear() {
         mSize = 0;

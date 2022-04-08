@@ -19,32 +19,22 @@ package com.android.systemui.doze;
 import android.app.AlarmManager;
 import android.os.Handler;
 
-import com.android.systemui.dagger.qualifiers.Main;
-import com.android.systemui.doze.dagger.DozeScope;
 import com.android.systemui.util.AlarmTimeout;
-
-import javax.inject.Inject;
 
 /**
  * Moves the doze machine from the pausing to the paused state after a timeout.
  */
-@DozeScope
 public class DozePauser implements DozeMachine.Part {
     public static final String TAG = DozePauser.class.getSimpleName();
     private final AlarmTimeout mPauseTimeout;
-    private DozeMachine mMachine;
+    private final DozeMachine mMachine;
     private final AlwaysOnDisplayPolicy mPolicy;
 
-    @Inject
-    public DozePauser(@Main Handler handler, AlarmManager alarmManager,
+    public DozePauser(Handler handler, DozeMachine machine, AlarmManager alarmManager,
             AlwaysOnDisplayPolicy policy) {
+        mMachine = machine;
         mPauseTimeout = new AlarmTimeout(alarmManager, this::onTimeout, TAG, handler);
         mPolicy = policy;
-    }
-
-    @Override
-    public void setDozeMachine(DozeMachine dozeMachine) {
-        mMachine = dozeMachine;
     }
 
     @Override

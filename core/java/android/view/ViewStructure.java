@@ -18,7 +18,6 @@ package android.view;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.SuppressLint;
 import android.graphics.Matrix;
 import android.graphics.Rect;
 import android.os.Bundle;
@@ -98,7 +97,6 @@ public abstract class ViewStructure {
     public abstract void setVisibility(int visibility);
 
     /** @hide */
-    @SuppressWarnings("HiddenAbstractMethod")
     public abstract void setAssistBlocked(boolean state);
 
     /**
@@ -373,15 +371,6 @@ public abstract class ViewStructure {
     public void setImportantForAutofill(@AutofillImportance int mode) {}
 
     /**
-     * Sets the MIME types accepted by this view. See {@link View#getReceiveContentMimeTypes()}.
-     *
-     * <p>Should only be set when the node is used for Autofill or Content Capture purposes - it
-     * will be ignored when used for Assist.
-     */
-    public void setReceiveContentMimeTypes(
-            @SuppressLint("NullableCollection") @Nullable String[] mimeTypes) {}
-
-    /**
      * Sets the {@link android.text.InputType} bits of this node.
      *
      * @param inputType inputType bits as defined by {@link android.text.InputType}.
@@ -442,7 +431,6 @@ public abstract class ViewStructure {
     public abstract void asyncCommit();
 
     /** @hide */
-    @SuppressWarnings("HiddenAbstractMethod")
     public abstract Rect getTempRect();
 
     /**

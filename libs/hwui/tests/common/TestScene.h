@@ -19,8 +19,8 @@
 #include <gui/Surface.h>
 #include <utils/StrongPointer.h>
 
-#include <map>
 #include <string>
+#include <unordered_map>
 
 namespace android {
 
@@ -35,12 +35,10 @@ namespace test {
 class TestScene {
 public:
     struct Options {
-        int frameCount = 150;
-        int repeatCount = 1;
+        int count = 0;
         int reportFrametimeWeight = 0;
         bool renderOffscreen = true;
-        bool reportGpuMemoryUsage = false;
-        bool reportGpuMemoryUsageVerbose = false;
+        int renderAhead = 0;
     };
 
     template <class T>
@@ -70,7 +68,7 @@ public:
     virtual void createContent(int width, int height, Canvas& renderer) = 0;
     virtual void doFrame(int frameNr) = 0;
 
-    static std::map<std::string, Info>& testMap();
+    static std::unordered_map<std::string, Info>& testMap();
     static void registerScene(const Info& info);
 
     sp<Surface> renderTarget;

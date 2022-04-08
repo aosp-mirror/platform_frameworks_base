@@ -26,7 +26,6 @@ import android.accessibilityservice.AccessibilityService;
 import android.content.Context;
 import android.graphics.Point;
 import android.graphics.PointF;
-import android.os.Handler;
 import android.view.MotionEvent;
 
 import androidx.test.InstrumentationRegistry;
@@ -57,8 +56,7 @@ public class GestureManifoldTest {
         // Construct a testable GestureManifold.
         mResultListener = mock(GestureManifold.Listener.class);
         mState = new TouchState();
-        Handler handler = new Handler(context.getMainLooper());
-        mManifold = new GestureManifold(context, mResultListener, mState, handler);
+        mManifold = new GestureManifold(context, mResultListener, mState);
         // Play the role of touch explorer in updating the shared state.
         when(mResultListener.onGestureStarted()).thenReturn(onGestureStarted());
 

@@ -16,7 +16,6 @@
 
 package com.android.server.notification;
 
-import static android.content.pm.LauncherApps.ShortcutQuery.FLAG_GET_PERSONS_DATA;
 import static android.content.pm.LauncherApps.ShortcutQuery.FLAG_MATCH_CACHED;
 import static android.content.pm.LauncherApps.ShortcutQuery.FLAG_MATCH_DYNAMIC;
 import static android.content.pm.LauncherApps.ShortcutQuery.FLAG_MATCH_PINNED_BY_ANY_LAUNCHER;
@@ -29,7 +28,6 @@ import android.content.pm.ShortcutServiceInternal;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.UserHandle;
-import android.os.UserManager;
 import android.text.TextUtils;
 import android.util.Slog;
 
@@ -68,7 +66,6 @@ public class ShortcutHelper {
     private LauncherApps mLauncherAppsService;
     private ShortcutListener mShortcutListener;
     private ShortcutServiceInternal mShortcutServiceInternal;
-    private UserManager mUserManager;
 
     // Key: packageName Value: <shortcutId, notifId>
     private HashMap<String, HashMap<String, String>> mActiveShortcutBubbles = new HashMap<>();
@@ -146,11 +143,10 @@ public class ShortcutHelper {
     };
 
     ShortcutHelper(LauncherApps launcherApps, ShortcutListener listener,
-            ShortcutServiceInternal shortcutServiceInternal, UserManager userManager) {
+            ShortcutServiceInternal shortcutServiceInternal) {
         mLauncherAppsService = launcherApps;
         mShortcutListener = listener;
         mShortcutServiceInternal = shortcutServiceInternal;
-        mUserManager = userManager;
     }
 
     @VisibleForTesting
@@ -161,11 +157,6 @@ public class ShortcutHelper {
     @VisibleForTesting
     void setShortcutServiceInternal(ShortcutServiceInternal shortcutServiceInternal) {
         mShortcutServiceInternal = shortcutServiceInternal;
-    }
-
-    @VisibleForTesting
-    void setUserManager(UserManager userManager) {
-        mUserManager = userManager;
     }
 
     /**
@@ -190,8 +181,7 @@ public class ShortcutHelper {
      * Only returns shortcut info if it's found and if it's a conversation shortcut.
      */
     ShortcutInfo getValidShortcutInfo(String shortcutId, String packageName, UserHandle user) {
-        // Shortcuts cannot be accessed when the user is locked.
-        if (mLauncherAppsService == null  || !mUserManager.isUserUnlocked(user)) {
+        if (mLauncherAppsService == null) {
             return null;
         }
         final long token = Binder.clearCallingIdentity();
@@ -202,8 +192,8 @@ public class ShortcutHelper {
             LauncherApps.ShortcutQuery query = new LauncherApps.ShortcutQuery();
             query.setPackage(packageName);
             query.setShortcutIds(Arrays.asList(shortcutId));
-            query.setQueryFlags(FLAG_MATCH_DYNAMIC | FLAG_MATCH_PINNED_BY_ANY_LAUNCHER
-                    | FLAG_MATCH_CACHED | FLAG_GET_PERSONS_DATA);
+            query.setQueryFlags(
+                    FLAG_MATCH_DYNAMIC | FLAG_MATCH_PINNED_BY_ANY_LAUNCHER | FLAG_MATCH_CACHED);
             List<ShortcutInfo> shortcuts = mLauncherAppsService.getShortcuts(query, user);
             ShortcutInfo info = shortcuts != null && shortcuts.size() > 0
                     ? shortcuts.get(0)

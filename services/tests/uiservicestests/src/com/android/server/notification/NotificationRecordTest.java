@@ -21,9 +21,6 @@ import static android.app.NotificationManager.IMPORTANCE_HIGH;
 import static android.app.NotificationManager.IMPORTANCE_LOW;
 import static android.service.notification.Adjustment.KEY_IMPORTANCE;
 import static android.service.notification.Adjustment.KEY_NOT_CONVERSATION;
-import static android.service.notification.NotificationListenerService.FLAG_FILTER_TYPE_ALERTING;
-import static android.service.notification.NotificationListenerService.FLAG_FILTER_TYPE_CONVERSATIONS;
-import static android.service.notification.NotificationListenerService.FLAG_FILTER_TYPE_SILENT;
 import static android.service.notification.NotificationListenerService.Ranking.USER_SENTIMENT_NEGATIVE;
 import static android.service.notification.NotificationListenerService.Ranking.USER_SENTIMENT_NEUTRAL;
 import static android.service.notification.NotificationListenerService.Ranking.USER_SENTIMENT_POSITIVE;
@@ -62,7 +59,6 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.UserHandle;
-import android.os.Vibrator;
 import android.provider.Settings;
 import android.service.notification.Adjustment;
 import android.service.notification.StatusBarNotification;
@@ -83,6 +79,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
@@ -91,7 +88,6 @@ public class NotificationRecordTest extends UiServiceTestCase {
     private final Context mMockContext = mock(Context.class);
     @Mock private PackageManager mPm;
     @Mock private ContentResolver mContentResolver;
-    @Mock private Vibrator mVibrator;
 
     private final String mPkg = PKG_O;
     private final int uid = 9583;
@@ -123,7 +119,6 @@ public class NotificationRecordTest extends UiServiceTestCase {
     public void setUp() {
         MockitoAnnotations.initMocks(this);
 
-        when(mMockContext.getSystemService(eq(Vibrator.class))).thenReturn(mVibrator);
         when(mMockContext.getResources()).thenReturn(getContext().getResources());
         when(mMockContext.getPackageManager()).thenReturn(mPm);
         when(mMockContext.getContentResolver()).thenReturn(mContentResolver);
@@ -200,26 +195,6 @@ public class NotificationRecordTest extends UiServiceTestCase {
         if (customHeadsUp) {
             builder.setCustomHeadsUpContentView(mock(RemoteViews.class));
         }
-
-        Notification n = builder.build();
-        return new StatusBarNotification(mPkg, mPkg, id1, tag1, uid, uid, n, mUser, null, uid);
-    }
-
-
-    private StatusBarNotification getInsistentNotification(boolean defaultVibration) {
-        final Builder builder = new Builder(mMockContext)
-                .setContentTitle("foo")
-                .setSmallIcon(android.R.drawable.sym_def_app_icon)
-                .setPriority(Notification.PRIORITY_HIGH);
-        int defaults = 0;
-        if (defaultVibration) {
-            defaults |= Notification.DEFAULT_VIBRATE;
-        } else {
-            builder.setVibrate(CUSTOM_VIBRATION);
-            channel.setVibrationPattern(CUSTOM_CHANNEL_VIBRATION);
-        }
-        builder.setDefaults(defaults);
-        builder.setFlag(Notification.FLAG_INSISTENT, true);
 
         Notification n = builder.build();
         return new StatusBarNotification(mPkg, mPkg, id1, tag1, uid, uid, n, mUser, null, uid);
@@ -331,8 +306,7 @@ public class NotificationRecordTest extends UiServiceTestCase {
                 false /* lights */, false /* defaultLights */, null /* group */);
 
         NotificationRecord record = new NotificationRecord(mMockContext, sbn, defaultChannel);
-        assertEquals(VibratorHelper.createWaveformVibration(
-                CUSTOM_VIBRATION, /* insistent= */ false), record.getVibration());
+        assertEquals(CUSTOM_VIBRATION, record.getVibration());
     }
 
     @Test
@@ -345,8 +319,7 @@ public class NotificationRecordTest extends UiServiceTestCase {
                 false /* lights */, false /* defaultLights */, null /* group */);
 
         NotificationRecord record = new NotificationRecord(mMockContext, sbn, defaultChannel);
-        assertNotEquals(VibratorHelper.createWaveformVibration(
-                CUSTOM_VIBRATION, /* insistent= */ false), record.getVibration());
+        assertTrue(!Arrays.equals(CUSTOM_VIBRATION, record.getVibration()));
     }
 
     @Test
@@ -358,18 +331,7 @@ public class NotificationRecordTest extends UiServiceTestCase {
                 false /* lights */, false /* defaultLights */, null /* group */);
 
         NotificationRecord record = new NotificationRecord(mMockContext, sbn, channel);
-        assertEquals(VibratorHelper.createWaveformVibration(
-                CUSTOM_CHANNEL_VIBRATION, /* insistent= */ false), record.getVibration());
-    }
-
-    @Test
-    public void testVibration_insistent_createsInsistentVibrationEffect() {
-        channel.enableVibration(true);
-        StatusBarNotification sbn = getInsistentNotification(false /* defaultBuzz */);
-
-        NotificationRecord record = new NotificationRecord(mMockContext, sbn, channel);
-        assertEquals(VibratorHelper.createWaveformVibration(
-                CUSTOM_CHANNEL_VIBRATION, /* insistent= */ true), record.getVibration());
+        assertEquals(CUSTOM_CHANNEL_VIBRATION, record.getVibration());
     }
 
     @Test
@@ -948,13 +910,11 @@ public class NotificationRecordTest extends UiServiceTestCase {
         record.setAssistantImportance(IMPORTANCE_LOW);
         record.calculateImportance();
         assertEquals(IMPORTANCE_LOW, record.getImportance());
-        assertEquals(FLAG_FILTER_TYPE_SILENT, record.getNotificationType());
 
         record.updateNotificationChannel(
                 new NotificationChannel(channelId, "", IMPORTANCE_DEFAULT));
 
         assertEquals(IMPORTANCE_LOW, record.getImportance());
-        assertEquals(FLAG_FILTER_TYPE_SILENT, record.getNotificationType());
     }
 
     @Test
@@ -1165,49 +1125,6 @@ public class NotificationRecordTest extends UiServiceTestCase {
         record.setShortcutInfo(mock(ShortcutInfo.class));
 
         assertTrue(record.isConversation());
-        assertEquals(FLAG_FILTER_TYPE_CONVERSATIONS, record.getNotificationType());
-    }
-
-    @Test
-    public void testIsConversation_shortcutHasOneBot_targetsR() {
-        StatusBarNotification sbn = getMessagingStyleNotification(PKG_R);
-        NotificationRecord record = new NotificationRecord(mMockContext, sbn, channel);
-        ShortcutInfo shortcutMock = mock(ShortcutInfo.class);
-        when(shortcutMock.getPersons()).thenReturn(new Person[]{
-                new Person.Builder().setName("Bot").setBot(true).build()
-        });
-        record.setShortcutInfo(shortcutMock);
-
-        assertFalse(record.isConversation());
-    }
-
-    @Test
-    public void testIsConversation_shortcutHasOnePerson_targetsR() {
-        StatusBarNotification sbn = getMessagingStyleNotification(PKG_R);
-        NotificationRecord record = new NotificationRecord(mMockContext, sbn, channel);
-        ShortcutInfo shortcutMock = mock(ShortcutInfo.class);
-        when(shortcutMock.getPersons()).thenReturn(new Person[]{
-                new Person.Builder().setName("Person").setBot(false).build()
-        });
-        record.setShortcutInfo(shortcutMock);
-
-        assertTrue(record.isConversation());
-        assertEquals(FLAG_FILTER_TYPE_CONVERSATIONS, record.getNotificationType());
-    }
-
-    @Test
-    public void testIsConversation_shortcutHasOneBotOnePerson_targetsR() {
-        StatusBarNotification sbn = getMessagingStyleNotification(PKG_R);
-        NotificationRecord record = new NotificationRecord(mMockContext, sbn, channel);
-        ShortcutInfo shortcutMock = mock(ShortcutInfo.class);
-        when(shortcutMock.getPersons()).thenReturn(new Person[]{
-                new Person.Builder().setName("Bot").setBot(true).build(),
-                new Person.Builder().setName("Person").setBot(false).build()
-        });
-        record.setShortcutInfo(shortcutMock);
-
-        assertTrue(record.isConversation());
-        assertEquals(FLAG_FILTER_TYPE_CONVERSATIONS, record.getNotificationType());
     }
 
     @Test
@@ -1217,7 +1134,6 @@ public class NotificationRecordTest extends UiServiceTestCase {
         record.setShortcutInfo(null);
 
         assertTrue(record.isConversation());
-        assertEquals(FLAG_FILTER_TYPE_CONVERSATIONS, record.getNotificationType());
     }
 
     @Test
@@ -1228,7 +1144,6 @@ public class NotificationRecordTest extends UiServiceTestCase {
         record.setHasSentValidMsg(true);
 
         assertFalse(record.isConversation());
-        assertEquals(FLAG_FILTER_TYPE_ALERTING, record.getNotificationType());
     }
 
     @Test

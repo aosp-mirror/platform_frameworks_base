@@ -23,8 +23,6 @@ import android.content.pm.ShortcutInfo;
 import android.content.pm.Signature;
 import android.content.pm.SigningInfo;
 import android.util.Slog;
-import android.util.TypedXmlPullParser;
-import android.util.TypedXmlSerializer;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.LocalServices;
@@ -34,6 +32,7 @@ import libcore.util.HexEncoding;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
+import org.xmlpull.v1.XmlSerializer;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -206,7 +205,7 @@ class ShortcutPackageInfo {
         mSigHashes = BackupUtils.hashSignatureArray(signatures);
     }
 
-    public void saveToXml(ShortcutService s, TypedXmlSerializer out, boolean forBackup)
+    public void saveToXml(ShortcutService s, XmlSerializer out, boolean forBackup)
             throws IOException {
         if (forBackup && !mBackupAllowedInitialized) {
             s.wtf("Backup happened before mBackupAllowed is initialized.");
@@ -237,7 +236,7 @@ class ShortcutPackageInfo {
         out.endTag(null, TAG_ROOT);
     }
 
-    public void loadFromXml(TypedXmlPullParser parser, boolean fromBackup)
+    public void loadFromXml(XmlPullParser parser, boolean fromBackup)
             throws IOException, XmlPullParserException {
         // Don't use the version code from the backup file.
         final long versionCode = ShortcutService.parseLongAttribute(parser, ATTR_VERSION,

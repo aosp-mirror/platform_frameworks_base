@@ -76,14 +76,7 @@ class CredstoreWritableIdentityCredential extends WritableIdentityCredential {
 
     @NonNull @Override
     public byte[] personalize(@NonNull PersonalizationData personalizationData) {
-        return personalize(mBinder, personalizationData);
-    }
 
-    // Used by both personalize() and CredstoreIdentityCredential.update().
-    //
-    @NonNull
-    static byte[] personalize(IWritableCredential binder,
-            @NonNull PersonalizationData personalizationData) {
         Collection<AccessControlProfile> accessControlProfiles =
                 personalizationData.getAccessControlProfiles();
 
@@ -151,7 +144,7 @@ class CredstoreWritableIdentityCredential extends WritableIdentityCredential {
             secureUserId = getRootSid();
         }
         try {
-            byte[] personalizationReceipt = binder.personalize(acpParcels, ensParcels,
+            byte[] personalizationReceipt = mBinder.personalize(acpParcels, ensParcels,
                     secureUserId);
             return personalizationReceipt;
         } catch (android.os.RemoteException e) {
@@ -170,5 +163,6 @@ class CredstoreWritableIdentityCredential extends WritableIdentityCredential {
         }
         return rootSid;
     }
+
 
 }

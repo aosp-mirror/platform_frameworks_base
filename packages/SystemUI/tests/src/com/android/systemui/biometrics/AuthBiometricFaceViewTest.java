@@ -50,46 +50,37 @@ public class AuthBiometricFaceViewTest extends SysuiTestCase {
     private TestableFaceView mFaceView;
 
     @Mock private Button mNegativeButton;
-    @Mock private Button mCancelButton;
-    @Mock private Button mUseCredentialButton;
-
-    @Mock private Button mConfirmButton;
+    @Mock private Button mPositiveButton;
     @Mock private Button mTryAgainButton;
-
     @Mock private TextView mErrorView;
 
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
         mFaceView = new TestableFaceView(mContext);
-        mFaceView.mFaceIconController = mock(TestableFaceView.TestableIconController.class);
+        mFaceView.mIconController = mock(TestableFaceView.TestableIconController.class);
         mFaceView.setCallback(mCallback);
-
         mFaceView.mNegativeButton = mNegativeButton;
-        mFaceView.mCancelButton = mCancelButton;
-        mFaceView.mUseCredentialButton = mUseCredentialButton;
-
-        mFaceView.mConfirmButton = mConfirmButton;
+        mFaceView.mPositiveButton = mPositiveButton;
         mFaceView.mTryAgainButton = mTryAgainButton;
-
         mFaceView.mIndicatorView = mErrorView;
     }
 
     @Test
     public void testStateUpdated_whenDialogAnimatedIn() {
         mFaceView.onDialogAnimatedIn();
-        verify(mFaceView.mFaceIconController)
+        verify(mFaceView.mIconController)
                 .updateState(anyInt(), eq(AuthBiometricFaceView.STATE_AUTHENTICATING));
     }
 
     @Test
     public void testIconUpdatesState_whenDialogStateUpdated() {
         mFaceView.updateState(AuthBiometricFaceView.STATE_AUTHENTICATING);
-        verify(mFaceView.mFaceIconController)
+        verify(mFaceView.mIconController)
                 .updateState(anyInt(), eq(AuthBiometricFaceView.STATE_AUTHENTICATING));
 
         mFaceView.updateState(AuthBiometricFaceView.STATE_AUTHENTICATED);
-        verify(mFaceView.mFaceIconController).updateState(
+        verify(mFaceView.mIconController).updateState(
                 eq(AuthBiometricFaceView.STATE_AUTHENTICATING),
                 eq(AuthBiometricFaceView.STATE_AUTHENTICATED));
     }

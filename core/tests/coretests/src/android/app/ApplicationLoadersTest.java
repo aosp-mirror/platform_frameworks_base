@@ -42,7 +42,7 @@ public class ApplicationLoadersTest {
         return new SharedLibraryInfo(
                 zip, null /*packageName*/, null /*codePaths*/, null /*name*/, 0 /*version*/,
                 SharedLibraryInfo.TYPE_BUILTIN, null /*declaringPackage*/,
-                null /*dependentPackages*/, null /*dependencies*/, false /*isNative*/);
+                null /*dependentPackages*/, null /*dependencies*/);
     }
 
     @Test

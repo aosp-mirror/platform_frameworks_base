@@ -350,7 +350,13 @@ public class ResolverActivity extends Activity implements
         // from managed profile to owner or other way around.
         setProfileSwitchMessageId(intent.getContentUserHint());
 
-        mLaunchedFromUid = getLaunchedFromUid();
+        try {
+            mLaunchedFromUid = ActivityTaskManager.getService().getLaunchedFromUid(
+                    getActivityToken());
+        } catch (RemoteException e) {
+            mLaunchedFromUid = -1;
+        }
+
         if (mLaunchedFromUid < 0 || UserHandle.isIsolated(mLaunchedFromUid)) {
             // Gulp!
             finish();
@@ -1079,7 +1085,7 @@ public class ResolverActivity extends Activity implements
         }
     }
 
-    protected boolean onTargetSelected(TargetInfo target, boolean always) {
+    protected boolean onTargetSelected(TargetInfo target, boolean alwaysCheck) {
         final ResolveInfo ri = target.getResolveInfo();
         final Intent intent = target != null ? target.getResolvedIntent() : null;
 
@@ -1201,12 +1207,12 @@ public class ResolverActivity extends Activity implements
                     if (otherProfileMatch > bestMatch) bestMatch = otherProfileMatch;
                 }
 
-                if (always) {
+                if (alwaysCheck) {
                     final int userId = getUserId();
                     final PackageManager pm = getPackageManager();
 
                     // Set the preferred Activity
-                    pm.addUniquePreferredActivity(filter, bestMatch, set, intent.getComponent());
+                    pm.addPreferredActivity(filter, bestMatch, set, intent.getComponent());
 
                     if (ri.handleAllWebDataURI) {
                         // Set default Browser if needed
@@ -1257,35 +1263,16 @@ public class ResolverActivity extends Activity implements
         // don't kill ourselves.
         StrictMode.disableDeathOnFileUriExposure();
         try {
-            UserHandle currentUserHandle = mMultiProfilePagerAdapter.getCurrentUserHandle();
-            safelyStartActivityInternal(cti, currentUserHandle);
+            safelyStartActivityInternal(cti);
         } finally {
             StrictMode.enableDeathOnFileUriExposure();
         }
     }
 
-    /**
-     * Start activity as a fixed user handle.
-     * @param cti TargetInfo to be launched.
-     * @param user User to launch this activity as.
-     */
-    @VisibleForTesting
-    public void safelyStartActivityAsUser(TargetInfo cti, UserHandle user) {
-        // We're dispatching intents that might be coming from legacy apps, so
-        // don't kill ourselves.
-        StrictMode.disableDeathOnFileUriExposure();
-        try {
-            safelyStartActivityInternal(cti, user);
-        } finally {
-            StrictMode.enableDeathOnFileUriExposure();
-        }
-    }
-
-
-    private void safelyStartActivityInternal(TargetInfo cti, UserHandle user) {
+    private void safelyStartActivityInternal(TargetInfo cti) {
         // If the target is suspended, the activity will not be successfully launched.
         // Do not unregister from package manager updates in this case
-        if (!cti.isSuspended() && mRegistered) {
+        if (!cti.isSuspended()) {
             if (mPersonalPackageMonitor != null) {
                 mPersonalPackageMonitor.unregister();
             }
@@ -1299,21 +1286,29 @@ public class ResolverActivity extends Activity implements
         if (mProfileSwitchMessageId != -1) {
             Toast.makeText(this, getString(mProfileSwitchMessageId), Toast.LENGTH_LONG).show();
         }
+        UserHandle currentUserHandle = mMultiProfilePagerAdapter.getCurrentUserHandle();
         if (!mSafeForwardingMode) {
-            if (cti.startAsUser(this, null, user)) {
+            if (cti.startAsUser(this, null, currentUserHandle)) {
                 onActivityStarted(cti);
-                maybeLogCrossProfileTargetLaunch(cti, user);
+                maybeLogCrossProfileTargetLaunch(cti, currentUserHandle);
             }
             return;
         }
         try {
-            if (cti.startAsCaller(this, null, user.getIdentifier())) {
+            if (cti.startAsCaller(this, null, currentUserHandle.getIdentifier())) {
                 onActivityStarted(cti);
-                maybeLogCrossProfileTargetLaunch(cti, user);
+                maybeLogCrossProfileTargetLaunch(cti, currentUserHandle);
             }
         } catch (RuntimeException e) {
+            String launchedFromPackage;
+            try {
+                launchedFromPackage = ActivityTaskManager.getService().getLaunchedFromPackage(
+                        getActivityToken());
+            } catch (RemoteException e2) {
+                launchedFromPackage = "??";
+            }
             Slog.wtf(TAG, "Unable to launch as uid " + mLaunchedFromUid
-                    + " package " + getLaunchedFromPackage() + ", while running in "
+                    + " package " + launchedFromPackage + ", while running in "
                     + ActivityThread.currentProcessName(), e);
         }
     }

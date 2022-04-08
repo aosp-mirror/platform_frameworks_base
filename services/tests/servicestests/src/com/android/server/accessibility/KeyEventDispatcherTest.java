@@ -39,7 +39,6 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.PowerManager;
 import android.os.RemoteException;
-import android.view.Display;
 import android.view.KeyEvent;
 
 import androidx.test.InstrumentationRegistry;
@@ -173,8 +172,8 @@ public class KeyEventDispatcherTest {
                 mFilter1SequenceCaptor.getValue());
 
         assertFalse(mInputEventsHandler.hasMessages(SEND_FRAMEWORK_KEY_EVENT));
-        verify(mMockPowerManagerService, times(1)).userActivity(eq(Display.DEFAULT_DISPLAY),
-                anyLong(), eq(PowerManager.USER_ACTIVITY_EVENT_ACCESSIBILITY), eq(0));
+        verify(mMockPowerManagerService, times(1)).userActivity(anyLong(),
+                eq(PowerManager.USER_ACTIVITY_EVENT_ACCESSIBILITY), eq(0));
         assertFalse(isTimeoutPending(mMessageCapturingHandler));
     }
 
@@ -205,8 +204,8 @@ public class KeyEventDispatcherTest {
                 mFilter2SequenceCaptor.getValue());
 
         assertFalse(mInputEventsHandler.hasMessages(SEND_FRAMEWORK_KEY_EVENT));
-        verify(mMockPowerManagerService, times(1)).userActivity(eq(Display.DEFAULT_DISPLAY),
-                anyLong(), eq(PowerManager.USER_ACTIVITY_EVENT_ACCESSIBILITY), eq(0));
+        verify(mMockPowerManagerService, times(1)).userActivity(anyLong(),
+                eq(PowerManager.USER_ACTIVITY_EVENT_ACCESSIBILITY), eq(0));
         assertFalse(isTimeoutPending(mMessageCapturingHandler));
     }
 
@@ -222,8 +221,8 @@ public class KeyEventDispatcherTest {
                 mFilter2SequenceCaptor.getValue());
 
         assertFalse(mInputEventsHandler.hasMessages(SEND_FRAMEWORK_KEY_EVENT));
-        verify(mMockPowerManagerService, times(1)).userActivity(eq(Display.DEFAULT_DISPLAY),
-                anyLong(), eq(PowerManager.USER_ACTIVITY_EVENT_ACCESSIBILITY), eq(0));
+        verify(mMockPowerManagerService, times(1)).userActivity(anyLong(),
+                eq(PowerManager.USER_ACTIVITY_EVENT_ACCESSIBILITY), eq(0));
         assertFalse(isTimeoutPending(mMessageCapturingHandler));
     }
 
@@ -239,8 +238,8 @@ public class KeyEventDispatcherTest {
                 mFilter2SequenceCaptor.getValue());
 
         assertFalse(mInputEventsHandler.hasMessages(SEND_FRAMEWORK_KEY_EVENT));
-        verify(mMockPowerManagerService, times(1)).userActivity(eq(Display.DEFAULT_DISPLAY),
-                anyLong(), eq(PowerManager.USER_ACTIVITY_EVENT_ACCESSIBILITY), eq(0));
+        verify(mMockPowerManagerService, times(1)).userActivity(anyLong(),
+                eq(PowerManager.USER_ACTIVITY_EVENT_ACCESSIBILITY), eq(0));
         assertFalse(isTimeoutPending(mMessageCapturingHandler));
     }
 
@@ -309,8 +308,8 @@ public class KeyEventDispatcherTest {
         mKeyEventDispatcher.handleMessage(getTimedMessage(mMessageCapturingHandler, 0));
 
         assertFalse(mInputEventsHandler.hasMessages(SEND_FRAMEWORK_KEY_EVENT));
-        verify(mMockPowerManagerService, times(1)).userActivity(eq(Display.DEFAULT_DISPLAY),
-                anyLong(), eq(PowerManager.USER_ACTIVITY_EVENT_ACCESSIBILITY), eq(0));
+        verify(mMockPowerManagerService, times(1)).userActivity(anyLong(),
+                eq(PowerManager.USER_ACTIVITY_EVENT_ACCESSIBILITY), eq(0));
     }
 
     @Test
@@ -358,8 +357,8 @@ public class KeyEventDispatcherTest {
         mKeyEventDispatcher.handleMessage(getTimedMessage(mMessageCapturingHandler, 0));
 
         assertFalse(mInputEventsHandler.hasMessages(SEND_FRAMEWORK_KEY_EVENT));
-        verify(mMockPowerManagerService, times(1)).userActivity(eq(Display.DEFAULT_DISPLAY),
-                anyLong(), eq(PowerManager.USER_ACTIVITY_EVENT_ACCESSIBILITY), eq(0));
+        verify(mMockPowerManagerService, times(1)).userActivity(anyLong(),
+                eq(PowerManager.USER_ACTIVITY_EVENT_ACCESSIBILITY), eq(0));
     }
 
     /*

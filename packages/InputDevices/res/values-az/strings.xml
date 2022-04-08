@@ -19,7 +19,6 @@
     <string name="keyboard_layout_swiss_german_label" msgid="2305520941993314258">"İsveçrə Almanı"</string>
     <string name="keyboard_layout_belgian" msgid="2011984572838651558">"Belçikalı"</string>
     <string name="keyboard_layout_bulgarian" msgid="8951224309972028398">"Bolqar"</string>
-    <string name="keyboard_layout_bulgarian_phonetic" msgid="7568914730360106653">"Bolqar dili, Fonetika"</string>
     <string name="keyboard_layout_italian" msgid="6497079660449781213">"İtalyan"</string>
     <string name="keyboard_layout_danish" msgid="8036432066627127851">"Danimarkalı"</string>
     <string name="keyboard_layout_norwegian" msgid="9090097917011040937">"Norveçli"</string>
@@ -27,7 +26,6 @@
     <string name="keyboard_layout_finnish" msgid="5585659438924315466">"Fin"</string>
     <string name="keyboard_layout_croatian" msgid="4172229471079281138">"Xorvat"</string>
     <string name="keyboard_layout_czech" msgid="1349256901452975343">"Çex"</string>
-    <string name="keyboard_layout_czech_qwerty" msgid="3331402534128515501">"Çex QWERTY üslubu"</string>
     <string name="keyboard_layout_estonian" msgid="8775830985185665274">"Eston"</string>
     <string name="keyboard_layout_hungarian" msgid="4154963661406035109">"Macar"</string>
     <string name="keyboard_layout_icelandic" msgid="5836645650912489642">"İslandiyalı"</string>
@@ -36,7 +34,6 @@
     <string name="keyboard_layout_slovak" msgid="2469379934672837296">"Slovak"</string>
     <string name="keyboard_layout_slovenian" msgid="1735933028924982368">"Sloven"</string>
     <string name="keyboard_layout_turkish" msgid="7736163250907964898">"Türk"</string>
-    <string name="keyboard_layout_turkish_f" msgid="9130320856010776018">"Türkcə F"</string>
     <string name="keyboard_layout_ukrainian" msgid="8176637744389480417">"Ukrayna"</string>
     <string name="keyboard_layout_arabic" msgid="5671970465174968712">"Ərəb"</string>
     <string name="keyboard_layout_greek" msgid="7289253560162386040">"Yunan"</string>
@@ -47,7 +44,4 @@
     <string name="keyboard_layout_persian" msgid="3920643161015888527">"Fars Dili"</string>
     <string name="keyboard_layout_azerbaijani" msgid="7315895417176467567">"Azəri"</string>
     <string name="keyboard_layout_polish" msgid="1121588624094925325">"Polyak"</string>
-    <string name="keyboard_layout_belarusian" msgid="7619281752698687588">"Belarus dili"</string>
-    <string name="keyboard_layout_mongolian" msgid="7678483495823936626">"Monqol"</string>
-    <string name="keyboard_layout_georgian" msgid="4596185456863747454">"Gürcü"</string>
 </resources>

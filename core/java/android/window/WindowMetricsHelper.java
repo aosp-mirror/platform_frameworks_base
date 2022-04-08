@@ -16,13 +16,17 @@
 
 package android.window;
 
+import static android.view.ViewRootImpl.NEW_INSETS_MODE_FULL;
 import static android.view.WindowInsets.Type.displayCutout;
 import static android.view.WindowInsets.Type.navigationBars;
 
 import android.annotation.NonNull;
+import android.graphics.Insets;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.view.Display;
+import android.view.DisplayCutout;
+import android.view.ViewRootImpl;
 import android.view.WindowInsets;
 import android.view.WindowMetrics;
 
@@ -42,8 +46,19 @@ public final class WindowMetricsHelper {
     public static Rect getBoundsExcludingNavigationBarAndCutout(
             @NonNull WindowMetrics windowMetrics) {
         final WindowInsets windowInsets = windowMetrics.getWindowInsets();
+        Insets insets;
+        if (ViewRootImpl.sNewInsetsMode == NEW_INSETS_MODE_FULL) {
+            insets = windowInsets.getInsetsIgnoringVisibility(navigationBars() | displayCutout());
+        } else {
+            final Insets stableInsets = windowInsets.getStableInsets();
+            insets = Insets.of(stableInsets.left, 0 /* top */, stableInsets.right,
+                    stableInsets.bottom);
+            final DisplayCutout cutout = windowInsets.getDisplayCutout();
+            insets = (cutout != null) ? Insets.max(insets, Insets.of(cutout.getSafeInsets()))
+                    : insets;
+        }
         final Rect result = new Rect(windowMetrics.getBounds());
-        result.inset(windowInsets.getInsetsIgnoringVisibility(navigationBars() | displayCutout()));
+        result.inset(insets);
         return result;
     }
 }

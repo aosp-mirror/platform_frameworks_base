@@ -17,7 +17,6 @@
 package com.android.ims.internal.uce.presence;
 
 import android.compat.annotation.UnsupportedAppUsage;
-import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -27,7 +26,6 @@ public class PresTupleInfo implements Parcelable {
     private String mFeatureTag = "";
     private String mContactUri = "";
     private String mTimestamp = "";
-    private String mVersion = "";
 
 
     /**
@@ -42,7 +40,7 @@ public class PresTupleInfo implements Parcelable {
      * Sets the feature tag.
      * @hide
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public void setFeatureTag(String featureTag) {
         this.mFeatureTag = featureTag;
     }
@@ -58,7 +56,7 @@ public class PresTupleInfo implements Parcelable {
      * Sets the contact URI.
      * @hide
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public void setContactUri(String contactUri) {
         this.mContactUri = contactUri;
     }
@@ -75,32 +73,16 @@ public class PresTupleInfo implements Parcelable {
      * Sets the timestamp.
      * @hide
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public void setTimestamp(String timestamp) {
         this.mTimestamp = timestamp;
-    }
-
-    /**
-     * Gets the version.
-     * @hide
-     */
-    public String getVersion() {
-        return mVersion;
-    }
-
-    /**
-     * Sets the version.
-     * @hide
-     */
-    public void setVersion(String version) {
-        this.mVersion = version;
     }
 
     /**
      * Constructor for the PresTupleInfo class.
      * @hide
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public PresTupleInfo(){};
 
     /** @hide */
@@ -113,7 +95,6 @@ public class PresTupleInfo implements Parcelable {
         dest.writeString(mFeatureTag);
         dest.writeString(mContactUri);
         dest.writeString(mTimestamp);
-        dest.writeString(mVersion);
     }
 
     /** @hide */
@@ -139,6 +120,5 @@ public class PresTupleInfo implements Parcelable {
         mFeatureTag = source.readString();
         mContactUri = source.readString();
         mTimestamp = source.readString();
-        mVersion = source.readString();
     }
 }

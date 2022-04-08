@@ -22,6 +22,8 @@ import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Slog;
 
+import com.android.internal.os.BackgroundThread;
+
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 
@@ -72,9 +74,8 @@ public class LockGuard {
     public static final int INDEX_PACKAGES = 3;
     public static final int INDEX_STORAGE = 4;
     public static final int INDEX_WINDOW = 5;
-    public static final int INDEX_PROC = 6;
-    public static final int INDEX_ACTIVITY = 7;
-    public static final int INDEX_DPMS = 8;
+    public static final int INDEX_ACTIVITY = 6;
+    public static final int INDEX_DPMS = 7;
 
     private static Object[] sKnownFixed = new Object[INDEX_DPMS + 1];
 
@@ -228,7 +229,6 @@ public class LockGuard {
             case INDEX_PACKAGES: return "PACKAGES";
             case INDEX_STORAGE: return "STORAGE";
             case INDEX_WINDOW: return "WINDOW";
-            case INDEX_PROC: return "PROCESS";
             case INDEX_ACTIVITY: return "ACTIVITY";
             case INDEX_DPMS: return "DPMS";
             default: return Integer.toString(index);

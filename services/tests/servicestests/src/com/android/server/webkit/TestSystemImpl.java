@@ -34,6 +34,7 @@ public class TestSystemImpl implements SystemInterface {
     List<Integer> mUsers = new ArrayList<>();
     // Package -> [user, package]
     Map<String, Map<Integer, PackageInfo>> mPackages = new HashMap();
+    private boolean mFallbackLogicEnabled;
     private final int mNumRelros;
     private final boolean mIsDebuggable;
     private int mMultiProcessSetting;
@@ -41,9 +42,10 @@ public class TestSystemImpl implements SystemInterface {
 
     public static final int PRIMARY_USER_ID = 0;
 
-    public TestSystemImpl(WebViewProviderInfo[] packageConfigs, int numRelros, boolean isDebuggable,
-            boolean multiProcessDefault) {
+    public TestSystemImpl(WebViewProviderInfo[] packageConfigs, boolean fallbackLogicEnabled,
+            int numRelros, boolean isDebuggable, boolean multiProcessDefault) {
         mPackageConfigs = packageConfigs;
+        mFallbackLogicEnabled = fallbackLogicEnabled;
         mNumRelros = numRelros;
         mIsDebuggable = isDebuggable;
         mUsers.add(PRIMARY_USER_ID);
@@ -74,6 +76,16 @@ public class TestSystemImpl implements SystemInterface {
 
     @Override
     public void killPackageDependents(String packageName) {}
+
+    @Override
+    public boolean isFallbackLogicEnabled() {
+        return mFallbackLogicEnabled;
+    }
+
+    @Override
+    public void enableFallbackLogic(boolean enable) {
+        mFallbackLogicEnabled = enable;
+    }
 
     @Override
     public void enablePackageForAllUsers(Context context, String packageName, boolean enable) {

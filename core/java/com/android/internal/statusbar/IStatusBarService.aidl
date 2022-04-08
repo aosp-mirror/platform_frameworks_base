@@ -17,15 +17,13 @@
 package com.android.internal.statusbar;
 
 import android.app.Notification;
+import android.net.Uri;
 import android.content.ComponentName;
 import android.graphics.Rect;
-import android.hardware.biometrics.IBiometricSysuiReceiver;
-import android.hardware.biometrics.PromptInfo;
-import android.hardware.fingerprint.IUdfpsHbmListener;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.UserHandle;
 import android.service.notification.StatusBarNotification;
+import android.hardware.biometrics.IBiometricServiceReceiverInternal;
 
 import com.android.internal.statusbar.IStatusBar;
 import com.android.internal.statusbar.RegisterStatusBarResult;
@@ -68,7 +66,7 @@ interface IStatusBarService
     void onNotificationError(String pkg, String tag, int id,
             int uid, int initialPid, String message, int userId);
     void onClearAllNotifications(int userId);
-    void onNotificationClear(String pkg, int userId, String key,
+    void onNotificationClear(String pkg, String tag, int id, int userId, String key,
             int dismissalSurface, int dismissalSentiment, in NotificationVisibility nv);
     void onNotificationVisibilityChanged( in NotificationVisibility[] newlyVisibleKeys,
             in NotificationVisibility[] noLongerVisibleKeys);
@@ -80,11 +78,10 @@ interface IStatusBarService
             in int notificationLocation, boolean modifiedBeforeSending);
     void onNotificationSettingsViewed(String key);
     void onNotificationBubbleChanged(String key, boolean isBubble, int flags);
-    void onBubbleNotificationSuppressionChanged(String key, boolean isNotifSuppressed, boolean isBubbleSuppressed);
+    void onBubbleNotificationSuppressionChanged(String key, boolean isSuppressed);
     void hideCurrentInputMethodForBubbles();
     void grantInlineReplyUriPermission(String key, in Uri uri, in UserHandle user, String packageName);
     void clearInlineReplyUriPermissions(String key);
-    void onNotificationFeedbackReceived(String key, in Bundle feedback);
 
     void onGlobalActionsShown();
     void onGlobalActionsHidden();
@@ -108,23 +105,17 @@ interface IStatusBarService
     void showPinningEscapeToast();
 
     // Used to show the authentication dialog (Biometrics, Device Credential)
-    void showAuthenticationDialog(in PromptInfo promptInfo, IBiometricSysuiReceiver sysuiReceiver,
-            in int[] sensorIds, boolean credentialAllowed, boolean requireConfirmation,
-            int userId, String opPackageName, long operationId, int multiSensorConfig);
-
+    void showAuthenticationDialog(in Bundle bundle, IBiometricServiceReceiverInternal receiver,
+            int biometricModality, boolean requireConfirmation, int userId, String opPackageName,
+            long operationId, int sysUiSessionId);
     // Used to notify the authentication dialog that a biometric has been authenticated
     void onBiometricAuthenticated();
     // Used to set a temporary message, e.g. fingerprint not recognized, finger moved too fast, etc
-    void onBiometricHelp(int modality, String message);
+    void onBiometricHelp(String message);
     // Used to show an error - the dialog will dismiss after a certain amount of time
     void onBiometricError(int modality, int error, int vendorCode);
     // Used to hide the authentication dialog, e.g. when the application cancels authentication
     void hideAuthenticationDialog();
-
-    /**
-     * Sets an instance of IUdfpsHbmListener for UdfpsController.
-     */
-    void setUdfpsHbmListener(in IUdfpsHbmListener listener);
 
     /**
      * Show a warning that the device is about to go to sleep due to user inactivity.

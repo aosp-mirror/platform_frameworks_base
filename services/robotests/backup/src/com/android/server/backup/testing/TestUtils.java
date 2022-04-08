@@ -17,7 +17,6 @@
 package com.android.server.backup.testing;
 
 import static com.google.common.truth.Truth.assertThat;
-import static com.google.common.truth.Truth.assertWithMessage;
 
 import static org.robolectric.Shadows.shadowOf;
 
@@ -96,8 +95,8 @@ public class TestUtils {
      * logcat before that.
      */
     public static void assertLogcatAtMost(String tag, int level) {
-        assertWithMessage("All logs <= " + level).that(
-                ShadowLog.getLogsForTag(tag).stream().allMatch(logItem -> logItem.type <= level))
+        assertThat(ShadowLog.getLogsForTag(tag).stream().allMatch(logItem -> logItem.type <= level))
+                .named("All logs <= " + level)
                 .isTrue();
     }
 
@@ -106,8 +105,8 @@ public class TestUtils {
      * logcat before that.
      */
     public static void assertLogcatAtLeast(String tag, int level) {
-        assertWithMessage("Any log >= " + level).that(
-                ShadowLog.getLogsForTag(tag).stream().anyMatch(logItem -> logItem.type >= level))
+        assertThat(ShadowLog.getLogsForTag(tag).stream().anyMatch(logItem -> logItem.type >= level))
+                .named("Any log >= " + level)
                 .isTrue();
     }
 
@@ -122,10 +121,11 @@ public class TestUtils {
      * that uses logcat before that.
      */
     public static void assertLogcat(String tag, int... logs) {
-        assertWithMessage("Log items (specified per level)").that(
+        assertThat(
                         ShadowLog.getLogsForTag(tag).stream()
                                 .map(logItem -> logItem.type)
                                 .collect(toSet()))
+                .named("Log items (specified per level)")
                 .containsExactly(IntStream.of(logs).boxed().toArray());
     }
 
@@ -135,13 +135,15 @@ public class TestUtils {
 
     /** Declare shadow {@link ShadowEventLog} to use this. */
     public static void assertEventLogged(int tag, Object... values) {
-        assertWithMessage("Event logs").that(ShadowEventLog.getEntries())
+        assertThat(ShadowEventLog.getEntries())
+                .named("Event logs")
                 .contains(new ShadowEventLog.Entry(tag, Arrays.asList(values)));
     }
 
     /** Declare shadow {@link ShadowEventLog} to use this. */
     public static void assertEventNotLogged(int tag, Object... values) {
-        assertWithMessage("Event logs").that(ShadowEventLog.getEntries())
+        assertThat(ShadowEventLog.getEntries())
+                .named("Event logs")
                 .doesNotContain(new ShadowEventLog.Entry(tag, Arrays.asList(values)));
     }
 

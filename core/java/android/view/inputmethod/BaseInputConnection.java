@@ -16,13 +16,7 @@
 
 package android.view.inputmethod;
 
-import static android.view.ContentInfo.SOURCE_INPUT_METHOD;
-
 import android.annotation.CallSuper;
-import android.annotation.IntRange;
-import android.annotation.Nullable;
-import android.content.ClipData;
-import android.content.ClipDescription;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.os.Bundle;
@@ -38,12 +32,9 @@ import android.text.TextUtils;
 import android.text.method.MetaKeyKeyListener;
 import android.util.Log;
 import android.util.LogPrinter;
-import android.view.ContentInfo;
 import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
 import android.view.View;
-
-import com.android.internal.util.Preconditions;
 
 class ComposingText implements NoCopySpan {
 }
@@ -63,7 +54,7 @@ public class BaseInputConnection implements InputConnection {
     /** @hide */
     protected final InputMethodManager mIMM;
     final View mTargetView;
-    final boolean mFallbackMode;
+    final boolean mDummyMode;
 
     private Object[] mDefaultComposingSpans;
 
@@ -73,14 +64,14 @@ public class BaseInputConnection implements InputConnection {
     BaseInputConnection(InputMethodManager mgr, boolean fullEditor) {
         mIMM = mgr;
         mTargetView = null;
-        mFallbackMode = !fullEditor;
+        mDummyMode = !fullEditor;
     }
 
     public BaseInputConnection(View targetView, boolean fullEditor) {
         mIMM = (InputMethodManager)targetView.getContext().getSystemService(
                 Context.INPUT_METHOD_SERVICE);
         mTargetView = targetView;
-        mFallbackMode = !fullEditor;
+        mDummyMode = !fullEditor;
     }
 
     public static final void removeComposingSpans(Spannable text) {
@@ -163,24 +154,11 @@ public class BaseInputConnection implements InputConnection {
     }
 
     /**
-     * Called after only the composing region is modified (so it isn't called if the text also
-     * changes).
-     * <p>
-     * Default implementation does nothing.
-     *
-     * @hide
-     */
-    public void endComposingRegionEditInternal() {
-    }
-
-    /**
-     * Default implementation calls {@link #finishComposingText()} and
-     * {@code setImeConsumesInput(false)}.
+     * Default implementation calls {@link #finishComposingText()}.
      */
     @CallSuper
     public void closeConnection() {
         finishComposingText();
-        setImeConsumesInput(false);
     }
 
     /**
@@ -211,7 +189,7 @@ public class BaseInputConnection implements InputConnection {
 
     /**
      * Default implementation replaces any existing composing text with
-     * the given text.  In addition, only if fallback mode, a key event is
+     * the given text.  In addition, only if dummy mode, a key event is
      * sent for the new text and the current editable buffer cleared.
      */
     public boolean commitText(CharSequence text, int newCursorPosition) {
@@ -467,7 +445,7 @@ public class BaseInputConnection implements InputConnection {
 
     /**
      * The default implementation removes the composing state from the
-     * current editable text.  In addition, only if fallback mode, a key event is
+     * current editable text.  In addition, only if dummy mode, a key event is
      * sent for the new text and the current editable buffer cleared.
      */
     public boolean finishComposingText() {
@@ -476,10 +454,9 @@ public class BaseInputConnection implements InputConnection {
         if (content != null) {
             beginBatchEdit();
             removeComposingSpans(content);
-            // Note: sendCurrentText does nothing unless mFallbackMode is set
+            // Note: sendCurrentText does nothing unless mDummyMode is set
             sendCurrentText();
             endBatchEdit();
-            endComposingRegionEditInternal();
         }
         return true;
     }
@@ -487,10 +464,10 @@ public class BaseInputConnection implements InputConnection {
     /**
      * The default implementation uses TextUtils.getCapsMode to get the
      * cursor caps mode for the current selection position in the editable
-     * text, unless in fallback mode in which case 0 is always returned.
+     * text, unless in dummy mode in which case 0 is always returned.
      */
     public int getCursorCapsMode(int reqModes) {
-        if (mFallbackMode) return 0;
+        if (mDummyMode) return 0;
 
         final Editable content = getEditable();
         if (content == null) return 0;
@@ -518,10 +495,7 @@ public class BaseInputConnection implements InputConnection {
      * The default implementation returns the given amount of text from the
      * current cursor position in the buffer.
      */
-    @Nullable
-    public CharSequence getTextBeforeCursor(@IntRange(from = 0) int length, int flags) {
-        Preconditions.checkArgumentNonnegative(length);
-
+    public CharSequence getTextBeforeCursor(int length, int flags) {
         final Editable content = getEditable();
         if (content == null) return null;
 
@@ -577,10 +551,7 @@ public class BaseInputConnection implements InputConnection {
      * The default implementation returns the given amount of text from the
      * current cursor position in the buffer.
      */
-    @Nullable
-    public CharSequence getTextAfterCursor(@IntRange(from = 0) int length, int flags) {
-        Preconditions.checkArgumentNonnegative(length);
-
+    public CharSequence getTextAfterCursor(int length, int flags) {
         final Editable content = getEditable();
         if (content == null) return null;
 
@@ -607,56 +578,6 @@ public class BaseInputConnection implements InputConnection {
             return content.subSequence(b, b + length);
         }
         return TextUtils.substring(content, b, b + length);
-    }
-
-    /**
-     * The default implementation returns the given amount of text around the current cursor
-     * position in the buffer.
-     */
-    @Nullable
-    public SurroundingText getSurroundingText(
-            @IntRange(from = 0) int beforeLength, @IntRange(from = 0)  int afterLength, int flags) {
-        Preconditions.checkArgumentNonnegative(beforeLength);
-        Preconditions.checkArgumentNonnegative(afterLength);
-
-        final Editable content = getEditable();
-        // If {@link #getEditable()} is null or {@code mEditable} is equal to {@link #getEditable()}
-        // (a.k.a, a fake editable), it means we cannot get valid content from the editable, so
-        // fallback to retrieve surrounding text from other APIs.
-        if (content == null || mEditable == content) {
-            return InputConnection.super.getSurroundingText(beforeLength, afterLength, flags);
-        }
-
-        int selStart = Selection.getSelectionStart(content);
-        int selEnd = Selection.getSelectionEnd(content);
-
-        // Guard against the case where the cursor has not been positioned yet.
-        if (selStart < 0 || selEnd < 0) {
-            return null;
-        }
-
-        if (selStart > selEnd) {
-            int tmp = selStart;
-            selStart = selEnd;
-            selEnd = tmp;
-        }
-
-        int contentLength = content.length();
-        int startPos = selStart - beforeLength;
-        int endPos = selEnd + afterLength;
-
-        // Guards the start and end pos within range [0, contentLength].
-        startPos = Math.max(0, startPos);
-        endPos = Math.min(contentLength, endPos);
-
-        CharSequence surroundingText;
-        if ((flags & GET_TEXT_WITH_STYLES) != 0) {
-            surroundingText = content.subSequence(startPos, endPos);
-        } else {
-            surroundingText = TextUtils.substring(content, startPos, endPos);
-        }
-        return new SurroundingText(
-                surroundingText, selStart - startPos, selEnd - startPos, startPos);
     }
 
     /**
@@ -743,10 +664,9 @@ public class BaseInputConnection implements InputConnection {
             content.setSpan(COMPOSING, a, b,
                     Spanned.SPAN_EXCLUSIVE_EXCLUSIVE | Spanned.SPAN_COMPOSING);
 
-            // Note: sendCurrentText does nothing unless mFallbackMode is set
+            // Note: sendCurrentText does nothing unless mDummyMode is set
             sendCurrentText();
             endBatchEdit();
-            endComposingRegionEditInternal();
         }
         return true;
     }
@@ -795,7 +715,7 @@ public class BaseInputConnection implements InputConnection {
     }
 
     private void sendCurrentText() {
-        if (!mFallbackMode) {
+        if (!mDummyMode) {
             return;
         }
 
@@ -950,33 +870,9 @@ public class BaseInputConnection implements InputConnection {
     }
 
     /**
-     * Default implementation which invokes {@link View#performReceiveContent} on the target
-     * view if the view {@link View#getReceiveContentMimeTypes allows} content insertion;
-     * otherwise returns false without any side effects.
+     * The default implementation does nothing.
      */
     public boolean commitContent(InputContentInfo inputContentInfo, int flags, Bundle opts) {
-        ClipDescription description = inputContentInfo.getDescription();
-        if (mTargetView.getReceiveContentMimeTypes() == null) {
-            if (DEBUG) {
-                Log.d(TAG, "Can't insert content from IME: content=" + description);
-            }
-            return false;
-        }
-        if ((flags & InputConnection.INPUT_CONTENT_GRANT_READ_URI_PERMISSION) != 0) {
-            try {
-                inputContentInfo.requestPermission();
-            } catch (Exception e) {
-                Log.w(TAG, "Can't insert content from IME; requestPermission() failed", e);
-                return false;
-            }
-        }
-        final ClipData clip = new ClipData(inputContentInfo.getDescription(),
-                new ClipData.Item(inputContentInfo.getContentUri()));
-        final ContentInfo payload = new ContentInfo.Builder(clip, SOURCE_INPUT_METHOD)
-                .setLinkUri(inputContentInfo.getLinkUri())
-                .setExtras(opts)
-                .setInputContentInfo(inputContentInfo)
-                .build();
-        return mTargetView.performReceiveContent(payload) == null;
+        return false;
     }
 }

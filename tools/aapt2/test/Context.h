@@ -200,11 +200,10 @@ class StaticSymbolSourceBuilder {
 
    private:
     std::unique_ptr<SymbolTable::Symbol> CloneSymbol(SymbolTable::Symbol* sym) {
-      CloningValueTransformer cloner(nullptr);
       std::unique_ptr<SymbolTable::Symbol> clone = util::make_unique<SymbolTable::Symbol>();
       clone->id = sym->id;
       if (sym->attribute) {
-        clone->attribute = std::unique_ptr<Attribute>(sym->attribute->Transform(cloner));
+        clone->attribute = std::unique_ptr<Attribute>(sym->attribute->Clone(nullptr));
       }
       clone->is_public = sym->is_public;
       return clone;

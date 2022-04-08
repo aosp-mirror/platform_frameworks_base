@@ -61,17 +61,12 @@ import android.widget.PopupWindow;
 import android.widget.TextView;
 
 import com.android.internal.R;
-import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.Preconditions;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Comparator;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -98,6 +93,7 @@ public final class FloatingToolbar {
     private final Rect mPreviousContentRect = new Rect();
 
     private Menu mMenu;
+    private List<MenuItem> mShowingMenuItems = new ArrayList<>();
     private MenuItem.OnMenuItemClickListener mMenuItemClickListener = NO_OP_MENUITEM_CLICK_LISTENER;
 
     private int mSuggestedWidth;
@@ -265,24 +261,27 @@ public final class FloatingToolbar {
 
     /**
      * If this is set to true, the action mode view will dismiss itself on touch events outside of
-     * its window. The setting takes effect immediately.
+     * its window. If the toolbar is already showing, it will be re-shown so that this setting takes
+     * effect immediately.
      *
      * @param outsideTouchable whether or not this action mode is "outside touchable"
      * @param onDismiss optional. Sets a callback for when this action mode popup dismisses itself
      */
     public void setOutsideTouchable(
             boolean outsideTouchable, @Nullable PopupWindow.OnDismissListener onDismiss) {
-        mPopup.setOutsideTouchable(outsideTouchable, onDismiss);
+        if (mPopup.setOutsideTouchable(outsideTouchable, onDismiss) && isShowing()) {
+            dismiss();
+            doShow();
+        }
     }
 
     private void doShow() {
         List<MenuItem> menuItems = getVisibleAndEnabledMenuItems(mMenu);
         menuItems.sort(mMenuItemComparator);
-        if (mPopup.isLayoutRequired(menuItems) || mWidthChanged) {
+        if (!isCurrentlyShowing(menuItems) || mWidthChanged) {
             mPopup.dismiss();
             mPopup.layoutMenuItems(menuItems, mMenuItemClickListener, mSuggestedWidth);
-        } else {
-            mPopup.updateMenuItems(menuItems, mMenuItemClickListener);
+            mShowingMenuItems = menuItems;
         }
         if (!mPopup.isShowing()) {
             mPopup.show(mContentRect);
@@ -294,10 +293,33 @@ public final class FloatingToolbar {
     }
 
     /**
+     * Returns true if this floating toolbar is currently showing the specified menu items.
+     */
+    private boolean isCurrentlyShowing(List<MenuItem> menuItems) {
+        if (mShowingMenuItems == null || menuItems.size() != mShowingMenuItems.size()) {
+            return false;
+        }
+
+        final int size = menuItems.size();
+        for (int i = 0; i < size; i++) {
+            final MenuItem menuItem = menuItems.get(i);
+            final MenuItem showingItem = mShowingMenuItems.get(i);
+            if (menuItem.getItemId() != showingItem.getItemId()
+                    || !TextUtils.equals(menuItem.getTitle(), showingItem.getTitle())
+                    || !Objects.equals(menuItem.getIcon(), showingItem.getIcon())
+                    || menuItem.getGroupId() != showingItem.getGroupId()) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
      * Returns the visible and enabled menu items in the specified menu.
      * This method is recursive.
      */
-    private static List<MenuItem> getVisibleAndEnabledMenuItems(Menu menu) {
+    private List<MenuItem> getVisibleAndEnabledMenuItems(Menu menu) {
         List<MenuItem> menuItems = new ArrayList<>();
         for (int i = 0; (menu != null) && (i < menu.size()); i++) {
             MenuItem menuItem = menu.getItem(i);
@@ -409,25 +431,17 @@ public final class FloatingToolbar {
         private Size mOverflowPanelSize;  // Should be null when there is no overflow.
         private Size mMainPanelSize;
 
-        /* Menu items and click listeners */
-        private final Map<MenuItemRepr, MenuItem> mMenuItems = new LinkedHashMap<>();
+        /* Item click listeners */
         private MenuItem.OnMenuItemClickListener mOnMenuItemClickListener;
         private final View.OnClickListener mMenuItemButtonOnClickListener =
                 new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        if (mOnMenuItemClickListener == null) {
-                            return;
+                        if (v.getTag() instanceof MenuItem) {
+                            if (mOnMenuItemClickListener != null) {
+                                mOnMenuItemClickListener.onMenuItemClick((MenuItem) v.getTag());
+                            }
                         }
-                        final Object tag = v.getTag();
-                        if (!(tag instanceof MenuItemRepr)) {
-                            return;
-                        }
-                        final MenuItem menuItem = mMenuItems.get((MenuItemRepr) tag);
-                        if (menuItem == null) {
-                            return;
-                        }
-                        mOnMenuItemClickListener.onMenuItemClick(menuItem);
                     }
                 };
 
@@ -516,6 +530,7 @@ public final class FloatingToolbar {
 
         /**
          * Makes this toolbar "outside touchable" and sets the onDismissListener.
+         * This will take effect the next time the toolbar is re-shown.
          *
          * @param outsideTouchable if true, the popup will be made "outside touchable" and
          *      "non focusable". The reverse will happen if false.
@@ -533,7 +548,6 @@ public final class FloatingToolbar {
             if (mPopupWindow.isOutsideTouchable() ^ outsideTouchable) {
                 mPopupWindow.setOutsideTouchable(outsideTouchable);
                 mPopupWindow.setFocusable(!outsideTouchable);
-                mPopupWindow.update();
                 ret = true;
             }
             mPopupWindow.setOnDismissListener(onDismiss);
@@ -548,37 +562,15 @@ public final class FloatingToolbar {
                 List<MenuItem> menuItems,
                 MenuItem.OnMenuItemClickListener menuItemClickListener,
                 int suggestedWidth) {
+            mOnMenuItemClickListener = menuItemClickListener;
             cancelOverflowAnimations();
             clearPanels();
-            updateMenuItems(menuItems, menuItemClickListener);
             menuItems = layoutMainPanelItems(menuItems, getAdjustedToolbarWidth(suggestedWidth));
             if (!menuItems.isEmpty()) {
                 // Add remaining items to the overflow.
                 layoutOverflowPanelItems(menuItems);
             }
             updatePopupSize();
-        }
-
-        /**
-         * Updates the popup's menu items without rebuilding the widget.
-         * Use in place of layoutMenuItems() when the popup's views need not be reconstructed.
-         *
-         * @see isLayoutRequired(List<MenuItem>)
-         */
-        public void updateMenuItems(
-                List<MenuItem> menuItems, MenuItem.OnMenuItemClickListener menuItemClickListener) {
-            mMenuItems.clear();
-            for (MenuItem menuItem : menuItems) {
-                mMenuItems.put(MenuItemRepr.of(menuItem), menuItem);
-            }
-            mOnMenuItemClickListener = menuItemClickListener;
-        }
-
-        /**
-         * Returns true if this popup needs a relayout to properly render the specified menu items.
-         */
-        public boolean isLayoutRequired(List<MenuItem> menuItems) {
-            return !MenuItemRepr.reprEquals(menuItems, mMenuItems.values());
         }
 
         /**
@@ -1386,7 +1378,7 @@ public final class FloatingToolbar {
         }
 
         private void setButtonTagAndClickListener(View menuItemButton, MenuItem menuItem) {
-            menuItemButton.setTag(MenuItemRepr.of(menuItem));
+            menuItemButton.setTag(menuItem);
             menuItemButton.setOnClickListener(mMenuItemButtonOnClickListener);
         }
 
@@ -1664,85 +1656,6 @@ public final class FloatingToolbar {
                 }
                 return false;
             }
-        }
-    }
-
-    /**
-     * Represents the identity of a MenuItem that is rendered in a FloatingToolbarPopup.
-     */
-    @VisibleForTesting
-    public static final class MenuItemRepr {
-
-        public final int itemId;
-        public final int groupId;
-        @Nullable public final String title;
-        @Nullable private final Drawable mIcon;
-
-        private MenuItemRepr(
-                int itemId, int groupId, @Nullable CharSequence title, @Nullable Drawable icon) {
-            this.itemId = itemId;
-            this.groupId = groupId;
-            this.title = (title == null) ? null : title.toString();
-            mIcon = icon;
-        }
-
-        /**
-         * Creates an instance of MenuItemRepr for the specified menu item.
-         */
-        public static MenuItemRepr of(MenuItem menuItem) {
-            return new MenuItemRepr(
-                    menuItem.getItemId(),
-                    menuItem.getGroupId(),
-                    menuItem.getTitle(),
-                    menuItem.getIcon());
-        }
-
-        /**
-         * Returns this object's hashcode.
-         */
-        @Override
-        public int hashCode() {
-            return Objects.hash(itemId, groupId, title, mIcon);
-        }
-
-        /**
-         * Returns true if this object is the same as the specified object.
-         */
-        @Override
-        public boolean equals(Object o) {
-            if (o == this) {
-                return true;
-            }
-            if (!(o instanceof MenuItemRepr)) {
-                return false;
-            }
-            final MenuItemRepr other = (MenuItemRepr) o;
-            return itemId == other.itemId
-                    && groupId == other.groupId
-                    && TextUtils.equals(title, other.title)
-                    // Many Drawables (icons) do not implement equals(). Using equals() here instead
-                    // of reference comparisons in case a Drawable subclass implements equals().
-                    && Objects.equals(mIcon, other.mIcon);
-        }
-
-        /**
-         * Returns true if the two menu item collections are the same based on MenuItemRepr.
-         */
-        public static boolean reprEquals(
-                Collection<MenuItem> menuItems1, Collection<MenuItem> menuItems2) {
-            if (menuItems1.size() != menuItems2.size()) {
-                return false;
-            }
-
-            final Iterator<MenuItem> menuItems2Iter = menuItems2.iterator();
-            for (MenuItem menuItem1 : menuItems1) {
-                final MenuItem menuItem2 = menuItems2Iter.next();
-                if (!MenuItemRepr.of(menuItem1).equals(MenuItemRepr.of(menuItem2))) {
-                    return false;
-                }
-            }
-
-            return true;
         }
     }
 

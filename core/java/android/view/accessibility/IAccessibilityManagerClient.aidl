@@ -29,6 +29,4 @@ oneway interface IAccessibilityManagerClient {
     void notifyServicesStateChanged(long updatedUiTimeout);
 
     void setRelevantEventTypes(int eventTypes);
-
-    void setFocusAppearance(int strokeWidth, int color);
 }

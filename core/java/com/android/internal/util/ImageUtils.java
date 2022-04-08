@@ -201,8 +201,7 @@ public class ImageUtils {
 
         try (ContentProviderClient client = resolver.acquireContentProviderClient(uri)) {
             final Bundle opts = new Bundle();
-            opts.putParcelable(ContentResolver.EXTRA_SIZE,
-                    new Point(size.getWidth(), size.getHeight()));
+            opts.putParcelable(ContentResolver.EXTRA_SIZE, Point.convert(size));
 
             return ImageDecoder.decodeBitmap(ImageDecoder.createSource(() -> {
                 return client.openTypedAssetFile(uri, "image/*", opts, null);

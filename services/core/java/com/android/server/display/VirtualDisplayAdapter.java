@@ -19,7 +19,6 @@ package com.android.server.display;
 import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR;
 import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_CAN_SHOW_WITH_INSECURE_KEYGUARD;
 import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_DESTROY_CONTENT_ON_REMOVAL;
-import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_OWN_DISPLAY_GROUP;
 import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_PRESENTATION;
 import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_PUBLIC;
 import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_ROTATES_WITH_CONTENT;
@@ -28,7 +27,6 @@ import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_SHOUL
 import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_SUPPORTS_TOUCH;
 import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_TRUSTED;
 
-import static com.android.server.display.DisplayDeviceInfo.FLAG_OWN_DISPLAY_GROUP;
 import static com.android.server.display.DisplayDeviceInfo.FLAG_TRUSTED;
 
 import android.content.Context;
@@ -236,7 +234,7 @@ public class VirtualDisplayAdapter extends DisplayAdapter {
                 int ownerUid, String ownerPackageName, Surface surface, int flags,
                 Callback callback, String uniqueId, int uniqueIndex,
                 VirtualDisplayConfig virtualDisplayConfig) {
-            super(VirtualDisplayAdapter.this, displayToken, uniqueId, getContext());
+            super(VirtualDisplayAdapter.this, displayToken, uniqueId);
             mAppToken = appToken;
             mOwnerUid = ownerUid;
             mOwnerPackageName = ownerPackageName;
@@ -293,8 +291,7 @@ public class VirtualDisplayAdapter extends DisplayAdapter {
         }
 
         @Override
-        public Runnable requestDisplayStateLocked(int state, float brightnessState,
-                float sdrBrightnessState) {
+        public Runnable requestDisplayStateLocked(int state, float brightnessState) {
             if (state != mDisplayState) {
                 mDisplayState = state;
                 if (state == Display.STATE_OFF) {
@@ -389,10 +386,6 @@ public class VirtualDisplayAdapter extends DisplayAdapter {
                     mInfo.flags &= ~DisplayDeviceInfo.FLAG_NEVER_BLANK;
                 } else {
                     mInfo.flags |= DisplayDeviceInfo.FLAG_OWN_CONTENT_ONLY;
-
-                    if ((mFlags & VIRTUAL_DISPLAY_FLAG_OWN_DISPLAY_GROUP) != 0) {
-                        mInfo.flags |= FLAG_OWN_DISPLAY_GROUP;
-                    }
                 }
 
                 if ((mFlags & VIRTUAL_DISPLAY_FLAG_SECURE) != 0) {

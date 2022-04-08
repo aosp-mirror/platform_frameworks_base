@@ -20,9 +20,7 @@ import static android.os.UserHandle.USER_SYSTEM;
 import static com.android.server.devicepolicy.DpmTestUtils.writeInputStreamToFile;
 import static com.android.server.pm.PackageManagerService.PLATFORM_PACKAGE_NAME;
 
-import static com.google.common.truth.Truth.assertThat;
-import static com.google.common.truth.Truth.assertWithMessage;
-
+import static org.junit.Assert.assertArrayEquals;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
@@ -34,7 +32,6 @@ import static org.mockito.Mockito.when;
 
 import android.app.admin.DevicePolicyManager;
 import android.app.admin.DevicePolicyManagerInternal;
-import android.app.admin.DevicePolicyManagerLiteInternal;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -46,15 +43,10 @@ import android.platform.test.annotations.Presubmit;
 import android.provider.Settings;
 
 import androidx.test.filters.SmallTest;
-import androidx.test.runner.AndroidJUnit4;
 
 import com.android.frameworks.servicestests.R;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
-
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
 
 import java.io.File;
 import java.util.HashMap;
@@ -62,7 +54,6 @@ import java.util.Map;
 import java.util.Set;
 
 @Presubmit
-@RunWith(AndroidJUnit4.class)
 public class DevicePolicyManagerServiceMigrationTest extends DpmTestBase {
 
     private static final String USER_TYPE_EMPTY = "";
@@ -72,8 +63,9 @@ public class DevicePolicyManagerServiceMigrationTest extends DpmTestBase {
 
     private DpmMockContext mContext;
 
-    @Before
-    public void setUp() throws Exception {
+    @Override
+    protected void setUp() throws Exception {
+        super.setUp();
 
         mContext = getContext();
 
@@ -85,7 +77,6 @@ public class DevicePolicyManagerServiceMigrationTest extends DpmTestBase {
                 .thenReturn(true);
     }
 
-    @Test
     public void testMigration() throws Exception {
         final File user10dir = getServices().addUser(10, 0, USER_TYPE_EMPTY);
         final File user11dir = getServices().addUser(11, 0,
@@ -159,7 +150,6 @@ public class DevicePolicyManagerServiceMigrationTest extends DpmTestBase {
 
         final long ident = mContext.binder.clearCallingIdentity();
         try {
-            LocalServices.removeServiceForTest(DevicePolicyManagerLiteInternal.class);
             LocalServices.removeServiceForTest(DevicePolicyManagerInternal.class);
 
             dpms = new DevicePolicyManagerServiceTestable(getServices(), mContext);
@@ -170,19 +160,19 @@ public class DevicePolicyManagerServiceMigrationTest extends DpmTestBase {
             mContext.binder.restoreCallingIdentity(ident);
         }
 
-        assertThat(dpms.mOwners.hasDeviceOwner()).isTrue();
-        assertThat(dpms.mOwners.hasProfileOwner(USER_SYSTEM)).isFalse();
-        assertThat(dpms.mOwners.hasProfileOwner(10)).isTrue();
-        assertThat(dpms.mOwners.hasProfileOwner(11)).isTrue();
-        assertThat(dpms.mOwners.hasProfileOwner(12)).isFalse();
+        assertTrue(dpms.mOwners.hasDeviceOwner());
+        assertFalse(dpms.mOwners.hasProfileOwner(USER_SYSTEM));
+        assertTrue(dpms.mOwners.hasProfileOwner(10));
+        assertTrue(dpms.mOwners.hasProfileOwner(11));
+        assertFalse(dpms.mOwners.hasProfileOwner(12));
 
         // Now all information should be migrated.
-        assertThat(dpms.mOwners.getDeviceOwnerUserRestrictionsNeedsMigration()).isFalse();
-        assertThat(dpms.mOwners.getProfileOwnerUserRestrictionsNeedsMigration(USER_SYSTEM))
-            .isFalse();
-        assertThat(dpms.mOwners.getProfileOwnerUserRestrictionsNeedsMigration(10)).isFalse();
-        assertThat(dpms.mOwners.getProfileOwnerUserRestrictionsNeedsMigration(11)).isFalse();
-        assertThat(dpms.mOwners.getProfileOwnerUserRestrictionsNeedsMigration(12)).isFalse();
+        assertFalse(dpms.mOwners.getDeviceOwnerUserRestrictionsNeedsMigration());
+        assertFalse(dpms.mOwners.getProfileOwnerUserRestrictionsNeedsMigration(
+                USER_SYSTEM));
+        assertFalse(dpms.mOwners.getProfileOwnerUserRestrictionsNeedsMigration(10));
+        assertFalse(dpms.mOwners.getProfileOwnerUserRestrictionsNeedsMigration(11));
+        assertFalse(dpms.mOwners.getProfileOwnerUserRestrictionsNeedsMigration(12));
 
         // Check the new base restrictions.
         DpmTestUtils.assertRestrictions(
@@ -231,7 +221,6 @@ public class DevicePolicyManagerServiceMigrationTest extends DpmTestBase {
                 dpms.getProfileOwnerAdminLocked(11).ensureUserRestrictions());
     }
 
-    @Test
     public void testMigration2_profileOwnerOnUser0() throws Exception {
         setUpPackageManagerForAdmin(admin2, DpmMockContext.CALLER_SYSTEM_USER_UID);
 
@@ -273,7 +262,6 @@ public class DevicePolicyManagerServiceMigrationTest extends DpmTestBase {
 
         final long ident = mContext.binder.clearCallingIdentity();
         try {
-            LocalServices.removeServiceForTest(DevicePolicyManagerLiteInternal.class);
             LocalServices.removeServiceForTest(DevicePolicyManagerInternal.class);
 
             dpms = new DevicePolicyManagerServiceTestable(getServices(), mContext);
@@ -283,13 +271,13 @@ public class DevicePolicyManagerServiceMigrationTest extends DpmTestBase {
         } finally {
             mContext.binder.restoreCallingIdentity(ident);
         }
-        assertThat(dpms.mOwners.hasDeviceOwner()).isFalse();
-        assertThat(dpms.mOwners.hasProfileOwner(USER_SYSTEM)).isTrue();
+        assertFalse(dpms.mOwners.hasDeviceOwner());
+        assertTrue(dpms.mOwners.hasProfileOwner(USER_SYSTEM));
 
         // Now all information should be migrated.
-        assertThat(dpms.mOwners.getDeviceOwnerUserRestrictionsNeedsMigration()).isFalse();
-        assertThat(dpms.mOwners.getProfileOwnerUserRestrictionsNeedsMigration(USER_SYSTEM))
-            .isFalse();
+        assertFalse(dpms.mOwners.getDeviceOwnerUserRestrictionsNeedsMigration());
+        assertFalse(dpms.mOwners.getProfileOwnerUserRestrictionsNeedsMigration(
+                USER_SYSTEM));
 
         // Check the new base restrictions.
         DpmTestUtils.assertRestrictions(
@@ -309,7 +297,6 @@ public class DevicePolicyManagerServiceMigrationTest extends DpmTestBase {
     }
 
     // Test setting default restrictions for managed profile.
-    @Test
     public void testMigration3_managedProfileOwner() throws Exception {
         // Create a managed profile user.
         final File user10dir = getServices().addUser(10, 0,
@@ -342,7 +329,6 @@ public class DevicePolicyManagerServiceMigrationTest extends DpmTestBase {
         // (Need clearCallingIdentity() to pass permission checks.)
         final long ident = mContext.binder.clearCallingIdentity();
         try {
-            LocalServices.removeServiceForTest(DevicePolicyManagerLiteInternal.class);
             LocalServices.removeServiceForTest(DevicePolicyManagerInternal.class);
 
             dpms = new DevicePolicyManagerServiceTestable(getServices(), mContext);
@@ -353,8 +339,8 @@ public class DevicePolicyManagerServiceMigrationTest extends DpmTestBase {
             mContext.binder.restoreCallingIdentity(ident);
         }
 
-        assertThat(dpms.mOwners.hasDeviceOwner()).isFalse();
-        assertThat(dpms.mOwners.hasProfileOwner(10)).isTrue();
+        assertFalse(dpms.mOwners.hasDeviceOwner());
+        assertTrue(dpms.mOwners.hasProfileOwner(10));
 
         // Check that default restrictions were applied.
         DpmTestUtils.assertRestrictions(
@@ -366,12 +352,11 @@ public class DevicePolicyManagerServiceMigrationTest extends DpmTestBase {
 
         final Set<String> alreadySet =
                 dpms.getProfileOwnerAdminLocked(10).defaultEnabledRestrictionsAlreadySet;
-        assertThat(alreadySet).hasSize(1);
-        assertThat(alreadySet.contains(UserManager.DISALLOW_BLUETOOTH_SHARING)).isTrue();
+        assertEquals(alreadySet.size(), 1);
+        assertTrue(alreadySet.contains(UserManager.DISALLOW_BLUETOOTH_SHARING));
     }
 
     @SmallTest
-    @Test
     public void testCompMigrationUnAffiliated_skipped() throws Exception {
         prepareAdmin1AsDo();
         prepareAdminAnotherPackageAsPo(COPE_PROFILE_USER_ID);
@@ -379,11 +364,10 @@ public class DevicePolicyManagerServiceMigrationTest extends DpmTestBase {
         final DevicePolicyManagerServiceTestable dpms = bootDpmsUp();
 
         // DO should still be DO since no migration should happen.
-        assertThat(dpms.mOwners.hasDeviceOwner()).isTrue();
+        assertTrue(dpms.mOwners.hasDeviceOwner());
     }
 
     @SmallTest
-    @Test
     public void testCompMigrationAffiliated() throws Exception {
         prepareAdmin1AsDo();
         prepareAdmin1AsPo(COPE_PROFILE_USER_ID, Build.VERSION_CODES.R);
@@ -394,54 +378,48 @@ public class DevicePolicyManagerServiceMigrationTest extends DpmTestBase {
         final DevicePolicyManagerServiceTestable dpms = bootDpmsUp();
 
         // DO should cease to be DO.
-        assertThat(dpms.mOwners.hasDeviceOwner()).isFalse();
+        assertFalse(dpms.mOwners.hasDeviceOwner());
 
         final DpmMockContext poContext = new DpmMockContext(getServices(), mRealTestContext);
         poContext.binder.callingUid = UserHandle.getUid(COPE_PROFILE_USER_ID, COPE_ADMIN1_APP_ID);
 
         runAsCaller(poContext, dpms, dpm -> {
-            assertWithMessage("Password history policy wasn't migrated to PO parent instance")
-                    .that(dpm.getParentProfileInstance(admin1).getPasswordHistoryLength(admin1))
-                    .isEqualTo(33);
-            assertWithMessage("Password history policy was put into non-parent PO instance")
-                    .that(dpm.getPasswordHistoryLength(admin1)).isEqualTo(0);
-            assertWithMessage("Screen capture restriction wasn't migrated to PO parent instance")
-                    .that(dpm.getParentProfileInstance(admin1).getScreenCaptureDisabled(admin1))
-                    .isTrue();
+            assertEquals("Password history policy wasn't migrated to PO parent instance",
+                    33, dpm.getParentProfileInstance(admin1).getPasswordHistoryLength(admin1));
+            assertEquals("Password history policy was put into non-parent PO instance",
+                    0, dpm.getPasswordHistoryLength(admin1));
+            assertTrue("Screen capture restriction wasn't migrated to PO parent instance",
+                    dpm.getParentProfileInstance(admin1).getScreenCaptureDisabled(admin1));
 
-            assertWithMessage("Accounts with management disabled weren't migrated to PO parent")
-                    .that(dpm.getParentProfileInstance(admin1)
-                            .getAccountTypesWithManagementDisabled()).asList()
-                    .containsExactly("com.google-primary");
+            assertArrayEquals("Accounts with management disabled weren't migrated to PO parent",
+                    new String[] {"com.google-primary"},
+                    dpm.getParentProfileInstance(admin1).getAccountTypesWithManagementDisabled());
+            assertArrayEquals("Accounts with management disabled for profile were lost",
+                    new String[] {"com.google-profile"},
+                    dpm.getAccountTypesWithManagementDisabled());
 
-            assertWithMessage("Accounts with management disabled for profile were lost")
-                    .that(dpm.getAccountTypesWithManagementDisabled()).asList()
-                    .containsExactly("com.google-profile");
+            assertTrue("User restriction wasn't migrated to PO parent instance",
+                    dpm.getParentProfileInstance(admin1).getUserRestrictions(admin1)
+                            .containsKey(UserManager.DISALLOW_BLUETOOTH));
+            assertFalse("User restriction was put into non-parent PO instance",
+                    dpm.getUserRestrictions(admin1).containsKey(UserManager.DISALLOW_BLUETOOTH));
 
-            assertWithMessage("User restriction wasn't migrated to PO parent instance")
-                    .that(dpm.getParentProfileInstance(admin1).getUserRestrictions(admin1).keySet())
-                    .contains(UserManager.DISALLOW_BLUETOOTH);
-
-            assertWithMessage("User restriction was put into non-parent PO instance").that(
-                    dpm.getUserRestrictions(admin1).keySet())
-                    .doesNotContain(UserManager.DISALLOW_BLUETOOTH);
-
-            assertWithMessage("User restriction wasn't migrated to PO parent instance")
-                    .that(dpms.getProfileOwnerAdminLocked(COPE_PROFILE_USER_ID)
-                            .getParentActiveAdmin().getEffectiveRestrictions().keySet())
-                    .contains(UserManager.DISALLOW_CONFIG_DATE_TIME);
-            assertWithMessage("User restriction was put into non-parent PO instance")
-                    .that(dpms.getProfileOwnerAdminLocked(COPE_PROFILE_USER_ID)
-                            .getEffectiveRestrictions().keySet())
-                    .doesNotContain(UserManager.DISALLOW_CONFIG_DATE_TIME);
-            assertWithMessage("Personal apps suspension wasn't migrated")
-                    .that(dpm.getPersonalAppsSuspendedReasons(admin1))
-                    .isEqualTo(DevicePolicyManager.PERSONAL_APPS_NOT_SUSPENDED);
+            assertTrue("User restriction wasn't migrated to PO parent instance",
+                    dpms.getProfileOwnerAdminLocked(COPE_PROFILE_USER_ID)
+                            .getParentActiveAdmin()
+                            .getEffectiveRestrictions()
+                            .containsKey(UserManager.DISALLOW_CONFIG_DATE_TIME));
+            assertFalse("User restriction was put into non-parent PO instance",
+                    dpms.getProfileOwnerAdminLocked(COPE_PROFILE_USER_ID)
+                            .getEffectiveRestrictions()
+                            .containsKey(UserManager.DISALLOW_CONFIG_DATE_TIME));
+            assertEquals("Personal apps suspension wasn't migrated",
+                    DevicePolicyManager.PERSONAL_APPS_NOT_SUSPENDED,
+                    dpm.getPersonalAppsSuspendedReasons(admin1));
         });
     }
 
     @SmallTest
-    @Test
     public void testCompMigration_keepSuspendedAppsWhenDpcIsRPlus() throws Exception {
         prepareAdmin1AsDo();
         prepareAdmin1AsPo(COPE_PROFILE_USER_ID, Build.VERSION_CODES.R);
@@ -467,14 +445,13 @@ public class DevicePolicyManagerServiceMigrationTest extends DpmTestBase {
         poContext.binder.callingUid = UserHandle.getUid(COPE_PROFILE_USER_ID, COPE_ADMIN1_APP_ID);
 
         runAsCaller(poContext, dpms, dpm -> {
-            assertWithMessage("Personal apps suspension wasn't migrated")
-                    .that(dpm.getPersonalAppsSuspendedReasons(admin1))
-                    .isEqualTo(DevicePolicyManager.PERSONAL_APPS_SUSPENDED_EXPLICITLY);
+            assertEquals("Personal apps suspension wasn't migrated",
+                    DevicePolicyManager.PERSONAL_APPS_SUSPENDED_EXPLICITLY,
+                    dpm.getPersonalAppsSuspendedReasons(admin1));
         });
     }
 
     @SmallTest
-    @Test
     public void testCompMigration_unsuspendAppsWhenDpcNotRPlus() throws Exception {
         prepareAdmin1AsDo();
         prepareAdmin1AsPo(COPE_PROFILE_USER_ID, Build.VERSION_CODES.Q);
@@ -493,9 +470,9 @@ public class DevicePolicyManagerServiceMigrationTest extends DpmTestBase {
         poContext.binder.callingUid = UserHandle.getUid(COPE_PROFILE_USER_ID, COPE_ADMIN1_APP_ID);
 
         runAsCaller(poContext, dpms, dpm -> {
-            assertWithMessage("Personal apps weren't unsuspended")
-                    .that(dpm.getPersonalAppsSuspendedReasons(admin1))
-                    .isEqualTo(DevicePolicyManager.PERSONAL_APPS_NOT_SUSPENDED);
+            assertEquals("Personal apps weren't unsuspended",
+                    DevicePolicyManager.PERSONAL_APPS_NOT_SUSPENDED,
+                    dpm.getPersonalAppsSuspendedReasons(admin1));
         });
     }
 
@@ -503,7 +480,6 @@ public class DevicePolicyManagerServiceMigrationTest extends DpmTestBase {
         DevicePolicyManagerServiceTestable dpms;
         final long ident = mContext.binder.clearCallingIdentity();
         try {
-            LocalServices.removeServiceForTest(DevicePolicyManagerLiteInternal.class);
             LocalServices.removeServiceForTest(DevicePolicyManagerInternal.class);
 
             dpms = new DevicePolicyManagerServiceTestable(getServices(), mContext);

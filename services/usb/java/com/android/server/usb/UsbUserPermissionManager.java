@@ -25,12 +25,12 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
-import android.hardware.SensorPrivacyManager.Sensors;
-import android.hardware.SensorPrivacyManagerInternal;
 import android.hardware.usb.AccessoryFilter;
 import android.hardware.usb.DeviceFilter;
 import android.hardware.usb.UsbAccessory;
+import android.hardware.usb.UsbConstants;
 import android.hardware.usb.UsbDevice;
+import android.hardware.usb.UsbInterface;
 import android.hardware.usb.UsbManager;
 import android.os.AsyncTask;
 import android.os.Binder;
@@ -47,14 +47,12 @@ import android.util.ArrayMap;
 import android.util.AtomicFile;
 import android.util.Slog;
 import android.util.SparseBooleanArray;
-import android.util.TypedXmlPullParser;
-import android.util.TypedXmlSerializer;
 import android.util.Xml;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.XmlUtils;
 import com.android.internal.util.dump.DualDumpOutputStream;
-import com.android.server.LocalServices;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -64,6 +62,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 
 /**
  * UsbUserPermissionManager manages usb device or accessory access permissions.
@@ -109,20 +108,19 @@ class UsbUserPermissionManager {
      */
     @GuardedBy("mLock")
     private boolean mIsCopyPermissionsScheduled;
-    private final SensorPrivacyManagerInternal mSensorPrivacyMgrInternal;
 
     UsbUserPermissionManager(@NonNull Context context,
             @NonNull UsbUserSettingsManager usbUserSettingsManager) {
         mContext = context;
         mUser = context.getUser();
         mUsbUserSettingsManager = usbUserSettingsManager;
-        mSensorPrivacyMgrInternal = LocalServices.getService(SensorPrivacyManagerInternal.class);
         mDisablePermissionDialogs = context.getResources().getBoolean(
                 com.android.internal.R.bool.config_disableUsbPermissionDialogs);
 
         mPermissionsFile = new AtomicFile(new File(
                 Environment.getUserSystemDirectory(mUser.getIdentifier()),
                 "usb_permissions.xml"), "usb-permissions");
+
         synchronized (mLock) {
             readPermissionsLocked();
         }
@@ -195,26 +193,10 @@ class UsbUserPermissionManager {
      */
     boolean hasPermission(@NonNull UsbDevice device, @NonNull String packageName, int pid,
             int uid) {
-        if (device.getHasVideoCapture()) {
-            boolean isCameraPrivacyEnabled = mSensorPrivacyMgrInternal.isSensorPrivacyEnabled(
-                    UserHandle.getUserId(uid), Sensors.CAMERA);
-            if (DEBUG) {
-                Slog.d(TAG, "isCameraPrivacyEnabled: " + isCameraPrivacyEnabled);
-            }
-            if (isCameraPrivacyEnabled || !isCameraPermissionGranted(packageName, pid, uid)) {
+        if (isCameraDevicePresent(device)) {
+            if (!isCameraPermissionGranted(packageName, pid, uid)) {
                 return false;
             }
-        }
-        // Only check for microphone privacy and not RECORD_AUDIO permission, because access to usb
-        // camera device with audio recording capabilities may still be granted with a warning
-        if (device.getHasAudioCapture() && mSensorPrivacyMgrInternal.isSensorPrivacyEnabled(
-                UserHandle.getUserId(uid), Sensors.MICROPHONE)) {
-            if (DEBUG) {
-                Slog.d(TAG,
-                        "Access to device with audio recording capabilities denied because "
-                                + "microphone privacy is enabled.");
-            }
-            return false;
         }
         synchronized (mLock) {
             if (uid == Process.SYSTEM_UID || mDisablePermissionDialogs) {
@@ -373,7 +355,8 @@ class UsbUserPermissionManager {
         mAccessoryPersistentPermissionMap.clear();
 
         try (FileInputStream in = mPermissionsFile.openRead()) {
-            TypedXmlPullParser parser = Xml.resolvePullParser(in);
+            XmlPullParser parser = Xml.newPullParser();
+            parser.setInput(in, StandardCharsets.UTF_8.name());
 
             XmlUtils.nextElement(parser);
             while (parser.getEventType() != XmlPullParser.END_DOCUMENT) {
@@ -457,7 +440,8 @@ class UsbUserPermissionManager {
                 FileOutputStream out = null;
                 try {
                     out = mPermissionsFile.startWrite();
-                    TypedXmlSerializer serializer = Xml.resolveSerializer(out);
+                    FastXmlSerializer serializer = new FastXmlSerializer();
+                    serializer.setOutput(out, StandardCharsets.UTF_8.name());
                     serializer.startDocument(null, true);
                     serializer.startTag(null, "permissions");
 
@@ -521,23 +505,22 @@ class UsbUserPermissionManager {
             int uid,
             @NonNull Context userContext,
             @NonNull PendingIntent pi) {
-        final long identity = Binder.clearCallingIdentity();
-        try {
-            Intent intent = new Intent();
-            if (device != null) {
-                intent.putExtra(UsbManager.EXTRA_DEVICE, device);
-            } else {
-                intent.putExtra(UsbManager.EXTRA_ACCESSORY, accessory);
-            }
-            intent.putExtra(Intent.EXTRA_INTENT, pi);
-            intent.putExtra(Intent.EXTRA_UID, uid);
-            intent.putExtra(UsbManager.EXTRA_CAN_BE_DEFAULT, canBeDefault);
-            intent.putExtra(UsbManager.EXTRA_PACKAGE, packageName);
-            intent.setComponent(
-                    ComponentName.unflattenFromString(userContext.getResources().getString(
-                            com.android.internal.R.string.config_usbPermissionActivity)));
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        long identity = Binder.clearCallingIdentity();
+        Intent intent = new Intent();
+        if (device != null) {
+            intent.putExtra(UsbManager.EXTRA_DEVICE, device);
+        } else {
+            intent.putExtra(UsbManager.EXTRA_ACCESSORY, accessory);
+        }
+        intent.putExtra(Intent.EXTRA_INTENT, pi);
+        intent.putExtra(Intent.EXTRA_UID, uid);
+        intent.putExtra(UsbManager.EXTRA_CAN_BE_DEFAULT, canBeDefault);
+        intent.putExtra(UsbManager.EXTRA_PACKAGE, packageName);
+        intent.setComponent(ComponentName.unflattenFromString(userContext.getResources().getString(
+                com.android.internal.R.string.config_usbPermissionActivity)));
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 
+        try {
             userContext.startActivityAsUser(intent, mUser);
         } catch (ActivityNotFoundException e) {
             Slog.e(TAG, "unable to start UsbPermissionActivity");
@@ -714,10 +697,7 @@ class UsbUserPermissionManager {
             }
             return;
         }
-        // If the app doesn't have camera permission do not request permission to the USB device.
-        // Note that if the USB camera also has a microphone, a warning will be shown to the user if
-        // the app doesn't have RECORD_AUDIO permission.
-        if (device.getHasVideoCapture()) {
+        if (isCameraDevicePresent(device)) {
             if (!isCameraPermissionGranted(packageName, pid, uid)) {
                 intent.putExtra(UsbManager.EXTRA_DEVICE, device);
                 intent.putExtra(UsbManager.EXTRA_PERMISSION_GRANTED, false);
@@ -751,5 +731,28 @@ class UsbUserPermissionManager {
 
         requestPermissionDialog(null, accessory,
                 mUsbUserSettingsManager.canBeDefault(accessory, packageName), packageName, pi, uid);
+    }
+
+    /**
+     * Check whether a particular device or any of its interfaces
+     * is of class VIDEO.
+     *
+     * @param device The device that needs to get scanned
+     * @return True in case a VIDEO device or interface is present,
+     * False otherwise.
+     */
+    private boolean isCameraDevicePresent(UsbDevice device) {
+        if (device.getDeviceClass() == UsbConstants.USB_CLASS_VIDEO) {
+            return true;
+        }
+
+        for (int i = 0; i < device.getInterfaceCount(); i++) {
+            UsbInterface iface = device.getInterface(i);
+            if (iface.getInterfaceClass() == UsbConstants.USB_CLASS_VIDEO) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

@@ -28,7 +28,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.os.CancellationSignal;
 
-import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.inflation.NotificationRowBinder;
@@ -42,6 +41,7 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 
 /**
  * {@link NotifBindPipeline} is responsible for converting notifications from their data form to
@@ -77,7 +77,7 @@ import javax.inject.Inject;
  * views and assumes that a row is given to it when it's inflated.
  */
 @MainThread
-@SysUISingleton
+@Singleton
 public final class NotifBindPipeline {
     private final Map<NotificationEntry, BindEntry> mBindEntries = new ArrayMap<>();
     private final NotifBindPipelineLogger mLogger;

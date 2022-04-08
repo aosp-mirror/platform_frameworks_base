@@ -26,12 +26,12 @@ import android.os.BatteryManager;
 import android.os.BatteryManagerInternal;
 import android.os.UserHandle;
 import android.util.ArraySet;
-import android.util.IndentingPrintWriter;
 import android.util.Log;
 import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.LocalServices;
 import com.android.server.job.JobSchedulerService;
 import com.android.server.job.StateControllerProto;
@@ -65,12 +65,10 @@ public final class BatteryController extends RestrictingController {
     @Override
     public void maybeStartTrackingJobLocked(JobStatus taskStatus, JobStatus lastJob) {
         if (taskStatus.hasPowerConstraint()) {
-            final long nowElapsed = sElapsedRealtimeClock.millis();
             mTrackedTasks.add(taskStatus);
             taskStatus.setTrackingController(JobStatus.TRACKING_BATTERY);
-            taskStatus.setChargingConstraintSatisfied(nowElapsed, mChargeTracker.isOnStablePower());
-            taskStatus.setBatteryNotLowConstraintSatisfied(
-                    nowElapsed, mChargeTracker.isBatteryNotLow());
+            taskStatus.setChargingConstraintSatisfied(mChargeTracker.isOnStablePower());
+            taskStatus.setBatteryNotLowConstraintSatisfied(mChargeTracker.isBatteryNotLow());
         }
     }
 
@@ -99,15 +97,14 @@ public final class BatteryController extends RestrictingController {
         if (DEBUG) {
             Slog.d(TAG, "maybeReportNewChargingStateLocked: " + stablePower);
         }
-        final long nowElapsed = sElapsedRealtimeClock.millis();
         boolean reportChange = false;
         for (int i = mTrackedTasks.size() - 1; i >= 0; i--) {
             final JobStatus ts = mTrackedTasks.valueAt(i);
-            boolean previous = ts.setChargingConstraintSatisfied(nowElapsed, stablePower);
+            boolean previous = ts.setChargingConstraintSatisfied(stablePower);
             if (previous != stablePower) {
                 reportChange = true;
             }
-            previous = ts.setBatteryNotLowConstraintSatisfied(nowElapsed, batteryNotLow);
+            previous = ts.setBatteryNotLowConstraintSatisfied(batteryNotLow);
             if (previous != batteryNotLow) {
                 reportChange = true;
             }

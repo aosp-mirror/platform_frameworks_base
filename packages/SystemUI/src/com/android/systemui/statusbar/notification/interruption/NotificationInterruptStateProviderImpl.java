@@ -32,7 +32,6 @@ import android.service.notification.StatusBarNotification;
 import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.StatusBarState;
@@ -45,11 +44,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 
 /**
  * Provides heads-up and pulsing state for notification entries.
  */
-@SysUISingleton
+@Singleton
 public class NotificationInterruptStateProviderImpl implements NotificationInterruptStateProvider {
     private static final String TAG = "InterruptionStateProvider";
     private static final boolean DEBUG = true; //false;

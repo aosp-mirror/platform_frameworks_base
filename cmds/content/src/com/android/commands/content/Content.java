@@ -19,7 +19,6 @@ package com.android.commands.content;
 import android.app.ActivityManager;
 import android.app.ContentProviderHolder;
 import android.app.IActivityManager;
-import android.content.AttributionSource;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.IContentProvider;
@@ -563,8 +562,7 @@ public class Content {
 
         @Override
         public void onExecute(IContentProvider provider) throws Exception {
-            provider.insert(new AttributionSource(Binder.getCallingUid(),
-                    resolveCallingPackage(), null), mUri, mContentValues, mExtras);
+            provider.insert(resolveCallingPackage(), null, mUri, mContentValues, mExtras);
         }
     }
 
@@ -578,8 +576,7 @@ public class Content {
 
         @Override
         public void onExecute(IContentProvider provider) throws Exception {
-            provider.delete(new AttributionSource(Binder.getCallingUid(),
-                    resolveCallingPackage(), null), mUri, mExtras);
+            provider.delete(resolveCallingPackage(), null, mUri, mExtras);
         }
     }
 
@@ -596,8 +593,7 @@ public class Content {
 
         @Override
         public void onExecute(IContentProvider provider) throws Exception {
-            Bundle result = provider.call(new AttributionSource(Binder.getCallingUid(),
-                    resolveCallingPackage(), null), mUri.getAuthority(), mMethod, mArg, mExtras);
+            Bundle result = provider.call(null, null, mUri.getAuthority(), mMethod, mArg, mExtras);
             if (result != null) {
                 result.size(); // unpack
             }
@@ -624,9 +620,7 @@ public class Content {
 
         @Override
         public void onExecute(IContentProvider provider) throws Exception {
-            try (ParcelFileDescriptor fd = provider.openFile(
-                    new AttributionSource(Binder.getCallingUid(),
-                    resolveCallingPackage(), null), mUri, "r", null)) {
+            try (ParcelFileDescriptor fd = provider.openFile(null, null, mUri, "r", null, null)) {
                 FileUtils.copy(fd.getFileDescriptor(), FileDescriptor.out);
             }
         }
@@ -639,8 +633,7 @@ public class Content {
 
         @Override
         public void onExecute(IContentProvider provider) throws Exception {
-            try (ParcelFileDescriptor fd = provider.openFile(new AttributionSource(
-                    Binder.getCallingUid(), resolveCallingPackage(), null), mUri, "w", null)) {
+            try (ParcelFileDescriptor fd = provider.openFile(null, null, mUri, "w", null, null)) {
                 FileUtils.copy(FileDescriptor.in, fd.getFileDescriptor());
             }
         }
@@ -658,8 +651,8 @@ public class Content {
 
         @Override
         public void onExecute(IContentProvider provider) throws Exception {
-            Cursor cursor = provider.query(new AttributionSource(Binder.getCallingUid(),
-                    resolveCallingPackage(), null), mUri, mProjection, mExtras, null);
+            Cursor cursor = provider.query(resolveCallingPackage(), null, mUri, mProjection,
+                    mExtras, null);
             if (cursor == null) {
                 System.out.println("No result found.");
                 return;
@@ -723,8 +716,7 @@ public class Content {
 
         @Override
         public void onExecute(IContentProvider provider) throws Exception {
-            provider.update(new AttributionSource(Binder.getCallingUid(),
-                    resolveCallingPackage(), null), mUri, mValues, mExtras);
+            provider.update(resolveCallingPackage(), null, mUri, mValues, mExtras);
         }
     }
 

@@ -18,7 +18,6 @@ package android.companion;
 
 import android.app.PendingIntent;
 import android.companion.IFindDeviceCallback;
-import android.companion.Association;
 import android.companion.AssociationRequest;
 import android.content.ComponentName;
 
@@ -36,8 +35,6 @@ interface ICompanionDeviceManager {
         in String callingPackage);
 
     List<String> getAssociations(String callingPackage, int userId);
-    List<Association> getAssociationsForUser(int userId);
-
     void disassociate(String deviceMacAddress, String callingPackage);
 
     boolean hasNotificationAccess(in ComponentName component);
@@ -45,13 +42,4 @@ interface ICompanionDeviceManager {
 
     boolean isDeviceAssociatedForWifiConnection(in String packageName, in String macAddress,
         int userId);
-
-    void registerDevicePresenceListenerService(in String packageName, in String deviceAddress);
-
-    void unregisterDevicePresenceListenerService(in String packageName, in String deviceAddress);
-
-    boolean canPairWithoutPrompt(in String packageName, in String deviceMacAddress, int userId);
-
-    void createAssociation(in String packageName, in String macAddress, int userId,
-        in byte[] certificate);
 }

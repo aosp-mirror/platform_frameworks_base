@@ -26,18 +26,24 @@
 #include <sys/mman.h>
 #include <sys/wait.h>
 
-#include <android/bitmap.h>
-
 #include <binder/ProcessState.h>
 
-#include <gui/ISurfaceComposer.h>
 #include <gui/SurfaceComposerClient.h>
-#include <gui/SyncScreenCaptureListener.h>
+#include <gui/ISurfaceComposer.h>
 
+#include <ui/DisplayInfo.h>
 #include <ui/GraphicTypes.h>
 #include <ui/PixelFormat.h>
 
 #include <system/graphics.h>
+
+// TODO: Fix Skia.
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+#include <SkImageEncoder.h>
+#include <SkData.h>
+#include <SkColorSpace.h>
+#pragma GCC diagnostic pop
 
 using namespace android;
 
@@ -51,20 +57,33 @@ static void usage(const char* pname, PhysicalDisplayId displayId)
             "usage: %s [-hp] [-d display-id] [FILENAME]\n"
             "   -h: this message\n"
             "   -p: save the file as a png.\n"
-            "   -d: specify the physical display ID to capture (default: %s)\n"
+            "   -d: specify the physical display ID to capture (default: %"
+                    ANDROID_PHYSICAL_DISPLAY_ID_FORMAT ")\n"
             "       see \"dumpsys SurfaceFlinger --display-id\" for valid display IDs.\n"
             "If FILENAME ends with .png it will be saved as a png.\n"
             "If FILENAME is not given, the results will be printed to stdout.\n",
-            pname, to_string(displayId).c_str());
+            pname, displayId);
 }
 
-static int32_t flinger2bitmapFormat(PixelFormat f)
+static SkColorType flinger2skia(PixelFormat f)
 {
     switch (f) {
         case PIXEL_FORMAT_RGB_565:
-            return ANDROID_BITMAP_FORMAT_RGB_565;
+            return kRGB_565_SkColorType;
         default:
-            return ANDROID_BITMAP_FORMAT_RGBA_8888;
+            return kN32_SkColorType;
+    }
+}
+
+static sk_sp<SkColorSpace> dataSpaceToColorSpace(ui::Dataspace d)
+{
+    switch (d) {
+        case ui::Dataspace::V0_SRGB:
+            return SkColorSpace::MakeSRGB();
+        case ui::Dataspace::DISPLAY_P3:
+            return SkColorSpace::MakeRGB(SkNamedTransferFn::kSRGB, SkNamedGamut::kDCIP3);
+        default:
+            return nullptr;
     }
 }
 
@@ -136,7 +155,7 @@ int main(int argc, char** argv)
                 png = true;
                 break;
             case 'd':
-                displayId = PhysicalDisplayId(atoll(optarg));
+                displayId = atoll(optarg);
                 break;
             case '?':
             case 'h':
@@ -173,6 +192,8 @@ int main(int argc, char** argv)
     ssize_t mapsize = -1;
 
     void* base = NULL;
+    uint32_t w, s, h, f;
+    size_t size = 0;
 
     // setThreadPoolMaxThreadCount(0) actually tells the kernel it's
     // not allowed to spawn any additional threads, but we still spawn
@@ -181,22 +202,16 @@ int main(int argc, char** argv)
     ProcessState::self()->setThreadPoolMaxThreadCount(0);
     ProcessState::self()->startThreadPool();
 
-    sp<SyncScreenCaptureListener> captureListener = new SyncScreenCaptureListener();
-    status_t result = ScreenshotClient::captureDisplay(displayId->value, captureListener);
+    ui::Dataspace outDataspace;
+    sp<GraphicBuffer> outBuffer;
+
+    status_t result = ScreenshotClient::capture(*displayId, &outDataspace, &outBuffer);
     if (result != NO_ERROR) {
         close(fd);
         return 1;
     }
 
-    ScreenCaptureResults captureResults = captureListener->waitForResults();
-    if (captureResults.result != NO_ERROR) {
-        close(fd);
-        return 1;
-    }
-    ui::Dataspace dataspace = captureResults.capturedDataspace;
-    sp<GraphicBuffer> buffer = captureResults.buffer;
-
-    result = buffer->lock(GraphicBuffer::USAGE_SW_READ_OFTEN, &base);
+    result = outBuffer->lock(GraphicBuffer::USAGE_SW_READ_OFTEN, &base);
 
     if (base == nullptr || result != NO_ERROR) {
         String8 reason;
@@ -210,36 +225,33 @@ int main(int argc, char** argv)
         return 1;
     }
 
+    w = outBuffer->getWidth();
+    h = outBuffer->getHeight();
+    s = outBuffer->getStride();
+    f = outBuffer->getPixelFormat();
+    size = s * h * bytesPerPixel(f);
+
     if (png) {
-        AndroidBitmapInfo info;
-        info.format = flinger2bitmapFormat(buffer->getPixelFormat());
-        info.flags = ANDROID_BITMAP_FLAGS_ALPHA_PREMUL;
-        info.width = buffer->getWidth();
-        info.height = buffer->getHeight();
-        info.stride = buffer->getStride() * bytesPerPixel(buffer->getPixelFormat());
-
-        int result = AndroidBitmap_compress(&info, static_cast<int32_t>(dataspace), base,
-                                            ANDROID_BITMAP_COMPRESS_FORMAT_PNG, 100, &fd,
-                                            [](void* fdPtr, const void* data, size_t size) -> bool {
-                                                int bytesWritten = write(*static_cast<int*>(fdPtr),
-                                                                         data, size);
-                                                return bytesWritten == size;
-                                            });
-
-        if (result != ANDROID_BITMAP_RESULT_SUCCESS) {
-            fprintf(stderr, "Failed to compress PNG (error code: %d)\n", result);
-        }
-
+        const SkImageInfo info =
+            SkImageInfo::Make(w, h, flinger2skia(f), kPremul_SkAlphaType,
+                              dataSpaceToColorSpace(outDataspace));
+        SkPixmap pixmap(info, base, s * bytesPerPixel(f));
+        struct FDWStream final : public SkWStream {
+          size_t fBytesWritten = 0;
+          int fFd;
+          FDWStream(int f) : fFd(f) {}
+          size_t bytesWritten() const override { return fBytesWritten; }
+          bool write(const void* buffer, size_t size) override {
+            fBytesWritten += size;
+            return size == 0 || ::write(fFd, buffer, size) > 0;
+          }
+        } fdStream(fd);
+        (void)SkEncodeImage(&fdStream, pixmap, SkEncodedImageFormat::kPNG, 100);
         if (fn != NULL) {
             notifyMediaScanner(fn);
         }
     } else {
-        uint32_t w = buffer->getWidth();
-        uint32_t h = buffer->getHeight();
-        uint32_t s = buffer->getStride();
-        uint32_t f = buffer->getPixelFormat();
-        uint32_t c = dataSpaceToInt(dataspace);
-
+        uint32_t c = dataSpaceToInt(outDataspace);
         write(fd, &w, 4);
         write(fd, &h, 4);
         write(fd, &f, 4);

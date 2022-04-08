@@ -25,7 +25,6 @@ import android.util.ArraySet;
 import android.util.LongSparseArray;
 
 import com.android.internal.util.ArrayUtils;
-import com.android.server.utils.WatchedArrayMap;
 
 import java.io.File;
 import java.io.IOException;
@@ -34,20 +33,20 @@ import java.security.cert.CertificateException;
 
 public class KeySetManagerServiceTest extends AndroidTestCase {
 
-    private WatchedArrayMap<String, PackageSetting> mPackagesMap;
+    private ArrayMap<String, PackageSetting> mPackagesMap;
     private KeySetManagerService mKsms;
 
     public PackageSetting generateFakePackageSetting(String name) {
-        return new PackageSettingBuilder()
-                .setName(name)
-                .setCodePath(new File(mContext.getCacheDir(), "fakeCodePath").getAbsolutePath())
-                .build();
+        return new PackageSetting(name, name, new File(mContext.getCacheDir(), "fakeCodePath"),
+                new File(mContext.getCacheDir(), "fakeResPath"), "", "", "",
+                "", 1, 0, 0, 0 /*sharedUserId*/, null /*usesStaticLibraries*/,
+                null /*usesStaticLibrariesVersions*/, null /*mimeGroups*/);
     }
 
     @Override
     public void setUp() throws Exception {
         super.setUp();
-        mPackagesMap = new WatchedArrayMap<String, PackageSetting>();
+        mPackagesMap = new ArrayMap<String, PackageSetting>();
         mKsms = new KeySetManagerService(mPackagesMap);
     }
 
@@ -95,8 +94,7 @@ public class KeySetManagerServiceTest extends AndroidTestCase {
     }
 
     public void testEncodePublicKey() throws IOException {
-        WatchedArrayMap<String, PackageSetting> packagesMap =
-                new WatchedArrayMap<String, PackageSetting>();
+        ArrayMap<String, PackageSetting> packagesMap = new ArrayMap<String, PackageSetting>();
         KeySetManagerService ksms = new KeySetManagerService(packagesMap);
 
         PublicKey keyA = PackageParser.parsePublicKey(KeySetStrings.ctsKeySetPublicKeyA);

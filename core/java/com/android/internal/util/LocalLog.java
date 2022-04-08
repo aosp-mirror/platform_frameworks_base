@@ -16,11 +16,11 @@
 
 package com.android.internal.util;
 
-import android.util.IndentingPrintWriter;
+import java.io.PrintWriter;
+import java.util.ArrayList;
+
 import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
-
-import java.util.ArrayList;
 
 /**
  * Helper class for logging serious issues, which also keeps a small
@@ -47,20 +47,19 @@ public class LocalLog {
         }
     }
 
-    public boolean dump(IndentingPrintWriter pw, String header) {
+    public boolean dump(PrintWriter pw, String header, String prefix) {
         synchronized (mLines) {
             if (mLines.size() <= 0) {
                 return false;
             }
             if (header != null) {
                 pw.println(header);
-                pw.increaseIndent();
             }
             for (int i=0; i<mLines.size(); i++) {
+                if (prefix != null) {
+                    pw.print(prefix);
+                }
                 pw.println(mLines.get(i));
-            }
-            if (header != null) {
-                pw.decreaseIndent();
             }
             return true;
         }

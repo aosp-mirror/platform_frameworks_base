@@ -132,7 +132,7 @@ public class MtpDatabaseTest {
 
         StorageVolume mainStorage = new StorageVolume(MAIN_STORAGE_ID_STR,
                 mMainStorageDir, mMainStorageDir, "Primary Storage",
-                true, false, true, false, -1, UserHandle.CURRENT, null /* uuid */, "", "");
+				true, false, true, false, -1, UserHandle.CURRENT, "", "");
 
         final StorageVolume primary = mainStorage;
 
@@ -271,10 +271,9 @@ public class MtpDatabaseTest {
 
         Log.d(TAG, "testMtpDatabaseThumbnail: Test bad JPG");
 
-// Now we support to generate thumbnail if embedded thumbnail is corrupted or not existed
-        testThumbnail(handleJpgBadThumb, jpgfileBadThumb, true);
+        testThumbnail(handleJpgBadThumb, jpgfileBadThumb, false);
 
-        testThumbnail(handleJpgNoThumb, jpgFileNoThumb, true);
+        testThumbnail(handleJpgNoThumb, jpgFileNoThumb, false);
 
         testThumbnail(handleJpgBad, jpgfileBad, false);
 

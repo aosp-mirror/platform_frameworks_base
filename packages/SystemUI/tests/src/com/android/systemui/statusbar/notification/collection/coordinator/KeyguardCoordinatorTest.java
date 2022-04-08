@@ -21,10 +21,9 @@ import static android.app.Notification.VISIBILITY_SECRET;
 import static android.app.NotificationManager.IMPORTANCE_HIGH;
 import static android.app.NotificationManager.IMPORTANCE_MIN;
 
-import static com.android.systemui.statusbar.notification.collection.EntryUtilKt.modifyEntry;
+import static junit.framework.Assert.assertFalse;
+import static junit.framework.Assert.assertTrue;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -42,7 +41,6 @@ import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.RankingBuilder;
 import com.android.systemui.statusbar.notification.collection.GroupEntry;
-import com.android.systemui.statusbar.notification.collection.GroupEntryBuilder;
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder;
@@ -73,12 +71,13 @@ public class KeyguardCoordinatorTest extends SysuiTestCase {
     @Mock private NotifPipeline mNotifPipeline;
 
     private NotificationEntry mEntry;
+    private KeyguardCoordinator mKeyguardCoordinator;
     private NotifFilter mKeyguardFilter;
 
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
-        KeyguardCoordinator keyguardCoordinator = new KeyguardCoordinator(
+        mKeyguardCoordinator = new KeyguardCoordinator(
                 mContext, mMainHandler, mKeyguardStateController, mLockscreenUserManager,
                 mBroadcastDispatcher, mStatusBarStateController,
                 mKeyguardUpdateMonitor, mHighPriorityProvider);
@@ -88,7 +87,7 @@ public class KeyguardCoordinatorTest extends SysuiTestCase {
                 .build();
 
         ArgumentCaptor<NotifFilter> filterCaptor = ArgumentCaptor.forClass(NotifFilter.class);
-        keyguardCoordinator.attach(mNotifPipeline);
+        mKeyguardCoordinator.attach(mNotifPipeline);
         verify(mNotifPipeline, times(1)).addFinalizeFilter(filterCaptor.capture());
         mKeyguardFilter = filterCaptor.getValue();
     }
@@ -187,16 +186,10 @@ public class KeyguardCoordinatorTest extends SysuiTestCase {
     public void summaryExceedsThresholdToShow() {
         // GIVEN the notification doesn't exceed the threshold to show on the lockscreen
         // but it's part of a group (has a parent)
+        final GroupEntry parent = new GroupEntry("test_group_key");
         final NotificationEntry entryWithParent = new NotificationEntryBuilder()
+                .setParent(parent)
                 .setUser(new UserHandle(NOTIF_USER_ID))
-                .build();
-
-        final GroupEntry parent = new GroupEntryBuilder()
-                .setKey("test_group_key")
-                .setSummary(new NotificationEntryBuilder()
-                        .setImportance(IMPORTANCE_HIGH)
-                        .build())
-                .addChild(entryWithParent)
                 .build();
 
         setupUnfilteredState(entryWithParent);
@@ -207,15 +200,18 @@ public class KeyguardCoordinatorTest extends SysuiTestCase {
 
         // WHEN its parent does exceed threshold tot show on the lockscreen
         when(mHighPriorityProvider.isHighPriority(parent)).thenReturn(true);
+        parent.setSummary(new NotificationEntryBuilder()
+                .setImportance(IMPORTANCE_HIGH)
+                .build());
 
         // THEN don't filter out the entry
         assertFalse(mKeyguardFilter.shouldFilterOut(entryWithParent, 0));
 
         // WHEN its parent doesn't exceed threshold to show on lockscreen
         when(mHighPriorityProvider.isHighPriority(parent)).thenReturn(false);
-        modifyEntry(parent.getSummary(), builder -> builder
+        parent.setSummary(new NotificationEntryBuilder()
                 .setImportance(IMPORTANCE_MIN)
-                .done());
+                .build());
 
         // THEN filter out the entry
         assertTrue(mKeyguardFilter.shouldFilterOut(entryWithParent, 0));

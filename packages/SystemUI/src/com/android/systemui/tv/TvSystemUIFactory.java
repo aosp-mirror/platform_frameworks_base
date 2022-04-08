@@ -19,16 +19,16 @@ package com.android.systemui.tv;
 import android.content.Context;
 
 import com.android.systemui.SystemUIFactory;
-import com.android.systemui.dagger.GlobalRootComponent;
+import com.android.systemui.dagger.SystemUIRootComponent;
 
 /**
- * TV variant {@link SystemUIFactory}, that substitutes default {@link GlobalRootComponent} for
- * {@link TvGlobalRootComponent}
+ * TV variant {@link SystemUIFactory}, that substitutes default {@link SystemUIRootComponent} for
+ * {@link TvSystemUIRootComponent}
  */
 public class TvSystemUIFactory extends SystemUIFactory {
     @Override
-    protected GlobalRootComponent buildGlobalRootComponent(Context context) {
-        return DaggerTvGlobalRootComponent.builder()
+    protected SystemUIRootComponent buildSystemUIRootComponent(Context context) {
+        return DaggerTvSystemUIRootComponent.builder()
                 .context(context)
                 .build();
     }

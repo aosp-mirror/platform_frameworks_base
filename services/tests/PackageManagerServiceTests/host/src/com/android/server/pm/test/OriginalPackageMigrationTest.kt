@@ -33,11 +33,11 @@ import org.junit.runner.RunWith
 class OriginalPackageMigrationTest : BaseHostJUnit4Test() {
 
     companion object {
-        private const val TEST_PKG_NAME = "com.android.server.pm.test.test_app"
-        private const val VERSION_ONE = "PackageManagerTestAppVersion1.apk"
-        private const val VERSION_TWO = "PackageManagerTestAppVersion2.apk"
-        private const val VERSION_THREE = "PackageManagerTestAppVersion3.apk"
-        private const val NEW_PKG = "PackageManagerTestAppOriginalOverride.apk"
+        private const val TEST_PKG_NAME = "com.android.server.pm.test.dummy_app"
+        private const val VERSION_ONE = "PackageManagerDummyAppVersion1.apk"
+        private const val VERSION_TWO = "PackageManagerDummyAppVersion2.apk"
+        private const val VERSION_THREE = "PackageManagerDummyAppVersion3.apk"
+        private const val NEW_PKG = "PackageManagerDummyAppOriginalOverride.apk"
 
         @get:ClassRule
         val deviceRebootRule = SystemPreparer.TestRuleDelegate(true)
@@ -47,8 +47,7 @@ class OriginalPackageMigrationTest : BaseHostJUnit4Test() {
     private val preparer: SystemPreparer = SystemPreparer(tempFolder,
             SystemPreparer.RebootStrategy.FULL, deviceRebootRule) { this.device }
 
-    @Rule
-    @JvmField
+    @get:Rule
     val rules = RuleChain.outerRule(tempFolder).around(preparer)!!
 
     @Before
@@ -56,7 +55,6 @@ class OriginalPackageMigrationTest : BaseHostJUnit4Test() {
     fun deleteApkFolders() {
         preparer.deleteApkFolders(Partition.SYSTEM, VERSION_ONE, VERSION_TWO, VERSION_THREE,
                 NEW_PKG)
-                .reboot()
     }
 
     @Test
@@ -101,7 +99,9 @@ class OriginalPackageMigrationTest : BaseHostJUnit4Test() {
     }
 
     private fun assertCodePath(apk: String) {
-        assertThat(HostUtils.getCodePaths(device, TEST_PKG_NAME))
-                .containsExactly(HostUtils.makePathForApk(apk, Partition.SYSTEM).parent.toString())
+        // dumpsys package and therefore device.getAppPackageInfo doesn't work here for some reason,
+        // so parse the package dump directly to see if the path matches.
+        assertThat(device.executeShellCommand("pm dump $TEST_PKG_NAME"))
+                .contains(HostUtils.makePathForApk(apk, Partition.SYSTEM).parent.toString())
     }
 }

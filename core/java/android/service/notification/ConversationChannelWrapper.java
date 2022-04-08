@@ -16,7 +16,6 @@
 
 package android.service.notification;
 
-import android.annotation.Nullable;
 import android.app.NotificationChannel;
 import android.content.pm.ShortcutInfo;
 import android.graphics.drawable.Drawable;
@@ -127,7 +126,7 @@ public final class ConversationChannelWrapper implements Parcelable {
     }
 
     @Override
-    public boolean equals(@Nullable Object o) {
+    public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         ConversationChannelWrapper that = (ConversationChannelWrapper) o;

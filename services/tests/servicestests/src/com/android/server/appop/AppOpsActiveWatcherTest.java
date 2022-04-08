@@ -20,8 +20,6 @@ import static com.google.common.truth.Truth.assertThat;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
@@ -68,8 +66,7 @@ public class AppOpsActiveWatcherTest {
         // Verify that we got called for the op being active
         verify(listener, timeout(NOTIFICATION_TIMEOUT_MILLIS)
                 .times(1)).onOpActiveChanged(eq(AppOpsManager.OPSTR_CAMERA),
-                eq(Process.myUid()), eq(getContext().getPackageName()),
-                isNull(), eq(true), anyInt(), anyInt());
+                eq(Process.myUid()), eq(getContext().getPackageName()), eq(true));
 
         // This should be the only callback we got
         verifyNoMoreInteractions(listener);
@@ -87,8 +84,7 @@ public class AppOpsActiveWatcherTest {
         // Verify that we got called for the op being active
         verify(listener, timeout(NOTIFICATION_TIMEOUT_MILLIS)
                 .times(1)).onOpActiveChanged(eq(AppOpsManager.OPSTR_CAMERA),
-                eq(Process.myUid()), eq(getContext().getPackageName()), isNull(),
-                eq(false), anyInt(), anyInt());
+                eq(Process.myUid()), eq(getContext().getPackageName()), eq(false));
 
         // Verify that the op is not active
         assertThat(appOpsManager.isOperationActive(AppOpsManager.OP_CAMERA,
@@ -125,8 +121,7 @@ public class AppOpsActiveWatcherTest {
         // We should get the callback again (and since we reset the listener, we therefore expect 1)
         verify(listener, timeout(NOTIFICATION_TIMEOUT_MILLIS)
                 .times(1)).onOpActiveChanged(eq(AppOpsManager.OPSTR_CAMERA),
-                eq(Process.myUid()), eq(getContext().getPackageName()), isNull(),
-                eq(true), anyInt(), anyInt());
+                eq(Process.myUid()), eq(getContext().getPackageName()), eq(true));
 
         // Finish up
         appOpsManager.finishOp(AppOpsManager.OP_CAMERA);

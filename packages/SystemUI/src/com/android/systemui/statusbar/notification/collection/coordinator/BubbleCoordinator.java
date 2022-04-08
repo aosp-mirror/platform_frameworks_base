@@ -16,22 +16,24 @@
 
 package com.android.systemui.statusbar.notification.collection.coordinator;
 
-import com.android.systemui.dagger.SysUISingleton;
+import static android.service.notification.NotificationStats.DISMISSAL_OTHER;
+import static android.service.notification.NotificationStats.DISMISS_SENTIMENT_NEUTRAL;
+
+import com.android.internal.statusbar.NotificationVisibility;
+import com.android.systemui.bubbles.BubbleController;
 import com.android.systemui.statusbar.notification.collection.NotifCollection;
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifFilter;
 import com.android.systemui.statusbar.notification.collection.notifcollection.DismissedByUserStats;
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifDismissInterceptor;
-import com.android.systemui.wmshell.BubblesManager;
-import com.android.wm.shell.bubbles.BubbleController;
-import com.android.wm.shell.bubbles.Bubbles;
+import com.android.systemui.statusbar.notification.logging.NotificationLogger;
 
 import java.util.HashSet;
-import java.util.Optional;
 import java.util.Set;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 
 /**
  * Coordinates hiding, intercepting (the dismissal), and deletion of bubbled notifications.
@@ -53,12 +55,11 @@ import javax.inject.Inject;
  * respond to app-cancellations (ie: remove the bubble if the app cancels the notification).
  *
  */
-@SysUISingleton
+@Singleton
 public class BubbleCoordinator implements Coordinator {
     private static final String TAG = "BubbleCoordinator";
 
-    private final Optional<BubblesManager> mBubblesManagerOptional;
-    private final Optional<Bubbles> mBubblesOptional;
+    private final BubbleController mBubbleController;
     private final NotifCollection mNotifCollection;
     private final Set<String> mInterceptedDismissalEntries = new HashSet<>();
     private NotifPipeline mNotifPipeline;
@@ -66,11 +67,9 @@ public class BubbleCoordinator implements Coordinator {
 
     @Inject
     public BubbleCoordinator(
-            Optional<BubblesManager> bubblesManagerOptional,
-            Optional<Bubbles> bubblesOptional,
+            BubbleController bubbleController,
             NotifCollection notifCollection) {
-        mBubblesManagerOptional = bubblesManagerOptional;
-        mBubblesOptional = bubblesOptional;
+        mBubbleController = bubbleController;
         mNotifCollection = notifCollection;
     }
 
@@ -79,18 +78,13 @@ public class BubbleCoordinator implements Coordinator {
         mNotifPipeline = pipeline;
         mNotifPipeline.addNotificationDismissInterceptor(mDismissInterceptor);
         mNotifPipeline.addFinalizeFilter(mNotifFilter);
-        if (mBubblesManagerOptional.isPresent()) {
-            mBubblesManagerOptional.get().addNotifCallback(mNotifCallback);
-        }
-
+        mBubbleController.addNotifCallback(mNotifCallback);
     }
 
     private final NotifFilter mNotifFilter = new NotifFilter(TAG) {
         @Override
         public boolean shouldFilterOut(NotificationEntry entry, long now) {
-            return mBubblesOptional.isPresent()
-                    && mBubblesOptional.get().isBubbleNotificationSuppressedFromShade(
-                            entry.getKey(), entry.getSbn().getGroupKey());
+            return mBubbleController.isBubbleNotificationSuppressedFromShade(entry);
         }
     };
 
@@ -107,8 +101,9 @@ public class BubbleCoordinator implements Coordinator {
 
         @Override
         public boolean shouldInterceptDismissal(NotificationEntry entry) {
-            if (mBubblesManagerOptional.isPresent()
-                    && mBubblesManagerOptional.get().handleDismissalInterception(entry)) {
+            // TODO: b/149041810 add support for intercepting app-cancelled bubble notifications
+            // for experimental bubbles
+            if (mBubbleController.handleDismissalInterception(entry)) {
                 mInterceptedDismissalEntries.add(entry.getKey());
                 return true;
             } else {
@@ -123,23 +118,20 @@ public class BubbleCoordinator implements Coordinator {
         }
     };
 
-    private final BubblesManager.NotifCallback mNotifCallback = new BubblesManager.NotifCallback() {
+    private final BubbleController.NotifCallback mNotifCallback =
+            new BubbleController.NotifCallback() {
         @Override
-        public void removeNotification(
-                NotificationEntry entry,
-                DismissedByUserStats dismissedByUserStats,
-                int reason
-        ) {
+        public void removeNotification(NotificationEntry entry, int reason) {
             if (isInterceptingDismissal(entry)) {
                 mInterceptedDismissalEntries.remove(entry.getKey());
                 mOnEndDismissInterception.onEndDismissInterception(mDismissInterceptor, entry,
-                        dismissedByUserStats);
+                        createDismissedByUserStats(entry));
             } else if (mNotifPipeline.getAllNotifs().contains(entry)) {
                 // Bubbles are hiding the notifications from the shade, but the bubble was
                 // deleted; therefore, the notification should be cancelled as if it were a user
                 // dismissal (this won't re-enter handleInterceptDimissal because Bubbles
                 // will have already marked it as no longer a bubble)
-                mNotifCollection.dismissNotification(entry, dismissedByUserStats);
+                mNotifCollection.dismissNotification(entry, createDismissedByUserStats(entry));
             }
         }
 
@@ -156,5 +148,17 @@ public class BubbleCoordinator implements Coordinator {
 
     private boolean isInterceptingDismissal(NotificationEntry entry) {
         return mInterceptedDismissalEntries.contains(entry.getKey());
+    }
+
+    private DismissedByUserStats createDismissedByUserStats(NotificationEntry entry) {
+        return new DismissedByUserStats(
+                DISMISSAL_OTHER,
+                DISMISS_SENTIMENT_NEUTRAL,
+                NotificationVisibility.obtain(entry.getKey(),
+                        entry.getRanking().getRank(),
+                        mNotifPipeline.getShadeListCount(),
+                        true, // was visible as a bubble
+                        NotificationLogger.getNotificationLocation(entry))
+        );
     }
 }

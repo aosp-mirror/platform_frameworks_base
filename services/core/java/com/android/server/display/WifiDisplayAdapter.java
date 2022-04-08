@@ -598,8 +598,7 @@ final class WifiDisplayAdapter extends DisplayAdapter {
         public WifiDisplayDevice(IBinder displayToken, String name,
                 int width, int height, float refreshRate, int flags, String address,
                 Surface surface) {
-            super(WifiDisplayAdapter.this, displayToken, DISPLAY_NAME_PREFIX + address,
-                    getContext());
+            super(WifiDisplayAdapter.this, displayToken, DISPLAY_NAME_PREFIX + address);
             mName = name;
             mWidth = width;
             mHeight = height;

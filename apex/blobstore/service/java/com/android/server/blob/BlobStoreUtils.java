@@ -24,7 +24,6 @@ import android.annotation.Nullable;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
-import android.os.UserHandle;
 import android.text.format.TimeMigrationUtils;
 import android.util.Slog;
 
@@ -35,8 +34,8 @@ class BlobStoreUtils {
     static Resources getPackageResources(@NonNull Context context,
             @NonNull String packageName, int userId) {
         try {
-            return context.createContextAsUser(UserHandle.of(userId), /* flags */ 0)
-                    .getPackageManager().getResourcesForApplication(packageName);
+            return context.getPackageManager()
+                    .getResourcesForApplicationAsUser(packageName, userId);
         } catch (PackageManager.NameNotFoundException e) {
             Slog.d(TAG, "Unknown package in user " + userId + ": "
                     + packageName, e);

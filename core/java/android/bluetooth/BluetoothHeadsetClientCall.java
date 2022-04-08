@@ -16,11 +16,7 @@
 
 package android.bluetooth;
 
-import android.annotation.NonNull;
 import android.compat.annotation.UnsupportedAppUsage;
-import android.content.Attributable;
-import android.content.AttributionSource;
-import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.SystemClock;
@@ -33,7 +29,7 @@ import java.util.UUID;
  *
  * @hide
  */
-public final class BluetoothHeadsetClientCall implements Parcelable, Attributable {
+public final class BluetoothHeadsetClientCall implements Parcelable {
 
     /* Call state */
     /**
@@ -101,11 +97,6 @@ public final class BluetoothHeadsetClientCall implements Parcelable, Attributabl
         mCreationElapsedMilli = SystemClock.elapsedRealtime();
     }
 
-    /** {@hide} */
-    public void setAttributionSource(@NonNull AttributionSource attributionSource) {
-        Attributable.setAttributionSource(mDevice, attributionSource);
-    }
-
     /**
      * Sets call's state.
      *
@@ -153,7 +144,7 @@ public final class BluetoothHeadsetClientCall implements Parcelable, Attributabl
      *
      * @return call id.
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public int getId() {
         return mId;
     }
@@ -173,7 +164,7 @@ public final class BluetoothHeadsetClientCall implements Parcelable, Attributabl
      *
      * @return state of this particular phone call.
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public int getState() {
         return mState;
     }
@@ -183,7 +174,7 @@ public final class BluetoothHeadsetClientCall implements Parcelable, Attributabl
      *
      * @return string representing phone number.
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public String getNumber() {
         return mNumber;
     }
@@ -202,7 +193,7 @@ public final class BluetoothHeadsetClientCall implements Parcelable, Attributabl
      *
      * @return <code>true</code> if call is a multi party call, <code>false</code> otherwise.
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public boolean isMultiParty() {
         return mMultiParty;
     }
@@ -212,7 +203,7 @@ public final class BluetoothHeadsetClientCall implements Parcelable, Attributabl
      *
      * @return <code>true</code> if its outgoing call, <code>false</code> otherwise.
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public boolean isOutgoing() {
         return mOutgoing;
     }

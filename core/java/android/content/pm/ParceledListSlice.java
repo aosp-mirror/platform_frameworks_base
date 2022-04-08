@@ -62,7 +62,7 @@ public class ParceledListSlice<T extends Parcelable> extends BaseParceledListSli
     }
 
     @Override
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     protected void writeParcelableCreator(T parcelable, Parcel dest) {
         dest.writeParcelableCreator((Parcelable) parcelable);
     }

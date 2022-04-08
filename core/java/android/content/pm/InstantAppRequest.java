@@ -18,7 +18,6 @@ package android.content.pm;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.UserIdInt;
 import android.content.Intent;
 import android.os.Bundle;
 
@@ -41,7 +40,7 @@ public final class InstantAppRequest {
     /** Whether or not the requesting package was an instant app */
     public final boolean isRequesterInstantApp;
     /** ID of the user requesting the instant application */
-    public final @UserIdInt int userId;
+    public final int userId;
     /**
      * Optional extra bundle provided by the source application to the installer for additional
      * verification.
@@ -61,7 +60,7 @@ public final class InstantAppRequest {
 
     public InstantAppRequest(AuxiliaryResolveInfo responseObj, Intent origIntent,
             String resolvedType, String callingPackage, @Nullable String callingFeatureId,
-            boolean isRequesterInstantApp, @UserIdInt int userId, Bundle verificationBundle,
+            boolean isRequesterInstantApp, int userId, Bundle verificationBundle,
             boolean resolveForStart, @Nullable int[] hostDigestPrefixSecure,
             @NonNull String token) {
         this.responseObj = responseObj;

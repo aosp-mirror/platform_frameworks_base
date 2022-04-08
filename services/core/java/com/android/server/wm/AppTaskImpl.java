@@ -16,8 +16,8 @@
 
 package com.android.server.wm;
 
-import static com.android.server.wm.ActivityTaskSupervisor.REMOVE_FROM_RECENTS;
-import static com.android.server.wm.RootWindowContainer.MATCH_ATTACHED_TASK_OR_RECENT_TASKS;
+import static com.android.server.wm.ActivityStackSupervisor.REMOVE_FROM_RECENTS;
+import static com.android.server.wm.RootWindowContainer.MATCH_TASK_IN_STACKS_OR_RECENT_TASKS;
 
 import android.app.ActivityManager;
 import android.app.IAppTask;
@@ -58,10 +58,10 @@ class AppTaskImpl extends IAppTask.Stub {
         checkCaller();
 
         synchronized (mService.mGlobalLock) {
-            final long origId = Binder.clearCallingIdentity();
+            long origId = Binder.clearCallingIdentity();
             try {
                 // We remove the task from recents to preserve backwards
-                if (!mService.mTaskSupervisor.removeTaskById(mTaskId, false,
+                if (!mService.mStackSupervisor.removeTaskById(mTaskId, false,
                         REMOVE_FROM_RECENTS, "finish-and-remove-task")) {
                     throw new IllegalArgumentException("Unable to find task ID " + mTaskId);
                 }
@@ -76,10 +76,10 @@ class AppTaskImpl extends IAppTask.Stub {
         checkCaller();
 
         synchronized (mService.mGlobalLock) {
-            final long origId = Binder.clearCallingIdentity();
+            long origId = Binder.clearCallingIdentity();
             try {
                 Task task = mService.mRootWindowContainer.anyTaskForId(mTaskId,
-                        MATCH_ATTACHED_TASK_OR_RECENT_TASKS);
+                        MATCH_TASK_IN_STACKS_OR_RECENT_TASKS);
                 if (task == null) {
                     throw new IllegalArgumentException("Unable to find task ID " + mTaskId);
                 }
@@ -101,6 +101,10 @@ class AppTaskImpl extends IAppTask.Stub {
         final long origId = Binder.clearCallingIdentity();
         try {
             synchronized (mService.mGlobalLock) {
+                if (!mService.checkAppSwitchAllowedLocked(callingPid, callingUid, -1, -1,
+                        "Move to front")) {
+                    return;
+                }
                 WindowProcessController callerApp = null;
                 if (appThread != null) {
                     callerApp = mService.getProcessController(appThread);
@@ -113,7 +117,7 @@ class AppTaskImpl extends IAppTask.Stub {
                         return;
                     }
                 }
-                mService.mTaskSupervisor.startActivityFromRecents(callingPid,
+                mService.mStackSupervisor.startActivityFromRecents(callingPid,
                         callingUid, mTaskId, null);
             }
         } finally {
@@ -132,7 +136,7 @@ class AppTaskImpl extends IAppTask.Stub {
         IApplicationThread appThread;
         synchronized (mService.mGlobalLock) {
             task = mService.mRootWindowContainer.anyTaskForId(mTaskId,
-                    MATCH_ATTACHED_TASK_OR_RECENT_TASKS);
+                    MATCH_TASK_IN_STACKS_OR_RECENT_TASKS);
             if (task == null) {
                 throw new IllegalArgumentException("Unable to find task ID " + mTaskId);
             }
@@ -158,10 +162,10 @@ class AppTaskImpl extends IAppTask.Stub {
         checkCaller();
 
         synchronized (mService.mGlobalLock) {
-            final long origId = Binder.clearCallingIdentity();
+            long origId = Binder.clearCallingIdentity();
             try {
                 Task task = mService.mRootWindowContainer.anyTaskForId(mTaskId,
-                        MATCH_ATTACHED_TASK_OR_RECENT_TASKS);
+                        MATCH_TASK_IN_STACKS_OR_RECENT_TASKS);
                 if (task == null) {
                     throw new IllegalArgumentException("Unable to find task ID " + mTaskId);
                 }

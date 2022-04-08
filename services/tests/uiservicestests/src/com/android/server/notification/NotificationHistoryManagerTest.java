@@ -47,7 +47,6 @@ import org.mockito.MockitoAnnotations;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 
 @RunWith(AndroidJUnit4.class)
@@ -366,29 +365,15 @@ public class NotificationHistoryManagerTest extends UiServiceTestCase {
     @Test
     public void testDeleteConversation_userUnlocked() {
         String pkg = "pkg";
-        Set<String> convos = Set.of("convo", "another");
+        String convo  = "convo";
         NotificationHistoryDatabase userHistory = mock(NotificationHistoryDatabase.class);
 
         mHistoryManager.onUserUnlocked(USER_SYSTEM);
         mHistoryManager.replaceNotificationHistoryDatabase(USER_SYSTEM, userHistory);
 
-        mHistoryManager.deleteConversations(pkg, 1, convos);
+        mHistoryManager.deleteConversation(pkg, 1, convo);
 
-        verify(userHistory, times(1)).deleteConversations(pkg, convos);
-    }
-
-    @Test
-    public void testDeleteNotificationChannel_userUnlocked() {
-        String pkg = "pkg";
-        String channelId = "channelId";
-        NotificationHistoryDatabase userHistory = mock(NotificationHistoryDatabase.class);
-
-        mHistoryManager.onUserUnlocked(USER_SYSTEM);
-        mHistoryManager.replaceNotificationHistoryDatabase(USER_SYSTEM, userHistory);
-
-        mHistoryManager.deleteNotificationChannel(pkg, 1, channelId);
-
-        verify(userHistory, times(1)).deleteNotificationChannel(pkg, channelId);
+        verify(userHistory, times(1)).deleteConversation(pkg, convo);
     }
 
     @Test

@@ -49,7 +49,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-@RunWithLooper(setAsMainLooper = true)
+@RunWithLooper
 @RunWith(AndroidTestingRunner.class)
 @SmallTest
 public class SysuiLifecycleTest extends SysuiTestCase {

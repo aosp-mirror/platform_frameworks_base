@@ -19,8 +19,6 @@
 
 #include <unistd.h>
 #include <inttypes.h>
-
-#include <util/map_ptr.h>
 #include <zlib.h>
 
 #include <utils/Compat.h>
@@ -36,7 +34,7 @@ public:
     StreamingZipInflater(int fd, off64_t compDataStart, size_t uncompSize, size_t compSize);
 
     // Flavor that gets the compressed data from an in-memory buffer
-    StreamingZipInflater(const incfs::IncFsFileMap* dataMap, size_t uncompSize);
+    StreamingZipInflater(class FileMap* dataMap, size_t uncompSize);
 
     ~StreamingZipInflater();
 
@@ -56,7 +54,7 @@ private:
     // where to find the uncompressed data
     int mFd;
     off64_t mInFileStart;         // where the compressed data lives in the file
-    const incfs::IncFsFileMap* mDataMap;
+    class FileMap* mDataMap;
 
     z_stream mInflateState;
     bool mStreamNeedsInit;

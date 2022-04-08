@@ -19,21 +19,17 @@ package android.telephony.ims;
 import android.annotation.NonNull;
 import android.annotation.SdkConstant;
 import android.annotation.SuppressLint;
-import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.content.Context;
-import android.telephony.BinderCacheManager;
 import android.telephony.SubscriptionManager;
-import android.telephony.TelephonyFrameworkInitializer;
-import android.telephony.ims.aidl.IImsRcsController;
-
-import com.android.internal.telephony.ITelephony;
 
 /**
  * Provides access to information about Telephony IMS services on the device.
  */
 @SystemService(Context.TELEPHONY_IMS_SERVICE)
 public class ImsManager {
+
+    private Context mContext;
 
     /**
      * <p>Broadcast Action: Indicates that a previously allowed IMS operation was rejected by the
@@ -90,14 +86,6 @@ public class ImsManager {
     public static final String EXTRA_WFC_REGISTRATION_FAILURE_MESSAGE =
             "android.telephony.ims.extra.WFC_REGISTRATION_FAILURE_MESSAGE";
 
-    // Cache Telephony Binder interfaces, one cache per process.
-    private static final BinderCacheManager<ITelephony> sTelephonyCache =
-            new BinderCacheManager<>(ImsManager::getITelephonyInterface);
-    private static final BinderCacheManager<IImsRcsController> sRcsCache =
-            new BinderCacheManager<>(ImsManager::getIImsRcsControllerInterface);
-
-    private final Context mContext;
-
     /**
      * Use {@link Context#getSystemService(String)} to get an instance of this class.
      * @hide
@@ -119,7 +107,7 @@ public class ImsManager {
             throw new IllegalArgumentException("Invalid subscription ID: " + subscriptionId);
         }
 
-        return new ImsRcsManager(mContext, subscriptionId, sRcsCache);
+        return new ImsRcsManager(mContext, subscriptionId);
     }
 
     /**
@@ -135,44 +123,6 @@ public class ImsManager {
             throw new IllegalArgumentException("Invalid subscription ID: " + subscriptionId);
         }
 
-        return new ImsMmTelManager(subscriptionId, sTelephonyCache);
-    }
-
-    /**
-     * Create an instance of {@link SipDelegateManager} for the subscription id specified.
-     * <p>
-     * Allows an IMS application to forward SIP traffic through the device's IMS service,
-     * which is used for cellular carriers that require the device to share a single IMS
-     * registration for both MMTEL and RCS features.
-     * @param subscriptionId The ID of the subscription that this {@link SipDelegateManager} will
-     *                       be bound to.
-     * @throws IllegalArgumentException if the subscription is invalid.
-     * @return a {@link SipDelegateManager} instance for the specified subscription ID.
-     * @hide
-     */
-    @SystemApi
-    @NonNull
-    public SipDelegateManager getSipDelegateManager(int subscriptionId) {
-        if (!SubscriptionManager.isValidSubscriptionId(subscriptionId)) {
-            throw new IllegalArgumentException("Invalid subscription ID: " + subscriptionId);
-        }
-
-        return new SipDelegateManager(mContext, subscriptionId, sRcsCache);
-    }
-
-    private static IImsRcsController getIImsRcsControllerInterface() {
-        return IImsRcsController.Stub.asInterface(
-                TelephonyFrameworkInitializer
-                        .getTelephonyServiceManager()
-                        .getTelephonyImsServiceRegisterer()
-                        .get());
-    }
-
-    private static ITelephony getITelephonyInterface() {
-        return ITelephony.Stub.asInterface(
-                TelephonyFrameworkInitializer
-                        .getTelephonyServiceManager()
-                        .getTelephonyServiceRegisterer()
-                        .get());
+        return new ImsMmTelManager(subscriptionId);
     }
 }

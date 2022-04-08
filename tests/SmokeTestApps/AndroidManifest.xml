@@ -15,33 +15,30 @@
 -->
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-     package="com.android.smoketest.triggers">
+    package="com.android.smoketest.triggers">
 
     <application android:label="something">
         <activity android:name=".CrashyApp"
-             android:label="Test Crashy App"
-             android:exported="true">
+                  android:label="Test Crashy App">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
-                <category android:name="android.intent.category.LAUNCHER"/>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
 
         <activity android:name=".CrashyApp2"
-             android:label="Test Crashy App2"
-             android:exported="true">
+                  android:label="Test Crashy App2">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
-                <category android:name="android.intent.category.LAUNCHER"/>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
 
         <activity android:name=".UnresponsiveApp"
-             android:label="Test Unresponsive App"
-             android:exported="true">
+                  android:label="Test Unresponsive App">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
-                <category android:name="android.intent.category.LAUNCHER"/>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
     </application>

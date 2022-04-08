@@ -26,21 +26,25 @@ import android.os.UserHandle;
 import android.text.TextUtils;
 import android.util.AtomicFile;
 import android.util.Slog;
-import android.util.TypedXmlPullParser;
-import android.util.TypedXmlSerializer;
 import android.util.Xml;
 
+import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.XmlUtils;
 
 import libcore.io.IoUtils;
 
+import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
+import org.xmlpull.v1.XmlSerializer;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -161,9 +165,10 @@ final class PersistentDataStore {
             return;
         }
 
-        TypedXmlPullParser parser;
+        XmlPullParser parser;
         try {
-            parser = Xml.resolvePullParser(is);
+            parser = Xml.newPullParser();
+            parser.setInput(new BufferedInputStream(is), StandardCharsets.UTF_8.name());
             loadFromXml(parser);
         } catch (IOException | XmlPullParserException ex) {
             Slog.w(TAG, "Failed to load tv input manager persistent store data.", ex);
@@ -195,7 +200,8 @@ final class PersistentDataStore {
             os = mAtomicFile.startWrite();
             boolean success = false;
             try {
-                TypedXmlSerializer serializer = Xml.resolveSerializer(os);
+                XmlSerializer serializer = new FastXmlSerializer();
+                serializer.setOutput(new BufferedOutputStream(os), StandardCharsets.UTF_8.name());
                 saveToXml(serializer);
                 serializer.flush();
                 success = true;
@@ -232,7 +238,7 @@ final class PersistentDataStore {
     private static final String ATTR_STRING = "string";
     private static final String ATTR_ENABLED = "enabled";
 
-    private void loadFromXml(TypedXmlPullParser parser)
+    private void loadFromXml(XmlPullParser parser)
             throws IOException, XmlPullParserException {
         XmlUtils.beginDocument(parser, TAG_TV_INPUT_MANAGER_STATE);
         final int outerDepth = parser.getDepth();
@@ -240,12 +246,17 @@ final class PersistentDataStore {
             if (parser.getName().equals(TAG_BLOCKED_RATINGS)) {
                 loadBlockedRatingsFromXml(parser);
             } else if (parser.getName().equals(TAG_PARENTAL_CONTROLS)) {
-                mParentalControlsEnabled = parser.getAttributeBoolean(null, ATTR_ENABLED);
+                String enabled = parser.getAttributeValue(null, ATTR_ENABLED);
+                if (TextUtils.isEmpty(enabled)) {
+                    throw new XmlPullParserException(
+                            "Missing " + ATTR_ENABLED + " attribute on " + TAG_PARENTAL_CONTROLS);
+                }
+                mParentalControlsEnabled = Boolean.parseBoolean(enabled);
             }
         }
     }
 
-    private void loadBlockedRatingsFromXml(TypedXmlPullParser parser)
+    private void loadBlockedRatingsFromXml(XmlPullParser parser)
             throws IOException, XmlPullParserException {
         final int outerDepth = parser.getDepth();
         while (XmlUtils.nextElementWithin(parser, outerDepth)) {
@@ -260,7 +271,7 @@ final class PersistentDataStore {
         }
     }
 
-    private void saveToXml(TypedXmlSerializer serializer) throws IOException {
+    private void saveToXml(XmlSerializer serializer) throws IOException {
         serializer.startDocument(null, true);
         serializer.setFeature("http://xmlpull.org/v1/doc/features.html#indent-output", true);
         serializer.startTag(null, TAG_TV_INPUT_MANAGER_STATE);
@@ -274,7 +285,7 @@ final class PersistentDataStore {
         }
         serializer.endTag(null, TAG_BLOCKED_RATINGS);
         serializer.startTag(null, TAG_PARENTAL_CONTROLS);
-        serializer.attributeBoolean(null, ATTR_ENABLED, mParentalControlsEnabled);
+        serializer.attribute(null, ATTR_ENABLED, Boolean.toString(mParentalControlsEnabled));
         serializer.endTag(null, TAG_PARENTAL_CONTROLS);
         serializer.endTag(null, TAG_TV_INPUT_MANAGER_STATE);
         serializer.endDocument();

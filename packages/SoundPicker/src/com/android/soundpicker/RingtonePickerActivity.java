@@ -333,9 +333,6 @@ public final class RingtonePickerActivity extends AlertActivity implements
 
     @Override
     public void onDestroy() {
-        if (mHandler != null) {
-            mHandler.removeCallbacksAndMessages(null);
-        }
         if (mCursor != null) {
             mCursor.close();
             mCursor = null;
@@ -587,19 +584,15 @@ public final class RingtonePickerActivity extends AlertActivity implements
     }
 
     private Uri getCurrentlySelectedRingtoneUri() {
-        if (getCheckedItem() == POS_UNKNOWN) {
-            // When the getCheckItem is POS_UNKNOWN, it is not the case we expected.
-            // We return null for this case.
-            return null;
-        } else if (getCheckedItem() == mDefaultRingtonePos) {
-            // Use the default Uri that they originally gave us.
-            return mUriForDefaultItem;
-        } else if (getCheckedItem() == mSilentPos) {
-            // Use a null Uri for the 'Silent' item.
-            return null;
-        } else {
-            return mRingtoneManager.getRingtoneUri(getRingtoneManagerPosition(getCheckedItem()));
-        }
+      if (getCheckedItem() == mDefaultRingtonePos) {
+        // Use the default Uri that they originally gave us.
+        return mUriForDefaultItem;
+      } else if (getCheckedItem() == mSilentPos) {
+        // Use a null Uri for the 'Silent' item.
+        return null;
+      } else {
+        return mRingtoneManager.getRingtoneUri(getRingtoneManagerPosition(getCheckedItem()));
+      }
     }
 
     private void saveAnyPlayingRingtone() {

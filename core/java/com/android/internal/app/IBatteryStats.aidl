@@ -19,8 +19,6 @@ package com.android.internal.app;
 import com.android.internal.os.BatteryStatsImpl;
 
 import android.bluetooth.BluetoothActivityEnergyInfo;
-import android.os.BatteryUsageStats;
-import android.os.BatteryUsageStatsQuery;
 import android.os.ParcelFileDescriptor;
 import android.os.WorkSource;
 import android.os.connectivity.CellularBatteryStats;
@@ -34,7 +32,7 @@ import android.telephony.SignalStrength;
 
 interface IBatteryStats {
     // These first methods are also called by native code, so must
-    // be kept in sync with frameworks/native/libs/binder/include_batterystats/batterystats/IBatteryStats.h
+    // be kept in sync with frameworks/native/libs/binder/include/binder/IBatteryStats.h
     void noteStartSensor(int uid, int sensor);
     void noteStopSensor(int uid, int sensor);
     void noteStartVideo(int uid);
@@ -51,16 +49,13 @@ interface IBatteryStats {
     void noteResetFlashlight();
 
     // Remaining methods are only used in Java.
-
-    List<BatteryUsageStats> getBatteryUsageStats(in List<BatteryUsageStatsQuery> queries);
-
     @UnsupportedAppUsage
     byte[] getStatistics();
 
-    ParcelFileDescriptor getStatisticsStream(boolean updateAll);
+    ParcelFileDescriptor getStatisticsStream();
 
     // Return true if we see the battery as currently charging.
-    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
+    @UnsupportedAppUsage
     boolean isCharging();
 
     // Return the computed amount of time remaining on battery, in milliseconds.
@@ -69,7 +64,7 @@ interface IBatteryStats {
 
     // Return the computed amount of time remaining to fully charge, in milliseconds.
     // Returns -1 if nothing could be computed.
-    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
+    @UnsupportedAppUsage
     long computeChargeTimeRemaining();
 
     void noteEvent(int code, String name, int uid);
@@ -134,12 +129,12 @@ interface IBatteryStats {
     void noteWifiBatchedScanStartedFromSource(in WorkSource ws, int csph);
     void noteWifiBatchedScanStoppedFromSource(in WorkSource ws);
     void noteWifiRadioPowerState(int powerState, long timestampNs, int uid);
-    void noteNetworkInterfaceForTransports(String iface, in int[] transportTypes);
+    void noteNetworkInterfaceType(String iface, int type);
     void noteNetworkStatsEnabled();
     void noteDeviceIdleMode(int mode, String activeReason, int activeUid);
     void setBatteryState(int status, int health, int plugType, int level, int temp, int volt,
             int chargeUAh, int chargeFullUAh, long chargeTimeToFullSeconds);
-    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
+    @UnsupportedAppUsage
     long getAwakeTimeBattery();
     long getAwakeTimePlugged();
 
@@ -166,15 +161,4 @@ interface IBatteryStats {
 
     /** {@hide} */
     boolean setChargingStateUpdateDelayMillis(int delay);
-
-    /** Exposed as a test API. */
-    void setChargerAcOnline(boolean online, boolean forceUpdate);
-    /** Exposed as a test API. */
-    void setBatteryLevel(int level, boolean forceUpdate);
-    /** Exposed as a test API. */
-    void unplugBattery(boolean forceUpdate);
-    /** Exposed as a test API. */
-    void resetBattery(boolean forceUpdate);
-    /** Exposed as a test API. */
-    void suspendBatteryInput();
 }

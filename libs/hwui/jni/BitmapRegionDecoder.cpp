@@ -22,8 +22,8 @@
 #include "GraphicsJNI.h"
 #include "Utils.h"
 
-#include "BitmapRegionDecoder.h"
 #include "SkBitmap.h"
+#include "SkBitmapRegionDecoder.h"
 #include "SkCodec.h"
 #include "SkData.h"
 #include "SkStream.h"
@@ -36,8 +36,10 @@
 
 using namespace android;
 
-static jobject createBitmapRegionDecoder(JNIEnv* env, sk_sp<SkData> data) {
-    auto brd = skia::BitmapRegionDecoder::Make(std::move(data));
+static jobject createBitmapRegionDecoder(JNIEnv* env, std::unique_ptr<SkStreamRewindable> stream) {
+  std::unique_ptr<SkBitmapRegionDecoder> brd(
+            SkBitmapRegionDecoder::Create(stream.release(),
+                                          SkBitmapRegionDecoder::kAndroidCodec_Strategy));
     if (!brd) {
         doThrowIOE(env, "Image format not supported");
         return nullObjectReturn("CreateBitmapRegionDecoder returned null");
@@ -47,13 +49,21 @@ static jobject createBitmapRegionDecoder(JNIEnv* env, sk_sp<SkData> data) {
 }
 
 static jobject nativeNewInstanceFromByteArray(JNIEnv* env, jobject, jbyteArray byteArray,
-                                              jint offset, jint length) {
+                                     jint offset, jint length, jboolean isShareable) {
+    /*  If isShareable we could decide to just wrap the java array and
+        share it, but that means adding a globalref to the java array object
+        For now we just always copy the array's data if isShareable.
+     */
     AutoJavaByteArray ar(env, byteArray);
-    return createBitmapRegionDecoder(env, SkData::MakeWithCopy(ar.ptr() + offset, length));
+    std::unique_ptr<SkMemoryStream> stream(new SkMemoryStream(ar.ptr() + offset, length, true));
+
+    // the decoder owns the stream.
+    jobject brd = createBitmapRegionDecoder(env, std::move(stream));
+    return brd;
 }
 
 static jobject nativeNewInstanceFromFileDescriptor(JNIEnv* env, jobject clazz,
-                                                   jobject fileDescriptor) {
+                                          jobject fileDescriptor, jboolean isShareable) {
     NPE_CHECK_RETURN_ZERO(env, fileDescriptor);
 
     jint descriptor = jniGetFDFromFileDescriptor(env, fileDescriptor);
@@ -64,28 +74,41 @@ static jobject nativeNewInstanceFromFileDescriptor(JNIEnv* env, jobject clazz,
         return nullObjectReturn("fstat return -1");
     }
 
-    return createBitmapRegionDecoder(env, SkData::MakeFromFD(descriptor));
+    sk_sp<SkData> data(SkData::MakeFromFD(descriptor));
+    std::unique_ptr<SkMemoryStream> stream(new SkMemoryStream(std::move(data)));
+
+    // the decoder owns the stream.
+    jobject brd = createBitmapRegionDecoder(env, std::move(stream));
+    return brd;
 }
 
-static jobject nativeNewInstanceFromStream(JNIEnv* env, jobject clazz, jobject is, // InputStream
-                                           jbyteArray storage) { // byte[]
-    jobject brd = nullptr;
-    sk_sp<SkData> data = CopyJavaInputStream(env, is, storage);
+static jobject nativeNewInstanceFromStream(JNIEnv* env, jobject clazz,
+                                  jobject is,       // InputStream
+                                  jbyteArray storage, // byte[]
+                                  jboolean isShareable) {
+    jobject brd = NULL;
+    // for now we don't allow shareable with java inputstreams
+    std::unique_ptr<SkStreamRewindable> stream(CopyJavaInputStream(env, is, storage));
 
-    if (data) {
-        brd = createBitmapRegionDecoder(env, std::move(data));
+    if (stream) {
+        // the decoder owns the stream.
+        brd = createBitmapRegionDecoder(env, std::move(stream));
     }
     return brd;
 }
 
-static jobject nativeNewInstanceFromAsset(JNIEnv* env, jobject clazz, jlong native_asset) {
+static jobject nativeNewInstanceFromAsset(JNIEnv* env, jobject clazz,
+                                 jlong native_asset, // Asset
+                                 jboolean isShareable) {
     Asset* asset = reinterpret_cast<Asset*>(native_asset);
-    sk_sp<SkData> data = CopyAssetToData(asset);
-    if (!data) {
-        return nullptr;
+    std::unique_ptr<SkMemoryStream> stream(CopyAssetToStream(asset));
+    if (NULL == stream) {
+        return NULL;
     }
 
-    return createBitmapRegionDecoder(env, data);
+    // the decoder owns the stream.
+    jobject brd = createBitmapRegionDecoder(env, std::move(stream));
+    return brd;
 }
 
 /*
@@ -135,7 +158,7 @@ static jobject nativeDecodeRegion(JNIEnv* env, jobject, jlong brdHandle, jint in
         recycledBytes = recycledBitmap->getAllocationByteCount();
     }
 
-    auto* brd = reinterpret_cast<skia::BitmapRegionDecoder*>(brdHandle);
+    SkBitmapRegionDecoder* brd = reinterpret_cast<SkBitmapRegionDecoder*>(brdHandle);
     SkColorType decodeColorType = brd->computeOutputColorType(colorType);
     if (decodeColorType == kRGBA_F16_SkColorType && isHardware &&
             !uirenderer::HardwareBitmapUploader::hasFP16Support()) {
@@ -143,7 +166,7 @@ static jobject nativeDecodeRegion(JNIEnv* env, jobject, jlong brdHandle, jint in
     }
 
     // Set up the pixel allocator
-    skia::BRDAllocator* allocator = nullptr;
+    SkBRDAllocator* allocator = nullptr;
     RecyclingClippingPixelAllocator recycleAlloc(recycledBitmap, recycledBytes);
     HeapAllocator heapAlloc;
     if (javaBitmap) {
@@ -207,17 +230,20 @@ static jobject nativeDecodeRegion(JNIEnv* env, jobject, jlong brdHandle, jint in
 }
 
 static jint nativeGetHeight(JNIEnv* env, jobject, jlong brdHandle) {
-    auto* brd = reinterpret_cast<skia::BitmapRegionDecoder*>(brdHandle);
+    SkBitmapRegionDecoder* brd =
+            reinterpret_cast<SkBitmapRegionDecoder*>(brdHandle);
     return static_cast<jint>(brd->height());
 }
 
 static jint nativeGetWidth(JNIEnv* env, jobject, jlong brdHandle) {
-    auto* brd = reinterpret_cast<skia::BitmapRegionDecoder*>(brdHandle);
+    SkBitmapRegionDecoder* brd =
+            reinterpret_cast<SkBitmapRegionDecoder*>(brdHandle);
     return static_cast<jint>(brd->width());
 }
 
 static void nativeClean(JNIEnv* env, jobject, jlong brdHandle) {
-    auto* brd = reinterpret_cast<skia::BitmapRegionDecoder*>(brdHandle);
+    SkBitmapRegionDecoder* brd =
+            reinterpret_cast<SkBitmapRegionDecoder*>(brdHandle);
     delete brd;
 }
 
@@ -235,22 +261,22 @@ static const JNINativeMethod gBitmapRegionDecoderMethods[] = {
     {   "nativeClean", "(J)V", (void*)nativeClean},
 
     {   "nativeNewInstance",
-        "([BII)Landroid/graphics/BitmapRegionDecoder;",
+        "([BIIZ)Landroid/graphics/BitmapRegionDecoder;",
         (void*)nativeNewInstanceFromByteArray
     },
 
     {   "nativeNewInstance",
-        "(Ljava/io/InputStream;[B)Landroid/graphics/BitmapRegionDecoder;",
+        "(Ljava/io/InputStream;[BZ)Landroid/graphics/BitmapRegionDecoder;",
         (void*)nativeNewInstanceFromStream
     },
 
     {   "nativeNewInstance",
-        "(Ljava/io/FileDescriptor;)Landroid/graphics/BitmapRegionDecoder;",
+        "(Ljava/io/FileDescriptor;Z)Landroid/graphics/BitmapRegionDecoder;",
         (void*)nativeNewInstanceFromFileDescriptor
     },
 
     {   "nativeNewInstance",
-        "(J)Landroid/graphics/BitmapRegionDecoder;",
+        "(JZ)Landroid/graphics/BitmapRegionDecoder;",
         (void*)nativeNewInstanceFromAsset
     },
 };

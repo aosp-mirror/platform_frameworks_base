@@ -16,6 +16,9 @@
 
 package com.android.settingslib.widget;
 
+import static com.android.settingslib.widget.AdaptiveOutlineDrawable.AdaptiveOutlineIconType.TYPE_ADVANCED;
+import static com.android.settingslib.widget.AdaptiveOutlineDrawable.AdaptiveOutlineIconType.TYPE_DEFAULT;
+
 import android.annotation.ColorInt;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
@@ -45,12 +48,11 @@ public class AdaptiveOutlineDrawable extends DrawableWrapper {
     private static final float ADVANCED_ICON_CENTER = 50f;
     private static final float ADVANCED_ICON_RADIUS = 48f;
 
-    public static final int ICON_TYPE_DEFAULT = 0;
-    public static final int ICON_TYPE_ADVANCED = 1;
-
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef({ICON_TYPE_DEFAULT, ICON_TYPE_ADVANCED})
+    @IntDef({TYPE_DEFAULT, TYPE_ADVANCED})
     public @interface AdaptiveOutlineIconType {
+        int TYPE_DEFAULT = 0;
+        int TYPE_ADVANCED = 1;
     }
 
     @VisibleForTesting
@@ -64,7 +66,7 @@ public class AdaptiveOutlineDrawable extends DrawableWrapper {
     public AdaptiveOutlineDrawable(Resources resources, Bitmap bitmap) {
         super(new AdaptiveIconShapeDrawable(resources));
 
-        init(resources, bitmap, ICON_TYPE_DEFAULT);
+        init(resources, bitmap, TYPE_DEFAULT);
     }
 
     public AdaptiveOutlineDrawable(Resources resources, Bitmap bitmap,
@@ -94,10 +96,10 @@ public class AdaptiveOutlineDrawable extends DrawableWrapper {
     private @ColorInt int getColor(Resources resources, @AdaptiveOutlineIconType int type) {
         int resId;
         switch (type) {
-            case ICON_TYPE_ADVANCED:
+            case TYPE_ADVANCED:
                 resId = R.color.advanced_outline_color;
                 break;
-            case ICON_TYPE_DEFAULT:
+            case TYPE_DEFAULT:
             default:
                 resId = R.color.bt_outline_color;
                 break;
@@ -108,10 +110,10 @@ public class AdaptiveOutlineDrawable extends DrawableWrapper {
     private int getDimensionPixelSize(Resources resources, @AdaptiveOutlineIconType int type) {
         int resId;
         switch (type) {
-            case ICON_TYPE_ADVANCED:
+            case TYPE_ADVANCED:
                 resId = R.dimen.advanced_dashboard_tile_foreground_image_inset;
                 break;
-            case ICON_TYPE_DEFAULT:
+            case TYPE_DEFAULT:
             default:
                 resId = R.dimen.dashboard_tile_foreground_image_inset;
                 break;
@@ -131,7 +133,7 @@ public class AdaptiveOutlineDrawable extends DrawableWrapper {
         final int count = canvas.save();
         canvas.scale(scaleX, scaleY);
         // Draw outline
-        if (mType == ICON_TYPE_DEFAULT) {
+        if (mType == TYPE_DEFAULT) {
             canvas.drawPath(mPath, mOutlinePaint);
         } else {
             canvas.drawCircle(ADVANCED_ICON_CENTER, ADVANCED_ICON_CENTER, ADVANCED_ICON_RADIUS,

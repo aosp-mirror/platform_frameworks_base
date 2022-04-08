@@ -188,8 +188,7 @@ class TaskPositioningController {
             transferFocusFromWin = displayContent.mCurrentFocus;
         }
         if (!mInputManager.transferTouchFocus(
-                transferFocusFromWin.mInputChannel, mTaskPositioner.mClientChannel,
-                false /* isDragDrop */)) {
+                transferFocusFromWin.mInputChannel, mTaskPositioner.mServerChannel)) {
             Slog.e(TAG_WM, "startPositioningLocked: Unable to transfer touch focus");
             cleanUpTaskPositioner();
             return false;

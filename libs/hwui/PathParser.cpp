@@ -16,6 +16,8 @@
 
 #include "PathParser.h"
 
+#include "jni.h"
+
 #include <errno.h>
 #include <stdlib.h>
 #include <utils/Log.h>

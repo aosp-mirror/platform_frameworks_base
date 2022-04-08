@@ -45,28 +45,20 @@ enum {
 
 // `out_values` must NOT be nullptr.
 // `out_indices` may be nullptr.
-base::expected<std::monostate, IOError> ResolveAttrs(Theme* theme, uint32_t def_style_attr,
-                                                     uint32_t def_style_resid, uint32_t* src_values,
-                                                     size_t src_values_length, uint32_t* attrs,
-                                                     size_t attrs_length, uint32_t* out_values,
-                                                     uint32_t* out_indices);
+bool ResolveAttrs(Theme* theme, uint32_t def_style_attr, uint32_t def_style_resid,
+                  uint32_t* src_values, size_t src_values_length, uint32_t* attrs,
+                  size_t attrs_length, uint32_t* out_values, uint32_t* out_indices);
 
 // `out_values` must NOT be nullptr.
 // `out_indices` is NOT optional and must NOT be nullptr.
-base::expected<std::monostate, IOError> ApplyStyle(Theme* theme, ResXMLParser* xml_parser,
-                                                   uint32_t def_style_attr,
-                                                   uint32_t def_style_resid,
-                                                   const uint32_t* attrs, size_t attrs_length,
-                                                   uint32_t* out_values, uint32_t* out_indices);
+void ApplyStyle(Theme* theme, ResXMLParser* xml_parser, uint32_t def_style_attr,
+                uint32_t def_style_resid, const uint32_t* attrs, size_t attrs_length,
+                uint32_t* out_values, uint32_t* out_indices);
 
 // `out_values` must NOT be nullptr.
 // `out_indices` may be nullptr.
-base::expected<std::monostate, IOError> RetrieveAttributes(AssetManager2* assetmanager,
-                                                           ResXMLParser* xml_parser,
-                                                           uint32_t* attrs,
-                                                           size_t attrs_length,
-                                                           uint32_t* out_values,
-                                                           uint32_t* out_indices);
+bool RetrieveAttributes(AssetManager2* assetmanager, ResXMLParser* xml_parser, uint32_t* attrs,
+                        size_t attrs_length, uint32_t* out_values, uint32_t* out_indices);
 
 }  // namespace android
 

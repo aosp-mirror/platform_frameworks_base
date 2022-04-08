@@ -132,8 +132,7 @@ public class ActivityManagerTest extends AndroidTestCase {
                 true,                    // ensureNavigationBarContrastWhenTransparent
                 RESIZE_MODE_RESIZEABLE,  // resizeMode
                 10,                      // minWidth
-                20,                      // minHeight
-                0                        // colorBackgroundFloating
+                20                       // minHeight
         );
 
         TaskDescription td2 = new TaskDescription();
@@ -156,8 +155,7 @@ public class ActivityManagerTest extends AndroidTestCase {
                 false,                     // ensureNavigationBarContrastWhenTransparent
                 RESIZE_MODE_UNRESIZEABLE,  // resizeMode
                 10,                        // minWidth
-                20,                        // minHeight
-                0                          // colorBackgroundFloating
+                20                         // minHeight
         );
 
         TaskDescription td2 = new TaskDescription(
@@ -171,8 +169,7 @@ public class ActivityManagerTest extends AndroidTestCase {
                 true,                    // ensureNavigationBarContrastWhenTransparent
                 RESIZE_MODE_RESIZEABLE,  // resizeMode
                 102,                     // minWidth
-                202,                     // minHeight
-                0                        // colorBackgroundFloating
+                202                      // minHeight
         );
 
         // Must overwrite all public and hidden fields, since other has all fields set.
@@ -201,8 +198,7 @@ public class ActivityManagerTest extends AndroidTestCase {
                 false,                     // ensureNavigationBarContrastWhenTransparent
                 RESIZE_MODE_UNRESIZEABLE,  // resizeMode
                 10,                        // minWidth
-                20,                        // minHeight
-                0                          // colorBackgroundFloating
+                20                         // minHeight
         );
 
         // Normal parceling should keep everything the same.
@@ -223,8 +219,7 @@ public class ActivityManagerTest extends AndroidTestCase {
                 false,                     // ensureNavigationBarContrastWhenTransparent
                 RESIZE_MODE_UNRESIZEABLE,  // resizeMode
                 10,                        // minWidth
-                20,                        // minHeight
-                0                          // colorBackgroundFloating
+                20                         // minHeight
         );
         // Recycled bitmap will be ignored while parceling.
         tdParcelled = new TaskDescription(parcelingRoundTrip(tdBitmapRecycled));
@@ -274,7 +269,7 @@ public class ActivityManagerTest extends AndroidTestCase {
         return unmarshalled;
     }
 
-    // If any entries in appear in the list, validity check them against all running applications
+    // If any entries in appear in the list, sanity check them against all running applications
     private void checkErrorListSanity(List<ActivityManager.ProcessErrorStateInfo> errList) {
         if (errList == null) return;
         
@@ -282,7 +277,7 @@ public class ActivityManagerTest extends AndroidTestCase {
         while (iter.hasNext()) {
             ActivityManager.ProcessErrorStateInfo info = iter.next();
             assertNotNull(info);
-            // validity checks
+            // sanity checks
             assertTrue((info.condition == ActivityManager.ProcessErrorStateInfo.CRASHED) ||
                        (info.condition == ActivityManager.ProcessErrorStateInfo.NOT_RESPONDING));
             // TODO look at each of these and consider a stronger test

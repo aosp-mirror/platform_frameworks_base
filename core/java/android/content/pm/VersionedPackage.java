@@ -17,7 +17,6 @@ package android.content.pm;
 
 import android.annotation.IntRange;
 import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -97,7 +96,7 @@ public final class VersionedPackage implements Parcelable {
     }
 
     @Override
-    public boolean equals(@Nullable Object o) {
+    public boolean equals(Object o) {
         return o instanceof VersionedPackage
                 && ((VersionedPackage) o).mPackageName.equals(mPackageName)
                 && ((VersionedPackage) o).mVersionCode == mVersionCode;

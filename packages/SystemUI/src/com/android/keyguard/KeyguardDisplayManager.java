@@ -16,12 +16,11 @@
 package com.android.keyguard;
 
 import static android.view.Display.DEFAULT_DISPLAY;
-import static android.view.Display.DEFAULT_DISPLAY_GROUP;
 
 import android.app.Presentation;
 import android.content.Context;
 import android.graphics.Color;
-import android.graphics.Rect;
+import android.graphics.Point;
 import android.hardware.display.DisplayManager;
 import android.media.MediaRouter;
 import android.media.MediaRouter.RouteInfo;
@@ -35,32 +34,28 @@ import android.view.View;
 import android.view.WindowManager;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.keyguard.dagger.KeyguardStatusViewComponent;
+import com.android.systemui.Dependency;
 import com.android.systemui.R;
-import com.android.systemui.dagger.qualifiers.UiBackground;
-import com.android.systemui.navigationbar.NavigationBarController;
-import com.android.systemui.navigationbar.NavigationBarView;
-
-import java.util.concurrent.Executor;
-
-import javax.inject.Inject;
-
-import dagger.Lazy;
+import com.android.systemui.statusbar.NavigationBarController;
+import com.android.systemui.statusbar.phone.NavigationBarView;
+import com.android.systemui.util.InjectionInflationController;
 
 public class KeyguardDisplayManager {
     protected static final String TAG = "KeyguardDisplayManager";
     private static boolean DEBUG = KeyguardConstants.DEBUG;
 
-    private MediaRouter mMediaRouter = null;
+    private final MediaRouter mMediaRouter;
     private final DisplayManager mDisplayService;
-    private final Lazy<NavigationBarController> mNavigationBarControllerLazy;
-    private final KeyguardStatusViewComponent.Factory mKeyguardStatusViewComponentFactory;
+    private final InjectionInflationController mInjectableInflater;
     private final Context mContext;
 
     private boolean mShowing;
     private final DisplayInfo mTmpDisplayInfo = new DisplayInfo();
 
     private final SparseArray<Presentation> mPresentations = new SparseArray<>();
+
+    private final NavigationBarController mNavBarController =
+            Dependency.get(NavigationBarController.class);
 
     private final DisplayManager.DisplayListener mDisplayListener =
             new DisplayManager.DisplayListener() {
@@ -76,7 +71,16 @@ public class KeyguardDisplayManager {
 
         @Override
         public void onDisplayChanged(int displayId) {
-
+            if (displayId == DEFAULT_DISPLAY) return;
+            final Presentation presentation = mPresentations.get(displayId);
+            if (presentation != null && mShowing) {
+                hidePresentation(displayId);
+                // update DisplayInfo.
+                final Display display = mDisplayService.getDisplay(displayId);
+                if (display != null) {
+                    showPresentation(display);
+                }
+            }
         }
 
         @Override
@@ -85,15 +89,11 @@ public class KeyguardDisplayManager {
         }
     };
 
-    @Inject
     public KeyguardDisplayManager(Context context,
-            Lazy<NavigationBarController> navigationBarControllerLazy,
-            KeyguardStatusViewComponent.Factory keyguardStatusViewComponentFactory,
-            @UiBackground Executor uiBgExecutor) {
+            InjectionInflationController injectableInflater) {
         mContext = context;
-        mNavigationBarControllerLazy = navigationBarControllerLazy;
-        mKeyguardStatusViewComponentFactory = keyguardStatusViewComponentFactory;
-        uiBgExecutor.execute(() -> mMediaRouter = mContext.getSystemService(MediaRouter.class));
+        mInjectableInflater = injectableInflater;
+        mMediaRouter = mContext.getSystemService(MediaRouter.class);
         mDisplayService = mContext.getSystemService(DisplayManager.class);
         mDisplayService.registerDisplayListener(mDisplayListener, null /* handler */);
     }
@@ -112,14 +112,6 @@ public class KeyguardDisplayManager {
             if (DEBUG) Log.i(TAG, "Do not show KeyguardPresentation on a private display");
             return false;
         }
-        if (mTmpDisplayInfo.displayGroupId != DEFAULT_DISPLAY_GROUP) {
-            if (DEBUG) {
-                Log.i(TAG,
-                        "Do not show KeyguardPresentation on a non-default group display");
-            }
-            return false;
-        }
-
         return true;
     }
     /**
@@ -134,7 +126,8 @@ public class KeyguardDisplayManager {
         final int displayId = display.getDisplayId();
         Presentation presentation = mPresentations.get(displayId);
         if (presentation == null) {
-            final Presentation newPresentation = createPresentation(display);
+            final Presentation newPresentation = new KeyguardPresentation(mContext, display,
+                    mInjectableInflater.injectable(LayoutInflater.from(mContext)));
             newPresentation.setOnDismissListener(dialog -> {
                 if (newPresentation.equals(mPresentations.get(displayId))) {
                     mPresentations.remove(displayId);
@@ -155,10 +148,6 @@ public class KeyguardDisplayManager {
         return false;
     }
 
-    KeyguardPresentation createPresentation(Display display) {
-        return new KeyguardPresentation(mContext, display, mKeyguardStatusViewComponentFactory);
-    }
-
     /**
      * @param displayId The id of the display to hide the presentation off.
      */
@@ -173,12 +162,8 @@ public class KeyguardDisplayManager {
     public void show() {
         if (!mShowing) {
             if (DEBUG) Log.v(TAG, "show");
-            if (mMediaRouter != null) {
-                mMediaRouter.addCallback(MediaRouter.ROUTE_TYPE_REMOTE_DISPLAY,
-                        mMediaRouterCallback, MediaRouter.CALLBACK_FLAG_PASSIVE_DISCOVERY);
-            } else {
-                Log.w(TAG, "MediaRouter not yet initialized");
-            }
+            mMediaRouter.addCallback(MediaRouter.ROUTE_TYPE_REMOTE_DISPLAY,
+                    mMediaRouterCallback, MediaRouter.CALLBACK_FLAG_PASSIVE_DISCOVERY);
             updateDisplays(true /* showing */);
         }
         mShowing = true;
@@ -187,9 +172,7 @@ public class KeyguardDisplayManager {
     public void hide() {
         if (mShowing) {
             if (DEBUG) Log.v(TAG, "hide");
-            if (mMediaRouter != null) {
-                mMediaRouter.removeCallback(mMediaRouterCallback);
-            }
+            mMediaRouter.removeCallback(mMediaRouterCallback);
             updateDisplays(false /* showing */);
         }
         mShowing = false;
@@ -244,8 +227,7 @@ public class KeyguardDisplayManager {
         // Leave this task to {@link StatusBarKeyguardViewManager}
         if (displayId == DEFAULT_DISPLAY) return;
 
-        NavigationBarView navBarView = mNavigationBarControllerLazy.get()
-                .getNavigationBarView(displayId);
+        NavigationBarView navBarView = mNavBarController.getNavigationBarView(displayId);
         // We may not have nav bar on a display.
         if (navBarView == null) return;
 
@@ -261,9 +243,7 @@ public class KeyguardDisplayManager {
     static final class KeyguardPresentation extends Presentation {
         private static final int VIDEO_SAFE_REGION = 80; // Percentage of display width & height
         private static final int MOVE_CLOCK_TIMEOUT = 10000; // 10s
-        private final KeyguardStatusViewComponent.Factory mKeyguardStatusViewComponentFactory;
-        private final Context mContext;
-        private KeyguardClockSwitchController mKeyguardClockSwitchController;
+        private final LayoutInflater mInjectableLayoutInflater;
         private View mClock;
         private int mUsableWidth;
         private int mUsableHeight;
@@ -281,17 +261,16 @@ public class KeyguardDisplayManager {
         };
 
         KeyguardPresentation(Context context, Display display,
-                KeyguardStatusViewComponent.Factory keyguardStatusViewComponentFactory) {
-            super(context, display, R.style.Theme_SystemUI_KeyguardPresentation,
-                    WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG);
-            mKeyguardStatusViewComponentFactory = keyguardStatusViewComponentFactory;
+                LayoutInflater injectionLayoutInflater) {
+            super(context, display, R.style.Theme_SystemUI_KeyguardPresentation);
+            mInjectableLayoutInflater = injectionLayoutInflater;
+            getWindow().setType(WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG);
             setCancelable(false);
-            mContext = context;
         }
 
         @Override
         public void cancel() {
-            // Do not allow anything to cancel KeyguardPresentation except KeyguardDisplayManager.
+            // Do not allow anything to cancel KeyguardPresetation except KeyguardDisplayManager.
         }
 
         @Override
@@ -300,19 +279,17 @@ public class KeyguardDisplayManager {
         }
 
         @Override
-        public void onDisplayChanged() {
-            updateBounds();
-            getWindow().getDecorView().requestLayout();
-        }
-
-        @Override
         protected void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
 
-            updateBounds();
+            Point p = new Point();
+            getDisplay().getSize(p);
+            mUsableWidth = VIDEO_SAFE_REGION * p.x/100;
+            mUsableHeight = VIDEO_SAFE_REGION * p.y/100;
+            mMarginLeft = (100 - VIDEO_SAFE_REGION) * p.x / 200;
+            mMarginTop = (100 - VIDEO_SAFE_REGION) * p.y / 200;
 
-            setContentView(LayoutInflater.from(mContext)
-                    .inflate(R.layout.keyguard_presentation, null));
+            setContentView(mInjectableLayoutInflater.inflate(R.layout.keyguard_presentation, null));
 
             // Logic to make the lock screen fullscreen
             getWindow().getDecorView().setSystemUiVisibility(
@@ -327,22 +304,6 @@ public class KeyguardDisplayManager {
 
             // Avoid screen burn in
             mClock.post(mMoveTextRunnable);
-
-            mKeyguardClockSwitchController = mKeyguardStatusViewComponentFactory
-                    .build(findViewById(R.id.clock))
-                    .getKeyguardClockSwitchController();
-
-            mKeyguardClockSwitchController.setOnlyClock(true);
-            mKeyguardClockSwitchController.init();
-        }
-
-        private void updateBounds() {
-            final Rect bounds = getWindow().getWindowManager().getMaximumWindowMetrics()
-                    .getBounds();
-            mUsableWidth = VIDEO_SAFE_REGION * bounds.width() / 100;
-            mUsableHeight = VIDEO_SAFE_REGION * bounds.height() / 100;
-            mMarginLeft = (100 - VIDEO_SAFE_REGION) * bounds.width() / 200;
-            mMarginTop = (100 - VIDEO_SAFE_REGION) * bounds.height() / 200;
         }
     }
 }

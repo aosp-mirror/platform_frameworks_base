@@ -308,15 +308,14 @@ public class SystemActionPerformer {
 
     private void sendDownAndUpKeyEvents(int keyCode) {
         final long token = Binder.clearCallingIdentity();
-        try {
-            // Inject down.
-            final long downTime = SystemClock.uptimeMillis();
-            sendKeyEventIdentityCleared(keyCode, KeyEvent.ACTION_DOWN, downTime, downTime);
-            sendKeyEventIdentityCleared(
-                    keyCode, KeyEvent.ACTION_UP, downTime, SystemClock.uptimeMillis());
-        } finally {
-            Binder.restoreCallingIdentity(token);
-        }
+
+        // Inject down.
+        final long downTime = SystemClock.uptimeMillis();
+        sendKeyEventIdentityCleared(keyCode, KeyEvent.ACTION_DOWN, downTime, downTime);
+        sendKeyEventIdentityCleared(
+                keyCode, KeyEvent.ACTION_UP, downTime, SystemClock.uptimeMillis());
+
+        Binder.restoreCallingIdentity(token);
     }
 
     private void sendKeyEventIdentityCleared(int keyCode, int action, long downTime, long time) {
@@ -330,24 +329,22 @@ public class SystemActionPerformer {
 
     private void expandNotifications() {
         final long token = Binder.clearCallingIdentity();
-        try {
-            StatusBarManager statusBarManager = (StatusBarManager) mContext.getSystemService(
-                    android.app.Service.STATUS_BAR_SERVICE);
-            statusBarManager.expandNotificationsPanel();
-        } finally {
-            Binder.restoreCallingIdentity(token);
-        }
+
+        StatusBarManager statusBarManager = (StatusBarManager) mContext.getSystemService(
+                android.app.Service.STATUS_BAR_SERVICE);
+        statusBarManager.expandNotificationsPanel();
+
+        Binder.restoreCallingIdentity(token);
     }
 
     private void expandQuickSettings() {
         final long token = Binder.clearCallingIdentity();
-        try {
-            StatusBarManager statusBarManager = (StatusBarManager) mContext.getSystemService(
-                    android.app.Service.STATUS_BAR_SERVICE);
-            statusBarManager.expandSettingsPanel();
-        } finally {
-            Binder.restoreCallingIdentity(token);
-        }
+
+        StatusBarManager statusBarManager = (StatusBarManager) mContext.getSystemService(
+                android.app.Service.STATUS_BAR_SERVICE);
+        statusBarManager.expandSettingsPanel();
+
+        Binder.restoreCallingIdentity(token);
     }
 
     private boolean openRecents() {

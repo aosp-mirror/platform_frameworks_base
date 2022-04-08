@@ -25,7 +25,6 @@ import android.util.Slog;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Base class representing a remote service that can queue multiple pending requests while not
@@ -33,17 +32,14 @@ import java.util.List;
  *
  * @param <S> the concrete remote service class
  * @param <I> the interface of the binder service
- *
- * @deprecated Use {@link ServiceConnector} to manage remote service connections
  */
-@Deprecated
 public abstract class AbstractMultiplePendingRequestsRemoteService<S
         extends AbstractMultiplePendingRequestsRemoteService<S, I>, I extends IInterface>
         extends AbstractRemoteService<S, I> {
 
     private final int mInitialCapacity;
 
-    protected @NonNull List<BasePendingRequest<S, I>> mPendingRequests;
+    protected ArrayList<BasePendingRequest<S, I>> mPendingRequests;
 
     public AbstractMultiplePendingRequestsRemoteService(@NonNull Context context,
             @NonNull String serviceInterface, @NonNull ComponentName componentName, int userId,
@@ -52,36 +48,35 @@ public abstract class AbstractMultiplePendingRequestsRemoteService<S
         super(context, serviceInterface, componentName, userId, callback, handler, bindingFlags,
                 verbose);
         mInitialCapacity = initialCapacity;
-        mPendingRequests = new ArrayList<>(mInitialCapacity);
     }
 
     @Override // from AbstractRemoteService
     void handlePendingRequests() {
-        synchronized (mPendingRequests) {
+        if (mPendingRequests != null) {
             final int size = mPendingRequests.size();
             if (mVerbose) Slog.v(mTag, "Sending " + size + " pending requests");
             for (int i = 0; i < size; i++) {
                 mPendingRequests.get(i).run();
             }
-            mPendingRequests.clear();
+            mPendingRequests = null;
         }
     }
 
     @Override // from AbstractRemoteService
     protected void handleOnDestroy() {
-        synchronized (mPendingRequests) {
+        if (mPendingRequests != null) {
             final int size = mPendingRequests.size();
             if (mVerbose) Slog.v(mTag, "Canceling " + size + " pending requests");
             for (int i = 0; i < size; i++) {
                 mPendingRequests.get(i).cancel();
             }
-            mPendingRequests.clear();
+            mPendingRequests = null;
         }
     }
 
     @Override // from AbstractRemoteService
     final void handleBindFailure() {
-        synchronized (mPendingRequests) {
+        if (mPendingRequests != null) {
             final int size = mPendingRequests.size();
             if (mVerbose) Slog.v(mTag, "Sending failure to " + size + " pending requests");
             for (int i = 0; i < size; i++) {
@@ -89,7 +84,7 @@ public abstract class AbstractMultiplePendingRequestsRemoteService<S
                 request.onFailed();
                 request.finish();
             }
-            mPendingRequests.clear();
+            mPendingRequests = null;
         }
     }
 
@@ -99,21 +94,18 @@ public abstract class AbstractMultiplePendingRequestsRemoteService<S
 
         pw.append(prefix).append("initialCapacity=").append(String.valueOf(mInitialCapacity))
                 .println();
-        int size;
-        synchronized (mPendingRequests) {
-            size = mPendingRequests.size();
-        }
+        final int size = mPendingRequests == null ? 0 : mPendingRequests.size();
         pw.append(prefix).append("pendingRequests=").append(String.valueOf(size)).println();
     }
 
     @Override // from AbstractRemoteService
     void handlePendingRequestWhileUnBound(@NonNull BasePendingRequest<S, I> pendingRequest) {
-        synchronized (mPendingRequests) {
-            mPendingRequests.add(pendingRequest);
-            if (mVerbose) {
-                Slog.v(mTag,
-                        "queued " + mPendingRequests.size() + " requests; last=" + pendingRequest);
-            }
+        if (mPendingRequests == null) {
+            mPendingRequests = new ArrayList<>(mInitialCapacity);
+        }
+        mPendingRequests.add(pendingRequest);
+        if (mVerbose) {
+            Slog.v(mTag, "queued " + mPendingRequests.size() + " requests; last=" + pendingRequest);
         }
     }
 }

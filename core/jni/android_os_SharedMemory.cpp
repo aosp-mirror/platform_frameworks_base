@@ -22,7 +22,7 @@
 #include <utils/Log.h>
 
 #include <nativehelper/jni_macros.h>
-#include <nativehelper/JNIPlatformHelp.h>
+#include <nativehelper/JNIHelp.h>
 #include <nativehelper/ScopedLocalRef.h>
 
 #include <algorithm>
@@ -34,6 +34,21 @@ namespace {
 
 jclass errnoExceptionClass;
 jmethodID errnoExceptionCtor;  // MethodID for ErrnoException.<init>(String,I)
+
+void throwErrnoException(JNIEnv* env, const char* functionName, int error) {
+    ScopedLocalRef<jstring> detailMessage(env, env->NewStringUTF(functionName));
+    if (detailMessage.get() == NULL) {
+        // Not really much we can do here. We're probably dead in the water,
+        // but let's try to stumble on...
+        env->ExceptionClear();
+    }
+
+    jobject exception = env->NewObject(errnoExceptionClass,
+                                       errnoExceptionCtor,
+                                       detailMessage.get(),
+                                       error);
+    env->Throw(reinterpret_cast<jthrowable>(exception));
+}
 
 jobject SharedMemory_nCreate(JNIEnv* env, jobject, jstring jname, jint size) {
 
@@ -50,15 +65,11 @@ jobject SharedMemory_nCreate(JNIEnv* env, jobject, jstring jname, jint size) {
     }
 
     if (fd < 0) {
-        jniThrowErrnoException(env, "SharedMemory_create", err);
+        throwErrnoException(env, "SharedMemory_create", err);
         return nullptr;
     }
 
-    jobject jifd = jniCreateFileDescriptor(env, fd);
-    if (jifd == nullptr) {
-        close(fd);
-    }
-    return jifd;
+    return jniCreateFileDescriptor(env, fd);
 }
 
 jint SharedMemory_nGetSize(JNIEnv* env, jobject, jobject fileDescriptor) {

@@ -16,7 +16,7 @@
 
 package com.android.systemui.statusbar.notification.row;
 
-import com.android.systemui.dagger.SysUISingleton;
+import javax.inject.Singleton;
 
 import dagger.Binds;
 import dagger.Module;
@@ -30,7 +30,7 @@ public abstract class NotificationRowModule {
      * Provides notification row content binder instance.
      */
     @Binds
-    @SysUISingleton
+    @Singleton
     public abstract NotificationRowContentBinder provideNotificationRowContentBinder(
             NotificationContentInflater contentBinderImpl);
 
@@ -38,7 +38,7 @@ public abstract class NotificationRowModule {
      * Provides notification remote view cache instance.
      */
     @Binds
-    @SysUISingleton
+    @Singleton
     public abstract NotifRemoteViewCache provideNotifRemoteViewCache(
             NotifRemoteViewCacheImpl cacheImpl);
 }

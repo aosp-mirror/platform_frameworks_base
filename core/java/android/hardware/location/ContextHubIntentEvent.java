@@ -43,45 +43,39 @@ public class ContextHubIntentEvent {
 
     private final int mNanoAppAbortCode;
 
-    private final int mClientAuthorizationState;
-
     private ContextHubIntentEvent(
             @NonNull ContextHubInfo contextHubInfo, @ContextHubManager.Event int eventType,
-            long nanoAppId, NanoAppMessage nanoAppMessage, int nanoAppAbortCode,
-            @ContextHubManager.AuthorizationState int clientAuthorizationState) {
+            long nanoAppId, NanoAppMessage nanoAppMessage, int nanoAppAbortCode) {
         mContextHubInfo = contextHubInfo;
         mEventType = eventType;
         mNanoAppId = nanoAppId;
         mNanoAppMessage = nanoAppMessage;
         mNanoAppAbortCode = nanoAppAbortCode;
-        mClientAuthorizationState = clientAuthorizationState;
     }
 
     private ContextHubIntentEvent(
             @NonNull ContextHubInfo contextHubInfo, @ContextHubManager.Event int eventType) {
         this(contextHubInfo, eventType, -1 /* nanoAppId */, null /* nanoAppMessage */,
-                -1 /* nanoAppAbortCode */, 0 /* clientAuthorizationState */);
+                -1 /* nanoAppAbortCode */);
     }
 
     private ContextHubIntentEvent(
             @NonNull ContextHubInfo contextHubInfo, @ContextHubManager.Event int eventType,
             long nanoAppId) {
         this(contextHubInfo, eventType, nanoAppId, null /* nanoAppMessage */,
-                -1 /* nanoAppAbortCode */, 0 /* clientAuthorizationState */);
+                -1 /* nanoAppAbortCode */);
     }
 
     private ContextHubIntentEvent(
             @NonNull ContextHubInfo contextHubInfo, @ContextHubManager.Event int eventType,
             long nanoAppId, @NonNull NanoAppMessage nanoAppMessage) {
-        this(contextHubInfo, eventType, nanoAppId, nanoAppMessage, -1 /* nanoAppAbortCode */,
-                0 /* clientAuthorizationState */);
+        this(contextHubInfo, eventType, nanoAppId, nanoAppMessage, -1 /* nanoAppAbortCode */);
     }
 
     private ContextHubIntentEvent(
             @NonNull ContextHubInfo contextHubInfo, @ContextHubManager.Event int eventType,
             long nanoAppId, int nanoAppAbortCode) {
-        this(contextHubInfo, eventType, nanoAppId, null /* nanoAppMessage */, nanoAppAbortCode,
-                0 /* clientAuthorizationState */);
+        this(contextHubInfo, eventType, nanoAppId, null /* nanoAppMessage */, nanoAppAbortCode);
     }
 
     /**
@@ -111,8 +105,7 @@ public class ContextHubIntentEvent {
             case ContextHubManager.EVENT_NANOAPP_ENABLED:
             case ContextHubManager.EVENT_NANOAPP_DISABLED:
             case ContextHubManager.EVENT_NANOAPP_ABORTED:
-            case ContextHubManager.EVENT_NANOAPP_MESSAGE:
-            case ContextHubManager.EVENT_CLIENT_AUTHORIZATION: // fall through
+            case ContextHubManager.EVENT_NANOAPP_MESSAGE: // fall through
                 long nanoAppId = getLongExtraOrThrow(intent, ContextHubManager.EXTRA_NANOAPP_ID);
                 if (eventType == ContextHubManager.EVENT_NANOAPP_MESSAGE) {
                     hasExtraOrThrow(intent, ContextHubManager.EXTRA_MESSAGE);
@@ -127,11 +120,6 @@ public class ContextHubIntentEvent {
                     int nanoAppAbortCode = getIntExtraOrThrow(
                             intent, ContextHubManager.EXTRA_NANOAPP_ABORT_CODE);
                     event = new ContextHubIntentEvent(info, eventType, nanoAppId, nanoAppAbortCode);
-                } else if (eventType == ContextHubManager.EVENT_CLIENT_AUTHORIZATION) {
-                    int authState = getIntExtraOrThrow(
-                            intent, ContextHubManager.EXTRA_CLIENT_AUTHORIZATION_STATE);
-                    event = new ContextHubIntentEvent(info, eventType, nanoAppId,
-                            null /* nanoAppMessage */, -1 /* nanoAppAbortCode */, authState);
                 } else {
                     event = new ContextHubIntentEvent(info, eventType, nanoAppId);
                 }
@@ -204,21 +192,6 @@ public class ContextHubIntentEvent {
         return mNanoAppMessage;
     }
 
-    /**
-     * @return the client authorization state
-     *
-     * @throws UnsupportedOperationException if this was not a client authorization state event
-     */
-    @ContextHubManager.AuthorizationState
-    public int getClientAuthorizationState() {
-        if (mEventType != ContextHubManager.EVENT_CLIENT_AUTHORIZATION) {
-            throw new UnsupportedOperationException(
-                    "Cannot invoke getClientAuthorizationState() on non-authorization event: "
-                    + mEventType);
-        }
-        return mClientAuthorizationState;
-    }
-
     @NonNull
     @Override
     public String toString() {
@@ -233,9 +206,6 @@ public class ContextHubIntentEvent {
         }
         if (mEventType == ContextHubManager.EVENT_NANOAPP_MESSAGE) {
             out += ", nanoAppMessage = " + mNanoAppMessage;
-        }
-        if (mEventType == ContextHubManager.EVENT_CLIENT_AUTHORIZATION) {
-            out += ", clientAuthState = " + mClientAuthorizationState;
         }
 
         return out + "]";
@@ -262,9 +232,6 @@ public class ContextHubIntentEvent {
                     }
                     if (mEventType == ContextHubManager.EVENT_NANOAPP_MESSAGE) {
                         isEqual &= other.getNanoAppMessage().equals(mNanoAppMessage);
-                    }
-                    if (mEventType == ContextHubManager.EVENT_CLIENT_AUTHORIZATION) {
-                        isEqual &= other.getClientAuthorizationState() == mClientAuthorizationState;
                     }
                 } catch (UnsupportedOperationException e) {
                     isEqual = false;

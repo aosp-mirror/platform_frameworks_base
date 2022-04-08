@@ -18,6 +18,6 @@ package android.service.euicc;
 
 /** @hide */
 oneway interface IGetEidCallback {
-    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
+    @UnsupportedAppUsage
     void onSuccess(String eid);
 }

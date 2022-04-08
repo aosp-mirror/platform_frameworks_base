@@ -47,7 +47,7 @@ abstract class MediaRoute2Provider {
         mUniqueId = componentName.flattenToShortString();
     }
 
-    public void setCallback(Callback callback) {
+    public void setCallback(MediaRoute2ProviderServiceProxy.Callback callback) {
         mCallback = callback;
     }
 
@@ -77,7 +77,7 @@ abstract class MediaRoute2Provider {
     @NonNull
     public List<RoutingSessionInfo> getSessionInfos() {
         synchronized (mLock) {
-            return new ArrayList<>(mSessionInfos);
+            return mSessionInfos;
         }
     }
 

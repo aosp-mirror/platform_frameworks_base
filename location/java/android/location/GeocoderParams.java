@@ -16,16 +16,12 @@
 
 package android.location;
 
-import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.os.Process;
 
 import java.util.Locale;
-import java.util.Objects;
 
 /**
  * This class contains extra parameters to pass to an IGeocodeProvider
@@ -38,88 +34,64 @@ import java.util.Objects;
  * @hide
  */
 public class GeocoderParams implements Parcelable {
+    private Locale mLocale;
+    private String mPackageName;
 
-    private final int mUid;
-    private final String mPackageName;
-    private final @Nullable String mAttributionTag;
-    private final Locale mLocale;
-
-    public GeocoderParams(Context context) {
-        this(context, Locale.getDefault());
+    // used only for parcelling
+    private GeocoderParams() {
     }
 
+    /**
+     * This object is only constructed by the Geocoder class
+     *
+     * @hide
+     */
     public GeocoderParams(Context context, Locale locale) {
-        this(Process.myUid(), context.getPackageName(), context.getAttributionTag(), locale);
-    }
-
-    private GeocoderParams(int uid, String packageName, String attributionTag, Locale locale) {
-        mUid = uid;
-        mPackageName = Objects.requireNonNull(packageName);
-        mAttributionTag = attributionTag;
-        mLocale = Objects.requireNonNull(locale);
+        mLocale = locale;
+        mPackageName = context.getPackageName();
     }
 
     /**
-     * Returns the client UID.
+     * returns the Geocoder's locale
      */
     @UnsupportedAppUsage
-    public int getClientUid() {
-        return mUid;
-    }
-
-    /**
-     * Returns the client package name.
-     */
-    @UnsupportedAppUsage
-    public @NonNull String getClientPackage() {
-        return mPackageName;
-    }
-
-    /**
-     * Returns the client attribution tag.
-     */
-    @UnsupportedAppUsage
-    public @Nullable String getClientAttributionTag() {
-        return mAttributionTag;
-    }
-
-    /**
-     * Returns the locale.
-     */
-    @UnsupportedAppUsage
-    public @NonNull Locale getLocale() {
+    public Locale getLocale() {
         return mLocale;
     }
 
-    public static final @NonNull Parcelable.Creator<GeocoderParams> CREATOR =
+    /**
+     * returns the package name of the Geocoder's client
+     */
+    @UnsupportedAppUsage
+    public String getClientPackage() {
+        return mPackageName;
+    }
+
+    public static final @android.annotation.NonNull Parcelable.Creator<GeocoderParams> CREATOR =
         new Parcelable.Creator<GeocoderParams>() {
-            public GeocoderParams createFromParcel(Parcel in) {
-                int uid = in.readInt();
-                String packageName = in.readString();
-                String attributionTag = in.readString();
-                String language = in.readString();
-                String country = in.readString();
-                String variant = in.readString();
+        public GeocoderParams createFromParcel(Parcel in) {
+            GeocoderParams gp = new GeocoderParams();
+            String language = in.readString();
+            String country = in.readString();
+            String variant = in.readString();
+            gp.mLocale = new Locale(language, country, variant);
+            gp.mPackageName = in.readString();
+            return gp;
+        }
 
-                return new GeocoderParams(uid, packageName, attributionTag,
-                        new Locale(language, country, variant));
-            }
-
-            public GeocoderParams[] newArray(int size) {
-                return new GeocoderParams[size];
-            }
-        };
+        public GeocoderParams[] newArray(int size) {
+            return new GeocoderParams[size];
+        }
+    };
 
     public int describeContents() {
         return 0;
     }
 
     public void writeToParcel(Parcel parcel, int flags) {
-        parcel.writeInt(mUid);
-        parcel.writeString(mPackageName);
-        parcel.writeString(mAttributionTag);
         parcel.writeString(mLocale.getLanguage());
         parcel.writeString(mLocale.getCountry());
         parcel.writeString(mLocale.getVariant());
+        parcel.writeString(mPackageName);
     }
 }

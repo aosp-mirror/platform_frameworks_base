@@ -93,8 +93,6 @@ class PeopleHubView(context: Context, attrs: AttributeSet) :
         }
     }
 
-    fun setOnHeaderClickListener(listener: OnClickListener) = label.setOnClickListener(listener)
-
     private inner class PersonDataListenerImpl(val avatarView: ImageView) :
             DataListener<PersonViewModel?> {
 

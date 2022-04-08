@@ -17,7 +17,6 @@
 package com.android.server.autofill;
 
 import static android.service.autofill.AutofillFieldClassificationService.EXTRA_SCORES;
-import static android.service.autofill.AutofillService.EXTRA_RESULT;
 
 import static com.android.server.autofill.AutofillManagerService.RECEIVER_BUNDLE_EXTRA_SESSIONS;
 
@@ -90,9 +89,6 @@ public final class AutofillManagerServiceShellCommand extends ShellCommand {
             pw.println("  get bind-instant-service-allowed");
             pw.println("    Gets whether binding to services provided by instant apps is allowed");
             pw.println("");
-            pw.println("  get saved-password-count");
-            pw.println("    Gets the number of saved passwords in the current service.");
-            pw.println("");
             pw.println("  set log_level [off | debug | verbose]");
             pw.println("    Sets the Autofill log level.");
             pw.println("");
@@ -149,8 +145,6 @@ public final class AutofillManagerServiceShellCommand extends ShellCommand {
                 return getBindInstantService(pw);
             case "default-augmented-service-enabled":
                 return getDefaultAugmentedServiceEnabled(pw);
-            case "saved-password-count":
-                return getSavedPasswordCount(pw);
             default:
                 pw.println("Invalid set: " + what);
                 return -1;
@@ -348,25 +342,6 @@ public final class AutofillManagerServiceShellCommand extends ShellCommand {
         return 0;
     }
 
-    private int getSavedPasswordCount(PrintWriter pw) {
-        final int userId = getNextIntArgRequired();
-        CountDownLatch latch = new CountDownLatch(1);
-        IResultReceiver resultReceiver = new IResultReceiver.Stub() {
-            @Override
-            public void send(int resultCode, Bundle resultData) {
-                pw.println("resultCode=" + resultCode);
-                if (resultCode == 0 && resultData != null) {
-                    pw.println("value=" + resultData.getInt(EXTRA_RESULT));
-                }
-                latch.countDown();
-            }
-        };
-        if (mService.requestSavedPasswordCount(userId, resultReceiver)) {
-            waitForLatch(pw, latch);
-        }
-        return 0;
-    }
-
     private int requestDestroy(PrintWriter pw) {
         if (!isNextArgSessions(pw)) {
             return -1;
@@ -380,7 +355,7 @@ public final class AutofillManagerServiceShellCommand extends ShellCommand {
                 latch.countDown();
             }
         };
-        return requestSessionCommon(pw, latch, () -> mService.removeAllSessions(userId, receiver));
+        return requestSessionCommon(pw, latch, () -> mService.destroySessions(userId, receiver));
     }
 
     private int requestList(PrintWriter pw) {

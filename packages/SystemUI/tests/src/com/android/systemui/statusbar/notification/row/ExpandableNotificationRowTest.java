@@ -35,16 +35,16 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.app.AppOpsManager;
 import android.app.NotificationChannel;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
-import android.util.Pair;
+import android.util.ArraySet;
 import android.view.View;
 
 import androidx.test.filters.SmallTest;
 
-import com.android.internal.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
@@ -56,6 +56,7 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 
@@ -72,6 +73,7 @@ public class ExpandableNotificationRowTest extends SysuiTestCase {
     boolean mHeadsUpAnimatingAway = false;
 
     @Rule public MockitoRule mockito = MockitoJUnit.rule();
+    @Mock private NotificationBlockingHelperManager mBlockingHelperManager;
 
     @Before
     public void setUp() throws Exception {
@@ -83,6 +85,9 @@ public class ExpandableNotificationRowTest extends SysuiTestCase {
         mGroupRow = mNotificationTestHelper.createGroup();
         mGroupRow.setHeadsUpAnimatingAwayListener(
                 animatingAway -> mHeadsUpAnimatingAway = animatingAway);
+        mDependency.injectTestDependency(
+                NotificationBlockingHelperManager.class,
+                mBlockingHelperManager);
     }
 
     @Test
@@ -98,8 +103,8 @@ public class ExpandableNotificationRowTest extends SysuiTestCase {
         mGroupRow.setSensitive(true, true);
         mGroupRow.setHideSensitive(true, false, 0, 0);
         mGroupRow.setHideSensitive(false, true, 0, 0);
-        assertEquals(View.VISIBLE, mGroupRow.getChildrenContainer().getVisibleWrapper()
-                .getNotificationHeader().getVisibility());
+        assertTrue(mGroupRow.getChildrenContainer().getVisibleHeader().getVisibility()
+                == View.VISIBLE);
     }
 
     @Test
@@ -208,15 +213,15 @@ public class ExpandableNotificationRowTest extends SysuiTestCase {
     }
 
     @Test
-    public void testFeedback_noHeader() {
+    public void testShowAppOps_noHeader() {
         // public notification is custom layout - no header
         mGroupRow.setSensitive(true, true);
-        mGroupRow.setOnFeedbackClickListener(null);
-        mGroupRow.showFeedbackIcon(false, null);
+        mGroupRow.setAppOpsOnClickListener(null);
+        mGroupRow.showAppOpsIcons(null);
     }
 
     @Test
-    public void testFeedback_header() {
+    public void testShowAppOpsIcons_header() {
         NotificationContentView publicLayout = mock(NotificationContentView.class);
         mGroupRow.setPublicLayout(publicLayout);
         NotificationContentView privateLayout = mock(NotificationContentView.class);
@@ -225,25 +230,25 @@ public class ExpandableNotificationRowTest extends SysuiTestCase {
         when(mockContainer.getNotificationChildCount()).thenReturn(1);
         mGroupRow.setChildrenContainer(mockContainer);
 
-        final boolean show = true;
-        final Pair<Integer, Integer> resIds = new Pair(R.drawable.ic_feedback_alerted,
-                R.string.notification_feedback_indicator_alerted);
-        mGroupRow.showFeedbackIcon(show, resIds);
+        ArraySet<Integer> ops = new ArraySet<>();
+        ops.add(AppOpsManager.OP_ANSWER_PHONE_CALLS);
+        mGroupRow.showAppOpsIcons(ops);
 
-        verify(mockContainer, times(1)).showFeedbackIcon(show, resIds);
-        verify(privateLayout, times(1)).showFeedbackIcon(show, resIds);
-        verify(publicLayout, times(1)).showFeedbackIcon(show, resIds);
+        verify(mockContainer, times(1)).showAppOpsIcons(ops);
+        verify(privateLayout, times(1)).showAppOpsIcons(ops);
+        verify(publicLayout, times(1)).showAppOpsIcons(ops);
+
     }
 
     @Test
-    public void testFeedbackOnClick() {
-        ExpandableNotificationRow.CoordinateOnClickListener l = mock(
-                ExpandableNotificationRow.CoordinateOnClickListener.class);
+    public void testAppOpsOnClick() {
+        ExpandableNotificationRow.OnAppOpsClickListener l = mock(
+                ExpandableNotificationRow.OnAppOpsClickListener.class);
         View view = mock(View.class);
 
-        mGroupRow.setOnFeedbackClickListener(l);
+        mGroupRow.setAppOpsOnClickListener(l);
 
-        mGroupRow.getFeedbackOnClickListener().onClick(view);
+        mGroupRow.getAppOpsOnClickListener().onClick(view);
         verify(l, times(1)).onClick(any(), anyInt(), anyInt(), any());
     }
 
@@ -253,6 +258,30 @@ public class ExpandableNotificationRowTest extends SysuiTestCase {
         Assert.assertEquals(true, mHeadsUpAnimatingAway);
         mGroupRow.setHeadsUpAnimatingAway(false);
         Assert.assertEquals(false, mHeadsUpAnimatingAway);
+    }
+
+    @Test
+    public void testPerformDismissWithBlockingHelper_falseWhenBlockingHelperIsntShown() {
+        when(mBlockingHelperManager.perhapsShowBlockingHelper(
+                eq(mGroupRow), any(NotificationMenuRowPlugin.class))).thenReturn(false);
+
+        assertFalse(
+                mGroupRow.performDismissWithBlockingHelper(false /* fromAccessibility */));
+    }
+
+    @Test
+    public void testPerformDismissWithBlockingHelper_doesntPerformOnGroupSummary() {
+        ExpandableNotificationRow childRow = mGroupRow.getChildrenContainer().getViewAtPosition(0);
+        when(mBlockingHelperManager.perhapsShowBlockingHelper(eq(childRow), any(NotificationMenuRowPlugin.class)))
+                .thenReturn(true);
+
+        assertTrue(
+                childRow.performDismissWithBlockingHelper(false /* fromAccessibility */));
+
+        verify(mBlockingHelperManager, times(1))
+                .perhapsShowBlockingHelper(eq(childRow), any(NotificationMenuRowPlugin.class));
+        verify(mBlockingHelperManager, times(0))
+                .perhapsShowBlockingHelper(eq(mGroupRow), any(NotificationMenuRowPlugin.class));
     }
 
     @Test
@@ -289,7 +318,6 @@ public class ExpandableNotificationRowTest extends SysuiTestCase {
 
     @Test
     public void testIconScrollXAfterTranslationAndReset() throws Exception {
-        mGroupRow.setDismissUsingRowTranslationX(false);
         mGroupRow.setTranslation(50);
         assertEquals(50, -mGroupRow.getEntry().getIcons().getShelfIcon().getScrollX());
 

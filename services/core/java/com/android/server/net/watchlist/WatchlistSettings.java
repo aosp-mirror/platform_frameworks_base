@@ -20,8 +20,6 @@ import android.os.Environment;
 import android.util.AtomicFile;
 import android.util.Log;
 import android.util.Slog;
-import android.util.TypedXmlPullParser;
-import android.util.TypedXmlSerializer;
 import android.util.Xml;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -94,7 +92,8 @@ class WatchlistSettings {
             return;
         }
         try (FileInputStream stream = mXmlFile.openRead()){
-            TypedXmlPullParser parser = Xml.resolvePullParser(stream);
+            XmlPullParser parser = Xml.newPullParser();
+            parser.setInput(stream, StandardCharsets.UTF_8.name());
             XmlUtils.beginDocument(parser, "network-watchlist-settings");
             final int outerDepth = parser.getDepth();
             while (XmlUtils.nextElementWithin(parser, outerDepth)) {
@@ -146,7 +145,8 @@ class WatchlistSettings {
             return;
         }
         try {
-            TypedXmlSerializer out = Xml.resolveSerializer(stream);
+            XmlSerializer out = new FastXmlSerializer();
+            out.setOutput(stream, StandardCharsets.UTF_8.name());
             out.startDocument(null, true);
             out.startTag(null, "network-watchlist-settings");
             out.startTag(null, "secret-key");

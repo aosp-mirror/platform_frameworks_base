@@ -24,9 +24,6 @@ import static org.junit.Assert.fail;
 import android.net.ConnectivityMetricsEvent;
 import android.net.IIpConnectivityMetrics;
 import android.net.INetdEventCallback;
-import android.net.LinkProperties;
-import android.net.Network;
-import android.net.NetworkCapabilities;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
@@ -108,16 +105,6 @@ public class NetworkWatchlistServiceTests {
         public boolean removeNetdEventCallback(int callerType) {
             counter--;
             return true;
-        }
-
-        // TODO: mark @Override when aosp/1541935 automerges to master.
-        public void logDefaultNetworkValidity(boolean valid) {
-        }
-
-        // TODO: mark @Override when aosp/1541935 automerges to master.
-        public void logDefaultNetworkEvent(Network defaultNetwork, int score, boolean validated,
-                LinkProperties lp, NetworkCapabilities nc, Network previousDefaultNetwork,
-                int previousScore, LinkProperties previousLp, NetworkCapabilities previousNc) {
         }
     };
 

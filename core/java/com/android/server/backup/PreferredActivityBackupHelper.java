@@ -16,12 +16,10 @@
 
 package com.android.server.backup;
 
-import android.annotation.StringDef;
-import android.annotation.UserIdInt;
 import android.app.AppGlobals;
 import android.app.backup.BlobBackupHelper;
 import android.content.pm.IPackageManager;
-import android.content.pm.verify.domain.DomainVerificationManager;
+import android.os.UserHandle;
 import android.util.Slog;
 
 public class PreferredActivityBackupHelper extends BlobBackupHelper {
@@ -29,7 +27,7 @@ public class PreferredActivityBackupHelper extends BlobBackupHelper {
     private static final boolean DEBUG = false;
 
     // current schema of the backup state blob
-    private static final int STATE_VERSION = 4;
+    private static final int STATE_VERSION = 3;
 
     // key under which the preferred-activity state blob is committed to backup
     private static final String KEY_PREFERRED = "preferred-activity";
@@ -37,41 +35,14 @@ public class PreferredActivityBackupHelper extends BlobBackupHelper {
     // key for default-browser [etc] state
     private static final String KEY_DEFAULT_APPS = "default-apps";
 
-    /**
-     * Intent-filter verification state
-     * @deprecated Replaced by {@link #KEY_DOMAIN_VERIFICATION}, retained to ensure the key is
-     * never reused.
-     */
-    @Deprecated
+    // intent-filter verification state
     private static final String KEY_INTENT_VERIFICATION = "intent-verification";
 
-    /**
-     * State for {@link DomainVerificationManager}.
-     */
-    private static final String KEY_DOMAIN_VERIFICATION = "domain-verification";
-
-    private static final String[] KEYS = new String[] {
-            KEY_PREFERRED,
-            KEY_DEFAULT_APPS,
-            KEY_INTENT_VERIFICATION,
-            KEY_DOMAIN_VERIFICATION
-    };
-
-    @StringDef(value = {
-            KEY_PREFERRED,
-            KEY_DEFAULT_APPS,
-            KEY_INTENT_VERIFICATION,
-            KEY_DOMAIN_VERIFICATION
-    })
-    private @interface Key {
-    }
-
-    @UserIdInt
-    private final int mUserId;
-
-    public PreferredActivityBackupHelper(@UserIdInt int userId) {
-        super(STATE_VERSION, KEYS);
-        mUserId = userId;
+    public PreferredActivityBackupHelper() {
+        super(STATE_VERSION,
+                KEY_PREFERRED,
+                KEY_DEFAULT_APPS,
+                KEY_INTENT_VERIFICATION);
     }
 
     @Override
@@ -81,50 +52,46 @@ public class PreferredActivityBackupHelper extends BlobBackupHelper {
             Slog.d(TAG, "Handling backup of " + key);
         }
         try {
+            // TODO: http://b/22388012
             switch (key) {
                 case KEY_PREFERRED:
-                    return pm.getPreferredActivityBackup(mUserId);
+                    return pm.getPreferredActivityBackup(UserHandle.USER_SYSTEM);
                 case KEY_DEFAULT_APPS:
-                    return pm.getDefaultAppsBackup(mUserId);
+                    return pm.getDefaultAppsBackup(UserHandle.USER_SYSTEM);
                 case KEY_INTENT_VERIFICATION:
-                    // Deprecated
-                    return null;
-                case KEY_DOMAIN_VERIFICATION:
-                    return pm.getDomainVerificationBackup(mUserId);
+                    return pm.getIntentFilterVerificationBackup(UserHandle.USER_SYSTEM);
                 default:
                     Slog.w(TAG, "Unexpected backup key " + key);
             }
         } catch (Exception e) {
-            Slog.e(TAG, "Unable to store payload " + key, e);
+            Slog.e(TAG, "Unable to store payload " + key);
         }
         return null;
     }
 
     @Override
-    protected void applyRestoredPayload(@Key String key, byte[] payload) {
+    protected void applyRestoredPayload(String key, byte[] payload) {
         IPackageManager pm = AppGlobals.getPackageManager();
         if (DEBUG) {
             Slog.d(TAG, "Handling restore of " + key);
         }
         try {
+            // TODO: http://b/22388012
             switch (key) {
                 case KEY_PREFERRED:
-                    pm.restorePreferredActivities(payload, mUserId);
+                    pm.restorePreferredActivities(payload, UserHandle.USER_SYSTEM);
                     break;
                 case KEY_DEFAULT_APPS:
-                    pm.restoreDefaultApps(payload, mUserId);
+                    pm.restoreDefaultApps(payload, UserHandle.USER_SYSTEM);
                     break;
                 case KEY_INTENT_VERIFICATION:
-                    // Deprecated
-                    break;
-                case KEY_DOMAIN_VERIFICATION:
-                    pm.restoreDomainVerification(payload, mUserId);
+                    pm.restoreIntentFilterVerification(payload, UserHandle.USER_SYSTEM);
                     break;
                 default:
                     Slog.w(TAG, "Unexpected restore key " + key);
             }
         } catch (Exception e) {
-            Slog.e(TAG, "Unable to restore key " + key, e);
+            Slog.w(TAG, "Unable to restore key " + key);
         }
     }
 }

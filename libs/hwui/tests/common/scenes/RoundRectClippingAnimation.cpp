@@ -27,7 +27,7 @@ public:
     std::vector<sp<RenderNode> > cards;
     void createContent(int width, int height, Canvas& canvas) override {
         canvas.drawColor(0xFFFFFFFF, SkBlendMode::kSrcOver);
-        canvas.enableZ(true);
+        canvas.insertReorderBarrier(true);
         int ci = 0;
 
         for (int x = 0; x < width; x += mSpacing) {
@@ -45,7 +45,7 @@ public:
             }
         }
 
-        canvas.enableZ(false);
+        canvas.insertReorderBarrier(false);
     }
     void doFrame(int frameNr) override {
         int curFrame = frameNr % 50;

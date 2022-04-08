@@ -25,22 +25,27 @@ import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
-import android.content.ContentResolver;
 import android.content.Context;
+import android.content.ContentResolver;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Icon;
 import android.media.AudioAttributes;
-import android.net.Uri;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.PowerManager;
-import android.os.SystemClock;
 import android.os.Vibrator;
+import android.os.Handler;
+import android.os.UserHandle;
 import android.util.Log;
+import android.net.Uri;
+import android.os.SystemClock;
 import android.widget.RemoteViews;
+import android.os.PowerManager;
+
+// private NM API
+import android.app.INotificationManager;
 import android.widget.Toast;
 
 public class NotificationTestList extends TestActivity
@@ -180,7 +185,6 @@ public class NotificationTestList extends TestActivity
                             .setContentTitle("default priority group 1")
                             .setGroup("group1")
                             .setOngoing(true)
-                            .setColor(Color.WHITE)
                             .setColorized(true)
                             .build();
                     mNM.notify(6002, n);
@@ -1156,12 +1160,12 @@ public class NotificationTestList extends TestActivity
     private PendingIntent makeIntent() {
         Intent intent = new Intent(Intent.ACTION_MAIN);
         intent.addCategory(Intent.CATEGORY_HOME);
-        return PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_MUTABLE_UNAUDITED);
+        return PendingIntent.getActivity(this, 0, intent, 0);
     }
 
     private PendingIntent makeIntent2() {
         Intent intent = new Intent(this, StatusBarTest.class);
-        return PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_MUTABLE_UNAUDITED);
+        return PendingIntent.getActivity(this, 0, intent, 0);
     }
 
 

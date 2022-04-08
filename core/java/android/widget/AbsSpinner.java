@@ -310,7 +310,6 @@ public abstract class AbsSpinner extends AdapterView<SpinnerAdapter> {
         }
     }
 
-    @SuppressWarnings("HiddenAbstractMethod")
     abstract void layout(int delta, boolean animate);
 
     @Override

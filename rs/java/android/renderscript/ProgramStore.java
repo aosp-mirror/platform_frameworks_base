@@ -17,7 +17,6 @@
 package android.renderscript;
 
 import android.compat.annotation.UnsupportedAppUsage;
-import android.os.Build;
 
 
 /**
@@ -34,11 +33,7 @@ import android.os.Build;
  *     framebuffer</li>
  *  </ul>
  *
- * @deprecated Renderscript has been deprecated in API level 31. Please refer to the <a
- * href="https://developer.android.com/guide/topics/renderscript/migration-guide">migration
- * guide</a> for the proposed alternatives.
  **/
-@Deprecated
 public class ProgramStore extends BaseObj {
     /**
     * Specifies the function used to determine whether a fragment
@@ -313,7 +308,7 @@ public class ProgramStore extends BaseObj {
     *
     *  @param rs Context to which the program will belong.
     **/
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public static ProgramStore BLEND_ALPHA_DEPTH_NONE(RenderScript rs) {
         if(rs.mProgramStore_BLEND_ALPHA_DEPTH_NO_DEPTH == null) {
             ProgramStore.Builder builder = new ProgramStore.Builder(rs);

@@ -18,11 +18,15 @@ package com.android.vpndialogs;
 
 import static android.view.WindowManager.LayoutParams.SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS;
 
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
+import android.net.IConnectivityManager;
 import android.net.VpnManager;
 import android.os.Bundle;
+import android.os.RemoteException;
+import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.text.Html;
@@ -44,7 +48,7 @@ public class ConfirmDialog extends AlertActivity
 
     private String mPackage;
 
-    private VpnManager mVm;
+    private IConnectivityManager mService;
 
     public ConfirmDialog() {
         this(VpnManager.TYPE_VPN_SERVICE);
@@ -58,9 +62,10 @@ public class ConfirmDialog extends AlertActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mPackage = getCallingPackage();
-        mVm = getSystemService(VpnManager.class);
+        mService = IConnectivityManager.Stub.asInterface(
+                ServiceManager.getService(Context.CONNECTIVITY_SERVICE));
 
-        if (mVm.prepareVpn(mPackage, null, UserHandle.myUserId())) {
+        if (prepareVpn()) {
             setResult(RESULT_OK);
             finish();
             return;
@@ -69,7 +74,7 @@ public class ConfirmDialog extends AlertActivity
             finish();
             return;
         }
-        final String alwaysOnVpnPackage = mVm.getAlwaysOnVpnPackageForUser(UserHandle.myUserId());
+        final String alwaysOnVpnPackage = getAlwaysOnVpnPackage();
         // Can't prepare new vpn app when another vpn is always-on
         if (alwaysOnVpnPackage != null && !alwaysOnVpnPackage.equals(mPackage)) {
             finish();
@@ -90,6 +95,24 @@ public class ConfirmDialog extends AlertActivity
         getWindow().addPrivateFlags(SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS);
         Button button = mAlert.getButton(DialogInterface.BUTTON_POSITIVE);
         button.setFilterTouchesWhenObscured(true);
+    }
+
+    private String getAlwaysOnVpnPackage() {
+        try {
+           return mService.getAlwaysOnVpnPackage(UserHandle.myUserId());
+        } catch (RemoteException e) {
+            Log.e(TAG, "fail to call getAlwaysOnVpnPackage", e);
+            // Fallback to null to show the dialog
+            return null;
+        }
+    }
+
+    private boolean prepareVpn() {
+        try {
+            return mService.prepareVpn(mPackage, null, UserHandle.myUserId());
+        } catch (RemoteException e) {
+            throw new IllegalStateException(e);
+        }
     }
 
     private CharSequence getVpnLabel() {
@@ -123,10 +146,10 @@ public class ConfirmDialog extends AlertActivity
     @Override
     public void onClick(DialogInterface dialog, int which) {
         try {
-            if (mVm.prepareVpn(null, mPackage, UserHandle.myUserId())) {
+            if (mService.prepareVpn(null, mPackage, UserHandle.myUserId())) {
                 // Authorize this app to initiate VPN connections in the future without user
                 // intervention.
-                mVm.setVpnPackageAuthorization(mPackage, UserHandle.myUserId(), mVpnType);
+                mService.setVpnPackageAuthorization(mPackage, UserHandle.myUserId(), mVpnType);
                 setResult(RESULT_OK);
             }
         } catch (Exception e) {

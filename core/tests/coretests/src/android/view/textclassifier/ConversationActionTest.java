@@ -39,8 +39,7 @@ public final class ConversationActionTest {
     @Test
     public void toBuilder() {
         final Context context = InstrumentationRegistry.getTargetContext();
-        final PendingIntent intent = PendingIntent.getActivity(
-                context, 0, new Intent(), PendingIntent.FLAG_IMMUTABLE);
+        final PendingIntent intent = PendingIntent.getActivity(context, 0, new Intent(), 0);
         final Icon icon = Icon.createWithData(new byte[]{0}, 0, 1);
         final Bundle extras = new Bundle();
         extras.putInt("key", 5);

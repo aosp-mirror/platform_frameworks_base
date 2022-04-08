@@ -16,24 +16,26 @@
 
 package com.android.internal.util;
 
+import java.util.Collection;
+import java.util.Iterator;
+
 import android.os.Debug;
 import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Message;
 import android.os.SystemClock;
 import android.os.test.TestLooper;
+
+import android.test.suitebuilder.annotation.Suppress;
+import com.android.internal.util.State;
+import com.android.internal.util.StateMachine;
+import com.android.internal.util.StateMachine.LogRec;
+
 import android.test.suitebuilder.annotation.MediumTest;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.util.Log;
 
-import com.android.internal.util.StateMachine.LogRec;
-
 import junit.framework.TestCase;
-
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.util.Collection;
-import java.util.Iterator;
 
 /**
  * Test for StateMachine.
@@ -542,83 +544,83 @@ public class StateMachineTest extends TestCase {
     public void testStateMachineEnterExitTransitionToTest() throws Exception {
         //if (WAIT_FOR_DEBUGGER) Debug.waitForDebugger();
 
-        StateMachineEnterExitTransitionToTest smEnterExitTransitionToTest =
-                new StateMachineEnterExitTransitionToTest("smEnterExitTransitionToTest");
-        smEnterExitTransitionToTest.start();
-        if (smEnterExitTransitionToTest.isDbg()) {
+        StateMachineEnterExitTransitionToTest smEnterExitTranstionToTest =
+            new StateMachineEnterExitTransitionToTest("smEnterExitTranstionToTest");
+        smEnterExitTranstionToTest.start();
+        if (smEnterExitTranstionToTest.isDbg()) {
             tlog("testStateMachineEnterExitTransitionToTest E");
         }
 
-        synchronized (smEnterExitTransitionToTest) {
-            smEnterExitTransitionToTest.sendMessage(TEST_CMD_1);
+        synchronized (smEnterExitTranstionToTest) {
+            smEnterExitTranstionToTest.sendMessage(TEST_CMD_1);
 
             try {
                 // wait for the messages to be handled
-                smEnterExitTransitionToTest.wait();
+                smEnterExitTranstionToTest.wait();
             } catch (InterruptedException e) {
                 tloge("testStateMachineEnterExitTransitionToTest: exception while waiting "
                     + e.getMessage());
             }
         }
 
-        dumpLogRecs(smEnterExitTransitionToTest);
+        dumpLogRecs(smEnterExitTranstionToTest);
 
-        assertEquals(9, smEnterExitTransitionToTest.getLogRecCount());
+        assertEquals(9, smEnterExitTranstionToTest.getLogRecCount());
         LogRec lr;
 
-        lr = smEnterExitTransitionToTest.getLogRec(0);
+        lr = smEnterExitTranstionToTest.getLogRec(0);
         assertEquals(ENTER, lr.getInfo());
-        assertEquals(smEnterExitTransitionToTest.mS1, lr.getState());
+        assertEquals(smEnterExitTranstionToTest.mS1, lr.getState());
 
-        lr = smEnterExitTransitionToTest.getLogRec(1);
+        lr = smEnterExitTranstionToTest.getLogRec(1);
         assertEquals(EXIT, lr.getInfo());
-        assertEquals(smEnterExitTransitionToTest.mS1, lr.getState());
+        assertEquals(smEnterExitTranstionToTest.mS1, lr.getState());
 
-        lr = smEnterExitTransitionToTest.getLogRec(2);
+        lr = smEnterExitTranstionToTest.getLogRec(2);
         assertEquals(ENTER, lr.getInfo());
-        assertEquals(smEnterExitTransitionToTest.mS2, lr.getState());
+        assertEquals(smEnterExitTranstionToTest.mS2, lr.getState());
 
-        lr = smEnterExitTransitionToTest.getLogRec(3);
+        lr = smEnterExitTranstionToTest.getLogRec(3);
         assertEquals(TEST_CMD_1, lr.getWhat());
-        assertEquals(smEnterExitTransitionToTest.mS2, lr.getState());
-        assertEquals(smEnterExitTransitionToTest.mS2, lr.getOriginalState());
-        assertEquals(smEnterExitTransitionToTest.mS3, lr.getDestState());
+        assertEquals(smEnterExitTranstionToTest.mS2, lr.getState());
+        assertEquals(smEnterExitTranstionToTest.mS2, lr.getOriginalState());
+        assertEquals(smEnterExitTranstionToTest.mS3, lr.getDestState());
 
-        lr = smEnterExitTransitionToTest.getLogRec(4);
+        lr = smEnterExitTranstionToTest.getLogRec(4);
         assertEquals(TEST_CMD_1, lr.getWhat());
-        assertEquals(smEnterExitTransitionToTest.mS2, lr.getState());
-        assertEquals(smEnterExitTransitionToTest.mS2, lr.getOriginalState());
-        assertEquals(smEnterExitTransitionToTest.mS4, lr.getDestState());
+        assertEquals(smEnterExitTranstionToTest.mS2, lr.getState());
+        assertEquals(smEnterExitTranstionToTest.mS2, lr.getOriginalState());
+        assertEquals(smEnterExitTranstionToTest.mS4, lr.getDestState());
         assertEquals(EXIT, lr.getInfo());
 
-        lr = smEnterExitTransitionToTest.getLogRec(5);
-        assertEquals(TEST_CMD_1, lr.getWhat());
-        assertEquals(ENTER, lr.getInfo());
-        assertEquals(smEnterExitTransitionToTest.mS3, lr.getState());
-        assertEquals(smEnterExitTransitionToTest.mS3, lr.getOriginalState());
-        assertEquals(smEnterExitTransitionToTest.mS4, lr.getDestState());
-
-        lr = smEnterExitTransitionToTest.getLogRec(6);
-        assertEquals(TEST_CMD_1, lr.getWhat());
-        assertEquals(EXIT, lr.getInfo());
-        assertEquals(smEnterExitTransitionToTest.mS3, lr.getState());
-        assertEquals(smEnterExitTransitionToTest.mS3, lr.getOriginalState());
-        assertEquals(smEnterExitTransitionToTest.mS4, lr.getDestState());
-
-        lr = smEnterExitTransitionToTest.getLogRec(7);
+        lr = smEnterExitTranstionToTest.getLogRec(5);
         assertEquals(TEST_CMD_1, lr.getWhat());
         assertEquals(ENTER, lr.getInfo());
-        assertEquals(smEnterExitTransitionToTest.mS4, lr.getState());
-        assertEquals(smEnterExitTransitionToTest.mS4, lr.getOriginalState());
-        assertEquals(smEnterExitTransitionToTest.mS4, lr.getDestState());
+        assertEquals(smEnterExitTranstionToTest.mS3, lr.getState());
+        assertEquals(smEnterExitTranstionToTest.mS3, lr.getOriginalState());
+        assertEquals(smEnterExitTranstionToTest.mS4, lr.getDestState());
 
-        lr = smEnterExitTransitionToTest.getLogRec(8);
+        lr = smEnterExitTranstionToTest.getLogRec(6);
         assertEquals(TEST_CMD_1, lr.getWhat());
         assertEquals(EXIT, lr.getInfo());
-        assertEquals(smEnterExitTransitionToTest.mS4, lr.getState());
-        assertEquals(smEnterExitTransitionToTest.mS4, lr.getOriginalState());
+        assertEquals(smEnterExitTranstionToTest.mS3, lr.getState());
+        assertEquals(smEnterExitTranstionToTest.mS3, lr.getOriginalState());
+        assertEquals(smEnterExitTranstionToTest.mS4, lr.getDestState());
 
-        if (smEnterExitTransitionToTest.isDbg()) {
+        lr = smEnterExitTranstionToTest.getLogRec(7);
+        assertEquals(TEST_CMD_1, lr.getWhat());
+        assertEquals(ENTER, lr.getInfo());
+        assertEquals(smEnterExitTranstionToTest.mS4, lr.getState());
+        assertEquals(smEnterExitTranstionToTest.mS4, lr.getOriginalState());
+        assertEquals(smEnterExitTranstionToTest.mS4, lr.getDestState());
+
+        lr = smEnterExitTranstionToTest.getLogRec(8);
+        assertEquals(TEST_CMD_1, lr.getWhat());
+        assertEquals(EXIT, lr.getInfo());
+        assertEquals(smEnterExitTranstionToTest.mS4, lr.getState());
+        assertEquals(smEnterExitTranstionToTest.mS4, lr.getOriginalState());
+
+        if (smEnterExitTranstionToTest.isDbg()) {
             tlog("testStateMachineEnterExitTransitionToTest X");
         }
     }
@@ -2010,13 +2012,5 @@ public class StateMachineTest extends TestCase {
 
     private static void tloge(String s) {
         Log.e(TAG, s);
-    }
-
-    public void testDumpDoesNotThrowNpeAfterQuit() {
-        final Hsm1 sm = Hsm1.makeHsm1();
-        sm.quitNow();
-        final StringWriter stringWriter = new StringWriter();
-        final PrintWriter printWriter = new PrintWriter(stringWriter);
-        sm.dump(null, printWriter, new String[0]);
     }
 }

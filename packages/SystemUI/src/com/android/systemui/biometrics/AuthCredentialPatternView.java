@@ -16,7 +16,6 @@
 
 package com.android.systemui.biometrics;
 
-import android.annotation.NonNull;
 import android.content.Context;
 import android.util.AttributeSet;
 
@@ -24,7 +23,6 @@ import com.android.internal.widget.LockPatternChecker;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.internal.widget.LockPatternView;
 import com.android.internal.widget.LockscreenCredential;
-import com.android.internal.widget.VerifyCredentialResponse;
 import com.android.systemui.R;
 
 import java.util.List;
@@ -63,25 +61,22 @@ public class AuthCredentialPatternView extends AuthCredentialView {
 
             if (pattern.size() < LockPatternUtils.MIN_PATTERN_REGISTER_FAIL) {
                 // Pattern size is less than the minimum, do not count it as a failed attempt.
-                onPatternVerified(VerifyCredentialResponse.ERROR, 0 /* timeoutMs */);
+                onPatternVerified(null /* attestation */, 0 /* timeoutMs */);
                 return;
             }
 
             try (LockscreenCredential credential = LockscreenCredential.createPattern(pattern)) {
-                // Request LockSettingsService to return the Gatekeeper Password in the
-                // VerifyCredentialResponse so that we can request a Gatekeeper HAT with the
-                // Gatekeeper Password and operationId.
                 mPendingLockCheck = LockPatternChecker.verifyCredential(
                         mLockPatternUtils,
                         credential,
+                        mOperationId,
                         mEffectiveUserId,
-                        LockPatternUtils.VERIFY_FLAG_REQUEST_GK_PW_HANDLE,
                         this::onPatternVerified);
             }
         }
 
-        private void onPatternVerified(@NonNull VerifyCredentialResponse response, int timeoutMs) {
-            AuthCredentialPatternView.this.onCredentialVerified(response, timeoutMs);
+        private void onPatternVerified(byte[] attestation, int timeoutMs) {
+            AuthCredentialPatternView.this.onCredentialVerified(attestation, timeoutMs);
             if (timeoutMs > 0) {
                 mLockPatternView.setEnabled(false);
             } else {

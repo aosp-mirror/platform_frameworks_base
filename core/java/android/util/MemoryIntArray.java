@@ -16,14 +16,12 @@
 
 package android.util;
 
-import android.annotation.Nullable;
 import android.os.Parcel;
 import android.os.ParcelFileDescriptor;
 import android.os.Parcelable;
 
-import dalvik.system.CloseGuard;
-
 import libcore.io.IoUtils;
+import dalvik.system.CloseGuard;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -185,7 +183,7 @@ public final class MemoryIntArray implements Parcelable, Closeable {
     }
 
     @Override
-    public boolean equals(@Nullable Object obj) {
+    public boolean equals(Object obj) {
         if (obj == null) {
             return false;
         }

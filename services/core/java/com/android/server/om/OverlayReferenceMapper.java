@@ -18,22 +18,19 @@ package com.android.server.om;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import com.android.server.pm.parsing.pkg.AndroidPackage;
 import android.text.TextUtils;
-import android.util.ArrayMap;
-import android.util.ArraySet;
 import android.util.Pair;
-import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.CollectionUtils;
 import com.android.server.SystemConfig;
-import com.android.server.pm.parsing.pkg.AndroidPackage;
 
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
@@ -75,8 +72,6 @@ import java.util.Set;
  */
 public class OverlayReferenceMapper {
 
-    private static final String TAG = "OverlayReferenceMapper";
-
     private final Object mLock = new Object();
 
     /**
@@ -86,15 +81,14 @@ public class OverlayReferenceMapper {
      * See class comment for specific types.
      */
     @GuardedBy("mLock")
-    private final ArrayMap<String, ArrayMap<String, ArraySet<String>>> mActorToTargetToOverlays =
-            new ArrayMap<>();
+    private final Map<String, Map<String, Set<String>>> mActorToTargetToOverlays = new HashMap<>();
 
     /**
      * Keys are actor package names, values are generic package names the actor should be able
      * to see.
      */
     @GuardedBy("mLock")
-    private final ArrayMap<String, Set<String>> mActorPkgToPkgs = new ArrayMap<>();
+    private final Map<String, Set<String>> mActorPkgToPkgs = new HashMap<>();
 
     @GuardedBy("mLock")
     private boolean mDeferRebuild;
@@ -150,7 +144,7 @@ public class OverlayReferenceMapper {
 
     public boolean isValidActor(@NonNull String targetName, @NonNull String actorPackageName) {
         synchronized (mLock) {
-            ensureMapBuilt();
+            assertMapBuilt();
             Set<String> validSet = mActorPkgToPkgs.get(actorPackageName);
             return validSet != null && validSet.contains(targetName);
         }
@@ -163,26 +157,21 @@ public class OverlayReferenceMapper {
      *
      * @param pkg the package to add
      * @param otherPkgs map of other packages to consider, excluding {@param pkg}
-     * @return Set of packages that may have changed visibility
      */
-    public ArraySet<String> addPkg(AndroidPackage pkg, Map<String, AndroidPackage> otherPkgs) {
+    public void addPkg(AndroidPackage pkg, Map<String, AndroidPackage> otherPkgs) {
         synchronized (mLock) {
-            ArraySet<String> changed = new ArraySet<>();
-
             if (!pkg.getOverlayables().isEmpty()) {
-                addTarget(pkg, otherPkgs, changed);
+                addTarget(pkg, otherPkgs);
             }
 
             // TODO(b/135203078): Replace with isOverlay boolean flag check; fix test mocks
             if (!mProvider.getTargetToOverlayables(pkg).isEmpty()) {
-                addOverlay(pkg, otherPkgs, changed);
+                addOverlay(pkg, otherPkgs);
             }
 
             if (!mDeferRebuild) {
                 rebuild();
             }
-
-            return changed;
         }
     }
 
@@ -192,40 +181,27 @@ public class OverlayReferenceMapper {
      * of {@link SystemConfig#getNamedActors()}.
      *
      * @param pkgName name to remove, as was added through {@link #addPkg(AndroidPackage, Map)}
-     * @return Set of packages that may have changed visibility
      */
-    public ArraySet<String> removePkg(String pkgName) {
+    public void removePkg(String pkgName) {
         synchronized (mLock) {
-            ArraySet<String> changedPackages = new ArraySet<>();
-            removeTarget(pkgName, changedPackages);
-            removeOverlay(pkgName, changedPackages);
+            removeTarget(pkgName);
+            removeOverlay(pkgName);
 
             if (!mDeferRebuild) {
                 rebuild();
             }
-
-            return changedPackages;
         }
     }
 
-    /**
-     * @param changedPackages Ongoing collection of packages that may have changed visibility
-     */
-    private void removeTarget(String target, @NonNull Collection<String> changedPackages) {
+    private void removeTarget(String target) {
         synchronized (mLock) {
-            int size = mActorToTargetToOverlays.size();
-            for (int index = size - 1; index >= 0; index--) {
-                ArrayMap<String, ArraySet<String>> targetToOverlays =
-                        mActorToTargetToOverlays.valueAt(index);
-                if (targetToOverlays.containsKey(target)) {
-                    targetToOverlays.remove(target);
-
-                    String actor = mActorToTargetToOverlays.keyAt(index);
-                    changedPackages.add(mProvider.getActorPkg(actor));
-
-                    if (targetToOverlays.isEmpty()) {
-                        mActorToTargetToOverlays.removeAt(index);
-                    }
+            Iterator<Map<String, Set<String>>> iterator =
+                    mActorToTargetToOverlays.values().iterator();
+            while (iterator.hasNext()) {
+                Map<String, Set<String>> next = iterator.next();
+                next.remove(target);
+                if (next.isEmpty()) {
+                    iterator.remove();
                 }
             }
         }
@@ -236,19 +212,16 @@ public class OverlayReferenceMapper {
      *
      * If a target overlays itself, it will not be associated with itself, as only one half of the
      * relationship needs to exist for visibility purposes.
-     *
-     * @param changedPackages Ongoing collection of packages that may have changed visibility
      */
-    private void addTarget(AndroidPackage targetPkg, Map<String, AndroidPackage> otherPkgs,
-            @NonNull Collection<String> changedPackages) {
+    private void addTarget(AndroidPackage targetPkg, Map<String, AndroidPackage> otherPkgs) {
         synchronized (mLock) {
             String target = targetPkg.getPackageName();
-            removeTarget(target, changedPackages);
+            removeTarget(target);
 
             Map<String, String> overlayablesToActors = targetPkg.getOverlayables();
             for (String overlayable : overlayablesToActors.keySet()) {
                 String actor = overlayablesToActors.get(overlayable);
-                addTargetToMap(actor, target, changedPackages);
+                addTargetToMap(actor, target);
 
                 for (AndroidPackage overlayPkg : otherPkgs.values()) {
                     Map<String, Set<String>> targetToOverlayables =
@@ -259,38 +232,18 @@ public class OverlayReferenceMapper {
                     }
 
                     if (overlayables.contains(overlayable)) {
-                        String overlay = overlayPkg.getPackageName();
-                        addOverlayToMap(actor, target, overlay, changedPackages);
+                        addOverlayToMap(actor, target, overlayPkg.getPackageName());
                     }
                 }
             }
         }
     }
 
-    /**
-     * @param changedPackages Ongoing collection of packages that may have changed visibility
-     */
-    private void removeOverlay(String overlay, @NonNull Collection<String> changedPackages) {
+    private void removeOverlay(String overlay) {
         synchronized (mLock) {
-            int actorsSize = mActorToTargetToOverlays.size();
-            for (int actorIndex = actorsSize - 1; actorIndex >= 0; actorIndex--) {
-                ArrayMap<String, ArraySet<String>> targetToOverlays =
-                        mActorToTargetToOverlays.valueAt(actorIndex);
-                int targetsSize = targetToOverlays.size();
-                for (int targetIndex = targetsSize - 1; targetIndex >= 0; targetIndex--) {
-                    final Set<String> overlays = targetToOverlays.valueAt(targetIndex);
-
-                    if (overlays.remove(overlay)) {
-                        String actor = mActorToTargetToOverlays.keyAt(actorIndex);
-                        changedPackages.add(mProvider.getActorPkg(actor));
-
-                        // targetToOverlays should not be removed here even if empty as the actor
-                        // will still have visibility to the target even if no overlays exist
-                    }
-                }
-
-                if (targetToOverlays.isEmpty()) {
-                    mActorToTargetToOverlays.removeAt(actorIndex);
+            for (Map<String, Set<String>> targetToOverlays : mActorToTargetToOverlays.values()) {
+                for (Set<String> overlays : targetToOverlays.values()) {
+                    overlays.remove(overlay);
                 }
             }
         }
@@ -301,14 +254,11 @@ public class OverlayReferenceMapper {
      *
      * If an overlay targets itself, it will not be associated with itself, as only one half of the
      * relationship needs to exist for visibility purposes.
-     *
-     * @param changedPackages Ongoing collection of packages that may have changed visibility
      */
-    private void addOverlay(AndroidPackage overlayPkg, Map<String, AndroidPackage> otherPkgs,
-            @NonNull Collection<String> changedPackages) {
+    private void addOverlay(AndroidPackage overlayPkg, Map<String, AndroidPackage> otherPkgs) {
         synchronized (mLock) {
             String overlay = overlayPkg.getPackageName();
-            removeOverlay(overlay, changedPackages);
+            removeOverlay(overlay);
 
             Map<String, Set<String>> targetToOverlayables =
                     mProvider.getTargetToOverlayables(overlayPkg);
@@ -327,7 +277,7 @@ public class OverlayReferenceMapper {
                     if (TextUtils.isEmpty(actor)) {
                         continue;
                     }
-                    addOverlayToMap(actor, targetPkgName, overlay, changedPackages);
+                    addOverlayToMap(actor, targetPkgName, overlay);
                 }
             }
         }
@@ -342,11 +292,10 @@ public class OverlayReferenceMapper {
         }
     }
 
-    private void ensureMapBuilt() {
+    private void assertMapBuilt() {
         if (mDeferRebuild) {
-            rebuildIfDeferred();
-            Slog.w(TAG, "The actor map was queried before the system was ready, which may"
-                    + "result in decreased performance.");
+            throw new IllegalStateException("The actor map must be built by calling "
+                    + "rebuildIfDeferred before it is queried");
         }
     }
 
@@ -359,8 +308,7 @@ public class OverlayReferenceMapper {
                     continue;
                 }
 
-                ArrayMap<String, ArraySet<String>> targetToOverlays =
-                        mActorToTargetToOverlays.get(actor);
+                Map<String, Set<String>> targetToOverlays = mActorToTargetToOverlays.get(actor);
                 Set<String> pkgs = new HashSet<>();
 
                 for (String target : targetToOverlays.keySet()) {
@@ -374,51 +322,36 @@ public class OverlayReferenceMapper {
         }
     }
 
-    /**
-     * @param changedPackages Ongoing collection of packages that may have changed visibility
-     */
-    private void addTargetToMap(String actor, String target,
-            @NonNull Collection<String> changedPackages) {
-        ArrayMap<String, ArraySet<String>> targetToOverlays = mActorToTargetToOverlays.get(actor);
+    private void addTargetToMap(String actor, String target) {
+        Map<String, Set<String>> targetToOverlays = mActorToTargetToOverlays.get(actor);
         if (targetToOverlays == null) {
-            targetToOverlays = new ArrayMap<>();
+            targetToOverlays = new HashMap<>();
             mActorToTargetToOverlays.put(actor, targetToOverlays);
         }
 
-        ArraySet<String> overlays = targetToOverlays.get(target);
+        Set<String> overlays = targetToOverlays.get(target);
         if (overlays == null) {
-            overlays = new ArraySet<>();
+            overlays = new HashSet<>();
             targetToOverlays.put(target, overlays);
         }
-
-        // For now, only actors themselves can gain or lose visibility through package changes
-        changedPackages.add(mProvider.getActorPkg(actor));
     }
 
-    /**
-     * @param changedPackages Ongoing collection of packages that may have changed visibility
-     */
-    private void addOverlayToMap(String actor, String target, String overlay,
-            @NonNull Collection<String> changedPackages) {
+    private void addOverlayToMap(String actor, String target, String overlay) {
         synchronized (mLock) {
-            ArrayMap<String, ArraySet<String>> targetToOverlays =
-                    mActorToTargetToOverlays.get(actor);
+            Map<String, Set<String>> targetToOverlays = mActorToTargetToOverlays.get(actor);
             if (targetToOverlays == null) {
-                targetToOverlays = new ArrayMap<>();
+                targetToOverlays = new HashMap<>();
                 mActorToTargetToOverlays.put(actor, targetToOverlays);
             }
 
-            ArraySet<String> overlays = targetToOverlays.get(target);
+            Set<String> overlays = targetToOverlays.get(target);
             if (overlays == null) {
-                overlays = new ArraySet<>();
+                overlays = new HashSet<>();
                 targetToOverlays.put(target, overlays);
             }
 
             overlays.add(overlay);
         }
-
-        // For now, only actors themselves can gain or lose visibility through package changes
-        changedPackages.add(mProvider.getActorPkg(actor));
     }
 
     public interface Provider {
@@ -427,7 +360,7 @@ public class OverlayReferenceMapper {
          * Given the actor string from an overlayable definition, return the actor's package name.
          */
         @Nullable
-        String getActorPkg(@NonNull String actor);
+        String getActorPkg(String actor);
 
         /**
          * Mock response of multiple overlay tags.

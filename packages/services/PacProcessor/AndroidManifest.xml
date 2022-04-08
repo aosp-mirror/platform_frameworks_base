@@ -3,12 +3,9 @@
     package="com.android.pacprocessor">
 
     <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
     <application
-        android:label="@string/app_name"
-        android:defaultToDeviceProtectedStorage="true"
-        android:directBootAware="true">
+        android:label="@string/app_name">
 
         <service android:name=".PacService"
             android:exported="true">

@@ -20,10 +20,6 @@ import android.annotation.FloatRange;
 import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
-import android.os.Parcel;
-import android.os.Parcelable;
-
-import com.android.internal.util.Preconditions;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -38,7 +34,7 @@ import java.util.Objects;
  * @see LocationManager#registerGnssStatusCallback
  * @see GnssStatus.Callback
  */
-public final class GnssStatus implements Parcelable {
+public final class GnssStatus {
 
     // These must match the definitions in GNSS HAL.
     //
@@ -132,13 +128,6 @@ public final class GnssStatus implements Parcelable {
     public static GnssStatus wrap(int svCount, int[] svidWithFlags, float[] cn0DbHzs,
             float[] elevations, float[] azimuths, float[] carrierFrequencies,
             float[] basebandCn0DbHzs) {
-        Preconditions.checkState(svCount >= 0);
-        Preconditions.checkState(svidWithFlags.length >= svCount);
-        Preconditions.checkState(elevations.length >= svCount);
-        Preconditions.checkState(azimuths.length >= svCount);
-        Preconditions.checkState(carrierFrequencies.length >= svCount);
-        Preconditions.checkState(basebandCn0DbHzs.length >= svCount);
-
         return new GnssStatus(svCount, svidWithFlags, cn0DbHzs, elevations, azimuths,
                 carrierFrequencies, basebandCn0DbHzs);
     }
@@ -284,7 +273,12 @@ public final class GnssStatus implements Parcelable {
      * Gets the carrier frequency of the signal tracked.
      *
      * <p>For example it can be the GPS central frequency for L1 = 1575.45 MHz, or L2 = 1227.60
-     * MHz, L5 = 1176.45 MHz, varying GLO channels, etc.
+     * MHz, L5 = 1176.45 MHz, varying GLO channels, etc. If the field is not set, it is the primary
+     * common use central frequency, e.g. L1 = 1575.45 MHz for GPS.
+     *
+     * For an L1, L5 receiver tracking a satellite on L1 and L5 at the same time, two measurements
+     * will be reported for this same satellite, in one all the values related to L1 will be
+     * filled, and in the other all of the values related to L5 will be filled.
      *
      * <p>The value is only available if {@link #hasCarrierFrequencyHz(int satelliteIndex)} is
      * {@code true}.
@@ -374,53 +368,6 @@ public final class GnssStatus implements Parcelable {
         return result;
     }
 
-    public static final @NonNull Creator<GnssStatus> CREATOR = new Creator<GnssStatus>() {
-        @Override
-        public GnssStatus createFromParcel(Parcel in) {
-            int svCount = in.readInt();
-            int[] svidWithFlags = new int[svCount];
-            float[] cn0DbHzs = new float[svCount];
-            float[] elevations = new float[svCount];
-            float[] azimuths = new float[svCount];
-            float[] carrierFrequencies = new float[svCount];
-            float[] basebandCn0DbHzs = new float[svCount];
-            for (int i = 0; i < svCount; i++) {
-                svidWithFlags[i] = in.readInt();
-                cn0DbHzs[i] = in.readFloat();
-                elevations[i] = in.readFloat();
-                azimuths[i] = in.readFloat();
-                carrierFrequencies[i] = in.readFloat();
-                basebandCn0DbHzs[i] = in.readFloat();
-            }
-
-            return new GnssStatus(svCount, svidWithFlags, cn0DbHzs, elevations, azimuths,
-                    carrierFrequencies, basebandCn0DbHzs);
-        }
-
-        @Override
-        public GnssStatus[] newArray(int size) {
-            return new GnssStatus[size];
-        }
-    };
-
-    @Override
-    public int describeContents() {
-        return 0;
-    }
-
-    @Override
-    public void writeToParcel(@NonNull Parcel parcel, int flags) {
-        parcel.writeInt(mSvCount);
-        for (int i = 0; i < mSvCount; i++) {
-            parcel.writeInt(mSvidWithFlags[i]);
-            parcel.writeFloat(mCn0DbHzs[i]);
-            parcel.writeFloat(mElevations[i]);
-            parcel.writeFloat(mAzimuths[i]);
-            parcel.writeFloat(mCarrierFrequencies[i]);
-            parcel.writeFloat(mBasebandCn0DbHzs[i]);
-        }
-    }
-
     /**
      * Builder class to help create new GnssStatus instances.
      */
@@ -504,7 +451,7 @@ public final class GnssStatus implements Parcelable {
                 basebandCn0DbHzs[i] = mSatellites.get(i).mBasebandCn0DbHz;
             }
 
-            return new GnssStatus(svCount, svidWithFlags, cn0DbHzs, elevations, azimuths,
+            return wrap(svCount, svidWithFlags, cn0DbHzs, elevations, azimuths,
                     carrierFrequencies, basebandCn0DbHzs);
         }
     }

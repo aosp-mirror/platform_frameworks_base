@@ -29,8 +29,8 @@ import android.widget.FrameLayout;
 import androidx.annotation.Nullable;
 
 import com.android.systemui.Dumpable;
+import com.android.systemui.Interpolators;
 import com.android.systemui.R;
-import com.android.systemui.animation.Interpolators;
 import com.android.systemui.statusbar.StatusBarIconView;
 import com.android.systemui.statusbar.notification.stack.ExpandableViewState;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
@@ -46,6 +46,7 @@ import java.util.List;
 public abstract class ExpandableView extends FrameLayout implements Dumpable {
     private static final String TAG = "ExpandableView";
 
+    public static final float NO_ROUNDNESS = -1;
     protected OnHeightChangedListener mOnHeightChangedListener;
     private int mActualHeight;
     protected int mClipTopAmount;
@@ -189,6 +190,14 @@ public abstract class ExpandableView extends FrameLayout implements Dumpable {
         if (notifyListeners) {
             notifyHeightChanged(false  /* needsAnimation */);
         }
+    }
+
+    /**
+     * Set the distance to the top roundness, from where we should start clipping a value above
+     * or equal to 0 is the effective distance, and if a value below 0 is received, there should
+     * be no clipping.
+     */
+    public void setDistanceToTopRoundness(float distanceToTopRoundness) {
     }
 
     public void setActualHeight(int actualHeight) {
@@ -479,8 +488,7 @@ public abstract class ExpandableView extends FrameLayout implements Dumpable {
 
     @Override
     public void setLayerType(int layerType, Paint paint) {
-        // Allow resetting the layerType to NONE regardless of overlappingRendering
-        if (layerType == LAYER_TYPE_NONE || hasOverlappingRendering()) {
+        if (hasOverlappingRendering()) {
             super.setLayerType(layerType, paint);
         }
     }
@@ -489,6 +497,15 @@ public abstract class ExpandableView extends FrameLayout implements Dumpable {
     public boolean hasOverlappingRendering() {
         // Otherwise it will be clipped
         return super.hasOverlappingRendering() && getActualHeight() <= getHeight();
+    }
+
+    /**
+     * @return an amount between -1 and 1 of increased padding that this child needs. 1 means it
+     * needs a full increased padding while -1 means it needs no padding at all. For 0.0f the normal
+     * padding is applied.
+     */
+    public float getIncreasedPaddingAmount() {
+        return 0.0f;
     }
 
     public boolean mustStayOnScreen() {

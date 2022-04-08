@@ -22,8 +22,6 @@ import android.net.nsd.NsdManager;
 import android.net.nsd.NsdServiceInfo;
 import android.text.TextUtils;
 
-import androidx.annotation.GuardedBy;
-
 import com.android.printservice.recommendation.R;
 import com.android.printservice.recommendation.util.DiscoveryListenerMultiplexer;
 import com.android.printservice.recommendation.util.PrinterHashMap;
@@ -42,12 +40,7 @@ public class ServiceListener implements ServiceResolveQueue.ResolveCallback {
     private final String[] mServiceType;
     private final Observer mObserver;
     private final ServiceResolveQueue mResolveQueue;
-    private final Object mLock = new Object();
-
-    @GuardedBy("mLock")
     private List<NsdManager.DiscoveryListener> mListeners = new ArrayList<>();
-
-    @GuardedBy("mLock")
     public HashMap<String, PrinterHashMap> mVendorHashMap = new HashMap<>();
 
     public interface Observer {
@@ -80,120 +73,108 @@ public class ServiceListener implements ServiceResolveQueue.ResolveCallback {
         printerFound(nsdServiceInfo);
     }
 
-    private void printerFound(NsdServiceInfo nsdServiceInfo) {
+    private synchronized void printerFound(NsdServiceInfo nsdServiceInfo) {
         if (nsdServiceInfo == null) return;
         if (TextUtils.isEmpty(PrinterHashMap.getKey(nsdServiceInfo))) return;
         String vendor = MDnsUtils.getVendor(nsdServiceInfo);
         if (vendor == null) vendor = "";
-
-        boolean mapsChanged;
-        synchronized (mLock) {
-            for (Map.Entry<String, VendorInfo> entry : mVendorInfoHashMap.entrySet()) {
-                for (String vendorValues : entry.getValue().mDNSValues) {
-                    if (vendor.equalsIgnoreCase(vendorValues)) {
-                        vendor = entry.getValue().mVendorID;
-                        break;
-                    }
-                }
-                // intentional pointer check
-                //noinspection StringEquality
-                if ((vendor != entry.getValue().mVendorID) &&
-                        MDnsUtils.isVendorPrinter(nsdServiceInfo, entry.getValue().mDNSValues)) {
+        for(Map.Entry<String,VendorInfo> entry : mVendorInfoHashMap.entrySet()) {
+            for(String vendorValues : entry.getValue().mDNSValues) {
+                if (vendor.equalsIgnoreCase(vendorValues)) {
                     vendor = entry.getValue().mVendorID;
+                    break;
                 }
-                // intentional pointer check
-                //noinspection StringEquality
-                if (vendor == entry.getValue().mVendorID) break;
             }
-
-            if (TextUtils.isEmpty(vendor)) {
-                return;
+            // intentional pointer check
+            //noinspection StringEquality
+            if ((vendor != entry.getValue().mVendorID) &&
+                    MDnsUtils.isVendorPrinter(nsdServiceInfo, entry.getValue().mDNSValues)) {
+                vendor = entry.getValue().mVendorID;
             }
-
-            if (!mObserver.matchesCriteria(vendor, nsdServiceInfo))
-                return;
-
-            PrinterHashMap vendorHash = mVendorHashMap.get(vendor);
-            if (vendorHash == null) {
-                vendorHash = new PrinterHashMap();
-            }
-            mapsChanged = (vendorHash.addPrinter(nsdServiceInfo) == null);
-            mVendorHashMap.put(vendor, vendorHash);
+            // intentional pointer check
+            //noinspection StringEquality
+            if (vendor == entry.getValue().mVendorID) break;
         }
+
+        if (TextUtils.isEmpty(vendor)) {
+            return;
+        }
+
+        if (!mObserver.matchesCriteria(vendor, nsdServiceInfo))
+            return;
+        boolean mapsChanged;
+
+        PrinterHashMap vendorHash = mVendorHashMap.get(vendor);
+        if (vendorHash == null) {
+            vendorHash = new PrinterHashMap();
+        }
+        mapsChanged = (vendorHash.addPrinter(nsdServiceInfo) == null);
+        mVendorHashMap.put(vendor, vendorHash);
 
         if (mapsChanged) {
             mObserver.dataSetChanged();
         }
     }
 
-    private void printerRemoved(NsdServiceInfo nsdServiceInfo) {
+    private synchronized void printerRemoved(NsdServiceInfo nsdServiceInfo) {
         boolean wasRemoved = false;
-
-        synchronized (mLock) {
-            Set<String> vendors = mVendorHashMap.keySet();
-            for (String vendor : vendors) {
-                PrinterHashMap map = mVendorHashMap.get(vendor);
-                wasRemoved |= (map.removePrinter(nsdServiceInfo) != null);
-                if (map.isEmpty()) wasRemoved |= (mVendorHashMap.remove(vendor) != null);
-            }
+        Set<String> vendors = mVendorHashMap.keySet();
+        for(String vendor : vendors) {
+            PrinterHashMap map = mVendorHashMap.get(vendor);
+            wasRemoved |= (map.removePrinter(nsdServiceInfo) != null);
+            if (map.isEmpty()) wasRemoved |= (mVendorHashMap.remove(vendor) != null);
         }
-
         if (wasRemoved) {
             mObserver.dataSetChanged();
         }
     }
 
     public void start() {
-        synchronized (mLock) {
-            stop();
+        stop();
+        for(final String service :mServiceType) {
+            NsdManager.DiscoveryListener listener = new NsdManager.DiscoveryListener() {
+                @Override
+                public void onStartDiscoveryFailed(String s, int i) {
 
-            for (final String service : mServiceType) {
-                NsdManager.DiscoveryListener listener = new NsdManager.DiscoveryListener() {
-                    @Override
-                    public void onStartDiscoveryFailed(String s, int i) {
+                }
 
-                    }
+                @Override
+                public void onStopDiscoveryFailed(String s, int i) {
 
-                    @Override
-                    public void onStopDiscoveryFailed(String s, int i) {
+                }
 
-                    }
+                @Override
+                public void onDiscoveryStarted(String s) {
 
-                    @Override
-                    public void onDiscoveryStarted(String s) {
+                }
 
-                    }
+                @Override
+                public void onDiscoveryStopped(String s) {
 
-                    @Override
-                    public void onDiscoveryStopped(String s) {
+                }
 
-                    }
+                @Override
+                public void onServiceFound(NsdServiceInfo nsdServiceInfo) {
+                    mResolveQueue.queueRequest(nsdServiceInfo, ServiceListener.this);
+                }
 
-                    @Override
-                    public void onServiceFound(NsdServiceInfo nsdServiceInfo) {
-                        mResolveQueue.queueRequest(nsdServiceInfo, ServiceListener.this);
-                    }
-
-                    @Override
-                    public void onServiceLost(NsdServiceInfo nsdServiceInfo) {
-                        mResolveQueue.removeRequest(nsdServiceInfo, ServiceListener.this);
-                        printerRemoved(nsdServiceInfo);
-                    }
-                };
-                DiscoveryListenerMultiplexer.addListener(mNSDManager, service, listener);
-                mListeners.add(listener);
-            }
+                @Override
+                public void onServiceLost(NsdServiceInfo nsdServiceInfo) {
+                    mResolveQueue.removeRequest(nsdServiceInfo, ServiceListener.this);
+                    printerRemoved(nsdServiceInfo);
+                }
+            };
+            DiscoveryListenerMultiplexer.addListener(mNSDManager, service, listener);
+            mListeners.add(listener);
         }
     }
 
     public void stop() {
-        synchronized (mLock) {
-            for (NsdManager.DiscoveryListener listener : mListeners) {
-                DiscoveryListenerMultiplexer.removeListener(mNSDManager, listener);
-            }
-            mVendorHashMap.clear();
-            mListeners.clear();
+        for(NsdManager.DiscoveryListener listener : mListeners) {
+            DiscoveryListenerMultiplexer.removeListener(mNSDManager, listener);
         }
+        mVendorHashMap.clear();
+        mListeners.clear();
     }
 
     /**
@@ -202,10 +183,8 @@ public class ServiceListener implements ServiceResolveQueue.ResolveCallback {
     public ArrayList<InetAddress> getPrinters() {
         ArrayList<InetAddress> printerAddressess = new ArrayList<>();
 
-        synchronized (mLock) {
-            for (PrinterHashMap oneVendorPrinters : mVendorHashMap.values()) {
-                printerAddressess.addAll(oneVendorPrinters.getPrinterAddresses());
-            }
+        for (PrinterHashMap oneVendorPrinters : mVendorHashMap.values()) {
+            printerAddressess.addAll(oneVendorPrinters.getPrinterAddresses());
         }
 
         return printerAddressess;

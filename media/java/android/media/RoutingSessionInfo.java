@@ -326,7 +326,6 @@ public final class RoutingSessionInfo implements Parcelable {
                 .append("RoutingSessionInfo{ ")
                 .append("sessionId=").append(getId())
                 .append(", name=").append(getName())
-                .append(", clientPackageName=").append(getClientPackageName())
                 .append(", selectedRoutes={")
                 .append(String.join(",", getSelectedRoutes()))
                 .append("}")

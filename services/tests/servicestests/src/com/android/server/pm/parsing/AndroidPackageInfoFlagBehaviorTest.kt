@@ -20,13 +20,12 @@ import android.content.pm.ApplicationInfo
 import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
 import android.content.pm.PackageParser
-import android.platform.test.annotations.Postsubmit
+import android.platform.test.annotations.Presubmit
 import com.android.server.pm.parsing.AndroidPackageInfoFlagBehaviorTest.Companion.Param.Companion.appInfo
 import com.android.server.pm.parsing.AndroidPackageInfoFlagBehaviorTest.Companion.Param.Companion.pkgInfo
 import com.android.server.pm.parsing.pkg.AndroidPackage
 import com.google.common.truth.Truth.assertThat
 import com.google.common.truth.Truth.assertWithMessage
-import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
@@ -38,7 +37,7 @@ import org.junit.runners.Parameterized
  * This test has to be updated manually whenever the info generation behavior changes, since
  * there's no single place where flag -> field is defined besides this test.
  */
-@Postsubmit
+@Presubmit
 @RunWith(Parameterized::class)
 class AndroidPackageInfoFlagBehaviorTest : AndroidPackageParsingTestBase() {
 
@@ -59,9 +58,7 @@ class AndroidPackageInfoFlagBehaviorTest : AndroidPackageParsingTestBase() {
 
                 fun appInfo(flag: Int, fieldFunction: (ApplicationInfo) -> List<Any?>) = Param(
                         flag, ApplicationInfo::class.java.simpleName,
-                        { pkg, flags -> oldAppInfo(pkg, flags) },
-                        { pkg, flags -> newAppInfo(pkg, flags) },
-                        fieldFunction
+                        ::oldAppInfo, ::newAppInfo, fieldFunction
                 )
             }
 
@@ -105,7 +102,6 @@ class AndroidPackageInfoFlagBehaviorTest : AndroidPackageParsingTestBase() {
     lateinit var param: Param<Any>
 
     @Test
-    @Ignore("b/155935153")
     fun fieldPresence() {
         oldPackages.asSequence().zip(newPackages.asSequence())
                 .forEach { (old, new) ->
@@ -128,7 +124,6 @@ class AndroidPackageInfoFlagBehaviorTest : AndroidPackageParsingTestBase() {
     }
 
     @Test
-    @Ignore("b/155935153")
     fun fieldAbsence() {
         newPackages.forEach {
             val newWithoutFlag = param.newPkgFunction(it, 0)

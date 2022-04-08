@@ -32,10 +32,9 @@ import androidx.recyclerview.widget.RecyclerView.AdapterDataObserver
 import com.android.systemui.R
 import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.controls.controller.ControlsController
-import com.android.systemui.controls.ui.ControlsActivity
-import com.android.systemui.controls.ui.ControlsUiController
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
+import com.android.systemui.globalactions.GlobalActionsComponent
 import com.android.systemui.settings.CurrentUserTracker
 import com.android.systemui.util.LifecycleActivity
 import java.util.concurrent.Executor
@@ -49,15 +48,14 @@ class ControlsProviderSelectorActivity @Inject constructor(
     @Background private val backExecutor: Executor,
     private val listingController: ControlsListingController,
     private val controlsController: ControlsController,
-    private val broadcastDispatcher: BroadcastDispatcher,
-    private val uiController: ControlsUiController
+    private val globalActionsComponent: GlobalActionsComponent,
+    broadcastDispatcher: BroadcastDispatcher
 ) : LifecycleActivity() {
 
     companion object {
         private const val TAG = "ControlsProviderSelectorActivity"
-        const val BACK_SHOULD_EXIT = "back_should_exit"
     }
-    private var backShouldExit = false
+
     private lateinit var recyclerView: RecyclerView
     private val currentUserTracker = object : CurrentUserTracker(broadcastDispatcher) {
         private val startingUser = listingController.currentUserId
@@ -103,17 +101,10 @@ class ControlsProviderSelectorActivity @Inject constructor(
             }
         }
         requireViewById<View>(R.id.done).visibility = View.GONE
-
-        backShouldExit = intent.getBooleanExtra(BACK_SHOULD_EXIT, false)
     }
 
     override fun onBackPressed() {
-        if (!backShouldExit) {
-            val i = Intent().apply {
-                component = ComponentName(applicationContext, ControlsActivity::class.java)
-            }
-            startActivity(i, ActivityOptions.makeSceneTransitionAnimation(this).toBundle())
-        }
+        globalActionsComponent.handleShowGlobalActionsMenu()
         animateExitAndFinish()
     }
 
@@ -163,7 +154,6 @@ class ControlsProviderSelectorActivity @Inject constructor(
                     putExtra(ControlsFavoritingActivity.EXTRA_FROM_PROVIDER_SELECTOR, true)
                 }
                 startActivity(intent, ActivityOptions.makeSceneTransitionAnimation(this).toBundle())
-                animateExitAndFinish()
             }
         }
     }

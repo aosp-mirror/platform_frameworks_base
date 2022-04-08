@@ -102,7 +102,7 @@ public class NotificationListenerServiceTest extends UiServiceTestCase {
             String key = mKeys[i];
             Ranking ranking = new Ranking();
             service.getCurrentRanking().getRanking(key, ranking);
-            assertEquals(getVisibilityOverride(i), ranking.getLockscreenVisibilityOverride());
+            assertEquals(getVisibilityOverride(i), ranking.getVisibilityOverride());
             assertEquals(getOverrideGroupKey(key), ranking.getOverrideGroupKey());
             assertEquals(!isIntercepted(i), ranking.matchesInterruptionFilter());
             assertEquals(getSuppressedVisualEffects(i), ranking.getSuppressedVisualEffects());
@@ -120,8 +120,7 @@ public class NotificationListenerServiceTest extends UiServiceTestCase {
             assertEquals(canBubble(i), ranking.canBubble());
             assertEquals(visuallyInterruptive(i), ranking.visuallyInterruptive());
             assertEquals(isConversation(i), ranking.isConversation());
-            assertEquals(getShortcutInfo(i).getId(), ranking.getConversationShortcutInfo().getId());
-            assertEquals(getRankingAdjustment(i), ranking.getRankingAdjustment());
+            assertEquals(getShortcutInfo(i).getId(), ranking.getShortcutInfo().getId());
         }
     }
 
@@ -173,7 +172,7 @@ public class NotificationListenerServiceTest extends UiServiceTestCase {
                 tweak.getKey(),
                 tweak.getRank(),
                 !tweak.matchesInterruptionFilter(), // note the inversion here!
-                tweak.getLockscreenVisibilityOverride(),
+                tweak.getVisibilityOverride(),
                 tweak.getSuppressedVisualEffects(),
                 tweak.getImportance(),
                 tweak.getImportanceExplanation(),
@@ -191,8 +190,7 @@ public class NotificationListenerServiceTest extends UiServiceTestCase {
                 tweak.canBubble(),
                 tweak.visuallyInterruptive(),
                 tweak.isConversation(),
-                tweak.getConversationShortcutInfo(),
-                tweak.getRankingAdjustment(),
+                tweak.getShortcutInfo(),
                 tweak.isBubble()
         );
         assertNotEquals(nru, nru2);
@@ -273,7 +271,6 @@ public class NotificationListenerServiceTest extends UiServiceTestCase {
                     visuallyInterruptive(i),
                     isConversation(i),
                     getShortcutInfo(i),
-                    getRankingAdjustment(i),
                     isBubble(i)
             );
             rankings[i] = ranking;
@@ -361,7 +358,7 @@ public class NotificationListenerServiceTest extends UiServiceTestCase {
                     getContext(),
                     index /*requestCode*/,
                     new Intent("ACTION_" + key),
-                    PendingIntent.FLAG_IMMUTABLE /*flags*/);
+                    0 /*flags*/);
             actions.add(new Notification.Action.Builder(null /*icon*/, key, intent).build());
         }
         return actions;
@@ -394,12 +391,8 @@ public class NotificationListenerServiceTest extends UiServiceTestCase {
                 "disabledMessage", 0, "disabledMessageResName",
                 null, null, 0, null, 0, 0,
                 0, "iconResName", "bitmapPath", null, 0,
-                null, null, null);
+                null, null);
         return si;
-    }
-
-    private int getRankingAdjustment(int index) {
-        return index % 3 - 1;
     }
 
     private boolean isBubble(int index) {
@@ -424,7 +417,7 @@ public class NotificationListenerServiceTest extends UiServiceTestCase {
         assertEquals(comment, a.getKey(), b.getKey());
         assertEquals(comment, a.getRank(), b.getRank());
         assertEquals(comment, a.matchesInterruptionFilter(), b.matchesInterruptionFilter());
-        assertEquals(comment, a.getLockscreenVisibilityOverride(), b.getLockscreenVisibilityOverride());
+        assertEquals(comment, a.getVisibilityOverride(), b.getVisibilityOverride());
         assertEquals(comment, a.getSuppressedVisualEffects(), b.getSuppressedVisualEffects());
         assertEquals(comment, a.getImportance(), b.getImportance());
         assertEquals(comment, a.getImportanceExplanation(), b.getImportanceExplanation());
@@ -440,8 +433,7 @@ public class NotificationListenerServiceTest extends UiServiceTestCase {
         assertEquals(comment, a.getSmartReplies(), b.getSmartReplies());
         assertEquals(comment, a.canBubble(), b.canBubble());
         assertEquals(comment, a.isConversation(), b.isConversation());
-        assertEquals(comment, a.getConversationShortcutInfo().getId(),
-                b.getConversationShortcutInfo().getId());
+        assertEquals(comment, a.getShortcutInfo().getId(), b.getShortcutInfo().getId());
         assertActionsEqual(a.getSmartActions(), b.getSmartActions());
     }
 

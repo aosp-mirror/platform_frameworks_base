@@ -47,17 +47,14 @@ public class FontResourcesParser {
         private final @NonNull String mProviderAuthority;
         private final @NonNull String mProviderPackage;
         private final @NonNull String mQuery;
-        private final @Nullable String mSystemFontFamilyName;
         private final @Nullable List<List<String>> mCerts;
 
         public ProviderResourceEntry(@NonNull String authority, @NonNull String pkg,
-                @NonNull String query, @Nullable List<List<String>> certs,
-                @Nullable String systemFontFamilyName) {
+                @NonNull String query, @Nullable List<List<String>> certs) {
             mProviderAuthority = authority;
             mProviderPackage = pkg;
             mQuery = query;
             mCerts = certs;
-            mSystemFontFamilyName = systemFontFamilyName;
         }
 
         public @NonNull String getAuthority() {
@@ -70,10 +67,6 @@ public class FontResourcesParser {
 
         public @NonNull String getQuery() {
             return mQuery;
-        }
-
-        public @NonNull String getSystemFontFamilyName() {
-            return mSystemFontFamilyName;
         }
 
         public @Nullable List<List<String>> getCerts() {
@@ -173,8 +166,6 @@ public class FontResourcesParser {
         String providerPackage = array.getString(R.styleable.FontFamily_fontProviderPackage);
         String query = array.getString(R.styleable.FontFamily_fontProviderQuery);
         int certsId = array.getResourceId(R.styleable.FontFamily_fontProviderCerts, 0);
-        String systemFontFamilyName = array.getString(
-                R.styleable.FontFamily_fontProviderSystemFontFamily);
         array.recycle();
         if (authority != null && providerPackage != null && query != null) {
             while (parser.next() != XmlPullParser.END_TAG) {
@@ -200,13 +191,7 @@ public class FontResourcesParser {
                     }
                 }
             }
-            return new ProviderResourceEntry(
-                    authority,
-                    providerPackage,
-                    query,
-                    certs,
-                    systemFontFamilyName
-            );
+            return new ProviderResourceEntry(authority, providerPackage, query, certs);
         }
         List<FontFileResourceEntry> fonts = new ArrayList<>();
         while (parser.next() != XmlPullParser.END_TAG) {

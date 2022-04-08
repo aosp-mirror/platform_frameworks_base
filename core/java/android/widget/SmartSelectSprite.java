@@ -50,9 +50,11 @@ import java.util.Objects;
  */
 final class SmartSelectSprite {
 
-    private static final int EXPAND_DURATION = 200;
+    private static final int EXPAND_DURATION = 300;
+    private static final int CORNER_DURATION = 50;
 
     private final Interpolator mExpandInterpolator;
+    private final Interpolator mCornerInterpolator;
 
     private Animator mActiveAnimator = null;
     private final Runnable mInvalidator;
@@ -335,6 +337,9 @@ final class SmartSelectSprite {
         mExpandInterpolator = AnimationUtils.loadInterpolator(
                 context,
                 android.R.interpolator.fast_out_slow_in);
+        mCornerInterpolator = AnimationUtils.loadInterpolator(
+                context,
+                android.R.interpolator.fast_out_linear_in);
         mFillColor = highlightColor;
         mInvalidator = Objects.requireNonNull(invalidator);
     }
@@ -367,6 +372,7 @@ final class SmartSelectSprite {
         final int rectangleCount = destinationRectangles.size();
 
         final List<RoundedRectangleShape> shapes = new ArrayList<>(rectangleCount);
+        final List<Animator> cornerAnimators = new ArrayList<>(rectangleCount);
 
         RectangleWithTextSelectionLayout centerRectangle = null;
 
@@ -399,6 +405,7 @@ final class SmartSelectSprite {
                     expansionDirections[index],
                     rectangleWithTextSelectionLayout.getTextSelectionLayout()
                             == Layout.TEXT_SELECTION_LAYOUT_RIGHT_TO_LEFT);
+            cornerAnimators.add(createCornerAnimator(shape, updateListener));
             shapes.add(shape);
         }
 
@@ -413,7 +420,7 @@ final class SmartSelectSprite {
         mExistingDrawable = shapeDrawable;
 
         mActiveAnimator = createAnimator(rectangleList, startingOffset, startingOffset,
-                updateListener, onAnimationEnd);
+                cornerAnimators, updateListener, onAnimationEnd);
         mActiveAnimator.start();
     }
 
@@ -426,6 +433,7 @@ final class SmartSelectSprite {
             final RectangleList rectangleList,
             final float startingOffsetLeft,
             final float startingOffsetRight,
+            final List<Animator> cornerAnimators,
             final ValueAnimator.AnimatorUpdateListener updateListener,
             final Runnable onAnimationEnd) {
         final ObjectAnimator rightBoundaryAnimator = ObjectAnimator.ofFloat(
@@ -449,12 +457,18 @@ final class SmartSelectSprite {
         rightBoundaryAnimator.setInterpolator(mExpandInterpolator);
         leftBoundaryAnimator.setInterpolator(mExpandInterpolator);
 
+        final AnimatorSet cornerAnimator = new AnimatorSet();
+        cornerAnimator.playTogether(cornerAnimators);
+
         final AnimatorSet boundaryAnimator = new AnimatorSet();
         boundaryAnimator.playTogether(leftBoundaryAnimator, rightBoundaryAnimator);
 
-        setUpAnimatorListener(boundaryAnimator, onAnimationEnd);
+        final AnimatorSet animatorSet = new AnimatorSet();
+        animatorSet.playSequentially(boundaryAnimator, cornerAnimator);
 
-        return boundaryAnimator;
+        setUpAnimatorListener(animatorSet, onAnimationEnd);
+
+        return animatorSet;
     }
 
     private void setUpAnimatorListener(final Animator animator, final Runnable onAnimationEnd) {
@@ -479,6 +493,19 @@ final class SmartSelectSprite {
             public void onAnimationRepeat(Animator animator) {
             }
         });
+    }
+
+    private ObjectAnimator createCornerAnimator(
+            final RoundedRectangleShape shape,
+            final ValueAnimator.AnimatorUpdateListener listener) {
+        final ObjectAnimator animator = ObjectAnimator.ofFloat(
+                shape,
+                RoundedRectangleShape.PROPERTY_ROUND_RATIO,
+                shape.getRoundRatio(), 0.0F);
+        animator.setDuration(CORNER_DURATION);
+        animator.addUpdateListener(listener);
+        animator.setInterpolator(mCornerInterpolator);
+        return animator;
     }
 
     private static @RoundedRectangleShape.ExpansionDirection int[] generateDirections(

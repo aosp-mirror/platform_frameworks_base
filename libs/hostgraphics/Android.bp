@@ -1,23 +1,8 @@
-package {
-    // See: http://go/android-license-faq
-    // A large-scale-change added 'default_applicable_licenses' to import
-    // all of the 'license_kinds' from "frameworks_base_license"
-    // to get the below license kinds:
-    //   SPDX-license-identifier-Apache-2.0
-    default_applicable_licenses: ["frameworks_base_license"],
-}
-
 cc_library_host_static {
     name: "libhostgraphics",
 
     cflags: [
         "-Wno-unused-parameter",
-    ],
-
-    static_libs: [
-        "libbase",
-        "libmath",
-        "libutils",
     ],
 
     srcs: [
@@ -35,7 +20,6 @@ cc_library_host_static {
         "frameworks/native/libs/nativebase/include",
         "frameworks/native/libs/nativewindow/include",
         "frameworks/native/libs/arect/include",
-        "frameworks/native/libs/ui/include_private",
     ],
     export_include_dirs: ["."],
 

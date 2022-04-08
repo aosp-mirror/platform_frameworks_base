@@ -152,11 +152,10 @@ public final class GpsStatus {
     }
 
     /**
-     * Builds an empty GpsStatus. Should only be used for legacy reasons.
+     * Builds an empty GpsStatus.
      *
      * @hide
      */
-    @NonNull
     static GpsStatus createEmpty() {
         return new GpsStatus();
     }

@@ -145,10 +145,10 @@ public class Lnb implements AutoCloseable {
 
     private static final String TAG = "Lnb";
 
+    int mId;
     LnbCallback mCallback;
     Executor mExecutor;
     Tuner mTuner;
-    private final Object mCallbackLock = new Object();
 
 
     private native int nativeSetVoltage(int voltage);
@@ -162,29 +162,25 @@ public class Lnb implements AutoCloseable {
     private Boolean mIsClosed = false;
     private final Object mLock = new Object();
 
-    private Lnb() {}
+    private Lnb(int id) {
+        mId = id;
+    }
 
     void setCallback(Executor executor, @Nullable LnbCallback callback, Tuner tuner) {
-        synchronized (mCallbackLock) {
-            mCallback = callback;
-            mExecutor = executor;
-            mTuner = tuner;
-        }
+        mCallback = callback;
+        mExecutor = executor;
+        mTuner = tuner;
     }
 
     private void onEvent(int eventType) {
-        synchronized (mCallbackLock) {
-            if (mExecutor != null && mCallback != null) {
-                mExecutor.execute(() -> mCallback.onEvent(eventType));
-            }
+        if (mExecutor != null && mCallback != null) {
+            mExecutor.execute(() -> mCallback.onEvent(eventType));
         }
     }
 
     private void onDiseqcMessage(byte[] diseqcMessage) {
-        synchronized (mCallbackLock) {
-            if (mExecutor != null && mCallback != null) {
-                mExecutor.execute(() -> mCallback.onDiseqcMessage(diseqcMessage));
-            }
+        if (mExecutor != null && mCallback != null) {
+            mExecutor.execute(() -> mCallback.onDiseqcMessage(diseqcMessage));
         }
     }
 

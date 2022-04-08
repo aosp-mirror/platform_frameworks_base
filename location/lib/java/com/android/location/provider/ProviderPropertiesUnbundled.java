@@ -16,70 +16,38 @@
 
 package com.android.location.provider;
 
-import android.annotation.NonNull;
-import android.location.provider.ProviderProperties;
-
-import java.util.Objects;
+import com.android.internal.location.ProviderProperties;
 
 /**
- * Represents provider properties for unbundled applications.
+ * This class is an interface to Provider Properties for unbundled applications.
  *
- * <p>IMPORTANT: This class is effectively a public API for unbundled applications, and must remain
- * API stable.
+ * <p>IMPORTANT: This class is effectively a public API for unbundled
+ * applications, and must remain API stable. See README.txt in the root
+ * of this package for more information.
  */
 public final class ProviderPropertiesUnbundled {
-
-    /**
-     * Create new instance of {@link ProviderPropertiesUnbundled} with the given arguments.
-     */
-    public static @NonNull ProviderPropertiesUnbundled create(boolean requiresNetwork,
-            boolean requiresSatellite, boolean requiresCell, boolean hasMonetaryCost,
-            boolean supportsAltitude, boolean supportsSpeed, boolean supportsBearing,
-            int powerUsage, int accuracy) {
-        return new ProviderPropertiesUnbundled(new ProviderProperties.Builder()
-                .setHasNetworkRequirement(requiresNetwork)
-                .setHasSatelliteRequirement(requiresSatellite)
-                .setHasCellRequirement(requiresCell)
-                .setHasMonetaryCost(requiresCell)
-                .setHasAltitudeSupport(requiresCell)
-                .setHasSpeedSupport(requiresCell)
-                .setHasBearingSupport(requiresCell)
-                .setPowerUsage(powerUsage)
-                .setAccuracy(accuracy)
-                .build());
-    }
-
     private final ProviderProperties mProperties;
 
+    public static ProviderPropertiesUnbundled create(boolean requiresNetwork,
+            boolean requiresSatellite, boolean requiresCell, boolean hasMonetaryCost,
+            boolean supportsAltitude, boolean supportsSpeed, boolean supportsBearing,
+            int powerRequirement, int accuracy) {
+        return new ProviderPropertiesUnbundled(new ProviderProperties(requiresNetwork,
+                requiresSatellite, requiresCell, hasMonetaryCost, supportsAltitude, supportsSpeed,
+                supportsBearing, powerRequirement, accuracy));
+    }
+
     private ProviderPropertiesUnbundled(ProviderProperties properties) {
-        mProperties = Objects.requireNonNull(properties);
+        mProperties = properties;
     }
 
     /** @hide */
-    public @NonNull ProviderProperties getProviderProperties() {
+    public ProviderProperties getProviderProperties() {
         return mProperties;
     }
 
     @Override
     public String toString() {
         return mProperties.toString();
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-
-        ProviderPropertiesUnbundled that = (ProviderPropertiesUnbundled) o;
-        return mProperties.equals(that.mProperties);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(mProperties);
     }
 }

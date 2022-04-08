@@ -20,8 +20,8 @@ import android.net.NetworkIdentity;
 import android.service.NetworkIdentitySetProto;
 import android.util.proto.ProtoOutputStream;
 
-import java.io.DataInput;
-import java.io.DataOutput;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.HashSet;
 
@@ -40,12 +40,11 @@ public class NetworkIdentitySet extends HashSet<NetworkIdentity> implements
     private static final int VERSION_ADD_NETWORK_ID = 3;
     private static final int VERSION_ADD_METERED = 4;
     private static final int VERSION_ADD_DEFAULT_NETWORK = 5;
-    private static final int VERSION_ADD_OEM_MANAGED_NETWORK = 6;
 
     public NetworkIdentitySet() {
     }
 
-    public NetworkIdentitySet(DataInput in) throws IOException {
+    public NetworkIdentitySet(DataInputStream in) throws IOException {
         final int version = in.readInt();
         final int size = in.readInt();
         for (int i = 0; i < size; i++) {
@@ -85,20 +84,13 @@ public class NetworkIdentitySet extends HashSet<NetworkIdentity> implements
                 defaultNetwork = true;
             }
 
-            final int oemNetCapabilities;
-            if (version >= VERSION_ADD_OEM_MANAGED_NETWORK) {
-                oemNetCapabilities = in.readInt();
-            } else {
-                oemNetCapabilities = NetworkIdentity.OEM_NONE;
-            }
-
             add(new NetworkIdentity(type, subType, subscriberId, networkId, roaming, metered,
-                    defaultNetwork, oemNetCapabilities));
+                    defaultNetwork));
         }
     }
 
-    public void writeToStream(DataOutput out) throws IOException {
-        out.writeInt(VERSION_ADD_OEM_MANAGED_NETWORK);
+    public void writeToStream(DataOutputStream out) throws IOException {
+        out.writeInt(VERSION_ADD_DEFAULT_NETWORK);
         out.writeInt(size());
         for (NetworkIdentity ident : this) {
             out.writeInt(ident.getType());
@@ -108,7 +100,6 @@ public class NetworkIdentitySet extends HashSet<NetworkIdentity> implements
             out.writeBoolean(ident.getRoaming());
             out.writeBoolean(ident.getMetered());
             out.writeBoolean(ident.getDefaultNetwork());
-            out.writeInt(ident.getOemManaged());
         }
     }
 
@@ -152,7 +143,7 @@ public class NetworkIdentitySet extends HashSet<NetworkIdentity> implements
         return true;
     }
 
-    private static void writeOptionalString(DataOutput out, String value) throws IOException {
+    private static void writeOptionalString(DataOutputStream out, String value) throws IOException {
         if (value != null) {
             out.writeByte(1);
             out.writeUTF(value);
@@ -161,7 +152,7 @@ public class NetworkIdentitySet extends HashSet<NetworkIdentity> implements
         }
     }
 
-    private static String readOptionalString(DataInput in) throws IOException {
+    private static String readOptionalString(DataInputStream in) throws IOException {
         if (in.readByte() != 0) {
             return in.readUTF();
         } else {

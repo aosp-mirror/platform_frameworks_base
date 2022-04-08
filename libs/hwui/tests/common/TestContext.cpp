@@ -22,16 +22,16 @@ namespace android {
 namespace uirenderer {
 namespace test {
 
-const ui::StaticDisplayInfo& getDisplayInfo() {
-    static ui::StaticDisplayInfo info = [] {
-        ui::StaticDisplayInfo info;
+const DisplayInfo& getDisplayInfo() {
+    static DisplayInfo info = [] {
+        DisplayInfo info;
 #if HWUI_NULL_GPU
         info.density = 2.f;
 #else
         const sp<IBinder> token = SurfaceComposerClient::getInternalDisplayToken();
         LOG_ALWAYS_FATAL_IF(!token, "%s: No internal display", __FUNCTION__);
 
-        const status_t status = SurfaceComposerClient::getStaticDisplayInfo(token, &info);
+        const status_t status = SurfaceComposerClient::getDisplayInfo(token, &info);
         LOG_ALWAYS_FATAL_IF(status, "%s: Failed to get display info", __FUNCTION__);
 #endif
         return info;
@@ -40,9 +40,9 @@ const ui::StaticDisplayInfo& getDisplayInfo() {
     return info;
 }
 
-const ui::DisplayMode& getActiveDisplayMode() {
-    static ui::DisplayMode config = [] {
-        ui::DisplayMode config;
+const DisplayConfig& getActiveDisplayConfig() {
+    static DisplayConfig config = [] {
+        DisplayConfig config;
 #if HWUI_NULL_GPU
         config.resolution = ui::Size(1080, 1920);
         config.xDpi = config.yDpi = 320.f;
@@ -51,7 +51,7 @@ const ui::DisplayMode& getActiveDisplayMode() {
         const sp<IBinder> token = SurfaceComposerClient::getInternalDisplayToken();
         LOG_ALWAYS_FATAL_IF(!token, "%s: No internal display", __FUNCTION__);
 
-        const status_t status = SurfaceComposerClient::getActiveDisplayMode(token, &config);
+        const status_t status = SurfaceComposerClient::getActiveDisplayConfig(token, &config);
         LOG_ALWAYS_FATAL_IF(status, "%s: Failed to get active display config", __FUNCTION__);
 #endif
         return config;

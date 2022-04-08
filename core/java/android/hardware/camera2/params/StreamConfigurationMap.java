@@ -24,6 +24,7 @@ import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CameraDevice;
 import android.hardware.camera2.CameraMetadata;
 import android.hardware.camera2.CaptureRequest;
+import android.hardware.camera2.legacy.LegacyCameraDevice;
 import android.hardware.camera2.utils.HashCodeHelpers;
 import android.hardware.camera2.utils.SurfaceUtils;
 import android.util.Range;
@@ -67,8 +68,6 @@ import java.util.Set;
 public final class StreamConfigurationMap {
 
     private static final String TAG = "StreamConfigurationMap";
-
-    private static final int MAX_DIMEN_FOR_ROUNDING = 1920; // maximum allowed width for rounding
 
     /**
      * Create a new {@link StreamConfigurationMap}.
@@ -569,7 +568,7 @@ public final class StreamConfigurationMap {
                 if (config.getSize().equals(surfaceSize)) {
                     return true;
                 } else if (isFlexible &&
-                        (config.getSize().getWidth() <= MAX_DIMEN_FOR_ROUNDING)) {
+                        (config.getSize().getWidth() <= LegacyCameraDevice.MAX_DIMEN_FOR_ROUNDING)) {
                     return true;
                 }
             }
@@ -1320,8 +1319,6 @@ public final class StreamConfigurationMap {
                 return ImageFormat.DEPTH16;
             case HAL_PIXEL_FORMAT_RAW16:
                 return ImageFormat.RAW_DEPTH;
-            case HAL_PIXEL_FORMAT_RAW10:
-                return ImageFormat.RAW_DEPTH10;
             case ImageFormat.JPEG:
                 throw new IllegalArgumentException(
                         "ImageFormat.JPEG is an unknown internal format");
@@ -1395,8 +1392,6 @@ public final class StreamConfigurationMap {
                 return HAL_PIXEL_FORMAT_Y16;
             case ImageFormat.RAW_DEPTH:
                 return HAL_PIXEL_FORMAT_RAW16;
-            case ImageFormat.RAW_DEPTH10:
-                return HAL_PIXEL_FORMAT_RAW10;
             default:
                 return format;
         }
@@ -1441,7 +1436,6 @@ public final class StreamConfigurationMap {
             case ImageFormat.DEPTH_POINT_CLOUD:
             case ImageFormat.DEPTH16:
             case ImageFormat.RAW_DEPTH:
-            case ImageFormat.RAW_DEPTH10:
                 return HAL_DATASPACE_DEPTH;
             case ImageFormat.DEPTH_JPEG:
                 return HAL_DATASPACE_DYNAMIC_DEPTH;
@@ -1575,7 +1569,7 @@ public final class StreamConfigurationMap {
         return sizes;
     }
 
-    /** Get the list of publicly visible output formats */
+    /** Get the list of publically visible output formats; does not include IMPL_DEFINED */
     private int[] getPublicFormats(boolean output) {
         int[] formats = new int[getPublicFormatCount(output)];
 
@@ -1746,21 +1740,6 @@ public final class StreamConfigurationMap {
         return sb.toString();
     }
 
-    /**
-     * Size comparison method used by size comparators.
-     *
-     * @hide
-     */
-    public static int compareSizes(int widthA, int heightA, int widthB, int heightB) {
-        long left = widthA * (long) heightA;
-        long right = widthB * (long) heightB;
-        if (left == right) {
-            left = widthA;
-            right = widthB;
-        }
-        return (left < right) ? -1 : (left > right ? 1 : 0);
-    }
-
     private void appendOutputsString(StringBuilder sb) {
         sb.append("Outputs(");
         int[] formats = getOutputFormats();
@@ -1858,10 +1837,7 @@ public final class StreamConfigurationMap {
         sb.append(")");
     }
 
-    /**
-     * @hide
-     */
-    public static String formatToString(int format) {
+    private String formatToString(int format) {
         switch (format) {
             case ImageFormat.YV12:
                 return "YV12";
@@ -1901,8 +1877,6 @@ public final class StreamConfigurationMap {
                 return "DEPTH_JPEG";
             case ImageFormat.RAW_DEPTH:
                 return "RAW_DEPTH";
-            case ImageFormat.RAW_DEPTH10:
-                return "RAW_DEPTH10";
             case ImageFormat.PRIVATE:
                 return "PRIVATE";
             case ImageFormat.HEIC:
@@ -1914,8 +1888,7 @@ public final class StreamConfigurationMap {
 
     // from system/core/include/system/graphics.h
     private static final int HAL_PIXEL_FORMAT_RAW16 = 0x20;
-    /** @hide */
-    public static final int HAL_PIXEL_FORMAT_BLOB = 0x21;
+    private static final int HAL_PIXEL_FORMAT_BLOB = 0x21;
     private static final int HAL_PIXEL_FORMAT_IMPLEMENTATION_DEFINED = 0x22;
     private static final int HAL_PIXEL_FORMAT_YCbCr_420_888 = 0x23;
     private static final int HAL_PIXEL_FORMAT_RAW_OPAQUE = 0x24;
@@ -1929,24 +1902,14 @@ public final class StreamConfigurationMap {
     private static final int HAL_DATASPACE_RANGE_SHIFT = 27;
 
     private static final int HAL_DATASPACE_UNKNOWN = 0x0;
-    /** @hide */
-    public static final int HAL_DATASPACE_V0_JFIF =
+    private static final int HAL_DATASPACE_V0_JFIF =
             (2 << HAL_DATASPACE_STANDARD_SHIFT) |
             (3 << HAL_DATASPACE_TRANSFER_SHIFT) |
             (1 << HAL_DATASPACE_RANGE_SHIFT);
 
-    /**
-     * @hide
-     */
-    public static final int HAL_DATASPACE_DEPTH = 0x1000;
-    /**
-     * @hide
-     */
-    public static final int HAL_DATASPACE_DYNAMIC_DEPTH = 0x1002;
-    /**
-     * @hide
-     */
-    public static final int HAL_DATASPACE_HEIF = 0x1003;
+    private static final int HAL_DATASPACE_DEPTH = 0x1000;
+    private static final int HAL_DATASPACE_DYNAMIC_DEPTH = 0x1002;
+    private static final int HAL_DATASPACE_HEIF = 0x1003;
     private static final long DURATION_20FPS_NS = 50000000L;
     /**
      * @see #getDurations(int, int)

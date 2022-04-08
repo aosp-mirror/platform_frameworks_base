@@ -21,21 +21,20 @@ import android.annotation.ColorLong;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.compat.annotation.UnsupportedAppUsage;
-import android.os.Build;
 
 
 public class LinearGradient extends Shader {
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     private float mX0;
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     private float mY0;
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     private float mX1;
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     private float mY1;
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     private float[] mPositions;
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     private TileMode mTileMode;
 
     // @ColorInts are replaced by @ColorLongs, but these remain due to @UnsupportedAppUsage.
@@ -45,7 +44,7 @@ public class LinearGradient extends Shader {
     @UnsupportedAppUsage
     @ColorInt
     private int mColor0;
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     @ColorInt
     private int mColor1;
 
@@ -152,9 +151,8 @@ public class LinearGradient extends Shader {
         this(x0, y0, x1, y1, new long[] {color0, color1}, null, tile);
     }
 
-    /** @hide */
     @Override
-    protected long createNativeInstance(long nativeMatrix, boolean filterFromPaint) {
+    long createNativeInstance(long nativeMatrix) {
         return nativeCreate(nativeMatrix, mX0, mY0, mX1, mY1,
                 mColorLongs, mPositions, mTileMode.nativeInt,
                 colorSpace().getNativeInstance());

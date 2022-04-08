@@ -43,15 +43,14 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.SharedLibraryInfo;
 import android.content.pm.parsing.ParsingPackage;
-import android.content.pm.parsing.component.ParsedUsesPermission;
 import android.content.res.TypedArray;
 import android.os.Environment;
 import android.os.UserHandle;
+import android.os.UserManagerInternal;
 import android.platform.test.annotations.Presubmit;
 import android.util.Pair;
 
 import com.android.server.compat.PlatformCompat;
-import com.android.server.pm.verify.domain.DomainVerificationManagerInternal;
 import com.android.server.pm.parsing.PackageInfoUtils;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.pm.parsing.pkg.PackageImpl;
@@ -93,14 +92,6 @@ public class ScanTests {
         when(mMockInjector.getAbiHelper()).thenReturn(mMockPackageAbiHelper);
         when(mMockInjector.getUserManagerInternal()).thenReturn(mMockUserManager);
         when(mMockInjector.getCompatibility()).thenReturn(mMockCompatibility);
-
-        DomainVerificationManagerInternal domainVerificationManager =
-                mock(DomainVerificationManagerInternal.class);
-        when(domainVerificationManager.generateNewId())
-                .thenAnswer(invocation -> UUID.randomUUID());
-
-        when(mMockInjector.getDomainVerificationManagerInternal())
-                .thenReturn(domainVerificationManager);
     }
 
     @Before
@@ -111,14 +102,13 @@ public class ScanTests {
     @Before
     public void setupDefaultAbiBehavior() throws Exception {
         when(mMockPackageAbiHelper.derivePackageAbi(
-                any(AndroidPackage.class), anyBoolean(), nullable(String.class),
-                any(File.class)))
+                any(AndroidPackage.class), anyBoolean(), nullable(String.class), anyBoolean()))
                 .thenReturn(new Pair<>(
                         new PackageAbiHelper.Abis("derivedPrimary", "derivedSecondary"),
                         new PackageAbiHelper.NativeLibraryPaths(
                                 "derivedRootDir", true, "derivedNativeDir", "derivedNativeDir2")));
-        when(mMockPackageAbiHelper.deriveNativeLibraryPaths(
-                any(AndroidPackage.class), anyBoolean(), any(File.class)))
+        when(mMockPackageAbiHelper.getNativeLibraryPaths(
+                any(AndroidPackage.class), any(PackageSetting.class), any(File.class)))
                 .thenReturn(new PackageAbiHelper.NativeLibraryPaths(
                         "getRootDir", true, "getNativeDir", "getNativeDir2"
                 ));
@@ -430,7 +420,7 @@ public class ScanTests {
     @Test
     public void factoryTestFlagSet() throws Exception {
         final ParsingPackage basicPackage = createBasicPackage(DUMMY_PACKAGE_NAME)
-                .addUsesPermission(new ParsedUsesPermission(Manifest.permission.FACTORY_TEST, 0));
+                .addRequestedPermission(Manifest.permission.FACTORY_TEST);
 
         final PackageManagerService.ScanResult scanResult = PackageManagerService.scanPackageOnlyLI(
                 createBasicScanRequestBuilder(basicPackage).build(),
@@ -480,16 +470,11 @@ public class ScanTests {
 
     private PackageManagerService.ScanResult executeScan(
             PackageManagerService.ScanRequest scanRequest) throws PackageManagerException {
-        PackageManagerService.ScanResult result = PackageManagerService.scanPackageOnlyLI(
+        return PackageManagerService.scanPackageOnlyLI(
                 scanRequest,
                 mMockInjector,
                 false /*isUnderFactoryTest*/,
                 System.currentTimeMillis());
-
-        // Need to call hideAsFinal to cache derived fields. This is normally done in PMS, but not
-        // in this cut down flow used for the test.
-        ((ParsedPackage) result.pkgSetting.pkg).hideAsFinal();
-        return result;
     }
 
     private static String createCodePath(String packageName) {
@@ -499,7 +484,8 @@ public class ScanTests {
     private static PackageSettingBuilder createBasicPackageSettingBuilder(String packageName) {
         return new PackageSettingBuilder()
                 .setName(packageName)
-                .setCodePath(createCodePath(packageName));
+                .setCodePath(createCodePath(packageName))
+                .setResourcePath(createCodePath(packageName));
     }
 
     private static ScanRequestBuilder createBasicScanRequestBuilder(ParsingPackage pkg) {
@@ -548,7 +534,8 @@ public class ScanTests {
                 arrayContaining("some.static.library", "some.other.static.library"));
         assertThat(pkgSetting.usesStaticLibrariesVersions, is(new long[]{234L, 456L}));
         assertThat(pkgSetting.pkg, is(scanResult.request.parsedPackage));
-        assertThat(pkgSetting.getPath(), is(new File(createCodePath(packageName))));
+        assertThat(pkgSetting.codePath, is(new File(createCodePath(packageName))));
+        assertThat(pkgSetting.resourcePath, is(new File(createCodePath(packageName))));
         assertThat(pkgSetting.versionCode, is(PackageInfo.composeLongVersionCode(1, 2345)));
     }
 

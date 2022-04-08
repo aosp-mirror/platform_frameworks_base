@@ -32,8 +32,6 @@ import android.content.Context;
 import android.content.IIntentSender;
 import android.content.Intent;
 import android.content.res.Resources;
-import android.graphics.Bitmap;
-import android.graphics.drawable.Icon;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -41,13 +39,10 @@ import android.os.RemoteException;
 import android.service.controls.actions.CommandAction;
 import android.service.controls.actions.ControlAction;
 import android.service.controls.actions.ControlActionWrapper;
-import android.service.controls.templates.ThumbnailTemplate;
 
 import androidx.test.filters.SmallTest;
 import androidx.test.platform.app.InstrumentationRegistry;
 import androidx.test.runner.AndroidJUnit4;
-
-import com.android.internal.R;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -112,8 +107,7 @@ public class ControlProviderServiceTest {
 
         mPendingIntent = new PendingIntent(mIIntentSender);
 
-        mControlsProviderService = new FakeControlsProviderService(
-                InstrumentationRegistry.getInstrumentation().getContext());
+        mControlsProviderService = new FakeControlsProviderService();
         mControlsProvider = IControlsProvider.Stub.asInterface(
                 mControlsProviderService.onBind(intent));
     }
@@ -140,8 +134,7 @@ public class ControlProviderServiceTest {
         verify(mSubscriber).onSubscribe(eq(mToken), subscriptionCaptor.capture());
         subscriptionCaptor.getValue().request(1000);
 
-        verify(mSubscriber, times(2))
-                .onNext(eq(mToken), controlCaptor.capture());
+        verify(mSubscriber, times(2)).onNext(eq(mToken), controlCaptor.capture());
         List<Control> values = controlCaptor.getAllValues();
         assertTrue(equals(values.get(0), list.get(0)));
         assertTrue(equals(values.get(1), list.get(1)));
@@ -217,69 +210,26 @@ public class ControlProviderServiceTest {
                 .setStatus(Control.STATUS_OK)
                 .build();
 
-        Control c = sendControlGetControl(control);
-        assertTrue(equals(c, control));
-    }
+        @SuppressWarnings("unchecked")
+        ArgumentCaptor<Control> controlCaptor =
+                ArgumentCaptor.forClass(Control.class);
+        ArgumentCaptor<IControlsSubscription.Stub> subscriptionCaptor =
+                ArgumentCaptor.forClass(IControlsSubscription.Stub.class);
 
-    @Test
-    public void testThumbnailRescaled_bigger() throws RemoteException {
-        Context context = mControlsProviderService.getBaseContext();
-        int maxWidth = context.getResources().getDimensionPixelSize(
-                R.dimen.controls_thumbnail_image_max_width);
-        int maxHeight = context.getResources().getDimensionPixelSize(
-                R.dimen.controls_thumbnail_image_max_height);
+        ArrayList<Control> list = new ArrayList<>();
+        list.add(control);
 
-        int min = Math.min(maxWidth, maxHeight);
-        int max = Math.max(maxWidth, maxHeight);
+        mControlsProviderService.setControls(list);
 
-        Bitmap bitmap = Bitmap.createBitmap(max * 2, max * 2, Bitmap.Config.ALPHA_8);
-        Icon icon = Icon.createWithBitmap(bitmap);
-        ThumbnailTemplate template = new ThumbnailTemplate("ID", false, icon, "");
+        mControlsProvider.subscribe(new ArrayList<String>(), mSubscriber);
+        InstrumentationRegistry.getInstrumentation().waitForIdleSync();
 
-        Control control = new Control.StatefulBuilder("TEST_ID", mPendingIntent)
-                .setTitle("TEST_TITLE")
-                .setStatus(Control.STATUS_OK)
-                .setControlTemplate(template)
-                .build();
+        verify(mSubscriber).onSubscribe(eq(mToken), subscriptionCaptor.capture());
+        subscriptionCaptor.getValue().request(1);
 
-        Control c = sendControlGetControl(control);
-
-        ThumbnailTemplate sentTemplate = (ThumbnailTemplate) c.getControlTemplate();
-        Bitmap sentBitmap = sentTemplate.getThumbnail().getBitmap();
-
-        // Aspect ratio is kept
-        assertEquals(sentBitmap.getWidth(), sentBitmap.getHeight());
-
-        assertEquals(min, sentBitmap.getWidth());
-    }
-
-    @Test
-    public void testThumbnailRescaled_smaller() throws RemoteException {
-        Context context = mControlsProviderService.getBaseContext();
-        int maxWidth = context.getResources().getDimensionPixelSize(
-                R.dimen.controls_thumbnail_image_max_width);
-        int maxHeight = context.getResources().getDimensionPixelSize(
-                R.dimen.controls_thumbnail_image_max_height);
-
-        int min = Math.min(maxWidth, maxHeight);
-
-        Bitmap bitmap = Bitmap.createBitmap(min / 2, min / 2, Bitmap.Config.ALPHA_8);
-        Icon icon = Icon.createWithBitmap(bitmap);
-        ThumbnailTemplate template = new ThumbnailTemplate("ID", false, icon, "");
-
-        Control control = new Control.StatefulBuilder("TEST_ID", mPendingIntent)
-                .setTitle("TEST_TITLE")
-                .setStatus(Control.STATUS_OK)
-                .setControlTemplate(template)
-                .build();
-
-        Control c = sendControlGetControl(control);
-
-        ThumbnailTemplate sentTemplate = (ThumbnailTemplate) c.getControlTemplate();
-        Bitmap sentBitmap = sentTemplate.getThumbnail().getBitmap();
-
-        assertEquals(bitmap.getHeight(), sentBitmap.getHeight());
-        assertEquals(bitmap.getWidth(), sentBitmap.getWidth());
+        verify(mSubscriber).onNext(eq(mToken), controlCaptor.capture());
+        Control c = controlCaptor.getValue();
+        assertTrue(equals(c, list.get(0)));
     }
 
     @Test
@@ -307,32 +257,6 @@ public class ControlProviderServiceTest {
                 intent.getParcelableExtra(ControlsProviderService.EXTRA_CONTROL)));
     }
 
-    /**
-     * Sends the control through the publisher in {@code mControlsProviderService}, returning
-     * the control obtained by the subscriber
-     */
-    private Control sendControlGetControl(Control control) throws RemoteException {
-        @SuppressWarnings("unchecked")
-        ArgumentCaptor<Control> controlCaptor =
-                ArgumentCaptor.forClass(Control.class);
-        ArgumentCaptor<IControlsSubscription.Stub> subscriptionCaptor =
-                ArgumentCaptor.forClass(IControlsSubscription.Stub.class);
-
-        ArrayList<Control> list = new ArrayList<>();
-        list.add(control);
-
-        mControlsProviderService.setControls(list);
-
-        mControlsProvider.subscribe(new ArrayList<String>(), mSubscriber);
-        InstrumentationRegistry.getInstrumentation().waitForIdleSync();
-
-        verify(mSubscriber).onSubscribe(eq(mToken), subscriptionCaptor.capture());
-        subscriptionCaptor.getValue().request(1);
-
-        verify(mSubscriber).onNext(eq(mToken), controlCaptor.capture());
-        return controlCaptor.getValue();
-    }
-
     private static boolean equals(Control c1, Control c2) {
         if (c1 == c2) return true;
         if (c1 == null || c2 == null) return false;
@@ -351,11 +275,6 @@ public class ControlProviderServiceTest {
     }
 
     static class FakeControlsProviderService extends ControlsProviderService {
-
-        FakeControlsProviderService(Context context) {
-            super();
-            attachBaseContext(context);
-        }
 
         private List<Control> mControls;
 

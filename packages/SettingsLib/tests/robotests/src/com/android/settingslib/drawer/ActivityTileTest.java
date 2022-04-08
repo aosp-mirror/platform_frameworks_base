@@ -105,10 +105,11 @@ public class ActivityTileTest {
     }
 
     @Test
-    public void getIcon_transparentColorInMetadata_returnNull() {
-        mActivityInfo.metaData.putInt(META_DATA_PREFERENCE_ICON, android.R.color.transparent);
+    public void getIcon_noIconMetadata_returnActivityIcon() {
+        mActivityInfo.metaData.putInt(META_DATA_PREFERENCE_ICON, 0);
 
-        assertThat(mTile.getIcon(RuntimeEnvironment.application)).isNull();
+        assertThat(mTile.getIcon(RuntimeEnvironment.application).getResId())
+                .isEqualTo(mActivityInfo.icon);
     }
 
     @Test

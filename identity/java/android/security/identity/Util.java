@@ -16,8 +16,6 @@
 
 package android.security.identity;
 
-import android.annotation.NonNull;
-
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.security.InvalidKeyException;
@@ -30,10 +28,7 @@ import java.util.Collection;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 
-/**
- * @hide
- */
-public class Util {
+class Util {
     private static final String TAG = "Util";
 
     static int[] integerCollectionToArray(Collection<Integer> collection) {
@@ -96,9 +91,8 @@ public class Util {
      *                     255.DigestSize, where DigestSize is the size of the underlying HMAC.
      * @return size pseudorandom bytes.
      */
-    @NonNull public static byte[] computeHkdf(
-            @NonNull String macAlgorithm, @NonNull final byte[] ikm, @NonNull final byte[] salt,
-            @NonNull final byte[] info, int size) {
+    static byte[] computeHkdf(
+            String macAlgorithm, final byte[] ikm, final byte[] salt, final byte[] info, int size) {
         Mac mac = null;
         try {
             mac = Mac.getInstance(macAlgorithm);
@@ -143,5 +137,4 @@ public class Util {
         }
     }
 
-    private Util() {}
 }

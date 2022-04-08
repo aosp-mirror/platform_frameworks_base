@@ -44,7 +44,6 @@ import android.app.backup.IFullBackupRestoreObserver;
 import android.app.backup.ISelectBackupTransportCallback;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.UserInfo;
 import android.os.IBinder;
 import android.os.ParcelFileDescriptor;
 import android.os.Process;
@@ -53,7 +52,6 @@ import android.os.UserManager;
 import android.platform.test.annotations.Presubmit;
 import android.util.SparseArray;
 
-import com.android.server.SystemService.TargetUser;
 import com.android.server.backup.testing.TransportData;
 import com.android.server.testing.shadows.ShadowApplicationPackageManager;
 import com.android.server.testing.shadows.ShadowBinder;
@@ -1594,7 +1592,7 @@ public class BackupManagerServiceRoboTest {
         BackupManagerService.Lifecycle lifecycle =
                 new BackupManagerService.Lifecycle(mContext, backupManagerService);
 
-        lifecycle.onUserUnlocking(new TargetUser(new UserInfo(UserHandle.USER_SYSTEM, null, 0)));
+        lifecycle.onUnlockUser(UserHandle.USER_SYSTEM);
 
         verify(backupManagerService).onUnlockUser(UserHandle.USER_SYSTEM);
     }
@@ -1606,7 +1604,7 @@ public class BackupManagerServiceRoboTest {
         BackupManagerService.Lifecycle lifecycle =
                 new BackupManagerService.Lifecycle(mContext, backupManagerService);
 
-        lifecycle.onUserStopping(new TargetUser(new UserInfo(UserHandle.USER_SYSTEM, null, 0)));
+        lifecycle.onStopUser(UserHandle.USER_SYSTEM);
 
         verify(backupManagerService).onStopUser(UserHandle.USER_SYSTEM);
     }

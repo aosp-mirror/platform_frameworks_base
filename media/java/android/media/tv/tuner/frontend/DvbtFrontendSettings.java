@@ -21,7 +21,6 @@ import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.hardware.tv.tuner.V1_0.Constants;
-import android.media.tv.tuner.TunerVersionChecker;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -76,21 +75,8 @@ public class DvbtFrontendSettings extends FrontendSettings {
      * 32K Transmission Mode.
      */
     public static final int TRANSMISSION_MODE_32K = Constants.FrontendDvbtTransmissionMode.MODE_32K;
-    /**
-     * 8K Transmission Extended Mode.
-     */
-    public static final int TRANSMISSION_MODE_EXTENDED_8K =
-            android.hardware.tv.tuner.V1_1.Constants.FrontendDvbtTransmissionMode.MODE_8K_E;
-    /**
-     * 16K Transmission Extended Mode.
-     */
-    public static final int TRANSMISSION_MODE_EXTENDED_16K =
-            android.hardware.tv.tuner.V1_1.Constants.FrontendDvbtTransmissionMode.MODE_16K_E;
-    /**
-     * 32K Transmission Extended Mode.
-     */
-    public static final int TRANSMISSION_MODE_EXTENDED_32K =
-            android.hardware.tv.tuner.V1_1.Constants.FrontendDvbtTransmissionMode.MODE_32K_E;
+
+
 
     /** @hide */
     @IntDef(flag = true,
@@ -138,9 +124,8 @@ public class DvbtFrontendSettings extends FrontendSettings {
     @IntDef(flag = true,
             prefix = "CONSTELLATION_",
             value = {CONSTELLATION_UNDEFINED, CONSTELLATION_AUTO, CONSTELLATION_QPSK,
-                    CONSTELLATION_16QAM, CONSTELLATION_64QAM, CONSTELLATION_256QAM,
-                    CONSTELLATION_QPSK_R, CONSTELLATION_16QAM_R, CONSTELLATION_64QAM_R,
-                    CONSTELLATION_256QAM_R})
+                    CONSTELLATION_16QAM, CONSTELLATION_64QAM,
+                    CONSTELLATION_256QAM})
     @Retention(RetentionPolicy.SOURCE)
     public @interface Constellation {}
 
@@ -172,30 +157,7 @@ public class DvbtFrontendSettings extends FrontendSettings {
      */
     public static final int CONSTELLATION_256QAM =
             Constants.FrontendDvbtConstellation.CONSTELLATION_256QAM;
-    /**
-     * QPSK Rotated Constellation.
-     */
-    public static final int CONSTELLATION_QPSK_R =
-            android.hardware.tv.tuner.V1_1.Constants.FrontendDvbtConstellation
-                    .CONSTELLATION_QPSK_R;
-    /**
-     * 16QAM Rotated Constellation.
-     */
-    public static final int CONSTELLATION_16QAM_R =
-            android.hardware.tv.tuner.V1_1.Constants.FrontendDvbtConstellation
-                    .CONSTELLATION_16QAM_R;
-    /**
-     * 64QAM Rotated Constellation.
-     */
-    public static final int CONSTELLATION_64QAM_R =
-            android.hardware.tv.tuner.V1_1.Constants.FrontendDvbtConstellation
-                    .CONSTELLATION_64QAM_R;
-    /**
-     * 256QAM Rotated Constellation.
-     */
-    public static final int CONSTELLATION_256QAM_R =
-            android.hardware.tv.tuner.V1_1.Constants.FrontendDvbtConstellation
-                    .CONSTELLATION_256QAM_R;
+
 
     /** @hide */
     @IntDef(flag = true,
@@ -404,7 +366,8 @@ public class DvbtFrontendSettings extends FrontendSettings {
      */
     public static final int PLP_MODE_MANUAL = Constants.FrontendDvbtPlpMode.MANUAL;
 
-    private int mTransmissionMode;
+
+    private final int mTransmissionMode;
     private final int mBandwidth;
     private final int mConstellation;
     private final int mHierarchy;
@@ -526,19 +489,6 @@ public class DvbtFrontendSettings extends FrontendSettings {
         return mPlpGroupId;
     }
 
-    private static boolean isExtendedTransmissionMode(@TransmissionMode int transmissionMode) {
-        return transmissionMode == TRANSMISSION_MODE_EXTENDED_8K
-                || transmissionMode == TRANSMISSION_MODE_EXTENDED_16K
-                || transmissionMode == TRANSMISSION_MODE_EXTENDED_32K;
-    }
-
-    private static boolean isExtendedConstellation(@Constellation int constellation) {
-        return constellation == CONSTELLATION_QPSK_R
-                || constellation == CONSTELLATION_16QAM_R
-                || constellation == CONSTELLATION_64QAM_R
-                || constellation == CONSTELLATION_256QAM_R;
-    }
-
     /**
      * Creates a builder for {@link DvbtFrontendSettings}.
      */
@@ -584,23 +534,13 @@ public class DvbtFrontendSettings extends FrontendSettings {
         /**
          * Sets Transmission Mode.
          *
-         * <p>{@link #TRANSMISSION_MODE_EXTENDED_8K}, {@link #TRANSMISSION_MODE_EXTENDED_16K} and
-         * {@link #TRANSMISSION_MODE_EXTENDED_32K} are only supported by Tuner HAL 1.1 or higher.
-         * Unsupported version would cause no-op. Use {@link TunerVersionChecker#getTunerVersion()}
-         * to check the version.
-         *
          * <p>Default value is {@link #TRANSMISSION_MODE_UNDEFINED}.
          */
         @NonNull
         public Builder setTransmissionMode(@TransmissionMode int transmissionMode) {
-            if (!isExtendedTransmissionMode(transmissionMode)
-                    || TunerVersionChecker.checkHigherOrEqualVersionTo(
-                            TunerVersionChecker.TUNER_VERSION_1_1, "set TransmissionMode Ext")) {
-                mTransmissionMode = transmissionMode;
-            }
+            mTransmissionMode = transmissionMode;
             return this;
         }
-
         /**
          * Sets Bandwidth.
          *
@@ -614,20 +554,11 @@ public class DvbtFrontendSettings extends FrontendSettings {
         /**
          * Sets Constellation.
          *
-         * <p>{@link #CONSTELLATION_QPSK_R}, {@link #CONSTELLATION_16QAM_R},
-         * {@link #CONSTELLATION_64QAM_R} and {@link #CONSTELLATION_256QAM_Rare} are only supported
-         * by Tuner HAL 1.1 or higher. Unsupported version would cause no-op. Use
-         * {@link TunerVersionChecker#getTunerVersion()} to check the version.
-         *
          * <p>Default value is {@link #CONSTELLATION_UNDEFINED}.
          */
         @NonNull
         public Builder setConstellation(@Constellation int constellation) {
-            if (!isExtendedConstellation(constellation)
-                    || TunerVersionChecker.checkHigherOrEqualVersionTo(
-                            TunerVersionChecker.TUNER_VERSION_1_1, "set Constellation Ext")) {
-                mConstellation = constellation;
-            }
+            mConstellation = constellation;
             return this;
         }
         /**

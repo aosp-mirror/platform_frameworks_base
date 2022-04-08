@@ -19,7 +19,6 @@ package com.android.internal.telephony;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.res.Resources;
 import android.content.res.XmlResourceParser;
-import android.os.Build;
 import android.util.SparseIntArray;
 
 import com.android.internal.telephony.cdma.sms.UserData;
@@ -29,15 +28,15 @@ import com.android.telephony.Rlog;
 
 public class Sms7BitEncodingTranslator {
     private static final String TAG = "Sms7BitEncodingTranslator";
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     private static final boolean DBG = TelephonyUtils.IS_DEBUGGABLE;
     private static boolean mIs7BitTranslationTableLoaded = false;
     private static SparseIntArray mTranslationTable = null;
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     private static SparseIntArray mTranslationTableCommon = null;
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     private static SparseIntArray mTranslationTableGSM = null;
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     private static SparseIntArray mTranslationTableCDMA = null;
 
     // Parser variables
@@ -66,7 +65,13 @@ public class Sms7BitEncodingTranslator {
             return "";
         }
 
-        ensure7BitTranslationTableLoaded();
+        if (!mIs7BitTranslationTableLoaded) {
+            mTranslationTableCommon = new SparseIntArray();
+            mTranslationTableGSM = new SparseIntArray();
+            mTranslationTableCDMA = new SparseIntArray();
+            load7BitTranslationTableFromXml();
+            mIs7BitTranslationTableLoaded = true;
+        }
 
         if ((mTranslationTableCommon != null && mTranslationTableCommon.size() > 0) ||
                 (mTranslationTableGSM != null && mTranslationTableGSM.size() > 0) ||
@@ -110,8 +115,6 @@ public class Sms7BitEncodingTranslator {
          */
         int translation = -1;
 
-        ensure7BitTranslationTableLoaded();
-
         if (mTranslationTableCommon != null) {
             translation = mTranslationTableCommon.get(c, -1);
         }
@@ -149,18 +152,6 @@ public class Sms7BitEncodingTranslator {
         }
         else {
             return GsmAlphabet.isGsmSeptets(c);
-        }
-    }
-
-    private static void ensure7BitTranslationTableLoaded() {
-        synchronized (Sms7BitEncodingTranslator.class) {
-            if (!mIs7BitTranslationTableLoaded) {
-                mTranslationTableCommon = new SparseIntArray();
-                mTranslationTableGSM = new SparseIntArray();
-                mTranslationTableCDMA = new SparseIntArray();
-                load7BitTranslationTableFromXml();
-                mIs7BitTranslationTableLoaded = true;
-            }
         }
     }
 

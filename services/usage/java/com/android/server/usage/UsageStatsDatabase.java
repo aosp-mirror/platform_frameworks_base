@@ -53,7 +53,6 @@ import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
@@ -1026,8 +1025,6 @@ public class UsageStatsDatabase {
             writeLocked(fos, stats, version, packagesTokenData);
             file.finishWrite(fos);
             fos = null;
-        } catch (Exception e) {
-            // Do nothing. Exception has already been handled.
         } finally {
             // When fos is null (successful write), this will no-op
             file.failWrite(fos);
@@ -1035,7 +1032,7 @@ public class UsageStatsDatabase {
     }
 
     private static void writeLocked(OutputStream out, IntervalStats stats, int version,
-            PackagesTokenData packagesTokenData) throws Exception {
+            PackagesTokenData packagesTokenData) throws RuntimeException {
         switch (version) {
             case 1:
             case 2:
@@ -1047,7 +1044,6 @@ public class UsageStatsDatabase {
                     UsageStatsProto.write(out, stats);
                 } catch (Exception e) {
                     Slog.e(TAG, "Unable to write interval stats to proto.", e);
-                    throw e;
                 }
                 break;
             case 5:
@@ -1056,7 +1052,6 @@ public class UsageStatsDatabase {
                     UsageStatsProtoV2.write(out, stats);
                 } catch (Exception e) {
                     Slog.e(TAG, "Unable to write interval stats to proto.", e);
-                    throw e;
                 }
                 break;
             default:
@@ -1505,10 +1500,6 @@ public class UsageStatsDatabase {
             pw.increaseIndent();
             pw.println("Counter: " + mPackagesTokenData.counter);
             pw.println("Tokens Map Size: " + mPackagesTokenData.tokensToPackagesMap.size());
-            if (!mPackagesTokenData.removedPackageTokens.isEmpty()) {
-                pw.println("Removed Package Tokens: "
-                        + Arrays.toString(mPackagesTokenData.removedPackageTokens.toArray()));
-            }
             for (int i = 0; i < mPackagesTokenData.tokensToPackagesMap.size(); i++) {
                 final int packageToken = mPackagesTokenData.tokensToPackagesMap.keyAt(i);
                 final String packageStrings = String.join(", ",

@@ -21,7 +21,7 @@ import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.UserIdInt;
+import android.app.ActivityManager;
 import android.app.contentsuggestions.ClassificationsRequest;
 import android.app.contentsuggestions.ContentSuggestionsManager;
 import android.app.contentsuggestions.IClassificationsCallback;
@@ -31,7 +31,7 @@ import android.app.contentsuggestions.SelectionsRequest;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.ColorSpace;
-import android.hardware.HardwareBuffer;
+import android.graphics.GraphicBuffer;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.RemoteException;
@@ -40,7 +40,6 @@ import android.os.ShellCallback;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.util.Slog;
-import android.window.TaskSnapshot;
 
 import com.android.internal.os.IResultReceiver;
 import com.android.server.LocalServices;
@@ -157,16 +156,16 @@ public class ContentSuggestionsManagerService extends
             }
             enforceCaller(UserHandle.getCallingUserId(), "provideContextImage");
 
-            HardwareBuffer snapshotBuffer = null;
+            GraphicBuffer snapshotBuffer = null;
             int colorSpaceId = 0;
 
             // Skip taking TaskSnapshot when bitmap is provided.
             if (!imageContextRequestExtras.containsKey(ContentSuggestionsManager.EXTRA_BITMAP)) {
                 // Can block, so call before acquiring the lock.
-                TaskSnapshot snapshot =
+                ActivityManager.TaskSnapshot snapshot =
                         mActivityTaskManagerInternal.getTaskSnapshotBlocking(taskId, false);
                 if (snapshot != null) {
-                    snapshotBuffer = snapshot.getHardwareBuffer();
+                    snapshotBuffer = snapshot.getSnapshot();
                     ColorSpace colorSpace = snapshot.getColorSpace();
                     if (colorSpace != null) {
                         colorSpaceId = colorSpace.getId();
@@ -252,23 +251,6 @@ public class ContentSuggestionsManagerService extends
                 isDisabled = isDisabledLocked(userId);
             }
             receiver.send(isDisabled ? 0 : 1, null);
-        }
-
-        @Override
-        public void resetTemporaryService(@UserIdInt int userId) {
-            ContentSuggestionsManagerService.this.resetTemporaryService(userId);
-        }
-
-        @Override
-        public void setTemporaryService(
-                @UserIdInt int userId, @NonNull String serviceName, int duration) {
-            ContentSuggestionsManagerService.this.setTemporaryService(
-                    userId, serviceName, duration);
-        }
-
-        @Override
-        public void setDefaultServiceEnabled(@UserIdInt int userId, boolean enabled) {
-            ContentSuggestionsManagerService.this.setDefaultServiceEnabled(userId, enabled);
         }
 
         public void onShellCommand(@Nullable FileDescriptor in, @Nullable FileDescriptor out,

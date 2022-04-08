@@ -16,10 +16,7 @@
 
 package com.android.systemui.keyguard;
 
-import androidx.annotation.NonNull;
-
 import java.util.ArrayList;
-import java.util.Objects;
 import java.util.function.Consumer;
 
 /**
@@ -29,8 +26,8 @@ public class Lifecycle<T> {
 
     private ArrayList<T> mObservers = new ArrayList<>();
 
-    public void addObserver(@NonNull T observer) {
-        mObservers.add(Objects.requireNonNull(observer));
+    public void addObserver(T observer) {
+        mObservers.add(observer);
     }
 
     public void removeObserver(T observer) {

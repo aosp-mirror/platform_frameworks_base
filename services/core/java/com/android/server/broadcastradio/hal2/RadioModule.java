@@ -392,7 +392,6 @@ class RadioModule {
                 } catch (RemoteException ex) {
                     Slog.e(TAG, "Failed closing announcement listener", ex);
                 }
-                hwCloseHandle.value = null;
             }
         };
     }

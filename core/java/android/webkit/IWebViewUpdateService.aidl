@@ -51,7 +51,7 @@ interface IWebViewUpdateService {
      * DevelopmentSettings uses this to get the current available WebView
      * providers (to display as choices to the user).
      */
-    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
+    @UnsupportedAppUsage
     WebViewProviderInfo[] getValidWebViewPackages();
 
     /**
@@ -62,7 +62,7 @@ interface IWebViewUpdateService {
     /**
      * Used by DevelopmentSetting to get the name of the WebView provider currently in use.
      */
-    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
+    @UnsupportedAppUsage
     String getCurrentWebViewPackageName();
 
     /**

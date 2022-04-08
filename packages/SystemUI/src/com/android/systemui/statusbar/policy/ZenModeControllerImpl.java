@@ -37,12 +37,9 @@ import android.service.notification.ZenModeConfig.ZenRule;
 import android.text.format.DateFormat;
 import android.util.Log;
 
-import androidx.annotation.NonNull;
-
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.Dumpable;
 import com.android.systemui.broadcast.BroadcastDispatcher;
-import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.qs.GlobalSetting;
 import com.android.systemui.settings.CurrentUserTracker;
@@ -54,9 +51,10 @@ import java.util.ArrayList;
 import java.util.Objects;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 
 /** Platform implementation of the zen mode controller. **/
-@SysUISingleton
+@Singleton
 public class ZenModeControllerImpl extends CurrentUserTracker
         implements ZenModeController, Dumpable {
     private static final String TAG = "ZenModeController";
@@ -126,14 +124,14 @@ public class ZenModeControllerImpl extends CurrentUserTracker
     }
 
     @Override
-    public void addCallback(@NonNull Callback callback) {
+    public void addCallback(Callback callback) {
         synchronized (mCallbacksLock) {
             mCallbacks.add(callback);
         }
     }
 
     @Override
-    public void removeCallback(@NonNull Callback callback) {
+    public void removeCallback(Callback callback) {
         synchronized (mCallbacksLock) {
             mCallbacks.remove(callback);
         }

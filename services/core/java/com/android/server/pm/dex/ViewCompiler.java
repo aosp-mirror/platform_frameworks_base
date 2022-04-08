@@ -40,13 +40,13 @@ public class ViewCompiler {
     public boolean compileLayouts(AndroidPackage pkg) {
         try {
             final String packageName = pkg.getPackageName();
-            final String apkPath = pkg.getBaseApkPath();
+            final String apkPath = pkg.getBaseCodePath();
             // TODO(b/143971007): Use a cross-user directory
             File dataDir = PackageInfoWithoutStateUtils.getDataDir(pkg, UserHandle.myUserId());
             final String outDexFile = dataDir.getAbsolutePath() + "/code_cache/compiled_view.dex";
             Log.i("PackageManager", "Compiling layouts in " + packageName + " (" + apkPath +
                 ") to " + outDexFile);
-            final long callingId = Binder.clearCallingIdentity();
+            long callingId = Binder.clearCallingIdentity();
             try {
                 synchronized (mInstallLock) {
                     return mInstaller.compileLayouts(apkPath, packageName, outDexFile,

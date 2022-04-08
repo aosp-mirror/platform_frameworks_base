@@ -18,13 +18,12 @@ package android.app.servertransaction;
 
 import static android.os.Trace.TRACE_TAG_ACTIVITY_MANAGER;
 
-import android.annotation.NonNull;
-import android.annotation.Nullable;
-import android.app.ActivityClient;
-import android.app.ActivityThread.ActivityClientRecord;
+import android.app.ActivityManager;
+import android.app.ActivityTaskManager;
 import android.app.ClientTransactionHandler;
 import android.os.IBinder;
 import android.os.Parcel;
+import android.os.RemoteException;
 import android.os.Trace;
 
 /**
@@ -41,10 +40,10 @@ public class PauseActivityItem extends ActivityLifecycleItem {
     private boolean mDontReport;
 
     @Override
-    public void execute(ClientTransactionHandler client, ActivityClientRecord r,
+    public void execute(ClientTransactionHandler client, IBinder token,
             PendingTransactionActions pendingActions) {
         Trace.traceBegin(TRACE_TAG_ACTIVITY_MANAGER, "activityPause");
-        client.handlePauseActivity(r, mFinished, mUserLeaving, mConfigChanges, pendingActions,
+        client.handlePauseActivity(token, mFinished, mUserLeaving, mConfigChanges, pendingActions,
                 "PAUSE_ACTIVITY_ITEM");
         Trace.traceEnd(TRACE_TAG_ACTIVITY_MANAGER);
     }
@@ -60,8 +59,12 @@ public class PauseActivityItem extends ActivityLifecycleItem {
         if (mDontReport) {
             return;
         }
-        // TODO(lifecycler): Use interface callback instead of actual implementation.
-        ActivityClient.getInstance().activityPaused(token);
+        try {
+            // TODO(lifecycler): Use interface callback instead of AMS.
+            ActivityTaskManager.getService().activityPaused(token);
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
     }
 
 
@@ -127,7 +130,7 @@ public class PauseActivityItem extends ActivityLifecycleItem {
         mDontReport = in.readBoolean();
     }
 
-    public static final @NonNull Creator<PauseActivityItem> CREATOR =
+    public static final @android.annotation.NonNull Creator<PauseActivityItem> CREATOR =
             new Creator<PauseActivityItem>() {
         public PauseActivityItem createFromParcel(Parcel in) {
             return new PauseActivityItem(in);
@@ -139,7 +142,7 @@ public class PauseActivityItem extends ActivityLifecycleItem {
     };
 
     @Override
-    public boolean equals(@Nullable Object o) {
+    public boolean equals(Object o) {
         if (this == o) {
             return true;
         }

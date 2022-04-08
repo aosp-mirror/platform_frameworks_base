@@ -17,8 +17,11 @@
 package com.android.shell;
 
 import android.graphics.Bitmap;
-import android.os.IBinder;
+import android.graphics.Point;
+import android.graphics.Rect;
+import android.hardware.display.DisplayManagerGlobal;
 import android.util.Log;
+import android.view.Display;
 import android.view.SurfaceControl;
 
 /**
@@ -37,17 +40,22 @@ final class Screenshooter {
      * @return The screenshot bitmap on success, null otherwise.
      */
     static Bitmap takeScreenshot() {
-        Log.d(TAG, "Taking fullscreen screenshot");
+        Display display = DisplayManagerGlobal.getInstance()
+                .getRealDisplay(Display.DEFAULT_DISPLAY);
+        Point displaySize = new Point();
+        display.getRealSize(displaySize);
+        final int displayWidth = displaySize.x;
+        final int displayHeight = displaySize.y;
+
+        int rotation = display.getRotation();
+        Rect crop = new Rect(0, 0, displayWidth, displayHeight);
+        Log.d(TAG, "Taking screenshot of dimensions " + displayWidth + " x " + displayHeight);
         // Take the screenshot
-        final IBinder displayToken = SurfaceControl.getInternalDisplayToken();
-        final SurfaceControl.DisplayCaptureArgs captureArgs =
-                new SurfaceControl.DisplayCaptureArgs.Builder(displayToken)
-                        .build();
-        final SurfaceControl.ScreenshotHardwareBuffer screenshotBuffer =
-                SurfaceControl.captureDisplay(captureArgs);
-        final Bitmap screenShot = screenshotBuffer == null ? null : screenshotBuffer.asBitmap();
+        Bitmap screenShot =
+                SurfaceControl.screenshot(crop, displayWidth, displayHeight, rotation);
         if (screenShot == null) {
-            Log.e(TAG, "Failed to take fullscreen screenshot");
+            Log.e(TAG, "Failed to take screenshot of dimensions " + displayWidth + " x "
+                    + displayHeight);
             return null;
         }
 

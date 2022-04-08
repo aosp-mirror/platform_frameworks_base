@@ -19,11 +19,9 @@ package com.android.server.timezonedetector;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.os.SystemClock;
-import android.os.TimestampedValue;
-import android.util.IndentingPrintWriter;
 
-import java.time.Duration;
+import com.android.internal.util.IndentingPrintWriter;
+
 import java.util.ArrayDeque;
 
 /**
@@ -52,15 +50,18 @@ import java.util.ArrayDeque;
  */
 public final class ReferenceWithHistory<V> {
 
+    private static final Object NULL_MARKER = "{null marker}";
+
     /** The maximum number of references to store. */
     private final int mMaxHistorySize;
 
-    /** The number of times {@link #set(Object)} has been called. */
-    private int mSetCount;
-
-    /** The history storage. */
+    /**
+     * The history storage. Note that ArrayDeque doesn't support {@code null} so this stores Object
+     * and not V. Use {@link #packNullIfRequired(Object)} and {@link #unpackNullIfRequired(Object)}
+     * to convert to / from the storage object.
+     */
     @Nullable
-    private ArrayDeque<TimestampedValue<V>> mValues;
+    private ArrayDeque<Object> mValues;
 
     /**
      * Creates an instance that records, at most, the specified number of values.
@@ -78,8 +79,8 @@ public final class ReferenceWithHistory<V> {
         if (mValues == null || mValues.isEmpty()) {
             return null;
         }
-        TimestampedValue<V> valueHolder = mValues.getFirst();
-        return valueHolder.getValue();
+        Object value = mValues.getFirst();
+        return unpackNullIfRequired(value);
     }
 
     /**
@@ -98,10 +99,8 @@ public final class ReferenceWithHistory<V> {
 
         V previous = get();
 
-        TimestampedValue<V> valueHolder =
-                new TimestampedValue<>(SystemClock.elapsedRealtime(), newValue);
-        mValues.addFirst(valueHolder);
-        mSetCount++;
+        Object nullSafeValue = packNullIfRequired(newValue);
+        mValues.addFirst(nullSafeValue);
         return previous;
     }
 
@@ -112,13 +111,10 @@ public final class ReferenceWithHistory<V> {
         if (mValues == null) {
             ipw.println("{Empty}");
         } else {
-            int i = mSetCount;
-            for (TimestampedValue<V> valueHolder : mValues) {
-                ipw.print(--i);
-                ipw.print("@");
-                ipw.print(Duration.ofMillis(valueHolder.getReferenceTimeMillis()).toString());
-                ipw.print(": ");
-                ipw.println(valueHolder.getValue());
+            int i = 0;
+            for (Object value : mValues) {
+                ipw.println(i + ": " + unpackNullIfRequired(value));
+                i++;
             }
         }
         ipw.flush();
@@ -134,5 +130,24 @@ public final class ReferenceWithHistory<V> {
     @Override
     public String toString() {
         return String.valueOf(get());
+    }
+
+    /**
+     * Turns a non-nullable Object into a nullable value. See also
+     * {@link #packNullIfRequired(Object)}.
+     */
+    @SuppressWarnings("unchecked")
+    @Nullable
+    private V unpackNullIfRequired(@NonNull Object value) {
+        return value == NULL_MARKER ? null : (V) value;
+    }
+
+    /**
+     * Turns a nullable value into a non-nullable Object. See also
+     * {@link #unpackNullIfRequired(Object)}.
+     */
+    @NonNull
+    private Object packNullIfRequired(@Nullable V value) {
+        return value == null ? NULL_MARKER : value;
     }
 }

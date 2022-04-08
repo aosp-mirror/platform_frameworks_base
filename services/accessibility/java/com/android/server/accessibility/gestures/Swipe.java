@@ -127,7 +127,7 @@ class Swipe extends GestureMatcher {
     }
 
     @Override
-    public void clear() {
+    protected void clear() {
         mBaseX = Float.NaN;
         mBaseY = Float.NaN;
         mBaseTime = 0;
@@ -390,7 +390,7 @@ class Swipe extends GestureMatcher {
     }
 
     @Override
-    protected String getGestureName() {
+    String getGestureName() {
         StringBuilder builder = new StringBuilder();
         builder.append("Swipe ").append(directionToString(mDirections[0]));
         for (int i = 1; i < mDirections.length; ++i) {

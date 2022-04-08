@@ -16,7 +16,6 @@
 
 package android.net;
 
-import android.annotation.Nullable;
 import android.net.NetworkTemplate;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -96,7 +95,7 @@ public final class DataUsageRequest implements Parcelable {
     }
 
     @Override
-    public boolean equals(@Nullable Object obj) {
+    public boolean equals(Object obj) {
         if (obj instanceof DataUsageRequest == false) return false;
         DataUsageRequest that = (DataUsageRequest) obj;
         return that.requestId == this.requestId

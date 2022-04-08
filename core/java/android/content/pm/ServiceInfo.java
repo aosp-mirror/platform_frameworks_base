@@ -121,8 +121,7 @@ public class ServiceInfo extends ComponentInfo
     /**
      * Constant corresponding to <code>phoneCall</code> in
      * the {@link android.R.attr#foregroundServiceType} attribute.
-     * Ongoing operations related to phone calls, video conferencing,
-     * or similar interactive communication.
+     * Ongoing phone call or video conference.
      */
     public static final int FOREGROUND_SERVICE_TYPE_PHONE_CALL = 1 << 2;
 

@@ -17,7 +17,6 @@
 package com.android.server.recoverysystem;
 
 import android.os.IRecoverySystem;
-import android.os.RecoverySystem;
 import android.os.RemoteException;
 import android.os.ShellCommand;
 
@@ -57,32 +56,26 @@ public class RecoverySystemShellCommand extends ShellCommand {
     }
 
     private int requestLskf() throws RemoteException {
-        String packageName = getNextArgRequired();
-        boolean success = mService.requestLskf(packageName, null);
+        String updateToken = getNextArgRequired();
+        boolean success = mService.requestLskf(updateToken, null);
         PrintWriter pw = getOutPrintWriter();
-        pw.printf("Request LSKF for packageName: %s, status: %s\n", packageName,
-                success ? "success" : "failure");
+        pw.println("Request LSKF status: " + (success ? "success" : "failure"));
         return 0;
     }
 
     private int clearLskf() throws RemoteException {
-        String packageName = getNextArgRequired();
-        boolean success = mService.clearLskf(packageName);
+        boolean success = mService.clearLskf();
         PrintWriter pw = getOutPrintWriter();
-        pw.printf("Clear LSKF for packageName: %s, status: %s\n", packageName,
-                success ? "success" : "failure");
+        pw.println("Clear LSKF: " + (success ? "success" : "failure"));
         return 0;
     }
 
     private int rebootAndApply() throws RemoteException {
-        String packageName = getNextArgRequired();
+        String updateToken = getNextArgRequired();
         String rebootReason = getNextArgRequired();
-        boolean success = (mService.rebootWithLskf(packageName, rebootReason, false)
-                == RecoverySystem.RESUME_ON_REBOOT_REBOOT_ERROR_NONE);
+        boolean success = mService.rebootWithLskf(updateToken, rebootReason);
         PrintWriter pw = getOutPrintWriter();
-        // Keep the old message for cts test.
-        pw.printf("%s Reboot and apply status: %s\n", packageName,
-                success ? "success" : "failure");
+        pw.println("Reboot and apply status: " + (success ? "success" : "failure"));
         return 0;
     }
 

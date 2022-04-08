@@ -2,6 +2,5 @@
 <font-family xmlns:android="http://schemas.android.com/apk/res/android"
         android:fontProviderAuthority="com.example.test.fontprovider.authority"
         android:fontProviderPackage="com.example.test.fontprovider.package"
-        android:fontProviderQuery="MyRequestedFont"
-        android:fontProviderSystemFontFamily="my-request-font">
+        android:fontProviderQuery="MyRequestedFont">
 </font-family>

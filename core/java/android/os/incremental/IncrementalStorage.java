@@ -18,15 +18,11 @@ package android.os.incremental;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.content.pm.DataLoaderParams;
-import android.content.pm.IDataLoaderStatusListener;
-import android.os.PersistableBundle;
 import android.os.RemoteException;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.util.Objects;
 import java.util.UUID;
 
 /**
@@ -174,10 +170,9 @@ public final class IncrementalStorage {
      * @param size             Size of the new file in bytes.
      * @param metadata         Metadata bytes.
      * @param v4signatureBytes Serialized V4SignatureProto.
-     * @param content          Optionally set file content.
      */
     public void makeFile(@NonNull String path, long size, @Nullable UUID id,
-            @Nullable byte[] metadata, @Nullable byte[] v4signatureBytes, @Nullable byte[] content)
+            @Nullable byte[] metadata, @Nullable byte[] v4signatureBytes)
             throws IOException {
         try {
             if (id == null && metadata == null) {
@@ -189,7 +184,7 @@ public final class IncrementalStorage {
             params.metadata = (metadata == null ? new byte[0] : metadata);
             params.fileId = idToBytes(id);
             params.signature = v4signatureBytes;
-            int res = mService.makeFile(mId, path, params, content);
+            int res = mService.makeFile(mId, path, params);
             if (res != 0) {
                 throw new IOException("makeFile() failed with errno " + -res);
             }
@@ -314,53 +309,24 @@ public final class IncrementalStorage {
      * @param path The relative path of the file.
      * @return True if the file is fully loaded.
      */
-    public boolean isFileFullyLoaded(@NonNull String path) throws IOException {
-        try {
-            int res = mService.isFileFullyLoaded(mId, path);
-            if (res < 0) {
-                throw new IOException("isFileFullyLoaded() failed, errno " + -res);
-            }
-            return res == 0;
-        } catch (RemoteException e) {
-            e.rethrowFromSystemServer();
-            return false;
-        }
-    }
-
-
-    /**
-     * Checks if all files in the storage are fully loaded.
-     */
-    public boolean isFullyLoaded() throws IOException {
-        try {
-            final int res = mService.isFullyLoaded(mId);
-            if (res < 0) {
-                throw new IOException(
-                        "isFullyLoaded() failed at querying loading progress, errno " + -res);
-            }
-            return res == 0;
-        } catch (RemoteException e) {
-            e.rethrowFromSystemServer();
-            return false;
-        }
+    public boolean isFileFullyLoaded(@NonNull String path) {
+        return isFileRangeLoaded(path, 0, -1);
     }
 
     /**
-     * Returns the loading progress of a storage
+     * Checks whether a range in a file if loaded.
      *
-     * @return progress value between [0, 1].
+     * @param path The relative path of the file.
+     * @param start            The starting offset of the range.
+     * @param end              The ending offset of the range.
+     * @return True if the file is fully loaded.
      */
-    public float getLoadingProgress() throws IOException {
+    public boolean isFileRangeLoaded(@NonNull String path, long start, long end) {
         try {
-            final float res = mService.getLoadingProgress(mId);
-            if (res < 0) {
-                throw new IOException(
-                        "getLoadingProgress() failed at querying loading progress, errno " + -res);
-            }
-            return res;
+            return mService.isFileRangeLoaded(mId, path, start, end);
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();
-            return 0;
+            return false;
         }
     }
 
@@ -398,38 +364,18 @@ public final class IncrementalStorage {
     }
 
     /**
-     * Initializes and starts the DataLoader.
-     * This makes sure all install-time parameters are applied.
-     * Does not affect persistent DataLoader params.
-     * @return True if start request was successfully queued.
+     * Informs the data loader service associated with the current storage to start data loader
+     *
+     * @return True if data loader is successfully started.
      */
-    public boolean startLoading(
-            @NonNull DataLoaderParams dataLoaderParams,
-            @Nullable IDataLoaderStatusListener statusListener,
-            @Nullable StorageHealthCheckParams healthCheckParams,
-            @Nullable IStorageHealthListener healthListener,
-            @NonNull PerUidReadTimeouts[] perUidReadTimeouts) {
-        Objects.requireNonNull(perUidReadTimeouts);
+    public boolean startLoading() {
         try {
-            return mService.startLoading(mId, dataLoaderParams.getData(), statusListener,
-                    healthCheckParams, healthListener, perUidReadTimeouts);
+            return mService.startLoading(mId);
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();
             return false;
         }
     }
-
-    /**
-     * Marks the completion of installation.
-     */
-    public void onInstallationComplete() {
-        try {
-            mService.onInstallationComplete(mId);
-        } catch (RemoteException e) {
-            e.rethrowFromSystemServer();
-        }
-    }
-
 
     private static final int UUID_BYTE_SIZE = 16;
 
@@ -474,9 +420,9 @@ public final class IncrementalStorage {
     /**
      * Permanently disable readlogs collection.
      */
-    public void disallowReadLogs() {
+    public void disableReadLogs() {
         try {
-            mService.disallowReadLogs(mId);
+            mService.disableReadLogs(mId);
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();
         }
@@ -560,44 +506,6 @@ public final class IncrementalStorage {
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();
             return false;
-        }
-    }
-
-    /**
-     * Register to listen to loading progress of all the files on this storage.
-     * @param listener To report progress from Incremental Service to the caller.
-     */
-    public boolean registerLoadingProgressListener(IStorageLoadingProgressListener listener) {
-        try {
-            return mService.registerLoadingProgressListener(mId, listener);
-        } catch (RemoteException e) {
-            e.rethrowFromSystemServer();
-            return false;
-        }
-    }
-
-    /**
-     * Unregister to stop listening to storage loading progress.
-     */
-    public boolean unregisterLoadingProgressListener() {
-        try {
-            return mService.unregisterLoadingProgressListener(mId);
-        } catch (RemoteException e) {
-            e.rethrowFromSystemServer();
-            return false;
-        }
-    }
-
-    /**
-     * Returns the metrics of the current storage.
-     * {@see IIncrementalService} for metrics keys.
-     */
-    public PersistableBundle getMetrics() {
-        try {
-            return mService.getMetrics(mId);
-        } catch (RemoteException e) {
-            e.rethrowFromSystemServer();
-            return null;
         }
     }
 }

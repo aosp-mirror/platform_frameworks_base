@@ -19,27 +19,15 @@ package com.android.systemui.qs.tiles;
 import android.app.UiModeManager;
 import android.content.Intent;
 import android.content.res.Configuration;
-import android.os.Handler;
-import android.os.Looper;
 import android.provider.Settings;
 import android.service.quicksettings.Tile;
 import android.text.TextUtils;
-import android.view.View;
 import android.widget.Switch;
 
-import androidx.annotation.Nullable;
-
-import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto;
 import com.android.systemui.R;
-import com.android.systemui.dagger.qualifiers.Background;
-import com.android.systemui.dagger.qualifiers.Main;
-import com.android.systemui.plugins.ActivityStarter;
-import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.qs.QSTile;
-import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.qs.QSHost;
-import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
@@ -62,27 +50,16 @@ public class UiModeNightTile extends QSTileImpl<QSTile.BooleanState> implements
     public static DateTimeFormatter formatter = DateTimeFormatter.ofPattern("hh:mm a");
     private final Icon mIcon = ResourceIcon.get(
             com.android.internal.R.drawable.ic_qs_ui_mode_night);
-    private UiModeManager mUiModeManager;
+    private final UiModeManager mUiModeManager;
     private final BatteryController mBatteryController;
     private final LocationController mLocationController;
+
     @Inject
-    public UiModeNightTile(
-            QSHost host,
-            @Background Looper backgroundLooper,
-            @Main Handler mainHandler,
-            FalsingManager falsingManager,
-            MetricsLogger metricsLogger,
-            StatusBarStateController statusBarStateController,
-            ActivityStarter activityStarter,
-            QSLogger qsLogger,
-            ConfigurationController configurationController,
-            BatteryController batteryController,
-            LocationController locationController
-    ) {
-        super(host, backgroundLooper, mainHandler, falsingManager, metricsLogger,
-                statusBarStateController, activityStarter, qsLogger);
+    public UiModeNightTile(QSHost host, ConfigurationController configurationController,
+            BatteryController batteryController, LocationController locationController) {
+        super(host);
         mBatteryController = batteryController;
-        mUiModeManager = host.getUserContext().getSystemService(UiModeManager.class);
+        mUiModeManager = mContext.getSystemService(UiModeManager.class);
         mLocationController = locationController;
         configurationController.observe(getLifecycle(), this);
         batteryController.observe(getLifecycle(), this);
@@ -104,7 +81,7 @@ public class UiModeNightTile extends QSTileImpl<QSTile.BooleanState> implements
     }
 
     @Override
-    protected void handleClick(@Nullable View view) {
+    protected void handleClick() {
         if (getState().state == Tile.STATE_UNAVAILABLE) {
             return;
         }

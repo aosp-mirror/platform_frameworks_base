@@ -25,15 +25,15 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Log;
 
-import com.android.server.servicewatcher.CurrentUserServiceSupplier;
-import com.android.server.servicewatcher.CurrentUserServiceSupplier.BoundServiceInfo;
-import com.android.server.servicewatcher.ServiceWatcher;
-import com.android.server.servicewatcher.ServiceWatcher.ServiceListener;
+import com.android.server.FgThread;
+import com.android.server.ServiceWatcher;
 
 /**
  * Proxy class to bind GmsCore to the ActivityRecognitionHardware.
+ *
+ * @hide
  */
-public class HardwareActivityRecognitionProxy implements ServiceListener<BoundServiceInfo> {
+public class HardwareActivityRecognitionProxy {
 
     private static final String TAG = "ARProxy";
     private static final String SERVICE_ACTION =
@@ -66,28 +66,20 @@ public class HardwareActivityRecognitionProxy implements ServiceListener<BoundSe
             mInstance = null;
         }
 
-        int useOverlayResId =
-                com.android.internal.R.bool.config_enableActivityRecognitionHardwareOverlay;
-        int nonOverlayPackageResId =
-                com.android.internal.R.string.config_activityRecognitionHardwarePackageName;
-
-        mServiceWatcher = ServiceWatcher.create(context,
-                "HardwareActivityRecognitionProxy",
-                new CurrentUserServiceSupplier(context, SERVICE_ACTION, useOverlayResId,
-                        nonOverlayPackageResId),
-                this);
+        mServiceWatcher = new ServiceWatcher(context,
+                FgThread.getHandler(),
+                SERVICE_ACTION,
+                this::onBind,
+                null,
+                com.android.internal.R.bool.config_enableActivityRecognitionHardwareOverlay,
+                com.android.internal.R.string.config_activityRecognitionHardwarePackageName);
     }
 
     private boolean register() {
-        boolean resolves = mServiceWatcher.checkServiceResolves();
-        if (resolves) {
-            mServiceWatcher.register();
-        }
-        return resolves;
+        return mServiceWatcher.register();
     }
 
-    @Override
-    public void onBind(IBinder binder, BoundServiceInfo boundServiceInfo) throws RemoteException {
+    private void onBind(IBinder binder) throws RemoteException {
         String descriptor = binder.getInterfaceDescriptor();
 
         if (IActivityRecognitionHardwareWatcher.class.getCanonicalName().equals(descriptor)) {
@@ -104,7 +96,4 @@ public class HardwareActivityRecognitionProxy implements ServiceListener<BoundSe
             Log.e(TAG, "Unknown descriptor: " + descriptor);
         }
     }
-
-    @Override
-    public void onUnbind() {}
 }

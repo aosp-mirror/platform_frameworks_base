@@ -17,7 +17,6 @@
 package android.net;
 
 import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -75,7 +74,7 @@ public final class TelephonyNetworkSpecifier extends NetworkSpecifier implements
     }
 
     @Override
-    public boolean equals(@Nullable Object obj) {
+    public boolean equals(Object obj) {
         if (this == obj) {
             return true;
         }

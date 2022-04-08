@@ -43,12 +43,12 @@ public abstract class DisplayAddress implements Parcelable {
     /**
      * Creates an address for a physical display given its port and model.
      *
-     * @param port A port in the range [0, 255].
+     * @param port A port in the range [0, 255] interpreted as signed.
      * @param model A positive integer, or {@code null} if the model cannot be identified.
      * @return The {@link Physical} address.
      */
     @NonNull
-    public static Physical fromPortAndModel(int port, Long model) {
+    public static Physical fromPortAndModel(byte port, Long model) {
         return new Physical(port, model);
     }
 
@@ -92,10 +92,10 @@ public abstract class DisplayAddress implements Parcelable {
         /**
          * Physical port to which the display is connected.
          *
-         * @return A port in the range [0, 255].
+         * @return A port in the range [0, 255] interpreted as signed.
          */
-        public int getPort() {
-            return (int) (mPhysicalDisplayId & 0xFF);
+        public byte getPort() {
+            return (byte) mPhysicalDisplayId;
         }
 
         /**
@@ -110,7 +110,7 @@ public abstract class DisplayAddress implements Parcelable {
         }
 
         @Override
-        public boolean equals(@Nullable Object other) {
+        public boolean equals(Object other) {
             return other instanceof Physical
                     && mPhysicalDisplayId == ((Physical) other).mPhysicalDisplayId;
         }
@@ -118,7 +118,7 @@ public abstract class DisplayAddress implements Parcelable {
         @Override
         public String toString() {
             final StringBuilder builder = new StringBuilder("{")
-                    .append("port=").append(getPort());
+                    .append("port=").append(Byte.toUnsignedInt(getPort()));
 
             final Long model = getModel();
             if (model != null) {
@@ -142,11 +142,8 @@ public abstract class DisplayAddress implements Parcelable {
             mPhysicalDisplayId = physicalDisplayId;
         }
 
-        private Physical(int port, Long model) {
-            if (port < 0 || port > 255) {
-                throw new IllegalArgumentException("The port should be in the interval [0, 255]");
-            }
-            mPhysicalDisplayId = Integer.toUnsignedLong(port)
+        private Physical(byte port, Long model) {
+            mPhysicalDisplayId = Byte.toUnsignedLong(port)
                     | (model == null ? UNKNOWN_MODEL : (model << MODEL_SHIFT));
         }
 
@@ -171,7 +168,7 @@ public abstract class DisplayAddress implements Parcelable {
         private final String mMacAddress;
 
         @Override
-        public boolean equals(@Nullable Object other) {
+        public boolean equals(Object other) {
             return other instanceof Network && mMacAddress.equals(((Network) other).mMacAddress);
         }
 

@@ -28,9 +28,6 @@ import com.android.internal.util.FunctionalUtils;
 import com.android.internal.util.function.DecConsumer;
 import com.android.internal.util.function.DecFunction;
 import com.android.internal.util.function.DecPredicate;
-import com.android.internal.util.function.DodecConsumer;
-import com.android.internal.util.function.DodecFunction;
-import com.android.internal.util.function.DodecPredicate;
 import com.android.internal.util.function.HeptConsumer;
 import com.android.internal.util.function.HeptFunction;
 import com.android.internal.util.function.HeptPredicate;
@@ -461,28 +458,6 @@ final class PooledLambdaImpl<R> extends OmniFunction<Object,
                     }
                 }
             } break;
-
-            case 12: {
-                switch (returnType) {
-                    case LambdaType.ReturnType.VOID: {
-                        ((DodecConsumer) mFunc).accept(popArg(0), popArg(1),
-                                popArg(2), popArg(3), popArg(4), popArg(5),
-                                popArg(6), popArg(7), popArg(8), popArg(9), popArg(10), popArg(11));
-                        return null;
-                    }
-                    case LambdaType.ReturnType.BOOLEAN: {
-                        return (R) (Object) ((DodecPredicate) mFunc).test(popArg(0),
-                                popArg(1), popArg(2), popArg(3), popArg(4),
-                                popArg(5), popArg(6), popArg(7), popArg(8), popArg(9), popArg(10),
-                                popArg(11));
-                    }
-                    case LambdaType.ReturnType.OBJECT: {
-                        return (R) ((DodecFunction) mFunc).apply(popArg(0), popArg(1),
-                                popArg(2), popArg(3), popArg(4), popArg(5),
-                                popArg(6), popArg(7), popArg(8), popArg(9), popArg(10), popArg(11));
-                    }
-                }
-            } break;
         }
         throw new IllegalStateException("Unknown function type: " + LambdaType.toString(funcType));
     }
@@ -548,8 +523,7 @@ final class PooledLambdaImpl<R> extends OmniFunction<Object,
      */
     static <E extends PooledLambda> E acquire(Pool pool, Object func,
             int fNumArgs, int numPlaceholders, int fReturnType, Object a, Object b, Object c,
-            Object d, Object e, Object f, Object g, Object h, Object i, Object j, Object k,
-            Object l) {
+            Object d, Object e, Object f, Object g, Object h, Object i, Object j, Object k) {
         PooledLambdaImpl r = acquire(pool);
         if (DEBUG) {
             Log.i(LOG_TAG,
@@ -569,7 +543,6 @@ final class PooledLambdaImpl<R> extends OmniFunction<Object,
                             + ", i = " + i
                             + ", j = " + j
                             + ", k = " + k
-                            + ", l = " + l
                             + ")");
         }
         r.mFunc = Objects.requireNonNull(func);
@@ -587,7 +560,6 @@ final class PooledLambdaImpl<R> extends OmniFunction<Object,
         setIfInBounds(r.mArgs, 8, i);
         setIfInBounds(r.mArgs, 9, j);
         setIfInBounds(r.mArgs, 10, k);
-        setIfInBounds(r.mArgs, 11, l);
         return (E) r;
     }
 

@@ -1,2 +1,0 @@
-per-file Overlay* = file:/core/java/android/app/RESOURCES_OWNERS
-per-file Resources* = file:/core/java/android/app/RESOURCES_OWNERS

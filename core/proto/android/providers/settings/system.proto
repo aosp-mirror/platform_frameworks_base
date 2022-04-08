@@ -52,8 +52,7 @@ message SystemSettingsProto {
     }
     optional Bluetooth bluetooth = 4;
 
-    reserved 5; // date_format is not used
-
+    optional SettingProto date_format = 5 [ (android.privacy).dest = DEST_AUTOMATIC ];
     optional SettingProto display_color_mode = 6 [ (android.privacy).dest = DEST_AUTOMATIC ];
 
     message DevOptions {

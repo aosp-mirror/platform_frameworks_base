@@ -20,8 +20,8 @@ import android.annotation.Nullable;
 import android.app.Service;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Intent;
-import android.os.Build;
 import android.os.IBinder;
+import android.os.RemoteException;
 import android.telephony.CarrierConfigManager;
 import android.telephony.ims.compat.feature.ImsFeature;
 import android.telephony.ims.compat.feature.MMTelFeature;
@@ -87,43 +87,33 @@ public class ImsService extends Service {
     /**
      * @hide
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     protected final IBinder mImsServiceController = new IImsServiceController.Stub() {
 
         @Override
-        public IImsMMTelFeature createEmergencyMMTelFeature(int slotId) {
-            return createEmergencyMMTelFeatureInternal(slotId);
-        }
-
-        @Override
-        public IImsMMTelFeature createMMTelFeature(int slotId) {
-            return createMMTelFeatureInternal(slotId);
-        }
-
-        @Override
-        public IImsRcsFeature createRcsFeature(int slotId) {
-            return createRcsFeatureInternal(slotId);
-        }
-
-        @Override
-        public void removeImsFeature(int slotId, int featureType) {
-            ImsService.this.removeImsFeature(slotId, featureType);
-        }
-
-        @Override
-        public void addFeatureStatusCallback(int slotId, int featureType,
+        public IImsMMTelFeature createEmergencyMMTelFeature(int slotId,
                 IImsFeatureStatusCallback c) {
-            addImsFeatureStatusCallback(slotId, featureType, c);
+            return createEmergencyMMTelFeatureInternal(slotId, c);
         }
 
         @Override
-        public void removeFeatureStatusCallback(int slotId, int featureType,
-                IImsFeatureStatusCallback c) {
-            removeImsFeatureStatusCallback(slotId, featureType, c);
+        public IImsMMTelFeature createMMTelFeature(int slotId, IImsFeatureStatusCallback c) {
+            return createMMTelFeatureInternal(slotId, c);
+        }
+
+        @Override
+        public IImsRcsFeature createRcsFeature(int slotId, IImsFeatureStatusCallback c) {
+            return createRcsFeatureInternal(slotId, c);
+        }
+
+        @Override
+        public void removeImsFeature(int slotId, int featureType, IImsFeatureStatusCallback c)
+                throws RemoteException {
+            ImsService.this.removeImsFeature(slotId, featureType, c);
         }
     };
 
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public ImsService() {
     }
 
@@ -147,40 +137,46 @@ public class ImsService extends Service {
         return mFeaturesBySlot.get(slotId);
     }
 
-    private IImsMMTelFeature createEmergencyMMTelFeatureInternal(int slotId) {
+    private IImsMMTelFeature createEmergencyMMTelFeatureInternal(int slotId,
+            IImsFeatureStatusCallback c) {
         MMTelFeature f = onCreateEmergencyMMTelImsFeature(slotId);
         if (f != null) {
-            setupFeature(f, slotId, ImsFeature.EMERGENCY_MMTEL);
+            setupFeature(f, slotId, ImsFeature.EMERGENCY_MMTEL, c);
             return f.getBinder();
         } else {
             return null;
         }
     }
 
-    private IImsMMTelFeature createMMTelFeatureInternal(int slotId) {
+    private IImsMMTelFeature createMMTelFeatureInternal(int slotId,
+            IImsFeatureStatusCallback c) {
         MMTelFeature f = onCreateMMTelImsFeature(slotId);
         if (f != null) {
-            setupFeature(f, slotId, ImsFeature.MMTEL);
+            setupFeature(f, slotId, ImsFeature.MMTEL, c);
             return f.getBinder();
         } else {
             return null;
         }
     }
 
-    private IImsRcsFeature createRcsFeatureInternal(int slotId) {
+    private IImsRcsFeature createRcsFeatureInternal(int slotId,
+            IImsFeatureStatusCallback c) {
         RcsFeature f = onCreateRcsFeature(slotId);
         if (f != null) {
-            setupFeature(f, slotId, ImsFeature.RCS);
+            setupFeature(f, slotId, ImsFeature.RCS, c);
             return f.getBinder();
         } else {
             return null;
         }
     }
 
-    private void setupFeature(ImsFeature f, int slotId, int featureType) {
+    private void setupFeature(ImsFeature f, int slotId, int featureType,
+            IImsFeatureStatusCallback c) {
         f.setContext(this);
         f.setSlotId(slotId);
+        f.addImsFeatureStatusCallback(c);
         addImsFeature(slotId, featureType, f);
+        // TODO: Remove once new onFeatureReady AIDL is merged in.
         f.onFeatureReady();
     }
 
@@ -197,41 +193,8 @@ public class ImsService extends Service {
         }
     }
 
-    private void addImsFeatureStatusCallback(int slotId, int featureType,
+    private void removeImsFeature(int slotId, int featureType,
             IImsFeatureStatusCallback c) {
-        synchronized (mFeaturesBySlot) {
-            // get ImsFeature associated with the slot/feature
-            SparseArray<ImsFeature> features = mFeaturesBySlot.get(slotId);
-            if (features == null) {
-                Log.w(LOG_TAG, "Can not add ImsFeatureStatusCallback. No ImsFeatures exist on"
-                        + " slot " + slotId);
-                return;
-            }
-            ImsFeature f = features.get(featureType);
-            if (f != null) {
-                f.addImsFeatureStatusCallback(c);
-            }
-        }
-    }
-
-    private void removeImsFeatureStatusCallback(int slotId, int featureType,
-            IImsFeatureStatusCallback c) {
-        synchronized (mFeaturesBySlot) {
-            // get ImsFeature associated with the slot/feature
-            SparseArray<ImsFeature> features = mFeaturesBySlot.get(slotId);
-            if (features == null) {
-                Log.w(LOG_TAG, "Can not remove ImsFeatureStatusCallback. No ImsFeatures exist on"
-                        + " slot " + slotId);
-                return;
-            }
-            ImsFeature f = features.get(featureType);
-            if (f != null) {
-                f.removeImsFeatureStatusCallback(c);
-            }
-        }
-    }
-
-    private void removeImsFeature(int slotId, int featureType) {
         synchronized (mFeaturesBySlot) {
             // get ImsFeature associated with the slot/feature
             SparseArray<ImsFeature> features = mFeaturesBySlot.get(slotId);
@@ -246,6 +209,7 @@ public class ImsService extends Service {
                         + featureType + " exists on slot " + slotId);
                 return;
             }
+            f.removeImsFeatureStatusCallback(c);
             f.onFeatureRemoved();
             features.remove(featureType);
         }

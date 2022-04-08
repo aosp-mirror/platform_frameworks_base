@@ -20,7 +20,6 @@ package android.opengl;
 
 import android.compat.annotation.UnsupportedAppUsage;
 import android.graphics.SurfaceTexture;
-import android.os.Build;
 import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
@@ -165,7 +164,7 @@ public static final int EGL_CORE_NATIVE_ENGINE             = 0x305B;
     /**
      * {@hide}
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public static native EGLDisplay eglGetDisplay(
         long display_id
     );

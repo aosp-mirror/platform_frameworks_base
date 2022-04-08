@@ -20,6 +20,7 @@ import com.android.internal.logging.InstanceId;
 import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.qs.external.TileServices;
+import com.android.systemui.qs.logging.QSLogger;
 
 import java.util.Collection;
 
@@ -30,7 +31,7 @@ public interface QSHost {
     void openPanels();
     Context getContext();
     Context getUserContext();
-    int getUserId();
+    QSLogger getQSLogger();
     UiEventLogger getUiEventLogger();
     Collection<QSTile> getTiles();
     void addCallback(Callback callback);

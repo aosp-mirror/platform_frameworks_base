@@ -16,18 +16,14 @@
 
 package com.android.server.am;
 
-import static android.system.OsConstants.AF_UNIX;
-import static android.system.OsConstants.SOCK_STREAM;
-import static android.system.OsConstants.SOL_SOCKET;
-import static android.system.OsConstants.SO_RCVTIMEO;
-import static android.system.OsConstants.SO_SNDTIMEO;
-
 import android.app.ApplicationErrorReport.CrashInfo;
 import android.system.ErrnoException;
 import android.system.Os;
 import android.system.StructTimeval;
 import android.system.UnixSocketAddress;
 import android.util.Slog;
+
+import static android.system.OsConstants.*;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -263,10 +259,8 @@ final class NativeCrashListener extends Thread {
                     // even though the process will vanish as soon as we let
                     // debuggerd proceed.
                     synchronized (mAm) {
-                        synchronized (mAm.mProcLock) {
-                            pr.mErrorState.setCrashing(true);
-                            pr.mErrorState.setForceCrashReport(true);
-                        }
+                        pr.setCrashing(true);
+                        pr.forceCrashReport = true;
                     }
 
                     // Crash reporting is synchronous but we want to let debuggerd

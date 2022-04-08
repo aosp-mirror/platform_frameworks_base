@@ -687,7 +687,7 @@ public final class SaveInfo implements Parcelable {
         public @NonNull Builder setValidator(@NonNull Validator validator) {
             throwIfDestroyed();
             Preconditions.checkArgument((validator instanceof InternalValidator),
-                    "not provided by Android System: %s", validator);
+                    "not provided by Android System: " + validator);
             mValidator = (InternalValidator) validator;
             return this;
         }
@@ -734,7 +734,7 @@ public final class SaveInfo implements Parcelable {
             throwIfDestroyed();
             Preconditions.checkArgument(!ArrayUtils.isEmpty(ids), "ids cannot be empty or null");
             Preconditions.checkArgument((sanitizer instanceof InternalSanitizer),
-                    "not provided by Android System: %s", sanitizer);
+                    "not provided by Android System: " + sanitizer);
 
             if (mSanitizers == null) {
                 mSanitizers = new ArrayMap<>();

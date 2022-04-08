@@ -16,7 +16,7 @@
 
 package com.android.mediaframeworktest.helpers;
 
-import static com.android.mediaframeworktest.helpers.AssertHelpers.assertArrayContainsAnyOf;
+import junit.framework.Assert;
 
 import android.graphics.ImageFormat;
 import android.graphics.Rect;
@@ -31,8 +31,6 @@ import android.util.Range;
 import android.util.Rational;
 import android.util.Size;
 
-import junit.framework.Assert;
-
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -41,6 +39,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
+import static com.android.mediaframeworktest.helpers.AssertHelpers.assertArrayContainsAnyOf;
 
 /**
  * Helpers to get common static info out of the camera.
@@ -435,7 +435,7 @@ public class StaticMetadata {
     }
 
     /**
-     * Get max AE regions and do validation check.
+     * Get max AE regions and do sanity check.
      *
      * @return AE max regions supported by the camera device
      */
@@ -448,7 +448,7 @@ public class StaticMetadata {
     }
 
     /**
-     * Get max AWB regions and do validation check.
+     * Get max AWB regions and do sanity check.
      *
      * @return AWB max regions supported by the camera device
      */
@@ -461,7 +461,7 @@ public class StaticMetadata {
     }
 
     /**
-     * Get max AF regions and do validation check.
+     * Get max AF regions and do sanity check.
      *
      * @return AF max regions supported by the camera device
      */
@@ -545,7 +545,7 @@ public class StaticMetadata {
     }
 
     /**
-     * Get available thumbnail sizes and do the  validation check.
+     * Get available thumbnail sizes and do the sanity check.
      *
      * @return The array of available thumbnail sizes
      */
@@ -573,7 +573,7 @@ public class StaticMetadata {
     }
 
     /**
-     * Get available focal lengths and do the validation check.
+     * Get available focal lengths and do the sanity check.
      *
      * @return The array of available focal lengths
      */
@@ -594,7 +594,7 @@ public class StaticMetadata {
     }
 
     /**
-     * Get available apertures and do the validation check.
+     * Get available apertures and do the sanity check.
      *
      * @return The non-null array of available apertures
      */
@@ -909,7 +909,7 @@ public class StaticMetadata {
     }
 
     /**
-     * Get hyperfocalDistance and do the validation check.
+     * Get hyperfocalDistance and do the sanity check.
      * <p>
      * Note that, this tag is optional, will return -1 if this tag is not
      * available.
@@ -1068,7 +1068,7 @@ public class StaticMetadata {
     }
 
     /**
-     * get android.control.availableModes and do the validation check.
+     * get android.control.availableModes and do the sanity check.
      *
      * @return available control modes.
      */
@@ -1124,7 +1124,7 @@ public class StaticMetadata {
     }
 
     /**
-     * Get aeAvailableModes and do the validation check.
+     * Get aeAvailableModes and do the sanity check.
      *
      * <p>Depending on the check level this class has, for WAR or COLLECT levels,
      * If the aeMode list is invalid, return an empty mode array. The the caller doesn't
@@ -1196,7 +1196,7 @@ public class StaticMetadata {
     }
 
     /**
-     * Get available AWB modes and do the validation check.
+     * Get available AWB modes and do the sanity check.
      *
      * @return array that contains available AWB modes, empty array if awbAvailableModes is
      * unavailable.
@@ -1222,7 +1222,7 @@ public class StaticMetadata {
     }
 
     /**
-     * Get available AF modes and do the validation check.
+     * Get available AF modes and do the sanity check.
      *
      * @return array that contains available AF modes, empty array if afAvailableModes is
      * unavailable.
@@ -1580,7 +1580,7 @@ public class StaticMetadata {
     }
 
     /**
-     * Get value of key android.control.aeCompensationStep and do the validation check.
+     * Get value of key android.control.aeCompensationStep and do the sanity check.
      *
      * @return default value if the value is null.
      */
@@ -1605,7 +1605,7 @@ public class StaticMetadata {
     }
 
     /**
-     * Get value of key android.control.aeCompensationRange and do the validation check.
+     * Get value of key android.control.aeCompensationRange and do the sanity check.
      *
      * @return default value if the value is null or malformed.
      */
@@ -1635,7 +1635,7 @@ public class StaticMetadata {
     }
 
     /**
-     * Get availableVideoStabilizationModes and do the validation check.
+     * Get availableVideoStabilizationModes and do the sanity check.
      *
      * @return available video stabilization modes, empty array if it is unavailable.
      */
@@ -1666,7 +1666,7 @@ public class StaticMetadata {
     }
 
     /**
-     * Get availableOpticalStabilization and do the validation check.
+     * Get availableOpticalStabilization and do the sanity check.
      *
      * @return available optical stabilization modes, empty array if it is unavailable.
      */
@@ -1780,7 +1780,7 @@ public class StaticMetadata {
     }
 
     /**
-     * Get max pipeline depth and do the validation check.
+     * Get max pipeline depth and do the sanity check.
      *
      * @return max pipeline depth, default value if it is not available.
      */
@@ -1846,7 +1846,7 @@ public class StaticMetadata {
 
 
     /**
-     * Get available capabilities and do the validation check.
+     * Get available capabilities and do the sanity check.
      *
      * @return reported available capabilities list, empty list if the value is unavailable.
      */
@@ -2070,7 +2070,7 @@ public class StaticMetadata {
     }
 
     /**
-     * Get max number of output raw streams and do the basic validation check.
+     * Get max number of output raw streams and do the basic sanity check.
      *
      * @return reported max number of raw output stream
      */
@@ -2083,7 +2083,7 @@ public class StaticMetadata {
     }
 
     /**
-     * Get max number of output processed streams and do the basic validation check.
+     * Get max number of output processed streams and do the basic sanity check.
      *
      * @return reported max number of processed output stream
      */
@@ -2096,7 +2096,7 @@ public class StaticMetadata {
     }
 
     /**
-     * Get max number of output stalling processed streams and do the basic validation check.
+     * Get max number of output stalling processed streams and do the basic sanity check.
      *
      * @return reported max number of stalling processed output stream
      */
@@ -2109,7 +2109,7 @@ public class StaticMetadata {
     }
 
     /**
-     * Get lens facing and do the validation check
+     * Get lens facing and do the sanity check
      * @return lens facing, return default value (BACK) if value is unavailable.
      */
     public int getLensFacingChecked() {

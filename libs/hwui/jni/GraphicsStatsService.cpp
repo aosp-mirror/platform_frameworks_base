@@ -24,10 +24,10 @@
 #include <service/GraphicsStatsService.h>
 #include <stats_event.h>
 #include <stats_pull_atom_callback.h>
-#include <statslog_hwui.h>
+#include <statslog.h>
 
-#include "GraphicsJNI.h"
 #include "android/graphics/jni_runtime.h"
+#include "GraphicsJNI.h"
 
 namespace android {
 
@@ -161,14 +161,14 @@ static void nativeInit(JNIEnv* env, jobject javaObject) {
     AStatsManager_PullAtomMetadata_setCoolDownMillis(metadata, 10);             // 10 milliseconds
     AStatsManager_PullAtomMetadata_setTimeoutMillis(metadata, 2 * MS_PER_SEC);  // 2 seconds
 
-    AStatsManager_setPullAtomCallback(stats::GRAPHICS_STATS, metadata, &graphicsStatsPullCallback,
-                                      nullptr);
+    AStatsManager_setPullAtomCallback(android::util::GRAPHICS_STATS, metadata,
+                                      &graphicsStatsPullCallback, nullptr);
 
     AStatsManager_PullAtomMetadata_release(metadata);
 }
 
 static void nativeDestructor(JNIEnv* env, jobject javaObject) {
-    AStatsManager_clearPullAtomCallback(stats::GRAPHICS_STATS);
+    AStatsManager_clearPullAtomCallback(android::util::GRAPHICS_STATS);
     env->DeleteGlobalRef(gGraphicsStatsServiceObject);
     gGraphicsStatsServiceObject = nullptr;
 }

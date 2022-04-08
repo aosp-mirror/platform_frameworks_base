@@ -129,14 +129,10 @@ public class SettingsInjector {
         if (Log.isLoggable(TAG, Log.DEBUG)) {
             Log.d(TAG, "Found services for profile id " + profileId + ": " + resolveInfos);
         }
-
-        final PackageManager userPackageManager = mContext.createContextAsUser(
-                userHandle, /* flags */ 0).getPackageManager();
         List<InjectedSetting> settings = new ArrayList<InjectedSetting>(resolveInfos.size());
         for (ResolveInfo resolveInfo : resolveInfos) {
             try {
-                InjectedSetting setting = parseServiceInfo(resolveInfo, userHandle,
-                        userPackageManager);
+                InjectedSetting setting = parseServiceInfo(resolveInfo, userHandle, pm);
                 if (setting == null) {
                     Log.w(TAG, "Unable to load service info " + resolveInfo);
                 } else {
@@ -252,7 +248,8 @@ public class SettingsInjector {
                         + SettingInjectorService.ATTRIBUTES_NAME + " tag");
             }
 
-            Resources res = pm.getResourcesForApplication(si.packageName);
+            Resources res = pm.getResourcesForApplicationAsUser(si.packageName,
+                    userHandle.getIdentifier());
             return parseAttributes(si.packageName, si.name, userHandle, res, attrs);
         } catch (PackageManager.NameNotFoundException e) {
             throw new XmlPullParserException(

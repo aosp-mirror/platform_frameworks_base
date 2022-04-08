@@ -16,6 +16,9 @@
 
 package com.android.systemui.shortcut;
 
+import static android.app.ActivityTaskManager.SPLIT_SCREEN_CREATE_MODE_BOTTOM_OR_RIGHT;
+import static android.app.ActivityTaskManager.SPLIT_SCREEN_CREATE_MODE_TOP_OR_LEFT;
+
 import android.content.Context;
 import android.content.res.Configuration;
 import android.os.RemoteException;
@@ -25,23 +28,23 @@ import android.view.WindowManagerGlobal;
 
 import com.android.internal.policy.DividerSnapAlgorithm;
 import com.android.systemui.SystemUI;
-import com.android.systemui.dagger.SysUISingleton;
-import com.android.wm.shell.legacysplitscreen.DividerView;
-import com.android.wm.shell.legacysplitscreen.LegacySplitScreen;
-
-import java.util.Optional;
+import com.android.systemui.recents.Recents;
+import com.android.systemui.stackdivider.Divider;
+import com.android.systemui.stackdivider.DividerView;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 
 /**
  * Dispatches shortcut to System UI components
  */
-@SysUISingleton
+@Singleton
 public class ShortcutKeyDispatcher extends SystemUI
         implements ShortcutKeyServiceProxy.Callbacks {
 
     private static final String TAG = "ShortcutKeyDispatcher";
-    private final Optional<LegacySplitScreen> mSplitScreenOptional;
+    private final Divider mDivider;
+    private final Recents mRecents;
 
     private ShortcutKeyServiceProxy mShortcutKeyServiceProxy = new ShortcutKeyServiceProxy(this);
     private IWindowManager mWindowManagerService = WindowManagerGlobal.getWindowManagerService();
@@ -55,14 +58,14 @@ public class ShortcutKeyDispatcher extends SystemUI
     protected final long SC_DOCK_RIGHT = META_MASK | KeyEvent.KEYCODE_RIGHT_BRACKET;
 
     @Inject
-    public ShortcutKeyDispatcher(Context context, Optional<LegacySplitScreen> splitScreenOptional) {
+    public ShortcutKeyDispatcher(Context context, Divider divider, Recents recents) {
         super(context);
-        mSplitScreenOptional = splitScreenOptional;
+        mDivider = divider;
+        mRecents = recents;
     }
 
     /**
      * Registers a shortcut key to window manager.
-     *
      * @param shortcutCode packed representation of shortcut key code and meta information
      */
     public void registerShortcutKey(long shortcutCode) {
@@ -89,24 +92,24 @@ public class ShortcutKeyDispatcher extends SystemUI
     }
 
     private void handleDockKey(long shortcutCode) {
-        mSplitScreenOptional.ifPresent(splitScreen -> {
-            if (splitScreen.isDividerVisible()) {
-                // If there is already a docked window, we respond by resizing the docking pane.
-                DividerView dividerView = splitScreen.getDividerView();
-                DividerSnapAlgorithm snapAlgorithm = dividerView.getSnapAlgorithm();
-                int dividerPosition = dividerView.getCurrentPosition();
-                DividerSnapAlgorithm.SnapTarget currentTarget =
-                        snapAlgorithm.calculateNonDismissingSnapTarget(dividerPosition);
-                DividerSnapAlgorithm.SnapTarget target = (shortcutCode == SC_DOCK_LEFT)
-                        ? snapAlgorithm.getPreviousTarget(currentTarget)
-                        : snapAlgorithm.getNextTarget(currentTarget);
-                dividerView.startDragging(true /* animate */, false /* touching */);
-                dividerView.stopDragging(target.position, 0f, false /* avoidDismissStart */,
-                        true /* logMetrics */);
-                return;
-            } else {
-                splitScreen.splitPrimaryTask();
-            }
-        });
+        if (mDivider == null || !mDivider.isDividerVisible()) {
+            // Split the screen
+            mRecents.splitPrimaryTask((shortcutCode == SC_DOCK_LEFT)
+                    ? SPLIT_SCREEN_CREATE_MODE_TOP_OR_LEFT
+                    : SPLIT_SCREEN_CREATE_MODE_BOTTOM_OR_RIGHT, null, -1);
+        } else {
+            // If there is already a docked window, we respond by resizing the docking pane.
+            DividerView dividerView = mDivider.getView();
+            DividerSnapAlgorithm snapAlgorithm = dividerView.getSnapAlgorithm();
+            int dividerPosition = dividerView.getCurrentPosition();
+            DividerSnapAlgorithm.SnapTarget currentTarget =
+                    snapAlgorithm.calculateNonDismissingSnapTarget(dividerPosition);
+            DividerSnapAlgorithm.SnapTarget target = (shortcutCode == SC_DOCK_LEFT)
+                    ? snapAlgorithm.getPreviousTarget(currentTarget)
+                    : snapAlgorithm.getNextTarget(currentTarget);
+            dividerView.startDragging(true /* animate */, false /* touching */);
+            dividerView.stopDragging(target.position, 0f, false /* avoidDismissStart */,
+                    true /* logMetrics */);
+        }
     }
 }

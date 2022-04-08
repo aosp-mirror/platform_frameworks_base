@@ -46,7 +46,6 @@ import android.content.pm.PackageManagerInternal;
 import android.os.Bundle;
 import android.os.Message;
 import android.os.ParcelFileDescriptor;
-import android.os.Process;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.UserHandle;
@@ -67,7 +66,7 @@ import com.android.server.backup.TransportManager;
 import com.android.server.backup.UserBackupManagerService;
 import com.android.server.backup.internal.OnTaskFinishedListener;
 import com.android.server.backup.transport.TransportClient;
-import com.android.server.backup.utils.BackupEligibilityRules;
+import com.android.server.backup.utils.AppBackupUtils;
 import com.android.server.backup.utils.BackupManagerMonitorUtils;
 
 import libcore.io.IoUtils;
@@ -163,7 +162,6 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
 
     private final int mEphemeralOpToken;
     private final BackupAgentTimeoutParameters mAgentTimeoutParameters;
-    private final BackupEligibilityRules mBackupEligibilityRules;
 
     @VisibleForTesting
     PerformUnifiedRestoreTask(UserBackupManagerService backupManagerService) {
@@ -173,7 +171,6 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
         mTransportManager = null;
         mEphemeralOpToken = 0;
         mUserId = 0;
-        mBackupEligibilityRules = null;
         this.backupManagerService = backupManagerService;
     }
 
@@ -189,8 +186,7 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
             int pmToken,
             boolean isFullSystemRestore,
             @Nullable String[] filterSet,
-            OnTaskFinishedListener listener,
-            BackupEligibilityRules backupEligibilityRules) {
+            OnTaskFinishedListener listener) {
         this.backupManagerService = backupManagerService;
         mUserId = backupManagerService.getUserId();
         mTransportManager = backupManagerService.getTransportManager();
@@ -211,7 +207,6 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
         mAgentTimeoutParameters = Objects.requireNonNull(
                 backupManagerService.getAgentTimeoutParameters(),
                 "Timeout parameters cannot be null");
-        mBackupEligibilityRules = backupEligibilityRules;
 
         if (targetPackage != null) {
             // Single package restore
@@ -223,8 +218,7 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
                 // We want everything and a pony
                 List<PackageInfo> apps =
                         PackageManagerBackupAgent.getStorableApplications(
-                                backupManagerService.getPackageManager(), mUserId,
-                                backupEligibilityRules);
+                                backupManagerService.getPackageManager(), mUserId);
                 filterSet = packagesToNames(apps);
                 if (DEBUG) {
                     Slog.i(TAG, "Full restore; asking about " + filterSet.length + " apps");
@@ -251,7 +245,7 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
                         continue;
                     }
 
-                    if (backupEligibilityRules.appIsEligibleForBackup(info.applicationInfo)) {
+                    if (AppBackupUtils.appIsEligibleForBackup(info.applicationInfo, mUserId)) {
                         mAcceptSet.add(info);
                     }
                 } catch (NameNotFoundException e) {
@@ -381,7 +375,7 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
 
         // If we're starting a full-system restore, set up to begin widget ID remapping
         if (mIsSystemRestore) {
-            AppWidgetBackupBridge.systemRestoreStarting(mUserId);
+            AppWidgetBackupBridge.restoreStarting(mUserId);
         }
 
         try {
@@ -434,8 +428,6 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
             // Pull the Package Manager metadata from the restore set first
             mCurrentPackage = new PackageInfo();
             mCurrentPackage.packageName = PACKAGE_MANAGER_SENTINEL;
-            mCurrentPackage.applicationInfo = new ApplicationInfo();
-            mCurrentPackage.applicationInfo.uid = Process.SYSTEM_UID;
             mPmAgent = backupManagerService.makeMetadataAgent(null);
             mAgent = IBackupAgent.Stub.asInterface(mPmAgent.onBind());
             if (MORE_DEBUG) {
@@ -662,8 +654,7 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
         // Good to go!  Set up and bind the agent...
         mAgent = backupManagerService.bindToAgentSynchronous(
                 mCurrentPackage.applicationInfo,
-                ApplicationThreadConstants.BACKUP_MODE_INCREMENTAL,
-                mBackupEligibilityRules.getOperationType());
+                ApplicationThreadConstants.BACKUP_MODE_INCREMENTAL);
         if (mAgent == null) {
             Slog.w(TAG, "Can't find backup agent for " + packageName);
             mMonitor = BackupManagerMonitorUtils.monitorEvent(mMonitor,
@@ -763,8 +754,7 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
             // Kick off the restore, checking for hung agents.  The timeout or
             // the operationComplete() callback will schedule the next step,
             // so we do not do that here.
-            long restoreAgentTimeoutMillis = mAgentTimeoutParameters.getRestoreAgentTimeoutMillis(
-                    app.applicationInfo.uid);
+            long restoreAgentTimeoutMillis = mAgentTimeoutParameters.getRestoreAgentTimeoutMillis();
             backupManagerService.prepareOperationTimeout(
                     mEphemeralOpToken, restoreAgentTimeoutMillis, this, OP_TYPE_RESTORE_WAIT);
             startedAgentRestore = true;
@@ -921,8 +911,7 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
                     mCurrentPackage.packageName);
 
             mEngine = new FullRestoreEngine(backupManagerService, this, null,
-                    mMonitor, mCurrentPackage, false, mEphemeralOpToken, false,
-                    mBackupEligibilityRules);
+                    mMonitor, mCurrentPackage, false, mEphemeralOpToken, false);
             mEngineThread = new FullRestoreEngineThread(mEngine, mEnginePipes[0]);
 
             ParcelFileDescriptor eWriteEnd = mEnginePipes[1];
@@ -1126,25 +1115,20 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
         } else {
             // We were invoked via an active restore session, not by the Package
             // Manager, so start up the session timeout again.
-            long restoreAgentTimeoutMillis =
-                    mAgentTimeoutParameters.getRestoreSessionTimeoutMillis();
+            long restoreAgentTimeoutMillis = mAgentTimeoutParameters.getRestoreAgentTimeoutMillis();
             backupManagerService.getBackupHandler().sendEmptyMessageDelayed(
                     MSG_RESTORE_SESSION_TIMEOUT,
                     restoreAgentTimeoutMillis);
         }
 
-        if (mIsSystemRestore) {
-            // Kick off any work that may be needed regarding app widget restores
-            AppWidgetBackupBridge.systemRestoreFinished(mUserId);
-        }
+        // Kick off any work that may be needed regarding app widget restores
+        AppWidgetBackupBridge.restoreFinished(mUserId);
 
         // If this was a full-system restore, record the ancestral
         // dataset information
         if (mIsSystemRestore && mPmAgent != null) {
             backupManagerService.setAncestralPackages(mPmAgent.getRestoredPackages());
             backupManagerService.setAncestralToken(mToken);
-            backupManagerService.setAncestralOperationType(
-                    mBackupEligibilityRules.getOperationType());
             backupManagerService.writeRestoreTokens();
         }
 

@@ -20,7 +20,7 @@ import android.app.PendingIntent;
 
 /** @hide */
 interface IFindDeviceCallback {
-    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
+    @UnsupportedAppUsage
     oneway void onSuccess(in PendingIntent launcher);
     oneway void onFailure(in CharSequence reason);
 }

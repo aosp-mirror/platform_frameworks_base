@@ -43,7 +43,6 @@ import android.view.SurfaceHolder;
 import com.android.systemui.glwallpaper.ImageWallpaperRenderer;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -54,7 +53,6 @@ import java.util.concurrent.CountDownLatch;
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper
-@Ignore
 public class ImageWallpaperTest extends SysuiTestCase {
     private static final int LOW_BMP_WIDTH = 128;
     private static final int LOW_BMP_HEIGHT = 128;

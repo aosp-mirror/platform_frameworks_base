@@ -18,7 +18,6 @@ package android.webkit;
 
 import android.annotation.Nullable;
 import android.compat.annotation.UnsupportedAppUsage;
-import android.os.Build;
 import android.webkit.CacheManager.CacheResult;
 
 import java.util.Iterator;
@@ -155,7 +154,7 @@ public final class UrlInterceptRegistry {
      */
     @Deprecated
     @Nullable
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public static synchronized PluginData getPluginData(
             String url, Map<String, String> headers) {
         if (urlInterceptDisabled()) {

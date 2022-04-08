@@ -18,11 +18,13 @@ package android.app.servertransaction;
 
 import static android.app.ActivityThread.DEBUG_MEMORY_TRIM;
 
-import android.app.ActivityClient;
+import android.app.ActivityManager;
+import android.app.ActivityTaskManager;
 import android.app.ActivityThread.ActivityClientRecord;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.PersistableBundle;
+import android.os.RemoteException;
 import android.os.TransactionTooLargeException;
 import android.util.Log;
 import android.util.LogWriter;
@@ -140,9 +142,9 @@ public class PendingTransactionActions {
             try {
                 if (DEBUG_MEMORY_TRIM) Slog.v(TAG, "Reporting activity stopped: " + mActivity);
                 // TODO(lifecycler): Use interface callback instead of AMS.
-                ActivityClient.getInstance().activityStopped(
+                ActivityTaskManager.getService().activityStopped(
                         mActivity.token, mState, mPersistentState, mDescription);
-            } catch (RuntimeException ex) {
+            } catch (RemoteException ex) {
                 // Dump statistics about bundle to help developers debug
                 final LogWriter writer = new LogWriter(Log.WARN, TAG);
                 final IndentingPrintWriter pw = new IndentingPrintWriter(writer, "  ");
@@ -151,12 +153,12 @@ public class PendingTransactionActions {
                 pw.println("PersistableBundle stats:");
                 Bundle.dumpStats(pw, mPersistentState);
 
-                if (ex.getCause() instanceof TransactionTooLargeException
+                if (ex instanceof TransactionTooLargeException
                         && mActivity.packageInfo.getTargetSdkVersion() < Build.VERSION_CODES.N) {
                     Log.e(TAG, "App sent too much data in instance state, so it was ignored", ex);
                     return;
                 }
-                throw ex;
+                throw ex.rethrowFromSystemServer();
             }
         }
     }

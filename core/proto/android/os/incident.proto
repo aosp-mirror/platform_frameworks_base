@@ -40,7 +40,7 @@ import "frameworks/base/core/proto/android/server/fingerprint.proto";
 import "frameworks/base/core/proto/android/server/jobscheduler.proto";
 import "frameworks/base/core/proto/android/server/location/context_hub.proto";
 import "frameworks/base/core/proto/android/server/powermanagerservice.proto";
-import "frameworks/base/core/proto/android/server/powerstatsservice.proto";
+import "frameworks/base/core/proto/android/server/rolemanagerservice.proto";
 import "frameworks/base/core/proto/android/server/windowmanagerservice.proto";
 import "frameworks/base/core/proto/android/service/appwidget.proto";
 import "frameworks/base/core/proto/android/service/battery.proto";
@@ -55,14 +55,13 @@ import "frameworks/base/core/proto/android/service/print.proto";
 import "frameworks/base/core/proto/android/service/procstats.proto";
 import "frameworks/base/core/proto/android/service/restricted_image.proto";
 import "frameworks/base/core/proto/android/service/sensor_service.proto";
-import "frameworks/base/core/proto/android/service/usb.proto";
 import "frameworks/base/core/proto/android/util/event_log_tags.proto";
 import "frameworks/base/core/proto/android/util/log.proto";
 import "frameworks/base/core/proto/android/util/textdump.proto";
 import "frameworks/base/core/proto/android/privacy.proto";
 import "frameworks/base/core/proto/android/section.proto";
 import "frameworks/base/proto/src/ipconnectivity.proto";
-import "packages/modules/Permission/service/proto/com/android/role/roleservice.proto";
+import "frameworks/proto_logging/stats/enums/service/usb.proto";
 
 package android.os;
 
@@ -362,7 +361,7 @@ message IncidentProto {
         (section).userdebug_and_eng_only = true
     ];
 
-    optional com.android.role.RoleServiceDumpProto role = 3024 [
+    optional com.android.server.role.RoleManagerServiceDumpProto role = 3024 [
         (section).type = SECTION_DUMPSYS,
         (section).args = "role --proto"
     ];
@@ -509,21 +508,6 @@ message IncidentProto {
     optional android.service.SensorServiceProto sensor_service = 3053 [
         (section).type = SECTION_DUMPSYS,
         (section).args = "sensorservice --proto"
-    ];
-
-    optional com.android.server.powerstats.PowerStatsServiceMeterProto powerstats_meter = 3054 [
-        (section).type = SECTION_DUMPSYS,
-        (section).args = "powerstats --proto meter"
-    ];
-
-    optional com.android.server.powerstats.PowerStatsServiceModelProto powerstats_model = 3055 [
-        (section).type = SECTION_DUMPSYS,
-        (section).args = "powerstats --proto model"
-    ];
-
-    optional com.android.server.powerstats.PowerStatsServiceResidencyProto powerstats_residency = 3056 [
-        (section).type = SECTION_DUMPSYS,
-        (section).args = "powerstats --proto residency"
     ];
 
     // Dumps in text format (on userdebug and eng builds only): 4000 ~ 4999

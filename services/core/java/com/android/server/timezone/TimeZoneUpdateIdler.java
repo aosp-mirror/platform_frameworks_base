@@ -16,6 +16,8 @@
 
 package com.android.server.timezone;
 
+import com.android.server.LocalServices;
+
 import android.app.job.JobInfo;
 import android.app.job.JobParameters;
 import android.app.job.JobScheduler;
@@ -23,8 +25,6 @@ import android.app.job.JobService;
 import android.content.ComponentName;
 import android.content.Context;
 import android.util.Slog;
-
-import com.android.server.LocalServices;
 
 /**
  * A JobService used to trigger time zone rules update work when a device falls idle.
@@ -55,7 +55,7 @@ public final class TimeZoneUpdateIdler extends JobService {
     @Override
     public boolean onStopJob(JobParameters params) {
         // Reschedule if stopped unless it was cancelled due to unschedule().
-        boolean reschedule = params.getStopReason() != JobParameters.STOP_REASON_CANCELLED_BY_APP;
+        boolean reschedule = params.getStopReason() != JobParameters.REASON_CANCELED;
         Slog.d(TAG, "onStopJob() called: Reschedule=" + reschedule);
         return reschedule;
     }

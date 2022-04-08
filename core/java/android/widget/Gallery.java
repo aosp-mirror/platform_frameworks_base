@@ -431,8 +431,7 @@ public class Gallery extends AbsSpinner implements GestureDetector.OnGestureList
             mSelectedCenterOffset = childLeft + childCenter - galleryCenter;
         }
 
-        // placeholder values, View's implementation does not use these.
-        onScrollChanged(0, 0, 0, 0);
+        onScrollChanged(0, 0, 0, 0); // dummy values, View's implementation does not use these.
 
         invalidate();
     }

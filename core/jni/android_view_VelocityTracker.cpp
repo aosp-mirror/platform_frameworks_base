@@ -16,14 +16,16 @@
 
 #define LOG_TAG "VelocityTracker-JNI"
 
+#include <nativehelper/JNIHelp.h>
+
 #include <android_runtime/AndroidRuntime.h>
-#include <cutils/properties.h>
+#include <utils/Log.h>
 #include <input/Input.h>
 #include <input/VelocityTracker.h>
-#include <nativehelper/JNIHelp.h>
-#include <nativehelper/ScopedUtfChars.h>
-#include <utils/Log.h>
 #include "android_view_MotionEvent.h"
+
+#include <nativehelper/ScopedUtfChars.h>
+
 #include "core_jni_helpers.h"
 
 namespace android {
@@ -43,7 +45,7 @@ static struct {
 
 class VelocityTrackerState {
 public:
-    explicit VelocityTrackerState(const VelocityTracker::Strategy strategy);
+    explicit VelocityTrackerState(const char* strategy);
 
     void clear();
     void addMovement(const MotionEvent* event);
@@ -62,8 +64,9 @@ private:
     Velocity mCalculatedVelocity[MAX_POINTERS];
 };
 
-VelocityTrackerState::VelocityTrackerState(const VelocityTracker::Strategy strategy)
-      : mVelocityTracker(strategy), mActivePointerId(-1) {}
+VelocityTrackerState::VelocityTrackerState(const char* strategy) :
+        mVelocityTracker(strategy), mActivePointerId(-1) {
+}
 
 void VelocityTrackerState::clear() {
     mVelocityTracker.clear();
@@ -133,20 +136,16 @@ bool VelocityTrackerState::getEstimator(int32_t id, VelocityTracker::Estimator* 
     return mVelocityTracker.getEstimator(id, outEstimator);
 }
 
-// Return a strategy enum from integer value.
-inline static VelocityTracker::Strategy getStrategyFromInt(const int32_t strategy) {
-    if (strategy < static_cast<int32_t>(VelocityTracker::Strategy::MIN) ||
-        strategy > static_cast<int32_t>(VelocityTracker::Strategy::MAX)) {
-        return VelocityTracker::Strategy::DEFAULT;
-    }
-    return static_cast<VelocityTracker::Strategy>(strategy);
-}
 
 // --- JNI Methods ---
 
 static jlong android_view_VelocityTracker_nativeInitialize(JNIEnv* env, jclass clazz,
-                                                           jint strategy) {
-    return reinterpret_cast<jlong>(new VelocityTrackerState(getStrategyFromInt(strategy)));
+        jstring strategyStr) {
+    if (strategyStr) {
+        ScopedUtfChars strategy(env, strategyStr);
+        return reinterpret_cast<jlong>(new VelocityTrackerState(strategy.c_str()));
+    }
+    return reinterpret_cast<jlong>(new VelocityTrackerState(NULL));
 }
 
 static void android_view_VelocityTracker_nativeDispose(JNIEnv* env, jclass clazz, jlong ptr) {
@@ -213,21 +212,35 @@ static jboolean android_view_VelocityTracker_nativeGetEstimator(JNIEnv* env, jcl
     return result;
 }
 
+
 // --- JNI Registration ---
 
 static const JNINativeMethod gVelocityTrackerMethods[] = {
-        /* name, signature, funcPtr */
-        {"nativeInitialize", "(I)J", (void*)android_view_VelocityTracker_nativeInitialize},
-        {"nativeDispose", "(J)V", (void*)android_view_VelocityTracker_nativeDispose},
-        {"nativeClear", "(J)V", (void*)android_view_VelocityTracker_nativeClear},
-        {"nativeAddMovement", "(JLandroid/view/MotionEvent;)V",
-         (void*)android_view_VelocityTracker_nativeAddMovement},
-        {"nativeComputeCurrentVelocity", "(JIF)V",
-         (void*)android_view_VelocityTracker_nativeComputeCurrentVelocity},
-        {"nativeGetXVelocity", "(JI)F", (void*)android_view_VelocityTracker_nativeGetXVelocity},
-        {"nativeGetYVelocity", "(JI)F", (void*)android_view_VelocityTracker_nativeGetYVelocity},
-        {"nativeGetEstimator", "(JILandroid/view/VelocityTracker$Estimator;)Z",
-         (void*)android_view_VelocityTracker_nativeGetEstimator},
+    /* name, signature, funcPtr */
+    { "nativeInitialize",
+            "(Ljava/lang/String;)J",
+            (void*)android_view_VelocityTracker_nativeInitialize },
+    { "nativeDispose",
+            "(J)V",
+            (void*)android_view_VelocityTracker_nativeDispose },
+    { "nativeClear",
+            "(J)V",
+            (void*)android_view_VelocityTracker_nativeClear },
+    { "nativeAddMovement",
+            "(JLandroid/view/MotionEvent;)V",
+            (void*)android_view_VelocityTracker_nativeAddMovement },
+    { "nativeComputeCurrentVelocity",
+            "(JIF)V",
+            (void*)android_view_VelocityTracker_nativeComputeCurrentVelocity },
+    { "nativeGetXVelocity",
+            "(JI)F",
+            (void*)android_view_VelocityTracker_nativeGetXVelocity },
+    { "nativeGetYVelocity",
+            "(JI)F",
+            (void*)android_view_VelocityTracker_nativeGetYVelocity },
+    { "nativeGetEstimator",
+            "(JILandroid/view/VelocityTracker$Estimator;)Z",
+            (void*)android_view_VelocityTracker_nativeGetEstimator },
 };
 
 int register_android_view_VelocityTracker(JNIEnv* env) {

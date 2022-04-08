@@ -1,3 +1,0 @@
-# LockSettings related
-per-file *LockPattern* = file:/services/core/java/com/android/server/locksettings/OWNERS
-per-file *Lockscreen* = file:/services/core/java/com/android/server/locksettings/OWNERS

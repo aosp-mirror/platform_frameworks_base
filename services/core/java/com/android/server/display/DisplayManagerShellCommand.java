@@ -16,11 +16,13 @@
 
 package com.android.server.display;
 
+import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
-import android.hardware.display.DisplayManager;
+import android.os.Binder;
 import android.os.ShellCommand;
-import android.view.Display;
+import android.os.UserHandle;
+import android.provider.Settings;
 
 import java.io.PrintWriter;
 
@@ -52,10 +54,6 @@ class DisplayManagerShellCommand extends ShellCommand {
                 return setDisplayWhiteBalanceLoggingEnabled(true);
             case "dwb-logging-disable":
                 return setDisplayWhiteBalanceLoggingEnabled(false);
-            case "dmd-logging-enable":
-                return setDisplayModeDirectorLoggingEnabled(true);
-            case "dmd-logging-disable":
-                return setDisplayModeDirectorLoggingEnabled(false);
             case "dwb-set-cct":
                 return setAmbientColorTemperatureOverride();
             default:
@@ -82,10 +80,6 @@ class DisplayManagerShellCommand extends ShellCommand {
         pw.println("    Enable display white-balance logging.");
         pw.println("  dwb-logging-disable");
         pw.println("    Disable display white-balance logging.");
-        pw.println("  dmd-logging-enable");
-        pw.println("    Enable display mode director logging.");
-        pw.println("  dmd-logging-disable");
-        pw.println("    Disable display mode director logging.");
         pw.println("  dwb-set-cct CCT");
         pw.println("    Sets the ambient color temperature override to CCT (use -1 to disable).");
         pw.println();
@@ -109,8 +103,17 @@ class DisplayManagerShellCommand extends ShellCommand {
         }
 
         final Context context = mService.getContext();
-        final DisplayManager dm = context.getSystemService(DisplayManager.class);
-        dm.setBrightness(Display.DEFAULT_DISPLAY, brightness);
+        context.enforceCallingOrSelfPermission(
+                Manifest.permission.CONTROL_DISPLAY_BRIGHTNESS,
+                "Permission required to set the display's brightness");
+        final long token = Binder.clearCallingIdentity();
+        try {
+            Settings.System.putFloatForUser(context.getContentResolver(),
+                    Settings.System.SCREEN_BRIGHTNESS_FLOAT, brightness,
+                    UserHandle.USER_CURRENT);
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
         return 0;
     }
 
@@ -126,11 +129,6 @@ class DisplayManagerShellCommand extends ShellCommand {
 
     private int setDisplayWhiteBalanceLoggingEnabled(boolean enabled) {
         mService.setDisplayWhiteBalanceLoggingEnabled(enabled);
-        return 0;
-    }
-
-    private int setDisplayModeDirectorLoggingEnabled(boolean enabled) {
-        mService.setDisplayModeDirectorLoggingEnabled(enabled);
         return 0;
     }
 

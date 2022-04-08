@@ -24,6 +24,6 @@ import android.os.IBinder;
  */
 interface IDragAndDropPermissions {
     void take(IBinder activityToken);
-    void takeTransient();
+    void takeTransient(IBinder transientToken);
     void release();
 }

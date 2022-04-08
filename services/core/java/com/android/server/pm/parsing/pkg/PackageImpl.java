@@ -16,7 +16,6 @@
 
 package com.android.server.pm.parsing.pkg;
 
-import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.pm.ActivityInfo;
@@ -29,9 +28,7 @@ import android.content.pm.parsing.component.ParsedActivity;
 import android.content.pm.parsing.component.ParsedProvider;
 import android.content.pm.parsing.component.ParsedService;
 import android.content.res.TypedArray;
-import android.os.Environment;
 import android.os.Parcel;
-import android.os.UserHandle;
 import android.os.storage.StorageManager;
 import android.text.TextUtils;
 
@@ -41,7 +38,6 @@ import com.android.internal.util.DataClass;
 import com.android.internal.util.Parcelling.BuiltIn.ForInternedString;
 import com.android.server.pm.parsing.PackageInfoUtils;
 
-import java.io.File;
 import java.util.UUID;
 
 /**
@@ -91,6 +87,8 @@ public final class PackageImpl extends ParsingPackageImpl implements ParsedPacka
     @DataClass.ParcelWith(ForInternedString.class)
     private final String manifestPackageName;
 
+    private boolean stub;
+
     @Nullable
     @DataClass.ParcelWith(ForInternedString.class)
     protected String nativeLibraryDir;
@@ -98,6 +96,8 @@ public final class PackageImpl extends ParsingPackageImpl implements ParsedPacka
     @Nullable
     @DataClass.ParcelWith(ForInternedString.class)
     protected String nativeLibraryRootDir;
+
+    private boolean nativeLibraryRootRequiresIsa;
 
     @Nullable
     @DataClass.ParcelWith(ForInternedString.class)
@@ -116,102 +116,42 @@ public final class PackageImpl extends ParsingPackageImpl implements ParsedPacka
     @DataClass.ParcelWith(ForInternedString.class)
     protected String seInfoUser;
 
+    private boolean coreApp;
+
+    private boolean system;
+    private boolean factoryTest;
+
+    private boolean systemExt;
+    private boolean privileged;
+    private boolean oem;
+    private boolean vendor;
+    private boolean product;
+    private boolean odm;
+
+    private boolean signedWithPlatformKey;
+
     /**
      * This is an appId, the uid if the userId is == USER_SYSTEM
      */
     private int uid = -1;
 
-    // This is kept around as a boolean to avoid flag calculation
-    // during ApplicationInfo generation.
-    private boolean nativeLibraryRootRequiresIsa;
-
-    private int mBooleans;
-
-    /**
-     * @see ParsingPackageImpl.Booleans
-     */
-    private static class Booleans {
-        @IntDef({
-                CORE_APP,
-                SYSTEM,
-                FACTORY_TEST,
-                SYSTEM_EXT,
-                PRIVILEGED,
-                OEM,
-                VENDOR,
-                PRODUCT,
-                ODM,
-                SIGNED_WITH_PLATFORM_KEY,
-                NATIVE_LIBRARY_ROOT_REQUIRES_ISA,
-                STUB,
-        })
-        public @interface Flags {}
-
-        private static final int CORE_APP = 1;
-        private static final int SYSTEM = 1 << 1;
-        private static final int FACTORY_TEST = 1 << 2;
-        private static final int SYSTEM_EXT = 1 << 3;
-        private static final int PRIVILEGED = 1 << 4;
-        private static final int OEM = 1 << 5;
-        private static final int VENDOR = 1 << 6;
-        private static final int PRODUCT = 1 << 7;
-        private static final int ODM = 1 << 8;
-        private static final int SIGNED_WITH_PLATFORM_KEY = 1 << 9;
-        private static final int NATIVE_LIBRARY_ROOT_REQUIRES_ISA = 1 << 10;
-        private static final int STUB = 1 << 11;
-    }
-
-    private ParsedPackage setBoolean(@Booleans.Flags int flag, boolean value) {
-        if (value) {
-            mBooleans |= flag;
-        } else {
-            mBooleans &= ~flag;
-        }
-        return this;
-    }
-
-    private boolean getBoolean(@Booleans.Flags int flag) {
-        return (mBooleans & flag) != 0;
-    }
-
-    // Derived fields
-    private int mBaseAppInfoFlags;
-    private int mBaseAppInfoPrivateFlags;
-    private int mBaseAppInfoPrivateFlagsExt;
-    private String mBaseAppDataCredentialProtectedDirForSystemUser;
-    private String mBaseAppDataDeviceProtectedDirForSystemUser;
-
     @VisibleForTesting
-    public PackageImpl(@NonNull String packageName, @NonNull String baseApkPath,
-            @NonNull String path, @Nullable TypedArray manifestArray, boolean isCoreApp) {
-        super(packageName, baseApkPath, path, manifestArray);
+    public PackageImpl(@NonNull String packageName, @NonNull String baseCodePath,
+            @NonNull String codePath, @Nullable TypedArray manifestArray, boolean isCoreApp) {
+        super(packageName, baseCodePath, codePath, manifestArray);
         this.manifestPackageName = this.packageName;
-        setBoolean(Booleans.CORE_APP, isCoreApp);
+        this.coreApp = isCoreApp;
     }
 
     @Override
     public ParsedPackage hideAsParsed() {
-        super.hideAsParsed();
         return this;
     }
 
     @Override
     public AndroidPackage hideAsFinal() {
         // TODO(b/135203078): Lock as immutable
-        assignDerivedFields();
         return this;
-    }
-
-    private void assignDerivedFields() {
-        mBaseAppInfoFlags = PackageInfoUtils.appInfoFlags(this, null);
-        mBaseAppInfoPrivateFlags = PackageInfoUtils.appInfoPrivateFlags(this, null);
-        mBaseAppInfoPrivateFlagsExt = PackageInfoUtils.appInfoPrivateFlagsExt(this, null);
-        String baseAppDataDir = Environment.getDataDirectoryPath(getVolumeUuid()) + File.separator;
-        String systemUserSuffix = File.separator + UserHandle.USER_SYSTEM + File.separator;
-        mBaseAppDataCredentialProtectedDirForSystemUser = TextUtils.safeIntern(
-                baseAppDataDir + Environment.DIR_USER_CE + systemUserSuffix);
-        mBaseAppDataDeviceProtectedDirForSystemUser = TextUtils.safeIntern(
-                baseAppDataDir + Environment.DIR_USER_DE + systemUserSuffix);
     }
 
     @Override
@@ -307,7 +247,7 @@ public final class PackageImpl extends ParsingPackageImpl implements ParsedPacka
 
     @Override
     public PackageImpl setCodePath(@NonNull String value) {
-        this.mPath = value;
+        this.codePath = value;
         return this;
     }
 
@@ -382,7 +322,7 @@ public final class PackageImpl extends ParsingPackageImpl implements ParsedPacka
 
     @Override
     public PackageImpl setBaseCodePath(@NonNull String baseCodePath) {
-        this.mBaseApkPath = TextUtils.safeIntern(baseCodePath);
+        this.baseCodePath = TextUtils.safeIntern(baseCodePath);
         return this;
     }
 
@@ -490,14 +430,15 @@ public final class PackageImpl extends ParsingPackageImpl implements ParsedPacka
     @Deprecated
     @Override
     public String toAppInfoToString() {
-        return "PackageImpl{"
+        return "ApplicationInfo{"
                 + Integer.toHexString(System.identityHashCode(this))
                 + " " + getPackageName() + "}";
     }
 
     @Override
     public ParsedPackage setCoreApp(boolean coreApp) {
-        return setBoolean(Booleans.CORE_APP, coreApp);
+        this.coreApp = coreApp;
+        return this;
     }
 
     @Override
@@ -515,9 +456,8 @@ public final class PackageImpl extends ParsingPackageImpl implements ParsedPacka
     @Override
     public ApplicationInfo toAppInfoWithoutState() {
         ApplicationInfo appInfo = super.toAppInfoWithoutStateWithoutFlags();
-        appInfo.flags = mBaseAppInfoFlags;
-        appInfo.privateFlags = mBaseAppInfoPrivateFlags;
-        appInfo.privateFlagsExt = mBaseAppInfoPrivateFlagsExt;
+        appInfo.flags = PackageInfoUtils.appInfoFlags(this, null);
+        appInfo.privateFlags = PackageInfoUtils.appInfoPrivateFlags(this, null);
         appInfo.nativeLibraryDir = nativeLibraryDir;
         appInfo.nativeLibraryRootDir = nativeLibraryRootDir;
         appInfo.nativeLibraryRootRequiresIsa = nativeLibraryRootRequiresIsa;
@@ -539,6 +479,7 @@ public final class PackageImpl extends ParsingPackageImpl implements ParsedPacka
     public void writeToParcel(Parcel dest, int flags) {
         super.writeToParcel(dest, flags);
         sForInternedString.parcel(this.manifestPackageName, dest, flags);
+        dest.writeBoolean(this.stub);
         dest.writeString(this.nativeLibraryDir);
         dest.writeString(this.nativeLibraryRootDir);
         dest.writeBoolean(this.nativeLibraryRootRequiresIsa);
@@ -548,12 +489,22 @@ public final class PackageImpl extends ParsingPackageImpl implements ParsedPacka
         dest.writeString(this.seInfo);
         dest.writeString(this.seInfoUser);
         dest.writeInt(this.uid);
-        dest.writeInt(this.mBooleans);
+        dest.writeBoolean(this.coreApp);
+        dest.writeBoolean(this.system);
+        dest.writeBoolean(this.factoryTest);
+        dest.writeBoolean(this.systemExt);
+        dest.writeBoolean(this.privileged);
+        dest.writeBoolean(this.oem);
+        dest.writeBoolean(this.vendor);
+        dest.writeBoolean(this.product);
+        dest.writeBoolean(this.odm);
+        dest.writeBoolean(this.signedWithPlatformKey);
     }
 
     public PackageImpl(Parcel in) {
         super(in);
         this.manifestPackageName = sForInternedString.unparcel(in);
+        this.stub = in.readBoolean();
         this.nativeLibraryDir = in.readString();
         this.nativeLibraryRootDir = in.readString();
         this.nativeLibraryRootRequiresIsa = in.readBoolean();
@@ -563,9 +514,16 @@ public final class PackageImpl extends ParsingPackageImpl implements ParsedPacka
         this.seInfo = in.readString();
         this.seInfoUser = in.readString();
         this.uid = in.readInt();
-        this.mBooleans = in.readInt();
-
-        assignDerivedFields();
+        this.coreApp = in.readBoolean();
+        this.system = in.readBoolean();
+        this.factoryTest = in.readBoolean();
+        this.systemExt = in.readBoolean();
+        this.privileged = in.readBoolean();
+        this.oem = in.readBoolean();
+        this.vendor = in.readBoolean();
+        this.product = in.readBoolean();
+        this.odm = in.readBoolean();
+        this.signedWithPlatformKey = in.readBoolean();
     }
 
     public static final Creator<PackageImpl> CREATOR = new Creator<PackageImpl>() {
@@ -586,8 +544,9 @@ public final class PackageImpl extends ParsingPackageImpl implements ParsedPacka
         return manifestPackageName;
     }
 
+    @DataClass.Generated.Member
     public boolean isStub() {
-        return getBoolean(Booleans.STUB);
+        return stub;
     }
 
     @Nullable
@@ -639,52 +598,52 @@ public final class PackageImpl extends ParsingPackageImpl implements ParsedPacka
 
     @Override
     public boolean isCoreApp() {
-        return getBoolean(Booleans.CORE_APP);
+        return coreApp;
     }
 
     @Override
     public boolean isSystem() {
-        return getBoolean(Booleans.SYSTEM);
+        return system;
     }
 
     @Override
     public boolean isFactoryTest() {
-        return getBoolean(Booleans.FACTORY_TEST);
+        return factoryTest;
     }
 
     @Override
     public boolean isSystemExt() {
-        return getBoolean(Booleans.SYSTEM_EXT);
+        return systemExt;
     }
 
     @Override
     public boolean isPrivileged() {
-        return getBoolean(Booleans.PRIVILEGED);
+        return privileged;
     }
 
     @Override
     public boolean isOem() {
-        return getBoolean(Booleans.OEM);
+        return oem;
     }
 
     @Override
     public boolean isVendor() {
-        return getBoolean(Booleans.VENDOR);
+        return vendor;
     }
 
     @Override
     public boolean isProduct() {
-        return getBoolean(Booleans.PRODUCT);
+        return product;
     }
 
     @Override
     public boolean isOdm() {
-        return getBoolean(Booleans.ODM);
+        return odm;
     }
 
     @Override
     public boolean isSignedWithPlatformKey() {
-        return getBoolean(Booleans.SIGNED_WITH_PLATFORM_KEY);
+        return signedWithPlatformKey;
     }
 
     /**
@@ -697,7 +656,7 @@ public final class PackageImpl extends ParsingPackageImpl implements ParsedPacka
 
     @DataClass.Generated.Member
     public PackageImpl setStub(boolean value) {
-        setBoolean(Booleans.STUB, value);
+        stub = value;
         return this;
     }
 
@@ -709,72 +668,77 @@ public final class PackageImpl extends ParsingPackageImpl implements ParsedPacka
 
     @Override
     public PackageImpl setSystem(boolean value) {
-        setBoolean(Booleans.SYSTEM, value);
+        system = value;
         return this;
     }
 
     @Override
     public PackageImpl setFactoryTest(boolean value) {
-        setBoolean(Booleans.FACTORY_TEST, value);
+        factoryTest = value;
         return this;
     }
 
     @Override
     public PackageImpl setSystemExt(boolean value) {
-        setBoolean(Booleans.SYSTEM_EXT, value);
+        systemExt = value;
         return this;
     }
 
     @Override
     public PackageImpl setPrivileged(boolean value) {
-        setBoolean(Booleans.PRIVILEGED, value);
+        privileged = value;
         return this;
     }
 
     @Override
     public PackageImpl setOem(boolean value) {
-        setBoolean(Booleans.OEM, value);
+        oem = value;
         return this;
     }
 
     @Override
     public PackageImpl setVendor(boolean value) {
-        setBoolean(Booleans.VENDOR, value);
+        vendor = value;
         return this;
     }
 
     @Override
     public PackageImpl setProduct(boolean value) {
-        setBoolean(Booleans.PRODUCT, value);
+        product = value;
         return this;
     }
 
     @Override
     public PackageImpl setOdm(boolean value) {
-        setBoolean(Booleans.ODM, value);
+        odm = value;
         return this;
     }
 
     @Override
     public PackageImpl setSignedWithPlatformKey(boolean value) {
-        setBoolean(Booleans.SIGNED_WITH_PLATFORM_KEY, value);
+        signedWithPlatformKey = value;
         return this;
     }
 
+    /**
+     * This is an appId, the uid if the userId is == USER_SYSTEM
+     */
     @Override
     public PackageImpl setUid(int value) {
         uid = value;
         return this;
     }
 
-    // The following methods are explicitly not inside any interface. These are hidden under
-    // PackageImpl which is only accessible to the system server. This is to prevent/discourage
-    // usage of these fields outside of the utility classes.
-    public String getBaseAppDataCredentialProtectedDirForSystemUser() {
-        return mBaseAppDataCredentialProtectedDirForSystemUser;
-    }
+    @DataClass.Generated(
+            time = 1580517688900L,
+            codegenVersion = "1.0.14",
+            sourceFile = "frameworks/base/services/core/java/com/android/server/pm/parsing/pkg/PackageImpl.java",
+            inputSignatures = "private final @android.annotation.NonNull @com.android.internal.util.DataClass.ParcelWith(com.android.internal.util.Parcelling.BuiltIn.ForInternedString.class) java.lang.String manifestPackageName\nprivate  boolean stub\nprotected @android.annotation.Nullable @com.android.internal.util.DataClass.ParcelWith(com.android.internal.util.Parcelling.BuiltIn.ForInternedString.class) java.lang.String nativeLibraryDir\nprotected @android.annotation.Nullable @com.android.internal.util.DataClass.ParcelWith(com.android.internal.util.Parcelling.BuiltIn.ForInternedString.class) java.lang.String nativeLibraryRootDir\nprivate  boolean nativeLibraryRootRequiresIsa\nprotected @android.annotation.Nullable @com.android.internal.util.DataClass.ParcelWith(com.android.internal.util.Parcelling.BuiltIn.ForInternedString.class) java.lang.String primaryCpuAbi\nprotected @android.annotation.Nullable @com.android.internal.util.DataClass.ParcelWith(com.android.internal.util.Parcelling.BuiltIn.ForInternedString.class) java.lang.String secondaryCpuAbi\nprotected @android.annotation.Nullable @com.android.internal.util.DataClass.ParcelWith(com.android.internal.util.Parcelling.BuiltIn.ForInternedString.class) java.lang.String secondaryNativeLibraryDir\nprotected @android.annotation.Nullable @com.android.internal.util.DataClass.ParcelWith(com.android.internal.util.Parcelling.BuiltIn.ForInternedString.class) java.lang.String seInfo\nprotected @android.annotation.Nullable @com.android.internal.util.DataClass.ParcelWith(com.android.internal.util.Parcelling.BuiltIn.ForInternedString.class) java.lang.String seInfoUser\nprivate  boolean system\nprivate  boolean factoryTest\nprivate  boolean systemExt\nprivate  boolean privileged\nprivate  boolean oem\nprivate  boolean vendor\nprivate  boolean product\nprivate  boolean odm\nprivate  boolean signedWithPlatformKey\nprivate  int uid\npublic static final  com.android.server.pm.parsing.pkg.Creator<com.android.server.pm.parsing.pkg.PackageImpl> CREATOR\npublic static  com.android.server.pm.parsing.pkg.PackageImpl forParsing(java.lang.String,java.lang.String,java.lang.String,android.content.res.TypedArray,boolean)\npublic static  com.android.server.pm.parsing.pkg.AndroidPackage buildFakeForDeletion(java.lang.String,java.lang.String)\npublic static @com.android.internal.annotations.VisibleForTesting android.content.pm.parsing.ParsingPackage forTesting(java.lang.String)\npublic static @com.android.internal.annotations.VisibleForTesting android.content.pm.parsing.ParsingPackage forTesting(java.lang.String,java.lang.String)\npublic @java.lang.Override com.android.server.pm.parsing.pkg.ParsedPackage hideAsParsed()\npublic @java.lang.Override com.android.server.pm.parsing.pkg.AndroidPackage hideAsFinal()\npublic @java.lang.Override long getLongVersionCode()\npublic @java.lang.Override com.android.server.pm.parsing.pkg.PackageImpl removePermission(int)\npublic @java.lang.Override com.android.server.pm.parsing.pkg.PackageImpl addUsesOptionalLibrary(int,java.lang.String)\npublic @java.lang.Override com.android.server.pm.parsing.pkg.PackageImpl addUsesLibrary(int,java.lang.String)\npublic @java.lang.Override com.android.server.pm.parsing.pkg.PackageImpl removeUsesLibrary(java.lang.String)\npublic @java.lang.Override com.android.server.pm.parsing.pkg.PackageImpl removeUsesOptionalLibrary(java.lang.String)\npublic @java.lang.Override com.android.server.pm.parsing.pkg.PackageImpl setSigningDetails(android.content.pm.PackageParser.SigningDetails)\npublic @java.lang.Override com.android.server.pm.parsing.pkg.PackageImpl setRestrictUpdateHash(byte)\npublic @java.lang.Override com.android.server.pm.parsing.pkg.PackageImpl setRealPackage(java.lang.String)\npublic @java.lang.Override com.android.server.pm.parsing.pkg.PackageImpl setPersistent(boolean)\npublic @java.lang.Override com.android.server.pm.parsing.pkg.PackageImpl setDefaultToDeviceProtectedStorage(boolean)\npublic @java.lang.Override com.android.server.pm.parsing.pkg.PackageImpl setDirectBootAware(boolean)\npublic @java.lang.Override com.android.server.pm.parsing.pkg.PackageImpl clearProtectedBroadcasts()\npublic @java.lang.Override com.android.server.pm.parsing.pkg.PackageImpl clearOriginalPackages()\npublic @java.lang.Override com.android.server.pm.parsing.pkg.PackageImpl clearAdoptPermissions()\npublic @java.lang.Override com.android.server.pm.parsing.pkg.PackageImpl setCodePath(java.lang.String)\npublic @java.lang.Override com.android.server.pm.parsing.pkg.PackageImpl setPackageName(java.lang.String)\npublic @java.lang.Override com.android.server.pm.parsing.pkg.PackageImpl setAllComponentsDirectBootAware(boolean)\npublic @java.lang.Override com.android.server.pm.parsing.pkg.PackageImpl setBaseCodePath(java.lang.String)\npublic @java.lang.Override com.android.server.pm.parsing.pkg.PackageImpl setNativeLibraryDir(java.lang.String)\npublic @java.lang.Override com.android.server.pm.parsing.pkg.PackageImpl setNativeLibraryRootDir(java.lang.String)\npublic @java.lang.Override com.android.server.pm.parsing.pkg.PackageImpl setPrimaryCpuAbi(java.lang.String)\npublic @java.lang.Override com.android.server.pm.parsing.pkg.PackageImpl setSecondaryCpuAbi(java.lang.String)\npublic @java.lang.Override com.android.server.pm.parsing.pkg.PackageImpl setSecondaryNativeLibraryDir(java.lang.String)\npublic @java.lang.Override com.android.server.pm.parsing.pkg.PackageImpl setSeInfo(java.lang.String)\npublic @java.lang.Override com.android.server.pm.parsing.pkg.PackageImpl setSeInfoUser(java.lang.String)\npublic @java.lang.Override com.android.server.pm.parsing.pkg.PackageImpl setSplitCodePaths(java.lang.String[])\npublic @java.lang.Override com.android.server.pm.parsing.pkg.PackageImpl capPermissionPriorities()\npublic @java.lang.Override com.android.server.pm.parsing.pkg.PackageImpl markNotActivitiesAsNotExportedIfSingleUser()\npublic @java.lang.Override java.util.UUID getStorageUuid()\npublic @java.lang.Deprecated @java.lang.Override java.lang.String toAppInfoToString()\npublic @java.lang.Override com.android.server.pm.parsing.pkg.ParsedPackage setCoreApp(boolean)\npublic @java.lang.Override com.android.server.pm.parsing.pkg.ParsedPackage setVersionCode(int)\npublic @java.lang.Override com.android.server.pm.parsing.pkg.ParsedPackage setVersionCodeMajor(int)\npublic @java.lang.Override android.content.pm.ApplicationInfo toAppInfoWithoutState()\npublic @java.lang.Override int describeContents()\npublic @java.lang.Override void writeToParcel(android.os.Parcel,int)\nclass PackageImpl extends android.content.pm.parsing.ParsingPackageImpl implements [com.android.server.pm.parsing.pkg.ParsedPackage, com.android.server.pm.parsing.pkg.AndroidPackage]\n@com.android.internal.util.DataClass(genConstructor=false, genParcelable=false, genAidl=false, genBuilder=false, genHiddenConstructor=false, genCopyConstructor=false)")
+    @Deprecated
+    private void __metadata() {}
 
-    public String getBaseAppDataDeviceProtectedDirForSystemUser() {
-        return mBaseAppDataDeviceProtectedDirForSystemUser;
-    }
+
+    //@formatter:on
+    // End of generated code
+
 }

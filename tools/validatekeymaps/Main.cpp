@@ -16,8 +16,8 @@
 
 #include <input/KeyCharacterMap.h>
 #include <input/KeyLayoutMap.h>
-#include <input/PropertyMap.h>
 #include <input/VirtualKeyMap.h>
+#include <utils/PropertyMap.h>
 
 #include <stdarg.h>
 #include <stdio.h>
@@ -26,15 +26,15 @@
 
 using namespace android;
 
-static const char* PROG_NAME = "validatekeymaps";
+static const char* kProgName = "validatekeymaps";
 static bool gQuiet = false;
 
-enum class FileType {
-    UNKNOWN,
-    KEY_LAYOUT,
-    KEY_CHARACTER_MAP,
-    VIRTUAL_KEY_DEFINITION,
-    INPUT_DEVICE_CONFIGURATION,
+enum FileType {
+    FILETYPE_UNKNOWN,
+    FILETYPE_KEYLAYOUT,
+    FILETYPE_KEYCHARACTERMAP,
+    FILETYPE_VIRTUALKEYDEFINITION,
+    FILETYPE_INPUTDEVICECONFIGURATION,
 };
 
 static void log(const char* fmt, ...) {
@@ -57,32 +57,33 @@ static void error(const char* fmt,  ...) {
 static void usage() {
     error("Keymap Validation Tool\n\n");
     error("Usage:\n");
-    error(" %s [-q] [*.kl] [*.kcm] [*.idc] [virtualkeys.*] [...]\n"
-          "   Validates the specified key layouts, key character maps, \n"
-          "   input device configurations, or virtual key definitions.\n\n"
-          "   -q Quiet; do not write anything to standard out.\n",
-          PROG_NAME);
+    error(
+        " %s [-q] [*.kl] [*.kcm] [*.idc] [virtualkeys.*] [...]\n"
+        "   Validates the specified key layouts, key character maps, \n"
+        "   input device configurations, or virtual key definitions.\n\n"
+        "   -q Quiet; do not write anything to standard out.\n",
+        kProgName);
 }
 
 static FileType getFileType(const char* filename) {
     const char *extension = strrchr(filename, '.');
     if (extension) {
         if (strcmp(extension, ".kl") == 0) {
-            return FileType::KEY_LAYOUT;
+            return FILETYPE_KEYLAYOUT;
         }
         if (strcmp(extension, ".kcm") == 0) {
-            return FileType::KEY_CHARACTER_MAP;
+            return FILETYPE_KEYCHARACTERMAP;
         }
         if (strcmp(extension, ".idc") == 0) {
-            return FileType::INPUT_DEVICE_CONFIGURATION;
+            return FILETYPE_INPUTDEVICECONFIGURATION;
         }
     }
 
     if (strstr(filename, "virtualkeys.")) {
-        return FileType::VIRTUAL_KEY_DEFINITION;
+        return FILETYPE_VIRTUALKEYDEFINITION;
     }
 
-    return FileType::UNKNOWN;
+    return FILETYPE_UNKNOWN;
 }
 
 static bool validateFile(const char* filename) {
@@ -90,49 +91,50 @@ static bool validateFile(const char* filename) {
 
     FileType fileType = getFileType(filename);
     switch (fileType) {
-        case FileType::UNKNOWN:
-            error("Supported file types: *.kl, *.kcm, virtualkeys.*\n\n");
+    case FILETYPE_UNKNOWN:
+        error("Supported file types: *.kl, *.kcm, virtualkeys.*\n\n");
+        return false;
+
+    case FILETYPE_KEYLAYOUT: {
+        sp<KeyLayoutMap> map;
+        status_t status = KeyLayoutMap::load(filename, &map);
+        if (status) {
+            error("Error %d parsing key layout file.\n\n", status);
             return false;
-
-        case FileType::KEY_LAYOUT: {
-            base::Result<std::shared_ptr<KeyLayoutMap>> ret = KeyLayoutMap::load(filename);
-            if (!ret.ok()) {
-                error("Error %s parsing key layout file.\n\n", ret.error().message().c_str());
-                return false;
-            }
-            break;
         }
+        break;
+    }
 
-        case FileType::KEY_CHARACTER_MAP: {
-            base::Result<std::shared_ptr<KeyCharacterMap>> ret =
-                    KeyCharacterMap::load(filename, KeyCharacterMap::Format::ANY);
-            if (!ret.ok()) {
-                error("Error %s parsing key character map file.\n\n",
-                      ret.error().message().c_str());
-                return false;
-            }
-            break;
+    case FILETYPE_KEYCHARACTERMAP: {
+        sp<KeyCharacterMap> map;
+        status_t status = KeyCharacterMap::load(filename,
+                KeyCharacterMap::FORMAT_ANY, &map);
+        if (status) {
+            error("Error %d parsing key character map file.\n\n", status);
+            return false;
         }
+        break;
+    }
 
-        case FileType::INPUT_DEVICE_CONFIGURATION: {
-            android::base::Result<std::unique_ptr<PropertyMap>> propertyMap =
-                    PropertyMap::load(String8(filename));
-            if (!propertyMap.ok()) {
-                error("Error %d parsing input device configuration file.\n\n",
-                      propertyMap.error().code());
-                return false;
-            }
-            break;
+    case FILETYPE_INPUTDEVICECONFIGURATION: {
+        PropertyMap* map;
+        status_t status = PropertyMap::load(String8(filename), &map);
+        if (status) {
+            error("Error %d parsing input device configuration file.\n\n", status);
+            return false;
         }
+        delete map;
+        break;
+    }
 
-        case FileType::VIRTUAL_KEY_DEFINITION: {
-            std::unique_ptr<VirtualKeyMap> map = VirtualKeyMap::load(filename);
-            if (!map) {
-                error("Error while parsing virtual key definition file.\n\n");
-                return false;
-            }
-            break;
+    case FILETYPE_VIRTUALKEYDEFINITION: {
+        std::unique_ptr<VirtualKeyMap> map = VirtualKeyMap::load(filename);
+        if (!map) {
+            error("Error while parsing virtual key definition file.\n\n");
+            return false;
         }
+        break;
+    }
     }
 
     return true;

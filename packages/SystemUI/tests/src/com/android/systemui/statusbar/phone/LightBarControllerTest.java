@@ -34,7 +34,6 @@ import androidx.test.filters.SmallTest;
 
 import com.android.internal.view.AppearanceRegion;
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.navigationbar.NavigationModeController;
 import com.android.systemui.statusbar.policy.BatteryController;
 
 import org.junit.Before;

@@ -16,24 +16,16 @@
 
 package android.app;
 
-import android.Manifest;
 import android.annotation.IntDef;
-import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
-import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
-import android.annotation.TestApi;
-import android.compat.annotation.ChangeId;
-import android.compat.annotation.EnabledSince;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Handler;
-import android.os.HandlerExecutor;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.RemoteException;
@@ -42,14 +34,13 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.util.proto.ProtoOutputStream;
 
-import com.android.i18n.timezone.ZoneInfoDb;
+import libcore.timezone.ZoneInfoDb;
 
+import java.io.IOException;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.ref.WeakReference;
-import java.util.Objects;
 import java.util.WeakHashMap;
-import java.util.concurrent.Executor;
 
 /**
  * This class provides access to the system alarm services.  These allow you
@@ -139,38 +130,6 @@ public class AlarmManager {
     public static final String ACTION_NEXT_ALARM_CLOCK_CHANGED =
             "android.app.action.NEXT_ALARM_CLOCK_CHANGED";
 
-    /**
-     * Broadcast Action: An app is granted the
-     * {@link android.Manifest.permission#SCHEDULE_EXACT_ALARM} permission.
-     *
-     * <p>When the user revokes the {@link android.Manifest.permission#SCHEDULE_EXACT_ALARM}
-     * permission, all alarms scheduled with
-     * {@link #setExact}, {@link #setExactAndAllowWhileIdle} and
-     * {@link #setAlarmClock(AlarmClockInfo, PendingIntent)} will be deleted.
-     *
-     * <p>When the user grants the {@link android.Manifest.permission#SCHEDULE_EXACT_ALARM},
-     * this broadcast will be sent. Applications can reschedule all the necessary alarms when
-     * receiving it.
-     *
-     * <p>This broadcast will <em>not</em> be sent when the user revokes the permission.
-     *
-     * <p><em>Note:</em>
-     * Applications are still required to check {@link #canScheduleExactAlarms()}
-     * before using the above APIs after receiving this broadcast,
-     * because it's possible that the permission is already revoked again by the time
-     * applications receive this broadcast.
-     *
-     * <p>This broadcast will be sent to both runtime receivers and manifest receivers.
-     *
-     * <p>This broadcast is sent as a foreground broadcast.
-     * See {@link android.content.Intent#FLAG_RECEIVER_FOREGROUND}.
-     *
-     * <p>When an application receives this broadcast, it's allowed to start a foreground service.
-     */
-    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
-    public static final String ACTION_SCHEDULE_EXACT_ALARM_PERMISSION_STATE_CHANGED =
-            "android.app.action.SCHEDULE_EXACT_ALARM_PERMISSION_STATE_CHANGED";
-
     /** @hide */
     @UnsupportedAppUsage
     public static final long WINDOW_EXACT = 0;
@@ -225,49 +184,6 @@ public class AlarmManager {
     @UnsupportedAppUsage
     public static final int FLAG_IDLE_UNTIL = 1<<4;
 
-    /**
-     * Flag for alarms: Used to provide backwards compatibility for apps with targetSdkVersion less
-     * than {@link Build.VERSION_CODES#S}
-     * @hide
-     */
-    public static final int FLAG_ALLOW_WHILE_IDLE_COMPAT = 1 << 5;
-
-    /**
-     * Flag for alarms: Used to mark prioritized alarms. These alarms will get to execute while idle
-     * and can be sent separately from other alarms that may be already due at the time.
-     * These alarms can be set via
-     * {@link #setPrioritized(int, long, long, String, Executor, OnAlarmListener)}
-     * @hide
-     */
-    public static final int FLAG_PRIORITIZE = 1 << 6;
-
-    /**
-     * For apps targeting {@link Build.VERSION_CODES#S} or above, any APIs setting exact alarms,
-     * e.g. {@link #setExact(int, long, PendingIntent)},
-     * {@link #setAlarmClock(AlarmClockInfo, PendingIntent)} and others will require holding a new
-     * permission {@link Manifest.permission#SCHEDULE_EXACT_ALARM}
-     *
-     * @hide
-     */
-    @ChangeId
-    @EnabledSince(targetSdkVersion = Build.VERSION_CODES.S)
-    public static final long REQUIRE_EXACT_ALARM_PERMISSION = 171306433L;
-
-    /**
-     * For apps targeting {@link Build.VERSION_CODES#S} or above, all inexact alarms will require
-     * to have a minimum window size, expected to be on the order of a few minutes.
-     *
-     * Practically, any alarms requiring smaller windows are the same as exact alarms and should use
-     * the corresponding APIs provided, like {@link #setExact(int, long, PendingIntent)}, et al.
-     *
-     * Inexact alarm with shorter windows specified will have their windows elongated by the system.
-     *
-     * @hide
-     */
-    @ChangeId
-    @EnabledSince(targetSdkVersion = Build.VERSION_CODES.S)
-    public static final long ENFORCE_MINIMUM_WINDOW_ON_INEXACT_ALARMS = 185199076L;
-
     @UnsupportedAppUsage
     private final IAlarmManager mService;
     private final Context mContext;
@@ -290,15 +206,15 @@ public class AlarmManager {
 
     final class ListenerWrapper extends IAlarmListener.Stub implements Runnable {
         final OnAlarmListener mListener;
-        Executor mExecutor;
+        Handler mHandler;
         IAlarmCompleteListener mCompletion;
 
         public ListenerWrapper(OnAlarmListener listener) {
             mListener = listener;
         }
 
-        void setExecutor(Executor e) {
-            mExecutor = e;
+        public void setHandler(Handler h) {
+           mHandler = h;
         }
 
         public void cancel() {
@@ -313,7 +229,7 @@ public class AlarmManager {
         public void doAlarm(IAlarmCompleteListener alarmManager) {
             mCompletion = alarmManager;
 
-            mExecutor.execute(this);
+            mHandler.post(this);
         }
 
         @Override
@@ -431,7 +347,7 @@ public class AlarmManager {
      */
     public void set(@AlarmType int type, long triggerAtMillis, PendingIntent operation) {
         setImpl(type, triggerAtMillis, legacyExactLength(), 0, 0, operation, null, null,
-                (Handler) null, null, null);
+                null, null, null);
     }
 
     /**
@@ -494,9 +410,6 @@ public class AlarmManager {
      * exact alarms, rescheduling each time as described above. Legacy applications
      * whose {@code targetSdkVersion} is earlier than API 19 will continue to have all
      * of their alarms, including repeating alarms, treated as exact.
-     * <p>Apps targeting {@link Build.VERSION_CODES#S} will need to set the flag
-     * {@link PendingIntent#FLAG_MUTABLE} on the {@link PendingIntent} being used to set this alarm,
-     * if they want the alarm count to be supplied with the key {@link Intent#EXTRA_ALARM_COUNT}.
      *
      * @param type type of alarm.
      * @param triggerAtMillis time in milliseconds that the alarm should first
@@ -519,12 +432,11 @@ public class AlarmManager {
      * @see #ELAPSED_REALTIME_WAKEUP
      * @see #RTC
      * @see #RTC_WAKEUP
-     * @see Intent#EXTRA_ALARM_COUNT
      */
     public void setRepeating(@AlarmType int type, long triggerAtMillis,
             long intervalMillis, PendingIntent operation) {
         setImpl(type, triggerAtMillis, legacyExactLength(), intervalMillis, 0, operation,
-                null, null, (Handler) null, null, null);
+                null, null, null, null, null);
     }
 
     /**
@@ -534,12 +446,6 @@ public class AlarmManager {
      * adjusted by the OS. This method allows an application to take advantage of the
      * battery optimizations that arise from delivery batching even when it has
      * modest timeliness requirements for its alarms.
-     *
-     * <p>
-     * Note: Starting with API {@link Build.VERSION_CODES#S}, apps should not pass in a window of
-     * less than 10 minutes. The system will try its best to accommodate smaller windows if the
-     * alarm is supposed to fire in the near future, but there are no guarantees and the app should
-     * expect any window smaller than 10 minutes to get elongated to 10 minutes.
      *
      * <p>
      * This method can also be used to achieve strict ordering guarantees among
@@ -580,7 +486,7 @@ public class AlarmManager {
     public void setWindow(@AlarmType int type, long windowStartMillis, long windowLengthMillis,
             PendingIntent operation) {
         setImpl(type, windowStartMillis, windowLengthMillis, 0, 0, operation,
-                null, null, (Handler) null, null, null);
+                null, null, null, null, null);
     }
 
     /**
@@ -591,65 +497,11 @@ public class AlarmManager {
      * The OnAlarmListener {@link OnAlarmListener#onAlarm() onAlarm()} method will be
      * invoked via the specified target Handler, or on the application's main looper
      * if {@code null} is passed as the {@code targetHandler} parameter.
-     *
-     * <p>
-     * Note: Starting with API {@link Build.VERSION_CODES#S}, apps should not pass in a window of
-     * less than 10 minutes. The system will try its best to accommodate smaller windows if the
-     * alarm is supposed to fire in the near future, but there are no guarantees and the app should
-     * expect any window smaller than 10 minutes to get elongated to 10 minutes.
-     *
-     * @see #setWindow(int, long, long, PendingIntent)
      */
     public void setWindow(@AlarmType int type, long windowStartMillis, long windowLengthMillis,
             String tag, OnAlarmListener listener, Handler targetHandler) {
         setImpl(type, windowStartMillis, windowLengthMillis, 0, 0, null, listener, tag,
                 targetHandler, null, null);
-    }
-
-    /**
-     * Schedule an alarm that is prioritized by the system while the device is in power saving modes
-     * such as battery saver and device idle (doze).
-     *
-     * <p>
-     * Apps that use this are not guaranteed to get all alarms as requested during power saving
-     * modes, i.e. the system may still impose restrictions on how frequently these alarms will go
-     * off for a particular application, like requiring a certain minimum duration be elapsed
-     * between consecutive alarms. This duration will be normally be in the order of a few minutes.
-     *
-     * <p>
-     * When the system wakes up to deliver these alarms, it may not deliver any of the other pending
-     * alarms set earlier by the calling app, even the special ones set via
-     * {@link #setAndAllowWhileIdle(int, long, PendingIntent)} or
-     * {@link #setExactAndAllowWhileIdle(int, long, PendingIntent)}. So the caller should not
-     * expect these to arrive in any relative order to its other alarms.
-     *
-     * @param type type of alarm
-     * @param windowStartMillis The earliest time, in milliseconds, that the alarm should
-     *        be delivered, expressed in the appropriate clock's units (depending on the alarm
-     *        type).
-     * @param windowLengthMillis The length of the requested delivery window,
-     *        in milliseconds.  The alarm will be delivered no later than this many
-     *        milliseconds after {@code windowStartMillis}.  Note that this parameter
-     *        is a <i>duration,</i> not the timestamp of the end of the window.
-     * @param tag Optional. A string describing the alarm, used for logging and battery-use
-     *         attribution.
-     * @param listener {@link OnAlarmListener} instance whose
-     *         {@link OnAlarmListener#onAlarm() onAlarm()} method will be
-     *         called when the alarm time is reached.  A given OnAlarmListener instance can
-     *         only be the target of a single pending alarm, just as a given PendingIntent
-     *         can only be used with one alarm at a time.
-     * @param executor {@link Executor} on which to execute the listener's onAlarm()
-     *         callback.
-     * @hide
-     */
-    @SystemApi
-    @RequiresPermission(Manifest.permission.SCHEDULE_PRIORITIZED_ALARM)
-    public void setPrioritized(@AlarmType int type, long windowStartMillis, long windowLengthMillis,
-            @Nullable String tag, @NonNull Executor executor, @NonNull OnAlarmListener listener) {
-        Objects.requireNonNull(executor);
-        Objects.requireNonNull(listener);
-        setImpl(type, windowStartMillis, windowLengthMillis, 0, FLAG_PRIORITIZE, null, listener,
-                tag, executor, null, null);
     }
 
     /**
@@ -665,20 +517,6 @@ public class AlarmManager {
      * delivery (such as an alarm clock ringing at the requested time) should be
      * scheduled as exact.  Applications are strongly discouraged from using exact
      * alarms unnecessarily as they reduce the OS's ability to minimize battery use.
-     *
-     * <p class="note"><strong>Note:</strong>
-     * Starting with {@link Build.VERSION_CODES#S}, apps targeting SDK level 31 or higher
-     * need to request the
-     * {@link Manifest.permission#SCHEDULE_EXACT_ALARM SCHEDULE_EXACT_ALARM} permission to use this
-     * API, unless the app is exempt from battery restrictions.
-     * The user and the system can revoke this permission via the special app access screen in
-     * Settings.
-     *
-     * <p class="note"><strong>Note:</strong>
-     * Exact alarms should only be used for user-facing features.
-     * For more details, see <a
-     * href="{@docRoot}about/versions/12/behavior-changes-12#exact-alarm-permission">
-     * Exact alarm permission</a>.
      *
      * @param type type of alarm.
      * @param triggerAtMillis time in milliseconds that the alarm should go
@@ -698,11 +536,9 @@ public class AlarmManager {
      * @see #ELAPSED_REALTIME_WAKEUP
      * @see #RTC
      * @see #RTC_WAKEUP
-     * @see Manifest.permission#SCHEDULE_EXACT_ALARM SCHEDULE_EXACT_ALARM
      */
-    @RequiresPermission(value = Manifest.permission.SCHEDULE_EXACT_ALARM, conditional = true)
     public void setExact(@AlarmType int type, long triggerAtMillis, PendingIntent operation) {
-        setImpl(type, triggerAtMillis, WINDOW_EXACT, 0, 0, operation, null, null, (Handler) null,
+        setImpl(type, triggerAtMillis, WINDOW_EXACT, 0, 0, operation, null, null, null,
                 null, null);
     }
 
@@ -714,24 +550,7 @@ public class AlarmManager {
      * The OnAlarmListener's {@link OnAlarmListener#onAlarm() onAlarm()} method will be
      * invoked via the specified target Handler, or on the application's main looper
      * if {@code null} is passed as the {@code targetHandler} parameter.
-     *
-     * <p class="note"><strong>Note:</strong>
-     * Starting with {@link Build.VERSION_CODES#S}, apps targeting SDK level 31 or higher
-     * need to request the
-     * {@link Manifest.permission#SCHEDULE_EXACT_ALARM SCHEDULE_EXACT_ALARM} permission to use this
-     * API, unless the app is exempt from battery restrictions.
-     * The user and the system can revoke this permission via the special app access screen in
-     * Settings.
-     *
-     * <p class="note"><strong>Note:</strong>
-     * Exact alarms should only be used for user-facing features.
-     * For more details, see <a
-     * href="{@docRoot}about/versions/12/behavior-changes-12#exact-alarm-permission">
-     * Exact alarm permission</a>.
-     *
-     * @see Manifest.permission#SCHEDULE_EXACT_ALARM SCHEDULE_EXACT_ALARM
      */
-    @RequiresPermission(value = Manifest.permission.SCHEDULE_EXACT_ALARM, conditional = true)
     public void setExact(@AlarmType int type, long triggerAtMillis, String tag,
             OnAlarmListener listener, Handler targetHandler) {
         setImpl(type, triggerAtMillis, WINDOW_EXACT, 0, 0, null, listener, tag,
@@ -770,23 +589,6 @@ public class AlarmManager {
      * This method is like {@link #setExact(int, long, PendingIntent)}, but implies
      * {@link #RTC_WAKEUP}.
      *
-     * <p class="note"><strong>Note:</strong>
-     * Starting with {@link Build.VERSION_CODES#S}, apps targeting SDK level 31 or higher
-     * need to request the
-     * {@link Manifest.permission#SCHEDULE_EXACT_ALARM SCHEDULE_EXACT_ALARM} permission to use this
-     * API.
-     * The user and the system can revoke this permission via the special app access screen in
-     * Settings.
-     *
-     * <p class="note"><strong>Note:</strong>
-     * Exact alarms should only be used for user-facing features.
-     * For more details, see <a
-     * href="{@docRoot}about/versions/12/behavior-changes-12#exact-alarm-permission">
-     * Exact alarm permission</a>.
-     *
-     * <p>Alarms scheduled via this API
-     * will be allowed to start a foreground service even if the app is in the background.
-     *
      * @param info
      * @param operation Action to perform when the alarm goes off;
      *        typically comes from {@link PendingIntent#getBroadcast
@@ -801,12 +603,10 @@ public class AlarmManager {
      * @see android.content.Context#sendBroadcast
      * @see android.content.Context#registerReceiver
      * @see android.content.Intent#filterEquals
-     * @see Manifest.permission#SCHEDULE_EXACT_ALARM SCHEDULE_EXACT_ALARM
      */
-    @RequiresPermission(Manifest.permission.SCHEDULE_EXACT_ALARM)
     public void setAlarmClock(AlarmClockInfo info, PendingIntent operation) {
         setImpl(RTC_WAKEUP, info.getTriggerTime(), WINDOW_EXACT, 0, 0, operation,
-                null, null, (Handler) null, null, info);
+                null, null, null, null, info);
     }
 
     /** @hide */
@@ -815,7 +615,7 @@ public class AlarmManager {
     public void set(@AlarmType int type, long triggerAtMillis, long windowMillis,
             long intervalMillis, PendingIntent operation, WorkSource workSource) {
         setImpl(type, triggerAtMillis, windowMillis, intervalMillis, 0, operation, null, null,
-                (Handler) null, workSource, null);
+                null, workSource, null);
     }
 
     /**
@@ -855,62 +655,9 @@ public class AlarmManager {
                 targetHandler, workSource, null);
     }
 
-    /**
-     * Exact version of {@link #set(int, long, long, long, OnAlarmListener, Handler, WorkSource)}.
-     * This equivalent to calling the aforementioned API with {@code windowMillis} and
-     * {@code intervalMillis} set to 0.
-     * One subtle difference is that this API requires {@code workSource} to be non-null. If you
-     * don't want to attribute this alarm to another app for battery consumption, you should use
-     * {@link #setExact(int, long, String, OnAlarmListener, Handler)} instead.
-     *
-     * <p>
-     * Note that using this API requires you to hold
-     * {@link Manifest.permission#SCHEDULE_EXACT_ALARM}, unless you are on the system's power
-     * allowlist. This can be set, for example, by marking the app as {@code <allow-in-power-save>}
-     * within the system config.
-     *
-     * @param type            type of alarm
-     * @param triggerAtMillis The exact time in milliseconds, that the alarm should be delivered,
-     *                        expressed in the appropriate clock's units (depending on the alarm
-     *                        type).
-     * @param listener        {@link OnAlarmListener} instance whose
-     *                        {@link OnAlarmListener#onAlarm() onAlarm()} method will be called when
-     *                        the alarm time is reached.
-     * @param executor        The {@link Executor} on which to execute the listener's onAlarm()
-     *                        callback.
-     * @param tag             Optional. A string tag used to identify this alarm in logs and
-     *                        battery-attribution.
-     * @param workSource      A {@link WorkSource} object to attribute this alarm to the app that
-     *                        requested this work.
-     * @hide
-     */
-    @SystemApi
-    @RequiresPermission(allOf = {
-            Manifest.permission.UPDATE_DEVICE_STATS,
-            Manifest.permission.SCHEDULE_EXACT_ALARM}, conditional = true)
-    public void setExact(@AlarmType int type, long triggerAtMillis, @Nullable String tag,
-            @NonNull Executor executor, @NonNull WorkSource workSource,
-            @NonNull OnAlarmListener listener) {
-        Objects.requireNonNull(executor);
-        Objects.requireNonNull(workSource);
-        Objects.requireNonNull(listener);
-        setImpl(type, triggerAtMillis, WINDOW_EXACT, 0, 0, null, listener, tag, executor,
-                workSource, null);
-    }
-
-
     private void setImpl(@AlarmType int type, long triggerAtMillis, long windowMillis,
             long intervalMillis, int flags, PendingIntent operation, final OnAlarmListener listener,
             String listenerTag, Handler targetHandler, WorkSource workSource,
-            AlarmClockInfo alarmClock) {
-        final Handler handlerToUse = (targetHandler != null) ? targetHandler : mMainThreadHandler;
-        setImpl(type, triggerAtMillis, windowMillis, intervalMillis, flags, operation, listener,
-                listenerTag, new HandlerExecutor(handlerToUse), workSource, alarmClock);
-    }
-
-    private void setImpl(@AlarmType int type, long triggerAtMillis, long windowMillis,
-            long intervalMillis, int flags, PendingIntent operation, final OnAlarmListener listener,
-            String listenerTag, Executor targetExecutor, WorkSource workSource,
             AlarmClockInfo alarmClock) {
         if (triggerAtMillis < 0) {
             /* NOTYET
@@ -940,7 +687,9 @@ public class AlarmManager {
                     sWrappers.put(listener, new WeakReference<>(recipientWrapper));
                 }
             }
-            recipientWrapper.setExecutor(targetExecutor);
+
+            final Handler handler = (targetHandler != null) ? targetHandler : mMainThreadHandler;
+            recipientWrapper.setHandler(handler);
         }
 
         try {
@@ -1008,9 +757,6 @@ public class AlarmManager {
      * been available since API 3, your application can safely call it and be
      * assured that it will get similar behavior on both current and older versions
      * of Android.
-     * <p>Apps targeting {@link Build.VERSION_CODES#S} will need to set the flag
-     * {@link PendingIntent#FLAG_MUTABLE} on the {@link PendingIntent} being used to set this alarm,
-     * if they want the alarm count to be supplied with the key {@link Intent#EXTRA_ALARM_COUNT}.
      *
      * @param type type of alarm.
      * @param triggerAtMillis time in milliseconds that the alarm should first
@@ -1045,12 +791,11 @@ public class AlarmManager {
      * @see #INTERVAL_HOUR
      * @see #INTERVAL_HALF_DAY
      * @see #INTERVAL_DAY
-     * @see Intent#EXTRA_ALARM_COUNT
      */
     public void setInexactRepeating(@AlarmType int type, long triggerAtMillis,
             long intervalMillis, PendingIntent operation) {
         setImpl(type, triggerAtMillis, WINDOW_HEURISTIC, intervalMillis, 0, operation, null,
-                null, (Handler) null, null, null);
+                null, null, null, null);
     }
 
     /**
@@ -1059,8 +804,8 @@ public class AlarmManager {
      * <b>only</b> be used for situations where it is actually required that the alarm go off while
      * in idle -- a reasonable example would be for a calendar notification that should make a
      * sound so the user is aware of it.  When the alarm is dispatched, the app will also be
-     * added to the system's temporary power exemption list for approximately 10 seconds to allow
-     * that application to acquire further wake locks in which to complete its work.</p>
+     * added to the system's temporary whitelist for approximately 10 seconds to allow that
+     * application to acquire further wake locks in which to complete its work.</p>
      *
      * <p>These alarms can significantly impact the power use
      * of the device when idle (and thus cause significant battery blame to the app scheduling
@@ -1100,7 +845,7 @@ public class AlarmManager {
     public void setAndAllowWhileIdle(@AlarmType int type, long triggerAtMillis,
             PendingIntent operation) {
         setImpl(type, triggerAtMillis, WINDOW_HEURISTIC, 0, FLAG_ALLOW_WHILE_IDLE,
-                operation, null, null, (Handler) null, null, null);
+                operation, null, null, null, null, null);
     }
 
     /**
@@ -1111,8 +856,8 @@ public class AlarmManager {
      * be used for situations where it is actually required that the alarm go off while in
      * idle -- a reasonable example would be for a calendar notification that should make a
      * sound so the user is aware of it.  When the alarm is dispatched, the app will also be
-     * added to the system's temporary power exemption list for approximately 10 seconds to allow
-     * that application to acquire further wake locks in which to complete its work.</p>
+     * added to the system's temporary whitelist for approximately 10 seconds to allow that
+     * application to acquire further wake locks in which to complete its work.</p>
      *
      * <p>These alarms can significantly impact the power use
      * of the device when idle (and thus cause significant battery blame to the app scheduling
@@ -1132,23 +877,6 @@ public class AlarmManager {
      * device is idle it may take even more liberties with scheduling in order to optimize
      * for battery life.</p>
      *
-     * <p class="note"><strong>Note:</strong>
-     * Starting with {@link Build.VERSION_CODES#S}, apps targeting SDK level 31 or higher
-     * need to request the
-     * {@link Manifest.permission#SCHEDULE_EXACT_ALARM SCHEDULE_EXACT_ALARM} permission to use this
-     * API, unless the app is exempt from battery restrictions.
-     * The user and the system can revoke this permission via the special app access screen in
-     * Settings.
-     *
-     * <p class="note"><strong>Note:</strong>
-     * Exact alarms should only be used for user-facing features.
-     * For more details, see <a
-     * href="{@docRoot}about/versions/12/behavior-changes-12#exact-alarm-permission">
-     * Exact alarm permission</a>.
-     *
-     * <p>Alarms scheduled via this API
-     * will be allowed to start a foreground service even if the app is in the background.
-     *
      * @param type type of alarm.
      * @param triggerAtMillis time in milliseconds that the alarm should go
      *        off, using the appropriate clock (depending on the alarm type).
@@ -1167,13 +895,11 @@ public class AlarmManager {
      * @see #ELAPSED_REALTIME_WAKEUP
      * @see #RTC
      * @see #RTC_WAKEUP
-     * @see Manifest.permission#SCHEDULE_EXACT_ALARM SCHEDULE_EXACT_ALARM
      */
-    @RequiresPermission(value = Manifest.permission.SCHEDULE_EXACT_ALARM, conditional = true)
     public void setExactAndAllowWhileIdle(@AlarmType int type, long triggerAtMillis,
             PendingIntent operation) {
         setImpl(type, triggerAtMillis, WINDOW_EXACT, 0, FLAG_ALLOW_WHILE_IDLE, operation,
-                null, null, (Handler) null, null, null);
+                null, null, null, null, null);
     }
 
     /**
@@ -1270,7 +996,12 @@ public class AlarmManager {
 
         // Reject this timezone if it isn't an Olson zone we recognize.
         if (mTargetSdkVersion >= Build.VERSION_CODES.M) {
-            boolean hasTimeZone = ZoneInfoDb.getInstance().hasTimeZone(timeZone);
+            boolean hasTimeZone = false;
+            try {
+                hasTimeZone = ZoneInfoDb.getInstance().hasTimeZone(timeZone);
+            } catch (IOException ignored) {
+            }
+
             if (!hasTimeZone) {
                 throw new IllegalArgumentException("Timezone: " + timeZone + " is not an Olson ID");
             }
@@ -1289,52 +1020,6 @@ public class AlarmManager {
             return mService.getNextWakeFromIdleTime();
         } catch (RemoteException ex) {
             throw ex.rethrowFromSystemServer();
-        }
-    }
-
-    /**
-     * Called to check if the caller can schedule exact alarms.
-     * Your app schedules exact alarms when it calls any of the {@code setExact...} or
-     * {@link #setAlarmClock(AlarmClockInfo, PendingIntent) setAlarmClock} API methods.
-     * <p>
-     * Apps targeting {@link Build.VERSION_CODES#S} or higher can schedule exact alarms only if they
-     * have the {@link Manifest.permission#SCHEDULE_EXACT_ALARM} permission or they are on the
-     * device's power-save exemption list.
-     * These apps can also
-     * start {@link android.provider.Settings#ACTION_REQUEST_SCHEDULE_EXACT_ALARM} to
-     * request this permission from the user.
-     * <p>
-     * Apps targeting lower sdk versions, can always schedule exact alarms.
-     *
-     * @return {@code true} if the caller can schedule exact alarms, {@code false} otherwise.
-     * @see android.provider.Settings#ACTION_REQUEST_SCHEDULE_EXACT_ALARM
-     * @see #setExact(int, long, PendingIntent)
-     * @see #setExactAndAllowWhileIdle(int, long, PendingIntent)
-     * @see #setAlarmClock(AlarmClockInfo, PendingIntent)
-     * @see android.os.PowerManager#isIgnoringBatteryOptimizations(String)
-     */
-    public boolean canScheduleExactAlarms() {
-        try {
-            return mService.canScheduleExactAlarms(mContext.getOpPackageName());
-        } catch (RemoteException re) {
-            throw re.rethrowFromSystemServer();
-        }
-    }
-
-    /**
-     * Called to check if the given package in the given user has the permission
-     * {@link Manifest.permission#SCHEDULE_EXACT_ALARM}.
-     *
-     * <p><em>Note: This is only for use by system components.</em>
-     *
-     * @hide
-     */
-    @TestApi
-    public boolean hasScheduleExactAlarm(@NonNull String packageName, int userId) {
-        try {
-            return mService.hasScheduleExactAlarm(packageName, userId);
-        } catch (RemoteException re) {
-            throw re.rethrowFromSystemServer();
         }
     }
 

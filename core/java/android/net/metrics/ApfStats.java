@@ -20,18 +20,13 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.compat.annotation.UnsupportedAppUsage;
-import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 
 /**
  * An event logged for an interface with APF capabilities when its IpClient state machine exits.
  * {@hide}
- * @deprecated The event may not be sent in Android S and above. The events
- * are logged by a single caller in the system using signature permissions
- * and that caller is migrating to statsd.
  */
-@Deprecated
 @SystemApi
 public final class ApfStats implements IpConnectivityLog.Event {
 
@@ -39,61 +34,61 @@ public final class ApfStats implements IpConnectivityLog.Event {
      * time interval in milliseconds these stastistics covers.
      * @hide
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public final long durationMs;
     /**
      * number of received RAs.
      * @hide
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public final int receivedRas;
     /**
      * number of received RAs matching a known RA.
      * @hide
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public final int matchingRas;
     /**
      * number of received RAs ignored due to the MAX_RAS limit.
      * @hide
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public final int droppedRas;
     /**
      * number of received RAs with a minimum lifetime of 0.
      * @hide
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public final int zeroLifetimeRas;
     /**
      * number of received RAs that could not be parsed.
      * @hide
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public final int parseErrors;
     /**
      * number of APF program updates from receiving RAs.
      * @hide
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public final int programUpdates;
     /**
      * total number of APF program updates.
      * @hide
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public final int programUpdatesAll;
     /**
      * number of APF program updates from allowing multicast traffic.
      * @hide
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public final int programUpdatesAllowingMulticast;
     /**
      * maximum APF program size advertised by hardware.
      * @hide
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public final int maxProgramSize;
 
     private ApfStats(Parcel in) {

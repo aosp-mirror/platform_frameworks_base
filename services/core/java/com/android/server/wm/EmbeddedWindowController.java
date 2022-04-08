@@ -134,13 +134,10 @@ class EmbeddedWindowController {
         final int mOwnerUid;
         final int mOwnerPid;
         final WindowManagerService mWmService;
-        final int mDisplayId;
-        public Session mSession;
         InputChannel mInputChannel;
         final int mWindowType;
 
         /**
-         * @param session  calling session to check ownership of the window
          * @param clientToken client token used to clean up the map if the embedding process dies
          * @param hostWindowState input channel token belonging to the host window. This is needed
          *                        to handle input callbacks to wm. It's used when raising ANR and
@@ -148,13 +145,9 @@ class EmbeddedWindowController {
          *                        can be null if there is no host window.
          * @param ownerUid  calling uid
          * @param ownerPid  calling pid used for anr blaming
-         * @param windowType to forward to input
-         * @param displayId used for focus requests
          */
-        EmbeddedWindow(Session session, WindowManagerService service, IWindow clientToken,
-                       WindowState hostWindowState, int ownerUid, int ownerPid, int windowType,
-                       int displayId) {
-            mSession = session;
+        EmbeddedWindow(WindowManagerService service, IWindow clientToken,
+                WindowState hostWindowState, int ownerUid, int ownerPid, int windowType) {
             mWmService = service;
             mClient = clientToken;
             mHostWindowState = hostWindowState;
@@ -163,7 +156,6 @@ class EmbeddedWindowController {
             mOwnerUid = ownerUid;
             mOwnerPid = ownerPid;
             mWindowType = windowType;
-            mDisplayId = displayId;
         }
 
         String getName() {
@@ -175,22 +167,32 @@ class EmbeddedWindowController {
 
         InputApplicationHandle getApplicationHandle() {
             if (mHostWindowState == null
-                    || mHostWindowState.mInputWindowHandle.getInputApplicationHandle() == null) {
+                    || mHostWindowState.mInputWindowHandle.inputApplicationHandle == null) {
                 return null;
             }
             return new InputApplicationHandle(
-                    mHostWindowState.mInputWindowHandle.getInputApplicationHandle());
+                    mHostWindowState.mInputWindowHandle.inputApplicationHandle);
         }
 
         InputChannel openInputChannel() {
             final String name = getName();
-            mInputChannel = mWmService.mInputManager.createInputChannel(name);
-            return mInputChannel;
+
+            final InputChannel[] inputChannels = InputChannel.openInputChannelPair(name);
+            mInputChannel = inputChannels[0];
+            final InputChannel clientChannel = inputChannels[1];
+            mWmService.mInputManager.registerInputChannel(mInputChannel);
+
+            if (mInputChannel.getToken() != clientChannel.getToken()) {
+                throw new IllegalStateException("Client and Server tokens are expected to"
+                        + "be the same");
+            }
+
+            return clientChannel;
         }
 
         void onRemoved() {
             if (mInputChannel != null) {
-                mWmService.mInputManager.removeInputChannel(mInputChannel.getToken());
+                mWmService.mInputManager.unregisterInputChannel(mInputChannel);
                 mInputChannel.dispose();
                 mInputChannel = null;
             }

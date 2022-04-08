@@ -29,30 +29,6 @@ public class NotificationDecoratedCustomViewWrapper extends NotificationTemplate
 
     private View mWrappedView = null;
 
-    /**
-     * Determines if the standard template contains a custom view, injected by Notification.Builder
-     */
-    public static boolean hasCustomView(View v) {
-        return getWrappedCustomView(v) != null;
-    }
-
-    private static View getWrappedCustomView(View view) {
-        if (view == null) {
-            return null;
-        }
-        ViewGroup container = view.findViewById(
-                com.android.internal.R.id.notification_main_column);
-        if (container == null) {
-            return null;
-        }
-        Integer childIndex = (Integer) container.getTag(
-                com.android.internal.R.id.notification_custom_view_index_tag);
-        if (childIndex == null || childIndex == -1) {
-            return null;
-        }
-        return container.getChildAt(childIndex);
-    }
-
     protected NotificationDecoratedCustomViewWrapper(Context ctx, View view,
             ExpandableNotificationRow row) {
         super(ctx, view, row);
@@ -60,8 +36,13 @@ public class NotificationDecoratedCustomViewWrapper extends NotificationTemplate
 
     @Override
     public void onContentUpdated(ExpandableNotificationRow row) {
-        mWrappedView = getWrappedCustomView(mView);
-
+        ViewGroup container = mView.findViewById(
+                com.android.internal.R.id.notification_main_column);
+        Integer childIndex = (Integer) container.getTag(
+                com.android.internal.R.id.notification_custom_view_index_tag);
+        if (childIndex != null && childIndex != -1) {
+            mWrappedView = container.getChildAt(childIndex);
+        }
         if (needsInversion(resolveBackgroundColor(), mWrappedView)) {
             invertViewLuminosity(mWrappedView);
         }

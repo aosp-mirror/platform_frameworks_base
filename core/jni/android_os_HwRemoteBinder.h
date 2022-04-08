@@ -36,13 +36,9 @@ class HwBinderDeathRecipientList : public RefBase {
     std::vector<sp<HwBinderDeathRecipient>> mList;
     Mutex mLock;
 
-protected:
-    ~HwBinderDeathRecipientList() override;
-
 public:
-    explicit HwBinderDeathRecipientList();
-
-    DISALLOW_COPY_AND_ASSIGN(HwBinderDeathRecipientList);
+    HwBinderDeathRecipientList();
+    ~HwBinderDeathRecipientList();
 
     void add(const sp<HwBinderDeathRecipient>& recipient);
     void remove(const sp<HwBinderDeathRecipient>& recipient);
@@ -70,7 +66,12 @@ struct JHwRemoteBinder : public RefBase {
     void setBinder(const sp<hardware::IBinder> &binder);
     sp<HwBinderDeathRecipientList> getDeathRecipientList() const;
 
+protected:
+    virtual ~JHwRemoteBinder();
+
 private:
+    jobject mObject;
+
     sp<hardware::IBinder> mBinder;
     sp<HwBinderDeathRecipientList> mDeathRecipientList;
     DISALLOW_COPY_AND_ASSIGN(JHwRemoteBinder);

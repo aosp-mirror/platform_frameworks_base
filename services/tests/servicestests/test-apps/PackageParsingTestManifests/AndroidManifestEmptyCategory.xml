@@ -15,14 +15,13 @@
 -->
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-     package="com.android.servicestests.pm.parsing.emptycategory">
+        package="com.android.servicestests.pm.parsing.emptycategory">
 
     <application>
-        <activity android:name="com.android.servicestests.pm.parsing.test.TestActivity"
-             android:exported="true">
+        <activity android:name="com.android.servicestests.pm.parsing.test.TestActivity">
             <intent-filter>
                 <action android:name="com.android.servicestests.pm.parsing.test.TEST_ACTION"/>
-                <category android:name=""/>
+                <category android:name="" />
             </intent-filter>
         </activity>
     </application>

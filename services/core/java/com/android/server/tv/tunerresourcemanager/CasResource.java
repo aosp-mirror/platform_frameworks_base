@@ -25,7 +25,7 @@ import java.util.Set;
  *
  * @hide
  */
-public class CasResource {
+public final class CasResource {
 
     private final int mSystemId;
 
@@ -38,7 +38,7 @@ public class CasResource {
      */
     private Map<Integer, Integer> mOwnerClientIdsToSessionNum = new HashMap<>();
 
-    CasResource(Builder builder) {
+    private CasResource(Builder builder) {
         this.mSystemId = builder.mSystemId;
         this.mMaxSessionNum = builder.mMaxSessionNum;
         this.mAvailableSessionNum = builder.mMaxSessionNum;
@@ -111,7 +111,7 @@ public class CasResource {
     public static class Builder {
 
         private int mSystemId;
-        protected int mMaxSessionNum;
+        private int mMaxSessionNum;
 
         Builder(int systemId) {
             this.mSystemId = systemId;
@@ -138,7 +138,7 @@ public class CasResource {
         }
     }
 
-    protected String ownersMapToString() {
+    private String ownersMapToString() {
         StringBuilder string = new StringBuilder("{");
         for (int clienId : mOwnerClientIdsToSessionNum.keySet()) {
             string.append(" clientId=")

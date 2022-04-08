@@ -48,16 +48,18 @@ import java.security.KeyStore.ProtectionParameter;
  */
 @Deprecated
 public final class KeyStoreParameter implements ProtectionParameter {
+    private final int mFlags;
 
     private KeyStoreParameter(
             int flags) {
+        mFlags = flags;
     }
 
     /**
      * @hide
      */
     public int getFlags() {
-        return 0;
+        return mFlags;
     }
 
     /**
@@ -72,16 +74,9 @@ public final class KeyStoreParameter implements ProtectionParameter {
      * screen after boot.
      *
      * @see KeyguardManager#isDeviceSecure()
-     *
-     * @deprecated Data at rest encryption is enabled by default. If extra binding to the
-     *             lockscreen credential is desired, use
-     *             {@link android.security.keystore.KeyGenParameterSpec
-     *             .Builder#setUserAuthenticationRequired(boolean)}.
-     *             This flag will be ignored from Android S.
      */
-    @Deprecated
     public boolean isEncryptionRequired() {
-        return false;
+        return (mFlags & KeyStore.FLAG_ENCRYPTED) != 0;
     }
 
     /**
@@ -105,6 +100,7 @@ public final class KeyStoreParameter implements ProtectionParameter {
      */
     @Deprecated
     public final static class Builder {
+        private int mFlags;
 
         /**
          * Creates a new instance of the {@code Builder} with the given
@@ -130,15 +126,14 @@ public final class KeyStoreParameter implements ProtectionParameter {
          * the user unlocks the secure lock screen after boot.
          *
          * @see KeyguardManager#isDeviceSecure()
-         *
-         * @deprecated Data at rest encryption is enabled by default. If extra binding to the
-         *             lockscreen credential is desired, use
-         *             {@link android.security.keystore.KeyGenParameterSpec
-         *             .Builder#setUserAuthenticationRequired(boolean)}.
-         *             This flag will be ignored from Android S.
          */
         @NonNull
         public Builder setEncryptionRequired(boolean required) {
+            if (required) {
+                mFlags |= KeyStore.FLAG_ENCRYPTED;
+            } else {
+                mFlags &= ~KeyStore.FLAG_ENCRYPTED;
+            }
             return this;
         }
 
@@ -150,7 +145,8 @@ public final class KeyStoreParameter implements ProtectionParameter {
          */
         @NonNull
         public KeyStoreParameter build() {
-            return new KeyStoreParameter(0 /* flags */);
+            return new KeyStoreParameter(
+                    mFlags);
         }
     }
 }

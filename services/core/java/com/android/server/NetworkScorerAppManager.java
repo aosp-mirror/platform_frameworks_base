@@ -19,7 +19,6 @@ package com.android.server;
 import android.Manifest.permission;
 import android.annotation.Nullable;
 import android.content.ComponentName;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.PermissionChecker;
@@ -405,8 +404,7 @@ public class NetworkScorerAppManager {
         }
 
         public int getSecureInt(Context context, String name, int defaultValue) {
-            final ContentResolver cr = context.getContentResolver();
-            return Settings.Secure.getIntForUser(cr, name, defaultValue, cr.getUserId());
+            return Settings.Secure.getInt(context.getContentResolver(), name, defaultValue);
         }
     }
 }

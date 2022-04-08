@@ -19,10 +19,12 @@ package com.android.server.pm.parsing
 import android.annotation.RawRes
 import android.content.Context
 import android.content.pm.parsing.ParsingPackage
+import android.content.pm.parsing.ParsingPackageImpl
 import android.content.pm.parsing.ParsingPackageUtils
 import android.content.pm.parsing.result.ParseInput
 import android.content.pm.parsing.result.ParseInput.DeferredError
 import android.content.pm.parsing.result.ParseResult
+import android.content.res.TypedArray
 import android.os.Build
 import androidx.test.InstrumentationRegistry
 import com.android.frameworks.servicestests.R
@@ -128,7 +130,7 @@ class PackageParsingDeferErrorTest {
                 input.copyTo(output)
             }
         }
-        return ParsingPackageUtils.parseDefaultOneTime(file, 0 /*flags*/, emptyList(),
+        return ParsingPackageUtils.parseDefaultOneTime(file, 0 /*flags*/,
                 false /*collectCertificates*/)
     }
 }

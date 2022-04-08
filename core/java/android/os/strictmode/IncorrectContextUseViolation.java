@@ -16,20 +16,19 @@
 
 package android.os.strictmode;
 
-import android.annotation.NonNull;
 import android.content.Context;
 
 /**
- * Incorrect usage of {@link Context}, such as obtaining a UI service from non-UI {@link Context}
- * instance.
- *
+ * Incorrect usage of {@link Context}, such as obtaining a visual service from non-visual
+ * {@link Context} instance.
  * @see Context#getSystemService(String)
- * @see Context#isUiContext
- * @see android.os.StrictMode.VmPolicy.Builder#detectIncorrectContextUse()
+ * @see Context#getDisplayNoVerify()
+ * @hide
  */
 public final class IncorrectContextUseViolation extends Violation {
 
-    public IncorrectContextUseViolation(@NonNull String message, @NonNull Throwable originStack) {
+    /** @hide */
+    public IncorrectContextUseViolation(String message, Throwable originStack) {
         super(message);
         initCause(originStack);
     }

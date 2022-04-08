@@ -41,7 +41,6 @@ import com.android.server.backup.BackupAgentTimeoutParameters;
 import com.android.server.backup.BackupRestoreTask;
 import com.android.server.backup.UserBackupManagerService;
 import com.android.server.backup.remote.RemoteCall;
-import com.android.server.backup.utils.BackupEligibilityRules;
 import com.android.server.backup.utils.FullBackupUtils;
 
 import java.io.File;
@@ -65,7 +64,6 @@ public class FullBackupEngine {
     private final int mOpToken;
     private final int mTransportFlags;
     private final BackupAgentTimeoutParameters mAgentTimeoutParameters;
-    private final BackupEligibilityRules mBackupEligibilityRules;
 
     class FullBackupRunner implements Runnable {
         private final @UserIdInt int mUserId;
@@ -192,8 +190,7 @@ public class FullBackupEngine {
             BackupRestoreTask timeoutMonitor,
             long quota,
             int opToken,
-            int transportFlags,
-            BackupEligibilityRules backupEligibilityRules) {
+            int transportFlags) {
         this.backupManagerService = backupManagerService;
         mOutput = output;
         mPreflightHook = preflightHook;
@@ -207,7 +204,6 @@ public class FullBackupEngine {
                 Objects.requireNonNull(
                         backupManagerService.getAgentTimeoutParameters(),
                         "Timeout parameters cannot be null");
-        mBackupEligibilityRules = backupEligibilityRules;
     }
 
     public int preflightCheck() throws RemoteException {
@@ -306,8 +302,7 @@ public class FullBackupEngine {
             }
             mAgent =
                     backupManagerService.bindToAgentSynchronous(
-                            mPkg.applicationInfo, ApplicationThreadConstants.BACKUP_MODE_FULL,
-                            mBackupEligibilityRules.getOperationType());
+                            mPkg.applicationInfo, ApplicationThreadConstants.BACKUP_MODE_FULL);
         }
         return mAgent != null;
     }

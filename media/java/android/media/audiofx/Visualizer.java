@@ -16,13 +16,10 @@
 
 package android.media.audiofx;
 
-import android.annotation.NonNull;
+import android.app.ActivityThread;
 import android.compat.annotation.UnsupportedAppUsage;
-import android.content.AttributionSource;
-import android.content.AttributionSource.ScopedParcelState;
 import android.os.Handler;
 import android.os.Looper;
-import android.os.Parcel;
 import android.util.Log;
 
 import com.android.internal.annotations.GuardedBy;
@@ -220,15 +217,9 @@ public class Visualizer {
 
         synchronized (mStateLock) {
             mState = STATE_UNINITIALIZED;
-
             // native initialization
-            // TODO b/182469354: make consistent with AudioRecord
-            int result;
-            try (ScopedParcelState attributionSourceState = AttributionSource.myAttributionSource()
-                    .asScopedParcelState()) {
-                result = native_setup(new WeakReference<>(this), audioSession, id,
-                        attributionSourceState.getParcel());
-            }
+            int result = native_setup(new WeakReference<Visualizer>(this), audioSession, id,
+                    ActivityThread.currentOpPackageName());
             if (result != SUCCESS && result != ALREADY_EXISTS) {
                 Log.e(TAG, "Error code "+result+" when initializing Visualizer.");
                 switch (result) {
@@ -695,7 +686,7 @@ public class Visualizer {
     private native final int native_setup(Object audioeffect_this,
                                           int audioSession,
                                           int[] id,
-                                          @NonNull Parcel attributionSource);
+                                          String opPackageName);
 
     @GuardedBy("mStateLock")
     private native final void native_finalize();

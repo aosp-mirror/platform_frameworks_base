@@ -20,7 +20,6 @@ import android.os.ServiceManager;
 
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.systemui.SystemUI;
-import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.plugins.GlobalActions;
 import com.android.systemui.plugins.GlobalActions.GlobalActionsManager;
 import com.android.systemui.statusbar.CommandQueue;
@@ -31,11 +30,12 @@ import com.android.systemui.statusbar.policy.ExtensionController.Extension;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
+import javax.inject.Singleton;
 
 /**
  * Manages power menu plugins and communicates power menu actions to the StatusBar.
  */
-@SysUISingleton
+@Singleton
 public class GlobalActionsComponent extends SystemUI implements Callbacks, GlobalActionsManager {
 
     private final CommandQueue mCommandQueue;

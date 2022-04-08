@@ -29,7 +29,6 @@ import android.graphics.PorterDuff;
 import android.graphics.Rect;
 import android.graphics.Region.Op;
 import android.graphics.drawable.Drawable;
-import android.os.Build;
 import android.os.Bundle;
 import android.util.AttributeSet;
 import android.view.KeyEvent;
@@ -39,7 +38,6 @@ import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.inspector.InspectableProperty;
 
 import com.android.internal.R;
-import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.Preconditions;
 
 import java.util.ArrayList;
@@ -777,23 +775,17 @@ public abstract class AbsSeekBar extends ProgressBar {
 
     /**
      * Grows {@code r} from its center such that each dimension is at least {@code minimumSize}.
-     *
-     * The result will still have the same {@link Rect#centerX()} and {@link Rect#centerY()} as the
-     * input.
-     *
-     * @hide
      */
-    @VisibleForTesting
-    public void growRectTo(Rect r, int minimumSize) {
-        int dy = minimumSize - r.height();
+    private void growRectTo(Rect r, int minimumSize) {
+        int dy = (minimumSize - r.height()) / 2;
         if (dy > 0) {
-            r.top -= (dy + 1) / 2;
-            r.bottom += dy / 2;
+            r.top -= dy;
+            r.bottom += dy;
         }
-        int dx = minimumSize - r.width();
+        int dx = (minimumSize - r.width()) / 2;
         if (dx > 0) {
-            r.left -= (dx + 1) / 2;
-            r.right += dx / 2;
+            r.left -= dx;
+            r.right += dx;
         }
     }
 
@@ -865,7 +857,7 @@ public abstract class AbsSeekBar extends ProgressBar {
     /**
      * Draw the thumb.
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     void drawThumb(Canvas canvas) {
         if (mThumb != null) {
             final int saveCount = canvas.save();
@@ -1034,7 +1026,7 @@ public abstract class AbsSeekBar extends ProgressBar {
     }
 
     /**
-     * This is called when the user either releases their touch or the touch is
+     * This is called when the user either releases his touch or the touch is
      * canceled.
      */
     void onStopTrackingTouch() {

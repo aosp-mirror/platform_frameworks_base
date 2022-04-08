@@ -39,6 +39,7 @@ class ResourceTableBuilder {
  public:
   ResourceTableBuilder() = default;
 
+  ResourceTableBuilder& SetPackageId(const android::StringPiece& package_name, uint8_t id);
   ResourceTableBuilder& AddSimple(const android::StringPiece& name, const ResourceId& id = {});
   ResourceTableBuilder& AddSimple(const android::StringPiece& name,
                                   const android::ConfigDescription& config,
@@ -74,7 +75,6 @@ class ResourceTableBuilder {
                                        Visibility::Level level, bool allow_new = false);
   ResourceTableBuilder& SetOverlayable(const android::StringPiece& name,
                                        const OverlayableItem& overlayable);
-  ResourceTableBuilder& Add(NewResource&& res);
 
   StringPool* string_pool();
   std::unique_ptr<ResourceTable> Build();

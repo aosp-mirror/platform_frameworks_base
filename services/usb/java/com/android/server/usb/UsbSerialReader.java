@@ -77,7 +77,7 @@ class UsbSerialReader extends IUsbSerialReader.Stub {
 
             UserHandle user = Binder.getCallingUserHandle();
             int packageTargetSdkVersion;
-            final long token = Binder.clearCallingIdentity();
+            long token = Binder.clearCallingIdentity();
             try {
                 PackageInfo pkg;
                 try {

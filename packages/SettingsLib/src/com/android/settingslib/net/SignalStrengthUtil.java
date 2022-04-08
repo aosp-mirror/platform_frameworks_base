@@ -17,8 +17,7 @@
 package com.android.settingslib.net;
 
 import android.content.Context;
-import android.os.PersistableBundle;
-import android.telephony.CarrierConfigManager;
+import android.telephony.SubscriptionManager;
 
 /**
  * Utilities for dealing with signal strength.
@@ -29,13 +28,7 @@ public class SignalStrengthUtil {
      * bar for the subscription with the given id
      */
     public static boolean shouldInflateSignalStrength(Context context, int subscriptionId) {
-        final CarrierConfigManager carrierConfigMgr =
-                context.getSystemService(CarrierConfigManager.class);
-        PersistableBundle bundle = null;
-        if (carrierConfigMgr != null) {
-            bundle = carrierConfigMgr.getConfigForSubId(subscriptionId);
-        }
-        return (bundle != null && bundle.getBoolean(
-                CarrierConfigManager.KEY_INFLATE_SIGNAL_STRENGTH_BOOL, false));
+        return SubscriptionManager.getResourcesForSubId(context, subscriptionId)
+                .getBoolean(com.android.internal.R.bool.config_inflateSignalStrength);
     }
 }

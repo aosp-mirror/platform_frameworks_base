@@ -16,22 +16,14 @@
 
 package com.android.systemui.tv;
 
-import com.android.systemui.SystemUI;
-import com.android.systemui.dagger.GlobalRootComponent;
-import com.android.systemui.statusbar.tv.notifications.TvNotificationHandler;
+import com.android.systemui.dagger.SystemUIRootComponent;
+import com.android.systemui.pip.tv.dagger.PipModule;
 
 import dagger.Binds;
 import dagger.Module;
-import dagger.multibindings.ClassKey;
-import dagger.multibindings.IntoMap;
 
-@Module
+@Module(includes = {PipModule.class})
 interface TvSystemUIBinder {
     @Binds
-    GlobalRootComponent bindGlobalRootComponent(TvGlobalRootComponent globalRootComponent);
-
-    @Binds
-    @IntoMap
-    @ClassKey(TvNotificationHandler.class)
-    SystemUI bindTvNotificationHandler(TvNotificationHandler systemui);
+    SystemUIRootComponent bindSystemUIRootComponent(TvSystemUIRootComponent systemUIRootComponent);
 }

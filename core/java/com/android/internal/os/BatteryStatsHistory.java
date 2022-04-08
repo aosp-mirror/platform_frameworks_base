@@ -16,8 +16,6 @@
 
 package com.android.internal.os;
 
-import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.os.BatteryStats;
 import android.os.Parcel;
 import android.os.StatFs;
@@ -63,7 +61,6 @@ public class BatteryStatsHistory {
     public static final String FILE_SUFFIX = ".bin";
     private static final int MIN_FREE_SPACE = 100 * 1024 * 1024;
 
-    @Nullable
     private final BatteryStatsImpl mStats;
     private final Parcel mHistoryBuffer;
     private final File mHistoryDir;
@@ -110,8 +107,7 @@ public class BatteryStatsHistory {
      * @param systemDir typically /data/system
      * @param historyBuffer The in-memory history buffer.
      */
-    public BatteryStatsHistory(@NonNull BatteryStatsImpl stats, File systemDir,
-            Parcel historyBuffer) {
+    public BatteryStatsHistory(BatteryStatsImpl stats, File systemDir, Parcel historyBuffer) {
         mStats = stats;
         mHistoryBuffer = historyBuffer;
         mHistoryDir = new File(systemDir, HISTORY_DIR);
@@ -153,10 +149,11 @@ public class BatteryStatsHistory {
     /**
      * Used when BatteryStatsImpl object is created from deserialization of a parcel,
      * such as Settings app or checkin file.
-     * @param historyBuffer the history buffer
+     * @param stats BatteryStatsImpl object.
+     * @param historyBuffer the history buffer inside BatteryStatsImpl
      */
-    public BatteryStatsHistory(Parcel historyBuffer) {
-        mStats = null;
+    public BatteryStatsHistory(BatteryStatsImpl stats, Parcel historyBuffer) {
+        mStats = stats;
         mHistoryDir = null;
         mHistoryBuffer = historyBuffer;
     }
@@ -187,16 +184,10 @@ public class BatteryStatsHistory {
      * create next history file.
      */
     public void startNextFile() {
-        if (mStats == null) {
-            Slog.wtf(TAG, "mStats should not be null when writing history");
-            return;
-        }
-
         if (mFileNumbers.isEmpty()) {
             Slog.wtf(TAG, "mFileNumbers should never be empty");
             return;
         }
-
         // The last number in mFileNumbers is the highest number. The next file number is highest
         // number plus one.
         final int next = mFileNumbers.get(mFileNumbers.size() - 1) + 1;
@@ -366,7 +357,7 @@ public class BatteryStatsHistory {
     private boolean skipHead(Parcel p) {
         p.setDataPosition(0);
         final int version = p.readInt();
-        if (version != BatteryStatsImpl.VERSION) {
+        if (version != mStats.VERSION) {
             return false;
         }
         // skip historyBaseTime field.

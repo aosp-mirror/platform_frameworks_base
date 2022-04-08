@@ -17,9 +17,9 @@
 package com.android.server.hdmi;
 
 import android.annotation.Nullable;
-import android.hardware.hdmi.HdmiControlManager;
-import android.hardware.hdmi.HdmiDeviceInfo;
 import android.hardware.hdmi.IHdmiControlCallback;
+import android.hardware.hdmi.HdmiDeviceInfo;
+import android.hardware.hdmi.HdmiControlManager;
 import android.os.RemoteException;
 import android.util.Slog;
 
@@ -69,7 +69,7 @@ final class ActiveSourceHandler {
 
         if (!tv.isProhibitMode()) {
             ActiveSource old = ActiveSource.of(tv.getActiveSource());
-            tv.updateActiveSource(newActive, "ActiveSourceHandler");
+            tv.updateActiveSource(newActive);
             boolean notifyInputChange = (mCallback == null);
             if (!old.equals(newActive)) {
                 tv.setPrevPortId(tv.getActivePortId());
@@ -85,7 +85,7 @@ final class ActiveSourceHandler {
                 HdmiCecMessage activeSourceCommand = HdmiCecMessageBuilder.buildActiveSource(
                         current.logicalAddress, current.physicalAddress);
                 mService.sendCecCommand(activeSourceCommand);
-                tv.updateActiveSource(current, "ActiveSourceHandler");
+                tv.updateActiveSource(current);
                 invokeCallback(HdmiControlManager.RESULT_SUCCESS);
             } else {
                 tv.startRoutingControl(newActive.physicalAddress, current.physicalAddress, true,

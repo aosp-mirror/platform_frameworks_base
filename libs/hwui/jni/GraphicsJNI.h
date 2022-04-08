@@ -4,8 +4,8 @@
 #include <cutils/compiler.h>
 
 #include "Bitmap.h"
-#include "BRDAllocator.h"
 #include "SkBitmap.h"
+#include "SkBRDAllocator.h"
 #include "SkCodec.h"
 #include "SkPixelRef.h"
 #include "SkMallocPixelRef.h"
@@ -17,14 +17,10 @@
 
 #include "graphics_jni_helpers.h"
 
+class SkBitmapRegionDecoder;
 class SkCanvas;
-struct SkFontMetrics;
 
 namespace android {
-namespace skia {
-    class BitmapRegionDecoder;
-}
-class Canvas;
 class Paint;
 struct Typeface;
 }
@@ -87,17 +83,6 @@ public:
                                      bool* isHardware);
     static SkRegion* getNativeRegion(JNIEnv*, jobject region);
 
-    /**
-     * Set SkFontMetrics to Java Paint.FontMetrics.
-     * Do nothing if metrics is nullptr.
-     */
-    static void set_metrics(JNIEnv*, jobject metrics, const SkFontMetrics& skmetrics);
-    /**
-     * Set SkFontMetrics to Java Paint.FontMetricsInt and return recommended interline space.
-     * Do nothing if metrics is nullptr.
-     */
-    static int set_metrics_int(JNIEnv*, jobject metrics, const SkFontMetrics& skmetrics);
-
     /*
      *  LegacyBitmapConfig is the old enum in Skia that matched the enum int values
      *  in Bitmap.Config. Skia no longer supports this config, but has replaced it
@@ -118,8 +103,7 @@ public:
 
     static jobject createRegion(JNIEnv* env, SkRegion* region);
 
-    static jobject createBitmapRegionDecoder(JNIEnv* env,
-                                             android::skia::BitmapRegionDecoder* bitmap);
+    static jobject createBitmapRegionDecoder(JNIEnv* env, SkBitmapRegionDecoder* bitmap);
 
     /**
      * Given a bitmap we natively allocate a memory block to store the contents
@@ -170,7 +154,7 @@ private:
     static JavaVM* mJavaVM;
 };
 
-class HeapAllocator : public android::skia::BRDAllocator {
+class HeapAllocator : public SkBRDAllocator {
 public:
    HeapAllocator() { };
     ~HeapAllocator() { };
@@ -197,7 +181,7 @@ private:
  *  the decoded output to fit in the recycled bitmap if necessary.
  *  This allocator implements that behavior.
  *
- *  Skia's BitmapRegionDecoder expects the memory that
+ *  Skia's SkBitmapRegionDecoder expects the memory that
  *  is allocated to be large enough to decode the entire region
  *  that is requested.  It will decode directly into the memory
  *  that is provided.
@@ -216,7 +200,7 @@ private:
  *  reuse it again, given that it still may be in use from our
  *  first allocation.
  */
-class RecyclingClippingPixelAllocator : public android::skia::BRDAllocator {
+class RecyclingClippingPixelAllocator : public SkBRDAllocator {
 public:
 
     RecyclingClippingPixelAllocator(android::Bitmap* recycledBitmap,

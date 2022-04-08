@@ -19,13 +19,10 @@ package com.android.server.accessibility.magnification;
 import static android.os.IBinder.DeathRecipient;
 
 import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.os.RemoteException;
 import android.util.Slog;
-import android.view.accessibility.IRemoteMagnificationAnimationCallback;
 import android.view.accessibility.IWindowMagnificationConnection;
 import android.view.accessibility.IWindowMagnificationConnectionCallback;
-import android.view.accessibility.MagnificationAnimationCallback;
 
 /**
  * A wrapper of {@link IWindowMagnificationConnection}.
@@ -50,14 +47,12 @@ class WindowMagnificationConnectionWrapper {
         mConnection.asBinder().linkToDeath(deathRecipient, 0);
     }
 
-    boolean enableWindowMagnification(int displayId, float scale, float centerX, float centerY,
-            @Nullable MagnificationAnimationCallback callback) {
+    boolean enableWindowMagnification(int displayId, float scale, float centerX, float centerY) {
         try {
-            mConnection.enableWindowMagnification(displayId, scale, centerX, centerY,
-                    transformToRemoteCallback(callback));
+            mConnection.enableWindowMagnification(displayId, scale, centerX, centerY);
         } catch (RemoteException e) {
             if (DBG) {
-                Slog.e(TAG, "Error calling enableWindowMagnification()", e);
+                Slog.e(TAG, "Error calling enableWindowMagnification()");
             }
             return false;
         }
@@ -69,20 +64,19 @@ class WindowMagnificationConnectionWrapper {
             mConnection.setScale(displayId, scale);
         } catch (RemoteException e) {
             if (DBG) {
-                Slog.e(TAG, "Error calling setScale()", e);
+                Slog.e(TAG, "Error calling setScale()");
             }
             return false;
         }
         return true;
     }
 
-    boolean disableWindowMagnification(int displayId,
-            @Nullable MagnificationAnimationCallback callback) {
+    boolean disableWindowMagnification(int displayId) {
         try {
-            mConnection.disableWindowMagnification(displayId, transformToRemoteCallback(callback));
+            mConnection.disableWindowMagnification(displayId);
         } catch (RemoteException e) {
             if (DBG) {
-                Slog.e(TAG, "Error calling disableWindowMagnification()", e);
+                Slog.e(TAG, "Error calling disableWindowMagnification()");
             }
             return false;
         }
@@ -94,31 +88,7 @@ class WindowMagnificationConnectionWrapper {
             mConnection.moveWindowMagnifier(displayId, offsetX, offsetY);
         } catch (RemoteException e) {
             if (DBG) {
-                Slog.e(TAG, "Error calling moveWindowMagnifier()", e);
-            }
-            return false;
-        }
-        return true;
-    }
-
-    boolean showMagnificationButton(int displayId, int magnificationMode) {
-        try {
-            mConnection.showMagnificationButton(displayId, magnificationMode);
-        } catch (RemoteException e) {
-            if (DBG) {
-                Slog.e(TAG, "Error calling showMagnificationButton()", e);
-            }
-            return false;
-        }
-        return true;
-    }
-
-    boolean removeMagnificationButton(int displayId) {
-        try {
-            mConnection.removeMagnificationButton(displayId);
-        } catch (RemoteException e) {
-            if (DBG) {
-                Slog.e(TAG, "Error calling removeMagnificationButton()", e);
+                Slog.e(TAG, "Error calling moveWindowMagnifier()");
             }
             return false;
         }
@@ -130,34 +100,11 @@ class WindowMagnificationConnectionWrapper {
             mConnection.setConnectionCallback(connectionCallback);
         } catch (RemoteException e) {
             if (DBG) {
-                Slog.e(TAG, "Error calling setConnectionCallback()", e);
+                Slog.e(TAG, "Error calling setConnectionCallback()");
             }
             return false;
         }
         return true;
     }
 
-    private static @Nullable
-            IRemoteMagnificationAnimationCallback transformToRemoteCallback(
-            MagnificationAnimationCallback callback) {
-        if (callback == null) {
-            return null;
-        }
-        return new RemoteAnimationCallback(callback);
-    }
-
-    private static class RemoteAnimationCallback extends
-            IRemoteMagnificationAnimationCallback.Stub {
-
-        private final MagnificationAnimationCallback mCallback;
-
-        RemoteAnimationCallback(@NonNull MagnificationAnimationCallback callback) {
-            mCallback = callback;
-        }
-
-        @Override
-        public void onResult(boolean success) throws RemoteException {
-            mCallback.onResult(success);
-        }
-    }
 }

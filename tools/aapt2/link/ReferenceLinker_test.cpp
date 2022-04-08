@@ -28,6 +28,7 @@ namespace aapt {
 TEST(ReferenceLinkerTest, LinkSimpleReferences) {
   std::unique_ptr<ResourceTable> table =
       test::ResourceTableBuilder()
+          .SetPackageId("com.app.test", 0x7f)
           .AddReference("com.app.test:string/foo", ResourceId(0x7f020000),
                         "com.app.test:string/bar")
 
@@ -74,6 +75,7 @@ TEST(ReferenceLinkerTest, LinkSimpleReferences) {
 TEST(ReferenceLinkerTest, LinkStyleAttributes) {
   std::unique_ptr<ResourceTable> table =
       test::ResourceTableBuilder()
+          .SetPackageId("com.app.test", 0x7f)
           .AddValue("com.app.test:style/Theme",
                     test::StyleBuilder()
                         .SetParent("android:style/Theme.Material")
@@ -153,6 +155,7 @@ TEST(ReferenceLinkerTest, LinkMangledReferencesAndAttributes) {
 
   std::unique_ptr<ResourceTable> table =
       test::ResourceTableBuilder()
+          .SetPackageId("com.app.test", 0x7f)
           .AddValue("com.app.test:style/Theme", ResourceId(0x7f020000),
                     test::StyleBuilder()
                         .AddItem("com.android.support:attr/foo",
@@ -173,6 +176,7 @@ TEST(ReferenceLinkerTest, LinkMangledReferencesAndAttributes) {
 TEST(ReferenceLinkerTest, FailToLinkPrivateSymbols) {
   std::unique_ptr<ResourceTable> table =
       test::ResourceTableBuilder()
+          .SetPackageId("com.app.test", 0x7f)
           .AddReference("com.app.test:string/foo", ResourceId(0x7f020000),
                         "android:string/hidden")
           .Build();
@@ -197,6 +201,7 @@ TEST(ReferenceLinkerTest, FailToLinkPrivateSymbols) {
 TEST(ReferenceLinkerTest, FailToLinkPrivateMangledSymbols) {
   std::unique_ptr<ResourceTable> table =
       test::ResourceTableBuilder()
+          .SetPackageId("com.app.test", 0x7f)
           .AddReference("com.app.test:string/foo", ResourceId(0x7f020000),
                         "com.app.lib:string/hidden")
           .Build();
@@ -224,6 +229,7 @@ TEST(ReferenceLinkerTest, FailToLinkPrivateMangledSymbols) {
 TEST(ReferenceLinkerTest, FailToLinkPrivateStyleAttributes) {
   std::unique_ptr<ResourceTable> table =
       test::ResourceTableBuilder()
+          .SetPackageId("com.app.test", 0x7f)
           .AddValue("com.app.test:style/Theme",
                     test::StyleBuilder()
                         .AddItem("android:attr/hidden",
@@ -363,24 +369,6 @@ TEST(ReferenceLinkerTest, ReferenceSymbolFromOtherSplit) {
                                      context.get(), &table);
 
   EXPECT_THAT(s, IsNull());
-}
-
-TEST(ReferenceLinkerTest, MacroFailToFindDefinition) {
-  std::unique_ptr<ResourceTable> table =
-      test::ResourceTableBuilder()
-          .AddReference("com.app.test:string/foo", ResourceId(0x7f020000), "com.app.test:macro/bar")
-          .Build();
-
-  std::unique_ptr<IAaptContext> context =
-      test::ContextBuilder()
-          .SetCompilationPackage("com.app.test")
-          .SetPackageId(0x7f)
-          .SetNameManglerPolicy(NameManglerPolicy{"com.app.test"})
-          .AddSymbolSource(util::make_unique<ResourceTableSymbolSource>(table.get()))
-          .Build();
-
-  ReferenceLinker linker;
-  ASSERT_FALSE(linker.Consume(context.get(), table.get()));
 }
 
 }  // namespace aapt

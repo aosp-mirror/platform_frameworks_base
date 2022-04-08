@@ -18,7 +18,6 @@ package android.widget;
 
 import android.content.Context;
 import android.util.AttributeSet;
-import android.widget.RemoteViews.RemoteView;
 
 /**
  * <p>
@@ -53,7 +52,6 @@ import android.widget.RemoteViews.RemoteView;
  * {@link android.R.styleable#View View Attributes}
  * </p>
  */
-@RemoteView
 public class CheckBox extends CompoundButton {
     public CheckBox(Context context) {
         this(context, null);

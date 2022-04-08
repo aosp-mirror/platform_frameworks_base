@@ -15,19 +15,14 @@
 
 package com.android.systemui.statusbar.policy;
 
-import androidx.annotation.NonNull;
 import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.Lifecycle.Event;
 import androidx.lifecycle.LifecycleEventObserver;
 import androidx.lifecycle.LifecycleOwner;
 
 public interface CallbackController<T> {
-
-    /** Add a callback */
-    void addCallback(@NonNull T listener);
-
-    /** Remove a callback */
-    void removeCallback(@NonNull T listener);
+    void addCallback(T listener);
+    void removeCallback(T listener);
 
     /**
      * Wrapper to {@link #addCallback(Object)} when a lifecycle is in the resumed state

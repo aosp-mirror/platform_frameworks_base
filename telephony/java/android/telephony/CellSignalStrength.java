@@ -17,7 +17,6 @@
 package android.telephony;
 
 import android.annotation.IntRange;
-import android.annotation.SystemApi;
 import android.os.PersistableBundle;
 
 /**
@@ -156,12 +155,11 @@ public abstract class CellSignalStrength {
 
     /**
      * Returns the number of signal strength levels.
-     * @return Number of signal strength levels, currently defined in the HAL as 5.
+     * @return Number of signal strength levels, enforced to be 5
      *
      * @hide
      */
-    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
-    public static int getNumSignalStrengthLevels() {
+    public static final int getNumSignalStrengthLevels() {
         return NUM_SIGNAL_STRENGTH_BINS;
     }
 }

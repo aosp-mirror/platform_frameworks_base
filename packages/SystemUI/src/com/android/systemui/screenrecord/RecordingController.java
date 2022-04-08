@@ -26,21 +26,19 @@ import android.os.CountDownTimer;
 import android.os.UserHandle;
 import android.util.Log;
 
-import androidx.annotation.NonNull;
-
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.broadcast.BroadcastDispatcher;
-import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.statusbar.policy.CallbackController;
 
-import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.ArrayList;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 
 /**
  * Helper class to initiate a screen recording
  */
-@SysUISingleton
+@Singleton
 public class RecordingController
         implements CallbackController<RecordingController.RecordingStateChangeCallback> {
     private static final String TAG = "RecordingController";
@@ -54,32 +52,14 @@ public class RecordingController
     private CountDownTimer mCountDownTimer = null;
     private BroadcastDispatcher mBroadcastDispatcher;
 
-    protected static final String INTENT_UPDATE_STATE =
-            "com.android.systemui.screenrecord.UPDATE_STATE";
-    protected static final String EXTRA_STATE = "extra_state";
-
-    private CopyOnWriteArrayList<RecordingStateChangeCallback> mListeners =
-            new CopyOnWriteArrayList<>();
+    private ArrayList<RecordingStateChangeCallback> mListeners = new ArrayList<>();
 
     @VisibleForTesting
     protected final BroadcastReceiver mUserChangeReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            stopRecording();
-        }
-    };
-
-    @VisibleForTesting
-    protected final BroadcastReceiver mStateChangeReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            if (intent != null && INTENT_UPDATE_STATE.equals(intent.getAction())) {
-                if (intent.hasExtra(EXTRA_STATE)) {
-                    boolean state = intent.getBooleanExtra(EXTRA_STATE, false);
-                    updateState(state);
-                } else {
-                    Log.e(TAG, "Received update intent with no state");
-                }
+            if (mStopIntent != null) {
+                stopRecording();
             }
         }
     };
@@ -135,10 +115,6 @@ public class RecordingController
                     startIntent.send();
                     IntentFilter userFilter = new IntentFilter(Intent.ACTION_USER_SWITCHED);
                     mBroadcastDispatcher.registerReceiver(mUserChangeReceiver, userFilter, null,
-                            UserHandle.ALL);
-
-                    IntentFilter stateFilter = new IntentFilter(INTENT_UPDATE_STATE);
-                    mBroadcastDispatcher.registerReceiver(mStateChangeReceiver, stateFilter, null,
                             UserHandle.ALL);
                     Log.d(TAG, "sent start intent");
                 } catch (PendingIntent.CanceledException e) {
@@ -196,6 +172,7 @@ public class RecordingController
         } catch (PendingIntent.CanceledException e) {
             Log.e(TAG, "Error stopping: " + e.getMessage());
         }
+        mBroadcastDispatcher.unregisterReceiver(mUserChangeReceiver);
     }
 
     /**
@@ -203,11 +180,6 @@ public class RecordingController
      * @param isRecording
      */
     public synchronized void updateState(boolean isRecording) {
-        if (!isRecording && mIsRecording) {
-            // Unregister receivers if we have stopped recording
-            mBroadcastDispatcher.unregisterReceiver(mUserChangeReceiver);
-            mBroadcastDispatcher.unregisterReceiver(mStateChangeReceiver);
-        }
         mIsRecording = isRecording;
         for (RecordingStateChangeCallback cb : mListeners) {
             if (isRecording) {
@@ -219,12 +191,12 @@ public class RecordingController
     }
 
     @Override
-    public void addCallback(@NonNull RecordingStateChangeCallback listener) {
+    public void addCallback(RecordingStateChangeCallback listener) {
         mListeners.add(listener);
     }
 
     @Override
-    public void removeCallback(@NonNull RecordingStateChangeCallback listener) {
+    public void removeCallback(RecordingStateChangeCallback listener) {
         mListeners.remove(listener);
     }
 

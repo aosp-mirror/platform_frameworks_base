@@ -48,18 +48,17 @@ public class ApplicationLoaders {
                                ClassLoader parent, String classLoaderName) {
         return getClassLoaderWithSharedLibraries(zip, targetSdkVersion, isBundled,
                               librarySearchPath, libraryPermittedPath, parent, classLoaderName,
-                              null, null);
+                              null);
     }
 
     ClassLoader getClassLoaderWithSharedLibraries(
             String zip, int targetSdkVersion, boolean isBundled,
             String librarySearchPath, String libraryPermittedPath,
             ClassLoader parent, String classLoaderName,
-            List<ClassLoader> sharedLibraries, List<String> nativeSharedLibraries) {
+            List<ClassLoader> sharedLibraries) {
         // For normal usage the cache key used is the same as the zip path.
         return getClassLoader(zip, targetSdkVersion, isBundled, librarySearchPath,
-                              libraryPermittedPath, parent, zip, classLoaderName, sharedLibraries,
-                              nativeSharedLibraries);
+                              libraryPermittedPath, parent, zip, classLoaderName, sharedLibraries);
     }
 
     /**
@@ -78,22 +77,14 @@ public class ApplicationLoaders {
             return loader;
         }
 
-        // TODO(b/142191088): allow (Java) shared libraries to have <uses-native-library>
-        // Until that is supported, assume that all native shared libraries are used.
-        // "ALL" is a magic string that libnativeloader uses to unconditionally add all available
-        // native shared libraries to the classloader.
-        List<String> nativeSharedLibraries = new ArrayList<>();
-        nativeSharedLibraries.add("ALL");
         return getClassLoaderWithSharedLibraries(zip, targetSdkVersion, isBundled,
-              librarySearchPath, libraryPermittedPath, parent, classLoaderName, sharedLibraries,
-              nativeSharedLibraries);
+              librarySearchPath, libraryPermittedPath, parent, classLoaderName, sharedLibraries);
     }
 
     private ClassLoader getClassLoader(String zip, int targetSdkVersion, boolean isBundled,
                                        String librarySearchPath, String libraryPermittedPath,
                                        ClassLoader parent, String cacheKey,
-                                       String classLoaderName, List<ClassLoader> sharedLibraries,
-                                       List<String> nativeSharedLibraries) {
+                                       String classLoaderName, List<ClassLoader> sharedLibraries) {
         /*
          * This is the parent we use if they pass "null" in.  In theory
          * this should be the "system" class loader; in practice we
@@ -122,8 +113,7 @@ public class ApplicationLoaders {
 
                 ClassLoader classloader = ClassLoaderFactory.createClassLoader(
                         zip,  librarySearchPath, libraryPermittedPath, parent,
-                        targetSdkVersion, isBundled, classLoaderName, sharedLibraries,
-                        nativeSharedLibraries);
+                        targetSdkVersion, isBundled, classLoaderName, sharedLibraries);
 
                 Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
 
@@ -195,8 +185,7 @@ public class ApplicationLoaders {
         // assume cached libraries work with current sdk since they are built-in
         ClassLoader classLoader = getClassLoader(path, Build.VERSION.SDK_INT, true /*isBundled*/,
                 null /*librarySearchPath*/, null /*libraryPermittedPath*/, null /*parent*/,
-                null /*cacheKey*/, null /*classLoaderName*/, sharedLibraries /*sharedLibraries*/,
-                null /* nativeSharedLibraries */);
+                null /*cacheKey*/, null /*classLoaderName*/, sharedLibraries /*sharedLibraries*/);
 
         if (classLoader == null) {
             // bad configuration or break in classloading code
@@ -243,8 +232,8 @@ public class ApplicationLoaders {
 
         // cached must be built and loaded in the same environment
         if (!sharedLibrariesEquals(sharedLibraries, cached.sharedLibraries)) {
-            Log.w(TAG, "Unexpected environment loading cached library " + zip + " (real|cached): ("
-                    + sharedLibraries + "|" + cached.sharedLibraries + ")");
+            Log.w(TAG, "Unexpected environment for cached library: (" + sharedLibraries + "|"
+                    + cached.sharedLibraries + ")");
             return null;
         }
 
@@ -266,8 +255,7 @@ public class ApplicationLoaders {
         // The cache key is passed separately to enable the stub WebView to be cached under the
         // stub's APK path, when the actual package path is the donor APK.
         return getClassLoader(packagePath, Build.VERSION.SDK_INT, false, libsPath, null, null,
-                              cacheKey, null /* classLoaderName */, null /* sharedLibraries */,
-                              null /* nativeSharedLibraries */);
+                              cacheKey, null /* classLoaderName */, null /* sharedLibraries */);
     }
 
     /**

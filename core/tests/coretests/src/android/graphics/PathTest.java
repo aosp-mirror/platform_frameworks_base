@@ -28,9 +28,7 @@ public class PathTest extends TestCase {
 
         final Path.FillType defaultFillType = path.getFillType();
         final Path.FillType fillType = Path.FillType.INVERSE_EVEN_ODD;
-
-        // This test is only meaningful if it changes from the default.
-        assertFalse(fillType.equals(defaultFillType));
+        assertFalse(fillType.equals(defaultFillType));  // Sanity check for the test itself.
 
         path.setFillType(fillType);
         path.reset();

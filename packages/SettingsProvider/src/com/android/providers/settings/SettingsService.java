@@ -17,7 +17,6 @@
 package com.android.providers.settings;
 
 import android.app.ActivityManager;
-import android.content.AttributionSource;
 import android.content.IContentProvider;
 import android.content.pm.PackageManager;
 import android.os.Binder;
@@ -310,9 +309,7 @@ final public class SettingsService extends Binder {
             try {
                 Bundle arg = new Bundle();
                 arg.putInt(Settings.CALL_METHOD_USER_KEY, userHandle);
-                final AttributionSource attributionSource = new AttributionSource(
-                        Binder.getCallingUid(), resolveCallingPackage(), /*attributionTag*/ null);
-                Bundle result = provider.call(attributionSource, Settings.AUTHORITY,
+                Bundle result = provider.call(resolveCallingPackage(), null, Settings.AUTHORITY,
                         callListCommand, null, arg);
                 lines.addAll(result.getStringArrayList(SettingsProvider.RESULT_SETTINGS_LIST));
                 Collections.sort(lines);
@@ -337,9 +334,7 @@ final public class SettingsService extends Binder {
             try {
                 Bundle arg = new Bundle();
                 arg.putInt(Settings.CALL_METHOD_USER_KEY, userHandle);
-                final AttributionSource attributionSource = new AttributionSource(
-                        Binder.getCallingUid(), resolveCallingPackage(), /*attributionTag*/ null);
-                Bundle b = provider.call(attributionSource, Settings.AUTHORITY,
+                Bundle b = provider.call(resolveCallingPackage(), null, Settings.AUTHORITY,
                         callGetCommand, key, arg);
                 if (b != null) {
                     result = b.getPairValue();
@@ -377,9 +372,7 @@ final public class SettingsService extends Binder {
                 if (makeDefault) {
                     arg.putBoolean(Settings.CALL_METHOD_MAKE_DEFAULT_KEY, true);
                 }
-                final AttributionSource attributionSource = new AttributionSource(
-                        Binder.getCallingUid(), resolveCallingPackage(), /*attributionTag*/ null);
-                provider.call(attributionSource, Settings.AUTHORITY,
+                provider.call(resolveCallingPackage(), null, Settings.AUTHORITY,
                         callPutCommand, key, arg);
             } catch (RemoteException e) {
                 throw new RuntimeException("Failed in IPC", e);
@@ -403,9 +396,7 @@ final public class SettingsService extends Binder {
             try {
                 Bundle arg = new Bundle();
                 arg.putInt(Settings.CALL_METHOD_USER_KEY, userHandle);
-                final AttributionSource attributionSource = new AttributionSource(
-                        Binder.getCallingUid(), resolveCallingPackage(), /*attributionTag*/ null);
-                Bundle result = provider.call(attributionSource, Settings.AUTHORITY,
+                Bundle result = provider.call(resolveCallingPackage(), null, Settings.AUTHORITY,
                         callDeleteCommand, key, arg);
                 return result.getInt(SettingsProvider.RESULT_ROWS_DELETED);
             } catch (RemoteException e) {
@@ -432,9 +423,7 @@ final public class SettingsService extends Binder {
                 }
                 String packageName = mPackageName != null ? mPackageName : resolveCallingPackage();
                 arg.putInt(Settings.CALL_METHOD_USER_KEY, userHandle);
-                final AttributionSource attributionSource = new AttributionSource(
-                        Binder.getCallingUid(), resolveCallingPackage(), /*attributionTag*/ null);
-                provider.call(attributionSource, Settings.AUTHORITY, callResetCommand, null, arg);
+                provider.call(packageName, null, Settings.AUTHORITY, callResetCommand, null, arg);
             } catch (RemoteException e) {
                 throw new RuntimeException("Failed in IPC", e);
             }

@@ -33,7 +33,6 @@ import androidx.test.filters.SmallTest;
 import com.android.systemui.SysuiTestCase;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -44,7 +43,6 @@ import java.util.Set;
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
-@Ignore
 public class ImageWallpaperRendererTest extends SysuiTestCase {
 
     private WallpaperManager mWpmSpy;

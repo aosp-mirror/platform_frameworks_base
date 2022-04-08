@@ -17,7 +17,6 @@
 package com.android.internal.util;
 
 import android.compat.annotation.UnsupportedAppUsage;
-import android.os.Build;
 import android.os.Debug;
 import android.os.StrictMode;
 
@@ -52,7 +51,7 @@ public final class MemInfoReader {
     /**
      * Amount of RAM that is not being used for anything.
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public long getFreeSize() {
         return mInfos[Debug.MEMINFO_FREE] * 1024;
     }
@@ -61,7 +60,7 @@ public final class MemInfoReader {
      * Amount of RAM that the kernel is being used for caches, not counting caches
      * that are mapped in to processes.
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public long getCachedSize() {
         return getCachedSizeKb() * 1024;
     }

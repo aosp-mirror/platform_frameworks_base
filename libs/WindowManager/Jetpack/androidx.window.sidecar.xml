@@ -17,5 +17,5 @@
 <permissions>
     <library
         name="androidx.window.sidecar"
-        file="/system_ext/framework/androidx.window.sidecar.jar"/>
+        file="/vendor/framework/androidx.window.sidecar.jar"/>
 </permissions>

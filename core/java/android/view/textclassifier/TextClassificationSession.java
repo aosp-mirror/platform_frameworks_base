@@ -20,11 +20,9 @@ import android.annotation.NonNull;
 import android.annotation.WorkerThread;
 import android.view.textclassifier.SelectionEvent.InvocationMethod;
 
-import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.Preconditions;
 
 import java.util.Objects;
-import java.util.function.Supplier;
 
 import sun.misc.Cleaner;
 
@@ -42,9 +40,6 @@ final class TextClassificationSession implements TextClassifier {
     private final TextClassificationContext mClassificationContext;
     private final Cleaner mCleaner;
 
-    private final Object mLock = new Object();
-
-    @GuardedBy("mLock")
     private boolean mDestroyed;
 
     TextClassificationSession(TextClassificationContext context, TextClassifier delegate) {
@@ -59,7 +54,8 @@ final class TextClassificationSession implements TextClassifier {
 
     @Override
     public TextSelection suggestSelection(TextSelection.Request request) {
-        return checkDestroyedAndRun(() -> mDelegate.suggestSelection(request));
+        checkDestroyed();
+        return mDelegate.suggestSelection(request);
     }
 
     private void initializeRemoteSession() {
@@ -71,97 +67,77 @@ final class TextClassificationSession implements TextClassifier {
 
     @Override
     public TextClassification classifyText(TextClassification.Request request) {
-        return checkDestroyedAndRun(() -> mDelegate.classifyText(request));
+        checkDestroyed();
+        return mDelegate.classifyText(request);
     }
 
     @Override
     public TextLinks generateLinks(TextLinks.Request request) {
-        return checkDestroyedAndRun(() -> mDelegate.generateLinks(request));
+        checkDestroyed();
+        return mDelegate.generateLinks(request);
     }
 
     @Override
     public ConversationActions suggestConversationActions(ConversationActions.Request request) {
-        return checkDestroyedAndRun(() -> mDelegate.suggestConversationActions(request));
+        checkDestroyed();
+        return mDelegate.suggestConversationActions(request);
     }
 
     @Override
     public TextLanguage detectLanguage(TextLanguage.Request request) {
-        return checkDestroyedAndRun(() -> mDelegate.detectLanguage(request));
+        checkDestroyed();
+        return mDelegate.detectLanguage(request);
     }
 
     @Override
     public int getMaxGenerateLinksTextLength() {
-        return checkDestroyedAndRun(mDelegate::getMaxGenerateLinksTextLength);
+        checkDestroyed();
+        return mDelegate.getMaxGenerateLinksTextLength();
     }
 
     @Override
     public void onSelectionEvent(SelectionEvent event) {
-        checkDestroyedAndRun(() -> {
-            try {
-                if (mEventHelper.sanitizeEvent(event)) {
-                    mDelegate.onSelectionEvent(event);
-                }
-            } catch (Exception e) {
-                // Avoid crashing for event reporting.
-                Log.e(LOG_TAG, "Error reporting text classifier selection event", e);
+        try {
+            if (mEventHelper.sanitizeEvent(event)) {
+                mDelegate.onSelectionEvent(event);
             }
-            return null;
-        });
+        } catch (Exception e) {
+            // Avoid crashing for event reporting.
+            Log.e(LOG_TAG, "Error reporting text classifier selection event", e);
+        }
     }
 
     @Override
     public void onTextClassifierEvent(TextClassifierEvent event) {
-        checkDestroyedAndRun(() -> {
-            try {
-                event.mHiddenTempSessionId = mSessionId;
-                mDelegate.onTextClassifierEvent(event);
-            } catch (Exception e) {
-                // Avoid crashing for event reporting.
-                Log.e(LOG_TAG, "Error reporting text classifier event", e);
-            }
-            return null;
-        });
+        try {
+            event.mHiddenTempSessionId = mSessionId;
+            mDelegate.onTextClassifierEvent(event);
+        } catch (Exception e) {
+            // Avoid crashing for event reporting.
+            Log.e(LOG_TAG, "Error reporting text classifier event", e);
+        }
     }
 
     @Override
     public void destroy() {
-        synchronized (mLock) {
-            if (!mDestroyed) {
-                mCleaner.clean();
-                mDestroyed = true;
-            }
-        }
+        mCleaner.clean();
+        mDestroyed = true;
     }
 
     @Override
     public boolean isDestroyed() {
-        synchronized (mLock) {
-            return mDestroyed;
-        }
+        return mDestroyed;
     }
 
     /**
-     * Check whether the TextClassification Session was destroyed before and after the actual API
-     * invocation, and return response if not.
-     *
-     * @param responseSupplier a Supplier that represents a TextClassifier call
-     * @return the response of the TextClassifier call
-     * @throws IllegalStateException if this TextClassification session was destroyed before the
-     *                               call returned
+     * @throws IllegalStateException if this TextClassification session has been destroyed.
      * @see #isDestroyed()
      * @see #destroy()
      */
-    private <T> T checkDestroyedAndRun(Supplier<T> responseSupplier) {
-        if (!isDestroyed()) {
-            T response = responseSupplier.get();
-            synchronized (mLock) {
-                if (!mDestroyed) {
-                    return response;
-                }
-            }
+    private void checkDestroyed() {
+        if (mDestroyed) {
+            throw new IllegalStateException("This TextClassification session has been destroyed");
         }
-        throw new IllegalStateException(
-                "This TextClassification session has been destroyed");
     }
 
     /**

@@ -17,8 +17,6 @@
 package android.service.voice;
 
 import android.Manifest;
-import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.app.AppGlobals;
 import android.content.ComponentName;
 import android.content.pm.PackageManager;
@@ -30,7 +28,6 @@ import android.os.RemoteException;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.Xml;
-
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -45,33 +42,29 @@ public class VoiceInteractionServiceInfo {
     private ServiceInfo mServiceInfo;
     private String mSessionService;
     private String mRecognitionService;
-    private String mHotwordDetectionService;
     private String mSettingsActivity;
     private boolean mSupportsAssist;
     private boolean mSupportsLaunchFromKeyguard;
     private boolean mSupportsLocalInteraction;
 
-    /**
-     * Loads the service metadata published by the component. Success is indicated by
-     * {@link #getParseError()}.
-     *
-     * @param pm A PackageManager from which the XML can be loaded.
-     * @param comp The {@link VoiceInteractionService} component.
-     */
-    public VoiceInteractionServiceInfo(
-            @NonNull PackageManager pm, @NonNull ComponentName comp, int userHandle)
+    public VoiceInteractionServiceInfo(PackageManager pm, ComponentName comp)
+            throws PackageManager.NameNotFoundException {
+        this(pm, pm.getServiceInfo(comp, PackageManager.GET_META_DATA));
+    }
+
+    public VoiceInteractionServiceInfo(PackageManager pm, ComponentName comp, int userHandle)
             throws PackageManager.NameNotFoundException {
         this(pm, getServiceInfoOrThrow(comp, userHandle));
     }
 
-    @NonNull
-    private static ServiceInfo getServiceInfoOrThrow(@NonNull ComponentName comp, int userHandle)
+    static ServiceInfo getServiceInfoOrThrow(ComponentName comp, int userHandle)
             throws PackageManager.NameNotFoundException {
         try {
             ServiceInfo si = AppGlobals.getPackageManager().getServiceInfo(comp,
                     PackageManager.GET_META_DATA
                             | PackageManager.MATCH_DIRECT_BOOT_AWARE
-                            | PackageManager.MATCH_DIRECT_BOOT_UNAWARE,
+                            | PackageManager.MATCH_DIRECT_BOOT_UNAWARE
+                            | PackageManager.MATCH_DEBUG_TRIAGED_MISSING,
                     userHandle);
             if (si != null) {
                 return si;
@@ -81,23 +74,20 @@ public class VoiceInteractionServiceInfo {
         throw new PackageManager.NameNotFoundException(comp.toString());
     }
 
-    /**
-     * Loads the service metadata published by the component. Success is indicated by
-     * {@link #getParseError()}.
-     *
-     * @param pm A PackageManager from which the XML can be loaded; usually the PackageManager
-     *           from which {@code si} was originally retrieved.
-     * @param si The {@link VoiceInteractionService} info.
-     */
-    public VoiceInteractionServiceInfo(@NonNull PackageManager pm, @NonNull ServiceInfo si) {
+    public VoiceInteractionServiceInfo(PackageManager pm, ServiceInfo si) {
+        if (si == null) {
+            mParseError = "Service not available";
+            return;
+        }
         if (!Manifest.permission.BIND_VOICE_INTERACTION.equals(si.permission)) {
             mParseError = "Service does not require permission "
                     + Manifest.permission.BIND_VOICE_INTERACTION;
             return;
         }
 
-        try (XmlResourceParser parser = si.loadXmlMetaData(pm,
-                VoiceInteractionService.SERVICE_META_DATA)) {
+        XmlResourceParser parser = null;
+        try {
+            parser = si.loadXmlMetaData(pm, VoiceInteractionService.SERVICE_META_DATA);
             if (parser == null) {
                 mParseError = "No " + VoiceInteractionService.SERVICE_META_DATA
                         + " meta-data for " + si.packageName;
@@ -135,8 +125,6 @@ public class VoiceInteractionServiceInfo {
                     false);
             mSupportsLocalInteraction = array.getBoolean(com.android.internal.
                     R.styleable.VoiceInteractionService_supportsLocalInteraction, false);
-            mHotwordDetectionService = array.getString(com.android.internal.R.styleable
-                    .VoiceInteractionService_hotwordDetectionService);
             array.recycle();
             if (mSessionService == null) {
                 mParseError = "No sessionService specified";
@@ -146,10 +134,20 @@ public class VoiceInteractionServiceInfo {
                 mParseError = "No recognitionService specified";
                 return;
             }
-        } catch (XmlPullParserException | IOException | PackageManager.NameNotFoundException e) {
+        } catch (XmlPullParserException e) {
             mParseError = "Error parsing voice interation service meta-data: " + e;
             Log.w(TAG, "error parsing voice interaction service meta-data", e);
             return;
+        } catch (IOException e) {
+            mParseError = "Error parsing voice interation service meta-data: " + e;
+            Log.w(TAG, "error parsing voice interaction service meta-data", e);
+            return;
+        } catch (PackageManager.NameNotFoundException e) {
+            mParseError = "Error parsing voice interation service meta-data: " + e;
+            Log.w(TAG, "error parsing voice interaction service meta-data", e);
+            return;
+        } finally {
+            if (parser != null) parser.close();
         }
         mServiceInfo = si;
     }
@@ -184,10 +182,5 @@ public class VoiceInteractionServiceInfo {
 
     public boolean getSupportsLocalInteraction() {
         return mSupportsLocalInteraction;
-    }
-
-    @Nullable
-    public String getHotwordDetectionService() {
-        return mHotwordDetectionService;
     }
 }

@@ -23,17 +23,14 @@
     android:layout_marginEnd="@dimen/rounded_corner_content_padding"
     android:paddingStart="@dimen/nav_content_padding"
     android:paddingEnd="@dimen/nav_content_padding"
-    android:clipChildren="false"
-    android:clipToPadding="false"
     android:id="@+id/horizontal">
 
-    <com.android.systemui.navigationbar.buttons.NearestTouchFrame
+    <com.android.systemui.statusbar.phone.NearestTouchFrame
         android:id="@+id/nav_buttons"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:clipChildren="false"
-        android:clipToPadding="false"
-        systemui:isVertical="false">
+        android:clipToPadding="false">
 
         <LinearLayout
             android:id="@+id/ends_group"
@@ -53,6 +50,6 @@
             android:clipToPadding="false"
             android:clipChildren="false" />
 
-    </com.android.systemui.navigationbar.buttons.NearestTouchFrame>
+    </com.android.systemui.statusbar.phone.NearestTouchFrame>
 
 </FrameLayout>

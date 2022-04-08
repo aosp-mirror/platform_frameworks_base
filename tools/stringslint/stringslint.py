@@ -1,5 +1,4 @@
-#!/usr/bin/env python3
-#-*- coding: utf-8 -*-
+#!/usr/bin/env python
 
 # Copyright (C) 2018 The Android Open Source Project
 #
@@ -33,6 +32,9 @@ In general:
 
 import re, sys, codecs
 import lxml.etree as ET
+
+reload(sys)
+sys.setdefaultencoding('utf8')
 
 BLACK, RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN, WHITE = range(8)
 
@@ -116,7 +118,7 @@ def lint(path):
         raw = f.read()
         if len(raw.strip()) == 0:
             return warnings
-        tree = ET.fromstring(bytes(raw, encoding='utf-8'))
+        tree = ET.fromstring(raw)
         root = tree #tree.getroot()
 
     last_comment = None
@@ -229,6 +231,6 @@ for b in before:
 
 if len(after) > 0:
     for a in sorted(after.keys()):
-        print(after[a])
-        print()
+        print after[a]
+        print
     sys.exit(1)

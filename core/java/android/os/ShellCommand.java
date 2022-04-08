@@ -19,9 +19,15 @@ package android.os;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.util.Slog;
 
-import com.android.modules.utils.BasicShellCommandHandler;
+import com.android.internal.util.FastPrintWriter;
 
+import java.io.BufferedInputStream;
 import java.io.FileDescriptor;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.PrintWriter;
 
 /**
  * Helper for implementing {@link Binder#onShellCommand Binder.onShellCommand}.
@@ -92,7 +98,7 @@ public abstract class ShellCommand extends BasicShellCommandHandler {
         return super.handleDefaultCommands(cmd);
     }
 
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public String peekNextArg() {
         return super.peekNextArg();
     }

@@ -27,7 +27,6 @@ import android.graphics.Paint.Align;
 import android.graphics.Paint.Style;
 import android.graphics.Rect;
 import android.graphics.Typeface;
-import android.icu.text.DateFormatSymbols;
 import android.icu.text.DisplayContext;
 import android.icu.text.RelativeDateTimeFormatter;
 import android.icu.text.SimpleDateFormat;
@@ -50,6 +49,8 @@ import android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction;
 
 import com.android.internal.R;
 import com.android.internal.widget.ExploreByTouchHelper;
+
+import libcore.icu.LocaleData;
 
 import java.text.NumberFormat;
 import java.util.Locale;
@@ -193,8 +194,7 @@ class SimpleMonthView extends View {
     private void updateDayOfWeekLabels() {
         // Use tiny (e.g. single-character) weekday names from ICU. The indices
         // for this list correspond to Calendar days, e.g. SUNDAY is index 1.
-        final String[] tinyWeekdayNames = DateFormatSymbols.getInstance(mLocale)
-            .getWeekdays(DateFormatSymbols.FORMAT, DateFormatSymbols.NARROW);
+        final String[] tinyWeekdayNames = LocaleData.get(mLocale).tinyWeekdayNames;
         for (int i = 0; i < DAYS_IN_WEEK; i++) {
             mDayOfWeekLabels[i] = tinyWeekdayNames[(mWeekStart + i - 1) % DAYS_IN_WEEK + 1];
         }

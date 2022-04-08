@@ -16,7 +16,6 @@
 
 package com.android.systemui.doze
 
-import android.view.Display
 import com.android.systemui.doze.DozeLog.Reason
 import com.android.systemui.doze.DozeLog.reasonToString
 import com.android.systemui.log.LogBuffer
@@ -62,14 +61,6 @@ class DozeLogger @Inject constructor(
             bool1 = isDozing
         }, {
             "Dozing=$bool1"
-        })
-    }
-
-    fun logDozingSuppressed(isDozingSuppressed: Boolean) {
-        buffer.log(TAG, INFO, {
-            bool1 = isDozingSuppressed
-        }, {
-            "DozingSuppressed=$bool1"
         })
     }
 
@@ -152,36 +143,11 @@ class DozeLogger @Inject constructor(
         })
     }
 
-    fun logStateChangedSent(state: DozeMachine.State) {
-        buffer.log(TAG, INFO, {
-            str1 = state.name
-        }, {
-            "Doze state sent to all DozeMachineParts stateSent=$str1"
-        })
-    }
-
-    fun logDisplayStateDelayedByUdfps(delayedDisplayState: Int) {
-        buffer.log(TAG, INFO, {
-            str1 = Display.stateToString(delayedDisplayState)
-        }, {
-            "Delaying display state change to: $str1 due to UDFPS activity"
-        })
-    }
-
-    fun logDisplayStateChanged(displayState: Int) {
-        buffer.log(TAG, INFO, {
-            str1 = Display.stateToString(displayState)
-        }, {
-            "Display state changed to $str1"
-        })
-    }
-
-    fun logWakeDisplay(isAwake: Boolean, @Reason reason: Int) {
+    fun logWakeDisplay(isAwake: Boolean) {
         buffer.log(TAG, DEBUG, {
             bool1 = isAwake
-            int1 = reason
         }, {
-            "Display wakefulness changed, isAwake=$bool1, reason=${reasonToString(int1)}"
+            "Display wakefulness changed, isAwake=$bool1"
         })
     }
 
@@ -234,22 +200,6 @@ class DozeLogger @Inject constructor(
             str1 = state.name
         }, {
             "Doze state suppressed, state=$str1"
-        })
-    }
-
-    fun logDozeScreenBrightness(brightness: Int) {
-        buffer.log(TAG, INFO, {
-            int1 = brightness
-        }, {
-            "Doze screen brightness set, brightness=$int1"
-        })
-    }
-
-    fun logSetAodDimmingScrim(scrimOpacity: Long) {
-        buffer.log(TAG, INFO, {
-            long1 = scrimOpacity
-        }, {
-            "Doze aod dimming scrim opacity set, opacity=$long1"
         })
     }
 }

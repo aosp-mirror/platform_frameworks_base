@@ -34,6 +34,7 @@ import android.os.Binder;
 import android.os.RemoteException;
 import android.os.ServiceSpecificException;
 import android.os.UserHandle;
+import android.security.KeyStore;
 import android.security.keystore.recovery.KeyChainProtectionParams;
 import android.security.keystore.recovery.KeyChainSnapshot;
 import android.security.keystore.recovery.RecoveryCertPath;
@@ -109,14 +110,14 @@ public class RecoverableKeyStoreManager {
      * @hide
      */
     public static synchronized RecoverableKeyStoreManager
-            getInstance(Context context) {
+            getInstance(Context context, KeyStore keystore) {
         if (mInstance == null) {
             RecoverableKeyStoreDb db = RecoverableKeyStoreDb.newInstance(context);
             PlatformKeyManager platformKeyManager;
             ApplicationKeyStorage applicationKeyStorage;
             try {
                 platformKeyManager = PlatformKeyManager.getInstance(context, db);
-                applicationKeyStorage = ApplicationKeyStorage.getInstance();
+                applicationKeyStorage = ApplicationKeyStorage.getInstance(keystore);
             } catch (NoSuchAlgorithmException e) {
                 // Impossible: all algorithms must be supported by AOSP
                 throw new RuntimeException(e);

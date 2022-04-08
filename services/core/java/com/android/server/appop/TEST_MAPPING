@@ -4,9 +4,6 @@
             "name": "CtsAppOpsTestCases"
         },
         {
-            "name": "CtsAppOps2TestCases"
-        },
-        {
             "name": "FrameworksServicesTests",
             "options": [
                 {
@@ -48,10 +45,10 @@
             ]
         },
         {
-            "name": "CtsStatsdAtomHostTestCases",
+            "name": "CtsStatsdHostTestCases",
             "options": [
                 {
-                    "include-filter": "android.cts.statsdatom.appops.AppOpsTests#testAppOps"
+                    "include-filter": "android.cts.statsd.atom.UidAtomTests#testAppOps"
                 }
             ]
         }        

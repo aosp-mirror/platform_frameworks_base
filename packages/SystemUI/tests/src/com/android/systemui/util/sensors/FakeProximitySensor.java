@@ -16,17 +16,14 @@
 
 package com.android.systemui.util.sensors;
 
-import com.android.systemui.util.concurrency.DelayableExecutor;
-import com.android.systemui.util.concurrency.FakeExecution;
+import android.content.res.Resources;
 
 public class FakeProximitySensor extends ProximitySensor {
     private boolean mAvailable;
     private boolean mRegistered;
 
-    public FakeProximitySensor(ThresholdSensor primary, ThresholdSensor secondary,
-            DelayableExecutor delayableExecutor) {
-        super(primary, secondary == null ? new FakeThresholdSensor() : secondary,
-                delayableExecutor, new FakeExecution());
+    public FakeProximitySensor(Resources resources, AsyncSensorManager sensorManager) {
+        super(resources, sensorManager);
         mAvailable = true;
     }
 
@@ -34,7 +31,7 @@ public class FakeProximitySensor extends ProximitySensor {
         mAvailable = available;
     }
 
-    public void setLastEvent(ThresholdSensorEvent event) {
+    public void setLastEvent(ProximityEvent event) {
         mLastEvent = event;
     }
 
@@ -44,7 +41,7 @@ public class FakeProximitySensor extends ProximitySensor {
     }
 
     @Override
-    public boolean isLoaded() {
+    public boolean getSensorAvailable() {
         return mAvailable;
     }
 

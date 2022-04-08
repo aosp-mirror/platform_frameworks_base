@@ -17,7 +17,6 @@
 package android.content;
 
 import android.annotation.ArrayRes;
-import android.annotation.Nullable;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -69,7 +68,7 @@ public class RestrictionEntry implements Parcelable {
 
     /**
      * Restriction of type "multi-select". Use this for presenting a multi-select list where more
-     * than one entry can be selected, such as for choosing specific titles to allowlist.
+     * than one entry can be selected, such as for choosing specific titles to white-list.
      * Call {@link #setChoiceEntries(String[])} and
      * {@link #setChoiceValues(String[])} to set the localized list entries to present to the user
      * and the corresponding values, respectively.
@@ -453,7 +452,7 @@ public class RestrictionEntry implements Parcelable {
     }
 
     @Override
-    public boolean equals(@Nullable Object o) {
+    public boolean equals(Object o) {
         if (o == this) return true;
         if (!(o instanceof RestrictionEntry)) return false;
         final RestrictionEntry other = (RestrictionEntry) o;

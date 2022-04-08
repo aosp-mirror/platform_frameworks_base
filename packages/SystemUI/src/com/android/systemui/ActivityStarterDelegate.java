@@ -18,16 +18,13 @@ import android.app.PendingIntent;
 import android.content.Intent;
 import android.view.View;
 
-import androidx.annotation.Nullable;
-
-import com.android.systemui.animation.ActivityLaunchAnimator;
-import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.statusbar.phone.StatusBar;
 
 import java.util.Optional;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 
 import dagger.Lazy;
 
@@ -36,7 +33,7 @@ import dagger.Lazy;
  * delegates to an actual implementation (StatusBar).
  */
 @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
-@SysUISingleton
+@Singleton
 public class ActivityStarterDelegate implements ActivityStarter {
 
     private Optional<Lazy<StatusBar>> mActualStarter;
@@ -54,27 +51,18 @@ public class ActivityStarterDelegate implements ActivityStarter {
 
     @Override
     public void startPendingIntentDismissingKeyguard(PendingIntent intent,
-            Runnable intentSentUiThreadCallback) {
+            Runnable intentSentCallback) {
         mActualStarter.ifPresent(
                 starter -> starter.get().startPendingIntentDismissingKeyguard(intent,
-                        intentSentUiThreadCallback));
+                        intentSentCallback));
     }
 
     @Override
     public void startPendingIntentDismissingKeyguard(PendingIntent intent,
-            Runnable intentSentUiThreadCallback, View associatedView) {
+            Runnable intentSentCallback, View associatedView) {
         mActualStarter.ifPresent(
                 starter -> starter.get().startPendingIntentDismissingKeyguard(intent,
-                        intentSentUiThreadCallback, associatedView));
-    }
-
-    @Override
-    public void startPendingIntentDismissingKeyguard(PendingIntent intent,
-            Runnable intentSentUiThreadCallback,
-            ActivityLaunchAnimator.Controller animationController) {
-        mActualStarter.ifPresent(
-                starter -> starter.get().startPendingIntentDismissingKeyguard(intent,
-                        intentSentUiThreadCallback, animationController));
+                        intentSentCallback, associatedView));
     }
 
     @Override
@@ -88,13 +76,6 @@ public class ActivityStarterDelegate implements ActivityStarter {
     @Override
     public void startActivity(Intent intent, boolean dismissShade) {
         mActualStarter.ifPresent(starter -> starter.get().startActivity(intent, dismissShade));
-    }
-
-    @Override
-    public void startActivity(Intent intent, boolean dismissShade,
-            @Nullable ActivityLaunchAnimator.Controller animationController) {
-        mActualStarter.ifPresent(
-                starter -> starter.get().startActivity(intent, dismissShade, animationController));
     }
 
     @Override
@@ -116,24 +97,9 @@ public class ActivityStarterDelegate implements ActivityStarter {
     }
 
     @Override
-    public void postStartActivityDismissingKeyguard(Intent intent, int delay,
-            @Nullable ActivityLaunchAnimator.Controller animationController) {
-        mActualStarter.ifPresent(
-                starter -> starter.get().postStartActivityDismissingKeyguard(intent, delay,
-                        animationController));
-    }
-
-    @Override
     public void postStartActivityDismissingKeyguard(PendingIntent intent) {
         mActualStarter.ifPresent(
                 starter -> starter.get().postStartActivityDismissingKeyguard(intent));
-    }
-
-    @Override
-    public void postStartActivityDismissingKeyguard(PendingIntent intent,
-            ActivityLaunchAnimator.Controller animationController) {
-        mActualStarter.ifPresent(starter ->
-                starter.get().postStartActivityDismissingKeyguard(intent, animationController));
     }
 
     @Override

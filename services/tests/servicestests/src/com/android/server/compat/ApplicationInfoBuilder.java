@@ -22,7 +22,6 @@ class ApplicationInfoBuilder {
     private boolean mIsDebuggable;
     private int mTargetSdk;
     private String mPackageName;
-    private long mVersionCode;
 
     private ApplicationInfoBuilder() {
         mTargetSdk = -1;
@@ -47,11 +46,6 @@ class ApplicationInfoBuilder {
         return this;
     }
 
-    ApplicationInfoBuilder withVersionCode(Long versionCode) {
-        mVersionCode = versionCode;
-        return this;
-    }
-
     ApplicationInfo build() {
         final ApplicationInfo applicationInfo = new ApplicationInfo();
         if (mIsDebuggable) {
@@ -59,7 +53,6 @@ class ApplicationInfoBuilder {
         }
         applicationInfo.packageName = mPackageName;
         applicationInfo.targetSdkVersion = mTargetSdk;
-        applicationInfo.longVersionCode = mVersionCode;
         return applicationInfo;
     }
 }

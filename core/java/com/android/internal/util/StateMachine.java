@@ -17,7 +17,6 @@
 package com.android.internal.util;
 
 import android.compat.annotation.UnsupportedAppUsage;
-import android.os.Build;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
@@ -48,7 +47,7 @@ import java.util.Vector;
  * in Object Oriented programming and are used to perform initialization and
  * cleanup of the state respectively. The <code>getName</code> method returns the
  * name of the state; the default implementation returns the class name. It may be
- * desirable to have <code>getName</code> return the state instance name instead,
+ * desirable to have <code>getName</code> return the the state instance name instead,
  * in particular if a particular state class has multiple instances.</p>
  *
  * <p>When a state machine is created, <code>addState</code> is used to build the
@@ -433,14 +432,14 @@ public class StateMachine {
 
     /**
      * Convenience constant that maybe returned by processMessage
-     * to indicate the message was processed and is not to be
+     * to indicate the the message was processed and is not to be
      * processed by parent states
      */
     public static final boolean HANDLED = true;
 
     /**
      * Convenience constant that maybe returned by processMessage
-     * to indicate the message was NOT processed and is to be
+     * to indicate the the message was NOT processed and is to be
      * processed by parent states
      */
     public static final boolean NOT_HANDLED = false;
@@ -1325,7 +1324,7 @@ public class StateMachine {
      *
      * @param name of the state machine
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     protected StateMachine(String name, Handler handler) {
         initStateMachine(name, handler.getLooper());
     }
@@ -1358,7 +1357,7 @@ public class StateMachine {
      * Add a new state to the state machine, parent will be null
      * @param state to add
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public final void addState(State state) {
         mSmHandler.addState(state, null);
     }
@@ -1377,7 +1376,7 @@ public class StateMachine {
      *
      * @param initialState is the state which will receive the first message.
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public final void setInitialState(State initialState) {
         mSmHandler.setInitialState(initialState);
     }
@@ -1416,7 +1415,7 @@ public class StateMachine {
      *
      * @param destState will be the state that receives the next message.
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public final void transitionTo(IState destState) {
         mSmHandler.transitionTo(destState);
     }
@@ -1701,7 +1700,7 @@ public class StateMachine {
      * @param obj is assigned to Message.obj
      * @return  A Message object from the global pool
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public final Message obtainMessage(int what, int arg1, int arg2, Object obj) {
         return Message.obtain(mSmHandler, what, arg1, arg2, obj);
     }
@@ -1739,7 +1738,7 @@ public class StateMachine {
      *
      * Message is ignored if state machine has quit.
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public void sendMessage(int what, int arg1) {
         // mSmHandler can be null if the state machine has quit.
         SmHandler smh = mSmHandler;
@@ -1766,7 +1765,7 @@ public class StateMachine {
      *
      * Message is ignored if state machine has quit.
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public void sendMessage(int what, int arg1, int arg2, Object obj) {
         // mSmHandler can be null if the state machine has quit.
         SmHandler smh = mSmHandler;
@@ -2067,7 +2066,7 @@ public class StateMachine {
     /**
      * Start the state machine.
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public void start() {
         // mSmHandler can be null if the state machine has quit.
         SmHandler smh = mSmHandler;
@@ -2084,16 +2083,15 @@ public class StateMachine {
      * @param pw
      * @param args
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         pw.println(getName() + ":");
         pw.println(" total records=" + getLogRecCount());
         for (int i = 0; i < getLogRecSize(); i++) {
-            pw.println(" rec[" + i + "]: " + getLogRec(i));
+            pw.println(" rec[" + i + "]: " + getLogRec(i).toString());
             pw.flush();
         }
-        final IState curState = getCurrentState();
-        pw.println("curState=" + (curState == null ? "<QUIT>" : curState.getName()));
+        pw.println("curState=" + getCurrentState().getName());
     }
 
     @Override

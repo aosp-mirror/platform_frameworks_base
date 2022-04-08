@@ -15,9 +15,8 @@
   ~ limitations under the License
   -->
 
-<shape xmlns:android="http://schemas.android.com/apk/res/android"
-       xmlns:androidprv="http://schemas.android.com/apk/prv/res/android">
-    <solid android:color="?androidprv:attr/colorSurface" />
+<shape xmlns:android="http://schemas.android.com/apk/res/android">
+    <solid android:color="@color/notification_material_background_color" />
     <!--The radius is 1dp smaller than the notification one, to avoid aliasing bugs on the corners -->
     <corners android:radius="1dp" />
 </shape>

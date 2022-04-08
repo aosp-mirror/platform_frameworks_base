@@ -60,36 +60,7 @@ public class AudioEventLogger {
          * @return the same instance of the event
          */
         public Event printLog(String tag) {
-            return printLog(ALOGI, tag);
-        }
-
-        public static final int ALOGI = 0;
-        public static final int ALOGE = 1;
-        public static final int ALOGW = 2;
-        public static final int ALOGV = 3;
-
-        /**
-         * Same as {@link #printLog(String)} with a log type
-         * @param type one of {@link #ALOGI}, {@link #ALOGE}, {@link #ALOGV}
-         * @param tag
-         * @return
-         */
-        public Event printLog(int type, String tag) {
-            switch (type) {
-                case ALOGI:
-                    Log.i(tag, eventToString());
-                    break;
-                case ALOGE:
-                    Log.e(tag, eventToString());
-                    break;
-                case ALOGW:
-                    Log.w(tag, eventToString());
-                    break;
-                case ALOGV:
-                default:
-                    Log.v(tag, eventToString());
-                    break;
-            }
+            Log.i(tag, eventToString());
             return this;
         }
 

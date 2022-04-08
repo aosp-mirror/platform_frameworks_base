@@ -25,31 +25,30 @@ import android.os.Handler;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.util.Log;
+import android.util.MathUtils;
 import android.view.KeyEvent;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.view.WindowInsets;
 
-import com.android.keyguard.KeyguardHostViewController;
-import com.android.keyguard.KeyguardRootViewController;
+import com.android.internal.widget.LockPatternUtils;
+import com.android.keyguard.KeyguardHostView;
 import com.android.keyguard.KeyguardSecurityModel;
 import com.android.keyguard.KeyguardSecurityView;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.keyguard.ViewMediatorCallback;
-import com.android.keyguard.dagger.KeyguardBouncerComponent;
 import com.android.systemui.DejankUtils;
-import com.android.systemui.classifier.FalsingCollector;
-import com.android.systemui.dagger.qualifiers.RootView;
+import com.android.systemui.Dependency;
+import com.android.systemui.R;
 import com.android.systemui.keyguard.DismissCallbackRegistry;
+import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.shared.system.SysUiStatsLog;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 
 import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.inject.Inject;
 
 /**
  * A class which manages the bouncer on the lockscreen.
@@ -58,21 +57,20 @@ public class KeyguardBouncer {
 
     private static final String TAG = "KeyguardBouncer";
     static final long BOUNCER_FACE_DELAY = 1200;
-    public static final float ALPHA_EXPANSION_THRESHOLD = 0.95f;
-    public static final float EXPANSION_HIDDEN = 1f;
-    public static final float EXPANSION_VISIBLE = 0f;
+    static final float ALPHA_EXPANSION_THRESHOLD = 0.95f;
+    static final float EXPANSION_HIDDEN = 1f;
+    static final float EXPANSION_VISIBLE = 0f;
 
     protected final Context mContext;
     protected final ViewMediatorCallback mCallback;
+    protected final LockPatternUtils mLockPatternUtils;
     protected final ViewGroup mContainer;
-    private final FalsingCollector mFalsingCollector;
+    private final FalsingManager mFalsingManager;
     private final DismissCallbackRegistry mDismissCallbackRegistry;
     private final Handler mHandler;
-    private final List<BouncerExpansionCallback> mExpansionCallbacks = new ArrayList<>();
+    private final BouncerExpansionCallback mExpansionCallback;
     private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     private final KeyguardStateController mKeyguardStateController;
-    private final KeyguardSecurityModel mKeyguardSecurityModel;
-    private final KeyguardBouncerComponent.Factory mKeyguardBouncerComponentFactory;
     private final KeyguardUpdateMonitorCallback mUpdateMonitorCallback =
             new KeyguardUpdateMonitorCallback() {
                 @Override
@@ -82,48 +80,40 @@ public class KeyguardBouncer {
             };
     private final Runnable mRemoveViewRunnable = this::removeView;
     private final KeyguardBypassController mKeyguardBypassController;
-    private KeyguardHostViewController mKeyguardViewController;
-    private final List<KeyguardResetCallback> mResetCallbacks = new ArrayList<>();
+    protected KeyguardHostView mKeyguardView;
     private final Runnable mResetRunnable = ()-> {
-        if (mKeyguardViewController != null) {
-            mKeyguardViewController.resetSecurityContainer();
-            for (KeyguardResetCallback callback : new ArrayList<>(mResetCallbacks)) {
-                callback.onKeyguardReset();
-            }
+        if (mKeyguardView != null) {
+            mKeyguardView.resetSecurityContainer();
         }
     };
 
     private int mStatusBarHeight;
     private float mExpansion = EXPANSION_HIDDEN;
     protected ViewGroup mRoot;
-    private KeyguardRootViewController mRootViewController;
     private boolean mShowingSoon;
     private int mBouncerPromptReason;
     private boolean mIsAnimatingAway;
     private boolean mIsScrimmed;
 
-    private KeyguardBouncer(Context context, ViewMediatorCallback callback,
-            ViewGroup container,
-            DismissCallbackRegistry dismissCallbackRegistry, FalsingCollector falsingCollector,
+    public KeyguardBouncer(Context context, ViewMediatorCallback callback,
+            LockPatternUtils lockPatternUtils, ViewGroup container,
+            DismissCallbackRegistry dismissCallbackRegistry, FalsingManager falsingManager,
             BouncerExpansionCallback expansionCallback,
             KeyguardStateController keyguardStateController,
             KeyguardUpdateMonitor keyguardUpdateMonitor,
-            KeyguardBypassController keyguardBypassController, Handler handler,
-            KeyguardSecurityModel keyguardSecurityModel,
-            KeyguardBouncerComponent.Factory keyguardBouncerComponentFactory) {
+            KeyguardBypassController keyguardBypassController, Handler handler) {
         mContext = context;
         mCallback = callback;
+        mLockPatternUtils = lockPatternUtils;
         mContainer = container;
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
-        mFalsingCollector = falsingCollector;
+        mFalsingManager = falsingManager;
         mDismissCallbackRegistry = dismissCallbackRegistry;
+        mExpansionCallback = expansionCallback;
         mHandler = handler;
         mKeyguardStateController = keyguardStateController;
-        mKeyguardSecurityModel = keyguardSecurityModel;
-        mKeyguardBouncerComponentFactory = keyguardBouncerComponentFactory;
         mKeyguardUpdateMonitor.registerCallback(mUpdateMonitorCallback);
         mKeyguardBypassController = keyguardBypassController;
-        mExpansionCallbacks.add(expansionCallback);
     }
 
     public void show(boolean resetSecuritySelection) {
@@ -172,7 +162,7 @@ public class KeyguardBouncer {
 
         // If allowed, try to dismiss the Keyguard. If no security auth (password/pin/pattern) is
         // set, this will dismiss the whole Keyguard. Otherwise, show the bouncer.
-        if (allowDismissKeyguard && mKeyguardViewController.dismiss(activeUserId)) {
+        if (allowDismissKeyguard && mKeyguardView.dismiss(activeUserId)) {
             return;
         }
 
@@ -194,7 +184,7 @@ public class KeyguardBouncer {
         }
 
         mCallback.onBouncerVisiblityChanged(true /* shown */);
-        dispatchStartingToShow();
+        mExpansionCallback.onStartingToShow();
     }
 
     public boolean isScrimmed() {
@@ -207,14 +197,13 @@ public class KeyguardBouncer {
      * will never be notified and its internal state will be out of sync.
      */
     private void onFullyShown() {
-        mFalsingCollector.onBouncerShown();
-        if (mKeyguardViewController == null) {
+        mFalsingManager.onBouncerShown();
+        if (mKeyguardView == null) {
             Log.wtf(TAG, "onFullyShown when view was null");
         } else {
-            mKeyguardViewController.onResume();
+            mKeyguardView.onResume();
             if (mRoot != null) {
-                mRoot.announceForAccessibility(
-                        mKeyguardViewController.getAccessibilityTitleForCurrentMode());
+                mRoot.announceForAccessibility(mKeyguardView.getAccessibilityTitleForCurrentMode());
             }
         }
     }
@@ -224,32 +213,42 @@ public class KeyguardBouncer {
      */
     private void onFullyHidden() {
         cancelShowRunnable();
-        setVisibility(View.INVISIBLE);
-        mFalsingCollector.onBouncerHidden();
-        DejankUtils.postAfterTraversal(mResetRunnable);
-    }
-
-    private void setVisibility(@View.Visibility int visibility) {
         if (mRoot != null) {
-            mRoot.setVisibility(visibility);
-            dispatchVisibilityChanged();
+            mRoot.setVisibility(View.INVISIBLE);
         }
+        mFalsingManager.onBouncerHidden();
+        DejankUtils.postAfterTraversal(mResetRunnable);
     }
 
     private final Runnable mShowRunnable = new Runnable() {
         @Override
         public void run() {
-            setVisibility(View.VISIBLE);
+            mRoot.setVisibility(View.VISIBLE);
             showPromptReason(mBouncerPromptReason);
             final CharSequence customMessage = mCallback.consumeCustomMessage();
             if (customMessage != null) {
-                mKeyguardViewController.showErrorMessage(customMessage);
+                mKeyguardView.showErrorMessage(customMessage);
             }
-            mKeyguardViewController.appear(mStatusBarHeight);
+            // We might still be collapsed and the view didn't have time to layout yet or still
+            // be small, let's wait on the predraw to do the animation in that case.
+            if (mKeyguardView.getHeight() != 0 && mKeyguardView.getHeight() != mStatusBarHeight) {
+                mKeyguardView.startAppearAnimation();
+            } else {
+                mKeyguardView.getViewTreeObserver().addOnPreDrawListener(
+                        new ViewTreeObserver.OnPreDrawListener() {
+                            @Override
+                            public boolean onPreDraw() {
+                                mKeyguardView.getViewTreeObserver().removeOnPreDrawListener(this);
+                                mKeyguardView.startAppearAnimation();
+                                return true;
+                            }
+                        });
+                mKeyguardView.requestLayout();
+            }
             mShowingSoon = false;
             if (mExpansion == EXPANSION_VISIBLE) {
-                mKeyguardViewController.onResume();
-                mKeyguardViewController.resetSecurityContainer();
+                mKeyguardView.onResume();
+                mKeyguardView.resetSecurityContainer();
                 showPromptReason(mBouncerPromptReason);
             }
             SysUiStatsLog.write(SysUiStatsLog.KEYGUARD_BOUNCER_STATE_CHANGED,
@@ -265,16 +264,16 @@ public class KeyguardBouncer {
      *               and {@link KeyguardSecurityView#PROMPT_REASON_RESTART}
      */
     public void showPromptReason(int reason) {
-        if (mKeyguardViewController != null) {
-            mKeyguardViewController.showPromptReason(reason);
+        if (mKeyguardView != null) {
+            mKeyguardView.showPromptReason(reason);
         } else {
             Log.w(TAG, "Trying to show prompt reason on empty bouncer");
         }
     }
 
     public void showMessage(String message, ColorStateList colorState) {
-        if (mKeyguardViewController != null) {
-            mKeyguardViewController.showMessage(message, colorState);
+        if (mKeyguardView != null) {
+            mKeyguardView.showMessage(message, colorState);
         } else {
             Log.w(TAG, "Trying to show message on empty bouncer");
         }
@@ -288,17 +287,8 @@ public class KeyguardBouncer {
 
     public void showWithDismissAction(OnDismissAction r, Runnable cancelAction) {
         ensureView();
-        setDismissAction(r, cancelAction);
+        mKeyguardView.setOnDismissAction(r, cancelAction);
         show(false /* resetSecuritySelection */);
-    }
-
-    /**
-     * Set the actions to run when the keyguard is dismissed or when the dismiss is cancelled. Those
-     * actions will still be run even if this bouncer is not shown, for instance when authenticating
-     * with an alternate authenticator like the UDFPS.
-     */
-    public void setDismissAction(OnDismissAction r, Runnable cancelAction) {
-        mKeyguardViewController.setOnDismissAction(r, cancelAction);
     }
 
     public void hide(boolean destroyView) {
@@ -308,16 +298,16 @@ public class KeyguardBouncer {
             mDismissCallbackRegistry.notifyDismissCancelled();
         }
         mIsScrimmed = false;
-        mFalsingCollector.onBouncerHidden();
+        mFalsingManager.onBouncerHidden();
         mCallback.onBouncerVisiblityChanged(false /* shown */);
         cancelShowRunnable();
-        if (mKeyguardViewController != null) {
-            mKeyguardViewController.cancelDismissAction();
-            mKeyguardViewController.cleanUp();
+        if (mKeyguardView != null) {
+            mKeyguardView.cancelDismissAction();
+            mKeyguardView.cleanUp();
         }
         mIsAnimatingAway = false;
         if (mRoot != null) {
-            setVisibility(View.INVISIBLE);
+            mRoot.setVisibility(View.INVISIBLE);
             if (destroyView) {
 
                 // We have a ViewFlipper that unregisters a broadcast when being detached, which may
@@ -332,8 +322,8 @@ public class KeyguardBouncer {
      */
     public void startPreHideAnimation(Runnable runnable) {
         mIsAnimatingAway = true;
-        if (mKeyguardViewController != null) {
-            mKeyguardViewController.startDisappearAnimation(runnable);
+        if (mKeyguardView != null) {
+            mKeyguardView.startDisappearAnimation(runnable);
         } else if (runnable != null) {
             runnable.run();
         }
@@ -345,13 +335,12 @@ public class KeyguardBouncer {
     public void reset() {
         cancelShowRunnable();
         inflateView();
-        mFalsingCollector.onBouncerHidden();
+        mFalsingManager.onBouncerHidden();
     }
 
     public void onScreenTurnedOff() {
-        if (mKeyguardViewController != null
-                && mRoot != null && mRoot.getVisibility() == View.VISIBLE) {
-            mKeyguardViewController.onPause();
+        if (mKeyguardView != null && mRoot != null && mRoot.getVisibility() == View.VISIBLE) {
+            mKeyguardView.onPause();
         }
     }
 
@@ -365,10 +354,6 @@ public class KeyguardBouncer {
      */
     public boolean inTransit() {
         return mShowingSoon || mExpansion != EXPANSION_HIDDEN && mExpansion != EXPANSION_VISIBLE;
-    }
-
-    public boolean getShowingSoon() {
-        return mShowingSoon;
     }
 
     /**
@@ -389,7 +374,7 @@ public class KeyguardBouncer {
     }
 
     private void showPrimarySecurityScreen() {
-        mKeyguardViewController.showPrimarySecurityScreen();
+        mKeyguardView.showPrimarySecurityScreen();
     }
 
     /**
@@ -399,40 +384,43 @@ public class KeyguardBouncer {
      */
     public void setExpansion(float fraction) {
         float oldExpansion = mExpansion;
-        boolean expansionChanged = mExpansion != fraction;
         mExpansion = fraction;
-        if (mKeyguardViewController != null && !mIsAnimatingAway) {
-            mKeyguardViewController.setExpansion(fraction);
+        if (mKeyguardView != null && !mIsAnimatingAway) {
+            float alpha = MathUtils.map(ALPHA_EXPANSION_THRESHOLD, 1, 1, 0, fraction);
+            mKeyguardView.setAlpha(MathUtils.constrain(alpha, 0f, 1f));
+            mKeyguardView.setTranslationY(fraction * mKeyguardView.getHeight());
         }
 
         if (fraction == EXPANSION_VISIBLE && oldExpansion != EXPANSION_VISIBLE) {
             onFullyShown();
-            dispatchFullyShown();
+            mExpansionCallback.onFullyShown();
         } else if (fraction == EXPANSION_HIDDEN && oldExpansion != EXPANSION_HIDDEN) {
             onFullyHidden();
-            dispatchFullyHidden();
+            mExpansionCallback.onFullyHidden();
         } else if (fraction != EXPANSION_VISIBLE && oldExpansion == EXPANSION_VISIBLE) {
-            dispatchStartingToHide();
-            if (mKeyguardViewController != null) {
-                mKeyguardViewController.onStartingToHide();
+            mExpansionCallback.onStartingToHide();
+            if (mKeyguardView != null) {
+                mKeyguardView.onStartingToHide();
             }
-        }
-
-        if (expansionChanged) {
-            dispatchExpansionChanged();
         }
     }
 
     public boolean willDismissWithAction() {
-        return mKeyguardViewController != null && mKeyguardViewController.hasDismissActions();
+        return mKeyguardView != null && mKeyguardView.hasDismissActions();
     }
 
     public int getTop() {
-        if (mKeyguardViewController == null) {
+        if (mKeyguardView == null) {
             return 0;
         }
 
-        return mKeyguardViewController.getTop();
+        int top = mKeyguardView.getTop();
+        // The password view has an extra top padding that should be ignored.
+        if (mKeyguardView.getCurrentSecurityMode() == SecurityMode.Password) {
+            View messageArea = mKeyguardView.findViewById(R.id.keyguard_message_area);
+            top += messageArea.getTop();
+        }
+        return top;
     }
 
     protected void ensureView() {
@@ -448,17 +436,14 @@ public class KeyguardBouncer {
     protected void inflateView() {
         removeView();
         mHandler.removeCallbacks(mRemoveViewRunnable);
-        KeyguardBouncerComponent component = mKeyguardBouncerComponentFactory.create();
-        mRootViewController = component.getKeyguardRootViewController();
-        mRootViewController.init();
-        mRoot = mRootViewController.getView();  // TODO(b/166448040): Don't access root view here.
-        mKeyguardViewController = component.getKeyguardHostViewController();
-        mKeyguardViewController.init();
-
+        mRoot = (ViewGroup) LayoutInflater.from(mContext).inflate(R.layout.keyguard_bouncer, null);
+        mKeyguardView = mRoot.findViewById(R.id.keyguard_host_view);
+        mKeyguardView.setLockPatternUtils(mLockPatternUtils);
+        mKeyguardView.setViewMediatorCallback(mCallback);
         mContainer.addView(mRoot, mContainer.getChildCount());
         mStatusBarHeight = mRoot.getResources().getDimensionPixelOffset(
                 com.android.systemui.R.dimen.status_bar_height);
-        setVisibility(View.INVISIBLE);
+        mRoot.setVisibility(View.INVISIBLE);
 
         final WindowInsets rootInsets = mRoot.getRootWindowInsets();
         if (rootInsets != null) {
@@ -473,12 +458,16 @@ public class KeyguardBouncer {
         }
     }
 
+    public boolean onBackPressed() {
+        return mKeyguardView != null && mKeyguardView.handleBackKey();
+    }
+
     /**
      * @return True if and only if the security method should be shown before showing the
      * notifications on Keyguard, like SIM PIN/PUK.
      */
     public boolean needsFullscreenBouncer() {
-        SecurityMode mode = mKeyguardSecurityModel.getSecurityMode(
+        SecurityMode mode = Dependency.get(KeyguardSecurityModel.class).getSecurityMode(
                 KeyguardUpdateMonitor.getCurrentUser());
         return mode == SecurityMode.SimPin || mode == SecurityMode.SimPuk;
     }
@@ -488,8 +477,8 @@ public class KeyguardBouncer {
      * makes this method much faster.
      */
     public boolean isFullscreenBouncer() {
-        if (mKeyguardViewController != null) {
-            SecurityMode mode = mKeyguardViewController.getCurrentSecurityMode();
+        if (mKeyguardView != null) {
+            SecurityMode mode = mKeyguardView.getCurrentSecurityMode();
             return mode == SecurityMode.SimPin || mode == SecurityMode.SimPuk;
         }
         return false;
@@ -499,77 +488,21 @@ public class KeyguardBouncer {
      * WARNING: This method might cause Binder calls.
      */
     public boolean isSecure() {
-        return mKeyguardSecurityModel.getSecurityMode(
-                KeyguardUpdateMonitor.getCurrentUser()) != SecurityMode.None;
+        return mKeyguardView == null || mKeyguardView.getSecurityMode() != SecurityMode.None;
     }
 
     public boolean shouldDismissOnMenuPressed() {
-        return mKeyguardViewController.shouldEnableMenuKey();
+        return mKeyguardView.shouldEnableMenuKey();
     }
 
     public boolean interceptMediaKey(KeyEvent event) {
         ensureView();
-        return mKeyguardViewController.interceptMediaKey(event);
-    }
-
-    /**
-     * @return true if the pre IME back event should be handled
-     */
-    public boolean dispatchBackKeyEventPreIme() {
-        ensureView();
-        return mKeyguardViewController.dispatchBackKeyEventPreIme();
+        return mKeyguardView.interceptMediaKey(event);
     }
 
     public void notifyKeyguardAuthenticated(boolean strongAuth) {
         ensureView();
-        mKeyguardViewController.finish(strongAuth, KeyguardUpdateMonitor.getCurrentUser());
-    }
-
-    private void dispatchFullyShown() {
-        for (BouncerExpansionCallback callback : mExpansionCallbacks) {
-            callback.onFullyShown();
-        }
-    }
-
-    private void dispatchStartingToHide() {
-        for (BouncerExpansionCallback callback : mExpansionCallbacks) {
-            callback.onStartingToHide();
-        }
-    }
-
-    private void dispatchStartingToShow() {
-        for (BouncerExpansionCallback callback : mExpansionCallbacks) {
-            callback.onStartingToShow();
-        }
-    }
-
-    private void dispatchFullyHidden() {
-        for (BouncerExpansionCallback callback : mExpansionCallbacks) {
-            callback.onFullyHidden();
-        }
-    }
-
-    private void dispatchExpansionChanged() {
-        for (BouncerExpansionCallback callback : mExpansionCallbacks) {
-            callback.onExpansionChanged(mExpansion);
-        }
-    }
-
-    private void dispatchVisibilityChanged() {
-        for (BouncerExpansionCallback callback : mExpansionCallbacks) {
-            callback.onVisibilityChanged(mRoot.getVisibility() == View.VISIBLE);
-        }
-    }
-
-    /**
-     * Apply keyguard configuration from the currently active resources. This can be called when the
-     * device configuration changes, to re-apply some resources that are qualified on the device
-     * configuration.
-     */
-    public void updateResources() {
-        if (mKeyguardViewController != null) {
-            mKeyguardViewController.updateResources();
-        }
+        mKeyguardView.finish(strongAuth, KeyguardUpdateMonitor.getCurrentUser());
     }
 
     public void dump(PrintWriter pw) {
@@ -577,25 +510,10 @@ public class KeyguardBouncer {
         pw.println("  isShowing(): " + isShowing());
         pw.println("  mStatusBarHeight: " + mStatusBarHeight);
         pw.println("  mExpansion: " + mExpansion);
-        pw.println("  mKeyguardViewController; " + mKeyguardViewController);
-        pw.println("  mShowingSoon: " + mShowingSoon);
+        pw.println("  mKeyguardView; " + mKeyguardView);
+        pw.println("  mShowingSoon: " + mKeyguardView);
         pw.println("  mBouncerPromptReason: " + mBouncerPromptReason);
         pw.println("  mIsAnimatingAway: " + mIsAnimatingAway);
-    }
-
-    /** Update keyguard position based on a tapped X coordinate. */
-    public void updateKeyguardPosition(float x) {
-        if (mKeyguardViewController != null) {
-            mKeyguardViewController.updateKeyguardPosition(x);
-        }
-    }
-
-    public void addKeyguardResetCallback(KeyguardResetCallback callback) {
-        mResetCallbacks.add(callback);
-    }
-
-    public void removeKeyguardResetCallback(KeyguardResetCallback callback) {
-        mResetCallbacks.remove(callback);
     }
 
     public interface BouncerExpansionCallback {
@@ -603,65 +521,5 @@ public class KeyguardBouncer {
         void onStartingToHide();
         void onStartingToShow();
         void onFullyHidden();
-
-        /**
-         * From 0f {@link KeyguardBouncer#EXPANSION_VISIBLE} when fully visible
-         * to 1f {@link KeyguardBouncer#EXPANSION_HIDDEN} when fully hidden
-         */
-        default void onExpansionChanged(float bouncerHideAmount) {}
-
-        /**
-         * Invoked when visibility of KeyguardBouncer has changed.
-         * Note the bouncer expansion can be {@link KeyguardBouncer#EXPANSION_VISIBLE}, but the
-         * view's visibility can be {@link View.INVISIBLE}.
-         */
-        default void onVisibilityChanged(boolean isVisible) {}
-    }
-
-    public interface KeyguardResetCallback {
-        void onKeyguardReset();
-    }
-
-    /** Create a {@link KeyguardBouncer} once a container and bouncer callback are available. */
-    public static class Factory {
-        private final Context mContext;
-        private final ViewMediatorCallback mCallback;
-        private final DismissCallbackRegistry mDismissCallbackRegistry;
-        private final FalsingCollector mFalsingCollector;
-        private final KeyguardStateController mKeyguardStateController;
-        private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
-        private final KeyguardBypassController mKeyguardBypassController;
-        private final Handler mHandler;
-        private final KeyguardSecurityModel mKeyguardSecurityModel;
-        private final KeyguardBouncerComponent.Factory mKeyguardBouncerComponentFactory;
-
-        @Inject
-        public Factory(Context context, ViewMediatorCallback callback,
-                DismissCallbackRegistry dismissCallbackRegistry, FalsingCollector falsingCollector,
-                KeyguardStateController keyguardStateController,
-                KeyguardUpdateMonitor keyguardUpdateMonitor,
-                KeyguardBypassController keyguardBypassController, Handler handler,
-                KeyguardSecurityModel keyguardSecurityModel,
-                KeyguardBouncerComponent.Factory keyguardBouncerComponentFactory) {
-            mContext = context;
-            mCallback = callback;
-            mDismissCallbackRegistry = dismissCallbackRegistry;
-            mFalsingCollector = falsingCollector;
-            mKeyguardStateController = keyguardStateController;
-            mKeyguardUpdateMonitor = keyguardUpdateMonitor;
-            mKeyguardBypassController = keyguardBypassController;
-            mHandler = handler;
-            mKeyguardSecurityModel = keyguardSecurityModel;
-            mKeyguardBouncerComponentFactory = keyguardBouncerComponentFactory;
-        }
-
-        public KeyguardBouncer create(@RootView ViewGroup container,
-                BouncerExpansionCallback expansionCallback) {
-            return new KeyguardBouncer(mContext, mCallback, container,
-                    mDismissCallbackRegistry, mFalsingCollector, expansionCallback,
-                    mKeyguardStateController, mKeyguardUpdateMonitor,
-                    mKeyguardBypassController, mHandler, mKeyguardSecurityModel,
-                    mKeyguardBouncerComponentFactory);
-        }
     }
 }

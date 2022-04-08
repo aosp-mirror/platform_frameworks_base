@@ -23,14 +23,12 @@ import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import android.content.res.Resources;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
 
 import androidx.test.filters.SmallTest;
 
-import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.statusbar.notification.NotificationSectionsFeatureManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
@@ -61,14 +59,10 @@ public class NotificationRoundnessManagerTest extends SysuiTestCase {
     private ExpandableNotificationRow mSecond;
     @Mock
     private KeyguardBypassController mBypassController;
-    private float mSmallRadiusRatio;
 
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
-        final Resources resources = mContext.getResources();
-        mSmallRadiusRatio = resources.getDimension(R.dimen.notification_corner_radius_small)
-                / resources.getDimension(R.dimen.notification_corner_radius);
         mRoundnessManager = new NotificationRoundnessManager(
                 mBypassController,
                 new NotificationSectionsFeatureManager(new DeviceConfigProxy(), mContext));
@@ -79,10 +73,10 @@ public class NotificationRoundnessManagerTest extends SysuiTestCase {
                 TestableLooper.get(this));
         mFirst = testHelper.createRow();
         mFirst.setHeadsUpAnimatingAwayListener(animatingAway
-                -> mRoundnessManager.updateView(mFirst, false));
+                -> mRoundnessManager.onHeadsupAnimatingAwayChanged(mFirst, animatingAway));
         mSecond = testHelper.createRow();
         mSecond.setHeadsUpAnimatingAwayListener(animatingAway
-                -> mRoundnessManager.updateView(mSecond, false));
+                -> mRoundnessManager.onHeadsupAnimatingAwayChanged(mSecond, animatingAway));
         mRoundnessManager.setOnRoundingChangedCallback(mRoundnessCallback);
         mRoundnessManager.setAnimatedChildren(mAnimatedChildren);
         mRoundnessManager.updateRoundedChildren(new NotificationSection[]{
@@ -145,7 +139,7 @@ public class NotificationRoundnessManagerTest extends SysuiTestCase {
                 createSection(null, null)
         });
         Assert.assertEquals(1.0f, mSecond.getCurrentBottomRoundness(), 0.0f);
-        Assert.assertEquals(mSmallRadiusRatio, mSecond.getCurrentTopRoundness(), 0.0f);
+        Assert.assertEquals(0.0f, mSecond.getCurrentTopRoundness(), 0.0f);
     }
 
     @Test
@@ -166,14 +160,14 @@ public class NotificationRoundnessManagerTest extends SysuiTestCase {
 
         when(testHelper.getStatusBarStateController().isDozing()).thenReturn(true);
         row.setHeadsUp(true);
-        mRoundnessManager.updateView(entry.getRow(), false);
+        mRoundnessManager.onHeadsUpStateChanged(entry, true);
         Assert.assertEquals(1f, row.getCurrentBottomRoundness(), 0.0f);
         Assert.assertEquals(1f, row.getCurrentTopRoundness(), 0.0f);
 
         row.setHeadsUp(false);
-        mRoundnessManager.updateView(entry.getRow(), false);
-        Assert.assertEquals(mSmallRadiusRatio, row.getCurrentBottomRoundness(), 0.0f);
-        Assert.assertEquals(mSmallRadiusRatio, row.getCurrentTopRoundness(), 0.0f);
+        mRoundnessManager.onHeadsUpStateChanged(entry, false);
+        Assert.assertEquals(0f, row.getCurrentBottomRoundness(), 0.0f);
+        Assert.assertEquals(0f, row.getCurrentTopRoundness(), 0.0f);
     }
 
     @Test
@@ -183,7 +177,7 @@ public class NotificationRoundnessManagerTest extends SysuiTestCase {
                 createSection(null, mSecond)
         });
         Assert.assertEquals(1.0f, mSecond.getCurrentBottomRoundness(), 0.0f);
-        Assert.assertEquals(mSmallRadiusRatio, mSecond.getCurrentTopRoundness(), 0.0f);
+        Assert.assertEquals(0.0f, mSecond.getCurrentTopRoundness(), 0.0f);
     }
 
     @Test
@@ -192,7 +186,7 @@ public class NotificationRoundnessManagerTest extends SysuiTestCase {
                 createSection(mFirst, mFirst),
                 createSection(mSecond, null)
         });
-        Assert.assertEquals(mSmallRadiusRatio, mSecond.getCurrentBottomRoundness(), 0.0f);
+        Assert.assertEquals(0.0f, mSecond.getCurrentBottomRoundness(), 0.0f);
         Assert.assertEquals(1.0f, mSecond.getCurrentTopRoundness(), 0.0f);
     }
 
@@ -202,7 +196,7 @@ public class NotificationRoundnessManagerTest extends SysuiTestCase {
                 createSection(mFirst, null),
                 createSection(null, null)
         });
-        Assert.assertEquals(mSmallRadiusRatio, mFirst.getCurrentBottomRoundness(), 0.0f);
+        Assert.assertEquals(0.0f, mFirst.getCurrentBottomRoundness(), 0.0f);
         Assert.assertEquals(1.0f, mFirst.getCurrentTopRoundness(), 0.0f);
     }
 
@@ -212,8 +206,8 @@ public class NotificationRoundnessManagerTest extends SysuiTestCase {
                 createSection(mSecond, mSecond),
                 createSection(null, null)
         });
-        Assert.assertEquals(mSmallRadiusRatio, mFirst.getCurrentBottomRoundness(), 0.0f);
-        Assert.assertEquals(mSmallRadiusRatio, mFirst.getCurrentTopRoundness(), 0.0f);
+        Assert.assertEquals(0.0f, mFirst.getCurrentBottomRoundness(), 0.0f);
+        Assert.assertEquals(0.0f, mFirst.getCurrentTopRoundness(), 0.0f);
     }
 
     @Test
@@ -259,8 +253,8 @@ public class NotificationRoundnessManagerTest extends SysuiTestCase {
                 createSection(mSecond, mSecond),
                 createSection(null, null)
         });
-        Assert.assertEquals(mSmallRadiusRatio, mFirst.getCurrentBottomRoundness(), 0.0f);
-        Assert.assertEquals(mSmallRadiusRatio, mFirst.getCurrentTopRoundness(), 0.0f);
+        Assert.assertEquals(0.0f, mFirst.getCurrentBottomRoundness(), 0.0f);
+        Assert.assertEquals(0.0f, mFirst.getCurrentTopRoundness(), 0.0f);
     }
 
     @Test
@@ -309,14 +303,14 @@ public class NotificationRoundnessManagerTest extends SysuiTestCase {
         });
         mFirst.setHeadsUpAnimatingAway(true);
         mFirst.setHeadsUpAnimatingAway(false);
-        Assert.assertEquals(mSmallRadiusRatio, mFirst.getCurrentBottomRoundness(), 0.0f);
-        Assert.assertEquals(mSmallRadiusRatio, mFirst.getCurrentTopRoundness(), 0.0f);
+        Assert.assertEquals(0.0f, mFirst.getCurrentBottomRoundness(), 0.0f);
+        Assert.assertEquals(0.0f, mFirst.getCurrentTopRoundness(), 0.0f);
     }
 
     @Test
     public void testNoViewsFirstOrLastInSectionWhenSecondSectionEmpty() {
-        Assert.assertTrue(mFirst.isFirstInSection());
-        Assert.assertTrue(mFirst.isLastInSection());
+        Assert.assertFalse(mFirst.isFirstInSection());
+        Assert.assertFalse(mFirst.isLastInSection());
     }
 
     @Test
@@ -325,8 +319,8 @@ public class NotificationRoundnessManagerTest extends SysuiTestCase {
                 createSection(null, null),
                 createSection(mSecond, mSecond)
         });
-        Assert.assertTrue(mSecond.isFirstInSection());
-        Assert.assertTrue(mSecond.isLastInSection());
+        Assert.assertFalse(mSecond.isFirstInSection());
+        Assert.assertFalse(mSecond.isLastInSection());
     }
 
     @Test
@@ -335,10 +329,10 @@ public class NotificationRoundnessManagerTest extends SysuiTestCase {
                 createSection(mFirst, mFirst),
                 createSection(mSecond, mSecond)
         });
-        Assert.assertTrue(mFirst.isFirstInSection());
+        Assert.assertFalse(mFirst.isFirstInSection());
         Assert.assertTrue(mFirst.isLastInSection());
         Assert.assertTrue(mSecond.isFirstInSection());
-        Assert.assertTrue(mSecond.isLastInSection());
+        Assert.assertFalse(mSecond.isLastInSection());
     }
 
     private NotificationSection createSection(ExpandableNotificationRow first,

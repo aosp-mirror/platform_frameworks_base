@@ -19,7 +19,6 @@ package com.android.server.policy.keyguard;
 import android.content.Context;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.os.PowerManager;
 import android.os.RemoteException;
 import android.util.Slog;
 
@@ -102,29 +101,27 @@ public class KeyguardServiceWrapper implements IKeyguardService {
     }
 
     @Override
-    public void onStartedGoingToSleep(@PowerManager.GoToSleepReason int pmSleepReason) {
+    public void onStartedGoingToSleep(int reason) {
         try {
-            mService.onStartedGoingToSleep(pmSleepReason);
+            mService.onStartedGoingToSleep(reason);
         } catch (RemoteException e) {
             Slog.w(TAG , "Remote Exception", e);
         }
     }
 
     @Override
-    public void onFinishedGoingToSleep(
-            @PowerManager.GoToSleepReason int pmSleepReason, boolean cameraGestureTriggered) {
+    public void onFinishedGoingToSleep(int reason, boolean cameraGestureTriggered) {
         try {
-            mService.onFinishedGoingToSleep(pmSleepReason, cameraGestureTriggered);
+            mService.onFinishedGoingToSleep(reason, cameraGestureTriggered);
         } catch (RemoteException e) {
             Slog.w(TAG , "Remote Exception", e);
         }
     }
 
     @Override
-    public void onStartedWakingUp(
-            @PowerManager.WakeReason int pmWakeReason, boolean cameraGestureTriggered) {
+    public void onStartedWakingUp() {
         try {
-            mService.onStartedWakingUp(pmWakeReason, cameraGestureTriggered);
+            mService.onStartedWakingUp();
         } catch (RemoteException e) {
             Slog.w(TAG , "Remote Exception", e);
         }

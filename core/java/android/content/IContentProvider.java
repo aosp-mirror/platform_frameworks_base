@@ -16,13 +16,11 @@
 
 package android.content;
 
-import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.res.AssetFileDescriptor;
 import android.database.Cursor;
 import android.net.Uri;
-import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -40,11 +38,11 @@ import java.util.ArrayList;
  * @hide
  */
 public interface IContentProvider extends IInterface {
-    Cursor query(@NonNull AttributionSource attributionSource, Uri url,
+    public Cursor query(String callingPkg, @Nullable String attributionTag, Uri url,
             @Nullable String[] projection,
             @Nullable Bundle queryArgs, @Nullable ICancellationSignal cancellationSignal)
             throws RemoteException;
-    String getType(Uri url) throws RemoteException;
+    public String getType(Uri url) throws RemoteException;
 
     /**
      * A oneway version of getType. The functionality is exactly the same, except that the
@@ -57,56 +55,54 @@ public interface IContentProvider extends IInterface {
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.Q, publicAlternatives = "Use {@link "
             + "ContentProviderClient#insert(android.net.Uri, android.content.ContentValues)} "
             + "instead")
-    default Uri insert(String callingPkg, Uri url, ContentValues initialValues)
+    public default Uri insert(String callingPkg, Uri url, ContentValues initialValues)
             throws RemoteException {
-        return insert(new AttributionSource(Binder.getCallingUid(), callingPkg, null),
-                url, initialValues, null);
+        return insert(callingPkg, null, url, initialValues, null);
     }
-    Uri insert(@NonNull AttributionSource attributionSource, Uri url,
+    public Uri insert(String callingPkg, String attributionTag, Uri url,
             ContentValues initialValues, Bundle extras) throws RemoteException;
     @Deprecated
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.Q, publicAlternatives = "Use {@link "
             + "ContentProviderClient#bulkInsert(android.net.Uri, android.content.ContentValues[])"
             + "} instead")
-    default int bulkInsert(String callingPkg, Uri url, ContentValues[] initialValues)
+    public default int bulkInsert(String callingPkg, Uri url, ContentValues[] initialValues)
             throws RemoteException {
-        return bulkInsert(new AttributionSource(Binder.getCallingUid(), callingPkg, null),
-                url, initialValues);
+        return bulkInsert(callingPkg, null, url, initialValues);
     }
-    int bulkInsert(@NonNull AttributionSource attributionSource, Uri url,
+    public int bulkInsert(String callingPkg, String attributionTag, Uri url,
             ContentValues[] initialValues) throws RemoteException;
     @Deprecated
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.Q, publicAlternatives = "Use {@link "
             + "ContentProviderClient#delete(android.net.Uri, java.lang.String, java.lang"
             + ".String[])} instead")
-    default int delete(String callingPkg, Uri url, String selection, String[] selectionArgs)
+    public default int delete(String callingPkg, Uri url, String selection, String[] selectionArgs)
             throws RemoteException {
-        return delete(new AttributionSource(Binder.getCallingUid(), callingPkg, null),
-                url, ContentResolver.createSqlQueryBundle(selection, selectionArgs));
+        return delete(callingPkg, null, url,
+                ContentResolver.createSqlQueryBundle(selection, selectionArgs));
     }
-    int delete(@NonNull AttributionSource attributionSource, Uri url, Bundle extras)
+    public int delete(String callingPkg, String attributionTag, Uri url, Bundle extras)
             throws RemoteException;
     @Deprecated
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.Q, publicAlternatives = "Use {@link "
             + "ContentProviderClient#update(android.net.Uri, android.content.ContentValues, java"
             + ".lang.String, java.lang.String[])} instead")
-    default int update(String callingPkg, Uri url, ContentValues values, String selection,
+    public default int update(String callingPkg, Uri url, ContentValues values, String selection,
             String[] selectionArgs) throws RemoteException {
-        return update(new AttributionSource(Binder.getCallingUid(), callingPkg, null),
-                url, values, ContentResolver.createSqlQueryBundle(selection, selectionArgs));
+        return update(callingPkg, null, url, values,
+                ContentResolver.createSqlQueryBundle(selection, selectionArgs));
     }
-    int update(@NonNull AttributionSource attributionSource, Uri url, ContentValues values,
+    public int update(String callingPkg, String attributionTag, Uri url, ContentValues values,
             Bundle extras) throws RemoteException;
 
-    ParcelFileDescriptor openFile(@NonNull AttributionSource attributionSource,
+    public ParcelFileDescriptor openFile(String callingPkg, @Nullable String attributionTag,
+            Uri url, String mode, ICancellationSignal signal, IBinder callerToken)
+            throws RemoteException, FileNotFoundException;
+
+    public AssetFileDescriptor openAssetFile(String callingPkg, @Nullable String attributionTag,
             Uri url, String mode, ICancellationSignal signal)
             throws RemoteException, FileNotFoundException;
 
-    AssetFileDescriptor openAssetFile(@NonNull AttributionSource attributionSource,
-            Uri url, String mode, ICancellationSignal signal)
-            throws RemoteException, FileNotFoundException;
-
-    ContentProviderResult[] applyBatch(@NonNull AttributionSource attributionSource,
+    public ContentProviderResult[] applyBatch(String callingPkg, @Nullable String attributionTag,
             String authority, ArrayList<ContentProviderOperation> operations)
             throws RemoteException, OperationApplicationException;
 
@@ -116,19 +112,18 @@ public interface IContentProvider extends IInterface {
             + "instead")
     public default Bundle call(String callingPkg, String method,
             @Nullable String arg, @Nullable Bundle extras) throws RemoteException {
-        return call(new AttributionSource(Binder.getCallingUid(), callingPkg, null),
-                "unknown", method, arg, extras);
+        return call(callingPkg, null, "unknown", method, arg, extras);
     }
 
-    Bundle call(@NonNull AttributionSource attributionSource, String authority,
+    public Bundle call(String callingPkg, @Nullable String attributionTag, String authority,
             String method, @Nullable String arg, @Nullable Bundle extras) throws RemoteException;
 
-    int checkUriPermission(@NonNull AttributionSource attributionSource, Uri uri,
+    public int checkUriPermission(String callingPkg, @Nullable String attributionTag, Uri uri,
             int uid, int modeFlags) throws RemoteException;
 
-    ICancellationSignal createCancellationSignal() throws RemoteException;
+    public ICancellationSignal createCancellationSignal() throws RemoteException;
 
-    Uri canonicalize(@NonNull AttributionSource attributionSource, Uri uri)
+    public Uri canonicalize(String callingPkg, @Nullable String attributionTag, Uri uri)
             throws RemoteException;
 
     /**
@@ -136,35 +131,28 @@ public interface IContentProvider extends IInterface {
      * call returns immediately, and the resulting type is returned when available via
      * a binder callback.
      */
-    void canonicalizeAsync(@NonNull AttributionSource attributionSource, Uri uri,
+    void canonicalizeAsync(String callingPkg, @Nullable String attributionTag, Uri uri,
             RemoteCallback callback) throws RemoteException;
 
-    Uri uncanonicalize(@NonNull AttributionSource attributionSource, Uri uri)
+    public Uri uncanonicalize(String callingPkg, @Nullable String attributionTag, Uri uri)
             throws RemoteException;
 
-    /**
-     * A oneway version of uncanonicalize. The functionality is exactly the same, except that the
-     * call returns immediately, and the resulting type is returned when available via
-     * a binder callback.
-     */
-    void uncanonicalizeAsync(@NonNull AttributionSource attributionSource, Uri uri,
-            RemoteCallback callback) throws RemoteException;
-
-    public boolean refresh(@NonNull AttributionSource attributionSource, Uri url,
+    public boolean refresh(String callingPkg, @Nullable String attributionTag, Uri url,
             @Nullable Bundle extras, ICancellationSignal cancellationSignal) throws RemoteException;
 
     // Data interchange.
     public String[] getStreamTypes(Uri url, String mimeTypeFilter) throws RemoteException;
 
-    public AssetFileDescriptor openTypedAssetFile(@NonNull AttributionSource attributionSource,
-            Uri url, String mimeType, Bundle opts, ICancellationSignal signal)
+    public AssetFileDescriptor openTypedAssetFile(String callingPkg,
+            @Nullable String attributionTag, Uri url, String mimeType, Bundle opts,
+            ICancellationSignal signal)
             throws RemoteException, FileNotFoundException;
 
     /* IPC constants */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     static final String descriptor = "android.content.IContentProvider";
 
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     static final int QUERY_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION;
     static final int GET_TYPE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 1;
     static final int INSERT_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 2;
@@ -184,5 +172,4 @@ public interface IContentProvider extends IInterface {
     static final int CHECK_URI_PERMISSION_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 27;
     int GET_TYPE_ASYNC_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 28;
     int CANONICALIZE_ASYNC_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 29;
-    int UNCANONICALIZE_ASYNC_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 30;
 }

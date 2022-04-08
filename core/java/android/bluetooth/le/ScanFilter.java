@@ -16,14 +16,10 @@
 
 package android.bluetooth.le;
 
-import static java.util.Objects.requireNonNull;
-
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.SystemApi;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
-import android.bluetooth.BluetoothDevice.AddressType;
 import android.os.Parcel;
 import android.os.ParcelUuid;
 import android.os.Parcelable;
@@ -57,11 +53,6 @@ public final class ScanFilter implements Parcelable {
     @Nullable
     private final String mDeviceAddress;
 
-    private final @AddressType int mAddressType;
-
-    @Nullable
-    private final byte[] mIrk;
-
     @Nullable
     private final ParcelUuid mServiceUuid;
     @Nullable
@@ -88,12 +79,12 @@ public final class ScanFilter implements Parcelable {
     /** @hide */
     public static final ScanFilter EMPTY = new ScanFilter.Builder().build();
 
+
     private ScanFilter(String name, String deviceAddress, ParcelUuid uuid,
             ParcelUuid uuidMask, ParcelUuid solicitationUuid,
             ParcelUuid solicitationUuidMask, ParcelUuid serviceDataUuid,
             byte[] serviceData, byte[] serviceDataMask,
-            int manufacturerId, byte[] manufacturerData, byte[] manufacturerDataMask,
-            @AddressType int addressType, @Nullable byte[] irk) {
+            int manufacturerId, byte[] manufacturerData, byte[] manufacturerDataMask) {
         mDeviceName = name;
         mServiceUuid = uuid;
         mServiceUuidMask = uuidMask;
@@ -106,8 +97,6 @@ public final class ScanFilter implements Parcelable {
         mManufacturerId = manufacturerId;
         mManufacturerData = manufacturerData;
         mManufacturerDataMask = manufacturerDataMask;
-        mAddressType = addressType;
-        mIrk = irk;
     }
 
     @Override
@@ -168,15 +157,6 @@ public final class ScanFilter implements Parcelable {
                 dest.writeByteArray(mManufacturerDataMask);
             }
         }
-
-        // IRK
-        if (mDeviceAddress != null) {
-            dest.writeInt(mAddressType);
-            dest.writeInt(mIrk == null ? 0 : 1);
-            if (mIrk != null) {
-                dest.writeByteArray(mIrk);
-            }
-        }
     }
 
     /**
@@ -196,10 +176,8 @@ public final class ScanFilter implements Parcelable {
             if (in.readInt() == 1) {
                 builder.setDeviceName(in.readString());
             }
-            String address = null;
-            // If we have a non-null address
             if (in.readInt() == 1) {
-                address = in.readString();
+                builder.setDeviceAddress(in.readString());
             }
             if (in.readInt() == 1) {
                 ParcelUuid uuid = in.readParcelable(ParcelUuid.class.getClassLoader());
@@ -256,17 +234,6 @@ public final class ScanFilter implements Parcelable {
                 }
             }
 
-            // IRK
-            if (address != null) {
-                final int addressType = in.readInt();
-                if (in.readInt() == 1) {
-                    final byte[] irk = new byte[16];
-                    in.readByteArray(irk);
-                    builder.setDeviceAddress(address, addressType, irk);
-                } else {
-                    builder.setDeviceAddress(address, addressType);
-                }
-            }
             return builder.build();
         }
     };
@@ -311,23 +278,6 @@ public final class ScanFilter implements Parcelable {
     @Nullable
     public String getDeviceAddress() {
         return mDeviceAddress;
-    }
-
-    /**
-     * @hide
-     */
-    @SystemApi
-    public @AddressType int getAddressType() {
-        return mAddressType;
-    }
-
-    /**
-     * @hide
-     */
-    @SystemApi
-    @Nullable
-    public byte[] getIrk() {
-        return mIrk;
     }
 
     @Nullable
@@ -529,7 +479,7 @@ public final class ScanFilter implements Parcelable {
     }
 
     @Override
-    public boolean equals(@Nullable Object obj) {
+    public boolean equals(Object obj) {
         if (this == obj) {
             return true;
         }
@@ -566,16 +516,8 @@ public final class ScanFilter implements Parcelable {
      */
     public static final class Builder {
 
-        /**
-         * @hide
-         */
-        @SystemApi
-        public static final int LEN_IRK_OCTETS = 16;
-
         private String mDeviceName;
         private String mDeviceAddress;
-        private @AddressType int mAddressType = BluetoothDevice.ADDRESS_TYPE_PUBLIC;
-        private byte[] mIrk;
 
         private ParcelUuid mServiceUuid;
         private ParcelUuid mUuidMask;
@@ -604,134 +546,14 @@ public final class ScanFilter implements Parcelable {
          *
          * @param deviceAddress The device Bluetooth address for the filter. It needs to be in the
          * format of "01:02:03:AB:CD:EF". The device address can be validated using {@link
-         * BluetoothAdapter#checkBluetoothAddress}.  The @AddressType is defaulted to {@link
-         * BluetoothDevice#ADDRESS_TYPE_PUBLIC}
+         * BluetoothAdapter#checkBluetoothAddress}.
          * @throws IllegalArgumentException If the {@code deviceAddress} is invalid.
          */
         public Builder setDeviceAddress(String deviceAddress) {
-            if (deviceAddress == null) {
-                mDeviceAddress = deviceAddress;
-                return this;
-            }
-            return setDeviceAddress(deviceAddress, BluetoothDevice.ADDRESS_TYPE_PUBLIC);
-        }
-
-        /**
-         * Set filter on Address with AddressType
-         *
-         * <p>This key is used to resolve a private address from a public address.
-         *
-         * @param deviceAddress The device Bluetooth address for the filter. It needs to be in the
-         * format of "01:02:03:AB:CD:EF". The device address can be validated using {@link
-         * BluetoothAdapter#checkBluetoothAddress}. May be any type of address.
-         * @param addressType indication of the type of address
-         * e.g. {@link BluetoothDevice#ADDRESS_TYPE_PUBLIC}
-         * or {@link BluetoothDevice#ADDRESS_TYPE_RANDOM}
-         *
-         * @throws IllegalArgumentException If the {@code deviceAddress} is invalid.
-         * @throws IllegalArgumentException If the {@code addressType} is invalid length
-         * @throws NullPointerException if {@code deviceAddress} is null.
-         *
-         * @hide
-         */
-        @NonNull
-        @SystemApi
-        public Builder setDeviceAddress(@NonNull String deviceAddress,
-                                        @AddressType int addressType) {
-            return setDeviceAddressInternal(deviceAddress, addressType, null);
-        }
-
-        /**
-         * Set filter on Address with AddressType and the Identity Resolving Key (IRK).
-         *
-         * <p>The IRK is used to resolve a {@link BluetoothDevice#ADDRESS_TYPE_PUBLIC} from
-         * a PRIVATE_ADDRESS type.
-         *
-         * @param deviceAddress The device Bluetooth address for the filter. It needs to be in the
-         * format of "01:02:03:AB:CD:EF". The device address can be validated using {@link
-         * BluetoothAdapter#checkBluetoothAddress}.  This Address type must only be PUBLIC OR RANDOM
-         * STATIC.
-         * @param addressType indication of the type of address
-         * e.g. {@link BluetoothDevice#ADDRESS_TYPE_PUBLIC}
-         * or {@link BluetoothDevice#ADDRESS_TYPE_RANDOM}
-         * @param irk non-null byte array representing the Identity Resolving Key
-         *
-         * @throws IllegalArgumentException If the {@code deviceAddress} is invalid.
-         * @throws IllegalArgumentException if the {@code irk} is invalid length.
-         * @throws IllegalArgumentException If the {@code addressType} is invalid length or is not
-         * PUBLIC or RANDOM STATIC when an IRK is present.
-         * @throws NullPointerException if {@code deviceAddress} or {@code irk} is null.
-         *
-         * @hide
-         */
-        @NonNull
-        @SystemApi
-        public Builder setDeviceAddress(@NonNull String deviceAddress,
-                                        @AddressType int addressType,
-                                        @NonNull byte[] irk) {
-            requireNonNull(irk);
-            if (irk.length != LEN_IRK_OCTETS) {
-                throw new IllegalArgumentException("'irk' is invalid length!");
-            }
-            return setDeviceAddressInternal(deviceAddress, addressType, irk);
-        }
-
-        /**
-         * Set filter on Address with AddressType and the Identity Resolving Key (IRK).
-         *
-         * <p>Internal setter for the device address
-         *
-         * @param deviceAddress The device Bluetooth address for the filter. It needs to be in the
-         * format of "01:02:03:AB:CD:EF". The device address can be validated using {@link
-         * BluetoothAdapter#checkBluetoothAddress}.
-         * @param addressType indication of the type of address
-         * e.g. {@link BluetoothDevice#ADDRESS_TYPE_PUBLIC}
-         * @param irk non-null byte array representing the Identity Resolving Address; nullable
-         * internally.
-         *
-         * @throws IllegalArgumentException If the {@code deviceAddress} is invalid.
-         * @throws IllegalArgumentException If the {@code addressType} is invalid length.
-         * @throws NullPointerException if {@code deviceAddress} is null.
-         *
-         * @hide
-         */
-        @NonNull
-        private Builder setDeviceAddressInternal(@NonNull String deviceAddress,
-                                                 @AddressType int addressType,
-                                                 @Nullable byte[] irk) {
-
-            // Make sure our deviceAddress is valid!
-            requireNonNull(deviceAddress);
-            if (!BluetoothAdapter.checkBluetoothAddress(deviceAddress)) {
+            if (deviceAddress != null && !BluetoothAdapter.checkBluetoothAddress(deviceAddress)) {
                 throw new IllegalArgumentException("invalid device address " + deviceAddress);
             }
-
-            // Verify type range
-            if (addressType < BluetoothDevice.ADDRESS_TYPE_PUBLIC
-                || addressType > BluetoothDevice.ADDRESS_TYPE_RANDOM) {
-                throw new IllegalArgumentException("'addressType' is invalid!");
-            }
-
-            // IRK can only be used for a PUBLIC or RANDOM (STATIC) Address.
-            if (addressType == BluetoothDevice.ADDRESS_TYPE_RANDOM) {
-                // Don't want a bad combination of address and irk!
-                if (irk != null) {
-                    // Since there are 3 possible RANDOM subtypes we must check to make sure
-                    // the correct type of address is used.
-                    if (!BluetoothAdapter.isAddressRandomStatic(deviceAddress)) {
-                        throw new IllegalArgumentException(
-                                "Invalid combination: IRK requires either a PUBLIC or "
-                                + "RANDOM (STATIC) Address");
-                    }
-                }
-            }
-
-            // PUBLIC doesn't require extra work
-            // Without an IRK any address may be accepted
-
             mDeviceAddress = deviceAddress;
-            mAddressType = addressType;
-            mIrk = irk;
             return this;
         }
 
@@ -905,8 +727,7 @@ public final class ScanFilter implements Parcelable {
                     mServiceUuid, mUuidMask, mServiceSolicitationUuid,
                     mServiceSolicitationUuidMask,
                     mServiceDataUuid, mServiceData, mServiceDataMask,
-                    mManufacturerId, mManufacturerData, mManufacturerDataMask,
-                    mAddressType, mIrk);
+                    mManufacturerId, mManufacturerData, mManufacturerDataMask);
         }
     }
 }

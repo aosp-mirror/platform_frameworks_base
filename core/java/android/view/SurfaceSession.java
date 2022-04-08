@@ -17,7 +17,6 @@
 package android.view;
 
 import android.compat.annotation.UnsupportedAppUsage;
-import android.os.Build;
 
 /**
  * An instance of this class represents a connection to the surface
@@ -27,11 +26,12 @@ import android.os.Build;
  */
 public final class SurfaceSession {
     // Note: This field is accessed by native code.
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     private long mNativeClient; // SurfaceComposerClient*
 
     private static native long nativeCreate();
     private static native void nativeDestroy(long ptr);
+    private static native void nativeKill(long ptr);
 
     /** Create a new connection with the surface flinger. */
     @UnsupportedAppUsage
@@ -43,22 +43,22 @@ public final class SurfaceSession {
     @Override
     protected void finalize() throws Throwable {
         try {
-            kill();
+            if (mNativeClient != 0) {
+                nativeDestroy(mNativeClient);
+            }
         } finally {
             super.finalize();
         }
     }
 
     /**
-     * Remove the reference to the native Session object. The native object may still exist if
-     * there are other references to it, but it cannot be accessed from this Java object anymore.
+     * Forcibly detach native resources associated with this object.
+     * Unlike destroy(), after this call any surfaces that were created
+     * from the session will no longer work.
      */
     @UnsupportedAppUsage
     public void kill() {
-        if (mNativeClient != 0) {
-            nativeDestroy(mNativeClient);
-            mNativeClient = 0;
-        }
+        nativeKill(mNativeClient);
     }
 }
 

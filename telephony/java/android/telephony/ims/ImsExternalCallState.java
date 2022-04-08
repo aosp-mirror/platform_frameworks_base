@@ -49,7 +49,8 @@ public final class ImsExternalCallState implements Parcelable {
     public static final int CALL_STATE_TERMINATED = 2;
 
     /**@hide*/
-    @IntDef(value = {
+    @IntDef(flag = true,
+            value = {
                     CALL_STATE_CONFIRMED,
                     CALL_STATE_TERMINATED
             },
@@ -58,7 +59,8 @@ public final class ImsExternalCallState implements Parcelable {
     public @interface ExternalCallState {}
 
     /**@hide*/
-    @IntDef(value = {
+    @IntDef(flag = true,
+            value = {
                     ImsCallProfile.CALL_TYPE_VOICE,
                     ImsCallProfile.CALL_TYPE_VT_TX,
                     ImsCallProfile.CALL_TYPE_VT_RX,

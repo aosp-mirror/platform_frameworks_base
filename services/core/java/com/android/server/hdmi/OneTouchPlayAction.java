@@ -16,12 +16,13 @@
 package com.android.server.hdmi;
 
 import android.hardware.hdmi.HdmiControlManager;
-import android.hardware.hdmi.HdmiDeviceInfo;
 import android.hardware.hdmi.HdmiPlaybackClient.OneTouchPlayCallback;
 import android.hardware.hdmi.IHdmiControlCallback;
+import android.os.RemoteException;
 import android.util.Slog;
 
-import com.android.internal.annotations.VisibleForTesting;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Feature action that performs one touch play against TV/Display device. This action is initiated
@@ -42,19 +43,16 @@ final class OneTouchPlayAction extends HdmiCecFeatureAction {
     // standby mode, and do not accept the command until their power status becomes 'ON'.
     // For a workaround, we send <Give Device Power Status> commands periodically to make sure
     // the device switches its status to 'ON'. Then we send additional <Active Source>.
-    @VisibleForTesting
-    static final int STATE_WAITING_FOR_REPORT_POWER_STATUS = 1;
+    private static final int STATE_WAITING_FOR_REPORT_POWER_STATUS = 1;
 
     // The maximum number of times we send <Give Device Power Status> before we give up.
     // We wait up to RESPONSE_TIMEOUT_MS * LOOP_COUNTER_MAX = 20 seconds.
     private static final int LOOP_COUNTER_MAX = 10;
 
     private final int mTargetAddress;
-    private final boolean mIsCec20;
+    private final List<IHdmiControlCallback> mCallbacks = new ArrayList<>();
 
     private int mPowerStatusCounter = 0;
-
-    private HdmiCecLocalDeviceSource mSource;
 
     // Factory method. Ensures arguments are valid.
     static OneTouchPlayAction create(HdmiCecLocalDeviceSource source,
@@ -63,79 +61,44 @@ final class OneTouchPlayAction extends HdmiCecFeatureAction {
             Slog.e(TAG, "Wrong arguments");
             return null;
         }
-        return new OneTouchPlayAction(source, targetAddress, callback);
+        return new OneTouchPlayAction(source, targetAddress,
+                callback);
     }
 
     private OneTouchPlayAction(HdmiCecLocalDevice localDevice, int targetAddress,
             IHdmiControlCallback callback) {
-        this(localDevice, targetAddress, callback,
-                localDevice.getDeviceInfo().getCecVersion()
-                        >= HdmiControlManager.HDMI_CEC_VERSION_2_0
-                        && getTargetCecVersion(localDevice, targetAddress)
-                        >= HdmiControlManager.HDMI_CEC_VERSION_2_0);
-    }
-
-    @VisibleForTesting
-    OneTouchPlayAction(HdmiCecLocalDevice localDevice, int targetAddress,
-            IHdmiControlCallback callback, boolean isCec20) {
-        super(localDevice, callback);
+        super(localDevice);
         mTargetAddress = targetAddress;
-        mIsCec20 = isCec20;
+        addCallback(callback);
     }
 
     @Override
     boolean start() {
-        // Because only source device can create this action, it's safe to cast.
-        mSource = source();
         sendCommand(HdmiCecMessageBuilder.buildTextViewOn(getSourceAddress(), mTargetAddress));
-
-        boolean is20TargetOnBefore = mIsCec20 && getTargetDevicePowerStatus(mSource, mTargetAddress,
-                HdmiControlManager.POWER_STATUS_UNKNOWN) == HdmiControlManager.POWER_STATUS_ON;
         broadcastActiveSource();
-        // If the device is not an audio system itself, request the connected audio system to
-        // turn on.
-        if (shouldTurnOnConnectedAudioSystem()) {
-            sendCommand(HdmiCecMessageBuilder.buildSystemAudioModeRequest(getSourceAddress(),
-                    Constants.ADDR_AUDIO_SYSTEM, getSourcePath(), true));
-        }
-
-        if (!mIsCec20) {
-            queryDevicePowerStatus();
-        } else {
-            int targetPowerStatus = getTargetDevicePowerStatus(mSource, mTargetAddress,
-                    HdmiControlManager.POWER_STATUS_UNKNOWN);
-            if (targetPowerStatus == HdmiControlManager.POWER_STATUS_UNKNOWN) {
-                queryDevicePowerStatus();
-            } else if (targetPowerStatus == HdmiControlManager.POWER_STATUS_ON) {
-                if (!is20TargetOnBefore) {
-                    // Suppress 2nd <Active Source> message if the target device was already on when
-                    // the 1st one was sent.
-                    broadcastActiveSource();
-                }
-                finishWithCallback(HdmiControlManager.RESULT_SUCCESS);
-                return true;
-            }
-        }
-        mState = STATE_WAITING_FOR_REPORT_POWER_STATUS;
+        queryDevicePowerStatus();
         addTimer(mState, HdmiConfig.TIMEOUT_MS);
         return true;
     }
 
     private void broadcastActiveSource() {
-        mSource.mService.setAndBroadcastActiveSourceFromOneDeviceType(
-                mTargetAddress, getSourcePath(), "OneTouchPlayAction#broadcastActiveSource()");
+        // Because only source device can create this action, it's safe to cast.
+        HdmiCecLocalDeviceSource source = source();
+        source.mService.setAndBroadcastActiveSourceFromOneDeviceType(
+                mTargetAddress, getSourcePath());
         // When OneTouchPlay is called, client side should be responsible to send out the intent
         // of which internal source, for example YouTube, it would like to switch to.
         // Here we only update the active port and the active source records in the local
         // device as well as claiming Active Source.
-        if (mSource.mService.audioSystem() != null) {
-            mSource = mSource.mService.audioSystem();
+        if (source.mService.audioSystem() != null) {
+            source = source.mService.audioSystem();
         }
-        mSource.setRoutingPort(Constants.CEC_SWITCH_HOME);
-        mSource.setLocalActivePort(Constants.CEC_SWITCH_HOME);
+        source.setRoutingPort(Constants.CEC_SWITCH_HOME);
+        source.setLocalActivePort(Constants.CEC_SWITCH_HOME);
     }
 
     private void queryDevicePowerStatus() {
+        mState = STATE_WAITING_FOR_REPORT_POWER_STATUS;
         sendCommand(HdmiCecMessageBuilder.buildGiveDevicePowerStatus(getSourceAddress(),
                 mTargetAddress));
     }
@@ -150,7 +113,8 @@ final class OneTouchPlayAction extends HdmiCecFeatureAction {
             int status = cmd.getParams()[0];
             if (status == HdmiControlManager.POWER_STATUS_ON) {
                 broadcastActiveSource();
-                finishWithCallback(HdmiControlManager.RESULT_SUCCESS);
+                invokeCallback(HdmiControlManager.RESULT_SUCCESS);
+                finish();
             }
             return true;
         }
@@ -168,39 +132,23 @@ final class OneTouchPlayAction extends HdmiCecFeatureAction {
                 addTimer(mState, HdmiConfig.TIMEOUT_MS);
             } else {
                 // Couldn't wake up the TV for whatever reason. Report failure.
-                finishWithCallback(HdmiControlManager.RESULT_TIMEOUT);
+                invokeCallback(HdmiControlManager.RESULT_TIMEOUT);
+                finish();
             }
         }
     }
 
-    private boolean shouldTurnOnConnectedAudioSystem() {
-        HdmiControlService service = mSource.mService;
-        if (service.isAudioSystemDevice()) {
-            return false;
-        }
-        @HdmiControlManager.PowerControlMode String sendStandbyOnSleep =
-                service.getHdmiCecConfig().getStringValue(
-                        HdmiControlManager.CEC_SETTING_NAME_POWER_CONTROL_MODE);
-        return sendStandbyOnSleep.equals(HdmiControlManager.POWER_CONTROL_MODE_BROADCAST);
+    public void addCallback(IHdmiControlCallback callback) {
+        mCallbacks.add(callback);
     }
 
-    private static int getTargetCecVersion(HdmiCecLocalDevice localDevice,
-            int targetLogicalAddress) {
-        HdmiDeviceInfo targetDevice = localDevice.mService.getHdmiCecNetwork().getCecDeviceInfo(
-                targetLogicalAddress);
-        if (targetDevice != null) {
-            return targetDevice.getCecVersion();
+    private void invokeCallback(int result) {
+        try {
+            for (IHdmiControlCallback callback : mCallbacks) {
+                callback.onComplete(result);
+            }
+        } catch (RemoteException e) {
+            Slog.e(TAG, "Callback failed:" + e);
         }
-        return HdmiControlManager.HDMI_CEC_VERSION_1_4_B;
-    }
-
-    private static int getTargetDevicePowerStatus(HdmiCecLocalDevice localDevice,
-            int targetLogicalAddress, int defaultPowerStatus) {
-        HdmiDeviceInfo targetDevice = localDevice.mService.getHdmiCecNetwork().getCecDeviceInfo(
-                targetLogicalAddress);
-        if (targetDevice != null) {
-            return targetDevice.getDevicePowerStatus();
-        }
-        return defaultPowerStatus;
     }
 }

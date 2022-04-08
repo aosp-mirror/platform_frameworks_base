@@ -19,16 +19,15 @@ package com.android.server.om;
 import android.annotation.NonNull;
 import android.content.om.OverlayInfo;
 import android.content.om.OverlayableInfo;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageInfo;
 import android.net.Uri;
 import android.os.Process;
 import android.text.TextUtils;
 import android.util.Pair;
-import android.util.Slog;
 
-import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.CollectionUtils;
-import com.android.server.pm.parsing.pkg.AndroidPackage;
 
 import java.io.IOException;
 import java.util.List;
@@ -43,7 +42,10 @@ import java.util.Map;
  */
 public class OverlayActorEnforcer {
 
-    private final PackageManagerHelper mPackageManager;
+    // By default, the reason is not logged to prevent leaks of why it failed
+    private static final boolean DEBUG_REASON = false;
+
+    private final OverlayableInfoCallback mOverlayableCallback;
 
     /**
      * @return nullable actor result with {@link ActorState} failure status
@@ -64,7 +66,7 @@ public class OverlayActorEnforcer {
 
         String actorNamespace = actorUri.getAuthority();
         Map<String, String> namespace = namedActors.get(actorNamespace);
-        if (ArrayUtils.isEmpty(namespace)) {
+        if (namespace == null) {
             return Pair.create(null, ActorState.MISSING_NAMESPACE);
         }
 
@@ -77,57 +79,44 @@ public class OverlayActorEnforcer {
         return Pair.create(packageName, ActorState.ALLOWED);
     }
 
-    public OverlayActorEnforcer(@NonNull PackageManagerHelper packageManager) {
-        mPackageManager = packageManager;
+    public OverlayActorEnforcer(@NonNull OverlayableInfoCallback overlayableCallback) {
+        mOverlayableCallback = overlayableCallback;
     }
 
     void enforceActor(@NonNull OverlayInfo overlayInfo, @NonNull String methodName,
             int callingUid, int userId) throws SecurityException {
-        final ActorState actorState = isAllowedActor(methodName, overlayInfo, callingUid, userId);
+        ActorState actorState = isAllowedActor(methodName, overlayInfo, callingUid, userId);
         if (actorState == ActorState.ALLOWED) {
             return;
         }
 
-        final String targetOverlayableName = overlayInfo.targetOverlayableName;
-        final String errorMessage = "UID" + callingUid + " is not allowed to call " + methodName
-                + " for "
+        String targetOverlayableName = overlayInfo.targetOverlayableName;
+        throw new SecurityException("UID" + callingUid + " is not allowed to call "
+                + methodName + " for "
                 + (TextUtils.isEmpty(targetOverlayableName) ? "" : (targetOverlayableName + " in "))
-                + overlayInfo.targetPackageName + " for user " + userId;
-        Slog.w(OverlayManagerService.TAG, errorMessage + " because " + actorState);
-        throw new SecurityException(errorMessage);
+                + overlayInfo.targetPackageName + (DEBUG_REASON ? (" because " + actorState) : "")
+        );
     }
 
     /**
      * See {@link OverlayActorEnforcer} class comment for actor requirements.
      * @return true if the actor is allowed to act on the target overlayInfo
      */
-    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PRIVATE)
-    public ActorState isAllowedActor(String methodName, OverlayInfo overlayInfo,
+    private ActorState isAllowedActor(String methodName, OverlayInfo overlayInfo,
             int callingUid, int userId) {
-        // Checked first to avoid package not found errors, which are ignored for calls from shell
         switch (callingUid) {
             case Process.ROOT_UID:
             case Process.SYSTEM_UID:
                 return ActorState.ALLOWED;
         }
 
-        final String targetPackageName = overlayInfo.targetPackageName;
-        final AndroidPackage targetPkgInfo = mPackageManager.getPackageForUser(targetPackageName,
-                userId);
-        if (targetPkgInfo == null) {
-            return ActorState.TARGET_NOT_FOUND;
-        }
-
-        if (targetPkgInfo.isDebuggable()) {
-            return ActorState.ALLOWED;
-        }
-
-        String[] callingPackageNames = mPackageManager.getPackagesForUid(callingUid);
+        String[] callingPackageNames = mOverlayableCallback.getPackagesForUid(callingUid);
         if (ArrayUtils.isEmpty(callingPackageNames)) {
             return ActorState.NO_PACKAGES_FOR_UID;
         }
 
         // A target is always an allowed actor for itself
+        String targetPackageName = overlayInfo.targetPackageName;
         if (ArrayUtils.contains(callingPackageNames, targetPackageName)) {
             return ActorState.ALLOWED;
         }
@@ -136,12 +125,12 @@ public class OverlayActorEnforcer {
 
         if (TextUtils.isEmpty(targetOverlayableName)) {
             try {
-                if (mPackageManager.doesTargetDefineOverlayable(targetPackageName, userId)) {
+                if (mOverlayableCallback.doesTargetDefineOverlayable(targetPackageName, userId)) {
                     return ActorState.MISSING_TARGET_OVERLAYABLE_NAME;
                 } else {
                     // If there's no overlayable defined, fallback to the legacy permission check
                     try {
-                        mPackageManager.enforcePermission(
+                        mOverlayableCallback.enforcePermission(
                                 android.Manifest.permission.CHANGE_OVERLAY_PACKAGES, methodName);
 
                         // If the previous method didn't throw, check passed
@@ -157,10 +146,10 @@ public class OverlayActorEnforcer {
 
         OverlayableInfo targetOverlayable;
         try {
-            targetOverlayable = mPackageManager.getOverlayableForTarget(targetPackageName,
+            targetOverlayable = mOverlayableCallback.getOverlayableForTarget(targetPackageName,
                     targetOverlayableName, userId);
         } catch (IOException e) {
-            return ActorState.UNABLE_TO_GET_TARGET_OVERLAYABLE;
+            return ActorState.UNABLE_TO_GET_TARGET;
         }
 
         if (targetOverlayable == null) {
@@ -171,7 +160,7 @@ public class OverlayActorEnforcer {
         if (TextUtils.isEmpty(actor)) {
             // If there's no actor defined, fallback to the legacy permission check
             try {
-                mPackageManager.enforcePermission(
+                mOverlayableCallback.enforcePermission(
                         android.Manifest.permission.CHANGE_OVERLAY_PACKAGES, methodName);
 
                 // If the previous method didn't throw, check passed
@@ -181,25 +170,30 @@ public class OverlayActorEnforcer {
             }
         }
 
-        Map<String, Map<String, String>> namedActors = mPackageManager.getNamedActors();
+        Map<String, Map<String, String>> namedActors = mOverlayableCallback.getNamedActors();
         Pair<String, ActorState> actorUriPair = getPackageNameForActor(actor, namedActors);
         ActorState actorUriState = actorUriPair.second;
         if (actorUriState != ActorState.ALLOWED) {
             return actorUriState;
         }
 
-        String actorPackageName = actorUriPair.first;
-        AndroidPackage actorPackage = mPackageManager.getPackageForUser(actorPackageName, userId);
-        if (actorPackage == null) {
-            return ActorState.ACTOR_NOT_FOUND;
+        String packageName = actorUriPair.first;
+        PackageInfo packageInfo = mOverlayableCallback.getPackageInfo(packageName, userId);
+        if (packageInfo == null) {
+            return ActorState.MISSING_APP_INFO;
+        }
+
+        ApplicationInfo appInfo = packageInfo.applicationInfo;
+        if (appInfo == null) {
+            return ActorState.MISSING_APP_INFO;
         }
 
         // Currently only pre-installed apps can be actors
-        if (!actorPackage.isSystem()) {
+        if (!appInfo.isSystemApp() && !appInfo.isUpdatedSystemApp()) {
             return ActorState.ACTOR_NOT_PREINSTALLED;
         }
 
-        if (ArrayUtils.contains(callingPackageNames, actorPackageName)) {
+        if (ArrayUtils.contains(callingPackageNames, packageName)) {
             return ActorState.ALLOWED;
         }
 
@@ -209,25 +203,22 @@ public class OverlayActorEnforcer {
     /**
      * For easier logging/debugging, a set of all possible failure/success states when running
      * enforcement.
-     *
-     * The ordering of this enum should be maintained in the order that cases are checked in code,
-     * as this ordering is used inside OverlayActorEnforcerTests.
      */
     public enum ActorState {
-        TARGET_NOT_FOUND,
+        ALLOWED,
+        INVALID_ACTOR,
+        MISSING_NAMESPACE,
+        MISSING_PACKAGE,
+        MISSING_APP_INFO,
+        ACTOR_NOT_PREINSTALLED,
         NO_PACKAGES_FOR_UID,
-        MISSING_TARGET_OVERLAYABLE_NAME,
-        MISSING_LEGACY_PERMISSION,
+        MISSING_ACTOR_NAME,
         ERROR_READING_OVERLAYABLE,
-        UNABLE_TO_GET_TARGET_OVERLAYABLE,
+        MISSING_TARGET_OVERLAYABLE_NAME,
         MISSING_OVERLAYABLE,
         INVALID_OVERLAYABLE_ACTOR_NAME,
         NO_NAMED_ACTORS,
-        MISSING_NAMESPACE,
-        MISSING_ACTOR_NAME,
-        ACTOR_NOT_FOUND,
-        ACTOR_NOT_PREINSTALLED,
-        INVALID_ACTOR,
-        ALLOWED
+        UNABLE_TO_GET_TARGET,
+        MISSING_LEGACY_PERMISSION
     }
 }

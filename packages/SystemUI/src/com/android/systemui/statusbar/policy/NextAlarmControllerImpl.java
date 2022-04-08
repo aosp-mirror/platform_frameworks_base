@@ -23,26 +23,19 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.UserHandle;
 
-import androidx.annotation.NonNull;
-
-import com.android.systemui.Dumpable;
-import com.android.systemui.broadcast.BroadcastDispatcher;
-import com.android.systemui.dagger.SysUISingleton;
-import com.android.systemui.dump.DumpManager;
-
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.Date;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 
 /**
  * Implementation of {@link NextAlarmController}
  */
-@SysUISingleton
+@Singleton
 public class NextAlarmControllerImpl extends BroadcastReceiver
-        implements NextAlarmController, Dumpable {
+        implements NextAlarmController {
 
     private final ArrayList<NextAlarmChangeCallback> mChangeCallbacks = new ArrayList<>();
 
@@ -52,44 +45,26 @@ public class NextAlarmControllerImpl extends BroadcastReceiver
     /**
      */
     @Inject
-    public NextAlarmControllerImpl(
-            AlarmManager alarmManager,
-            BroadcastDispatcher broadcastDispatcher,
-            DumpManager dumpManager) {
-        dumpManager.registerDumpable("NextAlarmController", this);
-        mAlarmManager = alarmManager;
+    public NextAlarmControllerImpl(Context context) {
+        mAlarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
         IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_USER_SWITCHED);
         filter.addAction(AlarmManager.ACTION_NEXT_ALARM_CLOCK_CHANGED);
-        broadcastDispatcher.registerReceiver(this, filter, null, UserHandle.ALL);
+        context.registerReceiverAsUser(this, UserHandle.ALL, filter, null, null);
         updateNextAlarm();
     }
 
-    @Override
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-        pw.print("mNextAlarm=");
-        if (mNextAlarm != null) {
-            pw.println(new Date(mNextAlarm.getTriggerTime()));
-            pw.print("  PendingIntentPkg=");
-            pw.println(mNextAlarm.getShowIntent().getCreatorPackage());
-        } else {
-            pw.println("null");
-        }
-
-        pw.println("Registered Callbacks:");
-        for (NextAlarmChangeCallback callback : mChangeCallbacks) {
-            pw.print("    "); pw.println(callback.toString());
-        }
+        pw.println("NextAlarmController state:");
+        pw.print("  mNextAlarm="); pw.println(mNextAlarm);
     }
 
-    @Override
-    public void addCallback(@NonNull NextAlarmChangeCallback cb) {
+    public void addCallback(NextAlarmChangeCallback cb) {
         mChangeCallbacks.add(cb);
         cb.onNextAlarmChanged(mNextAlarm);
     }
 
-    @Override
-    public void removeCallback(@NonNull NextAlarmChangeCallback cb) {
+    public void removeCallback(NextAlarmChangeCallback cb) {
         mChangeCallbacks.remove(cb);
     }
 

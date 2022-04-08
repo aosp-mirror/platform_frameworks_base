@@ -22,7 +22,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:clipToPadding="false"
-    android:theme="@style/Theme.SystemUI.QuickSettings"
+    android:theme="@style/qs_theme"
     android:gravity="center_vertical | right"
     android:clipChildren="false"
 >

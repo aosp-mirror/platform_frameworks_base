@@ -511,26 +511,18 @@ public class NetworkScoreManager {
 
         @Override
         public void updateScores(@NonNull List<ScoredNetwork> networks) {
-            final long token = Binder.clearCallingIdentity();
-            try {
-                mExecutor.execute(() -> {
-                    mCallback.onScoresUpdated(networks);
-                });
-            } finally {
-                Binder.restoreCallingIdentity(token);
-            }
+            Binder.clearCallingIdentity();
+            mExecutor.execute(() -> {
+                mCallback.onScoresUpdated(networks);
+            });
         }
 
         @Override
         public void clearScores() {
-            final long token = Binder.clearCallingIdentity();
-            try {
-                mExecutor.execute(() -> {
-                    mCallback.onScoresInvalidated();
-                });
-            } finally {
-                Binder.restoreCallingIdentity(token);
-            }
+            Binder.clearCallingIdentity();
+            mExecutor.execute(() -> {
+                mCallback.onScoresInvalidated();
+            });
         }
     }
 

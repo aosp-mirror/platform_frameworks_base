@@ -24,13 +24,13 @@ import android.content.pm.ApplicationInfo;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Pair;
-import android.util.TypedXmlPullParser;
-import android.util.TypedXmlSerializer;
 
 import com.android.internal.util.Preconditions;
 import com.android.internal.util.XmlUtils;
 
+import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
+import org.xmlpull.v1.XmlSerializer;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -343,15 +343,15 @@ public final class BrightnessConfiguration implements Parcelable {
      *
      * @hide
      */
-    public void saveToXml(@NonNull TypedXmlSerializer serializer) throws IOException {
+    public void saveToXml(@NonNull XmlSerializer serializer) throws IOException {
         serializer.startTag(null, TAG_BRIGHTNESS_CURVE);
         if (mDescription != null) {
             serializer.attribute(null, ATTR_DESCRIPTION, mDescription);
         }
         for (int i = 0; i < mLux.length; i++) {
             serializer.startTag(null, TAG_BRIGHTNESS_POINT);
-            serializer.attributeFloat(null, ATTR_LUX, mLux[i]);
-            serializer.attributeFloat(null, ATTR_NITS, mNits[i]);
+            serializer.attribute(null, ATTR_LUX, Float.toString(mLux[i]));
+            serializer.attribute(null, ATTR_NITS, Float.toString(mNits[i]));
             serializer.endTag(null, TAG_BRIGHTNESS_POINT);
         }
         serializer.endTag(null, TAG_BRIGHTNESS_CURVE);
@@ -370,7 +370,7 @@ public final class BrightnessConfiguration implements Parcelable {
             final int category = entry.getKey();
             final BrightnessCorrection correction = entry.getValue();
             serializer.startTag(null, TAG_BRIGHTNESS_CORRECTION);
-            serializer.attributeInt(null, ATTR_CATEGORY, category);
+            serializer.attribute(null, ATTR_CATEGORY, Integer.toString(category));
             correction.saveToXml(serializer);
             serializer.endTag(null, TAG_BRIGHTNESS_CORRECTION);
         }
@@ -378,18 +378,19 @@ public final class BrightnessConfiguration implements Parcelable {
 
         serializer.startTag(null, TAG_BRIGHTNESS_PARAMS);
         if (mShouldCollectColorSamples) {
-            serializer.attributeBoolean(null, ATTR_COLLECT_COLOR, true);
+            serializer.attribute(null, ATTR_COLLECT_COLOR, Boolean.toString(true));
         }
         if (mShortTermModelTimeout >= 0) {
-            serializer.attributeLong(null, ATTR_MODEL_TIMEOUT, mShortTermModelTimeout);
+            serializer.attribute(null, ATTR_MODEL_TIMEOUT,
+                    Long.toString(mShortTermModelTimeout));
         }
         if (!Float.isNaN(mShortTermModelLowerLuxMultiplier)) {
-            serializer.attributeFloat(null, ATTR_MODEL_LOWER_BOUND,
-                    mShortTermModelLowerLuxMultiplier);
+            serializer.attribute(null, ATTR_MODEL_LOWER_BOUND,
+                    Float.toString(mShortTermModelLowerLuxMultiplier));
         }
         if (!Float.isNaN(mShortTermModelUpperLuxMultiplier)) {
-            serializer.attributeFloat(null, ATTR_MODEL_UPPER_BOUND,
-                    mShortTermModelUpperLuxMultiplier);
+            serializer.attribute(null, ATTR_MODEL_UPPER_BOUND,
+                    Float.toString(mShortTermModelUpperLuxMultiplier));
         }
         serializer.endTag(null, TAG_BRIGHTNESS_PARAMS);
     }
@@ -407,7 +408,7 @@ public final class BrightnessConfiguration implements Parcelable {
      *
      * @hide
      */
-    public static BrightnessConfiguration loadFromXml(@NonNull TypedXmlPullParser parser)
+    public static BrightnessConfiguration loadFromXml(@NonNull XmlPullParser parser)
             throws IOException, XmlPullParserException {
         String description = null;
         List<Float> luxList = new ArrayList<>();
@@ -439,17 +440,22 @@ public final class BrightnessConfiguration implements Parcelable {
                         continue;
                     }
                     final String packageName = parser.getAttributeValue(null, ATTR_PACKAGE_NAME);
-                    final int category = parser.getAttributeInt(null, ATTR_CATEGORY, -1);
+                    final String categoryText = parser.getAttributeValue(null, ATTR_CATEGORY);
                     BrightnessCorrection correction = BrightnessCorrection.loadFromXml(parser);
                     if (packageName != null) {
                         correctionsByPackageName.put(packageName, correction);
-                    } else if (category != -1) {
-                        correctionsByCategory.put(category, correction);
+                    } else if (categoryText != null) {
+                        try {
+                            final int category = Integer.parseInt(categoryText);
+                            correctionsByCategory.put(category, correction);
+                        } catch (NullPointerException | NumberFormatException e) {
+                            continue;
+                        }
                     }
                 }
             } else if (TAG_BRIGHTNESS_PARAMS.equals(parser.getName())) {
                 shouldCollectColorSamples =
-                        parser.getAttributeBoolean(null, ATTR_COLLECT_COLOR, false);
+                        Boolean.parseBoolean(parser.getAttributeValue(null, ATTR_COLLECT_COLOR));
                 Long timeout = loadLongFromXml(parser, ATTR_MODEL_TIMEOUT);
                 if (timeout != null) {
                     shortTermModelTimeout = timeout;
@@ -485,16 +491,23 @@ public final class BrightnessConfiguration implements Parcelable {
         return builder.build();
     }
 
-    private static float loadFloatFromXml(TypedXmlPullParser parser, String attribute) {
-        return parser.getAttributeFloat(null, attribute, Float.NaN);
+    private static float loadFloatFromXml(XmlPullParser parser, String attribute) {
+        final String string = parser.getAttributeValue(null, attribute);
+        try {
+            return Float.parseFloat(string);
+        } catch (NullPointerException | NumberFormatException e) {
+            return Float.NaN;
+        }
     }
 
-    private static Long loadLongFromXml(TypedXmlPullParser parser, String attribute) {
+    private static Long loadLongFromXml(XmlPullParser parser, String attribute) {
+        final String string = parser.getAttributeValue(null, attribute);
         try {
-            return parser.getAttributeLong(null, attribute);
-        } catch (Exception e) {
-            return null;
+            return Long.parseLong(string);
+        } catch (NullPointerException | NumberFormatException e) {
+            // Ignoring
         }
+        return null;
     }
 
     /**

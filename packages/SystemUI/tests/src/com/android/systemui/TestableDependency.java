@@ -16,6 +16,7 @@ package com.android.systemui;
 
 import static org.mockito.Mockito.mock;
 
+import android.content.Context;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Log;
@@ -25,10 +26,13 @@ public class TestableDependency extends Dependency {
 
     private final ArrayMap<Object, Object> mObjs = new ArrayMap<>();
     private final ArraySet<Object> mInstantiatedObjects = new ArraySet<>();
-    private final Dependency mParent;
 
-    public TestableDependency(Dependency parent) {
-        mParent = parent;
+    public TestableDependency(Context context) {
+        SystemUIFactory.createFromConfig(context);
+        SystemUIFactory.getInstance().getRootComponent()
+                .createDependency()
+                .createSystemUI(this);
+        start();
     }
 
     public <T> T injectMockDependency(Class<T> cls) {
@@ -49,11 +53,11 @@ public class TestableDependency extends Dependency {
     }
 
     @Override
-    public <T> T createDependency(Object key) {
+    protected <T> T createDependency(Object key) {
         if (mObjs.containsKey(key)) return (T) mObjs.get(key);
 
         mInstantiatedObjects.add(key);
-        return mParent.createDependency(key);
+        return super.createDependency(key);
     }
 
     @Override

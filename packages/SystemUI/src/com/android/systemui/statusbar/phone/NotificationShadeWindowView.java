@@ -160,11 +160,6 @@ public class NotificationShadeWindowView extends FrameLayout {
         return mInteractionEventHandler.dispatchKeyEvent(event);
     }
 
-    @Override
-    public boolean dispatchKeyEventPreIme(KeyEvent event) {
-        return mInteractionEventHandler.dispatchKeyEventPreIme(event);
-    }
-
     protected void setInteractionEventHandler(InteractionEventHandler listener) {
         mInteractionEventHandler = listener;
     }
@@ -173,11 +168,7 @@ public class NotificationShadeWindowView extends FrameLayout {
     public boolean dispatchTouchEvent(MotionEvent ev) {
         Boolean result = mInteractionEventHandler.handleDispatchTouchEvent(ev);
 
-        result = result != null ? result : super.dispatchTouchEvent(ev);
-
-        mInteractionEventHandler.dispatchTouchEventComplete();
-
-        return result;
+        return result != null ? result : super.dispatchTouchEvent(ev);
     }
 
     @Override
@@ -349,12 +340,6 @@ public class NotificationShadeWindowView extends FrameLayout {
         Boolean handleDispatchTouchEvent(MotionEvent ev);
 
         /**
-         * Called after all dispatching is done.
-         */
-
-        void dispatchTouchEventComplete();
-
-        /**
          * Returns if the view should intercept the touch event.
          *
          * The touch event may still be interecepted if
@@ -374,8 +359,6 @@ public class NotificationShadeWindowView extends FrameLayout {
         boolean interceptMediaKey(KeyEvent event);
 
         boolean dispatchKeyEvent(KeyEvent event);
-
-        boolean dispatchKeyEventPreIme(KeyEvent event);
     }
 
     /**

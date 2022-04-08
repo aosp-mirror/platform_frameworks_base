@@ -23,7 +23,6 @@ import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.drawable.Drawable;
-import android.os.Build;
 import android.text.TextUtils;
 import android.text.TextUtils.TruncateAt;
 import android.view.Gravity;
@@ -225,7 +224,7 @@ public class ScrollingTabContainerView extends HorizontalScrollView
         mStackedTabMaxWidth = abp.getStackedTabMaxWidth();
     }
 
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public void animateToVisibility(int visibility) {
         if (mVisibilityAnim != null) {
             mVisibilityAnim.cancel();
@@ -250,7 +249,7 @@ public class ScrollingTabContainerView extends HorizontalScrollView
         }
     }
 
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public void animateToTab(final int position) {
         final View tabView = mTabLayout.getChildAt(position);
         if (mTabSelector != null) {
@@ -332,7 +331,7 @@ public class ScrollingTabContainerView extends HorizontalScrollView
         }
     }
 
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public void updateTab(int position) {
         ((TabView) mTabLayout.getChildAt(position)).update();
         if (mTabSpinner != null) {

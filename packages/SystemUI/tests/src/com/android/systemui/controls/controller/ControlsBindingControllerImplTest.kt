@@ -27,7 +27,6 @@ import android.service.controls.IControlsSubscription
 import android.testing.AndroidTestingRunner
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.settings.UserTracker
 import com.android.systemui.util.concurrency.DelayableExecutor
 import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.time.FakeSystemClock
@@ -62,8 +61,6 @@ class ControlsBindingControllerImplTest : SysuiTestCase() {
 
     @Mock
     private lateinit var mockControlsController: ControlsController
-    @Mock(stubOnly = true)
-    private lateinit var mockUserTracker: UserTracker
 
     @Captor
     private lateinit var subscriberCaptor: ArgumentCaptor<IControlsSubscriber.Stub>
@@ -85,10 +82,9 @@ class ControlsBindingControllerImplTest : SysuiTestCase() {
     fun setUp() {
         MockitoAnnotations.initMocks(this)
         providers.clear()
-        `when`(mockUserTracker.userHandle).thenReturn(user)
 
         controller = TestableControlsBindingControllerImpl(
-                mContext, executor, Lazy { mockControlsController }, mockUserTracker)
+                mContext, executor, Lazy { mockControlsController })
     }
 
     @After
@@ -368,9 +364,8 @@ class ControlsBindingControllerImplTest : SysuiTestCase() {
 class TestableControlsBindingControllerImpl(
     context: Context,
     executor: DelayableExecutor,
-    lazyController: Lazy<ControlsController>,
-    userTracker: UserTracker
-) : ControlsBindingControllerImpl(context, executor, lazyController, userTracker) {
+    lazyController: Lazy<ControlsController>
+) : ControlsBindingControllerImpl(context, executor, lazyController) {
 
     companion object {
         val providers = mutableListOf<ControlsProviderLifecycleManager>()

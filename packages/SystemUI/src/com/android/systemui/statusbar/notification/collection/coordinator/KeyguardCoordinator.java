@@ -34,9 +34,9 @@ import androidx.annotation.MainThread;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.systemui.broadcast.BroadcastDispatcher;
-import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
+import com.android.systemui.statusbar.notification.NotificationUtils;
 import com.android.systemui.statusbar.notification.collection.GroupEntry;
 import com.android.systemui.statusbar.notification.collection.ListEntry;
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;
@@ -46,11 +46,12 @@ import com.android.systemui.statusbar.notification.collection.provider.HighPrior
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 
 /**
  * Filters low priority and privacy-sensitive notifications from the lockscreen.
  */
-@SysUISingleton
+@Singleton
 public class KeyguardCoordinator implements Coordinator {
     private static final String TAG = "KeyguardCoordinator";
 
@@ -62,8 +63,6 @@ public class KeyguardCoordinator implements Coordinator {
     private final StatusBarStateController mStatusBarStateController;
     private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     private final HighPriorityProvider mHighPriorityProvider;
-
-    private boolean mHideSilentNotificationsOnLockscreen;
 
     @Inject
     public KeyguardCoordinator(
@@ -87,8 +86,6 @@ public class KeyguardCoordinator implements Coordinator {
 
     @Override
     public void attach(NotifPipeline pipeline) {
-        readShowSilentNotificationSetting();
-
         setupInvalidateNotifListCallbacks();
         pipeline.addFinalizeFilter(mNotifFilter);
     }
@@ -120,7 +117,7 @@ public class KeyguardCoordinator implements Coordinator {
                 // notifications to show in public mode
                 if (mLockscreenUserManager.isLockscreenPublicMode(currUserId)
                         || mLockscreenUserManager.isLockscreenPublicMode(notifUserId)) {
-                    if (entry.getRanking().getLockscreenVisibilityOverride() == VISIBILITY_SECRET) {
+                    if (entry.getRanking().getVisibilityOverride() == VISIBILITY_SECRET) {
                         return true;
                     }
 
@@ -149,12 +146,18 @@ public class KeyguardCoordinator implements Coordinator {
         if (entry == null) {
             return false;
         }
-        if (mHideSilentNotificationsOnLockscreen) {
+        if (NotificationUtils.useNewInterruptionModel(mContext)
+                && hideSilentNotificationsOnLockscreen()) {
             return mHighPriorityProvider.isHighPriority(entry);
         } else {
             return entry.getRepresentativeEntry() != null
                     && !entry.getRepresentativeEntry().getRanking().isAmbient();
         }
+    }
+
+    private boolean hideSilentNotificationsOnLockscreen() {
+        return Settings.Secure.getInt(mContext.getContentResolver(),
+                Settings.Secure.LOCK_SCREEN_SHOW_SILENT_NOTIFICATIONS, 1) == 0;
     }
 
     private void setupInvalidateNotifListCallbacks() {
@@ -166,11 +169,6 @@ public class KeyguardCoordinator implements Coordinator {
         final ContentObserver settingsObserver = new ContentObserver(mMainHandler) {
             @Override
             public void onChange(boolean selfChange, Uri uri) {
-                if (uri.equals(Settings.Secure.getUriFor(
-                        Settings.Secure.LOCK_SCREEN_SHOW_SILENT_NOTIFICATIONS))) {
-                    readShowSilentNotificationSetting();
-                }
-
                 if (mKeyguardStateController.isShowing()) {
                     invalidateListFromFilter("Settings " + uri + " changed");
                 }
@@ -194,12 +192,6 @@ public class KeyguardCoordinator implements Coordinator {
                 false,
                 settingsObserver);
 
-        mContext.getContentResolver().registerContentObserver(
-                Settings.Secure.getUriFor(Settings.Secure.LOCK_SCREEN_SHOW_SILENT_NOTIFICATIONS),
-                false,
-                settingsObserver,
-                UserHandle.USER_ALL);
-
         // register (maybe) public mode changed callbacks:
         mStatusBarStateController.addCallback(mStatusBarStateListener);
         mBroadcastDispatcher.registerReceiver(new BroadcastReceiver() {
@@ -214,14 +206,6 @@ public class KeyguardCoordinator implements Coordinator {
 
     private void invalidateListFromFilter(String reason) {
         mNotifFilter.invalidateList();
-    }
-
-    private void readShowSilentNotificationSetting() {
-        mHideSilentNotificationsOnLockscreen =
-                Settings.Secure.getInt(
-                        mContext.getContentResolver(),
-                        Settings.Secure.LOCK_SCREEN_SHOW_SILENT_NOTIFICATIONS,
-                        1) == 0;
     }
 
     private final KeyguardStateController.Callback mKeyguardCallback =

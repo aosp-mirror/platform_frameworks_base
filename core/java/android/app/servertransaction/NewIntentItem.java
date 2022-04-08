@@ -19,12 +19,9 @@ package android.app.servertransaction;
 import static android.app.servertransaction.ActivityLifecycleItem.ON_RESUME;
 import static android.app.servertransaction.ActivityLifecycleItem.UNDEFINED;
 
-import android.annotation.NonNull;
-import android.annotation.Nullable;
-import android.app.ActivityThread.ActivityClientRecord;
 import android.app.ClientTransactionHandler;
 import android.compat.annotation.UnsupportedAppUsage;
-import android.os.Build;
+import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.Trace;
@@ -38,9 +35,9 @@ import java.util.Objects;
  * New intent message.
  * @hide
  */
-public class NewIntentItem extends ActivityTransactionItem {
+public class NewIntentItem extends ClientTransactionItem {
 
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     private List<ReferrerIntent> mIntents;
     private boolean mResume;
 
@@ -50,10 +47,10 @@ public class NewIntentItem extends ActivityTransactionItem {
     }
 
     @Override
-    public void execute(ClientTransactionHandler client, ActivityClientRecord r,
+    public void execute(ClientTransactionHandler client, IBinder token,
             PendingTransactionActions pendingActions) {
         Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "activityNewIntent");
-        client.handleNewIntent(r, mIntents);
+        client.handleNewIntent(token, mIntents);
         Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
     }
 
@@ -97,7 +94,7 @@ public class NewIntentItem extends ActivityTransactionItem {
         mIntents = in.createTypedArrayList(ReferrerIntent.CREATOR);
     }
 
-    public static final @NonNull Parcelable.Creator<NewIntentItem> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<NewIntentItem> CREATOR =
             new Parcelable.Creator<NewIntentItem>() {
         public NewIntentItem createFromParcel(Parcel in) {
             return new NewIntentItem(in);
@@ -109,7 +106,7 @@ public class NewIntentItem extends ActivityTransactionItem {
     };
 
     @Override
-    public boolean equals(@Nullable Object o) {
+    public boolean equals(Object o) {
         if (this == o) {
             return true;
         }

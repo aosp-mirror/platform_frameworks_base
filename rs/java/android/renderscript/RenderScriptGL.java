@@ -37,7 +37,6 @@ import android.view.SurfaceHolder;
  * <a href="{@docRoot}guide/topics/renderscript/index.html">RenderScript</a> developer guide.</p>
  * </div>
  **/
-@Deprecated
 public class RenderScriptGL extends RenderScript {
     int mWidth;
     int mHeight;

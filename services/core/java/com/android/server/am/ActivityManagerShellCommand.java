@@ -25,16 +25,9 @@ import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.view.Display.INVALID_DISPLAY;
 
-import static com.android.internal.app.procstats.ProcessStats.ADJ_MEM_FACTOR_CRITICAL;
-import static com.android.internal.app.procstats.ProcessStats.ADJ_MEM_FACTOR_LOW;
-import static com.android.internal.app.procstats.ProcessStats.ADJ_MEM_FACTOR_MODERATE;
-import static com.android.internal.app.procstats.ProcessStats.ADJ_MEM_FACTOR_NORMAL;
-import static com.android.server.am.LowMemDetector.ADJ_MEM_FACTOR_NOTHING;
-
 import android.app.ActivityManager;
 import android.app.ActivityOptions;
 import android.app.ActivityTaskManager;
-import android.app.ActivityTaskManager.RootTaskInfo;
 import android.app.AppGlobals;
 import android.app.BroadcastOptions;
 import android.app.IActivityController;
@@ -98,7 +91,6 @@ import android.view.Display;
 import com.android.internal.compat.CompatibilityChangeConfig;
 import com.android.internal.util.HexDump;
 import com.android.internal.util.MemInfoReader;
-import com.android.server.am.LowMemDetector.MemFactor;
 import com.android.server.compat.PlatformCompat;
 
 import java.io.BufferedReader;
@@ -117,6 +109,7 @@ import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -167,7 +160,6 @@ final class ActivityManagerShellCommand extends ShellCommand {
     private int mTaskId;
     private boolean mIsTaskOverlay;
     private boolean mIsLockTask;
-    private boolean mAsync;
     private BroadcastOptions mBroadcastOptions;
 
     final boolean mDumping;
@@ -229,8 +221,6 @@ final class ActivityManagerShellCommand extends ShellCommand {
                     return runBugReport(pw);
                 case "force-stop":
                     return runForceStop(pw);
-                case "fgs-notification-rate-limit":
-                    return runFgsNotificationRateLimit(pw);
                 case "crash":
                     return runCrash(pw);
                 case "kill":
@@ -317,12 +307,6 @@ final class ActivityManagerShellCommand extends ShellCommand {
                     return runCompat(pw);
                 case "refresh-settings-cache":
                     return runRefreshSettingsCache();
-                case "memory-factor":
-                    return runMemoryFactor(pw);
-                case "service-restart-backoff":
-                    return runServiceRestartBackoff(pw);
-                case "get-isolated-pids":
-                    return runGetIsolatedProcesses(pw);
                 default:
                     return handleDefaultCommands(cmd);
             }
@@ -348,7 +332,6 @@ final class ActivityManagerShellCommand extends ShellCommand {
         mTaskId = INVALID_TASK_ID;
         mIsTaskOverlay = false;
         mIsLockTask = false;
-        mAsync = false;
         mBroadcastOptions = null;
 
         return Intent.parseCommandArgs(this, new Intent.CommandOptionHandler() {
@@ -413,8 +396,6 @@ final class ActivityManagerShellCommand extends ShellCommand {
                         mBroadcastOptions = BroadcastOptions.makeBasic();
                     }
                     mBroadcastOptions.setBackgroundActivityStartsAllowed(true);
-                } else if (opt.equals("--async")) {
-                    mAsync = true;
                 } else {
                     return false;
                 }
@@ -763,11 +744,9 @@ final class ActivityManagerShellCommand extends ShellCommand {
         pw.flush();
         Bundle bundle = mBroadcastOptions == null ? null : mBroadcastOptions.toBundle();
         mInterface.broadcastIntentWithFeature(null, null, intent, null, receiver, 0, null, null,
-                requiredPermissions, null, android.app.AppOpsManager.OP_NONE, bundle, true, false,
+                requiredPermissions, android.app.AppOpsManager.OP_NONE, bundle, true, false,
                 mUserId);
-        if (!mAsync) {
-            receiver.waitForFinish();
-        }
+        receiver.waitForFinish();
         return 0;
     }
 
@@ -1102,24 +1081,6 @@ final class ActivityManagerShellCommand extends ShellCommand {
             }
         }
         mInterface.forceStopPackage(getNextArgRequired(), userId);
-        return 0;
-    }
-
-    int runFgsNotificationRateLimit(PrintWriter pw) throws RemoteException {
-        final String toggleValue = getNextArgRequired();
-        final boolean enable;
-        switch (toggleValue) {
-            case "enable":
-                enable = true;
-                break;
-            case "disable":
-                enable = false;
-                break;
-            default:
-                throw new IllegalArgumentException(
-                        "Argument must be either 'enable' or 'disable'");
-        }
-        mInterface.enableFgsNotificationRateLimit(enable);
         return 0;
     }
 
@@ -1727,14 +1688,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
 
         pw.println("Hanging the system...");
         pw.flush();
-        try {
-            mInterface.hang(getShellCallback().getShellCallbackBinder(), allowRestart);
-        } catch (NullPointerException e) {
-            pw.println("Hanging failed, since caller " + Binder.getCallingPid() +
-                    " did not provide a ShellCallback!");
-            pw.flush();
-            return 1;
-        }
+        mInterface.hang(new Binder(), allowRestart);
         return 0;
     }
 
@@ -1876,11 +1830,9 @@ final class ActivityManagerShellCommand extends ShellCommand {
     }
 
     int runGetCurrentUser(PrintWriter pw) throws RemoteException {
-        int userId = mInterface.getCurrentUserId();
-        if (userId == UserHandle.USER_NULL) {
-            throw new IllegalStateException("Current user not set");
-        }
-        pw.println(userId);
+        UserInfo currentUser = Objects.requireNonNull(mInterface.getCurrentUser(),
+                "Current user not set");
+        pw.println(currentUser.id);
         return 0;
     }
 
@@ -2627,12 +2579,16 @@ final class ActivityManagerShellCommand extends ShellCommand {
         switch (op) {
             case "move-task":
                 return runStackMoveTask(pw);
+            case "positiontask":
+                return runStackPositionTask(pw);
             case "list":
                 return runStackList(pw);
             case "info":
-                return runRootTaskInfo(pw);
+                return runStackInfo(pw);
+            case "move-top-activity-to-pinned-stack":
+                return runMoveTopActivityToPinnedStack(pw);
             case "remove":
-                return runRootTaskRemove(pw);
+                return runStackRemove(pw);
             default:
                 getErrPrintWriter().println("Error: unknown command '" + op + "'");
                 return -1;
@@ -2669,19 +2625,19 @@ final class ActivityManagerShellCommand extends ShellCommand {
     }
 
     int runDisplayMoveStack(PrintWriter pw) throws RemoteException {
-        String rootTaskIdStr = getNextArgRequired();
-        int rootTaskId = Integer.parseInt(rootTaskIdStr);
+        String stackIdStr = getNextArgRequired();
+        int stackId = Integer.parseInt(stackIdStr);
         String displayIdStr = getNextArgRequired();
         int displayId = Integer.parseInt(displayIdStr);
-        mTaskInterface.moveRootTaskToDisplay(rootTaskId, displayId);
+        mTaskInterface.moveStackToDisplay(stackId, displayId);
         return 0;
     }
 
     int runStackMoveTask(PrintWriter pw) throws RemoteException {
         String taskIdStr = getNextArgRequired();
         int taskId = Integer.parseInt(taskIdStr);
-        String rootTaskIdStr = getNextArgRequired();
-        int rootTaskId = Integer.parseInt(rootTaskIdStr);
+        String stackIdStr = getNextArgRequired();
+        int stackId = Integer.parseInt(stackIdStr);
         String toTopStr = getNextArgRequired();
         final boolean toTop;
         if ("true".equals(toTopStr)) {
@@ -2693,31 +2649,78 @@ final class ActivityManagerShellCommand extends ShellCommand {
             return -1;
         }
 
-        mTaskInterface.moveTaskToRootTask(taskId, rootTaskId, toTop);
+        mTaskInterface.moveTaskToStack(taskId, stackId, toTop);
+        return 0;
+    }
+
+    int runStackPositionTask(PrintWriter pw) throws RemoteException {
+        String taskIdStr = getNextArgRequired();
+        int taskId = Integer.parseInt(taskIdStr);
+        String stackIdStr = getNextArgRequired();
+        int stackId = Integer.parseInt(stackIdStr);
+        String positionStr = getNextArgRequired();
+        int position = Integer.parseInt(positionStr);
+
+        mTaskInterface.positionTaskInStack(taskId, stackId, position);
         return 0;
     }
 
     int runStackList(PrintWriter pw) throws RemoteException {
-        List<RootTaskInfo> tasks = mTaskInterface.getAllRootTaskInfos();
-        for (RootTaskInfo info : tasks) {
+        List<ActivityManager.StackInfo> stacks = mTaskInterface.getAllStackInfos();
+        for (ActivityManager.StackInfo info : stacks) {
             pw.println(info);
         }
         return 0;
     }
 
-    int runRootTaskInfo(PrintWriter pw) throws RemoteException {
+    int runStackInfo(PrintWriter pw) throws RemoteException {
         int windowingMode = Integer.parseInt(getNextArgRequired());
         int activityType = Integer.parseInt(getNextArgRequired());
-        RootTaskInfo info = mTaskInterface.getRootTaskInfo(windowingMode, activityType);
+        ActivityManager.StackInfo info = mTaskInterface.getStackInfo(windowingMode, activityType);
         pw.println(info);
         return 0;
     }
 
-    int runRootTaskRemove(PrintWriter pw) throws RemoteException {
-        String taskIdStr = getNextArgRequired();
-        int taskId = Integer.parseInt(taskIdStr);
-        mTaskInterface.removeTask(taskId);
+    int runStackRemove(PrintWriter pw) throws RemoteException {
+        String stackIdStr = getNextArgRequired();
+        int stackId = Integer.parseInt(stackIdStr);
+        mTaskInterface.removeStack(stackId);
         return 0;
+    }
+
+    int runMoveTopActivityToPinnedStack(PrintWriter pw) throws RemoteException {
+        int stackId = Integer.parseInt(getNextArgRequired());
+        final Rect bounds = getBounds();
+        if (bounds == null) {
+            getErrPrintWriter().println("Error: invalid input bounds");
+            return -1;
+        }
+
+        if (!mTaskInterface.moveTopActivityToPinnedStack(stackId, bounds)) {
+            getErrPrintWriter().println("Didn't move top activity to pinned stack.");
+            return -1;
+        }
+        return 0;
+    }
+
+    void setBoundsSide(Rect bounds, String side, int value) {
+        switch (side) {
+            case "l":
+                bounds.left = value;
+                break;
+            case "r":
+                bounds.right = value;
+                break;
+            case "t":
+                bounds.top = value;
+                break;
+            case "b":
+                bounds.bottom = value;
+                break;
+            default:
+                getErrPrintWriter().println("Unknown set side: " + side);
+                break;
+        }
     }
 
     int runTask(PrintWriter pw) throws RemoteException {
@@ -2926,7 +2929,6 @@ final class ActivityManagerShellCommand extends ShellCommand {
         final PlatformCompat platformCompat = (PlatformCompat)
                 ServiceManager.getService(Context.PLATFORM_COMPAT_SERVICE);
         String toggleValue = getNextArgRequired();
-        boolean killPackage = !"--no-kill".equals(getNextOption());
         boolean toggleAll = false;
         int targetSdkVersion = -1;
         long changeId = -1;
@@ -2978,11 +2980,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
                         CompatibilityChangeConfig overrides =
                                 new CompatibilityChangeConfig(
                                         new Compatibility.ChangeConfig(enabled, disabled));
-                        if (killPackage) {
-                            platformCompat.setOverrides(overrides, packageName);
-                        } else {
-                            platformCompat.setOverridesForTest(overrides, packageName);
-                        }
+                        platformCompat.setOverrides(overrides, packageName);
                         pw.println("Enabled change " + changeId + " for " + packageName + ".");
                     }
                     return 0;
@@ -3001,31 +2999,17 @@ final class ActivityManagerShellCommand extends ShellCommand {
                         CompatibilityChangeConfig overrides =
                                 new CompatibilityChangeConfig(
                                         new Compatibility.ChangeConfig(enabled, disabled));
-                        if (killPackage) {
-                            platformCompat.setOverrides(overrides, packageName);
-                        } else {
-                            platformCompat.setOverridesForTest(overrides, packageName);
-                        }
+                        platformCompat.setOverrides(overrides, packageName);
                         pw.println("Disabled change " + changeId + " for " + packageName + ".");
                     }
                     return 0;
                 case "reset":
                     if (toggleAll) {
-                        if (killPackage) {
-                            platformCompat.clearOverrides(packageName);
-                        } else {
-                            platformCompat.clearOverridesForTest(packageName);
-                        }
+                        platformCompat.clearOverrides(packageName);
                         pw.println("Reset all changes for " + packageName + " to default value.");
                         return 0;
                     }
-                    boolean existed;
-                    if (killPackage) {
-                        existed = platformCompat.clearOverride(changeId, packageName);
-                    } else {
-                        existed = platformCompat.clearOverrideForTest(changeId, packageName);
-                    }
-                    if (existed) {
+                    if (platformCompat.clearOverride(changeId, packageName)) {
                         pw.println("Reset change " + changeId + " for " + packageName
                                 + " to default value.");
                     } else {
@@ -3041,121 +3025,6 @@ final class ActivityManagerShellCommand extends ShellCommand {
         return -1;
     }
 
-    private int runSetMemoryFactor(PrintWriter pw) throws RemoteException {
-        final String levelArg = getNextArgRequired();
-        @MemFactor int level = ADJ_MEM_FACTOR_NOTHING;
-        switch (levelArg) {
-            case "NORMAL":
-                level = ADJ_MEM_FACTOR_NORMAL;
-                break;
-            case "MODERATE":
-                level = ADJ_MEM_FACTOR_MODERATE;
-                break;
-            case "LOW":
-                level = ADJ_MEM_FACTOR_LOW;
-                break;
-            case "CRITICAL":
-                level = ADJ_MEM_FACTOR_CRITICAL;
-                break;
-            default:
-                try {
-                    level = Integer.parseInt(levelArg);
-                } catch (NumberFormatException e) {
-                }
-                if (level < ADJ_MEM_FACTOR_NORMAL || level > ADJ_MEM_FACTOR_CRITICAL) {
-                    getErrPrintWriter().println("Error: Unknown level option: " + levelArg);
-                    return -1;
-                }
-        }
-        mInternal.setMemFactorOverride(level);
-        return 0;
-    }
-
-    private int runShowMemoryFactor(PrintWriter pw) throws RemoteException {
-        final @MemFactor int level = mInternal.getMemoryTrimLevel();
-        switch (level) {
-            case ADJ_MEM_FACTOR_NOTHING:
-                pw.println("<UNKNOWN>");
-                break;
-            case ADJ_MEM_FACTOR_NORMAL:
-                pw.println("NORMAL");
-                break;
-            case ADJ_MEM_FACTOR_MODERATE:
-                pw.println("MODERATE");
-                break;
-            case ADJ_MEM_FACTOR_LOW:
-                pw.println("LOW");
-                break;
-            case ADJ_MEM_FACTOR_CRITICAL:
-                pw.println("CRITICAL");
-                break;
-        }
-        pw.flush();
-        return 0;
-    }
-
-    private int runResetMemoryFactor(PrintWriter pw) throws RemoteException {
-        mInternal.setMemFactorOverride(ADJ_MEM_FACTOR_NOTHING);
-        return 0;
-    }
-
-    private int runMemoryFactor(PrintWriter pw) throws RemoteException {
-        mInternal.enforceCallingPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS,
-                "runMemoryFactor()");
-
-        final String op = getNextArgRequired();
-        switch (op) {
-            case "set":
-                return runSetMemoryFactor(pw);
-            case "show":
-                return runShowMemoryFactor(pw);
-            case "reset":
-                return runResetMemoryFactor(pw);
-            default:
-                getErrPrintWriter().println("Error: unknown command '" + op + "'");
-                return -1;
-        }
-    }
-
-    private int runServiceRestartBackoff(PrintWriter pw) throws RemoteException {
-        mInternal.enforceCallingPermission(android.Manifest.permission.SET_PROCESS_LIMIT,
-                "runServiceRestartBackoff()");
-
-        final String opt = getNextArgRequired();
-        switch (opt) {
-            case "enable":
-                mInternal.setServiceRestartBackoffEnabled(getNextArgRequired(), true, "shell");
-                return 0;
-            case "disable":
-                mInternal.setServiceRestartBackoffEnabled(getNextArgRequired(), false, "shell");
-                return 0;
-            case "show":
-                pw.println(mInternal.isServiceRestartBackoffEnabled(getNextArgRequired())
-                        ? "enabled" : "disabled");
-                return 0;
-            default:
-                getErrPrintWriter().println("Error: unknown command '" + opt + "'");
-                return -1;
-        }
-    }
-
-    private int runGetIsolatedProcesses(PrintWriter pw) throws RemoteException {
-        mInternal.enforceCallingPermission(android.Manifest.permission.DUMP,
-                "getIsolatedProcesses()");
-        final List<Integer> result = mInternal.mInternal.getIsolatedProcesses(
-                Integer.parseInt(getNextArgRequired()));
-        pw.print("[");
-        if (result != null) {
-            for (int i = 0, size = result.size(); i < size; i++) {
-                if (i > 0) {
-                    pw.print(", ");
-                }
-                pw.print(result.get(i));
-            }
-        }
-        pw.println("]");
-        return 0;
-    }
 
     private Resources getResources(PrintWriter pw) throws RemoteException {
         // system resources does not contain all the device configuration, construct it manually.
@@ -3255,17 +3124,13 @@ final class ActivityManagerShellCommand extends ShellCommand {
             pw.println("      Stop a Service.  Options are:");
             pw.println("      --user <USER_ID> | current: Specify which user to run as; if not");
             pw.println("          specified then run as the current user.");
-            pw.println("  broadcast [--user <USER_ID> | all | current]");
-            pw.println("          [--receiver-permission <PERMISSION>]");
-            pw.println("          [--allow-background-activity-starts]");
-            pw.println("          [--async] <INTENT>");
+            pw.println("  broadcast [--user <USER_ID> | all | current] <INTENT>");
             pw.println("      Send a broadcast Intent.  Options are:");
             pw.println("      --user <USER_ID> | all | current: Specify which user to send to; if not");
             pw.println("          specified then send to all users.");
             pw.println("      --receiver-permission <PERMISSION>: Require receiver to hold permission.");
             pw.println("      --allow-background-activity-starts: The receiver may start activities");
             pw.println("          even if in the background.");
-            pw.println("      --async: Send without waiting for the completion of the receiver.");
             pw.println("  instrument [-r] [-e <NAME> <VALUE>] [-p <FILE>] [-w]");
             pw.println("          [--user <USER_ID> | current]");
             pw.println("          [--no-hidden-api-checks [--no-test-api-access]]");
@@ -3341,8 +3206,6 @@ final class ActivityManagerShellCommand extends ShellCommand {
             pw.println("        when done to select where it should be delivered. Options are:");
             pw.println("     --progress: will launch a notification right away to show its progress.");
             pw.println("     --telephony: will dump only telephony sections.");
-            pw.println("  fgs-notification-rate-limit {enable | disable}");
-            pw.println("     Enable/disable rate limit on FGS notification deferral policy.");
             pw.println("  force-stop [--user <USER_ID> | all | current] <PACKAGE>");
             pw.println("      Completely stop the given application package.");
             pw.println("  crash [--user <USER_ID>] <PACKAGE|PID>");
@@ -3422,7 +3285,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
             pw.println("      Sets the inactive state of an app.");
             pw.println("  get-inactive [--user <USER_ID>] <PACKAGE>");
             pw.println("      Returns the inactive state of an app.");
-            pw.println("  set-standby-bucket [--user <USER_ID>] <PACKAGE> active|working_set|frequent|rare|restricted");
+            pw.println("  set-standby-bucket [--user <USER_ID>] <PACKAGE> active|working_set|frequent|rare");
             pw.println("      Puts an app in the standby bucket.");
             pw.println("  get-standby-bucket [--user <USER_ID>] <PACKAGE>");
             pw.println("      Returns the standby bucket of an app.");
@@ -3436,6 +3299,16 @@ final class ActivityManagerShellCommand extends ShellCommand {
             pw.println("       move-task <TASK_ID> <STACK_ID> [true|false]");
             pw.println("           Move <TASK_ID> from its current stack to the top (true) or");
             pw.println("           bottom (false) of <STACK_ID>.");
+            pw.println("       resize-docked-stack <LEFT,TOP,RIGHT,BOTTOM> [<TASK_LEFT,TASK_TOP,TASK_RIGHT,TASK_BOTTOM>]");
+            pw.println("           Change docked stack to <LEFT,TOP,RIGHT,BOTTOM>");
+            pw.println("           and supplying temporary different task bounds indicated by");
+            pw.println("           <TASK_LEFT,TOP,RIGHT,BOTTOM>");
+            pw.println("       move-top-activity-to-pinned-stack: <STACK_ID> <LEFT,TOP,RIGHT,BOTTOM>");
+            pw.println("           Moves the top activity from");
+            pw.println("           <STACK_ID> to the pinned stack using <LEFT,TOP,RIGHT,BOTTOM> for the");
+            pw.println("           bounds of the pinned stack.");
+            pw.println("       positiontask <TASK_ID> <STACK_ID> <POSITION>");
+            pw.println("           Place <TASK_ID> in <STACK_ID> at <POSITION>");
             pw.println("       list");
             pw.println("           List all of the activity stacks and their sizes.");
             pw.println("       info <WINDOWING_MODE> <ACTIVITY_TYPE>");
@@ -3463,32 +3336,15 @@ final class ActivityManagerShellCommand extends ShellCommand {
             pw.println("  write");
             pw.println("      Write all pending state to storage.");
             pw.println("  compat [COMMAND] [...]: sub-commands for toggling app-compat changes.");
-            pw.println("         enable|disable [--no-kill] <CHANGE_ID|CHANGE_NAME> <PACKAGE_NAME>");
-            pw.println("            Toggles a change either by id or by name for <PACKAGE_NAME>.");
-            pw.println("            It kills <PACKAGE_NAME> (to allow the toggle to take effect) unless --no-kill is provided.");
-            pw.println("         reset <CHANGE_ID|CHANGE_NAME> <PACKAGE_NAME>");
+            pw.println("         enable|disable|reset <CHANGE_ID|CHANGE_NAME> <PACKAGE_NAME>");
             pw.println("            Toggles a change either by id or by name for <PACKAGE_NAME>.");
             pw.println("            It kills <PACKAGE_NAME> (to allow the toggle to take effect).");
-            pw.println("         enable-all|disable-all <targetSdkVersion> <PACKAGE_NAME>");
+            pw.println("         enable-all|disable-all <targetSdkVersion> <PACKAGE_NAME");
             pw.println("            Toggles all changes that are gated by <targetSdkVersion>.");
-            pw.println("         reset-all [--no-kill] <PACKAGE_NAME>");
+            pw.println("         reset-all <PACKAGE_NAME>");
             pw.println("            Removes all existing overrides for all changes for ");
             pw.println("            <PACKAGE_NAME> (back to default behaviour).");
-            pw.println("            It kills <PACKAGE_NAME> (to allow the toggle to take effect) unless --no-kill is provided.");
-            pw.println("  memory-factor [command] [...]: sub-commands for overriding memory pressure factor");
-            pw.println("         set <NORMAL|MODERATE|LOW|CRITICAL>");
-            pw.println("            Overrides memory pressure factor. May also supply a raw int level");
-            pw.println("         show");
-            pw.println("            Shows the existing memory pressure factor");
-            pw.println("         reset");
-            pw.println("            Removes existing override for memory pressure factor");
-            pw.println("  service-restart-backoff <COMMAND> [...]: sub-commands to toggle service restart backoff policy.");
-            pw.println("         enable|disable <PACKAGE_NAME>");
-            pw.println("            Toggles the restart backoff policy on/off for <PACKAGE_NAME>.");
-            pw.println("         show <PACKAGE_NAME>");
-            pw.println("            Shows the restart backoff policy state for <PACKAGE_NAME>.");
-            pw.println("  get-isolated-pids <UID>");
-            pw.println("         Get the PIDs of isolated processes with packages in this <UID>");
+            pw.println("            It kills <PACKAGE_NAME> (to allow the toggle to take effect).");
             pw.println();
             Intent.printIntentArgsHelp(pw, "");
         }

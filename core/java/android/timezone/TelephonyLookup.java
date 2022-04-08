@@ -41,17 +41,16 @@ public final class TelephonyLookup {
     public static TelephonyLookup getInstance() {
         synchronized (sLock) {
             if (sInstance == null) {
-                sInstance = new TelephonyLookup(com.android.i18n.timezone.TelephonyLookup
-                    .getInstance());
+                sInstance = new TelephonyLookup(libcore.timezone.TelephonyLookup.getInstance());
             }
             return sInstance;
         }
     }
 
     @NonNull
-    private final com.android.i18n.timezone.TelephonyLookup mDelegate;
+    private final libcore.timezone.TelephonyLookup mDelegate;
 
-    private TelephonyLookup(@NonNull com.android.i18n.timezone.TelephonyLookup delegate) {
+    private TelephonyLookup(@NonNull libcore.timezone.TelephonyLookup delegate) {
         mDelegate = Objects.requireNonNull(delegate);
     }
 
@@ -61,7 +60,7 @@ public final class TelephonyLookup {
      */
     @Nullable
     public TelephonyNetworkFinder getTelephonyNetworkFinder() {
-        com.android.i18n.timezone.TelephonyNetworkFinder telephonyNetworkFinderDelegate =
+        libcore.timezone.TelephonyNetworkFinder telephonyNetworkFinderDelegate =
                 mDelegate.getTelephonyNetworkFinder();
         return telephonyNetworkFinderDelegate != null
                 ? new TelephonyNetworkFinder(telephonyNetworkFinderDelegate) : null;

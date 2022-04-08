@@ -38,6 +38,8 @@ import android.view.ViewGroup;
 
 import com.android.internal.R;
 
+import libcore.icu.LocaleData;
+
 import java.util.Locale;
 
 /**
@@ -262,7 +264,7 @@ class CalendarViewLegacyDelegate extends CalendarView.AbstractCalendarViewDelega
         mShowWeekNumber = a.getBoolean(R.styleable.CalendarView_showWeekNumber,
                 DEFAULT_SHOW_WEEK_NUMBER);
         mFirstDayOfWeek = a.getInt(R.styleable.CalendarView_firstDayOfWeek,
-                Calendar.getInstance().getFirstDayOfWeek());
+                LocaleData.get(Locale.getDefault()).firstDayOfWeek);
         final String minDate = a.getString(R.styleable.CalendarView_minDate);
         if (!CalendarView.parseDate(minDate, mMinDate)) {
             CalendarView.parseDate(DEFAULT_MIN_DATE, mMinDate);

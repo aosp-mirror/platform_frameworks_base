@@ -40,7 +40,7 @@ public class InternalStreamingSessionCallback extends IMbmsStreamingSessionCallb
             return;
         }
 
-        final long token = Binder.clearCallingIdentity();
+        long token = Binder.clearCallingIdentity();
         try {
             mExecutor.execute(new Runnable() {
                 @Override
@@ -60,7 +60,7 @@ public class InternalStreamingSessionCallback extends IMbmsStreamingSessionCallb
             return;
         }
 
-        final long token = Binder.clearCallingIdentity();
+        long token = Binder.clearCallingIdentity();
         try {
             mExecutor.execute(new Runnable() {
                 @Override
@@ -79,7 +79,7 @@ public class InternalStreamingSessionCallback extends IMbmsStreamingSessionCallb
             return;
         }
 
-        final long token = Binder.clearCallingIdentity();
+        long token = Binder.clearCallingIdentity();
         try {
             mExecutor.execute(new Runnable() {
                 @Override

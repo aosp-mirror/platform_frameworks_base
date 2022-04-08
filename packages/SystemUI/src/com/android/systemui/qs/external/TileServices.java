@@ -39,7 +39,6 @@ import com.android.internal.statusbar.StatusBarIcon;
 import com.android.systemui.Dependency;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.qs.QSTileHost;
-import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.phone.StatusBarIconController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 
@@ -63,18 +62,15 @@ public class TileServices extends IQSService.Stub {
     private final Handler mMainHandler;
     private final QSTileHost mHost;
     private final BroadcastDispatcher mBroadcastDispatcher;
-    private final UserTracker mUserTracker;
 
     private int mMaxBound = DEFAULT_MAX_BOUND;
 
-    public TileServices(QSTileHost host, Looper looper, BroadcastDispatcher broadcastDispatcher,
-            UserTracker userTracker) {
+    public TileServices(QSTileHost host, Looper looper, BroadcastDispatcher broadcastDispatcher) {
         mHost = host;
         mContext = mHost.getContext();
         mBroadcastDispatcher = broadcastDispatcher;
         mHandler = new Handler(looper);
         mMainHandler = new Handler(Looper.getMainLooper());
-        mUserTracker = userTracker;
         mBroadcastDispatcher.registerReceiver(
                 mRequestListeningReceiver,
                 new IntentFilter(TileService.ACTION_REQUEST_LISTENING),
@@ -108,7 +104,7 @@ public class TileServices extends IQSService.Stub {
     protected TileServiceManager onCreateTileService(ComponentName component, Tile tile,
             BroadcastDispatcher broadcastDispatcher) {
         return new TileServiceManager(this, mHandler, component, tile,
-                broadcastDispatcher, mUserTracker);
+                broadcastDispatcher);
     }
 
     public void freeService(CustomTile tile, TileServiceManager service) {
@@ -204,7 +200,7 @@ public class TileServices extends IQSService.Stub {
                 tileServiceManager.clearPendingBind();
                 tileServiceManager.setLastUpdate(System.currentTimeMillis());
             }
-            customTile.updateTileState(tile);
+            customTile.updateState(tile);
             customTile.refreshState();
         }
     }

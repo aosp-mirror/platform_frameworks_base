@@ -42,7 +42,7 @@ public class InternalDownloadStatusListener extends IDownloadStatusListener.Stub
             return;
         }
 
-        final long token = Binder.clearCallingIdentity();
+        long token = Binder.clearCallingIdentity();
         try {
             mExecutor.execute(new Runnable() {
                 @Override

@@ -41,10 +41,7 @@ private fun ClassPrinter.generateInputSignaturesForClass(classAst: ClassOrInterf
         }
     } + ("class ${classAst.nameAsString}" +
             " extends ${classAst.extendedTypes.map { getFullClassName(it) }.ifEmpty { listOf("java.lang.Object") }.joinToString(", ")}" +
-            " implements [${classAst.implementedTypes.joinToString(", ") { getFullClassName(it) }}]") +
-    classAst.nestedNonDataClasses.flatMap { nestedClass ->
-        generateInputSignaturesForClass(nestedClass)
-    }
+            " implements [${classAst.implementedTypes.joinToString(", ") { getFullClassName(it) }}]")
 }
 
 private fun ClassPrinter.annotationsToString(annotatedAst: NodeWithAnnotations<*>): String {
@@ -63,7 +60,6 @@ private fun ClassPrinter.annotationToString(ann: AnnotationExpr?): String {
         append("@")
         append(getFullClassName(ann.nameAsString))
         if (ann is MarkerAnnotationExpr) return@buildString
-        if (!ann.nameAsString.startsWith("DataClass")) return@buildString
 
         append("(")
 
@@ -129,7 +125,7 @@ private fun ClassPrinter.getFullClassName(className: String): String {
 
     if (classAst.nameAsString == className) return thisPackagePrefix + classAst.nameAsString
 
-    nestedTypes.find {
+    nestedClasses.find {
         it.nameAsString == className
     }?.let { return thisClassPrefix + it.nameAsString }
 
@@ -144,8 +140,6 @@ private fun ClassPrinter.getFullClassName(className: String): String {
     }
 
     if (className[0].isLowerCase()) return className //primitive
-
-    if (className[0] == '?') return className //wildcard
 
     return thisPackagePrefix + className
 }

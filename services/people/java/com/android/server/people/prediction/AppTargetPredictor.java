@@ -24,7 +24,6 @@ import android.app.prediction.AppPredictionContext;
 import android.app.prediction.AppTarget;
 import android.app.prediction.AppTargetEvent;
 import android.app.prediction.AppTargetId;
-import android.content.Context;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.people.data.DataManager;
@@ -44,10 +43,10 @@ public class AppTargetPredictor {
     /** Creates a {@link AppTargetPredictor} instance based on the prediction context. */
     public static AppTargetPredictor create(@NonNull AppPredictionContext predictionContext,
             @NonNull Consumer<List<AppTarget>> updatePredictionsMethod,
-            @NonNull DataManager dataManager, @UserIdInt int callingUserId, Context context) {
+            @NonNull DataManager dataManager, @UserIdInt int callingUserId) {
         if (UI_SURFACE_SHARE.equals(predictionContext.getUiSurface())) {
-            return new ShareTargetPredictor(predictionContext, updatePredictionsMethod, dataManager,
-                    callingUserId, context);
+            return new ShareTargetPredictor(
+                    predictionContext, updatePredictionsMethod, dataManager, callingUserId);
         }
         return new AppTargetPredictor(
                 predictionContext, updatePredictionsMethod, dataManager, callingUserId);
@@ -123,11 +122,6 @@ public class AppTargetPredictor {
     @WorkerThread
     void sortTargets(List<AppTarget> targets, Consumer<List<AppTarget>> callback) {
         callback.accept(targets);
-    }
-
-    /** To be overridden by the subclass to recycle resources. */
-    @WorkerThread
-    void destroy() {
     }
 
     AppPredictionContext getPredictionContext() {

@@ -15,12 +15,10 @@
  */
 #pragma once
 
-#include "HolePunch.h"
 #include "RecordingCanvas.h"
 #include "ReorderBarrierDrawables.h"
 #include "SkiaCanvas.h"
 #include "SkiaDisplayList.h"
-#include "pipeline/skia/AnimatedDrawables.h"
 
 namespace android {
 namespace uirenderer {
@@ -41,14 +39,11 @@ public:
     }
 
     virtual void resetRecording(int width, int height,
-                                uirenderer::RenderNode* renderNode = nullptr) override {
+                                uirenderer::RenderNode* renderNode) override {
         initDisplayList(renderNode, width, height);
     }
 
-    virtual void punchHole(const SkRRect& rect) override;
-
-    virtual void finishRecording(uirenderer::RenderNode* destination) override;
-    std::unique_ptr<SkiaDisplayList> finishRecording();
+    virtual uirenderer::DisplayList* finishRecording() override;
 
     virtual void drawBitmap(Bitmap& bitmap, float left, float top, const Paint* paint) override;
     virtual void drawBitmap(Bitmap& bitmap, const SkMatrix& matrix, const Paint* paint) override;
@@ -71,22 +66,20 @@ public:
                             uirenderer::CanvasPropertyPrimitive* y,
                             uirenderer::CanvasPropertyPrimitive* radius,
                             uirenderer::CanvasPropertyPaint* paint) override;
-    virtual void drawRipple(const RippleDrawableParams& params) override;
 
     virtual void drawVectorDrawable(VectorDrawableRoot* vectorDrawable) override;
 
-    virtual void enableZ(bool enableZ) override;
+    virtual void insertReorderBarrier(bool enableReorder) override;
     virtual void drawLayer(uirenderer::DeferredLayerUpdater* layerHandle) override;
     virtual void drawRenderNode(uirenderer::RenderNode* renderNode) override;
-
+    virtual void callDrawGLFunction(Functor* functor,
+                                    uirenderer::GlFunctorLifecycleListener* listener) override;
     void drawWebViewFunctor(int functor) override;
 
 private:
     RecordingCanvas mRecorder;
     std::unique_ptr<SkiaDisplayList> mDisplayList;
     StartReorderBarrierDrawable* mCurrentBarrier;
-
-    static void FilterForImage(SkPaint&);
 
     /**
      *  A new SkiaDisplayList is created or recycled if available.
@@ -97,7 +90,7 @@ private:
      */
     void initDisplayList(uirenderer::RenderNode* renderNode, int width, int height);
 
-    using INHERITED = SkiaCanvas;
+    PaintCoW&& filterBitmap(PaintCoW&& paint);
 };
 
 }  // namespace skiapipeline

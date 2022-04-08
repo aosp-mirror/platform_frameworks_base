@@ -48,10 +48,6 @@
         <group gid="uhid" />
     </permission>
 
-    <permission name="android.permission.VIRTUAL_INPUT_DEVICE" >
-        <group gid="uhid" />
-    </permission>
-
     <permission name="android.permission.NET_TUNNELING" >
         <group gid="vpn" />
     </permission>
@@ -62,6 +58,10 @@
 
     <permission name="android.permission.READ_LOGS" >
         <group gid="log" />
+    </permission>
+
+    <permission name="android.permission.MANAGE_EXTERNAL_STORAGE" >
+        <group gid="external_storage" />
     </permission>
 
     <permission name="android.permission.ACCESS_MTP" >
@@ -152,11 +152,6 @@
     <assign-permission name="android.permission.UPDATE_DEVICE_STATS" uid="media" />
     <assign-permission name="android.permission.UPDATE_APP_OPS_STATS" uid="media" />
     <assign-permission name="android.permission.GET_PROCESS_STATE_AND_OOM_SCORE" uid="media" />
-    <assign-permission name="android.permission.PACKAGE_USAGE_STATS" uid="media" />
-    <assign-permission name="android.permission.REGISTER_MEDIA_RESOURCE_OBSERVER" uid="media" />
-    <assign-permission name="android.permission.REGISTER_STATS_PULL_ATOM" uid="media" />
-    <assign-permission name="android.permission.INTERACT_ACROSS_USERS" uid="media" />
-
     <assign-permission name="android.permission.INTERNET" uid="media" />
 
     <assign-permission name="android.permission.INTERNET" uid="shell" />
@@ -167,8 +162,6 @@
     <assign-permission name="android.permission.UPDATE_DEVICE_STATS" uid="audioserver" />
     <assign-permission name="android.permission.UPDATE_APP_OPS_STATS" uid="audioserver" />
     <assign-permission name="android.permission.PACKAGE_USAGE_STATS" uid="audioserver" />
-    <assign-permission name="android.permission.INTERACT_ACROSS_USERS" uid="audioserver" />
-    <assign-permission name="android.permission.OBSERVE_SENSOR_PRIVACY" uid="audioserver" />
 
     <assign-permission name="android.permission.MODIFY_AUDIO_SETTINGS" uid="cameraserver" />
     <assign-permission name="android.permission.ACCESS_SURFACE_FLINGER" uid="cameraserver" />
@@ -179,7 +172,6 @@
     <assign-permission name="android.permission.PACKAGE_USAGE_STATS" uid="cameraserver" />
     <assign-permission name="android.permission.WATCH_APPOPS" uid="cameraserver" />
     <assign-permission name="android.permission.MANAGE_APP_OPS_MODES" uid="cameraserver" />
-    <assign-permission name="android.permission.OBSERVE_SENSOR_PRIVACY" uid="cameraserver" />
 
     <assign-permission name="android.permission.ACCESS_SURFACE_FLINGER" uid="graphics" />
 
@@ -198,13 +190,15 @@
     <assign-permission name="android.permission.UPDATE_APP_OPS_STATS" uid="statsd" />
 
     <assign-permission name="android.permission.REGISTER_STATS_PULL_ATOM" uid="gpu_service" />
-    <assign-permission name="android.permission.REGISTER_STATS_PULL_ATOM" uid="keystore" />
 
     <split-permission name="android.permission.ACCESS_FINE_LOCATION">
         <new-permission name="android.permission.ACCESS_COARSE_LOCATION" />
     </split-permission>
     <split-permission name="android.permission.WRITE_EXTERNAL_STORAGE">
         <new-permission name="android.permission.READ_EXTERNAL_STORAGE" />
+    </split-permission>
+    <split-permission name="android.permission.READ_PRIVILEGED_PHONE_STATE">
+        <new-permission name="android.permission.READ_PHONE_STATE" />
     </split-permission>
     <split-permission name="android.permission.READ_CONTACTS"
                       targetSdk="16">
@@ -226,30 +220,6 @@
                       targetSdk="29">
         <new-permission name="android.permission.ACCESS_MEDIA_LOCATION" />
     </split-permission>
-    <split-permission name="android.permission.BLUETOOTH"
-                      targetSdk="31">
-        <new-permission name="android.permission.BLUETOOTH_SCAN" />
-    </split-permission>
-    <split-permission name="android.permission.BLUETOOTH"
-                      targetSdk="31">
-        <new-permission name="android.permission.BLUETOOTH_CONNECT" />
-    </split-permission>
-    <split-permission name="android.permission.BLUETOOTH"
-                      targetSdk="31">
-        <new-permission name="android.permission.BLUETOOTH_ADVERTISE" />
-    </split-permission>
-    <split-permission name="android.permission.BLUETOOTH_ADMIN"
-                      targetSdk="31">
-        <new-permission name="android.permission.BLUETOOTH_SCAN" />
-    </split-permission>
-    <split-permission name="android.permission.BLUETOOTH_ADMIN"
-                      targetSdk="31">
-        <new-permission name="android.permission.BLUETOOTH_CONNECT" />
-    </split-permission>
-    <split-permission name="android.permission.BLUETOOTH_ADMIN"
-                      targetSdk="31">
-        <new-permission name="android.permission.BLUETOOTH_ADVERTISE" />
-    </split-permission>
 
     <!-- This is a list of all the libraries available for application
          code to link against. -->
@@ -257,7 +227,8 @@
     <library name="android.test.base"
             file="/system/framework/android.test.base.jar" />
     <library name="android.test.mock"
-            file="/system/framework/android.test.mock.jar" />
+            file="/system/framework/android.test.mock.jar"
+            dependency="android.test.base" />
     <library name="android.test.runner"
             file="/system/framework/android.test.runner.jar"
             dependency="android.test.base:android.test.mock" />
@@ -266,7 +237,8 @@
     <library name="android.hidl.base-V1.0-java"
             file="/system/framework/android.hidl.base-V1.0-java.jar" />
     <library name="android.hidl.manager-V1.0-java"
-            file="/system/framework/android.hidl.manager-V1.0-java.jar" />
+            file="/system/framework/android.hidl.manager-V1.0-java.jar"
+            dependency="android.hidl.base-V1.0-java" />
 
     <!-- These are the standard packages that are white-listed to always have internet
          access while in power save mode, even if they aren't in the foreground. -->
@@ -281,12 +253,8 @@
     <allow-in-power-save package="com.android.cellbroadcastreceiver" />
     <allow-in-power-save package="com.android.shell" />
 
-    <!-- Emergency app needs to run in the background to reliably provide safety features -->
-    <allow-in-power-save package="com.android.emergency" />
-
     <!-- Whitelist system providers -->
-    <!-- Calendar provider needs alarms while in idle -->
-    <allow-in-power-save package="com.android.providers.calendar" />
+    <allow-in-power-save-except-idle package="com.android.providers.calendar" />
     <allow-in-power-save-except-idle package="com.android.providers.contacts" />
 
     <!-- The PAC proxy process must have network access, otherwise no app will
@@ -294,6 +262,9 @@
          all outgoing connections originate from this app. -->
     <allow-in-power-save-except-idle package="com.android.proxyhandler" />
 
-    <!-- Allow IMS service entitlement app to schedule jobs to run when app in background. -->
-    <allow-in-power-save-except-idle package="com.android.imsserviceentitlement" />
+    <!-- These are the packages that are white-listed to be able to run as system user -->
+    <system-user-whitelisted-app package="com.android.settings" />
+
+    <!-- These are the packages that shouldn't run as system user -->
+    <system-user-blacklisted-app package="com.android.wallpaper.livepicker" />
 </permissions>

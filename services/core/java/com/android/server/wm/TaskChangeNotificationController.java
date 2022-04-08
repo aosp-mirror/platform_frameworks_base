@@ -18,28 +18,29 @@ package com.android.server.wm;
 
 import android.app.ActivityManager;
 import android.app.ActivityManager.RunningTaskInfo;
+import android.app.ActivityManager.TaskSnapshot;
 import android.app.ITaskStackListener;
 import android.app.TaskInfo;
 import android.content.ComponentName;
 import android.os.Binder;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
-import android.window.TaskSnapshot;
 
 import com.android.internal.os.SomeArgs;
 
 import java.util.ArrayList;
 
 class TaskChangeNotificationController {
-    private static final int LOG_TASK_STATE_MSG = 1;
+    private static final int LOG_STACK_STATE_MSG = 1;
     private static final int NOTIFY_TASK_STACK_CHANGE_LISTENERS_MSG = 2;
     private static final int NOTIFY_ACTIVITY_PINNED_LISTENERS_MSG = 3;
     private static final int NOTIFY_ACTIVITY_RESTART_ATTEMPT_LISTENERS_MSG = 4;
     private static final int NOTIFY_FORCED_RESIZABLE_MSG = 6;
-    private static final int NOTIFY_ACTIVITY_DISMISSING_DOCKED_ROOT_TASK_MSG = 7;
+    private static final int NOTIFY_ACTIVITY_DISMISSING_DOCKED_STACK_MSG = 7;
     private static final int NOTIFY_TASK_ADDED_LISTENERS_MSG = 8;
     private static final int NOTIFY_TASK_REMOVED_LISTENERS_MSG = 9;
     private static final int NOTIFY_TASK_MOVED_TO_FRONT_LISTENERS_MSG = 10;
@@ -51,22 +52,23 @@ class TaskChangeNotificationController {
     private static final int NOTIFY_ACTIVITY_UNPINNED_LISTENERS_MSG = 17;
     private static final int NOTIFY_ACTIVITY_LAUNCH_ON_SECONDARY_DISPLAY_FAILED_MSG = 18;
     private static final int NOTIFY_ACTIVITY_LAUNCH_ON_SECONDARY_DISPLAY_REROUTED_MSG = 19;
-    private static final int NOTIFY_BACK_PRESSED_ON_TASK_ROOT = 20;
-    private static final int NOTIFY_TASK_DISPLAY_CHANGED_LISTENERS_MSG = 21;
-    private static final int NOTIFY_TASK_LIST_UPDATED_LISTENERS_MSG = 22;
-    private static final int NOTIFY_TASK_LIST_FROZEN_UNFROZEN_MSG = 23;
-    private static final int NOTIFY_TASK_FOCUS_CHANGED_MSG = 24;
-    private static final int NOTIFY_TASK_REQUESTED_ORIENTATION_CHANGED_MSG = 25;
-    private static final int NOTIFY_ACTIVITY_ROTATED_MSG = 26;
-    private static final int NOTIFY_TASK_MOVED_TO_BACK_LISTENERS_MSG = 27;
-    private static final int NOTIFY_LOCK_TASK_MODE_CHANGED_MSG = 28;
+    private static final int NOTIFY_SIZE_COMPAT_MODE_ACTIVITY_CHANGED_MSG = 20;
+    private static final int NOTIFY_BACK_PRESSED_ON_TASK_ROOT = 21;
+    private static final int NOTIFY_SINGLE_TASK_DISPLAY_DRAWN = 22;
+    private static final int NOTIFY_TASK_DISPLAY_CHANGED_LISTENERS_MSG = 23;
+    private static final int NOTIFY_TASK_LIST_UPDATED_LISTENERS_MSG = 24;
+    private static final int NOTIFY_SINGLE_TASK_DISPLAY_EMPTY = 25;
+    private static final int NOTIFY_TASK_LIST_FROZEN_UNFROZEN_MSG = 26;
+    private static final int NOTIFY_TASK_FOCUS_CHANGED_MSG = 27;
+    private static final int NOTIFY_TASK_REQUESTED_ORIENTATION_CHANGED_MSG = 28;
+    private static final int NOTIFY_ACTIVITY_ROTATED_MSG = 29;
 
     // Delay in notifying task stack change listeners (in millis)
     private static final int NOTIFY_TASK_STACK_CHANGE_LISTENERS_DELAY = 100;
 
     // Global lock used by the service the instantiate objects of this class.
     private final Object mServiceLock;
-    private final ActivityTaskSupervisor mTaskSupervisor;
+    private final ActivityStackSupervisor mStackSupervisor;
     private final Handler mHandler;
 
     // Task stack change listeners in a remote process.
@@ -130,8 +132,8 @@ class TaskChangeNotificationController {
         l.onActivityForcedResizable((String) m.obj, m.arg1, m.arg2);
     };
 
-    private final TaskStackConsumer mNotifyActivityDismissingDockedTask = (l, m) -> {
-        l.onActivityDismissingDockedTask();
+    private final TaskStackConsumer mNotifyActivityDismissingDockedStack = (l, m) -> {
+        l.onActivityDismissingDockedStack();
     };
 
     private final TaskStackConsumer mNotifyActivityLaunchOnSecondaryDisplayFailed = (l, m) -> {
@@ -148,6 +150,18 @@ class TaskChangeNotificationController {
 
     private final TaskStackConsumer mNotifyTaskSnapshotChanged = (l, m) -> {
         l.onTaskSnapshotChanged(m.arg1, (TaskSnapshot) m.obj);
+    };
+
+    private final TaskStackConsumer mOnSizeCompatModeActivityChanged = (l, m) -> {
+        l.onSizeCompatModeActivityChanged(m.arg1, (IBinder) m.obj);
+    };
+
+    private final TaskStackConsumer mNotifySingleTaskDisplayDrawn = (l, m) -> {
+        l.onSingleTaskDisplayDrawn(m.arg1);
+    };
+
+    private final TaskStackConsumer mNotifySingleTaskDisplayEmpty = (l, m) -> {
+        l.onSingleTaskDisplayEmpty(m.arg1);
     };
 
     private final TaskStackConsumer mNotifyTaskDisplayChanged = (l, m) -> {
@@ -174,14 +188,6 @@ class TaskChangeNotificationController {
         l.onActivityRotation(m.arg1);
     };
 
-    private final TaskStackConsumer mNotifyTaskMovedToBack = (l, m) -> {
-        l.onTaskMovedToBack((RunningTaskInfo) m.obj);
-    };
-
-    private final TaskStackConsumer mNotifyLockTaskModeChanged = (l, m) -> {
-        l.onLockTaskModeChanged(m.arg1);
-    };
-
     @FunctionalInterface
     public interface TaskStackConsumer {
         void accept(ITaskStackListener t, Message m) throws RemoteException;
@@ -195,9 +201,9 @@ class TaskChangeNotificationController {
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
-                case LOG_TASK_STATE_MSG: {
+                case LOG_STACK_STATE_MSG: {
                     synchronized (mServiceLock) {
-                        mTaskSupervisor.logRootTaskState();
+                        mStackSupervisor.logStackState();
                     }
                     break;
                 }
@@ -234,8 +240,8 @@ class TaskChangeNotificationController {
                 case NOTIFY_FORCED_RESIZABLE_MSG:
                     forAllRemoteListeners(mNotifyActivityForcedResizable, msg);
                     break;
-                case NOTIFY_ACTIVITY_DISMISSING_DOCKED_ROOT_TASK_MSG:
-                    forAllRemoteListeners(mNotifyActivityDismissingDockedTask, msg);
+                case NOTIFY_ACTIVITY_DISMISSING_DOCKED_STACK_MSG:
+                    forAllRemoteListeners(mNotifyActivityDismissingDockedStack, msg);
                     break;
                 case NOTIFY_ACTIVITY_LAUNCH_ON_SECONDARY_DISPLAY_FAILED_MSG:
                     forAllRemoteListeners(mNotifyActivityLaunchOnSecondaryDisplayFailed, msg);
@@ -249,8 +255,17 @@ class TaskChangeNotificationController {
                 case NOTIFY_TASK_SNAPSHOT_CHANGED_LISTENERS_MSG:
                     forAllRemoteListeners(mNotifyTaskSnapshotChanged, msg);
                     break;
+                case NOTIFY_SIZE_COMPAT_MODE_ACTIVITY_CHANGED_MSG:
+                    forAllRemoteListeners(mOnSizeCompatModeActivityChanged, msg);
+                    break;
                 case NOTIFY_BACK_PRESSED_ON_TASK_ROOT:
                     forAllRemoteListeners(mNotifyBackPressedOnTaskRoot, msg);
+                    break;
+                case NOTIFY_SINGLE_TASK_DISPLAY_DRAWN:
+                    forAllRemoteListeners(mNotifySingleTaskDisplayDrawn, msg);
+                    break;
+                case NOTIFY_SINGLE_TASK_DISPLAY_EMPTY:
+                    forAllRemoteListeners(mNotifySingleTaskDisplayEmpty, msg);
                     break;
                 case NOTIFY_TASK_DISPLAY_CHANGED_LISTENERS_MSG:
                     forAllRemoteListeners(mNotifyTaskDisplayChanged, msg);
@@ -270,12 +285,6 @@ class TaskChangeNotificationController {
                 case NOTIFY_ACTIVITY_ROTATED_MSG:
                     forAllRemoteListeners(mNotifyOnActivityRotation, msg);
                     break;
-                case NOTIFY_TASK_MOVED_TO_BACK_LISTENERS_MSG:
-                    forAllRemoteListeners(mNotifyTaskMovedToBack, msg);
-                    break;
-                case NOTIFY_LOCK_TASK_MODE_CHANGED_MSG:
-                    forAllRemoteListeners(mNotifyLockTaskModeChanged, msg);
-                    break;
             }
             if (msg.obj instanceof SomeArgs) {
                 ((SomeArgs) msg.obj).recycle();
@@ -284,9 +293,9 @@ class TaskChangeNotificationController {
     }
 
     public TaskChangeNotificationController(Object serviceLock,
-            ActivityTaskSupervisor taskSupervisor, Handler handler) {
+            ActivityStackSupervisor stackSupervisor, Handler handler) {
         mServiceLock = serviceLock;
-        mTaskSupervisor = taskSupervisor;
+        mStackSupervisor = stackSupervisor;
         mHandler = new MainHandler(handler.getLooper());
     }
 
@@ -344,7 +353,7 @@ class TaskChangeNotificationController {
 
     /** Notifies all listeners when the task stack has changed. */
     void notifyTaskStackChanged() {
-        mHandler.sendEmptyMessage(LOG_TASK_STATE_MSG);
+        mHandler.sendEmptyMessage(LOG_STACK_STATE_MSG);
         mHandler.removeMessages(NOTIFY_TASK_STACK_CHANGE_LISTENERS_MSG);
         final Message msg = mHandler.obtainMessage(NOTIFY_TASK_STACK_CHANGE_LISTENERS_MSG);
         forAllLocalListeners(mNotifyTaskStackChanged, msg);
@@ -388,10 +397,10 @@ class TaskChangeNotificationController {
         msg.sendToTarget();
     }
 
-    void notifyActivityDismissingDockedRootTask() {
-        mHandler.removeMessages(NOTIFY_ACTIVITY_DISMISSING_DOCKED_ROOT_TASK_MSG);
-        final Message msg = mHandler.obtainMessage(NOTIFY_ACTIVITY_DISMISSING_DOCKED_ROOT_TASK_MSG);
-        forAllLocalListeners(mNotifyActivityDismissingDockedTask, msg);
+    void notifyActivityDismissingDockedStack() {
+        mHandler.removeMessages(NOTIFY_ACTIVITY_DISMISSING_DOCKED_STACK_MSG);
+        final Message msg = mHandler.obtainMessage(NOTIFY_ACTIVITY_DISMISSING_DOCKED_STACK_MSG);
+        forAllLocalListeners(mNotifyActivityDismissingDockedStack, msg);
         msg.sendToTarget();
     }
 
@@ -489,6 +498,17 @@ class TaskChangeNotificationController {
     }
 
     /**
+     * Notify listeners that whether a size compatibility mode activity is using the override
+     * bounds which is not fit its parent.
+     */
+    void notifySizeCompatModeActivityChanged(int displayId, IBinder activityToken) {
+        final Message msg = mHandler.obtainMessage(NOTIFY_SIZE_COMPAT_MODE_ACTIVITY_CHANGED_MSG,
+                displayId, 0 /* unused */, activityToken);
+        forAllLocalListeners(mOnSizeCompatModeActivityChanged, msg);
+        msg.sendToTarget();
+    }
+
+    /**
      * Notify listeners that an activity received a back press when there are no other activities
      * in the back stack.
      */
@@ -500,12 +520,33 @@ class TaskChangeNotificationController {
     }
 
     /**
+     * Notify listeners that contents are drawn for the first time on a single task display.
+     */
+    void notifySingleTaskDisplayDrawn(int displayId) {
+        final Message msg = mHandler.obtainMessage(NOTIFY_SINGLE_TASK_DISPLAY_DRAWN,
+                displayId, 0 /* unused */);
+        forAllLocalListeners(mNotifySingleTaskDisplayDrawn, msg);
+        msg.sendToTarget();
+    }
+
+    /**
+     * Notify listeners that the last task is removed from a single task display.
+     */
+    void notifySingleTaskDisplayEmpty(int displayId) {
+        final Message msg = mHandler.obtainMessage(
+                NOTIFY_SINGLE_TASK_DISPLAY_EMPTY,
+                displayId, 0 /* unused */);
+        forAllLocalListeners(mNotifySingleTaskDisplayEmpty, msg);
+        msg.sendToTarget();
+    }
+
+    /**
      * Notify listeners that a task is reparented to another display.
      */
     void notifyTaskDisplayChanged(int taskId, int newDisplayId) {
         final Message msg = mHandler.obtainMessage(NOTIFY_TASK_DISPLAY_CHANGED_LISTENERS_MSG,
                 taskId, newDisplayId);
-        forAllLocalListeners(mNotifyTaskDisplayChanged, msg);
+        forAllLocalListeners(mNotifyTaskStackChanged, msg);
         msg.sendToTarget();
     }
 
@@ -547,22 +588,6 @@ class TaskChangeNotificationController {
         final Message msg = mHandler.obtainMessage(NOTIFY_ACTIVITY_ROTATED_MSG,
                 displayId, 0 /* unused */);
         forAllLocalListeners(mNotifyOnActivityRotation, msg);
-        msg.sendToTarget();
-    }
-
-    /**
-     * Notify that a task is being moved behind home.
-     */
-    void notifyTaskMovedToBack(TaskInfo ti) {
-        final Message msg = mHandler.obtainMessage(NOTIFY_TASK_MOVED_TO_BACK_LISTENERS_MSG, ti);
-        forAllLocalListeners(mNotifyTaskMovedToBack, msg);
-        msg.sendToTarget();
-    }
-
-    void notifyLockTaskModeChanged(int lockTaskModeState) {
-        final Message msg = mHandler.obtainMessage(NOTIFY_LOCK_TASK_MODE_CHANGED_MSG,
-                lockTaskModeState, 0 /* unused */);
-        forAllLocalListeners(mNotifyLockTaskModeChanged, msg);
         msg.sendToTarget();
     }
 }

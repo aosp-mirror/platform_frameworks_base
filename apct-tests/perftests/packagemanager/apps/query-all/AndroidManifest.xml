@@ -18,8 +18,7 @@
           package="com.android.perftests.appenumeration">
 
     <application android:hasCode="false" >
-        <activity android:name="android.perftests.utils.PerfTestActivity"
-            android:exported="true">
+        <activity android:name="android.perftests.utils.PerfTestActivity">
             <intent-filter>
                 <action android:name="com.android.perftests.packagemanager.PERFTEST" />
             </intent-filter>

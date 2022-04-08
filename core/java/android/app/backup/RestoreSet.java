@@ -16,9 +16,7 @@
 
 package android.app.backup;
 
-import android.annotation.Nullable;
 import android.annotation.SystemApi;
-import android.app.backup.BackupAgent.BackupTransportFlags;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -34,14 +32,12 @@ public class RestoreSet implements Parcelable {
      * Name of this restore set.  May be user generated, may simply be the name
      * of the handset model, e.g. "T-Mobile G1".
      */
-    @Nullable
     public String name;
 
     /**
      * Identifier of the device whose data this is.  This will be as unique as
      * is practically possible; for example, it might be an IMEI.
      */
-    @Nullable
     public String device;
 
     /**
@@ -51,49 +47,15 @@ public class RestoreSet implements Parcelable {
      */
     public long token;
 
-    /**
-     * Properties of the {@link BackupTransport} transport that was used to obtain the data in
-     * this restore set.
-     */
-    @BackupTransportFlags
-    public final int backupTransportFlags;
 
-    /**
-     * Constructs a RestoreSet object that identifies a set of data that can be restored.
-     */
     public RestoreSet() {
         // Leave everything zero / null
-        backupTransportFlags = 0;
     }
 
-    /**
-     * Constructs a RestoreSet object that identifies a set of data that can be restored.
-     *
-     * @param name The name of the restore set.
-     * @param device The name of the device where the restore data is coming from.
-     * @param token The unique identifier for the current restore set.
-     */
-    public RestoreSet(@Nullable String name, @Nullable String device, long token) {
-        this(name, device, token, /* backupTransportFlags */ 0);
-    }
-
-    /**
-     * Constructs a RestoreSet object that identifies a set of data that can be restored.
-     *
-     * @param name The name of the restore set.
-     * @param device The name of the device where the restore data is coming from.
-     * @param token The unique identifier for the current restore set.
-     * @param backupTransportFlags Flags returned by {@link BackupTransport#getTransportFlags()}
-     *                             implementation of the backup transport used by the source device
-     *                             to create this restore set. See {@link BackupAgent} for possible
-     *                             flag values.
-     */
-    public RestoreSet(@Nullable String name, @Nullable String device, long token,
-            @BackupTransportFlags int backupTransportFlags) {
-        this.name = name;
-        this.device = device;
-        this.token = token;
-        this.backupTransportFlags = backupTransportFlags;
+    public RestoreSet(String _name, String _dev, long _token) {
+        name = _name;
+        device = _dev;
+        token = _token;
     }
 
     // Parcelable implementation
@@ -105,7 +67,6 @@ public class RestoreSet implements Parcelable {
         out.writeString(name);
         out.writeString(device);
         out.writeLong(token);
-        out.writeInt(backupTransportFlags);
     }
 
     public static final @android.annotation.NonNull Parcelable.Creator<RestoreSet> CREATOR
@@ -123,6 +84,5 @@ public class RestoreSet implements Parcelable {
         name = in.readString();
         device = in.readString();
         token = in.readLong();
-        backupTransportFlags = in.readInt();
     }
 }

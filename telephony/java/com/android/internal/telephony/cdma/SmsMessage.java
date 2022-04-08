@@ -17,7 +17,7 @@
 package com.android.internal.telephony.cdma;
 
 import android.compat.annotation.UnsupportedAppUsage;
-import android.os.Build;
+import android.content.res.Resources;
 import android.sysprop.TelephonyProperties;
 import android.telephony.PhoneNumberUtils;
 import android.telephony.SmsCbLocation;
@@ -27,6 +27,7 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import com.android.internal.telephony.GsmAlphabet.TextEncodingDetails;
+import com.android.internal.telephony.Sms7BitEncodingTranslator;
 import com.android.internal.telephony.SmsAddress;
 import com.android.internal.telephony.SmsConstants;
 import com.android.internal.telephony.SmsHeader;
@@ -155,8 +156,7 @@ public class SmsMessage extends SmsMessageBase {
      *
      * @hide
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.Q, publicAlternatives = "Use {@link "
-            + "android.telephony.SmsMessage} API instead")
+    @UnsupportedAppUsage
     public static SmsMessage createFromEfRecord(int index, byte[] data) {
         try {
             SmsMessage msg = new SmsMessage();
@@ -233,7 +233,7 @@ public class SmsMessage extends SmsMessageBase {
      *         null on encode error.
      * @hide
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public static SubmitPdu getSubmitPdu(String scAddr, String destAddr, String message,
             boolean statusReportRequested, SmsHeader smsHeader, int priority) {
 
@@ -316,7 +316,7 @@ public class SmsMessage extends SmsMessageBase {
      * @return a <code>SubmitPdu</code> containing null SC address and the encoded message. Returns
      *         null on encode error.
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public static SubmitPdu getSubmitPdu(String destAddr, UserData userData,
             boolean statusReportRequested, int priority) {
         return privateGetSubmitPdu(destAddr, statusReportRequested, userData, priority);
@@ -414,7 +414,15 @@ public class SmsMessage extends SmsMessageBase {
     @UnsupportedAppUsage
     public static TextEncodingDetails calculateLength(CharSequence messageBody,
             boolean use7bitOnly, boolean isEntireMsg) {
-        return BearerData.calcTextEncodingDetails(messageBody, use7bitOnly, isEntireMsg);
+        CharSequence newMsgBody = null;
+        Resources r = Resources.getSystem();
+        if (r.getBoolean(com.android.internal.R.bool.config_sms_force_7bit_encoding)) {
+            newMsgBody = Sms7BitEncodingTranslator.translate(messageBody, true /* isCdmaFormat */);
+        }
+        if (TextUtils.isEmpty(newMsgBody)) {
+            newMsgBody = messageBody;
+        }
+        return BearerData.calcTextEncodingDetails(newMsgBody, use7bitOnly, isEntireMsg);
     }
 
     /**
@@ -479,7 +487,7 @@ public class SmsMessage extends SmsMessageBase {
             length = dis.readUnsignedByte();
             addr.numberOfDigits = length;
 
-            // Correctness check on the length
+            // sanity check on the length
             if (length > pdu.length) {
                 throw new RuntimeException(
                         "createFromPdu: Invalid pdu, addr.numberOfDigits " + length
@@ -496,7 +504,7 @@ public class SmsMessage extends SmsMessageBase {
 
             //encoded BearerData:
             bearerDataLength = dis.readInt();
-            // Correctness check on the length
+            // sanity check on the length
             if (bearerDataLength > pdu.length) {
                 throw new RuntimeException(
                         "createFromPdu: Invalid pdu, bearerDataLength " + bearerDataLength

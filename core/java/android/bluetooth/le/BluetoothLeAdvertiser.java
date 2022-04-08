@@ -16,17 +16,11 @@
 
 package android.bluetooth.le;
 
-import android.annotation.RequiresNoPermission;
-import android.annotation.RequiresPermission;
-import android.annotation.SuppressLint;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothUuid;
 import android.bluetooth.IBluetoothGatt;
 import android.bluetooth.IBluetoothManager;
-import android.bluetooth.annotations.RequiresBluetoothAdvertisePermission;
-import android.bluetooth.annotations.RequiresLegacyBluetoothAdminPermission;
-import android.content.AttributionSource;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.ParcelUuid;
@@ -36,7 +30,6 @@ import android.util.Log;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 
 /**
  * This class provides a way to perform Bluetooth LE advertise operations, such as starting and
@@ -45,6 +38,9 @@ import java.util.Objects;
  * <p>
  * To get an instance of {@link BluetoothLeAdvertiser}, call the
  * {@link BluetoothAdapter#getBluetoothLeAdvertiser()} method.
+ * <p>
+ * <b>Note:</b> Most of the methods here require {@link android.Manifest.permission#BLUETOOTH_ADMIN}
+ * permission.
  *
  * @see AdvertiseData
  */
@@ -60,11 +56,9 @@ public final class BluetoothLeAdvertiser {
     private static final int FLAGS_FIELD_BYTES = 3;
     private static final int MANUFACTURER_SPECIFIC_DATA_LENGTH = 2;
 
-    private final BluetoothAdapter mBluetoothAdapter;
     private final IBluetoothManager mBluetoothManager;
-    private final AttributionSource mAttributionSource;
-
     private final Handler mHandler;
+    private BluetoothAdapter mBluetoothAdapter;
     private final Map<AdvertiseCallback, AdvertisingSetCallback>
             mLegacyAdvertisers = new HashMap<>();
     private final Map<AdvertisingSetCallback, IAdvertisingSetCallback>
@@ -78,24 +72,22 @@ public final class BluetoothLeAdvertiser {
      * @param bluetoothManager BluetoothManager that conducts overall Bluetooth Management
      * @hide
      */
-    public BluetoothLeAdvertiser(BluetoothAdapter bluetoothAdapter) {
-        mBluetoothAdapter = Objects.requireNonNull(bluetoothAdapter);
-        mBluetoothManager = mBluetoothAdapter.getBluetoothManager();
-        mAttributionSource = mBluetoothAdapter.getAttributionSource();
+    public BluetoothLeAdvertiser(IBluetoothManager bluetoothManager) {
+        mBluetoothManager = bluetoothManager;
+        mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         mHandler = new Handler(Looper.getMainLooper());
     }
 
     /**
      * Start Bluetooth LE Advertising. On success, the {@code advertiseData} will be broadcasted.
      * Returns immediately, the operation status is delivered through {@code callback}.
+     * <p>
+     * Requires {@link android.Manifest.permission#BLUETOOTH_ADMIN} permission.
      *
      * @param settings Settings for Bluetooth LE advertising.
      * @param advertiseData Advertisement data to be broadcasted.
      * @param callback Callback for advertising status.
      */
-    @RequiresLegacyBluetoothAdminPermission
-    @RequiresBluetoothAdvertisePermission
-    @RequiresPermission(android.Manifest.permission.BLUETOOTH_ADVERTISE)
     public void startAdvertising(AdvertiseSettings settings,
             AdvertiseData advertiseData, final AdvertiseCallback callback) {
         startAdvertising(settings, advertiseData, null, callback);
@@ -106,15 +98,14 @@ public final class BluetoothLeAdvertiser {
      * operation succeeds. The {@code scanResponse} is returned when a scanning device sends an
      * active scan request. This method returns immediately, the operation status is delivered
      * through {@code callback}.
+     * <p>
+     * Requires {@link android.Manifest.permission#BLUETOOTH_ADMIN}
      *
      * @param settings Settings for Bluetooth LE advertising.
      * @param advertiseData Advertisement data to be advertised in advertisement packet.
      * @param scanResponse Scan response associated with the advertisement data.
      * @param callback Callback for advertising status.
      */
-    @RequiresLegacyBluetoothAdminPermission
-    @RequiresBluetoothAdvertisePermission
-    @RequiresPermission(android.Manifest.permission.BLUETOOTH_ADVERTISE)
     public void startAdvertising(AdvertiseSettings settings,
             AdvertiseData advertiseData, AdvertiseData scanResponse,
             final AdvertiseCallback callback) {
@@ -169,10 +160,6 @@ public final class BluetoothLeAdvertiser {
         }
     }
 
-    @SuppressLint({
-            "AndroidFrameworkBluetoothPermission",
-            "AndroidFrameworkRequiresPermission",
-    })
     AdvertisingSetCallback wrapOldCallback(AdvertiseCallback callback, AdvertiseSettings settings) {
         return new AdvertisingSetCallback() {
             @Override
@@ -205,12 +192,11 @@ public final class BluetoothLeAdvertiser {
     /**
      * Stop Bluetooth LE advertising. The {@code callback} must be the same one use in
      * {@link BluetoothLeAdvertiser#startAdvertising}.
+     * <p>
+     * Requires {@link android.Manifest.permission#BLUETOOTH_ADMIN} permission.
      *
      * @param callback {@link AdvertiseCallback} identifies the advertising instance to stop.
      */
-    @RequiresLegacyBluetoothAdminPermission
-    @RequiresBluetoothAdvertisePermission
-    @RequiresPermission(android.Manifest.permission.BLUETOOTH_ADVERTISE)
     public void stopAdvertising(final AdvertiseCallback callback) {
         synchronized (mLegacyAdvertisers) {
             if (callback == null) {
@@ -246,9 +232,6 @@ public final class BluetoothLeAdvertiser {
      * size, or unsupported advertising PHY is selected, or when attempt to use Periodic Advertising
      * feature is made when it's not supported by the controller.
      */
-    @RequiresLegacyBluetoothAdminPermission
-    @RequiresBluetoothAdvertisePermission
-    @RequiresPermission(android.Manifest.permission.BLUETOOTH_ADVERTISE)
     public void startAdvertisingSet(AdvertisingSetParameters parameters,
             AdvertiseData advertiseData, AdvertiseData scanResponse,
             PeriodicAdvertisingParameters periodicParameters,
@@ -279,9 +262,6 @@ public final class BluetoothLeAdvertiser {
      * size, or unsupported advertising PHY is selected, or when attempt to use Periodic Advertising
      * feature is made when it's not supported by the controller.
      */
-    @RequiresLegacyBluetoothAdminPermission
-    @RequiresBluetoothAdvertisePermission
-    @RequiresPermission(android.Manifest.permission.BLUETOOTH_ADVERTISE)
     public void startAdvertisingSet(AdvertisingSetParameters parameters,
             AdvertiseData advertiseData, AdvertiseData scanResponse,
             PeriodicAdvertisingParameters periodicParameters,
@@ -317,9 +297,6 @@ public final class BluetoothLeAdvertiser {
      * size, or unsupported advertising PHY is selected, or when attempt to use Periodic Advertising
      * feature is made when it's not supported by the controller.
      */
-    @RequiresLegacyBluetoothAdminPermission
-    @RequiresBluetoothAdvertisePermission
-    @RequiresPermission(android.Manifest.permission.BLUETOOTH_ADVERTISE)
     public void startAdvertisingSet(AdvertisingSetParameters parameters,
             AdvertiseData advertiseData, AdvertiseData scanResponse,
             PeriodicAdvertisingParameters periodicParameters,
@@ -360,9 +337,6 @@ public final class BluetoothLeAdvertiser {
      * maxExtendedAdvertisingEvents is used on a controller that doesn't support the LE Extended
      * Advertising
      */
-    @RequiresLegacyBluetoothAdminPermission
-    @RequiresBluetoothAdvertisePermission
-    @RequiresPermission(android.Manifest.permission.BLUETOOTH_ADVERTISE)
     public void startAdvertisingSet(AdvertisingSetParameters parameters,
             AdvertiseData advertiseData, AdvertiseData scanResponse,
             PeriodicAdvertisingParameters periodicParameters,
@@ -458,8 +432,7 @@ public final class BluetoothLeAdvertiser {
 
         try {
             gatt.startAdvertisingSet(parameters, advertiseData, scanResponse, periodicParameters,
-                    periodicData, duration, maxExtendedAdvertisingEvents, wrapped,
-                    mAttributionSource);
+                    periodicData, duration, maxExtendedAdvertisingEvents, wrapped);
         } catch (RemoteException e) {
             Log.e(TAG, "Failed to start advertising set - ", e);
             postStartSetFailure(handler, callback,
@@ -472,9 +445,6 @@ public final class BluetoothLeAdvertiser {
      * Used to dispose of a {@link AdvertisingSet} object, obtained with {@link
      * BluetoothLeAdvertiser#startAdvertisingSet}.
      */
-    @RequiresLegacyBluetoothAdminPermission
-    @RequiresBluetoothAdvertisePermission
-    @RequiresPermission(android.Manifest.permission.BLUETOOTH_ADVERTISE)
     public void stopAdvertisingSet(AdvertisingSetCallback callback) {
         if (callback == null) {
             throw new IllegalArgumentException("callback cannot be null");
@@ -488,7 +458,7 @@ public final class BluetoothLeAdvertiser {
         IBluetoothGatt gatt;
         try {
             gatt = mBluetoothManager.getBluetoothGatt();
-            gatt.stopAdvertisingSet(wrapped, mAttributionSource);
+            gatt.stopAdvertisingSet(wrapped);
         } catch (RemoteException e) {
             Log.e(TAG, "Failed to stop advertising - ", e);
         }
@@ -499,7 +469,6 @@ public final class BluetoothLeAdvertiser {
      *
      * @hide
      */
-    @RequiresNoPermission
     public void cleanup() {
         mLegacyAdvertisers.clear();
         mCallbackWrappers.clear();
@@ -507,8 +476,6 @@ public final class BluetoothLeAdvertiser {
     }
 
     // Compute the size of advertisement data or scan resp
-    @RequiresBluetoothAdvertisePermission
-    @RequiresPermission(android.Manifest.permission.BLUETOOTH_ADVERTISE)
     private int totalBytes(AdvertiseData data, boolean isFlagsIncluded) {
         if (data == null) return 0;
         // Flags field is omitted if the advertising is not connectable.
@@ -518,33 +485,6 @@ public final class BluetoothLeAdvertiser {
             int num32BitUuids = 0;
             int num128BitUuids = 0;
             for (ParcelUuid uuid : data.getServiceUuids()) {
-                if (BluetoothUuid.is16BitUuid(uuid)) {
-                    ++num16BitUuids;
-                } else if (BluetoothUuid.is32BitUuid(uuid)) {
-                    ++num32BitUuids;
-                } else {
-                    ++num128BitUuids;
-                }
-            }
-            // 16 bit service uuids are grouped into one field when doing advertising.
-            if (num16BitUuids != 0) {
-                size += OVERHEAD_BYTES_PER_FIELD + num16BitUuids * BluetoothUuid.UUID_BYTES_16_BIT;
-            }
-            // 32 bit service uuids are grouped into one field when doing advertising.
-            if (num32BitUuids != 0) {
-                size += OVERHEAD_BYTES_PER_FIELD + num32BitUuids * BluetoothUuid.UUID_BYTES_32_BIT;
-            }
-            // 128 bit service uuids are grouped into one field when doing advertising.
-            if (num128BitUuids != 0) {
-                size += OVERHEAD_BYTES_PER_FIELD
-                        + num128BitUuids * BluetoothUuid.UUID_BYTES_128_BIT;
-            }
-        }
-        if (data.getServiceSolicitationUuids() != null) {
-            int num16BitUuids = 0;
-            int num32BitUuids = 0;
-            int num128BitUuids = 0;
-            for (ParcelUuid uuid : data.getServiceSolicitationUuids()) {
                 if (BluetoothUuid.is16BitUuid(uuid)) {
                     ++num16BitUuids;
                 } else if (BluetoothUuid.is32BitUuid(uuid)) {
@@ -579,11 +519,8 @@ public final class BluetoothLeAdvertiser {
         if (data.getIncludeTxPowerLevel()) {
             size += OVERHEAD_BYTES_PER_FIELD + 1; // tx power level value is one byte.
         }
-        if (data.getIncludeDeviceName()) {
-            final int length = mBluetoothAdapter.getNameLengthForAdvertise();
-            if (length >= 0) {
-                size += OVERHEAD_BYTES_PER_FIELD + length;
-            }
+        if (data.getIncludeDeviceName() && mBluetoothAdapter.getName() != null) {
+            size += OVERHEAD_BYTES_PER_FIELD + mBluetoothAdapter.getName().length();
         }
         return size;
     }
@@ -592,7 +529,6 @@ public final class BluetoothLeAdvertiser {
         return array == null ? 0 : array.length;
     }
 
-    @SuppressLint("AndroidFrameworkBluetoothPermission")
     IAdvertisingSetCallback wrap(AdvertisingSetCallback callback, Handler handler) {
         return new IAdvertisingSetCallback.Stub() {
             @Override
@@ -606,8 +542,8 @@ public final class BluetoothLeAdvertiser {
                             return;
                         }
 
-                        AdvertisingSet advertisingSet = new AdvertisingSet(
-                                advertiserId, mBluetoothManager, mAttributionSource);
+                        AdvertisingSet advertisingSet =
+                                new AdvertisingSet(advertiserId, mBluetoothManager);
                         mAdvertisingSets.put(advertiserId, advertisingSet);
                         callback.onAdvertisingSetStarted(advertisingSet, txPower, status);
                     }
@@ -717,7 +653,6 @@ public final class BluetoothLeAdvertiser {
         };
     }
 
-    @SuppressLint("AndroidFrameworkBluetoothPermission")
     private void postStartSetFailure(Handler handler, final AdvertisingSetCallback callback,
             final int error) {
         handler.post(new Runnable() {
@@ -728,7 +663,6 @@ public final class BluetoothLeAdvertiser {
         });
     }
 
-    @SuppressLint("AndroidFrameworkBluetoothPermission")
     private void postStartFailure(final AdvertiseCallback callback, final int error) {
         mHandler.post(new Runnable() {
             @Override
@@ -738,7 +672,6 @@ public final class BluetoothLeAdvertiser {
         });
     }
 
-    @SuppressLint("AndroidFrameworkBluetoothPermission")
     private void postStartSuccess(final AdvertiseCallback callback,
             final AdvertiseSettings settings) {
         mHandler.post(new Runnable() {

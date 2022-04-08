@@ -22,7 +22,6 @@ package com.android.systemui.dock;
 public class DockManagerFake implements DockManager {
     DockEventListener mCallback;
     AlignmentStateListener mAlignmentListener;
-    private boolean mDocked;
 
     @Override
     public void addListener(DockEventListener callback) {
@@ -46,11 +45,7 @@ public class DockManagerFake implements DockManager {
 
     @Override
     public boolean isDocked() {
-        return mDocked;
-    }
-
-    public void setIsDocked(boolean docked) {
-        mDocked = docked;
+        return false;
     }
 
     @Override

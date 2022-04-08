@@ -22,22 +22,19 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
-import android.app.PendingIntent;
-import android.app.Person;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
-import android.graphics.Color;
+import android.media.session.MediaSession;
 import android.os.Build;
+import android.os.Process;
 import android.os.UserHandle;
-import android.os.Vibrator;
 import android.provider.Settings;
 import android.service.notification.StatusBarNotification;
 import android.telecom.TelecomManager;
@@ -64,7 +61,6 @@ public class NotificationComparatorTest extends UiServiceTestCase {
     @Mock TelecomManager mTm;
     @Mock RankingHandler handler;
     @Mock PackageManager mPm;
-    @Mock Vibrator mVibrator;
 
     private final String callPkg = "com.android.server.notification";
     private final int callUid = 10;
@@ -77,7 +73,7 @@ public class NotificationComparatorTest extends UiServiceTestCase {
     private NotificationRecord mRecordMinCallNonInterruptive;
     private NotificationRecord mRecordMinCall;
     private NotificationRecord mRecordHighCall;
-    private NotificationRecord mRecordHighCallStyle;
+    private NotificationRecord mRecordDefaultMedia;
     private NotificationRecord mRecordEmail;
     private NotificationRecord mRecordInlineReply;
     private NotificationRecord mRecordSms;
@@ -96,13 +92,9 @@ public class NotificationComparatorTest extends UiServiceTestCase {
         int userId = UserHandle.myUserId();
 
         when(mContext.getResources()).thenReturn(getContext().getResources());
-        when(mContext.getTheme()).thenReturn(getContext().getTheme());
         when(mContext.getContentResolver()).thenReturn(getContext().getContentResolver());
         when(mContext.getPackageManager()).thenReturn(mPm);
         when(mContext.getSystemService(eq(Context.TELECOM_SERVICE))).thenReturn(mTm);
-        when(mContext.getSystemService(Vibrator.class)).thenReturn(mVibrator);
-        when(mContext.getString(anyInt())).thenCallRealMethod();
-        when(mContext.getColor(anyInt())).thenCallRealMethod();
         when(mTm.getDefaultDialerPackage()).thenReturn(callPkg);
         final ApplicationInfo legacy = new ApplicationInfo();
         legacy.targetSdkVersion = Build.VERSION_CODES.N_MR1;
@@ -147,18 +139,14 @@ public class NotificationComparatorTest extends UiServiceTestCase {
                 new UserHandle(userId), "", 1999), getDefaultChannel());
         mRecordHighCall.setSystemImportance(NotificationManager.IMPORTANCE_HIGH);
 
-        Notification nHighCallStyle = new Notification.Builder(mContext, TEST_CHANNEL_ID)
-                .setStyle(Notification.CallStyle.forOngoingCall(
-                        new Person.Builder().setName("caller").build(),
-                        mock(PendingIntent.class)
-                ))
-                .setFlag(Notification.FLAG_FOREGROUND_SERVICE, true)
+        Notification n3 = new Notification.Builder(mContext, TEST_CHANNEL_ID)
+                .setStyle(new Notification.MediaStyle()
+                        .setMediaSession(new MediaSession.Token(Process.myUid(), null)))
                 .build();
-        mRecordHighCallStyle = new NotificationRecord(mContext, new StatusBarNotification(callPkg,
-                callPkg, 1, "highCallStyle", callUid, callUid, nHighCallStyle,
-                new UserHandle(userId), "", 2000), getDefaultChannel());
-        mRecordHighCallStyle.setSystemImportance(NotificationManager.IMPORTANCE_HIGH);
-        mRecordHighCallStyle.setInterruptive(true);
+        mRecordDefaultMedia = new NotificationRecord(mContext, new StatusBarNotification(pkg2,
+                pkg2, 1, "media", uid2, uid2, n3, new UserHandle(userId),
+                "", 1499), getDefaultChannel());
+        mRecordDefaultMedia.setSystemImportance(NotificationManager.IMPORTANCE_DEFAULT);
 
         Notification n4 = new Notification.Builder(mContext, TEST_CHANNEL_ID)
                 .setStyle(new Notification.MessagingStyle("sender!")).build();
@@ -217,7 +205,7 @@ public class NotificationComparatorTest extends UiServiceTestCase {
 
         Notification n11 = new Notification.Builder(mContext, TEST_CHANNEL_ID)
                 .setCategory(Notification.CATEGORY_MESSAGE)
-                .setColorized(true).setColor(Color.WHITE)
+                .setColorized(true)
                 .build();
         mRecordCheaterColorized = new NotificationRecord(mContext, new StatusBarNotification(pkg2,
                 pkg2, 1, "cheater", uid2, uid2, n11, new UserHandle(userId),
@@ -226,17 +214,17 @@ public class NotificationComparatorTest extends UiServiceTestCase {
 
         Notification n12 = new Notification.Builder(mContext, TEST_CHANNEL_ID)
                 .setCategory(Notification.CATEGORY_MESSAGE)
-                .setColorized(true).setColor(Color.WHITE)
+                .setColorized(true)
                 .setStyle(new Notification.MediaStyle())
                 .build();
         mNoMediaSessionMedia = new NotificationRecord(mContext, new StatusBarNotification(
-                pkg2, pkg2, 1, "media", uid2, uid2, n12, new UserHandle(userId),
+                pkg2, pkg2, 1, "cheater", uid2, uid2, n12, new UserHandle(userId),
                 "", 9258), getDefaultChannel());
         mNoMediaSessionMedia.setSystemImportance(NotificationManager.IMPORTANCE_DEFAULT);
 
         Notification n13 = new Notification.Builder(mContext, TEST_CHANNEL_ID)
                 .setFlag(Notification.FLAG_FOREGROUND_SERVICE, true)
-                .setColorized(true).setColor(Color.WHITE)
+                .setColorized(true /* colorized */)
                 .build();
         mRecordColorized = new NotificationRecord(mContext, new StatusBarNotification(pkg2,
                 pkg2, 1, "colorized", uid2, uid2, n13,
@@ -245,7 +233,7 @@ public class NotificationComparatorTest extends UiServiceTestCase {
 
         Notification n14 = new Notification.Builder(mContext, TEST_CHANNEL_ID)
                 .setCategory(Notification.CATEGORY_CALL)
-                .setColorized(true).setColor(Color.WHITE)
+                .setColorized(true)
                 .setFlag(Notification.FLAG_FOREGROUND_SERVICE, true)
                 .build();
         mRecordColorizedCall = new NotificationRecord(mContext, new StatusBarNotification(callPkg,
@@ -259,7 +247,7 @@ public class NotificationComparatorTest extends UiServiceTestCase {
         final List<NotificationRecord> expected = new ArrayList<>();
         expected.add(mRecordColorizedCall);
         expected.add(mRecordColorized);
-        expected.add(mRecordHighCallStyle);
+        expected.add(mRecordDefaultMedia);
         expected.add(mRecordHighCall);
         expected.add(mRecordInlineReply);
         if (mRecordSms != null) {

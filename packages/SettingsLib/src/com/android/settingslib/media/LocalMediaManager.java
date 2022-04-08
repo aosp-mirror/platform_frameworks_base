@@ -22,13 +22,11 @@ import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.Context;
 import android.media.RoutingSessionInfo;
-import android.os.Build;
 import android.text.TextUtils;
 import android.util.Log;
 
 import androidx.annotation.IntDef;
 import androidx.annotation.Nullable;
-import androidx.annotation.RequiresApi;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.settingslib.bluetooth.A2dpProfile;
@@ -51,7 +49,6 @@ import java.util.concurrent.CopyOnWriteArrayList;
 /**
  * LocalMediaManager provide interface to get MediaDevice list and transfer media to MediaDevice.
  */
-@RequiresApi(Build.VERSION_CODES.R)
 public class LocalMediaManager implements BluetoothCallback {
     private static final Comparator<MediaDevice> COMPARATOR = Comparator.naturalOrder();
     private static final String TAG = "LocalMediaManager";
@@ -208,6 +205,7 @@ public class LocalMediaManager implements BluetoothCallback {
 
     void dispatchDeviceListUpdate() {
         final List<MediaDevice> mediaDevices = new ArrayList<>(mMediaDevices);
+        Collections.sort(mediaDevices, COMPARATOR);
         for (DeviceCallback callback : getCallbacks()) {
             callback.onDeviceListUpdate(mediaDevices);
         }
@@ -404,20 +402,6 @@ public class LocalMediaManager implements BluetoothCallback {
         return mPackageName;
     }
 
-    /**
-     * Returns {@code true} if needed to disable media output, otherwise returns {@code false}.
-     */
-    public boolean shouldDisableMediaOutput(String packageName) {
-        return mInfoMediaManager.shouldDisableMediaOutput(packageName);
-    }
-
-    /**
-     * Returns {@code true} if needed to enable volume seekbar, otherwise returns {@code false}.
-     */
-    public boolean shouldEnableVolumeSeekBar(RoutingSessionInfo sessionInfo) {
-        return mInfoMediaManager.shouldEnableVolumeSeekBar(sessionInfo);
-    }
-
     @VisibleForTesting
     MediaDevice updateCurrentConnectedDevice() {
         MediaDevice connectedDevice = null;
@@ -481,17 +465,7 @@ public class LocalMediaManager implements BluetoothCallback {
             synchronized (mMediaDevicesLock) {
                 mMediaDevices.clear();
                 mMediaDevices.addAll(devices);
-                Collections.sort(devices, COMPARATOR);
-                // Add disconnected bluetooth devices only when phone output device is available.
-                for (MediaDevice device : devices) {
-                    final int type = device.getDeviceType();
-                    if (type == MediaDevice.MediaDeviceType.TYPE_USB_C_AUDIO_DEVICE
-                            || type == MediaDevice.MediaDeviceType.TYPE_3POINT5_MM_AUDIO_DEVICE
-                            || type == MediaDevice.MediaDeviceType.TYPE_PHONE_DEVICE) {
-                        mMediaDevices.addAll(buildDisconnectedBluetoothDevice());
-                        break;
-                    }
-                }
+                mMediaDevices.addAll(buildDisconnectedBluetoothDevice());
             }
 
             final MediaDevice infoMediaDevice = mInfoMediaManager.getCurrentConnectedDevice();

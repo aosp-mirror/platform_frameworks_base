@@ -694,16 +694,6 @@ public class AccessPointTest {
         assertThat(ap.getTitle()).isEqualTo(providerFriendlyName);
     }
 
-    // This method doesn't copy mIsFailover, mIsAvailable and mIsRoaming because NetworkInfo
-    // doesn't expose those three set methods. But that's fine since the tests don't use those three
-    // variables.
-    private NetworkInfo copyNetworkInfo(NetworkInfo ni) {
-        final NetworkInfo copy = new NetworkInfo(ni.getType(), ni.getSubtype(), ni.getTypeName(),
-                ni.getSubtypeName());
-        copy.setDetailedState(ni.getDetailedState(), ni.getReason(), ni.getExtraInfo());
-        return copy;
-    }
-
     @Test
     public void testUpdateNetworkInfo_returnsTrue() {
         int networkId = 123;
@@ -725,7 +715,7 @@ public class AccessPointTest {
                 .setWifiInfo(wifiInfo)
                 .build();
 
-        NetworkInfo newInfo = copyNetworkInfo(networkInfo);
+        NetworkInfo newInfo = new NetworkInfo(networkInfo);
         newInfo.setDetailedState(NetworkInfo.DetailedState.CONNECTED, "", "");
         assertThat(ap.update(config, wifiInfo, newInfo)).isTrue();
     }
@@ -751,7 +741,7 @@ public class AccessPointTest {
                 .setWifiInfo(wifiInfo)
                 .build();
 
-        NetworkInfo newInfo = copyNetworkInfo(networkInfo); // same values
+        NetworkInfo newInfo = new NetworkInfo(networkInfo); // same values
         assertThat(ap.update(config, wifiInfo, newInfo)).isFalse();
     }
 
@@ -776,7 +766,7 @@ public class AccessPointTest {
                 .setWifiInfo(wifiInfo)
                 .build();
 
-        NetworkInfo newInfo = copyNetworkInfo(networkInfo); // same values
+        NetworkInfo newInfo = new NetworkInfo(networkInfo); // same values
         wifiInfo.setRssi(rssi + 1);
         assertThat(ap.update(config, wifiInfo, newInfo)).isTrue();
     }
@@ -802,7 +792,7 @@ public class AccessPointTest {
                 .setWifiInfo(wifiInfo)
                 .build();
 
-        NetworkInfo newInfo = copyNetworkInfo(networkInfo); // same values
+        NetworkInfo newInfo = new NetworkInfo(networkInfo); // same values
         wifiInfo.setRssi(WifiInfo.INVALID_RSSI);
         assertThat(ap.update(config, wifiInfo, newInfo)).isFalse();
     }

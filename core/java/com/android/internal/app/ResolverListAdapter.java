@@ -833,7 +833,7 @@ public class ResolverListAdapter extends BaseAdapter {
         String getAppSubLabelInternal() {
             // Will default to app name if no intent filter or activity label set, make sure to
             // check if subLabel matches label before final display
-            return mRi.loadLabel(mPm).toString();
+            return (String) mRi.loadLabel(mPm);
         }
     }
 

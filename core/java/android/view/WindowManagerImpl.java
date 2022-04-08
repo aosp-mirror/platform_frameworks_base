@@ -19,31 +19,27 @@ package android.view;
 import static android.view.View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN;
 import static android.view.View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION;
 import static android.view.View.SYSTEM_UI_FLAG_VISIBLE;
+import static android.view.ViewRootImpl.NEW_INSETS_MODE_FULL;
 import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_INSET_DECOR;
 import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN;
 import static android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING;
 
-import android.annotation.CallbackExecutor;
 import android.annotation.NonNull;
-import android.annotation.Nullable;
-import android.annotation.UiContext;
 import android.app.ResourcesManager;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
-import android.content.res.Configuration;
+import android.graphics.Insets;
+import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
-import android.window.WindowContext;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.IResultReceiver;
 
 import java.util.List;
-import java.util.concurrent.Executor;
-import java.util.function.Consumer;
 
 /**
  * Provides low-level communication with the system window manager for
@@ -74,47 +70,27 @@ import java.util.function.Consumer;
 public final class WindowManagerImpl implements WindowManager {
     @UnsupportedAppUsage
     private final WindowManagerGlobal mGlobal = WindowManagerGlobal.getInstance();
-    @UiContext
     @VisibleForTesting
     public final Context mContext;
     private final Window mParentWindow;
 
-    /**
-     * If {@link LayoutParams#token} is {@code null} and no parent window is specified, the value
-     * of {@link LayoutParams#token} will be overridden to {@code mDefaultToken}.
-     */
     private IBinder mDefaultToken;
 
-    /**
-     * This token will be set to {@link LayoutParams#mWindowContextToken} and used to receive
-     * configuration changes from the server side.
-     */
-    @Nullable
-    private final IBinder mWindowContextToken;
-
     public WindowManagerImpl(Context context) {
-        this(context, null /* parentWindow */, null /* clientToken */);
+        this(context, null);
     }
 
-    private WindowManagerImpl(Context context, Window parentWindow,
-            @Nullable IBinder windowContextToken) {
+    private WindowManagerImpl(Context context, Window parentWindow) {
         mContext = context;
         mParentWindow = parentWindow;
-        mWindowContextToken = windowContextToken;
     }
 
     public WindowManagerImpl createLocalWindowManager(Window parentWindow) {
-        return new WindowManagerImpl(mContext, parentWindow, mWindowContextToken);
+        return new WindowManagerImpl(mContext, parentWindow);
     }
 
     public WindowManagerImpl createPresentationWindowManager(Context displayContext) {
-        return new WindowManagerImpl(displayContext, mParentWindow, mWindowContextToken);
-    }
-
-    /** Creates a {@link WindowManager} for a {@link WindowContext}. */
-    public static WindowManager createWindowContextWindowManager(Context context) {
-        final IBinder clientToken = context.getWindowContextToken();
-        return new WindowManagerImpl(context, null /* parentWindow */, clientToken);
+        return new WindowManagerImpl(displayContext, mParentWindow);
     }
 
     /**
@@ -129,27 +105,30 @@ public final class WindowManagerImpl implements WindowManager {
 
     @Override
     public void addView(@NonNull View view, @NonNull ViewGroup.LayoutParams params) {
-        applyTokens(params);
+        applyDefaultToken(params);
         mGlobal.addView(view, params, mContext.getDisplayNoVerify(), mParentWindow,
                 mContext.getUserId());
     }
 
     @Override
     public void updateViewLayout(@NonNull View view, @NonNull ViewGroup.LayoutParams params) {
-        applyTokens(params);
+        applyDefaultToken(params);
         mGlobal.updateViewLayout(view, params);
     }
 
-    private void applyTokens(@NonNull ViewGroup.LayoutParams params) {
-        if (!(params instanceof WindowManager.LayoutParams)) {
-            throw new IllegalArgumentException("Params must be WindowManager.LayoutParams");
+    private void applyDefaultToken(@NonNull ViewGroup.LayoutParams params) {
+        // Only use the default token if we don't have a parent window.
+        if (mDefaultToken != null && mParentWindow == null) {
+            if (!(params instanceof WindowManager.LayoutParams)) {
+                throw new IllegalArgumentException("Params must be WindowManager.LayoutParams");
+            }
+
+            // Only use the default token if we don't already have a token.
+            final WindowManager.LayoutParams wparams = (WindowManager.LayoutParams) params;
+            if (wparams.token == null) {
+                wparams.token = mDefaultToken;
+            }
         }
-        final WindowManager.LayoutParams wparams = (WindowManager.LayoutParams) params;
-        // Only use the default token if we don't have a parent window and a token.
-        if (mDefaultToken != null && mParentWindow == null && wparams.token == null) {
-            wparams.token = mDefaultToken;
-        }
-        wparams.mWindowContextToken = mWindowContextToken;
     }
 
     @Override
@@ -222,20 +201,20 @@ public final class WindowManagerImpl implements WindowManager {
     }
 
     @Override
-    public void setDisplayImePolicy(int displayId, @DisplayImePolicy int imePolicy) {
+    public void setShouldShowIme(int displayId, boolean shouldShow) {
         try {
-            WindowManagerGlobal.getWindowManagerService().setDisplayImePolicy(displayId, imePolicy);
+            WindowManagerGlobal.getWindowManagerService().setShouldShowIme(displayId, shouldShow);
         } catch (RemoteException e) {
         }
     }
 
     @Override
-    public @DisplayImePolicy int getDisplayImePolicy(int displayId) {
+    public boolean shouldShowIme(int displayId) {
         try {
-            return WindowManagerGlobal.getWindowManagerService().getDisplayImePolicy(displayId);
+            return WindowManagerGlobal.getWindowManagerService().shouldShowIme(displayId);
         } catch (RemoteException e) {
         }
-        return DISPLAY_IME_POLICY_FALLBACK_DISPLAY;
+        return false;
     }
 
     @Override
@@ -254,16 +233,17 @@ public final class WindowManagerImpl implements WindowManager {
 
     @Override
     public WindowMetrics getMaximumWindowMetrics() {
-        final Context context = mParentWindow != null ? mParentWindow.getContext() : mContext;
-        final Rect maxBounds = getMaximumBounds(context);
-
+        final Rect maxBounds = getMaximumBounds();
         return new WindowMetrics(maxBounds, computeWindowInsets(maxBounds));
     }
 
-    private static Rect getMaximumBounds(Context context) {
-        synchronized (ResourcesManager.getInstance()) {
-            return context.getResources().getConfiguration().windowConfiguration.getMaxBounds();
-        }
+    private Rect getMaximumBounds() {
+        // TODO(b/128338354): Current maximum bound is display size, but it should be displayArea
+        //  bound after displayArea feature is finished.
+        final Display display = mContext.getDisplayNoVerify();
+        final Point displaySize = new Point();
+        display.getRealSize(displaySize);
+        return new Rect(0, 0, displaySize.x, displaySize.y);
     }
 
     // TODO(b/150095967): Set window type to LayoutParams
@@ -271,8 +251,8 @@ public final class WindowManagerImpl implements WindowManager {
         // Initialize params which used for obtaining all system insets.
         final WindowManager.LayoutParams params = new WindowManager.LayoutParams();
         params.flags = FLAG_LAYOUT_IN_SCREEN | FLAG_LAYOUT_INSET_DECOR;
-        final Context context = (mParentWindow != null) ? mParentWindow.getContext() : mContext;
-        params.token = Context.getToken(context);
+        params.token = (mParentWindow != null) ? mParentWindow.getContext().getActivityToken()
+                : mContext.getActivityToken();
         params.systemUiVisibility = SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
                 | SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION;
         params.setFitInsetsTypes(0);
@@ -283,56 +263,31 @@ public final class WindowManagerImpl implements WindowManager {
 
     private WindowInsets getWindowInsetsFromServer(WindowManager.LayoutParams attrs, Rect bounds) {
         try {
+            final Rect systemWindowInsets = new Rect();
+            final Rect stableInsets = new Rect();
+            final DisplayCutout.ParcelableWrapper displayCutout =
+                    new DisplayCutout.ParcelableWrapper();
             final InsetsState insetsState = new InsetsState();
             final boolean alwaysConsumeSystemBars = WindowManagerGlobal.getWindowManagerService()
-                    .getWindowInsets(attrs, mContext.getDisplayId(), insetsState);
-            final Configuration config = mContext.getResources().getConfiguration();
-            final boolean isScreenRound = config.isScreenRound();
-            final int windowingMode = config.windowConfiguration.getWindowingMode();
-            return insetsState.calculateInsets(bounds, null /* ignoringVisibilityState*/,
-                    isScreenRound, alwaysConsumeSystemBars, SOFT_INPUT_ADJUST_NOTHING, attrs.flags,
-                    SYSTEM_UI_FLAG_VISIBLE, attrs.type, windowingMode, null /* typeSideMap */);
+                    .getWindowInsets(attrs, mContext.getDisplayId(), systemWindowInsets,
+                    stableInsets, displayCutout, insetsState);
+            final boolean isScreenRound =
+                    mContext.getResources().getConfiguration().isScreenRound();
+            if (ViewRootImpl.sNewInsetsMode == NEW_INSETS_MODE_FULL) {
+                return insetsState.calculateInsets(bounds, null /* ignoringVisibilityState*/,
+                        isScreenRound, alwaysConsumeSystemBars, displayCutout.get(),
+                        SOFT_INPUT_ADJUST_NOTHING, attrs.flags,
+                        SYSTEM_UI_FLAG_VISIBLE, null /* typeSideMap */);
+            } else {
+                return new WindowInsets.Builder()
+                        .setAlwaysConsumeSystemBars(alwaysConsumeSystemBars)
+                        .setRound(isScreenRound)
+                        .setSystemWindowInsets(Insets.of(systemWindowInsets))
+                        .setStableInsets(Insets.of(stableInsets))
+                        .setDisplayCutout(displayCutout.get()).build();
+            }
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
-    }
-
-    @Override
-    public void holdLock(IBinder token, int durationMs) {
-        try {
-            WindowManagerGlobal.getWindowManagerService().holdLock(token, durationMs);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
-    @Override
-    public boolean isCrossWindowBlurEnabled() {
-        return CrossWindowBlurListeners.getInstance().isCrossWindowBlurEnabled();
-    }
-
-    @Override
-    public void addCrossWindowBlurEnabledListener(@NonNull Consumer<Boolean> listener) {
-        addCrossWindowBlurEnabledListener(mContext.getMainExecutor(), listener);
-    }
-
-    @Override
-    public void addCrossWindowBlurEnabledListener(@NonNull @CallbackExecutor Executor executor,
-            @NonNull Consumer<Boolean> listener) {
-        CrossWindowBlurListeners.getInstance().addListener(executor, listener);
-    }
-
-    @Override
-    public void removeCrossWindowBlurEnabledListener(@NonNull Consumer<Boolean> listener) {
-        CrossWindowBlurListeners.getInstance().removeListener(listener);
-    }
-
-    @Override
-    public boolean isTaskSnapshotSupported() {
-        try {
-            return WindowManagerGlobal.getWindowManagerService().isTaskSnapshotSupported();
-        } catch (RemoteException e) {
-        }
-        return false;
     }
 }

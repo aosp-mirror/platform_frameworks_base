@@ -23,8 +23,6 @@ import android.content.Context;
 import android.provider.DeviceConfig;
 import android.provider.Settings;
 
-import com.android.systemui.dagger.SysUISingleton;
-
 import java.util.concurrent.Executor;
 
 import javax.inject.Inject;
@@ -32,9 +30,7 @@ import javax.inject.Inject;
 /**
  * Wrapper around DeviceConfig useful for testing.
  */
-@SysUISingleton
 public class DeviceConfigProxy {
-
     @Inject
     public DeviceConfigProxy() {
     }

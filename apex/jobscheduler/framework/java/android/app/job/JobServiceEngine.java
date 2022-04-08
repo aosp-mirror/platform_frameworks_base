@@ -17,6 +17,7 @@
 package android.app.job;
 
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Handler;
 import android.os.IBinder;
@@ -24,6 +25,8 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteException;
 import android.util.Log;
+
+import com.android.internal.annotations.GuardedBy;
 
 import java.lang.ref.WeakReference;
 
@@ -203,7 +206,8 @@ public abstract class JobServiceEngine {
 
     /**
      * Call in to engine to report that a job has finished executing.  See
-     * {@link JobService#jobFinished(JobParameters, boolean)} for more information.
+     * {@link JobService#jobFinished(JobParameters, boolean)}  JobService.jobFinished} for more
+     * information.
      */
     public void jobFinished(JobParameters params, boolean needsReschedule) {
         if (params == null) {

@@ -1082,7 +1082,7 @@ public class Spinner extends AbsSpinner implements OnClickListener {
         /**
          * @return true if the popup is showing, false otherwise.
          */
-        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+        @UnsupportedAppUsage
         public boolean isShowing();
 
         /**
@@ -1113,7 +1113,7 @@ public class Spinner extends AbsSpinner implements OnClickListener {
             }
         }
 
-        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+        @UnsupportedAppUsage
         public boolean isShowing() {
             return mPopup != null ? mPopup.isShowing() : false;
         }

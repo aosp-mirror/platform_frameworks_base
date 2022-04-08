@@ -62,7 +62,7 @@ public class HardwareRendererObserver {
      * @param handler the Handler to use when invoking callbacks
      */
     public HardwareRendererObserver(@NonNull OnFrameMetricsAvailableListener listener,
-            @NonNull long[] frameMetrics, @NonNull Handler handler, boolean waitForPresentTime) {
+            @NonNull long[] frameMetrics, @NonNull Handler handler) {
         if (handler == null || handler.getLooper() == null) {
             throw new NullPointerException("handler and its looper cannot be null");
         }
@@ -74,7 +74,7 @@ public class HardwareRendererObserver {
         mFrameMetrics = frameMetrics;
         mHandler = handler;
         mListener = listener;
-        mNativePtr = new VirtualRefBasePtr(nCreateObserver(waitForPresentTime));
+        mNativePtr = new VirtualRefBasePtr(nCreateObserver());
     }
 
     /*package*/ long getNativeInstance() {
@@ -98,6 +98,6 @@ public class HardwareRendererObserver {
         });
     }
 
-    private native long nCreateObserver(boolean waitForPresentTime);
+    private native long nCreateObserver();
     private static native int nGetNextBuffer(long nativePtr, long[] data);
 }

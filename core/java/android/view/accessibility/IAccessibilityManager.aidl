@@ -42,11 +42,9 @@ interface IAccessibilityManager {
 
     long addClient(IAccessibilityManagerClient client, int userId);
 
-    boolean removeClient(IAccessibilityManagerClient client, int userId);
-
     List<AccessibilityServiceInfo> getInstalledAccessibilityServiceList(int userId);
 
-    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
+    @UnsupportedAppUsage
     List<AccessibilityServiceInfo> getEnabledAccessibilityServiceList(int feedbackType, int userId);
 
     int addAccessibilityInteractionConnection(IWindow windowToken, IBinder leashToken,
@@ -94,8 +92,4 @@ interface IAccessibilityManager {
     void associateEmbeddedHierarchy(IBinder host, IBinder embedded);
 
     void disassociateEmbeddedHierarchy(IBinder token);
-
-    int getFocusStrokeWidth();
-
-    int getFocusColor();
 }

@@ -17,7 +17,6 @@
 package android.hardware.camera2.utils;
 
 import android.compat.annotation.UnsupportedAppUsage;
-import android.os.Build;
 
 /**
  * Provide hashing functions using the Modified Bernstein hash
@@ -33,7 +32,7 @@ public final class HashCodeHelpers {
      *
      * @return the numeric hash code
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public static int hashCode(int... array) {
         if (array == null) {
             return 0;

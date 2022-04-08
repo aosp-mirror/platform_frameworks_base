@@ -100,9 +100,6 @@ public class PendingInsetsController implements WindowInsetsController {
         if (mReplayedInsetsController != null) {
             return mReplayedInsetsController.getSystemBarsBehavior();
         }
-        if (mBehavior == KEEP_BEHAVIOR) {
-            return BEHAVIOR_DEFAULT;
-        }
         return mBehavior;
     }
 

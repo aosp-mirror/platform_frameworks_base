@@ -94,7 +94,7 @@ interface IVrManager {
      * @return {@link android.view.Display.INVALID_DISPLAY} if there is no virtual display
      * currently, else return the display id of the virtual display
      */
-    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
+    @UnsupportedAppUsage
     int getVr2dDisplayId();
 
     /**

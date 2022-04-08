@@ -25,7 +25,7 @@ import java.lang.annotation.RetentionPolicy;
  * Request for lifecycle state that an activity should reach.
  * @hide
  */
-public abstract class ActivityLifecycleItem extends ActivityTransactionItem {
+public abstract class ActivityLifecycleItem extends ClientTransactionItem {
 
     @IntDef(prefix = { "UNDEFINED", "PRE_", "ON_" }, value = {
             UNDEFINED,

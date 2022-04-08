@@ -40,73 +40,64 @@ import java.lang.annotation.RetentionPolicy;
  */
 public final class FrameInfo {
 
-    public long[] frameInfo = new long[FRAME_INFO_SIZE];
+    public long[] frameInfo = new long[9];
 
     // Various flags set to provide extra metadata about the current frame
-    public static final int FLAGS = 0;
+    private static final int FLAGS = 0;
 
     // Is this the first-draw following a window layout?
-    public static final long FLAG_WINDOW_VISIBILITY_CHANGED = 1;
+    public static final long FLAG_WINDOW_LAYOUT_CHANGED = 1;
 
     // A renderer associated with just a Surface, not with a ViewRootImpl instance.
     public static final long FLAG_SURFACE_CANVAS = 1 << 2;
 
-    // An invalid vsync id to be used when FRAME_TIMELINE_VSYNC_ID is unknown
-    // Needs to be in sync with android::ISurfaceComposer::INVALID_VSYNC_ID in native code
-    public static final long INVALID_VSYNC_ID = -1;
-
     @LongDef(flag = true, value = {
-            FLAG_WINDOW_VISIBILITY_CHANGED, FLAG_SURFACE_CANVAS })
+            FLAG_WINDOW_LAYOUT_CHANGED, FLAG_SURFACE_CANVAS })
     @Retention(RetentionPolicy.SOURCE)
     public @interface FrameInfoFlags {}
 
-    public static final int FRAME_TIMELINE_VSYNC_ID = 1;
-
     // The intended vsync time, unadjusted by jitter
-    public static final int INTENDED_VSYNC = 2;
+    private static final int INTENDED_VSYNC = 1;
 
     // Jitter-adjusted vsync time, this is what was used as input into the
     // animation & drawing system
-    public static final int VSYNC = 3;
+    private static final int VSYNC = 2;
 
-    // The id of the input event that caused the current frame
-    public static final int INPUT_EVENT_ID = 4;
+    // The time of the oldest input event
+    private static final int OLDEST_INPUT_EVENT = 3;
+
+    // The time of the newest input event
+    private static final int NEWEST_INPUT_EVENT = 4;
 
     // When input event handling started
-    public static final int HANDLE_INPUT_START = 5;
+    private static final int HANDLE_INPUT_START = 5;
 
     // When animation evaluations started
-    public static final int ANIMATION_START = 6;
+    private static final int ANIMATION_START = 6;
 
     // When ViewRootImpl#performTraversals() started
-    public static final int PERFORM_TRAVERSALS_START = 7;
+    private static final int PERFORM_TRAVERSALS_START = 7;
 
     // When View:draw() started
-    public static final int DRAW_START = 8;
-
-    // When the frame needs to be ready by
-    public static final int FRAME_DEADLINE = 9;
-
-    // When frame actually started.
-    public static final int FRAME_START_TIME = 10;
-
-    // Interval between two consecutive frames
-    public static final int FRAME_INTERVAL = 11;
-
-    // Must be the last one
-    // This value must be in sync with `UI_THREAD_FRAME_INFO_SIZE` in FrameInfo.h
-    private static final int FRAME_INFO_SIZE = FRAME_INTERVAL + 1;
+    private static final int DRAW_START = 8;
 
     /** checkstyle */
-    public void setVsync(long intendedVsync, long usedVsync, long frameTimelineVsyncId,
-            long frameDeadline, long frameStartTime, long frameInterval) {
-        frameInfo[FRAME_TIMELINE_VSYNC_ID] = frameTimelineVsyncId;
+    public void setVsync(long intendedVsync, long usedVsync) {
         frameInfo[INTENDED_VSYNC] = intendedVsync;
         frameInfo[VSYNC] = usedVsync;
+        frameInfo[OLDEST_INPUT_EVENT] = Long.MAX_VALUE;
+        frameInfo[NEWEST_INPUT_EVENT] = 0;
         frameInfo[FLAGS] = 0;
-        frameInfo[FRAME_DEADLINE] = frameDeadline;
-        frameInfo[FRAME_START_TIME] = frameStartTime;
-        frameInfo[FRAME_INTERVAL] = frameInterval;
+    }
+
+    /** checkstyle */
+    public void updateInputEventTime(long inputEventTime, long inputEventOldestTime) {
+        if (inputEventOldestTime < frameInfo[OLDEST_INPUT_EVENT]) {
+            frameInfo[OLDEST_INPUT_EVENT] = inputEventOldestTime;
+        }
+        if (inputEventTime > frameInfo[NEWEST_INPUT_EVENT]) {
+            frameInfo[NEWEST_INPUT_EVENT] = inputEventTime;
+        }
     }
 
     /** checkstyle */
@@ -125,7 +116,13 @@ public final class FrameInfo {
     }
 
     /** checkstyle */
+    public void markDrawStart() {
+        frameInfo[DRAW_START] = System.nanoTime();
+    }
+
+    /** checkstyle */
     public void addFlags(@FrameInfoFlags long flags) {
         frameInfo[FLAGS] |= flags;
     }
+
 }

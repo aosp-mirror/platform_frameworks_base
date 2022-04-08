@@ -52,13 +52,6 @@ public abstract class PanelBar extends FrameLayout {
     public void go(int state) {
         if (DEBUG) LOG("go state: %d -> %d", mState, state);
         mState = state;
-        if (mPanel != null) {
-            mPanel.setIsShadeOpening(state == STATE_OPENING);
-        }
-    }
-
-    protected boolean isShadeOpening() {
-        return mState == STATE_OPENING;
     }
 
     @Override
@@ -212,6 +205,7 @@ public abstract class PanelBar extends FrameLayout {
         } else {
             pv.resetViews(false /* animate */);
             pv.setExpandedFraction(0); // just in case
+            pv.cancelPeek();
         }
         if (DEBUG) LOG("collapsePanel: animate=%s waiting=%s", animate, waiting);
         if (!waiting && mState != STATE_CLOSED) {

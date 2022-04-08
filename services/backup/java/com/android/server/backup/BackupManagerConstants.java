@@ -112,7 +112,7 @@ public class BackupManagerConstants extends KeyValueSettingObserver {
     }
 
     public String getSettingValue(ContentResolver resolver) {
-        return Settings.Secure.getStringForUser(resolver, SETTING, resolver.getUserId());
+        return Settings.Secure.getString(resolver, SETTING);
     }
 
     public synchronized void update(KeyValueListParser parser) {

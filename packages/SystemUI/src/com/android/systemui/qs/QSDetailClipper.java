@@ -37,19 +37,6 @@ public class QSDetailClipper {
     }
 
     public void animateCircularClip(int x, int y, boolean in, AnimatorListener listener) {
-        updateCircularClip(true /* animate */, x, y, in, listener);
-    }
-
-    /**
-     * @param animate whether or not animation has a duration of 0. Either way, {@code listener}
-     *               will be called.
-     * @param x x position where animation should originate
-     * @param y y position where animation should originate
-     * @param in whether animating in or out
-     * @param listener Animation listener. Called whether or not {@code animate} is true.
-     */
-    public void updateCircularClip(boolean animate, int x, int y, boolean in,
-            AnimatorListener listener) {
         if (mAnimator != null) {
             mAnimator.cancel();
         }
@@ -71,16 +58,15 @@ public class QSDetailClipper {
         } else {
             mAnimator = ViewAnimationUtils.createCircularReveal(mDetail, x, y, r, innerR);
         }
-        mAnimator.setDuration(animate ? (long) (mAnimator.getDuration() * 1.5) : 0);
+        mAnimator.setDuration((long)(mAnimator.getDuration() * 1.5));
         if (listener != null) {
             mAnimator.addListener(listener);
         }
         if (in) {
-            mBackground.startTransition(animate ? (int) (mAnimator.getDuration() * 0.6) : 0);
+            mBackground.startTransition((int)(mAnimator.getDuration() * 0.6));
             mAnimator.addListener(mVisibleOnStart);
         } else {
-            mDetail.postDelayed(mReverseBackground,
-                    animate ? (long) (mAnimator.getDuration() * 0.65) : 0);
+            mDetail.postDelayed(mReverseBackground, (long)(mAnimator.getDuration() * 0.65));
             mAnimator.addListener(mGoneOnEnd);
         }
         mAnimator.start();

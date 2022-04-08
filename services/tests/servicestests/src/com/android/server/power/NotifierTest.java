@@ -209,8 +209,7 @@ public class NotifierTest {
     private final PowerManagerService.Injector mInjector = new PowerManagerService.Injector() {
         @Override
         Notifier createNotifier(Looper looper, Context context, IBatteryStats batteryStats,
-                SuspendBlocker suspendBlocker, WindowManagerPolicy policy,
-                FaceDownDetector faceDownDetector) {
+                SuspendBlocker suspendBlocker, WindowManagerPolicy policy) {
             return mNotifierMock;
         }
 
@@ -297,7 +296,6 @@ public class NotifierTest {
                 IBatteryStats.Stub.asInterface(ServiceManager.getService(
                         BatteryStats.SERVICE_NAME)),
                 mInjector.createSuspendBlocker(mService, "testBlocker"),
-                null,
                 null);
     }
 }

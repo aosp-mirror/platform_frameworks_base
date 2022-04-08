@@ -45,7 +45,6 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.RemoteException;
 import android.os.ServiceManager;
-import android.os.UserHandle;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.Slog;
@@ -100,7 +99,7 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
         }
     };
 
-    SystemMediaRoute2Provider(Context context, UserHandle user) {
+    SystemMediaRoute2Provider(Context context) {
         super(sComponentName);
 
         mIsSystemRouteProvider = true;
@@ -118,7 +117,7 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
         updateDeviceRoute(newAudioRoutes);
 
         // .getInstance returns null if there is no bt adapter available
-        mBtRouteProvider = BluetoothRouteProvider.createInstance(context, (routes) -> {
+        mBtRouteProvider = BluetoothRouteProvider.getInstance(context, (routes) -> {
             publishProviderState();
 
             boolean sessionInfoChanged;
@@ -131,12 +130,11 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
 
         IntentFilter intentFilter = new IntentFilter(AudioManager.VOLUME_CHANGED_ACTION);
         intentFilter.addAction(AudioManager.STREAM_DEVICES_CHANGED_ACTION);
-        mContext.registerReceiverAsUser(new AudioManagerBroadcastReceiver(), user,
-                intentFilter, null, null);
+        mContext.registerReceiver(new AudioManagerBroadcastReceiver(), intentFilter);
 
         if (mBtRouteProvider != null) {
             mHandler.post(() -> {
-                mBtRouteProvider.start(user);
+                mBtRouteProvider.start();
                 notifyProviderState();
             });
         }

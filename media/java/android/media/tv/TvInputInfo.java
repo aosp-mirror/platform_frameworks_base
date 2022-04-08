@@ -38,7 +38,6 @@ import android.hardware.hdmi.HdmiDeviceInfo;
 import android.hardware.hdmi.HdmiUtils;
 import android.hardware.hdmi.HdmiUtils.HdmiAddressRelativePosition;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -143,7 +142,6 @@ public final class TvInputInfo implements Parcelable {
     // Attributes from XML meta data.
     private final String mSetupActivity;
     private final boolean mCanRecord;
-    private final boolean mCanPauseRecording;
     private final int mTunerCount;
 
     // Attributes specific to HDMI
@@ -265,8 +263,8 @@ public final class TvInputInfo implements Parcelable {
 
     private TvInputInfo(ResolveInfo service, String id, int type, boolean isHardwareInput,
             CharSequence label, int labelResId, Icon icon, Icon iconStandby, Icon iconDisconnected,
-            String setupActivity, boolean canRecord, boolean canPauseRecording, int tunerCount,
-            HdmiDeviceInfo hdmiDeviceInfo, boolean isConnectedToHdmiSwitch,
+            String setupActivity, boolean canRecord, int tunerCount, HdmiDeviceInfo hdmiDeviceInfo,
+            boolean isConnectedToHdmiSwitch,
             @HdmiAddressRelativePosition int hdmiConnectionRelativePosition, String parentId,
             Bundle extras) {
         mService = service;
@@ -280,7 +278,6 @@ public final class TvInputInfo implements Parcelable {
         mIconDisconnected = iconDisconnected;
         mSetupActivity = setupActivity;
         mCanRecord = canRecord;
-        mCanPauseRecording = canPauseRecording;
         mTunerCount = tunerCount;
         mHdmiDeviceInfo = hdmiDeviceInfo;
         mIsConnectedToHdmiSwitch = isConnectedToHdmiSwitch;
@@ -329,7 +326,7 @@ public final class TvInputInfo implements Parcelable {
      * Returns the component of the service that implements this TV input.
      * @hide
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public ComponentName getComponent() {
         return new ComponentName(mService.serviceInfo.packageName, mService.serviceInfo.name);
     }
@@ -385,14 +382,6 @@ public final class TvInputInfo implements Parcelable {
      */
     public boolean canRecord() {
         return mCanRecord;
-    }
-
-    /**
-     * Returns {@code true} if this TV input can pause recording TV programs,
-     * {@code false} otherwise.
-     */
-    public boolean canPauseRecording() {
-        return mCanPauseRecording;
     }
 
     /**
@@ -581,7 +570,6 @@ public final class TvInputInfo implements Parcelable {
                 && Objects.equals(mIconDisconnected, obj.mIconDisconnected)
                 && TextUtils.equals(mSetupActivity, obj.mSetupActivity)
                 && mCanRecord == obj.mCanRecord
-                && mCanPauseRecording == obj.mCanPauseRecording
                 && mTunerCount == obj.mTunerCount
                 && Objects.equals(mHdmiDeviceInfo, obj.mHdmiDeviceInfo)
                 && mIsConnectedToHdmiSwitch == obj.mIsConnectedToHdmiSwitch
@@ -617,7 +605,6 @@ public final class TvInputInfo implements Parcelable {
         dest.writeParcelable(mIconDisconnected, flags);
         dest.writeString(mSetupActivity);
         dest.writeByte(mCanRecord ? (byte) 1 : 0);
-        dest.writeByte(mCanPauseRecording ? (byte) 1 : 0);
         dest.writeInt(mTunerCount);
         dest.writeParcelable(mHdmiDeviceInfo, flags);
         dest.writeByte(mIsConnectedToHdmiSwitch ? (byte) 1 : 0);
@@ -660,7 +647,6 @@ public final class TvInputInfo implements Parcelable {
         mIconDisconnected = in.readParcelable(null);
         mSetupActivity = in.readString();
         mCanRecord = in.readByte() == 1;
-        mCanPauseRecording = in.readByte() == 1;
         mTunerCount = in.readInt();
         mHdmiDeviceInfo = in.readParcelable(null);
         mIsConnectedToHdmiSwitch = in.readByte() == 1;
@@ -708,7 +694,6 @@ public final class TvInputInfo implements Parcelable {
         private Icon mIconDisconnected;
         private String mSetupActivity;
         private Boolean mCanRecord;
-        private Boolean mCanPauseRecording;
         private Integer mTunerCount;
         private TvInputHardwareInfo mTvInputHardwareInfo;
         private HdmiDeviceInfo mHdmiDeviceInfo;
@@ -893,18 +878,6 @@ public final class TvInputInfo implements Parcelable {
         }
 
         /**
-         * Sets whether this TV input can pause recording TV programs or not.
-         *
-         * @param canPauseRecording Whether this TV input can pause recording TV programs.
-         * @return This Builder object to allow for chaining of calls to builder methods.
-         */
-        @NonNull
-        public Builder setCanPauseRecording(boolean canPauseRecording) {
-            this.mCanPauseRecording = canPauseRecording;
-            return this;
-        }
-
-        /**
          * Sets domain-specific extras associated with this TV input.
          *
          * @param extras Domain-specific extras associated with this TV input. Keys <em>must</em> be
@@ -953,9 +926,7 @@ public final class TvInputInfo implements Parcelable {
             parseServiceMetadata(type);
             return new TvInputInfo(mResolveInfo, id, type, isHardwareInput, mLabel, mLabelResId,
                     mIcon, mIconStandby, mIconDisconnected, mSetupActivity,
-                    mCanRecord == null ? false : mCanRecord,
-                    mCanPauseRecording == null ? false : mCanPauseRecording,
-                    mTunerCount == null ? 0 : mTunerCount,
+                    mCanRecord == null ? false : mCanRecord, mTunerCount == null ? 0 : mTunerCount,
                     mHdmiDeviceInfo, isConnectedToHdmiSwitch, hdmiConnectionRelativePosition,
                     mParentId, mExtras);
         }
@@ -1025,12 +996,6 @@ public final class TvInputInfo implements Parcelable {
                     mTunerCount = sa.getInt(
                             com.android.internal.R.styleable.TvInputService_tunerCount, 1);
                 }
-                if (mCanPauseRecording == null) {
-                    mCanPauseRecording = sa.getBoolean(
-                            com.android.internal.R.styleable.TvInputService_canPauseRecording,
-                            false);
-                }
-
                 sa.recycle();
             } catch (IOException | XmlPullParserException e) {
                 throw new IllegalStateException("Failed reading meta-data for " + si.packageName, e);

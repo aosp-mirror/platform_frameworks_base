@@ -40,7 +40,6 @@ class MemoryMappedFileDataSource implements DataSource {
     /**
      * Constructs a new {@code MemoryMappedFileDataSource} for the specified region of the file.
      *
-     * @param fd file descriptor to read from.
      * @param position start position of the region in the file.
      * @param size size (in bytes) of the region.
      */

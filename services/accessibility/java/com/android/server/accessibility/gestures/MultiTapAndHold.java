@@ -22,10 +22,9 @@ import android.view.MotionEvent;
 /**
  * This class matches gestures of the form multi-tap and hold. The number of taps for each instance
  * is specified in the constructor.
- * @hide
  */
-public class MultiTapAndHold extends MultiTap {
-    public MultiTapAndHold(
+class MultiTapAndHold extends MultiTap {
+    MultiTapAndHold(
             Context context, int taps, int gesture, GestureMatcher.StateChangeListener listener) {
         super(context, taps, gesture, listener);
     }

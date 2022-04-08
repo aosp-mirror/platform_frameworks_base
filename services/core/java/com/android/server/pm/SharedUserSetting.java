@@ -26,7 +26,6 @@ import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.util.ArrayUtils;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
-import com.android.server.utils.SnapshotCache;
 
 import libcore.util.EmptyArray;
 
@@ -50,25 +49,12 @@ public final class SharedUserSetting extends SettingBase {
     // that all apps within the sharedUser run in the same selinux context.
     int seInfoTargetSdkVersion;
 
-    final ArraySet<PackageSetting> packages;
+    final ArraySet<PackageSetting> packages = new ArraySet<>();
 
     final PackageSignatures signatures = new PackageSignatures();
     Boolean signaturesChanged;
 
-    final ArrayMap<String, ParsedProcess> processes;
-
-    /**
-     * Snapshot support.
-     */
-    private final SnapshotCache<SharedUserSetting> mSnapshot;
-
-    private SnapshotCache<SharedUserSetting> makeCache() {
-        return new SnapshotCache<SharedUserSetting>(this, this) {
-            @Override
-            public SharedUserSetting createSnapshot() {
-                return new SharedUserSetting(mSource);
-            }};
-    }
+    ArrayMap<String, ParsedProcess> processes;
 
     SharedUserSetting(String _name, int _pkgFlags, int _pkgPrivateFlags) {
         super(_pkgFlags, _pkgPrivateFlags);
@@ -76,31 +62,6 @@ public final class SharedUserSetting extends SettingBase {
         uidPrivateFlags = _pkgPrivateFlags;
         name = _name;
         seInfoTargetSdkVersion = android.os.Build.VERSION_CODES.CUR_DEVELOPMENT;
-        packages = new ArraySet<>();
-        processes = new ArrayMap<>();
-        mSnapshot = makeCache();
-    }
-
-    // The copy constructor is used to create a snapshot
-    private SharedUserSetting(SharedUserSetting orig) {
-        super(orig);
-        name = orig.name;
-        uidFlags = orig.uidFlags;
-        uidPrivateFlags = orig.uidPrivateFlags;
-        packages = new ArraySet(orig.packages);
-        // A PackageParser.SigningDetails seems to consist solely of final attributes, so
-        // it is safe to copy the reference.
-        signatures.mSigningDetails = orig.signatures.mSigningDetails;
-        signaturesChanged = orig.signaturesChanged;
-        processes = new ArrayMap(orig.processes);
-        mSnapshot = new SnapshotCache.Sealed();
-    }
-
-    /**
-     * Return a read-only snapshot of this object.
-     */
-    public SharedUserSetting snapshot() {
-        return mSnapshot.snapshot();
     }
 
     @Override
@@ -119,6 +80,9 @@ public final class SharedUserSetting extends SettingBase {
     void addProcesses(Map<String, ParsedProcess> newProcs) {
         if (newProcs != null) {
             final int numProcs = newProcs.size();
+            if (processes == null) {
+                processes = new ArrayMap<>(numProcs);
+            }
             for (String key : newProcs.keySet()) {
                 ParsedProcess newProc = newProcs.get(key);
                 ParsedProcess proc = processes.get(newProc.getName());
@@ -129,7 +93,6 @@ public final class SharedUserSetting extends SettingBase {
                     proc.addStateFrom(newProc);
                 }
             }
-            onChanged();
         }
     }
 
@@ -154,7 +117,6 @@ public final class SharedUserSetting extends SettingBase {
         }
         // recalculate processes.
         updateProcesses();
-        onChanged();
         return true;
     }
 
@@ -167,7 +129,6 @@ public final class SharedUserSetting extends SettingBase {
         if (packages.add(packageSetting)) {
             setFlags(this.pkgFlags | packageSetting.pkgFlags);
             setPrivateFlags(this.pkgPrivateFlags | packageSetting.pkgPrivateFlags);
-            onChanged();
         }
         if (packageSetting.pkg != null) {
             addProcesses(packageSetting.pkg.getProcesses());
@@ -208,7 +169,6 @@ public final class SharedUserSetting extends SettingBase {
             }
             if (ps.pkg.getTargetSdkVersion() < seInfoTargetSdkVersion) {
                 seInfoTargetSdkVersion = ps.pkg.getTargetSdkVersion();
-                onChanged();
             }
         }
 
@@ -219,7 +179,6 @@ public final class SharedUserSetting extends SettingBase {
             final boolean isPrivileged = isPrivileged() | ps.pkg.isPrivileged();
             ps.getPkgState().setOverrideSeInfo(SELinuxMMAC.getSeInfo(ps.pkg, isPrivileged,
                     seInfoTargetSdkVersion));
-            onChanged();
         }
     }
 
@@ -227,7 +186,7 @@ public final class SharedUserSetting extends SettingBase {
      * Update tracked data about processes based on all known packages in the shared user ID.
      */
     public void updateProcesses() {
-        processes.clear();
+        processes = null;
         for (int i = packages.size() - 1; i >= 0; i--) {
             final AndroidPackage pkg = packages.valueAt(i).pkg;
             if (pkg != null) {
@@ -266,17 +225,15 @@ public final class SharedUserSetting extends SettingBase {
         this.signaturesChanged = sharedUser.signaturesChanged;
         if (sharedUser.processes != null) {
             final int numProcs = sharedUser.processes.size();
-            this.processes.clear();
-            this.processes.ensureCapacity(numProcs);
+            this.processes = new ArrayMap<>(numProcs);
             for (int i = 0; i < numProcs; i++) {
                 ParsedProcess proc =
                         new ParsedProcess(sharedUser.processes.valueAt(i));
                 this.processes.put(proc.getName(), proc);
             }
         } else {
-            this.processes.clear();
+            this.processes = null;
         }
-        onChanged();
         return this;
     }
 }

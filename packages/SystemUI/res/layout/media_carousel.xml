@@ -22,8 +22,7 @@
     android:layout_height="wrap_content"
     android:clipChildren="false"
     android:clipToPadding="false"
-    android:forceHasOverlappingRendering="false"
-    android:theme="@style/MediaPlayer">
+    >
     <com.android.systemui.media.MediaScrollView
         android:id="@+id/media_carousel_scroller"
         android:layout_width="match_parent"
@@ -48,7 +47,7 @@
         android:layout_width="wrap_content"
         android:layout_height="48dp"
         android:layout_marginBottom="4dp"
-        android:tint="?android:attr/textColor"
+        android:tint="@color/media_primary_text"
         android:forceHasOverlappingRendering="false"
     />
 </FrameLayout>

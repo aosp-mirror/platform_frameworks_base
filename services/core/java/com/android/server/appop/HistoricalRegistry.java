@@ -19,8 +19,6 @@ import static android.app.AppOpsManager.FILTER_BY_ATTRIBUTION_TAG;
 import static android.app.AppOpsManager.FILTER_BY_OP_NAMES;
 import static android.app.AppOpsManager.FILTER_BY_PACKAGE_NAME;
 import static android.app.AppOpsManager.FILTER_BY_UID;
-import static android.app.AppOpsManager.HISTORY_FLAG_AGGREGATE;
-import static android.app.AppOpsManager.HISTORY_FLAG_DISCRETE;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -32,7 +30,6 @@ import android.app.AppOpsManager.HistoricalOpsRequestFilter;
 import android.app.AppOpsManager.HistoricalPackageOps;
 import android.app.AppOpsManager.HistoricalUidOps;
 import android.app.AppOpsManager.OpFlags;
-import android.app.AppOpsManager.OpHistoryFlags;
 import android.app.AppOpsManager.UidState;
 import android.content.ContentResolver;
 import android.database.ContentObserver;
@@ -52,8 +49,6 @@ import android.util.ArraySet;
 import android.util.LongSparseArray;
 import android.util.Slog;
 import android.util.TimeUtils;
-import android.util.TypedXmlPullParser;
-import android.util.TypedXmlSerializer;
 import android.util.Xml;
 
 import com.android.internal.annotations.GuardedBy;
@@ -64,7 +59,9 @@ import com.android.internal.util.XmlUtils;
 import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.server.FgThread;
 
+import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
+import org.xmlpull.v1.XmlSerializer;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -72,6 +69,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -85,7 +83,7 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 /**
- * This class manages historical app op state. This includes reading, persistence,
+ * This class managers historical app op state. This includes reading, persistence,
  * accounting, querying.
  * <p>
  * The history is kept forever in multiple files. Each file time contains the
@@ -137,8 +135,6 @@ final class HistoricalRegistry {
     private static final String PARAMETER_DELIMITER = ",";
     private static final String PARAMETER_ASSIGNMENT = "=";
     private static final String PROPERTY_PERMISSIONS_HUB_ENABLED = "permissions_hub_enabled";
-
-    private volatile @NonNull DiscreteRegistry mDiscreteRegistry;
 
     @GuardedBy("mLock")
     private @NonNull LinkedList<HistoricalOps> mPendingWrites = new LinkedList<>();
@@ -201,7 +197,6 @@ final class HistoricalRegistry {
 
     HistoricalRegistry(@NonNull Object lock) {
         mInMemoryLock = lock;
-        mDiscreteRegistry = new DiscreteRegistry(lock);
     }
 
     HistoricalRegistry(@NonNull HistoricalRegistry other) {
@@ -209,11 +204,9 @@ final class HistoricalRegistry {
         mMode = other.mMode;
         mBaseSnapshotInterval = other.mBaseSnapshotInterval;
         mIntervalCompressionMultiplier = other.mIntervalCompressionMultiplier;
-        mDiscreteRegistry = other.mDiscreteRegistry;
     }
 
     void systemReady(@NonNull ContentResolver resolver) {
-        mDiscreteRegistry.systemReady();
         final Uri uri = Settings.Global.getUriFor(Settings.Global.APPOP_HISTORY_PARAMETERS);
         resolver.registerContentObserver(uri, false, new ContentObserver(
                 FgThread.getHandler()) {
@@ -351,63 +344,41 @@ final class HistoricalRegistry {
         }
     }
 
-    void dumpDiscreteData(@NonNull PrintWriter pw, int uidFilter,
-            @Nullable String packageNameFilter, @Nullable String attributionTagFilter,
-            @HistoricalOpsRequestFilter int filter, int dumpOp,
-            @NonNull SimpleDateFormat sdf, @NonNull Date date, @NonNull String prefix,
-            int nDiscreteOps) {
-        mDiscreteRegistry.dump(pw, uidFilter, packageNameFilter, attributionTagFilter, filter,
-                dumpOp, sdf, date, prefix, nDiscreteOps);
-    }
-
     @HistoricalMode int getMode() {
         synchronized (mInMemoryLock) {
             return mMode;
         }
     }
 
-    void getHistoricalOpsFromDiskRaw(int uid, @Nullable String packageName,
+    void getHistoricalOpsFromDiskRaw(int uid, @NonNull String packageName,
             @Nullable String attributionTag, @Nullable String[] opNames,
-            @OpHistoryFlags int historyFlags, @HistoricalOpsRequestFilter int filter,
-            long beginTimeMillis, long endTimeMillis, @OpFlags int flags,
-            String[] attributionExemptedPackages, @NonNull RemoteCallback callback) {
+            @HistoricalOpsRequestFilter int filter, long beginTimeMillis, long endTimeMillis,
+            @OpFlags int flags, @NonNull RemoteCallback callback) {
         if (!isApiEnabled()) {
             callback.sendResult(new Bundle());
             return;
         }
 
-        final HistoricalOps result = new HistoricalOps(beginTimeMillis, endTimeMillis);
-
-        if ((historyFlags & HISTORY_FLAG_AGGREGATE) != 0) {
-            synchronized (mOnDiskLock) {
-                synchronized (mInMemoryLock) {
-                    if (!isPersistenceInitializedMLocked()) {
-                        Slog.e(LOG_TAG, "Interaction before persistence initialized");
-                        callback.sendResult(new Bundle());
-                        return;
-                    }
+        synchronized (mOnDiskLock) {
+            synchronized (mInMemoryLock) {
+                if (!isPersistenceInitializedMLocked()) {
+                    Slog.e(LOG_TAG, "Interaction before persistence initialized");
+                    callback.sendResult(new Bundle());
+                    return;
                 }
-                mPersistence.collectHistoricalOpsDLocked(result, uid, packageName,
-                        attributionTag,
+                final HistoricalOps result = new HistoricalOps(beginTimeMillis, endTimeMillis);
+                mPersistence.collectHistoricalOpsDLocked(result, uid, packageName, attributionTag,
                         opNames, filter, beginTimeMillis, endTimeMillis, flags);
+                final Bundle payload = new Bundle();
+                payload.putParcelable(AppOpsManager.KEY_HISTORICAL_OPS, result);
+                callback.sendResult(payload);
             }
         }
-
-        if ((historyFlags & HISTORY_FLAG_DISCRETE) != 0) {
-            mDiscreteRegistry.addFilteredDiscreteOpsToHistoricalOps(result, beginTimeMillis,
-                    endTimeMillis, filter, uid, packageName, opNames, attributionTag,
-                    flags, new ArraySet<>(attributionExemptedPackages));
-        }
-
-        final Bundle payload = new Bundle();
-        payload.putParcelable(AppOpsManager.KEY_HISTORICAL_OPS, result);
-        callback.sendResult(payload);
     }
 
-    void getHistoricalOps(int uid, @Nullable String packageName, @Nullable String attributionTag,
-            @Nullable String[] opNames, @OpHistoryFlags int historyFlags,
-            @HistoricalOpsRequestFilter int filter, long beginTimeMillis, long endTimeMillis,
-            @OpFlags int flags, @Nullable String[] attributionExemptPkgs,
+    void getHistoricalOps(int uid, @NonNull String packageName, @Nullable String attributionTag,
+            @Nullable String[] opNames, @HistoricalOpsRequestFilter int filter,
+            long beginTimeMillis, long endTimeMillis, @OpFlags int flags,
             @NonNull RemoteCallback callback) {
         if (!isApiEnabled()) {
             callback.sendResult(new Bundle());
@@ -419,8 +390,6 @@ final class HistoricalRegistry {
             endTimeMillis = currentTimeMillis;
         }
 
-        final Bundle payload = new Bundle();
-
         // Argument times are based off epoch start while our internal store is
         // based off now, so take this into account.
         final long inMemoryAdjBeginTimeMillis = Math.max(currentTimeMillis - endTimeMillis, 0);
@@ -428,82 +397,68 @@ final class HistoricalRegistry {
         final HistoricalOps result = new HistoricalOps(inMemoryAdjBeginTimeMillis,
                 inMemoryAdjEndTimeMillis);
 
-        if ((historyFlags & HISTORY_FLAG_DISCRETE) != 0) {
-            mDiscreteRegistry.addFilteredDiscreteOpsToHistoricalOps(result, beginTimeMillis,
-                    endTimeMillis, filter, uid, packageName, opNames, attributionTag, flags,
-                    new ArraySet<>(attributionExemptPkgs));
-        }
+        synchronized (mOnDiskLock) {
+            final List<HistoricalOps> pendingWrites;
+            final HistoricalOps currentOps;
+            boolean collectOpsFromDisk;
 
-        if ((historyFlags & HISTORY_FLAG_AGGREGATE) != 0) {
-            synchronized (mOnDiskLock) {
-                final List<HistoricalOps> pendingWrites;
-                final HistoricalOps currentOps;
-                boolean collectOpsFromDisk;
-
-                synchronized (mInMemoryLock) {
-                    if (!isPersistenceInitializedMLocked()) {
-                        Slog.e(LOG_TAG, "Interaction before persistence initialized");
-                        callback.sendResult(new Bundle());
-                        return;
-                    }
-
-                    currentOps = getUpdatedPendingHistoricalOpsMLocked(currentTimeMillis);
-                    if (!(inMemoryAdjBeginTimeMillis >= currentOps.getEndTimeMillis()
-                            || inMemoryAdjEndTimeMillis <= currentOps.getBeginTimeMillis())) {
-                        // Some of the current batch falls into the query, so extract that.
-                        final HistoricalOps currentOpsCopy = new HistoricalOps(currentOps);
-                        currentOpsCopy.filter(uid, packageName, attributionTag, opNames,
-                                historyFlags, filter, inMemoryAdjBeginTimeMillis,
-                                inMemoryAdjEndTimeMillis);
-                        result.merge(currentOpsCopy);
-                    }
-                    pendingWrites = new ArrayList<>(mPendingWrites);
-                    mPendingWrites.clear();
-                    collectOpsFromDisk = inMemoryAdjEndTimeMillis > currentOps.getEndTimeMillis();
+            synchronized (mInMemoryLock) {
+                if (!isPersistenceInitializedMLocked()) {
+                    Slog.e(LOG_TAG, "Interaction before persistence initialized");
+                    callback.sendResult(new Bundle());
+                    return;
                 }
 
-                // If the query was only for in-memory state - done.
-                if (collectOpsFromDisk) {
-                    // If there is a write in flight we need to force it now
-                    persistPendingHistory(pendingWrites);
-                    // Collect persisted state.
-                    final long onDiskAndInMemoryOffsetMillis = currentTimeMillis
-                            - mNextPersistDueTimeMillis + mBaseSnapshotInterval;
-                    final long onDiskAdjBeginTimeMillis = Math.max(inMemoryAdjBeginTimeMillis
-                            - onDiskAndInMemoryOffsetMillis, 0);
-                    final long onDiskAdjEndTimeMillis = Math.max(inMemoryAdjEndTimeMillis
-                            - onDiskAndInMemoryOffsetMillis, 0);
-                    mPersistence.collectHistoricalOpsDLocked(result, uid, packageName,
-                            attributionTag,
-                            opNames, filter, onDiskAdjBeginTimeMillis, onDiskAdjEndTimeMillis,
-                            flags);
+                currentOps = getUpdatedPendingHistoricalOpsMLocked(currentTimeMillis);
+                if (!(inMemoryAdjBeginTimeMillis >= currentOps.getEndTimeMillis()
+                        || inMemoryAdjEndTimeMillis <= currentOps.getBeginTimeMillis())) {
+                    // Some of the current batch falls into the query, so extract that.
+                    final HistoricalOps currentOpsCopy = new HistoricalOps(currentOps);
+                    currentOpsCopy.filter(uid, packageName, attributionTag, opNames, filter,
+                            inMemoryAdjBeginTimeMillis, inMemoryAdjEndTimeMillis);
+                    result.merge(currentOpsCopy);
                 }
+                pendingWrites = new ArrayList<>(mPendingWrites);
+                mPendingWrites.clear();
+                collectOpsFromDisk = inMemoryAdjEndTimeMillis > currentOps.getEndTimeMillis();
             }
-        }
-        // Rebase the result time to be since epoch.
-        result.setBeginAndEndTime(beginTimeMillis, endTimeMillis);
 
-        // Send back the result.
-        payload.putParcelable(AppOpsManager.KEY_HISTORICAL_OPS, result);
-        callback.sendResult(payload);
+            // If the query was only for in-memory state - done.
+            if (collectOpsFromDisk) {
+                // If there is a write in flight we need to force it now
+                persistPendingHistory(pendingWrites);
+                // Collect persisted state.
+                final long onDiskAndInMemoryOffsetMillis = currentTimeMillis
+                        - mNextPersistDueTimeMillis + mBaseSnapshotInterval;
+                final long onDiskAdjBeginTimeMillis = Math.max(inMemoryAdjBeginTimeMillis
+                        - onDiskAndInMemoryOffsetMillis, 0);
+                final long onDiskAdjEndTimeMillis = Math.max(inMemoryAdjEndTimeMillis
+                        - onDiskAndInMemoryOffsetMillis, 0);
+                mPersistence.collectHistoricalOpsDLocked(result, uid, packageName, attributionTag,
+                        opNames, filter, onDiskAdjBeginTimeMillis, onDiskAdjEndTimeMillis, flags);
+            }
+
+            // Rebase the result time to be since epoch.
+            result.setBeginAndEndTime(beginTimeMillis, endTimeMillis);
+
+            // Send back the result.
+            final Bundle payload = new Bundle();
+            payload.putParcelable(AppOpsManager.KEY_HISTORICAL_OPS, result);
+            callback.sendResult(payload);
+        }
     }
 
     void incrementOpAccessedCount(int op, int uid, @NonNull String packageName,
-            @Nullable String attributionTag, @UidState int uidState, @OpFlags int flags,
-            long accessTime, @AppOpsManager.AttributionFlags int attributionFlags,
-            int attributionChainId) {
+            @Nullable String attributionTag, @UidState int uidState, @OpFlags int flags) {
         synchronized (mInMemoryLock) {
             if (mMode == AppOpsManager.HISTORICAL_MODE_ENABLED_ACTIVE) {
                 if (!isPersistenceInitializedMLocked()) {
-                    Slog.v(LOG_TAG, "Interaction before persistence initialized");
+                    Slog.e(LOG_TAG, "Interaction before persistence initialized");
                     return;
                 }
                 getUpdatedPendingHistoricalOpsMLocked(
                         System.currentTimeMillis()).increaseAccessCount(op, uid, packageName,
                         attributionTag, uidState, flags, 1);
-
-                mDiscreteRegistry.recordDiscreteAccess(uid, packageName, op, attributionTag,
-                        flags, uidState, accessTime, -1, attributionFlags, attributionChainId);
             }
         }
     }
@@ -513,7 +468,7 @@ final class HistoricalRegistry {
         synchronized (mInMemoryLock) {
             if (mMode == AppOpsManager.HISTORICAL_MODE_ENABLED_ACTIVE) {
                 if (!isPersistenceInitializedMLocked()) {
-                    Slog.v(LOG_TAG, "Interaction before persistence initialized");
+                    Slog.e(LOG_TAG, "Interaction before persistence initialized");
                     return;
                 }
                 getUpdatedPendingHistoricalOpsMLocked(
@@ -525,20 +480,16 @@ final class HistoricalRegistry {
 
     void increaseOpAccessDuration(int op, int uid, @NonNull String packageName,
             @Nullable String attributionTag, @UidState int uidState, @OpFlags int flags,
-            long eventStartTime, long increment,
-            @AppOpsManager.AttributionFlags int attributionFlags, int attributionChainId) {
+            long increment) {
         synchronized (mInMemoryLock) {
             if (mMode == AppOpsManager.HISTORICAL_MODE_ENABLED_ACTIVE) {
                 if (!isPersistenceInitializedMLocked()) {
-                    Slog.v(LOG_TAG, "Interaction before persistence initialized");
+                    Slog.e(LOG_TAG, "Interaction before persistence initialized");
                     return;
                 }
                 getUpdatedPendingHistoricalOpsMLocked(
                         System.currentTimeMillis()).increaseAccessDuration(op, uid, packageName,
                         attributionTag, uidState, flags, increment);
-                mDiscreteRegistry.recordDiscreteAccess(uid, packageName, op, attributionTag,
-                        flags, uidState, eventStartTime, increment, attributionFlags,
-                        attributionChainId);
             }
         }
     }
@@ -558,9 +509,6 @@ final class HistoricalRegistry {
                     mMode = mode;
                     if (mMode == AppOpsManager.HISTORICAL_MODE_DISABLED) {
                         clearHistoryOnDiskDLocked();
-                    }
-                    if (mMode == AppOpsManager.HISTORICAL_MODE_ENABLED_PASSIVE) {
-                        mDiscreteRegistry.setDebugMode(true);
                     }
                 }
                 if (mBaseSnapshotInterval != baseSnapshotInterval) {
@@ -585,32 +533,28 @@ final class HistoricalRegistry {
                     Slog.e(LOG_TAG, "Interaction before persistence initialized");
                     return;
                 }
-            }
-            final List<HistoricalOps> history = mPersistence.readHistoryDLocked();
-            clearHistoricalRegistry();
-            if (history != null) {
-                final int historySize = history.size();
-                for (int i = 0; i < historySize; i++) {
-                    final HistoricalOps ops = history.get(i);
-                    ops.offsetBeginAndEndTime(offsetMillis);
+                final List<HistoricalOps> history = mPersistence.readHistoryDLocked();
+                clearHistory();
+                if (history != null) {
+                    final int historySize = history.size();
+                    for (int i = 0; i < historySize; i++) {
+                        final HistoricalOps ops = history.get(i);
+                        ops.offsetBeginAndEndTime(offsetMillis);
+                    }
+                    if (offsetMillis < 0) {
+                        pruneFutureOps(history);
+                    }
+                    mPersistence.persistHistoricalOpsDLocked(history);
                 }
-                if (offsetMillis < 0) {
-                    pruneFutureOps(history);
-                }
-                mPersistence.persistHistoricalOpsDLocked(history);
             }
         }
-    }
-
-    void offsetDiscreteHistory(long offsetMillis) {
-        mDiscreteRegistry.offsetHistory(offsetMillis);
     }
 
     void addHistoricalOps(HistoricalOps ops) {
         final List<HistoricalOps> pendingWrites;
         synchronized (mInMemoryLock) {
             if (!isPersistenceInitializedMLocked()) {
-                Slog.d(LOG_TAG, "Interaction before persistence initialized");
+                Slog.e(LOG_TAG, "Interaction before persistence initialized");
                 return;
             }
             // The history files start from mBaseSnapshotInterval - take this into account.
@@ -629,19 +573,18 @@ final class HistoricalRegistry {
 
     void resetHistoryParameters() {
         if (!isPersistenceInitializedMLocked()) {
-            Slog.d(LOG_TAG, "Interaction before persistence initialized");
+            Slog.e(LOG_TAG, "Interaction before persistence initialized");
             return;
         }
         setHistoryParameters(DEFAULT_MODE, DEFAULT_SNAPSHOT_INTERVAL_MILLIS,
                 DEFAULT_COMPRESSION_STEP);
-        mDiscreteRegistry.setDebugMode(false);
     }
 
     void clearHistory(int uid, String packageName) {
         synchronized (mOnDiskLock) {
             synchronized (mInMemoryLock) {
                 if (!isPersistenceInitializedMLocked()) {
-                    Slog.d(LOG_TAG, "Interaction before persistence initialized");
+                    Slog.e(LOG_TAG, "Interaction before persistence initialized");
                     return;
                 }
                 if (mMode != AppOpsManager.HISTORICAL_MODE_ENABLED_ACTIVE) {
@@ -658,23 +601,13 @@ final class HistoricalRegistry {
                 mPersistence.clearHistoryDLocked(uid, packageName);
             }
         }
-        mDiscreteRegistry.clearHistory(uid, packageName);
     }
 
-    void writeAndClearDiscreteHistory() {
-        mDiscreteRegistry.writeAndClearAccessHistory();
-    }
-
-    void clearAllHistory() {
-        clearHistoricalRegistry();
-        mDiscreteRegistry.clearHistory();
-    }
-
-    void clearHistoricalRegistry() {
+    void clearHistory() {
         synchronized (mOnDiskLock) {
             synchronized (mInMemoryLock) {
                 if (!isPersistenceInitializedMLocked()) {
-                    Slog.d(LOG_TAG, "Interaction before persistence initialized");
+                    Slog.e(LOG_TAG, "Interaction before persistence initialized");
                     return;
                 }
                 clearHistoryOnDiskDLocked();
@@ -736,12 +669,10 @@ final class HistoricalRegistry {
 
     void shutdown() {
         synchronized (mInMemoryLock) {
-            if (mMode == AppOpsManager.HISTORICAL_MODE_DISABLED) {
-                return;
+            if (mMode != AppOpsManager.HISTORICAL_MODE_DISABLED) {
+                persistPendingHistory();
             }
         }
-        // Do not call persistPendingHistory inside the memory lock, due to possible deadlock
-        persistPendingHistory();
     }
 
     void persistPendingHistory() {
@@ -757,7 +688,6 @@ final class HistoricalRegistry {
             }
             persistPendingHistory(pendingWrites);
         }
-        mDiscreteRegistry.writeAndClearAccessHistory();
     }
 
     private void persistPendingHistory(@NonNull List<HistoricalOps> pendingWrites) {
@@ -810,7 +740,7 @@ final class HistoricalRegistry {
     private static boolean isApiEnabled() {
         return Binder.getCallingUid() == Process.myUid()
                 || DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_PRIVACY,
-                PROPERTY_PERMISSIONS_HUB_ENABLED, true);
+                PROPERTY_PERMISSIONS_HUB_ENABLED, false);
     }
 
     private static final class Persistence {
@@ -1252,18 +1182,19 @@ final class HistoricalRegistry {
             }
             List<HistoricalOps> allOps = null;
             try (FileInputStream stream = new FileInputStream(file)) {
-                final TypedXmlPullParser parser = Xml.resolvePullParser(stream);
+                final XmlPullParser parser = Xml.newPullParser();
+                parser.setInput(stream, StandardCharsets.UTF_8.name());
                 XmlUtils.beginDocument(parser, TAG_HISTORY);
 
                 // We haven't released version 1 and have more detailed
                 // accounting - just nuke the current state
-                final int version = parser.getAttributeInt(null, ATTR_VERSION);
+                final int version = XmlUtils.readIntAttribute(parser, ATTR_VERSION);
                 if (CURRENT_VERSION == 2 && version < CURRENT_VERSION) {
                     throw new IllegalStateException("Dropping unsupported history "
                             + "version 1 for file:" + file);
                 }
 
-                final long overflowMillis = parser.getAttributeLong(null, ATTR_OVERFLOW, 0);
+                final long overflowMillis = XmlUtils.readLongAttribute(parser, ATTR_OVERFLOW, 0);
                 final int depth = parser.getDepth();
                 while (XmlUtils.nextElementWithin(parser, depth)) {
                     if (TAG_OPS.equals(parser.getName())) {
@@ -1302,16 +1233,15 @@ final class HistoricalRegistry {
         }
 
         private @Nullable HistoricalOps readeHistoricalOpsDLocked(
-                @NonNull TypedXmlPullParser parser, int filterUid,
-                @Nullable String filterPackageName,
+                @NonNull XmlPullParser parser, int filterUid, @Nullable String filterPackageName,
                 @Nullable String filterAttributionTag, @Nullable String[] filterOpNames,
                 @HistoricalOpsRequestFilter int filter, long filterBeginTimeMillis,
                 long filterEndTimeMillis, @OpFlags int filterFlags,
                 @Nullable long[] cumulativeOverflowMillis)
                 throws IOException, XmlPullParserException {
-            final long beginTimeMillis = parser.getAttributeLong(null, ATTR_BEGIN_TIME, 0)
+            final long beginTimeMillis = XmlUtils.readLongAttribute(parser, ATTR_BEGIN_TIME, 0)
                     + (cumulativeOverflowMillis != null ? cumulativeOverflowMillis[0] : 0);
-            final long endTimeMillis = parser.getAttributeLong(null, ATTR_END_TIME, 0)
+            final long endTimeMillis = XmlUtils.readLongAttribute(parser, ATTR_END_TIME, 0)
                     + (cumulativeOverflowMillis != null ? cumulativeOverflowMillis[0] : 0);
             // Keep reading as subsequent records may start matching
             if (filterEndTimeMillis < beginTimeMillis) {
@@ -1348,12 +1278,12 @@ final class HistoricalRegistry {
         }
 
         private @Nullable HistoricalOps readHistoricalUidOpsDLocked(
-                @Nullable HistoricalOps ops, @NonNull TypedXmlPullParser parser, int filterUid,
+                @Nullable HistoricalOps ops, @NonNull XmlPullParser parser, int filterUid,
                 @Nullable String filterPackageName, @Nullable String filterAttributionTag,
                 @Nullable String[] filterOpNames, @HistoricalOpsRequestFilter int filter,
                 @OpFlags int filterFlags, double filterScale)
                 throws IOException, XmlPullParserException {
-            final int uid = parser.getAttributeInt(null, ATTR_NAME);
+            final int uid = XmlUtils.readIntAttribute(parser, ATTR_NAME);
             if ((filter & FILTER_BY_UID) != 0 && filterUid != uid) {
                 XmlUtils.skipCurrentTag(parser);
                 return null;
@@ -1373,7 +1303,7 @@ final class HistoricalRegistry {
         }
 
         private @Nullable HistoricalOps readHistoricalPackageOpsDLocked(
-                @Nullable HistoricalOps ops, int uid, @NonNull TypedXmlPullParser parser,
+                @Nullable HistoricalOps ops, int uid, @NonNull XmlPullParser parser,
                 @Nullable String filterPackageName, @Nullable String filterAttributionTag,
                 @Nullable String[] filterOpNames, @HistoricalOpsRequestFilter int filter,
                 @OpFlags int filterFlags, double filterScale)
@@ -1399,7 +1329,7 @@ final class HistoricalRegistry {
 
         private @Nullable HistoricalOps readHistoricalAttributionOpsDLocked(
                 @Nullable HistoricalOps ops, int uid, String packageName,
-                @NonNull TypedXmlPullParser parser, @Nullable String filterAttributionTag,
+                @NonNull XmlPullParser parser, @Nullable String filterAttributionTag,
                 @Nullable String[] filterOpNames, @HistoricalOpsRequestFilter int filter,
                 @OpFlags int filterFlags, double filterScale)
                 throws IOException, XmlPullParserException {
@@ -1425,11 +1355,11 @@ final class HistoricalRegistry {
 
         private @Nullable HistoricalOps readHistoricalOpDLocked(@Nullable HistoricalOps ops,
                 int uid, @NonNull String packageName, @Nullable String attributionTag,
-                @NonNull TypedXmlPullParser parser, @Nullable String[] filterOpNames,
+                @NonNull XmlPullParser parser, @Nullable String[] filterOpNames,
                 @HistoricalOpsRequestFilter int filter, @OpFlags int filterFlags,
                 double filterScale)
                 throws IOException, XmlPullParserException {
-            final int op = parser.getAttributeInt(null, ATTR_NAME);
+            final int op = XmlUtils.readIntAttribute(parser, ATTR_NAME);
             if ((filter & FILTER_BY_OP_NAMES) != 0 && !ArrayUtils.contains(filterOpNames,
                     AppOpsManager.opToPublicName(op))) {
                 XmlUtils.skipCurrentTag(parser);
@@ -1450,15 +1380,15 @@ final class HistoricalRegistry {
 
         private @Nullable HistoricalOps readStateDLocked(@Nullable HistoricalOps ops,
                 int uid, @NonNull String packageName, @Nullable String attributionTag, int op,
-                @NonNull TypedXmlPullParser parser, @OpFlags int filterFlags, double filterScale)
-                throws IOException, XmlPullParserException {
-            final long key = parser.getAttributeLong(null, ATTR_NAME);
+                @NonNull XmlPullParser parser, @OpFlags int filterFlags, double filterScale)
+                throws IOException {
+            final long key = XmlUtils.readLongAttribute(parser, ATTR_NAME);
             final int flags = AppOpsManager.extractFlagsFromKey(key) & filterFlags;
             if (flags == 0) {
                 return null;
             }
             final int uidState = AppOpsManager.extractUidStateFromKey(key);
-            long accessCount = parser.getAttributeLong(null, ATTR_ACCESS_COUNT, 0);
+            long accessCount = XmlUtils.readLongAttribute(parser, ATTR_ACCESS_COUNT, 0);
             if (accessCount > 0) {
                 if (!Double.isNaN(filterScale)) {
                     accessCount = (long) HistoricalOps.round(
@@ -1470,7 +1400,7 @@ final class HistoricalRegistry {
                 ops.increaseAccessCount(op, uid, packageName, attributionTag, uidState, flags,
                         accessCount);
             }
-            long rejectCount = parser.getAttributeLong(null, ATTR_REJECT_COUNT, 0);
+            long rejectCount = XmlUtils.readLongAttribute(parser, ATTR_REJECT_COUNT, 0);
             if (rejectCount > 0) {
                 if (!Double.isNaN(filterScale)) {
                     rejectCount = (long) HistoricalOps.round(
@@ -1482,7 +1412,7 @@ final class HistoricalRegistry {
                 ops.increaseRejectCount(op, uid, packageName, attributionTag, uidState, flags,
                         rejectCount);
             }
-            long accessDuration =  parser.getAttributeLong(null, ATTR_ACCESS_DURATION, 0);
+            long accessDuration =  XmlUtils.readLongAttribute(parser, ATTR_ACCESS_DURATION, 0);
             if (accessDuration > 0) {
                 if (!Double.isNaN(filterScale)) {
                     accessDuration = (long) HistoricalOps.round(
@@ -1501,14 +1431,16 @@ final class HistoricalRegistry {
                 long intervalOverflowMillis, @NonNull File file) throws IOException {
             final FileOutputStream output = sHistoricalAppOpsDir.openWrite(file);
             try {
-                final TypedXmlSerializer serializer = Xml.resolveSerializer(output);
+                final XmlSerializer serializer = Xml.newSerializer();
+                serializer.setOutput(output, StandardCharsets.UTF_8.name());
                 serializer.setFeature("http://xmlpull.org/v1/doc/features.html#indent-output",
                         true);
                 serializer.startDocument(null, true);
                 serializer.startTag(null, TAG_HISTORY);
-                serializer.attributeInt(null, ATTR_VERSION, CURRENT_VERSION);
+                serializer.attribute(null, ATTR_VERSION, String.valueOf(CURRENT_VERSION));
                 if (intervalOverflowMillis != 0) {
-                    serializer.attributeLong(null, ATTR_OVERFLOW, intervalOverflowMillis);
+                    serializer.attribute(null, ATTR_OVERFLOW,
+                            Long.toString(intervalOverflowMillis));
                 }
                 if (allOps != null) {
                     final int opsCount = allOps.size();
@@ -1527,10 +1459,10 @@ final class HistoricalRegistry {
         }
 
         private void writeHistoricalOpDLocked(@NonNull HistoricalOps ops,
-                @NonNull TypedXmlSerializer serializer) throws IOException {
+                @NonNull XmlSerializer serializer) throws IOException {
             serializer.startTag(null, TAG_OPS);
-            serializer.attributeLong(null, ATTR_BEGIN_TIME, ops.getBeginTimeMillis());
-            serializer.attributeLong(null, ATTR_END_TIME, ops.getEndTimeMillis());
+            serializer.attribute(null, ATTR_BEGIN_TIME, Long.toString(ops.getBeginTimeMillis()));
+            serializer.attribute(null, ATTR_END_TIME, Long.toString(ops.getEndTimeMillis()));
             final int uidCount = ops.getUidCount();
             for (int i = 0; i < uidCount; i++) {
                 final HistoricalUidOps uidOp = ops.getUidOpsAt(i);
@@ -1540,9 +1472,9 @@ final class HistoricalRegistry {
         }
 
         private void writeHistoricalUidOpsDLocked(@NonNull HistoricalUidOps uidOps,
-                @NonNull TypedXmlSerializer serializer) throws IOException {
+                @NonNull XmlSerializer serializer) throws IOException {
             serializer.startTag(null, TAG_UID);
-            serializer.attributeInt(null, ATTR_NAME, uidOps.getUid());
+            serializer.attribute(null, ATTR_NAME, Integer.toString(uidOps.getUid()));
             final int packageCount = uidOps.getPackageCount();
             for (int i = 0; i < packageCount; i++) {
                 final HistoricalPackageOps packageOps = uidOps.getPackageOpsAt(i);
@@ -1552,9 +1484,9 @@ final class HistoricalRegistry {
         }
 
         private void writeHistoricalPackageOpsDLocked(@NonNull HistoricalPackageOps packageOps,
-                @NonNull TypedXmlSerializer serializer) throws IOException {
+                @NonNull XmlSerializer serializer) throws IOException {
             serializer.startTag(null, TAG_PACKAGE);
-            serializer.attributeInterned(null, ATTR_NAME, packageOps.getPackageName());
+            serializer.attribute(null, ATTR_NAME, packageOps.getPackageName());
             final int numAttributions = packageOps.getAttributedOpsCount();
             for (int i = 0; i < numAttributions; i++) {
                 final AppOpsManager.AttributedHistoricalOps op = packageOps.getAttributedOpsAt(i);
@@ -1565,7 +1497,7 @@ final class HistoricalRegistry {
 
         private void writeHistoricalAttributionOpsDLocked(
                 @NonNull AppOpsManager.AttributedHistoricalOps attributionOps,
-                @NonNull TypedXmlSerializer serializer) throws IOException {
+                @NonNull XmlSerializer serializer) throws IOException {
             serializer.startTag(null, TAG_ATTRIBUTION);
             XmlUtils.writeStringAttribute(serializer, ATTR_NAME, attributionOps.getTag());
             final int opCount = attributionOps.getOpCount();
@@ -1577,13 +1509,13 @@ final class HistoricalRegistry {
         }
 
         private void writeHistoricalOpDLocked(@NonNull HistoricalOp op,
-                @NonNull TypedXmlSerializer serializer) throws IOException {
+                @NonNull XmlSerializer serializer) throws IOException {
             final LongSparseArray keys = op.collectKeys();
             if (keys == null || keys.size() <= 0) {
                 return;
             }
             serializer.startTag(null, TAG_OP);
-            serializer.attributeInt(null, ATTR_NAME, op.getOpCode());
+            serializer.attribute(null, ATTR_NAME, Integer.toString(op.getOpCode()));
             final int keyCount = keys.size();
             for (int i = 0; i < keyCount; i++) {
                 writeStateOnLocked(op, keys.keyAt(i), serializer);
@@ -1592,7 +1524,7 @@ final class HistoricalRegistry {
         }
 
         private void writeStateOnLocked(@NonNull HistoricalOp op, long key,
-                @NonNull TypedXmlSerializer serializer) throws IOException {
+                @NonNull XmlSerializer serializer) throws IOException {
             final int uidState = AppOpsManager.extractUidStateFromKey(key);
             final int flags = AppOpsManager.extractFlagsFromKey(key);
 
@@ -1605,15 +1537,15 @@ final class HistoricalRegistry {
             }
 
             serializer.startTag(null, TAG_STATE);
-            serializer.attributeLong(null, ATTR_NAME, key);
+            serializer.attribute(null, ATTR_NAME, Long.toString(key));
             if (accessCount > 0) {
-                serializer.attributeLong(null, ATTR_ACCESS_COUNT, accessCount);
+                serializer.attribute(null, ATTR_ACCESS_COUNT, Long.toString(accessCount));
             }
             if (rejectCount > 0) {
-                serializer.attributeLong(null, ATTR_REJECT_COUNT, rejectCount);
+                serializer.attribute(null, ATTR_REJECT_COUNT, Long.toString(rejectCount));
             }
             if (accessDuration > 0) {
-                serializer.attributeLong(null, ATTR_ACCESS_DURATION, accessDuration);
+                serializer.attribute(null, ATTR_ACCESS_DURATION, Long.toString(accessDuration));
             }
             serializer.endTag(null, TAG_STATE);
         }

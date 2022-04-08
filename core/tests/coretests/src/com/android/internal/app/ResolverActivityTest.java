@@ -650,7 +650,7 @@ public class ResolverActivityTest {
         onView(withId(R.id.contentPanel))
                 .perform(swipeUp());
 
-        onView(withText(R.string.resolver_cross_profile_blocked))
+        onView(withText(R.string.resolver_cant_access_work_apps))
                 .check(matches(isDisplayed()));
     }
 
@@ -700,7 +700,7 @@ public class ResolverActivityTest {
         onView(withText(R.string.resolver_work_tab)).perform(click());
         waitForIdle();
 
-        onView(withText(R.string.resolver_no_work_apps_available))
+        onView(withText(R.string.resolver_no_work_apps_available_resolve))
                 .check(matches(isDisplayed()));
     }
 
@@ -726,7 +726,7 @@ public class ResolverActivityTest {
         onView(withText(R.string.resolver_work_tab)).perform(click());
         waitForIdle();
 
-        onView(withText(R.string.resolver_cross_profile_blocked))
+        onView(withText(R.string.resolver_cant_access_work_apps))
                 .check(matches(isDisplayed()));
     }
 
@@ -751,7 +751,7 @@ public class ResolverActivityTest {
         onView(withText(R.string.resolver_work_tab)).perform(click());
         waitForIdle();
 
-        onView(withText(R.string.resolver_no_work_apps_available))
+        onView(withText(R.string.resolver_no_work_apps_available_resolve))
                 .check(matches(isDisplayed()));
     }
 

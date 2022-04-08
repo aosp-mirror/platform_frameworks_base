@@ -89,8 +89,8 @@ BuildVars::BuildVars(const string& outDir, const string& buildProduct,
     }
 
     Json::Value json;
-    Json::CharReaderBuilder builder;
-    if (!Json::parseFromStream(builder, stream, &json, /* errorMessage = */ nullptr)) {
+    Json::Reader reader;
+    if (!reader.parse(stream, json)) {
         return;
     }
 
@@ -132,9 +132,8 @@ BuildVars::save()
         return;
     }
 
-    Json::StreamWriterBuilder factory;
-    factory["indentation"] = "  ";
-    std::unique_ptr<Json::StreamWriter> const writer(factory.newStreamWriter());
+    Json::StyledStreamWriter writer("  ");
+
     Json::Value json(Json::objectValue);
 
     for (map<string,string>::const_iterator it = m_cache.begin(); it != m_cache.end(); it++) {
@@ -142,7 +141,7 @@ BuildVars::save()
     }
 
     std::ofstream stream(m_filename, std::ofstream::binary);
-    writer->write(json, &stream);
+    writer.write(stream, json);
 }
 
 string
@@ -213,8 +212,8 @@ read_modules(const string& buildOut, const string& device, map<string,Module>* r
     }
 
     Json::Value json;
-    Json::CharReaderBuilder builder;
-    if (!Json::parseFromStream(builder, stream, &json, /* errorMessage = */ nullptr)) {
+    Json::Reader reader;
+    if (!reader.parse(stream, json)) {
         json_error(filename, "can't parse json format", quiet);
         return;
     }

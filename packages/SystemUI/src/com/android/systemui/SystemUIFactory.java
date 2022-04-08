@@ -16,25 +16,40 @@
 
 package com.android.systemui;
 
-import android.app.ActivityThread;
+import android.annotation.NonNull;
 import android.content.Context;
-import android.content.res.AssetManager;
 import android.content.res.Resources;
 import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
+import android.view.ViewGroup;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.systemui.dagger.DaggerGlobalRootComponent;
-import com.android.systemui.dagger.GlobalRootComponent;
-import com.android.systemui.dagger.SysUIComponent;
-import com.android.systemui.dagger.WMComponent;
-import com.android.systemui.navigationbar.gestural.BackGestureTfClassifierProvider;
+import com.android.internal.widget.LockPatternUtils;
+import com.android.keyguard.KeyguardUpdateMonitor;
+import com.android.keyguard.ViewMediatorCallback;
+import com.android.systemui.bubbles.BubbleController;
+import com.android.systemui.dagger.DaggerSystemUIRootComponent;
+import com.android.systemui.dagger.DependencyProvider;
+import com.android.systemui.dagger.SystemUIRootComponent;
+import com.android.systemui.keyguard.DismissCallbackRegistry;
+import com.android.systemui.plugins.FalsingManager;
+import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.screenshot.ScreenshotNotificationSmartActionsProvider;
-import com.android.wm.shell.transition.Transitions;
+import com.android.systemui.statusbar.NotificationListener;
+import com.android.systemui.statusbar.NotificationMediaManager;
+import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator;
+import com.android.systemui.statusbar.phone.DozeParameters;
+import com.android.systemui.statusbar.phone.KeyguardBouncer;
+import com.android.systemui.statusbar.phone.KeyguardBypassController;
+import com.android.systemui.statusbar.phone.NotificationIconAreaController;
+import com.android.systemui.statusbar.phone.StatusBar;
+import com.android.systemui.statusbar.policy.KeyguardStateController;
 
-import java.util.Optional;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
+
+import dagger.Module;
+import dagger.Provides;
 
 /**
  * Class factory to provide customizable SystemUI components.
@@ -43,21 +58,13 @@ public class SystemUIFactory {
     private static final String TAG = "SystemUIFactory";
 
     static SystemUIFactory mFactory;
-    private GlobalRootComponent mRootComponent;
-    private WMComponent mWMComponent;
-    private SysUIComponent mSysUIComponent;
-    private boolean mInitializeComponents;
+    private SystemUIRootComponent mRootComponent;
 
     public static <T extends SystemUIFactory> T getInstance() {
         return (T) mFactory;
     }
 
     public static void createFromConfig(Context context) {
-        createFromConfig(context, false);
-    }
-
-    @VisibleForTesting
-    public static void createFromConfig(Context context, boolean fromTest) {
         if (mFactory != null) {
             return;
         }
@@ -71,7 +78,7 @@ public class SystemUIFactory {
             Class<?> cls = null;
             cls = context.getClassLoader().loadClass(clsName);
             mFactory = (SystemUIFactory) cls.newInstance();
-            mFactory.init(context, fromTest);
+            mFactory.init(context);
         } catch (Throwable t) {
             Log.w(TAG, "Error creating SystemUIFactory component: " + clsName, t);
             throw new RuntimeException(t);
@@ -85,110 +92,42 @@ public class SystemUIFactory {
 
     public SystemUIFactory() {}
 
-    @VisibleForTesting
-    public void init(Context context, boolean fromTest)
-            throws ExecutionException, InterruptedException {
-        // Only initialize components for the main system ui process running as the primary user
-        mInitializeComponents = !fromTest
-                && android.os.Process.myUserHandle().isSystem()
-                && ActivityThread.currentProcessName().equals(ActivityThread.currentPackageName());
-        mRootComponent = buildGlobalRootComponent(context);
-        // Stand up WMComponent
-        mWMComponent = mRootComponent.getWMComponentBuilder().build();
-        if (mInitializeComponents) {
-            // Only initialize when not starting from tests since this currently initializes some
-            // components that shouldn't be run in the test environment
-            mWMComponent.init();
-        }
-
-        // And finally, retrieve whatever SysUI needs from WMShell and build SysUI.
-        SysUIComponent.Builder builder = mRootComponent.getSysUIComponent();
-        if (mInitializeComponents) {
-            // Only initialize when not starting from tests since this currently initializes some
-            // components that shouldn't be run in the test environment
-            builder = prepareSysUIComponentBuilder(builder, mWMComponent)
-                    .setPip(mWMComponent.getPip())
-                    .setLegacySplitScreen(mWMComponent.getLegacySplitScreen())
-                    .setSplitScreen(mWMComponent.getSplitScreen())
-                    .setOneHanded(mWMComponent.getOneHanded())
-                    .setBubbles(mWMComponent.getBubbles())
-                    .setHideDisplayCutout(mWMComponent.getHideDisplayCutout())
-                    .setShellCommandHandler(mWMComponent.getShellCommandHandler())
-                    .setAppPairs(mWMComponent.getAppPairs())
-                    .setTaskViewFactory(mWMComponent.getTaskViewFactory())
-                    .setTransitions(mWMComponent.getTransitions())
-                    .setStartingSurface(mWMComponent.getStartingSurface())
-                    .setTaskSurfaceHelper(mWMComponent.getTaskSurfaceHelper());
-        } else {
-            // TODO: Call on prepareSysUIComponentBuilder but not with real components. Other option
-            // is separating this logic into newly creating SystemUITestsFactory.
-            builder = prepareSysUIComponentBuilder(builder, mWMComponent)
-                    .setPip(Optional.ofNullable(null))
-                    .setLegacySplitScreen(Optional.ofNullable(null))
-                    .setSplitScreen(Optional.ofNullable(null))
-                    .setOneHanded(Optional.ofNullable(null))
-                    .setBubbles(Optional.ofNullable(null))
-                    .setHideDisplayCutout(Optional.ofNullable(null))
-                    .setShellCommandHandler(Optional.ofNullable(null))
-                    .setAppPairs(Optional.ofNullable(null))
-                    .setTaskViewFactory(Optional.ofNullable(null))
-                    .setTransitions(Transitions.createEmptyForTesting())
-                    .setStartingSurface(Optional.ofNullable(null))
-                    .setTaskSurfaceHelper(Optional.ofNullable(null));
-        }
-        mSysUIComponent = builder.build();
-        if (mInitializeComponents) {
-            mSysUIComponent.init();
-        }
+    private void init(Context context) {
+        mRootComponent = buildSystemUIRootComponent(context);
 
         // Every other part of our codebase currently relies on Dependency, so we
         // really need to ensure the Dependency gets initialized early on.
-        Dependency dependency = mSysUIComponent.createDependency();
+
+        Dependency dependency = new Dependency();
+        mRootComponent.createDependency().createSystemUI(dependency);
         dependency.start();
     }
 
-    /**
-     * Prepares the SysUIComponent builder before it is built.
-     * @param sysUIBuilder the builder provided by the root component's getSysUIComponent() method
-     * @param wm the built WMComponent from the root component's getWMComponent() method
-     */
-    protected SysUIComponent.Builder prepareSysUIComponentBuilder(
-            SysUIComponent.Builder sysUIBuilder, WMComponent wm) {
-        return sysUIBuilder;
+    protected void initWithRootComponent(@NonNull SystemUIRootComponent rootComponent) {
+        if (mRootComponent != null) {
+            throw new RuntimeException("Root component can be set only once.");
+        }
+
+        mRootComponent = rootComponent;
     }
 
-    protected GlobalRootComponent buildGlobalRootComponent(Context context) {
-        return DaggerGlobalRootComponent.builder()
-                .context(context)
+    protected SystemUIRootComponent buildSystemUIRootComponent(Context context) {
+        return DaggerSystemUIRootComponent.builder()
+                .dependencyProvider(new DependencyProvider())
+                .contextHolder(new ContextHolder(context))
                 .build();
     }
 
-    protected boolean shouldInitializeComponents() {
-        return mInitializeComponents;
-    }
-
-    public GlobalRootComponent getRootComponent() {
+    public SystemUIRootComponent getRootComponent() {
         return mRootComponent;
     }
 
-    public WMComponent getWMComponent() {
-        return mWMComponent;
-    }
-
-    public SysUIComponent getSysUIComponent() {
-        return mSysUIComponent;
-    }
-
-    /**
-     * Returns the list of system UI components that should be started.
-     */
+    /** Returns the list of system UI components that should be started. */
     public String[] getSystemUIServiceComponents(Resources resources) {
         return resources.getStringArray(R.array.config_systemUIServiceComponents);
     }
 
-    /**
-     * Returns the list of system UI components that should be started per user.
-     */
+    /** Returns the list of system UI components that should be started per user. */
     public String[] getSystemUIServiceComponentsPerUser(Resources resources) {
         return resources.getStringArray(R.array.config_systemUIServiceComponentsPerUser);
     }
@@ -198,17 +137,49 @@ public class SystemUIFactory {
      * This method is overridden in vendor specific implementation of Sys UI.
      */
     public ScreenshotNotificationSmartActionsProvider
-                createScreenshotNotificationSmartActionsProvider(
-                        Context context, Executor executor, Handler uiHandler) {
+            createScreenshotNotificationSmartActionsProvider(Context context,
+            Executor executor,
+            Handler uiHandler) {
         return new ScreenshotNotificationSmartActionsProvider();
     }
 
-    /**
-     * Creates an instance of BackGestureTfClassifierProvider.
-     * This method is overridden in vendor specific implementation of Sys UI.
-     */
-    public BackGestureTfClassifierProvider createBackGestureTfClassifierProvider(
-            AssetManager am, String modelName) {
-        return new BackGestureTfClassifierProvider();
+    public KeyguardBouncer createKeyguardBouncer(Context context, ViewMediatorCallback callback,
+            LockPatternUtils lockPatternUtils, ViewGroup container,
+            DismissCallbackRegistry dismissCallbackRegistry,
+            KeyguardBouncer.BouncerExpansionCallback expansionCallback,
+            KeyguardStateController keyguardStateController, FalsingManager falsingManager,
+            KeyguardBypassController bypassController) {
+        return new KeyguardBouncer(context, callback, lockPatternUtils, container,
+                dismissCallbackRegistry, falsingManager,
+                expansionCallback, keyguardStateController,
+                Dependency.get(KeyguardUpdateMonitor.class), bypassController,
+                new Handler(Looper.getMainLooper()));
+    }
+
+    public NotificationIconAreaController createNotificationIconAreaController(Context context,
+            StatusBar statusBar,
+            NotificationWakeUpCoordinator wakeUpCoordinator,
+            KeyguardBypassController keyguardBypassController,
+            StatusBarStateController statusBarStateController) {
+        return new NotificationIconAreaController(context, statusBar, statusBarStateController,
+                wakeUpCoordinator, keyguardBypassController,
+                Dependency.get(NotificationMediaManager.class),
+                Dependency.get(NotificationListener.class),
+                Dependency.get(DozeParameters.class),
+                Dependency.get(BubbleController.class));
+    }
+
+    @Module
+    public static class ContextHolder {
+        private Context mContext;
+
+        public ContextHolder(Context context) {
+            mContext = context;
+        }
+
+        @Provides
+        public Context provideContext() {
+            return mContext;
+        }
     }
 }

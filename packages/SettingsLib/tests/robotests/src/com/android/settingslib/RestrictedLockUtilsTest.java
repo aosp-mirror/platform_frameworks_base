@@ -290,12 +290,12 @@ public class RestrictedLockUtilsTest {
     @Test
     public void sendShowAdminSupportDetailsIntent_extraRestrictionProvided() {
         EnforcedAdmin enforcedAdmin = new EnforcedAdmin();
-        enforcedAdmin.enforcedRestriction = "Fake";
+        enforcedAdmin.enforcedRestriction = "Dummy";
         RestrictedLockUtils.sendShowAdminSupportDetailsIntent(mContext, enforcedAdmin);
 
         ArgumentCaptor<Intent> intentCaptor = ArgumentCaptor.forClass(Intent.class);
         verify(mContext).startActivityAsUser(intentCaptor.capture(), any());
-        assertThat(intentCaptor.getValue().getExtra(EXTRA_RESTRICTION)).isEqualTo("Fake");
+        assertThat(intentCaptor.getValue().getExtra(EXTRA_RESTRICTION)).isEqualTo("Dummy");
     }
 
     @Test

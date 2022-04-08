@@ -21,12 +21,13 @@ import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentat
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Point;
+import android.graphics.Rect;
 import android.os.RemoteException;
 import android.perftests.utils.BenchmarkState;
 import android.perftests.utils.PerfStatusReporter;
 import android.perftests.utils.PerfTestActivity;
-import android.platform.test.annotations.Presubmit;
 import android.util.MergedConfiguration;
+import android.view.DisplayCutout;
 import android.view.IWindow;
 import android.view.IWindowSession;
 import android.view.InsetsSourceControl;
@@ -36,7 +37,6 @@ import android.view.View;
 import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
 import android.widget.LinearLayout;
-import android.window.ClientWindowFrames;
 
 import androidx.test.filters.LargeTest;
 import androidx.test.rule.ActivityTestRule;
@@ -52,9 +52,7 @@ import java.util.function.IntSupplier;
 
 @RunWith(Parameterized.class)
 @LargeTest
-@Presubmit
-public class RelayoutPerfTest extends WindowManagerPerfTestBase
-        implements BenchmarkState.CustomizedIterationListener {
+public class RelayoutPerfTest extends WindowManagerPerfTestBase {
     private int mIteration;
 
     @Rule
@@ -93,22 +91,9 @@ public class RelayoutPerfTest extends WindowManagerPerfTestBase
         mActivityRule.runOnUiThread(() -> activity.setContentView(contentView));
         getInstrumentation().waitForIdleSync();
 
-        final BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
-        state.setCustomizedIterations(getProfilingIterations(), this);
         final RelayoutRunner relayoutRunner = new RelayoutRunner(activity, contentView.getWindow(),
                 () -> visibilities[mIteration++ % visibilities.length]);
-        relayoutRunner.runBenchmark(state);
-    }
-
-    @Override
-    public void onStart(int iteration) {
-        startProfiling(RelayoutPerfTest.class.getSimpleName() + "_" + testName
-                + "_MethodTracing_" + iteration + ".trace");
-    }
-
-    @Override
-    public void onFinished(int iteration) {
-        stopProfiling();
+        relayoutRunner.runBenchmark(mPerfStatusReporter.getBenchmarkState());
     }
 
     /** A dummy view to get IWindow. */
@@ -124,7 +109,13 @@ public class RelayoutPerfTest extends WindowManagerPerfTestBase
     }
 
     private static class RelayoutRunner {
-        final ClientWindowFrames mOutFrames = new ClientWindowFrames();
+        final Rect mOutFrame = new Rect();
+        final Rect mOutContentInsets = new Rect();
+        final Rect mOutVisibleInsets = new Rect();
+        final Rect mOutStableInsets = new Rect();
+        final Rect mOutBackDropFrame = new Rect();
+        final DisplayCutout.ParcelableWrapper mOutDisplayCutout =
+                new DisplayCutout.ParcelableWrapper(DisplayCutout.NO_CUTOUT);
         final MergedConfiguration mOutMergedConfiguration = new MergedConfiguration();
         final InsetsState mOutInsetsState = new InsetsState();
         final InsetsSourceControl[] mOutControls = new InsetsSourceControl[0];
@@ -135,9 +126,11 @@ public class RelayoutPerfTest extends WindowManagerPerfTestBase
         final int mHeight;
         final Point mOutSurfaceSize = new Point();
         final SurfaceControl mOutSurfaceControl;
+        final SurfaceControl mOutBlastSurfaceControl = new SurfaceControl();
 
         final IntSupplier mViewVisibility;
 
+        int mSeq;
         int mFrameNumber;
         int mFlags;
 
@@ -154,10 +147,12 @@ public class RelayoutPerfTest extends WindowManagerPerfTestBase
         void runBenchmark(BenchmarkState state) throws RemoteException {
             final IWindowSession session = WindowManagerGlobal.getWindowSession();
             while (state.keepRunning()) {
-                session.relayout(mWindow, mParams, mWidth, mHeight,
-                        mViewVisibility.getAsInt(), mFlags, mFrameNumber, mOutFrames,
-                        mOutMergedConfiguration, mOutSurfaceControl, mOutInsetsState, mOutControls,
-                        mOutSurfaceSize);
+                session.relayout(mWindow, mSeq, mParams, mWidth, mHeight,
+                        mViewVisibility.getAsInt(), mFlags, mFrameNumber, mOutFrame,
+                        mOutContentInsets, mOutVisibleInsets, mOutStableInsets,
+                        mOutBackDropFrame, mOutDisplayCutout, mOutMergedConfiguration,
+                        mOutSurfaceControl, mOutInsetsState, mOutControls, mOutSurfaceSize,
+                        mOutBlastSurfaceControl);
             }
         }
     }

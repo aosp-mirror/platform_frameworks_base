@@ -36,10 +36,9 @@ import com.android.systemui.statusbar.notification.collection.NotifPipeline;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder;
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifPromoter;
-import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifSectioner;
+import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifSection;
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener;
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifLifetimeExtender;
-import com.android.systemui.statusbar.notification.collection.render.NodeController;
 import com.android.systemui.statusbar.notification.interruption.HeadsUpViewBinder;
 import com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProvider;
 import com.android.systemui.statusbar.notification.row.NotifBindPipeline.BindCallback;
@@ -65,7 +64,7 @@ public class HeadsUpCoordinatorTest extends SysuiTestCase {
     private NotifPromoter mNotifPromoter;
     private NotifLifetimeExtender mNotifLifetimeExtender;
     private OnHeadsUpChangedListener mOnHeadsUpChangedListener;
-    private NotifSectioner mNotifSectioner;
+    private NotifSection mNotifSection;
 
     @Mock private NotifPipeline mNotifPipeline;
     @Mock private HeadsUpManager mHeadsUpManager;
@@ -74,7 +73,6 @@ public class HeadsUpCoordinatorTest extends SysuiTestCase {
     @Mock private NotificationRemoteInputManager mRemoteInputManager;
     @Mock private RemoteInputController mRemoteInputController;
     @Mock private NotifLifetimeExtender.OnEndLifetimeExtensionCallback mEndLifetimeExtension;
-    @Mock private NodeController mHeaderController;
 
     private NotificationEntry mEntry;
 
@@ -87,8 +85,8 @@ public class HeadsUpCoordinatorTest extends SysuiTestCase {
                 mHeadsUpManager,
                 mHeadsUpViewBinder,
                 mNotificationInterruptStateProvider,
-                mRemoteInputManager,
-                mHeaderController);
+                mRemoteInputManager
+        );
 
         mCoordinator.attach(mNotifPipeline);
 
@@ -113,7 +111,7 @@ public class HeadsUpCoordinatorTest extends SysuiTestCase {
         mNotifLifetimeExtender = notifLifetimeExtenderCaptor.getValue();
         mOnHeadsUpChangedListener = headsUpChangedListenerCaptor.getValue();
 
-        mNotifSectioner = mCoordinator.getSectioner();
+        mNotifSection = mCoordinator.getSection();
         mNotifLifetimeExtender.setCallback(mEndLifetimeExtension);
         mEntry = new NotificationEntryBuilder().build();
     }
@@ -134,8 +132,8 @@ public class HeadsUpCoordinatorTest extends SysuiTestCase {
         setCurrentHUN(mEntry);
 
         // THEN only section the current HUN, mEntry
-        assertTrue(mNotifSectioner.isInSection(mEntry));
-        assertFalse(mNotifSectioner.isInSection(new NotificationEntryBuilder().build()));
+        assertTrue(mNotifSection.isInSection(mEntry));
+        assertFalse(mNotifSection.isInSection(new NotificationEntryBuilder().build()));
     }
 
     @Test

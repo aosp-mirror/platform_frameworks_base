@@ -29,7 +29,6 @@ public class NonInterceptingScrollView extends ScrollView {
 
     private final int mTouchSlop;
     private float mDownY;
-    private boolean mScrollEnabled = true;
 
     public NonInterceptingScrollView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -86,16 +85,6 @@ public class NonInterceptingScrollView extends ScrollView {
         return super.onInterceptTouchEvent(ev);
     }
 
-    @Override
-    public boolean canScrollVertically(int direction) {
-        return mScrollEnabled && super.canScrollVertically(direction);
-    }
-
-    @Override
-    public boolean canScrollHorizontally(int direction) {
-        return mScrollEnabled && super.canScrollHorizontally(direction);
-    }
-
     public int getScrollRange() {
         int scrollRange = 0;
         if (getChildCount() > 0) {
@@ -104,13 +93,5 @@ public class NonInterceptingScrollView extends ScrollView {
                     child.getHeight() - (getHeight() - mPaddingBottom - mPaddingTop));
         }
         return scrollRange;
-    }
-
-    /**
-     * Enable scrolling for this view. Needed because the view might be clipped but still intercepts
-     * touches on the lockscreen.
-     */
-    public void setScrollingEnabled(boolean enabled) {
-        mScrollEnabled = enabled;
     }
 }

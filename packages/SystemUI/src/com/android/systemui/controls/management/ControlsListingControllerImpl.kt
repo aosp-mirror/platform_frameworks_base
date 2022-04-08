@@ -16,6 +16,7 @@
 
 package com.android.systemui.controls.management
 
+import android.app.ActivityManager
 import android.content.ComponentName
 import android.content.Context
 import android.content.pm.ServiceInfo
@@ -26,12 +27,11 @@ import com.android.internal.annotations.VisibleForTesting
 import com.android.settingslib.applications.ServiceListing
 import com.android.settingslib.widget.CandidateInfo
 import com.android.systemui.controls.ControlsServiceInfo
-import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
-import com.android.systemui.settings.UserTracker
 import java.util.concurrent.Executor
 import java.util.concurrent.atomic.AtomicInteger
 import javax.inject.Inject
+import javax.inject.Singleton
 
 private fun createServiceListing(context: Context): ServiceListing {
     return ServiceListing.Builder(context).apply {
@@ -52,20 +52,18 @@ private fun createServiceListing(context: Context): ServiceListing {
  * * Has an intent-filter responding to [ControlsProviderService.CONTROLS_ACTION]
  * * Has the bind permission `android.permission.BIND_CONTROLS`
  */
-@SysUISingleton
+@Singleton
 class ControlsListingControllerImpl @VisibleForTesting constructor(
     private val context: Context,
     @Background private val backgroundExecutor: Executor,
-    private val serviceListingBuilder: (Context) -> ServiceListing,
-    userTracker: UserTracker
+    private val serviceListingBuilder: (Context) -> ServiceListing
 ) : ControlsListingController {
 
     @Inject
-    constructor(context: Context, executor: Executor, userTracker: UserTracker): this(
+    constructor(context: Context, executor: Executor): this(
             context,
             executor,
-            ::createServiceListing,
-            userTracker
+            ::createServiceListing
     )
 
     private var serviceListing = serviceListingBuilder(context)
@@ -80,7 +78,7 @@ class ControlsListingControllerImpl @VisibleForTesting constructor(
     private var availableServices = emptyList<ServiceInfo>()
     private var userChangeInProgress = AtomicInteger(0)
 
-    override var currentUserId = userTracker.userId
+    override var currentUserId = ActivityManager.getCurrentUser()
         private set
 
     private val serviceListingCallback = ServiceListing.Callback {

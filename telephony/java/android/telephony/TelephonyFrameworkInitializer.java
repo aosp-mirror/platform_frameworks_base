@@ -92,12 +92,6 @@ public class TelephonyFrameworkInitializer {
                 ImsManager.class,
                 context -> new ImsManager(context)
         );
-        SystemServiceRegistry.registerContextAwareService(
-                Context.SMS_SERVICE,
-                SmsManager.class,
-                context -> SmsManager.getSmsManagerForContextAndSubscriptionId(context,
-                        SubscriptionManager.DEFAULT_SUBSCRIPTION_ID)
-        );
     }
 
     /** @hide */

@@ -16,8 +16,6 @@
 
 package com.android.server.stats.pull.netstats;
 
-import static android.net.NetworkTemplate.OEM_MANAGED_ALL;
-
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.net.NetworkStats;
@@ -39,18 +37,17 @@ public class NetworkStatsExt {
     public final boolean slicedByTag;
     public final boolean slicedByMetered;
     public final int ratType;
-    public final int oemManaged;
     @Nullable
     public final SubInfo subInfo;
 
     public NetworkStatsExt(@NonNull NetworkStats stats, int[] transports, boolean slicedByFgbg) {
         this(stats, transports, slicedByFgbg, /*slicedByTag=*/false, /*slicedByMetered=*/false,
-                TelephonyManager.NETWORK_TYPE_UNKNOWN, /*subInfo=*/null, OEM_MANAGED_ALL);
+                TelephonyManager.NETWORK_TYPE_UNKNOWN, /*subInfo=*/null);
     }
 
     public NetworkStatsExt(@NonNull NetworkStats stats, int[] transports, boolean slicedByFgbg,
             boolean slicedByTag, boolean slicedByMetered, int ratType,
-            @Nullable SubInfo subInfo, int oemManaged) {
+            @Nullable SubInfo subInfo) {
         this.stats = stats;
 
         // Sort transports array so that we can test for equality without considering order.
@@ -62,7 +59,6 @@ public class NetworkStatsExt {
         this.slicedByMetered = slicedByMetered;
         this.ratType = ratType;
         this.subInfo = subInfo;
-        this.oemManaged = oemManaged;
     }
 
     /**
@@ -71,7 +67,6 @@ public class NetworkStatsExt {
     public boolean hasSameSlicing(@NonNull NetworkStatsExt other) {
         return Arrays.equals(transports, other.transports) && slicedByFgbg == other.slicedByFgbg
                 && slicedByTag == other.slicedByTag && slicedByMetered == other.slicedByMetered
-                && ratType == other.ratType && Objects.equals(subInfo, other.subInfo)
-                && oemManaged == other.oemManaged;
+                && ratType == other.ratType && Objects.equals(subInfo, other.subInfo);
     }
 }

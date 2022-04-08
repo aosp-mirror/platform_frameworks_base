@@ -25,6 +25,7 @@ import com.android.systemui.statusbar.notification.collection.GroupEntry
 import com.android.systemui.statusbar.notification.collection.ListEntry
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifFilter
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifPromoter
+import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifSection
 import javax.inject.Inject
 
 class ShadeListBuilderLogger @Inject constructor(
@@ -53,15 +54,6 @@ class ShadeListBuilderLogger @Inject constructor(
             int1 = pipelineState
         }, {
             """Pre-group NotifFilter "$str1" invalidated; pipeline state is $int1"""
-        })
-    }
-
-    fun logReorderingAllowedInvalidated(name: String, pipelineState: Int) {
-        buffer.log(TAG, DEBUG, {
-            str1 = name
-            int1 = pipelineState
-        }, {
-            """ReorderingNowAllowed "$str1" invalidated; pipeline state is $int1"""
         })
     }
 
@@ -133,18 +125,13 @@ class ShadeListBuilderLogger @Inject constructor(
             str2 = prevParent?.key
             str3 = newParent?.key
         }, {
-
-            val action = if (str2 == null && str3 != null) {
-                "ATTACHED"
+            if (str2 == null && str3 != null) {
+                "(Build $int1) ATTACHED {$str1}"
             } else if (str2 != null && str3 == null) {
-                "DETACHED"
-            } else if (str2 == null && str3 == null) {
-                "MODIFIED (DETACHED)"
+                "(Build $int1) DETACHED {$str1}"
             } else {
-                "MODIFIED (ATTACHED)"
+                "(Build $int1) MODIFIED {$str1}"
             }
-
-            "(Build $int1) $action {$str1}"
         })
     }
 
@@ -159,34 +146,8 @@ class ShadeListBuilderLogger @Inject constructor(
             } else if (str1 != null && str2 == null) {
                 "(Build $int1)     Parent was {$str1}"
             } else {
-                "(Build $int1)     Reparent: {$str1} -> {$str2}"
+                "(Build $int1)     Reparent: {$str2} -> {$str3}"
             }
-        })
-    }
-
-    fun logParentChangeSuppressed(
-        buildId: Int,
-        suppressedParent: GroupEntry?,
-        keepingParent: GroupEntry?
-    ) {
-        buffer.log(TAG, INFO, {
-            int1 = buildId
-            str1 = suppressedParent?.key
-            str2 = keepingParent?.key
-        }, {
-            "(Build $long1)     Change of parent to '$str1' suppressed; keeping parent '$str2'"
-        })
-    }
-
-    fun logGroupPruningSuppressed(
-        buildId: Int,
-        keepingParent: GroupEntry?
-    ) {
-        buffer.log(TAG, INFO, {
-            int1 = buildId
-            str1 = keepingParent?.key
-        }, {
-            "(Build $long1)     Group pruning suppressed; keeping parent '$str1'"
         })
     }
 
@@ -221,32 +182,22 @@ class ShadeListBuilderLogger @Inject constructor(
     fun logSectionChanged(
         buildId: Int,
         prevSection: NotifSection?,
-        newSection: NotifSection?
+        prevIndex: Int,
+        newSection: NotifSection?,
+        newIndex: Int
     ) {
         buffer.log(TAG, INFO, {
             long1 = buildId.toLong()
-            str1 = prevSection?.label
-            str2 = newSection?.label
+            str1 = prevSection?.name
+            int1 = prevIndex
+            str2 = newSection?.name
+            int2 = newIndex
         }, {
             if (str1 == null) {
-                "(Build $long1)     Section assigned: $str2"
+                "(Build $long1)     Section assigned: '$str2' (#$int2)"
             } else {
-                "(Build $long1)     Section changed: $str1 -> $str2"
+                "(Build $long1)     Section changed: '$str1' (#$int1) -> '$str2' (#$int2)"
             }
-        })
-    }
-
-    fun logSectionChangeSuppressed(
-        buildId: Int,
-        suppressedSection: NotifSection?,
-        assignedSection: NotifSection?
-    ) {
-        buffer.log(TAG, INFO, {
-            long1 = buildId.toLong()
-            str1 = suppressedSection?.label
-            str2 = assignedSection?.label
-        }, {
-            "(Build $long1)     Suppressing section change to $str1 (staying at $str2)"
         })
     }
 

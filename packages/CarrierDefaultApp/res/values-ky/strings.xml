@@ -8,7 +8,7 @@
     <string name="portal_notification_detail" msgid="2295729385924660881">"%s сайтына баш багуу үчүн басыңыз"</string>
     <string name="no_data_notification_detail" msgid="3112125343857014825">"%s Интернет провайдери менен байланышыңыз"</string>
     <string name="no_mobile_data_connection_title" msgid="7449525772416200578">"Мобилдик Интернет жок"</string>
-    <string name="no_mobile_data_connection" msgid="544980465184147010">"%s аркылуу дайындарды же роуминг планын кошуу"</string>
+    <string name="no_mobile_data_connection" msgid="544980465184147010">"%s аркылуу дайын-даректерди же роуминг планын кошуу"</string>
     <string name="mobile_data_status_notification_channel_name" msgid="833999690121305708">"Мобилдик Интернеттин абалы"</string>
     <string name="action_bar_label" msgid="4290345990334377177">"Мобилдик тармакка кирүү"</string>
     <string name="ssl_error_warning" msgid="3127935140338254180">"Кошулайын деген тармагыңызда коопсуздук көйгөйлөрү бар."</string>

@@ -16,13 +16,10 @@
 
 package com.android.systemui.biometrics;
 
-import static android.hardware.biometrics.BiometricAuthenticator.TYPE_FACE;
-import static android.hardware.biometrics.BiometricAuthenticator.TYPE_FINGERPRINT;
 import static android.hardware.biometrics.BiometricManager.Authenticators;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
@@ -30,7 +27,6 @@ import static org.mockito.Mockito.verify;
 
 import android.content.Context;
 import android.hardware.biometrics.BiometricPrompt;
-import android.hardware.biometrics.PromptInfo;
 import android.os.Bundle;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.AndroidTestingRunner;
@@ -59,18 +55,13 @@ public class AuthBiometricViewTest extends SysuiTestCase {
     @Mock private AuthPanelController mPanelController;
 
     @Mock private Button mNegativeButton;
-    @Mock private Button mCancelButton;
-    @Mock private Button mUseCredentialButton;
-
     @Mock private Button mPositiveButton;
     @Mock private Button mTryAgainButton;
-
     @Mock private TextView mTitleView;
     @Mock private TextView mSubtitleView;
     @Mock private TextView mDescriptionView;
     @Mock private TextView mIndicatorView;
     @Mock private ImageView mIconView;
-    @Mock private View mIconHolderView;
 
     private TestableBiometricView mBiometricView;
 
@@ -92,31 +83,15 @@ public class AuthBiometricViewTest extends SysuiTestCase {
 
     @Test
     public void testOnAuthenticationSucceeded_confirmationRequired_updatesDialogContents() {
-        final Button negativeButton = new Button(mContext);
-        final Button cancelButton = new Button(mContext);
-        initDialog(mContext, false /* allowDeviceCredential */, mCallback, new MockInjector() {
-            @Override
-            public Button getNegativeButton() {
-                return negativeButton;
-            }
-
-            @Override
-            public Button getCancelButton() {
-                return cancelButton;
-            }
-        });
+        initDialog(mContext, false /* allowDeviceCredential */, mCallback, new MockInjector());
 
         mBiometricView.setRequireConfirmation(true);
         mBiometricView.onAuthenticationSucceeded();
         waitForIdleSync();
         assertEquals(AuthBiometricView.STATE_PENDING_CONFIRMATION, mBiometricView.mState);
         verify(mCallback, never()).onAction(anyInt());
-
-        assertEquals(View.GONE, negativeButton.getVisibility());
-        assertEquals(View.VISIBLE, cancelButton.getVisibility());
-        assertTrue(cancelButton.isEnabled());
-
-        verify(mBiometricView.mConfirmButton).setEnabled(eq(true));
+        verify(mBiometricView.mNegativeButton).setText(eq(R.string.cancel));
+        verify(mBiometricView.mPositiveButton).setEnabled(eq(true));
         verify(mIndicatorView).setText(eq(R.string.biometric_dialog_tap_confirm));
         verify(mIndicatorView).setVisibility(eq(View.VISIBLE));
     }
@@ -126,7 +101,7 @@ public class AuthBiometricViewTest extends SysuiTestCase {
         Button button = new Button(mContext);
         initDialog(mContext, false /* allowDeviceCredential */, mCallback, new MockInjector() {
            @Override
-            public Button getConfirmButton() {
+            public Button getPositiveButton() {
                return button;
            }
         });
@@ -156,26 +131,18 @@ public class AuthBiometricViewTest extends SysuiTestCase {
     }
 
     @Test
-    public void testCancelButton_whenPendingConfirmation_sendsActionUserCanceled() {
-        Button cancelButton = new Button(mContext);
-        Button negativeButton = new Button(mContext);
+    public void testNegativeButton_whenPendingConfirmation_sendsActionUserCanceled() {
+        Button button = new Button(mContext);
         initDialog(mContext, false /* allowDeviceCredential */, mCallback, new MockInjector() {
             @Override
             public Button getNegativeButton() {
-                return negativeButton;
-            }
-            @Override
-            public Button getCancelButton() {
-                return cancelButton;
+                return button;
             }
         });
 
         mBiometricView.setRequireConfirmation(true);
         mBiometricView.onAuthenticationSucceeded();
-
-        assertEquals(View.GONE, negativeButton.getVisibility());
-
-        cancelButton.performClick();
+        button.performClick();
         waitForIdleSync();
 
         verify(mCallback).onAction(AuthBiometricView.Callback.ACTION_USER_CANCELED);
@@ -202,11 +169,11 @@ public class AuthBiometricViewTest extends SysuiTestCase {
     public void testError_sendsActionError() {
         initDialog(mContext, false /* allowDeviceCredential */, mCallback, new MockInjector());
         final String testError = "testError";
-        mBiometricView.onError(TYPE_FACE, testError);
+        mBiometricView.onError(testError);
         waitForIdleSync();
 
-        verify(mCallback).onAction(eq(AuthBiometricView.Callback.ACTION_ERROR));
-        assertEquals(AuthBiometricView.STATE_IDLE, mBiometricView.mState);
+        verify(mCallback).onAction(AuthBiometricView.Callback.ACTION_ERROR);
+        assertEquals(AuthBiometricView.STATE_ERROR, mBiometricView.mState);
     }
 
     @Test
@@ -233,30 +200,12 @@ public class AuthBiometricViewTest extends SysuiTestCase {
     @Test
     public void testBackgroundClicked_whenSmallDialog_neverSendsUserCanceled() {
         initDialog(mContext, false /* allowDeviceCredential */, mCallback, new MockInjector());
-        mBiometricView.mLayoutParams = new AuthDialog.LayoutParams(0, 0);
         mBiometricView.updateSize(AuthDialog.SIZE_SMALL);
 
         View view = new View(mContext);
         mBiometricView.setBackgroundView(view);
         view.performClick();
         verify(mCallback, never()).onAction(eq(AuthBiometricView.Callback.ACTION_USER_CANCELED));
-    }
-
-    @Test
-    public void testIgnoresUselessHelp() {
-        initDialog(mContext, false /* allowDeviceCredential */, mCallback, new MockInjector());
-
-        mBiometricView.onDialogAnimatedIn();
-        waitForIdleSync();
-
-        assertEquals(AuthBiometricView.STATE_AUTHENTICATING, mBiometricView.mState);
-
-        mBiometricView.onHelp(TYPE_FINGERPRINT, "");
-        waitForIdleSync();
-
-        verify(mIndicatorView, never()).setText(any());
-        verify(mCallback, never()).onAction(eq(AuthBiometricView.Callback.ACTION_ERROR));
-        assertEquals(AuthBiometricView.STATE_AUTHENTICATING, mBiometricView.mState);
     }
 
     @Test
@@ -274,17 +223,11 @@ public class AuthBiometricViewTest extends SysuiTestCase {
             public TextView getIndicatorView() {
                 return indicatorView;
             }
-
-            @Override
-            public int getDelayAfterError() {
-                // keep a real delay to test saving in the error state
-                return BiometricPrompt.HIDE_DIALOG_DELAY;
-            }
         });
 
         final String failureMessage = "testFailureMessage";
         mBiometricView.setRequireConfirmation(requireConfirmation);
-        mBiometricView.onAuthenticationFailed(TYPE_FACE, failureMessage);
+        mBiometricView.onAuthenticationFailed(failureMessage);
         waitForIdleSync();
 
         Bundle state = new Bundle();
@@ -332,46 +275,39 @@ public class AuthBiometricViewTest extends SysuiTestCase {
     }
 
     @Test
-    public void testCredentialButton_whenDeviceCredentialAllowed() {
-        final Button negativeButton = new Button(mContext);
-        final Button useCredentialButton = new Button(mContext);
+    public void testNegativeButton_whenDeviceCredentialAllowed() throws InterruptedException {
+        Button negativeButton = new Button(mContext);
         initDialog(mContext, true /* allowDeviceCredential */, mCallback, new MockInjector() {
             @Override
             public Button getNegativeButton() {
                 return negativeButton;
             }
-
-            @Override
-            public Button getUseCredentialButton() {
-                return useCredentialButton;
-            }
         });
 
-        assertEquals(View.GONE, negativeButton.getVisibility());
-        useCredentialButton.performClick();
+        negativeButton.performClick();
         waitForIdleSync();
 
         verify(mCallback).onAction(AuthBiometricView.Callback.ACTION_USE_DEVICE_CREDENTIAL);
     }
 
-    private PromptInfo buildPromptInfo(boolean allowDeviceCredential) {
-        PromptInfo promptInfo = new PromptInfo();
-        promptInfo.setTitle("Title");
+    private Bundle buildBiometricPromptBundle(boolean allowDeviceCredential) {
+        Bundle bundle = new Bundle();
+        bundle.putCharSequence(BiometricPrompt.KEY_TITLE, "Title");
         int authenticators = Authenticators.BIOMETRIC_WEAK;
         if (allowDeviceCredential) {
             authenticators |= Authenticators.DEVICE_CREDENTIAL;
         } else {
-            promptInfo.setNegativeButtonText("Negative");
+            bundle.putCharSequence(BiometricPrompt.KEY_NEGATIVE_TEXT, "Negative");
         }
-        promptInfo.setAuthenticators(authenticators);
-        return promptInfo;
+        bundle.putInt(BiometricPrompt.KEY_AUTHENTICATORS_ALLOWED, authenticators);
+        return bundle;
     }
 
     private void initDialog(Context context, boolean allowDeviceCredential,
             AuthBiometricView.Callback callback,
             Bundle savedState, MockInjector injector) {
         mBiometricView = new TestableBiometricView(context, null, injector);
-        mBiometricView.setPromptInfo(buildPromptInfo(allowDeviceCredential));
+        mBiometricView.setBiometricPromptBundle(buildBiometricPromptBundle(allowDeviceCredential));
         mBiometricView.setCallback(callback);
         mBiometricView.restoreState(savedState);
         mBiometricView.onFinishInflateInternal();
@@ -392,17 +328,7 @@ public class AuthBiometricViewTest extends SysuiTestCase {
         }
 
         @Override
-        public Button getCancelButton() {
-            return mCancelButton;
-        }
-
-        @Override
-        public Button getUseCredentialButton() {
-            return mUseCredentialButton;
-        }
-
-        @Override
-        public Button getConfirmButton() {
+        public Button getPositiveButton() {
             return mPositiveButton;
         }
 
@@ -434,11 +360,6 @@ public class AuthBiometricViewTest extends SysuiTestCase {
         @Override
         public ImageView getIconView() {
             return mIconView;
-        }
-
-        @Override
-        public View getIconHolderView() {
-            return mIconHolderView;
         }
 
         @Override

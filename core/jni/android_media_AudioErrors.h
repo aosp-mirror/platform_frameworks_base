@@ -35,7 +35,7 @@ enum {
     AUDIO_JAVA_WOULD_BLOCK        = -7,
 };
 
-static constexpr inline jint nativeToJavaStatus(status_t status) {
+static inline jint nativeToJavaStatus(status_t status) {
     switch (status) {
     case NO_ERROR:
         return AUDIO_JAVA_SUCCESS;

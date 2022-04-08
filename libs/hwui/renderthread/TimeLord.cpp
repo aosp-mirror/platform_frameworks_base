@@ -14,35 +14,14 @@
  * limitations under the License.
  */
 #include "TimeLord.h"
-#include <limits>
-#include "FrameInfo.h"
 
 namespace android {
 namespace uirenderer {
 namespace renderthread {
 
-TimeLord::TimeLord()
-        : mFrameIntervalNanos(milliseconds_to_nanoseconds(16))
-        , mFrameTimeNanos(0)
-        , mFrameIntendedTimeNanos(0)
-        , mFrameVsyncId(UiFrameInfoBuilder::INVALID_VSYNC_ID)
-        , mFrameDeadline(std::numeric_limits<int64_t>::max()) {}
+TimeLord::TimeLord() : mFrameIntervalNanos(milliseconds_to_nanoseconds(16)), mFrameTimeNanos(0) {}
 
-bool TimeLord::vsyncReceived(nsecs_t vsync, nsecs_t intendedVsync, int64_t vsyncId,
-                             int64_t frameDeadline, nsecs_t frameInterval) {
-    if (intendedVsync > mFrameIntendedTimeNanos) {
-        mFrameIntendedTimeNanos = intendedVsync;
-
-        // The intendedVsync might have been advanced to account for scheduling
-        // jitter. Since we don't have a way to advance the vsync id we just
-        // reset it.
-        mFrameVsyncId = (vsyncId > mFrameVsyncId) ? vsyncId : UiFrameInfoBuilder::INVALID_VSYNC_ID;
-        mFrameDeadline = frameDeadline;
-        if (frameInterval > 0) {
-            mFrameIntervalNanos = frameInterval;
-        }
-    }
-
+bool TimeLord::vsyncReceived(nsecs_t vsync) {
     if (vsync > mFrameTimeNanos) {
         mFrameTimeNanos = vsync;
         return true;
@@ -57,8 +36,6 @@ nsecs_t TimeLord::computeFrameTimeNanos() {
     if (jitterNanos >= mFrameIntervalNanos) {
         nsecs_t lastFrameOffset = jitterNanos % mFrameIntervalNanos;
         mFrameTimeNanos = now - lastFrameOffset;
-        // mFrameVsyncId is not adjusted here as we still want to send
-        // the vsync id that started this frame to the Surface Composer
     }
     return mFrameTimeNanos;
 }

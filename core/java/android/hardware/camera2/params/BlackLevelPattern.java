@@ -16,8 +16,6 @@
 
 package android.hardware.camera2.params;
 
-import android.annotation.Nullable;
-
 import java.util.Arrays;
 import java.util.Objects;
 
@@ -109,7 +107,7 @@ public final class BlackLevelPattern {
      * @return {@code true} if the objects were equal, {@code false} otherwise
      */
     @Override
-    public boolean equals(@Nullable Object obj) {
+    public boolean equals(Object obj) {
         if (obj == null) {
             return false;
         } else if (this == obj) {

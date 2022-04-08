@@ -31,14 +31,12 @@ public class RemoteViewsListAdapter extends BaseAdapter {
     private ArrayList<RemoteViews> mRemoteViewsList;
     private ArrayList<Integer> mViewTypes = new ArrayList<Integer>();
     private int mViewTypeCount;
-    private RemoteViews.ColorResources mColorResources;
 
     public RemoteViewsListAdapter(Context context, ArrayList<RemoteViews> remoteViews,
-            int viewTypeCount, RemoteViews.ColorResources colorResources) {
+            int viewTypeCount) {
         mContext = context;
         mRemoteViewsList = remoteViews;
         mViewTypeCount = viewTypeCount;
-        mColorResources = colorResources;
         init();
     }
 
@@ -92,10 +90,9 @@ public class RemoteViewsListAdapter extends BaseAdapter {
             if (convertView != null && rv != null &&
                     convertView.getId() == rv.getLayoutId()) {
                 v = convertView;
-                rv.reapply(mContext, v, null /* handler */, null /* size */, mColorResources);
+                rv.reapply(mContext, v);
             } else {
-                v = rv.apply(mContext, parent, null /* handler */, null /* size */,
-                        mColorResources);
+                v = rv.apply(mContext, parent);
             }
             return v;
         } else {

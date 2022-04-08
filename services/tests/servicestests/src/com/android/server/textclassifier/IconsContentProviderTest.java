@@ -29,7 +29,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 /**
- * Validity test for {@link IconsContentProvider}.
+ * Sanity test for {@link IconsContentProvider}.
  */
 @RunWith(AndroidJUnit4.class)
 public final class IconsContentProviderTest {

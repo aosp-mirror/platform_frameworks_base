@@ -22,9 +22,10 @@ import android.content.pm.PackageManager;
 import android.content.pm.VersionedPackage;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.IntArray;
+import android.util.SparseLongArray;
 
 import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Information about a rollback available for a particular package.
@@ -60,7 +61,7 @@ public final class PackageRollbackInfo implements Parcelable {
      * with credentials yet.
      */
     // NOTE: Not a part of the Parcelable representation of this object.
-    private final List<Integer> mPendingBackups;
+    private final IntArray mPendingBackups;
 
     /**
      * The list of users for which we need to restore userdata for this package. This field is
@@ -83,7 +84,13 @@ public final class PackageRollbackInfo implements Parcelable {
      * The list of users for which snapshots have been saved.
      */
     // NOTE: Not a part of the Parcelable representation of this object.
-    private final List<Integer> mSnapshottedUsers;
+    private final IntArray mSnapshottedUsers;
+
+    /**
+     * A mapping between user and an inode of theirs CE data snapshot.
+     */
+    // NOTE: Not a part of the Parcelable representation of this object.
+    private final SparseLongArray mCeSnapshotInodes;
 
     /**
      * The userdata policy to execute when a rollback for this package is committed.
@@ -120,7 +127,7 @@ public final class PackageRollbackInfo implements Parcelable {
     }
 
     /** @hide */
-    public List<Integer> getPendingBackups() {
+    public IntArray getPendingBackups() {
         return mPendingBackups;
     }
 
@@ -160,13 +167,26 @@ public final class PackageRollbackInfo implements Parcelable {
     }
 
     /** @hide */
-    public List<Integer> getSnapshottedUsers() {
+    public IntArray getSnapshottedUsers() {
         return mSnapshottedUsers;
     }
 
     /** @hide */
+    public SparseLongArray getCeSnapshotInodes() {
+        return mCeSnapshotInodes;
+    }
+
+    /** @hide */
+    public void putCeSnapshotInode(int userId, long ceSnapshotInode) {
+        mCeSnapshotInodes.put(userId, ceSnapshotInode);
+    }
+
+    /** @hide */
     public void removePendingBackup(int userId) {
-        mPendingBackups.remove((Integer) userId);
+        int idx = mPendingBackups.indexOf(userId);
+        if (idx != -1) {
+            mPendingBackups.remove(idx);
+        }
     }
 
     /** @hide */
@@ -177,17 +197,20 @@ public final class PackageRollbackInfo implements Parcelable {
     /** @hide */
     public PackageRollbackInfo(VersionedPackage packageRolledBackFrom,
             VersionedPackage packageRolledBackTo,
-            @NonNull List<Integer> pendingBackups, @NonNull ArrayList<RestoreInfo> pendingRestores,
-            boolean isApex, boolean isApkInApex, @NonNull List<Integer> snapshottedUsers) {
+            @NonNull IntArray pendingBackups, @NonNull ArrayList<RestoreInfo> pendingRestores,
+            boolean isApex, boolean isApkInApex, @NonNull IntArray snapshottedUsers,
+            @NonNull SparseLongArray ceSnapshotInodes) {
         this(packageRolledBackFrom, packageRolledBackTo, pendingBackups, pendingRestores, isApex,
-                isApkInApex, snapshottedUsers, PackageManager.RollbackDataPolicy.RESTORE);
+                isApkInApex, snapshottedUsers, ceSnapshotInodes,
+                PackageManager.RollbackDataPolicy.RESTORE);
     }
 
     /** @hide */
     public PackageRollbackInfo(VersionedPackage packageRolledBackFrom,
             VersionedPackage packageRolledBackTo,
-            @NonNull List<Integer> pendingBackups, @NonNull ArrayList<RestoreInfo> pendingRestores,
-            boolean isApex, boolean isApkInApex, @NonNull List<Integer> snapshottedUsers,
+            @NonNull IntArray pendingBackups, @NonNull ArrayList<RestoreInfo> pendingRestores,
+            boolean isApex, boolean isApkInApex, @NonNull IntArray snapshottedUsers,
+            @NonNull SparseLongArray ceSnapshotInodes,
             @PackageManager.RollbackDataPolicy int rollbackDataPolicy) {
         this.mVersionRolledBackFrom = packageRolledBackFrom;
         this.mVersionRolledBackTo = packageRolledBackTo;
@@ -197,6 +220,7 @@ public final class PackageRollbackInfo implements Parcelable {
         this.mRollbackDataPolicy = rollbackDataPolicy;
         this.mIsApkInApex = isApkInApex;
         this.mSnapshottedUsers = snapshottedUsers;
+        this.mCeSnapshotInodes = ceSnapshotInodes;
     }
 
     private PackageRollbackInfo(Parcel in) {
@@ -207,6 +231,7 @@ public final class PackageRollbackInfo implements Parcelable {
         this.mPendingRestores = null;
         this.mPendingBackups = null;
         this.mSnapshottedUsers = null;
+        this.mCeSnapshotInodes = null;
         this.mRollbackDataPolicy = PackageManager.RollbackDataPolicy.RESTORE;
     }
 

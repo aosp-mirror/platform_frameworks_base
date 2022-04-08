@@ -17,8 +17,9 @@
 package com.android.internal.logging;
 
 import android.util.Log;
-
 import com.android.internal.util.FastPrintWriter;
+import dalvik.system.DalvikLogging;
+import dalvik.system.DalvikLogHandler;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -81,7 +82,7 @@ import java.util.logging.Logger;
  *   </tr>
  * </table>
  */
-public class AndroidHandler extends Handler {
+public class AndroidHandler extends Handler implements DalvikLogHandler {
     /**
      * Holds the formatter for all Android log handlers.
      */
@@ -120,32 +121,10 @@ public class AndroidHandler extends Handler {
         // No need to flush, but must implement abstract method.
     }
 
-    /**
-     * Returns the short logger tag (up to 23 chars) for the given logger name.
-     * Traditionally loggers are named by fully-qualified Java classes; this
-     * method attempts to return a concise identifying part of such names.
-     */
-    private static String loggerNameToTag(String loggerName) {
-        // Anonymous logger.
-        if (loggerName == null) {
-            return "null";
-        }
-
-        int length = loggerName.length();
-        if (length <= 23) {
-            return loggerName;
-        }
-
-        int lastPeriod = loggerName.lastIndexOf(".");
-        return length - (lastPeriod + 1) <= 23
-                ? loggerName.substring(lastPeriod + 1)
-                : loggerName.substring(loggerName.length() - 23);
-    }
-
     @Override
     public void publish(LogRecord record) {
         int level = getAndroidLevel(record.getLevel());
-        String tag = loggerNameToTag(record.getLoggerName());
+        String tag = DalvikLogging.loggerNameToTag(record.getLoggerName());
         if (!Log.isLoggable(tag, level)) {
             return;
         }

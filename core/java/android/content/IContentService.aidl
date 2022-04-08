@@ -61,7 +61,7 @@ interface IContentService {
      */
     void sync(in SyncRequest request, String callingPackage);
     void syncAsUser(in SyncRequest request, int userId, String callingPackage);
-    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
+    @UnsupportedAppUsage
     void cancelSync(in Account account, String authority, in ComponentName cname);
     void cancelSyncAsUser(in Account account, String authority, in ComponentName cname, int userId);
 
@@ -159,7 +159,7 @@ interface IContentService {
      * @param cname component to identify sync service, must be null if account/providerName are
      * non-null.
      */
-    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
+    @UnsupportedAppUsage
     boolean isSyncActive(in Account account, String authority, in ComponentName cname);
 
     /**

@@ -16,9 +16,12 @@
 
 package android.permission;
 
+import static android.app.admin.DevicePolicyManager.PERMISSION_GRANT_STATE_DEFAULT;
+import static android.app.admin.DevicePolicyManager.PERMISSION_GRANT_STATE_DENIED;
+import static android.app.admin.DevicePolicyManager.PERMISSION_GRANT_STATE_GRANTED;
 import static android.permission.PermissionControllerService.SERVICE_INTERFACE;
 
-import static com.android.internal.util.FunctionalUtils.uncheckExceptions;
+import static com.android.internal.util.Preconditions.checkArgument;
 import static com.android.internal.util.Preconditions.checkArgumentNonnegative;
 import static com.android.internal.util.Preconditions.checkCollectionElementsNotNull;
 import static com.android.internal.util.Preconditions.checkFlagsArgument;
@@ -35,6 +38,7 @@ import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
 import android.app.ActivityThread;
+import android.app.admin.DevicePolicyManager.PermissionGrantState;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -52,7 +56,6 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.infra.AndroidFuture;
 import com.android.internal.infra.RemoteStream;
 import com.android.internal.infra.ServiceConnector;
-import com.android.internal.os.BackgroundThread;
 import com.android.internal.util.CollectionUtils;
 
 import libcore.util.EmptyArray;
@@ -65,7 +68,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
@@ -205,15 +207,8 @@ public final class PermissionControllerManager {
             ServiceConnector<IPermissionController> remoteService = sRemoteServices.get(key);
             if (remoteService == null) {
                 Intent intent = new Intent(SERVICE_INTERFACE);
-                String pkgName = context.getPackageManager().getPermissionControllerPackageName();
-                intent.setPackage(pkgName);
+                intent.setPackage(context.getPackageManager().getPermissionControllerPackageName());
                 ResolveInfo serviceInfo = context.getPackageManager().resolveService(intent, 0);
-                if (serviceInfo == null) {
-                    String errorMsg = "No PermissionController package (" + pkgName + ") for user "
-                            + context.getUserId();
-                    Log.wtf(TAG, errorMsg);
-                    throw new IllegalStateException(errorMsg);
-                }
                 remoteService = new ServiceConnector.Impl<IPermissionController>(
                         ActivityThread.currentApplication() /* context */,
                         new Intent(SERVICE_INTERFACE)
@@ -303,7 +298,7 @@ public final class PermissionControllerManager {
                     revokeRuntimePermissionsResult);
             return revokeRuntimePermissionsResult;
         }).whenCompleteAsync((revoked, err) -> {
-            final long token = Binder.clearCallingIdentity();
+            long token = Binder.clearCallingIdentity();
             try {
                 if (err != null) {
                     Log.e(TAG, "Failure when revoking runtime permissions " + revoked, err);
@@ -319,11 +314,11 @@ public final class PermissionControllerManager {
 
     /**
      * Set the runtime permission state from a device admin.
-     * This variant takes into account whether the admin may or may not grant sensors-related
-     * permissions.
      *
      * @param callerPackageName The package name of the admin requesting the change
-     * @param params Information about the permission being granted.
+     * @param packageName Package the permission belongs to
+     * @param permission Permission to change
+     * @param grantState State to set the permission into
      * @param executor Executor to run the {@code callback} on
      * @param callback The callback
      *
@@ -334,27 +329,30 @@ public final class PermissionControllerManager {
             Manifest.permission.ADJUST_RUNTIME_PERMISSIONS_POLICY},
             conditional = true)
     public void setRuntimePermissionGrantStateByDeviceAdmin(@NonNull String callerPackageName,
-            @NonNull AdminPermissionControlParams params,
-            @NonNull @CallbackExecutor Executor executor,
+            @NonNull String packageName, @NonNull String permission,
+            @PermissionGrantState int grantState, @NonNull @CallbackExecutor Executor executor,
             @NonNull Consumer<Boolean> callback) {
         checkStringNotEmpty(callerPackageName);
-        Objects.requireNonNull(executor);
-        Objects.requireNonNull(callback);
-        Objects.requireNonNull(params, "Admin control params must not be null.");
+        checkStringNotEmpty(packageName);
+        checkStringNotEmpty(permission);
+        checkArgument(grantState == PERMISSION_GRANT_STATE_GRANTED
+                || grantState == PERMISSION_GRANT_STATE_DENIED
+                || grantState == PERMISSION_GRANT_STATE_DEFAULT);
+        checkNotNull(executor);
+        checkNotNull(callback);
 
         mRemoteService.postAsync(service -> {
             AndroidFuture<Boolean> setRuntimePermissionGrantStateResult = new AndroidFuture<>();
-            service.setRuntimePermissionGrantStateByDeviceAdminFromParams(
-                    callerPackageName, params,
+            service.setRuntimePermissionGrantStateByDeviceAdmin(
+                    callerPackageName, packageName, permission, grantState,
                     setRuntimePermissionGrantStateResult);
             return setRuntimePermissionGrantStateResult;
         }).whenCompleteAsync((setRuntimePermissionGrantStateResult, err) -> {
-            final long token = Binder.clearCallingIdentity();
+            long token = Binder.clearCallingIdentity();
             try {
                 if (err != null) {
-                    Log.e(TAG,
-                            "Error setting permissions state for device admin "
-                                    + callerPackageName, err);
+                    Log.e(TAG, "Error setting permissions state for device admin " + packageName,
+                            err);
                     callback.accept(false);
                 } else {
                     callback.accept(Boolean.TRUE.equals(setRuntimePermissionGrantStateResult));
@@ -469,7 +467,7 @@ public final class PermissionControllerManager {
                     applyStagedRuntimePermissionBackupResult);
             return applyStagedRuntimePermissionBackupResult;
         }).whenCompleteAsync((applyStagedRuntimePermissionBackupResult, err) -> {
-            final long token = Binder.clearCallingIdentity();
+            long token = Binder.clearCallingIdentity();
             try {
                 if (err != null) {
                     Log.e(TAG, "Error restoring delayed permissions for " + packageName, err);
@@ -491,11 +489,8 @@ public final class PermissionControllerManager {
      */
     public void dump(@NonNull FileDescriptor fd, @Nullable String[] args) {
         try {
-            mRemoteService.postAsync(service -> {
-                return AndroidFuture.runAsync(uncheckExceptions(() -> {
-                    service.asBinder().dump(fd, args);
-                }), BackgroundThread.getExecutor());
-            }).get(REQUEST_TIMEOUT_MILLIS, TimeUnit.MILLISECONDS);
+            mRemoteService.post(service -> service.asBinder().dump(fd, args))
+                    .get(REQUEST_TIMEOUT_MILLIS, TimeUnit.MILLISECONDS);
         } catch (Exception e) {
             Log.e(TAG, "Could not get dump", e);
         }
@@ -615,7 +610,7 @@ public final class PermissionControllerManager {
                 Log.e(TAG, "Error getting permission usages", err);
                 callback.onPermissionUsageResult(Collections.emptyList());
             } else {
-                final long token = Binder.clearCallingIdentity();
+                long token = Binder.clearCallingIdentity();
                 try {
                     callback.onPermissionUsageResult(
                             CollectionUtils.emptyIfNull(getPermissionUsagesResult));
@@ -656,34 +651,6 @@ public final class PermissionControllerManager {
     }
 
     /**
-     * Gets the description of the privileges associated with the given device profiles
-     *
-     * @param profileName Name of the device profile
-     * @param executor Executor on which to invoke the callback
-     * @param callback Callback to receive the result
-     *
-     * @hide
-     */
-    @RequiresPermission(Manifest.permission.MANAGE_COMPANION_DEVICES)
-    public void getPrivilegesDescriptionStringForProfile(
-            @NonNull String profileName,
-            @NonNull @CallbackExecutor Executor executor,
-            @NonNull Consumer<CharSequence> callback) {
-        mRemoteService.postAsync(service -> {
-            AndroidFuture<String> future = new AndroidFuture<>();
-            service.getPrivilegesDescriptionStringForProfile(profileName, future);
-            return future;
-        }).whenCompleteAsync((description, err) -> {
-            if (err != null) {
-                Log.e(TAG, "Error from getPrivilegesDescriptionStringForProfile", err);
-                callback.accept(null);
-            } else {
-                callback.accept(description);
-            }
-        }, executor);
-    }
-
-    /**
      * @see PermissionControllerManager#updateUserSensitiveForApp
      * @hide
      */
@@ -719,71 +686,5 @@ public final class PermissionControllerManager {
     public void notifyOneTimePermissionSessionTimeout(@NonNull String packageName) {
         mRemoteService.run(
                 service -> service.notifyOneTimePermissionSessionTimeout(packageName));
-    }
-
-    /**
-     * Get the platform permissions which belong to a particular permission group.
-     *
-     * @param permissionGroupName The permission group whose permissions are desired
-     * @param executor Executor on which to invoke the callback
-     * @param callback A callback which will receive a list of the platform permissions in the
-     *                 group, or empty if the group is not a valid platform group, or there
-     *                 was an exception.
-     *
-     * @hide
-     */
-    public void getPlatformPermissionsForGroup(@NonNull String permissionGroupName,
-            @NonNull @CallbackExecutor Executor executor,
-            @NonNull Consumer<List<String>> callback) {
-        mRemoteService.postAsync(service -> {
-            AndroidFuture<List<String>> future = new AndroidFuture<>();
-            service.getPlatformPermissionsForGroup(permissionGroupName, future);
-            return future;
-        }).whenCompleteAsync((result, err) -> {
-            final long token = Binder.clearCallingIdentity();
-            try {
-                if (err != null) {
-                    Log.e(TAG, "Failed to get permissions of " + permissionGroupName, err);
-                    callback.accept(new ArrayList<>());
-                } else {
-                    callback.accept(result);
-                }
-            } finally {
-                Binder.restoreCallingIdentity(token);
-            }
-        }, executor);
-    }
-
-    /**
-     * Get the platform group of a particular permission, if the permission is a platform
-     * permission.
-     *
-     * @param permissionName The permission name whose group is desired
-     * @param executor Executor on which to invoke the callback
-     * @param callback A callback which will receive the name of the permission group this
-     *                 permission belongs to, or null if it has no group, is not a platform
-     *                 permission, or there was an exception.
-     *
-     * @hide
-     */
-    public void getGroupOfPlatformPermission(@NonNull String permissionName,
-            @NonNull @CallbackExecutor Executor executor, @NonNull Consumer<String> callback) {
-        mRemoteService.postAsync(service -> {
-            AndroidFuture<String> future = new AndroidFuture<>();
-            service.getGroupOfPlatformPermission(permissionName, future);
-            return future;
-        }).whenCompleteAsync((result, err) -> {
-            final long token = Binder.clearCallingIdentity();
-            try {
-                if (err != null) {
-                    Log.e(TAG, "Failed to get group of " + permissionName, err);
-                    callback.accept(null);
-                } else {
-                    callback.accept(result);
-                }
-            } finally {
-                Binder.restoreCallingIdentity(token);
-            }
-        }, executor);
     }
 }

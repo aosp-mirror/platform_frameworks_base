@@ -70,12 +70,4 @@ public interface ScanCallback {
     /** Frontend signal type. */
     void onSignalTypeReported(@AnalogFrontendSettings.SignalType int signalType);
 
-    /** Frontend modulation reported. */
-    default void onModulationReported(@FrontendStatus.FrontendModulation int modulation) {}
-
-    /** Frontend scan message priority reported. */
-    default void onPriorityReported(boolean isHighPriority) {}
-
-    /** DVBC Frontend Annex reported. */
-    default void onDvbcAnnexReported(@DvbcFrontendSettings.Annex int dvbcAnnex) {}
 }

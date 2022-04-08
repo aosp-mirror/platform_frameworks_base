@@ -27,7 +27,6 @@ import static com.android.server.NetworkManagementSocketTagger.kernelToTag;
 import android.annotation.Nullable;
 import android.net.INetd;
 import android.net.NetworkStats;
-import android.net.UnderlyingNetworkInfo;
 import android.net.util.NetdService;
 import android.os.RemoteException;
 import android.os.StrictMode;
@@ -35,6 +34,7 @@ import android.os.SystemClock;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.net.VpnInfo;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.ProcFileReader;
 
@@ -59,7 +59,7 @@ public class NetworkStatsFactory {
     private static final String TAG = "NetworkStatsFactory";
 
     private static final boolean USE_NATIVE_PARSING = true;
-    private static final boolean VALIDATE_NATIVE_STATS = false;
+    private static final boolean SANITY_CHECK_NATIVE = false;
 
     /** Path to {@code /proc/net/xt_qtaguid/iface_stat_all}. */
     private final File mStatsXtIfaceAll;
@@ -81,7 +81,7 @@ public class NetworkStatsFactory {
     private final Object mPersistentDataLock = new Object();
 
     /** Set containing info about active VPNs and their underlying networks. */
-    private volatile UnderlyingNetworkInfo[] mUnderlyingNetworkInfos = new UnderlyingNetworkInfo[0];
+    private volatile VpnInfo[] mVpnInfos = new VpnInfo[0];
 
     // A persistent snapshot of cumulative stats since device start
     @GuardedBy("mPersistentDataLock")
@@ -116,8 +116,8 @@ public class NetworkStatsFactory {
      *
      * @param vpnArray The snapshot of the currently-running VPNs.
      */
-    public void updateUnderlyingNetworkInfos(UnderlyingNetworkInfo[] vpnArray) {
-        mUnderlyingNetworkInfos = vpnArray.clone();
+    public void updateVpnInfos(VpnInfo[] vpnArray) {
+        mVpnInfos = vpnArray.clone();
     }
 
     /**
@@ -319,7 +319,7 @@ public class NetworkStatsFactory {
         // code that will acquire other locks within the system server. See b/134244752.
         synchronized (mPersistentDataLock) {
             // Take a reference. If this gets swapped out, we still have the old reference.
-            final UnderlyingNetworkInfo[] vpnArray = mUnderlyingNetworkInfos;
+            final VpnInfo[] vpnArray = mVpnInfos;
             // Take a defensive copy. mPersistSnapshot is mutated in some cases below
             final NetworkStats prev = mPersistSnapshot.clone();
 
@@ -347,7 +347,7 @@ public class NetworkStatsFactory {
                             INTERFACES_ALL, TAG_ALL, mUseBpfStats) != 0) {
                         throw new IOException("Failed to parse network stats");
                     }
-                    if (VALIDATE_NATIVE_STATS) {
+                    if (SANITY_CHECK_NATIVE) {
                         final NetworkStats javaStats = javaReadNetworkStatsDetail(mStatsXtUid,
                                 UID_ALL, INTERFACES_ALL, TAG_ALL);
                         assertEquals(javaStats, stats);
@@ -369,8 +369,8 @@ public class NetworkStatsFactory {
     }
 
     @GuardedBy("mPersistentDataLock")
-    private NetworkStats adjustForTunAnd464Xlat(NetworkStats uidDetailStats,
-            NetworkStats previousStats, UnderlyingNetworkInfo[] vpnArray) {
+    private NetworkStats adjustForTunAnd464Xlat(
+            NetworkStats uidDetailStats, NetworkStats previousStats, VpnInfo[] vpnArray) {
         // Calculate delta from last snapshot
         final NetworkStats delta = uidDetailStats.subtract(previousStats);
 
@@ -381,9 +381,8 @@ public class NetworkStatsFactory {
         delta.apply464xlatAdjustments(mStackedIfaces);
 
         // Migrate data usage over a VPN to the TUN network.
-        for (UnderlyingNetworkInfo info : vpnArray) {
-            delta.migrateTun(info.getOwnerUid(), info.getInterface(),
-                    info.getUnderlyingInterfaces());
+        for (VpnInfo info : vpnArray) {
+            delta.migrateTun(info.ownerUid, info.vpnIface, info.underlyingIfaces);
             // Filter out debug entries as that may lead to over counting.
             delta.filterDebugEntries();
         }

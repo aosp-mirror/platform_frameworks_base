@@ -44,7 +44,6 @@ public final class InputConnectionInspector {
             MissingMethodFlags.GET_HANDLER,
             MissingMethodFlags.CLOSE_CONNECTION,
             MissingMethodFlags.COMMIT_CONTENT,
-            MissingMethodFlags.GET_SURROUNDING_TEXT
     })
     public @interface MissingMethodFlags {
         /**
@@ -87,11 +86,6 @@ public final class InputConnectionInspector {
          * {@link android.os.Build.VERSION_CODES#N} MR-1 and later.
          */
         int COMMIT_CONTENT = 1 << 7;
-        /**
-         * {@link InputConnection#getSurroundingText(int, int, int)} is available in
-         * {@link android.os.Build.VERSION_CODES#S} and later.
-         */
-        int GET_SURROUNDING_TEXT = 1 << 8;
     }
 
     private static final Map<Class, Integer> sMissingMethodsMap = Collections.synchronizedMap(
@@ -143,9 +137,6 @@ public final class InputConnectionInspector {
         }
         if (!hasCommitContent(clazz)) {
             flags |= MissingMethodFlags.COMMIT_CONTENT;
-        }
-        if (!hasGetSurroundingText(clazz)) {
-            flags |= MissingMethodFlags.GET_SURROUNDING_TEXT;
         }
         sMissingMethodsMap.put(clazz, flags);
         return flags;
@@ -219,16 +210,6 @@ public final class InputConnectionInspector {
         try {
             final Method method = clazz.getMethod("commitContent", InputContentInfo.class,
                     int.class, Bundle.class);
-            return !Modifier.isAbstract(method.getModifiers());
-        } catch (NoSuchMethodException e) {
-            return false;
-        }
-    }
-
-    private static boolean hasGetSurroundingText(@NonNull final Class clazz) {
-        try {
-            final Method method = clazz.getMethod("getSurroundingText", int.class, int.class,
-                    int.class);
             return !Modifier.isAbstract(method.getModifiers());
         } catch (NoSuchMethodException e) {
             return false;

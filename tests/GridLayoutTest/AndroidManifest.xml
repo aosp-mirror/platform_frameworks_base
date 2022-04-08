@@ -15,96 +15,76 @@
 -->
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-     package="com.android.test.layout">
+          package="com.android.test.layout">
 
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-sdk android:minSdkVersion="11"/>
 
     <application>
-        <activity android:name="Activity0"
-             android:label="Activity0"
-             android:exported="true">
+        <activity android:name="Activity0" android:label="Activity0">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
 
-        <activity android:name="Activity1"
-             android:label="Activity1"
-             android:exported="true">
+        <activity android:name="Activity1" android:label="Activity1">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
 
-        <activity android:name="Activity4"
-             android:label="Activity4"
-             android:exported="true">
+        <activity android:name="Activity4" android:label="Activity4">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
 
-        <activity android:name="Activity5"
-             android:label="Activity5"
-             android:exported="true">
+        <activity android:name="Activity5" android:label="Activity5">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
 
-        <activity android:name="Activity6"
-             android:label="Activity6"
-             android:exported="true">
+        <activity android:name="Activity6" android:label="Activity6">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
 
-        <activity android:name="Activity7"
-             android:label="Activity7"
-             android:exported="true">
+        <activity android:name="Activity7" android:label="Activity7">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
 
-        <activity android:name="AlignmentTest"
-             android:label="AlignmentTest"
-             android:exported="true">
+        <activity android:name="AlignmentTest" android:label="AlignmentTest">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
 
-        <activity android:name="LinearLayoutTest"
-             android:label="LinearLayoutTest"
-             android:exported="true">
+        <activity android:name="LinearLayoutTest" android:label="LinearLayoutTest">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
 
-        <activity android:name="GridLayoutTest"
-             android:label="GridLayoutTest"
-             android:exported="true">
+        <activity android:name="GridLayoutTest" android:label="GridLayoutTest">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
 
-        <activity android:name="LayoutInsetsTest"
-             android:label="LayoutInsetsTest"
-             android:exported="true">
+        <activity android:name="LayoutInsetsTest" android:label="LayoutInsetsTest">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>

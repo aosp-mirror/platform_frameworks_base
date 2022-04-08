@@ -52,7 +52,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.ref.WeakReference;
 import java.util.Arrays;
-import java.util.NoSuchElementException;
 
 public final class RemotePrintDocument {
     private static final String LOG_TAG = "RemotePrintDocument";
@@ -442,12 +441,7 @@ public final class RemotePrintDocument {
             // Keep going - best effort...
         }
 
-        try {
-            mPrintDocumentAdapter.asBinder().unlinkToDeath(mDeathRecipient, 0);
-        } catch (NoSuchElementException e) {
-            Log.w(LOG_TAG, "Error unlinking print document adapter death recipient.");
-            // Keep going - best effort...
-        }
+        mPrintDocumentAdapter.asBinder().unlinkToDeath(mDeathRecipient, 0);
     }
 
     private void scheduleCommand(AsyncCommand command) {

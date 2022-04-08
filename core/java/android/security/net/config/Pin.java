@@ -16,8 +16,6 @@
 
 package android.security.net.config;
 
-import android.annotation.Nullable;
-
 import java.util.Arrays;
 
 /** @hide */
@@ -58,7 +56,7 @@ public final class Pin {
     }
 
     @Override
-    public boolean equals(@Nullable Object obj) {
+    public boolean equals(Object obj) {
         if (this == obj) {
             return true;
         }

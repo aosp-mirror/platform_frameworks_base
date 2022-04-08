@@ -19,6 +19,7 @@ package com.android.settingslib.drawer;
 import static com.android.settingslib.drawer.TileUtils.META_DATA_KEY_ORDER;
 import static com.android.settingslib.drawer.TileUtils.META_DATA_KEY_PROFILE;
 import static com.android.settingslib.drawer.TileUtils.META_DATA_PREFERENCE_ICON;
+import static com.android.settingslib.drawer.TileUtils.META_DATA_PREFERENCE_ICON_URI;
 import static com.android.settingslib.drawer.TileUtils.META_DATA_PREFERENCE_KEYHINT;
 import static com.android.settingslib.drawer.TileUtils.META_DATA_PREFERENCE_SUMMARY;
 import static com.android.settingslib.drawer.TileUtils.META_DATA_PREFERENCE_SUMMARY_URI;
@@ -300,8 +301,16 @@ public abstract class Tile implements Parcelable {
         }
 
         int iconResId = mMetaData.getInt(META_DATA_PREFERENCE_ICON);
-        // Set the icon. Skip the transparent color for backward compatibility since Android S.
-        if (iconResId != 0 && iconResId != android.R.color.transparent) {
+        // Set the icon
+        if (iconResId == 0) {
+            // Only fallback to componentInfo.icon if metadata does not contain ICON_URI.
+            // ICON_URI should be loaded in app UI when need the icon object. Handling IPC at this
+            // level is too complex because we don't have a strong threading contract for this class
+            if (!mMetaData.containsKey(META_DATA_PREFERENCE_ICON_URI)) {
+                iconResId = getComponentIcon(componentInfo);
+            }
+        }
+        if (iconResId != 0) {
             final Icon icon = Icon.createWithResource(componentInfo.packageName, iconResId);
             if (isIconTintable(context)) {
                 final TypedArray a = context.obtainStyledAttributes(new int[]{
@@ -367,12 +376,8 @@ public abstract class Tile implements Parcelable {
      * Check whether tile only has primary profile.
      */
     public boolean isPrimaryProfileOnly() {
-        return isPrimaryProfileOnly(mMetaData);
-    }
-
-    static boolean isPrimaryProfileOnly(Bundle metaData) {
-        String profile = metaData != null
-                ? metaData.getString(META_DATA_KEY_PROFILE) : PROFILE_ALL;
+        String profile = mMetaData != null
+                ? mMetaData.getString(META_DATA_KEY_PROFILE) : PROFILE_ALL;
         profile = (profile != null ? profile : PROFILE_ALL);
         return TextUtils.equals(profile, PROFILE_PRIMARY);
     }

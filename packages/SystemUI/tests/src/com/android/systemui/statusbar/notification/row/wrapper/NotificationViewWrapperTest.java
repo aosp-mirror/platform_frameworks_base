@@ -17,7 +17,6 @@
 package com.android.systemui.statusbar.notification.row.wrapper;
 
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 import android.content.Context;
 import android.testing.AndroidTestingRunner;
@@ -50,7 +49,6 @@ public class NotificationViewWrapperTest extends SysuiTestCase {
     public void setup() throws Exception {
         allowTestableLooperAsMainThread();
         mView = mock(View.class);
-        when(mView.getContext()).thenReturn(mContext);
         NotificationTestHelper helper = new NotificationTestHelper(
                 mContext,
                 mDependency,

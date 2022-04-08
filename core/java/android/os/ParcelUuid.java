@@ -16,7 +16,6 @@
 
 package android.os;
 
-import android.annotation.Nullable;
 import android.compat.annotation.UnsupportedAppUsage;
 
 import java.util.UUID;
@@ -92,7 +91,7 @@ public final class ParcelUuid implements Parcelable {
     *         or {@code false} if not.
     */
    @Override
-   public boolean equals(@Nullable Object object) {
+   public boolean equals(Object object) {
        if (object == null) {
            return false;
        }

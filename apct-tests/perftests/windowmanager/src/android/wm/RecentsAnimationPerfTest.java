@@ -24,8 +24,8 @@ import static org.hamcrest.core.AnyOf.anyOf;
 import static org.hamcrest.core.Is.is;
 
 import android.app.ActivityManager;
+import android.app.ActivityManager.TaskSnapshot;
 import android.app.ActivityTaskManager;
-import android.window.TaskSnapshot;
 import android.app.IActivityTaskManager;
 import android.content.ComponentName;
 import android.content.Context;
@@ -62,8 +62,7 @@ import java.util.concurrent.TimeUnit;
 
 @RunWith(Parameterized.class)
 @LargeTest
-public class RecentsAnimationPerfTest extends WindowManagerPerfTestBase
-        implements ManualBenchmarkState.CustomizedIterationListener {
+public class RecentsAnimationPerfTest extends WindowManagerPerfTestBase {
     private static Intent sRecentsIntent;
 
     @Rule
@@ -96,7 +95,7 @@ public class RecentsAnimationPerfTest extends WindowManagerPerfTestBase
     @BeforeClass
     public static void setUpClass() {
         // Get the permission to invoke startRecentsActivity.
-        getUiAutomation().adoptShellPermissionIdentity();
+        sUiAutomation.adoptShellPermissionIdentity();
 
         final Context context = getInstrumentation().getContext();
         final PackageManager pm = context.getPackageManager();
@@ -129,7 +128,7 @@ public class RecentsAnimationPerfTest extends WindowManagerPerfTestBase
             ActivityManager.resumeAppSwitches();
         } catch (RemoteException ignored) {
         }
-        getUiAutomation().dropShellPermissionIdentity();
+        sUiAutomation.dropShellPermissionIdentity();
     }
 
     @Before
@@ -163,7 +162,6 @@ public class RecentsAnimationPerfTest extends WindowManagerPerfTestBase
                     | StatsReport.FLAG_COEFFICIENT_VAR))
     public void testRecentsAnimation() throws Throwable {
         final ManualBenchmarkState state = mPerfStatusReporter.getBenchmarkState();
-        state.setCustomizedIterations(getProfilingIterations(), this);
         final IActivityTaskManager atm = ActivityTaskManager.getService();
 
         final ArrayList<Pair<String, Boolean>> finishCases = new ArrayList<>();
@@ -226,27 +224,13 @@ public class RecentsAnimationPerfTest extends WindowManagerPerfTestBase
             mMeasuredTimeNs = 0;
 
             final long startTime = SystemClock.elapsedRealtimeNanos();
-            atm.startRecentsActivity(sRecentsIntent, 0 /* eventTime */, anim);
+            atm.startRecentsActivity(sRecentsIntent, null /* unused */, anim);
             final long elapsedTimeNsOfStart = SystemClock.elapsedRealtimeNanos() - startTime;
             mMeasuredTimeNs += elapsedTimeNsOfStart;
             state.addExtraResult("start", elapsedTimeNsOfStart);
 
             // Ensure the animation callback is done.
-            Assume.assumeTrue(recentsSemaphore.tryAcquire(
-                    sIsProfilingMethod() ? 10 * TIME_5_S_IN_NS : TIME_5_S_IN_NS,
-                    TimeUnit.NANOSECONDS));
+            Assume.assumeTrue(recentsSemaphore.tryAcquire(TIME_5_S_IN_NS, TimeUnit.NANOSECONDS));
         }
-    }
-
-    @Override
-    public void onStart(int iteration) {
-        startProfiling(RecentsAnimationPerfTest.class.getSimpleName()
-                + "_interval_" + intervalBetweenOperations
-                + "_MethodTracing_" + iteration + ".trace");
-    }
-
-    @Override
-    public void onFinished(int iteration) {
-        stopProfiling();
     }
 }

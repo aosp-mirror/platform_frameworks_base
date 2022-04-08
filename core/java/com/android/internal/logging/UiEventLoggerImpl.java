@@ -33,11 +33,7 @@ public class UiEventLoggerImpl implements UiEventLogger {
     public void log(UiEventEnum event, int uid, String packageName) {
         final int eventID = event.getId();
         if (eventID > 0) {
-            FrameworkStatsLog.write(FrameworkStatsLog.UI_EVENT_REPORTED,
-                    /* event_id = 1 */ eventID,
-                    /* uid = 2 */ uid,
-                    /* package_name = 3 */ packageName,
-                    /* instance_id = 4 */ 0);
+            FrameworkStatsLog.write(FrameworkStatsLog.UI_EVENT_REPORTED, eventID, uid, packageName);
         }
     }
 
@@ -46,11 +42,8 @@ public class UiEventLoggerImpl implements UiEventLogger {
             InstanceId instance) {
         final int eventID = event.getId();
         if ((eventID > 0)  && (instance != null)) {
-            FrameworkStatsLog.write(FrameworkStatsLog.UI_EVENT_REPORTED,
-                    /* event_id = 1 */ eventID,
-                    /* uid = 2 */ uid,
-                    /* package_name = 3 */ packageName,
-                    /* instance_id = 4 */ instance.getId());
+            FrameworkStatsLog.write(FrameworkStatsLog.UI_EVENT_REPORTED, eventID, uid, packageName,
+                    instance.getId());
         } else {
             log(event, uid, packageName);
         }

@@ -23,6 +23,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.hardware.soundtrigger.SoundTrigger.GenericSoundModel;
 import android.media.AudioAttributes;
 import android.media.AudioFormat;
 import android.media.AudioManager;
@@ -30,7 +31,6 @@ import android.media.AudioRecord;
 import android.media.AudioTrack;
 import android.media.MediaPlayer;
 import android.media.soundtrigger.SoundTriggerDetector;
-import android.media.soundtrigger.SoundTriggerManager;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.IBinder;
@@ -232,8 +232,8 @@ public class SoundTriggerTestService extends Service {
         public AudioTrack captureAudioTrack;
     }
 
-    private SoundTriggerManager.Model createNewSoundModel(ModelInfo modelInfo) {
-        return SoundTriggerManager.Model.create(modelInfo.modelUuid, modelInfo.vendorUuid,
+    private GenericSoundModel createNewSoundModel(ModelInfo modelInfo) {
+        return new GenericSoundModel(modelInfo.modelUuid, modelInfo.vendorUuid,
                 modelInfo.modelData);
     }
 
@@ -246,16 +246,16 @@ public class SoundTriggerTestService extends Service {
 
         postMessage("Loading model: " + modelInfo.name);
 
-        SoundTriggerManager.Model soundModel = createNewSoundModel(modelInfo);
+        GenericSoundModel soundModel = createNewSoundModel(modelInfo);
 
         boolean status = mSoundTriggerUtil.addOrUpdateSoundModel(soundModel);
         if (status) {
             postToast("Successfully loaded " + modelInfo.name + ", UUID="
-                    + soundModel.getModelUuid());
+                    + soundModel.getUuid());
             setModelState(modelInfo, "Loaded");
         } else {
             postErrorToast("Failed to load " + modelInfo.name + ", UUID="
-                    + soundModel.getModelUuid() + "!");
+                    + soundModel.getUuid() + "!");
             setModelState(modelInfo, "Failed to load");
         }
     }
@@ -269,7 +269,7 @@ public class SoundTriggerTestService extends Service {
 
         postMessage("Unloading model: " + modelInfo.name);
 
-        SoundTriggerManager.Model soundModel = mSoundTriggerUtil.getSoundModel(modelUuid);
+        GenericSoundModel soundModel = mSoundTriggerUtil.getSoundModel(modelUuid);
         if (soundModel == null) {
             postErrorToast("Sound model not found for " + modelInfo.name + "!");
             return;
@@ -278,11 +278,11 @@ public class SoundTriggerTestService extends Service {
         boolean status = mSoundTriggerUtil.deleteSoundModel(modelUuid);
         if (status) {
             postToast("Successfully unloaded " + modelInfo.name + ", UUID="
-                    + soundModel.getModelUuid());
+                    + soundModel.getUuid());
             setModelState(modelInfo, "Unloaded");
         } else {
             postErrorToast("Failed to unload " +
-                    modelInfo.name + ", UUID=" + soundModel.getModelUuid() + "!");
+                    modelInfo.name + ", UUID=" + soundModel.getUuid() + "!");
             setModelState(modelInfo, "Failed to unload");
         }
     }
@@ -294,12 +294,12 @@ public class SoundTriggerTestService extends Service {
             return;
         }
         postMessage("Reloading model: " + modelInfo.name);
-        SoundTriggerManager.Model soundModel = mSoundTriggerUtil.getSoundModel(modelUuid);
+        GenericSoundModel soundModel = mSoundTriggerUtil.getSoundModel(modelUuid);
         if (soundModel == null) {
             postErrorToast("Sound model not found for " + modelInfo.name + "!");
             return;
         }
-        SoundTriggerManager.Model updated = createNewSoundModel(modelInfo);
+        GenericSoundModel updated = createNewSoundModel(modelInfo);
         boolean status = mSoundTriggerUtil.addOrUpdateSoundModel(updated);
         if (status) {
             postToast("Successfully reloaded " + modelInfo.name + ", UUID="

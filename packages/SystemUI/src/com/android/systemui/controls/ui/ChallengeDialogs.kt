@@ -26,9 +26,7 @@ import android.service.controls.actions.FloatAction
 import android.service.controls.actions.ModeAction
 import android.text.InputType
 import android.util.Log
-import android.view.LayoutInflater
 import android.view.WindowManager
-import android.view.inputmethod.InputMethodManager
 import android.widget.CheckBox
 import android.widget.EditText
 
@@ -73,21 +71,11 @@ object ChallengeDialogs {
                 R.string.controls_pin_instructions
             )
         }
-        return object : AlertDialog(cvh.context, STYLE) {
-            override fun dismiss() {
-                window?.decorView?.let {
-                    // workaround for b/159309083
-                    it.context.getSystemService(InputMethodManager::class.java)
-                            ?.hideSoftInputFromWindow(it.windowToken, 0)
-                }
-                super.dismiss()
-            }
-        }.apply {
+        val builder = AlertDialog.Builder(cvh.context, STYLE).apply {
             setTitle(title)
-            setView(LayoutInflater.from(context).inflate(R.layout.controls_dialog_pin, null))
-            setButton(
-                DialogInterface.BUTTON_POSITIVE,
-                context.getText(android.R.string.ok),
+            setView(R.layout.controls_dialog_pin)
+            setPositiveButton(
+                android.R.string.ok,
                 DialogInterface.OnClickListener { dialog, _ ->
                     if (dialog is Dialog) {
                         dialog.requireViewById<EditText>(R.id.controls_pin_input)
@@ -97,15 +85,15 @@ object ChallengeDialogs {
                         dialog.dismiss()
                     }
             })
-            setButton(
-                DialogInterface.BUTTON_NEGATIVE,
-                context.getText(android.R.string.cancel),
+            setNegativeButton(
+                android.R.string.cancel,
                 DialogInterface.OnClickListener { dialog, _ ->
                     onCancel.invoke()
                     dialog.cancel()
                 }
             )
-
+        }
+        return builder.create().apply {
             getWindow().apply {
                 setType(WINDOW_TYPE)
                 setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE)

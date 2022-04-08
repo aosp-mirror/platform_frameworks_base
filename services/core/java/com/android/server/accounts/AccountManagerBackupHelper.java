@@ -23,21 +23,25 @@ import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.Signature;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.UserHandle;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.PackageUtils;
 import android.util.Pair;
 import android.util.Slog;
-import android.util.TypedXmlPullParser;
-import android.util.TypedXmlSerializer;
 import android.util.Xml;
-
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.content.PackageMonitor;
+import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.XmlUtils;
+import com.android.server.accounts.AccountsDb.DeDatabaseHelper;
 
+import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
+import org.xmlpull.v1.XmlSerializer;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -159,7 +163,7 @@ public final class AccountManagerBackupHelper {
                 }
                 try {
                     ByteArrayOutputStream dataStream = new ByteArrayOutputStream();
-                    final TypedXmlSerializer serializer = Xml.newFastSerializer();
+                    final XmlSerializer serializer = new FastXmlSerializer();
                     serializer.setOutput(dataStream, StandardCharsets.UTF_8.name());
                     serializer.startDocument(null, true);
                     serializer.startTag(null, TAG_PERMISSIONS);
@@ -212,7 +216,7 @@ public final class AccountManagerBackupHelper {
     public void restoreAccountAccessPermissions(byte[] data, int userId) {
         try {
             ByteArrayInputStream dataStream = new ByteArrayInputStream(data);
-            TypedXmlPullParser parser = Xml.newFastPullParser();
+            XmlPullParser parser = Xml.newPullParser();
             parser.setInput(dataStream, StandardCharsets.UTF_8.name());
             PackageManager packageManager = mAccountManagerService.mContext.getPackageManager();
 

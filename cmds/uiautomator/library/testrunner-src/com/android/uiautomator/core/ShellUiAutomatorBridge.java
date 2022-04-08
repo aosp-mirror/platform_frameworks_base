@@ -20,7 +20,6 @@ import android.app.ActivityManager;
 import android.app.ContentProviderHolder;
 import android.app.IActivityManager;
 import android.app.UiAutomation;
-import android.content.AttributionSource;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.IContentProvider;
@@ -29,7 +28,6 @@ import android.hardware.display.DisplayManagerGlobal;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.IPowerManager;
-import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
@@ -69,8 +67,7 @@ public class ShellUiAutomatorBridge extends UiAutomatorBridge {
                     throw new IllegalStateException("Could not find provider: " + providerName);
                 }
                 provider = holder.provider;
-                cursor = provider.query(new AttributionSource(Binder.getCallingUid(),
-                        resolveCallingPackage(), null), Settings.Secure.CONTENT_URI,
+                cursor = provider.query(null, null, Settings.Secure.CONTENT_URI,
                         new String[] {
                             Settings.Secure.VALUE
                         },
@@ -125,19 +122,5 @@ public class ShellUiAutomatorBridge extends UiAutomatorBridge {
             throw new RuntimeException(e);
         }
         return ret;
-    }
-
-    private static String resolveCallingPackage() {
-        switch (Binder.getCallingUid()) {
-            case Process.ROOT_UID: {
-                return "root";
-            }
-            case Process.SHELL_UID: {
-                return "com.android.shell";
-            }
-            default: {
-                return null;
-            }
-        }
     }
 }

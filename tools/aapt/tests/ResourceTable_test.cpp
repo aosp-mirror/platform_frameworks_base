@@ -19,6 +19,7 @@
 
 #include "ConfigDescription.h"
 #include "ResourceTable.h"
+#include "TestHelper.h"
 
 using android::String16;
 

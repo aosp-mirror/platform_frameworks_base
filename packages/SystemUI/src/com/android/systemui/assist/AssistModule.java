@@ -21,12 +21,17 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.SystemClock;
 
+import androidx.annotation.Nullable;
 import androidx.slice.Clock;
 
 import com.android.internal.app.AssistUtils;
-import com.android.systemui.dagger.SysUISingleton;
+import com.android.systemui.statusbar.NavigationBarController;
+
+import java.util.EnumMap;
+import java.util.Map;
 
 import javax.inject.Named;
+import javax.inject.Singleton;
 
 import dagger.Module;
 import dagger.Provides;
@@ -39,7 +44,7 @@ public abstract class AssistModule {
     static final String UPTIME_NAME = "uptime";
 
     @Provides
-    @SysUISingleton
+    @Singleton
     @Named(ASSIST_HANDLE_THREAD_NAME)
     static Handler provideBackgroundHandler() {
         final HandlerThread backgroundHandlerThread =
@@ -49,13 +54,35 @@ public abstract class AssistModule {
     }
 
     @Provides
-    @SysUISingleton
+    @Singleton
+    static Map<AssistHandleBehavior, AssistHandleBehaviorController.BehaviorController>
+            provideAssistHandleBehaviorControllerMap(
+                    AssistHandleOffBehavior offBehavior,
+                    AssistHandleLikeHomeBehavior likeHomeBehavior,
+                    AssistHandleReminderExpBehavior reminderExpBehavior) {
+        Map<AssistHandleBehavior, AssistHandleBehaviorController.BehaviorController> map =
+                new EnumMap<>(AssistHandleBehavior.class);
+        map.put(AssistHandleBehavior.OFF, offBehavior);
+        map.put(AssistHandleBehavior.LIKE_HOME, likeHomeBehavior);
+        map.put(AssistHandleBehavior.REMINDER_EXP, reminderExpBehavior);
+        return map;
+    }
+
+    @Provides
+    @Nullable
+    static AssistHandleViewController provideAssistHandleViewController(
+            NavigationBarController navigationBarController) {
+        return navigationBarController.getAssistHandlerViewController();
+    }
+
+    @Provides
+    @Singleton
     static AssistUtils provideAssistUtils(Context context) {
         return new AssistUtils(context);
     }
 
     @Provides
-    @SysUISingleton
+    @Singleton
     @Named(UPTIME_NAME)
     static Clock provideSystemClock() {
         return SystemClock::uptimeMillis;

@@ -33,9 +33,4 @@ public class FakeConfigurationController
     @Override
     public void notifyThemeChanged() {
     }
-
-    @Override
-    public boolean isLayoutRtl() {
-        return false;
-    }
 }

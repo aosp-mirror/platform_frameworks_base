@@ -3,8 +3,6 @@ package com.android.systemui.statusbar.policy;
 import static android.telephony.AccessNetworkConstants.TRANSPORT_TYPE_WWAN;
 import static android.telephony.NetworkRegistrationInfo.DOMAIN_PS;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -12,17 +10,13 @@ import static org.mockito.Mockito.when;
 import android.net.NetworkCapabilities;
 import android.os.Looper;
 import android.telephony.NetworkRegistrationInfo;
-import android.telephony.ServiceState;
 import android.telephony.TelephonyManager;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
 
-import com.android.settingslib.mobile.TelephonyIcons;
 import com.android.settingslib.net.DataUsageController;
-import com.android.systemui.dump.DumpManager;
-import com.android.systemui.util.CarrierConfigTracker;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -108,13 +102,11 @@ public class NetworkControllerDataTest extends NetworkControllerBaseTest {
     public void test4gDataIcon() {
         // Switch to showing 4g icon and re-initialize the NetworkController.
         mConfig.show4gForLte = true;
-        mNetworkController = new NetworkControllerImpl(mContext, mMockCm, mMockTm,
-                mTelephonyListenerManager, mMockWm,
-                mMockNsm, mMockSm, mConfig, Looper.getMainLooper(), mFakeExecutor, mCallbackHandler,
+        mNetworkController = new NetworkControllerImpl(mContext, mMockCm, mMockTm, mMockWm,
+                mMockNsm, mMockSm, mConfig, Looper.getMainLooper(), mCallbackHandler,
                 mock(AccessPointControllerImpl.class),
                 mock(DataUsageController.class), mMockSubDefaults,
-                mock(DeviceProvisionedController.class), mMockBd, mDemoModeController,
-                mock(CarrierConfigTracker.class), mFeatureFlags, mock(DumpManager.class));
+                mock(DeviceProvisionedController.class), mMockBd);
         setupNetworkController();
 
         setupDefaultSignal();
@@ -130,13 +122,12 @@ public class NetworkControllerDataTest extends NetworkControllerBaseTest {
         when(mMockTm.isDataConnectionAllowed()).thenReturn(false);
         setupDefaultSignal();
         updateDataConnectionState(TelephonyManager.DATA_CONNECTED, 0);
-        setConnectivityViaCallbackInNetworkController(
-                NetworkCapabilities.TRANSPORT_CELLULAR, false, false, null);
+        setConnectivityViaBroadcast(NetworkCapabilities.TRANSPORT_CELLULAR, false, false);
 
         // Verify that a SignalDrawable with a cut out is used to display data disabled.
         verifyLastMobileDataIndicators(true, DEFAULT_SIGNAL_STRENGTH, 0,
                 true, DEFAULT_QS_SIGNAL_STRENGTH, 0, false,
-                false, true, NO_DATA_STRING, NO_DATA_STRING, false);
+                false, true, NO_DATA_STRING, NO_DATA_STRING);
     }
 
     @Test
@@ -145,13 +136,12 @@ public class NetworkControllerDataTest extends NetworkControllerBaseTest {
         when(mMockTm.isDataConnectionAllowed()).thenReturn(false);
         setupDefaultSignal();
         updateDataConnectionState(TelephonyManager.DATA_DISCONNECTED, 0);
-        setConnectivityViaCallbackInNetworkController(
-                NetworkCapabilities.TRANSPORT_CELLULAR, false, false, null);
+        setConnectivityViaBroadcast(NetworkCapabilities.TRANSPORT_CELLULAR, false, false);
 
         // Verify that a SignalDrawable with a cut out is used to display data disabled.
         verifyLastMobileDataIndicators(true, DEFAULT_SIGNAL_STRENGTH, 0,
                 true, DEFAULT_QS_SIGNAL_STRENGTH, 0, false,
-                false, true, NO_DATA_STRING, NO_DATA_STRING, false);
+                false, true, NO_DATA_STRING, NO_DATA_STRING);
     }
 
     @Test
@@ -161,13 +151,12 @@ public class NetworkControllerDataTest extends NetworkControllerBaseTest {
         setupDefaultSignal();
         setDefaultSubId(mSubId + 1);
         updateDataConnectionState(TelephonyManager.DATA_CONNECTED, 0);
-        setConnectivityViaCallbackInNetworkController(
-                NetworkCapabilities.TRANSPORT_CELLULAR, false, false, null);
+        setConnectivityViaBroadcast(NetworkCapabilities.TRANSPORT_CELLULAR, false, false);
 
         // Verify that a SignalDrawable with a cut out is used to display data disabled.
         verifyLastMobileDataIndicators(true, DEFAULT_SIGNAL_STRENGTH, 0,
                 true, DEFAULT_QS_SIGNAL_STRENGTH, 0, false,
-                false, false, NOT_DEFAULT_DATA_STRING, NOT_DEFAULT_DATA_STRING, false);
+                false, false, NOT_DEFAULT_DATA_STRING, NOT_DEFAULT_DATA_STRING);
     }
 
     @Test
@@ -177,13 +166,12 @@ public class NetworkControllerDataTest extends NetworkControllerBaseTest {
         setupDefaultSignal();
         setDefaultSubId(mSubId + 1);
         updateDataConnectionState(TelephonyManager.DATA_DISCONNECTED, 0);
-        setConnectivityViaCallbackInNetworkController(
-                NetworkCapabilities.TRANSPORT_CELLULAR, false, false, null);
+        setConnectivityViaBroadcast(NetworkCapabilities.TRANSPORT_CELLULAR, false, false);
 
         // Verify that a SignalDrawable with a cut out is used to display data disabled.
         verifyLastMobileDataIndicators(true, DEFAULT_SIGNAL_STRENGTH, 0,
                 true, DEFAULT_QS_SIGNAL_STRENGTH, 0, false,
-                false, false, NOT_DEFAULT_DATA_STRING, NOT_DEFAULT_DATA_STRING, false);
+                false, false, NOT_DEFAULT_DATA_STRING, NOT_DEFAULT_DATA_STRING);
     }
 
     @Test
@@ -192,15 +180,13 @@ public class NetworkControllerDataTest extends NetworkControllerBaseTest {
         when(mMockTm.isDataConnectionAllowed()).thenReturn(false);
         setupDefaultSignal();
         updateDataConnectionState(TelephonyManager.DATA_DISCONNECTED, 0);
-        setConnectivityViaCallbackInNetworkController(
-                NetworkCapabilities.TRANSPORT_CELLULAR, false, false, null);
+        setConnectivityViaBroadcast(NetworkCapabilities.TRANSPORT_CELLULAR, false, false);
         when(mMockProvisionController.isUserSetup(anyInt())).thenReturn(false);
         mUserCallback.onUserSetupChanged();
         TestableLooper.get(this).processAllMessages();
 
         // Don't show the X until the device is setup.
-        verifyLastMobileDataIndicators(true, DEFAULT_SIGNAL_STRENGTH, 0,
-                true, DEFAULT_QS_SIGNAL_STRENGTH, 0, false, false, false, null, null, false);
+        verifyDataIndicators(0);
     }
 
     @Test
@@ -215,10 +201,7 @@ public class NetworkControllerDataTest extends NetworkControllerBaseTest {
         mConfig.alwaysShowDataRatIcon = true;
         mNetworkController.handleConfigurationChanged();
 
-        setConnectivityViaCallbackInNetworkController(
-                NetworkCapabilities.TRANSPORT_CELLULAR, false, false, null);
-        verifyLastMobileDataIndicators(true, DEFAULT_SIGNAL_STRENGTH, TelephonyIcons.ICON_G,
-                true, DEFAULT_QS_SIGNAL_STRENGTH, 0, false, false, false, null, null, false);
+        verifyDataIndicators(TelephonyIcons.ICON_G);
     }
 
     @Test
@@ -274,25 +257,6 @@ public class NetworkControllerDataTest extends NetworkControllerBaseTest {
         when(mServiceState.getOperatorAlphaShort()).thenReturn(newDataName);
         updateServiceState();
         assertDataNetworkNameEquals(newDataName);
-    }
-
-    @Test
-    public void testIsDataInService_true() {
-        setupDefaultSignal();
-        assertTrue(mNetworkController.isMobileDataNetworkInService());
-    }
-
-    @Test
-    public void testIsDataInService_noSignal_false() {
-        assertFalse(mNetworkController.isMobileDataNetworkInService());
-    }
-
-    @Test
-    public void testIsDataInService_notInService_false() {
-        setupDefaultSignal();
-        setVoiceRegState(ServiceState.STATE_OUT_OF_SERVICE);
-        setDataRegState(ServiceState.STATE_OUT_OF_SERVICE);
-        assertFalse(mNetworkController.isMobileDataNetworkInService());
     }
 
     private void testDataActivity(int direction, boolean in, boolean out) {

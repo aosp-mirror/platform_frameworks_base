@@ -77,8 +77,8 @@ class AnimationContext {
     PREVENT_COPY_AND_ASSIGN(AnimationContext);
 
 public:
-    explicit AnimationContext(renderthread::TimeLord& clock);
-    virtual ~AnimationContext();
+    ANDROID_API explicit AnimationContext(renderthread::TimeLord& clock);
+    ANDROID_API virtual ~AnimationContext();
 
     nsecs_t frameTimeMs() { return mFrameTimeMs; }
     bool hasAnimations() {
@@ -87,22 +87,22 @@ public:
 
     // Will always add to the next frame list, which is swapped when
     // startFrame() is called
-    void addAnimatingRenderNode(RenderNode& node);
+    ANDROID_API void addAnimatingRenderNode(RenderNode& node);
 
     // Marks the start of a frame, which will update the frame time and move all
     // next frame animations into the current frame
-    virtual void startFrame(TreeInfo::TraversalMode mode);
+    ANDROID_API virtual void startFrame(TreeInfo::TraversalMode mode);
 
     // Runs any animations still left in mCurrentFrameAnimations that were not run
     // as part of the standard RenderNode:prepareTree pass.
-    virtual void runRemainingAnimations(TreeInfo& info);
+    ANDROID_API virtual void runRemainingAnimations(TreeInfo& info);
 
-    virtual void callOnFinished(BaseRenderNodeAnimator* animator,
+    ANDROID_API virtual void callOnFinished(BaseRenderNodeAnimator* animator,
                                             AnimationListener* listener);
 
-    virtual void destroy();
+    ANDROID_API virtual void destroy();
 
-    virtual void pauseAnimators() {}
+    ANDROID_API virtual void pauseAnimators() {}
 
 private:
     friend class AnimationHandle;

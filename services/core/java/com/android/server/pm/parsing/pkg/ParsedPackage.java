@@ -105,9 +105,6 @@ public interface ParsedPackage extends AndroidPackage {
 
     ParsedPackage setSecondaryNativeLibraryDir(String secondaryNativeLibraryDir);
 
-    /**
-     * This is an appId, the uid if the userId is == USER_SYSTEM
-     */
     ParsedPackage setUid(int uid);
 
     ParsedPackage setVersionCode(int versionCode);

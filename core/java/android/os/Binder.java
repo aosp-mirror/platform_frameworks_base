@@ -25,8 +25,6 @@ import android.util.ExceptionUtils;
 import android.util.Log;
 import android.util.Slog;
 
-import com.android.internal.os.BinderCallHeavyHitterWatcher;
-import com.android.internal.os.BinderCallHeavyHitterWatcher.BinderCallHeavyHitterListener;
 import com.android.internal.os.BinderInternal;
 import com.android.internal.os.BinderInternal.CallSession;
 import com.android.internal.util.FastPrintWriter;
@@ -129,10 +127,6 @@ public class Binder implements IBinder {
                 Binder.class.getClassLoader(), getNativeFinalizer(), NATIVE_ALLOCATION_SIZE);
     }
 
-    /**
-     * The watcher to monitor the heavy hitter from incoming transactions
-     */
-    private static volatile BinderCallHeavyHitterWatcher sHeavyHitterWatcher = null;
 
     // Transaction tracking code.
 
@@ -290,8 +284,6 @@ public class Binder implements IBinder {
      * system services to determine its identity and check permissions.
      * If the current thread is not currently executing an incoming transaction,
      * then its own pid is returned.
-     *
-     * Warning: oneway transactions do not receive PID.
      */
     @CriticalNative
     public static final native int getCallingPid();
@@ -371,7 +363,6 @@ public class Binder implements IBinder {
      *
      * @see #clearCallingIdentity
      */
-    @CriticalNative
     public static final native void restoreCallingIdentity(long token);
 
     /**
@@ -384,8 +375,8 @@ public class Binder implements IBinder {
      * @hide
      */
     public static final void withCleanCallingIdentity(@NonNull ThrowingRunnable action) {
+        long callingIdentity = clearCallingIdentity();
         Throwable throwableToPropagate = null;
-        final long callingIdentity = clearCallingIdentity();
         try {
             action.runOrThrow();
         } catch (Throwable throwable) {
@@ -408,8 +399,8 @@ public class Binder implements IBinder {
      * @hide
      */
     public static final <T> T withCleanCallingIdentity(@NonNull ThrowingSupplier<T> action) {
+        long callingIdentity = clearCallingIdentity();
         Throwable throwableToPropagate = null;
-        final long callingIdentity = clearCallingIdentity();
         try {
             return action.getOrThrow();
         } catch (Throwable throwable) {
@@ -536,28 +527,16 @@ public class Binder implements IBinder {
 
     /**
      * Mark as being built with VINTF-level stability promise. This API should
-     * only ever be invoked by generated code from the aidl compiler. It means
-     * that the interface represented by this binder is guaranteed to be kept
-     * stable for several years, according to the VINTF compatibility lifecycle,
-     * and the build system also keeps snapshots of these APIs and invokes the
-     * AIDL compiler to make sure that these snapshots are backwards compatible.
-     * Instead of using this API, use the @VintfStability annotation on your
-     * AIDL interface.
+     * only ever be invoked by the build system. It means that the interface
+     * represented by this binder is guaranteed to be kept stable for several
+     * years, and the build system also keeps snapshots of these APIs and
+     * invokes the AIDL compiler to make sure that these snapshots are
+     * backwards compatible. Instead of using this API, use an @VintfStability
+     * interface.
      *
      * @hide
      */
-    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     public final native void markVintfStability();
-
-    /**
-     * Use a VINTF-stability binder w/o VINTF requirements. Should be called
-     * on a binder before it is sent out of process.
-     *
-     * This must be called before the object is sent to another process.
-     *
-     * @hide
-     */
-    public final native void forceDowngradeToSystemStability();
 
     /**
      * Flush any Binder commands pending in the current thread to the kernel
@@ -1105,6 +1084,7 @@ public class Binder implements IBinder {
     }
 
     private static native long getNativeBBinderHolder();
+    private static native long getFinalizer();
 
     /**
      * By default, we use the calling uid since we can always trust it.
@@ -1162,11 +1142,6 @@ public class Binder implements IBinder {
         // If the call was FLAG_ONEWAY then these exceptions disappear into the ether.
         final boolean tracingEnabled = Binder.isTracingEnabled();
         try {
-            final BinderCallHeavyHitterWatcher heavyHitterWatcher = sHeavyHitterWatcher;
-            if (heavyHitterWatcher != null) {
-                // Notify the heavy hitter watcher, if it's enabled
-                heavyHitterWatcher.onTransaction(callingUid, getClass(), code);
-            }
             if (tracingEnabled) {
                 final String transactionName = getTransactionName(code);
                 Trace.traceBegin(Trace.TRACE_TAG_ALWAYS, getClass().getName() + ":"
@@ -1226,34 +1201,5 @@ public class Binder implements IBinder {
         // way, strict mode begone!
         StrictMode.clearGatheredViolations();
         return res;
-    }
-
-    /**
-     * Set the configuration for the heavy hitter watcher.
-     *
-     * @hide
-     */
-    public static synchronized void setHeavyHitterWatcherConfig(final boolean enabled,
-            final int batchSize, final float threshold,
-            @Nullable final BinderCallHeavyHitterListener listener) {
-        Slog.i(TAG, "Setting heavy hitter watcher config: "
-                + enabled + ", " + batchSize + ", " + threshold);
-        BinderCallHeavyHitterWatcher watcher = sHeavyHitterWatcher;
-        if (enabled) {
-            if (listener == null) {
-                throw new IllegalArgumentException();
-            }
-            boolean newWatcher = false;
-            if (watcher == null) {
-                watcher = BinderCallHeavyHitterWatcher.getInstance();
-                newWatcher = true;
-            }
-            watcher.setConfig(true, batchSize, threshold, listener);
-            if (newWatcher) {
-                sHeavyHitterWatcher = watcher;
-            }
-        } else if (watcher != null) {
-            watcher.setConfig(false, 0, 0.0f, null);
-        }
     }
 }

@@ -1,5 +1,0 @@
-include /services/core/java/com/android/server/pm/OWNERS
-
-dariofreni@google.com
-ioffe@google.com
-olilan@google.com

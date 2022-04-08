@@ -50,7 +50,6 @@ import org.mockito.Spy;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
-@Ignore
 public class EglHelperTest extends SysuiTestCase {
 
     @Spy

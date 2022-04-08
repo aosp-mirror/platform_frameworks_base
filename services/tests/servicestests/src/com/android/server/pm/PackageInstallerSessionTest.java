@@ -27,13 +27,12 @@ import android.content.pm.PackageInstaller;
 import android.platform.test.annotations.Presubmit;
 import android.util.AtomicFile;
 import android.util.Slog;
-import android.util.TypedXmlPullParser;
-import android.util.TypedXmlSerializer;
 import android.util.Xml;
 
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.os.BackgroundThread;
+import com.android.internal.util.FastXmlSerializer;
 
 import libcore.io.IoUtils;
 
@@ -44,13 +43,16 @@ import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
+import org.xmlpull.v1.XmlSerializer;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -157,13 +159,12 @@ public class PackageInstallerSessionTest {
             params.isMultiPackage = true;
         }
         InstallSource installSource = InstallSource.create("testInstallInitiator",
-                "testInstallOriginator", "testInstaller", "testAttributionTag");
+                "testInstallOriginator", "testInstaller");
         return new PackageInstallerSession(
                 /* callback */ null,
                 /* context */null,
                 /* pm */ mMockPackageManagerInternal,
                 /* sessionProvider */ null,
-                /* silentUpdatePolicy */ null,
                 /* looper */ BackgroundThread.getHandler().getLooper(),
                 /* stagingManager */ null,
                 /* sessionId */ sessionId,
@@ -172,11 +173,9 @@ public class PackageInstallerSessionTest {
                 /* installSource */ installSource,
                 /* sessionParams */ params,
                 /* createdMillis */ 0L,
-                /* committedMillis */ 0L,
                 /* stageDir */ mTmpDir,
                 /* stageCid */ null,
                 /* files */ null,
-                /* checksums */ null,
                 /* prepared */ true,
                 /* committed */ true,
                 /* destroyed */ staged ? true : false,
@@ -200,7 +199,8 @@ public class PackageInstallerSessionTest {
         try {
             fos = mSessionsFile.startWrite();
 
-            TypedXmlSerializer out = Xml.resolveSerializer(fos);
+            XmlSerializer out = new FastXmlSerializer();
+            out.setOutput(fos, StandardCharsets.UTF_8.name());
             out.startDocument(null, true);
             out.startTag(null, TAG_SESSIONS);
             for (PackageInstallerSession session : sessions) {
@@ -226,7 +226,8 @@ public class PackageInstallerSessionTest {
         FileInputStream fis = null;
         try {
             fis = mSessionsFile.openRead();
-            TypedXmlPullParser in = Xml.resolvePullParser(fis);
+            final XmlPullParser in = Xml.newPullParser();
+            in.setInput(fis, StandardCharsets.UTF_8.name());
 
             int type;
             while ((type = in.next()) != END_DOCUMENT) {
@@ -238,7 +239,7 @@ public class PackageInstallerSessionTest {
                             session = PackageInstallerSession.readFromXml(in, null,
                                     null, mMockPackageManagerInternal,
                                     BackgroundThread.getHandler().getLooper(), null,
-                                    mTmpDir, null, null);
+                                    mTmpDir, null);
                             ret.add(session);
                         } catch (Exception e) {
                             Slog.e("PackageInstallerSessionTest", "Exception ", e);

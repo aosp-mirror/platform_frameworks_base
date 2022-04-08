@@ -59,9 +59,8 @@ class ClassMember {
 template <typename T>
 class PrimitiveMember : public ClassMember {
  public:
-  PrimitiveMember(const android::StringPiece& name, const T& val, bool staged_api = false)
-      : name_(name.to_string()), val_(val), staged_api_(staged_api) {
-  }
+  PrimitiveMember(const android::StringPiece& name, const T& val)
+      : name_(name.to_string()), val_(val) {}
 
   bool empty() const override {
     return false;
@@ -71,8 +70,8 @@ class PrimitiveMember : public ClassMember {
     return name_;
   }
 
-  void Print(bool final, text::Printer* printer,
-             bool strip_api_annotations = false) const override {
+  void Print(bool final, text::Printer* printer, bool strip_api_annotations = false)
+      const override {
     using std::to_string;
 
     ClassMember::Print(final, printer, strip_api_annotations);
@@ -81,15 +80,7 @@ class PrimitiveMember : public ClassMember {
     if (final) {
       printer->Print("final ");
     }
-    printer->Print("int ").Print(name_);
-    if (staged_api_) {
-      // Prevent references to staged apis from being inline by setting their value out-of-line.
-      printer->Print("; static { ").Print(name_);
-    }
-    printer->Print("=").Print(to_string(val_)).Print(";");
-    if (staged_api_) {
-      printer->Print(" }");
-    }
+    printer->Print("int ").Print(name_).Print("=").Print(to_string(val_)).Print(";");
   }
 
  private:
@@ -97,16 +88,14 @@ class PrimitiveMember : public ClassMember {
 
   std::string name_;
   T val_;
-  bool staged_api_;
 };
 
 // Specialization for strings so they get the right type and are quoted with "".
 template <>
 class PrimitiveMember<std::string> : public ClassMember {
  public:
-  PrimitiveMember(const android::StringPiece& name, const std::string& val, bool staged_api = false)
-      : name_(name.to_string()), val_(val) {
-  }
+  PrimitiveMember(const android::StringPiece& name, const std::string& val)
+      : name_(name.to_string()), val_(val) {}
 
   bool empty() const override {
     return false;
@@ -138,13 +127,13 @@ using IntMember = PrimitiveMember<uint32_t>;
 using ResourceMember = PrimitiveMember<ResourceId>;
 using StringMember = PrimitiveMember<std::string>;
 
-template <typename T, typename StringConverter>
+template <typename T>
 class PrimitiveArrayMember : public ClassMember {
  public:
   explicit PrimitiveArrayMember(const android::StringPiece& name) : name_(name.to_string()) {}
 
   void AddElement(const T& val) {
-    elements_.emplace_back(val);
+    elements_.push_back(val);
   }
 
   bool empty() const override {
@@ -169,7 +158,7 @@ class PrimitiveArrayMember : public ClassMember {
         printer->Println();
       }
 
-      printer->Print(StringConverter::ToString(*current));
+      printer->Print(to_string(*current));
       if (std::distance(current, end) > 1) {
         printer->Print(", ");
       }
@@ -186,24 +175,7 @@ class PrimitiveArrayMember : public ClassMember {
   std::vector<T> elements_;
 };
 
-struct FieldReference {
-  explicit FieldReference(std::string reference) : ref(std::move(reference)) {
-  }
-  std::string ref;
-};
-
-struct ResourceArrayMemberStringConverter {
-  static std::string ToString(const std::variant<ResourceId, FieldReference>& ref) {
-    if (auto id = std::get_if<ResourceId>(&ref)) {
-      return to_string(*id);
-    } else {
-      return std::get<FieldReference>(ref).ref;
-    }
-  }
-};
-
-using ResourceArrayMember = PrimitiveArrayMember<std::variant<ResourceId, FieldReference>,
-                                                 ResourceArrayMemberStringConverter>;
+using ResourceArrayMember = PrimitiveArrayMember<ResourceId>;
 
 // Represents a method in a class.
 class MethodDefinition : public ClassMember {

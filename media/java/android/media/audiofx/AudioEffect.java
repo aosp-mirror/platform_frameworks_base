@@ -23,9 +23,8 @@ import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
+import android.app.ActivityThread;
 import android.compat.annotation.UnsupportedAppUsage;
-import android.content.AttributionSource;
-import android.content.AttributionSource.ScopedParcelState;
 import android.media.AudioDeviceAttributes;
 import android.media.AudioDeviceInfo;
 import android.media.AudioSystem;
@@ -54,7 +53,6 @@ import java.util.UUID;
  *   <li> {@link android.media.audiofx.PresetReverb}</li>
  *   <li> {@link android.media.audiofx.EnvironmentalReverb}</li>
  *   <li> {@link android.media.audiofx.DynamicsProcessing}</li>
- *   <li> {@link android.media.audiofx.HapticGenerator}</li>
  * </ul>
  * <p>To apply the audio effect to a specific AudioTrack or MediaPlayer instance,
  * the application must specify the audio session ID of that instance when creating the AudioEffect.
@@ -148,14 +146,6 @@ public class AudioEffect {
               .fromString("7261676f-6d75-7369-6364-28e2fd3ac39e");
 
     /**
-     * UUID for Haptic Generator.
-     */
-    // This is taken from system/media/audio/include/system/audio_effects/effect_hapticgenerator.h
-    @NonNull
-    public static final UUID EFFECT_TYPE_HAPTIC_GENERATOR = UUID
-              .fromString("1411e6d6-aecd-4021-a1cf-a6aceb0d71e5");
-
-    /**
      * Null effect UUID. See {@link AudioEffect(UUID, UUID, int, int)} for use.
      * @hide
      */
@@ -235,8 +225,7 @@ public class AudioEffect {
      * {@link AudioEffect#EFFECT_TYPE_BASS_BOOST}, {@link AudioEffect#EFFECT_TYPE_ENV_REVERB},
      * {@link AudioEffect#EFFECT_TYPE_EQUALIZER}, {@link AudioEffect#EFFECT_TYPE_NS},
      * {@link AudioEffect#EFFECT_TYPE_PRESET_REVERB}, {@link AudioEffect#EFFECT_TYPE_VIRTUALIZER},
-     * {@link AudioEffect#EFFECT_TYPE_DYNAMICS_PROCESSING},
-     * {@link AudioEffect#EFFECT_TYPE_HAPTIC_GENERATOR}.
+     * {@link AudioEffect#EFFECT_TYPE_DYNAMICS_PROCESSING}.
      *  </li>
      *  <li>uuid: UUID for this particular implementation</li>
      *  <li>connectMode: {@link #EFFECT_INSERT} or {@link #EFFECT_AUXILIARY}</li>
@@ -257,9 +246,8 @@ public class AudioEffect {
          *  {@link AudioEffect#EFFECT_TYPE_AGC}, {@link AudioEffect#EFFECT_TYPE_BASS_BOOST},
          *  {@link AudioEffect#EFFECT_TYPE_ENV_REVERB}, {@link AudioEffect#EFFECT_TYPE_EQUALIZER},
          *  {@link AudioEffect#EFFECT_TYPE_NS}, {@link AudioEffect#EFFECT_TYPE_PRESET_REVERB}
-         *  {@link AudioEffect#EFFECT_TYPE_VIRTUALIZER},
-         *  {@link AudioEffect#EFFECT_TYPE_DYNAMICS_PROCESSING},
-         *  or {@link AudioEffect#EFFECT_TYPE_HAPTIC_GENERATOR}.<br>
+         *  {@link AudioEffect#EFFECT_TYPE_VIRTUALIZER}
+         *   or {@link AudioEffect#EFFECT_TYPE_DYNAMICS_PROCESSING}.<br>
          *  For reverberation, bass boost, EQ and virtualizer, the UUID
          *  corresponds to the OpenSL ES Interface ID.
          */
@@ -296,8 +284,7 @@ public class AudioEffect {
          * {@link AudioEffect#EFFECT_TYPE_EQUALIZER}, {@link AudioEffect#EFFECT_TYPE_NS},
          * {@link AudioEffect#EFFECT_TYPE_PRESET_REVERB},
          * {@link AudioEffect#EFFECT_TYPE_VIRTUALIZER},
-         * {@link AudioEffect#EFFECT_TYPE_DYNAMICS_PROCESSING},
-         * {@link AudioEffect#EFFECT_TYPE_HAPTIC_GENERATOR}.
+         * {@link AudioEffect#EFFECT_TYPE_DYNAMICS_PROCESSING}.
          * @param uuid         UUID for this particular implementation
          * @param connectMode  {@link #EFFECT_INSERT} or {@link #EFFECT_AUXILIARY}
          * @param name         human readable effect name
@@ -516,14 +503,10 @@ public class AudioEffect {
         }
 
         // native initialization
-        // TODO b/182469354: Make consistent with AudioRecord
-        int initResult;
-        try (ScopedParcelState attributionSourceState =  AttributionSource.myAttributionSource()
-                .asScopedParcelState()) {
-            initResult = native_setup(new WeakReference<>(this), type.toString(), uuid.toString(),
-                    priority, audioSession, deviceType, deviceAddress, id, desc,
-                    attributionSourceState.getParcel(), probe);
-        }
+        int initResult = native_setup(new WeakReference<AudioEffect>(this),
+                type.toString(), uuid.toString(), priority, audioSession,
+                deviceType, deviceAddress,
+                id, desc, ActivityThread.currentOpPackageName(), probe);
         if (initResult != SUCCESS && initResult != ALREADY_EXISTS) {
             Log.e(TAG, "Error code " + initResult
                     + " when initializing AudioEffect.");
@@ -919,7 +902,7 @@ public class AudioEffect {
      * In case of success, the returns the number of meaningful integers in value array.
      * @hide
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public int getParameter(int[] param, int[] value)
             throws IllegalStateException {
         if (param.length > 2 || value.length > 2) {
@@ -988,7 +971,7 @@ public class AudioEffect {
      * @see #getParameter(byte[], byte[])
      * @hide
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public int getParameter(int[] param, byte[] value)
             throws IllegalStateException {
         if (param.length > 2) {
@@ -1390,7 +1373,7 @@ public class AudioEffect {
     private native final int native_setup(Object audioeffect_this, String type,
             String uuid, int priority, int audioSession,
             int deviceType, String deviceAddress, int[] id, Object[] desc,
-            @NonNull Parcel attributionSource, boolean probe);
+            String opPackageName, boolean probe);
 
     private native final void native_finalize();
 

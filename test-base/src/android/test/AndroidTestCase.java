@@ -71,13 +71,14 @@ public class AndroidTestCase extends TestCase {
      * latter is provided by the context set with the {@link #setContext}
      * method.
      *
+     * @hide
      */
     public void setTestContext(Context context) {
         mTestContext = context;
     }
 
     /**
-     * Returns the test context that was set via {@link #setTestContext(Context)}.
+     * @hide
      */
     public Context getTestContext() {
         return mTestContext;

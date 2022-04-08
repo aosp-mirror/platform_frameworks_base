@@ -231,43 +231,39 @@ TEST(RenderNode, multiTreeValidity) {
 }
 
 TEST(RenderNode, releasedCallback) {
-    int functor = WebViewFunctor_create(
-            nullptr, TestUtils::createMockFunctor(RenderMode::OpenGL_ES), RenderMode::OpenGL_ES);
+    class DecRefOnReleased : public GlFunctorLifecycleListener {
+    public:
+        explicit DecRefOnReleased(int* refcnt) : mRefCnt(refcnt) {}
+        void onGlFunctorReleased(Functor* functor) override { *mRefCnt -= 1; }
+
+    private:
+        int* mRefCnt;
+    };
+
+    int refcnt = 0;
+    sp<DecRefOnReleased> listener(new DecRefOnReleased(&refcnt));
+    Functor noopFunctor;
 
     auto node = TestUtils::createNode(0, 0, 200, 400, [&](RenderProperties& props, Canvas& canvas) {
-        canvas.drawWebViewFunctor(functor);
+        refcnt++;
+        canvas.callDrawGLFunction(&noopFunctor, listener.get());
     });
-    TestUtils::runOnRenderThreadUnmanaged([&] (RenderThread&) {
-        TestUtils::syncHierarchyPropertiesAndDisplayList(node);
-    });
-    auto& counts = TestUtils::countsForFunctor(functor);
-    EXPECT_EQ(1, counts.sync);
-    EXPECT_EQ(0, counts.destroyed);
+    TestUtils::syncHierarchyPropertiesAndDisplayList(node);
+    EXPECT_EQ(1, refcnt);
 
     TestUtils::recordNode(*node, [&](Canvas& canvas) {
-        canvas.drawWebViewFunctor(functor);
+        refcnt++;
+        canvas.callDrawGLFunction(&noopFunctor, listener.get());
     });
-    EXPECT_EQ(1, counts.sync);
-    EXPECT_EQ(0, counts.destroyed);
+    EXPECT_EQ(2, refcnt);
 
-    TestUtils::runOnRenderThreadUnmanaged([&] (RenderThread&) {
-        TestUtils::syncHierarchyPropertiesAndDisplayList(node);
-    });
-    EXPECT_EQ(2, counts.sync);
-    EXPECT_EQ(0, counts.destroyed);
-
-    WebViewFunctor_release(functor);
-    EXPECT_EQ(2, counts.sync);
-    EXPECT_EQ(0, counts.destroyed);
+    TestUtils::syncHierarchyPropertiesAndDisplayList(node);
+    EXPECT_EQ(1, refcnt);
 
     TestUtils::recordNode(*node, [](Canvas& canvas) {});
-    TestUtils::runOnRenderThreadUnmanaged([&] (RenderThread&) {
-        TestUtils::syncHierarchyPropertiesAndDisplayList(node);
-    });
-    // Fence on any remaining post'd work
-    TestUtils::runOnRenderThreadUnmanaged([] (RenderThread&) {});
-    EXPECT_EQ(2, counts.sync);
-    EXPECT_EQ(1, counts.destroyed);
+    EXPECT_EQ(1, refcnt);
+    TestUtils::syncHierarchyPropertiesAndDisplayList(node);
+    EXPECT_EQ(0, refcnt);
 }
 
 RENDERTHREAD_TEST(RenderNode, prepareTree_nullableDisplayList) {
@@ -326,7 +322,7 @@ RENDERTHREAD_TEST(DISABLED_RenderNode, prepareTree_HwLayer_AVD_enqueueDamage) {
 
     // Check that the VD is in the dislay list, and the layer update queue contains the correct
     // damage rect.
-    EXPECT_TRUE(rootNode->getDisplayList().hasVectorDrawables());
+    EXPECT_TRUE(rootNode->getDisplayList()->hasVectorDrawables());
     ASSERT_FALSE(info.layerUpdateQueue->entries().empty());
     EXPECT_EQ(rootNode.get(), info.layerUpdateQueue->entries().at(0).renderNode.get());
     EXPECT_EQ(uirenderer::Rect(0, 0, 200, 400), info.layerUpdateQueue->entries().at(0).damage);

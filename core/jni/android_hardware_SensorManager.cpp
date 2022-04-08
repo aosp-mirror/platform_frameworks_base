@@ -421,18 +421,11 @@ private:
 };
 
 static jlong nativeInitSensorEventQueue(JNIEnv *env, jclass clazz, jlong sensorManager,
-                                        jobject eventQWeak, jobject msgQ, jstring packageName,
-                                        jint mode, jstring opPackageName, jstring attributionTag) {
+        jobject eventQWeak, jobject msgQ, jstring packageName, jint mode) {
     SensorManager* mgr = reinterpret_cast<SensorManager*>(sensorManager);
     ScopedUtfChars packageUtf(env, packageName);
     String8 clientName(packageUtf.c_str());
-
-    String16 attributionTagName("");
-    if (attributionTag != nullptr) {
-        ScopedUtfChars attrUtf(env, attributionTag);
-        attributionTagName = String16(attrUtf.c_str());
-    }
-    sp<SensorEventQueue> queue(mgr->createEventQueue(clientName, mode, attributionTagName));
+    sp<SensorEventQueue> queue(mgr->createEventQueue(clientName, mode));
 
     if (queue == NULL) {
         jniThrowRuntimeException(env, "Cannot construct native SensorEventQueue.");
@@ -524,20 +517,29 @@ static const JNINativeMethod gSystemSensorManagerMethods[] = {
 };
 
 static const JNINativeMethod gBaseEventQueueMethods[] = {
-        {"nativeInitBaseEventQueue",
-         "(JLjava/lang/ref/WeakReference;Landroid/os/MessageQueue;Ljava/lang/String;ILjava/lang/"
-         "String;Ljava/lang/String;)J",
-         (void *)nativeInitSensorEventQueue},
+    {"nativeInitBaseEventQueue",
+             "(JLjava/lang/ref/WeakReference;Landroid/os/MessageQueue;Ljava/lang/String;ILjava/lang/String;)J",
+             (void*)nativeInitSensorEventQueue },
 
-        {"nativeEnableSensor", "(JIII)I", (void *)nativeEnableSensor},
+    {"nativeEnableSensor",
+            "(JIII)I",
+            (void*)nativeEnableSensor },
 
-        {"nativeDisableSensor", "(JI)I", (void *)nativeDisableSensor},
+    {"nativeDisableSensor",
+            "(JI)I",
+            (void*)nativeDisableSensor },
 
-        {"nativeDestroySensorEventQueue", "(J)V", (void *)nativeDestroySensorEventQueue},
+    {"nativeDestroySensorEventQueue",
+            "(J)V",
+            (void*)nativeDestroySensorEventQueue },
 
-        {"nativeFlushSensor", "(J)I", (void *)nativeFlushSensor},
+    {"nativeFlushSensor",
+            "(J)I",
+            (void*)nativeFlushSensor },
 
-        {"nativeInjectSensorData", "(JI[FIJ)I", (void *)nativeInjectSensorData},
+    {"nativeInjectSensorData",
+            "(JI[FIJ)I",
+            (void*)nativeInjectSensorData },
 };
 
 } //unnamed namespace

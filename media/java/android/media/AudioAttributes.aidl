@@ -15,4 +15,4 @@
 
 package android.media;
 
-@JavaOnlyStableParcelable parcelable AudioAttributes;
+parcelable AudioAttributes;

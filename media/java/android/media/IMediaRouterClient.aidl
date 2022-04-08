@@ -22,6 +22,6 @@ package android.media;
 oneway interface IMediaRouterClient {
     void onStateChanged();
     void onRestoreRoute();
-    void onGroupRouteSelected(String routeId);
+    void onSelectedRouteChanged(String routeId);
     void onGlobalA2dpChanged(boolean a2dpOn);
 }

@@ -1,12 +1,3 @@
-package {
-    // See: http://go/android-license-faq
-    // A large-scale-change added 'default_applicable_licenses' to import
-    // all of the 'license_kinds' from "frameworks_base_license"
-    // to get the below license kinds:
-    //   SPDX-license-identifier-Apache-2.0
-    default_applicable_licenses: ["frameworks_base_license"],
-}
-
 android_library {
 
     name: "SettingsLib",
@@ -17,8 +8,8 @@ android_library {
 
     // TODO(b/149540986): revert this change.
     static_libs: [
-        // All other dependent components should be put in
-        // "SettingsLibDependenciesWithoutWifiTracker".
+         // All other dependent components should be put in
+         // "SettingsLibDependenciesWithoutWifiTracker".
         "WifiTrackerLib",
     ],
 
@@ -27,12 +18,9 @@ android_library {
 
     resource_dirs: ["res"],
 
-    srcs: [
-        "src/**/*.java",
-        "src/**/*.kt",
-    ],
+    srcs: ["src/**/*.java", "src/**/*.kt"],
 
-    min_sdk_version: "29",
+    min_sdk_version: "21",
 
 }
 
@@ -54,9 +42,7 @@ java_defaults {
         "SettingsLibAppPreference",
         "SettingsLibSearchWidget",
         "SettingsLibSettingsSpinner",
-        "SettingsLibIllustrationPreference",
         "SettingsLibLayoutPreference",
-        "SettingsLibMainSwitchPreference",
         "SettingsLibActionButtonsPreference",
         "SettingsLibEntityHeaderWidgets",
         "SettingsLibBarChartPreference",
@@ -65,14 +51,6 @@ java_defaults {
         "SettingsLibRadioButtonPreference",
         "SettingsLibDisplayDensityUtils",
         "SettingsLibUtils",
-        "SettingsLibEmergencyNumber",
-        "SettingsLibTopIntroPreference",
-        "SettingsLibBannerMessagePreference",
-        "SettingsLibFooterPreference",
-        "SettingsLibUsageProgressBarPreference",
-        "SettingsLibCollapsingToolbarBaseActivity",
-        "SettingsLibTwoTargetPreference",
-        "SettingsLibSettingsTransition",
     ],
 }
 

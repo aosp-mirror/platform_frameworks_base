@@ -17,7 +17,6 @@
 package com.android.systemui.statusbar
 
 import android.app.WallpaperManager
-import android.os.IBinder
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper.RunWithLooper
 import android.view.Choreographer
@@ -27,9 +26,10 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.plugins.statusbar.StatusBarStateController
+import com.android.systemui.statusbar.notification.ActivityLaunchAnimator
 import com.android.systemui.statusbar.phone.BiometricUnlockController
 import com.android.systemui.statusbar.phone.DozeParameters
-import com.android.systemui.statusbar.phone.ScrimController
+import com.android.systemui.statusbar.phone.NotificationShadeWindowController
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.util.mockito.eq
 import org.junit.Before
@@ -38,7 +38,6 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.anyInt
-import org.mockito.Captor
 import org.mockito.Mock
 import org.mockito.Mockito.`when`
 import org.mockito.Mockito.any
@@ -47,11 +46,8 @@ import org.mockito.Mockito.anyString
 import org.mockito.Mockito.clearInvocations
 import org.mockito.Mockito.doThrow
 import org.mockito.Mockito.never
-import org.mockito.Mockito.reset
-import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
 import org.mockito.junit.MockitoJUnit
-import java.util.function.Consumer
 
 @RunWith(AndroidTestingRunner::class)
 @RunWithLooper
@@ -68,12 +64,12 @@ class NotificationShadeDepthControllerTest : SysuiTestCase() {
     @Mock private lateinit var dumpManager: DumpManager
     @Mock private lateinit var root: View
     @Mock private lateinit var viewRootImpl: ViewRootImpl
-    @Mock private lateinit var windowToken: IBinder
+    @Mock private lateinit var shadeSpring: NotificationShadeDepthController.DepthAnimation
     @Mock private lateinit var shadeAnimation: NotificationShadeDepthController.DepthAnimation
+    @Mock private lateinit var globalActionsSpring: NotificationShadeDepthController.DepthAnimation
     @Mock private lateinit var brightnessSpring: NotificationShadeDepthController.DepthAnimation
     @Mock private lateinit var listener: NotificationShadeDepthController.DepthListener
     @Mock private lateinit var dozeParameters: DozeParameters
-    @Captor private lateinit var scrimVisibilityCaptor: ArgumentCaptor<Consumer<Int>>
     @JvmField @Rule val mockitoRule = MockitoJUnit.rule()
 
     private lateinit var statusBarStateListener: StatusBarStateController.StateListener
@@ -84,32 +80,26 @@ class NotificationShadeDepthControllerTest : SysuiTestCase() {
     @Before
     fun setup() {
         `when`(root.viewRootImpl).thenReturn(viewRootImpl)
-        `when`(root.windowToken).thenReturn(windowToken)
-        `when`(root.isAttachedToWindow).thenReturn(true)
         `when`(statusBarStateController.state).then { statusBarState }
         `when`(blurUtils.blurRadiusOfRatio(anyFloat())).then { answer ->
-            answer.arguments[0] as Float * maxBlur.toFloat()
+            (answer.arguments[0] as Float * maxBlur).toInt()
         }
-        `when`(blurUtils.ratioOfBlurRadius(anyFloat())).then { answer ->
-            answer.arguments[0] as Float / maxBlur.toFloat()
-        }
-        `when`(blurUtils.supportsBlursOnWindows()).thenReturn(true)
-        `when`(blurUtils.maxBlurRadius).thenReturn(maxBlur)
+        `when`(blurUtils.minBlurRadius).thenReturn(0)
         `when`(blurUtils.maxBlurRadius).thenReturn(maxBlur)
 
         notificationShadeDepthController = NotificationShadeDepthController(
                 statusBarStateController, blurUtils, biometricUnlockController,
                 keyguardStateController, choreographer, wallpaperManager,
                 notificationShadeWindowController, dozeParameters, dumpManager)
+        notificationShadeDepthController.shadeSpring = shadeSpring
         notificationShadeDepthController.shadeAnimation = shadeAnimation
         notificationShadeDepthController.brightnessMirrorSpring = brightnessSpring
+        notificationShadeDepthController.globalActionsSpring = globalActionsSpring
         notificationShadeDepthController.root = root
 
         val captor = ArgumentCaptor.forClass(StatusBarStateController.StateListener::class.java)
         verify(statusBarStateController).addCallback(captor.capture())
         statusBarStateListener = captor.value
-        verify(notificationShadeWindowController)
-                .setScrimsVisibilityListener(scrimVisibilityCaptor.capture())
     }
 
     @Test
@@ -121,6 +111,7 @@ class NotificationShadeDepthControllerTest : SysuiTestCase() {
     fun onPanelExpansionChanged_apliesBlur_ifShade() {
         notificationShadeDepthController.onPanelExpansionChanged(1f /* expansion */,
                 false /* tracking */)
+        verify(shadeSpring).animateTo(eq(maxBlur), any())
         verify(shadeAnimation).animateTo(eq(maxBlur), any())
     }
 
@@ -169,51 +160,34 @@ class NotificationShadeDepthControllerTest : SysuiTestCase() {
     @Test
     fun onStateChanged_reevalutesBlurs_ifSameRadiusAndNewState() {
         onPanelExpansionChanged_apliesBlur_ifShade()
-        clearInvocations(choreographer)
+        clearInvocations(shadeSpring)
+        clearInvocations(shadeAnimation)
 
         statusBarState = StatusBarState.KEYGUARD
         statusBarStateListener.onStateChanged(statusBarState)
+        verify(shadeSpring).animateTo(eq(0), any())
         verify(shadeAnimation).animateTo(eq(0), any())
     }
 
     @Test
-    fun setQsPanelExpansion_appliesBlur() {
-        notificationShadeDepthController.qsPanelExpansion = 1f
-        notificationShadeDepthController.onPanelExpansionChanged(0.5f, tracking = false)
-        notificationShadeDepthController.updateBlurCallback.doFrame(0)
-        verify(blurUtils).applyBlur(any(), anyInt(), eq(false))
+    fun updateGlobalDialogVisibility_animatesBlur() {
+        notificationShadeDepthController.updateGlobalDialogVisibility(0.5f, root)
+        verify(globalActionsSpring).animateTo(eq(maxBlur / 2), eq(root))
     }
 
     @Test
-    fun setFullShadeTransition_appliesBlur() {
-        notificationShadeDepthController.transitionToFullShadeProgress = 1f
+    fun updateGlobalDialogVisibility_appliesBlur_withoutHomeControls() {
+        `when`(globalActionsSpring.radius).thenReturn(maxBlur)
         notificationShadeDepthController.updateBlurCallback.doFrame(0)
-        verify(blurUtils).applyBlur(any(), eq(maxBlur), eq(false))
+        verify(blurUtils).applyBlur(any(), eq(maxBlur))
     }
 
     @Test
-    fun onDozeAmountChanged_appliesBlur() {
-        statusBarStateListener.onDozeAmountChanged(1f, 1f)
+    fun updateGlobalDialogVisibility_appliesBlur_unlessHomeControls() {
+        notificationShadeDepthController.showingHomeControls = true
+        `when`(globalActionsSpring.radius).thenReturn(maxBlur)
         notificationShadeDepthController.updateBlurCallback.doFrame(0)
-        verify(blurUtils).applyBlur(any(), eq(maxBlur), eq(false))
-    }
-
-    @Test
-    fun setFullShadeTransition_appliesBlur_onlyIfSupported() {
-        reset(blurUtils)
-        `when`(blurUtils.blurRadiusOfRatio(anyFloat())).then { answer ->
-            answer.arguments[0] as Float * maxBlur
-        }
-        `when`(blurUtils.ratioOfBlurRadius(anyFloat())).then { answer ->
-            answer.arguments[0] as Float / maxBlur.toFloat()
-        }
-        `when`(blurUtils.maxBlurRadius).thenReturn(maxBlur)
-        `when`(blurUtils.maxBlurRadius).thenReturn(maxBlur)
-
-        notificationShadeDepthController.transitionToFullShadeProgress = 1f
-        notificationShadeDepthController.updateBlurCallback.doFrame(0)
-        verify(blurUtils).applyBlur(any(), eq(0), eq(false))
-        verify(wallpaperManager).setWallpaperZoomOut(any(), eq(1f))
+        verify(blurUtils).applyBlur(any(), eq(0))
     }
 
     @Test
@@ -222,53 +196,34 @@ class NotificationShadeDepthControllerTest : SysuiTestCase() {
         notificationShadeDepthController.updateBlurCallback.doFrame(0)
         verify(wallpaperManager).setWallpaperZoomOut(any(), anyFloat())
         verify(listener).onWallpaperZoomOutChanged(anyFloat())
-        verify(blurUtils).applyBlur(any(), anyInt(), eq(false))
-    }
-
-    @Test
-    fun updateBlurCallback_setsOpaque_whenScrim() {
-        scrimVisibilityCaptor.value.accept(ScrimController.OPAQUE)
-        notificationShadeDepthController.updateBlurCallback.doFrame(0)
-        verify(blurUtils).applyBlur(any(), anyInt(), eq(true))
+        verify(blurUtils).applyBlur(any(), anyInt())
     }
 
     @Test
     fun updateBlurCallback_setsBlur_whenExpanded() {
-        notificationShadeDepthController.onPanelExpansionChanged(1f, false)
-        `when`(shadeAnimation.radius).thenReturn(maxBlur.toFloat())
+        `when`(shadeSpring.radius).thenReturn(maxBlur)
+        `when`(shadeAnimation.radius).thenReturn(maxBlur)
         notificationShadeDepthController.updateBlurCallback.doFrame(0)
-        verify(blurUtils).applyBlur(any(), eq(maxBlur), eq(false))
+        verify(blurUtils).applyBlur(any(), eq(maxBlur))
     }
 
     @Test
-    fun updateBlurCallback_ignoreShadeBlurUntilHidden_overridesZoom() {
-        notificationShadeDepthController.onPanelExpansionChanged(1f, false)
-        `when`(shadeAnimation.radius).thenReturn(maxBlur.toFloat())
-        notificationShadeDepthController.blursDisabledForAppLaunch = true
+    fun updateBlurCallback_appLaunchAnimation_overridesZoom() {
+        `when`(shadeSpring.radius).thenReturn(maxBlur)
+        `when`(shadeAnimation.radius).thenReturn(maxBlur)
+        val animProgress = ActivityLaunchAnimator.ExpandAnimationParameters()
+        animProgress.linearProgress = 1f
+        notificationShadeDepthController.notificationLaunchAnimationParams = animProgress
         notificationShadeDepthController.updateBlurCallback.doFrame(0)
-        verify(blurUtils).applyBlur(any(), eq(0), eq(false))
+        verify(blurUtils).applyBlur(any(), eq(0))
     }
 
     @Test
     fun updateBlurCallback_invalidWindow() {
-        `when`(root.isAttachedToWindow).thenReturn(false)
-        notificationShadeDepthController.updateBlurCallback.doFrame(0)
-        verify(wallpaperManager, times(0)).setWallpaperZoomOut(any(), anyFloat())
-    }
-
-    @Test
-    fun updateBlurCallback_exception() {
         doThrow(IllegalArgumentException("test exception")).`when`(wallpaperManager)
                 .setWallpaperZoomOut(any(), anyFloat())
         notificationShadeDepthController.updateBlurCallback.doFrame(0)
         verify(wallpaperManager).setWallpaperZoomOut(any(), anyFloat())
-    }
-
-    @Test
-    fun ignoreShadeBlurUntilHidden_schedulesFrame() {
-        notificationShadeDepthController.blursDisabledForAppLaunch = true
-        verify(choreographer).postFrameCallback(
-                eq(notificationShadeDepthController.updateBlurCallback))
     }
 
     @Test
@@ -288,19 +243,31 @@ class NotificationShadeDepthControllerTest : SysuiTestCase() {
         // Brightness mirror is fully visible
         `when`(brightnessSpring.ratio).thenReturn(1f)
         // And shade is blurred
-        notificationShadeDepthController.onPanelExpansionChanged(1f, false)
-        `when`(shadeAnimation.radius).thenReturn(maxBlur.toFloat())
+        `when`(shadeSpring.radius).thenReturn(maxBlur)
+        `when`(shadeAnimation.radius).thenReturn(maxBlur)
 
         notificationShadeDepthController.updateBlurCallback.doFrame(0)
-        verify(notificationShadeWindowController).setBackgroundBlurRadius(eq(0))
-        verify(wallpaperManager).setWallpaperZoomOut(any(), eq(1f))
-        verify(blurUtils).applyBlur(eq(viewRootImpl), eq(0), eq(false))
+        verify(notificationShadeWindowController).setBackgroundBlurRadius(0)
+        verify(blurUtils).applyBlur(eq(viewRootImpl), eq(0))
     }
 
     @Test
-    fun ignoreShadeBlurUntilHidden_whennNull_ignoresIfShadeHasNoBlur() {
-        `when`(shadeAnimation.radius).thenReturn(0f)
-        notificationShadeDepthController.blursDisabledForAppLaunch = true
+    fun setNotificationLaunchAnimationParams_schedulesFrame() {
+        val animProgress = ActivityLaunchAnimator.ExpandAnimationParameters()
+        animProgress.linearProgress = 0.5f
+        notificationShadeDepthController.notificationLaunchAnimationParams = animProgress
+        verify(choreographer).postFrameCallback(
+                eq(notificationShadeDepthController.updateBlurCallback))
+    }
+
+    @Test
+    fun setNotificationLaunchAnimationParams_whennNull_ignoresIfShadeHasNoBlur() {
+        val animProgress = ActivityLaunchAnimator.ExpandAnimationParameters()
+        animProgress.linearProgress = 0.5f
+        `when`(shadeSpring.radius).thenReturn(0)
+        `when`(shadeAnimation.radius).thenReturn(0)
+        notificationShadeDepthController.notificationLaunchAnimationParams = animProgress
+        verify(shadeSpring, never()).animateTo(anyInt(), any())
         verify(shadeAnimation, never()).animateTo(anyInt(), any())
     }
 }

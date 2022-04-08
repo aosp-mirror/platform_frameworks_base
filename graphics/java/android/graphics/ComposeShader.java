@@ -84,20 +84,23 @@ public class ComposeShader extends Shader {
         mPorterDuffMode = nativeMode;
     }
 
-    /** @hide */
     @Override
-    protected long createNativeInstance(long nativeMatrix, boolean filterFromPaint) {
-        mNativeInstanceShaderA = mShaderA.getNativeInstance(filterFromPaint);
-        mNativeInstanceShaderB = mShaderB.getNativeInstance(filterFromPaint);
+    long createNativeInstance(long nativeMatrix) {
+        mNativeInstanceShaderA = mShaderA.getNativeInstance();
+        mNativeInstanceShaderB = mShaderB.getNativeInstance();
         return nativeCreate(nativeMatrix,
                 mShaderA.getNativeInstance(), mShaderB.getNativeInstance(), mPorterDuffMode);
     }
 
     /** @hide */
     @Override
-    protected boolean shouldDiscardNativeInstance(boolean filterFromPaint) {
-        return mShaderA.getNativeInstance(filterFromPaint) != mNativeInstanceShaderA
-                || mShaderB.getNativeInstance(filterFromPaint) != mNativeInstanceShaderB;
+    protected void verifyNativeInstance() {
+        if (mShaderA.getNativeInstance() != mNativeInstanceShaderA
+                || mShaderB.getNativeInstance() != mNativeInstanceShaderB) {
+            // Child shader native instance has been updated,
+            // so our cached native instance is no longer valid - discard it
+            discardNativeInstance();
+        }
     }
 
     private static native long nativeCreate(long nativeMatrix,

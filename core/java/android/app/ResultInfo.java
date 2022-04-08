@@ -16,7 +16,6 @@
 
 package android.app;
 
-import android.annotation.Nullable;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Intent;
 import android.os.Build;
@@ -91,7 +90,7 @@ public class ResultInfo implements Parcelable {
     }
 
     @Override
-    public boolean equals(@Nullable Object obj) {
+    public boolean equals(Object obj) {
         if (obj == null || !(obj instanceof ResultInfo)) {
             return false;
         }

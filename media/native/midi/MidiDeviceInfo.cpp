@@ -90,13 +90,13 @@ status_t MidiDeviceInfo::readFromParcel(const Parcel* parcel) {
 
 status_t MidiDeviceInfo::readStringVector(
         const Parcel* parcel, Vector<String16> *vectorPtr, size_t defaultLength) {
-    std::optional<std::vector<std::optional<String16>>> v;
+    std::unique_ptr<std::vector<std::unique_ptr<String16>>> v;
     status_t result = parcel->readString16Vector(&v);
     if (result != OK) return result;
     vectorPtr->clear();
-    if (v) {
+    if (v.get() != nullptr) {
         for (const auto& iter : *v) {
-            if (iter) {
+            if (iter.get() != nullptr) {
                 vectorPtr->push_back(*iter);
             } else {
                 vectorPtr->push_back(String16());

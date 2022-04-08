@@ -25,7 +25,6 @@
 #include <functional>
 #include <future>
 #include <mutex>
-#include <vector>
 
 namespace android {
 namespace uirenderer {
@@ -98,8 +97,6 @@ public:
         return task.get_future().get();
     };
 
-    static std::vector<int> getThreadIds();
-
     // For testing purposes only, blocks until all worker threads are parked.
     static void waitForIdle();
 
@@ -113,8 +110,6 @@ private:
     void doWaitForIdle();
 
     void workerLoop();
-
-    std::vector<int> mWorkerThreadIds;
 
     std::mutex mLock;
     std::condition_variable mCondition;

@@ -32,7 +32,7 @@ oneway interface ISyncAdapter {
      *
      * @param cb If called back with {@code false} accounts are not synced.
      */
-    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
+    @UnsupportedAppUsage
     void onUnsyncableAccount(ISyncAdapterUnsyncableAccountCallback cb);
 
     /**

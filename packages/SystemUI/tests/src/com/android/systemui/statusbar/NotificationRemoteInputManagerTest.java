@@ -108,7 +108,6 @@ public class NotificationRemoteInputManagerTest extends SysuiTestCase {
         when(mController.isRemoteInputActive(mEntry)).thenReturn(true);
         mRemoteInputManager.onPerformRemoveNotification(mEntry, mEntry.getKey());
 
-        assertFalse(mEntry.mRemoteEditImeVisible);
         verify(mController).removeRemoteInput(mEntry, null);
     }
 
@@ -161,7 +160,7 @@ public class NotificationRemoteInputManagerTest extends SysuiTestCase {
         String mimeType  = "image/jpeg";
         String text = "image inserted";
         StatusBarNotification newSbn =
-                mRemoteInputManager.rebuildNotificationWithRemoteInputInserted(
+                mRemoteInputManager.rebuildNotificationWithRemoteInput(
                         mEntry, text, false, mimeType, uri);
         RemoteInputHistoryItem[] messages = (RemoteInputHistoryItem[]) newSbn.getNotification()
                 .extras.getParcelableArray(Notification.EXTRA_REMOTE_INPUT_HISTORY_ITEMS);
@@ -174,7 +173,7 @@ public class NotificationRemoteInputManagerTest extends SysuiTestCase {
     @Test
     public void testRebuildWithRemoteInput_noExistingInputNoSpinner() {
         StatusBarNotification newSbn =
-                mRemoteInputManager.rebuildNotificationWithRemoteInputInserted(
+                mRemoteInputManager.rebuildNotificationWithRemoteInput(
                         mEntry, "A Reply", false, null, null);
         RemoteInputHistoryItem[] messages = (RemoteInputHistoryItem[]) newSbn.getNotification()
                 .extras.getParcelableArray(Notification.EXTRA_REMOTE_INPUT_HISTORY_ITEMS);
@@ -189,7 +188,7 @@ public class NotificationRemoteInputManagerTest extends SysuiTestCase {
     @Test
     public void testRebuildWithRemoteInput_noExistingInputWithSpinner() {
         StatusBarNotification newSbn =
-                mRemoteInputManager.rebuildNotificationWithRemoteInputInserted(
+                mRemoteInputManager.rebuildNotificationWithRemoteInput(
                         mEntry, "A Reply", true, null, null);
         RemoteInputHistoryItem[] messages = (RemoteInputHistoryItem[]) newSbn.getNotification()
                 .extras.getParcelableArray(Notification.EXTRA_REMOTE_INPUT_HISTORY_ITEMS);
@@ -205,14 +204,14 @@ public class NotificationRemoteInputManagerTest extends SysuiTestCase {
     public void testRebuildWithRemoteInput_withExistingInput() {
         // Setup a notification entry with 1 remote input.
         StatusBarNotification newSbn =
-                mRemoteInputManager.rebuildNotificationWithRemoteInputInserted(
+                mRemoteInputManager.rebuildNotificationWithRemoteInput(
                         mEntry, "A Reply", false, null, null);
         NotificationEntry entry = new NotificationEntryBuilder()
                 .setSbn(newSbn)
                 .build();
 
         // Try rebuilding to add another reply.
-        newSbn = mRemoteInputManager.rebuildNotificationWithRemoteInputInserted(
+        newSbn = mRemoteInputManager.rebuildNotificationWithRemoteInput(
                 entry, "Reply 2", true, null, null);
         RemoteInputHistoryItem[] messages = (RemoteInputHistoryItem[]) newSbn.getNotification()
                 .extras.getParcelableArray(Notification.EXTRA_REMOTE_INPUT_HISTORY_ITEMS);
@@ -228,14 +227,14 @@ public class NotificationRemoteInputManagerTest extends SysuiTestCase {
         String mimeType  = "image/jpeg";
         String text = "image inserted";
         StatusBarNotification newSbn =
-                mRemoteInputManager.rebuildNotificationWithRemoteInputInserted(
+                mRemoteInputManager.rebuildNotificationWithRemoteInput(
                         mEntry, text, false, mimeType, uri);
         NotificationEntry entry = new NotificationEntryBuilder()
                 .setSbn(newSbn)
                 .build();
 
         // Try rebuilding to add another reply.
-        newSbn = mRemoteInputManager.rebuildNotificationWithRemoteInputInserted(
+        newSbn = mRemoteInputManager.rebuildNotificationWithRemoteInput(
                 entry, "Reply 2", true, null, null);
         RemoteInputHistoryItem[] messages = (RemoteInputHistoryItem[]) newSbn.getNotification()
                 .extras.getParcelableArray(Notification.EXTRA_REMOTE_INPUT_HISTORY_ITEMS);

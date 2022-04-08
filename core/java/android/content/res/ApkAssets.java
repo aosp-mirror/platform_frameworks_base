@@ -22,7 +22,6 @@ import android.compat.annotation.UnsupportedAppUsage;
 import android.content.om.OverlayableInfo;
 import android.content.res.loader.AssetsProvider;
 import android.content.res.loader.ResourcesProvider;
-import android.text.TextUtils;
 
 import com.android.internal.annotations.GuardedBy;
 
@@ -69,12 +68,6 @@ public final class ApkAssets {
      */
     private static final int PROPERTY_OVERLAY = 1 << 3;
 
-    /**
-     * The apk assets is owned by the application running in this process and incremental crash
-     * protections for this APK must be disabled.
-     */
-    public static final int PROPERTY_DISABLE_INCREMENTAL_HARDENING = 1 << 4;
-
     /** Flags that change the behavior of loaded apk assets. */
     @IntDef(prefix = { "PROPERTY_" }, value = {
             PROPERTY_SYSTEM,
@@ -108,11 +101,14 @@ public final class ApkAssets {
     public @interface FormatType {}
 
     @GuardedBy("this")
-    private long mNativePtr;  // final, except cleared in finalizer.
+    private final long mNativePtr;
 
     @Nullable
     @GuardedBy("this")
-    private final StringBlock mStringBlock;  // null or closed if mNativePtr = 0.
+    private final StringBlock mStringBlock;
+
+    @GuardedBy("this")
+    private boolean mOpen = true;
 
     @PropertyFlags
     private final int mFlags;
@@ -329,25 +325,17 @@ public final class ApkAssets {
     @UnsupportedAppUsage
     public @NonNull String getAssetPath() {
         synchronized (this) {
-            return TextUtils.emptyIfNull(nativeGetAssetPath(mNativePtr));
+            return nativeGetAssetPath(mNativePtr);
         }
     }
 
-    /** @hide */
-    public @NonNull String getDebugName() {
-        synchronized (this) {
-            return nativeGetDebugName(mNativePtr);
-        }
-    }
-
-    @Nullable
     CharSequence getStringFromPool(int idx) {
         if (mStringBlock == null) {
             return null;
         }
 
         synchronized (this) {
-            return mStringBlock.getSequence(idx);
+            return mStringBlock.get(idx);
         }
     }
 
@@ -380,7 +368,7 @@ public final class ApkAssets {
             try (XmlBlock block = new XmlBlock(null, nativeXmlPtr)) {
                 XmlResourceParser parser = block.newParser();
                 // If nativeOpenXml doesn't throw, it will always return a valid native pointer,
-                // which makes newParser always return non-null. But let's be careful.
+                // which makes newParser always return non-null. But let's be paranoid.
                 if (parser == null) {
                     throw new AssertionError("block.newParser() returned a null parser");
                 }
@@ -392,16 +380,12 @@ public final class ApkAssets {
     /** @hide */
     @Nullable
     public OverlayableInfo getOverlayableInfo(String overlayableName) throws IOException {
-        synchronized (this) {
-            return nativeGetOverlayableInfo(mNativePtr, overlayableName);
-        }
+        return nativeGetOverlayableInfo(mNativePtr, overlayableName);
     }
 
     /** @hide */
     public boolean definesOverlayable() throws IOException {
-        synchronized (this) {
-            return nativeDefinesOverlayable(mNativePtr);
-        }
+        return nativeDefinesOverlayable(mNativePtr);
     }
 
     /**
@@ -415,7 +399,7 @@ public final class ApkAssets {
 
     @Override
     public String toString() {
-        return "ApkAssets{path=" + getDebugName() + "}";
+        return "ApkAssets{path=" + getAssetPath() + "}";
     }
 
     @Override
@@ -428,12 +412,12 @@ public final class ApkAssets {
      */
     public void close() {
         synchronized (this) {
-            if (mNativePtr != 0) {
+            if (mOpen) {
+                mOpen = false;
                 if (mStringBlock != null) {
                     mStringBlock.close();
                 }
                 nativeDestroy(mNativePtr);
-                mNativePtr = 0;
             }
         }
     }
@@ -450,7 +434,6 @@ public final class ApkAssets {
             @PropertyFlags int flags, @Nullable AssetsProvider asset) throws IOException;
     private static native void nativeDestroy(long ptr);
     private static native @NonNull String nativeGetAssetPath(long ptr);
-    private static native @NonNull String nativeGetDebugName(long ptr);
     private static native long nativeGetStringBlock(long ptr);
     private static native boolean nativeIsUpToDate(long ptr);
     private static native long nativeOpenXml(long ptr, @NonNull String fileName) throws IOException;

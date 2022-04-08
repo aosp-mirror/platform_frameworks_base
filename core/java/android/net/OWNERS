@@ -1,5 +1,11 @@
 set noparent
 
-include platform/frameworks/base:/services/core/java/com/android/server/net/OWNERS
+codewiz@google.com
+jchalard@google.com
+jsharkey@android.com
+junyulai@google.com
+lorenzo@google.com
+reminv@google.com
+satk@google.com
 
-per-file SSL*, Uri*, Url* = prb@google.com, dauletz@google.com, narayan@google.com, ngeoffray@google.com
+per-file SSL*, Uri*, Url* = prb@google.com, dauletz@google.com, narayan@google.com, tobiast@google.com

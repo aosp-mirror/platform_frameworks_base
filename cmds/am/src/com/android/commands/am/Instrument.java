@@ -19,7 +19,6 @@ package com.android.commands.am;
 import static android.app.ActivityManager.INSTR_FLAG_DISABLE_HIDDEN_API_CHECKS;
 import static android.app.ActivityManager.INSTR_FLAG_DISABLE_ISOLATED_STORAGE;
 import static android.app.ActivityManager.INSTR_FLAG_DISABLE_TEST_API_CHECKS;
-import static android.app.ActivityManager.INSTR_FLAG_NO_RESTART;
 
 import android.app.IActivityManager;
 import android.app.IInstrumentationWatcher;
@@ -90,7 +89,6 @@ public class Instrument {
     public boolean disableTestApiChecks = true;
     public boolean disableIsolatedStorage = false;
     public String abi = null;
-    public boolean noRestart = false;
     public int userId = UserHandle.USER_CURRENT;
     public Bundle args = new Bundle();
     // Required
@@ -516,9 +514,6 @@ public class Instrument {
             if (disableIsolatedStorage) {
                 flags |= INSTR_FLAG_DISABLE_ISOLATED_STORAGE;
             }
-            if (noRestart) {
-                flags |= INSTR_FLAG_NO_RESTART;
-            }
             if (!mAm.startInstrumentation(cn, profileFile, flags, args, watcher, connection, userId,
                         abi)) {
                 throw new AndroidException("INSTRUMENTATION_FAILED: " + cn.flattenToString());
@@ -555,7 +550,7 @@ public class Instrument {
 
             // Start the process
             final Process process = new ProcessBuilder()
-                    .command("logcat", "-d", "-v", "threadtime,uid", "-T", timestamp)
+                    .command("logcat", "-d", "-v threadtime,uid", "-T", timestamp)
                     .start();
 
             // Nothing to write. Don't let the command accidentally block.

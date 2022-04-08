@@ -50,7 +50,7 @@ public:
     bool createOrUpdateLayer(RenderNode* node, const DamageAccumulator& damageAccumulator,
                              ErrorHandler* errorHandler) override;
 
-    void setSurfaceColorProperties(ColorMode colorMode) override;
+    void setSurfaceColorProperties(renderthread::ColorMode colorMode) override;
     SkColorType getSurfaceColorType() const override { return mSurfaceColorType; }
     sk_sp<SkColorSpace> getSurfaceColorSpace() override { return mSurfaceColorSpace; }
 
@@ -76,11 +76,9 @@ protected:
 
     renderthread::RenderThread& mRenderThread;
 
-    ColorMode mColorMode = ColorMode::Default;
+    renderthread::ColorMode mColorMode = renderthread::ColorMode::SRGB;
     SkColorType mSurfaceColorType;
     sk_sp<SkColorSpace> mSurfaceColorSpace;
-
-    bool isCapturingSkp() const { return mCaptureMode != CaptureMode::None; }
 
 private:
     void renderFrameImpl(const SkRect& clip,
@@ -139,10 +137,9 @@ private:
     int mCaptureSequence = 0;
 
     // Multi frame serialization stream and writer used when serializing more than one frame.
-    std::unique_ptr<SkSharingSerialContext> mSerialContext;  // Must be declared before any other
-                                                             // serializing member
     std::unique_ptr<SkFILEWStream> mOpenMultiPicStream;
     sk_sp<SkDocument> mMultiPic;
+    std::unique_ptr<SkSharingSerialContext> mSerialContext;
 
     /**
      * mRecorder holds the current picture recorder when serializing in either SingleFrameSKP or

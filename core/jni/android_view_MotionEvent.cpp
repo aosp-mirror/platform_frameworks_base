@@ -21,13 +21,12 @@
 #include <android/graphics/matrix.h>
 #include <android_runtime/AndroidRuntime.h>
 #include <android_runtime/Log.h>
-#include <attestation/HmacKeyManager.h>
+#include <utils/Log.h>
 #include <input/Input.h>
 #include <nativehelper/ScopedUtfChars.h>
-#include <utils/Log.h>
 #include "android_os_Parcel.h"
-#include "android_util_Binder.h"
 #include "android_view_MotionEvent.h"
+#include "android_util_Binder.h"
 
 #include "core_jni_helpers.h"
 
@@ -256,13 +255,11 @@ static jfloatArray obtainPackedAxisValuesArray(JNIEnv* env, uint32_t minSize,
 }
 
 static void pointerCoordsFromNative(JNIEnv* env, const PointerCoords* rawPointerCoords,
-                                    ui::Transform transform, jobject outPointerCoordsObj) {
-    float rawX = rawPointerCoords->getAxisValue(AMOTION_EVENT_AXIS_X);
-    float rawY = rawPointerCoords->getAxisValue(AMOTION_EVENT_AXIS_Y);
-    vec2 transformed = transform.transform(rawX, rawY);
-
-    env->SetFloatField(outPointerCoordsObj, gPointerCoordsClassInfo.x, transformed.x);
-    env->SetFloatField(outPointerCoordsObj, gPointerCoordsClassInfo.y, transformed.y);
+        float xOffset, float yOffset, jobject outPointerCoordsObj) {
+    env->SetFloatField(outPointerCoordsObj, gPointerCoordsClassInfo.x,
+            rawPointerCoords->getAxisValue(AMOTION_EVENT_AXIS_X) + xOffset);
+    env->SetFloatField(outPointerCoordsObj, gPointerCoordsClassInfo.y,
+            rawPointerCoords->getAxisValue(AMOTION_EVENT_AXIS_Y) + yOffset);
     env->SetFloatField(outPointerCoordsObj, gPointerCoordsClassInfo.pressure,
             rawPointerCoords->getAxisValue(AMOTION_EVENT_AXIS_PRESSURE));
     env->SetFloatField(outPointerCoordsObj, gPointerCoordsClassInfo.size,
@@ -345,11 +342,11 @@ static jlong android_view_MotionEvent_nativeInitialize(
         return 0;
     }
 
-    std::unique_ptr<MotionEvent> event;
+    MotionEvent* event;
     if (nativePtr) {
-        event = std::unique_ptr<MotionEvent>(reinterpret_cast<MotionEvent*>(nativePtr));
+        event = reinterpret_cast<MotionEvent*>(nativePtr);
     } else {
-        event = std::make_unique<MotionEvent>();
+        event = new MotionEvent();
     }
 
     PointerProperties pointerProperties[pointerCount];
@@ -358,7 +355,7 @@ static jlong android_view_MotionEvent_nativeInitialize(
     for (jint i = 0; i < pointerCount; i++) {
         jobject pointerPropertiesObj = env->GetObjectArrayElement(pointerPropertiesObjArray, i);
         if (!pointerPropertiesObj) {
-            return 0;
+            goto Error;
         }
         pointerPropertiesToNative(env, pointerPropertiesObj, &pointerProperties[i]);
         env->DeleteLocalRef(pointerPropertiesObj);
@@ -366,23 +363,27 @@ static jlong android_view_MotionEvent_nativeInitialize(
         jobject pointerCoordsObj = env->GetObjectArrayElement(pointerCoordsObjArray, i);
         if (!pointerCoordsObj) {
             jniThrowNullPointerException(env, "pointerCoords");
-            return 0;
+            goto Error;
         }
         pointerCoordsToNative(env, pointerCoordsObj, xOffset, yOffset, &rawPointerCoords[i]);
         env->DeleteLocalRef(pointerCoordsObj);
     }
 
-    ui::Transform transform;
-    transform.set(xOffset, yOffset);
     event->initialize(InputEvent::nextId(), deviceId, source, displayId, INVALID_HMAC, action, 0,
                       flags, edgeFlags, metaState, buttonState,
-                      static_cast<MotionClassification>(classification), transform, xPrecision,
-                      yPrecision, AMOTION_EVENT_INVALID_CURSOR_POSITION,
-                      AMOTION_EVENT_INVALID_CURSOR_POSITION, AMOTION_EVENT_INVALID_DISPLAY_SIZE,
-                      AMOTION_EVENT_INVALID_DISPLAY_SIZE, downTimeNanos, eventTimeNanos,
-                      pointerCount, pointerProperties, rawPointerCoords);
+                      static_cast<MotionClassification>(classification), 1 /*xScale*/, 1 /*yScale*/,
+                      xOffset, yOffset, xPrecision, yPrecision,
+                      AMOTION_EVENT_INVALID_CURSOR_POSITION, AMOTION_EVENT_INVALID_CURSOR_POSITION,
+                      downTimeNanos, eventTimeNanos, pointerCount, pointerProperties,
+                      rawPointerCoords);
 
-    return reinterpret_cast<jlong>(event.release());
+    return reinterpret_cast<jlong>(event);
+
+Error:
+    if (!nativePtr) {
+        delete event;
+    }
+    return 0;
 }
 
 static void android_view_MotionEvent_nativeDispose(JNIEnv* env, jclass clazz,
@@ -436,7 +437,8 @@ static void android_view_MotionEvent_nativeGetPointerCoords(JNIEnv* env, jclass 
         }
         rawPointerCoords = event->getHistoricalRawPointerCoords(pointerIndex, historyPos);
     }
-    pointerCoordsFromNative(env, rawPointerCoords, event->getTransform(), outPointerCoordsObj);
+    pointerCoordsFromNative(env, rawPointerCoords, event->getXOffset(), event->getYOffset(),
+            outPointerCoordsObj);
 }
 
 static void android_view_MotionEvent_nativeGetPointerProperties(JNIEnv* env, jclass clazz,
@@ -573,18 +575,9 @@ static void android_view_MotionEvent_nativeTransform(JNIEnv* env, jclass clazz,
         jlong nativePtr, jobject matrixObj) {
     MotionEvent* event = reinterpret_cast<MotionEvent*>(nativePtr);
 
-    std::array<float, 9> matrix;
-    AMatrix_getContents(env, matrixObj, matrix.data());
-    event->transform(matrix);
-}
-
-static void android_view_MotionEvent_nativeApplyTransform(JNIEnv* env, jclass clazz,
-                                                          jlong nativePtr, jobject matrixObj) {
-    MotionEvent* event = reinterpret_cast<MotionEvent*>(nativePtr);
-
-    std::array<float, 9> matrix;
-    AMatrix_getContents(env, matrixObj, matrix.data());
-    event->applyTransform(matrix);
+    float m[9];
+    AMatrix_getContents(env, matrixObj, m);
+    event->transform(m);
 }
 
 // ----------------- @CriticalNative ------------------------------
@@ -799,8 +792,6 @@ static const JNINativeMethod gMotionEventMethods[] = {
         {"nativeGetAxisValue", "(JIII)F", (void*)android_view_MotionEvent_nativeGetAxisValue},
         {"nativeTransform", "(JLandroid/graphics/Matrix;)V",
          (void*)android_view_MotionEvent_nativeTransform},
-        {"nativeApplyTransform", "(JLandroid/graphics/Matrix;)V",
-         (void*)android_view_MotionEvent_nativeApplyTransform},
 
         // --------------- @CriticalNative ------------------
 

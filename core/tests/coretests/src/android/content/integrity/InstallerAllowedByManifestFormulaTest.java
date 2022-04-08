@@ -110,7 +110,7 @@ public class InstallerAllowedByManifestFormulaTest {
         assertThat(FORMULA.matches(appInstallMetadata)).isTrue();
     }
 
-    /** Returns a builder with all fields filled with some placeholder data. */
+    /** Returns a builder with all fields filled with some dummy data. */
     private AppInstallMetadata.Builder getAppInstallMetadataBuilder() {
         return new AppInstallMetadata.Builder()
                 .setPackageName("abc")

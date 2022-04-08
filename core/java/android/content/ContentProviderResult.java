@@ -143,16 +143,16 @@ public class ContentProviderResult implements Parcelable {
     public String toString() {
         final StringBuilder sb = new StringBuilder("ContentProviderResult(");
         if (uri != null) {
-            sb.append("uri=").append(uri).append(' ');
+            sb.append("uri=" + uri + " ");
         }
         if (count != null) {
-            sb.append("count=").append(count).append(' ');
+            sb.append("count=" + count + " ");
         }
         if (extras != null) {
-            sb.append("extras=").append(extras).append(' ');
+            sb.append("extras=" + extras + " ");
         }
         if (exception != null) {
-            sb.append("exception=").append(exception).append(' ');
+            sb.append("exception=" + exception + " ");
         }
         sb.deleteCharAt(sb.length() - 1);
         sb.append(")");

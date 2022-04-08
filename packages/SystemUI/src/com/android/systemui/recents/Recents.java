@@ -19,6 +19,7 @@ package com.android.systemui.recents;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.res.Configuration;
+import android.graphics.Rect;
 import android.provider.Settings;
 
 import com.android.systemui.SystemUI;
@@ -62,6 +63,10 @@ public class Recents extends SystemUI implements CommandQueue.Callbacks {
         if (mContext.getDisplayId() == displayId) {
             mImpl.onAppTransitionFinished();
         }
+    }
+
+    public void growRecents() {
+        mImpl.growRecents();
     }
 
     @Override
@@ -117,6 +122,17 @@ public class Recents extends SystemUI implements CommandQueue.Callbacks {
         }
 
         mImpl.cancelPreloadRecentApps();
+    }
+
+    public boolean splitPrimaryTask(int stackCreateMode, Rect initialBounds,
+            int metricsDockAction) {
+        // Ensure the device has been provisioned before allowing the user to interact with
+        // recents
+        if (!isUserSetup()) {
+            return false;
+        }
+
+        return mImpl.splitPrimaryTask(stackCreateMode, initialBounds, metricsDockAction);
     }
 
     /**

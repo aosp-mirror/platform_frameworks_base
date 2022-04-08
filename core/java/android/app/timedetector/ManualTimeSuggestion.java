@@ -109,7 +109,7 @@ public final class ManualTimeSuggestion implements Parcelable {
     }
 
     @Override
-    public boolean equals(@Nullable Object o) {
+    public boolean equals(Object o) {
         if (this == o) {
             return true;
         }

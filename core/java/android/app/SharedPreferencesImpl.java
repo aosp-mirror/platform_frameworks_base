@@ -19,7 +19,7 @@ package android.app;
 import android.annotation.Nullable;
 import android.compat.Compatibility;
 import android.compat.annotation.ChangeId;
-import android.compat.annotation.EnabledSince;
+import android.compat.annotation.EnabledAfter;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.SharedPreferences;
 import android.os.Build;
@@ -71,7 +71,7 @@ final class SharedPreferencesImpl implements SharedPreferences {
      * {@link android.content.SharedPreferences.Editor#clear Editor.clear}.
      */
     @ChangeId
-    @EnabledSince(targetSdkVersion = Build.VERSION_CODES.R)
+    @EnabledAfter(targetSdkVersion = Build.VERSION_CODES.Q)
     private static final long CALLBACK_ON_CLEAR_CHANGE = 119147584L;
 
     // Lock ordering rules:
@@ -130,7 +130,7 @@ final class SharedPreferencesImpl implements SharedPreferences {
         startLoadFromDisk();
     }
 
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     private void startLoadFromDisk() {
         synchronized (mLock) {
             mLoaded = false;

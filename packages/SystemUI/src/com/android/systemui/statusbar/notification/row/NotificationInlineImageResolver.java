@@ -19,7 +19,10 @@ package com.android.systemui.statusbar.notification.row;
 import android.app.ActivityManager;
 import android.app.Notification;
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.Icon;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Parcelable;
@@ -78,7 +81,7 @@ public class NotificationInlineImageResolver implements ImageResolver {
      * @return True if has its internal cache, false otherwise.
      */
     public boolean hasCache() {
-        return mImageCache != null && !isLowRam();
+        return mImageCache != null && !ActivityManager.isLowRamDeviceStatic();
     }
 
     private boolean isLowRam() {
@@ -107,6 +110,11 @@ public class NotificationInlineImageResolver implements ImageResolver {
                 : R.dimen.notification_custom_view_max_image_height);
     }
 
+    @VisibleForTesting
+    protected BitmapDrawable resolveImageInternal(Uri uri) throws IOException {
+        return (BitmapDrawable) LocalImageResolver.resolveImage(uri, mContext);
+    }
+
     /**
      * To resolve image from specified uri directly. If the resulting image is larger than the
      * maximum allowed size, scale it down.
@@ -115,7 +123,13 @@ public class NotificationInlineImageResolver implements ImageResolver {
      * @throws IOException Throws if failed at resolving the image.
      */
     Drawable resolveImage(Uri uri) throws IOException {
-        return LocalImageResolver.resolveImage(uri, mContext, mMaxImageWidth, mMaxImageHeight);
+        BitmapDrawable image = resolveImageInternal(uri);
+        if (image == null || image.getBitmap() == null) {
+            throw new IOException("resolveImageInternal returned null for uri: " + uri);
+        }
+        Bitmap bitmap = image.getBitmap();
+        image.setBitmap(Icon.scaleDownIfNecessary(bitmap, mMaxImageWidth, mMaxImageHeight));
+        return image;
     }
 
     @Override

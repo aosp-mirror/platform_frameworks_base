@@ -37,7 +37,6 @@ public:
     std::future<AnimatedImageDrawable::Snapshot> reset(const sk_sp<AnimatedImageDrawable>&);
 
 private:
-    friend sp<AnimatedImageThread>;
     AnimatedImageThread();
 };
 

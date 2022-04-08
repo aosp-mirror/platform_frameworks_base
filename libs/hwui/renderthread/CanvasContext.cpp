@@ -26,7 +26,6 @@
 #include <cstdlib>
 #include <functional>
 
-#include <gui/TraceUtils.h>
 #include "../Properties.h"
 #include "AnimationContext.h"
 #include "Frame.h"
@@ -40,6 +39,7 @@
 #include "thread/CommonPool.h"
 #include "utils/GLUtils.h"
 #include "utils/TimeUtils.h"
+#include "utils/TraceUtils.h"
 
 #define TRIM_MEMORY_COMPLETE 80
 #define TRIM_MEMORY_UI_HIDDEN 20
@@ -55,22 +55,6 @@ static const float NANOS_PER_MILLIS_F = 1000000.0f;
 namespace android {
 namespace uirenderer {
 namespace renderthread {
-
-namespace {
-class ScopedActiveContext {
-public:
-    ScopedActiveContext(CanvasContext* context) { sActiveContext = context; }
-
-    ~ScopedActiveContext() { sActiveContext = nullptr; }
-
-    static CanvasContext* getActiveContext() { return sActiveContext; }
-
-private:
-    static CanvasContext* sActiveContext;
-};
-
-CanvasContext* ScopedActiveContext::sActiveContext = nullptr;
-} /* namespace */
 
 CanvasContext* CanvasContext::create(RenderThread& thread, bool translucent,
                                      RenderNode* rootRenderNode, IContextFactory* contextFactory) {
@@ -124,6 +108,7 @@ CanvasContext::CanvasContext(RenderThread& thread, bool translucent, RenderNode*
     rootRenderNode->makeRoot();
     mRenderNodes.emplace_back(rootRenderNode);
     mProfiler.setDensity(DeviceInfo::getDensity());
+    setRenderAheadDepth(Properties::defaultRenderAhead);
 }
 
 CanvasContext::~CanvasContext() {
@@ -149,13 +134,12 @@ void CanvasContext::removeRenderNode(RenderNode* node) {
 void CanvasContext::destroy() {
     stopDrawing();
     setSurface(nullptr);
-    setSurfaceControl(nullptr);
     freePrefetchedLayers();
     destroyHardwareResources();
     mAnimationContext->destroy();
 }
 
-static void setBufferCount(ANativeWindow* window) {
+static void setBufferCount(ANativeWindow* window, uint32_t extraBuffers) {
     int query_value;
     int err = window->query(window, NATIVE_WINDOW_MIN_UNDEQUEUED_BUFFERS, &query_value);
     if (err != 0 || query_value < 0) {
@@ -164,14 +148,20 @@ static void setBufferCount(ANativeWindow* window) {
     }
     auto min_undequeued_buffers = static_cast<uint32_t>(query_value);
 
-    // We only need to set min_undequeued + 2 because the renderahead amount was already factored into the
-    // query for min_undequeued
-    int bufferCount = min_undequeued_buffers + 2;
+    int bufferCount = min_undequeued_buffers + 2 + extraBuffers;
     native_window_set_buffer_count(window, bufferCount);
 }
 
 void CanvasContext::setSurface(ANativeWindow* window, bool enableTimeout) {
     ATRACE_CALL();
+
+    if (mRenderAheadDepth == 0 && DeviceInfo::get()->getMaxRefreshRate() > 66.6f) {
+        mFixedRenderAhead = false;
+        mRenderAheadCapacity = 1;
+    } else {
+        mFixedRenderAhead = true;
+        mRenderAheadCapacity = mRenderAheadDepth;
+    }
 
     if (window) {
         mNativeSurface = std::make_unique<ReliableSurface>(window);
@@ -180,47 +170,21 @@ void CanvasContext::setSurface(ANativeWindow* window, bool enableTimeout) {
             // TODO: Fix error handling & re-shorten timeout
             ANativeWindow_setDequeueTimeout(window, 4000_ms);
         }
+        mNativeSurface->setExtraBufferCount(mRenderAheadCapacity);
     } else {
         mNativeSurface = nullptr;
     }
-    setupPipelineSurface();
-}
 
-void CanvasContext::setSurfaceControl(ASurfaceControl* surfaceControl) {
-    if (surfaceControl == mSurfaceControl) return;
-
-    auto funcs = mRenderThread.getASurfaceControlFunctions();
-
-    if (surfaceControl == nullptr) {
-        setASurfaceTransactionCallback(nullptr);
-        setPrepareSurfaceControlForWebviewCallback(nullptr);
-    }
-
-    if (mSurfaceControl != nullptr) {
-        funcs.unregisterListenerFunc(this, &onSurfaceStatsAvailable);
-        funcs.releaseFunc(mSurfaceControl);
-    }
-    mSurfaceControl = surfaceControl;
-    mSurfaceControlGenerationId++;
-    mExpectSurfaceStats = surfaceControl != nullptr;
-    if (mSurfaceControl != nullptr) {
-        funcs.acquireFunc(mSurfaceControl);
-        funcs.registerListenerFunc(surfaceControl, this, &onSurfaceStatsAvailable);
-    }
-}
-
-void CanvasContext::setupPipelineSurface() {
     bool hasSurface = mRenderPipeline->setSurface(
             mNativeSurface ? mNativeSurface->getNativeWindow() : nullptr, mSwapBehavior);
 
     if (mNativeSurface && !mNativeSurface->didSetExtraBuffers()) {
-        setBufferCount(mNativeSurface->getNativeWindow());
-
+        setBufferCount(mNativeSurface->getNativeWindow(), mRenderAheadCapacity);
     }
 
     mFrameNumber = -1;
 
-    if (mNativeSurface != nullptr && hasSurface) {
+    if (window != nullptr && hasSurface) {
         mHaveNewSurface = true;
         mSwapHistory.clear();
         // Enable frame stats after the surface has been bound to the appropriate graphics API.
@@ -275,9 +239,9 @@ void CanvasContext::setOpaque(bool opaque) {
     mOpaque = opaque;
 }
 
-void CanvasContext::setColorMode(ColorMode mode) {
-    mRenderPipeline->setSurfaceColorProperties(mode);
-    setupPipelineSurface();
+void CanvasContext::setWideGamut(bool wideGamut) {
+    ColorMode colorMode = wideGamut ? ColorMode::WideColorGamut : ColorMode::SRGB;
+    mRenderPipeline->setSurfaceColorProperties(colorMode);
 }
 
 bool CanvasContext::makeCurrent() {
@@ -354,8 +318,8 @@ void CanvasContext::prepareTree(TreeInfo& info, int64_t* uiFrameInfo, int64_t sy
     // just keep using the previous frame's structure instead
     if (!wasSkipped(mCurrentFrameInfo)) {
         mCurrentFrameInfo = mJankTracker.startFrame();
+        mLast4FrameInfos.next().first = mCurrentFrameInfo;
     }
-
     mCurrentFrameInfo->importUiThreadInfo(uiFrameInfo);
     mCurrentFrameInfo->set(FrameInfoIndex::SyncQueued) = syncQueued;
     mCurrentFrameInfo->markSyncStart();
@@ -459,7 +423,6 @@ void CanvasContext::prepareTree(TreeInfo& info, int64_t* uiFrameInfo, int64_t sy
 }
 
 void CanvasContext::stopDrawing() {
-    cleanupResources();
     mRenderThread.removeFrameCallback(this);
     mAnimationContext->pauseAnimators();
     mGenerationID++;
@@ -470,41 +433,44 @@ void CanvasContext::notifyFramePending() {
     mRenderThread.pushBackFrameCallback(this);
 }
 
-nsecs_t CanvasContext::draw() {
-    if (auto grContext = getGrContext()) {
-        if (grContext->abandoned()) {
-            LOG_ALWAYS_FATAL("GrContext is abandoned/device lost at start of CanvasContext::draw");
-            return 0;
-        }
+void CanvasContext::setPresentTime() {
+    int64_t presentTime = NATIVE_WINDOW_TIMESTAMP_AUTO;
+    int renderAhead = 0;
+    const auto frameIntervalNanos = mRenderThread.timeLord().frameIntervalNanos();
+    if (mFixedRenderAhead) {
+        renderAhead = std::min(mRenderAheadDepth, mRenderAheadCapacity);
+    } else if (frameIntervalNanos < 15_ms) {
+        renderAhead = std::min(1, static_cast<int>(mRenderAheadCapacity));
     }
+
+    if (renderAhead) {
+        presentTime = mCurrentFrameInfo->get(FrameInfoIndex::Vsync) +
+                (frameIntervalNanos * (renderAhead + 1)) - DeviceInfo::get()->getAppOffset() +
+                (frameIntervalNanos / 2);
+    }
+    native_window_set_buffers_timestamp(mNativeSurface->getNativeWindow(), presentTime);
+}
+
+void CanvasContext::draw() {
     SkRect dirty;
     mDamageAccumulator.finish(&dirty);
 
     if (dirty.isEmpty() && Properties::skipEmptyFrames && !surfaceRequiresRedraw()) {
         mCurrentFrameInfo->addFlag(FrameInfoFlags::SkippedFrame);
-        if (auto grContext = getGrContext()) {
-            // Submit to ensure that any texture uploads complete and Skia can
-            // free its staging buffers.
-            grContext->flushAndSubmit();
-        }
-
         // Notify the callbacks, even if there's nothing to draw so they aren't waiting
         // indefinitely
-        waitOnFences();
         for (auto& func : mFrameCompleteCallbacks) {
             std::invoke(func, mFrameNumber);
         }
         mFrameCompleteCallbacks.clear();
-        return 0;
+        return;
     }
-
-    ScopedActiveContext activeContext(this);
-    mCurrentFrameInfo->set(FrameInfoIndex::FrameInterval) =
-            mRenderThread.timeLord().frameIntervalNanos();
 
     mCurrentFrameInfo->markIssueDrawCommandsStart();
 
     Frame frame = mRenderPipeline->getFrame();
+    setPresentTime();
+
     SkRect windowDirty = computeDirtyRect(frame, &dirty);
 
     bool drew = mRenderPipeline->draw(frame, windowDirty, dirty, mLightGeometry, &mLayerUpdateQueue,
@@ -514,17 +480,6 @@ nsecs_t CanvasContext::draw() {
     int64_t frameCompleteNr = getFrameNumber();
 
     waitOnFences();
-
-    if (mNativeSurface) {
-        // TODO(b/165985262): measure performance impact
-        const auto vsyncId = mCurrentFrameInfo->get(FrameInfoIndex::FrameTimelineVsyncId);
-        if (vsyncId != UiFrameInfoBuilder::INVALID_VSYNC_ID) {
-            const auto inputEventId =
-                    static_cast<int32_t>(mCurrentFrameInfo->get(FrameInfoIndex::InputEventId));
-            native_window_set_frame_timeline_info(mNativeSurface->getNativeWindow(), vsyncId,
-                                                  inputEventId);
-        }
-    }
 
     bool requireSwap = false;
     int error = OK;
@@ -578,14 +533,17 @@ nsecs_t CanvasContext::draw() {
         }
         mCurrentFrameInfo->set(FrameInfoIndex::DequeueBufferDuration) = swap.dequeueDuration;
         mCurrentFrameInfo->set(FrameInfoIndex::QueueBufferDuration) = swap.queueDuration;
+        mLast4FrameInfos[-1].second = frameCompleteNr;
         mHaveNewSurface = false;
         mFrameNumber = -1;
     } else {
         mCurrentFrameInfo->set(FrameInfoIndex::DequeueBufferDuration) = 0;
         mCurrentFrameInfo->set(FrameInfoIndex::QueueBufferDuration) = 0;
+        mLast4FrameInfos[-1].second = -1;
     }
 
-    mCurrentFrameInfo->markSwapBuffersCompleted();
+    // TODO: Use a fence for real completion?
+    mCurrentFrameInfo->markFrameCompleted();
 
 #if LOG_FRAMETIME_MMA
     float thisFrame = mCurrentFrameInfo->duration(FrameInfoIndex::IssueDrawCommandsStart,
@@ -609,111 +567,28 @@ nsecs_t CanvasContext::draw() {
         mFrameCompleteCallbacks.clear();
     }
 
-    if (requireSwap) {
-        if (mExpectSurfaceStats) {
-            reportMetricsWithPresentTime();
-            std::lock_guard lock(mLast4FrameInfosMutex);
-            std::pair<FrameInfo*, int64_t>& next = mLast4FrameInfos.next();
-            next.first = mCurrentFrameInfo;
-            next.second = frameCompleteNr;
-        } else {
-            mCurrentFrameInfo->markFrameCompleted();
-            mCurrentFrameInfo->set(FrameInfoIndex::GpuCompleted)
-                    = mCurrentFrameInfo->get(FrameInfoIndex::FrameCompleted);
-            std::scoped_lock lock(mFrameMetricsReporterMutex);
-            mJankTracker.finishFrame(*mCurrentFrameInfo, mFrameMetricsReporter);
-        }
+    mJankTracker.finishFrame(*mCurrentFrameInfo);
+    if (CC_UNLIKELY(mFrameMetricsReporter.get() != nullptr)) {
+        mFrameMetricsReporter->reportFrameMetrics(mCurrentFrameInfo->data());
     }
 
-    cleanupResources();
+    if (mLast4FrameInfos.size() == mLast4FrameInfos.capacity()) {
+        // By looking 4 frames back, we guarantee all SF stats are available. There are at
+        // most 3 buffers in BufferQueue. Surface object keeps stats for the last 8 frames.
+        FrameInfo* forthBehind = mLast4FrameInfos.front().first;
+        int64_t composedFrameId = mLast4FrameInfos.front().second;
+        nsecs_t acquireTime = -1;
+        if (mNativeSurface) {
+            native_window_get_frame_timestamps(mNativeSurface->getNativeWindow(), composedFrameId,
+                                               nullptr, &acquireTime, nullptr, nullptr, nullptr,
+                                               nullptr, nullptr, nullptr, nullptr);
+        }
+        // Ignore default -1, NATIVE_WINDOW_TIMESTAMP_INVALID and NATIVE_WINDOW_TIMESTAMP_PENDING
+        forthBehind->set(FrameInfoIndex::GpuCompleted) = acquireTime > 0 ? acquireTime : -1;
+        mJankTracker.finishGpuDraw(*forthBehind);
+    }
+
     mRenderThread.cacheManager().onFrameCompleted();
-    return mCurrentFrameInfo->get(FrameInfoIndex::DequeueBufferDuration);
-}
-
-void CanvasContext::cleanupResources() {
-    auto& tracker = mJankTracker.frames();
-    auto size = tracker.size();
-    auto capacity = tracker.capacity();
-    if (size == capacity) {
-        nsecs_t nowNanos = systemTime(SYSTEM_TIME_MONOTONIC);
-        nsecs_t frameCompleteNanos =
-            tracker[0].get(FrameInfoIndex::FrameCompleted);
-        nsecs_t frameDiffNanos = nowNanos - frameCompleteNanos;
-        nsecs_t cleanupMillis = ns2ms(std::max(frameDiffNanos, 10_s));
-        mRenderThread.cacheManager().performDeferredCleanup(cleanupMillis);
-    }
-}
-
-void CanvasContext::reportMetricsWithPresentTime() {
-    {  // acquire lock
-        std::scoped_lock lock(mFrameMetricsReporterMutex);
-        if (mFrameMetricsReporter == nullptr) {
-            return;
-        }
-    }  // release lock
-    if (mNativeSurface == nullptr) {
-        return;
-    }
-    ATRACE_CALL();
-    FrameInfo* forthBehind;
-    int64_t frameNumber;
-    {  // acquire lock
-        std::scoped_lock lock(mLast4FrameInfosMutex);
-        if (mLast4FrameInfos.size() != mLast4FrameInfos.capacity()) {
-            // Not enough frames yet
-            return;
-        }
-        // Surface object keeps stats for the last 8 frames.
-        std::tie(forthBehind, frameNumber) = mLast4FrameInfos.front();
-    }  // release lock
-
-    nsecs_t presentTime = 0;
-    native_window_get_frame_timestamps(
-            mNativeSurface->getNativeWindow(), frameNumber, nullptr /*outRequestedPresentTime*/,
-            nullptr /*outAcquireTime*/, nullptr /*outLatchTime*/,
-            nullptr /*outFirstRefreshStartTime*/, nullptr /*outLastRefreshStartTime*/,
-            nullptr /*outGpuCompositionDoneTime*/, &presentTime, nullptr /*outDequeueReadyTime*/,
-            nullptr /*outReleaseTime*/);
-
-    forthBehind->set(FrameInfoIndex::DisplayPresentTime) = presentTime;
-    {  // acquire lock
-        std::scoped_lock lock(mFrameMetricsReporterMutex);
-        if (mFrameMetricsReporter != nullptr) {
-            mFrameMetricsReporter->reportFrameMetrics(forthBehind->data(), true /*hasPresentTime*/);
-        }
-    }  // release lock
-}
-
-FrameInfo* CanvasContext::getFrameInfoFromLast4(uint64_t frameNumber) {
-    std::scoped_lock lock(mLast4FrameInfosMutex);
-    for (size_t i = 0; i < mLast4FrameInfos.size(); i++) {
-        if (mLast4FrameInfos[i].second == frameNumber) {
-            return mLast4FrameInfos[i].first;
-        }
-    }
-    return nullptr;
-}
-
-void CanvasContext::onSurfaceStatsAvailable(void* context, ASurfaceControl* control,
-            ASurfaceControlStats* stats) {
-
-    CanvasContext* instance = static_cast<CanvasContext*>(context);
-
-    const ASurfaceControlFunctions& functions =
-            instance->mRenderThread.getASurfaceControlFunctions();
-
-    nsecs_t gpuCompleteTime = functions.getAcquireTimeFunc(stats);
-    uint64_t frameNumber = functions.getFrameNumberFunc(stats);
-
-    FrameInfo* frameInfo = instance->getFrameInfoFromLast4(frameNumber);
-
-    if (frameInfo != nullptr) {
-        frameInfo->set(FrameInfoIndex::FrameCompleted) = std::max(gpuCompleteTime,
-                frameInfo->get(FrameInfoIndex::SwapBuffersCompleted));
-        frameInfo->set(FrameInfoIndex::GpuCompleted) = gpuCompleteTime;
-        std::scoped_lock lock(instance->mFrameMetricsReporterMutex);
-        instance->mJankTracker.finishFrame(*frameInfo, instance->mFrameMetricsReporter);
-    }
 }
 
 // Called by choreographer to do an RT-driven animation
@@ -739,13 +614,8 @@ void CanvasContext::prepareAndDraw(RenderNode* node) {
     ATRACE_CALL();
 
     nsecs_t vsync = mRenderThread.timeLord().computeFrameTimeNanos();
-    int64_t vsyncId = mRenderThread.timeLord().lastVsyncId();
-    int64_t frameDeadline = mRenderThread.timeLord().lastFrameDeadline();
-    int64_t frameInterval = mRenderThread.timeLord().frameIntervalNanos();
     int64_t frameInfo[UI_THREAD_FRAME_INFO_SIZE];
-    UiFrameInfoBuilder(frameInfo)
-        .addFlag(FrameInfoFlags::RTAnimation)
-        .setVsync(vsync, vsync, vsyncId, frameDeadline, frameInterval);
+    UiFrameInfoBuilder(frameInfo).addFlag(FrameInfoFlags::RTAnimation).setVsync(vsync, vsync);
 
     TreeInfo info(TreeInfo::MODE_RT_ONLY, *this);
     prepareTree(info, frameInfo, systemTime(SYSTEM_TIME_MONOTONIC), node);
@@ -872,6 +742,14 @@ bool CanvasContext::surfaceRequiresRedraw() {
     return width != mLastFrameWidth || height != mLastFrameHeight;
 }
 
+void CanvasContext::setRenderAheadDepth(int renderAhead) {
+    if (renderAhead > 2 || renderAhead < 0 || mNativeSurface) {
+        return;
+    }
+    mFixedRenderAhead = true;
+    mRenderAheadDepth = static_cast<uint32_t>(renderAhead);
+}
+
 SkRect CanvasContext::computeDirtyRect(const Frame& frame, SkRect* dirty) {
     if (frame.width() != mLastFrameWidth || frame.height() != mLastFrameHeight) {
         // can't rely on prior content of window if viewport size changes
@@ -920,22 +798,6 @@ SkRect CanvasContext::computeDirtyRect(const Frame& frame, SkRect* dirty) {
     }
 
     return windowDirty;
-}
-
-CanvasContext* CanvasContext::getActiveContext() {
-    return ScopedActiveContext::getActiveContext();
-}
-
-bool CanvasContext::mergeTransaction(ASurfaceTransaction* transaction, ASurfaceControl* control) {
-    if (!mASurfaceTransactionCallback) return false;
-    return std::invoke(mASurfaceTransactionCallback, reinterpret_cast<int64_t>(transaction),
-                       reinterpret_cast<int64_t>(control), getFrameNumber());
-}
-
-void CanvasContext::prepareSurfaceControlForWebview() {
-    if (mPrepareSurfaceControlForWebviewCallback) {
-        std::invoke(mPrepareSurfaceControlForWebviewCallback);
-    }
 }
 
 } /* namespace renderthread */

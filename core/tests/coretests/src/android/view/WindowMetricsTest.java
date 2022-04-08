@@ -27,6 +27,7 @@ import android.hardware.display.DisplayManager;
 import android.os.Handler;
 import android.platform.test.annotations.Presubmit;
 
+import androidx.test.filters.FlakyTest;
 import androidx.test.filters.SmallTest;
 import androidx.test.platform.app.InstrumentationRegistry;
 import androidx.test.runner.AndroidJUnit4;
@@ -45,6 +46,7 @@ import org.junit.runner.RunWith;
  * <p>This test class is a part of Window Manager Service tests and specified in
  * {@link com.android.server.wm.test.filters.FrameworksTestsFilter}.
  */
+@FlakyTest(bugId = 148789183, detail = "Remove after confirmed it's stable.")
 @RunWith(AndroidJUnit4.class)
 @SmallTest
 @Presubmit
@@ -73,17 +75,17 @@ public class WindowMetricsTest {
             // Check get metrics do not crash.
             WindowMetrics currentMetrics = mWm.getCurrentWindowMetrics();
             WindowMetrics maxMetrics = mWm.getMaximumWindowMetrics();
-            verifyMetricsValidity(currentMetrics, maxMetrics);
+            verifyMetricsSanity(currentMetrics, maxMetrics);
 
             mWm.removeViewImmediate(view);
             // Check get metrics do not crash.
             currentMetrics = mWm.getCurrentWindowMetrics();
             maxMetrics = mWm.getMaximumWindowMetrics();
-            verifyMetricsValidity(currentMetrics, maxMetrics);
+            verifyMetricsSanity(currentMetrics, maxMetrics);
         }, 0);
     }
 
-    private static void verifyMetricsValidity(WindowMetrics currentMetrics,
+    private static void verifyMetricsSanity(WindowMetrics currentMetrics,
             WindowMetrics maxMetrics) {
         Rect currentBounds = currentMetrics.getBounds();
         Rect maxBounds = maxMetrics.getBounds();

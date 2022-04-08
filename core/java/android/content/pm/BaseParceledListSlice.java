@@ -18,7 +18,6 @@ package android.content.pm;
 
 import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Binder;
-import android.os.Build;
 import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -75,7 +74,16 @@ abstract class BaseParceledListSlice<T> implements Parcelable {
             if (p.readInt() == 0) {
                 break;
             }
-            listElementClass = readVerifyAndAddElement(creator, p, loader, listElementClass);
+
+            final T parcelable = readCreator(creator, p, loader);
+            if (listElementClass == null) {
+                listElementClass = parcelable.getClass();
+            } else {
+                verifySameType(listElementClass, parcelable.getClass());
+            }
+
+            mList.add(parcelable);
+
             if (DEBUG) Log.d(TAG, "Read inline #" + i + ": " + mList.get(mList.size()-1));
             i++;
         }
@@ -95,26 +103,17 @@ abstract class BaseParceledListSlice<T> implements Parcelable {
                 return;
             }
             while (i < N && reply.readInt() != 0) {
-                listElementClass = readVerifyAndAddElement(creator, reply, loader,
-                        listElementClass);
+                final T parcelable = readCreator(creator, reply, loader);
+                verifySameType(listElementClass, parcelable.getClass());
+
+                mList.add(parcelable);
+
                 if (DEBUG) Log.d(TAG, "Read extra #" + i + ": " + mList.get(mList.size()-1));
                 i++;
             }
             reply.recycle();
             data.recycle();
         }
-    }
-
-    private Class<?> readVerifyAndAddElement(Parcelable.Creator<?> creator, Parcel p,
-            ClassLoader loader, Class<?> listElementClass) {
-        final T parcelable = readCreator(creator, p, loader);
-        if (listElementClass == null) {
-            listElementClass = parcelable.getClass();
-        } else {
-            verifySameType(listElementClass, parcelable.getClass());
-        }
-        mList.add(parcelable);
-        return listElementClass;
     }
 
     private T readCreator(Parcelable.Creator<?> creator, Parcel p, ClassLoader loader) {
@@ -134,7 +133,7 @@ abstract class BaseParceledListSlice<T> implements Parcelable {
         }
     }
 
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public List<T> getList() {
         return mList;
     }
@@ -208,7 +207,7 @@ abstract class BaseParceledListSlice<T> implements Parcelable {
 
     protected abstract void writeElement(T parcelable, Parcel reply, int callFlags);
 
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     protected abstract void writeParcelableCreator(T parcelable, Parcel dest);
 
     protected abstract Parcelable.Creator<?> readParcelableCreator(Parcel from, ClassLoader loader);

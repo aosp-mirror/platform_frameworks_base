@@ -16,10 +16,6 @@
 
 package android.view;
 
-import static android.view.InsetsSourceProto.FRAME;
-import static android.view.InsetsSourceProto.TYPE;
-import static android.view.InsetsSourceProto.VISIBLE;
-import static android.view.InsetsSourceProto.VISIBLE_FRAME;
 import static android.view.InsetsState.ITYPE_CAPTION_BAR;
 import static android.view.InsetsState.ITYPE_IME;
 
@@ -29,7 +25,6 @@ import android.graphics.Insets;
 import android.graphics.Rect;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.util.proto.ProtoOutputStream;
 import android.view.InsetsState.InternalInsetsType;
 
 import java.io.PrintWriter;
@@ -59,14 +54,6 @@ public class InsetsSource implements Parcelable {
     public InsetsSource(InsetsSource other) {
         mType = other.mType;
         mFrame = new Rect(other.mFrame);
-        mVisible = other.mVisible;
-        mVisibleFrame = other.mVisibleFrame != null
-                ? new Rect(other.mVisibleFrame)
-                : null;
-    }
-
-    public void set(InsetsSource other) {
-        mFrame.set(other.mFrame);
         mVisible = other.mVisible;
         mVisibleFrame = other.mVisibleFrame != null
                 ? new Rect(other.mVisibleFrame)
@@ -140,11 +127,7 @@ public class InsetsSource implements Parcelable {
         if (getType() == ITYPE_CAPTION_BAR) {
             return Insets.of(0, frame.height(), 0, 0);
         }
-        // Checks for whether there is shared edge with insets for 0-width/height window.
-        final boolean hasIntersection = relativeFrame.isEmpty()
-                ? getIntersection(frame, relativeFrame, mTmpFrame)
-                : mTmpFrame.setIntersect(frame, relativeFrame);
-        if (!hasIntersection) {
+        if (!getIntersection(frame, relativeFrame, mTmpFrame)) {
             return Insets.NONE;
         }
 
@@ -200,23 +183,6 @@ public class InsetsSource implements Parcelable {
         return false;
     }
 
-    /**
-     * Export the state of {@link InsetsSource} into a protocol buffer output stream.
-     *
-     * @param proto   Stream to write the state to
-     * @param fieldId FieldId of InsetsSource as defined in the parent message
-     */
-    public void dumpDebug(ProtoOutputStream proto, long fieldId) {
-        final long token = proto.start(fieldId);
-        proto.write(TYPE, InsetsState.typeToString(mType));
-        mFrame.dumpDebug(proto, FRAME);
-        if (mVisibleFrame != null) {
-            mVisibleFrame.dumpDebug(proto, VISIBLE_FRAME);
-        }
-        proto.write(VISIBLE, mVisible);
-        proto.end(token);
-    }
-
     public void dump(String prefix, PrintWriter pw) {
         pw.print(prefix);
         pw.print("InsetsSource type="); pw.print(InsetsState.typeToString(mType));
@@ -229,7 +195,7 @@ public class InsetsSource implements Parcelable {
     }
 
     @Override
-    public boolean equals(@Nullable Object o) {
+    public boolean equals(Object o) {
         return equals(o, false);
     }
 
@@ -237,7 +203,7 @@ public class InsetsSource implements Parcelable {
      * @param excludeInvisibleImeFrames If {@link InsetsState#ITYPE_IME} frames should be ignored
      *                                  when IME is not visible.
      */
-    public boolean equals(@Nullable Object o, boolean excludeInvisibleImeFrames) {
+    public boolean equals(Object o, boolean excludeInvisibleImeFrames) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
@@ -261,7 +227,11 @@ public class InsetsSource implements Parcelable {
 
     public InsetsSource(Parcel in) {
         mType = in.readInt();
-        mFrame = Rect.CREATOR.createFromParcel(in);
+        if (in.readInt() != 0) {
+            mFrame = Rect.CREATOR.createFromParcel(in);
+        } else {
+            mFrame = null;
+        }
         if (in.readInt() != 0) {
             mVisibleFrame = Rect.CREATOR.createFromParcel(in);
         } else {
@@ -278,7 +248,12 @@ public class InsetsSource implements Parcelable {
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeInt(mType);
-        mFrame.writeToParcel(dest, 0);
+        if (mFrame != null) {
+            dest.writeInt(1);
+            mFrame.writeToParcel(dest, 0);
+        } else {
+            dest.writeInt(0);
+        }
         if (mVisibleFrame != null) {
             dest.writeInt(1);
             mVisibleFrame.writeToParcel(dest, 0);

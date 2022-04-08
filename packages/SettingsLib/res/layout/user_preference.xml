@@ -27,7 +27,9 @@
             android:layout_width="@dimen/user_icon_view_height"
             android:layout_height="@dimen/user_icon_view_height"
             android:layout_gravity="center"
-            android:scaleType="fitCenter" />
+            android:scaleType="fitCenter"
+            android:paddingBottom="@dimen/user_spinner_padding"
+            android:paddingTop="@dimen/user_spinner_padding" />
 
     <TextView
             android:id="@android:id/title"
@@ -40,6 +42,6 @@
             android:fadingEdge="horizontal"
             android:paddingStart="@dimen/user_spinner_padding"
             android:paddingEnd="@dimen/user_spinner_padding"
-            android:textAppearance="?android:attr/textAppearanceMedium" />
+            style="?android:attr/textAppearanceMedium" />
 
 </LinearLayout>

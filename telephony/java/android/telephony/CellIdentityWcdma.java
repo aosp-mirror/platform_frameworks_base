@@ -16,8 +16,6 @@
 
 package android.telephony;
 
-import static android.text.TextUtils.formatSimple;
-
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.compat.annotation.UnsupportedAppUsage;
@@ -157,7 +155,7 @@ public final class CellIdentityWcdma extends CellIdentity {
 
         if (mLac == CellInfo.UNAVAILABLE || mCid == CellInfo.UNAVAILABLE) return;
 
-        mGlobalCellId = plmn + formatSimple("%04x%04x", mLac, mCid);
+        mGlobalCellId = plmn + String.format("%04x%04x", mLac, mCid);
     }
 
     /**

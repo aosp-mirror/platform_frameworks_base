@@ -55,10 +55,6 @@ public class JobScheduledEvent implements Parcelable {
     /** @see JobParameters#getJobId() */
     public final int jobId;
 
-    public final String packageName;
-
-    public final boolean shouldUpdateVersions;
-
     /** Device is 'idle' and it's charging (plugged in). */
     public static final int SORT_IDLE_MAINTENANCE = 0;
     private static final int SORT_MAX = 0;
@@ -81,22 +77,14 @@ public class JobScheduledEvent implements Parcelable {
      * Only the job ID is retained from {@code jobParams}, all other param info is dropped.
      */
     @NonNull
-    public static JobScheduledEvent createIdleMaintenance(
-        @Type int type, JobParameters jobParams, String packageName, boolean shouldUpdateVersions) {
-        return new JobScheduledEvent(
-            type, jobParams.getJobId(), SORT_IDLE_MAINTENANCE, packageName, shouldUpdateVersions);
+    public static JobScheduledEvent createIdleMaintenance(@Type int type, JobParameters jobParams) {
+        return new JobScheduledEvent(type, jobParams.getJobId(), SORT_IDLE_MAINTENANCE);
     }
 
-    private JobScheduledEvent(@Type int type,
-                              int jobId,
-                              @Sort int sort,
-                              String packageName,
-                              boolean shouldUpdateVersions) {
+    private JobScheduledEvent(@Type int type, int jobId, @Sort int sort) {
         this.type = type;
         this.jobId = jobId;
         this.sort = sort;
-        this.packageName = packageName;
-        this.shouldUpdateVersions = shouldUpdateVersions;
 
         checkConstructorArguments();
     }
@@ -120,16 +108,12 @@ public class JobScheduledEvent implements Parcelable {
     private boolean equals(JobScheduledEvent other) {
         return type == other.type &&
                 jobId == other.jobId &&
-                sort == other.sort &&
-                packageName.equals(other.packageName) &&
-                shouldUpdateVersions == other.shouldUpdateVersions;
+                sort == other.sort;
     }
 
     @Override
     public String toString() {
-        return String.format(
-            "{type: %d, jobId: %d, sort: %d, packageName: %s, shouldUpdateVersions %b}",
-            type, jobId, sort, packageName, shouldUpdateVersions);
+        return String.format("{type: %d, jobId: %d, sort: %d}", type, jobId, sort);
     }
 
     //<editor-fold desc="Binder boilerplate">
@@ -138,8 +122,6 @@ public class JobScheduledEvent implements Parcelable {
         out.writeInt(type);
         out.writeInt(jobId);
         out.writeInt(sort);
-        out.writeString(packageName);
-        out.writeBoolean(shouldUpdateVersions);
 
         // We do not parcel the entire JobParameters here because there is no C++ equivalent
         // of that class [which the iorapd side of the binder interface requires].
@@ -149,8 +131,6 @@ public class JobScheduledEvent implements Parcelable {
         this.type = in.readInt();
         this.jobId = in.readInt();
         this.sort = in.readInt();
-        this.packageName = in.readString();
-        this.shouldUpdateVersions = in.readBoolean();
 
         checkConstructorArguments();
     }

@@ -49,7 +49,6 @@ class QuaresActivity : Activity() {
     private lateinit var label: Button
     private lateinit var grid: GridLayout
 
-    @Suppress("DEPRECATION")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 

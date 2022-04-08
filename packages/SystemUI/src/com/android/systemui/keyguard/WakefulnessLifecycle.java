@@ -17,21 +17,9 @@
 package com.android.systemui.keyguard;
 
 import android.annotation.IntDef;
-import android.app.IWallpaperManager;
-import android.content.Context;
-import android.content.res.Configuration;
-import android.graphics.Point;
-import android.os.Bundle;
-import android.os.PowerManager;
-import android.os.RemoteException;
 import android.os.Trace;
-import android.util.DisplayMetrics;
-
-import androidx.annotation.Nullable;
 
 import com.android.systemui.Dumpable;
-import com.android.systemui.R;
-import com.android.systemui.dagger.SysUISingleton;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -39,11 +27,12 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 
 /**
- * Tracks the wakefulness lifecycle, including why we're waking or sleeping.
+ * Tracks the wakefulness lifecycle.
  */
-@SysUISingleton
+@Singleton
 public class WakefulnessLifecycle extends Lifecycle<WakefulnessLifecycle.Observer> implements
         Dumpable {
 
@@ -61,70 +50,21 @@ public class WakefulnessLifecycle extends Lifecycle<WakefulnessLifecycle.Observe
     public static final int WAKEFULNESS_AWAKE = 2;
     public static final int WAKEFULNESS_GOING_TO_SLEEP = 3;
 
-    private final Context mContext;
-    private final DisplayMetrics mDisplayMetrics;
-
-    @Nullable
-    private final IWallpaperManager mWallpaperManagerService;
-
-    private int mWakefulness = WAKEFULNESS_AWAKE;
-
-    private @PowerManager.WakeReason int mLastWakeReason = PowerManager.WAKE_REASON_UNKNOWN;
-
-    @Nullable
-    private Point mLastWakeOriginLocation = null;
-
-    private @PowerManager.GoToSleepReason int mLastSleepReason =
-            PowerManager.GO_TO_SLEEP_REASON_MIN;
-
-    @Nullable
-    private Point mLastSleepOriginLocation = null;
+    private int mWakefulness = WAKEFULNESS_ASLEEP;
 
     @Inject
-    public WakefulnessLifecycle(
-            Context context,
-            @Nullable IWallpaperManager wallpaperManagerService) {
-        mContext = context;
-        mDisplayMetrics = context.getResources().getDisplayMetrics();
-        mWallpaperManagerService = wallpaperManagerService;
+    public WakefulnessLifecycle() {
     }
 
     public @Wakefulness int getWakefulness() {
         return mWakefulness;
     }
 
-    /**
-     * Returns the most recent reason the device woke up. This is one of PowerManager.WAKE_REASON_*.
-     */
-    public @PowerManager.WakeReason int getLastWakeReason() {
-        return mLastWakeReason;
-    }
-
-    /**
-     * Returns the most recent reason the device went to sleep up. This is one of
-     * PowerManager.GO_TO_SLEEP_REASON_*.
-     */
-    public @PowerManager.GoToSleepReason int getLastSleepReason() {
-        return mLastSleepReason;
-    }
-
-    public void dispatchStartedWakingUp(@PowerManager.WakeReason int pmWakeReason) {
+    public void dispatchStartedWakingUp() {
         if (getWakefulness() == WAKEFULNESS_WAKING) {
             return;
         }
         setWakefulness(WAKEFULNESS_WAKING);
-        mLastWakeReason = pmWakeReason;
-        updateLastWakeOriginLocation();
-
-        if (mWallpaperManagerService != null) {
-            try {
-                mWallpaperManagerService.notifyWakingUp(
-                        mLastWakeOriginLocation.x, mLastWakeOriginLocation.y, new Bundle());
-            } catch (RemoteException e) {
-                e.printStackTrace();
-            }
-        }
-
         dispatch(Observer::onStartedWakingUp);
     }
 
@@ -136,23 +76,11 @@ public class WakefulnessLifecycle extends Lifecycle<WakefulnessLifecycle.Observe
         dispatch(Observer::onFinishedWakingUp);
     }
 
-    public void dispatchStartedGoingToSleep(@PowerManager.GoToSleepReason int pmSleepReason) {
+    public void dispatchStartedGoingToSleep() {
         if (getWakefulness() == WAKEFULNESS_GOING_TO_SLEEP) {
             return;
         }
         setWakefulness(WAKEFULNESS_GOING_TO_SLEEP);
-        mLastSleepReason = pmSleepReason;
-        updateLastSleepOriginLocation();
-
-        if (mWallpaperManagerService != null) {
-            try {
-                mWallpaperManagerService.notifyGoingToSleep(
-                        mLastSleepOriginLocation.x, mLastSleepOriginLocation.y, new Bundle());
-            } catch (RemoteException e) {
-                e.printStackTrace();
-            }
-        }
-
         dispatch(Observer::onStartedGoingToSleep);
     }
 
@@ -173,60 +101,6 @@ public class WakefulnessLifecycle extends Lifecycle<WakefulnessLifecycle.Observe
     private void setWakefulness(@Wakefulness int wakefulness) {
         mWakefulness = wakefulness;
         Trace.traceCounter(Trace.TRACE_TAG_APP, "wakefulness", wakefulness);
-    }
-
-    private void updateLastWakeOriginLocation() {
-        mLastWakeOriginLocation = null;
-
-        switch (mLastWakeReason) {
-            case PowerManager.WAKE_REASON_POWER_BUTTON:
-                mLastWakeOriginLocation = getPowerButtonOrigin();
-                break;
-            default:
-                mLastWakeOriginLocation = getDefaultWakeSleepOrigin();
-                break;
-        }
-    }
-
-    private void updateLastSleepOriginLocation() {
-        mLastSleepOriginLocation = null;
-
-        switch (mLastSleepReason) {
-            case PowerManager.GO_TO_SLEEP_REASON_POWER_BUTTON:
-                mLastSleepOriginLocation = getPowerButtonOrigin();
-                break;
-            default:
-                mLastSleepOriginLocation = getDefaultWakeSleepOrigin();
-                break;
-        }
-    }
-
-    /**
-     * Returns the point on the screen closest to the physical power button.
-     */
-    private Point getPowerButtonOrigin() {
-        final boolean isPortrait = mContext.getResources().getConfiguration().orientation
-                == Configuration.ORIENTATION_PORTRAIT;
-
-        if (isPortrait) {
-            return new Point(
-                    mDisplayMetrics.widthPixels,
-                    mContext.getResources().getDimensionPixelSize(
-                            R.dimen.physical_power_button_center_screen_location_y));
-        } else {
-            return new Point(
-                    mContext.getResources().getDimensionPixelSize(
-                            R.dimen.physical_power_button_center_screen_location_y),
-                    mDisplayMetrics.heightPixels);
-        }
-    }
-
-    /**
-     * Returns the point on the screen used as the default origin for wake/sleep events. This is the
-     * middle-bottom of the screen.
-     */
-    private Point getDefaultWakeSleepOrigin() {
-        return new Point(mDisplayMetrics.widthPixels / 2, mDisplayMetrics.heightPixels);
     }
 
     public interface Observer {

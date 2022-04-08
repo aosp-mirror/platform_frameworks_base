@@ -103,11 +103,8 @@ public class GestureNavigationSettingsObserver extends ContentObserver {
         final DisplayMetrics dm = userRes.getDisplayMetrics();
         final float defaultInset = userRes.getDimension(
                 com.android.internal.R.dimen.config_backGestureInset) / dm.density;
-        // Only apply the back gesture config if there is an existing inset
-        final float backGestureInset = defaultInset > 0
-                ? DeviceConfig.getFloat(DeviceConfig.NAMESPACE_SYSTEMUI,
-                        BACK_GESTURE_EDGE_WIDTH, defaultInset)
-                : defaultInset;
+        final float backGestureInset = DeviceConfig.getFloat(DeviceConfig.NAMESPACE_SYSTEMUI,
+                BACK_GESTURE_EDGE_WIDTH, defaultInset);
         final float inset = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, backGestureInset,
                 dm);
         final float scale = Settings.Secure.getFloatForUser(

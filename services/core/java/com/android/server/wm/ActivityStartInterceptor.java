@@ -70,7 +70,7 @@ import com.android.server.am.ActivityManagerService;
 class ActivityStartInterceptor {
 
     private final ActivityTaskManagerService mService;
-    private final ActivityTaskSupervisor mSupervisor;
+    private final ActivityStackSupervisor mSupervisor;
     private final RootWindowContainer mRootWindowContainer;
     private final Context mServiceContext;
 
@@ -104,12 +104,12 @@ class ActivityStartInterceptor {
     ActivityOptions mActivityOptions;
 
     ActivityStartInterceptor(
-            ActivityTaskManagerService service, ActivityTaskSupervisor supervisor) {
+            ActivityTaskManagerService service, ActivityStackSupervisor supervisor) {
         this(service, supervisor, service.mRootWindowContainer, service.mContext);
     }
 
     @VisibleForTesting
-    ActivityStartInterceptor(ActivityTaskManagerService service, ActivityTaskSupervisor supervisor,
+    ActivityStartInterceptor(ActivityTaskManagerService service, ActivityStackSupervisor supervisor,
             RootWindowContainer root, Context context) {
         mService = service;
         mSupervisor = supervisor;

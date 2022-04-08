@@ -34,9 +34,6 @@ final class InclusiveIntegerRangeValidator implements Validator {
 
     @Override
     public boolean validate(@Nullable String value) {
-        if (value == null) {
-            return true;
-        }
         try {
             final int intValue = Integer.parseInt(value);
             return intValue >= mMin && intValue <= mMax;

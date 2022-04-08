@@ -1,6 +1,3 @@
-# Bug component: 34867
 set noparent
 
-include /services/core/java/com/android/server/inputmethod/OWNERS
-
-per-file *InlineSuggestion* = file:/core/java/android/service/autofill/OWNERS
+include ../../../../services/core/java/com/android/server/inputmethod/OWNERS

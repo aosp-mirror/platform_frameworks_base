@@ -23,7 +23,16 @@ import android.view.InflateException;
 import android.view.LayoutInflater;
 import android.view.View;
 
-import com.android.systemui.dagger.SysUISingleton;
+import com.android.keyguard.KeyguardClockSwitch;
+import com.android.keyguard.KeyguardMessageArea;
+import com.android.keyguard.KeyguardSliceView;
+import com.android.systemui.dagger.SystemUIRootComponent;
+import com.android.systemui.qs.QSFooterImpl;
+import com.android.systemui.qs.QSPanel;
+import com.android.systemui.qs.QuickQSPanel;
+import com.android.systemui.qs.QuickStatusBarHeader;
+import com.android.systemui.qs.customize.QSCustomizer;
+import com.android.systemui.statusbar.NotificationShelf;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
 
 import java.lang.reflect.InvocationTargetException;
@@ -32,26 +41,36 @@ import java.lang.reflect.Modifier;
 
 import javax.inject.Inject;
 import javax.inject.Named;
+import javax.inject.Singleton;
 
-import dagger.BindsInstance;
+import dagger.Module;
+import dagger.Provides;
 import dagger.Subcomponent;
 
 /**
  * Manages inflation that requires dagger injection.
  * See docs/dagger.md for details.
  */
-@SysUISingleton
+@Singleton
 public class InjectionInflationController {
 
     public static final String VIEW_CONTEXT = "view_context";
+    private final ViewCreator mViewCreator;
     private final ArrayMap<String, Method> mInjectionMap = new ArrayMap<>();
     private final LayoutInflater.Factory2 mFactory = new InjectionFactory();
-    private final ViewInstanceCreator.Factory mViewInstanceCreatorFactory;
 
     @Inject
-    public InjectionInflationController(ViewInstanceCreator.Factory viewInstanceCreatorFactory) {
-        mViewInstanceCreatorFactory = viewInstanceCreatorFactory;
+    public InjectionInflationController(SystemUIRootComponent rootComponent) {
+        mViewCreator = rootComponent.createViewCreator();
         initInjectionMap();
+    }
+
+    ArrayMap<String, Method> getInjectionMap() {
+        return mInjectionMap;
+    }
+
+    ViewCreator getFragmentCreator() {
+        return mViewCreator;
     }
 
     /**
@@ -74,25 +93,105 @@ public class InjectionInflationController {
     }
 
     /**
-     * Subcomponent that actually creates injected views.
+     * The subcomponent of dagger that holds all views that need injection.
      */
     @Subcomponent
-    public interface ViewInstanceCreator {
+    public interface ViewCreator {
+        /**
+         * Creates another subcomponent to actually generate the view.
+         */
+        ViewInstanceCreator createInstanceCreator(ViewAttributeProvider attributeProvider);
+    }
 
-        /** Factory for creating a ViewInstanceCreator. */
-        @Subcomponent.Factory
-        interface Factory {
-            ViewInstanceCreator build(
-                    @BindsInstance @Named(VIEW_CONTEXT) Context context,
-                    @BindsInstance AttributeSet attributeSet);
-        }
+    /**
+     * Secondary sub-component that actually creates the views.
+     *
+     * Having two subcomponents lets us hide the complexity of providing the named context
+     * and AttributeSet from the SystemUIRootComponent, instead we have one subcomponent that
+     * creates a new ViewInstanceCreator any time we need to inflate a view.
+     */
+    @Subcomponent(modules = ViewAttributeProvider.class)
+    public interface ViewInstanceCreator {
+        /**
+         * Creates the QuickStatusBarHeader.
+         */
+        QuickStatusBarHeader createQsHeader();
+        /**
+         * Creates the QSFooterImpl.
+         */
+        QSFooterImpl createQsFooter();
 
         /**
          * Creates the NotificationStackScrollLayout.
          */
         NotificationStackScrollLayout createNotificationStackScrollLayout();
+
+        /**
+         * Creates the Shelf.
+         */
+        NotificationShelf creatNotificationShelf();
+
+        /**
+         * Creates the KeyguardClockSwitch.
+         */
+        KeyguardClockSwitch createKeyguardClockSwitch();
+
+        /**
+         * Creates the KeyguardSliceView.
+         */
+        KeyguardSliceView createKeyguardSliceView();
+
+        /**
+         * Creates the KeyguardMessageArea.
+         */
+        KeyguardMessageArea createKeyguardMessageArea();
+
+        /**
+         * Creates the QSPanel.
+         */
+        QSPanel createQSPanel();
+
+        /**
+         * Creates the QuickQSPanel.
+         */
+        QuickQSPanel createQuickQSPanel();
+
+        /**
+         * Creates the QSCustomizer.
+         */
+        QSCustomizer createQSCustomizer();
     }
 
+    /**
+     * Module for providing view-specific constructor objects.
+     */
+    @Module
+    public class ViewAttributeProvider {
+        private final Context mContext;
+        private final AttributeSet mAttrs;
+
+        private ViewAttributeProvider(Context context, AttributeSet attrs) {
+            mContext = context;
+            mAttrs = attrs;
+        }
+
+        /**
+         * Provides the view-themed context (as opposed to the global sysui application context).
+         */
+        @Provides
+        @Named(VIEW_CONTEXT)
+        public Context provideContext() {
+            return mContext;
+        }
+
+        /**
+         * Provides the AttributeSet for the current view being inflated.
+         */
+        @Provides
+        public AttributeSet provideAttributeSet() {
+            return mAttrs;
+        }
+    }
 
     private class InjectionFactory implements LayoutInflater.Factory2 {
 
@@ -100,9 +199,10 @@ public class InjectionInflationController {
         public View onCreateView(String name, Context context, AttributeSet attrs) {
             Method creationMethod = mInjectionMap.get(name);
             if (creationMethod != null) {
+                ViewAttributeProvider provider = new ViewAttributeProvider(context, attrs);
                 try {
                     return (View) creationMethod.invoke(
-                            mViewInstanceCreatorFactory.build(context, attrs));
+                            mViewCreator.createInstanceCreator(provider));
                 } catch (IllegalAccessException e) {
                     throw new InflateException("Could not inflate " + name, e);
                 } catch (InvocationTargetException e) {

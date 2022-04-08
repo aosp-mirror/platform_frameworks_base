@@ -16,26 +16,23 @@
 
 package android.content.pm.parsing.component;
 
-import static android.content.pm.ActivityInfo.LAUNCH_SINGLE_INSTANCE_PER_TASK;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
 import static android.content.pm.parsing.component.ComponentParseUtils.flag;
 
 import android.annotation.NonNull;
 import android.app.ActivityTaskManager;
-import android.content.Intent;
 import android.content.pm.ActivityInfo;
+import android.content.pm.PackageParser;
 import android.content.pm.parsing.ParsingPackage;
 import android.content.pm.parsing.ParsingPackageUtils;
 import android.content.pm.parsing.ParsingUtils;
 import android.content.pm.parsing.result.ParseInput;
-import android.content.pm.parsing.result.ParseInput.DeferredError;
 import android.content.pm.parsing.result.ParseResult;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.content.res.XmlResourceParser;
 import android.os.Build;
-import android.util.ArraySet;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.Slog;
@@ -53,26 +50,11 @@ import org.xmlpull.v1.XmlPullParserException;
 import java.io.IOException;
 import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 
 /** @hide */
 public class ParsedActivityUtils {
 
-    private static final String TAG = ParsingUtils.TAG;
-
-    public static final boolean LOG_UNSAFE_BROADCASTS = false;
-
-    // Set of broadcast actions that are safe for manifest receivers
-    public static final Set<String> SAFE_BROADCASTS = new ArraySet<>();
-    static {
-        SAFE_BROADCASTS.add(Intent.ACTION_BOOT_COMPLETED);
-    }
-
-    /**
-     * Bit mask of all the valid bits that can be set in recreateOnConfigChanges.
-     */
-    private static final int RECREATE_ON_CONFIG_CHANGES_MASK =
-            ActivityInfo.CONFIG_MCC | ActivityInfo.CONFIG_MNC;
+    private static final String TAG = ParsingPackageUtils.TAG;
 
     @NonNull
     @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
@@ -102,8 +84,7 @@ public class ParsedActivityUtils {
                     R.styleable.AndroidManifestActivity_name,
                     R.styleable.AndroidManifestActivity_process,
                     R.styleable.AndroidManifestActivity_roundIcon,
-                    R.styleable.AndroidManifestActivity_splitName,
-                    R.styleable.AndroidManifestActivity_attributionTags);
+                    R.styleable.AndroidManifestActivity_splitName);
             if (result.isError()) {
                 return result;
             }
@@ -149,10 +130,7 @@ public class ParsedActivityUtils {
                         | flag(ActivityInfo.FLAG_TURN_SCREEN_ON, R.styleable.AndroidManifestActivity_turnScreenOn, sa)
                         | flag(ActivityInfo.FLAG_PREFER_MINIMAL_POST_PROCESSING, R.styleable.AndroidManifestActivity_preferMinimalPostProcessing, sa);
 
-                activity.privateFlags |= flag(ActivityInfo.FLAG_INHERIT_SHOW_WHEN_LOCKED,
-                        R.styleable.AndroidManifestActivity_inheritShowWhenLocked, sa)
-                        | flag(ActivityInfo.PRIVATE_FLAG_HOME_TRANSITION_SOUND,
-                        R.styleable.AndroidManifestActivity_playHomeTransitionSound, true, sa);
+                activity.privateFlags |= flag(ActivityInfo.FLAG_INHERIT_SHOW_WHEN_LOCKED, R.styleable.AndroidManifestActivity_inheritShowWhenLocked, sa);
 
                 activity.colorMode = sa.getInt(R.styleable.AndroidManifestActivity_colorMode, ActivityInfo.COLOR_MODE_DEFAULT);
                 activity.documentLaunchMode = sa.getInt(R.styleable.AndroidManifestActivity_documentLaunchMode, ActivityInfo.DOCUMENT_LAUNCH_NONE);
@@ -164,7 +142,7 @@ public class ParsedActivityUtils {
                 activity.rotationAnimation = sa.getInt(R.styleable.AndroidManifestActivity_rotationAnimation, WindowManager.LayoutParams.ROTATION_ANIMATION_UNSPECIFIED);
                 activity.softInputMode = sa.getInt(R.styleable.AndroidManifestActivity_windowSoftInputMode, 0);
 
-                activity.configChanges = getActivityConfigChanges(
+                activity.configChanges = PackageParser.getActivityConfigChanges(
                         sa.getInt(R.styleable.AndroidManifestActivity_configChanges, 0),
                         sa.getInt(R.styleable.AndroidManifestActivity_recreateOnConfigChanges, 0));
 
@@ -277,8 +255,7 @@ public class ParsedActivityUtils {
                     R.styleable.AndroidManifestActivityAlias_name,
                     null /*processAttr*/,
                     R.styleable.AndroidManifestActivityAlias_roundIcon,
-                    null /*splitNameAttr*/,
-                    R.styleable.AndroidManifestActivityAlias_attributionTags);
+                    null /*splitNameAttr*/);
             if (result.isError()) {
                 return result;
             }
@@ -357,7 +334,7 @@ public class ParsedActivityUtils {
                     if (intent != null) {
                         activity.order = Math.max(intent.getOrder(), activity.order);
                         activity.addIntent(intent);
-                        if (LOG_UNSAFE_BROADCASTS && isReceiver
+                        if (PackageParser.LOG_UNSAFE_BROADCASTS && isReceiver
                                 && pkg.getTargetSdkVersion() >= Build.VERSION_CODES.O) {
                             int actionCount = intent.countActions();
                             for (int i = 0; i < actionCount; i++) {
@@ -366,7 +343,7 @@ public class ParsedActivityUtils {
                                     continue;
                                 }
 
-                                if (!SAFE_BROADCASTS.contains(action)) {
+                                if (!PackageParser.SAFE_BROADCASTS.contains(action)) {
                                     Slog.w(TAG,
                                             "Broadcast " + action + " may never be delivered to "
                                                     + pkg.getPackageName() + " as requested at: "
@@ -379,8 +356,6 @@ public class ParsedActivityUtils {
                 result = intentResult;
             } else if (parser.getName().equals("meta-data")) {
                 result = ParsedComponentUtils.addMetaData(activity, pkg, resources, parser, input);
-            } else if (parser.getName().equals("property")) {
-                result = ParsedComponentUtils.addProperty(activity, pkg, resources, parser, input);
             } else if (!isReceiver && !isAlias && parser.getName().equals("preferred")) {
                 ParseResult<ParsedIntentInfo> intentResult = parseIntentFilter(pkg, activity,
                         true /*allowImplicitEphemeralVisibility*/, visibleToEphemeral,
@@ -393,8 +368,8 @@ public class ParsedActivityUtils {
                 }
                 result = intentResult;
             } else if (!isReceiver && !isAlias && parser.getName().equals("layout")) {
-                ParseResult<ActivityInfo.WindowLayout> layoutResult =
-                        parseActivityWindowLayout(resources, parser, input);
+                ParseResult<ActivityInfo.WindowLayout> layoutResult = parseLayout(resources, parser,
+                        input);
                 if (layoutResult.isSuccess()) {
                     activity.windowLayout = layoutResult.getResult();
                 }
@@ -408,36 +383,14 @@ public class ParsedActivityUtils {
             }
         }
 
-        if (!isAlias && activity.launchMode != LAUNCH_SINGLE_INSTANCE_PER_TASK
-                && activity.metaData != null && activity.metaData.containsKey(
-                ParsingPackageUtils.METADATA_ACTIVITY_LAUNCH_MODE)) {
-            final String launchMode = activity.metaData.getString(
-                    ParsingPackageUtils.METADATA_ACTIVITY_LAUNCH_MODE);
-            if (launchMode != null && launchMode.equals("singleInstancePerTask")) {
-                activity.launchMode = LAUNCH_SINGLE_INSTANCE_PER_TASK;
-            }
-        }
-
-        ParseResult<ActivityInfo.WindowLayout> layoutResult =
-                resolveActivityWindowLayout(activity, input);
+        ParseResult<ActivityInfo.WindowLayout> layoutResult = resolveWindowLayout(activity, input);
         if (layoutResult.isError()) {
             return input.error(layoutResult);
         }
         activity.windowLayout = layoutResult.getResult();
 
         if (!setExported) {
-            boolean hasIntentFilters = activity.getIntents().size() > 0;
-            if (hasIntentFilters) {
-                final ParseResult exportedCheckResult = input.deferError(
-                        activity.getName() + ": Targeting S+ (version " + Build.VERSION_CODES.S
-                        + " and above) requires that an explicit value for android:exported be"
-                        + " defined when intent filters are present",
-                        DeferredError.MISSING_EXPORTED_FLAG);
-                if (exportedCheckResult.isError()) {
-                    return input.error(exportedCheckResult);
-                }
-            }
-            activity.exported = hasIntentFilters;
+            activity.exported = activity.getIntents().size() > 0;
         }
 
         return input.success(activity);
@@ -504,7 +457,7 @@ public class ParsedActivityUtils {
     }
 
     @NonNull
-    private static ParseResult<ActivityInfo.WindowLayout> parseActivityWindowLayout(Resources res,
+    private static ParseResult<ActivityInfo.WindowLayout> parseLayout(Resources res,
             AttributeSet attrs, ParseInput input) {
         TypedArray sw = res.obtainAttributes(attrs, R.styleable.AndroidManifestLayout);
         try {
@@ -532,13 +485,8 @@ public class ParsedActivityUtils {
             int minWidth = sw.getDimensionPixelSize(R.styleable.AndroidManifestLayout_minWidth, -1);
             int minHeight = sw.getDimensionPixelSize(R.styleable.AndroidManifestLayout_minHeight,
                     -1);
-            String windowLayoutAffinity =
-                    sw.getNonConfigurationString(
-                            R.styleable.AndroidManifestLayout_windowLayoutAffinity, 0);
-            final ActivityInfo.WindowLayout windowLayout = new ActivityInfo.WindowLayout(width,
-                    widthFraction, height, heightFraction, gravity, minWidth, minHeight,
-                    windowLayoutAffinity);
-            return input.success(windowLayout);
+            return input.success(new ActivityInfo.WindowLayout(width, widthFraction, height,
+                    heightFraction, gravity, minWidth, minHeight));
         } finally {
             sw.recycle();
         }
@@ -550,11 +498,11 @@ public class ParsedActivityUtils {
      * <p>{@link ActivityInfo.WindowLayout#windowLayoutAffinity} has a fallback metadata used in
      * Android R and some variants of pre-R.
      */
-    private static ParseResult<ActivityInfo.WindowLayout> resolveActivityWindowLayout(
+    private static ParseResult<ActivityInfo.WindowLayout> resolveWindowLayout(
             ParsedActivity activity, ParseInput input) {
         // There isn't a metadata for us to fall back. Whatever is in layout is correct.
         if (activity.metaData == null || !activity.metaData.containsKey(
-                ParsingPackageUtils.METADATA_ACTIVITY_WINDOW_LAYOUT_AFFINITY)) {
+                PackageParser.METADATA_ACTIVITY_WINDOW_LAYOUT_AFFINITY)) {
             return input.success(activity.windowLayout);
         }
 
@@ -564,25 +512,14 @@ public class ParsedActivityUtils {
         }
 
         String windowLayoutAffinity = activity.metaData.getString(
-                ParsingPackageUtils.METADATA_ACTIVITY_WINDOW_LAYOUT_AFFINITY);
+                PackageParser.METADATA_ACTIVITY_WINDOW_LAYOUT_AFFINITY);
         ActivityInfo.WindowLayout layout = activity.windowLayout;
         if (layout == null) {
             layout = new ActivityInfo.WindowLayout(-1 /* width */, -1 /* widthFraction */,
                     -1 /* height */, -1 /* heightFraction */, Gravity.NO_GRAVITY,
-                    -1 /* minWidth */, -1 /* minHeight */, windowLayoutAffinity);
-        } else {
-            layout.windowLayoutAffinity = windowLayoutAffinity;
+                    -1 /* minWidth */, -1 /* minHeight */);
         }
+        layout.windowLayoutAffinity = windowLayoutAffinity;
         return input.success(layout);
-    }
-
-    /**
-     * @param configChanges The bit mask of configChanges fetched from AndroidManifest.xml.
-     * @param recreateOnConfigChanges The bit mask recreateOnConfigChanges fetched from
-     *                                AndroidManifest.xml.
-     * @hide
-     */
-    static int getActivityConfigChanges(int configChanges, int recreateOnConfigChanges) {
-        return configChanges | ((~recreateOnConfigChanges) & RECREATE_ON_CONFIG_CHANGES_MASK);
     }
 }

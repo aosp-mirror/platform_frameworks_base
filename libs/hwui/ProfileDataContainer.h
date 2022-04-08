@@ -19,9 +19,6 @@
 #include "ProfileData.h"
 #include "utils/Macros.h"
 
-#include <mutex>
-#include <utils/Mutex.h>
-
 namespace android {
 namespace uirenderer {
 
@@ -29,28 +26,23 @@ class ProfileDataContainer {
     PREVENT_COPY_AND_ASSIGN(ProfileDataContainer);
 
 public:
-    explicit ProfileDataContainer(std::mutex& jankDataMutex)
-            : mData(new ProfileData()), mJankDataMutex(jankDataMutex) {}
+    explicit ProfileDataContainer() {}
 
     ~ProfileDataContainer() { freeData(); }
 
     void rotateStorage();
     void switchStorageToAshmem(int ashmemfd);
 
-    ProfileData* get() NO_THREAD_SAFETY_ANALYSIS { return mData; }
-
-    ProfileData* operator->() NO_THREAD_SAFETY_ANALYSIS { return mData; }
-
-    std::mutex& getDataMutex() { return mJankDataMutex; }
+    ProfileData* get() { return mData; }
+    ProfileData* operator->() { return mData; }
 
 private:
     void freeData();
 
     // By default this will use malloc memory. It may be moved later to ashmem
     // if there is shared space for it and a request comes in to do that.
-    ProfileData* mData GUARDED_BY(mJankDataMutex);
+    ProfileData* mData = new ProfileData;
     bool mIsMapped = false;
-    std::mutex& mJankDataMutex;
 };
 
 } /* namespace uirenderer */

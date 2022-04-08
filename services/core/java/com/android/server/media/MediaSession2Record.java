@@ -20,6 +20,7 @@ import android.media.MediaController2;
 import android.media.Session2CommandGroup;
 import android.media.Session2Token;
 import android.os.Handler;
+import android.os.HandlerExecutor;
 import android.os.Looper;
 import android.os.ResultReceiver;
 import android.os.UserHandle;
@@ -31,7 +32,7 @@ import com.android.internal.annotations.GuardedBy;
 import java.io.PrintWriter;
 
 /**
- * Keeps the record of {@link Session2Token} to help send command to the corresponding session.
+ * Keeps the record of {@link Session2Token} helps to send command to the corresponding session.
  */
 // TODO(jaewan): Do not call service method directly -- introduce listener instead.
 public class MediaSession2Record implements MediaSessionRecordImpl {
@@ -56,17 +57,13 @@ public class MediaSession2Record implements MediaSessionRecordImpl {
 
     public MediaSession2Record(Session2Token sessionToken, MediaSessionService service,
             Looper handlerLooper, int policies) {
-        // The lock is required to prevent `Controller2Callback` from using partially initialized
-        // `MediaSession2Record.this`.
-        synchronized (mLock) {
-            mSessionToken = sessionToken;
-            mService = service;
-            mHandlerExecutor = new HandlerExecutor(new Handler(handlerLooper));
-            mController = new MediaController2.Builder(service.getContext(), sessionToken)
-                    .setControllerCallback(mHandlerExecutor, new Controller2Callback())
-                    .build();
-            mPolicies = policies;
-        }
+        mSessionToken = sessionToken;
+        mService = service;
+        mHandlerExecutor = new HandlerExecutor(new Handler(handlerLooper));
+        mController = new MediaController2.Builder(service.getContext(), sessionToken)
+                .setControllerCallback(mHandlerExecutor, new Controller2Callback())
+                .build();
+        mPolicies = policies;
     }
 
     @Override
@@ -90,7 +87,7 @@ public class MediaSession2Record implements MediaSessionRecordImpl {
 
     @Override
     public boolean isSystemPriority() {
-        // System priority session is currently only allowed for telephony, so it's OK to stick to
+        // System priority session is currently only allowed for telephony, and it's OK to stick to
         // the media1 API at this moment.
         return false;
     }
@@ -125,7 +122,7 @@ public class MediaSession2Record implements MediaSessionRecordImpl {
     public void close() {
         synchronized (mLock) {
             mIsClosed = true;
-            // Call close regardless of the mIsConnected. This may be called when it's not yet
+            // Call close regardless of the mIsAvailable. This may be called when it's not yet
             // connected.
             mController.close();
         }
@@ -180,12 +177,10 @@ public class MediaSession2Record implements MediaSessionRecordImpl {
             if (DEBUG) {
                 Log.d(TAG, "connected to " + mSessionToken + ", allowed=" + allowedCommands);
             }
-            MediaSessionService service;
             synchronized (mLock) {
                 mIsConnected = true;
-                service = mService;
             }
-            service.onSessionActiveStateChanged(MediaSession2Record.this);
+            mService.onSessionActiveStateChanged(MediaSession2Record.this);
         }
 
         @Override
@@ -193,12 +188,10 @@ public class MediaSession2Record implements MediaSessionRecordImpl {
             if (DEBUG) {
                 Log.d(TAG, "disconnected from " + mSessionToken);
             }
-            MediaSessionService service;
             synchronized (mLock) {
                 mIsConnected = false;
-                service = mService;
             }
-            service.onSessionDied(MediaSession2Record.this);
+            mService.onSessionDied(MediaSession2Record.this);
         }
 
         @Override
@@ -207,11 +200,7 @@ public class MediaSession2Record implements MediaSessionRecordImpl {
                 Log.d(TAG, "playback active changed, " + mSessionToken + ", active="
                         + playbackActive);
             }
-            MediaSessionService service;
-            synchronized (mLock) {
-                service = mService;
-            }
-            service.onSessionPlaybackStateChanged(MediaSession2Record.this, playbackActive);
+            mService.onSessionPlaybackStateChanged(MediaSession2Record.this, playbackActive);
         }
     }
 }

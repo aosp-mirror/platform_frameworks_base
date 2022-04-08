@@ -19,13 +19,12 @@ package android.graphics.fonts;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.graphics.FontListParser;
-import android.graphics.Typeface;
 import android.text.FontConfig;
 import android.util.ArrayMap;
 import android.util.Log;
 
-import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.util.ArrayUtils;
 
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -35,7 +34,10 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -45,18 +47,13 @@ import java.util.Set;
  */
 public final class SystemFonts {
     private static final String TAG = "SystemFonts";
-
-    private static final String FONTS_XML = "/system/etc/fonts.xml";
-    /** @hide */
-    public static final String SYSTEM_FONT_DIR = "/system/fonts/";
-    private static final String OEM_XML = "/product/etc/fonts_customization.xml";
-    /** @hide */
-    public static final String OEM_FONT_DIR = "/product/fonts/";
+    private static final String DEFAULT_FAMILY = "sans-serif";
 
     private SystemFonts() {}  // Do not instansiate.
 
-    private static final Object LOCK = new Object();
-    private static @GuardedBy("sLock") Set<Font> sAvailableFonts;
+    private static final Map<String, FontFamily[]> sSystemFallbackMap;
+    private static final FontConfig.Alias[] sAliases;
+    private static final List<Font> sAvailableFonts;
 
     /**
      * Returns all available font files in the system.
@@ -64,21 +61,42 @@ public final class SystemFonts {
      * @return a set of system fonts
      */
     public static @NonNull Set<Font> getAvailableFonts() {
-        synchronized (LOCK) {
-            if (sAvailableFonts == null) {
-                sAvailableFonts = Font.getAvailableFonts();
-            }
-            return sAvailableFonts;
-        }
+        HashSet<Font> set = new HashSet<>();
+        set.addAll(sAvailableFonts);
+        return set;
     }
 
     /**
+     * Returns fallback list for the given family name.
+     *
+     * If no fallback found for the given family name, returns fallback for the default family.
+     *
+     * @param familyName family name, e.g. "serif"
      * @hide
      */
-    public static void resetAvailableFonts() {
-        synchronized (LOCK) {
-            sAvailableFonts = null;
-        }
+    public static @NonNull FontFamily[] getSystemFallback(@Nullable String familyName) {
+        final FontFamily[] families = sSystemFallbackMap.get(familyName);
+        return families == null ? sSystemFallbackMap.get(DEFAULT_FAMILY) : families;
+    }
+
+    /**
+     * Returns raw system fallback map.
+     *
+     * This method is intended to be used only by Typeface static initializer.
+     * @hide
+     */
+    public static @NonNull Map<String, FontFamily[]> getRawSystemFallbackMap() {
+        return sSystemFallbackMap;
+    }
+
+    /**
+     * Returns a list of aliases.
+     *
+     * This method is intended to be used only by Typeface static initializer.
+     * @hide
+     */
+    public static @NonNull FontConfig.Alias[] getAliases() {
+        return sAliases;
     }
 
     private static @Nullable ByteBuffer mmap(@NonNull String fullPath) {
@@ -91,20 +109,20 @@ public final class SystemFonts {
         }
     }
 
-    private static void pushFamilyToFallback(@NonNull FontConfig.FontFamily xmlFamily,
+    private static void pushFamilyToFallback(@NonNull FontConfig.Family xmlFamily,
             @NonNull ArrayMap<String, ArrayList<FontFamily>> fallbackMap,
-            @NonNull Map<String, ByteBuffer> cache) {
+            @NonNull Map<String, ByteBuffer> cache,
+            @NonNull ArrayList<Font> availableFonts) {
 
-        final String languageTags = xmlFamily.getLocaleList().toLanguageTags();
+        final String languageTags = xmlFamily.getLanguages();
         final int variant = xmlFamily.getVariant();
 
         final ArrayList<FontConfig.Font> defaultFonts = new ArrayList<>();
-        final ArrayMap<String, ArrayList<FontConfig.Font>> specificFallbackFonts =
-                new ArrayMap<>();
+        final ArrayMap<String, ArrayList<FontConfig.Font>> specificFallbackFonts = new ArrayMap<>();
 
         // Collect default fallback and specific fallback fonts.
         for (final FontConfig.Font font : xmlFamily.getFonts()) {
-            final String fallbackName = font.getFontFamilyName();
+            final String fallbackName = font.getFallbackFor();
             if (fallbackName == null) {
                 defaultFonts.add(font);
             } else {
@@ -118,22 +136,20 @@ public final class SystemFonts {
         }
 
         final FontFamily defaultFamily = defaultFonts.isEmpty() ? null : createFontFamily(
-                xmlFamily.getName(), defaultFonts, languageTags, variant, cache);
+                xmlFamily.getName(), defaultFonts, languageTags, variant, cache, availableFonts);
 
         // Insert family into fallback map.
         for (int i = 0; i < fallbackMap.size(); i++) {
-            String name = fallbackMap.keyAt(i);
-            final ArrayList<FontConfig.Font> fallback = specificFallbackFonts.get(name);
+            final ArrayList<FontConfig.Font> fallback =
+                    specificFallbackFonts.get(fallbackMap.keyAt(i));
             if (fallback == null) {
-                String familyName = xmlFamily.getName();
-                if (defaultFamily != null
-                        // do not add myself to the fallback chain.
-                        && (familyName == null || !familyName.equals(name))) {
+                if (defaultFamily != null) {
                     fallbackMap.valueAt(i).add(defaultFamily);
                 }
             } else {
                 final FontFamily family = createFontFamily(
-                        xmlFamily.getName(), fallback, languageTags, variant, cache);
+                        xmlFamily.getName(), fallback, languageTags, variant, cache,
+                        availableFonts);
                 if (family != null) {
                     fallbackMap.valueAt(i).add(family);
                 } else if (defaultFamily != null) {
@@ -148,8 +164,9 @@ public final class SystemFonts {
     private static @Nullable FontFamily createFontFamily(@NonNull String familyName,
             @NonNull List<FontConfig.Font> fonts,
             @NonNull String languageTags,
-            @FontConfig.FontFamily.Variant int variant,
-            @NonNull Map<String, ByteBuffer> cache) {
+            @FontConfig.Family.Variant int variant,
+            @NonNull Map<String, ByteBuffer> cache,
+            @NonNull ArrayList<Font> availableFonts) {
         if (fonts.size() == 0) {
             return null;
         }
@@ -157,7 +174,7 @@ public final class SystemFonts {
         FontFamily.Builder b = null;
         for (int i = 0; i < fonts.size(); i++) {
             final FontConfig.Font fontConfig = fonts.get(i);
-            final String fullPath = fontConfig.getFile().getAbsolutePath();
+            final String fullPath = fontConfig.getFontName();
             ByteBuffer buffer = cache.get(fullPath);
             if (buffer == null) {
                 if (cache.containsKey(fullPath)) {
@@ -173,15 +190,17 @@ public final class SystemFonts {
             final Font font;
             try {
                 font = new Font.Builder(buffer, new File(fullPath), languageTags)
-                        .setWeight(fontConfig.getStyle().getWeight())
-                        .setSlant(fontConfig.getStyle().getSlant())
+                        .setWeight(fontConfig.getWeight())
+                        .setSlant(fontConfig.isItalic() ? FontStyle.FONT_SLANT_ITALIC
+                                : FontStyle.FONT_SLANT_UPRIGHT)
                         .setTtcIndex(fontConfig.getTtcIndex())
-                        .setFontVariationSettings(fontConfig.getFontVariationSettings())
+                        .setFontVariationSettings(fontConfig.getAxes())
                         .build();
             } catch (IOException e) {
                 throw new RuntimeException(e);  // Never reaches here
             }
 
+            availableFonts.add(font);
             if (b == null) {
                 b = new FontFamily.Builder(font);
             } else {
@@ -191,14 +210,14 @@ public final class SystemFonts {
         return b == null ? null : b.build(languageTags, variant, false /* isCustomFallback */);
     }
 
-    private static void appendNamedFamily(@NonNull FontConfig.FontFamily xmlFamily,
-            @NonNull ArrayMap<String, ByteBuffer> bufferCache,
-            @NonNull ArrayMap<String, ArrayList<FontFamily>> fallbackListMap) {
+    private static void appendNamedFamily(@NonNull FontConfig.Family xmlFamily,
+            @NonNull HashMap<String, ByteBuffer> bufferCache,
+            @NonNull ArrayMap<String, ArrayList<FontFamily>> fallbackListMap,
+            @NonNull ArrayList<Font> availableFonts) {
         final String familyName = xmlFamily.getName();
         final FontFamily family = createFontFamily(
-                familyName, xmlFamily.getFontList(),
-                xmlFamily.getLocaleList().toLanguageTags(), xmlFamily.getVariant(),
-                bufferCache);
+                familyName, Arrays.asList(xmlFamily.getFonts()),
+                xmlFamily.getLanguages(), xmlFamily.getVariant(), bufferCache, availableFonts);
         if (family == null) {
             return;
         }
@@ -208,106 +227,92 @@ public final class SystemFonts {
     }
 
     /**
-     * Get the updated FontConfig.
+     * Build the system fallback from xml file.
      *
-     * @param updatableFontMap a font mapping of updated font files.
+     * @param xmlPath A full path string to the fonts.xml file.
+     * @param fontDir A full path string to the system font directory. This must end with
+     *                slash('/').
+     * @param fallbackMap An output system fallback map. Caller must pass empty map.
+     * @return a list of aliases
      * @hide
      */
-    public static @NonNull FontConfig getSystemFontConfig(
-            @Nullable Map<String, File> updatableFontMap,
-            long lastModifiedDate,
-            int configVersion
-    ) {
-        return getSystemFontConfigInternal(FONTS_XML, SYSTEM_FONT_DIR, OEM_XML, OEM_FONT_DIR,
-                updatableFontMap, lastModifiedDate, configVersion);
-    }
-
-    /**
-     * Get the system preinstalled FontConfig.
-     * @hide
-     */
-    public static @NonNull FontConfig getSystemPreinstalledFontConfig() {
-        return getSystemFontConfigInternal(FONTS_XML, SYSTEM_FONT_DIR, OEM_XML, OEM_FONT_DIR, null,
-                0, 0);
-    }
-
-    /* package */ static @NonNull FontConfig getSystemFontConfigInternal(
-            @NonNull String fontsXml,
-            @NonNull String systemFontDir,
-            @Nullable String oemXml,
-            @Nullable String productFontDir,
-            @Nullable Map<String, File> updatableFontMap,
-            long lastModifiedDate,
-            int configVersion
-    ) {
+    @VisibleForTesting
+    public static FontConfig.Alias[] buildSystemFallback(@NonNull String xmlPath,
+            @NonNull String fontDir,
+            @NonNull FontCustomizationParser.Result oemCustomization,
+            @NonNull ArrayMap<String, FontFamily[]> fallbackMap,
+            @NonNull ArrayList<Font> availableFonts) {
         try {
-            return FontListParser.parse(fontsXml, systemFontDir, oemXml, productFontDir,
-                                                updatableFontMap, lastModifiedDate, configVersion);
+            final FileInputStream fontsIn = new FileInputStream(xmlPath);
+            final FontConfig fontConfig = FontListParser.parse(fontsIn, fontDir);
+
+            final HashMap<String, ByteBuffer> bufferCache = new HashMap<String, ByteBuffer>();
+            final FontConfig.Family[] xmlFamilies = fontConfig.getFamilies();
+
+            final ArrayMap<String, ArrayList<FontFamily>> fallbackListMap = new ArrayMap<>();
+            // First traverse families which have a 'name' attribute to create fallback map.
+            for (final FontConfig.Family xmlFamily : xmlFamilies) {
+                final String familyName = xmlFamily.getName();
+                if (familyName == null) {
+                    continue;
+                }
+                appendNamedFamily(xmlFamily, bufferCache, fallbackListMap, availableFonts);
+            }
+
+            for (int i = 0; i < oemCustomization.mAdditionalNamedFamilies.size(); ++i) {
+                appendNamedFamily(oemCustomization.mAdditionalNamedFamilies.get(i),
+                        bufferCache, fallbackListMap, availableFonts);
+            }
+
+            // Then, add fallback fonts to the each fallback map.
+            for (int i = 0; i < xmlFamilies.length; i++) {
+                final FontConfig.Family xmlFamily = xmlFamilies[i];
+                // The first family (usually the sans-serif family) is always placed immediately
+                // after the primary family in the fallback.
+                if (i == 0 || xmlFamily.getName() == null) {
+                    pushFamilyToFallback(xmlFamily, fallbackListMap, bufferCache, availableFonts);
+                }
+            }
+
+            // Build the font map and fallback map.
+            for (int i = 0; i < fallbackListMap.size(); i++) {
+                final String fallbackName = fallbackListMap.keyAt(i);
+                final List<FontFamily> familyList = fallbackListMap.valueAt(i);
+                final FontFamily[] families = familyList.toArray(new FontFamily[familyList.size()]);
+
+                fallbackMap.put(fallbackName, families);
+            }
+
+            final ArrayList<FontConfig.Alias> list = new ArrayList<>();
+            list.addAll(Arrays.asList(fontConfig.getAliases()));
+            list.addAll(oemCustomization.mAdditionalAliases);
+            return list.toArray(new FontConfig.Alias[list.size()]);
+        } catch (IOException | XmlPullParserException e) {
+            Log.e(TAG, "Failed initialize system fallbacks.", e);
+            return ArrayUtils.emptyArray(FontConfig.Alias.class);
+        }
+    }
+
+    private static FontCustomizationParser.Result readFontCustomization(
+            @NonNull String customizeXml, @NonNull String customFontsDir) {
+        try (FileInputStream f = new FileInputStream(customizeXml)) {
+            return FontCustomizationParser.parse(f, customFontsDir);
         } catch (IOException e) {
-            Log.e(TAG, "Failed to open/read system font configurations.", e);
-            return new FontConfig(Collections.emptyList(), Collections.emptyList(), 0, 0);
+            return new FontCustomizationParser.Result();
         } catch (XmlPullParserException e) {
-            Log.e(TAG, "Failed to parse the system font configuration.", e);
-            return new FontConfig(Collections.emptyList(), Collections.emptyList(), 0, 0);
+            Log.e(TAG, "Failed to parse font customization XML", e);
+            return new FontCustomizationParser.Result();
         }
     }
 
-    /**
-     * Build the system fallback from FontConfig.
-     * @hide
-     */
-    @VisibleForTesting
-    public static Map<String, FontFamily[]> buildSystemFallback(FontConfig fontConfig) {
-        return buildSystemFallback(fontConfig, new ArrayMap<>());
-    }
-
-    /** @hide */
-    @VisibleForTesting
-    public static Map<String, FontFamily[]> buildSystemFallback(FontConfig fontConfig,
-            ArrayMap<String, ByteBuffer> outBufferCache) {
-        final Map<String, FontFamily[]> fallbackMap = new ArrayMap<>();
-        final List<FontConfig.FontFamily> xmlFamilies = fontConfig.getFontFamilies();
-
-        final ArrayMap<String, ArrayList<FontFamily>> fallbackListMap = new ArrayMap<>();
-        // First traverse families which have a 'name' attribute to create fallback map.
-        for (final FontConfig.FontFamily xmlFamily : xmlFamilies) {
-            final String familyName = xmlFamily.getName();
-            if (familyName == null) {
-                continue;
-            }
-            appendNamedFamily(xmlFamily, outBufferCache, fallbackListMap);
-        }
-
-        // Then, add fallback fonts to the each fallback map.
-        for (int i = 0; i < xmlFamilies.size(); i++) {
-            final FontConfig.FontFamily xmlFamily = xmlFamilies.get(i);
-            // The first family (usually the sans-serif family) is always placed immediately
-            // after the primary family in the fallback.
-            if (i == 0 || xmlFamily.getName() == null) {
-                pushFamilyToFallback(xmlFamily, fallbackListMap, outBufferCache);
-            }
-        }
-
-        // Build the font map and fallback map.
-        for (int i = 0; i < fallbackListMap.size(); i++) {
-            final String fallbackName = fallbackListMap.keyAt(i);
-            final List<FontFamily> familyList = fallbackListMap.valueAt(i);
-            fallbackMap.put(fallbackName, familyList.toArray(new FontFamily[0]));
-        }
-
-        return fallbackMap;
-    }
-
-    /**
-     * Build the system Typeface mappings from FontConfig and FallbackMap.
-     * @hide
-     */
-    @VisibleForTesting
-    public static Map<String, Typeface> buildSystemTypefaces(
-            FontConfig fontConfig,
-            Map<String, FontFamily[]> fallbackMap) {
-        final ArrayMap<String, Typeface> result = new ArrayMap<>();
-        Typeface.initSystemDefaultTypefaces(fallbackMap, fontConfig.getAliases(), result);
-        return result;
+    static {
+        final ArrayMap<String, FontFamily[]> systemFallbackMap = new ArrayMap<>();
+        final ArrayList<Font> availableFonts = new ArrayList<>();
+        final FontCustomizationParser.Result oemCustomization =
+                readFontCustomization("/product/etc/fonts_customization.xml", "/product/fonts/");
+        sAliases = buildSystemFallback("/system/etc/fonts.xml", "/system/fonts/",
+                oemCustomization, systemFallbackMap, availableFonts);
+        sSystemFallbackMap = Collections.unmodifiableMap(systemFallbackMap);
+        sAvailableFonts = Collections.unmodifiableList(availableFonts);
     }
 }

@@ -18,10 +18,10 @@ package com.android.internal.os;
 
 import android.annotation.Nullable;
 import android.os.Process;
-import android.util.IntArray;
 import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.Preconditions;
 
 import java.io.IOException;
@@ -225,22 +225,19 @@ public class KernelCpuThreadReader {
 
     /** Set the number of frequency buckets to use */
     void setNumBuckets(int numBuckets) {
+        if (numBuckets < 1) {
+            Slog.w(TAG, "Number of buckets must be at least 1, but was " + numBuckets);
+            return;
+        }
         // If `numBuckets` hasn't changed since the last set, do nothing
         if (mFrequenciesKhz != null && mFrequenciesKhz.length == numBuckets) {
             return;
         }
-
-        final long[] frequenciesKhz = mProcTimeInStateReader.getFrequenciesKhz();
-        if (numBuckets != 0) {
-            mFrequencyBucketCreator = new FrequencyBucketCreator(frequenciesKhz, numBuckets);
-            mFrequenciesKhz = mFrequencyBucketCreator.bucketFrequencies(frequenciesKhz);
-        } else {
-            mFrequencyBucketCreator = null;
-            mFrequenciesKhz = new int[frequenciesKhz.length];
-            for (int i = 0; i < frequenciesKhz.length; i++) {
-                mFrequenciesKhz[i] = (int) frequenciesKhz[i];
-            }
-        }
+        mFrequencyBucketCreator =
+                new FrequencyBucketCreator(mProcTimeInStateReader.getFrequenciesKhz(), numBuckets);
+        mFrequenciesKhz =
+                mFrequencyBucketCreator.bucketFrequencies(
+                        mProcTimeInStateReader.getFrequenciesKhz());
     }
 
     /** Set the UID predicate for {@link #getProcessCpuUsage} */
@@ -323,15 +320,8 @@ public class KernelCpuThreadReader {
         if (cpuUsagesLong == null) {
             return null;
         }
-        final int[] cpuUsages;
-        if (mFrequencyBucketCreator != null) {
-            cpuUsages = mFrequencyBucketCreator.bucketValues(cpuUsagesLong);
-        } else {
-            cpuUsages = new int[cpuUsagesLong.length];
-            for (int i = 0; i < cpuUsagesLong.length; i++) {
-                cpuUsages[i] = (int) cpuUsagesLong[i];
-            }
-        }
+        int[] cpuUsages = mFrequencyBucketCreator.bucketValues(cpuUsagesLong);
+
         return new ThreadCpuUsage(threadId, threadName, cpuUsages);
     }
 
@@ -456,14 +446,14 @@ public class KernelCpuThreadReader {
          * cluster has started.
          */
         private static int[] getClusterStartIndices(long[] frequencies) {
-            IntArray indices = new IntArray();
+            ArrayList<Integer> indices = new ArrayList<>();
             indices.add(0);
             for (int i = 0; i < frequencies.length - 1; i++) {
                 if (frequencies[i] >= frequencies[i + 1]) {
                     indices.add(i + 1);
                 }
             }
-            return indices.toArray();
+            return ArrayUtils.convertToIntArray(indices);
         }
 
         /** Get the index in frequencies where each bucket starts */
@@ -477,7 +467,7 @@ public class KernelCpuThreadReader {
                 return Arrays.copyOfRange(clusterStartIndices, 0, targetNumBuckets);
             }
 
-            IntArray bucketStartIndices = new IntArray();
+            ArrayList<Integer> bucketStartIndices = new ArrayList<>();
             for (int clusterIdx = 0; clusterIdx < numClusters; clusterIdx++) {
                 final int clusterStartIdx = getLowerBound(clusterIdx, clusterStartIndices);
                 final int clusterEndIdx =
@@ -509,7 +499,7 @@ public class KernelCpuThreadReader {
                     bucketStartIndices.add(bucketStartIdx);
                 }
             }
-            return bucketStartIndices.toArray();
+            return ArrayUtils.convertToIntArray(bucketStartIndices);
         }
 
         private static int getLowerBound(int index, int[] startIndices) {

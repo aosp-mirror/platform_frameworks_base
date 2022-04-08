@@ -247,14 +247,14 @@ class ActivityTransitionState {
         mEnterActivityOptions = null;
     }
 
-    public void onStop(Activity activity) {
+    public void onStop() {
         restoreExitedViews();
         if (mEnterTransitionCoordinator != null) {
             mEnterTransitionCoordinator.stop();
             mEnterTransitionCoordinator = null;
         }
         if (mReturnExitCoordinator != null) {
-            mReturnExitCoordinator.stop(activity);
+            mReturnExitCoordinator.stop();
             mReturnExitCoordinator = null;
         }
     }
@@ -331,8 +331,7 @@ class ActivityTransitionState {
                     }
                 }
 
-                mReturnExitCoordinator = new ExitTransitionCoordinator(
-                        new ExitTransitionCoordinator.ActivityExitTransitionCallbacks(activity),
+                mReturnExitCoordinator = new ExitTransitionCoordinator(activity,
                         activity.getWindow(), activity.mEnterTransitionListener, pendingExitNames,
                         null, null, true);
                 if (enterViewsTransition != null && decor != null) {
@@ -342,11 +341,12 @@ class ActivityTransitionState {
                     final ViewGroup finalDecor = decor;
                     OneShotPreDrawListener.add(decor, () -> {
                         if (mReturnExitCoordinator != null) {
-                            mReturnExitCoordinator.startExit(activity);
+                            mReturnExitCoordinator.startExit(activity.mResultCode,
+                                    activity.mResultData);
                         }
                     });
                 } else {
-                    mReturnExitCoordinator.startExit(activity);
+                    mReturnExitCoordinator.startExit(activity.mResultCode, activity.mResultData);
                 }
             }
             return true;

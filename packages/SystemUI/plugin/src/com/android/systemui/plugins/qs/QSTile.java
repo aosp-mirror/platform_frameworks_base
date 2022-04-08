@@ -19,9 +19,6 @@ import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.metrics.LogMaker;
 import android.service.quicksettings.Tile;
-import android.view.View;
-
-import androidx.annotation.Nullable;
 
 import com.android.internal.logging.InstanceId;
 import com.android.systemui.plugins.annotations.DependsOn;
@@ -56,27 +53,10 @@ public interface QSTile {
     void removeCallbacks();
 
     QSIconView createTileView(Context context);
-
-    /**
-     * The tile was clicked.
-     *
-     * @param view The view that was clicked.
-     */
-    void click(@Nullable View view);
-
-    /**
-     * The tile secondary click was triggered.
-     *
-     * @param view The view that was clicked.
-     */
-    void secondaryClick(@Nullable View view);
-
-    /**
-     * The tile was long clicked.
-     *
-     * @param view The view that was clicked.
-     */
-    void longClick(@Nullable View view);
+    
+    void click();
+    void secondaryClick();
+    void longClick();
 
     void userSwitch(int currentUser);
     int getMetricsCategory();
@@ -105,10 +85,6 @@ public interface QSTile {
      * Return an {@link InstanceId} to be used to identify the tile in UiEvents.
      */
     InstanceId getInstanceId();
-
-    default boolean isTileReady() {
-        return false;
-    }
 
     @ProvidesInterface(version = Callback.VERSION)
     public interface Callback {
@@ -148,11 +124,9 @@ public interface QSTile {
     @ProvidesInterface(version = State.VERSION)
     public static class State {
         public static final int VERSION = 1;
-        public static final int DEFAULT_STATE = Tile.STATE_ACTIVE;
-
         public Icon icon;
         public Supplier<Icon> iconSupplier;
-        public int state = DEFAULT_STATE;
+        public int state = Tile.STATE_ACTIVE;
         public CharSequence label;
         public CharSequence secondaryLabel;
         public CharSequence contentDescription;
@@ -165,14 +139,11 @@ public interface QSTile {
         public SlashState slash;
         public boolean handlesLongClick = true;
         public boolean showRippleEffect = true;
-        public Drawable sideViewCustomDrawable;
-        public String spec;
 
         public boolean copyTo(State other) {
             if (other == null) throw new IllegalArgumentException();
             if (!other.getClass().equals(getClass())) throw new IllegalArgumentException();
-            final boolean changed = !Objects.equals(other.spec, spec)
-                    || !Objects.equals(other.icon, icon)
+            final boolean changed = !Objects.equals(other.icon, icon)
                     || !Objects.equals(other.iconSupplier, iconSupplier)
                     || !Objects.equals(other.label, label)
                     || !Objects.equals(other.secondaryLabel, secondaryLabel)
@@ -188,9 +159,7 @@ public interface QSTile {
                     || !Objects.equals(other.dualTarget, dualTarget)
                     || !Objects.equals(other.slash, slash)
                     || !Objects.equals(other.handlesLongClick, handlesLongClick)
-                    || !Objects.equals(other.showRippleEffect, showRippleEffect)
-                    || !Objects.equals(other.sideViewCustomDrawable, sideViewCustomDrawable);
-            other.spec = spec;
+                    || !Objects.equals(other.showRippleEffect, showRippleEffect);
             other.icon = icon;
             other.iconSupplier = iconSupplier;
             other.label = label;
@@ -206,7 +175,6 @@ public interface QSTile {
             other.slash = slash != null ? slash.copy() : null;
             other.handlesLongClick = handlesLongClick;
             other.showRippleEffect = showRippleEffect;
-            other.sideViewCustomDrawable = sideViewCustomDrawable;
             return changed;
         }
 
@@ -219,7 +187,6 @@ public interface QSTile {
         // This string may be used for CTS testing of tiles, so removing elements is discouraged.
         protected StringBuilder toStringBuilder() {
             final StringBuilder sb = new StringBuilder(getClass().getSimpleName()).append('[');
-            sb.append("spec=").append(spec);
             sb.append(",icon=").append(icon);
             sb.append(",iconSupplier=").append(iconSupplier);
             sb.append(",label=").append(label);
@@ -233,7 +200,6 @@ public interface QSTile {
             sb.append(",isTransient=").append(isTransient);
             sb.append(",state=").append(state);
             sb.append(",slash=\"").append(slash).append("\"");
-            sb.append(",sideViewCustomDrawable=").append(sideViewCustomDrawable);
             return sb.append(']');
         }
 
@@ -248,16 +214,12 @@ public interface QSTile {
     public static class BooleanState extends State {
         public static final int VERSION = 1;
         public boolean value;
-        public boolean forceExpandIcon;
 
         @Override
         public boolean copyTo(State other) {
             final BooleanState o = (BooleanState) other;
-            final boolean changed = super.copyTo(other)
-                    || o.value != value
-                    || o.forceExpandIcon != forceExpandIcon;
+            final boolean changed = super.copyTo(other) || o.value != value;
             o.value = value;
-            o.forceExpandIcon = forceExpandIcon;
             return changed;
         }
 
@@ -265,7 +227,6 @@ public interface QSTile {
         protected StringBuilder toStringBuilder() {
             final StringBuilder rt = super.toStringBuilder();
             rt.insert(rt.length() - 1, ",value=" + value);
-            rt.insert(rt.length() - 1, ",forceExpandIcon=" + forceExpandIcon);
             return rt;
         }
 

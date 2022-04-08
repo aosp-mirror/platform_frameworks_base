@@ -46,7 +46,4 @@ oneway interface IContextHubClientCallback {
 
     // Callback invoked when a nanoapp is disabled at the attached Context Hub.
     void onNanoAppDisabled(long nanoAppId);
-
-    // Callback invoked when the authorization state of a client changes.
-    void onClientAuthorizationChanged(long nanoAppId, int authorization);
 }

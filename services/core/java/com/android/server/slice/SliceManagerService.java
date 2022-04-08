@@ -26,10 +26,7 @@ import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.os.Process.SYSTEM_UID;
 
 import android.Manifest.permission;
-import android.annotation.NonNull;
 import android.app.AppOpsManager;
-import android.app.role.OnRoleHoldersChangedListener;
-import android.app.role.RoleManager;
 import android.app.slice.ISliceManager;
 import android.app.slice.SliceSpec;
 import android.app.usage.UsageStatsManagerInternal;
@@ -62,10 +59,10 @@ import android.util.Xml.Encoding;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.AssistUtils;
+import com.android.internal.util.Preconditions;
 import com.android.server.LocalServices;
 import com.android.server.ServiceThread;
 import com.android.server.SystemService;
-import com.android.server.SystemService.TargetUser;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -79,7 +76,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.concurrent.Executor;
 import java.util.function.Supplier;
 
 public class SliceManagerService extends ISliceManager.Stub {
@@ -124,7 +120,6 @@ public class SliceManagerService extends ISliceManager.Stub {
         filter.addAction(Intent.ACTION_PACKAGE_DATA_CLEARED);
         filter.addAction(Intent.ACTION_PACKAGE_REMOVED);
         filter.addDataScheme("package");
-        mRoleObserver = new RoleObserver();
         mContext.registerReceiverAsUser(mReceiver, UserHandle.ALL, filter, null, mHandler);
     }
 
@@ -256,6 +251,11 @@ public class SliceManagerService extends ISliceManager.Stub {
                 }
             }
         }
+        // Fallback to allowing uri permissions through.
+        if (mContext.checkUriPermission(uri, pid, uid, Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
+                == PERMISSION_GRANTED) {
+            return PackageManager.PERMISSION_GRANTED;
+        }
         return PackageManager.PERMISSION_DENIED;
     }
 
@@ -276,7 +276,7 @@ public class SliceManagerService extends ISliceManager.Stub {
             String providerPkg = getProviderPkg(grantUri, providerUser);
             mPermissions.grantSliceAccess(pkg, userId, providerPkg, providerUser, grantUri);
         }
-        final long ident = Binder.clearCallingIdentity();
+        long ident = Binder.clearCallingIdentity();
         try {
             mContext.getContentResolver().notifyChange(uri, null);
         } finally {
@@ -397,7 +397,7 @@ public class SliceManagerService extends ISliceManager.Stub {
     }
 
     private String getProviderPkg(Uri uri, int user) {
-        final long ident = Binder.clearCallingIdentity();
+        long ident = Binder.clearCallingIdentity();
         try {
             String providerName = getUriWithoutUserId(uri).getAuthority();
             ProviderInfo provider = mContext.getPackageManager().resolveContentProviderAsUser(
@@ -433,7 +433,7 @@ public class SliceManagerService extends ISliceManager.Stub {
     }
 
     private boolean hasFullSliceAccess(String pkg, int userId) {
-        final long ident = Binder.clearCallingIdentity();
+        long ident = Binder.clearCallingIdentity();
         try {
             boolean ret = isDefaultHomeApp(pkg, userId) || isAssistant(pkg, userId)
                     || isGrantedFullAccess(pkg, userId);
@@ -477,26 +477,10 @@ public class SliceManagerService extends ISliceManager.Stub {
         return cn.getPackageName();
     }
 
-    /**
-     * A cached value of the default home app
-     */
-    private String mCachedDefaultHome = null;
-
     // Based on getDefaultHome in ShortcutService.
     // TODO: Unify if possible
     @VisibleForTesting
     protected String getDefaultHome(int userId) {
-
-        // Set VERIFY to true to run the cache in "shadow" mode for cache
-        // testing.  Do not commit set to true;
-        final boolean VERIFY = false;
-
-        if (mCachedDefaultHome != null) {
-            if (!VERIFY) {
-                return mCachedDefaultHome;
-            }
-        }
-
         final long token = Binder.clearCallingIdentity();
         try {
             final List<ResolveInfo> allHomeCandidates = new ArrayList<>();
@@ -505,12 +489,10 @@ public class SliceManagerService extends ISliceManager.Stub {
             final ComponentName defaultLauncher = mPackageManagerInternal
                     .getHomeActivitiesAsUser(allHomeCandidates, userId);
 
-            ComponentName detected = defaultLauncher;
-
-            // Cache the default launcher.  It is not a problem if the
-            // launcher is null - eventually, the default launcher will be
-            // set to something non-null.
-            mCachedDefaultHome = ((detected != null) ? detected.getPackageName() : null);
+            ComponentName detected = null;
+            if (defaultLauncher != null) {
+                detected = defaultLauncher;
+            }
 
             if (detected == null) {
                 // If we reach here, that means it's the first check since the user was created,
@@ -534,51 +516,9 @@ public class SliceManagerService extends ISliceManager.Stub {
                     lastPriority = ri.priority;
                 }
             }
-            final String ret = ((detected != null) ? detected.getPackageName() : null);
-            if (VERIFY) {
-                if (mCachedDefaultHome != null && !mCachedDefaultHome.equals(ret)) {
-                    Slog.e(TAG, "getDefaultHome() cache failure, is " +
-                           mCachedDefaultHome + " should be " + ret);
-                }
-            }
-            return ret;
+            return detected != null ? detected.getPackageName() : null;
         } finally {
             Binder.restoreCallingIdentity(token);
-        }
-    }
-
-    public void invalidateCachedDefaultHome() {
-        mCachedDefaultHome = null;
-    }
-
-    /**
-     * Listen for changes in the roles, and invalidate the cached default
-     * home as necessary.
-     */
-    private RoleObserver mRoleObserver;
-
-    class RoleObserver implements OnRoleHoldersChangedListener {
-        private RoleManager mRm;
-        private final Executor mExecutor;
-
-        RoleObserver() {
-            mExecutor = mContext.getMainExecutor();
-            register();
-        }
-
-        public void register() {
-            mRm = mContext.getSystemService(RoleManager.class);
-            if (mRm != null) {
-                mRm.addOnRoleHoldersChangedListenerAsUser(mExecutor, this, UserHandle.ALL);
-                invalidateCachedDefaultHome();
-            }
-        }
-
-        @Override
-        public void onRoleHoldersChanged(@NonNull String roleName, @NonNull UserHandle user) {
-            if (RoleManager.ROLE_HOME.equals(roleName)) {
-                invalidateCachedDefaultHome();
-            }
         }
     }
 
@@ -675,13 +615,13 @@ public class SliceManagerService extends ISliceManager.Stub {
         }
 
         @Override
-        public void onUserUnlocking(@NonNull TargetUser user) {
-            mService.onUnlockUser(user.getUserIdentifier());
+        public void onUnlockUser(int userHandle) {
+            mService.onUnlockUser(userHandle);
         }
 
         @Override
-        public void onUserStopping(@NonNull TargetUser user) {
-            mService.onStopUser(user.getUserIdentifier());
+        public void onStopUser(int userHandle) {
+            mService.onStopUser(userHandle);
         }
     }
 

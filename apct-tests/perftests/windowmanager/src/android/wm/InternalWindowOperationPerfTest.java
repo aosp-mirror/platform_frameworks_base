@@ -18,6 +18,7 @@ package android.wm;
 
 import static android.perftests.utils.ManualBenchmarkState.StatsReport;
 
+import android.os.ParcelFileDescriptor;
 import android.os.SystemClock;
 import android.perftests.utils.ManualBenchmarkState;
 import android.perftests.utils.ManualBenchmarkState.ManualBenchmarkTest;
@@ -36,11 +37,11 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.concurrent.TimeUnit;
 
 /** Measure the performance of internal methods in window manager service by trace tag. */
 @LargeTest
-public class InternalWindowOperationPerfTest extends WindowManagerPerfTestBase
-        implements ManualBenchmarkState.CustomizedIterationListener {
+public class InternalWindowOperationPerfTest extends WindowManagerPerfTestBase {
     private static final String TAG = InternalWindowOperationPerfTest.class.getSimpleName();
 
     @Rule
@@ -53,7 +54,7 @@ public class InternalWindowOperationPerfTest extends WindowManagerPerfTestBase
             "applyPostLayoutPolicy",
             "applySurfaceChanges",
             "AppTransitionReady",
-            "closeSurfaceTransaction",
+            "closeSurfaceTransactiom",
             "openSurfaceTransaction",
             "performLayout",
             "performSurfacePlacement",
@@ -67,9 +68,6 @@ public class InternalWindowOperationPerfTest extends WindowManagerPerfTestBase
             "finishActivity",
             "startActivityInner");
 
-    private boolean mIsProfiling;
-    private boolean mIsTraceStarted;
-
     @Test
     @ManualBenchmarkTest(
             targetTestDurationNs = 20 * TIME_1_S_IN_NS,
@@ -78,13 +76,13 @@ public class InternalWindowOperationPerfTest extends WindowManagerPerfTestBase
                             | StatsReport.FLAG_MAX | StatsReport.FLAG_COEFFICIENT_VAR))
     public void testLaunchAndFinishActivity() throws Throwable {
         final ManualBenchmarkState state = mPerfStatusReporter.getBenchmarkState();
-        state.setCustomizedIterations(getProfilingIterations(), this);
         long measuredTimeNs = 0;
+        boolean isTraceStarted = false;
 
         while (state.keepRunning(measuredTimeNs)) {
-            if (!mIsTraceStarted && !mIsProfiling && !state.isWarmingUp()) {
-                startAsyncAtrace("wm");
-                mIsTraceStarted = true;
+            if (!isTraceStarted && !state.isWarmingUp()) {
+                startAsyncAtrace();
+                isTraceStarted = true;
             }
             final long startTime = SystemClock.elapsedRealtimeNanos();
             mActivityRule.launchActivity();
@@ -93,15 +91,9 @@ public class InternalWindowOperationPerfTest extends WindowManagerPerfTestBase
             measuredTimeNs = SystemClock.elapsedRealtimeNanos() - startTime;
         }
 
-        if (mIsTraceStarted) {
-            stopAsyncAtrace();
-        }
+        stopAsyncAtrace();
 
         mTraceMarkParser.forAllSlices((key, slices) -> {
-            if (slices.size() < 2) {
-                Log.w(TAG, "No sufficient samples: " + key);
-                return;
-            }
             for (TraceMarkSlice slice : slices) {
                 state.addExtraResult(key, (long) (slice.getDurationInSeconds() * NANOS_PER_S));
             }
@@ -110,35 +102,20 @@ public class InternalWindowOperationPerfTest extends WindowManagerPerfTestBase
         Log.i(TAG, String.valueOf(mTraceMarkParser));
     }
 
-    private void stopAsyncAtrace() {
-        final InputStream inputStream = stopAsyncAtraceWithStream();
+    private void startAsyncAtrace() throws IOException {
+        sUiAutomation.executeShellCommand("atrace -b 32768 --async_start wm");
+        // Avoid atrace isn't ready immediately.
+        SystemClock.sleep(TimeUnit.NANOSECONDS.toMillis(TIME_1_S_IN_NS));
+    }
+
+    private void stopAsyncAtrace() throws IOException {
+        final ParcelFileDescriptor pfd = sUiAutomation.executeShellCommand("atrace --async_stop");
+        final InputStream inputStream = new ParcelFileDescriptor.AutoCloseInputStream(pfd);
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
             String line;
             while ((line = reader.readLine()) != null) {
                 mTraceMarkParser.visit(line);
             }
-        } catch (IOException e) {
-            Log.w(TAG, "Failed to read the result of stopped atrace", e);
-        }
-    }
-
-    @Override
-    public void onStart(int iteration) {
-        if (mIsTraceStarted) {
-            // Do not capture trace when profiling because the result will be much slower.
-            stopAsyncAtrace();
-            mIsTraceStarted = false;
-        }
-        mIsProfiling = true;
-        startProfiling(InternalWindowOperationPerfTest.class.getSimpleName()
-                + "_MethodTracing_" + iteration + ".trace");
-    }
-
-    @Override
-    public void onFinished(int iteration) {
-        stopProfiling();
-        if (iteration >= getProfilingIterations() - 1) {
-            mIsProfiling = false;
         }
     }
 }

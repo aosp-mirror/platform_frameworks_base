@@ -31,8 +31,7 @@
 
         <service
             android:name=".RecommendationServiceImpl"
-            android:permission="android.permission.BIND_PRINT_RECOMMENDATION_SERVICE"
-            android:exported="true">
+            android:permission="android.permission.BIND_PRINT_RECOMMENDATION_SERVICE">
 
             <intent-filter>
                 <action android:name="android.printservice.recommendation.RecommendationService" />

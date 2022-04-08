@@ -18,7 +18,6 @@
 package com.google.android.mms.pdu;
 
 import android.compat.annotation.UnsupportedAppUsage;
-import android.os.Build;
 import android.util.Log;
 
 import com.google.android.mms.InvalidHeaderValueException;
@@ -151,7 +150,7 @@ public class SendReq extends MultimediaMessagePdu {
      * @param value the value
      * @throws NullPointerException if the value is null.
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public void setCc(EncodedStringValue[] value) {
         mPduHeaders.setEncodedStringValues(value, PduHeaders.CC);
     }

@@ -62,6 +62,9 @@ public class SQLiteCursor extends AbstractWindowedCursor {
     /** A mapping of column names to column indices, to speed up lookups */
     private Map<String, Integer> mColumnNameMap;
 
+    /** Used to find out where a cursor was allocated in case it never got released. */
+    private final Throwable mStackTrace;
+
     /** Controls fetching of rows relative to requested position **/
     private boolean mFillWindowForwardOnly;
 
@@ -98,6 +101,11 @@ public class SQLiteCursor extends AbstractWindowedCursor {
     public SQLiteCursor(SQLiteCursorDriver driver, String editTable, SQLiteQuery query) {
         if (query == null) {
             throw new IllegalArgumentException("query object cannot be null");
+        }
+        if (StrictMode.vmSqliteObjectLeaksEnabled()) {
+            mStackTrace = new DatabaseObjectNotClosedException().fillInStackTrace();
+        } else {
+            mStackTrace = null;
         }
         mDriver = driver;
         mEditTable = editTable;
@@ -139,12 +147,12 @@ public class SQLiteCursor extends AbstractWindowedCursor {
         clearOrCreateWindow(getDatabase().getPath());
         try {
             Preconditions.checkArgumentNonnegative(requiredPos,
-                    "requiredPos cannot be negative");
+                    "requiredPos cannot be negative, but was " + requiredPos);
 
             if (mCount == NO_COUNT) {
                 mCount = mQuery.fillWindow(mWindow, requiredPos, requiredPos, true);
                 mCursorWindowCapacity = mWindow.getNumRows();
-                if (SQLiteDebug.NoPreloadHolder.DEBUG_SQL_LOG) {
+                if (Log.isLoggable(TAG, Log.DEBUG)) {
                     Log.d(TAG, "received count(*) from native_fill_window: " + mCount);
                 }
             } else {
@@ -275,17 +283,17 @@ public class SQLiteCursor extends AbstractWindowedCursor {
         try {
             // if the cursor hasn't been closed yet, close it first
             if (mWindow != null) {
-                // Report original sql statement
-                if (StrictMode.vmSqliteObjectLeaksEnabled()) {
+                if (mStackTrace != null) {
                     String sql = mQuery.getSql();
                     int len = sql.length();
                     StrictMode.onSqliteObjectLeaked(
-                            "Finalizing a Cursor that has not been deactivated or closed. "
-                            + "database = " + mQuery.getDatabase().getLabel()
-                            + ", table = " + mEditTable
-                            + ", query = " + sql.substring(0, (len > 1000) ? 1000 : len),
-                            null);
+                        "Finalizing a Cursor that has not been deactivated or closed. " +
+                        "database = " + mQuery.getDatabase().getLabel() +
+                        ", table = " + mEditTable +
+                        ", query = " + sql.substring(0, (len > 1000) ? 1000 : len),
+                        mStackTrace);
                 }
+                close();
             }
         } finally {
             super.finalize();

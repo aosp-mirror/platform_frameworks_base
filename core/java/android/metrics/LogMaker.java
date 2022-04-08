@@ -37,7 +37,7 @@ public class LogMaker {
     /**
      * Min required eventlog line length.
      * See: android/util/cts/EventLogTest.java
-     * Size limits enforced here are intended only as a precaution;
+     * Size checks enforced here are intended only as sanity checks;
      * your logs may be truncated earlier. Please log responsibly.
      *
      * @hide

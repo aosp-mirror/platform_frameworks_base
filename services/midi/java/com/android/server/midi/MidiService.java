@@ -16,7 +16,6 @@
 
 package com.android.server.midi;
 
-import android.annotation.NonNull;
 import android.bluetooth.BluetoothDevice;
 import android.content.ComponentName;
 import android.content.Context;
@@ -43,14 +42,13 @@ import android.os.IBinder;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.UserHandle;
-import android.util.EventLog;
 import android.util.Log;
 
 import com.android.internal.content.PackageMonitor;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.IndentingPrintWriter;
+import com.android.internal.util.XmlUtils;
 import com.android.server.SystemService;
-import com.android.server.SystemService.TargetUser;
 
 import org.xmlpull.v1.XmlPullParser;
 
@@ -77,8 +75,8 @@ public class MidiService extends IMidiManager.Stub {
         }
 
         @Override
-        public void onUserUnlocking(@NonNull TargetUser user) {
-            if (user.getUserIdentifier()  == UserHandle.USER_SYSTEM) {
+        public void onUnlockUser(int userHandle) {
+            if (userHandle == UserHandle.USER_SYSTEM) {
                 mMidiService.onUnlockUser();
             }
         }
@@ -350,10 +348,8 @@ public class MidiService extends IMidiManager.Stub {
             }
 
             if (mDeviceConnections != null) {
-                synchronized (mDeviceConnections) {
-                    for (DeviceConnection connection : mDeviceConnections) {
-                        connection.notifyClient(server);
-                    }
+                for (DeviceConnection connection : mDeviceConnections) {
+                    connection.notifyClient(server);
                 }
             }
         }
@@ -670,7 +666,7 @@ public class MidiService extends IMidiManager.Stub {
         }
 
         // clear calling identity so bindService does not fail
-        final long identity = Binder.clearCallingIdentity();
+        long identity = Binder.clearCallingIdentity();
         try {
             client.addDeviceConnection(device, callback);
         } finally {
@@ -695,7 +691,7 @@ public class MidiService extends IMidiManager.Stub {
         }
 
         // clear calling identity so bindService does not fail
-        final long identity = Binder.clearCallingIdentity();
+        long identity = Binder.clearCallingIdentity();
         try {
             client.addDeviceConnection(device, callback);
         } finally {
@@ -739,19 +735,13 @@ public class MidiService extends IMidiManager.Stub {
 
     @Override
     public MidiDeviceInfo getServiceDeviceInfo(String packageName, String className) {
-        int uid = Binder.getCallingUid();
         synchronized (mDevicesByInfo) {
             for (Device device : mDevicesByInfo.values()) {
                  ServiceInfo serviceInfo = device.getServiceInfo();
                  if (serviceInfo != null &&
                         packageName.equals(serviceInfo.packageName) &&
                         className.equals(serviceInfo.name)) {
-                    if (device.isUidAllowed(uid)) {
-                        return device.getDeviceInfo();
-                    } else {
-                        EventLog.writeEvent(0x534e4554, "185796676", -1, "");
-                        return null;
-                    }
+                    return device.getDeviceInfo();
                 }
             }
             return null;

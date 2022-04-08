@@ -30,12 +30,12 @@ import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.Spinner;
 import android.widget.Switch;
-import android.widget.TextView;
 
 import com.android.systemui.R;
-import com.android.systemui.settings.UserContextProvider;
+import com.android.systemui.settings.CurrentUserContextTracker;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -51,7 +51,7 @@ public class ScreenRecordDialog extends Activity {
     private static final String TAG = "ScreenRecordDialog";
 
     private final RecordingController mController;
-    private final UserContextProvider mUserContextProvider;
+    private final CurrentUserContextTracker mCurrentUserContextTracker;
     private Switch mTapsSwitch;
     private Switch mAudioSwitch;
     private Spinner mOptions;
@@ -59,9 +59,9 @@ public class ScreenRecordDialog extends Activity {
 
     @Inject
     public ScreenRecordDialog(RecordingController controller,
-            UserContextProvider userContextProvider) {
+            CurrentUserContextTracker currentUserContextTracker) {
         mController = controller;
-        mUserContextProvider = userContextProvider;
+        mCurrentUserContextTracker = currentUserContextTracker;
     }
 
     @Override
@@ -78,20 +78,20 @@ public class ScreenRecordDialog extends Activity {
 
         setContentView(R.layout.screen_record_dialog);
 
-        TextView cancelBtn = findViewById(R.id.button_cancel);
+        Button cancelBtn = findViewById(R.id.button_cancel);
         cancelBtn.setOnClickListener(v -> {
             finish();
         });
 
-        TextView startBtn = findViewById(R.id.button_start);
+        Button startBtn = findViewById(R.id.button_start);
         startBtn.setOnClickListener(v -> {
             requestScreenCapture();
             finish();
         });
 
         mModes = new ArrayList<>();
-        mModes.add(INTERNAL);
         mModes.add(MIC);
+        mModes.add(INTERNAL);
         mModes.add(MIC_AND_INTERNAL);
 
         mAudioSwitch = findViewById(R.id.screenrecord_audio_switch);
@@ -108,7 +108,7 @@ public class ScreenRecordDialog extends Activity {
     }
 
     private void requestScreenCapture() {
-        Context userContext = mUserContextProvider.getUserContext();
+        Context userContext = mCurrentUserContextTracker.getCurrentUserContext();
         boolean showTaps = mTapsSwitch.isChecked();
         ScreenRecordingAudioSource audioMode = mAudioSwitch.isChecked()
                 ? (ScreenRecordingAudioSource) mOptions.getSelectedItem()

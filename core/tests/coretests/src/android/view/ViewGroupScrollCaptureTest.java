@@ -19,9 +19,7 @@ package android.view;
 import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentation;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.testng.AssertJUnit.assertSame;
 
@@ -29,29 +27,33 @@ import android.annotation.Nullable;
 import android.content.Context;
 import android.graphics.Point;
 import android.graphics.Rect;
-import android.os.CancellationSignal;
 import android.platform.test.annotations.Presubmit;
 
-import androidx.annotation.NonNull;
+import androidx.test.filters.FlakyTest;
 import androidx.test.filters.MediumTest;
 import androidx.test.filters.SmallTest;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import java.util.concurrent.Executor;
-import java.util.function.Consumer;
+import java.util.LinkedList;
+import java.util.Queue;
 
 /**
  * Exercises Scroll Capture search in {@link ViewGroup}.
  */
 @Presubmit
 @SmallTest
+@FlakyTest(detail = "promote once confirmed flake-free")
 @RunWith(MockitoJUnitRunner.class)
 public class ViewGroupScrollCaptureTest {
 
-    private static final Executor DIRECT_EXECUTOR = Runnable::run;
+    @Mock
+    ScrollCaptureCallback mMockCallback;
+    @Mock
+    ScrollCaptureCallback mMockCallback2;
 
     /** Make sure the hint flags are saved and loaded correctly. */
     @Test
@@ -91,18 +93,6 @@ public class ViewGroupScrollCaptureTest {
                 viewGroup.getScrollCaptureHint());
     }
 
-    /** Make sure the hint flags are saved and loaded correctly. */
-    @Test
-    public void testSetScrollCaptureHint_mutuallyExclusiveFlags() throws Exception {
-        final Context context = getInstrumentation().getContext();
-        final MockViewGroup viewGroup = new MockViewGroup(context);
-
-        viewGroup.setScrollCaptureHint(
-                View.SCROLL_CAPTURE_HINT_INCLUDE | View.SCROLL_CAPTURE_HINT_EXCLUDE);
-        assertEquals("Mutually exclusive flags were not resolved correctly",
-                ViewGroup.SCROLL_CAPTURE_HINT_EXCLUDE, viewGroup.getScrollCaptureHint());
-    }
-
     /**
      * Ensure a ViewGroup with 'scrollCaptureHint=auto', but no ScrollCaptureCallback set dispatches
      * correctly. Verifies that the framework helper is called. Verifies a that non-null callback
@@ -113,24 +103,25 @@ public class ViewGroupScrollCaptureTest {
     public void testDispatchScrollCaptureSearch_noCallback_hintAuto() throws Exception {
         final Context context = getInstrumentation().getContext();
         final MockViewGroup viewGroup = new MockViewGroup(context, 0, 0, 200, 200);
-        TestScrollCaptureCallback callback = new TestScrollCaptureCallback();
 
         // When system internal scroll capture is requested, this callback is returned.
-        viewGroup.setScrollCaptureCallbackInternalForTest(callback);
+        viewGroup.setScrollCaptureCallbackInternalForTest(mMockCallback);
 
         Rect localVisibleRect = new Rect(0, 0, 200, 200);
         Point windowOffset = new Point();
-        ScrollCaptureSearchResults results = new ScrollCaptureSearchResults(DIRECT_EXECUTOR);
+        LinkedList<ScrollCaptureTarget> targetList = new LinkedList<>();
 
         // Dispatch
-        viewGroup.dispatchScrollCaptureSearch(localVisibleRect, windowOffset, results::addTarget);
-        callback.completeSearchRequest(new Rect(1, 2, 3, 4));
-        assertTrue(results.isComplete());
+        viewGroup.dispatchScrollCaptureSearch(localVisibleRect, windowOffset, targetList);
+
+        // Verify the system checked for fallback support
+        viewGroup.assertDispatchScrollCaptureCount(1);
+        viewGroup.assertLastDispatchScrollCaptureArgs(localVisibleRect, windowOffset);
 
         // Verify the target is as expected.
-        ScrollCaptureTarget target = results.getTopResult();
-        assertNotNull("Target not found", target);
-        assertSame("Target has the wrong callback", callback, target.getCallback());
+        assertEquals(1, targetList.size());
+        ScrollCaptureTarget target = targetList.get(0);
+        assertSame("Target has the wrong callback", mMockCallback, target.getCallback());
         assertSame("Target has the wrong View", viewGroup, target.getContainingView());
         assertEquals("Target hint is incorrect", View.SCROLL_CAPTURE_HINT_AUTO,
                 target.getContainingView().getScrollCaptureHint());
@@ -148,22 +139,18 @@ public class ViewGroupScrollCaptureTest {
         final MockViewGroup viewGroup =
                 new MockViewGroup(context, 0, 0, 200, 200, View.SCROLL_CAPTURE_HINT_EXCLUDE);
 
-        TestScrollCaptureCallback callback = new TestScrollCaptureCallback();
-
         // When system internal scroll capture is requested, this callback is returned.
-        viewGroup.setScrollCaptureCallbackInternalForTest(callback);
+        viewGroup.setScrollCaptureCallbackInternalForTest(mMockCallback);
 
         Rect localVisibleRect = new Rect(0, 0, 200, 200);
         Point windowOffset = new Point();
-        ScrollCaptureSearchResults results = new ScrollCaptureSearchResults(DIRECT_EXECUTOR);
-        assertTrue(results.isComplete());
+        LinkedList<ScrollCaptureTarget> targetList = new LinkedList<>();
 
         // Dispatch
-        viewGroup.dispatchScrollCaptureSearch(localVisibleRect, windowOffset, results::addTarget);
-        callback.verifyZeroInteractions();
+        viewGroup.dispatchScrollCaptureSearch(localVisibleRect, windowOffset, targetList);
 
         // Verify the results.
-        assertTrue("Results should be empty.", results.isEmpty());
+        assertEquals("Target list size should be zero.", 0, targetList.size());
     }
 
     /**
@@ -177,34 +164,27 @@ public class ViewGroupScrollCaptureTest {
         final Context context = getInstrumentation().getContext();
         MockViewGroup viewGroup = new MockViewGroup(context, 0, 0, 200, 200);
 
-        TestScrollCaptureCallback callback = new TestScrollCaptureCallback();
-        TestScrollCaptureCallback callback2 = new TestScrollCaptureCallback();
-
         // With an already provided scroll capture callback
-        viewGroup.setScrollCaptureCallback(callback);
+        viewGroup.setScrollCaptureCallback(mMockCallback);
 
         // When system internal scroll capture is requested, this callback is returned.
-        viewGroup.setScrollCaptureCallbackInternalForTest(callback2);
+        viewGroup.setScrollCaptureCallbackInternalForTest(mMockCallback);
 
         Rect localVisibleRect = new Rect(0, 0, 200, 200);
         Point windowOffset = new Point();
-        ScrollCaptureSearchResults results = new ScrollCaptureSearchResults(DIRECT_EXECUTOR);
+        LinkedList<ScrollCaptureTarget> targetList = new LinkedList<>();
 
         // Dispatch to the ViewGroup
-        viewGroup.dispatchScrollCaptureSearch(localVisibleRect, windowOffset, results::addTarget);
-        callback.completeSearchRequest(new Rect(1, 2, 3, 4));
+        viewGroup.dispatchScrollCaptureSearch(localVisibleRect, windowOffset, targetList);
+
+        // Confirm that framework support was not requested,
+        // because this view already had a callback set.
+        viewGroup.assertCreateScrollCaptureCallbackInternalCount(0);
 
         // Verify the target is as expected.
-        assertFalse(results.isEmpty());
-        assertTrue(results.isComplete());
-
-        // internal framework callback was not requested
-        callback2.verifyZeroInteractions();
-
-        ScrollCaptureTarget target = results.getTopResult();
-
-        assertNotNull("Target not found", target);
-        assertSame("Target has the wrong callback", callback, target.getCallback());
+        assertEquals(1, targetList.size());
+        ScrollCaptureTarget target = targetList.get(0);
+        assertSame("Target has the wrong callback", mMockCallback, target.getCallback());
         assertSame("Target has the wrong View", viewGroup, target.getContainingView());
         assertEquals("Target hint is incorrect", View.SCROLL_CAPTURE_HINT_AUTO,
                 target.getContainingView().getScrollCaptureHint());
@@ -221,22 +201,22 @@ public class ViewGroupScrollCaptureTest {
         final Context context = getInstrumentation().getContext();
         MockViewGroup viewGroup =
                 new MockViewGroup(context, 0, 0, 200, 200, View.SCROLL_CAPTURE_HINT_EXCLUDE);
-
-        TestScrollCaptureCallback callback = new TestScrollCaptureCallback();
-
         // With an already provided scroll capture callback
-        viewGroup.setScrollCaptureCallback(callback);
+        viewGroup.setScrollCaptureCallback(mMockCallback);
 
         Rect localVisibleRect = new Rect(0, 0, 200, 200);
         Point windowOffset = new Point();
-        ScrollCaptureSearchResults results = new ScrollCaptureSearchResults(DIRECT_EXECUTOR);
+        LinkedList<ScrollCaptureTarget> targetList = new LinkedList<>();
 
         // Dispatch to the ViewGroup itself
-        viewGroup.dispatchScrollCaptureSearch(localVisibleRect, windowOffset, results::addTarget);
-        callback.verifyZeroInteractions();
+        viewGroup.dispatchScrollCaptureSearch(localVisibleRect, windowOffset, targetList);
+
+        // Confirm that framework support was not requested, because this view is excluded.
+        // (And because this view has a callback set.)
+        viewGroup.assertCreateScrollCaptureCallbackInternalCount(0);
 
         // Has callback, but hint=excluded, so excluded.
-        assertNull(results.getTopResult());
+        assertTrue(targetList.isEmpty());
     }
 
     /**
@@ -272,43 +252,37 @@ public class ViewGroupScrollCaptureTest {
         // |               |          |
         // +---------------+----------+ (200,200)
 
-        // View 1 is fully clipped and not visible.
+        // View 1 is clipped and not visible.
         final MockView view1 = new MockView(context, 0, 0, 200, 25);
         viewGroup.addView(view1);
 
-        // View 2 is partially visible. (75x75)
+        // View 2 is partially visible.
         final MockView view2 = new MockView(context, 0, 25, 150, 100);
         viewGroup.addView(view2);
 
-        TestScrollCaptureCallback callback1 = new TestScrollCaptureCallback();
-
-        // View 3 is partially visible (175x50)
+        // View 3 is partially visible.
         // Pretend View3 can scroll by having framework provide fallback support
         final MockView view3 = new MockView(context, 0, 100, 200, 200);
         // When system internal scroll capture is requested for this view, return this callback.
-        view3.setScrollCaptureCallbackInternalForTest(callback1);
+        view3.setScrollCaptureCallbackInternalForTest(mMockCallback);
         viewGroup.addView(view3);
 
         // View 4 is invisible and should be ignored.
         final MockView view4 = new MockView(context, 150, 25, 200, 100, View.INVISIBLE);
         viewGroup.addView(view4);
 
-        TestScrollCaptureCallback callback2 = new TestScrollCaptureCallback();
-
-        // View 5 is partially visible and explicitly included via flag. (25x50)
+        // View 4 is invisible and should be ignored.
         final MockView view5 = new MockView(context, 150, 100, 200, 200);
-        view5.setScrollCaptureCallback(callback2);
+        // When system internal scroll capture is requested for this view, return this callback.
+        view5.setScrollCaptureCallback(mMockCallback2);
         view5.setScrollCaptureHint(View.SCROLL_CAPTURE_HINT_INCLUDE);
         viewGroup.addView(view5);
 
         // Where targets are added
-        final ScrollCaptureSearchResults results = new ScrollCaptureSearchResults(DIRECT_EXECUTOR);
+        final LinkedList<ScrollCaptureTarget> targetList = new LinkedList<>();
 
         // Dispatch to the ViewGroup
-        viewGroup.dispatchScrollCaptureSearch(localVisibleRect, windowOffset, results::addTarget);
-        callback1.completeSearchRequest(new Rect(0, 0, 200, 100));
-        callback2.completeSearchRequest(new Rect(0, 0, 50, 100));
-        assertTrue(results.isComplete());
+        viewGroup.dispatchScrollCaptureSearch(localVisibleRect, windowOffset, targetList);
 
         // View 1 is entirely clipped by the parent and not visible, dispatch
         // skips this view entirely.
@@ -343,63 +317,19 @@ public class ViewGroupScrollCaptureTest {
         view5.assertCreateScrollCaptureCallbackInternalCount(0);
 
         // 2 views should have been returned, view3 & view5
-        assertFalse(results.isEmpty());
-        assertTrue(results.isComplete());
+        assertEquals(2, targetList.size());
 
-        ScrollCaptureTarget target = results.getTopResult();
-        assertNotNull("Target not found", target);
-        assertSame("Result is the wrong View", view5, target.getContainingView());
-        assertSame("Result is the wrong callback", callback2, target.getCallback());
-        assertEquals("First target hint is incorrect", View.SCROLL_CAPTURE_HINT_INCLUDE,
+        ScrollCaptureTarget target = targetList.get(0);
+        assertSame("First target has the wrong View", view3, target.getContainingView());
+        assertSame("First target has the wrong callback", mMockCallback, target.getCallback());
+        assertEquals("First target hint is incorrect", View.SCROLL_CAPTURE_HINT_AUTO,
                 target.getContainingView().getScrollCaptureHint());
-    }
 
-    /**
-     * Tests the effect of padding on scroll capture search dispatch.
-     * <p>
-     * Verifies computation of child visible bounds with padding.
-     */
-    @MediumTest
-    @Test
-    public void testOnScrollCaptureSearch_withPadding() {
-        final Context context = getInstrumentation().getContext();
-
-        Rect windowBounds = new Rect(0, 0, 200, 200);
-        Point windowOffset = new Point(0, 0);
-
-        final MockViewGroup parent = new MockViewGroup(context, 0, 0, 200, 200);
-        parent.setPadding(25, 50, 25, 50);
-        parent.setClipToPadding(true); // (default)
-
-        final MockView view1 = new MockView(context, 0, -100, 200, 100);
-        parent.addView(view1);
-
-        final MockView view2 = new MockView(context, 0, 0, 200, 200);
-        parent.addView(view2);
-
-        final MockViewGroup view3 = new MockViewGroup(context, 0, 100, 200, 300);
-        parent.addView(view3);
-        view3.setPadding(25, 25, 25, 25);
-        view3.setClipToPadding(true);
-
-        // Where targets are added
-        final ScrollCaptureSearchResults results = new ScrollCaptureSearchResults(DIRECT_EXECUTOR);
-
-        // Dispatch to the ViewGroup
-        parent.dispatchScrollCaptureSearch(windowBounds, windowOffset, results::addTarget);
-
-        // Verify padding (with clipToPadding) is subtracted from visibleBounds
-        parent.assertOnScrollCaptureSearchLastArgs(new Rect(25, 50, 175, 150), new Point(0, 0));
-
-        view1.assertOnScrollCaptureSearchLastArgs(
-                new Rect(25, 150, 175, 200), new Point(0, -100));
-
-        view2.assertOnScrollCaptureSearchLastArgs(
-                new Rect(25, 50, 175, 150), new Point(0, 0));
-
-        // Account for padding on view3 as well (top == 25px)
-        view3.assertOnScrollCaptureSearchLastArgs(
-                new Rect(25, 25, 175, 50), new Point(0, 100));
+        target = targetList.get(1);
+        assertSame("Second target has the wrong View", view5, target.getContainingView());
+        assertSame("Second target has the wrong callback", mMockCallback2, target.getCallback());
+        assertEquals("Second target hint is incorrect", View.SCROLL_CAPTURE_HINT_INCLUDE,
+                target.getContainingView().getScrollCaptureHint());
     }
 
     public static final class MockView extends View {
@@ -409,8 +339,6 @@ public class ViewGroupScrollCaptureTest {
         private Rect mDispatchScrollCaptureSearchLastLocalVisibleRect;
         private Point mDispatchScrollCaptureSearchLastWindowOffset;
         private int mCreateScrollCaptureCallbackInternalCount;
-        private Rect mOnScrollCaptureSearchLastLocalVisibleRect;
-        private Point mOnScrollCaptureSearchLastWindowOffset;
 
         MockView(Context context) {
             this(context, /* left */ 0, /* top */0, /* right */ 0, /* bottom */0);
@@ -443,7 +371,7 @@ public class ViewGroupScrollCaptureTest {
         }
 
         void assertCreateScrollCaptureCallbackInternalCount(int count) {
-            assertEquals("Unexpected number of calls to createScrollCaptureCallbackInternal",
+            assertEquals("Unexpected number of calls to createScrollCaptureCallackInternal",
                     count, mCreateScrollCaptureCallbackInternalCount);
         }
 
@@ -456,27 +384,12 @@ public class ViewGroupScrollCaptureTest {
         }
 
         @Override
-        public void onScrollCaptureSearch(Rect localVisibleRect, Point windowOffset,
-                Consumer<ScrollCaptureTarget> targets) {
-            super.onScrollCaptureSearch(localVisibleRect, windowOffset, targets);
-            mOnScrollCaptureSearchLastLocalVisibleRect = new Rect(localVisibleRect);
-            mOnScrollCaptureSearchLastWindowOffset = new Point(windowOffset);
-        }
-
-        void assertOnScrollCaptureSearchLastArgs(Rect localVisibleRect, Point windowOffset) {
-            assertEquals("arg localVisibleRect was incorrect.",
-                    localVisibleRect, mOnScrollCaptureSearchLastLocalVisibleRect);
-            assertEquals("arg windowOffset was incorrect.",
-                    windowOffset, mOnScrollCaptureSearchLastWindowOffset);
-        }
-
-        @Override
         public void dispatchScrollCaptureSearch(Rect localVisibleRect, Point windowOffset,
-                Consumer<ScrollCaptureTarget> results) {
+                Queue<ScrollCaptureTarget> targets) {
             mDispatchScrollCaptureSearchNumCalls++;
             mDispatchScrollCaptureSearchLastLocalVisibleRect = new Rect(localVisibleRect);
             mDispatchScrollCaptureSearchLastWindowOffset = new Point(windowOffset);
-            super.dispatchScrollCaptureSearch(localVisibleRect, windowOffset, results);
+            super.dispatchScrollCaptureSearch(localVisibleRect, windowOffset, targets);
         }
 
         @Override
@@ -488,33 +401,13 @@ public class ViewGroupScrollCaptureTest {
         }
     }
 
-    static class CallbackStub implements ScrollCaptureCallback {
-
-        @Override
-        public void onScrollCaptureSearch(@NonNull CancellationSignal signal,
-                @NonNull Consumer<Rect> onReady) {
-        }
-
-        @Override
-        public void onScrollCaptureStart(@NonNull ScrollCaptureSession session,
-                @NonNull CancellationSignal signal, @NonNull Runnable onReady) {
-        }
-
-        @Override
-        public void onScrollCaptureImageRequest(@NonNull ScrollCaptureSession session,
-                @NonNull CancellationSignal signal, @NonNull Rect captureArea,
-                Consumer<Rect> onComplete) {
-        }
-
-        @Override
-        public void onScrollCaptureEnd(@NonNull Runnable onReady) {
-        }
-    };
-
     public static final class MockViewGroup extends ViewGroup {
         private ScrollCaptureCallback mInternalCallback;
-        private Rect mOnScrollCaptureSearchLastLocalVisibleRect;
-        private Point mOnScrollCaptureSearchLastWindowOffset;
+        private int mDispatchScrollCaptureSearchNumCalls;
+        private Rect mDispatchScrollCaptureSearchLastLocalVisibleRect;
+        private Point mDispatchScrollCaptureSearchLastWindowOffset;
+        private int mCreateScrollCaptureCallbackInternalCount;
+
 
         MockViewGroup(Context context) {
             this(context, /* left */ 0, /* top */0, /* right */ 0, /* bottom */0);
@@ -535,31 +428,53 @@ public class ViewGroupScrollCaptureTest {
             mInternalCallback = internal;
         }
 
+        void assertDispatchScrollCaptureSearchCount(int count) {
+            assertEquals("Unexpected number of calls to dispatchScrollCaptureSearch",
+                    count, mDispatchScrollCaptureSearchNumCalls);
+        }
+
         @Override
         @Nullable
         public ScrollCaptureCallback createScrollCaptureCallbackInternal(Rect localVisibleRect,
                 Point offsetInWindow) {
+            mCreateScrollCaptureCallbackInternalCount++;
             return mInternalCallback;
-        }
-
-        @Override
-        public void onScrollCaptureSearch(Rect localVisibleRect, Point windowOffset,
-                Consumer<ScrollCaptureTarget> targets) {
-            super.onScrollCaptureSearch(localVisibleRect, windowOffset, targets);
-            mOnScrollCaptureSearchLastLocalVisibleRect = new Rect(localVisibleRect);
-            mOnScrollCaptureSearchLastWindowOffset = new Point(windowOffset);
-        }
-
-        void assertOnScrollCaptureSearchLastArgs(Rect localVisibleRect, Point windowOffset) {
-            assertEquals("arg localVisibleRect was incorrect.",
-                    localVisibleRect, mOnScrollCaptureSearchLastLocalVisibleRect);
-            assertEquals("arg windowOffset was incorrect.",
-                    windowOffset, mOnScrollCaptureSearchLastWindowOffset);
         }
 
         @Override
         protected void onLayout(boolean changed, int l, int t, int r, int b) {
             // We don't layout this view.
+        }
+
+        void assertDispatchScrollCaptureCount(int count) {
+            assertEquals(count, mDispatchScrollCaptureSearchNumCalls);
+        }
+
+        void assertLastDispatchScrollCaptureArgs(Rect localVisibleRect, Point windowOffset) {
+            assertEquals("arg localVisibleRect to dispatchScrollCaptureCallback was incorrect.",
+                    localVisibleRect, mDispatchScrollCaptureSearchLastLocalVisibleRect);
+            assertEquals("arg windowOffset to dispatchScrollCaptureCallback was incorrect.",
+                    windowOffset, mDispatchScrollCaptureSearchLastWindowOffset);
+        }
+        void assertCreateScrollCaptureCallbackInternalCount(int count) {
+            assertEquals("Unexpected number of calls to createScrollCaptureCallackInternal",
+                    count, mCreateScrollCaptureCallbackInternalCount);
+        }
+
+        void reset() {
+            mDispatchScrollCaptureSearchNumCalls = 0;
+            mDispatchScrollCaptureSearchLastWindowOffset = null;
+            mDispatchScrollCaptureSearchLastLocalVisibleRect = null;
+            mCreateScrollCaptureCallbackInternalCount = 0;
+        }
+
+        @Override
+        public void dispatchScrollCaptureSearch(Rect localVisibleRect, Point windowOffset,
+                Queue<ScrollCaptureTarget> targets) {
+            mDispatchScrollCaptureSearchNumCalls++;
+            mDispatchScrollCaptureSearchLastLocalVisibleRect = new Rect(localVisibleRect);
+            mDispatchScrollCaptureSearchLastWindowOffset = new Point(windowOffset);
+            super.dispatchScrollCaptureSearch(localVisibleRect, windowOffset, targets);
         }
     }
 }

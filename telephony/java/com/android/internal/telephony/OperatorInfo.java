@@ -35,37 +35,37 @@ public class OperatorInfo implements Parcelable {
         FORBIDDEN;
     }
 
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     private String mOperatorAlphaLong;
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     private String mOperatorAlphaShort;
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     private String mOperatorNumeric;
 
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     private State mState = State.UNKNOWN;
     private int mRan = AccessNetworkType.UNKNOWN;
 
 
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public String
     getOperatorAlphaLong() {
         return mOperatorAlphaLong;
     }
 
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public String
     getOperatorAlphaShort() {
         return mOperatorAlphaShort;
     }
 
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public String
     getOperatorNumeric() {
         return mOperatorNumeric;
     }
 
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public State
     getState() {
         return mState;
@@ -75,7 +75,7 @@ public class OperatorInfo implements Parcelable {
         return mRan;
     }
 
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     OperatorInfo(String operatorAlphaLong,
                 String operatorAlphaShort,
                 String operatorNumeric,
@@ -97,7 +97,7 @@ public class OperatorInfo implements Parcelable {
         mRan = ran;
     }
 
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public OperatorInfo(String operatorAlphaLong,
                 String operatorAlphaShort,
                 String operatorNumeric,
@@ -124,7 +124,7 @@ public class OperatorInfo implements Parcelable {
     /**
      * See state strings defined in ril.h RIL_REQUEST_QUERY_AVAILABLE_NETWORKS
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     private static State rilStateToState(String s) {
         if (s.equals("unknown")) {
             return State.UNKNOWN;
@@ -180,7 +180,7 @@ public class OperatorInfo implements Parcelable {
      * Implement the Parcelable interface
      * Method to deserialize a OperatorInfo object, or an array thereof.
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public static final Creator<OperatorInfo> CREATOR =
             new Creator<OperatorInfo>() {
                 @Override

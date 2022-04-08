@@ -25,7 +25,6 @@ import static android.view.contentcapture.ContentCaptureSession.STATE_SERVICE_RE
 import static android.view.contentcapture.ContentCaptureSession.STATE_SERVICE_UPDATING;
 
 import android.annotation.NonNull;
-import android.app.assist.ActivityId;
 import android.content.ComponentName;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -76,9 +75,9 @@ final class ContentCaptureServerSession {
     public final ComponentName appComponentName;
 
     ContentCaptureServerSession(@NonNull Object lock, @NonNull IBinder activityToken,
-            @NonNull ActivityId activityId, @NonNull ContentCapturePerUserService service,
-            @NonNull ComponentName appComponentName, @NonNull IResultReceiver sessionStateReceiver,
-            int taskId, int displayId, int sessionId, int uid, int flags) {
+            @NonNull ContentCapturePerUserService service, @NonNull ComponentName appComponentName,
+            @NonNull IResultReceiver sessionStateReceiver, int taskId, int displayId, int sessionId,
+            int uid, int flags) {
         Preconditions.checkArgument(sessionId != NO_SESSION_ID);
         mLock = lock;
         mActivityToken = activityToken;
@@ -87,7 +86,7 @@ final class ContentCaptureServerSession {
         mId = sessionId;
         mUid = uid;
         mContentCaptureContext = new ContentCaptureContext(/* clientContext= */ null,
-                activityId, appComponentName, displayId, flags);
+                appComponentName, taskId, displayId, flags);
         mSessionStateReceiver = sessionStateReceiver;
         try {
             sessionStateReceiver.asBinder().linkToDeath(() -> onClientDeath(), 0);

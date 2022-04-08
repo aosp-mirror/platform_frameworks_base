@@ -15,12 +15,10 @@
  */
 package android.telephony.euicc;
 
-import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.app.PendingIntent;
 import android.compat.annotation.UnsupportedAppUsage;
-import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.telephony.UiccAccessRule;
@@ -63,7 +61,7 @@ public final class DownloadableSubscription implements Parcelable {
      */
     @Nullable
     @Deprecated
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public final String encodedActivationCode;
 
     @Nullable private String confirmationCode;
@@ -103,81 +101,44 @@ public final class DownloadableSubscription implements Parcelable {
         this.accessRules = accessRules;
     }
 
+    /** @hide */
+    @SystemApi
     public static final class Builder {
         @Nullable private String encodedActivationCode;
         @Nullable private String confirmationCode;
         @Nullable private String carrierName;
         List<UiccAccessRule> accessRules;
 
-        /** @hide */
-        @SystemApi
         public Builder() {}
 
-        public Builder(@NonNull DownloadableSubscription baseSubscription) {
+        public Builder(DownloadableSubscription baseSubscription) {
             encodedActivationCode = baseSubscription.getEncodedActivationCode();
             confirmationCode = baseSubscription.getConfirmationCode();
             carrierName = baseSubscription.getCarrierName();
             accessRules = baseSubscription.getAccessRules();
         }
 
-        public Builder(@NonNull String encodedActivationCode) {
-            this.encodedActivationCode = encodedActivationCode;
-        }
-
-        /**
-         * Builds a {@link DownloadableSubscription} object.
-         * @return a non-null {@link DownloadableSubscription} object.
-         */
-        @NonNull
         public DownloadableSubscription build() {
             return new DownloadableSubscription(encodedActivationCode, confirmationCode,
                     carrierName, accessRules);
         }
 
-        /**
-         * Sets the encoded activation code.
-         * @param value the activation code to use. An activation code can be parsed from a user
-         *              scanned QR code. The format of activation code is defined in SGP.22. For
-         *              example, "1$SMDP.GSMA.COM$04386-AGYFT-A74Y8-3F815$1.3.6.1.4.1.31746". For
-         *              detail, see {@code com.android.euicc.data.ActivationCode}. Must not be null.
-         */
-        @NonNull
-        public Builder setEncodedActivationCode(@NonNull String value) {
+        public Builder setEncodedActivationCode(String value) {
             encodedActivationCode = value;
             return this;
         }
 
-        /**
-         * Sets the confirmation code.
-         * @param value the confirmation code to use to authenticate the carrier server got
-         *              subscription download.
-         */
-        @NonNull
-        public Builder setConfirmationCode(@NonNull String value) {
+        public Builder setConfirmationCode(String value) {
             confirmationCode = value;
             return this;
         }
 
-        /**
-         * Sets the user-visible carrier name.
-         * @param value carrier name.
-         * @hide
-         */
-        @NonNull
-        @SystemApi
-        public Builder setCarrierName(@NonNull String value) {
+        public Builder setCarrierName(String value) {
             carrierName = value;
             return this;
         }
 
-        /**
-         * Sets the {@link UiccAccessRule}s dictating access to this subscription.
-         * @param value A list of {@link UiccAccessRule}s.
-         * @hide
-         */
-        @NonNull
-        @SystemApi
-        public Builder setAccessRules(@NonNull List<UiccAccessRule> value) {
+        public Builder setAccessRules(List<UiccAccessRule> value) {
             accessRules = value;
             return this;
         }
@@ -230,7 +191,7 @@ public final class DownloadableSubscription implements Parcelable {
      * @deprecated - Do not use.
      */
     @Deprecated
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public void setCarrierName(String carrierName) {
         this.carrierName = carrierName;
     }
@@ -277,7 +238,7 @@ public final class DownloadableSubscription implements Parcelable {
      * @deprecated - Do not use.
      */
     @Deprecated
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public void setAccessRules(UiccAccessRule[] accessRules) {
         this.accessRules = Arrays.asList(accessRules);
     }

@@ -16,7 +16,6 @@
 
 package android.accounts;
 
-import android.annotation.Nullable;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Build;
 import android.os.Parcel;
@@ -112,7 +111,7 @@ public class AuthenticatorDescription implements Parcelable {
     }
 
     /** Compares the type only, suitable for key comparisons. */
-    public boolean equals(@Nullable Object o) {
+    public boolean equals(Object o) {
         if (o == this) return true;
         if (!(o instanceof AuthenticatorDescription)) return false;
         final AuthenticatorDescription other = (AuthenticatorDescription) o;

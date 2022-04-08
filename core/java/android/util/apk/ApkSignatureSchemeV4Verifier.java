@@ -16,14 +16,12 @@
 
 package android.util.apk;
 
-import static android.util.apk.ApkSigningBlockUtils.CONTENT_DIGEST_VERITY_CHUNKED_SHA256;
 import static android.util.apk.ApkSigningBlockUtils.getSignatureAlgorithmJcaKeyAlgorithm;
 import static android.util.apk.ApkSigningBlockUtils.getSignatureAlgorithmJcaSignatureAlgorithm;
 import static android.util.apk.ApkSigningBlockUtils.isSupportedSignatureAlgorithm;
 
 import android.os.incremental.IncrementalManager;
 import android.os.incremental.V4Signature;
-import android.util.ArrayMap;
 import android.util.Pair;
 
 import java.io.ByteArrayInputStream;
@@ -44,7 +42,6 @@ import java.security.spec.AlgorithmParameterSpec;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Arrays;
-import java.util.Map;
 
 /**
  * APK Signature Scheme v4 verifier.
@@ -82,20 +79,13 @@ public class ApkSignatureSchemeV4Verifier {
             throw new SignatureNotFoundException("Failed to read V4 signature.", e);
         }
 
-        // Verify signed data and extract certificates and apk digest.
-        final byte[] signedData = V4Signature.getSignedData(apk.length(), hashingInfo,
+        final byte[] signedData = V4Signature.getSigningData(apk.length(), hashingInfo,
                 signingInfo);
-        final Pair<Certificate, byte[]> result = verifySigner(signingInfo, signedData);
 
-        // Populate digests enforced by IncFS driver.
-        Map<Integer, byte[]> contentDigests = new ArrayMap<>();
-        contentDigests.put(convertToContentDigestType(hashingInfo.hashAlgorithm),
-                hashingInfo.rawRootHash);
-
-        return new VerifiedSigner(new Certificate[]{result.first}, result.second, contentDigests);
+        return verifySigner(signingInfo, signedData);
     }
 
-    private static Pair<Certificate, byte[]> verifySigner(V4Signature.SigningInfo signingInfo,
+    private static VerifiedSigner verifySigner(V4Signature.SigningInfo signingInfo,
             final byte[] signedData) throws SecurityException {
         if (!isSupportedSignatureAlgorithm(signingInfo.signatureAlgorithmId)) {
             throw new SecurityException("No supported signatures found");
@@ -155,34 +145,21 @@ public class ApkSignatureSchemeV4Verifier {
                     "Public key mismatch between certificate and signature record");
         }
 
-        return Pair.create(certificate, signingInfo.apkDigest);
-    }
-
-    private static int convertToContentDigestType(int hashAlgorithm) throws SecurityException {
-        if (hashAlgorithm == V4Signature.HASHING_ALGORITHM_SHA256) {
-            return CONTENT_DIGEST_VERITY_CHUNKED_SHA256;
-        }
-        throw new SecurityException("Unsupported hashAlgorithm: " + hashAlgorithm);
+        return new VerifiedSigner(new Certificate[]{certificate}, signingInfo.apkDigest);
     }
 
     /**
-     * Verified APK Signature Scheme v4 signer, including V2/V3 digest.
+     * Verified APK Signature Scheme v4 signer, including V3 digest.
      *
      * @hide for internal use only.
      */
     public static class VerifiedSigner {
         public final Certificate[] certs;
-        public final byte[] apkDigest;
+        public byte[] apkDigest;
 
-        // Algorithm -> digest map of signed digests in the signature.
-        // These are continuously enforced by the IncFS driver.
-        public final Map<Integer, byte[]> contentDigests;
-
-        public VerifiedSigner(Certificate[] certs, byte[] apkDigest,
-                Map<Integer, byte[]> contentDigests) {
+        public VerifiedSigner(Certificate[] certs, byte[] apkDigest) {
             this.certs = certs;
             this.apkDigest = apkDigest;
-            this.contentDigests = contentDigests;
         }
 
     }

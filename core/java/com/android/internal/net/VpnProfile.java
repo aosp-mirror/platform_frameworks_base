@@ -21,19 +21,14 @@ import android.compat.annotation.UnsupportedAppUsage;
 import android.net.Ikev2VpnProfile;
 import android.net.PlatformVpnProfile;
 import android.net.ProxyInfo;
-import android.net.Uri;
 import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.net.module.util.ProxyUtils;
 
-import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
-import java.net.URLDecoder;
-import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -76,9 +71,6 @@ public final class VpnProfile implements Cloneable, Parcelable {
     public static final int PROXY_MANUAL = 1;
 
     private static final String ENCODED_NULL_PROXY_INFO = "\0\0\0\0";
-
-    /** Default URL encoding. */
-    private static final String DEFAULT_ENCODING = StandardCharsets.UTF_8.name();
 
     // Entity fields.
     @UnsupportedAppUsage
@@ -135,6 +127,9 @@ public final class VpnProfile implements Cloneable, Parcelable {
 
     /**
      * The list of allowable algorithms.
+     *
+     * <p>This list is validated in the setter to ensure that encoding characters (list, value
+     * delimiters) are not present in the algorithm names. See {@link #validateAllowedAlgorithms()}
      */
     private List<String> mAllowedAlgorithms = new ArrayList<>(); // 19
     public boolean isBypassable = false;                         // 20
@@ -199,8 +194,11 @@ public final class VpnProfile implements Cloneable, Parcelable {
      *
      * @param allowedAlgorithms the list of allowable algorithms, as listed in {@link
      *     IpSecAlgorithm}.
+     * @throws IllegalArgumentException if any delimiters are used in algorithm names. See {@link
+     *     #VALUE_DELIMITER} and {@link LIST_DELIMITER}.
      */
     public void setAllowedAlgorithms(List<String> allowedAlgorithms) {
+        validateAllowedAlgorithms(allowedAlgorithms);
         mAllowedAlgorithms = allowedAlgorithms;
     }
 
@@ -237,7 +235,7 @@ public final class VpnProfile implements Cloneable, Parcelable {
      *
      * <p>See {@link #encode()}
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public static VpnProfile decode(String key, byte[] value) {
         try {
             if (key == null) {
@@ -286,22 +284,16 @@ public final class VpnProfile implements Cloneable, Parcelable {
                 String exclList = (values.length > 17) ? values[17] : "";
                 String pacFileUrl = (values.length > 18) ? values[18] : "";
                 if (!host.isEmpty() || !port.isEmpty() || !exclList.isEmpty()) {
-                    profile.proxy =
-                            ProxyInfo.buildDirectProxy(host, port.isEmpty() ?
-                                    0 : Integer.parseInt(port),
-                                    ProxyUtils.exclusionStringAsList(exclList));
+                    profile.proxy = new ProxyInfo(host, port.isEmpty() ?
+                            0 : Integer.parseInt(port), exclList);
                 } else if (!pacFileUrl.isEmpty()) {
-                    profile.proxy = ProxyInfo.buildPacProxy(Uri.parse(pacFileUrl));
+                    profile.proxy = new ProxyInfo(pacFileUrl);
                 }
             } // else profile.proxy = null
 
             // Either all must be present, or none must be.
             if (values.length >= 24) {
-                profile.mAllowedAlgorithms = new ArrayList<>();
-                for (String algo : Arrays.asList(values[19].split(LIST_DELIMITER))) {
-                    profile.mAllowedAlgorithms.add(URLDecoder.decode(algo, DEFAULT_ENCODING));
-                }
-
+                profile.mAllowedAlgorithms = Arrays.asList(values[19].split(LIST_DELIMITER));
                 profile.isBypassable = Boolean.parseBoolean(values[20]);
                 profile.isMetered = Boolean.parseBoolean(values[21]);
                 profile.maxMtu = Integer.parseInt(values[22]);
@@ -344,27 +336,15 @@ public final class VpnProfile implements Cloneable, Parcelable {
             builder.append(VALUE_DELIMITER).append(proxy.getPort());
             builder.append(VALUE_DELIMITER)
                     .append(
-                            ProxyUtils.exclusionListAsString(proxy.getExclusionList()) != null
-                                    ? ProxyUtils.exclusionListAsString(proxy.getExclusionList())
+                            proxy.getExclusionListAsString() != null
+                                    ? proxy.getExclusionListAsString()
                                     : "");
             builder.append(VALUE_DELIMITER).append(proxy.getPacFileUrl().toString());
         } else {
             builder.append(ENCODED_NULL_PROXY_INFO);
         }
 
-        final List<String> encodedAlgoNames = new ArrayList<>();
-
-        try {
-            for (String algo : mAllowedAlgorithms) {
-                encodedAlgoNames.add(URLEncoder.encode(algo, DEFAULT_ENCODING));
-            }
-        } catch (UnsupportedEncodingException e) {
-            // Unexpected error
-            throw new IllegalStateException("Failed to encode algorithms.", e);
-        }
-
-        builder.append(VALUE_DELIMITER).append(String.join(LIST_DELIMITER, encodedAlgoNames));
-
+        builder.append(VALUE_DELIMITER).append(String.join(LIST_DELIMITER, mAllowedAlgorithms));
         builder.append(VALUE_DELIMITER).append(isBypassable);
         builder.append(VALUE_DELIMITER).append(isMetered);
         builder.append(VALUE_DELIMITER).append(maxMtu);
@@ -377,15 +357,12 @@ public final class VpnProfile implements Cloneable, Parcelable {
     /** Checks if this profile specifies a LegacyVpn type. */
     public static boolean isLegacyType(int type) {
         switch (type) {
-            case VpnProfile.TYPE_PPTP:
-            case VpnProfile.TYPE_L2TP_IPSEC_PSK:
-            case VpnProfile.TYPE_L2TP_IPSEC_RSA:
-            case VpnProfile.TYPE_IPSEC_XAUTH_PSK:
-            case VpnProfile.TYPE_IPSEC_XAUTH_RSA:
-            case VpnProfile.TYPE_IPSEC_HYBRID_RSA:
-                return true;
-            default:
+            case VpnProfile.TYPE_IKEV2_IPSEC_USER_PASS: // fall through
+            case VpnProfile.TYPE_IKEV2_IPSEC_RSA: // fall through
+            case VpnProfile.TYPE_IKEV2_IPSEC_PSK:
                 return false;
+            default:
+                return true;
         }
     }
 
@@ -442,6 +419,20 @@ public final class VpnProfile implements Cloneable, Parcelable {
             return false;
         }
         return true;
+    }
+
+    /**
+     * Validates that the provided list of algorithms does not contain illegal characters.
+     *
+     * @param allowedAlgorithms The list to be validated
+     */
+    public static void validateAllowedAlgorithms(List<String> allowedAlgorithms) {
+        for (final String alg : allowedAlgorithms) {
+            if (alg.contains(VALUE_DELIMITER) || alg.contains(LIST_DELIMITER)) {
+                throw new IllegalArgumentException(
+                        "Algorithm contained illegal ('\0' or ',') character");
+            }
+        }
     }
 
     /** Generates a hashcode over the VpnProfile. */

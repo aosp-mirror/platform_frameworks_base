@@ -19,9 +19,6 @@ package android.net;
 import android.os.Parcelable;
 import android.net.ConnectivityMetricsEvent;
 import android.net.INetdEventCallback;
-import android.net.LinkProperties;
-import android.net.Network;
-import android.net.NetworkCapabilities;
 
 /** {@hide} */
 interface IIpConnectivityMetrics {
@@ -31,11 +28,6 @@ interface IIpConnectivityMetrics {
      * or -1 if the event was dropped due to rate limiting.
      */
     int logEvent(in ConnectivityMetricsEvent event);
-
-    void logDefaultNetworkValidity(boolean valid);
-    void logDefaultNetworkEvent(in Network defaultNetwork, int score, boolean validated,
-            in LinkProperties lp, in NetworkCapabilities nc, in Network previousDefaultNetwork,
-            int previousScore, in LinkProperties previousLp, in NetworkCapabilities previousNc);
 
     /**
      * Callback can be registered by DevicePolicyManager or NetworkWatchlistService only.

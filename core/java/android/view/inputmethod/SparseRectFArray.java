@@ -16,7 +16,6 @@
 
 package android.view.inputmethod;
 
-import android.annotation.Nullable;
 import android.graphics.RectF;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -93,7 +92,7 @@ public final class SparseRectFArray implements Parcelable {
     }
 
     @Override
-    public boolean equals(@Nullable Object obj){
+    public boolean equals(Object obj){
         if (obj == null) {
             return false;
         }

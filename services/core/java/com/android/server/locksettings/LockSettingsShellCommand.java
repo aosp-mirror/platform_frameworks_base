@@ -16,16 +16,15 @@
 
 package com.android.server.locksettings;
 
+import static android.app.admin.DevicePolicyManager.PASSWORD_COMPLEXITY_NONE;
+
 import static com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_NONE;
 import static com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_PATTERN;
 
 import android.app.ActivityManager;
 import android.app.admin.PasswordMetrics;
-import android.content.Context;
 import android.os.ShellCommand;
-import android.os.SystemProperties;
 import android.text.TextUtils;
-import android.util.Slog;
 
 import com.android.internal.widget.LockPatternUtils;
 import com.android.internal.widget.LockPatternUtils.RequestThrottledException;
@@ -46,25 +45,15 @@ class LockSettingsShellCommand extends ShellCommand {
     private static final String COMMAND_VERIFY = "verify";
     private static final String COMMAND_GET_DISABLED = "get-disabled";
     private static final String COMMAND_REMOVE_CACHE = "remove-cache";
-    private static final String COMMAND_SET_ROR_PROVIDER_PACKAGE =
-            "set-resume-on-reboot-provider-package";
     private static final String COMMAND_HELP = "help";
 
     private int mCurrentUserId;
     private final LockPatternUtils mLockPatternUtils;
-    private final Context mContext;
-    private final int mCallingPid;
-    private final int mCallingUid;
-
     private String mOld = "";
     private String mNew = "";
 
-    LockSettingsShellCommand(LockPatternUtils lockPatternUtils, Context context, int callingPid,
-            int callingUid) {
+    LockSettingsShellCommand(LockPatternUtils lockPatternUtils) {
         mLockPatternUtils = lockPatternUtils;
-        mCallingPid = callingPid;
-        mCallingUid = callingUid;
-        mContext = context;
     }
 
     @Override
@@ -81,7 +70,6 @@ class LockSettingsShellCommand extends ShellCommand {
                     case COMMAND_HELP:
                     case COMMAND_GET_DISABLED:
                     case COMMAND_SET_DISABLED:
-                    case COMMAND_SET_ROR_PROVIDER_PACKAGE:
                         break;
                     default:
                         getErrPrintWriter().println(
@@ -93,9 +81,6 @@ class LockSettingsShellCommand extends ShellCommand {
                 // Commands that do not require authentication go here.
                 case COMMAND_REMOVE_CACHE:
                     runRemoveCache();
-                    return 0;
-                case COMMAND_SET_ROR_PROVIDER_PACKAGE:
-                    runSetResumeOnRebootProviderPackage();
                     return 0;
                 case COMMAND_HELP:
                     onHelp();
@@ -170,7 +155,7 @@ class LockSettingsShellCommand extends ShellCommand {
             pw.println("  set-pin [--old <CREDENTIAL>] [--user USER_ID] <PIN>");
             pw.println("    Sets the lock screen as PIN, using the given PIN to unlock.");
             pw.println("");
-            pw.println("  set-password [--old <CREDENTIAL>] [--user USER_ID] <PASSWORD>");
+            pw.println("  set-pin [--old <CREDENTIAL>] [--user USER_ID] <PASSWORD>");
             pw.println("    Sets the lock screen as password, using the given PASSOWRD to unlock.");
             pw.println("");
             pw.println("  sp [--old <CREDENTIAL>] [--user USER_ID]");
@@ -187,10 +172,6 @@ class LockSettingsShellCommand extends ShellCommand {
             pw.println("");
             pw.println("  remove-cache [--user USER_ID]");
             pw.println("    Removes cached unified challenge for the managed profile.");
-            pw.println("");
-            pw.println("  set-resume-on-reboot-provider-package <package_name>");
-            pw.println("    Sets the package name for server based resume on reboot service "
-                    + "provider.");
             pw.println("");
         }
     }
@@ -277,17 +258,6 @@ class LockSettingsShellCommand extends ShellCommand {
         return true;
     }
 
-    private boolean runSetResumeOnRebootProviderPackage() {
-        final String packageName = mNew;
-        String name = ResumeOnRebootServiceProvider.PROP_ROR_PROVIDER_PACKAGE;
-        Slog.i(TAG, "Setting " +  name + " to " + packageName);
-
-        mContext.enforcePermission(android.Manifest.permission.BIND_RESUME_ON_REBOOT_SERVICE,
-                mCallingPid, mCallingUid, TAG);
-        SystemProperties.set(name, packageName);
-        return true;
-    }
-
     private boolean runClear() {
         LockscreenCredential none = LockscreenCredential.createNone();
         if (!isNewCredentialSufficient(none)) {
@@ -301,17 +271,15 @@ class LockSettingsShellCommand extends ShellCommand {
     private boolean isNewCredentialSufficient(LockscreenCredential credential) {
         final PasswordMetrics requiredMetrics =
                 mLockPatternUtils.getRequestedPasswordMetrics(mCurrentUserId);
-        final int requiredComplexity =
-                mLockPatternUtils.getRequestedPasswordComplexity(mCurrentUserId);
         final List<PasswordValidationError> errors;
         if (credential.isPassword() || credential.isPin()) {
-            errors = PasswordMetrics.validatePassword(requiredMetrics, requiredComplexity,
+            errors = PasswordMetrics.validatePassword(requiredMetrics, PASSWORD_COMPLEXITY_NONE,
                     credential.isPin(), credential.getCredential());
         } else {
             PasswordMetrics metrics = new PasswordMetrics(
                     credential.isPattern() ? CREDENTIAL_TYPE_PATTERN : CREDENTIAL_TYPE_NONE);
             errors = PasswordMetrics.validatePasswordMetrics(
-                    requiredMetrics, requiredComplexity, metrics);
+                    requiredMetrics, PASSWORD_COMPLEXITY_NONE, false /* isPin */, metrics);
         }
         if (!errors.isEmpty()) {
             getOutPrintWriter().println(

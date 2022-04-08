@@ -30,8 +30,8 @@
 #include "renderthread/RenderThread.h"
 #endif
 
-#include <gui/TraceUtils.h>
 #include "utils/Macros.h"
+#include "utils/TraceUtils.h"
 #include "utils/VectorDrawableUtils.h"
 
 namespace android {
@@ -505,14 +505,14 @@ void Tree::draw(SkCanvas* canvas, const SkRect& bounds, const SkPaint& inPaint) 
     SkPaint paint = inPaint;
     paint.setAlpha(mProperties.getRootAlpha() * 255);
 
-    sk_sp<SkImage> cachedBitmap = getBitmapUpdateIfDirty().makeImage();
+    Bitmap& bitmap = getBitmapUpdateIfDirty();
+    SkBitmap skiaBitmap;
+    bitmap.getSkBitmap(&skiaBitmap);
 
-    // HWUI always draws VD with bilinear filtering.
-    auto sampling = SkSamplingOptions(SkFilterMode::kLinear);
     int scaledWidth = SkScalarCeilToInt(mProperties.getScaledWidth());
     int scaledHeight = SkScalarCeilToInt(mProperties.getScaledHeight());
-    canvas->drawImageRect(cachedBitmap, SkRect::MakeWH(scaledWidth, scaledHeight), bounds,
-                          sampling, &paint, SkCanvas::kFast_SrcRectConstraint);
+    canvas->drawBitmapRect(skiaBitmap, SkRect::MakeWH(scaledWidth, scaledHeight), bounds,
+                           &paint, SkCanvas::kFast_SrcRectConstraint);
 }
 
 void Tree::updateBitmapCache(Bitmap& bitmap, bool useStagingData) {

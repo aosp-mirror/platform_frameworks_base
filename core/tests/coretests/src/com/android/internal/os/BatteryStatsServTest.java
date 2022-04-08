@@ -36,22 +36,22 @@ public class BatteryStatsServTest extends TestCase {
         }
 
         void populate() {
-            mStartTimeMs = 1010;
-            mRunningSinceMs = 2021;
+            mStartTime = 1010;
+            mRunningSince = 2021;
             mRunning = true;
             mStarts = 4042;
-            mLaunchedTimeMs = 5053;
-            mLaunchedSinceMs = 6064;
+            mLaunchedTime = 5053;
+            mLaunchedSince = 6064;
             mLaunched = true;
             mLaunches = 8085;
         }
 
         long getStartTime() {
-            return mStartTimeMs;
+            return mStartTime;
         }
 
         long getRunningSince() {
-            return mRunningSinceMs;
+            return mRunningSince;
         }
 
         void setRunning(boolean val) {
@@ -67,11 +67,11 @@ public class BatteryStatsServTest extends TestCase {
         }
 
         long getLaunchedTime() {
-            return mLaunchedTimeMs;
+            return mLaunchedTime;
         }
 
         long getLaunchedSince() {
-            return mLaunchedSinceMs;
+            return mLaunchedSince;
         }
 
         void setLaunched(boolean val) {
@@ -173,12 +173,7 @@ public class BatteryStatsServTest extends TestCase {
         MockBatteryStatsImpl bsi = new MockBatteryStatsImpl() {
             @Override
             public long getBatteryUptimeLocked() {
-                return 777777L * 1000; // microseconds
-            }
-
-            @Override
-            public long getBatteryUptimeLocked(long uptimeMs) {
-                return 777777L * 1000; // microseconds
+                return 777777L;
             }
         };
 
@@ -207,12 +202,7 @@ public class BatteryStatsServTest extends TestCase {
         MockBatteryStatsImpl bsi = new MockBatteryStatsImpl() {
             @Override
             public long getBatteryUptimeLocked() {
-                return 777777L * 1000; // microseconds
-            }
-
-            @Override
-            public long getBatteryUptimeLocked(long uptimeMs) {
-                return 777777L * 1000; // microseconds
+                return 777777L;
             }
         };
 
@@ -239,12 +229,7 @@ public class BatteryStatsServTest extends TestCase {
         MockBatteryStatsImpl bsi = new MockBatteryStatsImpl() {
             @Override
             public long getBatteryUptimeLocked() {
-                return 777777L * 1000; // microseconds
-            }
-
-            @Override
-            public long getBatteryUptimeLocked(long uptimeMs) {
-                return 777777L * 1000; // microseconds
+                return 777777L;
             }
         };
         TestServ serv = new TestServ(bsi);
@@ -274,12 +259,7 @@ public class BatteryStatsServTest extends TestCase {
         MockBatteryStatsImpl bsi = new MockBatteryStatsImpl() {
             @Override
             public long getBatteryUptimeLocked() {
-                return 777777L * 1000; // microseconds
-            }
-
-            @Override
-            public long getBatteryUptimeLocked(long uptimeMs) {
-                return 777777L * 1000; // microseconds
+                return 777777L;
             }
         };
         TestServ serv = new TestServ(bsi);
@@ -336,12 +316,7 @@ public class BatteryStatsServTest extends TestCase {
         MockBatteryStatsImpl bsi = new MockBatteryStatsImpl() {
             @Override
             public long getBatteryUptimeLocked() {
-                return 777777L * 1000; // microseconds
-            }
-
-            @Override
-            public long getBatteryUptimeLocked(long uptimeMs) {
-                return 777777L * 1000; // microseconds
+                return 777777L;
             }
         };
         TestServ serv = new TestServ(bsi);
@@ -370,12 +345,7 @@ public class BatteryStatsServTest extends TestCase {
         MockBatteryStatsImpl bsi = new MockBatteryStatsImpl() {
             @Override
             public long getBatteryUptimeLocked() {
-                return 777777L * 1000; // microseconds
-            }
-
-            @Override
-            public long getBatteryUptimeLocked(long uptimeMs) {
-                return 777777L * 1000; // microseconds
+                return 777777L;
             }
         };
         TestServ serv = new TestServ(bsi);
@@ -404,12 +374,7 @@ public class BatteryStatsServTest extends TestCase {
         MockBatteryStatsImpl bsi = new MockBatteryStatsImpl() {
             @Override
             public long getBatteryUptimeLocked() {
-                return 777777L * 1000; // microseconds
-            }
-
-            @Override
-            public long getBatteryUptimeLocked(long uptimeMs) {
-                return 777777L * 1000; // microseconds
+                return 777777L;
             }
         };
         TestServ serv = new TestServ(bsi);

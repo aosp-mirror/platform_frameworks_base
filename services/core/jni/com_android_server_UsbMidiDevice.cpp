@@ -19,8 +19,7 @@
 #include "utils/Log.h"
 
 #include "jni.h"
-#include <nativehelper/JNIPlatformHelp.h>
-#include <nativehelper/ScopedLocalRef.h>
+#include <nativehelper/JNIHelp.h>
 #include "android_runtime/AndroidRuntime.h"
 #include "android_runtime/Log.h"
 
@@ -100,45 +99,24 @@ android_server_UsbMidiDevice_open(JNIEnv *env, jobject thiz, jint card, jint dev
         int fd = open(path, O_RDWR);
         if (fd < 0) {
             ALOGE("open failed on %s for index %d", path, i);
-            goto release_fds;
+            return NULL;
         }
-        ScopedLocalRef<jobject> jifd(env, jniCreateFileDescriptor(env, fd));
-        if (jifd.get() == NULL) {
-            goto release_fds;
-        }
-        env->SetObjectArrayElement(fds, i, jifd.get());
+
+        jobject fileDescriptor = jniCreateFileDescriptor(env, fd);
+        env->SetObjectArrayElement(fds, i, fileDescriptor);
+        env->DeleteLocalRef(fileDescriptor);
     }
 
     // create a pipe to use for unblocking our input thread
-    {
-        int pipeFD[2];
-        if (pipe(pipeFD) == -1) {
-            ALOGE("pipe() failed, errno = %d", errno);
-            goto release_fds;
-        }
+    int pipeFD[2];
+    pipe(pipeFD);
+    jobject fileDescriptor = jniCreateFileDescriptor(env, pipeFD[0]);
+    env->SetObjectArrayElement(fds, subdevice_count, fileDescriptor);
+    env->DeleteLocalRef(fileDescriptor);
+    // store our end of the pipe in mPipeFD
+    env->SetIntField(thiz, sPipeFDField, pipeFD[1]);
 
-        ScopedLocalRef<jobject> jifd(env, jniCreateFileDescriptor(env, pipeFD[0]));
-        if (jifd.get() == NULL) {
-            close(pipeFD[0]);
-            close(pipeFD[1]);
-            goto release_fds;
-        }
-        env->SetObjectArrayElement(fds, subdevice_count, jifd.get());
-        // store our end of the pipe in mPipeFD
-        env->SetIntField(thiz, sPipeFDField, pipeFD[1]);
-    }
     return fds;
-
-release_fds:
-    for (int i = 0; i < subdevice_count + 1; ++i) {
-        ScopedLocalRef<jobject> jifd(env, env->GetObjectArrayElement(fds, i));
-        if (jifd.get() == NULL) {
-            break;
-        }
-        int fd = jniGetFDFromFileDescriptor(env, jifd.get());
-        close(fd);
-    }
-    return NULL;
 }
 
 static void

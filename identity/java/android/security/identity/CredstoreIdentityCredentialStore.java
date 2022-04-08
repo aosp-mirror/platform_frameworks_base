@@ -162,4 +162,5 @@ class CredstoreIdentityCredentialStore extends IdentityCredentialStore {
                     + e.errorCode, e);
         }
     }
+
 }

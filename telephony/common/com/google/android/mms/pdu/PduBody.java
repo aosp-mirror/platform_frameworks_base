@@ -18,7 +18,6 @@
 package com.google.android.mms.pdu;
 
 import android.compat.annotation.UnsupportedAppUsage;
-import android.os.Build;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -114,7 +113,7 @@ public class PduBody {
      * @param index index of the part to return
      * @return part at the specified index
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public PduPart removePart(int index) {
         return mParts.remove(index);
     }
@@ -143,7 +142,7 @@ public class PduBody {
      * @param part the part object
      * @return index the index of the first occurrence of the part in this body
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public int getPartIndex(PduPart part) {
         return mParts.indexOf(part);
     }

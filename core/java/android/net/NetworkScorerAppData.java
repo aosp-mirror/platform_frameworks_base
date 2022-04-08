@@ -110,7 +110,7 @@ public final class NetworkScorerAppData implements Parcelable {
     }
 
     @Override
-    public boolean equals(@Nullable Object o) {
+    public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         NetworkScorerAppData that = (NetworkScorerAppData) o;

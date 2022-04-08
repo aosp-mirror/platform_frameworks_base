@@ -33,8 +33,6 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import java.util.List;
-
 @RunWith(AndroidJUnit4.class)
 @SmallTest
 public class PowerCalculatorTest extends TestCase {
@@ -63,9 +61,11 @@ public class PowerCalculatorTest extends TestCase {
         when(videoTimer.getTotalTimeLocked(2L * US_IN_HR, 0)).thenReturn(1L * US_IN_HR);
 
         MediaPowerCalculator mediaPowerCalculator = new MediaPowerCalculator(mPowerProfile);
-        BatterySipper app = new BatterySipper(BatterySipper.DrainType.APP, u, 0);
+        BatterySipper app = new BatterySipper(BatterySipper.DrainType.APP, null, 0);
 
-        mediaPowerCalculator.calculate(List.of(app), null, 2L * US_IN_HR, 2L * US_IN_HR, 0, null);
+        mediaPowerCalculator.calculateApp(app, u, 2L * US_IN_HR, 2L * US_IN_HR, 0);
         assertEquals(49.0, app.sumPower());
     }
+
+
 }

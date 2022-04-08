@@ -34,7 +34,6 @@ import static org.mockito.Mockito.verifyZeroInteractions;
 
 import android.app.Instrumentation;
 import android.content.Context;
-import android.graphics.Insets;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.platform.test.annotations.Presubmit;
@@ -109,8 +108,7 @@ public class InsetsSourceConsumerTest {
         });
         instrumentation.waitForIdleSync();
 
-        mConsumer.setControl(
-                new InsetsSourceControl(ITYPE_STATUS_BAR, mLeash, new Point(), Insets.NONE),
+        mConsumer.setControl(new InsetsSourceControl(ITYPE_STATUS_BAR, mLeash, new Point()),
                 new int[1], new int[1]);
     }
 
@@ -179,8 +177,7 @@ public class InsetsSourceConsumerTest {
             mConsumer.hide();
             verifyZeroInteractions(mMockTransaction);
             int[] hideTypes = new int[1];
-            mConsumer.setControl(
-                    new InsetsSourceControl(ITYPE_STATUS_BAR, mLeash, new Point(), Insets.NONE),
+            mConsumer.setControl(new InsetsSourceControl(ITYPE_STATUS_BAR, mLeash, new Point()),
                     new int[1], hideTypes);
             assertEquals(statusBars(), hideTypes[0]);
             assertFalse(mRemoveSurfaceCalled);
@@ -197,8 +194,7 @@ public class InsetsSourceConsumerTest {
             verifyZeroInteractions(mMockTransaction);
             mRemoveSurfaceCalled = false;
             int[] hideTypes = new int[1];
-            mConsumer.setControl(
-                    new InsetsSourceControl(ITYPE_STATUS_BAR, mLeash, new Point(), Insets.NONE),
+            mConsumer.setControl(new InsetsSourceControl(ITYPE_STATUS_BAR, mLeash, new Point()),
                     new int[1], hideTypes);
             assertTrue(mRemoveSurfaceCalled);
             assertEquals(0, hideTypes[0]);

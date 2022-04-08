@@ -16,11 +16,13 @@
 
 package com.android.server.hdmi;
 
+import android.annotation.Nullable;
 import android.hardware.hdmi.HdmiControlManager;
 import android.hardware.hdmi.HdmiDeviceInfo;
 import android.hardware.hdmi.IHdmiControlCallback;
 import android.hardware.tv.cec.V1_0.SendMessageResult;
-
+import android.os.RemoteException;
+import android.util.Slog;
 import java.util.List;
 
 /**
@@ -47,6 +49,8 @@ abstract class SystemAudioAction extends HdmiCecFeatureAction {
     // The target audio status of the action, whether to enable the system audio mode or not.
     protected boolean mTargetAudioStatus;
 
+    @Nullable private final IHdmiControlCallback mCallback;
+
     private int mSendRetryCount = 0;
 
     /**
@@ -60,10 +64,11 @@ abstract class SystemAudioAction extends HdmiCecFeatureAction {
      */
     SystemAudioAction(HdmiCecLocalDevice source, int avrAddress, boolean targetStatus,
             IHdmiControlCallback callback) {
-        super(source, callback);
+        super(source);
         HdmiUtils.verifyAddressType(avrAddress, HdmiDeviceInfo.DEVICE_AUDIO_SYSTEM);
         mAvrLogicalAddress = avrAddress;
         mTargetAudioStatus = targetStatus;
+        mCallback = callback;
     }
 
     // Seq #27
@@ -169,7 +174,7 @@ abstract class SystemAudioAction extends HdmiCecFeatureAction {
     }
 
     protected void startAudioStatusAction() {
-        addAndStartAction(new SystemAudioStatusAction(tv(), mAvrLogicalAddress, mCallbacks));
+        addAndStartAction(new SystemAudioStatusAction(tv(), mAvrLogicalAddress, mCallback));
         finish();
     }
 
@@ -188,5 +193,18 @@ abstract class SystemAudioAction extends HdmiCecFeatureAction {
                 handleSendSystemAudioModeRequestTimeout();
                 return;
         }
+    }
+
+    // TODO: if IHdmiControlCallback is general to other FeatureAction,
+    //       move it into FeatureAction.
+    protected void finishWithCallback(int returnCode) {
+        if (mCallback != null) {
+            try {
+                mCallback.onComplete(returnCode);
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Failed to invoke callback.", e);
+            }
+        }
+        finish();
     }
 }

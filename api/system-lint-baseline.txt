@@ -1,0 +1,510 @@
+// Baseline format: 1.0
+AcronymName: android.net.NetworkCapabilities#setSSID(String):
+    Acronyms should not be capitalized in method names: was `setSSID`, should this be `setSsid`?
+
+
+ActionValue: android.location.Location#EXTRA_NO_GPS_LOCATION:
+    
+ActionValue: android.net.wifi.WifiManager#ACTION_LINK_CONFIGURATION_CHANGED:
+    
+
+// Tethering broadcast action / extras cannot change name for backwards compatibility
+ActionValue: android.net.TetheringManager#ACTION_TETHER_STATE_CHANGED:
+    Inconsistent action value; expected `android.net.action.TETHER_STATE_CHANGED`, was `android.net.conn.TETHER_STATE_CHANGED`
+ActionValue: android.net.TetheringManager#EXTRA_ACTIVE_TETHER:
+    Inconsistent extra value; expected `android.net.extra.ACTIVE_TETHER`, was `tetherArray`
+ActionValue: android.net.TetheringManager#EXTRA_AVAILABLE_TETHER:
+    Inconsistent extra value; expected `android.net.extra.AVAILABLE_TETHER`, was `availableArray`
+ActionValue: android.net.TetheringManager#EXTRA_ERRORED_TETHER:
+    Inconsistent extra value; expected `android.net.extra.ERRORED_TETHER`, was `erroredArray`
+
+ArrayReturn: android.bluetooth.BluetoothCodecStatus#BluetoothCodecStatus(android.bluetooth.BluetoothCodecConfig, android.bluetooth.BluetoothCodecConfig[], android.bluetooth.BluetoothCodecConfig[]) parameter #1:
+    Method parameter should be Collection<BluetoothCodecConfig> (or subclass) instead of raw array; was `android.bluetooth.BluetoothCodecConfig[]`
+ArrayReturn: android.bluetooth.BluetoothCodecStatus#BluetoothCodecStatus(android.bluetooth.BluetoothCodecConfig, android.bluetooth.BluetoothCodecConfig[], android.bluetooth.BluetoothCodecConfig[]) parameter #2:
+    Method parameter should be Collection<BluetoothCodecConfig> (or subclass) instead of raw array; was `android.bluetooth.BluetoothCodecConfig[]`
+ArrayReturn: android.bluetooth.BluetoothCodecStatus#getCodecsLocalCapabilities():
+    Method should return Collection<BluetoothCodecConfig> (or subclass) instead of raw array; was `android.bluetooth.BluetoothCodecConfig[]`
+ArrayReturn: android.bluetooth.BluetoothCodecStatus#getCodecsSelectableCapabilities():
+    Method should return Collection<BluetoothCodecConfig> (or subclass) instead of raw array; was `android.bluetooth.BluetoothCodecConfig[]`
+ArrayReturn: android.bluetooth.BluetoothUuid#containsAnyUuid(android.os.ParcelUuid[], android.os.ParcelUuid[]) parameter #0:
+    Method parameter should be Collection<ParcelUuid> (or subclass) instead of raw array; was `android.os.ParcelUuid[]`
+ArrayReturn: android.bluetooth.BluetoothUuid#containsAnyUuid(android.os.ParcelUuid[], android.os.ParcelUuid[]) parameter #1:
+    Method parameter should be Collection<ParcelUuid> (or subclass) instead of raw array; was `android.os.ParcelUuid[]`
+ArrayReturn: android.media.tv.tuner.Tuner.FilterCallback#onFilterEvent(android.media.tv.tuner.Tuner.Filter, android.media.tv.tuner.filter.FilterEvent[]) parameter #1:
+    Method parameter should be Collection<FilterEvent> (or subclass) instead of raw array; was `android.media.tv.tuner.filter.FilterEvent[]`
+ArrayReturn: android.net.NetworkScoreManager#requestScores(android.net.NetworkKey[]) parameter #0:
+    Method parameter should be Collection<NetworkKey> (or subclass) instead of raw array; was `android.net.NetworkKey[]`
+ArrayReturn: android.view.contentcapture.ViewNode#getAutofillOptions():
+    
+
+
+ExecutorRegistration: android.net.wifi.p2p.WifiP2pManager#deletePersistentGroup(android.net.wifi.p2p.WifiP2pManager.Channel, int, android.net.wifi.p2p.WifiP2pManager.ActionListener):
+    
+ExecutorRegistration: android.net.wifi.p2p.WifiP2pManager#factoryReset(android.net.wifi.p2p.WifiP2pManager.Channel, android.net.wifi.p2p.WifiP2pManager.ActionListener):
+    
+ExecutorRegistration: android.net.wifi.p2p.WifiP2pManager#listen(android.net.wifi.p2p.WifiP2pManager.Channel, boolean, android.net.wifi.p2p.WifiP2pManager.ActionListener):
+    
+ExecutorRegistration: android.net.wifi.p2p.WifiP2pManager#requestPersistentGroupInfo(android.net.wifi.p2p.WifiP2pManager.Channel, android.net.wifi.p2p.WifiP2pManager.PersistentGroupInfoListener):
+    
+ExecutorRegistration: android.net.wifi.p2p.WifiP2pManager#setDeviceName(android.net.wifi.p2p.WifiP2pManager.Channel, String, android.net.wifi.p2p.WifiP2pManager.ActionListener):
+    
+ExecutorRegistration: android.net.wifi.p2p.WifiP2pManager#setWfdInfo(android.net.wifi.p2p.WifiP2pManager.Channel, android.net.wifi.p2p.WifiP2pWfdInfo, android.net.wifi.p2p.WifiP2pManager.ActionListener):
+    
+ExecutorRegistration: android.net.wifi.p2p.WifiP2pManager#setWifiP2pChannels(android.net.wifi.p2p.WifiP2pManager.Channel, int, int, android.net.wifi.p2p.WifiP2pManager.ActionListener):
+    
+
+
+GenericException: android.app.prediction.AppPredictor#finalize():
+    
+GenericException: android.hardware.location.ContextHubClient#finalize():
+    
+GenericException: android.net.IpSecManager.IpSecTunnelInterface#finalize():
+    
+GenericException: android.service.autofill.augmented.FillWindow#finalize():
+    
+
+
+IntentBuilderName: android.content.Context#registerReceiverForAllUsers(android.content.BroadcastReceiver, android.content.IntentFilter, String, android.os.Handler):
+    Methods creating an Intent should be named `create<Foo>Intent()`, was `registerReceiverForAllUsers`
+
+
+KotlinKeyword: android.app.Notification#when:
+    
+
+
+KotlinOperator: android.telephony.CbGeoUtils.Geometry#contains(android.telephony.CbGeoUtils.LatLng):
+    Method can be invoked as a "in" operator from Kotlin: `contains` (this is usually desirable; just make sure it makes sense for this type of object)
+
+
+MissingNullability: android.hardware.soundtrigger.SoundTrigger.ModuleProperties#toString():
+    
+MissingNullability: android.hardware.soundtrigger.SoundTrigger.ModuleProperties#writeToParcel(android.os.Parcel, int) parameter #0:
+    
+MissingNullability: android.media.session.MediaSessionManager.Callback#onAddressedPlayerChanged(android.content.ComponentName) parameter #0:
+    
+MissingNullability: android.media.session.MediaSessionManager.Callback#onAddressedPlayerChanged(android.media.session.MediaSession.Token) parameter #0:
+    
+MissingNullability: android.media.session.MediaSessionManager.Callback#onMediaKeyEventDispatched(android.view.KeyEvent, android.content.ComponentName) parameter #0:
+    
+MissingNullability: android.media.session.MediaSessionManager.Callback#onMediaKeyEventDispatched(android.view.KeyEvent, android.content.ComponentName) parameter #1:
+    
+MissingNullability: android.media.session.MediaSessionManager.Callback#onMediaKeyEventDispatched(android.view.KeyEvent, android.media.session.MediaSession.Token) parameter #0:
+    
+MissingNullability: android.media.session.MediaSessionManager.Callback#onMediaKeyEventDispatched(android.view.KeyEvent, android.media.session.MediaSession.Token) parameter #1:
+    
+MissingNullability: android.media.soundtrigger.SoundTriggerDetectionService#onUnbind(android.content.Intent) parameter #0:
+    
+MissingNullability: android.media.tv.TvRecordingClient.RecordingCallback#onEvent(String, String, android.os.Bundle) parameter #0:
+    
+MissingNullability: android.media.tv.TvRecordingClient.RecordingCallback#onEvent(String, String, android.os.Bundle) parameter #1:
+    
+MissingNullability: android.media.tv.TvRecordingClient.RecordingCallback#onEvent(String, String, android.os.Bundle) parameter #2:
+    
+MissingNullability: android.net.wifi.rtt.RangingRequest.Builder#addResponder(android.net.wifi.rtt.ResponderConfig):
+    
+MissingNullability: android.printservice.recommendation.RecommendationService#attachBaseContext(android.content.Context) parameter #0:
+    
+MissingNullability: android.provider.ContactsContract.MetadataSync#CONTENT_URI:
+    
+MissingNullability: android.provider.ContactsContract.MetadataSync#METADATA_AUTHORITY_URI:
+    
+MissingNullability: android.provider.ContactsContract.MetadataSyncState#CONTENT_URI:
+    
+MissingNullability: android.provider.SearchIndexablesProvider#attachInfo(android.content.Context, android.content.pm.ProviderInfo) parameter #0:
+    
+MissingNullability: android.provider.SearchIndexablesProvider#attachInfo(android.content.Context, android.content.pm.ProviderInfo) parameter #1:
+    
+MissingNullability: android.service.autofill.augmented.AugmentedAutofillService#onUnbind(android.content.Intent) parameter #0:
+    
+MissingNullability: android.service.contentcapture.ContentCaptureService#dump(java.io.FileDescriptor, java.io.PrintWriter, String[]) parameter #0:
+    
+MissingNullability: android.service.contentcapture.ContentCaptureService#dump(java.io.FileDescriptor, java.io.PrintWriter, String[]) parameter #1:
+    
+MissingNullability: android.service.contentcapture.ContentCaptureService#dump(java.io.FileDescriptor, java.io.PrintWriter, String[]) parameter #2:
+    
+MissingNullability: android.service.notification.NotificationAssistantService#attachBaseContext(android.content.Context) parameter #0:
+    
+MissingNullability: android.telecom.CallScreeningService.CallResponse.Builder#setShouldScreenCallFurther(boolean):
+    
+MissingNullability: android.telephony.CallerInfo#toString():
+    
+MissingNullability: android.telephony.CellBroadcastService#onBind(android.content.Intent):
+    
+MissingNullability: android.telephony.CellBroadcastService#onBind(android.content.Intent) parameter #0:
+    
+MissingNullability: android.telephony.CellBroadcastService#onCdmaCellBroadcastSms(int, byte[]) parameter #1:
+    
+MissingNullability: android.telephony.CellBroadcastService#onCdmaCellBroadcastSms(int, byte[], int) parameter #1:
+    
+MissingNullability: android.telephony.CellBroadcastService#onGsmCellBroadcastSms(int, byte[]) parameter #1:
+    
+MissingNullability: android.telephony.ModemActivityInfo#toString():
+    
+MissingNullability: android.telephony.ModemActivityInfo#writeToParcel(android.os.Parcel, int) parameter #0:
+    
+MissingNullability: android.telephony.ModemActivityInfo.TransmitPower#toString():
+    
+MissingNullability: android.telephony.NetworkService#onUnbind(android.content.Intent) parameter #0:
+    
+MissingNullability: android.telephony.SmsCbCmasInfo#toString():
+    
+MissingNullability: android.telephony.SmsCbCmasInfo#writeToParcel(android.os.Parcel, int) parameter #0:
+    
+MissingNullability: android.telephony.SmsCbEtwsInfo#toString():
+    
+MissingNullability: android.telephony.SmsCbEtwsInfo#writeToParcel(android.os.Parcel, int) parameter #0:
+    
+MissingNullability: android.telephony.SmsCbLocation#equals(Object) parameter #0:
+    
+MissingNullability: android.telephony.SmsCbLocation#toString():
+    
+MissingNullability: android.telephony.SmsCbLocation#writeToParcel(android.os.Parcel, int) parameter #0:
+    
+MissingNullability: android.telephony.SmsCbMessage#toString():
+    
+MissingNullability: android.telephony.SmsCbMessage#writeToParcel(android.os.Parcel, int) parameter #0:
+    
+MissingNullability: android.telephony.SubscriptionPlan.Builder#createRecurringDaily(java.time.ZonedDateTime) parameter #0:
+    
+MissingNullability: android.telephony.SubscriptionPlan.Builder#createRecurringMonthly(java.time.ZonedDateTime) parameter #0:
+    
+MissingNullability: android.telephony.SubscriptionPlan.Builder#createRecurringWeekly(java.time.ZonedDateTime) parameter #0:
+    
+MissingNullability: android.telephony.cdma.CdmaSmsCbProgramData#toString():
+    
+MissingNullability: android.telephony.cdma.CdmaSmsCbProgramData#writeToParcel(android.os.Parcel, int) parameter #0:
+    
+MissingNullability: android.telephony.data.DataService#onUnbind(android.content.Intent) parameter #0:
+    
+MissingNullability: android.telephony.ims.stub.ImsSmsImplBase#onSmsStatusReportReceived(int, String, byte[]) parameter #1:
+    
+MissingNullability: android.telephony.ims.stub.ImsSmsImplBase#onSmsStatusReportReceived(int, String, byte[]) parameter #2:
+    
+MissingNullability: android.telephony.mbms.DownloadRequest.Builder#setServiceId(String):
+    
+MissingNullability: android.telephony.mbms.DownloadRequest.Builder#setServiceId(String) parameter #0:
+    
+
+
+MutableBareField: android.net.IpConfiguration#httpProxy:
+    
+MutableBareField: android.net.IpConfiguration#ipAssignment:
+    
+MutableBareField: android.net.IpConfiguration#proxySettings:
+    
+MutableBareField: android.net.IpConfiguration#staticIpConfiguration:
+    
+MutableBareField: android.net.wifi.WifiConfiguration#allowAutojoin:
+    
+MutableBareField: android.net.wifi.WifiConfiguration#carrierId:
+    
+MutableBareField: android.net.wifi.WifiConfiguration#fromWifiNetworkSpecifier:
+    
+MutableBareField: android.net.wifi.WifiConfiguration#fromWifiNetworkSuggestion:
+    
+MutableBareField: android.net.wifi.WifiConfiguration#macRandomizationSetting:
+    
+MutableBareField: android.net.wifi.WifiConfiguration#meteredOverride:
+    
+MutableBareField: android.net.wifi.WifiConfiguration#requirePmf:
+    
+MutableBareField: android.net.wifi.WifiConfiguration#saePasswordId:
+    
+MutableBareField: android.net.wifi.WifiConfiguration#shared:
+    
+MutableBareField: android.net.wifi.WifiScanner.ScanSettings#type:
+    
+
+
+NoClone: android.service.contentcapture.ContentCaptureService#dump(java.io.FileDescriptor, java.io.PrintWriter, String[]) parameter #0:
+    
+
+
+NotCloseable: android.bluetooth.BluetoothA2dpSink:
+    Classes that release resources (finalize()) should implement AutoClosable and CloseGuard: class android.bluetooth.BluetoothA2dpSink
+NotCloseable: android.bluetooth.BluetoothMap:
+    Classes that release resources (finalize()) should implement AutoClosable and CloseGuard: class android.bluetooth.BluetoothMap
+NotCloseable: android.bluetooth.BluetoothPan:
+    Classes that release resources (finalize()) should implement AutoClosable and CloseGuard: class android.bluetooth.BluetoothPan
+NotCloseable: android.bluetooth.BluetoothPbap:
+    Classes that release resources (finalize()) should implement AutoClosable and CloseGuard: class android.bluetooth.BluetoothPbap
+
+
+OnNameExpected: android.content.ContentProvider#checkUriPermission(android.net.Uri, int, int):
+    If implemented by developer, should follow the on<Something> style; otherwise consider marking final
+
+
+PairedRegistration: android.net.wifi.nl80211.WifiNl80211Manager#registerApCallback(String, java.util.concurrent.Executor, android.net.wifi.nl80211.WifiNl80211Manager.SoftApCallback):
+    
+
+
+ProtectedMember: android.printservice.recommendation.RecommendationService#attachBaseContext(android.content.Context):
+    
+ProtectedMember: android.service.contentcapture.ContentCaptureService#dump(java.io.FileDescriptor, java.io.PrintWriter, String[]):
+    
+ProtectedMember: android.service.notification.NotificationAssistantService#attachBaseContext(android.content.Context):
+    
+
+
+SamShouldBeLast: android.accounts.AccountManager#addAccount(String, String, String[], android.os.Bundle, android.app.Activity, android.accounts.AccountManagerCallback<android.os.Bundle>, android.os.Handler):
+    
+SamShouldBeLast: android.accounts.AccountManager#addOnAccountsUpdatedListener(android.accounts.OnAccountsUpdateListener, android.os.Handler, boolean):
+    
+SamShouldBeLast: android.accounts.AccountManager#addOnAccountsUpdatedListener(android.accounts.OnAccountsUpdateListener, android.os.Handler, boolean, String[]):
+    
+SamShouldBeLast: android.accounts.AccountManager#confirmCredentials(android.accounts.Account, android.os.Bundle, android.app.Activity, android.accounts.AccountManagerCallback<android.os.Bundle>, android.os.Handler):
+    
+SamShouldBeLast: android.accounts.AccountManager#editProperties(String, android.app.Activity, android.accounts.AccountManagerCallback<android.os.Bundle>, android.os.Handler):
+    
+SamShouldBeLast: android.accounts.AccountManager#finishSession(android.os.Bundle, android.app.Activity, android.accounts.AccountManagerCallback<android.os.Bundle>, android.os.Handler):
+    
+SamShouldBeLast: android.accounts.AccountManager#getAccountsByTypeAndFeatures(String, String[], android.accounts.AccountManagerCallback<android.accounts.Account[]>, android.os.Handler):
+    
+SamShouldBeLast: android.accounts.AccountManager#getAuthToken(android.accounts.Account, String, android.os.Bundle, android.app.Activity, android.accounts.AccountManagerCallback<android.os.Bundle>, android.os.Handler):
+    
+SamShouldBeLast: android.accounts.AccountManager#getAuthToken(android.accounts.Account, String, android.os.Bundle, boolean, android.accounts.AccountManagerCallback<android.os.Bundle>, android.os.Handler):
+    
+SamShouldBeLast: android.accounts.AccountManager#getAuthToken(android.accounts.Account, String, boolean, android.accounts.AccountManagerCallback<android.os.Bundle>, android.os.Handler):
+    
+SamShouldBeLast: android.accounts.AccountManager#getAuthTokenByFeatures(String, String, String[], android.app.Activity, android.os.Bundle, android.os.Bundle, android.accounts.AccountManagerCallback<android.os.Bundle>, android.os.Handler):
+    
+SamShouldBeLast: android.accounts.AccountManager#hasFeatures(android.accounts.Account, String[], android.accounts.AccountManagerCallback<java.lang.Boolean>, android.os.Handler):
+    
+SamShouldBeLast: android.accounts.AccountManager#isCredentialsUpdateSuggested(android.accounts.Account, String, android.accounts.AccountManagerCallback<java.lang.Boolean>, android.os.Handler):
+    
+SamShouldBeLast: android.accounts.AccountManager#removeAccount(android.accounts.Account, android.accounts.AccountManagerCallback<java.lang.Boolean>, android.os.Handler):
+    
+SamShouldBeLast: android.accounts.AccountManager#removeAccount(android.accounts.Account, android.app.Activity, android.accounts.AccountManagerCallback<android.os.Bundle>, android.os.Handler):
+    
+SamShouldBeLast: android.accounts.AccountManager#renameAccount(android.accounts.Account, String, android.accounts.AccountManagerCallback<android.accounts.Account>, android.os.Handler):
+    
+SamShouldBeLast: android.accounts.AccountManager#startAddAccountSession(String, String, String[], android.os.Bundle, android.app.Activity, android.accounts.AccountManagerCallback<android.os.Bundle>, android.os.Handler):
+    
+SamShouldBeLast: android.accounts.AccountManager#startUpdateCredentialsSession(android.accounts.Account, String, android.os.Bundle, android.app.Activity, android.accounts.AccountManagerCallback<android.os.Bundle>, android.os.Handler):
+    
+SamShouldBeLast: android.accounts.AccountManager#updateCredentials(android.accounts.Account, String, android.os.Bundle, android.app.Activity, android.accounts.AccountManagerCallback<android.os.Bundle>, android.os.Handler):
+    
+SamShouldBeLast: android.app.AlarmManager#set(int, long, String, android.app.AlarmManager.OnAlarmListener, android.os.Handler):
+    
+SamShouldBeLast: android.app.AlarmManager#setExact(int, long, String, android.app.AlarmManager.OnAlarmListener, android.os.Handler):
+    
+SamShouldBeLast: android.app.AlarmManager#setWindow(int, long, long, String, android.app.AlarmManager.OnAlarmListener, android.os.Handler):
+    
+SamShouldBeLast: android.app.WallpaperInfo#dump(android.util.Printer, String):
+    
+SamShouldBeLast: android.app.WallpaperManager#addOnColorsChangedListener(android.app.WallpaperManager.OnColorsChangedListener, android.os.Handler):
+    SAM-compatible parameters (such as parameter 1, "listener", in android.app.WallpaperManager.addOnColorsChangedListener) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
+SamShouldBeLast: android.app.admin.DevicePolicyManager#installSystemUpdate(android.content.ComponentName, android.net.Uri, java.util.concurrent.Executor, android.app.admin.DevicePolicyManager.InstallSystemUpdateCallback):
+    
+SamShouldBeLast: android.content.Context#bindIsolatedService(android.content.Intent, int, String, java.util.concurrent.Executor, android.content.ServiceConnection):
+    
+SamShouldBeLast: android.content.Context#bindService(android.content.Intent, int, java.util.concurrent.Executor, android.content.ServiceConnection):
+    
+SamShouldBeLast: android.content.ContextWrapper#bindIsolatedService(android.content.Intent, int, String, java.util.concurrent.Executor, android.content.ServiceConnection):
+    
+SamShouldBeLast: android.content.ContextWrapper#bindService(android.content.Intent, int, java.util.concurrent.Executor, android.content.ServiceConnection):
+    
+SamShouldBeLast: android.content.IntentFilter#dump(android.util.Printer, String):
+    
+SamShouldBeLast: android.content.pm.ApplicationInfo#dump(android.util.Printer, String):
+    
+SamShouldBeLast: android.content.pm.LauncherApps#registerPackageInstallerSessionCallback(java.util.concurrent.Executor, android.content.pm.PackageInstaller.SessionCallback):
+    
+SamShouldBeLast: android.content.pm.PackageItemInfo#dumpBack(android.util.Printer, String):
+    
+SamShouldBeLast: android.content.pm.PackageItemInfo#dumpFront(android.util.Printer, String):
+    
+SamShouldBeLast: android.content.pm.ResolveInfo#dump(android.util.Printer, String):
+    
+SamShouldBeLast: android.location.Location#dump(android.util.Printer, String):
+    
+SamShouldBeLast: android.location.LocationManager#addNmeaListener(android.location.OnNmeaMessageListener, android.os.Handler):
+    
+SamShouldBeLast: android.location.LocationManager#registerGnssMeasurementsCallback(java.util.concurrent.Executor, android.location.GnssMeasurementsEvent.Callback):
+    
+SamShouldBeLast: android.location.LocationManager#registerGnssNavigationMessageCallback(java.util.concurrent.Executor, android.location.GnssNavigationMessage.Callback):
+    
+SamShouldBeLast: android.location.LocationManager#registerGnssStatusCallback(java.util.concurrent.Executor, android.location.GnssStatus.Callback):
+    
+SamShouldBeLast: android.location.LocationManager#requestLocationUpdates(String, long, float, android.location.LocationListener, android.os.Looper):
+    SAM-compatible parameters (such as parameter 4, "listener", in android.location.LocationManager.requestLocationUpdates) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
+SamShouldBeLast: android.location.LocationManager#requestLocationUpdates(String, long, float, java.util.concurrent.Executor, android.location.LocationListener):
+    
+SamShouldBeLast: android.location.LocationManager#requestLocationUpdates(android.location.LocationRequest, java.util.concurrent.Executor, android.location.LocationListener):
+    
+SamShouldBeLast: android.location.LocationManager#requestLocationUpdates(long, float, android.location.Criteria, android.location.LocationListener, android.os.Looper):
+    SAM-compatible parameters (such as parameter 4, "listener", in android.location.LocationManager.requestLocationUpdates) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
+SamShouldBeLast: android.location.LocationManager#requestLocationUpdates(long, float, android.location.Criteria, java.util.concurrent.Executor, android.location.LocationListener):
+    
+SamShouldBeLast: android.location.LocationManager#requestSingleUpdate(String, android.location.LocationListener, android.os.Looper):
+    SAM-compatible parameters (such as parameter 2, "listener", in android.location.LocationManager.requestSingleUpdate) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
+SamShouldBeLast: android.location.LocationManager#requestSingleUpdate(android.location.Criteria, android.location.LocationListener, android.os.Looper):
+    SAM-compatible parameters (such as parameter 2, "listener", in android.location.LocationManager.requestSingleUpdate) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
+SamShouldBeLast: android.media.AudioFocusRequest.Builder#setOnAudioFocusChangeListener(android.media.AudioManager.OnAudioFocusChangeListener, android.os.Handler):
+    
+SamShouldBeLast: android.media.AudioManager#requestAudioFocus(android.media.AudioManager.OnAudioFocusChangeListener, int, int):
+    
+SamShouldBeLast: android.media.AudioRecord#addOnRoutingChangedListener(android.media.AudioRouting.OnRoutingChangedListener, android.os.Handler):
+    
+SamShouldBeLast: android.media.AudioRecord#registerAudioRecordingCallback(java.util.concurrent.Executor, android.media.AudioManager.AudioRecordingCallback):
+    
+SamShouldBeLast: android.media.AudioRecordingMonitor#registerAudioRecordingCallback(java.util.concurrent.Executor, android.media.AudioManager.AudioRecordingCallback):
+    
+SamShouldBeLast: android.media.AudioRouting#addOnRoutingChangedListener(android.media.AudioRouting.OnRoutingChangedListener, android.os.Handler):
+    
+SamShouldBeLast: android.media.MediaRecorder#addOnRoutingChangedListener(android.media.AudioRouting.OnRoutingChangedListener, android.os.Handler):
+    
+SamShouldBeLast: android.media.MediaRecorder#registerAudioRecordingCallback(java.util.concurrent.Executor, android.media.AudioManager.AudioRecordingCallback):
+    
+SamShouldBeLast: android.media.session.MediaSessionManager#addOnActiveSessionsChangedListener(android.media.session.MediaSessionManager.OnActiveSessionsChangedListener, android.content.ComponentName):
+    
+SamShouldBeLast: android.media.session.MediaSessionManager#addOnActiveSessionsChangedListener(android.media.session.MediaSessionManager.OnActiveSessionsChangedListener, android.content.ComponentName, android.os.Handler):
+    
+SamShouldBeLast: android.media.session.MediaSessionManager#addOnSession2TokensChangedListener(android.media.session.MediaSessionManager.OnSession2TokensChangedListener, android.os.Handler):
+    
+SamShouldBeLast: android.media.session.MediaSessionManager#registerCallback(java.util.concurrent.Executor, android.media.session.MediaSessionManager.Callback):
+    
+SamShouldBeLast: android.net.ConnectivityManager#createSocketKeepalive(android.net.Network, android.net.IpSecManager.UdpEncapsulationSocket, java.net.InetAddress, java.net.InetAddress, java.util.concurrent.Executor, android.net.SocketKeepalive.Callback):
+    
+SamShouldBeLast: android.net.wifi.WifiManager#startLocalOnlyHotspot(android.net.wifi.SoftApConfiguration, java.util.concurrent.Executor, android.net.wifi.WifiManager.LocalOnlyHotspotCallback):
+    
+SamShouldBeLast: android.net.wifi.rtt.WifiRttManager#startRanging(android.net.wifi.rtt.RangingRequest, java.util.concurrent.Executor, android.net.wifi.rtt.RangingResultCallback):
+    
+SamShouldBeLast: android.nfc.NfcAdapter#enableReaderMode(android.app.Activity, android.nfc.NfcAdapter.ReaderCallback, int, android.os.Bundle):
+    
+SamShouldBeLast: android.nfc.NfcAdapter#ignore(android.nfc.Tag, int, android.nfc.NfcAdapter.OnTagRemovedListener, android.os.Handler):
+    
+SamShouldBeLast: android.nfc.NfcAdapter#setBeamPushUrisCallback(android.nfc.NfcAdapter.CreateBeamUrisCallback, android.app.Activity):
+    
+SamShouldBeLast: android.nfc.NfcAdapter#setNdefPushMessageCallback(android.nfc.NfcAdapter.CreateNdefMessageCallback, android.app.Activity, android.app.Activity...):
+    
+SamShouldBeLast: android.nfc.NfcAdapter#setOnNdefPushCompleteCallback(android.nfc.NfcAdapter.OnNdefPushCompleteCallback, android.app.Activity, android.app.Activity...):
+    
+SamShouldBeLast: android.os.Binder#attachInterface(android.os.IInterface, String):
+    
+SamShouldBeLast: android.os.Binder#linkToDeath(android.os.IBinder.DeathRecipient, int):
+    
+SamShouldBeLast: android.os.Binder#unlinkToDeath(android.os.IBinder.DeathRecipient, int):
+    
+SamShouldBeLast: android.os.Handler#dump(android.util.Printer, String):
+    
+SamShouldBeLast: android.os.Handler#postAtTime(Runnable, Object, long):
+    
+SamShouldBeLast: android.os.Handler#postAtTime(Runnable, long):
+    
+SamShouldBeLast: android.os.Handler#postDelayed(Runnable, Object, long):
+    
+SamShouldBeLast: android.os.Handler#postDelayed(Runnable, long):
+    
+SamShouldBeLast: android.os.Handler#removeCallbacks(Runnable, Object):
+    
+SamShouldBeLast: android.os.IBinder#linkToDeath(android.os.IBinder.DeathRecipient, int):
+    
+SamShouldBeLast: android.os.IBinder#unlinkToDeath(android.os.IBinder.DeathRecipient, int):
+    
+SamShouldBeLast: android.os.RecoverySystem#verifyPackage(java.io.File, android.os.RecoverySystem.ProgressListener, java.io.File):
+    
+SamShouldBeLast: android.telephony.MbmsDownloadSession#addProgressListener(android.telephony.mbms.DownloadRequest, java.util.concurrent.Executor, android.telephony.mbms.DownloadProgressListener):
+    
+SamShouldBeLast: android.telephony.MbmsDownloadSession#addStatusListener(android.telephony.mbms.DownloadRequest, java.util.concurrent.Executor, android.telephony.mbms.DownloadStatusListener):
+    
+SamShouldBeLast: android.telephony.MbmsDownloadSession#create(android.content.Context, java.util.concurrent.Executor, android.telephony.mbms.MbmsDownloadSessionCallback):
+    
+SamShouldBeLast: android.telephony.MbmsDownloadSession#create(android.content.Context, java.util.concurrent.Executor, int, android.telephony.mbms.MbmsDownloadSessionCallback):
+    
+SamShouldBeLast: android.telephony.MbmsGroupCallSession#create(android.content.Context, int, java.util.concurrent.Executor, android.telephony.mbms.MbmsGroupCallSessionCallback):
+    
+SamShouldBeLast: android.telephony.MbmsGroupCallSession#create(android.content.Context, java.util.concurrent.Executor, android.telephony.mbms.MbmsGroupCallSessionCallback):
+    
+SamShouldBeLast: android.telephony.MbmsGroupCallSession#startGroupCall(long, java.util.List<java.lang.Integer>, java.util.List<java.lang.Integer>, java.util.concurrent.Executor, android.telephony.mbms.GroupCallCallback):
+    
+SamShouldBeLast: android.telephony.MbmsStreamingSession#create(android.content.Context, java.util.concurrent.Executor, android.telephony.mbms.MbmsStreamingSessionCallback):
+    
+SamShouldBeLast: android.telephony.MbmsStreamingSession#create(android.content.Context, java.util.concurrent.Executor, int, android.telephony.mbms.MbmsStreamingSessionCallback):
+    
+SamShouldBeLast: android.telephony.MbmsStreamingSession#startStreaming(android.telephony.mbms.StreamingServiceInfo, java.util.concurrent.Executor, android.telephony.mbms.StreamingServiceCallback):
+    
+SamShouldBeLast: android.telephony.SmsManager#getSmsMessagesForFinancialApp(android.os.Bundle, java.util.concurrent.Executor, android.telephony.SmsManager.FinancialSmsCallback):
+    
+SamShouldBeLast: android.telephony.SubscriptionManager#addOnOpportunisticSubscriptionsChangedListener(java.util.concurrent.Executor, android.telephony.SubscriptionManager.OnOpportunisticSubscriptionsChangedListener):
+    
+SamShouldBeLast: android.telephony.TelephonyManager#requestCellInfoUpdate(java.util.concurrent.Executor, android.telephony.TelephonyManager.CellInfoCallback):
+    
+SamShouldBeLast: android.telephony.TelephonyManager#requestNetworkScan(android.telephony.NetworkScanRequest, java.util.concurrent.Executor, android.telephony.TelephonyScanManager.NetworkScanCallback):
+    
+SamShouldBeLast: android.telephony.TelephonyManager#setPreferredOpportunisticDataSubscription(int, boolean, java.util.concurrent.Executor, java.util.function.Consumer<java.lang.Integer>):
+    
+SamShouldBeLast: android.telephony.TelephonyManager#updateAvailableNetworks(java.util.List<android.telephony.AvailableNetworkInfo>, java.util.concurrent.Executor, java.util.function.Consumer<java.lang.Integer>):
+    
+SamShouldBeLast: android.view.View#postDelayed(Runnable, long):
+    
+SamShouldBeLast: android.view.View#postOnAnimationDelayed(Runnable, long):
+    
+SamShouldBeLast: android.view.View#scheduleDrawable(android.graphics.drawable.Drawable, Runnable, long):
+    
+SamShouldBeLast: android.view.Window#addOnFrameMetricsAvailableListener(android.view.Window.OnFrameMetricsAvailableListener, android.os.Handler):
+    
+SamShouldBeLast: android.view.accessibility.AccessibilityManager#addAccessibilityStateChangeListener(android.view.accessibility.AccessibilityManager.AccessibilityStateChangeListener, android.os.Handler):
+    
+SamShouldBeLast: android.view.accessibility.AccessibilityManager#addTouchExplorationStateChangeListener(android.view.accessibility.AccessibilityManager.TouchExplorationStateChangeListener, android.os.Handler):
+    
+SamShouldBeLast: android.webkit.WebChromeClient#onShowFileChooser(android.webkit.WebView, android.webkit.ValueCallback<android.net.Uri[]>, android.webkit.WebChromeClient.FileChooserParams):
+    
+SamShouldBeLast: android.webkit.WebView#setWebViewRenderProcessClient(java.util.concurrent.Executor, android.webkit.WebViewRenderProcessClient):
+    
+
+
+ServiceName: android.Manifest.permission#BIND_ATTENTION_SERVICE:
+    
+ServiceName: android.Manifest.permission#BIND_AUGMENTED_AUTOFILL_SERVICE:
+    
+ServiceName: android.Manifest.permission#BIND_CELL_BROADCAST_SERVICE:
+    
+ServiceName: android.Manifest.permission#BIND_CONTENT_CAPTURE_SERVICE:
+    
+ServiceName: android.Manifest.permission#BIND_CONTENT_SUGGESTIONS_SERVICE:
+    
+ServiceName: android.Manifest.permission#BIND_EUICC_SERVICE:
+    
+ServiceName: android.Manifest.permission#BIND_EXTERNAL_STORAGE_SERVICE:
+    
+ServiceName: android.Manifest.permission#BIND_IMS_SERVICE:
+    
+ServiceName: android.Manifest.permission#BIND_NETWORK_RECOMMENDATION_SERVICE:
+    
+ServiceName: android.Manifest.permission#BIND_NOTIFICATION_ASSISTANT_SERVICE:
+    
+ServiceName: android.Manifest.permission#BIND_PHONE_ACCOUNT_SUGGESTION_SERVICE:
+    
+ServiceName: android.Manifest.permission#BIND_PRINT_RECOMMENDATION_SERVICE:
+    
+ServiceName: android.Manifest.permission#BIND_RESOLVER_RANKER_SERVICE:
+    
+ServiceName: android.Manifest.permission#BIND_RUNTIME_PERMISSION_PRESENTER_SERVICE:
+    
+ServiceName: android.Manifest.permission#BIND_SETTINGS_SUGGESTIONS_SERVICE:
+    
+ServiceName: android.Manifest.permission#BIND_SOUND_TRIGGER_DETECTION_SERVICE:
+    
+ServiceName: android.Manifest.permission#BIND_TELEPHONY_DATA_SERVICE:
+    
+ServiceName: android.Manifest.permission#BIND_TELEPHONY_NETWORK_SERVICE:
+    
+ServiceName: android.Manifest.permission#BIND_TEXTCLASSIFIER_SERVICE:
+    
+ServiceName: android.Manifest.permission#BIND_TV_REMOTE_SERVICE:
+    
+ServiceName: android.Manifest.permission#PROVIDE_RESOLVER_RANKER_SERVICE:
+    
+ServiceName: android.Manifest.permission#REQUEST_NOTIFICATION_ASSISTANT_SERVICE:
+    
+ServiceName: android.provider.DeviceConfig#NAMESPACE_PACKAGE_MANAGER_SERVICE:
+    
+
+
+UserHandle: android.companion.CompanionDeviceManager#isDeviceAssociated(String, android.net.MacAddress, android.os.UserHandle):
+    When a method overload is needed to target a specific UserHandle, callers should be directed to use Context.createPackageContextAsUser() and re-obtain the relevant Manager, and no new API should be added
+
+
+UserHandleName: android.telephony.CellBroadcastIntents#sendOrderedBroadcastForBackgroundReceivers(android.content.Context, android.os.UserHandle, android.content.Intent, String, String, android.content.BroadcastReceiver, android.os.Handler, int, String, android.os.Bundle):
+    Method taking UserHandle should be named `doFooAsUser` or `queryFooForUser`, was `sendOrderedBroadcastForBackgroundReceivers`

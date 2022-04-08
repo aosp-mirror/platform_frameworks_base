@@ -2,5 +2,3 @@
 *.iml
 *.sw*
 gen/
-.vscode/
-*.code-workspace

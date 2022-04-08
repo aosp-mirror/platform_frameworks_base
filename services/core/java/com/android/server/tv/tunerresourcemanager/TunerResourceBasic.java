@@ -25,10 +25,10 @@ import static android.media.tv.tunerresourcemanager.TunerResourceManager.INVALID
  */
 public class TunerResourceBasic {
     /**
-     * Handle of the current resource. Should not be changed and should be aligned with the driver
-     * level implementation.
+     * Id of the current resource. Should not be changed and should be aligned with the driver level
+     * implementation.
      */
-    final int mHandle;
+    final int mId;
 
     /**
      * If the current resource is in use.
@@ -41,11 +41,11 @@ public class TunerResourceBasic {
     int mOwnerClientId = INVALID_OWNER_ID;
 
     TunerResourceBasic(Builder builder) {
-        this.mHandle = builder.mHandle;
+        this.mId = builder.mId;
     }
 
-    public int getHandle() {
-        return mHandle;
+    public int getId() {
+        return mId;
     }
 
     public boolean isInUse() {
@@ -78,10 +78,10 @@ public class TunerResourceBasic {
      * Builder class for {@link TunerResourceBasic}.
      */
     public static class Builder {
-        private final int mHandle;
+        private final int mId;
 
-        Builder(int handle) {
-            this.mHandle = handle;
+        Builder(int id) {
+            this.mId = id;
         }
 
         /**

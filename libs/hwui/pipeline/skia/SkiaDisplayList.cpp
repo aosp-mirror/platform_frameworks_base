@@ -47,13 +47,7 @@ void SkiaDisplayList::syncContents(const WebViewSyncData& data) {
     }
 }
 
-void SkiaDisplayList::onRemovedFromTree() {
-    for (auto& functor : mChildFunctors) {
-        functor->onRemovedFromTree();
-    }
-}
-
-bool SkiaDisplayList::reuseDisplayList(RenderNode* node) {
+bool SkiaDisplayList::reuseDisplayList(RenderNode* node, renderthread::CanvasContext* context) {
     reset();
     node->attachAvailableList(this);
     return true;
@@ -108,12 +102,12 @@ bool SkiaDisplayList::prepareListAndChildren(
     bool hasBackwardProjectedNodesSubtree = false;
 
     for (auto& child : mChildNodes) {
+        hasBackwardProjectedNodesHere |= child.getNodeProperties().getProjectBackwards();
         RenderNode* childNode = child.getRenderNode();
         Matrix4 mat4(child.getRecordedMatrix());
         info.damageAccumulator->pushTransform(&mat4);
         info.hasBackwardProjectedNodes = false;
         childFn(childNode, observer, info, functorsNeedLayer);
-        hasBackwardProjectedNodesHere |= child.getNodeProperties().getProjectBackwards();
         hasBackwardProjectedNodesSubtree |= info.hasBackwardProjectedNodes;
         info.damageAccumulator->popTransform();
     }
@@ -178,7 +172,7 @@ void SkiaDisplayList::reset() {
     new (&allocator) LinearAllocator();
 }
 
-void SkiaDisplayList::output(std::ostream& output, uint32_t level) const {
+void SkiaDisplayList::output(std::ostream& output, uint32_t level) {
     DumpOpsCanvas canvas(output, level, *this);
     mDisplayList.draw(&canvas);
 }

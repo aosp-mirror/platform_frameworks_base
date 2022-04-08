@@ -18,5 +18,4 @@
 <paths xmlns:android="http://schemas.android.com/apk/res/android">
     <cache-path name="leak" path="leak/"/>
     <external-path name="screenrecord" path="."/>
-    <cache-path name="multi_user" path="multi_user/" />
 </paths>

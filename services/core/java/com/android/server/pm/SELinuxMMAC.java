@@ -18,7 +18,6 @@ package com.android.server.pm;
 
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.EnabledAfter;
-import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageParser.SigningDetails;
 import android.content.pm.Signature;
 import android.os.Environment;
@@ -78,21 +77,9 @@ public final class SELinuxMMAC {
     private static final String TARGETSDKVERSION_STR = ":targetSdkVersion=";
 
     /**
-     * Allows opt-in to the latest targetSdkVersion enforced changes without changing target SDK.
-     * Turning this change off for an app targeting the latest SDK is a no-op.
-     *
-     * <p>Has no effect for apps using shared user id.
-     *
-     * TODO(b/143539591): Update description with relevant SELINUX changes this opts in to.
-     */
-    @EnabledAfter(targetSdkVersion = android.os.Build.VERSION_CODES.R)
-    @ChangeId
-    static final long SELINUX_LATEST_CHANGES = 143539591L;
-
-    /**
-     * This change gates apps access to untrusted_app_R-targetSDK SELinux domain. Allows opt-in
+     * This change gates apps access to untrusted_app_R-targetSDk SELinux domain. Allows opt-in
      * to R targetSdkVersion enforced changes without changing target SDK. Turning this change
-     * off for an app targeting S is a no-op.
+     * off for an app targeting R is a no-op.
      *
      * <p>Has no effect for apps using shared user id.
      *
@@ -100,7 +87,7 @@ public final class SELinuxMMAC {
      */
     @EnabledAfter(targetSdkVersion = android.os.Build.VERSION_CODES.Q)
     @ChangeId
-    static final long SELINUX_R_CHANGES = 168782947L;
+    static final long SELINUX_LATEST_CHANGES = 143539591L;
 
     // Only initialize sMacPermissions once.
     static {
@@ -362,11 +349,9 @@ public final class SELinuxMMAC {
         if ((sharedUserSetting != null) && (sharedUserSetting.packages.size() != 0)) {
             return sharedUserSetting.seInfoTargetSdkVersion;
         }
-        final ApplicationInfo appInfo = pkg.toAppInfoWithoutState();
-        if (compatibility.isChangeEnabledInternal(SELINUX_LATEST_CHANGES, appInfo)) {
-            return android.os.Build.VERSION_CODES.S;
-        } else if (compatibility.isChangeEnabledInternal(SELINUX_R_CHANGES, appInfo)) {
-            return Math.max(android.os.Build.VERSION_CODES.R, pkg.getTargetSdkVersion());
+        if (compatibility.isChangeEnabledInternal(SELINUX_LATEST_CHANGES,
+                pkg.toAppInfoWithoutState())) {
+            return android.os.Build.VERSION_CODES.R;
         }
 
         return pkg.getTargetSdkVersion();

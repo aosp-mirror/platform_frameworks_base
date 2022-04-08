@@ -47,6 +47,8 @@ public final class MapClientProfile implements LocalBluetoothProfile {
     private final LocalBluetoothProfileManager mProfileManager;
 
     static final ParcelUuid[] UUIDS = {
+        BluetoothUuid.MAP,
+        BluetoothUuid.MNS,
         BluetoothUuid.MAS,
     };
 

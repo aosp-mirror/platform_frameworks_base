@@ -16,146 +16,147 @@
 -->
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-     package="com.android.test.dynamic">
+    package="com.android.test.dynamic" >
 
-    <application android:hardwareAccelerated="true"
-         android:label="vector"
-         android:supportsRtl="true">
-        <activity android:name="VectorDrawablePerformance"
-             android:label="Vector Performance"
-             android:exported="true">
+    <application
+        android:hardwareAccelerated="true"
+        android:label="vector"
+        android:supportsRtl="true" >
+        <activity
+            android:name="VectorDrawablePerformance"
+            android:label="Vector Performance" >
             <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
+                <action android:name="android.intent.action.MAIN" />
 
-                <category android:name="com.android.test.dynamic.TEST"/>
+                <category android:name="com.android.test.dynamic.TEST" />
             </intent-filter>
         </activity>
-        <activity android:name="BitmapDrawableDupe"
-             android:label="Bitmap Performance of clones"
-             android:exported="true">
+        <activity
+            android:name="BitmapDrawableDupe"
+            android:label="Bitmap Performance of clones" >
             <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
+                <action android:name="android.intent.action.MAIN" />
 
-                <category android:name="com.android.test.dynamic.TEST"/>
+                <category android:name="com.android.test.dynamic.TEST" />
             </intent-filter>
 
         </activity>
-        <activity android:name="VectorDrawableAnimation"
-             android:label="VectorTestAnimation"
-             android:exported="true">
+        <activity
+            android:name="VectorDrawableAnimation"
+            android:label="VectorTestAnimation" >
             <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
+                <action android:name="android.intent.action.MAIN" />
 
-                <category android:name="com.android.test.dynamic.TEST"/>
+                <category android:name="com.android.test.dynamic.TEST" />
             </intent-filter>
         </activity>
-        <activity android:name="VectorDrawableTest"
-             android:label="Vector Icon"
-             android:exported="true">
+        <activity
+            android:name="VectorDrawableTest"
+            android:label="Vector Icon" >
             <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
+                <action android:name="android.intent.action.MAIN" />
 
-                <category android:name="android.intent.category.DEFAULT"/>
-                <category android:name="android.intent.category.LAUNCHER"/>
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="AnimatedVectorDrawableTest"
-             android:label="AnimatedVectorDrawableTest"
-             android:exported="true">
+        <activity
+            android:name="AnimatedVectorDrawableTest"
+            android:label="AnimatedVectorDrawableTest" >
             <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
+                <action android:name="android.intent.action.MAIN" />
 
-                <category android:name="com.android.test.dynamic.TEST"/>
+                <category android:name="com.android.test.dynamic.TEST" />
             </intent-filter>
         </activity>
-        <activity android:name="AnimatedStateVectorDrawableTest"
-             android:label="AnimatedStateList and AnimatedVectorDrawable"
-             android:exported="true">
+        <activity
+            android:name="AnimatedStateVectorDrawableTest"
+            android:label="AnimatedStateList and AnimatedVectorDrawable" >
             <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
+                <action android:name="android.intent.action.MAIN" />
 
-                <category android:name="com.android.test.dynamic.TEST"/>
+                <category android:name="com.android.test.dynamic.TEST" />
             </intent-filter>
         </activity>
-        <activity android:name="VectorDrawable01"
-             android:label="VectorTest1"
-             android:exported="true">
+        <activity
+            android:name="VectorDrawable01"
+            android:label="VectorTest1" >
             <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
+                <action android:name="android.intent.action.MAIN" />
 
-                <category android:name="com.android.test.dynamic.TEST"/>
+                <category android:name="com.android.test.dynamic.TEST" />
             </intent-filter>
         </activity>
-        <activity android:name="VectorDrawableDupPerf"
-             android:label="Vector Performance of clones"
-             android:exported="true">
+        <activity
+            android:name="VectorDrawableDupPerf"
+            android:label="Vector Performance of clones" >
             <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
+                <action android:name="android.intent.action.MAIN" />
 
-                <category android:name="com.android.test.dynamic.TEST"/>
+                <category android:name="com.android.test.dynamic.TEST" />
             </intent-filter>
         </activity>
-        <activity android:name="AnimatedVectorDrawableDupPerf"
-             android:label="Animated Vector Performance of clones"
-             android:exported="true">
+        <activity
+            android:name="AnimatedVectorDrawableDupPerf"
+            android:label="Animated Vector Performance of clones" >
             <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
+                <action android:name="android.intent.action.MAIN" />
 
-                <category android:name="com.android.test.dynamic.TEST"/>
+                <category android:name="com.android.test.dynamic.TEST" />
             </intent-filter>
         </activity>
-        <activity android:name="VectorDrawableStaticPerf"
-             android:label="System icons"
-             android:exported="true">
+        <activity
+            android:name="VectorDrawableStaticPerf"
+            android:label="System icons" >
             <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
+                <action android:name="android.intent.action.MAIN" />
 
-                <category android:name="com.android.test.dynamic.TEST"/>
+                <category android:name="com.android.test.dynamic.TEST" />
             </intent-filter>
         </activity>
-        <activity android:name="VectorCheckbox"
-             android:label="Basic static vector drawables"
-             android:exported="true">
+        <activity
+            android:name="VectorCheckbox"
+            android:label="Basic static vector drawables" >
             <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
+                <action android:name="android.intent.action.MAIN" />
 
-                <category android:name="com.android.test.dynamic.TEST"/>
+                <category android:name="com.android.test.dynamic.TEST" />
             </intent-filter>
         </activity>
-        <activity android:name="VectorPathChecking"
-             android:label="Path Checking graphics"
-             android:exported="true">
+        <activity
+            android:name="VectorPathChecking"
+            android:label="Path Checking graphics" >
             <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
+                <action android:name="android.intent.action.MAIN" />
 
-                <category android:name="com.android.test.dynamic.TEST"/>
+                <category android:name="com.android.test.dynamic.TEST" />
             </intent-filter>
         </activity>
-        <activity android:name="ScaleDrawableTests"
-             android:label="Scale Type Test"
-             android:exported="true">
+        <activity
+            android:name="ScaleDrawableTests"
+            android:label="Scale Type Test" >
             <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
+                <action android:name="android.intent.action.MAIN" />
 
-                <category android:name="com.android.test.dynamic.TEST"/>
+                <category android:name="com.android.test.dynamic.TEST" />
             </intent-filter>
         </activity>
-        <activity android:name="AnimatedVectorDrawableAttr"
-             android:label="AnimatedVectorDrawable Attr Test"
-             android:exported="true">
+        <activity
+            android:name="AnimatedVectorDrawableAttr"
+            android:label="AnimatedVectorDrawable Attr Test" >
             <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
+                <action android:name="android.intent.action.MAIN" />
 
-                <category android:name="com.android.test.dynamic.TEST"/>
+                <category android:name="com.android.test.dynamic.TEST" />
             </intent-filter>
         </activity>
-        <activity android:name="BoundsCheckTest"
-             android:label="SetBound check"
-             android:exported="true">
+        <activity
+            android:name="BoundsCheckTest"
+            android:label="SetBound check" >
             <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
+                <action android:name="android.intent.action.MAIN" />
 
-                <category android:name="com.android.test.dynamic.TEST"/>
+                <category android:name="com.android.test.dynamic.TEST" />
             </intent-filter>
         </activity>
     </application>

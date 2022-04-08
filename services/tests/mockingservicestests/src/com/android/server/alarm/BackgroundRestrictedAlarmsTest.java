@@ -27,6 +27,7 @@ import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.util.ObjectUtils;
+import com.android.server.alarm.AlarmManagerService.Alarm;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -45,7 +46,7 @@ public class BackgroundRestrictedAlarmsTest {
         }
         uidAlarms.add(new Alarm(
                 removeIt ? RTC : RTC_WAKEUP,
-                0, 0, 0, 0, null, null, null, null, 0, null, uid, name, null, 0));
+                0, 0, 0, 0, 0, null, null, null, null, 0, null, uid, name));
         return all;
     }
 

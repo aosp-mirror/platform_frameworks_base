@@ -16,8 +16,6 @@
 
 package android.util;
 
-import android.annotation.Nullable;
-
 import java.lang.reflect.Array;
 import java.util.Collection;
 import java.util.Iterator;
@@ -251,7 +249,7 @@ abstract class MapCollections<K, V> {
         }
 
         @Override
-        public boolean equals(@Nullable Object object) {
+        public boolean equals(Object object) {
             return equalsSetHelper(this, object);
         }
 
@@ -341,7 +339,7 @@ abstract class MapCollections<K, V> {
         }
 
         @Override
-        public boolean equals(@Nullable Object object) {
+        public boolean equals(Object object) {
             return equalsSetHelper(this, object);
         }
 

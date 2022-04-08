@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+/**
+ * Copyright (c) 2018, The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+ -->
+
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="car_guest" msgid="1125545940563459016">"Convidado"</string>
+    <string name="start_guest_session" msgid="548879769864070364">"Convidado"</string>
+    <string name="car_add_user" msgid="9196649698797257695">"Adicionar utilizador"</string>
+    <string name="car_new_user" msgid="2994965724661108420">"Novo utilizador"</string>
+    <string name="user_add_user_message_setup" msgid="116571509380700718">"Ao adicionar um novo utilizador, essa pessoa tem de configurar o respetivo espaço."</string>
+    <string name="user_add_user_message_update" msgid="537998123816022363">"Qualquer utilizador pode atualizar apps para todos os outros utilizadores."</string>
+</resources>

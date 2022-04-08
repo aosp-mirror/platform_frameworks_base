@@ -23,7 +23,6 @@ import static org.junit.Assert.assertEquals;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.os.Handler;
-import android.os.Process;
 import android.platform.test.annotations.Presubmit;
 import android.provider.Settings;
 
@@ -65,7 +64,7 @@ public class BackupAgentTimeoutParametersTest {
         long kvBackupAgentTimeoutMillis = mParameters.getKvBackupAgentTimeoutMillis();
         long fullBackupAgentTimeoutMillis = mParameters.getFullBackupAgentTimeoutMillis();
         long sharedBackupAgentTimeoutMillis = mParameters.getSharedBackupAgentTimeoutMillis();
-        long restoreSessionTimeoutMillis = mParameters.getRestoreSessionTimeoutMillis();
+        long restoreAgentTimeoutMillis = mParameters.getRestoreAgentTimeoutMillis();
         long restoreAgentFinishedTimeoutMillis = mParameters.getRestoreAgentFinishedTimeoutMillis();
 
         assertEquals(
@@ -78,38 +77,11 @@ public class BackupAgentTimeoutParametersTest {
                 BackupAgentTimeoutParameters.DEFAULT_SHARED_BACKUP_AGENT_TIMEOUT_MILLIS,
                 sharedBackupAgentTimeoutMillis);
         assertEquals(
-                BackupAgentTimeoutParameters.DEFAULT_RESTORE_SESSION_TIMEOUT_MILLIS,
-                restoreSessionTimeoutMillis);
+                BackupAgentTimeoutParameters.DEFAULT_RESTORE_AGENT_TIMEOUT_MILLIS,
+                restoreAgentTimeoutMillis);
         assertEquals(
                 BackupAgentTimeoutParameters.DEFAULT_RESTORE_AGENT_FINISHED_TIMEOUT_MILLIS,
                 restoreAgentFinishedTimeoutMillis);
-    }
-
-    @Test
-    public void
-            testGetRestoreAgentTimeout_afterConstructorWithStartForSystemAgent_returnsDefaultValue() {
-        mParameters.start();
-
-        // Numbers before FIRST_APPLICATION_UID are reserved as UIDs for system components.
-        long restoreTimeout =
-                mParameters.getRestoreAgentTimeoutMillis(Process.FIRST_APPLICATION_UID - 1);
-
-        assertThat(restoreTimeout)
-                .isEqualTo(
-                        BackupAgentTimeoutParameters.DEFAULT_RESTORE_SYSTEM_AGENT_TIMEOUT_MILLIS);
-    }
-
-    @Test
-    public void
-            testGetRestoreAgentTimeout_afterConstructorWithStartForAppAgent_returnsDefaultValue() {
-        mParameters.start();
-
-        // Numbers starting from FIRST_APPLICATION_UID are reserved for app UIDs.
-        long restoreTimeout =
-                mParameters.getRestoreAgentTimeoutMillis(Process.FIRST_APPLICATION_UID);
-
-        assertThat(restoreTimeout)
-                .isEqualTo(BackupAgentTimeoutParameters.DEFAULT_RESTORE_AGENT_TIMEOUT_MILLIS);
     }
 
     @Test

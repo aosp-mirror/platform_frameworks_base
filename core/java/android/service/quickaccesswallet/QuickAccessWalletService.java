@@ -195,13 +195,6 @@ public abstract class QuickAccessWalletService extends Service {
      */
     public static final String SERVICE_META_DATA = "android.quickaccesswallet";
 
-    /**
-     * Name of the QuickAccessWallet tile service meta-data.
-     *
-     * @hide
-     */
-    public static final String TILE_SERVICE_META_DATA = "android.quickaccesswallet.tile";
-
     private final Handler mHandler = new Handler(Looper.getMainLooper());
 
     /**

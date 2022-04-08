@@ -19,7 +19,6 @@ package android.transition;
 import android.annotation.TestApi;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
-import android.os.Build;
 import android.util.ArrayMap;
 import android.util.Log;
 import android.view.View;
@@ -216,7 +215,7 @@ public class TransitionManager {
         }
     }
 
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     private static ArrayMap<ViewGroup, ArrayList<Transition>> getRunningTransitions() {
         WeakReference<ArrayMap<ViewGroup, ArrayList<Transition>>> runningTransitions =
                 sRunningTransitions.get();

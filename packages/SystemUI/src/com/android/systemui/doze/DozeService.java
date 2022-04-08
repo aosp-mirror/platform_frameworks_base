@@ -22,7 +22,6 @@ import android.os.SystemClock;
 import android.service.dreams.DreamService;
 import android.util.Log;
 
-import com.android.systemui.doze.dagger.DozeComponent;
 import com.android.systemui.plugins.DozeServicePlugin;
 import com.android.systemui.plugins.DozeServicePlugin.RequestDoze;
 import com.android.systemui.plugins.PluginListener;
@@ -37,16 +36,16 @@ public class DozeService extends DreamService
         implements DozeMachine.Service, RequestDoze, PluginListener<DozeServicePlugin> {
     private static final String TAG = "DozeService";
     static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
-    private final DozeComponent.Builder mDozeComponentBuilder;
+    private final DozeFactory mDozeFactory;
 
     private DozeMachine mDozeMachine;
     private DozeServicePlugin mDozePlugin;
     private PluginManager mPluginManager;
 
     @Inject
-    public DozeService(DozeComponent.Builder dozeComponentBuilder, PluginManager pluginManager) {
-        mDozeComponentBuilder = dozeComponentBuilder;
+    public DozeService(DozeFactory dozeFactory, PluginManager pluginManager) {
         setDebug(DEBUG);
+        mDozeFactory = dozeFactory;
         mPluginManager = pluginManager;
     }
 
@@ -57,8 +56,7 @@ public class DozeService extends DreamService
         setWindowless(true);
 
         mPluginManager.addPluginListener(this, DozeServicePlugin.class, false /* allowMultiple */);
-        DozeComponent dozeComponent = mDozeComponentBuilder.build(this);
-        mDozeMachine = dozeComponent.getDozeMachine();
+        mDozeMachine = mDozeFactory.assembleMachine(this);
     }
 
     @Override
@@ -131,11 +129,5 @@ public class DozeService extends DreamService
         if (mDozeMachine != null) {
             mDozeMachine.requestState(DozeMachine.State.DOZE);
         }
-    }
-
-    @Override
-    public void setDozeScreenState(int state) {
-        super.setDozeScreenState(state);
-        mDozeMachine.onScreenState(state);
     }
 }

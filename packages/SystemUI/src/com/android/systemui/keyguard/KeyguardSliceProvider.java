@@ -52,6 +52,7 @@ import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.SystemUIAppComponentFactory;
+import com.android.systemui.SystemUIFactory;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.NotificationMediaManager;
 import com.android.systemui.statusbar.StatusBarState;
@@ -71,16 +72,11 @@ import javax.inject.Inject;
 
 /**
  * Simple Slice provider that shows the current date.
- *
- * Injection is handled by {@link SystemUIAppComponentFactory} +
- * {@link com.android.systemui.dagger.GlobalRootComponent#inject(KeyguardSliceProvider)}.
  */
 public class KeyguardSliceProvider extends SliceProvider implements
         NextAlarmController.NextAlarmChangeCallback, ZenModeController.Callback,
         NotificationMediaManager.MediaListener, StatusBarStateController.StateListener,
         SystemUIAppComponentFactory.ContextInitializer {
-
-    private static final String TAG = "KgdSliceProvider";
 
     private static final StyleSpan BOLD_STYLE = new StyleSpan(Typeface.BOLD);
     public static final String KEYGUARD_SLICE_URI = "content://com.android.systemui.keyguard/main";
@@ -302,8 +298,7 @@ public class KeyguardSliceProvider extends SliceProvider implements
     @Override
     public boolean onCreateSliceProvider() {
         mContextAvailableCallback.onContextAvailable(getContext());
-        mMediaWakeLock = new SettableWakeLock(WakeLock.createPartial(getContext(), "media"),
-                "media");
+        inject();
         synchronized (KeyguardSliceProvider.sInstanceLock) {
             KeyguardSliceProvider oldInstance = KeyguardSliceProvider.sInstance;
             if (oldInstance != null) {
@@ -311,8 +306,7 @@ public class KeyguardSliceProvider extends SliceProvider implements
             }
             mDatePattern = getContext().getString(R.string.system_ui_aod_date_pattern);
             mPendingIntent = PendingIntent.getActivity(getContext(), 0,
-                    new Intent(getContext(), KeyguardSliceProvider.class),
-                    PendingIntent.FLAG_IMMUTABLE);
+                    new Intent(getContext(), KeyguardSliceProvider.class), 0);
             mMediaManager.addCallback(this);
             mStatusBarStateController.addCallback(this);
             mNextAlarmController.addCallback(this);
@@ -322,6 +316,13 @@ public class KeyguardSliceProvider extends SliceProvider implements
             updateClockLocked();
         }
         return true;
+    }
+
+    @VisibleForTesting
+    protected void inject() {
+        SystemUIFactory.getInstance().getRootComponent().inject(this);
+        mMediaWakeLock = new SettableWakeLock(WakeLock.createPartial(getContext(), "media"),
+                "media");
     }
 
     @VisibleForTesting

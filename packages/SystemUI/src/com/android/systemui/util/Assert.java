@@ -25,21 +25,16 @@ import androidx.annotation.VisibleForTesting;
  */
 public class Assert {
     private static final Looper sMainLooper = Looper.getMainLooper();
-    private static Thread sTestThread = null;
+    private static Looper sTestLooper = null;
 
     @VisibleForTesting
     public static void setTestableLooper(Looper testLooper) {
-        setTestThread(testLooper == null ? null : testLooper.getThread());
-    }
-
-    @VisibleForTesting
-    public static void setTestThread(Thread thread) {
-        sTestThread = thread;
+        sTestLooper = testLooper;
     }
 
     public static void isMainThread() {
         if (!sMainLooper.isCurrentThread()
-                && (sTestThread == null || sTestThread != Thread.currentThread())) {
+                && (sTestLooper == null || !sTestLooper.isCurrentThread())) {
             throw new IllegalStateException("should be called from the main thread."
                     + " sMainLooper.threadName=" + sMainLooper.getThread().getName()
                     + " Thread.currentThread()=" + Thread.currentThread().getName());
@@ -48,7 +43,7 @@ public class Assert {
 
     public static void isNotMainThread() {
         if (sMainLooper.isCurrentThread()
-                && (sTestThread == null || sTestThread == Thread.currentThread())) {
+                && (sTestLooper == null || sTestLooper.isCurrentThread())) {
             throw new IllegalStateException("should not be called from the main thread.");
         }
     }

@@ -30,12 +30,10 @@ import androidx.annotation.Nullable;
 import com.android.systemui.BootCompleteCache;
 import com.android.systemui.Dependency;
 import com.android.systemui.broadcast.BroadcastDispatcher;
-import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.shared.system.PackageManagerWrapper;
 import com.android.systemui.shared.system.TaskStackChangeListener;
-import com.android.systemui.shared.system.TaskStackChangeListeners;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.phone.StatusBar;
 
@@ -44,11 +42,12 @@ import java.util.List;
 import java.util.Optional;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 
 import dagger.Lazy;
 
 /** Class to monitor and report the state of the phone. */
-@SysUISingleton
+@Singleton
 public final class PhoneStateMonitor {
 
     public static final int PHONE_STATE_AOD1 = 1;
@@ -83,6 +82,7 @@ public final class PhoneStateMonitor {
         mStatusBarOptionalLazy = statusBarOptionalLazy;
         mStatusBarStateController = Dependency.get(StatusBarStateController.class);
 
+        ActivityManagerWrapper activityManagerWrapper = ActivityManagerWrapper.getInstance();
         mDefaultHome = getCurrentDefaultHome();
         bootCompleteCache.addListener(() -> mDefaultHome = getCurrentDefaultHome());
         IntentFilter intentFilter = new IntentFilter();
@@ -95,13 +95,12 @@ public final class PhoneStateMonitor {
                 mDefaultHome = getCurrentDefaultHome();
             }
         }, intentFilter);
-        mLauncherShowing = isLauncherShowing(ActivityManagerWrapper.getInstance().getRunningTask());
-        TaskStackChangeListeners.getInstance().registerTaskStackListener(
-                new TaskStackChangeListener() {
-                    @Override
-                    public void onTaskMovedToFront(ActivityManager.RunningTaskInfo taskInfo) {
-                        mLauncherShowing = isLauncherShowing(taskInfo);
-                    }
+        mLauncherShowing = isLauncherShowing(activityManagerWrapper.getRunningTask());
+        activityManagerWrapper.registerTaskStackListener(new TaskStackChangeListener() {
+            @Override
+            public void onTaskMovedToFront(ActivityManager.RunningTaskInfo taskInfo) {
+                mLauncherShowing = isLauncherShowing(taskInfo);
+            }
         });
     }
 
@@ -112,7 +111,7 @@ public final class PhoneStateMonitor {
         } else if (mLauncherShowing) {
             phoneState = getPhoneLauncherState();
         } else {
-            phoneState = PHONE_STATE_APP_IMMERSIVE;
+            phoneState = getPhoneAppState();
         }
         return phoneState;
     }
@@ -161,6 +160,16 @@ public final class PhoneStateMonitor {
         }
     }
 
+    private int getPhoneAppState() {
+        if (isAppImmersive()) {
+            return PHONE_STATE_APP_IMMERSIVE;
+        } else if (isAppFullscreen()) {
+            return PHONE_STATE_APP_FULLSCREEN;
+        } else {
+            return PHONE_STATE_APP_DEFAULT;
+        }
+    }
+
     private boolean isShadeFullscreen() {
         int statusBarState = mStatusBarStateController.getState();
         return statusBarState == StatusBarState.KEYGUARD
@@ -177,6 +186,14 @@ public final class PhoneStateMonitor {
         } else {
             return runningTaskInfo.topActivity.equals(mDefaultHome);
         }
+    }
+
+    private boolean isAppImmersive() {
+        return mStatusBarOptionalLazy.get().get().inImmersiveMode();
+    }
+
+    private boolean isAppFullscreen() {
+        return mStatusBarOptionalLazy.get().get().inFullscreenMode();
     }
 
     private boolean isBouncerShowing() {

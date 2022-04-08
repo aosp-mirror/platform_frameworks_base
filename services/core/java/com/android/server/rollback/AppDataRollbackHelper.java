@@ -20,8 +20,11 @@ import android.content.pm.PackageManager;
 import android.content.rollback.PackageRollbackInfo;
 import android.content.rollback.PackageRollbackInfo.RestoreInfo;
 import android.os.storage.StorageManager;
+import android.util.IntArray;
 import android.util.Slog;
+import android.util.SparseLongArray;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.pm.ApexManager;
 import com.android.server.pm.Installer;
@@ -42,7 +45,7 @@ public class AppDataRollbackHelper {
     private final Installer mInstaller;
     private final ApexManager mApexManager;
 
-    AppDataRollbackHelper(Installer installer) {
+    public AppDataRollbackHelper(Installer installer) {
         mInstaller = installer;
         mApexManager = ApexManager.getInstance();
     }
@@ -58,6 +61,8 @@ public class AppDataRollbackHelper {
      * {@code userIds}. Updates said {@code packageRollbackInfo} with the inodes of the CE user data
      * snapshot folders.
      */
+    @GuardedBy("rollback.mLock")
+    // TODO(b/136241838): Move into Rollback and synchronize there.
     public void snapshotAppData(
             int rollbackId, PackageRollbackInfo packageRollbackInfo, int[] userIds) {
         for (int user : userIds) {
@@ -84,11 +89,13 @@ public class AppDataRollbackHelper {
      *         to {@code packageRollbackInfo} are restricted to the removal or addition of {@code
      *         userId} to the list of pending backups or restores.
      */
+    @GuardedBy("rollback.mLock")
+    // TODO(b/136241838): Move into Rollback and synchronize there.
     public boolean restoreAppData(int rollbackId, PackageRollbackInfo packageRollbackInfo,
             int userId, int appId, String seInfo) {
         int storageFlags = Installer.FLAG_STORAGE_DE;
 
-        final List<Integer> pendingBackups = packageRollbackInfo.getPendingBackups();
+        final IntArray pendingBackups = packageRollbackInfo.getPendingBackups();
         final List<RestoreInfo> pendingRestores = packageRollbackInfo.getPendingRestores();
         boolean changedRollback = false;
 
@@ -122,14 +129,22 @@ public class AppDataRollbackHelper {
         if (packageRollbackInfo.isApex()) {
             // For APEX, only snapshot CE here
             if ((flags & Installer.FLAG_STORAGE_CE) != 0) {
-                return mApexManager.snapshotCeData(
+                long ceSnapshotInode = mApexManager.snapshotCeData(
                         userId, rollbackId, packageRollbackInfo.getPackageName());
+                if (ceSnapshotInode > 0) {
+                    packageRollbackInfo.putCeSnapshotInode(userId, ceSnapshotInode);
+                } else {
+                    return false;
+                }
             }
         } else {
             // APK
             try {
-                return mInstaller.snapshotAppData(
+                long ceSnapshotInode = mInstaller.snapshotAppData(
                         packageRollbackInfo.getPackageName(), userId, rollbackId, flags);
+                if ((flags & Installer.FLAG_STORAGE_CE) != 0) {
+                    packageRollbackInfo.putCeSnapshotInode(userId, ceSnapshotInode);
+                }
             } catch (InstallerException ie) {
                 Slog.e(TAG, "Unable to create app data snapshot for: "
                         + packageRollbackInfo.getPackageName() + ", userId: " + userId, ie);
@@ -186,12 +201,22 @@ public class AppDataRollbackHelper {
      * Deletes an app data snapshot with a given {@code rollbackId} for a specified package
      * {@code packageName} for a given {@code user}.
      */
+    @GuardedBy("rollback.mLock")
+    // TODO(b/136241838): Move into Rollback and synchronize there.
     public void destroyAppDataSnapshot(int rollbackId, PackageRollbackInfo packageRollbackInfo,
             int user) {
+        int storageFlags = Installer.FLAG_STORAGE_DE;
+        final SparseLongArray ceSnapshotInodes = packageRollbackInfo.getCeSnapshotInodes();
+        long ceSnapshotInode = ceSnapshotInodes.get(user);
+        if (ceSnapshotInode > 0) {
+            storageFlags |= Installer.FLAG_STORAGE_CE;
+        }
         try {
-            // Delete both DE and CE snapshots if any
             mInstaller.destroyAppDataSnapshot(packageRollbackInfo.getPackageName(), user,
-                    rollbackId, Installer.FLAG_STORAGE_DE | Installer.FLAG_STORAGE_CE);
+                    ceSnapshotInode, rollbackId, storageFlags);
+            if ((storageFlags & Installer.FLAG_STORAGE_CE) != 0) {
+                ceSnapshotInodes.delete(user);
+            }
         } catch (InstallerException ie) {
             Slog.e(TAG, "Unable to delete app data snapshot for "
                         + packageRollbackInfo.getPackageName(), ie);
@@ -206,28 +231,19 @@ public class AppDataRollbackHelper {
     }
 
     /**
-     * Deletes snapshots of the credential encrypted apex data directories for the specified user,
-     * for the given rollback id. This method will be a no-op if the user is not unlocked.
-     */
-    public void destroyApexCeSnapshots(int userId, int rollbackId) {
-        if (!isUserCredentialLocked(userId)) {
-            mApexManager.destroyCeSnapshots(userId, rollbackId);
-        }
-    }
-
-    /**
      * Commits the pending backups and restores for a given {@code userId} and {@code rollback}. If
      * the rollback has a pending backup, it is updated with a mapping from {@code userId} to inode
      * of the CE user data snapshot.
      *
      * @return true if any backups or restores were found for the userId
      */
+    @GuardedBy("rollback.mLock")
     boolean commitPendingBackupAndRestoreForUser(int userId, Rollback rollback) {
         boolean foundBackupOrRestore = false;
         for (PackageRollbackInfo info : rollback.info.getPackages()) {
             boolean hasPendingBackup = false;
             boolean hasPendingRestore = false;
-            final List<Integer> pendingBackupUsers = info.getPendingBackups();
+            final IntArray pendingBackupUsers = info.getPendingBackups();
             if (pendingBackupUsers != null) {
                 if (pendingBackupUsers.indexOf(userId) != -1) {
                     hasPendingBackup = true;

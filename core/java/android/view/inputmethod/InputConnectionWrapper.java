@@ -16,13 +16,9 @@
 
 package android.view.inputmethod;
 
-import android.annotation.IntRange;
-import android.annotation.Nullable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.KeyEvent;
-
-import com.android.internal.util.Preconditions;
 
 /**
  * <p>Wrapper class for proxying calls to another InputConnection.  Subclass and have fun!
@@ -77,24 +73,18 @@ public class InputConnectionWrapper implements InputConnection {
     /**
      * {@inheritDoc}
      * @throws NullPointerException if the target is {@code null}.
-     * @throws IllegalArgumentException if {@code length} is negative.
      */
-    @Nullable
     @Override
-    public CharSequence getTextBeforeCursor(@IntRange(from = 0) int n, int flags) {
-        Preconditions.checkArgumentNonnegative(n);
+    public CharSequence getTextBeforeCursor(int n, int flags) {
         return mTarget.getTextBeforeCursor(n, flags);
     }
 
     /**
      * {@inheritDoc}
      * @throws NullPointerException if the target is {@code null}.
-     * @throws IllegalArgumentException if {@code length} is negative.
      */
-    @Nullable
     @Override
-    public CharSequence getTextAfterCursor(@IntRange(from = 0) int n, int flags) {
-        Preconditions.checkArgumentNonnegative(n);
+    public CharSequence getTextAfterCursor(int n, int flags) {
         return mTarget.getTextAfterCursor(n, flags);
     }
 
@@ -105,19 +95,6 @@ public class InputConnectionWrapper implements InputConnection {
     @Override
     public CharSequence getSelectedText(int flags) {
         return mTarget.getSelectedText(flags);
-    }
-
-    /**
-     * {@inheritDoc}
-     * @throws NullPointerException if the target is {@code null}.
-     * @throws IllegalArgumentException if {@code beforeLength} or {@code afterLength} is negative.
-     */
-    @Nullable
-    @Override
-    public SurroundingText getSurroundingText(int beforeLength, int afterLength, int flags) {
-        Preconditions.checkArgumentNonnegative(beforeLength);
-        Preconditions.checkArgumentNonnegative(afterLength);
-        return mTarget.getSurroundingText(beforeLength, afterLength, flags);
     }
 
     /**
@@ -287,15 +264,6 @@ public class InputConnectionWrapper implements InputConnection {
      * @throws NullPointerException if the target is {@code null}.
      */
     @Override
-    public boolean performSpellCheck() {
-        return mTarget.performSpellCheck();
-    }
-
-    /**
-     * {@inheritDoc}
-     * @throws NullPointerException if the target is {@code null}.
-     */
-    @Override
     public boolean performPrivateCommand(String action, Bundle data) {
         return mTarget.performPrivateCommand(action, data);
     }
@@ -334,14 +302,5 @@ public class InputConnectionWrapper implements InputConnection {
     @Override
     public boolean commitContent(InputContentInfo inputContentInfo, int flags, Bundle opts) {
         return mTarget.commitContent(inputContentInfo, flags, opts);
-    }
-
-    /**
-     * {@inheritDoc}
-     * @throws NullPointerException if the target is {@code null}.
-     */
-    @Override
-    public boolean setImeConsumesInput(boolean imeConsumesInput) {
-        return mTarget.setImeConsumesInput(imeConsumesInput);
     }
 }

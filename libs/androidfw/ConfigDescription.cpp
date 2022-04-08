@@ -887,16 +887,13 @@ bool ConfigDescription::Dominates(const ConfigDescription& o) const {
   }
 
   // Locale de-duping is not-trivial, disable for now (b/62409213).
-  // We must also disable de-duping for all configuration qualifiers with precedence higher than
-  // locale (b/171892595)
-  if (diff(o) & (CONFIG_LOCALE | CONFIG_MCC | CONFIG_MNC)) {
+  if (diff(o) & CONFIG_LOCALE) {
     return false;
   }
 
   if (*this == DefaultConfig()) {
     return true;
   }
-
   return MatchWithDensity(o) && !o.MatchWithDensity(*this) &&
          !isMoreSpecificThan(o) && !o.HasHigherPrecedenceThan(*this);
 }

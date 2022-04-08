@@ -27,7 +27,7 @@
 namespace android {
 namespace uirenderer {
 
-void ProfileDataContainer::freeData() REQUIRES(mJankDataMutex) {
+void ProfileDataContainer::freeData() {
     if (mIsMapped) {
         munmap(mData, sizeof(ProfileData));
     } else {
@@ -38,8 +38,6 @@ void ProfileDataContainer::freeData() REQUIRES(mJankDataMutex) {
 }
 
 void ProfileDataContainer::rotateStorage() {
-    std::lock_guard lock(mJankDataMutex);
-
     // If we are mapped we want to stop using the ashmem backend and switch to malloc
     // We are expecting a switchStorageToAshmem call to follow this, but it's not guaranteed
     // If we aren't sitting on top of ashmem then just do a reset() as it's functionally
@@ -52,7 +50,6 @@ void ProfileDataContainer::rotateStorage() {
 }
 
 void ProfileDataContainer::switchStorageToAshmem(int ashmemfd) {
-    std::lock_guard lock(mJankDataMutex);
     int regionSize = ashmem_get_size_region(ashmemfd);
     if (regionSize < 0) {
         int err = errno;
@@ -73,9 +70,7 @@ void ProfileDataContainer::switchStorageToAshmem(int ashmemfd) {
         return;
     }
 
-    if (mData != nullptr) {
-        newData->mergeWith(*mData);
-    }
+    newData->mergeWith(*mData);
     freeData();
     mData = newData;
     mIsMapped = true;

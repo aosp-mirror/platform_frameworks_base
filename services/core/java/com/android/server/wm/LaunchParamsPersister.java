@@ -27,24 +27,26 @@ import android.util.ArraySet;
 import android.util.AtomicFile;
 import android.util.Slog;
 import android.util.SparseArray;
-import android.util.TypedXmlPullParser;
-import android.util.TypedXmlSerializer;
 import android.util.Xml;
 import android.view.DisplayInfo;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.util.FastXmlSerializer;
 import com.android.server.LocalServices;
 import com.android.server.pm.PackageList;
 import com.android.server.wm.LaunchParamsController.LaunchParams;
 
-import org.xmlpull.v1.XmlPullParser;
+import libcore.io.IoUtils;
 
-import java.io.ByteArrayOutputStream;
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlSerializer;
+
+import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.IOException;
-import java.io.InputStream;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -67,13 +69,12 @@ class LaunchParamsPersister {
 
     // Chars below are used to escape the backslash in component name to underscore.
     private static final char ORIGINAL_COMPONENT_SEPARATOR = '/';
-    private static final char ESCAPED_COMPONENT_SEPARATOR = '-';
-    private static final char OLD_ESCAPED_COMPONENT_SEPARATOR = '_';
+    private static final char ESCAPED_COMPONENT_SEPARATOR = '_';
 
     private static final String TAG_LAUNCH_PARAMS = "launch_params";
 
     private final PersisterQueue mPersisterQueue;
-    private final ActivityTaskSupervisor mSupervisor;
+    private final ActivityStackSupervisor mSupervisor;
 
     /**
      * A function that takes in user ID and returns a folder to store information of that user. Used
@@ -99,12 +100,12 @@ class LaunchParamsPersister {
     private final ArrayMap<String, ArraySet<ComponentName>> mWindowLayoutAffinityMap =
             new ArrayMap<>();
 
-    LaunchParamsPersister(PersisterQueue persisterQueue, ActivityTaskSupervisor supervisor) {
+    LaunchParamsPersister(PersisterQueue persisterQueue, ActivityStackSupervisor supervisor) {
         this(persisterQueue, supervisor, Environment::getDataSystemCeDirectory);
     }
 
     @VisibleForTesting
-    LaunchParamsPersister(PersisterQueue persisterQueue, ActivityTaskSupervisor supervisor,
+    LaunchParamsPersister(PersisterQueue persisterQueue, ActivityStackSupervisor supervisor,
             IntFunction<File> userFolderGetter) {
         mPersisterQueue = persisterQueue;
         mSupervisor = supervisor;
@@ -149,31 +150,7 @@ class LaunchParamsPersister {
                 filesToDelete.add(paramsFile);
                 continue;
             }
-            String paramsFileName = paramsFile.getName();
-            // Migrate all records from old separator to new separator.
-            final int oldSeparatorIndex =
-                    paramsFileName.indexOf(OLD_ESCAPED_COMPONENT_SEPARATOR);
-            if (oldSeparatorIndex != -1) {
-                if (paramsFileName.indexOf(
-                        OLD_ESCAPED_COMPONENT_SEPARATOR, oldSeparatorIndex + 1) != -1) {
-                    // Rare case. We have more than one old escaped component separator probably
-                    // because this app uses underscore in their package name. We can't distinguish
-                    // which one is the real separator so let's skip it.
-                    filesToDelete.add(paramsFile);
-                    continue;
-                }
-                paramsFileName = paramsFileName.replace(
-                        OLD_ESCAPED_COMPONENT_SEPARATOR, ESCAPED_COMPONENT_SEPARATOR);
-                final File newFile = new File(launchParamsFolder, paramsFileName);
-                if (paramsFile.renameTo(newFile)) {
-                    paramsFile = newFile;
-                } else {
-                    // Rare case. For some reason we can't rename the file. Let's drop this record
-                    // instead.
-                    filesToDelete.add(paramsFile);
-                    continue;
-                }
-            }
+            final String paramsFileName = paramsFile.getName();
             final String componentNameString = paramsFileName.substring(
                     0 /* beginIndex */,
                     paramsFileName.length() - LAUNCH_PARAMS_FILE_SUFFIX.length())
@@ -193,9 +170,12 @@ class LaunchParamsPersister {
                 continue;
             }
 
-            try (InputStream in = new FileInputStream(paramsFile)) {
+            BufferedReader reader = null;
+            try {
+                reader = new BufferedReader(new FileReader(paramsFile));
                 final PersistableLaunchParams params = new PersistableLaunchParams();
-                final TypedXmlPullParser parser = Xml.resolvePullParser(in);
+                final XmlPullParser parser = Xml.newPullParser();
+                parser.setInput(reader);
                 int event;
                 while ((event = parser.next()) != XmlPullParser.END_DOCUMENT
                         && event != XmlPullParser.END_TAG) {
@@ -218,6 +198,8 @@ class LaunchParamsPersister {
             } catch (Exception e) {
                 Slog.w(TAG, "Failed to restore launch params for " + name, e);
                 filesToDelete.add(paramsFile);
+            } finally {
+                IoUtils.closeQuietly(reader);
             }
         }
 
@@ -232,9 +214,6 @@ class LaunchParamsPersister {
 
     void saveTask(Task task, DisplayContent display) {
         final ComponentName name = task.realActivity;
-        if (name == null) {
-            return;
-        }
         final int userId = task.mUserId;
         PersistableLaunchParams params;
         ArrayMap<ComponentName, PersistableLaunchParams> map = mLaunchParamsMap.get(userId);
@@ -384,13 +363,11 @@ class LaunchParamsPersister {
 
     private class PackageListObserver implements PackageManagerInternal.PackageListObserver {
         @Override
-        public void onPackageAdded(String packageName, int uid) {}
+        public void onPackageAdded(String packageName, int uid) { }
 
         @Override
         public void onPackageRemoved(String packageName, int uid) {
-            synchronized (mSupervisor.mService.getGlobalLock()) {
-                removeRecordForPackage(packageName);
-            }
+            removeRecordForPackage(packageName);
         }
     }
 
@@ -408,11 +385,12 @@ class LaunchParamsPersister {
             mLaunchParams = launchParams;
         }
 
-        private byte[] saveParamsToXml() {
-            try {
-                final ByteArrayOutputStream os = new ByteArrayOutputStream();
-                final TypedXmlSerializer serializer = Xml.resolveSerializer(os);
+        private StringWriter saveParamsToXml() {
+            final StringWriter writer = new StringWriter();
+            final XmlSerializer serializer = new FastXmlSerializer();
 
+            try {
+                serializer.setOutput(writer);
                 serializer.startDocument(/* encoding */ null, /* standalone */ true);
                 serializer.startTag(null, TAG_LAUNCH_PARAMS);
 
@@ -422,7 +400,7 @@ class LaunchParamsPersister {
                 serializer.endDocument();
                 serializer.flush();
 
-                return os.toByteArray();
+                return writer;
             } catch (IOException e) {
                 return null;
             }
@@ -430,7 +408,7 @@ class LaunchParamsPersister {
 
         @Override
         public void process() {
-            final byte[] data = saveParamsToXml();
+            final StringWriter writer = saveParamsToXml();
 
             final File launchParamFolder = getLaunchParamFolder(mUserId);
             if (!launchParamFolder.isDirectory() && !launchParamFolder.mkdirs()) {
@@ -444,7 +422,7 @@ class LaunchParamsPersister {
             FileOutputStream stream = null;
             try {
                 stream = atomicFile.startWrite();
-                stream.write(data);
+                stream.write(writer.toString().getBytes());
             } catch (Exception e) {
                 Slog.e(TAG, "Failed to write param file for " + mComponentName, e);
                 if (stream != null) {
@@ -510,16 +488,17 @@ class LaunchParamsPersister {
          */
         long mTimestamp;
 
-        void saveToXml(TypedXmlSerializer serializer) throws IOException {
+        void saveToXml(XmlSerializer serializer) throws IOException {
             serializer.attribute(null, ATTR_DISPLAY_UNIQUE_ID, mDisplayUniqueId);
-            serializer.attributeInt(null, ATTR_WINDOWING_MODE, mWindowingMode);
+            serializer.attribute(null, ATTR_WINDOWING_MODE,
+                    Integer.toString(mWindowingMode));
             serializer.attribute(null, ATTR_BOUNDS, mBounds.flattenToString());
             if (mWindowLayoutAffinity != null) {
                 serializer.attribute(null, ATTR_WINDOW_LAYOUT_AFFINITY, mWindowLayoutAffinity);
             }
         }
 
-        void restore(File xmlFile, TypedXmlPullParser parser) {
+        void restore(File xmlFile, XmlPullParser parser) {
             for (int i = 0; i < parser.getAttributeCount(); ++i) {
                 final String attrValue = parser.getAttributeValue(i);
                 switch (parser.getAttributeName(i)) {

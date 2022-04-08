@@ -22,8 +22,6 @@ import static android.os.ParcelFileDescriptor.MODE_READ_ONLY;
 import static android.os.ParcelFileDescriptor.MODE_READ_WRITE;
 import static android.os.ParcelFileDescriptor.MODE_TRUNCATE;
 import static android.os.ParcelFileDescriptor.MODE_WRITE_ONLY;
-import static android.system.OsConstants.EINVAL;
-import static android.system.OsConstants.ENOSYS;
 import static android.system.OsConstants.F_OK;
 import static android.system.OsConstants.O_ACCMODE;
 import static android.system.OsConstants.O_APPEND;
@@ -42,14 +40,9 @@ import static android.system.OsConstants.W_OK;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.TestApi;
-import android.app.AppGlobals;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ContentResolver;
-import android.content.Context;
-import android.content.pm.PackageManager;
-import android.content.pm.ProviderInfo;
 import android.provider.DocumentsContract.Document;
-import android.provider.MediaStore;
 import android.system.ErrnoException;
 import android.system.Os;
 import android.system.StructStat;
@@ -115,9 +108,6 @@ public final class FileUtils {
     private FileUtils() {
     }
 
-    private static final String CAMERA_DIR_LOWER_CASE = "/storage/emulated/" + UserHandle.myUserId()
-            + "/dcim/camera";
-
     /** Regular expression for safe filenames: no spaces or metacharacters.
       *
       * Use a preload holder so that FileUtils can be compile-time initialized.
@@ -128,7 +118,6 @@ public final class FileUtils {
 
     // non-final so it can be toggled by Robolectric's ShadowFileUtils
     private static boolean sEnableCopyOptimizations = true;
-    private static volatile int sMediaProviderAppId = -1;
 
     private static final long COPY_CHECKPOINT_BYTES = 524288;
 
@@ -192,7 +181,7 @@ public final class FileUtils {
      * @return 0 on success, otherwise errno.
      * @hide
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public static int setPermissions(FileDescriptor fd, int mode, int uid, int gid) {
         try {
             Os.fchmod(fd, mode);
@@ -443,19 +432,7 @@ public final class FileUtils {
                 final StructStat st_in = Os.fstat(in);
                 final StructStat st_out = Os.fstat(out);
                 if (S_ISREG(st_in.st_mode) && S_ISREG(st_out.st_mode)) {
-                    try {
-                        return copyInternalSendfile(in, out, count, signal, executor, listener);
-                    } catch (ErrnoException e) {
-                        if (e.errno == EINVAL || e.errno == ENOSYS) {
-                            // sendfile(2) will fail in at least any of the following conditions:
-                            // 1. |in| doesn't support mmap(2)
-                            // 2. |out| was opened with O_APPEND
-                            // We fallback to userspace copy if that fails
-                            return copyInternalUserspace(in, out, count, signal, executor,
-                                    listener);
-                        }
-                        throw e;
-                    }
+                    return copyInternalSendfile(in, out, count, signal, executor, listener);
                 } else if (S_ISFIFO(st_in.st_mode) || S_ISFIFO(st_out.st_mode)) {
                     return copyInternalSplice(in, out, count, signal, executor, listener);
                 }
@@ -687,7 +664,7 @@ public final class FileUtils {
     }
 
     /** {@hide} */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public static void stringToFile(File file, String string) throws IOException {
         stringToFile(file.getAbsolutePath(), string);
     }
@@ -736,7 +713,7 @@ public final class FileUtils {
      *             to its potential for collision.
      * @hide
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     @Deprecated
     public static long checksumCrc32(File file) throws FileNotFoundException, IOException {
         CRC32 checkSummer = new CRC32();
@@ -823,7 +800,7 @@ public final class FileUtils {
      * @return if any files were deleted.
      * @hide
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public static boolean deleteOlderFiles(File dir, int minCount, long minAgeMs) {
         if (minCount < 0 || minAgeMs < 0) {
             throw new IllegalArgumentException("Constraints must be positive or 0");
@@ -932,7 +909,7 @@ public final class FileUtils {
     }
 
     /** {@hide} */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public static boolean deleteContents(File dir) {
         File[] files = dir.listFiles();
         boolean success = true;
@@ -1258,9 +1235,9 @@ public final class FileUtils {
     }
 
     /**
-     * Creates a directory with name {@code name} under an existing directory {@code baseDir} if it
-     * doesn't exist already. Returns a {@code File} object representing the directory if it exists
-     * and {@code null} if not.
+     * Creates a directory with name {@code name} under an existing directory {@code baseDir}.
+     * Returns a {@code File} object representing the directory on success, {@code null} on
+     * failure.
      *
      * @hide
      */
@@ -1270,23 +1247,13 @@ public final class FileUtils {
         return createDir(dir) ? dir : null;
     }
 
-    /**
-     * Ensure the given directory exists, creating it if needed. This method is threadsafe.
-     *
-     * @return false if the directory doesn't exist and couldn't be created
-     *
-     * @hide
-     */
+    /** @hide */
     public static boolean createDir(File dir) {
-        if (dir.mkdir()) {
-            return true;
-        }
-
         if (dir.exists()) {
             return dir.isDirectory();
         }
 
-        return false;
+        return dir.mkdir();
     }
 
     /**
@@ -1339,7 +1306,7 @@ public final class FileUtils {
 
     /** {@hide} */
     public static int translateModeStringToPosix(String mode) {
-        // Quick check for invalid chars
+        // Sanity check for invalid chars
         for (int i = 0; i < mode.length(); i++) {
             switch (mode.charAt(i)) {
                 case 'r':
@@ -1455,42 +1422,6 @@ public final class FileUtils {
         } else {
             throw new IllegalArgumentException("Bad mode: " + mode);
         }
-    }
-
-    /** {@hide} */
-    @VisibleForTesting
-    public static ParcelFileDescriptor convertToModernFd(FileDescriptor fd) {
-        Context context = AppGlobals.getInitialApplication();
-        if (UserHandle.getAppId(Process.myUid()) == getMediaProviderAppId(context)) {
-            // Never convert modern fd for MediaProvider, because this requires
-            // MediaStore#scanFile and can cause infinite loops when MediaProvider scans
-            return null;
-        }
-
-        try (ParcelFileDescriptor dupFd = ParcelFileDescriptor.dup(fd)) {
-            return MediaStore.getOriginalMediaFormatFileDescriptor(context, dupFd);
-        } catch (Exception e) {
-            // Ignore error
-            return null;
-        }
-    }
-
-    private static int getMediaProviderAppId(Context context) {
-        if (sMediaProviderAppId != -1) {
-            return sMediaProviderAppId;
-        }
-
-        PackageManager pm = context.getPackageManager();
-        ProviderInfo provider = context.getPackageManager().resolveContentProvider(
-                MediaStore.AUTHORITY, PackageManager.MATCH_DIRECT_BOOT_AWARE
-                | PackageManager.MATCH_DIRECT_BOOT_UNAWARE
-                | PackageManager.MATCH_SYSTEM_ONLY);
-        if (provider == null) {
-            return -1;
-        }
-
-        sMediaProviderAppId = UserHandle.getAppId(provider.applicationInfo.uid);
-        return sMediaProviderAppId;
     }
 
     /** {@hide} */

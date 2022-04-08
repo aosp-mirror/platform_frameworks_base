@@ -28,7 +28,6 @@ import com.android.internal.colorextraction.types.ExtractionType;
 import com.android.internal.colorextraction.types.Tonal;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.Dumpable;
-import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 
 import java.io.FileDescriptor;
@@ -36,11 +35,12 @@ import java.io.PrintWriter;
 import java.util.Arrays;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 
 /**
  * ColorExtractor aware of wallpaper visibility
  */
-@SysUISingleton
+@Singleton
 public class SysuiColorExtractor extends ColorExtractor implements Dumpable,
         ConfigurationController.ConfigurationListener {
     private static final String TAG = "SysuiColorExtractor";

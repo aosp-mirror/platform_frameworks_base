@@ -14,17 +14,16 @@
 
 package com.android.systemui;
 
-import com.android.systemui.dagger.SysUISingleton;
-
 import java.util.ArrayList;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 
 /**
  * Created by {@link Dependency} on SystemUI startup. Add tasks which need to be executed only
  * after all other dependencies have been created.
  */
-@SysUISingleton
+@Singleton
 public class InitController {
 
     /**

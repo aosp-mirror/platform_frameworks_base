@@ -1,12 +1,3 @@
-package {
-    // See: http://go/android-license-faq
-    // A large-scale-change added 'default_applicable_licenses' to import
-    // all of the 'license_kinds' from "frameworks_base_license"
-    // to get the below license kinds:
-    //   SPDX-license-identifier-Apache-2.0
-    default_applicable_licenses: ["frameworks_base_license"],
-}
-
 android_test {
     name: "PackageManagerPerfTests",
 
@@ -19,7 +10,6 @@ android_test {
         "androidx.test.ext.junit",
         "androidx.annotation_annotation",
         "apct-perftests-utils",
-        "collector-device-lib-platform",
     ],
 
     libs: ["android.test.base"],
@@ -27,9 +17,5 @@ android_test {
     platform_apis: true,
 
     test_suites: ["device-tests"],
-
-    data: [":perfetto_artifacts"],
-
-    certificate: "platform",
 
 }

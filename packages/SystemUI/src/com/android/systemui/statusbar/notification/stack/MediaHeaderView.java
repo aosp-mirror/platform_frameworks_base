@@ -19,6 +19,7 @@ package com.android.systemui.statusbar.notification.stack;
 import android.animation.AnimatorListenerAdapter;
 import android.content.Context;
 import android.util.AttributeSet;
+import android.view.ViewGroup;
 
 import com.android.systemui.statusbar.notification.row.ExpandableView;
 
@@ -41,5 +42,12 @@ public class MediaHeaderView extends ExpandableView {
     @Override
     public void performAddAnimation(long delay, long duration, boolean isHeadsUpAppear) {
         // No animation, it doesn't need it, this would be local
+    }
+
+    public void setContentView(ViewGroup contentView) {
+        addView(contentView);
+        ViewGroup.LayoutParams layoutParams = contentView.getLayoutParams();
+        layoutParams.height = ViewGroup.LayoutParams.WRAP_CONTENT;
+        layoutParams.width = ViewGroup.LayoutParams.MATCH_PARENT;
     }
 }

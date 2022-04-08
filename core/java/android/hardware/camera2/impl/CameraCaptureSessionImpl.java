@@ -27,7 +27,6 @@ import android.hardware.camera2.utils.TaskDrainer;
 import android.hardware.camera2.utils.TaskSingleDrainer;
 import android.os.Binder;
 import android.os.Handler;
-import android.os.SystemClock;
 import android.util.Log;
 import android.view.Surface;
 
@@ -1003,7 +1002,7 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession
                     // begin transition to unconfigured
                     mDeviceImpl.configureStreamsChecked(/*inputConfig*/null, /*outputs*/null,
                             /*operatingMode*/ ICameraDeviceUser.NORMAL_MODE,
-                            /*sessionParams*/ null, SystemClock.uptimeMillis());
+                            /*sessionParams*/ null);
                 } catch (CameraAccessException e) {
                     // OK: do not throw checked exceptions.
                     Log.e(TAG, mIdString + "Exception while unconfiguring outputs: ", e);

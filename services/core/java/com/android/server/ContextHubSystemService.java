@@ -16,13 +16,11 @@
 
 package com.android.server;
 
-import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.content.Context;
 import android.util.Log;
 
 import com.android.internal.util.ConcurrentUtils;
-import com.android.server.location.contexthub.ContextHubService;
+import com.android.server.location.ContextHubService;
 
 import java.util.concurrent.Future;
 
@@ -52,10 +50,5 @@ class ContextHubSystemService extends SystemService {
             mInit = null;
             publishBinderService(Context.CONTEXTHUB_SERVICE, mContextHubService);
         }
-    }
-
-    @Override
-    public void onUserSwitching(@Nullable TargetUser from, @NonNull TargetUser to) {
-        mContextHubService.onUserChanged();
     }
 }

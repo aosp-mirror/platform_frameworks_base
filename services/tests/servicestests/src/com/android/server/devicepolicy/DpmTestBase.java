@@ -16,8 +16,6 @@
 
 package com.android.server.devicepolicy;
 
-import static com.google.common.truth.Truth.assertThat;
-
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -37,28 +35,18 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.os.UserHandle;
-
-import androidx.test.InstrumentationRegistry;
-
-import org.junit.Before;
+import android.test.AndroidTestCase;
 
 import java.io.InputStream;
 import java.util.List;
 
-/**
- * Temporary copy of DpmTestBase using JUnit 4 - once all tests extend it, it should be renamed
- * back to DpmTestBase (with the temporary methods removed.
- *
- */
-public abstract class DpmTestBase {
-
+public abstract class DpmTestBase extends AndroidTestCase {
     public static final String TAG = "DpmTest";
 
-    protected final Context mRealTestContext = InstrumentationRegistry.getTargetContext();
+    protected Context mRealTestContext;
     protected DpmMockContext mMockContext;
     private MockSystemServices mServices;
 
-    // Attributes below are public so they don't need to be prefixed with m
     public ComponentName admin1;
     public ComponentName admin2;
     public ComponentName admin3;
@@ -66,8 +54,12 @@ public abstract class DpmTestBase {
     public ComponentName adminNoPerm;
     public ComponentName delegateCertInstaller;
 
-    @Before
-    public void setFixtures() throws Exception {
+    @Override
+    protected void setUp() throws Exception {
+        super.setUp();
+
+        mRealTestContext = super.getContext();
+
         mServices = new MockSystemServices(mRealTestContext, "test-data");
         mMockContext = new DpmMockContext(mServices, mRealTestContext);
 
@@ -82,7 +74,8 @@ public abstract class DpmTestBase {
         mockSystemPropertiesToReturnDefault();
     }
 
-    protected DpmMockContext getContext() {
+    @Override
+    public DpmMockContext getContext() {
         return mMockContext;
     }
 
@@ -143,15 +136,20 @@ public abstract class DpmTestBase {
         final PackageInfo pi = DpmTestUtils.cloneParcelable(
                 mRealTestContext.getPackageManager().getPackageInfo(
                         mRealTestContext.getPackageName(), 0));
-        assertThat(pi.applicationInfo.flags).isNotEqualTo(0);
+        assertTrue(pi.applicationInfo.flags != 0);
 
         if (ai != null) {
             pi.applicationInfo = ai;
         }
 
-        doReturn(pi).when(mServices.ipackageManager).getPackageInfo(packageName, 0, userId);
+        doReturn(pi).when(mServices.ipackageManager).getPackageInfo(
+                eq(packageName),
+                eq(0),
+                eq(userId));
 
-        doReturn(ai.uid).when(mServices.packageManager).getPackageUidAsUser(packageName, userId);
+        doReturn(ai.uid).when(mServices.packageManager).getPackageUidAsUser(
+                eq(packageName),
+                eq(userId));
     }
 
     protected void markDelegatedCertInstallerAsInstalled() throws Exception {
@@ -232,8 +230,8 @@ public abstract class DpmTestBase {
                 mRealTestContext.getPackageManager().queryBroadcastReceivers(
                         resolveIntent,
                         PackageManager.GET_META_DATA);
-        assertThat(realResolveInfo).isNotNull();
-        assertThat(realResolveInfo).hasSize(1);
+        assertNotNull(realResolveInfo);
+        assertEquals(1, realResolveInfo.size());
 
         // We need to change AI, so set a clone.
         realResolveInfo.set(0, DpmTestUtils.cloneParcelable(realResolveInfo.get(0)));
@@ -253,8 +251,6 @@ public abstract class DpmTestBase {
 
         doReturn(new String[] {admin.getPackageName()}).when(mServices.ipackageManager)
             .getPackagesForUid(eq(packageUid));
-        doReturn(new String[] {admin.getPackageName()}).when(mServices.packageManager)
-                .getPackagesForUid(eq(packageUid));
         // Set up getPackageInfo().
         markPackageAsInstalled(admin.getPackageName(), ai, UserHandle.getUserId(packageUid));
     }

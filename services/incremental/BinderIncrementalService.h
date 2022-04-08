@@ -18,7 +18,6 @@
 
 #include <binder/BinderService.h>
 #include <binder/IServiceManager.h>
-#include <binder/PersistableBundle.h>
 #include <jni.h>
 
 #include "IncrementalService.h"
@@ -40,20 +39,15 @@ public:
     void onInvalidStorage(int mountId);
 
     binder::Status openStorage(const std::string& path, int32_t* _aidl_return) final;
-    binder::Status createStorage(const ::std::string& path,
-                                 const ::android::content::pm::DataLoaderParamsParcel& params,
-                                 int32_t createMode, int32_t* _aidl_return) final;
-    binder::Status createLinkedStorage(const std::string& path, int32_t otherStorageId,
-                                       int32_t createMode, int32_t* _aidl_return) final;
-    binder::Status startLoading(
-            int32_t storageId, const ::android::content::pm::DataLoaderParamsParcel& params,
+    binder::Status createStorage(
+            const ::std::string& path, const ::android::content::pm::DataLoaderParamsParcel& params,
+            int32_t createMode,
             const ::android::sp<::android::content::pm::IDataLoaderStatusListener>& statusListener,
             const ::android::os::incremental::StorageHealthCheckParams& healthCheckParams,
             const ::android::sp<IStorageHealthListener>& healthListener,
-            const ::std::vector<::android::os::incremental::PerUidReadTimeouts>& perUidReadTimeouts,
-            bool* _aidl_return) final;
-    binder::Status onInstallationComplete(int32_t storageId) final;
-
+            int32_t* _aidl_return) final;
+    binder::Status createLinkedStorage(const std::string& path, int32_t otherStorageId,
+                                       int32_t createMode, int32_t* _aidl_return) final;
     binder::Status makeBindMount(int32_t storageId, const std::string& sourcePath,
                                  const std::string& targetFullPath, int32_t bindType,
                                  int32_t* _aidl_return) final;
@@ -64,9 +58,7 @@ public:
     binder::Status makeDirectories(int32_t storageId, const std::string& path,
                                    int32_t* _aidl_return) final;
     binder::Status makeFile(int32_t storageId, const std::string& path,
-                            const IncrementalNewFileParams& params,
-                            const ::std::optional<::std::vector<uint8_t>>& content,
-                            int32_t* _aidl_return) final;
+                            const IncrementalNewFileParams& params, int32_t* _aidl_return) final;
     binder::Status makeFileFromRange(int32_t storageId, const std::string& targetPath,
                                      const std::string& sourcePath, int64_t start, int64_t end,
                                      int32_t* _aidl_return) final;
@@ -74,29 +66,20 @@ public:
                             int32_t destStorageId, const std::string& destPath,
                             int32_t* _aidl_return) final;
     binder::Status unlink(int32_t storageId, const std::string& path, int32_t* _aidl_return) final;
-    binder::Status isFileFullyLoaded(int32_t storageId, const std::string& path,
-                                     int32_t* _aidl_return) final;
-    binder::Status isFullyLoaded(int32_t storageId, int32_t* _aidl_return) final;
-    binder::Status getLoadingProgress(int32_t storageId, float* _aidl_return) final;
+    binder::Status isFileRangeLoaded(int32_t storageId, const std::string& path, int64_t start,
+                                     int64_t end, bool* _aidl_return) final;
     binder::Status getMetadataByPath(int32_t storageId, const std::string& path,
                                      std::vector<uint8_t>* _aidl_return) final;
     binder::Status getMetadataById(int32_t storageId, const std::vector<uint8_t>& id,
                                    std::vector<uint8_t>* _aidl_return) final;
+    binder::Status startLoading(int32_t storageId, bool* _aidl_return) final;
     binder::Status deleteStorage(int32_t storageId) final;
-    binder::Status disallowReadLogs(int32_t storageId) final;
+    binder::Status disableReadLogs(int32_t storageId) final;
     binder::Status configureNativeBinaries(int32_t storageId, const std::string& apkFullPath,
                                            const std::string& libDirRelativePath,
                                            const std::string& abi, bool extractNativeLibs,
                                            bool* _aidl_return) final;
     binder::Status waitForNativeBinariesExtraction(int storageId, bool* _aidl_return) final;
-    binder::Status registerLoadingProgressListener(
-            int32_t storageId,
-            const ::android::sp<::android::os::incremental::IStorageLoadingProgressListener>&
-                    progressListener,
-            bool* _aidl_return) final;
-    binder::Status unregisterLoadingProgressListener(int32_t storageId, bool* _aidl_return) final;
-    binder::Status getMetrics(int32_t storageId,
-                              android::os::PersistableBundle* _aidl_return) final;
 
 private:
     android::incremental::IncrementalService mImpl;

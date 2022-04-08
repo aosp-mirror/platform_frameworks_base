@@ -49,7 +49,7 @@ public class UiAutomationShellWrapper {
         }
         try {
             if (isSet) {
-                am.setActivityController(new NoOpActivityController(), true);
+                am.setActivityController(new DummyActivityController(), true);
             } else {
                 am.setActivityController(null, true);
             }
@@ -80,9 +80,9 @@ public class UiAutomationShellWrapper {
     }
 
     /**
-     * No-op, no interference, activity controller.
+     * Dummy, no interference, activity controller.
      */
-    private class NoOpActivityController extends IActivityController.Stub {
+    private class DummyActivityController extends IActivityController.Stub {
         @Override
         public boolean activityStarting(Intent intent, String pkg) throws RemoteException {
             /* do nothing and let activity proceed normally */

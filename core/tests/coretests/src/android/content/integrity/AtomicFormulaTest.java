@@ -486,7 +486,7 @@ public class AtomicFormulaTest {
         assertThat(boolFormula.isInstallerFormula()).isFalse();
     }
 
-    /** Returns a builder with all fields filled with some placeholder data. */
+    /** Returns a builder with all fields filled with some dummy data. */
     private AppInstallMetadata.Builder getAppInstallMetadataBuilder() {
         return new AppInstallMetadata.Builder()
                 .setPackageName("abc")

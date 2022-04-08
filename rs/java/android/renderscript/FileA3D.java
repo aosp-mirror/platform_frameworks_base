@@ -36,7 +36,6 @@ import java.io.InputStream;
  * index entries for all the objects stored inside it.
  *
  **/
-@Deprecated
 public class FileA3D extends BaseObj {
 
     /**

@@ -55,6 +55,6 @@ public:
             TestUtils::drawUtf8ToCanvas(canvas.get(), text, paint, 0, 100 * (i + 2));
         }
 
-        canvas->finishRecording(container.get());
+        container->setStagingDisplayList(canvas->finishRecording());
     }
 };

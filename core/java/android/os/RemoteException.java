@@ -37,11 +37,6 @@ public class RemoteException extends AndroidException {
         super(message, cause, enableSuppression, writableStackTrace);
     }
 
-    /** @hide */
-    public RemoteException(Throwable cause) {
-        this(cause.getMessage(), cause, true, false);
-    }
-
     /**
      * Rethrow this as an unchecked runtime exception.
      * <p>

@@ -17,8 +17,8 @@
 package com.android.server.display;
 
 import android.annotation.Nullable;
+import android.app.ActivityManager.StackInfo;
 import android.app.ActivityTaskManager;
-import android.app.ActivityTaskManager.RootTaskInfo;
 import android.app.IActivityTaskManager;
 import android.app.TaskStackListener;
 import android.content.Context;
@@ -42,8 +42,8 @@ import android.util.MathUtils;
 import android.util.Slog;
 import android.util.TimeUtils;
 
+import com.android.internal.BrightnessSynchronizer;
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.display.BrightnessSynchronizer;
 import com.android.internal.os.BackgroundThread;
 import com.android.server.EventLogTags;
 
@@ -68,7 +68,6 @@ class AutomaticBrightnessController {
     private static final int MSG_INVALIDATE_SHORT_TERM_MODEL = 3;
     private static final int MSG_UPDATE_FOREGROUND_APP = 4;
     private static final int MSG_UPDATE_FOREGROUND_APP_SYNC = 5;
-    private static final int MSG_RUN_UPDATE = 6;
 
     // Length of the ambient light horizon used to calculate the long term estimate of ambient
     // light.
@@ -191,13 +190,10 @@ class AutomaticBrightnessController {
 
     // When the short term model is invalidated, we don't necessarily reset it (i.e. clear the
     // user's adjustment) immediately, but wait for a drastic enough change in the ambient light.
-    // The anchor determines what were the light levels when the user has set their preference, and
+    // The anchor determines what were the light levels when the user has set her preference, and
     // we use a relative threshold to determine when to revert to the OEM curve.
     private boolean mShortTermModelValid;
     private float mShortTermModelAnchor;
-
-    // Controls High Brightness Mode.
-    private HighBrightnessModeController mHbmController;
 
     // Context-sensitive brightness configurations require keeping track of the foreground app's
     // package name and category, which is done by registering a TaskStackListener to call back to
@@ -212,6 +208,7 @@ class AutomaticBrightnessController {
     private PackageManager mPackageManager;
     private Context mContext;
 
+    private DisplayDeviceConfig mDisplayDeviceConfig;
     private final Injector mInjector;
 
     AutomaticBrightnessController(Callbacks callbacks, Looper looper,
@@ -220,15 +217,14 @@ class AutomaticBrightnessController {
             float dozeScaleFactor, int lightSensorRate, int initialLightSensorRate,
             long brighteningLightDebounceConfig, long darkeningLightDebounceConfig,
             boolean resetAmbientLuxAfterWarmUpConfig, HysteresisLevels ambientBrightnessThresholds,
-            HysteresisLevels screenBrightnessThresholds, LogicalDisplay display, Context context,
-            HighBrightnessModeController hbmController) {
+            HysteresisLevels screenBrightnessThresholds, Context context, DisplayDeviceConfig
+            displayDeviceConfig) {
         this(new Injector(), callbacks, looper, sensorManager, lightSensor, mapper,
                 lightSensorWarmUpTime, brightnessMin, brightnessMax, dozeScaleFactor,
                 lightSensorRate, initialLightSensorRate, brighteningLightDebounceConfig,
                 darkeningLightDebounceConfig, resetAmbientLuxAfterWarmUpConfig,
-                ambientBrightnessThresholds, screenBrightnessThresholds, display, context,
-                hbmController
-        );
+                ambientBrightnessThresholds, screenBrightnessThresholds, context,
+                displayDeviceConfig);
     }
 
     @VisibleForTesting
@@ -238,8 +234,8 @@ class AutomaticBrightnessController {
             float dozeScaleFactor, int lightSensorRate, int initialLightSensorRate,
             long brighteningLightDebounceConfig, long darkeningLightDebounceConfig,
             boolean resetAmbientLuxAfterWarmUpConfig, HysteresisLevels ambientBrightnessThresholds,
-            HysteresisLevels screenBrightnessThresholds, LogicalDisplay display, Context context,
-            HighBrightnessModeController hbmController) {
+            HysteresisLevels screenBrightnessThresholds, Context context, DisplayDeviceConfig
+            displayDeviceConfig) {
         mInjector = injector;
         mContext = context;
         mCallbacks = callbacks;
@@ -261,6 +257,7 @@ class AutomaticBrightnessController {
         mScreenBrightnessThresholds = screenBrightnessThresholds;
         mShortTermModelValid = true;
         mShortTermModelAnchor = -1;
+        mDisplayDeviceConfig = displayDeviceConfig;
         mHandler = new AutomaticBrightnessHandler(looper);
         mAmbientLightRingBuffer =
             new AmbientLightRingBuffer(mNormalLightSensorRate, mAmbientLightHorizon);
@@ -276,7 +273,6 @@ class AutomaticBrightnessController {
         mPendingForegroundAppPackageName = null;
         mForegroundAppCategory = ApplicationInfo.CATEGORY_UNDEFINED;
         mPendingForegroundAppCategory = ApplicationInfo.CATEGORY_UNDEFINED;
-        mHbmController = hbmController;
     }
 
     /**
@@ -317,7 +313,6 @@ class AutomaticBrightnessController {
     public void configure(boolean enable, @Nullable BrightnessConfiguration configuration,
             float brightness, boolean userChangedBrightness, float adjustment,
             boolean userChangedAutoBrightnessAdjustment, int displayPolicy) {
-        mHbmController.setAutoBrightnessEnabled(enable);
         // While dozing, the application processor may be suspended which will prevent us from
         // receiving new information from the light sensor. On some devices, we may be able to
         // switch to a wake-up light sensor instead but for now we will simply disable the sensor
@@ -345,10 +340,6 @@ class AutomaticBrightnessController {
         }
     }
 
-    public void stop() {
-        setLightSensorEnabled(false);
-    }
-
     public boolean hasUserDataPoints() {
         return mBrightnessMapper.hasUserDataPoints();
     }
@@ -359,13 +350,6 @@ class AutomaticBrightnessController {
 
     public BrightnessConfiguration getDefaultConfig() {
         return mBrightnessMapper.getDefaultConfig();
-    }
-
-    /**
-     * Force recalculate of the state of automatic brightness.
-     */
-    public void update() {
-        mHandler.sendEmptyMessage(MSG_RUN_UPDATE);
     }
 
     private boolean setDisplayPolicy(int policy) {
@@ -558,7 +542,6 @@ class AutomaticBrightnessController {
         mAmbientLux = lux;
         mAmbientBrighteningThreshold = mAmbientBrightnessThresholds.getBrighteningThreshold(lux);
         mAmbientDarkeningThreshold = mAmbientBrightnessThresholds.getDarkeningThreshold(lux);
-        mHbmController.onAmbientLuxChange(mAmbientLux);
 
         // If the short term model was invalidated and the change is drastic enough, reset it.
         if (!mShortTermModelValid && mShortTermModelAnchor != -1) {
@@ -746,19 +729,13 @@ class AutomaticBrightnessController {
         float value = mBrightnessMapper.getBrightness(mAmbientLux, mForegroundAppPackageName,
                 mForegroundAppCategory);
         float newScreenAutoBrightness = clampScreenBrightness(value);
-
-        // The min/max range can change for brightness due to HBM. See if the current brightness
-        // value still falls within the current range (which could have changed).
-        final boolean currentBrightnessWithinAllowedRange = BrightnessSynchronizer.floatEquals(
-                mScreenAutoBrightness, clampScreenBrightness(mScreenAutoBrightness));
         // If screenAutoBrightness is set, we should have screen{Brightening,Darkening}Threshold,
         // in which case we ignore the new screen brightness if it doesn't differ enough from the
         // previous one.
         if (!Float.isNaN(mScreenAutoBrightness)
                 && !isManuallySet
                 && newScreenAutoBrightness > mScreenDarkeningThreshold
-                && newScreenAutoBrightness < mScreenBrighteningThreshold
-                && currentBrightnessWithinAllowedRange) {
+                && newScreenAutoBrightness < mScreenBrighteningThreshold) {
             if (mLoggingEnabled) {
                 Slog.d(TAG, "ignoring newScreenAutoBrightness: "
                         + mScreenDarkeningThreshold + " < " + newScreenAutoBrightness
@@ -788,7 +765,7 @@ class AutomaticBrightnessController {
     // Clamps values with float range [0.0-1.0]
     private float clampScreenBrightness(float value) {
         return MathUtils.constrain(value,
-                mHbmController.getCurrentBrightnessMin(), mHbmController.getCurrentBrightnessMax());
+                mScreenBrightnessRangeMinimum, mScreenBrightnessRangeMaximum);
     }
 
     private void prepareBrightnessAdjustmentSample() {
@@ -869,7 +846,7 @@ class AutomaticBrightnessController {
             public void run() {
                 try {
                     // The foreground app is the top activity of the focused tasks stack.
-                    final RootTaskInfo info = mActivityTaskManager.getFocusedRootTaskInfo();
+                    final StackInfo info = mActivityTaskManager.getFocusedStackInfo();
                     if (info == null || info.topActivity == null) {
                         return;
                     }
@@ -917,10 +894,6 @@ class AutomaticBrightnessController {
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
-                case MSG_RUN_UPDATE:
-                    updateAutoBrightness(true /*sendUpdate*/, false /*isManuallySet*/);
-                    break;
-
                 case MSG_UPDATE_AMBIENT_LUX:
                     updateAmbientLux();
                     break;
@@ -1082,7 +1055,7 @@ class AutomaticBrightnessController {
 
         @Override
         public String toString() {
-            StringBuilder buf = new StringBuilder();
+            StringBuffer buf = new StringBuffer();
             buf.append('[');
             for (int i = 0; i < mCount; i++) {
                 final long next = i + 1 < mCount ? getTime(i + 1) : SystemClock.uptimeMillis();

@@ -17,4 +17,4 @@
 
 package android.view;
 
-@JavaOnlyStableParcelable parcelable KeyEvent;
+parcelable KeyEvent;

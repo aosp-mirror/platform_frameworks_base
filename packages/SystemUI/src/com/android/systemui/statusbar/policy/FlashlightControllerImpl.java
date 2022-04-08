@@ -30,21 +30,18 @@ import android.provider.Settings.Secure;
 import android.text.TextUtils;
 import android.util.Log;
 
-import androidx.annotation.NonNull;
-
-import com.android.systemui.dagger.SysUISingleton;
-
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 
 /**
  * Manages the flashlight.
  */
-@SysUISingleton
+@Singleton
 public class FlashlightControllerImpl implements FlashlightController {
 
     private static final String TAG = "FlashlightController";
@@ -126,8 +123,7 @@ public class FlashlightControllerImpl implements FlashlightController {
         return mTorchAvailable;
     }
 
-    @Override
-    public void addCallback(@NonNull FlashlightListener l) {
+    public void addCallback(FlashlightListener l) {
         synchronized (mListeners) {
             if (mCameraId == null) {
                 tryInitCamera();
@@ -139,8 +135,7 @@ public class FlashlightControllerImpl implements FlashlightController {
         }
     }
 
-    @Override
-    public void removeCallback(@NonNull FlashlightListener l) {
+    public void removeCallback(FlashlightListener l) {
         synchronized (mListeners) {
             cleanUpListenersLocked(l);
         }

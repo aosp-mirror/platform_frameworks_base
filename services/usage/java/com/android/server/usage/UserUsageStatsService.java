@@ -115,8 +115,9 @@ class UserUsageStatsService {
         mSystemTimeSnapshot = System.currentTimeMillis();
     }
 
-    void init(final long currentTimeMillis, HashMap<String, Long> installedPackages) {
-        readPackageMappingsLocked(installedPackages);
+    void init(final long currentTimeMillis, HashMap<String, Long> installedPackages,
+            boolean deleteObsoleteData) {
+        readPackageMappingsLocked(installedPackages, deleteObsoleteData);
         mDatabase.init(currentTimeMillis);
         if (mDatabase.wasUpgradePerformed()) {
             mDatabase.prunePackagesDataOnUpgrade(installedPackages);
@@ -180,12 +181,13 @@ class UserUsageStatsService {
         return mDatabase.onPackageRemoved(packageName, timeRemoved);
     }
 
-    private void readPackageMappingsLocked(HashMap<String, Long> installedPackages) {
+    private void readPackageMappingsLocked(HashMap<String, Long> installedPackages,
+            boolean deleteObsoleteData) {
         mDatabase.readMappingsLocked();
         // Package mappings for the system user are updated after 24 hours via a job scheduled by
         // UsageStatsIdleService to ensure restored data is not lost on first boot. Additionally,
         // this makes user service initialization a little quicker on subsequent boots.
-        if (mUserId != UserHandle.USER_SYSTEM) {
+        if (mUserId != UserHandle.USER_SYSTEM && deleteObsoleteData) {
             updatePackageMappingsLocked(installedPackages);
         }
     }
@@ -277,11 +279,8 @@ class UserUsageStatsService {
                     + eventToString(event.mEventType));
         }
 
-        if (event.mEventType != Event.USER_INTERACTION
-                && event.mEventType != Event.APP_COMPONENT_USED) {
-            checkAndGetTimeLocked();
-            convertToSystemTimeLocked(event);
-        }
+        checkAndGetTimeLocked();
+        convertToSystemTimeLocked(event);
 
         if (event.mTimeStamp >= mDailyExpiryDate.getTimeInMillis()) {
             // Need to rollover
@@ -306,9 +305,7 @@ class UserUsageStatsService {
                 // FLUSH_TO_DISK is a private event.
                 && event.mEventType != Event.FLUSH_TO_DISK
                 // DEVICE_SHUTDOWN is added to event list after reboot.
-                && event.mEventType != Event.DEVICE_SHUTDOWN
-                // We aren't interested in every instance of the APP_COMPONENT_USED event.
-                && event.mEventType != Event.APP_COMPONENT_USED) {
+                && event.mEventType != Event.DEVICE_SHUTDOWN) {
             currentDailyStats.addEvent(event);
         }
 
@@ -1006,8 +1003,6 @@ class UserUsageStatsService {
                     formatElapsedTime(usageStats.mTotalTimeVisible, prettyDates));
             pw.printPair("lastTimeVisible",
                     formatDateTime(usageStats.mLastTimeVisible, prettyDates));
-            pw.printPair("lastTimeComponentUsed",
-                    formatDateTime(usageStats.mLastTimeComponentUsed, prettyDates));
             pw.printPair("totalTimeFS",
                     formatElapsedTime(usageStats.mTotalTimeForegroundServiceUsed, prettyDates));
             pw.printPair("lastTimeFS",
@@ -1177,14 +1172,6 @@ class UserUsageStatsService {
                 return "DEVICE_SHUTDOWN";
             case Event.DEVICE_STARTUP:
                 return "DEVICE_STARTUP";
-            case Event.USER_UNLOCKED:
-                return "USER_UNLOCKED";
-            case Event.USER_STOPPED:
-                return "USER_STOPPED";
-            case Event.LOCUS_ID_SET:
-                return "LOCUS_ID_SET";
-            case Event.APP_COMPONENT_USED:
-                return "APP_COMPONENT_USED";
             default:
                 return "UNKNOWN_TYPE_" + eventType;
         }

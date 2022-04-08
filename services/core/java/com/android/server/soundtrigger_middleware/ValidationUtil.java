@@ -62,9 +62,7 @@ public class ValidationUtil {
         }
         validateUuid(model.uuid);
         validateUuid(model.vendorUuid);
-        if (model.dataSize > 0) {
-            Objects.requireNonNull(model.data);
-        }
+        Objects.requireNonNull(model.data);
     }
 
     static void validatePhraseModel(@Nullable PhraseSoundModel model) {

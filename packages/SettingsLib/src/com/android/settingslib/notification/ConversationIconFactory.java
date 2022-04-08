@@ -33,7 +33,6 @@ import android.util.Log;
 
 import com.android.launcher3.icons.BaseIconFactory;
 import com.android.settingslib.R;
-import com.android.settingslib.Utils;
 
 /**
  * Factory for creating normalized conversation icons.
@@ -100,7 +99,7 @@ public class ConversationIconFactory extends BaseIconFactory {
         try {
             final ApplicationInfo appInfo = mPackageManager.getApplicationInfoAsUser(
                     packageName, PackageManager.GET_META_DATA, userId);
-            badge = Utils.getBadgedIcon(mContext, appInfo);
+            badge = mIconDrawableFactory.getBadgedIcon(appInfo, userId);
         } catch (PackageManager.NameNotFoundException e) {
             badge = mPackageManager.getDefaultActivityIcon();
         }

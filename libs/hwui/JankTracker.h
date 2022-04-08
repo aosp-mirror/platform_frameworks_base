@@ -17,7 +17,6 @@
 #define JANKTRACKER_H_
 
 #include "FrameInfo.h"
-#include "FrameMetricsReporter.h"
 #include "ProfileData.h"
 #include "ProfileDataContainer.h"
 #include "renderthread/TimeLord.h"
@@ -57,12 +56,10 @@ public:
     }
 
     FrameInfo* startFrame() { return &mFrames.next(); }
-    void finishFrame(FrameInfo& frame, std::unique_ptr<FrameMetricsReporter>& reporter);
+    void finishFrame(const FrameInfo& frame);
+    void finishGpuDraw(const FrameInfo& frame);
 
-    // Calculates the 'legacy' jank information, i.e. with outdated refresh rate information and
-    // without GPU completion or deadlined information.
-    void calculateLegacyJank(FrameInfo& frame);
-    void dumpStats(int fd) NO_THREAD_SAFETY_ANALYSIS { dumpData(fd, &mDescription, mData.get()); }
+    void dumpStats(int fd) { dumpData(fd, &mDescription, mData.get()); }
     void dumpFrames(int fd);
     void reset();
 
@@ -71,16 +68,14 @@ public:
     RingBuffer<FrameInfo, 120>& frames() { return mFrames; }
 
 private:
-    void recomputeThresholds(int64_t frameInterval);
+    void setFrameInterval(nsecs_t frameIntervalNanos);
+
     static void dumpData(int fd, const ProfileDataDescription* description,
                          const ProfileData* data);
 
-    // Last frame budget for which mThresholds were computed.
-    int64_t mThresholdsFrameBudget GUARDED_BY(mDataMutex);
-    std::array<int64_t, NUM_BUCKETS> mThresholds GUARDED_BY(mDataMutex);
-
-    int64_t mFrameIntervalLegacy;
-    nsecs_t mSwapDeadlineLegacy = -1;
+    std::array<int64_t, NUM_BUCKETS> mThresholds;
+    int64_t mFrameInterval;
+    nsecs_t mSwapDeadline;
     // The amount of time we will erase from the total duration to account
     // for SF vsync offsets with HWC2 blocking dequeueBuffers.
     // (Vsync + mDequeueBlockTolerance) is the point at which we expect
@@ -88,18 +83,13 @@ private:
     // point in time by comparing to (IssueDrawCommandsStart + DequeueDuration)
     // This is only used if we are in pipelined mode and are using HWC2,
     // otherwise it's 0.
-    nsecs_t mDequeueTimeForgivenessLegacy = 0;
-
-    nsecs_t mNextFrameStartUnstuffed GUARDED_BY(mDataMutex) = -1;
-    ProfileDataContainer mData GUARDED_BY(mDataMutex);
-    ProfileDataContainer* mGlobalData GUARDED_BY(mDataMutex);
+    nsecs_t mDequeueTimeForgiveness = 0;
+    ProfileDataContainer mData;
+    ProfileDataContainer* mGlobalData;
     ProfileDataDescription mDescription;
 
     // Ring buffer large enough for 2 seconds worth of frames
     RingBuffer<FrameInfo, 120> mFrames;
-
-    // Mutex to protect acccess to mData and mGlobalData obtained from mGlobalData->getDataMutex
-    std::mutex& mDataMutex;
 };
 
 } /* namespace uirenderer */

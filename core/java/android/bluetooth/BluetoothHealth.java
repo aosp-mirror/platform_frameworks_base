@@ -16,10 +16,6 @@
 
 package android.bluetooth;
 
-import android.annotation.RequiresPermission;
-import android.annotation.SuppressLint;
-import android.bluetooth.annotations.RequiresBluetoothConnectPermission;
-import android.bluetooth.annotations.RequiresLegacyBluetoothPermission;
 import android.os.ParcelFileDescriptor;
 import android.util.Log;
 
@@ -115,6 +111,8 @@ public final class BluetoothHealth implements BluetoothProfile {
      * which will act as the {@link #SOURCE_ROLE}. This is an asynchronous call and so
      * the callback is used to notify success or failure if the function returns true.
      *
+     * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
+     *
      * @param name The friendly name associated with the application or configuration.
      * @param dataType The dataType of the Source role of Health Profile to which the sink wants to
      * connect to.
@@ -128,10 +126,6 @@ public final class BluetoothHealth implements BluetoothProfile {
      * {@link BluetoothDevice#createL2capChannel(int)}
      */
     @Deprecated
-    @RequiresLegacyBluetoothPermission
-    @RequiresBluetoothConnectPermission
-    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
-    @SuppressLint("AndroidFrameworkRequiresPermission")
     public boolean registerSinkAppConfiguration(String name, int dataType,
             BluetoothHealthCallback callback) {
         Log.e(TAG, "registerSinkAppConfiguration(): BluetoothHealth is deprecated");
@@ -142,6 +136,8 @@ public final class BluetoothHealth implements BluetoothProfile {
      * Unregister an application configuration that has been registered using
      * {@link #registerSinkAppConfiguration}
      *
+     * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
+     *
      * @param config The health app configuration
      * @return Success or failure.
      *
@@ -151,10 +147,6 @@ public final class BluetoothHealth implements BluetoothProfile {
      * {@link BluetoothDevice#createL2capChannel(int)}
      */
     @Deprecated
-    @RequiresLegacyBluetoothPermission
-    @RequiresBluetoothConnectPermission
-    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
-    @SuppressLint("AndroidFrameworkRequiresPermission")
     public boolean unregisterAppConfiguration(BluetoothHealthAppConfiguration config) {
         Log.e(TAG, "unregisterAppConfiguration(): BluetoothHealth is deprecated");
         return false;
@@ -164,6 +156,8 @@ public final class BluetoothHealth implements BluetoothProfile {
      * Connect to a health device which has the {@link #SOURCE_ROLE}.
      * This is an asynchronous call. If this function returns true, the callback
      * associated with the application configuration will be called.
+     *
+     * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
      *
      * @param device The remote Bluetooth device.
      * @param config The application configuration which has been registered using {@link
@@ -176,10 +170,6 @@ public final class BluetoothHealth implements BluetoothProfile {
      * {@link BluetoothDevice#createL2capChannel(int)}
      */
     @Deprecated
-    @RequiresLegacyBluetoothPermission
-    @RequiresBluetoothConnectPermission
-    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
-    @SuppressLint("AndroidFrameworkRequiresPermission")
     public boolean connectChannelToSource(BluetoothDevice device,
             BluetoothHealthAppConfiguration config) {
         Log.e(TAG, "connectChannelToSource(): BluetoothHealth is deprecated");
@@ -190,6 +180,8 @@ public final class BluetoothHealth implements BluetoothProfile {
      * Disconnect a connected health channel.
      * This is an asynchronous call. If this function returns true, the callback
      * associated with the application configuration will be called.
+     *
+     * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
      *
      * @param device The remote Bluetooth device.
      * @param config The application configuration which has been registered using {@link
@@ -203,10 +195,6 @@ public final class BluetoothHealth implements BluetoothProfile {
      * {@link BluetoothDevice#createL2capChannel(int)}
      */
     @Deprecated
-    @RequiresLegacyBluetoothPermission
-    @RequiresBluetoothConnectPermission
-    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
-    @SuppressLint("AndroidFrameworkRequiresPermission")
     public boolean disconnectChannel(BluetoothDevice device,
             BluetoothHealthAppConfiguration config, int channelId) {
         Log.e(TAG, "disconnectChannel(): BluetoothHealth is deprecated");
@@ -216,6 +204,8 @@ public final class BluetoothHealth implements BluetoothProfile {
     /**
      * Get the file descriptor of the main channel associated with the remote device
      * and application configuration.
+     *
+     * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
      *
      * <p> Its the responsibility of the caller to close the ParcelFileDescriptor
      * when done.
@@ -230,10 +220,6 @@ public final class BluetoothHealth implements BluetoothProfile {
      * {@link BluetoothDevice#createL2capChannel(int)}
      */
     @Deprecated
-    @RequiresLegacyBluetoothPermission
-    @RequiresBluetoothConnectPermission
-    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
-    @SuppressLint("AndroidFrameworkRequiresPermission")
     public ParcelFileDescriptor getMainChannelFd(BluetoothDevice device,
             BluetoothHealthAppConfiguration config) {
         Log.e(TAG, "getMainChannelFd(): BluetoothHealth is deprecated");
@@ -242,6 +228,8 @@ public final class BluetoothHealth implements BluetoothProfile {
 
     /**
      * Get the current connection state of the profile.
+     *
+     * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
      *
      * This is not specific to any application configuration but represents the connection
      * state of the local Bluetooth adapter with the remote device. This can be used
@@ -253,10 +241,6 @@ public final class BluetoothHealth implements BluetoothProfile {
      * #STATE_CONNECTING}, {@link #STATE_DISCONNECTED}, {@link #STATE_DISCONNECTING}
      */
     @Override
-    @RequiresLegacyBluetoothPermission
-    @RequiresBluetoothConnectPermission
-    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
-    @SuppressLint("AndroidFrameworkRequiresPermission")
     public int getConnectionState(BluetoothDevice device) {
         Log.e(TAG, "getConnectionState(): BluetoothHealth is deprecated");
         return STATE_DISCONNECTED;
@@ -267,6 +251,8 @@ public final class BluetoothHealth implements BluetoothProfile {
      *
      * <p> Return the set of devices which are in state {@link #STATE_CONNECTED}
      *
+     * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
+     *
      * This is not specific to any application configuration but represents the connection
      * state of the local Bluetooth adapter for this profile. This can be used
      * by applications like status bar which would just like to know the state of the
@@ -275,10 +261,6 @@ public final class BluetoothHealth implements BluetoothProfile {
      * @return List of devices. The list will be empty on error.
      */
     @Override
-    @RequiresLegacyBluetoothPermission
-    @RequiresBluetoothConnectPermission
-    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
-    @SuppressLint("AndroidFrameworkRequiresPermission")
     public List<BluetoothDevice> getConnectedDevices() {
         Log.e(TAG, "getConnectedDevices(): BluetoothHealth is deprecated");
         return new ArrayList<>();
@@ -291,7 +273,8 @@ public final class BluetoothHealth implements BluetoothProfile {
      * <p> If none of the devices match any of the given states,
      * an empty list will be returned.
      *
-     * <p>This is not specific to any application configuration but represents the connection
+     * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
+     * This is not specific to any application configuration but represents the connection
      * state of the local Bluetooth adapter for this profile. This can be used
      * by applications like status bar which would just like to know the state of the
      * local adapter.
@@ -301,10 +284,6 @@ public final class BluetoothHealth implements BluetoothProfile {
      * @return List of devices. The list will be empty on error.
      */
     @Override
-    @RequiresLegacyBluetoothPermission
-    @RequiresBluetoothConnectPermission
-    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
-    @SuppressLint("AndroidFrameworkRequiresPermission")
     public List<BluetoothDevice> getDevicesMatchingConnectionStates(int[] states) {
         Log.e(TAG, "getDevicesMatchingConnectionStates(): BluetoothHealth is deprecated");
         return new ArrayList<>();

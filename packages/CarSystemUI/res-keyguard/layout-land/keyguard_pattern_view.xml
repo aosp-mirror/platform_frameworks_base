@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+**
+** Copyright 2018, The Android Open Source Project
+**
+** Licensed under the Apache License, Version 2.0 (the "License")
+** you may not use this file except in compliance with the License.
+** You may obtain a copy of the License at
+**
+**     http://www.apache.org/licenses/LICENSE-2.0
+**
+** Unless required by applicable law or agreed to in writing, software
+** distributed under the License is distributed on an "AS IS" BASIS,
+** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+** See the License for the specific language governing permissions and
+** limitations under the License.
+*/
+-->
+
+<!-- Car customizations
+     - Added title "Enter your Pattern" at the top
+     - Hid the emergency call at the bottom
+-->
+
+<com.android.keyguard.KeyguardPatternView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/keyguard_pattern_view"
+    android:orientation="horizontal"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingHorizontal="@*android:dimen/car_margin">
+
+    <FrameLayout
+        android:layout_height="match_parent"
+        android:layout_width="0dp"
+        android:layout_weight="1">
+
+        <com.android.internal.widget.LockPatternView
+            android:id="@+id/lockPatternView"
+            android:layout_width="@dimen/keyguard_pattern_dimension"
+            android:layout_height="@dimen/keyguard_pattern_dimension"
+            android:layout_gravity="center"/>
+    </FrameLayout>
+
+    <LinearLayout
+        android:id="@+id/container"
+        android:layout_height="match_parent"
+        android:layout_width="0dp"
+        android:layout_weight="1"
+        android:orientation="vertical"
+        android:gravity="center_vertical">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="@*android:dimen/car_padding_2"
+            android:gravity="center"
+            android:textColor="@android:color/white"
+            android:textSize="@*android:dimen/car_body1_size"
+            android:text="@string/keyguard_enter_your_pattern" />
+
+        <include layout="@layout/keyguard_message_area" />
+
+        <Button
+            android:id="@+id/cancel_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            style="@style/KeyguardButton"
+            android:text="@string/cancel"/>
+
+        <include layout="@layout/keyguard_eca"
+            android:id="@+id/keyguard_selector_fade_container"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_gravity="bottom|center_horizontal"
+            android:gravity="center_horizontal"
+            android:visibility="gone" />
+    </LinearLayout>
+
+</com.android.keyguard.KeyguardPatternView>

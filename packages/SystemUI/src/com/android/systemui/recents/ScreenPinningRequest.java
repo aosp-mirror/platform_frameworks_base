@@ -17,7 +17,6 @@
 package com.android.systemui.recents;
 
 import static com.android.systemui.util.leak.RotationUtils.ROTATION_LANDSCAPE;
-import static com.android.systemui.util.leak.RotationUtils.ROTATION_NONE;
 import static com.android.systemui.util.leak.RotationUtils.ROTATION_SEASCAPE;
 
 import android.animation.ArgbEvaluator;
@@ -28,7 +27,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.res.Configuration;
 import android.graphics.PixelFormat;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Binder;
@@ -53,8 +51,8 @@ import com.android.systemui.R;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.shared.system.QuickStepContract;
 import com.android.systemui.shared.system.WindowManagerWrapper;
-import com.android.systemui.navigationbar.NavigationBarView;
-import com.android.systemui.navigationbar.NavigationModeController;
+import com.android.systemui.statusbar.phone.NavigationBarView;
+import com.android.systemui.statusbar.phone.NavigationModeController;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.util.leak.RotationUtils;
 
@@ -130,7 +128,7 @@ public class ScreenPinningRequest implements View.OnClickListener,
         }
     }
 
-    protected WindowManager.LayoutParams getWindowLayoutParams() {
+    private WindowManager.LayoutParams getWindowLayoutParams() {
         final WindowManager.LayoutParams lp = new WindowManager.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.MATCH_PARENT,
@@ -188,7 +186,7 @@ public class ScreenPinningRequest implements View.OnClickListener,
             DisplayMetrics metrics = new DisplayMetrics();
             mWindowManager.getDefaultDisplay().getMetrics(metrics);
             float density = metrics.density;
-            int rotation = getRotation(mContext);
+            int rotation = RotationUtils.getRotation(mContext);
 
             inflateView(rotation);
             int bgColor = mContext.getColor(
@@ -344,23 +342,14 @@ public class ScreenPinningRequest implements View.OnClickListener,
 
         protected void onConfigurationChanged() {
             removeAllViews();
-            inflateView(getRotation(mContext));
-        }
-
-        private int getRotation(Context context) {
-            Configuration config = context.getResources().getConfiguration();
-            if (config.smallestScreenWidthDp >= 600) {
-                return ROTATION_NONE;
-            }
-
-            return RotationUtils.getRotation(context);
+            inflateView(RotationUtils.getRotation(mContext));
         }
 
         private final Runnable mUpdateLayoutRunnable = new Runnable() {
             @Override
             public void run() {
                 if (mLayout != null && mLayout.getParent() != null) {
-                    mLayout.setLayoutParams(getRequestLayoutParams(getRotation(mContext)));
+                    mLayout.setLayoutParams(getRequestLayoutParams(RotationUtils.getRotation(mContext)));
                 }
             }
         };

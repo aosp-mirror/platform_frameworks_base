@@ -206,12 +206,11 @@ public final class Rating implements Parcelable {
                 Log.e(TAG, "Invalid rating style (" + starRatingStyle + ") for a star rating");
                 return null;
         }
-        if (starRating >= 0.0f && starRating <= maxRating) {
-            return new Rating(starRatingStyle, starRating);
-        } else {
+        if ((starRating < 0.0f) || (starRating > maxRating)) {
             Log.e(TAG, "Trying to set out of range star-based rating");
             return null;
         }
+        return new Rating(starRatingStyle, starRating);
     }
 
     /**
@@ -222,11 +221,11 @@ public final class Rating implements Parcelable {
      * @return null if the rating is out of range, a new Rating instance otherwise.
      */
     public static Rating newPercentageRating(float percent) {
-        if (percent >= 0.0f && percent <= 100.0f) {
-            return new Rating(RATING_PERCENTAGE, percent);
-        } else {
+        if ((percent < 0.0f) || (percent > 100.0f)) {
             Log.e(TAG, "Invalid percentage-based rating value");
             return null;
+        } else {
+            return new Rating(RATING_PERCENTAGE, percent);
         }
     }
 

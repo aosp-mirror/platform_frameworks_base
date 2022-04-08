@@ -16,6 +16,7 @@
 
 package com.android.server.connectivity;
 
+import static android.net.NetworkCapabilities.MAX_TRANSPORT;
 import static android.net.NetworkCapabilities.TRANSPORT_BLUETOOTH;
 import static android.net.NetworkCapabilities.TRANSPORT_CELLULAR;
 import static android.net.NetworkCapabilities.TRANSPORT_ETHERNET;
@@ -24,14 +25,15 @@ import static android.net.NetworkCapabilities.TRANSPORT_VPN;
 import static android.net.NetworkCapabilities.TRANSPORT_WIFI;
 import static android.net.NetworkCapabilities.TRANSPORT_WIFI_AWARE;
 
+import android.net.ConnectivityManager;
 import android.net.ConnectivityMetricsEvent;
 import android.net.metrics.ApfProgramEvent;
 import android.net.metrics.ApfStats;
-import android.net.metrics.ConnectStats;
 import android.net.metrics.DefaultNetworkEvent;
 import android.net.metrics.DhcpClientEvent;
 import android.net.metrics.DhcpErrorEvent;
 import android.net.metrics.DnsEvent;
+import android.net.metrics.ConnectStats;
 import android.net.metrics.IpManagerEvent;
 import android.net.metrics.IpReachabilityEvent;
 import android.net.metrics.NetworkEvent;
@@ -39,13 +41,12 @@ import android.net.metrics.RaEvent;
 import android.net.metrics.ValidationProbeEvent;
 import android.net.metrics.WakeupStats;
 import android.os.Parcelable;
+import android.util.SparseArray;
 import android.util.SparseIntArray;
-
 import com.android.server.connectivity.metrics.nano.IpConnectivityLogClass;
 import com.android.server.connectivity.metrics.nano.IpConnectivityLogClass.IpConnectivityEvent;
 import com.android.server.connectivity.metrics.nano.IpConnectivityLogClass.IpConnectivityLog;
 import com.android.server.connectivity.metrics.nano.IpConnectivityLogClass.Pair;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -360,22 +361,29 @@ final public class IpConnectivityEventBuilder {
                 return IpConnectivityLogClass.UNKNOWN;
             case 1:
                 int t = Long.numberOfTrailingZeros(transports);
-                return TRANSPORT_LINKLAYER_MAP.get(t, IpConnectivityLogClass.UNKNOWN);
+                return transportToLinkLayer(t);
             default:
                 return IpConnectivityLogClass.MULTIPLE;
         }
     }
 
-    private static final SparseIntArray TRANSPORT_LINKLAYER_MAP = new SparseIntArray();
-    static {
-        TRANSPORT_LINKLAYER_MAP.append(TRANSPORT_CELLULAR, IpConnectivityLogClass.CELLULAR);
-        TRANSPORT_LINKLAYER_MAP.append(TRANSPORT_WIFI, IpConnectivityLogClass.WIFI);
-        TRANSPORT_LINKLAYER_MAP.append(TRANSPORT_BLUETOOTH, IpConnectivityLogClass.BLUETOOTH);
-        TRANSPORT_LINKLAYER_MAP.append(TRANSPORT_ETHERNET, IpConnectivityLogClass.ETHERNET);
-        TRANSPORT_LINKLAYER_MAP.append(TRANSPORT_VPN, IpConnectivityLogClass.UNKNOWN);
-        TRANSPORT_LINKLAYER_MAP.append(TRANSPORT_WIFI_AWARE, IpConnectivityLogClass.WIFI_NAN);
-        TRANSPORT_LINKLAYER_MAP.append(TRANSPORT_LOWPAN, IpConnectivityLogClass.LOWPAN);
+    private static int transportToLinkLayer(int transport) {
+        if (0 <= transport && transport < TRANSPORT_LINKLAYER_MAP.length) {
+            return TRANSPORT_LINKLAYER_MAP[transport];
+        }
+        return IpConnectivityLogClass.UNKNOWN;
     }
+
+    private static final int[] TRANSPORT_LINKLAYER_MAP = new int[MAX_TRANSPORT + 1];
+    static {
+        TRANSPORT_LINKLAYER_MAP[TRANSPORT_CELLULAR]   = IpConnectivityLogClass.CELLULAR;
+        TRANSPORT_LINKLAYER_MAP[TRANSPORT_WIFI]       = IpConnectivityLogClass.WIFI;
+        TRANSPORT_LINKLAYER_MAP[TRANSPORT_BLUETOOTH]  = IpConnectivityLogClass.BLUETOOTH;
+        TRANSPORT_LINKLAYER_MAP[TRANSPORT_ETHERNET]   = IpConnectivityLogClass.ETHERNET;
+        TRANSPORT_LINKLAYER_MAP[TRANSPORT_VPN]        = IpConnectivityLogClass.UNKNOWN;
+        TRANSPORT_LINKLAYER_MAP[TRANSPORT_WIFI_AWARE] = IpConnectivityLogClass.WIFI_NAN;
+        TRANSPORT_LINKLAYER_MAP[TRANSPORT_LOWPAN]     = IpConnectivityLogClass.LOWPAN;
+    };
 
     private static int ifnameToLinkLayer(String ifname) {
         // Do not try to catch all interface names with regexes, instead only catch patterns that

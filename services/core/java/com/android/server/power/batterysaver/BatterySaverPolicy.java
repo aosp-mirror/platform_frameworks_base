@@ -17,8 +17,12 @@ package com.android.server.power.batterysaver;
 
 import android.annotation.IntDef;
 import android.app.UiModeManager;
+import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.res.Configuration;
 import android.database.ContentObserver;
 import android.net.Uri;
 import android.os.BatterySaverPolicyConfig;
@@ -26,11 +30,9 @@ import android.os.Handler;
 import android.os.PowerManager;
 import android.os.PowerManager.ServiceType;
 import android.os.PowerSaveState;
-import android.provider.DeviceConfig;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.ArrayMap;
-import android.util.IndentingPrintWriter;
 import android.util.KeyValueListParser;
 import android.util.Slog;
 import android.view.accessibility.AccessibilityManager;
@@ -49,7 +51,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
 
 /**
  * Class to decide whether to turn on battery saver mode for specific services.
@@ -59,103 +60,82 @@ import java.util.Set;
  *
  * Test: atest com.android.server.power.batterysaver.BatterySaverPolicyTest
  */
-public class BatterySaverPolicy extends ContentObserver implements
-        DeviceConfig.OnPropertiesChangedListener {
+public class BatterySaverPolicy extends ContentObserver {
     private static final String TAG = "BatterySaverPolicy";
 
     static final boolean DEBUG = false; // DO NOT SUBMIT WITH TRUE.
 
-    @VisibleForTesting
-    static final String KEY_LOCATION_MODE = "location_mode";
-    @VisibleForTesting
-    static final String KEY_DISABLE_VIBRATION = "disable_vibration";
-    @VisibleForTesting
-    static final String KEY_DISABLE_ANIMATION = "disable_animation";
-    @VisibleForTesting
-    static final String KEY_SOUNDTRIGGER_MODE = "soundtrigger_mode";
+    private static final String KEY_GPS_MODE = "gps_mode";
+    private static final String KEY_VIBRATION_DISABLED = "vibration_disabled";
+    private static final String KEY_ANIMATION_DISABLED = "animation_disabled";
+    private static final String KEY_SOUNDTRIGGER_DISABLED = "soundtrigger_disabled";
 
     /**
-     * Turn on the network firewall when Battery Saver is turned on.
-     * If set to false, the firewall WILL NOT be turned on when Battery Saver is turned on.
-     * If set to true, the firewall WILL be turned on when Battery Saver is turned on.
+     * Disable turning on the network firewall when Battery Saver is turned on.
+     * If set to false, the firewall WILL be turned on when Battery Saver is turned on.
+     * If set to true, the firewall WILL NOT be turned on when Battery Saver is turned on.
      */
-    @VisibleForTesting
-    static final String KEY_ENABLE_FIREWALL = "enable_firewall";
+    private static final String KEY_ACTIVATE_FIREWALL_DISABLED = "firewall_disabled";
 
     /**
-     * Turn on the special low power screen brightness dimming when Battery Saver is
+     * Disable turning on the special low power screen brightness dimming when Battery Saver is
      * turned on.
-     * If set to false, the screen brightness dimming WILL NOT be turned on by Battery Saver.
-     * If set to true, the screen brightness WILL be turned on by Battery Saver.
+     * If set to false, the screen brightness dimming WILL be turned on by Battery Saver.
+     * If set to true, the screen brightness WILL NOT be turned on by Battery Saver.
      */
-    @VisibleForTesting
-    static final String KEY_ENABLE_BRIGHTNESS_ADJUSTMENT = "enable_brightness_adjustment";
+    private static final String KEY_ADJUST_BRIGHTNESS_DISABLED = "adjust_brightness_disabled";
 
     /**
-     * Turn on Data Saver when Battery Saver is turned on.
-     * If set to false, Data Saver WILL NOT be turned on when Battery Saver is turned on.
-     * If set to true, Data Saver WILL be turned on when Battery Saver is turned on.
+     * Disable turning on Data Saver when Battery Saver is turned on.
+     * If set to false, Data Saver WILL be turned on when Battery Saver is turned on.
+     * If set to true, Data Saver WILL NOT be turned on when Battery Saver is turned on.
      */
-    @VisibleForTesting
-    static final String KEY_ENABLE_DATASAVER = "enable_datasaver";
+    private static final String KEY_ACTIVATE_DATASAVER_DISABLED = "datasaver_disabled";
 
     /**
      * {@code true} if the Policy should advertise to the rest of the system that battery saver
      * is enabled. This advertising could cause other system components to change their
      * behavior. This will not affect other policy flags and what they change.
      */
-    @VisibleForTesting
-    static final String KEY_ADVERTISE_IS_ENABLED = "advertise_is_enabled";
+    private static final String KEY_ADVERTISE_IS_ENABLED = "advertise_is_enabled";
 
-    @VisibleForTesting
-    static final String KEY_DISABLE_LAUNCH_BOOST = "disable_launch_boost";
-    @VisibleForTesting
-    static final String KEY_ADJUST_BRIGHTNESS_FACTOR = "adjust_brightness_factor";
-    @VisibleForTesting
-    static final String KEY_DEFER_FULL_BACKUP = "defer_full_backup";
-    @VisibleForTesting
-    static final String KEY_DEFER_KEYVALUE_BACKUP = "defer_keyvalue_backup";
-    @VisibleForTesting
-    static final String KEY_FORCE_ALL_APPS_STANDBY = "force_all_apps_standby";
-    @VisibleForTesting
-    static final String KEY_FORCE_BACKGROUND_CHECK = "force_background_check";
-    @VisibleForTesting
-    static final String KEY_DISABLE_OPTIONAL_SENSORS = "disable_optional_sensors";
-    @VisibleForTesting
-    static final String KEY_DISABLE_AOD = "disable_aod";
+    private static final String KEY_LAUNCH_BOOST_DISABLED = "launch_boost_disabled";
+    private static final String KEY_ADJUST_BRIGHTNESS_FACTOR = "adjust_brightness_factor";
+    private static final String KEY_FULLBACKUP_DEFERRED = "fullbackup_deferred";
+    private static final String KEY_KEYVALUE_DEFERRED = "keyvaluebackup_deferred";
+    private static final String KEY_FORCE_ALL_APPS_STANDBY = "force_all_apps_standby";
+    private static final String KEY_FORCE_BACKGROUND_CHECK = "force_background_check";
+    private static final String KEY_OPTIONAL_SENSORS_DISABLED = "optional_sensors_disabled";
+    private static final String KEY_AOD_DISABLED = "aod_disabled";
     // Go into deep Doze as soon as the screen turns off.
-    @VisibleForTesting
-    static final String KEY_ENABLE_QUICK_DOZE = "enable_quick_doze";
-    @VisibleForTesting
-    static final String KEY_ENABLE_NIGHT_MODE = "enable_night_mode";
+    private static final String KEY_QUICK_DOZE_ENABLED = "quick_doze_enabled";
+    private static final String KEY_ENABLE_NIGHT_MODE = "enable_night_mode";
 
     private static final String KEY_CPU_FREQ_INTERACTIVE = "cpufreq-i";
     private static final String KEY_CPU_FREQ_NONINTERACTIVE = "cpufreq-n";
-
-    private static final String KEY_SUFFIX_ADAPTIVE = "_adaptive";
 
     @VisibleForTesting
     static final Policy OFF_POLICY = new Policy(
             1f,    /* adjustBrightnessFactor */
             false, /* advertiseIsEnabled */
-            new CpuFrequencies(), /* cpuFrequenciesForInteractive */
-            new CpuFrequencies(), /* cpuFrequenciesForNoninteractive */
             false, /* deferFullBackup */
             false, /* deferKeyValueBackup */
             false, /* disableAnimation */
             false, /* disableAod */
             false, /* disableLaunchBoost */
             false, /* disableOptionalSensors */
+            false, /* disableSoundTrigger */
             false, /* disableVibration */
             false, /* enableAdjustBrightness */
             false, /* enableDataSaver */
             false, /* enableFireWall */
             false, /* enableNightMode */
             false, /* enableQuickDoze */
+            new ArrayMap<>(), /* filesForInteractive */
+            new ArrayMap<>(), /* filesForNoninteractive */
             false, /* forceAllAppsStandby */
             false, /* forceBackgroundCheck */
-            PowerManager.LOCATION_MODE_NO_CHANGE, /* locationMode */
-            PowerManager.SOUND_TRIGGER_MODE_ALL_ENABLED /* soundTriggerMode */
+            PowerManager.LOCATION_MODE_NO_CHANGE /* locationMode */
     );
 
     private static final Policy DEFAULT_ADAPTIVE_POLICY = OFF_POLICY;
@@ -163,24 +143,24 @@ public class BatterySaverPolicy extends ContentObserver implements
     private static final Policy DEFAULT_FULL_POLICY = new Policy(
             0.5f,  /* adjustBrightnessFactor */
             true,  /* advertiseIsEnabled */
-            new CpuFrequencies(), /* cpuFrequenciesForInteractive */
-            new CpuFrequencies(), /* cpuFrequenciesForNoninteractive */
             true,  /* deferFullBackup */
             true,  /* deferKeyValueBackup */
             false, /* disableAnimation */
             true,  /* disableAod */
             true,  /* disableLaunchBoost */
             true,  /* disableOptionalSensors */
+            true,  /* disableSoundTrigger */
             true,  /* disableVibration */
             false, /* enableAdjustBrightness */
             false, /* enableDataSaver */
             true,  /* enableFirewall */
             true, /* enableNightMode */
             true, /* enableQuickDoze */
+            new ArrayMap<>(), /* filesForInteractive */
+            new ArrayMap<>(), /* filesForNoninteractive */
             true, /* forceAllAppsStandby */
             true, /* forceBackgroundCheck */
-            PowerManager.LOCATION_MODE_FOREGROUND_ONLY, /* locationMode */
-            PowerManager.SOUND_TRIGGER_MODE_CRITICAL_ONLY /* soundTriggerMode */
+            PowerManager.LOCATION_MODE_ALL_DISABLED_WHEN_SCREEN_OFF /* locationMode */
     );
 
     private final Object mLock;
@@ -196,7 +176,10 @@ public class BatterySaverPolicy extends ContentObserver implements
     private String mDeviceSpecificSettingsSource; // For dump() only.
 
     @GuardedBy("mLock")
-    private DeviceConfig.Properties mLastDeviceConfigProperties;
+    private String mAdaptiveSettings;
+
+    @GuardedBy("mLock")
+    private String mAdaptiveDeviceSpecificSettings;
 
     /**
      * A short string describing which battery saver is now enabled, which we dump in the eventlog.
@@ -207,12 +190,12 @@ public class BatterySaverPolicy extends ContentObserver implements
     /**
      * Whether accessibility is currently enabled or not.
      */
-    @VisibleForTesting
-    final PolicyBoolean mAccessibilityEnabled = new PolicyBoolean("accessibility");
+    @GuardedBy("mLock")
+    private boolean mAccessibilityEnabled;
 
-    /** Whether the phone has set automotive projection or not. */
-    @VisibleForTesting
-    final PolicyBoolean mAutomotiveProjectionActive = new PolicyBoolean("automotiveProjection");
+    /** Whether the phone is projecting in car mode or not. */
+    @GuardedBy("mLock")
+    private boolean mCarModeEnabled;
 
     /** The current default adaptive policy. */
     @GuardedBy("mLock")
@@ -221,10 +204,6 @@ public class BatterySaverPolicy extends ContentObserver implements
     /** The policy that will be used for adaptive battery saver. */
     @GuardedBy("mLock")
     private Policy mAdaptivePolicy = DEFAULT_ADAPTIVE_POLICY;
-
-    /** The current default full policy. */
-    @GuardedBy("mLock")
-    private Policy mDefaultFullPolicy = DEFAULT_FULL_POLICY;
 
     /** The policy to be used for full battery saver. */
     @GuardedBy("mLock")
@@ -256,8 +235,19 @@ public class BatterySaverPolicy extends ContentObserver implements
     private final ContentResolver mContentResolver;
     private final BatterySavingStats mBatterySavingStats;
 
-    private final UiModeManager.OnProjectionStateChangedListener mOnProjectionStateChangedListener =
-            (t, pkgs) -> mAutomotiveProjectionActive.update(!pkgs.isEmpty());
+    private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            switch (intent.getAction()) {
+                case UiModeManager.ACTION_ENTER_CAR_MODE_PRIORITIZED:
+                    setCarModeEnabled(true);
+                    break;
+                case UiModeManager.ACTION_EXIT_CAR_MODE_PRIORITIZED:
+                    setCarModeEnabled(false);
+                    break;
+            }
+        }
+    };
 
     @GuardedBy("mLock")
     private final List<BatterySaverPolicyListener> mListeners = new ArrayList<>();
@@ -285,22 +275,32 @@ public class BatterySaverPolicy extends ContentObserver implements
                 Settings.Global.BATTERY_SAVER_CONSTANTS), false, this);
         mContentResolver.registerContentObserver(Settings.Global.getUriFor(
                 Settings.Global.BATTERY_SAVER_DEVICE_SPECIFIC_CONSTANTS), false, this);
+        mContentResolver.registerContentObserver(Settings.Global.getUriFor(
+                Settings.Global.BATTERY_SAVER_ADAPTIVE_CONSTANTS), false, this);
+        mContentResolver.registerContentObserver(Settings.Global.getUriFor(
+                Settings.Global.BATTERY_SAVER_ADAPTIVE_DEVICE_SPECIFIC_CONSTANTS), false, this);
 
         final AccessibilityManager acm = mContext.getSystemService(AccessibilityManager.class);
 
-        acm.addAccessibilityStateChangeListener(enabled -> mAccessibilityEnabled.update(enabled));
-        mAccessibilityEnabled.initialize(acm.isEnabled());
+        acm.addAccessibilityStateChangeListener((enabled) -> setAccessibilityEnabled(enabled));
+        final boolean accessibilityEnabled = acm.isEnabled();
+        synchronized (mLock) {
+            mAccessibilityEnabled = accessibilityEnabled;
+        }
 
-        UiModeManager uiModeManager = mContext.getSystemService(UiModeManager.class);
-        uiModeManager.addOnProjectionStateChangedListener(UiModeManager.PROJECTION_TYPE_AUTOMOTIVE,
-                mContext.getMainExecutor(), mOnProjectionStateChangedListener);
-        mAutomotiveProjectionActive.initialize(
-                uiModeManager.getActiveProjectionTypes() != UiModeManager.PROJECTION_TYPE_NONE);
+        final IntentFilter filter = new IntentFilter(
+                UiModeManager.ACTION_ENTER_CAR_MODE_PRIORITIZED);
+        filter.addAction(UiModeManager.ACTION_EXIT_CAR_MODE_PRIORITIZED);
+        // The ENTER/EXIT_CAR_MODE_PRIORITIZED intents are sent to UserHandle.ALL, so no need to
+        // register as all users here.
+        mContext.registerReceiver(mBroadcastReceiver, filter);
+        final boolean carModeEnabled =
+                mContext.getSystemService(UiModeManager.class).getCurrentModeType()
+                        == Configuration.UI_MODE_TYPE_CAR;
+        synchronized (mLock) {
+            mCarModeEnabled = carModeEnabled;
+        }
 
-        DeviceConfig.addOnPropertiesChangedListener(DeviceConfig.NAMESPACE_BATTERY_SAVER,
-                mContext.getMainExecutor(), this);
-        mLastDeviceConfigProperties =
-                DeviceConfig.getProperties(DeviceConfig.NAMESPACE_BATTERY_SAVER);
         onChange(true, null);
     }
 
@@ -329,7 +329,7 @@ public class BatterySaverPolicy extends ContentObserver implements
 
     /**
      * Notifies listeners of a policy change on the handler thread only if the current policy level
-     * is not {@link #POLICY_LEVEL_OFF}.
+     * is not {@link POLICY_LEVEL_OFF}.
      */
     private void maybeNotifyListenersOfPolicyChange() {
         final BatterySaverPolicyListener[] listeners;
@@ -354,54 +354,6 @@ public class BatterySaverPolicy extends ContentObserver implements
         refreshSettings();
     }
 
-    @Override
-    public void onPropertiesChanged(DeviceConfig.Properties properties) {
-        // Need to get all of the flags atomically.
-        mLastDeviceConfigProperties =
-                DeviceConfig.getProperties(DeviceConfig.NAMESPACE_BATTERY_SAVER);
-        Policy newAdaptivePolicy = null;
-        Policy newFullPolicy = null;
-
-        boolean changed = false;
-
-        synchronized (mLock) {
-            for (String name : properties.getKeyset()) {
-                if (name == null) {
-                    continue;
-                }
-                if (name.endsWith(KEY_SUFFIX_ADAPTIVE)) {
-                    if (newAdaptivePolicy == null) {
-                        newAdaptivePolicy = Policy.fromSettings("", "",
-                                mLastDeviceConfigProperties, KEY_SUFFIX_ADAPTIVE,
-                                DEFAULT_ADAPTIVE_POLICY);
-                    }
-                } else if (newFullPolicy == null) {
-                    newFullPolicy = Policy.fromSettings(mSettings, mDeviceSpecificSettings,
-                            mLastDeviceConfigProperties, null, DEFAULT_FULL_POLICY);
-                }
-            }
-
-            if (newFullPolicy != null) {
-                changed |= maybeUpdateDefaultFullPolicy(newFullPolicy);
-            }
-
-            if (newAdaptivePolicy != null && !mAdaptivePolicy.equals(newAdaptivePolicy)) {
-                mDefaultAdaptivePolicy = newAdaptivePolicy;
-                // This will override any config set by an external source. This should be fine
-                // for now.
-                // TODO(119261320): make sure it doesn't override what's set externally
-                mAdaptivePolicy = mDefaultAdaptivePolicy;
-                changed |= (mPolicyLevel == POLICY_LEVEL_ADAPTIVE);
-            }
-
-            updatePolicyDependenciesLocked();
-        }
-
-        if (changed) {
-            maybeNotifyListenersOfPolicyChange();
-        }
-    }
-
     private void refreshSettings() {
         synchronized (mLock) {
             // Load the non-device-specific setting.
@@ -421,7 +373,13 @@ public class BatterySaverPolicy extends ContentObserver implements
                 mDeviceSpecificSettingsSource = "(overlay)";
             }
 
-            if (!updateConstantsLocked(setting, deviceSpecificSetting)) {
+            final String adaptiveSetting =
+                    getGlobalSetting(Settings.Global.BATTERY_SAVER_ADAPTIVE_CONSTANTS);
+            final String adaptiveDeviceSpecificSetting = getGlobalSetting(
+                    Settings.Global.BATTERY_SAVER_ADAPTIVE_DEVICE_SPECIFIC_CONSTANTS);
+
+            if (!updateConstantsLocked(setting, deviceSpecificSetting,
+                    adaptiveSetting, adaptiveDeviceSpecificSetting)) {
                 // Nothing of note changed.
                 return;
             }
@@ -432,30 +390,47 @@ public class BatterySaverPolicy extends ContentObserver implements
 
     @GuardedBy("mLock")
     @VisibleForTesting
+    void updateConstantsLocked(final String setting, final String deviceSpecificSetting) {
+        updateConstantsLocked(setting, deviceSpecificSetting, "", "");
+    }
+
     /** @return true if the currently active policy changed. */
-    boolean updateConstantsLocked(String setting, String deviceSpecificSetting) {
+    private boolean updateConstantsLocked(String setting, String deviceSpecificSetting,
+            String adaptiveSetting, String adaptiveDeviceSpecificSetting) {
         setting = TextUtils.emptyIfNull(setting);
         deviceSpecificSetting = TextUtils.emptyIfNull(deviceSpecificSetting);
+        adaptiveSetting = TextUtils.emptyIfNull(adaptiveSetting);
+        adaptiveDeviceSpecificSetting = TextUtils.emptyIfNull(adaptiveDeviceSpecificSetting);
 
         if (setting.equals(mSettings)
-                && deviceSpecificSetting.equals(mDeviceSpecificSettings)) {
+                && deviceSpecificSetting.equals(mDeviceSpecificSettings)
+                && adaptiveSetting.equals(mAdaptiveSettings)
+                && adaptiveDeviceSpecificSetting.equals(mAdaptiveDeviceSpecificSettings)) {
             return false;
         }
 
         mSettings = setting;
         mDeviceSpecificSettings = deviceSpecificSetting;
+        mAdaptiveSettings = adaptiveSetting;
+        mAdaptiveDeviceSpecificSettings = adaptiveDeviceSpecificSetting;
 
         if (DEBUG) {
             Slog.i(TAG, "mSettings=" + mSettings);
             Slog.i(TAG, "mDeviceSpecificSettings=" + mDeviceSpecificSettings);
+            Slog.i(TAG, "mAdaptiveSettings=" + mAdaptiveSettings);
+            Slog.i(TAG, "mAdaptiveDeviceSpecificSettings=" + mAdaptiveDeviceSpecificSettings);
         }
 
-        boolean changed = maybeUpdateDefaultFullPolicy(
-                Policy.fromSettings(setting, deviceSpecificSetting,
-                        mLastDeviceConfigProperties, null, DEFAULT_FULL_POLICY));
+        boolean changed = false;
+        Policy newFullPolicy = Policy.fromSettings(setting, deviceSpecificSetting,
+                DEFAULT_FULL_POLICY);
+        if (mPolicyLevel == POLICY_LEVEL_FULL && !mFullPolicy.equals(newFullPolicy)) {
+            changed = true;
+        }
+        mFullPolicy = newFullPolicy;
 
-        mDefaultAdaptivePolicy = Policy.fromSettings("", "",
-                mLastDeviceConfigProperties, KEY_SUFFIX_ADAPTIVE, DEFAULT_ADAPTIVE_POLICY);
+        mDefaultAdaptivePolicy = Policy.fromSettings(adaptiveSetting, adaptiveDeviceSpecificSetting,
+                DEFAULT_ADAPTIVE_POLICY);
         if (mPolicyLevel == POLICY_LEVEL_ADAPTIVE
                 && !mAdaptivePolicy.equals(mDefaultAdaptivePolicy)) {
             changed = true;
@@ -475,7 +450,7 @@ public class BatterySaverPolicy extends ContentObserver implements
         final int locationMode;
 
         invalidatePowerSaveModeCaches();
-        if (mAutomotiveProjectionActive.get()
+        if (mCarModeEnabled
                 && rawPolicy.locationMode != PowerManager.LOCATION_MODE_NO_CHANGE
                 && rawPolicy.locationMode != PowerManager.LOCATION_MODE_FOREGROUND_ONLY) {
             // If car projection is enabled, ensure that navigation works.
@@ -487,26 +462,26 @@ public class BatterySaverPolicy extends ContentObserver implements
         mEffectivePolicyRaw = new Policy(
                 rawPolicy.adjustBrightnessFactor,
                 rawPolicy.advertiseIsEnabled,
-                rawPolicy.cpuFrequenciesForInteractive,
-                rawPolicy.cpuFrequenciesForNoninteractive,
                 rawPolicy.deferFullBackup,
                 rawPolicy.deferKeyValueBackup,
                 rawPolicy.disableAnimation,
                 rawPolicy.disableAod,
                 rawPolicy.disableLaunchBoost,
                 rawPolicy.disableOptionalSensors,
+                rawPolicy.disableSoundTrigger,
                 // Don't disable vibration when accessibility is on.
-                rawPolicy.disableVibration && !mAccessibilityEnabled.get(),
+                rawPolicy.disableVibration && !mAccessibilityEnabled,
                 rawPolicy.enableAdjustBrightness,
                 rawPolicy.enableDataSaver,
                 rawPolicy.enableFirewall,
                 // Don't force night mode when car projection is enabled.
-                rawPolicy.enableNightMode && !mAutomotiveProjectionActive.get(),
+                rawPolicy.enableNightMode && !mCarModeEnabled,
                 rawPolicy.enableQuickDoze,
+                rawPolicy.filesForInteractive,
+                rawPolicy.filesForNoninteractive,
                 rawPolicy.forceAllAppsStandby,
                 rawPolicy.forceBackgroundCheck,
-                locationMode,
-                rawPolicy.soundTriggerMode
+                locationMode
         );
 
 
@@ -517,9 +492,7 @@ public class BatterySaverPolicy extends ContentObserver implements
 
         if (mEffectivePolicyRaw.disableVibration) sb.append("v");
         if (mEffectivePolicyRaw.disableAnimation) sb.append("a");
-
-        sb.append(mEffectivePolicyRaw.soundTriggerMode);
-
+        if (mEffectivePolicyRaw.disableSoundTrigger) sb.append("s");
         if (mEffectivePolicyRaw.deferFullBackup) sb.append("F");
         if (mEffectivePolicyRaw.deferKeyValueBackup) sb.append("K");
         if (mEffectivePolicyRaw.enableFirewall) sb.append("f");
@@ -560,7 +533,7 @@ public class BatterySaverPolicy extends ContentObserver implements
          * {@code true} if full backup is deferred in battery saver mode.
          *
          * @see Settings.Global#BATTERY_SAVER_CONSTANTS
-         * @see #KEY_DEFER_FULL_BACKUP
+         * @see #KEY_FULLBACKUP_DEFERRED
          */
         public final boolean deferFullBackup;
 
@@ -568,7 +541,7 @@ public class BatterySaverPolicy extends ContentObserver implements
          * {@code true} if key value backup is deferred in battery saver mode.
          *
          * @see Settings.Global#BATTERY_SAVER_CONSTANTS
-         * @see #KEY_DEFER_KEYVALUE_BACKUP
+         * @see #KEY_KEYVALUE_DEFERRED
          */
         public final boolean deferKeyValueBackup;
 
@@ -576,7 +549,7 @@ public class BatterySaverPolicy extends ContentObserver implements
          * {@code true} if animation is disabled in battery saver mode.
          *
          * @see Settings.Global#BATTERY_SAVER_CONSTANTS
-         * @see #KEY_DISABLE_ANIMATION
+         * @see #KEY_ANIMATION_DISABLED
          */
         public final boolean disableAnimation;
 
@@ -600,15 +573,15 @@ public class BatterySaverPolicy extends ContentObserver implements
          * in battery saver mode.
          *
          * @see Settings.Global#BATTERY_SAVER_CONSTANTS
-         * @see #KEY_SOUNDTRIGGER_MODE
+         * @see #KEY_SOUNDTRIGGER_DISABLED
          */
-        public final int soundTriggerMode;
+        public final boolean disableSoundTrigger;
 
         /**
          * {@code true} if vibration is disabled in battery saver mode.
          *
          * @see Settings.Global#BATTERY_SAVER_CONSTANTS
-         * @see #KEY_DISABLE_VIBRATION
+         * @see #KEY_VIBRATION_DISABLED
          */
         public final boolean disableVibration;
 
@@ -617,7 +590,7 @@ public class BatterySaverPolicy extends ContentObserver implements
          * mode.
          *
          * @see Settings.Global#BATTERY_SAVER_CONSTANTS
-         * @see #KEY_ENABLE_BRIGHTNESS_ADJUSTMENT
+         * @see #KEY_ADJUST_BRIGHTNESS_DISABLED
          */
         public final boolean enableAdjustBrightness;
 
@@ -625,7 +598,7 @@ public class BatterySaverPolicy extends ContentObserver implements
          * {@code true} if data saver should be turned on in battery saver mode.
          *
          * @see Settings.Global#BATTERY_SAVER_CONSTANTS
-         * @see #KEY_ENABLE_DATASAVER
+         * @see #KEY_ACTIVATE_DATASAVER_DISABLED
          */
         public final boolean enableDataSaver;
 
@@ -633,7 +606,7 @@ public class BatterySaverPolicy extends ContentObserver implements
          * {@code true} if network policy firewall should be turned on in battery saver mode.
          *
          * @see Settings.Global#BATTERY_SAVER_CONSTANTS
-         * @see #KEY_ENABLE_FIREWALL
+         * @see #KEY_ACTIVATE_FIREWALL_DISABLED
          */
         public final boolean enableFirewall;
 
@@ -648,20 +621,20 @@ public class BatterySaverPolicy extends ContentObserver implements
         public final boolean enableQuickDoze;
 
         /**
-         * List of CPU frequencies that should be written when battery saver is activated
+         * List of [Filename -> content] that should be written when battery saver is activated
          * and the device is interactive.
          *
          * We use this to change the max CPU frequencies.
          */
-        public final CpuFrequencies cpuFrequenciesForInteractive;
+        public final ArrayMap<String, String> filesForInteractive;
 
         /**
-         * List of CPU frequencies that should be written when battery saver is activated
+         * List of [Filename -> content] that should be written when battery saver is activated
          * and the device is non-interactive.
          *
          * We use this to change the max CPU frequencies.
          */
-        public final CpuFrequencies cpuFrequenciesForNoninteractive;
+        public final ArrayMap<String, String> filesForNoninteractive;
 
         /**
          * Whether to put all apps in the stand-by mode.
@@ -678,7 +651,7 @@ public class BatterySaverPolicy extends ContentObserver implements
          * previously called gpsMode.
          *
          * @see Settings.Global#BATTERY_SAVER_CONSTANTS
-         * @see #KEY_LOCATION_MODE
+         * @see #KEY_GPS_MODE
          */
         public final int locationMode;
 
@@ -687,41 +660,42 @@ public class BatterySaverPolicy extends ContentObserver implements
         Policy(
                 float adjustBrightnessFactor,
                 boolean advertiseIsEnabled,
-                CpuFrequencies cpuFrequenciesForInteractive,
-                CpuFrequencies cpuFrequenciesForNoninteractive,
                 boolean deferFullBackup,
                 boolean deferKeyValueBackup,
                 boolean disableAnimation,
                 boolean disableAod,
                 boolean disableLaunchBoost,
                 boolean disableOptionalSensors,
+                boolean disableSoundTrigger,
                 boolean disableVibration,
                 boolean enableAdjustBrightness,
                 boolean enableDataSaver,
                 boolean enableFirewall,
                 boolean enableNightMode,
                 boolean enableQuickDoze,
+                ArrayMap<String, String> filesForInteractive,
+                ArrayMap<String, String> filesForNoninteractive,
                 boolean forceAllAppsStandby,
                 boolean forceBackgroundCheck,
-                int locationMode,
-                int soundTriggerMode) {
+                int locationMode) {
 
             this.adjustBrightnessFactor = Math.min(1, Math.max(0, adjustBrightnessFactor));
             this.advertiseIsEnabled = advertiseIsEnabled;
-            this.cpuFrequenciesForInteractive = cpuFrequenciesForInteractive;
-            this.cpuFrequenciesForNoninteractive = cpuFrequenciesForNoninteractive;
             this.deferFullBackup = deferFullBackup;
             this.deferKeyValueBackup = deferKeyValueBackup;
             this.disableAnimation = disableAnimation;
             this.disableAod = disableAod;
             this.disableLaunchBoost = disableLaunchBoost;
             this.disableOptionalSensors = disableOptionalSensors;
+            this.disableSoundTrigger = disableSoundTrigger;
             this.disableVibration = disableVibration;
             this.enableAdjustBrightness = enableAdjustBrightness;
             this.enableDataSaver = enableDataSaver;
             this.enableFirewall = enableFirewall;
             this.enableNightMode = enableNightMode;
             this.enableQuickDoze = enableQuickDoze;
+            this.filesForInteractive = filesForInteractive;
+            this.filesForNoninteractive = filesForNoninteractive;
             this.forceAllAppsStandby = forceAllAppsStandby;
             this.forceBackgroundCheck = forceBackgroundCheck;
 
@@ -733,35 +707,27 @@ public class BatterySaverPolicy extends ContentObserver implements
                 this.locationMode = locationMode;
             }
 
-            if (soundTriggerMode < PowerManager.MIN_SOUND_TRIGGER_MODE
-                    || soundTriggerMode > PowerManager.MAX_SOUND_TRIGGER_MODE) {
-                Slog.e(TAG, "Invalid SoundTrigger mode: " + soundTriggerMode);
-                this.soundTriggerMode = PowerManager.SOUND_TRIGGER_MODE_ALL_ENABLED;
-            } else {
-                this.soundTriggerMode = soundTriggerMode;
-            }
-
             mHashCode = Objects.hash(
                     adjustBrightnessFactor,
                     advertiseIsEnabled,
-                    cpuFrequenciesForInteractive,
-                    cpuFrequenciesForNoninteractive,
                     deferFullBackup,
                     deferKeyValueBackup,
                     disableAnimation,
                     disableAod,
                     disableLaunchBoost,
                     disableOptionalSensors,
+                    disableSoundTrigger,
                     disableVibration,
                     enableAdjustBrightness,
                     enableDataSaver,
                     enableFirewall,
                     enableNightMode,
                     enableQuickDoze,
+                    filesForInteractive,
+                    filesForNoninteractive,
                     forceAllAppsStandby,
                     forceBackgroundCheck,
-                    locationMode,
-                    soundTriggerMode);
+                    locationMode);
         }
 
         static Policy fromConfig(BatterySaverPolicyConfig config) {
@@ -780,65 +746,36 @@ public class BatterySaverPolicy extends ContentObserver implements
             return new Policy(
                     config.getAdjustBrightnessFactor(),
                     config.getAdvertiseIsEnabled(),
-                    (new CpuFrequencies()).parseString(cpuFreqInteractive),
-                    (new CpuFrequencies()).parseString(cpuFreqNoninteractive),
                     config.getDeferFullBackup(),
                     config.getDeferKeyValueBackup(),
                     config.getDisableAnimation(),
                     config.getDisableAod(),
                     config.getDisableLaunchBoost(),
                     config.getDisableOptionalSensors(),
+                    config.getDisableSoundTrigger(),
                     config.getDisableVibration(),
                     config.getEnableAdjustBrightness(),
                     config.getEnableDataSaver(),
                     config.getEnableFirewall(),
                     config.getEnableNightMode(),
                     config.getEnableQuickDoze(),
+                    /* filesForInteractive */
+                    (new CpuFrequencies()).parseString(cpuFreqInteractive).toSysFileMap(),
+                    /* filesForNoninteractive */
+                    (new CpuFrequencies()).parseString(cpuFreqNoninteractive).toSysFileMap(),
                     config.getForceAllAppsStandby(),
                     config.getForceBackgroundCheck(),
-                    config.getLocationMode(),
-                    config.getSoundTriggerMode()
+                    config.getLocationMode()
             );
         }
 
-        BatterySaverPolicyConfig toConfig() {
-            return new BatterySaverPolicyConfig.Builder()
-                    .addDeviceSpecificSetting(KEY_CPU_FREQ_INTERACTIVE,
-                            cpuFrequenciesForInteractive.toString())
-                    .addDeviceSpecificSetting(KEY_CPU_FREQ_NONINTERACTIVE,
-                            cpuFrequenciesForNoninteractive.toString())
-                    .setAdjustBrightnessFactor(adjustBrightnessFactor)
-                    .setAdvertiseIsEnabled(advertiseIsEnabled)
-                    .setDeferFullBackup(deferFullBackup)
-                    .setDeferKeyValueBackup(deferKeyValueBackup)
-                    .setDisableAnimation(disableAnimation)
-                    .setDisableAod(disableAod)
-                    .setDisableLaunchBoost(disableLaunchBoost)
-                    .setDisableOptionalSensors(disableOptionalSensors)
-                    .setDisableVibration(disableVibration)
-                    .setEnableAdjustBrightness(enableAdjustBrightness)
-                    .setEnableDataSaver(enableDataSaver)
-                    .setEnableFirewall(enableFirewall)
-                    .setEnableNightMode(enableNightMode)
-                    .setEnableQuickDoze(enableQuickDoze)
-                    .setForceAllAppsStandby(forceAllAppsStandby)
-                    .setForceBackgroundCheck(forceBackgroundCheck)
-                    .setLocationMode(locationMode)
-                    .setSoundTriggerMode(soundTriggerMode)
-                    .build();
+        static Policy fromSettings(String settings, String deviceSpecificSettings) {
+            return fromSettings(settings, deviceSpecificSettings, OFF_POLICY);
         }
 
-        @VisibleForTesting
         static Policy fromSettings(String settings, String deviceSpecificSettings,
-                DeviceConfig.Properties properties, String configSuffix) {
-            return fromSettings(settings, deviceSpecificSettings, properties, configSuffix,
-                    OFF_POLICY);
-        }
-
-        private static Policy fromSettings(String settings, String deviceSpecificSettings,
-                DeviceConfig.Properties properties, String configSuffix, Policy defaultPolicy) {
+                Policy defaultPolicy) {
             final KeyValueListParser parser = new KeyValueListParser(',');
-            configSuffix = TextUtils.emptyIfNull(configSuffix);
 
             // Device-specific parameters.
             try {
@@ -858,85 +795,65 @@ public class BatterySaverPolicy extends ContentObserver implements
                 Slog.wtf(TAG, "Bad battery saver constants: " + settings);
             }
 
-            // The Settings value overrides everything, since that will be set by the user.
-            // The DeviceConfig value takes second place, with the default as the last choice.
-            final float adjustBrightnessFactor = parser.getFloat(KEY_ADJUST_BRIGHTNESS_FACTOR,
-                    properties.getFloat(KEY_ADJUST_BRIGHTNESS_FACTOR + configSuffix,
-                            defaultPolicy.adjustBrightnessFactor));
-            final boolean advertiseIsEnabled = parser.getBoolean(KEY_ADVERTISE_IS_ENABLED,
-                    properties.getBoolean(KEY_ADVERTISE_IS_ENABLED + configSuffix,
-                            defaultPolicy.advertiseIsEnabled));
-            final boolean deferFullBackup = parser.getBoolean(KEY_DEFER_FULL_BACKUP,
-                    properties.getBoolean(KEY_DEFER_FULL_BACKUP + configSuffix,
-                            defaultPolicy.deferFullBackup));
-            final boolean deferKeyValueBackup = parser.getBoolean(KEY_DEFER_KEYVALUE_BACKUP,
-                    properties.getBoolean(KEY_DEFER_KEYVALUE_BACKUP + configSuffix,
-                            defaultPolicy.deferKeyValueBackup));
-            final boolean disableAnimation = parser.getBoolean(KEY_DISABLE_ANIMATION,
-                    properties.getBoolean(KEY_DISABLE_ANIMATION + configSuffix,
-                            defaultPolicy.disableAnimation));
-            final boolean disableAod = parser.getBoolean(KEY_DISABLE_AOD,
-                    properties.getBoolean(KEY_DISABLE_AOD + configSuffix,
-                            defaultPolicy.disableAod));
-            final boolean disableLaunchBoost = parser.getBoolean(KEY_DISABLE_LAUNCH_BOOST,
-                    properties.getBoolean(KEY_DISABLE_LAUNCH_BOOST + configSuffix,
-                            defaultPolicy.disableLaunchBoost));
-            final boolean disableOptionalSensors = parser.getBoolean(KEY_DISABLE_OPTIONAL_SENSORS,
-                    properties.getBoolean(KEY_DISABLE_OPTIONAL_SENSORS + configSuffix,
-                            defaultPolicy.disableOptionalSensors));
-            final boolean disableVibrationConfig = parser.getBoolean(KEY_DISABLE_VIBRATION,
-                    properties.getBoolean(KEY_DISABLE_VIBRATION + configSuffix,
-                            defaultPolicy.disableVibration));
-            final boolean enableBrightnessAdjustment = parser.getBoolean(
-                    KEY_ENABLE_BRIGHTNESS_ADJUSTMENT,
-                    properties.getBoolean(KEY_ENABLE_BRIGHTNESS_ADJUSTMENT + configSuffix,
-                            defaultPolicy.enableAdjustBrightness));
-            final boolean enableDataSaver = parser.getBoolean(KEY_ENABLE_DATASAVER,
-                    properties.getBoolean(KEY_ENABLE_DATASAVER + configSuffix,
-                            defaultPolicy.enableDataSaver));
-            final boolean enableFirewall = parser.getBoolean(KEY_ENABLE_FIREWALL,
-                    properties.getBoolean(KEY_ENABLE_FIREWALL + configSuffix,
-                            defaultPolicy.enableFirewall));
-            final boolean enableNightMode = parser.getBoolean(KEY_ENABLE_NIGHT_MODE,
-                    properties.getBoolean(KEY_ENABLE_NIGHT_MODE + configSuffix,
-                            defaultPolicy.enableNightMode));
-            final boolean enableQuickDoze = parser.getBoolean(KEY_ENABLE_QUICK_DOZE,
-                    properties.getBoolean(KEY_ENABLE_QUICK_DOZE + configSuffix,
-                            defaultPolicy.enableQuickDoze));
-            final boolean forceAllAppsStandby = parser.getBoolean(KEY_FORCE_ALL_APPS_STANDBY,
-                    properties.getBoolean(KEY_FORCE_ALL_APPS_STANDBY + configSuffix,
-                            defaultPolicy.forceAllAppsStandby));
-            final boolean forceBackgroundCheck = parser.getBoolean(KEY_FORCE_BACKGROUND_CHECK,
-                    properties.getBoolean(KEY_FORCE_BACKGROUND_CHECK + configSuffix,
-                            defaultPolicy.forceBackgroundCheck));
-            final int locationMode = parser.getInt(KEY_LOCATION_MODE,
-                    properties.getInt(KEY_LOCATION_MODE + configSuffix,
-                            defaultPolicy.locationMode));
-            final int soundTriggerMode = parser.getInt(KEY_SOUNDTRIGGER_MODE,
-                    properties.getInt(KEY_SOUNDTRIGGER_MODE + configSuffix,
-                            defaultPolicy.soundTriggerMode));
+            float adjustBrightnessFactor = parser.getFloat(KEY_ADJUST_BRIGHTNESS_FACTOR,
+                    defaultPolicy.adjustBrightnessFactor);
+            boolean advertiseIsEnabled = parser.getBoolean(KEY_ADVERTISE_IS_ENABLED,
+                    defaultPolicy.advertiseIsEnabled);
+            boolean deferFullBackup = parser.getBoolean(KEY_FULLBACKUP_DEFERRED,
+                    defaultPolicy.deferFullBackup);
+            boolean deferKeyValueBackup = parser.getBoolean(KEY_KEYVALUE_DEFERRED,
+                    defaultPolicy.deferKeyValueBackup);
+            boolean disableAnimation = parser.getBoolean(KEY_ANIMATION_DISABLED,
+                    defaultPolicy.disableAnimation);
+            boolean disableAod = parser.getBoolean(KEY_AOD_DISABLED, defaultPolicy.disableAod);
+            boolean disableLaunchBoost = parser.getBoolean(KEY_LAUNCH_BOOST_DISABLED,
+                    defaultPolicy.disableLaunchBoost);
+            boolean disableOptionalSensors = parser.getBoolean(KEY_OPTIONAL_SENSORS_DISABLED,
+                    defaultPolicy.disableOptionalSensors);
+            boolean disableSoundTrigger = parser.getBoolean(KEY_SOUNDTRIGGER_DISABLED,
+                    defaultPolicy.disableSoundTrigger);
+            boolean disableVibrationConfig = parser.getBoolean(KEY_VIBRATION_DISABLED,
+                    defaultPolicy.disableVibration);
+            boolean enableAdjustBrightness = !parser.getBoolean(KEY_ADJUST_BRIGHTNESS_DISABLED,
+                    !defaultPolicy.enableAdjustBrightness);
+            boolean enableDataSaver = !parser.getBoolean(KEY_ACTIVATE_DATASAVER_DISABLED,
+                    !defaultPolicy.enableDataSaver);
+            boolean enableFirewall = !parser.getBoolean(KEY_ACTIVATE_FIREWALL_DISABLED,
+                    !defaultPolicy.enableFirewall);
+            boolean enableNightMode = parser.getBoolean(KEY_ENABLE_NIGHT_MODE,
+                    defaultPolicy.enableNightMode);
+            boolean enableQuickDoze = parser.getBoolean(KEY_QUICK_DOZE_ENABLED,
+                    defaultPolicy.enableQuickDoze);
+            boolean forceAllAppsStandby = parser.getBoolean(KEY_FORCE_ALL_APPS_STANDBY,
+                    defaultPolicy.forceAllAppsStandby);
+            boolean forceBackgroundCheck = parser.getBoolean(KEY_FORCE_BACKGROUND_CHECK,
+                    defaultPolicy.forceBackgroundCheck);
+            int locationMode = parser.getInt(KEY_GPS_MODE, defaultPolicy.locationMode);
+
             return new Policy(
                     adjustBrightnessFactor,
                     advertiseIsEnabled,
-                    (new CpuFrequencies()).parseString(cpuFreqInteractive),
-                    (new CpuFrequencies()).parseString(cpuFreqNoninteractive),
                     deferFullBackup,
                     deferKeyValueBackup,
                     disableAnimation,
                     disableAod,
                     disableLaunchBoost,
                     disableOptionalSensors,
+                    disableSoundTrigger,
                     /* disableVibration */
                     disableVibrationConfig,
-                    enableBrightnessAdjustment,
+                    enableAdjustBrightness,
                     enableDataSaver,
                     enableFirewall,
                     enableNightMode,
                     enableQuickDoze,
+                    /* filesForInteractive */
+                    (new CpuFrequencies()).parseString(cpuFreqInteractive).toSysFileMap(),
+                    /* filesForNoninteractive */
+                    (new CpuFrequencies()).parseString(cpuFreqNoninteractive).toSysFileMap(),
                     forceAllAppsStandby,
                     forceBackgroundCheck,
-                    locationMode,
-                    soundTriggerMode
+                    locationMode
             );
         }
 
@@ -953,6 +870,7 @@ public class BatterySaverPolicy extends ContentObserver implements
                     && disableAod == other.disableAod
                     && disableLaunchBoost == other.disableLaunchBoost
                     && disableOptionalSensors == other.disableOptionalSensors
+                    && disableSoundTrigger == other.disableSoundTrigger
                     && disableVibration == other.disableVibration
                     && enableAdjustBrightness == other.enableAdjustBrightness
                     && enableDataSaver == other.enableDataSaver
@@ -962,10 +880,8 @@ public class BatterySaverPolicy extends ContentObserver implements
                     && forceAllAppsStandby == other.forceAllAppsStandby
                     && forceBackgroundCheck == other.forceBackgroundCheck
                     && locationMode == other.locationMode
-                    && soundTriggerMode == other.soundTriggerMode
-                    && cpuFrequenciesForInteractive.equals(other.cpuFrequenciesForInteractive)
-                    && cpuFrequenciesForNoninteractive.equals(
-                            other.cpuFrequenciesForNoninteractive);
+                    && filesForInteractive.equals(other.filesForInteractive)
+                    && filesForNoninteractive.equals(other.filesForNoninteractive);
         }
 
         @Override
@@ -1014,11 +930,7 @@ public class BatterySaverPolicy extends ContentObserver implements
                     return builder.setBatterySaverEnabled(currPolicy.enableDataSaver)
                             .build();
                 case ServiceType.SOUND:
-                    boolean soundTriggerBatterySaverEnabled = currPolicy.advertiseIsEnabled
-                            || currPolicy.soundTriggerMode
-                            != PowerManager.SOUND_TRIGGER_MODE_ALL_ENABLED;
-                    return builder.setBatterySaverEnabled(soundTriggerBatterySaverEnabled)
-                            .setSoundTriggerMode(currPolicy.soundTriggerMode)
+                    return builder.setBatterySaverEnabled(currPolicy.disableSoundTrigger)
                             .build();
                 case ServiceType.VIBRATION:
                     return builder.setBatterySaverEnabled(currPolicy.disableVibration)
@@ -1058,11 +970,6 @@ public class BatterySaverPolicy extends ContentObserver implements
             if (mPolicyLevel == level) {
                 return false;
             }
-            // If we are leaving the full policy level, then any overrides to the full policy set
-            // through #setFullPolicyLocked should be cleared.
-            if (mPolicyLevel == POLICY_LEVEL_FULL) {
-                mFullPolicy = mDefaultFullPolicy;
-            }
             switch (level) {
                 case POLICY_LEVEL_FULL:
                 case POLICY_LEVEL_ADAPTIVE:
@@ -1076,62 +983,6 @@ public class BatterySaverPolicy extends ContentObserver implements
             updatePolicyDependenciesLocked();
             return true;
         }
-    }
-
-    /**
-     * Get the current policy for the provided policy level.
-     */
-    Policy getPolicyLocked(@PolicyLevel int policyLevel) {
-        switch (policyLevel) {
-            case POLICY_LEVEL_OFF:
-                return OFF_POLICY;
-            case POLICY_LEVEL_ADAPTIVE:
-                return mAdaptivePolicy;
-            case POLICY_LEVEL_FULL:
-                return mFullPolicy;
-        }
-
-        throw new IllegalArgumentException(
-                "getPolicyLocked: incorrect policy level provided - " + policyLevel);
-    }
-
-    /**
-     * Updates the default policy with the passed in policy.
-     * If the full policy is not overridden with runtime settings, then the full policy will be
-     * updated.
-     *
-     * @return True if the active policy requires an update, false if not.
-     */
-    private boolean maybeUpdateDefaultFullPolicy(Policy p) {
-        boolean fullPolicyChanged = false;
-        if (!mDefaultFullPolicy.equals(p)) {
-            // default policy can be overridden by #setFullPolicyLocked
-            boolean isDefaultFullPolicyOverridden = !mDefaultFullPolicy.equals(mFullPolicy);
-            if (!isDefaultFullPolicyOverridden) {
-                mFullPolicy = p;
-                fullPolicyChanged = (mPolicyLevel == POLICY_LEVEL_FULL);
-            }
-            mDefaultFullPolicy = p;
-        }
-        return fullPolicyChanged;
-    }
-
-    /** @return true if the current policy changed and the policy level is FULL. */
-    boolean setFullPolicyLocked(Policy p) {
-        if (p == null) {
-            Slog.wtf(TAG, "setFullPolicy given null policy");
-            return false;
-        }
-        if (mFullPolicy.equals(p)) {
-            return false;
-        }
-
-        mFullPolicy = p;
-        if (mPolicyLevel == POLICY_LEVEL_FULL) {
-            updatePolicyDependenciesLocked();
-            return true;
-        }
-        return false;
     }
 
     /** @return true if the current policy changed and the policy level is ADAPTIVE. */
@@ -1181,9 +1032,8 @@ public class BatterySaverPolicy extends ContentObserver implements
 
     public ArrayMap<String, String> getFileValues(boolean interactive) {
         synchronized (mLock) {
-            return interactive
-                    ? getCurrentPolicyLocked().cpuFrequenciesForInteractive.toSysFileMap()
-                    : getCurrentPolicyLocked().cpuFrequenciesForNoninteractive.toSysFileMap();
+            return interactive ? getCurrentPolicyLocked().filesForInteractive
+                    : getCurrentPolicyLocked().filesForNoninteractive;
         }
     }
 
@@ -1206,96 +1056,90 @@ public class BatterySaverPolicy extends ContentObserver implements
     }
 
     public void dump(PrintWriter pw) {
-        final IndentingPrintWriter ipw = new IndentingPrintWriter(pw, "  ");
-
         synchronized (mLock) {
-            ipw.println();
-            mBatterySavingStats.dump(ipw);
+            pw.println();
+            mBatterySavingStats.dump(pw, "");
 
-            ipw.println();
-            ipw.println("Battery saver policy (*NOTE* they only apply when battery saver is ON):");
-            ipw.increaseIndent();
-            ipw.println("Settings: " + Settings.Global.BATTERY_SAVER_CONSTANTS);
-            ipw.increaseIndent();
-            ipw.println("value: " + mSettings);
-            ipw.decreaseIndent();
-            ipw.println("Settings: " + mDeviceSpecificSettingsSource);
-            ipw.increaseIndent();
-            ipw.println("value: " + mDeviceSpecificSettings);
-            ipw.decreaseIndent();
-            ipw.println("DeviceConfig: " + DeviceConfig.NAMESPACE_BATTERY_SAVER);
-            ipw.increaseIndent();
-            final Set<String> keys = mLastDeviceConfigProperties.getKeyset();
-            if (keys.size() == 0) {
-                ipw.println("N/A");
-            } else {
-                for (final String key : keys) {
-                    ipw.print(key);
-                    ipw.print(": ");
-                    ipw.println(mLastDeviceConfigProperties.getString(key, null));
-                }
-            }
-            ipw.decreaseIndent();
+            pw.println();
+            pw.println("Battery saver policy (*NOTE* they only apply when battery saver is ON):");
+            pw.println("  Settings: " + Settings.Global.BATTERY_SAVER_CONSTANTS);
+            pw.println("    value: " + mSettings);
+            pw.println("  Settings: " + mDeviceSpecificSettingsSource);
+            pw.println("    value: " + mDeviceSpecificSettings);
 
-            ipw.println("mAccessibilityEnabled=" + mAccessibilityEnabled.get());
-            ipw.println("mAutomotiveProjectionActive=" + mAutomotiveProjectionActive.get());
-            ipw.println("mPolicyLevel=" + mPolicyLevel);
+            pw.println("  Adaptive Settings: " + Settings.Global.BATTERY_SAVER_ADAPTIVE_CONSTANTS);
+            pw.println("    value: " + mAdaptiveSettings);
+            pw.println("  Adaptive Device Specific Settings: "
+                    + Settings.Global.BATTERY_SAVER_ADAPTIVE_DEVICE_SPECIFIC_CONSTANTS);
+            pw.println("    value: " + mAdaptiveDeviceSpecificSettings);
 
-            dumpPolicyLocked(ipw, "default full", mDefaultFullPolicy);
-            dumpPolicyLocked(ipw, "current full", mFullPolicy);
-            dumpPolicyLocked(ipw, "default adaptive", mDefaultAdaptivePolicy);
-            dumpPolicyLocked(ipw, "current adaptive", mAdaptivePolicy);
-            dumpPolicyLocked(ipw, "effective", mEffectivePolicyRaw);
+            pw.println("  mAccessibilityEnabled=" + mAccessibilityEnabled);
+            pw.println("  mCarModeEnabled=" + mCarModeEnabled);
+            pw.println("  mPolicyLevel=" + mPolicyLevel);
 
-            ipw.decreaseIndent();
+            dumpPolicyLocked(pw, "  ", "full", mFullPolicy);
+            dumpPolicyLocked(pw, "  ", "default adaptive", mDefaultAdaptivePolicy);
+            dumpPolicyLocked(pw, "  ", "current adaptive", mAdaptivePolicy);
+            dumpPolicyLocked(pw, "  ", "effective", mEffectivePolicyRaw);
         }
     }
 
-    private void dumpPolicyLocked(IndentingPrintWriter pw, String label, Policy p) {
+    private void dumpPolicyLocked(PrintWriter pw, String indent, String label, Policy p) {
         pw.println();
+        pw.print(indent);
         pw.println("Policy '" + label + "'");
-        pw.increaseIndent();
-        pw.println(KEY_ADVERTISE_IS_ENABLED + "=" + p.advertiseIsEnabled);
-        pw.println(KEY_DISABLE_VIBRATION + "=" + p.disableVibration);
-        pw.println(KEY_DISABLE_ANIMATION + "=" + p.disableAnimation);
-        pw.println(KEY_DEFER_FULL_BACKUP + "=" + p.deferFullBackup);
-        pw.println(KEY_DEFER_KEYVALUE_BACKUP + "=" + p.deferKeyValueBackup);
-        pw.println(KEY_ENABLE_FIREWALL + "=" + p.enableFirewall);
-        pw.println(KEY_ENABLE_DATASAVER + "=" + p.enableDataSaver);
-        pw.println(KEY_DISABLE_LAUNCH_BOOST + "=" + p.disableLaunchBoost);
-        pw.println(KEY_ENABLE_BRIGHTNESS_ADJUSTMENT + "=" + p.enableAdjustBrightness);
-        pw.println(KEY_ADJUST_BRIGHTNESS_FACTOR + "=" + p.adjustBrightnessFactor);
-        pw.println(KEY_LOCATION_MODE + "=" + p.locationMode);
-        pw.println(KEY_FORCE_ALL_APPS_STANDBY + "=" + p.forceAllAppsStandby);
-        pw.println(KEY_FORCE_BACKGROUND_CHECK + "=" + p.forceBackgroundCheck);
-        pw.println(KEY_DISABLE_OPTIONAL_SENSORS + "=" + p.disableOptionalSensors);
-        pw.println(KEY_DISABLE_AOD + "=" + p.disableAod);
-        pw.println(KEY_SOUNDTRIGGER_MODE + "=" + p.soundTriggerMode);
-        pw.println(KEY_ENABLE_QUICK_DOZE + "=" + p.enableQuickDoze);
-        pw.println(KEY_ENABLE_NIGHT_MODE + "=" + p.enableNightMode);
+        pw.print(indent);
+        pw.println("  " + KEY_ADVERTISE_IS_ENABLED + "=" + p.advertiseIsEnabled);
+        pw.print(indent);
+        pw.println("  " + KEY_VIBRATION_DISABLED + "=" + p.disableVibration);
+        pw.print(indent);
+        pw.println("  " + KEY_ANIMATION_DISABLED + "=" + p.disableAnimation);
+        pw.print(indent);
+        pw.println("  " + KEY_FULLBACKUP_DEFERRED + "=" + p.deferFullBackup);
+        pw.print(indent);
+        pw.println("  " + KEY_KEYVALUE_DEFERRED + "=" + p.deferKeyValueBackup);
+        pw.print(indent);
+        pw.println("  " + KEY_ACTIVATE_FIREWALL_DISABLED + "=" + !p.enableFirewall);
+        pw.print(indent);
+        pw.println("  " + KEY_ACTIVATE_DATASAVER_DISABLED + "=" + !p.enableDataSaver);
+        pw.print(indent);
+        pw.println("  " + KEY_LAUNCH_BOOST_DISABLED + "=" + p.disableLaunchBoost);
+        pw.println(
+                "    " + KEY_ADJUST_BRIGHTNESS_DISABLED + "=" + !p.enableAdjustBrightness);
+        pw.print(indent);
+        pw.println("  " + KEY_ADJUST_BRIGHTNESS_FACTOR + "=" + p.adjustBrightnessFactor);
+        pw.print(indent);
+        pw.println("  " + KEY_GPS_MODE + "=" + p.locationMode);
+        pw.print(indent);
+        pw.println("  " + KEY_FORCE_ALL_APPS_STANDBY + "=" + p.forceAllAppsStandby);
+        pw.print(indent);
+        pw.println("  " + KEY_FORCE_BACKGROUND_CHECK + "=" + p.forceBackgroundCheck);
+        pw.println(
+                "    " + KEY_OPTIONAL_SENSORS_DISABLED + "=" + p.disableOptionalSensors);
+        pw.print(indent);
+        pw.println("  " + KEY_AOD_DISABLED + "=" + p.disableAod);
+        pw.print(indent);
+        pw.println("  " + KEY_SOUNDTRIGGER_DISABLED + "=" + p.disableSoundTrigger);
+        pw.print(indent);
+        pw.println("  " + KEY_QUICK_DOZE_ENABLED + "=" + p.enableQuickDoze);
+        pw.print(indent);
+        pw.println("  " + KEY_ENABLE_NIGHT_MODE + "=" + p.enableNightMode);
 
-        pw.println("Interactive File values:");
-        pw.increaseIndent();
-        dumpMap(pw, p.cpuFrequenciesForInteractive.toSysFileMap());
-        pw.decreaseIndent();
+        pw.print("    Interactive File values:\n");
+        dumpMap(pw, "      ", p.filesForInteractive);
         pw.println();
 
-        pw.println("Noninteractive File values:");
-        pw.increaseIndent();
-        dumpMap(pw, p.cpuFrequenciesForNoninteractive.toSysFileMap());
-        pw.decreaseIndent();
-
-        // Decrease from indent right after "Policy" line
-        pw.decreaseIndent();
+        pw.print("    Noninteractive File values:\n");
+        dumpMap(pw, "      ", p.filesForNoninteractive);
     }
 
-    private void dumpMap(PrintWriter pw, ArrayMap<String, String> map) {
-        if (map == null || map.size() == 0) {
-            pw.println("N/A");
+    private void dumpMap(PrintWriter pw, String prefix, ArrayMap<String, String> map) {
+        if (map == null) {
             return;
         }
         final int size = map.size();
         for (int i = 0; i < size; i++) {
+            pw.print(prefix);
             pw.print(map.keyAt(i));
             pw.print(": '");
             pw.print(map.valueAt(i));
@@ -1303,42 +1147,24 @@ public class BatterySaverPolicy extends ContentObserver implements
         }
     }
 
-    /**
-     * A boolean value which should trigger a policy update when it changes.
-     */
     @VisibleForTesting
-    class PolicyBoolean {
-        private final String mDebugName;
-        @GuardedBy("mLock")
-        private boolean mValue;
-
-        private PolicyBoolean(String debugName) {
-            mDebugName = debugName;
-        }
-
-        /** Sets the initial value without triggering a policy update. */
-        private void initialize(boolean initialValue) {
-            synchronized (mLock) {
-                mValue = initialValue;
+    void setAccessibilityEnabled(boolean enabled) {
+        synchronized (mLock) {
+            if (mAccessibilityEnabled != enabled) {
+                mAccessibilityEnabled = enabled;
+                updatePolicyDependenciesLocked();
+                maybeNotifyListenersOfPolicyChange();
             }
         }
+    }
 
-        private boolean get() {
-            synchronized (mLock) {
-                return mValue;
-            }
-        }
-
-        /** Sets a value, which if different from the current value, triggers a policy update. */
-        @VisibleForTesting
-        void update(boolean newValue) {
-            synchronized (mLock) {
-                if (mValue != newValue) {
-                    Slog.d(TAG, mDebugName + " changed to " + newValue + ", updating policy.");
-                    mValue = newValue;
-                    updatePolicyDependenciesLocked();
-                    maybeNotifyListenersOfPolicyChange();
-                }
+    @VisibleForTesting
+    void setCarModeEnabled(boolean enabled) {
+        synchronized (mLock) {
+            if (mCarModeEnabled != enabled) {
+                mCarModeEnabled = enabled;
+                updatePolicyDependenciesLocked();
+                maybeNotifyListenersOfPolicyChange();
             }
         }
     }

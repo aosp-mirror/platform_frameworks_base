@@ -17,8 +17,6 @@
 package com.android.server.wm;
 
 import android.annotation.NonNull;
-import android.graphics.ColorSpace;
-import android.graphics.GraphicBuffer;
 import android.graphics.Matrix;
 import android.graphics.Rect;
 import android.graphics.Region;
@@ -138,17 +136,42 @@ public class StubTransaction extends SurfaceControl.Transaction {
     }
 
     @Override
-    public SurfaceControl.Transaction setBackgroundBlurRadius(SurfaceControl sc, int radius) {
-        return this;
-    }
-
-    @Override
     public SurfaceControl.Transaction setLayerStack(SurfaceControl sc, int layerStack) {
         return this;
     }
 
     @Override
+    public SurfaceControl.Transaction deferTransactionUntil(SurfaceControl sc,
+            SurfaceControl barrier, long frameNumber) {
+        return this;
+    }
+
+    @Override
+    public SurfaceControl.Transaction deferTransactionUntilSurface(SurfaceControl sc,
+            Surface barrierSurface,
+            long frameNumber) {
+        return this;
+    }
+
+    @Override
+    public SurfaceControl.Transaction reparentChildren(SurfaceControl sc,
+            SurfaceControl newParent) {
+        return this;
+    }
+
+    @Override
     public SurfaceControl.Transaction reparent(SurfaceControl sc, SurfaceControl newParent) {
+        return this;
+    }
+
+    @Override
+    public SurfaceControl.Transaction detachChildren(SurfaceControl sc) {
+        return this;
+    }
+
+    @Override
+    public SurfaceControl.Transaction setOverrideScalingMode(SurfaceControl sc,
+            int overrideScalingMode) {
         return this;
     }
 
@@ -194,6 +217,11 @@ public class StubTransaction extends SurfaceControl.Transaction {
     }
 
     @Override
+    public SurfaceControl.Transaction setEarlyWakeup() {
+        return this;
+    }
+
+    @Override
     public SurfaceControl.Transaction setMetadata(SurfaceControl sc, int key, int data) {
         return this;
     }
@@ -230,12 +258,6 @@ public class StubTransaction extends SurfaceControl.Transaction {
     }
 
     @Override
-    public SurfaceControl.Transaction setFrameRate(SurfaceControl sc, float frameRate,
-            int compatibility, int changeFrameRateStrategy) {
-        return this;
-    }
-
-    @Override
     public SurfaceControl.Transaction unsetColor(SurfaceControl sc) {
         return this;
     }
@@ -253,16 +275,6 @@ public class StubTransaction extends SurfaceControl.Transaction {
 
     @Override
     public SurfaceControl.Transaction unsetFixedTransformHint(@NonNull SurfaceControl sc) {
-        return this;
-    }
-
-    @Override
-    public SurfaceControl.Transaction setBuffer(SurfaceControl sc, GraphicBuffer buffer) {
-        return this;
-    }
-
-    @Override
-    public SurfaceControl.Transaction setColorSpace(SurfaceControl sc, ColorSpace colorSpace) {
         return this;
     }
 

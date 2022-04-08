@@ -194,7 +194,7 @@ public class IntegrityFileManagerTest {
         assertThat(rulesFetched.size())
                 .isEqualTo(INDEXING_BLOCK_SIZE * 2 + unindexedRuleCount);
         assertThat(rulesFetched)
-                .containsAtLeast(
+                .containsAllOf(
                         getPackageNameIndexedRule(installedPackageName),
                         getAppCertificateIndexedRule(installedAppCertificate));
     }

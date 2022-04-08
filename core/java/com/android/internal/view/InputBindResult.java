@@ -19,10 +19,12 @@ package com.android.internal.view;
 import static java.lang.annotation.RetentionPolicy.SOURCE;
 
 import android.annotation.IntDef;
+import android.annotation.Nullable;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.graphics.Matrix;
 import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -199,17 +201,37 @@ public final class InputBindResult implements Parcelable {
      */
     public final int sequence;
 
-    public final boolean isInputMethodSuppressingSpellChecker;
+    @Nullable
+    private final float[] mActivityViewToScreenMatrixValues;
+
+    /**
+     * @return {@link Matrix} that corresponds to {@link #mActivityViewToScreenMatrixValues}.
+     *         {@code null} if {@link #mActivityViewToScreenMatrixValues} is {@code null}.
+     */
+    @Nullable
+    public Matrix getActivityViewToScreenMatrix() {
+        if (mActivityViewToScreenMatrixValues == null) {
+            return null;
+        }
+        final Matrix matrix = new Matrix();
+        matrix.setValues(mActivityViewToScreenMatrixValues);
+        return matrix;
+    }
 
     public InputBindResult(@ResultCode int _result,
             IInputMethodSession _method, InputChannel _channel, String _id, int _sequence,
-            boolean isInputMethodSuppressingSpellChecker) {
+            @Nullable Matrix activityViewToScreenMatrix) {
         result = _result;
         method = _method;
         channel = _channel;
         id = _id;
         sequence = _sequence;
-        this.isInputMethodSuppressingSpellChecker = isInputMethodSuppressingSpellChecker;
+        if (activityViewToScreenMatrix == null) {
+            mActivityViewToScreenMatrixValues = null;
+        } else {
+            mActivityViewToScreenMatrixValues = new float[9];
+            activityViewToScreenMatrix.getValues(mActivityViewToScreenMatrixValues);
+        }
     }
 
     InputBindResult(Parcel source) {
@@ -222,14 +244,14 @@ public final class InputBindResult implements Parcelable {
         }
         id = source.readString();
         sequence = source.readInt();
-        isInputMethodSuppressingSpellChecker = source.readBoolean();
+        mActivityViewToScreenMatrixValues = source.createFloatArray();
     }
 
     @Override
     public String toString() {
         return "InputBindResult{result=" + getResultString() + " method="+ method + " id=" + id
                 + " sequence=" + sequence
-                + " isInputMethodSuppressingSpellChecker=" + isInputMethodSuppressingSpellChecker
+                + " activityViewToScreenMatrix=" + getActivityViewToScreenMatrix()
                 + "}";
     }
 
@@ -251,7 +273,7 @@ public final class InputBindResult implements Parcelable {
         }
         dest.writeString(id);
         dest.writeInt(sequence);
-        dest.writeBoolean(isInputMethodSuppressingSpellChecker);
+        dest.writeFloatArray(mActivityViewToScreenMatrixValues);
     }
 
     /**
@@ -318,7 +340,7 @@ public final class InputBindResult implements Parcelable {
     }
 
     private static InputBindResult error(@ResultCode int result) {
-        return new InputBindResult(result, null, null, null, -1, false);
+        return new InputBindResult(result, null, null, null, -1, null);
     }
 
     /**

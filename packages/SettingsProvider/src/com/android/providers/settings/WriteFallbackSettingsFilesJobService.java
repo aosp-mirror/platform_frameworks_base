@@ -35,17 +35,19 @@ import java.util.List;
 public class WriteFallbackSettingsFilesJobService extends JobService {
     @Override
     public boolean onStartJob(final JobParameters params) {
-        if (params.getJobId() != WRITE_FALLBACK_SETTINGS_FILES_JOB_ID) {
-            return false;
+        switch (params.getJobId()) {
+            case WRITE_FALLBACK_SETTINGS_FILES_JOB_ID:
+                final List<String> settingsFiles = new ArrayList<>();
+                settingsFiles.add(params.getExtras().getString(TABLE_GLOBAL, ""));
+                settingsFiles.add(params.getExtras().getString(TABLE_SYSTEM, ""));
+                settingsFiles.add(params.getExtras().getString(TABLE_SECURE, ""));
+                settingsFiles.add(params.getExtras().getString(TABLE_SSAID, ""));
+                settingsFiles.add(params.getExtras().getString(TABLE_CONFIG, ""));
+                SettingsProvider.writeFallBackSettingsFiles(settingsFiles);
+                return true;
+            default:
+                return false;
         }
-        final List<String> settingsFiles = new ArrayList<>();
-        settingsFiles.add(params.getExtras().getString(TABLE_GLOBAL, ""));
-        settingsFiles.add(params.getExtras().getString(TABLE_SYSTEM, ""));
-        settingsFiles.add(params.getExtras().getString(TABLE_SECURE, ""));
-        settingsFiles.add(params.getExtras().getString(TABLE_SSAID, ""));
-        settingsFiles.add(params.getExtras().getString(TABLE_CONFIG, ""));
-        SettingsProvider.writeFallBackSettingsFiles(settingsFiles);
-        return false;
     }
 
     @Override

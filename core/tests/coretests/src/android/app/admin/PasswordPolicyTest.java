@@ -28,7 +28,6 @@ import static android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED
 import static com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_NONE;
 import static com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_PASSWORD;
 import static com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_PATTERN;
-import static com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_PIN;
 
 import static org.junit.Assert.assertEquals;
 
@@ -81,7 +80,7 @@ public class PasswordPolicyTest {
     public void testGetMinMetrics_numeric() {
         PasswordPolicy policy = testPolicy(PASSWORD_QUALITY_NUMERIC);
         PasswordMetrics minMetrics = policy.getMinMetrics();
-        assertEquals(CREDENTIAL_TYPE_PIN, minMetrics.credType);
+        assertEquals(CREDENTIAL_TYPE_PASSWORD, minMetrics.credType);
         assertEquals(TEST_VALUE, minMetrics.length);
         assertEquals(0, minMetrics.numeric); // numeric can doesn't really require digits.
         assertEquals(0, minMetrics.letters);
@@ -105,7 +104,7 @@ public class PasswordPolicyTest {
     public void testGetMinMetrics_numericComplex() {
         PasswordPolicy policy = testPolicy(PASSWORD_QUALITY_NUMERIC_COMPLEX);
         PasswordMetrics minMetrics = policy.getMinMetrics();
-        assertEquals(CREDENTIAL_TYPE_PIN, minMetrics.credType);
+        assertEquals(CREDENTIAL_TYPE_PASSWORD, minMetrics.credType);
         assertEquals(TEST_VALUE, minMetrics.length);
         assertEquals(0, minMetrics.numeric);
         assertEquals(0, minMetrics.letters);

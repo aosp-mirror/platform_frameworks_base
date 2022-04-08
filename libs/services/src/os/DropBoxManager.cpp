@@ -18,9 +18,7 @@
 
 #include <android/os/DropBoxManager.h>
 
-#include <android-base/unique_fd.h>
 #include <binder/IServiceManager.h>
-#include <binder/ParcelFileDescriptor.h>
 #include <com/android/internal/os/IDropBoxManagerService.h>
 #include <cutils/log.h>
 
@@ -180,24 +178,18 @@ DropBoxManager::~DropBoxManager()
 Status
 DropBoxManager::addText(const String16& tag, const string& text)
 {
-    return addData(tag, reinterpret_cast<uint8_t const*>(text.c_str()), text.size(), IS_TEXT);
+    Entry entry(tag, IS_TEXT);
+    entry.mData.assign(text.c_str(), text.c_str() + text.size());
+    return add(entry);
 }
 
 Status
 DropBoxManager::addData(const String16& tag, uint8_t const* data,
         size_t size, int flags)
 {
-    sp<IDropBoxManagerService> service = interface_cast<IDropBoxManagerService>(
-        defaultServiceManager()->getService(android::String16("dropbox")));
-    if (service == NULL) {
-        return Status::fromExceptionCode(Status::EX_NULL_POINTER, "can't find dropbox service");
-    }
-    ALOGD("About to call service->add()");
-    vector<uint8_t> dataArg;
-    dataArg.assign(data, data + size);
-    Status status = service->addData(tag, dataArg, flags);
-    ALOGD("service->add returned %s", status.toString8().string());
-    return status;
+    Entry entry(tag, flags);
+    entry.mData.assign(data, data+size);
+    return add(entry);
 }
 
 Status
@@ -221,15 +213,20 @@ DropBoxManager::addFile(const String16& tag, int fd, int flags)
         ALOGW("DropboxManager: %s", message.c_str());
         return Status::fromExceptionCode(Status::EX_ILLEGAL_STATE, message.c_str());
     }
+    Entry entry(tag, flags, fd);
+    return add(entry);
+}
+
+Status
+DropBoxManager::add(const Entry& entry)
+{
     sp<IDropBoxManagerService> service = interface_cast<IDropBoxManagerService>(
         defaultServiceManager()->getService(android::String16("dropbox")));
     if (service == NULL) {
         return Status::fromExceptionCode(Status::EX_NULL_POINTER, "can't find dropbox service");
     }
     ALOGD("About to call service->add()");
-    android::base::unique_fd uniqueFd(fd);
-    android::os::ParcelFileDescriptor parcelFd(std::move(uniqueFd));
-    Status status = service->addFile(tag, parcelFd, flags);
+    Status status = service->add(entry);
     ALOGD("service->add returned %s", status.toString8().string());
     return status;
 }

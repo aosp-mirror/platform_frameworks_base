@@ -27,11 +27,8 @@ import com.android.ims.internal.IImsCallSession;
  * See MmTelFeature#Listener for more information.
  * {@hide}
  */
- // This interface is not considered oneway because we need to ensure that these operations are
- // processed by telephony before the control flow returns to the ImsService to perform
- // operations on the IImsCallSession.
-interface IImsMmTelListener {
+oneway interface IImsMmTelListener {
     void onIncomingCall(IImsCallSession c, in Bundle extras);
     void onRejectedCall(in ImsCallProfile callProfile, in ImsReasonInfo reason);
-    oneway void onVoiceMessageCountUpdate(int count);
+    void onVoiceMessageCountUpdate(int count);
 }

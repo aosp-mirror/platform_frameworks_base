@@ -18,7 +18,6 @@ package com.android.systemui.statusbar.notification.collection;
 
 import static android.service.notification.NotificationListenerService.REASON_APP_CANCEL;
 import static android.service.notification.NotificationListenerService.REASON_APP_CANCEL_ALL;
-import static android.service.notification.NotificationListenerService.REASON_CANCEL;
 import static android.service.notification.NotificationListenerService.REASON_CANCEL_ALL;
 import static android.service.notification.NotificationListenerService.REASON_CHANNEL_BANNED;
 import static android.service.notification.NotificationListenerService.REASON_CLICK;
@@ -60,7 +59,6 @@ import androidx.annotation.NonNull;
 
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.systemui.Dumpable;
-import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.dump.LogBufferEulogizer;
 import com.android.systemui.statusbar.FeatureFlags;
@@ -100,6 +98,7 @@ import java.util.Queue;
 import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 
 /**
  * Keeps a record of all of the "active" notifications, i.e. the notifications that are currently
@@ -124,7 +123,7 @@ import javax.inject.Inject;
  * events occur.
  */
 @MainThread
-@SysUISingleton
+@Singleton
 public class NotifCollection implements Dumpable {
     private final IStatusBarService mStatusBarService;
     private final SystemClock mClock;
@@ -183,11 +182,6 @@ public class NotifCollection implements Dumpable {
     void setBuildListener(CollectionReadyForBuildListener buildListener) {
         Assert.isMainThread();
         mBuildListener = buildListener;
-    }
-
-    /** @see NotifPipeline#getEntry(String) () */
-    NotificationEntry getEntry(String key) {
-        return mNotificationSet.get(key);
     }
 
     /** @see NotifPipeline#getAllNotifs() */
@@ -259,6 +253,8 @@ public class NotifCollection implements Dumpable {
                 try {
                     mStatusBarService.onNotificationClear(
                             entry.getSbn().getPackageName(),
+                            entry.getSbn().getTag(),
+                            entry.getSbn().getId(),
                             entry.getSbn().getUser().getIdentifier(),
                             entry.getSbn().getKey(),
                             stats.dismissalSurface,
@@ -294,7 +290,6 @@ public class NotifCollection implements Dumpable {
         mLogger.logDismissAll(userId);
 
         try {
-            // TODO(b/169585328): Do not clear media player notifications
             mStatusBarService.onClearAllNotifications(userId);
         } catch (RemoteException e) {
             // system process is dead if we're here.
@@ -464,7 +459,8 @@ public class NotifCollection implements Dumpable {
                             + ": has not been marked for removal"));
         }
 
-        if (cannotBeLifetimeExtended(entry)) {
+        if (isDismissedByUser(entry)) {
+            // User-dismissed notifications cannot be lifetime-extended
             cancelLifetimeExtension(entry);
         } else {
             updateLifetimeExtension(entry);
@@ -587,7 +583,7 @@ public class NotifCollection implements Dumpable {
     }
 
     private void cancelLocalDismissal(NotificationEntry entry) {
-        if (entry.getDismissState() != NOT_DISMISSED) {
+        if (isDismissedByUser(entry)) {
             entry.setDismissState(NOT_DISMISSED);
             if (entry.getSbn().getNotification().isGroupSummary()) {
                 for (NotificationEntry otherEntry : mNotificationSet.values()) {
@@ -673,16 +669,12 @@ public class NotifCollection implements Dumpable {
      * immediately removed from the collection, but can sometimes stick around due to lifetime
      * extenders.
      */
-    private boolean isCanceled(NotificationEntry entry) {
+    private static boolean isCanceled(NotificationEntry entry) {
         return entry.mCancellationReason != REASON_NOT_CANCELED;
     }
 
-    private boolean cannotBeLifetimeExtended(NotificationEntry entry) {
-        final boolean locallyDismissedByUser = entry.getDismissState() != NOT_DISMISSED;
-        final boolean systemServerReportedUserCancel =
-                entry.mCancellationReason == REASON_CLICK
-                        || entry.mCancellationReason == REASON_CANCEL;
-        return locallyDismissedByUser || systemServerReportedUserCancel;
+    private static boolean isDismissedByUser(NotificationEntry entry) {
+        return entry.getDismissState() != NOT_DISMISSED;
     }
 
     /**

@@ -24,8 +24,7 @@
 
 namespace android {
 
-extern void android_server_PowerManagerService_userActivity(nsecs_t eventTime, int32_t eventType,
-                                                            int32_t displayId);
+extern void android_server_PowerManagerService_userActivity(nsecs_t eventTime, int32_t eventType);
 
 } // namespace android
 

@@ -18,6 +18,8 @@ package android.service.voice;
 
 import android.os.Bundle;
 
+import android.service.voice.IVoiceInteractionSession;
+
 /**
  * @hide
  */

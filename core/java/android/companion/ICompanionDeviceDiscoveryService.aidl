@@ -23,7 +23,7 @@ import com.android.internal.infra.AndroidFuture;
 
 
 /** @hide */
-oneway interface ICompanionDeviceDiscoveryService {
+interface ICompanionDeviceDiscoveryService {
     void startDiscovery(
         in AssociationRequest request,
         in String callingPackage,

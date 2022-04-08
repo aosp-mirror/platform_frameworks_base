@@ -29,8 +29,6 @@ import android.util.Log;
 
 import com.android.internal.util.FileRotator.Reader;
 import com.android.internal.util.FileRotator.Writer;
-import com.android.internal.util.test.FsUtil;
-
 import com.google.android.collect.Lists;
 
 import java.io.DataInputStream;
@@ -40,9 +38,14 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.ProtocolException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Random;
+
+import junit.framework.Assert;
+
+import libcore.io.IoUtils;
 
 /**
  * Tests for {@link FileRotator}.
@@ -64,7 +67,7 @@ public class FileRotatorTest extends AndroidTestCase {
         super.setUp();
 
         mBasePath = getContext().getFilesDir();
-        FsUtil.deleteContents(mBasePath);
+        IoUtils.deleteContents(mBasePath);
     }
 
     public void testEmpty() throws Exception {

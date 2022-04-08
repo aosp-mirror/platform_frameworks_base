@@ -18,7 +18,6 @@ package android.telecom;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.net.Uri;
@@ -68,8 +67,7 @@ public final class ConnectionRequest implements Parcelable {
          * Sets the participants for the resulting {@link ConnectionRequest}
          * @param participants The participants to which the {@link Connection} is to connect.
          */
-        public @NonNull Builder setParticipants(
-                @SuppressLint("NullableCollection") @Nullable List<Uri> participants) {
+        public @NonNull Builder setParticipants(@Nullable List<Uri> participants) {
             this.mParticipants = participants;
             return this;
         }

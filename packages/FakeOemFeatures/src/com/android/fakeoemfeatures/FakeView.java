@@ -26,7 +26,7 @@ import android.os.Message;
 import android.view.View;
 
 /**
- * Fake view to emulate stuff an OEM may want to do.
+ * Dummy view to emulate stuff an OEM may want to do.
  */
 public class FakeView extends View {
     static final long TICK_DELAY = 30*1000; // 30 seconds

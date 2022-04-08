@@ -16,15 +16,13 @@
 
 package com.android.server.job.controllers;
 
-import static com.android.server.job.JobSchedulerService.sElapsedRealtimeClock;
-
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.UserHandle;
 import android.util.ArraySet;
-import android.util.IndentingPrintWriter;
 import android.util.proto.ProtoOutputStream;
 
+import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.job.JobSchedulerService;
 import com.android.server.job.StateControllerProto;
 import com.android.server.job.controllers.idle.CarIdlenessTracker;
@@ -60,10 +58,9 @@ public final class IdleController extends RestrictingController implements Idlen
     @Override
     public void maybeStartTrackingJobLocked(JobStatus taskStatus, JobStatus lastJob) {
         if (taskStatus.hasIdleConstraint()) {
-            final long nowElapsed = sElapsedRealtimeClock.millis();
             mTrackedTasks.add(taskStatus);
             taskStatus.setTrackingController(JobStatus.TRACKING_IDLE);
-            taskStatus.setIdleConstraintSatisfied(nowElapsed, mIdleTracker.isIdle());
+            taskStatus.setIdleConstraintSatisfied(mIdleTracker.isIdle());
         }
     }
 
@@ -93,9 +90,8 @@ public final class IdleController extends RestrictingController implements Idlen
     @Override
     public void reportNewIdleState(boolean isIdle) {
         synchronized (mLock) {
-            final long nowElapsed = sElapsedRealtimeClock.millis();
             for (int i = mTrackedTasks.size()-1; i >= 0; i--) {
-                mTrackedTasks.valueAt(i).setIdleConstraintSatisfied(nowElapsed, isIdle);
+                mTrackedTasks.valueAt(i).setIdleConstraintSatisfied(isIdle);
             }
         }
         mStateChangedListener.onControllerStateChanged();

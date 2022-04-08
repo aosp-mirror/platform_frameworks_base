@@ -16,7 +16,7 @@
 
 #define LOG_TAG "LocalSocketImpl"
 
-#include <nativehelper/JNIPlatformHelp.h>
+#include <nativehelper/JNIHelp.h>
 #include "jni.h"
 #include "utils/Log.h"
 #include "utils/misc.h"

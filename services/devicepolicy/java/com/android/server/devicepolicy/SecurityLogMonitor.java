@@ -226,7 +226,7 @@ class SecurityLogMonitor implements Runnable {
 
         Slog.i(TAG, "Resumed.");
         try {
-            notifyDeviceOwnerOrProfileOwnerIfNeeded(false /* force */);
+            notifyDeviceOwnerIfNeeded(false /* force */);
         } catch (InterruptedException e) {
             Log.w(TAG, "Thread interrupted.", e);
         }
@@ -439,7 +439,7 @@ class SecurityLogMonitor implements Runnable {
 
                 saveLastEvents(newLogs);
                 newLogs.clear();
-                notifyDeviceOwnerOrProfileOwnerIfNeeded(force);
+                notifyDeviceOwnerIfNeeded(force);
             } catch (IOException e) {
                 Log.e(TAG, "Failed to read security log", e);
             } catch (InterruptedException e) {
@@ -460,9 +460,8 @@ class SecurityLogMonitor implements Runnable {
         Slog.i(TAG, "MonitorThread exit.");
     }
 
-    private void notifyDeviceOwnerOrProfileOwnerIfNeeded(boolean force)
-            throws InterruptedException {
-        boolean allowRetrievalAndNotifyDOOrPO = false;
+    private void notifyDeviceOwnerIfNeeded(boolean force) throws InterruptedException {
+        boolean allowRetrievalAndNotifyDO = false;
         mLock.lockInterruptibly();
         try {
             if (mPaused) {
@@ -472,16 +471,16 @@ class SecurityLogMonitor implements Runnable {
             if (logSize >= BUFFER_ENTRIES_NOTIFICATION_LEVEL || (force && logSize > 0)) {
                 // Allow DO to retrieve logs if too many pending logs or if forced.
                 if (!mAllowedToRetrieve) {
-                    allowRetrievalAndNotifyDOOrPO = true;
+                    allowRetrievalAndNotifyDO = true;
                 }
                 if (DEBUG) Slog.d(TAG, "Number of log entries over threshold: " + logSize);
             }
             if (logSize > 0 && SystemClock.elapsedRealtime() >= mNextAllowedRetrievalTimeMillis) {
                 // Rate limit reset
-                allowRetrievalAndNotifyDOOrPO = true;
+                allowRetrievalAndNotifyDO = true;
                 if (DEBUG) Slog.d(TAG, "Timeout reached");
             }
-            if (allowRetrievalAndNotifyDOOrPO) {
+            if (allowRetrievalAndNotifyDO) {
                 mAllowedToRetrieve = true;
                 // Set the timeout to retry the notification if the DO misses it.
                 mNextAllowedRetrievalTimeMillis = SystemClock.elapsedRealtime()
@@ -490,10 +489,10 @@ class SecurityLogMonitor implements Runnable {
         } finally {
             mLock.unlock();
         }
-        if (allowRetrievalAndNotifyDOOrPO) {
-            Slog.i(TAG, "notify DO or PO");
-            mService.sendDeviceOwnerOrProfileOwnerCommand(
-                    DeviceAdminReceiver.ACTION_SECURITY_LOGS_AVAILABLE, null, mEnabledUser);
+        if (allowRetrievalAndNotifyDO) {
+            Slog.i(TAG, "notify DO");
+            mService.sendDeviceOwnerCommand(DeviceAdminReceiver.ACTION_SECURITY_LOGS_AVAILABLE,
+                    null);
         }
     }
 

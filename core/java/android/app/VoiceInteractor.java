@@ -37,6 +37,7 @@ import com.android.internal.app.IVoiceInteractorCallback;
 import com.android.internal.app.IVoiceInteractorRequest;
 import com.android.internal.os.HandlerCaller;
 import com.android.internal.os.SomeArgs;
+import com.android.internal.util.Preconditions;
 import com.android.internal.util.function.pooled.PooledLambda;
 
 import java.io.FileDescriptor;
@@ -76,6 +77,8 @@ public final class VoiceInteractor {
 
     /** @hide */
     public static final String KEY_CANCELLATION_SIGNAL = "key_cancellation_signal";
+    /** @hide */
+    public static final String KEY_KILL_SIGNAL = "key_kill_signal";
 
     @Nullable IVoiceInteractor mInteractor;
 

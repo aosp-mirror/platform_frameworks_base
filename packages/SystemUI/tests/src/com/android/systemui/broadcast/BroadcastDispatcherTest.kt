@@ -18,6 +18,7 @@ package com.android.systemui.broadcast
 
 import android.content.BroadcastReceiver
 import android.content.Context
+import android.content.Intent
 import android.content.IntentFilter
 import android.os.Handler
 import android.os.Looper
@@ -29,7 +30,6 @@ import android.testing.TestableLooper
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.broadcast.logging.BroadcastDispatcherLogger
 import com.android.systemui.dump.DumpManager
-import com.android.systemui.settings.UserTracker
 import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.time.FakeSystemClock
 import junit.framework.Assert.assertSame
@@ -80,8 +80,6 @@ class BroadcastDispatcherTest : SysuiTestCase() {
     private lateinit var mockHandler: Handler
     @Mock
     private lateinit var logger: BroadcastDispatcherLogger
-    @Mock
-    private lateinit var userTracker: UserTracker
 
     private lateinit var executor: Executor
 
@@ -103,7 +101,6 @@ class BroadcastDispatcherTest : SysuiTestCase() {
                 mock(Executor::class.java),
                 mock(DumpManager::class.java),
                 logger,
-                userTracker,
                 mapOf(0 to mockUBRUser0, 1 to mockUBRUser1))
 
         // These should be valid filters
@@ -181,7 +178,11 @@ class BroadcastDispatcherTest : SysuiTestCase() {
 
     @Test
     fun testRegisterCurrentAsActualUser() {
-        `when`(userTracker.userId).thenReturn(user1.identifier)
+        val intent = Intent(Intent.ACTION_USER_SWITCHED).apply {
+            putExtra(Intent.EXTRA_USER_HANDLE, user1.identifier)
+        }
+        broadcastDispatcher.onReceive(mockContext, intent)
+        testableLooper.processAllMessages()
 
         broadcastDispatcher.registerReceiverWithHandler(broadcastReceiver, intentFilter,
                 mockHandler, UserHandle.CURRENT)
@@ -249,9 +250,8 @@ class BroadcastDispatcherTest : SysuiTestCase() {
         executor: Executor,
         dumpManager: DumpManager,
         logger: BroadcastDispatcherLogger,
-        userTracker: UserTracker,
         var mockUBRMap: Map<Int, UserBroadcastDispatcher>
-    ) : BroadcastDispatcher(context, bgLooper, executor, dumpManager, logger, userTracker) {
+    ) : BroadcastDispatcher(context, bgLooper, executor, dumpManager, logger) {
         override fun createUBRForUser(userId: Int): UserBroadcastDispatcher {
             return mockUBRMap.getOrDefault(userId, mock(UserBroadcastDispatcher::class.java))
         }

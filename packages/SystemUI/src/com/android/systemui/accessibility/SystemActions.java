@@ -16,7 +16,7 @@
 
 package com.android.systemui.accessibility;
 
-import static android.view.WindowManager.ScreenshotSource.SCREENSHOT_ACCESSIBILITY_ACTIONS;
+import static android.view.WindowManager.ScreenshotSource.SCREENSHOT_GLOBAL_ACTIONS;
 
 import static com.android.internal.accessibility.common.ShortcutConstants.CHOOSER_PACKAGE_NAME;
 
@@ -49,25 +49,20 @@ import android.view.accessibility.AccessibilityManager;
 import com.android.internal.R;
 import com.android.internal.accessibility.dialog.AccessibilityButtonChooserActivity;
 import com.android.internal.util.ScreenshotHelper;
+import com.android.systemui.Dependency;
 import com.android.systemui.SystemUI;
-import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.recents.Recents;
-import com.android.systemui.statusbar.CommandQueue;
-import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.phone.StatusBar;
-import com.android.systemui.statusbar.phone.StatusBarWindowCallback;
-import com.android.systemui.util.Assert;
 
 import java.util.Locale;
 
 import javax.inject.Inject;
-
-import dagger.Lazy;
+import javax.inject.Singleton;
 
 /**
  * Class to register system actions with accessibility framework.
  */
-@SysUISingleton
+@Singleton
 public class SystemActions extends SystemUI {
     private static final String TAG = "SystemActions";
 
@@ -133,42 +128,27 @@ public class SystemActions extends SystemUI {
     public static final int SYSTEM_ACTION_ID_ACCESSIBILITY_SHORTCUT =
             AccessibilityService.GLOBAL_ACTION_ACCESSIBILITY_SHORTCUT; // 13
 
-    public static final int SYSTEM_ACTION_ID_ACCESSIBILITY_DISMISS_NOTIFICATION_SHADE =
-            AccessibilityService.GLOBAL_ACTION_DISMISS_NOTIFICATION_SHADE; // 15
-
     private static final String PERMISSION_SELF = "com.android.systemui.permission.SELF";
 
-    private final SystemActionsBroadcastReceiver mReceiver;
-    private final Recents mRecents;
+    private Recents mRecents;
+    private StatusBar mStatusBar;
+    private SystemActionsBroadcastReceiver mReceiver;
     private Locale mLocale;
-    private final AccessibilityManager mA11yManager;
-    private final Lazy<StatusBar> mStatusBar;
-    private final NotificationShadeWindowController mNotificationShadeController;
-    private final StatusBarWindowCallback mNotificationShadeCallback;
-    private boolean mDismissNotificationShadeActionRegistered;
+    private AccessibilityManager mA11yManager;
 
     @Inject
-    public SystemActions(Context context,
-            NotificationShadeWindowController notificationShadeController,
-            Lazy<StatusBar> statusBar,
-            Recents recents) {
+    public SystemActions(Context context) {
         super(context);
-        mRecents = recents;
+        mRecents = Dependency.get(Recents.class);
+        mStatusBar = Dependency.get(StatusBar.class);
         mReceiver = new SystemActionsBroadcastReceiver();
         mLocale = mContext.getResources().getConfiguration().getLocales().get(0);
         mA11yManager = (AccessibilityManager) mContext.getSystemService(
                 Context.ACCESSIBILITY_SERVICE);
-        mNotificationShadeController = notificationShadeController;
-        // Saving in instance variable since to prevent GC since
-        // NotificationShadeWindowController.registerCallback() only keeps weak references.
-        mNotificationShadeCallback = (keyguardShowing, keyguardOccluded, bouncerShowing) ->
-                registerOrUnregisterDismissNotificationShadeAction();
-        mStatusBar = statusBar;
     }
 
     @Override
     public void start() {
-        mNotificationShadeController.registerCallback(mNotificationShadeCallback);
         mContext.registerReceiverForAllUsers(
                 mReceiver,
                 mReceiver.createIntentFilter(),
@@ -234,32 +214,6 @@ public class SystemActions extends SystemUI {
         mA11yManager.registerSystemAction(actionTakeScreenshot, SYSTEM_ACTION_ID_TAKE_SCREENSHOT);
         mA11yManager.registerSystemAction(
                 actionAccessibilityShortcut, SYSTEM_ACTION_ID_ACCESSIBILITY_SHORTCUT);
-        registerOrUnregisterDismissNotificationShadeAction();
-    }
-
-    private void registerOrUnregisterDismissNotificationShadeAction() {
-        Assert.isMainThread();
-
-        // Saving state in instance variable since this callback is called quite often to avoid
-        // binder calls
-        StatusBar statusBar = mStatusBar.get();
-        if (statusBar.isPanelExpanded() && !statusBar.isKeyguardShowing()) {
-            if (!mDismissNotificationShadeActionRegistered) {
-                mA11yManager.registerSystemAction(
-                        createRemoteAction(
-                                R.string.accessibility_system_action_dismiss_notification_shade,
-                                SystemActionsBroadcastReceiver
-                                        .INTENT_ACTION_ACCESSIBILITY_DISMISS_NOTIFICATION_SHADE),
-                        SYSTEM_ACTION_ID_ACCESSIBILITY_DISMISS_NOTIFICATION_SHADE);
-                mDismissNotificationShadeActionRegistered = true;
-            }
-        } else {
-            if (mDismissNotificationShadeActionRegistered) {
-                mA11yManager.unregisterSystemAction(
-                        SYSTEM_ACTION_ID_ACCESSIBILITY_DISMISS_NOTIFICATION_SHADE);
-                mDismissNotificationShadeActionRegistered = false;
-            }
-        }
     }
 
     /**
@@ -311,14 +265,9 @@ public class SystemActions extends SystemUI {
                         R.string.accessibility_system_action_on_screen_a11y_shortcut_chooser_label;
                 intent = SystemActionsBroadcastReceiver.INTENT_ACTION_ACCESSIBILITY_BUTTON_CHOOSER;
                 break;
-            case SYSTEM_ACTION_ID_ACCESSIBILITY_SHORTCUT:
+            case  SYSTEM_ACTION_ID_ACCESSIBILITY_SHORTCUT:
                 labelId = R.string.accessibility_system_action_hardware_a11y_shortcut_label;
                 intent = SystemActionsBroadcastReceiver.INTENT_ACTION_ACCESSIBILITY_SHORTCUT;
-                break;
-            case SYSTEM_ACTION_ID_ACCESSIBILITY_DISMISS_NOTIFICATION_SHADE:
-                labelId = R.string.accessibility_system_action_dismiss_notification_shade;
-                intent = SystemActionsBroadcastReceiver
-                        .INTENT_ACTION_ACCESSIBILITY_DISMISS_NOTIFICATION_SHADE;
                 break;
             default:
                 return;
@@ -372,11 +321,11 @@ public class SystemActions extends SystemUI {
     }
 
     private void handleNotifications() {
-        mStatusBar.get().animateExpandNotificationsPanel();
+        mStatusBar.animateExpandNotificationsPanel();
     }
 
     private void handleQuickSettings() {
-        mStatusBar.get().animateExpandSettingsPanel(null);
+        mStatusBar.animateExpandSettingsPanel(null);
     }
 
     private void handlePowerDialog() {
@@ -404,7 +353,7 @@ public class SystemActions extends SystemUI {
     private void handleTakeScreenshot() {
         ScreenshotHelper screenshotHelper = new ScreenshotHelper(mContext);
         screenshotHelper.takeScreenshot(WindowManager.TAKE_SCREENSHOT_FULLSCREEN, true, true,
-                SCREENSHOT_ACCESSIBILITY_ACTIONS, new Handler(Looper.getMainLooper()), null);
+                SCREENSHOT_GLOBAL_ACTIONS, new Handler(Looper.getMainLooper()), null);
     }
 
     private void handleAccessibilityButton() {
@@ -424,10 +373,6 @@ public class SystemActions extends SystemUI {
         mA11yManager.performAccessibilityShortcut();
     }
 
-    private void handleAccessibilityDismissNotificationShade() {
-        mStatusBar.get().animateCollapsePanels(CommandQueue.FLAG_EXCLUDE_NONE, false /* force */);
-    }
-
     private class SystemActionsBroadcastReceiver extends BroadcastReceiver {
         private static final String INTENT_ACTION_BACK = "SYSTEM_ACTION_BACK";
         private static final String INTENT_ACTION_HOME = "SYSTEM_ACTION_HOME";
@@ -443,8 +388,6 @@ public class SystemActions extends SystemUI {
                 "SYSTEM_ACTION_ACCESSIBILITY_BUTTON_MENU";
         private static final String INTENT_ACTION_ACCESSIBILITY_SHORTCUT =
                 "SYSTEM_ACTION_ACCESSIBILITY_SHORTCUT";
-        private static final String INTENT_ACTION_ACCESSIBILITY_DISMISS_NOTIFICATION_SHADE =
-                "SYSTEM_ACTION_ACCESSIBILITY_DISMISS_NOTIFICATION_SHADE";
 
         private PendingIntent createPendingIntent(Context context, String intentAction) {
             switch (intentAction) {
@@ -458,12 +401,10 @@ public class SystemActions extends SystemUI {
                 case INTENT_ACTION_TAKE_SCREENSHOT:
                 case INTENT_ACTION_ACCESSIBILITY_BUTTON:
                 case INTENT_ACTION_ACCESSIBILITY_BUTTON_CHOOSER:
-                case INTENT_ACTION_ACCESSIBILITY_SHORTCUT:
-                case INTENT_ACTION_ACCESSIBILITY_DISMISS_NOTIFICATION_SHADE: {
+                case INTENT_ACTION_ACCESSIBILITY_SHORTCUT: {
                     Intent intent = new Intent(intentAction);
                     intent.setPackage(context.getPackageName());
-                    return PendingIntent.getBroadcast(context, 0, intent,
-                            PendingIntent.FLAG_IMMUTABLE);
+                    return PendingIntent.getBroadcast(context, 0, intent, 0);
                 }
                 default:
                     break;
@@ -484,7 +425,6 @@ public class SystemActions extends SystemUI {
             intentFilter.addAction(INTENT_ACTION_ACCESSIBILITY_BUTTON);
             intentFilter.addAction(INTENT_ACTION_ACCESSIBILITY_BUTTON_CHOOSER);
             intentFilter.addAction(INTENT_ACTION_ACCESSIBILITY_SHORTCUT);
-            intentFilter.addAction(INTENT_ACTION_ACCESSIBILITY_DISMISS_NOTIFICATION_SHADE);
             return intentFilter;
         }
 
@@ -534,10 +474,6 @@ public class SystemActions extends SystemUI {
                 }
                 case INTENT_ACTION_ACCESSIBILITY_SHORTCUT: {
                     handleAccessibilityShortcut();
-                    break;
-                }
-                case INTENT_ACTION_ACCESSIBILITY_DISMISS_NOTIFICATION_SHADE: {
-                    handleAccessibilityDismissNotificationShade();
                     break;
                 }
                 default:

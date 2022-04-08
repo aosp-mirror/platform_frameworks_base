@@ -16,11 +16,10 @@
 
 package android.content;
 
-import android.accounts.Account;
-import android.annotation.Nullable;
+import android.os.Parcelable;
 import android.os.Bundle;
 import android.os.Parcel;
-import android.os.Parcelable;
+import android.accounts.Account;
 
 import java.util.Objects;
 
@@ -118,7 +117,7 @@ public class PeriodicSync implements Parcelable {
     };
 
     @Override
-    public boolean equals(@Nullable Object o) {
+    public boolean equals(Object o) {
         if (o == this) {
             return true;
         }

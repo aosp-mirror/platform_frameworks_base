@@ -16,22 +16,20 @@
 
 package com.android.systemui.doze;
 
-import com.android.keyguard.KeyguardUpdateMonitor;
-import com.android.systemui.doze.dagger.DozeScope;
+import android.content.Context;
 
-import javax.inject.Inject;
+import com.android.keyguard.KeyguardUpdateMonitor;
+import com.android.systemui.Dependency;
 
 /**
  * Controls removing Keyguard authorization when the phone goes to sleep.
  */
-@DozeScope
 public class DozeAuthRemover implements DozeMachine.Part {
 
     private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
 
-    @Inject
-    public DozeAuthRemover(KeyguardUpdateMonitor keyguardUpdateMonitor) {
-        mKeyguardUpdateMonitor = keyguardUpdateMonitor;
+    public DozeAuthRemover(Context context) {
+        mKeyguardUpdateMonitor = Dependency.get(KeyguardUpdateMonitor.class);
     }
 
     @Override

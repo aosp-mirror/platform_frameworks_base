@@ -71,7 +71,7 @@ public class NativeActivity extends Activity implements SurfaceHolder.Callback2,
     private NativeContentView mNativeContentView;
     private InputMethodManager mIMM;
 
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     private long mNativeHandle;
     
     private InputQueue mCurInputQueue;
@@ -87,7 +87,7 @@ public class NativeActivity extends Activity implements SurfaceHolder.Callback2,
 
     private boolean mDestroyed;
     
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     private native long loadNativeCode(String path, String funcname, MessageQueue queue,
             String internalDataPath, String obbPath, String externalDataPath, int sdkVersion,
             AssetManager assetMgr, byte[] savedState, ClassLoader classLoader, String libraryPath);
@@ -315,22 +315,22 @@ public class NativeActivity extends Activity implements SurfaceHolder.Callback2,
         }
     }
 
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     void setWindowFlags(int flags, int mask) {
         getWindow().setFlags(flags, mask);
     }
     
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     void setWindowFormat(int format) {
         getWindow().setFormat(format);
     }
 
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     void showIme(int mode) {
         mIMM.showSoftInput(mNativeContentView, mode);
     }
 
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     void hideIme(int mode) {
         mIMM.hideSoftInputFromWindow(mNativeContentView.getWindowToken(), mode);
     }

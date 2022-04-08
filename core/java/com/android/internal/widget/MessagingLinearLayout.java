@@ -17,7 +17,6 @@
 package com.android.internal.widget;
 
 import android.annotation.Nullable;
-import android.annotation.Px;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
@@ -250,16 +249,6 @@ public class MessagingLinearLayout extends ViewGroup {
             }
         }
         return super.drawChild(canvas, child, drawingTime);
-    }
-
-    /**
-     * Set the spacing to be applied between views.
-     */
-    public void setSpacing(@Px int spacing) {
-        if (mSpacing != spacing) {
-            mSpacing = spacing;
-            requestLayout();
-        }
     }
 
     @Override

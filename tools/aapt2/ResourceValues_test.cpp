@@ -62,8 +62,7 @@ TEST(ResourceValuesTest, PluralClone) {
   a.values[Plural::One] = util::make_unique<String>(pool.MakeRef("one"));
   a.values[Plural::Other] = util::make_unique<String>(pool.MakeRef("other"));
 
-  CloningValueTransformer cloner(&pool);
-  std::unique_ptr<Plural> b(a.Transform(cloner));
+  std::unique_ptr<Plural> b(a.Clone(&pool));
   EXPECT_TRUE(a.Equals(b.get()));
 }
 
@@ -98,8 +97,7 @@ TEST(ResourceValuesTest, ArrayClone) {
   a.elements.push_back(util::make_unique<String>(pool.MakeRef("one")));
   a.elements.push_back(util::make_unique<String>(pool.MakeRef("two")));
 
-  CloningValueTransformer cloner(&pool);
-  std::unique_ptr<Array> b(a.Transform(cloner));
+  std::unique_ptr<Array> b(a.Clone(&pool));
   EXPECT_TRUE(a.Equals(b.get()));
 }
 
@@ -162,8 +160,7 @@ TEST(ResourceValuesTest, StyleClone) {
       .AddItem("android:attr/bar", ResourceUtils::TryParseInt("2"))
       .Build();
 
-  CloningValueTransformer cloner(nullptr);
-  std::unique_ptr<Style> b(a->Transform(cloner));
+  std::unique_ptr<Style> b(a->Clone(nullptr));
   EXPECT_TRUE(a->Equals(b.get()));
 }
 
@@ -177,8 +174,7 @@ TEST(ResourcesValuesTest, StringClones) {
   EXPECT_THAT(pool_a.strings()[0]->context.config, Eq(test::ParseConfigOrDie("en")));
   EXPECT_THAT(pool_a.strings()[0]->value, StrEq("hello"));
 
-  CloningValueTransformer cloner(&pool_b);
-  str_a.Transform(cloner);
+  std::unique_ptr<String> str_b(str_a.Clone(&pool_b));
   ASSERT_THAT(pool_b, SizeIs(1u));
   EXPECT_THAT(pool_b.strings()[0]->context.config, Eq(test::ParseConfigOrDie("en")));
   EXPECT_THAT(pool_b.strings()[0]->value, StrEq("hello"));

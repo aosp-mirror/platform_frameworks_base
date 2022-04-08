@@ -22,7 +22,6 @@ import android.annotation.Nullable;
 import android.apex.ApexInfo;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
-import android.content.pm.Attribution;
 import android.content.pm.ComponentInfo;
 import android.content.pm.ConfigurationInfo;
 import android.content.pm.FallbackCategoryProvider;
@@ -41,10 +40,8 @@ import android.content.pm.SELinuxUtil;
 import android.content.pm.ServiceInfo;
 import android.content.pm.Signature;
 import android.content.pm.SigningInfo;
-import android.content.pm.overlay.OverlayPaths;
 import android.content.pm.parsing.component.ComponentParseUtils;
 import android.content.pm.parsing.component.ParsedActivity;
-import android.content.pm.parsing.component.ParsedAttribution;
 import android.content.pm.parsing.component.ParsedComponent;
 import android.content.pm.parsing.component.ParsedInstrumentation;
 import android.content.pm.parsing.component.ParsedMainComponent;
@@ -52,7 +49,6 @@ import android.content.pm.parsing.component.ParsedPermission;
 import android.content.pm.parsing.component.ParsedPermissionGroup;
 import android.content.pm.parsing.component.ParsedProvider;
 import android.content.pm.parsing.component.ParsedService;
-import android.content.pm.parsing.component.ParsedUsesPermission;
 import android.os.Environment;
 import android.os.UserHandle;
 
@@ -62,14 +58,10 @@ import libcore.util.EmptyArray;
 
 import java.io.File;
 import java.util.Collections;
-import java.util.List;
 import java.util.Set;
 
 /** @hide **/
 public class PackageInfoWithoutStateUtils {
-
-    public static final String SYSTEM_DATA_PATH =
-            Environment.getDataDirectoryPath() + File.separator + "system";
 
     @Nullable
     public static PackageInfo generate(ParsingPackageRead pkg, int[] gids,
@@ -176,8 +168,7 @@ public class PackageInfoWithoutStateUtils {
                 info.instrumentation = new InstrumentationInfo[N];
                 for (int i = 0; i < N; i++) {
                     info.instrumentation[i] = generateInstrumentationInfo(
-                            pkg.getInstrumentations().get(i), pkg, flags, userId,
-                            true /* assignUserFields */);
+                            pkg.getInstrumentations().get(i), pkg, flags, userId);
                 }
             }
         }
@@ -266,48 +257,20 @@ public class PackageInfoWithoutStateUtils {
                             flags);
                 }
             }
-            final List<ParsedUsesPermission> usesPermissions = pkg.getUsesPermissions();
-            size = usesPermissions.size();
+            size = pkg.getRequestedPermissions().size();
             if (size > 0) {
                 pi.requestedPermissions = new String[size];
                 pi.requestedPermissionsFlags = new int[size];
                 for (int i = 0; i < size; i++) {
-                    final ParsedUsesPermission usesPermission = usesPermissions.get(i);
-                    pi.requestedPermissions[i] = usesPermission.name;
+                    final String perm = pkg.getRequestedPermissions().get(i);
+                    pi.requestedPermissions[i] = perm;
                     // The notion of required permissions is deprecated but for compatibility.
-                    pi.requestedPermissionsFlags[i] |=
-                            PackageInfo.REQUESTED_PERMISSION_REQUIRED;
-                    if (grantedPermissions != null
-                            && grantedPermissions.contains(usesPermission.name)) {
-                        pi.requestedPermissionsFlags[i] |=
-                                PackageInfo.REQUESTED_PERMISSION_GRANTED;
-                    }
-                    if ((usesPermission.usesPermissionFlags
-                            & ParsedUsesPermission.FLAG_NEVER_FOR_LOCATION) != 0) {
-                        pi.requestedPermissionsFlags[i] |=
-                                PackageInfo.REQUESTED_PERMISSION_NEVER_FOR_LOCATION;
+                    pi.requestedPermissionsFlags[i] |= PackageInfo.REQUESTED_PERMISSION_REQUIRED;
+                    if (grantedPermissions != null && grantedPermissions.contains(perm)) {
+                        pi.requestedPermissionsFlags[i] |= PackageInfo.REQUESTED_PERMISSION_GRANTED;
                     }
                 }
             }
-        }
-        if ((flags & PackageManager.GET_ATTRIBUTIONS) != 0) {
-            int size = ArrayUtils.size(pkg.getAttributions());
-            if (size > 0) {
-                pi.attributions = new Attribution[size];
-                for (int i = 0; i < size; i++) {
-                    pi.attributions[i] = generateAttribution(pkg.getAttributions().get(i));
-                }
-            }
-            if (pkg.areAttributionsUserVisible()) {
-                pi.applicationInfo.privateFlagsExt
-                        |= ApplicationInfo.PRIVATE_FLAG_EXT_ATTRIBUTIONS_ARE_USER_VISIBLE;
-            } else {
-                pi.applicationInfo.privateFlagsExt
-                        &= ~ApplicationInfo.PRIVATE_FLAG_EXT_ATTRIBUTIONS_ARE_USER_VISIBLE;
-            }
-        } else {
-            pi.applicationInfo.privateFlagsExt
-                    &= ~ApplicationInfo.PRIVATE_FLAG_EXT_ATTRIBUTIONS_ARE_USER_VISIBLE;
         }
 
         if (apexInfo != null) {
@@ -317,10 +280,8 @@ public class PackageInfoWithoutStateUtils {
             pi.applicationInfo.publicSourceDir = apexFile.getPath();
             if (apexInfo.isFactory) {
                 pi.applicationInfo.flags |= ApplicationInfo.FLAG_SYSTEM;
-                pi.applicationInfo.flags &= ~ApplicationInfo.FLAG_UPDATED_SYSTEM_APP;
             } else {
                 pi.applicationInfo.flags &= ~ApplicationInfo.FLAG_SYSTEM;
-                pi.applicationInfo.flags |= ApplicationInfo.FLAG_UPDATED_SYSTEM_APP;
             }
             if (apexInfo.isActive) {
                 pi.applicationInfo.flags |= ApplicationInfo.FLAG_INSTALLED;
@@ -371,8 +332,7 @@ public class PackageInfoWithoutStateUtils {
             return null;
         }
 
-        return generateApplicationInfoUnchecked(pkg, flags, state, userId,
-                true /* assignUserFields */);
+        return generateApplicationInfoUnchecked(pkg, flags, state, userId);
     }
 
     /**
@@ -380,23 +340,15 @@ public class PackageInfoWithoutStateUtils {
      * system server.
      *
      * Prefer {@link #generateApplicationInfo(ParsingPackageRead, int, PackageUserState, int)}.
-     *
-     * @param assignUserFields whether to fill the returned {@link ApplicationInfo} with user
-     *                         specific fields. This can be skipped when building from a system
-     *                         server package, as there are cached strings which can be used rather
-     *                         than querying and concatenating the comparatively expensive
-     *                         {@link Environment#getDataDirectory(String)}}.
      */
     @NonNull
     public static ApplicationInfo generateApplicationInfoUnchecked(@NonNull ParsingPackageRead pkg,
-            @PackageManager.ApplicationInfoFlags int flags, PackageUserState state, int userId,
-            boolean assignUserFields) {
+            @PackageManager.ApplicationInfoFlags int flags, PackageUserState state, int userId) {
         // Make shallow copy so we can store the metadata/libraries safely
         ApplicationInfo ai = pkg.toAppInfoWithoutState();
-
-        if (assignUserFields) {
-            assignUserFields(pkg, ai, userId);
-        }
+        // Init handles data directories
+        // TODO(b/135203078): Consolidate the data directory logic, remove initForUser
+        ai.initForUser(userId);
 
         if ((flags & PackageManager.GET_META_DATA) == 0) {
             ai.metaData = null;
@@ -407,7 +359,7 @@ public class PackageInfoWithoutStateUtils {
         }
 
         // CompatibilityMode is global state.
-        if (!android.content.pm.PackageParser.sCompatibilityModeEnabled) {
+        if (!PackageParser.sCompatibilityModeEnabled) {
             ai.disableCompatibilityMode();
         }
 
@@ -434,11 +386,7 @@ public class PackageInfoWithoutStateUtils {
             ai.category = FallbackCategoryProvider.getFallbackCategory(ai.packageName);
         }
         ai.seInfoUser = SELinuxUtil.assignSeinfoUser(state);
-        final OverlayPaths overlayPaths = state.getAllOverlayPaths();
-        if (overlayPaths != null) {
-            ai.resourceDirs = overlayPaths.getResourceDirs().toArray(new String[0]);
-            ai.overlayPaths = overlayPaths.getOverlayPaths().toArray(new String[0]);
-        }
+        ai.resourceDirs = state.getAllOverlayPaths();
 
         return ai;
     }
@@ -458,7 +406,7 @@ public class PackageInfoWithoutStateUtils {
             return null;
         }
 
-        return generateActivityInfoUnchecked(a, flags, applicationInfo);
+        return generateActivityInfoUnchecked(a, applicationInfo);
     }
 
     /**
@@ -470,7 +418,6 @@ public class PackageInfoWithoutStateUtils {
      */
     @NonNull
     public static ActivityInfo generateActivityInfoUnchecked(@NonNull ParsedActivity a,
-            @PackageManager.ComponentInfoFlags int flags,
             @NonNull ApplicationInfo applicationInfo) {
         // Make shallow copies so we can store the metadata safely
         ActivityInfo ai = new ActivityInfo();
@@ -495,18 +442,15 @@ public class PackageInfoWithoutStateUtils {
         ai.screenOrientation = a.getScreenOrientation();
         ai.resizeMode = a.getResizeMode();
         Float maxAspectRatio = a.getMaxAspectRatio();
-        ai.setMaxAspectRatio(maxAspectRatio != null ? maxAspectRatio : 0f);
+        ai.maxAspectRatio = maxAspectRatio != null ? maxAspectRatio : 0f;
         Float minAspectRatio = a.getMinAspectRatio();
-        ai.setMinAspectRatio(minAspectRatio != null ? minAspectRatio : 0f);
+        ai.minAspectRatio = minAspectRatio != null ? minAspectRatio : 0f;
         ai.supportsSizeChanges = a.getSupportsSizeChanges();
         ai.requestedVrComponent = a.getRequestedVrComponent();
         ai.rotationAnimation = a.getRotationAnimation();
         ai.colorMode = a.getColorMode();
         ai.windowLayout = a.getWindowLayout();
-        ai.attributionTags = a.getAttributionTags();
-        if ((flags & PackageManager.GET_META_DATA) != 0) {
-            ai.metaData = a.getMetaData();
-        }
+        ai.metaData = a.getMetaData();
         ai.applicationInfo = applicationInfo;
         return ai;
     }
@@ -532,7 +476,7 @@ public class PackageInfoWithoutStateUtils {
             return null;
         }
 
-        return generateServiceInfoUnchecked(s, flags,  applicationInfo);
+        return generateServiceInfoUnchecked(s, applicationInfo);
     }
 
     /**
@@ -544,20 +488,17 @@ public class PackageInfoWithoutStateUtils {
      */
     @NonNull
     public static ServiceInfo generateServiceInfoUnchecked(@NonNull ParsedService s,
-            @PackageManager.ComponentInfoFlags int flags,
             @NonNull ApplicationInfo applicationInfo) {
         // Make shallow copies so we can store the metadata safely
         ServiceInfo si = new ServiceInfo();
         assignSharedFieldsForComponentInfo(si, s);
         si.exported = s.isExported();
         si.flags = s.getFlags();
+        si.metaData = s.getMetaData();
         si.permission = s.getPermission();
         si.processName = s.getProcessName();
         si.mForegroundServiceType = s.getForegroundServiceType();
         si.applicationInfo = applicationInfo;
-        if ((flags & PackageManager.GET_META_DATA) != 0) {
-            si.metaData = s.getMetaData();
-        }
         return si;
     }
 
@@ -612,11 +553,9 @@ public class PackageInfoWithoutStateUtils {
         pi.initOrder = p.getInitOrder();
         pi.uriPermissionPatterns = p.getUriPermissionPatterns();
         pi.pathPermissions = p.getPathPermissions();
+        pi.metaData = p.getMetaData();
         if ((flags & PackageManager.GET_URI_PERMISSION_PATTERNS) == 0) {
             pi.uriPermissionPatterns = null;
-        }
-        if ((flags & PackageManager.GET_META_DATA) != 0) {
-            pi.metaData = p.getMetaData();
         }
         pi.applicationInfo = applicationInfo;
         return pi;
@@ -628,14 +567,9 @@ public class PackageInfoWithoutStateUtils {
         return generateProviderInfo(pkg, p, flags, state, null, userId);
     }
 
-    /**
-     * @param assignUserFields see {@link #generateApplicationInfoUnchecked(ParsingPackageRead, int,
-     *                         PackageUserState, int, boolean)}
-     */
     @Nullable
     public static InstrumentationInfo generateInstrumentationInfo(ParsedInstrumentation i,
-            ParsingPackageRead pkg, @PackageManager.ComponentInfoFlags int flags, int userId,
-            boolean assignUserFields) {
+            ParsingPackageRead pkg, @PackageManager.ComponentInfoFlags int flags, int userId) {
         if (i == null) return null;
 
         InstrumentationInfo ii = new InstrumentationInfo();
@@ -645,16 +579,16 @@ public class PackageInfoWithoutStateUtils {
         ii.handleProfiling = i.isHandleProfiling();
         ii.functionalTest = i.isFunctionalTest();
 
-        ii.sourceDir = pkg.getBaseApkPath();
-        ii.publicSourceDir = pkg.getBaseApkPath();
+        ii.sourceDir = pkg.getBaseCodePath();
+        ii.publicSourceDir = pkg.getBaseCodePath();
         ii.splitNames = pkg.getSplitNames();
         ii.splitSourceDirs = pkg.getSplitCodePaths();
         ii.splitPublicSourceDirs = pkg.getSplitCodePaths();
         ii.splitDependencies = pkg.getSplitDependencies();
-
-        if (assignUserFields) {
-            assignUserFields(pkg, ii, userId);
-        }
+        ii.dataDir = getDataDir(pkg, userId).getAbsolutePath();
+        ii.deviceProtectedDataDir = getDeviceProtectedDataDir(pkg, userId).getAbsolutePath();
+        ii.credentialProtectedDataDir = getCredentialProtectedDataDir(pkg,
+                userId).getAbsolutePath();
 
         if ((flags & PackageManager.GET_META_DATA) == 0) {
             return ii;
@@ -677,7 +611,6 @@ public class PackageInfoWithoutStateUtils {
         pi.protectionLevel = p.getProtectionLevel();
         pi.descriptionRes = p.getDescriptionRes();
         pi.flags = p.getFlags();
-        pi.knownCerts = p.getKnownCerts();
 
         if ((flags & PackageManager.GET_META_DATA) == 0) {
             return pi;
@@ -710,12 +643,6 @@ public class PackageInfoWithoutStateUtils {
         return pgi;
     }
 
-    @Nullable
-    public static Attribution generateAttribution(ParsedAttribution pa) {
-        if (pa == null) return null;
-        return new Attribution(pa.tag, pa.label);
-    }
-
     private static void assignSharedFieldsForComponentInfo(@NonNull ComponentInfo componentInfo,
             @NonNull ParsedMainComponent mainComponent) {
         assignSharedFieldsForPackageItemInfo(componentInfo, mainComponent);
@@ -723,7 +650,6 @@ public class PackageInfoWithoutStateUtils {
         componentInfo.directBootAware = mainComponent.isDirectBootAware();
         componentInfo.enabled = mainComponent.isEnabled();
         componentInfo.splitName = mainComponent.getSplitName();
-        componentInfo.attributionTags = mainComponent.getAttributionTags();
     }
 
     private static void assignSharedFieldsForPackageItemInfo(
@@ -813,19 +739,6 @@ public class PackageInfoWithoutStateUtils {
         return privateFlags;
     }
 
-    /** @see ApplicationInfo#privateFlagsExt */
-    public static int appInfoPrivateFlagsExt(ParsingPackageRead pkg) {
-        // @formatter:off
-        int privateFlagsExt =
-                flag(pkg.isProfileable(), ApplicationInfo.PRIVATE_FLAG_EXT_PROFILEABLE)
-                | flag(pkg.hasRequestForegroundServiceExemption(),
-                        ApplicationInfo.PRIVATE_FLAG_EXT_REQUEST_FOREGROUND_SERVICE_EXEMPTION)
-                | flag(pkg.areAttributionsUserVisible(),
-                        ApplicationInfo.PRIVATE_FLAG_EXT_ATTRIBUTIONS_ARE_USER_VISIBLE);
-        // @formatter:on
-        return privateFlagsExt;
-    }
-
     private static boolean checkUseInstalled(ParsingPackageRead pkg, PackageUserState state,
             @PackageManager.PackageInfoFlags int flags) {
         // If available for the target user
@@ -856,56 +769,5 @@ public class PackageInfoWithoutStateUtils {
     public static File getCredentialProtectedDataDir(ParsingPackageRead pkg, int userId) {
         return Environment.getDataUserCePackageDirectory(pkg.getVolumeUuid(), userId,
                 pkg.getPackageName());
-    }
-
-    private static void assignUserFields(ParsingPackageRead pkg, ApplicationInfo info, int userId) {
-        // This behavior is undefined for no-state ApplicationInfos when called by a public API,
-        // since the uid is never assigned by the system. It will always effectively be appId 0.
-        info.uid = UserHandle.getUid(userId, UserHandle.getAppId(info.uid));
-
-        String pkgName = pkg.getPackageName();
-        if ("android".equals(pkgName)) {
-            info.dataDir = SYSTEM_DATA_PATH;
-            return;
-        }
-
-        // For performance reasons, all these paths are built as strings
-        String baseDataDirPrefix =
-                Environment.getDataDirectoryPath(pkg.getVolumeUuid()) + File.separator;
-        String userIdPkgSuffix = File.separator + userId + File.separator + pkgName;
-        info.credentialProtectedDataDir = baseDataDirPrefix + Environment.DIR_USER_CE
-                + userIdPkgSuffix;
-        info.deviceProtectedDataDir = baseDataDirPrefix + Environment.DIR_USER_DE + userIdPkgSuffix;
-
-        if (pkg.isDefaultToDeviceProtectedStorage()
-                && PackageManager.APPLY_DEFAULT_TO_DEVICE_PROTECTED_STORAGE) {
-            info.dataDir = info.deviceProtectedDataDir;
-        } else {
-            info.dataDir = info.credentialProtectedDataDir;
-        }
-    }
-
-    private static void assignUserFields(ParsingPackageRead pkg, InstrumentationInfo info,
-            int userId) {
-        String pkgName = pkg.getPackageName();
-        if ("android".equals(pkgName)) {
-            info.dataDir = SYSTEM_DATA_PATH;
-            return;
-        }
-
-        // For performance reasons, all these paths are built as strings
-        String baseDataDirPrefix =
-                Environment.getDataDirectoryPath(pkg.getVolumeUuid()) + File.separator;
-        String userIdPkgSuffix = File.separator + userId + File.separator + pkgName;
-        info.credentialProtectedDataDir = baseDataDirPrefix + Environment.DIR_USER_CE
-                + userIdPkgSuffix;
-        info.deviceProtectedDataDir = baseDataDirPrefix + Environment.DIR_USER_DE + userIdPkgSuffix;
-
-        if (pkg.isDefaultToDeviceProtectedStorage()
-                && PackageManager.APPLY_DEFAULT_TO_DEVICE_PROTECTED_STORAGE) {
-            info.dataDir = info.deviceProtectedDataDir;
-        } else {
-            info.dataDir = info.credentialProtectedDataDir;
-        }
     }
 }

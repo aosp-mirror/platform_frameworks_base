@@ -16,6 +16,7 @@
 
 package com.android.systemui.broadcast
 
+import android.app.ActivityManager
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -26,13 +27,12 @@ import android.os.Looper
 import android.os.Message
 import android.os.UserHandle
 import android.text.TextUtils
-import android.util.IndentingPrintWriter
 import android.util.SparseArray
 import com.android.internal.annotations.VisibleForTesting
+import com.android.internal.util.IndentingPrintWriter
 import com.android.systemui.Dumpable
 import com.android.systemui.broadcast.logging.BroadcastDispatcherLogger
 import com.android.systemui.dump.DumpManager
-import com.android.systemui.settings.UserTracker
 import java.io.FileDescriptor
 import java.io.PrintWriter
 import java.util.concurrent.Executor
@@ -47,6 +47,8 @@ data class ReceiverData(
 private const val MSG_ADD_RECEIVER = 0
 private const val MSG_REMOVE_RECEIVER = 1
 private const val MSG_REMOVE_RECEIVER_FOR_USER = 2
+private const val MSG_USER_SWITCH = 3
+private const val MSG_SET_STARTING_USER = 99
 private const val TAG = "BroadcastDispatcher"
 private const val DEBUG = true
 
@@ -66,15 +68,23 @@ open class BroadcastDispatcher constructor (
     private val bgLooper: Looper,
     private val bgExecutor: Executor,
     private val dumpManager: DumpManager,
-    private val logger: BroadcastDispatcherLogger,
-    private val userTracker: UserTracker
-) : Dumpable {
+    private val logger: BroadcastDispatcherLogger
+) : Dumpable, BroadcastReceiver() {
 
     // Only modify in BG thread
     private val receiversByUser = SparseArray<UserBroadcastDispatcher>(20)
 
     fun initialize() {
         dumpManager.registerDumpable(javaClass.name, this)
+        handler.sendEmptyMessage(MSG_SET_STARTING_USER)
+        registerReceiver(this, IntentFilter(Intent.ACTION_USER_SWITCHED), null, UserHandle.ALL)
+    }
+
+    override fun onReceive(context: Context, intent: Intent) {
+        if (intent.action == Intent.ACTION_USER_SWITCHED) {
+            val user = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, UserHandle.USER_NULL)
+            handler.obtainMessage(MSG_USER_SWITCH, user, 0).sendToTarget()
+        }
     }
 
     /**
@@ -112,7 +122,7 @@ open class BroadcastDispatcher constructor (
      * @param executor An executor to dispatch [BroadcastReceiver.onReceive]. Pass null to use an
      *                 executor in the main thread (default).
      * @param user A user handle to determine which broadcast should be dispatched to this receiver.
-     *             Pass `null` to use the user of the context (system user in SystemUI).
+     *             By default, it is the user of the context (system user in SystemUI).
      * @throws IllegalArgumentException if the filter has other constraints that are not actions or
      *                                  categories or the filter has no actions.
      */
@@ -120,17 +130,13 @@ open class BroadcastDispatcher constructor (
     open fun registerReceiver(
         receiver: BroadcastReceiver,
         filter: IntentFilter,
-        executor: Executor? = null,
-        user: UserHandle? = null
+        executor: Executor? = context.mainExecutor,
+        user: UserHandle = context.user
     ) {
         checkFilter(filter)
         this.handler
-                .obtainMessage(MSG_ADD_RECEIVER, ReceiverData(
-                        receiver,
-                        filter,
-                        executor ?: context.mainExecutor,
-                        user ?: context.user
-                ))
+                .obtainMessage(MSG_ADD_RECEIVER,
+                        ReceiverData(receiver, filter, executor ?: context.mainExecutor, user))
                 .sendToTarget()
     }
 
@@ -175,6 +181,7 @@ open class BroadcastDispatcher constructor (
         pw.println("Broadcast dispatcher:")
         val ipw = IndentingPrintWriter(pw, "  ")
         ipw.increaseIndent()
+        ipw.println("Current user: ${handler.currentUser}")
         for (index in 0 until receiversByUser.size()) {
             ipw.println("User ${receiversByUser.keyAt(index)}")
             receiversByUser.valueAt(index).dump(fd, ipw, args)
@@ -183,6 +190,7 @@ open class BroadcastDispatcher constructor (
     }
 
     private val handler = object : Handler(bgLooper) {
+        var currentUser = UserHandle.USER_SYSTEM
 
         override fun handleMessage(msg: Message) {
             when (msg.what) {
@@ -191,7 +199,7 @@ open class BroadcastDispatcher constructor (
                     // If the receiver asked to be registered under the current user, we register
                     // under the actual current user.
                     val userId = if (data.user.identifier == UserHandle.USER_CURRENT) {
-                        userTracker.userId
+                        currentUser
                     } else {
                         data.user.identifier
                     }
@@ -213,6 +221,14 @@ open class BroadcastDispatcher constructor (
                 MSG_REMOVE_RECEIVER_FOR_USER -> {
                     receiversByUser.get(msg.arg1)?.unregisterReceiver(msg.obj as BroadcastReceiver)
                 }
+
+                MSG_USER_SWITCH -> {
+                    currentUser = msg.arg1
+                }
+                MSG_SET_STARTING_USER -> {
+                    currentUser = ActivityManager.getCurrentUser()
+                }
+
                 else -> super.handleMessage(msg)
             }
         }

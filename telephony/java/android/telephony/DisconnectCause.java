@@ -17,14 +17,16 @@
 package android.telephony;
 
 import android.annotation.NonNull;
+import android.annotation.SystemApi;
 import android.compat.annotation.UnsupportedAppUsage;
 
 /**
  * Describes the cause of a disconnected call. Those disconnect causes can be converted into a more
  * generic {@link android.telecom.DisconnectCause} object.
  *
- * Used in {@link PhoneStateListener#onCallDisconnectCauseChanged}.
+ * @hide
  */
+@SystemApi
 public final class DisconnectCause {
 
     /** The disconnect cause is not valid (Not received a disconnect cause) */
@@ -335,17 +337,20 @@ public final class DisconnectCause {
     /**
      * Indicates that the call is dropped due to RTCP inactivity, primarily due to media path
      * disruption.
+     * @hide
      */
     public static final int MEDIA_TIMEOUT = 77;
 
     /**
      * Indicates that an emergency call cannot be placed over WFC because the service is not
      * available in the current location.
+     * @hide
      */
     public static final int EMERGENCY_CALL_OVER_WFC_NOT_AVAILABLE = 78;
 
     /**
      * Indicates that WiFi calling service is not available in the current location.
+     * @hide
      */
     public static final int WFC_SERVICE_NOT_AVAILABLE_IN_THIS_LOCATION = 79;
 

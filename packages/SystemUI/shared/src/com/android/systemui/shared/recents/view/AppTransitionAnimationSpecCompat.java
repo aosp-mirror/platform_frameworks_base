@@ -36,6 +36,6 @@ public class AppTransitionAnimationSpecCompat {
 
     public AppTransitionAnimationSpec toAppTransitionAnimationSpec() {
         return new AppTransitionAnimationSpec(mTaskId,
-                mBuffer != null ? mBuffer.getHardwareBuffer() : null, mRect);
+                mBuffer != null ? mBuffer.createGraphicBufferHandle() : null, mRect);
     }
 }

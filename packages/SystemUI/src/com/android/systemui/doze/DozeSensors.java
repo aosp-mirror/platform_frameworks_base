@@ -21,6 +21,8 @@ import static com.android.systemui.plugins.SensorManagerPlugin.Sensor.TYPE_WAKE_
 
 import android.annotation.AnyThread;
 import android.app.ActivityManager;
+import android.app.AlarmManager;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.database.ContentObserver;
 import android.hardware.Sensor;
@@ -34,22 +36,19 @@ import android.os.SystemClock;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.text.TextUtils;
-import android.util.IndentingPrintWriter;
 import android.util.Log;
-import android.view.Display;
 
 import androidx.annotation.VisibleForTesting;
 
+import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.UiEvent;
 import com.android.internal.logging.UiEventLogger;
 import com.android.internal.logging.UiEventLoggerImpl;
-import com.android.keyguard.KeyguardUpdateMonitor;
-import com.android.systemui.biometrics.AuthController;
+import com.android.internal.logging.nano.MetricsProto;
 import com.android.systemui.plugins.SensorManagerPlugin;
 import com.android.systemui.statusbar.phone.DozeParameters;
 import com.android.systemui.util.sensors.AsyncSensorManager;
 import com.android.systemui.util.sensors.ProximitySensor;
-import com.android.systemui.util.settings.SecureSettings;
 import com.android.systemui.util.wakelock.WakeLock;
 
 import java.io.PrintWriter;
@@ -64,13 +63,15 @@ public class DozeSensors {
     private static final UiEventLogger UI_EVENT_LOGGER = new UiEventLoggerImpl();
 
     private final Context mContext;
+    private final AlarmManager mAlarmManager;
     private final AsyncSensorManager mSensorManager;
+    private final ContentResolver mResolver;
+    private final TriggerSensor mPickupSensor;
+    private final DozeParameters mDozeParameters;
     private final AmbientDisplayConfiguration mConfig;
     private final WakeLock mWakeLock;
     private final Consumer<Boolean> mProxCallback;
-    private final SecureSettings mSecureSettings;
     private final Callback mCallback;
-    private final boolean mScreenOffUdfpsEnabled;
     @VisibleForTesting
     protected TriggerSensor[] mSensors;
 
@@ -79,11 +80,7 @@ public class DozeSensors {
     private long mDebounceFrom;
     private boolean mSettingRegistered;
     private boolean mListening;
-    private boolean mListeningTouchScreenSensors;
-    private boolean mListeningProxSensors;
-
-    // whether to only register sensors that use prox when the display state is dozing or off
-    private boolean mSelectivelyRegisterProxSensors;
+    private boolean mPaused;
 
     @VisibleForTesting
     public enum DozeSensorsUiEvent implements UiEventLogger.UiEventEnum {
@@ -102,27 +99,21 @@ public class DozeSensors {
         }
     }
 
-    DozeSensors(Context context, AsyncSensorManager sensorManager,
+    public DozeSensors(Context context, AlarmManager alarmManager, AsyncSensorManager sensorManager,
             DozeParameters dozeParameters, AmbientDisplayConfiguration config, WakeLock wakeLock,
             Callback callback, Consumer<Boolean> proxCallback, DozeLog dozeLog,
-            ProximitySensor proximitySensor, SecureSettings secureSettings,
-            AuthController authController) {
+            ProximitySensor proximitySensor) {
         mContext = context;
+        mAlarmManager = alarmManager;
         mSensorManager = sensorManager;
+        mDozeParameters = dozeParameters;
         mConfig = config;
         mWakeLock = wakeLock;
         mProxCallback = proxCallback;
-        mSecureSettings = secureSettings;
+        mResolver = mContext.getContentResolver();
         mCallback = callback;
         mProximitySensor = proximitySensor;
-        mProximitySensor.setTag(TAG);
-        mSelectivelyRegisterProxSensors = dozeParameters.getSelectivelyRegisterSensorsUsingProx();
-        mListeningProxSensors = !mSelectivelyRegisterProxSensors;
-        mScreenOffUdfpsEnabled =
-                config.screenOffUdfpsEnabled(KeyguardUpdateMonitor.getCurrentUser());
 
-        boolean udfpsEnrolled =
-                authController.isUdfpsEnrolled(KeyguardUpdateMonitor.getCurrentUser());
         boolean alwaysOn = mConfig.alwaysOnEnabled(UserHandle.USER_CURRENT);
         mSensors = new TriggerSensor[] {
                 new TriggerSensor(
@@ -131,7 +122,7 @@ public class DozeSensors {
                         dozeParameters.getPulseOnSigMotion(),
                         DozeLog.PULSE_REASON_SENSOR_SIGMOTION, false /* touchCoords */,
                         false /* touchscreen */, dozeLog),
-                new TriggerSensor(
+                mPickupSensor = new TriggerSensor(
                         mSensorManager.getDefaultSensor(Sensor.TYPE_PICK_UP_GESTURE),
                         Settings.Secure.DOZE_PICK_UP_GESTURE,
                         true /* settingDef */,
@@ -139,7 +130,6 @@ public class DozeSensors {
                         DozeLog.REASON_SENSOR_PICKUP, false /* touchCoords */,
                         false /* touchscreen */,
                         false /* ignoresSetting */,
-                        false /* requires prox */,
                         dozeLog),
                 new TriggerSensor(
                         findSensorWithType(config.doubleTapSensorType()),
@@ -152,13 +142,10 @@ public class DozeSensors {
                 new TriggerSensor(
                         findSensorWithType(config.tapSensorType()),
                         Settings.Secure.DOZE_TAP_SCREEN_GESTURE,
-                        true /* settingDef */,
                         true /* configured */,
                         DozeLog.REASON_SENSOR_TAP,
                         false /* reports touch coordinates */,
                         true /* touchscreen */,
-                        false /* ignoresSetting */,
-                        dozeParameters.singleTapUsesProx() /* requiresProx */,
                         dozeLog),
                 new TriggerSensor(
                         findSensorWithType(config.longPressSensorType()),
@@ -168,19 +155,6 @@ public class DozeSensors {
                         DozeLog.PULSE_REASON_SENSOR_LONG_PRESS,
                         true /* reports touch coordinates */,
                         true /* touchscreen */,
-                        false /* ignoresSetting */,
-                        dozeParameters.longPressUsesProx() /* requiresProx */,
-                        dozeLog),
-                new TriggerSensor(
-                        findSensorWithType(config.udfpsLongPressSensorType()),
-                        "doze_pulse_on_auth",
-                        true /* settingDef */,
-                        udfpsEnrolled && (alwaysOn || mScreenOffUdfpsEnabled),
-                        DozeLog.REASON_SENSOR_UDFPS_LONG_PRESS,
-                        true /* reports touch coordinates */,
-                        true /* touchscreen */,
-                        false /* ignoresSetting */,
-                        dozeParameters.longPressUsesProx(),
                         dozeLog),
                 new PluginSensor(
                         new SensorManagerPlugin.Sensor(TYPE_WAKE_DISPLAY),
@@ -199,22 +173,13 @@ public class DozeSensors {
                         false /* touchscreen */,
                         mConfig.getWakeLockScreenDebounce(),
                         dozeLog),
-                new TriggerSensor(
-                        findSensorWithType(config.quickPickupSensorType()),
-                        Settings.Secure.DOZE_QUICK_PICKUP_GESTURE,
-                        true /* setting default */,
-                        config.quickPickupSensorEnabled(KeyguardUpdateMonitor.getCurrentUser())
-                                && udfpsEnrolled,
-                        DozeLog.REASON_SENSOR_QUICK_PICKUP,
-                        false /* touchCoords */,
-                        false /* touchscreen */, dozeLog),
         };
 
         setProxListening(false);  // Don't immediately start listening when we register.
         mProximitySensor.register(
                 proximityEvent -> {
                     if (proximityEvent != null) {
-                        mProxCallback.accept(!proximityEvent.getBelow());
+                        mProxCallback.accept(!proximityEvent.getNear());
                     }
                 });
     }
@@ -242,10 +207,7 @@ public class DozeSensors {
         return findSensorWithType(mSensorManager, type);
     }
 
-    /**
-     * Utility method to find a {@link Sensor} for the supplied string type.
-     */
-    public static Sensor findSensorWithType(SensorManager sensorManager, String type) {
+    static Sensor findSensorWithType(SensorManager sensorManager, String type) {
         if (TextUtils.isEmpty(type)) {
             return null;
         }
@@ -261,49 +223,40 @@ public class DozeSensors {
     /**
      * If sensors should be registered and sending signals.
      */
-    public void setListening(boolean listen, boolean includeTouchScreenSensors) {
-        if (mListening == listen && mListeningTouchScreenSensors == includeTouchScreenSensors) {
+    public void setListening(boolean listen) {
+        if (mListening == listen) {
             return;
         }
         mListening = listen;
-        mListeningTouchScreenSensors = includeTouchScreenSensors;
         updateListening();
     }
 
     /**
-     * If sensors should be registered and sending signals.
+     * Unregister sensors, when listening, unless they are prox gated.
+     * @see #setListening(boolean)
      */
-    public void setListening(boolean listen, boolean includeTouchScreenSensors,
-            boolean lowPowerStateOrOff) {
-        final boolean shouldRegisterProxSensors =
-                !mSelectivelyRegisterProxSensors || lowPowerStateOrOff;
-        if (mListening == listen && mListeningTouchScreenSensors == includeTouchScreenSensors
-                && mListeningProxSensors == shouldRegisterProxSensors) {
+    public void setPaused(boolean paused) {
+        if (mPaused == paused) {
             return;
         }
-        mListening = listen;
-        mListeningTouchScreenSensors = includeTouchScreenSensors;
-        mListeningProxSensors = shouldRegisterProxSensors;
+        mPaused = paused;
         updateListening();
     }
 
     /**
      * Registers/unregisters sensors based on internal state.
      */
-    private void updateListening() {
+    public void updateListening() {
         boolean anyListening = false;
         for (TriggerSensor s : mSensors) {
-            boolean listen = mListening
-                    && (!s.mRequiresTouchscreen || mListeningTouchScreenSensors)
-                    && (!s.mRequiresProx || mListeningProxSensors);
-            s.setListening(listen);
-            if (listen) {
+            s.setListening(mListening);
+            if (mListening) {
                 anyListening = true;
             }
         }
 
         if (!anyListening) {
-            mSecureSettings.unregisterContentObserver(mSettingsObserver);
+            mResolver.unregisterContentObserver(mSettingsObserver);
         } else if (!mSettingRegistered) {
             for (TriggerSensor s : mSensors) {
                 s.registerSettingsObserver(mSettingsObserver);
@@ -325,13 +278,6 @@ public class DozeSensors {
         for (TriggerSensor s : mSensors) {
             s.updateListening();
         }
-    }
-
-    void onScreenState(int state) {
-        mProximitySensor.setSecondarySafe(
-                state == Display.STATE_DOZE
-                || state == Display.STATE_DOZE_SUSPEND
-                || state == Display.STATE_OFF);
     }
 
     public void setProxListening(boolean listen) {
@@ -358,6 +304,10 @@ public class DozeSensors {
         }
     };
 
+    public void setDisableSensorsInterferingWithProximity(boolean disable) {
+        mPickupSensor.setDisabled(disable);
+    }
+
     /** Ignore the setting value of only the sensors that require the touchscreen. */
     public void ignoreTouchScreenSensorsSettingInterferingWithDocking(boolean ignore) {
         for (TriggerSensor sensor : mSensors) {
@@ -369,17 +319,10 @@ public class DozeSensors {
 
     /** Dump current state */
     public void dump(PrintWriter pw) {
-        pw.println("mListening=" + mListening);
-        pw.println("mListeningTouchScreenSensors=" + mListeningTouchScreenSensors);
-        pw.println("mSelectivelyRegisterProxSensors=" + mSelectivelyRegisterProxSensors);
-        pw.println("mListeningProxSensors=" + mListeningProxSensors);
-        pw.println("mScreenOffUdfpsEnabled=" + mScreenOffUdfpsEnabled);
-        IndentingPrintWriter idpw = new IndentingPrintWriter(pw);
-        idpw.increaseIndent();
         for (TriggerSensor s : mSensors) {
-            idpw.println("Sensor: " + s.toString());
+            pw.println("  Sensor: " + s.toString());
         }
-        idpw.println("ProxSensor: " + mProximitySensor.toString());
+        pw.println("  ProxSensor: " + mProximitySensor.toString());
     }
 
     /**
@@ -398,7 +341,6 @@ public class DozeSensors {
         private final boolean mReportsTouchCoordinates;
         private final boolean mSettingDefault;
         private final boolean mRequiresTouchscreen;
-        private final boolean mRequiresProx;
 
         protected boolean mRequested;
         protected boolean mRegistered;
@@ -416,14 +358,12 @@ public class DozeSensors {
                 boolean configured, int pulseReason, boolean reportsTouchCoordinates,
                 boolean requiresTouchscreen, DozeLog dozeLog) {
             this(sensor, setting, settingDef, configured, pulseReason, reportsTouchCoordinates,
-                    requiresTouchscreen, false /* ignoresSetting */,
-                    false /* requiresProx */, dozeLog);
+                    requiresTouchscreen, false /* ignoresSetting */, dozeLog);
         }
 
         private TriggerSensor(Sensor sensor, String setting, boolean settingDef,
                 boolean configured, int pulseReason, boolean reportsTouchCoordinates,
-                boolean requiresTouchscreen, boolean ignoresSetting, boolean requiresProx,
-                DozeLog dozeLog) {
+                boolean requiresTouchscreen, boolean ignoresSetting, DozeLog dozeLog) {
             mSensor = sensor;
             mSetting = setting;
             mSettingDefault = settingDef;
@@ -432,7 +372,6 @@ public class DozeSensors {
             mReportsTouchCoordinates = reportsTouchCoordinates;
             mRequiresTouchscreen = requiresTouchscreen;
             mIgnoresSetting = ignoresSetting;
-            mRequiresProx = requiresProx;
             mDozeLog = dozeLog;
         }
 
@@ -473,7 +412,7 @@ public class DozeSensors {
             } else if (TextUtils.isEmpty(mSetting)) {
                 return true;
             }
-            return mSecureSettings.getIntForUser(mSetting, mSettingDefault ? 1 : 0,
+            return Settings.Secure.getIntForUser(mResolver, mSetting, mSettingDefault ? 1 : 0,
                     UserHandle.USER_CURRENT) != 0;
         }
 
@@ -494,6 +433,10 @@ public class DozeSensors {
             mHandler.post(mWakeLock.wrap(() -> {
                 if (DEBUG) Log.d(TAG, "onTrigger: " + triggerEventToString(event));
                 if (mSensor != null && mSensor.getType() == Sensor.TYPE_PICK_UP_GESTURE) {
+                    int subType = (int) event.values[0];
+                    MetricsLogger.action(
+                            mContext, MetricsProto.MetricsEvent.ACTION_AMBIENT_GESTURE,
+                            subType);
                     UI_EVENT_LOGGER.log(DozeSensorsUiEvent.ACTION_AMBIENT_GESTURE_PICKUP);
                 }
 
@@ -513,8 +456,9 @@ public class DozeSensors {
 
         public void registerSettingsObserver(ContentObserver settingsObserver) {
             if (mConfigured && !TextUtils.isEmpty(mSetting)) {
-                mSecureSettings.registerContentObserverForUser(
-                        mSetting, mSettingsObserver, UserHandle.USER_ALL);
+                mResolver.registerContentObserver(
+                        Settings.Secure.getUriFor(mSetting), false /* descendants */,
+                        mSettingsObserver, UserHandle.USER_ALL);
             }
         }
 

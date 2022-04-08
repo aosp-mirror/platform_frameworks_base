@@ -16,8 +16,6 @@
 
 package android.appwidget;
 
-import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.app.Activity;
 import android.app.ActivityOptions;
 import android.compat.annotation.UnsupportedAppUsage;
@@ -31,18 +29,14 @@ import android.content.pm.LauncherApps;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Resources;
 import android.graphics.Color;
-import android.graphics.PointF;
 import android.graphics.Rect;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.CancellationSignal;
 import android.os.Parcelable;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.Pair;
-import android.util.SizeF;
 import android.util.SparseArray;
-import android.util.SparseIntArray;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -52,7 +46,7 @@ import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.FrameLayout;
 import android.widget.RemoteViews;
-import android.widget.RemoteViews.InteractionHandler;
+import android.widget.RemoteViews.OnClickHandler;
 import android.widget.RemoteViewsAdapter.RemoteAdapterConnectionCallback;
 import android.widget.TextView;
 
@@ -69,7 +63,6 @@ public class AppWidgetHostView extends FrameLayout {
 
     static final String TAG = "AppWidgetHostView";
     private static final String KEY_JAILED_ARRAY = "jail";
-    private static final String KEY_INFLATION_ID = "inflation_id";
 
     static final boolean LOGD = false;
 
@@ -77,10 +70,6 @@ public class AppWidgetHostView extends FrameLayout {
     static final int VIEW_MODE_CONTENT = 1;
     static final int VIEW_MODE_ERROR = 2;
     static final int VIEW_MODE_DEFAULT = 3;
-
-    // Set of valid colors resources.
-    private static final int FIRST_RESOURCE_COLOR_ID = android.R.color.system_neutral1_0;
-    private static final int LAST_RESOURCE_COLOR_ID = android.R.color.system_accent3_1000;
 
     // When we're inflating the initialLayout for a AppWidget, we only allow
     // views that are allowed in RemoteViews.
@@ -97,19 +86,11 @@ public class AppWidgetHostView extends FrameLayout {
     View mView;
     int mViewMode = VIEW_MODE_NOINIT;
     int mLayoutId = -1;
-    private InteractionHandler mInteractionHandler;
+    private OnClickHandler mOnClickHandler;
     private boolean mOnLightBackground;
-    private SizeF mCurrentSize = null;
-    private RemoteViews.ColorResources mColorResources = null;
-    private SparseIntArray mColorMapping = null;
-    // Stores the last remote views last inflated.
-    private RemoteViews mLastInflatedRemoteViews = null;
-    private long mLastInflatedRemoteViewsId = -1;
 
     private Executor mAsyncExecutor;
     private CancellationSignal mLastExecutionSignal;
-    private SparseArray<Parcelable> mDelayedRestoredState;
-    private long mDelayedRestoredInflationId;
 
     /**
      * Create a host view.  Uses default fade animations.
@@ -121,9 +102,9 @@ public class AppWidgetHostView extends FrameLayout {
     /**
      * @hide
      */
-    public AppWidgetHostView(Context context, InteractionHandler handler) {
+    public AppWidgetHostView(Context context, OnClickHandler handler) {
         this(context, android.R.anim.fade_in, android.R.anim.fade_out);
-        mInteractionHandler = getHandler(handler);
+        mOnClickHandler = getHandler(handler);
     }
 
     /**
@@ -149,8 +130,8 @@ public class AppWidgetHostView extends FrameLayout {
      * @param handler
      * @hide
      */
-    public void setInteractionHandler(InteractionHandler handler) {
-        mInteractionHandler = getHandler(handler);
+    public void setOnClickHandler(OnClickHandler handler) {
+        mOnClickHandler = getHandler(handler);
     }
 
     /**
@@ -236,8 +217,6 @@ public class AppWidgetHostView extends FrameLayout {
 
         Bundle bundle = new Bundle();
         bundle.putSparseParcelableArray(KEY_JAILED_ARRAY, jail);
-        bundle.putLong(KEY_INFLATION_ID, mLastInflatedRemoteViewsId);
-        container.put(generateId(), bundle);
         container.put(generateId(), bundle);
     }
 
@@ -251,62 +230,23 @@ public class AppWidgetHostView extends FrameLayout {
         final Parcelable parcelable = container.get(generateId());
 
         SparseArray<Parcelable> jail = null;
-        long inflationId = -1;
         if (parcelable instanceof Bundle) {
-            Bundle bundle = (Bundle) parcelable;
-            jail = bundle.getSparseParcelableArray(KEY_JAILED_ARRAY);
-            inflationId = bundle.getLong(KEY_INFLATION_ID, -1);
+            jail = ((Bundle) parcelable).getSparseParcelableArray(KEY_JAILED_ARRAY);
         }
 
         if (jail == null) jail = new SparseArray<>();
 
-        mDelayedRestoredState = jail;
-        mDelayedRestoredInflationId = inflationId;
-        restoreInstanceState();
-    }
-
-    void restoreInstanceState() {
-        long inflationId = mDelayedRestoredInflationId;
-        SparseArray<Parcelable> state = mDelayedRestoredState;
-        if (inflationId == -1 || inflationId != mLastInflatedRemoteViewsId) {
-            return; // We don't restore.
-        }
-        mDelayedRestoredInflationId = -1;
-        mDelayedRestoredState = null;
         try  {
-            super.dispatchRestoreInstanceState(state);
+            super.dispatchRestoreInstanceState(jail);
         } catch (Exception e) {
             Log.e(TAG, "failed to restoreInstanceState for widget id: " + mAppWidgetId + ", "
                     + (mInfo == null ? "null" : mInfo.provider), e);
         }
     }
 
-    private SizeF computeSizeFromLayout(int left, int top, int right, int bottom) {
-        float density = getResources().getDisplayMetrics().density;
-        return new SizeF(
-                (right - left - getPaddingLeft() - getPaddingRight()) / density,
-                (bottom - top - getPaddingTop() - getPaddingBottom()) / density
-        );
-    }
-
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
         try {
-            SizeF oldSize = mCurrentSize;
-            SizeF newSize = computeSizeFromLayout(left, top, right, bottom);
-            mCurrentSize = newSize;
-            if (mLastInflatedRemoteViews != null) {
-                RemoteViews toApply = mLastInflatedRemoteViews.getRemoteViewsToApplyIfDifferent(
-                        oldSize, newSize);
-                if (toApply != null) {
-                    applyRemoteViews(toApply, false);
-                    measureChildWithMargins(mView,
-                            MeasureSpec.makeMeasureSpec(getMeasuredWidth(), MeasureSpec.EXACTLY),
-                            0 /* widthUsed */,
-                            MeasureSpec.makeMeasureSpec(getMeasuredHeight(), MeasureSpec.EXACTLY),
-                            0 /* heightUsed */);
-                }
-            }
             super.onLayout(changed, left, top, right, bottom);
         } catch (final RuntimeException e) {
             Log.e(TAG, "Remote provider threw runtime exception, using error view instead.", e);
@@ -327,8 +267,7 @@ public class AppWidgetHostView extends FrameLayout {
      * Provide guidance about the size of this widget to the AppWidgetManager. The widths and
      * heights should correspond to the full area the AppWidgetHostView is given. Padding added by
      * the framework will be accounted for automatically. This information gets embedded into the
-     * AppWidget options and causes a callback to the AppWidgetProvider. In addition, the list of
-     * sizes is explicitly set to an empty list.
+     * AppWidget options and causes a callback to the AppWidgetProvider.
      * @see AppWidgetProvider#onAppWidgetOptionsChanged(Context, AppWidgetManager, int, Bundle)
      *
      * @param newOptions The bundle of options, in addition to the size information,
@@ -337,71 +276,17 @@ public class AppWidgetHostView extends FrameLayout {
      * @param minHeight The maximum height in dips that the widget will be displayed at.
      * @param maxWidth The maximum width in dips that the widget will be displayed at.
      * @param maxHeight The maximum height in dips that the widget will be displayed at.
-     * @deprecated use {@link AppWidgetHostView#updateAppWidgetSize(Bundle, List)} instead.
+     *
      */
-    @Deprecated
     public void updateAppWidgetSize(Bundle newOptions, int minWidth, int minHeight, int maxWidth,
             int maxHeight) {
         updateAppWidgetSize(newOptions, minWidth, minHeight, maxWidth, maxHeight, false);
     }
 
     /**
-     * Provide guidance about the size of this widget to the AppWidgetManager. The sizes should
-     * correspond to the full area the AppWidgetHostView is given. Padding added by the framework
-     * will be accounted for automatically.
-     *
-     * This method will update the option bundle with the list of sizes and the min/max bounds for
-     * width and height.
-     *
-     * @see AppWidgetProvider#onAppWidgetOptionsChanged(Context, AppWidgetManager, int, Bundle)
-     *
-     * @param newOptions The bundle of options, in addition to the size information.
-     * @param sizes Sizes, in dips, the widget may be displayed at without calling the provider
-     *              again. Typically, this will be size of the widget in landscape and portrait.
-     *              On some foldables, this might include the size on the outer and inner screens.
-     */
-    public void updateAppWidgetSize(@NonNull Bundle newOptions, @NonNull List<SizeF> sizes) {
-        AppWidgetManager widgetManager = AppWidgetManager.getInstance(mContext);
-
-        Rect padding = getDefaultPadding();
-        float density = getResources().getDisplayMetrics().density;
-
-        float xPaddingDips = (padding.left + padding.right) / density;
-        float yPaddingDips = (padding.top + padding.bottom) / density;
-
-        ArrayList<SizeF> paddedSizes = new ArrayList<>(sizes.size());
-        float minWidth = Float.MAX_VALUE;
-        float maxWidth = 0;
-        float minHeight = Float.MAX_VALUE;
-        float maxHeight = 0;
-        for (int i = 0; i < sizes.size(); i++) {
-            SizeF size = sizes.get(i);
-            SizeF paddedSize = new SizeF(Math.max(0.f, size.getWidth() - xPaddingDips),
-                    Math.max(0.f, size.getHeight() - yPaddingDips));
-            paddedSizes.add(paddedSize);
-            minWidth = Math.min(minWidth, paddedSize.getWidth());
-            maxWidth = Math.max(maxWidth, paddedSize.getWidth());
-            minHeight = Math.min(minHeight, paddedSize.getHeight());
-            maxHeight = Math.max(maxHeight, paddedSize.getHeight());
-        }
-        if (paddedSizes.equals(
-                widgetManager.getAppWidgetOptions(mAppWidgetId).<SizeF>getParcelableArrayList(
-                        AppWidgetManager.OPTION_APPWIDGET_SIZES))) {
-            return;
-        }
-        Bundle options = newOptions.deepCopy();
-        options.putInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH, (int) minWidth);
-        options.putInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT, (int) minHeight);
-        options.putInt(AppWidgetManager.OPTION_APPWIDGET_MAX_WIDTH, (int) maxWidth);
-        options.putInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT, (int) maxHeight);
-        options.putParcelableArrayList(AppWidgetManager.OPTION_APPWIDGET_SIZES, paddedSizes);
-        updateAppWidgetOptions(options);
-    }
-
-    /**
      * @hide
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public void updateAppWidgetSize(Bundle newOptions, int minWidth, int minHeight, int maxWidth,
             int maxHeight, boolean ignorePadding) {
         if (newOptions == null) {
@@ -436,8 +321,6 @@ public class AppWidgetHostView extends FrameLayout {
             newOptions.putInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT, newMinHeight);
             newOptions.putInt(AppWidgetManager.OPTION_APPWIDGET_MAX_WIDTH, newMaxWidth);
             newOptions.putInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT, newMaxHeight);
-            newOptions.putParcelableArrayList(AppWidgetManager.OPTION_APPWIDGET_SIZES,
-                    new ArrayList<PointF>());
             updateAppWidgetOptions(newOptions);
         }
     }
@@ -503,30 +386,16 @@ public class AppWidgetHostView extends FrameLayout {
      * AppWidget provider. Will animate into these new views as needed
      */
     public void updateAppWidget(RemoteViews remoteViews) {
-        mLastInflatedRemoteViews = remoteViews;
         applyRemoteViews(remoteViews, true);
-    }
-
-    /**
-     * Reapply the last inflated remote views, or the default view is none was inflated.
-     */
-    private void reapplyLastRemoteViews() {
-        SparseArray<Parcelable> savedState = new SparseArray<>();
-        saveHierarchyState(savedState);
-        applyRemoteViews(mLastInflatedRemoteViews, true);
-        restoreHierarchyState(savedState);
     }
 
     /**
      * @hide
      */
-    protected void applyRemoteViews(@Nullable RemoteViews remoteViews, boolean useAsyncIfPossible) {
+    protected void applyRemoteViews(RemoteViews remoteViews, boolean useAsyncIfPossible) {
         boolean recycled = false;
         View content = null;
         Exception exception = null;
-
-        // Block state restore until the end of the apply.
-        mLastInflatedRemoteViewsId = -1;
 
         if (mLastExecutionSignal != null) {
             mLastExecutionSignal.cancel();
@@ -542,23 +411,24 @@ public class AppWidgetHostView extends FrameLayout {
             mLayoutId = -1;
             mViewMode = VIEW_MODE_DEFAULT;
         } else {
-            // Select the remote view we are actually going to apply.
-            RemoteViews rvToApply = remoteViews.getRemoteViewsToApply(mContext, mCurrentSize);
             if (mOnLightBackground) {
-                rvToApply = rvToApply.getDarkTextViews();
+                remoteViews = remoteViews.getDarkTextViews();
             }
 
             if (mAsyncExecutor != null && useAsyncIfPossible) {
-                inflateAsync(rvToApply);
+                inflateAsync(remoteViews);
                 return;
             }
-            int layoutId = rvToApply.getLayoutId();
-            if (rvToApply.canRecycleView(mView)) {
+            // Prepare a local reference to the remote Context so we're ready to
+            // inflate any requested LayoutParams.
+            mRemoteContext = getRemoteContext();
+            int layoutId = remoteViews.getLayoutId();
+            // If our stale view has been prepared to match active, and the new
+            // layout matches, try recycling it
+            if (content == null && layoutId == mLayoutId) {
                 try {
-                    rvToApply.reapply(mContext, mView, mInteractionHandler, mCurrentSize,
-                            mColorResources);
+                    remoteViews.reapply(mContext, mView, mOnClickHandler);
                     content = mView;
-                    mLastInflatedRemoteViewsId = rvToApply.computeUniqueId(remoteViews);
                     recycled = true;
                     if (LOGD) Log.d(TAG, "was able to recycle existing layout");
                 } catch (RuntimeException e) {
@@ -569,9 +439,7 @@ public class AppWidgetHostView extends FrameLayout {
             // Try normal RemoteView inflation
             if (content == null) {
                 try {
-                    content = rvToApply.apply(mContext, this, mInteractionHandler,
-                            mCurrentSize, mColorResources);
-                    mLastInflatedRemoteViewsId = rvToApply.computeUniqueId(remoteViews);
+                    content = remoteViews.apply(mContext, this, mOnClickHandler);
                     if (LOGD) Log.d(TAG, "had to inflate new layout");
                 } catch (RuntimeException e) {
                     exception = e;
@@ -592,7 +460,7 @@ public class AppWidgetHostView extends FrameLayout {
                 return ;
             }
             if (exception != null) {
-                Log.w(TAG, "Error inflating RemoteViews", exception);
+                Log.w(TAG, "Error inflating RemoteViews : " + exception.toString());
             }
             content = getErrorView();
             mViewMode = VIEW_MODE_ERROR;
@@ -609,15 +477,11 @@ public class AppWidgetHostView extends FrameLayout {
         }
     }
 
-    private void inflateAsync(@NonNull RemoteViews remoteViews) {
+    private void inflateAsync(RemoteViews remoteViews) {
         // Prepare a local reference to the remote Context so we're ready to
         // inflate any requested LayoutParams.
         mRemoteContext = getRemoteContext();
         int layoutId = remoteViews.getLayoutId();
-
-        if (mLastExecutionSignal != null) {
-            mLastExecutionSignal.cancel();
-        }
 
         // If our stale view has been prepared to match active, and the new
         // layout matches, try recycling it
@@ -627,9 +491,7 @@ public class AppWidgetHostView extends FrameLayout {
                         mView,
                         mAsyncExecutor,
                         new ViewApplyListener(remoteViews, layoutId, true),
-                        mInteractionHandler,
-                        mCurrentSize,
-                        mColorResources);
+                        mOnClickHandler);
             } catch (Exception e) {
                 // Reapply failed. Try apply
             }
@@ -639,9 +501,7 @@ public class AppWidgetHostView extends FrameLayout {
                     this,
                     mAsyncExecutor,
                     new ViewApplyListener(remoteViews, layoutId, false),
-                    mInteractionHandler,
-                    mCurrentSize,
-                    mColorResources);
+                    mOnClickHandler);
         }
     }
 
@@ -650,10 +510,7 @@ public class AppWidgetHostView extends FrameLayout {
         private final boolean mIsReapply;
         private final int mLayoutId;
 
-        ViewApplyListener(
-                RemoteViews views,
-                int layoutId,
-                boolean isReapply) {
+        public ViewApplyListener(RemoteViews views, int layoutId, boolean isReapply) {
             mViews = views;
             mLayoutId = layoutId;
             mIsReapply = isReapply;
@@ -665,10 +522,6 @@ public class AppWidgetHostView extends FrameLayout {
             mViewMode = VIEW_MODE_CONTENT;
 
             applyContent(v, mIsReapply, null);
-
-            mLastInflatedRemoteViewsId = mViews.computeUniqueId(mLastInflatedRemoteViews);
-            restoreInstanceState();
-            mLastExecutionSignal = null;
         }
 
         @Override
@@ -679,12 +532,10 @@ public class AppWidgetHostView extends FrameLayout {
                         AppWidgetHostView.this,
                         mAsyncExecutor,
                         new ViewApplyListener(mViews, mLayoutId, false),
-                        mInteractionHandler,
-                        mCurrentSize);
+                        mOnClickHandler);
             } else {
                 applyContent(null, false, e);
             }
-            mLastExecutionSignal = null;
         }
     }
 
@@ -717,13 +568,9 @@ public class AppWidgetHostView extends FrameLayout {
     protected Context getRemoteContext() {
         try {
             // Return if cloned successfully, otherwise default
-            Context newContext = mContext.createApplicationContext(
+            return mContext.createApplicationContext(
                     mInfo.providerInfo.applicationInfo,
                     Context.CONTEXT_RESTRICTED);
-            if (mColorResources != null) {
-                mColorResources.apply(newContext);
-            }
-            return newContext;
         } catch (NameNotFoundException e) {
             Log.e(TAG, "Package name " +  mInfo.providerInfo.packageName + " not found");
             return mContext;
@@ -790,7 +637,7 @@ public class AppWidgetHostView extends FrameLayout {
         }
 
         if (exception != null) {
-            Log.w(TAG, "Error inflating AppWidget " + mInfo, exception);
+            Log.w(TAG, "Error inflating AppWidget " + mInfo + ": " + exception.toString());
         }
 
         if (defaultView == null) {
@@ -867,69 +714,15 @@ public class AppWidgetHostView extends FrameLayout {
         return null;
     }
 
-    private InteractionHandler getHandler(InteractionHandler handler) {
+    private OnClickHandler getHandler(OnClickHandler handler) {
         return (view, pendingIntent, response) -> {
             AppWidgetManager.getInstance(mContext).noteAppWidgetTapped(mAppWidgetId);
             if (handler != null) {
-                return handler.onInteraction(view, pendingIntent, response);
+                return handler.onClickHandler(view, pendingIntent, response);
             } else {
                 return RemoteViews.startPendingIntent(view, pendingIntent,
                         response.getLaunchOptions(view));
             }
         };
-    }
-
-    /**
-     * Set the dynamically overloaded color resources.
-     *
-     * {@code colorMapping} maps a predefined set of color resources to their ARGB
-     * representation. Any entry not in the predefined set of colors will be ignored.
-     *
-     * Calling this method will trigger a full re-inflation of the App Widget.
-     *
-     * The color resources that can be overloaded are the ones whose name is prefixed with
-     * {@code system_neutral} or {@code system_accent}, for example
-     * {@link android.R.color#system_neutral1_500}.
-     */
-    public void setColorResources(@NonNull SparseIntArray colorMapping) {
-        if (mColorMapping != null && isSameColorMapping(mColorMapping, colorMapping)) {
-            return;
-        }
-        mColorMapping = colorMapping.clone();
-        mColorResources = RemoteViews.ColorResources.create(mContext, mColorMapping);
-        mLayoutId = -1;
-        mViewMode = VIEW_MODE_NOINIT;
-        reapplyLastRemoteViews();
-    }
-
-    /** Check if, in the current context, the two color mappings are equivalent. */
-    private boolean isSameColorMapping(SparseIntArray oldColors, SparseIntArray newColors) {
-        if (oldColors.size() != newColors.size()) {
-            return false;
-        }
-        for (int i = 0; i < oldColors.size(); i++) {
-            if (oldColors.keyAt(i) != newColors.keyAt(i)
-                    || oldColors.valueAt(i) != newColors.valueAt(i)) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    /**
-     * Reset the dynamically overloaded resources, reverting to the default values for
-     * all the colors.
-     *
-     * If colors were defined before, calling this method will trigger a full re-inflation of the
-     * App Widget.
-     */
-    public void resetColorResources() {
-        if (mColorResources != null) {
-            mColorResources = null;
-            mColorMapping = null;
-            mLayoutId = -1;
-            mViewMode = VIEW_MODE_NOINIT;
-            reapplyLastRemoteViews();
-        }
     }
 }

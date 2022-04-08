@@ -16,7 +16,6 @@
 
 package android.bluetooth;
 
-import android.annotation.Nullable;
 import android.annotation.TestApi;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Build;
@@ -73,7 +72,7 @@ public final class BluetoothClass implements Parcelable {
     }
 
     @Override
-    public boolean equals(@Nullable Object o) {
+    public boolean equals(Object o) {
         if (o instanceof BluetoothClass) {
             return mClass == ((BluetoothClass) o).mClass;
         }
@@ -426,13 +425,13 @@ public final class BluetoothClass implements Parcelable {
                     return false;
             }
         } else if (profile == PROFILE_HID) {
-            return getMajorDeviceClass() == Device.Major.PERIPHERAL;
+            return (getDeviceClass() & Device.Major.PERIPHERAL) == Device.Major.PERIPHERAL;
         } else if (profile == PROFILE_PANU || profile == PROFILE_NAP) {
             // No good way to distinguish between the two, based on class bits.
             if (hasService(Service.NETWORKING)) {
                 return true;
             }
-            return getMajorDeviceClass() == Device.Major.NETWORKING;
+            return (getDeviceClass() & Device.Major.NETWORKING) == Device.Major.NETWORKING;
         } else {
             return false;
         }

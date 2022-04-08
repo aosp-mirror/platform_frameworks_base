@@ -18,6 +18,7 @@ package com.android.systemui.qs.tiles;
 
 import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.FIELD_QS_MODE;
 
+import android.annotation.Nullable;
 import android.content.Intent;
 import android.hardware.display.ColorDisplayManager;
 import android.hardware.display.NightDisplayListener;
@@ -28,24 +29,14 @@ import android.provider.Settings;
 import android.service.quicksettings.Tile;
 import android.text.TextUtils;
 import android.util.Log;
-import android.view.View;
 import android.widget.Switch;
 
-import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
 
-import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.systemui.R;
-import com.android.systemui.dagger.NightDisplayListenerModule;
-import com.android.systemui.dagger.qualifiers.Background;
-import com.android.systemui.dagger.qualifiers.Main;
-import com.android.systemui.plugins.ActivityStarter;
-import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.qs.QSTile.BooleanState;
-import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.qs.QSHost;
-import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.statusbar.policy.LocationController;
 
@@ -69,32 +60,17 @@ public class NightDisplayTile extends QSTileImpl<BooleanState> implements
     private static final String PATTERN_HOUR_MINUTE = "h:mm a";
     private static final String PATTERN_HOUR_NINUTE_24 = "HH:mm";
 
-    private ColorDisplayManager mManager;
+    private final ColorDisplayManager mManager;
     private final LocationController mLocationController;
-    private final NightDisplayListenerModule.Builder mNightDisplayListenerBuilder;
     private NightDisplayListener mListener;
     private boolean mIsListening;
 
     @Inject
-    public NightDisplayTile(
-            QSHost host,
-            @Background Looper backgroundLooper,
-            @Main Handler mainHandler,
-            FalsingManager falsingManager,
-            MetricsLogger metricsLogger,
-            StatusBarStateController statusBarStateController,
-            ActivityStarter activityStarter,
-            QSLogger qsLogger,
-            LocationController locationController,
-            ColorDisplayManager colorDisplayManager,
-            NightDisplayListenerModule.Builder nightDisplayListenerBuilder
-    ) {
-        super(host, backgroundLooper, mainHandler, falsingManager, metricsLogger,
-                statusBarStateController, activityStarter, qsLogger);
+    public NightDisplayTile(QSHost host, LocationController locationController) {
+        super(host);
         mLocationController = locationController;
-        mManager = colorDisplayManager;
-        mNightDisplayListenerBuilder = nightDisplayListenerBuilder;
-        mListener = mNightDisplayListenerBuilder.setUser(host.getUserContext().getUserId()).build();
+        mManager = mContext.getSystemService(ColorDisplayManager.class);
+        mListener = new NightDisplayListener(mContext, new Handler(Looper.myLooper()));
     }
 
     @Override
@@ -108,7 +84,7 @@ public class NightDisplayTile extends QSTileImpl<BooleanState> implements
     }
 
     @Override
-    protected void handleClick(@Nullable View view) {
+    protected void handleClick() {
         // Enroll in forced auto mode if eligible.
         if ("1".equals(Settings.Global.getString(mContext.getContentResolver(),
                 Settings.Global.NIGHT_DISPLAY_FORCED_AUTO_MODE_AVAILABLE))
@@ -129,10 +105,8 @@ public class NightDisplayTile extends QSTileImpl<BooleanState> implements
             mListener.setCallback(null);
         }
 
-        mManager = getHost().getUserContext().getSystemService(ColorDisplayManager.class);
-
         // Make a new controller for the new user.
-        mListener = mNightDisplayListenerBuilder.setUser(newUserId).build();
+        mListener = new NightDisplayListener(mContext, newUserId, new Handler(Looper.myLooper()));
         if (mIsListening) {
             mListener.setCallback(this);
         }

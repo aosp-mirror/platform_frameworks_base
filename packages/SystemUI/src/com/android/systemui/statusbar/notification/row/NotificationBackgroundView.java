@@ -20,6 +20,7 @@ import android.content.Context;
 import android.content.res.ColorStateList;
 import android.graphics.Canvas;
 import android.graphics.PorterDuff;
+import android.graphics.PorterDuffXfermode;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.LayerDrawable;
@@ -28,8 +29,9 @@ import android.util.AttributeSet;
 import android.view.View;
 
 import com.android.internal.util.ArrayUtils;
+import com.android.systemui.Interpolators;
 import com.android.systemui.R;
-import com.android.systemui.statusbar.notification.ExpandAnimationParameters;
+import com.android.systemui.statusbar.notification.ActivityLaunchAnimator;
 
 /**
  * A view that can be used for both the dimmed and normal background of an notification.
@@ -42,14 +44,19 @@ public class NotificationBackgroundView extends View {
     private int mActualHeight;
     private int mClipBottomAmount;
     private int mTintColor;
-    private final float[] mCornerRadii = new float[8];
+    private float[] mCornerRadii = new float[8];
     private boolean mBottomIsRounded;
+    private boolean mLastInSection;
+    private boolean mFirstInSection;
     private int mBackgroundTop;
     private boolean mBottomAmountClips = true;
     private boolean mExpandAnimationRunning;
     private float mActualWidth;
     private int mDrawableAlpha = 255;
     private boolean mIsPressedAllowed;
+
+    private boolean mTopAmountRounded;
+    private float mDistanceToTopRoundness;
 
     public NotificationBackgroundView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -76,7 +83,8 @@ public class NotificationBackgroundView extends View {
             int bottom = mActualHeight;
             if (mBottomIsRounded
                     && mBottomAmountClips
-                    && !mExpandAnimationRunning) {
+                    && !mExpandAnimationRunning
+                    && !mLastInSection) {
                 bottom -= mClipBottomAmount;
             }
             int left = 0;
@@ -84,6 +92,15 @@ public class NotificationBackgroundView extends View {
             if (mExpandAnimationRunning) {
                 left = (int) ((getWidth() - mActualWidth) / 2.0f);
                 right = (int) (left + mActualWidth);
+            }
+            if (mTopAmountRounded) {
+                int clipTop = (int) (mClipTopAmount - mDistanceToTopRoundness);
+                if (clipTop >= 0 || !mFirstInSection) {
+                    top += clipTop;
+                }
+                if (clipTop >= 0 && !mLastInSection) {
+                    bottom += clipTop;
+                }
             }
             drawable.setBounds(left, top, right, bottom);
             drawable.draw(canvas);
@@ -166,6 +183,14 @@ public class NotificationBackgroundView extends View {
         invalidate();
     }
 
+    public void setDistanceToTopRoundness(float distanceToTopRoundness) {
+        if (distanceToTopRoundness != mDistanceToTopRoundness) {
+            mTopAmountRounded = distanceToTopRoundness >= 0;
+            mDistanceToTopRoundness = distanceToTopRoundness;
+            invalidate();
+        }
+    }
+
     @Override
     public boolean hasOverlappingRendering() {
 
@@ -199,9 +224,10 @@ public class NotificationBackgroundView extends View {
     }
 
     /**
-     * Sets the current top and bottom radius for this background.
+     * Sets the current top and bottom roundness amounts for this background, between 0.0 (not
+     * rounded) and 1.0 (maximally rounded).
      */
-    public void setRadius(float topRoundness, float bottomRoundness) {
+    public void setRoundness(float topRoundness, float bottomRoundness) {
         if (topRoundness == mCornerRadii[0] && bottomRoundness == mCornerRadii[4]) {
             return;
         }
@@ -224,6 +250,18 @@ public class NotificationBackgroundView extends View {
         }
     }
 
+    /** Sets whether this background belongs to the last notification in a section. */
+    public void setLastInSection(boolean lastInSection) {
+        mLastInSection = lastInSection;
+        invalidate();
+    }
+
+    /** Sets whether this background belongs to the first notification in a section. */
+    public void setFirstInSection(boolean firstInSection) {
+        mFirstInSection = firstInSection;
+        invalidate();
+    }
+
     private void updateBackgroundRadii() {
         if (mDontModifyCorners) {
             return;
@@ -240,10 +278,14 @@ public class NotificationBackgroundView extends View {
         invalidate();
     }
 
-    /** Set the current expand animation size. */
-    public void setExpandAnimationSize(int actualWidth, int actualHeight) {
-        mActualHeight = actualHeight;
-        mActualWidth = actualWidth;
+    public void setExpandAnimationParams(ActivityLaunchAnimator.ExpandAnimationParameters params) {
+        mActualHeight = params.getHeight();
+        mActualWidth = params.getWidth();
+        float alphaProgress = Interpolators.ALPHA_IN.getInterpolation(
+                params.getProgress(
+                        ActivityLaunchAnimator.ANIMATION_DURATION_FADE_CONTENT /* delay */,
+                        ActivityLaunchAnimator.ANIMATION_DURATION_FADE_APP /* duration */));
+        mBackground.setAlpha((int) (mDrawableAlpha * (1.0f - alphaProgress)));
         invalidate();
     }
 
@@ -252,6 +294,8 @@ public class NotificationBackgroundView extends View {
         if (mBackground instanceof LayerDrawable) {
             GradientDrawable gradientDrawable =
                     (GradientDrawable) ((LayerDrawable) mBackground).getDrawable(0);
+            gradientDrawable.setXfermode(
+                    running ? new PorterDuffXfermode(PorterDuff.Mode.SRC) : null);
             // Speed optimization: disable AA if transfer mode is not SRC_OVER. AA is not easy to
             // spot during animation anyways.
             gradientDrawable.setAntiAlias(!running);

@@ -16,6 +16,8 @@
 
 package android.os;
 
+import android.media.AudioAttributes;
+
 /**
  * Vibrator implementation that does nothing.
  *
@@ -48,14 +50,10 @@ public class NullVibrator extends Vibrator {
 
     @Override
     public void vibrate(int uid, String opPkg, VibrationEffect effect,
-            String reason, VibrationAttributes attributes) {
+            String reason, AudioAttributes attributes) {
     }
 
     @Override
     public void cancel() {
-    }
-
-    @Override
-    public void cancel(int usageFilter) {
     }
 }

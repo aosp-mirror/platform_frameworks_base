@@ -24,6 +24,7 @@ import static android.util.apk.ApkSigningBlockUtils.getSignatureAlgorithmContent
 import static android.util.apk.ApkSigningBlockUtils.getSignatureAlgorithmJcaKeyAlgorithm;
 import static android.util.apk.ApkSigningBlockUtils.getSignatureAlgorithmJcaSignatureAlgorithm;
 import static android.util.apk.ApkSigningBlockUtils.isSupportedSignatureAlgorithm;
+import static android.util.apk.ApkSigningBlockUtils.pickBestDigestForV4;
 import static android.util.apk.ApkSigningBlockUtils.readLengthPrefixedByteArray;
 
 import android.util.ArrayMap;
@@ -149,7 +150,7 @@ public class ApkSignatureSchemeV2Verifier {
      * @throws SignatureNotFoundException if the APK is not signed using APK Signature Scheme v2.
      * @throws IOException if an I/O error occurs while reading the APK file.
      */
-    public static SignatureInfo findSignature(RandomAccessFile apk)
+    private static SignatureInfo findSignature(RandomAccessFile apk)
             throws IOException, SignatureNotFoundException {
         return ApkSigningBlockUtils.findSignature(apk, APK_SIGNATURE_SCHEME_V2_BLOCK_ID);
     }
@@ -212,9 +213,11 @@ public class ApkSignatureSchemeV2Verifier {
                     verityDigest, apk.length(), signatureInfo);
         }
 
+        byte[] digest = pickBestDigestForV4(contentDigests);
+
         return new VerifiedSigner(
                 signerCerts.toArray(new X509Certificate[signerCerts.size()][]),
-                verityRootHash, contentDigests);
+                verityRootHash, digest);
     }
 
     private static X509Certificate[] verifySigner(
@@ -336,7 +339,8 @@ public class ApkSignatureSchemeV2Verifier {
             } catch (CertificateException e) {
                 throw new SecurityException("Failed to decode certificate #" + certificateCount, e);
             }
-            certificate = new VerbatimX509Certificate(certificate, encodedCert);
+            certificate = new VerbatimX509Certificate(
+                    certificate, encodedCert);
             certs.add(certificate);
         }
 
@@ -430,15 +434,12 @@ public class ApkSignatureSchemeV2Verifier {
         public final X509Certificate[][] certs;
 
         public final byte[] verityRootHash;
-        // Algorithm -> digest map of signed digests in the signature.
-        // All these are verified if requested.
-        public final Map<Integer, byte[]> contentDigests;
+        public final byte[] digest;
 
-        public VerifiedSigner(X509Certificate[][] certs, byte[] verityRootHash,
-                Map<Integer, byte[]> contentDigests) {
+        public VerifiedSigner(X509Certificate[][] certs, byte[] verityRootHash, byte[] digest) {
             this.certs = certs;
             this.verityRootHash = verityRootHash;
-            this.contentDigests = contentDigests;
+            this.digest = digest;
         }
 
     }

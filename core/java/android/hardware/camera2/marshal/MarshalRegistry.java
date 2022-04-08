@@ -15,7 +15,6 @@
  */
 package android.hardware.camera2.marshal;
 
-import android.annotation.Nullable;
 import android.hardware.camera2.impl.CameraMetadataNative;
 import android.hardware.camera2.utils.TypeReference;
 
@@ -115,7 +114,7 @@ public class MarshalRegistry {
         private final int hash;
 
         @Override
-        public boolean equals(@Nullable Object other) {
+        public boolean equals(Object other) {
             if (other instanceof MarshalToken<?>) {
                 MarshalToken<?> otherToken = (MarshalToken<?>)other;
                 return typeReference.equals(otherToken.typeReference) &&

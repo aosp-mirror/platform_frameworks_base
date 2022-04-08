@@ -30,14 +30,10 @@ import android.os.Trace;
 import android.os.UserHandle;
 import android.util.Log;
 import android.util.TimingsTraceLog;
-import android.view.SurfaceControl;
 
-import com.android.internal.protolog.common.ProtoLog;
 import com.android.systemui.dagger.ContextComponentHelper;
-import com.android.systemui.dagger.GlobalRootComponent;
-import com.android.systemui.dagger.SysUIComponent;
+import com.android.systemui.dagger.SystemUIRootComponent;
 import com.android.systemui.dump.DumpManager;
-import com.android.systemui.shared.system.ThreadedRendererCompat;
 import com.android.systemui.util.NotificationChannels;
 
 import java.lang.reflect.Constructor;
@@ -61,14 +57,11 @@ public class SystemUIApplication extends Application implements
     private SystemUI[] mServices;
     private boolean mServicesStarted;
     private SystemUIAppComponentFactory.ContextAvailableCallback mContextAvailableCallback;
-    private GlobalRootComponent mRootComponent;
-    private SysUIComponent mSysUIComponent;
+    private SystemUIRootComponent mRootComponent;
 
     public SystemUIApplication() {
         super();
         Log.v(TAG, "SystemUIApplication constructed.");
-        // SysUI may be building without protolog preprocessing in some cases
-        ProtoLog.REQUIRE_PROTOLOGTOOL = false;
     }
 
     @Override
@@ -82,9 +75,8 @@ public class SystemUIApplication extends Application implements
         log.traceBegin("DependencyInjection");
         mContextAvailableCallback.onContextAvailable(this);
         mRootComponent = SystemUIFactory.getInstance().getRootComponent();
-        mSysUIComponent = SystemUIFactory.getInstance().getSysUIComponent();
-        mComponentHelper = mSysUIComponent.getContextComponentHelper();
-        mBootCompleteCache = mSysUIComponent.provideBootCacheImpl();
+        mComponentHelper = mRootComponent.getContextComponentHelper();
+        mBootCompleteCache = mRootComponent.provideBootCacheImpl();
         log.traceEnd();
 
         // Set the application theme that is inherited by all services. Note that setting the
@@ -95,18 +87,6 @@ public class SystemUIApplication extends Application implements
         if (Process.myUserHandle().equals(UserHandle.SYSTEM)) {
             IntentFilter bootCompletedFilter = new IntentFilter(Intent.ACTION_BOOT_COMPLETED);
             bootCompletedFilter.setPriority(IntentFilter.SYSTEM_HIGH_PRIORITY);
-
-            // If SF GPU context priority is set to realtime, then SysUI should run at high.
-            // The priority is defaulted at medium.
-            int sfPriority = SurfaceControl.getGPUContextPriority();
-            Log.i(TAG, "Found SurfaceFlinger's GPU Priority: " + sfPriority);
-            if (sfPriority == ThreadedRendererCompat.EGL_CONTEXT_PRIORITY_REALTIME_NV) {
-                Log.i(TAG, "Setting SysUI's GPU Context priority to: "
-                        + ThreadedRendererCompat.EGL_CONTEXT_PRIORITY_HIGH_IMG);
-                ThreadedRendererCompat.setContextPriority(
-                        ThreadedRendererCompat.EGL_CONTEXT_PRIORITY_HIGH_IMG);
-            }
-
             registerReceiver(new BroadcastReceiver() {
                 @Override
                 public void onReceive(Context context, Intent intent) {
@@ -192,7 +172,7 @@ public class SystemUIApplication extends Application implements
             }
         }
 
-        final DumpManager dumpManager = mSysUIComponent.createDumpManager();
+        final DumpManager dumpManager = mRootComponent.createDumpManager();
 
         Log.v(TAG, "Starting SystemUI services for user " +
                 Process.myUserHandle().getIdentifier() + ".");
@@ -235,7 +215,7 @@ public class SystemUIApplication extends Application implements
 
             dumpManager.registerDumpable(mServices[i].getClass().getName(), mServices[i]);
         }
-        mSysUIComponent.getInitController().executePostInitTasks();
+        mRootComponent.getInitController().executePostInitTasks();
         log.traceEnd();
 
         mServicesStarted = true;
@@ -244,7 +224,7 @@ public class SystemUIApplication extends Application implements
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
         if (mServicesStarted) {
-            mSysUIComponent.getConfigurationController().onConfigurationChanged(newConfig);
+            mRootComponent.getConfigurationController().onConfigurationChanged(newConfig);
             int len = mServices.length;
             for (int i = 0; i < len; i++) {
                 if (mServices[i] != null) {

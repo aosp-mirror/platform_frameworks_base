@@ -16,7 +16,6 @@
 
 package android.accounts;
 
-import android.annotation.Nullable;
 import android.compat.annotation.UnsupportedAppUsage;
 
 /**
@@ -36,7 +35,7 @@ public class AccountAndUser {
         this.userId = userId;
     }
 
-    public boolean equals(@Nullable Object o) {
+    public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof AccountAndUser)) return false;
         final AccountAndUser other = (AccountAndUser) o;

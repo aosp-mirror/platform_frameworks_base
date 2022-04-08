@@ -34,7 +34,6 @@
 #include <sys/types.h>
 
 #include <log/log.h>
-#include <android/log.h>
 
 #include "netutils/ifc.h"
 

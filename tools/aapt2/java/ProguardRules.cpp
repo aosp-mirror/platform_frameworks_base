@@ -115,10 +115,15 @@ class LayoutVisitor : public BaseVisitor {
 
   void Visit(xml::Element* node) override {
     bool is_view = false;
+    bool is_fragment = false;
     if (node->namespace_uri.empty()) {
       if (node->name == "view") {
         is_view = true;
+      } else if (node->name == "fragment") {
+        is_fragment = true;
       }
+    } else if (node->namespace_uri == xml::kSchemaAndroid) {
+      is_fragment = node->name == "fragment";
     }
 
     for (const auto& attr : node->attributes) {
@@ -127,12 +132,12 @@ class LayoutVisitor : public BaseVisitor {
           if (is_view) {
             AddClass(node->line_number, attr.value,
                 "android.content.Context, android.util.AttributeSet");
-          } else {
+          } else if (is_fragment) {
             AddClass(node->line_number, attr.value, "");
           }
         }
       } else if (attr.namespace_uri == xml::kSchemaAndroid && attr.name == "name") {
-        if (util::IsJavaClassName(attr.value)) {
+        if (is_fragment && util::IsJavaClassName(attr.value)) {
           AddClass(node->line_number, attr.value, "");
         }
       } else if (attr.namespace_uri == xml::kSchemaAndroid && attr.name == "onClick") {

@@ -18,7 +18,6 @@ package android.view
 
 import android.view.InputDevice.SOURCE_TOUCHSCREEN
 import android.view.MotionEvent.ACTION_MOVE
-import android.view.MotionEvent.FLAG_IS_ACCESSIBILITY_EVENT
 import android.view.MotionEvent.FLAG_WINDOW_IS_OBSCURED
 import android.view.MotionEvent.FLAG_WINDOW_IS_PARTIALLY_OBSCURED
 import android.view.MotionEvent.FLAG_TAINTED
@@ -50,7 +49,6 @@ class VerifiedMotionEventTest {
         assertEquals(RAW_Y, event.rawY, 0f)
         assertEquals(ACTION_MASKED, event.actionMasked)
         assertEquals(DOWN_TIME_NANOS, event.downTimeNanos)
-        assertEquals(FLAGS, event.flags)
         assertEquals(META_STATE, event.metaState)
         assertEquals(BUTTON_STATE, event.buttonState)
     }
@@ -130,9 +128,8 @@ class VerifiedMotionEventTest {
         assertNull(motionEvent.getFlag(0))
         // Flag that was not set
         assertEquals(false, motionEvent.getFlag(FLAG_WINDOW_IS_PARTIALLY_OBSCURED))
-        // Flags that were set
+        // Flag that was set
         assertEquals(true, motionEvent.getFlag(FLAG_WINDOW_IS_OBSCURED))
-        assertEquals(true, motionEvent.getFlag(FLAG_IS_ACCESSIBILITY_EVENT))
         // Only 1 flag at a time is accepted
         assertNull(motionEvent.getFlag(
                 FLAG_WINDOW_IS_PARTIALLY_OBSCURED or FLAG_WINDOW_IS_OBSCURED))
@@ -156,7 +153,7 @@ class VerifiedMotionEventTest {
         private const val RAW_Y = 200f
         private const val ACTION_MASKED = ACTION_MOVE
         private const val DOWN_TIME_NANOS: Long = 1000
-        private const val FLAGS = FLAG_WINDOW_IS_OBSCURED or FLAG_IS_ACCESSIBILITY_EVENT
+        private const val FLAGS = FLAG_WINDOW_IS_OBSCURED
         private const val META_STATE = 11
         private const val BUTTON_STATE = 22
 
@@ -181,7 +178,6 @@ class VerifiedMotionEventTest {
             assertEquals(event1.rawY, event2.rawY, 0f)
             assertEquals(event1.actionMasked, event2.actionMasked)
             assertEquals(event1.downTimeNanos, event2.downTimeNanos)
-            assertEquals(event1.flags, event2.flags)
             assertEquals(event1.metaState, event2.metaState)
             assertEquals(event1.buttonState, event2.buttonState)
         }

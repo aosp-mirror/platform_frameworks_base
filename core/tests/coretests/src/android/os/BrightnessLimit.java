@@ -42,8 +42,7 @@ public class BrightnessLimit extends Activity implements OnClickListener {
 
     public void onClick(View v) {
         DisplayManager dm = getSystemService(DisplayManager.class);
-        final int displayId = getBaseContext().getDisplay().getDisplayId();
-        dm.setTemporaryBrightness(displayId, 0.0f);
+        dm.setTemporaryBrightness(0.0f);
         Settings.System.putInt(getContentResolver(), Settings.System.SCREEN_BRIGHTNESS, 0);
     }
 }

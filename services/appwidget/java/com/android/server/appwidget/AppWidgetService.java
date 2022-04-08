@@ -16,13 +16,11 @@
 
 package com.android.server.appwidget;
 
-import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.content.Context;
 
 import com.android.server.AppWidgetBackupBridge;
+import com.android.server.FgThread;
 import com.android.server.SystemService;
-import com.android.server.SystemService.TargetUser;
 
 /**
  * SystemService that publishes an IAppWidgetService.
@@ -51,12 +49,12 @@ public class AppWidgetService extends SystemService {
     }
 
     @Override
-    public void onUserStopping(@NonNull TargetUser user) {
-        mImpl.onUserStopped(user.getUserIdentifier());
+    public void onStopUser(int userHandle) {
+        mImpl.onUserStopped(userHandle);
     }
 
     @Override
-    public void onUserSwitching(@Nullable TargetUser from, @NonNull TargetUser to) {
-        mImpl.reloadWidgetsMaskedStateForGroup(to.getUserIdentifier());
+    public void onSwitchUser(int userHandle) {
+        mImpl.reloadWidgetsMaskedStateForGroup(userHandle);
     }
 }

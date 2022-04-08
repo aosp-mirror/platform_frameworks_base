@@ -27,7 +27,6 @@ import static org.mockito.Mockito.when;
 import static org.mockito.internal.verification.VerificationModeFactory.times;
 import static org.testng.Assert.assertThrows;
 
-import android.compat.Compatibility.ChangeConfig;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
@@ -36,7 +35,6 @@ import android.os.Build;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.compat.AndroidBuildClassifier;
-import com.android.internal.compat.CompatibilityChangeConfig;
 import com.android.internal.compat.CompatibilityChangeInfo;
 import com.android.server.LocalServices;
 
@@ -45,9 +43,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-
-import java.util.HashSet;
-import java.util.Set;
 
 @RunWith(AndroidJUnit4.class)
 public class PlatformCompatTest {
@@ -75,15 +70,11 @@ public class PlatformCompatTest {
                 new PackageManager.NameNotFoundException());
         when(mPackageManagerInternal.getPackageUid(eq(PACKAGE_NAME), eq(0), anyInt()))
             .thenReturn(-1);
-        when(mPackageManager.getApplicationInfo(eq(PACKAGE_NAME), anyInt()))
-            .thenThrow(new PackageManager.NameNotFoundException());
         mCompatConfig = new CompatConfig(mBuildClassifier, mContext);
-        mPlatformCompat = new PlatformCompat(mContext, mCompatConfig, mBuildClassifier);
+        mPlatformCompat = new PlatformCompat(mContext, mCompatConfig);
         // Assume userdebug/eng non-final build
-        mCompatConfig.forceNonDebuggableFinalForTest(false);
         when(mBuildClassifier.isDebuggableBuild()).thenReturn(true);
         when(mBuildClassifier.isFinalBuild()).thenReturn(false);
-        when(mBuildClassifier.platformTargetSdk()).thenReturn(30);
         LocalServices.removeServiceForTest(PackageManagerInternal.class);
         LocalServices.addService(PackageManagerInternal.class, mPackageManagerInternal);
     }
@@ -93,27 +84,22 @@ public class PlatformCompatTest {
         mCompatConfig = CompatConfigBuilder.create(mBuildClassifier, mContext)
                 .addEnabledChangeWithId(1L)
                 .addDisabledChangeWithIdAndName(2L, "change2")
-                .addEnableAfterSdkChangeWithIdAndDescription(Build.VERSION_CODES.O, 3L, "desc")
-                .addEnableAfterSdkChangeWithId(Build.VERSION_CODES.P, 4L)
-                .addEnableAfterSdkChangeWithId(Build.VERSION_CODES.Q, 5L)
-                .addEnableAfterSdkChangeWithId(Build.VERSION_CODES.R, 6L)
+                .addTargetSdkChangeWithIdAndDescription(Build.VERSION_CODES.O, 3L, "description")
+                .addTargetSdkChangeWithId(Build.VERSION_CODES.P, 4L)
+                .addTargetSdkChangeWithId(Build.VERSION_CODES.Q, 5L)
+                .addTargetSdkChangeWithId(Build.VERSION_CODES.R, 6L)
                 .addLoggingOnlyChangeWithId(7L)
-                .addDisabledOverridableChangeWithId(8L)
                 .build();
-        mPlatformCompat = new PlatformCompat(mContext, mCompatConfig, mBuildClassifier);
+        mPlatformCompat = new PlatformCompat(mContext, mCompatConfig);
         assertThat(mPlatformCompat.listAllChanges()).asList().containsExactly(
-                new CompatibilityChangeInfo(1L, "", -1, -1, false, false, "", false),
-                new CompatibilityChangeInfo(2L, "change2", -1, -1, true, false, "", false),
-                new CompatibilityChangeInfo(3L, "", Build.VERSION_CODES.O, -1, false, false,
-                        "desc", false),
-                new CompatibilityChangeInfo(
-                        4L, "", Build.VERSION_CODES.P, -1, false, false, "", false),
-                new CompatibilityChangeInfo(
-                        5L, "", Build.VERSION_CODES.Q, -1, false, false, "", false),
-                new CompatibilityChangeInfo(
-                        6L, "", Build.VERSION_CODES.R, -1, false, false, "", false),
-                new CompatibilityChangeInfo(7L, "", -1, -1, false, true, "", false),
-                new CompatibilityChangeInfo(8L, "", -1, -1, true, false, "", true));
+                new CompatibilityChangeInfo(1L, "", -1, false, false, ""),
+                new CompatibilityChangeInfo(2L, "change2", -1, true, false, ""),
+                new CompatibilityChangeInfo(3L, "", Build.VERSION_CODES.O, false, false,
+                        "description"),
+                new CompatibilityChangeInfo(4L, "", Build.VERSION_CODES.P, false, false, ""),
+                new CompatibilityChangeInfo(5L, "", Build.VERSION_CODES.Q, false, false, ""),
+                new CompatibilityChangeInfo(6L, "", Build.VERSION_CODES.R, false, false, ""),
+                new CompatibilityChangeInfo(7L, "", -1, false, true, ""));
     }
 
     @Test
@@ -121,53 +107,18 @@ public class PlatformCompatTest {
         mCompatConfig = CompatConfigBuilder.create(mBuildClassifier, mContext)
                 .addEnabledChangeWithId(1L)
                 .addDisabledChangeWithIdAndName(2L, "change2")
-                .addEnableSinceSdkChangeWithIdAndDescription(Build.VERSION_CODES.O, 3L, "desc")
-                .addEnableSinceSdkChangeWithId(Build.VERSION_CODES.P, 4L)
-                .addEnableSinceSdkChangeWithId(Build.VERSION_CODES.Q, 5L)
-                .addEnableSinceSdkChangeWithId(Build.VERSION_CODES.R, 6L)
+                .addTargetSdkChangeWithIdAndDescription(Build.VERSION_CODES.O, 3L, "description")
+                .addTargetSdkChangeWithId(Build.VERSION_CODES.P, 4L)
+                .addTargetSdkChangeWithId(Build.VERSION_CODES.Q, 5L)
+                .addTargetSdkChangeWithId(Build.VERSION_CODES.R, 6L)
                 .addLoggingOnlyChangeWithId(7L)
-                .addEnableSinceSdkChangeWithId(31, 8L)
                 .build();
-        mPlatformCompat = new PlatformCompat(mContext, mCompatConfig, mBuildClassifier);
+        mPlatformCompat = new PlatformCompat(mContext, mCompatConfig);
         assertThat(mPlatformCompat.listUIChanges()).asList().containsExactly(
-                new CompatibilityChangeInfo(1L, "", -1, -1, false, false, "", false),
-                new CompatibilityChangeInfo(2L, "change2", -1, -1, true, false, "", false),
-                new CompatibilityChangeInfo(
-                        5L, "", Build.VERSION_CODES.P, -1, false, false, "", false),
-                new CompatibilityChangeInfo(
-                        6L, "", Build.VERSION_CODES.Q, -1, false, false, "", false));
-    }
-
-    @Test
-    public void testOverrideAtInstallTime() throws Exception {
-        mCompatConfig = CompatConfigBuilder.create(mBuildClassifier, mContext)
-                .addEnabledChangeWithId(1L)
-                .addDisabledChangeWithId(2L)
-                .addEnableAfterSdkChangeWithId(Build.VERSION_CODES.O, 3L)
-                .build();
-        mCompatConfig.forceNonDebuggableFinalForTest(true);
-        mPlatformCompat = new PlatformCompat(mContext, mCompatConfig, mBuildClassifier);
-
-        // Before adding overrides.
-        assertThat(mPlatformCompat.isChangeEnabledByPackageName(1, PACKAGE_NAME, 0)).isTrue();
-        assertThat(mPlatformCompat.isChangeEnabledByPackageName(2, PACKAGE_NAME, 0)).isFalse();
-        assertThat(mPlatformCompat.isChangeEnabledByPackageName(3, PACKAGE_NAME, 0)).isTrue();
-
-        // Add overrides.
-        Set<Long> enabled = new HashSet<>();
-        enabled.add(2L);
-        Set<Long> disabled = new HashSet<>();
-        disabled.add(1L);
-        disabled.add(3L);
-        ChangeConfig changeConfig = new ChangeConfig(enabled, disabled);
-        CompatibilityChangeConfig compatibilityChangeConfig =
-                new CompatibilityChangeConfig(changeConfig);
-        mPlatformCompat.setOverridesForTest(compatibilityChangeConfig, PACKAGE_NAME);
-
-        // After adding overrides.
-        assertThat(mPlatformCompat.isChangeEnabledByPackageName(1, PACKAGE_NAME, 0)).isFalse();
-        assertThat(mPlatformCompat.isChangeEnabledByPackageName(2, PACKAGE_NAME, 0)).isTrue();
-        assertThat(mPlatformCompat.isChangeEnabledByPackageName(3, PACKAGE_NAME, 0)).isFalse();
+                new CompatibilityChangeInfo(1L, "", -1, false, false, ""),
+                new CompatibilityChangeInfo(2L, "change2", -1, true, false, ""),
+                new CompatibilityChangeInfo(4L, "", Build.VERSION_CODES.P, false, false, ""),
+                new CompatibilityChangeInfo(5L, "", Build.VERSION_CODES.Q, false, false, ""));
     }
 
     @Test
@@ -198,9 +149,6 @@ public class PlatformCompatTest {
         mPlatformCompat.registerListener(1, mListener1);
         mPlatformCompat.registerListener(2, mListener1);
 
-        when(mPackageManager.getApplicationInfo(eq(PACKAGE_NAME), anyInt()))
-                .thenReturn(ApplicationInfoBuilder.create().withPackageName(PACKAGE_NAME).build());
-
         mPlatformCompat.setOverrides(
                 CompatibilityChangeConfigBuilder.create().enable(1L).disable(2L).build(),
                 PACKAGE_NAME);
@@ -213,9 +161,6 @@ public class PlatformCompatTest {
         mPlatformCompat.registerListener(1, mListener1);
         mPlatformCompat.registerListener(2, mListener1);
 
-        when(mPackageManager.getApplicationInfo(eq(PACKAGE_NAME), anyInt()))
-                .thenReturn(ApplicationInfoBuilder.create().withPackageName(PACKAGE_NAME).build());
-
         mPlatformCompat.setOverrides(
                 CompatibilityChangeConfigBuilder.create().enable(1L).disable(2L).build(),
                 PACKAGE_NAME);
@@ -226,9 +171,6 @@ public class PlatformCompatTest {
     @Test
     public void testListenerCalledOnSetOverridesTwoListeners() throws Exception {
         mPlatformCompat.registerListener(1, mListener1);
-
-        when(mPackageManager.getApplicationInfo(eq(PACKAGE_NAME), anyInt()))
-                .thenReturn(ApplicationInfoBuilder.create().withPackageName(PACKAGE_NAME).build());
 
         mPlatformCompat.setOverrides(
                 CompatibilityChangeConfigBuilder.create().enable(1L).disable(2L).build(),
@@ -255,9 +197,6 @@ public class PlatformCompatTest {
         mPlatformCompat.registerListener(1, mListener1);
         mPlatformCompat.registerListener(2, mListener1);
 
-        when(mPackageManager.getApplicationInfo(eq(PACKAGE_NAME), anyInt()))
-                .thenReturn(ApplicationInfoBuilder.create().withPackageName(PACKAGE_NAME).build());
-
         mPlatformCompat.setOverrides(
                 CompatibilityChangeConfigBuilder.create().enable(1L).disable(2L).build(),
                 PACKAGE_NAME);
@@ -266,11 +205,8 @@ public class PlatformCompatTest {
     }
 
     @Test
-    public void testListenerCalledOnSetOverridesForTestTwoListeners() throws Exception {
+    public void testListenerCalledOnSetOverridesTwoListenersForTest() throws Exception {
         mPlatformCompat.registerListener(1, mListener1);
-
-        when(mPackageManager.getApplicationInfo(eq(PACKAGE_NAME), anyInt()))
-                .thenReturn(ApplicationInfoBuilder.create().withPackageName(PACKAGE_NAME).build());
 
         mPlatformCompat.setOverrides(
                 CompatibilityChangeConfigBuilder.create().enable(1L).disable(2L).build(),
@@ -297,9 +233,6 @@ public class PlatformCompatTest {
         mPlatformCompat.registerListener(1, mListener1);
         mPlatformCompat.registerListener(2, mListener2);
 
-        when(mPackageManager.getApplicationInfo(eq(PACKAGE_NAME), anyInt()))
-                .thenReturn(ApplicationInfoBuilder.create().withPackageName(PACKAGE_NAME).build());
-
         mPlatformCompat.setOverrides(
                 CompatibilityChangeConfigBuilder.create().enable(1L).build(),
                 PACKAGE_NAME);
@@ -318,9 +251,6 @@ public class PlatformCompatTest {
     public void testListenerCalledOnClearOverridesMultipleOverrides() throws Exception {
         mPlatformCompat.registerListener(1, mListener1);
         mPlatformCompat.registerListener(2, mListener2);
-
-        when(mPackageManager.getApplicationInfo(eq(PACKAGE_NAME), anyInt()))
-                .thenReturn(ApplicationInfoBuilder.create().withPackageName(PACKAGE_NAME).build());
 
         mPlatformCompat.setOverrides(
                 CompatibilityChangeConfigBuilder.create().enable(1L).disable(2L).build(),
@@ -341,9 +271,6 @@ public class PlatformCompatTest {
         mPlatformCompat.registerListener(1, mListener1);
         mPlatformCompat.registerListener(2, mListener2);
 
-        when(mPackageManager.getApplicationInfo(eq(PACKAGE_NAME), anyInt()))
-                .thenReturn(ApplicationInfoBuilder.create().withPackageName(PACKAGE_NAME).build());
-
         mPlatformCompat.setOverrides(
                 CompatibilityChangeConfigBuilder.create().enable(1L).build(),
                 PACKAGE_NAME);
@@ -361,9 +288,6 @@ public class PlatformCompatTest {
     @Test
     public void testListenerCalledOnClearOverrideDoesntExist() throws Exception {
         mPlatformCompat.registerListener(1, mListener1);
-
-        when(mPackageManager.getApplicationInfo(eq(PACKAGE_NAME), anyInt()))
-                .thenReturn(ApplicationInfoBuilder.create().withPackageName(PACKAGE_NAME).build());
 
         mPlatformCompat.clearOverride(1, PACKAGE_NAME);
         // Listener not called when a non existing override is removed.

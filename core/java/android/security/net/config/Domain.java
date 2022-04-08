@@ -16,10 +16,7 @@
 
 package android.security.net.config;
 
-import android.annotation.Nullable;
-
 import java.util.Locale;
-
 /** @hide */
 public final class Domain {
     /**
@@ -46,7 +43,7 @@ public final class Domain {
     }
 
     @Override
-    public boolean equals(@Nullable Object other) {
+    public boolean equals(Object other) {
         if (other == this) {
             return true;
         }

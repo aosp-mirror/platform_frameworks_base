@@ -20,8 +20,6 @@ import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.emptySet;
 
-import android.annotation.CallSuper;
-import android.annotation.LongDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Intent;
@@ -31,7 +29,6 @@ import android.content.pm.ConfigurationInfo;
 import android.content.pm.FeatureGroupInfo;
 import android.content.pm.FeatureInfo;
 import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager.Property;
 import android.content.pm.PackageParser;
 import android.content.pm.parsing.component.ParsedActivity;
 import android.content.pm.parsing.component.ParsedAttribution;
@@ -44,7 +41,6 @@ import android.content.pm.parsing.component.ParsedPermissionGroup;
 import android.content.pm.parsing.component.ParsedProcess;
 import android.content.pm.parsing.component.ParsedProvider;
 import android.content.pm.parsing.component.ParsedService;
-import android.content.pm.parsing.component.ParsedUsesPermission;
 import android.content.res.TypedArray;
 import android.os.Build;
 import android.os.Bundle;
@@ -77,7 +73,6 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.UUID;
 
 /**
  * The backing data for a package that was parsed from disk.
@@ -103,8 +98,6 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
     public static ForInternedStringValueMap sForInternedStringValueMap =
             Parcelling.Cache.getOrCreate(ForInternedStringValueMap.class);
     public static ForStringSet sForStringSet = Parcelling.Cache.getOrCreate(ForStringSet.class);
-    public static ForInternedStringSet sForInternedStringSet =
-            Parcelling.Cache.getOrCreate(ForInternedStringSet.class);
     protected static ParsedIntentInfo.StringPairListParceler sForIntentInfoPairs =
             Parcelling.Cache.getOrCreate(ParsedIntentInfo.StringPairListParceler.class);
 
@@ -152,8 +145,9 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
     private String realPackage;
 
     @NonNull
-    protected String mBaseApkPath;
+    protected String baseCodePath;
 
+    private boolean requiredForAllUsers;
     @Nullable
     @DataClass.ParcelWith(ForInternedString.class)
     private String restrictedAccountType;
@@ -171,6 +165,7 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
     @DataClass.ParcelWith(ForInternedString.class)
     private String overlayCategory;
     private int overlayPriority;
+    private boolean overlayIsStatic;
     @NonNull
     @DataClass.ParcelWith(ForInternedStringValueMap.class)
     private Map<String, String> overlayables = emptyMap();
@@ -188,13 +183,6 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
     @NonNull
     @DataClass.ParcelWith(ForInternedStringList.class)
     protected List<String> usesOptionalLibraries = emptyList();
-
-    @NonNull
-    @DataClass.ParcelWith(ForInternedStringList.class)
-    protected List<String> usesNativeLibraries = emptyList();
-    @NonNull
-    @DataClass.ParcelWith(ForInternedStringList.class)
-    protected List<String> usesOptionalNativeLibraries = emptyList();
 
     @NonNull
     @DataClass.ParcelWith(ForInternedStringList.class)
@@ -226,18 +214,10 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
     @NonNull
     @DataClass.ParcelWith(ForInternedStringList.class)
     protected List<String> adoptPermissions = emptyList();
-    /**
-     * @deprecated consider migrating to {@link #getUsesPermissions} which has
-     *             more parsed details, such as flags
-     */
+
     @NonNull
-    @Deprecated
     @DataClass.ParcelWith(ForInternedStringList.class)
-    protected List<String> requestedPermissions = emptyList();
-
-    @NonNull
-    private List<ParsedUsesPermission> usesPermissions = emptyList();
-
+    private List<String> requestedPermissions = emptyList();
     @NonNull
     @DataClass.ParcelWith(ForInternedStringList.class)
     private List<String> implicitPermissions = emptyList();
@@ -285,9 +265,6 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
     @Nullable
     private Bundle metaData;
 
-    @NonNull
-    private Map<String, Property> mProperties = emptyMap();
-
     @Nullable
     @DataClass.ParcelWith(ForInternedString.class)
     protected String volumeUuid;
@@ -296,7 +273,12 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
 
     @NonNull
     @DataClass.ParcelWith(ForInternedString.class)
-    protected String mPath;
+    protected String codePath;
+
+    private boolean use32BitAbi;
+    private boolean visibleToInstantApps;
+
+    private boolean forceQueryable;
 
     @NonNull
     @DataClass.ParcelWith(ForInternedStringList.class)
@@ -342,10 +324,15 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
     private int compatibleWidthLimitDp;
     private int descriptionRes;
 
+    // Usually there's code to set this to true during parsing, but it's possible to install an APK
+    // targeting <R that doesn't contain an <application> tag. That code would be skipped and never
+    // assign this, so initialize this to true for those cases.
+    private boolean enabled = true;
+
+    private boolean crossProfile;
     private int fullBackupContent;
-    private int dataExtractionRules;
     private int iconRes;
-    private int installLocation = ParsingPackageUtils.PARSE_DEFAULT_INSTALL_LOCATION;
+    private int installLocation = PackageParser.PARSE_DEFAULT_INSTALL_LOCATION;
     private int labelRes;
     private int largestWidthLimitDp;
     private int logo;
@@ -356,7 +343,7 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
     private float minAspectRatio;
     @Nullable
     private SparseIntArray minExtensionVersions;
-    private int minSdkVersion = ParsingUtils.DEFAULT_MIN_SDK_VERSION;
+    private int minSdkVersion;
     private int networkSecurityConfigRes;
     @Nullable
     private CharSequence nonLocalizedLabel;
@@ -369,7 +356,7 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
     private int requiresSmallestWidthDp;
     private int roundIconRes;
     private int targetSandboxVersion;
-    private int targetSdkVersion = ParsingUtils.DEFAULT_TARGET_SDK_VERSION;
+    private int targetSdkVersion;
     @Nullable
     @DataClass.ParcelWith(ForInternedString.class)
     private String taskAffinity;
@@ -380,6 +367,26 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
     @DataClass.ParcelWith(ForInternedString.class)
     private String zygotePreloadName;
 
+    private boolean externalStorage;
+    private boolean baseHardwareAccelerated;
+    private boolean allowBackup;
+    private boolean killAfterRestore;
+    private boolean restoreAnyVersion;
+    private boolean fullBackupOnly;
+    private boolean persistent;
+    private boolean debuggable;
+    private boolean vmSafeMode;
+    private boolean hasCode;
+    private boolean allowTaskReparenting;
+    private boolean allowClearUserData;
+    private boolean largeHeap;
+    private boolean usesCleartextTraffic;
+    private boolean supportsRtl;
+    private boolean testOnly;
+    private boolean multiArch;
+    private boolean extractNativeLibs;
+    private boolean game;
+
     /**
      * @see ParsingPackageRead#getResizeableActivity()
      */
@@ -387,160 +394,39 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
     @DataClass.ParcelWith(ForBoolean.class)
     private Boolean resizeableActivity;
 
+    private boolean staticSharedLibrary;
+    private boolean overlay;
+    private boolean isolatedSplitLoading;
+    private boolean hasDomainUrls;
+    private boolean profileableByShell;
+    private boolean backupInForeground;
+    private boolean useEmbeddedDex;
+    private boolean defaultToDeviceProtectedStorage;
+    private boolean directBootAware;
+    private boolean partiallyDirectBootAware;
+    private boolean resizeableActivityViaSdkVersion;
+    private boolean allowClearUserDataOnFailedRestore;
+    private boolean allowAudioPlaybackCapture;
+    private boolean requestLegacyExternalStorage;
+    private boolean usesNonSdkApi;
+    private boolean hasFragileUserData;
+    private boolean cantSaveState;
+    private boolean allowNativeHeapPointerTagging;
     private int autoRevokePermissions;
+    private boolean preserveLegacyExternalStorage;
 
-    @ApplicationInfo.GwpAsanMode
-    private int gwpAsanMode;
-
-    @ApplicationInfo.MemtagMode
-    private int memtagMode;
-
-    @ApplicationInfo.NativeHeapZeroInitialized
-    private int nativeHeapZeroInitialized;
-
-    @Nullable
-    @DataClass.ParcelWith(ForBoolean.class)
-    private Boolean requestRawExternalStorageAccess;
+    protected int gwpAsanMode;
 
     // TODO(chiuwinson): Non-null
     @Nullable
     private ArraySet<String> mimeGroups;
 
-    // Usually there's code to set enabled to true during parsing, but it's possible to install
-    // an APK targeting <R that doesn't contain an <application> tag. That code would be skipped
-    // and never assign this, so initialize this to true for those cases.
-    private long mBooleans = Booleans.ENABLED;
-
-    /**
-     * Flags used for a internal bitset. These flags should never be persisted or exposed outside
-     * of this class. It is expected that PackageCacher explicitly clears itself whenever the
-     * Parcelable implementation changes such that all these flags can be re-ordered or invalidated.
-     */
-    protected static class Booleans {
-        @LongDef({
-                EXTERNAL_STORAGE,
-                BASE_HARDWARE_ACCELERATED,
-                ALLOW_BACKUP,
-                KILL_AFTER_RESTORE,
-                RESTORE_ANY_VERSION,
-                FULL_BACKUP_ONLY,
-                PERSISTENT,
-                DEBUGGABLE,
-                VM_SAFE_MODE,
-                HAS_CODE,
-                ALLOW_TASK_REPARENTING,
-                ALLOW_CLEAR_USER_DATA,
-                LARGE_HEAP,
-                USES_CLEARTEXT_TRAFFIC,
-                SUPPORTS_RTL,
-                TEST_ONLY,
-                MULTI_ARCH,
-                EXTRACT_NATIVE_LIBS,
-                GAME,
-                STATIC_SHARED_LIBRARY,
-                OVERLAY,
-                ISOLATED_SPLIT_LOADING,
-                HAS_DOMAIN_URLS,
-                PROFILEABLE_BY_SHELL,
-                BACKUP_IN_FOREGROUND,
-                USE_EMBEDDED_DEX,
-                DEFAULT_TO_DEVICE_PROTECTED_STORAGE,
-                DIRECT_BOOT_AWARE,
-                PARTIALLY_DIRECT_BOOT_AWARE,
-                RESIZEABLE_ACTIVITY_VIA_SDK_VERSION,
-                ALLOW_CLEAR_USER_DATA_ON_FAILED_RESTORE,
-                ALLOW_AUDIO_PLAYBACK_CAPTURE,
-                REQUEST_LEGACY_EXTERNAL_STORAGE,
-                USES_NON_SDK_API,
-                HAS_FRAGILE_USER_DATA,
-                CANT_SAVE_STATE,
-                ALLOW_NATIVE_HEAP_POINTER_TAGGING,
-                PRESERVE_LEGACY_EXTERNAL_STORAGE,
-                REQUIRED_FOR_ALL_USERS,
-                OVERLAY_IS_STATIC,
-                USE_32_BIT_ABI,
-                VISIBLE_TO_INSTANT_APPS,
-                FORCE_QUERYABLE,
-                CROSS_PROFILE,
-                ENABLED,
-                DISALLOW_PROFILING,
-                REQUEST_FOREGROUND_SERVICE_EXEMPTION,
-        })
-        public @interface Values {}
-        private static final long EXTERNAL_STORAGE = 1L;
-        private static final long BASE_HARDWARE_ACCELERATED = 1L << 1;
-        private static final long ALLOW_BACKUP = 1L << 2;
-        private static final long KILL_AFTER_RESTORE = 1L << 3;
-        private static final long RESTORE_ANY_VERSION = 1L << 4;
-        private static final long FULL_BACKUP_ONLY = 1L << 5;
-        private static final long PERSISTENT = 1L << 6;
-        private static final long DEBUGGABLE = 1L << 7;
-        private static final long VM_SAFE_MODE = 1L << 8;
-        private static final long HAS_CODE = 1L << 9;
-        private static final long ALLOW_TASK_REPARENTING = 1L << 10;
-        private static final long ALLOW_CLEAR_USER_DATA = 1L << 11;
-        private static final long LARGE_HEAP = 1L << 12;
-        private static final long USES_CLEARTEXT_TRAFFIC = 1L << 13;
-        private static final long SUPPORTS_RTL = 1L << 14;
-        private static final long TEST_ONLY = 1L << 15;
-        private static final long MULTI_ARCH = 1L << 16;
-        private static final long EXTRACT_NATIVE_LIBS = 1L << 17;
-        private static final long GAME = 1L << 18;
-        private static final long STATIC_SHARED_LIBRARY = 1L << 19;
-        private static final long OVERLAY = 1L << 20;
-        private static final long ISOLATED_SPLIT_LOADING = 1L << 21;
-        private static final long HAS_DOMAIN_URLS = 1L << 22;
-        private static final long PROFILEABLE_BY_SHELL = 1L << 23;
-        private static final long BACKUP_IN_FOREGROUND = 1L << 24;
-        private static final long USE_EMBEDDED_DEX = 1L << 25;
-        private static final long DEFAULT_TO_DEVICE_PROTECTED_STORAGE = 1L << 26;
-        private static final long DIRECT_BOOT_AWARE = 1L << 27;
-        private static final long PARTIALLY_DIRECT_BOOT_AWARE = 1L << 28;
-        private static final long RESIZEABLE_ACTIVITY_VIA_SDK_VERSION = 1L << 29;
-        private static final long ALLOW_CLEAR_USER_DATA_ON_FAILED_RESTORE = 1L << 30;
-        private static final long ALLOW_AUDIO_PLAYBACK_CAPTURE = 1L << 31;
-        private static final long REQUEST_LEGACY_EXTERNAL_STORAGE = 1L << 32;
-        private static final long USES_NON_SDK_API = 1L << 33;
-        private static final long HAS_FRAGILE_USER_DATA = 1L << 34;
-        private static final long CANT_SAVE_STATE = 1L << 35;
-        private static final long ALLOW_NATIVE_HEAP_POINTER_TAGGING = 1L << 36;
-        private static final long PRESERVE_LEGACY_EXTERNAL_STORAGE = 1L << 37;
-        private static final long REQUIRED_FOR_ALL_USERS = 1L << 38;
-        private static final long OVERLAY_IS_STATIC = 1L << 39;
-        private static final long USE_32_BIT_ABI = 1L << 40;
-        private static final long VISIBLE_TO_INSTANT_APPS = 1L << 41;
-        private static final long FORCE_QUERYABLE = 1L << 42;
-        private static final long CROSS_PROFILE = 1L << 43;
-        private static final long ENABLED = 1L << 44;
-        private static final long DISALLOW_PROFILING = 1L << 45;
-        private static final long REQUEST_FOREGROUND_SERVICE_EXEMPTION = 1L << 46;
-        private static final long ATTRIBUTIONS_ARE_USER_VISIBLE = 1L << 47;
-    }
-
-    private ParsingPackageImpl setBoolean(@Booleans.Values long flag, boolean value) {
-        if (value) {
-            mBooleans |= flag;
-        } else {
-            mBooleans &= ~flag;
-        }
-        return this;
-    }
-
-    private boolean getBoolean(@Booleans.Values long flag) {
-        return (mBooleans & flag) != 0;
-    }
-
-    // Derived fields
-    @NonNull
-    private UUID mStorageUuid;
-    private long mLongVersionCode;
-
     @VisibleForTesting
-    public ParsingPackageImpl(@NonNull String packageName, @NonNull String baseApkPath,
-            @NonNull String path, @Nullable TypedArray manifestArray) {
+    public ParsingPackageImpl(@NonNull String packageName, @NonNull String baseCodePath,
+            @NonNull String codePath, @Nullable TypedArray manifestArray) {
         this.packageName = TextUtils.safeIntern(packageName);
-        this.mBaseApkPath = baseApkPath;
-        this.mPath = path;
+        this.baseCodePath = baseCodePath;
+        this.codePath = codePath;
 
         if (manifestArray != null) {
             versionCode = manifestArray.getInteger(R.styleable.AndroidManifest_versionCode, 0);
@@ -624,16 +510,10 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
         return this;
     }
 
-    @CallSuper
     @Override
     public Object hideAsParsed() {
-        assignDerivedFields();
-        return this;
-    }
-
-    private void assignDerivedFields() {
-        mStorageUuid = StorageManager.convert(volumeUuid);
-        mLongVersionCode = PackageInfo.composeLongVersionCode(versionCodeMajor, versionCode);
+        // There is no equivalent for core-only parsing
+        throw new UnsupportedOperationException();
     }
 
     @Override
@@ -651,15 +531,6 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
     @Override
     public ParsingPackageImpl addFeatureGroup(FeatureGroupInfo featureGroup) {
         this.featureGroups = CollectionUtils.add(this.featureGroups, featureGroup);
-        return this;
-    }
-
-    @Override
-    public ParsingPackageImpl addProperty(@Nullable Property property) {
-        if (property == null) {
-            return this;
-        }
-        this.mProperties = CollectionUtils.add(this.mProperties, property.getName(), property);
         return this;
     }
 
@@ -711,13 +582,9 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
     }
 
     @Override
-    public ParsingPackageImpl addUsesPermission(ParsedUsesPermission permission) {
-        this.usesPermissions = CollectionUtils.add(this.usesPermissions, permission);
-
-        // Continue populating legacy data structures to avoid performance
-        // issues until all that code can be migrated
-        this.requestedPermissions = CollectionUtils.add(this.requestedPermissions, permission.name);
-
+    public ParsingPackageImpl addRequestedPermission(String permission) {
+        this.requestedPermissions = CollectionUtils.add(this.requestedPermissions,
+                TextUtils.safeIntern(permission));
         return this;
     }
 
@@ -797,27 +664,6 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
     @Override
     public ParsingPackageImpl removeUsesOptionalLibrary(String libraryName) {
         this.usesOptionalLibraries = CollectionUtils.remove(this.usesOptionalLibraries,
-                libraryName);
-        return this;
-    }
-
-    @Override
-    public final ParsingPackageImpl addUsesOptionalNativeLibrary(String libraryName) {
-        this.usesOptionalNativeLibraries = CollectionUtils.add(this.usesOptionalNativeLibraries,
-                TextUtils.safeIntern(libraryName));
-        return this;
-    }
-
-    @Override
-    public final ParsingPackageImpl addUsesNativeLibrary(String libraryName) {
-        this.usesNativeLibraries = CollectionUtils.add(this.usesNativeLibraries,
-                TextUtils.safeIntern(libraryName));
-        return this;
-    }
-
-
-    @Override public ParsingPackageImpl removeUsesOptionalNativeLibrary(String libraryName) {
-        this.usesOptionalNativeLibraries = CollectionUtils.remove(this.usesOptionalNativeLibraries,
                 libraryName);
         return this;
     }
@@ -988,12 +834,6 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
         return this;
     }
 
-    @Override
-    public ParsingPackageImpl setNonLocalizedLabel(@Nullable CharSequence value) {
-        nonLocalizedLabel = value == null ? null : value.toString().trim();
-        return this;
-    }
-
     @NonNull
     @Override
     public String getProcessName() {
@@ -1013,7 +853,6 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
         ApplicationInfo appInfo = toAppInfoWithoutStateWithoutFlags();
         appInfo.flags = PackageInfoWithoutStateUtils.appInfoFlags(this);
         appInfo.privateFlags = PackageInfoWithoutStateUtils.appInfoPrivateFlags(this);
-        appInfo.privateFlagsExt = PackageInfoWithoutStateUtils.appInfoPrivateFlagsExt(this);
         return appInfo;
     }
 
@@ -1021,9 +860,6 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
     public ApplicationInfo toAppInfoWithoutStateWithoutFlags() {
         ApplicationInfo appInfo = new ApplicationInfo();
 
-        // Lines that are commented below are state related and should not be assigned here.
-        // They are left in as placeholders, since there is no good backwards compatible way to
-        // separate these.
         appInfo.appComponentFactory = appComponentFactory;
         appInfo.backupAgentName = backupAgentName;
         appInfo.banner = banner;
@@ -1033,20 +869,14 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
         appInfo.compatibleWidthLimitDp = compatibleWidthLimitDp;
         appInfo.compileSdkVersion = compileSdkVersion;
         appInfo.compileSdkVersionCodename = compileSdkVersionCodeName;
-//        appInfo.credentialProtectedDataDir
-        appInfo.crossProfile = isCrossProfile();
-//        appInfo.dataDir
+//        appInfo.credentialProtectedDataDir = credentialProtectedDataDir;
+//        appInfo.dataDir = dataDir;
         appInfo.descriptionRes = descriptionRes;
-//        appInfo.deviceProtectedDataDir
-        appInfo.enabled = getBoolean(Booleans.ENABLED);
-//        appInfo.enabledSetting
+//        appInfo.deviceProtectedDataDir = deviceProtectedDataDir;
+        appInfo.enabled = enabled;
         appInfo.fullBackupContent = fullBackupContent;
-        appInfo.dataExtractionRulesRes = dataExtractionRules;
-        // TODO(b/135203078): See ParsingPackageImpl#getHiddenApiEnforcementPolicy
-//        appInfo.mHiddenApiPolicy
-//        appInfo.hiddenUntilInstalled
-        appInfo.icon =
-                (ParsingPackageUtils.sUseRoundIcon && roundIconRes != 0) ? roundIconRes : iconRes;
+//        appInfo.hiddenUntilInstalled = hiddenUntilInstalled;
+        appInfo.icon = (PackageParser.sUseRoundIcon && roundIconRes != 0) ? roundIconRes : iconRes;
         appInfo.iconRes = iconRes;
         appInfo.roundIconRes = roundIconRes;
         appInfo.installLocation = installLocation;
@@ -1059,47 +889,59 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
         appInfo.minAspectRatio = minAspectRatio;
         appInfo.minSdkVersion = minSdkVersion;
         appInfo.name = className;
-//        appInfo.nativeLibraryDir
-//        appInfo.nativeLibraryRootDir
-//        appInfo.nativeLibraryRootRequiresIsa
+        if (appInfo.name != null) {
+            appInfo.name = appInfo.name.trim();
+        }
+//        appInfo.nativeLibraryDir = nativeLibraryDir;
+//        appInfo.nativeLibraryRootDir = nativeLibraryRootDir;
+//        appInfo.nativeLibraryRootRequiresIsa = nativeLibraryRootRequiresIsa;
         appInfo.networkSecurityConfigRes = networkSecurityConfigRes;
         appInfo.nonLocalizedLabel = nonLocalizedLabel;
+        if (appInfo.nonLocalizedLabel != null) {
+            appInfo.nonLocalizedLabel = appInfo.nonLocalizedLabel.toString().trim();
+        }
         appInfo.packageName = packageName;
         appInfo.permission = permission;
-//        appInfo.primaryCpuAbi
+//        appInfo.primaryCpuAbi = primaryCpuAbi;
         appInfo.processName = getProcessName();
         appInfo.requiresSmallestWidthDp = requiresSmallestWidthDp;
-//        appInfo.resourceDirs
-//        appInfo.secondaryCpuAbi
-//        appInfo.secondaryNativeLibraryDir
-//        appInfo.seInfo
-//        appInfo.seInfoUser
-//        appInfo.sharedLibraryFiles
-//        appInfo.sharedLibraryInfos
-//        appInfo.showUserIcon
+//        appInfo.secondaryCpuAbi = secondaryCpuAbi;
+//        appInfo.secondaryNativeLibraryDir = secondaryNativeLibraryDir;
+//        appInfo.seInfo = seInfo;
+//        appInfo.seInfoUser = seInfoUser;
+//        appInfo.sharedLibraryFiles = usesLibraryFiles.isEmpty()
+//                ? null : usesLibraryFiles.toArray(new String[0]);
+//        appInfo.sharedLibraryInfos = usesLibraryInfos.isEmpty() ? null : usesLibraryInfos;
         appInfo.splitClassLoaderNames = splitClassLoaderNames;
         appInfo.splitDependencies = splitDependencies;
         appInfo.splitNames = splitNames;
-        appInfo.storageUuid = mStorageUuid;
+        appInfo.storageUuid = StorageManager.convert(volumeUuid);
         appInfo.targetSandboxVersion = targetSandboxVersion;
         appInfo.targetSdkVersion = targetSdkVersion;
         appInfo.taskAffinity = taskAffinity;
         appInfo.theme = theme;
-//        appInfo.uid
+//        appInfo.uid = uid;
         appInfo.uiOptions = uiOptions;
         appInfo.volumeUuid = volumeUuid;
         appInfo.zygotePreloadName = zygotePreloadName;
+        appInfo.crossProfile = isCrossProfile();
         appInfo.setGwpAsanMode(gwpAsanMode);
-        appInfo.setMemtagMode(memtagMode);
-        appInfo.setNativeHeapZeroInitialized(nativeHeapZeroInitialized);
-        appInfo.setRequestRawExternalStorageAccess(requestRawExternalStorageAccess);
-        appInfo.setBaseCodePath(mBaseApkPath);
-        appInfo.setBaseResourcePath(mBaseApkPath);
-        appInfo.setCodePath(mPath);
-        appInfo.setResourcePath(mPath);
+        appInfo.setBaseCodePath(baseCodePath);
+        appInfo.setBaseResourcePath(baseCodePath);
+        appInfo.setCodePath(codePath);
+        appInfo.setResourcePath(codePath);
         appInfo.setSplitCodePaths(splitCodePaths);
         appInfo.setSplitResourcePaths(splitCodePaths);
-        appInfo.setVersionCode(mLongVersionCode);
+        appInfo.setVersionCode(PackageInfo.composeLongVersionCode(versionCodeMajor, versionCode));
+
+        // TODO(b/135203078): Can this be removed? Looks only used in ActivityInfo.
+//        appInfo.showUserIcon = pkg.getShowUserIcon();
+        // TODO(b/135203078): Unused?
+//        appInfo.resourceDirs = pkg.getResourceDirs();
+        // TODO(b/135203078): Unused?
+//        appInfo.enabledSetting = pkg.getEnabledSetting();
+        // TODO(b/135203078): See ParsingPackageImpl#getHiddenApiEnforcementPolicy
+//        appInfo.mHiddenApiPolicy = pkg.getHiddenApiPolicy();
 
         return appInfo;
     }
@@ -1125,21 +967,21 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
         dest.writeString(this.compileSdkVersionCodeName);
         sForInternedString.parcel(this.packageName, dest, flags);
         dest.writeString(this.realPackage);
-        dest.writeString(this.mBaseApkPath);
+        dest.writeString(this.baseCodePath);
+        dest.writeBoolean(this.requiredForAllUsers);
         dest.writeString(this.restrictedAccountType);
         dest.writeString(this.requiredAccountType);
         sForInternedString.parcel(this.overlayTarget, dest, flags);
         dest.writeString(this.overlayTargetName);
         dest.writeString(this.overlayCategory);
         dest.writeInt(this.overlayPriority);
+        dest.writeBoolean(this.overlayIsStatic);
         sForInternedStringValueMap.parcel(this.overlayables, dest, flags);
         sForInternedString.parcel(this.staticSharedLibName, dest, flags);
         dest.writeLong(this.staticSharedLibVersion);
         sForInternedStringList.parcel(this.libraryNames, dest, flags);
         sForInternedStringList.parcel(this.usesLibraries, dest, flags);
         sForInternedStringList.parcel(this.usesOptionalLibraries, dest, flags);
-        sForInternedStringList.parcel(this.usesNativeLibraries, dest, flags);
-        sForInternedStringList.parcel(this.usesOptionalNativeLibraries, dest, flags);
         sForInternedStringList.parcel(this.usesStaticLibraries, dest, flags);
         dest.writeLongArray(this.usesStaticLibrariesVersions);
 
@@ -1161,7 +1003,6 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
         dest.writeStringList(this.originalPackages);
         sForInternedStringList.parcel(this.adoptPermissions, dest, flags);
         sForInternedStringList.parcel(this.requestedPermissions, dest, flags);
-        dest.writeTypedList(this.usesPermissions);
         sForInternedStringList.parcel(this.implicitPermissions, dest, flags);
         sForStringSet.parcel(this.upgradeKeySets, dest, flags);
         ParsingPackageUtils.writeKeySetMapping(dest, this.keySetMapping);
@@ -1179,10 +1020,12 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
         dest.writeBundle(this.metaData);
         sForInternedString.parcel(this.volumeUuid, dest, flags);
         dest.writeParcelable(this.signingDetails, flags);
-        dest.writeString(this.mPath);
+        dest.writeString(this.codePath);
+        dest.writeBoolean(this.use32BitAbi);
+        dest.writeBoolean(this.visibleToInstantApps);
+        dest.writeBoolean(this.forceQueryable);
         dest.writeTypedList(this.queriesIntents, flags);
         sForInternedStringList.parcel(this.queriesPackages, dest, flags);
-        sForInternedStringSet.parcel(this.queriesProviders, dest, flags);
         dest.writeString(this.appComponentFactory);
         dest.writeString(this.backupAgentName);
         dest.writeInt(this.banner);
@@ -1191,8 +1034,9 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
         dest.writeString(this.className);
         dest.writeInt(this.compatibleWidthLimitDp);
         dest.writeInt(this.descriptionRes);
+        dest.writeBoolean(this.enabled);
+        dest.writeBoolean(this.crossProfile);
         dest.writeInt(this.fullBackupContent);
-        dest.writeInt(this.dataExtractionRules);
         dest.writeInt(this.iconRes);
         dest.writeInt(this.installLocation);
         dest.writeInt(this.labelRes);
@@ -1220,16 +1064,52 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
         dest.writeIntArray(this.splitFlags);
         dest.writeStringArray(this.splitNames);
         dest.writeIntArray(this.splitRevisionCodes);
+
+        dest.writeBoolean(this.externalStorage);
+        dest.writeBoolean(this.baseHardwareAccelerated);
+        dest.writeBoolean(this.allowBackup);
+        dest.writeBoolean(this.killAfterRestore);
+        dest.writeBoolean(this.restoreAnyVersion);
+        dest.writeBoolean(this.fullBackupOnly);
+        dest.writeBoolean(this.persistent);
+        dest.writeBoolean(this.debuggable);
+        dest.writeBoolean(this.vmSafeMode);
+        dest.writeBoolean(this.hasCode);
+        dest.writeBoolean(this.allowTaskReparenting);
+        dest.writeBoolean(this.allowClearUserData);
+        dest.writeBoolean(this.largeHeap);
+        dest.writeBoolean(this.usesCleartextTraffic);
+        dest.writeBoolean(this.supportsRtl);
+        dest.writeBoolean(this.testOnly);
+        dest.writeBoolean(this.multiArch);
+        dest.writeBoolean(this.extractNativeLibs);
+        dest.writeBoolean(this.game);
+
         sForBoolean.parcel(this.resizeableActivity, dest, flags);
+
+        dest.writeBoolean(this.staticSharedLibrary);
+        dest.writeBoolean(this.overlay);
+        dest.writeBoolean(this.isolatedSplitLoading);
+        dest.writeBoolean(this.hasDomainUrls);
+        dest.writeBoolean(this.profileableByShell);
+        dest.writeBoolean(this.backupInForeground);
+        dest.writeBoolean(this.useEmbeddedDex);
+        dest.writeBoolean(this.defaultToDeviceProtectedStorage);
+        dest.writeBoolean(this.directBootAware);
+        dest.writeBoolean(this.partiallyDirectBootAware);
+        dest.writeBoolean(this.resizeableActivityViaSdkVersion);
+        dest.writeBoolean(this.allowClearUserDataOnFailedRestore);
+        dest.writeBoolean(this.allowAudioPlaybackCapture);
+        dest.writeBoolean(this.requestLegacyExternalStorage);
+        dest.writeBoolean(this.usesNonSdkApi);
+        dest.writeBoolean(this.hasFragileUserData);
+        dest.writeBoolean(this.cantSaveState);
+        dest.writeBoolean(this.allowNativeHeapPointerTagging);
         dest.writeInt(this.autoRevokePermissions);
+        dest.writeBoolean(this.preserveLegacyExternalStorage);
         dest.writeArraySet(this.mimeGroups);
         dest.writeInt(this.gwpAsanMode);
         dest.writeSparseIntArray(this.minExtensionVersions);
-        dest.writeLong(this.mBooleans);
-        dest.writeMap(this.mProperties);
-        dest.writeInt(this.memtagMode);
-        dest.writeInt(this.nativeHeapZeroInitialized);
-        sForBoolean.parcel(this.requestRawExternalStorageAccess, dest, flags);
     }
 
     public ParsingPackageImpl(Parcel in) {
@@ -1249,21 +1129,21 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
         this.compileSdkVersionCodeName = in.readString();
         this.packageName = sForInternedString.unparcel(in);
         this.realPackage = in.readString();
-        this.mBaseApkPath = in.readString();
+        this.baseCodePath = in.readString();
+        this.requiredForAllUsers = in.readBoolean();
         this.restrictedAccountType = in.readString();
         this.requiredAccountType = in.readString();
         this.overlayTarget = sForInternedString.unparcel(in);
         this.overlayTargetName = in.readString();
         this.overlayCategory = in.readString();
         this.overlayPriority = in.readInt();
+        this.overlayIsStatic = in.readBoolean();
         this.overlayables = sForInternedStringValueMap.unparcel(in);
         this.staticSharedLibName = sForInternedString.unparcel(in);
         this.staticSharedLibVersion = in.readLong();
         this.libraryNames = sForInternedStringList.unparcel(in);
         this.usesLibraries = sForInternedStringList.unparcel(in);
         this.usesOptionalLibraries = sForInternedStringList.unparcel(in);
-        this.usesNativeLibraries = sForInternedStringList.unparcel(in);
-        this.usesOptionalNativeLibraries = sForInternedStringList.unparcel(in);
         this.usesStaticLibraries = sForInternedStringList.unparcel(in);
         this.usesStaticLibrariesVersions = in.createLongArray();
 
@@ -1284,7 +1164,6 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
         this.originalPackages = in.createStringArrayList();
         this.adoptPermissions = sForInternedStringList.unparcel(in);
         this.requestedPermissions = sForInternedStringList.unparcel(in);
-        this.usesPermissions = in.createTypedArrayList(ParsedUsesPermission.CREATOR);
         this.implicitPermissions = sForInternedStringList.unparcel(in);
         this.upgradeKeySets = sForStringSet.unparcel(in);
         this.keySetMapping = ParsingPackageUtils.readKeySetMapping(in);
@@ -1303,10 +1182,12 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
         this.metaData = in.readBundle(boot);
         this.volumeUuid = sForInternedString.unparcel(in);
         this.signingDetails = in.readParcelable(boot);
-        this.mPath = in.readString();
+        this.codePath = in.readString();
+        this.use32BitAbi = in.readBoolean();
+        this.visibleToInstantApps = in.readBoolean();
+        this.forceQueryable = in.readBoolean();
         this.queriesIntents = in.createTypedArrayList(Intent.CREATOR);
         this.queriesPackages = sForInternedStringList.unparcel(in);
-        this.queriesProviders = sForInternedStringSet.unparcel(in);
         this.appComponentFactory = in.readString();
         this.backupAgentName = in.readString();
         this.banner = in.readInt();
@@ -1315,8 +1196,9 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
         this.className = in.readString();
         this.compatibleWidthLimitDp = in.readInt();
         this.descriptionRes = in.readInt();
+        this.enabled = in.readBoolean();
+        this.crossProfile = in.readBoolean();
         this.fullBackupContent = in.readInt();
-        this.dataExtractionRules = in.readInt();
         this.iconRes = in.readInt();
         this.installLocation = in.readInt();
         this.labelRes = in.readInt();
@@ -1344,18 +1226,50 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
         this.splitFlags = in.createIntArray();
         this.splitNames = in.createStringArray();
         this.splitRevisionCodes = in.createIntArray();
+        this.externalStorage = in.readBoolean();
+        this.baseHardwareAccelerated = in.readBoolean();
+        this.allowBackup = in.readBoolean();
+        this.killAfterRestore = in.readBoolean();
+        this.restoreAnyVersion = in.readBoolean();
+        this.fullBackupOnly = in.readBoolean();
+        this.persistent = in.readBoolean();
+        this.debuggable = in.readBoolean();
+        this.vmSafeMode = in.readBoolean();
+        this.hasCode = in.readBoolean();
+        this.allowTaskReparenting = in.readBoolean();
+        this.allowClearUserData = in.readBoolean();
+        this.largeHeap = in.readBoolean();
+        this.usesCleartextTraffic = in.readBoolean();
+        this.supportsRtl = in.readBoolean();
+        this.testOnly = in.readBoolean();
+        this.multiArch = in.readBoolean();
+        this.extractNativeLibs = in.readBoolean();
+        this.game = in.readBoolean();
         this.resizeableActivity = sForBoolean.unparcel(in);
 
+        this.staticSharedLibrary = in.readBoolean();
+        this.overlay = in.readBoolean();
+        this.isolatedSplitLoading = in.readBoolean();
+        this.hasDomainUrls = in.readBoolean();
+        this.profileableByShell = in.readBoolean();
+        this.backupInForeground = in.readBoolean();
+        this.useEmbeddedDex = in.readBoolean();
+        this.defaultToDeviceProtectedStorage = in.readBoolean();
+        this.directBootAware = in.readBoolean();
+        this.partiallyDirectBootAware = in.readBoolean();
+        this.resizeableActivityViaSdkVersion = in.readBoolean();
+        this.allowClearUserDataOnFailedRestore = in.readBoolean();
+        this.allowAudioPlaybackCapture = in.readBoolean();
+        this.requestLegacyExternalStorage = in.readBoolean();
+        this.usesNonSdkApi = in.readBoolean();
+        this.hasFragileUserData = in.readBoolean();
+        this.cantSaveState = in.readBoolean();
+        this.allowNativeHeapPointerTagging = in.readBoolean();
         this.autoRevokePermissions = in.readInt();
+        this.preserveLegacyExternalStorage = in.readBoolean();
         this.mimeGroups = (ArraySet<String>) in.readArraySet(boot);
         this.gwpAsanMode = in.readInt();
         this.minExtensionVersions = in.readSparseIntArray();
-        this.mBooleans = in.readLong();
-        this.mProperties = in.readHashMap(boot);
-        this.memtagMode = in.readInt();
-        this.nativeHeapZeroInitialized = in.readInt();
-        this.requestRawExternalStorageAccess = sForBoolean.unparcel(in);
-        assignDerivedFields();
     }
 
     public static final Parcelable.Creator<ParsingPackageImpl> CREATOR =
@@ -1417,13 +1331,13 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
 
     @NonNull
     @Override
-    public String getBaseApkPath() {
-        return mBaseApkPath;
+    public String getBaseCodePath() {
+        return baseCodePath;
     }
 
     @Override
     public boolean isRequiredForAllUsers() {
-        return getBoolean(Booleans.REQUIRED_FOR_ALL_USERS);
+        return requiredForAllUsers;
     }
 
     @Nullable
@@ -1463,7 +1377,7 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
 
     @Override
     public boolean isOverlayIsStatic() {
-        return getBoolean(Booleans.OVERLAY_IS_STATIC);
+        return overlayIsStatic;
     }
 
     @NonNull
@@ -1499,18 +1413,6 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
     @Override
     public List<String> getUsesOptionalLibraries() {
         return usesOptionalLibraries;
-    }
-
-    @NonNull
-    @Override
-    public List<String> getUsesNativeLibraries() {
-        return usesNativeLibraries;
-    }
-
-    @NonNull
-    @Override
-    public List<String> getUsesOptionalNativeLibraries() {
-        return usesOptionalNativeLibraries;
     }
 
     @NonNull
@@ -1578,33 +1480,16 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
         return adoptPermissions;
     }
 
-    /**
-     * @deprecated consider migrating to {@link #getUsesPermissions} which has
-     *             more parsed details, such as flags
-     */
     @NonNull
     @Override
-    @Deprecated
     public List<String> getRequestedPermissions() {
         return requestedPermissions;
     }
 
     @NonNull
     @Override
-    public List<ParsedUsesPermission> getUsesPermissions() {
-        return usesPermissions;
-    }
-
-    @NonNull
-    @Override
     public List<String> getImplicitPermissions() {
         return implicitPermissions;
-    }
-
-    @NonNull
-    @Override
-    public Map<String, Property> getProperties() {
-        return mProperties;
     }
 
     @NonNull
@@ -1720,23 +1605,23 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
 
     @NonNull
     @Override
-    public String getPath() {
-        return mPath;
+    public String getCodePath() {
+        return codePath;
     }
 
     @Override
     public boolean isUse32BitAbi() {
-        return getBoolean(Booleans.USE_32_BIT_ABI);
+        return use32BitAbi;
     }
 
     @Override
     public boolean isVisibleToInstantApps() {
-        return getBoolean(Booleans.VISIBLE_TO_INSTANT_APPS);
+        return visibleToInstantApps;
     }
 
     @Override
     public boolean isForceQueryable() {
-        return getBoolean(Booleans.FORCE_QUERYABLE);
+        return forceQueryable;
     }
 
     @NonNull
@@ -1839,22 +1724,17 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
 
     @Override
     public boolean isEnabled() {
-        return getBoolean(Booleans.ENABLED);
+        return enabled;
     }
 
     @Override
     public boolean isCrossProfile() {
-        return getBoolean(Booleans.CROSS_PROFILE);
+        return crossProfile;
     }
 
     @Override
     public int getFullBackupContent() {
         return fullBackupContent;
-    }
-
-    @Override
-    public int getDataExtractionRules() {
-        return dataExtractionRules;
     }
 
     @Override
@@ -1970,97 +1850,97 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
 
     @Override
     public boolean isExternalStorage() {
-        return getBoolean(Booleans.EXTERNAL_STORAGE);
+        return externalStorage;
     }
 
     @Override
     public boolean isBaseHardwareAccelerated() {
-        return getBoolean(Booleans.BASE_HARDWARE_ACCELERATED);
+        return baseHardwareAccelerated;
     }
 
     @Override
     public boolean isAllowBackup() {
-        return getBoolean(Booleans.ALLOW_BACKUP);
+        return allowBackup;
     }
 
     @Override
     public boolean isKillAfterRestore() {
-        return getBoolean(Booleans.KILL_AFTER_RESTORE);
+        return killAfterRestore;
     }
 
     @Override
     public boolean isRestoreAnyVersion() {
-        return getBoolean(Booleans.RESTORE_ANY_VERSION);
+        return restoreAnyVersion;
     }
 
     @Override
     public boolean isFullBackupOnly() {
-        return getBoolean(Booleans.FULL_BACKUP_ONLY);
+        return fullBackupOnly;
     }
 
     @Override
     public boolean isPersistent() {
-        return getBoolean(Booleans.PERSISTENT);
+        return persistent;
     }
 
     @Override
     public boolean isDebuggable() {
-        return getBoolean(Booleans.DEBUGGABLE);
+        return debuggable;
     }
 
     @Override
     public boolean isVmSafeMode() {
-        return getBoolean(Booleans.VM_SAFE_MODE);
+        return vmSafeMode;
     }
 
     @Override
     public boolean isHasCode() {
-        return getBoolean(Booleans.HAS_CODE);
+        return hasCode;
     }
 
     @Override
     public boolean isAllowTaskReparenting() {
-        return getBoolean(Booleans.ALLOW_TASK_REPARENTING);
+        return allowTaskReparenting;
     }
 
     @Override
     public boolean isAllowClearUserData() {
-        return getBoolean(Booleans.ALLOW_CLEAR_USER_DATA);
+        return allowClearUserData;
     }
 
     @Override
     public boolean isLargeHeap() {
-        return getBoolean(Booleans.LARGE_HEAP);
+        return largeHeap;
     }
 
     @Override
     public boolean isUsesCleartextTraffic() {
-        return getBoolean(Booleans.USES_CLEARTEXT_TRAFFIC);
+        return usesCleartextTraffic;
     }
 
     @Override
     public boolean isSupportsRtl() {
-        return getBoolean(Booleans.SUPPORTS_RTL);
+        return supportsRtl;
     }
 
     @Override
     public boolean isTestOnly() {
-        return getBoolean(Booleans.TEST_ONLY);
+        return testOnly;
     }
 
     @Override
     public boolean isMultiArch() {
-        return getBoolean(Booleans.MULTI_ARCH);
+        return multiArch;
     }
 
     @Override
     public boolean isExtractNativeLibs() {
-        return getBoolean(Booleans.EXTRACT_NATIVE_LIBS);
+        return extractNativeLibs;
     }
 
     @Override
     public boolean isGame() {
-        return getBoolean(Booleans.GAME);
+        return game;
     }
 
     /**
@@ -2074,121 +1954,97 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
 
     @Override
     public boolean isStaticSharedLibrary() {
-        return getBoolean(Booleans.STATIC_SHARED_LIBRARY);
+        return staticSharedLibrary;
     }
 
     @Override
     public boolean isOverlay() {
-        return getBoolean(Booleans.OVERLAY);
+        return overlay;
     }
 
     @Override
     public boolean isIsolatedSplitLoading() {
-        return getBoolean(Booleans.ISOLATED_SPLIT_LOADING);
+        return isolatedSplitLoading;
     }
 
     @Override
     public boolean isHasDomainUrls() {
-        return getBoolean(Booleans.HAS_DOMAIN_URLS);
+        return hasDomainUrls;
     }
 
     @Override
     public boolean isProfileableByShell() {
-        return isProfileable() && getBoolean(Booleans.PROFILEABLE_BY_SHELL);
-    }
-
-    @Override
-    public boolean isProfileable() {
-        return !getBoolean(Booleans.DISALLOW_PROFILING);
+        return profileableByShell;
     }
 
     @Override
     public boolean isBackupInForeground() {
-        return getBoolean(Booleans.BACKUP_IN_FOREGROUND);
+        return backupInForeground;
     }
 
     @Override
     public boolean isUseEmbeddedDex() {
-        return getBoolean(Booleans.USE_EMBEDDED_DEX);
+        return useEmbeddedDex;
     }
 
     @Override
     public boolean isDefaultToDeviceProtectedStorage() {
-        return getBoolean(Booleans.DEFAULT_TO_DEVICE_PROTECTED_STORAGE);
+        return defaultToDeviceProtectedStorage;
     }
 
     @Override
     public boolean isDirectBootAware() {
-        return getBoolean(Booleans.DIRECT_BOOT_AWARE);
+        return directBootAware;
     }
 
-    @ApplicationInfo.GwpAsanMode
     @Override
     public int getGwpAsanMode() {
         return gwpAsanMode;
     }
 
-    @ApplicationInfo.MemtagMode
-    @Override
-    public int getMemtagMode() {
-        return memtagMode;
-    }
-
-    @ApplicationInfo.NativeHeapZeroInitialized
-    @Override
-    public int getNativeHeapZeroInitialized() {
-        return nativeHeapZeroInitialized;
-    }
-
-    @Nullable
-    @Override
-    public Boolean hasRequestRawExternalStorageAccess() {
-        return requestRawExternalStorageAccess;
-    }
-
     @Override
     public boolean isPartiallyDirectBootAware() {
-        return getBoolean(Booleans.PARTIALLY_DIRECT_BOOT_AWARE);
+        return partiallyDirectBootAware;
     }
 
     @Override
     public boolean isResizeableActivityViaSdkVersion() {
-        return getBoolean(Booleans.RESIZEABLE_ACTIVITY_VIA_SDK_VERSION);
+        return resizeableActivityViaSdkVersion;
     }
 
     @Override
     public boolean isAllowClearUserDataOnFailedRestore() {
-        return getBoolean(Booleans.ALLOW_CLEAR_USER_DATA_ON_FAILED_RESTORE);
+        return allowClearUserDataOnFailedRestore;
     }
 
     @Override
     public boolean isAllowAudioPlaybackCapture() {
-        return getBoolean(Booleans.ALLOW_AUDIO_PLAYBACK_CAPTURE);
+        return allowAudioPlaybackCapture;
     }
 
     @Override
     public boolean isRequestLegacyExternalStorage() {
-        return getBoolean(Booleans.REQUEST_LEGACY_EXTERNAL_STORAGE);
+        return requestLegacyExternalStorage;
     }
 
     @Override
     public boolean isUsesNonSdkApi() {
-        return getBoolean(Booleans.USES_NON_SDK_API);
+        return usesNonSdkApi;
     }
 
     @Override
     public boolean isHasFragileUserData() {
-        return getBoolean(Booleans.HAS_FRAGILE_USER_DATA);
+        return hasFragileUserData;
     }
 
     @Override
     public boolean isCantSaveState() {
-        return getBoolean(Booleans.CANT_SAVE_STATE);
+        return cantSaveState;
     }
 
     @Override
     public boolean isAllowNativeHeapPointerTagging() {
-        return getBoolean(Booleans.ALLOW_NATIVE_HEAP_POINTER_TAGGING);
+        return allowNativeHeapPointerTagging;
     }
 
     @Override
@@ -2198,17 +2054,7 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
 
     @Override
     public boolean hasPreserveLegacyExternalStorage() {
-        return getBoolean(Booleans.PRESERVE_LEGACY_EXTERNAL_STORAGE);
-    }
-
-    @Override
-    public boolean hasRequestForegroundServiceExemption() {
-        return getBoolean(Booleans.REQUEST_FOREGROUND_SERVICE_EXEMPTION);
-    }
-
-    @Override
-    public boolean areAttributionsUserVisible() {
-        return getBoolean(Booleans.ATTRIBUTIONS_ARE_USER_VISIBLE);
+        return preserveLegacyExternalStorage;
     }
 
     @Override
@@ -2225,7 +2071,8 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
 
     @Override
     public ParsingPackageImpl setRequiredForAllUsers(boolean value) {
-        return setBoolean(Booleans.REQUIRED_FOR_ALL_USERS, value);
+        requiredForAllUsers = value;
+        return this;
     }
 
     @Override
@@ -2236,7 +2083,8 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
 
     @Override
     public ParsingPackageImpl setOverlayIsStatic(boolean value) {
-        return setBoolean(Booleans.OVERLAY_IS_STATIC, value);
+        overlayIsStatic = value;
+        return this;
     }
 
     @Override
@@ -2283,17 +2131,20 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
 
     @Override
     public ParsingPackageImpl setUse32BitAbi(boolean value) {
-        return setBoolean(Booleans.USE_32_BIT_ABI, value);
+        use32BitAbi = value;
+        return this;
     }
 
     @Override
     public ParsingPackageImpl setVisibleToInstantApps(boolean value) {
-        return setBoolean(Booleans.VISIBLE_TO_INSTANT_APPS, value);
+        visibleToInstantApps = value;
+        return this;
     }
 
     @Override
     public ParsingPackageImpl setForceQueryable(boolean value) {
-        return setBoolean(Booleans.FORCE_QUERYABLE, value);
+        forceQueryable = value;
+        return this;
     }
 
     @Override
@@ -2322,23 +2173,19 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
 
     @Override
     public ParsingPackageImpl setEnabled(boolean value) {
-        return setBoolean(Booleans.ENABLED, value);
+        enabled = value;
+        return this;
     }
 
     @Override
     public ParsingPackageImpl setCrossProfile(boolean value) {
-        return setBoolean(Booleans.CROSS_PROFILE, value);
+        crossProfile = value;
+        return this;
     }
 
     @Override
     public ParsingPackageImpl setFullBackupContent(int value) {
         fullBackupContent = value;
-        return this;
-    }
-
-    @Override
-    public ParsingPackageImpl setDataExtractionRules(int value) {
-        dataExtractionRules = value;
         return this;
     }
 
@@ -2403,6 +2250,12 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
     }
 
     @Override
+    public ParsingPackageImpl setNonLocalizedLabel(@Nullable CharSequence value) {
+        nonLocalizedLabel = value;
+        return this;
+    }
+
+    @Override
     public ParsingPackageImpl setRequiresSmallestWidthDp(int value) {
         requiresSmallestWidthDp = value;
         return this;
@@ -2433,11 +2286,6 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
     }
 
     @Override
-    public ParsingPackageImpl setRequestForegroundServiceExemption(boolean value) {
-        return setBoolean(Booleans.REQUEST_FOREGROUND_SERVICE_EXEMPTION, value);
-    }
-
-    @Override
     public ParsingPackageImpl setUiOptions(int value) {
         uiOptions = value;
         return this;
@@ -2445,97 +2293,116 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
 
     @Override
     public ParsingPackageImpl setExternalStorage(boolean value) {
-        return setBoolean(Booleans.EXTERNAL_STORAGE, value);
+        externalStorage = value;
+        return this;
     }
 
     @Override
     public ParsingPackageImpl setBaseHardwareAccelerated(boolean value) {
-        return setBoolean(Booleans.BASE_HARDWARE_ACCELERATED, value);
+        baseHardwareAccelerated = value;
+        return this;
     }
 
     @Override
     public ParsingPackageImpl setAllowBackup(boolean value) {
-        return setBoolean(Booleans.ALLOW_BACKUP, value);
+        allowBackup = value;
+        return this;
     }
 
     @Override
     public ParsingPackageImpl setKillAfterRestore(boolean value) {
-        return setBoolean(Booleans.KILL_AFTER_RESTORE, value);
+        killAfterRestore = value;
+        return this;
     }
 
     @Override
     public ParsingPackageImpl setRestoreAnyVersion(boolean value) {
-        return setBoolean(Booleans.RESTORE_ANY_VERSION, value);
+        restoreAnyVersion = value;
+        return this;
     }
 
     @Override
     public ParsingPackageImpl setFullBackupOnly(boolean value) {
-        return setBoolean(Booleans.FULL_BACKUP_ONLY, value);
+        fullBackupOnly = value;
+        return this;
     }
 
     @Override
     public ParsingPackageImpl setPersistent(boolean value) {
-        return setBoolean(Booleans.PERSISTENT, value);
+        persistent = value;
+        return this;
     }
 
     @Override
     public ParsingPackageImpl setDebuggable(boolean value) {
-        return setBoolean(Booleans.DEBUGGABLE, value);
+        debuggable = value;
+        return this;
     }
 
     @Override
     public ParsingPackageImpl setVmSafeMode(boolean value) {
-        return setBoolean(Booleans.VM_SAFE_MODE, value);
+        vmSafeMode = value;
+        return this;
     }
 
     @Override
     public ParsingPackageImpl setHasCode(boolean value) {
-        return setBoolean(Booleans.HAS_CODE, value);
+        hasCode = value;
+        return this;
     }
 
     @Override
     public ParsingPackageImpl setAllowTaskReparenting(boolean value) {
-        return setBoolean(Booleans.ALLOW_TASK_REPARENTING, value);
+        allowTaskReparenting = value;
+        return this;
     }
 
     @Override
     public ParsingPackageImpl setAllowClearUserData(boolean value) {
-        return setBoolean(Booleans.ALLOW_CLEAR_USER_DATA, value);
+        allowClearUserData = value;
+        return this;
     }
 
     @Override
     public ParsingPackageImpl setLargeHeap(boolean value) {
-        return setBoolean(Booleans.LARGE_HEAP, value);
+        largeHeap = value;
+        return this;
     }
 
     @Override
     public ParsingPackageImpl setUsesCleartextTraffic(boolean value) {
-        return setBoolean(Booleans.USES_CLEARTEXT_TRAFFIC, value);
+        usesCleartextTraffic = value;
+        return this;
     }
 
     @Override
     public ParsingPackageImpl setSupportsRtl(boolean value) {
-        return setBoolean(Booleans.SUPPORTS_RTL, value);
+        supportsRtl = value;
+        return this;
     }
 
     @Override
     public ParsingPackageImpl setTestOnly(boolean value) {
-        return setBoolean(Booleans.TEST_ONLY, value);
+        testOnly = value;
+        return this;
     }
 
     @Override
     public ParsingPackageImpl setMultiArch(boolean value) {
-        return setBoolean(Booleans.MULTI_ARCH, value);
+        multiArch = value;
+        return this;
     }
 
     @Override
     public ParsingPackageImpl setExtractNativeLibs(boolean value) {
-        return setBoolean(Booleans.EXTRACT_NATIVE_LIBS, value);
+        extractNativeLibs = value;
+        return this;
     }
 
     @Override
     public ParsingPackageImpl setGame(boolean value) {
-        return setBoolean(Booleans.GAME, value);
+        game = value;
+        return this;
     }
 
     /**
@@ -2549,121 +2416,116 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
 
     @Override
     public ParsingPackageImpl setStaticSharedLibrary(boolean value) {
-        return setBoolean(Booleans.STATIC_SHARED_LIBRARY, value);
+        staticSharedLibrary = value;
+        return this;
     }
 
     @Override
     public ParsingPackageImpl setOverlay(boolean value) {
-        return setBoolean(Booleans.OVERLAY, value);
+        overlay = value;
+        return this;
     }
 
     @Override
     public ParsingPackageImpl setIsolatedSplitLoading(boolean value) {
-        return setBoolean(Booleans.ISOLATED_SPLIT_LOADING, value);
+        isolatedSplitLoading = value;
+        return this;
     }
 
     @Override
     public ParsingPackageImpl setHasDomainUrls(boolean value) {
-        return setBoolean(Booleans.HAS_DOMAIN_URLS, value);
+        hasDomainUrls = value;
+        return this;
     }
 
     @Override
     public ParsingPackageImpl setProfileableByShell(boolean value) {
-        return setBoolean(Booleans.PROFILEABLE_BY_SHELL, value);
-    }
-
-    @Override
-    public ParsingPackageImpl setProfileable(boolean value) {
-        return setBoolean(Booleans.DISALLOW_PROFILING, !value);
+        profileableByShell = value;
+        return this;
     }
 
     @Override
     public ParsingPackageImpl setBackupInForeground(boolean value) {
-        return setBoolean(Booleans.BACKUP_IN_FOREGROUND, value);
+        backupInForeground = value;
+        return this;
     }
 
     @Override
     public ParsingPackageImpl setUseEmbeddedDex(boolean value) {
-        return setBoolean(Booleans.USE_EMBEDDED_DEX, value);
+        useEmbeddedDex = value;
+        return this;
     }
 
     @Override
     public ParsingPackageImpl setDefaultToDeviceProtectedStorage(boolean value) {
-        return setBoolean(Booleans.DEFAULT_TO_DEVICE_PROTECTED_STORAGE, value);
+        defaultToDeviceProtectedStorage = value;
+        return this;
     }
 
     @Override
     public ParsingPackageImpl setDirectBootAware(boolean value) {
-        return setBoolean(Booleans.DIRECT_BOOT_AWARE, value);
+        directBootAware = value;
+        return this;
     }
 
     @Override
-    public ParsingPackageImpl setGwpAsanMode(@ApplicationInfo.GwpAsanMode int value) {
+    public ParsingPackageImpl setGwpAsanMode(int value) {
         gwpAsanMode = value;
         return this;
     }
 
     @Override
-    public ParsingPackageImpl setMemtagMode(@ApplicationInfo.MemtagMode int value) {
-        memtagMode = value;
-        return this;
-    }
-
-    @Override
-    public ParsingPackageImpl setNativeHeapZeroInitialized(
-            @ApplicationInfo.NativeHeapZeroInitialized int value) {
-        nativeHeapZeroInitialized = value;
-        return this;
-    }
-
-    @Override
-    public ParsingPackageImpl setRequestRawExternalStorageAccess(@Nullable Boolean value) {
-        requestRawExternalStorageAccess = value;
-        return this;
-    }
-    @Override
     public ParsingPackageImpl setPartiallyDirectBootAware(boolean value) {
-        return setBoolean(Booleans.PARTIALLY_DIRECT_BOOT_AWARE, value);
+        partiallyDirectBootAware = value;
+        return this;
     }
 
     @Override
     public ParsingPackageImpl setResizeableActivityViaSdkVersion(boolean value) {
-        return setBoolean(Booleans.RESIZEABLE_ACTIVITY_VIA_SDK_VERSION, value);
+        resizeableActivityViaSdkVersion = value;
+        return this;
     }
 
     @Override
     public ParsingPackageImpl setAllowClearUserDataOnFailedRestore(boolean value) {
-        return setBoolean(Booleans.ALLOW_CLEAR_USER_DATA_ON_FAILED_RESTORE, value);
+        allowClearUserDataOnFailedRestore = value;
+        return this;
     }
 
     @Override
     public ParsingPackageImpl setAllowAudioPlaybackCapture(boolean value) {
-        return setBoolean(Booleans.ALLOW_AUDIO_PLAYBACK_CAPTURE, value);
+        allowAudioPlaybackCapture = value;
+        return this;
     }
 
     @Override
     public ParsingPackageImpl setRequestLegacyExternalStorage(boolean value) {
-        return setBoolean(Booleans.REQUEST_LEGACY_EXTERNAL_STORAGE, value);
+        requestLegacyExternalStorage = value;
+        return this;
     }
 
     @Override
     public ParsingPackageImpl setUsesNonSdkApi(boolean value) {
-        return setBoolean(Booleans.USES_NON_SDK_API, value);
+        usesNonSdkApi = value;
+        return this;
     }
 
     @Override
     public ParsingPackageImpl setHasFragileUserData(boolean value) {
-        return setBoolean(Booleans.HAS_FRAGILE_USER_DATA, value);
+        hasFragileUserData = value;
+        return this;
     }
 
     @Override
     public ParsingPackageImpl setCantSaveState(boolean value) {
-        return setBoolean(Booleans.CANT_SAVE_STATE, value);
+        cantSaveState = value;
+        return this;
     }
 
     @Override
     public ParsingPackageImpl setAllowNativeHeapPointerTagging(boolean value) {
-        return setBoolean(Booleans.ALLOW_NATIVE_HEAP_POINTER_TAGGING, value);
+        allowNativeHeapPointerTagging = value;
+        return this;
     }
 
     @Override
@@ -2674,7 +2536,8 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
 
     @Override
     public ParsingPackageImpl setPreserveLegacyExternalStorage(boolean value) {
-        return setBoolean(Booleans.PRESERVE_LEGACY_EXTERNAL_STORAGE, value);
+        preserveLegacyExternalStorage = value;
+        return this;
     }
 
     @Override
@@ -2739,7 +2602,7 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
 
     @Override
     public ParsingPackageImpl setClassName(@Nullable String className) {
-        this.className = className == null ? null : className.trim();
+        this.className = className;
         return this;
     }
 
@@ -2764,12 +2627,6 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
     @Override
     public ParsingPackageImpl setZygotePreloadName(@Nullable String zygotePreloadName) {
         this.zygotePreloadName = zygotePreloadName;
-        return this;
-    }
-
-    @Override
-    public ParsingPackage setAttributionsAreUserVisible(boolean attributionsAreUserVisible) {
-        setBoolean(Booleans.ATTRIBUTIONS_ARE_USER_VISIBLE, attributionsAreUserVisible);
         return this;
     }
 }

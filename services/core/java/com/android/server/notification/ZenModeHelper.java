@@ -21,8 +21,8 @@ import static android.app.NotificationManager.AUTOMATIC_RULE_STATUS_ENABLED;
 import static android.app.NotificationManager.AUTOMATIC_RULE_STATUS_REMOVED;
 import static android.app.NotificationManager.Policy.PRIORITY_SENDERS_ANY;
 import static android.service.notification.DNDModeProto.ROOT_CONFIG;
-import static android.util.StatsLog.ANNOTATION_ID_IS_UID;
 
+import static com.android.internal.util.FrameworkStatsLog.ANNOTATION_ID_IS_UID;
 import static com.android.internal.util.FrameworkStatsLog.DND_MODE_RULE;
 
 import android.app.AppOpsManager;
@@ -72,8 +72,6 @@ import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.StatsEvent;
-import android.util.TypedXmlPullParser;
-import android.util.TypedXmlSerializer;
 import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.R;
@@ -81,13 +79,13 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.internal.notification.SystemNotificationChannels;
-import com.android.internal.util.XmlUtils;
 import com.android.server.LocalServices;
 
 import libcore.io.IoUtils;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
+import org.xmlpull.v1.XmlSerializer;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -104,9 +102,6 @@ public class ZenModeHelper {
 
     // The amount of time rules instances can exist without their owning app being installed.
     private static final int RULE_INSTANCE_GRACE_PERIOD = 1000 * 60 * 60 * 72;
-
-    // pkg|userId => uid
-    protected final ArrayMap<String, Integer> mRulesUidCache = new ArrayMap<>();
 
     private final Context mContext;
     private final H mHandler;
@@ -147,7 +142,7 @@ public class ZenModeHelper {
         mHandler = new H(looper);
         addCallback(mMetrics);
         mAppOps = context.getSystemService(AppOpsManager.class);
-        mNotificationManager = context.getSystemService(NotificationManager.class);
+        mNotificationManager =  context.getSystemService(NotificationManager.class);
 
         mDefaultConfig = readDefaultConfig(mContext.getResources());
         updateDefaultAutomaticRuleNames();
@@ -307,8 +302,7 @@ public class ZenModeHelper {
         return null;
     }
 
-    public String addAutomaticZenRule(String pkg, AutomaticZenRule automaticZenRule,
-            String reason) {
+    public String addAutomaticZenRule(AutomaticZenRule automaticZenRule, String reason) {
         if (!isSystemRule(automaticZenRule)) {
             PackageItemInfo component = getServiceInfo(automaticZenRule.getOwner());
             if (component == null) {
@@ -341,7 +335,7 @@ public class ZenModeHelper {
             }
             newConfig = mConfig.copy();
             ZenRule rule = new ZenRule();
-            populateZenRule(pkg, automaticZenRule, rule, true);
+            populateZenRule(automaticZenRule, rule, true);
             newConfig.automaticRules.put(rule.id, rule);
             if (setConfigLocked(newConfig, reason, rule.component, true)) {
                 return rule.id;
@@ -372,12 +366,12 @@ public class ZenModeHelper {
                 }
             }
             if (rule.enabled != automaticZenRule.isEnabled()) {
-                dispatchOnAutomaticRuleStatusChanged(mConfig.user, rule.getPkg(), ruleId,
+                dispatchOnAutomaticRuleStatusChanged(mConfig.user, rule.pkg, ruleId,
                         automaticZenRule.isEnabled()
                                 ? AUTOMATIC_RULE_STATUS_ENABLED : AUTOMATIC_RULE_STATUS_DISABLED);
             }
 
-            populateZenRule(rule.pkg, automaticZenRule, rule, false);
+            populateZenRule(automaticZenRule, rule, false);
             return setConfigLocked(newConfig, reason, rule.component, true);
         }
     }
@@ -387,26 +381,17 @@ public class ZenModeHelper {
         synchronized (mConfig) {
             if (mConfig == null) return false;
             newConfig = mConfig.copy();
-            ZenRule ruleToRemove = newConfig.automaticRules.get(id);
-            if (ruleToRemove == null) return false;
-            if (canManageAutomaticZenRule(ruleToRemove)) {
+            ZenRule rule = newConfig.automaticRules.get(id);
+            if (rule == null) return false;
+            if (canManageAutomaticZenRule(rule)) {
                 newConfig.automaticRules.remove(id);
-                if (ruleToRemove.getPkg() != null && !"android".equals(ruleToRemove.getPkg())) {
-                    for (ZenRule currRule : newConfig.automaticRules.values()) {
-                        if (currRule.getPkg() != null
-                                && currRule.getPkg().equals(ruleToRemove.getPkg())) {
-                            break; // no need to remove from cache
-                        }
-                    }
-                    mRulesUidCache.remove(getPackageUserKey(ruleToRemove.getPkg(), newConfig.user));
-                }
                 if (DEBUG) Log.d(TAG, "removeZenRule zenRule=" + id + " reason=" + reason);
             } else {
                 throw new SecurityException(
                         "Cannot delete rules not owned by your condition provider");
             }
             dispatchOnAutomaticRuleStatusChanged(
-                    mConfig.user, ruleToRemove.getPkg(), id, AUTOMATIC_RULE_STATUS_REMOVED);
+                    mConfig.user, rule.pkg, id, AUTOMATIC_RULE_STATUS_REMOVED);
             return setConfigLocked(newConfig, reason, null, true);
         }
     }
@@ -418,7 +403,7 @@ public class ZenModeHelper {
             newConfig = mConfig.copy();
             for (int i = newConfig.automaticRules.size() - 1; i >= 0; i--) {
                 ZenRule rule = newConfig.automaticRules.get(newConfig.automaticRules.keyAt(i));
-                if (Objects.equals(rule.getPkg(), packageName) && canManageAutomaticZenRule(rule)) {
+                if (rule.pkg.equals(packageName) && canManageAutomaticZenRule(rule)) {
                     newConfig.automaticRules.removeAt(i);
                 }
             }
@@ -432,9 +417,7 @@ public class ZenModeHelper {
             if (mConfig == null) return;
 
             newConfig = mConfig.copy();
-            ArrayList<ZenRule> rules = new ArrayList<>();
-            rules.add(newConfig.automaticRules.get(id));
-            setAutomaticZenRuleStateLocked(newConfig, rules, condition);
+            setAutomaticZenRuleStateLocked(newConfig, newConfig.automaticRules.get(id), condition);
         }
     }
 
@@ -445,34 +428,31 @@ public class ZenModeHelper {
             newConfig = mConfig.copy();
 
             setAutomaticZenRuleStateLocked(newConfig,
-                    findMatchingRules(newConfig, ruleDefinition, condition),
+                    findMatchingRule(newConfig, ruleDefinition, condition),
                     condition);
         }
     }
 
-    private void setAutomaticZenRuleStateLocked(ZenModeConfig config, List<ZenRule> rules,
+    private void setAutomaticZenRuleStateLocked(ZenModeConfig config, ZenRule rule,
             Condition condition) {
-        if (rules == null || rules.isEmpty()) return;
+        if (rule == null) return;
 
-        for (ZenRule rule : rules) {
-            rule.condition = condition;
-            updateSnoozing(rule);
-            setConfigLocked(config, rule.component, "conditionChanged");
-        }
+        rule.condition = condition;
+        updateSnoozing(rule);
+        setConfigLocked(config, rule.component, "conditionChanged");
     }
 
-    private List<ZenRule> findMatchingRules(ZenModeConfig config, Uri id, Condition condition) {
-        List<ZenRule> matchingRules= new ArrayList<>();
+    private ZenRule findMatchingRule(ZenModeConfig config, Uri id, Condition condition) {
         if (ruleMatches(id, condition, config.manualRule)) {
-            matchingRules.add(config.manualRule);
+            return config.manualRule;
         } else {
             for (ZenRule automaticRule : config.automaticRules.values()) {
                 if (ruleMatches(id, condition, automaticRule)) {
-                    matchingRules.add(automaticRule);
+                    return automaticRule;
                 }
             }
         }
-        return matchingRules;
+        return null;
     }
 
     private boolean ruleMatches(Uri id, Condition condition, ZenRule rule) {
@@ -518,7 +498,7 @@ public class ZenModeHelper {
             if (packages != null) {
                 final int packageCount = packages.length;
                 for (int i = 0; i < packageCount; i++) {
-                    if (packages[i].equals(rule.getPkg())) {
+                    if (packages[i].equals(rule.pkg)) {
                         return true;
                     }
                 }
@@ -587,8 +567,20 @@ public class ZenModeHelper {
         return null;
     }
 
-    private void populateZenRule(String pkg, AutomaticZenRule automaticZenRule, ZenRule rule,
-            boolean isNew) {
+    private void populateZenRule(AutomaticZenRule automaticZenRule, ZenRule rule, boolean isNew) {
+        if (isNew) {
+            rule.id = ZenModeConfig.newRuleId();
+            rule.creationTime = System.currentTimeMillis();
+            rule.component = automaticZenRule.getOwner();
+            rule.configurationActivity = automaticZenRule.getConfigurationActivity();
+            rule.pkg = (rule.component != null)
+                    ? rule.component.getPackageName()
+                    : rule.configurationActivity.getPackageName();
+        }
+
+        if (rule.enabled != automaticZenRule.isEnabled()) {
+            rule.snoozing = false;
+        }
         rule.name = automaticZenRule.getName();
         rule.condition = null;
         rule.conditionId = automaticZenRule.getConditionId();
@@ -597,28 +589,13 @@ public class ZenModeHelper {
         rule.zenPolicy = automaticZenRule.getZenPolicy();
         rule.zenMode = NotificationManager.zenModeFromInterruptionFilter(
                 automaticZenRule.getInterruptionFilter(), Global.ZEN_MODE_OFF);
-        rule.configurationActivity = automaticZenRule.getConfigurationActivity();
-
-        if (isNew) {
-            rule.id = ZenModeConfig.newRuleId();
-            rule.creationTime = System.currentTimeMillis();
-            rule.component = automaticZenRule.getOwner();
-            rule.pkg = pkg;
-        }
-
-        if (rule.enabled != automaticZenRule.isEnabled()) {
-            rule.snoozing = false;
-        }
     }
 
     protected AutomaticZenRule createAutomaticZenRule(ZenRule rule) {
-        AutomaticZenRule azr =  new AutomaticZenRule(rule.name, rule.component,
-                rule.configurationActivity,
+        return new AutomaticZenRule(rule.name, rule.component, rule.configurationActivity,
                 rule.conditionId, rule.zenPolicy,
                 NotificationManager.zenModeToInterruptionFilter(rule.zenMode),
                 rule.enabled, rule.creationTime);
-        azr.setPackageName(rule.pkg);
-        return azr;
     }
 
     public void setManualZenMode(int zenMode, Uri conditionId, String caller, String reason) {
@@ -663,8 +640,7 @@ public class ZenModeHelper {
                 mConfig.manualRule.dumpDebug(proto, ZenModeProto.ENABLED_ACTIVE_CONDITIONS);
             }
             for (ZenRule rule : mConfig.automaticRules.values()) {
-                if (rule.enabled && rule.condition != null
-                        && rule.condition.state == Condition.STATE_TRUE
+                if (rule.enabled && rule.condition.state == Condition.STATE_TRUE
                         && !rule.snoozing) {
                     rule.dumpDebug(proto, ZenModeProto.ENABLED_ACTIVE_CONDITIONS);
                 }
@@ -721,7 +697,7 @@ public class ZenModeHelper {
         }
     }
 
-    public void readXml(TypedXmlPullParser parser, boolean forRestore, int userId)
+    public void readXml(XmlPullParser parser, boolean forRestore, int userId)
             throws XmlPullParserException, IOException {
         ZenModeConfig config = ZenModeConfig.readXml(parser);
         String reason = "readXml";
@@ -780,7 +756,7 @@ public class ZenModeHelper {
         }
     }
 
-    public void writeXml(TypedXmlSerializer out, boolean forBackup, Integer version, int userId)
+    public void writeXml(XmlSerializer out, boolean forBackup, Integer version, int userId)
             throws IOException {
         synchronized (mConfigs) {
             final int n = mConfigs.size();
@@ -828,8 +804,8 @@ public class ZenModeHelper {
                     ZenRule rule = newConfig.automaticRules.get(newConfig.automaticRules.keyAt(i));
                     if (RULE_INSTANCE_GRACE_PERIOD < (currentTime - rule.creationTime)) {
                         try {
-                            if (rule.getPkg() != null) {
-                                mPm.getPackageInfo(rule.getPkg(), PackageManager.MATCH_ANY_USER);
+                            if (rule.pkg != null) {
+                                mPm.getPackageInfo(rule.pkg, PackageManager.MATCH_ANY_USER);
                             }
                         } catch (PackageManager.NameNotFoundException e) {
                             newConfig.automaticRules.removeAt(i);
@@ -893,13 +869,13 @@ public class ZenModeHelper {
             final boolean policyChanged = !Objects.equals(getNotificationPolicy(mConfig),
                     getNotificationPolicy(config));
             if (!config.equals(mConfig)) {
-                mConfig = config;
                 dispatchOnConfigChanged();
                 updateConsolidatedPolicy(reason);
             }
             if (policyChanged) {
                 dispatchOnPolicyChanged();
             }
+            mConfig = config;
             mHandler.postApplyConfig(config, reason, triggeringComponent, setRingerMode);
             return true;
         } catch (SecurityException e) {
@@ -1182,7 +1158,7 @@ public class ZenModeHelper {
         try {
             parser = resources.getXml(R.xml.default_zen_mode_config);
             while (parser.next() != XmlPullParser.END_DOCUMENT) {
-                final ZenModeConfig config = ZenModeConfig.readXml(XmlUtils.makeTyped(parser));
+                final ZenModeConfig config = ZenModeConfig.readXml(parser);
                 if (config != null) return config;
             }
         } catch (Exception e) {
@@ -1208,6 +1184,7 @@ public class ZenModeHelper {
     public void pullRules(List<StatsEvent> events) {
         synchronized (mConfig) {
             final int numConfigs = mConfigs.size();
+            int id = 0;
             for (int i = 0; i < numConfigs; i++) {
                 final int user = mConfigs.keyAt(i);
                 final ZenModeConfig config = mConfigs.valueAt(i);
@@ -1223,16 +1200,16 @@ public class ZenModeHelper {
                         .writeByteArray(config.toZenPolicy().toProto());
                 events.add(data.build());
                 if (config.manualRule != null && config.manualRule.enabler != null) {
-                    ruleToProtoLocked(user, config.manualRule, events);
+                    ruleToProto(user, config.manualRule, events);
                 }
                 for (ZenRule rule : config.automaticRules.values()) {
-                    ruleToProtoLocked(user, rule, events);
+                    ruleToProto(user, rule, events);
                 }
             }
         }
     }
 
-    private void ruleToProtoLocked(int user, ZenRule rule, List<StatsEvent> events) {
+    private void ruleToProto(int user, ZenRule rule, List<StatsEvent> events) {
         // Make the ID safe.
         String id = rule.id == null ? "" : rule.id;
         if (!ZenModeConfig.DEFAULT_RULE_IDS.contains(id)) {
@@ -1240,11 +1217,14 @@ public class ZenModeHelper {
         }
 
         // Look for packages and enablers, enablers get priority.
-        String pkg = rule.getPkg() == null ? "" : rule.getPkg();
+        String pkg = rule.pkg == null ? "" : rule.pkg;
         if (rule.enabler != null) {
             pkg = rule.enabler;
             id = ZenModeConfig.MANUAL_RULE_ID;
         }
+
+        // TODO: fetch the uid from the package manager
+        int uid = "android".equals(pkg) ? Process.SYSTEM_UID : 0;
 
         SysUiStatsEvent.Builder data;
         data = mStatsEventBuilderFactory.newBuilder()
@@ -1254,7 +1234,7 @@ public class ZenModeHelper {
                 .writeBoolean(false) // channels_bypassing unused for rules
                 .writeInt(rule.zenMode)
                 .writeString(id)
-                .writeInt(getPackageUid(pkg, user))
+                .writeInt(uid)
                 .addBooleanAnnotation(ANNOTATION_ID_IS_UID, true);
         byte[] policyProto = new byte[]{};
         if (rule.zenPolicy != null) {
@@ -1262,24 +1242,6 @@ public class ZenModeHelper {
         }
         data.writeByteArray(policyProto);
         events.add(data.build());
-    }
-
-    private int getPackageUid(String pkg, int user) {
-        if ("android".equals(pkg)) {
-            return Process.SYSTEM_UID;
-        }
-        final String key = getPackageUserKey(pkg, user);
-        if (mRulesUidCache.get(key) == null) {
-            try {
-                mRulesUidCache.put(key, mPm.getPackageUidAsUser(pkg, user));
-            } catch (PackageManager.NameNotFoundException e) {
-            }
-        }
-        return mRulesUidCache.getOrDefault(key, -1);
-    }
-
-    private static String getPackageUserKey(String pkg, int user) {
-        return pkg + "|" + user;
     }
 
     @VisibleForTesting

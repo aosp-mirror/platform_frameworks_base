@@ -16,7 +16,6 @@
 
 package android.service.carrier;
 
-import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SdkConstant;
@@ -26,8 +25,6 @@ import android.net.Uri;
 import android.os.IBinder;
 import android.os.RemoteException;
 
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
 import java.util.List;
 
 /**
@@ -77,15 +74,6 @@ public abstract class CarrierMessagingService extends Service {
      */
     public static final int RECEIVE_OPTIONS_SKIP_NOTIFY_WHEN_CREDENTIAL_PROTECTED_STORAGE_UNAVAILABLE = 0x2;
 
-    /** @hide */
-    @IntDef(flag = true, prefix = { "RECEIVE_OPTIONS_" }, value = {
-            RECEIVE_OPTIONS_DEFAULT,
-            RECEIVE_OPTIONS_DROP,
-            RECEIVE_OPTIONS_SKIP_NOTIFY_WHEN_CREDENTIAL_PROTECTED_STORAGE_UNAVAILABLE
-    })
-    @Retention(RetentionPolicy.SOURCE)
-    public @interface FilterCompleteResult{}
-
     /**
      * Indicates that an SMS or MMS message was successfully sent.
      */
@@ -100,15 +88,6 @@ public abstract class CarrierMessagingService extends Service {
      * SMS/MMS sending failed. We should not retry via the carrier network.
      */
     public static final int SEND_STATUS_ERROR = 2;
-
-    /** @hide */
-    @IntDef(prefix = { "SEND_STATUS_" }, value = {
-            SEND_STATUS_OK,
-            SEND_STATUS_RETRY_ON_CARRIER_NETWORK,
-            SEND_STATUS_ERROR
-    })
-    @Retention(RetentionPolicy.SOURCE)
-    public @interface SendResult {}
 
     /**
      * Successfully downloaded an MMS message.
@@ -125,26 +104,10 @@ public abstract class CarrierMessagingService extends Service {
      */
     public static final int DOWNLOAD_STATUS_ERROR = 2;
 
-    /** @hide */
-    @IntDef(prefix = { "DOWNLOAD_STATUS_" }, value = {
-            DOWNLOAD_STATUS_OK,
-            DOWNLOAD_STATUS_RETRY_ON_CARRIER_NETWORK,
-            DOWNLOAD_STATUS_ERROR
-    })
-    @Retention(RetentionPolicy.SOURCE)
-    public @interface DownloadResult {}
-
     /**
      * Flag to request SMS delivery status report.
      */
-    public static final int SEND_FLAG_REQUEST_DELIVERY_STATUS = 0x1;
-
-    /** @hide */
-    @IntDef(flag = true, prefix = { "SEND_FLAG_" }, value = {
-            SEND_FLAG_REQUEST_DELIVERY_STATUS
-    })
-    @Retention(RetentionPolicy.SOURCE)
-    public @interface SendRequest {}
+    public static final int SEND_FLAG_REQUEST_DELIVERY_STATUS = 1;
 
     private final ICarrierMessagingWrapper mWrapper = new ICarrierMessagingWrapper();
 

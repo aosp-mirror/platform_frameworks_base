@@ -175,7 +175,7 @@ public class GraphicsStatsService extends IGraphicsStats.Stub {
         int uid = Binder.getCallingUid();
         int pid = Binder.getCallingPid();
         ParcelFileDescriptor pfd = null;
-        final long callingIdentity = Binder.clearCallingIdentity();
+        long callingIdentity = Binder.clearCallingIdentity();
         try {
             mAppOps.checkPackage(uid, packageName);
             PackageInfo info = mContext.getPackageManager().getPackageInfoAsUser(
@@ -214,7 +214,7 @@ public class GraphicsStatsService extends IGraphicsStats.Stub {
             }
         }
 
-        final long callingIdentity = Binder.clearCallingIdentity();
+        long callingIdentity = Binder.clearCallingIdentity();
         try {
             pullGraphicsStatsImpl(lastFullDay, pulledData);
         } finally {

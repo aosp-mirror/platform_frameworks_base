@@ -1,0 +1,13 @@
+{
+  "postsubmit": [
+    // Run tests on real device
+    {
+      "name": "FlickerTests",
+      "keywords": ["primary-device"]
+    },
+    // Also run the tests in the cloud
+    {
+      "name": "FlickerTests"
+    }
+  ]
+}

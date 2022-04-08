@@ -70,7 +70,9 @@ public class DeviceConfigProxyFake extends DeviceConfigProxy {
 
         for (Pair<Executor, OnPropertiesChangedListener> listener : mListeners) {
             Properties.Builder propBuilder = new Properties.Builder(namespace);
-            propBuilder.setString(name, value);
+            for (String key : mProperties.get(namespace).keySet()) {
+                propBuilder.setString(key, mProperties.get(namespace).get(key));
+            }
             listener.first.execute(() -> listener.second.onPropertiesChanged(propBuilder.build()));
         }
         return true;

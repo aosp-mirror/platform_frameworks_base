@@ -261,7 +261,7 @@ public:
 
     void onDeviceAvailable(const TvInputDeviceInfo& info);
     void onDeviceUnavailable(int deviceId);
-    void onStreamConfigurationsChanged(int deviceId, int cableConnectionStatus);
+    void onStreamConfigurationsChanged(int deviceId);
     void onCaptured(int deviceId, int streamId, uint32_t seq, bool succeeded);
 
 private:
@@ -519,7 +519,7 @@ void JTvInputHal::onDeviceUnavailable(int deviceId) {
             deviceId);
 }
 
-void JTvInputHal::onStreamConfigurationsChanged(int deviceId, int cableConnectionStatus) {
+void JTvInputHal::onStreamConfigurationsChanged(int deviceId) {
     {
         Mutex::Autolock autoLock(&mLock);
         KeyedVector<int, Connection>& connections = mConnections.editValueFor(deviceId);
@@ -529,8 +529,10 @@ void JTvInputHal::onStreamConfigurationsChanged(int deviceId, int cableConnectio
         connections.clear();
     }
     JNIEnv* env = AndroidRuntime::getJNIEnv();
-    env->CallVoidMethod(mThiz, gTvInputHalClassInfo.streamConfigsChanged, deviceId,
-                        cableConnectionStatus);
+    env->CallVoidMethod(
+            mThiz,
+            gTvInputHalClassInfo.streamConfigsChanged,
+            deviceId);
 }
 
 void JTvInputHal::onCaptured(int deviceId, int streamId, uint32_t seq, bool succeeded) {
@@ -570,8 +572,7 @@ void JTvInputHal::NotifyHandler::handleMessage(const Message& message) {
             mHal->onDeviceUnavailable(mEvent.deviceInfo.deviceId);
         } break;
         case TvInputEventType::STREAM_CONFIGURATIONS_CHANGED: {
-            int cableConnectionStatus = static_cast<int>(mEvent.deviceInfo.cableConnectionStatus);
-            mHal->onStreamConfigurationsChanged(mEvent.deviceInfo.deviceId, cableConnectionStatus);
+            mHal->onStreamConfigurationsChanged(mEvent.deviceInfo.deviceId);
         } break;
         default:
             ALOGE("Unrecognizable event");
@@ -687,8 +688,9 @@ int register_android_server_tv_TvInputHal(JNIEnv* env) {
             "deviceAvailableFromNative", "(Landroid/media/tv/TvInputHardwareInfo;)V");
     GET_METHOD_ID(
             gTvInputHalClassInfo.deviceUnavailable, clazz, "deviceUnavailableFromNative", "(I)V");
-    GET_METHOD_ID(gTvInputHalClassInfo.streamConfigsChanged, clazz,
-                  "streamConfigsChangedFromNative", "(II)V");
+    GET_METHOD_ID(
+            gTvInputHalClassInfo.streamConfigsChanged, clazz,
+            "streamConfigsChangedFromNative", "(I)V");
     GET_METHOD_ID(
             gTvInputHalClassInfo.firstFrameCaptured, clazz,
             "firstFrameCapturedFromNative", "(II)V");

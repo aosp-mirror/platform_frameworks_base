@@ -16,7 +16,6 @@
 
 package com.android.internal.content;
 
-import android.annotation.NonNull;
 import android.app.Activity;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
@@ -38,7 +37,6 @@ import java.util.Objects;
  * updating, and disappearing and reappearing on the SD card.
  */
 public abstract class PackageMonitor extends android.content.BroadcastReceiver {
-    static final String TAG = "PackageMonitor";
     static final IntentFilter sPackageFilt = new IntentFilter();
     static final IntentFilter sNonDataFilt = new IntentFilter();
     static final IntentFilter sExternalFilt = new IntentFilter();
@@ -232,7 +230,7 @@ public abstract class PackageMonitor extends android.content.BroadcastReceiver {
     /**
      * Called when an existing package is updated or its disabled state changes.
      */
-    public void onPackageModified(@NonNull String packageName) {
+    public void onPackageModified(String packageName) {
     }
     
     public boolean didSomePackagesChange() {
@@ -306,13 +304,6 @@ public abstract class PackageMonitor extends android.content.BroadcastReceiver {
 
     public void onPackageDataCleared(String packageName, int uid) {
     }
-
-    /**
-     * Callback to indicate the package's state has changed.
-     * @param packageName Name of an installed package
-     * @param uid The UID the package runs under.
-     */
-    public void onPackageStateChanged(String packageName, int uid) {}
 
     public int getChangingUserId() {
         return mChangeUserId;
@@ -466,7 +457,7 @@ public abstract class PackageMonitor extends android.content.BroadcastReceiver {
         if (mSomePackagesChanged) {
             onSomePackagesChanged();
         }
-
+        
         onFinishPackageChanges();
         mChangeUserId = UserHandle.USER_NULL;
     }

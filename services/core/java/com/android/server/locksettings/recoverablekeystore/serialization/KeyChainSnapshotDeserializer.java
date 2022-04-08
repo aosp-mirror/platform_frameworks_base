@@ -18,6 +18,7 @@ package com.android.server.locksettings.recoverablekeystore.serialization;
 
 import static com.android.server.locksettings.recoverablekeystore.serialization.KeyChainSnapshotSchema.CERTIFICATE_FACTORY_TYPE;
 import static com.android.server.locksettings.recoverablekeystore.serialization.KeyChainSnapshotSchema.NAMESPACE;
+import static com.android.server.locksettings.recoverablekeystore.serialization.KeyChainSnapshotSchema.OUTPUT_ENCODING;
 import static com.android.server.locksettings.recoverablekeystore.serialization.KeyChainSnapshotSchema.TAG_ALGORITHM;
 import static com.android.server.locksettings.recoverablekeystore.serialization.KeyChainSnapshotSchema.TAG_ALIAS;
 import static com.android.server.locksettings.recoverablekeystore.serialization.KeyChainSnapshotSchema.TAG_APPLICATION_KEY;
@@ -45,7 +46,6 @@ import android.security.keystore.recovery.KeyChainSnapshot;
 import android.security.keystore.recovery.KeyDerivationParams;
 import android.security.keystore.recovery.WrappedApplicationKey;
 import android.util.Base64;
-import android.util.TypedXmlPullParser;
 import android.util.Xml;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -84,7 +84,8 @@ public class KeyChainSnapshotDeserializer {
 
     private static KeyChainSnapshot deserializeInternal(InputStream inputStream) throws IOException,
             XmlPullParserException, KeyChainSnapshotParserException {
-        TypedXmlPullParser parser = Xml.resolvePullParser(inputStream);
+        XmlPullParser parser = Xml.newPullParser();
+        parser.setInput(inputStream, OUTPUT_ENCODING);
 
         parser.nextTag();
         parser.require(XmlPullParser.START_TAG, NAMESPACE, TAG_KEY_CHAIN_SNAPSHOT);
@@ -155,7 +156,7 @@ public class KeyChainSnapshotDeserializer {
         }
     }
 
-    private static List<WrappedApplicationKey> readWrappedApplicationKeys(TypedXmlPullParser parser)
+    private static List<WrappedApplicationKey> readWrappedApplicationKeys(XmlPullParser parser)
             throws IOException, XmlPullParserException, KeyChainSnapshotParserException {
         parser.require(XmlPullParser.START_TAG, NAMESPACE, TAG_APPLICATION_KEYS);
         ArrayList<WrappedApplicationKey> keys = new ArrayList<>();
@@ -169,7 +170,7 @@ public class KeyChainSnapshotDeserializer {
         return keys;
     }
 
-    private static WrappedApplicationKey readWrappedApplicationKey(TypedXmlPullParser parser)
+    private static WrappedApplicationKey readWrappedApplicationKey(XmlPullParser parser)
             throws IOException, XmlPullParserException, KeyChainSnapshotParserException {
         parser.require(XmlPullParser.START_TAG, NAMESPACE, TAG_APPLICATION_KEY);
         WrappedApplicationKey.Builder builder = new WrappedApplicationKey.Builder();
@@ -208,7 +209,7 @@ public class KeyChainSnapshotDeserializer {
     }
 
     private static List<KeyChainProtectionParams> readKeyChainProtectionParamsList(
-            TypedXmlPullParser parser) throws IOException, XmlPullParserException,
+            XmlPullParser parser) throws IOException, XmlPullParserException,
             KeyChainSnapshotParserException {
         parser.require(XmlPullParser.START_TAG, NAMESPACE, TAG_KEY_CHAIN_PROTECTION_PARAMS_LIST);
 
@@ -224,7 +225,7 @@ public class KeyChainSnapshotDeserializer {
         return keyChainProtectionParamsList;
     }
 
-    private static KeyChainProtectionParams readKeyChainProtectionParams(TypedXmlPullParser parser)
+    private static KeyChainProtectionParams readKeyChainProtectionParams(XmlPullParser parser)
         throws IOException, XmlPullParserException, KeyChainSnapshotParserException {
         parser.require(XmlPullParser.START_TAG, NAMESPACE, TAG_KEY_CHAIN_PROTECTION_PARAMS);
 
@@ -268,7 +269,7 @@ public class KeyChainSnapshotDeserializer {
         }
     }
 
-    private static KeyDerivationParams readKeyDerivationParams(TypedXmlPullParser parser)
+    private static KeyDerivationParams readKeyDerivationParams(XmlPullParser parser)
             throws XmlPullParserException, IOException, KeyChainSnapshotParserException {
         parser.require(XmlPullParser.START_TAG, NAMESPACE, TAG_KEY_DERIVATION_PARAMS);
 
@@ -330,7 +331,7 @@ public class KeyChainSnapshotDeserializer {
         return keyDerivationParams;
     }
 
-    private static int readIntTag(TypedXmlPullParser parser, String tagName)
+    private static int readIntTag(XmlPullParser parser, String tagName)
             throws IOException, XmlPullParserException, KeyChainSnapshotParserException {
         parser.require(XmlPullParser.START_TAG, NAMESPACE, tagName);
         String text = readText(parser);
@@ -344,7 +345,7 @@ public class KeyChainSnapshotDeserializer {
         }
     }
 
-    private static long readLongTag(TypedXmlPullParser parser, String tagName)
+    private static long readLongTag(XmlPullParser parser, String tagName)
             throws IOException, XmlPullParserException, KeyChainSnapshotParserException {
         parser.require(XmlPullParser.START_TAG, NAMESPACE, tagName);
         String text = readText(parser);
@@ -358,7 +359,7 @@ public class KeyChainSnapshotDeserializer {
         }
     }
 
-    private static String readStringTag(TypedXmlPullParser parser, String tagName)
+    private static String readStringTag(XmlPullParser parser, String tagName)
             throws IOException, XmlPullParserException {
         parser.require(XmlPullParser.START_TAG, NAMESPACE, tagName);
         String text = readText(parser);
@@ -366,7 +367,7 @@ public class KeyChainSnapshotDeserializer {
         return text;
     }
 
-    private static byte[] readBlobTag(TypedXmlPullParser parser, String tagName)
+    private static byte[] readBlobTag(XmlPullParser parser, String tagName)
             throws IOException, XmlPullParserException, KeyChainSnapshotParserException {
         parser.require(XmlPullParser.START_TAG, NAMESPACE, tagName);
         String text = readText(parser);
@@ -383,7 +384,7 @@ public class KeyChainSnapshotDeserializer {
         }
     }
 
-    private static CertPath readCertPathTag(TypedXmlPullParser parser, String tagName)
+    private static CertPath readCertPathTag(XmlPullParser parser, String tagName)
             throws IOException, XmlPullParserException, KeyChainSnapshotParserException {
         byte[] bytes = readBlobTag(parser, tagName);
         try {
@@ -395,7 +396,7 @@ public class KeyChainSnapshotDeserializer {
         }
     }
 
-    private static String readText(TypedXmlPullParser parser)
+    private static String readText(XmlPullParser parser)
             throws IOException, XmlPullParserException {
         String result = "";
         if (parser.next() == XmlPullParser.TEXT) {

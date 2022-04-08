@@ -38,7 +38,7 @@ public class BatteryPreference extends DropDownPreference implements TunerServic
     private final String mBattery;
     private boolean mBatteryEnabled;
     private boolean mHasPercentage;
-    private ArraySet<String> mHideList;
+    private ArraySet<String> mBlacklist;
     private boolean mHasSetValue;
 
     public BatteryPreference(Context context, AttributeSet attrs) {
@@ -52,7 +52,7 @@ public class BatteryPreference extends DropDownPreference implements TunerServic
         super.onAttached();
         mHasPercentage = Settings.System.getInt(getContext().getContentResolver(),
                 SHOW_BATTERY_PERCENT, 0) != 0;
-        Dependency.get(TunerService.class).addTunable(this, StatusBarIconController.ICON_HIDE_LIST);
+        Dependency.get(TunerService.class).addTunable(this, StatusBarIconController.ICON_BLACKLIST);
     }
 
     @Override
@@ -63,9 +63,9 @@ public class BatteryPreference extends DropDownPreference implements TunerServic
 
     @Override
     public void onTuningChanged(String key, String newValue) {
-        if (StatusBarIconController.ICON_HIDE_LIST.equals(key)) {
-            mHideList = StatusBarIconController.getIconHideList(getContext(), newValue);
-            mBatteryEnabled = !mHideList.contains(mBattery);
+        if (StatusBarIconController.ICON_BLACKLIST.equals(key)) {
+            mBlacklist = StatusBarIconController.getIconBlacklist(getContext(), newValue);
+            mBatteryEnabled = !mBlacklist.contains(mBattery);
         }
         if (!mHasSetValue) {
             // Because of the complicated tri-state it can end up looping and setting state back to
@@ -88,12 +88,12 @@ public class BatteryPreference extends DropDownPreference implements TunerServic
         MetricsLogger.action(getContext(), MetricsEvent.TUNER_BATTERY_PERCENTAGE, v);
         Settings.System.putInt(getContext().getContentResolver(), SHOW_BATTERY_PERCENT, v ? 1 : 0);
         if (DISABLED.equals(value)) {
-            mHideList.add(mBattery);
+            mBlacklist.add(mBattery);
         } else {
-            mHideList.remove(mBattery);
+            mBlacklist.remove(mBattery);
         }
-        Dependency.get(TunerService.class).setValue(StatusBarIconController.ICON_HIDE_LIST,
-                TextUtils.join(",", mHideList));
+        Dependency.get(TunerService.class).setValue(StatusBarIconController.ICON_BLACKLIST,
+                TextUtils.join(",", mBlacklist));
         return true;
     }
 }

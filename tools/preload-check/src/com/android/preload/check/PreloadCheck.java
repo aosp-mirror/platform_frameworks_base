@@ -69,13 +69,13 @@ public class PreloadCheck implements IDeviceTest {
     }
 
     /**
-     * Test the classes mentioned in the embedded preloaded-classes denylist.
+     * Test the classes mentioned in the embedded preloaded-classes blacklist.
      */
     @Test
-    public void testDenyList() throws Exception {
+    public void testBlackList() throws Exception {
         StringBuilder sb = new StringBuilder();
         try (BufferedReader br = new BufferedReader(new InputStreamReader(getClass()
-                .getResourceAsStream("/preloaded-classes-denylist")))) {
+                .getResourceAsStream("/preloaded-classes-blacklist")))) {
             String s;
             while ((s = br.readLine()) != null) {
                 s = s.trim();

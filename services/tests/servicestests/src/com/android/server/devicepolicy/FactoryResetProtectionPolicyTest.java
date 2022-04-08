@@ -16,15 +16,13 @@
 
 package com.android.server.devicepolicy;
 
-import static com.google.common.truth.Truth.assertThat;
-
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import android.app.admin.FactoryResetProtectionPolicy;
 import android.os.Parcel;
-import android.util.TypedXmlPullParser;
-import android.util.TypedXmlSerializer;
 import android.util.Xml;
 
 import androidx.test.runner.AndroidJUnit4;
@@ -100,9 +98,9 @@ public class FactoryResetProtectionPolicyTest {
             throws Exception {
         ByteArrayOutputStream outStream = serialize(policy);
         ByteArrayInputStream inStream = new ByteArrayInputStream(outStream.toByteArray());
-        TypedXmlPullParser parser = Xml.newFastPullParser();
+        XmlPullParser parser = Xml.newPullParser();
         parser.setInput(new InputStreamReader(inStream));
-        assertThat(parser.next()).isEqualTo(XmlPullParser.START_TAG);
+        assertEquals(XmlPullParser.START_TAG, parser.next());
 
         assertPoliciesAreEqual(policy, policy.readFromXml(parser));
     }
@@ -111,18 +109,18 @@ public class FactoryResetProtectionPolicyTest {
             throws Exception {
         ByteArrayOutputStream outStream = serialize(policy);
         ByteArrayInputStream inStream = new ByteArrayInputStream(outStream.toByteArray());
-        TypedXmlPullParser parser = mock(TypedXmlPullParser.class);
+        XmlPullParser parser = mock(XmlPullParser.class);
         when(parser.next()).thenThrow(XmlPullParserException.class);
         parser.setInput(new InputStreamReader(inStream));
 
         // If deserialization fails, then null is returned.
-        assertThat(policy.readFromXml(parser)).isNull();
+        assertNull(policy.readFromXml(parser));
     }
 
     private ByteArrayOutputStream serialize(FactoryResetProtectionPolicy policy)
             throws IOException {
         ByteArrayOutputStream outStream = new ByteArrayOutputStream();
-        final TypedXmlSerializer outXml = Xml.newFastSerializer();
+        final XmlSerializer outXml = new FastXmlSerializer();
         outXml.setOutput(outStream, StandardCharsets.UTF_8.name());
         outXml.startDocument(null, true);
         outXml.startTag(null, TAG_FACTORY_RESET_PROTECTION_POLICY);
@@ -135,17 +133,17 @@ public class FactoryResetProtectionPolicyTest {
 
     private void assertPoliciesAreEqual(FactoryResetProtectionPolicy expectedPolicy,
             FactoryResetProtectionPolicy actualPolicy) {
-        assertThat(actualPolicy.isFactoryResetProtectionEnabled())
-                .isEqualTo(expectedPolicy.isFactoryResetProtectionEnabled());
+        assertEquals(expectedPolicy.isFactoryResetProtectionEnabled(),
+                actualPolicy.isFactoryResetProtectionEnabled());
         assertAccountsAreEqual(expectedPolicy.getFactoryResetProtectionAccounts(),
                 actualPolicy.getFactoryResetProtectionAccounts());
     }
 
     private void assertAccountsAreEqual(List<String> expectedAccounts,
             List<String> actualAccounts) {
-        assertThat(actualAccounts.size()).isEqualTo(expectedAccounts.size());
+        assertEquals(expectedAccounts.size(), actualAccounts.size());
         for (int i = 0; i < expectedAccounts.size(); i++) {
-            assertThat(actualAccounts.get(i)).isEqualTo(expectedAccounts.get(i));
+            assertEquals(expectedAccounts.get(i), actualAccounts.get(i));
         }
     }
 

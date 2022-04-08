@@ -27,6 +27,7 @@ import static org.mockito.Mockito.verify;
 
 import android.content.Context;
 import android.graphics.Point;
+import android.os.IBinder;
 import android.testing.AndroidTestingRunner;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -49,6 +50,7 @@ import org.mockito.MockitoAnnotations;
 public class MirrorWindowControlTest extends SysuiTestCase {
 
     @Mock WindowManager mWindowManager;
+    @Mock IBinder mIBinder;
     View mView;
     int mViewWidth;
     int mViewHeight;
@@ -75,7 +77,7 @@ public class MirrorWindowControlTest extends SysuiTestCase {
 
     @Test
     public void showControl_createViewAndAddView() {
-        mStubMirrorWindowControl.showControl();
+        mStubMirrorWindowControl.showControl(mIBinder);
 
         assertTrue(mStubMirrorWindowControl.mInvokeOnCreateView);
         ArgumentCaptor<ViewGroup.LayoutParams> lpCaptor = ArgumentCaptor.forClass(
@@ -87,7 +89,7 @@ public class MirrorWindowControlTest extends SysuiTestCase {
 
     @Test
     public void destroyControl_removeView() {
-        mStubMirrorWindowControl.showControl();
+        mStubMirrorWindowControl.showControl(mIBinder);
         ArgumentCaptor<View> captor = ArgumentCaptor.forClass(View.class);
         verify(mWindowManager).addView(captor.capture(), any(LayoutParams.class));
 
@@ -100,7 +102,7 @@ public class MirrorWindowControlTest extends SysuiTestCase {
     public void move_offsetIsCorrect() {
         ArgumentCaptor<ViewGroup.LayoutParams> lpCaptor = ArgumentCaptor.forClass(
                 ViewGroup.LayoutParams.class);
-        mStubMirrorWindowControl.showControl();
+        mStubMirrorWindowControl.showControl(mIBinder);
         verify(mWindowManager).addView(any(), lpCaptor.capture());
         LayoutParams lp = (LayoutParams) lpCaptor.getValue();
         Point startPosition = new Point(lp.x, lp.y);

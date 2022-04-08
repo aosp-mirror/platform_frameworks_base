@@ -519,7 +519,7 @@ public abstract class SliceProvider extends ContentProvider {
         intent.setData(sliceUri.buildUpon().appendQueryParameter("package", callingPackage)
                 .build());
 
-        return PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_IMMUTABLE);
+        return PendingIntent.getActivity(context, 0, intent, 0);
     }
 
     /**

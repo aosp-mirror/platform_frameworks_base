@@ -25,7 +25,7 @@ import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.row.ActivatableNotificationView;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRowController;
-import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
+import com.android.systemui.statusbar.notification.row.RowContentBindStage;
 import com.android.systemui.statusbar.phone.StatusBar;
 
 import dagger.Binds;
@@ -55,9 +55,11 @@ public interface ExpandableNotificationRowComponent {
         @BindsInstance
         Builder notificationEntry(NotificationEntry entry);
         @BindsInstance
-        Builder onExpandClickListener(ExpandableNotificationRow.OnExpandClickListener presenter);
+        Builder onDismissRunnable(@DismissRunnable Runnable runnable);
         @BindsInstance
-        Builder listContainer(NotificationListContainer listContainer);
+        Builder rowContentBindStage(RowContentBindStage rowContentBindStage);
+        @BindsInstance
+        Builder onExpandClickListener(ExpandableNotificationRow.OnExpandClickListener presenter);
         ExpandableNotificationRowComponent build();
     }
 

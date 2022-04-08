@@ -63,6 +63,7 @@ public final class HdmiAudioSystemClient extends HdmiClient {
      *
      * @hide
      */
+    // TODO(b/110094868): unhide and add @SystemApi for Q
     public interface SetSystemAudioModeCallback {
         /**
          * Called when the input was changed.
@@ -73,6 +74,7 @@ public final class HdmiAudioSystemClient extends HdmiClient {
     }
 
     /** @hide */
+    // TODO(b/110094868): unhide and add @SystemApi for Q
     @Override
     public int getDeviceType() {
         return HdmiDeviceInfo.DEVICE_AUDIO_SYSTEM;
@@ -141,6 +143,7 @@ public final class HdmiAudioSystemClient extends HdmiClient {
      *
      * @hide
      */
+    // TODO(b/110094868): unhide and add @SystemApi for Q
     public void setSystemAudioMode(boolean state, @NonNull SetSystemAudioModeCallback callback) {
         // TODO(amyjojo): implement this when needed.
     }
@@ -153,6 +156,7 @@ public final class HdmiAudioSystemClient extends HdmiClient {
      *
      * @hide
      */
+    // TODO(b/110094868): unhide and add @SystemApi for Q
     public void setSystemAudioModeOnForAudioOnlySource() {
         try {
             mService.setSystemAudioModeOnForAudioOnlySource();

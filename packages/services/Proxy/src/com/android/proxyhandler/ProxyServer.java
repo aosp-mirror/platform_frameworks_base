@@ -19,8 +19,8 @@ import android.os.RemoteException;
 import android.util.Log;
 
 import com.android.net.IProxyPortListener;
-
 import com.google.android.collect.Lists;
+import com.google.android.collect.Sets;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -34,6 +34,7 @@ import java.net.SocketException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -360,7 +361,7 @@ public class ProxyServer extends Thread {
             try {
                 mCallback.setProxyPort(port);
             } catch (RemoteException e) {
-                Log.w(TAG, "Proxy failed to report port to PacProxyService", e);
+                Log.w(TAG, "Proxy failed to report port to PacManager", e);
             }
         }
         mPort = port;
@@ -371,7 +372,7 @@ public class ProxyServer extends Thread {
             try {
                 callback.setProxyPort(mPort);
             } catch (RemoteException e) {
-                Log.w(TAG, "Proxy failed to report port to PacProxyService", e);
+                Log.w(TAG, "Proxy failed to report port to PacManager", e);
             }
         }
         mCallback = callback;

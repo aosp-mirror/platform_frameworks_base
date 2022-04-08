@@ -65,6 +65,7 @@ public abstract class HdmiClient {
      * @param isPressed true if this is key press event
      *
      * @hide
+     * TODO(b/110094868): unhide for Q
      */
     public void sendVolumeKeyEvent(int keyCode, boolean isPressed) {
         try {

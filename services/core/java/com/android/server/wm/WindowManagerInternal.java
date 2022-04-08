@@ -23,17 +23,13 @@ import android.content.Context;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.hardware.display.DisplayManagerInternal;
-import android.os.Bundle;
 import android.os.IBinder;
 import android.view.Display;
 import android.view.IInputFilter;
-import android.view.IRemoteAnimationFinishedCallback;
 import android.view.IWindow;
 import android.view.InputChannel;
 import android.view.MagnificationSpec;
-import android.view.RemoteAnimationTarget;
 import android.view.WindowInfo;
-import android.view.WindowManager.DisplayImePolicy;
 
 import com.android.internal.policy.KeyInterceptionInfo;
 import com.android.server.input.InputManagerService;
@@ -47,57 +43,6 @@ import java.util.List;
  * @hide Only for use within the system server.
  */
 public abstract class WindowManagerInternal {
-
-    /**
-     * Interface for accessibility features implemented by AccessibilityController inside
-     * WindowManager.
-     */
-    public interface AccessibilityControllerInternal {
-        /**
-         * Enable the accessibility trace logging.
-         */
-        void startTrace();
-
-        /**
-         * Disable the accessibility trace logging.
-         */
-        void stopTrace();
-
-        /**
-         * Is trace enabled or not.
-         */
-        boolean isAccessibilityTracingEnabled();
-
-        /**
-         * Add an accessibility trace entry.
-         *
-         * @param where A string to identify this log entry, which can be used to filter/search
-         *        through the tracing file.
-         * @param callingParams The parameters for the method to be logged.
-         * @param a11yDump The proto byte array for a11y state when the entry is generated.
-         * @param callingUid The calling uid.
-         * @param stackTrace The stack trace, null if not needed.
-         */
-        void logTrace(
-                String where, String callingParams, byte[] a11yDump, int callingUid,
-                StackTraceElement[] stackTrace);
-
-        /**
-         * Add an accessibility trace entry.
-         *
-         * @param where A string to identify this log entry, which can be used to filter/search
-         *        through the tracing file.
-         * @param callingParams The parameters for the method to be logged.
-         * @param a11yDump The proto byte array for a11y state when the entry is generated.
-         * @param callingUid The calling uid.
-         * @param callStack The call stack of the method to be logged.
-         * @param timeStamp The time when the method to be logged is called.
-         * @param processId The calling process Id.
-         * @param threadId The calling thread Id.
-         */
-        void logTrace(String where, String callingParams, byte[] a11yDump, int callingUid,
-                StackTraceElement[] callStack, long timeStamp, int processId, long threadId);
-    }
 
     /**
      * Interface to receive a callback when the windows reported for
@@ -129,7 +74,7 @@ public abstract class WindowManagerInternal {
          *
          * @param magnificationRegion the current magnification region
          */
-        void onMagnificationRegionChanged(Region magnificationRegion);
+        public void onMagnificationRegionChanged(Region magnificationRegion);
 
         /**
          * Called when an application requests a rectangle on the screen to allow
@@ -140,27 +85,20 @@ public abstract class WindowManagerInternal {
          * @param right The rectangle right.
          * @param bottom The rectangle bottom.
          */
-        void onRectangleOnScreenRequested(int left, int top, int right, int bottom);
+        public void onRectangleOnScreenRequested(int left, int top, int right, int bottom);
 
         /**
          * Notifies that the rotation changed.
          *
          * @param rotation The current rotation.
          */
-        void onRotationChanged(int rotation);
+        public void onRotationChanged(int rotation);
 
         /**
          * Notifies that the context of the user changed. For example, an application
          * was started.
          */
-        void onUserContextChanged();
-
-        /**
-         * Notifies that the IME window visibility changed.
-         * @param shown {@code true} means the IME window shows on the screen. Otherwise it's
-         *                           hidden.
-         */
-        void onImeWindowVisibilityChanged(boolean shown);
+        public void onUserContextChanged();
     }
 
     /**
@@ -177,9 +115,9 @@ public abstract class WindowManagerInternal {
         /**
          * Called when a pending app transition gets cancelled.
          *
-         * @param keyguardGoingAway true if keyguard going away transition transition got cancelled.
+         * @param transit transition type indicating what kind of transition got cancelled
          */
-        public void onAppTransitionCancelledLocked(boolean keyguardGoingAway) {}
+        public void onAppTransitionCancelledLocked(int transit) {}
 
         /**
          * Called when an app transition is timed out.
@@ -189,7 +127,8 @@ public abstract class WindowManagerInternal {
         /**
          * Called when an app transition gets started
          *
-         * @param keyguardGoingAway true if keyguard going away transition is started.
+         * @param transit transition type indicating what kind of transition gets run, must be one
+         *                of AppTransition.TRANSIT_* values
          * @param duration the total duration of the transition
          * @param statusBarAnimationStartTime the desired start time for all visual animations in
          *        the status bar caused by this app transition in uptime millis
@@ -201,7 +140,7 @@ public abstract class WindowManagerInternal {
          * {@link WindowManagerPolicy#FINISH_LAYOUT_REDO_WALLPAPER},
          * or {@link WindowManagerPolicy#FINISH_LAYOUT_REDO_ANIM}.
          */
-        public int onAppTransitionStartingLocked(boolean keyguardGoingAway, long duration,
+        public int onAppTransitionStartingLocked(int transit, long duration,
                 long statusBarAnimationStartTime, long statusBarAnimationDuration) {
             return 0;
         }
@@ -212,21 +151,6 @@ public abstract class WindowManagerInternal {
          * @param token the token for app whose transition has finished
          */
         public void onAppTransitionFinishedLocked(IBinder token) {}
-    }
-
-    /**
-     * An interface to be notified when keyguard exit animation should start.
-     */
-    public interface KeyguardExitAnimationStartListener {
-        /**
-         * Called when keyguard exit animation should start.
-         * @param apps The list of apps to animate.
-         * @param wallpapers The list of wallpapers to animate.
-         * @param finishedCallback The callback to invoke when the animation is finished.
-         */
-        void onAnimationStart(RemoteAnimationTarget[] apps,
-                RemoteAnimationTarget[] wallpapers,
-                IRemoteAnimationFinishedCallback finishedCallback);
     }
 
     /**
@@ -244,8 +168,7 @@ public abstract class WindowManagerInternal {
                 DragState state, Display display, InputManagerService service,
                 InputChannel source) {
             state.register(display);
-            return service.transferTouchFocus(source, state.getInputChannel(),
-                    true /* isDragDrop */);
+            return service.transferTouchFocus(source, state.getInputChannel());
         }
 
         /**
@@ -282,11 +205,6 @@ public abstract class WindowManagerInternal {
          */
         default void postCancelDragAndDrop() {}
     }
-
-    /**
-     * Request the interface to access features implemented by AccessibilityController.
-     */
-    public abstract AccessibilityControllerInternal getAccessibilityController();
 
     /**
      * Request that the window manager call
@@ -433,33 +351,18 @@ public abstract class WindowManagerInternal {
      * @param token The token to add.
      * @param type The window type.
      * @param displayId The display to add the token to.
-     * @param options A bundle used to pass window-related options.
      */
-    public abstract void addWindowToken(@NonNull android.os.IBinder token, int type, int displayId,
-            @Nullable Bundle options);
+    public abstract void addWindowToken(android.os.IBinder token, int type, int displayId);
 
     /**
      * Removes a window token.
      *
      * @param token The toke to remove.
      * @param removeWindows Whether to also remove the windows associated with the token.
-     * @param displayId The display to remove the token from.
-     */
-    public final void removeWindowToken(android.os.IBinder token, boolean removeWindows,
-            int displayId) {
-        removeWindowToken(token, removeWindows, true /* animateExit */, displayId);
-    }
-
-    /**
-     * Removes a window token.
-     *
-     * @param token The toke to remove.
-     * @param removeWindows Whether to also remove the windows associated with the token.
-     * @param animateExit Whether to play the windows exit animation after the token removal.
      * @param displayId The display to remove the token from.
      */
     public abstract void removeWindowToken(android.os.IBinder token, boolean removeWindows,
-            boolean animateExit, int displayId);
+            int displayId);
 
     /**
      * Registers a listener to be notified about app transition events.
@@ -467,14 +370,6 @@ public abstract class WindowManagerInternal {
      * @param listener The listener to register.
      */
     public abstract void registerAppTransitionListener(AppTransitionListener listener);
-
-    /**
-     * Registers a listener to be notified to start the keyguard exit animation.
-     *
-     * @param listener The listener to register.
-     */
-    public abstract void registerKeyguardExitAnimationStartListener(
-            KeyguardExitAnimationStartListener listener);
 
     /**
      * Reports that the password for the given user has changed.
@@ -487,15 +382,24 @@ public abstract class WindowManagerInternal {
     public abstract int getInputMethodWindowVisibleHeight(int displayId);
 
     /**
-     * Notifies WindowManagerService that the expected back-button behavior might have changed.
+     * Notifies WindowManagerService that the current IME window status is being changed.
      *
      * <p>Only {@link com.android.server.inputmethod.InputMethodManagerService} is the expected and
      * tested caller of this method.</p>
      *
+     * @param imeToken token to track the active input method. Corresponding IME windows can be
+     *                 identified by checking {@link android.view.WindowManager.LayoutParams#token}.
+     *                 Note that there is no guarantee that the corresponding window is already
+     *                 created
+     * @param imeWindowVisible whether the active IME thinks that its window should be visible or
+     *                         hidden, no matter how WindowManagerService will react / has reacted
+     *                         to corresponding API calls.  Note that this state is not guaranteed
+     *                         to be synchronized with state in WindowManagerService.
      * @param dismissImeOnBackKeyPressed {@code true} if the software keyboard is shown and the back
      *                                   key is expected to dismiss the software keyboard.
      */
-    public abstract void setDismissImeOnBackKeyPressed(boolean dismissImeOnBackKeyPressed);
+    public abstract void updateInputMethodWindowStatus(@NonNull IBinder imeToken,
+            boolean imeWindowVisible, boolean dismissImeOnBackKeyPressed);
 
     /**
      * Notifies WindowManagerService that the current IME window status is being changed.
@@ -525,6 +429,9 @@ public abstract class WindowManagerInternal {
       */
     public abstract void setOnHardKeyboardStatusChangeListener(
         OnHardKeyboardStatusChangeListener listener);
+
+    /** Returns true if a stack in the windowing mode is currently visible. */
+    public abstract boolean isStackVisibleLw(int windowingMode);
 
     /**
      * Requests the window manager to resend the windows for accessibility on specified display.
@@ -603,12 +510,12 @@ public abstract class WindowManagerInternal {
     public abstract boolean shouldShowSystemDecorOnDisplay(int displayId);
 
     /**
-     * Indicates the policy for how the display should show IME.
+     * Indicates that the display should show IME.
      *
      * @param displayId The id of the display.
-     * @return The policy for how the display should show IME.
+     * @return {@code true} if the display should show IME when an input field become focused on it.
      */
-    public abstract @DisplayImePolicy int getDisplayImePolicy(int displayId);
+    public abstract boolean shouldShowIme(int displayId);
 
     /**
      * Show IME on imeTargetWindow once IME has finished layout.
@@ -639,9 +546,9 @@ public abstract class WindowManagerInternal {
     public abstract void removeNonHighRefreshRatePackage(@NonNull String packageName);
 
     /**
-     * Checks if the device supports touch or faketouch.
+     * Checks if this display is touchable.
      */
-    public abstract boolean isTouchOrFaketouchDevice();
+    public abstract boolean isTouchableDisplay(int displayId);
 
     /**
      * Returns the info associated with the input token used to determine if a key should be
@@ -690,18 +597,4 @@ public abstract class WindowManagerInternal {
      * @return The corresponding {@link WindowState#getName()}
      */
     public abstract @Nullable String getImeTargetNameForLogging(int displayId);
-
-    /**
-     * Moves the {@link WindowToken} {@code binder} to the display specified by {@code displayId}.
-     */
-    public abstract void moveWindowTokenToDisplay(IBinder binder, int displayId);
-
-    /**
-     * Checks whether the given window should restore the last IME visibility.
-     *
-     * @param imeTargetWindowToken The token of the (IME target) window
-     * @return {@code true} when the system allows to restore the IME visibility,
-     *         {@code false} otherwise.
-     */
-    public abstract boolean shouldRestoreImeVisibility(IBinder imeTargetWindowToken);
 }

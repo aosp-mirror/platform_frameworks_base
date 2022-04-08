@@ -14,24 +14,22 @@
 
 package com.android.systemui.qs.tileimpl;
 
+import static com.android.systemui.qs.tileimpl.QSTileImpl.getColorForState;
+
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
 import android.content.Context;
 import android.content.res.ColorStateList;
-import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.drawable.Animatable2;
 import android.graphics.drawable.Animatable2.AnimationCallback;
 import android.graphics.drawable.Drawable;
-import android.service.quicksettings.Tile;
-import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.ImageView.ScaleType;
 
-import com.android.settingslib.Utils;
 import com.android.systemui.R;
 import com.android.systemui.plugins.qs.QSIconView;
 import com.android.systemui.plugins.qs.QSTile;
@@ -45,7 +43,7 @@ public class QSIconViewImpl extends QSIconView {
     public static final long QS_ANIM_LENGTH = 350;
 
     protected final View mIcon;
-    protected int mIconSizePx;
+    protected final int mIconSizePx;
     private boolean mAnimationEnabled = true;
     private int mState = -1;
     private int mTint;
@@ -55,16 +53,10 @@ public class QSIconViewImpl extends QSIconView {
         super(context);
 
         final Resources res = context.getResources();
-        mIconSizePx = res.getDimensionPixelSize(R.dimen.qs_icon_size);
+        mIconSizePx = res.getDimensionPixelSize(R.dimen.qs_tile_icon_size);
 
         mIcon = createIcon();
         addView(mIcon);
-    }
-
-    @Override
-    protected void onConfigurationChanged(Configuration newConfig) {
-        super.onConfigurationChanged(newConfig);
-        mIconSizePx = getContext().getResources().getDimensionPixelSize(R.dimen.qs_icon_size);
     }
 
     public void disableAnimation() {
@@ -177,7 +169,7 @@ public class QSIconViewImpl extends QSIconView {
     }
 
     protected int getColor(int state) {
-        return getIconColorForState(getContext(), state);
+        return getColorForState(getContext(), state);
     }
 
     private void animateGrayScale(int fromColor, int toColor, ImageView iv,
@@ -236,24 +228,5 @@ public class QSIconViewImpl extends QSIconView {
 
     protected final void layout(View child, int left, int top) {
         child.layout(left, top, left + child.getMeasuredWidth(), top + child.getMeasuredHeight());
-    }
-
-    /**
-     * Color to tint the tile icon based on state
-     */
-    public static int getIconColorForState(Context context, int state) {
-        switch (state) {
-            case Tile.STATE_UNAVAILABLE:
-                return Utils.applyAlpha(QSTileViewImpl.UNAVAILABLE_ALPHA,
-                        Utils.getColorAttrDefaultColor(context, android.R.attr.textColorPrimary));
-            case Tile.STATE_INACTIVE:
-                return Utils.getColorAttrDefaultColor(context, android.R.attr.textColorPrimary);
-            case Tile.STATE_ACTIVE:
-                return Utils.getColorAttrDefaultColor(context,
-                        android.R.attr.textColorPrimaryInverse);
-            default:
-                Log.e("QSIconView", "Invalid state " + state);
-                return 0;
-        }
     }
 }

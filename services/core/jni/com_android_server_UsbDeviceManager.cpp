@@ -18,8 +18,7 @@
 #include "utils/Log.h"
 
 #include "jni.h"
-#include <nativehelper/JNIPlatformHelp.h>
-#include <nativehelper/ScopedUtfChars.h>
+#include <nativehelper/JNIHelp.h>
 #include "android_runtime/AndroidRuntime.h"
 #include "android_runtime/Log.h"
 #include "MtpDescriptors.h"
@@ -89,7 +88,6 @@ static jobject android_server_UsbDeviceManager_openAccessory(JNIEnv *env, jobjec
     }
     jobject fileDescriptor = jniCreateFileDescriptor(env, fd);
     if (fileDescriptor == NULL) {
-        close(fd);
         return NULL;
     }
     return env->NewObject(gParcelFileDescriptorOffsets.mClass,
@@ -122,30 +120,35 @@ static jint android_server_UsbDeviceManager_getAudioMode(JNIEnv* /* env */, jobj
 }
 
 static jobject android_server_UsbDeviceManager_openControl(JNIEnv *env, jobject /* thiz */, jstring jFunction) {
-    ScopedUtfChars function(env, jFunction);
+    const char *function = env->GetStringUTFChars(jFunction, NULL);
     bool ptp = false;
     int fd = -1;
-    if (!strcmp(function.c_str(), "ptp")) {
+    if (!strcmp(function, "ptp")) {
         ptp = true;
     }
-    if (!strcmp(function.c_str(), "mtp") || ptp) {
+    if (!strcmp(function, "mtp") || ptp) {
         fd = TEMP_FAILURE_RETRY(open(ptp ? FFS_PTP_EP0 : FFS_MTP_EP0, O_RDWR));
         if (fd < 0) {
-            ALOGE("could not open control for %s %s", function.c_str(), strerror(errno));
-            return NULL;
+            ALOGE("could not open control for %s %s", function, strerror(errno));
+            goto error;
         }
         if (!writeDescriptors(fd, ptp)) {
-            close(fd);
-            return NULL;
+            goto error;
         }
     }
 
-    jobject jifd = jniCreateFileDescriptor(env, fd);
-    if (jifd == NULL) {
-        // OutOfMemoryError will be pending.
+    if (function != NULL) {
+        env->ReleaseStringUTFChars(jFunction, function);
+    }
+    return jniCreateFileDescriptor(env, fd);
+error:
+    if (fd != -1) {
         close(fd);
     }
-    return jifd;
+    if (function != NULL) {
+        env->ReleaseStringUTFChars(jFunction, function);
+    }
+    return NULL;
 }
 
 static const JNINativeMethod method_table[] = {

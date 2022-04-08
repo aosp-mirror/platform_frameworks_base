@@ -16,7 +16,6 @@
 
 package android.provider.settings.validators;
 
-import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.ComponentName;
 import android.net.Uri;
@@ -25,6 +24,7 @@ import android.text.TextUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.text.SimpleDateFormat;
 import java.util.Locale;
 
 /**
@@ -48,9 +48,6 @@ public class SettingsValidators {
     public static final Validator NON_NEGATIVE_INTEGER_VALIDATOR = new Validator() {
         @Override
         public boolean validate(@Nullable String value) {
-            if (value == null) {
-                return true;
-            }
             try {
                 return Integer.parseInt(value) >= 0;
             } catch (NumberFormatException e) {
@@ -62,9 +59,6 @@ public class SettingsValidators {
     public static final Validator ANY_INTEGER_VALIDATOR = new Validator() {
         @Override
         public boolean validate(@Nullable String value) {
-            if (value == null) {
-                return true;
-            }
             try {
                 Integer.parseInt(value);
                 return true;
@@ -77,9 +71,6 @@ public class SettingsValidators {
     public static final Validator URI_VALIDATOR = new Validator() {
         @Override
         public boolean validate(@Nullable String value) {
-            if (value == null) {
-                return true;
-            }
             try {
                 Uri.decode(value);
                 return true;
@@ -96,7 +87,7 @@ public class SettingsValidators {
      */
     public static final Validator COMPONENT_NAME_VALIDATOR = new Validator() {
         @Override
-        public boolean validate(@NonNull String value) {
+        public boolean validate(@Nullable String value) {
             return value != null && ComponentName.unflattenFromString(value) != null;
         }
     };
@@ -113,15 +104,18 @@ public class SettingsValidators {
 
     public static final Validator PACKAGE_NAME_VALIDATOR = new Validator() {
         @Override
-        public boolean validate(@NonNull String value) {
+        public boolean validate(@Nullable String value) {
             return value != null && isStringPackageName(value);
         }
 
-        private boolean isStringPackageName(@NonNull String value) {
+        private boolean isStringPackageName(String value) {
             // The name may contain uppercase or lowercase letters ('A' through 'Z'), numbers,
             // and underscores ('_'). However, individual package name parts may only
             // start with letters.
             // (https://developer.android.com/guide/topics/manifest/manifest-element.html#package)
+            if (value == null) {
+                return false;
+            }
             String[] subparts = value.split("\\.");
             boolean isValidPackageName = true;
             for (String subpart : subparts) {
@@ -149,7 +143,7 @@ public class SettingsValidators {
         @Override
         public boolean validate(@Nullable String value) {
             if (value == null) {
-                return true;
+                return false;
             }
             return value.length() <= MAX_IPV6_LENGTH;
         }
@@ -159,7 +153,7 @@ public class SettingsValidators {
         @Override
         public boolean validate(@Nullable String value) {
             if (value == null) {
-                return true;
+                return false;
             }
             Locale[] validLocales = Locale.getAvailableLocales();
             for (Locale locale : validLocales) {
@@ -173,9 +167,6 @@ public class SettingsValidators {
 
     /** {@link Validator} that checks whether a value is a valid {@link JSONObject}. */
     public static final Validator JSON_OBJECT_VALIDATOR = (value) -> {
-        if (value == null) {
-            return true;
-        }
         if (TextUtils.isEmpty(value)) {
             return false;
         }
@@ -190,6 +181,15 @@ public class SettingsValidators {
     public static final Validator TTS_LIST_VALIDATOR = new TTSListValidator();
 
     public static final Validator TILE_LIST_VALIDATOR = new TileListValidator();
+
+    static final Validator DATE_FORMAT_VALIDATOR = value -> {
+        try {
+            new SimpleDateFormat(value);
+            return true;
+        } catch (IllegalArgumentException | NullPointerException e) {
+            return false;
+        }
+    };
 
     static final Validator COLON_SEPARATED_COMPONENT_LIST_VALIDATOR =
             new ComponentNameListValidator(":");
@@ -211,9 +211,6 @@ public class SettingsValidators {
     static final Validator NONE_NEGATIVE_LONG_VALIDATOR = new Validator() {
         @Override
         public boolean validate(String value) {
-            if (value == null) {
-                return true;
-            }
             try {
                 return Long.parseLong(value) >= 0;
             } catch (NumberFormatException e) {

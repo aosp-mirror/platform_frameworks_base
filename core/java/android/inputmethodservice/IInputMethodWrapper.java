@@ -37,8 +37,8 @@ import android.view.inputmethod.InputMethod;
 import android.view.inputmethod.InputMethodSession;
 import android.view.inputmethod.InputMethodSubtype;
 
-import com.android.internal.inputmethod.CancellationGroup;
 import com.android.internal.inputmethod.IInputMethodPrivilegedOperations;
+import com.android.internal.inputmethod.CancellationGroup;
 import com.android.internal.os.HandlerCaller;
 import com.android.internal.os.SomeArgs;
 import com.android.internal.view.IInlineSuggestionsRequestCallback;
@@ -156,8 +156,8 @@ class IInputMethodWrapper extends IInputMethod.Stub
                 }
                 SomeArgs args = (SomeArgs)msg.obj;
                 try {
-                    target.dump((FileDescriptor) args.arg1,
-                            (PrintWriter) args.arg2, (String[]) args.arg3);
+                    target.dump((FileDescriptor)args.arg1,
+                            (PrintWriter)args.arg2, (String[])args.arg3);
                 } catch (RuntimeException e) {
                     ((PrintWriter)args.arg2).println("Exception: " + e);
                 }
@@ -171,7 +171,7 @@ class IInputMethodWrapper extends IInputMethod.Stub
                 SomeArgs args = (SomeArgs) msg.obj;
                 try {
                     inputMethod.initializeInternal((IBinder) args.arg1, msg.arg1,
-                            (IInputMethodPrivilegedOperations) args.arg2, (int) args.arg3);
+                            (IInputMethodPrivilegedOperations) args.arg2);
                 } finally {
                     args.recycle();
                 }
@@ -200,7 +200,8 @@ class IInputMethodWrapper extends IInputMethod.Stub
                         ic,
                         info,
                         moreArgs.argi1 == 1 /* restarting */,
-                        startInputToken);
+                        startInputToken,
+                        moreArgs.argi2 == 1 /* shouldPreRenderIme */);
                 args.recycle();
                 moreArgs.recycle();
                 return;
@@ -266,7 +267,7 @@ class IInputMethodWrapper extends IInputMethod.Stub
         }
 
         CountDownLatch latch = new CountDownLatch(1);
-        mCaller.getHandler().sendMessageAtFrontOfQueue(mCaller.obtainMessageOOOO(DO_DUMP,
+        mCaller.executeOrSendMessage(mCaller.obtainMessageOOOO(DO_DUMP,
                 fd, fout, args, latch));
         try {
             if (!latch.await(5, TimeUnit.SECONDS)) {
@@ -280,10 +281,9 @@ class IInputMethodWrapper extends IInputMethod.Stub
     @BinderThread
     @Override
     public void initializeInternal(IBinder token, int displayId,
-            IInputMethodPrivilegedOperations privOps, int configChanges) {
+            IInputMethodPrivilegedOperations privOps) {
         mCaller.executeOrSendMessage(
-                mCaller.obtainMessageIOOO(DO_INITIALIZE_INTERNAL, displayId, token, privOps,
-                        configChanges));
+                mCaller.obtainMessageIOO(DO_INITIALIZE_INTERNAL, displayId, token, privOps));
     }
 
     @BinderThread
@@ -327,13 +327,14 @@ class IInputMethodWrapper extends IInputMethod.Stub
     @Override
     public void startInput(IBinder startInputToken, IInputContext inputContext,
             @InputConnectionInspector.MissingMethodFlags final int missingMethods,
-            EditorInfo attribute, boolean restarting) {
+            EditorInfo attribute, boolean restarting, boolean shouldPreRenderIme) {
         if (mCancellationGroup == null) {
             Log.e(TAG, "startInput must be called after bindInput.");
             mCancellationGroup = new CancellationGroup();
         }
         SomeArgs args = SomeArgs.obtain();
         args.argi1 = restarting ? 1 : 0;
+        args.argi2 = shouldPreRenderIme ? 1 : 0;
         args.argi3 = missingMethods;
         mCaller.executeOrSendMessage(mCaller.obtainMessageOOOOO(DO_START_INPUT, startInputToken,
                 inputContext, attribute, mCancellationGroup, args));

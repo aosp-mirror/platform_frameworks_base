@@ -184,7 +184,6 @@ public class BroadcastRecordTest {
                 false /* callerInstantApp */,
                 null /* resolvedType */,
                 null /* requiredPermissions */,
-                null /* excludedPermissions */,
                 0 /* appOp */,
                 null /* options */,
                 new ArrayList<>(receivers), // Make a copy to not affect the original list.
@@ -196,8 +195,7 @@ public class BroadcastRecordTest {
                 false /* sticky */,
                 false /* initialSticky */,
                 userId,
-                false /* allowBackgroundActivityStarts */,
-                null /* activityStartsToken */,
+                false, /* allowBackgroundActivityStarts */
                 false /* timeoutExempt */ );
     }
 }

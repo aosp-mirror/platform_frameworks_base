@@ -48,7 +48,6 @@ import android.view.SearchEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
-import android.view.WindowInsets;
 import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams;
 import android.view.accessibility.AccessibilityEvent;
@@ -771,7 +770,7 @@ public class DreamService extends Service implements Window.Callback {
      * @see #setDozeScreenBrightness
      * @hide For use by system UI components only.
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public int getDozeScreenBrightness() {
         return mDozeScreenBrightness;
     }
@@ -1062,16 +1061,10 @@ public class DreamService extends Service implements Window.Callback {
                     | (mFullscreen ? WindowManager.LayoutParams.FLAG_FULLSCREEN : 0)
                     | (mScreenBright ? WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON : 0)
                     );
-        lp.layoutInDisplayCutoutMode =
-                WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
         mWindow.setAttributes(lp);
         // Workaround: Currently low-profile and in-window system bar backgrounds don't go
         // along well. Dreams usually don't need such bars anyways, so disable them by default.
         mWindow.clearFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
-
-        // Hide all insets  when the dream is showing
-        mWindow.getDecorView().getWindowInsetsController().hide(WindowInsets.Type.systemBars());
-        mWindow.setDecorFitsSystemWindows(false);
 
         mWindow.getDecorView().addOnAttachStateChangeListener(
                 new View.OnAttachStateChangeListener() {

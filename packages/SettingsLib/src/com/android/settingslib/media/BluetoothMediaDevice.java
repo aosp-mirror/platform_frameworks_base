@@ -18,7 +18,6 @@ package com.android.settingslib.media;
 import android.bluetooth.BluetoothClass;
 import android.bluetooth.BluetoothDevice;
 import android.content.Context;
-import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.media.MediaRoute2Info;
 import android.media.MediaRouter2Manager;
@@ -57,9 +56,8 @@ public class BluetoothMediaDevice extends MediaDevice {
 
     @Override
     public Drawable getIcon() {
-        final Drawable drawable =
-                BluetoothUtils.getBtDrawableWithDescription(mContext, mCachedDevice).first;
-        if (!(drawable instanceof BitmapDrawable)) {
+        final Drawable drawable = getIconWithoutBackground();
+        if (!isFastPairDevice()) {
             setColorFilter(drawable);
         }
         return BluetoothUtils.buildAdvancedDrawable(mContext, drawable);
@@ -67,7 +65,9 @@ public class BluetoothMediaDevice extends MediaDevice {
 
     @Override
     public Drawable getIconWithoutBackground() {
-        return BluetoothUtils.getBtClassDrawableWithDescription(mContext, mCachedDevice).first;
+        return isFastPairDevice()
+                ? BluetoothUtils.getBtDrawableWithDescription(mContext, mCachedDevice).first
+                : mContext.getDrawable(R.drawable.ic_headphone);
     }
 
     @Override

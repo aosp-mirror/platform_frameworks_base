@@ -70,33 +70,10 @@ public class SurfaceControlViewHost {
     public static final class SurfacePackage implements Parcelable {
         private SurfaceControl mSurfaceControl;
         private final IAccessibilityEmbeddedConnection mAccessibilityEmbeddedConnection;
-        private final IBinder mInputToken;
 
-        SurfacePackage(SurfaceControl sc, IAccessibilityEmbeddedConnection connection,
-                       IBinder inputToken) {
+        SurfacePackage(SurfaceControl sc, IAccessibilityEmbeddedConnection connection) {
             mSurfaceControl = sc;
             mAccessibilityEmbeddedConnection = connection;
-            mInputToken = inputToken;
-        }
-
-        /**
-         * Constructs a copy of {@code SurfacePackage} with an independent lifetime.
-         *
-         * The caller can use this to create an independent copy in situations where ownership of
-         * the {@code SurfacePackage} would be transferred elsewhere, such as attaching to a
-         * {@code SurfaceView}, returning as {@code Binder} result value, etc. The caller is
-         * responsible for releasing this copy when its done.
-         *
-         * @param other {@code SurfacePackage} to create a copy of.
-         */
-        public SurfacePackage(@NonNull SurfacePackage other) {
-            SurfaceControl otherSurfaceControl = other.mSurfaceControl;
-            if (otherSurfaceControl != null && otherSurfaceControl.isValid()) {
-                mSurfaceControl = new SurfaceControl();
-                mSurfaceControl.copyFrom(otherSurfaceControl, "SurfacePackage");
-            }
-            mAccessibilityEmbeddedConnection = other.mAccessibilityEmbeddedConnection;
-            mInputToken = other.mInputToken;
         }
 
         private SurfacePackage(Parcel in) {
@@ -104,7 +81,6 @@ public class SurfaceControlViewHost {
             mSurfaceControl.readFromParcel(in);
             mAccessibilityEmbeddedConnection = IAccessibilityEmbeddedConnection.Stub.asInterface(
                     in.readStrongBinder());
-            mInputToken = in.readStrongBinder();
         }
 
         /**
@@ -135,7 +111,6 @@ public class SurfaceControlViewHost {
         public void writeToParcel(@NonNull Parcel out, int flags) {
             mSurfaceControl.writeToParcel(out, flags);
             out.writeStrongBinder(mAccessibilityEmbeddedConnection.asBinder());
-            out.writeStrongBinder(mInputToken);
         }
 
         /**
@@ -149,15 +124,6 @@ public class SurfaceControlViewHost {
                 mSurfaceControl.release();
              }
              mSurfaceControl = null;
-        }
-
-        /**
-         * Returns an input token used which can be used to request focus on the embedded surface.
-         *
-         * @hide
-         */
-        public IBinder getInputToken() {
-            return mInputToken;
         }
 
         public static final @NonNull Creator<SurfacePackage> CREATOR
@@ -182,6 +148,7 @@ public class SurfaceControlViewHost {
             @NonNull WindowlessWindowManager wwm, boolean useSfChoreographer) {
         mWm = wwm;
         mViewRoot = new ViewRootImpl(c, d, mWm, useSfChoreographer);
+        mViewRoot.forceDisableBLAST();
         mAccessibilityEmbeddedConnection = mViewRoot.getAccessibilityEmbeddedConnection();
     }
 
@@ -207,6 +174,7 @@ public class SurfaceControlViewHost {
         mWm = new WindowlessWindowManager(context.getResources().getConfiguration(),
                 mSurfaceControl, hostToken);
         mViewRoot = new ViewRootImpl(context, display, mWm);
+        mViewRoot.forceDisableBLAST();
         mAccessibilityEmbeddedConnection = mViewRoot.getAccessibilityEmbeddedConnection();
     }
 
@@ -230,11 +198,19 @@ public class SurfaceControlViewHost {
      */
     public @Nullable SurfacePackage getSurfacePackage() {
         if (mSurfaceControl != null && mAccessibilityEmbeddedConnection != null) {
-            return new SurfacePackage(mSurfaceControl, mAccessibilityEmbeddedConnection,
-                    mViewRoot.getInputToken());
+            return new SurfacePackage(mSurfaceControl, mAccessibilityEmbeddedConnection);
         } else {
             return null;
         }
+    }
+
+    /**
+     * @hide
+     */
+    @TestApi
+    public void setView(@NonNull View view, @NonNull WindowManager.LayoutParams attrs) {
+        Objects.requireNonNull(view);
+        mViewRoot.setView(view, attrs, null);
     }
 
     /**
@@ -250,18 +226,8 @@ public class SurfaceControlViewHost {
         final WindowManager.LayoutParams lp =
                 new WindowManager.LayoutParams(width, height,
                         WindowManager.LayoutParams.TYPE_APPLICATION, 0, PixelFormat.TRANSPARENT);
+        lp.flags |= WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED;
         setView(view, lp);
-    }
-
-    /**
-     * @hide
-     */
-    @TestApi
-    public void setView(@NonNull View view, @NonNull WindowManager.LayoutParams attrs) {
-        Objects.requireNonNull(view);
-        attrs.flags |= WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED;
-        view.setLayoutParams(attrs);
-        mViewRoot.setView(view, attrs, null);
     }
 
     /**

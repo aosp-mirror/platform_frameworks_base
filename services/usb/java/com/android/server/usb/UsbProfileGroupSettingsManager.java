@@ -53,8 +53,6 @@ import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
-import android.util.TypedXmlPullParser;
-import android.util.TypedXmlSerializer;
 import android.util.Xml;
 
 import com.android.internal.annotations.GuardedBy;
@@ -263,15 +261,6 @@ class UsbProfileGroupSettingsManager {
     }
 
     /**
-     * Unregister all broadcast receivers. Must be called explicitly before
-     * object deletion.
-     */
-    public void unregisterReceivers() {
-        mPackageMonitor.unregister();
-        mMtpNotificationManager.unregister();
-    }
-
-    /**
      * Remove all defaults and denied packages for a user.
      *
      * @param userToRemove The user
@@ -437,7 +426,8 @@ class UsbProfileGroupSettingsManager {
             FileInputStream fis = null;
             try {
                 fis = new FileInputStream(sSingleUserSettingsFile);
-                TypedXmlPullParser parser = Xml.resolvePullParser(fis);
+                XmlPullParser parser = Xml.newPullParser();
+                parser.setInput(fis, StandardCharsets.UTF_8.name());
 
                 XmlUtils.nextElement(parser);
                 while (parser.getEventType() != XmlPullParser.END_DOCUMENT) {
@@ -471,7 +461,8 @@ class UsbProfileGroupSettingsManager {
         FileInputStream stream = null;
         try {
             stream = mSettingsFile.openRead();
-            TypedXmlPullParser parser = Xml.resolvePullParser(stream);
+            XmlPullParser parser = Xml.newPullParser();
+            parser.setInput(stream, StandardCharsets.UTF_8.name());
 
             XmlUtils.nextElement(parser);
             while (parser.getEventType() != XmlPullParser.END_DOCUMENT) {
@@ -516,7 +507,8 @@ class UsbProfileGroupSettingsManager {
                 try {
                     fos = mSettingsFile.startWrite();
 
-                    TypedXmlSerializer serializer = Xml.resolveSerializer(fos);
+                    FastXmlSerializer serializer = new FastXmlSerializer();
+                    serializer.setOutput(fos, StandardCharsets.UTF_8.name());
                     serializer.startDocument(null, true);
                     serializer.setFeature("http://xmlpull.org/v1/doc/features.html#indent-output",
                                     true);

@@ -71,8 +71,7 @@ public final class InputMethodSubtype implements Parcelable {
     // TODO: remove this
     private static final String EXTRA_KEY_UNTRANSLATABLE_STRING_IN_SUBTYPE_NAME =
             "UntranslatableReplacementStringInSubtypeName";
-    /** {@hide} */
-    public static final int SUBTYPE_ID_NONE = 0;
+    private static final int SUBTYPE_ID_NONE = 0;
 
     private final boolean mIsAuxiliary;
     private final boolean mOverridesImplicitlyEnabledSubtype;
@@ -598,7 +597,7 @@ public final class InputMethodSubtype implements Parcelable {
     }
 
     @Override
-    public boolean equals(@Nullable Object o) {
+    public boolean equals(Object o) {
         if (o instanceof InputMethodSubtype) {
             InputMethodSubtype subtype = (InputMethodSubtype) o;
             if (subtype.mSubtypeId != 0 || mSubtypeId != 0) {

@@ -86,9 +86,12 @@ void SkiaMemoryTracer::processElement() {
             }
         }
 
-        // if we don't have a pretty name then use the dumpName
+        // if we don't have a resource name then we don't know how to label the
+        // data and should abort.
         if (resourceName == nullptr) {
-            resourceName = mCurrentElement.c_str();
+            mCurrentElement.clear();
+            mCurrentValues.clear();
+            return;
         }
 
         auto result = mResults.find(resourceName);
@@ -123,12 +126,6 @@ void SkiaMemoryTracer::dumpNumericValue(const char* dumpName, const char* valueN
     mCurrentValues.insert({valueName, {units, value}});
 }
 
-bool SkiaMemoryTracer::hasOutput() {
-    // process any remaining elements
-    processElement();
-    return mResults.size() > 0;
-}
-
 void SkiaMemoryTracer::logOutput(String8& log) {
     // process any remaining elements
     processElement();
@@ -152,14 +149,6 @@ void SkiaMemoryTracer::logOutput(String8& log) {
             }
         }
     }
-}
-
-size_t SkiaMemoryTracer::total() {
-    processElement();
-    if (!strcmp("bytes", mTotalSize.units)) {
-        return mTotalSize.value;
-    }
-    return 0;
 }
 
 void SkiaMemoryTracer::logTotals(String8& log) {

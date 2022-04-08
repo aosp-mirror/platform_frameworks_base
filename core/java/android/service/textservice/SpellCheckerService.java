@@ -16,6 +16,11 @@
 
 package android.service.textservice;
 
+import com.android.internal.textservice.ISpellCheckerService;
+import com.android.internal.textservice.ISpellCheckerServiceCallback;
+import com.android.internal.textservice.ISpellCheckerSession;
+import com.android.internal.textservice.ISpellCheckerSessionListener;
+
 import android.app.Service;
 import android.content.Intent;
 import android.os.Bundle;
@@ -28,11 +33,6 @@ import android.util.Log;
 import android.view.textservice.SentenceSuggestionsInfo;
 import android.view.textservice.SuggestionsInfo;
 import android.view.textservice.TextInfo;
-
-import com.android.internal.textservice.ISpellCheckerService;
-import com.android.internal.textservice.ISpellCheckerServiceCallback;
-import com.android.internal.textservice.ISpellCheckerSession;
-import com.android.internal.textservice.ISpellCheckerSessionListener;
 
 import java.lang.ref.WeakReference;
 import java.text.BreakIterator;
@@ -231,18 +231,6 @@ public abstract class SpellCheckerService extends Service {
         public Bundle getBundle() {
             return mInternalSession.getBundle();
         }
-
-        /**
-         * Returns result attributes supported for this session.
-         *
-         * <p>The session implementation should not set attributes that are not included in the
-         * return value of {@code getSupportedAttributes()} when creating {@link SuggestionsInfo}.
-         *
-         * @return The supported result attributes for this session
-         */
-        public @SuggestionsInfo.ResultAttrs int getSupportedAttributes() {
-            return mInternalSession.getSupportedAttributes();
-        }
     }
 
     // Preventing from exposing ISpellCheckerSession.aidl, create an internal class.
@@ -251,16 +239,13 @@ public abstract class SpellCheckerService extends Service {
         private final Session mSession;
         private final String mLocale;
         private final Bundle mBundle;
-        private final @SuggestionsInfo.ResultAttrs int mSupportedAttributes;
 
         public InternalISpellCheckerSession(String locale, ISpellCheckerSessionListener listener,
-                Bundle bundle, Session session,
-                @SuggestionsInfo.ResultAttrs int supportedAttributes) {
+                Bundle bundle, Session session) {
             mListener = listener;
             mSession = session;
             mLocale = locale;
             mBundle = bundle;
-            mSupportedAttributes = supportedAttributes;
             session.setInternalISpellCheckerSession(this);
         }
 
@@ -318,10 +303,6 @@ public abstract class SpellCheckerService extends Service {
         public Bundle getBundle() {
             return mBundle;
         }
-
-        public @SuggestionsInfo.ResultAttrs int getSupportedAttributes() {
-            return mSupportedAttributes;
-        }
     }
 
     private static class SpellCheckerServiceBinder extends ISpellCheckerService.Stub {
@@ -342,14 +323,11 @@ public abstract class SpellCheckerService extends Service {
          *                 {@link Session#onGetSuggestionsMultiple(TextInfo[], int, boolean)} and
          *                 {@link Session#onGetSuggestions(TextInfo, int)}
          * @param bundle bundle to be returned from {@link Session#getBundle()}
-         * @param supportedAttributes A union of {@link SuggestionsInfo} attributes that the spell
-         *                            checker can set in the spell checking results.
          * @param callback IPC channel to return the result to the caller in an asynchronous manner
          */
         @Override
         public void getISpellCheckerSession(
                 String locale, ISpellCheckerSessionListener listener, Bundle bundle,
-                @SuggestionsInfo.ResultAttrs int supportedAttributes,
                 ISpellCheckerServiceCallback callback) {
             final SpellCheckerService service = mInternalServiceRef.get();
             final InternalISpellCheckerSession internalSession;
@@ -359,8 +337,8 @@ public abstract class SpellCheckerService extends Service {
                 internalSession = null;
             } else {
                 final Session session = service.createSession();
-                internalSession = new InternalISpellCheckerSession(
-                        locale, listener, bundle, session, supportedAttributes);
+                internalSession =
+                        new InternalISpellCheckerSession(locale, listener, bundle, session);
                 session.onCreate();
             }
             try {
@@ -421,8 +399,7 @@ public abstract class SpellCheckerService extends Service {
             final ArrayList<SentenceWordItem> wordItems = new ArrayList<SentenceWordItem>();
             wordIterator.setCharSequence(originalText, 0, originalText.length());
             int wordEnd = wordIterator.following(start);
-            int wordStart = wordEnd == BreakIterator.DONE ? BreakIterator.DONE
-                    : wordIterator.getBeginning(wordEnd);
+            int wordStart = wordIterator.getBeginning(wordEnd);
             if (DBG) {
                 Log.d(TAG, "iterator: break: ---- 1st word start = " + wordStart + ", end = "
                         + wordEnd + "\n" + originalText);

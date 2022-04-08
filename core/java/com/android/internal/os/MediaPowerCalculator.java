@@ -33,7 +33,7 @@ public class MediaPowerCalculator extends PowerCalculator {
     }
 
     @Override
-    protected void calculateApp(BatterySipper app, BatteryStats.Uid u, long rawRealtimeUs,
+    public void calculateApp(BatterySipper app, BatteryStats.Uid u, long rawRealtimeUs,
             long rawUptimeUs, int statsType) {
         // Calculate audio power usage, an estimate based on the average power routed to different
         // components like speaker, bluetooth, usb-c, earphone, etc.

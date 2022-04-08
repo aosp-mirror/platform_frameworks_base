@@ -16,14 +16,9 @@
 
 package android.bluetooth.le;
 
-import android.annotation.RequiresNoPermission;
-import android.annotation.RequiresPermission;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.IBluetoothGatt;
 import android.bluetooth.IBluetoothManager;
-import android.bluetooth.annotations.RequiresBluetoothAdvertisePermission;
-import android.bluetooth.annotations.RequiresLegacyBluetoothAdminPermission;
-import android.content.AttributionSource;
 import android.os.RemoteException;
 import android.util.Log;
 
@@ -32,6 +27,9 @@ import android.util.Log;
  * <p>
  * To get an instance of {@link AdvertisingSet}, call the
  * {@link BluetoothLeAdvertiser#startAdvertisingSet} method.
+ * <p>
+ * <b>Note:</b> Most of the methods here require {@link android.Manifest.permission#BLUETOOTH_ADMIN}
+ * permission.
  *
  * @see AdvertiseData
  */
@@ -40,12 +38,11 @@ public final class AdvertisingSet {
 
     private final IBluetoothGatt mGatt;
     private int mAdvertiserId;
-    private AttributionSource mAttributionSource;
 
-    /* package */ AdvertisingSet(int advertiserId, IBluetoothManager bluetoothManager,
-            AttributionSource attributionSource) {
+    /* package */ AdvertisingSet(int advertiserId,
+            IBluetoothManager bluetoothManager) {
         mAdvertiserId = advertiserId;
-        mAttributionSource = attributionSource;
+
         try {
             mGatt = bluetoothManager.getBluetoothGatt();
         } catch (RemoteException e) {
@@ -61,6 +58,8 @@ public final class AdvertisingSet {
     /**
      * Enables Advertising. This method returns immediately, the operation status is
      * delivered through {@code callback.onAdvertisingEnabled()}.
+     * <p>
+     * Requires {@link android.Manifest.permission#BLUETOOTH_ADMIN}
      *
      * @param enable whether the advertising should be enabled (true), or disabled (false)
      * @param duration advertising duration, in 10ms unit. Valid range is from 1 (10ms) to 65535
@@ -69,14 +68,11 @@ public final class AdvertisingSet {
      * controller shall attempt to send prior to terminating the extended advertising, even if the
      * duration has not expired. Valid range is from 1 to 255.
      */
-    @RequiresLegacyBluetoothAdminPermission
-    @RequiresBluetoothAdvertisePermission
-    @RequiresPermission(android.Manifest.permission.BLUETOOTH_ADVERTISE)
     public void enableAdvertising(boolean enable, int duration,
             int maxExtendedAdvertisingEvents) {
         try {
             mGatt.enableAdvertisingSet(mAdvertiserId, enable, duration,
-                    maxExtendedAdvertisingEvents, mAttributionSource);
+                    maxExtendedAdvertisingEvents);
         } catch (RemoteException e) {
             Log.e(TAG, "remote exception - ", e);
         }
@@ -94,12 +90,9 @@ public final class AdvertisingSet {
      * three bytes will be added for flags. If the update takes place when the advertising set is
      * enabled, the data can be maximum 251 bytes long.
      */
-    @RequiresLegacyBluetoothAdminPermission
-    @RequiresBluetoothAdvertisePermission
-    @RequiresPermission(android.Manifest.permission.BLUETOOTH_ADVERTISE)
     public void setAdvertisingData(AdvertiseData advertiseData) {
         try {
-            mGatt.setAdvertisingData(mAdvertiserId, advertiseData, mAttributionSource);
+            mGatt.setAdvertisingData(mAdvertiserId, advertiseData);
         } catch (RemoteException e) {
             Log.e(TAG, "remote exception - ", e);
         }
@@ -114,12 +107,9 @@ public final class AdvertisingSet {
      * exceed {@link BluetoothAdapter#getLeMaximumAdvertisingDataLength}. If the update takes place
      * when the advertising set is enabled, the data can be maximum 251 bytes long.
      */
-    @RequiresLegacyBluetoothAdminPermission
-    @RequiresBluetoothAdvertisePermission
-    @RequiresPermission(android.Manifest.permission.BLUETOOTH_ADVERTISE)
     public void setScanResponseData(AdvertiseData scanResponse) {
         try {
-            mGatt.setScanResponseData(mAdvertiserId, scanResponse, mAttributionSource);
+            mGatt.setScanResponseData(mAdvertiserId, scanResponse);
         } catch (RemoteException e) {
             Log.e(TAG, "remote exception - ", e);
         }
@@ -132,12 +122,9 @@ public final class AdvertisingSet {
      *
      * @param parameters advertising set parameters.
      */
-    @RequiresLegacyBluetoothAdminPermission
-    @RequiresBluetoothAdvertisePermission
-    @RequiresPermission(android.Manifest.permission.BLUETOOTH_ADVERTISE)
     public void setAdvertisingParameters(AdvertisingSetParameters parameters) {
         try {
-            mGatt.setAdvertisingParameters(mAdvertiserId, parameters, mAttributionSource);
+            mGatt.setAdvertisingParameters(mAdvertiserId, parameters);
         } catch (RemoteException e) {
             Log.e(TAG, "remote exception - ", e);
         }
@@ -148,12 +135,9 @@ public final class AdvertisingSet {
      * periodic advertising is not enabled. This method returns immediately, the operation
      * status is delivered through {@code callback.onPeriodicAdvertisingParametersUpdated()}.
      */
-    @RequiresLegacyBluetoothAdminPermission
-    @RequiresBluetoothAdvertisePermission
-    @RequiresPermission(android.Manifest.permission.BLUETOOTH_ADVERTISE)
     public void setPeriodicAdvertisingParameters(PeriodicAdvertisingParameters parameters) {
         try {
-            mGatt.setPeriodicAdvertisingParameters(mAdvertiserId, parameters, mAttributionSource);
+            mGatt.setPeriodicAdvertisingParameters(mAdvertiserId, parameters);
         } catch (RemoteException e) {
             Log.e(TAG, "remote exception - ", e);
         }
@@ -169,12 +153,9 @@ public final class AdvertisingSet {
      * BluetoothAdapter#getLeMaximumAdvertisingDataLength}. If the update takes place when the
      * periodic advertising is enabled for this set, the data can be maximum 251 bytes long.
      */
-    @RequiresLegacyBluetoothAdminPermission
-    @RequiresBluetoothAdvertisePermission
-    @RequiresPermission(android.Manifest.permission.BLUETOOTH_ADVERTISE)
     public void setPeriodicAdvertisingData(AdvertiseData periodicData) {
         try {
-            mGatt.setPeriodicAdvertisingData(mAdvertiserId, periodicData, mAttributionSource);
+            mGatt.setPeriodicAdvertisingData(mAdvertiserId, periodicData);
         } catch (RemoteException e) {
             Log.e(TAG, "remote exception - ", e);
         }
@@ -187,12 +168,9 @@ public final class AdvertisingSet {
      * @param enable whether the periodic advertising should be enabled (true), or disabled
      * (false).
      */
-    @RequiresLegacyBluetoothAdminPermission
-    @RequiresBluetoothAdvertisePermission
-    @RequiresPermission(android.Manifest.permission.BLUETOOTH_ADVERTISE)
     public void setPeriodicAdvertisingEnabled(boolean enable) {
         try {
-            mGatt.setPeriodicAdvertisingEnable(mAdvertiserId, enable, mAttributionSource);
+            mGatt.setPeriodicAdvertisingEnable(mAdvertiserId, enable);
         } catch (RemoteException e) {
             Log.e(TAG, "remote exception - ", e);
         }
@@ -203,16 +181,13 @@ public final class AdvertisingSet {
      * This method is exposed only for Bluetooth PTS tests, no app or system service
      * should ever use it.
      *
+     * This method requires {@link android.Manifest.permission#BLUETOOTH_PRIVILEGED} permission.
+     *
      * @hide
      */
-    @RequiresBluetoothAdvertisePermission
-    @RequiresPermission(allOf = {
-            android.Manifest.permission.BLUETOOTH_ADVERTISE,
-            android.Manifest.permission.BLUETOOTH_PRIVILEGED,
-    })
     public void getOwnAddress() {
         try {
-            mGatt.getOwnAddress(mAdvertiserId, mAttributionSource);
+            mGatt.getOwnAddress(mAdvertiserId);
         } catch (RemoteException e) {
             Log.e(TAG, "remote exception - ", e);
         }
@@ -223,7 +198,6 @@ public final class AdvertisingSet {
      *
      * @hide
      */
-    @RequiresNoPermission
     public int getAdvertiserId() {
         return mAdvertiserId;
     }

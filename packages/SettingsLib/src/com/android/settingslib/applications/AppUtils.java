@@ -31,7 +31,6 @@ import android.os.Environment;
 import android.os.RemoteException;
 import android.os.SystemProperties;
 import android.os.UserHandle;
-import android.text.TextUtils;
 import android.util.Log;
 
 import com.android.settingslib.R;
@@ -198,18 +197,5 @@ public class AppUtils {
             }
         }
         return false;
-    }
-
-    /**
-     * Returns a boolean indicating whether a given package is a default browser.
-     *
-     * @param packageName a given package.
-     * @return true if the given package is default browser.
-     */
-    public static boolean isDefaultBrowser(Context context, String packageName) {
-        final String defaultBrowserPackage =
-                context.getPackageManager().getDefaultBrowserPackageNameAsUser(
-                        UserHandle.myUserId());
-        return TextUtils.equals(packageName, defaultBrowserPackage);
     }
 }

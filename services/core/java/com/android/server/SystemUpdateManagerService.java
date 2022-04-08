@@ -38,8 +38,6 @@ import android.os.SystemUpdateManager;
 import android.provider.Settings;
 import android.util.AtomicFile;
 import android.util.Slog;
-import android.util.TypedXmlPullParser;
-import android.util.TypedXmlSerializer;
 import android.util.Xml;
 
 import com.android.internal.util.FastXmlSerializer;
@@ -132,7 +130,8 @@ public class SystemUpdateManagerService extends ISystemUpdateManager.Stub {
     private Bundle loadSystemUpdateInfoLocked() {
         PersistableBundle loadedBundle = null;
         try (FileInputStream fis = mFile.openRead()) {
-            TypedXmlPullParser parser = Xml.resolvePullParser(fis);
+            XmlPullParser parser = Xml.newPullParser();
+            parser.setInput(fis, StandardCharsets.UTF_8.name());
             loadedBundle = readInfoFileLocked(parser);
         } catch (FileNotFoundException e) {
             Slog.i(TAG, "No existing info file " + mFile.getBaseFile());
@@ -201,7 +200,7 @@ public class SystemUpdateManagerService extends ISystemUpdateManager.Stub {
 
     // Performs I/O work only, without validating the loaded info.
     @Nullable
-    private PersistableBundle readInfoFileLocked(TypedXmlPullParser parser)
+    private PersistableBundle readInfoFileLocked(XmlPullParser parser)
             throws XmlPullParserException, IOException {
         int type;
         while ((type = parser.next()) != END_DOCUMENT) {
@@ -217,7 +216,8 @@ public class SystemUpdateManagerService extends ISystemUpdateManager.Stub {
         try {
             fos = mFile.startWrite();
 
-            TypedXmlSerializer out = Xml.resolveSerializer(fos);
+            XmlSerializer out = new FastXmlSerializer();
+            out.setOutput(fos, StandardCharsets.UTF_8.name());
             out.startDocument(null, true);
 
             out.startTag(null, TAG_INFO);

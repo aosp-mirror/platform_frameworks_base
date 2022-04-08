@@ -13,15 +13,6 @@
 // limitations under the License.
 
 // The headers module is in frameworks/native/Android.bp.
-package {
-    // See: http://go/android-license-faq
-    // A large-scale-change added 'default_applicable_licenses' to import
-    // all of the 'license_kinds' from "frameworks_base_license"
-    // to get the below license kinds:
-    //   SPDX-license-identifier-Apache-2.0
-    default_applicable_licenses: ["frameworks_base_license"],
-}
-
 ndk_library {
     name: "libandroid",
     symbol_file: "libandroid.map.txt",
@@ -45,7 +36,6 @@ cc_library_shared {
     defaults: ["libandroid_defaults"],
 
     srcs: [
-        "activity_manager.cpp",
         "asset_manager.cpp",
         "choreographer.cpp",
         "configuration.cpp",
@@ -56,8 +46,6 @@ cc_library_shared {
         "native_window_jni.cpp",
         "net.c",
         "obb.cpp",
-        "permission_manager.cpp",
-        "performance_hint.cpp",
         "sensor.cpp",
         "sharedmem.cpp",
         "storage_manager.cpp",
@@ -65,7 +53,7 @@ cc_library_shared {
         "surface_texture.cpp",
         "system_fonts.cpp",
         "trace.cpp",
-        "thermal.cpp",
+        "thermal.cpp"
     ],
 
     shared_libs: [
@@ -78,9 +66,8 @@ cc_library_shared {
         "libbinder",
         "libui",
         "libgui",
-        "libharfbuzz_ng", // Only for including hb.h via minikin
+        "libharfbuzz_ng",  // Only for including hb.h via minikin
         "libsensor",
-        "libactivitymanager_aidl",
         "libandroid_runtime",
         "libminikin",
         "libnetd_client",
@@ -99,10 +86,7 @@ cc_library_shared {
         "libarect",
     ],
 
-    header_libs: [
-        "libhwui_internal_headers",
-        "libandroid_headers_private",
-    ],
+    header_libs: [ "libhwui_internal_headers",],
 
     whole_static_libs: ["libnativewindow"],
 
@@ -110,17 +94,10 @@ cc_library_shared {
 
     include_dirs: ["bionic/libc/dns/include"],
 
-    local_include_dirs: ["include_platform"],
-
-    export_include_dirs: ["include_platform"],
-
     version_script: "libandroid.map.txt",
     stubs: {
         symbol_file: "libandroid.map.txt",
-        versions: [
-            "29",
-            "31",
-        ],
+        versions: ["29"],
     },
 }
 
@@ -128,11 +105,6 @@ cc_library_shared {
 cc_library_shared {
     name: "libandroid_net",
     defaults: ["libandroid_defaults"],
-    llndk: {
-        symbol_file: "libandroid_net.map.txt",
-        unversioned: true,
-        override_export_include_dirs: ["include"],
-    },
     srcs: ["net.c"],
 
     shared_libs: ["libnetd_client"],
@@ -140,26 +112,34 @@ cc_library_shared {
     include_dirs: ["bionic/libc/dns/include"],
 }
 
+llndk_library {
+    name: "libandroid_net",
+    export_include_dirs: ["include"],
+    symbol_file: "libandroid_net.map.txt",
+    unversioned: true,
+}
+
+
 // Aidl library for platform compat.
 cc_library_shared {
     name: "lib-platform-compat-native-api",
     cflags: [
-        "-Wall",
-        "-Werror",
-        "-Wno-missing-field-initializers",
-        "-Wno-unused-variable",
-        "-Wunused-parameter",
-    ],
+            "-Wall",
+            "-Werror",
+            "-Wno-missing-field-initializers",
+            "-Wno-unused-variable",
+            "-Wunused-parameter",
+        ],
     shared_libs: [
         "libbinder",
-        "libutils",
+         "libutils",
     ],
     aidl: {
         local_include_dirs: ["aidl"],
         export_aidl_headers: true,
     },
     srcs: [
-        ":platform-compat-native-aidl",
+         ":platform-compat-native-aidl",
     ],
     export_include_dirs: ["aidl"],
 }

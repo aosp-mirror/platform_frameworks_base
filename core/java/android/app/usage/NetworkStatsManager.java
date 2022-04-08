@@ -16,30 +16,24 @@
 
 package android.app.usage;
 
-import static android.annotation.SystemApi.Client.MODULE_LIBRARIES;
-
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
-import android.annotation.WorkerThread;
 import android.app.usage.NetworkStats.Bucket;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.DataUsageRequest;
 import android.net.INetworkStatsService;
-import android.net.Network;
+import android.net.NetworkIdentity;
 import android.net.NetworkStack;
-import android.net.NetworkStateSnapshot;
 import android.net.NetworkTemplate;
-import android.net.UnderlyingNetworkInfo;
 import android.net.netstats.provider.INetworkStatsProviderCallback;
 import android.net.netstats.provider.NetworkStatsProvider;
 import android.os.Binder;
-import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -48,14 +42,11 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.ServiceManager.ServiceNotFoundException;
 import android.telephony.TelephonyManager;
-import android.text.TextUtils;
 import android.util.DataUnit;
 import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.net.module.util.NetworkIdentityUtils;
 
-import java.util.List;
 import java.util.Objects;
 
 /**
@@ -138,7 +129,7 @@ public class NetworkStatsManager {
     /**
      * {@hide}
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public NetworkStatsManager(Context context) throws ServiceNotFoundException {
         this(context, INetworkStatsService.Stub.asInterface(
                 ServiceManager.getServiceOrThrow(Context.NETWORK_STATS_SERVICE)));
@@ -162,7 +153,7 @@ public class NetworkStatsManager {
     }
 
     /** @hide */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     @TestApi
     public void setPollForce(boolean pollForce) {
         if (pollForce) {
@@ -203,7 +194,6 @@ public class NetworkStatsManager {
      * default network {@link NetworkStats.Bucket#DEFAULT_NETWORK_ALL},
      * metered {@link NetworkStats.Bucket#METERED_ALL},
      * and roaming {@link NetworkStats.Bucket#ROAMING_ALL}.
-     * This may take a long time, and apps should avoid calling this on their main thread.
      *
      * @param networkType As defined in {@link ConnectivityManager}, e.g.
      *            {@link ConnectivityManager#TYPE_MOBILE}, {@link ConnectivityManager#TYPE_WIFI}
@@ -215,10 +205,6 @@ public class NetworkStatsManager {
      *                     null} value when querying for the mobile network type to receive usage
      *                     for all mobile networks. For additional details see {@link
      *                     TelephonyManager#getSubscriberId()}.
-     *                     <p>Starting with API level 31, calling apps can provide a
-     *                     {@code subscriberId} with wifi network type to receive usage for
-     *                     wifi networks which is under the given subscription if applicable.
-     *                     Otherwise, pass {@code null} when querying all wifi networks.
      * @param startTime Start of period. Defined in terms of "Unix time", see
      *            {@link java.lang.System#currentTimeMillis}.
      * @param endTime End of period. Defined in terms of "Unix time", see
@@ -226,7 +212,6 @@ public class NetworkStatsManager {
      * @return Bucket object or null if permissions are insufficient or error happened during
      *         statistics collection.
      */
-    @WorkerThread
     public Bucket querySummaryForDevice(int networkType, String subscriberId,
             long startTime, long endTime) throws SecurityException, RemoteException {
         NetworkTemplate template;
@@ -248,7 +233,6 @@ public class NetworkStatsManager {
      * uid {@link NetworkStats.Bucket#UID_ALL}, tag {@link NetworkStats.Bucket#TAG_NONE},
      * metered {@link NetworkStats.Bucket#METERED_ALL}, and roaming
      * {@link NetworkStats.Bucket#ROAMING_ALL}.
-     * This may take a long time, and apps should avoid calling this on their main thread.
      *
      * @param networkType As defined in {@link ConnectivityManager}, e.g.
      *            {@link ConnectivityManager#TYPE_MOBILE}, {@link ConnectivityManager#TYPE_WIFI}
@@ -260,10 +244,6 @@ public class NetworkStatsManager {
      *                     null} value when querying for the mobile network type to receive usage
      *                     for all mobile networks. For additional details see {@link
      *                     TelephonyManager#getSubscriberId()}.
-     *                     <p>Starting with API level 31, calling apps can provide a
-     *                     {@code subscriberId} with wifi network type to receive usage for
-     *                     wifi networks which is under the given subscription if applicable.
-     *                     Otherwise, pass {@code null} when querying all wifi networks.
      * @param startTime Start of period. Defined in terms of "Unix time", see
      *            {@link java.lang.System#currentTimeMillis}.
      * @param endTime End of period. Defined in terms of "Unix time", see
@@ -271,7 +251,6 @@ public class NetworkStatsManager {
      * @return Bucket object or null if permissions are insufficient or error happened during
      *         statistics collection.
      */
-    @WorkerThread
     public Bucket querySummaryForUser(int networkType, String subscriberId, long startTime,
             long endTime) throws SecurityException, RemoteException {
         NetworkTemplate template;
@@ -297,7 +276,6 @@ public class NetworkStatsManager {
      * means buckets' start and end timestamps are going to be the same as the 'startTime' and
      * 'endTime' parameters. State, uid, metered, and roaming are going to vary, and tag is going to
      * be the same.
-     * This may take a long time, and apps should avoid calling this on their main thread.
      *
      * @param networkType As defined in {@link ConnectivityManager}, e.g.
      *            {@link ConnectivityManager#TYPE_MOBILE}, {@link ConnectivityManager#TYPE_WIFI}
@@ -309,10 +287,6 @@ public class NetworkStatsManager {
      *                     null} value when querying for the mobile network type to receive usage
      *                     for all mobile networks. For additional details see {@link
      *                     TelephonyManager#getSubscriberId()}.
-     *                     <p>Starting with API level 31, calling apps can provide a
-     *                     {@code subscriberId} with wifi network type to receive usage for
-     *                     wifi networks which is under the given subscription if applicable.
-     *                     Otherwise, pass {@code null} when querying all wifi networks.
      * @param startTime Start of period. Defined in terms of "Unix time", see
      *            {@link java.lang.System#currentTimeMillis}.
      * @param endTime End of period. Defined in terms of "Unix time", see
@@ -320,7 +294,6 @@ public class NetworkStatsManager {
      * @return Statistics object or null if permissions are insufficient or error happened during
      *         statistics collection.
      */
-    @WorkerThread
     public NetworkStats querySummary(int networkType, String subscriberId, long startTime,
             long endTime) throws SecurityException, RemoteException {
         NetworkTemplate template;
@@ -346,11 +319,9 @@ public class NetworkStatsManager {
 
     /**
      * Query network usage statistics details for a given uid.
-     * This may take a long time, and apps should avoid calling this on their main thread.
      *
      * @see #queryDetailsForUidTagState(int, String, long, long, int, int, int)
      */
-    @WorkerThread
     public NetworkStats queryDetailsForUid(int networkType, String subscriberId,
             long startTime, long endTime, int uid) throws SecurityException {
         return queryDetailsForUidTagState(networkType, subscriberId, startTime, endTime, uid,
@@ -366,11 +337,9 @@ public class NetworkStatsManager {
 
     /**
      * Query network usage statistics details for a given uid and tag.
-     * This may take a long time, and apps should avoid calling this on their main thread.
      *
      * @see #queryDetailsForUidTagState(int, String, long, long, int, int, int)
      */
-    @WorkerThread
     public NetworkStats queryDetailsForUidTag(int networkType, String subscriberId,
             long startTime, long endTime, int uid, int tag) throws SecurityException {
         return queryDetailsForUidTagState(networkType, subscriberId, startTime, endTime, uid,
@@ -389,7 +358,6 @@ public class NetworkStatsManager {
      * <p>Only includes buckets that atomically occur in the inclusive time range. Doesn't
      * interpolate across partial buckets. Since bucket length is in the order of hours, this
      * method cannot be used to measure data usage on a fine grained time scale.
-     * This may take a long time, and apps should avoid calling this on their main thread.
      *
      * @param networkType As defined in {@link ConnectivityManager}, e.g.
      *            {@link ConnectivityManager#TYPE_MOBILE}, {@link ConnectivityManager#TYPE_WIFI}
@@ -401,10 +369,6 @@ public class NetworkStatsManager {
      *                     null} value when querying for the mobile network type to receive usage
      *                     for all mobile networks. For additional details see {@link
      *                     TelephonyManager#getSubscriberId()}.
-     *                     <p>Starting with API level 31, calling apps can provide a
-     *                     {@code subscriberId} with wifi network type to receive usage for
-     *                     wifi networks which is under the given subscription if applicable.
-     *                     Otherwise, pass {@code null} when querying all wifi networks.
      * @param startTime Start of period. Defined in terms of "Unix time", see
      *            {@link java.lang.System#currentTimeMillis}.
      * @param endTime End of period. Defined in terms of "Unix time", see
@@ -416,7 +380,6 @@ public class NetworkStatsManager {
      * @return Statistics object or null if an error happened during statistics collection.
      * @throws SecurityException if permissions are insufficient to read network statistics.
      */
-    @WorkerThread
     public NetworkStats queryDetailsForUidTagState(int networkType, String subscriberId,
             long startTime, long endTime, int uid, int tag, int state) throws SecurityException {
         NetworkTemplate template;
@@ -455,7 +418,6 @@ public class NetworkStatsManager {
      * <p>Only includes buckets that atomically occur in the inclusive time range. Doesn't
      * interpolate across partial buckets. Since bucket length is in the order of hours, this
      * method cannot be used to measure data usage on a fine grained time scale.
-     * This may take a long time, and apps should avoid calling this on their main thread.
      *
      * @param networkType As defined in {@link ConnectivityManager}, e.g.
      *            {@link ConnectivityManager#TYPE_MOBILE}, {@link ConnectivityManager#TYPE_WIFI}
@@ -467,10 +429,6 @@ public class NetworkStatsManager {
      *                     null} value when querying for the mobile network type to receive usage
      *                     for all mobile networks. For additional details see {@link
      *                     TelephonyManager#getSubscriberId()}.
-     *                     <p>Starting with API level 31, calling apps can provide a
-     *                     {@code subscriberId} with wifi network type to receive usage for
-     *                     wifi networks which is under the given subscription if applicable.
-     *                     Otherwise, pass {@code null} when querying all wifi networks.
      * @param startTime Start of period. Defined in terms of "Unix time", see
      *            {@link java.lang.System#currentTimeMillis}.
      * @param endTime End of period. Defined in terms of "Unix time", see
@@ -478,7 +436,6 @@ public class NetworkStatsManager {
      * @return Statistics object or null if permissions are insufficient or error happened during
      *         statistics collection.
      */
-    @WorkerThread
     public NetworkStats queryDetails(int networkType, String subscriberId, long startTime,
             long endTime) throws SecurityException, RemoteException {
         NetworkTemplate template;
@@ -552,10 +509,6 @@ public class NetworkStatsManager {
      *                     null} value when registering for the mobile network type to receive
      *                     notifications for all mobile networks. For additional details see {@link
      *                     TelephonyManager#getSubscriberId()}.
-     *                     <p>Starting with API level 31, calling apps can provide a
-     *                     {@code subscriberId} with wifi network type to receive usage for
-     *                     wifi networks which is under the given subscription if applicable.
-     *                     Otherwise, pass {@code null} when querying all wifi networks.
      * @param thresholdBytes Threshold in bytes to be notified on.
      * @param callback The {@link UsageCallback} that the system will call when data usage
      *            has exceeded the specified threshold.
@@ -669,60 +622,14 @@ public class NetworkStatsManager {
                         : NetworkTemplate.buildTemplateMobileAll(subscriberId);
                 break;
             case ConnectivityManager.TYPE_WIFI:
-                template = TextUtils.isEmpty(subscriberId)
-                        ? NetworkTemplate.buildTemplateWifiWildcard()
-                        : NetworkTemplate.buildTemplateWifi(NetworkTemplate.WIFI_NETWORKID_ALL,
-                                subscriberId);
+                template = NetworkTemplate.buildTemplateWifiWildcard();
                 break;
             default:
                 throw new IllegalArgumentException("Cannot create template for network type "
                         + networkType + ", subscriberId '"
-                        + NetworkIdentityUtils.scrubSubscriberId(subscriberId) + "'.");
+                        + NetworkIdentity.scrubSubscriberId(subscriberId) + "'.");
         }
         return template;
-    }
-
-    /**
-     * Notify {@code NetworkStatsService} about network status changed.
-     *
-     * Notifies NetworkStatsService of network state changes for data usage accounting purposes.
-     *
-     * To avoid races that attribute data usage to wrong network, such as new network with
-     * the same interface after SIM hot-swap, this function will not return until
-     * {@code NetworkStatsService} finishes its work of retrieving traffic statistics from
-     * all data sources.
-     *
-     * @param defaultNetworks the list of all networks that could be used by network traffic that
-     *                        does not explicitly select a network.
-     * @param networkStateSnapshots a list of {@link NetworkStateSnapshot}s, one for
-     *                              each network that is currently connected.
-     * @param activeIface the active (i.e., connected) default network interface for the calling
-     *                    uid. Used to determine on which network future calls to
-     *                    {@link android.net.TrafficStats#incrementOperationCount} applies to.
-     * @param underlyingNetworkInfos the list of underlying network information for all
-     *                               currently-connected VPNs.
-     *
-     * @hide
-     */
-    @SystemApi(client = MODULE_LIBRARIES)
-    @RequiresPermission(anyOf = {
-            NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK,
-            android.Manifest.permission.NETWORK_STACK})
-    public void notifyNetworkStatus(
-            @NonNull List<Network> defaultNetworks,
-            @NonNull List<NetworkStateSnapshot> networkStateSnapshots,
-            @Nullable String activeIface,
-            @NonNull List<UnderlyingNetworkInfo> underlyingNetworkInfos) {
-        try {
-            Objects.requireNonNull(defaultNetworks);
-            Objects.requireNonNull(networkStateSnapshots);
-            Objects.requireNonNull(underlyingNetworkInfos);
-            mService.notifyNetworkStatus(defaultNetworks.toArray(new Network[0]),
-                    networkStateSnapshots.toArray(new NetworkStateSnapshot[0]), activeIface,
-                    underlyingNetworkInfos.toArray(new UnderlyingNetworkInfo[0]));
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
     }
 
     private static class CallbackHandler extends Handler {

@@ -383,11 +383,6 @@ public class ShortcutParser {
             final int textResId = sa.getResourceId(R.styleable.Shortcut_shortcutLongLabel, 0);
             final int disabledMessageResId = sa.getResourceId(
                     R.styleable.Shortcut_shortcutDisabledMessage, 0);
-            final int splashScreenThemeResId = sa.getResourceId(
-                    R.styleable.Shortcut_splashScreenTheme, 0);
-            final String splashScreenThemeResName = splashScreenThemeResId != 0
-                    ? service.mContext.getResources().getResourceName(splashScreenThemeResId)
-                    : null;
 
             if (TextUtils.isEmpty(id)) {
                 Log.w(TAG, "android:shortcutId must be provided. activity=" + activity);
@@ -409,8 +404,7 @@ public class ShortcutParser {
                     disabledMessageResId,
                     rank,
                     iconResId,
-                    enabled,
-                    splashScreenThemeResName);
+                    enabled);
         } finally {
             sa.recycle();
         }
@@ -419,7 +413,7 @@ public class ShortcutParser {
     private static ShortcutInfo createShortcutFromManifest(ShortcutService service,
             @UserIdInt int userId, String id, String packageName, ComponentName activityComponent,
             int titleResId, int textResId, int disabledMessageResId,
-            int rank, int iconResId, boolean enabled, @Nullable String splashScreenThemeResName) {
+            int rank, int iconResId, boolean enabled) {
 
         final int flags =
                 (enabled ? ShortcutInfo.FLAG_MANIFEST : ShortcutInfo.FLAG_DISABLED)
@@ -458,8 +452,7 @@ public class ShortcutParser {
                 null, // icon Url
                 disabledReason,
                 null /* persons */,
-                null /* locusId */,
-                splashScreenThemeResName);
+                null /* locusId */);
     }
 
     private static String parseCategory(ShortcutService service, AttributeSet attrs) {

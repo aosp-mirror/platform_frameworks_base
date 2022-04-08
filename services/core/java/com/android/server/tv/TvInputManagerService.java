@@ -20,9 +20,7 @@ import static android.media.AudioManager.DEVICE_NONE;
 import static android.media.tv.TvInputManager.INPUT_STATE_CONNECTED;
 import static android.media.tv.TvInputManager.INPUT_STATE_CONNECTED_STANDBY;
 
-import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.UserIdInt;
 import android.app.ActivityManager;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -34,12 +32,10 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.pm.ActivityInfo;
-import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
-import android.content.pm.UserInfo;
 import android.graphics.Rect;
 import android.hardware.hdmi.HdmiControlManager;
 import android.hardware.hdmi.HdmiDeviceInfo;
@@ -54,7 +50,6 @@ import android.media.tv.ITvInputService;
 import android.media.tv.ITvInputServiceCallback;
 import android.media.tv.ITvInputSession;
 import android.media.tv.ITvInputSessionCallback;
-import android.media.tv.TunedInfo;
 import android.media.tv.TvContentRating;
 import android.media.tv.TvContentRatingSystemInfo;
 import android.media.tv.TvContract;
@@ -76,21 +71,15 @@ import android.os.Process;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.os.UserHandle;
-import android.os.UserManager;
 import android.text.TextUtils;
-import android.util.ArrayMap;
-import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.view.InputChannel;
 import android.view.Surface;
 
-import com.android.internal.annotations.GuardedBy;
-import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.content.PackageMonitor;
 import com.android.internal.os.SomeArgs;
 import com.android.internal.util.DumpUtils;
-import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.IoThread;
 import com.android.server.SystemService;
@@ -102,15 +91,12 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
-import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -119,9 +105,6 @@ public final class TvInputManagerService extends SystemService {
     private static final boolean DEBUG = false;
     private static final String TAG = "TvInputManagerService";
     private static final String DVB_DIRECTORY = "/dev/dvb";
-    private static final int APP_TAG_SELF = TunedInfo.APP_TAG_SELF;
-    private static final String PERMISSION_ACCESS_WATCHED_PROGRAMS =
-            "com.android.providers.tv.permission.ACCESS_WATCHED_PROGRAMS";
 
     // There are two different formats of DVB frontend devices. One is /dev/dvb%d.frontend%d,
     // another one is /dev/dvb/adapter%d/frontend%d. Followings are the patterns for selecting the
@@ -135,29 +118,20 @@ public final class TvInputManagerService extends SystemService {
 
     private final Context mContext;
     private final TvInputHardwareManager mTvInputHardwareManager;
-    private final UserManager mUserManager;
 
     // A global lock.
     private final Object mLock = new Object();
 
     // ID of the current user.
-    @GuardedBy("mLock")
     private int mCurrentUserId = UserHandle.USER_SYSTEM;
-    // IDs of the running profiles. Their parent user ID should be mCurrentUserId.
-    @GuardedBy("mLock")
-    private final Set<Integer> mRunningProfiles = new HashSet<>();
 
     // A map from user id to UserState.
-    @GuardedBy("mLock")
     private final SparseArray<UserState> mUserStates = new SparseArray<>();
 
     // A map from session id to session state saved in userstate
-    @GuardedBy("mLock")
     private final Map<String, SessionState> mSessionIdToSessionStateMap = new HashMap<>();
 
     private final WatchLogHandler mWatchLogHandler;
-
-    private final ActivityManager mActivityManager;
 
     public TvInputManagerService(Context context) {
         super(context);
@@ -166,10 +140,6 @@ public final class TvInputManagerService extends SystemService {
         mWatchLogHandler = new WatchLogHandler(mContext.getContentResolver(),
                 IoThread.get().getLooper());
         mTvInputHardwareManager = new TvInputHardwareManager(context, new HardwareListener());
-
-        mActivityManager =
-                (ActivityManager) getContext().getSystemService(Context.ACTIVITY_SERVICE);
-        mUserManager = (UserManager) getContext().getSystemService(Context.USER_SERVICE);
 
         synchronized (mLock) {
             getOrCreateUserStateLocked(mCurrentUserId);
@@ -195,10 +165,10 @@ public final class TvInputManagerService extends SystemService {
     }
 
     @Override
-    public void onUserUnlocking(@NonNull TargetUser user) {
-        if (DEBUG) Slog.d(TAG, "onUnlockUser(user=" + user + ")");
+    public void onUnlockUser(int userHandle) {
+        if (DEBUG) Slog.d(TAG, "onUnlockUser(userHandle=" + userHandle + ")");
         synchronized (mLock) {
-            if (mCurrentUserId != user.getUserIdentifier()) {
+            if (mCurrentUserId != userHandle) {
                 return;
             }
             buildTvInputListLocked(mCurrentUserId, null);
@@ -209,11 +179,10 @@ public final class TvInputManagerService extends SystemService {
     private void registerBroadcastReceivers() {
         PackageMonitor monitor = new PackageMonitor() {
             private void buildTvInputList(String[] packages) {
-                int userId = getChangingUserId();
                 synchronized (mLock) {
-                    if (mCurrentUserId == userId || mRunningProfiles.contains(userId)) {
-                        buildTvInputListLocked(userId, packages);
-                        buildTvContentRatingSystemListLocked(userId);
+                    if (mCurrentUserId == getChangingUserId()) {
+                        buildTvInputListLocked(mCurrentUserId, packages);
+                        buildTvContentRatingSystemListLocked(mCurrentUserId);
                     }
                 }
             }
@@ -278,8 +247,6 @@ public final class TvInputManagerService extends SystemService {
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(Intent.ACTION_USER_SWITCHED);
         intentFilter.addAction(Intent.ACTION_USER_REMOVED);
-        intentFilter.addAction(Intent.ACTION_USER_STARTED);
-        intentFilter.addAction(Intent.ACTION_USER_STOPPED);
         mContext.registerReceiverAsUser(new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
@@ -288,12 +255,6 @@ public final class TvInputManagerService extends SystemService {
                     switchUser(intent.getIntExtra(Intent.EXTRA_USER_HANDLE, 0));
                 } else if (Intent.ACTION_USER_REMOVED.equals(action)) {
                     removeUser(intent.getIntExtra(Intent.EXTRA_USER_HANDLE, 0));
-                } else if (Intent.ACTION_USER_STARTED.equals(action)) {
-                    int userId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, 0);
-                    startUser(userId);
-                } else if (Intent.ACTION_USER_STOPPED.equals(action)) {
-                    int userId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, 0);
-                    stopUser(userId);
                 }
             }
         }, UserHandle.ALL, intentFilter, null, null);
@@ -303,7 +264,7 @@ public final class TvInputManagerService extends SystemService {
         return pm.checkPermission(android.Manifest.permission.TV_INPUT_HARDWARE,
                 component.getPackageName()) == PackageManager.PERMISSION_GRANTED;
     }
-    @GuardedBy("mLock")
+
     private void buildTvInputListLocked(int userId, String[] updatedPackages) {
         UserState userState = getOrCreateUserStateLocked(userId);
         userState.packageSet.clear();
@@ -347,27 +308,17 @@ public final class TvInputManagerService extends SystemService {
             userState.packageSet.add(si.packageName);
         }
 
-        // sort the input list by input id so that TvInputState.inputNumber is stable.
-        Collections.sort(inputList, Comparator.comparing(TvInputInfo::getId));
         Map<String, TvInputState> inputMap = new HashMap<>();
-        ArrayMap<String, Integer> tisInputCount = new ArrayMap<>(inputMap.size());
         for (TvInputInfo info : inputList) {
-            String inputId = info.getId();
             if (DEBUG) {
-                Slog.d(TAG, "add " + inputId);
+                Slog.d(TAG, "add " + info.getId());
             }
-            // Running count of input for each input service
-            Integer count = tisInputCount.get(inputId);
-            count = count == null ? Integer.valueOf(1) : count + 1;
-            tisInputCount.put(inputId, count);
-            TvInputState inputState = userState.inputMap.get(inputId);
+            TvInputState inputState = userState.inputMap.get(info.getId());
             if (inputState == null) {
                 inputState = new TvInputState();
             }
             inputState.info = info;
-            inputState.uid = getInputUid(info);
-            inputMap.put(inputId, inputState);
-            inputState.inputNumber = count;
+            inputMap.put(info.getId(), inputState);
         }
 
         for (String inputId : inputMap.keySet()) {
@@ -401,17 +352,6 @@ public final class TvInputManagerService extends SystemService {
         userState.inputMap = inputMap;
     }
 
-    private int getInputUid(TvInputInfo info) {
-        try {
-            return getContext().getPackageManager().getApplicationInfo(
-                    info.getServiceInfo().packageName, 0).uid;
-        } catch (NameNotFoundException e) {
-            Slog.w(TAG, "Unable to get UID for  " + info, e);
-            return Process.INVALID_UID;
-        }
-    }
-
-    @GuardedBy("mLock")
     private void buildTvContentRatingSystemListLocked(int userId) {
         UserState userState = getOrCreateUserStateLocked(userId);
         userState.contentRatingSystemList.clear();
@@ -439,60 +379,48 @@ public final class TvInputManagerService extends SystemService {
         }
     }
 
-    private void startUser(int userId) {
-        synchronized (mLock) {
-            if (userId == mCurrentUserId || mRunningProfiles.contains(userId)) {
-                // user already started
-                return;
-            }
-            UserInfo userInfo = mUserManager.getUserInfo(userId);
-            UserInfo parentInfo = mUserManager.getProfileParent(userId);
-            if (userInfo.isProfile()
-                    && parentInfo != null
-                    && parentInfo.id == mCurrentUserId) {
-                // only the children of the current user can be started in background
-                startProfileLocked(userId);
-            }
-        }
-    }
-
-    private void stopUser(int userId) {
-        if (userId == mCurrentUserId) {
-            switchUser(ActivityManager.getCurrentUser());
-            return;
-        }
-
-        releaseSessionOfUserLocked(userId);
-        unbindServiceOfUserLocked(userId);
-        mRunningProfiles.remove(userId);
-    }
-
-    private void startProfileLocked(int userId) {
-        mRunningProfiles.add(userId);
-        buildTvInputListLocked(userId, null);
-        buildTvContentRatingSystemListLocked(userId);
-    }
-
     private void switchUser(int userId) {
         synchronized (mLock) {
             if (mCurrentUserId == userId) {
                 return;
             }
-            UserInfo userInfo = mUserManager.getUserInfo(userId);
-            if (userInfo.isProfile()) {
-                Slog.w(TAG, "cannot switch to a profile!");
-                return;
-            }
+            if (mUserStates.contains(mCurrentUserId)) {
+                UserState userState = mUserStates.get(mCurrentUserId);
+                List<SessionState> sessionStatesToRelease = new ArrayList<>();
+                for (SessionState sessionState : userState.sessionStateMap.values()) {
+                    if (sessionState.session != null && !sessionState.isRecordingSession) {
+                        sessionStatesToRelease.add(sessionState);
+                    }
+                }
+                for (SessionState sessionState : sessionStatesToRelease) {
+                    try {
+                        sessionState.session.release();
+                    } catch (RemoteException e) {
+                        Slog.e(TAG, "error in release", e);
+                    }
+                    clearSessionAndNotifyClientLocked(sessionState);
+                }
 
-            for (int runningId : mRunningProfiles) {
-                releaseSessionOfUserLocked(runningId);
-                unbindServiceOfUserLocked(runningId);
+                for (Iterator<ComponentName> it = userState.serviceStateMap.keySet().iterator();
+                    it.hasNext(); ) {
+                    ComponentName component = it.next();
+                    ServiceState serviceState = userState.serviceStateMap.get(component);
+                    if (serviceState != null && serviceState.sessionTokens.isEmpty()) {
+                        if (serviceState.callback != null) {
+                            try {
+                                serviceState.service.unregisterCallback(serviceState.callback);
+                            } catch (RemoteException e) {
+                                Slog.e(TAG, "error in unregisterCallback", e);
+                            }
+                        }
+                        mContext.unbindService(serviceState.connection);
+                        it.remove();
+                    }
+                }
             }
-            mRunningProfiles.clear();
-            releaseSessionOfUserLocked(mCurrentUserId);
-            unbindServiceOfUserLocked(mCurrentUserId);
 
             mCurrentUserId = userId;
+            getOrCreateUserStateLocked(userId);
             buildTvInputListLocked(userId, null);
             buildTvContentRatingSystemListLocked(userId);
             mWatchLogHandler.obtainMessage(WatchLogHandler.MSG_SWITCH_CONTENT_RESOLVER,
@@ -500,63 +428,6 @@ public final class TvInputManagerService extends SystemService {
         }
     }
 
-    @GuardedBy("mLock")
-    private void releaseSessionOfUserLocked(int userId) {
-        UserState userState = getUserStateLocked(userId);
-        if (userState == null) {
-            return;
-        }
-        List<SessionState> sessionStatesToRelease = new ArrayList<>();
-        for (SessionState sessionState : userState.sessionStateMap.values()) {
-            if (sessionState.session != null && !sessionState.isRecordingSession) {
-                sessionStatesToRelease.add(sessionState);
-            }
-        }
-        boolean notifyInfoUpdated = false;
-        for (SessionState sessionState : sessionStatesToRelease) {
-            try {
-                sessionState.session.release();
-                sessionState.currentChannel = null;
-                if (sessionState.isCurrent) {
-                    sessionState.isCurrent = false;
-                    notifyInfoUpdated = true;
-                }
-            } catch (RemoteException e) {
-                Slog.e(TAG, "error in release", e);
-            } finally {
-                if (notifyInfoUpdated) {
-                    notifyCurrentChannelInfosUpdatedLocked(userState);
-                }
-            }
-            clearSessionAndNotifyClientLocked(sessionState);
-        }
-    }
-
-    @GuardedBy("mLock")
-    private void unbindServiceOfUserLocked(int userId) {
-        UserState userState = getUserStateLocked(userId);
-        if (userState == null) {
-            return;
-        }
-        for (Iterator<ComponentName> it = userState.serviceStateMap.keySet().iterator();
-                it.hasNext(); ) {
-            ComponentName component = it.next();
-            ServiceState serviceState = userState.serviceStateMap.get(component);
-            if (serviceState != null && serviceState.sessionTokens.isEmpty()) {
-                if (serviceState.callback != null) {
-                    try {
-                        serviceState.service.unregisterCallback(serviceState.callback);
-                    } catch (RemoteException e) {
-                        Slog.e(TAG, "error in unregisterCallback", e);
-                    }
-                }
-                mContext.unbindService(serviceState.connection);
-                it.remove();
-            }
-        }
-    }
-
-    @GuardedBy("mLock")
     private void clearSessionAndNotifyClientLocked(SessionState state) {
         if (state.client != null) {
             try {
@@ -582,27 +453,17 @@ public final class TvInputManagerService extends SystemService {
 
     private void removeUser(int userId) {
         synchronized (mLock) {
-            UserState userState = getUserStateLocked(userId);
+            UserState userState = mUserStates.get(userId);
             if (userState == null) {
                 return;
             }
             // Release all created sessions.
-            boolean notifyInfoUpdated = false;
             for (SessionState state : userState.sessionStateMap.values()) {
                 if (state.session != null) {
                     try {
                         state.session.release();
-                        state.currentChannel = null;
-                        if (state.isCurrent) {
-                            state.isCurrent = false;
-                            notifyInfoUpdated = true;
-                        }
                     } catch (RemoteException e) {
                         Slog.e(TAG, "error in release", e);
-                    } finally {
-                        if (notifyInfoUpdated) {
-                            notifyCurrentChannelInfosUpdatedLocked(userState);
-                        }
                     }
                 }
             }
@@ -631,7 +492,6 @@ public final class TvInputManagerService extends SystemService {
             userState.mCallbacks.kill();
             userState.mainSessionToken = null;
 
-            mRunningProfiles.remove(userId);
             mUserStates.remove(userId);
 
             if (userId == mCurrentUserId) {
@@ -652,9 +512,8 @@ public final class TvInputManagerService extends SystemService {
         return context.getContentResolver();
     }
 
-    @GuardedBy("mLock")
     private UserState getOrCreateUserStateLocked(int userId) {
-        UserState userState = getUserStateLocked(userId);
+        UserState userState = mUserStates.get(userId);
         if (userState == null) {
             userState = new UserState(mContext, userId);
             mUserStates.put(userId, userState);
@@ -662,7 +521,6 @@ public final class TvInputManagerService extends SystemService {
         return userState;
     }
 
-    @GuardedBy("mLock")
     private ServiceState getServiceStateLocked(ComponentName component, int userId) {
         UserState userState = getOrCreateUserStateLocked(userId);
         ServiceState serviceState = userState.serviceStateMap.get(component);
@@ -672,15 +530,9 @@ public final class TvInputManagerService extends SystemService {
         }
         return serviceState;
     }
-    @GuardedBy("mLock")
+
     private SessionState getSessionStateLocked(IBinder sessionToken, int callingUid, int userId) {
         UserState userState = getOrCreateUserStateLocked(userId);
-        return getSessionStateLocked(sessionToken, callingUid, userState);
-    }
-
-    @GuardedBy("mLock")
-    private SessionState getSessionStateLocked(IBinder sessionToken,
-            int callingUid, UserState userState) {
         SessionState sessionState = userState.sessionStateMap.get(sessionToken);
         if (sessionState == null) {
             throw new SessionNotFoundException("Session state not found for token " + sessionToken);
@@ -693,12 +545,10 @@ public final class TvInputManagerService extends SystemService {
         return sessionState;
     }
 
-    @GuardedBy("mLock")
     private ITvInputSession getSessionLocked(IBinder sessionToken, int callingUid, int userId) {
         return getSessionLocked(getSessionStateLocked(sessionToken, callingUid, userId));
     }
 
-    @GuardedBy("mLock")
     private ITvInputSession getSessionLocked(SessionState sessionState) {
         ITvInputSession session = sessionState.session;
         if (session == null) {
@@ -714,7 +564,6 @@ public final class TvInputManagerService extends SystemService {
                 false, methodName, null);
     }
 
-    @GuardedBy("mLock")
     private void updateServiceConnectionLocked(ComponentName component, int userId) {
         UserState userState = getOrCreateUserStateLocked(userId);
         ServiceState serviceState = userState.serviceStateMap.get(component);
@@ -730,7 +579,7 @@ public final class TvInputManagerService extends SystemService {
         }
 
         boolean shouldBind;
-        if (userId == mCurrentUserId || mRunningProfiles.contains(userId)) {
+        if (userId == mCurrentUserId) {
             shouldBind = !serviceState.sessionTokens.isEmpty() || serviceState.isHardware;
         } else {
             // For a non-current user,
@@ -768,7 +617,6 @@ public final class TvInputManagerService extends SystemService {
         }
     }
 
-    @GuardedBy("mLock")
     private void abortPendingCreateSessionRequestsLocked(ServiceState serviceState,
             String inputId, int userId) {
         // Let clients know the create session requests are failed.
@@ -789,7 +637,6 @@ public final class TvInputManagerService extends SystemService {
         updateServiceConnectionLocked(serviceState.component, userId);
     }
 
-    @GuardedBy("mLock")
     private boolean createSessionInternalLocked(ITvInputService service, IBinder sessionToken,
             int userId) {
         UserState userState = getOrCreateUserStateLocked(userId);
@@ -823,7 +670,6 @@ public final class TvInputManagerService extends SystemService {
         return created;
     }
 
-    @GuardedBy("mLock")
     private void sendSessionTokenToClientLocked(ITvInputClient client, String inputId,
             IBinder sessionToken, InputChannel channel, int seq) {
         try {
@@ -833,24 +679,17 @@ public final class TvInputManagerService extends SystemService {
         }
     }
 
-    @GuardedBy("mLock")
-    @Nullable
-    private SessionState releaseSessionLocked(IBinder sessionToken, int callingUid, int userId) {
+    private void releaseSessionLocked(IBinder sessionToken, int callingUid, int userId) {
         SessionState sessionState = null;
         try {
             sessionState = getSessionStateLocked(sessionToken, callingUid, userId);
-            UserState userState = getOrCreateUserStateLocked(userId);
             if (sessionState.session != null) {
+                UserState userState = getOrCreateUserStateLocked(userId);
                 if (sessionToken == userState.mainSessionToken) {
                     setMainLocked(sessionToken, false, callingUid, userId);
                 }
                 sessionState.session.asBinder().unlinkToDeath(sessionState, 0);
                 sessionState.session.release();
-            }
-            sessionState.currentChannel = null;
-            if (sessionState.isCurrent) {
-                sessionState.isCurrent = false;
-                notifyCurrentChannelInfosUpdatedLocked(userState);
             }
         } catch (RemoteException | SessionNotFoundException e) {
             Slog.e(TAG, "error in releaseSession", e);
@@ -860,10 +699,8 @@ public final class TvInputManagerService extends SystemService {
             }
         }
         removeSessionStateLocked(sessionToken, userId);
-        return sessionState;
     }
 
-    @GuardedBy("mLock")
     private void removeSessionStateLocked(IBinder sessionToken, int userId) {
         UserState userState = getOrCreateUserStateLocked(userId);
         if (sessionToken == userState.mainSessionToken) {
@@ -877,7 +714,6 @@ public final class TvInputManagerService extends SystemService {
         SessionState sessionState = userState.sessionStateMap.remove(sessionToken);
 
         if (sessionState == null) {
-            Slog.e(TAG, "sessionState null, no more remove session action!");
             return;
         }
 
@@ -907,7 +743,6 @@ public final class TvInputManagerService extends SystemService {
         mWatchLogHandler.obtainMessage(WatchLogHandler.MSG_LOG_WATCH_END, args).sendToTarget();
     }
 
-    @GuardedBy("mLock")
     private void setMainLocked(IBinder sessionToken, boolean isMain, int callingUid, int userId) {
         try {
             SessionState sessionState = getSessionStateLocked(sessionToken, callingUid, userId);
@@ -921,17 +756,11 @@ public final class TvInputManagerService extends SystemService {
             }
             ITvInputSession session = getSessionLocked(sessionState);
             session.setMain(isMain);
-            if (sessionState.isMainSession != isMain) {
-                UserState userState = getUserStateLocked(userId);
-                sessionState.isMainSession = isMain;
-                notifyCurrentChannelInfosUpdatedLocked(userState);
-            }
         } catch (RemoteException | SessionNotFoundException e) {
             Slog.e(TAG, "error in setMain", e);
         }
     }
 
-    @GuardedBy("mLock")
     private void notifyInputAddedLocked(UserState userState, String inputId) {
         if (DEBUG) {
             Slog.d(TAG, "notifyInputAddedLocked(inputId=" + inputId + ")");
@@ -947,7 +776,6 @@ public final class TvInputManagerService extends SystemService {
         userState.mCallbacks.finishBroadcast();
     }
 
-    @GuardedBy("mLock")
     private void notifyInputRemovedLocked(UserState userState, String inputId) {
         if (DEBUG) {
             Slog.d(TAG, "notifyInputRemovedLocked(inputId=" + inputId + ")");
@@ -963,7 +791,6 @@ public final class TvInputManagerService extends SystemService {
         userState.mCallbacks.finishBroadcast();
     }
 
-    @GuardedBy("mLock")
     private void notifyInputUpdatedLocked(UserState userState, String inputId) {
         if (DEBUG) {
             Slog.d(TAG, "notifyInputUpdatedLocked(inputId=" + inputId + ")");
@@ -979,7 +806,6 @@ public final class TvInputManagerService extends SystemService {
         userState.mCallbacks.finishBroadcast();
     }
 
-    @GuardedBy("mLock")
     private void notifyInputStateChangedLocked(UserState userState, String inputId,
             int state, ITvInputManagerCallback targetCallback) {
         if (DEBUG) {
@@ -1005,31 +831,6 @@ public final class TvInputManagerService extends SystemService {
         }
     }
 
-    @GuardedBy("mLock")
-    private void notifyCurrentChannelInfosUpdatedLocked(UserState userState) {
-        if (DEBUG) {
-            Slog.d(TAG, "notifyCurrentChannelInfosUpdatedLocked");
-        }
-        int n = userState.mCallbacks.beginBroadcast();
-        for (int i = 0; i < n; ++i) {
-            try {
-                ITvInputManagerCallback callback = userState.mCallbacks.getBroadcastItem(i);
-                Pair<Integer, Integer> pidUid = userState.callbackPidUidMap.get(callback);
-                if (mContext.checkPermission(android.Manifest.permission.ACCESS_TUNED_INFO,
-                        pidUid.first, pidUid.second) != PackageManager.PERMISSION_GRANTED) {
-                    continue;
-                }
-                List<TunedInfo> infos = getCurrentTunedInfosInternalLocked(
-                        userState, pidUid.first, pidUid.second);
-                callback.onCurrentTunedInfosUpdated(infos);
-            } catch (RemoteException e) {
-                Slog.e(TAG, "failed to report updated current channel infos to callback", e);
-            }
-        }
-        userState.mCallbacks.finishBroadcast();
-    }
-
-    @GuardedBy("mLock")
     private void updateTvInputInfoLocked(UserState userState, TvInputInfo inputInfo) {
         if (DEBUG) {
             Slog.d(TAG, "updateTvInputInfoLocked(inputInfo=" + inputInfo + ")");
@@ -1041,7 +842,6 @@ public final class TvInputManagerService extends SystemService {
             return;
         }
         inputState.info = inputInfo;
-        inputState.uid = getInputUid(inputInfo);
 
         int n = userState.mCallbacks.beginBroadcast();
         for (int i = 0; i < n; ++i) {
@@ -1054,7 +854,6 @@ public final class TvInputManagerService extends SystemService {
         userState.mCallbacks.finishBroadcast();
     }
 
-    @GuardedBy("mLock")
     private void setStateLocked(String inputId, int state, int userId) {
         UserState userState = getOrCreateUserStateLocked(userId);
         TvInputState inputState = userState.inputMap.get(inputId);
@@ -1228,19 +1027,14 @@ public final class TvInputManagerService extends SystemService {
 
         @Override
         public void registerCallback(final ITvInputManagerCallback callback, int userId) {
-            int callingPid = Binder.getCallingPid();
-            int callingUid = Binder.getCallingUid();
-            final int resolvedUserId = resolveCallingUserId(callingPid, callingUid, userId,
-                    "registerCallback");
+            final int resolvedUserId = resolveCallingUserId(Binder.getCallingPid(),
+                    Binder.getCallingUid(), userId, "registerCallback");
             final long identity = Binder.clearCallingIdentity();
             try {
                 synchronized (mLock) {
                     final UserState userState = getOrCreateUserStateLocked(resolvedUserId);
                     if (!userState.mCallbacks.register(callback)) {
                         Slog.e(TAG, "client process has already died");
-                    } else {
-                        userState.callbackPidUidMap.put(
-                                callback, Pair.create(callingPid, callingUid));
                     }
                 }
             } finally {
@@ -1257,7 +1051,6 @@ public final class TvInputManagerService extends SystemService {
                 synchronized (mLock) {
                     UserState userState = getOrCreateUserStateLocked(resolvedUserId);
                     userState.mCallbacks.unregister(callback);
-                    userState.callbackPidUidMap.remove(callback);
                 }
             } finally {
                 Binder.restoreCallingIdentity(identity);
@@ -1382,29 +1175,12 @@ public final class TvInputManagerService extends SystemService {
             final int resolvedUserId = resolveCallingUserId(callingPid, callingUid,
                     userId, "createSession");
             final long identity = Binder.clearCallingIdentity();
-            /**
-             * A randomly generated id for this this session.
-             *
-             * <p>This field contains no user or device reference and is large enough to be
-             * effectively globally unique.
-             *
-             * <p><b>WARNING</b> Any changes to this field should be carefully reviewed for privacy.
-             * Inspect the code at:
-             *
-             * <ul>
-             *   <li>framework/base/cmds/statsd/src/atoms.proto#TifTuneState
-             *   <li>{@link #logTuneStateChanged}
-             *   <li>{@link TvInputManagerService.BinderService#createSession}
-             *   <li>{@link SessionState#sessionId}
-             * </ul>
-             */
-            String uniqueSessionId = UUID.randomUUID().toString();
+            StringBuilder sessionId = new StringBuilder();
             try {
                 synchronized (mLock) {
-                    if (userId != mCurrentUserId && !mRunningProfiles.contains(userId)
-                            && !isRecordingSession) {
-                        // Only current user and its running profiles can create
-                        // non-recording sessions.
+                    if (userId != mCurrentUserId && !isRecordingSession) {
+                        // A non-recording session of a backgroud (non-current) user
+                        // should not be created.
                         // Let the client get onConnectionFailed callback for this case.
                         sendSessionTokenToClientLocked(client, inputId, null, null, seq);
                         return;
@@ -1419,8 +1195,6 @@ public final class TvInputManagerService extends SystemService {
                     TvInputInfo info = inputState.info;
                     ServiceState serviceState = userState.serviceStateMap.get(info.getComponent());
                     if (serviceState == null) {
-                        int tisUid = PackageManager.getApplicationInfoAsUserCached(
-                                info.getComponent().getPackageName(), 0, resolvedUserId).uid;
                         serviceState = new ServiceState(info.getComponent(), resolvedUserId);
                         userState.serviceStateMap.put(info.getComponent(), serviceState);
                     }
@@ -1430,17 +1204,20 @@ public final class TvInputManagerService extends SystemService {
                         return;
                     }
 
+                    // Create a unique session id with pid, uid and resolved user id
+                    sessionId.append(callingUid).append(callingPid).append(resolvedUserId);
+
                     // Create a new session token and a session state.
                     IBinder sessionToken = new Binder();
                     SessionState sessionState = new SessionState(sessionToken, info.getId(),
                             info.getComponent(), isRecordingSession, client, seq, callingUid,
-                            callingPid, resolvedUserId, uniqueSessionId);
+                            callingPid, resolvedUserId, sessionId.toString());
 
                     // Add them to the global session state map of the current user.
                     userState.sessionStateMap.put(sessionToken, sessionState);
 
                     // Map the session id to the sessionStateMap in the user state
-                    mSessionIdToSessionStateMap.put(uniqueSessionId, sessionState);
+                    mSessionIdToSessionStateMap.put(sessionId.toString(), sessionState);
 
                     // Also, add them to the session state map of the current service.
                     serviceState.sessionTokens.add(sessionToken);
@@ -1453,8 +1230,6 @@ public final class TvInputManagerService extends SystemService {
                     } else {
                         updateServiceConnectionLocked(info.getComponent(), resolvedUserId);
                     }
-                    logTuneStateChanged(FrameworkStatsLog.TIF_TUNE_STATE_CHANGED__STATE__CREATED,
-                            sessionState, inputState);
                 }
             } finally {
                 Binder.restoreCallingIdentity(identity);
@@ -1471,17 +1246,8 @@ public final class TvInputManagerService extends SystemService {
                     userId, "releaseSession");
             final long identity = Binder.clearCallingIdentity();
             try {
-                SessionState sessionState = null;
-                UserState userState = null;
                 synchronized (mLock) {
-                    sessionState = releaseSessionLocked(sessionToken, callingUid, resolvedUserId);
-                    userState = getUserStateLocked(userId);
-                }
-                if (sessionState != null) {
-                    TvInputState tvInputState = TvInputManagerService.getTvInputState(sessionState,
-                            userState);
-                    logTuneStateChanged(FrameworkStatsLog.TIF_TUNE_STATE_CHANGED__STATE__RELEASED,
-                            sessionState, tvInputState);
+                    releaseSessionLocked(sessionToken, callingUid, resolvedUserId);
                 }
             } finally {
                 Binder.restoreCallingIdentity(identity);
@@ -1535,24 +1301,16 @@ public final class TvInputManagerService extends SystemService {
             final int resolvedUserId = resolveCallingUserId(Binder.getCallingPid(), callingUid,
                     userId, "setSurface");
             final long identity = Binder.clearCallingIdentity();
-            SessionState sessionState = null;
-            UserState userState = null;
             try {
                 synchronized (mLock) {
                     try {
-                        userState = getUserStateLocked(userId);
-                        sessionState = getSessionStateLocked(sessionToken, callingUid,
+                        SessionState sessionState = getSessionStateLocked(sessionToken, callingUid,
                                 resolvedUserId);
                         if (sessionState.hardwareSessionToken == null) {
                             getSessionLocked(sessionState).setSurface(surface);
                         } else {
                             getSessionLocked(sessionState.hardwareSessionToken,
                                     Process.SYSTEM_UID, resolvedUserId).setSurface(surface);
-                        }
-                        boolean isVisible = (surface == null);
-                        if (sessionState.isVisible != isVisible) {
-                            sessionState.isVisible = isVisible;
-                            notifyCurrentChannelInfosUpdatedLocked(userState);
                         }
                     } catch (RemoteException | SessionNotFoundException e) {
                         Slog.e(TAG, "error in setSurface", e);
@@ -1562,14 +1320,6 @@ public final class TvInputManagerService extends SystemService {
                 if (surface != null) {
                     // surface is not used in TvInputManagerService.
                     surface.release();
-                }
-                if (sessionState != null) {
-                    int state = surface == null
-                            ?
-                            FrameworkStatsLog.TIF_TUNE_STATE_CHANGED__STATE__SURFACE_DETACHED
-                            : FrameworkStatsLog.TIF_TUNE_STATE_CHANGED__STATE__SURFACE_ATTACHED;
-                    logTuneStateChanged(state, sessionState,
-                            TvInputManagerService.getTvInputState(sessionState, userState));
                 }
                 Binder.restoreCallingIdentity(identity);
             }
@@ -1635,36 +1385,25 @@ public final class TvInputManagerService extends SystemService {
         @Override
         public void tune(IBinder sessionToken, final Uri channelUri, Bundle params, int userId) {
             final int callingUid = Binder.getCallingUid();
-            final int callingPid = Binder.getCallingPid();
-            final int resolvedUserId = resolveCallingUserId(callingPid, callingUid, userId, "tune");
+            final int resolvedUserId = resolveCallingUserId(Binder.getCallingPid(), callingUid,
+                    userId, "tune");
             final long identity = Binder.clearCallingIdentity();
             try {
                 synchronized (mLock) {
                     try {
                         getSessionLocked(sessionToken, callingUid, resolvedUserId).tune(
                                 channelUri, params);
-                        UserState userState = getOrCreateUserStateLocked(resolvedUserId);
-                        SessionState sessionState = getSessionStateLocked(sessionToken, callingUid,
-                                userState);
-                        if (!sessionState.isCurrent
-                                || !Objects.equals(sessionState.currentChannel, channelUri)) {
-                            sessionState.isCurrent = true;
-                            sessionState.currentChannel = channelUri;
-                            notifyCurrentChannelInfosUpdatedLocked(userState);
-                        }
                         if (TvContract.isChannelUriForPassthroughInput(channelUri)) {
                             // Do not log the watch history for passthrough inputs.
                             return;
                         }
 
+                        UserState userState = getOrCreateUserStateLocked(resolvedUserId);
+                        SessionState sessionState = userState.sessionStateMap.get(sessionToken);
                         if (sessionState.isRecordingSession) {
                             return;
                         }
 
-                        logTuneStateChanged(
-                                FrameworkStatsLog.TIF_TUNE_STATE_CHANGED__STATE__TUNE_STARTED,
-                                sessionState,
-                                TvInputManagerService.getTvInputState(sessionState, userState));
                         // Log the start of watch.
                         SomeArgs args = SomeArgs.obtain();
                         args.arg1 = sessionState.componentName.getPackageName();
@@ -1989,46 +1728,6 @@ public final class TvInputManagerService extends SystemService {
         }
 
         @Override
-        public void pauseRecording(IBinder sessionToken, @NonNull Bundle params, int userId) {
-            final int callingUid = Binder.getCallingUid();
-            final int resolvedUserId = resolveCallingUserId(Binder.getCallingPid(), callingUid,
-                    userId, "pauseRecording");
-            final long identity = Binder.clearCallingIdentity();
-            try {
-                synchronized (mLock) {
-                    try {
-                        getSessionLocked(sessionToken, callingUid, resolvedUserId)
-                                .pauseRecording(params);
-                    } catch (RemoteException | SessionNotFoundException e) {
-                        Slog.e(TAG, "error in pauseRecording", e);
-                    }
-                }
-            } finally {
-                Binder.restoreCallingIdentity(identity);
-            }
-        }
-
-        @Override
-        public void resumeRecording(IBinder sessionToken, @NonNull Bundle params, int userId) {
-            final int callingUid = Binder.getCallingUid();
-            final int resolvedUserId = resolveCallingUserId(Binder.getCallingPid(), callingUid,
-                    userId, "resumeRecording");
-            final long identity = Binder.clearCallingIdentity();
-            try {
-                synchronized (mLock) {
-                    try {
-                        getSessionLocked(sessionToken, callingUid, resolvedUserId)
-                                .resumeRecording(params);
-                    } catch (RemoteException | SessionNotFoundException e) {
-                        Slog.e(TAG, "error in resumeRecording", e);
-                    }
-                }
-            } finally {
-                Binder.restoreCallingIdentity(identity);
-            }
-        }
-
-        @Override
         public List<TvInputHardwareInfo> getHardwareList() throws RemoteException {
             if (mContext.checkCallingPermission(android.Manifest.permission.TV_INPUT_HARDWARE)
                     != PackageManager.PERMISSION_GRANTED) {
@@ -2282,8 +1981,10 @@ public final class TvInputManagerService extends SystemService {
                         SessionState[] sessionStates = userState.sessionStateMap.values().toArray(
                                 new SessionState[2]);
                         // Check if there is a wrapper input.
-                        return sessionStates[0].hardwareSessionToken != null
-                                || sessionStates[1].hardwareSessionToken != null;
+                        if (sessionStates[0].hardwareSessionToken != null
+                                || sessionStates[1].hardwareSessionToken != null) {
+                            return true;
+                        }
                     }
                     return false;
                 }
@@ -2346,28 +2047,11 @@ public final class TvInputManagerService extends SystemService {
             return clientPid;
         }
 
-        @Override
-        public List<TunedInfo> getCurrentTunedInfos(@UserIdInt int userId) {
-            if (mContext.checkCallingPermission(android.Manifest.permission.ACCESS_TUNED_INFO)
-                    != PackageManager.PERMISSION_GRANTED) {
-                throw new SecurityException(
-                        "The caller does not have access tuned info permission");
-            }
-            int callingPid = Binder.getCallingPid();
-            int callingUid = Binder.getCallingUid();
-            final int resolvedUserId = resolveCallingUserId(callingPid, callingUid, userId,
-                    "getTvCurrentChannelInfos");
-            synchronized (mLock) {
-                UserState userState = getOrCreateUserStateLocked(resolvedUserId);
-                return getCurrentTunedInfosInternalLocked(userState, callingPid, callingUid);
-            }
-        }
-
         /**
          * Add a hardware device in the TvInputHardwareManager for CTS testing
          * purpose.
          *
-         * @param deviceId  the id of the adding hardware device.
+         * @param device id of the adding hardware device.
          */
         @Override
         public void addHardwareDevice(int deviceId) {
@@ -2379,20 +2063,20 @@ public final class TvInputManagerService extends SystemService {
                         .hdmiPortId(0)
                         .build();
             mTvInputHardwareManager.onDeviceAvailable(info, null);
+            return;
         }
 
         /**
          * Remove a hardware device in the TvInputHardwareManager for CTS testing
          * purpose.
          *
-         * @param deviceId the id of the removing hardware device.
+         * @param device id of the removing hardware device.
          */
         @Override
         public void removeHardwareDevice(int deviceId) {
             mTvInputHardwareManager.onDeviceUnavailable(deviceId);
         }
 
-        @GuardedBy("mLock")
         private int getClientPidLocked(String sessionId)
                 throws IllegalStateException {
             if (mSessionIdToSessionStateMap.get(sessionId) == null) {
@@ -2510,6 +2194,7 @@ public final class TvInputManagerService extends SystemService {
                         pw.println("userId: " + session.userId);
                         pw.println("sessionToken: " + session.sessionToken);
                         pw.println("session: " + session.session);
+                        pw.println("logUri: " + session.logUri);
                         pw.println("hardwareSessionToken: " + session.hardwareSessionToken);
                         pw.decreaseIndent();
                     }
@@ -2519,7 +2204,7 @@ public final class TvInputManagerService extends SystemService {
                     pw.increaseIndent();
                     int n = userState.mCallbacks.beginBroadcast();
                     for (int j = 0; j < n; ++j) {
-                        pw.println(userState.mCallbacks.getRegisteredCallbackItem(j));
+                        pw.println(userState.mCallbacks.getRegisteredCallbackItem(j).toString());
                     }
                     userState.mCallbacks.finishBroadcast();
                     pw.decreaseIndent();
@@ -2530,107 +2215,6 @@ public final class TvInputManagerService extends SystemService {
             }
             mTvInputHardwareManager.dump(fd, writer, args);
         }
-    }
-
-    @Nullable
-    private static TvInputState getTvInputState(
-            SessionState sessionState,
-            @Nullable UserState userState) {
-        if (userState != null) {
-            return userState.inputMap.get(sessionState.inputId);
-        }
-        return null;
-    }
-
-    @GuardedBy("mLock")
-    private List<TunedInfo> getCurrentTunedInfosInternalLocked(
-            UserState userState, int callingPid, int callingUid) {
-        List<TunedInfo> channelInfos = new ArrayList<>();
-        boolean watchedProgramsAccess = hasAccessWatchedProgramsPermission(callingPid, callingUid);
-        for (SessionState state : userState.sessionStateMap.values()) {
-            if (state.isCurrent) {
-                Integer appTag;
-                int appType;
-                if (state.callingUid == callingUid) {
-                    appTag = APP_TAG_SELF;
-                    appType = TunedInfo.APP_TYPE_SELF;
-                } else {
-                    appTag = userState.mAppTagMap.get(state.callingUid);
-                    if (appTag == null) {
-                        appTag = userState.mNextAppTag++;
-                        userState.mAppTagMap.put(state.callingUid, appTag);
-                    }
-                    appType = isSystemApp(state.componentName.getPackageName())
-                            ? TunedInfo.APP_TYPE_SYSTEM
-                            : TunedInfo.APP_TYPE_NON_SYSTEM;
-                }
-                channelInfos.add(new TunedInfo(
-                        state.inputId,
-                        watchedProgramsAccess ? state.currentChannel : null,
-                        state.isRecordingSession,
-                        state.isVisible,
-                        state.isMainSession,
-                        appType,
-                        appTag));
-            }
-        }
-        return channelInfos;
-    }
-
-    private boolean hasAccessWatchedProgramsPermission(int callingPid, int callingUid) {
-        return mContext.checkPermission(PERMISSION_ACCESS_WATCHED_PROGRAMS, callingPid, callingUid)
-                == PackageManager.PERMISSION_GRANTED;
-    }
-
-    private boolean isSystemApp(String pkg) {
-        try {
-            return (mContext.getPackageManager().getApplicationInfo(pkg, 0).flags
-                    & ApplicationInfo.FLAG_SYSTEM) != 0;
-        } catch (NameNotFoundException e) {
-            return false;
-        }
-    }
-
-    /**
-     * Log Tune state changes to {@link FrameworkStatsLog}.
-     *
-     * <p><b>WARNING</b> Any changes to this field should be carefully reviewed for privacy.
-     * Inspect the code at:
-     *
-     * <ul>
-     *   <li>framework/base/cmds/statsd/src/atoms.proto#TifTuneState
-     *   <li>{@link #logTuneStateChanged}
-     *   <li>{@link TvInputManagerService.BinderService#createSession}
-     *   <li>{@link SessionState#sessionId}
-     * </ul>
-     */
-    private void logTuneStateChanged(int state, SessionState sessionState,
-            @Nullable TvInputState inputState) {
-        int tisUid = Process.INVALID_UID;
-        int inputType = FrameworkStatsLog.TIF_TUNE_STATE_CHANGED__TYPE__TIF_INPUT_TYPE_UNKNOWN;
-        int inputId = 0;
-        int hdmiPort = 0;
-        if (inputState != null) {
-            tisUid = inputState.uid;
-            inputType = inputState.info.getType();
-            if (inputType == TvInputInfo.TYPE_TUNER) {
-                inputType = FrameworkStatsLog.TIF_TUNE_STATE_CHANGED__TYPE__TUNER;
-            }
-            inputId = inputState.inputNumber;
-            HdmiDeviceInfo hdmiDeviceInfo = inputState.info.getHdmiDeviceInfo();
-            if (hdmiDeviceInfo != null) {
-                hdmiPort = hdmiDeviceInfo.getPortId();
-            }
-        }
-        FrameworkStatsLog.write(FrameworkStatsLog.TIF_TUNE_CHANGED,
-                new int[]{sessionState.callingUid,
-                        tisUid},
-                new String[]{"tif_player", "tv_input_service"},
-                state,
-                sessionState.sessionId,
-                inputType,
-                inputId,
-                hdmiPort);
     }
 
     private static final class UserState {
@@ -2655,10 +2239,7 @@ public final class TvInputManagerService extends SystemService {
 
         // A list of callbacks.
         private final RemoteCallbackList<ITvInputManagerCallback> mCallbacks =
-                new RemoteCallbackList<>();
-
-        private final Map<ITvInputManagerCallback, Pair<Integer, Integer>> callbackPidUidMap =
-                new HashMap<>();
+                new RemoteCallbackList<ITvInputManagerCallback>();
 
         // The token of a "main" TV input session.
         private IBinder mainSessionToken = null;
@@ -2666,11 +2247,6 @@ public final class TvInputManagerService extends SystemService {
         // Persistent data store for all internal settings maintained by the TV input manager
         // service.
         private final PersistentDataStore persistentDataStore;
-
-        @GuardedBy("TvInputManagerService.this.mLock")
-        private final Map<Integer, Integer> mAppTagMap = new HashMap<>();
-        @GuardedBy("TvInputManagerService.this.mLock")
-        private int mNextAppTag = 1;
 
         private UserState(Context context, int userId) {
             persistentDataStore = new PersistentDataStore(context, userId);
@@ -2701,16 +2277,8 @@ public final class TvInputManagerService extends SystemService {
                 ClientState clientState = userState.clientStateMap.get(clientToken);
                 if (clientState != null) {
                     while (clientState.sessionTokens.size() > 0) {
-                        IBinder sessionToken = clientState.sessionTokens.get(0);
                         releaseSessionLocked(
-                                sessionToken, Process.SYSTEM_UID, userId);
-                        // the releaseSessionLocked function may return before the sessionToken
-                        // is removed if the related sessionState is null. So need to check again
-                        // to avoid death curculation.
-                        if (clientState.sessionTokens.contains(sessionToken)) {
-                            Slog.d(TAG, "remove sessionToken " + sessionToken + " for " + clientToken);
-                            clientState.sessionTokens.remove(sessionToken);
-                        }
+                                clientState.sessionTokens.get(0), Process.SYSTEM_UID, userId);
                     }
                 }
                 clientToken = null;
@@ -2738,30 +2306,10 @@ public final class TvInputManagerService extends SystemService {
     }
 
     private static final class TvInputState {
-
-        /** A TvInputInfo object which represents the TV input. */
+        // A TvInputInfo object which represents the TV input.
         private TvInputInfo info;
 
-        /**
-         * ID unique to a specific TvInputService.
-         */
-        private int inputNumber;
-
-        /**
-         * The kernel user-ID that has been assigned to the application the TvInput is a part of.
-         *
-         * <p>
-         * Currently this is not a unique ID (multiple applications can have
-         * the same uid).
-         */
-        private int uid;
-
-        /**
-         * The state of TV input.
-         *
-         * <p>
-         * Connected by default
-         */
+        // The state of TV input. Connected by default.
         private int state = INPUT_STATE_CONNECTED;
 
         @Override
@@ -2772,52 +2320,19 @@ public final class TvInputManagerService extends SystemService {
 
     private final class SessionState implements IBinder.DeathRecipient {
         private final String inputId;
-
-        /**
-         * A randomly generated id for this this session.
-         *
-         * <p>This field contains no user or device reference and is large enough to be
-         * effectively globally unique.
-         *
-         * <p><b>WARNING</b> Any changes to this field should be carefully reviewed for privacy.
-         * Inspect the code at:
-         *
-         * <ul>
-         *   <li>framework/base/cmds/statsd/src/atoms.proto#TifTuneState
-         *   <li>{@link #logTuneStateChanged}
-         *   <li>{@link TvInputManagerService.BinderService#createSession}
-         *   <li>{@link SessionState#sessionId}
-         * </ul>
-         */
         private final String sessionId;
         private final ComponentName componentName;
         private final boolean isRecordingSession;
         private final ITvInputClient client;
         private final int seq;
-        /**
-         * The {code UID} of the application that created the session.
-         *
-         * <p>
-         * The application is usually the TIF Player.
-         */
         private final int callingUid;
-        /**
-         * The  {@code PID} of the application that created the session.
-         *
-         * <p>
-         * The application is usually the TIF Player.
-         */
         private final int callingPid;
         private final int userId;
         private final IBinder sessionToken;
         private ITvInputSession session;
+        private Uri logUri;
         // Not null if this session represents an external device connected to a hardware TV input.
         private IBinder hardwareSessionToken;
-
-        private boolean isCurrent = false;
-        private Uri currentChannel = null;
-        private boolean isVisible = false;
-        private boolean isMainSession = false;
 
         private SessionState(IBinder sessionToken, String inputId, ComponentName componentName,
                 boolean isRecordingSession, ITvInputClient client, int seq, int callingUid,
@@ -2858,7 +2373,7 @@ public final class TvInputManagerService extends SystemService {
                 Slog.d(TAG, "onServiceConnected(component=" + component + ")");
             }
             synchronized (mLock) {
-                UserState userState = getUserStateLocked(mUserId);
+                UserState userState = mUserStates.get(mUserId);
                 if (userState == null) {
                     // The user was removed while connecting.
                     mContext.unbindService(this);
@@ -2964,7 +2479,6 @@ public final class TvInputManagerService extends SystemService {
             }
         }
 
-        @GuardedBy("mLock")
         private void addHardwareInputLocked(TvInputInfo inputInfo) {
             ServiceState serviceState = getServiceStateLocked(mComponent, mUserId);
             serviceState.hardwareInputMap.put(inputInfo.getId(), inputInfo);
@@ -3034,7 +2548,6 @@ public final class TvInputManagerService extends SystemService {
             }
         }
 
-        @GuardedBy("mLock")
         private boolean addSessionTokenToClientStateLocked(ITvInputSession session) {
             try {
                 session.asBinder().linkToDeath(mSessionState, 0);
@@ -3075,13 +2588,6 @@ public final class TvInputManagerService extends SystemService {
                     // be addressed. e.g. add a field which represents where the channel change
                     // originated from.
                     mSessionState.client.onChannelRetuned(channelUri, mSessionState.seq);
-                    if (!mSessionState.isCurrent
-                            || !Objects.equals(mSessionState.currentChannel, channelUri)) {
-                        UserState userState = getOrCreateUserStateLocked(mSessionState.userId);
-                        mSessionState.isCurrent = true;
-                        mSessionState.currentChannel = channelUri;
-                        notifyCurrentChannelInfosUpdatedLocked(userState);
-                    }
                 } catch (RemoteException e) {
                     Slog.e(TAG, "error in onChannelRetuned", e);
                 }
@@ -3131,13 +2637,8 @@ public final class TvInputManagerService extends SystemService {
                 if (mSessionState.session == null || mSessionState.client == null) {
                     return;
                 }
-                TvInputState tvInputState = getTvInputState(mSessionState,
-                        getUserStateLocked(mCurrentUserId));
                 try {
                     mSessionState.client.onVideoAvailable(mSessionState.seq);
-                    logTuneStateChanged(
-                            FrameworkStatsLog.TIF_TUNE_STATE_CHANGED__STATE__VIDEO_AVAILABLE,
-                            mSessionState, tvInputState);
                 } catch (RemoteException e) {
                     Slog.e(TAG, "error in onVideoAvailable", e);
                 }
@@ -3153,12 +2654,8 @@ public final class TvInputManagerService extends SystemService {
                 if (mSessionState.session == null || mSessionState.client == null) {
                     return;
                 }
-                TvInputState tvInputState = getTvInputState(mSessionState,
-                        getUserStateLocked(mCurrentUserId));
                 try {
                     mSessionState.client.onVideoUnavailable(reason, mSessionState.seq);
-                    int loggedReason = getVideoUnavailableReasonForStatsd(reason);
-                    logTuneStateChanged(loggedReason, mSessionState, tvInputState);
                 } catch (RemoteException e) {
                     Slog.e(TAG, "error in onVideoUnavailable", e);
                 }
@@ -3344,25 +2841,6 @@ public final class TvInputManagerService extends SystemService {
         }
     }
 
-    @VisibleForTesting
-    static int getVideoUnavailableReasonForStatsd(
-            @TvInputManager.VideoUnavailableReason int reason) {
-        int loggedReason = reason + FrameworkStatsLog
-                .TIF_TUNE_STATE_CHANGED__STATE__VIDEO_UNAVAILABLE_REASON_UNKNOWN;
-        if (loggedReason < FrameworkStatsLog
-                .TIF_TUNE_STATE_CHANGED__STATE__VIDEO_UNAVAILABLE_REASON_UNKNOWN
-                || loggedReason > FrameworkStatsLog
-                .TIF_TUNE_STATE_CHANGED__STATE__VIDEO_UNAVAILABLE_REASON_CAS_UNKNOWN) {
-            loggedReason = FrameworkStatsLog
-                    .TIF_TUNE_STATE_CHANGED__STATE__VIDEO_UNAVAILABLE_REASON_UNKNOWN;
-        }
-        return loggedReason;
-    }
-
-    private UserState getUserStateLocked(int userId) {
-        return mUserStates.get(userId);
-    }
-
     private static final class WatchLogHandler extends Handler {
         // There are only two kinds of watch events that can happen on the system:
         // 1. The current TV input session is tuned to a new channel.
@@ -3395,7 +2873,7 @@ public final class TvInputManagerService extends SystemService {
                     IBinder sessionToken = (IBinder) args.arg5;
 
                     ContentValues values = new ContentValues();
-                    values.put(TvContract.BaseTvColumns.COLUMN_PACKAGE_NAME, packageName);
+                    values.put(TvContract.WatchedPrograms.COLUMN_PACKAGE_NAME, packageName);
                     values.put(TvContract.WatchedPrograms.COLUMN_WATCH_START_TIME_UTC_MILLIS,
                             watchStartTime);
                     values.put(TvContract.WatchedPrograms.COLUMN_CHANNEL_ID, channelId);
@@ -3406,11 +2884,7 @@ public final class TvInputManagerService extends SystemService {
                     values.put(TvContract.WatchedPrograms.COLUMN_INTERNAL_SESSION_TOKEN,
                             sessionToken.toString());
 
-                    try{
-                        mContentResolver.insert(TvContract.WatchedPrograms.CONTENT_URI, values);
-                    }catch(IllegalArgumentException ex){
-                        Slog.w(TAG, "error in insert db for MSG_LOG_WATCH_START", ex);
-                    }
+                    mContentResolver.insert(TvContract.WatchedPrograms.CONTENT_URI, values);
                     args.recycle();
                     break;
                 }
@@ -3425,11 +2899,7 @@ public final class TvInputManagerService extends SystemService {
                     values.put(TvContract.WatchedPrograms.COLUMN_INTERNAL_SESSION_TOKEN,
                             sessionToken.toString());
 
-                    try{
-                        mContentResolver.insert(TvContract.WatchedPrograms.CONTENT_URI, values);
-                    }catch(IllegalArgumentException ex){
-                        Slog.w(TAG, "error in insert db for MSG_LOG_WATCH_END", ex);
-                    }
+                    mContentResolver.insert(TvContract.WatchedPrograms.CONTENT_URI, values);
                     args.recycle();
                     break;
                 }

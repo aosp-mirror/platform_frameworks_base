@@ -21,7 +21,6 @@ import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_APPEARANCE_CO
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_BEHAVIOR_CONTROLLED;
 
 import android.annotation.NonNull;
-import android.content.res.CompatibilityInfo;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -110,10 +109,6 @@ public class ViewRootInsetsControllerHost implements InsetsController.Host {
     @Override
     public void dispatchWindowInsetsAnimationEnd(@NonNull WindowInsetsAnimation animation) {
         if (DEBUG) Log.d(TAG, "windowInsetsAnimation ended");
-        if (mViewRoot.mView == null) {
-            // The view has already detached from window.
-            return;
-        }
         mViewRoot.mView.dispatchWindowInsetsAnimationEnd(animation);
     }
 
@@ -131,9 +126,7 @@ public class ViewRootInsetsControllerHost implements InsetsController.Host {
             // Window doesn't support hardware acceleration, no synchronization for now.
             // TODO(b/149342281): use mViewRoot.mSurface.getNextFrameNumber() to sync on every
             //  frame instead.
-            final SurfaceControl.Transaction t = new SurfaceControl.Transaction();
-            mApplier.applyParams(t, params);
-            mApplier.applyTransaction(t, -1);
+            mApplier.applyParams(new SurfaceControl.Transaction(), -1 /* frame */, params);
         }
     }
 
@@ -151,9 +144,7 @@ public class ViewRootInsetsControllerHost implements InsetsController.Host {
     @Override
     public void onInsetsModified(InsetsState insetsState) {
         try {
-            if (mViewRoot.mAdded) {
-                mViewRoot.mWindowSession.insetsModified(mViewRoot.mWindow, insetsState);
-            }
+            mViewRoot.mWindowSession.insetsModified(mViewRoot.mWindow, insetsState);
         } catch (RemoteException e) {
             Log.e(TAG, "Failed to call insetsModified", e);
         }
@@ -180,12 +171,11 @@ public class ViewRootInsetsControllerHost implements InsetsController.Host {
 
     @Override
     public int getSystemBarsAppearance() {
+        if ((mViewRoot.mWindowAttributes.privateFlags & PRIVATE_FLAG_APPEARANCE_CONTROLLED) == 0) {
+            // We only return the requested appearance, not the implied one.
+            return 0;
+        }
         return mViewRoot.mWindowAttributes.insetsFlags.appearance;
-    }
-
-    @Override
-    public boolean isSystemBarsAppearanceControlled() {
-        return (mViewRoot.mWindowAttributes.privateFlags & PRIVATE_FLAG_APPEARANCE_CONTROLLED) != 0;
     }
 
     @Override
@@ -200,12 +190,11 @@ public class ViewRootInsetsControllerHost implements InsetsController.Host {
 
     @Override
     public int getSystemBarsBehavior() {
+        if ((mViewRoot.mWindowAttributes.privateFlags & PRIVATE_FLAG_BEHAVIOR_CONTROLLED) == 0) {
+            // We only return the requested behavior, not the implied one.
+            return 0;
+        }
         return mViewRoot.mWindowAttributes.insetsFlags.behavior;
-    }
-
-    @Override
-    public boolean isSystemBarsBehaviorControlled() {
-        return (mViewRoot.mWindowAttributes.privateFlags & PRIVATE_FLAG_BEHAVIOR_CONTROLLED) != 0;
     }
 
     @Override
@@ -259,13 +248,5 @@ public class ViewRootInsetsControllerHost implements InsetsController.Host {
             return null;
         }
         return view.getWindowToken();
-    }
-
-    @Override
-    public CompatibilityInfo.Translator getTranslator() {
-        if (mViewRoot != null) {
-            return mViewRoot.mTranslator;
-        }
-        return null;
     }
 }

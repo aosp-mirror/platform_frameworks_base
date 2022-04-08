@@ -16,7 +16,6 @@
 
 package android.bluetooth.le;
 
-import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 
 import java.util.List;
@@ -27,7 +26,6 @@ import java.util.List;
  * @hide
  */
 @SystemApi
-@SuppressLint("AndroidFrameworkBluetoothPermission")
 public final class TruncatedFilter {
     private final ScanFilter mFilter;
     private final List<ResultStorageDescriptor> mStorageDescriptors;

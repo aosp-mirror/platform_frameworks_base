@@ -1,0 +1,1273 @@
+// Baseline format: 1.0
+AcronymName: android.system.ErrnoException#rethrowAsIOException():
+    
+
+
+ActionValue: android.provider.Settings#ACTION_CONDITION_PROVIDER_SETTINGS:
+    
+
+
+AllUpper: android.media.MediaCodecInfo.CodecCapabilities#FEATURE_LowLatency:
+    
+
+
+ArrayReturn: android.app.Notification.MessagingStyle.Message#getMessagesFromBundleArray(android.os.Parcelable[]) parameter #0:
+    
+ArrayReturn: android.content.ContentProviderOperation#resolveExtrasBackReferences(android.content.ContentProviderResult[], int) parameter #0:
+    
+ArrayReturn: android.location.GnssAntennaInfo.SphericalCorrections#SphericalCorrections(double[][], double[][]) parameter #0:
+    Method parameter should be Collection<> (or subclass) instead of raw array; was `double[][]`
+ArrayReturn: android.location.GnssAntennaInfo.SphericalCorrections#SphericalCorrections(double[][], double[][]) parameter #1:
+    Method parameter should be Collection<> (or subclass) instead of raw array; was `double[][]`
+ArrayReturn: android.location.GnssAntennaInfo.SphericalCorrections#getCorrectionUncertaintiesArray():
+    Method should return Collection<> (or subclass) instead of raw array; was `double[][]`
+ArrayReturn: android.location.GnssAntennaInfo.SphericalCorrections#getCorrectionsArray():
+    Method should return Collection<> (or subclass) instead of raw array; was `double[][]`
+ArrayReturn: android.service.autofill.FillResponse.Builder#setAuthentication(android.view.autofill.AutofillId[], android.content.IntentSender, android.widget.RemoteViews, android.service.autofill.InlinePresentation) parameter #0:
+    Method parameter should be Collection<AutofillId> (or subclass) instead of raw array; was `android.view.autofill.AutofillId[]`
+
+
+BroadcastBehavior: android.app.AlarmManager#ACTION_NEXT_ALARM_CLOCK_CHANGED:
+    
+BroadcastBehavior: android.app.admin.DevicePolicyManager#ACTION_APPLICATION_DELEGATION_SCOPES_CHANGED:
+    
+BroadcastBehavior: android.app.admin.DevicePolicyManager#ACTION_MANAGED_PROFILE_PROVISIONED:
+    
+BroadcastBehavior: android.bluetooth.BluetoothAdapter#ACTION_DISCOVERY_FINISHED:
+    
+BroadcastBehavior: android.bluetooth.BluetoothAdapter#ACTION_DISCOVERY_STARTED:
+    
+BroadcastBehavior: android.bluetooth.BluetoothAdapter#ACTION_LOCAL_NAME_CHANGED:
+    
+BroadcastBehavior: android.bluetooth.BluetoothAdapter#ACTION_SCAN_MODE_CHANGED:
+    
+BroadcastBehavior: android.bluetooth.BluetoothAdapter#ACTION_STATE_CHANGED:
+    
+BroadcastBehavior: android.bluetooth.BluetoothDevice#ACTION_ACL_CONNECTED:
+    
+BroadcastBehavior: android.bluetooth.BluetoothDevice#ACTION_ACL_DISCONNECTED:
+    
+BroadcastBehavior: android.bluetooth.BluetoothDevice#ACTION_ACL_DISCONNECT_REQUESTED:
+    
+BroadcastBehavior: android.bluetooth.BluetoothDevice#ACTION_BOND_STATE_CHANGED:
+    
+BroadcastBehavior: android.bluetooth.BluetoothDevice#ACTION_CLASS_CHANGED:
+    
+BroadcastBehavior: android.bluetooth.BluetoothDevice#ACTION_FOUND:
+    
+BroadcastBehavior: android.bluetooth.BluetoothDevice#ACTION_NAME_CHANGED:
+    
+BroadcastBehavior: android.bluetooth.BluetoothDevice#ACTION_PAIRING_REQUEST:
+    
+BroadcastBehavior: android.bluetooth.BluetoothDevice#ACTION_UUID:
+    
+BroadcastBehavior: android.content.Intent#ACTION_AIRPLANE_MODE_CHANGED:
+    
+BroadcastBehavior: android.content.Intent#ACTION_APPLICATION_RESTRICTIONS_CHANGED:
+    
+BroadcastBehavior: android.content.Intent#ACTION_BATTERY_CHANGED:
+    
+BroadcastBehavior: android.content.Intent#ACTION_BATTERY_LOW:
+    
+BroadcastBehavior: android.content.Intent#ACTION_BATTERY_OKAY:
+    
+BroadcastBehavior: android.content.Intent#ACTION_CAMERA_BUTTON:
+    
+BroadcastBehavior: android.content.Intent#ACTION_CLOSE_SYSTEM_DIALOGS:
+    
+BroadcastBehavior: android.content.Intent#ACTION_CONFIGURATION_CHANGED:
+    
+BroadcastBehavior: android.content.Intent#ACTION_DATE_CHANGED:
+    
+BroadcastBehavior: android.content.Intent#ACTION_DEVICE_STORAGE_LOW:
+    
+BroadcastBehavior: android.content.Intent#ACTION_DEVICE_STORAGE_OK:
+    
+BroadcastBehavior: android.content.Intent#ACTION_DOCK_EVENT:
+    
+BroadcastBehavior: android.content.Intent#ACTION_DREAMING_STARTED:
+    
+BroadcastBehavior: android.content.Intent#ACTION_DREAMING_STOPPED:
+    
+BroadcastBehavior: android.content.Intent#ACTION_EXTERNAL_APPLICATIONS_AVAILABLE:
+    
+BroadcastBehavior: android.content.Intent#ACTION_EXTERNAL_APPLICATIONS_UNAVAILABLE:
+    
+BroadcastBehavior: android.content.Intent#ACTION_GTALK_SERVICE_CONNECTED:
+    
+BroadcastBehavior: android.content.Intent#ACTION_GTALK_SERVICE_DISCONNECTED:
+    
+BroadcastBehavior: android.content.Intent#ACTION_HEADSET_PLUG:
+    
+BroadcastBehavior: android.content.Intent#ACTION_INPUT_METHOD_CHANGED:
+    
+BroadcastBehavior: android.content.Intent#ACTION_LOCALE_CHANGED:
+    
+BroadcastBehavior: android.content.Intent#ACTION_LOCKED_BOOT_COMPLETED:
+    
+BroadcastBehavior: android.content.Intent#ACTION_MANAGE_PACKAGE_STORAGE:
+    
+BroadcastBehavior: android.content.Intent#ACTION_MEDIA_BAD_REMOVAL:
+    
+BroadcastBehavior: android.content.Intent#ACTION_MEDIA_BUTTON:
+    
+BroadcastBehavior: android.content.Intent#ACTION_MEDIA_CHECKING:
+    
+BroadcastBehavior: android.content.Intent#ACTION_MEDIA_EJECT:
+    
+BroadcastBehavior: android.content.Intent#ACTION_MEDIA_MOUNTED:
+    
+BroadcastBehavior: android.content.Intent#ACTION_MEDIA_NOFS:
+    
+BroadcastBehavior: android.content.Intent#ACTION_MEDIA_REMOVED:
+    
+BroadcastBehavior: android.content.Intent#ACTION_MEDIA_SCANNER_FINISHED:
+    
+BroadcastBehavior: android.content.Intent#ACTION_MEDIA_SCANNER_SCAN_FILE:
+    
+BroadcastBehavior: android.content.Intent#ACTION_MEDIA_SCANNER_STARTED:
+    
+BroadcastBehavior: android.content.Intent#ACTION_MEDIA_SHARED:
+    
+BroadcastBehavior: android.content.Intent#ACTION_MEDIA_UNMOUNTABLE:
+    
+BroadcastBehavior: android.content.Intent#ACTION_MEDIA_UNMOUNTED:
+    
+BroadcastBehavior: android.content.Intent#ACTION_MY_PACKAGE_REPLACED:
+    
+BroadcastBehavior: android.content.Intent#ACTION_MY_PACKAGE_SUSPENDED:
+    
+BroadcastBehavior: android.content.Intent#ACTION_MY_PACKAGE_UNSUSPENDED:
+    
+BroadcastBehavior: android.content.Intent#ACTION_NEW_OUTGOING_CALL:
+    
+BroadcastBehavior: android.content.Intent#ACTION_PACKAGES_SUSPENDED:
+    
+BroadcastBehavior: android.content.Intent#ACTION_PACKAGES_UNSUSPENDED:
+    
+BroadcastBehavior: android.content.Intent#ACTION_PACKAGE_ADDED:
+    
+BroadcastBehavior: android.content.Intent#ACTION_PACKAGE_CHANGED:
+    
+BroadcastBehavior: android.content.Intent#ACTION_PACKAGE_DATA_CLEARED:
+    
+BroadcastBehavior: android.content.Intent#ACTION_PACKAGE_FIRST_LAUNCH:
+    
+BroadcastBehavior: android.content.Intent#ACTION_PACKAGE_FULLY_REMOVED:
+    
+BroadcastBehavior: android.content.Intent#ACTION_PACKAGE_INSTALL:
+    
+BroadcastBehavior: android.content.Intent#ACTION_PACKAGE_NEEDS_VERIFICATION:
+    
+BroadcastBehavior: android.content.Intent#ACTION_PACKAGE_REMOVED:
+    
+BroadcastBehavior: android.content.Intent#ACTION_PACKAGE_REPLACED:
+    
+BroadcastBehavior: android.content.Intent#ACTION_PACKAGE_RESTARTED:
+    
+BroadcastBehavior: android.content.Intent#ACTION_PACKAGE_VERIFIED:
+    
+BroadcastBehavior: android.content.Intent#ACTION_POWER_CONNECTED:
+    
+BroadcastBehavior: android.content.Intent#ACTION_POWER_DISCONNECTED:
+    
+BroadcastBehavior: android.content.Intent#ACTION_PROVIDER_CHANGED:
+    
+BroadcastBehavior: android.content.Intent#ACTION_REBOOT:
+    
+BroadcastBehavior: android.content.Intent#ACTION_SCREEN_OFF:
+    
+BroadcastBehavior: android.content.Intent#ACTION_SCREEN_ON:
+    
+BroadcastBehavior: android.content.Intent#ACTION_SHUTDOWN:
+    
+BroadcastBehavior: android.content.Intent#ACTION_TIMEZONE_CHANGED:
+    
+BroadcastBehavior: android.content.Intent#ACTION_TIME_CHANGED:
+    
+BroadcastBehavior: android.content.Intent#ACTION_TIME_TICK:
+    
+BroadcastBehavior: android.content.Intent#ACTION_UID_REMOVED:
+    
+BroadcastBehavior: android.content.Intent#ACTION_UMS_CONNECTED:
+    
+BroadcastBehavior: android.content.Intent#ACTION_UMS_DISCONNECTED:
+    
+BroadcastBehavior: android.content.Intent#ACTION_USER_PRESENT:
+    
+BroadcastBehavior: android.content.Intent#ACTION_USER_UNLOCKED:
+    
+BroadcastBehavior: android.content.Intent#ACTION_WALLPAPER_CHANGED:
+    
+BroadcastBehavior: android.content.pm.PackageInstaller#ACTION_SESSION_COMMITTED:
+    
+BroadcastBehavior: android.content.pm.PackageInstaller#ACTION_SESSION_UPDATED:
+    
+BroadcastBehavior: android.hardware.Camera#ACTION_NEW_PICTURE:
+    
+BroadcastBehavior: android.hardware.Camera#ACTION_NEW_VIDEO:
+    
+BroadcastBehavior: android.hardware.input.InputManager#ACTION_QUERY_KEYBOARD_LAYOUTS:
+    
+BroadcastBehavior: android.hardware.usb.UsbManager#ACTION_USB_ACCESSORY_DETACHED:
+    
+BroadcastBehavior: android.hardware.usb.UsbManager#ACTION_USB_DEVICE_DETACHED:
+    
+BroadcastBehavior: android.media.AudioManager#ACTION_HDMI_AUDIO_PLUG:
+    
+BroadcastBehavior: android.media.AudioManager#ACTION_HEADSET_PLUG:
+    
+BroadcastBehavior: android.media.AudioManager#ACTION_MICROPHONE_MUTE_CHANGED:
+    
+BroadcastBehavior: android.media.AudioManager#ACTION_SPEAKERPHONE_STATE_CHANGED:
+    
+BroadcastBehavior: android.media.tv.TvContract#ACTION_INITIALIZE_PROGRAMS:
+    
+BroadcastBehavior: android.media.tv.TvContract#ACTION_PREVIEW_PROGRAM_ADDED_TO_WATCH_NEXT:
+    
+BroadcastBehavior: android.media.tv.TvContract#ACTION_PREVIEW_PROGRAM_BROWSABLE_DISABLED:
+    
+BroadcastBehavior: android.media.tv.TvContract#ACTION_WATCH_NEXT_PROGRAM_BROWSABLE_DISABLED:
+    
+BroadcastBehavior: android.net.ConnectivityManager#ACTION_BACKGROUND_DATA_SETTING_CHANGED:
+    
+BroadcastBehavior: android.net.Proxy#PROXY_CHANGE_ACTION:
+    
+BroadcastBehavior: android.nfc.NfcAdapter#ACTION_ADAPTER_STATE_CHANGED:
+    
+BroadcastBehavior: android.nfc.NfcAdapter#ACTION_TRANSACTION_DETECTED:
+    
+BroadcastBehavior: android.os.DropBoxManager#ACTION_DROPBOX_ENTRY_ADDED:
+    
+BroadcastBehavior: android.provider.CalendarContract#ACTION_EVENT_REMINDER:
+    
+BroadcastBehavior: android.provider.Telephony.Sms.Intents#DATA_SMS_RECEIVED_ACTION:
+    
+BroadcastBehavior: android.provider.Telephony.Sms.Intents#SECRET_CODE_ACTION:
+    
+BroadcastBehavior: android.provider.Telephony.Sms.Intents#SIM_FULL_ACTION:
+    
+BroadcastBehavior: android.provider.Telephony.Sms.Intents#SMS_CB_RECEIVED_ACTION:
+    
+BroadcastBehavior: android.provider.Telephony.Sms.Intents#SMS_DELIVER_ACTION:
+    
+BroadcastBehavior: android.provider.Telephony.Sms.Intents#SMS_RECEIVED_ACTION:
+    
+BroadcastBehavior: android.provider.Telephony.Sms.Intents#SMS_REJECTED_ACTION:
+    
+BroadcastBehavior: android.provider.Telephony.Sms.Intents#SMS_SERVICE_CATEGORY_PROGRAM_DATA_RECEIVED_ACTION:
+    
+BroadcastBehavior: android.provider.Telephony.Sms.Intents#WAP_PUSH_DELIVER_ACTION:
+    
+BroadcastBehavior: android.provider.Telephony.Sms.Intents#WAP_PUSH_RECEIVED_ACTION:
+    
+BroadcastBehavior: android.security.KeyChain#ACTION_KEYCHAIN_CHANGED:
+    
+BroadcastBehavior: android.security.KeyChain#ACTION_KEY_ACCESS_CHANGED:
+    
+BroadcastBehavior: android.security.KeyChain#ACTION_STORAGE_CHANGED:
+    
+BroadcastBehavior: android.security.KeyChain#ACTION_TRUST_STORE_CHANGED:
+    
+BroadcastBehavior: android.speech.tts.TextToSpeech#ACTION_TTS_QUEUE_PROCESSING_COMPLETED:
+    
+BroadcastBehavior: android.speech.tts.TextToSpeech.Engine#ACTION_TTS_DATA_INSTALLED:
+    
+BroadcastBehavior: android.telephony.SubscriptionManager#ACTION_DEFAULT_SMS_SUBSCRIPTION_CHANGED:
+    
+BroadcastBehavior: android.telephony.SubscriptionManager#ACTION_DEFAULT_SUBSCRIPTION_CHANGED:
+    
+BroadcastBehavior: android.telephony.SubscriptionManager#ACTION_REFRESH_SUBSCRIPTION_PLANS:
+    
+BroadcastBehavior: android.telephony.TelephonyManager#ACTION_SECRET_CODE:
+    
+BroadcastBehavior: android.telephony.TelephonyManager#ACTION_SUBSCRIPTION_CARRIER_IDENTITY_CHANGED:
+    
+BroadcastBehavior: android.telephony.TelephonyManager#ACTION_SUBSCRIPTION_SPECIFIC_CARRIER_IDENTITY_CHANGED:
+    
+BroadcastBehavior: android.telephony.euicc.EuiccManager#ACTION_NOTIFY_CARRIER_SETUP_INCOMPLETE:
+    
+
+
+CompileTimeConstant: android.icu.util.JapaneseCalendar#REIWA:
+    
+
+
+DeprecationMismatch: android.accounts.AccountManager#newChooseAccountIntent(android.accounts.Account, java.util.ArrayList<android.accounts.Account>, String[], boolean, String, String, String[], android.os.Bundle):
+    
+DeprecationMismatch: android.app.Activity#enterPictureInPictureMode():
+    
+DeprecationMismatch: android.app.Instrumentation#startAllocCounting():
+    
+DeprecationMismatch: android.app.Instrumentation#stopAllocCounting():
+    
+DeprecationMismatch: android.app.Notification#bigContentView:
+    
+DeprecationMismatch: android.app.Notification#contentView:
+    
+DeprecationMismatch: android.app.Notification#headsUpContentView:
+    
+DeprecationMismatch: android.app.Notification#tickerView:
+    
+DeprecationMismatch: android.app.Notification.Action.Builder#Builder(int, CharSequence, android.app.PendingIntent):
+    
+DeprecationMismatch: android.app.Notification.Action.WearableExtender#getCancelLabel():
+    
+DeprecationMismatch: android.app.Notification.Action.WearableExtender#getConfirmLabel():
+    
+DeprecationMismatch: android.app.Notification.Action.WearableExtender#getInProgressLabel():
+    
+DeprecationMismatch: android.app.Notification.Action.WearableExtender#setCancelLabel(CharSequence):
+    
+DeprecationMismatch: android.app.Notification.Action.WearableExtender#setConfirmLabel(CharSequence):
+    
+DeprecationMismatch: android.app.Notification.Action.WearableExtender#setInProgressLabel(CharSequence):
+    
+DeprecationMismatch: android.app.Notification.Builder#setContent(android.widget.RemoteViews):
+    
+DeprecationMismatch: android.app.Notification.Builder#setTicker(CharSequence, android.widget.RemoteViews):
+    
+DeprecationMismatch: android.app.Notification.WearableExtender#getContentIcon():
+    
+DeprecationMismatch: android.app.Notification.WearableExtender#getContentIconGravity():
+    
+DeprecationMismatch: android.app.Notification.WearableExtender#getCustomContentHeight():
+    
+DeprecationMismatch: android.app.Notification.WearableExtender#getCustomSizePreset():
+    
+DeprecationMismatch: android.app.Notification.WearableExtender#getGravity():
+    
+DeprecationMismatch: android.app.Notification.WearableExtender#getHintAvoidBackgroundClipping():
+    
+DeprecationMismatch: android.app.Notification.WearableExtender#getHintHideIcon():
+    
+DeprecationMismatch: android.app.Notification.WearableExtender#getHintScreenTimeout():
+    
+DeprecationMismatch: android.app.Notification.WearableExtender#getHintShowBackgroundOnly():
+    
+DeprecationMismatch: android.app.Notification.WearableExtender#setContentIcon(int):
+    
+DeprecationMismatch: android.app.Notification.WearableExtender#setContentIconGravity(int):
+    
+DeprecationMismatch: android.app.Notification.WearableExtender#setCustomContentHeight(int):
+    
+DeprecationMismatch: android.app.Notification.WearableExtender#setCustomSizePreset(int):
+    
+DeprecationMismatch: android.app.Notification.WearableExtender#setGravity(int):
+    
+DeprecationMismatch: android.app.Notification.WearableExtender#setHintAvoidBackgroundClipping(boolean):
+    
+DeprecationMismatch: android.app.Notification.WearableExtender#setHintHideIcon(boolean):
+    
+DeprecationMismatch: android.app.Notification.WearableExtender#setHintScreenTimeout(int):
+    
+DeprecationMismatch: android.app.Notification.WearableExtender#setHintShowBackgroundOnly(boolean):
+    
+DeprecationMismatch: android.content.ContextWrapper#clearWallpaper():
+    
+DeprecationMismatch: android.content.ContextWrapper#getWallpaper():
+    
+DeprecationMismatch: android.content.ContextWrapper#getWallpaperDesiredMinimumHeight():
+    
+DeprecationMismatch: android.content.ContextWrapper#getWallpaperDesiredMinimumWidth():
+    
+DeprecationMismatch: android.content.ContextWrapper#peekWallpaper():
+    
+DeprecationMismatch: android.content.ContextWrapper#removeStickyBroadcast(android.content.Intent):
+    
+DeprecationMismatch: android.content.ContextWrapper#removeStickyBroadcastAsUser(android.content.Intent, android.os.UserHandle):
+    
+DeprecationMismatch: android.content.ContextWrapper#sendStickyBroadcast(android.content.Intent):
+    
+DeprecationMismatch: android.content.ContextWrapper#sendStickyBroadcastAsUser(android.content.Intent, android.os.UserHandle):
+    
+DeprecationMismatch: android.content.ContextWrapper#sendStickyOrderedBroadcast(android.content.Intent, android.content.BroadcastReceiver, android.os.Handler, int, String, android.os.Bundle):
+    
+DeprecationMismatch: android.content.ContextWrapper#sendStickyOrderedBroadcastAsUser(android.content.Intent, android.os.UserHandle, android.content.BroadcastReceiver, android.os.Handler, int, String, android.os.Bundle):
+    
+DeprecationMismatch: android.content.ContextWrapper#setWallpaper(android.graphics.Bitmap):
+    
+DeprecationMismatch: android.content.ContextWrapper#setWallpaper(java.io.InputStream):
+    
+DeprecationMismatch: android.database.CursorWrapper#deactivate():
+    
+DeprecationMismatch: android.database.CursorWrapper#requery():
+    
+DeprecationMismatch: android.graphics.ComposeShader#ComposeShader(android.graphics.Shader, android.graphics.Shader, android.graphics.Xfermode):
+    
+DeprecationMismatch: android.graphics.PixelFormat#A_8:
+    
+DeprecationMismatch: android.graphics.PixelFormat#LA_88:
+    
+DeprecationMismatch: android.graphics.PixelFormat#L_8:
+    
+DeprecationMismatch: android.graphics.PixelFormat#RGBA_4444:
+    
+DeprecationMismatch: android.graphics.PixelFormat#RGBA_5551:
+    
+DeprecationMismatch: android.graphics.PixelFormat#RGB_332:
+    
+DeprecationMismatch: android.net.wifi.WifiManager#EXTRA_BSSID:
+    
+DeprecationMismatch: android.net.wifi.WifiManager#EXTRA_WIFI_INFO:
+    
+DeprecationMismatch: android.opengl.EGL14#eglCreatePixmapSurface(android.opengl.EGLDisplay, android.opengl.EGLConfig, int, int[], int):
+    
+DeprecationMismatch: android.opengl.GLES20#GL_STENCIL_INDEX:
+    
+DeprecationMismatch: android.opengl.GLSurfaceView#surfaceRedrawNeeded(android.view.SurfaceHolder):
+    
+DeprecationMismatch: android.os.UserManager#setUserRestrictions(android.os.Bundle):
+    
+DeprecationMismatch: android.os.UserManager#setUserRestrictions(android.os.Bundle, android.os.UserHandle):
+    
+DeprecationMismatch: android.provider.Contacts.People#markAsContacted(android.content.ContentResolver, long):
+    
+DeprecationMismatch: android.renderscript.Type.CubemapFace#POSITVE_X:
+    
+DeprecationMismatch: android.renderscript.Type.CubemapFace#POSITVE_Y:
+    
+DeprecationMismatch: android.renderscript.Type.CubemapFace#POSITVE_Z:
+    
+DeprecationMismatch: android.speech.tts.TextToSpeech#areDefaultsEnforced():
+    
+DeprecationMismatch: android.text.format.DateUtils#FORMAT_12HOUR:
+    
+DeprecationMismatch: android.text.format.DateUtils#FORMAT_24HOUR:
+    
+DeprecationMismatch: android.text.format.DateUtils#FORMAT_CAP_AMPM:
+    
+DeprecationMismatch: android.text.format.DateUtils#FORMAT_CAP_MIDNIGHT:
+    
+DeprecationMismatch: android.text.format.DateUtils#FORMAT_CAP_NOON:
+    
+DeprecationMismatch: android.text.format.DateUtils#FORMAT_CAP_NOON_MIDNIGHT:
+    
+DeprecationMismatch: android.text.format.DateUtils#FORMAT_NO_NOON_MIDNIGHT:
+    
+DeprecationMismatch: android.view.ViewGroup.LayoutParams#FILL_PARENT:
+    
+DeprecationMismatch: android.view.Window#setTitleColor(int):
+    
+DeprecationMismatch: android.view.accessibility.AccessibilityEvent#MAX_TEXT_LENGTH:
+    
+DeprecationMismatch: android.webkit.WebSettings#getSaveFormData():
+    
+DeprecationMismatch: android.webkit.WebView#shouldDelayChildPressedState():
+    
+DeprecationMismatch: android.webkit.WebViewDatabase#clearFormData():
+    
+DeprecationMismatch: android.webkit.WebViewDatabase#hasFormData():
+    
+DeprecationMismatch: javax.microedition.khronos.egl.EGL10#eglCreatePixmapSurface(javax.microedition.khronos.egl.EGLDisplay, javax.microedition.khronos.egl.EGLConfig, Object, int[]):
+    
+
+
+ExecutorRegistration: android.media.MediaRouter2#setOnGetControllerHintsListener(android.media.MediaRouter2.OnGetControllerHintsListener):
+    Registration methods should have overload that accepts delivery Executor: `setOnGetControllerHintsListener`
+
+
+GenericException: android.content.res.loader.ResourcesProvider#finalize():
+    
+
+
+HiddenSuperclass: android.content.res.ColorStateList:
+    
+HiddenSuperclass: android.graphics.Canvas:
+    
+HiddenSuperclass: android.graphics.RecordingCanvas:
+    
+HiddenSuperclass: android.hardware.biometrics.BiometricPrompt.AuthenticationCallback:
+    
+HiddenSuperclass: android.hardware.biometrics.BiometricPrompt.AuthenticationResult:
+    
+HiddenSuperclass: android.hardware.biometrics.BiometricPrompt.CryptoObject:
+    
+HiddenSuperclass: android.hardware.fingerprint.FingerprintManager.AuthenticationCallback:
+    
+HiddenSuperclass: android.hardware.fingerprint.FingerprintManager.CryptoObject:
+    
+HiddenSuperclass: android.media.AudioTrack:
+    
+HiddenSuperclass: android.media.MediaPlayer:
+    
+HiddenSuperclass: android.media.SoundPool:
+    
+HiddenSuperclass: android.service.autofill.CharSequenceTransformation:
+    
+HiddenSuperclass: android.service.autofill.DateTransformation:
+    
+HiddenSuperclass: android.service.autofill.DateValueSanitizer:
+    
+HiddenSuperclass: android.service.autofill.ImageTransformation:
+    
+HiddenSuperclass: android.service.autofill.LuhnChecksumValidator:
+    
+HiddenSuperclass: android.service.autofill.RegexValidator:
+    
+HiddenSuperclass: android.service.autofill.TextValueSanitizer:
+    
+HiddenSuperclass: android.service.autofill.VisibilitySetterAction:
+    
+HiddenSuperclass: android.util.StatsLog:
+    
+
+
+IntentBuilderName: android.net.VpnManager#provisionVpnProfile(android.net.PlatformVpnProfile):
+    Methods creating an Intent should be named `create<Foo>Intent()`, was `provisionVpnProfile`
+
+
+KotlinOperator: android.media.AudioMetadata.Map#set(android.media.AudioMetadata.Key<T>, T):
+    Method can be invoked with an indexing operator from Kotlin: `set` (this is usually desirable; just make sure it makes sense for this type of object)
+KotlinOperator: android.media.AudioMetadata.ReadMap#get(android.media.AudioMetadata.Key<T>):
+    Method can be invoked with an indexing operator from Kotlin: `get` (this is usually desirable; just make sure it makes sense for this type of object)
+
+
+MethodNameUnits: android.media.MediaParser.SeekMap#getDurationMicros():
+    Returned time values are strongly encouraged to be in milliseconds unless you need the extra precision, was `getDurationMicros`
+
+
+MinMaxConstant: android.telephony.DataFailCause#MAX_ACCESS_PROBE:
+    If min/max could change in future, make them dynamic methods: android.telephony.DataFailCause#MAX_ACCESS_PROBE
+MinMaxConstant: android.telephony.DataFailCause#MAX_IPV4_CONNECTIONS:
+    If min/max could change in future, make them dynamic methods: android.telephony.DataFailCause#MAX_IPV4_CONNECTIONS
+MinMaxConstant: android.telephony.DataFailCause#MAX_IPV6_CONNECTIONS:
+    If min/max could change in future, make them dynamic methods: android.telephony.DataFailCause#MAX_IPV6_CONNECTIONS
+MinMaxConstant: android.telephony.DataFailCause#MAX_PPP_INACTIVITY_TIMER_EXPIRED:
+    If min/max could change in future, make them dynamic methods: android.telephony.DataFailCause#MAX_PPP_INACTIVITY_TIMER_EXPIRED
+
+
+MissingNullability: android.app.AsyncNotedAppOp#equals(Object) parameter #0:
+    
+MissingNullability: android.app.AsyncNotedAppOp#writeToParcel(android.os.Parcel, int) parameter #0:
+    
+MissingNullability: android.app.SyncNotedAppOp#equals(Object) parameter #0:
+    
+MissingNullability: android.icu.lang.UCharacter.UnicodeBlock#CHORASMIAN:
+    
+MissingNullability: android.icu.lang.UCharacter.UnicodeBlock#CJK_UNIFIED_IDEOGRAPHS_EXTENSION_G:
+    
+MissingNullability: android.icu.lang.UCharacter.UnicodeBlock#DIVES_AKURU:
+    
+MissingNullability: android.icu.lang.UCharacter.UnicodeBlock#EGYPTIAN_HIEROGLYPH_FORMAT_CONTROLS:
+    
+MissingNullability: android.icu.lang.UCharacter.UnicodeBlock#ELYMAIC:
+    
+MissingNullability: android.icu.lang.UCharacter.UnicodeBlock#KHITAN_SMALL_SCRIPT:
+    
+MissingNullability: android.icu.lang.UCharacter.UnicodeBlock#LISU_SUPPLEMENT:
+    
+MissingNullability: android.icu.lang.UCharacter.UnicodeBlock#NANDINAGARI:
+    
+MissingNullability: android.icu.lang.UCharacter.UnicodeBlock#NYIAKENG_PUACHUE_HMONG:
+    
+MissingNullability: android.icu.lang.UCharacter.UnicodeBlock#OTTOMAN_SIYAQ_NUMBERS:
+    
+MissingNullability: android.icu.lang.UCharacter.UnicodeBlock#SMALL_KANA_EXTENSION:
+    
+MissingNullability: android.icu.lang.UCharacter.UnicodeBlock#SYMBOLS_AND_PICTOGRAPHS_EXTENDED_A:
+    
+MissingNullability: android.icu.lang.UCharacter.UnicodeBlock#SYMBOLS_FOR_LEGACY_COMPUTING:
+    
+MissingNullability: android.icu.lang.UCharacter.UnicodeBlock#TAMIL_SUPPLEMENT:
+    
+MissingNullability: android.icu.lang.UCharacter.UnicodeBlock#TANGUT_SUPPLEMENT:
+    
+MissingNullability: android.icu.lang.UCharacter.UnicodeBlock#WANCHO:
+    
+MissingNullability: android.icu.lang.UCharacter.UnicodeBlock#YEZIDI:
+    
+MissingNullability: android.icu.text.DateTimePatternGenerator#getFieldDisplayName(int, android.icu.text.DateTimePatternGenerator.DisplayWidth):
+    
+MissingNullability: android.icu.text.DateTimePatternGenerator#getFieldDisplayName(int, android.icu.text.DateTimePatternGenerator.DisplayWidth) parameter #1:
+    
+MissingNullability: android.icu.util.MeasureUnit#ATMOSPHERE:
+    
+MissingNullability: android.icu.util.MeasureUnit#PERCENT:
+    
+MissingNullability: android.icu.util.MeasureUnit#PERMILLE:
+    
+MissingNullability: android.icu.util.MeasureUnit#PETABYTE:
+    
+MissingNullability: android.icu.util.VersionInfo#UNICODE_12_0:
+    
+MissingNullability: android.icu.util.VersionInfo#UNICODE_12_1:
+    
+MissingNullability: android.icu.util.VersionInfo#UNICODE_13_0:
+    
+MissingNullability: android.media.MediaMetadataRetriever#getFrameAtTime(long, int, android.media.MediaMetadataRetriever.BitmapParams):
+    
+MissingNullability: android.media.MediaMetadataRetriever#getScaledFrameAtTime(long, int, int, int, android.media.MediaMetadataRetriever.BitmapParams):
+    
+MissingNullability: java.time.chrono.JapaneseEra#REIWA:
+    
+
+
+NotCloseable: android.media.MediaCodec.GraphicBlock:
+    Classes that release resources (finalize()) should implement AutoClosable and CloseGuard: class android.media.MediaCodec.GraphicBlock
+NotCloseable: android.media.MediaCodec.LinearBlock:
+    Classes that release resources (finalize()) should implement AutoClosable and CloseGuard: class android.media.MediaCodec.LinearBlock
+NotCloseable: android.media.MediaParser:
+    Classes that release resources (release()) should implement AutoClosable and CloseGuard: class android.media.MediaParser
+NotCloseable: android.media.MediaRouter2.RoutingController:
+    Classes that release resources (release()) should implement AutoClosable and CloseGuard: class android.media.MediaRouter2.RoutingController
+NotCloseable: android.util.CloseGuard:
+    Classes that release resources (close()) should implement AutoClosable and CloseGuard: class android.util.CloseGuard
+NotCloseable: android.view.SurfaceControlViewHost:
+    Classes that release resources (release()) should implement AutoClosable and CloseGuard: class android.view.SurfaceControlViewHost
+
+
+OnNameExpected: android.app.admin.DevicePolicyKeyguardService#dismiss():
+    If implemented by developer, should follow the on<Something> style; otherwise consider marking final
+OnNameExpected: android.service.controls.ControlsProviderService#createPublisherFor(java.util.List<java.lang.String>):
+    Methods implemented by developers should follow the on<Something> style, was `createPublisherFor`
+OnNameExpected: android.service.controls.ControlsProviderService#createPublisherForAllAvailable():
+    Methods implemented by developers should follow the on<Something> style, was `createPublisherForAllAvailable`
+OnNameExpected: android.service.controls.ControlsProviderService#createPublisherForSuggested():
+    If implemented by developer, should follow the on<Something> style; otherwise consider marking final
+OnNameExpected: android.service.controls.ControlsProviderService#performControlAction(String, android.service.controls.actions.ControlAction, java.util.function.Consumer<java.lang.Integer>):
+    Methods implemented by developers should follow the on<Something> style, was `performControlAction`
+
+
+RequiresPermission: android.accounts.AccountManager#getAccountsByTypeAndFeatures(String, String[], android.accounts.AccountManagerCallback<android.accounts.Account[]>, android.os.Handler):
+    
+RequiresPermission: android.accounts.AccountManager#hasFeatures(android.accounts.Account, String[], android.accounts.AccountManagerCallback<java.lang.Boolean>, android.os.Handler):
+    
+RequiresPermission: android.app.AlarmManager#setTime(long):
+    
+RequiresPermission: android.app.AppOpsManager#isOpActive(String, int, String):
+    
+RequiresPermission: android.app.AppOpsManager#startWatchingActive(String[], java.util.concurrent.Executor, android.app.AppOpsManager.OnOpActiveChangedListener):
+    
+RequiresPermission: android.app.DownloadManager.Request#setDestinationInExternalPublicDir(String, String):
+    
+RequiresPermission: android.app.DownloadManager.Request#setDestinationUri(android.net.Uri):
+    
+RequiresPermission: android.app.DownloadManager.Request#setNotificationVisibility(int):
+    
+RequiresPermission: android.app.DownloadManager.Request#setShowRunningNotification(boolean):
+    
+RequiresPermission: android.app.Notification.Builder#setFullScreenIntent(android.app.PendingIntent, boolean):
+    
+RequiresPermission: android.app.Service#startForeground(int, android.app.Notification):
+    
+RequiresPermission: android.app.WallpaperInfo#getSettingsSliceUri():
+    
+RequiresPermission: android.app.WallpaperManager#clear():
+    
+RequiresPermission: android.app.WallpaperManager#clearWallpaper():
+    
+RequiresPermission: android.app.WallpaperManager#setBitmap(android.graphics.Bitmap):
+    
+RequiresPermission: android.app.WallpaperManager#setBitmap(android.graphics.Bitmap, android.graphics.Rect, boolean):
+    
+RequiresPermission: android.app.WallpaperManager#setDisplayPadding(android.graphics.Rect):
+    
+RequiresPermission: android.app.WallpaperManager#setResource(int):
+    
+RequiresPermission: android.app.WallpaperManager#setStream(java.io.InputStream):
+    
+RequiresPermission: android.app.WallpaperManager#setStream(java.io.InputStream, android.graphics.Rect, boolean):
+    
+RequiresPermission: android.app.WallpaperManager#suggestDesiredDimensions(int, int):
+    
+RequiresPermission: android.app.admin.DevicePolicyManager#bindDeviceAdminServiceAsUser(android.content.ComponentName, android.content.Intent, android.content.ServiceConnection, int, android.os.UserHandle):
+    
+RequiresPermission: android.app.admin.DevicePolicyManager#getPasswordComplexity():
+    
+RequiresPermission: android.app.admin.DevicePolicyManager#setAlwaysOnVpnPackage(android.content.ComponentName, String, boolean):
+    
+RequiresPermission: android.app.backup.BackupManager#dataChanged(String):
+    
+RequiresPermission: android.app.usage.StorageStatsManager#queryExternalStatsForUser(java.util.UUID, android.os.UserHandle):
+    
+RequiresPermission: android.app.usage.StorageStatsManager#queryStatsForPackage(java.util.UUID, String, android.os.UserHandle):
+    
+RequiresPermission: android.app.usage.StorageStatsManager#queryStatsForUid(java.util.UUID, int):
+    
+RequiresPermission: android.app.usage.StorageStatsManager#queryStatsForUser(java.util.UUID, android.os.UserHandle):
+    
+RequiresPermission: android.app.usage.UsageStatsManager#queryAndAggregateUsageStats(long, long):
+    
+RequiresPermission: android.app.usage.UsageStatsManager#queryConfigurations(int, long, long):
+    
+RequiresPermission: android.app.usage.UsageStatsManager#queryEventStats(int, long, long):
+    
+RequiresPermission: android.app.usage.UsageStatsManager#queryEvents(long, long):
+    
+RequiresPermission: android.app.usage.UsageStatsManager#queryUsageStats(int, long, long):
+    
+RequiresPermission: android.appwidget.AppWidgetManager#bindAppWidgetIdIfAllowed(int, android.os.UserHandle, android.content.ComponentName, android.os.Bundle):
+    
+RequiresPermission: android.bluetooth.BluetoothA2dp#isA2dpPlaying(android.bluetooth.BluetoothDevice):
+    
+RequiresPermission: android.bluetooth.BluetoothAdapter#getName():
+    
+RequiresPermission: android.bluetooth.BluetoothDevice#setPin(byte[]):
+    
+RequiresPermission: android.bluetooth.BluetoothGatt#abortReliableWrite():
+    
+RequiresPermission: android.bluetooth.BluetoothGatt#beginReliableWrite():
+    
+RequiresPermission: android.bluetooth.BluetoothGatt#disconnect():
+    
+RequiresPermission: android.bluetooth.BluetoothGatt#discoverServices():
+    
+RequiresPermission: android.bluetooth.BluetoothGatt#executeReliableWrite():
+    
+RequiresPermission: android.bluetooth.BluetoothGatt#getService(java.util.UUID):
+    
+RequiresPermission: android.bluetooth.BluetoothGatt#getServices():
+    
+RequiresPermission: android.bluetooth.BluetoothGatt#readCharacteristic(android.bluetooth.BluetoothGattCharacteristic):
+    
+RequiresPermission: android.bluetooth.BluetoothGatt#readDescriptor(android.bluetooth.BluetoothGattDescriptor):
+    
+RequiresPermission: android.bluetooth.BluetoothGatt#readRemoteRssi():
+    
+RequiresPermission: android.bluetooth.BluetoothGatt#requestMtu(int):
+    
+RequiresPermission: android.bluetooth.BluetoothGatt#setCharacteristicNotification(android.bluetooth.BluetoothGattCharacteristic, boolean):
+    
+RequiresPermission: android.bluetooth.BluetoothGatt#writeCharacteristic(android.bluetooth.BluetoothGattCharacteristic):
+    
+RequiresPermission: android.bluetooth.BluetoothGatt#writeDescriptor(android.bluetooth.BluetoothGattDescriptor):
+    
+RequiresPermission: android.bluetooth.BluetoothGattCharacteristic#BluetoothGattCharacteristic(java.util.UUID, int, int):
+    
+RequiresPermission: android.bluetooth.BluetoothGattCharacteristic#addDescriptor(android.bluetooth.BluetoothGattDescriptor):
+    
+RequiresPermission: android.bluetooth.BluetoothGattDescriptor#BluetoothGattDescriptor(java.util.UUID, int):
+    
+RequiresPermission: android.bluetooth.BluetoothGattServer#addService(android.bluetooth.BluetoothGattService):
+    
+RequiresPermission: android.bluetooth.BluetoothGattServer#cancelConnection(android.bluetooth.BluetoothDevice):
+    
+RequiresPermission: android.bluetooth.BluetoothGattServer#clearServices():
+    
+RequiresPermission: android.bluetooth.BluetoothGattServer#connect(android.bluetooth.BluetoothDevice, boolean):
+    
+RequiresPermission: android.bluetooth.BluetoothGattServer#getService(java.util.UUID):
+    
+RequiresPermission: android.bluetooth.BluetoothGattServer#getServices():
+    
+RequiresPermission: android.bluetooth.BluetoothGattServer#notifyCharacteristicChanged(android.bluetooth.BluetoothDevice, android.bluetooth.BluetoothGattCharacteristic, boolean):
+    
+RequiresPermission: android.bluetooth.BluetoothGattServer#removeService(android.bluetooth.BluetoothGattService):
+    
+RequiresPermission: android.bluetooth.BluetoothGattServer#sendResponse(android.bluetooth.BluetoothDevice, int, int, int, byte[]):
+    
+RequiresPermission: android.bluetooth.BluetoothGattService#BluetoothGattService(java.util.UUID, int):
+    
+RequiresPermission: android.bluetooth.BluetoothGattService#addCharacteristic(android.bluetooth.BluetoothGattCharacteristic):
+    
+RequiresPermission: android.bluetooth.BluetoothGattService#addService(android.bluetooth.BluetoothGattService):
+    
+RequiresPermission: android.bluetooth.BluetoothHeadset#isAudioConnected(android.bluetooth.BluetoothDevice):
+    
+RequiresPermission: android.bluetooth.BluetoothHeadset#sendVendorSpecificResultCode(android.bluetooth.BluetoothDevice, String, String):
+    
+RequiresPermission: android.bluetooth.BluetoothHeadset#startVoiceRecognition(android.bluetooth.BluetoothDevice):
+    
+RequiresPermission: android.bluetooth.BluetoothHeadset#stopVoiceRecognition(android.bluetooth.BluetoothDevice):
+    
+RequiresPermission: android.bluetooth.BluetoothHealth#connectChannelToSource(android.bluetooth.BluetoothDevice, android.bluetooth.BluetoothHealthAppConfiguration):
+    
+RequiresPermission: android.bluetooth.BluetoothHealth#disconnectChannel(android.bluetooth.BluetoothDevice, android.bluetooth.BluetoothHealthAppConfiguration, int):
+    
+RequiresPermission: android.bluetooth.BluetoothHealth#getConnectedDevices():
+    
+RequiresPermission: android.bluetooth.BluetoothHealth#getConnectionState(android.bluetooth.BluetoothDevice):
+    
+RequiresPermission: android.bluetooth.BluetoothHealth#getDevicesMatchingConnectionStates(int[]):
+    
+RequiresPermission: android.bluetooth.BluetoothHealth#getMainChannelFd(android.bluetooth.BluetoothDevice, android.bluetooth.BluetoothHealthAppConfiguration):
+    
+RequiresPermission: android.bluetooth.BluetoothHealth#registerSinkAppConfiguration(String, int, android.bluetooth.BluetoothHealthCallback):
+    
+RequiresPermission: android.bluetooth.BluetoothHealth#unregisterAppConfiguration(android.bluetooth.BluetoothHealthAppConfiguration):
+    
+RequiresPermission: android.bluetooth.le.AdvertisingSet#enableAdvertising(boolean, int, int):
+    
+RequiresPermission: android.bluetooth.le.BluetoothLeAdvertiser#startAdvertising(android.bluetooth.le.AdvertiseSettings, android.bluetooth.le.AdvertiseData, android.bluetooth.le.AdvertiseCallback):
+    
+RequiresPermission: android.bluetooth.le.BluetoothLeAdvertiser#startAdvertising(android.bluetooth.le.AdvertiseSettings, android.bluetooth.le.AdvertiseData, android.bluetooth.le.AdvertiseData, android.bluetooth.le.AdvertiseCallback):
+    
+RequiresPermission: android.bluetooth.le.BluetoothLeAdvertiser#stopAdvertising(android.bluetooth.le.AdvertiseCallback):
+    
+RequiresPermission: android.companion.CompanionDeviceManager#associate(android.companion.AssociationRequest, android.companion.CompanionDeviceManager.Callback, android.os.Handler):
+    
+RequiresPermission: android.content.ContentResolver#addPeriodicSync(android.accounts.Account, String, android.os.Bundle, long):
+    
+RequiresPermission: android.content.ContentResolver#cancelSync(android.content.SyncRequest):
+    
+RequiresPermission: android.content.ContentResolver#getCurrentSync():
+    
+RequiresPermission: android.content.ContentResolver#getCurrentSyncs():
+    
+RequiresPermission: android.content.ContentResolver#getIsSyncable(android.accounts.Account, String):
+    
+RequiresPermission: android.content.ContentResolver#getMasterSyncAutomatically():
+    
+RequiresPermission: android.content.ContentResolver#getPeriodicSyncs(android.accounts.Account, String):
+    
+RequiresPermission: android.content.ContentResolver#getSyncAutomatically(android.accounts.Account, String):
+    
+RequiresPermission: android.content.ContentResolver#isSyncActive(android.accounts.Account, String):
+    
+RequiresPermission: android.content.ContentResolver#isSyncPending(android.accounts.Account, String):
+    
+RequiresPermission: android.content.ContentResolver#removePeriodicSync(android.accounts.Account, String, android.os.Bundle):
+    
+RequiresPermission: android.content.ContentResolver#setIsSyncable(android.accounts.Account, String, int):
+    
+RequiresPermission: android.content.ContentResolver#setMasterSyncAutomatically(boolean):
+    
+RequiresPermission: android.content.ContentResolver#setSyncAutomatically(android.accounts.Account, String, boolean):
+    
+RequiresPermission: android.content.Context#clearWallpaper():
+    
+RequiresPermission: android.content.Context#getExternalCacheDir():
+    
+RequiresPermission: android.content.Context#getExternalCacheDirs():
+    
+RequiresPermission: android.content.Context#getExternalFilesDir(String):
+    
+RequiresPermission: android.content.Context#getExternalFilesDirs(String):
+    
+RequiresPermission: android.content.Context#getExternalMediaDirs():
+    
+RequiresPermission: android.content.Context#getObbDir():
+    
+RequiresPermission: android.content.Context#getObbDirs():
+    
+RequiresPermission: android.content.Context#removeStickyBroadcastAsUser(android.content.Intent, android.os.UserHandle):
+    
+RequiresPermission: android.content.Context#setWallpaper(android.graphics.Bitmap):
+    
+RequiresPermission: android.content.Context#setWallpaper(java.io.InputStream):
+    
+RequiresPermission: android.content.pm.LauncherApps.Callback#onPackagesSuspended(String[], android.os.UserHandle, android.os.Bundle):
+    
+RequiresPermission: android.content.pm.PackageManager#canRequestPackageInstalls():
+    
+RequiresPermission: android.content.pm.PackageManager#getSuspendedPackageAppExtras():
+    
+RequiresPermission: android.content.pm.PackageManager#isPackageSuspended():
+    
+RequiresPermission: android.hardware.camera2.CameraCharacteristics#getKeysNeedingPermission():
+    
+RequiresPermission: android.hardware.usb.UsbManager#hasPermission(android.hardware.usb.UsbDevice):
+    
+RequiresPermission: android.hardware.usb.UsbManager#requestPermission(android.hardware.usb.UsbDevice, android.app.PendingIntent):
+    
+RequiresPermission: android.location.LocationManager#addGpsStatusListener(android.location.GpsStatus.Listener):
+    
+RequiresPermission: android.location.LocationManager#addNmeaListener(android.location.OnNmeaMessageListener):
+    
+RequiresPermission: android.location.LocationManager#addNmeaListener(android.location.OnNmeaMessageListener, android.os.Handler):
+    
+RequiresPermission: android.location.LocationManager#addNmeaListener(java.util.concurrent.Executor, android.location.OnNmeaMessageListener):
+    
+RequiresPermission: android.location.LocationManager#addProximityAlert(double, double, float, long, android.app.PendingIntent):
+    
+RequiresPermission: android.location.LocationManager#registerGnssStatusCallback(android.location.GnssStatus.Callback):
+    
+RequiresPermission: android.location.LocationManager#registerGnssStatusCallback(android.location.GnssStatus.Callback, android.os.Handler):
+    
+RequiresPermission: android.location.LocationManager#registerGnssStatusCallback(java.util.concurrent.Executor, android.location.GnssStatus.Callback):
+    
+RequiresPermission: android.media.AudioManager#startBluetoothSco():
+    
+RequiresPermission: android.media.AudioManager#stopBluetoothSco():
+    
+RequiresPermission: android.media.MediaExtractor#setDataSource(String):
+    
+RequiresPermission: android.media.MediaExtractor#setDataSource(String, java.util.Map<java.lang.String,java.lang.String>):
+    
+RequiresPermission: android.media.MediaExtractor#setDataSource(android.content.Context, android.net.Uri, java.util.Map<java.lang.String,java.lang.String>):
+    
+RequiresPermission: android.media.MediaPlayer#setWakeMode(android.content.Context, int):
+    
+RequiresPermission: android.media.MediaSession2Service#onUpdateNotification(android.media.MediaSession2):
+    
+RequiresPermission: android.media.RingtoneManager#getCursor():
+    
+RequiresPermission: android.media.RingtoneManager#getValidRingtoneUri(android.content.Context):
+    
+RequiresPermission: android.media.session.MediaSessionManager#addOnActiveSessionsChangedListener(android.media.session.MediaSessionManager.OnActiveSessionsChangedListener, android.content.ComponentName):
+    
+RequiresPermission: android.media.session.MediaSessionManager#addOnActiveSessionsChangedListener(android.media.session.MediaSessionManager.OnActiveSessionsChangedListener, android.content.ComponentName, android.os.Handler):
+    
+RequiresPermission: android.media.session.MediaSessionManager#getActiveSessions(android.content.ComponentName):
+    
+RequiresPermission: android.media.session.MediaSessionManager#isTrustedForMediaControl(android.media.session.MediaSessionManager.RemoteUserInfo):
+    
+RequiresPermission: android.net.ConnectivityManager#requestNetwork(android.net.NetworkRequest, android.app.PendingIntent):
+    
+RequiresPermission: android.net.ConnectivityManager#requestNetwork(android.net.NetworkRequest, android.net.ConnectivityManager.NetworkCallback):
+    
+RequiresPermission: android.net.ConnectivityManager#requestNetwork(android.net.NetworkRequest, android.net.ConnectivityManager.NetworkCallback, android.os.Handler):
+    
+RequiresPermission: android.net.ConnectivityManager#requestNetwork(android.net.NetworkRequest, android.net.ConnectivityManager.NetworkCallback, android.os.Handler, int):
+    
+RequiresPermission: android.net.ConnectivityManager#requestNetwork(android.net.NetworkRequest, android.net.ConnectivityManager.NetworkCallback, int):
+    
+RequiresPermission: android.net.sip.SipAudioCall#setSpeakerMode(boolean):
+    
+RequiresPermission: android.net.sip.SipAudioCall#startAudio():
+    
+RequiresPermission: android.net.wifi.WifiManager#getScanResults():
+    
+RequiresPermission: android.net.wifi.WifiManager#setWifiEnabled(boolean):
+    
+RequiresPermission: android.net.wifi.WifiManager#startLocalOnlyHotspot(android.net.wifi.WifiManager.LocalOnlyHotspotCallback, android.os.Handler):
+    
+RequiresPermission: android.net.wifi.WifiManager#startScan():
+    
+RequiresPermission: android.net.wifi.aware.IdentityChangedListener#onIdentityChanged(byte[]):
+    
+RequiresPermission: android.net.wifi.aware.WifiAwareManager#attach(android.net.wifi.aware.AttachCallback, android.net.wifi.aware.IdentityChangedListener, android.os.Handler):
+    
+RequiresPermission: android.net.wifi.aware.WifiAwareSession#publish(android.net.wifi.aware.PublishConfig, android.net.wifi.aware.DiscoverySessionCallback, android.os.Handler):
+    
+RequiresPermission: android.net.wifi.aware.WifiAwareSession#subscribe(android.net.wifi.aware.SubscribeConfig, android.net.wifi.aware.DiscoverySessionCallback, android.os.Handler):
+    
+RequiresPermission: android.nfc.NfcAdapter#disableForegroundDispatch(android.app.Activity):
+    
+RequiresPermission: android.nfc.NfcAdapter#disableForegroundNdefPush(android.app.Activity):
+    
+RequiresPermission: android.nfc.NfcAdapter#enableForegroundDispatch(android.app.Activity, android.app.PendingIntent, android.content.IntentFilter[], String[][]):
+    
+RequiresPermission: android.nfc.NfcAdapter#enableForegroundNdefPush(android.app.Activity, android.nfc.NdefMessage):
+    
+RequiresPermission: android.nfc.NfcAdapter#setBeamPushUris(android.net.Uri[], android.app.Activity):
+    
+RequiresPermission: android.nfc.NfcAdapter#setBeamPushUrisCallback(android.nfc.NfcAdapter.CreateBeamUrisCallback, android.app.Activity):
+    
+RequiresPermission: android.nfc.NfcAdapter#setNdefPushMessage(android.nfc.NdefMessage, android.app.Activity, android.app.Activity...):
+    
+RequiresPermission: android.nfc.NfcAdapter#setNdefPushMessageCallback(android.nfc.NfcAdapter.CreateNdefMessageCallback, android.app.Activity, android.app.Activity...):
+    
+RequiresPermission: android.nfc.NfcAdapter#setOnNdefPushCompleteCallback(android.nfc.NfcAdapter.OnNdefPushCompleteCallback, android.app.Activity, android.app.Activity...):
+    
+RequiresPermission: android.nfc.cardemulation.CardEmulation#isDefaultServiceForAid(android.content.ComponentName, String):
+    
+RequiresPermission: android.nfc.cardemulation.CardEmulation#isDefaultServiceForCategory(android.content.ComponentName, String):
+    
+RequiresPermission: android.nfc.cardemulation.CardEmulation#setOffHostForService(android.content.ComponentName, String):
+    
+RequiresPermission: android.nfc.tech.IsoDep#getTimeout():
+    
+RequiresPermission: android.nfc.tech.IsoDep#setTimeout(int):
+    
+RequiresPermission: android.nfc.tech.IsoDep#transceive(byte[]):
+    
+RequiresPermission: android.nfc.tech.MifareClassic#authenticateSectorWithKeyA(int, byte[]):
+    
+RequiresPermission: android.nfc.tech.MifareClassic#authenticateSectorWithKeyB(int, byte[]):
+    
+RequiresPermission: android.nfc.tech.MifareClassic#decrement(int, int):
+    
+RequiresPermission: android.nfc.tech.MifareClassic#getTimeout():
+    
+RequiresPermission: android.nfc.tech.MifareClassic#increment(int, int):
+    
+RequiresPermission: android.nfc.tech.MifareClassic#readBlock(int):
+    
+RequiresPermission: android.nfc.tech.MifareClassic#restore(int):
+    
+RequiresPermission: android.nfc.tech.MifareClassic#setTimeout(int):
+    
+RequiresPermission: android.nfc.tech.MifareClassic#transceive(byte[]):
+    
+RequiresPermission: android.nfc.tech.MifareClassic#transfer(int):
+    
+RequiresPermission: android.nfc.tech.MifareClassic#writeBlock(int, byte[]):
+    
+RequiresPermission: android.nfc.tech.MifareUltralight#getTimeout():
+    
+RequiresPermission: android.nfc.tech.MifareUltralight#readPages(int):
+    
+RequiresPermission: android.nfc.tech.MifareUltralight#setTimeout(int):
+    
+RequiresPermission: android.nfc.tech.MifareUltralight#transceive(byte[]):
+    
+RequiresPermission: android.nfc.tech.MifareUltralight#writePage(int, byte[]):
+    
+RequiresPermission: android.nfc.tech.Ndef#getNdefMessage():
+    
+RequiresPermission: android.nfc.tech.Ndef#isWritable():
+    
+RequiresPermission: android.nfc.tech.Ndef#makeReadOnly():
+    
+RequiresPermission: android.nfc.tech.Ndef#writeNdefMessage(android.nfc.NdefMessage):
+    
+RequiresPermission: android.nfc.tech.NdefFormatable#format(android.nfc.NdefMessage):
+    
+RequiresPermission: android.nfc.tech.NdefFormatable#formatReadOnly(android.nfc.NdefMessage):
+    
+RequiresPermission: android.nfc.tech.NfcA#getTimeout():
+    
+RequiresPermission: android.nfc.tech.NfcA#setTimeout(int):
+    
+RequiresPermission: android.nfc.tech.NfcA#transceive(byte[]):
+    
+RequiresPermission: android.nfc.tech.NfcB#transceive(byte[]):
+    
+RequiresPermission: android.nfc.tech.NfcF#getTimeout():
+    
+RequiresPermission: android.nfc.tech.NfcF#setTimeout(int):
+    
+RequiresPermission: android.nfc.tech.NfcF#transceive(byte[]):
+    
+RequiresPermission: android.nfc.tech.NfcV#transceive(byte[]):
+    
+RequiresPermission: android.nfc.tech.TagTechnology#close():
+    
+RequiresPermission: android.nfc.tech.TagTechnology#connect():
+    
+RequiresPermission: android.os.Build#getSerial():
+    
+RequiresPermission: android.os.Debug#dumpService(String, java.io.FileDescriptor, String[]):
+    
+RequiresPermission: android.os.Environment#getExternalStorageDirectory():
+    
+RequiresPermission: android.os.PowerManager#newWakeLock(int, String):
+    
+RequiresPermission: android.os.PowerManager#reboot(String):
+    
+RequiresPermission: android.os.RecoverySystem#rebootWipeUserData(android.content.Context):
+    
+RequiresPermission: android.os.StrictMode.VmPolicy.Builder#detectFileUriExposure():
+    
+RequiresPermission: android.os.UserManager#getUserName():
+    
+RequiresPermission: android.os.UserManager#isUserUnlocked(android.os.UserHandle):
+    
+RequiresPermission: android.os.health.SystemHealthManager#takeUidSnapshot(int):
+    
+RequiresPermission: android.os.health.SystemHealthManager#takeUidSnapshots(int[]):
+    
+RequiresPermission: android.os.storage.StorageVolume#createAccessIntent(String):
+    
+RequiresPermission: android.provider.MediaStore#setRequireOriginal(android.net.Uri):
+    
+RequiresPermission: android.provider.Settings#canDrawOverlays(android.content.Context):
+    
+RequiresPermission: android.provider.Settings.System#canWrite(android.content.Context):
+    
+RequiresPermission: android.telecom.TelecomManager#acceptHandover(android.net.Uri, int, android.telecom.PhoneAccountHandle):
+    
+RequiresPermission: android.telecom.TelecomManager#acceptRingingCall():
+    
+RequiresPermission: android.telecom.TelecomManager#acceptRingingCall(int):
+    
+RequiresPermission: android.telecom.TelecomManager#addNewIncomingCall(android.telecom.PhoneAccountHandle, android.os.Bundle):
+    
+RequiresPermission: android.telecom.TelecomManager#cancelMissedCallsNotification():
+    
+RequiresPermission: android.telecom.TelecomManager#endCall():
+    
+RequiresPermission: android.telecom.TelecomManager#getAdnUriForPhoneAccount(android.telecom.PhoneAccountHandle):
+    
+RequiresPermission: android.telecom.TelecomManager#getCallCapablePhoneAccounts():
+    
+RequiresPermission: android.telecom.TelecomManager#getDefaultOutgoingPhoneAccount(String):
+    
+RequiresPermission: android.telecom.TelecomManager#getLine1Number(android.telecom.PhoneAccountHandle):
+    
+RequiresPermission: android.telecom.TelecomManager#getSelfManagedPhoneAccounts():
+    
+RequiresPermission: android.telecom.TelecomManager#getVoiceMailNumber(android.telecom.PhoneAccountHandle):
+    
+RequiresPermission: android.telecom.TelecomManager#handleMmi(String):
+    
+RequiresPermission: android.telecom.TelecomManager#handleMmi(String, android.telecom.PhoneAccountHandle):
+    
+RequiresPermission: android.telecom.TelecomManager#isInCall():
+    
+RequiresPermission: android.telecom.TelecomManager#isInManagedCall():
+    
+RequiresPermission: android.telecom.TelecomManager#isVoiceMailNumber(android.telecom.PhoneAccountHandle, String):
+    
+RequiresPermission: android.telecom.TelecomManager#placeCall(android.net.Uri, android.os.Bundle):
+    
+RequiresPermission: android.telecom.TelecomManager#showInCallScreen(boolean):
+    
+RequiresPermission: android.telecom.TelecomManager#silenceRinger():
+    
+RequiresPermission: android.telephony.CarrierConfigManager#getConfig():
+    
+RequiresPermission: android.telephony.CarrierConfigManager#getConfigByComponentForSubId(String, int):
+    
+RequiresPermission: android.telephony.CarrierConfigManager#getConfigForSubId(int):
+    
+RequiresPermission: android.telephony.PhoneStateListener#onCallStateChanged(int, String):
+    
+RequiresPermission: android.telephony.SmsManager#injectSmsPdu(byte[], String, android.app.PendingIntent):
+    
+RequiresPermission: android.telephony.SmsManager#sendDataMessage(String, String, short, byte[], android.app.PendingIntent, android.app.PendingIntent):
+    
+RequiresPermission: android.telephony.SmsManager#sendMultipartTextMessage(String, String, java.util.ArrayList<java.lang.String>, java.util.ArrayList<android.app.PendingIntent>, java.util.ArrayList<android.app.PendingIntent>):
+    
+RequiresPermission: android.telephony.SmsManager#sendTextMessage(String, String, String, android.app.PendingIntent, android.app.PendingIntent):
+    
+RequiresPermission: android.telephony.SmsManager#sendTextMessageWithoutPersisting(String, String, String, android.app.PendingIntent, android.app.PendingIntent):
+    
+RequiresPermission: android.telephony.SubscriptionManager#addSubscriptionsIntoGroup(java.util.List<java.lang.Integer>, android.os.ParcelUuid):
+    
+RequiresPermission: android.telephony.SubscriptionManager#createSubscriptionGroup(java.util.List<java.lang.Integer>):
+    
+RequiresPermission: android.telephony.SubscriptionManager#getActiveSubscriptionInfo(int):
+    
+RequiresPermission: android.telephony.SubscriptionManager#getActiveSubscriptionInfoCount():
+    
+RequiresPermission: android.telephony.SubscriptionManager#getActiveSubscriptionInfoForSimSlotIndex(int):
+    
+RequiresPermission: android.telephony.SubscriptionManager#getActiveSubscriptionInfoList():
+    
+RequiresPermission: android.telephony.SubscriptionManager#getOpportunisticSubscriptions():
+    
+RequiresPermission: android.telephony.SubscriptionManager#getSubscriptionsInGroup(android.os.ParcelUuid):
+    
+RequiresPermission: android.telephony.SubscriptionManager#removeSubscriptionsFromGroup(java.util.List<java.lang.Integer>, android.os.ParcelUuid):
+    
+RequiresPermission: android.telephony.SubscriptionManager#setOpportunistic(boolean, int):
+    
+RequiresPermission: android.telephony.TelephonyManager#doesSwitchMultiSimConfigTriggerReboot():
+    
+RequiresPermission: android.telephony.TelephonyManager#getCarrierConfig():
+    
+RequiresPermission: android.telephony.TelephonyManager#getDataNetworkType():
+    
+RequiresPermission: android.telephony.TelephonyManager#getDeviceId():
+    
+RequiresPermission: android.telephony.TelephonyManager#getDeviceId(int):
+    
+RequiresPermission: android.telephony.TelephonyManager#getDeviceSoftwareVersion():
+    
+RequiresPermission: android.telephony.TelephonyManager#getEmergencyNumberList():
+    
+RequiresPermission: android.telephony.TelephonyManager#getEmergencyNumberList(int):
+    
+RequiresPermission: android.telephony.TelephonyManager#getForbiddenPlmns():
+    
+RequiresPermission: android.telephony.TelephonyManager#getGroupIdLevel1():
+    
+RequiresPermission: android.telephony.TelephonyManager#getImei(int):
+    
+RequiresPermission: android.telephony.TelephonyManager#getLine1Number():
+    
+RequiresPermission: android.telephony.TelephonyManager#getMeid():
+    
+RequiresPermission: android.telephony.TelephonyManager#getMeid(int):
+    
+RequiresPermission: android.telephony.TelephonyManager#getNai():
+    
+RequiresPermission: android.telephony.TelephonyManager#getPreferredOpportunisticDataSubscription():
+    
+RequiresPermission: android.telephony.TelephonyManager#getServiceState():
+    
+RequiresPermission: android.telephony.TelephonyManager#getSimSerialNumber():
+    
+RequiresPermission: android.telephony.TelephonyManager#getSubscriberId():
+    
+RequiresPermission: android.telephony.TelephonyManager#getVisualVoicemailPackageName():
+    
+RequiresPermission: android.telephony.TelephonyManager#getVoiceMailAlphaTag():
+    
+RequiresPermission: android.telephony.TelephonyManager#getVoiceMailNumber():
+    
+RequiresPermission: android.telephony.TelephonyManager#getVoiceNetworkType():
+    
+RequiresPermission: android.telephony.TelephonyManager#iccCloseLogicalChannel(int):
+    
+RequiresPermission: android.telephony.TelephonyManager#iccExchangeSimIO(int, int, int, int, int, String):
+    
+RequiresPermission: android.telephony.TelephonyManager#iccOpenLogicalChannel(String):
+    
+RequiresPermission: android.telephony.TelephonyManager#iccOpenLogicalChannel(String, int):
+    
+RequiresPermission: android.telephony.TelephonyManager#iccTransmitApduBasicChannel(int, int, int, int, int, String):
+    
+RequiresPermission: android.telephony.TelephonyManager#iccTransmitApduLogicalChannel(int, int, int, int, int, int, String):
+    
+RequiresPermission: android.telephony.TelephonyManager#isDataEnabled():
+    
+RequiresPermission: android.telephony.TelephonyManager#isDataRoamingEnabled():
+    
+RequiresPermission: android.telephony.TelephonyManager#isMultiSimSupported():
+    
+RequiresPermission: android.telephony.TelephonyManager#requestNetworkScan(android.telephony.NetworkScanRequest, java.util.concurrent.Executor, android.telephony.TelephonyScanManager.NetworkScanCallback):
+    
+RequiresPermission: android.telephony.TelephonyManager#sendEnvelopeWithStatus(String):
+    
+RequiresPermission: android.telephony.TelephonyManager#sendUssdRequest(String, android.telephony.TelephonyManager.UssdResponseCallback, android.os.Handler):
+    
+RequiresPermission: android.telephony.TelephonyManager#sendVisualVoicemailSms(String, int, String, android.app.PendingIntent):
+    
+RequiresPermission: android.telephony.TelephonyManager#setDataEnabled(boolean):
+    
+RequiresPermission: android.telephony.TelephonyManager#setNetworkSelectionModeAutomatic():
+    
+RequiresPermission: android.telephony.TelephonyManager#setNetworkSelectionModeManual(String, boolean):
+    
+RequiresPermission: android.telephony.TelephonyManager#setPreferredOpportunisticDataSubscription(int, boolean, java.util.concurrent.Executor, java.util.function.Consumer<java.lang.Integer>):
+    
+RequiresPermission: android.telephony.TelephonyManager#setVoicemailRingtoneUri(android.telecom.PhoneAccountHandle, android.net.Uri):
+    
+RequiresPermission: android.telephony.TelephonyManager#setVoicemailVibrationEnabled(android.telecom.PhoneAccountHandle, boolean):
+    
+RequiresPermission: android.telephony.TelephonyManager#switchMultiSimConfig(int):
+    
+RequiresPermission: android.telephony.TelephonyManager#updateAvailableNetworks(java.util.List<android.telephony.AvailableNetworkInfo>, java.util.concurrent.Executor, java.util.function.Consumer<java.lang.Integer>):
+    
+RequiresPermission: android.telephony.euicc.EuiccManager#deleteSubscription(int, android.app.PendingIntent):
+    
+RequiresPermission: android.telephony.euicc.EuiccManager#downloadSubscription(android.telephony.euicc.DownloadableSubscription, boolean, android.app.PendingIntent):
+    
+RequiresPermission: android.telephony.euicc.EuiccManager#switchToSubscription(int, android.app.PendingIntent):
+    
+RequiresPermission: android.telephony.euicc.EuiccManager#updateSubscriptionNickname(int, String, android.app.PendingIntent):
+    
+RequiresPermission: android.view.inputmethod.InputMethodManager#setCurrentInputMethodSubtype(android.view.inputmethod.InputMethodSubtype):
+    
+RequiresPermission: android.view.inputmethod.InputMethodManager#setInputMethod(android.os.IBinder, String):
+    
+RequiresPermission: android.view.inputmethod.InputMethodManager#setInputMethodAndSubtype(android.os.IBinder, String, android.view.inputmethod.InputMethodSubtype):
+    
+RequiresPermission: android.webkit.WebSettings#setBlockNetworkLoads(boolean):
+    
+RequiresPermission: android.webkit.WebSettings#setGeolocationEnabled(boolean):
+    
+
+
+SamShouldBeLast: android.location.LocationManager#registerGnssMeasurementsCallback(java.util.concurrent.Executor, android.location.GnssMeasurementsEvent.Callback):
+    
+SamShouldBeLast: android.location.LocationManager#registerGnssNavigationMessageCallback(java.util.concurrent.Executor, android.location.GnssNavigationMessage.Callback):
+    
+SamShouldBeLast: android.location.LocationManager#registerGnssStatusCallback(java.util.concurrent.Executor, android.location.GnssStatus.Callback):
+    
+SamShouldBeLast: android.location.LocationManager#requestLocationUpdates(String, long, float, java.util.concurrent.Executor, android.location.LocationListener):
+    
+SamShouldBeLast: android.location.LocationManager#requestLocationUpdates(long, float, android.location.Criteria, java.util.concurrent.Executor, android.location.LocationListener):
+    
+
+
+StreamFiles: android.content.res.loader.DirectoryAssetsProvider#DirectoryAssetsProvider(java.io.File):
+    Methods accepting `File` should also accept `FileDescriptor` or streams: constructor android.content.res.loader.DirectoryAssetsProvider(java.io.File)
+StreamFiles: android.content.res.loader.DirectoryResourceLoader#DirectoryResourceLoader(java.io.File):
+    
+
+
+Todo: android.hardware.camera2.params.StreamConfigurationMap:
+    
+Todo: android.hardware.camera2.params.StreamConfigurationMap#getOutputMinFrameDuration(Class<T>, android.util.Size):
+    
+Todo: android.hardware.camera2.params.StreamConfigurationMap#getOutputMinFrameDuration(int, android.util.Size):
+    
+Todo: android.provider.ContactsContract.RawContacts#newEntityIterator(android.database.Cursor):
+    
+Todo: android.telephony.CarrierConfigManager#KEY_USE_OTASP_FOR_PROVISIONING_BOOL:
+    

@@ -89,25 +89,15 @@ std::optional<bool> isEmptyDir(std::string_view dir);
 bool startsWith(std::string_view path, std::string_view prefix);
 
 template <class... Paths>
-std::string join(std::string&& first, std::string_view second, Paths&&... paths) {
-    std::string& result = first;
+std::string join(std::string_view first, std::string_view second, Paths&&... paths) {
+    std::string result;
     {
         using std::size;
         result.reserve(first.size() + second.size() + 1 + (sizeof...(paths) + ... + size(paths)));
     }
-    (details::append_next_path(result, second), ...,
-     details::append_next_path(result, std::forward<Paths>(paths)));
-    return std::move(result);
-}
-
-template <class... Paths>
-std::string join(std::string_view first, std::string_view second, Paths&&... paths) {
-    return path::join(std::string(), first, second, std::forward<Paths>(paths)...);
-}
-
-template <class... Paths>
-std::string join(const char* first, std::string_view second, Paths&&... paths) {
-    return path::join(std::string_view(first), second, std::forward<Paths>(paths)...);
+    result.assign(first);
+    (details::append_next_path(result, second), ..., details::append_next_path(result, paths));
+    return result;
 }
 
 } // namespace android::incremental::path

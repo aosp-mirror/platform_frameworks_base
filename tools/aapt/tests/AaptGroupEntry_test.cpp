@@ -19,6 +19,7 @@
 
 #include "AaptAssets.h"
 #include "ResourceFilter.h"
+#include "TestHelper.h"
 
 using android::String8;
 

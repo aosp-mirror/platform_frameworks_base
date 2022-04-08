@@ -16,6 +16,8 @@
 
 package com.android.systemui.statusbar.notification.row;
 
+import static org.mockito.ArgumentMatchers.anyFloat;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
@@ -23,7 +25,8 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import android.util.Pair;
+import android.app.AppOpsManager;
+import android.util.ArraySet;
 import android.view.NotificationHeaderView;
 import android.view.View;
 import android.view.ViewPropertyAnimator;
@@ -32,10 +35,8 @@ import androidx.test.annotation.UiThreadTest;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
-import com.android.internal.R;
 import com.android.internal.widget.NotificationExpandButton;
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.media.dialog.MediaOutputDialogFactory;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -50,11 +51,10 @@ public class NotificationContentViewTest extends SysuiTestCase {
     @Before
     @UiThreadTest
     public void setup() {
-        mDependency.injectMockDependency(MediaOutputDialogFactory.class);
-
         mView = new NotificationContentView(mContext, null);
         ExpandableNotificationRow row = new ExpandableNotificationRow(mContext, null);
         ExpandableNotificationRow mockRow = spy(row);
+        doNothing().when(mockRow).updateBackgroundAlpha(anyFloat());
         doReturn(10).when(mockRow).getIntrinsicHeight();
 
         mView.setContainingNotification(mockRow);
@@ -76,26 +76,24 @@ public class NotificationContentViewTest extends SysuiTestCase {
 
     @Test
     @UiThreadTest
-    public void testShowFeedbackIcon() {
+    public void testShowAppOpsIcons() {
         View mockContracted = mock(NotificationHeaderView.class);
-        when(mockContracted.findViewById(com.android.internal.R.id.feedback))
+        when(mockContracted.findViewById(com.android.internal.R.id.mic))
                 .thenReturn(mockContracted);
-        when(mockContracted.getContext()).thenReturn(mContext);
         View mockExpanded = mock(NotificationHeaderView.class);
-        when(mockExpanded.findViewById(com.android.internal.R.id.feedback))
+        when(mockExpanded.findViewById(com.android.internal.R.id.mic))
                 .thenReturn(mockExpanded);
-        when(mockExpanded.getContext()).thenReturn(mContext);
         View mockHeadsUp = mock(NotificationHeaderView.class);
-        when(mockHeadsUp.findViewById(com.android.internal.R.id.feedback))
+        when(mockHeadsUp.findViewById(com.android.internal.R.id.mic))
                 .thenReturn(mockHeadsUp);
-        when(mockHeadsUp.getContext()).thenReturn(mContext);
 
         mView.setContractedChild(mockContracted);
         mView.setExpandedChild(mockExpanded);
         mView.setHeadsUpChild(mockHeadsUp);
 
-        mView.showFeedbackIcon(true, new Pair(R.drawable.ic_feedback_alerted,
-                R.string.notification_feedback_indicator_alerted));
+        ArraySet<Integer> ops = new ArraySet<>();
+        ops.add(AppOpsManager.OP_RECORD_AUDIO);
+        mView.showAppOpsIcons(ops);
 
         verify(mockContracted, times(1)).setVisibility(View.VISIBLE);
         verify(mockExpanded, times(1)).setVisibility(View.VISIBLE);
@@ -110,21 +108,18 @@ public class NotificationContentViewTest extends SysuiTestCase {
         when(mockContracted.animate()).thenReturn(mock(ViewPropertyAnimator.class));
         when(mockContracted.findViewById(com.android.internal.R.id.expand_button)).thenReturn(
                 mockContractedEB);
-        when(mockContracted.getContext()).thenReturn(mContext);
 
         View mockExpandedEB = mock(NotificationExpandButton.class);
         View mockExpanded = mock(NotificationHeaderView.class);
         when(mockExpanded.animate()).thenReturn(mock(ViewPropertyAnimator.class));
         when(mockExpanded.findViewById(com.android.internal.R.id.expand_button)).thenReturn(
                 mockExpandedEB);
-        when(mockExpanded.getContext()).thenReturn(mContext);
 
         View mockHeadsUpEB = mock(NotificationExpandButton.class);
         View mockHeadsUp = mock(NotificationHeaderView.class);
         when(mockHeadsUp.animate()).thenReturn(mock(ViewPropertyAnimator.class));
         when(mockHeadsUp.findViewById(com.android.internal.R.id.expand_button)).thenReturn(
                 mockHeadsUpEB);
-        when(mockHeadsUp.getContext()).thenReturn(mContext);
 
         // Set up all 3 child forms
         mView.setContractedChild(mockContracted);

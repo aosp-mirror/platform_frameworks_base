@@ -394,8 +394,7 @@ public final class DreamManagerService extends SystemService {
 
     private void startDreamLocked(final ComponentName name,
             final boolean isTest, final boolean canDoze, final int userId) {
-        if (!mCurrentDreamIsWaking
-                && Objects.equals(mCurrentDreamName, name)
+        if (Objects.equals(mCurrentDreamName, name)
                 && mCurrentDreamIsTest == isTest
                 && mCurrentDreamCanDoze == canDoze
                 && mCurrentDreamUserId == userId) {

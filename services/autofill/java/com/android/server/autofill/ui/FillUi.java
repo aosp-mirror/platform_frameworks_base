@@ -203,7 +203,7 @@ final class FillUi {
                     .getInteger(com.android.internal.R.integer.autofill_max_visible_datasets);
         }
 
-        final RemoteViews.InteractionHandler interceptionHandler = (view, pendingIntent, r) -> {
+        final RemoteViews.OnClickHandler interceptionHandler = (view, pendingIntent, r) -> {
             if (pendingIntent != null) {
                 mCallback.startIntentSender(pendingIntent.getIntentSender());
             }
@@ -258,11 +258,10 @@ final class FillUi {
                         + mVisibleDatasetsMaxCount);
             }
 
-            RemoteViews.InteractionHandler interactionBlocker = null;
+            RemoteViews.OnClickHandler clickBlocker = null;
             if (headerPresentation != null) {
-                interactionBlocker = newInteractionBlocker();
-                mHeader = headerPresentation.applyWithTheme(
-                        mContext, null, interactionBlocker, mThemeId);
+                clickBlocker = newClickBlocker();
+                mHeader = headerPresentation.applyWithTheme(mContext, null, clickBlocker, mThemeId);
                 final LinearLayout headerContainer =
                         decor.findViewById(R.id.autofill_dataset_header);
                 applyCancelAction(mHeader, response.getCancelIds());
@@ -277,11 +276,11 @@ final class FillUi {
                 final LinearLayout footerContainer =
                         decor.findViewById(R.id.autofill_dataset_footer);
                 if (footerContainer != null) {
-                    if (interactionBlocker == null) { // already set for header
-                        interactionBlocker = newInteractionBlocker();
+                    if (clickBlocker == null) { // already set for header
+                        clickBlocker = newClickBlocker();
                     }
                     mFooter = footerPresentation.applyWithTheme(
-                            mContext, null, interactionBlocker, mThemeId);
+                            mContext, null, clickBlocker, mThemeId);
                     applyCancelAction(mFooter, response.getCancelIds());
                     // Footer not supported on some platform e.g. TV
                     if (sVerbose) Slog.v(TAG, "adding footer");
@@ -398,9 +397,9 @@ final class FillUi {
     }
 
     /**
-     * Creates a remoteview interceptor used to block clicks or other interactions.
+     * Creates a remoteview interceptor used to block clicks.
      */
-    private RemoteViews.InteractionHandler newInteractionBlocker() {
+    private RemoteViews.OnClickHandler newClickBlocker() {
         return (view, pendingIntent, response) -> {
             if (sVerbose) Slog.v(TAG, "Ignoring click on " + view);
             return true;

@@ -362,12 +362,14 @@ public class VirtualDisplayTest extends AndroidTestCase {
 
     private final class TestPresentation extends Presentation {
         private final int mColor;
+        private final int mWindowType;
         private final int mWindowFlags;
 
         public TestPresentation(Context context, Display display,
                 int color, int windowType, int windowFlags) {
-            super(context, display, 0 /* theme */, windowType);
+            super(context, display);
             mColor = color;
+            mWindowType = windowType;
             mWindowFlags = windowFlags;
         }
 
@@ -376,6 +378,7 @@ public class VirtualDisplayTest extends AndroidTestCase {
             super.onCreate(savedInstanceState);
 
             setTitle(TAG);
+            getWindow().setType(mWindowType);
             getWindow().addFlags(mWindowFlags);
 
             // Create a solid color image to use as the content of the presentation.

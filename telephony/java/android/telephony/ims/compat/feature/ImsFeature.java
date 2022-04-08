@@ -19,7 +19,6 @@ package android.telephony.ims.compat.feature;
 import android.annotation.IntDef;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
-import android.os.Build;
 import android.os.IInterface;
 import android.os.RemoteException;
 import android.telephony.SubscriptionManager;
@@ -79,12 +78,12 @@ public abstract class ImsFeature {
         mSlotId = slotId;
     }
 
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public int getFeatureState() {
         return mState;
     }
 
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     protected final void setFeatureState(@ImsState int state) {
         if (mState != state) {
             mState = state;

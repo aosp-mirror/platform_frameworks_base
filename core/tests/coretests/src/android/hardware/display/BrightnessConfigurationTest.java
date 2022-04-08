@@ -23,16 +23,18 @@ import static org.junit.Assert.fail;
 
 import android.os.Parcel;
 import android.util.Pair;
-import android.util.TypedXmlPullParser;
-import android.util.TypedXmlSerializer;
 import android.util.Xml;
 
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
+import com.android.internal.util.FastXmlSerializer;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
+import org.xmlpull.v1.XmlSerializer;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -161,7 +163,7 @@ public class BrightnessConfigurationTest {
         BrightnessConfiguration config = builder.build();
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        TypedXmlSerializer out = Xml.newFastSerializer();
+        XmlSerializer out = new FastXmlSerializer();
         out.setOutput(baos, StandardCharsets.UTF_8.name());
         out.startDocument(null, true);
         config.saveToXml(out);
@@ -169,7 +171,7 @@ public class BrightnessConfigurationTest {
         baos.flush();
 
         ByteArrayInputStream input = new ByteArrayInputStream(baos.toByteArray());
-        TypedXmlPullParser parser = Xml.newFastPullParser();
+        XmlPullParser parser = Xml.newPullParser();
         parser.setInput(input, StandardCharsets.UTF_8.name());
         BrightnessConfiguration loadedConfig = BrightnessConfiguration.loadFromXml(parser);
 

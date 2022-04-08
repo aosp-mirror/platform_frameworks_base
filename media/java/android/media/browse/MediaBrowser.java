@@ -25,6 +25,7 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.pm.ParceledListSlice;
 import android.media.MediaDescription;
+import android.media.session.MediaController;
 import android.media.session.MediaSession;
 import android.os.Binder;
 import android.os.Bundle;
@@ -184,7 +185,7 @@ public final class MediaBrowser {
                 boolean bound = false;
                 try {
                     bound = mContext.bindService(intent, mServiceConnection,
-                            Context.BIND_AUTO_CREATE | Context.BIND_INCLUDE_CAPABILITIES);
+                            Context.BIND_AUTO_CREATE);
                 } catch (Exception ex) {
                     Log.e(TAG, "Failed binding to service " + mServiceComponent);
                 }
@@ -210,7 +211,7 @@ public final class MediaBrowser {
     public void disconnect() {
         // It's ok to call this any state, because allowing this lets apps not have
         // to check isConnected() unnecessarily. They won't appreciate the extra
-        // assertions for this. We do everything we can here to go back to a valid state.
+        // assertions for this. We do everything we can here to go back to a sane state.
         mState = CONNECT_STATE_DISCONNECTING;
         mHandler.post(new Runnable() {
             @Override
@@ -756,8 +757,8 @@ public final class MediaBrowser {
          * Flag: Indicates that the item is playable.
          * <p>
          * The id of this item may be passed to
-         * {@link android.media.session.MediaController.TransportControls
-         * #playFromMediaId(String, Bundle)} to start playing it.
+         * {@link MediaController.TransportControls#playFromMediaId(String, Bundle)}
+         * to start playing it.
          * </p>
          */
         public static final int FLAG_PLAYABLE = 1 << 1;
@@ -1106,7 +1107,13 @@ public final class MediaBrowser {
         }
 
         @Override
-        public void onLoadChildren(String parentId, ParceledListSlice list, Bundle options) {
+        public void onLoadChildren(String parentId, ParceledListSlice list) {
+            onLoadChildrenWithOptions(parentId, list, null);
+        }
+
+        @Override
+        public void onLoadChildrenWithOptions(String parentId, ParceledListSlice list,
+                final Bundle options) {
             MediaBrowser mediaBrowser = mMediaBrowser.get();
             if (mediaBrowser != null) {
                 mediaBrowser.onLoadChildren(this, parentId, list, options);

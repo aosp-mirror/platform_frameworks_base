@@ -58,7 +58,7 @@ public class BluetoothGattDescriptor implements Parcelable {
     public static final int PERMISSION_READ_ENCRYPTED = 0x02;
 
     /**
-     * Descriptor permission: Allow reading with person-in-the-middle protection
+     * Descriptor permission: Allow reading with man-in-the-middle protection
      */
     public static final int PERMISSION_READ_ENCRYPTED_MITM = 0x04;
 
@@ -73,7 +73,7 @@ public class BluetoothGattDescriptor implements Parcelable {
     public static final int PERMISSION_WRITE_ENCRYPTED = 0x20;
 
     /**
-     * Descriptor permission: Allow encrypted writes with person-in-the-middle
+     * Descriptor permission: Allow encrypted writes with man-in-the-middle
      * protection
      */
     public static final int PERMISSION_WRITE_ENCRYPTED_MITM = 0x40;
@@ -85,7 +85,7 @@ public class BluetoothGattDescriptor implements Parcelable {
 
     /**
      * Descriptor permission: Allow signed write operations with
-     * person-in-the-middle protection
+     * man-in-the-middle protection
      */
     public static final int PERMISSION_WRITE_SIGNED_MITM = 0x100;
 
@@ -128,6 +128,7 @@ public class BluetoothGattDescriptor implements Parcelable {
 
     /**
      * Create a new BluetoothGattDescriptor.
+     * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
      *
      * @param uuid The UUID for this descriptor
      * @param permissions Permissions for this descriptor
@@ -138,6 +139,7 @@ public class BluetoothGattDescriptor implements Parcelable {
 
     /**
      * Create a new BluetoothGattDescriptor.
+     * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
      *
      * @param characteristic The characteristic this descriptor belongs to
      * @param uuid The UUID for this descriptor
@@ -225,6 +227,8 @@ public class BluetoothGattDescriptor implements Parcelable {
      *
      * <p>If a remote device offers multiple descriptors with the same UUID,
      * the instance ID is used to distuinguish between descriptors.
+     *
+     * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
      *
      * @return Instance ID of this descriptor
      * @hide

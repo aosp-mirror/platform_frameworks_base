@@ -21,7 +21,7 @@ import android.content.Context;
 import android.content.Intent;
 
 /**
- * Placeholder widget for testing
+ * Dummy widget for testing
  */
 public class DummyAppWidget extends BroadcastReceiver {
 

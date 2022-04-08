@@ -27,6 +27,8 @@ import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.MediumTest;
 import androidx.test.runner.AndroidJUnit4;
 
+import com.android.server.BluetoothAirplaneModeListener.AirplaneModeHelper;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -39,7 +41,7 @@ public class BluetoothAirplaneModeListenerTest {
     private Context mContext;
     private BluetoothAirplaneModeListener mBluetoothAirplaneModeListener;
     private BluetoothAdapter mBluetoothAdapter;
-    private BluetoothModeChangeHelper mHelper;
+    private AirplaneModeHelper mHelper;
 
     @Mock BluetoothManagerService mBluetoothManagerService;
 
@@ -47,7 +49,7 @@ public class BluetoothAirplaneModeListenerTest {
     public void setUp() throws Exception {
         mContext = InstrumentationRegistry.getTargetContext();
 
-        mHelper = mock(BluetoothModeChangeHelper.class);
+        mHelper = mock(AirplaneModeHelper.class);
         when(mHelper.getSettingsInt(BluetoothAirplaneModeListener.TOAST_COUNT))
                 .thenReturn(BluetoothAirplaneModeListener.MAX_TOAST_COUNT);
         doNothing().when(mHelper).setSettingsInt(anyString(), anyInt());

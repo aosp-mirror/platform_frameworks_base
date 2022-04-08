@@ -30,7 +30,6 @@ import static com.android.internal.util.function.pooled.PooledLambda.obtainMessa
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.UserIdInt;
 import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.content.Context;
@@ -133,7 +132,7 @@ final class UserState implements PrintSpoolerCallbacks, PrintServiceCallbacks,
 
     private final Context mContext;
 
-    private final @UserIdInt int mUserId;
+    private final int mUserId;
 
     private final RemotePrintSpooler mSpooler;
 
@@ -651,7 +650,7 @@ final class UserState implements PrintSpoolerCallbacks, PrintServiceCallbacks,
 
                 mPrintServiceRecommendationsService =
                         new RemotePrintServiceRecommendationService(mContext,
-                                UserHandle.of(mUserId), this);
+                                UserHandle.getUserHandleForUid(mUserId), this);
             }
             mPrintServiceRecommendationsChangeListenerRecords.add(
                     new ListenerRecord<IRecommendationsChangeListener>(listener) {

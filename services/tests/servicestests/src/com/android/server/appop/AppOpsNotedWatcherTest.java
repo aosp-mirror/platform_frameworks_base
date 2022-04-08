@@ -66,12 +66,10 @@ public class AppOpsNotedWatcherTest {
         inOrder.verify(listener, timeout(NOTIFICATION_TIMEOUT_MILLIS)
                 .times(1)).onOpNoted(eq(AppOpsManager.OP_FINE_LOCATION),
                 eq(Process.myUid()), eq(getContext().getPackageName()),
-                eq(getContext().getAttributionTag()), eq(AppOpsManager.OP_FLAG_SELF),
                 eq(AppOpsManager.MODE_ALLOWED));
         inOrder.verify(listener, timeout(NOTIFICATION_TIMEOUT_MILLIS)
                 .times(1)).onOpNoted(eq(AppOpsManager.OP_CAMERA),
                 eq(Process.myUid()), eq(getContext().getPackageName()),
-                eq(getContext().getAttributionTag()), eq(AppOpsManager.OP_FLAG_SELF),
                 eq(AppOpsManager.MODE_ALLOWED));
 
         // Stop watching
@@ -96,7 +94,6 @@ public class AppOpsNotedWatcherTest {
         verify(listener, timeout(NOTIFICATION_TIMEOUT_MILLIS)
                 .times(2)).onOpNoted(eq(AppOpsManager.OP_FINE_LOCATION),
                 eq(Process.myUid()), eq(getContext().getPackageName()),
-                eq(getContext().getAttributionTag()), eq(AppOpsManager.OP_FLAG_SELF),
                 eq(AppOpsManager.MODE_ALLOWED));
 
         // Finish up

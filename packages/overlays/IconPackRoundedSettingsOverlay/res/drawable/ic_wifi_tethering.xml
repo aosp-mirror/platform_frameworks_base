@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+   Copyright (C) 2019 The Android Open Source Project
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:height="24dp"
+    android:tint="?android:attr/colorControlNormal"
+    android:viewportHeight="24"
+    android:viewportWidth="24"
+    android:width="24dp" >
+    <path
+        android:fillColor="@android:color/white"
+        android:pathData="M 12 11 C 12.8284271247 11 13.5 11.6715728753 13.5 12.5 C 13.5 13.3284271247 12.8284271247 14 12 14 C 11.1715728753 14 10.5 13.3284271247 10.5 12.5 C 10.5 11.6715728753 11.1715728753 11 12 11 Z" />
+    <path
+        android:fillColor="@android:color/white"
+        android:pathData="M15.01,16.57c0.29,0.29,0.77,0.29,1.06,0c1.09-1.09,1.68-2.53,1.68-4.07s-0.6-2.98-1.68-4.07c-2.24-2.24-5.89-2.24-8.13,0 c-1.09,1.09-1.68,2.53-1.68,4.07s0.6,2.98,1.68,4.07c0.15,0.15,0.34,0.22,0.53,0.22s0.38-0.07,0.53-0.22 c0.29-0.29,0.29-0.77,0-1.06c-0.8-0.8-1.24-1.87-1.24-3.01c0-1.13,0.44-2.2,1.24-3c1.66-1.66,4.35-1.66,6.01,0 c0.8,0.8,1.24,1.87,1.24,3.01c0,1.13-0.44,2.2-1.24,3C14.71,15.8,14.71,16.27,15.01,16.57z" />
+    <path
+        android:fillColor="@android:color/white"
+        android:pathData="M18.36,19.61c0.19,0,0.38-0.07,0.53-0.22c1.84-1.84,2.86-4.29,2.86-6.89s-1.01-5.05-2.86-6.89c-3.8-3.8-9.99-3.8-13.79,0 C3.26,7.45,2.25,9.9,2.25,12.5s1.01,5.05,2.86,6.89c0.29,0.29,0.77,0.29,1.06,0s0.29-0.77,0-1.06c-1.56-1.56-2.42-3.63-2.42-5.83 s0.86-4.28,2.42-5.83c3.22-3.22,8.45-3.22,11.67,0c1.56,1.56,2.42,3.63,2.42,5.83s-0.86,4.28-2.42,5.83 c-0.29,0.29-0.29,0.77,0,1.06C17.98,19.54,18.17,19.61,18.36,19.61z" />
+</vector>

@@ -51,14 +51,10 @@ class ToggleAccessibilityServiceTarget extends AccessibilityServiceTarget {
         final boolean isEditMenuMode =
                 shortcutMenuMode == ShortcutMenuMode.EDIT;
         holder.mStatusView.setVisibility(isEditMenuMode ? View.GONE : View.VISIBLE);
-        holder.mStatusView.setText(getStateDescription());
-    }
 
-    @Override
-    public CharSequence getStateDescription() {
         final int statusResId = isAccessibilityServiceEnabled(getContext(), getId())
                 ? R.string.accessibility_shortcut_menu_item_status_on
                 : R.string.accessibility_shortcut_menu_item_status_off;
-        return getContext().getString(statusResId);
+        holder.mStatusView.setText(getContext().getString(statusResId));
     }
 }

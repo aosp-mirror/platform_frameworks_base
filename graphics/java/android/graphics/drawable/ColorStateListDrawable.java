@@ -48,12 +48,6 @@ public class ColorStateListDrawable extends Drawable implements Drawable.Callbac
         setColorStateList(colorStateList);
     }
 
-    private ColorStateListDrawable(@NonNull ColorStateListDrawableState state) {
-        mState = state;
-        initializeColorDrawable();
-        onStateChange(getState());
-    }
-
     @Override
     public void draw(@NonNull Canvas canvas) {
         mColorDrawable.draw(canvas);
@@ -290,6 +284,11 @@ public class ColorStateListDrawable extends Drawable implements Drawable.Callbac
             return (mColor != null && mColor.canApplyTheme())
                     || (mTint != null && mTint.canApplyTheme());
         }
+    }
+
+    private ColorStateListDrawable(@NonNull ColorStateListDrawableState state) {
+        mState = state;
+        initializeColorDrawable();
     }
 
     private void initializeColorDrawable() {

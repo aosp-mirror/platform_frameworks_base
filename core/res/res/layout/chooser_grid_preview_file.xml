@@ -24,7 +24,7 @@
     android:layout_height="wrap_content"
     android:orientation="vertical"
     android:paddingBottom="@dimen/chooser_view_spacing"
-    android:background="?attr/colorBackground">
+    android:background="?attr/colorBackgroundFloating">
 
   <LinearLayout
       android:layout_width="@dimen/chooser_preview_width"

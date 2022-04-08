@@ -1,6 +1,6 @@
 package android.content.pm;
 
-import com.android.internal.util.ArrayUtils;
+import libcore.util.ArrayUtils;
 
 import java.io.FilterInputStream;
 import java.io.IOException;

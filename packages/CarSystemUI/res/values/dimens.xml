@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (C) 2018 The Android Open Source Project
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~      http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License
+  -->
+<resources>
+    <!-- Text size for car -->
+    <dimen name="car_title_size">32sp</dimen>
+    <dimen name="car_title2_size">32sp</dimen>
+    <dimen name="car_headline1_size">45sp</dimen>
+    <dimen name="car_headline2_size">32sp</dimen>
+    <dimen name="car_headline3_size">24sp</dimen>
+    <dimen name="car_headline4_size">20sp</dimen>
+    <dimen name="car_body1_size">32sp</dimen>
+    <dimen name="car_body2_size">28sp</dimen>
+    <dimen name="car_body3_size">26sp</dimen>
+    <dimen name="car_body4_size">24sp</dimen>
+    <!-- car_body5_size is deprecated -->
+    <dimen name="car_body5_size">18sp</dimen>
+    <dimen name="car_label1_size">26sp</dimen>
+    <dimen name="car_label2_size">64sp</dimen>
+    <dimen name="car_action1_size">26sp</dimen>
+    <dimen name="car_action2_size">26sp</dimen>
+    <!-- Paddings -->
+    <dimen name="car_padding_0">4dp</dimen>
+    <dimen name="car_padding_1">8dp</dimen>
+    <dimen name="car_padding_2">16dp</dimen>
+    <dimen name="car_padding_3">24dp</dimen>
+    <dimen name="car_padding_4">32dp</dimen>
+    <dimen name="car_padding_5">64dp</dimen>
+    <dimen name="car_padding_6">96dp</dimen>
+
+    <!--
+       Note: status bar height and navigation bar heights are defined
+       in frameworks/base/core package and thus will have no effect if
+       set here. See car_product overlay for car specific defaults-->
+
+    <dimen name="status_bar_icon_drawing_size_dark">36dp</dimen>
+    <dimen name="status_bar_icon_drawing_size">36dp</dimen>
+    <!-- The amount by which to scale up the status bar icons. -->
+    <item name="status_bar_icon_scale_factor" format="float" type="dimen">1.75</item>
+
+    <dimen name="car_primary_icon_size">@*android:dimen/car_primary_icon_size</dimen>
+
+    <!--These values represent MIN and MAX for hvac-->
+    <item name="hvac_min_value" format="float" type="dimen">0</item>
+    <item name="hvac_max_value" format="float" type="dimen">126</item>
+
+    <!-- Largest size an avatar might need to be drawn in the user picker, status bar, or
+         quick settings header -->
+    <dimen name="max_avatar_size">128dp</dimen>
+
+    <!-- Standard image button size for volume dialog buttons -->
+    <dimen name="volume_button_size">84dp</dimen>
+    <!-- The maximum width allowed for the volume dialog. For auto, we allow this to span a good
+         deal of the screen. This value accounts for the side margins. -->
+    <dimen name="volume_dialog_panel_width">1920dp</dimen>
+    <dimen name="volume_dialog_side_margin">@dimen/side_margin</dimen>
+
+    <dimen name="volume_dialog_elevation">6dp</dimen>
+
+    <dimen name="volume_dialog_row_margin_end">@*android:dimen/car_keyline_3</dimen>
+
+    <dimen name="volume_dialog_row_padding_end">0dp</dimen>
+
+    <dimen name="line_item_height">128dp</dimen>
+    <dimen name="volume_icon_size">96dp</dimen>
+    <dimen name="side_margin">148dp</dimen>
+    <dimen name="car_keyline_1">24dp</dimen>
+    <dimen name="car_keyline_2">96dp</dimen>
+    <dimen name="car_keyline_3">128dp</dimen>
+
+    <!-- Car volume dimens. -->
+    <dimen name="car_volume_item_icon_size">@dimen/car_primary_icon_size</dimen>
+    <dimen name="car_volume_item_height">@*android:dimen/car_single_line_list_item_height</dimen>
+    <dimen name="car_volume_item_padding_start">@*android:dimen/car_keyline_1</dimen>
+    <dimen name="car_volume_item_padding_end">@*android:dimen/car_keyline_1</dimen>
+    <dimen name="car_volume_item_seekbar_margin_vertical">@*android:dimen/car_padding_1</dimen>
+    <dimen name="car_volume_item_seekbar_margin_start">@*android:dimen/car_keyline_3</dimen>
+    <dimen name="car_volume_item_seekbar_margin_end">@*android:dimen/car_padding_4</dimen>
+    <dimen name="car_volume_item_seekbar_padding_vertical">@*android:dimen/car_seekbar_padding</dimen>
+    <dimen name="car_volume_item_divider_height">60dp</dimen>
+    <dimen name="car_volume_item_divider_width">1dp</dimen>
+    <dimen name="car_volume_item_divider_margin_end">@*android:dimen/car_padding_4</dimen>
+    <dimen name="car_volume_item_corner_radius">@*android:dimen/car_radius_3</dimen>
+
+    <!-- Car notification shade-->
+    <dimen name="notification_shade_handle_bar_height">10dp</dimen>
+    <dimen name="notification_shade_handle_bar_radius">20dp</dimen>
+    <dimen name="notification_shade_handle_bar_margin_start">200dp</dimen>
+    <dimen name="notification_shade_handle_bar_margin_end">200dp</dimen>
+    <dimen name="notification_shade_handle_bar_margin_top">20dp</dimen>
+    <dimen name="notification_shade_handle_bar_margin_bottom">10dp</dimen>
+    <dimen name="notification_shade_list_padding_bottom">50dp</dimen>
+
+    <!-- The alpha for the scrim behind the notification shade. This value is 1 so that the
+     scrim has no transparency. -->
+    <item name="scrim_behind_alpha" format="float" type="dimen">1.0</item>
+
+    <!-- The width of panel holding the notification card. -->
+    <dimen name="notification_panel_width">522dp</dimen>
+
+    <!-- Height of a small notification in the status bar-->
+    <dimen name="notification_min_height">192dp</dimen>
+
+    <!-- Height of a small notification in the status bar which was used before android N -->
+    <dimen name="notification_min_height_legacy">192dp</dimen>
+
+    <!-- Height of a large notification in the status bar -->
+    <dimen name="notification_max_height">400dp</dimen>
+
+    <!-- Height of a heads up notification in the status bar for legacy custom views -->
+    <dimen name="notification_max_heads_up_height_legacy">400dp</dimen>
+
+    <!-- Height of a heads up notification in the status bar -->
+    <dimen name="notification_max_heads_up_height">400dp</dimen>
+
+    <!-- Height of the status bar header bar -->
+    <dimen name="status_bar_header_height">54dp</dimen>
+
+    <!-- The height of the divider between the individual notifications. -->
+    <dimen name="notification_divider_height">16dp</dimen>
+
+    <!-- The height of the divider between the individual notifications when the notification
+         wants it to be increased. This value is the same as notification_divider_height so that
+         the spacing between all notifications will always be the same. -->
+    <dimen name="notification_divider_height_increased">@dimen/notification_divider_height</dimen>
+
+    <!-- The alpha of the dividing line between child notifications of a notification group. -->
+    <item name="notification_divider_alpha" format="float" type="dimen">1.0</item>
+
+    <!-- The width of each individual notification card. -->
+    <dimen name="notification_child_width">522dp</dimen>
+
+    <!-- The top margin of the notification panel. -->
+    <dimen name="notification_panel_margin_top">32dp</dimen>
+
+    <!-- The bottom margin of the panel that holds the list of notifications. -->
+    <dimen name="notification_panel_margin_bottom">@dimen/notification_divider_height</dimen>
+
+    <!-- The corner radius of the shadow behind the notification. -->
+    <dimen name="notification_shadow_radius">16dp</dimen>
+
+    <!-- The amount of space below the notification list. This value is 0 so the list scrolls
+         all the way to the bottom. -->
+    <dimen name="close_handle_underlap">0dp</dimen>
+
+    <!-- The height of the divider between the individual notifications in a notification group. -->
+    <dimen name="notification_children_container_divider_height">1dp</dimen>
+
+    <!-- The height of the header for a container containing child notifications. -->
+    <dimen name="notification_children_container_header_height">76dp</dimen>
+
+    <!-- The top margin for the notification children container in its non-expanded form. This
+         value is smaller than notification_children_container_header_height to bring the first
+         child closer so there is less wasted space. -->
+    <dimen name="notification_children_container_margin_top">68dp</dimen>
+
+    <!-- dimensions for the car user switcher -->
+    <dimen name="car_user_switcher_name_text_size">@*android:dimen/car_body1_size</dimen>
+    <dimen name="car_user_switcher_image_avatar_size">@*android:dimen/car_large_avatar_size</dimen>
+    <dimen name="car_user_switcher_vertical_spacing_between_users">@*android:dimen/car_padding_5</dimen>
+    <dimen name="car_user_switcher_vertical_spacing_between_name_and_avatar">@*android:dimen/car_padding_4</dimen>
+    <dimen name="car_user_switcher_margin_top">@*android:dimen/car_padding_4</dimen>
+
+    <dimen name="car_navigation_button_width">64dp</dimen>
+    <dimen name="car_navigation_button_icon_height">44dp</dimen>
+    <dimen name="car_navigation_bar_width">760dp</dimen>
+    <dimen name="car_left_navigation_bar_width">96dp</dimen>
+    <dimen name="car_right_navigation_bar_width">96dp</dimen>
+
+    <dimen name="car_user_switcher_container_height">420dp</dimen>
+    <!-- This must be the negative of car_user_switcher_container_height for the animation. -->
+    <dimen name="car_user_switcher_container_anim_height">-420dp</dimen>
+
+    <!-- dimensions for car user switching dialog -->
+    <dimen name="car_fullscreen_user_pod_image_avatar_width">96dp</dimen>
+    <dimen name="car_fullscreen_user_pod_image_avatar_height">96dp</dimen>
+    <dimen name="car_user_switching_dialog_loading_text_margin_top">@*android:dimen/car_padding_4</dimen>
+    <dimen name="car_user_switching_dialog_loading_text_font_size">@*android:dimen/car_body1_size</dimen>
+</resources>

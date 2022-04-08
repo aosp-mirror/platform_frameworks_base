@@ -14,15 +14,6 @@
 // limitations under the License.
 //
 
-package {
-    // See: http://go/android-license-faq
-    // A large-scale-change added 'default_applicable_licenses' to import
-    // all of the 'license_kinds' from "frameworks_base_license"
-    // to get the below license kinds:
-    //   SPDX-license-identifier-Apache-2.0
-    default_applicable_licenses: ["frameworks_base_license"],
-}
-
 toolSources = [
     "cmd/Command.cpp",
     "cmd/Compile.cpp",
@@ -56,7 +47,6 @@ cc_defaults {
             cflags: ["-D_DARWIN_UNLIMITED_STREAMS"],
         },
     },
-    header_libs: ["jni_headers"],
     static_libs: [
         "libandroidfw",
         "libutils",
@@ -162,7 +152,6 @@ cc_library_host_static {
         "Configuration.proto",
         "Resources.proto",
         "ResourcesInternal.proto",
-        "ValueTransformer.cpp",
     ],
     proto: {
         export_proto_headers: true,
@@ -197,9 +186,9 @@ cc_test_host {
     ],
     defaults: ["aapt2_defaults"],
     data: [
-        "integration-tests/CompileTest/**/*",
-        "integration-tests/CommandTests/**/*",
-        "integration-tests/ConvertTest/**/*",
+         "integration-tests/CompileTest/**/*",
+         "integration-tests/CommandTests/**/*",
+         "integration-tests/ConvertTest/**/*"
     ],
 }
 
@@ -212,9 +201,6 @@ cc_binary_host {
     use_version_lib: true,
     static_libs: ["libaapt2"],
     defaults: ["aapt2_defaults"],
-    dist: {
-        targets: ["aapt2_artifacts"],
-    },
 }
 
 // ==========================================================
@@ -233,9 +219,6 @@ genrule {
         "cp $(in) $(genDir)/protos && " +
         "$(location :soong_zip) -o $(out) -C $(genDir)/protos -D $(genDir)/protos",
     dist: {
-        targets: [
-            "sdk_repo",
-            "aapt2_artifacts",
-        ],
+        targets: ["sdk_repo"],
     },
 }

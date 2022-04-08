@@ -22,19 +22,20 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 /**
- * A {@link Parcelable} wrapper for a {@link ColorSpace}. In order to enable parceling, the
- * ColorSpace must be either a {@link ColorSpace.Named Named} ColorSpace or a
- * {@link ColorSpace.Rgb} instance that has an ICC parametric transfer function as returned by
- * {@link ColorSpace.Rgb#getTransferParameters()}.
+ * A {@link Parcelable} {@link ColorSpace}. In order to enable parceling, the ColorSpace
+ * must be either a {@link ColorSpace.Named Named} ColorSpace or a {@link ColorSpace.Rgb} instance
+ * that has an ICC parametric transfer function as returned by {@link Rgb#getTransferParameters()}.
+ * TODO: Make public
+ * @hide
  */
-public final class ParcelableColorSpace implements Parcelable {
+public final class ParcelableColorSpace extends ColorSpace implements Parcelable {
     private final ColorSpace mColorSpace;
 
     /**
      * Checks if the given ColorSpace is able to be parceled. A ColorSpace can only be
      * parceled if it is a {@link ColorSpace.Named Named} ColorSpace or a {@link ColorSpace.Rgb}
      * instance that has an ICC parametric transfer function as returned by
-     * {@link ColorSpace.Rgb#getTransferParameters()}
+     * {@link Rgb#getTransferParameters()}
      */
     public static boolean isParcelable(@NonNull ColorSpace colorSpace) {
         if (colorSpace.getId() == ColorSpace.MIN_ID) {
@@ -58,6 +59,7 @@ public final class ParcelableColorSpace implements Parcelable {
      * to be parceled. See {@link #isParcelable(ColorSpace)}.
      */
     public ParcelableColorSpace(@NonNull ColorSpace colorSpace) {
+        super(colorSpace.getName(), colorSpace.getModel(), colorSpace.getId());
         mColorSpace = colorSpace;
 
         if (mColorSpace.getId() == ColorSpace.MIN_ID) {
@@ -73,9 +75,6 @@ public final class ParcelableColorSpace implements Parcelable {
         }
     }
 
-    /**
-     * @return the backing ColorSpace that this ParcelableColorSpace is wrapping.
-     */
     public @NonNull ColorSpace getColorSpace() {
         return mColorSpace;
     }
@@ -139,6 +138,31 @@ public final class ParcelableColorSpace implements Parcelable {
     };
 
     @Override
+    public boolean isWideGamut() {
+        return mColorSpace.isWideGamut();
+    }
+
+    @Override
+    public float getMinValue(int component) {
+        return mColorSpace.getMinValue(component);
+    }
+
+    @Override
+    public float getMaxValue(int component) {
+        return mColorSpace.getMaxValue(component);
+    }
+
+    @Override
+    public @NonNull float[] toXyz(@NonNull float[] v) {
+        return mColorSpace.toXyz(v);
+    }
+
+    @Override
+    public @NonNull float[] fromXyz(@NonNull float[] v) {
+        return mColorSpace.fromXyz(v);
+    }
+
+    @Override
     public boolean equals(@Nullable Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
@@ -149,5 +173,11 @@ public final class ParcelableColorSpace implements Parcelable {
     @Override
     public int hashCode() {
         return mColorSpace.hashCode();
+    }
+
+    /** @hide */
+    @Override
+    long getNativeInstance() {
+        return mColorSpace.getNativeInstance();
     }
 }

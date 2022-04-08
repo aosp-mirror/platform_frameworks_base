@@ -2,7 +2,6 @@
 <resources>
     <string name="str">none</string>
     <string name="str2">none</string>
-    <integer name="overlaid">0</integer>
     <integer name="matrix_100000">100</integer>
     <integer name="matrix_100001">100</integer>
     <integer name="matrix_100010">100</integer>

@@ -40,9 +40,9 @@ public final class CountryTimeZones {
     public static final class TimeZoneMapping {
 
         @NonNull
-        private com.android.i18n.timezone.CountryTimeZones.TimeZoneMapping mDelegate;
+        private libcore.timezone.CountryTimeZones.TimeZoneMapping mDelegate;
 
-        TimeZoneMapping(com.android.i18n.timezone.CountryTimeZones.TimeZoneMapping delegate) {
+        TimeZoneMapping(libcore.timezone.CountryTimeZones.TimeZoneMapping delegate) {
             this.mDelegate = Objects.requireNonNull(delegate);
         }
 
@@ -66,7 +66,7 @@ public final class CountryTimeZones {
         }
 
         @Override
-        public boolean equals(@Nullable Object o) {
+        public boolean equals(Object o) {
             if (this == o) {
                 return true;
             }
@@ -120,7 +120,7 @@ public final class CountryTimeZones {
         }
 
         @Override
-        public boolean equals(@Nullable Object o) {
+        public boolean equals(Object o) {
             if (this == o) {
                 return true;
             }
@@ -147,9 +147,9 @@ public final class CountryTimeZones {
     }
 
     @NonNull
-    private final com.android.i18n.timezone.CountryTimeZones mDelegate;
+    private final libcore.timezone.CountryTimeZones mDelegate;
 
-    CountryTimeZones(com.android.i18n.timezone.CountryTimeZones delegate) {
+    CountryTimeZones(libcore.timezone.CountryTimeZones delegate) {
         mDelegate = delegate;
     }
 
@@ -158,7 +158,7 @@ public final class CountryTimeZones {
      * supplied.
      */
     public boolean matchesCountryCode(@NonNull String countryIso) {
-        return mDelegate.matchesCountryCode(countryIso);
+        return mDelegate.isForCountryCode(countryIso);
     }
 
     /**
@@ -221,7 +221,7 @@ public final class CountryTimeZones {
     @Nullable
     public OffsetResult lookupByOffsetWithBias(long whenMillis, @Nullable TimeZone bias,
             int totalOffsetMillis, boolean isDst) {
-        com.android.i18n.timezone.CountryTimeZones.OffsetResult delegateOffsetResult =
+        libcore.timezone.CountryTimeZones.OffsetResult delegateOffsetResult =
                 mDelegate.lookupByOffsetWithBias(
                         whenMillis, bias, totalOffsetMillis, isDst);
         return delegateOffsetResult == null ? null :
@@ -244,7 +244,7 @@ public final class CountryTimeZones {
     @Nullable
     public OffsetResult lookupByOffsetWithBias(long whenMillis, @Nullable TimeZone bias,
             int totalOffsetMillis) {
-        com.android.i18n.timezone.CountryTimeZones.OffsetResult delegateOffsetResult =
+        libcore.timezone.CountryTimeZones.OffsetResult delegateOffsetResult =
                 mDelegate.lookupByOffsetWithBias(whenMillis, bias, totalOffsetMillis);
         return delegateOffsetResult == null ? null :
                 new OffsetResult(
@@ -260,19 +260,18 @@ public final class CountryTimeZones {
      */
     @NonNull
     public List<TimeZoneMapping> getEffectiveTimeZoneMappingsAt(long whenMillis) {
-        List<com.android.i18n.timezone.CountryTimeZones.TimeZoneMapping> delegateList =
+        List<libcore.timezone.CountryTimeZones.TimeZoneMapping> delegateList =
                 mDelegate.getEffectiveTimeZoneMappingsAt(whenMillis);
 
         List<TimeZoneMapping> toReturn = new ArrayList<>(delegateList.size());
-        for (com.android.i18n.timezone.CountryTimeZones.TimeZoneMapping delegateMapping
-                : delegateList) {
+        for (libcore.timezone.CountryTimeZones.TimeZoneMapping delegateMapping : delegateList) {
             toReturn.add(new TimeZoneMapping(delegateMapping));
         }
         return Collections.unmodifiableList(toReturn);
     }
 
     @Override
-    public boolean equals(@Nullable Object o) {
+    public boolean equals(Object o) {
         if (this == o) {
             return true;
         }

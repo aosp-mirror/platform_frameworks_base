@@ -34,9 +34,6 @@ final class InclusiveFloatRangeValidator implements Validator {
 
     @Override
     public boolean validate(@Nullable String value) {
-        if (value == null) {
-            return true;
-        }
         try {
             final float floatValue = Float.parseFloat(value);
             return floatValue >= mMin && floatValue <= mMax;

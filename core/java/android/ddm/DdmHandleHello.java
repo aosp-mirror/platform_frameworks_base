@@ -31,11 +31,11 @@ import java.nio.ByteBuffer;
 /**
  * Handle "hello" messages and feature discovery.
  */
-public class DdmHandleHello extends DdmHandle {
+public class DdmHandleHello extends ChunkHandler {
 
-    public static final int CHUNK_HELO = ChunkHandler.type("HELO");
-    public static final int CHUNK_WAIT = ChunkHandler.type("WAIT");
-    public static final int CHUNK_FEAT = ChunkHandler.type("FEAT");
+    public static final int CHUNK_HELO = type("HELO");
+    public static final int CHUNK_WAIT = type("WAIT");
+    public static final int CHUNK_FEAT = type("FEAT");
 
     private static final int CLIENT_PROTOCOL_VERSION = 1;
 
@@ -61,14 +61,15 @@ public class DdmHandleHello extends DdmHandle {
      * Called when the DDM server connects.  The handler is allowed to
      * send messages to the server.
      */
-    public void onConnected() {
+    public void connected() {
         if (false)
             Log.v("ddm-hello", "Connected!");
 
         if (false) {
             /* test spontaneous transmission */
             byte[] data = new byte[] { 0, 1, 2, 3, 4, -4, -3, -2, -1, 127 };
-            Chunk testChunk = new Chunk(ChunkHandler.type("TEST"), data, 1, data.length - 2);
+            Chunk testChunk =
+                new Chunk(ChunkHandler.type("TEST"), data, 1, data.length-2);
             DdmServer.sendChunk(testChunk);
         }
     }
@@ -77,7 +78,7 @@ public class DdmHandleHello extends DdmHandle {
      * Called when the DDM server disconnects.  Can be used to disable
      * periodic transmissions or clean up saved state.
      */
-    public void onDisconnected() {
+    public void disconnected() {
         if (false)
             Log.v("ddm-hello", "Disconnected!");
     }
@@ -95,7 +96,8 @@ public class DdmHandleHello extends DdmHandle {
         } else if (type == CHUNK_FEAT) {
             return handleFEAT(request);
         } else {
-            throw new RuntimeException("Unknown packet " + name(type));
+            throw new RuntimeException("Unknown packet "
+                + ChunkHandler.name(type));
         }
     }
 

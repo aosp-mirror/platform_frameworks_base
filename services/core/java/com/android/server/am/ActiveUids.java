@@ -16,34 +16,21 @@
 
 package com.android.server.am;
 
-import android.app.ActivityManager;
-import android.os.UserHandle;
 import android.util.SparseArray;
-import android.util.proto.ProtoOutputStream;
-
-import com.android.internal.annotations.CompositeRWLock;
-import com.android.internal.annotations.GuardedBy;
-
-import java.io.PrintWriter;
 
 /** Class for tracking active uids for running processes. */
 final class ActiveUids {
 
-    private final ActivityManagerService mService;
-    private final ActivityManagerGlobalLock mProcLock;
+    private ActivityManagerService mService;
 
-    private final boolean mPostChangesToAtm;
-
-    @CompositeRWLock({"mService", "mProcLock"})
+    private boolean mPostChangesToAtm;
     private final SparseArray<UidRecord> mActiveUids = new SparseArray<>();
 
     ActiveUids(ActivityManagerService service, boolean postChangesToAtm) {
         mService = service;
-        mProcLock = service != null ? service.mProcLock : null;
         mPostChangesToAtm = postChangesToAtm;
     }
 
-    @GuardedBy({"mService", "mProcLock"})
     void put(int uid, UidRecord value) {
         mActiveUids.put(uid, value);
         if (mPostChangesToAtm) {
@@ -51,7 +38,6 @@ final class ActiveUids {
         }
     }
 
-    @GuardedBy({"mService", "mProcLock"})
     void remove(int uid) {
         mActiveUids.remove(uid);
         if (mPostChangesToAtm) {
@@ -59,75 +45,30 @@ final class ActiveUids {
         }
     }
 
-    @GuardedBy({"mService", "mProcLock"})
     void clear() {
         mActiveUids.clear();
-        // It is only called for a temporal container with mPostChangesToAtm == false or test case.
-        // So there is no need to notify activity task manager.
+        if (mPostChangesToAtm) {
+            mService.mAtmInternal.onActiveUidsCleared();
+        }
     }
 
-    @GuardedBy(anyOf = {"mService", "mProcLock"})
     UidRecord get(int uid) {
         return mActiveUids.get(uid);
     }
 
-    @GuardedBy(anyOf = {"mService", "mProcLock"})
     int size() {
         return mActiveUids.size();
     }
 
-    @GuardedBy(anyOf = {"mService", "mProcLock"})
     UidRecord valueAt(int index) {
         return mActiveUids.valueAt(index);
     }
 
-    @GuardedBy(anyOf = {"mService", "mProcLock"})
     int keyAt(int index) {
         return mActiveUids.keyAt(index);
     }
 
-    @GuardedBy(anyOf = {"mService", "mProcLock"})
     int indexOfKey(int uid) {
         return mActiveUids.indexOfKey(uid);
-    }
-
-    @GuardedBy(anyOf = {"mService", "mProcLock"})
-    boolean dump(final PrintWriter pw, String dumpPackage, int dumpAppId,
-            String header, boolean needSep) {
-        boolean printed = false;
-        for (int i = 0; i < mActiveUids.size(); i++) {
-            final UidRecord uidRec = mActiveUids.valueAt(i);
-            if (dumpPackage != null && UserHandle.getAppId(uidRec.getUid()) != dumpAppId) {
-                continue;
-            }
-            if (!printed) {
-                printed = true;
-                if (needSep) {
-                    pw.println();
-                }
-                pw.print("  "); pw.println(header);
-            }
-            pw.print("    UID "); UserHandle.formatUid(pw, uidRec.getUid());
-            pw.print(": "); pw.println(uidRec);
-            pw.print("      curProcState="); pw.print(uidRec.getCurProcState());
-            pw.print(" curCapability=");
-            ActivityManager.printCapabilitiesFull(pw, uidRec.getCurCapability());
-            pw.println();
-            uidRec.forEachProcess(app -> {
-                pw.print("      proc=");
-                pw.println(app);
-            });
-        }
-        return printed;
-    }
-
-    void dumpProto(ProtoOutputStream proto, String dumpPackage, int dumpAppId, long fieldId) {
-        for (int i = 0; i < mActiveUids.size(); i++) {
-            UidRecord uidRec = mActiveUids.valueAt(i);
-            if (dumpPackage != null && UserHandle.getAppId(uidRec.getUid()) != dumpAppId) {
-                continue;
-            }
-            uidRec.dumpDebug(proto, fieldId);
-        }
     }
 }

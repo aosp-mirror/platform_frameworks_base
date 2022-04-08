@@ -21,7 +21,6 @@
 #include <apex/window.h>
 #include <utils/Errors.h>
 #include <utils/Macros.h>
-#include <utils/NdkUtils.h>
 #include <utils/StrongPointer.h>
 
 #include <memory>
@@ -51,6 +50,11 @@ public:
         return ret;
     }
 
+    void setExtraBufferCount(size_t extraBuffers) {
+        std::lock_guard _lock{mMutex};
+        mExtraBuffers = extraBuffers;
+    }
+
     bool didSetExtraBuffers() const {
         std::lock_guard _lock{mMutex};
         return mDidSetExtraBuffers;
@@ -63,11 +67,13 @@ private:
 
     uint64_t mUsage = AHARDWAREBUFFER_USAGE_GPU_FRAMEBUFFER;
     AHardwareBuffer_Format mFormat = AHARDWAREBUFFER_FORMAT_R8G8B8A8_UNORM;
-    UniqueAHardwareBuffer mScratchBuffer;
+    std::unique_ptr<AHardwareBuffer, void (*)(AHardwareBuffer*)> mScratchBuffer{
+            nullptr, AHardwareBuffer_release};
     ANativeWindowBuffer* mReservedBuffer = nullptr;
     base::unique_fd mReservedFenceFd;
     bool mHasDequeuedBuffer = false;
     int mBufferQueueState = OK;
+    size_t mExtraBuffers = 0;
     size_t mExpectedBufferCount = 0;
     bool mDidSetExtraBuffers = false;
 

@@ -28,7 +28,6 @@ import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.os.PowerManager.GoToSleepReason;
 import android.os.PowerManager.WakeReason;
 import android.os.RemoteException;
 import android.util.proto.ProtoOutputStream;
@@ -87,8 +86,18 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
     }
 
     @Override
+    public int getMaxWallpaperLayer() {
+        return 0;
+    }
+
+    @Override
     public boolean isKeyguardHostWindow(WindowManager.LayoutParams attrs) {
         return attrs.type == TYPE_NOTIFICATION_SHADE;
+    }
+
+    @Override
+    public boolean canBeHiddenByKeyguardLw(WindowState win) {
+        return false;
     }
 
     /**
@@ -100,9 +109,9 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
     }
 
     @Override
-    public StartingSurface addSplashScreen(IBinder appToken, int userId, String packageName,
-            int theme, CompatibilityInfo compatInfo, CharSequence nonLocalizedLabel, int labelRes,
-            int icon, int logo, int windowFlags, Configuration overrideConfig, int displayId) {
+    public StartingSurface addSplashScreen(IBinder appToken, String packageName, int theme,
+            CompatibilityInfo compatInfo, CharSequence nonLocalizedLabel, int labelRes, int icon,
+            int logo, int windowFlags, Configuration overrideConfig, int displayId) {
         final com.android.server.wm.WindowState window;
         final ActivityRecord activity;
         final WindowManagerService wm = mWmSupplier.get();
@@ -113,16 +122,16 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
             window = WindowTestsBase.createWindow(null, TYPE_APPLICATION_STARTING, activity,
                     "Starting window", 0 /* ownerId */, 0 /* userId*/, false /* internalWindows */,
                     wm, mock(Session.class), iWindow, mPowerManagerWrapper);
-            activity.mStartingWindow = window;
+            activity.startingWindow = window;
         }
         if (mRunnableWhenAddingSplashScreen != null) {
             mRunnableWhenAddingSplashScreen.run();
             mRunnableWhenAddingSplashScreen = null;
         }
-        return (a) -> {
+        return () -> {
             synchronized (wm.mGlobalLock) {
                 activity.removeChild(window);
-                activity.mStartingWindow = null;
+                activity.startingWindow = null;
             }
         };
     }
@@ -169,39 +178,43 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
     }
 
     @Override
+    public void applyKeyguardPolicyLw(WindowState win, WindowState imeTarget) {
+    }
+
+    @Override
     public void setAllowLockscreenWhenOn(int displayId, boolean allow) {
     }
 
     @Override
-    public void startedWakingUp(@WakeReason int wakeReason) {
+    public void startedWakingUp(@WakeReason int reason) {
     }
 
     @Override
-    public void finishedWakingUp(@WakeReason int wakeReason) {
+    public void finishedWakingUp(@WakeReason int reason) {
     }
 
     @Override
-    public void startedGoingToSleep(@GoToSleepReason int sleepReason) {
+    public void startedGoingToSleep(int why) {
     }
 
     @Override
-    public void finishedGoingToSleep(@GoToSleepReason int sleepReason) {
+    public void finishedGoingToSleep(int why) {
     }
 
     @Override
-    public void screenTurningOn(int displayId, ScreenOnListener screenOnListener) {
+    public void screenTurningOn(ScreenOnListener screenOnListener) {
     }
 
     @Override
-    public void screenTurnedOn(int displayId) {
+    public void screenTurnedOn() {
     }
 
     @Override
-    public void screenTurningOff(int displayId, ScreenOffListener screenOffListener) {
+    public void screenTurningOff(ScreenOffListener screenOffListener) {
     }
 
     @Override
-    public void screenTurnedOff(int displayId) {
+    public void screenTurnedOff() {
     }
 
     @Override
@@ -210,7 +223,7 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
     }
 
     @Override
-    public boolean okToAnimate(boolean ignoreScreenOn) {
+    public boolean okToAnimate() {
         return mOkToAnimate;
     }
 
@@ -364,12 +377,12 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
     }
 
     @Override
-    public void startKeyguardExitAnimation(long startTime, long fadeoutDuration) {
+    public boolean isTopLevelWindow(int windowType) {
+        return false;
     }
 
     @Override
-    public int applyKeyguardOcclusionChange() {
-        return 0;
+    public void startKeyguardExitAnimation(long startTime, long fadeoutDuration) {
     }
 
     @Override
@@ -391,5 +404,10 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
     @Override
     public boolean canDismissBootAnimation() {
         return true;
+    }
+
+    @Override
+    public boolean setAodShowing(boolean aodShowing) {
+        return false;
     }
 }

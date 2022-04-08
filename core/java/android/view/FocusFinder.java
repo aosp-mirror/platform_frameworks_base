@@ -311,9 +311,6 @@ public class FocusFinder {
         }
 
         final int count = focusables.size();
-        if (count < 2) {
-            return null;
-        }
         switch (direction) {
             case View.FOCUS_FORWARD:
                 return getNextFocusable(focused, focusables, count);
@@ -376,29 +373,29 @@ public class FocusFinder {
     }
 
     private static View getNextFocusable(View focused, ArrayList<View> focusables, int count) {
-        if (count < 2) {
-            return null;
-        }
         if (focused != null) {
             int position = focusables.lastIndexOf(focused);
             if (position >= 0 && position + 1 < count) {
                 return focusables.get(position + 1);
             }
         }
-        return focusables.get(0);
+        if (!focusables.isEmpty()) {
+            return focusables.get(0);
+        }
+        return null;
     }
 
     private static View getPreviousFocusable(View focused, ArrayList<View> focusables, int count) {
-        if (count < 2) {
-            return null;
-        }
         if (focused != null) {
             int position = focusables.indexOf(focused);
             if (position > 0) {
                 return focusables.get(position - 1);
             }
         }
-        return focusables.get(count - 1);
+        if (!focusables.isEmpty()) {
+            return focusables.get(count - 1);
+        }
+        return null;
     }
 
     private static View getNextKeyboardNavigationCluster(

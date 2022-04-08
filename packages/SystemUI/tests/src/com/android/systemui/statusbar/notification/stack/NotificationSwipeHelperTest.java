@@ -35,7 +35,6 @@ import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewConfiguration;
 
 import androidx.test.filters.SmallTest;
 
@@ -79,8 +78,7 @@ public class NotificationSwipeHelperTest extends SysuiTestCase {
         mCallback = mock(NotificationSwipeHelper.NotificationCallback.class);
         mListener = mock(NotificationMenuRowPlugin.OnMenuEventListener.class);
         mSwipeHelper = spy(new NotificationSwipeHelper(
-                mContext.getResources(), ViewConfiguration.get(mContext),
-                new FalsingManagerFake(), SwipeHelper.X, mCallback, mListener));
+                SwipeHelper.X, mCallback, mContext, mListener, new FalsingManagerFake()));
         mView = mock(View.class);
         mEvent = mock(MotionEvent.class);
         mMenuRow = mock(NotificationMenuRowPlugin.class);

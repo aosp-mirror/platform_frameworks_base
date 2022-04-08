@@ -47,32 +47,32 @@ public class KeyRevocationListTest {
 
     private static Context sContext;
 
-    private static String sBlocklistJsonString;
+    private static String sBlacklistJsonString;
 
     @BeforeClass
     public static void setUpClass() throws Exception {
         sContext = InstrumentationRegistry.getInstrumentation().getContext();
-        sBlocklistJsonString =
-                sContext.getString(com.android.dynsystem.tests.R.string.blocklist_json_string);
+        sBlacklistJsonString =
+                sContext.getString(com.android.dynsystem.tests.R.string.blacklist_json_string);
     }
 
     @Test
     @SmallTest
     public void testFromJsonString() throws JSONException {
-        KeyRevocationList blocklist;
-        blocklist = KeyRevocationList.fromJsonString(sBlocklistJsonString);
-        Assert.assertNotNull(blocklist);
-        Assert.assertFalse(blocklist.mEntries.isEmpty());
-        blocklist = KeyRevocationList.fromJsonString("{}");
-        Assert.assertNotNull(blocklist);
-        Assert.assertTrue(blocklist.mEntries.isEmpty());
+        KeyRevocationList blacklist;
+        blacklist = KeyRevocationList.fromJsonString(sBlacklistJsonString);
+        Assert.assertNotNull(blacklist);
+        Assert.assertFalse(blacklist.mEntries.isEmpty());
+        blacklist = KeyRevocationList.fromJsonString("{}");
+        Assert.assertNotNull(blacklist);
+        Assert.assertTrue(blacklist.mEntries.isEmpty());
     }
 
     @Test
     @SmallTest
     public void testFromUrl() throws IOException, JSONException {
         URLConnection mockConnection = mock(URLConnection.class);
-        doReturn(new ByteArrayInputStream(sBlocklistJsonString.getBytes()))
+        doReturn(new ByteArrayInputStream(sBlacklistJsonString.getBytes()))
                 .when(mockConnection).getInputStream();
         URL mockUrl = new URL(
                 "http",     // protocol
@@ -97,36 +97,36 @@ public class KeyRevocationListTest {
                     }
                 });
 
-        KeyRevocationList blocklist = KeyRevocationList.fromUrl(mockUrl);
-        Assert.assertNotNull(blocklist);
-        Assert.assertFalse(blocklist.mEntries.isEmpty());
+        KeyRevocationList blacklist = KeyRevocationList.fromUrl(mockUrl);
+        Assert.assertNotNull(blacklist);
+        Assert.assertFalse(blacklist.mEntries.isEmpty());
 
-        blocklist = null;
+        blacklist = null;
         try {
-            blocklist = KeyRevocationList.fromUrl(mockBadUrl);
+            blacklist = KeyRevocationList.fromUrl(mockBadUrl);
             // Up should throw, down should be unreachable
             Assert.fail("Expected IOException not thrown");
         } catch (IOException e) {
             // This is expected, do nothing
         }
-        Assert.assertNull(blocklist);
+        Assert.assertNull(blacklist);
     }
 
     @Test
     @SmallTest
     public void testIsRevoked() {
-        KeyRevocationList blocklist = new KeyRevocationList();
-        blocklist.addEntry("key1", "REVOKED", "reason for key1");
+        KeyRevocationList blacklist = new KeyRevocationList();
+        blacklist.addEntry("key1", "REVOKED", "reason for key1");
 
         KeyRevocationList.RevocationStatus revocationStatus =
-                blocklist.getRevocationStatusForKey("key1");
+                blacklist.getRevocationStatusForKey("key1");
         Assert.assertNotNull(revocationStatus);
         Assert.assertEquals(revocationStatus.mReason, "reason for key1");
 
-        revocationStatus = blocklist.getRevocationStatusForKey("key2");
+        revocationStatus = blacklist.getRevocationStatusForKey("key2");
         Assert.assertNull(revocationStatus);
 
-        Assert.assertTrue(blocklist.isRevoked("key1"));
-        Assert.assertFalse(blocklist.isRevoked("key2"));
+        Assert.assertTrue(blacklist.isRevoked("key1"));
+        Assert.assertFalse(blacklist.isRevoked("key2"));
     }
 }

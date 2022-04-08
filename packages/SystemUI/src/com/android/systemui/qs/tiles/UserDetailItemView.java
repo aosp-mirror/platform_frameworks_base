@@ -41,7 +41,7 @@ public class UserDetailItemView extends LinearLayout {
     protected static int layoutResId = R.layout.qs_user_detail_item;
 
     private UserAvatarView mAvatar;
-    protected TextView mName;
+    private TextView mName;
     private int mActivatedStyle;
     private int mRegularStyle;
     private View mRestrictedPadlock;

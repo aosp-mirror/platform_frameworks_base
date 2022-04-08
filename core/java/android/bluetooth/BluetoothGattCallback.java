@@ -16,8 +16,6 @@
 
 package android.bluetooth;
 
-import android.annotation.NonNull;
-
 /**
  * This abstract class is used to implement {@link BluetoothGatt} callbacks.
  */
@@ -185,7 +183,7 @@ public abstract class BluetoothGattCallback {
      * @param gatt GATT client involved
      * @param interval Connection interval used on this connection, 1.25ms unit. Valid range is from
      * 6 (7.5ms) to 3200 (4000ms).
-     * @param latency Worker latency for the connection in number of connection events. Valid range
+     * @param latency Slave latency for the connection in number of connection events. Valid range
      * is from 0 to 499
      * @param timeout Supervision timeout for this connection, in 10ms unit. Valid range is from 10
      * (0.1s) to 3200 (32s)
@@ -195,17 +193,5 @@ public abstract class BluetoothGattCallback {
      */
     public void onConnectionUpdated(BluetoothGatt gatt, int interval, int latency, int timeout,
             int status) {
-    }
-
-    /**
-     * Callback indicating service changed event is received
-     *
-     * <p>Receiving this event means that the GATT database is out of sync with
-     * the remote device. {@link BluetoothGatt#discoverServices} should be
-     * called to re-discover the services.
-     *
-     * @param gatt GATT client involved
-     */
-    public void onServiceChanged(@NonNull BluetoothGatt gatt) {
     }
 }

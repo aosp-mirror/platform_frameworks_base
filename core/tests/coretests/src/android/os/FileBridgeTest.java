@@ -16,9 +16,6 @@
 
 package android.os;
 
-import static android.os.ParcelFileDescriptor.MODE_CREATE;
-import static android.os.ParcelFileDescriptor.MODE_READ_WRITE;
-
 import android.os.FileBridge.FileBridgeOutputStream;
 import android.test.AndroidTestCase;
 import android.test.MoreAsserts;
@@ -28,6 +25,7 @@ import libcore.io.Streams;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Random;
@@ -35,7 +33,7 @@ import java.util.Random;
 public class FileBridgeTest extends AndroidTestCase {
 
     private File file;
-    private ParcelFileDescriptor outputFile;
+    private FileOutputStream fileOs;
     private FileBridge bridge;
     private FileBridgeOutputStream client;
 
@@ -46,17 +44,17 @@ public class FileBridgeTest extends AndroidTestCase {
         file = getContext().getFileStreamPath("meow.dat");
         file.delete();
 
-        outputFile = ParcelFileDescriptor.open(file, MODE_CREATE | MODE_READ_WRITE);
+        fileOs = new FileOutputStream(file);
 
         bridge = new FileBridge();
-        bridge.setTargetFile(outputFile);
+        bridge.setTargetFile(fileOs.getFD());
         bridge.start();
         client = new FileBridgeOutputStream(bridge.getClientSocket());
     }
 
     @Override
     protected void tearDown() throws Exception {
-        outputFile.close();
+        fileOs.close();
         file.delete();
     }
 

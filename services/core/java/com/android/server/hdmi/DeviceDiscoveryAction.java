@@ -339,8 +339,7 @@ final class DeviceDiscoveryAction extends HdmiCecFeatureAction {
 
         // This is to manager CEC device separately in case they don't have address.
         if (mIsTvDevice) {
-            localDevice().mService.getHdmiCecNetwork().updateCecSwitchInfo(current.mLogicalAddress,
-                    current.mDeviceType,
+            tv().updateCecSwitchInfo(current.mLogicalAddress, current.mDeviceType,
                     current.mPhysicalAddress);
         }
         increaseProcessedDeviceCount();

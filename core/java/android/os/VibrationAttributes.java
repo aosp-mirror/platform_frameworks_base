@@ -21,8 +21,6 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.TestApi;
 import android.media.AudioAttributes;
-import android.os.vibrator.PrebakedSegment;
-import android.os.vibrator.VibrationEffectSegment;
 import android.util.Slog;
 
 import java.lang.annotation.Retention;
@@ -62,11 +60,6 @@ public final class VibrationAttributes implements Parcelable {
     @Retention(RetentionPolicy.SOURCE)
     public @interface Usage{}
 
-    /**
-     * Vibration usage filter value to match all usages.
-     * @hide
-     */
-    public static final int USAGE_FILTER_MATCH_ALL = -1;
     /**
      * Vibration usage class value to use when the vibration usage class is unknown.
      */
@@ -136,23 +129,18 @@ public final class VibrationAttributes implements Parcelable {
      */
     public static final int FLAG_BYPASS_INTERRUPTION_POLICY = 0x1;
 
-    /**
-     * All flags supported by vibrator service, update it when adding new flag.
-     * @hide
-     */
-    public static final int FLAG_ALL_SUPPORTED = FLAG_BYPASS_INTERRUPTION_POLICY;
-
     // If a vibration is playing for longer than 5s, it's probably not haptic feedback
     private static final long MAX_HAPTIC_FEEDBACK_DURATION = 5000;
 
     private final int mUsage;
     private final int mFlags;
-    private final int mOriginalAudioUsage;
 
-    private VibrationAttributes(int usage, int audioUsage, int flags) {
+    private final AudioAttributes mAudioAttributes;
+
+    private VibrationAttributes(int usage, int flags, @NonNull AudioAttributes audio) {
         mUsage = usage;
-        mOriginalAudioUsage = audioUsage;
-        mFlags = flags & FLAG_ALL_SUPPORTED;
+        mFlags = flags;
+        mAudioAttributes = audio;
     }
 
     /**
@@ -188,31 +176,14 @@ public final class VibrationAttributes implements Parcelable {
     }
 
     /**
-     * Return {@link AudioAttributes} usage equivalent to {@link #getUsage()}.
-     * @return one of {@link AudioAttributes#SDK_USAGES} that represents {@link #getUsage()}
+     * Return AudioAttributes equivalent to this VibrationAttributes.
+     * @deprecated Temporary support of AudioAttributes, will be removed when out of WIP
      * @hide
      */
+    @Deprecated
     @TestApi
-    public int getAudioUsage() {
-        if (mOriginalAudioUsage != AudioAttributes.USAGE_UNKNOWN) {
-            // Return same audio usage set in the Builder.
-            return mOriginalAudioUsage;
-        }
-        // Return correct audio usage based on the vibration usage set in the Builder.
-        switch (mUsage) {
-            case USAGE_NOTIFICATION:
-                return AudioAttributes.USAGE_NOTIFICATION;
-            case USAGE_COMMUNICATION_REQUEST:
-                return AudioAttributes.USAGE_NOTIFICATION_COMMUNICATION_REQUEST;
-            case USAGE_RINGTONE:
-                return AudioAttributes.USAGE_NOTIFICATION_RINGTONE;
-            case USAGE_TOUCH:
-                return AudioAttributes.USAGE_ASSISTANCE_SONIFICATION;
-            case USAGE_ALARM:
-                return AudioAttributes.USAGE_ALARM;
-            default:
-                return AudioAttributes.USAGE_UNKNOWN;
-        }
+    public @NonNull AudioAttributes getAudioAttributes() {
+        return mAudioAttributes;
     }
 
     @Override
@@ -223,14 +194,15 @@ public final class VibrationAttributes implements Parcelable {
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         dest.writeInt(mUsage);
-        dest.writeInt(mOriginalAudioUsage);
         dest.writeInt(mFlags);
+        dest.writeParcelable(mAudioAttributes, flags);
     }
 
     private VibrationAttributes(Parcel src) {
         mUsage = src.readInt();
-        mOriginalAudioUsage = src.readInt();
         mFlags = src.readInt();
+        mAudioAttributes = (AudioAttributes) src.readParcelable(
+                AudioAttributes.class.getClassLoader());
     }
 
     public static final @NonNull Parcelable.Creator<VibrationAttributes>
@@ -244,7 +216,7 @@ public final class VibrationAttributes implements Parcelable {
             };
 
     @Override
-    public boolean equals(@Nullable Object o) {
+    public boolean equals(Object o) {
         if (this == o) {
             return true;
         }
@@ -252,20 +224,18 @@ public final class VibrationAttributes implements Parcelable {
             return false;
         }
         VibrationAttributes rhs = (VibrationAttributes) o;
-        return mUsage == rhs.mUsage && mOriginalAudioUsage == rhs.mOriginalAudioUsage
-                && mFlags == rhs.mFlags;
+        return mUsage == rhs.mUsage && mFlags == rhs.mFlags;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(mUsage, mOriginalAudioUsage, mFlags);
+        return Objects.hash(mUsage, mFlags);
     }
 
     @Override
     public String toString() {
         return "VibrationAttributes:"
                 + " Usage=" + usageToString()
-                + " Audio Usage= " + AudioAttributes.usageToString(mOriginalAudioUsage)
                 + " Flags=" + mFlags;
     }
 
@@ -275,7 +245,7 @@ public final class VibrationAttributes implements Parcelable {
     }
 
     /** @hide */
-    public static String usageToString(int usage) {
+    public String usageToString(int usage) {
         switch (usage) {
             case USAGE_UNKNOWN:
                 return "UNKNOWN";
@@ -304,8 +274,9 @@ public final class VibrationAttributes implements Parcelable {
      */
     public static final class Builder {
         private int mUsage = USAGE_UNKNOWN;
-        private int mOriginalAudioUsage = AudioAttributes.USAGE_UNKNOWN;
         private int mFlags = 0x0;
+
+        private AudioAttributes mAudioAttributes = new AudioAttributes.Builder().build();
 
         /**
          * Constructs a new Builder with the defaults.
@@ -319,8 +290,8 @@ public final class VibrationAttributes implements Parcelable {
         public Builder(@Nullable VibrationAttributes vib) {
             if (vib != null) {
                 mUsage = vib.mUsage;
-                mOriginalAudioUsage = vib.mOriginalAudioUsage;
                 mFlags = vib.mFlags;
+                mAudioAttributes = vib.mAudioAttributes;
             }
         }
 
@@ -329,7 +300,9 @@ public final class VibrationAttributes implements Parcelable {
          * @hide
          */
         @TestApi
-        public Builder(@NonNull AudioAttributes audio, @Nullable VibrationEffect effect) {
+        public Builder(@NonNull AudioAttributes audio,
+                @Nullable VibrationEffect effect) {
+            mAudioAttributes = audio;
             setUsage(audio);
             setFlags(audio);
             applyHapticFeedbackHeuristics(effect);
@@ -337,9 +310,9 @@ public final class VibrationAttributes implements Parcelable {
 
         private void applyHapticFeedbackHeuristics(@Nullable VibrationEffect effect) {
             if (effect != null) {
-                PrebakedSegment prebaked = extractPrebakedSegment(effect);
-                if (mUsage == USAGE_UNKNOWN && prebaked != null) {
-                    switch (prebaked.getEffectId()) {
+                if (mUsage == USAGE_UNKNOWN && effect instanceof VibrationEffect.Prebaked) {
+                    VibrationEffect.Prebaked prebaked = (VibrationEffect.Prebaked) effect;
+                    switch (prebaked.getId()) {
                         case VibrationEffect.EFFECT_CLICK:
                         case VibrationEffect.EFFECT_DOUBLE_CLICK:
                         case VibrationEffect.EFFECT_HEAVY_CLICK:
@@ -362,22 +335,7 @@ public final class VibrationAttributes implements Parcelable {
             }
         }
 
-        @Nullable
-        private PrebakedSegment extractPrebakedSegment(VibrationEffect effect) {
-            if (effect instanceof VibrationEffect.Composed) {
-                VibrationEffect.Composed composed = (VibrationEffect.Composed) effect;
-                if (composed.getSegments().size() == 1) {
-                    VibrationEffectSegment segment = composed.getSegments().get(0);
-                    if (segment instanceof PrebakedSegment) {
-                        return (PrebakedSegment) segment;
-                    }
-                }
-            }
-            return null;
-        }
-
         private void setUsage(@NonNull AudioAttributes audio) {
-            mOriginalAudioUsage = audio.getUsage();
             switch (audio.getUsage()) {
                 case AudioAttributes.USAGE_NOTIFICATION:
                 case AudioAttributes.USAGE_NOTIFICATION_EVENT:
@@ -415,7 +373,8 @@ public final class VibrationAttributes implements Parcelable {
          * @return a new {@link VibrationAttributes} object
          */
         public @NonNull VibrationAttributes build() {
-            VibrationAttributes ans = new VibrationAttributes(mUsage, mOriginalAudioUsage, mFlags);
+            VibrationAttributes ans = new VibrationAttributes(mUsage, mFlags,
+                    mAudioAttributes);
             return ans;
         }
 
@@ -431,8 +390,18 @@ public final class VibrationAttributes implements Parcelable {
          * @return the same Builder instance.
          */
         public @NonNull Builder setUsage(int usage) {
-            mOriginalAudioUsage = AudioAttributes.USAGE_UNKNOWN;
             mUsage = usage;
+            return this;
+        }
+
+        /**
+         * Replaces flags
+         * @param flags any combination of flags.
+         * @return the same Builder instance.
+         * @hide
+         */
+        public @NonNull Builder replaceFlags(int flags) {
+            mFlags = flags;
             return this;
         }
 
@@ -443,7 +412,6 @@ public final class VibrationAttributes implements Parcelable {
          * @return the same Builder instance.
          */
         public @NonNull Builder setFlags(int flags, int mask) {
-            mask &= FLAG_ALL_SUPPORTED;
             mFlags = (mFlags & ~mask) | (flags & mask);
             return this;
         }

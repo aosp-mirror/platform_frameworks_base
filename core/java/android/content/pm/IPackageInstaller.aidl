@@ -28,8 +28,7 @@ import android.graphics.Bitmap;
 
 /** {@hide} */
 interface IPackageInstaller {
-    int createSession(in PackageInstaller.SessionParams params, String installerPackageName,
-            String installerAttributionTag, int userId);
+    int createSession(in PackageInstaller.SessionParams params, String installerPackageName, int userId);
 
     void updateSessionAppIcon(int sessionId, in Bitmap appIcon);
     void updateSessionAppLabel(int sessionId, String appLabel);
@@ -48,7 +47,7 @@ interface IPackageInstaller {
     void registerCallback(IPackageInstallerCallback callback, int userId);
     void unregisterCallback(IPackageInstallerCallback callback);
 
-    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
+    @UnsupportedAppUsage
     void uninstall(in VersionedPackage versionedPackage, String callerPackageName, int flags,
             in IntentSender statusReceiver, int userId);
 
@@ -61,9 +60,4 @@ interface IPackageInstaller {
     void setPermissionsResult(int sessionId, boolean accepted);
 
     void bypassNextStagedInstallerCheck(boolean value);
-
-    void bypassNextAllowedApexUpdateCheck(boolean value);
-
-    void setAllowUnlimitedSilentUpdates(String installerPackageName);
-    void setSilentUpdatesThrottleTime(long throttleTimeInSeconds);
 }

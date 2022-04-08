@@ -21,9 +21,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
-import static java.lang.Boolean.TRUE;
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 
 import android.annotation.NonNull;
@@ -34,7 +32,6 @@ import android.content.pm.ConfigurationInfo;
 import android.content.pm.FeatureGroupInfo;
 import android.content.pm.FeatureInfo;
 import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager.Property;
 import android.content.pm.PackageParser;
 import android.content.pm.PackageUserState;
 import android.content.pm.ServiceInfo;
@@ -48,7 +45,6 @@ import android.content.pm.parsing.component.ParsedPermission;
 import android.content.pm.parsing.component.ParsedPermissionGroup;
 import android.content.pm.parsing.component.ParsedProvider;
 import android.content.pm.parsing.component.ParsedService;
-import android.content.pm.parsing.component.ParsedUsesPermission;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.platform.test.annotations.Presubmit;
@@ -85,9 +81,7 @@ import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 @Presubmit
@@ -105,8 +99,6 @@ public class PackageParserTest {
     private static final String TEST_APP1_APK = "PackageParserTestApp1.apk";
     private static final String TEST_APP2_APK = "PackageParserTestApp2.apk";
     private static final String TEST_APP3_APK = "PackageParserTestApp3.apk";
-    private static final String TEST_APP4_APK = "PackageParserTestApp4.apk";
-    private static final String PACKAGE_NAME = "com.android.servicestests.apps.packageparserapp";
 
     @Before
     public void setUp() throws IOException {
@@ -163,8 +155,8 @@ public class PackageParserTest {
     @Test
     public void test_serializePackage() throws Exception {
         try (PackageParser2 pp = PackageParser2.forParsingFileWithDefaults()) {
-            AndroidPackage pkg = pp.parsePackage(FRAMEWORK, 0 /* parseFlags */,
-                    true /* useCaches */).hideAsFinal();
+            ParsedPackage pkg = pp.parsePackage(FRAMEWORK, 0 /* parseFlags */,
+                    true /* useCaches */);
 
             Parcel p = Parcel.obtain();
             pkg.writeToParcel(p, 0 /* flags */);
@@ -278,234 +270,6 @@ public class PackageParserTest {
         }
     }
 
-    private static final int PROPERTY_TYPE_BOOLEAN = 1;
-    private static final int PROPERTY_TYPE_FLOAT = 2;
-    private static final int PROPERTY_TYPE_INTEGER = 3;
-    private static final int PROPERTY_TYPE_RESOURCE = 4;
-    private static final int PROPERTY_TYPE_STRING = 5;
-    public void assertProperty(Map<String, Property> properties, String propertyName,
-            int propertyType, Object propertyValue) {
-        assertTrue(properties.containsKey(propertyName));
-
-        final Property testProperty = properties.get(propertyName);
-        assertEquals(propertyType, testProperty.getType());
-
-        if (propertyType == PROPERTY_TYPE_BOOLEAN) {
-            assertTrue(testProperty.isBoolean());
-            assertFalse(testProperty.isFloat());
-            assertFalse(testProperty.isInteger());
-            assertFalse(testProperty.isResourceId());
-            assertFalse(testProperty.isString());
-
-            // assert the property's type is set correctly
-            final Boolean boolValue = (Boolean) propertyValue;
-            if (boolValue.booleanValue()) {
-                assertTrue(testProperty.getBoolean());
-            } else {
-                assertFalse(testProperty.getBoolean());
-            }
-            // assert the other values have an appropriate default
-            assertEquals(0.0f, testProperty.getFloat(), 0.0f);
-            assertEquals(0, testProperty.getInteger());
-            assertEquals(0, testProperty.getResourceId());
-            assertEquals(null, testProperty.getString());
-        } else if (propertyType == PROPERTY_TYPE_FLOAT) {
-            assertFalse(testProperty.isBoolean());
-            assertTrue(testProperty.isFloat());
-            assertFalse(testProperty.isInteger());
-            assertFalse(testProperty.isResourceId());
-            assertFalse(testProperty.isString());
-
-            // assert the property's type is set correctly
-            final Float floatValue = (Float) propertyValue;
-            assertEquals(floatValue.floatValue(), testProperty.getFloat(), 0.0f);
-            // assert the other values have an appropriate default
-            assertFalse(testProperty.getBoolean());
-            assertEquals(0, testProperty.getInteger());
-            assertEquals(0, testProperty.getResourceId());
-            assertEquals(null, testProperty.getString());
-        } else if (propertyType == PROPERTY_TYPE_INTEGER) {
-            assertFalse(testProperty.isBoolean());
-            assertFalse(testProperty.isFloat());
-            assertTrue(testProperty.isInteger());
-            assertFalse(testProperty.isResourceId());
-            assertFalse(testProperty.isString());
-
-            // assert the property's type is set correctly
-            final Integer integerValue = (Integer) propertyValue;
-            assertEquals(integerValue.intValue(), testProperty.getInteger());
-            // assert the other values have an appropriate default
-            assertFalse(testProperty.getBoolean());
-            assertEquals(0.0f, testProperty.getFloat(), 0.0f);
-            assertEquals(0, testProperty.getResourceId());
-            assertEquals(null, testProperty.getString());
-        } else if (propertyType == PROPERTY_TYPE_RESOURCE) {
-            assertFalse(testProperty.isBoolean());
-            assertFalse(testProperty.isFloat());
-            assertFalse(testProperty.isInteger());
-            assertTrue(testProperty.isResourceId());
-            assertFalse(testProperty.isString());
-
-            // assert the property's type is set correctly
-            final Integer resourceValue = (Integer) propertyValue;
-            assertEquals(resourceValue.intValue(), testProperty.getResourceId());
-            // assert the other values have an appropriate default
-            assertFalse(testProperty.getBoolean());
-            assertEquals(0.0f, testProperty.getFloat(), 0.0f);
-            assertEquals(0, testProperty.getInteger());
-            assertEquals(null, testProperty.getString());
-        } else if (propertyType == PROPERTY_TYPE_STRING) {
-            assertFalse(testProperty.isBoolean());
-            assertFalse(testProperty.isFloat());
-            assertFalse(testProperty.isInteger());
-            assertFalse(testProperty.isResourceId());
-            assertTrue(testProperty.isString());
-
-            // assert the property's type is set correctly
-            final String stringValue = (String) propertyValue;
-            assertEquals(stringValue, testProperty.getString());
-            // assert the other values have an appropriate default
-            assertFalse(testProperty.getBoolean());
-            assertEquals(0.0f, testProperty.getFloat(), 0.0f);
-            assertEquals(0, testProperty.getInteger());
-            assertEquals(0, testProperty.getResourceId());
-        } else {
-            fail("Unknown property type");
-        }
-    }
-
-    @Test
-    public void testParseApplicationProperties() throws Exception {
-        final File testFile = extractFile(TEST_APP4_APK);
-        try {
-            final ParsedPackage pkg = new TestPackageParser2().parsePackage(testFile, 0, false);
-            final Map<String, Property> properties = pkg.getProperties();
-            assertEquals(10, properties.size());
-            assertProperty(properties,
-                    "android.cts.PROPERTY_RESOURCE_XML", PROPERTY_TYPE_RESOURCE, 0x7f060000);
-            assertProperty(properties,
-                    "android.cts.PROPERTY_RESOURCE_INTEGER", PROPERTY_TYPE_RESOURCE, 0x7f040000);
-            assertProperty(properties,
-                    "android.cts.PROPERTY_BOOLEAN", PROPERTY_TYPE_BOOLEAN, TRUE);
-            assertProperty(properties,
-                    "android.cts.PROPERTY_BOOLEAN_VIA_RESOURCE", PROPERTY_TYPE_BOOLEAN, TRUE);
-            assertProperty(properties,
-                    "android.cts.PROPERTY_FLOAT", PROPERTY_TYPE_FLOAT, 3.14f);
-            assertProperty(properties,
-                    "android.cts.PROPERTY_FLOAT_VIA_RESOURCE", PROPERTY_TYPE_FLOAT, 2.718f);
-            assertProperty(properties,
-                    "android.cts.PROPERTY_INTEGER", PROPERTY_TYPE_INTEGER, 42);
-            assertProperty(properties,
-                    "android.cts.PROPERTY_INTEGER_VIA_RESOURCE", PROPERTY_TYPE_INTEGER, 123);
-            assertProperty(properties,
-                    "android.cts.PROPERTY_STRING", PROPERTY_TYPE_STRING, "koala");
-            assertProperty(properties,
-                    "android.cts.PROPERTY_STRING_VIA_RESOURCE", PROPERTY_TYPE_STRING, "giraffe");
-        } finally {
-            testFile.delete();
-        }
-    }
-
-    @Test
-    public void testParseActivityProperties() throws Exception {
-        final File testFile = extractFile(TEST_APP4_APK);
-        try {
-            final ParsedPackage pkg = new TestPackageParser2().parsePackage(testFile, 0, false);
-            final List<ParsedActivity> activities = pkg.getActivities();
-            for (ParsedActivity activity : activities) {
-                final Map<String, Property> properties = activity.getProperties();
-                if ((PACKAGE_NAME + ".MyActivityAlias").equals(activity.getName())) {
-                    assertEquals(2, properties.size());
-                    assertProperty(properties,
-                            "android.cts.PROPERTY_ACTIVITY_ALIAS", PROPERTY_TYPE_INTEGER, 123);
-                    assertProperty(properties,
-                            "android.cts.PROPERTY_COMPONENT", PROPERTY_TYPE_INTEGER, 123);
-                } else if ((PACKAGE_NAME + ".MyActivity").equals(activity.getName())) {
-                    assertEquals(3, properties.size());
-                    assertProperty(properties,
-                            "android.cts.PROPERTY_ACTIVITY", PROPERTY_TYPE_INTEGER, 123);
-                    assertProperty(properties,
-                            "android.cts.PROPERTY_COMPONENT", PROPERTY_TYPE_INTEGER, 123);
-                    assertProperty(properties,
-                            "android.cts.PROPERTY_STRING", PROPERTY_TYPE_STRING, "koala activity");
-                } else if ("android.app.AppDetailsActivity".equals(activity.getName())) {
-                    // ignore default added activity
-                } else {
-                    fail("Found unknown activity; name = " + activity.getName());
-                }
-            }
-        } finally {
-            testFile.delete();
-        }
-    }
-
-    @Test
-    public void testParseProviderProperties() throws Exception {
-        final File testFile = extractFile(TEST_APP4_APK);
-        try {
-            final ParsedPackage pkg = new TestPackageParser2().parsePackage(testFile, 0, false);
-            final List<ParsedProvider> providers = pkg.getProviders();
-            for (ParsedProvider provider : providers) {
-                final Map<String, Property> properties = provider.getProperties();
-                if ((PACKAGE_NAME + ".MyProvider").equals(provider.getName())) {
-                    assertEquals(1, properties.size());
-                    assertProperty(properties,
-                            "android.cts.PROPERTY_PROVIDER", PROPERTY_TYPE_INTEGER, 123);
-                } else {
-                    fail("Found unknown provider; name = " + provider.getName());
-                }
-            }
-        } finally {
-            testFile.delete();
-        }
-    }
-
-    @Test
-    public void testParseReceiverProperties() throws Exception {
-        final File testFile = extractFile(TEST_APP4_APK);
-        try {
-            final ParsedPackage pkg = new TestPackageParser2().parsePackage(testFile, 0, false);
-            final List<ParsedActivity> receivers = pkg.getReceivers();
-            for (ParsedActivity receiver : receivers) {
-                final Map<String, Property> properties = receiver.getProperties();
-                if ((PACKAGE_NAME + ".MyReceiver").equals(receiver.getName())) {
-                    assertEquals(2, properties.size());
-                    assertProperty(properties,
-                            "android.cts.PROPERTY_RECEIVER", PROPERTY_TYPE_INTEGER, 123);
-                    assertProperty(properties,
-                            "android.cts.PROPERTY_STRING", PROPERTY_TYPE_STRING, "koala receiver");
-                } else {
-                    fail("Found unknown receiver; name = " + receiver.getName());
-                }
-            }
-        } finally {
-            testFile.delete();
-        }
-    }
-
-    @Test
-    public void testParseServiceProperties() throws Exception {
-        final File testFile = extractFile(TEST_APP4_APK);
-        try {
-            final ParsedPackage pkg = new TestPackageParser2().parsePackage(testFile, 0, false);
-            final List<ParsedService> services = pkg.getServices();
-            for (ParsedService service : services) {
-                final Map<String, Property> properties = service.getProperties();
-                if ((PACKAGE_NAME + ".MyService").equals(service.getName())) {
-                    assertEquals(2, properties.size());
-                    assertProperty(properties,
-                            "android.cts.PROPERTY_SERVICE", PROPERTY_TYPE_INTEGER, 123);
-                    assertProperty(properties,
-                            "android.cts.PROPERTY_COMPONENT", PROPERTY_TYPE_RESOURCE, 0x7f040000);
-                } else {
-                    fail("Found unknown service; name = " + service.getName());
-                }
-            }
-        } finally {
-            testFile.delete();
-        }
-    }
-
     /**
      * A trivial subclass of package parser that only caches the package name, and throws away
      * all other information.
@@ -547,17 +311,13 @@ public class PackageParserTest {
     }
 
     private static PackageSetting mockPkgSetting(AndroidPackage pkg) {
-        return new PackageSettingBuilder()
-                .setName(pkg.getPackageName())
-                .setRealName(pkg.getRealPackage())
-                .setCodePath(pkg.getPath())
-                .setPrimaryCpuAbiString(pkg.getPrimaryCpuAbi())
-                .setSecondaryCpuAbiString(pkg.getSecondaryCpuAbi())
-                .setPVersionCode(pkg.getLongVersionCode())
-                .setPkgFlags(PackageInfoUtils.appInfoFlags(pkg, null))
-                .setPrivateFlags(PackageInfoUtils.appInfoPrivateFlags(pkg, null))
-                .setSharedUserId(pkg.getSharedUserLabel())
-                .build();
+        return new PackageSetting(pkg.getPackageName(), pkg.getRealPackage(),
+                new File(pkg.getCodePath()), new File(pkg.getCodePath()), null,
+                pkg.getPrimaryCpuAbi(), pkg.getSecondaryCpuAbi(),
+                null, pkg.getVersionCode(),
+                PackageInfoUtils.appInfoFlags(pkg, null),
+                PackageInfoUtils.appInfoPrivateFlags(pkg, null),
+                pkg.getSharedUserLabel(), null, null, null);
     }
 
     // NOTE: The equality assertions below are based on code autogenerated by IntelliJ.
@@ -576,8 +336,8 @@ public class PackageParserTest {
         assertEquals(a.getPackageName(), b.getPackageName());
         assertArrayEquals(a.getSplitNames(), b.getSplitNames());
         assertEquals(a.getVolumeUuid(), b.getVolumeUuid());
-        assertEquals(a.getPath(), b.getPath());
-        assertEquals(a.getBaseApkPath(), b.getBaseApkPath());
+        assertEquals(a.getCodePath(), b.getCodePath());
+        assertEquals(a.getBaseCodePath(), b.getBaseCodePath());
         assertArrayEquals(a.getSplitCodePaths(), b.getSplitCodePaths());
         assertArrayEquals(a.getSplitRevisionCodes(), b.getSplitRevisionCodes());
         assertArrayEquals(a.getSplitFlags(), b.getSplitFlags());
@@ -625,13 +385,6 @@ public class PackageParserTest {
         for (int i = 0; i < ArrayUtils.size(a.getInstrumentations()); ++i) {
             assertInstrumentationEqual(a.getInstrumentations().get(i),
                     b.getInstrumentations().get(i));
-        }
-
-        assertEquals(a.getProperties().size(), b.getProperties().size());
-        final Iterator<String> iter = a.getProperties().keySet().iterator();
-        while (iter.hasNext()) {
-            final String key = iter.next();
-            assertEquals(a.getProperties().get(key), b.getProperties().get(key));
         }
 
         assertEquals(a.getRequestedPermissions(), b.getRequestedPermissions());
@@ -691,13 +444,6 @@ public class PackageParserTest {
             assertEquals(aIntent.getNonLocalizedLabel(), bIntent.getNonLocalizedLabel());
             assertEquals(aIntent.getIcon(), bIntent.getIcon());
         }
-
-        assertEquals(a.getProperties().size(), b.getProperties().size());
-        final Iterator<String> iter = a.getProperties().keySet().iterator();
-        while (iter.hasNext()) {
-            final String key = iter.next();
-            assertEquals(a.getProperties().get(key), b.getProperties().get(key));
-        }
     }
 
     private static void assertPermissionsEqual(ParsedPermission a, ParsedPermission b) {
@@ -722,7 +468,7 @@ public class PackageParserTest {
             ParsedInstrumentation b) {
         assertComponentsEqual(a, b);
 
-        // Validity check for InstrumentationInfo.
+        // Sanity check for InstrumentationInfo.
         assertEquals(a.getTargetPackage(), b.getTargetPackage());
         assertEquals(a.getTargetProcesses(), b.getTargetProcesses());
         assertEquals(a.isHandleProfiling(), b.isHandleProfiling());
@@ -737,7 +483,7 @@ public class PackageParserTest {
     ) {
         assertComponentsEqual(a, b);
 
-        // Validity check for ServiceInfo.
+        // Sanity check for ServiceInfo.
         ServiceInfo aInfo = PackageInfoUtils.generateServiceInfo(aPkg, a, 0,
                 new PackageUserState(), 0, mockPkgSetting(aPkg));
         ServiceInfo bInfo = PackageInfoUtils.generateServiceInfo(bPkg, b, 0,
@@ -764,7 +510,7 @@ public class PackageParserTest {
     ) {
         assertComponentsEqual(a, b);
 
-        // Validity check for ActivityInfo.
+        // Sanity check for ActivityInfo.
         ActivityInfo aInfo = PackageInfoUtils.generateActivityInfo(aPkg, a, 0,
                 new PackageUserState(), 0, mockPkgSetting(aPkg));
         ActivityInfo bInfo = PackageInfoUtils.generateActivityInfo(bPkg, b, 0,
@@ -777,7 +523,7 @@ public class PackageParserTest {
             ParsedPermissionGroup b) {
         assertComponentsEqual(a, b);
 
-        // Validity check for PermissionGroupInfo.
+        // Sanity check for PermissionGroupInfo.
         assertEquals(a.getName(), b.getName());
         assertEquals(a.getDescriptionRes(), b.getDescriptionRes());
     }
@@ -815,7 +561,6 @@ public class PackageParserTest {
         assertArrayEquals(a.splitSourceDirs, that.splitSourceDirs);
         assertArrayEquals(a.splitPublicSourceDirs, that.splitPublicSourceDirs);
         assertArrayEquals(a.resourceDirs, that.resourceDirs);
-        assertArrayEquals(a.overlayPaths, that.overlayPaths);
         assertEquals(a.seInfo, that.seInfo);
         assertArrayEquals(a.sharedLibraryFiles, that.sharedLibraryFiles);
         assertEquals(a.dataDir, that.dataDir);
@@ -847,7 +592,7 @@ public class PackageParserTest {
                         null
                 )
                 .setUse32BitAbi(true)
-                .setVolumeUuid("d52ef59a-7def-4541-bf21-4c28ed4b65a0")
+                .setVolumeUuid("foo3")
                 .addPermission(permission)
                 .addPermissionGroup(new ParsedPermissionGroup())
                 .addActivity(new ParsedActivity())
@@ -855,7 +600,7 @@ public class PackageParserTest {
                 .addProvider(new ParsedProvider())
                 .addService(new ParsedService())
                 .addInstrumentation(new ParsedInstrumentation())
-                .addUsesPermission(new ParsedUsesPermission("foo7", 0))
+                .addRequestedPermission("foo7")
                 .addImplicitPermission("foo25")
                 .addProtectedBroadcast("foo8")
                 .setStaticSharedLibName("foo23")
@@ -921,13 +666,13 @@ public class PackageParserTest {
             }
 
             if (List.class.isAssignableFrom(fieldType)) {
-                // Validity check for list fields: Assume they're non-null and contain precisely
+                // Sanity check for list fields: Assume they're non-null and contain precisely
                 // one element.
                 List<?> list = (List<?>) f.get(pkg);
                 assertNotNull("List was null: " + f, list);
                 assertEquals(1, list.size());
             } else if (fieldType.getComponentType() != null) {
-                // Validity check for array fields: Assume they're non-null and contain precisely
+                // Sanity check for array fields: Assume they're non-null and contain precisely
                 // one element.
                 Object array = f.get(pkg);
                 assertNotNull(Array.get(array, 0));

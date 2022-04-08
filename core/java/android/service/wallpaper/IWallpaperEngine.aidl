@@ -16,34 +16,26 @@
 
 package android.service.wallpaper;
 
-import android.app.ILocalWallpaperColorConsumer;
-import android.app.WallpaperColors;
 import android.graphics.Rect;
-import android.graphics.RectF;
 import android.view.MotionEvent;
-import android.view.SurfaceControl;
 import android.os.Bundle;
 
 /**
  * @hide
  */
-interface IWallpaperEngine {
-    oneway void setDesiredSize(int width, int height);
-    oneway void setDisplayPadding(in Rect padding);
+oneway interface IWallpaperEngine {
+    void setDesiredSize(int width, int height);
+    void setDisplayPadding(in Rect padding);
     @UnsupportedAppUsage
-    oneway void setVisibility(boolean visible);
-    oneway void setInAmbientMode(boolean inAmbientDisplay, long animationDuration);
+    void setVisibility(boolean visible);
+    void setInAmbientMode(boolean inAmbientDisplay, long animationDuration);
     @UnsupportedAppUsage
-    oneway void dispatchPointer(in MotionEvent event);
+    void dispatchPointer(in MotionEvent event);
     @UnsupportedAppUsage
-    oneway void dispatchWallpaperCommand(String action, int x, int y,
+    void dispatchWallpaperCommand(String action, int x, int y,
             int z, in Bundle extras);
-    oneway void requestWallpaperColors();
+    void requestWallpaperColors();
     @UnsupportedAppUsage
-    oneway void destroy();
-    oneway void setZoomOut(float scale);
-    oneway void scalePreview(in Rect positionInWindow);
-    oneway void removeLocalColorsAreas(in List<RectF> regions);
-    oneway void addLocalColorsAreas(in List<RectF> regions);
-    SurfaceControl mirrorSurfaceControl();
+    void destroy();
+    void setZoomOut(float scale);
 }

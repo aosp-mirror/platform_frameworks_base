@@ -37,12 +37,10 @@ namespace android {
 static_assert(std::is_same<int64_t, jlong>::value, "jlong isn't an int64_t");
 static_assert(std::is_same<decltype(uptimeMillis()), int64_t>::value,
         "uptimeMillis signature change, expected int64_t return value");
-static_assert(std::is_same<decltype(uptimeNanos()), int64_t>::value,
-        "uptimeNanos signature change, expected int64_t return value");
 static_assert(std::is_same<decltype(elapsedRealtime()), int64_t>::value,
-        "elapsedRealtime signature change, expected int64_t return value");
+        "uptimeMillis signature change, expected int64_t return value");
 static_assert(std::is_same<decltype(elapsedRealtimeNano()), int64_t>::value,
-        "elapsedRealtimeNano signature change, expected int64_t return value");
+        "uptimeMillis signature change, expected int64_t return value");
 
 /*
  * native public static long currentThreadTimeMillis();
@@ -78,7 +76,6 @@ static const JNINativeMethod gMethods[] = {
     // All of these are @CriticalNative, so we can defer directly to SystemClock.h for
     // some of these
     { "uptimeMillis", "()J", (void*) uptimeMillis },
-    { "uptimeNanos", "()J", (void*) uptimeNanos },
     { "elapsedRealtime", "()J", (void*) elapsedRealtime },
     { "elapsedRealtimeNanos", "()J", (void*) elapsedRealtimeNano },
 

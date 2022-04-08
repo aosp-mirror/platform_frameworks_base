@@ -16,11 +16,13 @@
 
 package com.android.vpndialogs;
 
+import android.content.Context;
 import android.content.DialogInterface;
-import android.net.VpnManager;
+import android.net.IConnectivityManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.util.Log;
@@ -39,7 +41,7 @@ public class ManageDialog extends AlertActivity implements
 
     private VpnConfig mConfig;
 
-    private VpnManager mVm;
+    private IConnectivityManager mService;
 
     private TextView mDuration;
     private TextView mDataTransmitted;
@@ -53,9 +55,11 @@ public class ManageDialog extends AlertActivity implements
         super.onCreate(savedInstanceState);
 
         try {
-            mVm = getSystemService(VpnManager.class);
 
-            mConfig = mVm.getVpnConfig(UserHandle.myUserId());
+            mService = IConnectivityManager.Stub.asInterface(
+                    ServiceManager.getService(Context.CONNECTIVITY_SERVICE));
+
+            mConfig = mService.getVpnConfig(UserHandle.myUserId());
 
             // mConfig can be null if we are a restricted user, in that case don't show this dialog
             if (mConfig == null) {
@@ -114,9 +118,9 @@ public class ManageDialog extends AlertActivity implements
             } else if (which == DialogInterface.BUTTON_NEUTRAL) {
                 final int myUserId = UserHandle.myUserId();
                 if (mConfig.legacy) {
-                    mVm.prepareVpn(VpnConfig.LEGACY_VPN, VpnConfig.LEGACY_VPN, myUserId);
+                    mService.prepareVpn(VpnConfig.LEGACY_VPN, VpnConfig.LEGACY_VPN, myUserId);
                 } else {
-                    mVm.prepareVpn(mConfig.user, VpnConfig.LEGACY_VPN, myUserId);
+                    mService.prepareVpn(mConfig.user, VpnConfig.LEGACY_VPN, myUserId);
                 }
             }
         } catch (Exception e) {

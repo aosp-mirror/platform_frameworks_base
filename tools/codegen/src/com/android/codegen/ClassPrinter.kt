@@ -145,6 +145,7 @@ class ClassPrinter(
             }
             return when {
                 cliArgs.contains("--hidden-$kebabCase") -> true
+                this == FeatureFlag.BUILD_UPON -> FeatureFlag.BUILDER.hidden
                 else -> false
             }
         }

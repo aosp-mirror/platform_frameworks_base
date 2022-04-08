@@ -22,11 +22,8 @@ import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.annotation.UserIdInt;
 import android.compat.annotation.UnsupportedAppUsage;
-import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
-
-import com.android.internal.annotations.VisibleForTesting;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -39,7 +36,7 @@ import java.util.Objects;
  * @hide
  */
 @SystemApi
-public final class OverlayInfo implements CriticalOverlayInfo, Parcelable {
+public final class OverlayInfo implements Parcelable {
 
     /** @hide */
     @IntDef(prefix = "STATE_", value = {
@@ -145,14 +142,6 @@ public final class OverlayInfo implements CriticalOverlayInfo, Parcelable {
     public final String packageName;
 
     /**
-     * The unique name within the package of the overlay.
-     *
-     * @hide
-     */
-    @Nullable
-    public final String overlayName;
-
-    /**
      * Package name of the target package
      *
      * @hide
@@ -185,7 +174,7 @@ public final class OverlayInfo implements CriticalOverlayInfo, Parcelable {
      * The state of this OverlayInfo as defined by the STATE_* constants in this class.
      * @hide
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public final @State int state;
 
     /**
@@ -211,14 +200,6 @@ public final class OverlayInfo implements CriticalOverlayInfo, Parcelable {
      */
     public final boolean isMutable;
 
-    private OverlayIdentifier mIdentifierCached;
-
-    /**
-     *
-     * @hide
-     */
-    public final boolean isFabricated;
-
     /**
      * Create a new OverlayInfo based on source with an updated state.
      *
@@ -228,28 +209,17 @@ public final class OverlayInfo implements CriticalOverlayInfo, Parcelable {
      * @hide
      */
     public OverlayInfo(@NonNull OverlayInfo source, @State int state) {
-        this(source.packageName, source.overlayName, source.targetPackageName,
-                source.targetOverlayableName, source.category, source.baseCodePath, state,
-                source.userId, source.priority, source.isMutable, source.isFabricated);
+        this(source.packageName, source.targetPackageName, source.targetOverlayableName,
+                source.category, source.baseCodePath, state, source.userId, source.priority,
+                source.isMutable);
     }
 
     /** @hide */
-    @VisibleForTesting
     public OverlayInfo(@NonNull String packageName, @NonNull String targetPackageName,
             @Nullable String targetOverlayableName, @Nullable String category,
-            @NonNull String baseCodePath, int state, int userId, int priority, boolean isMutable) {
-        this(packageName, null /* overlayName */, targetPackageName, targetOverlayableName,
-                category, baseCodePath, state, userId, priority, isMutable,
-                false /* isFabricated */);
-    }
-
-    /** @hide */
-    public OverlayInfo(@NonNull String packageName, @Nullable String overlayName,
-            @NonNull String targetPackageName, @Nullable String targetOverlayableName,
-            @Nullable String category, @NonNull String baseCodePath, int state, int userId,
-            int priority, boolean isMutable, boolean isFabricated) {
+            @NonNull String baseCodePath, int state, int userId,
+            int priority, boolean isMutable) {
         this.packageName = packageName;
-        this.overlayName = overlayName;
         this.targetPackageName = targetPackageName;
         this.targetOverlayableName = targetOverlayableName;
         this.category = category;
@@ -258,14 +228,12 @@ public final class OverlayInfo implements CriticalOverlayInfo, Parcelable {
         this.userId = userId;
         this.priority = priority;
         this.isMutable = isMutable;
-        this.isFabricated = isFabricated;
         ensureValidState();
     }
 
     /** @hide */
     public OverlayInfo(Parcel source) {
         packageName = source.readString();
-        overlayName = source.readString();
         targetPackageName = source.readString();
         targetOverlayableName = source.readString();
         category = source.readString();
@@ -274,15 +242,13 @@ public final class OverlayInfo implements CriticalOverlayInfo, Parcelable {
         userId = source.readInt();
         priority = source.readInt();
         isMutable = source.readBoolean();
-        isFabricated = source.readBoolean();
         ensureValidState();
     }
 
     /**
-     * {@inheritDoc}
+     * Returns package name of the current overlay.
      * @hide
      */
-    @Override
     @SystemApi
     @NonNull
     public String getPackageName() {
@@ -290,20 +256,9 @@ public final class OverlayInfo implements CriticalOverlayInfo, Parcelable {
     }
 
     /**
-     * {@inheritDoc}
+     * Returns the target package name of the current overlay.
      * @hide
      */
-    @Override
-    @Nullable
-    public String getOverlayName() {
-        return overlayName;
-    }
-
-    /**
-     * {@inheritDoc}
-     * @hide
-     */
-    @Override
     @SystemApi
     @NonNull
     public String getTargetPackageName() {
@@ -312,8 +267,7 @@ public final class OverlayInfo implements CriticalOverlayInfo, Parcelable {
 
     /**
      * Returns the category of the current overlay.
-     *
-     * @hide
+     * @hide\
      */
     @SystemApi
     @Nullable
@@ -323,7 +277,6 @@ public final class OverlayInfo implements CriticalOverlayInfo, Parcelable {
 
     /**
      * Returns user handle for which this overlay applies to.
-     *
      * @hide
      */
     @SystemApi
@@ -333,45 +286,13 @@ public final class OverlayInfo implements CriticalOverlayInfo, Parcelable {
     }
 
     /**
-     * {@inheritDoc}
+     * Returns name of the target overlayable declaration.
      * @hide
      */
-    @Override
     @SystemApi
     @Nullable
     public String getTargetOverlayableName() {
         return targetOverlayableName;
-    }
-
-    /**
-     * {@inheritDoc}
-     * @hide
-     */
-    @Override
-    public boolean isFabricated() {
-        return isFabricated;
-    }
-
-    /**
-     * Full path to the base APK or fabricated overlay for this overlay package.
-     *
-     * @hide
-     */
-    public String getBaseCodePath() {
-        return baseCodePath;
-    }
-
-    /**
-     * {@inheritDoc}
-     * @hide
-     */
-    @Override
-    @NonNull
-    public OverlayIdentifier getOverlayIdentifier() {
-        if (mIdentifierCached == null) {
-            mIdentifierCached = new OverlayIdentifier(packageName, overlayName);
-        }
-        return mIdentifierCached;
     }
 
     @SuppressWarnings("ConstantConditions")
@@ -408,7 +329,6 @@ public final class OverlayInfo implements CriticalOverlayInfo, Parcelable {
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(packageName);
-        dest.writeString(overlayName);
         dest.writeString(targetPackageName);
         dest.writeString(targetOverlayableName);
         dest.writeString(category);
@@ -417,7 +337,6 @@ public final class OverlayInfo implements CriticalOverlayInfo, Parcelable {
         dest.writeInt(userId);
         dest.writeInt(priority);
         dest.writeBoolean(isMutable);
-        dest.writeBoolean(isFabricated);
     }
 
     public static final @android.annotation.NonNull Parcelable.Creator<OverlayInfo> CREATOR =
@@ -490,7 +409,6 @@ public final class OverlayInfo implements CriticalOverlayInfo, Parcelable {
         result = prime * result + userId;
         result = prime * result + state;
         result = prime * result + ((packageName == null) ? 0 : packageName.hashCode());
-        result = prime * result + ((overlayName == null) ? 0 : overlayName.hashCode());
         result = prime * result + ((targetPackageName == null) ? 0 : targetPackageName.hashCode());
         result = prime * result + ((targetOverlayableName == null) ? 0
                 : targetOverlayableName.hashCode());
@@ -520,9 +438,6 @@ public final class OverlayInfo implements CriticalOverlayInfo, Parcelable {
         if (!packageName.equals(other.packageName)) {
             return false;
         }
-        if (!Objects.equals(overlayName, other.overlayName)) {
-            return false;
-        }
         if (!targetPackageName.equals(other.targetPackageName)) {
             return false;
         }
@@ -541,13 +456,9 @@ public final class OverlayInfo implements CriticalOverlayInfo, Parcelable {
     @NonNull
     @Override
     public String toString() {
-        return "OverlayInfo {"
-                + "packageName=" + packageName
-                + ", overlayName=" + overlayName
-                + ", targetPackage=" + targetPackageName
-                + ", targetOverlayable=" + targetOverlayableName
-                + ", state=" + state + " (" + stateToString(state) + "),"
-                + ", userId=" + userId
-                + " }";
+        return "OverlayInfo { overlay=" + packageName + ", targetPackage=" + targetPackageName
+                + ((targetOverlayableName == null) ? ""
+                : ", targetOverlayable=" + targetOverlayableName)
+                + ", state=" + state + " (" + stateToString(state) + "), userId=" + userId + " }";
     }
 }

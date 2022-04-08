@@ -1,7 +1,0 @@
-{
-  "imports": [
-    {
-      "path": "frameworks/av/camera"
-    }
-  ]
-}

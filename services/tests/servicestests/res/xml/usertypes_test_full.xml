@@ -22,7 +22,4 @@
             <item res='@*android:color/profile_badge_1' />
         </badge-colors>
     </full-type>
-
-    <change-user-type from="android.old.name" to="android.test.1" whenVersionLeq="1" />
-
 </user-types>

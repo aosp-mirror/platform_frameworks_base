@@ -67,7 +67,7 @@ import com.android.server.backup.remote.RemoteCallable;
 import com.android.server.backup.remote.RemoteResult;
 import com.android.server.backup.transport.TransportClient;
 import com.android.server.backup.transport.TransportNotAvailableException;
-import com.android.server.backup.utils.BackupEligibilityRules;
+import com.android.server.backup.utils.AppBackupUtils;
 
 import libcore.io.IoUtils;
 
@@ -220,8 +220,7 @@ public class KeyValueBackupTask implements BackupRestoreTask, Runnable {
             OnTaskFinishedListener listener,
             List<String> pendingFullBackups,
             boolean userInitiated,
-            boolean nonIncremental,
-            BackupEligibilityRules backupEligibilityRules) {
+            boolean nonIncremental) {
         KeyValueBackupReporter reporter =
                 new KeyValueBackupReporter(backupManagerService, observer, monitor);
         KeyValueBackupTask task =
@@ -235,8 +234,7 @@ public class KeyValueBackupTask implements BackupRestoreTask, Runnable {
                         listener,
                         pendingFullBackups,
                         userInitiated,
-                        nonIncremental,
-                        backupEligibilityRules);
+                        nonIncremental);
         Thread thread = new Thread(task, "key-value-backup-" + THREAD_COUNT.incrementAndGet());
         thread.start();
         KeyValueBackupReporter.onNewThread(thread.getName());
@@ -260,7 +258,6 @@ public class KeyValueBackupTask implements BackupRestoreTask, Runnable {
     private final List<String> mPendingFullBackups;
     private final Object mQueueLock;
     @Nullable private final DataChangedJournal mJournal;
-    private final BackupEligibilityRules mBackupEligibilityRules;
 
     @Nullable private PerformFullTransportBackupTask mFullBackupTask;
     @Nullable private IBackupAgent mAgent;
@@ -310,8 +307,7 @@ public class KeyValueBackupTask implements BackupRestoreTask, Runnable {
             OnTaskFinishedListener taskFinishedListener,
             List<String> pendingFullBackups,
             boolean userInitiated,
-            boolean nonIncremental,
-            BackupEligibilityRules backupEligibilityRules) {
+            boolean nonIncremental) {
         mBackupManagerService = backupManagerService;
         mPackageManager = backupManagerService.getPackageManager();
         mTransportClient = transportClient;
@@ -334,7 +330,6 @@ public class KeyValueBackupTask implements BackupRestoreTask, Runnable {
         mQueueLock = mBackupManagerService.getQueueLock();
         mBlankStateFile = new File(mStateDirectory, BLANK_STATE_FILE_NAME);
         mUserId = backupManagerService.getUserId();
-        mBackupEligibilityRules = backupEligibilityRules;
     }
 
     private void registerTask() {
@@ -422,7 +417,7 @@ public class KeyValueBackupTask implements BackupRestoreTask, Runnable {
 
             for (String packageName : succeedingPackages) {
                 if (appsBackedUp.contains(packageName)) {
-                    Log.v(TAG, "Skipping package which was backed up this time: " + packageName);
+                    Log.v(TAG, "Skipping package which was backed up this time :" + packageName);
                     // Skip packages we backed up in this run.
                     continue;
                 }
@@ -461,9 +456,9 @@ public class KeyValueBackupTask implements BackupRestoreTask, Runnable {
 
     /** Determine if a package is eligible to be backed up to the transport */
     private boolean isEligibleForNoDataCall(PackageInfo packageInfo) {
-        return mBackupEligibilityRules.appIsKeyValueOnly(packageInfo)
-                && mBackupEligibilityRules.appIsRunningAndEligibleForBackupWithTransport(
-                        mTransportClient, packageInfo.packageName);
+        return AppBackupUtils.appIsKeyValueOnly(packageInfo)
+                && AppBackupUtils.appIsRunningAndEligibleForBackupWithTransport(mTransportClient,
+                packageInfo.packageName, mPackageManager, mUserId);
     }
 
     /** Send the "no data changed" message to a transport for a specific package */
@@ -647,41 +642,23 @@ public class KeyValueBackupTask implements BackupRestoreTask, Runnable {
                 mReporter.getObserver(),
                 mReporter.getMonitor(),
                 mTaskFinishedListener,
-                mUserInitiated,
-                mBackupEligibilityRules);
+                mUserInitiated);
     }
 
     private void backupPm() throws TaskException {
         mReporter.onStartPackageBackup(PM_PACKAGE);
         mCurrentPackage = new PackageInfo();
         mCurrentPackage.packageName = PM_PACKAGE;
+
         try {
-            // If we can't even extractPmAgentData(), then we treat the local state as
-            // compromised, just in case. This means that we will clear data and will
-            // start from a clean slate in the next attempt. It's not clear whether that's
-            // the right thing to do, but matches what we have historically done.
-            try {
-                extractPmAgentData(mCurrentPackage);
-            } catch (TaskException e) {
-                throw TaskException.stateCompromised(e); // force stateCompromised
-            }
-            // During sendDataToTransport, we generally trust any thrown TaskException
-            // about whether stateCompromised because those are likely transient;
-            // clearing state for those would have the potential to lead to cascading
-            // failures, as discussed in http://b/144030477.
-            // For specific status codes (e.g. TRANSPORT_NON_INCREMENTAL_BACKUP_REQUIRED),
-            // cleanUpAgentForTransportStatus() or theoretically handleTransportStatus()
-            // still have the opportunity to perform additional clean-up tasks.
+            extractPmAgentData(mCurrentPackage);
             int status = sendDataToTransport(mCurrentPackage);
             cleanUpAgentForTransportStatus(status);
         } catch (AgentException | TaskException e) {
             mReporter.onExtractPmAgentDataError(e);
             cleanUpAgentForError(e);
-            if (e instanceof TaskException) {
-                throw (TaskException) e;
-            } else {
-                throw TaskException.stateCompromised(e); // PM agent failure is task failure.
-            }
+            // PM agent failure is task failure.
+            throw TaskException.stateCompromised(e);
         }
     }
 
@@ -710,15 +687,15 @@ public class KeyValueBackupTask implements BackupRestoreTask, Runnable {
             throw AgentException.permanent(e);
         }
         ApplicationInfo applicationInfo = packageInfo.applicationInfo;
-        if (!mBackupEligibilityRules.appIsEligibleForBackup(applicationInfo)) {
+        if (!AppBackupUtils.appIsEligibleForBackup(applicationInfo, mUserId)) {
             mReporter.onPackageNotEligibleForBackup(packageName);
             throw AgentException.permanent();
         }
-        if (mBackupEligibilityRules.appGetsFullBackup(packageInfo)) {
+        if (AppBackupUtils.appGetsFullBackup(packageInfo)) {
             mReporter.onPackageEligibleForFullBackup(packageName);
             throw AgentException.permanent();
         }
-        if (mBackupEligibilityRules.appIsStopped(applicationInfo)) {
+        if (AppBackupUtils.appIsStopped(applicationInfo)) {
             mReporter.onPackageStopped(packageName);
             throw AgentException.permanent();
         }
@@ -731,8 +708,7 @@ public class KeyValueBackupTask implements BackupRestoreTask, Runnable {
         try {
             agent =
                     mBackupManagerService.bindToAgentSynchronous(
-                            packageInfo.applicationInfo, BACKUP_MODE_INCREMENTAL,
-                            mBackupEligibilityRules.getOperationType());
+                            packageInfo.applicationInfo, BACKUP_MODE_INCREMENTAL);
             if (agent == null) {
                 mReporter.onAgentError(packageName);
                 throw AgentException.transitory();
@@ -850,7 +826,7 @@ public class KeyValueBackupTask implements BackupRestoreTask, Runnable {
     /** Same as {@link #extractAgentData(PackageInfo)}, but only for PM package. */
     private void extractPmAgentData(PackageInfo packageInfo) throws AgentException, TaskException {
         Preconditions.checkArgument(packageInfo.packageName.equals(PM_PACKAGE));
-        BackupAgent pmAgent = mBackupManagerService.makeMetadataAgentWithEligibilityRules(mBackupEligibilityRules);
+        BackupAgent pmAgent = mBackupManagerService.makeMetadataAgent();
         mAgent = IBackupAgent.Stub.asInterface(pmAgent.onBind());
         extractAgentData(packageInfo, mAgent);
     }

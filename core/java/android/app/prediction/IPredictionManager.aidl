@@ -29,7 +29,7 @@ import android.content.pm.ParceledListSlice;
 interface IPredictionManager {
 
     void createPredictionSession(in AppPredictionContext context,
-            in AppPredictionSessionId sessionId, in IBinder token);
+            in AppPredictionSessionId sessionId);
 
     void notifyAppTargetEvent(in AppPredictionSessionId sessionId, in AppTargetEvent event);
 

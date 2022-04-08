@@ -11,7 +11,7 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- * limitations under the License.
+ * limitations under the License
  */
 
 package android.view.autofill;
@@ -24,17 +24,11 @@ import android.perftests.utils.PerfTestActivity;
 import android.view.View;
 import android.widget.EditText;
 
-import androidx.test.filters.LargeTest;
-
 import com.android.perftests.autofill.R;
 
 import org.junit.Test;
 
-@LargeTest
 public class LoginTest extends AbstractAutofillPerfTestCase {
-
-    public static final String ID_USERNAME = "username";
-    public static final String ID_PASSWORD = "password";
 
     private EditText mUsername;
     private EditText mPassword;
@@ -57,15 +51,15 @@ public class LoginTest extends AbstractAutofillPerfTestCase {
      */
     @Test
     public void testFocus_noService() throws Throwable {
-        mTestWatcher.resetAutofillService();
+        resetService();
 
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
-        while (state.keepRunning()) {
-            mActivityRule.runOnUiThread(() -> {
+        mActivityRule.runOnUiThread(() -> {
+            BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+            while (state.keepRunning()) {
                 mUsername.requestFocus();
                 mPassword.requestFocus();
-            });
-        }
+            }
+        });
     }
 
     /**
@@ -75,23 +69,22 @@ public class LoginTest extends AbstractAutofillPerfTestCase {
     @Test
     public void testFocus_serviceDoesNotAutofill() throws Throwable {
         MyAutofillService.newCannedResponse().reply();
-        mTestWatcher.setAutofillService();
+        setService();
 
         // Must first focus in a field to trigger autofill and wait for service response
         // outside the loop
         mActivityRule.runOnUiThread(() -> mUsername.requestFocus());
-        mTestWatcher.waitServiceConnect();
         MyAutofillService.getLastFillRequest();
         // Then focus on password so loop start with focus away from username
         mActivityRule.runOnUiThread(() -> mPassword.requestFocus());
 
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
-        while (state.keepRunning()) {
-            mActivityRule.runOnUiThread(() -> {
+        mActivityRule.runOnUiThread(() -> {
+            BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+            while (state.keepRunning()) {
                 mUsername.requestFocus();
                 mPassword.requestFocus();
-            });
-        }
+            }
+        });
     }
 
     /**
@@ -100,10 +93,10 @@ public class LoginTest extends AbstractAutofillPerfTestCase {
     @Test
     public void testFocus_autofillBothFields() throws Throwable {
         MyAutofillService.newCannedResponse()
-                .setUsername(ID_USERNAME, "user")
-                .setPassword(ID_PASSWORD, "pass")
+                .setUsername(mUsername.getAutofillId(), "user")
+                .setPassword(mPassword.getAutofillId(), "pass")
                 .reply();
-        mTestWatcher.setAutofillService();
+        setService();
 
         // Callback is used to slow down the calls made to the autofill server so the
         // app is not crashed due to binder exhaustion. But the time spent waiting for the callbacks
@@ -113,7 +106,6 @@ public class LoginTest extends AbstractAutofillPerfTestCase {
 
         // Must first trigger autofill and wait for service response outside the loop
         mActivityRule.runOnUiThread(() -> mUsername.requestFocus());
-        mTestWatcher.waitServiceConnect();
         MyAutofillService.getLastFillRequest();
         callback.expectEvent(mUsername, EVENT_INPUT_SHOWN);
 
@@ -154,10 +146,10 @@ public class LoginTest extends AbstractAutofillPerfTestCase {
     public void testFocus_autofillUsernameOnly() throws Throwable {
         // Must set ignored ids so focus on password does not trigger new requests
         MyAutofillService.newCannedResponse()
-                .setUsername(ID_USERNAME, "user")
-                .setIgnored(ID_PASSWORD)
+                .setUsername(mUsername.getAutofillId(), "user")
+                .setIgnored(mPassword.getAutofillId())
                 .reply();
-        mTestWatcher.setAutofillService();
+        setService();
 
         // Callback is used to slow down the calls made to the autofill server so the
         // app is not crashed due to binder exhaustion. But the time spent waiting for the callbacks
@@ -167,7 +159,6 @@ public class LoginTest extends AbstractAutofillPerfTestCase {
 
         // Must first trigger autofill and wait for service response outside the loop
         mActivityRule.runOnUiThread(() -> mUsername.requestFocus());
-        mTestWatcher.waitServiceConnect();
         MyAutofillService.getLastFillRequest();
         callback.expectEvent(mUsername, EVENT_INPUT_SHOWN);
 
@@ -202,7 +193,7 @@ public class LoginTest extends AbstractAutofillPerfTestCase {
      */
     @Test
     public void testChange_noService() throws Throwable {
-        mTestWatcher.resetAutofillService();
+        resetService();
 
         changeTest(false);
     }
@@ -214,7 +205,7 @@ public class LoginTest extends AbstractAutofillPerfTestCase {
     @Test
     public void testChange_serviceDoesNotAutofill() throws Throwable {
         MyAutofillService.newCannedResponse().reply();
-        mTestWatcher.setAutofillService();
+        setService();
 
         changeTest(true);
     }
@@ -225,10 +216,10 @@ public class LoginTest extends AbstractAutofillPerfTestCase {
     @Test
     public void testChange_autofillBothFields() throws Throwable {
         MyAutofillService.newCannedResponse()
-                .setUsername(ID_USERNAME, "user")
-                .setPassword(ID_PASSWORD, "pass")
+                .setUsername(mUsername.getAutofillId(), "user")
+                .setPassword(mPassword.getAutofillId(), "pass")
                 .reply();
-        mTestWatcher.setAutofillService();
+        setService();
 
         changeTest(true);
     }
@@ -240,10 +231,10 @@ public class LoginTest extends AbstractAutofillPerfTestCase {
     public void testChange_autofillUsernameOnly() throws Throwable {
         // Must set ignored ids so focus on password does not trigger new requests
         MyAutofillService.newCannedResponse()
-                .setUsername(ID_USERNAME, "user")
-                .setIgnored(ID_PASSWORD)
+                .setUsername(mUsername.getAutofillId(), "user")
+                .setIgnored(mPassword.getAutofillId())
                 .reply();
-        mTestWatcher.setAutofillService();
+        setService();
 
         changeTest(true);
     }
@@ -253,27 +244,27 @@ public class LoginTest extends AbstractAutofillPerfTestCase {
         // outside the loop
         mActivityRule.runOnUiThread(() -> mUsername.requestFocus());
         if (waitForService) {
-            mTestWatcher.waitServiceConnect();
             MyAutofillService.getLastFillRequest();
         }
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
-        while (state.keepRunning()) {
-            mActivityRule.runOnUiThread(() -> {
+        mActivityRule.runOnUiThread(() -> {
+
+            BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+            while (state.keepRunning()) {
                 mUsername.setText("");
                 mUsername.setText("a");
                 mPassword.setText("");
                 mPassword.setText("x");
-            });
-        }
+            }
+        });
     }
 
     @Test
     public void testCallbacks() throws Throwable {
         MyAutofillService.newCannedResponse()
-                .setUsername(ID_USERNAME, "user")
-                .setPassword(ID_PASSWORD, "pass")
+                .setUsername(mUsername.getAutofillId(), "user")
+                .setPassword(mPassword.getAutofillId(), "pass")
                 .reply();
-        mTestWatcher.setAutofillService();
+        setService();
 
         MyAutofillCallback callback = new MyAutofillCallback();
         mAfm.registerCallback(callback);
@@ -281,7 +272,6 @@ public class LoginTest extends AbstractAutofillPerfTestCase {
         // Must first focus in a field to trigger autofill and wait for service response
         // outside the loop
         mActivityRule.runOnUiThread(() -> mUsername.requestFocus());
-        mTestWatcher.waitServiceConnect();
         MyAutofillService.getLastFillRequest();
         callback.expectEvent(mUsername, EVENT_INPUT_SHOWN);
 

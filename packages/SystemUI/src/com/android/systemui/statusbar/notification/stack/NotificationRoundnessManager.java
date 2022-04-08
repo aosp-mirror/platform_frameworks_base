@@ -16,25 +16,25 @@
 
 package com.android.systemui.statusbar.notification.stack;
 
-import android.content.res.Resources;
 import android.util.MathUtils;
 
-import com.android.systemui.R;
-import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.statusbar.notification.NotificationSectionsFeatureManager;
+import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.ExpandableView;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
+import com.android.systemui.statusbar.policy.OnHeadsUpChangedListener;
 
 import java.util.HashSet;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 
 /**
  * A class that manages the roundness for notification views
  */
-@SysUISingleton
-public class NotificationRoundnessManager {
+@Singleton
+public class NotificationRoundnessManager implements OnHeadsUpChangedListener {
 
     private final ExpandableView[] mFirstInSectionViews;
     private final ExpandableView[] mLastInSectionViews;
@@ -46,10 +46,6 @@ public class NotificationRoundnessManager {
     private Runnable mRoundingChangedCallback;
     private ExpandableNotificationRow mTrackedHeadsUp;
     private float mAppearFraction;
-
-    private ExpandableView mSwipedView = null;
-    private ExpandableView mViewBeforeSwipedView = null;
-    private ExpandableView mViewAfterSwipedView = null;
 
     @Inject
     NotificationRoundnessManager(
@@ -63,122 +59,80 @@ public class NotificationRoundnessManager {
         mBypassController = keyguardBypassController;
     }
 
-    public void updateView(ExpandableView view, boolean animate) {
+    @Override
+    public void onHeadsUpPinned(NotificationEntry headsUp) {
+        updateView(headsUp.getRow(), false /* animate */);
+    }
+
+    @Override
+    public void onHeadsUpUnPinned(NotificationEntry headsUp) {
+        updateView(headsUp.getRow(), true /* animate */);
+    }
+
+    public void onHeadsupAnimatingAwayChanged(ExpandableNotificationRow row,
+            boolean isAnimatingAway) {
+        updateView(row, false /* animate */);
+    }
+
+    @Override
+    public void onHeadsUpStateChanged(NotificationEntry entry, boolean isHeadsUp) {
+        updateView(entry.getRow(), false /* animate */);
+    }
+
+    private void updateView(ExpandableView view, boolean animate) {
         boolean changed = updateViewWithoutCallback(view, animate);
         if (changed) {
             mRoundingChangedCallback.run();
         }
     }
 
-    public boolean isViewAffectedBySwipe(ExpandableView expandableView) {
-        return expandableView != null
-                && (expandableView == mSwipedView
-                    || expandableView == mViewBeforeSwipedView
-                    || expandableView == mViewAfterSwipedView);
-    }
-
-    boolean updateViewWithoutCallback(ExpandableView view,
+    private boolean updateViewWithoutCallback(ExpandableView view,
             boolean animate) {
-        if (view == null
-                || view == mViewBeforeSwipedView
-                || view == mViewAfterSwipedView) {
-            return false;
-        }
-
-        final float topRoundness = getRoundness(view, true /* top */);
-        final float bottomRoundness = getRoundness(view, false /* top */);
-
-        final boolean topChanged = view.setTopRoundness(topRoundness, animate);
-        final boolean bottomChanged = view.setBottomRoundness(bottomRoundness, animate);
-
-        final boolean isFirstInSection = isFirstInSection(view);
-        final boolean isLastInSection = isLastInSection(view);
-
-        view.setFirstInSection(isFirstInSection);
-        view.setLastInSection(isLastInSection);
-
-        return (isFirstInSection || isLastInSection) && (topChanged || bottomChanged);
+        float topRoundness = getRoundness(view, true /* top */);
+        float bottomRoundness = getRoundness(view, false /* top */);
+        boolean topChanged = view.setTopRoundness(topRoundness, animate);
+        boolean bottomChanged = view.setBottomRoundness(bottomRoundness, animate);
+        boolean firstInSection = isFirstInSection(view, false /* exclude first section */);
+        boolean lastInSection = isLastInSection(view, false /* exclude last section */);
+        view.setFirstInSection(firstInSection);
+        view.setLastInSection(lastInSection);
+        return (firstInSection || lastInSection) && (topChanged || bottomChanged);
     }
 
-    private boolean isFirstInSection(ExpandableView view) {
+    private boolean isFirstInSection(ExpandableView view, boolean includeFirstSection) {
+        int numNonEmptySections = 0;
         for (int i = 0; i < mFirstInSectionViews.length; i++) {
             if (view == mFirstInSectionViews[i]) {
-                return true;
+                return includeFirstSection || numNonEmptySections > 0;
+            }
+            if (mFirstInSectionViews[i] != null) {
+                numNonEmptySections++;
             }
         }
         return false;
     }
 
-    private boolean isLastInSection(ExpandableView view) {
+    private boolean isLastInSection(ExpandableView view, boolean includeLastSection) {
+        int numNonEmptySections = 0;
         for (int i = mLastInSectionViews.length - 1; i >= 0; i--) {
             if (view == mLastInSectionViews[i]) {
-                return true;
+                return includeLastSection || numNonEmptySections > 0;
+            }
+            if (mLastInSectionViews[i] != null) {
+                numNonEmptySections++;
             }
         }
         return false;
-    }
-
-    void setViewsAffectedBySwipe(
-            ExpandableView viewBefore,
-            ExpandableView viewSwiped,
-            ExpandableView viewAfter,
-            boolean cornerAnimationsEnabled) {
-        if (!cornerAnimationsEnabled) {
-            return;
-        }
-        final boolean animate = true;
-
-        ExpandableView oldViewBefore = mViewBeforeSwipedView;
-        mViewBeforeSwipedView = viewBefore;
-        if (oldViewBefore != null) {
-            final float bottomRoundness = getRoundness(oldViewBefore, false /* top */);
-            oldViewBefore.setBottomRoundness(bottomRoundness,  animate);
-        }
-        if (viewBefore != null) {
-            viewBefore.setBottomRoundness(1f, animate);
-        }
-
-        ExpandableView oldSwipedview = mSwipedView;
-        mSwipedView = viewSwiped;
-        if (oldSwipedview != null) {
-            final float bottomRoundness = getRoundness(oldSwipedview, false /* top */);
-            final float topRoundness = getRoundness(oldSwipedview, true /* top */);
-            oldSwipedview.setTopRoundness(topRoundness, animate);
-            oldSwipedview.setBottomRoundness(bottomRoundness, animate);
-        }
-        if (viewSwiped != null) {
-            viewSwiped.setTopRoundness(1f, animate);
-            viewSwiped.setBottomRoundness(1f, animate);
-        }
-
-        ExpandableView oldViewAfter = mViewAfterSwipedView;
-        mViewAfterSwipedView = viewAfter;
-        if (oldViewAfter != null) {
-            final float topRoundness = getRoundness(oldViewAfter, true /* top */);
-            oldViewAfter.setTopRoundness(topRoundness, animate);
-        }
-        if (viewAfter != null) {
-            viewAfter.setTopRoundness(1f, animate);
-        }
     }
 
     private float getRoundness(ExpandableView view, boolean top) {
-        if (view == null) {
-            return 0f;
-        }
-        if (view == mViewBeforeSwipedView
-                || view == mSwipedView
-                || view == mViewAfterSwipedView) {
-            return 1f;
-        }
-        if ((view.isPinned()
-                || (view.isHeadsUpAnimatingAway()) && !mExpanded)) {
+        if ((view.isPinned() || view.isHeadsUpAnimatingAway()) && !mExpanded) {
             return 1.0f;
         }
-        if (isFirstInSection(view) && top) {
+        if (isFirstInSection(view, true /* include first section */) && top) {
             return 1.0f;
         }
-        if (isLastInSection(view) && !top) {
+        if (isLastInSection(view, true /* include last section */) && !top) {
             return 1.0f;
         }
         if (view == mTrackedHeadsUp) {
@@ -189,16 +143,14 @@ public class NotificationRoundnessManager {
         if (view.showingPulsing() && !mBypassController.getBypassEnabled()) {
             return 1.0f;
         }
-        final Resources resources = view.getResources();
-        return resources.getDimension(R.dimen.notification_corner_radius_small)
-                / resources.getDimension(R.dimen.notification_corner_radius);
+        return 0.0f;
     }
 
     public void setExpanded(float expandedHeight, float appearFraction) {
         mExpanded = expandedHeight != 0.0f;
         mAppearFraction = appearFraction;
         if (mTrackedHeadsUp != null) {
-            updateView(mTrackedHeadsUp, false /* animate */);
+            updateView(mTrackedHeadsUp, true);
         }
     }
 
@@ -232,8 +184,10 @@ public class NotificationRoundnessManager {
                                     : section.getLastVisibleChild());
                     if (newView == oldView) {
                         isStillPresent = true;
-                        if (oldView.isFirstInSection() != isFirstInSection(oldView)
-                                || oldView.isLastInSection() != isLastInSection(oldView)) {
+                        if (oldView.isFirstInSection() != isFirstInSection(oldView,
+                                false /* exclude first section */)
+                                || oldView.isLastInSection() != isLastInSection(oldView,
+                                false /* exclude last section */)) {
                             adjacentSectionChanged = true;
                         }
                         break;

@@ -58,11 +58,6 @@ public class KeyguardUpdateMonitorCallback {
     public void onTimeZoneChanged(TimeZone timeZone) { }
 
     /**
-     * Called when time format changes.
-     */
-    public void onTimeFormatChanged(String timeFormat) { }
-
-    /**
      * Called when the carrier PLMN or SPN changes.
      */
     public void onRefreshCarrierInfo() { }
@@ -99,8 +94,7 @@ public class KeyguardUpdateMonitorCallback {
 
     /**
      * Called when the keyguard enters or leaves bouncer mode.
-     * @param bouncer if true, keyguard is showing the bouncer or transitioning from/to bouncer
-     *                mode.
+     * @param bouncer if true, keyguard is now in bouncer mode.
      */
     public void onKeyguardBouncerChanged(boolean bouncer) { }
 
@@ -323,18 +317,4 @@ public class KeyguardUpdateMonitorCallback {
      */
     public void onSecondaryLockscreenRequirementChanged(int userId) { }
 
-    /**
-     * Called to switch lock screen layout/clock layouts
-     */
-    public void onLockScreenModeChanged(int mode) { }
-
-    /**
-     * Called when notifying user to unlock in order to use NFC.
-     */
-    public void onRequireUnlockForNfc() { }
-
-    /**
-     * Called when the notification shade is expanded or collapsed.
-     */
-    public void onShadeExpandedChanged(boolean expanded) { }
 }

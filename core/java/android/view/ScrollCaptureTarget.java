@@ -16,21 +16,20 @@
 
 package android.view;
 
-import static java.util.Objects.requireNonNull;
-
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UiThread;
+import android.graphics.Matrix;
 import android.graphics.Point;
 import android.graphics.Rect;
-import android.os.CancellationSignal;
 
-import java.io.PrintWriter;
-import java.util.function.Consumer;
+import com.android.internal.util.FastMath;
 
 /**
  * A target collects the set of contextual information for a ScrollCaptureHandler discovered during
  * a {@link View#dispatchScrollCaptureSearch scroll capture search}.
+ *
+ * @hide
  */
 public final class ScrollCaptureTarget {
     private final View mContainingView;
@@ -40,21 +39,20 @@ public final class ScrollCaptureTarget {
     private final int mHint;
     private Rect mScrollBounds;
 
-    private final int[] mTmpIntArr = new int[2];
+    private final float[] mTmpFloatArr = new float[2];
+    private final Matrix mMatrixViewLocalToWindow = new Matrix();
+    private final Rect mTmpRect = new Rect();
 
     public ScrollCaptureTarget(@NonNull View scrollTarget, @NonNull Rect localVisibleRect,
             @NonNull Point positionInWindow, @NonNull ScrollCaptureCallback callback) {
-        mContainingView = requireNonNull(scrollTarget);
+        mContainingView = scrollTarget;
         mHint = mContainingView.getScrollCaptureHint();
-        mCallback = requireNonNull(callback);
-        mLocalVisibleRect = requireNonNull(localVisibleRect);
-        mPositionInWindow = requireNonNull(positionInWindow);
+        mCallback = callback;
+        mLocalVisibleRect = localVisibleRect;
+        mPositionInWindow = positionInWindow;
     }
 
-    /**
-     * @return the hint that the {@code containing view} had during the scroll capture search
-     * @see View#getScrollCaptureHint()
-     */
+    /** @return the hint that the {@code containing view} had during the scroll capture search */
     @View.ScrollCaptureHint
     public int getHint() {
         return mHint;
@@ -73,7 +71,8 @@ public final class ScrollCaptureTarget {
     }
 
     /**
-     * Returns the visible bounds of the containing view.
+     * Returns the un-clipped, visible bounds of the containing view during the scroll capture
+     * search. This is used to determine on-screen area to assist in selecting the primary target.
      *
      * @return the visible bounds of the {@code containing view} in view-local coordinates
      */
@@ -82,17 +81,13 @@ public final class ScrollCaptureTarget {
         return mLocalVisibleRect;
     }
 
-    /** @return the position of the visible bounds of the containing view within the window */
+    /** @return the position of the {@code containing view} within the window */
     @NonNull
     public Point getPositionInWindow() {
         return mPositionInWindow;
     }
 
-    /**
-     * @return the {@code scroll bounds} for this {@link ScrollCaptureCallback callback}
-     *
-     * @see ScrollCaptureCallback#onScrollCaptureSearch(CancellationSignal, Consumer)
-     */
+    /** @return the {@code scroll bounds} for this {@link ScrollCaptureCallback callback} */
     @Nullable
     public Rect getScrollBounds() {
         return mScrollBounds;
@@ -113,38 +108,28 @@ public final class ScrollCaptureTarget {
         }
     }
 
+    private static void zero(float[] pointArray) {
+        pointArray[0] = 0;
+        pointArray[1] = 0;
+    }
+
+    private static void roundIntoPoint(Point pointObj, float[] pointArray) {
+        pointObj.x = FastMath.round(pointArray[0]);
+        pointObj.y = FastMath.round(pointArray[1]);
+    }
+
     /**
-     * Refresh the local visible bounds and its offset within the window, based on the current
-     * state of the {@code containing view}.
+     * Refresh the value of {@link #mLocalVisibleRect} and {@link #mPositionInWindow} based on the
+     * current state of the {@code containing view}.
      */
     @UiThread
     public void updatePositionInWindow() {
-        mContainingView.getLocationInWindow(mTmpIntArr);
-        mPositionInWindow.x = mTmpIntArr[0];
-        mPositionInWindow.y = mTmpIntArr[1];
+        mMatrixViewLocalToWindow.reset();
+        mContainingView.transformMatrixToGlobal(mMatrixViewLocalToWindow);
+
+        zero(mTmpFloatArr);
+        mMatrixViewLocalToWindow.mapPoints(mTmpFloatArr);
+        roundIntoPoint(mPositionInWindow, mTmpFloatArr);
     }
 
-    public String toString() {
-        return "ScrollCaptureTarget{" + "view=" + mContainingView
-                + ", callback=" + mCallback
-                + ", scrollBounds=" + mScrollBounds
-                + ", localVisibleRect=" + mLocalVisibleRect
-                + ", positionInWindow=" + mPositionInWindow
-                + "}";
-    }
-
-    void dump(@NonNull PrintWriter writer) {
-        View view = getContainingView();
-        writer.println("view: " + view);
-        writer.println("hint: " + mHint);
-        writer.println("callback: " + mCallback);
-        writer.println("scrollBounds: "
-                + (mScrollBounds == null ? "null" : mScrollBounds.toShortString()));
-        Point inWindow = getPositionInWindow();
-        writer.println("positionInWindow: "
-                + ((inWindow == null) ? "null" : "[" + inWindow.x + "," + inWindow.y + "]"));
-        Rect localVisible = getLocalVisibleRect();
-        writer.println("localVisibleRect: "
-                + (localVisible == null ? "null" : localVisible.toShortString()));
-    }
 }

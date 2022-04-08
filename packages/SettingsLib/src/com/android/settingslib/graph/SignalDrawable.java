@@ -72,9 +72,9 @@ public class SignalDrawable extends DrawableWrapper {
     private final int mLightModeFillColor;
     private final Path mCutoutPath = new Path();
     private final Path mForegroundPath = new Path();
-    private final Path mAttributionPath = new Path();
-    private final Matrix mAttributionScaleMatrix = new Matrix();
-    private final Path mScaledAttributionPath = new Path();
+    private final Path mXPath = new Path();
+    private final Matrix mXScaleMatrix = new Matrix();
+    private final Path mScaledXPath = new Path();
     private final Handler mHandler;
     private final float mCutoutWidthFraction;
     private final float mCutoutHeightFraction;
@@ -85,10 +85,10 @@ public class SignalDrawable extends DrawableWrapper {
 
     public SignalDrawable(Context context) {
         super(context.getDrawable(com.android.internal.R.drawable.ic_signal_cellular));
-        final String attributionPathString = context.getString(
-                com.android.internal.R.string.config_signalAttributionPath);
-        mAttributionPath.set(PathParser.createPathFromPathData(attributionPathString));
-        updateScaledAttributionPath();
+        final String xPathString = context.getString(
+                com.android.internal.R.string.config_signalXPath);
+        mXPath.set(PathParser.createPathFromPathData(xPathString));
+        updateScaledXPath();
         mCutoutWidthFraction = context.getResources().getFloat(
                 com.android.internal.R.dimen.config_signalCutoutWidthFraction);
         mCutoutHeightFraction = context.getResources().getFloat(
@@ -104,14 +104,13 @@ public class SignalDrawable extends DrawableWrapper {
         setDarkIntensity(0);
     }
 
-    private void updateScaledAttributionPath() {
+    private void updateScaledXPath() {
         if (getBounds().isEmpty()) {
-            mAttributionScaleMatrix.setScale(1f, 1f);
+            mXScaleMatrix.setScale(1f, 1f);
         } else {
-            mAttributionScaleMatrix.setScale(
-                    getBounds().width() / VIEWPORT, getBounds().height() / VIEWPORT);
+            mXScaleMatrix.setScale(getBounds().width() / VIEWPORT, getBounds().height() / VIEWPORT);
         }
-        mAttributionPath.transform(mAttributionScaleMatrix, mScaledAttributionPath);
+        mXPath.transform(mXScaleMatrix, mScaledXPath);
     }
 
     @Override
@@ -178,7 +177,7 @@ public class SignalDrawable extends DrawableWrapper {
     @Override
     protected void onBoundsChange(Rect bounds) {
         super.onBoundsChange(bounds);
-        updateScaledAttributionPath();
+        updateScaledXPath();
         invalidateSelf();
     }
 
@@ -222,7 +221,7 @@ public class SignalDrawable extends DrawableWrapper {
             mCutoutPath.rLineTo(cutX, 0);
             mCutoutPath.rLineTo(0, cutY);
             canvas.drawPath(mCutoutPath, mTransparentPaint);
-            canvas.drawPath(mScaledAttributionPath, mForegroundPaint);
+            canvas.drawPath(mScaledXPath, mForegroundPaint);
         }
         if (isRtl) {
             canvas.restore();

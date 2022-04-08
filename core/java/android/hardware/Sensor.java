@@ -19,7 +19,6 @@ package android.hardware;
 
 import android.annotation.SystemApi;
 import android.compat.annotation.UnsupportedAppUsage;
-import android.hardware.input.InputSensorInfo;
 import android.os.Build;
 
 /**
@@ -510,7 +509,7 @@ public final class Sensor {
      *
      * @hide Expected to be used internally for always on display.
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public static final int TYPE_PICK_UP_GESTURE = 25;
 
     /**
@@ -550,7 +549,7 @@ public final class Sensor {
      * @hide Expected to be used internally for auto-rotate and speaker rotation.
      *
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public static final int TYPE_DEVICE_ORIENTATION = 27;
 
     /**
@@ -617,7 +616,7 @@ public final class Sensor {
     public static final String STRING_TYPE_MOTION_DETECT = "android.sensor.motion_detect";
 
     /**
-     * A constant describing a heart beat sensor.
+     * A constant describing a motion detect sensor.
      *
      * See {@link android.hardware.SensorEvent#values SensorEvent.values} for more details.
      *
@@ -848,10 +847,8 @@ public final class Sensor {
     /**
      * Get the highest supported direct report mode rate level of the sensor.
      *
-     * @return Highest direct report rate level of this sensor. Note that if the app does not have
-     * the {@link android.Manifest.permission#HIGH_SAMPLING_RATE_SENSORS} permission, the highest
-     * direct report rate level is {@link SensorDirectChannel#RATE_NORMAL}. If the sensor
-     * does not support direct report mode, this returns {@link SensorDirectChannel#RATE_STOP}.
+     * @return Highest direct report rate level of this sensor. If the sensor does not support
+     * direct report mode, this returns {@link SensorDirectChannel#RATE_STOP}.
      * @see SensorDirectChannel#RATE_STOP
      * @see SensorDirectChannel#RATE_NORMAL
      * @see SensorDirectChannel#RATE_FAST
@@ -883,11 +880,7 @@ public final class Sensor {
         }
     }
 
-    /**
-     * Return sensor's maximum length of values array
-     * @hide
-     */
-    public static int getMaxLengthValuesArray(Sensor sensor, int sdkLevel) {
+    static int getMaxLengthValuesArray(Sensor sensor, int sdkLevel) {
         // RotationVector length has changed to 3 to 5 for API level 18
         // Set it to 3 for backward compatibility.
         if (sensor.mType == Sensor.TYPE_ROTATION_VECTOR
@@ -930,32 +923,7 @@ public final class Sensor {
     }
 
     /**
-     * Construct a sensor object from SensorInfo of an input device.
-     * This is only used for constructing an input device sensor object.
-     * @hide
-     */
-    public Sensor(InputSensorInfo sensorInfo) {
-        this.mName = sensorInfo.getName();
-        this.mVendor = sensorInfo.getVendor();
-        this.mVersion = sensorInfo.getVersion();
-        this.mHandle = sensorInfo.getHandle();
-        this.mType = sensorInfo.getType();
-        this.mMaxRange = sensorInfo.getMaxRange();
-        this.mResolution = sensorInfo.getResolution();
-        this.mPower = sensorInfo.getPower();
-        this.mMinDelay = sensorInfo.getMinDelay();
-        this.mFifoReservedEventCount = sensorInfo.getFifoReservedEventCount();
-        this.mFifoMaxEventCount = sensorInfo.getFifoMaxEventCount();
-        this.mStringType = sensorInfo.getStringType();
-        this.mRequiredPermission = sensorInfo.getRequiredPermission();
-        this.mMaxDelay = sensorInfo.getMaxDelay();
-        this.mFlags = sensorInfo.getFlags();
-        this.mId = sensorInfo.getId();
-    }
-
-    /**
-     * @return name string of the sensor. The name is guaranteed to be unique
-     * for a particular sensor type.
+     * @return name string of the sensor.
      */
     public String getName() {
         return mName;
@@ -1004,11 +972,9 @@ public final class Sensor {
     }
 
     /**
-     * @return the minimum delay allowed between two events in microseconds
+     * @return the minimum delay allowed between two events in microsecond
      * or zero if this sensor only returns a value when the data it's measuring
-     * changes. Note that if the app does not have the
-     * {@link android.Manifest.permission#HIGH_SAMPLING_RATE_SENSORS} permission, the
-     * minimum delay is capped at 5000 microseconds (200 Hz).
+     * changes.
      */
     public int getMinDelay() {
         return mMinDelay;
@@ -1279,7 +1245,6 @@ public final class Sensor {
                 return true;
             case TYPE_HINGE_ANGLE:
                 mStringType = STRING_TYPE_HINGE_ANGLE;
-                return true;
             default:
                 return false;
         }

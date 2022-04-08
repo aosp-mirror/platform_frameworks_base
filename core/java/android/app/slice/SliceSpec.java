@@ -17,7 +17,6 @@
 package android.app.slice;
 
 import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -98,7 +97,7 @@ public final class SliceSpec implements Parcelable {
     }
 
     @Override
-    public boolean equals(@Nullable Object obj) {
+    public boolean equals(Object obj) {
         if (!(obj instanceof SliceSpec)) return false;
         SliceSpec other = (SliceSpec) obj;
         return mType.equals(other.mType) && mRevision == other.mRevision;

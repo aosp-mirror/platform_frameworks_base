@@ -84,7 +84,8 @@ public class MDNSFilterPlugin implements PrintServicePlugin {
      */
     public MDNSFilterPlugin(@NonNull Context context, @NonNull String name,
             @NonNull CharSequence packageName, @NonNull List<String> mDNSNames) {
-        mName = context.getResources().getIdentifier(name, null, context.getPackageName());
+        mName = context.getResources().getIdentifier(name, null,
+                "com.android.printservice.recommendation");
         mPackageName = packageName;
         mMDNSFilteredDiscovery = new MDNSFilteredDiscovery(context, PRINTER_SERVICE_TYPES,
                 new VendorNameFilter(new HashSet<>(mDNSNames)));

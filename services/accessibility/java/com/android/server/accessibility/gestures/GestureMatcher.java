@@ -19,7 +19,6 @@ package com.android.server.accessibility.gestures;
 import static com.android.server.accessibility.gestures.TouchExplorer.DEBUG;
 
 import android.annotation.IntDef;
-import android.annotation.NonNull;
 import android.os.Handler;
 import android.util.Slog;
 import android.view.MotionEvent;
@@ -32,22 +31,21 @@ import android.view.ViewConfiguration;
  * onUp, etc methods as necessary. If you don't override a method your matcher will do nothing in
  * response to that type of event. Finally, be sure to give your gesture a name by overriding
  * getGestureName().
- * @hide
  */
-public abstract class GestureMatcher {
+abstract class GestureMatcher {
     // Potential states for this individual gesture matcher.
     // In STATE_CLEAR, this matcher is accepting new motion events but has not formally signaled
     // that there is enough data to judge that a gesture has started.
-    public static final int STATE_CLEAR = 0;
+    static final int STATE_CLEAR = 0;
     // In STATE_GESTURE_STARTED, this matcher continues to accept motion events and it has signaled
     // to the gesture manifold that what looks like the specified gesture has started.
-    public static final int STATE_GESTURE_STARTED = 1;
+    static final int STATE_GESTURE_STARTED = 1;
     // In STATE_GESTURE_COMPLETED, this matcher has successfully matched the specified gesture. and
     // will not accept motion events until it is cleared.
-    public static final int STATE_GESTURE_COMPLETED = 2;
+    static final int STATE_GESTURE_COMPLETED = 2;
     // In STATE_GESTURE_CANCELED, this matcher will not accept new motion events because it is
     // impossible that this set of motion events will match the specified gesture.
-    public static final int STATE_GESTURE_CANCELED = 3;
+    static final int STATE_GESTURE_CANCELED = 3;
 
     @IntDef({STATE_CLEAR, STATE_GESTURE_STARTED, STATE_GESTURE_COMPLETED, STATE_GESTURE_CANCELED})
     public @interface State {}
@@ -58,14 +56,14 @@ public abstract class GestureMatcher {
     // handler for asynchronous operations like timeouts
     private final Handler mHandler;
 
-    private StateChangeListener mListener;
+    private final StateChangeListener mListener;
 
     // Use this to transition to new states after a delay.
     // e.g. cancel or complete after some timeout.
     // Convenience functions for tapTimeout and doubleTapTimeout are already defined here.
     protected final DelayedTransition mDelayedTransition;
 
-    protected GestureMatcher(int gestureId, Handler handler, StateChangeListener listener) {
+    GestureMatcher(int gestureId, Handler handler, StateChangeListener listener) {
         mGestureId = gestureId;
         mHandler = handler;
         mDelayedTransition = new DelayedTransition();
@@ -77,12 +75,12 @@ public abstract class GestureMatcher {
      * information should override this method to reset their own state information and call
      * super.clear().
      */
-    public void clear() {
+    protected void clear() {
         mState = STATE_CLEAR;
         cancelPendingTransitions();
     }
 
-    public final int getState() {
+    public int getState() {
         return mState;
     }
 
@@ -94,9 +92,7 @@ public abstract class GestureMatcher {
             @State int state, MotionEvent event, MotionEvent rawEvent, int policyFlags) {
         mState = state;
         cancelPendingTransitions();
-        if (mListener != null) {
-            mListener.onStateChanged(mGestureId, mState, event, rawEvent, policyFlags);
-        }
+        mListener.onStateChanged(mGestureId, mState, event, rawEvent, policyFlags);
     }
 
     /** Indicates that there is evidence to suggest that this gesture has started. */
@@ -112,10 +108,6 @@ public abstract class GestureMatcher {
     /** Indicates this gesture is completed. */
     protected final void completeGesture(MotionEvent event, MotionEvent rawEvent, int policyFlags) {
         setState(STATE_GESTURE_COMPLETED, event, rawEvent, policyFlags);
-    }
-
-    public final void setListener(@NonNull StateChangeListener listener) {
-        mListener = listener;
     }
 
     public int getGestureId() {
@@ -280,7 +272,7 @@ public abstract class GestureMatcher {
         completeAfter(ViewConfiguration.getDoubleTapTimeout(), event, rawEvent, policyFlags);
     }
 
-    static String getStateSymbolicName(@State int state) {
+    public static String getStateSymbolicName(@State int state) {
         switch (state) {
             case STATE_CLEAR:
                 return "STATE_CLEAR";
@@ -299,7 +291,7 @@ public abstract class GestureMatcher {
      * Returns a readable name for this matcher that can be displayed to the user and in system
      * logs.
      */
-    protected abstract String getGestureName();
+    abstract String getGestureName();
 
     /**
      * Returns a String representation of this matcher. Each matcher can override this method to add
@@ -371,7 +363,7 @@ public abstract class GestureMatcher {
     }
 
     /** Interface to allow a class to listen for state changes in a specific gesture matcher */
-    public interface StateChangeListener {
+    interface StateChangeListener {
 
         void onStateChanged(
                 int gestureId, int state, MotionEvent event, MotionEvent rawEvent, int policyFlags);

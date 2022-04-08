@@ -45,6 +45,7 @@ import android.content.Intent;
 import android.os.Binder;
 import android.os.ServiceSpecificException;
 import android.os.UserHandle;
+import android.security.keystore.AndroidKeyStoreSecretKey;
 import android.security.keystore.KeyGenParameterSpec;
 import android.security.keystore.KeyProperties;
 import android.security.keystore.recovery.KeyChainProtectionParams;
@@ -1073,7 +1074,7 @@ public class RecoverableKeyStoreManagerTest {
         int uid = Binder.getCallingUid();
         PendingIntent intent = PendingIntent.getBroadcast(
                 InstrumentationRegistry.getTargetContext(), /*requestCode=*/1,
-                new Intent(), /*flags=*/ PendingIntent.FLAG_MUTABLE_UNAUDITED);
+                new Intent(), /*flags=*/ 0);
         mRecoverableKeyStoreManager.setSnapshotCreatedPendingIntent(intent);
         verify(mMockListenersStorage).setSnapshotListener(eq(uid), any(PendingIntent.class));
     }
@@ -1310,7 +1311,7 @@ public class RecoverableKeyStoreManagerTest {
         mRecoverableKeyStoreDb.setShouldCreateSnapshot(userId, uid, false);
     }
 
-    private SecretKey generateAndroidKeyStoreKey() throws Exception {
+    private AndroidKeyStoreSecretKey generateAndroidKeyStoreKey() throws Exception {
         KeyGenerator keyGenerator = KeyGenerator.getInstance(
                 KEY_ALGORITHM,
                 ANDROID_KEY_STORE_PROVIDER);
@@ -1319,6 +1320,6 @@ public class RecoverableKeyStoreManagerTest {
                 .setBlockModes(KeyProperties.BLOCK_MODE_GCM)
                 .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_NONE)
                 .build());
-        return keyGenerator.generateKey();
+        return (AndroidKeyStoreSecretKey) keyGenerator.generateKey();
     }
 }

@@ -20,6 +20,6 @@ import android.service.euicc.GetEuiccProfileInfoListResult;
 
 /** @hide */
 oneway interface IGetEuiccProfileInfoListCallback {
-    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
+    @UnsupportedAppUsage
     void onComplete(in GetEuiccProfileInfoListResult result);
 }

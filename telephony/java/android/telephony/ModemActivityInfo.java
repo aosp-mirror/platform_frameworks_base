@@ -16,12 +16,8 @@
 
 package android.telephony;
 
-import android.annotation.DurationMillisLong;
-import android.annotation.ElapsedRealtimeLong;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
-import android.annotation.SystemApi;
-import android.annotation.TestApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.SystemClock;
@@ -29,48 +25,45 @@ import android.util.Range;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-import java.util.Arrays;
-import java.util.Objects;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
- * Contains information about the modem's activity. May be useful for power stats reporting.
+ * Reports modem activity information.
  * @hide
  */
-@SystemApi
 public final class ModemActivityInfo implements Parcelable {
-    private static final int TX_POWER_LEVELS = 5;
-
     /**
-     * Corresponds to transmit power of less than 0dBm.
+     * Tx(transmit) power level. see power index below
+     * <ul>
+     *   <li> index 0 = tx_power < 0dBm. </li>
+     *   <li> index 1 = 0dBm < tx_power < 5dBm. </li>
+     *   <li> index 2 = 5dBm < tx_power < 15dBm. </li>
+     *   <li> index 3 = 15dBm < tx_power < 20dBm. </li>
+     *   <li> index 4 = tx_power > 20dBm. </li>
+     * </ul>
+     */
+    public static final int TX_POWER_LEVELS = 5;
+    /**
+     * Tx(transmit) power level 0: tx_power < 0dBm
      */
     public static final int TX_POWER_LEVEL_0 = 0;
-
     /**
-     * Corresponds to transmit power between 0dBm and 5dBm.
+     * Tx(transmit) power level 1: 0dBm < tx_power < 5dBm
      */
     public static final int TX_POWER_LEVEL_1 = 1;
-
     /**
-     * Corresponds to transmit power between 5dBm and 15dBm.
+     * Tx(transmit) power level 2: 5dBm < tx_power < 15dBm
      */
     public static final int TX_POWER_LEVEL_2 = 2;
-
     /**
-     * Corresponds to transmit power between 15dBm and 20dBm.
+     * Tx(transmit) power level 3: 15dBm < tx_power < 20dBm.
      */
     public static final int TX_POWER_LEVEL_3 = 3;
-
     /**
-     * Corresponds to transmit power above 20dBm.
+     * Tx(transmit) power level 4: tx_power > 20dBm
      */
     public static final int TX_POWER_LEVEL_4 = 4;
-
-    /**
-     * The number of transmit power levels. Fixed by HAL definition.
-     */
-    public static int getNumTxPowerLevels() {
-        return TX_POWER_LEVELS;
-    }
 
     /** @hide */
     @IntDef(prefix = {"TX_POWER_LEVEL_"}, value = {
@@ -89,39 +82,34 @@ public final class ModemActivityInfo implements Parcelable {
         new Range<>(5, 15),
         new Range<>(15, 20),
         new Range<>(20, Integer.MAX_VALUE)
+
     };
 
     private long mTimestamp;
     private int mSleepTimeMs;
     private int mIdleTimeMs;
-    private int[] mTxTimeMs;
+    private List<TransmitPower> mTransmitPowerInfo = new ArrayList<>(TX_POWER_LEVELS);
     private int mRxTimeMs;
 
-    /**
-     * @hide
-     */
-    @TestApi
     public ModemActivityInfo(long timestamp, int sleepTimeMs, int idleTimeMs,
                         @NonNull int[] txTimeMs, int rxTimeMs) {
-        Objects.requireNonNull(txTimeMs);
-        if (txTimeMs.length != TX_POWER_LEVELS) {
-            throw new IllegalArgumentException("txTimeMs must have length == TX_POWER_LEVELS");
-        }
         mTimestamp = timestamp;
         mSleepTimeMs = sleepTimeMs;
         mIdleTimeMs = idleTimeMs;
-        mTxTimeMs = txTimeMs;
+        populateTransmitPowerRange(txTimeMs);
         mRxTimeMs = rxTimeMs;
     }
 
-    /**
-     * Provided for convenience in manipulation since the API exposes long values but internal
-     * representations are ints.
-     * @hide
-     */
-    public ModemActivityInfo(long timestamp, long sleepTimeMs, long idleTimeMs,
-            @NonNull int[] txTimeMs, long rxTimeMs) {
-        this(timestamp, (int) sleepTimeMs, (int) idleTimeMs, txTimeMs, (int) rxTimeMs);
+    /** helper API to populate tx power range for each bucket **/
+    private void populateTransmitPowerRange(@NonNull int[] transmitPowerMs) {
+        int i = 0;
+        for ( ; i < Math.min(transmitPowerMs.length, TX_POWER_LEVELS); i++) {
+            mTransmitPowerInfo.add(i, new TransmitPower(TX_POWER_RANGES[i], transmitPowerMs[i]));
+        }
+        // Make sure that mTransmitPowerInfo is fully initialized.
+        for ( ; i < TX_POWER_LEVELS; i++) {
+            mTransmitPowerInfo.add(i, new TransmitPower(TX_POWER_RANGES[i], 0));
+        }
     }
 
     @Override
@@ -130,7 +118,7 @@ public final class ModemActivityInfo implements Parcelable {
             + " mTimestamp=" + mTimestamp
             + " mSleepTimeMs=" + mSleepTimeMs
             + " mIdleTimeMs=" + mIdleTimeMs
-            + " mTxTimeMs[]=" + Arrays.toString(mTxTimeMs)
+            + " mTransmitPowerInfo[]=" + mTransmitPowerInfo.toString()
             + " mRxTimeMs=" + mRxTimeMs
             + "}";
     }
@@ -141,12 +129,14 @@ public final class ModemActivityInfo implements Parcelable {
 
     public static final @android.annotation.NonNull Parcelable.Creator<ModemActivityInfo> CREATOR =
             new Parcelable.Creator<ModemActivityInfo>() {
-        public ModemActivityInfo createFromParcel(@NonNull Parcel in) {
+        public ModemActivityInfo createFromParcel(Parcel in) {
             long timestamp = in.readLong();
             int sleepTimeMs = in.readInt();
             int idleTimeMs = in.readInt();
             int[] txTimeMs = new int[TX_POWER_LEVELS];
-            in.readIntArray(txTimeMs);
+            for (int i = 0; i < TX_POWER_LEVELS; i++) {
+                txTimeMs[i] = in.readInt();
+            }
             int rxTimeMs = in.readInt();
             return new ModemActivityInfo(timestamp, sleepTimeMs, idleTimeMs,
                                 txTimeMs, rxTimeMs);
@@ -157,25 +147,21 @@ public final class ModemActivityInfo implements Parcelable {
         }
     };
 
-    /**
-     * @param dest The Parcel in which the object should be written.
-     * @param flags Additional flags about how the object should be written.
-     */
-    public void writeToParcel(@NonNull Parcel dest, int flags) {
+    public void writeToParcel(Parcel dest, int flags) {
         dest.writeLong(mTimestamp);
         dest.writeInt(mSleepTimeMs);
         dest.writeInt(mIdleTimeMs);
-        dest.writeIntArray(mTxTimeMs);
+        for (int i = 0; i < TX_POWER_LEVELS; i++) {
+            dest.writeInt(mTransmitPowerInfo.get(i).getTimeInMillis());
+        }
         dest.writeInt(mRxTimeMs);
     }
 
     /**
-     * Gets the timestamp at which this modem activity info was recorded.
-     *
-     * @return The timestamp, as returned by {@link SystemClock#elapsedRealtime()}, when this
-     * {@link ModemActivityInfo} was recorded.
+     * @return milliseconds since boot, including mTimeInMillis spent in sleep.
+     * @see SystemClock#elapsedRealtime()
      */
-    public @ElapsedRealtimeLong long getTimestampMillis() {
+    public long getTimestamp() {
         return mTimestamp;
     }
 
@@ -185,48 +171,35 @@ public final class ModemActivityInfo implements Parcelable {
     }
 
     /**
-     * Gets the amount of time the modem spent transmitting at a certain power level.
+     * @return an arrayList of {@link TransmitPower} with each element representing the total time where
+     * transmitter is awake time (in ms) for a given power range (in dbm).
      *
-     * @param powerLevel The power level to query.
-     * @return The amount of time, in milliseconds, that the modem spent transmitting at the
-     * given power level.
+     * @see #TX_POWER_LEVELS
      */
-    public @DurationMillisLong long getTransmitDurationMillisAtPowerLevel(
-            @TxPowerLevel int powerLevel) {
-        return mTxTimeMs[powerLevel];
-    }
-
-    /**
-     * Gets the range of transmit powers corresponding to a certain power level.
-     *
-     * @param powerLevel The power level to query
-     * @return A {@link Range} object representing the range of intensities (in dBm) to which this
-     * power level corresponds.
-     */
-    public @NonNull Range<Integer> getTransmitPowerRange(@TxPowerLevel int powerLevel) {
-        return TX_POWER_RANGES[powerLevel];
+    @NonNull
+    public List<TransmitPower> getTransmitPowerInfo() {
+        return mTransmitPowerInfo;
     }
 
     /** @hide */
     public void setTransmitTimeMillis(int[] txTimeMs) {
-        mTxTimeMs = Arrays.copyOf(txTimeMs, TX_POWER_LEVELS);
+        populateTransmitPowerRange(txTimeMs);
     }
 
-    /**
-     * @return The raw array of transmit power durations
-     * @hide
-     */
+    /** @hide */
     @NonNull
     public int[] getTransmitTimeMillis() {
-        return mTxTimeMs;
+        int[] transmitTimeMillis = new int[TX_POWER_LEVELS];
+        for (int i = 0; i < transmitTimeMillis.length; i++) {
+            transmitTimeMillis[i] = mTransmitPowerInfo.get(i).getTimeInMillis();
+        }
+        return transmitTimeMillis;
     }
 
     /**
-     * Gets the amount of time (in milliseconds) when the modem is in a low power or sleep state.
-     *
-     * @return Time in milliseconds.
+     * @return total mTimeInMillis (in ms) when modem is in a low power or sleep state.
      */
-    public @DurationMillisLong long getSleepTimeMillis() {
+    public int getSleepTimeMillis() {
         return mSleepTimeMs;
     }
 
@@ -236,44 +209,10 @@ public final class ModemActivityInfo implements Parcelable {
     }
 
     /**
-     * Provided for convenience, since the API surface needs to return longs but internal
-     * representations are ints.
-     * @hide
+     * @return total mTimeInMillis (in ms) when modem is awake but neither the transmitter nor receiver are
+     * active.
      */
-    public void setSleepTimeMillis(long sleepTimeMillis) {
-        mSleepTimeMs = (int) sleepTimeMillis;
-    }
-
-    /**
-     * Computes the difference between this instance of {@link ModemActivityInfo} and another
-     * instance.
-     *
-     * This method should be used to compute the amount of activity that has happened between two
-     * samples of modem activity taken at separate times. The sample passed in as an argument to
-     * this method should be the one that's taken later in time (and therefore has more activity).
-     * @param other The other instance of {@link ModemActivityInfo} to diff against.
-     * @return An instance of {@link ModemActivityInfo} representing the difference in modem
-     * activity.
-     */
-    public @NonNull ModemActivityInfo getDelta(@NonNull ModemActivityInfo other) {
-        int[] txTimeMs = new int[ModemActivityInfo.TX_POWER_LEVELS];
-        for (int i = 0; i < ModemActivityInfo.TX_POWER_LEVELS; i++) {
-            txTimeMs[i] = other.mTxTimeMs[i] - mTxTimeMs[i];
-        }
-        return new ModemActivityInfo(other.getTimestampMillis(),
-                other.getSleepTimeMillis() - getSleepTimeMillis(),
-                other.getIdleTimeMillis() - getIdleTimeMillis(),
-                txTimeMs,
-                other.getReceiveTimeMillis() - getReceiveTimeMillis());
-    }
-
-    /**
-     * Gets the amount of time (in milliseconds) when the modem is awake but neither transmitting
-     * nor receiving.
-     *
-     * @return Time in milliseconds.
-     */
-    public @DurationMillisLong long getIdleTimeMillis() {
+    public int getIdleTimeMillis() {
         return mIdleTimeMs;
     }
 
@@ -283,20 +222,9 @@ public final class ModemActivityInfo implements Parcelable {
     }
 
     /**
-     * Provided for convenience, since the API surface needs to return longs but internal
-     * representations are ints.
-     * @hide
+     * @return rx(receive) mTimeInMillis in ms.
      */
-    public void setIdleTimeMillis(long idleTimeMillis) {
-        mIdleTimeMs = (int) idleTimeMillis;
-    }
-
-    /**
-     * Gets the amount of time (in milliseconds) when the modem is awake and receiving data.
-     *
-     * @return Time in milliseconds.
-     */
-    public @DurationMillisLong long getReceiveTimeMillis() {
+    public int getReceiveTimeMillis() {
         return mRxTimeMs;
     }
 
@@ -306,56 +234,71 @@ public final class ModemActivityInfo implements Parcelable {
     }
 
     /**
-     * Provided for convenience, since the API surface needs to return longs but internal
-     * representations are ints.
-     * @hide
-     */
-    public void setReceiveTimeMillis(long receiveTimeMillis) {
-        mRxTimeMs = (int) receiveTimeMillis;
-    }
-
-    /**
-     * Indicates if the modem has reported valid {@link ModemActivityInfo}.
+     * Indicate if the ModemActivityInfo is invalid due to modem's invalid reporting.
      *
      * @return {@code true} if this {@link ModemActivityInfo} record is valid,
      * {@code false} otherwise.
-     * @hide
      */
-    @TestApi
     public boolean isValid() {
-        boolean isTxPowerValid = Arrays.stream(mTxTimeMs).allMatch((i) -> i >= 0);
+        for (TransmitPower powerInfo : getTransmitPowerInfo()) {
+            if(powerInfo.getTimeInMillis() < 0) {
+                return false;
+            }
+        }
 
-        return isTxPowerValid && ((getIdleTimeMillis() >= 0) && (getSleepTimeMillis() >= 0)
+        return ((getIdleTimeMillis() >= 0) && (getSleepTimeMillis() >= 0)
                 && (getReceiveTimeMillis() >= 0) && !isEmpty());
     }
 
-    /** @hide */
-    @TestApi
-    public boolean isEmpty() {
-        boolean isTxPowerEmpty = mTxTimeMs == null || mTxTimeMs.length == 0
-                || Arrays.stream(mTxTimeMs).allMatch((i) -> i == 0);
+    private boolean isEmpty() {
+        for (TransmitPower txVal : getTransmitPowerInfo()) {
+            if(txVal.getTimeInMillis() != 0) {
+                return false;
+            }
+        }
 
-        return isTxPowerEmpty && ((getIdleTimeMillis() == 0) && (getSleepTimeMillis() == 0)
+        return ((getIdleTimeMillis() == 0) && (getSleepTimeMillis() == 0)
                 && (getReceiveTimeMillis() == 0));
     }
 
+    /**
+     * Transmit power Information, including the power range in dbm and the total time (in ms) where
+     * the transmitter is active/awake for this power range.
+     * e.g, range: 0dbm(lower) ~ 5dbm(upper)
+     *      time: 5ms
+     */
+    public class TransmitPower {
+        private int mTimeInMillis;
+        private Range<Integer> mPowerRangeInDbm;
+        /** @hide */
+        public TransmitPower(@NonNull Range<Integer> range, int time) {
+            this.mTimeInMillis = time;
+            this.mPowerRangeInDbm = range;
+        }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        ModemActivityInfo that = (ModemActivityInfo) o;
-        return mTimestamp == that.mTimestamp
-                && mSleepTimeMs == that.mSleepTimeMs
-                && mIdleTimeMs == that.mIdleTimeMs
-                && mRxTimeMs == that.mRxTimeMs
-                && Arrays.equals(mTxTimeMs, that.mTxTimeMs);
-    }
+        /**
+         * @return the total time in ms where the transmitter is active/wake for this power range
+         * {@link #getPowerRangeInDbm()}.
+         */
+        public int getTimeInMillis() {
+            return mTimeInMillis;
+        }
 
-    @Override
-    public int hashCode() {
-        int result = Objects.hash(mTimestamp, mSleepTimeMs, mIdleTimeMs, mRxTimeMs);
-        result = 31 * result + Arrays.hashCode(mTxTimeMs);
-        return result;
+        /**
+         * @return the power range in dbm. e.g, range: 0dbm(lower) ~ 5dbm(upper)
+         */
+        @NonNull
+        public Range<Integer> getPowerRangeInDbm() {
+            return mPowerRangeInDbm;
+        }
+
+        @Override
+        public String toString() {
+            return "TransmitPower{"
+                + " mTimeInMillis=" + mTimeInMillis
+                + " mPowerRangeInDbm={" + mPowerRangeInDbm.getLower()
+                + "," + mPowerRangeInDbm.getUpper()
+                + "}}";
+        }
     }
 }

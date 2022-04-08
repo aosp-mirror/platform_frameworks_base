@@ -17,11 +17,8 @@
 package com.android.settingslib.widget.settingsspinner;
 
 import android.content.Context;
-import android.os.Build;
 import android.util.AttributeSet;
 import android.widget.Spinner;
-
-import androidx.annotation.RequiresApi;
 
 import com.android.settingslib.widget.R;
 
@@ -120,16 +117,8 @@ public class SettingsSpinner extends Spinner {
      * @see Spinner#MODE_DIALOG
      * @see Spinner#MODE_DROPDOWN
      */
-    @RequiresApi(Build.VERSION_CODES.M)
     public SettingsSpinner(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes,
             int mode) {
         super(context, attrs, defStyleAttr, defStyleRes, mode, null);
-    }
-
-    @Override
-    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-        setDropDownVerticalOffset(getMeasuredHeight() - (int) getContext().getResources()
-                .getDimension(R.dimen.spinner_padding_top_or_bottom));
     }
 }

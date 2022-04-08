@@ -20,7 +20,6 @@ import android.compat.annotation.UnsupportedAppUsage;
 import android.net.LinkAddress;
 import android.net.LinkProperties;
 import android.net.RouteInfo;
-import android.os.Build;
 import android.util.Log;
 
 import java.net.InetAddress;
@@ -81,7 +80,7 @@ public class NetlinkTracker extends BaseNetworkObserver {
 
     private static final boolean DBG = false;
 
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public NetlinkTracker(String iface, Callback callback) {
         TAG = "NetlinkTracker/" + iface;
         mInterfaceName = iface;
@@ -190,12 +189,12 @@ public class NetlinkTracker extends BaseNetworkObserver {
     /**
      * Returns a copy of this object's LinkProperties.
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public synchronized LinkProperties getLinkProperties() {
         return new LinkProperties(mLinkProperties);
     }
 
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public synchronized void clearLinkProperties() {
         // Clear the repository before clearing mLinkProperties. That way, if a clear() happens
         // while interfaceDnsServerInfo() is being called, we'll end up with no DNS servers in

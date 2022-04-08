@@ -17,7 +17,6 @@
 package android.content;
 
 import android.annotation.Nullable;
-import android.annotation.TestApi;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Build;
 import android.os.Parcel;
@@ -36,11 +35,11 @@ public class SyncAdapterType implements Parcelable {
     private final boolean userVisible;
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private final boolean supportsUploading;
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     private final boolean isAlwaysSyncable;
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     private final boolean allowParallelSyncs;
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     private final String settingsActivity;
     private final String packageName;
 
@@ -169,7 +168,6 @@ public class SyncAdapterType implements Parcelable {
      *
      * @hide
      */
-    @TestApi
     public @Nullable String getPackageName() {
         return packageName;
     }
@@ -178,7 +176,7 @@ public class SyncAdapterType implements Parcelable {
         return new SyncAdapterType(authority, accountType);
     }
 
-    public boolean equals(@Nullable Object o) {
+    public boolean equals(Object o) {
         if (o == this) return true;
         if (!(o instanceof SyncAdapterType)) return false;
         final SyncAdapterType other = (SyncAdapterType)o;

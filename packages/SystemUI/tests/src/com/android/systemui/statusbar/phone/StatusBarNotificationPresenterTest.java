@@ -23,11 +23,13 @@ import static org.mockito.Mockito.when;
 
 import android.app.Notification;
 import android.app.StatusBarManager;
+import android.content.Context;
 import android.metrics.LogMaker;
 import android.support.test.metricshelper.MetricsAsserts;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
+import android.view.ViewGroup;
 
 import androidx.test.filters.SmallTest;
 
@@ -40,26 +42,23 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.KeyguardIndicationController;
-import com.android.systemui.statusbar.LockscreenShadeTransitionController;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationMediaManager;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
-import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.NotificationViewHierarchyManager;
 import com.android.systemui.statusbar.RemoteInputController;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
+import com.android.systemui.statusbar.notification.ActivityLaunchAnimator;
 import com.android.systemui.statusbar.notification.DynamicPrivacyController;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
+import com.android.systemui.statusbar.notification.VisualStabilityManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder;
-import com.android.systemui.statusbar.notification.collection.legacy.VisualStabilityManager;
 import com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProvider;
 import com.android.systemui.statusbar.notification.interruption.NotificationInterruptSuppressor;
 import com.android.systemui.statusbar.notification.row.ActivatableNotificationView;
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
-import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
-import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 
 import org.junit.Before;
@@ -113,23 +112,16 @@ public class StatusBarNotificationPresenterTest extends SysuiTestCase {
 
         NotificationShadeWindowView notificationShadeWindowView =
                 mock(NotificationShadeWindowView.class);
-        NotificationStackScrollLayoutController stackScrollLayoutController =
-                mock(NotificationStackScrollLayoutController.class);
-        when(stackScrollLayoutController.getView()).thenReturn(
-                mock(NotificationStackScrollLayout.class));
-        when(stackScrollLayoutController.getNotificationListContainer()).thenReturn(
-                mock(NotificationListContainer.class));
         when(notificationShadeWindowView.getResources()).thenReturn(mContext.getResources());
 
         mStatusBarNotificationPresenter = new StatusBarNotificationPresenter(mContext,
                 mock(NotificationPanelViewController.class), mock(HeadsUpManagerPhone.class),
-                notificationShadeWindowView, stackScrollLayoutController,
+                notificationShadeWindowView, mock(NotificationListContainerViewGroup.class),
                 mock(DozeScrimController.class), mock(ScrimController.class),
-                mock(NotificationShadeWindowController.class), mock(DynamicPrivacyController.class),
+                mock(ActivityLaunchAnimator.class), mock(DynamicPrivacyController.class),
                 mock(KeyguardStateController.class),
                 mock(KeyguardIndicationController.class), mStatusBar,
-                mock(ShadeControllerImpl.class), mock(LockscreenShadeTransitionController.class),
-                mCommandQueue, mInitController,
+                mock(ShadeControllerImpl.class), mCommandQueue, mInitController,
                 mNotificationInterruptStateProvider);
         mInitController.executePostInitTasks();
         ArgumentCaptor<NotificationInterruptSuppressor> suppressorCaptor =
@@ -212,5 +204,15 @@ public class StatusBarNotificationPresenterTest extends SysuiTestCase {
                 mMetricsLogger.getLogs(),
                 new LogMaker(MetricsEvent.ACTION_LS_NOTE)
                         .setType(MetricsEvent.TYPE_ACTION));
+    }
+
+    // We need this because mockito doesn't know how to construct a mock that extends ViewGroup
+    // and implements NotificationListContainer without it because of classloader issues.
+    private abstract static class NotificationListContainerViewGroup extends ViewGroup
+            implements NotificationListContainer {
+
+        public NotificationListContainerViewGroup(Context context) {
+            super(context);
+        }
     }
 }

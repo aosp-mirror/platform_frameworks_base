@@ -135,7 +135,7 @@ public final class SQLiteDebug {
          * that overflowed because no space was left in the page cache.
          * documented at http://www.sqlite.org/c3ref/c_status_malloc_size.html
          */
-        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+        @UnsupportedAppUsage
         public int pageCacheOverflow;
 
         /** records the largest memory allocation request handed to sqlite3.

@@ -39,7 +39,7 @@ import org.mockito.MockitoAnnotations;
 import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.IOException;
+import java.util.ArrayList;
 import java.util.function.Consumer;
 
 @SmallTest
@@ -90,13 +90,7 @@ public class DataChangedJournalTest {
 
     @Test
     public void equals_isTrueForTheSameFile() throws Exception {
-        assertEqualsBothWaysAndHashCode(mJournal, new DataChangedJournal(mFile));
-    }
-
-    private static <T> void assertEqualsBothWaysAndHashCode(T a, T b) {
-        assertEquals(a, b);
-        assertEquals(b, a);
-        assertEquals(a.hashCode(), b.hashCode());
+        assertThat(mJournal.equals(new DataChangedJournal(mFile))).isTrue();
     }
 
     @Test
@@ -123,7 +117,9 @@ public class DataChangedJournalTest {
         DataChangedJournal.newJournal(folder);
         DataChangedJournal.newJournal(folder);
 
-        assertThat(DataChangedJournal.listJournals(folder)).hasSize(2);
+        ArrayList<DataChangedJournal> journals = DataChangedJournal.listJournals(folder);
+
+        assertThat(journals).hasSize(2);
     }
 
     @Test
@@ -135,16 +131,6 @@ public class DataChangedJournalTest {
         assertThat(folder.listFiles()).hasLength(1);
     }
 
-    @Test(expected = NullPointerException.class)
-    public void newJournal_nullJournalDir() throws IOException {
-        DataChangedJournal.newJournal(null);
-    }
-
-    @Test(expected = NullPointerException.class)
-    public void nullFile() {
-        new DataChangedJournal(null);
-    }
-
     @Test
     public void toString_isSameAsFileToString() throws Exception {
         assertThat(mJournal.toString()).isEqualTo(mFile.toString());
@@ -154,6 +140,6 @@ public class DataChangedJournalTest {
     public void listJournals_invalidJournalFile_returnsEmptyList() throws Exception {
         when(invalidFile.listFiles()).thenReturn(null);
 
-        assertThat(DataChangedJournal.listJournals(invalidFile)).isEmpty();
+        assertEquals(0, DataChangedJournal.listJournals(invalidFile).size());
     }
 }

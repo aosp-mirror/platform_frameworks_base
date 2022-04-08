@@ -46,11 +46,12 @@ private:
 };
 
 /**
- *  Make a deep copy of the asset, and return it as an SkData, or NULL if there
+ *  Make a deep copy of the asset, and return it as a stream, or NULL if there
  *  was an error.
+ *  FIXME: If we could "ref/reopen" the asset, we may not need to copy it here.
  */
 
-sk_sp<SkData> CopyAssetToData(Asset*);
+SkMemoryStream* CopyAssetToStream(Asset*);
 
 /** Restore the file descriptor's offset in our destructor
  */

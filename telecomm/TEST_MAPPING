@@ -24,16 +24,6 @@
         }
       ]
     }
-  ],
-  "presubmit-large": [
-    {
-      "name": "CtsTelecomTestCases",
-      "options": [
-        {
-          "exclude-annotation": "androidx.test.filters.FlakyTest"
-        }
-      ]
-    }
   ]
 }
 

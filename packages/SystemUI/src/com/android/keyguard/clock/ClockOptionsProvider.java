@@ -28,12 +28,11 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.systemui.Dependency;
 
 import java.io.FileNotFoundException;
 import java.util.List;
-
-import javax.inject.Inject;
-import javax.inject.Provider;
+import java.util.function.Supplier;
 
 /**
  * Exposes custom clock face options and provides realistic preview images.
@@ -66,12 +65,15 @@ public final class ClockOptionsProvider extends ContentProvider {
     private static final String CONTENT_SCHEME = "content";
     private static final String AUTHORITY = "com.android.keyguard.clock";
 
-    @Inject
-    public Provider<List<ClockInfo>> mClockInfosProvider;
+    private final Supplier<List<ClockInfo>> mClocksSupplier;
+
+    public ClockOptionsProvider() {
+        this(() -> Dependency.get(ClockManager.class).getClockInfos());
+    }
 
     @VisibleForTesting
-    ClockOptionsProvider(Provider<List<ClockInfo>> clockInfosProvider) {
-        mClockInfosProvider = clockInfosProvider;
+    ClockOptionsProvider(Supplier<List<ClockInfo>> clocksSupplier) {
+        mClocksSupplier = clocksSupplier;
     }
 
     @Override
@@ -97,7 +99,7 @@ public final class ClockOptionsProvider extends ContentProvider {
         }
         MatrixCursor cursor = new MatrixCursor(new String[] {
                 COLUMN_NAME, COLUMN_TITLE, COLUMN_ID, COLUMN_THUMBNAIL, COLUMN_PREVIEW});
-        List<ClockInfo> clocks = mClockInfosProvider.get();
+        List<ClockInfo> clocks = mClocksSupplier.get();
         for (int i = 0; i < clocks.size(); i++) {
             ClockInfo clock = clocks.get(i);
             cursor.newRow()
@@ -137,7 +139,7 @@ public final class ClockOptionsProvider extends ContentProvider {
             throw new FileNotFoundException("Invalid preview url, missing id");
         }
         ClockInfo clock = null;
-        List<ClockInfo> clocks = mClockInfosProvider.get();
+        List<ClockInfo> clocks = mClocksSupplier.get();
         for (int i = 0; i < clocks.size(); i++) {
             if (id.equals(clocks.get(i).getId())) {
                 clock = clocks.get(i);

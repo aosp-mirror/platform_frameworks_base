@@ -108,7 +108,11 @@ public class AlertingNotificationManagerTest extends SysuiTestCase {
         return new TestableAlertingNotificationManager();
     }
 
-    protected StatusBarNotification createNewSbn(int id, Notification.Builder n) {
+    protected StatusBarNotification createNewNotification(int id) {
+        Notification.Builder n = new Notification.Builder(mContext, "")
+                .setSmallIcon(R.drawable.ic_person)
+                .setContentTitle("Title")
+                .setContentText("Text");
         return new StatusBarNotification(
                 TEST_PACKAGE_NAME /* pkg */,
                 TEST_PACKAGE_NAME,
@@ -120,14 +124,6 @@ public class AlertingNotificationManagerTest extends SysuiTestCase {
                 new UserHandle(ActivityManager.getCurrentUser()),
                 null /* overrideGroupKey */,
                 0 /* postTime */);
-    }
-
-    protected StatusBarNotification createNewNotification(int id) {
-        Notification.Builder n = new Notification.Builder(mContext, "")
-                .setSmallIcon(R.drawable.ic_person)
-                .setContentTitle("Title")
-                .setContentText("Text");
-        return createNewSbn(id, n);
     }
 
     @Before

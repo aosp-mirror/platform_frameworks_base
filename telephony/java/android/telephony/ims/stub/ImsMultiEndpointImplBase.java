@@ -25,7 +25,6 @@ import com.android.ims.internal.IImsExternalCallStateListener;
 import com.android.ims.internal.IImsMultiEndpoint;
 
 import java.util.List;
-import java.util.Objects;
 
 /**
  * Base implementation of ImsMultiEndpoint, which implements stub versions of the methods
@@ -42,32 +41,10 @@ public class ImsMultiEndpointImplBase {
     private static final String TAG = "MultiEndpointImplBase";
 
     private IImsExternalCallStateListener mListener;
-    private final Object mLock = new Object();
-    private final IImsMultiEndpoint mImsMultiEndpoint = new IImsMultiEndpoint.Stub() {
-
+    private IImsMultiEndpoint mImsMultiEndpoint = new IImsMultiEndpoint.Stub() {
         @Override
         public void setListener(IImsExternalCallStateListener listener) throws RemoteException {
-            synchronized (mLock) {
-                if (mListener != null && !mListener.asBinder().isBinderAlive()) {
-                    Log.w(TAG, "setListener: discarding dead Binder");
-                    mListener = null;
-                }
-                if (mListener != null && listener != null && Objects.equals(
-                        mListener.asBinder(), listener.asBinder())) {
-                    return;
-                }
-
-                if (listener == null) {
-                    mListener = null;
-                } else if (listener != null && mListener == null) {
-                    mListener = listener;
-                } else {
-                    // Warn that the listener is being replaced while active
-                    Log.w(TAG, "setListener is being called when there is already an active "
-                            + "listener");
-                    mListener = listener;
-                }
-            }
+            mListener = listener;
         }
 
         @Override
@@ -88,13 +65,9 @@ public class ImsMultiEndpointImplBase {
      */
     public final void onImsExternalCallStateUpdate(List<ImsExternalCallState> externalCallDialogs) {
         Log.d(TAG, "ims external call state update triggered.");
-        IImsExternalCallStateListener listener;
-        synchronized (mLock) {
-            listener = mListener;
-        }
-        if (listener != null) {
+        if (mListener != null) {
             try {
-                listener.onImsExternalCallStateUpdate(externalCallDialogs);
+                mListener.onImsExternalCallStateUpdate(externalCallDialogs);
             } catch (RemoteException e) {
                 throw new RuntimeException(e);
             }

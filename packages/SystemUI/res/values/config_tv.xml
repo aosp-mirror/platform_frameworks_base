@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (C) 2016 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+
+<resources>
+    <!-- Bounds [left top right bottom] on screen for picture-in-picture (PIP) windows,
+         when the PIP menu is shown with settings. -->
+    <string translatable="false" name="pip_settings_bounds">"662 756 1142 1026"</string>
+
+    <!-- Bounds [left top right bottom] on screen for picture-in-picture (PIP) windows,
+         when the PIP menu is shown in center. -->
+    <string translatable="false" name="pip_menu_bounds">"596 280 1324 690"</string>
+</resources>

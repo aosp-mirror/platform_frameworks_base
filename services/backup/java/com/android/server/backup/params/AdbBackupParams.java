@@ -18,8 +18,6 @@ package com.android.server.backup.params;
 
 import android.os.ParcelFileDescriptor;
 
-import com.android.server.backup.utils.BackupEligibilityRules;
-
 public class AdbBackupParams extends AdbParams {
 
     public boolean includeApks;
@@ -31,12 +29,10 @@ public class AdbBackupParams extends AdbParams {
     public boolean doCompress;
     public boolean includeKeyValue;
     public String[] packages;
-    public BackupEligibilityRules backupEligibilityRules;
 
     public AdbBackupParams(ParcelFileDescriptor output, boolean saveApks, boolean saveObbs,
             boolean saveShared, boolean alsoWidgets, boolean doAllApps, boolean doSystem,
-            boolean compress, boolean doKeyValue, String[] pkgList,
-            BackupEligibilityRules eligibilityRules) {
+            boolean compress, boolean doKeyValue, String[] pkgList) {
         fd = output;
         includeApks = saveApks;
         includeObbs = saveObbs;
@@ -47,6 +43,5 @@ public class AdbBackupParams extends AdbParams {
         doCompress = compress;
         includeKeyValue = doKeyValue;
         packages = pkgList;
-        backupEligibilityRules = eligibilityRules;
     }
 }

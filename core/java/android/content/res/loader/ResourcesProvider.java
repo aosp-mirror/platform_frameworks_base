@@ -284,6 +284,11 @@ public class ResourcesProvider implements AutoCloseable, Closeable {
                 Log.w(TAG, "ResourcesProvider " + this + " finalized with non-zero refs: "
                         + mOpenCount);
             }
+
+            if (mOpen) {
+                mOpen = false;
+                mApkAssets.close();
+            }
         }
     }
 }

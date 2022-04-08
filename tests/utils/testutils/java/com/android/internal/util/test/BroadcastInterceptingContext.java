@@ -196,12 +196,6 @@ public class BroadcastInterceptingContext extends ContextWrapper {
     }
 
     @Override
-    public void sendBroadcastMultiplePermissions(Intent intent, String[] receiverPermissions,
-            Bundle options) {
-        sendBroadcast(intent);
-    }
-
-    @Override
     public void sendBroadcastAsUserMultiplePermissions(Intent intent, UserHandle user,
             String[] receiverPermissions) {
         sendBroadcast(intent);
@@ -220,11 +214,6 @@ public class BroadcastInterceptingContext extends ContextWrapper {
 
     @Override
     public void sendStickyBroadcast(Intent intent) {
-        sendBroadcast(intent);
-    }
-
-    @Override
-    public void sendStickyBroadcast(Intent intent, Bundle options) {
         sendBroadcast(intent);
     }
 

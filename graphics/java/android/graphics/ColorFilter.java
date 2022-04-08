@@ -48,7 +48,7 @@ public class ColorFilter {
         return 0;
     }
 
-    synchronized final void discardNativeInstance() {
+    void discardNativeInstance() {
         if (mNativeInstance != 0) {
             mCleaner.run();
             mCleaner = null;
@@ -57,7 +57,7 @@ public class ColorFilter {
     }
 
     /** @hide */
-    public synchronized final long getNativeInstance() {
+    public long getNativeInstance() {
         if (mNativeInstance == 0) {
             mNativeInstance = createNativeInstance();
 

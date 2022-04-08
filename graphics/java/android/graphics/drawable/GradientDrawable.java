@@ -276,11 +276,7 @@ public class GradientDrawable extends Drawable {
      */
     @Nullable
     public float[] getCornerRadii() {
-        float[] radii = mGradientState.mRadiusArray;
-        if (radii == null) {
-            return null;
-        }
-        return radii.clone();
+        return mGradientState.mRadiusArray.clone();
     }
 
     /**
@@ -1168,6 +1164,7 @@ public class GradientDrawable extends Drawable {
                 || (s.mTint != null && s.mTint.isStateful());
     }
 
+    /** @hide */
     @Override
     public boolean hasFocusStateSpecified() {
         final GradientState s = mGradientState;

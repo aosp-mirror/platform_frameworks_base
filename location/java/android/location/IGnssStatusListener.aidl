@@ -16,7 +16,7 @@
 
 package android.location;
 
-import android.location.GnssStatus;
+import android.location.Location;
 
 /**
  * {@hide}
@@ -26,5 +26,8 @@ oneway interface IGnssStatusListener
     void onGnssStarted();
     void onGnssStopped();
     void onFirstFix(int ttff);
-    void onSvStatusChanged(in GnssStatus gnssStatus);
+    void onSvStatusChanged(int svCount, in int[] svidWithFlags, in float[] cn0s,
+            in float[] elevations, in float[] azimuths,
+            in float[] carrierFreqs, in float[] basebandCn0s);
+    void onNmeaReceived(long timestamp, String nmea);
 }

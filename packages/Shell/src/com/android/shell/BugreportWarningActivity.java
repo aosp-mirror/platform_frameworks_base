@@ -29,7 +29,6 @@ import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.LayoutInflater;
-import android.view.WindowManager;
 import android.widget.CheckBox;
 
 import com.android.internal.app.AlertActivity;
@@ -47,10 +46,6 @@ public class BugreportWarningActivity extends AlertActivity
     @Override
     public void onCreate(Bundle icicle) {
         super.onCreate(icicle);
-
-        // Don't allow overlay windows.
-        getWindow().addSystemFlags(
-                WindowManager.LayoutParams.SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS);
 
         mSendIntent = getIntent().getParcelableExtra(Intent.EXTRA_INTENT);
 

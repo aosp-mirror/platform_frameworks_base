@@ -169,7 +169,7 @@ public final class GeofenceHardware {
                     GeofenceHardwareMonitorCallbackWrapper>();
 
     /** @hide */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public GeofenceHardware(IGeofenceHardware service) {
         mService = service;
     }
