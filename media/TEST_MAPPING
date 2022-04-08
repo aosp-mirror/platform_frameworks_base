@@ -1,6 +1,14 @@
 {
   "presubmit": [
     {
+      "name": "CtsCameraTestCases",
+      "options" : [
+        {
+          "include-filter": "android.hardware.camera2.cts.ImageReaderTest#testP010"
+        }
+      ]
+    },
+    {
       "name": "GtsMediaTestCases",
       "options" : [
         {
