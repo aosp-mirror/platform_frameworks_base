@@ -955,6 +955,29 @@ public class TransitionTests extends WindowTestsBase {
         verify(snapshotController, times(1)).recordTaskSnapshot(eq(task1), eq(false));
     }
 
+    @Test
+    public void testNotReadyPushPop() {
+        final TaskSnapshotController snapshotController = mock(TaskSnapshotController.class);
+        final TransitionController controller = new TransitionController(mAtm, snapshotController);
+        final ITransitionPlayer player = new ITransitionPlayer.Default();
+        controller.registerTransitionPlayer(player, null /* appThread */);
+        final Transition openTransition = controller.createTransition(TRANSIT_OPEN);
+
+        // Start out with task2 visible and set up a transition that closes task2 and opens task1
+        final Task task1 = createTask(mDisplayContent);
+        openTransition.collectExistenceChange(task1);
+
+        assertFalse(openTransition.allReady());
+
+        openTransition.setAllReady();
+
+        openTransition.deferTransitionReady();
+        assertFalse(openTransition.allReady());
+
+        openTransition.continueTransitionReady();
+        assertTrue(openTransition.allReady());
+    }
+
     private static void makeTaskOrganized(Task... tasks) {
         final ITaskOrganizer organizer = mock(ITaskOrganizer.class);
         for (Task t : tasks) {
