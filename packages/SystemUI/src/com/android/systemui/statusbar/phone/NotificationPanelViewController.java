@@ -194,7 +194,6 @@ import com.android.systemui.util.settings.SecureSettings;
 import com.android.systemui.wallet.controller.QuickAccessWalletController;
 import com.android.wm.shell.animation.FlingAnimationUtils;
 
-import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -405,7 +404,7 @@ public class NotificationPanelViewController extends PanelViewController {
      * Determines if QS should be already expanded when expanding shade.
      * Used for split shade, two finger gesture as well as accessibility shortcut to QS.
      */
-    private boolean mQsExpandImmediate;
+    @VisibleForTesting boolean mQsExpandImmediate;
     private boolean mTwoFingerQsExpandPossible;
     private String mHeaderDebugInfo;
 
@@ -430,7 +429,6 @@ public class NotificationPanelViewController extends PanelViewController {
     private boolean mExpandingFromHeadsUp;
     private boolean mCollapsedOnDown;
     private int mPositionMinSideMargin;
-    private int mLastOrientation = -1;
     private boolean mClosingWithAlphaFadeOut;
     private boolean mHeadsUpAnimatingAway;
     private boolean mLaunchingAffordance;
@@ -955,7 +953,6 @@ public class NotificationPanelViewController extends PanelViewController {
         mKeyguardBottomArea = mView.findViewById(R.id.keyguard_bottom_area);
         mPreviewContainer = mView.findViewById(R.id.preview_container);
         mKeyguardBottomArea.setPreviewContainer(mPreviewContainer);
-        mLastOrientation = mResources.getConfiguration().orientation;
 
         initBottomArea();
 
@@ -1993,9 +1990,6 @@ public class NotificationPanelViewController extends PanelViewController {
     public void startWaitingForOpenPanelGesture() {
         if (!isFullyCollapsed()) {
             return;
-        }
-        if (mShouldUseSplitNotificationShade) {
-            mQsExpandImmediate = true;
         }
         mExpectingSynthesizedDown = true;
         onTrackingStarted();
@@ -3172,6 +3166,9 @@ public class NotificationPanelViewController extends PanelViewController {
         mFalsingCollector.onTrackingStarted(!mKeyguardStateController.canDismissLockScreen());
         super.onTrackingStarted();
         mScrimController.onTrackingStarted();
+        if (mShouldUseSplitNotificationShade) {
+            mQsExpandImmediate = true;
+        }
         if (mQsFullyExpanded) {
             mQsExpandImmediate = true;
             setShowShelfOnly(true);
@@ -3817,14 +3814,14 @@ public class NotificationPanelViewController extends PanelViewController {
     }
 
     @Override
-    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-        super.dump(fd, pw, args);
+    public void dump(PrintWriter pw, String[] args) {
+        super.dump(pw, args);
         pw.println("    gestureExclusionRect: " + calculateGestureExclusionRect()
                 + " applyQSClippingImmediately: top(" + mQsClipTop + ") bottom(" + mQsClipBottom
                 + ") qsVisible(" + mQsVisible
         );
         if (mKeyguardStatusBarViewController != null) {
-            mKeyguardStatusBarViewController.dump(fd, pw, args);
+            mKeyguardStatusBarViewController.dump(pw, args);
         }
     }
 
@@ -4876,7 +4873,6 @@ public class NotificationPanelViewController extends PanelViewController {
         public void onConfigurationChanged(Configuration newConfig) {
             super.onConfigurationChanged(newConfig);
             mAffordanceHelper.onConfigurationChanged();
-            mLastOrientation = newConfig.orientation;
         }
     }
 

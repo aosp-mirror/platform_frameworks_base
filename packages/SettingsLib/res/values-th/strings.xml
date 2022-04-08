@@ -596,8 +596,7 @@
     <string name="guest_reset_guest_dialog_title" msgid="8047270010895437534">"รีเซ็ตผู้เข้าร่วมไหม"</string>
     <string name="guest_remove_guest_dialog_title" msgid="4548511006624088072">"นำผู้เข้าร่วมออกไหม"</string>
     <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"รีเซ็ต"</string>
-    <!-- no translation found for guest_remove_guest_confirm_button (7858123434954143879) -->
-    <skip />
+    <string name="guest_remove_guest_confirm_button" msgid="7858123434954143879">"นำออก"</string>
     <string name="guest_resetting" msgid="7822120170191509566">"กำลังรีเซ็ตผู้เข้าร่วม…"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"ถ่ายรูป"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"เลือกรูปภาพ"</string>

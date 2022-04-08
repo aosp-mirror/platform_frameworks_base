@@ -26,7 +26,6 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.eq
-import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.nullable
 import com.android.systemui.util.mockito.withArgCaptor
 import com.android.systemui.util.settings.SecureSettings
@@ -34,6 +33,7 @@ import com.google.common.truth.Truth.assertThat
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
+import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.Mock
 import org.mockito.Mockito.anyBoolean
 import org.mockito.Mockito.anyString
@@ -321,7 +321,7 @@ class FeatureFlagsDebugTest : SysuiTestCase() {
         inOrder(mFlagManager, mSecureSettings).apply {
             verify(mFlagManager, times(numReads)).readFlagValue(eq(id), any<FlagSerializer<*>>())
             verify(mFlagManager).idToSettingsKey(eq(id))
-            verify(mSecureSettings).putString(eq("key-$id"), eq(data))
+            verify(mSecureSettings).putStringForUser(eq("key-$id"), eq(data), anyInt())
             verify(mFlagManager).dispatchListenersAndMaybeRestart(eq(id), any())
         }.verifyNoMoreInteractions()
         verifyNoMoreInteractions(mFlagManager, mSecureSettings)
@@ -379,7 +379,7 @@ class FeatureFlagsDebugTest : SysuiTestCase() {
     private fun dumpToString(): String {
         val sw = StringWriter()
         val pw = PrintWriter(sw)
-        mFeatureFlagsDebug.dump(mock(), pw, emptyArray<String>())
+        mFeatureFlagsDebug.dump(pw, emptyArray<String>())
         pw.flush()
         return sw.toString()
     }

@@ -22,7 +22,7 @@
     <string name="app_label" msgid="4811759950673118541">"시스템 UI"</string>
     <string name="battery_low_title" msgid="5319680173344341779">"절전 모드를 사용 설정하시겠습니까?"</string>
     <string name="battery_low_description" msgid="3282977755476423966">"배터리가 <xliff:g id="PERCENTAGE">%s</xliff:g> 남았습니다. 절전 모드는 어두운 테마를 사용 설정하고 백그라운드 활동을 제한하며 알림을 지연시킵니다."</string>
-    <string name="battery_low_intro" msgid="5148725009653088790">"절전 모드는 어두운 테마를 사용 설정하고 백그라운드 활동을 제한하며 알림을 지연시킵니다."</string>
+    <string name="battery_low_intro" msgid="5148725009653088790">"절전 모드는 어두운 테마를 사용하고 백그라운드 활동을 제한하며 알림을 지연시킵니다."</string>
     <string name="battery_low_percent_format" msgid="4276661262843170964">"<xliff:g id="PERCENTAGE">%s</xliff:g> 남았습니다."</string>
     <string name="invalid_charger_title" msgid="938685362320735167">"USB로 충전할 수 없습니다."</string>
     <string name="invalid_charger_text" msgid="2339310107232691577">"기기와 함께 제공된 충전기를 사용하세요."</string>
@@ -135,7 +135,7 @@
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="2242167416140740920">"얼굴이 인증되었습니다."</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"확인함"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"완료하려면 확인을 탭하세요."</string>
-    <!-- no translation found for biometric_dialog_tap_confirm_with_face (7538145860465755864) -->
+    <!-- no translation found for biometric_dialog_tap_confirm_with_face (1092050545851021991) -->
     <skip />
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"인증됨"</string>
     <string name="biometric_dialog_use_pin" msgid="8385294115283000709">"PIN 사용"</string>
@@ -292,24 +292,15 @@
     <string name="sensor_privacy_start_use_mic_dialog_content" msgid="1624701280680913717">"마이크를 사용할 수 있는 모든 앱 및 서비스에 대해 액세스가 차단 해제됩니다."</string>
     <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"카메라를 사용할 수 있는 모든 앱 및 서비스에 대해 액세스가 차단 해제됩니다."</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_content" msgid="3577642558418404919">"카메라 또는 마이크를 사용할 수 있는 모든 앱 및 서비스에 대해 액세스가 차단 해제됩니다."</string>
-    <!-- no translation found for sensor_privacy_start_use_mic_blocked_dialog_title (2640140287496469689) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_start_use_camera_blocked_dialog_title (7398084286822440384) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_start_use_mic_camera_blocked_dialog_title (195236134743281973) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_start_use_mic_blocked_dialog_content (2138318880682877747) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_start_use_camera_blocked_dialog_content (7216015168047965948) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_start_use_mic_camera_blocked_dialog_content (3960837827570483762) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_mic_unblocked_toast_content (306555320557065068) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_camera_unblocked_toast_content (7843105715964332311) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_mic_camera_unblocked_toast_content (7339355093282661115) -->
-    <skip />
+    <string name="sensor_privacy_start_use_mic_blocked_dialog_title" msgid="2640140287496469689">"마이크 차단됨"</string>
+    <string name="sensor_privacy_start_use_camera_blocked_dialog_title" msgid="7398084286822440384">"카메라 차단됨"</string>
+    <string name="sensor_privacy_start_use_mic_camera_blocked_dialog_title" msgid="195236134743281973">"마이크 및 카메라 차단됨"</string>
+    <string name="sensor_privacy_start_use_mic_blocked_dialog_content" msgid="2138318880682877747">"차단을 해제하려면 기기에서 마이크 개인 정보 보호 스위치를 켜짐 위치로 움직여 마이크 액세스를 허용하세요. 기기의 개인 정보 보호 스위치를 찾으려면 기기 설명서를 참고하세요."</string>
+    <string name="sensor_privacy_start_use_camera_blocked_dialog_content" msgid="7216015168047965948">"차단을 해제하려면 기기에서 카메라 개인 정보 보호 스위치를 켜짐 위치로 움직여 카메라 액세스를 허용하세요. 기기의 개인 정보 보호 스위치를 찾으려면 기기 설명서를 참고하세요."</string>
+    <string name="sensor_privacy_start_use_mic_camera_blocked_dialog_content" msgid="3960837827570483762">"차단을 해제하려면 기기에서 개인 정보 보호 스위치를 차단 해제 위치로 움직여 액세스를 허용하세요. 기기의 개인 정보 보호 스위치를 찾으려면 기기 설명서를 참고하세요."</string>
+    <string name="sensor_privacy_mic_unblocked_toast_content" msgid="306555320557065068">"마이크 사용 가능"</string>
+    <string name="sensor_privacy_camera_unblocked_toast_content" msgid="7843105715964332311">"카메라 사용 가능"</string>
+    <string name="sensor_privacy_mic_camera_unblocked_toast_content" msgid="7339355093282661115">"마이크 및 카메라 사용 가능"</string>
     <string name="media_seamless_other_device" msgid="4654849800789196737">"기타 기기"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"최근 사용 버튼 전환"</string>
     <string name="zen_priority_introduction" msgid="3159291973383796646">"알람, 알림, 일정 및 지정한 발신자로부터 받은 전화를 제외한 소리와 진동을 끕니다. 음악, 동영상, 게임 등 재생하도록 선택한 소리는 정상적으로 들립니다."</string>
@@ -320,7 +311,10 @@
     <string name="notification_tap_again" msgid="4477318164947497249">"다시 탭하여 열기"</string>
     <string name="tap_again" msgid="1315420114387908655">"다시 탭하세요."</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"위로 스와이프하여 열기"</string>
-    <string name="keyguard_unlock_press" msgid="8488350566398524740">"열려면 누르세요"</string>
+    <!-- no translation found for keyguard_unlock_press (9140109453735019209) -->
+    <skip />
+    <!-- no translation found for keyguard_face_successful_unlock_press (25520941264602588) -->
+    <skip />
     <string name="keyguard_retry" msgid="886802522584053523">"위로 스와이프하여 다시 시도해 주세요"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"잠금 해제하여 NFC 사용"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"내 조직에 속한 기기입니다."</string>
@@ -788,18 +782,12 @@
     <string name="controls_dialog_ok" msgid="2770230012857881822">"추가"</string>
     <string name="controls_dialog_message" msgid="342066938390663844">"<xliff:g id="APP">%s</xliff:g>에서 제안"</string>
     <string name="controls_tile_locked" msgid="731547768182831938">"기기 잠김"</string>
-    <!-- no translation found for controls_settings_show_controls_dialog_title (3357852503553809554) -->
-    <skip />
-    <!-- no translation found for controls_settings_show_controls_dialog_message (7666211700524587969) -->
-    <skip />
-    <!-- no translation found for controls_settings_trivial_controls_dialog_title (7593188157655036677) -->
-    <skip />
-    <!-- no translation found for controls_settings_trivial_controls_dialog_message (237183787721917586) -->
-    <skip />
-    <!-- no translation found for controls_settings_dialog_neutral_button (4514446354793124140) -->
-    <skip />
-    <!-- no translation found for controls_settings_dialog_positive_button (436070672551674863) -->
-    <skip />
+    <string name="controls_settings_show_controls_dialog_title" msgid="3357852503553809554">"잠금 화면에서 기기를 표시하고 제어하시겠습니까?"</string>
+    <string name="controls_settings_show_controls_dialog_message" msgid="7666211700524587969">"외부 기기에 대한 제어 권한을 잠금 화면에 추가할 수 있습니다.\n\n기기 앱을 사용하여 휴대전화나 태블릿의 잠금을 해제하지 않고 해당 기기를 제어할 수도 있습니다.\n\n언제든지 설정에서 옵션을 변경할 수 있습니다."</string>
+    <string name="controls_settings_trivial_controls_dialog_title" msgid="7593188157655036677">"잠금 화면에서 기기를 제어하시겠습니까?"</string>
+    <string name="controls_settings_trivial_controls_dialog_message" msgid="237183787721917586">"휴대전화나 태블릿의 화면을 잠금 해제하지 않고 해당 기기를 제어할 수 있습니다.\n\n기기 앱에 이러한 방식으로 어떤 기기를 제어할 수 있는지 표시됩니다."</string>
+    <string name="controls_settings_dialog_neutral_button" msgid="4514446354793124140">"아니요"</string>
+    <string name="controls_settings_dialog_positive_button" msgid="436070672551674863">"예"</string>
     <string name="controls_pin_use_alphanumeric" msgid="8478371861023048414">"PIN에 문자나 기호가 포함됨"</string>
     <string name="controls_pin_verify" msgid="3452778292918877662">"<xliff:g id="DEVICE">%s</xliff:g> 확인"</string>
     <string name="controls_pin_wrong" msgid="6162694056042164211">"잘못된 PIN"</string>
@@ -849,20 +837,13 @@
     <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"세션을 전송하려면 앱을 열어 주세요"</string>
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"알 수 없는 앱"</string>
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"전송 중지"</string>
-    <!-- no translation found for media_output_first_broadcast_title (6292237789860753022) -->
-    <skip />
-    <!-- no translation found for media_output_broadcast (3555580945878071543) -->
-    <skip />
-    <!-- no translation found for media_output_first_notify_broadcast_message (6353857724136398494) -->
-    <skip />
-    <!-- no translation found for media_output_broadcasting_message (4150299923404886073) -->
-    <skip />
-    <!-- no translation found for media_output_broadcast_name (8786127091542624618) -->
-    <skip />
-    <!-- no translation found for media_output_broadcast_code (870795639644728542) -->
-    <skip />
-    <!-- no translation found for media_output_broadcast_dialog_save (7910865591430010198) -->
-    <skip />
+    <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"브로드캐스팅 작동 원리"</string>
+    <string name="media_output_broadcast" msgid="3555580945878071543">"브로드캐스트"</string>
+    <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"호환되는 블루투스 기기를 가진 근처의 사용자가 내가 브로드캐스트 중인 미디어를 수신 대기할 수 있습니다."</string>
+    <string name="media_output_broadcasting_message" msgid="4150299923404886073">"호환되는 블루투스 기기를 가진 근처의 사람들이 QR 코드를 스캔하거나 브로드캐스트 이름과 비밀번호를 사용하여 내 브로드캐스트를 수신 대기할 수 있습니다."</string>
+    <string name="media_output_broadcast_name" msgid="8786127091542624618">"브로드캐스트 이름"</string>
+    <string name="media_output_broadcast_code" msgid="870795639644728542">"비밀번호"</string>
+    <string name="media_output_broadcast_dialog_save" msgid="7910865591430010198">"저장"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"빌드 번호"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"빌드 번호가 클립보드에 복사되었습니다."</string>
     <string name="basic_status" msgid="2315371112182658176">"대화 열기"</string>
@@ -939,8 +920,7 @@
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"활성 상태의 앱"</string>
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"중지"</string>
     <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"중지됨"</string>
-    <!-- no translation found for clipboard_edit_text_done (4551887727694022409) -->
-    <skip />
+    <string name="clipboard_edit_text_done" msgid="4551887727694022409">"완료"</string>
     <string name="clipboard_overlay_text_copied" msgid="1872624400464891363">"복사됨"</string>
     <string name="clipboard_edit_source" msgid="9156488177277788029">"복사한 위치: <xliff:g id="APPNAME">%1$s</xliff:g>"</string>
     <string name="clipboard_dismiss_description" msgid="7544573092766945657">"UI 복사 닫기"</string>

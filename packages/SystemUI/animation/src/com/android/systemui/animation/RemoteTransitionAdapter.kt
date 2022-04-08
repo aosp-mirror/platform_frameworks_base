@@ -138,7 +138,7 @@ class RemoteTransitionAdapter {
             info: TransitionInfo,
             t: SurfaceControl.Transaction
         ): RemoteAnimationTarget {
-            return RemoteAnimationTarget(
+            val target = RemoteAnimationTarget(
                     /* taskId */ if (change.taskInfo != null) change.taskInfo!!.taskId else -1,
                     /* mode */ newModeToLegacyMode(change.mode),
                     /* leash */ createLeash(info, change, order, t),
@@ -160,6 +160,8 @@ class RemoteTransitionAdapter {
                     /* taskInfo */ change.taskInfo,
                     /* allowEnterPip */ change.allowEnterPip,
                     /* windowType */ WindowManager.LayoutParams.INVALID_WINDOW_TYPE)
+            target.backgroundColor = change.backgroundColor
+            return target
         }
 
         /**

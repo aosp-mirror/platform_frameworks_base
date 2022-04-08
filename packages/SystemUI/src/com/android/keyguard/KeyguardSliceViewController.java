@@ -47,7 +47,6 @@ import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.tuner.TunerService;
 import com.android.systemui.util.ViewController;
 
-import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.List;
 import java.util.Map;
@@ -226,7 +225,7 @@ public class KeyguardSliceViewController extends ViewController<KeyguardSliceVie
     }
 
     @Override
-    public void dump(@NonNull FileDescriptor fd, @NonNull PrintWriter pw, @NonNull String[] args) {
+    public void dump(@NonNull PrintWriter pw, @NonNull String[] args) {
         pw.println("  mSlice: " + mSlice);
         pw.println("  mClickActions: " + mClickActions);
     }

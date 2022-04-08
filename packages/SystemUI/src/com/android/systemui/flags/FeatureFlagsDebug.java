@@ -31,6 +31,7 @@ import android.content.IntentFilter;
 import android.content.res.Resources;
 import android.os.Bundle;
 import android.os.RemoteException;
+import android.os.UserHandle;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
@@ -43,7 +44,6 @@ import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.util.settings.SecureSettings;
 
-import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Map;
@@ -210,7 +210,8 @@ public class FeatureFlagsDebug implements FeatureFlags, Dumpable {
             Log.w(TAG, "Failed to set id " + id + " to " + value);
             return;
         }
-        mSecureSettings.putString(mFlagManager.idToSettingsKey(id), data);
+        mSecureSettings.putStringForUser(mFlagManager.idToSettingsKey(id), data,
+                UserHandle.USER_CURRENT);
         Log.i(TAG, "Set id " + id + " to " + value);
         removeFromCache(id);
         mFlagManager.dispatchListenersAndMaybeRestart(id, this::restartSystemUI);
@@ -238,7 +239,8 @@ public class FeatureFlagsDebug implements FeatureFlags, Dumpable {
     /** Works just like {@link #eraseFlag(int)} except that it doesn't restart SystemUI. */
     private void eraseInternal(int id) {
         // We can't actually "erase" things from sysprops, but we can set them to empty!
-        mSecureSettings.putString(mFlagManager.idToSettingsKey(id), "");
+        mSecureSettings.putStringForUser(mFlagManager.idToSettingsKey(id), "",
+                UserHandle.USER_CURRENT);
         Log.i(TAG, "Erase id " + id);
     }
 
@@ -378,7 +380,7 @@ public class FeatureFlagsDebug implements FeatureFlags, Dumpable {
     }
 
     @Override
-    public void dump(@NonNull FileDescriptor fd, @NonNull PrintWriter pw, @NonNull String[] args) {
+    public void dump(@NonNull PrintWriter pw, @NonNull String[] args) {
         pw.println("can override: true");
         pw.println("booleans: " + mBooleanFlagCache.size());
         mBooleanFlagCache.forEach((key, value) -> pw.println("  sysui_flag_" + key + ": " + value));

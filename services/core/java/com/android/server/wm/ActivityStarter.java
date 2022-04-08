@@ -195,7 +195,6 @@ class ActivityStarter {
     private TaskFragment mInTaskFragment;
     @VisibleForTesting
     boolean mAddingToTask;
-    private Task mReuseTask;
 
     private ActivityInfo mNewTaskInfo;
     private Intent mNewTaskIntent;
@@ -204,6 +203,7 @@ class ActivityStarter {
     // The task that the last activity was started into. We currently reset the actual start
     // activity's task and as a result may not have a reference to the task in all cases
     private Task mTargetTask;
+    private boolean mIsTaskCleared;
     private boolean mMovedToFront;
     private boolean mNoAnimation;
     private boolean mAvoidMoveToFront;
@@ -597,7 +597,6 @@ class ActivityStarter {
         mInTask = starter.mInTask;
         mInTaskFragment = starter.mInTaskFragment;
         mAddingToTask = starter.mAddingToTask;
-        mReuseTask = starter.mReuseTask;
 
         mNewTaskInfo = starter.mNewTaskInfo;
         mNewTaskIntent = starter.mNewTaskIntent;
@@ -605,6 +604,7 @@ class ActivityStarter {
 
         mTargetTask = starter.mTargetTask;
         mTargetRootTask = starter.mTargetRootTask;
+        mIsTaskCleared = starter.mIsTaskCleared;
         mMovedToFront = starter.mMovedToFront;
         mNoAnimation = starter.mNoAnimation;
         mAvoidMoveToFront = starter.mAvoidMoveToFront;
@@ -1568,10 +1568,7 @@ class ActivityStarter {
             return;
         }
 
-        final int clearTaskFlags = FLAG_ACTIVITY_NEW_TASK | FLAG_ACTIVITY_CLEAR_TASK;
-        boolean clearedTask = (mLaunchFlags & clearTaskFlags) == clearTaskFlags
-                && mReuseTask != null;
-        if (result == START_TASK_TO_FRONT || result == START_DELIVERED_TO_TOP || clearedTask) {
+        if (result == START_TASK_TO_FRONT || result == START_DELIVERED_TO_TOP) {
             // The activity was already running so it wasn't started, but either brought to the
             // front or the new intent was delivered to it since it was already in front. Notify
             // anyone interested in this piece of information.
@@ -1581,7 +1578,7 @@ class ActivityStarter {
             final ActivityRecord top = targetTask.getTopNonFinishingActivity();
             final boolean visible = top != null && top.isVisible();
             mService.getTaskChangeNotificationController().notifyActivityRestartAttempt(
-                    targetTask.getTaskInfo(), homeTaskVisible, clearedTask, visible);
+                    targetTask.getTaskInfo(), homeTaskVisible, mIsTaskCleared, visible);
         }
 
         if (ActivityManager.isStartResultSuccessful(result)) {
@@ -1927,6 +1924,7 @@ class ActivityStarter {
         return START_SUCCESS;
     }
 
+    /** Returns the leaf task where the target activity may be placed. */
     private Task computeTargetTask() {
         if (mStartActivity.resultTo == null && mInTask == null && !mAddingToTask
                 && (mLaunchFlags & FLAG_ACTIVITY_NEW_TASK) != 0) {
@@ -1935,6 +1933,12 @@ class ActivityStarter {
         } else if (mSourceRecord != null) {
             return mSourceRecord.getTask();
         } else if (mInTask != null) {
+            // The task is specified from AppTaskImpl, so it may not be attached yet.
+            if (!mInTask.isAttached()) {
+                // Attach the task to display area. Ignore the returned root task (though usually
+                // they are the same) because "target task" should be leaf task.
+                getOrCreateRootTask(mStartActivity, mLaunchFlags, mInTask, mOptions);
+            }
             return mInTask;
         } else {
             final Task rootTask = getOrCreateRootTask(mStartActivity, mLaunchFlags, null /* task */,
@@ -2225,13 +2229,12 @@ class ActivityStarter {
             // activity. Well that should not be too hard...
             // Note: we must persist the {@link Task} first as intentActivity could be
             // removed from calling performClearTaskLocked (For example, if it is being brought out
-            // of history or if it is finished immediately), thus disassociating the task. Also note
-            // that mReuseTask is reset as a result of {@link Task#performClearTaskLocked}
-            // launching another activity. Keep the task-overlay activity because the targetTask
-            // will be reused to launch new activity.
+            // of history or if it is finished immediately), thus disassociating the task. Keep the
+            // task-overlay activity because the targetTask will be reused to launch new activity.
             targetTask.performClearTaskForReuse(true /* excludingTaskOverlay*/);
             targetTask.setIntent(mStartActivity);
             mAddingToTask = true;
+            mIsTaskCleared = true;
         } else if ((mLaunchFlags & FLAG_ACTIVITY_CLEAR_TOP) != 0
                 || isDocumentLaunchesIntoExisting(mLaunchFlags)
                 || isLaunchModeOneOf(LAUNCH_SINGLE_INSTANCE, LAUNCH_SINGLE_TASK,
@@ -2344,7 +2347,6 @@ class ActivityStarter {
         mInTask = null;
         mInTaskFragment = null;
         mAddingToTask = false;
-        mReuseTask = null;
 
         mNewTaskInfo = null;
         mNewTaskIntent = null;
@@ -2352,6 +2354,7 @@ class ActivityStarter {
 
         mTargetRootTask = null;
         mTargetTask = null;
+        mIsTaskCleared = false;
         mMovedToFront = false;
         mNoAnimation = false;
         mAvoidMoveToFront = false;
@@ -2569,8 +2572,6 @@ class ActivityStarter {
             } else {
                 mAddingToTask = true;
             }
-
-            mReuseTask = mInTask;
         } else {
             mInTask = null;
             // Launch ResolverActivity in the source task, so that it stays in the task bounds
@@ -2843,7 +2844,7 @@ class ActivityStarter {
                 mNewTaskIntent != null ? mNewTaskIntent : mIntent, mVoiceSession,
                 mVoiceInteractor, toTop, mStartActivity, mSourceRecord, mOptions);
         task.mTransitionController.collectExistenceChange(task);
-        addOrReparentStartingActivity(task, "setTaskFromReuseOrCreateNewTask - mReuseTask");
+        addOrReparentStartingActivity(task, "setTaskFromReuseOrCreateNewTask");
 
         ProtoLog.v(WM_DEBUG_TASKS, "Starting new activity %s in new task %s",
                 mStartActivity, mStartActivity.getTask());
@@ -2953,11 +2954,6 @@ class ActivityStarter {
 
     private Task getOrCreateRootTask(ActivityRecord r, int launchFlags, Task task,
             ActivityOptions aOptions) {
-        // We are reusing a task, keep the root task!
-        if (mReuseTask != null) {
-            return mReuseTask.getRootTask();
-        }
-
         final boolean onTop =
                 (aOptions == null || !aOptions.getAvoidMoveToFront()) && !mLaunchTaskBehind;
         final Task sourceTask = mSourceRecord != null ? mSourceRecord.getTask() : null;

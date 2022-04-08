@@ -152,8 +152,7 @@ public class WalletActivity extends LifecycleActivity implements
                         Log.w(TAG, "Unable to create wallet app intent.");
                         return;
                     }
-                    if (!mKeyguardStateController.isUnlocked()
-                            && mFalsingManager.isFalseTap(FalsingManager.LOW_PENALTY)) {
+                    if (mFalsingManager.isFalseTap(FalsingManager.LOW_PENALTY)) {
                         return;
                     }
 

@@ -47,12 +47,6 @@ import com.android.server.LocalServices;
 class BackNavigationController {
 
     private static final String TAG = "BackNavigationController";
-    // By default, enable new back dispatching without any animations.
-    private static final int BACK_PREDICTABILITY_PROP =
-            SystemProperties.getInt("persist.debug.back_predictability", 1);
-    private static final int ANIMATIONS_MASK = 1 << 1;
-    private static final int SCREENSHOT_MASK = 1 << 2;
-
     @Nullable
     private TaskSnapshotController mTaskSnapshotController;
 
@@ -60,15 +54,15 @@ class BackNavigationController {
      * Returns true if the back predictability feature is enabled
      */
     static boolean isEnabled() {
-        return BACK_PREDICTABILITY_PROP > 0;
+        return SystemProperties.getInt("persist.wm.debug.predictive_back", 1) != 0;
     }
 
     static boolean isScreenshotEnabled() {
-        return (BACK_PREDICTABILITY_PROP & SCREENSHOT_MASK) != 0;
+        return SystemProperties.getInt("persist.wm.debug.predictive_back_screenshot", 0) != 0;
     }
 
     private static boolean isAnimationEnabled() {
-        return (BACK_PREDICTABILITY_PROP & ANIMATIONS_MASK) != 0;
+        return SystemProperties.getInt("persist.wm.debug.predictive_back_anim", 0) != 0;
     }
 
     /**
