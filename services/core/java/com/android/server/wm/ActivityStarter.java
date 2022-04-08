@@ -2481,6 +2481,12 @@ class ActivityStarter {
             if (inTaskFragment == null) {
                 inTaskFragment = TaskFragment.fromTaskFragmentToken(
                         mOptions.getLaunchTaskFragmentToken(), mService);
+                if (inTaskFragment != null && inTaskFragment.isEmbeddedTaskFragmentInPip()) {
+                    // Do not start activity in TaskFragment in a PIP Task.
+                    Slog.w(TAG, "Can not start activity in TaskFragment in PIP: "
+                            + inTaskFragment);
+                    inTaskFragment = null;
+                }
             }
         }
 
