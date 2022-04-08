@@ -2918,6 +2918,11 @@
         com.android.settings.intelligence
     </string>
 
+    <!-- System bluetooth stack package name -->
+    <string name="config_systemBluetoothStack" translatable="false">
+        com.android.bluetooth.services
+    </string>
+
     <!-- Flag indicating that the media framework should not allow changes or mute on any
          stream or global volumes. -->
     <bool name="config_useFixedVolume">false</bool>

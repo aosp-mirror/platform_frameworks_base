@@ -448,6 +448,12 @@ public class PackageInfo implements Parcelable {
      */
     public boolean isApex;
 
+    /**
+     * Whether this is an active APEX package.
+     * @hide
+     */
+    public boolean isActiveApex;
+
     public PackageInfo() {
     }
 
@@ -534,6 +540,7 @@ public class PackageInfo implements Parcelable {
             dest.writeInt(0);
         }
         dest.writeBoolean(isApex);
+        dest.writeBoolean(isActiveApex);
         dest.restoreAllowSquashing(prevAllowSquashing);
     }
 
@@ -598,5 +605,6 @@ public class PackageInfo implements Parcelable {
             signingInfo = SigningInfo.CREATOR.createFromParcel(source);
         }
         isApex = source.readBoolean();
+        isActiveApex = source.readBoolean();
     }
 }

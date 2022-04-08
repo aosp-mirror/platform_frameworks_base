@@ -108,10 +108,10 @@
 
     <!-- ================== System data transfer ==================== -->
     <!-- Title of the permission sync confirmation dialog. [CHAR LIMIT=NONE] -->
-    <string name="permission_sync_confirmation_title">Give apps on <xliff:g id="companion_device_name" example="Galaxy Watch 5">%1$s</xliff:g> the same permissions as on <xliff:g id="primary_device_name" example="Pixel 6">%2$s</xliff:g>?</string>
+    <string name="permission_sync_confirmation_title">Give apps on &lt;strong&gt;<xliff:g id="companion_device_name" example="Galaxy Watch 5">%1$s</xliff:g>&lt;/strong&gt; the same permissions as on &lt;strong&gt;<xliff:g id="primary_device_name" example="Pixel 6">%2$s</xliff:g>&lt;/strong&gt;?</string>
 
     <!-- Text of the permission sync explanation in the confirmation dialog. [CHAR LIMIT=NONE] -->
-    <string name="permission_sync_summary">&lt;p&gt;This may include Microphone, Camera, and Location access, and other sensitive permissions on <xliff:g id="companion_device_name" example="Galaxy Watch 5">%1$s</xliff:g>.&lt;/p&gt;
-        &lt;p&gt;You can change these permissions any time in your Settings on <xliff:g id="companion_device_name" example="Galaxy Watch 5">%1$s</xliff:g>.&lt;/p&gt;</string>
+    <string name="permission_sync_summary">&lt;p&gt;This may include Microphone, Camera, and Location access, and other sensitive permissions on &lt;strong&gt;<xliff:g id="companion_device_name" example="Galaxy Watch 5">%1$s</xliff:g>&lt;/strong&gt;.&lt;/p&gt;
+        &lt;p&gt;You can change these permissions any time in your Settings on &lt;strong&gt;<xliff:g id="companion_device_name" example="Galaxy Watch 5">%1$s</xliff:g>&lt;/strong&gt;.&lt;/p&gt;</string>
 
 </resources>

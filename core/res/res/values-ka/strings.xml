@@ -585,7 +585,7 @@
     <string name="biometric_error_generic" msgid="6784371929985434439">"შეცდომა ავთენტიკაციისას"</string>
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"გამოიყენეთ ეკრანის დაბლოკვა"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"გასაგრძელებლად შედით ეკრანის დაბლოკვაში"</string>
-    <string name="fingerprint_acquired_partial" msgid="694598777291084823">"ამოცნობილია ნაწილობრივი თითის ანაბეჭდი"</string>
+    <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"მაგრად დააჭირეთ სენსორს"</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"თითის ანაბეჭდის დამუშავება ვერ მოხერხდა. გთხოვთ, ცადოთ ხელახლა."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"გაწმინდეთ თითის ანაბეჭდის სენსორი და ხელახლა ცადეთ"</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"გაწმინდეთ სენსორი და ხელახლა ცადეთ"</string>
@@ -598,7 +598,7 @@
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_error_not_match" msgid="4599441812893438961">"თითის ანაბეჭდის ამოცნობა ვერ მოხერხდა"</string>
-    <string name="fingerprint_udfps_error_not_match" msgid="4709197752023550709">"მაგრად დააჭირეთ სენსორს"</string>
+    <string name="fingerprint_udfps_error_not_match" msgid="8236930793223158856">"თითის ანაბეჭდის ამოცნობა ვერ მოხერხდა"</string>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"თითის ანაბეჭდი ავტორიზებულია"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"სახე ავტორიზებულია"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"სახე ავტორიზებულია, დააჭირეთ დადასტურებას"</string>
@@ -1451,12 +1451,6 @@
     <string name="permdesc_requestIgnoreBatteryOptimizations" msgid="634260656917874356">"საშუალებას მისცემს აპს, მოითხოვოს მასთან დაკავშირებული ბატარეის ოპტიმიზაციის იგნორირების ნებართვა."</string>
     <string name="permlab_queryAllPackages" msgid="2928450604653281650">"ყველა პაკეტის მოთხოვნა"</string>
     <string name="permdesc_queryAllPackages" msgid="5339069855520996010">"საშუალებას აძლევს აპს, ნახოს ყველა ინსტალირებული პაკეტი."</string>
-    <string name="permlab_accessAdServicesTopics" msgid="6687112022940098945">"წვდომა AdServices Topics API-ებზე"</string>
-    <string name="permdesc_accessAdServicesTopics" msgid="6011532458156465929">"აპლიკაციას აძლევს წვდომას AdServices Topics API-ებზე."</string>
-    <string name="permlab_accessAdServicesAttribution" msgid="3268942271128309354">"წვდომა AdServices Attribution API-ებზე"</string>
-    <string name="permdesc_accessAdServicesAttribution" msgid="577482544832578288">"აპლიკაციას აძლევს წვდომას AdServices Attribution API-ებზე."</string>
-    <string name="permlab_accessAdServicesCustomAudiences" msgid="7249286630514600684">"წვდომა AdServices Custom Audiences API-ებზე"</string>
-    <string name="permdesc_accessAdServicesCustomAudiences" msgid="645526926477180315">"აპლიკაციას აძლევს წვდომას AdServices Custom Audiences API-ებზე."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1842872462124648678">"მასშტაბის ცვლილებისთვის შეეხეთ ორჯერ"</string>
     <string name="gadget_host_error_inflating" msgid="2449961590495198720">"ვერ დაემატა ვიჯეტი."</string>
     <string name="ime_action_go" msgid="5536744546326495436">"გადასვლა"</string>
@@ -1685,7 +1679,6 @@
     <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"ჩართულია"</string>
     <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"გამორთულია"</string>
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"დართავთ ნებას <xliff:g id="SERVICE">%1$s</xliff:g>-ს, სრულად მართოს თქვენი მოწყობილობა?"</string>
-    <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"<xliff:g id="SERVICE">%1$s</xliff:g>-ს თუ ჩართავთ, მონაცემთა დაშიფვრის გასაძლიერებლად თქვენი მოწყობილობა ეკრანის დაბლოკვას არ გამოიყენებს."</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"სრული კონტროლი გამოსადეგია აპებისთვის, რომლებიც მარტივი წვდომის საჭიროებისას გეხმარებათ, მაგრამ არა აპების უმრავლესობისთვის."</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"ეკრანის ნახვა და მართვა"</string>
     <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"მას შეუძლია წაიკითხოს ეკრანზე არსებული მთელი კონტენტი და აჩვენოს კონტენტი სხვა აპებში."</string>
@@ -1939,6 +1932,7 @@
     <string name="app_blocked_title" msgid="7353262160455028160">"აპი მიუწვდომელია"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> ამჟამად მიუწვდომელია."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> მიუწვდომელია"</string>
+    <string name="app_streaming_blocked_title_for_permission_dialog" msgid="4483161748582966785">"საჭიროა ნებართვა"</string>
     <string name="app_streaming_blocked_message" product="tv" msgid="4003011766528814377">"ამჟამად ამ აპზე თქვენი <xliff:g id="DEVICE">%1$s</xliff:g>-დან წვდომა შეუძლებელია. ცადეთ Android TV მოწყობილობიდან."</string>
     <string name="app_streaming_blocked_message" product="tablet" msgid="4242053045964946062">"ამჟამად ამ აპზე თქვენი <xliff:g id="DEVICE">%1$s</xliff:g>-დან წვდომა შეუძლებელია. ცადეთ ტაბლეტიდან."</string>
     <string name="app_streaming_blocked_message" product="default" msgid="6159168735030739398">"ამჟამად ამ აპზე თქვენი <xliff:g id="DEVICE">%1$s</xliff:g>-დან წვდომა შეუძლებელია. ცადეთ ტელეფონიდან."</string>
@@ -2032,9 +2026,9 @@
     <string name="harmful_app_warning_open_anyway" msgid="5963657791740211807">"მაინც გახსნა"</string>
     <string name="harmful_app_warning_title" msgid="8794823880881113856">"აღმოჩენილია საზიანო აპი"</string>
     <string name="log_access_confirmation_title" msgid="2343578467290592708">"გსურთ <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g>-ს მიანიჭოთ მოწყობილობის ყველა ჟურნალზე წვდომა?"</string>
-    <string name="log_access_confirmation_allow" msgid="143157286283302512">"მხოლოდ ამ ერთხელ"</string>
+    <string name="log_access_confirmation_allow" msgid="5302517782599389507">"ერთჯერადი წვდომის დაშვება"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"არ დაიშვას"</string>
-    <string name="log_access_confirmation_body" msgid="4483075525611652922">"მოწყობილობის ჟურნალში იწერება, რა ხდება ამ მოწყობილობაზე. აპებს შეუძლია ამ ჟურნალების გამოყენება პრობლემების აღმოსაჩენად და მოსაგვარებლად.\n\nზოგი ჟურნალი შეიძლება სენსიტიური ინფორმაციის მატარებელი იყოს, ამიტომაც მოწყობილობის ყველა ჟურნალზე წვდომა მხოლოდ სანდო აპებს მიანიჭეთ. \n\nთუ ამ აპს მოწყობილობის ყველა ჟურნალზე წვდომას არ მიანიჭებთ, მას მაინც ექნება წვდომა თქვენს ჟურნალებზე და თქვენი მოწყობილობის მწარმოებელს მაინც შეეძლება თქვენი მოწყობილობის ზოგიერთ ჟურნალსა თუ ინფორმაციაზე წვდომა. შეიტყვეთ მეტი"</string>
+    <string name="log_access_confirmation_body" msgid="6581985716241928135">"მოწყობილობის ჟურნალში იწერება, რა ხდება ამ მოწყობილობაზე. აპებს შეუძლია ამ ჟურნალების გამოყენება პრობლემების აღმოსაჩენად და მოსაგვარებლად.\n\nზოგი ჟურნალი შეიძლება სენსიტიური ინფორმაციის მატარებელი იყოს, ამიტომაც მოწყობილობის ყველა ჟურნალზე წვდომა მხოლოდ სანდო აპებს მიანიჭეთ. \n\nთუ ამ აპს მოწყობილობის ყველა ჟურნალზე წვდომას არ მიანიჭებთ, მას მაინც ექნება წვდომა თქვენს ჟურნალებზე. თქვენი მოწყობილობის მწარმოებელს მაინც შეეძლება თქვენი მოწყობილობის ზოგიერთ ჟურნალსა თუ ინფორმაციაზე წვდომა. შეიტყვეთ მეტი"</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"აღარ გამოჩნდეს"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g>-ს სურს, გაჩვენოთ <xliff:g id="APP_2">%2$s</xliff:g>-ის ფრაგმენტები"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"რედაქტირება"</string>
@@ -2264,11 +2258,12 @@
     <string name="ui_translation_accessibility_translated_text" msgid="3197547218178944544">"<xliff:g id="MESSAGE">%1$s</xliff:g> ნათარგმნია."</string>
     <string name="ui_translation_accessibility_translation_finished" msgid="3057830947610088465">"შეტყობინება ნათარგმნია <xliff:g id="FROM_LANGUAGE">%1$s</xliff:g>-დან შემდეგ ენაზე: <xliff:g id="TO_LANGUAGE">%2$s</xliff:g>."</string>
     <string name="notification_channel_abusive_bg_apps" msgid="6092140213264920355">"აქტივობა ფონურ რეჟიმში"</string>
-    <string name="notification_title_abusive_bg_apps" msgid="344582472797982073">"აქტივობა ფონურ რეჟიმში"</string>
-    <string name="notification_content_abusive_bg_apps" msgid="5572096708044958249">"<xliff:g id="APP">%1$s</xliff:g> გაშვებულია ფონში და იყენებს ბატარეას. შეეხეთ გადასახედად."</string>
-    <string name="notification_content_long_running_fgs" msgid="8878031652441570178">"<xliff:g id="APP">%1$s</xliff:g> ფონურ რეჟიმში დიდი ხანია გაშვებულია. შეეხეთ გადასახედად."</string>
+    <string name="notification_title_abusive_bg_apps" msgid="3258460527676573815">"აპი იყენებს ბატარეას"</string>
+    <string name="notification_title_long_running_fgs" msgid="8170284286477131587">"აპი კვლავ აქტიურია"</string>
+    <string name="notification_content_abusive_bg_apps" msgid="9180610713603474720">"<xliff:g id="APP">%1$s</xliff:g> იყენებს ბატარეას ფონში შეეხეთ გადასახედად."</string>
+    <string name="notification_content_long_running_fgs" msgid="8258193410039977101">"<xliff:g id="APP">%1$s</xliff:g> იმოქმედებს ბატარეის მუშაობის ხანგრძლივობაზე. შეეხეთ აქტიური აპების მიმოხილვისთვის."</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"აქტიური აპების შემოწმება"</string>
-    <string name="vdm_camera_access_denied" msgid="6345652513729130490">"კამერაზე წვდომა ამ მოწყობილობიდან ვერ მოხერხდება"</string>
-    <!-- no translation found for system_locale_title (3978041860457277638) -->
-    <skip />
+    <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"ტელეფონის კამერაზე წვდომა ვერ მოხერხდა თქვენი <xliff:g id="DEVICE">%1$s</xliff:g>-დან"</string>
+    <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"ტაბლეტის კამერაზე წვდომა ვერ მოხერხდა თქვენი <xliff:g id="DEVICE">%1$s</xliff:g>-დან"</string>
+    <string name="system_locale_title" msgid="3978041860457277638">"სისტემის ენა"</string>
 </resources>

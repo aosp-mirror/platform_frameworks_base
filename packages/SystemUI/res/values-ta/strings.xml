@@ -34,6 +34,10 @@
     <string name="status_bar_settings_auto_rotation" msgid="8329080442278431708">"திரையைத் தானாகச் சுழற்று"</string>
     <string name="usb_device_permission_prompt" msgid="4414719028369181772">"<xliff:g id="USB_DEVICE">%2$s</xliff:g>ஐ அணுக, <xliff:g id="APPLICATION">%1$s</xliff:g> ஆப்ஸை அனுமதிக்கவா?"</string>
     <string name="usb_device_permission_prompt_warn" msgid="2309129784984063656">"<xliff:g id="USB_DEVICE">%2$s</xliff:g>ஐப் பயன்படுத்த <xliff:g id="APPLICATION">%1$s</xliff:g>ஐ அனுமதிக்கவா?\nஇந்த ஆப்ஸிற்கு ரெக்கார்டு செய்வதற்கான அனுமதி வழங்கப்படவில்லை, எனினும் இந்த USB சாதனம் மூலம் ஆடியோவைப் பதிவுசெய்யும்."</string>
+    <string name="usb_audio_device_permission_prompt_title" msgid="4221351137250093451">"<xliff:g id="USB_DEVICE">%2$s</xliff:g> சாதனத்தை அணுக <xliff:g id="APPLICATION">%1$s</xliff:g> ஆப்ஸை அனுமதிக்கவா?"</string>
+    <string name="usb_audio_device_confirm_prompt_title" msgid="8828406516732985696">"<xliff:g id="USB_DEVICE">%2$s</xliff:g> சாதனத்தைக் கையாள <xliff:g id="APPLICATION">%1$s</xliff:g> ஆப்ஸைத் திறக்கவா?"</string>
+    <string name="usb_audio_device_prompt_warn" msgid="2504972133361130335">"இந்த ஆப்ஸில் ரெக்கார்டு செய்வதற்கு அனுமதி இல்லை, எனினும் இந்த USB சாதனம் மூலம் ஆடியோவைப் பதிவுசெய்யலாம். இந்தச் சாதனத்தில் <xliff:g id="APPLICATION">%1$s</xliff:g> ஆப்ஸைப் பயன்படுத்தினால் அழைப்புகள், அறிவிப்புகள், அலாரங்கள் ஆகியவற்றின் ஒலி கேட்பது தடுக்கப்படக்கூடும்."</string>
+    <string name="usb_audio_device_prompt" msgid="7944987408206252949">"இந்தச் சாதனத்தில் <xliff:g id="APPLICATION">%1$s</xliff:g> ஆப்ஸைப் பயன்படுத்தினால் அழைப்புகள், அறிவிப்புகள், அலாரங்கள் ஆகியவற்றின் ஒலி கேட்பது தடுக்கப்படக்கூடும்."</string>
     <string name="usb_accessory_permission_prompt" msgid="717963550388312123">"<xliff:g id="USB_ACCESSORY">%2$s</xliff:g>ஐ அணுக, <xliff:g id="APPLICATION">%1$s</xliff:g> ஆப்ஸை அனுமதிக்கவா?"</string>
     <string name="usb_device_confirm_prompt" msgid="4091711472439910809">"<xliff:g id="USB_DEVICE">%2$s</xliff:g>ஐக் கையாள, <xliff:g id="APPLICATION">%1$s</xliff:g> பயன்பாட்டைத் திறக்கவா?"</string>
     <string name="usb_device_confirm_prompt_warn" msgid="990208659736311769">"<xliff:g id="USB_DEVICE">%2$s</xliff:g>ஐக் கையாள <xliff:g id="APPLICATION">%1$s</xliff:g>ஐத் திறக்கவா?\nஇந்த ஆப்ஸிற்கு ரெக்கார்டு செய்வதற்கான அனுமதி வழங்கப்படவில்லை, எனினும் இந்த USB சாதனம் மூலம் ஆடியோவைப் பதிவுசெய்ய முடியும்."</string>
@@ -131,7 +135,8 @@
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="2242167416140740920">"முகம் அங்கீகரிக்கப்பட்டது"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"உறுதிப்படுத்தப்பட்டது"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"முடிக்க \'உறுதிப்படுத்துக\' என்பதை தட்டவும்"</string>
-    <string name="biometric_dialog_tap_confirm_with_face" msgid="1597899891472340950">"முகத்தை வைத்து அன்லாக் செய்யப்பட்டது. திறக்க அழுத்தவும்."</string>
+    <!-- no translation found for biometric_dialog_tap_confirm_with_face (1092050545851021991) -->
+    <skip />
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"அங்கீகரிக்கப்பட்டது"</string>
     <string name="biometric_dialog_use_pin" msgid="8385294115283000709">"பின்னைப் பயன்படுத்து"</string>
     <string name="biometric_dialog_use_pattern" msgid="2315593393167211194">"பேட்டர்னைப் பயன்படுத்து"</string>
@@ -287,6 +292,15 @@
     <string name="sensor_privacy_start_use_mic_dialog_content" msgid="1624701280680913717">"உங்கள் மைக்ரோஃபோனைப் பயன்படுத்த அனுமதிக்கப்பட்டுள்ள அனைத்து ஆப்ஸ் மற்றும் சேவைகளை அணுகுவதற்கான தடுப்பை இது நீக்கும்."</string>
     <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"உங்கள் கேமராவைப் பயன்படுத்த அனுமதிக்கப்பட்டுள்ள அனைத்து ஆப்ஸ் மற்றும் சேவைகளை அணுகுவதற்கான தடுப்பை இது நீக்கும்."</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_content" msgid="3577642558418404919">"உங்கள் கேமராவையோ மைக்ரோஃபோனையோ பயன்படுத்த அனுமதிக்கப்பட்டுள்ள அனைத்து ஆப்ஸ் மற்றும் சேவைகளை அணுகுவதற்கான தடுப்பை இது நீக்கும்."</string>
+    <string name="sensor_privacy_start_use_mic_blocked_dialog_title" msgid="2640140287496469689">"மைக்ரோஃபோன் அணுகல் முடக்கப்பட்டுள்ளது"</string>
+    <string name="sensor_privacy_start_use_camera_blocked_dialog_title" msgid="7398084286822440384">"கேமரா அணுகல் முடக்கப்பட்டுள்ளது"</string>
+    <string name="sensor_privacy_start_use_mic_camera_blocked_dialog_title" msgid="195236134743281973">"மைக்ரோஃபோன் &amp; கேமரா அணுகல் முடக்கப்பட்டுள்ளது"</string>
+    <string name="sensor_privacy_start_use_mic_blocked_dialog_content" msgid="2138318880682877747">"மைக்ரோஃபோனுக்கான அணுகலை அனுமதிக்க, உங்கள் சாதனத்தில் உள்ள தனியுரிமை ஸ்விட்ச்சை மைக்ரோஃபோனுக்கு \'ஆன்\' என்று அமைக்கவும். உங்கள் சாதனத்தில் தனியுரிமை ஸ்விட்ச் எங்குள்ளது என்பதை அறிய சாதனக் கையேட்டைப் பார்க்கவும்."</string>
+    <string name="sensor_privacy_start_use_camera_blocked_dialog_content" msgid="7216015168047965948">"கேமராவிற்கான அணுகலை அனுமதிக்க, உங்கள் சாதனத்தில் உள்ள தனியுரிமை ஸ்விட்ச்சை கேமராவிற்கு \'ஆன்\' என்று அமைக்கவும். உங்கள் சாதனத்தில் தனியுரிமை ஸ்விட்ச் எங்குள்ளது என்பதை அறிய சாதனக் கையேட்டைப் பார்க்கவும்."</string>
+    <string name="sensor_privacy_start_use_mic_camera_blocked_dialog_content" msgid="3960837827570483762">"அவற்றுக்கான அணுகலை அனுமதிக்க, உங்கள் சாதனத்தில் உள்ள தனியுரிமை ஸ்விட்ச்சை அவற்றுக்கு \'ஆன்\' என்று அமைக்கவும். உங்கள் சாதனத்தில் தனியுரிமை ஸ்விட்ச் எங்குள்ளது என்பதை அறிய சாதனக் கையேட்டைப் பார்க்கவும்."</string>
+    <string name="sensor_privacy_mic_unblocked_toast_content" msgid="306555320557065068">"மைக்ரோஃபோன் அணுகல் உள்ளது"</string>
+    <string name="sensor_privacy_camera_unblocked_toast_content" msgid="7843105715964332311">"கேமரா அணுகல் உள்ளது"</string>
+    <string name="sensor_privacy_mic_camera_unblocked_toast_content" msgid="7339355093282661115">"மைக்ரோஃபோன் &amp; கேமரா அணுகல் உள்ளது"</string>
     <string name="media_seamless_other_device" msgid="4654849800789196737">"பிற சாதனம்"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"மேலோட்டப் பார்வையை நிலைமாற்று"</string>
     <string name="zen_priority_introduction" msgid="3159291973383796646">"அலாரங்கள், நினைவூட்டல்கள், நிகழ்வுகள் மற்றும் குறிப்பிட்ட அழைப்பாளர்களைத் தவிர்த்து, பிற ஒலிகள் மற்றும் அதிர்வுகளின் தொந்தரவு இருக்காது. எனினும், நீங்கள் எதையேனும் (இசை, வீடியோக்கள், கேம்ஸ் போன்றவை) ஒலிக்கும்படி தேர்ந்தெடுத்திருந்தால், அவை வழக்கம் போல் ஒலிக்கும்."</string>
@@ -297,7 +311,10 @@
     <string name="notification_tap_again" msgid="4477318164947497249">"அன்லாக் செய்ய, மீண்டும் தட்டவும்"</string>
     <string name="tap_again" msgid="1315420114387908655">"மீண்டும் தட்டவும்"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"திறப்பதற்கு மேல் நோக்கி ஸ்வைப் செய்யவும்"</string>
-    <string name="keyguard_unlock_press" msgid="8488350566398524740">"திறப்பதற்கு அழுத்தவும்"</string>
+    <!-- no translation found for keyguard_unlock_press (9140109453735019209) -->
+    <skip />
+    <!-- no translation found for keyguard_face_successful_unlock_press (25520941264602588) -->
+    <skip />
     <string name="keyguard_retry" msgid="886802522584053523">"மீண்டும் முயல மேல்நோக்கி ஸ்வைப் செய்யவும்"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"NFCயைப் பயன்படுத்த அன்லாக் செய்யவும்"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"இந்த சாதனம் உங்கள் நிறுவனத்துக்கு சொந்தமானது"</string>
@@ -320,7 +337,6 @@
     <string name="keyguard_indication_charging_time_dock" msgid="6150404291427377863">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • டாக் மூலம் சார்ஜாகிறது • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> இல் முழுமையாகச் சார்ஜாகிவிடும்"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"பயனரை மாற்று"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"இந்த அமர்வின் எல்லா ஆப்ஸும் தரவும் நீக்கப்படும்."</string>
-    <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"அகற்று"</string>
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"நல்வரவு!"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"உங்கள் அமர்வைத் தொடர விருப்பமா?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"மீண்டும் தொடங்கு"</string>
@@ -335,7 +351,7 @@
     <string name="user_remove_user_remove" msgid="8387386066949061256">"அகற்று"</string>
     <string name="media_projection_dialog_text" msgid="1755705274910034772">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> உங்கள் திரையில் தெரியும் தகவல்கள், ரெக்கார்டு செய்யும்போதோ அனுப்பும்போதோ உங்கள் சாதனத்திலிருந்து பிளே ஆகும் அனைத்து தகவல்கள் ஆகியவற்றுக்கான அணுகலைக் கொண்டிருக்கும். கடவுச்சொற்கள், பேமெண்ட் தொடர்பான தகவல்கள், படங்கள், மெசேஜ்கள், நீங்கள் பிளே செய்யும் ஆடியோ போன்ற அனைத்துத் தகவல்களும் இதில் அடங்கும்."</string>
     <string name="media_projection_dialog_service_text" msgid="958000992162214611">"இந்தச் செயல்பாட்டை வழங்கும் சேவையானது உங்கள் திரையில் தெரியும் தகவல்கள், ரெக்கார்டு செய்யும்போதோ அனுப்பும்போதோ உங்கள் சாதனத்திலிருந்து பிளே ஆகும் அனைத்துத் தகவல்கள் ஆகியவற்றுக்கான அணுகலைக் கொண்டிருக்கும். கடவுச்சொற்கள், பேமெண்ட் தொடர்பான தகவல்கள், படங்கள், மெசேஜ்கள், நீங்கள் பிளே செய்யும் ஆடியோ போன்ற அனைத்துத் தகவல்களும் இதில் அடங்கும்."</string>
-    <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"ரெக்கார்டிங் செய்யவோ அனுப்புவதற்கோ தொடங்கிவிட்டீர்களா?"</string>
+    <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"ரெக்கார்டிங் செய்யவோ அனுப்புவோ தொடங்கவா?"</string>
     <string name="media_projection_dialog_title" msgid="3316063622495360646">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> மூலம் ரெக்கார்டிங் செய்யவோ அனுப்புவதற்கோ தொடங்கிவீட்டீர்களா?"</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"எல்லாவற்றையும் அழி"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"நிர்வகி"</string>
@@ -766,6 +782,12 @@
     <string name="controls_dialog_ok" msgid="2770230012857881822">"சேர்"</string>
     <string name="controls_dialog_message" msgid="342066938390663844">"<xliff:g id="APP">%s</xliff:g> ஆப்ஸால் பரிந்துரைக்கப்பட்டது"</string>
     <string name="controls_tile_locked" msgid="731547768182831938">"சாதனம் பூட்டப்பட்டது"</string>
+    <string name="controls_settings_show_controls_dialog_title" msgid="3357852503553809554">"பூட்டுத் திரையிலிருந்தே சாதனங்களைப் பார்க்கவும் கட்டுப்படுத்தவும் அனுமதிக்கவா?"</string>
+    <string name="controls_settings_show_controls_dialog_message" msgid="7666211700524587969">"வெளிப்புறச் சாதனங்களுக்கான கட்டுப்பாடுகளை உங்கள் பூட்டுத் திரையில் சேர்க்கலாம்.\n\nஉங்கள் மொபைலையோ டேப்லெட்டையோ அன்லாக் செய்யாமலேயே சில சாதனங்களைக் கட்டுப்படுத்த சாதன ஆப்ஸ் உங்களை அனுமதிக்கக்கூடும்.\n\nஅமைப்புகளுக்குச் சென்று எப்போது வேண்டுமானாலும் மாற்றங்களைச் செய்யலாம்."</string>
+    <string name="controls_settings_trivial_controls_dialog_title" msgid="7593188157655036677">"பூட்டுத் திரையிலிருந்தே சாதனங்களைக் கட்டுப்படுத்தவா?"</string>
+    <string name="controls_settings_trivial_controls_dialog_message" msgid="237183787721917586">"உங்கள் மொபைலையோ டேப்லெட்டையோ அன்லாக் செய்யாமலேயே சில சாதனங்களை நீங்கள் கட்டுப்படுத்தலாம்.\n\nஎந்தெந்தச் சாதனங்களை இவ்வாறு கட்டுப்படுத்தலாம் என்பதை உங்கள் சாதன ஆப்ஸ் தீர்மானிக்கும்."</string>
+    <string name="controls_settings_dialog_neutral_button" msgid="4514446354793124140">"வேண்டாம்"</string>
+    <string name="controls_settings_dialog_positive_button" msgid="436070672551674863">"ஆம்"</string>
     <string name="controls_pin_use_alphanumeric" msgid="8478371861023048414">"பின்னில் எழுத்துகள் அல்லது குறிகள் உள்ளன"</string>
     <string name="controls_pin_verify" msgid="3452778292918877662">"<xliff:g id="DEVICE">%s</xliff:g> ஐச் சரிபார்த்தல்"</string>
     <string name="controls_pin_wrong" msgid="6162694056042164211">"தவறான பின்"</string>
@@ -775,8 +797,7 @@
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"மேலும் பார்க்க ஸ்வைப் செய்யவும்"</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"பரிந்துரைகளை ஏற்றுகிறது"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"மீடியா"</string>
-    <!-- no translation found for controls_media_close_session (4780485355795635052) -->
-    <skip />
+    <string name="controls_media_close_session" msgid="4780485355795635052">"<xliff:g id="APP_NAME">%1$s</xliff:g> ஆப்ஸுக்கான இந்த மீடியா கட்டுப்பாடுகளை மறைக்கவா?"</string>
     <string name="controls_media_active_session" msgid="3146882316024153337">"தற்போதைய மீடியா அமர்வை மறைக்க முடியாது."</string>
     <string name="controls_media_dismiss_button" msgid="4485675693008031646">"மறை"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"தொடர்க"</string>
@@ -815,13 +836,20 @@
     <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"புதிய சாதனத்தை இணைத்தல்"</string>
     <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"இந்த அமர்வை அலைபரப்ப ஆப்ஸைத் திறங்கள்."</string>
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"அறியப்படாத ஆப்ஸ்"</string>
+    <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"பிராட்காஸ்ட் எவ்வாறு செயல்படுகிறது?"</string>
+    <string name="media_output_broadcast" msgid="3555580945878071543">"பிராட்காஸ்ட்"</string>
+    <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"நீங்கள் பிராட்காஸ்ட் செய்யும் மீடியாவை அருகிலுள்ளவர்கள் இணக்கமான புளூடூத் சாதனங்கள் மூலம் கேட்கலாம்"</string>
+    <string name="media_output_broadcasting_message" msgid="4150299923404886073">"அருகிலுள்ளவர்கள் இணக்கமான புளூடூத் சாதனத்தின் மூலம் உங்கள் QR குறியீட்டை ஸ்கேன் செய்தோ பிராட்காஸ்ட் பெயரையும் கடவுச்சொல்லையும் பயன்படுத்தியோ பிராட்காஸ்ட் மீடியாவைக் கேட்கலாம்"</string>
+    <string name="media_output_broadcast_name" msgid="8786127091542624618">"பிராட்காஸ்ட்டின் பெயர்"</string>
+    <string name="media_output_broadcast_code" msgid="870795639644728542">"கடவுச்சொல்"</string>
+    <string name="media_output_broadcast_dialog_save" msgid="7910865591430010198">"சேமி"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"பதிப்பு எண்"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"பதிப்பு எண் கிளிப்போர்டுக்கு நகலெடுக்கப்பட்டது."</string>
     <string name="basic_status" msgid="2315371112182658176">"திறந்தநிலை உரையாடல்"</string>
     <string name="select_conversation_title" msgid="6716364118095089519">"உரையாடல் விட்ஜெட்டுகள்"</string>
     <string name="select_conversation_text" msgid="3376048251434956013">"ஓர் உரையாடலை உங்கள் முகப்புத் திரையில் சேர்க்க அந்த உரையாடலைத் தட்டுங்கள்"</string>
     <string name="no_conversations_text" msgid="5354115541282395015">"உங்கள் சமீபத்திய உரையாடல்கள் இங்கே காட்டப்படும்"</string>
-    <string name="priority_conversations" msgid="3967482288896653039">"முன்னுரிமை அளிக்கப்பட்ட உரையாடல்கள்"</string>
+    <string name="priority_conversations" msgid="3967482288896653039">"முக்கிய உரையாடல்கள்"</string>
     <string name="recent_conversations" msgid="8531874684782574622">"சமீபத்திய உரையாடல்கள்"</string>
     <string name="days_timestamp" msgid="5821854736213214331">"<xliff:g id="DURATION">%1$s</xliff:g> நாட்களுக்கு முன்பு"</string>
     <string name="one_week_timestamp" msgid="4925600765473875590">"1 வாரத்திற்கு முன்பு"</string>
@@ -891,7 +919,7 @@
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"செயலிலுள்ள ஆப்ஸ்"</string>
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"நிறுத்து"</string>
     <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"இயங்கவில்லை"</string>
-    <string name="clipboard_edit_text_copy" msgid="770856373439969178">"நகலெடு"</string>
+    <string name="clipboard_edit_text_done" msgid="4551887727694022409">"முடிந்தது"</string>
     <string name="clipboard_overlay_text_copied" msgid="1872624400464891363">"நகலெடுக்கப்பட்டது"</string>
     <string name="clipboard_edit_source" msgid="9156488177277788029">"<xliff:g id="APPNAME">%1$s</xliff:g> ஆப்ஸிலிருந்து"</string>
     <string name="clipboard_dismiss_description" msgid="7544573092766945657">"கிளிப்போர்டு மேலடுக்கை மூடுக"</string>

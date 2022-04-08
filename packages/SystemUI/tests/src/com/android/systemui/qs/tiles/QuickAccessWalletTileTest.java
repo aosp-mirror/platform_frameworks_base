@@ -45,6 +45,7 @@ import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.Icon;
 import android.os.Handler;
+import android.os.UserHandle;
 import android.service.quickaccesswallet.GetWalletCardsError;
 import android.service.quickaccesswallet.GetWalletCardsResponse;
 import android.service.quickaccesswallet.QuickAccessWalletClient;
@@ -186,7 +187,8 @@ public class QuickAccessWalletTileTest extends SysuiTestCase {
     public void testIsAvailable_qawFeatureAvailable() {
         when(mPackageManager.hasSystemFeature(FEATURE_NFC_HOST_CARD_EMULATION)).thenReturn(true);
         when(mPackageManager.hasSystemFeature("org.chromium.arc")).thenReturn(false);
-        when(mSecureSettings.getString(NFC_PAYMENT_DEFAULT_COMPONENT)).thenReturn("Component");
+        when(mSecureSettings.getStringForUser(NFC_PAYMENT_DEFAULT_COMPONENT,
+                UserHandle.USER_CURRENT)).thenReturn("Component");
 
         assertTrue(mTile.isAvailable());
     }

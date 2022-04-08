@@ -34,6 +34,10 @@
     <string name="status_bar_settings_auto_rotation" msgid="8329080442278431708">"Rrotullimi automatik i ekranit"</string>
     <string name="usb_device_permission_prompt" msgid="4414719028369181772">"Të lejohet <xliff:g id="APPLICATION">%1$s</xliff:g> të ketë qasje te <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
     <string name="usb_device_permission_prompt_warn" msgid="2309129784984063656">"Dëshiron të lejosh që <xliff:g id="APPLICATION">%1$s</xliff:g> të ketë qasje te <xliff:g id="USB_DEVICE">%2$s</xliff:g>?\nKëtij aplikacioni nuk i është dhënë leje për regjistrim, por mund të regjistrojë audio përmes kësaj pajisjeje USB."</string>
+    <string name="usb_audio_device_permission_prompt_title" msgid="4221351137250093451">"Të lejohet \"<xliff:g id="APPLICATION">%1$s</xliff:g>\" të qaset te <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
+    <string name="usb_audio_device_confirm_prompt_title" msgid="8828406516732985696">"Të hapet <xliff:g id="APPLICATION">%1$s</xliff:g> për të përdorur <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
+    <string name="usb_audio_device_prompt_warn" msgid="2504972133361130335">"Këtij aplikacioni nuk i është dhënë leje për regjistrim, por mund të regjistrojë audio përmes kësaj pajisjeje USB. Përdorimi i <xliff:g id="APPLICATION">%1$s</xliff:g> me këtë pajisje mund të ndalojë dëgjimin e telefonatave, njoftimeve dhe alarmeve."</string>
+    <string name="usb_audio_device_prompt" msgid="7944987408206252949">"Përdorimi i <xliff:g id="APPLICATION">%1$s</xliff:g> me këtë pajisje mund të ndalojë dëgjimin e telefonatave, njoftimeve dhe alarmeve."</string>
     <string name="usb_accessory_permission_prompt" msgid="717963550388312123">"Të lejohet <xliff:g id="APPLICATION">%1$s</xliff:g> të ketë qasje te <xliff:g id="USB_ACCESSORY">%2$s</xliff:g>?"</string>
     <string name="usb_device_confirm_prompt" msgid="4091711472439910809">"Të hapet <xliff:g id="APPLICATION">%1$s</xliff:g> për të përdorur <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
     <string name="usb_device_confirm_prompt_warn" msgid="990208659736311769">"Dëshiron të hapësh <xliff:g id="APPLICATION">%1$s</xliff:g> që të përpunojë <xliff:g id="USB_DEVICE">%2$s</xliff:g>?\nKëtij aplikacioni nuk i është dhënë leje për regjistrim, por mund të regjistrojë audio përmes kësaj pajisjeje USB."</string>
@@ -131,7 +135,8 @@
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="2242167416140740920">"Fytyra u vërtetua"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"Konfirmuar"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"Trokit \"Konfirmo\" për ta përfunduar"</string>
-    <string name="biometric_dialog_tap_confirm_with_face" msgid="1597899891472340950">"Shkyçur nga fytyra jote. Shtyp për të vazhduar."</string>
+    <!-- no translation found for biometric_dialog_tap_confirm_with_face (1092050545851021991) -->
+    <skip />
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"U vërtetua"</string>
     <string name="biometric_dialog_use_pin" msgid="8385294115283000709">"Përdor kodin PIN"</string>
     <string name="biometric_dialog_use_pattern" msgid="2315593393167211194">"Përdor motivin"</string>
@@ -287,6 +292,15 @@
     <string name="sensor_privacy_start_use_mic_dialog_content" msgid="1624701280680913717">"Kjo zhbllokon qasjen për të gjitha aplikacionet dhe shërbimet që lejohen të përdorin mikrofonin tënd."</string>
     <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"Kjo zhbllokon qasjen për të gjitha aplikacionet dhe shërbimet që lejohen të përdorin kamerën tënde."</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_content" msgid="3577642558418404919">"Kjo zhbllokon qasjen për të gjitha aplikacionet dhe shërbimet që lejohen të përdorin kamerën ose mikrofonin tënd."</string>
+    <string name="sensor_privacy_start_use_mic_blocked_dialog_title" msgid="2640140287496469689">"Mikrofoni është bllokuar"</string>
+    <string name="sensor_privacy_start_use_camera_blocked_dialog_title" msgid="7398084286822440384">"Kamera është bllokuar"</string>
+    <string name="sensor_privacy_start_use_mic_camera_blocked_dialog_title" msgid="195236134743281973">"Mikrofoni dhe kamera janë bllokuar"</string>
+    <string name="sensor_privacy_start_use_mic_blocked_dialog_content" msgid="2138318880682877747">"Për ta zhbllokuar, lëviz çelësin e privatësisë në pajisjen tënde në pozicionin e ndezjes së mikrofonit për të lejuar qasjen te mikrofoni. Referoju manualit të pajisjes për të gjetur vendndodhjen e çelësit të privatësisë në pajisjen tënde."</string>
+    <string name="sensor_privacy_start_use_camera_blocked_dialog_content" msgid="7216015168047965948">"Për ta zhbllokuar, lëviz çelësin e privatësisë në pajisjen tënde në pozicionin e ndezjes së kamerës për të lejuar qasjen te kamera. Referoju manualit të pajisjes për të gjetur vendndodhjen e çelësit të privatësisë në pajisjen tënde."</string>
+    <string name="sensor_privacy_start_use_mic_camera_blocked_dialog_content" msgid="3960837827570483762">"Për t\'i zhbllokuar, lëviz çelësin e privatësisë në pajisjen tënde në pozicionin e zhbllokuar për të lejuar qasjen. Referoju manualit të pajisjes për të gjetur vendndodhjen e çelësit të privatësisë në pajisjen tënde."</string>
+    <string name="sensor_privacy_mic_unblocked_toast_content" msgid="306555320557065068">"Mikrofoni ofrohet"</string>
+    <string name="sensor_privacy_camera_unblocked_toast_content" msgid="7843105715964332311">"Kamera ofrohet"</string>
+    <string name="sensor_privacy_mic_camera_unblocked_toast_content" msgid="7339355093282661115">"Mikrofoni dhe kamera ofrohen"</string>
     <string name="media_seamless_other_device" msgid="4654849800789196737">"Pajisje tjetër"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"Kalo te përmbledhja"</string>
     <string name="zen_priority_introduction" msgid="3159291973383796646">"Nuk do të shqetësohesh nga tingujt dhe dridhjet, përveç alarmeve, alarmeve rikujtuese, ngjarjeve dhe telefonuesve që specifikon. Do të vazhdosh të dëgjosh çdo gjë që zgjedh të luash duke përfshirë muzikën, videot dhe lojërat."</string>
@@ -297,7 +311,10 @@
     <string name="notification_tap_again" msgid="4477318164947497249">"Trokit përsëri për ta hapur"</string>
     <string name="tap_again" msgid="1315420114387908655">"Trokit sërish"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"Rrëshqit lart për ta hapur"</string>
-    <string name="keyguard_unlock_press" msgid="8488350566398524740">"Shtyp për të hapur"</string>
+    <!-- no translation found for keyguard_unlock_press (9140109453735019209) -->
+    <skip />
+    <!-- no translation found for keyguard_face_successful_unlock_press (25520941264602588) -->
+    <skip />
     <string name="keyguard_retry" msgid="886802522584053523">"Rrëshqit lart për të provuar përsëri"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"Shkyçe për të përdorur NFC-në"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"Kjo pajisje i përket organizatës sate"</string>
@@ -320,7 +337,6 @@
     <string name="keyguard_indication_charging_time_dock" msgid="6150404291427377863">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Po karikohet në stacion • Plot për <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Ndërro përdorues"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Të gjitha aplikacionet dhe të dhënat në këtë sesion do të fshihen."</string>
-    <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"Hiq"</string>
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"Mirë se erdhe, i ftuar!"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"Dëshiron ta vazhdosh sesionin tënd?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"Fillo nga e para"</string>
@@ -766,6 +782,12 @@
     <string name="controls_dialog_ok" msgid="2770230012857881822">"Shto"</string>
     <string name="controls_dialog_message" msgid="342066938390663844">"Sugjeruar nga <xliff:g id="APP">%s</xliff:g>"</string>
     <string name="controls_tile_locked" msgid="731547768182831938">"Pajisja është e kyçur"</string>
+    <string name="controls_settings_show_controls_dialog_title" msgid="3357852503553809554">"Të shfaqen dhe të kontrollohen pajisjet nga ekrani i kyçjes?"</string>
+    <string name="controls_settings_show_controls_dialog_message" msgid="7666211700524587969">"Mund të shtosh kontrolle për pajisjet e tua të jashtme në ekranin e kyçjes.\n\nAplikacioni në pajisjen tënde mund të të lejojë të kontrollosh disa pajisje pa shkyçur telefonin apo tabletin.\n\nMund të bësh ndryshime në çdo kohë te \"Cilësimet\"."</string>
+    <string name="controls_settings_trivial_controls_dialog_title" msgid="7593188157655036677">"Të kontrollohen pajisjet nga ekrani i kyçjes?"</string>
+    <string name="controls_settings_trivial_controls_dialog_message" msgid="237183787721917586">"Mund të kontrollosh disa pajisje pa shkyçur telefonin apo tabletin.\n\nAplikacioni në pajisjen tënde përcakton se cilat pajisje mund të kontrollohen në këtë mënyrë."</string>
+    <string name="controls_settings_dialog_neutral_button" msgid="4514446354793124140">"Jo, faleminderit"</string>
+    <string name="controls_settings_dialog_positive_button" msgid="436070672551674863">"Po"</string>
     <string name="controls_pin_use_alphanumeric" msgid="8478371861023048414">"Kodi PIN përmban shkronja ose simbole"</string>
     <string name="controls_pin_verify" msgid="3452778292918877662">"Verifiko <xliff:g id="DEVICE">%s</xliff:g>"</string>
     <string name="controls_pin_wrong" msgid="6162694056042164211">"Kod PIN i gabuar"</string>
@@ -775,8 +797,7 @@
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"Rrëshqit shpejt për të shikuar më shumë"</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"Po ngarkon rekomandimet"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"Media"</string>
-    <!-- no translation found for controls_media_close_session (4780485355795635052) -->
-    <skip />
+    <string name="controls_media_close_session" msgid="4780485355795635052">"Të fshihet kontrolluesi i medias për <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="controls_media_active_session" msgid="3146882316024153337">"Seanca aktuale e medias nuk mund të fshihet."</string>
     <string name="controls_media_dismiss_button" msgid="4485675693008031646">"Fshih"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"Vazhdo"</string>
@@ -796,8 +817,7 @@
     <string name="media_move_closer_to_end_cast" msgid="6495907340926563656">"Afrohu te <xliff:g id="DEVICENAME">%1$s</xliff:g> për ta luajtur këtu"</string>
     <string name="media_transfer_playing_different_device" msgid="7186806382609785610">"Po luhet në <xliff:g id="DEVICENAME">%1$s</xliff:g>"</string>
     <string name="media_transfer_playing_this_device" msgid="1856890686844499172">"Po luhet në këtë telefon"</string>
-    <!-- no translation found for media_transfer_failed (7955354964610603723) -->
-    <skip />
+    <string name="media_transfer_failed" msgid="7955354964610603723">"Ndodhi një gabim. Provo përsëri."</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"Joaktive, kontrollo aplikacionin"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"Nuk u gjet"</string>
     <string name="controls_error_removed_title" msgid="1207794911208047818">"Kontrolli është i padisponueshëm"</string>
@@ -816,6 +836,13 @@
     <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"Çifto pajisjen e re"</string>
     <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"Hap aplikacionin për të transmetuar këtë seancë."</string>
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"Aplikacion i panjohur"</string>
+    <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Si funksionon transmetimi"</string>
+    <string name="media_output_broadcast" msgid="3555580945878071543">"Transmetimi"</string>
+    <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"Personat në afërsi me ty me pajisje të përputhshme me Bluetooth mund të dëgjojnë median që ti po transmeton"</string>
+    <string name="media_output_broadcasting_message" msgid="4150299923404886073">"Për të dëgjuar transmetimin tënd, personat në afërsi me pajisje të përputhshme me Bluetooth mund të skanojnë kodin tënd QR ose të përdorin emrin dhe fjalëkalimin e transmetimit tënd"</string>
+    <string name="media_output_broadcast_name" msgid="8786127091542624618">"Emri i transmetimit"</string>
+    <string name="media_output_broadcast_code" msgid="870795639644728542">"Fjalëkalimi"</string>
+    <string name="media_output_broadcast_dialog_save" msgid="7910865591430010198">"Ruaj"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"Numri i ndërtimit"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"Numri i ndërtimit u kopjua te kujtesa e fragmenteve"</string>
     <string name="basic_status" msgid="2315371112182658176">"Hap bisedën"</string>
@@ -892,7 +919,7 @@
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"Aplikacionet aktive"</string>
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"Ndalo"</string>
     <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"Ndaluar"</string>
-    <string name="clipboard_edit_text_copy" msgid="770856373439969178">"Kopjo"</string>
+    <string name="clipboard_edit_text_done" msgid="4551887727694022409">"U krye"</string>
     <string name="clipboard_overlay_text_copied" msgid="1872624400464891363">"U kopjua"</string>
     <string name="clipboard_edit_source" msgid="9156488177277788029">"Nga <xliff:g id="APPNAME">%1$s</xliff:g>"</string>
     <string name="clipboard_dismiss_description" msgid="7544573092766945657">"Hiq kopjen e ndërfaqes së përdoruesit"</string>

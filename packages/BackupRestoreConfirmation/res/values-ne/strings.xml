@@ -25,11 +25,10 @@
     <string name="allow_restore_button_label" msgid="3081286752277127827">"मेरो डेटा पुनःबहाली गर्नुहोस्"</string>
     <string name="deny_restore_button_label" msgid="1724367334453104378">"पुन:स्थापना नगर्नुहोस्"</string>
     <string name="current_password_text" msgid="8268189555578298067">"कृपया तल तपाईंको हालको ब्याकअप पासवर्ड प्रविष्टि गर्नुहोस्:"</string>
-    <string name="device_encryption_restore_text" msgid="1570864916855208992">"कृपया तल तपाईंको उपकरण एन्क्रिप्सन पासवर्ड प्रविष्टि गर्नुहोस्:"</string>
-    <string name="device_encryption_backup_text" msgid="5866590762672844664">"कृपया तल तपाईंको उपकरण एन्क्रिप्सन पासवर्ड प्रविष्टि गर्नुहोस्: यो ब्याकप सँग्रह एन्क्रिप्ट गर्न पनि प्रयोग हुने छ।"</string>
+    <string name="device_encryption_restore_text" msgid="1570864916855208992">"कृपया तल तपाईंको उपकरण इन्क्रिप्सन पासवर्ड प्रविष्टि गर्नुहोस्:"</string>
+    <string name="device_encryption_backup_text" msgid="5866590762672844664">"कृपया तल तपाईंको उपकरण इन्क्रिप्सन पासवर्ड प्रविष्टि गर्नुहोस्: यो ब्याकप सँग्रह एन्क्रिप्ट गर्न पनि प्रयोग हुने छ।"</string>
     <string name="backup_enc_password_text" msgid="4981585714795233099">"ब्याकप डेटालाई encrypt गर्न पासवर्ड प्रविष्टि गर्नुहोस्, यदि यो खालि छोडिएको खण्डमा तपाईको पुरानै पासवर्ड प्रयोग हुने छ।"</string>
     <string name="backup_enc_password_optional" msgid="1350137345907579306">"यदि तपाईं पूर्ण ब्याकअप डेटा इन्क्रिप्ट गर्न चाहनु हुन्छ भने तल पासवर्ड प्रविष्टि गर्नुहोस्।"</string>
-    <string name="backup_enc_password_required" msgid="7889652203371654149">"तपाईँको उपकरण गुप्तिकरण गरिए देखि, तपाईंले आफ्नो जगेडा गुप्तिकरण गर्न आवश्यक छ। कृपया तल पासवर्ड प्रविष्टि गर्नुहोस्:"</string>
     <string name="restore_enc_password_text" msgid="6140898525580710823">"यदि पुनःबहाली डेटा इन्क्रिप्ट छ भने कृपया तल पासवर्ड प्रविष्टि गर्नुहोस्:"</string>
     <string name="toast_backup_started" msgid="550354281452756121">"जगेडा राख्न सुरु हुँदै..."</string>
     <string name="toast_backup_ended" msgid="3818080769548726424">"ब्याकअप सकियो"</string>

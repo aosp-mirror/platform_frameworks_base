@@ -34,6 +34,10 @@
     <string name="status_bar_settings_auto_rotation" msgid="8329080442278431708">"I-auto rotate ang screen"</string>
     <string name="usb_device_permission_prompt" msgid="4414719028369181772">"Payagan ang <xliff:g id="APPLICATION">%1$s</xliff:g> na ma-access ang <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
     <string name="usb_device_permission_prompt_warn" msgid="2309129784984063656">"Payagan ang <xliff:g id="APPLICATION">%1$s</xliff:g> na i-access ang <xliff:g id="USB_DEVICE">%2$s</xliff:g>?\nHindi nabigyan ng pahintulot ang app na ito para mag-record pero nakakapag-capture ito ng audio sa pamamagitan ng USB device na ito."</string>
+    <string name="usb_audio_device_permission_prompt_title" msgid="4221351137250093451">"Payagan ang <xliff:g id="APPLICATION">%1$s</xliff:g> na i-access ang <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
+    <string name="usb_audio_device_confirm_prompt_title" msgid="8828406516732985696">"Buksan ang <xliff:g id="APPLICATION">%1$s</xliff:g> para pangasiwaan ang <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
+    <string name="usb_audio_device_prompt_warn" msgid="2504972133361130335">"Hindi nabigyan ng pahintulot ang app na ito na mag-record pero puwede itong mag-capture ng audio sa pamamagitan ng USB device na ito. Kapag ginamit ang <xliff:g id="APPLICATION">%1$s</xliff:g> sa device na ito, posibleng hindi marinig ang mga tawag, notification, at alarm."</string>
+    <string name="usb_audio_device_prompt" msgid="7944987408206252949">"Kapag ginamit ang <xliff:g id="APPLICATION">%1$s</xliff:g> sa device na ito, posibleng hindi marinig ang mga tawag, notification, at alarm."</string>
     <string name="usb_accessory_permission_prompt" msgid="717963550388312123">"Payagan ang <xliff:g id="APPLICATION">%1$s</xliff:g> na ma-access ang <xliff:g id="USB_ACCESSORY">%2$s</xliff:g>?"</string>
     <string name="usb_device_confirm_prompt" msgid="4091711472439910809">"Buksan ang <xliff:g id="APPLICATION">%1$s</xliff:g> upang pamahalaan ang <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
     <string name="usb_device_confirm_prompt_warn" msgid="990208659736311769">"Buksan ang <xliff:g id="APPLICATION">%1$s</xliff:g> para pangasiwaan ang <xliff:g id="USB_DEVICE">%2$s</xliff:g>?\nHindi nabigyan ng pahintulot ang app na ito para mag-record pero nakakapag-capture ito ng audio sa pamamagitan ng USB device na ito."</string>
@@ -131,7 +135,7 @@
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="2242167416140740920">"Na-authenticate ang mukha"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"Nakumpirma"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"I-tap ang Kumpirmahin para kumpletuhin"</string>
-    <string name="biometric_dialog_tap_confirm_with_face" msgid="1597899891472340950">"Na-unlock gamit ang mukha mo. Pindutin para magpatuloy."</string>
+    <string name="biometric_dialog_tap_confirm_with_face" msgid="1092050545851021991">"Na-unlock gamit ang mukha. Pindutin ang icon ng unlock para magpatuloy."</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"Na-authenticate"</string>
     <string name="biometric_dialog_use_pin" msgid="8385294115283000709">"Gumamit ng PIN"</string>
     <string name="biometric_dialog_use_pattern" msgid="2315593393167211194">"Gumamit ng pattern"</string>
@@ -287,6 +291,15 @@
     <string name="sensor_privacy_start_use_mic_dialog_content" msgid="1624701280680913717">"Ina-unblock nito ang access para sa lahat ng app at serbisyong pinapayagang gumamit ng iyong mikropono."</string>
     <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"Ina-unblock nito ang access para sa lahat ng app at serbisyong pinapayagang gumamit ng iyong camera."</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_content" msgid="3577642558418404919">"Ina-unblock nito ang access para sa lahat ng app at serbisyong pinapayagang gumamit ng iyong camera o mikropono."</string>
+    <string name="sensor_privacy_start_use_mic_blocked_dialog_title" msgid="2640140287496469689">"Naka-block ang mikropono"</string>
+    <string name="sensor_privacy_start_use_camera_blocked_dialog_title" msgid="7398084286822440384">"Naka-block ang camera"</string>
+    <string name="sensor_privacy_start_use_mic_camera_blocked_dialog_title" msgid="195236134743281973">"Naka-block ang mic at camera"</string>
+    <string name="sensor_privacy_start_use_mic_blocked_dialog_content" msgid="2138318880682877747">"Para i-unblock, ilipat sa naka-on na posisyon ang switch ng privacy sa iyong device sa mikropono para payagan ang access sa mikropono. Sumangguni sa manual ng device para mahanap ang switch ng privacy sa iyong device."</string>
+    <string name="sensor_privacy_start_use_camera_blocked_dialog_content" msgid="7216015168047965948">"Para i-unblock, ilipat sa naka-on na posisyon ang switch ng privacy sa iyong device sa camera para payagan ang access sa camera. Sumangguni sa manual ng device para mahanap ang switch ng privacy sa iyong device."</string>
+    <string name="sensor_privacy_start_use_mic_camera_blocked_dialog_content" msgid="3960837827570483762">"Para i-unblock ang mga ito, ilipat sa naka-unblock na posisyon ang switch ng privacy sa iyong device para payagan ang access. Sumangguni sa manual ng device para mahanap ang switch ng privacy sa iyong device."</string>
+    <string name="sensor_privacy_mic_unblocked_toast_content" msgid="306555320557065068">"Available ang mikropono"</string>
+    <string name="sensor_privacy_camera_unblocked_toast_content" msgid="7843105715964332311">"Available ang camera"</string>
+    <string name="sensor_privacy_mic_camera_unblocked_toast_content" msgid="7339355093282661115">"Available ang mikropono at camera"</string>
     <string name="media_seamless_other_device" msgid="4654849800789196737">"Iba pang device"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"I-toggle ang Overview"</string>
     <string name="zen_priority_introduction" msgid="3159291973383796646">"Hindi ka maiistorbo ng mga tunog at pag-vibrate, maliban mula sa mga alarm, paalala, event, at tumatawag na tutukuyin mo. Maririnig mo pa rin ang kahit na anong piliin mong i-play kabilang ang mga musika, video, at laro."</string>
@@ -297,7 +310,8 @@
     <string name="notification_tap_again" msgid="4477318164947497249">"I-tap ulit upang buksan"</string>
     <string name="tap_again" msgid="1315420114387908655">"I-tap ulit"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"Mag-swipe pataas para buksan"</string>
-    <string name="keyguard_unlock_press" msgid="8488350566398524740">"Pindutin para buksan"</string>
+    <string name="keyguard_unlock_press" msgid="9140109453735019209">"Pindutin ang icon ng unlock para buksan"</string>
+    <string name="keyguard_face_successful_unlock_press" msgid="25520941264602588">"Na-unlock gamit ang mukha. Pindutin ang icon ng unlock para buksan."</string>
     <string name="keyguard_retry" msgid="886802522584053523">"Mag-swipe pataas para subukan ulit"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"I-unlock para magamit ang NFC"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"Pagmamay-ari ng iyong organisasyon ang device na ito"</string>
@@ -320,7 +334,6 @@
     <string name="keyguard_indication_charging_time_dock" msgid="6150404291427377863">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Charging Dock • Mapupuno sa loob ng <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Magpalit ng user"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Ide-delete ang lahat ng app at data sa session na ito."</string>
-    <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"Alisin"</string>
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"Welcome ulit, bisita!"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"Gusto mo bang ipagpatuloy ang iyong session?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"Magsimulang muli"</string>
@@ -766,6 +779,12 @@
     <string name="controls_dialog_ok" msgid="2770230012857881822">"Idagdag"</string>
     <string name="controls_dialog_message" msgid="342066938390663844">"Iminungkahi ng <xliff:g id="APP">%s</xliff:g>"</string>
     <string name="controls_tile_locked" msgid="731547768182831938">"Naka-lock ang device"</string>
+    <string name="controls_settings_show_controls_dialog_title" msgid="3357852503553809554">"Ipakita at kontrolin ang mga device mula sa lock screen?"</string>
+    <string name="controls_settings_show_controls_dialog_message" msgid="7666211700524587969">"Puwede kang magdagdag ng mga kontrol para sa iyong mga external device sa lock screen.\n\nPosibleng payagan ka ng app ng iyong device na kontrolin ang ilang device nang hindi ina-unlock ang telepono o tablet mo.\n\nPuwede kang magsagawa ng mga pagbabago anumang oras sa Mga Setting."</string>
+    <string name="controls_settings_trivial_controls_dialog_title" msgid="7593188157655036677">"Kontrolin ang mga device mula sa lock screen?"</string>
+    <string name="controls_settings_trivial_controls_dialog_message" msgid="237183787721917586">"Puwede mong kontrolin ang ilang device nang hindi ina-unlock ang iyong telepono o tablet.\n\nNakadepende sa app ng iyong device kung aling mga device ang puwedeng kontrolin sa ganitong paraan."</string>
+    <string name="controls_settings_dialog_neutral_button" msgid="4514446354793124140">"Huwag na lang"</string>
+    <string name="controls_settings_dialog_positive_button" msgid="436070672551674863">"Oo"</string>
     <string name="controls_pin_use_alphanumeric" msgid="8478371861023048414">"May mga titik o simbolo ang PIN"</string>
     <string name="controls_pin_verify" msgid="3452778292918877662">"I-verify ang <xliff:g id="DEVICE">%s</xliff:g>"</string>
     <string name="controls_pin_wrong" msgid="6162694056042164211">"Maling PIN"</string>
@@ -775,8 +794,7 @@
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"Mag-swipe para tumingin ng higit pa"</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"Nilo-load ang rekomendasyon"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"Media"</string>
-    <!-- no translation found for controls_media_close_session (4780485355795635052) -->
-    <skip />
+    <string name="controls_media_close_session" msgid="4780485355795635052">"itago ang kontrol sa media na ito para sa <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="controls_media_active_session" msgid="3146882316024153337">"Hindi maitatago ang kasalukuyang session ng media."</string>
     <string name="controls_media_dismiss_button" msgid="4485675693008031646">"Itago"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"Ituloy"</string>
@@ -796,8 +814,7 @@
     <string name="media_move_closer_to_end_cast" msgid="6495907340926563656">"Lumapit sa <xliff:g id="DEVICENAME">%1$s</xliff:g> para mag-play rito"</string>
     <string name="media_transfer_playing_different_device" msgid="7186806382609785610">"Nagpe-play sa <xliff:g id="DEVICENAME">%1$s</xliff:g>"</string>
     <string name="media_transfer_playing_this_device" msgid="1856890686844499172">"Nagpe-play sa teleponong ito"</string>
-    <!-- no translation found for media_transfer_failed (7955354964610603723) -->
-    <skip />
+    <string name="media_transfer_failed" msgid="7955354964610603723">"Nagkaproblema. Subukan ulit."</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"Hindi aktibo, tingnan ang app"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"Hindi nahanap"</string>
     <string name="controls_error_removed_title" msgid="1207794911208047818">"Hindi available ang kontrol"</string>
@@ -816,6 +833,13 @@
     <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"Magpares ng bagong device"</string>
     <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"Para ma-cast ang session na ito, buksan ang app."</string>
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"Hindi kilalang app"</string>
+    <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Paano gumagana ang pag-broadcast"</string>
+    <string name="media_output_broadcast" msgid="3555580945878071543">"Broadcast"</string>
+    <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"Makakapakinig ang mga taong malapit sa iyo na may mga compatible na Bluetooth device sa media na bino-broadcast mo"</string>
+    <string name="media_output_broadcasting_message" msgid="4150299923404886073">"Para makinig sa iyong broadcast, puwedeng i-scan ng mga tao sa malapit na may mga compatible na Bluetooth device ang QR code mo o puwede nilang gamitin ang pangalan at password ng iyong broadcast"</string>
+    <string name="media_output_broadcast_name" msgid="8786127091542624618">"Pangalan ng Broadcast"</string>
+    <string name="media_output_broadcast_code" msgid="870795639644728542">"Password"</string>
+    <string name="media_output_broadcast_dialog_save" msgid="7910865591430010198">"I-save"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"Numero ng build"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"Nakopya sa clipboard ang numero ng build."</string>
     <string name="basic_status" msgid="2315371112182658176">"Buksan ang pag-uusap"</string>
@@ -892,7 +916,7 @@
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"Mga aktibong app"</string>
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"Ihinto"</string>
     <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"Inihinto"</string>
-    <string name="clipboard_edit_text_copy" msgid="770856373439969178">"Kopyahin"</string>
+    <string name="clipboard_edit_text_done" msgid="4551887727694022409">"Tapos na"</string>
     <string name="clipboard_overlay_text_copied" msgid="1872624400464891363">"Nakopya"</string>
     <string name="clipboard_edit_source" msgid="9156488177277788029">"Mula sa <xliff:g id="APPNAME">%1$s</xliff:g>"</string>
     <string name="clipboard_dismiss_description" msgid="7544573092766945657">"I-dismiss ang UI ng pagkopya"</string>

@@ -18,6 +18,7 @@ package com.android.systemui.statusbar.policy;
 
 import static android.os.BatteryManager.EXTRA_PRESENT;
 
+import android.annotation.WorkerThread;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -43,6 +44,7 @@ import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.demomode.DemoMode;
 import com.android.systemui.demomode.DemoModeController;
 import com.android.systemui.power.EnhancedEstimates;
+import com.android.systemui.util.Assert;
 
 import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
@@ -133,7 +135,7 @@ public class BatteryControllerImpl extends BroadcastReceiver implements BatteryC
         }
         mDemoModeController.addCallback(this);
         updatePowerSave();
-        updateEstimate();
+        updateEstimateInBackground();
     }
 
     @Override
@@ -338,7 +340,9 @@ public class BatteryControllerImpl extends BroadcastReceiver implements BatteryC
         }
     }
 
+    @WorkerThread
     private void updateEstimate() {
+        Assert.isNotMainThread();
         // if the estimate has been cached we can just use that, otherwise get a new one and
         // throw it in the cache.
         mEstimate = Estimate.getCachedEstimateIfAvailable(mContext);

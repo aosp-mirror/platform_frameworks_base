@@ -23,7 +23,7 @@
     android:layout_height="@dimen/footer_actions_height"
     android:elevation="@dimen/qs_panel_elevation"
     android:paddingTop="8dp"
-    android:paddingBottom="4dp"
+    android:paddingBottom="@dimen/qs_footer_actions_bottom_padding"
     android:background="@drawable/qs_footer_actions_background"
     android:gravity="center_vertical"
     android:layout_gravity="bottom"

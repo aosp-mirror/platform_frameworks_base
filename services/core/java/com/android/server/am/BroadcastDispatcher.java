@@ -580,6 +580,11 @@ public class BroadcastDispatcher {
     // ----------------------------------
     // BroadcastQueue operation support
     void enqueueOrderedBroadcastLocked(BroadcastRecord r) {
+        if (r.receivers == null || r.receivers.isEmpty()) {
+            mOrderedBroadcasts.add(r);
+            return;
+        }
+
         if (Intent.ACTION_LOCKED_BOOT_COMPLETED.equals(r.intent.getAction())) {
             // Create one BroadcastRecord for each UID that can be deferred.
             final SparseArray<BroadcastRecord> deferred =

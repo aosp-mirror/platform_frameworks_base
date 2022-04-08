@@ -29,7 +29,6 @@
     <string name="device_encryption_backup_text" msgid="5866590762672844664">"Төхөөрөмж шифрлэх нууц үгийг доор оруулна уу. Энэ нууц үгийг нөөшлөх архивийг шифрлэхэд бас ашиглана."</string>
     <string name="backup_enc_password_text" msgid="4981585714795233099">"Бүрэн дата нөөшлөлтийг шифрлэхэд ашиглах нууц үгийг оруулна уу. Хэрэв та хоосон үлдээвэл таны одоогийн нөөшлөлтийн нууц үг ашиглагдах болно:"</string>
     <string name="backup_enc_password_optional" msgid="1350137345907579306">"Хэрэв та бүрэн нөөшлөх датаг шифрлэх бол доор нууц үгийг оруулна уу:"</string>
-    <string name="backup_enc_password_required" msgid="7889652203371654149">"Таны төхөөрөмж шифрлэгдсэн тул та нөөшлөлтийг мөн шифрлэх шаардлагатай. Нууц үгийг доор оруулна уу:"</string>
     <string name="restore_enc_password_text" msgid="6140898525580710823">"Хэрэв сэргээх дата шифрлэгдсэн бол доор нууц үгийг оруулна уу:"</string>
     <string name="toast_backup_started" msgid="550354281452756121">"Нөөшлөж эхлэх..."</string>
     <string name="toast_backup_ended" msgid="3818080769548726424">"Нөөшлөлт дуусав"</string>

@@ -109,6 +109,9 @@
     <string name="bluetooth_battery_level" msgid="2893696778200201555">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> de bateria"</string>
     <string name="bluetooth_battery_level_untethered" msgid="4002282355111504349">"E: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> bateria, D: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> bateria"</string>
     <string name="bluetooth_active_no_battery_level" msgid="4155462233006205630">"Actiu"</string>
+    <string name="bluetooth_hearing_aid_left_active" msgid="7084887715570971441">"Actiu, només l\'esquerre"</string>
+    <string name="bluetooth_hearing_aid_right_active" msgid="8574683234077567230">"Actiu, només el dret"</string>
+    <string name="bluetooth_hearing_aid_left_and_right_active" msgid="407704460573163973">"Actiu, esquerre i dret"</string>
     <string name="bluetooth_profile_a2dp" msgid="4632426382762851724">"Àudio multimèdia"</string>
     <string name="bluetooth_profile_headset" msgid="5395952236133499331">"Trucades telefòniques"</string>
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"Transferència de fitxers"</string>
@@ -158,10 +161,6 @@
     <string name="bluetooth_talkback_headphone" msgid="8613073829180337091">"Auricular"</string>
     <string name="bluetooth_talkback_input_peripheral" msgid="5133944817800149942">"Perifèric d\'entrada"</string>
     <string name="bluetooth_talkback_bluetooth" msgid="1143241359781999989">"Bluetooth"</string>
-    <string name="bluetooth_hearingaid_left_pairing_message" msgid="8561855779703533591">"S\'està vinculant l\'audiòfon esquerre…"</string>
-    <string name="bluetooth_hearingaid_right_pairing_message" msgid="2655347721696331048">"S\'està vinculant l\'audiòfon dret…"</string>
-    <string name="bluetooth_hearingaid_left_battery_level" msgid="7375621694748104876">"Esquerre: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> de bateria"</string>
-    <string name="bluetooth_hearingaid_right_battery_level" msgid="1850094448499089312">"Dret: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> de bateria"</string>
     <string name="accessibility_wifi_off" msgid="1195445715254137155">"Wi-Fi desactivada."</string>
     <string name="accessibility_no_wifi" msgid="5297119459491085771">"Wi-Fi desconnectada."</string>
     <string name="accessibility_wifi_one_bar" msgid="6025652717281815212">"Senyal Wi-Fi: una barra."</string>
@@ -180,7 +179,6 @@
     <string name="tether_settings_title_usb_bluetooth" msgid="1727111807207577322">"Compartició de xarxa"</string>
     <string name="tether_settings_title_all" msgid="8910259483383010470">"Compartició de xarxa i punt d\'accés Wi-Fi"</string>
     <string name="managed_user_title" msgid="449081789742645723">"Totes les aplic. de feina"</string>
-    <string name="user_guest" msgid="6939192779649870792">"Convidat"</string>
     <string name="unknown" msgid="3544487229740637809">"Desconegut"</string>
     <string name="running_process_item_user_label" msgid="3988506293099805796">"Usuari: <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
     <string name="launch_defaults_some" msgid="3631650616557252926">"S\'han definit alguns valors predeterminats"</string>
@@ -313,7 +311,7 @@
     <string name="private_dns_mode_provider_failure" msgid="8356259467861515108">"No s\'ha pogut connectar"</string>
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Mostra les opcions per a la certificació de pantalla sense fil"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Augmenta el nivell de registre de la connexió Wi‑Fi i es mostra per SSID RSSI al selector de Wi‑Fi"</string>
-    <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Redueix el consum de bateria i millora el rendiment de la xarxa"</string>
+    <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Exhaureix menys la bateria i millora el rendiment de la xarxa"</string>
     <string name="wifi_non_persistent_mac_randomization_summary" msgid="2159794543105053930">"Quan aquest mode està activat, és possible que l’adreça MAC d\'aquest dispositiu canviï cada vegada que es connecti a una xarxa amb l\'aleatorització d\'adreces MAC activada."</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"D\'ús mesurat"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"D\'ús no mesurat"</string>
@@ -442,12 +440,6 @@
     <string name="select_webview_provider_title" msgid="3917815648099445503">"Implementació de WebView"</string>
     <string name="select_webview_provider_dialog_title" msgid="2444261109877277714">"Estableix implementació de WebView"</string>
     <string name="select_webview_provider_toast_text" msgid="8512254949169359848">"Aquesta opció ja no és vàlida. Torna-ho a provar."</string>
-    <string name="convert_to_file_encryption" msgid="2828976934129751818">"Converteix en encriptació de fitxers"</string>
-    <string name="convert_to_file_encryption_enabled" msgid="840757431284311754">"Converteix…"</string>
-    <string name="convert_to_file_encryption_done" msgid="8965831011811180627">"El fitxer ja està encriptat"</string>
-    <string name="title_convert_fbe" msgid="5780013350366495149">"S\'està convertint en l\'encriptació basada en fitxers"</string>
-    <string name="convert_to_fbe_warning" msgid="34294381569282109">"Converteix la partició de dades en una encriptació basada en fitxers.\n Advertiment: s\'esborraran totes les teves dades.\n Aquesta funció és alfa i és possible que no funcioni correctament.\n Per continuar, prem Esborra i converteix…"</string>
-    <string name="button_convert_fbe" msgid="1159861795137727671">"Neteja i converteix…"</string>
     <string name="picture_color_mode" msgid="1013807330552931903">"Mode de color de la imatge"</string>
     <string name="picture_color_mode_desc" msgid="151780973768136200">"Utilitza sRGB"</string>
     <string name="daltonizer_mode_disabled" msgid="403424372812399228">"Desactivat"</string>
@@ -512,7 +504,7 @@
     <string name="screen_zoom_summary_default" msgid="1888865694033865408">"Predeterminat"</string>
     <string name="screen_zoom_summary_large" msgid="4706951482598978984">"Gran"</string>
     <string name="screen_zoom_summary_very_large" msgid="7317423942896999029">"Més gran"</string>
-    <string name="screen_zoom_summary_extremely_large" msgid="1438045624562358554">"Més grans possible"</string>
+    <string name="screen_zoom_summary_extremely_large" msgid="1438045624562358554">"El més gran"</string>
     <string name="screen_zoom_summary_custom" msgid="3468154096832912210">"Personalitzat (<xliff:g id="DENSITYDPI">%d</xliff:g>)"</string>
     <string name="content_description_menu_button" msgid="6254844309171779931">"Menú"</string>
     <string name="retail_demo_reset_message" msgid="5392824901108195463">"Introdueix la contrasenya per restablir les dades de fàbrica en mode de demostració"</string>
@@ -533,8 +525,7 @@
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"Menys temps"</string>
     <string name="cancel" msgid="5665114069455378395">"Cancel·la"</string>
     <string name="okay" msgid="949938843324579502">"D\'acord"</string>
-    <!-- no translation found for done (381184316122520313) -->
-    <skip />
+    <string name="done" msgid="381184316122520313">"Fet"</string>
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"Alarmes i recordatoris"</string>
     <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"Permet la configuració d\'alarmes i recordatoris"</string>
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"Alarmes i recordatoris"</string>
@@ -554,8 +545,7 @@
     <string name="zen_mode_forever" msgid="3339224497605461291">"Fins que no el desactivis"</string>
     <string name="time_unit_just_now" msgid="3006134267292728099">"Ara mateix"</string>
     <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"Aquest telèfon"</string>
-    <!-- no translation found for media_transfer_this_device_name (3714653244000242800) -->
-    <skip />
+    <string name="media_transfer_this_device_name" product="tablet" msgid="3714653244000242800">"Aquesta tauleta"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"Aquest telèfon"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"Hi ha hagut un problema amb la connexió. Apaga el dispositiu i torna\'l a encendre."</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"Dispositiu d\'àudio amb cable"</string>
@@ -599,16 +589,22 @@
     <string name="add_user_failed" msgid="4809887794313944872">"No s\'ha pogut crear l\'usuari"</string>
     <string name="add_guest_failed" msgid="8074548434469843443">"No s\'ha pogut crear un convidat"</string>
     <string name="user_nickname" msgid="262624187455825083">"Àlies"</string>
+    <string name="user_add_user" msgid="7876449291500212468">"Afegeix un usuari"</string>
     <string name="guest_new_guest" msgid="3482026122932643557">"Afegeix un convidat"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"Suprimeix el convidat"</string>
     <string name="guest_reset_guest" msgid="6110013010356013758">"Restableix el convidat"</string>
-    <string name="guest_nickname" msgid="6332276931583337261">"Convidat"</string>
     <string name="guest_reset_guest_dialog_title" msgid="8047270010895437534">"Vols restablir el convidat?"</string>
+    <string name="guest_remove_guest_dialog_title" msgid="4548511006624088072">"Vols suprimir el convidat?"</string>
     <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"Restableix"</string>
+    <string name="guest_remove_guest_confirm_button" msgid="7858123434954143879">"Suprimeix"</string>
     <string name="guest_resetting" msgid="7822120170191509566">"S\'està restablint el convidat…"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"Fes una foto"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"Tria una imatge"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"Selecciona una foto"</string>
+    <string name="failed_attempts_now_wiping_device" msgid="4016329172216428897">"Has superat el nombre d\'intents incorrectes permesos. Les dades d\'aquest dispositiu se suprimiran."</string>
+    <string name="failed_attempts_now_wiping_user" msgid="469060411789668050">"Has superat el nombre d\'intents incorrectes permesos. Aquest usuari se suprimirà."</string>
+    <string name="failed_attempts_now_wiping_profile" msgid="7626589520888963129">"Has superat el nombre d\'intents incorrectes permesos. Aquest perfil de treball i les dades que contingui se suprimiran."</string>
+    <string name="failed_attempts_now_wiping_dialog_dismiss" msgid="2749889771223578925">"Ignora"</string>
     <string name="cached_apps_freezer_device_default" msgid="2616594131750144342">"Opció predeter. del dispositiu"</string>
     <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"Desactivat"</string>
     <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"Activat"</string>
@@ -653,4 +649,10 @@
     <string name="physical_keyboard_title" msgid="4811935435315835220">"Teclat físic"</string>
     <string name="keyboard_layout_dialog_title" msgid="3927180147005616290">"Tria una disposició de teclat"</string>
     <string name="keyboard_layout_default_label" msgid="1997292217218546957">"Predeterminat"</string>
+    <string name="turn_screen_on_title" msgid="3266937298097573424">"Activa la pantalla"</string>
+    <string name="allow_turn_screen_on" msgid="6194845766392742639">"Permet que activi la pantalla"</string>
+    <string name="allow_turn_screen_on_description" msgid="43834403291575164">"Permet que una aplicació activi la pantalla. Si concedeixes aquest permís, pot ser que l\'aplicació activi la pantalla en qualsevol moment sense la teva intenció explícita."</string>
+    <string name="bt_le_audio_scan_qr_code" msgid="3521809854780392679">"Escaneja un codi QR"</string>
+    <string name="bt_le_audio_scan_qr_code_scanner" msgid="4679500020630341107">"Per començar a escoltar, centra el codi QR més avall"</string>
+    <string name="bt_le_audio_qr_code_is_not_valid_format" msgid="6092191081849434734">"El codi QR no té un format vàlid"</string>
 </resources>

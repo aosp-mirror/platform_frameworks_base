@@ -385,7 +385,7 @@ public class ComputerEngine implements Computer {
     private final ResolveInfo mInstantAppInstallerInfo;
     private final InstantAppRegistry mInstantAppRegistry;
     private final ApplicationInfo mLocalAndroidApplication;
-    private final AppsFilter mAppsFilter;
+    private final AppsFilterSnapshot mAppsFilter;
     private final WatchedArrayMap<String, Integer> mFrozenPackages;
 
     // Immutable service attribute
@@ -540,8 +540,13 @@ public class ComputerEngine implements Computer {
                                 && ((!matchInstantApp && !isCallerInstantApp && isTargetInstantApp)
                                 || (matchVisibleToInstantAppOnly && isCallerInstantApp
                                 && isTargetHiddenFromInstantApp));
+                final boolean resolveForStartNonExported = resolveForStart
+                                && !ai.exported
+                                && !isCallerSameApp(pkgName, filterCallingUid);
                 final boolean blockNormalResolution =
-                        !resolveForStart && !isTargetInstantApp && !isCallerInstantApp
+                        (!resolveForStart || resolveForStartNonExported)
+                                && !isTargetInstantApp
+                                && !isCallerInstantApp
                                 && shouldFilterApplication(
                                 getPackageStateInternal(ai.applicationInfo.packageName,
                                         Process.SYSTEM_UID), filterCallingUid, userId);
@@ -1835,9 +1840,6 @@ public class ComputerEngine implements Computer {
                 list.addAll(mApexManager.getFactoryPackages());
             } else {
                 list.addAll(mApexManager.getActivePackages());
-                if (listUninstalled) {
-                    list.addAll(mApexManager.getInactivePackages());
-                }
             }
         }
         return new ParceledListSlice<>(list);
