@@ -232,23 +232,26 @@ final class TranslationManagerServiceImpl extends
     public void updateUiTranslationStateLocked(@UiTranslationState int state,
             TranslationSpec sourceSpec, TranslationSpec targetSpec, List<AutofillId> viewIds,
             IBinder token, int taskId, UiTranslationSpec uiTranslationSpec) {
-        // Get top activity for a given task id
-        final ActivityTokens taskTopActivityTokens =
-                mActivityTaskManagerInternal.getTopActivityForTask(taskId);
-        if (taskTopActivityTokens == null
-                || taskTopActivityTokens.getShareableActivityToken() != token) {
-            Slog.w(TAG, "Unknown activity or it was finished to query for update translation "
-                    + "state for token=" + token + " taskId=" + taskId + " for state= " + state);
+        // If the app starts a new Activity in the same task then the finish or pause API
+        // is called, the operation doesn't work if we only check task top Activity. The top
+        // Activity is the new Activity, the original Activity is paused in the same task.
+        // To make sure the operation still work, we use the token to find the target Activity in
+        // this task, not the top Activity only.
+        ActivityTokens candidateActivityTokens =
+                mActivityTaskManagerInternal.getAttachedNonFinishingActivityForTask(taskId, token);
+        if (candidateActivityTokens == null) {
+            Slog.w(TAG, "Unknown activity or it was finished to query for update "
+                    + "translation state for token=" + token + " taskId=" + taskId + " for "
+                    + "state= " + state);
             return;
         }
-        mLastActivityTokens = new WeakReference<>(taskTopActivityTokens);
+        mLastActivityTokens = new WeakReference<>(candidateActivityTokens);
         if (state == STATE_UI_TRANSLATION_FINISHED) {
             mWaitingFinishedCallbackActivities.add(token);
         }
-
-        IBinder activityToken = taskTopActivityTokens.getActivityToken();
+        IBinder activityToken = candidateActivityTokens.getActivityToken();
         try {
-            taskTopActivityTokens.getApplicationThread().updateUiTranslationState(
+            candidateActivityTokens.getApplicationThread().updateUiTranslationState(
                     activityToken, state, sourceSpec, targetSpec,
                     viewIds, uiTranslationSpec);
         } catch (RemoteException e) {
