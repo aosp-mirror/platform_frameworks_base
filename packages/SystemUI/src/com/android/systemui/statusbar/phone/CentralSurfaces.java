@@ -3251,9 +3251,13 @@ public class CentralSurfaces extends CoreStartable implements
     }
 
     public boolean onBackPressed() {
-        boolean isScrimmedBouncer = mScrimController.getState() == ScrimState.BOUNCER_SCRIMMED;
-        if (mStatusBarKeyguardViewManager.onBackPressed(isScrimmedBouncer /* hideImmediately */)) {
-            if (isScrimmedBouncer) {
+        final boolean isScrimmedBouncer =
+                mScrimController.getState() == ScrimState.BOUNCER_SCRIMMED;
+        final boolean isBouncerOverDream = isBouncerShowingOverDream();
+
+        if (mStatusBarKeyguardViewManager.onBackPressed(
+                isScrimmedBouncer || isBouncerOverDream /* hideImmediately */)) {
+            if (isScrimmedBouncer || isBouncerOverDream) {
                 mStatusBarStateController.setLeaveOpenOnKeyguardHide(false);
             } else {
                 mNotificationPanelViewController.expandWithoutQs();
@@ -3275,7 +3279,8 @@ public class CentralSurfaces extends CoreStartable implements
         if (mNotificationPanelViewController.closeUserSwitcherIfOpen()) {
             return true;
         }
-        if (mState != StatusBarState.KEYGUARD && mState != StatusBarState.SHADE_LOCKED) {
+        if (mState != StatusBarState.KEYGUARD && mState != StatusBarState.SHADE_LOCKED
+                && !isBouncerOverDream) {
             if (mNotificationPanelViewController.canPanelBeCollapsed()) {
                 mShadeController.animateCollapsePanels();
             }
