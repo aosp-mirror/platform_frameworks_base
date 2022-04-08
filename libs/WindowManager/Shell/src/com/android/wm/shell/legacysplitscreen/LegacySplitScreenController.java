@@ -25,7 +25,6 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 import static android.view.Display.DEFAULT_DISPLAY;
 
-import android.animation.AnimationHandler;
 import android.app.ActivityManager;
 import android.app.ActivityManager.RunningTaskInfo;
 import android.app.ActivityTaskManager;
@@ -82,7 +81,6 @@ public class LegacySplitScreenController implements DisplayController.OnDisplays
     private final DividerState mDividerState = new DividerState();
     private final ForcedResizableInfoActivityController mForcedResizableController;
     private final ShellExecutor mMainExecutor;
-    private final AnimationHandler mSfVsyncAnimationHandler;
     private final LegacySplitScreenTaskListener mSplits;
     private final SystemWindows mSystemWindows;
     final TransactionPool mTransactionPool;
@@ -118,13 +116,12 @@ public class LegacySplitScreenController implements DisplayController.OnDisplays
             DisplayImeController imeController, TransactionPool transactionPool,
             ShellTaskOrganizer shellTaskOrganizer, SyncTransactionQueue syncQueue,
             TaskStackListenerImpl taskStackListener, Transitions transitions,
-            ShellExecutor mainExecutor, AnimationHandler sfVsyncAnimationHandler) {
+            ShellExecutor mainExecutor) {
         mContext = context;
         mDisplayController = displayController;
         mSystemWindows = systemWindows;
         mImeController = imeController;
         mMainExecutor = mainExecutor;
-        mSfVsyncAnimationHandler = sfVsyncAnimationHandler;
         mForcedResizableController = new ForcedResizableInfoActivityController(context, this,
                 mainExecutor);
         mTransactionPool = transactionPool;
@@ -314,7 +311,6 @@ public class LegacySplitScreenController implements DisplayController.OnDisplays
         Context dctx = mDisplayController.getDisplayContext(mContext.getDisplayId());
         mView = (DividerView)
                 LayoutInflater.from(dctx).inflate(R.layout.docked_stack_divider, null);
-        mView.setAnimationHandler(mSfVsyncAnimationHandler);
         DisplayLayout displayLayout = mDisplayController.getDisplayLayout(mContext.getDisplayId());
         mView.injectDependencies(this, mWindowManager, mDividerState, mForcedResizableController,
                 mSplits, mSplitLayout, mImePositionProcessor, mWindowManagerProxy);
