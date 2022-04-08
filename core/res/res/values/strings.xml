@@ -234,9 +234,9 @@
     <!-- Displayed to tell the user that they should switch their network preference. -->
     <string name="NetworkPreferenceSwitchSummary">Try changing preferred network. Tap to change.</string>
     <!-- Displayed to tell the user that emergency calls might not be available. -->
-    <string name="EmergencyCallWarningTitle">Emergency calls may be unavailable</string>
+    <string name="EmergencyCallWarningTitle">Emergency calling unavailable</string>
     <!-- Displayed to tell the user that emergency calls might not be available. -->
-    <string name="EmergencyCallWarningSummary"><xliff:g id="spn" example="Operator">%s</xliff:g> doesn\'t support emergency calls over Wi-Fi. Tap for details.</string>
+    <string name="EmergencyCallWarningSummary">Can\u2019t make emergency calls over Wi\u2011Fi</string>
 
     <!-- Telephony notification channel name for a channel containing network alert notifications. -->
     <string name="notification_channel_network_alert">Alerts</string>
