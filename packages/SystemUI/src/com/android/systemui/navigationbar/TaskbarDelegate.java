@@ -55,8 +55,8 @@ import android.view.WindowInsetsController.Behavior;
 import androidx.annotation.NonNull;
 
 import com.android.internal.view.AppearanceRegion;
-import com.android.systemui.Dependency;
 import com.android.systemui.Dumpable;
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.model.SysUiState;
 import com.android.systemui.navigationbar.gestural.EdgeBackGestureHandler;
@@ -78,9 +78,9 @@ import java.util.Optional;
 import java.util.function.Consumer;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
-@Singleton
+/** */
+@SysUISingleton
 public class TaskbarDelegate implements CommandQueue.Callbacks,
         OverviewProxyService.OverviewProxyListener, NavigationModeController.ModeChangedListener,
         ComponentCallbacks, Dumpable {
@@ -88,6 +88,7 @@ public class TaskbarDelegate implements CommandQueue.Callbacks,
 
     private final EdgeBackGestureHandler mEdgeBackGestureHandler;
     private final NavigationBarOverlayController mNavBarOverlayController;
+    private final LightBarTransitionsController.Factory mLightBarTransitionsControllerFactory;
     private boolean mInitialized;
     private CommandQueue mCommandQueue;
     private OverviewProxyService mOverviewProxyService;
@@ -154,10 +155,15 @@ public class TaskbarDelegate implements CommandQueue.Callbacks,
     private BackAnimation mBackAnimation;
 
     @Inject
-    public TaskbarDelegate(Context context) {
-        mEdgeBackGestureHandler = Dependency.get(EdgeBackGestureHandler.Factory.class)
-                .create(context);
-        mNavBarOverlayController = Dependency.get(NavigationBarOverlayController.class);
+    public TaskbarDelegate(
+            Context context,
+            EdgeBackGestureHandler.Factory edgeBackGestureHandlerFactory,
+            NavigationBarOverlayController navigationBarOverlayController,
+            LightBarTransitionsController.Factory lightBarTransitionsControllerFactory
+    ) {
+        mLightBarTransitionsControllerFactory = lightBarTransitionsControllerFactory;
+        mEdgeBackGestureHandler = edgeBackGestureHandlerFactory.create(context);
+        mNavBarOverlayController = navigationBarOverlayController;
         if (mNavBarOverlayController.isNavigationBarOverlayEnabled()) {
             mNavBarOverlayController.init(mNavbarOverlayVisibilityChangeCallback,
                     mEdgeBackGestureHandler::updateNavigationBarOverlayExcludeRegion);
@@ -185,14 +191,15 @@ public class TaskbarDelegate implements CommandQueue.Callbacks,
         dumpManager.registerDumpable(this);
         mAutoHideController = autoHideController;
         mLightBarController = lightBarController;
-        mLightBarTransitionsController = createLightBarTransitionsController();
         mPipOptional = pipOptional;
         mBackAnimation = backAnimation;
+        mLightBarTransitionsController = createLightBarTransitionsController();
     }
 
     // Separated into a method to keep setDependencies() clean/readable.
     private LightBarTransitionsController createLightBarTransitionsController() {
-        return new LightBarTransitionsController(mContext,
+
+        LightBarTransitionsController controller =  mLightBarTransitionsControllerFactory.create(
                 new LightBarTransitionsController.DarkIntensityApplier() {
                     @Override
                     public void applyDarkIntensity(float darkIntensity) {
@@ -203,13 +210,10 @@ public class TaskbarDelegate implements CommandQueue.Callbacks,
                     public int getTintAnimationDuration() {
                         return LightBarTransitionsController.DEFAULT_TINT_ANIMATION_DURATION;
                     }
-                }, mCommandQueue) {
-            @Override
-            public boolean supportsIconTintForNavMode(int navigationMode) {
-                // Always tint taskbar nav buttons (region sampling handles gesture bar separately).
-                return true;
-            }
-        };
+                });
+        controller.overrideIconTintForNavMode(true);
+
+        return controller;
     }
 
     public void init(int displayId) {
