@@ -655,4 +655,8 @@
     <string name="bt_le_audio_scan_qr_code" msgid="3521809854780392679">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‏‎‏‏‏‏‏‎‏‏‎‎‎‎‏‏‎‏‏‏‏‏‏‏‏‏‏‎‏‏‎‏‏‎‎‏‏‏‎‏‎‏‎‎‎‎‏‎‏‎‎‏‏‏‏‏‎‎‎‏‎‎‏‏‏‎‎‏‏‏‎Scan QR code‎‏‎‎‏‎"</string>
     <string name="bt_le_audio_scan_qr_code_scanner" msgid="4679500020630341107">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‏‎‏‏‏‏‏‏‏‎‎‎‎‎‎‏‏‏‏‎‎‎‎‏‏‏‎‏‏‎‎‎‏‏‏‏‎‎‏‏‏‎‎‏‎‎‎‎‎‎‏‏‎‏‎‏‏‎‎‎‏‎‏‏‏‏‏‎‎‏‏‎To start listening, center the QR code below‎‏‎‎‏‎"</string>
     <string name="bt_le_audio_qr_code_is_not_valid_format" msgid="6092191081849434734">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‏‎‏‏‏‏‏‏‏‎‏‎‏‎‎‏‎‎‎‏‎‏‏‏‏‎‎‏‏‏‏‏‎‎‎‎‎‏‎‏‏‎‏‏‎‎‏‎‏‏‏‎‎‎‎‎‎‏‏‎‎‏‎‎‏‏‎‏‏‏‎‎QR code isn\'t a valid format‎‏‎‎‏‎"</string>
+    <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‏‎‏‏‏‏‏‏‏‎‎‏‎‏‎‏‏‎‏‎‏‏‎‏‏‎‏‏‎‏‏‎‎‎‏‎‏‎‏‎‏‏‏‎‎‏‎‏‏‎‎‏‏‏‏‏‏‏‏‏‏‎‎‏‎‏‏‎‎‏‎‎Stop broadcasting ‎‏‎‎‏‏‎<xliff:g id="APP_NAME">%1$s</xliff:g>‎‏‎‎‏‏‏‎?‎‏‎‎‏‎"</string>
+    <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="268234802198852753">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‏‎‏‏‏‎‏‎‏‏‏‎‏‏‏‎‎‎‏‏‏‏‎‏‏‎‎‎‏‎‎‎‎‏‏‎‏‎‎‏‎‏‎‏‏‏‎‏‎‏‏‎‏‏‎‏‎‎‏‎‎‏‎‎‎‏‎If you broadcast ‎‏‎‎‏‏‎<xliff:g id="SWITCHAPP">%1$s</xliff:g>‎‏‎‎‏‏‏‎ or change the output, your current broadcast will stop‎‏‎‎‏‎"</string>
+    <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‏‎‏‏‏‏‏‏‏‎‎‏‏‏‏‏‏‎‎‏‎‏‏‎‏‏‏‎‎‎‎‏‎‏‏‏‏‏‎‏‎‏‎‎‏‎‎‎‎‏‏‎‎‏‏‏‎‏‎‏‏‏‎‏‏‏‏‎‏‎‎‎Broadcast ‎‏‎‎‏‏‎<xliff:g id="SWITCHAPP">%1$s</xliff:g>‎‏‎‎‏‏‏‎‎‏‎‎‏‎"</string>
+    <string name="bt_le_audio_broadcast_dialog_different_output" msgid="2638402023060391333">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‏‎‏‏‏‏‏‎‏‎‎‏‎‎‏‎‎‏‏‏‎‏‎‏‏‏‏‏‎‎‏‎‏‎‏‎‎‏‎‎‏‏‏‏‏‏‎‎‏‎‏‏‏‏‏‏‎‎‎‏‎‏‏‎‏‎‎‏‎‏‎Change output‎‏‎‎‏‎"</string>
 </resources>
