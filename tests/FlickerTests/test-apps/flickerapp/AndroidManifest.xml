@@ -130,5 +130,27 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
+        <activity android:name=".ShowWhenLockedActivity"
+            android:taskAffinity="com.android.server.wm.flicker.testapp.ShowWhenLockedActivity"
+            android:theme="@style/CutoutShortEdges"
+            android:configChanges="orientation|screenSize"
+            android:label="ShowWhenLockedActivity"
+            android:showWhenLocked="true"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity>
+        <activity android:name=".NotificationActivity"
+            android:taskAffinity="com.android.server.wm.flicker.testapp.NotificationActivity"
+            android:theme="@style/CutoutShortEdges"
+            android:configChanges="orientation|screenSize"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity>
     </application>
 </manifest>
