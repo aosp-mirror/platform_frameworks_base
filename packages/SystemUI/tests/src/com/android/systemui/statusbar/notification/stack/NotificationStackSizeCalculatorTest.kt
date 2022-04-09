@@ -57,7 +57,7 @@ class NotificationStackSizeCalculatorTest : SysuiTestCase() {
             .thenReturn(GAP_HEIGHT)
         with(testableResources) {
             addOverride(R.integer.keyguard_max_notification_count, -1)
-            addOverride(R.dimen.notification_divider_height, NOTIFICATION_PADDING.toInt())
+            addOverride(R.dimen.notification_divider_height, DIVIDER_HEIGHT.toInt())
         }
 
         sizeCalculator =
@@ -109,7 +109,7 @@ class NotificationStackSizeCalculatorTest : SysuiTestCase() {
     fun computeMaxKeyguardNotifications_spaceForOne_shelfUsableForLastNotification_returnsTwo() {
         val rowHeight = ROW_HEIGHT
         val totalSpaceForEachRow = GAP_HEIGHT + rowHeight
-        val shelfHeight = totalSpaceForEachRow + NOTIFICATION_PADDING
+        val shelfHeight = totalSpaceForEachRow + DIVIDER_HEIGHT
         val spaceForOne = totalSpaceForEachRow
         val rows =
             listOf(
@@ -127,7 +127,7 @@ class NotificationStackSizeCalculatorTest : SysuiTestCase() {
     fun computeMaxKeyguardNotifications_spaceForTwo_returnsTwo() {
         val rowHeight = ROW_HEIGHT
         val totalSpaceForEachRow = GAP_HEIGHT + rowHeight
-        val spaceForTwo = totalSpaceForEachRow * 2 + NOTIFICATION_PADDING
+        val spaceForTwo = totalSpaceForEachRow * 2 + DIVIDER_HEIGHT
         val rows =
             listOf(
                 createMockRow(rowHeight),
@@ -143,7 +143,7 @@ class NotificationStackSizeCalculatorTest : SysuiTestCase() {
     fun computeHeight_returnsAtMostSpaceAvailable_withGapBeforeShelf() {
         val rowHeight = ROW_HEIGHT
         val shelfHeight = SHELF_HEIGHT
-        val totalSpaceForEachRow = GAP_HEIGHT + rowHeight + NOTIFICATION_PADDING
+        val totalSpaceForEachRow = GAP_HEIGHT + rowHeight + DIVIDER_HEIGHT
         val availableSpace = totalSpaceForEachRow * 2
 
         // All rows in separate sections (default setup).
@@ -164,7 +164,7 @@ class NotificationStackSizeCalculatorTest : SysuiTestCase() {
     fun computeHeight_returnsAtMostSpaceAvailable_noGapBeforeShelf() {
         val rowHeight = ROW_HEIGHT
         val shelfHeight = SHELF_HEIGHT
-        val totalSpaceForEachRow = GAP_HEIGHT + rowHeight + NOTIFICATION_PADDING
+        val totalSpaceForEachRow = GAP_HEIGHT + rowHeight + DIVIDER_HEIGHT
         val availableSpace = totalSpaceForEachRow * 1
 
         // Both rows are in the same section.
@@ -223,7 +223,7 @@ class NotificationStackSizeCalculatorTest : SysuiTestCase() {
     /** Default dimensions for tests that don't overwrite them. */
     companion object {
         const val GAP_HEIGHT = 12f
-        const val NOTIFICATION_PADDING = 3f
+        const val DIVIDER_HEIGHT = 3f
         const val SHELF_HEIGHT = 14f
         const val ROW_HEIGHT = SHELF_HEIGHT * 3
     }
