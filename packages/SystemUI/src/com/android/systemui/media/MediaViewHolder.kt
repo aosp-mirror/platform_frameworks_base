@@ -178,5 +178,14 @@ class MediaViewHolder constructor(itemView: View) {
                 R.id.dismiss,
                 R.id.settings
         )
+
+        // Buttons used for notification-based actions
+        val genericButtonIds = setOf(
+            R.id.action0,
+            R.id.action1,
+            R.id.action2,
+            R.id.action3,
+            R.id.action4
+        )
     }
 }
