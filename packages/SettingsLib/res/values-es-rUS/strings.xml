@@ -655,4 +655,12 @@
     <string name="bt_le_audio_scan_qr_code" msgid="3521809854780392679">"Escanear código QR"</string>
     <string name="bt_le_audio_scan_qr_code_scanner" msgid="4679500020630341107">"Para comenzar a escuchar, centra el código QR que aparece a continuación"</string>
     <string name="bt_le_audio_qr_code_is_not_valid_format" msgid="6092191081849434734">"El código QR no tiene un formato válido"</string>
+    <!-- no translation found for bt_le_audio_broadcast_dialog_title (5392738488989777074) -->
+    <skip />
+    <!-- no translation found for bt_le_audio_broadcast_dialog_sub_title (268234802198852753) -->
+    <skip />
+    <!-- no translation found for bt_le_audio_broadcast_dialog_switch_app (5749813313369517812) -->
+    <skip />
+    <!-- no translation found for bt_le_audio_broadcast_dialog_different_output (2638402023060391333) -->
+    <skip />
 </resources>
