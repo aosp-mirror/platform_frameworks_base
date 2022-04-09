@@ -30,6 +30,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
@@ -127,6 +128,7 @@ public class ScreenDecorationsTest extends SysuiTestCase {
     private CornerDecorProvider mPrivacyDotBottomRightDecorProvider;
     @Mock
     private Display.Mode mDisplayMode;
+    private PrivacyDotViewController.ShowingListener mPrivacyDotShowingListener;
 
     @Before
     public void setup() {
@@ -195,10 +197,24 @@ public class ScreenDecorationsTest extends SysuiTestCase {
                 super.onTuningChanged(key, newValue);
                 mExecutor.runAllReady();
             }
+
+            @Override
+            protected void setOverlayWindowVisibilityIfViewExist(@Nullable View view,
+                    @View.Visibility int visibility) {
+                super.setOverlayWindowVisibilityIfViewExist(view, visibility);
+                mExecutor.runAllReady();
+            }
         });
         reset(mTunerService);
-    }
 
+        try {
+            mPrivacyDotShowingListener = mScreenDecorations.mPrivacyDotShowingListener.getClass()
+                    .getDeclaredConstructor(ScreenDecorations.class)
+                    .newInstance(mScreenDecorations);
+        } catch (Exception e) {
+            fail(e.getMessage());
+        }
+    }
 
     private void verifyRoundedCornerViewsVisibility(
             @DisplayCutout.BoundsPosition final int overlayId,
@@ -277,43 +293,59 @@ public class ScreenDecorationsTest extends SysuiTestCase {
         verifyBottomDotViewsVisibility(visibility);
     }
 
-    private void verifyOverlaysExistAndAdded(final boolean left, final boolean top,
-            final boolean right, final boolean bottom) {
+    private void verifyOverlaysExistAndAdded(boolean left, boolean top, boolean right,
+            boolean bottom, @Nullable Integer visibilityIfExist) {
         if (left || top || right || bottom) {
             assertNotNull(mScreenDecorations.mOverlays);
         } else {
-            verify(mWindowManager, never()).addView(any(), any());
+            assertNull(mScreenDecorations.mOverlays);
             return;
         }
 
         if (left) {
-            assertNotNull(mScreenDecorations.mOverlays[BOUNDS_POSITION_LEFT]);
+            final OverlayWindow overlay = mScreenDecorations.mOverlays[BOUNDS_POSITION_LEFT];
+            assertNotNull(overlay);
             verify(mWindowManager, times(1)).addView(
-                    eq(mScreenDecorations.mOverlays[BOUNDS_POSITION_LEFT].getRootView()), any());
+                    eq(overlay.getRootView()), any());
+            if (visibilityIfExist != null) {
+                assertEquals(visibilityIfExist.intValue(), overlay.getRootView().getVisibility());
+            }
         } else {
             assertNull(mScreenDecorations.mOverlays[BOUNDS_POSITION_LEFT]);
         }
 
         if (top) {
-            assertNotNull(mScreenDecorations.mOverlays[BOUNDS_POSITION_TOP]);
+            final OverlayWindow overlay = mScreenDecorations.mOverlays[BOUNDS_POSITION_TOP];
+            assertNotNull(overlay);
             verify(mWindowManager, times(1)).addView(
-                    eq(mScreenDecorations.mOverlays[BOUNDS_POSITION_TOP].getRootView()), any());
+                    eq(overlay.getRootView()), any());
+            if (visibilityIfExist != null) {
+                assertEquals(visibilityIfExist.intValue(), overlay.getRootView().getVisibility());
+            }
         } else {
             assertNull(mScreenDecorations.mOverlays[BOUNDS_POSITION_TOP]);
         }
 
         if (right) {
-            assertNotNull(mScreenDecorations.mOverlays[BOUNDS_POSITION_RIGHT]);
+            final OverlayWindow overlay = mScreenDecorations.mOverlays[BOUNDS_POSITION_RIGHT];
+            assertNotNull(overlay);
             verify(mWindowManager, times(1)).addView(
-                    eq(mScreenDecorations.mOverlays[BOUNDS_POSITION_RIGHT].getRootView()), any());
+                    eq(overlay.getRootView()), any());
+            if (visibilityIfExist != null) {
+                assertEquals(visibilityIfExist.intValue(), overlay.getRootView().getVisibility());
+            }
         } else {
             assertNull(mScreenDecorations.mOverlays[BOUNDS_POSITION_RIGHT]);
         }
 
         if (bottom) {
-            assertNotNull(mScreenDecorations.mOverlays[BOUNDS_POSITION_BOTTOM]);
+            final OverlayWindow overlay = mScreenDecorations.mOverlays[BOUNDS_POSITION_BOTTOM];
+            assertNotNull(overlay);
             verify(mWindowManager, times(1)).addView(
-                    eq(mScreenDecorations.mOverlays[BOUNDS_POSITION_BOTTOM].getRootView()), any());
+                    eq(overlay.getRootView()), any());
+            if (visibilityIfExist != null) {
+                assertEquals(visibilityIfExist.intValue(), overlay.getRootView().getVisibility());
+            }
         } else {
             assertNull(mScreenDecorations.mOverlays[BOUNDS_POSITION_BOTTOM]);
         }
@@ -330,7 +362,7 @@ public class ScreenDecorationsTest extends SysuiTestCase {
 
         mScreenDecorations.start();
         // No views added.
-        verifyOverlaysExistAndAdded(false, false, false, false);
+        verifyOverlaysExistAndAdded(false, false, false, false, null);
         // No Tuners tuned.
         verify(mTunerService, never()).addTunable(any(), any());
         // No dot controller init
@@ -348,9 +380,12 @@ public class ScreenDecorationsTest extends SysuiTestCase {
 
         mScreenDecorations.start();
 
-        // Top and bottom windows are created for privacy dot.
+        // Top and bottom windows are created with INVISIBLE because of privacy dot only
         // Left and right window should be null.
-        verifyOverlaysExistAndAdded(false, true, false, true);
+        verifyOverlaysExistAndAdded(false, true, false, true, View.INVISIBLE);
+        verify(mDotViewController, times(1)).initialize(any(), any(), any(), any());
+        verify(mDotViewController, times(1)).setShowingListener(
+                mScreenDecorations.mPrivacyDotShowingListener);
 
         // Rounded corner views shall not exist
         verifyRoundedCornerViewsVisibility(BOUNDS_POSITION_TOP, View.GONE);
@@ -379,7 +414,7 @@ public class ScreenDecorationsTest extends SysuiTestCase {
 
         // Top and bottom windows are created for rounded corners.
         // Left and right window should be null.
-        verifyOverlaysExistAndAdded(false, true, false, true);
+        verifyOverlaysExistAndAdded(false, true, false, true, View.VISIBLE);
 
         // Rounded corner views shall exist
         verifyRoundedCornerViewsVisibility(BOUNDS_POSITION_TOP, View.VISIBLE);
@@ -407,7 +442,9 @@ public class ScreenDecorationsTest extends SysuiTestCase {
 
         // Top and bottom windows are created for rounded corners.
         // Left and right window should be null.
-        verifyOverlaysExistAndAdded(false, true, false, true);
+        verifyOverlaysExistAndAdded(false, true, false, true, View.VISIBLE);
+        verify(mDotViewController, times(1)).initialize(any(), any(), any(), any());
+        verify(mDotViewController, times(1)).setShowingListener(null);
 
         // Rounded corner views shall exist
         verifyRoundedCornerViewsVisibility(BOUNDS_POSITION_TOP, View.VISIBLE);
@@ -522,7 +559,7 @@ public class ScreenDecorationsTest extends SysuiTestCase {
         mScreenDecorations.start();
         // Top and bottom windows are created for rounded corners.
         // Left and right window should be null.
-        verifyOverlaysExistAndAdded(false, true, false, true);
+        verifyOverlaysExistAndAdded(false, true, false, true, View.VISIBLE);
 
         // Rounded corner views shall exist
         verifyRoundedCornerViewsVisibility(BOUNDS_POSITION_TOP, View.VISIBLE);
@@ -556,7 +593,9 @@ public class ScreenDecorationsTest extends SysuiTestCase {
         mScreenDecorations.start();
         // Top and bottom windows are created for rounded corners.
         // Left and right window should be null.
-        verifyOverlaysExistAndAdded(false, true, false, true);
+        verifyOverlaysExistAndAdded(false, true, false, true, View.VISIBLE);
+        verify(mDotViewController, times(1)).initialize(any(), any(), any(), any());
+        verify(mDotViewController, times(1)).setShowingListener(null);
 
         // Rounded corner views shall exist
         verifyRoundedCornerViewsVisibility(BOUNDS_POSITION_TOP, View.VISIBLE);
@@ -591,7 +630,7 @@ public class ScreenDecorationsTest extends SysuiTestCase {
         mScreenDecorations.start();
         // Top window is created for top cutout.
         // Bottom, left, or right window should be null.
-        verifyOverlaysExistAndAdded(false, true, false, false);
+        verifyOverlaysExistAndAdded(false, true, false, false, View.VISIBLE);
 
         // Privacy dots shall not exist because of no privacy
         verifyDotViewsNullable(true);
@@ -615,7 +654,9 @@ public class ScreenDecorationsTest extends SysuiTestCase {
         // Top window is created for top cutout.
         // Bottom window is created for privacy dot.
         // Left or right window should be null.
-        verifyOverlaysExistAndAdded(false, true, false, true);
+        verifyOverlaysExistAndAdded(false, true, false, true, View.VISIBLE);
+        verify(mDotViewController, times(1)).initialize(any(), any(), any(), any());
+        verify(mDotViewController, times(1)).setShowingListener(null);
 
         // Top rounded corner views shall exist because of cutout
         // but be gone because of no rounded corner
@@ -646,7 +687,7 @@ public class ScreenDecorationsTest extends SysuiTestCase {
         mScreenDecorations.start();
         // Left window is created for left cutout.
         // Bottom, top, or right window should be null.
-        verifyOverlaysExistAndAdded(true, false, false, false);
+        verifyOverlaysExistAndAdded(true, false, false, false, View.VISIBLE);
 
         // Left rounded corner views shall exist because of cutout
         // but be gone because of no rounded corner
@@ -674,7 +715,9 @@ public class ScreenDecorationsTest extends SysuiTestCase {
         // Left window is created for left cutout.
         // Right window is created for privacy.
         // Bottom, or top window should be null.
-        verifyOverlaysExistAndAdded(true, false, true, false);
+        verifyOverlaysExistAndAdded(true, false, true, false, View.VISIBLE);
+        verify(mDotViewController, times(1)).initialize(any(), any(), any(), any());
+        verify(mDotViewController, times(1)).setShowingListener(null);
 
         // Privacy dots shall exist but invisible
         verifyDotViewsVisibility(View.INVISIBLE);
@@ -699,7 +742,7 @@ public class ScreenDecorationsTest extends SysuiTestCase {
         // Top window is created for rounded corner and top cutout.
         // Bottom window is created for rounded corner.
         // Left, or right window should be null.
-        verifyOverlaysExistAndAdded(false, true, false, true);
+        verifyOverlaysExistAndAdded(false, true, false, true, View.VISIBLE);
 
         // Rounded corner views shall exist
         verifyRoundedCornerViewsVisibility(BOUNDS_POSITION_TOP, View.VISIBLE);
@@ -727,7 +770,9 @@ public class ScreenDecorationsTest extends SysuiTestCase {
         // Top window is created for rounded corner and top cutout.
         // Bottom window is created for rounded corner.
         // Left, or right window should be null.
-        verifyOverlaysExistAndAdded(false, true, false, true);
+        verifyOverlaysExistAndAdded(false, true, false, true, View.VISIBLE);
+        verify(mDotViewController, times(1)).initialize(any(), any(), any(), any());
+        verify(mDotViewController, times(1)).setShowingListener(null);
 
         // Rounded corner views shall exist
         verifyRoundedCornerViewsVisibility(BOUNDS_POSITION_TOP, View.VISIBLE);
@@ -756,7 +801,7 @@ public class ScreenDecorationsTest extends SysuiTestCase {
         // Left window is created for rounded corner and left cutout.
         // Right window is created for rounded corner.
         // Top, or bottom window should be null.
-        verifyOverlaysExistAndAdded(true, false, true, false);
+        verifyOverlaysExistAndAdded(true, false, true, false, View.VISIBLE);
     }
 
     @Test
@@ -774,7 +819,9 @@ public class ScreenDecorationsTest extends SysuiTestCase {
         // Left window is created for rounded corner, left cutout, and privacy.
         // Right window is created for rounded corner and privacy dot.
         // Top, or bottom window should be null.
-        verifyOverlaysExistAndAdded(true, false, true, false);
+        verifyOverlaysExistAndAdded(true, false, true, false, View.VISIBLE);
+        verify(mDotViewController, times(1)).initialize(any(), any(), any(), any());
+        verify(mDotViewController, times(1)).setShowingListener(null);
     }
 
     @Test
@@ -793,7 +840,7 @@ public class ScreenDecorationsTest extends SysuiTestCase {
         // Bottom window is created for rounded corner.
         // Left window is created for left cutout.
         // Right window should be null.
-        verifyOverlaysExistAndAdded(true, true, false, true);
+        verifyOverlaysExistAndAdded(true, true, false, true, View.VISIBLE);
     }
 
     @Test
@@ -812,7 +859,9 @@ public class ScreenDecorationsTest extends SysuiTestCase {
         // Bottom window is created for rounded corner.
         // Left window is created for left cutout.
         // Right window should be null.
-        verifyOverlaysExistAndAdded(true, true, false, true);
+        verifyOverlaysExistAndAdded(true, true, false, true, View.VISIBLE);
+        verify(mDotViewController, times(1)).initialize(any(), any(), any(), any());
+        verify(mDotViewController, times(1)).setShowingListener(null);
     }
 
     @Test
@@ -827,7 +876,7 @@ public class ScreenDecorationsTest extends SysuiTestCase {
                 .when(mScreenDecorations).getCutout();
 
         mScreenDecorations.start();
-        verifyOverlaysExistAndAdded(false, true, false, false);
+        verifyOverlaysExistAndAdded(false, true, false, false, View.VISIBLE);
 
         // Switch to long edge cutout(left).
         final Rect[] newBounds = {new Rect(0, 50, 1, 60), null, null, null};
@@ -835,7 +884,7 @@ public class ScreenDecorationsTest extends SysuiTestCase {
                 .when(mScreenDecorations).getCutout();
 
         mScreenDecorations.onConfigurationChanged(new Configuration());
-        verifyOverlaysExistAndAdded(true, false, false, false);
+        verifyOverlaysExistAndAdded(true, false, false, false, View.VISIBLE);
     }
 
     @Test
@@ -850,7 +899,9 @@ public class ScreenDecorationsTest extends SysuiTestCase {
                 .when(mScreenDecorations).getCutout();
 
         mScreenDecorations.start();
-        verifyOverlaysExistAndAdded(false, true, false, true);
+        verifyOverlaysExistAndAdded(false, true, false, true, View.VISIBLE);
+        verify(mDotViewController, times(1)).initialize(any(), any(), any(), any());
+        verify(mDotViewController, times(1)).setShowingListener(null);
 
         // Switch to long edge cutout(left).
         final Rect[] newBounds = {new Rect(0, 50, 1, 60), null, null, null};
@@ -858,7 +909,9 @@ public class ScreenDecorationsTest extends SysuiTestCase {
                 .when(mScreenDecorations).getCutout();
 
         mScreenDecorations.onConfigurationChanged(new Configuration());
-        verifyOverlaysExistAndAdded(true, false, true, false);
+        verifyOverlaysExistAndAdded(true, false, true, false, View.VISIBLE);
+        verify(mDotViewController, times(2)).initialize(any(), any(), any(), any());
+        verify(mDotViewController, times(2)).setShowingListener(null);
 
         // Verify each privacy dot id appears only once
         mDecorProviders.stream().map(DecorProvider::getViewId).forEach(viewId -> {
@@ -889,7 +942,7 @@ public class ScreenDecorationsTest extends SysuiTestCase {
                 .when(mScreenDecorations).getCutout();
 
         mScreenDecorations.start();
-        assertNull(mScreenDecorations.mOverlays);
+        verifyOverlaysExistAndAdded(false, false, false, false, null);
 
         when(mContext.getResources().getBoolean(
                 com.android.internal.R.bool.config_fillMainBuiltInDisplayCutout))
@@ -897,7 +950,7 @@ public class ScreenDecorationsTest extends SysuiTestCase {
         mScreenDecorations.onConfigurationChanged(new Configuration());
 
         // Only top windows should be added.
-        verifyOverlaysExistAndAdded(false, true, false, false);
+        verifyOverlaysExistAndAdded(false, true, false, false, View.VISIBLE);
     }
 
     @Test
@@ -912,23 +965,27 @@ public class ScreenDecorationsTest extends SysuiTestCase {
                 .when(mScreenDecorations).getCutout();
 
         mScreenDecorations.start();
-        // Both top and bottom windows should be added because of privacy dot,
-        // but their visibility shall be gone because of no rounding.
-        verifyOverlaysExistAndAdded(false, true, false, true);
+        // Both top and bottom windows should be added with INVISIBLE because of only privacy dot,
+        // but rounded corners visibility shall be gone because of no rounding.
+        verifyOverlaysExistAndAdded(false, true, false, true, View.INVISIBLE);
         verifyRoundedCornerViewsVisibility(BOUNDS_POSITION_TOP, View.GONE);
         verifyRoundedCornerViewsVisibility(BOUNDS_POSITION_BOTTOM, View.GONE);
+        verify(mDotViewController, times(1)).initialize(any(), any(), any(), any());
+        verify(mDotViewController, times(1)).setShowingListener(
+                mScreenDecorations.mPrivacyDotShowingListener);
 
         when(mContext.getResources().getBoolean(
                 com.android.internal.R.bool.config_fillMainBuiltInDisplayCutout))
                 .thenReturn(true);
         mScreenDecorations.onConfigurationChanged(new Configuration());
 
-        assertNotNull(mScreenDecorations.mOverlays);
-        // Both top and bottom windows should be added because of privacy dot,
-        // but their visibility shall be gone because of no rounding.
-        verifyOverlaysExistAndAdded(false, true, false, true);
+        // Both top and bottom windows should be added with VISIBLE because of privacy dot and
+        // cutout, but rounded corners visibility shall be gone because of no rounding.
+        verifyOverlaysExistAndAdded(false, true, false, true, View.VISIBLE);
         verifyRoundedCornerViewsVisibility(BOUNDS_POSITION_TOP, View.GONE);
         verifyRoundedCornerViewsVisibility(BOUNDS_POSITION_BOTTOM, View.GONE);
+        verify(mDotViewController, times(2)).initialize(any(), any(), any(), any());
+        verify(mDotViewController, times(1)).setShowingListener(null);
     }
 
     @Test
@@ -1043,9 +1100,7 @@ public class ScreenDecorationsTest extends SysuiTestCase {
         mScreenDecorations.start();
         // should only inflate mOverlays when the hwc doesn't support screen decoration
         assertNull(mScreenDecorations.mScreenDecorHwcWindow);
-        assertNotNull(mScreenDecorations.mOverlays);
-        assertNotNull(mScreenDecorations.mOverlays[BOUNDS_POSITION_TOP]);
-        assertNotNull(mScreenDecorations.mOverlays[BOUNDS_POSITION_BOTTOM]);
+        verifyOverlaysExistAndAdded(false, true, false, true, View.VISIBLE);
 
         final DisplayDecorationSupport decorationSupport = new DisplayDecorationSupport();
         decorationSupport.format = PixelFormat.R_8;
@@ -1056,7 +1111,7 @@ public class ScreenDecorationsTest extends SysuiTestCase {
 
         // should only inflate hwc layer when the hwc supports screen decoration
         assertNotNull(mScreenDecorations.mScreenDecorHwcWindow);
-        assertNull(mScreenDecorations.mOverlays);
+        verifyOverlaysExistAndAdded(false, false, false, false, null);
     }
 
     @Test
@@ -1076,7 +1131,7 @@ public class ScreenDecorationsTest extends SysuiTestCase {
         mScreenDecorations.start();
         // should only inflate hwc layer when the hwc supports screen decoration
         assertNotNull(mScreenDecorations.mScreenDecorHwcWindow);
-        assertNull(mScreenDecorations.mOverlays);
+        verifyOverlaysExistAndAdded(false, false, false, false, null);
 
         doReturn(null).when(mDisplay).getDisplayDecorationSupport();
         // Trigger the support hwc screen decoration change by changing the display unique id
@@ -1085,9 +1140,66 @@ public class ScreenDecorationsTest extends SysuiTestCase {
 
         // should only inflate mOverlays when the hwc doesn't support screen decoration
         assertNull(mScreenDecorations.mScreenDecorHwcWindow);
-        assertNotNull(mScreenDecorations.mOverlays);
-        assertNotNull(mScreenDecorations.mOverlays[BOUNDS_POSITION_TOP]);
-        assertNotNull(mScreenDecorations.mOverlays[BOUNDS_POSITION_BOTTOM]);
+        verifyOverlaysExistAndAdded(false, true, false, true, View.VISIBLE);
+    }
+
+    @Test
+    public void testPrivacyDotShowingListenerWorkWellWithNullParameter() {
+        mPrivacyDotShowingListener.onPrivacyDotShown(null);
+        mPrivacyDotShowingListener.onPrivacyDotHidden(null);
+    }
+
+    @Test
+    public void testAutoShowHideOverlayWindowWhenSupportHwcLayer() {
+        setupResources(0 /* radius */, 10 /* radiusTop */, 20 /* radiusBottom */,
+                0 /* roundedPadding */, false /* multipleRadius */,
+                true /* fillCutout */, true /* privacyDot */);
+        final DisplayDecorationSupport decorationSupport = new DisplayDecorationSupport();
+        decorationSupport.format = PixelFormat.R_8;
+        doReturn(decorationSupport).when(mDisplay).getDisplayDecorationSupport();
+
+        // top cutout
+        final Rect[] bounds = {null, new Rect(9, 0, 10, 1), null, null};
+        doReturn(getDisplayCutoutForRotation(Insets.of(0, 1, 0, 0), bounds))
+                .when(mScreenDecorations).getCutout();
+
+        mScreenDecorations.start();
+        // Inflate top and bottom overlay with INVISIBLE because of only privacy dots on sw layer
+        verifyOverlaysExistAndAdded(false, true, false, true, View.INVISIBLE);
+
+        // Make sure view found and window visibility changed as well
+        final View view = mScreenDecorations.mOverlays[BOUNDS_POSITION_BOTTOM].getRootView()
+                .findViewById(R.id.privacy_dot_bottom_right_container);
+        mPrivacyDotShowingListener.onPrivacyDotShown(view);
+        assertEquals(View.VISIBLE,
+                mScreenDecorations.mOverlays[BOUNDS_POSITION_BOTTOM].getRootView().getVisibility());
+        mPrivacyDotShowingListener.onPrivacyDotHidden(view);
+        assertEquals(View.INVISIBLE,
+                mScreenDecorations.mOverlays[BOUNDS_POSITION_BOTTOM].getRootView().getVisibility());
+    }
+
+    @Test
+    public void testAutoShowHideOverlayWindowWhenNoRoundedAndNoCutout() {
+        setupResources(0 /* radius */, 0 /* radiusTop */, 0 /* radiusBottom */,
+                0 /* roundedPadding */, false /* multipleRadius */,
+                false /* fillCutout */, true /* privacyDot */);
+
+        // no cutout
+        doReturn(null).when(mScreenDecorations).getCutout();
+
+        mScreenDecorations.start();
+        // Inflate top and bottom overlay with INVISIBLE because of only privacy dots on sw layer
+        verifyOverlaysExistAndAdded(false, true, false, true, View.INVISIBLE);
+
+        // Make sure view found and window visibility changed as well
+        final View view = mScreenDecorations.mOverlays[BOUNDS_POSITION_BOTTOM].getRootView()
+                .findViewById(R.id.privacy_dot_bottom_right_container);
+        mPrivacyDotShowingListener.onPrivacyDotShown(view);
+        assertEquals(View.VISIBLE,
+                mScreenDecorations.mOverlays[BOUNDS_POSITION_BOTTOM].getRootView().getVisibility());
+        mPrivacyDotShowingListener.onPrivacyDotHidden(view);
+        assertEquals(View.INVISIBLE,
+                mScreenDecorations.mOverlays[BOUNDS_POSITION_BOTTOM].getRootView().getVisibility());
     }
 
     @Test
@@ -1108,7 +1220,7 @@ public class ScreenDecorationsTest extends SysuiTestCase {
 
         // Should only inflate hwc layer.
         assertNotNull(mScreenDecorations.mScreenDecorHwcWindow);
-        assertNull(mScreenDecorations.mOverlays);
+        verifyOverlaysExistAndAdded(false, false, false, false, null);
     }
 
     @Test
@@ -1128,13 +1240,11 @@ public class ScreenDecorationsTest extends SysuiTestCase {
         mScreenDecorations.start();
 
         assertNotNull(mScreenDecorations.mScreenDecorHwcWindow);
-        // mOverlays are inflated but the visibility should be GONE.
-        assertNotNull(mScreenDecorations.mOverlays);
-        final View topOverlay = mScreenDecorations.mOverlays[BOUNDS_POSITION_TOP].getRootView();
-        final View botOverlay = mScreenDecorations.mOverlays[BOUNDS_POSITION_BOTTOM].getRootView();
-        assertEquals(topOverlay.getVisibility(), View.INVISIBLE);
-        assertEquals(botOverlay.getVisibility(), View.INVISIBLE);
-
+        // mOverlays are inflated but the visibility should be INVISIBLE.
+        verifyOverlaysExistAndAdded(false, true, false, true, View.INVISIBLE);
+        verify(mDotViewController, times(1)).initialize(any(), any(), any(), any());
+        verify(mDotViewController, times(1)).setShowingListener(
+                mScreenDecorations.mPrivacyDotShowingListener);
     }
 
     @Test
