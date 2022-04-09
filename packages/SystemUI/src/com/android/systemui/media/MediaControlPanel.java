@@ -629,7 +629,7 @@ public class MediaControlPanel {
             for (int id : SEMANTIC_ACTIONS_ALL) {
                 ImageButton button = mMediaViewHolder.getAction(id);
                 MediaAction action = semanticActions.getActionById(id);
-                setSemanticButton(button, action);
+                setSemanticButton(button, action, semanticActions);
             }
         } else {
             // Hide buttons that only appear for semantic actions
@@ -698,7 +698,10 @@ public class MediaControlPanel {
         setVisibleAndAlpha(collapsedSet, button.getId(), visible && showInCompact);
     }
 
-    private void setSemanticButton(final ImageButton button, @Nullable MediaAction mediaAction) {
+    private void setSemanticButton(
+            final ImageButton button,
+            @Nullable MediaAction mediaAction,
+            MediaButton semanticActions) {
         AnimationBindHandler animHandler;
         if (button.getTag() == null) {
             animHandler = new AnimationBindHandler();
@@ -709,7 +712,7 @@ public class MediaControlPanel {
 
         animHandler.tryExecute(() -> {
             bindButtonWithAnimations(button, mediaAction, animHandler);
-            setSemanticButtonVisibleAndAlpha(button.getId(), mediaAction);
+            setSemanticButtonVisibleAndAlpha(button.getId(), mediaAction, semanticActions);
         });
     }
 
@@ -772,12 +775,14 @@ public class MediaControlPanel {
 
     private void setSemanticButtonVisibleAndAlpha(
             int buttonId,
-            MediaAction mediaAction) {
+            @Nullable MediaAction mediaAction,
+            MediaButton semanticActions) {
         ConstraintSet collapsedSet = mMediaViewController.getCollapsedLayout();
         ConstraintSet expandedSet = mMediaViewController.getExpandedLayout();
         boolean showInCompact = SEMANTIC_ACTIONS_COMPACT.contains(buttonId);
         boolean hideWhenScrubbing = SEMANTIC_ACTIONS_HIDE_WHEN_SCRUBBING.contains(buttonId);
-        boolean shouldBeHiddenDueToScrubbing = hideWhenScrubbing && mIsScrubbing;
+        boolean shouldBeHiddenDueToScrubbing =
+                scrubbingTimeViewsEnabled(semanticActions) && hideWhenScrubbing && mIsScrubbing;
         boolean visible = mediaAction != null && !shouldBeHiddenDueToScrubbing;
 
         setVisibleAndAlpha(expandedSet, buttonId, visible);
@@ -790,7 +795,8 @@ public class MediaControlPanel {
         // Update visibilities of the scrubbing time views and the scrubbing-dependent buttons.
         bindScrubbingTime(mMediaData);
         SEMANTIC_ACTIONS_HIDE_WHEN_SCRUBBING.forEach((id) ->
-                setSemanticButtonVisibleAndAlpha(id, semanticActions.getActionById(id)));
+                setSemanticButtonVisibleAndAlpha(
+                        id, semanticActions.getActionById(id), semanticActions));
         // Trigger a state refresh so that we immediately update visibilities.
         mMediaViewController.refreshState();
     }
@@ -801,12 +807,20 @@ public class MediaControlPanel {
         int elapsedTimeId = mMediaViewHolder.getScrubbingElapsedTimeView().getId();
         int totalTimeId = mMediaViewHolder.getScrubbingTotalTimeView().getId();
 
-        boolean visible = data.getSemanticActions() != null && mIsScrubbing;
+        boolean visible = scrubbingTimeViewsEnabled(data.getSemanticActions()) && mIsScrubbing;
         setVisibleAndAlpha(expandedSet, elapsedTimeId, visible);
         setVisibleAndAlpha(expandedSet, totalTimeId, visible);
         // Never show in collapsed
         setVisibleAndAlpha(collapsedSet, elapsedTimeId, false);
         setVisibleAndAlpha(collapsedSet, totalTimeId, false);
+    }
+
+    private boolean scrubbingTimeViewsEnabled(@Nullable MediaButton semanticActions) {
+        // The scrubbing time views replace the SEMANTIC_ACTIONS_HIDE_WHEN_SCRUBBING action views,
+        // so we should only allow scrubbing times to be shown if those action views are present.
+        return semanticActions != null && SEMANTIC_ACTIONS_HIDE_WHEN_SCRUBBING.stream().allMatch(
+                id -> semanticActions.getActionById(id) != null
+        );
     }
 
     // AnimationBindHandler is responsible for tracking the bound animation state and preventing

@@ -413,8 +413,50 @@ public class MediaControlPanelTest : SysuiTestCase() {
         listener.onScrubbingChanged(true)
         mainExecutor.runAllReady()
 
+        verify(expandedSet, never()).setVisibility(eq(R.id.actionPrev), anyInt())
+        verify(expandedSet, never()).setVisibility(eq(R.id.actionNext), anyInt())
         verify(expandedSet, never()).setVisibility(eq(R.id.media_scrubbing_elapsed_time), anyInt())
         verify(expandedSet, never()).setVisibility(eq(R.id.media_scrubbing_total_time), anyInt())
+    }
+
+    @Test
+    fun setIsScrubbing_noPrevButton_scrubbingTimesNotShown() {
+        val icon = context.getDrawable(android.R.drawable.ic_media_play)
+        val semanticActions = MediaButton(
+            prevOrCustom = null,
+            nextOrCustom = MediaAction(icon, {}, "next", null),
+        )
+        val state = mediaData.copy(semanticActions = semanticActions)
+        player.attachPlayer(viewHolder)
+        player.bindPlayer(state, PACKAGE)
+        reset(expandedSet)
+
+        getScrubbingChangeListener().onScrubbingChanged(true)
+        mainExecutor.runAllReady()
+
+        verify(expandedSet).setVisibility(R.id.actionNext, View.VISIBLE)
+        verify(expandedSet).setVisibility(R.id.media_scrubbing_elapsed_time, View.GONE)
+        verify(expandedSet).setVisibility(R.id.media_scrubbing_total_time, View.GONE)
+    }
+
+    @Test
+    fun setIsScrubbing_noNextButton_scrubbingTimesNotShown() {
+        val icon = context.getDrawable(android.R.drawable.ic_media_play)
+        val semanticActions = MediaButton(
+            prevOrCustom = MediaAction(icon, {}, "prev", null),
+            nextOrCustom = null,
+        )
+        val state = mediaData.copy(semanticActions = semanticActions)
+        player.attachPlayer(viewHolder)
+        player.bindPlayer(state, PACKAGE)
+        reset(expandedSet)
+
+        getScrubbingChangeListener().onScrubbingChanged(true)
+        mainExecutor.runAllReady()
+
+        verify(expandedSet).setVisibility(R.id.actionPrev, View.VISIBLE)
+        verify(expandedSet).setVisibility(R.id.media_scrubbing_elapsed_time, View.GONE)
+        verify(expandedSet).setVisibility(R.id.media_scrubbing_total_time, View.GONE)
     }
 
     @Test
