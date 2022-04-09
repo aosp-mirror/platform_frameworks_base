@@ -161,6 +161,10 @@ class MediaDataManager(
         @JvmField
         val MAX_COMPACT_ACTIONS = 3
 
+        // Maximum number of actions allowed in expanded view
+        @JvmField
+        val MAX_NOTIFICATION_ACTIONS = MediaViewHolder.genericButtonIds.size
+
         /** Maximum number of [PlaybackState.CustomAction] buttons supported */
         @JvmField
         val MAX_CUSTOM_ACTIONS = 4
@@ -727,6 +731,11 @@ class MediaDataManager(
 
         if (actions != null) {
             for ((index, action) in actions.withIndex()) {
+                if (index == MAX_NOTIFICATION_ACTIONS) {
+                    Log.w(TAG, "Too many notification actions for ${sbn.key}," +
+                        " limiting to first $MAX_NOTIFICATION_ACTIONS")
+                    break
+                }
                 if (action.getIcon() == null) {
                     if (DEBUG) Log.i(TAG, "No icon for action $index ${action.title}")
                     actionsToShowCollapsed.remove(index)
