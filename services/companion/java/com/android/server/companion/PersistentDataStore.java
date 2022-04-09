@@ -25,6 +25,8 @@ import static com.android.internal.util.XmlUtils.writeBooleanAttribute;
 import static com.android.internal.util.XmlUtils.writeIntAttribute;
 import static com.android.internal.util.XmlUtils.writeLongAttribute;
 import static com.android.internal.util.XmlUtils.writeStringAttribute;
+import static com.android.server.companion.CompanionDeviceManagerService.getFirstAssociationIdForUser;
+import static com.android.server.companion.CompanionDeviceManagerService.getLastAssociationIdForUser;
 import static com.android.server.companion.DataStoreUtils.createStorageFileForUser;
 import static com.android.server.companion.DataStoreUtils.isEndOfTag;
 import static com.android.server.companion.DataStoreUtils.isStartOfTag;
@@ -194,7 +196,25 @@ final class PersistentDataStore {
 
             // Associations for all users are stored in a single "flat" set: so we read directly
             // into it.
-            readStateForUser(userId, allAssociationsOut, previouslyUsedIds);
+            final Set<AssociationInfo> associationsForUser = new HashSet<>();
+            readStateForUser(userId, associationsForUser, previouslyUsedIds);
+
+            // Go through all the associations for the user and check if their IDs are within
+            // the allowed range (for the user).
+            final int firstAllowedId = getFirstAssociationIdForUser(userId);
+            final int lastAllowedId = getLastAssociationIdForUser(userId);
+            for (AssociationInfo association : associationsForUser) {
+                final int id = association.getId();
+                if (id < firstAllowedId || id > lastAllowedId) {
+                    Slog.e(TAG, "Wrong association ID assignment: " + id + ". "
+                            + "Association belongs to u" + userId + " and thus its ID should be "
+                            + "within [" + firstAllowedId + ", " + lastAllowedId + "] range.");
+                    // TODO(b/224736262): try fixing (re-assigning) the ID?
+                }
+            }
+
+            // Add user's association to the "output" set.
+            allAssociationsOut.addAll(associationsForUser);
 
             // Save previously used IDs for this user into the "out" structure.
             previouslyUsedIdsPerUserOut.append(userId, previouslyUsedIds);
@@ -369,7 +389,7 @@ final class PersistentDataStore {
         // existing ones from the backup files. And the fact that we are reading from a V0 file,
         // means that CDM hasn't assigned any IDs yet, so we can just start from the first available
         // id for each user (eg. 1 for user 0; 100 001 - for user 1; 200 001 - for user 2; etc).
-        int associationId = CompanionDeviceManagerService.getFirstAssociationIdForUser(userId);
+        int associationId = getFirstAssociationIdForUser(userId);
         while (true) {
             parser.nextTag();
             if (isEndOfTag(parser, XML_TAG_ASSOCIATIONS)) break;

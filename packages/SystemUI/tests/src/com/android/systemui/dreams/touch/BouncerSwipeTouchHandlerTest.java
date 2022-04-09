@@ -27,6 +27,7 @@ import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
 import android.graphics.Rect;
 import android.graphics.Region;
@@ -70,7 +71,6 @@ public class BouncerSwipeTouchHandlerTest extends SysuiTestCase {
 
     @Mock
     FlingAnimationUtils mFlingAnimationUtils;
-
 
     @Mock
     FlingAnimationUtils mFlingAnimationUtilsClosing;
@@ -301,6 +301,8 @@ public class BouncerSwipeTouchHandlerTest extends SysuiTestCase {
         swipeToPosition(swipeUpPercentage, Direction.UP, velocityY);
 
         verify(mValueAnimatorCreator).create(eq(expansion), eq(KeyguardBouncer.EXPANSION_HIDDEN));
+        verify(mValueAnimator, never()).addListener(any());
+
         verify(mFlingAnimationUtilsClosing).apply(eq(mValueAnimator),
                 eq(SCREEN_HEIGHT_PX * expansion),
                 eq(SCREEN_HEIGHT_PX * KeyguardBouncer.EXPANSION_HIDDEN),
@@ -321,11 +323,20 @@ public class BouncerSwipeTouchHandlerTest extends SysuiTestCase {
         swipeToPosition(swipeUpPercentage, Direction.UP, velocityY);
 
         verify(mValueAnimatorCreator).create(eq(expansion), eq(KeyguardBouncer.EXPANSION_VISIBLE));
+
+        ArgumentCaptor<AnimatorListenerAdapter> endAnimationListenerCaptor =
+                ArgumentCaptor.forClass(AnimatorListenerAdapter.class);
+        verify(mValueAnimator).addListener(endAnimationListenerCaptor.capture());
+        AnimatorListenerAdapter endAnimationListener = endAnimationListenerCaptor.getValue();
+
         verify(mFlingAnimationUtils).apply(eq(mValueAnimator), eq(SCREEN_HEIGHT_PX * expansion),
                 eq(SCREEN_HEIGHT_PX * KeyguardBouncer.EXPANSION_VISIBLE),
                 eq(velocityY), eq((float) SCREEN_HEIGHT_PX));
         verify(mValueAnimator).start();
         verify(mUiEventLogger).log(BouncerSwipeTouchHandler.DreamEvent.DREAM_SWIPED);
+
+        endAnimationListener.onAnimationEnd(mValueAnimator);
+        verify(mUiEventLogger).log(BouncerSwipeTouchHandler.DreamEvent.DREAM_BOUNCER_FULLY_VISIBLE);
     }
 
     /**
@@ -343,6 +354,8 @@ public class BouncerSwipeTouchHandlerTest extends SysuiTestCase {
 
         verify(mValueAnimatorCreator).create(eq(swipeDownPercentage),
                 eq(KeyguardBouncer.EXPANSION_VISIBLE));
+        verify(mValueAnimator, never()).addListener(any());
+
         verify(mFlingAnimationUtils).apply(eq(mValueAnimator),
                 eq(SCREEN_HEIGHT_PX * swipeDownPercentage),
                 eq(SCREEN_HEIGHT_PX * KeyguardBouncer.EXPANSION_VISIBLE),
@@ -367,6 +380,8 @@ public class BouncerSwipeTouchHandlerTest extends SysuiTestCase {
 
         verify(mValueAnimatorCreator).create(eq(swipeDownPercentage),
                 eq(KeyguardBouncer.EXPANSION_HIDDEN));
+        verify(mValueAnimator, never()).addListener(any());
+
         verify(mFlingAnimationUtilsClosing).apply(eq(mValueAnimator),
                 eq(SCREEN_HEIGHT_PX * swipeDownPercentage),
                 eq(SCREEN_HEIGHT_PX * KeyguardBouncer.EXPANSION_HIDDEN),
@@ -389,11 +404,20 @@ public class BouncerSwipeTouchHandlerTest extends SysuiTestCase {
         swipeToPosition(swipeUpPercentage, Direction.UP, velocityY);
 
         verify(mValueAnimatorCreator).create(eq(expansion), eq(KeyguardBouncer.EXPANSION_VISIBLE));
+
+        ArgumentCaptor<AnimatorListenerAdapter> endAnimationListenerCaptor =
+                ArgumentCaptor.forClass(AnimatorListenerAdapter.class);
+        verify(mValueAnimator).addListener(endAnimationListenerCaptor.capture());
+        AnimatorListenerAdapter endAnimationListener = endAnimationListenerCaptor.getValue();
+
         verify(mFlingAnimationUtils).apply(eq(mValueAnimator), eq(SCREEN_HEIGHT_PX * expansion),
                 eq(SCREEN_HEIGHT_PX * KeyguardBouncer.EXPANSION_VISIBLE),
                 eq(velocityY), eq((float) SCREEN_HEIGHT_PX));
         verify(mValueAnimator).start();
         verify(mUiEventLogger).log(BouncerSwipeTouchHandler.DreamEvent.DREAM_SWIPED);
+
+        endAnimationListener.onAnimationEnd(mValueAnimator);
+        verify(mUiEventLogger).log(BouncerSwipeTouchHandler.DreamEvent.DREAM_BOUNCER_FULLY_VISIBLE);
     }
 
     private void swipeToPosition(float percent, Direction direction, float velocityY) {

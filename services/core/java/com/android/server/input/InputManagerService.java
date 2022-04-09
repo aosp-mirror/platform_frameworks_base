@@ -20,7 +20,6 @@ import static android.view.KeyEvent.KEYCODE_UNKNOWN;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.app.ActivityManagerInternal;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -838,15 +837,7 @@ public class InputManagerService extends IInputManager.Stub
     }
 
     @Override // Binder call
-    public boolean injectInputEvent(InputEvent event, int mode, int targetUid) {
-        if (!checkCallingPermission(android.Manifest.permission.INJECT_EVENTS,
-                "injectInputEvent()", true /*checkInstrumentationSource*/)) {
-            throw new SecurityException(
-                    "Injecting input events requires the caller (or the source of the "
-                            + "instrumentation, if any) to have the INJECT_EVENTS permission.");
-        }
-        // We are not checking if targetUid matches the callingUid, since having the permission
-        // already means you can inject into any window.
+    public boolean injectInputEvent(InputEvent event, int mode) {
         Objects.requireNonNull(event, "event must not be null");
         if (mode != InputEventInjectionSync.NONE
                 && mode != InputEventInjectionSync.WAIT_FOR_FINISHED
@@ -855,41 +846,22 @@ public class InputManagerService extends IInputManager.Stub
         }
 
         final int pid = Binder.getCallingPid();
+        final int uid = Binder.getCallingUid();
         final long ident = Binder.clearCallingIdentity();
-        final boolean injectIntoUid = targetUid != Process.INVALID_UID;
         final int result;
         try {
-            result = mNative.injectInputEvent(event, injectIntoUid,
-                    targetUid, mode, INJECTION_TIMEOUT_MILLIS,
-                    WindowManagerPolicy.FLAG_DISABLE_KEY_REPEAT);
+            result = mNative.injectInputEvent(event, pid, uid, mode,
+                    INJECTION_TIMEOUT_MILLIS, WindowManagerPolicy.FLAG_DISABLE_KEY_REPEAT);
         } finally {
             Binder.restoreCallingIdentity(ident);
         }
         switch (result) {
+            case InputEventInjectionResult.PERMISSION_DENIED:
+                Slog.w(TAG, "Input event injection from pid " + pid + " permission denied.");
+                throw new SecurityException(
+                        "Injecting to another application requires INJECT_EVENTS permission");
             case InputEventInjectionResult.SUCCEEDED:
                 return true;
-            case InputEventInjectionResult.TARGET_MISMATCH:
-                if (!injectIntoUid) {
-                    throw new IllegalStateException("Injection should not result in TARGET_MISMATCH"
-                            + " when it is not targeted into to a specific uid.");
-                }
-                // Attempt to inject into a window owned by the instrumentation source of the caller
-                // because it is possible that tests adopt the identity of the shell when launching
-                // activities that they would like to inject into.
-                final ActivityManagerInternal ami =
-                        LocalServices.getService(ActivityManagerInternal.class);
-                Objects.requireNonNull(ami, "ActivityManagerInternal should not be null.");
-                final int instrUid = ami.getInstrumentationSourceUid(Binder.getCallingUid());
-                if (instrUid != Process.INVALID_UID && targetUid != instrUid) {
-                    Slog.w(TAG, "Targeted input event was not directed at a window owned by uid "
-                            + targetUid + ". Attempting to inject into window owned by "
-                            + "instrumentation source uid " + instrUid + ".");
-                    return injectInputEvent(event, mode, instrUid);
-                }
-                throw new IllegalArgumentException(
-                        "Targeted input event injection from pid " + pid
-                                + " was not directed at a window owned by uid "
-                                + targetUid + ".");
             case InputEventInjectionResult.TIMED_OUT:
                 Slog.w(TAG, "Input event injection from pid " + pid + " timed out.");
                 return false;
@@ -2725,12 +2697,8 @@ public class InputManagerService extends IInputManager.Stub
             }
         }
     }
-    private boolean checkCallingPermission(String permission, String func) {
-        return checkCallingPermission(permission, func, false /*checkInstrumentationSource*/);
-    }
 
-    private boolean checkCallingPermission(String permission, String func,
-            boolean checkInstrumentationSource) {
+    private boolean checkCallingPermission(String permission, String func) {
         // Quick check: if the calling permission is me, it's all okay.
         if (Binder.getCallingPid() == Process.myPid()) {
             return true;
@@ -2739,18 +2707,6 @@ public class InputManagerService extends IInputManager.Stub
         if (mContext.checkCallingPermission(permission) == PackageManager.PERMISSION_GRANTED) {
             return true;
         }
-
-        if (checkInstrumentationSource) {
-            final ActivityManagerInternal ami =
-                    LocalServices.getService(ActivityManagerInternal.class);
-            Objects.requireNonNull(ami, "ActivityManagerInternal should not be null.");
-            final int instrumentationUid = ami.getInstrumentationSourceUid(Binder.getCallingUid());
-            if (instrumentationUid != Process.INVALID_UID && mContext.checkPermission(permission,
-                    -1 /*pid*/, instrumentationUid) == PackageManager.PERMISSION_GRANTED) {
-                return true;
-            }
-        }
-
         String msg = "Permission Denial: " + func + " from pid="
                 + Binder.getCallingPid()
                 + ", uid=" + Binder.getCallingUid()
@@ -2992,6 +2948,13 @@ public class InputManagerService extends IInputManager.Stub
     @SuppressWarnings("unused")
     private KeyEvent dispatchUnhandledKey(IBinder focus, KeyEvent event, int policyFlags) {
         return mWindowManagerCallbacks.dispatchUnhandledKey(focus, event, policyFlags);
+    }
+
+    // Native callback.
+    @SuppressWarnings("unused")
+    private boolean checkInjectEventsPermission(int injectorPid, int injectorUid) {
+        return mContext.checkPermission(android.Manifest.permission.INJECT_EVENTS,
+                injectorPid, injectorUid) == PackageManager.PERMISSION_GRANTED;
     }
 
     // Native callback.
@@ -3436,17 +3399,12 @@ public class InputManagerService extends IInputManager.Stub
 
         @Override
         public void sendInputEvent(InputEvent event, int policyFlags) {
-            if (!checkCallingPermission(android.Manifest.permission.INJECT_EVENTS,
-                    "sendInputEvent()")) {
-                throw new SecurityException(
-                        "The INJECT_EVENTS permission is required for injecting input events.");
-            }
             Objects.requireNonNull(event, "event must not be null");
 
             synchronized (mInputFilterLock) {
                 if (!mDisconnected) {
-                    mNative.injectInputEvent(event, false /* injectIntoUid */, -1 /* uid */,
-                            InputManager.INJECT_INPUT_EVENT_MODE_ASYNC, 0 /* timeout */,
+                    mNative.injectInputEvent(event, 0, 0,
+                            InputManager.INJECT_INPUT_EVENT_MODE_ASYNC, 0,
                             policyFlags | WindowManagerPolicy.FLAG_FILTERED);
                 }
             }
