@@ -48,6 +48,10 @@ public final class AutoShowTest {
     @Rule
     public UnlockScreenRule mUnlockScreenRule = new UnlockScreenRule();
 
+    @Rule
+    public ScreenCaptureRule mScreenCaptureRule =
+            new ScreenCaptureRule("/sdcard/InputMethodStressTest");
+
     @Test
     public void autoShow() {
         Instrumentation instrumentation = InstrumentationRegistry.getInstrumentation();
