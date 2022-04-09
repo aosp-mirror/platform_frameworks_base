@@ -832,7 +832,13 @@ public class CompanionDeviceManagerService extends SystemService {
         synchronized (mPreviouslyUsedIds) {
             // First: collect all IDs currently in use for this user's Associations.
             final SparseBooleanArray usedIds = new SparseBooleanArray();
-            for (AssociationInfo it : mAssociationStore.getAssociationsForUser(userId)) {
+
+            // We should really only be checking associations for the given user (i.e.:
+            // mAssociationStore.getAssociationsForUser(userId)), BUT in the past we've got in a
+            // state where association IDs were not assigned correctly in regard to
+            // user-to-association-ids-range (e.g. associations with IDs from 1 to 100,000 should
+            // always belong to u0), so let's check all the associations.
+            for (AssociationInfo it : mAssociationStore.getAssociations()) {
                 usedIds.put(it.getId(), true);
             }
 

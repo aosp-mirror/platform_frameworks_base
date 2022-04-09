@@ -70,7 +70,7 @@ public interface NativeInputManagerService {
 
     void setBlockUntrustedTouchesMode(int mode);
 
-    int injectInputEvent(InputEvent event, boolean injectIntoUid, int uid, int syncMode,
+    int injectInputEvent(InputEvent event, int pid, int uid, int syncMode,
             int timeoutMillis, int policyFlags);
 
     VerifiedInputEvent verifyInputEvent(InputEvent event);
@@ -90,7 +90,11 @@ public interface NativeInputManagerService {
     boolean transferTouchFocus(IBinder fromChannelToken, IBinder toChannelToken,
             boolean isDragDrop);
 
-    boolean transferTouch(IBinder destChannelToken);
+    /**
+     * Transfer the current touch gesture to the window identified by 'destChannelToken' positioned
+     * on display with id 'displayId'.
+     */
+    boolean transferTouch(IBinder destChannelToken, int displayId);
 
     void setPointerSpeed(int speed);
 
@@ -233,8 +237,7 @@ public interface NativeInputManagerService {
         public native void setBlockUntrustedTouchesMode(int mode);
 
         @Override
-        public native int injectInputEvent(InputEvent event, boolean injectIntoUid, int uid,
-                int syncMode,
+        public native int injectInputEvent(InputEvent event, int pid, int uid, int syncMode,
                 int timeoutMillis, int policyFlags);
 
         @Override
@@ -263,7 +266,7 @@ public interface NativeInputManagerService {
                 boolean isDragDrop);
 
         @Override
-        public native boolean transferTouch(IBinder destChannelToken);
+        public native boolean transferTouch(IBinder destChannelToken, int displayId);
 
         @Override
         public native void setPointerSpeed(int speed);

@@ -47,14 +47,18 @@ import java.util.List;
  * ShellCommand for MediaSessionService.
  */
 public class MediaShellCommand extends ShellCommand {
-    // This doesn't belongs to any package. Setting the package name to empty string.
-    private static final String PACKAGE_NAME = "";
     private static ActivityThread sThread;
     private static MediaSessionManager sMediaSessionManager;
+
+    private final String mPackageName;
     private ISessionManager mSessionService;
     private PrintWriter mWriter;
     private PrintWriter mErrorWriter;
     private InputStream mInput;
+
+    public MediaShellCommand(String packageName) {
+        mPackageName = packageName;
+    }
 
     @Override
     public int onCommand(String cmd) {
@@ -110,7 +114,7 @@ public class MediaShellCommand extends ShellCommand {
         mWriter.println();
         mWriter.println("media_session dispatch: dispatch a media key to the system.");
         mWriter.println("                KEY may be: play, pause, play-pause, mute, headsethook,");
-        mWriter.println("                stop, next, previous, rewind, record, fast-forword.");
+        mWriter.println("                stop, next, previous, rewind, record, fast-forward.");
         mWriter.println("media_session list-sessions: print a list of the current sessions.");
         mWriter.println("media_session monitor: monitor updates to the specified session.");
         mWriter.println("                       Use the tag from list-sessions.");
@@ -120,7 +124,8 @@ public class MediaShellCommand extends ShellCommand {
 
     private void sendMediaKey(KeyEvent event) {
         try {
-            mSessionService.dispatchMediaKeyEvent(PACKAGE_NAME, false, event, false);
+            mSessionService.dispatchMediaKeyEvent(
+                    mPackageName, /* asSystemService= */ false, event, /* needWakeLock= */ false);
         } catch (RemoteException e) {
         }
     }

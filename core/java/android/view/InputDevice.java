@@ -18,6 +18,7 @@ package android.view;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.TestApi;
 import android.compat.annotation.UnsupportedAppUsage;
@@ -517,6 +518,7 @@ public final class InputDevice implements Parcelable {
      * @param id The device id.
      * @return The input device or null if not found.
      */
+    @Nullable
     public static InputDevice getDevice(int id) {
         return InputManager.getInstance().getInputDevice(id);
     }

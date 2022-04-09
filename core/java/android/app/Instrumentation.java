@@ -1058,11 +1058,10 @@ public class Instrumentation {
     }
     
     /**
-     * Sends the key events that result in the given text being typed into the currently focused
-     * window, and waits for it to be processed.
-     *
-     * @param text The text to be sent.
-     * @see #sendKeySync(KeyEvent)
+     * Sends the key events corresponding to the text to the app being
+     * instrumented.
+     * 
+     * @param text The text to be sent. 
      */
     public void sendStringSync(String text) {
         if (text == null) {
@@ -1085,12 +1084,11 @@ public class Instrumentation {
     }
 
     /**
-     * Sends a key event to the currently focused window, and waits for it to be processed.
-     * <p>
-     * This method blocks until the recipient has finished handling the event. Note that the
-     * recipient may <em>not</em> have completely finished reacting from the event when this method
-     * returns. For example, it may still be in the process of updating its display or UI contents
-     * upon reacting to the injected event.
+     * Send a key event to the currently focused window/view and wait for it to
+     * be processed.  Finished at some point after the recipient has returned
+     * from its event processing, though it may <em>not</em> have completely
+     * finished reacting from the event -- for example, if it needs to update
+     * its display as a result, it may still be in the process of doing that.
      *
      * @param event The event to send to the current focus.
      */
@@ -1118,42 +1116,34 @@ public class Instrumentation {
     }
 
     /**
-     * Sends up and down key events with the given key code to the currently focused window, and
-     * waits for it to be processed.
+     * Sends an up and down key event sync to the currently focused window.
      * 
-     * @param keyCode The key code for the events to send.
-     * @see #sendKeySync(KeyEvent)
+     * @param key The integer keycode for the event.
      */
-    public void sendKeyDownUpSync(int keyCode) {
+    public void sendKeyDownUpSync(int key) {        
+        sendKeySync(new KeyEvent(KeyEvent.ACTION_DOWN, key));
+        sendKeySync(new KeyEvent(KeyEvent.ACTION_UP, key));
+    }
+
+    /**
+     * Higher-level method for sending both the down and up key events for a
+     * particular character key code.  Equivalent to creating both KeyEvent
+     * objects by hand and calling {@link #sendKeySync}.  The event appears
+     * as if it came from keyboard 0, the built in one.
+     * 
+     * @param keyCode The key code of the character to send.
+     */
+    public void sendCharacterSync(int keyCode) {
         sendKeySync(new KeyEvent(KeyEvent.ACTION_DOWN, keyCode));
         sendKeySync(new KeyEvent(KeyEvent.ACTION_UP, keyCode));
     }
-
+    
     /**
-     * Sends up and down key events with the given key code to the currently focused window, and
-     * waits for it to be processed.
-     * <p>
-     * Equivalent to {@link #sendKeyDownUpSync(int)}.
-     *
-     * @param keyCode The key code of the character to send.
-     * @see #sendKeySync(KeyEvent)
-     */
-    public void sendCharacterSync(int keyCode) {
-        sendKeyDownUpSync(keyCode);
-    }
-
-    /**
-     * Dispatches a pointer event into a window owned by the instrumented application, and waits for
-     * it to be processed.
-     * <p>
-     * If the motion event being injected is targeted at a window that is not owned by the
-     * instrumented application, the input injection will fail. See {@link #getUiAutomation()} for
-     * injecting events into all windows.
-     * <p>
-     * This method blocks until the recipient has finished handling the event. Note that the
-     * recipient may <em>not</em> have completely finished reacting from the event when this method
-     * returns. For example, it may still be in the process of updating its display or UI contents
-     * upon reacting to the injected event.
+     * Dispatch a pointer event. Finished at some point after the recipient has
+     * returned from its event processing, though it may <em>not</em> have
+     * completely finished reacting from the event -- for example, if it needs
+     * to update its display as a result, it may still be in the process of
+     * doing that.
      * 
      * @param event A motion event describing the pointer action.  (As noted in 
      * {@link MotionEvent#obtain(long, long, int, float, float, int)}, be sure to use 
@@ -1165,10 +1155,10 @@ public class Instrumentation {
             event.setSource(InputDevice.SOURCE_TOUCHSCREEN);
         }
 
-        syncInputTransactionsAndInjectEventIntoSelf(event);
+        syncInputTransactionsAndInjectEvent(event);
     }
 
-    private void syncInputTransactionsAndInjectEventIntoSelf(MotionEvent event) {
+    private void syncInputTransactionsAndInjectEvent(MotionEvent event) {
         final boolean syncBefore = event.getAction() == MotionEvent.ACTION_DOWN
                 || event.isFromSource(InputDevice.SOURCE_MOUSE);
         final boolean syncAfter = event.getAction() == MotionEvent.ACTION_UP;
@@ -1179,9 +1169,8 @@ public class Instrumentation {
                         .syncInputTransactions(true /*waitForAnimations*/);
             }
 
-            // Direct the injected event into windows owned by the instrumentation target.
             InputManager.getInstance().injectInputEvent(
-                    event, InputManager.INJECT_INPUT_EVENT_MODE_WAIT_FOR_RESULT, Process.myUid());
+                    event, InputManager.INJECT_INPUT_EVENT_MODE_WAIT_FOR_FINISH);
 
             if (syncAfter) {
                 WindowManagerGlobal.getWindowManagerService()
@@ -1193,21 +1182,19 @@ public class Instrumentation {
     }
 
     /**
-     * Dispatches a trackball event into the currently focused window, and waits for it to be
-     * processed.
-     * <p>
-     * This method blocks until the recipient has finished handling the event. Note that the
-     * recipient may <em>not</em> have completely finished reacting from the event when this method
-     * returns. For example, it may still be in the process of updating its display or UI contents
-     * upon reacting to the injected event.
-     *
+     * Dispatch a trackball event. Finished at some point after the recipient has
+     * returned from its event processing, though it may <em>not</em> have
+     * completely finished reacting from the event -- for example, if it needs
+     * to update its display as a result, it may still be in the process of
+     * doing that.
+     * 
      * @param event A motion event describing the trackball action.  (As noted in 
      * {@link MotionEvent#obtain(long, long, int, float, float, int)}, be sure to use 
      * {@link SystemClock#uptimeMillis()} as the timebase.
      */
     public void sendTrackballEventSync(MotionEvent event) {
         validateNotAppThread();
-        if (!event.isFromSource(InputDevice.SOURCE_CLASS_TRACKBALL)) {
+        if ((event.getSource() & InputDevice.SOURCE_CLASS_TRACKBALL) == 0) {
             event.setSource(InputDevice.SOURCE_TRACKBALL);
         }
         InputManager.getInstance().injectInputEvent(event,

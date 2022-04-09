@@ -34,7 +34,7 @@ import android.util.Slog;
 import android.view.RemoteAnimationTarget;
 import android.view.SurfaceControl;
 import android.window.BackNavigationInfo;
-import android.window.IOnBackInvokedCallback;
+import android.window.OnBackInvokedCallbackInfo;
 import android.window.TaskSnapshot;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -152,33 +152,27 @@ class BackNavigationController {
             }
 
             // Now let's find if this window has a callback from the client side.
-            IOnBackInvokedCallback applicationCallback = null;
-            IOnBackInvokedCallback systemCallback = null;
+            OnBackInvokedCallbackInfo callbackInfo = null;
             if (window != null) {
                 activityRecord = window.mActivityRecord;
                 task = window.getTask();
-                applicationCallback = window.getApplicationOnBackInvokedCallback();
-                if (applicationCallback != null) {
-                    backType = BackNavigationInfo.TYPE_CALLBACK;
-                    infoBuilder.setOnBackInvokedCallback(applicationCallback);
-                } else {
-                    systemCallback = window.getSystemOnBackInvokedCallback();
-                    infoBuilder.setOnBackInvokedCallback(systemCallback);
+                callbackInfo = window.getOnBackInvokedCallbackInfo();
+                if (callbackInfo == null) {
+                    Slog.e(TAG, "No callback registered, returning null.");
+                    return null;
                 }
+                if (!callbackInfo.isSystemCallback()) {
+                    backType = BackNavigationInfo.TYPE_CALLBACK;
+                }
+                infoBuilder.setOnBackInvokedCallback(callbackInfo.getCallback());
             }
 
             ProtoLog.d(WM_DEBUG_BACK_PREVIEW, "startBackNavigation task=%s, "
-                            + "topRunningActivity=%s, applicationBackCallback=%s, "
-                            + "systemBackCallback=%s, currentFocus=%s",
-                    task, activityRecord, applicationCallback, systemCallback, window);
+                            + "topRunningActivity=%s, callbackInfo=%s, currentFocus=%s",
+                    task, activityRecord, callbackInfo, window);
 
             if (window == null) {
                 Slog.e(TAG, "Window is null, returning null.");
-                return null;
-            }
-
-            if (systemCallback == null && applicationCallback == null) {
-                Slog.e(TAG, "No callback registered, returning null.");
                 return null;
             }
 

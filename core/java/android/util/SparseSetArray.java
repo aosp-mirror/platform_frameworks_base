@@ -63,6 +63,19 @@ public class SparseSetArray<T> {
     }
 
     /**
+     * Add a set of values for key n.
+     */
+    public void addAll(int n, ArraySet<T> values) {
+        ArraySet<T> set = mData.get(n);
+        if (set == null) {
+            set = new ArraySet<>(values);
+            mData.put(n, set);
+            return;
+        }
+        set.addAll(values);
+    }
+
+    /**
      * Removes all mappings from this SparseSetArray.
      */
     public void clear() {
@@ -109,6 +122,7 @@ public class SparseSetArray<T> {
     public void remove(int n) {
         mData.remove(n);
     }
+
     public int size() {
         return mData.size();
     }

@@ -23,6 +23,7 @@ import android.app.ActivityManager;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.content.pm.UserInfo;
 import android.os.Environment;
 import android.os.SystemClock;
@@ -162,16 +163,17 @@ public final class SystemServiceManager implements Dumpable {
     /**
      * Returns true if the jar is in a test APEX.
      */
-    private static boolean isJarInTestApex(String pathStr) {
+    private boolean isJarInTestApex(String pathStr) {
         Path path = Paths.get(pathStr);
         if (path.getNameCount() >= 2 && path.getName(0).toString().equals("apex")) {
             String apexModuleName = path.getName(1).toString();
             ApexManager apexManager = ApexManager.getInstance();
             String packageName = apexManager.getActivePackageNameForApexModuleName(apexModuleName);
-            PackageInfo packageInfo = apexManager.getPackageInfo(
-                    packageName, ApexManager.MATCH_ACTIVE_PACKAGE);
-            if (packageInfo != null) {
+            try {
+                PackageInfo packageInfo =  mContext.getPackageManager().getPackageInfo(packageName,
+                        PackageManager.PackageInfoFlags.of(PackageManager.MATCH_APEX));
                 return (packageInfo.applicationInfo.flags & ApplicationInfo.FLAG_TEST_ONLY) != 0;
+            } catch (Exception ignore) {
             }
         }
         return false;

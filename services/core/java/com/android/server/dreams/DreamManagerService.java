@@ -92,6 +92,7 @@ public final class DreamManagerService extends SystemService {
     private boolean mCurrentDreamIsDozing;
     private boolean mCurrentDreamIsWaking;
     private boolean mForceAmbientDisplayEnabled;
+    private boolean mDreamsOnlyEnabledForSystemUser;
     private int mCurrentDreamDozeScreenState = Display.STATE_UNKNOWN;
     private int mCurrentDreamDozeScreenBrightness = PowerManager.BRIGHTNESS_DEFAULT;
 
@@ -115,6 +116,8 @@ public final class DreamManagerService extends SystemService {
                 mContext.getResources().getString(R.string.config_loggable_dream_prefix));
         AmbientDisplayConfiguration adc = new AmbientDisplayConfiguration(mContext);
         mAmbientDisplayComponent = ComponentName.unflattenFromString(adc.ambientDisplayComponent());
+        mDreamsOnlyEnabledForSystemUser =
+                mContext.getResources().getBoolean(R.bool.config_dreamsOnlyEnabledForSystemUser);
     }
 
     @Override
@@ -156,6 +159,7 @@ public final class DreamManagerService extends SystemService {
         pw.println("mCurrentDreamIsDozing=" + mCurrentDreamIsDozing);
         pw.println("mCurrentDreamIsWaking=" + mCurrentDreamIsWaking);
         pw.println("mForceAmbientDisplayEnabled=" + mForceAmbientDisplayEnabled);
+        pw.println("mDreamsOnlyEnabledForSystemUser=" + mDreamsOnlyEnabledForSystemUser);
         pw.println("mCurrentDreamDozeScreenState="
                 + Display.stateToString(mCurrentDreamDozeScreenState));
         pw.println("mCurrentDreamDozeScreenBrightness=" + mCurrentDreamDozeScreenBrightness);
@@ -314,6 +318,11 @@ public final class DreamManagerService extends SystemService {
     }
 
     private ComponentName[] getDreamComponentsForUser(int userId) {
+        if (!dreamsEnabledForUser(userId)) {
+            // Don't return any dream components if the user is not allowed to dream.
+            return null;
+        }
+
         String names = Settings.Secure.getStringForUser(mContext.getContentResolver(),
                 Settings.Secure.SCREENSAVER_COMPONENTS,
                 userId);
@@ -365,6 +374,10 @@ public final class DreamManagerService extends SystemService {
             return null;
         }
 
+    }
+
+    private boolean dreamsEnabledForUser(int userId) {
+        return !mDreamsOnlyEnabledForSystemUser || (userId == UserHandle.USER_SYSTEM);
     }
 
     private ServiceInfo getServiceInfo(ComponentName name) {

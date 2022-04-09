@@ -20,6 +20,8 @@ import static com.android.systemui.dreams.touch.dagger.BouncerSwipeModule.SWIPE_
 import static com.android.systemui.dreams.touch.dagger.BouncerSwipeModule.SWIPE_TO_BOUNCER_FLING_ANIMATION_UTILS_OPENING;
 import static com.android.systemui.dreams.touch.dagger.BouncerSwipeModule.SWIPE_TO_BOUNCER_START_REGION;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
 import android.graphics.Rect;
 import android.graphics.Region;
@@ -142,13 +144,19 @@ public class BouncerSwipeTouchHandler implements DreamTouchHandler {
 
     private void setPanelExpansion(float expansion) {
         mCurrentExpansion = expansion;
+
+        mCentralSurfaces.setBouncerShowing(expansion != KeyguardBouncer.EXPANSION_HIDDEN);
+
         mStatusBarKeyguardViewManager.onPanelExpansionChanged(mCurrentExpansion, false, true);
     }
 
     @VisibleForTesting
     public enum DreamEvent implements UiEventLogger.UiEventEnum {
         @UiEvent(doc = "The screensaver has been swiped up.")
-        DREAM_SWIPED(988);
+        DREAM_SWIPED(988),
+
+        @UiEvent(doc = "The bouncer has become fully visible over dream.")
+        DREAM_BOUNCER_FULLY_VISIBLE(1056);
 
         private final int mId;
 
@@ -278,6 +286,15 @@ public class BouncerSwipeTouchHandler implements DreamTouchHandler {
                 animation -> {
                     setPanelExpansion((float) animation.getAnimatedValue());
                 });
+        if (!mBouncerInitiallyShowing && targetExpansion == KeyguardBouncer.EXPANSION_VISIBLE) {
+            animator.addListener(
+                    new AnimatorListenerAdapter() {
+                        @Override
+                        public void onAnimationEnd(Animator animation) {
+                            mUiEventLogger.log(DreamEvent.DREAM_BOUNCER_FULLY_VISIBLE);
+                        }
+                    });
+        }
         return animator;
     }
 

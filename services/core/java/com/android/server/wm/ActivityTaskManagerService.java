@@ -2944,7 +2944,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         final long callingId = Binder.clearCallingIdentity();
         LocalService.ActivityTokens tokens = null;
         try {
-            tokens = mInternal.getTopActivityForTask(taskId);
+            tokens = mInternal.getAttachedNonFinishingActivityForTask(taskId, null);
         } finally {
             Binder.restoreCallingIdentity(callingId);
         }
@@ -5804,7 +5804,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         }
 
         @Override
-        public ActivityTokens getTopActivityForTask(int taskId) {
+        public ActivityTokens getAttachedNonFinishingActivityForTask(int taskId,
+                IBinder token) {
             synchronized (mGlobalLock) {
                 final Task task = mRootWindowContainer.anyTaskForId(taskId,
                         MATCH_ATTACHED_TASK_ONLY);
@@ -5813,19 +5814,30 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                             + " Requested task not found");
                     return null;
                 }
-                final ActivityRecord activity = task.getTopNonFinishingActivity();
-                if (activity == null) {
-                    Slog.w(TAG, "getApplicationThreadForTopActivity failed:"
-                            + " Requested activity not found");
+                final List<ActivityRecord> list = new ArrayList<>();
+                task.forAllActivities(r -> {
+                    if (!r.finishing) {
+                        list.add(r);
+                    }
+                });
+                if (list.size() <= 0) {
                     return null;
                 }
-                if (!activity.attachedToProcess()) {
-                    Slog.w(TAG, "getApplicationThreadForTopActivity failed: No process for "
-                            + activity);
-                    return null;
+                // pass null, get top Activity
+                if (token == null && list.get(0).attachedToProcess()) {
+                    ActivityRecord topRecord = list.get(0);
+                    return new ActivityTokens(topRecord.token, topRecord.assistToken,
+                            topRecord.app.getThread(), topRecord.shareableActivityToken);
                 }
-                return new ActivityTokens(activity.token, activity.assistToken,
-                        activity.app.getThread(), activity.shareableActivityToken);
+                // find the expected Activity
+                for (int i = 0; i < list.size(); i++) {
+                    ActivityRecord record = list.get(i);
+                    if (record.shareableActivityToken == token && record.attachedToProcess()) {
+                        return new ActivityTokens(record.token, record.assistToken,
+                                record.app.getThread(), record.shareableActivityToken);
+                    }
+                }
+                return null;
             }
         }
 

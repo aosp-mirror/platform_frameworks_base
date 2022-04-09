@@ -66,8 +66,6 @@ import com.android.settingslib.utils.ThreadUtils;
 import com.android.systemui.Dumpable;
 import com.android.systemui.GuestResetOrExitSessionReceiver;
 import com.android.systemui.GuestResumeSessionReceiver;
-import com.android.systemui.Prefs;
-import com.android.systemui.Prefs.Key;
 import com.android.systemui.R;
 import com.android.systemui.SystemUISecondaryUserService;
 import com.android.systemui.animation.DialogLaunchAnimator;
@@ -86,6 +84,7 @@ import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.phone.SystemUIDialog;
 import com.android.systemui.telephony.TelephonyListenerManager;
 import com.android.systemui.user.CreateUserActivity;
+import com.android.systemui.util.settings.GlobalSettings;
 import com.android.systemui.util.settings.SecureSettings;
 
 import java.io.PrintWriter;
@@ -148,6 +147,7 @@ public class UserSwitcherController implements Dumpable {
     // When false, there won't be any visual affordance to add a new user from the keyguard even if
     // the user is unlocked
     private boolean mAddUsersFromLockScreen;
+    private boolean mUserSwitcherEnabled;
     @VisibleForTesting
     boolean mPauseRefreshUsers;
     private int mSecondaryUser = UserHandle.USER_NULL;
@@ -164,6 +164,7 @@ public class UserSwitcherController implements Dumpable {
     private FalsingManager mFalsingManager;
     private View mView;
     private String mCreateSupervisedUserPackage;
+    private GlobalSettings mGlobalSettings;
 
     @Inject
     public UserSwitcherController(Context context,
@@ -181,6 +182,7 @@ public class UserSwitcherController implements Dumpable {
             FalsingManager falsingManager,
             TelephonyListenerManager telephonyListenerManager,
             SecureSettings secureSettings,
+            GlobalSettings globalSettings,
             @Background Executor bgExecutor,
             @LongRunning Executor longRunningExecutor,
             @Main Executor uiExecutor,
@@ -202,6 +204,7 @@ public class UserSwitcherController implements Dumpable {
         mLatencyTracker = latencyTracker;
         mGuestResumeSessionReceiver = guestResumeSessionReceiver;
         mGuestResetOrExitSessionReceiver = guestResetOrExitSessionReceiver;
+        mGlobalSettings = globalSettings;
         mBgExecutor = bgExecutor;
         mLongRunningExecutor = longRunningExecutor;
         mUiExecutor = uiExecutor;
@@ -242,13 +245,18 @@ public class UserSwitcherController implements Dumpable {
             @Override
             public void onChange(boolean selfChange) {
                 mSimpleUserSwitcher = shouldUseSimpleUserSwitcher();
-                mAddUsersFromLockScreen = Settings.Global.getInt(mContext.getContentResolver(),
-                        Settings.Global.ADD_USERS_WHEN_LOCKED, 0) != 0;
+                mAddUsersFromLockScreen = mGlobalSettings.getIntForUser(
+                        Settings.Global.ADD_USERS_WHEN_LOCKED, 0, UserHandle.USER_SYSTEM) != 0;
+                mUserSwitcherEnabled = mGlobalSettings.getIntForUser(
+                        Settings.Global.USER_SWITCHER_ENABLED, 0, UserHandle.USER_SYSTEM) != 0;
                 refreshUsers(UserHandle.USER_NULL);
             };
         };
         mContext.getContentResolver().registerContentObserver(
                 Settings.Global.getUriFor(SIMPLE_USER_SWITCHER_GLOBAL_SETTING), true,
+                mSettingsObserver);
+        mContext.getContentResolver().registerContentObserver(
+                Settings.Global.getUriFor(Settings.Global.USER_SWITCHER_ENABLED), true,
                 mSettingsObserver);
         mContext.getContentResolver().registerContentObserver(
                 Settings.Global.getUriFor(Settings.Global.ADD_USERS_WHEN_LOCKED), true,
@@ -323,6 +331,10 @@ public class UserSwitcherController implements Dumpable {
             for (UserInfo info : infos) {
                 boolean isCurrent = currentId == info.id;
                 boolean switchToEnabled = canSwitchUsers || isCurrent;
+                if (!mUserSwitcherEnabled && !info.isPrimary()) {
+                    continue;
+                }
+
                 if (info.isEnabled()) {
                     if (info.isGuest()) {
                         // Tapping guest icon triggers remove and a user switch therefore
@@ -348,9 +360,6 @@ public class UserSwitcherController implements Dumpable {
                                 switchToEnabled, false /* isAddSupervisedUser */));
                     }
                 }
-            }
-            if (records.size() > 1 || guestRecord != null) {
-                Prefs.putBoolean(mContext, Key.SEEN_MULTI_USER, true);
             }
 
             if (guestRecord == null) {
@@ -420,12 +429,14 @@ public class UserSwitcherController implements Dumpable {
     }
 
     boolean canCreateGuest(boolean hasExistingGuest) {
-        return (currentUserCanCreateUsers() || anyoneCanCreateUsers())
+        return mUserSwitcherEnabled
+                && (currentUserCanCreateUsers() || anyoneCanCreateUsers())
                 && !hasExistingGuest;
     }
 
     boolean canCreateUser() {
-        return (currentUserCanCreateUsers() || anyoneCanCreateUsers())
+        return mUserSwitcherEnabled
+                && (currentUserCanCreateUsers() || anyoneCanCreateUsers())
                 && mUserManager.canAddMoreUsers(UserManager.USER_TYPE_FULL_SECONDARY);
     }
 
@@ -1115,8 +1126,8 @@ public class UserSwitcherController implements Dumpable {
     private boolean shouldUseSimpleUserSwitcher() {
         int defaultSimpleUserSwitcher = mContext.getResources().getBoolean(
                 com.android.internal.R.bool.config_expandLockScreenUserSwitcher) ? 1 : 0;
-        return Settings.Global.getInt(mContext.getContentResolver(),
-                SIMPLE_USER_SWITCHER_GLOBAL_SETTING, defaultSimpleUserSwitcher) != 0;
+        return mGlobalSettings.getIntForUser(SIMPLE_USER_SWITCHER_GLOBAL_SETTING,
+                defaultSimpleUserSwitcher, UserHandle.USER_SYSTEM) != 0;
     }
 
     public void startActivity(Intent intent) {

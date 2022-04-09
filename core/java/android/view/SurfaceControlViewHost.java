@@ -264,14 +264,8 @@ public class SurfaceControlViewHost {
     /** @hide */
     public SurfaceControlViewHost(@NonNull Context c, @NonNull Display d,
             @NonNull WindowlessWindowManager wwm) {
-        this(c, d, wwm, false /* useSfChoreographer */);
-    }
-
-    /** @hide */
-    public SurfaceControlViewHost(@NonNull Context c, @NonNull Display d,
-            @NonNull WindowlessWindowManager wwm, boolean useSfChoreographer) {
         mWm = wwm;
-        mViewRoot = new ViewRootImpl(c, d, mWm, useSfChoreographer);
+        mViewRoot = new ViewRootImpl(c, d, mWm);
         WindowManagerGlobal.getInstance().addWindowlessRoot(mViewRoot);
 
         mAccessibilityEmbeddedConnection = mViewRoot.getAccessibilityEmbeddedConnection();
