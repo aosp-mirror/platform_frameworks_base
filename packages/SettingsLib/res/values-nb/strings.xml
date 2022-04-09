@@ -237,7 +237,7 @@
     <string name="keywords_adb_wireless" msgid="6507505581882171240">"adb, feilsøking, utvikler"</string>
     <string name="bugreport_in_power" msgid="8664089072534638709">"Snarvei til feilrapport"</string>
     <string name="bugreport_in_power_summary" msgid="1885529649381831775">"Vis en knapp for generering av feilrapport i batterimenyen"</string>
-    <string name="keep_screen_on" msgid="1187161672348797558">"Forbli våken"</string>
+    <string name="keep_screen_on" msgid="1187161672348797558">"Hold våken"</string>
     <string name="keep_screen_on_summary" msgid="1510731514101925829">"Skjermen blir aldri svart under lading"</string>
     <string name="bt_hci_snoop_log" msgid="7291287955649081448">"Slå på Bluetooth HCI snoop-logg"</string>
     <string name="bt_hci_snoop_log_summary" msgid="6808538971394092284">"Samle Bluetooth-pakker. (Slå Bluetooth av/på etter at du har endret denne innstillingen)"</string>
@@ -245,9 +245,9 @@
     <string name="oem_unlock_enable_summary" msgid="5857388174390953829">"Tillat at oppstartsinnlasteren låses opp"</string>
     <string name="confirm_enable_oem_unlock_title" msgid="8249318129774367535">"Vil du tillate OEM-opplåsing?"</string>
     <string name="confirm_enable_oem_unlock_text" msgid="854131050791011970">"ADVARSEL: Funksjoner for enhetsbeskyttelse fungerer ikke på denne enheten mens denne innstillingen er slått på."</string>
-    <string name="mock_location_app" msgid="6269380172542248304">"Velg app for fiktiv plassering"</string>
-    <string name="mock_location_app_not_set" msgid="6972032787262831155">"Ingen app for fiktiv plassering er angitt"</string>
-    <string name="mock_location_app_set" msgid="4706722469342913843">"App for fiktiv plassering: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="mock_location_app" msgid="6269380172542248304">"Velg app for fiktiv posisjon"</string>
+    <string name="mock_location_app_not_set" msgid="6972032787262831155">"Ingen app for fiktiv posisjon er angitt"</string>
+    <string name="mock_location_app_set" msgid="4706722469342913843">"App for fiktiv posisjon: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="debug_networking_category" msgid="6829757985772659599">"Nettverk"</string>
     <string name="wifi_display_certification" msgid="1805579519992520381">"Trådløs skjerm-sertifisering"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"Slå på detaljert Wi-Fi-loggføring"</string>
@@ -310,7 +310,7 @@
     <string name="verify_apps_over_usb_title" msgid="6031809675604442636">"Bekreft apper via USB"</string>
     <string name="verify_apps_over_usb_summary" msgid="1317933737581167839">"Sjekk apper som er installert via ADB/ADT, for skadelig atferd."</string>
     <string name="bluetooth_show_devices_without_names_summary" msgid="780964354377854507">"Bluetooth-enheter uten navn (bare MAC-adresser) vises"</string>
-    <string name="bluetooth_disable_absolute_volume_summary" msgid="2006309932135547681">"Slår av funksjonen for absolutt volum via Bluetooth i tilfelle det oppstår volumrelaterte problemer med eksterne enheter, for eksempel uakseptabelt høyt volum eller mangel på kontroll."</string>
+    <string name="bluetooth_disable_absolute_volume_summary" msgid="2006309932135547681">"Slår av absolutt volum via Bluetooth i tilfelle volumproblemer med eksterne enheter, for eksempel svært høyt volum eller mangel på kontroll."</string>
     <string name="bluetooth_enable_gabeldorsche_summary" msgid="2054730331770712629">"Aktiverer funksjonsstabelen Bluetooth Gabeldorsche"</string>
     <string name="enhanced_connectivity_summary" msgid="1576414159820676330">"Slår på Forbedret tilkobling-funksjonen."</string>
     <string name="enable_terminal_title" msgid="3834790541986303654">"Lokal terminal"</string>
@@ -351,7 +351,7 @@
     <string name="usb_audio_disable_routing_summary" msgid="8768242894849534699">"Slå av automatisk lydomkobling til USB-enheter"</string>
     <string name="debug_layout" msgid="1659216803043339741">"Vis layoutgrenser"</string>
     <string name="debug_layout_summary" msgid="8825829038287321978">"Vis kanter, marger osv."</string>
-    <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"Tving layoutretning for RTL"</string>
+    <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"Tvungen RTL-layout"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"Tving RTL-retning på skjermen for alle språk"</string>
     <string name="window_blurs" msgid="6831008984828425106">"Tillat uskarphet i vindu"</string>
     <string name="force_msaa" msgid="4081288296137775550">"Tving 4x MSAA"</string>
@@ -374,10 +374,10 @@
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"Vis Appen svarer ikke-dialog for bakgrunnsapper"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"Vis varselskanaladvarsler"</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"Viser advarsler på skjermen når apper publiserer varsler uten en gyldig kanal"</string>
-    <string name="force_allow_on_external" msgid="9187902444231637880">"Tving frem tillatelse for ekstern lagring av apper"</string>
+    <string name="force_allow_on_external" msgid="9187902444231637880">"Tillat alltid ekstern lagring av apper"</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"Dette gjør at alle apper kan lagres på eksterne lagringsmedier – uavhengig av manifestverdier"</string>
-    <string name="force_resizable_activities" msgid="7143612144399959606">"Tving aktiviteter til å kunne endre størrelse"</string>
-    <string name="force_resizable_activities_summary" msgid="2490382056981583062">"Gjør at alle aktivitetene kan endre størrelse for flervindusmodus, uavhengig av manifestverdier."</string>
+    <string name="force_resizable_activities" msgid="7143612144399959606">"Alle aktiviteter kan endre størrelse"</string>
+    <string name="force_resizable_activities_summary" msgid="2490382056981583062">"Gjør at alle aktiviteter kan endre størrelse for flervindusmodus, uavhengig av manifestverdier."</string>
     <string name="enable_freeform_support" msgid="7599125687603914253">"Slå på vinduer i fritt format"</string>
     <string name="enable_freeform_support_summary" msgid="1822862728719276331">"Slå på støtte for vinduer i eksperimentelt fritt format."</string>
     <string name="local_backup_password_title" msgid="4631017948933578709">"Passord for sikkerhetskopiering på datamaskin"</string>
