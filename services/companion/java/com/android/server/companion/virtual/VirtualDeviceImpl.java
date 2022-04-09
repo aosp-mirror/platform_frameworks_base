@@ -283,6 +283,11 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
         return mVirtualAudioController;
     }
 
+    @VisibleForTesting
+    SparseArray<GenericWindowPolicyController> getWindowPolicyControllersForTesting() {
+        return mWindowPolicyControllers;
+    }
+
     @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
     @Override // Binder call
     public void onAudioSessionStarting(int displayId,
@@ -528,6 +533,8 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
                     new GenericWindowPolicyController(FLAG_SECURE,
                             SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS,
                             getAllowedUserHandles(),
+                            mParams.getAllowedCrossTaskNavigations(),
+                            mParams.getBlockedCrossTaskNavigations(),
                             mParams.getAllowedActivities(),
                             mParams.getBlockedActivities(),
                             mParams.getDefaultActivityPolicy(),

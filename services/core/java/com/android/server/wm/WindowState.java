@@ -249,8 +249,7 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
 import android.window.ClientWindowFrames;
-import android.window.IOnBackInvokedCallback;
-import android.window.WindowOnBackInvokedDispatcher;
+import android.window.OnBackInvokedCallbackInfo;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.policy.KeyInterceptionInfo;
@@ -821,12 +820,9 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     };
 
     /**
-     * @see #setOnBackInvokedCallback(IOnBackInvokedCallback)
+     * @see #setOnBackInvokedCallbackInfo(OnBackInvokedCallbackInfo)
      */
-    // TODO(b/224856664): Consolidate application and system callback into one.
-    private IOnBackInvokedCallback mApplicationOnBackInvokedCallback;
-    private IOnBackInvokedCallback mSystemOnBackInvokedCallback;
-
+    private OnBackInvokedCallbackInfo mOnBackInvokedCallbackInfo;
     @Override
     WindowState asWindowState() {
         return this;
@@ -1083,28 +1079,16 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
      * called when a back navigation action is initiated.
      * @see BackNavigationController
      */
-    void setOnBackInvokedCallback(
-            @Nullable IOnBackInvokedCallback onBackInvokedCallback, int priority) {
-        ProtoLog.d(WM_DEBUG_BACK_PREVIEW, "WindowState: Setting back callback %s (priority: %d) "
-                        + "(Client IWindow: %s). (WindowState: %s)",
-                onBackInvokedCallback, priority, mClient, this);
-        if (priority >= WindowOnBackInvokedDispatcher.PRIORITY_DEFAULT) {
-            mApplicationOnBackInvokedCallback = onBackInvokedCallback;
-            mSystemOnBackInvokedCallback = null;
-        } else {
-            mApplicationOnBackInvokedCallback = null;
-            mSystemOnBackInvokedCallback = onBackInvokedCallback;
-        }
+    void setOnBackInvokedCallbackInfo(
+            @Nullable OnBackInvokedCallbackInfo callbackInfo) {
+        ProtoLog.d(WM_DEBUG_BACK_PREVIEW, "%s: Setting back callback %s",
+                this, callbackInfo);
+        mOnBackInvokedCallbackInfo = callbackInfo;
     }
 
     @Nullable
-    IOnBackInvokedCallback getApplicationOnBackInvokedCallback() {
-        return mApplicationOnBackInvokedCallback;
-    }
-
-    @Nullable
-    IOnBackInvokedCallback getSystemOnBackInvokedCallback() {
-        return mSystemOnBackInvokedCallback;
+    OnBackInvokedCallbackInfo getOnBackInvokedCallbackInfo() {
+        return mOnBackInvokedCallbackInfo;
     }
 
     interface PowerManagerWrapper {
@@ -2496,8 +2480,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         dc.getDisplayPolicy().removeWindowLw(this);
 
         disposeInputChannel();
-        mSystemOnBackInvokedCallback = null;
-        mApplicationOnBackInvokedCallback = null;
+        mOnBackInvokedCallbackInfo = null;
 
         mSession.windowRemovedLocked();
         try {
@@ -2551,8 +2534,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
         try {
             disposeInputChannel();
-            mSystemOnBackInvokedCallback = null;
-            mApplicationOnBackInvokedCallback = null;
+            mOnBackInvokedCallbackInfo = null;
 
             ProtoLog.v(WM_DEBUG_APP_TRANSITIONS,
                     "Remove %s: mSurfaceController=%s mAnimatingExit=%b mRemoveOnExit=%b "
@@ -2805,7 +2787,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
      * Move the touch gesture from the currently touched window on this display to this window.
      */
     public boolean transferTouch() {
-        return mWmService.mInputManager.transferTouch(mInputChannelToken);
+        return mWmService.mInputManager.transferTouch(mInputChannelToken, getDisplayId());
     }
 
     void disposeInputChannel() {
@@ -3519,6 +3501,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                     "Setting visibility of " + this + ": " + clientVisible);
             mClient.dispatchAppVisibility(clientVisible);
         } catch (RemoteException e) {
+            Slog.w(TAG, "Exception thrown during dispatchAppVisibility " + this, e);
         }
     }
 

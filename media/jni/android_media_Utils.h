@@ -35,6 +35,8 @@ bool isFormatOpaque(int format);
 
 bool isPossiblyYUV(PixelFormat format);
 
+bool isPossibly10BitYUV(PixelFormat format);
+
 status_t getLockedImageInfo(LockedImage* buffer, int idx, int32_t containerFormat,
         uint8_t **base, uint32_t *size, int *pixelStride, int *rowStride);
 
