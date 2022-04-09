@@ -427,7 +427,7 @@
     <string name="permdesc_writeCallLog" product="tablet" msgid="2657525794731690397">"Aplikaciji omogućuje izmjenu dnevnika poziva vašeg tabletnog računala zajedno s podacima o dolaznim i odlaznim pozivima. Zlonamjerne aplikacije to mogu upotrebljavati za brisanje ili izmjenu vašeg dnevnika poziva."</string>
     <string name="permdesc_writeCallLog" product="tv" msgid="3934939195095317432">"Aplikaciji omogućuje izmjenu zapisnika poziva vašeg Android TV uređaja, uključujući podatke o dolaznim i odlaznim pozivima. Zlonamjerne aplikacije to mogu upotrijebiti za brisanje ili izmjenu zapisnika poziva."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="5903033505665134802">"Aplikaciji omogućuje izmjenu dnevnika poziva vašeg telefona zajedno s podacima o dolaznim i odlaznim pozivima. Zlonamjerne aplikacije to mogu upotrebljavati za brisanje ili izmjenu vašeg dnevnika poziva."</string>
-    <string name="permlab_bodySensors" msgid="3411035315357380862">"pristupati biometrijskim senzorima (kao što su monitori otkucaja srca)"</string>
+    <string name="permlab_bodySensors" msgid="3411035315357380862">"pristup biometrijskim senzorima (kao što su monitori otkucaja srca)"</string>
     <string name="permdesc_bodySensors" product="default" msgid="2365357960407973997">"Omogućuje aplikaciji pristup podacima sa senzora koji nadziru vaše fizičko stanje, na primjer, broj otkucaja srca."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"Čitanje događaja i pojedinosti kalendara"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"Aplikacija može čitati sve kalendarske događaje pohranjene na tabletu i dijeliti ili spremati podatke iz vašeg kalendara."</string>
@@ -1899,7 +1899,7 @@
     <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"Štednja baterije uključuje tamnu temu i ograničava ili isključuje aktivnosti u pozadini, neke vizualne efekte, određene značajke i neke mrežne veze."</string>
     <string name="battery_saver_description" msgid="8518809702138617167">"Štednja baterije uključuje tamnu temu i ograničava ili isključuje aktivnosti u pozadini, neke vizualne efekte, određene značajke i neke mrežne veze."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Da bi se smanjio podatkovni promet, značajka Štednja podatkovnog prometa onemogućuje nekim aplikacijama slanje ili primanje podataka u pozadini. Aplikacija koju trenutačno upotrebljavate može pristupiti podacima, no možda će to činiti rjeđe. To može značiti da se, na primjer, slike neće prikazivati dok ih ne dodirnete."</string>
-    <string name="data_saver_enable_title" msgid="7080620065745260137">"Uključiti Štednju podatkovnog prometa?"</string>
+    <string name="data_saver_enable_title" msgid="7080620065745260137">"Uključiti štednju podatkovnog prometa?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Uključi"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="2877101784123058273">
       <item quantity="one">%1$d minutu (do <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>

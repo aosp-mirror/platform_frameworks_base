@@ -55,8 +55,8 @@
     <string name="usb_accessory_uri_prompt" msgid="6756649383432542382">"Er werken geen geïnstalleerde apps met dit USB-accessoire. Meer informatie op: <xliff:g id="URL">%1$s</xliff:g>"</string>
     <string name="title_usb_accessory" msgid="1236358027511638648">"USB-accessoire"</string>
     <string name="label_view" msgid="6815442985276363364">"Bekijken"</string>
-    <string name="always_use_device" msgid="210535878779644679">"<xliff:g id="APPLICATION">%1$s</xliff:g> altijd openen wanneer <xliff:g id="USB_DEVICE">%2$s</xliff:g> is verbonden"</string>
-    <string name="always_use_accessory" msgid="1977225429341838444">"<xliff:g id="APPLICATION">%1$s</xliff:g> altijd openen wanneer <xliff:g id="USB_ACCESSORY">%2$s</xliff:g> is verbonden"</string>
+    <string name="always_use_device" msgid="210535878779644679">"<xliff:g id="APPLICATION">%1$s</xliff:g> altijd openen wanneer <xliff:g id="USB_DEVICE">%2$s</xliff:g> verbonden is"</string>
+    <string name="always_use_accessory" msgid="1977225429341838444">"<xliff:g id="APPLICATION">%1$s</xliff:g> altijd openen wanneer <xliff:g id="USB_ACCESSORY">%2$s</xliff:g> verbonden is"</string>
     <string name="usb_debugging_title" msgid="8274884945238642726">"USB-foutopsporing toestaan?"</string>
     <string name="usb_debugging_message" msgid="5794616114463921773">"De vingerafdruk voor de RSA-sleutel van de computer is:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="4003121804294739548">"Altijd toestaan vanaf deze computer"</string>
@@ -507,7 +507,7 @@
     <string name="battery_saver_notification_text" msgid="2617841636449016951">"Vermindert de prestaties en achtergrondgegevens"</string>
     <string name="battery_saver_notification_action_text" msgid="6022091913807026887">"Batterijbesparing uitzetten"</string>
     <string name="media_projection_dialog_text" msgid="1755705274910034772">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> krijgt toegang tot alle informatie die zichtbaar is op je scherm of die wordt afgespeeld vanaf je apparaat tijdens het opnemen of casten. Dit omvat informatie zoals wachtwoorden, betalingsgegevens, foto\'s, berichten en audio die je afspeelt."</string>
-    <string name="media_projection_dialog_service_text" msgid="958000992162214611">"De service die deze functie levert, krijgt toegang tot alle informatie die zichtbaar is op je scherm of die wordt afgespeeld vanaf je apparaat tijdens het opnemen of casten. Dit omvat informatie zoals wachtwoorden, betalingsgegevens, foto\'s, berichten en audio die je afspeelt."</string>
+    <string name="media_projection_dialog_service_text" msgid="958000992162214611">"De service die deze functie levert, krijgt tijdens het opnemen of casten toegang tot alle informatie die op je scherm te zien is of op je apparaat wordt afgespeeld. Dit omvat informatie zoals wachtwoorden, betalingsgegevens, foto\'s, berichten en audio die je afspeelt."</string>
     <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"Beginnen met opnemen of casten?"</string>
     <string name="media_projection_dialog_title" msgid="3316063622495360646">"Beginnen met opnemen of casten met <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>?"</string>
     <string name="media_projection_remember_text" msgid="6896767327140422951">"Niet opnieuw tonen"</string>
@@ -704,8 +704,8 @@
     <string name="enable_bluetooth_confirmation_ok" msgid="2866408183324184876">"Aanzetten"</string>
     <string name="show_silently" msgid="5629369640872236299">"Meldingen zonder geluid tonen"</string>
     <string name="block" msgid="188483833983476566">"Alle meldingen blokkeren"</string>
-    <string name="do_not_silence" msgid="4982217934250511227">"Niet zonder geluid weergeven"</string>
-    <string name="do_not_silence_block" msgid="4361847809775811849">"Niet zonder geluid weergeven of blokkeren"</string>
+    <string name="do_not_silence" msgid="4982217934250511227">"Niet zonder geluid bekijken"</string>
+    <string name="do_not_silence_block" msgid="4361847809775811849">"Niet zonder geluid bekijken of blokkeren"</string>
     <string name="tuner_full_importance_settings" msgid="1388025816553459059">"Beheeropties voor meldingen met betrekking tot stroomverbruik"</string>
     <string name="tuner_full_importance_settings_on" msgid="917981436602311547">"Aan"</string>
     <string name="tuner_full_importance_settings_off" msgid="5580102038749680829">"Uit"</string>
@@ -998,7 +998,7 @@
     <string name="slice_permission_deny" msgid="6870256451658176895">"Weigeren"</string>
     <string name="auto_saver_title" msgid="6873691178754086596">"Tikken om Batterijbesparing aan te zetten"</string>
     <string name="auto_saver_text" msgid="3214960308353838764">"Aanzetten als de batterij waarschijnlijk leeg raakt"</string>
-    <string name="no_auto_saver_action" msgid="7467924389609773835">"Nee"</string>
+    <string name="no_auto_saver_action" msgid="7467924389609773835">"Nee, bedankt"</string>
     <string name="auto_saver_enabled_title" msgid="4294726198280286333">"Batterijbesparing staat aan"</string>
     <string name="auto_saver_enabled_text" msgid="7889491183116752719">"Batterijbesparing wordt automatisch aangezet wanneer de batterijstatus lager is dan <xliff:g id="PERCENTAGE">%d</xliff:g>%%."</string>
     <string name="open_saver_setting_action" msgid="2111461909782935190">"Instellingen"</string>
@@ -1059,7 +1059,7 @@
     <string name="accessibility_control_change_unfavorite" msgid="6997408061750740327">"als favoriet verwijderen"</string>
     <string name="accessibility_control_move" msgid="8980344493796647792">"Verplaatsen naar positie <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Bedieningselementen"</string>
-    <string name="controls_favorite_subtitle" msgid="6481675111056961083">"Kies welke bedieningselementen je in Snelle instellingen wilt zien"</string>
+    <string name="controls_favorite_subtitle" msgid="6481675111056961083">"Kies welke bedieningselementen je wilt zien in Snelle instellingen"</string>
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Houd vast en sleep om de bedieningselementen opnieuw in te delen"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"Alle bedieningselementen verwijderd"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"Wijzigingen zijn niet opgeslagen"</string>

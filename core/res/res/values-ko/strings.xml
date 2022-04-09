@@ -324,7 +324,7 @@
     <string name="permgroupdesc_calllog" msgid="2026996642917801803">"통화 기록 읽고 쓰기"</string>
     <string name="permgrouplab_phone" msgid="570318944091926620">"전화"</string>
     <string name="permgroupdesc_phone" msgid="270048070781478204">"전화 걸기 및 관리"</string>
-    <string name="permgrouplab_sensors" msgid="9134046949784064495">"신체 센서"</string>
+    <string name="permgrouplab_sensors" msgid="9134046949784064495">"생체 신호 센서"</string>
     <string name="permgroupdesc_sensors" msgid="2610631290633747752">"생체 신호에 관한 센서 데이터에 액세스"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="7554282892101587296">"창 콘텐츠 가져오기"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="6195610527625237661">"상호작용 중인 창의 콘텐츠를 검사합니다."</string>
@@ -424,7 +424,7 @@
     <string name="permdesc_writeCallLog" product="tablet" msgid="2657525794731690397">"앱에서 수신 및 발신 통화 데이터를 포함하여 태블릿의 통화 기록을 수정할 수 있도록 허용합니다. 이 경우 악성 앱이 통화 기록을 지우거나 수정할 수 있습니다."</string>
     <string name="permdesc_writeCallLog" product="tv" msgid="3934939195095317432">"앱이 수신 및 발신 통화에 관한 데이터를 비롯하여 Android TV 기기의 통화 기록을 수정하도록 허용합니다. 이렇게 하면 악성 앱이 통화 기록을 삭제하거나 수정할 수도 있습니다."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="5903033505665134802">"앱에서 수신 및 발신 통화 데이터를 포함하여 휴대전화의 통화 기록을 수정할 수 있도록 허용합니다. 이 경우 악성 앱이 통화 기록을 지우거나 수정할 수 있습니다."</string>
-    <string name="permlab_bodySensors" msgid="3411035315357380862">"인체 감지 센서(예: 심박수 모니터)에 액세스"</string>
+    <string name="permlab_bodySensors" msgid="3411035315357380862">"심박수와 같은 생체 신호 센서 데이터에 액세스"</string>
     <string name="permdesc_bodySensors" product="default" msgid="2365357960407973997">"앱이 심박수와 같은 신체 상태를 확인하는 센서의 데이터에 접근하도록 허용합니다."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"캘린더 일정 및 세부정보 읽기"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"이 앱은 태블릿에 저장된 모든 캘린더 일정을 읽고 캘린더 데이터를 공유하거나 저장할 수 있습니다."</string>
@@ -1873,8 +1873,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"관리자에 의해 업데이트되었습니다."</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"관리자에 의해 삭제되었습니다."</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"확인"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"절전 기능은 어두운 테마를 사용 설정하고 백그라운드 활동, 일부 시각 효과, 특정 기능 및 일부 네트워크 연결을 제한하거나 사용 중지합니다."</string>
-    <string name="battery_saver_description" msgid="8518809702138617167">"절전 기능은 어두운 테마를 사용 설정하고 백그라운드 활동, 일부 시각 효과, 특정 기능 및 일부 네트워크 연결을 제한하거나 사용 중지합니다."</string>
+    <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"절전 모드는 어두운 테마를 사용하고 백그라운드 활동, 일부 시각 효과, 특정 기능 및 일부 네트워크 연결을 제한하거나 사용 중지합니다."</string>
+    <string name="battery_saver_description" msgid="8518809702138617167">"절전 모드는 어두운 테마를 사용하고 백그라운드 활동, 일부 시각 효과, 특정 기능 및 일부 네트워크 연결을 제한하거나 사용 중지합니다."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"데이터 사용량을 줄이기 위해 데이터 절약 모드는 일부 앱이 백그라운드에서 데이터를 전송하거나 수신하지 못하도록 합니다. 현재 사용 중인 앱에서 데이터에 액세스할 수 있지만 빈도가 줄어듭니다. 예를 들면, 이미지를 탭하기 전에는 이미지가 표시되지 않습니다."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"데이터 절약 모드를 사용 설정하시겠습니까?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"사용 설정"</string>

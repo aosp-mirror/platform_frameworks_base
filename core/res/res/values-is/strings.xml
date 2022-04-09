@@ -325,7 +325,7 @@
     <string name="permgrouplab_phone" msgid="570318944091926620">"Sími"</string>
     <string name="permgroupdesc_phone" msgid="270048070781478204">"hringja og stjórna símtölum"</string>
     <string name="permgrouplab_sensors" msgid="9134046949784064495">"Líkamsskynjarar"</string>
-    <string name="permgroupdesc_sensors" msgid="2610631290633747752">"aðgangur að skynjaragögnum yfir lífsmörk þín"</string>
+    <string name="permgroupdesc_sensors" msgid="2610631290633747752">"aðgangur að skynjaragögnum um lífsmörk þín"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="7554282892101587296">"Sækja innihald glugga"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="6195610527625237661">"Kanna innihald glugga sem þú ert að nota."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="327598364696316213">"Kveikja á snertikönnun"</string>
