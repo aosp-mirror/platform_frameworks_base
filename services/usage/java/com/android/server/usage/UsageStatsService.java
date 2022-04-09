@@ -95,6 +95,7 @@ import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
+import android.util.SparseSetArray;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
@@ -183,8 +184,7 @@ public class UsageStatsService extends SystemService implements
     static final int MSG_PACKAGE_REMOVED = 6;
     static final int MSG_ON_START = 7;
     static final int MSG_HANDLE_LAUNCH_TIME_ON_USER_UNLOCK = 8;
-    static final int MSG_NOTIFY_ESTIMATED_LAUNCH_TIME_CHANGED = 9;
-    static final int MSG_NOTIFY_ESTIMATED_LAUNCH_TIMES_CHANGED = 10;
+    static final int MSG_NOTIFY_ESTIMATED_LAUNCH_TIMES_CHANGED = 9;
 
     private final Object mLock = new Object();
     Handler mHandler;
@@ -225,6 +225,8 @@ public class UsageStatsService extends SystemService implements
             new ArraySet<>();
     private final CopyOnWriteArraySet<UsageStatsManagerInternal.EstimatedLaunchTimeChangedListener>
             mEstimatedLaunchTimeChangedListeners = new CopyOnWriteArraySet<>();
+    @GuardedBy("mPendingLaunchTimeChangePackages")
+    private final SparseSetArray<String> mPendingLaunchTimeChangePackages = new SparseSetArray<>();
 
     private BroadcastResponseStatsTracker mResponseStatsTracker;
 
@@ -233,6 +235,7 @@ public class UsageStatsService extends SystemService implements
         private final String mTaskRootClass;
         private final String mUsageSourcePackage;
         public int lastEvent = Event.NONE;
+
         private ActivityData(String taskRootPackage, String taskRootClass, String sourcePackage) {
             mTaskRootPackage = taskRootPackage;
             mTaskRootClass = taskRootClass;
@@ -537,9 +540,10 @@ public class UsageStatsService extends SystemService implements
                         + expired.toString());
             }
             if (expired.size() > 0) {
-                mHandler.obtainMessage(
-                        MSG_NOTIFY_ESTIMATED_LAUNCH_TIMES_CHANGED, mUserId, 0, expired)
-                        .sendToTarget();
+                synchronized (mPendingLaunchTimeChangePackages) {
+                    mPendingLaunchTimeChangePackages.addAll(mUserId, expired);
+                }
+                mHandler.sendEmptyMessage(MSG_NOTIFY_ESTIMATED_LAUNCH_TIMES_CHANGED);
             }
         }
     }
@@ -1058,9 +1062,9 @@ public class UsageStatsService extends SystemService implements
                                     + " app launch resetting future launch estimate");
                         }
                         mAppStandby.setEstimatedLaunchTime(event.mPackage, userId, 0);
-                        mHandler.obtainMessage(
-                                MSG_NOTIFY_ESTIMATED_LAUNCH_TIME_CHANGED, userId, 0, event.mPackage)
-                                .sendToTarget();
+                        if (stageChangedEstimatedLaunchTime(userId, event.mPackage)) {
+                            mHandler.sendEmptyMessage(MSG_NOTIFY_ESTIMATED_LAUNCH_TIMES_CHANGED);
+                        }
                     }
                     break;
                 case Event.ACTIVITY_PAUSED:
@@ -1212,7 +1216,7 @@ public class UsageStatsService extends SystemService implements
     }
 
     /**
-     * Called by the Binder stub.
+     * Called by the Handler for message MSG_USER_REMOVED.
      */
     void onUserRemoved(int userId) {
         synchronized (mLock) {
@@ -1225,6 +1229,11 @@ public class UsageStatsService extends SystemService implements
                 mLaunchTimeAlarmQueues.remove(userId);
             }
         }
+        // Since this is only called from the Handler, we don't have to worry about modifying the
+        // pending change list while the handler is iterating to notify listeners.
+        synchronized (mPendingLaunchTimeChangePackages) {
+            mPendingLaunchTimeChangePackages.remove(userId);
+        }
         mAppStandby.onUserRemoved(userId);
         // Cancel any scheduled jobs for this user since the user is being removed.
         UsageStatsIdleService.cancelJob(getContext(), userId);
@@ -1235,6 +1244,15 @@ public class UsageStatsService extends SystemService implements
      * Called by the Handler for message MSG_PACKAGE_REMOVED.
      */
     private void onPackageRemoved(int userId, String packageName) {
+        // Since this is only called from the Handler, we don't have to worry about modifying the
+        // pending change list while the handler is iterating to notify listeners.
+        synchronized (mPendingLaunchTimeChangePackages) {
+            final ArraySet<String> pkgNames = mPendingLaunchTimeChangePackages.get(userId);
+            if (pkgNames != null) {
+                pkgNames.remove(packageName);
+            }
+        }
+
         final int tokenRemoved;
         synchronized (mLock) {
             final long timeRemoved = System.currentTimeMillis();
@@ -1435,7 +1453,7 @@ public class UsageStatsService extends SystemService implements
             @NonNull String packageName, int eventType) {
         synchronized (mLock) {
             if (!mUserUnlockedStates.contains(userId)) {
-                Slog.w(TAG, "Failed to query earliset package events for locked user " + userId);
+                Slog.w(TAG, "Failed to query earliest package events for locked user " + userId);
                 return null;
             }
 
@@ -1547,7 +1565,7 @@ public class UsageStatsService extends SystemService implements
                         userId, getContext(), BackgroundThread.get().getLooper());
                 mLaunchTimeAlarmQueues.put(userId, alarmQueue);
             }
-            final ArraySet<String> changedTimes = new ArraySet<>();
+            boolean changedTimes = false;
             for (boolean unprocessedEvent = events.getNextEvent(event); unprocessedEvent;
                     unprocessedEvent = events.getNextEvent(event)) {
                 final String packageName = event.getPackageName();
@@ -1577,15 +1595,13 @@ public class UsageStatsService extends SystemService implements
                             Slog.d(TAG, "User " + userId + " unlock resulting in"
                                     + " estimated launch time change for " + packageName);
                         }
-                        changedTimes.add(packageName);
+                        changedTimes |= stageChangedEstimatedLaunchTime(userId, packageName);
                     }
                     alarmQueue.addAlarm(packageName, nowElapsed + (estimatedLaunchTime - now));
                 }
             }
-            if (changedTimes.size() > 0) {
-                mHandler.obtainMessage(
-                        MSG_NOTIFY_ESTIMATED_LAUNCH_TIMES_CHANGED, userId, 0, changedTimes)
-                        .sendToTarget();
+            if (changedTimes) {
+                mHandler.sendEmptyMessage(MSG_NOTIFY_ESTIMATED_LAUNCH_TIMES_CHANGED);
             }
         }
     }
@@ -1603,14 +1619,14 @@ public class UsageStatsService extends SystemService implements
         final long oldEstimatedLaunchTime = mAppStandby.getEstimatedLaunchTime(packageName, userId);
         if (estimatedLaunchTime != oldEstimatedLaunchTime) {
             mAppStandby.setEstimatedLaunchTime(packageName, userId, estimatedLaunchTime);
-            mHandler.obtainMessage(
-                    MSG_NOTIFY_ESTIMATED_LAUNCH_TIME_CHANGED, userId, 0, packageName)
-                    .sendToTarget();
+            if (stageChangedEstimatedLaunchTime(userId, packageName)) {
+                mHandler.sendEmptyMessage(MSG_NOTIFY_ESTIMATED_LAUNCH_TIMES_CHANGED);
+            }
         }
     }
 
     private void setEstimatedLaunchTimes(int userId, List<AppLaunchEstimateInfo> launchEstimates) {
-        final ArraySet<String> changedTimes = new ArraySet<>();
+        boolean changedTimes = false;
         final long now = System.currentTimeMillis();
         for (int i = launchEstimates.size() - 1; i >= 0; --i) {
             AppLaunchEstimateInfo estimate = launchEstimates.get(i);
@@ -1626,13 +1642,17 @@ public class UsageStatsService extends SystemService implements
             if (estimate.estimatedLaunchTime != oldEstimatedLaunchTime) {
                 mAppStandby.setEstimatedLaunchTime(
                         estimate.packageName, userId, estimate.estimatedLaunchTime);
-                changedTimes.add(estimate.packageName);
+                changedTimes |= stageChangedEstimatedLaunchTime(userId, estimate.packageName);
             }
         }
-        if (changedTimes.size() > 0) {
-            mHandler.obtainMessage(
-                    MSG_NOTIFY_ESTIMATED_LAUNCH_TIMES_CHANGED, userId, 0, changedTimes)
-                    .sendToTarget();
+        if (changedTimes) {
+            mHandler.sendEmptyMessage(MSG_NOTIFY_ESTIMATED_LAUNCH_TIMES_CHANGED);
+        }
+    }
+
+    private boolean stageChangedEstimatedLaunchTime(int userId, String packageName) {
+        synchronized (mPendingLaunchTimeChangePackages) {
+            return mPendingLaunchTimeChangePackages.add(userId, packageName);
         }
     }
 
@@ -1946,35 +1966,45 @@ public class UsageStatsService extends SystemService implements
                     handleEstimatedLaunchTimesOnUserUnlock(userId);
                 }
                 break;
-                case MSG_NOTIFY_ESTIMATED_LAUNCH_TIME_CHANGED: {
-                    final int userId = msg.arg1;
-                    final String pkgName = (String) msg.obj;
-                    final long nextEstimatedLaunchTime =
-                            getEstimatedPackageLaunchTime(userId, pkgName);
-                    if (DEBUG) {
-                        Slog.d(TAG, "Notifying listener for " + userId + ":" + pkgName);
-                    }
-                    for (UsageStatsManagerInternal.EstimatedLaunchTimeChangedListener listener :
-                            mEstimatedLaunchTimeChangedListeners) {
-                        listener.onEstimatedLaunchTimeChanged(
-                                userId, pkgName, nextEstimatedLaunchTime);
-                    }
-                }
-                break;
                 case MSG_NOTIFY_ESTIMATED_LAUNCH_TIMES_CHANGED: {
-                    final int userId = msg.arg1;
-                    final ArraySet<String> pkgNames = (ArraySet<String>) msg.obj;
-                    if (DEBUG) {
-                        Slog.d(TAG, "Notifying listeners for " + userId + "-->" + pkgNames);
+                    removeMessages(MSG_NOTIFY_ESTIMATED_LAUNCH_TIMES_CHANGED);
+
+                    // Note that this method of getting the list's size outside and then using it
+                    // for iteration outside of the lock implies possible issue if the set is
+                    // modified during iteration. However, at the time of implementation, this is
+                    // not an issue.
+                    // For addition (increasing the size): if something is added after we get the
+                    // size, then there will be a new MSG_NOTIFY_ESTIMATED_LAUNCH_TIMES_CHANGED
+                    // message in the handler's queue, which means we will iterate over the list
+                    // once again and process the addition
+                    // For removal (decreasing the size): removals only ever happen via the handler,
+                    // which means this iteration code cannot happen at the same time as a removal.
+                    // We go through hoops to avoid holding locks when calling out to listeners.
+                    final int numUsers;
+                    final ArraySet<String> pkgNames = new ArraySet();
+                    synchronized (mPendingLaunchTimeChangePackages) {
+                        numUsers = mPendingLaunchTimeChangePackages.size();
                     }
-                    for (int p = pkgNames.size() - 1; p >= 0; --p) {
-                        final String pkgName = pkgNames.valueAt(p);
-                        final long nextEstimatedLaunchTime =
-                                getEstimatedPackageLaunchTime(userId, pkgName);
-                        for (UsageStatsManagerInternal.EstimatedLaunchTimeChangedListener listener :
-                                mEstimatedLaunchTimeChangedListeners) {
-                            listener.onEstimatedLaunchTimeChanged(
-                                    userId, pkgName, nextEstimatedLaunchTime);
+                    for (int u = numUsers - 1; u >= 0; --u) {
+                        pkgNames.clear();
+                        final int userId;
+                        synchronized (mPendingLaunchTimeChangePackages) {
+                            userId = mPendingLaunchTimeChangePackages.keyAt(u);
+                            pkgNames.addAll(mPendingLaunchTimeChangePackages.get(userId));
+                            mPendingLaunchTimeChangePackages.remove(userId);
+                        }
+                        if (DEBUG) {
+                            Slog.d(TAG, "Notifying listeners for " + userId + "-->" + pkgNames);
+                        }
+                        for (int p = pkgNames.size() - 1; p >= 0; --p) {
+                            final String pkgName = pkgNames.valueAt(p);
+                            final long nextEstimatedLaunchTime =
+                                    getEstimatedPackageLaunchTime(userId, pkgName);
+                            for (UsageStatsManagerInternal.EstimatedLaunchTimeChangedListener
+                                    listener : mEstimatedLaunchTimeChangedListeners) {
+                                listener.onEstimatedLaunchTimeChanged(
+                                        userId, pkgName, nextEstimatedLaunchTime);
+                            }
                         }
                     }
                 }

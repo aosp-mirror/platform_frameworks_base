@@ -24,6 +24,7 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import android.hardware.radio.V1_5.ApnTypes;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.provider.Telephony;
@@ -2181,6 +2182,14 @@ public class ApnSetting implements Parcelable {
                     | TYPE_FOTA | TYPE_IMS | TYPE_CBS | TYPE_IA | TYPE_EMERGENCY | TYPE_MCX
                     | TYPE_XCAP | TYPE_VSIM | TYPE_BIP | TYPE_ENTERPRISE)) == 0
                 || TextUtils.isEmpty(mApnName) || TextUtils.isEmpty(mEntryName)) {
+                return null;
+            }
+            if ((mApnTypeBitmask & TYPE_MMS) != 0 && !TextUtils.isEmpty(mMmsProxyAddress)
+                    && mMmsProxyAddress.startsWith("http")) {
+                if (Build.IS_DEBUGGABLE) {
+                    throw new IllegalArgumentException("mms proxy(" +  mMmsProxyAddress
+                            + ") should be a hostname, not a url");
+                }
                 return null;
             }
             return new ApnSetting(this);

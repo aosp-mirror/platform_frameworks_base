@@ -32,6 +32,7 @@ import com.android.systemui.statusbar.tv.TvStatusBar
 import com.android.systemui.statusbar.tv.VpnStatusObserver
 import com.android.systemui.statusbar.tv.notifications.TvNotificationHandler
 import com.android.systemui.statusbar.tv.notifications.TvNotificationPanel
+import com.android.systemui.theme.ThemeOverlayController
 import com.android.systemui.toast.ToastUI
 import com.android.systemui.usb.StorageNotification
 import com.android.systemui.util.NotificationChannels
@@ -107,6 +108,12 @@ abstract class TVSystemUICoreStartableModule {
     @IntoMap
     @ClassKey(StorageNotification::class)
     abstract fun bindStorageNotification(sysui: StorageNotification): CoreStartable
+
+    /** Inject into ThemeOverlayController.  */
+    @Binds
+    @IntoMap
+    @ClassKey(ThemeOverlayController::class)
+    abstract fun bindThemeOverlayController(sysui: ThemeOverlayController): CoreStartable
 
     /** Inject into ToastUI.  */
     @Binds

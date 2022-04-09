@@ -585,7 +585,8 @@
     <string name="biometric_error_generic" msgid="6784371929985434439">"การตรวจสอบข้อผิดพลาด"</string>
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"ใช้การล็อกหน้าจอ"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"ป้อนข้อมูลการล็อกหน้าจอเพื่อดำเนินการต่อ"</string>
-    <string name="fingerprint_acquired_partial" msgid="694598777291084823">"ตรวจพบลายนิ้วมือบางส่วน"</string>
+    <!-- no translation found for fingerprint_acquired_partial (4323789264604479684) -->
+    <skip />
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"ประมวลผลลายนิ้วมือไม่ได้ โปรดลองอีกครั้ง"</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"ทำความสะอาดเซ็นเซอร์ลายนิ้วมือแล้วลองอีกครั้ง"</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"ทำความสะอาดเซ็นเซอร์แล้วลองอีกครั้ง"</string>
@@ -598,7 +599,8 @@
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_error_not_match" msgid="4599441812893438961">"ไม่รู้จักลายนิ้วมือ"</string>
-    <string name="fingerprint_udfps_error_not_match" msgid="4709197752023550709">"กดเซ็นเซอร์ให้แน่น"</string>
+    <!-- no translation found for fingerprint_udfps_error_not_match (8236930793223158856) -->
+    <skip />
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"ตรวจสอบสิทธิ์ลายนิ้วมือแล้ว"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"ตรวจสอบสิทธิ์ใบหน้าแล้ว"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"ตรวจสอบสิทธิ์ใบหน้าแล้ว โปรดกดยืนยัน"</string>
@@ -1679,7 +1681,6 @@
     <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"เปิด"</string>
     <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"ปิด"</string>
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"อนุญาตให้ <xliff:g id="SERVICE">%1$s</xliff:g> ควบคุมอุปกรณ์อย่างเต็มที่ไหม"</string>
-    <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"หากคุณเปิด <xliff:g id="SERVICE">%1$s</xliff:g> อุปกรณ์ของคุณจะไม่ใช้ล็อกหน้าจอเพื่อปรับปรุงการเข้ารหัสข้อมูล"</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"การควบคุมอย่างเต็มที่เหมาะสำหรับแอปที่ช่วยคุณในเรื่องความต้องการความช่วยเหลือพิเศษแต่ไม่เหมาะสำหรับแอปส่วนใหญ่"</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"ดูและควบคุมหน้าจอ"</string>
     <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"การควบคุมนี้อ่านเนื้อหาทั้งหมดบนหน้าจอและแสดงเนื้อหาทับแอปอื่นๆ"</string>
@@ -2027,7 +2028,8 @@
     <string name="harmful_app_warning_open_anyway" msgid="5963657791740211807">"เปิดต่อไป"</string>
     <string name="harmful_app_warning_title" msgid="8794823880881113856">"ตรวจพบแอปที่เป็นอันตราย"</string>
     <string name="log_access_confirmation_title" msgid="2343578467290592708">"อนุญาตให้ <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> เข้าถึงบันทึกทั้งหมดของอุปกรณ์ใช่ไหม"</string>
-    <string name="log_access_confirmation_allow" msgid="143157286283302512">"เฉพาะครั้งนี้"</string>
+    <!-- no translation found for log_access_confirmation_allow (5302517782599389507) -->
+    <skip />
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"ไม่อนุญาต"</string>
     <string name="log_access_confirmation_body" msgid="6581985716241928135">"บันทึกของอุปกรณ์เก็บข้อมูลสิ่งที่เกิดขึ้นในอุปกรณ์ แอปสามารถใช้บันทึกเหล่านี้เพื่อค้นหาและแก้ไขปัญหา\n\nบันทึกบางรายการอาจมีข้อมูลที่ละเอียดอ่อน คุณจึงควรอนุญาตเฉพาะแอปที่เชื่อถือได้ให้เข้าถึงบันทึกทั้งหมดของอุปกรณ์ \n\nหากคุณไม่อนุญาตให้แอปนี้เข้าถึงบันทึกทั้งหมดของอุปกรณ์ แอปจะยังเข้าถึงบันทึกของตัวเองได้อยู่ ผู้ผลิตอุปกรณ์อาจยังเข้าถึงบันทึกหรือข้อมูลบางรายการในอุปกรณ์ของคุณได้ ดูข้อมูลเพิ่มเติม"</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"ไม่ต้องแสดงอีก"</string>
@@ -2259,9 +2261,14 @@
     <string name="ui_translation_accessibility_translated_text" msgid="3197547218178944544">"<xliff:g id="MESSAGE">%1$s</xliff:g> แปลแล้ว"</string>
     <string name="ui_translation_accessibility_translation_finished" msgid="3057830947610088465">"แปลข้อความจากภาษา<xliff:g id="FROM_LANGUAGE">%1$s</xliff:g>เป็นภาษา<xliff:g id="TO_LANGUAGE">%2$s</xliff:g>แล้ว"</string>
     <string name="notification_channel_abusive_bg_apps" msgid="6092140213264920355">"กิจกรรมในเบื้องหลัง"</string>
-    <string name="notification_title_abusive_bg_apps" msgid="344582472797982073">"กิจกรรมในเบื้องหลัง"</string>
-    <string name="notification_content_abusive_bg_apps" msgid="5572096708044958249">"<xliff:g id="APP">%1$s</xliff:g> กำลังทำงานอยู่ในเบื้องหลังและทำให้เปลืองแบตเตอรี่ แตะเพื่อตรวจสอบ"</string>
-    <string name="notification_content_long_running_fgs" msgid="8878031652441570178">"<xliff:g id="APP">%1$s</xliff:g> ทำงานอยู่ในเบื้องหลังเป็นเวลานาน แตะเพื่อตรวจสอบ"</string>
+    <!-- no translation found for notification_title_abusive_bg_apps (3258460527676573815) -->
+    <skip />
+    <!-- no translation found for notification_title_long_running_fgs (8170284286477131587) -->
+    <skip />
+    <!-- no translation found for notification_content_abusive_bg_apps (9180610713603474720) -->
+    <skip />
+    <!-- no translation found for notification_content_long_running_fgs (8258193410039977101) -->
+    <skip />
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"ตรวจสอบแอปที่ใช้งานอยู่"</string>
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"เข้าถึงกล้องของโทรศัพท์จาก <xliff:g id="DEVICE">%1$s</xliff:g> ไม่ได้"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"เข้าถึงกล้องของแท็บเล็ตจาก <xliff:g id="DEVICE">%1$s</xliff:g> ไม่ได้"</string>

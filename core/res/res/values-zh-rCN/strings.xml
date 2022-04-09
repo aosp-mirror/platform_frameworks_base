@@ -425,9 +425,9 @@
     <string name="permdesc_writeCallLog" product="tablet" msgid="2657525794731690397">"允许该应用修改平板电脑的通话记录，包括有关来电和外拨电话的数据。恶意应用可能会借此清除或修改您的通话记录。"</string>
     <string name="permdesc_writeCallLog" product="tv" msgid="3934939195095317432">"允许应用修改您的 Android TV 设备的通话记录，包括关于来电和去电的数据。恶意应用可能会借此清空或修改您的通话记录。"</string>
     <string name="permdesc_writeCallLog" product="default" msgid="5903033505665134802">"允许该应用修改手机的通话记录，包括有关来电和外拨电话的数据。恶意应用可能会借此清除或修改您的通话记录。"</string>
-    <string name="permlab_bodySensors" msgid="662918578601619569">"允许应用在使用中时访问身体传感器数据，如心率"</string>
-    <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"允许应用在使用中时访问身体传感器数据，如心率、体温和血氧浓度。"</string>
-    <string name="permlab_bodySensors_background" msgid="4912560779957760446">"允许应用在后台运行时访问身体传感器数据，如心率"</string>
+    <string name="permlab_bodySensors" msgid="662918578601619569">"在使用期间可访问身体传感器数据，如心率"</string>
+    <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"允许应用在使用期间访问身体传感器数据，如心率、体温和血氧浓度。"</string>
+    <string name="permlab_bodySensors_background" msgid="4912560779957760446">"在后台运行时可访问身体传感器数据，如心率"</string>
     <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"允许应用在后台运行时访问身体传感器数据，如心率、体温和血氧浓度。"</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"读取日历活动和详情"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"此应用可读取您平板电脑上存储的所有日历活动，并分享或保存您的日历数据。"</string>
@@ -585,7 +585,7 @@
     <string name="biometric_error_generic" msgid="6784371929985434439">"进行身份验证时出错"</string>
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"使用屏幕锁定凭据"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"输入您的屏幕锁定凭据才能继续"</string>
-    <string name="fingerprint_acquired_partial" msgid="694598777291084823">"检测到局部指纹"</string>
+    <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"请用力按住传感器"</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"无法处理指纹，请重试。"</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"请清洁指纹传感器，然后重试"</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"请清洁传感器，然后重试"</string>
@@ -598,7 +598,7 @@
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_error_not_match" msgid="4599441812893438961">"未能识别指纹"</string>
-    <string name="fingerprint_udfps_error_not_match" msgid="4709197752023550709">"请用力按住传感器"</string>
+    <string name="fingerprint_udfps_error_not_match" msgid="8236930793223158856">"未能识别指纹"</string>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"已验证指纹"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"面孔已验证"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"面孔已验证，请按确认按钮"</string>
@@ -1679,7 +1679,6 @@
     <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"已开启"</string>
     <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"已关闭"</string>
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"要允许<xliff:g id="SERVICE">%1$s</xliff:g>完全控制您的设备吗？"</string>
-    <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"如果您开启<xliff:g id="SERVICE">%1$s</xliff:g>，您的设备将无法使用屏幕锁定功能来增强数据加密效果。"</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"对于能满足您的无障碍功能需求的应用，可授予其完全控制权限；但对大部分应用来说，都不适合授予此权限。"</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"查看和控制屏幕"</string>
     <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"此功能可以读出屏幕上的所有内容，并在其他应用上层显示内容。"</string>
@@ -2027,10 +2026,9 @@
     <string name="harmful_app_warning_open_anyway" msgid="5963657791740211807">"仍然打开"</string>
     <string name="harmful_app_warning_title" msgid="8794823880881113856">"检测到有害应用"</string>
     <string name="log_access_confirmation_title" msgid="2343578467290592708">"允许“<xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g>”访问所有设备日志吗？"</string>
-    <string name="log_access_confirmation_allow" msgid="143157286283302512">"仅限这一次"</string>
+    <string name="log_access_confirmation_allow" msgid="5302517782599389507">"允许访问一次"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"不允许"</string>
-    <!-- no translation found for log_access_confirmation_body (6581985716241928135) -->
-    <skip />
+    <string name="log_access_confirmation_body" msgid="6581985716241928135">"设备日志会记录设备上发生的活动。应用可以使用这些日志查找和修复问题。\n\n部分日志可能包含敏感信息，因此请仅允许您信任的应用访问所有设备日志。\n\n如果您不授予此应用访问所有设备日志的权限，它仍然可以访问自己的日志。您的设备制造商可能仍然能够访问您设备上的部分日志或信息。了解详情"</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"不再显示"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"“<xliff:g id="APP_0">%1$s</xliff:g>”想要显示“<xliff:g id="APP_2">%2$s</xliff:g>”图块"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"编辑"</string>
@@ -2260,13 +2258,12 @@
     <string name="ui_translation_accessibility_translated_text" msgid="3197547218178944544">"已翻译“<xliff:g id="MESSAGE">%1$s</xliff:g>”。"</string>
     <string name="ui_translation_accessibility_translation_finished" msgid="3057830947610088465">"已将消息内容从<xliff:g id="FROM_LANGUAGE">%1$s</xliff:g>翻译成<xliff:g id="TO_LANGUAGE">%2$s</xliff:g>。"</string>
     <string name="notification_channel_abusive_bg_apps" msgid="6092140213264920355">"后台活动"</string>
-    <string name="notification_title_abusive_bg_apps" msgid="344582472797982073">"后台活动"</string>
-    <string name="notification_content_abusive_bg_apps" msgid="5572096708044958249">"“<xliff:g id="APP">%1$s</xliff:g>”正在后台运行，并且消耗了大量电池电量。点按即可查看。"</string>
-    <string name="notification_content_long_running_fgs" msgid="8878031652441570178">"“<xliff:g id="APP">%1$s</xliff:g>”已在后台运行较长时间。点按即可查看。"</string>
+    <string name="notification_title_abusive_bg_apps" msgid="3258460527676573815">"某个应用正在消耗电量"</string>
+    <string name="notification_title_long_running_fgs" msgid="8170284286477131587">"某个应用仍在使用中"</string>
+    <string name="notification_content_abusive_bg_apps" msgid="9180610713603474720">"“<xliff:g id="APP">%1$s</xliff:g>”正在后台消耗电量。点按即可查看。"</string>
+    <string name="notification_content_long_running_fgs" msgid="8258193410039977101">"“<xliff:g id="APP">%1$s</xliff:g>”可能会影响电池续航时间。点按即可查看使用中的应用。"</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"查看使用中的应用"</string>
-    <!-- no translation found for vdm_camera_access_denied (6102378580971542473) -->
-    <skip />
-    <!-- no translation found for vdm_camera_access_denied (6895968310395249076) -->
-    <skip />
+    <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"无法从<xliff:g id="DEVICE">%1$s</xliff:g>上访问手机的摄像头"</string>
+    <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"无法从<xliff:g id="DEVICE">%1$s</xliff:g>上访问平板电脑的摄像头"</string>
     <string name="system_locale_title" msgid="3978041860457277638">"系统语言"</string>
 </resources>

@@ -585,7 +585,7 @@
     <string name="biometric_error_generic" msgid="6784371929985434439">"Nagkaroon ng error sa pag-authenticate"</string>
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"Gumamit ng lock ng screen"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"Ilagay ang iyong lock ng screen para magpatuloy"</string>
-    <string name="fingerprint_acquired_partial" msgid="694598777291084823">"Hindi buo ang natukoy na fingerprint"</string>
+    <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"Pumindot nang madiin sa sensor"</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"Hindi maproseso ang fingerprint. Pakisubukan ulit."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"Linisin ang sensor para sa fingerprint at subukan ulit"</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"Linisin ang sensor at subukan ulit"</string>
@@ -598,7 +598,7 @@
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_error_not_match" msgid="4599441812893438961">"Hindi nakilala ang fingerprint"</string>
-    <string name="fingerprint_udfps_error_not_match" msgid="4709197752023550709">"Pumindot nang madiin sa sensor"</string>
+    <string name="fingerprint_udfps_error_not_match" msgid="8236930793223158856">"Hindi nakilala ang fingerprint"</string>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"Na-authenticate ang fingerprint"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"Na-authenticate ang mukha"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"Na-authenticate ang mukha, pakipindot ang kumpirmahin"</string>
@@ -1679,7 +1679,6 @@
     <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"NAKA-ON"</string>
     <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"NAKA-OFF"</string>
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"Bigyan ang <xliff:g id="SERVICE">%1$s</xliff:g> ng ganap na kontrol sa iyong device?"</string>
-    <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"Kung io-on mo ang <xliff:g id="SERVICE">%1$s</xliff:g>, hindi gagamitin ng iyong device ang lock ng screen mo para pahusayin ang pag-encrypt ng data."</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"Naaangkop ang ganap na kontrol sa mga app na tumutulong sa mga pangangailangan mo sa accessibility, pero hindi sa karamihan ng mga app."</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Tingnan at kontrolin ang screen"</string>
     <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Mababasa nito ang lahat ng content na nasa screen at makakapagpakita ito ng content sa iba pang app."</string>
@@ -2027,7 +2026,7 @@
     <string name="harmful_app_warning_open_anyway" msgid="5963657791740211807">"BUKSAN PA RIN"</string>
     <string name="harmful_app_warning_title" msgid="8794823880881113856">"May na-detect na mapaminsalang app"</string>
     <string name="log_access_confirmation_title" msgid="2343578467290592708">"Payagan ang <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> na i-access ang lahat ng log ng device?"</string>
-    <string name="log_access_confirmation_allow" msgid="143157286283302512">"Ngayon lang"</string>
+    <string name="log_access_confirmation_allow" msgid="5302517782599389507">"Payagan ang isang beses na pag-access"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"Huwag payagan"</string>
     <string name="log_access_confirmation_body" msgid="6581985716241928135">"Nire-record ng mga log ng device kung ano ang nangyayari sa iyong device. Magagamit ng mga app ang mga log na ito para maghanap at mag-ayos ng mga isyu.\n\nPosibleng maglaman ang ilang log ng sensitibong impormasyon, kaya ang mga app lang na pinagkakatiwalaan mo ang payagang maka-access sa lahat ng log ng device. \n\nKung hindi mo papayagan ang app na ito na i-access ang lahat ng log ng device, maa-access pa rin nito ang mga sarili nitong log. Posible pa ring ma-access ng manufacturer ng iyong device ang ilang log o impormasyon sa device mo. Matuto pa"</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"Huwag ipakita ulit"</string>
@@ -2259,9 +2258,10 @@
     <string name="ui_translation_accessibility_translated_text" msgid="3197547218178944544">"Naisalin ang <xliff:g id="MESSAGE">%1$s</xliff:g>."</string>
     <string name="ui_translation_accessibility_translation_finished" msgid="3057830947610088465">"Naisalin ang mensahe sa <xliff:g id="TO_LANGUAGE">%2$s</xliff:g> mula sa <xliff:g id="FROM_LANGUAGE">%1$s</xliff:g>."</string>
     <string name="notification_channel_abusive_bg_apps" msgid="6092140213264920355">"Aktibidad sa Background"</string>
-    <string name="notification_title_abusive_bg_apps" msgid="344582472797982073">"Aktibidad sa Background"</string>
-    <string name="notification_content_abusive_bg_apps" msgid="5572096708044958249">"Gumagana ang <xliff:g id="APP">%1$s</xliff:g> sa background at gumagamit ito ng baterya I-tap para suriin."</string>
-    <string name="notification_content_long_running_fgs" msgid="8878031652441570178">"Napakatagal nang gumagana ang <xliff:g id="APP">%1$s</xliff:g> sa background. I-tap para suriin."</string>
+    <string name="notification_title_abusive_bg_apps" msgid="3258460527676573815">"May app na gumagamit ng baterya"</string>
+    <string name="notification_title_long_running_fgs" msgid="8170284286477131587">"May app na aktibo pa rin"</string>
+    <string name="notification_content_abusive_bg_apps" msgid="9180610713603474720">"Gumagamit ng baterya ang <xliff:g id="APP">%1$s</xliff:g> sa background. I-tap para suriin."</string>
+    <string name="notification_content_long_running_fgs" msgid="8258193410039977101">"Posibleng maapektuhan ng <xliff:g id="APP">%1$s</xliff:g> ang tagal ng baterya. I-tap para suriin ang mga aktibong app."</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Tingnan ang mga aktibong app"</string>
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"Hindi ma-access ang camera ng telepono mula sa iyong <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"Hindi ma-access ang camera ng tablet mula sa iyong <xliff:g id="DEVICE">%1$s</xliff:g>"</string>

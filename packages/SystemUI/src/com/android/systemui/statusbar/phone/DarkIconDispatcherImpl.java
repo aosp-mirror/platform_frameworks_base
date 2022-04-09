@@ -26,7 +26,6 @@ import android.widget.ImageView;
 import com.android.systemui.R;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dump.DumpManager;
-import com.android.systemui.statusbar.CommandQueue;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -53,12 +52,12 @@ public class DarkIconDispatcherImpl implements SysuiDarkIconDispatcher,
     @Inject
     public DarkIconDispatcherImpl(
             Context context,
-            CommandQueue commandQueue,
+            LightBarTransitionsController.Factory lightBarTransitionsControllerFactory,
             DumpManager dumpManager) {
         mDarkModeIconColorSingleTone = context.getColor(R.color.dark_mode_icon_color_single_tone);
         mLightModeIconColorSingleTone = context.getColor(R.color.light_mode_icon_color_single_tone);
 
-        mTransitionsController = new LightBarTransitionsController(context, this, commandQueue);
+        mTransitionsController = lightBarTransitionsControllerFactory.create(this);
 
         dumpManager.registerDumpable(getClass().getSimpleName(), this);
     }
