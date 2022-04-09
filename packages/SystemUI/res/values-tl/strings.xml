@@ -454,7 +454,7 @@
     <string name="enable_demo_mode" msgid="3180345364745966431">"I-enable ang demo mode"</string>
     <string name="show_demo_mode" msgid="3677956462273059726">"Ipakita ang demo mode"</string>
     <string name="status_bar_ethernet" msgid="5690979758988647484">"Ethernet"</string>
-    <string name="status_bar_alarm" msgid="87160847643623352">"Alarma"</string>
+    <string name="status_bar_alarm" msgid="87160847643623352">"Alarm"</string>
     <string name="wallet_title" msgid="5369767670735827105">"Wallet"</string>
     <string name="wallet_empty_state_label" msgid="7776761245237530394">"I-set up para makapagsagawa ng mas mabibilis, mas secure na pagbili gamit ang telepono mo"</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"Ipakita lahat"</string>
@@ -805,6 +805,8 @@
     <string name="controls_media_button_pause" msgid="8614887780950376258">"I-pause"</string>
     <string name="controls_media_button_prev" msgid="8126822360056482970">"Nakaraang track"</string>
     <string name="controls_media_button_next" msgid="6662636627525947610">"Susunod na track"</string>
+    <!-- no translation found for controls_media_button_connecting (3138354625847598095) -->
+    <skip />
     <string name="controls_media_smartspace_rec_title" msgid="1699818353932537407">"I-play"</string>
     <string name="controls_media_smartspace_rec_description" msgid="4136242327044070732">"Buksan ang <xliff:g id="APP_LABEL">%1$s</xliff:g>"</string>
     <string name="controls_media_smartspace_rec_item_description" msgid="2189271793070870883">"I-play ang <xliff:g id="SONG_NAME">%1$s</xliff:g> ni/ng <xliff:g id="ARTIST_NAME">%2$s</xliff:g> mula sa <xliff:g id="APP_LABEL">%3$s</xliff:g>"</string>
