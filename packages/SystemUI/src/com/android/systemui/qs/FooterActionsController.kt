@@ -38,7 +38,6 @@ import com.android.systemui.qs.dagger.QSFlagsModule.PM_LITE_ENABLED
 import com.android.systemui.qs.dagger.QSScope
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.statusbar.phone.MultiUserSwitchController
-import com.android.systemui.statusbar.phone.SettingsButton
 import com.android.systemui.statusbar.policy.DeviceProvisionedController
 import com.android.systemui.statusbar.policy.UserInfoController
 import com.android.systemui.statusbar.policy.UserInfoController.OnUserInfoChangedListener
@@ -89,8 +88,7 @@ internal class FooterActionsController @Inject constructor(
             updateVisibility()
         }
 
-    private val settingsButton: SettingsButton = view.findViewById(R.id.settings_button)
-    private val settingsButtonContainer: View? = view.findViewById(R.id.settings_button_container)
+    private val settingsButtonContainer: View = view.findViewById(R.id.settings_button_container)
     private val securityFootersContainer: ViewGroup? =
         view.findViewById(R.id.security_footers_container)
     private val powerMenuLite: View = view.findViewById(R.id.pm_lite)
@@ -121,7 +119,7 @@ internal class FooterActionsController @Inject constructor(
         if (!visible || falsingManager.isFalseTap(FalsingManager.LOW_PENALTY)) {
             return@OnClickListener
         }
-        if (v === settingsButton) {
+        if (v === settingsButtonContainer) {
             if (!deviceProvisionedController.isCurrentUserSetup) {
                 // If user isn't setup just unlock the device and dump them back at SUW.
                 activityStarter.postQSRunnableDismissingKeyguard {}
@@ -166,7 +164,7 @@ internal class FooterActionsController @Inject constructor(
         } else {
             powerMenuLite.visibility = View.GONE
         }
-        settingsButton.setOnClickListener(onClickListener)
+        settingsButtonContainer.setOnClickListener(onClickListener)
         multiUserSetting.isListening = true
 
         val securityFooter = securityFooterController.view
