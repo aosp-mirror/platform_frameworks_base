@@ -447,8 +447,8 @@
     <string name="daltonizer_mode_deuteranomaly" msgid="3507284319584683963">"Дейтераномалия (кызыл-жашыл)"</string>
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"Протаномалия (кызыл-жашыл)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"Тританомалия (көк-сары)"</string>
-    <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"Түсүн тууралоо"</string>
-    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1522101114585266455">"Төмөнкү учурларда түстөрдү тууралоонун пайдасы тийиши мүмкүн:&lt;br/&gt; &lt;ol&gt; &lt;li&gt;&amp;nbsp;Түстөрдү тагыраак көргүңүз келсе&lt;/li&gt; &lt;li&gt;&amp;nbsp;Көңүл топтоо үчүн түстөрдү өчүргүңүз келсе&lt;/li&gt; &lt;/ol&gt;"</string>
+    <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"Түстөрдү тууралоо"</string>
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1522101114585266455">"Түстөрдү тууралоо менен:&lt;br/&gt; &lt;ol&gt; &lt;li&gt;&amp;nbsp;Керектүү түстөрдү аласыз&lt;/li&gt; &lt;li&gt;&amp;nbsp;Алагды кылган түстөрдү өчүрүп саласыз&lt;/li&gt; &lt;/ol&gt;"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"<xliff:g id="TITLE">%1$s</xliff:g> менен алмаштырылган"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> – <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
     <string name="power_remaining_duration_only" msgid="8264199158671531431">"Болжол менен <xliff:g id="TIME_REMAINING">%1$s</xliff:g> калды"</string>
@@ -598,6 +598,21 @@
     <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"Баштапкы абалга келтирүү"</string>
     <string name="guest_remove_guest_confirm_button" msgid="7858123434954143879">"Өчүрүү"</string>
     <string name="guest_resetting" msgid="7822120170191509566">"Конок сеансы баштапкы абалга келтирилүүдө…"</string>
+    <string name="guest_reset_and_restart_dialog_title" msgid="3396657008451616041">"Конок сеансы баштапкы абалга келтирилсинби?"</string>
+    <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"Бул аракет жаңы конок сеансын баштап, учурдагы сеанстагы бардык колдонмолорду жана дайындарды жок кылат"</string>
+    <string name="guest_exit_dialog_title" msgid="1846494656849381804">"Конок режиминен чыгасызбы?"</string>
+    <string name="guest_exit_dialog_message" msgid="1743218864242719783">"Бул учурдагы конок сеансындагы колдонмолорду жана дайындарды жок кылат"</string>
+    <string name="guest_exit_dialog_button" msgid="1736401897067442044">"Чыгуу"</string>
+    <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"Коноктун аракеттери сакталсынбы?"</string>
+    <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"Учурдагы сеанстагы аракеттерди сактап же бардык колдонмолорду жана дайындарды жок кылсаңыз болот"</string>
+    <string name="guest_exit_clear_data_button" msgid="3425812652180679014">"Өчүрүү"</string>
+    <string name="guest_exit_save_data_button" msgid="3690974510644963547">"Сактоо"</string>
+    <string name="guest_exit_button" msgid="5774985819191803960">"Конок режиминен чыгуу"</string>
+    <string name="guest_reset_button" msgid="2515069346223503479">"Конок сеансын кайра коюу"</string>
+    <string name="guest_exit_quick_settings_button" msgid="1912362095913765471">"Конок режиминен чыгуу"</string>
+    <string name="guest_notification_ephemeral" msgid="7263252466950923871">"Чыксаңыз, бардык аракеттер өчүрүлөт"</string>
+    <string name="guest_notification_non_ephemeral" msgid="6843799963012259330">"Чыгуудан мурун аракеттериңизди сактап же жок кылсаңыз болот"</string>
+    <string name="guest_notification_non_ephemeral_non_first_login" msgid="8009307983766934876">"Сеанстагы аракеттерди азыр жок кылуу үчүн баштапкы абалга келтириңиз, же болбосо чыгуу учурунда аракеттерди сактап же жок кылсаңыз болот"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"Сүрөткө тартуу"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"Сүрөт тандаңыз"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"Сүрөт тандаңыз"</string>
@@ -655,4 +670,12 @@
     <string name="bt_le_audio_scan_qr_code" msgid="3521809854780392679">"QR кодун скандоо"</string>
     <string name="bt_le_audio_scan_qr_code_scanner" msgid="4679500020630341107">"Угуп баштоо үчүн QR кодун борборго жайгаштырыңыз"</string>
     <string name="bt_le_audio_qr_code_is_not_valid_format" msgid="6092191081849434734">"QR кодунун форматы жараксыз"</string>
+    <!-- no translation found for bt_le_audio_broadcast_dialog_title (5392738488989777074) -->
+    <skip />
+    <!-- no translation found for bt_le_audio_broadcast_dialog_sub_title (268234802198852753) -->
+    <skip />
+    <!-- no translation found for bt_le_audio_broadcast_dialog_switch_app (5749813313369517812) -->
+    <skip />
+    <!-- no translation found for bt_le_audio_broadcast_dialog_different_output (2638402023060391333) -->
+    <skip />
 </resources>

@@ -264,7 +264,7 @@
     <string name="adb_wireless_no_network_msg" msgid="2365795244718494658">"Maak verbinding met een wifi-netwerk"</string>
     <string name="keywords_adb_wireless" msgid="6507505581882171240">"adb, foutopsporing, ontwikkeling"</string>
     <string name="bugreport_in_power" msgid="8664089072534638709">"Snelle link naar bugrapport"</string>
-    <string name="bugreport_in_power_summary" msgid="1885529649381831775">"Toon een knop in het aan/uit-menu om een bugrapport te maken"</string>
+    <string name="bugreport_in_power_summary" msgid="1885529649381831775">"Zet een knop in het aan/uit-menu om een bugrapport te maken"</string>
     <string name="keep_screen_on" msgid="1187161672348797558">"Stand-by"</string>
     <string name="keep_screen_on_summary" msgid="1510731514101925829">"Scherm gaat nooit uit tijdens het opladen"</string>
     <string name="bt_hci_snoop_log" msgid="7291287955649081448">"Snoop-logbestand voor bluetooth-HCI aanzetten"</string>
@@ -338,7 +338,7 @@
     <string name="verify_apps_over_usb_title" msgid="6031809675604442636">"Apps verifiëren via USB"</string>
     <string name="verify_apps_over_usb_summary" msgid="1317933737581167839">"Controleer apps die zijn geïnstalleerd via ADB/ADT op schadelijk gedrag"</string>
     <string name="bluetooth_show_devices_without_names_summary" msgid="780964354377854507">"Toon bluetooth-apparaten zonder naam (alleen MAC-adressen)"</string>
-    <string name="bluetooth_disable_absolute_volume_summary" msgid="2006309932135547681">"Zet de functie voor absoluut volume van bluetooth uit in geval van volumeproblemen met externe apparaten, zoals een onacceptabel hoog volume of geen volumeregeling."</string>
+    <string name="bluetooth_disable_absolute_volume_summary" msgid="2006309932135547681">"Zet de functie voor absoluut volume van bluetooth uit bij volumeproblemen met externe apparaten, zoals een veel te hoog volume of geen volumeregeling"</string>
     <string name="bluetooth_enable_gabeldorsche_summary" msgid="2054730331770712629">"Zet de Gabeldorsche-functiestack voor bluetooth aan."</string>
     <string name="enhanced_connectivity_summary" msgid="1576414159820676330">"Hiermee wordt de functie voor verbeterde connectiviteit aangezet."</string>
     <string name="enable_terminal_title" msgid="3834790541986303654">"Lokale terminal"</string>
@@ -389,7 +389,7 @@
     <string name="enable_gpu_debug_layers" msgid="4986675516188740397">"GPU-foutopsporingslagen aanzetten"</string>
     <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"Sta laden van GPU-foutopsporingslagen toe voor foutopsporingsapps"</string>
     <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"Uitgebreide leverancierslogboeken aanzetten"</string>
-    <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"Neem aanvullende apparaatspecifieke leverancierslogboeken op in bugrapporten. Deze kunnen privégegevens bevatten, meer batterijlading gebruiken en/of meer opslagruimte gebruiken."</string>
+    <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"Neem aanvullende apparaatspecifieke leverancierslogboeken op in bugrapporten. Deze kunnen privégegevens bevatten, meer batterijlading gebruiken en/of meer opslagruimte gebruiken"</string>
     <string name="window_animation_scale_title" msgid="5236381298376812508">"Venster­animatieschaal"</string>
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"Overgangs­animatieschaal"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"Duur van animatieschaal"</string>
@@ -405,9 +405,9 @@
     <string name="force_allow_on_external" msgid="9187902444231637880">"Toestaan van apps op externe opslag afdwingen"</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"Hiermee komt elke app in aanmerking voor schrijven naar externe opslag, ongeacht de manifestwaarden"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"Formaat activiteiten geforceerd aanpasbaar maken"</string>
-    <string name="force_resizable_activities_summary" msgid="2490382056981583062">"Maak het formaat van alle activiteiten aanpasbaar, ongeacht de manifestwaarden."</string>
+    <string name="force_resizable_activities_summary" msgid="2490382056981583062">"Maak het formaat van alle activiteiten aanpasbaar, ongeacht de manifestwaarden"</string>
     <string name="enable_freeform_support" msgid="7599125687603914253">"Vensters met vrije vorm aanzetten"</string>
-    <string name="enable_freeform_support_summary" msgid="1822862728719276331">"Zet ondersteuning voor vensters met experimentele vrije vorm aan."</string>
+    <string name="enable_freeform_support_summary" msgid="1822862728719276331">"Zet ondersteuning voor vensters met experimentele vrije vorm aan"</string>
     <string name="local_backup_password_title" msgid="4631017948933578709">"Wachtwoord desktopback-up"</string>
     <string name="local_backup_password_summary_none" msgid="7646898032616361714">"Volledige back-ups naar desktops zijn momenteel niet beveiligd"</string>
     <string name="local_backup_password_summary_change" msgid="1707357670383995567">"Tik om het wachtwoord voor volledige back-ups naar desktops te wijzigen of te verwijderen"</string>
@@ -541,7 +541,7 @@
     <string name="alarm_template" msgid="3346777418136233330">"om <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="alarm_template_far" msgid="6382760514842998629">"op <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="zen_mode_duration_settings_title" msgid="1553451650289651489">"Duur"</string>
-    <string name="zen_mode_duration_always_prompt_title" msgid="3212996860498119555">"Vraag altijd"</string>
+    <string name="zen_mode_duration_always_prompt_title" msgid="3212996860498119555">"Altijd vragen"</string>
     <string name="zen_mode_forever" msgid="3339224497605461291">"Totdat je uitzet"</string>
     <string name="time_unit_just_now" msgid="3006134267292728099">"Zojuist"</string>
     <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"Deze telefoon"</string>
@@ -552,7 +552,7 @@
     <string name="help_label" msgid="3528360748637781274">"Hulp en feedback"</string>
     <string name="storage_category" msgid="2287342585424631813">"Opslag"</string>
     <string name="shared_data_title" msgid="1017034836800864953">"Gedeelde gegevens"</string>
-    <string name="shared_data_summary" msgid="5516326713822885652">"Gedeelde gegevens bekijken en aanpassen"</string>
+    <string name="shared_data_summary" msgid="5516326713822885652">"Bekijk gedeelde gegevens en pas ze aan"</string>
     <string name="shared_data_no_blobs_text" msgid="3108114670341737434">"Er zijn geen gedeelde gegevens voor deze gebruiker."</string>
     <string name="shared_data_query_failure_text" msgid="3489828881998773687">"Er is een fout opgetreden bij het ophalen van gedeelde gegevens. Probeer het opnieuw."</string>
     <string name="blob_id_text" msgid="8680078988996308061">"ID gedeelde gegevens: <xliff:g id="BLOB_ID">%d</xliff:g>"</string>
@@ -598,6 +598,36 @@
     <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"Resetten"</string>
     <string name="guest_remove_guest_confirm_button" msgid="7858123434954143879">"Verwijderen"</string>
     <string name="guest_resetting" msgid="7822120170191509566">"Gast resetten…"</string>
+    <!-- no translation found for guest_reset_and_restart_dialog_title (3396657008451616041) -->
+    <skip />
+    <!-- no translation found for guest_reset_and_restart_dialog_message (2764425635305200790) -->
+    <skip />
+    <!-- no translation found for guest_exit_dialog_title (1846494656849381804) -->
+    <skip />
+    <!-- no translation found for guest_exit_dialog_message (1743218864242719783) -->
+    <skip />
+    <!-- no translation found for guest_exit_dialog_button (1736401897067442044) -->
+    <skip />
+    <!-- no translation found for guest_exit_dialog_title_non_ephemeral (7675327443743162986) -->
+    <skip />
+    <!-- no translation found for guest_exit_dialog_message_non_ephemeral (223385323235719442) -->
+    <skip />
+    <!-- no translation found for guest_exit_clear_data_button (3425812652180679014) -->
+    <skip />
+    <!-- no translation found for guest_exit_save_data_button (3690974510644963547) -->
+    <skip />
+    <!-- no translation found for guest_exit_button (5774985819191803960) -->
+    <skip />
+    <!-- no translation found for guest_reset_button (2515069346223503479) -->
+    <skip />
+    <!-- no translation found for guest_exit_quick_settings_button (1912362095913765471) -->
+    <skip />
+    <!-- no translation found for guest_notification_ephemeral (7263252466950923871) -->
+    <skip />
+    <!-- no translation found for guest_notification_non_ephemeral (6843799963012259330) -->
+    <skip />
+    <!-- no translation found for guest_notification_non_ephemeral_non_first_login (8009307983766934876) -->
+    <skip />
     <string name="user_image_take_photo" msgid="467512954561638530">"Foto maken"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"Afbeelding kiezen"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"Foto selecteren"</string>
@@ -655,4 +685,12 @@
     <string name="bt_le_audio_scan_qr_code" msgid="3521809854780392679">"QR-code scannen"</string>
     <string name="bt_le_audio_scan_qr_code_scanner" msgid="4679500020630341107">"Centreer de onderstaande QR-code om te beginnen met luisteren"</string>
     <string name="bt_le_audio_qr_code_is_not_valid_format" msgid="6092191081849434734">"QR-code heeft geen geldige indeling"</string>
+    <!-- no translation found for bt_le_audio_broadcast_dialog_title (5392738488989777074) -->
+    <skip />
+    <!-- no translation found for bt_le_audio_broadcast_dialog_sub_title (268234802198852753) -->
+    <skip />
+    <!-- no translation found for bt_le_audio_broadcast_dialog_switch_app (5749813313369517812) -->
+    <skip />
+    <!-- no translation found for bt_le_audio_broadcast_dialog_different_output (2638402023060391333) -->
+    <skip />
 </resources>
