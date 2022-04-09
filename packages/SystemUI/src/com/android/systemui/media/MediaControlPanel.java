@@ -611,12 +611,11 @@ public class MediaControlPanel {
 
     private void bindActionButtons(MediaData data) {
         MediaButton semanticActions = data.getSemanticActions();
-        ImageButton[] genericButtons = new ImageButton[]{
-                mMediaViewHolder.getAction0(),
-                mMediaViewHolder.getAction1(),
-                mMediaViewHolder.getAction2(),
-                mMediaViewHolder.getAction3(),
-                mMediaViewHolder.getAction4()};
+
+        List<ImageButton> genericButtons = new ArrayList<>();
+        for (int id : MediaViewHolder.Companion.getGenericButtonIds()) {
+            genericButtons.add(mMediaViewHolder.getAction(id));
+        }
 
         ConstraintSet expandedSet = mMediaViewController.getExpandedLayout();
         ConstraintSet collapsedSet = mMediaViewController.getCollapsedLayout();
@@ -643,19 +642,19 @@ public class MediaControlPanel {
             List<Integer> actionsWhenCollapsed = data.getActionsToShowInCompact();
             List<MediaAction> actions = data.getActions();
             int i = 0;
-            for (; i < actions.size(); i++) {
+            for (; i < actions.size() && i < genericButtons.size(); i++) {
                 boolean showInCompact = actionsWhenCollapsed.contains(i);
                 setGenericButton(
-                        genericButtons[i],
+                        genericButtons.get(i),
                         actions.get(i),
                         collapsedSet,
                         expandedSet,
                         showInCompact);
             }
-            for (; i < 5; i++) {
+            for (; i < genericButtons.size(); i++) {
                 // Hide any unused buttons
                 setGenericButton(
-                        genericButtons[i],
+                        genericButtons.get(i),
                         /* mediaAction= */ null,
                         collapsedSet,
                         expandedSet,
