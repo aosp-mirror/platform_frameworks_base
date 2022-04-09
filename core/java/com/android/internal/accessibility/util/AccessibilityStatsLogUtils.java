@@ -179,6 +179,18 @@ public final class AccessibilityStatsLogUtils {
     }
 
     /**
+     * Logs the duration for the magnification session which is activated by the triple tap and
+     * hold gesture.
+     *
+     * @param duration The duration of a triple-tap-and-hold activation session.
+     */
+    public static void logMagnificationTripleTapAndHoldSession(long duration) {
+        FrameworkStatsLog.write(
+                FrameworkStatsLog.MAGNIFICATION_TRIPLE_TAP_AND_HOLD_ACTIVATED_SESSION_REPORTED,
+                duration);
+    }
+
+    /**
      * Logs the warning status of the non-a11yTool service. Calls this when the warning status is
      * changed.
      *
