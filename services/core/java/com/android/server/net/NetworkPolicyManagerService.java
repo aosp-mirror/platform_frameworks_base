@@ -926,6 +926,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
             mUsageStats = LocalServices.getService(UsageStatsManagerInternal.class);
             mAppStandby = LocalServices.getService(AppStandbyInternal.class);
+            mActivityManagerInternal = LocalServices.getService(ActivityManagerInternal.class);
 
             synchronized (mUidRulesFirstLock) {
                 synchronized (mNetworkPoliciesSecondLock) {
@@ -1003,7 +1004,6 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 }
             }
 
-            mActivityManagerInternal = LocalServices.getService(ActivityManagerInternal.class);
             try {
                 final int changes = ActivityManager.UID_OBSERVER_PROCSTATE
                         | ActivityManager.UID_OBSERVER_GONE
@@ -4225,7 +4225,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                     : uidBlockedState.deriveUidRules();
         }
         if (oldEffectiveBlockedReasons != newEffectiveBlockedReasons) {
-            postBlockedReasonsChangedMsg(uid,
+            handleBlockedReasonsChanged(uid,
                     newEffectiveBlockedReasons, oldEffectiveBlockedReasons);
 
             postUidRulesChangedMsg(uid, uidRules);
@@ -4587,6 +4587,9 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                         someArgs.argi2 = uidBlockedState.effectiveBlockedReasons;
                         someArgs.argi3 = uidBlockedState.deriveUidRules();
                         uidStateUpdates.append(uid, someArgs);
+                        // TODO: Update the state for all changed uids together.
+                        mActivityManagerInternal.onUidBlockedReasonsChanged(uid,
+                                uidBlockedState.effectiveBlockedReasons);
                     }
                 }
             }
@@ -4810,6 +4813,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             mUidBlockedState.delete(uid);
         }
         mUidState.delete(uid);
+        mActivityManagerInternal.onUidBlockedReasonsChanged(uid, BLOCKED_REASON_NONE);
         mUidPolicy.delete(uid);
         mUidFirewallStandbyRules.delete(uid);
         mUidFirewallDozableRules.delete(uid);
@@ -4972,7 +4976,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             }
         }
         if (oldEffectiveBlockedReasons != newEffectiveBlockedReasons) {
-            postBlockedReasonsChangedMsg(uid,
+            handleBlockedReasonsChanged(uid,
                     newEffectiveBlockedReasons, oldEffectiveBlockedReasons);
 
             postUidRulesChangedMsg(uid, uidRules);
@@ -5115,7 +5119,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                     : uidBlockedState.deriveUidRules();
         }
         if (oldEffectiveBlockedReasons != newEffectiveBlockedReasons) {
-            postBlockedReasonsChangedMsg(uid,
+            handleBlockedReasonsChanged(uid,
                     newEffectiveBlockedReasons,
                     oldEffectiveBlockedReasons);
 
@@ -5146,6 +5150,12 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 updateRulesForAppIdleParoleUL();
             }
         }
+    }
+
+    private void handleBlockedReasonsChanged(int uid, int newEffectiveBlockedReasons,
+            int oldEffectiveBlockedReasons) {
+        mActivityManagerInternal.onUidBlockedReasonsChanged(uid, newEffectiveBlockedReasons);
+        postBlockedReasonsChangedMsg(uid, newEffectiveBlockedReasons, oldEffectiveBlockedReasons);
     }
 
     private void postBlockedReasonsChangedMsg(int uid, int newEffectiveBlockedReasons,
