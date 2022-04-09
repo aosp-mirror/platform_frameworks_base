@@ -172,7 +172,7 @@
     <string name="process_kernel_label" msgid="950292573930336765">"Android OS"</string>
     <string name="data_usage_uninstalled_apps" msgid="1933665711856171491">"काढलेले अ‍ॅप्स"</string>
     <string name="data_usage_uninstalled_apps_users" msgid="5533981546921913295">"काढलेले अ‍ॅप्स आणि वापरकर्ते"</string>
-    <string name="data_usage_ota" msgid="7984667793701597001">"सिस्टम अपडेट"</string>
+    <string name="data_usage_ota" msgid="7984667793701597001">"सिस्टीम अपडेट"</string>
     <string name="tether_settings_title_usb" msgid="3728686573430917722">"USB टेदरिंग"</string>
     <string name="tether_settings_title_wifi" msgid="4803402057533895526">"पोर्टेबल हॉटस्पॉट"</string>
     <string name="tether_settings_title_bluetooth" msgid="916519902721399656">"ब्लूटूथ टेदरिंग"</string>
@@ -234,7 +234,7 @@
     <string name="apn_settings_not_available" msgid="1147111671403342300">"या वापरकर्त्यासाठी अ‍ॅक्सेस बिंदू नाव सेटिंग्ज उपलब्ध नाहीत"</string>
     <string name="enable_adb" msgid="8072776357237289039">"USB डीबग करणे"</string>
     <string name="enable_adb_summary" msgid="3711526030096574316">"USB कनेक्ट केलेले असताना डीबग मोड"</string>
-    <string name="clear_adb_keys" msgid="3010148733140369917">"USB डीबग करणारी प्रमाणीकरणे रीव्होक करा"</string>
+    <string name="clear_adb_keys" msgid="3010148733140369917">"USB डीबग करणारी ऑथोरायझेशन मागे घ्या"</string>
     <string name="enable_adb_wireless" msgid="6973226350963971018">"वायरलेस डीबगिंग"</string>
     <string name="enable_adb_wireless_summary" msgid="7344391423657093011">"वाय-फाय कनेक्ट केलेले असताना डीबग मोड"</string>
     <string name="adb_wireless_error" msgid="721958772149779856">"एरर"</string>
@@ -284,7 +284,7 @@
     <string name="mobile_data_always_on" msgid="8275958101875563572">"मोबाइल डेटा नेहमी सक्रिय"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"टेदरिंग हार्डवेअर अ‍ॅक्सिलरेशन"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"नावांशिवाय ब्‍लूटूथ डिव्‍हाइस दाखवा"</string>
-    <string name="bluetooth_disable_absolute_volume" msgid="1452342324349203434">"संपूर्ण आवाज बंद करा"</string>
+    <string name="bluetooth_disable_absolute_volume" msgid="1452342324349203434">"संपूर्ण व्हॉल्यूम बंद करा"</string>
     <string name="bluetooth_enable_gabeldorsche" msgid="9131730396242883416">"गाबलडॉर्ष सुरू करा"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="1710571610177659127">"ब्लूटूथ AVRCP आवृत्ती"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7846922290083709633">"ब्लूटूथ AVRCP आवृत्ती निवडा"</string>
@@ -312,7 +312,7 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"वायरलेस डिस्प्ले प्रमाणिकरणाचे पर्याय दाखवा"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"वाय-फाय लॉगिंग स्‍तर वाढवा, वाय-फाय सिलेक्टरमध्‍ये प्रति SSID RSSI दर्शवा"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"बॅटरी जलदरीतीने संपण्यापासून रोखते आणि नेटवर्क परफॉर्मन्समध्ये सुधारणा करते"</string>
-    <string name="wifi_non_persistent_mac_randomization_summary" msgid="2159794543105053930">"हा मोड सुरू केलेला असले तेव्हा, हे डिव्हाइस MAC रँडमायझेशन सुरू केलेल्या नेटवर्कशी कनेक्ट होताना प्रत्येक वेळी त्याचा MAC अ‍ॅड्रेस बदलू शकतो."</string>
+    <string name="wifi_non_persistent_mac_randomization_summary" msgid="2159794543105053930">"हा मोड सुरू केलेला असेल, तेव्हा हे डिव्हाइस MAC रँडमायझेशन सुरू केलेल्या नेटवर्कशी कनेक्ट होताना प्रत्येक वेळी त्याचा MAC अ‍ॅड्रेस बदलू शकतो."</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"मीटरने मोजलेले"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"मीटरने न मोजलेले"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"लॉगर बफर आकार"</string>
@@ -337,8 +337,8 @@
     <string name="dev_settings_warning_message" msgid="37741686486073668">"या सेटिंग्जचा हेतू फक्त विकास वापरासाठी आहे. त्यामुळे तुमचे डिव्हाइस आणि त्यावरील ॲप्लिकेशन ब्रेक होऊ शकतात किंवा नेहमीपेक्षा वेगळे वर्तन करू शकतात."</string>
     <string name="verify_apps_over_usb_title" msgid="6031809675604442636">"USB वर अ‍ॅप्स पडताळून पहा"</string>
     <string name="verify_apps_over_usb_summary" msgid="1317933737581167839">"हानिकारक वर्तनासाठी ADB/ADT द्वारे इंस्टॉल अ‍ॅप्स तपासा."</string>
-    <string name="bluetooth_show_devices_without_names_summary" msgid="780964354377854507">"नावांशिवाय ब्‍लूटूथ डिव्‍हाइस (फक्‍त MAC पत्ते) दाखवले जातील"</string>
-    <string name="bluetooth_disable_absolute_volume_summary" msgid="2006309932135547681">"रिमोट डिव्हाइसमध्ये सहन न होणारा मोठा आवाज किंवा नियंत्रणाचा अभाव यासारखी आवाजाची समस्या असल्यास ब्लूटूथ संपूर्ण आवाज वैशिष्ट्य बंद करते."</string>
+    <string name="bluetooth_show_devices_without_names_summary" msgid="780964354377854507">"नावांशिवाय ब्‍लूटूथ डिव्‍हाइस (फक्‍त MAC अ‍ॅड्रेस) दाखवले जातील"</string>
+    <string name="bluetooth_disable_absolute_volume_summary" msgid="2006309932135547681">"रिमोट डिव्हाइसमध्ये सहन न होणारा मोठा व्हॉल्यूम किंवा नियंत्रणाचा अभाव यासारखी व्हॉल्यूमची समस्या असल्यास ब्लूटूथ संपूर्ण व्हॉल्यूम वैशिष्ट्य बंद करते."</string>
     <string name="bluetooth_enable_gabeldorsche_summary" msgid="2054730331770712629">"ब्लूटूथ गाबलडॉर्ष वैशिष्‍ट्य स्टॅक सुरू करा."</string>
     <string name="enhanced_connectivity_summary" msgid="1576414159820676330">"वर्धित कनेक्टिव्हिटी वैशिष्‍ट्य सुरू करा."</string>
     <string name="enable_terminal_title" msgid="3834790541986303654">"स्थानिक टर्मिनल"</string>
@@ -355,7 +355,7 @@
     <string name="wait_for_debugger_summary" msgid="6846330006113363286">"डीबग केलेले ॲप्लिकेशन अंमलात आणण्यापूर्वी डीबगर संलग्न करण्याची प्रतीक्षा करतो"</string>
     <string name="debug_input_category" msgid="7349460906970849771">"इनपुट"</string>
     <string name="debug_drawing_category" msgid="5066171112313666619">"ड्रॉइंग"</string>
-    <string name="debug_hw_drawing_category" msgid="5830815169336975162">"हार्डवेअर ॲक्सलरेटेड रेंडरिंग"</string>
+    <string name="debug_hw_drawing_category" msgid="5830815169336975162">"हार्डवेअर अ‍ॅक्सिलरेटेड रेंडरिंग"</string>
     <string name="media_category" msgid="8122076702526144053">"मीडिया"</string>
     <string name="debug_monitoring_category" msgid="1597387133765424994">"परीक्षण"</string>
     <string name="strict_mode" msgid="889864762140862437">"कठोर मोड सुरू"</string>
@@ -363,20 +363,20 @@
     <string name="pointer_location" msgid="7516929526199520173">"पॉइंटर स्थान"</string>
     <string name="pointer_location_summary" msgid="957120116989798464">"वर्तमान स्पर्श डेटा दर्शविणारे स्क्रीन ओव्हरले"</string>
     <string name="show_touches" msgid="8437666942161289025">"टॅप दाखवा"</string>
-    <string name="show_touches_summary" msgid="3692861665994502193">"टॅपसाठी दृश्यमान अभिप्राय दर्शवा"</string>
-    <string name="show_screen_updates" msgid="2078782895825535494">"पृष्ठभाग अपडेट दर्शवा"</string>
-    <string name="show_screen_updates_summary" msgid="2126932969682087406">"संपूर्ण विंडो पृष्ठभाग अद्ययावत होतात तेव्हा ते फ्‍लॅश करा"</string>
+    <string name="show_touches_summary" msgid="3692861665994502193">"टॅपसाठी व्हिज्युअल फीडबॅक दाखवा"</string>
+    <string name="show_screen_updates" msgid="2078782895825535494">"सर्फेस अपडेट दाखवा"</string>
+    <string name="show_screen_updates_summary" msgid="2126932969682087406">"संपूर्ण विंडो सर्फेस अपडेट होतात तेव्हा ते फ्‍लॅश करा"</string>
     <string name="show_hw_screen_updates" msgid="2021286231267747506">"व्‍ह्यू अपडेट दाखवा"</string>
     <string name="show_hw_screen_updates_summary" msgid="3539770072741435691">"रेखांकित केल्‍यावर विंडोच्‍या आतील फ्लॅश व्‍ह्यू"</string>
     <string name="show_hw_layers_updates" msgid="5268370750002509767">"हार्डवेअर स्तर अपडेट दाखवा"</string>
-    <string name="show_hw_layers_updates_summary" msgid="5850955890493054618">"हार्डवेअर स्तर अद्ययावत झाल्यावर ते हिरव्या रंगात फ्लॅश करा"</string>
+    <string name="show_hw_layers_updates_summary" msgid="5850955890493054618">"हार्डवेअर स्तर अपडेट झाल्यावर ते हिरव्या रंगात फ्लॅश करा"</string>
     <string name="debug_hw_overdraw" msgid="8944851091008756796">"GPU ओव्हरड्रॉ डीबग करा"</string>
     <string name="disable_overlays" msgid="4206590799671557143">"HW ओव्हरले बंद करा"</string>
     <string name="disable_overlays_summary" msgid="1954852414363338166">"स्क्रीन तयार करण्यासाठी नेहमी GPU वापरा"</string>
     <string name="simulate_color_space" msgid="1206503300335835151">"रंग स्थान सिम्युलेट करा"</string>
     <string name="enable_opengl_traces_title" msgid="4638773318659125196">"OpenGL ट्रेस सुरू करा"</string>
     <string name="usb_audio_disable_routing" msgid="3367656923544254975">"USB ऑडिओ राउटिंग बंद करा"</string>
-    <string name="usb_audio_disable_routing_summary" msgid="8768242894849534699">"USB ऑडिओ परिधीय वरील स्वयंचलित राउटिंग बंद करा"</string>
+    <string name="usb_audio_disable_routing_summary" msgid="8768242894849534699">"USB ऑडिओ उपकरणांवरील ऑटेमॅटिक राउटिंग बंद करा"</string>
     <string name="debug_layout" msgid="1659216803043339741">"लेआउट सीमा दाखवा"</string>
     <string name="debug_layout_summary" msgid="8825829038287321978">"क्लिप सीमा, समास इत्यादी दर्शवा."</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"RTL लेआउट दिशानिर्देशाची सक्ती करा"</string>
@@ -397,7 +397,7 @@
     <string name="debug_applications_category" msgid="5394089406638954196">"अ‍ॅप्स"</string>
     <string name="immediately_destroy_activities" msgid="1826287490705167403">"ॲक्टिव्हिटी ठेवू नका"</string>
     <string name="immediately_destroy_activities_summary" msgid="6289590341144557614">"वापरकर्त्याने प्रत्येक ॲक्टिव्हिटी सोडताच ती नष्ट करा"</string>
-    <string name="app_process_limit_title" msgid="8361367869453043007">"पार्श्वभूमी प्रक्रिया मर्यादा"</string>
+    <string name="app_process_limit_title" msgid="8361367869453043007">"बॅकग्राउंड प्रक्रिया मर्यादा"</string>
     <string name="show_all_anrs" msgid="9160563836616468726">"बॅकग्राउंड ANR दाखवा"</string>
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"बॅकग्राउंड अ‍ॅप्ससाठी अ‍ॅप प्रतिसाद देत नाही दाखवते"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"सूचना चॅनल चेतावण्या दाखवा"</string>
@@ -442,7 +442,7 @@
     <string name="select_webview_provider_toast_text" msgid="8512254949169359848">"ही निवड यापुढे वैध असणार नाही. पुन्हा प्रयत्न करा."</string>
     <string name="picture_color_mode" msgid="1013807330552931903">"चित्र रंग मोड"</string>
     <string name="picture_color_mode_desc" msgid="151780973768136200">"sRGB वापरा"</string>
-    <string name="daltonizer_mode_disabled" msgid="403424372812399228">"अक्षम केले"</string>
+    <string name="daltonizer_mode_disabled" msgid="403424372812399228">"बंद केले"</string>
     <string name="daltonizer_mode_monochromacy" msgid="362060873835885014">"रंग दृष्टीहीनता"</string>
     <string name="daltonizer_mode_deuteranomaly" msgid="3507284319584683963">"हरित असंगती (लाल-हिरवा)"</string>
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"क्षीण रक्तवर्णांधता (लाल-हिरवा)"</string>
@@ -655,4 +655,12 @@
     <string name="bt_le_audio_scan_qr_code" msgid="3521809854780392679">"QR कोड स्कॅन करा"</string>
     <string name="bt_le_audio_scan_qr_code_scanner" msgid="4679500020630341107">"ऐकणे सुरू करण्यासाठी, खालील QR कोड मध्यभागी ठेवा"</string>
     <string name="bt_le_audio_qr_code_is_not_valid_format" msgid="6092191081849434734">"QR कोडचा फॉरमॅट चुकीचा आहे"</string>
+    <!-- no translation found for bt_le_audio_broadcast_dialog_title (5392738488989777074) -->
+    <skip />
+    <!-- no translation found for bt_le_audio_broadcast_dialog_sub_title (268234802198852753) -->
+    <skip />
+    <!-- no translation found for bt_le_audio_broadcast_dialog_switch_app (5749813313369517812) -->
+    <skip />
+    <!-- no translation found for bt_le_audio_broadcast_dialog_different_output (2638402023060391333) -->
+    <skip />
 </resources>

@@ -655,4 +655,12 @@
     <string name="bt_le_audio_scan_qr_code" msgid="3521809854780392679">"扫描二维码"</string>
     <string name="bt_le_audio_scan_qr_code_scanner" msgid="4679500020630341107">"将扫描器对准下方二维码，即可开始收听"</string>
     <string name="bt_le_audio_qr_code_is_not_valid_format" msgid="6092191081849434734">"二维码的格式无效"</string>
+    <!-- no translation found for bt_le_audio_broadcast_dialog_title (5392738488989777074) -->
+    <skip />
+    <!-- no translation found for bt_le_audio_broadcast_dialog_sub_title (268234802198852753) -->
+    <skip />
+    <!-- no translation found for bt_le_audio_broadcast_dialog_switch_app (5749813313369517812) -->
+    <skip />
+    <!-- no translation found for bt_le_audio_broadcast_dialog_different_output (2638402023060391333) -->
+    <skip />
 </resources>
