@@ -105,6 +105,7 @@ import android.util.TypedXmlSerializer;
 import android.util.Xml;
 import android.view.IWindowManager;
 
+import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.config.sysui.SystemUiDeviceConfigFlags;
@@ -454,6 +455,8 @@ public class ShortcutService extends IShortcutService.Stub {
     private final MetricsLogger mMetricsLogger = new MetricsLogger();
 
     private final boolean mIsAppSearchEnabled;
+
+    private ComponentName mChooserActivity;
 
     static class InvalidFileFormatException extends Exception {
         public InvalidFileFormatException(String message, Throwable cause) {
@@ -1646,6 +1649,26 @@ public class ShortcutService extends IShortcutService.Stub {
         return callingUid == Process.SHELL_UID || callingUid == Process.ROOT_UID;
     }
 
+    @VisibleForTesting
+    ComponentName injectChooserActivity() {
+        if (mChooserActivity == null) {
+            mChooserActivity = ComponentName.unflattenFromString(
+                    mContext.getResources().getString(R.string.config_chooserActivity));
+        }
+        return mChooserActivity;
+    }
+
+    private boolean isCallerChooserActivity() {
+        // TODO(b/228975502): Migrate this check to a proper permission or role check
+        final int callingUid = injectBinderCallingUid();
+        ComponentName systemChooser = injectChooserActivity();
+        if (systemChooser == null) {
+            return false;
+        }
+        int uid = injectGetPackageUid(systemChooser.getPackageName(), UserHandle.USER_SYSTEM);
+        return uid == callingUid;
+    }
+
     private void enforceSystemOrShell() {
         if (!(isCallerSystem() || isCallerShell())) {
             throw new SecurityException("Caller must be system or shell");
@@ -2525,7 +2548,9 @@ public class ShortcutService extends IShortcutService.Stub {
             IntentFilter filter, @UserIdInt int userId) {
         Preconditions.checkStringNotEmpty(packageName, "packageName");
         Objects.requireNonNull(filter, "intentFilter");
-        verifyCaller(packageName, userId);
+        if (!isCallerChooserActivity()) {
+            verifyCaller(packageName, userId);
+        }
         enforceCallingOrSelfPermission(android.Manifest.permission.MANAGE_APP_PREDICTIONS,
                 "getShareTargets");
         synchronized (mLock) {
