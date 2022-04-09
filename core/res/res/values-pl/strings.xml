@@ -87,8 +87,8 @@
     <string name="RestrictedStateContentMsimTemplate" msgid="5228235722511044687">"Tymczasowo wyłączone przez operatora karty SIM <xliff:g id="SIMNUMBER">%d</xliff:g>"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"Brak zasięgu sieci komórkowej"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"Spróbuj zmienić preferowaną sieć. Kliknij, by zmienić."</string>
-    <string name="EmergencyCallWarningTitle" msgid="9164532362414787774">"Połączenia alarmowe mogą nie być dostępne."</string>
-    <string name="EmergencyCallWarningSummary" msgid="3365701131304664899">"<xliff:g id="SPN">%s</xliff:g> nie obsługuje połączeń alarmowych przez Wi-Fi. Kliknij, aby wyświetlić szczegóły."</string>
+    <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"Połączenia alarmowe są niedostępne"</string>
+    <string name="EmergencyCallWarningSummary" msgid="1194185880092805497">"Nie można nawiązywać połączeń alarmowych przez Wi‑Fi"</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"Alerty"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"Przekierowanie połączeń"</string>
     <string name="notification_channel_emergency_callback" msgid="54074839059123159">"Tryb alarmowego połączenia zwrotnego"</string>
@@ -1935,9 +1935,36 @@
     <string name="app_blocked_message" msgid="542972921087873023">"Aplikacja <xliff:g id="APP_NAME">%1$s</xliff:g> jest obecnie niedostępna."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> – brak dostępu"</string>
     <string name="app_streaming_blocked_title_for_permission_dialog" msgid="4483161748582966785">"Wymagane są uprawnienia"</string>
-    <string name="app_streaming_blocked_message" product="tv" msgid="4003011766528814377">"W tej chwili nie można z tego skorzystać na urządzeniu <xliff:g id="DEVICE">%1$s</xliff:g>. Użyj urządzenia z Androidem TV."</string>
-    <string name="app_streaming_blocked_message" product="tablet" msgid="4242053045964946062">"W tej chwili nie można z tego skorzystać na urządzeniu <xliff:g id="DEVICE">%1$s</xliff:g>. Użyj tabletu."</string>
-    <string name="app_streaming_blocked_message" product="default" msgid="6159168735030739398">"W tej chwili nie można z tego skorzystać na urządzeniu <xliff:g id="DEVICE">%1$s</xliff:g>. Użyj telefonu."</string>
+    <!-- no translation found for app_streaming_blocked_title_for_camera_dialog (3935701653713853065) -->
+    <skip />
+    <!-- no translation found for app_streaming_blocked_title_for_fingerprint_dialog (3516853717714141951) -->
+    <skip />
+    <!-- no translation found for app_streaming_blocked_title_for_microphone_dialog (544822455127171206) -->
+    <skip />
+    <!-- no translation found for app_streaming_blocked_title_for_settings_dialog (196994247017450357) -->
+    <skip />
+    <!-- no translation found for app_streaming_blocked_title_for_settings_dialog (8222710146267948647) -->
+    <skip />
+    <!-- no translation found for app_streaming_blocked_title_for_settings_dialog (6895719984375299791) -->
+    <skip />
+    <!-- no translation found for app_streaming_blocked_message (5024599278277957935) -->
+    <skip />
+    <!-- no translation found for app_streaming_blocked_message (7491114163056552686) -->
+    <skip />
+    <!-- no translation found for app_streaming_blocked_message (1245180131667647277) -->
+    <skip />
+    <!-- no translation found for app_streaming_blocked_message_for_permission_dialog (6306583663205997979) -->
+    <skip />
+    <!-- no translation found for app_streaming_blocked_message_for_permission_dialog (6545624942642129664) -->
+    <skip />
+    <!-- no translation found for app_streaming_blocked_message_for_permission_dialog (8462740631707923000) -->
+    <skip />
+    <!-- no translation found for app_streaming_blocked_message_for_fingerprint_dialog (3470977315395784567) -->
+    <skip />
+    <!-- no translation found for app_streaming_blocked_message_for_fingerprint_dialog (698460091901465092) -->
+    <skip />
+    <!-- no translation found for app_streaming_blocked_message_for_fingerprint_dialog (8552691971910603907) -->
+    <skip />
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"Ta aplikacja jest na starszą wersję Androida i może nie działać prawidłowo. Sprawdź dostępność aktualizacji lub skontaktuj się z programistą."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Sprawdź dostępność aktualizacji"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Masz nowe wiadomości"</string>
@@ -2042,6 +2069,14 @@
     <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"Kliknij, by dowiedzieć się więcej i zmienić ustawienia."</string>
     <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"Zmiany w trybie Nie przeszkadzać"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Kliknij, by sprawdzić, co jest zablokowane."</string>
+    <!-- no translation found for review_notification_settings_title (5102557424459810820) -->
+    <skip />
+    <!-- no translation found for review_notification_settings_text (5696497037817525074) -->
+    <skip />
+    <!-- no translation found for review_notification_settings_remind_me_action (1081081018678480907) -->
+    <skip />
+    <!-- no translation found for review_notification_settings_dismiss (4160916504616428294) -->
+    <skip />
     <string name="notification_app_name_system" msgid="3045196791746735601">"System"</string>
     <string name="notification_app_name_settings" msgid="9088548800899952531">"Ustawienia"</string>
     <string name="notification_appops_camera_active" msgid="8177643089272352083">"Aparat"</string>

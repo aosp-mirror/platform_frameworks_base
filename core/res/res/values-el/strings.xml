@@ -85,8 +85,8 @@
     <string name="RestrictedStateContentMsimTemplate" msgid="5228235722511044687">"Απενεργοποιήθηκε προσωρινά από την εταιρεία κινητής τηλεφωνίας σας για τον αριθμό SIM <xliff:g id="SIMNUMBER">%d</xliff:g>"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"Δεν είναι δυνατή η σύνδεση στο δίκτυο κινητής τηλεφωνίας"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"Δοκιμάστε να αλλάξετε το προτιμώμενο δίκτυο. Πατήστε για αλλαγή."</string>
-    <string name="EmergencyCallWarningTitle" msgid="9164532362414787774">"Οι κλήσεις έκτακτης ανάγκης μπορεί να μην είναι διαθέσιμες."</string>
-    <string name="EmergencyCallWarningSummary" msgid="3365701131304664899">"H εταιρεία <xliff:g id="SPN">%s</xliff:g> δεν υποστηρίζει κλήσεις έκτακτης ανάγκης μέσω Wi-Fi. Πατήστε για λεπτομέρειες."</string>
+    <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"Οι κλήσεις έκτακτης ανάγκης δεν είναι διαθέσιμες"</string>
+    <string name="EmergencyCallWarningSummary" msgid="1194185880092805497">"Δεν είναι δυνατή η πραγματοποίηση κλήσεων έκτακτης ανάγκης μέσω Wi‑Fi"</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"Ειδοποιήσεις"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"Προώθηση κλήσης"</string>
     <string name="notification_channel_emergency_callback" msgid="54074839059123159">"Λειτουργία επιστροφής κλήσης έκτακτης ανάγκης"</string>
@@ -1933,9 +1933,36 @@
     <string name="app_blocked_message" msgid="542972921087873023">"Η εφαρμογή <xliff:g id="APP_NAME">%1$s</xliff:g> δεν είναι διαθέσιμη αυτήν τη στιγμή."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> δεν διατίθεται"</string>
     <string name="app_streaming_blocked_title_for_permission_dialog" msgid="4483161748582966785">"Απαιτείται άδεια"</string>
-    <string name="app_streaming_blocked_message" product="tv" msgid="4003011766528814377">"Δεν είναι δυνατή η πρόσβαση στη συγκεκριμένη εφαρμογή από τη συσκευή <xliff:g id="DEVICE">%1$s</xliff:g> αυτήν τη στιγμή. Δοκιμάστε στη συσκευή Android TV."</string>
-    <string name="app_streaming_blocked_message" product="tablet" msgid="4242053045964946062">"Δεν είναι δυνατή η πρόσβαση στη συγκεκριμένη εφαρμογή από τη συσκευή <xliff:g id="DEVICE">%1$s</xliff:g> αυτήν τη στιγμή. Δοκιμάστε στο tablet σας."</string>
-    <string name="app_streaming_blocked_message" product="default" msgid="6159168735030739398">"Δεν είναι δυνατή η πρόσβαση στη συγκεκριμένη εφαρμογή από τη συσκευή <xliff:g id="DEVICE">%1$s</xliff:g> αυτήν τη στιγμή. Δοκιμάστε στο τηλέφωνό σας."</string>
+    <!-- no translation found for app_streaming_blocked_title_for_camera_dialog (3935701653713853065) -->
+    <skip />
+    <!-- no translation found for app_streaming_blocked_title_for_fingerprint_dialog (3516853717714141951) -->
+    <skip />
+    <!-- no translation found for app_streaming_blocked_title_for_microphone_dialog (544822455127171206) -->
+    <skip />
+    <!-- no translation found for app_streaming_blocked_title_for_settings_dialog (196994247017450357) -->
+    <skip />
+    <!-- no translation found for app_streaming_blocked_title_for_settings_dialog (8222710146267948647) -->
+    <skip />
+    <!-- no translation found for app_streaming_blocked_title_for_settings_dialog (6895719984375299791) -->
+    <skip />
+    <!-- no translation found for app_streaming_blocked_message (5024599278277957935) -->
+    <skip />
+    <!-- no translation found for app_streaming_blocked_message (7491114163056552686) -->
+    <skip />
+    <!-- no translation found for app_streaming_blocked_message (1245180131667647277) -->
+    <skip />
+    <!-- no translation found for app_streaming_blocked_message_for_permission_dialog (6306583663205997979) -->
+    <skip />
+    <!-- no translation found for app_streaming_blocked_message_for_permission_dialog (6545624942642129664) -->
+    <skip />
+    <!-- no translation found for app_streaming_blocked_message_for_permission_dialog (8462740631707923000) -->
+    <skip />
+    <!-- no translation found for app_streaming_blocked_message_for_fingerprint_dialog (3470977315395784567) -->
+    <skip />
+    <!-- no translation found for app_streaming_blocked_message_for_fingerprint_dialog (698460091901465092) -->
+    <skip />
+    <!-- no translation found for app_streaming_blocked_message_for_fingerprint_dialog (8552691971910603907) -->
+    <skip />
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"Αυτή η εφαρμογή δημιουργήθηκε για παλαιότερη έκδοση του Android και μπορεί να μην λειτουργεί σωστά. Δοκιμάστε να ελέγξετε εάν υπάρχουν ενημερώσεις ή επικοινωνήστε με τον προγραμματιστή."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Έλεγχος για ενημέρωση"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Έχετε νέα μηνύματα"</string>
@@ -2040,6 +2067,14 @@
     <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"Πατήστε για να μάθετε περισσότερα και να κάνετε αλλαγές."</string>
     <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"Η λειτουργία \"Μην ενοχλείτε\" άλλαξε"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Πατήστε για να ελέγξετε το περιεχόμενο που έχει αποκλειστεί."</string>
+    <!-- no translation found for review_notification_settings_title (5102557424459810820) -->
+    <skip />
+    <!-- no translation found for review_notification_settings_text (5696497037817525074) -->
+    <skip />
+    <!-- no translation found for review_notification_settings_remind_me_action (1081081018678480907) -->
+    <skip />
+    <!-- no translation found for review_notification_settings_dismiss (4160916504616428294) -->
+    <skip />
     <string name="notification_app_name_system" msgid="3045196791746735601">"Σύστημα"</string>
     <string name="notification_app_name_settings" msgid="9088548800899952531">"Ρυθμίσεις"</string>
     <string name="notification_appops_camera_active" msgid="8177643089272352083">"Κάμερα"</string>
