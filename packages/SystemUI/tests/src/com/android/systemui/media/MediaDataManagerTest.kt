@@ -1,5 +1,6 @@
 package com.android.systemui.media
 
+import android.app.Notification
 import android.app.Notification.MediaStyle
 import android.app.PendingIntent
 import android.app.smartspace.SmartspaceAction
@@ -618,6 +619,36 @@ class MediaDataManagerTest : SysuiTestCase() {
                 eq(0), eq(false))
         assertThat(mediaDataCaptor.value.actionsToShowInCompact.size).isEqualTo(
                 MediaDataManager.MAX_COMPACT_ACTIONS)
+    }
+
+    @Test
+    fun testTooManyNotificationActions_isTruncated() {
+        // GIVEN a notification where too many notification actions are added
+        val action = Notification.Action(R.drawable.ic_android, "action", null)
+        val notif = SbnBuilder().run {
+            setPkg(PACKAGE_NAME)
+            modifyNotification(context).also {
+                it.setSmallIcon(android.R.drawable.ic_media_pause)
+                it.setStyle(MediaStyle().apply {
+                    setMediaSession(session.sessionToken)
+                })
+                for (i in 0..MediaDataManager.MAX_NOTIFICATION_ACTIONS) {
+                    it.addAction(action)
+                }
+            }
+            build()
+        }
+
+        // WHEN the notification is loaded
+        mediaDataManager.onNotificationAdded(KEY, notif)
+        assertThat(backgroundExecutor.runAllReady()).isEqualTo(1)
+        assertThat(foregroundExecutor.runAllReady()).isEqualTo(1)
+
+        // THEN only the first MAX_NOTIFICATION_ACTIONS are actually included
+        verify(listener).onMediaDataLoaded(eq(KEY), eq(null), capture(mediaDataCaptor), eq(true),
+            eq(0), eq(false))
+        assertThat(mediaDataCaptor.value.actions.size).isEqualTo(
+            MediaDataManager.MAX_NOTIFICATION_ACTIONS)
     }
 
     @Test
