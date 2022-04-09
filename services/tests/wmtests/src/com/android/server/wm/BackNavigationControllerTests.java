@@ -44,6 +44,7 @@ import android.window.BackEvent;
 import android.window.BackNavigationInfo;
 import android.window.IOnBackInvokedCallback;
 import android.window.OnBackInvokedCallback;
+import android.window.OnBackInvokedCallbackInfo;
 import android.window.OnBackInvokedDispatcher;
 import android.window.TaskSnapshot;
 import android.window.WindowOnBackInvokedDispatcher;
@@ -104,7 +105,8 @@ public class BackNavigationControllerTests extends WindowTestsBase {
         WindowState window = createAppWindow(task, FIRST_APPLICATION_WINDOW, "window");
         addToWindowMap(window, true);
         IOnBackInvokedCallback callback = createOnBackInvokedCallback();
-        window.setOnBackInvokedCallback(callback, OnBackInvokedDispatcher.PRIORITY_SYSTEM);
+        window.setOnBackInvokedCallbackInfo(
+                new OnBackInvokedCallbackInfo(callback, OnBackInvokedDispatcher.PRIORITY_SYSTEM));
         BackNavigationInfo backNavigationInfo = startBackNavigation();
         assertWithMessage("BackNavigationInfo").that(backNavigationInfo).isNotNull();
         assertThat(typeToString(backNavigationInfo.getType()))
@@ -130,7 +132,8 @@ public class BackNavigationControllerTests extends WindowTestsBase {
         addToWindowMap(window, true);
 
         IOnBackInvokedCallback callback = createOnBackInvokedCallback();
-        window.setOnBackInvokedCallback(callback, OnBackInvokedDispatcher.PRIORITY_DEFAULT);
+        window.setOnBackInvokedCallbackInfo(
+                new OnBackInvokedCallbackInfo(callback, OnBackInvokedDispatcher.PRIORITY_DEFAULT));
 
         BackNavigationInfo backNavigationInfo = startBackNavigation();
         assertWithMessage("BackNavigationInfo").that(backNavigationInfo).isNotNull();
@@ -169,11 +172,9 @@ public class BackNavigationControllerTests extends WindowTestsBase {
         WindowState appWindow = task.getTopVisibleAppMainWindow();
         WindowOnBackInvokedDispatcher dispatcher = new WindowOnBackInvokedDispatcher();
         doAnswer(invocation -> {
-            appWindow.setOnBackInvokedCallback(invocation.getArgument(1),
-                    invocation.getArgument(2));
+            appWindow.setOnBackInvokedCallbackInfo(invocation.getArgument(1));
             return null;
-        }).when(appWindow.mSession).setOnBackInvokedCallback(eq(appWindow.mClient), any(),
-                anyInt());
+        }).when(appWindow.mSession).setOnBackInvokedCallbackInfo(eq(appWindow.mClient), any());
 
         addToWindowMap(appWindow, true);
         dispatcher.attachToWindow(appWindow.mSession, appWindow.mClient);
@@ -216,15 +217,15 @@ public class BackNavigationControllerTests extends WindowTestsBase {
 
     private IOnBackInvokedCallback withSystemCallback(Task task) {
         IOnBackInvokedCallback callback = createOnBackInvokedCallback();
-        task.getTopMostActivity().getTopChild().setOnBackInvokedCallback(callback,
-                OnBackInvokedDispatcher.PRIORITY_SYSTEM);
+        task.getTopMostActivity().getTopChild().setOnBackInvokedCallbackInfo(
+                new OnBackInvokedCallbackInfo(callback, OnBackInvokedDispatcher.PRIORITY_SYSTEM));
         return callback;
     }
 
     private IOnBackInvokedCallback withAppCallback(Task task) {
         IOnBackInvokedCallback callback = createOnBackInvokedCallback();
-        task.getTopMostActivity().getTopChild().setOnBackInvokedCallback(callback,
-                OnBackInvokedDispatcher.PRIORITY_DEFAULT);
+        task.getTopMostActivity().getTopChild().setOnBackInvokedCallbackInfo(
+                new OnBackInvokedCallbackInfo(callback, OnBackInvokedDispatcher.PRIORITY_DEFAULT));
         return callback;
     }
 

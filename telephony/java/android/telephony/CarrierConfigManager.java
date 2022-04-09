@@ -980,6 +980,12 @@ public class CarrierConfigManager {
     public static final String KEY_CARRIER_VOLTE_TTY_SUPPORTED_BOOL
             = "carrier_volte_tty_supported_bool";
 
+    /** Flag specifying whether VoWIFI TTY is supported.
+     * @hide
+     */
+    public static final String KEY_CARRIER_VOWIFI_TTY_SUPPORTED_BOOL =
+            "carrier_vowifi_tty_supported_bool";
+
     /**
      * Flag specifying whether IMS service can be turned off. If false then the service will not be
      * turned-off completely, but individual features can be disabled.
@@ -1922,6 +1928,13 @@ public class CarrierConfigManager {
      */
     public static final String KEY_SHOW_4G_FOR_LTE_DATA_ICON_BOOL =
             "show_4g_for_lte_data_icon_bool";
+
+    /**
+     * Boolean indicating if default data account should show 4G LTE or 4G icon.
+     * @hide
+     */
+    public static final String KEY_SHOW_4GLTE_FOR_LTE_DATA_ICON_BOOL =
+            "show_4glte_for_lte_data_icon_bool";
 
     /**
      * Boolean indicating if default data account should show 4G icon when in 3G.
@@ -8574,6 +8587,7 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_CARRIER_SUPPORTS_SS_OVER_UT_BOOL, false);
         sDefaults.putBoolean(KEY_CARRIER_VOLTE_OVERRIDE_WFC_PROVISIONING_BOOL, false);
         sDefaults.putBoolean(KEY_CARRIER_VOLTE_TTY_SUPPORTED_BOOL, true);
+        sDefaults.putBoolean(KEY_CARRIER_VOWIFI_TTY_SUPPORTED_BOOL, true);
         sDefaults.putBoolean(KEY_CARRIER_ALLOW_TURNOFF_IMS_BOOL, true);
         sDefaults.putBoolean(KEY_CARRIER_IMS_GBA_REQUIRED_BOOL, false);
         sDefaults.putBoolean(KEY_CARRIER_INSTANT_LETTERING_AVAILABLE_BOOL, false);
@@ -8907,6 +8921,7 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_SPN_DISPLAY_RULE_USE_ROAMING_FROM_SERVICE_STATE_BOOL, false);
         sDefaults.putBoolean(KEY_ALWAYS_SHOW_DATA_RAT_ICON_BOOL, false);
         sDefaults.putBoolean(KEY_SHOW_4G_FOR_LTE_DATA_ICON_BOOL, false);
+        sDefaults.putBoolean(KEY_SHOW_4GLTE_FOR_LTE_DATA_ICON_BOOL, false);
         sDefaults.putBoolean(KEY_SHOW_4G_FOR_3G_DATA_ICON_BOOL, false);
         sDefaults.putString(KEY_OPERATOR_NAME_FILTER_PATTERN_STRING, "");
         sDefaults.putString(KEY_SHOW_CARRIER_DATA_ICON_PATTERN_STRING, "");

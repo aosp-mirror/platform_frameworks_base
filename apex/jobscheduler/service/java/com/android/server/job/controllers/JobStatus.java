@@ -1974,8 +1974,8 @@ public final class JobStatus {
             case 2: return "FREQUENT";
             case 3: return "RARE";
             case 4: return "NEVER";
-            case 5:
-                return "RESTRICTED";
+            case 5: return "RESTRICTED";
+            case 6: return "EXEMPTED";
             default:
                 return "Unknown: " + standbyBucket;
         }

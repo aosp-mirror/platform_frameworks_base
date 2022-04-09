@@ -2216,6 +2216,7 @@
   <java-symbol type="integer" name="config_dreamsBatteryLevelMinimumWhenNotPowered" />
   <java-symbol type="integer" name="config_dreamsBatteryLevelDrainCutoff" />
   <java-symbol type="string" name="config_dreamsDefaultComponent" />
+  <java-symbol type="bool" name="config_dreamsOnlyEnabledForSystemUser" />
   <java-symbol type="array" name="config_supportedDreamComplications" />
   <java-symbol type="array" name="config_dreamComplicationsEnabledByDefault" />
   <java-symbol type="array" name="config_disabledDreamComponents" />
@@ -3284,7 +3285,13 @@
 
   <java-symbol type="string" name="app_streaming_blocked_title" />
   <java-symbol type="string" name="app_streaming_blocked_title_for_permission_dialog" />
+  <java-symbol type="string" name="app_streaming_blocked_title_for_camera_dialog" />
+  <java-symbol type="string" name="app_streaming_blocked_title_for_fingerprint_dialog" />
+  <java-symbol type="string" name="app_streaming_blocked_title_for_microphone_dialog" />
+  <java-symbol type="string" name="app_streaming_blocked_title_for_settings_dialog" />
   <java-symbol type="string" name="app_streaming_blocked_message" />
+  <java-symbol type="string" name="app_streaming_blocked_message_for_permission_dialog" />
+  <java-symbol type="string" name="app_streaming_blocked_message_for_fingerprint_dialog" />
 
   <!-- Used internally for assistant to launch activity transitions -->
   <java-symbol type="id" name="cross_task_transition" />
@@ -3890,6 +3897,11 @@
   <java-symbol type="string" name="zen_upgrade_notification_content" />
   <java-symbol type="string" name="zen_upgrade_notification_visd_title" />
   <java-symbol type="string" name="zen_upgrade_notification_visd_content" />
+
+  <java-symbol type="string" name="review_notification_settings_title" />
+  <java-symbol type="string" name="review_notification_settings_text" />
+  <java-symbol type="string" name="review_notification_settings_remind_me_action" />
+  <java-symbol type="string" name="review_notification_settings_dismiss" />
 
   <java-symbol type="string" name="config_managed_provisioning_package" />
 

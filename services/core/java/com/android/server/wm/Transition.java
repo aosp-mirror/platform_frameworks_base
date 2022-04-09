@@ -1595,6 +1595,19 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
     }
 
     /**
+     * This transition will be considered not-ready until a corresponding call to
+     * {@link #continueTransitionReady}
+     */
+    void deferTransitionReady() {
+        ++mReadyTracker.mDeferReadyDepth;
+    }
+
+    /** This undoes one call to {@link #deferTransitionReady}. */
+    void continueTransitionReady() {
+        --mReadyTracker.mDeferReadyDepth;
+    }
+
+    /**
      * The transition sync mechanism has 2 parts:
      *   1. Whether all WM operations for a particular transition are "ready" (eg. did the app
      *      launch or stop or get a new configuration?).
@@ -1622,6 +1635,14 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
          * transitions via {@link #setAllReady()}.
          */
         private boolean mReadyOverride = false;
+
+        /**
+         * When non-zero, this transition is forced not-ready (even over setAllReady()). Use this
+         * (via deferTransitionReady/continueTransitionReady) for situations where we want to do
+         * bulk operations which could trigger surface-placement but the existing ready-state
+         * isn't known.
+         */
+        private int mDeferReadyDepth = 0;
 
         /**
          * Adds a ready-group. Any setReady calls in this subtree will be tracked together. For
@@ -1664,7 +1685,13 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
         boolean allReady() {
             ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS, " allReady query: used=%b "
                     + "override=%b states=[%s]", mUsed, mReadyOverride, groupsToString());
+            // If the readiness has never been touched, mUsed will be false. We never want to
+            // consider a transition ready if nothing has been reported on it.
             if (!mUsed) return false;
+            // If we are deferring readiness, we never report ready. This is usually temporary.
+            if (mDeferReadyDepth > 0) return false;
+            // Next check all the ready groups to see if they are ready. We can short-cut this if
+            // ready-override is set (which is treated as "everything is marked ready").
             if (mReadyOverride) return true;
             for (int i = mReadyGroups.size() - 1; i >= 0; --i) {
                 final WindowContainer wc = mReadyGroups.keyAt(i);

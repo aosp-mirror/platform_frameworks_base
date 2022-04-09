@@ -21,7 +21,6 @@ import android.view.View;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.BatteryController.BatteryStateChangeCallback;
 
-import java.io.FileDescriptor;
 import java.io.PrintWriter;
 
 public class FakeBatteryController extends BaseLeakChecker<BatteryStateChangeCallback>
@@ -38,7 +37,7 @@ public class FakeBatteryController extends BaseLeakChecker<BatteryStateChangeCal
     }
 
     @Override
-    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+    public void dump(PrintWriter pw, String[] args) {
 
     }
 

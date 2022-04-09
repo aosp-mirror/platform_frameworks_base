@@ -455,6 +455,24 @@ class TransitionController {
         setReady(wc, true);
     }
 
+    /** @see Transition#deferTransitionReady */
+    void deferTransitionReady() {
+        if (!isShellTransitionsEnabled()) return;
+        if (mCollectingTransition == null) {
+            throw new IllegalStateException("No collecting transition to defer readiness for.");
+        }
+        mCollectingTransition.deferTransitionReady();
+    }
+
+    /** @see Transition#continueTransitionReady */
+    void continueTransitionReady() {
+        if (!isShellTransitionsEnabled()) return;
+        if (mCollectingTransition == null) {
+            throw new IllegalStateException("No collecting transition to defer readiness for.");
+        }
+        mCollectingTransition.continueTransitionReady();
+    }
+
     /** @see Transition#finishTransition */
     void finishTransition(@NonNull IBinder token) {
         // It is usually a no-op but make sure that the metric consumer is removed.

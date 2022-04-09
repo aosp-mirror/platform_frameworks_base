@@ -25,7 +25,6 @@ import android.util.Size
 import android.view.RoundedCorners
 import com.android.systemui.Dumpable
 import com.android.systemui.R
-import java.io.FileDescriptor
 import java.io.PrintWriter
 
 class RoundedCornerResDelegate(
@@ -163,7 +162,7 @@ class RoundedCornerResDelegate(
         return drawable
     }
 
-    override fun dump(fd: FileDescriptor, pw: PrintWriter, args: Array<out String>) {
+    override fun dump(pw: PrintWriter, args: Array<out String>) {
         pw.println("RoundedCornerResDelegate state:")
         pw.println("  isMultipleRadius:$isMultipleRadius")
         pw.println("  roundedSize(w,h)=(${roundedSize.width},${roundedSize.height})")

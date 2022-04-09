@@ -585,7 +585,8 @@
     <string name="biometric_error_generic" msgid="6784371929985434439">"No se ha podido autenticar"</string>
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"Usar bloqueo de pantalla"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"Introduce tu bloqueo de pantalla para continuar"</string>
-    <string name="fingerprint_acquired_partial" msgid="694598777291084823">"Huella digital parcial detectada"</string>
+    <!-- no translation found for fingerprint_acquired_partial (4323789264604479684) -->
+    <skip />
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"No se ha podido procesar la huella digital. Vuelve a intentarlo."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"Limpia el sensor de huellas digitales e inténtalo de nuevo"</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"Limpia el sensor e inténtalo de nuevo"</string>
@@ -598,7 +599,8 @@
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_error_not_match" msgid="4599441812893438961">"Huella digital no reconocida"</string>
-    <string name="fingerprint_udfps_error_not_match" msgid="4709197752023550709">"Mantén pulsado firmemente el sensor"</string>
+    <!-- no translation found for fingerprint_udfps_error_not_match (8236930793223158856) -->
+    <skip />
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"Se ha autenticado la huella digital"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"Cara autenticada"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"Se ha autenticado la cara, pulsa para confirmar"</string>
@@ -1679,7 +1681,6 @@
     <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"ACTIVADO"</string>
     <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"NO"</string>
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"¿Permitir que <xliff:g id="SERVICE">%1$s</xliff:g> pueda controlar totalmente tu dispositivo?"</string>
-    <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"Si activas <xliff:g id="SERVICE">%1$s</xliff:g>, el dispositivo no utilizará el bloqueo de pantalla para mejorar el cifrado de datos."</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"El control total es adecuado para las aplicaciones de accesibilidad, pero no para la mayoría de las aplicaciones."</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Ver y controlar la pantalla"</string>
     <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Puede leer todo el contenido de la pantalla y mostrar contenido encima de otras aplicaciones."</string>
@@ -1933,8 +1934,7 @@
     <string name="app_blocked_title" msgid="7353262160455028160">"La aplicación no está disponible"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"En estos momentos, <xliff:g id="APP_NAME">%1$s</xliff:g> no está disponible."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> no disponible"</string>
-    <!-- no translation found for app_streaming_blocked_title_for_permission_dialog (4483161748582966785) -->
-    <skip />
+    <string name="app_streaming_blocked_title_for_permission_dialog" msgid="4483161748582966785">"Se necesita permiso"</string>
     <string name="app_streaming_blocked_message" product="tv" msgid="4003011766528814377">"En estos momentos, no se puede acceder a este contenido en tu <xliff:g id="DEVICE">%1$s</xliff:g>. Prueba en tu dispositivo Android TV."</string>
     <string name="app_streaming_blocked_message" product="tablet" msgid="4242053045964946062">"En estos momentos, no se puede acceder a este contenido en tu <xliff:g id="DEVICE">%1$s</xliff:g>. Prueba en tu tablet."</string>
     <string name="app_streaming_blocked_message" product="default" msgid="6159168735030739398">"En estos momentos, no se puede acceder a este contenido en tu <xliff:g id="DEVICE">%1$s</xliff:g>. Prueba en tu teléfono."</string>
@@ -2028,10 +2028,10 @@
     <string name="harmful_app_warning_open_anyway" msgid="5963657791740211807">"ABRIR IGUALMENTE"</string>
     <string name="harmful_app_warning_title" msgid="8794823880881113856">"Se ha detectado una aplicación dañina"</string>
     <string name="log_access_confirmation_title" msgid="2343578467290592708">"¿Permitir que <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> acceda a todos los registros del dispositivo?"</string>
-    <string name="log_access_confirmation_allow" msgid="143157286283302512">"Solo esta vez"</string>
-    <string name="log_access_confirmation_deny" msgid="7685790957455099845">"No permitir"</string>
-    <!-- no translation found for log_access_confirmation_body (6581985716241928135) -->
+    <!-- no translation found for log_access_confirmation_allow (5302517782599389507) -->
     <skip />
+    <string name="log_access_confirmation_deny" msgid="7685790957455099845">"No permitir"</string>
+    <string name="log_access_confirmation_body" msgid="6581985716241928135">"Los registros del dispositivo documentan lo que sucede en tu dispositivo. Las aplicaciones pueden usar estos registros para encontrar y solucionar problemas.\n\nComo algunos registros pueden contener información sensible, es mejor que solo permitas que accedan a ellos las aplicaciones en las que confíes. \n\nAunque no permitas que esta aplicación acceda a todos los registros del dispositivo, aún podrá acceder a sus propios registros. Es posible que el fabricante del dispositivo pueda acceder a algunos registros o información de tu dispositivo. Más información"</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"No volver a mostrar"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g> quiere mostrar fragmentos de <xliff:g id="APP_2">%2$s</xliff:g>"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"Editar"</string>
@@ -2261,13 +2261,16 @@
     <string name="ui_translation_accessibility_translated_text" msgid="3197547218178944544">"<xliff:g id="MESSAGE">%1$s</xliff:g> traducido."</string>
     <string name="ui_translation_accessibility_translation_finished" msgid="3057830947610088465">"Mensaje traducido del <xliff:g id="FROM_LANGUAGE">%1$s</xliff:g> al <xliff:g id="TO_LANGUAGE">%2$s</xliff:g>."</string>
     <string name="notification_channel_abusive_bg_apps" msgid="6092140213264920355">"Actividad en segundo plano"</string>
-    <string name="notification_title_abusive_bg_apps" msgid="344582472797982073">"Actividad en segundo plano"</string>
-    <string name="notification_content_abusive_bg_apps" msgid="5572096708044958249">"<xliff:g id="APP">%1$s</xliff:g> se está ejecutando en segundo plano y agotando batería. Toca para revisarlo."</string>
-    <string name="notification_content_long_running_fgs" msgid="8878031652441570178">"<xliff:g id="APP">%1$s</xliff:g> lleva mucho tiempo ejecutándose en segundo plano. Toca para revisarlo."</string>
+    <!-- no translation found for notification_title_abusive_bg_apps (3258460527676573815) -->
+    <skip />
+    <!-- no translation found for notification_title_long_running_fgs (8170284286477131587) -->
+    <skip />
+    <!-- no translation found for notification_content_abusive_bg_apps (9180610713603474720) -->
+    <skip />
+    <!-- no translation found for notification_content_long_running_fgs (8258193410039977101) -->
+    <skip />
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Consultar aplicaciones activas"</string>
-    <!-- no translation found for vdm_camera_access_denied (6102378580971542473) -->
-    <skip />
-    <!-- no translation found for vdm_camera_access_denied (6895968310395249076) -->
-    <skip />
+    <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"No se puede acceder a la cámara del teléfono desde tu <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
+    <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"No se puede acceder a la cámara del tablet desde tu <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
     <string name="system_locale_title" msgid="3978041860457277638">"Idioma del sistema"</string>
 </resources>

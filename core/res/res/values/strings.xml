@@ -234,9 +234,9 @@
     <!-- Displayed to tell the user that they should switch their network preference. -->
     <string name="NetworkPreferenceSwitchSummary">Try changing preferred network. Tap to change.</string>
     <!-- Displayed to tell the user that emergency calls might not be available. -->
-    <string name="EmergencyCallWarningTitle">Emergency calls may be unavailable</string>
+    <string name="EmergencyCallWarningTitle">Emergency calling unavailable</string>
     <!-- Displayed to tell the user that emergency calls might not be available. -->
-    <string name="EmergencyCallWarningSummary"><xliff:g id="spn" example="Operator">%s</xliff:g> doesn\'t support emergency calls over Wi-Fi. Tap for details.</string>
+    <string name="EmergencyCallWarningSummary">Can\u2019t make emergency calls over Wi\u2011Fi</string>
 
     <!-- Telephony notification channel name for a channel containing network alert notifications. -->
     <string name="notification_channel_network_alert">Alerts</string>
@@ -5459,12 +5459,36 @@
     <string name="app_streaming_blocked_title"><xliff:g id="activity" example="Permission dialog">%1$s</xliff:g> unavailable</string>
     <!-- Title of the dialog shown when the permissioncontroller is blocked from being streamed to a remote device. [CHAR LIMIT=NONE] -->
     <string name="app_streaming_blocked_title_for_permission_dialog">Permission needed</string>
+    <!-- Title of the dialog shown when the camera permission is blocked from being streamed to a remote device. [CHAR LIMIT=NONE] -->
+    <string name="app_streaming_blocked_title_for_camera_dialog">Camera unavailable</string>
+    <!-- Title of the dialog shown when the fingerprint permission is blocked from being streamed to a remote device. [CHAR LIMIT=NONE] -->
+    <string name="app_streaming_blocked_title_for_fingerprint_dialog">Continue on phone</string>
+    <!-- Title of the dialog shown when the microphone permission is blocked from being streamed to a remote device. [CHAR LIMIT=NONE] -->
+    <string name="app_streaming_blocked_title_for_microphone_dialog">Microphone unavailable</string>
+    <!-- Title of the dialog shown when the settings is blocked from being streamed to a remote device. [CHAR LIMIT=NONE] -->
+    <string name="app_streaming_blocked_title_for_settings_dialog" product="tv">Android TV settings unavailable</string>
+    <!-- Title of the dialog shown when the settings is blocked from being streamed to a remote device. [CHAR LIMIT=NONE] -->
+    <string name="app_streaming_blocked_title_for_settings_dialog" product="tablet">Tablet settings unavailable</string>
+    <!-- Title of the dialog shown when the settings is blocked from being streamed to a remote device. [CHAR LIMIT=NONE] -->
+    <string name="app_streaming_blocked_title_for_settings_dialog" product="default">Phone settings unavailable</string>
     <!-- Message shown when an app is blocked from being streamed to a remote device. [CHAR LIMIT=NONE] -->
-    <string name="app_streaming_blocked_message" product="tv">This can’t be accessed on your <xliff:g id="device" example="Chromebook">%1$s</xliff:g> at this time. Try on your Android TV device instead.</string>
+    <string name="app_streaming_blocked_message" product="tv">This can’t be accessed on your <xliff:g id="device" example="Chromebook">%1$s</xliff:g>. Try on your Android TV device instead.</string>
     <!-- Message shown when an app is blocked from being streamed to a remote device. [CHAR LIMIT=NONE] -->
-    <string name="app_streaming_blocked_message" product="tablet">This can’t be accessed on your <xliff:g id="device" example="Chromebook">%1$s</xliff:g> at this time. Try on your tablet instead.</string>
+    <string name="app_streaming_blocked_message" product="tablet">This can’t be accessed on your <xliff:g id="device" example="Chromebook">%1$s</xliff:g>. Try on your tablet instead.</string>
     <!-- Message shown when an app is blocked from being streamed to a remote device. [CHAR LIMIT=NONE] -->
-    <string name="app_streaming_blocked_message" product="default">This can’t be accessed on your <xliff:g id="device" example="Chromebook">%1$s</xliff:g> at this time. Try on your phone instead.</string>
+    <string name="app_streaming_blocked_message" product="default">This can’t be accessed on your <xliff:g id="device" example="Chromebook">%1$s</xliff:g>. Try on your phone instead.</string>
+    <!-- Message shown when an app is blocked from being streamed to a remote device. [CHAR LIMIT=NONE] -->
+    <string name="app_streaming_blocked_message_for_permission_dialog" product="tv">This can’t be accessed on your <xliff:g id="device" example="Chromebook">%1$s</xliff:g> at this time. Try on your Android TV device instead.</string>
+    <!-- Message shown when an app is blocked from being streamed to a remote device. [CHAR LIMIT=NONE] -->
+    <string name="app_streaming_blocked_message_for_permission_dialog" product="tablet">This can’t be accessed on your <xliff:g id="device" example="Chromebook">%1$s</xliff:g> at this time. Try on your tablet instead.</string>
+    <!-- Message shown when an app is blocked from being streamed to a remote device. [CHAR LIMIT=NONE] -->
+    <string name="app_streaming_blocked_message_for_permission_dialog" product="default">This can’t be accessed on your <xliff:g id="device" example="Chromebook">%1$s</xliff:g> at this time. Try on your phone instead.</string>
+    <!-- Message shown when the fingerprint permission is blocked from being streamed to a remote device. [CHAR LIMIT=NONE] -->
+    <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tv">This app is requesting additional security. Try on your Android TV device instead.</string>
+    <!-- Message shown when the fingerprint permission is blocked from being streamed to a remote device. [CHAR LIMIT=NONE] -->
+    <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tablet">This app is requesting additional security. Try on your tablet instead.</string>
+    <!-- Message shown when the fingerprint permission is blocked from being streamed to a remote device. [CHAR LIMIT=NONE] -->
+    <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="default">This app is requesting additional security. Try on your phone instead.</string>
 
     <!-- Message displayed in dialog when app is too old to run on this verison of android. [CHAR LIMIT=NONE] -->
     <string name="deprecated_target_sdk_message">This app was built for an older version of Android and may not work properly. Try checking for updates, or contact the developer.</string>
@@ -5744,6 +5768,16 @@
     <string name="zen_upgrade_notification_title">Do Not Disturb has changed</string>
     <!-- Content of notification indicating users can tap on the notification to go to dnd behavior settings -->
     <string name="zen_upgrade_notification_content">Tap to check what\'s blocked.</string>
+
+    <!-- Notification permission informational notification text -->
+    <!-- Title for notification inviting users to review their notification settings [CHAR LIMIT=NONE] -->
+    <string name="review_notification_settings_title">Review notification settings</string>
+    <!-- Content of notification informing users of notification permission change, and inviting them to modify current settings. [CHAR LIMIT=NONE]-->
+    <string name="review_notification_settings_text">In Android 13, apps that you install need your permission to send notifications. Tap to change this permission for existing apps.</string>
+    <!-- Notification action text for having this notification come back later [CHAR LIMIT=20] -->
+    <string name="review_notification_settings_remind_me_action">Remind me later</string>
+    <!-- Notification action text to dismiss this notification [CHAR LIMIT=20]-->
+    <string name="review_notification_settings_dismiss">Dismiss</string>
 
     <!-- Application name displayed in notifications [CHAR LIMIT=60] -->
     <string name="notification_app_name_system">System</string>

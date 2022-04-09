@@ -585,7 +585,7 @@
     <string name="biometric_error_generic" msgid="6784371929985434439">"සත්‍යාපනය කිරීමේ දෝෂයකි"</string>
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"තිර අගුල භාවිත කරන්න"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"ඉදිරියට යාමට ඔබගේ තිර අගුල ඇතුළත් කරන්න"</string>
-    <string name="fingerprint_acquired_partial" msgid="694598777291084823">"අර්ධ ඇඟිලි සලකුණක් අනාවරණය කරන ලදි"</string>
+    <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"සංවේදකය මත තදින් ඔබන්න"</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"ඇඟිලි සලකුණ පිරිසැකසීමට නොහැකි විය. කරුණාකර නැවත උත්සාහ කරන්න."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"ඇඟිලි සලකුණු සංවේදකය පිරිසිදු කර නැවත උත්සාහ කරන්න"</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"සංවේදකය පිරිසිදු කර නැවත උත්සාහ කරන්න"</string>
@@ -598,7 +598,7 @@
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_error_not_match" msgid="4599441812893438961">"ඇඟිලි සලකුණ හඳුනා නොගන්නා ලදි"</string>
-    <string name="fingerprint_udfps_error_not_match" msgid="4709197752023550709">"සංවේදකය මත තදින් ඔබන්න"</string>
+    <string name="fingerprint_udfps_error_not_match" msgid="8236930793223158856">"ඇඟිලි සලකුණ හඳුනා නොගන්නා ලදි"</string>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"ඇඟිලි සලකුණ සත්‍යාපනය කරන ලදී"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"මුහුණ සත්‍යාපනය කරන ලදී"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"මුහුණ සත්‍යාපනය කරන ලදී, කරුණාකර තහවුරු කරන්න ඔබන්න"</string>
@@ -1679,7 +1679,6 @@
     <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"සක්‍රියයි"</string>
     <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"අක්‍රියයි"</string>
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"<xliff:g id="SERVICE">%1$s</xliff:g> හට ඔබේ උපාංගයේ සම්පූර්ණ පාලනය තබා ගැනීමට ඉඩ දෙන්නද?"</string>
-    <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"ඔබ <xliff:g id="SERVICE">%1$s</xliff:g> ක්‍රියාත්මක කරන්නේ නම්, දත්ත සංකේතනය වැඩිදියුණු කිරීමට ඔබේ උපාංගය ඔබේ තිර අගුල භාවිත නොකරනු ඇත."</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"පූර්ණ පාලනය ඔබට ප්‍රවේශ්‍යතා අවශ්‍යතා සමඟ උදවු කරන යෙදුම් සඳහා සුදුසු වන නමුත් බොහෝ යෙදුම් සඳහා සුදුසු නොවේ."</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"තිරය බලන්න සහ පාලන කරන්න"</string>
     <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"එයට තිරයේ සියලුම අන්තර්ගත කියවිය හැකි අතර අනෙකුත් යෙදුම් මත අන්තර්ගතය සංදර්ශන කළ හැක."</string>
@@ -1933,8 +1932,7 @@
     <string name="app_blocked_title" msgid="7353262160455028160">"යෙදුම ලබා ගත නොහැකිය"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> මේ දැන් ලබා ගත නොහැකිය."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> නොතිබේ"</string>
-    <!-- no translation found for app_streaming_blocked_title_for_permission_dialog (4483161748582966785) -->
-    <skip />
+    <string name="app_streaming_blocked_title_for_permission_dialog" msgid="4483161748582966785">"අවසරය අවශ්‍යයි"</string>
     <string name="app_streaming_blocked_message" product="tv" msgid="4003011766528814377">"මේ අවස්ථාවේදී මෙයට ඔබගේ <xliff:g id="DEVICE">%1$s</xliff:g> හි ප්‍රවේශ විය නොහැකිය. ඒ වෙනුවට ඔබගේ Android TV උපාංගයෙහි උත්සාහ කරන්න."</string>
     <string name="app_streaming_blocked_message" product="tablet" msgid="4242053045964946062">"මේ අවස්ථාවේදී මෙයට ඔබගේ <xliff:g id="DEVICE">%1$s</xliff:g> හි ප්‍රවේශ විය නොහැකිය. ඒ වෙනුවට ඔබගේ ටැබ්ලටයෙහි උත්සාහ කරන්න."</string>
     <string name="app_streaming_blocked_message" product="default" msgid="6159168735030739398">"මේ අවස්ථාවේදී මෙයට ඔබගේ <xliff:g id="DEVICE">%1$s</xliff:g> හි ප්‍රවේශ විය නොහැකිය. ඒ වෙනුවට ඔබගේ දුරකථනයෙහි උත්සාහ කරන්න."</string>
@@ -2028,10 +2026,9 @@
     <string name="harmful_app_warning_open_anyway" msgid="5963657791740211807">"කෙසේ වුවත් විවෘත කරන්න"</string>
     <string name="harmful_app_warning_title" msgid="8794823880881113856">"හානිකර යෙදුමක් අනාවරණය කර ගන්නා ලදී"</string>
     <string name="log_access_confirmation_title" msgid="2343578467290592708">"<xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> හට සියලු උපාංග ලොග ප්‍රවේශ වීමට ඉඩ දෙන්නද?"</string>
-    <string name="log_access_confirmation_allow" msgid="143157286283302512">"මෙම වතාවේ පමණි"</string>
+    <string name="log_access_confirmation_allow" msgid="5302517782599389507">"එක් වරක් ප්‍රවේශය ඉඩ දෙන්න"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"ඉඩ නොදෙන්න"</string>
-    <!-- no translation found for log_access_confirmation_body (6581985716241928135) -->
-    <skip />
+    <string name="log_access_confirmation_body" msgid="6581985716241928135">"උපාංග ලොග ඔබගේ උපාංගයේ සිදු වන දේ වාර්තා කරයි. ගැටලු සොයා ගැනීමට සහ විසඳීමට යෙදුම්වලට මෙම ලොග භාවිත කළ හැකිය.\n\nසමහර ලොගවල සංවේදී තොරතුරු අඩංගු විය හැකිය, එබැවින් ඔබ විශ්වාස කරන යෙදුම්වලට පමණක් සියලු උපාංග ලොග වෙත ප්‍රවේශ වීමට ඉඩ දෙන්න. \n\nඔබ මෙම යෙදුමට සියලු උපාංග ලොග වෙත ප්‍රවේශ වීමට ඉඩ නොදෙන්නේ නම්, එයට තවමත් එහිම ලොග වෙත ප්‍රවේශ විය හැකිය. ඔබගේ උපාංග නිෂ්පාදකයාට තවමත් ඔබගේ උපාංගයේ සමහර ලොග හෝ තොරතුරු වෙත ප්‍රවේශ විය හැකිය. තව දැන ගන්න"</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"නැවත නොපෙන්වන්න"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g> හට කොටස් <xliff:g id="APP_2">%2$s</xliff:g>ක් පෙන්වීමට අවශ්‍යයි"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"සංස්කරණය"</string>
@@ -2261,13 +2258,12 @@
     <string name="ui_translation_accessibility_translated_text" msgid="3197547218178944544">"<xliff:g id="MESSAGE">%1$s</xliff:g> පරිවර්තනය කරන ලදි."</string>
     <string name="ui_translation_accessibility_translation_finished" msgid="3057830947610088465">"පණිවිඩය <xliff:g id="FROM_LANGUAGE">%1$s</xliff:g> සිට <xliff:g id="TO_LANGUAGE">%2$s</xliff:g> භාෂාවට පරිවර්තනය කරන ලදි."</string>
     <string name="notification_channel_abusive_bg_apps" msgid="6092140213264920355">"පසුබිම් ක්‍රියාකාරකම"</string>
-    <string name="notification_title_abusive_bg_apps" msgid="344582472797982073">"පසුබිම් ක්‍රියාකාරකම"</string>
-    <string name="notification_content_abusive_bg_apps" msgid="5572096708044958249">"<xliff:g id="APP">%1$s</xliff:g> පසුබිමේ ධාවනය වන අතර බැටරිය බැස යයි. සමාලෝචනය කිරීමට තට්ටු කරන්න."</string>
-    <string name="notification_content_long_running_fgs" msgid="8878031652441570178">"<xliff:g id="APP">%1$s</xliff:g> දිගු වේලාවක් පසුබිමේ ධාවනය වේ. සමාලෝචනය කිරීමට තට්ටු කරන්න."</string>
+    <string name="notification_title_abusive_bg_apps" msgid="3258460527676573815">"යෙදුමක් බැටරිය භාවිත කරමින් ඇත"</string>
+    <string name="notification_title_long_running_fgs" msgid="8170284286477131587">"යෙදුමක් තවම සක්‍රියයි"</string>
+    <string name="notification_content_abusive_bg_apps" msgid="9180610713603474720">"<xliff:g id="APP">%1$s</xliff:g> පසුබිමේ බැටරිය භාවිත කරමින් ඇත. සමාලෝචනය කිරීමට තට්ටු කරන්න."</string>
+    <string name="notification_content_long_running_fgs" msgid="8258193410039977101">"<xliff:g id="APP">%1$s</xliff:g> බැටරි ආයු කාලය සඳහා බලපෑමට ඉඩ ඇත. සක්‍රිය යෙදුම් සමාලෝචනය කිරීමට තට්ටු කරන්න."</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"සක්‍රිය යෙදුම් පරීක්ෂා කරන්න"</string>
-    <!-- no translation found for vdm_camera_access_denied (6102378580971542473) -->
-    <skip />
-    <!-- no translation found for vdm_camera_access_denied (6895968310395249076) -->
-    <skip />
+    <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"ඔබගේ <xliff:g id="DEVICE">%1$s</xliff:g> වෙතින් දුරකථනයේ කැමරාවට ප්‍රවේශ විය නොහැකිය"</string>
+    <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"ඔබගේ <xliff:g id="DEVICE">%1$s</xliff:g> වෙතින් ටැබ්ලටයේ කැමරාවට ප්‍රවේශ විය නොහැකිය"</string>
     <string name="system_locale_title" msgid="3978041860457277638">"පද්ධති භාෂාව"</string>
 </resources>

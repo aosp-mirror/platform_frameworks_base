@@ -142,6 +142,9 @@ public class BouncerSwipeTouchHandler implements DreamTouchHandler {
 
     private void setPanelExpansion(float expansion) {
         mCurrentExpansion = expansion;
+
+        mCentralSurfaces.setBouncerShowing(expansion != KeyguardBouncer.EXPANSION_HIDDEN);
+
         mStatusBarKeyguardViewManager.onPanelExpansionChanged(mCurrentExpansion, false, true);
     }
 

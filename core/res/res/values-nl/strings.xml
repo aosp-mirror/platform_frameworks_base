@@ -585,7 +585,7 @@
     <string name="biometric_error_generic" msgid="6784371929985434439">"Fout bij verificatie"</string>
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"Schermvergrendeling gebruiken"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"Voer je schermvergrendeling in om door te gaan"</string>
-    <string name="fingerprint_acquired_partial" msgid="694598777291084823">"Gedeeltelijke vingerafdruk gedetecteerd"</string>
+    <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"Druk stevig op de sensor"</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"Kan vingerafdruk niet verwerken. Probeer het opnieuw."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"Reinig de vingerafdruksensor en probeer het opnieuw"</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"Reinig de sensor en probeer het opnieuw"</string>
@@ -598,7 +598,7 @@
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_error_not_match" msgid="4599441812893438961">"Vingerafdruk niet herkend"</string>
-    <string name="fingerprint_udfps_error_not_match" msgid="4709197752023550709">"Druk stevig op de sensor"</string>
+    <string name="fingerprint_udfps_error_not_match" msgid="8236930793223158856">"Vingerafdruk niet herkend"</string>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"Vingerafdruk geverifieerd"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"Gezicht geverifieerd"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"Gezicht geverifieerd. Druk op Bevestigen."</string>
@@ -1679,7 +1679,6 @@
     <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"AAN"</string>
     <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"UIT"</string>
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"Toestaan dat <xliff:g id="SERVICE">%1$s</xliff:g> volledige controle over je apparaat heeft?"</string>
-    <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"Als je <xliff:g id="SERVICE">%1$s</xliff:g> aanzet, gebruikt je apparaat geen schermvergrendeling om de gegevensversleuteling te verbeteren."</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"Volledige controle is gepast voor apps die je helpen met toegankelijkheid, maar voor de meeste apps is het ongepast."</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Scherm bekijken en bedienen"</string>
     <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"De functie kan alle content op het scherm lezen en content bovenop andere apps bekijken."</string>
@@ -1933,8 +1932,7 @@
     <string name="app_blocked_title" msgid="7353262160455028160">"App is niet beschikbaar"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> is momenteel niet beschikbaar."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> niet beschikbaar"</string>
-    <!-- no translation found for app_streaming_blocked_title_for_permission_dialog (4483161748582966785) -->
-    <skip />
+    <string name="app_streaming_blocked_title_for_permission_dialog" msgid="4483161748582966785">"Rechten vereist"</string>
     <string name="app_streaming_blocked_message" product="tv" msgid="4003011766528814377">"Je hebt hier nu geen toegang toe op je <xliff:g id="DEVICE">%1$s</xliff:g>. Probeer het in plaats daarvan op je Android TV-apparaat."</string>
     <string name="app_streaming_blocked_message" product="tablet" msgid="4242053045964946062">"Je hebt hier nu geen toegang toe op je <xliff:g id="DEVICE">%1$s</xliff:g>. Probeer het in plaats daarvan op je tablet."</string>
     <string name="app_streaming_blocked_message" product="default" msgid="6159168735030739398">"Je hebt hier nu geen toegang toe op je <xliff:g id="DEVICE">%1$s</xliff:g>. Probeer het in plaats daarvan op je telefoon."</string>
@@ -2028,10 +2026,9 @@
     <string name="harmful_app_warning_open_anyway" msgid="5963657791740211807">"TOCH OPENEN"</string>
     <string name="harmful_app_warning_title" msgid="8794823880881113856">"Schadelijke app gevonden"</string>
     <string name="log_access_confirmation_title" msgid="2343578467290592708">"<xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> toegang geven tot alle apparaatlogboeken?"</string>
-    <string name="log_access_confirmation_allow" msgid="143157286283302512">"Alleen deze keer"</string>
+    <string name="log_access_confirmation_allow" msgid="5302517782599389507">"Eenmalige toegang toestaan"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"Niet toestaan"</string>
-    <!-- no translation found for log_access_confirmation_body (6581985716241928135) -->
-    <skip />
+    <string name="log_access_confirmation_body" msgid="6581985716241928135">"Apparaatlogboeken leggen vast wat er op je apparaat gebeurt. Apps kunnen deze logboeken gebruiken om problemen op te sporen en te verhelpen.\n\nSommige logboeken kunnen gevoelige informatie bevatten, dus geef alleen apps die je vertrouwt toegang tot alle apparaatlogboeken. \n\nAls je deze app geen toegang tot alle apparaatlogboeken geeft, heeft de app nog wel toegang tot de eigen logboeken. De fabrikant van je apparaat heeft misschien nog steeds toegang tot bepaalde logboeken of informatie op je apparaat. Meer informatie"</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"Niet opnieuw tonen"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g> wil segmenten van <xliff:g id="APP_2">%2$s</xliff:g> tonen"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"Bewerken"</string>
@@ -2261,13 +2258,12 @@
     <string name="ui_translation_accessibility_translated_text" msgid="3197547218178944544">"<xliff:g id="MESSAGE">%1$s</xliff:g> vertaald."</string>
     <string name="ui_translation_accessibility_translation_finished" msgid="3057830947610088465">"Bericht vertaald vanuit het <xliff:g id="FROM_LANGUAGE">%1$s</xliff:g> naar het <xliff:g id="TO_LANGUAGE">%2$s</xliff:g>."</string>
     <string name="notification_channel_abusive_bg_apps" msgid="6092140213264920355">"Achtergrondactiviteit"</string>
-    <string name="notification_title_abusive_bg_apps" msgid="344582472797982073">"Achtergrondactiviteit"</string>
-    <string name="notification_content_abusive_bg_apps" msgid="5572096708044958249">"<xliff:g id="APP">%1$s</xliff:g> wordt uitgevoerd op de achtergrond en verbruikt veel batterijlading. Tik om te bekijken."</string>
-    <string name="notification_content_long_running_fgs" msgid="8878031652441570178">"<xliff:g id="APP">%1$s</xliff:g> wordt al lange tijd uitgevoerd op de achtergrond. Tik om te bekijken."</string>
+    <string name="notification_title_abusive_bg_apps" msgid="3258460527676573815">"Een app gebruikt de batterij"</string>
+    <string name="notification_title_long_running_fgs" msgid="8170284286477131587">"Een app is nog actief"</string>
+    <string name="notification_content_abusive_bg_apps" msgid="9180610713603474720">"<xliff:g id="APP">%1$s</xliff:g> gebruikt de batterij op de achtergrond. Tik om te bekijken."</string>
+    <string name="notification_content_long_running_fgs" msgid="8258193410039977101">"<xliff:g id="APP">%1$s</xliff:g> kan van invloed zijn op de batterijduur. Tik om actieve apps te bekijken."</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Actieve apps checken"</string>
-    <!-- no translation found for vdm_camera_access_denied (6102378580971542473) -->
-    <skip />
-    <!-- no translation found for vdm_camera_access_denied (6895968310395249076) -->
-    <skip />
+    <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"Kan geen toegang tot de camera van de telefoon krijgen vanaf je <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
+    <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"Kan geen toegang tot de camera van de tablet krijgen vanaf je <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
     <string name="system_locale_title" msgid="3978041860457277638">"Systeemtaal"</string>
 </resources>

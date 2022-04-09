@@ -63,6 +63,7 @@ public class LocalePickerWithRegion extends ListFragment implements SearchView.O
     private int mFirstVisiblePosition = 0;
     private int mTopDistance = 0;
     private String mAppPackageName;
+    private CharSequence mTitle = null;
 
     /**
      * Other classes can register to be notified when a locale was selected.
@@ -213,6 +214,7 @@ public class LocalePickerWithRegion extends ListFragment implements SearchView.O
             return;
         }
 
+        mTitle = getActivity().getTitle();
         final boolean countryMode = mParentLocale != null;
         final Locale sortingLocale = countryMode ? mParentLocale.getLocale() : Locale.getDefault();
         mAdapter = new SuggestedLocaleAdapter(mLocaleList, countryMode, mAppPackageName);
@@ -248,7 +250,7 @@ public class LocalePickerWithRegion extends ListFragment implements SearchView.O
         if (mParentLocale != null) {
             getActivity().setTitle(mParentLocale.getFullNameNative());
         } else {
-            getActivity().setTitle(R.string.language_selection_title);
+            getActivity().setTitle(mTitle);
         }
 
         getListView().requestFocus();
