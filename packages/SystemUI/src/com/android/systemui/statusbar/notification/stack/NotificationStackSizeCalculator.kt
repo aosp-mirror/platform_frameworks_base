@@ -54,7 +54,7 @@ constructor(
     /**
      * Minimum space between two notifications. There might be more space, see [calculateGapHeight].
      */
-    private var notificationPadding by notNull<Int>()
+    private var dividerHeight by notNull<Int>()
 
     init {
         updateResources()
@@ -155,7 +155,7 @@ constructor(
         maxKeyguardNotifications =
             infiniteIfNegative(resources.getInteger(R.integer.keyguard_max_notification_count))
 
-        notificationPadding =
+        dividerHeight =
             max(1, resources.getDimensionPixelSize(R.dimen.notification_divider_height))
     }
 
@@ -178,7 +178,7 @@ constructor(
                 intrinsicHeight.toFloat()
             }
         if (visibleIndex != 0) {
-            size += notificationPadding
+            size += dividerHeight
         }
         val gapHeight = calculateGapHeight(stack, previousView, visibleIndex)
         log { "\ti=$visibleIndex gapHeight=$gapHeight"}
