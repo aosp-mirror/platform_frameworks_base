@@ -116,7 +116,6 @@ import com.android.systemui.util.Assert;
 
 import com.google.android.collect.Lists;
 
-import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -3598,7 +3597,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     }
 
     @Override
-    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+    public void dump(PrintWriter pw, String[] args) {
         pw.println("KeyguardUpdateMonitor state:");
         pw.println("  SIM States:");
         for (SimData data : mSimDatas.values()) {

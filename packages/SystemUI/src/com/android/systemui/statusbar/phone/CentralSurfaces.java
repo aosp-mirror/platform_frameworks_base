@@ -248,7 +248,6 @@ import com.android.wm.shell.bubbles.Bubbles;
 import com.android.wm.shell.startingsurface.SplashscreenContentDrawer;
 import com.android.wm.shell.startingsurface.StartingSurface;
 
-import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.List;
@@ -1708,7 +1707,7 @@ public class CentralSurfaces extends CoreStartable implements
             @Nullable ActivityLaunchAnimator.Controller animationController,
             boolean showOverLockscreenWhenLocked) {
         startActivity(intent, dismissShade, animationController, showOverLockscreenWhenLocked,
-                UserHandle.CURRENT);
+                getActivityUserHandle(intent));
     }
 
     @Override
@@ -1795,7 +1794,7 @@ public class CentralSurfaces extends CoreStartable implements
     public void startActivity(Intent intent, boolean dismissShade, Callback callback) {
         startActivityDismissingKeyguard(intent, false, dismissShade,
                 false /* disallowEnterPictureInPictureWhileLaunching */, callback, 0,
-                null /* animationController */, UserHandle.CURRENT);
+                null /* animationController */, getActivityUserHandle(intent));
     }
 
     public void setQsExpanded(boolean expanded) {
@@ -2263,7 +2262,7 @@ public class CentralSurfaces extends CoreStartable implements
     }
 
     @Override
-    public void dump(FileDescriptor fd, PrintWriter pwOriginal, String[] args) {
+    public void dump(PrintWriter pwOriginal, String[] args) {
         IndentingPrintWriter pw = DumpUtilsKt.asIndenting(pwOriginal);
         synchronized (mQueueLock) {
             pw.println("Current Status Bar state:");
@@ -2285,13 +2284,13 @@ public class CentralSurfaces extends CoreStartable implements
 
         pw.println("  ShadeWindowView: ");
         if (mNotificationShadeWindowViewController != null) {
-            mNotificationShadeWindowViewController.dump(fd, pw, args);
+            mNotificationShadeWindowViewController.dump(pw, args);
             dumpBarTransitions(pw, "PhoneStatusBarTransitions", mStatusBarTransitions);
         }
 
         pw.println("  mMediaManager: ");
         if (mMediaManager != null) {
-            mMediaManager.dump(fd, pw, args);
+            mMediaManager.dump(pw, args);
         }
 
         pw.println("  Panels: ");
@@ -2300,14 +2299,14 @@ public class CentralSurfaces extends CoreStartable implements
                     + mNotificationPanelViewController.getView() + " params="
                     + mNotificationPanelViewController.getView().getLayoutParams().debug(""));
             pw.print  ("      ");
-            mNotificationPanelViewController.dump(fd, pw, args);
+            mNotificationPanelViewController.dump(pw, args);
         }
         pw.println("  mStackScroller: ");
         if (mStackScroller != null) {
             // Double indent until we rewrite the rest of this dump()
             pw.increaseIndent();
             pw.increaseIndent();
-            mStackScroller.dump(fd, pw, args);
+            mStackScroller.dump(pw, args);
             pw.decreaseIndent();
             pw.decreaseIndent();
         }
@@ -2322,11 +2321,11 @@ public class CentralSurfaces extends CoreStartable implements
         pw.println("    light wallpaper theme: " + lightWpTheme);
 
         if (mKeyguardIndicationController != null) {
-            mKeyguardIndicationController.dump(fd, pw, args);
+            mKeyguardIndicationController.dump(pw, args);
         }
 
         if (mScrimController != null) {
-            mScrimController.dump(fd, pw, args);
+            mScrimController.dump(pw, args);
         }
 
         if (mLightRevealScrim != null) {
@@ -2340,27 +2339,27 @@ public class CentralSurfaces extends CoreStartable implements
             mStatusBarKeyguardViewManager.dump(pw);
         }
 
-        mNotificationsController.dump(fd, pw, args, DUMPTRUCK);
+        mNotificationsController.dump(pw, args, DUMPTRUCK);
 
         if (DEBUG_GESTURES) {
             pw.print("  status bar gestures: ");
-            mGestureRec.dump(fd, pw, args);
+            mGestureRec.dump(pw, args);
         }
 
         if (mHeadsUpManager != null) {
-            mHeadsUpManager.dump(fd, pw, args);
+            mHeadsUpManager.dump(pw, args);
         } else {
             pw.println("  mHeadsUpManager: null");
         }
 
         if (mStatusBarTouchableRegionManager != null) {
-            mStatusBarTouchableRegionManager.dump(fd, pw, args);
+            mStatusBarTouchableRegionManager.dump(pw, args);
         } else {
             pw.println("  mStatusBarTouchableRegionManager: null");
         }
 
         if (mLightBarController != null) {
-            mLightBarController.dump(fd, pw, args);
+            mLightBarController.dump(pw, args);
         }
 
         pw.println("SharedPreferences:");
@@ -2425,7 +2424,7 @@ public class CentralSurfaces extends CoreStartable implements
             boolean dismissShade, int flags) {
         startActivityDismissingKeyguard(intent, onlyProvisioned, dismissShade,
                 false /* disallowEnterPictureInPictureWhileLaunching */, null /* callback */,
-                flags, null /* animationController */, UserHandle.CURRENT);
+                flags, null /* animationController */, getActivityUserHandle(intent));
     }
 
     public void startActivityDismissingKeyguard(final Intent intent, boolean onlyProvisioned,
@@ -2868,7 +2867,7 @@ public class CentralSurfaces extends CoreStartable implements
                                 null /* callback */,
                                 0 /* flags */,
                                 animationController,
-                                UserHandle.CURRENT),
+                                getActivityUserHandle(intent)),
                 delay);
     }
 
@@ -3468,9 +3467,7 @@ public class CentralSurfaces extends CoreStartable implements
         mStatusBarHideIconsForBouncerManager.setBouncerShowingAndTriggerUpdate(bouncerShowing);
         mCommandQueue.recomputeDisableFlags(mDisplayId, true /* animate */);
         updateScrimController();
-        if (!mBouncerShowing) {
-            updatePanelExpansionForKeyguard();
-        }
+        updateNotificationPanelTouchState();
     }
 
     /**
@@ -3602,7 +3599,8 @@ public class CentralSurfaces extends CoreStartable implements
                 mLaunchEmergencyActionWhenFinishedWaking = false;
                 Intent emergencyIntent = getEmergencyActionIntent();
                 if (emergencyIntent != null) {
-                    mContext.startActivityAsUser(emergencyIntent, UserHandle.CURRENT);
+                    mContext.startActivityAsUser(emergencyIntent,
+                            getActivityUserHandle(emergencyIntent));
                 }
             }
             updateScrimController();
@@ -3614,10 +3612,13 @@ public class CentralSurfaces extends CoreStartable implements
      * collapse the panel after we expanded it, and thus we would end up with a blank
      * Keyguard.
      */
-    void updateNotificationPanelTouchState() {
+    public void updateNotificationPanelTouchState() {
         boolean goingToSleepWithoutAnimation = isGoingToSleep()
                 && !mDozeParameters.shouldControlScreenOff();
-        boolean disabled = (!mDeviceInteractive && !mDozeServiceHost.isPulsing())
+        boolean bouncerShowingOverDream = isBouncerShowing()
+                && mDreamOverlayStateController.isOverlayActive();
+        boolean disabled = bouncerShowingOverDream
+                || (!mDeviceInteractive && !mDozeServiceHost.isPulsing())
                 || goingToSleepWithoutAnimation;
         mNotificationPanelViewController.setTouchAndAnimationDisabled(disabled);
         mNotificationIconAreaController.setAnimationsEnabled(!disabled);
@@ -4500,4 +4501,20 @@ public class CentralSurfaces extends CoreStartable implements
         @Override
         public void dispatchDemoCommand(String command, Bundle args) { }
     };
+
+    /**
+     *  Determines what UserHandle to use when launching an activity.
+     *
+     *  We want to ensure that activities that are launched within the systemui process should be
+     *  launched as user of the current process.
+     * @param intent
+     * @return UserHandle
+     */
+    private UserHandle getActivityUserHandle(Intent intent) {
+        if (intent.getComponent() != null
+                && mContext.getPackageName().equals(intent.getComponent().getPackageName())) {
+            return new UserHandle(UserHandle.myUserId());
+        }
+        return UserHandle.CURRENT;
+    }
 }

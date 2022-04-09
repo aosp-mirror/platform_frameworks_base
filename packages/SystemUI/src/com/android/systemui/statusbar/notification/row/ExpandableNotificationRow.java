@@ -121,7 +121,6 @@ import com.android.systemui.util.Compile;
 import com.android.systemui.util.DumpUtilsKt;
 import com.android.systemui.wmshell.BubblesManager;
 
-import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -3474,7 +3473,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     }
 
     @Override
-    public void dump(FileDescriptor fd, PrintWriter pwOriginal, String[] args) {
+    public void dump(PrintWriter pwOriginal, String[] args) {
         IndentingPrintWriter pw = DumpUtilsKt.asIndenting(pwOriginal);
         // Skip super call; dump viewState ourselves
         pw.println("Notification: " + mEntry.getKey());
@@ -3487,10 +3486,10 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
             NotificationContentView showingLayout = getShowingLayout();
             pw.print(", privateShowing: " + (showingLayout == mPrivateLayout));
             pw.println();
-            showingLayout.dump(fd, pw, args);
+            showingLayout.dump(pw, args);
 
             if (getViewState() != null) {
-                getViewState().dump(fd, pw, args);
+                getViewState().dump(pw, args);
                 pw.println();
             } else {
                 pw.println("no viewState!!!");
@@ -3509,7 +3508,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
                 pw.increaseIndent();
                 for (ExpandableNotificationRow child : notificationChildren) {
                     pw.println();
-                    child.dump(fd, pw, args);
+                    child.dump(pw, args);
                 }
                 pw.decreaseIndent();
                 pw.println("}");

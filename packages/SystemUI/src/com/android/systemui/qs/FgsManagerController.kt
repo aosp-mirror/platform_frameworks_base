@@ -55,7 +55,6 @@ import com.android.systemui.statusbar.phone.SystemUIDialog
 import com.android.systemui.util.DeviceConfigProxy
 import com.android.systemui.util.indentIfPossible
 import com.android.systemui.util.time.SystemClock
-import java.io.FileDescriptor
 import java.io.PrintWriter
 import java.util.Objects
 import java.util.concurrent.Executor
@@ -520,7 +519,7 @@ class FgsManagerController @Inject constructor(
         NORMAL, HIDE_BUTTON, HIDE_ENTRY
     }
 
-    override fun dump(fd: FileDescriptor, printwriter: PrintWriter, args: Array<out String>) {
+    override fun dump(printwriter: PrintWriter, args: Array<out String>) {
         val pw = IndentingPrintWriter(printwriter)
         synchronized(lock) {
             pw.println("changesSinceDialog=$changesSinceDialog")

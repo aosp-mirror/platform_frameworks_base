@@ -30,7 +30,6 @@ import com.android.internal.util.Preconditions
 import com.android.systemui.Dumpable
 import com.android.systemui.broadcast.logging.BroadcastDispatcherLogger
 import com.android.systemui.util.indentIfPossible
-import java.io.FileDescriptor
 import java.io.PrintWriter
 import java.util.concurrent.Executor
 import java.util.concurrent.atomic.AtomicInteger
@@ -171,7 +170,7 @@ open class UserBroadcastDispatcher(
         logger.logReceiverUnregistered(userId, receiver)
     }
 
-    override fun dump(fd: FileDescriptor, pw: PrintWriter, args: Array<out String>) {
+    override fun dump(pw: PrintWriter, args: Array<out String>) {
         pw.indentIfPossible {
             actionsToActionsReceivers.forEach { (actionFlagsPerm, actionReceiver) ->
                 println(
@@ -179,7 +178,7 @@ open class UserBroadcastDispatcher(
                         BroadcastDispatcherLogger.flagToString(actionFlagsPerm.flags) +
                         if (actionFlagsPerm.permission == null) "):"
                             else ":${actionFlagsPerm.permission}):")
-                actionReceiver.dump(fd, pw, args)
+                actionReceiver.dump(pw, args)
             }
         }
     }

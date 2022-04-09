@@ -20,7 +20,6 @@ import android.testing.LeakCheck.Tracker;
 import com.android.systemui.Dumpable;
 import com.android.systemui.statusbar.policy.CallbackController;
 
-import java.io.FileDescriptor;
 import java.io.PrintWriter;
 
 public class BaseLeakChecker<T> implements CallbackController<T>, Dumpable {
@@ -46,7 +45,7 @@ public class BaseLeakChecker<T> implements CallbackController<T>, Dumpable {
     }
 
     @Override
-    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+    public void dump(PrintWriter pw, String[] args) {
 
     }
 }

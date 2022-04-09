@@ -28,7 +28,6 @@ import com.android.systemui.statusbar.notification.stack.ExpandableViewState;
 import com.android.systemui.statusbar.notification.stack.ViewState;
 import com.android.systemui.util.DumpUtilsKt;
 
-import java.io.FileDescriptor;
 import java.io.PrintWriter;
 
 public class FooterView extends StackScrollerDecorView {
@@ -54,9 +53,9 @@ public class FooterView extends StackScrollerDecorView {
     }
 
     @Override
-    public void dump(FileDescriptor fd, PrintWriter pwOriginal, String[] args) {
+    public void dump(PrintWriter pwOriginal, String[] args) {
         IndentingPrintWriter pw = DumpUtilsKt.asIndenting(pwOriginal);
-        super.dump(fd, pw, args);
+        super.dump(pw, args);
         DumpUtilsKt.withIncreasedIndent(pw, () -> {
             pw.println("visibility: " + DumpUtilsKt.visibilityString(getVisibility()));
             pw.println("manageButton showHistory: " + mShowHistory);

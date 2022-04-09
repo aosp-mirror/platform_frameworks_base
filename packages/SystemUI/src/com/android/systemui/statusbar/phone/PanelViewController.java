@@ -66,7 +66,6 @@ import com.android.systemui.statusbar.phone.panelstate.PanelExpansionStateManage
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.wm.shell.animation.FlingAnimationUtils;
 
-import java.io.FileDescriptor;
 import java.io.PrintWriter;
 
 public abstract class PanelViewController {
@@ -419,6 +418,8 @@ public abstract class PanelViewController {
                     expand = false;
                 } else if (onKeyguard) {
                     expand = true;
+                } else if (mCentralSurfaces.isBouncerShowingOverDream()) {
+                    expand = false;
                 } else if (mKeyguardStateController.isKeyguardFadingAway()) {
                     // If we're in the middle of dismissing the keyguard, don't expand due to the
                     // cancelled gesture. Gesture cancellation during an unlock is expected in some
@@ -1144,7 +1145,7 @@ public abstract class PanelViewController {
 
     protected abstract boolean isDozing();
 
-    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+    public void dump(PrintWriter pw, String[] args) {
         pw.println(String.format("[PanelView(%s): expandedHeight=%f maxPanelHeight=%d closing=%s"
                         + " tracking=%s timeAnim=%s%s "
                         + "touchDisabled=%s" + "]",

@@ -311,8 +311,8 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
             callback.sendResult(null);
             return;
         }
-        final ActivityTokens tokens = LocalServices.getService(
-                ActivityTaskManagerInternal.class).getTopActivityForTask(taskId);
+        final ActivityTokens tokens = LocalServices.getService(ActivityTaskManagerInternal.class)
+                .getAttachedNonFinishingActivityForTask(taskId, null);
         if (tokens == null || tokens.getAssistToken() != assistToken) {
             Slog.w(TAG, "Unknown activity to query for direct actions");
             callback.sendResult(null);
@@ -336,8 +336,8 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
             resultCallback.sendResult(null);
             return;
         }
-        final ActivityTokens tokens = LocalServices.getService(
-                ActivityTaskManagerInternal.class).getTopActivityForTask(taskId);
+        final ActivityTokens tokens = LocalServices.getService(ActivityTaskManagerInternal.class)
+                .getAttachedNonFinishingActivityForTask(taskId, null);
         if (tokens == null || tokens.getAssistToken() != assistToken) {
             Slog.w(TAG, "Unknown activity to perform a direct action");
             resultCallback.sendResult(null);

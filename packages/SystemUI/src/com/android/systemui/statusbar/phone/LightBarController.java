@@ -40,7 +40,6 @@ import com.android.systemui.navigationbar.NavigationModeController;
 import com.android.systemui.plugins.DarkIconDispatcher;
 import com.android.systemui.statusbar.policy.BatteryController;
 
-import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 
@@ -258,7 +257,7 @@ public class LightBarController implements BatteryController.BatteryStateChangeC
     }
 
     @Override
-    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+    public void dump(PrintWriter pw, String[] args) {
         pw.println("LightBarController: ");
         pw.print(" mAppearance="); pw.println(ViewDebug.flagsToString(
                 InsetsFlags.class, "appearance", mAppearance));
@@ -287,13 +286,13 @@ public class LightBarController implements BatteryController.BatteryStateChangeC
                 mStatusBarIconController.getTransitionsController();
         if (transitionsController != null) {
             pw.println(" StatusBarTransitionsController:");
-            transitionsController.dump(fd, pw, args);
+            transitionsController.dump(pw, args);
             pw.println();
         }
 
         if (mNavigationBarController != null) {
             pw.println(" NavigationBarTransitionsController:");
-            mNavigationBarController.dump(fd, pw, args);
+            mNavigationBarController.dump(pw, args);
             pw.println();
         }
     }

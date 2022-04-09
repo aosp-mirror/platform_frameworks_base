@@ -30,7 +30,6 @@ import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dump.DumpManager;
 
-import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Date;
@@ -66,7 +65,7 @@ public class NextAlarmControllerImpl extends BroadcastReceiver
     }
 
     @Override
-    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+    public void dump(PrintWriter pw, String[] args) {
         pw.print("mNextAlarm=");
         if (mNextAlarm != null) {
             pw.println(new Date(mNextAlarm.getTriggerTime()));

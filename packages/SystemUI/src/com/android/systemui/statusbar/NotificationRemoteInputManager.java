@@ -69,7 +69,6 @@ import com.android.systemui.statusbar.policy.RemoteInputUriController;
 import com.android.systemui.statusbar.policy.RemoteInputView;
 import com.android.systemui.util.DumpUtilsKt;
 
-import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
@@ -654,7 +653,7 @@ public class NotificationRemoteInputManager implements Dumpable {
     }
 
     @Override
-    public void dump(FileDescriptor fd, PrintWriter pwOriginal, String[] args) {
+    public void dump(PrintWriter pwOriginal, String[] args) {
         IndentingPrintWriter pw = DumpUtilsKt.asIndenting(pwOriginal);
         if (mRemoteInputController != null) {
             pw.println("mRemoteInputController: " + mRemoteInputController);
@@ -665,7 +664,7 @@ public class NotificationRemoteInputManager implements Dumpable {
         if (mRemoteInputListener instanceof Dumpable) {
             pw.println("mRemoteInputListener: " + mRemoteInputListener.getClass().getSimpleName());
             pw.increaseIndent();
-            ((Dumpable) mRemoteInputListener).dump(fd, pw, args);
+            ((Dumpable) mRemoteInputListener).dump(pw, args);
             pw.decreaseIndent();
         }
     }
@@ -920,7 +919,7 @@ public class NotificationRemoteInputManager implements Dumpable {
         }
 
         @Override
-        public void dump(@NonNull FileDescriptor fd, @NonNull PrintWriter pw,
+        public void dump(@NonNull PrintWriter pw,
                 @NonNull String[] args) {
             pw.println("LegacyRemoteInputLifetimeExtender:");
             pw.print("  mKeysKeptForRemoteInputHistory: ");

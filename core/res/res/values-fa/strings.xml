@@ -585,7 +585,7 @@
     <string name="biometric_error_generic" msgid="6784371929985434439">"خطا هنگام اصالت‌سنجی"</string>
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"از قفل صفحه استفاده کنید"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"برای ادامه، قفل صفحه‌تان را وارد کنید"</string>
-    <string name="fingerprint_acquired_partial" msgid="694598777291084823">"بخشی از اثر انگشت شناسایی شد"</string>
+    <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"محکم روی حسگر فشار دهید"</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"اثرانگشت پردازش نشد. لطفاً دوباره امتحان کنید."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"حسگر اثر انگشت را تمیز و دوباره امتحان کنید"</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"حسگر را تمیز و دوباره امتحان کنید"</string>
@@ -598,7 +598,7 @@
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_error_not_match" msgid="4599441812893438961">"اثر انگشت تشخیص داده نشد"</string>
-    <string name="fingerprint_udfps_error_not_match" msgid="4709197752023550709">"محکم روی حسگر فشار دهید"</string>
+    <string name="fingerprint_udfps_error_not_match" msgid="8236930793223158856">"اثر انگشت تشخیص داده نشد"</string>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"اثر انگشت اصالت‌سنجی شد"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"چهره اصالت‌سنجی شد"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"چهره اصالت‌سنجی شد، لطفاً تأیید را فشار دهید"</string>
@@ -1679,7 +1679,6 @@
     <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"روشن"</string>
     <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"خاموش"</string>
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"به <xliff:g id="SERVICE">%1$s</xliff:g> اجازه می‌دهید بر دستگاهتان کنترل کامل داشته باشد؟"</string>
-    <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"اگر <xliff:g id="SERVICE">%1$s</xliff:g> را روشن کنید، دستگاه شما از قفل صفحه شما جهت بهبود رمزگذاری اطلاعات استفاده نخواهد کرد."</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"کنترل کامل برای بیشتر برنامه‌ها مناسب نیست، به‌جز برنامه‌هایی که به شما در زمینه نیازهای دسترس‌پذیری کمک می‌کند."</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"مشاهده و کنترل صفحه"</string>
     <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"می‌تواند همه محتوای صفحه را بخواند و آن را روی بقیه برنامه‌ها نمایش دهد."</string>
@@ -1933,8 +1932,7 @@
     <string name="app_blocked_title" msgid="7353262160455028160">"برنامه در دسترس نیست"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> درحال‌حاضر در دسترس نیست."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> دردسترس نیست"</string>
-    <!-- no translation found for app_streaming_blocked_title_for_permission_dialog (4483161748582966785) -->
-    <skip />
+    <string name="app_streaming_blocked_title_for_permission_dialog" msgid="4483161748582966785">"اجازه لازم است"</string>
     <string name="app_streaming_blocked_message" product="tv" msgid="4003011766528814377">"‏درحال‌حاضر نمی‌توان در <xliff:g id="DEVICE">%1$s</xliff:g> شما به این برنامه دسترسی داشت. دسترسی به آن را در دستگاه Android TV امتحان کنید."</string>
     <string name="app_streaming_blocked_message" product="tablet" msgid="4242053045964946062">"درحال‌حاضر نمی‌توان در <xliff:g id="DEVICE">%1$s</xliff:g> شما به این برنامه دسترسی داشت. دسترسی به آن را در رایانه لوحی‌تان امتحان کنید."</string>
     <string name="app_streaming_blocked_message" product="default" msgid="6159168735030739398">"درحال‌حاضر نمی‌توان در <xliff:g id="DEVICE">%1$s</xliff:g> شما به این برنامه دسترسی داشت. دسترسی به آن را در تلفنتان امتحان کنید."</string>
@@ -2028,10 +2026,9 @@
     <string name="harmful_app_warning_open_anyway" msgid="5963657791740211807">"درهرصورت باز شود"</string>
     <string name="harmful_app_warning_title" msgid="8794823880881113856">"برنامه مضر شناسایی شد"</string>
     <string name="log_access_confirmation_title" msgid="2343578467290592708">"به <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> اجازه می‌دهید به همه گزارش‌های دستگاه دسترسی داشته باشد؟"</string>
-    <string name="log_access_confirmation_allow" msgid="143157286283302512">"فقط این بار"</string>
+    <string name="log_access_confirmation_allow" msgid="5302517782599389507">"مجاز کردن دسترسی یک‌باره"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"مجاز نیست"</string>
-    <!-- no translation found for log_access_confirmation_body (6581985716241928135) -->
-    <skip />
+    <string name="log_access_confirmation_body" msgid="6581985716241928135">"گزارش‌های دستگاه آنچه را در دستگاهتان رخ می‌دهد ثبت می‌کند. برنامه‌ها می‌توانند از این گزارش‌ها برای پیدا کردن مشکلات و رفع آن‌ها استفاده کنند.\n\nبرخی‌از گزارش‌ها ممکن است حاوی اطلاعات حساس باشند، بنابراین فقط به برنامه‌های مورداعتمادتان اجازه دسترسی به همه گزارش‌های دستگاه را بدهید. \n\nاگر به این برنامه اجازه ندهید به همه گزارش‌های دستگاه دسترسی داشته باشد، همچنان می‌تواند به گزارش‌های خودش دسترسی داشته باشد. سازنده دستگاه نیز ممکن است همچنان بتواند به برخی‌از گزارش‌ها یا اطلاعات دستگاهتان دسترسی داشته باشد. بیشتر بدانید"</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"دوباره نشان داده نشود"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g> می‌خواهد تکه‌های <xliff:g id="APP_2">%2$s</xliff:g> را نشان دهد"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"ویرایش"</string>
@@ -2261,13 +2258,12 @@
     <string name="ui_translation_accessibility_translated_text" msgid="3197547218178944544">"<xliff:g id="MESSAGE">%1$s</xliff:g> ترجمه شد."</string>
     <string name="ui_translation_accessibility_translation_finished" msgid="3057830947610088465">"پیام از <xliff:g id="FROM_LANGUAGE">%1$s</xliff:g> به <xliff:g id="TO_LANGUAGE">%2$s</xliff:g> ترجمه شد."</string>
     <string name="notification_channel_abusive_bg_apps" msgid="6092140213264920355">"فعالیت در پس‌زمینه"</string>
-    <string name="notification_title_abusive_bg_apps" msgid="344582472797982073">"فعالیت در پس‌زمینه"</string>
-    <string name="notification_content_abusive_bg_apps" msgid="5572096708044958249">"‫<xliff:g id="APP">%1$s</xliff:g> در پس‌زمینه اجرا می‌شود و شارژ باتری را تخلیه می‌کند. برای مرور، ضربه بزنید."</string>
-    <string name="notification_content_long_running_fgs" msgid="8878031652441570178">"<xliff:g id="APP">%1$s</xliff:g> برای مدتی طولانی در پس‌زمینه اجرا می‌شود. برای مرور، ضربه بزنید."</string>
+    <string name="notification_title_abusive_bg_apps" msgid="3258460527676573815">"یکی از برنامه‌ها درحال مصرف شارژ باتری است"</string>
+    <string name="notification_title_long_running_fgs" msgid="8170284286477131587">"یکی از برنامه‌ها همچنان فعال است"</string>
+    <string name="notification_content_abusive_bg_apps" msgid="9180610713603474720">"<xliff:g id="APP">%1$s</xliff:g> در پس‌زمینه از شارژ باتری استفاده می‌کند. برای مرور، ضربه بزنید."</string>
+    <string name="notification_content_long_running_fgs" msgid="8258193410039977101">"<xliff:g id="APP">%1$s</xliff:g> ممکن است بر عمر باتری تأثیر بگذارد. برای مرور برنامه‌های فعال، ضربه بزنید."</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"بررسی برنامه‌های فعال"</string>
-    <!-- no translation found for vdm_camera_access_denied (6102378580971542473) -->
-    <skip />
-    <!-- no translation found for vdm_camera_access_denied (6895968310395249076) -->
-    <skip />
+    <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"نمی‌توان از <xliff:g id="DEVICE">%1$s</xliff:g> شما به دوربین تلفن دسترسی داشت"</string>
+    <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"نمی‌توان از <xliff:g id="DEVICE">%1$s</xliff:g> شما به دوربین رایانه لوحی دسترسی داشت"</string>
     <string name="system_locale_title" msgid="3978041860457277638">"زبان سیستم"</string>
 </resources>

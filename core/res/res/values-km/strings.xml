@@ -585,7 +585,7 @@
     <string name="biometric_error_generic" msgid="6784371929985434439">"មានបញ្ហាក្នុង​ការផ្ទៀងផ្ទាត់"</string>
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"ប្រើ​ការ​ចាក់​សោ​អេក្រង់"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"បញ្ចូលការចាក់សោអេក្រង់របស់អ្នក ដើម្បីបន្ត"</string>
-    <string name="fingerprint_acquired_partial" msgid="694598777291084823">"បានសម្គាល់​ស្នាមម្រាមដៃដោយផ្នែក"</string>
+    <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"សង្កត់លើ​ឧបករណ៍​ចាប់សញ្ញា​ឱ្យណែន"</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"មិនអាចដំណើរការស្នាមម្រាមដៃបានទេ។ សូមព្យាយាមម្តងទៀត។"</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"សម្អាត​ឧបករណ៍​ចាប់ស្នាមម្រាមដៃ រួចព្យាយាម​ម្ដងទៀត"</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"សម្អាត​ឧបករណ៍​ចាប់សញ្ញា រួចព្យាយាម​ម្ដងទៀត"</string>
@@ -598,7 +598,7 @@
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_error_not_match" msgid="4599441812893438961">"មិនស្គាល់ស្នាមម្រាមដៃទេ"</string>
-    <string name="fingerprint_udfps_error_not_match" msgid="4709197752023550709">"សង្កត់លើ​ឧបករណ៍​ចាប់សញ្ញា​ឱ្យណែន"</string>
+    <string name="fingerprint_udfps_error_not_match" msgid="8236930793223158856">"មិនស្គាល់ស្នាមម្រាមដៃទេ"</string>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"បាន​ផ្ទៀង​ផ្ទាត់​ស្នាម​ម្រាមដៃ"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"បានផ្ទៀងផ្ទាត់​មុខ"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"បានផ្ទៀងផ្ទាត់​មុខ សូម​ចុច​បញ្ជាក់"</string>
@@ -1679,7 +1679,6 @@
     <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"បើក"</string>
     <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"បិទ"</string>
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"អនុញ្ញាតឱ្យ <xliff:g id="SERVICE">%1$s</xliff:g> មានសិទ្ធិគ្រប់គ្រងឧបករណ៍​របស់អ្នក​ទាំងស្រុងឬ?"</string>
-    <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"បើ​អ្នក​បើក <xliff:g id="SERVICE">%1$s</xliff:g> ឧបករណ៍របស់​អ្នកនឹង​មិន​ប្រើ​ការចាក់សោអេក្រង់របស់​អ្នក​ ដើម្បី​បង្កើន​ប្រសិទ្ធភាពការ​អ៊ីនគ្រីប​ទិន្នន័យ​ទេ។"</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"ការគ្រប់គ្រង​ទាំងស្រុងមានលក្ខណៈ​សមស្របសម្រាប់​កម្មវិធី ដែលជួយអ្នក​ទាក់ទងនឹងការប្រើមុខងារភាពងាយស្រួល ប៉ុន្តែមិនសមស្របសម្រាប់​កម្មវិធីភាគច្រើនទេ។"</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"មើល និង​គ្រប់គ្រងអេក្រង់"</string>
     <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"ការគ្រប់គ្រងអេក្រង់​អាចអានខ្លឹមសារទាំងអស់​នៅលើអេក្រង់ និងបង្ហាញខ្លឹមសារ​លើកម្មវិធីផ្សេងទៀត។"</string>
@@ -1933,8 +1932,7 @@
     <string name="app_blocked_title" msgid="7353262160455028160">"មិនអាច​ប្រើ​កម្មវិធី​នេះបានទេ"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"មិនអាច​ប្រើ <xliff:g id="APP_NAME">%1$s</xliff:g> នៅពេល​នេះ​បានទេ​។"</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"មិនអាចប្រើ <xliff:g id="ACTIVITY">%1$s</xliff:g> បានទេ"</string>
-    <!-- no translation found for app_streaming_blocked_title_for_permission_dialog (4483161748582966785) -->
-    <skip />
+    <string name="app_streaming_blocked_title_for_permission_dialog" msgid="4483161748582966785">"តម្រូវឱ្យមាន​ការអនុញ្ញាត"</string>
     <string name="app_streaming_blocked_message" product="tv" msgid="4003011766528814377">"មិនអាចប្រើ​កម្មវិធីនេះ​នៅលើ <xliff:g id="DEVICE">%1$s</xliff:g> របស់អ្នក​នៅពេលនេះ​បានទេ។ សូមសាកល្បងប្រើ​នៅលើ​ឧបករណ៍ Android TV របស់អ្នក​ជំនួសវិញ។"</string>
     <string name="app_streaming_blocked_message" product="tablet" msgid="4242053045964946062">"មិនអាចប្រើ​កម្មវិធីនេះ​នៅលើ <xliff:g id="DEVICE">%1$s</xliff:g> របស់អ្នក​នៅពេលនេះ​បានទេ។ សូមសាកល្បងប្រើ​នៅលើ​ថេប្លេត​របស់អ្នក​ជំនួសវិញ។"</string>
     <string name="app_streaming_blocked_message" product="default" msgid="6159168735030739398">"មិនអាចប្រើ​កម្មវិធីនេះ​នៅលើ <xliff:g id="DEVICE">%1$s</xliff:g> របស់អ្នក​នៅពេលនេះ​បានទេ។ សូមសាកល្បងប្រើ​នៅលើ​ទូរសព្ទរបស់អ្នក​ជំនួសវិញ។"</string>
@@ -2028,10 +2026,9 @@
     <string name="harmful_app_warning_open_anyway" msgid="5963657791740211807">"មិន​អីទេ បើក​ចុះ"</string>
     <string name="harmful_app_warning_title" msgid="8794823880881113856">"បាន​រកឃើញ​កម្មវិធី​ដែលបង្ក​គ្រោះថ្នាក់"</string>
     <string name="log_access_confirmation_title" msgid="2343578467290592708">"អនុញ្ញាតឱ្យ <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> ចូលប្រើកំណត់ហេតុឧបករណ៍ទាំងអស់ឬ?"</string>
-    <string name="log_access_confirmation_allow" msgid="143157286283302512">"តែពេលនេះ​ប៉ុណ្ណោះ"</string>
+    <string name="log_access_confirmation_allow" msgid="5302517782599389507">"អនុញ្ញាត​ការចូលប្រើ​តែម្ដង"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"មិនអនុញ្ញាត"</string>
-    <!-- no translation found for log_access_confirmation_body (6581985716241928135) -->
-    <skip />
+    <string name="log_access_confirmation_body" msgid="6581985716241928135">"កំណត់ហេតុឧបករណ៍កត់ត្រាអ្វីដែលកើតឡើងនៅលើឧបករណ៍របស់អ្នក។ កម្មវិធីអាចប្រើកំណត់ហេតុទាំងនេះដើម្បីស្វែងរក និងដោះស្រាយបញ្ហាបាន។\n\nកំណត់ហេតុមួយចំនួនអាចមានព័ត៌មានរសើប ដូច្នេះគួរអនុញ្ញាតឱ្យចូលប្រើកំណត់ហេតុឧបករណ៍ទាំងអស់សម្រាប់តែកម្មវិធីដែលអ្នកទុកចិត្តប៉ុណ្ណោះ។ \n\nប្រសិនបើអ្នកមិនអនុញ្ញាតឱ្យកម្មវិធីនេះចូលប្រើកំណត់ហេតុឧបករណ៍ទាំងអស់ទេ វានៅតែអាចចូលប្រើកំណត់ហេតុរបស់វាផ្ទាល់បាន។ ក្រុមហ៊ុន​ផលិត​ឧបករណ៍របស់អ្នក​ប្រហែលជា​នៅតែអាចចូលប្រើ​កំណត់ហេតុ ឬព័ត៌មានមួយចំនួន​នៅលើឧបករណ៍​របស់អ្នក​បានដដែល។ ស្វែងយល់បន្ថែម"</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"កុំ​បង្ហាញ​ម្ដង​ទៀត"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g> ចង់​បង្ហាញ​ស្ថិតិ​ប្រើប្រាស់​របស់ <xliff:g id="APP_2">%2$s</xliff:g>"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"កែសម្រួល"</string>
@@ -2261,13 +2258,12 @@
     <string name="ui_translation_accessibility_translated_text" msgid="3197547218178944544">"បាន​បកប្រែ <xliff:g id="MESSAGE">%1$s</xliff:g>។"</string>
     <string name="ui_translation_accessibility_translation_finished" msgid="3057830947610088465">"បានបកប្រែសារពីភាសា<xliff:g id="FROM_LANGUAGE">%1$s</xliff:g>ទៅភាសា<xliff:g id="TO_LANGUAGE">%2$s</xliff:g>។"</string>
     <string name="notification_channel_abusive_bg_apps" msgid="6092140213264920355">"សកម្មភាពនៅផ្ទៃខាងក្រោយ"</string>
-    <string name="notification_title_abusive_bg_apps" msgid="344582472797982073">"សកម្មភាពនៅផ្ទៃខាងក្រោយ"</string>
-    <string name="notification_content_abusive_bg_apps" msgid="5572096708044958249">"<xliff:g id="APP">%1$s</xliff:g> កំពុងដំណើរការនៅផ្ទៃខាងក្រោយ និងធ្វើឱ្យអស់ថ្មលឿន។ សូមចុច ដើម្បី​ពិនិត្យមើល។"</string>
-    <string name="notification_content_long_running_fgs" msgid="8878031652441570178">"<xliff:g id="APP">%1$s</xliff:g> កំពុងដំណើរការនៅផ្ទៃខាងក្រោយអស់រយៈពេលយូរហើយ។ សូមចុច ដើម្បី​ពិនិត្យមើល។"</string>
+    <string name="notification_title_abusive_bg_apps" msgid="3258460527676573815">"កម្មវិធីកំពុងប្រើថ្ម"</string>
+    <string name="notification_title_long_running_fgs" msgid="8170284286477131587">"កម្មវិធីនៅតែសកម្មដដែល"</string>
+    <string name="notification_content_abusive_bg_apps" msgid="9180610713603474720">"<xliff:g id="APP">%1$s</xliff:g> កំពុងប្រើថ្ម​នៅផ្ទៃខាងក្រោយ។ សូមចុច ដើម្បី​ពិនិត្យមើល។"</string>
+    <string name="notification_content_long_running_fgs" msgid="8258193410039977101">"<xliff:g id="APP">%1$s</xliff:g> អាច​ប៉ះពាល់ដល់​កម្រិតថាមពលថ្ម។ សូមចុច ដើម្បីពិនិត្យមើល​កម្មវិធីដែលសកម្ម។"</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"ពិនិត្យមើលកម្មវិធីសកម្ម"</string>
-    <!-- no translation found for vdm_camera_access_denied (6102378580971542473) -->
-    <skip />
-    <!-- no translation found for vdm_camera_access_denied (6895968310395249076) -->
-    <skip />
+    <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"មិនអាច​ចូលប្រើ​កាមេរ៉ាទូរសព្ទ​ពី <xliff:g id="DEVICE">%1$s</xliff:g> របស់អ្នក​បានទេ"</string>
+    <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"មិនអាច​ចូលប្រើ​កាមេរ៉ា​ថេប្លេតពី <xliff:g id="DEVICE">%1$s</xliff:g> របស់អ្នក​បានទេ"</string>
     <string name="system_locale_title" msgid="3978041860457277638">"ភាសាប្រព័ន្ធ"</string>
 </resources>

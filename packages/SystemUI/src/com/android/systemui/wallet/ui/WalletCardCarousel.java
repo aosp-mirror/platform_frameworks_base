@@ -82,6 +82,12 @@ public class WalletCardCarousel extends RecyclerView {
 
     interface OnSelectionListener {
         /**
+         * A non-centered card was clicked.
+         * @param position
+         */
+        void onUncenteredClick(int position);
+
+        /**
          * The card was moved to the center, thus selecting it.
          */
         void onCardSelected(@NonNull WalletCardViewInfo card);
@@ -403,7 +409,7 @@ public class WalletCardCarousel extends RecyclerView {
             viewHolder.mCardView.setOnClickListener(
                     v -> {
                         if (position != mCenteredAdapterPosition) {
-                            smoothScrollToPosition(position);
+                            mSelectionListener.onUncenteredClick(position);
                         } else {
                             mSelectionListener.onCardClicked(cardViewInfo);
                         }

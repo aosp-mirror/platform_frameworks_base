@@ -16,14 +16,13 @@
 
 package com.android.systemui.statusbar
 
-import android.view.CrossWindowBlurListeners.CROSS_WINDOW_BLUR_SUPPORTED
-
 import android.app.ActivityManager
 import android.content.res.Resources
 import android.os.SystemProperties
 import android.util.IndentingPrintWriter
 import android.util.MathUtils
 import android.view.CrossWindowBlurListeners
+import android.view.CrossWindowBlurListeners.CROSS_WINDOW_BLUR_SUPPORTED
 import android.view.SurfaceControl
 import android.view.ViewRootImpl
 import androidx.annotation.VisibleForTesting
@@ -32,7 +31,6 @@ import com.android.systemui.R
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.dump.DumpManager
-import java.io.FileDescriptor
 import java.io.PrintWriter
 import javax.inject.Inject
 
@@ -116,7 +114,7 @@ open class BlurUtils @Inject constructor(
                 !SystemProperties.getBoolean("persist.sysui.disableBlur", false)
     }
 
-    override fun dump(fd: FileDescriptor, pw: PrintWriter, args: Array<out String>) {
+    override fun dump(pw: PrintWriter, args: Array<out String>) {
         IndentingPrintWriter(pw, "  ").let {
             it.println("BlurUtils:")
             it.increaseIndent()

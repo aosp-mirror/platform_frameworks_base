@@ -1976,23 +1976,23 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
 
     void moveActivityToPinnedRootTask(@NonNull ActivityRecord r,
             @Nullable ActivityRecord launchIntoPipHostActivity, String reason) {
-        mService.deferWindowLayout();
 
         final TaskDisplayArea taskDisplayArea = r.getDisplayArea();
+        final Task task = r.getTask();
+        final Task rootTask;
 
+        Transition newTransition = null;
+        // Create a transition now to collect the current pinned Task dismiss. Only do the
+        // create here as the Task (trigger) to enter PIP is not ready yet.
+        final TransitionController transitionController = task.mTransitionController;
+        if (!transitionController.isCollecting()
+                && transitionController.getTransitionPlayer() != null) {
+            newTransition = transitionController.createTransition(TRANSIT_PIP);
+        }
+
+        transitionController.deferTransitionReady();
+        mService.deferWindowLayout();
         try {
-            final Task task = r.getTask();
-
-            // Create a transition now to collect the current pinned Task dismiss. Only do the
-            // create here as the Task (trigger) to enter PIP is not ready yet.
-            final TransitionController transitionController = task.mTransitionController;
-            Transition newTransition = null;
-            if (transitionController.isCollecting()) {
-                transitionController.setReady(task, false /* ready */);
-            } else if (transitionController.getTransitionPlayer() != null) {
-                newTransition = transitionController.createTransition(TRANSIT_PIP);
-            }
-
             // This will change the root pinned task's windowing mode to its original mode, ensuring
             // we only have one root task that is in pinned mode.
             final Task rootPinnedTask = taskDisplayArea.getRootPinnedTask();
@@ -2006,7 +2006,6 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             r.getDisplayContent().prepareAppTransition(TRANSIT_NONE);
 
             final boolean singleActivity = task.getChildCount() == 1;
-            final Task rootTask;
             if (singleActivity) {
                 rootTask = task;
 
@@ -2064,6 +2063,9 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
                     oldTopActivity.mRequestForceTransition = true;
                 }
             }
+
+            transitionController.collect(rootTask);
+
             // The intermediate windowing mode to be set on the ActivityRecord later.
             // This needs to happen before the re-parenting, otherwise we will always set the
             // ActivityRecord to be fullscreen.
@@ -2073,13 +2075,6 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
                 // display area, so reparent.
                 rootTask.reparent(taskDisplayArea, true /* onTop */);
             }
-
-            // The new PIP Task is ready, start the transition before updating the windowing mode.
-            if (newTransition != null) {
-                transitionController.requestStartTransition(newTransition, rootTask,
-                        null /* remoteTransition */, null /* displayChange */);
-            }
-            transitionController.collect(rootTask);
 
             // Defer the windowing mode change until after the transition to prevent the activity
             // from doing work and changing the activity visuals while animating
@@ -2098,9 +2093,23 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             r.supportsEnterPipOnTaskSwitch = false;
         } finally {
             mService.continueWindowLayout();
+            try {
+                ensureActivitiesVisible(null, 0, false /* preserveWindows */);
+            } finally {
+                transitionController.continueTransitionReady();
+            }
         }
 
-        ensureActivitiesVisible(null, 0, false /* preserveWindows */);
+        if (newTransition != null) {
+            // Request at end since we want task-organizer events from ensureActivitiesVisible
+            // to be recognized.
+            transitionController.requestStartTransition(newTransition, rootTask,
+                    null /* remoteTransition */, null /* displayChange */);
+            // A new transition was created just for this operations. Since the operation is
+            // complete, mark it as ready.
+            newTransition.setReady(rootTask, true /* ready */);
+        }
+
         resumeFocusedTasksTopActivities();
 
         notifyActivityPipModeChanged(r.getTask(), r);

@@ -76,6 +76,10 @@ public class GenericWindowPolicyController extends DisplayWindowPolicyController
     @NonNull
     private final ArraySet<UserHandle> mAllowedUsers;
     @Nullable
+    private final ArraySet<ComponentName> mAllowedCrossTaskNavigations;
+    @Nullable
+    private final ArraySet<ComponentName> mBlockedCrossTaskNavigations;
+    @Nullable
     private final ArraySet<ComponentName> mAllowedActivities;
     @Nullable
     private final ArraySet<ComponentName> mBlockedActivities;
@@ -100,6 +104,10 @@ public class GenericWindowPolicyController extends DisplayWindowPolicyController
      * @param windowFlags The window flags that this controller is interested in.
      * @param systemWindowFlags The system window flags that this controller is interested in.
      * @param allowedUsers The set of users that are allowed to stream in this display.
+     * @param allowedCrossTaskNavigations The set of components explicitly allowed to navigate
+     *   across tasks on this device.
+     * @param blockedCrossTaskNavigations The set of components explicitly blocked from
+     *   navigating across tasks on this device.
      * @param allowedActivities The set of activities explicitly allowed to stream on this device.
      *   Used only if the {@code activityPolicy} is
      *   {@link VirtualDeviceParams#ACTIVITY_POLICY_DEFAULT_BLOCKED}.
@@ -115,6 +123,8 @@ public class GenericWindowPolicyController extends DisplayWindowPolicyController
      */
     public GenericWindowPolicyController(int windowFlags, int systemWindowFlags,
             @NonNull ArraySet<UserHandle> allowedUsers,
+            @NonNull Set<ComponentName> allowedCrossTaskNavigations,
+            @NonNull Set<ComponentName> blockedCrossTaskNavigations,
             @NonNull Set<ComponentName> allowedActivities,
             @NonNull Set<ComponentName> blockedActivities,
             @ActivityPolicy int defaultActivityPolicy,
@@ -122,6 +132,8 @@ public class GenericWindowPolicyController extends DisplayWindowPolicyController
             @NonNull Consumer<ActivityInfo> activityBlockedCallback) {
         super();
         mAllowedUsers = allowedUsers;
+        mAllowedCrossTaskNavigations = new ArraySet<>(allowedCrossTaskNavigations);
+        mBlockedCrossTaskNavigations = new ArraySet<>(blockedCrossTaskNavigations);
         mAllowedActivities = new ArraySet<>(allowedActivities);
         mBlockedActivities = new ArraySet<>(blockedActivities);
         mDefaultActivityPolicy = defaultActivityPolicy;
@@ -152,6 +164,46 @@ public class GenericWindowPolicyController extends DisplayWindowPolicyController
         }
         return true;
     }
+
+    @Override
+    public boolean canActivityBeLaunched(ActivityInfo activityInfo,
+            @WindowConfiguration.WindowingMode int windowingMode, int launchingFromDisplayId,
+            boolean isNewTask) {
+        if (!isWindowingModeSupported(windowingMode)) {
+            return false;
+        }
+
+        final ComponentName activityComponent = activityInfo.getComponentName();
+        if (BLOCKED_APP_STREAMING_COMPONENT.equals(activityComponent)) {
+            // The error dialog alerting users that streaming is blocked is always allowed.
+            return true;
+        }
+
+        if (!canContainActivity(activityInfo, /* windowFlags= */  0, /* systemWindowFlags= */ 0)) {
+            mActivityBlockedCallback.accept(activityInfo);
+            return false;
+        }
+
+        if (launchingFromDisplayId == Display.DEFAULT_DISPLAY) {
+            return true;
+        }
+        if (isNewTask && !mBlockedCrossTaskNavigations.isEmpty()
+                && mBlockedCrossTaskNavigations.contains(activityComponent)) {
+            Slog.d(TAG, "Virtual device blocking cross task navigation of " + activityComponent);
+            mActivityBlockedCallback.accept(activityInfo);
+            return false;
+        }
+        if (isNewTask && !mAllowedCrossTaskNavigations.isEmpty()
+                && !mAllowedCrossTaskNavigations.contains(activityComponent)) {
+            Slog.d(TAG, "Virtual device not allowing cross task navigation of "
+                    + activityComponent);
+            mActivityBlockedCallback.accept(activityInfo);
+            return false;
+        }
+
+        return true;
+    }
+
 
     @Override
     public boolean keepActivityOnWindowFlagsChanged(ActivityInfo activityInfo, int windowFlags,

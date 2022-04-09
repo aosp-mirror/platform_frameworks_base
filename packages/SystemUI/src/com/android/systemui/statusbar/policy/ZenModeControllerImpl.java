@@ -50,7 +50,6 @@ import com.android.systemui.settings.CurrentUserTracker;
 import com.android.systemui.util.Utils;
 import com.android.systemui.util.settings.GlobalSettings;
 
-import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Objects;
@@ -306,7 +305,7 @@ public class ZenModeControllerImpl extends CurrentUserTracker
     };
 
     @Override
-    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+    public void dump(PrintWriter pw, String[] args) {
         pw.println("ZenModeControllerImpl:");
         pw.println("  mZenMode=" + mZenMode);
         pw.println("  mConfig=" + mConfig);

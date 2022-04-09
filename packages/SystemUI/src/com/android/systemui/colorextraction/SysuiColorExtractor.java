@@ -32,7 +32,6 @@ import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 
-import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.Arrays;
 
@@ -145,7 +144,7 @@ public class SysuiColorExtractor extends ColorExtractor implements Dumpable,
     }
 
     @Override
-    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+    public void dump(PrintWriter pw, String[] args) {
         pw.println("SysuiColorExtractor:");
 
         pw.println("  Current wallpaper colors:");
