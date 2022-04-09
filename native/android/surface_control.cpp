@@ -669,6 +669,8 @@ void ASurfaceTransaction_setFrameTimeline(ASurfaceTransaction* aSurfaceTransacti
                                           AVsyncId vsyncId) {
     CHECK_NOT_NULL(aSurfaceTransaction);
     const auto startTime = AChoreographer_getStartTimeNanosForVsyncId(vsyncId);
-    ASurfaceTransaction_to_Transaction(aSurfaceTransaction)
-            ->setFrameTimelineInfo({.vsyncId = vsyncId, .startTimeNanos = startTime});
+    FrameTimelineInfo ftInfo;
+    ftInfo.vsyncId = vsyncId;
+    ftInfo.startTimeNanos = startTime;
+    ASurfaceTransaction_to_Transaction(aSurfaceTransaction)->setFrameTimelineInfo(ftInfo);
 }
