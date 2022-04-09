@@ -135,8 +135,7 @@
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="2242167416140740920">"顔を認証しました"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"確認しました"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"完了するには [確認] をタップしてください"</string>
-    <!-- no translation found for biometric_dialog_tap_confirm_with_face (1092050545851021991) -->
-    <skip />
+    <string name="biometric_dialog_tap_confirm_with_face" msgid="1092050545851021991">"顔でロック解除しました。ロック解除アイコンを押して続行します。"</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"認証済み"</string>
     <string name="biometric_dialog_use_pin" msgid="8385294115283000709">"PIN を使用"</string>
     <string name="biometric_dialog_use_pattern" msgid="2315593393167211194">"パターンを使用"</string>
@@ -311,10 +310,8 @@
     <string name="notification_tap_again" msgid="4477318164947497249">"開くにはもう一度タップしてください"</string>
     <string name="tap_again" msgid="1315420114387908655">"もう一度タップしてください"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"開くには上にスワイプします"</string>
-    <!-- no translation found for keyguard_unlock_press (9140109453735019209) -->
-    <skip />
-    <!-- no translation found for keyguard_face_successful_unlock_press (25520941264602588) -->
-    <skip />
+    <string name="keyguard_unlock_press" msgid="9140109453735019209">"ロック解除アイコンを押して開きます"</string>
+    <string name="keyguard_face_successful_unlock_press" msgid="25520941264602588">"顔でロック解除しました。ロック解除アイコンを押して開きます。"</string>
     <string name="keyguard_retry" msgid="886802522584053523">"上にスワイプしてもう一度お試しください"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"NFC を使用するには、ロックを解除してください"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"これは組織が所有するデバイスです"</string>
@@ -350,7 +347,7 @@
     <string name="user_remove_user_message" msgid="6702834122128031833">"このユーザーのアプリとデータがすべて削除されます。"</string>
     <string name="user_remove_user_remove" msgid="8387386066949061256">"削除"</string>
     <string name="media_projection_dialog_text" msgid="1755705274910034772">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> は、録画中やキャスト中に画面に表示されたり、デバイスで再生されるすべての情報にアクセスできます。これには、パスワード、お支払いの詳細、写真、メッセージ、再生される音声などが含まれます。"</string>
-    <string name="media_projection_dialog_service_text" msgid="958000992162214611">"この機能を提供するサービスは、画面上に表示される情報またはキャスト先に転送する情報すべてに、録画中またはキャスト中にアクセスできます。これには、パスワード、お支払いの詳細、写真、メッセージ、再生される音声などが含まれます。"</string>
+    <string name="media_projection_dialog_service_text" msgid="958000992162214611">"この機能を提供するサービスは、録画中またはキャスト中に画面上に表示される情報、またはキャスト先に転送される情報すべてにアクセスできます。これには、パスワード、お支払いの詳細、写真、メッセージ、再生される音声などが含まれます。"</string>
     <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"録画やキャストを開始しますか？"</string>
     <string name="media_projection_dialog_title" msgid="3316063622495360646">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> で録画やキャストを開始しますか？"</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"すべて消去"</string>
@@ -808,6 +805,8 @@
     <string name="controls_media_button_pause" msgid="8614887780950376258">"一時停止"</string>
     <string name="controls_media_button_prev" msgid="8126822360056482970">"前のトラック"</string>
     <string name="controls_media_button_next" msgid="6662636627525947610">"次のトラック"</string>
+    <!-- no translation found for controls_media_button_connecting (3138354625847598095) -->
+    <skip />
     <string name="controls_media_smartspace_rec_title" msgid="1699818353932537407">"再生"</string>
     <string name="controls_media_smartspace_rec_description" msgid="4136242327044070732">"<xliff:g id="APP_LABEL">%1$s</xliff:g> を開く"</string>
     <string name="controls_media_smartspace_rec_item_description" msgid="2189271793070870883">"<xliff:g id="SONG_NAME">%1$s</xliff:g>（アーティスト名: <xliff:g id="ARTIST_NAME">%2$s</xliff:g>）を <xliff:g id="APP_LABEL">%3$s</xliff:g> で再生"</string>
@@ -913,11 +912,11 @@
     <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"タイルを追加しない"</string>
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"ユーザーの選択"</string>
     <plurals name="fgs_manager_footer_label" formatted="false" msgid="9091110396713032871">
-      <item quantity="other">有効なアプリ: <xliff:g id="COUNT_1">%s</xliff:g> 個</item>
-      <item quantity="one">有効なアプリ: <xliff:g id="COUNT_0">%s</xliff:g> 個</item>
+      <item quantity="other">実行中のアプリ: <xliff:g id="COUNT_1">%s</xliff:g> 個</item>
+      <item quantity="one">実行中のアプリ: <xliff:g id="COUNT_0">%s</xliff:g> 個</item>
     </plurals>
     <string name="fgs_dot_content_description" msgid="2865071539464777240">"最新情報"</string>
-    <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"有効なアプリ"</string>
+    <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"実行中のアプリ"</string>
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"停止"</string>
     <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"停止中"</string>
     <string name="clipboard_edit_text_done" msgid="4551887727694022409">"完了"</string>

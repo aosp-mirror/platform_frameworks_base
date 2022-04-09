@@ -95,7 +95,7 @@
     <string name="screenrecord_description" msgid="1123231719680353736">"రికార్డ్ చేస్తున్నప్పుడు, Android సిస్టమ్ మీ స్క్రీన్‌పై ప్రదర్శించబడిన లేదా మీ పరికరం నుండి ప్లే చేయబడిన ఏ సున్నితమైన సమాచారాన్నయినా క్యాప్చర్ చేయగలదు. ఈ సమాచారంలో, పాస్‌వర్డ్‌లు, పేమెంట్ వివరాలు, ఫోటోలు, మెసేజ్‌లు, ఆడియో కూడా ఉంటాయి."</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"ఆడియోను రికార్డ్ చేయి"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"పరికరం ఆడియో"</string>
-    <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"మీ పరికరం నుండి వచ్చే సంగీతం, కాల్స్‌, రింగ్‌టోన్‌ల వంటి ధ్వనులు"</string>
+    <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"మీ పరికరం నుండి వచ్చే మ్యూజిక్, కాల్స్‌, రింగ్‌టోన్‌ల వంటి ధ్వనులు"</string>
     <string name="screenrecord_mic_label" msgid="2111264835791332350">"మైక్రోఫోన్"</string>
     <string name="screenrecord_device_audio_and_mic_label" msgid="1831323771978646841">"పరికరం ఆడియో, మైక్రోఫోన్"</string>
     <string name="screenrecord_start" msgid="330991441575775004">"ప్రారంభించు"</string>
@@ -135,8 +135,7 @@
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="2242167416140740920">"ముఖం ప్రామాణీకరించబడింది"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"నిర్ధారించబడింది"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"పూర్తి చేయడానికి \"నిర్ధారించు\" నొక్కండి"</string>
-    <!-- no translation found for biometric_dialog_tap_confirm_with_face (1092050545851021991) -->
-    <skip />
+    <string name="biometric_dialog_tap_confirm_with_face" msgid="1092050545851021991">"ముఖం ద్వారా అన్‌లాక్ చేయబడింది. కొనసాగించడానికి అన్‌లాక్ చిహ్నాన్ని నొక్కండి."</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"ప్రామాణీకరించబడింది"</string>
     <string name="biometric_dialog_use_pin" msgid="8385294115283000709">"పిన్‌ను ఉపయోగించు"</string>
     <string name="biometric_dialog_use_pattern" msgid="2315593393167211194">"ఆకృతిని ఉపయోగించు"</string>
@@ -311,10 +310,8 @@
     <string name="notification_tap_again" msgid="4477318164947497249">"తెరవడానికి మళ్లీ నొక్కండి"</string>
     <string name="tap_again" msgid="1315420114387908655">"మళ్లీ ట్యాప్ చేయండి"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"తెరవడానికి, పైకి స్వైప్ చేయండి"</string>
-    <!-- no translation found for keyguard_unlock_press (9140109453735019209) -->
-    <skip />
-    <!-- no translation found for keyguard_face_successful_unlock_press (25520941264602588) -->
-    <skip />
+    <string name="keyguard_unlock_press" msgid="9140109453735019209">"తెరవడానికి అన్‌లాక్ చిహ్నాన్ని నొక్కండి"</string>
+    <string name="keyguard_face_successful_unlock_press" msgid="25520941264602588">"ముఖం ద్వారా అన్‌లాక్ చేయబడింది. తెరవడానికి అన్‌లాక్ చిహ్నాన్ని నొక్కండి."</string>
     <string name="keyguard_retry" msgid="886802522584053523">"మళ్ళీ ప్రయత్నించడానికి పైకి స్వైప్ చేయండి"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"NFCని ఉపయోగించడానికి అన్‌లాక్ చేయండి"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"ఈ పరికరం మీ సంస్థకు చెందినది"</string>
@@ -704,7 +701,7 @@
     <string name="qs_dnd_prompt_auto_rule" msgid="3535469468310002616">"ఆటోమేటిక్‌ నియమం (<xliff:g id="ID_1">%s</xliff:g>) ద్వారా అంతరాయం కలిగించవద్దు ఆన్ చేయబడింది."</string>
     <string name="qs_dnd_prompt_app" msgid="4027984447935396820">"యాప్ (<xliff:g id="ID_1">%s</xliff:g>) ద్వారా అంతరాయం కలిగించవద్దు ఆన్ చేయబడింది."</string>
     <string name="qs_dnd_prompt_auto_rule_app" msgid="1841469944118486580">"ఆటోమేటిక్‌ నియమం లేదా యాప్ ద్వారా అంతరాయం కలిగించవద్దు ఆన్ చేయబడింది."</string>
-    <string name="running_foreground_services_title" msgid="5137313173431186685">"నేపథ్యంలో అమలు అవుతున్న ఆప్‌లు"</string>
+    <string name="running_foreground_services_title" msgid="5137313173431186685">"బ్యాక్‌గ్రౌండ్‌లో అమలు అవుతున్న ఆప్‌లు"</string>
     <string name="running_foreground_services_msg" msgid="3009459259222695385">"బ్యాటరీ మరియు డేటా వినియోగ వివరాల కోసం నొక్కండి"</string>
     <string name="mobile_data_disable_title" msgid="5366476131671617790">"మొబైల్ డేటాను ఆఫ్ చేయాలా?"</string>
     <string name="mobile_data_disable_message" msgid="8604966027899770415">"\"<xliff:g id="CARRIER">%s</xliff:g>\" ద్వారా మీకు డేటా లేదా ఇంటర్నెట్‌కు యాక్సెస్ ఉండదు. Wi-Fi ద్వారా మాత్రమే ఇంటర్నెట్ అందుబాటులో ఉంటుంది."</string>
@@ -771,7 +768,7 @@
     <string name="accessibility_control_move" msgid="8980344493796647792">"<xliff:g id="NUMBER">%d</xliff:g> పొజిషన్‌కు తరలించండి"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"నియంత్రణలు"</string>
     <string name="controls_favorite_subtitle" msgid="6481675111056961083">"త్వరిత సెట్టింగ్‌ల నుండి యాక్సెస్ చేయడానికి కంట్రోల్స్‌ను ఎంచుకోండి"</string>
-    <string name="controls_favorite_rearrange" msgid="5616952398043063519">"కంట్రోల్స్ క్రమం మార్చడానికి దేనినైనా పట్టుకుని, లాగి వదిలేయండి"</string>
+    <string name="controls_favorite_rearrange" msgid="5616952398043063519">"కంట్రోల్స్ క్రమం మార్చడానికి దేన్నయినా పట్టుకుని, లాగి వదలండి"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"అన్ని కంట్రోల్స్ తీసివేయబడ్డాయి"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"మార్పులు సేవ్ చేయబడలేదు"</string>
     <string name="controls_favorite_see_other_apps" msgid="7709087332255283460">"ఇతర యాప్‌లను చూడండి"</string>
@@ -808,6 +805,8 @@
     <string name="controls_media_button_pause" msgid="8614887780950376258">"పాజ్ చేయండి"</string>
     <string name="controls_media_button_prev" msgid="8126822360056482970">"మునుపటి ట్రాక్"</string>
     <string name="controls_media_button_next" msgid="6662636627525947610">"తర్వాతి ట్రాక్"</string>
+    <!-- no translation found for controls_media_button_connecting (3138354625847598095) -->
+    <skip />
     <string name="controls_media_smartspace_rec_title" msgid="1699818353932537407">"ప్లే చేయండి"</string>
     <string name="controls_media_smartspace_rec_description" msgid="4136242327044070732">"<xliff:g id="APP_LABEL">%1$s</xliff:g>ను తెరవండి"</string>
     <string name="controls_media_smartspace_rec_item_description" msgid="2189271793070870883">"<xliff:g id="APP_LABEL">%3$s</xliff:g> నుండి <xliff:g id="ARTIST_NAME">%2$s</xliff:g> పాడిన <xliff:g id="SONG_NAME">%1$s</xliff:g>‌ను ప్లే చేయండి"</string>

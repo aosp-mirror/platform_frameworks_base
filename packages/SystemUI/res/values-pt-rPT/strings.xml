@@ -805,6 +805,8 @@
     <string name="controls_media_button_pause" msgid="8614887780950376258">"Pausar"</string>
     <string name="controls_media_button_prev" msgid="8126822360056482970">"Faixa anterior"</string>
     <string name="controls_media_button_next" msgid="6662636627525947610">"Faixa seguinte"</string>
+    <!-- no translation found for controls_media_button_connecting (3138354625847598095) -->
+    <skip />
     <string name="controls_media_smartspace_rec_title" msgid="1699818353932537407">"Reproduzir"</string>
     <string name="controls_media_smartspace_rec_description" msgid="4136242327044070732">"Abrir <xliff:g id="APP_LABEL">%1$s</xliff:g>"</string>
     <string name="controls_media_smartspace_rec_item_description" msgid="2189271793070870883">"Reproduzir <xliff:g id="SONG_NAME">%1$s</xliff:g> de <xliff:g id="ARTIST_NAME">%2$s</xliff:g> a partir da app <xliff:g id="APP_LABEL">%3$s</xliff:g>"</string>
