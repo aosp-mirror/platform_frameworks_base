@@ -85,8 +85,8 @@
     <string name="RestrictedStateContentMsimTemplate" msgid="5228235722511044687">"Service temporairement désactivé par votre opérateur concernant la carte SIM <xliff:g id="SIMNUMBER">%d</xliff:g>"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"Impossible d\'accéder au réseau mobile"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"Essayez de changer le réseau préféré. Appuyez pour le modifier."</string>
-    <string name="EmergencyCallWarningTitle" msgid="9164532362414787774">"Vous ne pourrez peut-être pas passer d\'appels d\'urgence"</string>
-    <string name="EmergencyCallWarningSummary" msgid="3365701131304664899">"<xliff:g id="SPN">%s</xliff:g> ne prend pas en charge les appels d\'urgence via le Wi-Fi. Appuyez ici pour en savoir plus."</string>
+    <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"Appels d\'urgence non disponibles"</string>
+    <string name="EmergencyCallWarningSummary" msgid="1194185880092805497">"Impossible de passer des appels d\'urgence via le Wi-Fi"</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"Alertes"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"Transfert d\'appel"</string>
     <string name="notification_channel_emergency_callback" msgid="54074839059123159">"Mode de rappel d\'urgence"</string>
@@ -585,8 +585,7 @@
     <string name="biometric_error_generic" msgid="6784371929985434439">"Erreur d\'authentification"</string>
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"Utiliser verrouillage écran"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"Utilisez le verrouillage de l\'écran pour continuer"</string>
-    <!-- no translation found for fingerprint_acquired_partial (4323789264604479684) -->
-    <skip />
+    <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"Appuyez bien sur le lecteur"</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"Impossible de reconnaître l\'empreinte digitale. Veuillez réessayer."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"Nettoyez le lecteur d\'empreinte digitale et réessayez"</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"Nettoyez le lecteur et réessayez"</string>
@@ -599,8 +598,7 @@
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_error_not_match" msgid="4599441812893438961">"Empreinte digitale non reconnue"</string>
-    <!-- no translation found for fingerprint_udfps_error_not_match (8236930793223158856) -->
-    <skip />
+    <string name="fingerprint_udfps_error_not_match" msgid="8236930793223158856">"Empreinte digitale non reconnue"</string>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"Empreinte digitale authentifiée"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"Visage authentifié"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"Visage authentifié, veuillez appuyer sur \"Confirmer\""</string>
@@ -1935,9 +1933,36 @@
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> n\'est pas disponible pour le moment."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> indisponible"</string>
     <string name="app_streaming_blocked_title_for_permission_dialog" msgid="4483161748582966785">"Autorisation nécessaire"</string>
-    <string name="app_streaming_blocked_message" product="tv" msgid="4003011766528814377">"Actuellement, vous ne pouvez pas accéder à cette application sur votre <xliff:g id="DEVICE">%1$s</xliff:g>. Essayez plutôt d\'y accéder sur votre appareil Android TV."</string>
-    <string name="app_streaming_blocked_message" product="tablet" msgid="4242053045964946062">"Actuellement, vous ne pouvez pas accéder à cette application sur votre <xliff:g id="DEVICE">%1$s</xliff:g>. Essayez plutôt d\'y accéder sur votre tablette."</string>
-    <string name="app_streaming_blocked_message" product="default" msgid="6159168735030739398">"Actuellement, vous ne pouvez pas accéder à cette application sur votre <xliff:g id="DEVICE">%1$s</xliff:g>. Essayez plutôt d\'y accéder sur votre téléphone."</string>
+    <!-- no translation found for app_streaming_blocked_title_for_camera_dialog (3935701653713853065) -->
+    <skip />
+    <!-- no translation found for app_streaming_blocked_title_for_fingerprint_dialog (3516853717714141951) -->
+    <skip />
+    <!-- no translation found for app_streaming_blocked_title_for_microphone_dialog (544822455127171206) -->
+    <skip />
+    <!-- no translation found for app_streaming_blocked_title_for_settings_dialog (196994247017450357) -->
+    <skip />
+    <!-- no translation found for app_streaming_blocked_title_for_settings_dialog (8222710146267948647) -->
+    <skip />
+    <!-- no translation found for app_streaming_blocked_title_for_settings_dialog (6895719984375299791) -->
+    <skip />
+    <!-- no translation found for app_streaming_blocked_message (5024599278277957935) -->
+    <skip />
+    <!-- no translation found for app_streaming_blocked_message (7491114163056552686) -->
+    <skip />
+    <!-- no translation found for app_streaming_blocked_message (1245180131667647277) -->
+    <skip />
+    <!-- no translation found for app_streaming_blocked_message_for_permission_dialog (6306583663205997979) -->
+    <skip />
+    <!-- no translation found for app_streaming_blocked_message_for_permission_dialog (6545624942642129664) -->
+    <skip />
+    <!-- no translation found for app_streaming_blocked_message_for_permission_dialog (8462740631707923000) -->
+    <skip />
+    <!-- no translation found for app_streaming_blocked_message_for_fingerprint_dialog (3470977315395784567) -->
+    <skip />
+    <!-- no translation found for app_streaming_blocked_message_for_fingerprint_dialog (698460091901465092) -->
+    <skip />
+    <!-- no translation found for app_streaming_blocked_message_for_fingerprint_dialog (8552691971910603907) -->
+    <skip />
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"Cette application a été conçue pour une ancienne version d\'Android et risque de ne pas fonctionner correctement. Recherchez des mises à jour ou contactez le développeur."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Rechercher une mise à jour"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Vous avez de nouveaux messages"</string>
@@ -2028,8 +2053,7 @@
     <string name="harmful_app_warning_open_anyway" msgid="5963657791740211807">"OUVRIR QUAND MÊME"</string>
     <string name="harmful_app_warning_title" msgid="8794823880881113856">"Application dangereuse détectée"</string>
     <string name="log_access_confirmation_title" msgid="2343578467290592708">"Autoriser <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> à accéder à tous les journaux de l\'appareil ?"</string>
-    <!-- no translation found for log_access_confirmation_allow (5302517782599389507) -->
-    <skip />
+    <string name="log_access_confirmation_allow" msgid="5302517782599389507">"Autoriser un accès unique"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"Ne pas autoriser"</string>
     <string name="log_access_confirmation_body" msgid="6581985716241928135">"Les journaux enregistrent ce qui se passe sur votre appareil. Les applis peuvent les utiliser pour rechercher et résoudre les problèmes.\n\nCertains journaux pouvant contenir des infos sensibles, autorisez uniquement les applis de confiance à accéder à tous les journaux de l\'appareil. \n\nSi vous refusez à cette appli l\'accès à tous les journaux de l\'appareil, elle a quand même accès aux siens. Le fabricant de l\'appareil peut accéder à certains journaux ou certaines infos sur votre appareil. En savoir plus"</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"Ne plus afficher"</string>
@@ -2043,6 +2067,14 @@
     <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"Appuyez pour en savoir plus et pour modifier les paramètres."</string>
     <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"Le mode Ne pas déranger a été modifié"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Appuyez pour vérifier les contenus bloqués."</string>
+    <!-- no translation found for review_notification_settings_title (5102557424459810820) -->
+    <skip />
+    <!-- no translation found for review_notification_settings_text (5696497037817525074) -->
+    <skip />
+    <!-- no translation found for review_notification_settings_remind_me_action (1081081018678480907) -->
+    <skip />
+    <!-- no translation found for review_notification_settings_dismiss (4160916504616428294) -->
+    <skip />
     <string name="notification_app_name_system" msgid="3045196791746735601">"Système"</string>
     <string name="notification_app_name_settings" msgid="9088548800899952531">"Paramètres"</string>
     <string name="notification_appops_camera_active" msgid="8177643089272352083">"Caméra"</string>
@@ -2261,14 +2293,10 @@
     <string name="ui_translation_accessibility_translated_text" msgid="3197547218178944544">"<xliff:g id="MESSAGE">%1$s</xliff:g> traduit."</string>
     <string name="ui_translation_accessibility_translation_finished" msgid="3057830947610088465">"Message en <xliff:g id="FROM_LANGUAGE">%1$s</xliff:g> traduit en <xliff:g id="TO_LANGUAGE">%2$s</xliff:g>."</string>
     <string name="notification_channel_abusive_bg_apps" msgid="6092140213264920355">"Activité en arrière-plan"</string>
-    <!-- no translation found for notification_title_abusive_bg_apps (3258460527676573815) -->
-    <skip />
-    <!-- no translation found for notification_title_long_running_fgs (8170284286477131587) -->
-    <skip />
-    <!-- no translation found for notification_content_abusive_bg_apps (9180610713603474720) -->
-    <skip />
-    <!-- no translation found for notification_content_long_running_fgs (8258193410039977101) -->
-    <skip />
+    <string name="notification_title_abusive_bg_apps" msgid="3258460527676573815">"Une appli utilise la batterie"</string>
+    <string name="notification_title_long_running_fgs" msgid="8170284286477131587">"Une appli est encore active"</string>
+    <string name="notification_content_abusive_bg_apps" msgid="9180610713603474720">"<xliff:g id="APP">%1$s</xliff:g> utilise la batterie en arrière-plan. Appuyez pour en savoir plus."</string>
+    <string name="notification_content_long_running_fgs" msgid="8258193410039977101">"<xliff:g id="APP">%1$s</xliff:g> peut affecter l\'autonomie de la batterie. Appuyez pour consulter les applis actives."</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Vérifier les applis actives"</string>
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"Impossible d\'accéder à l\'appareil photo du téléphone depuis votre <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"Impossible d\'accéder à l\'appareil photo de la tablette depuis votre <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
