@@ -812,6 +812,25 @@ class MediaDataManagerTest : SysuiTestCase() {
     }
 
     @Test
+    fun testPlaybackActions_playPause_hasButton() {
+        whenever(mediaFlags.areMediaSessionActionsEnabled(any(), any())).thenReturn(true)
+        val stateActions = PlaybackState.ACTION_PLAY_PAUSE
+        val stateBuilder = PlaybackState.Builder().setActions(stateActions)
+        whenever(controller.playbackState).thenReturn(stateBuilder.build())
+
+        addNotificationAndLoad()
+
+        assertThat(mediaDataCaptor.value!!.semanticActions).isNotNull()
+        val actions = mediaDataCaptor.value!!.semanticActions!!
+
+        assertThat(actions.playOrPause).isNotNull()
+        assertThat(actions.playOrPause!!.contentDescription).isEqualTo(
+            context.getString(R.string.controls_media_button_play))
+        actions.playOrPause!!.action!!.run()
+        verify(transportControls).play()
+    }
+
+    @Test
     fun testPlaybackLocationChange_isLogged() {
         // Media control added for local playback
         addNotificationAndLoad()
