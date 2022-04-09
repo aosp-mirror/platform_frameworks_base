@@ -43,7 +43,7 @@
     <string name="title_usb_accessory" msgid="1236358027511638648">"USB aksesuarı"</string>
     <string name="label_view" msgid="6815442985276363364">"Görüntüle"</string>
     <string name="always_use_device" msgid="210535878779644679">"<xliff:g id="USB_DEVICE">%2$s</xliff:g> bağlandığında <xliff:g id="APPLICATION">%1$s</xliff:g> uygulamasını her zaman aç"</string>
-    <string name="always_use_accessory" msgid="1977225429341838444">"<xliff:g id="USB_ACCESSORY">%2$s</xliff:g> bağlandığında <xliff:g id="APPLICATION">%1$s</xliff:g> uygulamasını her zaman aç"</string>
+    <string name="always_use_accessory" msgid="1977225429341838444">"<xliff:g id="USB_ACCESSORY">%2$s</xliff:g> bağlandığında her zaman <xliff:g id="APPLICATION">%1$s</xliff:g> uygulamasını aç"</string>
     <string name="usb_debugging_title" msgid="8274884945238642726">"USB hata ayıklamasına izin verilsin mi?"</string>
     <string name="usb_debugging_message" msgid="5794616114463921773">"Bilgisayarın RSA anahtarı parmak izi:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="4003121804294739548">"Bu bilgisayardan her zaman izin ver"</string>

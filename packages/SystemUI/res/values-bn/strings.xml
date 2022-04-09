@@ -881,6 +881,6 @@
     <string name="see_all_networks" msgid="3773666844913168122">"সবকটি দেখুন"</string>
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"নেটওয়ার্ক বদলাতে ইথারনেট ডিসকানেক্ট করুন"</string>
     <string name="wifi_scan_notify_message" msgid="3753839537448621794">"ডিভাইস সংক্রান্ত অভিজ্ঞতা আরও ভাল করতে, অ্যাপ ও পরিষেবা যেকোনও সময় আপনার ওয়াই-ফাই নেটওয়ার্ক স্ক্যান করতে পারবে, এমনকি ডিভাইসের ওয়াই-ফাই বন্ধ করা থাকলেও। ওয়াই-ফাই স্ক্যানিং সেটিংস থেকে আপনি এটি পরিবর্তন করতে পারবেন। "<annotation id="link">"পরিবর্তন করুন"</annotation></string>
-    <string name="turn_off_airplane_mode" msgid="8425587763226548579">"\'বিমান\' মোড বন্ধ করুন"</string>
+    <string name="turn_off_airplane_mode" msgid="8425587763226548579">"\'বিমান মোড\' বন্ধ করুন"</string>
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"ব্যবহারকারী বেছে নিন"</string>
 </resources>

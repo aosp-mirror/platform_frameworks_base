@@ -84,7 +84,7 @@
     <string name="screenrecord_name" msgid="2596401223859996572">"螢幕畫面錄影工具"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"正在處理螢幕錄影內容"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"持續顯示錄影畫面工作階段通知"</string>
-    <string name="screenrecord_start_label" msgid="1750350278888217473">"要開始錄影嗎？"</string>
+    <string name="screenrecord_start_label" msgid="1750350278888217473">"要開始錄製嗎？"</string>
     <string name="screenrecord_description" msgid="1123231719680353736">"錄影時，Android 系統可擷取螢幕上顯示或裝置播放的任何敏感資料，包括密碼、付款資料、相片、訊息和音訊。"</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"錄音"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"裝置音訊"</string>

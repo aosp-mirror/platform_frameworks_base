@@ -32,13 +32,13 @@
     <string name="usb_device_permission_prompt" msgid="4414719028369181772">"Dozvoliti aplikaciji <xliff:g id="APPLICATION">%1$s</xliff:g> pristup uređaju: <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
     <string name="usb_device_permission_prompt_warn" msgid="2309129784984063656">"Dozvoliti aplikaciji <xliff:g id="APPLICATION">%1$s</xliff:g> pristup uređaju <xliff:g id="USB_DEVICE">%2$s</xliff:g>?\nOvoj aplikaciji nije dato odobrenje za snimanje, ali može snimati zvuk putem ovog USB uređaja."</string>
     <string name="usb_audio_device_permission_prompt_title" msgid="4221351137250093451">"Dozvoliti aplikaciji <xliff:g id="APPLICATION">%1$s</xliff:g> pristup dodatku: <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
-    <string name="usb_audio_device_confirm_prompt_title" msgid="8828406516732985696">"Otvoriti aplikaciju <xliff:g id="APPLICATION">%1$s</xliff:g> za upravljanje dodatkom: <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
+    <string name="usb_audio_device_confirm_prompt_title" msgid="8828406516732985696">"Otvoriti aplikaciju <xliff:g id="APPLICATION">%1$s</xliff:g> za upravljanje uređajem: <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
     <string name="usb_audio_device_prompt_warn" msgid="2504972133361130335">"Ovoj aplikaciji nije dato odobrenje za snimanje, ali može snimati zvuk putem ovog USB uređaja. Korištenje aplikacije <xliff:g id="APPLICATION">%1$s</xliff:g> s ovim uređajem može vas spriječiti da čujete pozive, obavještenja i alarme."</string>
     <string name="usb_audio_device_prompt" msgid="7944987408206252949">"Korištenje aplikacije <xliff:g id="APPLICATION">%1$s</xliff:g> s ovim uređajem može vas spriječiti da čujete pozive, obavještenja i alarme."</string>
     <string name="usb_accessory_permission_prompt" msgid="717963550388312123">"Dozvoliti aplikaciji <xliff:g id="APPLICATION">%1$s</xliff:g> pristup dodatku: <xliff:g id="USB_ACCESSORY">%2$s</xliff:g>?"</string>
     <string name="usb_device_confirm_prompt" msgid="4091711472439910809">"Otvoriti aplikaciju <xliff:g id="APPLICATION">%1$s</xliff:g> za upravljanje uređajem: <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
     <string name="usb_device_confirm_prompt_warn" msgid="990208659736311769">"Želite li upravljati uređajem <xliff:g id="USB_DEVICE">%2$s</xliff:g> putem aplikacije <xliff:g id="APPLICATION">%1$s</xliff:g>?\nOvoj aplikaciji nije dato odobrenje za snimanje, ali može snimati zvuk putem ovog USB uređaja."</string>
-    <string name="usb_accessory_confirm_prompt" msgid="5728408382798643421">"Otvoriti aplikaciju <xliff:g id="APPLICATION">%1$s</xliff:g> za upravljanje dodatkom: <xliff:g id="USB_ACCESSORY">%2$s</xliff:g>?"</string>
+    <string name="usb_accessory_confirm_prompt" msgid="5728408382798643421">"Otvoriti aplikaciju <xliff:g id="APPLICATION">%1$s</xliff:g> za upravljanje uređajem: <xliff:g id="USB_ACCESSORY">%2$s</xliff:g>?"</string>
     <string name="usb_accessory_uri_prompt" msgid="6756649383432542382">"Nema instaliranih aplikacija za ovaj USB uređaj. Saznajte više o uređaju na <xliff:g id="URL">%1$s</xliff:g>"</string>
     <string name="title_usb_accessory" msgid="1236358027511638648">"USB periferni uređaj"</string>
     <string name="label_view" msgid="6815442985276363364">"Prikaži"</string>
@@ -87,10 +87,10 @@
     <string name="screenrecord_start_label" msgid="1750350278888217473">"Započeti snimanje?"</string>
     <string name="screenrecord_description" msgid="1123231719680353736">"Prilikom snimanja, Android sistem može snimiti sve osjetljive informacije koje su vidljive na vašem ekranu ili koje reproducirate na uređaju. To uključuje lozinke, informacije za plaćanje, fotografije, poruke i zvuk."</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"Snimi zvučni zapis"</string>
-    <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"Zvuk uređaja"</string>
+    <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"Zvuk na uređaju"</string>
     <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"Zvuk s vašeg uređaja, naprimjer muzika, pozivi i melodije zvona"</string>
     <string name="screenrecord_mic_label" msgid="2111264835791332350">"Mikrofon"</string>
-    <string name="screenrecord_device_audio_and_mic_label" msgid="1831323771978646841">"Zvuk i mikrofon uređaja"</string>
+    <string name="screenrecord_device_audio_and_mic_label" msgid="1831323771978646841">"Zvuk na uređaju i mikrofon"</string>
     <string name="screenrecord_start" msgid="330991441575775004">"Započni"</string>
     <string name="screenrecord_ongoing_screen_only" msgid="4459670242451527727">"Snimanje ekrana"</string>
     <string name="screenrecord_ongoing_screen_and_audio" msgid="5351133763125180920">"Snimanje ekrana i zvuka"</string>
@@ -705,7 +705,7 @@
     <string name="mobile_data" msgid="4564407557775397216">"Prijenos podataka"</string>
     <string name="mobile_data_text_format" msgid="6806501540022589786">"<xliff:g id="ID_1">%1$s</xliff:g> — <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="mobile_carrier_text_format" msgid="8912204177152950766">"<xliff:g id="CARRIER_NAME">%1$s</xliff:g>, <xliff:g id="MOBILE_DATA_TYPE">%2$s</xliff:g>"</string>
-    <string name="wifi_is_off" msgid="5389597396308001471">"WiFi veza je isključena"</string>
+    <string name="wifi_is_off" msgid="5389597396308001471">"WiFi je isključen"</string>
     <string name="bt_is_off" msgid="7436344904889461591">"Bluetooth je isključen"</string>
     <string name="dnd_is_off" msgid="3185706903793094463">"Način rada Ne ometaj je isključen"</string>
     <string name="qs_dnd_prompt_auto_rule" msgid="3535469468310002616">"Opciju Ne ometaju uključilo je automatsko pravilo (<xliff:g id="ID_1">%s</xliff:g>)."</string>
@@ -776,7 +776,7 @@
     <string name="accessibility_control_change_unfavorite" msgid="6997408061750740327">"uklonite iz omiljenog"</string>
     <string name="accessibility_control_move" msgid="8980344493796647792">"Premjesti na poziciju <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Kontrole"</string>
-    <string name="controls_favorite_subtitle" msgid="6481675111056961083">"Odaberite kontrole kojim želite pristupati pomoću Brzih postavki"</string>
+    <string name="controls_favorite_subtitle" msgid="6481675111056961083">"Odaberite kontrole kojim želite pristupati iz Brzih postavki"</string>
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Držite i prevucite da preuredite kontrole"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"Sve kontrole su uklonjene"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"Promjene nisu sačuvane"</string>
@@ -864,7 +864,7 @@
     <string name="person_available" msgid="2318599327472755472">"Dostupan/na je"</string>
     <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"Došlo je do problema prilikom očitavanja mjerača stanja baterije"</string>
     <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"Dodirnite za više informacija"</string>
-    <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"Nije postavljen alarm"</string>
+    <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"Nema nijednog alarma"</string>
     <string name="accessibility_fingerprint_label" msgid="5255731221854153660">"Senzor za otisak prsta"</string>
     <string name="accessibility_authenticate_hint" msgid="798914151813205721">"autentificiranje"</string>
     <string name="accessibility_enter_hint" msgid="2617864063504824834">"pristup uređaju"</string>

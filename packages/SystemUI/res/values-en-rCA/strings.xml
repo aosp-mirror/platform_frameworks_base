@@ -881,6 +881,6 @@
     <string name="see_all_networks" msgid="3773666844913168122">"See all"</string>
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"To switch networks, disconnect Ethernet"</string>
     <string name="wifi_scan_notify_message" msgid="3753839537448621794">"To improve device experience, apps and services can still scan for Wi‑Fi networks at any time, even when Wi‑Fi is off. You can change this in Wi‑Fi scanning settings. "<annotation id="link">"Change"</annotation></string>
-    <string name="turn_off_airplane_mode" msgid="8425587763226548579">"Turn off aeroplane mode"</string>
+    <string name="turn_off_airplane_mode" msgid="8425587763226548579">"Turn off Airplane mode"</string>
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"Select user"</string>
 </resources>

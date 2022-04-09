@@ -31,18 +31,18 @@
     <string name="status_bar_settings_auto_rotation" msgid="8329080442278431708">"Samodejno zasukaj zaslon"</string>
     <string name="usb_device_permission_prompt" msgid="4414719028369181772">"Ali aplikaciji <xliff:g id="APPLICATION">%1$s</xliff:g> dovolite dostop do dodatka USB <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
     <string name="usb_device_permission_prompt_warn" msgid="2309129784984063656">"Ali aplikaciji <xliff:g id="APPLICATION">%1$s</xliff:g> dovolite dostop do naprave <xliff:g id="USB_DEVICE">%2$s</xliff:g>?\nTa aplikacija sicer nima dovoljenja za snemanje, vendar bi lahko zajemala zvok prek te naprave USB."</string>
-    <string name="usb_audio_device_permission_prompt_title" msgid="4221351137250093451">"Ali aplikaciji <xliff:g id="APPLICATION">%1$s</xliff:g> dovolite dostop do naprave USB <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
-    <string name="usb_audio_device_confirm_prompt_title" msgid="8828406516732985696">"Želite odpreti aplikacijo <xliff:g id="APPLICATION">%1$s</xliff:g> za upravljanje naprave USB <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
+    <string name="usb_audio_device_permission_prompt_title" msgid="4221351137250093451">"Dovolite aplikaciji <xliff:g id="APPLICATION">%1$s</xliff:g> dostop do naprave <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
+    <string name="usb_audio_device_confirm_prompt_title" msgid="8828406516732985696">"Želite odpreti <xliff:g id="APPLICATION">%1$s</xliff:g> za upravljanje naprave <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
     <string name="usb_audio_device_prompt_warn" msgid="2504972133361130335">"Ta aplikacija sicer nima dovoljenja za snemanje, vendar bi lahko zajemala zvok prek te naprave USB. Uporaba aplikacije <xliff:g id="APPLICATION">%1$s</xliff:g> s to napravo lahko povzroči, da boste preslišali klice, obvestila in alarme."</string>
     <string name="usb_audio_device_prompt" msgid="7944987408206252949">"Uporaba aplikacije <xliff:g id="APPLICATION">%1$s</xliff:g> s to napravo lahko povzroči, da boste preslišali klice, obvestila in alarme."</string>
     <string name="usb_accessory_permission_prompt" msgid="717963550388312123">"Ali aplikaciji <xliff:g id="APPLICATION">%1$s</xliff:g> dovolite dostop do dodatka USB <xliff:g id="USB_ACCESSORY">%2$s</xliff:g>?"</string>
-    <string name="usb_device_confirm_prompt" msgid="4091711472439910809">"Želite odpreti aplikacijo <xliff:g id="APPLICATION">%1$s</xliff:g> za upravljanje dodatka USB <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
+    <string name="usb_device_confirm_prompt" msgid="4091711472439910809">"Želite odpreti <xliff:g id="APPLICATION">%1$s</xliff:g> za upravljanje naprave <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
     <string name="usb_device_confirm_prompt_warn" msgid="990208659736311769">"Želite odpreti aplikacijo <xliff:g id="APPLICATION">%1$s</xliff:g> za upravljanje naprave <xliff:g id="USB_DEVICE">%2$s</xliff:g>?\nTa aplikacija sicer nima dovoljenja za snemanje, vendar bi lahko zajemala zvok prek te naprave USB."</string>
-    <string name="usb_accessory_confirm_prompt" msgid="5728408382798643421">"Želite odpreti aplikacijo <xliff:g id="APPLICATION">%1$s</xliff:g> za upravljanje dodatka USB <xliff:g id="USB_ACCESSORY">%2$s</xliff:g>?"</string>
+    <string name="usb_accessory_confirm_prompt" msgid="5728408382798643421">"Želite odpreti <xliff:g id="APPLICATION">%1$s</xliff:g> za upravljanje dodatka <xliff:g id="USB_ACCESSORY">%2$s</xliff:g>?"</string>
     <string name="usb_accessory_uri_prompt" msgid="6756649383432542382">"Namešč. prog. ne delujejo s tem dodatkom USB. Več o tem dodatku preberite na <xliff:g id="URL">%1$s</xliff:g>"</string>
     <string name="title_usb_accessory" msgid="1236358027511638648">"Dodatek USB"</string>
     <string name="label_view" msgid="6815442985276363364">"Prikaži"</string>
-    <string name="always_use_device" msgid="210535878779644679">"Ko je dodatek <xliff:g id="USB_DEVICE">%2$s</xliff:g> povezan, vedno odpri aplikacijo <xliff:g id="APPLICATION">%1$s</xliff:g>"</string>
+    <string name="always_use_device" msgid="210535878779644679">"Ko je naprava <xliff:g id="USB_DEVICE">%2$s</xliff:g> povezana, vedno odpri aplikacijo <xliff:g id="APPLICATION">%1$s</xliff:g>"</string>
     <string name="always_use_accessory" msgid="1977225429341838444">"Ko je dodatek <xliff:g id="USB_ACCESSORY">%2$s</xliff:g> povezan, vedno odpri aplikacijo <xliff:g id="APPLICATION">%1$s</xliff:g>"</string>
     <string name="usb_debugging_title" msgid="8274884945238642726">"Ali dovolite odpravljanje težav prek USB?"</string>
     <string name="usb_debugging_message" msgid="5794616114463921773">"Računalnikov prstni odtis ključa RSA je:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
@@ -465,7 +465,7 @@
     <string name="enable_demo_mode" msgid="3180345364745966431">"Omogočanje predstavitvenega načina"</string>
     <string name="show_demo_mode" msgid="3677956462273059726">"Prikaz predstavitvenega načina"</string>
     <string name="status_bar_ethernet" msgid="5690979758988647484">"Ethernet"</string>
-    <string name="status_bar_alarm" msgid="87160847643623352">"Opozorilo"</string>
+    <string name="status_bar_alarm" msgid="87160847643623352">"Alarm"</string>
     <string name="wallet_title" msgid="5369767670735827105">"Denarnica"</string>
     <string name="wallet_empty_state_label" msgid="7776761245237530394">"Nastavite možnost hitrejšega in varnejšega plačevanja s telefonom."</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"Prikaži vse"</string>
@@ -710,7 +710,7 @@
     <string name="mobile_data" msgid="4564407557775397216">"Mobilni podatki"</string>
     <string name="mobile_data_text_format" msgid="6806501540022589786">"<xliff:g id="ID_1">%1$s</xliff:g> – <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="mobile_carrier_text_format" msgid="8912204177152950766">"<xliff:g id="CARRIER_NAME">%1$s</xliff:g>, <xliff:g id="MOBILE_DATA_TYPE">%2$s</xliff:g>"</string>
-    <string name="wifi_is_off" msgid="5389597396308001471">"Wi-Fi je izklopljen"</string>
+    <string name="wifi_is_off" msgid="5389597396308001471">"Wi-Fi je izklopljen."</string>
     <string name="bt_is_off" msgid="7436344904889461591">"Bluetooth je izklopljen"</string>
     <string name="dnd_is_off" msgid="3185706903793094463">"Način »ne moti« je izklopljen"</string>
     <string name="qs_dnd_prompt_auto_rule" msgid="3535469468310002616">"Samodejno pravilo (<xliff:g id="ID_1">%s</xliff:g>) je vklopilo način »ne moti«."</string>

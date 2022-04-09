@@ -770,7 +770,7 @@
     <string name="accessibility_control_change_unfavorite" msgid="6997408061750740327">"ਮਨਪਸੰਦ ਵਿੱਚੋਂ ਹਟਾਓ"</string>
     <string name="accessibility_control_move" msgid="8980344493796647792">"<xliff:g id="NUMBER">%d</xliff:g> ਸਥਾਨ \'ਤੇ ਲਿਜਾਓ"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"ਕੰਟਰੋਲ"</string>
-    <string name="controls_favorite_subtitle" msgid="6481675111056961083">"ਪਹੁੰਚ ਕਰਨ ਲਈ ਤਤਕਾਲ ਸੈਟਿੰਗਾਂ ਤੋਂ ਕੰਟਰੋਲ ਚੁਣੋ"</string>
+    <string name="controls_favorite_subtitle" msgid="6481675111056961083">"ਤਤਕਾਲ ਸੈਟਿੰਗਾਂ ਤੋਂ ਪਹੁੰਚ ਕਰਨ ਲਈ ਕੰਟਰੋਲ ਚੁਣੋ"</string>
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"ਕੰਟਰੋਲਾਂ ਨੂੰ ਮੁੜ-ਵਿਵਸਥਿਤ ਕਰਨ ਲਈ ਫੜ੍ਹ ਕੇ ਘਸੀਟੋ"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"ਸਾਰੇ ਕੰਟਰੋਲ ਹਟਾਏ ਗਏ"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"ਤਬਦੀਲੀਆਂ ਨੂੰ ਰੱਖਿਅਤ ਨਹੀਂ ਕੀਤਾ ਗਿਆ"</string>
