@@ -262,7 +262,7 @@ public final class TouchInteractionController {
      * interaction.
      */
     public void requestTouchExploration() {
-        checkState();
+        validateTransitionRequest();
         final IAccessibilityServiceConnection connection =
                 AccessibilityInteractionClient.getInstance()
                         .getConnection(mService.getConnectionId());
@@ -288,7 +288,7 @@ public final class TouchInteractionController {
      * @throws IllegalArgumentException if the pointer id is outside of the allowed range.
      */
     public void requestDragging(int pointerId) {
-        checkState();
+        validateTransitionRequest();
         if (pointerId < 0 || pointerId > MAX_POINTER_COUNT) {
             throw new IllegalArgumentException("Invalid pointer id: " + pointerId);
         }
@@ -313,7 +313,7 @@ public final class TouchInteractionController {
      * the duration of this interaction.
      */
     public void requestDelegating() {
-        checkState();
+        validateTransitionRequest();
         final IAccessibilityServiceConnection connection =
                 AccessibilityInteractionClient.getInstance()
                         .getConnection(mService.getConnectionId());
@@ -371,14 +371,14 @@ public final class TouchInteractionController {
         }
     }
 
-    private void checkState() {
+    private void validateTransitionRequest() {
         if (!mServiceDetectsGestures || mCallbacks.size() == 0) {
             throw new IllegalStateException(
                     "State transitions are not allowed without first adding a callback.");
         }
-        if (mState != STATE_TOUCH_INTERACTING && mState != STATE_DRAGGING) {
+        if ((mState == STATE_DELEGATING || mState == STATE_TOUCH_EXPLORING)) {
             throw new IllegalStateException(
-                    "State transitions are not allowed in " + stateToString(mState));
+                    "State transition requests are not allowed in " + stateToString(mState));
         }
     }
 

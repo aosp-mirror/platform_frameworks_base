@@ -28,6 +28,7 @@ import static android.Manifest.permission.READ_PHONE_STATE;
 import static android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE;
 import static android.app.ActivityManager.PROCESS_STATE_UNKNOWN;
 import static android.app.ActivityManager.isProcStateConsideredInteraction;
+import static android.app.ActivityManager.procStateToString;
 import static android.app.PendingIntent.FLAG_IMMUTABLE;
 import static android.app.PendingIntent.FLAG_UPDATE_CURRENT;
 import static android.content.Intent.ACTION_PACKAGE_ADDED;
@@ -925,6 +926,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
             mUsageStats = LocalServices.getService(UsageStatsManagerInternal.class);
             mAppStandby = LocalServices.getService(AppStandbyInternal.class);
+            mActivityManagerInternal = LocalServices.getService(ActivityManagerInternal.class);
 
             synchronized (mUidRulesFirstLock) {
                 synchronized (mNetworkPoliciesSecondLock) {
@@ -1002,7 +1004,6 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 }
             }
 
-            mActivityManagerInternal = LocalServices.getService(ActivityManagerInternal.class);
             try {
                 final int changes = ActivityManager.UID_OBSERVER_PROCSTATE
                         | ActivityManager.UID_OBSERVER_GONE
@@ -1119,7 +1120,9 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                     callbackInfo = new UidStateCallbackInfo();
                     mUidStateCallbackInfos.put(uid, callbackInfo);
                 }
-                callbackInfo.update(uid, procState, procStateSeq, capability);
+                if (callbackInfo.procStateSeq == -1 || procStateSeq > callbackInfo.procStateSeq) {
+                    callbackInfo.update(uid, procState, procStateSeq, capability);
+                }
                 if (!callbackInfo.isPending) {
                     mUidEventHandler.obtainMessage(UID_MSG_STATE_CHANGED, callbackInfo)
                             .sendToTarget();
@@ -1146,8 +1149,8 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
     private static final class UidStateCallbackInfo {
         public int uid;
-        public int procState;
-        public long procStateSeq;
+        public int procState = ActivityManager.PROCESS_STATE_NONEXISTENT;
+        public long procStateSeq = -1;
         @ProcessCapability
         public int capability;
         public boolean isPending;
@@ -4044,13 +4047,22 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
      * {@link #updateRulesForPowerRestrictionsUL(int)}. Returns true if the state was updated.
      */
     @GuardedBy("mUidRulesFirstLock")
-    private boolean updateUidStateUL(int uid, int procState, @ProcessCapability int capability) {
+    private boolean updateUidStateUL(int uid, int procState, long procStateSeq,
+            @ProcessCapability int capability) {
         Trace.traceBegin(Trace.TRACE_TAG_NETWORK, "updateUidStateUL");
         try {
             final UidState oldUidState = mUidState.get(uid);
+            if (oldUidState != null && procStateSeq < oldUidState.procStateSeq) {
+                if (LOGV) {
+                    Slog.v(TAG, "Ignoring older uid state updates; uid=" + uid
+                            + ",procState=" + procStateToString(procState) + ",seq=" + procStateSeq
+                            + ",cap=" + capability + ",oldUidState=" + oldUidState);
+                }
+                return false;
+            }
             if (oldUidState == null || oldUidState.procState != procState
                     || oldUidState.capability != capability) {
-                final UidState newUidState = new UidState(uid, procState, capability);
+                final UidState newUidState = new UidState(uid, procState, procStateSeq, capability);
                 // state changed, push updated rules
                 mUidState.put(uid, newUidState);
                 updateRestrictBackgroundRulesOnUidStatusChangedUL(uid, oldUidState, newUidState);
@@ -4213,7 +4225,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                     : uidBlockedState.deriveUidRules();
         }
         if (oldEffectiveBlockedReasons != newEffectiveBlockedReasons) {
-            postBlockedReasonsChangedMsg(uid,
+            handleBlockedReasonsChanged(uid,
                     newEffectiveBlockedReasons, oldEffectiveBlockedReasons);
 
             postUidRulesChangedMsg(uid, uidRules);
@@ -4575,6 +4587,9 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                         someArgs.argi2 = uidBlockedState.effectiveBlockedReasons;
                         someArgs.argi3 = uidBlockedState.deriveUidRules();
                         uidStateUpdates.append(uid, someArgs);
+                        // TODO: Update the state for all changed uids together.
+                        mActivityManagerInternal.onUidBlockedReasonsChanged(uid,
+                                uidBlockedState.effectiveBlockedReasons);
                     }
                 }
             }
@@ -4797,6 +4812,8 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         synchronized (mUidBlockedState) {
             mUidBlockedState.delete(uid);
         }
+        mUidState.delete(uid);
+        mActivityManagerInternal.onUidBlockedReasonsChanged(uid, BLOCKED_REASON_NONE);
         mUidPolicy.delete(uid);
         mUidFirewallStandbyRules.delete(uid);
         mUidFirewallDozableRules.delete(uid);
@@ -4959,7 +4976,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             }
         }
         if (oldEffectiveBlockedReasons != newEffectiveBlockedReasons) {
-            postBlockedReasonsChangedMsg(uid,
+            handleBlockedReasonsChanged(uid,
                     newEffectiveBlockedReasons, oldEffectiveBlockedReasons);
 
             postUidRulesChangedMsg(uid, uidRules);
@@ -5102,7 +5119,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                     : uidBlockedState.deriveUidRules();
         }
         if (oldEffectiveBlockedReasons != newEffectiveBlockedReasons) {
-            postBlockedReasonsChangedMsg(uid,
+            handleBlockedReasonsChanged(uid,
                     newEffectiveBlockedReasons,
                     oldEffectiveBlockedReasons);
 
@@ -5133,6 +5150,12 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 updateRulesForAppIdleParoleUL();
             }
         }
+    }
+
+    private void handleBlockedReasonsChanged(int uid, int newEffectiveBlockedReasons,
+            int oldEffectiveBlockedReasons) {
+        mActivityManagerInternal.onUidBlockedReasonsChanged(uid, newEffectiveBlockedReasons);
+        postBlockedReasonsChangedMsg(uid, newEffectiveBlockedReasons, oldEffectiveBlockedReasons);
     }
 
     private void postBlockedReasonsChangedMsg(int uid, int newEffectiveBlockedReasons,
@@ -5438,21 +5461,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         public boolean handleMessage(Message msg) {
             switch (msg.what) {
                 case UID_MSG_STATE_CHANGED: {
-                    final UidStateCallbackInfo uidStateCallbackInfo =
-                            (UidStateCallbackInfo) msg.obj;
-                    final int uid;
-                    final int procState;
-                    final long procStateSeq;
-                    final int capability;
-                    synchronized (mUidStateCallbackInfos) {
-                        uid = uidStateCallbackInfo.uid;
-                        procState = uidStateCallbackInfo.procState;
-                        procStateSeq = uidStateCallbackInfo.procStateSeq;
-                        capability = uidStateCallbackInfo.capability;
-                        uidStateCallbackInfo.isPending = false;
-                    }
-
-                    handleUidChanged(uid, procState, procStateSeq, capability);
+                    handleUidChanged((UidStateCallbackInfo) msg.obj);
                     return true;
                 }
                 case UID_MSG_GONE: {
@@ -5467,17 +5476,28 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         }
     };
 
-    void handleUidChanged(int uid, int procState, long procStateSeq,
-            @ProcessCapability int capability) {
+    void handleUidChanged(@NonNull UidStateCallbackInfo uidStateCallbackInfo) {
         Trace.traceBegin(Trace.TRACE_TAG_NETWORK, "onUidStateChanged");
         try {
             boolean updated;
+            final int uid;
+            final int procState;
+            final long procStateSeq;
+            final int capability;
             synchronized (mUidRulesFirstLock) {
+                synchronized (mUidStateCallbackInfos) {
+                    uid = uidStateCallbackInfo.uid;
+                    procState = uidStateCallbackInfo.procState;
+                    procStateSeq = uidStateCallbackInfo.procStateSeq;
+                    capability = uidStateCallbackInfo.capability;
+                    uidStateCallbackInfo.isPending = false;
+                }
+
                 // We received a uid state change callback, add it to the history so that it
                 // will be useful for debugging.
                 mLogger.uidStateChanged(uid, procState, procStateSeq, capability);
                 // Now update the network policy rules as per the updated uid state.
-                updated = updateUidStateUL(uid, procState, capability);
+                updated = updateUidStateUL(uid, procState, procStateSeq, capability);
                 // Updating the network rules is done, so notify AMS about this.
                 mActivityManagerInternal.notifyNetworkPolicyRulesUpdated(uid, procStateSeq);
             }

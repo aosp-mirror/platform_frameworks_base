@@ -99,16 +99,9 @@ public final class UidRecord {
     long lastNetworkUpdatedProcStateSeq;
 
     /**
-     * Last seq number for which AcitivityManagerService dispatched uid state change to
-     * NetworkPolicyManagerService.
+     * Indicates if any thread is waiting for network rules to get updated for {@link #mUid}.
      */
-    @GuardedBy("networkStateUpdate")
-    long lastDispatchedProcStateSeq;
-
-    /**
-     * Indicates if any thread is waiting for network rules to get updated for {@link #uid}.
-     */
-    volatile boolean waitingForNetwork;
+    volatile long procStateSeqWaitingForNetwork;
 
     /**
      * Indicates whether this uid has internet permission or not.
@@ -345,18 +338,6 @@ public final class UidRecord {
                 mUid) == PackageManager.PERMISSION_GRANTED;
     }
 
-    /**
-     * If the change being dispatched is not CHANGE_GONE (not interested in
-     * these changes), then update the {@link #lastDispatchedProcStateSeq} with
-     * {@link #curProcStateSeq}.
-     */
-    public void updateLastDispatchedProcStateSeq(int changeToDispatch) {
-        if ((changeToDispatch & CHANGE_GONE) == 0) {
-            lastDispatchedProcStateSeq = curProcStateSeq;
-        }
-    }
-
-
     void dumpDebug(ProtoOutputStream proto, long fieldId) {
         long token = proto.start(fieldId);
         proto.write(UidRecordProto.UID, mUid);
@@ -377,7 +358,6 @@ public final class UidRecord {
         proto.write(UidRecordProto.ProcStateSequence.CURURENT, curProcStateSeq);
         proto.write(UidRecordProto.ProcStateSequence.LAST_NETWORK_UPDATED,
                 lastNetworkUpdatedProcStateSeq);
-        proto.write(UidRecordProto.ProcStateSequence.LAST_DISPATCHED, lastDispatchedProcStateSeq);
         proto.end(seqToken);
 
         proto.end(token);
@@ -460,8 +440,6 @@ public final class UidRecord {
         sb.append(curProcStateSeq);
         sb.append(",");
         sb.append(lastNetworkUpdatedProcStateSeq);
-        sb.append(",");
-        sb.append(lastDispatchedProcStateSeq);
         sb.append(")}");
         return sb.toString();
     }
