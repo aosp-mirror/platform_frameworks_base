@@ -1637,7 +1637,7 @@
     <string name="wireless_display_route_description" msgid="8297563323032966831">"Безжичен дисплей"</string>
     <string name="media_route_button_content_description" msgid="2299223698196869956">"Предаване"</string>
     <string name="media_route_chooser_title" msgid="6646594924991269208">"Свързване с устройство"</string>
-    <string name="media_route_chooser_title_for_remote_display" msgid="3105906508794326446">"Екран за предаване към устройството"</string>
+    <string name="media_route_chooser_title_for_remote_display" msgid="3105906508794326446">"Предаване на екран към устройство"</string>
     <string name="media_route_chooser_searching" msgid="6119673534251329535">"Търсят се устройства…"</string>
     <string name="media_route_chooser_extended_settings" msgid="2506352159381327741">"Настройки"</string>
     <string name="media_route_controller_disconnect" msgid="7362617572732576959">"Прекратяване на връзката"</string>

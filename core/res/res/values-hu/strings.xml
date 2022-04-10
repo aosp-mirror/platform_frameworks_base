@@ -1637,7 +1637,7 @@
     <string name="wireless_display_route_description" msgid="8297563323032966831">"Vezeték nélküli kijelző"</string>
     <string name="media_route_button_content_description" msgid="2299223698196869956">"Tartalomátküldés"</string>
     <string name="media_route_chooser_title" msgid="6646594924991269208">"Csatlakozás adott eszközhöz"</string>
-    <string name="media_route_chooser_title_for_remote_display" msgid="3105906508794326446">"Képernyő átküldése az eszközre"</string>
+    <string name="media_route_chooser_title_for_remote_display" msgid="3105906508794326446">"Képernyő átküldése eszközre"</string>
     <string name="media_route_chooser_searching" msgid="6119673534251329535">"Eszközkeresés…"</string>
     <string name="media_route_chooser_extended_settings" msgid="2506352159381327741">"Beállítások"</string>
     <string name="media_route_controller_disconnect" msgid="7362617572732576959">"Leválasztás"</string>

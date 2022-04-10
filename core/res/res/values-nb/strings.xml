@@ -1923,7 +1923,7 @@
     <string name="zen_mode_alarm" msgid="7046911727540499275">"Til <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> (neste alarm)"</string>
     <string name="zen_mode_forever" msgid="740585666364912448">"Til du slår av"</string>
     <string name="zen_mode_forever_dnd" msgid="3423201955704180067">"Inntil du slår av Ikke forstyrr"</string>
-    <string name="zen_mode_rule_name_combination" msgid="7174598364351313725">"<xliff:g id="FIRST">%1$s</xliff:g>/<xliff:g id="REST">%2$s</xliff:g>"</string>
+    <string name="zen_mode_rule_name_combination" msgid="7174598364351313725">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="8009920446193610996">"Skjul"</string>
     <string name="zen_mode_feature_name" msgid="3785547207263754500">"«Ikke forstyrr»"</string>
     <string name="zen_mode_downtime_feature_name" msgid="5886005761431427128">"Pause"</string>
