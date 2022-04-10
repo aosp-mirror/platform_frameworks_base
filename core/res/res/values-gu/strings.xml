@@ -85,8 +85,8 @@
     <string name="RestrictedStateContentMsimTemplate" msgid="5228235722511044687">"તમારા કૅરિઅર દ્વારા સિમ <xliff:g id="SIMNUMBER">%d</xliff:g> માટે હંગામી રૂપે બંધ કરેલ છે"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"મોબાઇલ નેટવર્ક સુધી પહોંચી શકાતું નથી"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"પસંદગીનું નેટવર્ક બદલવાનો પ્રયાસ કરો. બદલવા માટે ટૅપ કરો."</string>
-    <string name="EmergencyCallWarningTitle" msgid="9164532362414787774">"ઇમર્જન્સી કૉલ કદાચ ઉપલબ્ધ ન હોય"</string>
-    <string name="EmergencyCallWarningSummary" msgid="3365701131304664899">"<xliff:g id="SPN">%s</xliff:g> વાઇ-ફાઇ પર ઇમર્જન્સી કૉલને સપોર્ટ કરતા નથી. વિગતો માટે ટૅપ કરો."</string>
+    <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"કટોકટીની કૉલિંગ સેવા અનુપલબ્ધ"</string>
+    <string name="EmergencyCallWarningSummary" msgid="1194185880092805497">"વાઇ-ફાઇ પરથી કટોકટીના કૉલ કરી શકાતા નથી"</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"અલર્ટ"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"કૉલ ફૉર્વર્ડિંગ"</string>
     <string name="notification_channel_emergency_callback" msgid="54074839059123159">"કટોકટી કૉલબૅક મોડ"</string>
@@ -585,8 +585,7 @@
     <string name="biometric_error_generic" msgid="6784371929985434439">"પ્રમાણિત કરવામાં ભૂલ આવી"</string>
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"સ્ક્રીન લૉકનો ઉપયોગ કરો"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"આગળ વધવા માટે તમારું સ્ક્રીન લૉક દાખલ કરો"</string>
-    <!-- no translation found for fingerprint_acquired_partial (4323789264604479684) -->
-    <skip />
+    <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"સેન્સર પર જોરથી દબાવો"</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"ફિંગરપ્રિન્ટ પ્રક્રિયા કરી શકાઈ નથી. કૃપા કરીને ફરી પ્રયાસ કરો."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"ફિંગરપ્રિન્ટ સેન્સર સાફ કરો અને ફરી પ્રયાસ કરો"</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"સેન્સર સાફ કરો અને ફરી પ્રયાસ કરો"</string>
@@ -599,8 +598,7 @@
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_error_not_match" msgid="4599441812893438961">"ફિંગરપ્રિન્ટ ઓળખી શકાઈ નથી"</string>
-    <!-- no translation found for fingerprint_udfps_error_not_match (8236930793223158856) -->
-    <skip />
+    <string name="fingerprint_udfps_error_not_match" msgid="8236930793223158856">"ફિંગરપ્રિન્ટ ઓળખી શકાઈ નથી"</string>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"ફિંગરપ્રિન્ટ પ્રમાણિત કરી"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"ચહેરા પ્રમાણિત"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"ચહેરા પ્રમાણિત, કૃપા કરીને કન્ફર્મ કરો"</string>
@@ -1935,9 +1933,36 @@
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> હાલમાં ઉપલબ્ધ નથી."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> ઉપલબ્ધ નથી"</string>
     <string name="app_streaming_blocked_title_for_permission_dialog" msgid="4483161748582966785">"પરવાનગી જરૂરી છે"</string>
-    <string name="app_streaming_blocked_message" product="tv" msgid="4003011766528814377">"અત્યારે આને તમારા <xliff:g id="DEVICE">%1$s</xliff:g> પર ઍક્સેસ કરી શકાતી નથી. તેના બદલે તમારા Android TV ડિવાઇસ પર પ્રયાસ કરો."</string>
-    <string name="app_streaming_blocked_message" product="tablet" msgid="4242053045964946062">"અત્યારે આને તમારા <xliff:g id="DEVICE">%1$s</xliff:g> પર ઍક્સેસ કરી શકાતી નથી. તેના બદલે તમારા ટૅબ્લેટ પર પ્રયાસ કરો."</string>
-    <string name="app_streaming_blocked_message" product="default" msgid="6159168735030739398">"અત્યારે આને તમારા <xliff:g id="DEVICE">%1$s</xliff:g> પર ઍક્સેસ કરી શકાતી નથી. તેના બદલે તમારા ફોન પર પ્રયાસ કરો."</string>
+    <!-- no translation found for app_streaming_blocked_title_for_camera_dialog (3935701653713853065) -->
+    <skip />
+    <!-- no translation found for app_streaming_blocked_title_for_fingerprint_dialog (3516853717714141951) -->
+    <skip />
+    <!-- no translation found for app_streaming_blocked_title_for_microphone_dialog (544822455127171206) -->
+    <skip />
+    <!-- no translation found for app_streaming_blocked_title_for_settings_dialog (196994247017450357) -->
+    <skip />
+    <!-- no translation found for app_streaming_blocked_title_for_settings_dialog (8222710146267948647) -->
+    <skip />
+    <!-- no translation found for app_streaming_blocked_title_for_settings_dialog (6895719984375299791) -->
+    <skip />
+    <!-- no translation found for app_streaming_blocked_message (5024599278277957935) -->
+    <skip />
+    <!-- no translation found for app_streaming_blocked_message (7491114163056552686) -->
+    <skip />
+    <!-- no translation found for app_streaming_blocked_message (1245180131667647277) -->
+    <skip />
+    <!-- no translation found for app_streaming_blocked_message_for_permission_dialog (6306583663205997979) -->
+    <skip />
+    <!-- no translation found for app_streaming_blocked_message_for_permission_dialog (6545624942642129664) -->
+    <skip />
+    <!-- no translation found for app_streaming_blocked_message_for_permission_dialog (8462740631707923000) -->
+    <skip />
+    <!-- no translation found for app_streaming_blocked_message_for_fingerprint_dialog (3470977315395784567) -->
+    <skip />
+    <!-- no translation found for app_streaming_blocked_message_for_fingerprint_dialog (698460091901465092) -->
+    <skip />
+    <!-- no translation found for app_streaming_blocked_message_for_fingerprint_dialog (8552691971910603907) -->
+    <skip />
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"આ ઍપ Androidના જૂના વર્ઝન માટે બનાવવામાં આવ્યું હતું અને તે કદાચ તે યોગ્ય રીતે કાર્ય કરી શકશે નહીં. અપડેટ માટે તપાસવાનો પ્રયાસ કરો અથવા ડેવલપરનો સંપર્ક કરો."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"અપડેટ માટે તપાસો"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"તમારી પાસે નવા સંદેશા છે"</string>
@@ -2028,8 +2053,7 @@
     <string name="harmful_app_warning_open_anyway" msgid="5963657791740211807">"કોઈપણ રીતે ખોલો"</string>
     <string name="harmful_app_warning_title" msgid="8794823880881113856">"નુકસાનકારક ઍપ મળી આવી છે"</string>
     <string name="log_access_confirmation_title" msgid="2343578467290592708">"<xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g>ને ડિવાઇસનો બધો લૉગ ઍક્સેસ કરવાની મંજૂરી આપવી છે?"</string>
-    <!-- no translation found for log_access_confirmation_allow (5302517782599389507) -->
-    <skip />
+    <string name="log_access_confirmation_allow" msgid="5302517782599389507">"એક-વખતના ઍક્સેસની મંજૂરી આપો"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"મંજૂરી આપશો નહીં"</string>
     <string name="log_access_confirmation_body" msgid="6581985716241928135">"તમારા ડિવાઇસ પર થતી કામગીરીને ડિવાઇસ લૉગ રેકોર્ડ કરે છે. ઍપ આ લૉગનો ઉપયોગ સમસ્યાઓ શોધી તેનું નિરાકરણ કરવા માટે કરી શકે છે.\n\nઅમુક લૉગમાં સંવેદનશીલ માહિતી હોઈ શકે, આથી ડિવાઇસનો બધો લૉગ ઍક્સેસ કરવાની મંજૂરી માત્ર તમારી વિશ્વાસપાત્ર ઍપને જ આપો. \n\nતમે આ ઍપને ડિવાઇસનો બધો લૉગ ઍક્સેસ કરવાની મંજૂરી નહીં આપી હોય, તો પણ તે તેના પોતાના લૉગ ઍક્સેસ કરી શકે છે. તમારા ડિવાઇસના નિર્માતા હજુ પણ કદાચ તમારા ડિવાઇસ પર અમુક લૉગ અથવા માહિતી ઍક્સેસ કરી શકે છે. વધુ જાણો"</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"ફરીથી બતાવશો નહીં"</string>
@@ -2043,6 +2067,14 @@
     <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"વધુ જાણવા અને બદલવા માટે ટૅપ કરો."</string>
     <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"ખલેલ પાડશો નહીંમાં ફેરફાર થયો છે"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"શું બ્લૉક કરેલ છે તે તપાસવા માટે ટૅપ કરો."</string>
+    <!-- no translation found for review_notification_settings_title (5102557424459810820) -->
+    <skip />
+    <!-- no translation found for review_notification_settings_text (5696497037817525074) -->
+    <skip />
+    <!-- no translation found for review_notification_settings_remind_me_action (1081081018678480907) -->
+    <skip />
+    <!-- no translation found for review_notification_settings_dismiss (4160916504616428294) -->
+    <skip />
     <string name="notification_app_name_system" msgid="3045196791746735601">"સિસ્ટમ"</string>
     <string name="notification_app_name_settings" msgid="9088548800899952531">"સેટિંગ"</string>
     <string name="notification_appops_camera_active" msgid="8177643089272352083">"કૅમેરા"</string>
@@ -2261,14 +2293,10 @@
     <string name="ui_translation_accessibility_translated_text" msgid="3197547218178944544">"<xliff:g id="MESSAGE">%1$s</xliff:g>નો અનુવાદ કર્યો."</string>
     <string name="ui_translation_accessibility_translation_finished" msgid="3057830947610088465">"<xliff:g id="FROM_LANGUAGE">%1$s</xliff:g>થી <xliff:g id="TO_LANGUAGE">%2$s</xliff:g>માં સંદેશનો અનુવાદ કરવામાં આવ્યો."</string>
     <string name="notification_channel_abusive_bg_apps" msgid="6092140213264920355">"બૅકગ્રાઉન્ડ પ્રવૃત્તિ"</string>
-    <!-- no translation found for notification_title_abusive_bg_apps (3258460527676573815) -->
-    <skip />
-    <!-- no translation found for notification_title_long_running_fgs (8170284286477131587) -->
-    <skip />
-    <!-- no translation found for notification_content_abusive_bg_apps (9180610713603474720) -->
-    <skip />
-    <!-- no translation found for notification_content_long_running_fgs (8258193410039977101) -->
-    <skip />
+    <string name="notification_title_abusive_bg_apps" msgid="3258460527676573815">"કોઈ ઍપ બૅટરીનો વપરાશ કરી રહી છે"</string>
+    <string name="notification_title_long_running_fgs" msgid="8170284286477131587">"કોઈ ઍપ હજી પણ સક્રિય છે"</string>
+    <string name="notification_content_abusive_bg_apps" msgid="9180610713603474720">"<xliff:g id="APP">%1$s</xliff:g> દ્વારા બૅકગ્રાઉન્ડમાં બૅટરીનો વપરાશ કરવામાં આવી રહ્યો છે. રિવ્યૂ કરવા માટે ટૅપ કરો."</string>
+    <string name="notification_content_long_running_fgs" msgid="8258193410039977101">"<xliff:g id="APP">%1$s</xliff:g>, બૅટરીની આવરદાને અસર કરી શકે છે. બધી સક્રિય ઍપનો રિવ્યૂ કરવા માટે ટૅપ કરો."</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"સક્રિય ઍપ ચેક કરો"</string>
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"તમારા <xliff:g id="DEVICE">%1$s</xliff:g> પરથી ફોનના કૅમેરાનો ઍક્સેસ કરી શકતાં નથી"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"તમારા <xliff:g id="DEVICE">%1$s</xliff:g> પરથી ટૅબ્લેટના કૅમેરાનો ઍક્સેસ કરી શકતાં નથી"</string>
