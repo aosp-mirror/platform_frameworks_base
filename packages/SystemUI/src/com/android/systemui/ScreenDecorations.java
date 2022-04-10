@@ -200,48 +200,44 @@ public class ScreenDecorations extends CoreStartable implements Tunable , Dumpab
         }
     };
 
-    private PrivacyDotViewController.ShowingListener mPrivacyDotShowingListener =
+    @VisibleForTesting
+    PrivacyDotViewController.ShowingListener mPrivacyDotShowingListener =
             new PrivacyDotViewController.ShowingListener() {
         @Override
         public void onPrivacyDotShown(@Nullable View v) {
-            // We don't need to control the window visibility when the hwc doesn't support screen
-            // decoration since the overlay windows are always visible in this case.
-            if (mHwcScreenDecorationSupport == null || v == null) {
-                return;
-            }
-            mExecutor.execute(() -> {
-                for (int i = 0; i < BOUNDS_POSITION_LENGTH; i++) {
-                    if (mOverlays[i] == null) {
-                        continue;
-                    }
-                    final ViewGroup overlayView = mOverlays[i].getRootView();
-                    if (overlayView.findViewById(v.getId()) != null) {
-                        overlayView.setVisibility(View.VISIBLE);
-                    }
-                }
-            });
+            setOverlayWindowVisibilityIfViewExist(v, View.VISIBLE);
         }
 
         @Override
         public void onPrivacyDotHidden(@Nullable View v) {
-            // We don't need to control the window visibility when the hwc doesn't support screen
-            // decoration since the overlay windows are always visible in this case.
-            if (mHwcScreenDecorationSupport == null || v == null) {
-                return;
-            }
-            mExecutor.execute(() -> {
-                for (int i = 0; i < BOUNDS_POSITION_LENGTH; i++) {
-                    if (mOverlays[i] == null) {
-                        continue;
-                    }
-                    final ViewGroup overlayView = mOverlays[i].getRootView();
-                    if (overlayView.findViewById(v.getId()) != null) {
-                        overlayView.setVisibility(View.INVISIBLE);
-                    }
-                }
-            });
+            setOverlayWindowVisibilityIfViewExist(v, View.INVISIBLE);
         }
     };
+
+    @VisibleForTesting
+    protected void setOverlayWindowVisibilityIfViewExist(@Nullable View view,
+            @View.Visibility int visibility) {
+        if (view == null) {
+            return;
+        }
+        mExecutor.execute(() -> {
+            // We don't need to control the window visibility if rounded corners or cutout is drawn
+            // on sw layer since the overlay windows are always visible in this case.
+            if (mOverlays == null || !isOnlyPrivacyDotInSwLayer()) {
+                return;
+            }
+
+            for (final OverlayWindow overlay : mOverlays) {
+                if (overlay == null) {
+                    continue;
+                }
+                if (overlay.getView(view.getId()) != null) {
+                    overlay.getRootView().setVisibility(visibility);
+                    return;
+                }
+            }
+        });
+    }
 
     private static boolean eq(DisplayDecorationSupport a, DisplayDecorationSupport b) {
         if (a == null) return (b == null);
@@ -268,7 +264,6 @@ public class ScreenDecorations extends CoreStartable implements Tunable , Dumpab
         mDotViewController = dotViewController;
         mThreadFactory = threadFactory;
         mDotFactory = dotFactory;
-        dotViewController.setShowingListener(mPrivacyDotShowingListener);
     }
 
     @Override
@@ -425,18 +420,24 @@ public class ScreenDecorations extends CoreStartable implements Tunable , Dumpab
                 removeHwcOverlay();
             }
             final DisplayCutout cutout = getCutout();
+            final boolean isOnlyPrivacyDotInSwLayer = isOnlyPrivacyDotInSwLayer();
             for (int i = 0; i < BOUNDS_POSITION_LENGTH; i++) {
-                if (shouldShowCutout(i, cutout) || shouldShowRoundedCorner(i, cutout)
-                        || shouldShowPrivacyDot(i, cutout)) {
+                if (shouldShowSwLayerCutout(i, cutout) || shouldShowSwLayerRoundedCorner(i, cutout)
+                        || shouldShowSwLayerPrivacyDot(i, cutout)) {
                     Pair<List<DecorProvider>, List<DecorProvider>> pair =
                             DecorProviderKt.partitionAlignedBound(decorProviders, i);
                     decorProviders = pair.getSecond();
-                    createOverlay(i, cutout, pair.getFirst());
+                    createOverlay(i, cutout, pair.getFirst(), isOnlyPrivacyDotInSwLayer);
                 } else {
                     removeOverlay(i);
                 }
             }
 
+            if (isOnlyPrivacyDotInSwLayer) {
+                mDotViewController.setShowingListener(mPrivacyDotShowingListener);
+            } else {
+                mDotViewController.setShowingListener(null);
+            }
             final View tl, tr, bl, br;
             if ((tl = getOverlayView(R.id.privacy_dot_top_left_container)) != null
                     && (tr = getOverlayView(R.id.privacy_dot_top_right_container)) != null
@@ -530,19 +531,51 @@ public class ScreenDecorations extends CoreStartable implements Tunable , Dumpab
         mOverlays[pos] = null;
     }
 
+    @View.Visibility
+    private int getWindowVisibility(@NonNull OverlayWindow overlay,
+            boolean isOnlyPrivacyDotInSwLayer) {
+        if (!isOnlyPrivacyDotInSwLayer) {
+            // Multiple views inside overlay, no need to optimize
+            return View.VISIBLE;
+        }
+
+        int[] ids = {
+                R.id.privacy_dot_top_left_container,
+                R.id.privacy_dot_top_right_container,
+                R.id.privacy_dot_bottom_left_container,
+                R.id.privacy_dot_bottom_right_container
+        };
+        for (int id: ids) {
+            final View view = overlay.getView(id);
+            if (view != null && view.getVisibility() == View.VISIBLE) {
+                // Only privacy dot in sw layers, overlay shall be VISIBLE if one of privacy dot
+                // views inside this overlay is VISIBLE
+                return View.VISIBLE;
+            }
+        }
+        // Only privacy dot in sw layers, overlay shall be INVISIBLE like default if no privacy dot
+        // view inside this overlay is VISIBLE.
+        return View.INVISIBLE;
+    }
+
     private void createOverlay(
             @BoundsPosition int pos,
             @Nullable DisplayCutout cutout,
-            @NonNull List<DecorProvider> decorProviders) {
+            @NonNull List<DecorProvider> decorProviders,
+            boolean isOnlyPrivacyDotInSwLayer) {
         if (mOverlays == null) {
             mOverlays = new OverlayWindow[BOUNDS_POSITION_LENGTH];
         }
 
         if (mOverlays[pos] != null) {
+            // When mOverlay[pos] is not null and only privacy dot in sw layer, use privacy dot
+            // view's visibility
+            mOverlays[pos].getRootView().setVisibility(
+                    getWindowVisibility(mOverlays[pos], isOnlyPrivacyDotInSwLayer));
             return;
         }
 
-        mOverlays[pos] = overlayForPosition(pos, decorProviders);
+        mOverlays[pos] = overlayForPosition(pos, decorProviders, isOnlyPrivacyDotInSwLayer);
         final ViewGroup overlayView = mOverlays[pos].getRootView();
         overlayView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
         overlayView.setAlpha(0);
@@ -612,18 +645,18 @@ public class ScreenDecorations extends CoreStartable implements Tunable , Dumpab
      */
     private OverlayWindow overlayForPosition(
             @BoundsPosition int pos,
-            @NonNull List<DecorProvider> decorProviders) {
+            @NonNull List<DecorProvider> decorProviders,
+            boolean isOnlyPrivacyDotInSwLayer) {
         final OverlayWindow currentOverlay = new OverlayWindow(LayoutInflater.from(mContext), pos);
         decorProviders.forEach(provider -> {
             removeOverlayView(provider.getViewId());
             currentOverlay.addDecorProvider(provider, mRotation);
-            // If the hwc supports screen decoration and privacy dot is enabled, it means there will
-            // be only privacy dot in mOverlay. So set the initial visibility of mOverlays to
-            // INVISIBLE and will only set it to VISIBLE when the privacy dot is showing.
-            if (mHwcScreenDecorationSupport != null) {
-                currentOverlay.getRootView().setVisibility(View.INVISIBLE);
-            }
         });
+        // When only privacy dot in mOverlay, set the initial visibility of mOverlays to
+        // INVISIBLE and set it to VISIBLE when the privacy dot is showing.
+        if (isOnlyPrivacyDotInSwLayer) {
+            currentOverlay.getRootView().setVisibility(View.INVISIBLE);
+        }
         return currentOverlay;
     }
 
@@ -842,6 +875,7 @@ public class ScreenDecorations extends CoreStartable implements Tunable , Dumpab
         pw.println("ScreenDecorations state:");
         pw.println("  DEBUG_DISABLE_SCREEN_DECORATIONS:" + DEBUG_DISABLE_SCREEN_DECORATIONS);
         pw.println("  mIsPrivacyDotEnabled:" + isPrivacyDotEnabled());
+        pw.println("  isOnlyPrivacyDotInSwLayer:" + isOnlyPrivacyDotInSwLayer());
         pw.println("  mPendingRotationChange:" + mPendingRotationChange);
         if (mHwcScreenDecorationSupport != null) {
             pw.println("  mHwcScreenDecorationSupport:");
@@ -923,7 +957,7 @@ public class ScreenDecorations extends CoreStartable implements Tunable , Dumpab
             return;
         }
         rounded.setVisibility(View.GONE);
-        if (shouldShowRoundedCorner(pos, cutout)) {
+        if (shouldShowSwLayerRoundedCorner(pos, cutout)) {
             final int gravity = getRoundedCornerGravity(pos, id == R.id.left);
             ((FrameLayout.LayoutParams) rounded.getLayoutParams()).gravity = gravity;
             setRoundedCornerOrientation(rounded, gravity);
@@ -997,21 +1031,30 @@ public class ScreenDecorations extends CoreStartable implements Tunable , Dumpab
         }
     }
 
-    private boolean shouldShowRoundedCorner(@BoundsPosition int pos,
+    private boolean shouldShowSwLayerRoundedCorner(@BoundsPosition int pos,
             @Nullable DisplayCutout cutout) {
         return hasRoundedCorners() && isDefaultShownOverlayPos(pos, cutout)
                 && mHwcScreenDecorationSupport == null;
     }
 
-    private boolean shouldShowPrivacyDot(@BoundsPosition int pos, @Nullable DisplayCutout cutout) {
+    private boolean shouldShowSwLayerPrivacyDot(@BoundsPosition int pos,
+            @Nullable DisplayCutout cutout) {
         return isPrivacyDotEnabled() && isDefaultShownOverlayPos(pos, cutout);
     }
 
-    private boolean shouldShowCutout(@BoundsPosition int pos, @Nullable DisplayCutout cutout) {
+    private boolean shouldShowSwLayerCutout(@BoundsPosition int pos,
+            @Nullable DisplayCutout cutout) {
         final Rect[] bounds = cutout == null ? null : cutout.getBoundingRectsAll();
         final int rotatedPos = getBoundPositionFromRotation(pos, mRotation);
         return (bounds != null && !bounds[rotatedPos].isEmpty()
                 && mHwcScreenDecorationSupport == null);
+    }
+
+    private boolean isOnlyPrivacyDotInSwLayer() {
+        return isPrivacyDotEnabled()
+                && (mHwcScreenDecorationSupport != null
+                    || (!hasRoundedCorners() && !shouldDrawCutout())
+                );
     }
 
     private boolean shouldDrawCutout() {

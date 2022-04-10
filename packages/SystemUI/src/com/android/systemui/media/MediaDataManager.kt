@@ -161,6 +161,10 @@ class MediaDataManager(
         @JvmField
         val MAX_COMPACT_ACTIONS = 3
 
+        // Maximum number of actions allowed in expanded view
+        @JvmField
+        val MAX_NOTIFICATION_ACTIONS = MediaViewHolder.genericButtonIds.size
+
         /** Maximum number of [PlaybackState.CustomAction] buttons supported */
         @JvmField
         val MAX_CUSTOM_ACTIONS = 4
@@ -727,6 +731,11 @@ class MediaDataManager(
 
         if (actions != null) {
             for ((index, action) in actions.withIndex()) {
+                if (index == MAX_NOTIFICATION_ACTIONS) {
+                    Log.w(TAG, "Too many notification actions for ${sbn.key}," +
+                        " limiting to first $MAX_NOTIFICATION_ACTIONS")
+                    break
+                }
                 if (action.getIcon() == null) {
                     if (DEBUG) Log.i(TAG, "No icon for action $index ${action.title}")
                     actionsToShowCollapsed.remove(index)
@@ -843,18 +852,23 @@ class MediaDataManager(
     }
 
     /**
-     * Get a [MediaAction] representing one of
-     * - [PlaybackState.ACTION_PLAY]
-     * - [PlaybackState.ACTION_PAUSE]
-     * - [PlaybackState.ACTION_SKIP_TO_PREVIOUS]
-     * - [PlaybackState.ACTION_SKIP_TO_NEXT]
+     * Create a [MediaAction] for a given action and media session
+     *
+     * @param controller MediaController for the session
+     * @param stateActions The actions included with the session's [PlaybackState]
+     * @param action A [PlaybackState.Actions] value representing what action to generate. One of:
+     *      [PlaybackState.ACTION_PLAY]
+     *      [PlaybackState.ACTION_PAUSE]
+     *      [PlaybackState.ACTION_SKIP_TO_PREVIOUS]
+     *      [PlaybackState.ACTION_SKIP_TO_NEXT]
+     * @return A [MediaAction] with correct values set, or null if the state doesn't support it
      */
     private fun getStandardAction(
         controller: MediaController,
         stateActions: Long,
-        action: Long
+        @PlaybackState.Actions action: Long
     ): MediaAction? {
-        if (stateActions and action == 0L) {
+        if (!includesAction(stateActions, action)) {
             return null
         }
 
@@ -893,6 +907,17 @@ class MediaDataManager(
             }
             else -> null
         }
+    }
+
+    /**
+     * Check whether the actions from a [PlaybackState] include a specific action
+     */
+    private fun includesAction(stateActions: Long, @PlaybackState.Actions action: Long): Boolean {
+        if ((action == PlaybackState.ACTION_PLAY || action == PlaybackState.ACTION_PAUSE) &&
+                (stateActions and PlaybackState.ACTION_PLAY_PAUSE > 0L)) {
+            return true
+        }
+        return (stateActions and action != 0L)
     }
 
     /**
