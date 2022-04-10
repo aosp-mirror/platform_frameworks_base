@@ -631,7 +631,7 @@ public abstract class ActivityManagerInternal {
      * @param uid uid
      * @param pid pid of the ProcessRecord that is pending top.
      */
-    public abstract void addPendingTopUid(int uid, int pid);
+    public abstract void addPendingTopUid(int uid, int pid, @Nullable IApplicationThread thread);
 
     /**
      * Delete uid from the ActivityManagerService PendingStartActivityUids list.
