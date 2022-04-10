@@ -805,6 +805,7 @@
     <string name="controls_media_button_pause" msgid="8614887780950376258">"Pause"</string>
     <string name="controls_media_button_prev" msgid="8126822360056482970">"Previous track"</string>
     <string name="controls_media_button_next" msgid="6662636627525947610">"Next track"</string>
+    <string name="controls_media_button_connecting" msgid="3138354625847598095">"Connecting"</string>
     <string name="controls_media_smartspace_rec_title" msgid="1699818353932537407">"Play"</string>
     <string name="controls_media_smartspace_rec_description" msgid="4136242327044070732">"Open <xliff:g id="APP_LABEL">%1$s</xliff:g>"</string>
     <string name="controls_media_smartspace_rec_item_description" msgid="2189271793070870883">"Play <xliff:g id="SONG_NAME">%1$s</xliff:g> by <xliff:g id="ARTIST_NAME">%2$s</xliff:g> from <xliff:g id="APP_LABEL">%3$s</xliff:g>"</string>
