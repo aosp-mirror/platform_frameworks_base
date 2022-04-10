@@ -135,8 +135,7 @@
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="2242167416140740920">"Դեմքը ճանաչվեց"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"Հաստատվեց"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"Ավարտելու համար հպեք «Հաստատել»"</string>
-    <!-- no translation found for biometric_dialog_tap_confirm_with_face (1092050545851021991) -->
-    <skip />
+    <string name="biometric_dialog_tap_confirm_with_face" msgid="1092050545851021991">"Ապակողպվել է դեմքով։ Սեղմեք ապակողպման պատկերակը։"</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"Նույնականացված է"</string>
     <string name="biometric_dialog_use_pin" msgid="8385294115283000709">"Օգտագործել PIN կոդ"</string>
     <string name="biometric_dialog_use_pattern" msgid="2315593393167211194">"Օգտագործել նախշ"</string>
@@ -311,10 +310,8 @@
     <string name="notification_tap_again" msgid="4477318164947497249">"Կրկին հպեք՝ բացելու համար"</string>
     <string name="tap_again" msgid="1315420114387908655">"Նորից հպեք"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"Բացելու համար սահեցրեք վերև"</string>
-    <!-- no translation found for keyguard_unlock_press (9140109453735019209) -->
-    <skip />
-    <!-- no translation found for keyguard_face_successful_unlock_press (25520941264602588) -->
-    <skip />
+    <string name="keyguard_unlock_press" msgid="9140109453735019209">"Բացեք՝ սեղմելով ապակողպման պատկերակը"</string>
+    <string name="keyguard_face_successful_unlock_press" msgid="25520941264602588">"Ապակողպվել է դեմքով։ Բացեք՝ սեղմելով ապակողպման պատկերակը։"</string>
     <string name="keyguard_retry" msgid="886802522584053523">"Սահեցրեք վերև՝ նորից փորձելու համար"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"Ապակողպեք՝ NFC-ն օգտագործելու համար"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"Այս սարքը պատկանում է ձեր կազմակերպությանը"</string>
@@ -611,7 +608,7 @@
     <item msgid="5874146774389433072">"Աջակողմյան"</item>
   </string-array>
     <string name="save" msgid="3392754183673848006">"Պահել"</string>
-    <string name="reset" msgid="8715144064608810383">"Վերակայել"</string>
+    <string name="reset" msgid="8715144064608810383">"Զրոյացնել"</string>
     <string name="clipboard" msgid="8517342737534284617">"Սեղմատախտակ"</string>
     <string name="accessibility_key" msgid="3471162841552818281">"Հատուկ նավիգացիայի կոճակ"</string>
     <string name="left_keycode" msgid="8211040899126637342">"Ձախ ստեղնային կոդ"</string>
@@ -808,6 +805,8 @@
     <string name="controls_media_button_pause" msgid="8614887780950376258">"Դադարեցնել"</string>
     <string name="controls_media_button_prev" msgid="8126822360056482970">"Նախորդ կատարումը"</string>
     <string name="controls_media_button_next" msgid="6662636627525947610">"Հաջորդ կատարումը"</string>
+    <!-- no translation found for controls_media_button_connecting (3138354625847598095) -->
+    <skip />
     <string name="controls_media_smartspace_rec_title" msgid="1699818353932537407">"Նվագարկել"</string>
     <string name="controls_media_smartspace_rec_description" msgid="4136242327044070732">"Բացեք <xliff:g id="APP_LABEL">%1$s</xliff:g> հավելվածը"</string>
     <string name="controls_media_smartspace_rec_item_description" msgid="2189271793070870883">"Նվագարկել <xliff:g id="SONG_NAME">%1$s</xliff:g> երգը <xliff:g id="ARTIST_NAME">%2$s</xliff:g>-ի կատարմամբ <xliff:g id="APP_LABEL">%3$s</xliff:g> հավելվածից"</string>

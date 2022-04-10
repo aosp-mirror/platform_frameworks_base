@@ -135,8 +135,7 @@
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="2242167416140740920">"Kasvot tunnistettu"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"Vahvistettu"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"Valitse lopuksi Vahvista"</string>
-    <!-- no translation found for biometric_dialog_tap_confirm_with_face (1092050545851021991) -->
-    <skip />
+    <string name="biometric_dialog_tap_confirm_with_face" msgid="1092050545851021991">"Avattu kasvojen avulla. Jatka lukituksen avauskuvakkeella."</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"Todennettu"</string>
     <string name="biometric_dialog_use_pin" msgid="8385294115283000709">"Käytä PIN-koodia"</string>
     <string name="biometric_dialog_use_pattern" msgid="2315593393167211194">"Käytä kuviota"</string>
@@ -311,10 +310,8 @@
     <string name="notification_tap_again" msgid="4477318164947497249">"Avaa napauttamalla uudelleen"</string>
     <string name="tap_again" msgid="1315420114387908655">"Napauta uudelleen"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"Avaa pyyhkäisemällä ylös"</string>
-    <!-- no translation found for keyguard_unlock_press (9140109453735019209) -->
-    <skip />
-    <!-- no translation found for keyguard_face_successful_unlock_press (25520941264602588) -->
-    <skip />
+    <string name="keyguard_unlock_press" msgid="9140109453735019209">"Jatka painamalla lukituksen avauskuvaketta."</string>
+    <string name="keyguard_face_successful_unlock_press" msgid="25520941264602588">"Avattu kasvojen avulla. Jatka lukituksen avauskuvakkeella."</string>
     <string name="keyguard_retry" msgid="886802522584053523">"Yritä uudelleen pyyhkäisemällä ylös"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"Avaa lukitus, jotta voit käyttää NFC:tä"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"Organisaatiosi omistaa tämän laitteen"</string>
@@ -808,6 +805,8 @@
     <string name="controls_media_button_pause" msgid="8614887780950376258">"Keskeytä"</string>
     <string name="controls_media_button_prev" msgid="8126822360056482970">"Edellinen kappale"</string>
     <string name="controls_media_button_next" msgid="6662636627525947610">"Seuraava kappale"</string>
+    <!-- no translation found for controls_media_button_connecting (3138354625847598095) -->
+    <skip />
     <string name="controls_media_smartspace_rec_title" msgid="1699818353932537407">"Toista"</string>
     <string name="controls_media_smartspace_rec_description" msgid="4136242327044070732">"Avaa <xliff:g id="APP_LABEL">%1$s</xliff:g>"</string>
     <string name="controls_media_smartspace_rec_item_description" msgid="2189271793070870883">"Soita <xliff:g id="SONG_NAME">%1$s</xliff:g> (<xliff:g id="ARTIST_NAME">%2$s</xliff:g>) sovelluksessa <xliff:g id="APP_LABEL">%3$s</xliff:g>"</string>
