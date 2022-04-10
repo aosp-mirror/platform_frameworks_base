@@ -1244,7 +1244,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         mSession.windowAddedLocked();
     }
 
-    boolean updateGlobalScale() {
+    void updateGlobalScale() {
         if (hasCompatScale()) {
             if (mOverrideScale != 1f) {
                 mGlobalScale = mToken.hasSizeCompatBounds()
@@ -1254,11 +1254,10 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                 mGlobalScale = mToken.getSizeCompatScale();
             }
             mInvGlobalScale = 1f / mGlobalScale;
-            return true;
+            return;
         }
 
         mGlobalScale = mInvGlobalScale = 1f;
-        return false;
     }
 
     /**
@@ -1511,15 +1510,14 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         final boolean dragResizingChanged = isDragResizeChanged()
                 && !isDragResizingChangeReported();
 
+        final boolean attachedFrameChanged = LOCAL_LAYOUT
+                && mLayoutAttached && getParentWindow().frameChanged();
+
         if (DEBUG) {
             Slog.v(TAG_WM, "Resizing " + this + ": configChanged=" + configChanged
                     + " dragResizingChanged=" + dragResizingChanged
                     + " last=" + mWindowFrames.mLastFrame + " frame=" + mWindowFrames.mFrame);
         }
-
-        // We update mLastFrame always rather than in the conditional with the last inset
-        // variables, because mFrameSizeChanged only tracks the width and height changing.
-        updateLastFrames();
 
         // Add a window that is using blastSync to the resizing list if it hasn't been reported
         // already. This because the window is waiting on a finishDrawing from the client.
@@ -1527,7 +1525,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                 || configChanged
                 || insetsChanged
                 || dragResizingChanged
-                || shouldSendRedrawForSync()) {
+                || shouldSendRedrawForSync()
+                || attachedFrameChanged) {
             ProtoLog.v(WM_DEBUG_RESIZE,
                         "Resize reasons for w=%s:  %s configChanged=%b dragResizingChanged=%b",
                         this, mWindowFrames.getInsetsChangedInfo(),
@@ -1581,6 +1580,10 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                         - mWmService.mDisplayFreezeTime);
             }
         }
+    }
+
+    private boolean frameChanged() {
+        return !mWindowFrames.mFrame.equals(mWindowFrames.mLastFrame);
     }
 
     boolean getOrientationChanging() {
@@ -3834,6 +3837,12 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         if (mInvGlobalScale != 1.0f && hasCompatScale()) {
             outFrames.displayFrame.scale(mInvGlobalScale);
         }
+        if (mLayoutAttached) {
+            if (outFrames.attachedFrame == null) {
+                outFrames.attachedFrame = new Rect();
+            }
+            outFrames.attachedFrame.set(getParentWindow().getCompatFrame());
+        }
 
         // Note: in the cases where the window is tied to an activity, we should not send a
         // configuration update when the window has requested to be hidden. Doing so can lead to
@@ -3884,6 +3893,10 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         // that may cause WINDOW_FREEZE_TIMEOUT because resizing the client keeps failing.
         mDragResizingChangeReported = true;
         mWindowFrames.clearReportResizeHints();
+
+        // We update mLastFrame always rather than in the conditional with the last inset
+        // variables, because mFrameSizeChanged only tracks the width and height changing.
+        updateLastFrames();
 
         final int prevRotation = mLastReportedConfiguration
                 .getMergedConfiguration().windowConfiguration.getRotation();

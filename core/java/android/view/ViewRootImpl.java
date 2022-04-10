@@ -60,13 +60,11 @@ import static android.view.WindowInsetsController.BEHAVIOR_DEFAULT;
 import static android.view.WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE;
 import static android.view.WindowLayout.UNSPECIFIED_LENGTH;
 import static android.view.WindowManager.LayoutParams.FIRST_APPLICATION_WINDOW;
-import static android.view.WindowManager.LayoutParams.FIRST_SUB_WINDOW;
 import static android.view.WindowManager.LayoutParams.FLAG_FULLSCREEN;
 import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN;
 import static android.view.WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION;
 import static android.view.WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS;
 import static android.view.WindowManager.LayoutParams.LAST_APPLICATION_WINDOW;
-import static android.view.WindowManager.LayoutParams.LAST_SUB_WINDOW;
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_APPEARANCE_CONTROLLED;
@@ -77,7 +75,6 @@ import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_INSET_PARENT_
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_LAYOUT_SIZE_EXTENDED_BY_CUTOUT;
 import static android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE;
 import static android.view.WindowManager.LayoutParams.SOFT_INPUT_MASK_ADJUST;
-import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_ATTACHED_DIALOG;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
 import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR_ADDITIONAL;
@@ -565,8 +562,6 @@ public final class ViewRootImpl implements ViewParent,
     private final Rect mTempRect = new Rect();
 
     private final WindowLayout mWindowLayout;
-
-    private ViewRootImpl mParentViewRoot;
 
     // This is used to reduce the race between window focus changes being dispatched from
     // the window manager and input events coming through the input system.
@@ -1185,7 +1180,6 @@ public final class ViewRootImpl implements ViewParent,
                 if (panelParentView != null) {
                     mAttachInfo.mPanelParentWindowToken
                             = panelParentView.getApplicationWindowToken();
-                    mParentViewRoot = panelParentView.getViewRootImpl();
                 }
                 mAdded = true;
                 int res; /* = WindowManagerImpl.ADD_OKAY; */
@@ -1216,14 +1210,21 @@ public final class ViewRootImpl implements ViewParent,
                     collectViewAttributes();
                     adjustLayoutParamsForCompatibility(mWindowAttributes);
                     controlInsetsForCompatibility(mWindowAttributes);
+
+                    Rect attachedFrame = new Rect();
                     res = mWindowSession.addToDisplayAsUser(mWindow, mWindowAttributes,
                             getHostVisibility(), mDisplay.getDisplayId(), userId,
                             mInsetsController.getRequestedVisibilities(), inputChannel, mTempInsets,
-                            mTempControls);
+                            mTempControls, attachedFrame);
+                    if (!attachedFrame.isValid()) {
+                        attachedFrame = null;
+                    }
                     if (mTranslator != null) {
                         mTranslator.translateInsetsStateInScreenToAppWindow(mTempInsets);
                         mTranslator.translateSourceControlsInScreenToAppWindow(mTempControls);
+                        mTranslator.translateRectInScreenToAppWindow(attachedFrame);
                     }
+                    mTmpFrames.attachedFrame = attachedFrame;
                 } catch (RemoteException e) {
                     mAdded = false;
                     mView = null;
@@ -1250,8 +1251,8 @@ public final class ViewRootImpl implements ViewParent,
                 mWindowLayout.computeFrames(mWindowAttributes, state,
                         displayCutoutSafe, winConfig.getBounds(), winConfig.getWindowingMode(),
                         UNSPECIFIED_LENGTH, UNSPECIFIED_LENGTH,
-                        mInsetsController.getRequestedVisibilities(),
-                        getAttachedWindowFrame(), 1f /* compactScale */, mTmpFrames);
+                        mInsetsController.getRequestedVisibilities(), 1f /* compactScale */,
+                        mTmpFrames);
                 setFrame(mTmpFrames.frame);
                 registerBackCallbackOnWindow();
                 if (!WindowOnBackInvokedDispatcher.isOnBackInvokedCallbackEnabled(mContext)) {
@@ -1371,14 +1372,6 @@ public final class ViewRootImpl implements ViewParent,
                 AnimationHandler.requestAnimatorsEnabled(mAppVisible, this);
             }
         }
-    }
-
-    private Rect getAttachedWindowFrame() {
-        final int type = mWindowAttributes.type;
-        final boolean layoutAttached = (mParentViewRoot != null
-                && type >= FIRST_SUB_WINDOW && type <= LAST_SUB_WINDOW
-                && type != TYPE_APPLICATION_ATTACHED_DIALOG);
-        return layoutAttached ? mParentViewRoot.mWinFrame : null;
     }
 
     /**
@@ -1738,16 +1731,20 @@ public final class ViewRootImpl implements ViewParent,
 
         final Rect frame = frames.frame;
         final Rect displayFrame = frames.displayFrame;
+        final Rect attachedFrame = frames.attachedFrame;
         if (mTranslator != null) {
             mTranslator.translateRectInScreenToAppWindow(frame);
             mTranslator.translateRectInScreenToAppWindow(displayFrame);
+            mTranslator.translateRectInScreenToAppWindow(attachedFrame);
         }
         final boolean frameChanged = !mWinFrame.equals(frame);
         final boolean configChanged = !mLastReportedMergedConfiguration.equals(mergedConfiguration);
+        final boolean attachedFrameChanged = LOCAL_LAYOUT
+                && !Objects.equals(mTmpFrames.attachedFrame, attachedFrame);
         final boolean displayChanged = mDisplay.getDisplayId() != displayId;
         final boolean resizeModeChanged = mResizeMode != resizeMode;
-        if (msg == MSG_RESIZED && !frameChanged && !configChanged && !displayChanged
-                && !resizeModeChanged && !forceNextWindowRelayout) {
+        if (msg == MSG_RESIZED && !frameChanged && !configChanged && !attachedFrameChanged
+                && !displayChanged && !resizeModeChanged && !forceNextWindowRelayout) {
             return;
         }
 
@@ -1765,6 +1762,9 @@ public final class ViewRootImpl implements ViewParent,
 
         setFrame(frame);
         mTmpFrames.displayFrame.set(displayFrame);
+        if (mTmpFrames.attachedFrame != null && attachedFrame != null) {
+            mTmpFrames.attachedFrame.set(attachedFrame);
+        }
 
         if (mDragResizing && mUseMTRenderer) {
             boolean fullscreen = frame.equals(mPendingBackDropFrame);
@@ -8039,7 +8039,7 @@ public final class ViewRootImpl implements ViewParent,
             mWindowLayout.computeFrames(mWindowAttributes, state, displayCutoutSafe,
                     winConfig.getBounds(), winConfig.getWindowingMode(), requestedWidth,
                     requestedHeight, mInsetsController.getRequestedVisibilities(),
-                    getAttachedWindowFrame(), 1f /* compatScale */, mTmpFrames);
+                    1f /* compatScale */, mTmpFrames);
 
             mWindowSession.updateLayout(mWindow, params,
                     insetsPending ? WindowManagerGlobal.RELAYOUT_INSETS_PENDING : 0, mTmpFrames,
@@ -8059,6 +8059,7 @@ public final class ViewRootImpl implements ViewParent,
             if (mTranslator != null) {
                 mTranslator.translateRectInScreenToAppWindow(mTmpFrames.frame);
                 mTranslator.translateRectInScreenToAppWindow(mTmpFrames.displayFrame);
+                mTranslator.translateRectInScreenToAppWindow(mTmpFrames.attachedFrame);
                 mTranslator.translateInsetsStateInScreenToAppWindow(mTempInsets);
                 mTranslator.translateSourceControlsInScreenToAppWindow(mTempControls);
             }
