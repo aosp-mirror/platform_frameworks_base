@@ -341,6 +341,14 @@
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"Bạn có muốn tiếp tục phiên của mình không?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"Bắt đầu lại"</string>
     <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"Có, tiếp tục"</string>
+    <!-- no translation found for guest_notification_app_name (2110425506754205509) -->
+    <skip />
+    <!-- no translation found for guest_notification_session_active (5567273684713471450) -->
+    <skip />
+    <string name="user_add_user_title" msgid="4172327541504825032">"Thêm người dùng mới?"</string>
+    <string name="user_add_user_message_short" msgid="2599370307878014791">"Khi bạn thêm người dùng mới, họ cần thiết lập không gian của mình.\n\nMọi người dùng đều có thể cập nhật ứng dụng cho tất cả người dùng khác."</string>
+    <!-- no translation found for user_add_user_message_guest_remove (5589286604543355007) -->
+    <skip />
     <string name="user_limit_reached_title" msgid="2429229448830346057">"Đã đạt đến giới hạn người dùng"</string>
     <plurals name="user_limit_reached_message" formatted="false" msgid="2573535787802908398">
       <item quantity="other">Bạn có thể thêm tối đa <xliff:g id="COUNT">%d</xliff:g> người dùng.</item>
@@ -770,7 +778,7 @@
     <string name="accessibility_control_change_unfavorite" msgid="6997408061750740327">"bỏ yêu thích"</string>
     <string name="accessibility_control_move" msgid="8980344493796647792">"Di chuyển tới vị trí số <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Các tùy chọn điều khiển"</string>
-    <string name="controls_favorite_subtitle" msgid="6481675111056961083">"Chọn các chế độ điều khiển sẽ truy cập từ trình đơn Cài đặt nhanh"</string>
+    <string name="controls_favorite_subtitle" msgid="6481675111056961083">"Chọn các tuỳ chọn điều khiển để truy cập từ trình đơn Cài đặt nhanh"</string>
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Giữ và kéo để sắp xếp lại các tùy chọn điều khiển"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"Đã xóa tất cả tùy chọn điều khiển"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"Chưa lưu các thay đổi"</string>
@@ -808,6 +816,8 @@
     <string name="controls_media_button_pause" msgid="8614887780950376258">"Tạm dừng"</string>
     <string name="controls_media_button_prev" msgid="8126822360056482970">"Bản nhạc trước"</string>
     <string name="controls_media_button_next" msgid="6662636627525947610">"Bản nhạc tiếp theo"</string>
+    <!-- no translation found for controls_media_button_connecting (3138354625847598095) -->
+    <skip />
     <string name="controls_media_smartspace_rec_title" msgid="1699818353932537407">"Phát"</string>
     <string name="controls_media_smartspace_rec_description" msgid="4136242327044070732">"Mở <xliff:g id="APP_LABEL">%1$s</xliff:g>"</string>
     <string name="controls_media_smartspace_rec_item_description" msgid="2189271793070870883">"Phát <xliff:g id="SONG_NAME">%1$s</xliff:g> của <xliff:g id="ARTIST_NAME">%2$s</xliff:g> trên <xliff:g id="APP_LABEL">%3$s</xliff:g>"</string>
