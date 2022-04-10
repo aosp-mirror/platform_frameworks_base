@@ -1,5 +1,6 @@
 package com.android.systemui.media
 
+import android.app.Notification
 import android.app.Notification.MediaStyle
 import android.app.PendingIntent
 import android.app.smartspace.SmartspaceAction
@@ -621,6 +622,36 @@ class MediaDataManagerTest : SysuiTestCase() {
     }
 
     @Test
+    fun testTooManyNotificationActions_isTruncated() {
+        // GIVEN a notification where too many notification actions are added
+        val action = Notification.Action(R.drawable.ic_android, "action", null)
+        val notif = SbnBuilder().run {
+            setPkg(PACKAGE_NAME)
+            modifyNotification(context).also {
+                it.setSmallIcon(android.R.drawable.ic_media_pause)
+                it.setStyle(MediaStyle().apply {
+                    setMediaSession(session.sessionToken)
+                })
+                for (i in 0..MediaDataManager.MAX_NOTIFICATION_ACTIONS) {
+                    it.addAction(action)
+                }
+            }
+            build()
+        }
+
+        // WHEN the notification is loaded
+        mediaDataManager.onNotificationAdded(KEY, notif)
+        assertThat(backgroundExecutor.runAllReady()).isEqualTo(1)
+        assertThat(foregroundExecutor.runAllReady()).isEqualTo(1)
+
+        // THEN only the first MAX_NOTIFICATION_ACTIONS are actually included
+        verify(listener).onMediaDataLoaded(eq(KEY), eq(null), capture(mediaDataCaptor), eq(true),
+            eq(0), eq(false))
+        assertThat(mediaDataCaptor.value.actions.size).isEqualTo(
+            MediaDataManager.MAX_NOTIFICATION_ACTIONS)
+    }
+
+    @Test
     fun testPlaybackActions_noState_usesNotification() {
         val desc = "Notification Action"
         whenever(mediaFlags.areMediaSessionActionsEnabled(any(), any())).thenReturn(true)
@@ -778,6 +809,25 @@ class MediaDataManagerTest : SysuiTestCase() {
 
         assertThat(actions.custom1).isNotNull()
         assertThat(actions.custom1!!.contentDescription).isEqualTo(customDesc[1])
+    }
+
+    @Test
+    fun testPlaybackActions_playPause_hasButton() {
+        whenever(mediaFlags.areMediaSessionActionsEnabled(any(), any())).thenReturn(true)
+        val stateActions = PlaybackState.ACTION_PLAY_PAUSE
+        val stateBuilder = PlaybackState.Builder().setActions(stateActions)
+        whenever(controller.playbackState).thenReturn(stateBuilder.build())
+
+        addNotificationAndLoad()
+
+        assertThat(mediaDataCaptor.value!!.semanticActions).isNotNull()
+        val actions = mediaDataCaptor.value!!.semanticActions!!
+
+        assertThat(actions.playOrPause).isNotNull()
+        assertThat(actions.playOrPause!!.contentDescription).isEqualTo(
+            context.getString(R.string.controls_media_button_play))
+        actions.playOrPause!!.action!!.run()
+        verify(transportControls).play()
     }
 
     @Test

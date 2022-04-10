@@ -52,9 +52,9 @@ constructor(
     private var maxKeyguardNotifications by notNull<Int>()
 
     /**
-     * Minimum space between two notifications. There might be more space, see [calculateGapHeight].
+     * Minimum space between two notifications, see [calculateGapAndDividerHeight].
      */
-    private var notificationPadding by notNull<Int>()
+    private var dividerHeight by notNull<Int>()
 
     init {
         updateResources()
@@ -84,16 +84,20 @@ constructor(
         val onLockscreen = true
         val showableRows = children.filter { it.isShowable(onLockscreen) }
         val showableRowsCount = showableRows.count()
+        log { "\tshowableRowsCount=$showableRowsCount "}
+
         showableRows.forEachIndexed { i, current ->
             val spaceNeeded = current.spaceNeeded(count, previous, stack, onLockscreen)
+            val spaceAfter = remainingSpace - spaceNeeded
             previous = current
-            log { "\ti=$i spaceNeeded=$spaceNeeded remainingSpace=$remainingSpace" }
+            log { "\ti=$i spaceNeeded=$spaceNeeded remainingSpace=$remainingSpace " +
+                    "spaceAfter=$spaceAfter" }
 
             if (remainingSpace - spaceNeeded >= 0 && count < maxKeyguardNotifications) {
                 count += 1
                 remainingSpace -= spaceNeeded
             } else if (remainingSpace - spaceNeeded > -shelfHeight && i == showableRowsCount - 1) {
-                log { "Showing all notifications. Shelf is not be needed." }
+                log { "Show all notifications. Shelf not needed." }
                 // If this is the last one, and it fits using the space shelf would use, then we can
                 // display it, as the shelf will not be needed (as all notifications are shown).
                 return count + 1
@@ -139,8 +143,7 @@ constructor(
                 height += spaceNeeded
                 count += 1
             } else {
-                val gapBeforeFirstViewInShelf = current.calculateGapHeight(stack, previous, count)
-                height += gapBeforeFirstViewInShelf
+                height += current.calculateGapAndDividerHeight(stack, previous, count)
                 height += shelfHeight
                 log { "returning height with shelf -> $height" }
                 return height
@@ -155,7 +158,7 @@ constructor(
         maxKeyguardNotifications =
             infiniteIfNegative(resources.getInteger(R.integer.keyguard_max_notification_count))
 
-        notificationPadding =
+        dividerHeight =
             max(1, resources.getDimensionPixelSize(R.dimen.notification_divider_height))
     }
 
@@ -177,12 +180,7 @@ constructor(
             } else {
                 intrinsicHeight.toFloat()
             }
-        if (visibleIndex != 0) {
-            size += notificationPadding
-        }
-        val gapHeight = calculateGapHeight(stack, previousView, visibleIndex)
-        log { "\ti=$visibleIndex gapHeight=$gapHeight"}
-        size += gapHeight
+        size += calculateGapAndDividerHeight(stack, previousView, visibleIndex)
         return size
     }
 
@@ -202,11 +200,17 @@ constructor(
         return true
     }
 
-    private fun ExpandableView.calculateGapHeight(
+    private fun ExpandableView.calculateGapAndDividerHeight(
         stack: NotificationStackScrollLayout,
         previous: ExpandableView?,
         visibleIndex: Int
-    ) = stack.calculateGapHeight(previous, /* current= */ this, visibleIndex)
+    ) : Float {
+        var height = stack.calculateGapHeight(previous, /* current= */ this, visibleIndex)
+        if (visibleIndex != 0) {
+            height += dividerHeight
+        }
+        return height
+    }
 
     /**
      * Can a view be shown on the lockscreen when calculating the number of allowed notifications to

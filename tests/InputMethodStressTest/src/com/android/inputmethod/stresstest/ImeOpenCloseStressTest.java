@@ -55,6 +55,10 @@ public final class ImeOpenCloseStressTest {
     @Rule
     public UnlockScreenRule mUnlockScreenRule = new UnlockScreenRule();
 
+    @Rule
+    public ScreenCaptureRule mScreenCaptureRule =
+            new ScreenCaptureRule("/sdcard/InputMethodStressTest");
+
     @Test
     public void test() {
         Instrumentation instrumentation = InstrumentationRegistry.getInstrumentation();
