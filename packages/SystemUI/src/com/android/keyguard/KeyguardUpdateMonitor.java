@@ -2194,7 +2194,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         }
 
         // don't start running fingerprint until they're registered
-        if (!mAuthController.areAllAuthenticatorsRegistered()) {
+        if (!mAuthController.areAllFingerprintAuthenticatorsRegistered()) {
             return;
         }
         final boolean shouldListenForFingerprint = shouldListenForFingerprint(isUdfpsSupported());
@@ -3619,8 +3619,8 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
             final int strongAuthFlags = mStrongAuthTracker.getStrongAuthForUser(userId);
             BiometricAuthenticated fingerprint = mUserFingerprintAuthenticated.get(userId);
             pw.println("  Fingerprint state (user=" + userId + ")");
-            pw.println("    areAllAuthenticatorsRegistered="
-                    + mAuthController.areAllAuthenticatorsRegistered());
+            pw.println("    areAllFpAuthenticatorsRegistered="
+                    + mAuthController.areAllFingerprintAuthenticatorsRegistered());
             pw.println("    allowed="
                     + (fingerprint != null
                             && isUnlockingWithBiometricAllowed(fingerprint.mIsStrongBiometric)));
