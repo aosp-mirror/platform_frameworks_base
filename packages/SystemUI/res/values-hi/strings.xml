@@ -1118,7 +1118,7 @@
     <string name="select_conversation_title" msgid="6716364118095089519">"बातचीत विजेट"</string>
     <string name="select_conversation_text" msgid="3376048251434956013">"किसी बातचीत को होम स्क्रीन पर जोड़ने के लिए, उस बातचीत पर टैप करें"</string>
     <string name="no_conversations_text" msgid="5354115541282395015">"हाल ही में हुई बातचीत यहां दिखेंगी"</string>
-    <string name="priority_conversations" msgid="3967482288896653039">"प्राथमिकता वाली बातचीत"</string>
+    <string name="priority_conversations" msgid="3967482288896653039">"अहम बातचीत"</string>
     <string name="recent_conversations" msgid="8531874684782574622">"हाल ही में की गई बातचीत"</string>
     <string name="okay" msgid="6490552955618608554">"ठीक है"</string>
     <string name="days_timestamp" msgid="5821854736213214331">"<xliff:g id="DURATION">%1$s</xliff:g> दिन पहले"</string>

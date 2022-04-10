@@ -99,7 +99,7 @@
     <string name="screenrecord_name" msgid="2596401223859996572">"Ekran Kaydedicisi"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Ekran kaydı işleniyor"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Ekran kaydı oturumu için devam eden bildirim"</string>
-    <string name="screenrecord_start_label" msgid="1750350278888217473">"Kayıt Başlatılsın mı?"</string>
+    <string name="screenrecord_start_label" msgid="1750350278888217473">"Kayıt başlatılsın mı?"</string>
     <string name="screenrecord_description" msgid="1123231719680353736">"Kayıt sırasında Android Sistemi, ekranınızda görünen veya cihazınızda oynatılan hassas bilgileri yakalayabilir. Buna şifreler, ödeme bilgileri, fotoğraflar, mesajlar ve sesler dahildir."</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"Ses kaydet"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"Cihaz sesi"</string>

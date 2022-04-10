@@ -547,7 +547,7 @@
     <string name="monitoring_title_device_owned" msgid="7029691083837606324">"Gailuaren kudeaketa"</string>
     <string name="monitoring_title_profile_owned" msgid="6301118649405449568">"Profila kontrolatzeko aukera"</string>
     <string name="monitoring_title" msgid="4063890083735924568">"Sareen kontrola"</string>
-    <string name="monitoring_subtitle_vpn" msgid="800485258004629079">"VPN"</string>
+    <string name="monitoring_subtitle_vpn" msgid="800485258004629079">"VPNa"</string>
     <string name="monitoring_subtitle_network_logging" msgid="2444199331891219596">"Sarearen erregistroak"</string>
     <string name="monitoring_subtitle_ca_certificate" msgid="8588092029755175800">"CA ziurtagiriak"</string>
     <string name="disable_vpn" msgid="482685974985502922">"Desgaitu VPN konexioa"</string>
@@ -580,7 +580,7 @@
     <string name="monitoring_description_vpn" msgid="1685428000684586870">"Aplikazio bati VPN bidezko konexio bat konfiguratzeko baimena eman diozu.\n\nAplikazio horrek gailuko eta sareko jarduerak kontrola ditzake, mezu elektronikoak, aplikazioak eta webguneak barne."</string>
     <string name="monitoring_description_vpn_profile_owned" msgid="4964237035412372751">"<xliff:g id="ORGANIZATION">%1$s</xliff:g> erakundeak kudeatzen du zure laneko profila.\n\nAdministratzaileak sareko jarduerak kontrola diezazkizuke, besteak beste, posta elektronikoa, aplikazioak eta webguneak.\n\nInformazio gehiago lortzeko, jarri administratzailearekin harremanetan.\n\nHorrez gain, VPN batera zaude konektatuta, eta hark ere kontrola ditzake zure sareko jarduerak."</string>
     <string name="monitoring_description_parental_controls" msgid="8184693528917051626">"Zure gurasoak kudeatzen du gailua. Zure gurasoak gailuko informazioa ikusi eta kudea dezake; besteak beste, zer aplikazio erabiltzen dituzun, zure kokapena zein den eta pantaila aurrean zenbat eta noiz egoten zaren."</string>
-    <string name="legacy_vpn_name" msgid="4174223520162559145">"VPN konexioa"</string>
+    <string name="legacy_vpn_name" msgid="4174223520162559145">"VPNa"</string>
     <string name="monitoring_description_app" msgid="376868879287922929">"<xliff:g id="APPLICATION">%1$s</xliff:g> aplikaziora konektatuta zaude. Aplikazio horrek sarean egiten dituzun jarduerak kontrola ditzake, mezu elektronikoak, aplikazioak eta webguneak barne."</string>
     <string name="monitoring_description_app_personal" msgid="1970094872688265987">"<xliff:g id="APPLICATION">%1$s</xliff:g> aplikaziora konektatuta zaude. Aplikazio horrek sarean egiten dituzun jarduera pertsonalak kontrola ditzake, mezu elektronikoak, aplikazioak eta webguneak barne."</string>
     <string name="branded_monitoring_description_app_personal" msgid="1703511985892688885">"<xliff:g id="APPLICATION">%1$s</xliff:g> aplikaziora konektatuta zaude. Aplikazio horrek sarean egiten dituzun jarduera pertsonalak kontrola ditzake, mezu elektronikoak, aplikazioak eta webguneak barne."</string>
@@ -1059,7 +1059,7 @@
     <string name="accessibility_control_change_unfavorite" msgid="6997408061750740327">"kendu gogokoetatik"</string>
     <string name="accessibility_control_move" msgid="8980344493796647792">"Eraman <xliff:g id="NUMBER">%d</xliff:g>garren postura"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Kontrolatzeko aukerak"</string>
-    <string name="controls_favorite_subtitle" msgid="6481675111056961083">"Aukeratu atzitu nahi dituzunak Ezarpen bizkorrak menutik"</string>
+    <string name="controls_favorite_subtitle" msgid="6481675111056961083">"Aukeratu Ezarpen bizkorrak menutik atzitu nahi dituzunak"</string>
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Kontrolatzeko aukerak antolatzeko, eduki itzazu sakatuta, eta arrastatu"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"Kendu dira kontrolatzeko aukera guztiak"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"Ez dira gorde aldaketak"</string>

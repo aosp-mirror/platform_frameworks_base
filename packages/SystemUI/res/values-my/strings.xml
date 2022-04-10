@@ -214,7 +214,7 @@
     <string name="accessibility_three_bars" msgid="819417766606501295">"၃ ဘား"</string>
     <string name="accessibility_signal_full" msgid="5920148525598637311">"ဒေတာထုတ်လွှင့်မှုအပြည့်ဖမ်းမိခြင်း"</string>
     <string name="accessibility_desc_on" msgid="2899626845061427845">"ဖွင့်"</string>
-    <string name="accessibility_desc_off" msgid="8055389500285421408">"ပိတ်ထားသည်"</string>
+    <string name="accessibility_desc_off" msgid="8055389500285421408">"ပိတ်"</string>
     <string name="accessibility_desc_connected" msgid="3082590384032624233">"ချိတ်ဆက်ထားသည်"</string>
     <string name="accessibility_desc_connecting" msgid="8011433412112903614">"ချိတ်ဆက်နေ။"</string>
     <string name="data_connection_hspa" msgid="6096234094857660873">"HSPA"</string>

@@ -507,7 +507,7 @@
     <string name="battery_saver_notification_text" msgid="2617841636449016951">"パフォーマンスとバックグラウンドデータを制限します"</string>
     <string name="battery_saver_notification_action_text" msgid="6022091913807026887">"バッテリー セーバーを OFF"</string>
     <string name="media_projection_dialog_text" msgid="1755705274910034772">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> は、録画中やキャスト中に画面に表示されたり、デバイスで再生されるすべての情報にアクセスできます。これには、パスワード、お支払いの詳細、写真、メッセージ、再生される音声などが含まれます。"</string>
-    <string name="media_projection_dialog_service_text" msgid="958000992162214611">"この機能を提供するサービスは、画面上に表示される情報またはキャスト先に転送する情報すべてに、録画中またはキャスト中にアクセスできます。これには、パスワード、お支払いの詳細、写真、メッセージ、再生される音声などが含まれます。"</string>
+    <string name="media_projection_dialog_service_text" msgid="958000992162214611">"この機能を提供するサービスは、録画中またはキャスト中に画面上に表示される情報、またはキャスト先に転送される情報すべてにアクセスできます。これには、パスワード、お支払いの詳細、写真、メッセージ、再生される音声などが含まれます。"</string>
     <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"録画やキャストを開始しますか？"</string>
     <string name="media_projection_dialog_title" msgid="3316063622495360646">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> で録画やキャストを開始しますか？"</string>
     <string name="media_projection_remember_text" msgid="6896767327140422951">"次回から表示しない"</string>

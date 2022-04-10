@@ -36,7 +36,7 @@
     <string name="battery_saver_confirmation_title" msgid="1234998463717398453">"Attivare il risparmio energetico?"</string>
     <string name="battery_saver_confirmation_title_generic" msgid="2299231884234959849">"Informazioni su Risparmio energetico"</string>
     <string name="battery_saver_confirmation_ok" msgid="5042136476802816494">"Attiva"</string>
-    <string name="battery_saver_start_action" msgid="4553256017945469937">"Attiva Risparmio energetico"</string>
+    <string name="battery_saver_start_action" msgid="4553256017945469937">"Attiva il risparmio energetico"</string>
     <string name="status_bar_settings_settings_button" msgid="534331565185171556">"Impostazioni"</string>
     <string name="status_bar_settings_wifi_button" msgid="7243072479837270946">"Wi-Fi"</string>
     <string name="status_bar_settings_auto_rotation" msgid="8329080442278431708">"Rotazione automatica schermo"</string>
