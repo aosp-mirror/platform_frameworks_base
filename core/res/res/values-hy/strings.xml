@@ -85,8 +85,8 @@
     <string name="RestrictedStateContentMsimTemplate" msgid="5228235722511044687">"SIM <xliff:g id="SIMNUMBER">%d</xliff:g> քարտի օպերատորը ժամանակավորապես անջատել է"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"Չհաջողվեց միանալ բջջային ցանցին"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"Փորձեք այլ ցանցի միանալ: Հպեք՝ նախընտրած ցանցը փոխելու համար:"</string>
-    <string name="EmergencyCallWarningTitle" msgid="9164532362414787774">"Շտապ կանչերը կարող են անհասանելի լինել"</string>
-    <string name="EmergencyCallWarningSummary" msgid="3365701131304664899">"<xliff:g id="SPN">%s</xliff:g>՝ չի աջակցում շտապ կանչեր Wi-Fi-ի միջոցով։ Հպեք՝ ավելին իմանալու համար։"</string>
+    <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"Շտապ կանչերը հասանելի չեն"</string>
+    <string name="EmergencyCallWarningSummary" msgid="1194185880092805497">"Շտապ կանչերը հասանելի չեն Wi‑Fi-ի միջոցով"</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"Ծանուցումներ"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"Զանգի վերահասցեավորում"</string>
     <string name="notification_channel_emergency_callback" msgid="54074839059123159">"Շտապ հետզանգի ռեժիմ"</string>
@@ -585,8 +585,7 @@
     <string name="biometric_error_generic" msgid="6784371929985434439">"Չհաջողվեց նույնականացնել"</string>
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"Էկրանի կողպում"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"Շարունակելու համար ապակողպեք էկրանը"</string>
-    <!-- no translation found for fingerprint_acquired_partial (4323789264604479684) -->
-    <skip />
+    <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"Մատը ուժեղ սեղմեք սկաների վրա"</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"Չհաջողվեց մշակել մատնահետքը: Նորից փորձեք:"</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"Մաքրեք մատնահետքերի սկաները և նորից փորձեք"</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"Մաքրեք սկաները և նորից փորձեք"</string>
@@ -599,8 +598,7 @@
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_error_not_match" msgid="4599441812893438961">"Մատնահետքը չի ճանաչվել"</string>
-    <!-- no translation found for fingerprint_udfps_error_not_match (8236930793223158856) -->
-    <skip />
+    <string name="fingerprint_udfps_error_not_match" msgid="8236930793223158856">"Մատնահետքը չի ճանաչվել"</string>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"Մատնահետքը նույնականացվեց"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"Դեմքը ճանաչվեց"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"Դեմքը ճանաչվեց: Սեղմեք «Հաստատել»:"</string>
@@ -1494,7 +1492,7 @@
     <string name="vpn_lockdown_config" msgid="8331697329868252169">"Փոխել ցանցը կամ VPN-ի կարգավորումները"</string>
     <string name="upload_file" msgid="8651942222301634271">"Ընտրել ֆայլը"</string>
     <string name="no_file_chosen" msgid="4146295695162318057">"Ոչ մի ֆայլ չի ընտրված"</string>
-    <string name="reset" msgid="3865826612628171429">"Վերակայել"</string>
+    <string name="reset" msgid="3865826612628171429">"Զրոյացնել"</string>
     <string name="submit" msgid="862795280643405865">"Ուղարկել"</string>
     <string name="car_mode_disable_notification_title" msgid="8450693275833142896">"Հավելվածն աշխատում է"</string>
     <string name="car_mode_disable_notification_message" msgid="8954550232288567515">"Հպեք՝ հավելվածը փակելու համար:"</string>
@@ -1935,9 +1933,36 @@
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> հավելվածն այս պահին հասանելի չէ։"</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g>՝ անհասանելի է"</string>
     <string name="app_streaming_blocked_title_for_permission_dialog" msgid="4483161748582966785">"Անհրաժեշտ է թույլտվություն"</string>
-    <string name="app_streaming_blocked_message" product="tv" msgid="4003011766528814377">"Այս պահին հնարավոր չէ բացել հավելվածը <xliff:g id="DEVICE">%1$s</xliff:g> սարքում։ Փորձեք Android TV սարքում։"</string>
-    <string name="app_streaming_blocked_message" product="tablet" msgid="4242053045964946062">"Այս պահին հնարավոր չէ բացել հավելվածը <xliff:g id="DEVICE">%1$s</xliff:g> սարքում։ Փորձեք ձեր պլանշետում։"</string>
-    <string name="app_streaming_blocked_message" product="default" msgid="6159168735030739398">"Այս պահին հնարավոր չէ բացել հավելվածը <xliff:g id="DEVICE">%1$s</xliff:g> սարքում։ Փորձեք ձեր հեռախոսում։"</string>
+    <!-- no translation found for app_streaming_blocked_title_for_camera_dialog (3935701653713853065) -->
+    <skip />
+    <!-- no translation found for app_streaming_blocked_title_for_fingerprint_dialog (3516853717714141951) -->
+    <skip />
+    <!-- no translation found for app_streaming_blocked_title_for_microphone_dialog (544822455127171206) -->
+    <skip />
+    <!-- no translation found for app_streaming_blocked_title_for_settings_dialog (196994247017450357) -->
+    <skip />
+    <!-- no translation found for app_streaming_blocked_title_for_settings_dialog (8222710146267948647) -->
+    <skip />
+    <!-- no translation found for app_streaming_blocked_title_for_settings_dialog (6895719984375299791) -->
+    <skip />
+    <!-- no translation found for app_streaming_blocked_message (5024599278277957935) -->
+    <skip />
+    <!-- no translation found for app_streaming_blocked_message (7491114163056552686) -->
+    <skip />
+    <!-- no translation found for app_streaming_blocked_message (1245180131667647277) -->
+    <skip />
+    <!-- no translation found for app_streaming_blocked_message_for_permission_dialog (6306583663205997979) -->
+    <skip />
+    <!-- no translation found for app_streaming_blocked_message_for_permission_dialog (6545624942642129664) -->
+    <skip />
+    <!-- no translation found for app_streaming_blocked_message_for_permission_dialog (8462740631707923000) -->
+    <skip />
+    <!-- no translation found for app_streaming_blocked_message_for_fingerprint_dialog (3470977315395784567) -->
+    <skip />
+    <!-- no translation found for app_streaming_blocked_message_for_fingerprint_dialog (698460091901465092) -->
+    <skip />
+    <!-- no translation found for app_streaming_blocked_message_for_fingerprint_dialog (8552691971910603907) -->
+    <skip />
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"Այս հավելվածը ստեղծվել է Android-ի ավելի հին տարբերակի համար և կարող է պատշաճ չաշխատել: Ստուգեք թարմացումների առկայությունը կամ դիմեք մշակողին:"</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Ստուգել նոր տարբերակի առկայությունը"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Դուք ունեք նոր հաղորդագրություններ"</string>
@@ -2028,8 +2053,7 @@
     <string name="harmful_app_warning_open_anyway" msgid="5963657791740211807">"ԲԱՑԵԼ"</string>
     <string name="harmful_app_warning_title" msgid="8794823880881113856">"Հայտնաբերվել է վնասաբեր հավելված"</string>
     <string name="log_access_confirmation_title" msgid="2343578467290592708">"Հասանելի դարձնե՞լ <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> հավելվածին սարքի բոլոր մատյանները"</string>
-    <!-- no translation found for log_access_confirmation_allow (5302517782599389507) -->
-    <skip />
+    <string name="log_access_confirmation_allow" msgid="5302517782599389507">"Թույլատրել մեկանգամյա մուտքը"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"Չթույլատրել"</string>
     <string name="log_access_confirmation_body" msgid="6581985716241928135">"Այն, ինչ տեղի է ունենում ձեր սարքում, գրանցվում է սարքի մատյաններում։ Հավելվածները կարող են դրանք օգտագործել անսարքությունները հայտնաբերելու և վերացնելու նպատակով։\n\nՔանի որ որոշ մատյաններ անձնական տեղեկություններ են պարունակում, խորհուրդ ենք տալիս հասանելի դարձնել ձեր սարքի բոլոր մատյանները միայն այն հավելվածներին, որոնց վստահում եք։ \n\nԵթե այս հավելվածին նման թույլտվություն չեք տվել, դրան նախկինի պես հասանելի կլինեն իր մատյանները։ Հնարավոր է՝ ձեր սարքի արտադրողին ևս հասանելի լինեն սարքի որոշ մատյաններ և տեղեկություններ։ Իմանալ ավելին"</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"Այլևս ցույց չտալ"</string>
@@ -2043,6 +2067,14 @@
     <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"Հպեք՝ ավելին իմանալու և կարգավորումները փոխելու համար:"</string>
     <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"«Չանհանգստացնել» ռեժիմի կարգավորումները փոխվել են"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Հպեք՝ տեսնելու, թե ինչ է արգելափակվել:"</string>
+    <!-- no translation found for review_notification_settings_title (5102557424459810820) -->
+    <skip />
+    <!-- no translation found for review_notification_settings_text (5696497037817525074) -->
+    <skip />
+    <!-- no translation found for review_notification_settings_remind_me_action (1081081018678480907) -->
+    <skip />
+    <!-- no translation found for review_notification_settings_dismiss (4160916504616428294) -->
+    <skip />
     <string name="notification_app_name_system" msgid="3045196791746735601">"Համակարգ"</string>
     <string name="notification_app_name_settings" msgid="9088548800899952531">"Կարգավորումներ"</string>
     <string name="notification_appops_camera_active" msgid="8177643089272352083">"Տեսախցիկ"</string>
@@ -2261,14 +2293,10 @@
     <string name="ui_translation_accessibility_translated_text" msgid="3197547218178944544">"«<xliff:g id="MESSAGE">%1$s</xliff:g>» հաղորդագրությունը թարգմանված է։"</string>
     <string name="ui_translation_accessibility_translation_finished" msgid="3057830947610088465">"Հաղորդագրությունը <xliff:g id="FROM_LANGUAGE">%1$s</xliff:g>ից թարգմանվել է <xliff:g id="TO_LANGUAGE">%2$s</xliff:g>։"</string>
     <string name="notification_channel_abusive_bg_apps" msgid="6092140213264920355">"Ակտիվ հավելվածներ ֆոնային ռեժիմում"</string>
-    <!-- no translation found for notification_title_abusive_bg_apps (3258460527676573815) -->
-    <skip />
-    <!-- no translation found for notification_title_long_running_fgs (8170284286477131587) -->
-    <skip />
-    <!-- no translation found for notification_content_abusive_bg_apps (9180610713603474720) -->
-    <skip />
-    <!-- no translation found for notification_content_long_running_fgs (8258193410039977101) -->
-    <skip />
+    <string name="notification_title_abusive_bg_apps" msgid="3258460527676573815">"Հավելվածն օգտագործում է մարտկոցի լիցքը"</string>
+    <string name="notification_title_long_running_fgs" msgid="8170284286477131587">"Հավելվածը դեռ ակտիվ է"</string>
+    <string name="notification_content_abusive_bg_apps" msgid="9180610713603474720">"<xliff:g id="APP">%1$s</xliff:g> հավելվածն օգտագործում է մարտկոցի լիցքը ֆոնային ռեժիմում։ Հպեք՝ մանրամասները տեսնելու համար։"</string>
+    <string name="notification_content_long_running_fgs" msgid="8258193410039977101">"<xliff:g id="APP">%1$s</xliff:g> հավելվածը կարող է ազդել մարտկոցի աշխատաժամանակի վրա։ Հպեք՝ ակտիվ հավելվածները տեսնելու համար։"</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Ստուգել ակտիվ հավելվածները"</string>
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"Հնարավոր չէ օգտագործել հեռախոսի տեսախցիկը ձեր <xliff:g id="DEVICE">%1$s</xliff:g> սարքից"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"Հնարավոր չէ օգտագործել պլանշետի տեսախցիկը ձեր <xliff:g id="DEVICE">%1$s</xliff:g> սարքից"</string>

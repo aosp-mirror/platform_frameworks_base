@@ -85,8 +85,8 @@
     <string name="RestrictedStateContentMsimTemplate" msgid="5228235722511044687">"ಸಿಮ್ <xliff:g id="SIMNUMBER">%d</xliff:g> ಗಾಗಿ ನಿಮ್ಮ ವಾಹಕದ ಮೂಲಕ ತಾತ್ಕಾಲಿಕವಾಗಿ ಆಫ್ ಮಾಡಲಾಗಿದೆ"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"ಮೊಬೈಲ್‌ ನೆಟ್‌ವರ್ಕ್ ತಲುಪಲು ಸಾಧ್ಯವಿಲ್ಲ"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"ಆದ್ಯತೆಗೊಳಿಸಿದ ನೆಟ್‌ವರ್ಕ್‌ಗಳನ್ನು ಬದಲಾಯಿಸಲು ಪ್ರಯತ್ನಿಸಿ. ಬದಲಾಯಿಸಲು ಟ್ಯಾಪ್‌ ಮಾಡಿ."</string>
-    <string name="EmergencyCallWarningTitle" msgid="9164532362414787774">"ತುರ್ತು ಕರೆಗಳು ಲಭ್ಯವಿಲ್ಲದಿರಬಹುದು"</string>
-    <string name="EmergencyCallWarningSummary" msgid="3365701131304664899">"ವೈ-ಫೈ ಮೂಲಕ ತುರ್ತು ಕರೆಗಳನ್ನು <xliff:g id="SPN">%s</xliff:g> ಬೆಂಬಲಿಸುವುದಿಲ್ಲ. ವಿವರಗಳಿಗಾಗಿ ಟ್ಯಾಪ್ ಮಾಡಿ."</string>
+    <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"ತುರ್ತು ಕರೆ ಮಾಡುವಿಕೆ ಲಭ್ಯವಿಲ್ಲ"</string>
+    <string name="EmergencyCallWarningSummary" msgid="1194185880092805497">"ವೈ-ಫೈ ಮೂಲಕ ತುರ್ತು ಕರೆಗಳನ್ನು ಮಾಡಲು ಸಾಧ್ಯವಿಲ್ಲ"</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"ಎಚ್ಚರಿಕೆಗಳು"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"ಕರೆ ಫಾರ್ವರ್ಡ್‌ ಮಾಡುವಿಕೆ"</string>
     <string name="notification_channel_emergency_callback" msgid="54074839059123159">"ತುರ್ತು ಕಾಲ್‌ಬ್ಯಾಕ್‌ ಮೋಡ್‌"</string>
@@ -1201,7 +1201,7 @@
     <string name="aerr_process_repeated" msgid="1153152413537954974">"<xliff:g id="PROCESS">%1$s</xliff:g> ನಿಲ್ಲುತ್ತಲೇ ಇರುತ್ತದೆ"</string>
     <string name="aerr_restart" msgid="2789618625210505419">"ಅಪ್ಲಿಕೇಶನ್ ಮತ್ತೆ ತೆರೆಯಿರಿ"</string>
     <string name="aerr_report" msgid="3095644466849299308">"ಪ್ರತಿಕ್ರಿಯೆ ಕಳುಹಿಸಿ"</string>
-    <string name="aerr_close" msgid="3398336821267021852">"ಮುಚ್ಚು"</string>
+    <string name="aerr_close" msgid="3398336821267021852">"ಮುಚ್ಚಿ"</string>
     <string name="aerr_mute" msgid="2304972923480211376">"ಸಾಧನವು ಮರುಪ್ರಾರಂಭವಾಗುವವರೆಗೂ ಮ್ಯೂಟ್ ಮಾಡಿ"</string>
     <string name="aerr_wait" msgid="3198677780474548217">"ನಿರೀಕ್ಷಿಸು"</string>
     <string name="aerr_close_app" msgid="8318883106083050970">"ಅಪ್ಲಿಕೇಶನ್ ಅನ್ನು ಮುಚ್ಚಿ"</string>
@@ -1613,10 +1613,10 @@
     <string name="wireless_display_route_description" msgid="8297563323032966831">"ವಯರ್‌ಲೆಸ್ ಪ್ರದರ್ಶನ"</string>
     <string name="media_route_button_content_description" msgid="2299223698196869956">"ಪಾತ್ರ"</string>
     <string name="media_route_chooser_title" msgid="6646594924991269208">"ಸಾಧನಕ್ಕೆ ಸಂಪರ್ಕಿಸಿ"</string>
-    <string name="media_route_chooser_title_for_remote_display" msgid="3105906508794326446">"ಪರದೆಯನ್ನು ಸಾಧನದಲ್ಲಿ ಬಿತ್ತರಿಸಿ"</string>
+    <string name="media_route_chooser_title_for_remote_display" msgid="3105906508794326446">"ಸ್ಕ್ರೀನ್ ಅನ್ನು ಸಾಧನದಲ್ಲಿ ಬಿತ್ತರಿಸಿ"</string>
     <string name="media_route_chooser_searching" msgid="6119673534251329535">"ಸಾಧನಗಳನ್ನು ಹುಡುಕಲಾಗುತ್ತಿದೆ…"</string>
     <string name="media_route_chooser_extended_settings" msgid="2506352159381327741">"ಸೆಟ್ಟಿಂಗ್‌ಗಳು"</string>
-    <string name="media_route_controller_disconnect" msgid="7362617572732576959">"ಸಂಪರ್ಕ ಕಡಿತಗೊಳಿಸು"</string>
+    <string name="media_route_controller_disconnect" msgid="7362617572732576959">"ಸಂಪರ್ಕ ಕಡಿತಗೊಳಿಸಿ"</string>
     <string name="media_route_status_scanning" msgid="8045156315309594482">"ಸ್ಕ್ಯಾನ್ ಮಾಡಲಾಗುತ್ತಿದೆ…"</string>
     <string name="media_route_status_connecting" msgid="5845597961412010540">"ಸಂಪರ್ಕಿಸಲಾಗುತ್ತಿದೆ..."</string>
     <string name="media_route_status_available" msgid="1477537663492007608">"ಲಭ್ಯ"</string>
@@ -1899,7 +1899,7 @@
     <string name="floating_toolbar_open_overflow_description" msgid="2260297653578167367">"ಇನ್ನಷ್ಟು ಆಯ್ಕೆಗಳು"</string>
     <string name="floating_toolbar_close_overflow_description" msgid="3949818077708138098">"ಓವರ್‌ಫ್ಲೋ ಮುಚ್ಚು"</string>
     <string name="maximize_button_text" msgid="4258922519914732645">"ಹಿಗ್ಗಿಸು"</string>
-    <string name="close_button_text" msgid="10603510034455258">"ಮುಚ್ಚು"</string>
+    <string name="close_button_text" msgid="10603510034455258">"ಮುಚ್ಚಿ"</string>
     <string name="notification_messaging_title_template" msgid="772857526770251989">"<xliff:g id="CONVERSATION_TITLE">%1$s</xliff:g>: <xliff:g id="SENDER_NAME">%2$s</xliff:g>"</string>
     <string name="call_notification_answer_action" msgid="5999246836247132937">"ಉತ್ತರಿಸಿ"</string>
     <string name="call_notification_answer_video_action" msgid="2086030940195382249">"ವೀಡಿಯೊ"</string>
@@ -1933,9 +1933,36 @@
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> ಇದೀಗ ಲಭ್ಯವಿಲ್ಲ."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> ಲಭ್ಯವಿಲ್ಲ"</string>
     <string name="app_streaming_blocked_title_for_permission_dialog" msgid="4483161748582966785">"ಅನುಮತಿಯ ಅಗತ್ಯವಿದೆ"</string>
-    <string name="app_streaming_blocked_message" product="tv" msgid="4003011766528814377">"ಈ ಸಮಯದಲ್ಲಿ ನಿಮ್ಮ <xliff:g id="DEVICE">%1$s</xliff:g> ನಲ್ಲಿ ಇದನ್ನು ಪ್ರವೇಶಿಸಲು ಸಾಧ್ಯವಿಲ್ಲ. ಅದರ ಬದಲು ನಿಮ್ಮ Android TV ಸಾಧನದಲ್ಲಿ ಪ್ರಯತ್ನಿಸಿ."</string>
-    <string name="app_streaming_blocked_message" product="tablet" msgid="4242053045964946062">"ಈ ಸಮಯದಲ್ಲಿ ನಿಮ್ಮ <xliff:g id="DEVICE">%1$s</xliff:g> ನಲ್ಲಿ ಇದನ್ನು ಪ್ರವೇಶಿಸಲು ಸಾಧ್ಯವಿಲ್ಲ. ಅದರ ಬದಲು ನಿಮ್ಮ ಟ್ಯಾಬ್ಲೆಟ್‌ನಲ್ಲಿ ಪ್ರಯತ್ನಿಸಿ."</string>
-    <string name="app_streaming_blocked_message" product="default" msgid="6159168735030739398">"ಈ ಸಮಯದಲ್ಲಿ ನಿಮ್ಮ <xliff:g id="DEVICE">%1$s</xliff:g> ನಲ್ಲಿ ಇದನ್ನು ಪ್ರವೇಶಿಸಲು ಸಾಧ್ಯವಿಲ್ಲ. ಅದರ ಬದಲು ನಿಮ್ಮ ಫೋನ್‌ನಲ್ಲಿ ಪ್ರಯತ್ನಿಸಿ."</string>
+    <!-- no translation found for app_streaming_blocked_title_for_camera_dialog (3935701653713853065) -->
+    <skip />
+    <!-- no translation found for app_streaming_blocked_title_for_fingerprint_dialog (3516853717714141951) -->
+    <skip />
+    <!-- no translation found for app_streaming_blocked_title_for_microphone_dialog (544822455127171206) -->
+    <skip />
+    <!-- no translation found for app_streaming_blocked_title_for_settings_dialog (196994247017450357) -->
+    <skip />
+    <!-- no translation found for app_streaming_blocked_title_for_settings_dialog (8222710146267948647) -->
+    <skip />
+    <!-- no translation found for app_streaming_blocked_title_for_settings_dialog (6895719984375299791) -->
+    <skip />
+    <!-- no translation found for app_streaming_blocked_message (5024599278277957935) -->
+    <skip />
+    <!-- no translation found for app_streaming_blocked_message (7491114163056552686) -->
+    <skip />
+    <!-- no translation found for app_streaming_blocked_message (1245180131667647277) -->
+    <skip />
+    <!-- no translation found for app_streaming_blocked_message_for_permission_dialog (6306583663205997979) -->
+    <skip />
+    <!-- no translation found for app_streaming_blocked_message_for_permission_dialog (6545624942642129664) -->
+    <skip />
+    <!-- no translation found for app_streaming_blocked_message_for_permission_dialog (8462740631707923000) -->
+    <skip />
+    <!-- no translation found for app_streaming_blocked_message_for_fingerprint_dialog (3470977315395784567) -->
+    <skip />
+    <!-- no translation found for app_streaming_blocked_message_for_fingerprint_dialog (698460091901465092) -->
+    <skip />
+    <!-- no translation found for app_streaming_blocked_message_for_fingerprint_dialog (8552691971910603907) -->
+    <skip />
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"ಈ ಅಪ್ಲಿಕೇಶನ್ ಅನ್ನು Android ನ ಹಳೆಯ ಆವೃತ್ತಿಗೆ ರಚಿಸಲಾಗಿದೆ ಮತ್ತು ಸರಿಯಾಗಿ ಕೆಲಸ ಮಾಡದಿರಬಹುದು. ಅಪ್‌ಡೇಟ್‌ಗಳನ್ನು ಪರಿಶೀಲಿಸಲು ಪ್ರಯತ್ನಿಸಿ ಅಥವಾ ಡೆವಲಪರ್ ಅನ್ನು ಸಂಪರ್ಕಿಸಿ."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"ಅಪ್‌ಡೇಟ್‌ಗಾಗಿ ಪರಿಶೀಲಿಸಿ"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"ನೀವು ಹೊಸ ಸಂದೇಶಗಳನ್ನು ಹೊಂದಿರುವಿರಿ"</string>
@@ -2040,6 +2067,14 @@
     <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"ಇನ್ನಷ್ಟು ತಿಳಿಯಲು ಮತ್ತು ಬದಲಿಸಲು ಟ್ಯಾಪ್ ಮಾಡಿ."</string>
     <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"ಅಡಚಣೆ ಮಾಡಬೇಡಿ ಬದಲಾಗಿದೆ"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"ಏನನ್ನು ನಿರ್ಬಂಧಿಸಲಾಗಿದೆ ಎಂಬುದನ್ನು ಪರೀಕ್ಷಿಸಲು ಟ್ಯಾಪ್ ಮಾಡಿ."</string>
+    <!-- no translation found for review_notification_settings_title (5102557424459810820) -->
+    <skip />
+    <!-- no translation found for review_notification_settings_text (5696497037817525074) -->
+    <skip />
+    <!-- no translation found for review_notification_settings_remind_me_action (1081081018678480907) -->
+    <skip />
+    <!-- no translation found for review_notification_settings_dismiss (4160916504616428294) -->
+    <skip />
     <string name="notification_app_name_system" msgid="3045196791746735601">"ಸಿಸ್ಟಂ"</string>
     <string name="notification_app_name_settings" msgid="9088548800899952531">"ಸೆಟ್ಟಿಂಗ್‌ಗಳು"</string>
     <string name="notification_appops_camera_active" msgid="8177643089272352083">"ಕ್ಯಾಮರಾ"</string>
