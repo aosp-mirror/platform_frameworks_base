@@ -42,6 +42,8 @@
     <string name="consent_yes" msgid="8344487259618762872">"അനുവദിക്കുക"</string>
     <string name="consent_no" msgid="2640796915611404382">"അനുവദിക്കരുത്"</string>
     <string name="consent_back" msgid="2560683030046918882">"മടങ്ങുക"</string>
-    <string name="permission_sync_confirmation_title" msgid="667074294393493186">"നിങ്ങളുടെ വാച്ചിലേക്ക് ആപ്പ് അനുമതികൾ കൈമാറുക"</string>
-    <string name="permission_sync_summary" msgid="8873391306499120778">"നിങ്ങളുടെ വാച്ച് സജ്ജീകരിക്കുന്നത് എളുപ്പമാക്കാൻ, സജ്ജീകരിക്കുമ്പോൾ ഫോണിലുള്ള അതേ അനുമതികൾ നിങ്ങളുടെ വാച്ചിൽ ഇൻസ്റ്റാൾ ചെയ്തിട്ടുള്ള ആപ്പുകൾ ഉപയോഗിക്കും.\n\n ഈ അനുമതികളിൽ നിങ്ങളുടെ വാച്ചിന്റെ മൈക്രോഫോണിലേക്കും ലോക്കേഷനിലേക്കുമുള്ള ആക്‌സസ് ഉൾപ്പെട്ടേക്കാം."</string>
+    <!-- no translation found for permission_sync_confirmation_title (4409622174437248702) -->
+    <skip />
+    <!-- no translation found for permission_sync_summary (4866838188678457084) -->
+    <skip />
 </resources>

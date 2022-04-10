@@ -42,6 +42,8 @@
     <string name="consent_yes" msgid="8344487259618762872">"ခွင့်ပြုရန်"</string>
     <string name="consent_no" msgid="2640796915611404382">"ခွင့်မပြုပါ"</string>
     <string name="consent_back" msgid="2560683030046918882">"နောက်သို့"</string>
-    <string name="permission_sync_confirmation_title" msgid="667074294393493186">"သင်၏နာရီသို့ အက်ပ်ခွင့်ပြုချက်များ လွှဲပြောင်းရန်"</string>
-    <string name="permission_sync_summary" msgid="8873391306499120778">"သင်၏နာရီ စနစ်ထည့်သွင်းရာတွင် ပိုလွယ်ကူစေရန် စနစ်ထည့်သွင်းနေစဉ်အတွင်း နာရီတွင်ထည့်သွင်းသော အက်ပ်များသည် သင့်ဖုန်းနှင့် အလားတူခွင့်ပြုချက်များကို သုံးပါမည်။\n\n ဤခွင့်ပြုချက်များတွင် သင့်နာရီ၏ မိုက်ခရိုဖုန်းနှင့် တည်နေရာတို့ကို သုံးခွင့် ပါဝင်နိုင်သည်။"</string>
+    <!-- no translation found for permission_sync_confirmation_title (4409622174437248702) -->
+    <skip />
+    <!-- no translation found for permission_sync_summary (4866838188678457084) -->
+    <skip />
 </resources>

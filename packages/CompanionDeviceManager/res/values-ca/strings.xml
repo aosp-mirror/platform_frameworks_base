@@ -42,6 +42,8 @@
     <string name="consent_yes" msgid="8344487259618762872">"Permet"</string>
     <string name="consent_no" msgid="2640796915611404382">"No permetis"</string>
     <string name="consent_back" msgid="2560683030046918882">"Enrere"</string>
-    <string name="permission_sync_confirmation_title" msgid="667074294393493186">"Transfereix els permisos de les aplicacions al teu rellotge"</string>
-    <string name="permission_sync_summary" msgid="8873391306499120778">"Per facilitar la configuració del rellotge, les aplicacions instal·lades al rellotge durant la configuració utilitzaran els mateixos permisos que al teu telèfon.\n\n Aquests permisos poden incloure l\'accés al micròfon i a la ubicació del rellotge."</string>
+    <!-- no translation found for permission_sync_confirmation_title (4409622174437248702) -->
+    <skip />
+    <!-- no translation found for permission_sync_summary (4866838188678457084) -->
+    <skip />
 </resources>

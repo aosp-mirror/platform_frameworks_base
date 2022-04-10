@@ -42,6 +42,8 @@
     <string name="consent_yes" msgid="8344487259618762872">"अनुमति दें"</string>
     <string name="consent_no" msgid="2640796915611404382">"अनुमति न दें"</string>
     <string name="consent_back" msgid="2560683030046918882">"वापस जाएं"</string>
-    <string name="permission_sync_confirmation_title" msgid="667074294393493186">"ऐप्लिकेशन से जुड़ी अनुमतियों को अपनी वॉच में ट्रांसफ़र करें"</string>
-    <string name="permission_sync_summary" msgid="8873391306499120778">"वॉच को सेट अप करने की प्रोसेस को आसान बनाने के लिए, उस पर इंस्टॉल किए गए ऐप्लिकेशन को भी वही अनुमतियां मिलेंगी जो आपने उन ऐप्लिकेशन को फ़ोन पर दी होंगी.\n\n इन अनुमतियों में, आपकी वॉच के माइक्रोफ़ोन और जगह की जानकारी का ऐक्सेस शामिल हो सकता है."</string>
+    <!-- no translation found for permission_sync_confirmation_title (4409622174437248702) -->
+    <skip />
+    <!-- no translation found for permission_sync_summary (4866838188678457084) -->
+    <skip />
 </resources>

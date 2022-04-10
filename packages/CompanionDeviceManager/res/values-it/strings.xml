@@ -42,6 +42,8 @@
     <string name="consent_yes" msgid="8344487259618762872">"Consenti"</string>
     <string name="consent_no" msgid="2640796915611404382">"Non consentire"</string>
     <string name="consent_back" msgid="2560683030046918882">"Indietro"</string>
-    <string name="permission_sync_confirmation_title" msgid="667074294393493186">"Trasferisci le autorizzazioni app all\'orologio"</string>
-    <string name="permission_sync_summary" msgid="8873391306499120778">"Per facilitare la configurazione dell\'orologio, le app installate su quest\'ultimo durante la configurazione useranno le stesse autorizzazioni delle app sul telefono.\n\n Queste autorizzazioni potrebbero includere l\'accesso al microfono e alla posizione dell\'orologio."</string>
+    <!-- no translation found for permission_sync_confirmation_title (4409622174437248702) -->
+    <skip />
+    <!-- no translation found for permission_sync_summary (4866838188678457084) -->
+    <skip />
 </resources>
