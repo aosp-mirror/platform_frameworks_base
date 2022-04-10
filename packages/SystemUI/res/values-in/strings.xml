@@ -84,7 +84,7 @@
     <string name="screenrecord_name" msgid="2596401223859996572">"Perekam Layar"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Memproses perekaman layar"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Notifikasi yang sedang berjalan untuk sesi rekaman layar"</string>
-    <string name="screenrecord_start_label" msgid="1750350278888217473">"Mulai Merekam?"</string>
+    <string name="screenrecord_start_label" msgid="1750350278888217473">"Mulai merekam?"</string>
     <string name="screenrecord_description" msgid="1123231719680353736">"Saat merekam, Sistem Android dapat ikut merekam informasi sensitif yang terlihat di layar atau diputar di perangkat Anda. Informasi ini mencakup sandi, info pembayaran, foto, pesan, dan audio."</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"Rekam audio"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"Audio perangkat"</string>
@@ -221,7 +221,7 @@
     <string name="accessibility_rotation_lock_on_landscape" msgid="936972553861524360">"Layar dikunci dalam orientasi lanskap."</string>
     <string name="accessibility_rotation_lock_on_portrait" msgid="2356633398683813837">"Layar dikunci dalam orientasi potret."</string>
     <string name="dessert_case" msgid="9104973640704357717">"Etalase Hidangan Penutup"</string>
-    <string name="start_dreams" msgid="9131802557946276718">"Screen saver"</string>
+    <string name="start_dreams" msgid="9131802557946276718">"Screensaver"</string>
     <string name="ethernet_label" msgid="2203544727007463351">"Ethernet"</string>
     <string name="quick_settings_dnd_label" msgid="7728690179108024338">"Jangan Ganggu"</string>
     <string name="quick_settings_bluetooth_label" msgid="7018763367142041481">"Bluetooth"</string>
@@ -881,6 +881,6 @@
     <string name="see_all_networks" msgid="3773666844913168122">"Lihat semua"</string>
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"Untuk beralih jaringan, lepaskan kabel ethernet"</string>
     <string name="wifi_scan_notify_message" msgid="3753839537448621794">"Agar pengalaman perangkat menjadi lebih baik, aplikasi dan layanan tetap dapat memindai jaringan Wi-Fi kapan saja, bahkan saat Wi-Fi nonaktif. Anda dapat mengubahnya di setelan pemindaian Wi-Fi. "<annotation id="link">"Ubah"</annotation></string>
-    <string name="turn_off_airplane_mode" msgid="8425587763226548579">"Menonaktifkan mode pesawat"</string>
+    <string name="turn_off_airplane_mode" msgid="8425587763226548579">"Nonaktifkan mode pesawat"</string>
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"Pilih pengguna"</string>
 </resources>

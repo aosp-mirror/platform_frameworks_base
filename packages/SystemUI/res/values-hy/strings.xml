@@ -612,7 +612,7 @@
     <item msgid="5874146774389433072">"Աջակողմյան"</item>
   </string-array>
     <string name="save" msgid="3392754183673848006">"Պահել"</string>
-    <string name="reset" msgid="8715144064608810383">"Վերակայել"</string>
+    <string name="reset" msgid="8715144064608810383">"Զրոյացնել"</string>
     <string name="clipboard" msgid="8517342737534284617">"Սեղմատախտակ"</string>
     <string name="accessibility_key" msgid="3471162841552818281">"Հատուկ նավիգացիայի կոճակ"</string>
     <string name="left_keycode" msgid="8211040899126637342">"Ձախ ստեղնային կոդ"</string>

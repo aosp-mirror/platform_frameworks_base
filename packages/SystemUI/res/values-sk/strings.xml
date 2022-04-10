@@ -107,7 +107,7 @@
     <string name="accessibility_accessibility_button" msgid="4089042473497107709">"Dostupnosť"</string>
     <string name="accessibility_rotate_button" msgid="1238584767612362586">"Otočenie obrazovky"</string>
     <string name="accessibility_recent" msgid="901641734769533575">"Prehľad"</string>
-    <string name="accessibility_camera_button" msgid="2938898391716647247">"Fotoaparát"</string>
+    <string name="accessibility_camera_button" msgid="2938898391716647247">"Kamera"</string>
     <string name="accessibility_phone_button" msgid="4256353121703100427">"Telefón"</string>
     <string name="accessibility_voice_assist_button" msgid="6497706615649754510">"Hlasový asistent"</string>
     <string name="accessibility_wallet_button" msgid="1458258783460555507">"Peňaženka"</string>

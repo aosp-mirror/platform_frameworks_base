@@ -573,7 +573,7 @@
     <string name="keyboard_shortcut_group_system_back" msgid="1055709713218453863">"Terug"</string>
     <string name="keyboard_shortcut_group_system_notifications" msgid="3615971650562485878">"Meldingen"</string>
     <string name="keyboard_shortcut_group_system_shortcuts_helper" msgid="4856808328618265589">"Sneltoetsen"</string>
-    <string name="keyboard_shortcut_group_system_switch_input" msgid="952555530383268166">"Toetsenbordindeling schakelen"</string>
+    <string name="keyboard_shortcut_group_system_switch_input" msgid="952555530383268166">"Toetsenbordindeling wisselen"</string>
     <string name="keyboard_shortcut_group_applications" msgid="7386239431100651266">"Apps"</string>
     <string name="keyboard_shortcut_group_applications_assist" msgid="771606231466098742">"Assistentie"</string>
     <string name="keyboard_shortcut_group_applications_browser" msgid="2776211137869809251">"Browser"</string>
