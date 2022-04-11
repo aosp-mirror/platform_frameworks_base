@@ -79,7 +79,6 @@ import android.os.storage.IStorageManager;
 import android.provider.DeviceConfig;
 import android.provider.Settings;
 import android.server.ServerProtoEnums;
-import android.sysprop.VoldProperties;
 import android.system.ErrnoException;
 import android.system.Os;
 import android.text.TextUtils;
@@ -237,9 +236,6 @@ import java.util.concurrent.Future;
 public final class SystemServer implements Dumpable {
 
     private static final String TAG = "SystemServer";
-
-    private static final String ENCRYPTING_STATE = "trigger_restart_min_framework";
-    private static final String ENCRYPTED_STATE = "1";
 
     private static final long SLOW_DISPATCH_THRESHOLD_MS = 100;
     private static final long SLOW_DELIVERY_THRESHOLD_MS = 200;
@@ -462,7 +458,6 @@ public final class SystemServer implements Dumpable {
     private DataLoaderManagerService mDataLoaderManagerService;
     private long mIncrementalServiceHandle = 0;
 
-    private boolean mOnlyCore;
     private boolean mFirstBoot;
     private final int mStartCount;
     private final boolean mRuntimeRestart;
@@ -1203,16 +1198,6 @@ public final class SystemServer implements Dumpable {
         mSystemServiceManager.startBootPhase(t, SystemService.PHASE_WAIT_FOR_DEFAULT_DISPLAY);
         t.traceEnd();
 
-        // Only run "core" apps if we're encrypting the device.
-        String cryptState = VoldProperties.decrypt().orElse("");
-        if (ENCRYPTING_STATE.equals(cryptState)) {
-            Slog.w(TAG, "Detected encryption in progress - only parsing core apps");
-            mOnlyCore = true;
-        } else if (ENCRYPTED_STATE.equals(cryptState)) {
-            Slog.w(TAG, "Device encrypted - only parsing core apps");
-            mOnlyCore = true;
-        }
-
         // Start the package manager.
         if (!mRuntimeRestart) {
             FrameworkStatsLog.write(FrameworkStatsLog.BOOT_TIME_EVENT_ELAPSED_TIME_REPORTED,
@@ -1233,7 +1218,7 @@ public final class SystemServer implements Dumpable {
             Watchdog.getInstance().pauseWatchingCurrentThread("packagemanagermain");
             Pair<PackageManagerService, IPackageManager> pmsPair = PackageManagerService.main(
                     mSystemContext, installer, domainVerificationService,
-                    mFactoryTestMode != FactoryTest.FACTORY_TEST_OFF, mOnlyCore);
+                    mFactoryTestMode != FactoryTest.FACTORY_TEST_OFF, /* onlyCore= */ false);
             mPackageManagerService = pmsPair.first;
             iPackageManager = pmsPair.second;
         } finally {
@@ -1256,21 +1241,17 @@ public final class SystemServer implements Dumpable {
         }
         // Manages A/B OTA dexopting. This is a bootstrap service as we need it to rename
         // A/B artifacts after boot, before anything else might touch/need them.
-        // Note: this isn't needed during decryption (we don't have /data anyways).
-        if (!mOnlyCore) {
-            boolean disableOtaDexopt = SystemProperties.getBoolean("config.disable_otadexopt",
-                    false);
-            if (!disableOtaDexopt) {
-                t.traceBegin("StartOtaDexOptService");
-                try {
-                    Watchdog.getInstance().pauseWatchingCurrentThread("moveab");
-                    OtaDexoptService.main(mSystemContext, mPackageManagerService);
-                } catch (Throwable e) {
-                    reportWtf("starting OtaDexOptService", e);
-                } finally {
-                    Watchdog.getInstance().resumeWatchingCurrentThread("moveab");
-                    t.traceEnd();
-                }
+        boolean disableOtaDexopt = SystemProperties.getBoolean("config.disable_otadexopt", false);
+        if (!disableOtaDexopt) {
+            t.traceBegin("StartOtaDexOptService");
+            try {
+                Watchdog.getInstance().pauseWatchingCurrentThread("moveab");
+                OtaDexoptService.main(mSystemContext, mPackageManagerService);
+            } catch (Throwable e) {
+                reportWtf("starting OtaDexOptService", e);
+            } finally {
+                Watchdog.getInstance().resumeWatchingCurrentThread("moveab");
+                t.traceEnd();
             }
         }
 
@@ -1583,8 +1564,9 @@ public final class SystemServer implements Dumpable {
             t.traceBegin("StartWindowManagerService");
             // WMS needs sensor service ready
             mSystemServiceManager.startBootPhase(t, SystemService.PHASE_WAIT_FOR_SENSOR_SERVICE);
-            wm = WindowManagerService.main(context, inputManager, !mFirstBoot, mOnlyCore,
-                    new PhoneWindowManager(), mActivityManagerService.mActivityTaskManager);
+            wm = WindowManagerService.main(context, inputManager, !mFirstBoot,
+                    /* onlyCore= */ false, new PhoneWindowManager(),
+                    mActivityManagerService.mActivityTaskManager);
             ServiceManager.addService(Context.WINDOW_SERVICE, wm, /* allowIsolated= */ false,
                     DUMP_FLAG_PRIORITY_CRITICAL | DUMP_FLAG_PROTO);
             ServiceManager.addService(Context.INPUT_SERVICE, inputManager,
@@ -1757,19 +1739,16 @@ public final class SystemServer implements Dumpable {
         }
         t.traceEnd();
 
-
-        if (!mOnlyCore) {
-            t.traceBegin("UpdatePackagesIfNeeded");
-            try {
-                Watchdog.getInstance().pauseWatchingCurrentThread("dexopt");
-                mPackageManagerService.updatePackagesIfNeeded();
-            } catch (Throwable e) {
-                reportWtf("update packages", e);
-            } finally {
-                Watchdog.getInstance().resumeWatchingCurrentThread("dexopt");
-            }
-            t.traceEnd();
+        t.traceBegin("UpdatePackagesIfNeeded");
+        try {
+            Watchdog.getInstance().pauseWatchingCurrentThread("dexopt");
+            mPackageManagerService.updatePackagesIfNeeded();
+        } catch (Throwable e) {
+            reportWtf("update packages", e);
+        } finally {
+            Watchdog.getInstance().resumeWatchingCurrentThread("dexopt");
         }
+        t.traceEnd();
 
         t.traceBegin("PerformFstrimIfNeeded");
         try {
@@ -2308,13 +2287,9 @@ public final class SystemServer implements Dumpable {
             t.traceEnd();
 
             // timezone.RulesManagerService will prevent a device starting up if the chain of trust
-            // required for safe time zone updates might be broken. RuleManagerService cannot do
-            // this check when mOnlyCore == true, so we don't enable the service in this case.
-            // This service requires that JobSchedulerService is already started when it starts.
-            final boolean startRulesManagerService =
-                    !mOnlyCore && context.getResources().getBoolean(
-                            R.bool.config_enableUpdateableTimeZoneRules);
-            if (startRulesManagerService) {
+            // required for safe time zone updates might be broken.  This service requires that
+            // JobSchedulerService is already started when it starts.
+            if (context.getResources().getBoolean(R.bool.config_enableUpdateableTimeZoneRules)) {
                 t.traceBegin("StartTimeZoneRulesManagerService");
                 mSystemServiceManager.startService(TIME_ZONE_RULES_MANAGER_SERVICE_CLASS);
                 t.traceEnd();
@@ -2720,7 +2695,7 @@ public final class SystemServer implements Dumpable {
         t.traceBegin("MakeDisplayManagerServiceReady");
         try {
             // TODO: use boot phase and communicate these flags some other way
-            mDisplayManagerService.systemReady(safeMode, mOnlyCore);
+            mDisplayManagerService.systemReady(safeMode, /* onlyCore= */ false);
         } catch (Throwable e) {
             reportWtf("making Display Manager Service ready", e);
         }
@@ -2828,7 +2803,7 @@ public final class SystemServer implements Dumpable {
             // be completed before allowing 3rd party
             final String WEBVIEW_PREPARATION = "WebViewFactoryPreparation";
             Future<?> webviewPrep = null;
-            if (!mOnlyCore && mWebViewUpdateService != null) {
+            if (mWebViewUpdateService != null) {
                 webviewPrep = SystemServerInitThreadPool.submit(() -> {
                     Slog.i(TAG, WEBVIEW_PREPARATION);
                     TimingsTraceAndSlog traceLog = TimingsTraceAndSlog.newAsyncLog();
