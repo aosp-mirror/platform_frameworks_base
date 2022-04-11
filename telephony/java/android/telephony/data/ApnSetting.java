@@ -1576,7 +1576,9 @@ public class ApnSetting implements Parcelable {
      * @hide
      */
     public boolean canSupportLingeringNetworkType(@NetworkType int networkType) {
-        if (networkType == 0) {
+        // For backwards compatibility, if this field is not set, we just use the existing
+        // network type bitmask.
+        if (mLingeringNetworkTypeBitmask == 0) {
             return canSupportNetworkType(networkType);
         }
         // Do a special checking for GSM. In reality, GSM is a voice only network type and can never
