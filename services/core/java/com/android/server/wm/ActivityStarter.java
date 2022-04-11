@@ -2638,14 +2638,16 @@ class ActivityStarter {
             Slog.w(TAG, "startActivity called from finishing " + mSourceRecord
                     + "; forcing " + "Intent.FLAG_ACTIVITY_NEW_TASK for: " + mIntent);
             mLaunchFlags |= FLAG_ACTIVITY_NEW_TASK;
-            mNewTaskInfo = mSourceRecord.info;
 
-            // It is not guaranteed that the source record will have a task associated with it. For,
-            // example, if this method is being called for processing a pending activity launch, it
-            // is possible that the activity has been removed from the task after the launch was
-            // enqueued.
+            // It is not guaranteed that the source record will have a task associated with it.
+            // For example, if this method is being called for processing a pending activity
+            // launch, it is possible that the activity has been removed from the task after the
+            // launch was enqueued.
             final Task sourceTask = mSourceRecord.getTask();
-            mNewTaskIntent = sourceTask != null ? sourceTask.intent : null;
+            if (sourceTask == null || sourceTask.getTopNonFinishingActivity() == null) {
+                mNewTaskInfo = mSourceRecord.info;
+                mNewTaskIntent = sourceTask != null ? sourceTask.intent : null;
+            }
         }
         mSourceRecord = null;
         mSourceRootTask = null;
