@@ -27,6 +27,8 @@ import static com.android.internal.util.CollectionUtils.any;
 import static com.android.internal.util.Preconditions.checkState;
 import static com.android.internal.util.function.pooled.PooledLambda.obtainMessage;
 import static com.android.server.companion.AssociationStore.CHANGE_TYPE_UPDATED_ADDRESS_UNCHANGED;
+import static com.android.server.companion.MetricUtils.logCreateAssociation;
+import static com.android.server.companion.MetricUtils.logRemoveAssociation;
 import static com.android.server.companion.PackageUtils.enforceUsesCompanionDeviceFeature;
 import static com.android.server.companion.PackageUtils.getPackageInfo;
 import static com.android.server.companion.PermissionsUtils.checkCallerCanManageCompanionDevice;
@@ -771,7 +773,7 @@ public class CompanionDeviceManagerService extends SystemService {
         }
 
         updateSpecialAccessPermissionForAssociatedPackage(association);
-
+        logCreateAssociation(deviceProfile);
         return association;
     }
 
@@ -856,6 +858,7 @@ public class CompanionDeviceManagerService extends SystemService {
 
         // Removing the association.
         mAssociationStore.removeAssociation(associationId);
+        logRemoveAssociation(deviceProfile);
 
         final List<AssociationInfo> otherAssociations =
                 mAssociationStore.getAssociationsForPackage(userId, packageName);
