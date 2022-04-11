@@ -424,6 +424,8 @@ public abstract class PanelViewController {
                     // situations, such keeping your finger down while swiping to unlock to an app
                     // that is locked in landscape (the rotation will cancel the touch event).
                     expand = false;
+                } else if (mCentralSurfaces.isBouncerShowingOverDream()) {
+                    expand = false;
                 } else {
                     // If we get a cancel, put the shade back to the state it was in when the
                     // gesture started

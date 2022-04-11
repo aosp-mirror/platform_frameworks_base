@@ -468,6 +468,7 @@ public class CentralSurfaces extends CoreStartable implements
      */
     protected int mState; // TODO: remove this. Just use StatusBarStateController
     protected boolean mBouncerShowing;
+    private boolean mBouncerShowingOverDream;
 
     private final PhoneStatusBarPolicy mIconPolicy;
 
@@ -3473,6 +3474,16 @@ public class CentralSurfaces extends CoreStartable implements
     }
 
     /**
+     * Sets whether the bouncer over dream is showing. Note that the bouncer over dream is handled
+     * independently of the rest of the notification panel. As a result, setting this state via
+     * {@link #setBouncerShowing(boolean)} leads to unintended side effects from states modified
+     * behind the dream.
+     */
+    public void setBouncerShowingOverDream(boolean bouncerShowingOverDream) {
+        mBouncerShowingOverDream = bouncerShowingOverDream;
+    }
+
+    /**
      * Propagate the bouncer state to status bar components.
      *
      * Separate from {@link #setBouncerShowing} because we sometimes re-create the status bar and
@@ -4145,7 +4156,7 @@ public class CentralSurfaces extends CoreStartable implements
     }
 
     public boolean isBouncerShowingOverDream() {
-        return isBouncerShowing() && mDreamOverlayStateController.isOverlayActive();
+        return mBouncerShowingOverDream;
     }
 
     /**
