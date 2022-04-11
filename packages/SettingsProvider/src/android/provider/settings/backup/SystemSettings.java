@@ -43,7 +43,6 @@ public class SystemSettings {
         Settings.System.FONT_SCALE,
         Settings.System.DIM_SCREEN,
         Settings.System.SCREEN_OFF_TIMEOUT,
-        Settings.System.SCREEN_OFF_TIMEOUT_DOCKED,
         Settings.System.SCREEN_BRIGHTNESS_MODE,
         Settings.System.SCREEN_AUTO_BRIGHTNESS_ADJ,
         Settings.System.SCREEN_BRIGHTNESS_FOR_VR,
