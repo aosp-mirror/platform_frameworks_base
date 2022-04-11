@@ -26,7 +26,7 @@
     <string name="battery_low_percent_format" msgid="4276661262843170964">"<xliff:g id="PERCENTAGE">%s</xliff:g> বাকী আছে"</string>
     <string name="invalid_charger_title" msgid="938685362320735167">"ইউএছবি জৰিয়তে চ্চাৰ্জ কৰিব নোৱাৰি"</string>
     <string name="invalid_charger_text" msgid="2339310107232691577">"আপোনাৰ ডিভাইচৰ লগত পোৱা চ্চাৰ্জাৰটো ব্যৱহাৰ কৰক।"</string>
-    <string name="battery_saver_confirmation_title" msgid="1234998463717398453">"বেটাৰী সঞ্চয়কাৰী অন কৰেনে?"</string>
+    <string name="battery_saver_confirmation_title" msgid="1234998463717398453">"বেটাৰী সঞ্চয়কাৰী অন কৰিবনে?"</string>
     <string name="battery_saver_confirmation_title_generic" msgid="2299231884234959849">"বেটাৰী সঞ্চয়কাৰীৰ বিষয়ে"</string>
     <string name="battery_saver_confirmation_ok" msgid="5042136476802816494">"অন কৰক"</string>
     <string name="battery_saver_start_action" msgid="8353766979886287140">"অন কৰক"</string>
@@ -135,8 +135,7 @@
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="2242167416140740920">"মুখমণ্ডলৰ বিশ্বাসযোগ্যতা প্ৰমাণীকৰণ কৰা হ’ল"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"নিশ্চিত কৰিলে"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"সম্পূৰ্ণ কৰিবলৈ নিশ্চিত কৰক-ত টিপক"</string>
-    <!-- no translation found for biometric_dialog_tap_confirm_with_face (1092050545851021991) -->
-    <skip />
+    <string name="biometric_dialog_tap_confirm_with_face" msgid="1092050545851021991">"মুখাৱয়বৰ জৰিয়তে আনলক কৰা হৈছে। অব্যাহত ৰাখিবলৈ আনলক কৰক চিহ্নটোত টিপক।"</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"বিশ্বাসযোগ্যতা প্ৰমাণীকৰণ কৰা হ’ল"</string>
     <string name="biometric_dialog_use_pin" msgid="8385294115283000709">"পিন ব্যৱহাৰ কৰক"</string>
     <string name="biometric_dialog_use_pattern" msgid="2315593393167211194">"আৰ্হি ব্যৱহাৰ কৰক"</string>
@@ -311,10 +310,8 @@
     <string name="notification_tap_again" msgid="4477318164947497249">"খুলিবলৈ পুনৰাই টিপক"</string>
     <string name="tap_again" msgid="1315420114387908655">"পুনৰ টিপক"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"খুলিবলৈ ওপৰলৈ ছোৱাইপ কৰক"</string>
-    <!-- no translation found for keyguard_unlock_press (9140109453735019209) -->
-    <skip />
-    <!-- no translation found for keyguard_face_successful_unlock_press (25520941264602588) -->
-    <skip />
+    <string name="keyguard_unlock_press" msgid="9140109453735019209">"খুলিবলৈ আনলক কৰক চিহ্নটোত টিপক"</string>
+    <string name="keyguard_face_successful_unlock_press" msgid="25520941264602588">"মুখাৱয়বৰ জৰিয়তে আনলক কৰা হৈছে। খুলিবলৈ আনলক কৰক চিহ্নটোত টিপক।"</string>
     <string name="keyguard_retry" msgid="886802522584053523">"পুনৰ চেষ্টা কৰিবলৈ ওপৰলৈ ছোৱাইপ কৰক"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"NFC ব্যৱহাৰ কৰিবলৈ আনলক কৰক"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"এই ডিভাইচটো আপোনাৰ প্ৰতিষ্ঠানৰ"</string>
@@ -468,7 +465,7 @@
     <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"লক স্ক্ৰীনৰ ছেটিং"</string>
     <string name="qr_code_scanner_title" msgid="5290201053875420785">"কিউআৰ ক’ড স্কেন কৰক"</string>
     <string name="status_bar_work" msgid="5238641949837091056">"কৰ্মস্থানৰ প্ৰ\'ফাইল"</string>
-    <string name="status_bar_airplane" msgid="4848702508684541009">"এয়াৰপ্লেইন ম\'ড"</string>
+    <string name="status_bar_airplane" msgid="4848702508684541009">"এয়াৰপ্লে’ন ম’ড"</string>
     <string name="zen_alarm_warning" msgid="7844303238486849503">"আপুনি আপোনাৰ পিছৰটো এলাৰ্ম <xliff:g id="WHEN">%1$s</xliff:g> বজাত শুনা নাপাব"</string>
     <string name="alarm_template" msgid="2234991538018805736">"<xliff:g id="WHEN">%1$s</xliff:g> বজাত"</string>
     <string name="alarm_template_far" msgid="3561752195856839456">"<xliff:g id="WHEN">%1$s</xliff:g> বজাত"</string>
@@ -808,6 +805,8 @@
     <string name="controls_media_button_pause" msgid="8614887780950376258">"পজ কৰক"</string>
     <string name="controls_media_button_prev" msgid="8126822360056482970">"পূৰ্বৱৰ্তী ট্ৰেক"</string>
     <string name="controls_media_button_next" msgid="6662636627525947610">"পৰৱৰ্তী ট্ৰেক"</string>
+    <!-- no translation found for controls_media_button_connecting (3138354625847598095) -->
+    <skip />
     <string name="controls_media_smartspace_rec_title" msgid="1699818353932537407">"প্লে’ কৰক"</string>
     <string name="controls_media_smartspace_rec_description" msgid="4136242327044070732">"<xliff:g id="APP_LABEL">%1$s</xliff:g> খোলক"</string>
     <string name="controls_media_smartspace_rec_item_description" msgid="2189271793070870883">"<xliff:g id="APP_LABEL">%3$s</xliff:g>ত <xliff:g id="ARTIST_NAME">%2$s</xliff:g>ৰ <xliff:g id="SONG_NAME">%1$s</xliff:g> গীতটো প্লে’ কৰক"</string>
