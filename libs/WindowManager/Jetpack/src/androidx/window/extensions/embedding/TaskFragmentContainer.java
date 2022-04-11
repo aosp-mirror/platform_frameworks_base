@@ -192,10 +192,30 @@ class TaskFragmentContainer {
     }
 
     /**
+     * Removes a container that should be finished when this container is finished.
+     */
+    void removeContainerToFinishOnExit(@NonNull TaskFragmentContainer containerToRemove) {
+        mContainersToFinishOnExit.remove(containerToRemove);
+    }
+
+    /**
      * Adds an activity that should be finished when this container is finished.
      */
     void addActivityToFinishOnExit(@NonNull Activity activityToFinish) {
         mActivitiesToFinishOnExit.add(activityToFinish);
+    }
+
+    /**
+     * Removes an activity that should be finished when this container is finished.
+     */
+    void removeActivityToFinishOnExit(@NonNull Activity activityToRemove) {
+        mActivitiesToFinishOnExit.remove(activityToRemove);
+    }
+
+    /** Removes all dependencies that should be finished when this container is finished. */
+    void resetDependencies() {
+        mContainersToFinishOnExit.clear();
+        mActivitiesToFinishOnExit.clear();
     }
 
     /**
