@@ -308,7 +308,6 @@ import android.provider.DeviceConfig;
 import android.provider.Settings;
 import android.server.ServerProtoEnums;
 import android.sysprop.InitProperties;
-import android.sysprop.VoldProperties;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.text.style.SuggestionSpan;
@@ -5084,12 +5083,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
             // Tell anyone interested that we are done booting!
             SystemProperties.set("sys.boot_completed", "1");
-
-            // And trigger dev.bootcomplete if we are not showing encryption progress
-            if (!"trigger_restart_min_framework".equals(VoldProperties.decrypt().orElse(""))
-                    || "".equals(VoldProperties.encrypt_progress().orElse(""))) {
-                SystemProperties.set("dev.bootcomplete", "1");
-            }
+            SystemProperties.set("dev.bootcomplete", "1");
             mUserController.sendBootCompleted(
                     new IIntentReceiver.Stub() {
                         @Override
