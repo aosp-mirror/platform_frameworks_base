@@ -331,6 +331,8 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
     private NotificationListContainer mNotificationListContainer;
     @Mock
     private NotificationStackSizeCalculator mNotificationStackSizeCalculator;
+    @Mock
+    private UnlockedScreenOffAnimationController mUnlockedScreenOffAnimationController;
     private NotificationPanelViewController.PanelEventsEmitter mPanelEventsEmitter;
     private Optional<SysUIUnfoldComponent> mSysUIUnfoldComponent = Optional.empty();
     private SysuiStatusBarStateController mStatusBarStateController;
@@ -511,7 +513,8 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
                 mKeyguardUnlockAnimationController,
                 mNotificationListContainer,
                 mPanelEventsEmitter,
-                mNotificationStackSizeCalculator);
+                mNotificationStackSizeCalculator,
+                mUnlockedScreenOffAnimationController);
         mNotificationPanelViewController.initDependencies(
                 mCentralSurfaces,
                 () -> {},
