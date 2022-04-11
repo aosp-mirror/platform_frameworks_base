@@ -23,6 +23,7 @@ import android.content.Context
 import android.graphics.Matrix
 import android.graphics.Rect
 import android.os.Handler
+import android.provider.Settings
 import android.util.Log
 import android.view.RemoteAnimationTarget
 import android.view.SyncRtSurfaceTransactionApplier
@@ -94,6 +95,20 @@ const val DISMISS_AMOUNT_EXIT_KEYGUARD_THRESHOLD = 0.4f
 const val UNLOCK_ANIMATION_DURATION_MS = 200L
 
 /**
+ * How long the in-window launcher icon animation takes. This is used if the launcher is underneath
+ * the lock screen and supports in-window animations.
+ *
+ * This animation will take place entirely within the Launcher window. We can safely unlock the
+ * device, end remote animations, etc. even if this is still running.
+ */
+const val LAUNCHER_ICONS_ANIMATION_DURATION_MS = 633L
+
+/**
+ * How long to wait for the shade to get out of the way before starting the canned unlock animation.
+ */
+const val CANNED_UNLOCK_START_DELAY = 100L
+
+/**
  * Duration for the alpha animation on the surface behind. This plays to fade in the surface during
  * a swipe to unlock (and to fade it back out if the swipe is cancelled).
  */
@@ -119,7 +134,7 @@ const val UNLOCK_ANIMATION_SURFACE_BEHIND_START_DELAY_MS = 75L
  */
 @SysUISingleton
 class KeyguardUnlockAnimationController @Inject constructor(
-    context: Context,
+    private val context: Context,
     private val keyguardStateController: KeyguardStateController,
     private val
     keyguardViewMediator: Lazy<KeyguardViewMediator>,
@@ -483,23 +498,34 @@ class KeyguardUnlockAnimationController @Inject constructor(
      * transition if possible.
      */
     private fun unlockToLauncherWithInWindowAnimations() {
-        unlockingToLauncherWithInWindowAnimations = true
-
         // See if we can do the smartspace transition, and if so, do it!
         if (prepareForSmartspaceTransition()) {
             animateSmartspaceToDestination()
             listeners.forEach { it.onSmartspaceSharedElementTransitionStarted() }
         }
 
-        // Tell the launcher to prepare for the animation by setting its views invisible and
-        // syncing the selected smartspace pages.
-        launcherUnlockController?.prepareForUnlock(
-            unlockingWithSmartspaceTransition /* willAnimateSmartspace */,
-            (lockscreenSmartspace as BcSmartspaceDataPlugin.SmartspaceView?)?.selectedPage ?: -1)
+        val startDelay = Settings.Secure.getLong(
+            context.contentResolver, "unlock_start_delay", CANNED_UNLOCK_START_DELAY)
+        val duration = Settings.Secure.getLong(
+            context.contentResolver, "unlock_duration", LAUNCHER_ICONS_ANIMATION_DURATION_MS)
 
-        // Begin the animation.
+        unlockingToLauncherWithInWindowAnimations = true
+        prepareLauncherWorkspaceForUnlockAnimation()
+
+        // Begin the animation, waiting for the shade to animate out.
         launcherUnlockController?.playUnlockAnimation(
-            true /* unlocked */, UNLOCK_ANIMATION_DURATION_MS)
+            true /* unlocked */,
+            duration /* duration */,
+            startDelay /* startDelay */)
+
+        handler.postDelayed({
+            applyParamsToSurface(
+                SyncRtSurfaceTransactionApplier.SurfaceParams.Builder(
+                    surfaceBehindRemoteAnimationTarget!!.leash)
+                    .withAlpha(1f)
+                    .build())
+        }, startDelay)
+
         if (!unlockingWithSmartspaceTransition) {
             // If we are not unlocking with the smartspace transition, wait for the unlock animation
             // to end and then finish the remote animation. If we are using the smartspace
@@ -509,9 +535,18 @@ class KeyguardUnlockAnimationController @Inject constructor(
                     false /* cancelled */)
             }, UNLOCK_ANIMATION_DURATION_MS)
         }
+    }
 
-        // Wait a moment, then show the launcher surface.
-        setSurfaceBehindAppearAmount(1f)
+    /**
+     * Asks Launcher to prepare the workspace to be unlocked. This sets up the animation and makes
+     * the page invisible.
+     */
+    private fun prepareLauncherWorkspaceForUnlockAnimation() {
+        // Tell the launcher to prepare for the animation by setting its views invisible and
+        // syncing the selected smartspace pages.
+        launcherUnlockController?.prepareForUnlock(
+            unlockingWithSmartspaceTransition /* willAnimateSmartspace */,
+            (lockscreenSmartspace as BcSmartspaceDataPlugin.SmartspaceView?)?.selectedPage ?: -1)
     }
 
     /**
@@ -615,20 +650,18 @@ class KeyguardUnlockAnimationController @Inject constructor(
         }
 
         if (unlockingToLauncherWithInWindowAnimations) {
-            // If we're using the in-window launcher animations, and haven't yet applied alpha = 1f
-            // to the launcher surface, do that now so we can see the launcher animations.
-            if (surfaceBehindParams?.alpha?.let { it < 1f } != false) {
-                applyParamsToSurface(
-                    SyncRtSurfaceTransactionApplier.SurfaceParams.Builder(
-                        surfaceBehindRemoteAnimationTarget!!.leash)
-                    .withAlpha(1f)
-                    .build())
-            }
-
             // If we aren't using the canned unlock animation (which would be setting the unlock
             // amount in its update listener), do it here.
             if (!isPlayingCannedUnlockAnimation()) {
                 launcherUnlockController?.setUnlockAmount(amount)
+
+                if (surfaceBehindParams?.alpha?.let { it < 1f } != false) {
+                    applyParamsToSurface(
+                        SyncRtSurfaceTransactionApplier.SurfaceParams.Builder(
+                            surfaceBehindRemoteAnimationTarget!!.leash)
+                            .withAlpha(1f)
+                            .build())
+                }
             }
         } else {
             // Otherwise, animate in the surface's scale/transltion.
@@ -743,9 +776,10 @@ class KeyguardUnlockAnimationController @Inject constructor(
                 !keyguardViewMediator.get().requestedShowSurfaceBehindKeyguard()) {
             // We passed the threshold, and we're not yet showing the surface behind the
             // keyguard. Animate it in.
-            if (canPerformInWindowLauncherAnimations()) {
-                launcherUnlockController?.setUnlockAmount(0f)
+            if (!unlockingToLauncherWithInWindowAnimations &&
+                canPerformInWindowLauncherAnimations()) {
                 unlockingToLauncherWithInWindowAnimations = true
+                prepareLauncherWorkspaceForUnlockAnimation()
             }
             keyguardViewMediator.get().showSurfaceBehindKeyguard()
             fadeInSurfaceBehind()
@@ -928,7 +962,11 @@ class KeyguardUnlockAnimationController @Inject constructor(
      * the device.
      */
     fun canPerformInWindowLauncherAnimations(): Boolean {
-        return isNexusLauncherUnderneath() && launcherUnlockController != null
+        return isNexusLauncherUnderneath() &&
+                launcherUnlockController != null &&
+                // Temporarily disable for foldables since foldable launcher has two first pages,
+                // which breaks the in-window animation.
+                !isFoldable(context)
     }
 
     /**
@@ -968,6 +1006,10 @@ class KeyguardUnlockAnimationController @Inject constructor(
             return ActivityManagerWrapper.getInstance()
                     .runningTask?.topActivity?.className?.equals(
                             QuickStepContract.LAUNCHER_ACTIVITY_CLASS_NAME) ?: false
+        }
+
+        fun isFoldable(context: Context): Boolean {
+            return context.resources.getIntArray(R.array.config_foldedDeviceStates).isNotEmpty()
         }
     }
 }
