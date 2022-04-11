@@ -896,7 +896,7 @@
     <string name="drag_to_rearrange_tiles" msgid="2143204300089638620">"ចុច​ឱ្យ​ជាប់ រួចអូស​ដើម្បី​រៀបចំ​ប្រអប់​ឡើងវិញ"</string>
     <string name="drag_to_remove_tiles" msgid="4682194717573850385">"អូសទីនេះដើម្បីយកចេញ"</string>
     <string name="drag_to_remove_disabled" msgid="933046987838658850">"អ្នក​ត្រូវការ​ប្រអប់​យ៉ាងតិច <xliff:g id="MIN_NUM_TILES">%1$d</xliff:g>"</string>
-    <string name="qs_edit" msgid="5583565172803472437">"កែសម្រួល"</string>
+    <string name="qs_edit" msgid="5583565172803472437">"កែ"</string>
     <string name="tuner_time" msgid="2450785840990529997">"ម៉ោង"</string>
   <string-array name="clock_options">
     <item msgid="3986445361435142273">"បង្ហាញម៉ោង នាទី និងវិនាទី"</item>
