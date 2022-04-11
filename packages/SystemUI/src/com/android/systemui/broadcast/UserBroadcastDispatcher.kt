@@ -20,12 +20,12 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.os.Handler
 import android.os.Looper
-import android.os.Message
 import android.os.UserHandle
 import android.util.ArrayMap
 import android.util.ArraySet
 import android.util.Log
 import androidx.annotation.VisibleForTesting
+import androidx.annotation.WorkerThread
 import com.android.internal.util.Preconditions
 import com.android.systemui.Dumpable
 import com.android.systemui.broadcast.logging.BroadcastDispatcherLogger
@@ -34,8 +34,6 @@ import java.io.PrintWriter
 import java.util.concurrent.Executor
 import java.util.concurrent.atomic.AtomicInteger
 
-private const val MSG_REGISTER_RECEIVER = 0
-private const val MSG_UNREGISTER_RECEIVER = 1
 private const val TAG = "UserBroadcastDispatcher"
 private const val DEBUG = false
 
@@ -50,7 +48,8 @@ open class UserBroadcastDispatcher(
     private val userId: Int,
     private val bgLooper: Looper,
     private val bgExecutor: Executor,
-    private val logger: BroadcastDispatcherLogger
+    private val logger: BroadcastDispatcherLogger,
+    private val removalPendingStore: PendingRemovalStore
 ) : Dumpable {
 
     companion object {
@@ -60,22 +59,14 @@ open class UserBroadcastDispatcher(
         val index = AtomicInteger(0)
     }
 
-    private val bgHandler = object : Handler(bgLooper) {
-        override fun handleMessage(msg: Message) {
-            when (msg.what) {
-                MSG_REGISTER_RECEIVER -> handleRegisterReceiver(msg.obj as ReceiverData, msg.arg1)
-                MSG_UNREGISTER_RECEIVER -> handleUnregisterReceiver(msg.obj as BroadcastReceiver)
-                else -> Unit
-            }
-        }
-    }
-
     // Used for key in actionsToActionsReceivers
     internal data class ReceiverProperties(
         val action: String,
         val flags: Int,
         val permission: String?
     )
+
+    private val bgHandler = Handler(bgLooper)
 
     // Only modify in BG thread
     @VisibleForTesting
@@ -92,19 +83,21 @@ open class UserBroadcastDispatcher(
     /**
      * Register a [ReceiverData] for this user.
      */
+    @WorkerThread
     fun registerReceiver(receiverData: ReceiverData, flags: Int) {
-        bgHandler.obtainMessage(MSG_REGISTER_RECEIVER, flags, 0, receiverData).sendToTarget()
+        handleRegisterReceiver(receiverData, flags)
     }
 
     /**
      * Unregister a given [BroadcastReceiver] for this user.
      */
+    @WorkerThread
     fun unregisterReceiver(receiver: BroadcastReceiver) {
-        bgHandler.obtainMessage(MSG_UNREGISTER_RECEIVER, receiver).sendToTarget()
+        handleUnregisterReceiver(receiver)
     }
 
     private fun handleRegisterReceiver(receiverData: ReceiverData, flags: Int) {
-        Preconditions.checkState(bgHandler.looper.isCurrentThread,
+        Preconditions.checkState(bgLooper.isCurrentThread,
                 "This method should only be called from BG thread")
         if (DEBUG) Log.w(TAG, "Register receiver: ${receiverData.receiver}")
         receiverToActions
@@ -151,12 +144,13 @@ open class UserBroadcastDispatcher(
                     }
                 },
                 bgExecutor,
-                logger
+                logger,
+                removalPendingStore::isPendingRemoval
         )
     }
 
     private fun handleUnregisterReceiver(receiver: BroadcastReceiver) {
-        Preconditions.checkState(bgHandler.looper.isCurrentThread,
+        Preconditions.checkState(bgLooper.isCurrentThread,
                 "This method should only be called from BG thread")
         if (DEBUG) Log.w(TAG, "Unregister receiver: $receiver")
         receiverToActions.getOrDefault(receiver, mutableSetOf()).forEach {
