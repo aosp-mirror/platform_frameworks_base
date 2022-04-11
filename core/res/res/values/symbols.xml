@@ -4774,4 +4774,6 @@
   <java-symbol type="layout" name="app_language_picker_current_locale_item" />
   <java-symbol type="id" name="system_locale_subtitle" />
   <java-symbol type="id" name="language_picker_item" />
+
+  <java-symbol type="dimen" name="status_bar_height_default" />
 </resources>
