@@ -4959,8 +4959,12 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         @Override
         public String getSplashScreenTheme(@NonNull String packageName, int userId) {
             final Computer snapshot = snapshotComputer();
+            final int callingUid = Binder.getCallingUid();
+            snapshot.enforceCrossUserPermission(
+                    callingUid, userId, false /* requireFullPermission */,
+                    false /* checkShell */, "getSplashScreenTheme");
             PackageStateInternal packageState = filterPackageStateForInstalledAndFiltered(snapshot,
-                    packageName, Binder.getCallingUid(), userId);
+                    packageName, callingUid, userId);
             return packageState == null ? null
                     : packageState.getUserStateOrDefault(userId).getSplashScreenTheme();
         }
