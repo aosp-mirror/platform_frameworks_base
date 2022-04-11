@@ -91,7 +91,7 @@
     <string name="screenrecord_name" msgid="2596401223859996572">"螢幕畫面錄影工具"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"正在處理螢幕錄影內容"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"持續顯示錄影畫面工作階段通知"</string>
-    <string name="screenrecord_start_label" msgid="1750350278888217473">"要開始錄影嗎？"</string>
+    <string name="screenrecord_start_label" msgid="1750350278888217473">"要開始錄製嗎？"</string>
     <string name="screenrecord_description" msgid="1123231719680353736">"錄影時，Android 系統可擷取螢幕上顯示或裝置播放的任何敏感資料，包括密碼、付款資料、相片、訊息和音訊。"</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"錄音"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"裝置音訊"</string>
@@ -135,8 +135,7 @@
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="2242167416140740920">"臉孔已經驗證"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"已確認"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"輕按 [確定] 以完成"</string>
-    <!-- no translation found for biometric_dialog_tap_confirm_with_face (1092050545851021991) -->
-    <skip />
+    <string name="biometric_dialog_tap_confirm_with_face" msgid="1092050545851021991">"已使用面孔解鎖。按解鎖圖示即可繼續。"</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"驗證咗"</string>
     <string name="biometric_dialog_use_pin" msgid="8385294115283000709">"使用 PIN"</string>
     <string name="biometric_dialog_use_pattern" msgid="2315593393167211194">"使用圖案"</string>
@@ -311,10 +310,8 @@
     <string name="notification_tap_again" msgid="4477318164947497249">"再次輕按即可開啟"</string>
     <string name="tap_again" msgid="1315420114387908655">"再次輕按"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"向上滑動即可開啟"</string>
-    <!-- no translation found for keyguard_unlock_press (9140109453735019209) -->
-    <skip />
-    <!-- no translation found for keyguard_face_successful_unlock_press (25520941264602588) -->
-    <skip />
+    <string name="keyguard_unlock_press" msgid="9140109453735019209">"按解鎖圖示即可開啟"</string>
+    <string name="keyguard_face_successful_unlock_press" msgid="25520941264602588">"已使用面孔解鎖。按解鎖圖示即可開啟。"</string>
     <string name="keyguard_retry" msgid="886802522584053523">"請向上滑動以再試一次"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"解鎖方可使用 NFC"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"此裝置屬於您的機構"</string>
@@ -808,6 +805,8 @@
     <string name="controls_media_button_pause" msgid="8614887780950376258">"暫停"</string>
     <string name="controls_media_button_prev" msgid="8126822360056482970">"上一首曲目"</string>
     <string name="controls_media_button_next" msgid="6662636627525947610">"下一首曲目"</string>
+    <!-- no translation found for controls_media_button_connecting (3138354625847598095) -->
+    <skip />
     <string name="controls_media_smartspace_rec_title" msgid="1699818353932537407">"播放"</string>
     <string name="controls_media_smartspace_rec_description" msgid="4136242327044070732">"開啟 <xliff:g id="APP_LABEL">%1$s</xliff:g>"</string>
     <string name="controls_media_smartspace_rec_item_description" msgid="2189271793070870883">"在 <xliff:g id="APP_LABEL">%3$s</xliff:g> 播放 <xliff:g id="ARTIST_NAME">%2$s</xliff:g> 的《<xliff:g id="SONG_NAME">%1$s</xliff:g>》"</string>
@@ -913,8 +912,8 @@
     <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"不要新增圖塊"</string>
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"選取使用者"</string>
     <plurals name="fgs_manager_footer_label" formatted="false" msgid="9091110396713032871">
-      <item quantity="other"><xliff:g id="COUNT_1">%s</xliff:g> 個使用中的應用程式</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%s</xliff:g> 個使用中的應用程式</item>
+      <item quantity="other">有 <xliff:g id="COUNT_1">%s</xliff:g> 個應用程式正在使用</item>
+      <item quantity="one">有 <xliff:g id="COUNT_0">%s</xliff:g> 個應用程式正在使用</item>
     </plurals>
     <string name="fgs_dot_content_description" msgid="2865071539464777240">"新資料"</string>
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"使用中的應用程式"</string>
