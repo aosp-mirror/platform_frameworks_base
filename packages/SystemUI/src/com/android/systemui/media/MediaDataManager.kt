@@ -173,10 +173,6 @@ class MediaDataManager(
         // Maximum number of actions allowed in expanded view
         @JvmField
         val MAX_NOTIFICATION_ACTIONS = MediaViewHolder.genericButtonIds.size
-
-        /** Maximum number of [PlaybackState.CustomAction] buttons supported */
-        @JvmField
-        val MAX_CUSTOM_ACTIONS = 4
     }
 
     private val themeText = com.android.settingslib.Utils.getColorAttr(context,
@@ -821,14 +817,11 @@ class MediaDataManager(
             val nextButton = getStandardAction(controller, state.actions,
                     PlaybackState.ACTION_SKIP_TO_NEXT)
 
-            // Then, check for custom actions
-            val customActions = MutableList<MediaAction?>(MAX_CUSTOM_ACTIONS) { null }
-            var customCount = 0
-            for (i in 0..(MAX_CUSTOM_ACTIONS - 1)) {
-                getCustomAction(state, packageName, controller, customCount)?.let {
-                    customActions[customCount++] = it
-                }
-            }
+            // Then, create a way to build any custom actions that will be needed
+            val customActions = state.customActions.asSequence().filterNotNull().map {
+                getCustomAction(state, packageName, controller, it)
+            }.iterator()
+            fun nextCustomAction() = if (customActions.hasNext()) customActions.next() else null
 
             // Finally, assign the remaining button slots: play/pause A B C D
             // A = previous, else custom action (if not reserved)
@@ -838,12 +831,11 @@ class MediaDataManager(
                     MediaConstants.SESSION_EXTRAS_KEY_SLOT_RESERVATION_SKIP_TO_PREV) == true
             val reserveNext = controller.extras?.getBoolean(
                     MediaConstants.SESSION_EXTRAS_KEY_SLOT_RESERVATION_SKIP_TO_NEXT) == true
-            var customIdx = 0
 
             actions.prevOrCustom = if (prevButton != null) {
                 prevButton
             } else if (!reservePrev) {
-                customActions[customIdx++]
+                nextCustomAction()
             } else {
                 null
             }
@@ -851,13 +843,13 @@ class MediaDataManager(
             actions.nextOrCustom = if (nextButton != null) {
                 nextButton
             } else if (!reserveNext) {
-                customActions[customIdx++]
+                nextCustomAction()
             } else {
                 null
             }
 
-            actions.custom0 = customActions[customIdx++]
-            actions.custom1 = customActions[customIdx++]
+            actions.custom0 = nextCustomAction()
+            actions.custom1 = nextCustomAction()
         }
         return actions
     }
@@ -938,18 +930,12 @@ class MediaDataManager(
         state: PlaybackState,
         packageName: String,
         controller: MediaController,
-        index: Int
-    ): MediaAction? {
-        if (state.customActions.size <= index || state.customActions[index] == null) {
-            if (DEBUG) { Log.d(TAG, "not enough actions or action was null at $index") }
-            return null
-        }
-
-        val it = state.customActions[index]
+        customAction: PlaybackState.CustomAction
+    ): MediaAction {
         return MediaAction(
-            Icon.createWithResource(packageName, it.icon).loadDrawable(context),
-            { controller.transportControls.sendCustomAction(it, it.extras) },
-            it.name,
+            Icon.createWithResource(packageName, customAction.icon).loadDrawable(context),
+            { controller.transportControls.sendCustomAction(customAction, customAction.extras) },
+            customAction.name,
             null
         )
     }
