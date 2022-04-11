@@ -317,8 +317,6 @@ public class NotificationPanelViewController extends PanelViewController {
     private boolean mShouldUseSplitNotificationShade;
     // The bottom padding reserved for elements of the keyguard measuring notifications
     private float mKeyguardNotificationBottomPadding;
-    // Space available for notifications.
-    private float mKeyguardNotificationAvailableSpace;
     // Current max allowed keyguard notifications determined by measuring the panel
     private int mMaxAllowedKeyguardNotifications;
 
@@ -1245,8 +1243,6 @@ public class NotificationPanelViewController extends PanelViewController {
                     mMaxAllowedKeyguardNotifications);
             mNotificationStackScrollLayoutController.setKeyguardBottomPaddingForDebug(
                     mKeyguardNotificationBottomPadding);
-            mNotificationStackScrollLayoutController.mKeyguardNotificationAvailableSpaceForDebug(
-                    mKeyguardNotificationAvailableSpace);
         } else {
             // no max when not on the keyguard
             mNotificationStackScrollLayoutController.setMaxDisplayedNotifications(-1);
@@ -1468,13 +1464,11 @@ public class NotificationPanelViewController extends PanelViewController {
      * @return the maximum keyguard notifications that can fit on the screen
      */
     private int computeMaxKeyguardNotifications() {
-        int notificationPadding = Math.max(
-                1, mResources.getDimensionPixelSize(R.dimen.notification_divider_height));
         float topPadding = mNotificationStackScrollLayoutController.getTopPadding();
-        float shelfHeight =
+        float shelfIntrinsicHeight =
                 mNotificationShelfController.getVisibility() == View.GONE
                         ? 0
-                        : mNotificationShelfController.getIntrinsicHeight() + notificationPadding;
+                        : mNotificationShelfController.getIntrinsicHeight();
 
         // Padding to add to the bottom of the stack to keep a minimum distance from the top of
         // the lock icon.
@@ -1493,13 +1487,11 @@ public class NotificationPanelViewController extends PanelViewController {
         float availableSpace =
                 mNotificationStackScrollLayoutController.getHeight()
                         - topPadding
-                        - shelfHeight
                         - bottomPadding;
-        mKeyguardNotificationAvailableSpace = availableSpace;
 
         return mNotificationStackSizeCalculator.computeMaxKeyguardNotifications(
                 mNotificationStackScrollLayoutController.getView(), availableSpace,
-                shelfHeight);
+                shelfIntrinsicHeight);
     }
 
     private void updateClock() {

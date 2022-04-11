@@ -1305,12 +1305,6 @@ public class NotificationStackScrollLayoutController {
         mView.setKeyguardBottomPadding(keyguardBottomPadding);
     }
 
-    /** For debugging only. */
-    public void mKeyguardNotificationAvailableSpaceForDebug(
-            float keyguardNotificationAvailableSpace) {
-        mView.setKeyguardAvailableSpaceForDebug(keyguardNotificationAvailableSpace);
-    }
-
     public RemoteInputController.Delegate createDelegate() {
         return new RemoteInputController.Delegate() {
             public void setRemoteInputActive(NotificationEntry entry,
