@@ -42,6 +42,8 @@
     <string name="consent_yes" msgid="8344487259618762872">"Дозволи"</string>
     <string name="consent_no" msgid="2640796915611404382">"Не дозволувај"</string>
     <string name="consent_back" msgid="2560683030046918882">"Назад"</string>
-    <string name="permission_sync_confirmation_title" msgid="667074294393493186">"Префрлете ги дозволите за апликациите на вашиот часовник"</string>
-    <string name="permission_sync_summary" msgid="8873391306499120778">"За полесно поставувањето на часовникот, апликациите инсталирани на часовникот при поставувањето ќе ги користат истите дозволи како на телефонот.\n\n Овие дозволи може да опфаќаат пристап до микрофонот и локацијата на часовникот."</string>
+    <!-- no translation found for permission_sync_confirmation_title (4409622174437248702) -->
+    <skip />
+    <!-- no translation found for permission_sync_summary (4866838188678457084) -->
+    <skip />
 </resources>

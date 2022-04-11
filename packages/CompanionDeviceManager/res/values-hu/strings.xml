@@ -42,6 +42,8 @@
     <string name="consent_yes" msgid="8344487259618762872">"Engedélyezés"</string>
     <string name="consent_no" msgid="2640796915611404382">"Tiltás"</string>
     <string name="consent_back" msgid="2560683030046918882">"Vissza"</string>
-    <string name="permission_sync_confirmation_title" msgid="667074294393493186">"Alkalmazásengedélyek átvitele az órára"</string>
-    <string name="permission_sync_summary" msgid="8873391306499120778">"Az óra beállításának megkönnyítése érdekében a beállítás során az órára telepített alkalmazások ugyanazokat az engedélyeket használják majd, mint a telefonja.\n\n Ezek az engedélyek magukban foglalhatják az óra mikrofonjához és helyadataihoz való hozzáférést."</string>
+    <!-- no translation found for permission_sync_confirmation_title (4409622174437248702) -->
+    <skip />
+    <!-- no translation found for permission_sync_summary (4866838188678457084) -->
+    <skip />
 </resources>

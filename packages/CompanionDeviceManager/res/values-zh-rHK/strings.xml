@@ -42,6 +42,8 @@
     <string name="consent_yes" msgid="8344487259618762872">"允許"</string>
     <string name="consent_no" msgid="2640796915611404382">"不允許"</string>
     <string name="consent_back" msgid="2560683030046918882">"返回"</string>
-    <string name="permission_sync_confirmation_title" msgid="667074294393493186">"將應用程式權限轉移至手錶"</string>
-    <string name="permission_sync_summary" msgid="8873391306499120778">"為簡化手錶的設定程序，在設定過程中安裝到手錶上的應用程式都將沿用手機上的權限。\n\n這些權限可能包括手錶麥克風和位置的存取權。"</string>
+    <!-- no translation found for permission_sync_confirmation_title (4409622174437248702) -->
+    <skip />
+    <!-- no translation found for permission_sync_summary (4866838188678457084) -->
+    <skip />
 </resources>

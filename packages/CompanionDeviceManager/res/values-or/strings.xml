@@ -42,6 +42,8 @@
     <string name="consent_yes" msgid="8344487259618762872">"ଅନୁମତି ଦିଅନ୍ତୁ"</string>
     <string name="consent_no" msgid="2640796915611404382">"ଅନୁମତି ଦିଅନ୍ତୁ ନାହିଁ"</string>
     <string name="consent_back" msgid="2560683030046918882">"ପଛକୁ ଫେରନ୍ତୁ"</string>
-    <string name="permission_sync_confirmation_title" msgid="667074294393493186">"ଆପଣଙ୍କ ୱାଚକୁ ଆପ ଅନୁମତିଗୁଡ଼ିକ ଟ୍ରାନ୍ସଫର କରନ୍ତୁ"</string>
-    <string name="permission_sync_summary" msgid="8873391306499120778">"ଆପଣଙ୍କ ୱାଚ ସେଟ ଅପ କରିବାକୁ ସହଜ କରିବା ପାଇଁ, ସେଟଅପ ସମୟରେ ଆପଣଙ୍କର ୱାଚରେ ଇନଷ୍ଟଲ କରାଯାଇଥିବା ଆପଗୁଡ଼ିକ ଆପଣଙ୍କ ଫୋନରେ ଥିବା ଆପଗୁଡ଼ିକ ପରି ସମାନ ଅନୁମତିଗୁଡ଼ିକ ବ୍ୟବହାର କରିବ।\n\n ଏହି ଅନୁମତିଗୁଡ଼ିକରେ ଆପଣଙ୍କ ୱାଚର ମାଇକ୍ରୋଫୋନ ଏବଂ ଲୋକେସନକୁ ଆକ୍ସେସ ଅନ୍ତର୍ଭୁକ୍ତ ହୋଇପାରେ।"</string>
+    <!-- no translation found for permission_sync_confirmation_title (4409622174437248702) -->
+    <skip />
+    <!-- no translation found for permission_sync_summary (4866838188678457084) -->
+    <skip />
 </resources>

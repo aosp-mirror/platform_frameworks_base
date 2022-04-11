@@ -42,6 +42,8 @@
     <string name="consent_yes" msgid="8344487259618762872">"Permiteți"</string>
     <string name="consent_no" msgid="2640796915611404382">"Nu permiteți"</string>
     <string name="consent_back" msgid="2560683030046918882">"Înapoi"</string>
-    <string name="permission_sync_confirmation_title" msgid="667074294393493186">"Transferați permisiunile pentru aplicații pe ceas"</string>
-    <string name="permission_sync_summary" msgid="8873391306499120778">"Ca să configurați mai ușor ceasul, aplicațiile instalate pe ceas în timpul procesului de configurare vor folosi aceleași permisiuni ca telefonul.\n\n Între acestea se poate număra accesul la microfonul și locația ceasului."</string>
+    <!-- no translation found for permission_sync_confirmation_title (4409622174437248702) -->
+    <skip />
+    <!-- no translation found for permission_sync_summary (4866838188678457084) -->
+    <skip />
 </resources>

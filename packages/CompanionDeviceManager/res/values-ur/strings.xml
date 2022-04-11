@@ -42,6 +42,8 @@
     <string name="consent_yes" msgid="8344487259618762872">"اجازت دیں"</string>
     <string name="consent_no" msgid="2640796915611404382">"اجازت نہ دیں"</string>
     <string name="consent_back" msgid="2560683030046918882">"پیچھے"</string>
-    <string name="permission_sync_confirmation_title" msgid="667074294393493186">"اپنی گھڑی پر ایپ کی اجازتیں منتقل کریں"</string>
-    <string name="permission_sync_summary" msgid="8873391306499120778">"آپ کی گھڑی کو سیٹ اپ کرنے کے عمل کو زیادہ آسان بنانے کے لیے، سیٹ اپ کے دوران آپ کی گھڑی پر انسٹال کردہ ایپس انہیں اجازتوں کا استعمال کریں گی جن کا استعمال آپ کا فون کرتا ہے۔\n\n ان اجازتوں میں آپ کی گھڑی کے مائیکروفون اور مقام تک کی رسائی شامل ہو سکتی ہے۔"</string>
+    <!-- no translation found for permission_sync_confirmation_title (4409622174437248702) -->
+    <skip />
+    <!-- no translation found for permission_sync_summary (4866838188678457084) -->
+    <skip />
 </resources>

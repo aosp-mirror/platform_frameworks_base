@@ -42,6 +42,8 @@
     <string name="consent_yes" msgid="8344487259618762872">"Lejo"</string>
     <string name="consent_no" msgid="2640796915611404382">"Mos lejo"</string>
     <string name="consent_back" msgid="2560683030046918882">"Pas"</string>
-    <string name="permission_sync_confirmation_title" msgid="667074294393493186">"Transfero lejet e aplikacionit te ora jote"</string>
-    <string name="permission_sync_summary" msgid="8873391306499120778">"Për ta bërë më të lehtë konfigurimin e orës, aplikacionet e instaluara në orën tënde gjatë konfigurimit do të përdorin të njëjtat leje si telefoni yt.\n\n Këto leje mund të përfshijnë qasje në mikrofonin dhe vendndodhjen e orës."</string>
+    <!-- no translation found for permission_sync_confirmation_title (4409622174437248702) -->
+    <skip />
+    <!-- no translation found for permission_sync_summary (4866838188678457084) -->
+    <skip />
 </resources>

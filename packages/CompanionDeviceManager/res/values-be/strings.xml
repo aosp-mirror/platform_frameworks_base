@@ -42,6 +42,8 @@
     <string name="consent_yes" msgid="8344487259618762872">"Дазволіць"</string>
     <string name="consent_no" msgid="2640796915611404382">"Не дазваляць"</string>
     <string name="consent_back" msgid="2560683030046918882">"Назад"</string>
-    <string name="permission_sync_confirmation_title" msgid="667074294393493186">"Перанос дазволаў праграм на ваш гадзіннік"</string>
-    <string name="permission_sync_summary" msgid="8873391306499120778">"Для праграм, усталяваных на гадзіннік падчас наладжвання, будуць дзейнічаць тыя самыя дазволы, што і на тэлефоне.\n\n Так гадзіннік можа атрымаць доступ да мікрафона і даных пра месцазнаходжанне."</string>
+    <!-- no translation found for permission_sync_confirmation_title (4409622174437248702) -->
+    <skip />
+    <!-- no translation found for permission_sync_summary (4866838188678457084) -->
+    <skip />
 </resources>

@@ -42,6 +42,8 @@
     <string name="consent_yes" msgid="8344487259618762872">"Povoliť"</string>
     <string name="consent_no" msgid="2640796915611404382">"Nepovoliť"</string>
     <string name="consent_back" msgid="2560683030046918882">"Späť"</string>
-    <string name="permission_sync_confirmation_title" msgid="667074294393493186">"Presun povolení aplikácie do hodiniek"</string>
-    <string name="permission_sync_summary" msgid="8873391306499120778">"V rámci zjednodušenia nastavenia hodiniek budú aplikácie nainštalované do hodiniek pri nastavovaní používať rovnaké povolenia ako váš telefón.\n\n Tieto povolenia môžu zahrnovať prístup k mikrofónu a polohe hodiniek."</string>
+    <!-- no translation found for permission_sync_confirmation_title (4409622174437248702) -->
+    <skip />
+    <!-- no translation found for permission_sync_summary (4866838188678457084) -->
+    <skip />
 </resources>
