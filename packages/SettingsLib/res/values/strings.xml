@@ -1478,6 +1478,12 @@
     <!-- Content description of the data connection type LTE+. [CHAR LIMIT=NONE] -->
     <string name="data_connection_lte_plus">LTE+</string>
 
+    <!-- Content description of the data connection type 4G LTE . [CHAR LIMIT=NONE] -->
+    <string name="data_connection_4g_lte" translatable="false">4G LTE</string>
+
+    <!-- Content description of the data connection type 4G LTE+ . [CHAR LIMIT=NONE] -->
+    <string name="data_connection_4g_lte_plus" translatable="false">4G LTE+</string>
+
     <!-- Content description of the data connection type 5Ge with HTML styling. DO NOT TRANSLATE [CHAR LIMIT=NONE] -->
     <string name="data_connection_5ge_html" translate="false"> &lt;i>5G &lt;small>E&lt;/small>&lt;/i> </string>
 

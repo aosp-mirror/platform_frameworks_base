@@ -589,6 +589,12 @@ static jint ImageReader_imageSetup(JNIEnv* env, jobject thiz, jobject image) {
                 // (HAL_PIXEL_FORMAT_YCbCr_420_888) as HAL_PIXEL_FORMAT_YCbCr_420_888.
                 ALOGV("%s: Treat buffer format to 0x%x as HAL_PIXEL_FORMAT_YCbCr_420_888",
                         __FUNCTION__, bufferFormat);
+            } else if (imgReaderFmt == HAL_PIXEL_FORMAT_YCBCR_P010 &&
+                    isPossibly10BitYUV(bufferFormat)) {
+                // Treat formats that are compatible with flexible 10-bit YUV
+                // (HAL_PIXEL_FORMAT_YCBCR_P010) as HAL_PIXEL_FORMAT_YCBCR_P010.
+                ALOGV("%s: Treat buffer format to 0x%x as HAL_PIXEL_FORMAT_YCBCR_P010",
+                        __FUNCTION__, bufferFormat);
             } else if (imgReaderFmt == HAL_PIXEL_FORMAT_BLOB &&
                     bufferFormat == HAL_PIXEL_FORMAT_RGBA_8888) {
                 // Using HAL_PIXEL_FORMAT_RGBA_8888 Gralloc buffers containing JPEGs to get around
