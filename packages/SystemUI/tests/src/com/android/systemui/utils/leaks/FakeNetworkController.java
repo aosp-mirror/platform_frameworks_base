@@ -46,11 +46,6 @@ public class FakeNetworkController extends BaseLeakChecker<SignalCallback>
     }
 
     @Override
-    public boolean hasEmergencyCryptKeeperText() {
-        return false;
-    }
-
-    @Override
     public boolean isRadioOn() {
         return false;
     }

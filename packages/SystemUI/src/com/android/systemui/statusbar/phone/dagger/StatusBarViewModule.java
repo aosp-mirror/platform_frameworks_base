@@ -38,7 +38,6 @@ import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.NotificationShelf;
 import com.android.systemui.statusbar.NotificationShelfController;
 import com.android.systemui.statusbar.OperatorNameViewController;
-import com.android.systemui.statusbar.connectivity.NetworkController;
 import com.android.systemui.statusbar.events.SystemStatusAnimationScheduler;
 import com.android.systemui.statusbar.notification.row.dagger.NotificationShelfComponent;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
@@ -261,7 +260,6 @@ public abstract class StatusBarViewModule {
             StatusBarHideIconsForBouncerManager statusBarHideIconsForBouncerManager,
             KeyguardStateController keyguardStateController,
             NotificationPanelViewController notificationPanelViewController,
-            NetworkController networkController,
             StatusBarStateController statusBarStateController,
             CommandQueue commandQueue,
             CarrierConfigTracker carrierConfigTracker,
@@ -281,7 +279,6 @@ public abstract class StatusBarViewModule {
                 statusBarHideIconsForBouncerManager,
                 keyguardStateController,
                 notificationPanelViewController,
-                networkController,
                 statusBarStateController,
                 commandQueue,
                 carrierConfigTracker,
