@@ -3967,6 +3967,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         } else {
             onRemovedFromDisplay();
         }
+        mActivityRecordInputSink.releaseSurfaceControl();
+
         super.removeImmediately();
     }
 
