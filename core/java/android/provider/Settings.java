@@ -14272,6 +14272,14 @@ public final class Settings {
                 "emergency_gesture_power_button_cooldown_period_ms";
 
         /**
+         * The minimum time in milliseconds to perform the emergency gesture.
+         *
+         * @hide
+         */
+        public static final String EMERGENCY_GESTURE_TAP_DETECTION_MIN_TIME_MS =
+                "emergency_gesture_tap_detection_min_time_ms";
+
+        /**
          * Whether to enable automatic system server heap dumps. This only works on userdebug or
          * eng builds, not on user builds. This is set by the user and overrides the config value.
          * 1 means enable, 0 means disable.
