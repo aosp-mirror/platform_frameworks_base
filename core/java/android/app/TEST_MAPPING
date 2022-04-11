@@ -168,6 +168,23 @@
                     "exclude-annotation": "androidx.test.filters.FlakyTest"
                 }
             ]
+        },
+        {
+            "name": "FrameworksCoreTests",
+            "options": [
+                {
+                    "exclude-annotation": "androidx.test.filters.FlakyTest"
+                },
+                {
+                    "exclude-annotation": "org.junit.Ignore"
+                },
+                {
+                    "include-filter": "android.app.KeyguardManagerTest"
+                }
+            ],
+            "file_patterns": [
+                "(/|^)KeyguardManager.java"
+            ]
         }
     ],
     "presubmit-large": [
