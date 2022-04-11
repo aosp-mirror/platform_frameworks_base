@@ -130,6 +130,24 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
         }
     };
 
+    private final KeyguardUnlockAnimationController.KeyguardUnlockAnimationListener
+            mKeyguardUnlockAnimationListener =
+            new KeyguardUnlockAnimationController.KeyguardUnlockAnimationListener() {
+                @Override
+                public void onSmartspaceSharedElementTransitionStarted() {
+                    // The smartspace needs to be able to translate out of bounds in order to
+                    // end up where the launcher's smartspace is, while its container is being
+                    // swiped off the top of the screen.
+                    setClipChildrenForUnlock(false);
+                }
+
+                @Override
+                public void onUnlockAnimationFinished() {
+                    // For performance reasons, reset this once the unlock animation ends.
+                    setClipChildrenForUnlock(true);
+                }
+            };
+
     @Inject
     public KeyguardClockSwitchController(
             KeyguardClockSwitch keyguardClockSwitch,
@@ -162,22 +180,6 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
         mUiExecutor = uiExecutor;
         mKeyguardUnlockAnimationController = keyguardUnlockAnimationController;
         mDumpManager = dumpManager;
-        mKeyguardUnlockAnimationController.addKeyguardUnlockAnimationListener(
-                new KeyguardUnlockAnimationController.KeyguardUnlockAnimationListener() {
-                    @Override
-                    public void onSmartspaceSharedElementTransitionStarted() {
-                        // The smartspace needs to be able to translate out of bounds in order to
-                        // end up where the launcher's smartspace is, while its container is being
-                        // swiped off the top of the screen.
-                        setClipChildrenForUnlock(false);
-                    }
-
-                    @Override
-                    public void onUnlockAnimationFinished() {
-                        // For performance reasons, reset this once the unlock animation ends.
-                        setClipChildrenForUnlock(true);
-                    }
-                });
     }
 
     /**
@@ -272,6 +274,9 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
         );
 
         updateDoubleLineClock();
+
+        mKeyguardUnlockAnimationController.addKeyguardUnlockAnimationListener(
+                mKeyguardUnlockAnimationListener);
     }
 
     int getNotificationIconAreaHeight() {
@@ -287,6 +292,9 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
         mView.setClockPlugin(null, mStatusBarStateController.getState());
 
         mSecureSettings.unregisterContentObserver(mDoubleLineClockObserver);
+
+        mKeyguardUnlockAnimationController.removeKeyguardUnlockAnimationListener(
+                mKeyguardUnlockAnimationListener);
     }
 
     /**
