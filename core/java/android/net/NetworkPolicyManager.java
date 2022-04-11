@@ -176,6 +176,9 @@ public class NetworkPolicyManager {
     public static final int FOREGROUND_THRESHOLD_STATE =
             ActivityManager.PROCESS_STATE_BOUND_FOREGROUND_SERVICE;
 
+    /** @hide */
+    public static final int TOP_THRESHOLD_STATE = ActivityManager.PROCESS_STATE_BOUND_TOP;
+
     /**
      * {@link Intent} extra that indicates which {@link NetworkTemplate} rule it
      * applies to.
@@ -246,6 +249,20 @@ public class NetworkPolicyManager {
      * @hide
      */
     public static final int ALLOWED_REASON_RESTRICTED_MODE_PERMISSIONS = 1 << 4;
+    /**
+     * Flag to indicate that app is exempt from certain network restrictions because of it being
+     * in the bound top or top procstate.
+     *
+     * @hide
+     */
+    public static final int ALLOWED_REASON_TOP = 1 << 5;
+    /**
+     * Flag to indicate that app is exempt from low power standby restrictions because of it being
+     * allowlisted.
+     *
+     * @hide
+     */
+    public static final int ALLOWED_REASON_LOW_POWER_STANDBY_ALLOWLIST = 1 << 6;
     /**
      * Flag to indicate that app is exempt from certain metered network restrictions because user
      * explicitly exempted it.
@@ -768,6 +785,14 @@ public class NetworkPolicyManager {
             int procState, @ProcessCapability int capability) {
         return procState <= FOREGROUND_THRESHOLD_STATE
                 || (capability & ActivityManager.PROCESS_CAPABILITY_NETWORK) != 0;
+    }
+
+    /** @hide */
+    public static boolean isProcStateAllowedWhileInLowPowerStandby(@Nullable UidState uidState) {
+        if (uidState == null) {
+            return false;
+        }
+        return uidState.procState <= TOP_THRESHOLD_STATE;
     }
 
     /**
