@@ -80,8 +80,11 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.CommandQueue;
+import com.android.systemui.util.concurrency.DelayableExecutor;
 import com.android.systemui.util.concurrency.Execution;
 import com.android.systemui.util.concurrency.FakeExecution;
+import com.android.systemui.util.concurrency.FakeExecutor;
+import com.android.systemui.util.time.FakeSystemClock;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -156,6 +159,7 @@ public class AuthControllerTest extends SysuiTestCase {
     private Execution mExecution;
     private TestableLooper mTestableLooper;
     private Handler mHandler;
+    private DelayableExecutor mBackgroundExecutor;
     private TestableAuthController mAuthController;
 
     @Before
@@ -164,6 +168,7 @@ public class AuthControllerTest extends SysuiTestCase {
         mExecution = new FakeExecution();
         mTestableLooper = TestableLooper.get(this);
         mHandler = new Handler(mTestableLooper.getLooper());
+        mBackgroundExecutor = new FakeExecutor(new FakeSystemClock());
 
         when(mContextSpy.getPackageManager()).thenReturn(mPackageManager);
         when(mPackageManager.hasSystemFeature(PackageManager.FEATURE_FACE))
@@ -759,11 +764,12 @@ public class AuthControllerTest extends SysuiTestCase {
             super(context, execution, commandQueue, activityTaskManager, windowManager,
                     fingerprintManager, faceManager, udfpsControllerFactory,
                     sidefpsControllerFactory, mDisplayManager, mWakefulnessLifecycle,
-                    mUserManager, mLockPatternUtils, statusBarStateController, mHandler);
+                    mUserManager, mLockPatternUtils, statusBarStateController, mHandler,
+                    mBackgroundExecutor);
         }
 
         @Override
-        protected AuthDialog buildDialog(PromptInfo promptInfo,
+        protected AuthDialog buildDialog(DelayableExecutor bgExecutor, PromptInfo promptInfo,
                 boolean requireConfirmation, int userId, int[] sensorIds,
                 String opPackageName, boolean skipIntro, long operationId, long requestId,
                 @BiometricManager.BiometricMultiSensorMode int multiSensorConfig,
