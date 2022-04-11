@@ -66,3 +66,6 @@ per-file *UpdateEngine* = file:/platform/system/update_engine:/OWNERS
 
 # VINTF
 per-file Vintf* = file:/platform/system/libvintf:/OWNERS
+
+# Tracing
+per-file Trace.java = file:/TRACE_OWNERS

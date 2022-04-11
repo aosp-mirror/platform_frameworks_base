@@ -29,7 +29,6 @@
     <string name="device_encryption_backup_text" msgid="5866590762672844664">"Vui lòng nhập mật khẩu mã hóa thiết bị của bạn bên dưới. Mật khẩu này cũng được sử dụng để mã hóa kho lưu trữ sao lưu."</string>
     <string name="backup_enc_password_text" msgid="4981585714795233099">"Vui lòng nhập mật khẩu dùng để mã hóa toàn bộ dữ liệu sao lưu. Nếu trường này bị bỏ trống, mật khẩu sao lưu hiện tại của bạn sẽ được sử dụng:"</string>
     <string name="backup_enc_password_optional" msgid="1350137345907579306">"Nếu bạn muốn mã hóa toàn bộ dữ liệu sao lưu, hãy nhập mật khẩu bên dưới:"</string>
-    <string name="backup_enc_password_required" msgid="7889652203371654149">"Vì thiết bị của bạn được mã hóa nên bạn phải mã hóa bản sao lưu của mình. Vui lòng nhập mật khẩu bên dưới:"</string>
     <string name="restore_enc_password_text" msgid="6140898525580710823">"Nếu dữ liệu khôi phục được mã hóa, vui lòng nhập mật khẩu bên dưới:"</string>
     <string name="toast_backup_started" msgid="550354281452756121">"Đang bắt đầu sao lưu..."</string>
     <string name="toast_backup_ended" msgid="3818080769548726424">"Đã hoàn thành sao lưu"</string>

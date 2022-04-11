@@ -2556,4 +2556,7 @@ interface ITelephony {
      * for the slot, or {@code null} if none is resolved
      */
     String getCarrierServicePackageNameForLogicalSlot(int logicalSlotIndex);
+
+    /** Check if telephony new data stack is enabled. */
+    boolean isUsingNewDataStack();
 }

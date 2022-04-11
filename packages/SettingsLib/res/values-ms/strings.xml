@@ -95,7 +95,9 @@
     <string name="bluetooth_profile_a2dp_high_quality" msgid="4739440941324792775">"Audio HD: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="2477639096903834374">"Audio HD"</string>
     <string name="bluetooth_profile_hearing_aid" msgid="58154575573984914">"Alat Bantu Dengar"</string>
+    <string name="bluetooth_profile_le_audio" msgid="5158149987518342036">"LE_AUDIO"</string>
     <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="8191273236809964030">"Disambungkan pada Alat Bantu Dengar"</string>
+    <string name="bluetooth_le_audio_profile_summary_connected" msgid="3162538609379333442">"Disambungkan kepada LE_AUDIO"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="7422607970115444153">"Disambungkan ke audio media"</string>
     <string name="bluetooth_headset_profile_summary_connected" msgid="2420981566026949688">"Disambungkan ke audio telefon"</string>
     <string name="bluetooth_opp_profile_summary_connected" msgid="2393521801478157362">"Bersambung ke pelayan pemindahan fail"</string>
@@ -113,6 +115,7 @@
     <string name="bluetooth_opp_profile_summary_use_for" msgid="461981154387015457">"Gunakan untuk pemindahan fail"</string>
     <string name="bluetooth_hid_profile_summary_use_for" msgid="4289460627406490952">"Gunakan untuk input"</string>
     <string name="bluetooth_hearing_aid_profile_summary_use_for" msgid="7689393730163320483">"Gunakan untuk Alat Bantu Dengar"</string>
+    <string name="bluetooth_le_audio_profile_summary_use_for" msgid="2778318636027348572">"Gunakan untuk LE_AUDIO"</string>
     <string name="bluetooth_pairing_accept" msgid="2054232610815498004">"Gandingkan"</string>
     <string name="bluetooth_pairing_accept_all_caps" msgid="2734383073450506220">"JADIKAN PASANGAN"</string>
     <string name="bluetooth_pairing_decline" msgid="6483118841204885890">"Batal"</string>
@@ -252,7 +255,7 @@
     <string name="wifi_display_certification" msgid="1805579519992520381">"Pensijilan paparan wayarles"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"Dayakan Pengelogan Berjela-jela Wi-Fi"</string>
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"Pendikitan pengimbasan Wi-Fi"</string>
-    <string name="wifi_enhanced_mac_randomization" msgid="5437378364995776979">"Perawakan MAC dipertingkat Wi‑Fi"</string>
+    <string name="wifi_enhanced_mac_randomization" msgid="882650208573834301">"Perawakan MAC tidak berterusan Wi‑Fi"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"Data mudah alih sentiasa aktif"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"Pecutan perkakasan penambatan"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"Tunjukkan peranti Bluetooth tanpa nama"</string>
@@ -291,7 +294,7 @@
     <string name="select_logd_size_dialog_title" msgid="2105401994681013578">"Pilih saiz Pengelog bagi setiap penimbal log"</string>
     <string name="dev_logpersist_clear_warning_title" msgid="8631859265777337991">"Kosongkan storan gigih pengelog?"</string>
     <string name="dev_logpersist_clear_warning_message" msgid="6447590867594287413">"Apabila kami tidak lagi memantau menggunakan pengelog gigih, kami dikehendaki untuk memadamkan data pengelog yang menghuni peranti anda."</string>
-    <string name="select_logpersist_title" msgid="447071974007104196">"Smpn data pengelog secara gigih pd prnti"</string>
+    <string name="select_logpersist_title" msgid="447071974007104196">"Sentiasa simpan data pengelog pada peranti"</string>
     <string name="select_logpersist_dialog_title" msgid="7745193591195485594">"Pilih penimbal log untuk menyimpan secara gigih pada peranti"</string>
     <string name="select_usb_configuration_title" msgid="6339801314922294586">"Pilih Konfigurasi USB"</string>
     <string name="select_usb_configuration_dialog_title" msgid="3579567144722589237">"Pilih Konfigurasi USB"</string>
@@ -347,19 +350,20 @@
     <string name="disable_overlays_summary" msgid="1954852414363338166">"Sentiasa gunakan GPU untuk komposit skrin"</string>
     <string name="simulate_color_space" msgid="1206503300335835151">"Tiru ruang warna"</string>
     <string name="enable_opengl_traces_title" msgid="4638773318659125196">"Dayakan kesan OpenGL"</string>
-    <string name="usb_audio_disable_routing" msgid="3367656923544254975">"Lmpuhkn phalaan audio USB"</string>
+    <string name="usb_audio_disable_routing" msgid="3367656923544254975">"Lumpuhkan penghalaan audio USB"</string>
     <string name="usb_audio_disable_routing_summary" msgid="8768242894849534699">"Lumpuhkan penghalaan automatik ke persisian audio USB"</string>
     <string name="debug_layout" msgid="1659216803043339741">"Tunjukkan batas reka letak"</string>
     <string name="debug_layout_summary" msgid="8825829038287321978">"Tunjukkan batas klip, margin dll."</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"Paksa arah reka letak RTL"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"Paksa arah reka letak skrin RTL bagi semua tempat peristiwa"</string>
+    <string name="window_blurs" msgid="6831008984828425106">"Benarkan kabur tahap tetingkap"</string>
     <string name="force_msaa" msgid="4081288296137775550">"Paksa 4x MSAA"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"Dayakan 4x MSAA dalam apl OpenGL ES 2.0"</string>
     <string name="show_non_rect_clip" msgid="7499758654867881817">"Nyahpepijat operasi keratan bukan segi empat tepat"</string>
     <string name="track_frame_time" msgid="522674651937771106">"Pemaparan HWUI profil"</string>
-    <string name="enable_gpu_debug_layers" msgid="4986675516188740397">"Dayakan lpsn nyhppjat GPU"</string>
+    <string name="enable_gpu_debug_layers" msgid="4986675516188740397">"Dayakan lepasan nyahpepijat GPU"</string>
     <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"Bnrkn pemuatan lpsn nyhppjt GPU utk apl pnyhppjtn"</string>
-    <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"Dayakn pngelogan vendor brjela"</string>
+    <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"Dayakan pengelogan vendor berjela"</string>
     <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"Sertakan log tambahan vendor khusus peranti dalam laporan pepijat, yang mungkin mengandungi maklumat peribadi, menggunakan lebih banyak kuasa bateri dan/atau menggunakan lebih banyak storan."</string>
     <string name="window_animation_scale_title" msgid="5236381298376812508">"Skala animasi tetingkap"</string>
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"Skala animasi peralihan"</string>
@@ -405,17 +409,12 @@
     <string name="transcode_enable_all" msgid="2411165920039166710">"Dayakan transpengekodan"</string>
     <string name="transcode_default" msgid="3784803084573509491">"Mengambil alih sokongan apl format moden"</string>
     <string name="transcode_notification" msgid="5560515979793436168">"Tunjukkan pemberitahuan transpengekodan"</string>
+    <string name="transcode_disable_cache" msgid="3160069309377467045">"Lumpuhkan cache transpengekodan"</string>
     <string name="runningservices_settings_title" msgid="6460099290493086515">"Perkhidmatan dijalankan"</string>
     <string name="runningservices_settings_summary" msgid="1046080643262665743">"Lihat dan kawal perkhidmatan yang sedang dijalankan"</string>
     <string name="select_webview_provider_title" msgid="3917815648099445503">"Pelaksanaan WebView"</string>
     <string name="select_webview_provider_dialog_title" msgid="2444261109877277714">"Tetapkan pelaksanaan WebView"</string>
     <string name="select_webview_provider_toast_text" msgid="8512254949169359848">"Pilihan ini tidak lagi sah. Cuba lagi."</string>
-    <string name="convert_to_file_encryption" msgid="2828976934129751818">"Tukar kepada penyulitan fail"</string>
-    <string name="convert_to_file_encryption_enabled" msgid="840757431284311754">"Tukar..."</string>
-    <string name="convert_to_file_encryption_done" msgid="8965831011811180627">"Sudah disulitkan fail"</string>
-    <string name="title_convert_fbe" msgid="5780013350366495149">"Menukar kepada penyulitan berasaskan fail"</string>
-    <string name="convert_to_fbe_warning" msgid="34294381569282109">"Tukar pembahagian data kepada penyulitan berasaskan fail.\n !!Amaran!! Tindakan ini akan menghapuskan data anda.\n Ini ialah ciri alfa dan mungkin tidak berfungsi dengan betul.\n Tekan \'Hapuskan dan tukar…\' untuk meneruskan."</string>
-    <string name="button_convert_fbe" msgid="1159861795137727671">"Hapuskan dan tukar..."</string>
     <string name="picture_color_mode" msgid="1013807330552931903">"Mod warna gambar"</string>
     <string name="picture_color_mode_desc" msgid="151780973768136200">"Gunakan sRGB"</string>
     <string name="daltonizer_mode_disabled" msgid="403424372812399228">"Dilumpuhkan"</string>
@@ -450,19 +449,17 @@
     <string name="power_remaining_duration_shutdown_imminent" product="tablet" msgid="7703677921000858479">"Tablet mungkin ditutup tidak lama lagi (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_remaining_duration_shutdown_imminent" product="device" msgid="4374784375644214578">"Peranti mungkin ditutup tidak lama lagi (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
-    <!-- no translation found for power_remaining_charging_duration_only (8085099012811384899) -->
-    <skip />
-    <!-- no translation found for power_charging_duration (6127154952524919719) -->
-    <skip />
-    <string name="power_charging_limited" msgid="1956874810658999681">"<xliff:g id="LEVEL">%1$s</xliff:g> - Pengoptimuman untuk kesihatan bateri"</string>
+    <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"<xliff:g id="TIME">%1$s</xliff:g> lagi hingga penuh"</string>
+    <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> lagi hingga penuh"</string>
+    <string name="power_charging_limited" msgid="7956120998372505295">"<xliff:g id="LEVEL">%1$s</xliff:g> - Pengecasan terhad sementara"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"Tidak diketahui"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"Mengecas"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"Mengecas dgn cepat"</string>
-    <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"Mengecas dgn prlahan"</string>
+    <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"Mengecas perlahan"</string>
+    <string name="battery_info_status_charging_wireless" msgid="8924722966861282197">"Mengecas tanpa wayar"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"Tidak mengecas"</string>
-    <string name="battery_info_status_not_charging" msgid="8330015078868707899">"Dipalamkan, tidak boleh mengecas sekarang"</string>
-    <!-- no translation found for battery_info_status_full (1339002294876531312) -->
-    <skip />
+    <string name="battery_info_status_not_charging" msgid="3371084153747234837">"Bersambung, tidak mengecas"</string>
+    <string name="battery_info_status_full" msgid="1339002294876531312">"Sudah dicas"</string>
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"Dikawal oleh pentadbir"</string>
     <string name="disabled" msgid="8017887509554714950">"Dilumpuhkan"</string>
     <string name="external_source_trusted" msgid="1146522036773132905">"Dibenarkan"</string>
@@ -505,10 +502,10 @@
     <string name="cancel" msgid="5665114069455378395">"Batal"</string>
     <string name="okay" msgid="949938843324579502">"OK"</string>
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"Penggera dan peringatan"</string>
-    <string name="alarms_and_reminders_switch_title" msgid="186992351401152744">"Benarkan untuk menetapkan penggera atau peringatan"</string>
-    <string name="alarms_and_reminders_title" msgid="2988400785896875237">"Penggera dan peringatan"</string>
-    <string name="alarms_and_reminders_footer_title" msgid="5882788882647778753">"Benarkan apl ini untuk menjadualkan penggera atau peristiwa berdasarkan pemasaan yang lain. Tindakan ini akan membenarkan apl untuk bangkit dan berfungsi walaupun anda tidak menggunakan peranti. Harap maklum bahawa pembatalan kebenaran ini mungkin menyebabkan apl tidak berfungsi, khususnya mana-mana penggera yang telah dijadualkan oleh apl tidak lagi akan berfungsi."</string>
-    <string name="keywords_alarms_and_reminders" msgid="8882739572152019456">"jadual, penggera, peringatan, peristiwa"</string>
+    <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"Benarkan penetapan penggera dan peringatan"</string>
+    <string name="alarms_and_reminders_title" msgid="8819933264635406032">"Penggera &amp; peringatan"</string>
+    <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"Benarkan apl ini menetapkan penggera dan menjadualkan tindakan yang sensitif masa. Ini membolehkan apl berjalan di latar, yang mungkin menggunakan lebih banyak bateri.\n\nJika kebenaran ini dimatikan, penggera sedia ada dan acara berdasarkan masa yang dijadualkan oleh apl ini tidak akan berfungsi."</string>
+    <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"jadual, penggera, peringatan, jam"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"Hidupkan"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"Hidupkan Jangan Ganggu"</string>
     <string name="zen_mode_settings_summary_off" msgid="3832876036123504076">"Jangan sekali-kali"</string>
@@ -562,12 +559,15 @@
     <string name="user_set_lock_button" msgid="1427128184982594856">"Tetapkan kunci"</string>
     <string name="user_switch_to_user" msgid="6975428297154968543">"Tukar kepada <xliff:g id="USER_NAME">%s</xliff:g>"</string>
     <string name="creating_new_user_dialog_message" msgid="7232880257538970375">"Mencipta pengguna baharu…"</string>
-    <!-- no translation found for add_user_failed (4809887794313944872) -->
-    <skip />
+    <string name="add_user_failed" msgid="4809887794313944872">"Gagal membuat pengguna baharu"</string>
     <string name="user_nickname" msgid="262624187455825083">"Nama panggilan"</string>
     <string name="guest_new_guest" msgid="3482026122932643557">"Tambah tetamu"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"Alih keluar tetamu"</string>
+    <string name="guest_reset_guest" msgid="6110013010356013758">"Tetapkan semula tetamu"</string>
     <string name="guest_nickname" msgid="6332276931583337261">"Tetamu"</string>
+    <string name="guest_reset_guest_dialog_title" msgid="8047270010895437534">"Tetapkan semula tetamu?"</string>
+    <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"Tetapkan semula"</string>
+    <string name="guest_resetting" msgid="7822120170191509566">"Menetapkan semula tetamu…"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"Ambil foto"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"Pilih imej"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"Pilih foto"</string>

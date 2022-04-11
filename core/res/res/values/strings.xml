@@ -4687,13 +4687,6 @@
         <xliff:g id="service" example="TalkBack">%1$s</xliff:g> to have full control of your
         device?</string>
 
-    <!-- Warning that the device data will not be encrypted with password or PIN if
-    enabling an accessibility service and there is a secure lock setup. [CHAR LIMIT=NONE] -->
-    <string name="accessibility_enable_service_encryption_warning">If you turn on
-        <xliff:g id="service" example="TalkBack">%1$s</xliff:g>, your device won’t use your screen
-        lock to enhance data encryption.
-    </string>
-
     <!-- Warning description that explains that it's appropriate for accessibility
      services to have full control to help users with accessibility needs. [CHAR LIMIT=NONE] -->
     <string name="accessibility_service_warning_description">Full control is appropriate for apps

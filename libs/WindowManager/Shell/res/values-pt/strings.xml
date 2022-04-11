@@ -18,8 +18,9 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="pip_phone_close" msgid="5783752637260411309">"Fechar"</string>
-    <string name="pip_phone_expand" msgid="2579292903468287504">"Expandir"</string>
+    <string name="pip_phone_expand" msgid="2579292903468287504">"Abrir"</string>
     <string name="pip_phone_settings" msgid="5468987116750491918">"Configurações"</string>
+    <string name="pip_phone_enter_split" msgid="7042877263880641911">"Dividir tela"</string>
     <string name="pip_menu_title" msgid="5393619322111827096">"Menu"</string>
     <string name="pip_notification_title" msgid="1347104727641353453">"<xliff:g id="NAME">%s</xliff:g> está em picture-in-picture"</string>
     <string name="pip_notification_message" msgid="8854051911700302620">"Se você não quer que o app <xliff:g id="NAME">%s</xliff:g> use este recurso, toque para abrir as configurações e desativá-lo."</string>
@@ -28,6 +29,8 @@
     <string name="pip_skip_to_next" msgid="8403429188794867653">"Pular para a próxima"</string>
     <string name="pip_skip_to_prev" msgid="7172158111196394092">"Pular para a anterior"</string>
     <string name="accessibility_action_pip_resize" msgid="4623966104749543182">"Redimensionar"</string>
+    <string name="accessibility_action_pip_stash" msgid="4060775037619702641">"Ocultar"</string>
+    <string name="accessibility_action_pip_unstash" msgid="7467499339610437646">"Exibir"</string>
     <string name="dock_forced_resizable" msgid="1749750436092293116">"É possível que o app não funcione com a tela dividida."</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="7408396418008948957">"O app não é compatível com a divisão de tela."</string>
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"É possível que o app não funcione em uma tela secundária."</string>
@@ -70,5 +73,4 @@
     <string name="manage_bubbles_text" msgid="7730624269650594419">"Gerenciar"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"Balão dispensado."</string>
     <string name="restart_button_description" msgid="5887656107651190519">"Toque para reiniciar o app e usar tela cheia."</string>
-    <string name="got_it" msgid="4428750913636945527">"Ok"</string>
 </resources>

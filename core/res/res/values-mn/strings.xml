@@ -42,10 +42,10 @@
     <string name="serviceErased" msgid="997354043770513494">"Амжилттай арилгалаа."</string>
     <string name="passwordIncorrect" msgid="917087532676155877">"Буруу нууц үг"</string>
     <string name="mmiComplete" msgid="6341884570892520140">"MMI дууссан."</string>
-    <string name="badPin" msgid="888372071306274355">"Таны бичсэн хуучин PIN буруу байна."</string>
+    <string name="badPin" msgid="888372071306274355">"Таны бичсэн хуучин ПИН буруу байна."</string>
     <string name="badPuk" msgid="4232069163733147376">"Таны бичсэн PUК буруу байна."</string>
-    <string name="mismatchPin" msgid="2929611853228707473">"Таны оруулсан PIN таарахгүй байна."</string>
-    <string name="invalidPin" msgid="7542498253319440408">"4-8 тооноос бүтэх PIN-г бичнэ үү."</string>
+    <string name="mismatchPin" msgid="2929611853228707473">"Таны оруулсан ПИН таарахгүй байна."</string>
+    <string name="invalidPin" msgid="7542498253319440408">"4-8 тооноос бүтэх ПИН-г бичнэ үү."</string>
     <string name="invalidPuk" msgid="8831151490931907083">"8-с цөөнгүй тооноос бүтэх PUK-г бичнэ үү."</string>
     <string name="needPuk" msgid="7321876090152422918">"SIM картны PUK-түгжигдсэн. Тайлах бол PUK кодыг бичнэ үү."</string>
     <string name="needPuk2" msgid="7032612093451537186">"SIM картыг блокоос гаргах бол PUK2-г бичнэ үү."</string>
@@ -64,7 +64,7 @@
     <string name="CwMmi" msgid="3164609577675404761">"дуудлага хүлээлгэх"</string>
     <string name="BaMmi" msgid="7205614070543372167">"Дуудлага хориглох"</string>
     <string name="PwdMmi" msgid="3360991257288638281">"Нууц үг солих"</string>
-    <string name="PinMmi" msgid="7133542099618330959">"PIN солих"</string>
+    <string name="PinMmi" msgid="7133542099618330959">"ПИН солих"</string>
     <string name="CnipMmi" msgid="4897531155968151160">"Дуудсан дугаар харуулах"</string>
     <string name="CnirMmi" msgid="885292039284503036">"Дуудлага хийгчийн дугаар хязгаарлагдсан"</string>
     <string name="ThreeWCMmi" msgid="2436550866139999411">"Гурван чиглэлт дуудлага"</string>
@@ -202,7 +202,6 @@
     <string name="gnss_service" msgid="8907781262179951385">"GNSS үйлчилгээ"</string>
     <string name="sensor_notification_service" msgid="7474531979178682676">"Мэдрэгчийн мэдэгдлийн үйлчилгээ"</string>
     <string name="twilight_service" msgid="8964898045693187224">"Twilight үйлчилгээ"</string>
-    <string name="offline_location_time_zone_detection_service_attribution" msgid="303754195048744816">"Цагийн бүс илрүүлэгч (Холболт байхгүй)"</string>
     <string name="gnss_time_update_service" msgid="9039489496037616095">"GNSS Хугацаа шинэчлэлтийн үйлчилгээ"</string>
     <string name="music_recognition_manager_service" msgid="7481956037950276359">"Хөгжим танилтын менежерийн үйлчилгээ"</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"Таны төхөөрөмж устах болно."</string>
@@ -308,7 +307,7 @@
     <string name="permgrouplab_location" msgid="1858277002233964394">"Байршил"</string>
     <string name="permgroupdesc_location" msgid="1995955142118450685">"энэ төхөөрөмжийн байршилд хандалт хийх"</string>
     <string name="permgrouplab_calendar" msgid="6426860926123033230">"Календарь"</string>
-    <string name="permgroupdesc_calendar" msgid="6762751063361489379">"Хуанли руу хандах"</string>
+    <string name="permgroupdesc_calendar" msgid="6762751063361489379">"Календарь руу хандах"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"Мессеж"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"SMS мессежийг илгээх, харах"</string>
     <string name="permgrouplab_storage" msgid="1938416135375282333">"Файл болон мeдиа"</string>
@@ -427,14 +426,14 @@
     <string name="permdesc_writeCallLog" product="default" msgid="5903033505665134802">"Апп нь таны утасны ирсэн гарсан дуудлага зэргийг агуулсан дуудлагын логыг өөрчлөх боломжтой. Хортой апп нь энийг ашиглан таны дуудлагын логыг өөрчлөх болон арилгах боломжтой."</string>
     <string name="permlab_bodySensors" msgid="3411035315357380862">"биеийн мэдрэгчид хандах (зүрхний хэмнэл шалгагч г.м)"</string>
     <string name="permdesc_bodySensors" product="default" msgid="2365357960407973997">"Апп-т таны зүрхний цохилт гэх мэт биеийн байдлыг хянадаг мэдрэгчдийн датанд хандалт хийх боломж олгоно."</string>
-    <string name="permlab_readCalendar" msgid="6408654259475396200">"Хуанлийн арга хэмжээ, дэлгэрэнгүйг унших"</string>
-    <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"Энэ апп таны таблетад хадгалсан хуанлийн бүх арга хэмжээг унших, хуанлийн өгөгдлийг хуваалцах, хадгалах боломжтой."</string>
+    <string name="permlab_readCalendar" msgid="6408654259475396200">"Календарийн арга хэмжээ, дэлгэрэнгүйг унших"</string>
+    <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"Энэ апп таны таблетад хадгалсан календарийн бүх арга хэмжээг унших, календарийн өгөгдлийг хуваалцах, хадгалах боломжтой."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"Энэ апп таны Android TV төхөөрөмжид хадгалсан календарийн бүх арга хэмжээг унших болон таны календарийн өгөгдлийг хуваалцах эсвэл хадгалах боломжтой."</string>
-    <string name="permdesc_readCalendar" product="default" msgid="9118823807655829957">"Энэ апп таны утсанд хадгалсан хуанлийн бүх арга хэмжээг унших, хуанлийн өгөгдлийг хуваалцах, хадгалах боломжтой."</string>
+    <string name="permdesc_readCalendar" product="default" msgid="9118823807655829957">"Энэ апп таны утсанд хадгалсан календарийн бүх арга хэмжээг унших, календарийн өгөгдлийг хуваалцах, хадгалах боломжтой."</string>
     <string name="permlab_writeCalendar" msgid="6422137308329578076">"календарын хуваарийг нэмэх эсвэл өөрчлөх болон эзэмшигчид мэдэгдэлгүйгээр зочидруу имэйл илгээх"</string>
-    <string name="permdesc_writeCalendar" product="tablet" msgid="8722230940717092850">"Энэ апп таны таблет дээр хуанлийн арга хэмжээг нэмэх, устгах, эсвэл өөрчлөх боломжтой. Энэ апп нь хуанли эзэмшигчээс мессеж илгээсэн мэт харагдах, эсвэл эзэмшигчид мэдэгдэлгүйгээр арга хэмжээг өөрчлөх боломжтой."</string>
+    <string name="permdesc_writeCalendar" product="tablet" msgid="8722230940717092850">"Энэ апп таны таблет дээр календарийн арга хэмжээг нэмэх, устгах, эсвэл өөрчлөх боломжтой. Энэ апп нь календарь эзэмшигчээс мессеж илгээсэн мэт харагдах, эсвэл эзэмшигчид мэдэгдэлгүйгээр арга хэмжээг өөрчлөх боломжтой."</string>
     <string name="permdesc_writeCalendar" product="tv" msgid="951246749004952706">"Энэ апп таны Android TV төхөөрөмжид календарийн арга хэмжээ нэмэх, үүнийг устгах, эсвэл өөрчлөх боломжтой. Энэ апп календарийн өмчлөгчөөс ирсэн мэт харагдаж болох мессеж илгээх эсвэл арга хэмжээг өмчлөгчид нь мэдэгдэлгүйгээр өөрчлөх боломжтой."</string>
-    <string name="permdesc_writeCalendar" product="default" msgid="5416380074475634233">"Энэ апп таны утсанд хуанлийн арга хэмжээг нэмэх, устгах, эсвэл өөрчлөх боломжтой. Энэ апп нь хуанли эзэмшигчээс мессеж илгээсэн мэт харагдах, эсвэл эзэмшигчид мэдэгдэлгүйгээр арга хэмжээг өөрчлөх боломжтой."</string>
+    <string name="permdesc_writeCalendar" product="default" msgid="5416380074475634233">"Энэ апп таны утсанд календарийн арга хэмжээг нэмэх, устгах, эсвэл өөрчлөх боломжтой. Энэ апп нь календарь эзэмшигчээс мессеж илгээсэн мэт харагдах, эсвэл эзэмшигчид мэдэгдэлгүйгээр арга хэмжээг өөрчлөх боломжтой."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="5162339812057983988">"байршил нийлүүлэгчийн нэмэлт тушаалд хандах"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="355369611979907967">"Апп нь байршил нийлүүлэгчийн нэмэлт тушаалд хандах боломжтой. Энэ нь апп-д GPS эсвэл бусад байршлын үйлчилгээний ажиллагаанд нөлөөлөх боломжийг олгоно."</string>
     <string name="permlab_accessFineLocation" msgid="6426318438195622966">"нарийвчилсан байршилд зөвхөн нүүр хэсэгт хандах"</string>
@@ -470,6 +469,8 @@
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"Апп нь дуудлага хийхдээ таны оролцоогүйгээр IMS үйлчилгээг ашиглах боломжтой."</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"утасны статус ба таниулбарыг унших"</string>
     <string name="permdesc_readPhoneState" msgid="7229063553502788058">"Апп нь төхөөрөмжийн утасны функцд хандах боломжтой. Энэ зөвшөөрөл нь апп-д утасны дугаар болон төхөөрөмжийн ID-г, дуудлага идэвхтэй эсэх, холын дугаар дуудлагаар холбогдсон байгаа эсэхийг тогтоох боломжийг олгоно,"</string>
+    <string name="permlab_readBasicPhoneState" msgid="3214853233263871347">"утасны үндсэн статус болон таних мэдээллийг уншуулна уу"</string>
+    <string name="permdesc_readBasicPhoneState" msgid="828185691675460520">"Аппад төхөөрөмжийн утасны үндсэн онцлогт хандах боломжийг олгоно."</string>
     <string name="permlab_manageOwnCalls" msgid="9033349060307561370">"системээр дамжуулах дуудлага"</string>
     <string name="permdesc_manageOwnCalls" msgid="4431178362202142574">"Дуудлагыг сайжруулахын тулд дуудлагаа системээр дамжуулах зөвшөөрлийг апп-д олгодог."</string>
     <string name="permlab_callCompanionApp" msgid="3654373653014126884">"систем дэх дуудлагыг харах болон хянах."</string>
@@ -542,6 +543,8 @@
     <string name="permdesc_bluetooth_advertise" product="default" msgid="6085174451034210183">"Аппад ойролцоох Bluetooth төхөөрөмжүүдэд сурталчлахыг зөвшөөрнө"</string>
     <string name="permlab_uwb_ranging" msgid="8141915781475770665">"ойролцоох ультра өргөн зурвасын төхөөрөмжүүдийн хоорондох холбоотой байрлалыг тодорхойлох"</string>
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"Аппад ойролцоох ультра өргөн зурвасын төхөөрөмжүүдийн хоорондох холбоотой байрлалыг тодорхойлохыг зөвшөөрөх"</string>
+    <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"ойролцоох Wi-Fi төхөөрөмжүүдтэй харилцах"</string>
+    <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"Аппад ойролцоох Wi-Fi төхөөрөмжүүдтэй холбоотой байрлалыг мэдэгдэх, холбох, тодорхойлохыг зөвшөөрнө"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Сонгосон NFC төлбөрийн үйлчилгээний мэдээлэл"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Бүртгүүлсэн төхөөрөмж болон маршрутын хүрэх цэг зэрэг сонгосон nfc төлбөрийн үйлчилгээний мэдээллийг авахыг аппад зөвшөөрдөг."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"ойролцоо талбарын холбоог удирдах"</string>
@@ -580,11 +583,12 @@
     <string name="fingerprint_acquired_partial" msgid="694598777291084823">"Хэсэгчилсэн хурууны хээ илэрлээ"</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"Хурууны хээ боловсруулж чадахгүй байна. Дахин оролдоно уу."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="5236744087471419479">"Мэдрэгчийг цэвэрлэнэ үү"</string>
-    <string name="fingerprint_acquired_too_fast" msgid="1254724478300787385">"Хуруу хэт хурдан хөдөллөө"</string>
+    <string name="fingerprint_acquired_too_fast" msgid="6038375140739678098">"Бага зэрэг удаан дарна уу"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"Хуруу хэт удаан хөдөлгөсөн байна. Дахин оролдоно уу."</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"Өөр хурууны хээ туршина уу"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"Хэт гэрэлтэй байна"</string>
     <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"Тохируулж үзнэ үү"</string>
+    <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"Хурууныхаа байрлалыг тухай бүрд бага зэрэг өөрчилнө үү"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"Хурууны хээг нотолсон"</string>
@@ -601,6 +605,7 @@
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"Бүртгүүлсэн хурууны хээ алга."</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"Энэ төхөөрөмжид хурууны хээ мэдрэгч алга."</string>
     <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"Мэдрэгчийг түр хугацаанд идэвхгүй болгосон."</string>
+    <string name="fingerprint_error_bad_calibration" msgid="4385512597740168120">"Хурууны хээ мэдрэгч ашиглах боломжгүй. Засварын үйлчилгээ үзүүлэгчид зочилно уу"</string>
     <string name="fingerprint_name_template" msgid="8941662088160289778">"Хурууны хээ <xliff:g id="FINGERID">%d</xliff:g>"</string>
     <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"Хурууны хээ ашиглах"</string>
     <string name="fingerprint_or_screen_lock_app_setting_name" msgid="3501743523487644907">"Хурууны хээ эсвэл дэлгэцийн түгжээ ашиглах"</string>
@@ -608,18 +613,19 @@
     <string name="fingerprint_or_screen_lock_dialog_default_subtitle" msgid="5195808203117992200">"Үргэлжлүүлэхийн тулд хурууны хээ эсвэл дэлгэцийн түгжээгээ ашиглана уу"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
+    <string name="fingerprint_error_vendor_unknown" msgid="4170002184907291065">"Алдаа гарлаа. Дахин оролдоно уу."</string>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"Хурууны хээний дүрс"</string>
-    <string name="permlab_manageFace" msgid="4569549381889283282">"царайгаар тайлах техник хангамжийг удирдах"</string>
-    <string name="permdesc_manageFace" msgid="6204569688492710471">"Аппад царайны загварыг ашиглахын тулд нэмэх эсвэл устгах аргыг идэвхжүүлэхийг зөвшөөрдөг."</string>
-    <string name="permlab_useFaceAuthentication" msgid="1011430526454859030">"царайгаар тайлах техник хангамж ашиглах"</string>
-    <string name="permdesc_useFaceAuthentication" msgid="3115697017684668012">"Аппад царайгаар тайлах техник хангамжийг баталгаажуулалтад ашиглахыг зөвшөөрдөг"</string>
-    <string name="face_recalibrate_notification_name" msgid="6006095897989257026">"Царайгаар тайлах"</string>
-    <string name="face_recalibrate_notification_title" msgid="5944930528030496897">"Царайгаа дахин бүртгүүлнэ үү"</string>
-    <string name="face_recalibrate_notification_content" msgid="892757485125249962">"Танилтыг сайжруулахын тулд царайгаа дахин бүртгүүлнэ үү"</string>
-    <string name="face_setup_notification_title" msgid="550617822603450009">"Царайгаар тайлах онцлогийг тохируулна уу"</string>
+    <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"Царайгаар түгжээ тайлах"</string>
+    <string name="face_recalibrate_notification_title" msgid="2524791952735579082">"Царайгаар түгжээ тайлахтай холбоотой асуудал"</string>
+    <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"Нүүрний загвараа устгахын тулд товшоод, дараа нь царайгаа дахин нэмнэ үү"</string>
+    <string name="face_setup_notification_title" msgid="8843461561970741790">"Царайгаар түгжээ тайлахыг тохируулах"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"Утас руугаа харж түгжээг нь тайлна уу"</string>
+    <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"Царайгаар түгжээ тайлахыг ашиглахын тулд Тохиргоо &gt; Нууцлал хэсэгт "<b>" Камерын хандалтыг "</b>" асаана уу"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Түгжээ тайлах илүү олон арга тохируулна уу"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"Хурууны хээ нэмэхийн тулд товшино уу"</string>
+    <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Хурууны хээгээр түгжээ тайлах"</string>
+    <string name="fingerprint_recalibrate_notification_title" msgid="2406561052064558497">"Хурууны хээ мэдрэгч ашиглах боломжгүй"</string>
+    <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"Засварын үйлчилгээ үзүүлэгчид зочилно уу."</string>
     <string name="face_acquired_insufficient" msgid="2150805835949162453">"Царайн өгөгдлийг зөв авч чадсангүй. Дахин оролдоно уу."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"Хэт цайвар байна. Гэрэл багатай газар оролдоно уу."</string>
     <string name="face_acquired_too_dark" msgid="252573548464426546">"Хэт харанхуй байна. Гэрэлтэй орчинд туршина уу."</string>
@@ -643,23 +649,25 @@
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"Царайг бататгаж чадсангүй. Техник хангамж боломжгүй байна."</string>
-    <string name="face_error_timeout" msgid="522924647742024699">"Царайгаар тайлахыг дахин оролдоно уу."</string>
+    <string name="face_error_timeout" msgid="2598544068593889762">"Царайгаар түгжээ тайлахыг дахин оролдоно уу"</string>
     <string name="face_error_no_space" msgid="5649264057026021723">"Царайн шинэ өгөгдлийг хадгалж чадсангүй. Эхлээд хуучин өгөгдлийг устгана уу."</string>
     <string name="face_error_canceled" msgid="2164434737103802131">"Царайны үйл ажиллагааг цуцаллаа."</string>
-    <string name="face_error_user_canceled" msgid="8553045452825849843">"Хэрэглэгч царайгаар тайлахыг цуцалсан."</string>
+    <string name="face_error_user_canceled" msgid="5766472033202928373">"Хэрэглэгч Царайгаар түгжээ тайлахыг цуцалсан"</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"Хэт олон удаа оролдлоо. Дараа дахин оролдоно уу."</string>
-    <string name="face_error_lockout_permanent" msgid="8277853602168960343">"Хэтэрхий олон удаа оролдлоо. Царайгаар тайлахыг идэвхгүй болголоо."</string>
+    <string name="face_error_lockout_permanent" msgid="3277134834042995260">"Хэт олон удаа оролдлоо. Царайгаар түгжээ тайлахыг идэвхгүй болгосон."</string>
+    <string name="face_error_lockout_screen_lock" msgid="5062609811636860928">"Хэт олон удаа оролдлоо. Оронд нь дэлгэцийн түгжээ оруулна уу."</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"Царайг бататгаж чадсангүй. Дахин оролдоно уу."</string>
-    <string name="face_error_not_enrolled" msgid="7369928733504691611">"Та царайгаар тайлахыг тохируулаагүй байна."</string>
-    <string name="face_error_hw_not_present" msgid="1070600921591729944">"Царайгаар тайлахыг энэ төхөөрөмж дээр дэмждэггүй."</string>
+    <string name="face_error_not_enrolled" msgid="1134739108536328412">"Та Царайгаар түгжээ тайлахыг тохируулаагүй байна"</string>
+    <string name="face_error_hw_not_present" msgid="7940978724978763011">"Энэ төхөөрөмж дээр Царайгаар түгжээ тайлахыг дэмждэггүй"</string>
     <string name="face_error_security_update_required" msgid="5076017208528750161">"Мэдрэгчийг түр хугацаанд идэвхгүй болгосон."</string>
     <string name="face_name_template" msgid="3877037340223318119">"Царай <xliff:g id="FACEID">%d</xliff:g>"</string>
-    <string name="face_app_setting_name" msgid="8130135875458467243">"Царайгаар тайлахыг ашиглах"</string>
-    <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"Царай эсвэл дэлгэцийн түгжээ ашиглах"</string>
+    <string name="face_app_setting_name" msgid="5854024256907828015">"Царайгаар түгжээ тайлахыг ашиглах"</string>
+    <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"Царайгаар түгжээ тайлах эсвэл дэлгэцийн түгжээ ашиглах"</string>
     <string name="face_dialog_default_subtitle" msgid="6620492813371195429">"Үргэлжлүүлэхийн тулд царайгаа ашиглана уу"</string>
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"Үргэлжлүүлэхийн тулд царай эсвэл дэлгэцийн түгжээгээ ашиглана уу"</string>
   <string-array name="face_error_vendor">
   </string-array>
+    <string name="face_error_vendor_unknown" msgid="7387005932083302070">"Алдаа гарлаа. Дахин оролдоно уу."</string>
     <string name="face_icon_content_description" msgid="465030547475916280">"Царайны дүрс тэмдэг"</string>
     <string name="permlab_readSyncSettings" msgid="6250532864893156277">"синк тохиргоог унших"</string>
     <string name="permdesc_readSyncSettings" msgid="1325658466358779298">"Апп нь бүртгэлийн синк тохиргоог унших боломжтой. Жишээ нь энэ нь Хүмүүс апп бүртгэлтэй синк хийгдсэн эсэхийг тодорхойлох боломжтой."</string>
@@ -726,9 +734,11 @@
     <string name="policylab_watchLogin" msgid="7599669460083719504">"Дэлгэцийн түгжээг тайлах оролдлогыг хянах"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"Дэлгэц түгжигдсэн үед нууц үг буруу оруулалтын тоог хянах ба хэрэв хэт олон удаа нууц үгийг буруу оруулбал таблетыг түгжих болон таблетын бүх датаг арилгана"</string>
     <string name="policydesc_watchLogin" product="tv" msgid="2140588224468517507">"Дэлгэцийн түгжээг тайлахаар буруу оруулсан нууц үгийн тоог хянаж, нууц үгийг хэт олон удаа буруу оруулсан тохиолдолд таны Android TV төхөөрөмжийг түгжиж эсвэл үүний бүх өгөгдлийг устгана."</string>
+    <string name="policydesc_watchLogin" product="automotive" msgid="7011438994051251521">"Дэлгэцийн түгжээг тайлахад буруу бичиж оруулсан нууц үгний тоог хянаж, инфотэйнмент системийг түгжих эсвэл хэт олон удаа нууц үгийг буруу бичиж оруулсан тохиолдолд инфотэйнмент системийн бүх өгөгдлийг устгана."</string>
     <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"Дэлгэц түгжигдсэн үед нууц үг буруу оруулалтын тоог хянах, ба хэрэв хэт олон удаа нууц үгийг буруу оруулбал утсыг түгжих болон утасны бүх датаг арилгана"</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="2049038943004297474">"Дэлгэцийн түгжээг тайлахад оруулсан буруу нууц үгийн давтамжийг хянаж таблетыг түгжих эсвэл буруу нууц үгийг хэт олон удаа оруулсан тохиолдолд энэ хэрэглэгчийн мэдээллийг устгах."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tv" msgid="8965224107449407052">"Дэлгэцийн түгжээг тайлахаар буруу оруулсан нууц үгийн тоог хянаж, нууц үгийг хэт олон удаа буруу оруулсан тохиолдолд таны Android TV төхөөрөмжийг түгжиж эсвэл энэ хэрэглэгчийн бүх өгөгдлийг устгана."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="automotive" msgid="7180857406058327941">"Дэлгэцийн түгжээг тайлахад буруу бичиж оруулсан нууц үгний тоог хянаж, инфотэйнмент системийг түгжих эсвэл хэт олон удаа нууц үгийг буруу бичиж оруулсан тохиолдолд энэ профайлын бүх өгөгдлийг устгана."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="9177645136475155924">"Дэлгэцийн түгжээг тайлахад оруулсан буруу нууц үгийн давтамжийг хянаж гар утсыг түгжих эсвэл буруу нууц үгийг хэт олон удаа оруулсан тохиолдолд энэ хэрэглэгчийн мэдээллийг устгах."</string>
     <string name="policylab_resetPassword" msgid="214556238645096520">"Дэлгэцийн түгжээг өөрчлөх"</string>
     <string name="policydesc_resetPassword" msgid="4626419138439341851">"Дэлгэцийн түгжээг өөрчлөх."</string>
@@ -737,10 +747,13 @@
     <string name="policylab_wipeData" msgid="1359485247727537311">"Бүх датаг арилгах"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"Үйлдвэрийн дата утгыг өгсөнөөр таблетын дата шууд арилгагдана."</string>
     <string name="policydesc_wipeData" product="tv" msgid="513862488950801261">"Таны Android TV төхөөрөмжийн өгөгдлийг танд анхааруулалгүйгээр үйлдвэрээс гарсан төлөвт шилжүүлэн устгана."</string>
+    <string name="policydesc_wipeData" product="automotive" msgid="660804547737323300">"Үйлдвэрийн өгөгдлийн төлөвт үйлдлийг гүйцэтгэснээр инфотэйнмент системийн өгөгдлийг сануулгагүйгээр устгана."</string>
     <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"Сануулахгүйгээр утасны бүх мэдээллийг устгаж, үйлдвэрийн өгөгдмөл байдалд шилжүүлнэ"</string>
-    <string name="policylab_wipeData_secondaryUser" msgid="413813645323433166">"Хэрэглэгчийн мэдээллийг арилгах"</string>
+    <string name="policylab_wipeData_secondaryUser" product="automotive" msgid="115034358520328373">"Профайлын өгөгдлийг устгах"</string>
+    <string name="policylab_wipeData_secondaryUser" product="default" msgid="413813645323433166">"Хэрэглэгчийн мэдээллийг арилгах"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="2336676480090926470">"Анхааруулга өгөхгүйгээр энэ хэрэглэгчийн энэ таблет дээрх мэдээллийг устгах."</string>
     <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2293713284515865200">"Энэ Android TV төхөөрөмж дээрх хэрэглэгчийн өгөгдлийг хэрэглэгчид анхааруулалгүйгээр устгана."</string>
+    <string name="policydesc_wipeData_secondaryUser" product="automotive" msgid="4658832487305780879">"Энэ инфотэйнмент систем дээр энэ профайлын өгөгдлийг сануулгагүйгээр устгана."</string>
     <string name="policydesc_wipeData_secondaryUser" product="default" msgid="2788325512167208654">"Анхааруулга өгөхгүйгээр энэ хэрэглэгчийн энэ гар утсан дээрх мэдээллийг устгах."</string>
     <string name="policylab_setGlobalProxy" msgid="215332221188670221">"Төхөрөөмжийн глобал проксиг тохируулах"</string>
     <string name="policydesc_setGlobalProxy" msgid="7149665222705519604">"Бодлогыг ашиглах боломжтой үед төхөөрөмжийн олон улсын эрхийг тохируулах. Зөвхөн төхөөрөмж эзэмшигч нь олон улсын эрхийг тохируулах боломжтой."</string>
@@ -866,14 +879,14 @@
     <string name="sipAddressTypeWork" msgid="7873967986701216770">"Ажлын"</string>
     <string name="sipAddressTypeOther" msgid="6317012577345187275">"Бусад"</string>
     <string name="quick_contacts_not_available" msgid="1262709196045052223">"Энэ харилцагчийг харах аппликейшн олдсонгүй."</string>
-    <string name="keyguard_password_enter_pin_code" msgid="6401406801060956153">"PIN кодыг бичнэ үү"</string>
-    <string name="keyguard_password_enter_puk_code" msgid="3112256684547584093">"PUK-г бичээд шинэ PIN код оруулна уу"</string>
+    <string name="keyguard_password_enter_pin_code" msgid="6401406801060956153">"ПИН кодыг бичнэ үү"</string>
+    <string name="keyguard_password_enter_puk_code" msgid="3112256684547584093">"PUK-г бичээд шинэ ПИН код оруулна уу"</string>
     <string name="keyguard_password_enter_puk_prompt" msgid="2825313071899938305">"PUK код"</string>
-    <string name="keyguard_password_enter_pin_prompt" msgid="5505434724229581207">"Шинэ PIN код"</string>
+    <string name="keyguard_password_enter_pin_prompt" msgid="5505434724229581207">"Шинэ ПИН код"</string>
     <string name="keyguard_password_entry_touch_hint" msgid="4032288032993261520"><font size="17">"Нууц үг шивэх бол товшино уу"</font></string>
     <string name="keyguard_password_enter_password_code" msgid="2751130557661643482">"Тайлах нууц үгийг бичнэ үү"</string>
-    <string name="keyguard_password_enter_pin_password_code" msgid="7792964196473964340">"Тайлах PIN-г оруулна уу"</string>
-    <string name="keyguard_password_wrong_pin_code" msgid="8583732939138432793">"Буруу PIN код."</string>
+    <string name="keyguard_password_enter_pin_password_code" msgid="7792964196473964340">"Тайлах ПИН-г оруулна уу"</string>
+    <string name="keyguard_password_wrong_pin_code" msgid="8583732939138432793">"Буруу ПИН код."</string>
     <string name="keyguard_label_text" msgid="3841953694564168384">"Тайлах бол Цэсийг дараад 0."</string>
     <string name="emergency_call_dialog_number_for_display" msgid="2978165477085612673">"Яаралтай тусламжийн дугаар"</string>
     <string name="lockscreen_carrier_default" msgid="6192313772955399160">"Үйлчилгээ байхгүй"</string>
@@ -887,7 +900,7 @@
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"Дахин оролдох"</string>
     <string name="lockscreen_password_wrong" msgid="8605355913868947490">"Дахин оролдох"</string>
     <string name="lockscreen_storage_locked" msgid="634993789186443380">"Бүх онцлог, өгөгдлийн түгжээг тайлах"</string>
-    <string name="faceunlock_multiple_failures" msgid="681991538434031708">"Нүүрээр түгжээ тайлах оролдлогын тоо дээд хэмжээнээс хэтэрсэн"</string>
+    <string name="faceunlock_multiple_failures" msgid="681991538434031708">"Царайгаар түгжээ тайлах оролдлогын тоо дээд хэмжээнээс хэтэрсэн"</string>
     <string name="lockscreen_missing_sim_message_short" msgid="1248431165144893792">"SIM карт байхгүй"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="8596805728510570760">"Таблет SIM картгүй."</string>
     <string name="lockscreen_missing_sim_message" product="tv" msgid="2582768023352171073">"Таны Android TV төхөөрөмжид SIM карт алга."</string>
@@ -911,7 +924,7 @@
     <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="2286497117428409709">"SIM картны түгжээг гаргаж байна…"</string>
     <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="6458790975898594240">"Та тайлах хээг <xliff:g id="NUMBER_0">%1$d</xliff:g> удаа буруу зурлаа. \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> секундын дараа дахин оролдоно уу."</string>
     <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="3118353451602377380">"Та нууц үгээ <xliff:g id="NUMBER_0">%1$d</xliff:g> удаа буруу бичив. \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> секундын дараа дахин оролдоно уу."</string>
-    <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="2874278239714821984">"Та PIN кодоо <xliff:g id="NUMBER_0">%1$d</xliff:g> удаа буруу бичив. \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> секундын дараа дахин оролдоно уу."</string>
+    <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="2874278239714821984">"Та ПИН кодоо <xliff:g id="NUMBER_0">%1$d</xliff:g> удаа буруу бичив. \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> секундын дараа дахин оролдоно уу."</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="3069635524964070596">"Та тайлах хээг <xliff:g id="NUMBER_0">%1$d</xliff:g> удаа буруу зурлаа. <xliff:g id="NUMBER_1">%2$d</xliff:g> удаа дахин буруу оруулбал, та таблетаа тайлахын тулд Google нэвтрэлтээ ашиглах шаардлагатай болно.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> секундын дараа дахин оролдоно уу."</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="tv" msgid="6399092175942158529">"Та тайлах хээг <xliff:g id="NUMBER_0">%1$d</xliff:g> удаа буруу зурсан байна. Та дахин <xliff:g id="NUMBER_1">%2$d</xliff:g> удаа буруу оруулсан тохиолдолд Android TV төхөөрөмжийнхөө түгжээг тайлахын тулд Google-д нэвтрэх шаардлагатай болно.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> секундийн дараа дахин оролдоно уу."</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="5691623136957148335">"Та тайлах хээг <xliff:g id="NUMBER_0">%1$d</xliff:g> удаа буруу зурлаа. <xliff:g id="NUMBER_1">%2$d</xliff:g> удаа дахин буруу оролдвол, та таблетаа тайлахын тулд Google нэвтрэлтээ ашиглах шаардлагатай болно.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> секундын дараа дахин оролдоно уу."</string>
@@ -957,7 +970,7 @@
     <string name="keyguard_accessibility_expand_lock_area" msgid="4215280881346033434">"Түгжээгүй хэсгийг өргөсгөх."</string>
     <string name="keyguard_accessibility_slide_unlock" msgid="2968195219692413046">"Тайлах гулсуулалт."</string>
     <string name="keyguard_accessibility_pattern_unlock" msgid="8669128146589233293">"Тайлах хээ."</string>
-    <string name="keyguard_accessibility_face_unlock" msgid="632407612842329815">"Царайгаар тайлах"</string>
+    <string name="keyguard_accessibility_face_unlock" msgid="4533832120787386728">"Царайгаар түгжээ тайлах."</string>
     <string name="keyguard_accessibility_pin_unlock" msgid="4020864007967340068">"Тайлах пин."</string>
     <string name="keyguard_accessibility_sim_pin_unlock" msgid="4895939120871890557">"Sim-н пин кодыг тайлна уу."</string>
     <string name="keyguard_accessibility_sim_puk_unlock" msgid="3459003464041899101">"Sim-н Puk кодыг тайлна уу."</string>
@@ -1022,7 +1035,7 @@
     <string name="text_copied" msgid="2531420577879738860">"Текст хуулагдав."</string>
     <string name="copied" msgid="4675902854553014676">"Хуулсан"</string>
     <string name="pasted_from_app" msgid="5627698450808256545">"<xliff:g id="SOURCE_APP_NAME">%2$s</xliff:g>-с буулгасан <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g>"</string>
-    <string name="pasted_from_clipboard" msgid="6295556725844421812">"Түр санах ойгоос буулгасан <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g>"</string>
+    <string name="pasted_from_clipboard" msgid="7355790625710831847">"Таны түр санах ойгоос <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g>-г буулгасан"</string>
     <string name="pasted_text" msgid="4298871641549173733">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> таны хуулсан текстийг буулгасан"</string>
     <string name="pasted_image" msgid="4729097394781491022">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> таны хуулсан зургийг буулгасан"</string>
     <string name="pasted_content" msgid="646276353060777131">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> таны хуулсан контентыг буулгасан"</string>
@@ -1259,6 +1272,10 @@
     <string name="android_preparing_apk" msgid="589736917792300956">"Бэлдэж байна <xliff:g id="APPNAME">%1$s</xliff:g>."</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"Апп-г эхлүүлж байна."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"Эхлэлийг дуусгаж байна."</string>
+    <string name="fp_enrollment_powerbutton_intent_title" msgid="3385634173366119903">"Дэлгэцийг унтраах уу?"</string>
+    <string name="fp_enrollment_powerbutton_intent_message" msgid="6582149052513682522">"Та хурууны хээгээ тохируулж байх үед Асаах/унтраах товчийг дарсан байна.\n\nЭнэ нь ихэвчлэн таны дэлгэцийг унтраана."</string>
+    <string name="fp_enrollment_powerbutton_intent_positive_button" msgid="5963520983910436791">"Унтраах"</string>
+    <string name="fp_enrollment_powerbutton_intent_negative_button" msgid="6465764183480190748">"Цуцлах"</string>
     <string name="heavy_weight_notification" msgid="8382784283600329576">"<xliff:g id="APP">%1$s</xliff:g> ажиллаж байна"</string>
     <string name="heavy_weight_notification_detail" msgid="6802247239468404078">"Тоглоом руу буцахын тулд товших"</string>
     <string name="heavy_weight_switcher_title" msgid="3861984210040100886">"Тоглоом сонгох"</string>
@@ -1457,6 +1474,8 @@
     <string name="permdesc_requestDeletePackages" msgid="6133633516423860381">"Апп-д багц устгах хүсэлт тавихыг зөвшөөрнө."</string>
     <string name="permlab_requestIgnoreBatteryOptimizations" msgid="7646611326036631439">"батерейны оновчлол алгасахыг асуух"</string>
     <string name="permdesc_requestIgnoreBatteryOptimizations" msgid="634260656917874356">"Тухайн аппaaс батерейны оновчлол алгасах зөвшөөрөл асуухыг зөвшөөрдөг."</string>
+    <string name="permlab_queryAllPackages" msgid="2928450604653281650">"бүх багцыг лавлах"</string>
+    <string name="permdesc_queryAllPackages" msgid="5339069855520996010">"Аппап бүх суулгасан багцыг харахыг зөвшөөрнө."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1842872462124648678">"Өсгөх контрол дээр хоёр удаа товшино уу"</string>
     <string name="gadget_host_error_inflating" msgid="2449961590495198720">"Виджет нэмж чадсангүй."</string>
     <string name="ime_action_go" msgid="5536744546326495436">"Очих"</string>
@@ -1475,6 +1494,7 @@
     <string name="deny" msgid="6632259981847676572">"Татгалзах"</string>
     <string name="permission_request_notification_title" msgid="1810025922441048273">"Зөвшөөрөл хүсэв"</string>
     <string name="permission_request_notification_with_subtitle" msgid="3743417870360129298">"<xliff:g id="ACCOUNT">%s</xliff:g> бүртгэл зөвшөөрөл \n хүссэн"</string>
+    <string name="permission_request_notification_for_app_with_subtitle" msgid="1298704005732851350">"<xliff:g id="APP">%1$s</xliff:g>\n нь <xliff:g id="ACCOUNT">%2$s</xliff:g> бүртгэлд зөвшөөрөл хүссэн."</string>
     <string name="forward_intent_to_owner" msgid="4620359037192871015">"Та энэ апп-г өөрийн ажлын профайлаас гадуур ашиглаж байна"</string>
     <string name="forward_intent_to_work" msgid="3620262405636021151">"Та энэ апп-г өөрийн ажлын профайл дотор ашиглаж байна"</string>
     <string name="input_method_binding_label" msgid="1166731601721983656">"Оруулах арга"</string>
@@ -1638,24 +1658,24 @@
     <string name="kg_forgot_pattern_button_text" msgid="406145459223122537">"Хээг мартсан"</string>
     <string name="kg_wrong_pattern" msgid="1342812634464179931">"Буруу хээ"</string>
     <string name="kg_wrong_password" msgid="2384677900494439426">"Нууц үг буруу"</string>
-    <string name="kg_wrong_pin" msgid="3680925703673166482">"PIN буруу"</string>
+    <string name="kg_wrong_pin" msgid="3680925703673166482">"ПИН буруу"</string>
     <plurals name="kg_too_many_failed_attempts_countdown" formatted="false" msgid="236717428673283568">
       <item quantity="other"><xliff:g id="NUMBER">%d</xliff:g> секундын дараа дахин оролдоно уу.</item>
       <item quantity="one">1 секундын дараа дахин оролдоно уу.</item>
     </plurals>
     <string name="kg_pattern_instructions" msgid="8366024510502517748">"Хээг зурах"</string>
-    <string name="kg_sim_pin_instructions" msgid="6479401489471690359">"SIM PIN оруулна уу"</string>
-    <string name="kg_pin_instructions" msgid="7355933174673539021">"PIN оруулна уу"</string>
+    <string name="kg_sim_pin_instructions" msgid="6479401489471690359">"SIM ПИН оруулна уу"</string>
+    <string name="kg_pin_instructions" msgid="7355933174673539021">"ПИН оруулна уу"</string>
     <string name="kg_password_instructions" msgid="7179782578809398050">"Нууц үгээ оруулна уу"</string>
     <string name="kg_puk_enter_puk_hint" msgid="6696187482616360994">"SIM идэвхгүй байна. Үргэлжлүүлэх бол PUK кодыг оруулна уу. Дэлгэрэнгүй мэдээллийг оператороос асууна ууу"</string>
-    <string name="kg_puk_enter_pin_hint" msgid="8190982314659429770">"Хүссэн PIN кодоо оруулна уу"</string>
-    <string name="kg_enter_confirm_pin_hint" msgid="6372557107414074580">"Хүссэн PIN кодоо дахин оруулна уу"</string>
+    <string name="kg_puk_enter_pin_hint" msgid="8190982314659429770">"Хүссэн ПИН кодоо оруулна уу"</string>
+    <string name="kg_enter_confirm_pin_hint" msgid="6372557107414074580">"Хүссэн ПИН кодоо дахин оруулна уу"</string>
     <string name="kg_sim_unlock_progress_dialog_message" msgid="8871937892678885545">"SIM картны түгжээг гаргаж байна…"</string>
-    <string name="kg_password_wrong_pin_code" msgid="9013856346870572451">"Буруу PIN код."</string>
-    <string name="kg_invalid_sim_pin_hint" msgid="4821601451222564077">"4-8 тооноос бүтэх PIN-г бичнэ үү."</string>
+    <string name="kg_password_wrong_pin_code" msgid="9013856346870572451">"Буруу ПИН код."</string>
+    <string name="kg_invalid_sim_pin_hint" msgid="4821601451222564077">"4-8 тооноос бүтэх ПИН-г бичнэ үү."</string>
     <string name="kg_invalid_sim_puk_hint" msgid="2539364558870734339">"PUK код 8 тоотой байх ёстой."</string>
     <string name="kg_invalid_puk" msgid="4809502818518963344">"Зөв PUK кодыг дахин оруулна уу. Давтан оролдвол SIM нь бүрмөсөн идэвхгүй болгоно."</string>
-    <string name="kg_invalid_confirm_pin_hint" product="default" msgid="4705368340409816254">"PIN кодууд таарахгүй байна"</string>
+    <string name="kg_invalid_confirm_pin_hint" product="default" msgid="4705368340409816254">"ПИН кодууд таарахгүй байна"</string>
     <string name="kg_login_too_many_attempts" msgid="699292728290654121">"Хээ оруулах оролдлого хэт олон"</string>
     <string name="kg_login_instructions" msgid="3619844310339066827">"Түгжээг тайлах бол Google акаунтаараа нэвтэрнэ үү."</string>
     <string name="kg_login_username_hint" msgid="1765453775467133251">"Хэрэглэгчийн нэр (имэйл)"</string>
@@ -1664,8 +1684,8 @@
     <string name="kg_login_invalid_input" msgid="8292367491901220210">"Хэрэглэгчийн нэр эсвэл нууц үг буруу."</string>
     <string name="kg_login_account_recovery_hint" msgid="4892466171043541248">"Хэрэглэгчийн нэр нууц үгээ мартсан уу?\n"<b>"google.com/accounts/recovery"</b>"-д зочилно уу."</string>
     <string name="kg_login_checking_password" msgid="4676010303243317253">"Бүртгэл шалгаж байна…"</string>
-    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="23741434207544038">"Та PIN кодоо <xliff:g id="NUMBER_0">%1$d</xliff:g> удаа буруу бичив. \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> секундын дараа дахин оролдоно уу."</string>
-    <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="3328686432962224215">"Та PIN кодоо <xliff:g id="NUMBER_0">%1$d</xliff:g> удаа буруу бичив. \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> секундын дараа дахин оролдоно уу."</string>
+    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="23741434207544038">"Та ПИН кодоо <xliff:g id="NUMBER_0">%1$d</xliff:g> удаа буруу бичив. \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> секундын дараа дахин оролдоно уу."</string>
+    <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="3328686432962224215">"Та ПИН кодоо <xliff:g id="NUMBER_0">%1$d</xliff:g> удаа буруу бичив. \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> секундын дараа дахин оролдоно уу."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="7357404233979139075">"Та тайлах хээг <xliff:g id="NUMBER_0">%1$d</xliff:g> удаа буруу зурлаа. \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> секундын дараа дахин оролдоно уу."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="3479940221343361587">"Та таблетыг тайлах гэж <xliff:g id="NUMBER_0">%1$d</xliff:g> удаа буруу оролдлоо. <xliff:g id="NUMBER_1">%2$d</xliff:g> удаа дахин буруу оролдвол таблет үйлдвэрийн үндсэн утгаараа тохируулагдах ба хэрэглэгчийн дата бүхэлдээ устана."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="tv" msgid="9064457748587850217">"Та Android TV төхөөрөмжийнхөө түгжээг тайлахаар <xliff:g id="NUMBER_0">%1$d</xliff:g> удаа буруу оролдсон байна. <xliff:g id="NUMBER_1">%2$d</xliff:g> удаагийн амжилтгүй оролдлогын дараагаас таны Android TV төхөөрөмжийг үйлдвэрийн өгөгдмөл төлөвт шинэчлэх бөгөөд хэрэглэгчийн бүх өгөгдөл устах болно."</string>
@@ -1683,7 +1703,7 @@
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Товчлол асаалттай үед дууны түвшний хоёр товчлуурыг хамтад нь 3 секунд дарснаар хандалтын онцлогийг эхлүүлнэ."</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"Хандалтын онцлогуудын товчлолыг асаах уу?"</string>
     <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"Дууны түвшний түлхүүрийг хэдэн секундийн турш зэрэг дарснаар хандалтын онцлогууд асна. Энэ нь таны төхөөрөмжийн ажиллах зарчмыг өөрчилж болзошгүй.\n\nОдоогийн онцлогууд:\n<xliff:g id="SERVICE">%1$s</xliff:g>\nТа сонгосон онцлогуудыг Тохиргоо &gt; Хандалт хэсэгт өөрчлөх боломжтой."</string>
-    <string name="accessibility_shortcut_multiple_service_list" msgid="6935581470716541531">"	• <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
+    <string name="accessibility_shortcut_multiple_service_list" msgid="2128323171922023762">" • <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
     <string name="accessibility_shortcut_single_service_warning_title" msgid="1909518473488345266">"<xliff:g id="SERVICE">%1$s</xliff:g>-н товчлолыг асаах уу?"</string>
     <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"Дууны түвшний түлхүүрийг хэдэн секундийн турш зэрэг дарах нь хандалтын онцлог болох <xliff:g id="SERVICE">%1$s</xliff:g>-г асаадаг. Энэ нь таны төхөөрөмжийн ажиллах зарчмыг өөрчилж болзошгүй.\n\nТа Тохиргоо &gt; Хандалт хэсэгт энэ товчлолыг өөр онцлогт оноож өөрчлөх боломжтой."</string>
     <string name="accessibility_shortcut_on" msgid="5463618449556111344">"Асаах"</string>
@@ -1709,6 +1729,7 @@
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Товчлол ашиглах"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"Өнгө хувиргалт"</string>
     <string name="color_correction_feature_name" msgid="3655077237805422597">"Өнгөний засвар"</string>
+    <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"Нэг гарын горим"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"Хэт бүүдгэр"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Дууны түвшний түлхүүрийг удаан дарсан. <xliff:g id="SERVICE_NAME">%1$s</xliff:g>-г асаалаа."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Дууны түвшний түлхүүрийг удаан дарсан. <xliff:g id="SERVICE_NAME">%1$s</xliff:g>-г унтраалаа."</string>
@@ -1830,14 +1851,14 @@
     <string name="print_service_installed_title" msgid="6134880817336942482">"<xliff:g id="NAME">%s</xliff:g> үйлчилгээ суугдсан"</string>
     <string name="print_service_installed_message" msgid="7005672469916968131">"Идэвхжүүлэх бол товшино уу"</string>
     <string name="restr_pin_enter_admin_pin" msgid="1199419462726962697">"Админы ПИН-г оруулах"</string>
-    <string name="restr_pin_enter_pin" msgid="373139384161304555">"PIN оруулна уу"</string>
+    <string name="restr_pin_enter_pin" msgid="373139384161304555">"ПИН оруулна уу"</string>
     <string name="restr_pin_incorrect" msgid="3861383632940852496">"Буруу"</string>
-    <string name="restr_pin_enter_old_pin" msgid="7537079094090650967">"Одоогийн PIN"</string>
-    <string name="restr_pin_enter_new_pin" msgid="3267614461844565431">"Шинэ PIN"</string>
-    <string name="restr_pin_confirm_pin" msgid="7143161971614944989">"Шинэ PIN-г баталгаажуулах"</string>
-    <string name="restr_pin_create_pin" msgid="917067613896366033">"Өөрчлөлтийг хязгаарлахад зориулан PIN үүсгэх"</string>
-    <string name="restr_pin_error_doesnt_match" msgid="7063392698489280556">"PIN таарахгүй байна. Дахин оролдоно уу."</string>
-    <string name="restr_pin_error_too_short" msgid="1547007808237941065">"PIN хэт богино байна. Хамгийн багадаа 4 цифртэй байх ёстой."</string>
+    <string name="restr_pin_enter_old_pin" msgid="7537079094090650967">"Одоогийн ПИН"</string>
+    <string name="restr_pin_enter_new_pin" msgid="3267614461844565431">"Шинэ ПИН"</string>
+    <string name="restr_pin_confirm_pin" msgid="7143161971614944989">"Шинэ ПИН-г баталгаажуулах"</string>
+    <string name="restr_pin_create_pin" msgid="917067613896366033">"Өөрчлөлтийг хязгаарлахад зориулан ПИН үүсгэх"</string>
+    <string name="restr_pin_error_doesnt_match" msgid="7063392698489280556">"ПИН таарахгүй байна. Дахин оролдоно уу."</string>
+    <string name="restr_pin_error_too_short" msgid="1547007808237941065">"ПИН хэт богино байна. Хамгийн багадаа 4 цифртэй байх ёстой."</string>
     <plurals name="restr_pin_countdown" formatted="false" msgid="4427486903285216153">
       <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> секундын дараа дахин оролдоно уу</item>
       <item quantity="one">1 секундын дараа дахин оролдоно уу</item>
@@ -1857,15 +1878,15 @@
     <string name="managed_profile_label_badge" msgid="6762559569999499495">"Ажлын <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_2" msgid="5673187309555352550">"2 дахь ажил <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_3" msgid="6882151970556391957">"3 дахь ажил <xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <string name="lock_to_app_unlock_pin" msgid="3890940811866290782">"Бэхэлснийг болиулахаасаа өмнө PIN асуух"</string>
+    <string name="lock_to_app_unlock_pin" msgid="3890940811866290782">"Бэхэлснийг болиулахаасаа өмнө ПИН асуух"</string>
     <string name="lock_to_app_unlock_pattern" msgid="2694204070499712503">"Бэхэлснийг болиулахаас өмнө түгжээ тайлах хээ асуух"</string>
     <string name="lock_to_app_unlock_password" msgid="9126722403506560473">"Тогтоосныг суллахаас өмнө нууц үг асуух"</string>
     <string name="package_installed_device_owner" msgid="7035926868974878525">"Таны админ суулгасан"</string>
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Таны админ шинэчилсэн"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Таны админ устгасан"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"ОК"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="750683025714899363">"Батарей хэмнэгч нь Бараан загварыг асааж, дэвсгэрийн үйл ажиллагаа, зарим визуал эффект болон тодорхой онцлогуудийг хязгаарлаж эсвэл унтраана.\n\n"<annotation id="url">"Нэмэлт мэдээлэл авах"</annotation></string>
-    <string name="battery_saver_description" msgid="5693741424234005958">"Батарей хэмнэгч нь Бараан загварыг асааж, дэвсгэрийн үйл ажиллагаа, зарим визуал эффект болон тодорхой онцлогуудийг хязгаарлаж эсвэл унтраана."</string>
+    <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"Батарей хэмнэгч нь Бараан загварыг асааж, дэвсгэрийн үйл ажиллагаа, зарим визуал эффект, тодорхой онцлогууд болон зарим сүлжээний холболтыг хязгаарлах эсвэл унтраана."</string>
+    <string name="battery_saver_description" msgid="8518809702138617167">"Батарей хэмнэгч нь Бараан загварыг асааж, дэвсгэрийн үйл ажиллагаа, зарим визуал эффект, тодорхой онцлогууд болон зарим сүлжээний холболтыг хязгаарлах эсвэл унтраана."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Дата ашиглалтыг багасгахын тулд дата хэмнэгч нь ар талд ажиллаж буй зарим апп-н өгөгдлийг илгээх болон авахаас сэргийлдэг. Таны одоогийн ашиглаж буй апп нь өгөгдөлд хандах боломжтой хэдий ч тогтмол хандахгүй. Энэ нь жишээлбэл зургийг товших хүртэл харагдахгүй гэсэн үг юм."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Дата хэмнэгчийг асаах уу?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Асаах"</string>
@@ -1968,8 +1989,8 @@
     <string name="app_suspended_default_message" msgid="6451215678552004172">"<xliff:g id="APP_NAME_0">%1$s</xliff:g> одоогоор боломжгүй байна. Үүнийг <xliff:g id="APP_NAME_1">%2$s</xliff:g>-р удирддаг."</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"Дэлгэрэнгүй үзэх"</string>
     <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"Аппыг түр зогсоохоо болих"</string>
-    <string name="work_mode_off_title" msgid="5503291976647976560">"Ажлын профайлыг асаах уу?"</string>
-    <string name="work_mode_off_message" msgid="8417484421098563803">"Таны ажлын апп, мэдэгдэл, өгөгдөл болон бусад ажлын профайлын онцлогийг асаана"</string>
+    <string name="work_mode_off_title" msgid="961171256005852058">"Ажлын аппуудыг асаах уу?"</string>
+    <string name="work_mode_off_message" msgid="7319580997683623309">"Ажлын аппууд болон мэдэгдлүүддээ хандах эрх аваарай"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"Асаах"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"Апп боломжгүй байна"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> яг одоо боломжгүй байна."</string>
@@ -1982,7 +2003,7 @@
     <string name="profile_encrypted_message" msgid="1128512616293157802">"Ажлын профайлын түгжээг тайлахын тулд дарна уу"</string>
     <string name="usb_mtp_launch_notification_title" msgid="774319638256707227">"<xliff:g id="PRODUCT_NAME">%1$s</xliff:g>-д холбогдсон"</string>
     <string name="usb_mtp_launch_notification_description" msgid="6942535713629852684">"Файлыг үзэхийн тулд дарна уу"</string>
-    <string name="pin_target" msgid="8036028973110156895">"PIN"</string>
+    <string name="pin_target" msgid="8036028973110156895">"ПИН"</string>
     <string name="pin_specific_target" msgid="7824671240625957415">"<xliff:g id="LABEL">%1$s</xliff:g>-г бэхлэх"</string>
     <string name="unpin_target" msgid="3963318576590204447">"Unpin"</string>
     <string name="unpin_specific_target" msgid="3859828252160908146">"<xliff:g id="LABEL">%1$s</xliff:g>-г тогтоосныг болиулах"</string>
@@ -2085,17 +2106,12 @@
     <string name="notification_feedback_indicator_silenced" msgid="3799442124723177262">"Энэ мэдэгдлийг Чимээгүй болгож зэргийг нь бууруулсан байна. Санал хүсэлт өгөхийн тулд товшино уу."</string>
     <string name="notification_feedback_indicator_promoted" msgid="9030204303764698640">"Энэ мэдэгдлийг дээгүүр зэрэглэсэн байна. Санал хүсэлт өгөхийн тулд товшино уу."</string>
     <string name="notification_feedback_indicator_demoted" msgid="8880309924296450875">"Энэ мэдэгдлийг доогуур зэрэглэсэн байна. Санал хүсэлт өгөхийн тулд товшино уу."</string>
-    <!-- no translation found for nas_upgrade_notification_title (8436359459300146555) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_content (5157550369837103337) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_enable_action (3046406808378726874) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_disable_action (3794833210043497982) -->
-    <skip />
+    <string name="nas_upgrade_notification_title" msgid="8436359459300146555">"Сайжруулсан мэдэгдэл"</string>
+    <string name="nas_upgrade_notification_content" msgid="5157550369837103337">"Санал болгосон үйлдэл, хариултыг одоо сайржуулсан мэдэгдлээр олгоно. Android-н Орчинтой тохирсон мэдэгдлийг цаашид дэмжихээ больсон."</string>
+    <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"OK"</string>
+    <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"Унтраах"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"Нэмэлт мэдээлэл авах"</string>
-    <!-- no translation found for nas_upgrade_notification_learn_more_content (2353549817159426430) -->
-    <skip />
+    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"Сайжруулсан мэдэгдэл нь Android 12 дахь Android-н Орчинтой тохирсон мэдэгдлийг орлосон. Энэ онцлог нь санал болгосон үйлдлүүд болон хариунуудыг харуулж, таны мэдэгдлийг цэгцэлнэ.\n\nСайжруулсан мэдэгдэл нь харилцагчийн нэр, мессеж зэрэг хувийн мэдээллийг оруулаад мэдэгдлийн контентод хандах боломжтой. Энэ онцлог мөн утасны дуудлагад хариулах болон Бүү саад бол горимыг хянах зэргээр мэдэгдлийг хаах эсвэл түүнд хариулах боломжтой."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Хэвшлийн горимын мэдээллийн мэдэгдэл"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Батарей ихэвчлэн цэнэглэдэг хугацаанаас өмнө дуусаж болзошгүй"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Батарейн ажиллах хугацааг уртасгахын тулд Батарей хэмнэгчийг идэвхжүүллээ"</string>
@@ -2292,4 +2308,6 @@
     <string name="splash_screen_view_branding_description" msgid="7911129347402728216">"Аппын брэнд зураг"</string>
     <string name="view_and_control_notification_title" msgid="4300765399209912240">"Хандалтын тохиргоог шалгана уу"</string>
     <string name="view_and_control_notification_content" msgid="8003766498562604034">"<xliff:g id="SERVICE_NAME">%s</xliff:g> таны дэлгэцийг харах болон хянах боломжтой. Хянахын тулд товшино уу."</string>
+    <string name="ui_translation_accessibility_translated_text" msgid="3197547218178944544">"<xliff:g id="MESSAGE">%1$s</xliff:g> Орчуулсан."</string>
+    <string name="ui_translation_accessibility_translation_finished" msgid="3057830947610088465">"Мессежийг <xliff:g id="FROM_LANGUAGE">%1$s</xliff:g>-с <xliff:g id="TO_LANGUAGE">%2$s</xliff:g> руу орчуулсан."</string>
 </resources>

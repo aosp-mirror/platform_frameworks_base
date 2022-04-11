@@ -20,6 +20,7 @@
     <string name="pip_phone_close" msgid="5783752637260411309">"बंद करा"</string>
     <string name="pip_phone_expand" msgid="2579292903468287504">"विस्तृत करा"</string>
     <string name="pip_phone_settings" msgid="5468987116750491918">"सेटिंग्ज"</string>
+    <string name="pip_phone_enter_split" msgid="7042877263880641911">"स्प्लिट स्क्रीन एंटर करा"</string>
     <string name="pip_menu_title" msgid="5393619322111827096">"मेनू"</string>
     <string name="pip_notification_title" msgid="1347104727641353453">"<xliff:g id="NAME">%s</xliff:g> चित्रामध्ये चित्र मध्ये आहे"</string>
     <string name="pip_notification_message" msgid="8854051911700302620">"<xliff:g id="NAME">%s</xliff:g>ने हे वैशिष्ट्य वापरू नये असे तुम्हाला वाटत असल्यास, सेटिंग्ज उघडण्यासाठी टॅप करा आणि ते बंद करा."</string>
@@ -28,6 +29,8 @@
     <string name="pip_skip_to_next" msgid="8403429188794867653">"डावलून पुढे जा"</string>
     <string name="pip_skip_to_prev" msgid="7172158111196394092">"डावलून मागे जा"</string>
     <string name="accessibility_action_pip_resize" msgid="4623966104749543182">"आकार बदला"</string>
+    <string name="accessibility_action_pip_stash" msgid="4060775037619702641">"स्टॅश करा"</string>
+    <string name="accessibility_action_pip_unstash" msgid="7467499339610437646">"अनस्टॅश करा"</string>
     <string name="dock_forced_resizable" msgid="1749750436092293116">"अ‍ॅप कदाचित स्प्लिट स्क्रीनसह काम करू शकत नाही."</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="7408396418008948957">"अ‍ॅप स्क्रीन-विभाजनास समर्थन देत नाही."</string>
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"दुसऱ्या डिस्प्लेवर अ‍ॅप कदाचित चालणार नाही."</string>
@@ -70,5 +73,4 @@
     <string name="manage_bubbles_text" msgid="7730624269650594419">"व्यवस्थापित करा"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"बबल डिसमिस केला."</string>
     <string name="restart_button_description" msgid="5887656107651190519">"हे अ‍ॅप रीस्टार्ट करण्यासाठी आणि फुल स्क्रीन करण्यासाठी टॅप करा."</string>
-    <string name="got_it" msgid="4428750913636945527">"समजले"</string>
 </resources>

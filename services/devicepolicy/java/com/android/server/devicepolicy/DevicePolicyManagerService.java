@@ -1497,23 +1497,6 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             return StorageManager.isFileEncryptedNativeOnly();
         }
 
-        boolean storageManagerIsNonDefaultBlockEncrypted() {
-            final long identity = Binder.clearCallingIdentity();
-            try {
-                return StorageManager.isNonDefaultBlockEncrypted();
-            } finally {
-                Binder.restoreCallingIdentity(identity);
-            }
-        }
-
-        boolean storageManagerIsEncrypted() {
-            return StorageManager.isEncrypted();
-        }
-
-        boolean storageManagerIsEncryptable() {
-            return StorageManager.isEncryptable();
-        }
-
         Looper getMyLooper() {
             return Looper.myLooper();
         }
@@ -2295,11 +2278,6 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
 
     private void setDeviceOwnershipSystemPropertyLocked() {
-        // Still at the first stage of CryptKeeper double bounce, nothing can be learnt about
-        // the real system at this point.
-        if (StorageManager.inCryptKeeperBounce()) {
-            return;
-        }
         final boolean deviceProvisioned =
                 mInjector.settingsGlobalGetInt(Settings.Global.DEVICE_PROVISIONED, 0) != 0;
         final boolean hasDeviceOwner = mOwners.hasDeviceOwner();
@@ -7678,21 +7656,12 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     /**
      * Hook to low-levels:  Reporting the current status of encryption.
-     * @return A value such as {@link DevicePolicyManager#ENCRYPTION_STATUS_UNSUPPORTED},
-     * {@link DevicePolicyManager#ENCRYPTION_STATUS_INACTIVE},
-     * {@link DevicePolicyManager#ENCRYPTION_STATUS_ACTIVE_DEFAULT_KEY},
-     * {@link DevicePolicyManager#ENCRYPTION_STATUS_ACTIVE_PER_USER}, or
-     * {@link DevicePolicyManager#ENCRYPTION_STATUS_ACTIVE}.
+     * @return Either {@link DevicePolicyManager#ENCRYPTION_STATUS_UNSUPPORTED}
+     * or {@link DevicePolicyManager#ENCRYPTION_STATUS_ACTIVE_PER_USER}.
      */
     private int getEncryptionStatus() {
         if (mInjector.storageManagerIsFileBasedEncryptionEnabled()) {
             return DevicePolicyManager.ENCRYPTION_STATUS_ACTIVE_PER_USER;
-        } else if (mInjector.storageManagerIsNonDefaultBlockEncrypted()) {
-            return DevicePolicyManager.ENCRYPTION_STATUS_ACTIVE;
-        } else if (mInjector.storageManagerIsEncrypted()) {
-            return DevicePolicyManager.ENCRYPTION_STATUS_ACTIVE_DEFAULT_KEY;
-        } else if (mInjector.storageManagerIsEncryptable()) {
-            return DevicePolicyManager.ENCRYPTION_STATUS_INACTIVE;
         } else {
             return DevicePolicyManager.ENCRYPTION_STATUS_UNSUPPORTED;
         }

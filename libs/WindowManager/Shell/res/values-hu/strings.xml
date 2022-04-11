@@ -20,6 +20,7 @@
     <string name="pip_phone_close" msgid="5783752637260411309">"Bezárás"</string>
     <string name="pip_phone_expand" msgid="2579292903468287504">"Kibontás"</string>
     <string name="pip_phone_settings" msgid="5468987116750491918">"Beállítások"</string>
+    <string name="pip_phone_enter_split" msgid="7042877263880641911">"Váltás osztott képernyőre"</string>
     <string name="pip_menu_title" msgid="5393619322111827096">"Menü"</string>
     <string name="pip_notification_title" msgid="1347104727641353453">"A(z) <xliff:g id="NAME">%s</xliff:g> kép a képben funkciót használ"</string>
     <string name="pip_notification_message" msgid="8854051911700302620">"Ha nem szeretné, hogy a(z) <xliff:g id="NAME">%s</xliff:g> használja ezt a funkciót, koppintson a beállítások megnyitásához, és kapcsolja ki."</string>
@@ -28,6 +29,8 @@
     <string name="pip_skip_to_next" msgid="8403429188794867653">"Ugrás a következőre"</string>
     <string name="pip_skip_to_prev" msgid="7172158111196394092">"Ugrás az előzőre"</string>
     <string name="accessibility_action_pip_resize" msgid="4623966104749543182">"Átméretezés"</string>
+    <string name="accessibility_action_pip_stash" msgid="4060775037619702641">"Félretevés"</string>
+    <string name="accessibility_action_pip_unstash" msgid="7467499339610437646">"Félretevés megszüntetése"</string>
     <string name="dock_forced_resizable" msgid="1749750436092293116">"Lehet, hogy az alkalmazás nem működik osztott képernyős nézetben."</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="7408396418008948957">"Az alkalmazás nem támogatja az osztott képernyős nézetet."</string>
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"Előfordulhat, hogy az alkalmazás nem működik másodlagos kijelzőn."</string>
@@ -70,5 +73,4 @@
     <string name="manage_bubbles_text" msgid="7730624269650594419">"Kezelés"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"Buborék elvetve."</string>
     <string name="restart_button_description" msgid="5887656107651190519">"Koppintson az alkalmazás újraindításához és a teljes képernyős mód elindításához."</string>
-    <string name="got_it" msgid="4428750913636945527">"Rendben"</string>
 </resources>

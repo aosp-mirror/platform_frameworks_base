@@ -20,6 +20,7 @@
     <string name="pip_phone_close" msgid="5783752637260411309">"बंद करें"</string>
     <string name="pip_phone_expand" msgid="2579292903468287504">"विस्तार करें"</string>
     <string name="pip_phone_settings" msgid="5468987116750491918">"सेटिंग"</string>
+    <string name="pip_phone_enter_split" msgid="7042877263880641911">"स्प्लिट स्क्रीन मोड में जाएं"</string>
     <string name="pip_menu_title" msgid="5393619322111827096">"मेन्यू"</string>
     <string name="pip_notification_title" msgid="1347104727641353453">"<xliff:g id="NAME">%s</xliff:g> \"पिक्चर में पिक्चर\" के अंदर है"</string>
     <string name="pip_notification_message" msgid="8854051911700302620">"अगर आप नहीं चाहते कि <xliff:g id="NAME">%s</xliff:g> इस सुविधा का उपयोग करे, तो सेटिंग खोलने के लिए टैप करें और उसे बंद करें ."</string>
@@ -28,6 +29,8 @@
     <string name="pip_skip_to_next" msgid="8403429188794867653">"अगले पर जाएं"</string>
     <string name="pip_skip_to_prev" msgid="7172158111196394092">"पिछले पर जाएं"</string>
     <string name="accessibility_action_pip_resize" msgid="4623966104749543182">"आकार बदलें"</string>
+    <string name="accessibility_action_pip_stash" msgid="4060775037619702641">"छिपाएं"</string>
+    <string name="accessibility_action_pip_unstash" msgid="7467499339610437646">"दिखाएं"</string>
     <string name="dock_forced_resizable" msgid="1749750436092293116">"ऐप्लिकेशन शायद स्प्लिट स्क्रीन मोड में काम न करे."</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="7408396418008948957">"ऐप विभाजित स्‍क्रीन का समर्थन नहीं करता है."</string>
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"हो सकता है कि ऐप प्राइमरी (मुख्य) डिस्प्ले के अलावा बाकी दूसरे डिस्प्ले पर काम न करे."</string>
@@ -70,5 +73,4 @@
     <string name="manage_bubbles_text" msgid="7730624269650594419">"मैनेज करें"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"बबल खारिज किया गया."</string>
     <string name="restart_button_description" msgid="5887656107651190519">"इस ऐप्लिकेशन को रीस्टार्ट करने और फ़ुल स्क्रीन पर देखने के लिए टैप करें."</string>
-    <string name="got_it" msgid="4428750913636945527">"ठीक है"</string>
 </resources>

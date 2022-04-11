@@ -327,6 +327,9 @@ public class TelephonyManager {
      */
     public static final int DEFAULT_PORT_INDEX = 0;
 
+    /** @hide */
+    public static final int INVALID_PORT_INDEX = -1;
+
     private final Context mContext;
     private final int mSubId;
     @UnsupportedAppUsage
@@ -11484,7 +11487,25 @@ public class TelephonyManager {
         if (SubscriptionManager.isValidPhoneId(phoneId)) {
             List<String> newList = updateTelephonyProperty(
                     TelephonyProperties.operator_alpha(), phoneId, name);
-            TelephonyProperties.operator_alpha(newList);
+            try {
+                TelephonyProperties.operator_alpha(newList);
+            } catch (IllegalArgumentException e) { //property value is longer than the byte limit
+                Log.e(TAG, "setNetworkOperatorNameForPhone: ", e);
+
+                int numberOfEntries = newList.size();
+                int maxOperatorLength = //save 1 byte for joiner " , "
+                        (SystemProperties.PROP_VALUE_MAX - numberOfEntries) / numberOfEntries;
+
+                //examine and truncate every operator and retry
+                for (int i = 0; i < newList.size(); i++) {
+                    if (newList.get(i) != null) {
+                        newList.set(i, TextUtils
+                                .truncateStringForUtf8Storage(newList.get(i), maxOperatorLength));
+                    }
+                }
+                TelephonyProperties.operator_alpha(newList);
+                Log.e(TAG, "successfully truncated operator_alpha: " + newList);
+            }
         }
     }
 
@@ -16426,32 +16447,6 @@ public class TelephonyManager {
     }
 
     /**
-     * Callback to listen for when the set of packages with carrier privileges for a SIM changes.
-     *
-     * @hide
-     * @deprecated Use {@link CarrierPrivilegesCallback} instead. This API will be removed soon
-     * prior to API finalization.
-     */
-    @Deprecated
-    @SystemApi
-    public interface CarrierPrivilegesListener {
-        /**
-         * Called when the set of packages with carrier privileges has changed.
-         *
-         * <p>Of note, this callback will <b>not</b> be fired if a carrier triggers a SIM profile
-         * switch and the same set of packages remains privileged after the switch.
-         *
-         * <p>At registration, the callback will receive the current set of privileged packages.
-         *
-         * @param privilegedPackageNames The updated set of package names that have carrier
-         *     privileges
-         * @param privilegedUids The updated set of UIDs that have carrier privileges
-         */
-        void onCarrierPrivilegesChanged(
-                @NonNull List<String> privilegedPackageNames, @NonNull int[] privilegedUids);
-    }
-
-    /**
      * Callbacks to listen for when the set of packages with carrier privileges for a SIM changes.
      *
      * <p>Of note, when multiple callbacks are registered, they may be triggered one after another.
@@ -16497,61 +16492,6 @@ public class TelephonyManager {
                 @Nullable String carrierServicePackageName, int carrierServiceUid) {
             // do nothing by default
         }
-    }
-
-    /**
-     * Registers a {@link CarrierPrivilegesListener} on the given {@code logicalSlotIndex} to
-     * receive callbacks when the set of packages with carrier privileges changes. The callback will
-     * immediately be called with the latest state.
-     *
-     * @param logicalSlotIndex The SIM slot to listen on
-     * @param executor The executor where {@code listener} will be invoked
-     * @param listener The callback to register
-     * @hide
-     * @deprecated Use {@link #registerCarrierPrivilegesCallback} instead. This API will be
-     * removed prior to API finalization.
-     */
-    @Deprecated
-    @SystemApi
-    @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
-    public void addCarrierPrivilegesListener(
-            int logicalSlotIndex,
-            @NonNull @CallbackExecutor Executor executor,
-            @NonNull CarrierPrivilegesListener listener) {
-        if (mContext == null) {
-            throw new IllegalStateException("Telephony service is null");
-        } else if (executor == null || listener == null) {
-            throw new IllegalArgumentException(
-                    "CarrierPrivilegesListener and executor must be non-null");
-        }
-        mTelephonyRegistryMgr = mContext.getSystemService(TelephonyRegistryManager.class);
-        if (mTelephonyRegistryMgr == null) {
-            throw new IllegalStateException("Telephony registry service is null");
-        }
-        mTelephonyRegistryMgr.addCarrierPrivilegesListener(logicalSlotIndex, executor, listener);
-    }
-
-    /**
-     * Unregisters an existing {@link CarrierPrivilegesListener}.
-     *
-     * @hide
-     * @deprecated Use {@link #unregisterCarrierPrivilegesCallback} instead. This API will be
-     * removed prior to API finalization.
-     */
-    @Deprecated
-    @SystemApi
-    @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
-    public void removeCarrierPrivilegesListener(@NonNull CarrierPrivilegesListener listener) {
-        if (mContext == null) {
-            throw new IllegalStateException("Telephony service is null");
-        } else if (listener == null) {
-            throw new IllegalArgumentException("CarrierPrivilegesListener must be non-null");
-        }
-        mTelephonyRegistryMgr = mContext.getSystemService(TelephonyRegistryManager.class);
-        if (mTelephonyRegistryMgr == null) {
-            throw new IllegalStateException("Telephony registry service is null");
-        }
-        mTelephonyRegistryMgr.removeCarrierPrivilegesListener(listener);
     }
 
     /**

@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+  ~ Copyright (C) 2021 The Android Open Source Project
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~      http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+   -->
+
+<!--  This resources set the default subtitle for tiles. This way, each tile can be translated
+     separately.
+     The indices in the array correspond to the state values in QSTile:
+      * STATE_UNAVAILABLE
+      * STATE_INACTIVE
+      * STATE_ACTIVE
+     This subtitle is shown when the tile is in that particular state but does not set its own
+     subtitle, so some of these may never appear on screen. They should still be translated as if
+     they could appear.
+ -->
+
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <!-- no translation found for tile_states_default:0 (4578901299524323311) -->
+    <!-- no translation found for tile_states_default:1 (7086813178962737808) -->
+    <!-- no translation found for tile_states_default:2 (9192445505551219506) -->
+  <string-array name="tile_states_internet">
+    <item msgid="5499482407653291407">"Μη διαθέσιμο"</item>
+    <item msgid="3048856902433862868">"Ανενεργό"</item>
+    <item msgid="6877982264300789870">"Ενεργό"</item>
+  </string-array>
+  <string-array name="tile_states_wifi">
+    <item msgid="8054147400538405410">"Μη διαθέσιμο"</item>
+    <item msgid="4293012229142257455">"Ανενεργό"</item>
+    <item msgid="6221288736127914861">"Ενεργό"</item>
+  </string-array>
+  <string-array name="tile_states_cell">
+    <item msgid="1235899788959500719">"Μη διαθέσιμο"</item>
+    <item msgid="2074416252859094119">"Ανενεργό"</item>
+    <item msgid="287997784730044767">"Ενεργό"</item>
+  </string-array>
+  <string-array name="tile_states_battery">
+    <item msgid="6311253873330062961">"Μη διαθέσιμο"</item>
+    <item msgid="7838121007534579872">"Ανενεργό"</item>
+    <item msgid="1578872232501319194">"Ενεργό"</item>
+  </string-array>
+  <string-array name="tile_states_dnd">
+    <item msgid="467587075903158357">"Μη διαθέσιμο"</item>
+    <item msgid="5376619709702103243">"Ανενεργό"</item>
+    <item msgid="4875147066469902392">"Ενεργό"</item>
+  </string-array>
+  <string-array name="tile_states_flashlight">
+    <item msgid="3465257127433353857">"Μη διαθέσιμο"</item>
+    <item msgid="5044688398303285224">"Ανενεργό"</item>
+    <item msgid="8527389108867454098">"Ενεργό"</item>
+  </string-array>
+  <string-array name="tile_states_rotation">
+    <item msgid="4578491772376121579">"Μη διαθέσιμο"</item>
+    <item msgid="5776427577477729185">"Ανενεργό"</item>
+    <item msgid="7105052717007227415">"Ενεργό"</item>
+  </string-array>
+  <string-array name="tile_states_bt">
+    <item msgid="5330252067413512277">"Μη διαθέσιμο"</item>
+    <item msgid="5315121904534729843">"Ανενεργό"</item>
+    <item msgid="503679232285959074">"Ενεργό"</item>
+  </string-array>
+  <string-array name="tile_states_airplane">
+    <item msgid="1985366811411407764">"Μη διαθέσιμο"</item>
+    <item msgid="4801037224991420996">"Ανενεργό"</item>
+    <item msgid="1982293347302546665">"Ενεργό"</item>
+  </string-array>
+  <string-array name="tile_states_location">
+    <item msgid="3316542218706374405">"Μη διαθέσιμο"</item>
+    <item msgid="4813655083852587017">"Ανενεργό"</item>
+    <item msgid="6744077414775180687">"Ενεργό"</item>
+  </string-array>
+  <string-array name="tile_states_hotspot">
+    <item msgid="3145597331197351214">"Μη διαθέσιμο"</item>
+    <item msgid="5715725170633593906">"Ανενεργό"</item>
+    <item msgid="2075645297847971154">"Ενεργό"</item>
+  </string-array>
+  <string-array name="tile_states_inversion">
+    <item msgid="3638187931191394628">"Μη διαθέσιμο"</item>
+    <item msgid="9103697205127645916">"Ανενεργό"</item>
+    <item msgid="8067744885820618230">"Ενεργό"</item>
+  </string-array>
+  <string-array name="tile_states_saver">
+    <item msgid="39714521631367660">"Μη διαθέσιμο"</item>
+    <item msgid="6983679487661600728">"Ανενεργό"</item>
+    <item msgid="7520663805910678476">"Ενεργό"</item>
+  </string-array>
+  <string-array name="tile_states_dark">
+    <item msgid="2762596907080603047">"Μη διαθέσιμο"</item>
+    <item msgid="400477985171353">"Ανενεργό"</item>
+    <item msgid="630890598801118771">"Ενεργό"</item>
+  </string-array>
+  <string-array name="tile_states_work">
+    <item msgid="389523503690414094">"Μη διαθέσιμο"</item>
+    <item msgid="8045580926543311193">"Ανενεργό"</item>
+    <item msgid="4913460972266982499">"Ενεργό"</item>
+  </string-array>
+  <string-array name="tile_states_cast">
+    <item msgid="6032026038702435350">"Μη διαθέσιμο"</item>
+    <item msgid="1488620600954313499">"Ανενεργό"</item>
+    <item msgid="588467578853244035">"Ενεργό"</item>
+  </string-array>
+  <string-array name="tile_states_night">
+    <item msgid="7857498964264855466">"Μη διαθέσιμο"</item>
+    <item msgid="2744885441164350155">"Ανενεργό"</item>
+    <item msgid="151121227514952197">"Ενεργό"</item>
+  </string-array>
+  <string-array name="tile_states_screenrecord">
+    <item msgid="1085836626613341403">"Μη διαθέσιμο"</item>
+    <item msgid="8259411607272330225">"Ανενεργό"</item>
+    <item msgid="578444932039713369">"Ενεργό"</item>
+  </string-array>
+  <string-array name="tile_states_reverse">
+    <item msgid="3574611556622963971">"Μη διαθέσιμο"</item>
+    <item msgid="8707481475312432575">"Ανενεργό"</item>
+    <item msgid="8031106212477483874">"Ενεργό"</item>
+  </string-array>
+  <string-array name="tile_states_reduce_brightness">
+    <item msgid="1839836132729571766">"Μη διαθέσιμο"</item>
+    <item msgid="4572245614982283078">"Ανενεργό"</item>
+    <item msgid="6536448410252185664">"Ενεργό"</item>
+  </string-array>
+  <string-array name="tile_states_cameratoggle">
+    <item msgid="6680671247180519913">"Μη διαθέσιμο"</item>
+    <item msgid="4765607635752003190">"Ανενεργό"</item>
+    <item msgid="1697460731949649844">"Ενεργό"</item>
+  </string-array>
+  <string-array name="tile_states_mictoggle">
+    <item msgid="6895831614067195493">"Μη διαθέσιμο"</item>
+    <item msgid="3296179158646568218">"Ανενεργό"</item>
+    <item msgid="8998632451221157987">"Ενεργό"</item>
+  </string-array>
+  <string-array name="tile_states_controls">
+    <item msgid="8199009425335668294">"Μη διαθέσιμο"</item>
+    <item msgid="4544919905196727508">"Ανενεργό"</item>
+    <item msgid="3422023746567004609">"Ενεργό"</item>
+  </string-array>
+  <string-array name="tile_states_wallet">
+    <item msgid="4177615438710836341">"Μη διαθέσιμο"</item>
+    <item msgid="7571394439974244289">"Ανενεργό"</item>
+    <item msgid="6866424167599381915">"Ενεργό"</item>
+  </string-array>
+  <string-array name="tile_states_alarm">
+    <item msgid="4936533380177298776">"Μη διαθέσιμο"</item>
+    <item msgid="2710157085538036590">"Ανενεργό"</item>
+    <item msgid="7809470840976856149">"Ενεργό"</item>
+  </string-array>
+</resources>
