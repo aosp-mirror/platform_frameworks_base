@@ -148,8 +148,8 @@ import java.util.function.Consumer;
  * <p><b>Note: </b>on
  * {@link android.content.pm.PackageManager#FEATURE_AUTOMOTIVE automotive builds}, some methods can
  * throw an {@link UnsafeStateException} exception (for example, if the vehicle is moving), so
- * callers running on automotive builds should wrap every method call under the methods provided by
- * {@code android.car.admin.CarDevicePolicyManager}.
+ * callers running on automotive builds should always check for that exception, otherwise they
+ * might crash.
  *
  * <div class="special reference">
  * <h3>Developer Guides</h3>
