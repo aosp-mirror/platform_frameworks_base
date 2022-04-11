@@ -207,10 +207,10 @@
     <string name="factory_reset_warning" msgid="6858705527798047809">"तपाईंको यन्त्र मेटिनेछ"</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"प्रशासकको एप प्रयोग गर्न मिल्दैन। तपाईंको डिभाइसको डेटा अब मेटाइने छ।\n\nतपाईंसँग प्रश्नहरू भएका खण्डमा आफ्नो संगठनका प्रशासकसँग सम्पर्क गर्नुहोस्।"</string>
     <string name="printing_disabled_by" msgid="3517499806528864633">"<xliff:g id="OWNER_APP">%s</xliff:g> ले छाप्ने कार्यलाई असक्षम पार्यो।"</string>
-    <string name="personal_apps_suspension_title" msgid="7561416677884286600">"आफ्नो कार्य प्रोफाइल सक्रिय गर्नुहोस्"</string>
+    <string name="personal_apps_suspension_title" msgid="7561416677884286600">"आफ्नो कार्य प्रोफाइल अन गर्नुहोस्"</string>
     <string name="personal_apps_suspension_text" msgid="6115455688932935597">"तपाईंले आफ्नो कार्य प्रोफाइल सक्रिय नगरुन्जेल तपाईंका व्यक्तिगत एपहरूलाई रोक लगाइन्छ"</string>
     <string name="personal_apps_suspension_soon_text" msgid="8123898693479590">"मिति <xliff:g id="DATE">%1$s</xliff:g> <xliff:g id="TIME">%2$s</xliff:g> बजे व्यक्तिगत एपहरूलाई रोक लगाइने छ। तपाईंका IT एडमिन तपाईंलाई आफ्नो कार्य प्रोफाइल <xliff:g id="NUMBER">%3$d</xliff:g> भन्दा धेरै दिन निष्क्रिय राख्ने अनुमति दिनुहुन्न।"</string>
-    <string name="personal_apps_suspended_turn_profile_on" msgid="2758012869627513689">"सक्रिय गर्नुहोस्"</string>
+    <string name="personal_apps_suspended_turn_profile_on" msgid="2758012869627513689">"अन गर्नुहोस्"</string>
     <string name="me" msgid="6207584824693813140">"मलाई"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"ट्याब्लेट विकल्पहरू"</string>
     <string name="power_dialog" product="tv" msgid="7792839006640933763">"Android टिभी सम्बन्धी विकल्पहरू"</string>
@@ -1344,7 +1344,7 @@
     <string name="sim_added_title" msgid="7930779986759414595">"SIM कार्ड थप गरियो"</string>
     <string name="sim_added_message" msgid="6602906609509958680">"मोबाइल नेटवर्क पहुँच गर्न तपाईँको उपकरण पुनःस्टार्ट गर्नुहोस्।"</string>
     <string name="sim_restart_button" msgid="8481803851341190038">"पुनः सुरु गर्नुहोस्"</string>
-    <string name="install_carrier_app_notification_title" msgid="5712723402213090102">"मोबाइल सेवा सक्रिय गर्नुहोस्"</string>
+    <string name="install_carrier_app_notification_title" msgid="5712723402213090102">"मोबाइल सेवा अन गर्नुहोस्"</string>
     <string name="install_carrier_app_notification_text" msgid="2781317581274192728">"आफ्नो नयाँ SIM सक्रिय गर्न सेवा प्रदायकको एप डाउनलोड गर्नुहोस्"</string>
     <string name="install_carrier_app_notification_text_app_name" msgid="4086877327264106484">"आफ्नो नयाँ SIM सक्रिय गर्न <xliff:g id="APP_NAME">%1$s</xliff:g> एप डाउनलोड गर्नुहोस्"</string>
     <string name="install_carrier_app_notification_button" msgid="6257740533102594290">"एप डाउनलोड गर्नुहोस्"</string>
@@ -1630,7 +1630,7 @@
     <string name="media_route_button_content_description" msgid="2299223698196869956">"कास्ट"</string>
     <string name="media_route_chooser_title" msgid="6646594924991269208">"उपकरणमा कनेक्ट गर्नुहोस्"</string>
     <string name="media_route_chooser_title_for_remote_display" msgid="3105906508794326446">"स्क्रिन डिभाइसमा कास्ट गर्नुहोस्"</string>
-    <string name="media_route_chooser_searching" msgid="6119673534251329535">"उपकरणको खोजी गरिँदै..."</string>
+    <string name="media_route_chooser_searching" msgid="6119673534251329535">"डिभाइस खोजिँदै छ..."</string>
     <string name="media_route_chooser_extended_settings" msgid="2506352159381327741">"सेटिंङहरू"</string>
     <string name="media_route_controller_disconnect" msgid="7362617572732576959">"डिस्कनेक्ट गर्नुहोस्"</string>
     <string name="media_route_status_scanning" msgid="8045156315309594482">"स्क्यान गर्दै ..."</string>
@@ -1715,7 +1715,7 @@
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"सम्पन्न भयो"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"सर्टकटलाई निष्क्रिय पार्नुहोस्"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"सर्टकट प्रयोग गर्नुहोस्"</string>
-    <string name="color_inversion_feature_name" msgid="326050048927789012">"रङ्ग उल्टाउने सुविधा"</string>
+    <string name="color_inversion_feature_name" msgid="326050048927789012">"कलर इन्भर्सन"</string>
     <string name="color_correction_feature_name" msgid="3655077237805422597">"रङ्ग सच्याउने सुविधा"</string>
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"एक हाते मोड"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"अझै मधुरो"</string>
@@ -1877,7 +1877,7 @@
     <string name="battery_saver_description" msgid="8518809702138617167">"ब्याट्री सेभरले अँध्यारो थिम अन गर्छ र ब्याकग्राउन्डमा हुने क्रियाकलाप, केही भिजुअल इफेक्ट, निश्चित सुविधा र केही नेटवर्क कनेक्सनहरू अफ गर्छ वा सीमित रूपमा मात्र चल्न दिन्छ।"</string>
     <string name="data_saver_description" msgid="4995164271550590517">"डेटा सेभरले डेटा खपत कम गर्न केही एपहरूलाई ब्याकग्राउन्डमा डेटा पठाउन वा प्राप्त गर्न दिँदैन। तपाईंले अहिले प्रयोग गरिरहनुभएको एपले सीमित रूपमा मात्र डेटा चलाउन पाउँछ। उदाहरणका लागि, तपाईंले फोटोमा ट्याप गर्नुभयो भने मात्र फोटो देखिन्छ नत्र देखिँदैन।"</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"डेटा सेभर अन गर्ने हो?"</string>
-    <string name="data_saver_enable_button" msgid="4399405762586419726">"सक्रिय गर्नुहोस्"</string>
+    <string name="data_saver_enable_button" msgid="4399405762586419726">"अन गर्नुहोस्"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="2877101784123058273">
       <item quantity="other"> %1$d मिनेटको लागि (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> सम्म)</item>
       <item quantity="one">एक मिनेटको लागि (<xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g> सम्म)</item>
@@ -1922,7 +1922,7 @@
     <string name="zen_mode_default_weeknights_name" msgid="7902108149994062847">"हरेक हप्तादिनको राति"</string>
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"शनिबार"</string>
     <string name="zen_mode_default_events_name" msgid="2280682960128512257">"कार्यक्रम"</string>
-    <string name="zen_mode_default_every_night_name" msgid="1467765312174275823">"शयन अवस्था"</string>
+    <string name="zen_mode_default_every_night_name" msgid="1467765312174275823">"निदाएका बेला"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> ले केही ध्वनिहरू म्युट गर्दै छ"</string>
     <string name="system_error_wipe_data" msgid="5910572292172208493">"तपाईंको यन्त्रसँग आन्तरिक समस्या छ, र तपाईंले फ्याक्ट्री डाटा रिसेट नगर्दासम्म यो अस्थिर रहन्छ।"</string>
     <string name="system_error_manufacturer" msgid="703545241070116315">"तपाईंको यन्त्रसँग आन्तरिक समस्या छ। विवरणहरूको लागि आफ्नो निर्मातासँग सम्पर्क गर्नुहोस्।"</string>
@@ -1966,7 +1966,7 @@
     <string name="notification_history_title_placeholder" msgid="7748630986182249599">"एपसम्बन्धी आफ्नो रोजाइअनुसारको सूचना"</string>
     <string name="user_creation_account_exists" msgid="2239146360099708035">"<xliff:g id="ACCOUNT">%2$s</xliff:g> (यस खाताको प्रयोगकर्ता पहिले नै अवस्थित छ) मा नयाँ प्रयोगकर्ता सिर्जना गर्न <xliff:g id="APP">%1$s</xliff:g> लाई अनुमति दिने हो?"</string>
     <string name="user_creation_adding" msgid="7305185499667958364">"<xliff:g id="ACCOUNT">%2$s</xliff:g> मा नयाँ प्रयोगकर्ता सिर्जना गर्न <xliff:g id="APP">%1$s</xliff:g> लाई अनुमति दिने हो?"</string>
-    <string name="language_selection_title" msgid="52674936078683285">"भाषा थप्नुहोस्"</string>
+    <string name="language_selection_title" msgid="52674936078683285">"भाषा हाल्नुहोस्"</string>
     <string name="country_selection_title" msgid="5221495687299014379">"क्षेत्रको प्राथमिकता"</string>
     <string name="search_language_hint" msgid="7004225294308793583">"भाषाको नाम टाइप गर्नुहोस्"</string>
     <string name="language_picker_section_suggested" msgid="6556199184638990447">"सिफारिस गरिएको"</string>
@@ -1979,7 +1979,7 @@
     <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"एपको पज हटाउनुहोस्"</string>
     <string name="work_mode_off_title" msgid="961171256005852058">"कामसम्बन्धी एपहरू सक्षम पार्ने हो?"</string>
     <string name="work_mode_off_message" msgid="7319580997683623309">"कामसम्बन्धी एप चलाउने र सूचना प्राप्त गर्ने सुविधा अन गर्नुहोस्"</string>
-    <string name="work_mode_turn_on" msgid="3662561662475962285">"सक्रिय गर्नुहोस्"</string>
+    <string name="work_mode_turn_on" msgid="3662561662475962285">"अन गर्नुहोस्"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"एप उपलब्ध छैन"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> अहिले उपलब्ध छैन।"</string>
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"यो एप Android को पुरानो संस्करणका लागि बनाइएको हुनाले यसले सही ढङ्गले काम नगर्न सक्छ। अद्यावधिकहरू उपलब्ध छन् वा छैनन् भनी जाँच गरी हेर्नुहोस् वा यसको विकासकर्तालाई सम्पर्क गर्नुहोस्।"</string>
