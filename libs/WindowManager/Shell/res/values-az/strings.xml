@@ -20,6 +20,7 @@
     <string name="pip_phone_close" msgid="5783752637260411309">"Bağlayın"</string>
     <string name="pip_phone_expand" msgid="2579292903468287504">"Genişləndirin"</string>
     <string name="pip_phone_settings" msgid="5468987116750491918">"Ayarlar"</string>
+    <string name="pip_phone_enter_split" msgid="7042877263880641911">"Bölünmüş ekrana daxil olun"</string>
     <string name="pip_menu_title" msgid="5393619322111827096">"Menyu"</string>
     <string name="pip_notification_title" msgid="1347104727641353453">"<xliff:g id="NAME">%s</xliff:g> şəkil içində şəkildədir"</string>
     <string name="pip_notification_message" msgid="8854051911700302620">"<xliff:g id="NAME">%s</xliff:g> tətbiqinin bu funksiyadan istifadə etməyini istəmirsinizsə, ayarları açmaq və deaktiv etmək üçün klikləyin."</string>
@@ -28,6 +29,8 @@
     <string name="pip_skip_to_next" msgid="8403429188794867653">"Növbətiyə keçin"</string>
     <string name="pip_skip_to_prev" msgid="7172158111196394092">"Əvvəlkinə keçin"</string>
     <string name="accessibility_action_pip_resize" msgid="4623966104749543182">"Ölçüsünü dəyişin"</string>
+    <string name="accessibility_action_pip_stash" msgid="4060775037619702641">"Güvənli məkanda saxlayın"</string>
+    <string name="accessibility_action_pip_unstash" msgid="7467499339610437646">"Güvənli məkandan çıxarın"</string>
     <string name="dock_forced_resizable" msgid="1749750436092293116">"Tətbiq bölünmüş ekran ilə işləməyə bilər."</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="7408396418008948957">"Tətbiq ekran bölünməsini dəstəkləmir."</string>
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"Tətbiq ikinci ekranda işləməyə bilər."</string>
@@ -43,10 +46,10 @@
     <string name="accessibility_action_divider_top_50" msgid="8649582798829048946">"Yuxarı 50%"</string>
     <string name="accessibility_action_divider_top_30" msgid="3572788224908570257">"Yuxarı 30%"</string>
     <string name="accessibility_action_divider_bottom_full" msgid="2831868345092314060">"Aşağı tam ekran"</string>
-    <string name="one_handed_tutorial_title" msgid="4583241688067426350">"Bir əlli rejimdən istifadə edilir"</string>
+    <string name="one_handed_tutorial_title" msgid="4583241688067426350">"Birəlli rejim istifadəsi"</string>
     <string name="one_handed_tutorial_description" msgid="3486582858591353067">"Çıxmaq üçün ekranın aşağısından yuxarıya doğru sürüşdürün və ya tətbiqin yuxarısında istənilən yerə toxunun"</string>
-    <string name="accessibility_action_start_one_handed" msgid="5070337354072861426">"Bir əlli rejimi başladın"</string>
-    <string name="accessibility_action_stop_one_handed" msgid="1369940261782179442">"Bir əlli rejimdən çıxın"</string>
+    <string name="accessibility_action_start_one_handed" msgid="5070337354072861426">"Birəlli rejim başlasın"</string>
+    <string name="accessibility_action_stop_one_handed" msgid="1369940261782179442">"Birəlli rejimdən çıxın"</string>
     <string name="bubbles_settings_button_description" msgid="1301286017420516912">"<xliff:g id="APP_NAME">%1$s</xliff:g> yumrucuqları üçün ayarlar"</string>
     <string name="bubble_overflow_button_content_description" msgid="8160974472718594382">"Kənara çıxma"</string>
     <string name="bubble_accessibility_action_add_back" msgid="1830101076853540953">"Yenidən dəstəyə əlavə edin"</string>
@@ -70,5 +73,4 @@
     <string name="manage_bubbles_text" msgid="7730624269650594419">"İdarə edin"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"Qabarcıqdan imtina edilib."</string>
     <string name="restart_button_description" msgid="5887656107651190519">"Bu tətbiqi sıfırlayaraq tam ekrana keçmək üçün toxunun."</string>
-    <string name="got_it" msgid="4428750913636945527">"Anladım"</string>
 </resources>

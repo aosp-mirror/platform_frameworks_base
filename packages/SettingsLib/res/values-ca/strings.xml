@@ -95,7 +95,9 @@
     <string name="bluetooth_profile_a2dp_high_quality" msgid="4739440941324792775">"Àudio HD: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="2477639096903834374">"Àudio HD"</string>
     <string name="bluetooth_profile_hearing_aid" msgid="58154575573984914">"Audiòfons"</string>
+    <string name="bluetooth_profile_le_audio" msgid="5158149987518342036">"LE_AUDIO"</string>
     <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="8191273236809964030">"S\'ha connectat als audiòfons"</string>
+    <string name="bluetooth_le_audio_profile_summary_connected" msgid="3162538609379333442">"Connectat a LE_AUDIO"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="7422607970115444153">"Connectat a l\'àudio del mitjà"</string>
     <string name="bluetooth_headset_profile_summary_connected" msgid="2420981566026949688">"Connectat a àudio del telèfon"</string>
     <string name="bluetooth_opp_profile_summary_connected" msgid="2393521801478157362">"Connectat al servidor de transferència de fitxers"</string>
@@ -113,12 +115,13 @@
     <string name="bluetooth_opp_profile_summary_use_for" msgid="461981154387015457">"Utilitza per a la transferència de fitxers"</string>
     <string name="bluetooth_hid_profile_summary_use_for" msgid="4289460627406490952">"Utilitza per a entrada"</string>
     <string name="bluetooth_hearing_aid_profile_summary_use_for" msgid="7689393730163320483">"Utilitza per als audiòfons"</string>
+    <string name="bluetooth_le_audio_profile_summary_use_for" msgid="2778318636027348572">"Utilitza per a LE_AUDIO"</string>
     <string name="bluetooth_pairing_accept" msgid="2054232610815498004">"Vincula"</string>
     <string name="bluetooth_pairing_accept_all_caps" msgid="2734383073450506220">"VINCULA"</string>
     <string name="bluetooth_pairing_decline" msgid="6483118841204885890">"Cancel·la"</string>
     <string name="bluetooth_pairing_will_share_phonebook" msgid="3064334458659165176">"La vinculació permet accedir als contactes i a l\'historial de trucades quan el dispositiu està connectat."</string>
-    <string name="bluetooth_pairing_error_message" msgid="6626399020672335565">"No s\'ha pogut vincular amb <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
-    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"No s\'ha pogut vincular amb <xliff:g id="DEVICE_NAME">%1$s</xliff:g>, perquè el PIN o la contrasenya són incorrectes."</string>
+    <string name="bluetooth_pairing_error_message" msgid="6626399020672335565">"No s\'ha pogut vincular a <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
+    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"No s\'ha pogut vincular a <xliff:g id="DEVICE_NAME">%1$s</xliff:g>: el PIN o la clau d\'accés són incorrectes."</string>
     <string name="bluetooth_pairing_device_down_error_message" msgid="2554424863101358857">"No es pot comunicar amb <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
     <string name="bluetooth_pairing_rejected_error_message" msgid="5943444352777314442">"Vinculació rebutjada per <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
     <string name="bluetooth_talkback_computer" msgid="3736623135703893773">"Ordinador"</string>
@@ -223,7 +226,7 @@
     <string name="adb_device_fingerprint_title_format" msgid="291504822917843701">"Empremta digital del dispositiu: <xliff:g id="FINGERPRINT_PARAM">%1$s</xliff:g>"</string>
     <string name="adb_wireless_connection_failed_title" msgid="664211177427438438">"No s\'ha pogut connectar"</string>
     <string name="adb_wireless_connection_failed_message" msgid="9213896700171602073">"Assegura\'t que <xliff:g id="DEVICE_NAME">%1$s</xliff:g> estigui connectat a la xarxa correcta"</string>
-    <string name="adb_pairing_device_dialog_title" msgid="7141739231018530210">"Vincula amb el dispositiu"</string>
+    <string name="adb_pairing_device_dialog_title" msgid="7141739231018530210">"Vincula el dispositiu"</string>
     <string name="adb_pairing_device_dialog_pairing_code_label" msgid="3639239786669722731">"Codi de vinculació Wi‑Fi"</string>
     <string name="adb_pairing_device_dialog_failed_title" msgid="3426758947882091735">"No s\'ha pogut vincular"</string>
     <string name="adb_pairing_device_dialog_failed_msg" msgid="6611097519661997148">"Assegura\'t que el dispositiu estigui connectat a la mateixa xarxa."</string>
@@ -252,7 +255,7 @@
     <string name="wifi_display_certification" msgid="1805579519992520381">"Certificació de pantalla sense fil"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"Activa el registre Wi‑Fi detallat"</string>
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"Limitació de la cerca de xarxes Wi‑Fi"</string>
-    <string name="wifi_enhanced_mac_randomization" msgid="5437378364995776979">"Aleatorització de MAC millorada per Wi‑Fi"</string>
+    <string name="wifi_enhanced_mac_randomization" msgid="882650208573834301">"Aleatorització de MAC no persistent per a connexions Wi‑Fi"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"Dades mòbils sempre actives"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"Acceleració per maquinari per a compartició de xarxa"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"Mostra els dispositius Bluetooth sense el nom"</string>
@@ -282,23 +285,23 @@
     <string name="private_dns_mode_provider_hostname_hint" msgid="6564868953748514595">"Introdueix el nom d\'amfitrió del proveïdor de DNS"</string>
     <string name="private_dns_mode_provider_failure" msgid="8356259467861515108">"No s\'ha pogut connectar"</string>
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Mostra les opcions per a la certificació de pantalla sense fil"</string>
-    <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Augmenta nivell de registre Wi‑Fi, mostra\'l per SSID RSSI al selector de Wi‑Fi"</string>
+    <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Augmenta el nivell de registre de la connexió Wi‑Fi i es mostra per SSID RSSI al selector de Wi‑Fi"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Redueix el consum de bateria i millora el rendiment de la xarxa"</string>
-    <string name="wifi_enhanced_mac_randomization_summary" msgid="1210663439867489931">"Quan aquest mode està activat, és possible que l’adreça MAC d’aquest dispositiu canviï cada vegada que es connecti a una xarxa amb l\'aleatorització d\'adreces MAC activada."</string>
+    <string name="wifi_enhanced_mac_randomization_summary" msgid="1210663439867489931">"Quan aquest mode està activat, és possible que l’adreça MAC d’aquest dispositiu canviï cada vegada que es connecti a una xarxa amb l\'aleatorització d\'adreces MAC activada"</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"D\'ús mesurat"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"D\'ús no mesurat"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"Mides de la mem. intermèdia del registrador"</string>
     <string name="select_logd_size_dialog_title" msgid="2105401994681013578">"Selecciona la mida de la memòria intermèdia del registre"</string>
     <string name="dev_logpersist_clear_warning_title" msgid="8631859265777337991">"Vols esborrar l\'emmagatzematge persistent del registrador?"</string>
     <string name="dev_logpersist_clear_warning_message" msgid="6447590867594287413">"Quan deixem de supervisar amb el registrador persistent, hem d\'esborrar les dades del registrador que hi ha al teu dispositiu."</string>
-    <string name="select_logpersist_title" msgid="447071974007104196">"Desa dades registrador permanentment"</string>
+    <string name="select_logpersist_title" msgid="447071974007104196">"Desa dades de registre contínuament al dispositiu"</string>
     <string name="select_logpersist_dialog_title" msgid="7745193591195485594">"Selecciona memòries interm. de registre per emmag. de manera persistent al disp."</string>
     <string name="select_usb_configuration_title" msgid="6339801314922294586">"Selecciona configuració d\'USB"</string>
     <string name="select_usb_configuration_dialog_title" msgid="3579567144722589237">"Selecciona configuració d\'USB"</string>
     <string name="allow_mock_location" msgid="2102650981552527884">"Ubicacions simulades"</string>
     <string name="allow_mock_location_summary" msgid="179780881081354579">"Permet les ubicacions simulades"</string>
     <string name="debug_view_attributes" msgid="3539609843984208216">"Activa la inspecció d\'atributs de visualització"</string>
-    <string name="mobile_data_always_on_summary" msgid="1112156365594371019">"Mantén les dades mòbils sempre actives, fins i tot quan la Wi‑Fi està activada (per canviar de xarxa ràpidament)."</string>
+    <string name="mobile_data_always_on_summary" msgid="1112156365594371019">"Mantén les dades mòbils sempre actives, fins i tot quan la Wi‑Fi està activada (per canviar de xarxa ràpidament)"</string>
     <string name="tethering_hardware_offload_summary" msgid="7801345335142803029">"Fes servir l\'acceleració per maquinari per a compartició de xarxa, si està disponible"</string>
     <string name="adb_warning_title" msgid="7708653449506485728">"Voleu permetre la depuració per USB?"</string>
     <string name="adb_warning_message" msgid="8145270656419669221">"La depuració per USB només està indicada per a activitats de desenvolupament. Fes-la servir intercanviar dades entre l\'ordinador i el dispositiu, per instal·lar aplicacions al dispositiu sense rebre notificacions i per llegir dades de registre."</string>
@@ -310,8 +313,8 @@
     <string name="verify_apps_over_usb_title" msgid="6031809675604442636">"Verifica aplicacions per USB"</string>
     <string name="verify_apps_over_usb_summary" msgid="1317933737581167839">"Comprova les aplicacions instal·lades mitjançant ADB/ADT per detectar comportaments perillosos"</string>
     <string name="bluetooth_show_devices_without_names_summary" msgid="780964354377854507">"Es mostraran els dispositius Bluetooth sense el nom (només l\'adreça MAC)"</string>
-    <string name="bluetooth_disable_absolute_volume_summary" msgid="2006309932135547681">"Desactiva la funció de volum absolut del Bluetooth en cas que es produeixin problemes de volum amb dispositius remots, com ara un volum massa alt o una manca de control."</string>
-    <string name="bluetooth_enable_gabeldorsche_summary" msgid="2054730331770712629">"Activa el conjunt de funcions de Bluetooth Gabeldorsche."</string>
+    <string name="bluetooth_disable_absolute_volume_summary" msgid="2006309932135547681">"Desactiva la funció de volum absolut del Bluetooth en cas que es produeixin problemes de volum amb dispositius remots, com ara un volum massa alt o una manca de control"</string>
+    <string name="bluetooth_enable_gabeldorsche_summary" msgid="2054730331770712629">"Activa el conjunt de funcions de Bluetooth Gabeldorsche"</string>
     <string name="enhanced_connectivity_summary" msgid="1576414159820676330">"Activa la funció de connectivitat millorada."</string>
     <string name="enable_terminal_title" msgid="3834790541986303654">"Terminal local"</string>
     <string name="enable_terminal_summary" msgid="2481074834856064500">"Activa l\'aplicació de terminal que ofereix accés al shell local"</string>
@@ -342,8 +345,8 @@
     <string name="show_hw_screen_updates_summary" msgid="3539770072741435691">"Il·lumina visualitzacions de finestres creades"</string>
     <string name="show_hw_layers_updates" msgid="5268370750002509767">"Mostra actualitzacions de capes de maquinari"</string>
     <string name="show_hw_layers_updates_summary" msgid="5850955890493054618">"Il·lumina capes de maquinari en verd en actualitzar-se"</string>
-    <string name="debug_hw_overdraw" msgid="8944851091008756796">"Depura sobredibuix de GPU"</string>
-    <string name="disable_overlays" msgid="4206590799671557143">"Desactiva superposicions maquinari"</string>
+    <string name="debug_hw_overdraw" msgid="8944851091008756796">"Depura el sobredibuix de GPU"</string>
+    <string name="disable_overlays" msgid="4206590799671557143">"Desactiva superposicions de maquinari"</string>
     <string name="disable_overlays_summary" msgid="1954852414363338166">"Utilitza sempre GPU per a la composició de pantalles"</string>
     <string name="simulate_color_space" msgid="1206503300335835151">"Simula l\'espai de color"</string>
     <string name="enable_opengl_traces_title" msgid="4638773318659125196">"Activa traces d\'OpenGL"</string>
@@ -353,14 +356,15 @@
     <string name="debug_layout_summary" msgid="8825829038287321978">"Mostra els límits de clips, els marges, etc."</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"Força direcció dreta-esquerra"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"Força direcció de pantalla dreta-esquerra en totes les llengües"</string>
-    <string name="force_msaa" msgid="4081288296137775550">"Força MSAA  4x"</string>
+    <string name="window_blurs" msgid="6831008984828425106">"Permet desenfoc. finestra"</string>
+    <string name="force_msaa" msgid="4081288296137775550">"Força MSAA 4x"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"Activa MSAA 4x en aplicacions d\'OpenGL ES 2.0"</string>
     <string name="show_non_rect_clip" msgid="7499758654867881817">"Depura operacions de retall no rectangulars"</string>
     <string name="track_frame_time" msgid="522674651937771106">"Renderització perfil HWUI"</string>
     <string name="enable_gpu_debug_layers" msgid="4986675516188740397">"Activa les capes de depuració de GPU"</string>
     <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"Permet capes de depuració de GPU en apps de depuració"</string>
     <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"Activa el registre detallat"</string>
-    <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"Inclou altres registres de proveïdor específics del dispositiu als informes d’errors; és possible que continguin informació privada, consumeixin més bateria o utilitzin més espai d\'emmagatzematge."</string>
+    <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"Inclou altres registres de proveïdor específics del dispositiu als informes d’errors; és possible que continguin informació privada, consumeixin més bateria o utilitzin més espai d\'emmagatzematge"</string>
     <string name="window_animation_scale_title" msgid="5236381298376812508">"Escala d\'animació finestra"</string>
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"Escala d\'animació transició"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"Escala de durada d\'animació"</string>
@@ -376,9 +380,9 @@
     <string name="force_allow_on_external" msgid="9187902444231637880">"Força permetre aplicacions de manera externa"</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"Permet que qualsevol aplicació es pugui escriure en un dispositiu d’emmagatzematge extern, independentment dels valors definits"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"Força l\'ajust de la mida de les activitats"</string>
-    <string name="force_resizable_activities_summary" msgid="2490382056981583062">"Permet ajustar la mida de totes les activitats per al mode multifinestra, independentment dels valors definits."</string>
+    <string name="force_resizable_activities_summary" msgid="2490382056981583062">"Permet ajustar la mida de totes les activitats per al mode multifinestra, independentment dels valors definits"</string>
     <string name="enable_freeform_support" msgid="7599125687603914253">"Activa les finestres de forma lliure"</string>
-    <string name="enable_freeform_support_summary" msgid="1822862728719276331">"Activa la compatibilitat amb finestres de forma lliure experimentals."</string>
+    <string name="enable_freeform_support_summary" msgid="1822862728719276331">"Activa la compatibilitat amb finestres de forma lliure experimentals"</string>
     <string name="local_backup_password_title" msgid="4631017948933578709">"Contrasenya per a còpies d\'ordinador"</string>
     <string name="local_backup_password_summary_none" msgid="7646898032616361714">"Les còpies de seguretat completes d\'ordinador no estan protegides"</string>
     <string name="local_backup_password_summary_change" msgid="1707357670383995567">"Toca per canviar o suprimir la contrasenya per a les còpies de seguretat completes de l\'ordinador"</string>
@@ -405,17 +409,12 @@
     <string name="transcode_enable_all" msgid="2411165920039166710">"Activa la transcodificació"</string>
     <string name="transcode_default" msgid="3784803084573509491">"Assumeix que les aplicacions són compatibles amb formats moderns"</string>
     <string name="transcode_notification" msgid="5560515979793436168">"Mostra les notificacions de transcodificació"</string>
+    <string name="transcode_disable_cache" msgid="3160069309377467045">"Desactiva la memòria cau per a la transcodificació"</string>
     <string name="runningservices_settings_title" msgid="6460099290493086515">"Serveis en execució"</string>
     <string name="runningservices_settings_summary" msgid="1046080643262665743">"Visualitza i controla els serveis en execució"</string>
     <string name="select_webview_provider_title" msgid="3917815648099445503">"Implementació de WebView"</string>
     <string name="select_webview_provider_dialog_title" msgid="2444261109877277714">"Estableix implementació de WebView"</string>
     <string name="select_webview_provider_toast_text" msgid="8512254949169359848">"Aquesta opció ja no és vàlida. Torna-ho a provar."</string>
-    <string name="convert_to_file_encryption" msgid="2828976934129751818">"Converteix en encriptació de fitxers"</string>
-    <string name="convert_to_file_encryption_enabled" msgid="840757431284311754">"Converteix…"</string>
-    <string name="convert_to_file_encryption_done" msgid="8965831011811180627">"El fitxer ja està encriptat"</string>
-    <string name="title_convert_fbe" msgid="5780013350366495149">"S\'està convertint en l\'encriptació basada en fitxers"</string>
-    <string name="convert_to_fbe_warning" msgid="34294381569282109">"Converteix la partició de dades en una encriptació basada en fitxers.\n Advertiment: s\'esborraran totes les teves dades.\n Aquesta funció és alfa i és possible que no funcioni correctament.\n Per continuar, prem Esborra i converteix…"</string>
-    <string name="button_convert_fbe" msgid="1159861795137727671">"Neteja i converteix…"</string>
     <string name="picture_color_mode" msgid="1013807330552931903">"Mode de color de la imatge"</string>
     <string name="picture_color_mode_desc" msgid="151780973768136200">"Utilitza sRGB"</string>
     <string name="daltonizer_mode_disabled" msgid="403424372812399228">"Desactivat"</string>
@@ -450,24 +449,22 @@
     <string name="power_remaining_duration_shutdown_imminent" product="tablet" msgid="7703677921000858479">"És possible que la tauleta s\'apagui aviat (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_remaining_duration_shutdown_imminent" product="device" msgid="4374784375644214578">"És possible que el dispositiu s\'apagui aviat (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g>: <xliff:g id="STATE">%2$s</xliff:g>"</string>
-    <!-- no translation found for power_remaining_charging_duration_only (8085099012811384899) -->
-    <skip />
-    <!-- no translation found for power_charging_duration (6127154952524919719) -->
-    <skip />
-    <string name="power_charging_limited" msgid="1956874810658999681">"<xliff:g id="LEVEL">%1$s</xliff:g>: s\'està optimitzant per preservar l\'estat de la bateria"</string>
+    <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"<xliff:g id="TIME">%1$s</xliff:g> per completar la càrrega"</string>
+    <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g>: <xliff:g id="TIME">%2$s</xliff:g> per completar la càrrega"</string>
+    <string name="power_charging_limited" msgid="7956120998372505295">"<xliff:g id="LEVEL">%1$s</xliff:g>: càrrega limitada temporalment"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"Desconegut"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"S\'està carregant"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"Carregant ràpidament"</string>
     <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"Carregant lentament"</string>
+    <string name="battery_info_status_charging_wireless" msgid="8924722966861282197">"Carregant sense fil"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"No s\'està carregant"</string>
-    <string name="battery_info_status_not_charging" msgid="8330015078868707899">"El dispositiu està endollat però en aquests moments no es pot carregar"</string>
-    <!-- no translation found for battery_info_status_full (1339002294876531312) -->
-    <skip />
+    <string name="battery_info_status_not_charging" msgid="3371084153747234837">"Connectat; no s\'està carregant"</string>
+    <string name="battery_info_status_full" msgid="1339002294876531312">"Carregada"</string>
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"Controlat per l\'administrador"</string>
     <string name="disabled" msgid="8017887509554714950">"Desactivat"</string>
     <string name="external_source_trusted" msgid="1146522036773132905">"Amb permís"</string>
     <string name="external_source_untrusted" msgid="5037891688911672227">"Sense permís"</string>
-    <string name="install_other_apps" msgid="3232595082023199454">"Instal·la aplicacions desconegudes"</string>
+    <string name="install_other_apps" msgid="3232595082023199454">"Instal·lar aplicacions desconegudes"</string>
     <string name="home" msgid="973834627243661438">"Pàgina d\'inici de configuració"</string>
   <string-array name="battery_labels">
     <item msgid="7878690469765357158">"0%"</item>
@@ -480,7 +477,7 @@
     <string name="screen_zoom_summary_default" msgid="1888865694033865408">"Predeterminat"</string>
     <string name="screen_zoom_summary_large" msgid="4706951482598978984">"Gran"</string>
     <string name="screen_zoom_summary_very_large" msgid="7317423942896999029">"Més gran"</string>
-    <string name="screen_zoom_summary_extremely_large" msgid="1438045624562358554">"Més grans possible"</string>
+    <string name="screen_zoom_summary_extremely_large" msgid="1438045624562358554">"El més gran"</string>
     <string name="screen_zoom_summary_custom" msgid="3468154096832912210">"Personalitzat (<xliff:g id="DENSITYDPI">%d</xliff:g>)"</string>
     <string name="content_description_menu_button" msgid="6254844309171779931">"Menú"</string>
     <string name="retail_demo_reset_message" msgid="5392824901108195463">"Introdueix la contrasenya per restablir les dades de fàbrica en mode de demostració"</string>
@@ -505,10 +502,10 @@
     <string name="cancel" msgid="5665114069455378395">"Cancel·la"</string>
     <string name="okay" msgid="949938843324579502">"D\'acord"</string>
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"Alarmes i recordatoris"</string>
-    <string name="alarms_and_reminders_switch_title" msgid="186992351401152744">"Permet configurar alarmes o recordatoris"</string>
-    <string name="alarms_and_reminders_title" msgid="2988400785896875237">"Alarmes i recordatoris"</string>
-    <string name="alarms_and_reminders_footer_title" msgid="5882788882647778753">"Permet que aquesta aplicació programi alarmes o altres esdeveniments basats en el temps. Això permetrà que l\'aplicació s\'activi i s\'executi fins i tot quan no utilitzes el dispositiu. Si revoques aquest permís, pot ser que l\'aplicació no funcioni correctament; concretament, no sonarà cap alarma que l\'aplicació hagi programat."</string>
-    <string name="keywords_alarms_and_reminders" msgid="8882739572152019456">"programació, alarma, recordatori, esdeveniment"</string>
+    <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"Permet la configuració d\'alarmes i recordatoris"</string>
+    <string name="alarms_and_reminders_title" msgid="8819933264635406032">"Alarmes i recordatoris"</string>
+    <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"Permet que aquesta aplicació configuri alarmes i programi accions. Això permet a l\'aplicació executar-se en segon pla i, per tant, és possible que consumeixi més bateria.\n\nSi aquest permís està desactivat, les alarmes i els esdeveniments que ja hagi programat l\'aplicació no funcionaran."</string>
+    <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"programació, alarma, recordatori, rellotge"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"Activa"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"Activa el mode No molestis"</string>
     <string name="zen_mode_settings_summary_off" msgid="3832876036123504076">"Mai"</string>
@@ -524,13 +521,13 @@
     <string name="time_unit_just_now" msgid="3006134267292728099">"Ara mateix"</string>
     <string name="media_transfer_this_device_name" msgid="2716555073132169240">"Altaveu del telèfon"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"Aquest telèfon"</string>
-    <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"Hi ha hagut un problema amb la connexió. Desactiva el dispositiu i torna\'l a activar."</string>
+    <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"Hi ha hagut un problema amb la connexió. Apaga el dispositiu i torna\'l a encendre."</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"Dispositiu d\'àudio amb cable"</string>
     <string name="help_label" msgid="3528360748637781274">"Ajuda i suggeriments"</string>
     <string name="storage_category" msgid="2287342585424631813">"Emmagatzematge"</string>
     <string name="shared_data_title" msgid="1017034836800864953">"Dades compartides"</string>
     <string name="shared_data_summary" msgid="5516326713822885652">"Mostra i modifica les dades compartides"</string>
-    <string name="shared_data_no_blobs_text" msgid="3108114670341737434">"No hi ha dades compartides per a aquest usuari."</string>
+    <string name="shared_data_no_blobs_text" msgid="3108114670341737434">"No hi ha dades compartides per a aquest usuari"</string>
     <string name="shared_data_query_failure_text" msgid="3489828881998773687">"S\'ha produït un error en recollir les dades compartides. Torna-ho a provar."</string>
     <string name="blob_id_text" msgid="8680078988996308061">"Identificador de dades compartides: <xliff:g id="BLOB_ID">%d</xliff:g>"</string>
     <string name="blob_expires_text" msgid="7882727111491739331">"Caduquen el dia <xliff:g id="DATE">%s</xliff:g>"</string>
@@ -562,12 +559,15 @@
     <string name="user_set_lock_button" msgid="1427128184982594856">"Defineix un bloqueig"</string>
     <string name="user_switch_to_user" msgid="6975428297154968543">"Canvia a <xliff:g id="USER_NAME">%s</xliff:g>"</string>
     <string name="creating_new_user_dialog_message" msgid="7232880257538970375">"S\'està creant l\'usuari…"</string>
-    <!-- no translation found for add_user_failed (4809887794313944872) -->
-    <skip />
+    <string name="add_user_failed" msgid="4809887794313944872">"No s\'ha pogut crear l\'usuari"</string>
     <string name="user_nickname" msgid="262624187455825083">"Àlies"</string>
     <string name="guest_new_guest" msgid="3482026122932643557">"Afegeix un convidat"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"Suprimeix el convidat"</string>
+    <string name="guest_reset_guest" msgid="6110013010356013758">"Restableix el convidat"</string>
     <string name="guest_nickname" msgid="6332276931583337261">"Convidat"</string>
+    <string name="guest_reset_guest_dialog_title" msgid="8047270010895437534">"Vols restablir el convidat?"</string>
+    <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"Restableix"</string>
+    <string name="guest_resetting" msgid="7822120170191509566">"S\'està restablint el convidat…"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"Fes una foto"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"Tria una imatge"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"Selecciona una foto"</string>

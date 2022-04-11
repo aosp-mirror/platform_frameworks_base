@@ -31,7 +31,6 @@ import android.os.RecoverySystem;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemProperties;
-import android.os.storage.StorageManager;
 import android.provider.Downloads;
 import android.system.ErrnoException;
 import android.system.Os;
@@ -281,14 +280,8 @@ public class BootReceiver extends BroadcastReceiver {
         HashMap<String, Long> timestamps = readTimestamps();
 
         if (SystemProperties.getLong("ro.runtime.firstboot", 0) == 0) {
-            if (StorageManager.inCryptKeeperBounce()) {
-                // Encrypted, first boot to get PIN/pattern/password so data is tmpfs
-                // Don't set ro.runtime.firstboot so that we will do this again
-                // when data is properly mounted
-            } else {
-                String now = Long.toString(System.currentTimeMillis());
-                SystemProperties.set("ro.runtime.firstboot", now);
-            }
+            String now = Long.toString(System.currentTimeMillis());
+            SystemProperties.set("ro.runtime.firstboot", now);
             if (db != null) db.addText("SYSTEM_BOOT", headers);
 
             // Negative sizes mean to take the *tail* of the file (see FileUtils.readTextFile())

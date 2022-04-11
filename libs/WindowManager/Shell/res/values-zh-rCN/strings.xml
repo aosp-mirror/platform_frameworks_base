@@ -20,6 +20,7 @@
     <string name="pip_phone_close" msgid="5783752637260411309">"关闭"</string>
     <string name="pip_phone_expand" msgid="2579292903468287504">"展开"</string>
     <string name="pip_phone_settings" msgid="5468987116750491918">"设置"</string>
+    <string name="pip_phone_enter_split" msgid="7042877263880641911">"进入分屏模式"</string>
     <string name="pip_menu_title" msgid="5393619322111827096">"菜单"</string>
     <string name="pip_notification_title" msgid="1347104727641353453">"<xliff:g id="NAME">%s</xliff:g>目前位于“画中画”中"</string>
     <string name="pip_notification_message" msgid="8854051911700302620">"如果您不想让“<xliff:g id="NAME">%s</xliff:g>”使用此功能，请点按以打开设置，然后关闭此功能。"</string>
@@ -28,6 +29,8 @@
     <string name="pip_skip_to_next" msgid="8403429188794867653">"跳到下一个"</string>
     <string name="pip_skip_to_prev" msgid="7172158111196394092">"跳到上一个"</string>
     <string name="accessibility_action_pip_resize" msgid="4623966104749543182">"调整大小"</string>
+    <string name="accessibility_action_pip_stash" msgid="4060775037619702641">"隐藏"</string>
+    <string name="accessibility_action_pip_unstash" msgid="7467499339610437646">"取消隐藏"</string>
     <string name="dock_forced_resizable" msgid="1749750436092293116">"应用可能无法在分屏模式下正常运行。"</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="7408396418008948957">"应用不支持分屏。"</string>
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"应用可能无法在辅显示屏上正常运行。"</string>
@@ -70,5 +73,4 @@
     <string name="manage_bubbles_text" msgid="7730624269650594419">"管理"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"已关闭对话泡。"</string>
     <string name="restart_button_description" msgid="5887656107651190519">"点按即可重启此应用并进入全屏模式。"</string>
-    <string name="got_it" msgid="4428750913636945527">"知道了"</string>
 </resources>

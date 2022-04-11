@@ -202,7 +202,6 @@
     <string name="gnss_service" msgid="8907781262179951385">"Perkhidmatan GNSS"</string>
     <string name="sensor_notification_service" msgid="7474531979178682676">"Perkhidmatan Pemberitahuan Penderia"</string>
     <string name="twilight_service" msgid="8964898045693187224">"Perkhidmatan Twilight"</string>
-    <string name="offline_location_time_zone_detection_service_attribution" msgid="303754195048744816">"Pengesan Zon Waktu (Tiada kesambungan)"</string>
     <string name="gnss_time_update_service" msgid="9039489496037616095">"Perkhidmatan Kemaskinian Waktu GNSS"</string>
     <string name="music_recognition_manager_service" msgid="7481956037950276359">"Perkhidmatan Pengurus Pengecaman Muzik"</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"Peranti anda akan dipadam"</string>
@@ -470,6 +469,8 @@
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"Membenarkan apl menggunakan perkhidmatan IMS untuk membuat panggilan tanpa campur tangan anda."</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"baca status dan identiti telefon"</string>
     <string name="permdesc_readPhoneState" msgid="7229063553502788058">"Membenarkan apl mengakses ciri telefon pada peranti. Kebenaran ini membolehkan apl menentukan nombor telefon dan ID peranti, sama ada panggilan aktif dan nombor jauh yang dihubungkan dengan panggilan."</string>
+    <string name="permlab_readBasicPhoneState" msgid="3214853233263871347">"membaca status telefoni asas dan identiti"</string>
+    <string name="permdesc_readBasicPhoneState" msgid="828185691675460520">"Membenarkan apl mengakses ciri telefoni asas peranti."</string>
     <string name="permlab_manageOwnCalls" msgid="9033349060307561370">"halakan panggilan menerusi sistem"</string>
     <string name="permdesc_manageOwnCalls" msgid="4431178362202142574">"Membenarkan apl menghalakan panggilan menerusi sistem untuk meningkatkan pengalaman panggilan."</string>
     <string name="permlab_callCompanionApp" msgid="3654373653014126884">"lihat dan kawal panggilan melalui sistem."</string>
@@ -542,6 +543,8 @@
     <string name="permdesc_bluetooth_advertise" product="default" msgid="6085174451034210183">"Membenarkan apl menyiarkan kandungan kepada peranti Bluetooth yang berdekatan"</string>
     <string name="permlab_uwb_ranging" msgid="8141915781475770665">"tentukan kedudukan relatif antara peranti Ultrajalur Lebar berdekatan"</string>
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"Benarkan apl menentukan kedudukan relatif antara peranti Ultrajalur Lebar berdekatan"</string>
+    <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"berinteraksi dengan peranti Wi-Fi berdekatan"</string>
+    <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"Membenarkan apl mengiklankan, menyambung dan menentukan kedudukan relatif peranti Wi-Fi berdekatan"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Maklumat Perkhidmatan Pembayaran NFC Pilihan"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Membenarkan apl mendapatkan maklumat perkhidmatan pembayaran nfc pilihan seperti bantuan berdaftar dan destinasi laluan."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"mengawal Komunikasi Medan Dekat"</string>
@@ -580,11 +583,12 @@
     <string name="fingerprint_acquired_partial" msgid="694598777291084823">"Cap jari separa dikesan"</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"Tidak dapat memproses cap jari. Sila cuba lagi."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="5236744087471419479">"Bersihkan penderia"</string>
-    <string name="fingerprint_acquired_too_fast" msgid="1254724478300787385">"Jari digerakkan terlalu cepat"</string>
+    <string name="fingerprint_acquired_too_fast" msgid="6038375140739678098">"Tahan lebih lama sedikit"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"Jari digerakkan terlalu perlahan. Sila cuba lagi."</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"Cuba cap jari lain"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"Terlalu terang"</string>
     <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"Cuba selaraskan"</string>
+    <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"Tukar sedikit kedudukan jari anda setiap kali pergerakan dilakukan"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"Cap jari disahkan"</string>
@@ -601,6 +605,7 @@
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"Tiada cap jari didaftarkan."</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"Peranti ini tiada penderia cap jari."</string>
     <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"Penderia dilumpuhkan sementara."</string>
+    <string name="fingerprint_error_bad_calibration" msgid="4385512597740168120">"Tidak boleh menggunakan penderia cap jari. Lawati penyedia pembaikan"</string>
     <string name="fingerprint_name_template" msgid="8941662088160289778">"Jari <xliff:g id="FINGERID">%d</xliff:g>"</string>
     <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"Gunakan cap jari"</string>
     <string name="fingerprint_or_screen_lock_app_setting_name" msgid="3501743523487644907">"Gunakan cap jari atau kunci skrin"</string>
@@ -608,18 +613,19 @@
     <string name="fingerprint_or_screen_lock_dialog_default_subtitle" msgid="5195808203117992200">"Gunakan cap jari atau kunci skrin anda untuk meneruskan"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
+    <string name="fingerprint_error_vendor_unknown" msgid="4170002184907291065">"Kesilapan telah berlaku. Cuba lagi."</string>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"Ikon cap jari"</string>
-    <string name="permlab_manageFace" msgid="4569549381889283282">"urus perkakasan wajah buka kunci"</string>
-    <string name="permdesc_manageFace" msgid="6204569688492710471">"Membenarkan apl menggunakan kaedah untuk menambahkan dan memadamkan templat wajah untuk digunakan."</string>
-    <string name="permlab_useFaceAuthentication" msgid="1011430526454859030">"gunakan perkakasan wajah buka kunci"</string>
-    <string name="permdesc_useFaceAuthentication" msgid="3115697017684668012">"Membenarkan apl menggunakan perkakasan wajah buka kunci untuk pengesahan"</string>
-    <string name="face_recalibrate_notification_name" msgid="6006095897989257026">"Wajah buka kunci"</string>
-    <string name="face_recalibrate_notification_title" msgid="5944930528030496897">"Daftarkan semula wajah anda"</string>
-    <string name="face_recalibrate_notification_content" msgid="892757485125249962">"Untuk meningkatkan pengecaman, sila daftarkan semula wajah anda"</string>
-    <string name="face_setup_notification_title" msgid="550617822603450009">"Sediakan wajah buka kunci"</string>
+    <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"Buka Kunci Wajah"</string>
+    <string name="face_recalibrate_notification_title" msgid="2524791952735579082">"Isu dengan Buka Kunci Wajah"</string>
+    <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"Ketik untuk memadamkan model wajah anda, kemudian tambahkan wajah anda semula"</string>
+    <string name="face_setup_notification_title" msgid="8843461561970741790">"Sediakan Buka Kunci Wajah"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"Buka kunci telefon anda dengan melihat telefon anda"</string>
+    <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"Untuk menggunakan Buka Kunci Wajah, hidupkan "<b>"akses Kamera"</b>" dalam Tetapan &gt; Privasi"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Sediakan lebih banyak cara untuk membuka kunci"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"Ketik untuk menambahkan cap jari"</string>
+    <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Buka Kunci Cap Jari"</string>
+    <string name="fingerprint_recalibrate_notification_title" msgid="2406561052064558497">"Tidak boleh menggunakan penderia cap jari"</string>
+    <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"Lawati penyedia pembaikan."</string>
     <string name="face_acquired_insufficient" msgid="2150805835949162453">"Gagal menangkap data wajah dgn tepat. Cuba lagi."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"Terlalu terang. Cuba pencahayaan yang lebih lembut."</string>
     <string name="face_acquired_too_dark" msgid="252573548464426546">"Terlalu gelap. Cuba pencahayaan yang lebih cerah."</string>
@@ -643,23 +649,25 @@
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"Tdk dpt sahkan wajah. Perkakasan tidak tersedia."</string>
-    <string name="face_error_timeout" msgid="522924647742024699">"Cuba wajah buka kunci sekali lagi."</string>
+    <string name="face_error_timeout" msgid="2598544068593889762">"Cuba Buka Kunci Wajah sekali lagi"</string>
     <string name="face_error_no_space" msgid="5649264057026021723">"Tdk dpt menyimpan data wajah baharu. Padamkan yg lama dahulu."</string>
     <string name="face_error_canceled" msgid="2164434737103802131">"Pengendalian wajah dibatalkan."</string>
-    <string name="face_error_user_canceled" msgid="8553045452825849843">"Wajah buka kunci dibatalkan oleh pengguna."</string>
+    <string name="face_error_user_canceled" msgid="5766472033202928373">"Buka Kunci Wajah dibatalkan oleh pengguna"</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"Terlalu banyak percubaan. Cuba sebentar lagi."</string>
-    <string name="face_error_lockout_permanent" msgid="8277853602168960343">"Terlalu banyak percubaan. Wajah buka kunci dilumpuhkan."</string>
+    <string name="face_error_lockout_permanent" msgid="3277134834042995260">"Terlalu banyak percubaan. Buka Kunci Wajah dilumpuhkan."</string>
+    <string name="face_error_lockout_screen_lock" msgid="5062609811636860928">"Terlalu banyak percubaan. Sebaliknya, masukkan kunci skrin."</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"Tidak dapat mengesahkan wajah. Cuba lagi."</string>
-    <string name="face_error_not_enrolled" msgid="7369928733504691611">"Anda belum menyediakan wajah buka kunci."</string>
-    <string name="face_error_hw_not_present" msgid="1070600921591729944">"Wajah buka kunci tidak disokong pada peranti ini."</string>
+    <string name="face_error_not_enrolled" msgid="1134739108536328412">"Anda belum menyediakan Buka Kunci Wajah"</string>
+    <string name="face_error_hw_not_present" msgid="7940978724978763011">"Buka Kunci Wajah tidak disokong pada peranti ini"</string>
     <string name="face_error_security_update_required" msgid="5076017208528750161">"Penderia dilumpuhkan sementara."</string>
     <string name="face_name_template" msgid="3877037340223318119">"Wajah <xliff:g id="FACEID">%d</xliff:g>"</string>
-    <string name="face_app_setting_name" msgid="8130135875458467243">"Gunakan wajah buka kunci"</string>
+    <string name="face_app_setting_name" msgid="5854024256907828015">"Gunakan Buka Kunci Wajah"</string>
     <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"Gunakan kunci wajah atau skrin"</string>
     <string name="face_dialog_default_subtitle" msgid="6620492813371195429">"Gunakan wajah untuk teruskan"</string>
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"Gunakan wajah atau kunci skrin anda untuk meneruskan"</string>
   <string-array name="face_error_vendor">
   </string-array>
+    <string name="face_error_vendor_unknown" msgid="7387005932083302070">"Kesilapan telah berlaku. Cuba lagi."</string>
     <string name="face_icon_content_description" msgid="465030547475916280">"Ikon wajah"</string>
     <string name="permlab_readSyncSettings" msgid="6250532864893156277">"membaca tetapan penyegerakan"</string>
     <string name="permdesc_readSyncSettings" msgid="1325658466358779298">"Membenarkan apl membaca tetapan segerak untuk akaun. Sebagai contoh, ini boleh menentukan sama ada apl Orang disegerakkan dengan akaun."</string>
@@ -726,9 +734,11 @@
     <string name="policylab_watchLogin" msgid="7599669460083719504">"Pantau percubaan buka kunci skrin"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"Memantau bilangan kata laluan yang tersilap ditaip apabila membuka skrin, dan mengunci tablet atau memadam semua data tablet jika terlalu banyak kesilapan menaip kata laluan."</string>
     <string name="policydesc_watchLogin" product="tv" msgid="2140588224468517507">"Pantau bilangan kata laluan salah yang ditaip semasa membuka kunci skrin, dan kunci peranti Android TV anda atau padamkan semua data peranti Android TV jika terlalu banyak kata laluan yang salah ditaip."</string>
+    <string name="policydesc_watchLogin" product="automotive" msgid="7011438994051251521">"Memantau bilangan kata laluan tidak betul yang ditaip semasa membuka kunci skrin dan mengunci sistem maklumat hibur atau memadam semua data sistem maklumat hibur jika terlalu banyak kata laluan yang tidak betul ditaip."</string>
     <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"Memantau bilangan kata laluan salah yang ditaip semasa membuka skrin, dan mengunci telefon atau memadam semua data telefon jika terlalu banyak kata laluan salah ditaip."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="2049038943004297474">"Pantau bilangan kata laluan tidak betul yang ditaip semasa membuka kunci skrin dan kunci tablet atau padam semua data pengguna ini jika terlalu banyak kata laluan yang tidak betul ditaip."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tv" msgid="8965224107449407052">"Pantau bilangan kata laluan salah yang ditaip semasa membuka kunci skrin, dan kunci peranti Android TV anda atau padamkan semua data pengguna ini jika terlalu banyak kata laluan yang salah ditaip."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="automotive" msgid="7180857406058327941">"Memantau bilangan kata laluan tidak betul yang ditaip semasa membuka kunci skrin dan mengunci sistem maklumat hibur atau memadam semua data profil ini jika terlalu banyak kata laluan yang tidak betul ditaip."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="9177645136475155924">"Pantau bilangan kata laluan tidak betul yang ditaip semasa membuka kunci skrin dan kunci telefon atau padam semua data pengguna ini jika terlalu banyak kata laluan yang tidak betul ditaip."</string>
     <string name="policylab_resetPassword" msgid="214556238645096520">"Tukar kunci skrin"</string>
     <string name="policydesc_resetPassword" msgid="4626419138439341851">"Tukar kunci skrin."</string>
@@ -737,10 +747,13 @@
     <string name="policylab_wipeData" msgid="1359485247727537311">"Padamkan semua data"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"Memadamkan data tablet tanpa amaran dengan melakukan tetapan semula data kilang."</string>
     <string name="policydesc_wipeData" product="tv" msgid="513862488950801261">"Padamkan data peranti Android TV anda tanpa amaran dengan melaksanakan tetapan semula data kilang."</string>
+    <string name="policydesc_wipeData" product="automotive" msgid="660804547737323300">"Memadam data sistem maklumat hibur tanpa amaran dengan melakukan tetapan semula data kilang."</string>
     <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"Padamkan data telefon tanpa amaran dengan melakukan tetapan semula data kilang."</string>
-    <string name="policylab_wipeData_secondaryUser" msgid="413813645323433166">"Padam data pengguna"</string>
+    <string name="policylab_wipeData_secondaryUser" product="automotive" msgid="115034358520328373">"Padam data profil"</string>
+    <string name="policylab_wipeData_secondaryUser" product="default" msgid="413813645323433166">"Padam data pengguna"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="2336676480090926470">"Padam data pengguna ini pada tablet ini tanpa amaran."</string>
     <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2293713284515865200">"Padamkan data pengguna ini pada peranti Android TV tanpa amaran."</string>
+    <string name="policydesc_wipeData_secondaryUser" product="automotive" msgid="4658832487305780879">"Memadam data profil pada sistem maklumat hibur ini tanpa amaran."</string>
     <string name="policydesc_wipeData_secondaryUser" product="default" msgid="2788325512167208654">"Padam data pengguna ini pada telefon ini tanpa amaran."</string>
     <string name="policylab_setGlobalProxy" msgid="215332221188670221">"Tetapkan proksi global peranti"</string>
     <string name="policydesc_setGlobalProxy" msgid="7149665222705519604">"Tetapkan proksi global peranti untuk digunakan sementara dasar didayakan. Hanya pemilik peranti boleh menetapkan proksi global."</string>
@@ -957,7 +970,7 @@
     <string name="keyguard_accessibility_expand_lock_area" msgid="4215280881346033434">"Kembangkan bahagian buka kunci."</string>
     <string name="keyguard_accessibility_slide_unlock" msgid="2968195219692413046">"Buka kunci luncur."</string>
     <string name="keyguard_accessibility_pattern_unlock" msgid="8669128146589233293">"Buka kunci corak."</string>
-    <string name="keyguard_accessibility_face_unlock" msgid="632407612842329815">"Wajah Buka Kunci"</string>
+    <string name="keyguard_accessibility_face_unlock" msgid="4533832120787386728">"Buka Kunci Wajah."</string>
     <string name="keyguard_accessibility_pin_unlock" msgid="4020864007967340068">"Buka kunci pin."</string>
     <string name="keyguard_accessibility_sim_pin_unlock" msgid="4895939120871890557">"Buka kunci Pin Sim."</string>
     <string name="keyguard_accessibility_sim_puk_unlock" msgid="3459003464041899101">"Buka kunci Puk Sim."</string>
@@ -1022,7 +1035,7 @@
     <string name="text_copied" msgid="2531420577879738860">"Teks disalin ke papan keratan"</string>
     <string name="copied" msgid="4675902854553014676">"Disalin"</string>
     <string name="pasted_from_app" msgid="5627698450808256545">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> ditampalkan daripada <xliff:g id="SOURCE_APP_NAME">%2$s</xliff:g>"</string>
-    <string name="pasted_from_clipboard" msgid="6295556725844421812">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> ditampalkan daripada papan keratan"</string>
+    <string name="pasted_from_clipboard" msgid="7355790625710831847">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> ditampal daripada papan keratan anda"</string>
     <string name="pasted_text" msgid="4298871641549173733">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> telah menampal teks yang anda salin"</string>
     <string name="pasted_image" msgid="4729097394781491022">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> telah menampal imej yang anda salin"</string>
     <string name="pasted_content" msgid="646276353060777131">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> telah menampal kandungan yang anda salin"</string>
@@ -1259,6 +1272,10 @@
     <string name="android_preparing_apk" msgid="589736917792300956">"Menyediakan <xliff:g id="APPNAME">%1$s</xliff:g>."</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"Memulakan apl."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"But akhir."</string>
+    <string name="fp_enrollment_powerbutton_intent_title" msgid="3385634173366119903">"Matikan skrin?"</string>
+    <string name="fp_enrollment_powerbutton_intent_message" msgid="6582149052513682522">"Semasa menyediakan cap jari anda, anda menekan butang Kuasa.\n\nTindakan ini biasanya mematikan skrin anda."</string>
+    <string name="fp_enrollment_powerbutton_intent_positive_button" msgid="5963520983910436791">"Matikan"</string>
+    <string name="fp_enrollment_powerbutton_intent_negative_button" msgid="6465764183480190748">"Batal"</string>
     <string name="heavy_weight_notification" msgid="8382784283600329576">"<xliff:g id="APP">%1$s</xliff:g> dijalankan"</string>
     <string name="heavy_weight_notification_detail" msgid="6802247239468404078">"Ketik untuk kembali ke permainan"</string>
     <string name="heavy_weight_switcher_title" msgid="3861984210040100886">"Pilih permainan"</string>
@@ -1457,6 +1474,8 @@
     <string name="permdesc_requestDeletePackages" msgid="6133633516423860381">"Membenarkan aplikasi meminta pemadaman pakej."</string>
     <string name="permlab_requestIgnoreBatteryOptimizations" msgid="7646611326036631439">"minta kebenaran untuk mengabaikan pengoptimuman bateri"</string>
     <string name="permdesc_requestIgnoreBatteryOptimizations" msgid="634260656917874356">"Membenarkan apl meminta kebenaran untuk mengabaikan pengoptimuman bateri untuk apl itu."</string>
+    <string name="permlab_queryAllPackages" msgid="2928450604653281650">"buat pertanyaan untuk semua pakej"</string>
+    <string name="permdesc_queryAllPackages" msgid="5339069855520996010">"Membenarkan apl melihat semua pakej yang dipasang."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1842872462124648678">"Ketik dua kali untuk mendapatkan kawalan zum"</string>
     <string name="gadget_host_error_inflating" msgid="2449961590495198720">"Tidak dapat menambahkan widget."</string>
     <string name="ime_action_go" msgid="5536744546326495436">"Pergi"</string>
@@ -1475,6 +1494,7 @@
     <string name="deny" msgid="6632259981847676572">"Nafi"</string>
     <string name="permission_request_notification_title" msgid="1810025922441048273">"Kebenaran diminta"</string>
     <string name="permission_request_notification_with_subtitle" msgid="3743417870360129298">"Kebenaran diminta\nuntuk akaun <xliff:g id="ACCOUNT">%s</xliff:g>."</string>
+    <string name="permission_request_notification_for_app_with_subtitle" msgid="1298704005732851350">"Kebenaran diminta oleh <xliff:g id="APP">%1$s</xliff:g>\nuntuk akaun <xliff:g id="ACCOUNT">%2$s</xliff:g>."</string>
     <string name="forward_intent_to_owner" msgid="4620359037192871015">"Anda menggunakan apl ini di luar profil kerja anda"</string>
     <string name="forward_intent_to_work" msgid="3620262405636021151">"Anda menggunakan apl ini dalam profil kerja anda"</string>
     <string name="input_method_binding_label" msgid="1166731601721983656">"Kaedah input"</string>
@@ -1529,7 +1549,7 @@
     <string name="sync_do_nothing" msgid="4528734662446469646">"Jangan lakukan apa-apa sekarang"</string>
     <string name="choose_account_label" msgid="5557833752759831548">"Pilih akaun"</string>
     <string name="add_account_label" msgid="4067610644298737417">"Tambah akaun"</string>
-    <string name="add_account_button_label" msgid="322390749416414097">"Tambah akaun"</string>
+    <string name="add_account_button_label" msgid="322390749416414097">"Tambahkan akaun"</string>
     <string name="number_picker_increment_button" msgid="7621013714795186298">"Tingkatkan"</string>
     <string name="number_picker_decrement_button" msgid="5116948444762708204">"Kurangkan"</string>
     <string name="number_picker_increment_scroll_mode" msgid="8403893549806805985">"<xliff:g id="VALUE">%s</xliff:g> ketik &amp; tahan."</string>
@@ -1683,7 +1703,7 @@
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Apabila pintasan dihidupkan, tindakan menekan kedua-dua butang kelantangan selama 3 saat akan memulakan ciri kebolehaksesan."</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"Hidupkan pintasan untuk ciri kebolehaksesan?"</string>
     <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"Tindakan menahan kedua-dua kekunci kelantangan selama beberapa saat akan menghidupkan ciri kebolehaksesan. Hal ini mungkin mengubah cara peranti anda berfungsi.\n\nCiri semasa:\n<xliff:g id="SERVICE">%1$s</xliff:g>\nAnda boleh menukar ciri yang dipilih dalam Tetapan &gt; Kebolehaksesan."</string>
-    <string name="accessibility_shortcut_multiple_service_list" msgid="6935581470716541531">"	• <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
+    <string name="accessibility_shortcut_multiple_service_list" msgid="2128323171922023762">" • <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
     <string name="accessibility_shortcut_single_service_warning_title" msgid="1909518473488345266">"Hidupkan pintasan <xliff:g id="SERVICE">%1$s</xliff:g>?"</string>
     <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"Tindakan menahan kedua-dua kekunci kelantangan selama beberapa saat akan menghidupkan <xliff:g id="SERVICE">%1$s</xliff:g>, iaitu satu ciri kebolehaksesan. Ini mungkin mengubah cara peranti anda berfungsi.\n\nAnda boleh menukar pintasan ini kepada ciri lain dalam Tetapan &gt; Kebolehaksesan."</string>
     <string name="accessibility_shortcut_on" msgid="5463618449556111344">"Hidupkan"</string>
@@ -1709,6 +1729,7 @@
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Gunakan Pintasan"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"Penyongsangan Warna"</string>
     <string name="color_correction_feature_name" msgid="3655077237805422597">"Pembetulan Warna"</string>
+    <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"Mod sebelah tangan"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"Amat malap"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Kekunci kelantangan ditahan. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> dihidupkan."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Kekunci kelantangan ditahan. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> dimatikan."</string>
@@ -1864,8 +1885,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Dikemas kini oleh pentadbir anda"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Dipadamkan oleh pentadbir anda"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"OK"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="750683025714899363">"Penjimat Bateri menghidupkan tema Gelap dan mengehadkan atau mematikan aktiviti latar, sesetengah kesan visual dan ciri tertentu.\n\n"<annotation id="url">"Ketahui lebih lanjut"</annotation></string>
-    <string name="battery_saver_description" msgid="5693741424234005958">"Penjimat Bateri menghidupkan tema Gelap dan mengehadkan atau mematikan aktiviti latar, sesetengah kesan visual dan ciri tertentu."</string>
+    <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"Penjimat Bateri menghidupkan tema Gelap dan mengehadkan atau mematikan aktiviti latar, sesetengah kesan visual, ciri tertentu dan sesetengah sambungan rangkaian."</string>
+    <string name="battery_saver_description" msgid="8518809702138617167">"Penjimat Bateri menghidupkan tema Gelap dan mengehadkan atau mematikan aktiviti latar, sesetengah kesan visual, ciri tertentu dan sesetengah sambungan rangkaian."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Untuk membantu penggunaan data dikurangkan, Penjimat Data menghalang sesetengah apl daripada menghantar atau menerima data di latar. Apl yang sedang digunakan boleh mengakses data tetapi mungkin tidak secara kerap. Perkara ini mungkin bermaksud bahawa imej tidak dipaparkan sehingga anda mengetik pada imej itu, contohnya."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Hidupkan Penjimat Data?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Hidupkan"</string>
@@ -1940,7 +1961,7 @@
     <string name="maximize_button_text" msgid="4258922519914732645">"Maksimumkan"</string>
     <string name="close_button_text" msgid="10603510034455258">"Tutup"</string>
     <string name="notification_messaging_title_template" msgid="772857526770251989">"<xliff:g id="CONVERSATION_TITLE">%1$s</xliff:g>: <xliff:g id="SENDER_NAME">%2$s</xliff:g>"</string>
-    <string name="call_notification_answer_action" msgid="5999246836247132937">"Jawapan"</string>
+    <string name="call_notification_answer_action" msgid="5999246836247132937">"Jawab"</string>
     <string name="call_notification_answer_video_action" msgid="2086030940195382249">"Video"</string>
     <string name="call_notification_decline_action" msgid="3700345945214000726">"Tolak"</string>
     <string name="call_notification_hang_up_action" msgid="9130720590159188131">"Tamatkan Panggilan"</string>
@@ -1968,8 +1989,8 @@
     <string name="app_suspended_default_message" msgid="6451215678552004172">"<xliff:g id="APP_NAME_0">%1$s</xliff:g> tidak tersedia sekarang. Ini diurus oleh <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"Ketahui lebih lanjut"</string>
     <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"Nyahjeda apl"</string>
-    <string name="work_mode_off_title" msgid="5503291976647976560">"Hidupkan profil kerja?"</string>
-    <string name="work_mode_off_message" msgid="8417484421098563803">"Apl kerja, pemberitahuan, data dan ciri profil kerja anda yang lain akan dihidupkan"</string>
+    <string name="work_mode_off_title" msgid="961171256005852058">"Hidupkan apl kerja?"</string>
+    <string name="work_mode_off_message" msgid="7319580997683623309">"Dapatkan akses kepada apl kerja dan pemberitahuan anda"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"Hidupkan"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"Apl tidak tersedia"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> tidak tersedia sekarang."</string>
@@ -2086,11 +2107,11 @@
     <string name="notification_feedback_indicator_promoted" msgid="9030204303764698640">"Pemberitahuan ini berada di kedudukan lebih tinggi. Ketik untuk memberikan maklum balas."</string>
     <string name="notification_feedback_indicator_demoted" msgid="8880309924296450875">"Pemberitahuan ini berada di kedudukan lebih rendah. Ketik untuk memberikan maklum balas."</string>
     <string name="nas_upgrade_notification_title" msgid="8436359459300146555">"Pemberitahuan dipertingkatkan"</string>
-    <string name="nas_upgrade_notification_content" msgid="5157550369837103337">"Tindakan dan balasan yang dicadangkan kini disediakan oleh pemberitahuan yang dipertingkatkan. Pemberitahuan Boleh Suai Android tidak disokong lagi."</string>
+    <string name="nas_upgrade_notification_content" msgid="5157550369837103337">"Cadangan tindakan dan balasan kini diberikan oleh pemberitahuan dipertingkatkan. Pemberitahuan Boleh Suai Android tidak disokong lagi."</string>
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"OK"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"Matikan"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"Ketahui lebih lanjut"</string>
-    <string name="nas_upgrade_notification_learn_more_content" msgid="2353549817159426430">"Pemberitahuan yang dipertingkatkan menggantikan Pemberitahuan Boleh Suai Android dalam Android 12. Ciri ini menunjukkan tindakan dan balasan yang dicadangkan, serta mengatur pemberitahuan anda.\n\nPemberitahuan yang dipertingkatkan dapat mengakses kandungan pemberitahuan, termasuk maklumat peribadi seperti nama kenalan dan mesej. Ciri ini juga dapat mengetepikan atau membalas pemberitahuan, seperti menjawab panggilan telefon dan mengawal Jangan Ganggu."</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"Pemberitahuan yang dipertingkatkan menggantikan Pemberitahuan Boleh Suai Android dalam Android 12. Ciri ini menunjukkan cadangan tindakan dan balasan, serta mengatur pemberitahuan anda.\n\nPemberitahuan yang dipertingkatkan dapat mengakses kandungan pemberitahuan, termasuk maklumat peribadi seperti nama kenalan dan mesej. Ciri ini juga dapat mengetepikan atau membalas pemberitahuan, seperti menjawab panggilan telefon dan mengawal Jangan Ganggu."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Pemberitahuan maklumat Mod Rutin"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Bateri mungkin habis sebelum pengecasan biasa"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Penjimat Bateri diaktifkan untuk memanjangkan hayat bateri"</string>
@@ -2287,4 +2308,6 @@
     <string name="splash_screen_view_branding_description" msgid="7911129347402728216">"Imej jenama aplikasi"</string>
     <string name="view_and_control_notification_title" msgid="4300765399209912240">"Semak tetapan akses"</string>
     <string name="view_and_control_notification_content" msgid="8003766498562604034">"<xliff:g id="SERVICE_NAME">%s</xliff:g> boleh melihat dan mengawal skrin anda. Ketik untuk membuat semakan."</string>
+    <string name="ui_translation_accessibility_translated_text" msgid="3197547218178944544">"<xliff:g id="MESSAGE">%1$s</xliff:g> Diterjemahkan."</string>
+    <string name="ui_translation_accessibility_translation_finished" msgid="3057830947610088465">"Mesej diterjemahkan daripada <xliff:g id="FROM_LANGUAGE">%1$s</xliff:g> kepada <xliff:g id="TO_LANGUAGE">%2$s</xliff:g>."</string>
 </resources>

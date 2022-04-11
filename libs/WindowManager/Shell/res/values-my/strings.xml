@@ -20,14 +20,17 @@
     <string name="pip_phone_close" msgid="5783752637260411309">"ပိတ်ရန်"</string>
     <string name="pip_phone_expand" msgid="2579292903468287504">"ချဲ့ရန်"</string>
     <string name="pip_phone_settings" msgid="5468987116750491918">"ဆက်တင်များ"</string>
+    <string name="pip_phone_enter_split" msgid="7042877263880641911">"မျက်နှာပြင် ခွဲ၍ပြသခြင်းသို့ ဝင်ရန်"</string>
     <string name="pip_menu_title" msgid="5393619322111827096">"မီနူး"</string>
-    <string name="pip_notification_title" msgid="1347104727641353453">"<xliff:g id="NAME">%s</xliff:g> သည် တစ်ခုပေါ် တစ်ခုထပ်၍ ဖွင့်ထားသည်"</string>
+    <string name="pip_notification_title" msgid="1347104727641353453">"<xliff:g id="NAME">%s</xliff:g> သည် နှစ်ခုထပ်၍ကြည့်ခြင်း ဖွင့်ထားသည်"</string>
     <string name="pip_notification_message" msgid="8854051911700302620">"<xliff:g id="NAME">%s</xliff:g> အား ဤဝန်ဆောင်မှုကို အသုံးမပြုစေလိုလျှင် ဆက်တင်ကိုဖွင့်ရန် တို့ပြီး ၎င်းဝန်ဆောင်မှုကို ပိတ်လိုက်ပါ။"</string>
     <string name="pip_play" msgid="3496151081459417097">"ဖွင့်ရန်"</string>
     <string name="pip_pause" msgid="690688849510295232">"ခေတ္တရပ်ရန်"</string>
     <string name="pip_skip_to_next" msgid="8403429188794867653">"နောက်တစ်ခုသို့ ကျော်ရန်"</string>
     <string name="pip_skip_to_prev" msgid="7172158111196394092">"ယခင်တစ်ခုသို့ ပြန်သွားရန်"</string>
     <string name="accessibility_action_pip_resize" msgid="4623966104749543182">"အရွယ်အစားပြောင်းရန်"</string>
+    <string name="accessibility_action_pip_stash" msgid="4060775037619702641">"သိုဝှက်ရန်"</string>
+    <string name="accessibility_action_pip_unstash" msgid="7467499339610437646">"မသိုဝှက်ရန်"</string>
     <string name="dock_forced_resizable" msgid="1749750436092293116">"မျက်နှာပြင် ခွဲ၍ပြသခြင်းဖြင့် အက်ပ်သည် အလုပ်မလုပ်ပါ။"</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="7408396418008948957">"အက်ပ်သည် မျက်နှာပြင်ခွဲပြရန် ပံ့ပိုးထားခြင်းမရှိပါ။"</string>
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"ဤအက်ပ်အနေဖြင့် ဒုတိယဖန်သားပြင်ပေါ်တွင် အလုပ်လုပ်မည် မဟုတ်ပါ။"</string>
@@ -70,5 +73,4 @@
     <string name="manage_bubbles_text" msgid="7730624269650594419">"စီမံရန်"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"ပူဖောင်းကွက် ဖယ်လိုက်သည်။"</string>
     <string name="restart_button_description" msgid="5887656107651190519">"ဤအက်ပ်ကို ပြန်စပြီး ဖန်သားပြင်အပြည့်လုပ်ရန် တို့ပါ။"</string>
-    <string name="got_it" msgid="4428750913636945527">"ရပြီ"</string>
 </resources>

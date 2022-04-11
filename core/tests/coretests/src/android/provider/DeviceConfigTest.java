@@ -827,4 +827,80 @@ public class DeviceConfigTest {
         return compositeName.equals(result.getString(Settings.NameValueTable.VALUE));
     }
 
+    @Test
+    public void deleteProperty_nullNamespace() {
+        try {
+            DeviceConfig.deleteProperty(null, KEY);
+            Assert.fail("Null namespace should have resulted in an NPE.");
+        } catch (NullPointerException e) {
+            // expected
+        }
+    }
+
+    @Test
+    public void deleteProperty_nullName() {
+        try {
+            DeviceConfig.deleteProperty(NAMESPACE, null);
+            Assert.fail("Null name should have resulted in an NPE.");
+        } catch (NullPointerException e) {
+            // expected
+        }
+    }
+
+    @Test
+    public void deletePropertyString() {
+        final String value = "new_value";
+        final String default_value = "default";
+        DeviceConfig.setProperty(NAMESPACE, KEY, value, false);
+        DeviceConfig.deleteProperty(NAMESPACE, KEY);
+        final String result = DeviceConfig.getString(NAMESPACE, KEY, default_value);
+        assertThat(result).isEqualTo(default_value);
+    }
+
+    @Test
+    public void deletePropertyBoolean() {
+        final boolean value = true;
+        final boolean default_value = false;
+        DeviceConfig.setProperty(NAMESPACE, KEY, String.valueOf(value), false);
+        DeviceConfig.deleteProperty(NAMESPACE, KEY);
+        final boolean result = DeviceConfig.getBoolean(NAMESPACE, KEY, default_value);
+        assertThat(result).isEqualTo(default_value);
+    }
+
+    @Test
+    public void deletePropertyInt() {
+        final int value = 123;
+        final int default_value = 999;
+        DeviceConfig.setProperty(NAMESPACE, KEY, String.valueOf(value), false);
+        DeviceConfig.deleteProperty(NAMESPACE, KEY);
+        final int result = DeviceConfig.getInt(NAMESPACE, KEY, default_value);
+        assertThat(result).isEqualTo(default_value);
+    }
+
+    @Test
+    public void deletePropertyLong() {
+        final long value = 456789;
+        final long default_value = 123456;
+        DeviceConfig.setProperty(NAMESPACE, KEY, String.valueOf(value), false);
+        DeviceConfig.deleteProperty(NAMESPACE, KEY);
+        final long result = DeviceConfig.getLong(NAMESPACE, KEY, default_value);
+        assertThat(result).isEqualTo(default_value);
+    }
+
+    @Test
+    public void deletePropertyFloat() {
+        final float value = 456.789f;
+        final float default_value = 123.456f;
+        DeviceConfig.setProperty(NAMESPACE, KEY, String.valueOf(value), false);
+        DeviceConfig.deleteProperty(NAMESPACE, KEY);
+        final float result = DeviceConfig.getFloat(NAMESPACE, KEY, default_value);
+        assertThat(result).isEqualTo(default_value);
+    }
+
+    @Test
+    public void deleteProperty_empty() {
+        assertThat(DeviceConfig.deleteProperty(NAMESPACE, KEY)).isTrue();
+        final String result = DeviceConfig.getString(NAMESPACE, KEY, null);
+        assertThat(result).isNull();
+    }
 }

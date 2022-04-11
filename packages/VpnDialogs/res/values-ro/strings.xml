@@ -18,6 +18,7 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="prompt" msgid="3183836924226407828">"Solicitare de conexiune"</string>
     <string name="warning" msgid="809658604548412033">"<xliff:g id="APP">%s</xliff:g> dorește să configureze o conexiune VPN care să îi permită să monitorizeze traficul în rețea. Acceptați numai dacă aveți încredere în sursă. Atunci când conexiunea VPN este activă, &lt;br /&gt; &lt;br /&gt; &lt;img src=vpn_icon /&gt; se afișează în partea de sus a ecranului."</string>
+    <string name="warning" product="tv" msgid="5188957997628124947">"<xliff:g id="APP">%s</xliff:g> solicită permisiunea de a configura o conexiune VPN care să îi permită să monitorizeze traficul de rețea. Acceptați numai dacă aveți încredere în sursă. &lt;br /&gt; &lt;br /&gt; &lt;img src=vpn_icon /&gt; va apărea pe ecran atunci când conexiunea VPN este activă."</string>
     <string name="legacy_title" msgid="192936250066580964">"VPN este conectat"</string>
     <string name="session" msgid="6470628549473641030">"Sesiune:"</string>
     <string name="duration" msgid="3584782459928719435">"Durată:"</string>

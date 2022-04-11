@@ -4127,7 +4127,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         if (mRestrictedNetworkingMode) {
             // Note: setUidFirewallRule also updates mUidFirewallRestrictedModeRules.
             // In this case, default firewall rules can also be added.
-            setUidFirewallRule(FIREWALL_CHAIN_RESTRICTED, uid,
+            setUidFirewallRuleUL(FIREWALL_CHAIN_RESTRICTED, uid,
                     getRestrictedModeFirewallRule(uidBlockedState));
         }
     }
@@ -4291,9 +4291,9 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             final boolean isWhitelisted = isWhitelistedFromPowerSaveUL(uid,
                     chain == FIREWALL_CHAIN_DOZABLE);
             if (isWhitelisted || isUidForegroundOnRestrictPowerUL(uid)) {
-                setUidFirewallRule(chain, uid, FIREWALL_RULE_ALLOW);
+                setUidFirewallRuleUL(chain, uid, FIREWALL_RULE_ALLOW);
             } else {
-                setUidFirewallRule(chain, uid, FIREWALL_RULE_DEFAULT);
+                setUidFirewallRuleUL(chain, uid, FIREWALL_RULE_DEFAULT);
             }
         }
     }
@@ -4339,10 +4339,10 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             int appId = UserHandle.getAppId(uid);
             if (!mPowerSaveTempWhitelistAppIds.get(appId) && isUidIdle(uid)
                     && !isUidForegroundOnRestrictPowerUL(uid)) {
-                setUidFirewallRule(FIREWALL_CHAIN_STANDBY, uid, FIREWALL_RULE_DENY);
+                setUidFirewallRuleUL(FIREWALL_CHAIN_STANDBY, uid, FIREWALL_RULE_DENY);
                 if (LOGD) Log.d(TAG, "updateRuleForAppIdleUL DENY " + uid);
             } else {
-                setUidFirewallRule(FIREWALL_CHAIN_STANDBY, uid, FIREWALL_RULE_DEFAULT);
+                setUidFirewallRuleUL(FIREWALL_CHAIN_STANDBY, uid, FIREWALL_RULE_DEFAULT);
                 if (LOGD) Log.d(TAG, "updateRuleForAppIdleUL " + uid + " to DEFAULT");
             }
         } finally {
@@ -5406,10 +5406,11 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     /**
      * Add or remove a uid to the firewall denylist for all network ifaces.
      */
-    private void setUidFirewallRule(int chain, int uid, int rule) {
+    @GuardedBy("mUidRulesFirstLock")
+    private void setUidFirewallRuleUL(int chain, int uid, int rule) {
         if (Trace.isTagEnabled(Trace.TRACE_TAG_NETWORK)) {
             Trace.traceBegin(Trace.TRACE_TAG_NETWORK,
-                    "setUidFirewallRule: " + chain + "/" + uid + "/" + rule);
+                    "setUidFirewallRuleUL: " + chain + "/" + uid + "/" + rule);
         }
         try {
             if (chain == FIREWALL_CHAIN_DOZABLE) {

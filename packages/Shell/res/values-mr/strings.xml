@@ -18,30 +18,30 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="3701846017049540910">"शेल"</string>
     <string name="bugreport_notification_channel" msgid="2574150205913861141">"बग रीपोर्ट"</string>
-    <string name="bugreport_in_progress_title" msgid="4311705936714972757">"बग रीपोर्ट <xliff:g id="ID">#%d</xliff:g> तयार केला जात आहे"</string>
-    <string name="bugreport_finished_title" msgid="4429132808670114081">"बग रीपोर्ट <xliff:g id="ID">#%d</xliff:g> कॅप्चर केला"</string>
-    <string name="bugreport_updating_title" msgid="4423539949559634214">"दोष अहवालामध्‍ये तपशील जोडत आहे"</string>
+    <string name="bugreport_in_progress_title" msgid="4311705936714972757">"बग रिपोर्ट <xliff:g id="ID">#%d</xliff:g> तयार केला जात आहे"</string>
+    <string name="bugreport_finished_title" msgid="4429132808670114081">"बग रिपोर्ट <xliff:g id="ID">#%d</xliff:g> कॅप्चर केला"</string>
+    <string name="bugreport_updating_title" msgid="4423539949559634214">"बग रिपोर्टमध्ये तपशील जोडत आहे"</string>
     <string name="bugreport_updating_wait" msgid="3322151947853929470">"कृपया प्रतीक्षा करा..."</string>
-    <string name="bugreport_finished_text" product="watch" msgid="1223616207145252689">"फोनवर बग रीपोर्ट लवकरच दिसेल"</string>
-    <string name="bugreport_finished_text" product="tv" msgid="5758325479058638893">"तुमचा बग रीपोर्ट शेअर करण्यासाठी निवडा"</string>
-    <string name="bugreport_finished_text" product="default" msgid="8353769438382138847">"तुमचा बग रीपोर्ट शेअर करण्यासाठी टॅप करा"</string>
-    <string name="bugreport_finished_pending_screenshot_text" product="tv" msgid="2343263822812016950">"तुमचा बग रीपोर्ट स्क्रीनशॉटशिवाय शेअर करण्यासाठी टॅप करा किंवा स्क्रीनशॉट पूर्ण होण्याची प्रतीक्षा करा"</string>
-    <string name="bugreport_finished_pending_screenshot_text" product="watch" msgid="1474435374470177193">"स्क्रीनशॉट शिवाय तुमचा बग रीपोर्ट शेअर करण्यासाठी टॅप करा किंवा समाप्त करण्यासाठी स्क्रीनशॉटची प्रतीक्षा करा"</string>
-    <string name="bugreport_finished_pending_screenshot_text" product="default" msgid="1474435374470177193">"स्क्रीनशॉट शिवाय तुमचा बग रीपोर्ट शेअर करण्यासाठी टॅप करा किंवा समाप्त करण्यासाठी स्क्रीनशॉटची प्रतीक्षा करा"</string>
+    <string name="bugreport_finished_text" product="watch" msgid="1223616207145252689">"फोनवर बग रिपोर्ट लवकरच दिसेल"</string>
+    <string name="bugreport_finished_text" product="tv" msgid="5758325479058638893">"तुमचा बग रिपोर्ट शेअर करण्यासाठी निवडा"</string>
+    <string name="bugreport_finished_text" product="default" msgid="8353769438382138847">"तुमचा बग रिपोर्ट शेअर करण्यासाठी टॅप करा"</string>
+    <string name="bugreport_finished_pending_screenshot_text" product="tv" msgid="2343263822812016950">"तुमचा बग रिपोर्ट स्क्रीनशॉटशिवाय शेअर करण्यासाठी टॅप करा किंवा स्क्रीनशॉट पूर्ण होईपर्यंत थांबा"</string>
+    <string name="bugreport_finished_pending_screenshot_text" product="watch" msgid="1474435374470177193">"स्क्रीनशॉट शिवाय तुमचा बग रिपोर्ट शेअर करण्यासाठी टॅप करा किंवा स्क्रीनशॉट पूर्ण होईपर्यंत थांबा"</string>
+    <string name="bugreport_finished_pending_screenshot_text" product="default" msgid="1474435374470177193">"स्क्रीनशॉट शिवाय तुमचा बग रिपोर्ट शेअर करण्यासाठी टॅप करा किंवा स्क्रीनशॉट पूर्ण होईपर्यंत थांबा"</string>
     <string name="bugreport_confirm" msgid="5917407234515812495">"बग रीपोर्टांमध्ये तुम्ही संवेदनशील (अ‍ॅप-वापर आणि स्थान डेटा यासारखा) डेटा म्हणून विचार करता त्या डेटाच्या समावेशासह सिस्टीमच्या विविध लॉग फायलींमधील डेटा असतो. ज्या लोकांवर आणि अ‍ॅपवर तुमचा विश्वास आहे केवळ त्यांच्यासह हा बग रीपोर्ट शेअर करा."</string>
     <string name="bugreport_confirm_dont_repeat" msgid="6179945398364357318">"पुन्हा दर्शवू नका"</string>
     <string name="bugreport_storage_title" msgid="5332488144740527109">"बग रीपोर्ट"</string>
-    <string name="bugreport_unreadable_text" msgid="586517851044535486">"बग रीपोर्ट फाइल वाचणे शक्य झाले नाही"</string>
-    <string name="bugreport_add_details_to_zip_failed" msgid="1302931926486712371">"झिप फाइल मध्ये बग रीपोर्ट तपशील जोडणे शक्य झाले नाही"</string>
+    <string name="bugreport_unreadable_text" msgid="586517851044535486">"बग अहवाल फाइल वाचणे शक्य झाले नाही"</string>
+    <string name="bugreport_add_details_to_zip_failed" msgid="1302931926486712371">"झिप फाइल मध्ये बग रिपोर्ट तपशील जोडणे शक्य झाले नाही"</string>
     <string name="bugreport_unnamed" msgid="2800582406842092709">"अनामित"</string>
     <string name="bugreport_info_action" msgid="2158204228510576227">"तपशील"</string>
     <string name="bugreport_screenshot_action" msgid="8677781721940614995">"स्क्रीनशॉट"</string>
     <string name="bugreport_screenshot_taken" msgid="5684211273096253120">"स्क्रीनशॉट यशस्वीरित्या घेतला."</string>
     <string name="bugreport_screenshot_failed" msgid="5853049140806834601">"स्क्रीनशॉट घेणे शक्य झाले नाही."</string>
-    <string name="bugreport_info_dialog_title" msgid="1355948594292983332">"बग रीपोर्ट <xliff:g id="ID">#%d</xliff:g> तपशील"</string>
+    <string name="bugreport_info_dialog_title" msgid="1355948594292983332">"बग रिपोर्ट <xliff:g id="ID">#%d</xliff:g> तपशील"</string>
     <string name="bugreport_info_name" msgid="4414036021935139527">"फाईलनाव"</string>
     <string name="bugreport_info_title" msgid="2306030793918239804">"दोष शीर्षक"</string>
     <string name="bugreport_info_description" msgid="5072835127481627722">"दोष सारांश"</string>
     <string name="save" msgid="4781509040564835759">"सेव्ह करा"</string>
-    <string name="bugreport_intent_chooser_title" msgid="7605709494790894076">"बग रीपोर्ट शेअर करा"</string>
+    <string name="bugreport_intent_chooser_title" msgid="7605709494790894076">"बग रिपोर्ट शेअर करा"</string>
 </resources>

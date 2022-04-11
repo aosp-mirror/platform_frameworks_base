@@ -19,11 +19,15 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="mic_active" msgid="5766614241012047024">"Mikrofonen är aktiv"</string>
-    <string name="app_accessed_mic" msgid="2754428675130470196">"%1$s har fått åtkomst till mikrofonen"</string>
     <string name="notification_vpn_connected" msgid="3891023882833274730">"VPN är anslutet"</string>
     <string name="notification_vpn_disconnected" msgid="7150747626448044843">"VPN är frånkopplat"</string>
     <string name="notification_disclosure_vpn_text" msgid="3873532735584866236">"via <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
     <string name="tv_notification_panel_title" msgid="5311050946506276154">"Aviseringar"</string>
     <string name="tv_notification_panel_no_notifications" msgid="9115191912267270678">"Inga aviseringar"</string>
+    <string name="mic_recording_announcement" msgid="7587123608060316575">"Mikrofonen spelar in"</string>
+    <string name="camera_recording_announcement" msgid="7240177719403759112">"Kameran spelar in"</string>
+    <string name="mic_and_camera_recording_announcement" msgid="8599231390508812667">"Kameran och mikrofonen spelar in"</string>
+    <string name="mic_stopped_recording_announcement" msgid="7301537004900721242">"Mikrofonen slutade spela in"</string>
+    <string name="camera_stopped_recording_announcement" msgid="8540496432367032801">"Kameran slutade spela in"</string>
+    <string name="mic_camera_stopped_recording_announcement" msgid="8708524579599977412">"Kameran och mikrofonen slutade spelade in"</string>
 </resources>

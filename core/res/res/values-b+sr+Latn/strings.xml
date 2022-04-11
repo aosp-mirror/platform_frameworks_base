@@ -78,7 +78,7 @@
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"ID pozivaoca podrazumevano nije ograničen. Sledeći poziv: Nije ograničen."</string>
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"Usluga nije dobavljena."</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"Ne možete da promenite podešavanje ID-a korisnika."</string>
-    <string name="RestrictedOnDataTitle" msgid="1500576417268169774">"Nema usluge prenosa podataka preko mobilnog operatera"</string>
+    <string name="RestrictedOnDataTitle" msgid="1500576417268169774">"Nema usluge mobilnih podataka"</string>
     <string name="RestrictedOnEmergencyTitle" msgid="2852916906106191866">"Hitni pozivi nisu dostupni"</string>
     <string name="RestrictedOnNormalTitle" msgid="7009474589746551737">"Nema glasovne usluge"</string>
     <string name="RestrictedOnAllVoiceTitle" msgid="3982069078579103087">"Nema glasovne usluge ni hitnih poziva"</string>
@@ -204,7 +204,6 @@
     <string name="gnss_service" msgid="8907781262179951385">"GNSS usluga"</string>
     <string name="sensor_notification_service" msgid="7474531979178682676">"Usluga obaveštenja senzora"</string>
     <string name="twilight_service" msgid="8964898045693187224">"Usluga Sumrak"</string>
-    <string name="offline_location_time_zone_detection_service_attribution" msgid="303754195048744816">"Detektor vremenske zone (nema internet veze)"</string>
     <string name="gnss_time_update_service" msgid="9039489496037616095">"GNSS usluga za ažuriranje vremena"</string>
     <string name="music_recognition_manager_service" msgid="7481956037950276359">"Usluga Menadžer prepoznavanja muzike"</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"Uređaj će biti obrisan"</string>
@@ -352,7 +351,7 @@
     <string name="permdesc_expandStatusBar" msgid="7180756900448498536">"Dozvoljava aplikaciji da proširuje ili skuplja statusnu traku."</string>
     <string name="permlab_fullScreenIntent" msgid="4310888199502509104">"prikazuje obaveštenja kao aktivnosti preko celog ekrana na zaključanom uređaju"</string>
     <string name="permdesc_fullScreenIntent" msgid="1100721419406643997">"Omogućava aplikaciji da na zaključanom uređaju prikazuje obaveštenja kao aktivnosti preko celog ekrana."</string>
-    <string name="permlab_install_shortcut" msgid="7451554307502256221">"instaliranje prečica"</string>
+    <string name="permlab_install_shortcut" msgid="7451554307502256221">"Instaliranje prečica"</string>
     <string name="permdesc_install_shortcut" msgid="4476328467240212503">"Omogućava aplikaciji da dodaje prečice na početni ekran bez intervencije korisnika."</string>
     <string name="permlab_uninstall_shortcut" msgid="295263654781900390">"deinstaliranje prečica"</string>
     <string name="permdesc_uninstall_shortcut" msgid="1924735350988629188">"Omogućava aplikaciji da uklanja prečice sa početnog ekrana bez intervencije korisnika."</string>
@@ -365,11 +364,11 @@
     <string name="permlab_receiveMms" msgid="4000650116674380275">"prijem tekstualnih poruka (MMS)"</string>
     <string name="permdesc_receiveMms" msgid="958102423732219710">"Dozvoljava aplikaciji da prima i obrađuje MMS poruke. To znači da aplikacija može da nadgleda ili briše poruke koje se šalju uređaju, a da vam ih ne prikaže."</string>
     <string name="permlab_bindCellBroadcastService" msgid="586746677002040651">"Prosleđivanje poruka za mobilne uređaje na lokalitetu"</string>
-    <string name="permdesc_bindCellBroadcastService" msgid="6540910200973641606">"Dozvoljava aplikaciji da se vezuje za modul poruka za mobilne uređaje na lokalitetu da bi prosleđivala poruke za mobilne uređaje na lokalitetu onako kako su primljene. Obaveštenja poruka za mobilne uređaje na lokalitetu se na nekim lokacijama primaju kao upozorenja na hitne slučajeve. Zlonamerne aplikacije mogu da utiču na učinak ili ometaju rad uređaja kada se primi poruka o hitnom slučaju za mobilne uređaje na lokalitetu."</string>
+    <string name="permdesc_bindCellBroadcastService" msgid="6540910200973641606">"Dozvoljava aplikaciji da se vezuje za modul poruka za mobilne uređaje na lokalitetu da bi prosleđivala poruke za mobilne uređaje na lokalitetu onako kako su primljene. Obaveštenja poruka za mobilne uređaje na lokalitetu se na nekim lokacijama primaju kao upozorenja na hitne slučajeve. Zlonamerne aplikacije mogu da utiču na performanse ili ometaju rad uređaja kada se primi poruka o hitnom slučaju za mobilne uređaje na lokalitetu."</string>
     <string name="permlab_manageOngoingCalls" msgid="281244770664231782">"Upravljanje odlaznim pozivima"</string>
     <string name="permdesc_manageOngoingCalls" msgid="7003138133829915265">"Omogućava aplikaciji da vidi detalje o odlaznim pozivima na uređaju i da kontroliše te pozive."</string>
     <string name="permlab_readCellBroadcasts" msgid="5869884450872137693">"čitanje poruka info servisa"</string>
-    <string name="permdesc_readCellBroadcasts" msgid="672513437331980168">"Omogućava aplikaciji da čita poruke info servisa koje uređaj prima. Upozorenja info servisa se na nekim lokacijama primaju kao upozorenja na hitne slučajeve. Zlonamerne aplikacije mogu da utiču na učinak ili ometaju funkcionisanje uređaja kada se primi poruka info servisa o hitnom slučaju."</string>
+    <string name="permdesc_readCellBroadcasts" msgid="672513437331980168">"Omogućava aplikaciji da čita poruke info servisa koje uređaj prima. Upozorenja info servisa se na nekim lokacijama primaju kao upozorenja na hitne slučajeve. Zlonamerne aplikacije mogu da utiču na performanse ili ometaju funkcionisanje uređaja kada se primi poruka info servisa o hitnom slučaju."</string>
     <string name="permlab_subscribedFeedsRead" msgid="217624769238425461">"čitanje prijavljenih fidova"</string>
     <string name="permdesc_subscribedFeedsRead" msgid="6911349196661811865">"Dozvoljava aplikaciji da preuzima detalje o trenutno sinhronizovanim fidovima."</string>
     <string name="permlab_sendSms" msgid="7757368721742014252">"šalje i pregleda SMS poruke"</string>
@@ -473,6 +472,8 @@
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"Dozvoljava aplikaciji da koristi uslugu razmene trenutnih poruka da bi upućivala pozive bez vaše intervencije."</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"čitanje statusa i identiteta telefona"</string>
     <string name="permdesc_readPhoneState" msgid="7229063553502788058">"Dozvoljava aplikaciji da pristupa funkcijama telefona na uređaju. Ova dozvola omogućava aplikaciji da utvrdi broj telefona i ID-ove uređaja, zatim da li je poziv aktivan, kao i broj daljinskog uređaja sa kojim je uspostavljen poziv."</string>
+    <string name="permlab_readBasicPhoneState" msgid="3214853233263871347">"očitavanje osnovnog telefonskog statusa i identiteta"</string>
+    <string name="permdesc_readBasicPhoneState" msgid="828185691675460520">"Omogućava aplikaciji da pristupa osnovnim telefonskim funkcijama uređaja."</string>
     <string name="permlab_manageOwnCalls" msgid="9033349060307561370">"preusmeravanje poziva preko sistema"</string>
     <string name="permdesc_manageOwnCalls" msgid="4431178362202142574">"Dozvoljava aplikaciji da preusmerava pozive preko sistema da bi poboljšala doživljaj pozivanja."</string>
     <string name="permlab_callCompanionApp" msgid="3654373653014126884">"pregled i kontrola poziva preko sistema."</string>
@@ -545,6 +546,8 @@
     <string name="permdesc_bluetooth_advertise" product="default" msgid="6085174451034210183">"Dozvoljava aplikaciji da se oglašava na Bluetooth uređajima u blizini"</string>
     <string name="permlab_uwb_ranging" msgid="8141915781475770665">"određivanje razdaljine između uređaja ultra-širokog pojasa u blizini"</string>
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"Dozvoljava aplikaciji da određuje relativnu razdaljinu između uređaja ultra-širokog pojasa u blizini"</string>
+    <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"interakcija sa WiFi uređajima u blizini"</string>
+    <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"Dozvoljava aplikaciji da se oglašava, povezuje i utvrđuje relativnu poziciju WiFi uređaja u blizini"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Informacije o željenoj NFC usluzi za plaćanje"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Dozvoljava aplikaciji da preuzima informacije o željenoj NFC usluzi za plaćanje, poput registrovanih identifikatora aplikacija i odredišta preusmeravanja."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"kontrola komunikacije u užem polju (Near Field Communication)"</string>
@@ -583,11 +586,12 @@
     <string name="fingerprint_acquired_partial" msgid="694598777291084823">"Otkriven je delimičan otisak prsta"</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"Nije uspela obrada otiska prsta. Probajte ponovo."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="5236744087471419479">"Obrišite senzor"</string>
-    <string name="fingerprint_acquired_too_fast" msgid="1254724478300787385">"Prst je pomeren prebrzo"</string>
+    <string name="fingerprint_acquired_too_fast" msgid="6038375140739678098">"Zadržite malo duže"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"Previše sporo ste pomerili prst. Probajte ponovo."</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"Probajte sa drugim otiskom prsta"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"Previše je svetlo"</string>
     <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"Probajte da prilagodite"</string>
+    <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"Svaki put lagano promenite položaj prsta"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"Otisak prsta je potvrđen"</string>
@@ -604,6 +608,7 @@
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"Nije registrovan nijedan otisak prsta."</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"Ovaj uređaj nema senzor za otisak prsta."</string>
     <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"Senzor je privremeno onemogućen."</string>
+    <string name="fingerprint_error_bad_calibration" msgid="4385512597740168120">"Ne možete da koristite senzor za otisak prsta. Posetite dobavljača za popravke"</string>
     <string name="fingerprint_name_template" msgid="8941662088160289778">"Prst <xliff:g id="FINGERID">%d</xliff:g>"</string>
     <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"Koristite otisak prsta"</string>
     <string name="fingerprint_or_screen_lock_app_setting_name" msgid="3501743523487644907">"Koristite otisak prsta ili zaključavanje ekrana"</string>
@@ -611,18 +616,19 @@
     <string name="fingerprint_or_screen_lock_dialog_default_subtitle" msgid="5195808203117992200">"Koristite otisak prsta ili zaključavanje ekrana da biste nastavili"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
+    <string name="fingerprint_error_vendor_unknown" msgid="4170002184907291065">"Došlo je do problema. Probajte ponovo."</string>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"Ikona otiska prsta"</string>
-    <string name="permlab_manageFace" msgid="4569549381889283282">"upravljanje hardv. za otključavanje licem"</string>
-    <string name="permdesc_manageFace" msgid="6204569688492710471">"Dozvoljava da aplikacija aktivira metode za dodavanje i brisanje šablona lica radi korišćenja."</string>
-    <string name="permlab_useFaceAuthentication" msgid="1011430526454859030">"korišćenje hardvera za otključavanje licem"</string>
-    <string name="permdesc_useFaceAuthentication" msgid="3115697017684668012">"Dozvoljava da aplikacija koristi hardver za otključavanje licem radi potvrde identiteta"</string>
-    <string name="face_recalibrate_notification_name" msgid="6006095897989257026">"Otključavanje licem"</string>
-    <string name="face_recalibrate_notification_title" msgid="5944930528030496897">"Ponovo registrujte lice"</string>
-    <string name="face_recalibrate_notification_content" msgid="892757485125249962">"Da biste poboljšali prepoznavanje, ponovo registrujte lice"</string>
-    <string name="face_setup_notification_title" msgid="550617822603450009">"Podesite otključavanje licem"</string>
+    <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"Otključavanje licem"</string>
+    <string name="face_recalibrate_notification_title" msgid="2524791952735579082">"Problem sa otključavanje licem"</string>
+    <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"Dodirnite da biste izbrisali model lica, pa ponovo dodajte svoje lice"</string>
+    <string name="face_setup_notification_title" msgid="8843461561970741790">"Podesite otključavanje licem"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"Otključajte telefon tako što ćete ga pogledati"</string>
+    <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"Da biste koristili otključavanje licem, uključite "<b>"pristup kameri"</b>" u odeljku Podešavanja &gt; Privatnost"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Podesite još načina za otključavanje"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"Dodirnite da biste dodali otisak prsta"</string>
+    <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Otključavanje otiskom prsta"</string>
+    <string name="fingerprint_recalibrate_notification_title" msgid="2406561052064558497">"Ne možete da koristite senzor za otisak prsta"</string>
+    <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"Posetite dobavljača za popravke."</string>
     <string name="face_acquired_insufficient" msgid="2150805835949162453">"Snimanje lica nije uspelo. Probajte ponovo."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"Previše je svetlo. Probajte sa slabijim osvetljenjem."</string>
     <string name="face_acquired_too_dark" msgid="252573548464426546">"Pretamno je. Probajte sa jačim osvetljenjem."</string>
@@ -646,23 +652,25 @@
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"Provera lica nije uspela. Hardver nije dostupan."</string>
-    <string name="face_error_timeout" msgid="522924647742024699">"Probajte ponovo otključavanje licem."</string>
+    <string name="face_error_timeout" msgid="2598544068593889762">"Probajte ponovo otključavanje licem"</string>
     <string name="face_error_no_space" msgid="5649264057026021723">"Novi podaci o licu nisu sačuvani. Prvo izbrišete prethodne."</string>
     <string name="face_error_canceled" msgid="2164434737103802131">"Obrada lica je otkazana."</string>
-    <string name="face_error_user_canceled" msgid="8553045452825849843">"Korisnik je otkazao otključavanje licem"</string>
+    <string name="face_error_user_canceled" msgid="5766472033202928373">"Korisnik je otkazao otključavanje licem"</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"Previše pokušaja. Probajte ponovo kasnije."</string>
-    <string name="face_error_lockout_permanent" msgid="8277853602168960343">"Previše pokušaja. Otključavanje licem je onemogućeno."</string>
+    <string name="face_error_lockout_permanent" msgid="3277134834042995260">"Previše pokušaja. Otključavanje licem je onemogućeno."</string>
+    <string name="face_error_lockout_screen_lock" msgid="5062609811636860928">"Previše pokušaja. Koristite zaključavanje ekrana za to."</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"Provera lica nije uspela. Probajte ponovo."</string>
-    <string name="face_error_not_enrolled" msgid="7369928733504691611">"Niste podesili otključavanje licem"</string>
-    <string name="face_error_hw_not_present" msgid="1070600921591729944">"Otključavanje licem nije podržano na ovom uređaju"</string>
+    <string name="face_error_not_enrolled" msgid="1134739108536328412">"Niste podesili otključavanje licem"</string>
+    <string name="face_error_hw_not_present" msgid="7940978724978763011">"Otključavanje licem nije podržano na ovom uređaju"</string>
     <string name="face_error_security_update_required" msgid="5076017208528750161">"Senzor je privremeno onemogućen."</string>
     <string name="face_name_template" msgid="3877037340223318119">"Lice <xliff:g id="FACEID">%d</xliff:g>"</string>
-    <string name="face_app_setting_name" msgid="8130135875458467243">"Koristite otključavanje licem"</string>
+    <string name="face_app_setting_name" msgid="5854024256907828015">"Koristite otključavanje licem"</string>
     <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"Koristite zaključavanje licem ili zaključavanje ekrana"</string>
     <string name="face_dialog_default_subtitle" msgid="6620492813371195429">"Potvrdite identitet licem da biste nastavili"</string>
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"Koristite lice ili zaključavanje ekrana da biste nastavili"</string>
   <string-array name="face_error_vendor">
   </string-array>
+    <string name="face_error_vendor_unknown" msgid="7387005932083302070">"Došlo je do problema. Probajte ponovo."</string>
     <string name="face_icon_content_description" msgid="465030547475916280">"Ikona lica"</string>
     <string name="permlab_readSyncSettings" msgid="6250532864893156277">"čitanje podešavanja sinhronizacije"</string>
     <string name="permdesc_readSyncSettings" msgid="1325658466358779298">"Dozvoljava aplikaciji da čita podešavanja sinhronizacije za nalog. Na primer, ovako može da se utvrdi da li je aplikacija Ljudi sinhronizovana sa nalogom."</string>
@@ -729,9 +737,11 @@
     <string name="policylab_watchLogin" msgid="7599669460083719504">"Nadgledajte pokušaje otključavanja ekrana"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"Prati broj netačno unetih lozinki prilikom otključavanja ekrana i zaključava tablet ili briše podatke sa tableta ako je netačna lozinka uneta previše puta."</string>
     <string name="policydesc_watchLogin" product="tv" msgid="2140588224468517507">"Nadgleda broj netačnih lozinki unetih pri otključavanju ekrana i zaključava Android TV uređaj ili briše sve podatke sa Android TV uređaja ako se unese previše netačnih lozinki."</string>
+    <string name="policydesc_watchLogin" product="automotive" msgid="7011438994051251521">"Prati broj netačno unetih lozinki pri otključavanju ekrana i zaključava sistem za info-zabavu ili briše sve podatke sa sistema za info-zabavu ako je netačna lozinka uneta previše puta."</string>
     <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"Prati broj netačno unetih lozinki pri otključavanju ekrana i zaključava telefon ili briše sve podatke sa telefona ako je netačna lozinka uneta previše puta."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="2049038943004297474">"Nadgleda broj netačnih lozinki unetih pri otključavanju ekrana i zaključava tablet ili briše sve podatke ovog korisnika ako se unese previše netačnih lozinki."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tv" msgid="8965224107449407052">"Nadgleda broj netačnih lozinki unetih pri otključavanju ekrana i zaključava Android TV uređaj ili briše sve podatke ovog korisnika ako se unese previše netačnih lozinki."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="automotive" msgid="7180857406058327941">"Nadgleda broj netačnih lozinki unetih pri otključavanju ekrana i zaključava sistem za info-zabavu ili briše sve podatke ovog profila ako se unese previše netačnih lozinki."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="9177645136475155924">"Nadgleda broj netačnih lozinki unetih pri otključavanju ekrana i zaključava telefon ili briše sve podatke ovog korisnika ako se unese previše netačnih lozinki."</string>
     <string name="policylab_resetPassword" msgid="214556238645096520">"Promena zaključavanja ekrana"</string>
     <string name="policydesc_resetPassword" msgid="4626419138439341851">"Menja zaključavanje ekrana."</string>
@@ -740,10 +750,13 @@
     <string name="policylab_wipeData" msgid="1359485247727537311">"Brisanje svih podataka"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"Brisanje podataka na tabletu bez upozorenja resetovanjem na fabrička podešavanja."</string>
     <string name="policydesc_wipeData" product="tv" msgid="513862488950801261">"Briše podatke Android TV uređaja bez upozorenja pomoću resetovanja na fabrička podešavanja."</string>
+    <string name="policydesc_wipeData" product="automotive" msgid="660804547737323300">"Briše podatke na sistemu za info-zabavu bez upozorenja resetovanjem na fabrička podešavanja."</string>
     <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"Brisanje podataka na telefonu bez upozorenja resetovanjem na fabrička podešavanja."</string>
-    <string name="policylab_wipeData_secondaryUser" msgid="413813645323433166">"Obriši podatke korisnika"</string>
+    <string name="policylab_wipeData_secondaryUser" product="automotive" msgid="115034358520328373">"Brisanje podataka profila"</string>
+    <string name="policylab_wipeData_secondaryUser" product="default" msgid="413813645323433166">"Obriši podatke korisnika"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="2336676480090926470">"Briše podatke ovog korisnika na ovom tabletu bez upozorenja."</string>
     <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2293713284515865200">"Briše podatke ovog korisnika na ovom Android TV uređaju bez upozorenja."</string>
+    <string name="policydesc_wipeData_secondaryUser" product="automotive" msgid="4658832487305780879">"Briše podatke ovog profila na ovom sistemu za info-zabavu bez upozorenja."</string>
     <string name="policydesc_wipeData_secondaryUser" product="default" msgid="2788325512167208654">"Briše podatke ovog korisnika na ovom telefonu bez upozorenja."</string>
     <string name="policylab_setGlobalProxy" msgid="215332221188670221">"Podesite globalni proksi server uređaja"</string>
     <string name="policydesc_setGlobalProxy" msgid="7149665222705519604">"Podešava globalni proksi uređaja koji će se koristiti dok su smernice omogućene. Samo vlasnik uređaja može da podesi globalni proksi."</string>
@@ -960,7 +973,7 @@
     <string name="keyguard_accessibility_expand_lock_area" msgid="4215280881346033434">"Proširi oblast otključavanja."</string>
     <string name="keyguard_accessibility_slide_unlock" msgid="2968195219692413046">"Otključavanje prevlačenjem."</string>
     <string name="keyguard_accessibility_pattern_unlock" msgid="8669128146589233293">"Otključavanje šablonom."</string>
-    <string name="keyguard_accessibility_face_unlock" msgid="632407612842329815">"Otključavanje licem."</string>
+    <string name="keyguard_accessibility_face_unlock" msgid="4533832120787386728">"Otključavanje licem."</string>
     <string name="keyguard_accessibility_pin_unlock" msgid="4020864007967340068">"Otključavanje PIN-om."</string>
     <string name="keyguard_accessibility_sim_pin_unlock" msgid="4895939120871890557">"Otključava SIM karticu PIN-om."</string>
     <string name="keyguard_accessibility_sim_puk_unlock" msgid="3459003464041899101">"Otključava SIM karticu PUK-om."</string>
@@ -1025,7 +1038,7 @@
     <string name="text_copied" msgid="2531420577879738860">"Tekst je kopiran u privremenu memoriju."</string>
     <string name="copied" msgid="4675902854553014676">"Kopirano je"</string>
     <string name="pasted_from_app" msgid="5627698450808256545">"Aplikacija<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> je nalepila podatke iz aplikacije <xliff:g id="SOURCE_APP_NAME">%2$s</xliff:g>"</string>
-    <string name="pasted_from_clipboard" msgid="6295556725844421812">"Aplikacija<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> nalepila podatke iz privremene memorije"</string>
+    <string name="pasted_from_clipboard" msgid="7355790625710831847">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> je prelepio/la iz privremene memorije"</string>
     <string name="pasted_text" msgid="4298871641549173733">"Aplikacija<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> je nalepila tekst koji ste kopirali"</string>
     <string name="pasted_image" msgid="4729097394781491022">"Aplikacija<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> je nalepila sliku koju ste kopirali"</string>
     <string name="pasted_content" msgid="646276353060777131">"Aplikacija<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> je nalepila sadržaj koji ste kopirali"</string>
@@ -1279,10 +1292,14 @@
     <string name="android_preparing_apk" msgid="589736917792300956">"Priprema se <xliff:g id="APPNAME">%1$s</xliff:g>."</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"Pokretanje aplikacija."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"Završavanje pokretanja."</string>
+    <string name="fp_enrollment_powerbutton_intent_title" msgid="3385634173366119903">"Želite da isključite ekran?"</string>
+    <string name="fp_enrollment_powerbutton_intent_message" msgid="6582149052513682522">"Pritisli ste dugme za uključivanje tokom podešavanja otiska prsta.\n\nTako se najčešće isključuje ekran."</string>
+    <string name="fp_enrollment_powerbutton_intent_positive_button" msgid="5963520983910436791">"Isključi"</string>
+    <string name="fp_enrollment_powerbutton_intent_negative_button" msgid="6465764183480190748">"Otkaži"</string>
     <string name="heavy_weight_notification" msgid="8382784283600329576">"Aplikacija <xliff:g id="APP">%1$s</xliff:g> je pokrenuta"</string>
     <string name="heavy_weight_notification_detail" msgid="6802247239468404078">"Dodirnite da biste se vratili u igru"</string>
     <string name="heavy_weight_switcher_title" msgid="3861984210040100886">"Odaberite igru"</string>
-    <string name="heavy_weight_switcher_text" msgid="6814316627367160126">"Da bi učinak bio bolji, možete da otvorite samo jednu od ovih igara odjednom."</string>
+    <string name="heavy_weight_switcher_text" msgid="6814316627367160126">"Da bi performanse bile bolje, može da bude otvorena samo jedna od ovih igara."</string>
     <string name="old_app_action" msgid="725331621042848590">"Nazad na <xliff:g id="OLD_APP">%1$s</xliff:g>"</string>
     <string name="new_app_action" msgid="547772182913269801">"Otvori <xliff:g id="NEW_APP">%1$s</xliff:g>"</string>
     <string name="new_app_description" msgid="1958903080400806644">"<xliff:g id="OLD_APP">%1$s</xliff:g> će se zatvoriti bez čuvanja"</string>
@@ -1394,7 +1411,7 @@
     <string name="test_harness_mode_notification_title" msgid="2282785860014142511">"Omogućen je režim probnog korišćenja"</string>
     <string name="test_harness_mode_notification_message" msgid="3039123743127958420">"Obavite resetovanje na fabrička podešavanja da biste onemogućili režim probnog korišćenja."</string>
     <string name="console_running_notification_title" msgid="6087888939261635904">"Serijska konzola je omogućena"</string>
-    <string name="console_running_notification_message" msgid="7892751888125174039">"Učinak je smanjen. Da biste onemogući konzolu, proverite pokretački program."</string>
+    <string name="console_running_notification_message" msgid="7892751888125174039">"Performanse su smanjene. Da biste onemogući konzolu, proverite pokretački program."</string>
     <string name="usb_contaminant_detected_title" msgid="4359048603069159678">"Tečnost ili nečistoća u USB portu"</string>
     <string name="usb_contaminant_detected_message" msgid="7346100585390795743">"USB port je automatski isključen. Dodirnite da biste saznali više."</string>
     <string name="usb_contaminant_not_detected_title" msgid="2651167729563264053">"Korišćenje USB porta je dozvoljeno"</string>
@@ -1406,7 +1423,7 @@
     <string name="share_remote_bugreport_action" msgid="7630880678785123682">"DELI"</string>
     <string name="decline_remote_bugreport_action" msgid="4040894777519784346">"ODBIJ"</string>
     <string name="select_input_method" msgid="3971267998568587025">"Izbor metoda unosa"</string>
-    <string name="show_ime" msgid="6406112007347443383">"Zadrži je na ekranu dok je fizička tastatura aktivna"</string>
+    <string name="show_ime" msgid="6406112007347443383">"Zadržava se na ekranu dok je fizička tastatura aktivna"</string>
     <string name="hardware" msgid="1800597768237606953">"Prikaži virtuelnu tastaturu"</string>
     <string name="select_keyboard_layout_notification_title" msgid="4427643867639774118">"Konfigurišite fizičku tastaturu"</string>
     <string name="select_keyboard_layout_notification_message" msgid="8835158247369158154">"Dodirnite da biste izabrali jezik i raspored"</string>
@@ -1477,6 +1494,8 @@
     <string name="permdesc_requestDeletePackages" msgid="6133633516423860381">"Omogućava da aplikacija zahteva brisanje paketa."</string>
     <string name="permlab_requestIgnoreBatteryOptimizations" msgid="7646611326036631439">"traženje dozvole za ignorisanje optimizacija baterije"</string>
     <string name="permdesc_requestIgnoreBatteryOptimizations" msgid="634260656917874356">"Dozvoljava aplikaciji da traži dozvolu za ignorisanje optimizacija baterije za tu aplikaciju."</string>
+    <string name="permlab_queryAllPackages" msgid="2928450604653281650">"slanje upita za sve pakete"</string>
+    <string name="permdesc_queryAllPackages" msgid="5339069855520996010">"Dozvoljava aplikaciji da vidi sve instalirane pakete."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1842872462124648678">"Dodirnite dvaput za kontrolu zumiranja"</string>
     <string name="gadget_host_error_inflating" msgid="2449961590495198720">"Nije moguće dodati vidžet."</string>
     <string name="ime_action_go" msgid="5536744546326495436">"Idi"</string>
@@ -1495,6 +1514,7 @@
     <string name="deny" msgid="6632259981847676572">"Odbij"</string>
     <string name="permission_request_notification_title" msgid="1810025922441048273">"Zatražena je dozvola"</string>
     <string name="permission_request_notification_with_subtitle" msgid="3743417870360129298">"Zatražena je dozvola\nza nalog <xliff:g id="ACCOUNT">%s</xliff:g>"</string>
+    <string name="permission_request_notification_for_app_with_subtitle" msgid="1298704005732851350">"<xliff:g id="APP">%1$s</xliff:g> traži dozvolu \nza nalog <xliff:g id="ACCOUNT">%2$s</xliff:g>."</string>
     <string name="forward_intent_to_owner" msgid="4620359037192871015">"Koristite ovu aplikaciju izvan poslovnog profila"</string>
     <string name="forward_intent_to_work" msgid="3620262405636021151">"Koristite ovu aplikaciju na poslovnom profilu"</string>
     <string name="input_method_binding_label" msgid="1166731601721983656">"Metod unosa"</string>
@@ -1515,7 +1535,7 @@
     <string name="vpn_lockdown_disconnected" msgid="5573611651300764955">"Veza sa uvek uključenim VPN-om je prekinuta"</string>
     <string name="vpn_lockdown_error" msgid="4453048646854247947">"Povezivanje na stalno uključeni VPN nije uspelo"</string>
     <string name="vpn_lockdown_config" msgid="8331697329868252169">"Promenite podešavanja VPN-a"</string>
-    <string name="upload_file" msgid="8651942222301634271">"Odaberi datoteku"</string>
+    <string name="upload_file" msgid="8651942222301634271">"Odaberi fajl"</string>
     <string name="no_file_chosen" msgid="4146295695162318057">"Nije izabrana nijedna datoteka"</string>
     <string name="reset" msgid="3865826612628171429">"Resetuj"</string>
     <string name="submit" msgid="862795280643405865">"Pošalji"</string>
@@ -1705,7 +1725,7 @@
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Kada je prečica uključena, pritisnite oba dugmeta za jačinu zvuka da biste pokrenuli funkciju pristupačnosti."</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"Želite da uključite prečicu za funkcije pristupačnosti?"</string>
     <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"Ako zadržite oba tastera za jačinu zvuka par sekundi, uključiće se funkcije pristupačnosti. To može da promeni način rada uređaja.\n\nPostojeće funkcije:\n<xliff:g id="SERVICE">%1$s</xliff:g>\nMožete da promenite izabrane funkcije u odeljku Podešavanja &gt; Pristupačnost."</string>
-    <string name="accessibility_shortcut_multiple_service_list" msgid="6935581470716541531">"	• <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
+    <string name="accessibility_shortcut_multiple_service_list" msgid="2128323171922023762">" • <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
     <string name="accessibility_shortcut_single_service_warning_title" msgid="1909518473488345266">"Želite da uključite prečicu za uslugu <xliff:g id="SERVICE">%1$s</xliff:g>?"</string>
     <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"Ako zadržite oba tastera za jačinu zvuka par sekundi, uključuje se <xliff:g id="SERVICE">%1$s</xliff:g>, funkcija pristupačnosti. To može da promeni način rada uređaja.\n\nMožete da promenite funkciju na koju se odnosi ova prečica u odeljku Podešavanja &gt; Pristupačnost."</string>
     <string name="accessibility_shortcut_on" msgid="5463618449556111344">"Uključi"</string>
@@ -1731,6 +1751,7 @@
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Koristi prečicu"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"Inverzija boja"</string>
     <string name="color_correction_feature_name" msgid="3655077237805422597">"Korekcija boja"</string>
+    <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"Režim jednom rukom"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"Dodatno zatamnjeno"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Držali ste tastere za jačinu zvuka. Usluga <xliff:g id="SERVICE_NAME">%1$s</xliff:g> je uključena."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Držali ste tastere za jačinu zvuka. Usluga <xliff:g id="SERVICE_NAME">%1$s</xliff:g> je isključena."</string>
@@ -1887,8 +1908,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Ažurirao je administrator"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Izbrisao je administrator"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"Potvrdi"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="750683025714899363">"Ušteda baterije uključuje Tamnu temu i ograničava ili isključuje aktivnosti u pozadini, neke vizuelne efekte i određene funkcije.\n\n"<annotation id="url">"Saznajte više"</annotation></string>
-    <string name="battery_saver_description" msgid="5693741424234005958">"Ušteda baterije uključuje Tamnu temu i ograničava ili isključuje aktivnosti u pozadini, neke vizuelne efekte i određene funkcije."</string>
+    <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"Ušteda baterije uključuje tamnu temu i ograničava ili isključuje aktivnosti u pozadini, neke vizuelne efekte, određene funkcije i neke mrežne veze."</string>
+    <string name="battery_saver_description" msgid="8518809702138617167">"Ušteda baterije uključuje tamnu temu i ograničava ili isključuje aktivnosti u pozadini, neke vizuelne efekte, određene funkcije i neke mrežne veze."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Da bi se smanjila potrošnja podataka, Ušteda podataka sprečava neke aplikacije da šalju ili primaju podatke u pozadini. Aplikacija koju trenutno koristite može da pristupa podacima, ali će to činiti ređe. Na primer, slike se neće prikazivati dok ih ne dodirnete."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Želite da uključite Uštedu podataka?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Uključi"</string>
@@ -2000,8 +2021,8 @@
     <string name="app_suspended_default_message" msgid="6451215678552004172">"Aplikacija <xliff:g id="APP_NAME_0">%1$s</xliff:g> trenutno nije dostupna. <xliff:g id="APP_NAME_1">%2$s</xliff:g> upravlja dostupnošću."</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"Saznajte više"</string>
     <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"Opozovi pauziranje aplikacije"</string>
-    <string name="work_mode_off_title" msgid="5503291976647976560">"Da uključimo poslovni profil?"</string>
-    <string name="work_mode_off_message" msgid="8417484421098563803">"Uključiće se poslovne aplikacije, obaveštenja, podaci i druge funkcije poslovnog profila"</string>
+    <string name="work_mode_off_title" msgid="961171256005852058">"Uključujete poslovne aplikacije?"</string>
+    <string name="work_mode_off_message" msgid="7319580997683623309">"Pristupajte poslovnim aplikacijama i obaveštenjima"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"Uključi"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"Aplikacija nije dostupna"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"Aplikacija <xliff:g id="APP_NAME">%1$s</xliff:g> trenutno nije dostupna."</string>
@@ -2123,7 +2144,7 @@
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"Potvrdi"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"Isključi"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"Saznajte više"</string>
-    <string name="nas_upgrade_notification_learn_more_content" msgid="2353549817159426430">"Poboljšana obaveštenja su zamenila Android prilagodljiva obaveštenja u Android-u 12. Ova funkcija pokazuje predložene radnje i odgovore i organizuje obaveštenja.\n\nPoboljšana obaveštenja mogu da pristupaju sadržaju obaveštenja, uključujući lične informacije poput imena kontakata i poruka. Ova funkcija može i da odbacuje obaveštenja ili da odgovara na njih, na primer, da se javlja na telefonske pozive i kontroliše režim Ne uznemiravaj."</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"Poboljšana obaveštenja su zamenila Android prilagodljiva obaveštenja u Android-u 12. Ova funkcija pokazuje predložene radnje i odgovore, i organizuje obaveštenja.\n\nPoboljšana obaveštenja mogu da pristupaju sadržaju obaveštenja, uključujući lične podatke poput imena kontakata i poruka. Ova funkcija može i da odbacuje obaveštenja ili da odgovara na njih, na primer, da se javlja na telefonske pozive i kontroliše režim Ne uznemiravaj."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Obaveštenje o informacijama Rutinskog režima"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Baterija će se možda isprazniti pre uobičajenog punjenja"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Ušteda baterije je aktivirana da bi se produžilo trajanje baterije"</string>
@@ -2166,7 +2187,7 @@
     <string name="accessibility_system_action_notifications_label" msgid="6083767351772162010">"Obaveštenja"</string>
     <string name="accessibility_system_action_quick_settings_label" msgid="4583900123506773783">"Brza podešavanja"</string>
     <string name="accessibility_system_action_power_dialog_label" msgid="8095341821683910781">"Dijalog napajanja"</string>
-    <string name="accessibility_system_action_lock_screen_label" msgid="5484190691945563838">"Zaključani ekran"</string>
+    <string name="accessibility_system_action_lock_screen_label" msgid="5484190691945563838">"Zaključavanje ekrana"</string>
     <string name="accessibility_system_action_screenshot_label" msgid="3581566515062741676">"Snimak ekrana"</string>
     <string name="accessibility_system_action_on_screen_a11y_shortcut_label" msgid="8488701469459210309">"Prečica za pristupačnost na ekranu"</string>
     <string name="accessibility_system_action_on_screen_a11y_shortcut_chooser_label" msgid="1057878690209817886">"Alatka za biranje prečica za pristupačnost na ekranu"</string>
@@ -2321,4 +2342,6 @@
     <string name="splash_screen_view_branding_description" msgid="7911129347402728216">"Imidž brenda aplikacije"</string>
     <string name="view_and_control_notification_title" msgid="4300765399209912240">"Proverite podešavanja pristupa"</string>
     <string name="view_and_control_notification_content" msgid="8003766498562604034">"<xliff:g id="SERVICE_NAME">%s</xliff:g> može da pregleda i kontroliše ekran. Dodirnite da biste pregledali."</string>
+    <string name="ui_translation_accessibility_translated_text" msgid="3197547218178944544">"<xliff:g id="MESSAGE">%1$s</xliff:g> Prevedeno."</string>
+    <string name="ui_translation_accessibility_translation_finished" msgid="3057830947610088465">"Poruka je prevedena sa jezika <xliff:g id="FROM_LANGUAGE">%1$s</xliff:g> na <xliff:g id="TO_LANGUAGE">%2$s</xliff:g>."</string>
 </resources>

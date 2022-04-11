@@ -369,6 +369,10 @@ public class ApnSetting implements Parcelable {
     public @interface AuthType {}
 
     // Possible values for protocol which is defined in TS 27.007 section 10.1.1.
+    /** Unknown protocol.
+     * @hide
+     */
+    public static final int PROTOCOL_UNKNOWN = -1;
     /** Internet protocol. */
     public static final int PROTOCOL_IP = 0;
     /** Internet protocol, version 6. */
