@@ -135,8 +135,7 @@
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="2242167416140740920">"Жүздүн аныктыгы текшерилди"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"Ырасталды"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"Бүтүрүү үчүн \"Ырастоо\" баскычын басыңыз"</string>
-    <!-- no translation found for biometric_dialog_tap_confirm_with_face (1092050545851021991) -->
-    <skip />
+    <string name="biometric_dialog_tap_confirm_with_face" msgid="1092050545851021991">"Кулпусун жүзүңүз менен ачтыңыз. Улантуу үчүн кулпусун ачуу сүрөтчөсүн басыңыз."</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"Аныктыгы текшерилди"</string>
     <string name="biometric_dialog_use_pin" msgid="8385294115283000709">"PIN кодду колдонуу"</string>
     <string name="biometric_dialog_use_pattern" msgid="2315593393167211194">"Графикалык ачкычты колдонуу"</string>
@@ -241,8 +240,8 @@
     <string name="quick_settings_cast_detail_empty_text" msgid="2846282280014617785">"Жеткиликтүү түзмөктөр жок"</string>
     <string name="quick_settings_cast_no_wifi" msgid="6980194769795014875">"Wi-Fi туташкан жок"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="4980669966716685588">"Жарыктыгы"</string>
-    <string name="quick_settings_inversion_label" msgid="3501527749494755688">"Түстү инверсиялоо"</string>
-    <string name="quick_settings_color_correction_label" msgid="5636617913560474664">"Түсүн тууралоо"</string>
+    <string name="quick_settings_inversion_label" msgid="3501527749494755688">"Түстөрдү инверсиялоо"</string>
+    <string name="quick_settings_color_correction_label" msgid="5636617913560474664">"Түстөрдү тууралоо"</string>
     <string name="quick_settings_more_user_settings" msgid="1064187451100861954">"Колдонуучунун жөндөөлөрү"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"Бүттү"</string>
     <string name="quick_settings_close_user_panel" msgid="5599724542275896849">"Жабуу"</string>
@@ -311,10 +310,8 @@
     <string name="notification_tap_again" msgid="4477318164947497249">"Ачуу үчүн кайра таптап коюңуз"</string>
     <string name="tap_again" msgid="1315420114387908655">"Кайра таптап коюңуз"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"Ачуу үчүн өйдө сүрүңүз"</string>
-    <!-- no translation found for keyguard_unlock_press (9140109453735019209) -->
-    <skip />
-    <!-- no translation found for keyguard_face_successful_unlock_press (25520941264602588) -->
-    <skip />
+    <string name="keyguard_unlock_press" msgid="9140109453735019209">"Ачуу үчүн кулпусун ачуу сүрөтчөсүн басыңыз"</string>
+    <string name="keyguard_face_successful_unlock_press" msgid="25520941264602588">"Кулпусун жүзүңүз менен ачтыңыз. Ачуу үчүн кулпусун ачуу сүрөтчөсүн басыңыз."</string>
     <string name="keyguard_retry" msgid="886802522584053523">"Кайталоо үчүн экранды өйдө сүрүңүз"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"NFC колдонуу үчүн түзмөктүн кулпусун ачыңыз"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"Бул түзмөк уюмуңузга таандык"</string>
@@ -341,6 +338,11 @@
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"Сеансыңызды улантасызбы?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"Кайра баштоо"</string>
     <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"Ооба, уланта берели"</string>
+    <string name="guest_notification_app_name" msgid="2110425506754205509">"Конок режими"</string>
+    <string name="guest_notification_session_active" msgid="5567273684713471450">"Конок режиминдесиз"</string>
+    <string name="user_add_user_title" msgid="4172327541504825032">"Жаңы колдонуучу кошосузбу?"</string>
+    <string name="user_add_user_message_short" msgid="2599370307878014791">"Жаңы колдонуучу кошулганда, ал өз мейкиндигин түзүп алышы керек.\n\nКолдонмолорду бир колдонуучу жаңыртканда, ал калган бардык колдонуучулар үчүн да жаңырат."</string>
+    <string name="user_add_user_message_guest_remove" msgid="5589286604543355007">\n\n"Жаңы колдонуучуну кошсоңуз, конок режими жабылат жана учурдагы конок сеансындагы бардык колдонмолор жана дайындар өчүрүлөт."</string>
     <string name="user_limit_reached_title" msgid="2429229448830346057">"Дагы колдонуучу кошууга болбойт"</string>
     <plurals name="user_limit_reached_message" formatted="false" msgid="2573535787802908398">
       <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> колдонуучуга чейин кошууга болот.</item>
@@ -808,6 +810,7 @@
     <string name="controls_media_button_pause" msgid="8614887780950376258">"Тындыруу"</string>
     <string name="controls_media_button_prev" msgid="8126822360056482970">"Мурунку трек"</string>
     <string name="controls_media_button_next" msgid="6662636627525947610">"Кийинки трек"</string>
+    <string name="controls_media_button_connecting" msgid="3138354625847598095">"Туташууда"</string>
     <string name="controls_media_smartspace_rec_title" msgid="1699818353932537407">"Ойнотуу"</string>
     <string name="controls_media_smartspace_rec_description" msgid="4136242327044070732">"<xliff:g id="APP_LABEL">%1$s</xliff:g> колдонмосун ачуу"</string>
     <string name="controls_media_smartspace_rec_item_description" msgid="2189271793070870883">"<xliff:g id="SONG_NAME">%1$s</xliff:g> ырын (аткаруучу: <xliff:g id="ARTIST_NAME">%2$s</xliff:g>) <xliff:g id="APP_LABEL">%3$s</xliff:g> колдонмосунан ойнотуу"</string>

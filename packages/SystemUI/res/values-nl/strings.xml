@@ -135,8 +135,7 @@
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="2242167416140740920">"Gezicht geverifieerd"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"Bevestigd"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"Tik op Bevestigen om te voltooien"</string>
-    <!-- no translation found for biometric_dialog_tap_confirm_with_face (1092050545851021991) -->
-    <skip />
+    <string name="biometric_dialog_tap_confirm_with_face" msgid="1092050545851021991">"Ontgrendeld via gezicht. Druk op het ontgrendelicoon."</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"Geverifieerd"</string>
     <string name="biometric_dialog_use_pin" msgid="8385294115283000709">"Pincode gebruiken"</string>
     <string name="biometric_dialog_use_pattern" msgid="2315593393167211194">"Patroon gebruiken"</string>
@@ -311,10 +310,8 @@
     <string name="notification_tap_again" msgid="4477318164947497249">"Tik nog eens om te openen"</string>
     <string name="tap_again" msgid="1315420114387908655">"Tik nog een keer"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"Swipe omhoog om te openen"</string>
-    <!-- no translation found for keyguard_unlock_press (9140109453735019209) -->
-    <skip />
-    <!-- no translation found for keyguard_face_successful_unlock_press (25520941264602588) -->
-    <skip />
+    <string name="keyguard_unlock_press" msgid="9140109453735019209">"Druk op het ontgrendelicoon om te openen"</string>
+    <string name="keyguard_face_successful_unlock_press" msgid="25520941264602588">"Ontgrendeld via gezicht. Druk op het ontgrendelicoon."</string>
     <string name="keyguard_retry" msgid="886802522584053523">"Swipe omhoog om het opnieuw te proberen"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"Ontgrendel het apparaat om NFC te gebruiken"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"Dit apparaat is eigendom van je organisatie"</string>
@@ -341,6 +338,14 @@
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"Wil je doorgaan met je sessie?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"Opnieuw starten"</string>
     <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"Ja, doorgaan"</string>
+    <!-- no translation found for guest_notification_app_name (2110425506754205509) -->
+    <skip />
+    <!-- no translation found for guest_notification_session_active (5567273684713471450) -->
+    <skip />
+    <string name="user_add_user_title" msgid="4172327541504825032">"Nieuwe gebruiker toevoegen?"</string>
+    <string name="user_add_user_message_short" msgid="2599370307878014791">"Als je een nieuwe gebruiker toevoegt, moet die persoon zijn eigen profiel instellen.\n\nElke gebruiker kan apps updaten voor alle andere gebruikers."</string>
+    <!-- no translation found for user_add_user_message_guest_remove (5589286604543355007) -->
+    <skip />
     <string name="user_limit_reached_title" msgid="2429229448830346057">"Gebruikerslimiet bereikt"</string>
     <plurals name="user_limit_reached_message" formatted="false" msgid="2573535787802908398">
       <item quantity="other">Je kunt maximaal <xliff:g id="COUNT">%d</xliff:g> gebruikers toevoegen.</item>
@@ -572,7 +577,7 @@
     <string name="keyboard_shortcut_group_system_back" msgid="1055709713218453863">"Terug"</string>
     <string name="keyboard_shortcut_group_system_notifications" msgid="3615971650562485878">"Meldingen"</string>
     <string name="keyboard_shortcut_group_system_shortcuts_helper" msgid="4856808328618265589">"Sneltoetsen"</string>
-    <string name="keyboard_shortcut_group_system_switch_input" msgid="952555530383268166">"Toetsenbordindeling schakelen"</string>
+    <string name="keyboard_shortcut_group_system_switch_input" msgid="952555530383268166">"Toetsenbordindeling wisselen"</string>
     <string name="keyboard_shortcut_group_applications" msgid="7386239431100651266">"Apps"</string>
     <string name="keyboard_shortcut_group_applications_assist" msgid="771606231466098742">"Assistentie"</string>
     <string name="keyboard_shortcut_group_applications_browser" msgid="2776211137869809251">"Browser"</string>
@@ -808,6 +813,8 @@
     <string name="controls_media_button_pause" msgid="8614887780950376258">"Pauzeren"</string>
     <string name="controls_media_button_prev" msgid="8126822360056482970">"Vorige track"</string>
     <string name="controls_media_button_next" msgid="6662636627525947610">"Volgende track"</string>
+    <!-- no translation found for controls_media_button_connecting (3138354625847598095) -->
+    <skip />
     <string name="controls_media_smartspace_rec_title" msgid="1699818353932537407">"Afspelen"</string>
     <string name="controls_media_smartspace_rec_description" msgid="4136242327044070732">"<xliff:g id="APP_LABEL">%1$s</xliff:g> openen"</string>
     <string name="controls_media_smartspace_rec_item_description" msgid="2189271793070870883">"<xliff:g id="SONG_NAME">%1$s</xliff:g> van <xliff:g id="ARTIST_NAME">%2$s</xliff:g> afspelen via <xliff:g id="APP_LABEL">%3$s</xliff:g>"</string>
