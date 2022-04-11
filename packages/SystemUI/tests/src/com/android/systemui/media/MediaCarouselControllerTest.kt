@@ -19,6 +19,7 @@ package com.android.systemui.media
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import androidx.test.filters.SmallTest
+import com.android.internal.logging.InstanceId
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.classifier.FalsingCollector
 import com.android.systemui.dagger.qualifiers.Main
@@ -28,6 +29,7 @@ import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.statusbar.notification.collection.provider.VisualStabilityProvider
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.util.concurrency.DelayableExecutor
+import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.time.FakeSystemClock
 import junit.framework.Assert.assertEquals
 import junit.framework.Assert.assertTrue
@@ -224,5 +226,20 @@ class MediaCarouselControllerTest : SysuiTestCase() {
             mediaHostState,
             animate = false)
         verify(logger).logCarouselPosition(MediaHierarchyManager.LOCATION_DREAM_OVERLAY)
+    }
+
+    @Test
+    fun testRecommendationRemoved_logged() {
+        val packageName = "smartspace package"
+        val instanceId = InstanceId.fakeInstanceId(123)
+
+        val smartspaceData = EMPTY_SMARTSPACE_MEDIA_DATA.copy(
+            packageName = packageName,
+            instanceId = instanceId
+        )
+        MediaPlayerData.addMediaRecommendation(SMARTSPACE_KEY, smartspaceData, panel, true, clock)
+        mediaCarouselController.removePlayer(SMARTSPACE_KEY)
+
+        verify(logger).logRecommendationRemoved(eq(packageName), eq(instanceId!!))
     }
 }

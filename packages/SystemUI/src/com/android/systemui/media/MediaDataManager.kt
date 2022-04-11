@@ -103,8 +103,17 @@ private val LOADING = MediaData(
         appUid = Process.INVALID_UID)
 
 @VisibleForTesting
-internal val EMPTY_SMARTSPACE_MEDIA_DATA = SmartspaceMediaData("INVALID", false, false,
-    "INVALID", null, emptyList(), null, 0, 0)
+internal val EMPTY_SMARTSPACE_MEDIA_DATA = SmartspaceMediaData(
+    targetId = "INVALID",
+    isActive = false,
+    isValid = false,
+    packageName = "INVALID",
+    cardAction = null,
+    recommendations = emptyList(),
+    dismissIntent = null,
+    backgroundColor = 0,
+    headphoneConnectionTimeMillis = 0,
+    instanceId = InstanceId.fakeInstanceId(-1))
 
 fun isMediaNotification(sbn: StatusBarNotification): Boolean {
     return sbn.notification.isMediaNotification()
@@ -532,14 +541,16 @@ class MediaDataManager(
      * connection session.
      */
     fun dismissSmartspaceRecommendation(key: String, delay: Long) {
-        if (smartspaceMediaData.targetId != key) {
+        if (smartspaceMediaData.targetId != key || !smartspaceMediaData.isValid) {
+            // If this doesn't match, or we've already invalidated the data, no action needed
             return
         }
 
         if (DEBUG) Log.d(TAG, "Dismissing Smartspace media target")
         if (smartspaceMediaData.isActive) {
             smartspaceMediaData = EMPTY_SMARTSPACE_MEDIA_DATA.copy(
-                targetId = smartspaceMediaData.targetId)
+                targetId = smartspaceMediaData.targetId,
+                instanceId = smartspaceMediaData.instanceId)
         }
         foregroundExecutor.executeDelayed(
             { notifySmartspaceMediaDataRemoved(
@@ -1035,7 +1046,8 @@ class MediaDataManager(
                     Log.d(TAG, "Set Smartspace media to be inactive for the data update")
                 }
                 smartspaceMediaData = EMPTY_SMARTSPACE_MEDIA_DATA.copy(
-                    targetId = smartspaceMediaData.targetId)
+                    targetId = smartspaceMediaData.targetId,
+                    instanceId = smartspaceMediaData.instanceId)
                 notifySmartspaceMediaDataRemoved(smartspaceMediaData.targetId, immediately = false)
             }
             1 -> {
@@ -1214,15 +1226,24 @@ class MediaDataManager(
                 .getParcelable(EXTRAS_SMARTSPACE_DISMISS_INTENT_KEY) as Intent?
         }
         packageName(target)?.let {
-            return SmartspaceMediaData(target.smartspaceTargetId, isActive, true, it,
-                target.baseAction, target.iconGrid,
-                dismissIntent, 0, target.creationTimeMillis)
+            return SmartspaceMediaData(
+                targetId = target.smartspaceTargetId,
+                isActive = isActive,
+                isValid = true,
+                packageName = it,
+                cardAction = target.baseAction,
+                recommendations = target.iconGrid,
+                dismissIntent = dismissIntent,
+                backgroundColor = 0,
+                headphoneConnectionTimeMillis = target.creationTimeMillis,
+                instanceId = logger.getNewInstanceId())
         }
         return EMPTY_SMARTSPACE_MEDIA_DATA
             .copy(targetId = target.smartspaceTargetId,
                     isActive = isActive,
                     dismissIntent = dismissIntent,
-                    headphoneConnectionTimeMillis = target.creationTimeMillis)
+                    headphoneConnectionTimeMillis = target.creationTimeMillis,
+                    instanceId = logger.getNewInstanceId())
     }
 
     private fun packageName(target: SmartspaceTarget): String? {
