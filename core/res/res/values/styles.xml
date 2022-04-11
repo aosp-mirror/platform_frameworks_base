@@ -1500,15 +1500,13 @@ please see styles_device_defaults.xml.
     </style>
 
     <!-- The style for log access consent text -->
-    <style name="AllowLogAccess"
-        parent="@android:style/Theme.DeviceDefault.Dialog.Alert.DayNight">
+    <style name="AllowLogAccess">
         <item name="android:layout_width">332dp</item>
         <item name="android:textSize">24sp</item>
         <item name="android:fontFamily">google-sans</item>
     </style>
 
-    <style name="PrimaryAllowLogAccess"
-            parent="@android:style/Theme.DeviceDefault.Dialog.Alert.DayNight">
+    <style name="PrimaryAllowLogAccess">
         <item name="android:layout_width">332dp</item>
         <item name="android:textSize">14sp</item>
         <item name="android:fontFamily">google-sans-text</item>
