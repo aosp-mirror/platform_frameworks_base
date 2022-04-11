@@ -1270,6 +1270,8 @@ public class MediaControlPanel {
             return SysUiStatsLog.SMART_SPACE_CARD_REPORTED__DISPLAY_SURFACE__SHADE;
         } else if (currentEndLocation == MediaHierarchyManager.LOCATION_LOCKSCREEN) {
             return SysUiStatsLog.SMART_SPACE_CARD_REPORTED__DISPLAY_SURFACE__LOCKSCREEN;
+        } else if (currentEndLocation == MediaHierarchyManager.LOCATION_DREAM_OVERLAY) {
+            return SysUiStatsLog.SMART_SPACE_CARD_REPORTED__DISPLAY_SURFACE__DREAM_OVERLAY;
         }
         return SysUiStatsLog.SMART_SPACE_CARD_REPORTED__DISPLAY_SURFACE__DEFAULT_SURFACE;
     }
