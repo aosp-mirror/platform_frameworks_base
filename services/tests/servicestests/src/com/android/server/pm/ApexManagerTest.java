@@ -398,7 +398,8 @@ public class ApexManagerTest {
         when(mApexService.installAndActivatePackage(anyString())).thenReturn(newApexInfo);
 
         File installedApex = extractResource("installed", "test.rebootless_apex_v2.apex");
-        mApexManager.installPackage(installedApex, mPackageParser2, apexPackageInfo);
+        newApexInfo = mApexManager.installPackage(installedApex, mPackageParser2, apexPackageInfo);
+        apexPackageInfo.notifyPackageInstalled(newApexInfo, mPackageParser2);
 
         PackageInfo newInfo = apexPackageInfo.getPackageInfo("test.apex.rebootless",
                 ApexManager.MATCH_ACTIVE_PACKAGE);
@@ -438,7 +439,8 @@ public class ApexManagerTest {
         when(mApexService.installAndActivatePackage(anyString())).thenReturn(newApexInfo);
 
         File installedApex = extractResource("installed", "test.rebootless_apex_v2.apex");
-        mApexManager.installPackage(installedApex, mPackageParser2, apexPackageInfo);
+        newApexInfo = mApexManager.installPackage(installedApex, mPackageParser2, apexPackageInfo);
+        apexPackageInfo.notifyPackageInstalled(newApexInfo, mPackageParser2);
 
         PackageInfo newInfo = apexPackageInfo.getPackageInfo("test.apex.rebootless",
                 ApexManager.MATCH_ACTIVE_PACKAGE);

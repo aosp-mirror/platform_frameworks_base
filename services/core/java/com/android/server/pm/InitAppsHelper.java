@@ -185,9 +185,19 @@ final class InitAppsHelper {
     @GuardedBy({"mPm.mInstallLock", "mPm.mLock"})
     private List<ApexManager.ScanResult> scanApexPackagesTraced(PackageParser2 packageParser) {
         Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "scanApexPackages");
+
         try {
-            return mApexPackageInfo.scanApexPackages(
-                    mApexManager.getAllApexInfos(), packageParser, mExecutorService);
+            final List<ApexManager.ScanResult> apexScanResults;
+            if (ApexPackageInfo.ENABLE_FEATURE_SCAN_APEX) {
+                apexScanResults = mInstallPackageHelper.scanApexPackages(
+                        mApexManager.getAllApexInfos(), mSystemParseFlags, mSystemScanFlags,
+                        packageParser, mExecutorService);
+                mApexPackageInfo.notifyScanResult(apexScanResults);
+            } else {
+                apexScanResults = mApexPackageInfo.scanApexPackages(
+                        mApexManager.getAllApexInfos(), packageParser, mExecutorService);
+            }
+            return apexScanResults;
         } finally {
             Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
         }
