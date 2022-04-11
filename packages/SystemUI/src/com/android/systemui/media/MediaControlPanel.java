@@ -1054,6 +1054,24 @@ public class MediaControlPanel {
                                 recommendation.getTitle(), artistName, appName));
             }
 
+
+            // Set up title
+            CharSequence title = recommendation.getTitle();
+            TextView titleView =
+                    mRecommendationViewHolder.getMediaTitles().get(uiComponentIndex);
+            titleView.setText(title);
+            // TODO(b/223603970): If none of them have titles, should we then hide the views?
+
+            // Set up subtitle
+            CharSequence subtitle = recommendation.getSubtitle();
+            TextView subtitleView =
+                    mRecommendationViewHolder.getMediaSubtitles().get(uiComponentIndex);
+            // It would look awkward to show a subtitle if we don't have a title.
+            boolean shouldShowSubtitleText = !TextUtils.isEmpty(title);
+            CharSequence subtitleText = shouldShowSubtitleText ? subtitle : "";
+            subtitleView.setText(subtitleText);
+            // TODO(b/223603970): If none of them have subtitles, should we then hide the views?
+
             uiComponentIndex++;
         }
 
