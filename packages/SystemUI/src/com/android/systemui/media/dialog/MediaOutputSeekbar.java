@@ -26,8 +26,7 @@ import android.widget.SeekBar;
  * otherwise performs click.
  */
 public class MediaOutputSeekbar extends SeekBar {
-    private static final int DRAGGING_THRESHOLD = 20;
-    private boolean mIsDragging = false;
+    private int mLastDownPosition = -1;
 
     public MediaOutputSeekbar(Context context) {
         super(context);
@@ -39,26 +38,16 @@ public class MediaOutputSeekbar extends SeekBar {
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        int width = getWidth()
-                - getPaddingLeft()
-                - getPaddingRight();
-        int thumbPos = getPaddingLeft()
-                + width
-                * getProgress()
-                / getMax();
-        if (event.getAction() == MotionEvent.ACTION_DOWN
-                && Math.abs(event.getX() - thumbPos) < DRAGGING_THRESHOLD) {
-            mIsDragging = true;
-            super.onTouchEvent(event);
-        } else if (event.getAction() == MotionEvent.ACTION_MOVE && mIsDragging) {
-            super.onTouchEvent(event);
-        } else if (event.getAction() == MotionEvent.ACTION_UP && mIsDragging) {
-            mIsDragging = false;
-            super.onTouchEvent(event);
-        } else if (event.getAction() == MotionEvent.ACTION_UP && !mIsDragging) {
-            performClick();
+        if (event.getAction() == MotionEvent.ACTION_DOWN) {
+            mLastDownPosition = Math.round(event.getX());
+        } else if (event.getAction() == MotionEvent.ACTION_UP) {
+            if (mLastDownPosition == event.getX()) {
+                performClick();
+                return true;
+            }
+            mLastDownPosition = -1;
         }
-        return true;
+        return super.onTouchEvent(event);
     }
 
     @Override
