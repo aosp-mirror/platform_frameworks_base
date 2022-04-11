@@ -47,6 +47,7 @@
             android:layout_marginBottom="32dp"
             android:text="@string/log_access_confirmation_title"
             android:textAppearance="@style/AllowLogAccess"
+            android:textColor="?android:attr/textColorPrimary"
             android:gravity="center" />
 
     <TextView
@@ -56,6 +57,7 @@
             android:layout_marginBottom="40dp"
             android:text="@string/log_access_confirmation_body"
             android:textAppearance="@style/PrimaryAllowLogAccess"
+            android:textColor="?android:attr/textColorPrimary"
             android:gravity="center" />
 
     <Button
