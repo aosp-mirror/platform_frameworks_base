@@ -3584,7 +3584,8 @@ public class TelephonyManager {
     @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     @Deprecated
     public @SimState int getSimCardState(int physicalSlotIndex) {
-        int simState = getSimState(getLogicalSlotIndex(physicalSlotIndex, DEFAULT_PORT_INDEX));
+        int activePort = getFirstActivePortIndex(physicalSlotIndex);
+        int simState = getSimState(getLogicalSlotIndex(physicalSlotIndex, activePort));
         return getSimCardStateFromSimState(simState);
     }
 
@@ -3690,9 +3691,10 @@ public class TelephonyManager {
     @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     @Deprecated
     public @SimState int getSimApplicationState(int physicalSlotIndex) {
+        int activePort = getFirstActivePortIndex(physicalSlotIndex);
         int simState =
                 SubscriptionManager.getSimStateForSlotIndex(getLogicalSlotIndex(physicalSlotIndex,
-                        DEFAULT_PORT_INDEX));
+                        activePort));
         return getSimApplicationStateFromSimState(simState);
     }
 
