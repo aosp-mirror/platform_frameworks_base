@@ -468,6 +468,7 @@
   <java-symbol type="array"   name="config_mobile_tcp_buffers" />
   <java-symbol type="array"   name="config_network_type_tcp_buffers" />
   <java-symbol type="string"  name="config_tcp_buffers" />
+  <java-symbol type="bool" name="config_force_enable_telephony_new_data_stack" />
   <java-symbol type="integer" name="config_volte_replacement_rat"/>
   <java-symbol type="integer" name="config_valid_wappush_index" />
   <java-symbol type="integer" name="config_overrideHasPermanentMenuKey" />

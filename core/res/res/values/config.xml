@@ -2599,6 +2599,9 @@
          Values are bandwidth_estimator, carrier_config and modem. -->
     <string name="config_bandwidthEstimateSource">bandwidth_estimator</string>
 
+    <!-- Whether force to enable telephony new data stack or not -->
+    <bool name="config_force_enable_telephony_new_data_stack">false</bool>
+
     <!-- Whether WiFi display is supported by this device.
          There are many prerequisites for this feature to work correctly.
          Here are a few of them:

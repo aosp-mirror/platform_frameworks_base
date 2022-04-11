@@ -255,21 +255,6 @@ public class DevicePolicyManagerServiceTestable extends DevicePolicyManagerServi
         }
 
         @Override
-        boolean storageManagerIsNonDefaultBlockEncrypted() {
-            return services.storageManager.isNonDefaultBlockEncrypted();
-        }
-
-        @Override
-        boolean storageManagerIsEncrypted() {
-            return services.storageManager.isEncrypted();
-        }
-
-        @Override
-        boolean storageManagerIsEncryptable() {
-            return services.storageManager.isEncryptable();
-        }
-
-        @Override
         String getDevicePolicyFilePathForSystemUser() {
             return services.systemUserDataDir.getAbsolutePath() + "/";
         }
