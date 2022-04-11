@@ -770,7 +770,7 @@
     <string name="accessibility_control_change_unfavorite" msgid="6997408061750740327">"bỏ yêu thích"</string>
     <string name="accessibility_control_move" msgid="8980344493796647792">"Di chuyển tới vị trí số <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Các tùy chọn điều khiển"</string>
-    <string name="controls_favorite_subtitle" msgid="6481675111056961083">"Chọn các chế độ điều khiển sẽ truy cập từ trình đơn Cài đặt nhanh"</string>
+    <string name="controls_favorite_subtitle" msgid="6481675111056961083">"Chọn các tuỳ chọn điều khiển để truy cập từ trình đơn Cài đặt nhanh"</string>
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Giữ và kéo để sắp xếp lại các tùy chọn điều khiển"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"Đã xóa tất cả tùy chọn điều khiển"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"Chưa lưu các thay đổi"</string>
@@ -808,6 +808,8 @@
     <string name="controls_media_button_pause" msgid="8614887780950376258">"Tạm dừng"</string>
     <string name="controls_media_button_prev" msgid="8126822360056482970">"Bản nhạc trước"</string>
     <string name="controls_media_button_next" msgid="6662636627525947610">"Bản nhạc tiếp theo"</string>
+    <!-- no translation found for controls_media_button_connecting (3138354625847598095) -->
+    <skip />
     <string name="controls_media_smartspace_rec_title" msgid="1699818353932537407">"Phát"</string>
     <string name="controls_media_smartspace_rec_description" msgid="4136242327044070732">"Mở <xliff:g id="APP_LABEL">%1$s</xliff:g>"</string>
     <string name="controls_media_smartspace_rec_item_description" msgid="2189271793070870883">"Phát <xliff:g id="SONG_NAME">%1$s</xliff:g> của <xliff:g id="ARTIST_NAME">%2$s</xliff:g> trên <xliff:g id="APP_LABEL">%3$s</xliff:g>"</string>
