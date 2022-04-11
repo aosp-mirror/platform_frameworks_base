@@ -508,6 +508,11 @@ class MediaCarouselController @Inject constructor(
         dismissMediaData: Boolean = true,
         dismissRecommendation: Boolean = true
     ) {
+        if (key == MediaPlayerData.smartspaceMediaKey()) {
+            MediaPlayerData.smartspaceMediaData?.let {
+                logger.logRecommendationRemoved(it.packageName, it.instanceId)
+            }
+        }
         val removed = MediaPlayerData.removeMediaPlayer(key)
         removed?.apply {
             mediaCarouselScrollHandler.onPrePlayerRemoved(removed)
