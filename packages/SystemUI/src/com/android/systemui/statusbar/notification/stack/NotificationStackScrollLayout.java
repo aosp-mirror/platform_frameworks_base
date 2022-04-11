@@ -415,6 +415,10 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     private boolean mForwardScrollable;
     private boolean mBackwardScrollable;
     private NotificationShelf mShelf;
+    /**
+     * Limits the number of visible notifications. The remaining are collapsed in the notification
+     * shelf. -1 when there is no limit.
+     */
     private int mMaxDisplayedNotifications = -1;
     private float mKeyguardBottomPadding = -1;
     @VisibleForTesting int mStatusBarHeight;
@@ -1323,7 +1327,14 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     }
 
     private float updateStackEndHeight(float height, float bottomMargin, float topPadding) {
-        final float stackEndHeight = Math.max(0f, height - bottomMargin - topPadding);
+        final float stackEndHeight;
+        if (mMaxDisplayedNotifications != -1) {
+            // The stack intrinsic height already contains the correct value when there is a limit
+            // in the max number of notifications (e.g. as in keyguard).
+            stackEndHeight = mIntrinsicContentHeight;
+        } else {
+            stackEndHeight = Math.max(0f, height - bottomMargin - topPadding);
+        }
         mAmbientState.setStackEndHeight(stackEndHeight);
         return stackEndHeight;
     }
