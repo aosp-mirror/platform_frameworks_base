@@ -880,7 +880,7 @@
     <string name="wifi_wont_autoconnect_for_now" msgid="5782282612749867762">"Du ansluts inte till wifi automatiskt för närvarande"</string>
     <string name="see_all_networks" msgid="3773666844913168122">"Visa alla"</string>
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"Koppla bort Ethernet för att växla nätverk"</string>
-    <string name="wifi_scan_notify_message" msgid="3753839537448621794">"I syfte att förbättra upplevelsen med enheten kan appar och tjänster fortfarande söka efter wifi-nätverk när som helst, även om wifi har inaktiverats. "<annotation id="link">"Ändra"</annotation></string>
+    <string name="wifi_scan_notify_message" msgid="3753839537448621794">"I syfte att förbättra upplevelsen med enheten kan appar och tjänster fortfarande söka efter wifi-nätverk när som helst, även om wifi har inaktiverats. Du kan ändra detta i inställningarna för wifi-sökning. "<annotation id="link">"Ändra"</annotation></string>
     <string name="turn_off_airplane_mode" msgid="8425587763226548579">"Inaktivera flygplansläge"</string>
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"Välj användare"</string>
 </resources>

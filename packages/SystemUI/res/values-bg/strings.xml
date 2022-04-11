@@ -25,7 +25,7 @@
     <string name="invalid_charger_title" msgid="938685362320735167">"Зареждането през USB не е възможно"</string>
     <string name="invalid_charger_text" msgid="2339310107232691577">"Използвайте оригиналното зарядно устройство"</string>
     <string name="battery_saver_confirmation_title" msgid="1234998463717398453">"Да се включи ли режимът за запазване на батерията?"</string>
-    <string name="battery_saver_confirmation_title_generic" msgid="2299231884234959849">"Всичко за режима за запазване на батерията"</string>
+    <string name="battery_saver_confirmation_title_generic" msgid="2299231884234959849">"За режима за запазване на батерията"</string>
     <string name="battery_saver_confirmation_ok" msgid="5042136476802816494">"Включване"</string>
     <string name="battery_saver_start_action" msgid="4553256017945469937">"Включване на режима за запазване на батерията"</string>
     <string name="status_bar_settings_auto_rotation" msgid="8329080442278431708">"Авт. завъртане на екрана"</string>

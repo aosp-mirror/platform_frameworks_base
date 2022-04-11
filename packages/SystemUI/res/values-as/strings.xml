@@ -24,7 +24,7 @@
     <string name="battery_low_percent_format" msgid="4276661262843170964">"<xliff:g id="PERCENTAGE">%s</xliff:g> বাকী আছে"</string>
     <string name="invalid_charger_title" msgid="938685362320735167">"ইউএছবি জৰিয়তে চ্চাৰ্জ কৰিব নোৱাৰি"</string>
     <string name="invalid_charger_text" msgid="2339310107232691577">"আপোনাৰ ডিভাইচৰ লগত পোৱা চ্চাৰ্জাৰটো ব্যৱহাৰ কৰক।"</string>
-    <string name="battery_saver_confirmation_title" msgid="1234998463717398453">"বেটাৰী সঞ্চয়কাৰী অন কৰেনে?"</string>
+    <string name="battery_saver_confirmation_title" msgid="1234998463717398453">"বেটাৰী সঞ্চয়কাৰী অন কৰিবনে?"</string>
     <string name="battery_saver_confirmation_title_generic" msgid="2299231884234959849">"বেটাৰী সঞ্চয়কাৰীৰ বিষয়ে"</string>
     <string name="battery_saver_confirmation_ok" msgid="5042136476802816494">"অন কৰক"</string>
     <string name="battery_saver_start_action" msgid="4553256017945469937">"বেটাৰী সঞ্চয়কাৰী অন কৰক"</string>
@@ -469,7 +469,7 @@
     <string name="wallet_error_generic" msgid="257704570182963611">"আপোনাৰ কাৰ্ড লাভ কৰোঁতে এটা সমস্যা হৈছে, অনুগ্ৰহ কৰি পাছত পুনৰ চেষ্টা কৰক"</string>
     <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"লক স্ক্ৰীনৰ ছেটিং"</string>
     <string name="status_bar_work" msgid="5238641949837091056">"কৰ্মস্থানৰ প্ৰ\'ফাইল"</string>
-    <string name="status_bar_airplane" msgid="4848702508684541009">"এয়াৰপ্লেইন ম\'ড"</string>
+    <string name="status_bar_airplane" msgid="4848702508684541009">"এয়াৰপ্লে’ন ম’ড"</string>
     <string name="zen_alarm_warning" msgid="7844303238486849503">"আপুনি আপোনাৰ পিছৰটো এলাৰ্ম <xliff:g id="WHEN">%1$s</xliff:g> বজাত শুনা নাপাব"</string>
     <string name="alarm_template" msgid="2234991538018805736">"<xliff:g id="WHEN">%1$s</xliff:g> বজাত"</string>
     <string name="alarm_template_far" msgid="3561752195856839456">"<xliff:g id="WHEN">%1$s</xliff:g> বজাত"</string>

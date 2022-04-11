@@ -232,7 +232,7 @@
     <string name="quick_settings_bluetooth_secondary_label_input" msgid="3887552721233148132">"Entrada"</string>
     <string name="quick_settings_bluetooth_secondary_label_hearing_aids" msgid="3003338571871392293">"Audiófonos"</string>
     <string name="quick_settings_bluetooth_secondary_label_transient" msgid="3882884317600669650">"Activando…"</string>
-    <string name="quick_settings_rotation_unlocked_label" msgid="2359922767950346112">"Xirar automat."</string>
+    <string name="quick_settings_rotation_unlocked_label" msgid="2359922767950346112">"Xirar automaticamente"</string>
     <string name="accessibility_quick_settings_rotation" msgid="4800050198392260738">"Xirar pantalla automaticamente"</string>
     <string name="quick_settings_location_label" msgid="2621868789013389163">"Localización"</string>
     <string name="quick_settings_camera_label" msgid="5612076679385269339">"Acceso á cámara"</string>
@@ -292,7 +292,7 @@
     <string name="quick_settings_nfc_label" msgid="1054317416221168085">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="3465000058515424663">"A opción NFC está desactivada"</string>
     <string name="quick_settings_nfc_on" msgid="1004976611203202230">"A opción NFC está activada"</string>
-    <string name="quick_settings_screen_record_label" msgid="8650355346742003694">"Gravar pant."</string>
+    <string name="quick_settings_screen_record_label" msgid="8650355346742003694">"Gravar pantalla"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"Iniciar"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"Deter"</string>
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"Queres desbloquear o micrófono do dispositivo?"</string>

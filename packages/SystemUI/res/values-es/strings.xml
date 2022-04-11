@@ -90,11 +90,11 @@
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"Audio del dispositivo"</string>
     <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"Sonido de tu dispositivo, como música, llamadas y tonos de llamada"</string>
     <string name="screenrecord_mic_label" msgid="2111264835791332350">"Micrófono"</string>
-    <string name="screenrecord_device_audio_and_mic_label" msgid="1831323771978646841">"Audio y micrófono del dispositivo"</string>
+    <string name="screenrecord_device_audio_and_mic_label" msgid="1831323771978646841">"Audio del dispositivo y micrófono"</string>
     <string name="screenrecord_start" msgid="330991441575775004">"Iniciar"</string>
     <string name="screenrecord_ongoing_screen_only" msgid="4459670242451527727">"Grabando pantalla"</string>
     <string name="screenrecord_ongoing_screen_and_audio" msgid="5351133763125180920">"Grabando pantalla y audio"</string>
-    <string name="screenrecord_taps_label" msgid="1595690528298857649">"Mostrar toques en la pantalla"</string>
+    <string name="screenrecord_taps_label" msgid="1595690528298857649">"Mostrar toques de pantalla"</string>
     <string name="screenrecord_stop_label" msgid="72699670052087989">"Detener"</string>
     <string name="screenrecord_share_label" msgid="5025590804030086930">"Compartir"</string>
     <string name="screenrecord_save_title" msgid="1886652605520893850">"Grabación de pantalla guardada"</string>
@@ -232,11 +232,11 @@
     <string name="quick_settings_bluetooth_secondary_label_input" msgid="3887552721233148132">"Entrada"</string>
     <string name="quick_settings_bluetooth_secondary_label_hearing_aids" msgid="3003338571871392293">"Audífonos"</string>
     <string name="quick_settings_bluetooth_secondary_label_transient" msgid="3882884317600669650">"Activando…"</string>
-    <string name="quick_settings_rotation_unlocked_label" msgid="2359922767950346112">"Girar automáticamente"</string>
+    <string name="quick_settings_rotation_unlocked_label" msgid="2359922767950346112">"Giro automático"</string>
     <string name="accessibility_quick_settings_rotation" msgid="4800050198392260738">"Girar pantalla automáticamente"</string>
     <string name="quick_settings_location_label" msgid="2621868789013389163">"Ubicación"</string>
     <string name="quick_settings_camera_label" msgid="5612076679385269339">"Acceso a cámara"</string>
-    <string name="quick_settings_mic_label" msgid="8392773746295266375">"Acceso micro."</string>
+    <string name="quick_settings_mic_label" msgid="8392773746295266375">"Acceso al micro"</string>
     <string name="quick_settings_camera_mic_available" msgid="1453719768420394314">"Disponible"</string>
     <string name="quick_settings_camera_mic_blocked" msgid="4710884905006788281">"Bloqueado"</string>
     <string name="quick_settings_media_device_label" msgid="8034019242363789941">"Dispositivo multimedia"</string>
@@ -292,7 +292,7 @@
     <string name="quick_settings_nfc_label" msgid="1054317416221168085">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="3465000058515424663">"El NFC está desactivado"</string>
     <string name="quick_settings_nfc_on" msgid="1004976611203202230">"El NFC está activado"</string>
-    <string name="quick_settings_screen_record_label" msgid="8650355346742003694">"Grabación de pantalla"</string>
+    <string name="quick_settings_screen_record_label" msgid="8650355346742003694">"Grabar pantalla"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"Iniciar"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"Detener"</string>
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"¿Desbloquear el micrófono del dispositivo?"</string>
@@ -619,7 +619,7 @@
     <string name="right_keycode" msgid="2480715509844798438">"Código de teclado a la derecha"</string>
     <string name="left_icon" msgid="5036278531966897006">"Icono a la izquierda"</string>
     <string name="right_icon" msgid="1103955040645237425">"Icono a la derecha"</string>
-    <string name="drag_to_add_tiles" msgid="8933270127508303672">"Pulsa y arrastra para añadir recuadros"</string>
+    <string name="drag_to_add_tiles" msgid="8933270127508303672">"Mantén pulsado un recuadro y arrástralo para añadirlo"</string>
     <string name="drag_to_rearrange_tiles" msgid="2143204300089638620">"Mantén pulsado un recuadro y arrástralo para reubicarlo"</string>
     <string name="drag_to_remove_tiles" msgid="4682194717573850385">"Arrastra aquí para quitar una función"</string>
     <string name="drag_to_remove_disabled" msgid="933046987838658850">"Necesitas al menos <xliff:g id="MIN_NUM_TILES">%1$d</xliff:g> recuadros"</string>
@@ -771,7 +771,7 @@
     <string name="accessibility_control_move" msgid="8980344493796647792">"Mover a la posición <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Controles"</string>
     <string name="controls_favorite_subtitle" msgid="6481675111056961083">"Selecciona controles a los que quieras acceder desde los ajustes rápidos"</string>
-    <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Mantén pulsado y arrastra un control para reubicarlo"</string>
+    <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Mantén pulsado un control y arrástralo para reubicarlo"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"Todos los controles quitados"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"No se han guardado los cambios"</string>
     <string name="controls_favorite_see_other_apps" msgid="7709087332255283460">"Ver otras aplicaciones"</string>
@@ -866,7 +866,7 @@
     <string name="accessibility_fingerprint_bouncer" msgid="7189102492498735519">"Autenticación obligatoria. Toca el sensor de huellas digitales para autenticarte."</string>
     <string name="ongoing_phone_call_content_description" msgid="5332334388483099947">"Llamada en curso"</string>
     <string name="mobile_data_settings_title" msgid="3955246641380064901">"Datos móviles"</string>
-    <string name="preference_summary_default_combination" msgid="8453246369903749670">"<xliff:g id="STATE">%1$s</xliff:g>/<xliff:g id="NETWORKMODE">%2$s</xliff:g>"</string>
+    <string name="preference_summary_default_combination" msgid="8453246369903749670">"<xliff:g id="STATE">%1$s</xliff:g> / <xliff:g id="NETWORKMODE">%2$s</xliff:g>"</string>
     <string name="mobile_data_connection_active" msgid="944490013299018227">"Conectado"</string>
     <string name="mobile_data_off_summary" msgid="3663995422004150567">"Los datos móviles no se conectarán automáticamente"</string>
     <string name="mobile_data_no_connection" msgid="1713872434869947377">"Sin conexión"</string>

@@ -27,7 +27,7 @@
     <string name="battery_saver_confirmation_title" msgid="1234998463717398453">"Attivare il risparmio energetico?"</string>
     <string name="battery_saver_confirmation_title_generic" msgid="2299231884234959849">"Informazioni su Risparmio energetico"</string>
     <string name="battery_saver_confirmation_ok" msgid="5042136476802816494">"Attiva"</string>
-    <string name="battery_saver_start_action" msgid="4553256017945469937">"Attiva Risparmio energetico"</string>
+    <string name="battery_saver_start_action" msgid="4553256017945469937">"Attiva il risparmio energetico"</string>
     <string name="status_bar_settings_auto_rotation" msgid="8329080442278431708">"Rotazione automatica schermo"</string>
     <string name="usb_device_permission_prompt" msgid="4414719028369181772">"Consentire a <xliff:g id="APPLICATION">%1$s</xliff:g> di accedere a <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
     <string name="usb_device_permission_prompt_warn" msgid="2309129784984063656">"Vuoi consentire all\'app <xliff:g id="APPLICATION">%1$s</xliff:g> di accedere a <xliff:g id="USB_DEVICE">%2$s</xliff:g>?\nA questa app non è stata concessa l\'autorizzazione di registrazione, ma l\'app potrebbe acquisire l\'audio tramite questo dispositivo USB."</string>
