@@ -536,6 +536,12 @@ public final class SystemUiDeviceConfigFlags {
      */
     public static final String CLIPBOARD_OVERLAY_ENABLED = "clipboard_overlay_enabled";
 
+    /**
+     * (boolean) Whether widget provider info would be saved to / loaded from system persistence
+     * layer as opposed to individual manifests in respective apps.
+     */
+    public static final String PERSISTS_WIDGET_PROVIDER_INFO = "persists_widget_provider_info";
+
     private SystemUiDeviceConfigFlags() {
     }
 }
