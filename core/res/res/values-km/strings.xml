@@ -1203,7 +1203,7 @@
     <string name="whichGiveAccessToApplicationLabel" msgid="7805857277166106236">"ផ្តល់​សិទ្ធិ​ចូល​ប្រើ"</string>
     <string name="whichEditApplication" msgid="6191568491456092812">"កែសម្រួល​ជាមួយ"</string>
     <string name="whichEditApplicationNamed" msgid="8096494987978521514">"កែសម្រួល​ជាមួយ​ %1$s"</string>
-    <string name="whichEditApplicationLabel" msgid="1463288652070140285">"កែសម្រួល"</string>
+    <string name="whichEditApplicationLabel" msgid="1463288652070140285">"កែ"</string>
     <string name="whichSendApplication" msgid="4143847974460792029">"ចែករំលែក"</string>
     <string name="whichSendApplicationNamed" msgid="4470386782693183461">"ចែករំលែក​ជាមួយ %1$s"</string>
     <string name="whichSendApplicationLabel" msgid="7467813004769188515">"ចែករំលែក"</string>
@@ -1588,7 +1588,7 @@
     <string name="storage_usb_drive" msgid="448030813201444573">"ឧបករណ៍ផ្ទុក USB"</string>
     <string name="storage_usb_drive_label" msgid="6631740655876540521">"ឧបករណ៍ផ្ទុក USB <xliff:g id="MANUFACTURER">%s</xliff:g>"</string>
     <string name="storage_usb" msgid="2391213347883616886">"ឧបករណ៍​ផ្ទុក​យូអេសប៊ី"</string>
-    <string name="extract_edit_menu_button" msgid="63954536535863040">"កែសម្រួល​"</string>
+    <string name="extract_edit_menu_button" msgid="63954536535863040">"កែ"</string>
     <string name="data_usage_warning_title" msgid="9034893717078325845">"ការព្រមានពីការប្រើទិន្នន័យ"</string>
     <string name="data_usage_warning_body" msgid="1669325367188029454">"អ្នកបានប្រើ​ទិន្នន័យអស់ <xliff:g id="APP">%s</xliff:g>"</string>
     <string name="data_usage_mobile_limit_title" msgid="3911447354393775241">"បានឈានដល់ចំនួនកម្រិតនៃទិន្នន័យទូរសព្ទចល័តហើយ"</string>
@@ -2083,7 +2083,7 @@
     <string name="harmful_app_warning_open_anyway" msgid="5963657791740211807">"មិន​អីទេ បើក​ចុះ"</string>
     <string name="harmful_app_warning_title" msgid="8794823880881113856">"បាន​រកឃើញ​កម្មវិធី​ដែលបង្ក​គ្រោះថ្នាក់"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g> ចង់​បង្ហាញ​ស្ថិតិ​ប្រើប្រាស់​របស់ <xliff:g id="APP_2">%2$s</xliff:g>"</string>
-    <string name="screenshot_edit" msgid="7408934887203689207">"កែសម្រួល"</string>
+    <string name="screenshot_edit" msgid="7408934887203689207">"កែ"</string>
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"ការហៅ​ទូរសព្ទ និងការជូន​ដំណឹងនឹងញ័រ"</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"ការហៅ​ទូរសព្ទ និងការជូន​ដំណឹងនឹង​បិទសំឡេង"</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"ការផ្លាស់ប្ដូរ​ប្រព័ន្ធ"</string>

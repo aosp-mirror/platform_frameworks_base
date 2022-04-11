@@ -1228,7 +1228,7 @@
     <string name="aerr_process_repeated" msgid="1153152413537954974">"<xliff:g id="PROCESS">%1$s</xliff:g> ನಿಲ್ಲುತ್ತಲೇ ಇರುತ್ತದೆ"</string>
     <string name="aerr_restart" msgid="2789618625210505419">"ಅಪ್ಲಿಕೇಶನ್ ಮತ್ತೆ ತೆರೆಯಿರಿ"</string>
     <string name="aerr_report" msgid="3095644466849299308">"ಪ್ರತಿಕ್ರಿಯೆ ಕಳುಹಿಸಿ"</string>
-    <string name="aerr_close" msgid="3398336821267021852">"ಮುಚ್ಚು"</string>
+    <string name="aerr_close" msgid="3398336821267021852">"ಮುಚ್ಚಿ"</string>
     <string name="aerr_mute" msgid="2304972923480211376">"ಸಾಧನವು ಮರುಪ್ರಾರಂಭವಾಗುವವರೆಗೂ ಮ್ಯೂಟ್ ಮಾಡಿ"</string>
     <string name="aerr_wait" msgid="3198677780474548217">"ನಿರೀಕ್ಷಿಸು"</string>
     <string name="aerr_close_app" msgid="8318883106083050970">"ಅಪ್ಲಿಕೇಶನ್ ಅನ್ನು ಮುಚ್ಚಿ"</string>
@@ -1637,10 +1637,10 @@
     <string name="wireless_display_route_description" msgid="8297563323032966831">"ವಯರ್‌ಲೆಸ್ ಪ್ರದರ್ಶನ"</string>
     <string name="media_route_button_content_description" msgid="2299223698196869956">"ಪಾತ್ರ"</string>
     <string name="media_route_chooser_title" msgid="6646594924991269208">"ಸಾಧನಕ್ಕೆ ಸಂಪರ್ಕಿಸಿ"</string>
-    <string name="media_route_chooser_title_for_remote_display" msgid="3105906508794326446">"ಪರದೆಯನ್ನು ಸಾಧನದಲ್ಲಿ ಬಿತ್ತರಿಸಿ"</string>
+    <string name="media_route_chooser_title_for_remote_display" msgid="3105906508794326446">"ಸ್ಕ್ರೀನ್ ಅನ್ನು ಸಾಧನದಲ್ಲಿ ಬಿತ್ತರಿಸಿ"</string>
     <string name="media_route_chooser_searching" msgid="6119673534251329535">"ಸಾಧನಗಳನ್ನು ಹುಡುಕಲಾಗುತ್ತಿದೆ…"</string>
     <string name="media_route_chooser_extended_settings" msgid="2506352159381327741">"ಸೆಟ್ಟಿಂಗ್‌ಗಳು"</string>
-    <string name="media_route_controller_disconnect" msgid="7362617572732576959">"ಸಂಪರ್ಕ ಕಡಿತಗೊಳಿಸು"</string>
+    <string name="media_route_controller_disconnect" msgid="7362617572732576959">"ಸಂಪರ್ಕ ಕಡಿತಗೊಳಿಸಿ"</string>
     <string name="media_route_status_scanning" msgid="8045156315309594482">"ಸ್ಕ್ಯಾನ್ ಮಾಡಲಾಗುತ್ತಿದೆ…"</string>
     <string name="media_route_status_connecting" msgid="5845597961412010540">"ಸಂಪರ್ಕಿಸಲಾಗುತ್ತಿದೆ..."</string>
     <string name="media_route_status_available" msgid="1477537663492007608">"ಲಭ್ಯ"</string>
@@ -1955,7 +1955,7 @@
     <string name="floating_toolbar_open_overflow_description" msgid="2260297653578167367">"ಇನ್ನಷ್ಟು ಆಯ್ಕೆಗಳು"</string>
     <string name="floating_toolbar_close_overflow_description" msgid="3949818077708138098">"ಓವರ್‌ಫ್ಲೋ ಮುಚ್ಚು"</string>
     <string name="maximize_button_text" msgid="4258922519914732645">"ಹಿಗ್ಗಿಸು"</string>
-    <string name="close_button_text" msgid="10603510034455258">"ಮುಚ್ಚು"</string>
+    <string name="close_button_text" msgid="10603510034455258">"ಮುಚ್ಚಿ"</string>
     <string name="notification_messaging_title_template" msgid="772857526770251989">"<xliff:g id="CONVERSATION_TITLE">%1$s</xliff:g>: <xliff:g id="SENDER_NAME">%2$s</xliff:g>"</string>
     <string name="call_notification_answer_action" msgid="5999246836247132937">"ಉತ್ತರಿಸಿ"</string>
     <string name="call_notification_answer_video_action" msgid="2086030940195382249">"ವೀಡಿಯೊ"</string>

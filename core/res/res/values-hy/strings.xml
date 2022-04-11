@@ -1513,7 +1513,7 @@
     <string name="vpn_lockdown_config" msgid="8331697329868252169">"Փոխել ցանցը կամ VPN-ի կարգավորումները"</string>
     <string name="upload_file" msgid="8651942222301634271">"Ընտրել ֆայլը"</string>
     <string name="no_file_chosen" msgid="4146295695162318057">"Ոչ մի ֆայլ չի ընտրված"</string>
-    <string name="reset" msgid="3865826612628171429">"Վերակայել"</string>
+    <string name="reset" msgid="3865826612628171429">"Զրոյացնել"</string>
     <string name="submit" msgid="862795280643405865">"Ուղարկել"</string>
     <string name="car_mode_disable_notification_title" msgid="8450693275833142896">"Հավելվածն աշխատում է"</string>
     <string name="car_mode_disable_notification_message" msgid="8954550232288567515">"Հպեք՝ հավելվածը փակելու համար:"</string>
