@@ -63,14 +63,14 @@ package android {
   public static final class R.bool {
     field public static final int config_assistantOnTopOfDream = 17891333; // 0x1110005
     field public static final int config_perDisplayFocusEnabled = 17891332; // 0x1110004
-    field public static final int config_preventImeStartupUnlessTextEditor;
+    field public static final int config_preventImeStartupUnlessTextEditor = 17891335; // 0x1110007
     field public static final int config_remoteInsetsControllerControlsSystemBars = 17891334; // 0x1110006
   }
 
   public static final class R.string {
     field public static final int config_defaultAssistant = 17039393; // 0x1040021
     field public static final int config_defaultDialer = 17039395; // 0x1040023
-    field public static final int config_systemAutomotiveCalendarSyncManager;
+    field public static final int config_systemAutomotiveCalendarSyncManager = 17039423; // 0x104003f
     field public static final int config_systemAutomotiveCluster = 17039400; // 0x1040028
     field public static final int config_systemAutomotiveProjection = 17039401; // 0x1040029
     field public static final int config_systemGallery = 17039399; // 0x1040027
