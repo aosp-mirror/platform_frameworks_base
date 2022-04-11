@@ -598,6 +598,21 @@
     <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"Reset"</string>
     <string name="guest_remove_guest_confirm_button" msgid="7858123434954143879">"Remove"</string>
     <string name="guest_resetting" msgid="7822120170191509566">"Resetting guest…"</string>
+    <string name="guest_reset_and_restart_dialog_title" msgid="3396657008451616041">"Reset guest session?"</string>
+    <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"This will start a new guest session and delete all apps and data from the current session"</string>
+    <string name="guest_exit_dialog_title" msgid="1846494656849381804">"Exit guest mode?"</string>
+    <string name="guest_exit_dialog_message" msgid="1743218864242719783">"This will delete apps and data from the current guest session"</string>
+    <string name="guest_exit_dialog_button" msgid="1736401897067442044">"Exit"</string>
+    <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"Save guest activity?"</string>
+    <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"You can save activity from the current session or delete all apps and data"</string>
+    <string name="guest_exit_clear_data_button" msgid="3425812652180679014">"Delete"</string>
+    <string name="guest_exit_save_data_button" msgid="3690974510644963547">"Save"</string>
+    <string name="guest_exit_button" msgid="5774985819191803960">"Exit guest mode"</string>
+    <string name="guest_reset_button" msgid="2515069346223503479">"Reset guest session"</string>
+    <string name="guest_exit_quick_settings_button" msgid="1912362095913765471">"Exit guest"</string>
+    <string name="guest_notification_ephemeral" msgid="7263252466950923871">"All activity will be deleted on exit"</string>
+    <string name="guest_notification_non_ephemeral" msgid="6843799963012259330">"You can save or delete your activity on exit"</string>
+    <string name="guest_notification_non_ephemeral_non_first_login" msgid="8009307983766934876">"Reset to delete session activity now, or you can save or delete activity on exit"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"Take a photo"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"Choose an image"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"Select photo"</string>
@@ -655,4 +670,12 @@
     <string name="bt_le_audio_scan_qr_code" msgid="3521809854780392679">"Scan QR code"</string>
     <string name="bt_le_audio_scan_qr_code_scanner" msgid="4679500020630341107">"To start listening, centre the QR code below"</string>
     <string name="bt_le_audio_qr_code_is_not_valid_format" msgid="6092191081849434734">"QR code isn\'t a valid format"</string>
+    <!-- no translation found for bt_le_audio_broadcast_dialog_title (5392738488989777074) -->
+    <skip />
+    <!-- no translation found for bt_le_audio_broadcast_dialog_sub_title (268234802198852753) -->
+    <skip />
+    <!-- no translation found for bt_le_audio_broadcast_dialog_switch_app (5749813313369517812) -->
+    <skip />
+    <!-- no translation found for bt_le_audio_broadcast_dialog_different_output (2638402023060391333) -->
+    <skip />
 </resources>

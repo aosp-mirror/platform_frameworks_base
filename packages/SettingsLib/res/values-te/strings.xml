@@ -447,7 +447,7 @@
     <string name="daltonizer_mode_deuteranomaly" msgid="3507284319584683963">"డ్యూటెరానోమలీ (ఎరుపు-ఆకుపచ్చ)"</string>
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"ప్రొటానోమలీ (ఎరుపు-ఆకుపచ్చ రంగు)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"ట్రైటనోమలీ (నీలం-పసుపు రంగు)"</string>
-    <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"కలర్ సరిచేయడం"</string>
+    <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"కలర్ కరెక్షన్"</string>
     <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1522101114585266455">"మీరు కింది వాటిని చేయాలనుకున్నప్పుడు కలర్ కరెక్షన్ సహాయకరంగా ఉంటుంది:&lt;br/&gt; &lt;ol&gt; &lt;li&gt;&amp;nbsp;రంగులను మరింత ఖచ్చితంగా చూడండి&lt;/li&gt; &lt;li&gt;&amp;nbsp;మీరు ఫోకస్ చేయడంలో సహాయపడటానికి రంగులను తీసివేయండి&lt;/li&gt; &lt;/ol&gt;"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"<xliff:g id="TITLE">%1$s</xliff:g> ద్వారా భర్తీ చేయబడింది"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> - <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
@@ -598,6 +598,36 @@
     <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"రీసెట్ చేయండి"</string>
     <string name="guest_remove_guest_confirm_button" msgid="7858123434954143879">"తీసివేయండి"</string>
     <string name="guest_resetting" msgid="7822120170191509566">"గెస్ట్ సెషన్‌ను రీసెట్ చేస్తోంది…"</string>
+    <!-- no translation found for guest_reset_and_restart_dialog_title (3396657008451616041) -->
+    <skip />
+    <!-- no translation found for guest_reset_and_restart_dialog_message (2764425635305200790) -->
+    <skip />
+    <!-- no translation found for guest_exit_dialog_title (1846494656849381804) -->
+    <skip />
+    <!-- no translation found for guest_exit_dialog_message (1743218864242719783) -->
+    <skip />
+    <!-- no translation found for guest_exit_dialog_button (1736401897067442044) -->
+    <skip />
+    <!-- no translation found for guest_exit_dialog_title_non_ephemeral (7675327443743162986) -->
+    <skip />
+    <!-- no translation found for guest_exit_dialog_message_non_ephemeral (223385323235719442) -->
+    <skip />
+    <!-- no translation found for guest_exit_clear_data_button (3425812652180679014) -->
+    <skip />
+    <!-- no translation found for guest_exit_save_data_button (3690974510644963547) -->
+    <skip />
+    <!-- no translation found for guest_exit_button (5774985819191803960) -->
+    <skip />
+    <!-- no translation found for guest_reset_button (2515069346223503479) -->
+    <skip />
+    <!-- no translation found for guest_exit_quick_settings_button (1912362095913765471) -->
+    <skip />
+    <!-- no translation found for guest_notification_ephemeral (7263252466950923871) -->
+    <skip />
+    <!-- no translation found for guest_notification_non_ephemeral (6843799963012259330) -->
+    <skip />
+    <!-- no translation found for guest_notification_non_ephemeral_non_first_login (8009307983766934876) -->
+    <skip />
     <string name="user_image_take_photo" msgid="467512954561638530">"ఒక ఫోటో తీయండి"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"ఇమేజ్‌ను ఎంచుకోండి"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"ఫోటోను ఎంచుకోండి"</string>
@@ -655,4 +685,12 @@
     <string name="bt_le_audio_scan_qr_code" msgid="3521809854780392679">"QR కోడ్‌ను స్కాన్ చేయండి"</string>
     <string name="bt_le_audio_scan_qr_code_scanner" msgid="4679500020630341107">"వినడం ప్రారంభించడానికి, కింద ఉన్న QR కోడ్‌ను మధ్యలో ఉంచండి"</string>
     <string name="bt_le_audio_qr_code_is_not_valid_format" msgid="6092191081849434734">"QR కోడ్ చెల్లుబాటు అయ్యే ఫార్మాట్‌లో లేదు"</string>
+    <!-- no translation found for bt_le_audio_broadcast_dialog_title (5392738488989777074) -->
+    <skip />
+    <!-- no translation found for bt_le_audio_broadcast_dialog_sub_title (268234802198852753) -->
+    <skip />
+    <!-- no translation found for bt_le_audio_broadcast_dialog_switch_app (5749813313369517812) -->
+    <skip />
+    <!-- no translation found for bt_le_audio_broadcast_dialog_different_output (2638402023060391333) -->
+    <skip />
 </resources>
