@@ -233,7 +233,7 @@
     <string name="tethering_settings_not_available" msgid="266821736434699780">"Les paramètres de partage de connexion ne sont pas disponibles pour cet utilisateur."</string>
     <string name="apn_settings_not_available" msgid="1147111671403342300">"Les paramètres de point d\'accès ne sont pas disponibles pour cet utilisateur."</string>
     <string name="enable_adb" msgid="8072776357237289039">"Débogage USB"</string>
-    <string name="enable_adb_summary" msgid="3711526030096574316">"Mode débogage lorsqu\'un câble USB est connecté"</string>
+    <string name="enable_adb_summary" msgid="3711526030096574316">"Mode de débogage en connexion USB"</string>
     <string name="clear_adb_keys" msgid="3010148733140369917">"Annuler autorisations pour débog. USB"</string>
     <string name="enable_adb_wireless" msgid="6973226350963971018">"Débogage sans fil"</string>
     <string name="enable_adb_wireless_summary" msgid="7344391423657093011">"Mode de débogage en connexion Wi-Fi"</string>
@@ -655,4 +655,12 @@
     <string name="bt_le_audio_scan_qr_code" msgid="3521809854780392679">"Scanner un code QR"</string>
     <string name="bt_le_audio_scan_qr_code_scanner" msgid="4679500020630341107">"Pour commencer à écouter, centrez le code QR ci-dessous"</string>
     <string name="bt_le_audio_qr_code_is_not_valid_format" msgid="6092191081849434734">"Le format de code QR n\'est pas valide"</string>
+    <!-- no translation found for bt_le_audio_broadcast_dialog_title (5392738488989777074) -->
+    <skip />
+    <!-- no translation found for bt_le_audio_broadcast_dialog_sub_title (268234802198852753) -->
+    <skip />
+    <!-- no translation found for bt_le_audio_broadcast_dialog_switch_app (5749813313369517812) -->
+    <skip />
+    <!-- no translation found for bt_le_audio_broadcast_dialog_different_output (2638402023060391333) -->
+    <skip />
 </resources>
