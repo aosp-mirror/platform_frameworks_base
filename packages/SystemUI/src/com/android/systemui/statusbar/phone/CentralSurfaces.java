@@ -3467,7 +3467,9 @@ public class CentralSurfaces extends CoreStartable implements
         mStatusBarHideIconsForBouncerManager.setBouncerShowingAndTriggerUpdate(bouncerShowing);
         mCommandQueue.recomputeDisableFlags(mDisplayId, true /* animate */);
         updateScrimController();
-        updateNotificationPanelTouchState();
+        if (!mBouncerShowing) {
+            updatePanelExpansionForKeyguard();
+        }
     }
 
     /**
@@ -3612,13 +3614,10 @@ public class CentralSurfaces extends CoreStartable implements
      * collapse the panel after we expanded it, and thus we would end up with a blank
      * Keyguard.
      */
-    public void updateNotificationPanelTouchState() {
+    void updateNotificationPanelTouchState() {
         boolean goingToSleepWithoutAnimation = isGoingToSleep()
                 && !mDozeParameters.shouldControlScreenOff();
-        boolean bouncerShowingOverDream = isBouncerShowing()
-                && mDreamOverlayStateController.isOverlayActive();
-        boolean disabled = bouncerShowingOverDream
-                || (!mDeviceInteractive && !mDozeServiceHost.isPulsing())
+        boolean disabled = (!mDeviceInteractive && !mDozeServiceHost.isPulsing())
                 || goingToSleepWithoutAnimation;
         mNotificationPanelViewController.setTouchAndAnimationDisabled(disabled);
         mNotificationIconAreaController.setAnimationsEnabled(!disabled);
