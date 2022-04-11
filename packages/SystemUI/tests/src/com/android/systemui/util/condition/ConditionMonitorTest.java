@@ -65,7 +65,7 @@ public class ConditionMonitorTest extends SysuiTestCase {
         mCondition3 = spy(new FakeCondition());
         mConditions = new HashSet<>(Arrays.asList(mCondition1, mCondition2, mCondition3));
 
-        mConditionMonitor = new Monitor(mExecutor, mConditions, null /*callbacks*/);
+        mConditionMonitor = new Monitor(mExecutor, mConditions);
     }
 
     @Test
@@ -76,8 +76,10 @@ public class ConditionMonitorTest extends SysuiTestCase {
 
         final Monitor monitor = new Monitor(
                 mExecutor,
-                new HashSet<>(Arrays.asList(overridingCondition, regularCondition)),
-                new HashSet<>(Arrays.asList(callback)));
+                new HashSet<>(Arrays.asList(overridingCondition, regularCondition)));
+
+        monitor.addCallback(callback);
+        mExecutor.runAllReady();
 
         when(overridingCondition.isOverridingCondition()).thenReturn(true);
         when(overridingCondition.isConditionMet()).thenReturn(true);
@@ -123,8 +125,9 @@ public class ConditionMonitorTest extends SysuiTestCase {
         final Monitor monitor = new Monitor(
                 mExecutor,
                 new HashSet<>(Arrays.asList(overridingCondition, overridingCondition2,
-                        regularCondition)),
-                new HashSet<>(Arrays.asList(callback)));
+                        regularCondition)));
+        monitor.addCallback(callback);
+        mExecutor.runAllReady();
 
         when(overridingCondition.isOverridingCondition()).thenReturn(true);
         when(overridingCondition.isConditionMet()).thenReturn(true);
@@ -174,8 +177,8 @@ public class ConditionMonitorTest extends SysuiTestCase {
                 mock(Monitor.Callback.class);
         final Condition condition = mock(Condition.class);
         when(condition.isConditionMet()).thenReturn(true);
-        final Monitor monitor = new Monitor(mExecutor, new HashSet<>(Arrays.asList(condition)),
-                new HashSet<>(Arrays.asList(callback1)));
+        final Monitor monitor = new Monitor(mExecutor, new HashSet<>(Arrays.asList(condition)));
+        monitor.addCallback(callback1);
 
         final Monitor.Callback callback2 =
                 mock(Monitor.Callback.class);
@@ -186,7 +189,7 @@ public class ConditionMonitorTest extends SysuiTestCase {
 
     @Test
     public void addCallback_noConditions_reportAllConditionsMet() {
-        final Monitor monitor = new Monitor(mExecutor, new HashSet<>(), null /*callbacks*/);
+        final Monitor monitor = new Monitor(mExecutor, new HashSet<>());
         final Monitor.Callback callback = mock(Monitor.Callback.class);
 
         monitor.addCallback(callback);
@@ -196,7 +199,7 @@ public class ConditionMonitorTest extends SysuiTestCase {
 
     @Test
     public void addCallback_withMultipleInstancesOfTheSameCallback_registerOnlyOne() {
-        final Monitor monitor = new Monitor(mExecutor, new HashSet<>(), null /*callbacks*/);
+        final Monitor monitor = new Monitor(mExecutor, new HashSet<>());
         final Monitor.Callback callback = mock(Monitor.Callback.class);
 
         // Adds the same instance multiple times.
@@ -212,8 +215,7 @@ public class ConditionMonitorTest extends SysuiTestCase {
     @Test
     public void removeCallback_shouldNoLongerReceiveUpdate() {
         final Condition condition = mock(Condition.class);
-        final Monitor monitor = new Monitor(mExecutor, new HashSet<>(Arrays.asList(condition)),
-                null);
+        final Monitor monitor = new Monitor(mExecutor, new HashSet<>(Arrays.asList(condition)));
         final Monitor.Callback callback =
                 mock(Monitor.Callback.class);
         monitor.addCallback(callback);
