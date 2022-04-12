@@ -93,9 +93,8 @@ public class GenericWindowPolicyController extends DisplayWindowPolicyController
     final ArraySet<Integer> mRunningUids = new ArraySet<>();
     @Nullable private final ActivityListener mActivityListener;
     private final Handler mHandler = new Handler(Looper.getMainLooper());
-
-    @Nullable
-    private RunningAppsChangedListener mRunningAppsChangedListener;
+    private final ArraySet<RunningAppsChangedListener> mRunningAppsChangedListener =
+            new ArraySet<>();
 
     /**
      * Creates a window policy controller that is generic to the different use cases of virtual
@@ -142,9 +141,14 @@ public class GenericWindowPolicyController extends DisplayWindowPolicyController
         mActivityListener = activityListener;
     }
 
-    /** Sets listener for running applications change. */
-    public void setRunningAppsChangedListener(@Nullable RunningAppsChangedListener listener) {
-        mRunningAppsChangedListener = listener;
+    /** Register a listener for running applications changes. */
+    public void registerRunningAppsChangedListener(@NonNull RunningAppsChangedListener listener) {
+        mRunningAppsChangedListener.add(listener);
+    }
+
+    /** Unregister a listener for running applications changes. */
+    public void unregisterRunningAppsChangedListener(@NonNull RunningAppsChangedListener listener) {
+        mRunningAppsChangedListener.remove(listener);
     }
 
     @Override
@@ -237,9 +241,11 @@ public class GenericWindowPolicyController extends DisplayWindowPolicyController
                 mHandler.post(() -> mActivityListener.onDisplayEmpty(Display.INVALID_DISPLAY));
             }
         }
-        if (mRunningAppsChangedListener != null) {
-            mRunningAppsChangedListener.onRunningAppsChanged(runningUids);
-        }
+        mHandler.post(() -> {
+            for (RunningAppsChangedListener listener : mRunningAppsChangedListener) {
+                listener.onRunningAppsChanged(runningUids);
+            }
+        });
     }
 
     /**
