@@ -99,7 +99,7 @@
     <string name="screenrecord_name" msgid="2596401223859996572">"Perekam Layar"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Memproses perekaman layar"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Notifikasi yang sedang berjalan untuk sesi rekaman layar"</string>
-    <string name="screenrecord_start_label" msgid="1750350278888217473">"Mulai Merekam?"</string>
+    <string name="screenrecord_start_label" msgid="1750350278888217473">"Mulai merekam?"</string>
     <string name="screenrecord_description" msgid="1123231719680353736">"Saat merekam, Sistem Android dapat ikut merekam informasi sensitif yang terlihat di layar atau diputar di perangkat Anda. Informasi ini mencakup sandi, info pembayaran, foto, pesan, dan audio."</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"Rekam audio"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"Audio perangkat"</string>
@@ -326,7 +326,7 @@
     <string name="accessibility_rotation_lock_on_landscape_changed" msgid="5785739044300729592">"Sekarang layar dikunci dalam orientasi lanskap."</string>
     <string name="accessibility_rotation_lock_on_portrait_changed" msgid="5580170829728987989">"Sekarang layar dikunci dalam orientasi potret."</string>
     <string name="dessert_case" msgid="9104973640704357717">"Etalase Hidangan Penutup"</string>
-    <string name="start_dreams" msgid="9131802557946276718">"Screen saver"</string>
+    <string name="start_dreams" msgid="9131802557946276718">"Screensaver"</string>
     <string name="ethernet_label" msgid="2203544727007463351">"Ethernet"</string>
     <string name="quick_settings_header_onboarding_text" msgid="1918085351115504765">"Sentuh lama ikon untuk opsi lainnya"</string>
     <string name="quick_settings_dnd_label" msgid="7728690179108024338">"Jangan Ganggu"</string>
