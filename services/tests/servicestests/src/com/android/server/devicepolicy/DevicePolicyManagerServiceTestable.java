@@ -21,6 +21,8 @@ import android.app.IActivityManager;
 import android.app.IActivityTaskManager;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.app.admin.DevicePolicyManagerInternal;
+import android.app.admin.DevicePolicyManagerLiteInternal;
 import android.app.backup.IBackupManager;
 import android.app.usage.UsageStatsManagerInternal;
 import android.content.Context;
@@ -49,6 +51,7 @@ import androidx.annotation.NonNull;
 import com.android.internal.util.FunctionalUtils.ThrowingRunnable;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.internal.widget.LockSettingsInternal;
+import com.android.server.LocalServices;
 import com.android.server.PersistentDataBlockManagerInternal;
 import com.android.server.net.NetworkPolicyManagerInternal;
 import com.android.server.pm.UserManagerInternal;
@@ -99,9 +102,20 @@ public class DevicePolicyManagerServiceTestable extends DevicePolicyManagerServi
     }
 
     private DevicePolicyManagerServiceTestable(MockInjector injector) {
-        super(injector);
+        super(unregisterLocalServices(injector));
         mMockInjector = injector;
         this.context = injector.context;
+    }
+
+    /**
+     * Unregisters local services to avoid IllegalStateException when DPMS ctor re-registers them.
+     * This is made into a static method to circumvent the requirement to call super() first.
+     * Returns its parameter as is.
+     */
+    private static MockInjector unregisterLocalServices(MockInjector injector) {
+        LocalServices.removeServiceForTest(DevicePolicyManagerLiteInternal.class);
+        LocalServices.removeServiceForTest(DevicePolicyManagerInternal.class);
+        return injector;
     }
 
     public void notifyChangeToContentObserver(Uri uri, int userHandle) {
