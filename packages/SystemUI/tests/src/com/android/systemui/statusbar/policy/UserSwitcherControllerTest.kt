@@ -28,6 +28,7 @@ import android.hardware.fingerprint.FingerprintManager
 import android.os.Handler
 import android.os.UserHandle
 import android.os.UserManager
+import android.provider.Settings
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import android.view.ThreadedRenderer
@@ -51,6 +52,7 @@ import com.android.systemui.settings.UserTracker
 import com.android.systemui.statusbar.phone.NotificationShadeWindowView
 import com.android.systemui.telephony.TelephonyListenerManager
 import com.android.systemui.util.concurrency.FakeExecutor
+import com.android.systemui.util.settings.GlobalSettings
 import com.android.systemui.util.settings.SecureSettings
 import com.android.systemui.util.time.FakeSystemClock
 import org.junit.Assert.assertEquals
@@ -67,6 +69,7 @@ import org.mockito.Mockito.`when`
 import org.mockito.Mockito.any
 import org.mockito.Mockito.doNothing
 import org.mockito.Mockito.doReturn
+import org.mockito.Mockito.eq
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
@@ -95,6 +98,7 @@ class UserSwitcherControllerTest : SysuiTestCase() {
     @Mock private lateinit var notificationShadeWindowView: NotificationShadeWindowView
     @Mock private lateinit var threadedRenderer: ThreadedRenderer
     @Mock private lateinit var dialogLaunchAnimator: DialogLaunchAnimator
+    @Mock private lateinit var globalSettings: GlobalSettings
     private lateinit var testableLooper: TestableLooper
     private lateinit var bgExecutor: FakeExecutor
     private lateinit var longRunningExecutor: FakeExecutor
@@ -148,6 +152,22 @@ class UserSwitcherControllerTest : SysuiTestCase() {
         `when`(userTracker.userId).thenReturn(ownerId)
         `when`(userTracker.userInfo).thenReturn(ownerInfo)
 
+        `when`(
+            globalSettings.getIntForUser(
+                eq(Settings.Global.ADD_USERS_WHEN_LOCKED),
+                anyInt(),
+                eq(UserHandle.USER_SYSTEM)
+            )
+        ).thenReturn(0)
+
+        `when`(
+            globalSettings.getIntForUser(
+                eq(Settings.Global.USER_SWITCHER_ENABLED),
+                anyInt(),
+                eq(UserHandle.USER_SYSTEM)
+            )
+        ).thenReturn(1)
+
         setupController()
     }
 
@@ -168,6 +188,7 @@ class UserSwitcherControllerTest : SysuiTestCase() {
                 falsingManager,
                 telephonyListenerManager,
                 secureSettings,
+                globalSettings,
                 bgExecutor,
                 longRunningExecutor,
                 uiExecutor,
@@ -467,6 +488,45 @@ class UserSwitcherControllerTest : SysuiTestCase() {
         testableLooper.processAllMessages()
 
         // THEN a supervised user can NOT be constructed
+        assertFalse(userSwitcherController.canCreateSupervisedUser())
+    }
+
+    @Test
+    fun testCannotCreateUserWhenUserSwitcherDisabled() {
+        `when`(
+            globalSettings.getIntForUser(
+                eq(Settings.Global.USER_SWITCHER_ENABLED),
+                anyInt(),
+                eq(UserHandle.USER_SYSTEM)
+            )
+        ).thenReturn(0)
+        setupController()
+        assertFalse(userSwitcherController.canCreateUser())
+    }
+
+    @Test
+    fun testCannotCreateGuestUserWhenUserSwitcherDisabled() {
+        `when`(
+            globalSettings.getIntForUser(
+                eq(Settings.Global.USER_SWITCHER_ENABLED),
+                anyInt(),
+                eq(UserHandle.USER_SYSTEM)
+            )
+        ).thenReturn(0)
+        setupController()
+        assertFalse(userSwitcherController.canCreateGuest(false))
+    }
+
+    @Test
+    fun testCannotCreateSupervisedUserWhenUserSwitcherDisabled() {
+        `when`(
+            globalSettings.getIntForUser(
+                eq(Settings.Global.USER_SWITCHER_ENABLED),
+                anyInt(),
+                eq(UserHandle.USER_SYSTEM)
+            )
+        ).thenReturn(0)
+        setupController()
         assertFalse(userSwitcherController.canCreateSupervisedUser())
     }
 }
