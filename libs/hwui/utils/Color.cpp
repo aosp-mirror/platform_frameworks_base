@@ -165,6 +165,14 @@ android_dataspace ColorSpaceToADataSpace(SkColorSpace* colorSpace, SkColorType c
         if (SkColorSpace::Equals(colorSpace, rec2020PQ.get())) {
             return HAL_DATASPACE_BT2020_PQ;
         }
+        // HLG
+        const auto hlgFn = GetHLGScaleTransferFunction();
+        if (hlgFn.has_value()) {
+            auto rec2020HLG = SkColorSpace::MakeRGB(hlgFn.value(), SkNamedGamut::kRec2020);
+            if (SkColorSpace::Equals(colorSpace, rec2020HLG.get())) {
+                return static_cast<android_dataspace>(HAL_DATASPACE_BT2020_HLG);
+            }
+        }
         LOG_ALWAYS_FATAL("Only select non-numerical transfer functions are supported");
     }
 
@@ -247,6 +255,14 @@ sk_sp<SkColorSpace> DataSpaceToColorSpace(android_dataspace dataspace) {
             return nullptr;
     }
 
+    // HLG
+    if ((dataspace & HAL_DATASPACE_TRANSFER_MASK) == HAL_DATASPACE_TRANSFER_HLG) {
+        const auto hlgFn = GetHLGScaleTransferFunction();
+        if (hlgFn.has_value()) {
+            return SkColorSpace::MakeRGB(hlgFn.value(), gamut);
+        }
+    }
+
     switch (dataspace & HAL_DATASPACE_TRANSFER_MASK) {
         case HAL_DATASPACE_TRANSFER_LINEAR:
             return SkColorSpace::MakeRGB(SkNamedTransferFn::kLinear, gamut);
@@ -264,7 +280,6 @@ sk_sp<SkColorSpace> DataSpaceToColorSpace(android_dataspace dataspace) {
             return SkColorSpace::MakeRGB(SkNamedTransferFn::kRec2020, gamut);
         case HAL_DATASPACE_TRANSFER_UNSPECIFIED:
             return nullptr;
-        case HAL_DATASPACE_TRANSFER_HLG:
         default:
             ALOGV("Unsupported Gamma: %d", dataspace);
             return nullptr;
@@ -379,6 +394,15 @@ skcms_TransferFunction GetPQSkTransferFunction(float sdr_white_level) {
     fn.a = ws * fn.a;
     fn.b = ws * fn.b;
     return fn;
+}
+
+// Skia skcms' default HLG maps encoded [0, 1] to linear [1, 12] in order to follow ARIB
+// but LinearEffect expects a decoded [0, 1] range instead to follow Rec 2100.
+std::optional<skcms_TransferFunction> GetHLGScaleTransferFunction() {
+    std::optional<skcms_TransferFunction> hlgFn = {};
+    skcms_TransferFunction_makeScaledHLGish(&hlgFn.value(), 1.f / 12.f, 2.f, 2.f, 1.f / 0.17883277f,
+                                            0.28466892f, 0.55991073f);
+    return hlgFn;
 }
 
 }  // namespace uirenderer

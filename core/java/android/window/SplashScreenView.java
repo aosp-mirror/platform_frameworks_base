@@ -237,7 +237,6 @@ public final class SplashScreenView extends FrameLayout {
 
         /**
          * Set the Runnable that can receive the task which should be executed on UI thread.
-         * @param uiThreadInitTask
          */
         public Builder setUiThreadInitConsumer(Consumer<Runnable> uiThreadInitTask) {
             mUiThreadInitTask = uiThreadInitTask;
@@ -281,9 +280,11 @@ public final class SplashScreenView extends FrameLayout {
 
             view.mBrandingImageView = view.findViewById(R.id.splashscreen_branding_view);
 
+            boolean hasIcon = false;
             // center icon
             if (mIconDrawable instanceof SplashScreenView.IconAnimateListener
                     || mSurfacePackage != null) {
+                hasIcon = true;
                 if (mUiThreadInitTask != null) {
                     mUiThreadInitTask.accept(() -> view.mIconView = createSurfaceView(view));
                 } else {
@@ -306,9 +307,10 @@ public final class SplashScreenView extends FrameLayout {
                 if (mIconBackground != null) {
                     imageView.setBackground(mIconBackground);
                 }
+                hasIcon = true;
                 view.mIconView = imageView;
             }
-            if (mOverlayDrawable != null || (view.mIconView == null && !mAllowHandleSolidColor)) {
+            if (mOverlayDrawable != null || (!hasIcon && !mAllowHandleSolidColor)) {
                 view.setNotCopyable();
             }
 

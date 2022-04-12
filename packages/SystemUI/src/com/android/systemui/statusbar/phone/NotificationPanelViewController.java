@@ -338,6 +338,7 @@ public class NotificationPanelViewController extends PanelViewController {
     private boolean mAnimateNextPositionUpdate;
     private float mQuickQsHeaderHeight;
     private ScreenOffAnimationController mScreenOffAnimationController;
+    private UnlockedScreenOffAnimationController mUnlockedScreenOffAnimationController;
 
     private int mTrackingPointer;
     private VelocityTracker mQsVelocityTracker;
@@ -745,7 +746,8 @@ public class NotificationPanelViewController extends PanelViewController {
             KeyguardUnlockAnimationController keyguardUnlockAnimationController,
             NotificationListContainer notificationListContainer,
             PanelEventsEmitter panelEventsEmitter,
-            NotificationStackSizeCalculator notificationStackSizeCalculator) {
+            NotificationStackSizeCalculator notificationStackSizeCalculator,
+            UnlockedScreenOffAnimationController unlockedScreenOffAnimationController) {
         super(view,
                 falsingManager,
                 dozeLog,
@@ -846,6 +848,7 @@ public class NotificationPanelViewController extends PanelViewController {
         mAuthController = authController;
         mLockIconViewController = lockIconViewController;
         mScreenOffAnimationController = screenOffAnimationController;
+        mUnlockedScreenOffAnimationController = unlockedScreenOffAnimationController;
         mRemoteInputManager = remoteInputManager;
 
         int currentMode = navigationModeController.addListener(
@@ -901,7 +904,7 @@ public class NotificationPanelViewController extends PanelViewController {
                                 onTrackingStopped(false);
                                 instantCollapse();
                             } else {
-                                fling(0f, false, 0.7f, false);
+                                fling(0f, false, 1f, false);
                             }
                         }
                     }
@@ -1249,6 +1252,10 @@ public class NotificationPanelViewController extends PanelViewController {
             mNotificationStackScrollLayoutController.setMaxDisplayedNotifications(-1);
             mNotificationStackScrollLayoutController.setKeyguardBottomPaddingForDebug(-1f);
         }
+    }
+
+    private boolean shouldAvoidChangingNotificationsCount() {
+        return mHintAnimationRunning || mUnlockedScreenOffAnimationController.isAnimationPlaying();
     }
 
     public void setKeyguardIndicationController(KeyguardIndicationController indicationController) {
@@ -4733,7 +4740,7 @@ public class NotificationPanelViewController extends PanelViewController {
                 int oldTop, int oldRight, int oldBottom) {
             DejankUtils.startDetectingBlockingIpcs("NVP#onLayout");
             super.onLayoutChange(v, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom);
-            updateMaxDisplayedNotifications(true);
+            updateMaxDisplayedNotifications(!shouldAvoidChangingNotificationsCount());
             setIsFullWidth(mNotificationStackScrollLayoutController.getWidth() == mView.getWidth());
 
             // Update Clock Pivot

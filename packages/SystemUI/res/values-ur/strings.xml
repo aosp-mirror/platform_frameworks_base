@@ -135,8 +135,7 @@
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="2242167416140740920">"چہرے کی تصدیق ہو گئی"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"تصدیق شدہ"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"مکمل کرنے کیلئے \'تصدیق کریں\' تھپتھپائیں"</string>
-    <!-- no translation found for biometric_dialog_tap_confirm_with_face (1092050545851021991) -->
-    <skip />
+    <string name="biometric_dialog_tap_confirm_with_face" msgid="1092050545851021991">"چہرے سے انلاک کیا گیا۔ جاری رکھنے کیلئے انلاک آئیکن دبائیں۔"</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"تصدیق کردہ"</string>
     <string name="biometric_dialog_use_pin" msgid="8385294115283000709">"‏PIN استعمال کریں"</string>
     <string name="biometric_dialog_use_pattern" msgid="2315593393167211194">"پیٹرن کا استعمال کریں"</string>
@@ -311,10 +310,8 @@
     <string name="notification_tap_again" msgid="4477318164947497249">"کھولنے کیلئے دوبارہ تھپتھپائیں"</string>
     <string name="tap_again" msgid="1315420114387908655">"دوبارہ تھپتھپائیں"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"کھولنے کے لیے اوپر سوائپ کريں"</string>
-    <!-- no translation found for keyguard_unlock_press (9140109453735019209) -->
-    <skip />
-    <!-- no translation found for keyguard_face_successful_unlock_press (25520941264602588) -->
-    <skip />
+    <string name="keyguard_unlock_press" msgid="9140109453735019209">"کھولنے کیلئے انلاک آئیکن دبائیں"</string>
+    <string name="keyguard_face_successful_unlock_press" msgid="25520941264602588">"چہرے سے انلاک کیا گیا۔ کھولنے کیلئے انلاک آئیکن دبائیں۔"</string>
     <string name="keyguard_retry" msgid="886802522584053523">"دوبارہ کوشش کرنے کے لیے اوپر سوائپ کريں"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"‏NFC استعمال کرنے کیلئے غیر مقفل کریں"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"یہ آلہ آپ کی تنظیم کا ہے"</string>
@@ -808,6 +805,8 @@
     <string name="controls_media_button_pause" msgid="8614887780950376258">"روکیں"</string>
     <string name="controls_media_button_prev" msgid="8126822360056482970">"پچھلا ٹریک"</string>
     <string name="controls_media_button_next" msgid="6662636627525947610">"اگلا ٹریک"</string>
+    <!-- no translation found for controls_media_button_connecting (3138354625847598095) -->
+    <skip />
     <string name="controls_media_smartspace_rec_title" msgid="1699818353932537407">"چلائیں"</string>
     <string name="controls_media_smartspace_rec_description" msgid="4136242327044070732">"<xliff:g id="APP_LABEL">%1$s</xliff:g> کھولیں"</string>
     <string name="controls_media_smartspace_rec_item_description" msgid="2189271793070870883">"<xliff:g id="APP_LABEL">%3$s</xliff:g> سے <xliff:g id="ARTIST_NAME">%2$s</xliff:g> کا <xliff:g id="SONG_NAME">%1$s</xliff:g> چلائیں"</string>

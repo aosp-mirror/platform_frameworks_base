@@ -135,8 +135,7 @@
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="2242167416140740920">"ମୁହଁ ପ୍ରାମାଣିକତା ହୋଇଛି"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"ସୁନିଶ୍ଚିତ କରାଯାଇଛି"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"ସମ୍ପୂର୍ଣ୍ଣ କରିବାକୁ ସୁନିଶ୍ଚିତ କରନ୍ତୁରେ ଟାପ୍ କରନ୍ତୁ"</string>
-    <!-- no translation found for biometric_dialog_tap_confirm_with_face (1092050545851021991) -->
-    <skip />
+    <string name="biometric_dialog_tap_confirm_with_face" msgid="1092050545851021991">"ଫେସ ମାଧ୍ୟମରେ ଅନଲକ କରାଯାଇଛି। ଜାରି ରଖିବାକୁ ଅନଲକ ଆଇକନ ଦବାନ୍ତୁ।"</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"ପ୍ରାମାଣିକତା ହୋଇଛି"</string>
     <string name="biometric_dialog_use_pin" msgid="8385294115283000709">"PIN ବ୍ୟବହାର କରନ୍ତୁ"</string>
     <string name="biometric_dialog_use_pattern" msgid="2315593393167211194">"ପାଟର୍ନ ବ୍ୟବହାର କରନ୍ତୁ"</string>
@@ -311,10 +310,8 @@
     <string name="notification_tap_again" msgid="4477318164947497249">"ଖୋଲିବା ପାଇଁ ପୁଣି ଟାପ୍‍ କରନ୍ତୁ"</string>
     <string name="tap_again" msgid="1315420114387908655">"ପୁଣି ଟାପ୍ କରନ୍ତୁ"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"ଖୋଲିବା ପାଇଁ ଉପରକୁ ସ୍ୱାଇପ୍ କରନ୍ତୁ"</string>
-    <!-- no translation found for keyguard_unlock_press (9140109453735019209) -->
-    <skip />
-    <!-- no translation found for keyguard_face_successful_unlock_press (25520941264602588) -->
-    <skip />
+    <string name="keyguard_unlock_press" msgid="9140109453735019209">"ଖୋଲିବାକୁ ଅନଲକ ଆଇକନ ଦବାନ୍ତୁ"</string>
+    <string name="keyguard_face_successful_unlock_press" msgid="25520941264602588">"ଫେସ ମାଧ୍ୟମରେ ଅନଲକ କରାଯାଇଛି। ଖୋଲିବାକୁ ଅନଲକ ଆଇକନ ଦବାନ୍ତୁ।"</string>
     <string name="keyguard_retry" msgid="886802522584053523">"ପୁଣି ଚେଷ୍ଟା କରିବା ପାଇଁ ଉପରକୁ ସ୍ୱାଇପ୍ କରନ୍ତୁ"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"NFC ବ୍ୟବହାର କରିବାକୁ ଅନଲକ୍ କରନ୍ତୁ"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"ଏହି ଡିଭାଇସଟି ଆପଣଙ୍କ ସଂସ୍ଥାର ଅଟେ"</string>
@@ -698,7 +695,7 @@
     <string name="mobile_data" msgid="4564407557775397216">"ମୋବାଇଲ୍‌ ଡାଟା"</string>
     <string name="mobile_data_text_format" msgid="6806501540022589786">"<xliff:g id="ID_1">%1$s</xliff:g> — <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="mobile_carrier_text_format" msgid="8912204177152950766">"<xliff:g id="CARRIER_NAME">%1$s</xliff:g>, <xliff:g id="MOBILE_DATA_TYPE">%2$s</xliff:g>"</string>
-    <string name="wifi_is_off" msgid="5389597396308001471">"ୱାଇ-ଫାଇ ଅଫ୍‍ ଅଛି"</string>
+    <string name="wifi_is_off" msgid="5389597396308001471">"ୱାଇ-ଫାଇ ବନ୍ଦ ଅଛି"</string>
     <string name="bt_is_off" msgid="7436344904889461591">"ବ୍ଲୁଟୂଥ୍‍‌ ଅଫ୍ ଅଛି"</string>
     <string name="dnd_is_off" msgid="3185706903793094463">"\"ବିରକ୍ତ କରନ୍ତୁ ନାହିଁ\" ଅଫ୍‍ ଅଛି"</string>
     <string name="qs_dnd_prompt_auto_rule" msgid="3535469468310002616">"ଏକ (<xliff:g id="ID_1">%s</xliff:g>) ନିୟମ ଦ୍ୱାରା \"ବିରକ୍ତ କରନ୍ତୁ ନାହିଁ\" ସ୍ୱଚାଳିତ ଭାବେ ଅନ୍‍ କରାଗଲା।"</string>
@@ -771,7 +768,7 @@
     <string name="accessibility_control_move" msgid="8980344493796647792">"<xliff:g id="NUMBER">%d</xliff:g> ସ୍ଥିତିକୁ ମୁଭ୍ କରନ୍ତୁ"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"ନିୟନ୍ତ୍ରଣଗୁଡ଼ିକ"</string>
     <string name="controls_favorite_subtitle" msgid="6481675111056961083">"କ୍ୱିକ୍ ସେଟିଂସରୁ ଆକ୍ସେସ୍ କରିବାକୁ ନିୟନ୍ତ୍ରଣଗୁଡ଼ିକୁ ବାଛନ୍ତୁ"</string>
-    <string name="controls_favorite_rearrange" msgid="5616952398043063519">"ନିୟନ୍ତ୍ରଣଗୁଡ଼ିକ ପୁଣି ସଜାଇବାକୁ ସେଗୁଡ଼ିକୁ ଧରି ଟାଣନ୍ତୁ"</string>
+    <string name="controls_favorite_rearrange" msgid="5616952398043063519">"ନିୟନ୍ତ୍ରଣଗୁଡ଼ିକୁ ପୁଣି ବ୍ୟବସ୍ଥିତ କରିବାକୁ ସେଗୁଡ଼ିକୁ ଡ୍ରାଗ କରି ଧରି ରଖନ୍ତୁ"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"ସମସ୍ତ ନିୟନ୍ତ୍ରଣ କାଢ଼ି ଦିଆଯାଇଛି"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"ପରିବର୍ତ୍ତନଗୁଡ଼ିକ ସେଭ୍ କରାଯାଇନାହିଁ"</string>
     <string name="controls_favorite_see_other_apps" msgid="7709087332255283460">"ଅନ୍ୟ ଆପ୍ ଦେଖନ୍ତୁ"</string>
@@ -808,6 +805,8 @@
     <string name="controls_media_button_pause" msgid="8614887780950376258">"ବିରତ କରନ୍ତୁ"</string>
     <string name="controls_media_button_prev" msgid="8126822360056482970">"ପୂର୍ବବର୍ତ୍ତୀ ଟ୍ରାକ"</string>
     <string name="controls_media_button_next" msgid="6662636627525947610">"ପରବର୍ତ୍ତୀ ଟ୍ରାକ"</string>
+    <!-- no translation found for controls_media_button_connecting (3138354625847598095) -->
+    <skip />
     <string name="controls_media_smartspace_rec_title" msgid="1699818353932537407">"ଚଲାନ୍ତୁ"</string>
     <string name="controls_media_smartspace_rec_description" msgid="4136242327044070732">"<xliff:g id="APP_LABEL">%1$s</xliff:g> ଖୋଲନ୍ତୁ"</string>
     <string name="controls_media_smartspace_rec_item_description" msgid="2189271793070870883">"<xliff:g id="APP_LABEL">%3$s</xliff:g>ରୁ <xliff:g id="ARTIST_NAME">%2$s</xliff:g>ଙ୍କ <xliff:g id="SONG_NAME">%1$s</xliff:g> ଚଲାନ୍ତୁ"</string>
