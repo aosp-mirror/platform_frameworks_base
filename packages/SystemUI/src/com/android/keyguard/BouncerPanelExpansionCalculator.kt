@@ -23,7 +23,7 @@ object BouncerPanelExpansionCalculator {
      *  Scale the alpha/position of the host view.
      */
     @JvmStatic
-    fun getHostViewScaledExpansion(fraction: Float): Float {
+    fun showBouncerProgress(fraction: Float): Float {
         return when {
                     fraction >= 0.9f -> 1f
                     fraction < 0.6 -> 0f
@@ -35,7 +35,7 @@ object BouncerPanelExpansionCalculator {
      *  Scale the alpha/tint of the back scrim.
      */
     @JvmStatic
-    fun getBackScrimScaledExpansion(fraction: Float): Float {
+    fun aboutToShowBouncerProgress(fraction: Float): Float {
         return MathUtils.constrain((fraction - 0.9f) / 0.1f, 0f, 1f)
     }
 
