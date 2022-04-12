@@ -468,6 +468,7 @@ public class CentralSurfaces extends CoreStartable implements
      */
     protected int mState; // TODO: remove this. Just use StatusBarStateController
     protected boolean mBouncerShowing;
+    private boolean mBouncerShowingOverDream;
 
     private final PhoneStatusBarPolicy mIconPolicy;
 
@@ -3467,7 +3468,19 @@ public class CentralSurfaces extends CoreStartable implements
         mStatusBarHideIconsForBouncerManager.setBouncerShowingAndTriggerUpdate(bouncerShowing);
         mCommandQueue.recomputeDisableFlags(mDisplayId, true /* animate */);
         updateScrimController();
-        updateNotificationPanelTouchState();
+        if (!mBouncerShowing) {
+            updatePanelExpansionForKeyguard();
+        }
+    }
+
+    /**
+     * Sets whether the bouncer over dream is showing. Note that the bouncer over dream is handled
+     * independently of the rest of the notification panel. As a result, setting this state via
+     * {@link #setBouncerShowing(boolean)} leads to unintended side effects from states modified
+     * behind the dream.
+     */
+    public void setBouncerShowingOverDream(boolean bouncerShowingOverDream) {
+        mBouncerShowingOverDream = bouncerShowingOverDream;
     }
 
     /**
@@ -3612,13 +3625,10 @@ public class CentralSurfaces extends CoreStartable implements
      * collapse the panel after we expanded it, and thus we would end up with a blank
      * Keyguard.
      */
-    public void updateNotificationPanelTouchState() {
+    void updateNotificationPanelTouchState() {
         boolean goingToSleepWithoutAnimation = isGoingToSleep()
                 && !mDozeParameters.shouldControlScreenOff();
-        boolean bouncerShowingOverDream = isBouncerShowing()
-                && mDreamOverlayStateController.isOverlayActive();
-        boolean disabled = bouncerShowingOverDream
-                || (!mDeviceInteractive && !mDozeServiceHost.isPulsing())
+        boolean disabled = (!mDeviceInteractive && !mDozeServiceHost.isPulsing())
                 || goingToSleepWithoutAnimation;
         mNotificationPanelViewController.setTouchAndAnimationDisabled(disabled);
         mNotificationIconAreaController.setAnimationsEnabled(!disabled);
@@ -4146,7 +4156,7 @@ public class CentralSurfaces extends CoreStartable implements
     }
 
     public boolean isBouncerShowingOverDream() {
-        return isBouncerShowing() && mDreamOverlayStateController.isOverlayActive();
+        return mBouncerShowingOverDream;
     }
 
     /**
