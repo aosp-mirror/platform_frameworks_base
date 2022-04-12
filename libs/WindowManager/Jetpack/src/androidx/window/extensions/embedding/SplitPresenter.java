@@ -36,6 +36,7 @@ import androidx.annotation.IntDef;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import java.util.Collection;
 import java.util.concurrent.Executor;
 
 /**
@@ -65,9 +66,23 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
     /**
      * Updates the presentation of the provided container.
      */
-    void updateContainer(TaskFragmentContainer container) {
+    void updateContainer(@NonNull TaskFragmentContainer container) {
         final WindowContainerTransaction wct = new WindowContainerTransaction();
         mController.updateContainer(wct, container);
+        applyTransaction(wct);
+    }
+
+    /**
+     * Updates the presentation of the provided containers.
+     */
+    void updateContainers(@NonNull Collection<TaskFragmentContainer> containers) {
+        if (containers.isEmpty()) {
+            return;
+        }
+        final WindowContainerTransaction wct = new WindowContainerTransaction();
+        for (TaskFragmentContainer container : containers) {
+            mController.updateContainer(wct, container);
+        }
         applyTransaction(wct);
     }
 
