@@ -4273,12 +4273,19 @@ public class ActivityManagerService extends IActivityManager.Stub
             intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY
                     | Intent.FLAG_RECEIVER_FOREGROUND);
         }
+        final int userId = UserHandle.getUserId(uid);
+        final int[] broadcastAllowList =
+                getPackageManagerInternal().getVisibilityAllowList(packageName, userId);
         intent.putExtra(Intent.EXTRA_UID, uid);
-        intent.putExtra(Intent.EXTRA_USER_HANDLE, UserHandle.getUserId(uid));
-        broadcastIntentLocked(null, null, null, intent,
-                null, null, 0, null, null, null, null, OP_NONE,
-                null, false, false, MY_PID, SYSTEM_UID, Binder.getCallingUid(),
-                Binder.getCallingPid(), UserHandle.getUserId(uid));
+        intent.putExtra(Intent.EXTRA_USER_HANDLE, userId);
+        broadcastIntentLocked(null /* callerApp */, null /* callerPackage */,
+                null /* callerFeatureId */, intent, null /* resolvedType */, null /* resultTo */,
+                0 /* resultCode */, null /* resultData */, null /* resultExtras */,
+                null /* requiredPermissions */, null /* excludedPermissions */, OP_NONE,
+                null /* bOptions */, false /* ordered */, false /* sticky */, MY_PID, SYSTEM_UID,
+                Binder.getCallingUid(), Binder.getCallingPid(), userId,
+                false /* allowBackgroundActivityStarts */, null /* backgroundActivityStartsToken */,
+                broadcastAllowList);
     }
 
     private void cleanupDisabledPackageComponentsLocked(
