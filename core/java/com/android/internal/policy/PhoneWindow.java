@@ -912,6 +912,12 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             }
         }
 
+        if (!st.hasPanelItems()) {
+            // Ensure that |st.decorView| has its actual content. Otherwise, an empty window can be
+            // created and cause ANR.
+            return;
+        }
+
         st.isHandled = false;
 
         WindowManager.LayoutParams lp = new WindowManager.LayoutParams(
