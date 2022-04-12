@@ -83,6 +83,7 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.text.BidiFormatter;
 import android.util.ArraySet;
+import android.util.Base64;
 import android.util.ExceptionUtils;
 import android.util.Log;
 import android.util.Slog;
@@ -102,6 +103,7 @@ import com.android.server.SystemService;
 import com.android.server.companion.datatransfer.SystemDataTransferProcessor;
 import com.android.server.companion.datatransfer.SystemDataTransferRequestStore;
 import com.android.server.companion.presence.CompanionDevicePresenceMonitor;
+import com.android.server.companion.securechannel.CompanionSecureCommunicationsManager;
 import com.android.server.pm.UserManagerInternal;
 
 import java.io.File;
@@ -137,6 +139,7 @@ public class CompanionDeviceManagerService extends SystemService {
     private SystemDataTransferProcessor mSystemDataTransferProcessor;
     private CompanionDevicePresenceMonitor mDevicePresenceMonitor;
     private CompanionApplicationController mCompanionAppController;
+    private CompanionSecureCommunicationsManager mSecureCommsManager;
 
     private final ActivityManagerInternal mAmInternal;
     private final IAppOpsService mAppOpsManager;
@@ -173,6 +176,8 @@ public class CompanionDeviceManagerService extends SystemService {
 
     @Override
     public void onStart() {
+        final Context context = getContext();
+
         mPersistentStore = new PersistentDataStore();
 
         loadAssociationsFromDisk();
@@ -185,10 +190,10 @@ public class CompanionDeviceManagerService extends SystemService {
                 /* cdmService */this, mAssociationStore);
         mSystemDataTransferProcessor = new SystemDataTransferProcessor(this, mAssociationStore,
                 mSystemDataTransferRequestStore);
-
-        final Context context = getContext();
         mCompanionAppController = new CompanionApplicationController(
                 context, mApplicationControllerCallback);
+        mSecureCommsManager = new CompanionSecureCommunicationsManager(
+                mAssociationStore, mCompanionAppController);
 
         // Publish "binder" service.
         final CompanionDeviceManagerImpl impl = new CompanionDeviceManagerImpl();
@@ -257,7 +262,7 @@ public class CompanionDeviceManagerService extends SystemService {
         if (DEBUG) Log.i(TAG, "onDevice_Appeared_Internal() id=" + associationId);
 
         final AssociationInfo association = mAssociationStore.getAssociationById(associationId);
-        if (DEBUG) Log.d(TAG, "  association=" + associationId);
+        if (DEBUG) Log.d(TAG, "  association=" + association);
 
         if (!association.shouldBindWhenPresent()) return;
 
@@ -279,7 +284,7 @@ public class CompanionDeviceManagerService extends SystemService {
         if (DEBUG) Log.i(TAG, "onDevice_Disappeared_Internal() id=" + associationId);
 
         final AssociationInfo association = mAssociationStore.getAssociationById(associationId);
-        if (DEBUG) Log.d(TAG, "  association=" + associationId);
+        if (DEBUG) Log.d(TAG, "  association=" + association);
 
         final int userId = association.getUserId();
         final String packageName = association.getPackageName();
@@ -603,9 +608,13 @@ public class CompanionDeviceManagerService extends SystemService {
         }
 
         @Override
-        public void dispatchMessage(int messageId, int associationId, byte[] message)
-                throws RemoteException {
-            // TODO(b/199427116): implement.
+        public void dispatchMessage(int messageId, int associationId, @NonNull byte[] message) {
+            if (DEBUG) {
+                Log.i(TAG, "dispatchMessage() associationId=" + associationId + "\n"
+                        + " message(Base64)=" + Base64.encodeToString(message, 0));
+            }
+
+            mSecureCommsManager.receiveSecureMessage(associationId, message);
         }
 
         @Override
@@ -740,7 +749,7 @@ public class CompanionDeviceManagerService extends SystemService {
                 throws RemoteException {
             enforceCallerCanManageCompanionDevice(getContext(), "onShellCommand");
             new CompanionDeviceShellCommand(
-                    CompanionDeviceManagerService.this, mAssociationStore)
+                    CompanionDeviceManagerService.this, mAssociationStore, mSecureCommsManager)
                     .exec(this, in, out, err, args, callback, resultReceiver);
         }
 

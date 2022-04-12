@@ -62,7 +62,7 @@ import java.util.Map;
  * @see CompanionDeviceServiceConnector
  */
 @SuppressLint("LongLogTag")
-class CompanionApplicationController {
+public class CompanionApplicationController {
     static final boolean DEBUG = false;
     private static final String TAG = "CompanionDevice_ApplicationController";
 
@@ -164,7 +164,10 @@ class CompanionApplicationController {
         }
     }
 
-    boolean isCompanionApplicationBound(@UserIdInt int userId, @NonNull String packageName) {
+    /**
+     * @return whether the companion application is bound now.
+     */
+    public boolean isCompanionApplicationBound(@UserIdInt int userId, @NonNull String packageName) {
         synchronized (mBoundCompanionApplications) {
             return mBoundCompanionApplications.containsValueForPackage(userId, packageName);
         }
@@ -232,6 +235,28 @@ class CompanionApplicationController {
         }
 
         primaryServiceConnector.postOnDeviceDisappeared(association);
+    }
+
+    /** Pass an encryped secure message to the companion application for transporting. */
+    public void dispatchMessage(@UserIdInt int userId, @NonNull String packageName,
+            int associationId, @NonNull byte[] message) {
+        if (DEBUG) {
+            Log.i(TAG, "dispatchMessage() u" + userId + "/" + packageName
+                    + " associationId=" + associationId);
+        }
+
+        final CompanionDeviceServiceConnector primaryServiceConnector =
+                getPrimaryServiceConnector(userId, packageName);
+        if (primaryServiceConnector == null) {
+            if (DEBUG) {
+                Log.e(TAG, "dispatchMessage(): "
+                        + "u" + userId + "/" + packageName + " is NOT bound.");
+                Log.d(TAG, "Stacktrace", new Throwable());
+            }
+            return;
+        }
+
+        primaryServiceConnector.postOnMessageDispatchedFromSystem(associationId, message);
     }
 
     private void onPrimaryServiceBindingDied(@UserIdInt int userId, @NonNull String packageName) {

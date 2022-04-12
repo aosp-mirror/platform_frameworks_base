@@ -98,6 +98,17 @@ class CompanionDeviceServiceConnector extends ServiceConnector.Impl<ICompanionDe
         post(companionService -> companionService.onDeviceDisappeared(associationInfo));
     }
 
+    void postOnMessageDispatchedFromSystem(int associationId, @NonNull byte[] message) {
+        // We always use messageId 0 (at least for now).
+        // Unlike the message itself, the messageId is not encoded, which means that the CDM on the
+        // other (receiving) end CAN NOT and MUST NOT trust this messageId.
+        // If CDM needs to pass messageId around to the other side - it should embed it in the
+        // message body.
+        post(companionService ->
+                companionService.onMessageDispatchedFromSystem(
+                        /* messageId*/ 0, associationId, message));
+    }
+
     /**
      * Post "unbind" job, which will run *after* all previously posted jobs complete.
      *
