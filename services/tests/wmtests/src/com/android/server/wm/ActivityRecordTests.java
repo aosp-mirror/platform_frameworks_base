@@ -1850,9 +1850,12 @@ public class ActivityRecordTests extends WindowTestsBase {
     @Test
     public void testIsSnapshotCompatible() {
         final ActivityRecord activity = createActivityWithTask();
+        final Task task = activity.getTask();
+        final Rect taskBounds = task.getBounds();
         final TaskSnapshot snapshot = new TaskSnapshotPersisterTestBase.TaskSnapshotBuilder()
                 .setTopActivityComponent(activity.mActivityComponent)
                 .setRotation(activity.getWindowConfiguration().getRotation())
+                .setTaskSize(taskBounds.width(), taskBounds.height())
                 .build();
 
         assertTrue(activity.isSnapshotCompatible(snapshot));
@@ -1872,13 +1875,39 @@ public class ActivityRecordTests extends WindowTestsBase {
                 .setTask(activity.getTask())
                 .setOnTop(true)
                 .build();
+        final Task task = secondActivity.getTask();
+        final Rect taskBounds = task.getBounds();
         final TaskSnapshot snapshot = new TaskSnapshotPersisterTestBase.TaskSnapshotBuilder()
                 .setTopActivityComponent(secondActivity.mActivityComponent)
+                .setTaskSize(taskBounds.width(), taskBounds.height())
                 .build();
 
         assertTrue(secondActivity.isSnapshotCompatible(snapshot));
 
         // Emulate the top activity changed.
+        assertFalse(activity.isSnapshotCompatible(snapshot));
+    }
+
+    /**
+     * Test that the snapshot should be obsoleted if the task size changed.
+     */
+    @Test
+    public void testIsSnapshotCompatibleTaskSizeChanged() {
+        final ActivityRecord activity = createActivityWithTask();
+        final Task task = activity.getTask();
+        final Rect taskBounds = task.getBounds();
+        final TaskSnapshot snapshot = new TaskSnapshotPersisterTestBase.TaskSnapshotBuilder()
+                .setTopActivityComponent(activity.mActivityComponent)
+                .setRotation(activity.getWindowConfiguration().getRotation())
+                .setTaskSize(taskBounds.width(), taskBounds.height())
+                .build();
+
+        assertTrue(activity.isSnapshotCompatible(snapshot));
+
+        taskBounds.right = taskBounds.width() * 2;
+        task.getWindowConfiguration().setBounds(taskBounds);
+        activity.getWindowConfiguration().setBounds(taskBounds);
+
         assertFalse(activity.isSnapshotCompatible(snapshot));
     }
 
