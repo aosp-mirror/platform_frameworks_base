@@ -25,6 +25,7 @@ import org.junit.runner.RunWith
 import com.android.wm.shell.pip.PipBoundsState.STASH_TYPE_NONE
 import com.android.wm.shell.pip.PipBoundsState.STASH_TYPE_BOTTOM
 import com.android.wm.shell.pip.PipBoundsState.STASH_TYPE_RIGHT
+import com.android.wm.shell.pip.PipBoundsState.STASH_TYPE_TOP
 import com.android.wm.shell.pip.tv.TvPipKeepClearAlgorithm.Placement
 import org.junit.Before
 import org.junit.Test
@@ -431,6 +432,28 @@ class TvPipKeepClearAlgorithmTest {
         assertEquals(STASH_TYPE_RIGHT, placement.stashType)
         assertEquals(expectedUnstashBounds, placement.unstashDestinationBounds)
         assertEquals(currentTime + algorithm.stashDuration, placement.unstashTime)
+    }
+
+    @Test
+    fun test_ExpandedPiPHeightExceedsMovementBounds_AtAnchor() {
+        gravity = Gravity.RIGHT or Gravity.CENTER_VERTICAL
+        pipSize = Size(DEFAULT_PIP_SIZE.width, SCREEN_SIZE.height)
+        testAnchorPosition()
+    }
+
+    @Test
+    fun test_ExpandedPiPHeightExceedsMovementBounds_BottomBar_StashedUp() {
+        gravity = Gravity.RIGHT or Gravity.CENTER_VERTICAL
+        pipSize = Size(DEFAULT_PIP_SIZE.width, SCREEN_SIZE.height)
+        val bottomBar = makeBottomBar(96)
+        unrestrictedAreas.add(bottomBar)
+
+        val expectedBounds = getExpectedAnchorBounds()
+        expectedBounds.offset(0, -bottomBar.height() - PADDING)
+        val placement = getActualPlacement()
+        assertEquals(expectedBounds, placement.bounds)
+        assertEquals(STASH_TYPE_TOP, placement.stashType)
+        assertEquals(getExpectedAnchorBounds(), placement.unstashDestinationBounds)
     }
 
     @Test
