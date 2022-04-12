@@ -21,9 +21,11 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.never;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
+import static com.android.server.wm.ActivityRecord.State.RESUMED;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.clearInvocations;
 
 import android.graphics.Rect;
@@ -169,5 +171,35 @@ public class TaskFragmentTest extends WindowTestsBase {
         mTaskFragment.getTask().ensureActivitiesVisible(null /* starting */, 0 /* configChanges */,
                 false /* preserveWindows */);
         assertEquals(true, activityBelow.isVisibleRequested());
+    }
+
+    @Test
+    public void testMoveTaskToFront_supportsEnterPipOnTaskSwitchForAdjacentTaskFragment() {
+        final Task bottomTask = createTask(mDisplayContent);
+        final ActivityRecord bottomActivity = createActivityRecord(bottomTask);
+        final Task topTask = createTask(mDisplayContent);
+        // First create primary TF, and then secondary TF, so that the secondary will be on the top.
+        final TaskFragment primaryTf = createTaskFragmentWithParentTask(
+                topTask, false /* createEmbeddedTask */);
+        final TaskFragment secondaryTf = createTaskFragmentWithParentTask(
+                topTask, false /* createEmbeddedTask */);
+        final ActivityRecord primaryActivity = primaryTf.getTopMostActivity();
+        final ActivityRecord secondaryActivity = secondaryTf.getTopMostActivity();
+        doReturn(true).when(primaryActivity).supportsPictureInPicture();
+        doReturn(false).when(secondaryActivity).supportsPictureInPicture();
+
+        primaryTf.setAdjacentTaskFragment(secondaryTf, false /* moveAdjacentTogether */);
+        primaryActivity.setState(RESUMED, "test");
+        secondaryActivity.setState(RESUMED, "test");
+
+        assertEquals(topTask, bottomTask.getDisplayArea().getTopRootTask());
+
+        // When moving Task to front, the resumed activity that supports PIP should support enter
+        // PIP on Task switch even if it is not the topmost in the Task.
+        bottomTask.moveTaskToFront(bottomTask, false /* noAnimation */, null /* options */,
+                null /* timeTracker */, "test");
+
+        assertTrue(primaryActivity.supportsEnterPipOnTaskSwitch);
+        assertFalse(secondaryActivity.supportsEnterPipOnTaskSwitch);
     }
 }

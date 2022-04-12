@@ -85,8 +85,8 @@
     <string name="RestrictedStateContentMsimTemplate" msgid="5228235722511044687">"Símafyrirtækið slökkti tímabundið á þessu fyrir SIM-kort <xliff:g id="SIMNUMBER">%d</xliff:g>"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"Ekki næst samband við farsímakerfi"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"Prófaðu að velja annað símkerfi. Ýttu til að breyta."</string>
-    <string name="EmergencyCallWarningTitle" msgid="9164532362414787774">"Neyðarsímtöl eru hugsanlega ekki tiltæk"</string>
-    <string name="EmergencyCallWarningSummary" msgid="3365701131304664899">"<xliff:g id="SPN">%s</xliff:g> styður ekki neyðarsímtöl um Wi-Fi. Ýttu til að fá frekari upplýsingar."</string>
+    <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"Neyðarsímtöl eru ekki í boði"</string>
+    <string name="EmergencyCallWarningSummary" msgid="1194185880092805497">"Ekki er hægt að hringja neyðarsímtöl með Wi-Fi"</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"Tilkynningar"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"Símtalsflutningur"</string>
     <string name="notification_channel_emergency_callback" msgid="54074839059123159">"Stilling fyrir svarhringingu neyðarsímtala"</string>
@@ -585,8 +585,7 @@
     <string name="biometric_error_generic" msgid="6784371929985434439">"Villa við auðkenningu"</string>
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"Nota skjálás"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"Sláðu inn skjálásinn þinn til að halda áfram"</string>
-    <!-- no translation found for fingerprint_acquired_partial (4323789264604479684) -->
-    <skip />
+    <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"Ýttu ákveðið á lesarann"</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"Ekki var hægt að vinna úr fingrafarinu. Reyndu aftur."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"Hreinsaðu fingrafaralesarann og reyndu aftur"</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"Hreinsaðu lesarann og reyndu aftur"</string>
@@ -599,8 +598,7 @@
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_error_not_match" msgid="4599441812893438961">"Ekki þekkt fingrafar"</string>
-    <!-- no translation found for fingerprint_udfps_error_not_match (8236930793223158856) -->
-    <skip />
+    <string name="fingerprint_udfps_error_not_match" msgid="8236930793223158856">"Fingrafar þekkist ekki"</string>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"Fingrafar staðfest"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"Andlit staðfest"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"Andlit staðfest, ýttu til að staðfesta"</string>
@@ -1935,9 +1933,36 @@
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> er ekki tiltækt núna."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> ekki í boði"</string>
     <string name="app_streaming_blocked_title_for_permission_dialog" msgid="4483161748582966785">"Heimildar krafist"</string>
-    <string name="app_streaming_blocked_message" product="tv" msgid="4003011766528814377">"Aðgangur að þessu í <xliff:g id="DEVICE">%1$s</xliff:g> er ekki í boði eins og er. Prófaðu það í Android TV tækinu í staðinn."</string>
-    <string name="app_streaming_blocked_message" product="tablet" msgid="4242053045964946062">"Aðgangur að þessu í <xliff:g id="DEVICE">%1$s</xliff:g> er ekki í boði eins og er. Prófaðu það í spjaldtölvunni í staðinn."</string>
-    <string name="app_streaming_blocked_message" product="default" msgid="6159168735030739398">"Aðgangur að þessu í <xliff:g id="DEVICE">%1$s</xliff:g> er ekki í boði eins og er. Prófaðu það í símanum í staðinn."</string>
+    <!-- no translation found for app_streaming_blocked_title_for_camera_dialog (3935701653713853065) -->
+    <skip />
+    <!-- no translation found for app_streaming_blocked_title_for_fingerprint_dialog (3516853717714141951) -->
+    <skip />
+    <!-- no translation found for app_streaming_blocked_title_for_microphone_dialog (544822455127171206) -->
+    <skip />
+    <!-- no translation found for app_streaming_blocked_title_for_settings_dialog (196994247017450357) -->
+    <skip />
+    <!-- no translation found for app_streaming_blocked_title_for_settings_dialog (8222710146267948647) -->
+    <skip />
+    <!-- no translation found for app_streaming_blocked_title_for_settings_dialog (6895719984375299791) -->
+    <skip />
+    <!-- no translation found for app_streaming_blocked_message (5024599278277957935) -->
+    <skip />
+    <!-- no translation found for app_streaming_blocked_message (7491114163056552686) -->
+    <skip />
+    <!-- no translation found for app_streaming_blocked_message (1245180131667647277) -->
+    <skip />
+    <!-- no translation found for app_streaming_blocked_message_for_permission_dialog (6306583663205997979) -->
+    <skip />
+    <!-- no translation found for app_streaming_blocked_message_for_permission_dialog (6545624942642129664) -->
+    <skip />
+    <!-- no translation found for app_streaming_blocked_message_for_permission_dialog (8462740631707923000) -->
+    <skip />
+    <!-- no translation found for app_streaming_blocked_message_for_fingerprint_dialog (3470977315395784567) -->
+    <skip />
+    <!-- no translation found for app_streaming_blocked_message_for_fingerprint_dialog (698460091901465092) -->
+    <skip />
+    <!-- no translation found for app_streaming_blocked_message_for_fingerprint_dialog (8552691971910603907) -->
+    <skip />
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"Þetta forrit var hannað fyrir eldri útgáfu af Android og ekki er víst að það virki eðlilega. Athugaðu hvort uppfærslur séu í boði eða hafðu samband við þróunaraðilann."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Leita að uppfærslu"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Þú ert með ný skilaboð"</string>
@@ -2028,8 +2053,7 @@
     <string name="harmful_app_warning_open_anyway" msgid="5963657791740211807">"OPNA SAMT"</string>
     <string name="harmful_app_warning_title" msgid="8794823880881113856">"Skaðlegt forrit fannst"</string>
     <string name="log_access_confirmation_title" msgid="2343578467290592708">"Veita <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> aðgang að öllum annálum í tækinu?"</string>
-    <!-- no translation found for log_access_confirmation_allow (5302517782599389507) -->
-    <skip />
+    <string name="log_access_confirmation_allow" msgid="5302517782599389507">"Leyfa aðgang í eitt skipti"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"Ekki leyfa"</string>
     <string name="log_access_confirmation_body" msgid="6581985716241928135">"Annálar tækisins skrá það sem gerist í tækinu. Forrit geta notað þessa annála til að finna og lagfæra vandamál.\n\nTilteknir annálar innihalda viðkvæmar upplýsingar og því skaltu einungis veita forritum sem þú treystir aðgang að öllum annálum tækisins. \n\nEf þú veitir þessu forriti ekki aðgang að öllum annálum tækisins hefur það áfram aðgang að eigin annálum. Framleiðandi tækisins getur þó hugsanlega opnað tiltekna annála eða upplýsingar í tækinu. Nánar"</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"Ekki sýna aftur"</string>
@@ -2043,6 +2067,14 @@
     <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"Ýttu til að fá frekari upplýsingar og breyta."</string>
     <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"„Ónáðið ekki“ var breytt"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Ýttu til að skoða hvað lokað hefur verið á."</string>
+    <!-- no translation found for review_notification_settings_title (5102557424459810820) -->
+    <skip />
+    <!-- no translation found for review_notification_settings_text (5696497037817525074) -->
+    <skip />
+    <!-- no translation found for review_notification_settings_remind_me_action (1081081018678480907) -->
+    <skip />
+    <!-- no translation found for review_notification_settings_dismiss (4160916504616428294) -->
+    <skip />
     <string name="notification_app_name_system" msgid="3045196791746735601">"Kerfi"</string>
     <string name="notification_app_name_settings" msgid="9088548800899952531">"Stillingar"</string>
     <string name="notification_appops_camera_active" msgid="8177643089272352083">"Myndavél"</string>
@@ -2261,14 +2293,10 @@
     <string name="ui_translation_accessibility_translated_text" msgid="3197547218178944544">"<xliff:g id="MESSAGE">%1$s</xliff:g> var þýtt."</string>
     <string name="ui_translation_accessibility_translation_finished" msgid="3057830947610088465">"Skilaboð þýdd úr <xliff:g id="FROM_LANGUAGE">%1$s</xliff:g> á <xliff:g id="TO_LANGUAGE">%2$s</xliff:g>."</string>
     <string name="notification_channel_abusive_bg_apps" msgid="6092140213264920355">"Bakgrunnsvirkni"</string>
-    <!-- no translation found for notification_title_abusive_bg_apps (3258460527676573815) -->
-    <skip />
-    <!-- no translation found for notification_title_long_running_fgs (8170284286477131587) -->
-    <skip />
-    <!-- no translation found for notification_content_abusive_bg_apps (9180610713603474720) -->
-    <skip />
-    <!-- no translation found for notification_content_long_running_fgs (8258193410039977101) -->
-    <skip />
+    <string name="notification_title_abusive_bg_apps" msgid="3258460527676573815">"Forrit notar rafhlöðuorku"</string>
+    <string name="notification_title_long_running_fgs" msgid="8170284286477131587">"Forrit er enn virkt"</string>
+    <string name="notification_content_abusive_bg_apps" msgid="9180610713603474720">"<xliff:g id="APP">%1$s</xliff:g> notar rafhlöðuorku í bakgrunni. Ýttu til að skoða."</string>
+    <string name="notification_content_long_running_fgs" msgid="8258193410039977101">"<xliff:g id="APP">%1$s</xliff:g> gæti haft áhrif á rafhlöðuendingu. Ýttu til að skoða virk forrit."</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Skoða virk forrit"</string>
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"Ekki er hægt að opna myndavél símans úr <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"Ekki er hægt að opna myndavél spjaldtölvunnar úr <xliff:g id="DEVICE">%1$s</xliff:g>"</string>

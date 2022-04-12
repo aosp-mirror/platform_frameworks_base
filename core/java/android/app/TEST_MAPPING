@@ -159,6 +159,15 @@
                 }
             ],
             "file_patterns": ["(/|^)ContextImpl.java"]
+        },
+        {
+            "file_patterns": ["(/|^)LocaleManager.java"],
+            "name": "CtsLocaleManagerTestCases",
+            "options": [
+                {
+                    "exclude-annotation": "androidx.test.filters.FlakyTest"
+                }
+            ]
         }
     ],
     "presubmit-large": [
@@ -186,16 +195,6 @@
         {
             "file_patterns": ["(/|^)ActivityThreadTest.java"],
             "name": "FrameworksCoreTests"
-        },
-        // TODO(b/225192026): Move back to presubmit after b/225192026 is fixed
-        {
-            "file_patterns": ["(/|^)LocaleManager.java"],
-            "name": "CtsLocaleManagerTestCases",
-            "options": [
-                {
-                    "exclude-annotation": "androidx.test.filters.FlakyTest"
-                }
-            ]
         }
     ]
 }

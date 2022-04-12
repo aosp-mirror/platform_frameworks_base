@@ -85,8 +85,8 @@
     <string name="RestrictedStateContentMsimTemplate" msgid="5228235722511044687">"បិទ​​ដោយ​ក្រុមហ៊ុន​សេវា​ទូរសព្ទ​របស់អ្នកជាបណ្តោះ​អាសន្ន ​សម្រាប់​ស៊ីមទី <xliff:g id="SIMNUMBER">%d</xliff:g>"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"មិន​អាច​ភ្ជាប់​បណ្ដាញ​ទូរសព្ទ​ចល័តបានទេ"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"សាកល្បង​ប្ដូរ​ទៅបណ្ដាញ​ដែល​ចង់ប្រើ។ សូមចុច​ដើម្បីផ្លាស់​ប្ដូរ។"</string>
-    <string name="EmergencyCallWarningTitle" msgid="9164532362414787774">"ប្រហែលជាមិនអាចហៅទៅលេខសង្គ្រោះបន្ទាន់បានទេ"</string>
-    <string name="EmergencyCallWarningSummary" msgid="3365701131304664899">"<xliff:g id="SPN">%s</xliff:g> មិនអាចហៅទៅលេខសង្គ្រោះបន្ទាន់តាម Wi-Fi បានទេ។ សូមចុច​ដើម្បី​ទទួលបាន​ព័ត៌មាន​លម្អិត។"</string>
+    <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"មិន​អាច​ប្រើ​ការ​ហៅ​បន្ទាន់​បានទេ"</string>
+    <string name="EmergencyCallWarningSummary" msgid="1194185880092805497">"មិន​អាចធ្វើការ​ហៅ​បន្ទាន់​តាម Wi‑Fi បានទេ"</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"ការជូនដំណឹង"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"ការបញ្ជូន​ការហៅ​ទូរសព្ទ​បន្ត"</string>
     <string name="notification_channel_emergency_callback" msgid="54074839059123159">"មុខងារ​ហៅត្រឡប់​វិញ​បន្ទាន់"</string>
@@ -1176,7 +1176,7 @@
     <string name="whichGiveAccessToApplicationLabel" msgid="7805857277166106236">"ផ្តល់​សិទ្ធិ​ចូល​ប្រើ"</string>
     <string name="whichEditApplication" msgid="6191568491456092812">"កែសម្រួល​ជាមួយ"</string>
     <string name="whichEditApplicationNamed" msgid="8096494987978521514">"កែសម្រួល​ជាមួយ​ %1$s"</string>
-    <string name="whichEditApplicationLabel" msgid="1463288652070140285">"កែសម្រួល"</string>
+    <string name="whichEditApplicationLabel" msgid="1463288652070140285">"កែ"</string>
     <string name="whichSendApplication" msgid="4143847974460792029">"ចែករំលែក"</string>
     <string name="whichSendApplicationNamed" msgid="4470386782693183461">"ចែករំលែក​ជាមួយ %1$s"</string>
     <string name="whichSendApplicationLabel" msgid="7467813004769188515">"ចែករំលែក"</string>
@@ -1564,7 +1564,7 @@
     <string name="storage_usb_drive" msgid="448030813201444573">"ឧបករណ៍ផ្ទុក USB"</string>
     <string name="storage_usb_drive_label" msgid="6631740655876540521">"ឧបករណ៍ផ្ទុក USB <xliff:g id="MANUFACTURER">%s</xliff:g>"</string>
     <string name="storage_usb" msgid="2391213347883616886">"ឧបករណ៍​ផ្ទុក​យូអេសប៊ី"</string>
-    <string name="extract_edit_menu_button" msgid="63954536535863040">"កែសម្រួល​"</string>
+    <string name="extract_edit_menu_button" msgid="63954536535863040">"កែ"</string>
     <string name="data_usage_warning_title" msgid="9034893717078325845">"ការព្រមានពីការប្រើទិន្នន័យ"</string>
     <string name="data_usage_warning_body" msgid="1669325367188029454">"អ្នកបានប្រើ​ទិន្នន័យអស់ <xliff:g id="APP">%s</xliff:g>"</string>
     <string name="data_usage_mobile_limit_title" msgid="3911447354393775241">"បានឈានដល់ចំនួនកម្រិតនៃទិន្នន័យទូរសព្ទចល័តហើយ"</string>
@@ -1933,9 +1933,36 @@
     <string name="app_blocked_message" msgid="542972921087873023">"មិនអាច​ប្រើ <xliff:g id="APP_NAME">%1$s</xliff:g> នៅពេល​នេះ​បានទេ​។"</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"មិនអាចប្រើ <xliff:g id="ACTIVITY">%1$s</xliff:g> បានទេ"</string>
     <string name="app_streaming_blocked_title_for_permission_dialog" msgid="4483161748582966785">"តម្រូវឱ្យមាន​ការអនុញ្ញាត"</string>
-    <string name="app_streaming_blocked_message" product="tv" msgid="4003011766528814377">"មិនអាចប្រើ​កម្មវិធីនេះ​នៅលើ <xliff:g id="DEVICE">%1$s</xliff:g> របស់អ្នក​នៅពេលនេះ​បានទេ។ សូមសាកល្បងប្រើ​នៅលើ​ឧបករណ៍ Android TV របស់អ្នក​ជំនួសវិញ។"</string>
-    <string name="app_streaming_blocked_message" product="tablet" msgid="4242053045964946062">"មិនអាចប្រើ​កម្មវិធីនេះ​នៅលើ <xliff:g id="DEVICE">%1$s</xliff:g> របស់អ្នក​នៅពេលនេះ​បានទេ។ សូមសាកល្បងប្រើ​នៅលើ​ថេប្លេត​របស់អ្នក​ជំនួសវិញ។"</string>
-    <string name="app_streaming_blocked_message" product="default" msgid="6159168735030739398">"មិនអាចប្រើ​កម្មវិធីនេះ​នៅលើ <xliff:g id="DEVICE">%1$s</xliff:g> របស់អ្នក​នៅពេលនេះ​បានទេ។ សូមសាកល្បងប្រើ​នៅលើ​ទូរសព្ទរបស់អ្នក​ជំនួសវិញ។"</string>
+    <!-- no translation found for app_streaming_blocked_title_for_camera_dialog (3935701653713853065) -->
+    <skip />
+    <!-- no translation found for app_streaming_blocked_title_for_fingerprint_dialog (3516853717714141951) -->
+    <skip />
+    <!-- no translation found for app_streaming_blocked_title_for_microphone_dialog (544822455127171206) -->
+    <skip />
+    <!-- no translation found for app_streaming_blocked_title_for_settings_dialog (196994247017450357) -->
+    <skip />
+    <!-- no translation found for app_streaming_blocked_title_for_settings_dialog (8222710146267948647) -->
+    <skip />
+    <!-- no translation found for app_streaming_blocked_title_for_settings_dialog (6895719984375299791) -->
+    <skip />
+    <!-- no translation found for app_streaming_blocked_message (5024599278277957935) -->
+    <skip />
+    <!-- no translation found for app_streaming_blocked_message (7491114163056552686) -->
+    <skip />
+    <!-- no translation found for app_streaming_blocked_message (1245180131667647277) -->
+    <skip />
+    <!-- no translation found for app_streaming_blocked_message_for_permission_dialog (6306583663205997979) -->
+    <skip />
+    <!-- no translation found for app_streaming_blocked_message_for_permission_dialog (6545624942642129664) -->
+    <skip />
+    <!-- no translation found for app_streaming_blocked_message_for_permission_dialog (8462740631707923000) -->
+    <skip />
+    <!-- no translation found for app_streaming_blocked_message_for_fingerprint_dialog (3470977315395784567) -->
+    <skip />
+    <!-- no translation found for app_streaming_blocked_message_for_fingerprint_dialog (698460091901465092) -->
+    <skip />
+    <!-- no translation found for app_streaming_blocked_message_for_fingerprint_dialog (8552691971910603907) -->
+    <skip />
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"កម្មវិធី​នេះ​ត្រូវបាន​បង្កើត​ឡើង​សម្រាប់​កំណែ​ប្រព័ន្ធ​ប្រតិបត្តិការ Android ចាស់ ហើយ​វាអាច​ដំណើរការ​ខុសប្រក្រតី។ សូម​សាកល្បង​ពិនិត្យមើល​កំណែ​ថ្មី ឬ​ទាក់ទង​ទៅអ្នក​អភិវឌ្ឍន៍។"</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"រក​មើល​កំណែ​ថ្មី"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"អ្នកមានសារថ្មី"</string>
@@ -2031,7 +2058,7 @@
     <string name="log_access_confirmation_body" msgid="6581985716241928135">"កំណត់ហេតុឧបករណ៍កត់ត្រាអ្វីដែលកើតឡើងនៅលើឧបករណ៍របស់អ្នក។ កម្មវិធីអាចប្រើកំណត់ហេតុទាំងនេះដើម្បីស្វែងរក និងដោះស្រាយបញ្ហាបាន។\n\nកំណត់ហេតុមួយចំនួនអាចមានព័ត៌មានរសើប ដូច្នេះគួរអនុញ្ញាតឱ្យចូលប្រើកំណត់ហេតុឧបករណ៍ទាំងអស់សម្រាប់តែកម្មវិធីដែលអ្នកទុកចិត្តប៉ុណ្ណោះ។ \n\nប្រសិនបើអ្នកមិនអនុញ្ញាតឱ្យកម្មវិធីនេះចូលប្រើកំណត់ហេតុឧបករណ៍ទាំងអស់ទេ វានៅតែអាចចូលប្រើកំណត់ហេតុរបស់វាផ្ទាល់បាន។ ក្រុមហ៊ុន​ផលិត​ឧបករណ៍របស់អ្នក​ប្រហែលជា​នៅតែអាចចូលប្រើ​កំណត់ហេតុ ឬព័ត៌មានមួយចំនួន​នៅលើឧបករណ៍​របស់អ្នក​បានដដែល។ ស្វែងយល់បន្ថែម"</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"កុំ​បង្ហាញ​ម្ដង​ទៀត"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g> ចង់​បង្ហាញ​ស្ថិតិ​ប្រើប្រាស់​របស់ <xliff:g id="APP_2">%2$s</xliff:g>"</string>
-    <string name="screenshot_edit" msgid="7408934887203689207">"កែសម្រួល"</string>
+    <string name="screenshot_edit" msgid="7408934887203689207">"កែ"</string>
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"ការហៅ​ទូរសព្ទ និងការជូន​ដំណឹងនឹងញ័រ"</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"ការហៅ​ទូរសព្ទ និងការជូន​ដំណឹងនឹង​បិទសំឡេង"</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"ការផ្លាស់ប្ដូរ​ប្រព័ន្ធ"</string>
@@ -2040,6 +2067,14 @@
     <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"ចុចដើម្បីស្វែងយល់បន្ថែម និងផ្លាស់ប្ដូរ។"</string>
     <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"មុខងារ​កុំ​រំខាន​ត្រូវ​បាន​ប្ដូរ"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"សូមចុច​ដើម្បី​មើល​ថា​​បានទប់ស្កាត់អ្វីខ្លះ។"</string>
+    <!-- no translation found for review_notification_settings_title (5102557424459810820) -->
+    <skip />
+    <!-- no translation found for review_notification_settings_text (5696497037817525074) -->
+    <skip />
+    <!-- no translation found for review_notification_settings_remind_me_action (1081081018678480907) -->
+    <skip />
+    <!-- no translation found for review_notification_settings_dismiss (4160916504616428294) -->
+    <skip />
     <string name="notification_app_name_system" msgid="3045196791746735601">"ប្រព័ន្ធ"</string>
     <string name="notification_app_name_settings" msgid="9088548800899952531">"ការកំណត់"</string>
     <string name="notification_appops_camera_active" msgid="8177643089272352083">"កាមេរ៉ា"</string>

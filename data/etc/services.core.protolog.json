@@ -1951,12 +1951,6 @@
       "group": "WM_DEBUG_ORIENTATION",
       "at": "com\/android\/server\/wm\/ScreenRotationAnimation.java"
     },
-    "-172900257": {
-      "message": "addTaskToTargets, target: %s",
-      "level": "DEBUG",
-      "group": "WM_DEBUG_RECENTS_ANIMATIONS",
-      "at": "com\/android\/server\/wm\/RecentsAnimationController.java"
-    },
     "-172326720": {
       "message": "Saving icicle of %s: %s",
       "level": "INFO",
@@ -3318,6 +3312,12 @@
       "level": "VERBOSE",
       "group": "WM_DEBUG_WINDOW_ORGANIZER",
       "at": "com\/android\/server\/wm\/DisplayAreaOrganizerController.java"
+    },
+    "1151072840": {
+      "message": "collectTaskRemoteAnimations, target: %s",
+      "level": "DEBUG",
+      "group": "WM_DEBUG_RECENTS_ANIMATIONS",
+      "at": "com\/android\/server\/wm\/RecentsAnimationController.java"
     },
     "1164325516": {
       "message": "onExitAnimationDone in %s: exiting=%b remove=%b selfAnimating=%b anim=%s",

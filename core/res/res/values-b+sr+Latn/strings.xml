@@ -86,8 +86,8 @@
     <string name="RestrictedStateContentMsimTemplate" msgid="5228235722511044687">"Privremeno je isključio mobilni operater za SIM <xliff:g id="SIMNUMBER">%d</xliff:g>"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"Povezivanje sa mobilnom mrežom nije uspelo"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"Probajte da promenite željenu mrežu. Dodirnite da biste promenili."</string>
-    <string name="EmergencyCallWarningTitle" msgid="9164532362414787774">"Hitni pozivi možda nisu dostupni"</string>
-    <string name="EmergencyCallWarningSummary" msgid="3365701131304664899">"<xliff:g id="SPN">%s</xliff:g> ne podržava hitne pozive preko WiFi-ja. Dodirnite za detalje."</string>
+    <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"Hitni pozivi nisu dostupni"</string>
+    <string name="EmergencyCallWarningSummary" msgid="1194185880092805497">"Ne možete da upućujete hitne pozive preko Wi‑Fi-ja"</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"Obaveštenja"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"Preusmeravanje poziva"</string>
     <string name="notification_channel_emergency_callback" msgid="54074839059123159">"Režim za hitan povratni poziv"</string>
@@ -1934,9 +1934,36 @@
     <string name="app_blocked_message" msgid="542972921087873023">"Aplikacija <xliff:g id="APP_NAME">%1$s</xliff:g> trenutno nije dostupna."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> – nije dostupno"</string>
     <string name="app_streaming_blocked_title_for_permission_dialog" msgid="4483161748582966785">"Potrebna je dozvola"</string>
-    <string name="app_streaming_blocked_message" product="tv" msgid="4003011766528814377">"Ovoj aplikaciji trenutno ne može da se pristupi sa uređaja <xliff:g id="DEVICE">%1$s</xliff:g>. Probajte na Android TV uređaju."</string>
-    <string name="app_streaming_blocked_message" product="tablet" msgid="4242053045964946062">"Ovoj aplikaciji trenutno ne može da se pristupi sa uređaja <xliff:g id="DEVICE">%1$s</xliff:g>. Probajte na tabletu."</string>
-    <string name="app_streaming_blocked_message" product="default" msgid="6159168735030739398">"Ovoj aplikaciji trenutno ne može da se pristupi sa uređaja <xliff:g id="DEVICE">%1$s</xliff:g>. Probajte na telefonu."</string>
+    <!-- no translation found for app_streaming_blocked_title_for_camera_dialog (3935701653713853065) -->
+    <skip />
+    <!-- no translation found for app_streaming_blocked_title_for_fingerprint_dialog (3516853717714141951) -->
+    <skip />
+    <!-- no translation found for app_streaming_blocked_title_for_microphone_dialog (544822455127171206) -->
+    <skip />
+    <!-- no translation found for app_streaming_blocked_title_for_settings_dialog (196994247017450357) -->
+    <skip />
+    <!-- no translation found for app_streaming_blocked_title_for_settings_dialog (8222710146267948647) -->
+    <skip />
+    <!-- no translation found for app_streaming_blocked_title_for_settings_dialog (6895719984375299791) -->
+    <skip />
+    <!-- no translation found for app_streaming_blocked_message (5024599278277957935) -->
+    <skip />
+    <!-- no translation found for app_streaming_blocked_message (7491114163056552686) -->
+    <skip />
+    <!-- no translation found for app_streaming_blocked_message (1245180131667647277) -->
+    <skip />
+    <!-- no translation found for app_streaming_blocked_message_for_permission_dialog (6306583663205997979) -->
+    <skip />
+    <!-- no translation found for app_streaming_blocked_message_for_permission_dialog (6545624942642129664) -->
+    <skip />
+    <!-- no translation found for app_streaming_blocked_message_for_permission_dialog (8462740631707923000) -->
+    <skip />
+    <!-- no translation found for app_streaming_blocked_message_for_fingerprint_dialog (3470977315395784567) -->
+    <skip />
+    <!-- no translation found for app_streaming_blocked_message_for_fingerprint_dialog (698460091901465092) -->
+    <skip />
+    <!-- no translation found for app_streaming_blocked_message_for_fingerprint_dialog (8552691971910603907) -->
+    <skip />
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"Ova aplikacija je napravljena za stariju verziju Android-a, pa možda neće raditi ispravno. Potražite ažuriranja ili kontaktirajte programera."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Potraži ažuriranje"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Imate nove poruke"</string>
@@ -2041,6 +2068,14 @@
     <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"Dodirnite da biste saznali više i promenili podešavanje."</string>
     <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"Režim Ne uznemiravaj je promenjen"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Dodirnite da biste proverili šta je blokirano."</string>
+    <!-- no translation found for review_notification_settings_title (5102557424459810820) -->
+    <skip />
+    <!-- no translation found for review_notification_settings_text (5696497037817525074) -->
+    <skip />
+    <!-- no translation found for review_notification_settings_remind_me_action (1081081018678480907) -->
+    <skip />
+    <!-- no translation found for review_notification_settings_dismiss (4160916504616428294) -->
+    <skip />
     <string name="notification_app_name_system" msgid="3045196791746735601">"Sistem"</string>
     <string name="notification_app_name_settings" msgid="9088548800899952531">"Podešavanja"</string>
     <string name="notification_appops_camera_active" msgid="8177643089272352083">"Kamera"</string>
