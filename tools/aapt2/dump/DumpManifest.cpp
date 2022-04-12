@@ -17,16 +17,18 @@
 #include "DumpManifest.h"
 
 #include <algorithm>
+#include <memory>
+#include <set>
+#include <vector>
 
 #include "LoadedApk.h"
 #include "SdkConstants.h"
 #include "ValueVisitor.h"
+#include "androidfw/ConfigDescription.h"
 #include "io/File.h"
 #include "io/FileStream.h"
 #include "process/IResourceTableConsumer.h"
 #include "xml/XmlDom.h"
-
-#include "androidfw/ConfigDescription.h"
 
 using ::android::base::StringPrintf;
 using ::android::ConfigDescription;
@@ -113,6 +115,9 @@ static xml::Attribute* FindAttribute(xml::Element *el, const std::string &packag
 }
 
 class CommonFeatureGroup;
+class Architectures;
+class SupportsScreen;
+class FeatureGroup;
 
 class ManifestExtractor {
  public:
@@ -338,7 +343,8 @@ class ManifestExtractor {
     return config;
   }
 
-  bool Dump(text::Printer* printer, IDiagnostics* diag);
+  bool Extract(IDiagnostics* diag);
+  bool Dump(text::Printer* printer);
 
   /** Recursively visit the xml element tree and return a processed badging element tree. */
   std::unique_ptr<Element> Visit(xml::Element* element);
@@ -354,7 +360,7 @@ class ManifestExtractor {
    * Retrieves the default feature group that features are added into when <uses-feature>
    * are not in a <feature-group> element.
    **/
-  CommonFeatureGroup* GetCommonFeatureGroup() {
+  CommonFeatureGroup* common_feature_group() {
     return commonFeatureGroup_.get();
   }
 
@@ -387,11 +393,22 @@ class ManifestExtractor {
   DumpManifestOptions& options_;
 
  private:
+  std::unique_ptr<xml::XmlResource> doc_;
   std::unique_ptr<CommonFeatureGroup> commonFeatureGroup_ = util::make_unique<CommonFeatureGroup>();
   std::map<std::string, ConfigDescription> locales_;
   std::map<uint16_t, ConfigDescription> densities_;
   std::vector<Element*> parent_stack_;
   int32_t target_sdk_ = 0;
+
+  std::unique_ptr<ManifestExtractor::Element> root_element_;
+  std::vector<std::unique_ptr<ManifestExtractor::Element>> implied_permissions_;
+  std::set<std::string> components_;
+  std::vector<FeatureGroup*> feature_groups_;
+  bool other_activities_ = false;
+  bool other_receivers_ = false;
+  bool other_services_ = false;
+  std::unique_ptr<Architectures> architectures_ = util::make_unique<Architectures>();
+  const SupportsScreen* supports_screen_;
 };
 
 template<typename T> T* ElementCast(ManifestExtractor::Element* element);
@@ -427,6 +444,7 @@ static ManifestExtractor::Element* FindElement(ManifestExtractor::Element* root,
 class Manifest : public ManifestExtractor::Element {
  public:
   Manifest() = default;
+  bool only_package_name;
   std::string package;
   int32_t versionCode;
   std::string versionName;
@@ -463,6 +481,14 @@ class Manifest : public ManifestExtractor::Element {
   }
 
   void Print(text::Printer* printer) override {
+    if (only_package_name) {
+      printer->Println(StringPrintf("package: %s", package.data()));
+    } else {
+      PrintFull(printer);
+    }
+  }
+
+  void PrintFull(text::Printer* printer) {
     printer->Print(StringPrintf("package: name='%s' ", package.data()));
     printer->Print(StringPrintf("versionCode='%s' ",
                                (versionCode > 0) ? std::to_string(versionCode).data() : ""));
@@ -733,7 +759,7 @@ class SupportsScreen : public ManifestExtractor::Element {
     }
   }
 
-  void PrintScreens(text::Printer* printer, int32_t target_sdk) {
+  void PrintScreens(text::Printer* printer, int32_t target_sdk) const {
     int32_t small_screen_temp = small_screen;
     int32_t normal_screen_temp  = normal_screen;
     int32_t large_screen_temp  = large_screen;
@@ -1050,7 +1076,7 @@ class UsesFeature : public ManifestExtractor::Element {
     // common feature group
     FeatureGroup* feature_group = ElementCast<FeatureGroup>(extractor()->parent_stack()[0]);
     if (!feature_group) {
-      feature_group = extractor()->GetCommonFeatureGroup();
+      feature_group = extractor()->common_feature_group();
     } else {
       // All features in side of <feature-group> elements are required.
       required = true;
@@ -1068,12 +1094,14 @@ class UsesFeature : public ManifestExtractor::Element {
 class UsesPermission : public ManifestExtractor::Element {
  public:
   UsesPermission() = default;
+  bool implied;
   std::string name;
   std::vector<std::string> requiredFeatures;
   std::vector<std::string> requiredNotFeatures;
   int32_t required = true;
   int32_t maxSdkVersion = -1;
   int32_t usesPermissionFlags = 0;
+  std::string impliedReason;
 
   void Extract(xml::Element* element) override {
     name = GetAttributeStringDefault(FindAttribute(element, NAME_ATTR), "");
@@ -1094,7 +1122,7 @@ class UsesPermission : public ManifestExtractor::Element {
         FindAttribute(element, USES_PERMISSION_FLAGS_ATTR), 0);
 
     if (!name.empty()) {
-      CommonFeatureGroup* common = extractor()->GetCommonFeatureGroup();
+      CommonFeatureGroup* common = extractor()->common_feature_group();
       common->addImpliedFeaturesForPermission(extractor()->target_sdk(), name, false);
     }
   }
@@ -1126,17 +1154,16 @@ class UsesPermission : public ManifestExtractor::Element {
         printer->Print("\n");
       }
     }
-  }
-
-  void PrintImplied(text::Printer* printer, const std::string& reason) {
-    printer->Print(StringPrintf("uses-implied-permission: name='%s'", name.data()));
-    if (maxSdkVersion >= 0) {
-      printer->Print(StringPrintf(" maxSdkVersion='%d'", maxSdkVersion));
+    if (implied) {
+      printer->Print(StringPrintf("uses-implied-permission: name='%s'", name.data()));
+      if (maxSdkVersion >= 0) {
+        printer->Print(StringPrintf(" maxSdkVersion='%d'", maxSdkVersion));
+      }
+      if ((usesPermissionFlags & kNeverForLocation) != 0) {
+        printer->Print(StringPrintf(" usesPermissionFlags='neverForLocation'"));
+      }
+      printer->Print(StringPrintf(" reason='%s'\n", impliedReason.data()));
     }
-    if ((usesPermissionFlags & kNeverForLocation) != 0) {
-      printer->Print(StringPrintf(" usesPermissionFlags='neverForLocation'"));
-    }
-    printer->Print(StringPrintf(" reason='%s'\n", reason.data()));
   }
 };
 
@@ -1184,7 +1211,7 @@ class UsesPermissionSdk23 : public ManifestExtractor::Element {
     maxSdkVersion = GetAttributeInteger(FindAttribute(element, MAX_SDK_VERSION_ATTR));
 
     if (name) {
-      CommonFeatureGroup* common = extractor()->GetCommonFeatureGroup();
+      CommonFeatureGroup* common = extractor()->common_feature_group();
       common->addImpliedFeaturesForPermission(extractor()->target_sdk(), *name, true);
     }
   }
@@ -1256,7 +1283,7 @@ class Activity : public ManifestExtractor::Element {
 
     auto orientation = GetAttributeInteger(FindAttribute(element, SCREEN_ORIENTATION_ATTR));
     if (orientation) {
-      CommonFeatureGroup* common = extractor()->GetCommonFeatureGroup();
+      CommonFeatureGroup* common = extractor()->common_feature_group();
       int orien = *orientation;
       if (orien == 0 || orien == 6 || orien == 8) {
         // Requests landscape, sensorLandscape, or reverseLandscape.
@@ -1962,6 +1989,29 @@ class Property : public ManifestExtractor::Element {
   }
 };
 
+class Architectures {
+ public:
+  std::set<std::string> architectures;
+  std::set<std::string> alt_architectures;
+
+  void Print(text::Printer* printer) {
+    if (!architectures.empty()) {
+      printer->Print("native-code:");
+      for (auto& arch : architectures) {
+        printer->Print(StringPrintf(" '%s'", arch.data()));
+      }
+      printer->Print("\n");
+    }
+    if (!alt_architectures.empty()) {
+      printer->Print("alt-native-code:");
+      for (auto& arch : alt_architectures) {
+        printer->Print(StringPrintf(" '%s'", arch.data()));
+      }
+      printer->Print("\n");
+    }
+  }
+};
+
 /** Recursively prints the extracted badging element. */
 static void Print(ManifestExtractor::Element* el, text::Printer* printer) {
   el->Print(printer);
@@ -1970,15 +2020,15 @@ static void Print(ManifestExtractor::Element* el, text::Printer* printer) {
   }
 }
 
-bool ManifestExtractor::Dump(text::Printer* printer, IDiagnostics* diag) {
+bool ManifestExtractor::Extract(IDiagnostics* diag) {
   // Load the manifest
-  std::unique_ptr<xml::XmlResource> doc = apk_->LoadXml("AndroidManifest.xml", diag);
-  if (doc == nullptr) {
+  doc_ = apk_->LoadXml("AndroidManifest.xml", diag);
+  if (doc_ == nullptr) {
     diag->Error(DiagMessage() << "failed to find AndroidManifest.xml");
     return false;
   }
 
-  xml::Element* element = doc->root.get();
+  xml::Element* element = doc_->root.get();
   if (element->name != "manifest") {
     diag->Error(DiagMessage() << "manifest does not start with <manifest> tag");
     return false;
@@ -1987,10 +2037,11 @@ bool ManifestExtractor::Dump(text::Printer* printer, IDiagnostics* diag) {
   // Print only the <uses-permission>, <uses-permission-sdk23>, and <permission> elements if
   // printing only permission elements is requested
   if (options_.only_permissions) {
-    std::unique_ptr<ManifestExtractor::Element> manifest_element =
-        ManifestExtractor::Element::Inflate(this, element);
+    root_element_ = ManifestExtractor::Element::Inflate(this, element);
 
-    if (auto manifest = ElementCast<Manifest>(manifest_element.get())) {
+    if (auto manifest = ElementCast<Manifest>(root_element_.get())) {
+      manifest->only_package_name = true;
+
       for (xml::Element* child : element->GetChildElements()) {
         if (child->name == "uses-permission" || child->name == "uses-permission-sdk-23"
             || child->name == "permission") {
@@ -1999,15 +2050,8 @@ bool ManifestExtractor::Dump(text::Printer* printer, IDiagnostics* diag) {
           manifest->AddChild(permission_element);
         }
       }
-
-      printer->Print(StringPrintf("package: %s\n", manifest->package.data()));
-      ForEachChild(manifest, [&printer](ManifestExtractor::Element* el) -> void {
-        el->Print(printer);
-      });
-
       return true;
     }
-
     return false;
   }
 
@@ -2041,26 +2085,23 @@ bool ManifestExtractor::Dump(text::Printer* printer, IDiagnostics* diag) {
   }
 
   // Extract badging information
-  auto root = Visit(element);
+  root_element_ = Visit(element);
 
   // Filter out all "uses-sdk" tags besides the very last tag. The android runtime only uses the
   // attribute values from the last defined tag.
   std::vector<UsesSdkBadging*> filtered_uses_sdk_tags;
-  for (const auto& child : root->children()) {
+  for (const auto& child : root_element_->children()) {
     if (auto uses_sdk = ElementCast<UsesSdkBadging>(child.get())) {
       filtered_uses_sdk_tags.emplace_back(uses_sdk);
     }
   }
   if (filtered_uses_sdk_tags.size() >= 2U) {
     filtered_uses_sdk_tags.pop_back();
-    root->Filter([&](const ManifestExtractor::Element* e) {
+    root_element_->Filter([&](const ManifestExtractor::Element* e) {
       return std::find(filtered_uses_sdk_tags.begin(), filtered_uses_sdk_tags.end(), e) !=
              filtered_uses_sdk_tags.end();
     });
   }
-
-  // Print the elements in order seen
-  Print(root.get(), printer);
 
   /** Recursively checks the extracted elements for the specified permission. **/
   auto FindPermission = [&](ManifestExtractor::Element* root,
@@ -2073,30 +2114,30 @@ bool ManifestExtractor::Dump(text::Printer* printer, IDiagnostics* diag) {
     });
   };
 
-  auto PrintPermission = [&printer](const std::string& name, const std::string& reason,
-                                    int32_t max_sdk_version) -> void {
+  auto AddImpliedPermission = [&](const std::string& name, const std::string& reason,
+                                  int32_t max_sdk_version) -> void {
     auto permission = util::make_unique<UsesPermission>();
     permission->name = name;
     permission->maxSdkVersion = max_sdk_version;
-    permission->Print(printer);
-    permission->PrintImplied(printer, reason);
+    permission->implied = true;
+    permission->impliedReason = reason;
+    implied_permissions_.push_back(std::move(permission));
   };
 
   // Implied permissions
   // Pre-1.6 implicitly granted permission compatibility logic
-  CommonFeatureGroup* common_feature_group = GetCommonFeatureGroup();
   bool insert_write_external = false;
   auto write_external_permission = ElementCast<UsesPermission>(
-      FindPermission(root.get(), "android.permission.WRITE_EXTERNAL_STORAGE"));
+      FindPermission(root_element_.get(), "android.permission.WRITE_EXTERNAL_STORAGE"));
 
   if (target_sdk() < SDK_DONUT) {
     if (!write_external_permission) {
-      PrintPermission("android.permission.WRITE_EXTERNAL_STORAGE", "targetSdkVersion < 4", -1);
+      AddImpliedPermission("android.permission.WRITE_EXTERNAL_STORAGE", "targetSdkVersion < 4", -1);
       insert_write_external = true;
     }
 
-    if (!FindPermission(root.get(), "android.permission.READ_PHONE_STATE")) {
-      PrintPermission("android.permission.READ_PHONE_STATE", "targetSdkVersion < 4", -1);
+    if (!FindPermission(root_element_.get(), "android.permission.READ_PHONE_STATE")) {
+      AddImpliedPermission("android.permission.READ_PHONE_STATE", "targetSdkVersion < 4", -1);
     }
   }
 
@@ -2104,62 +2145,60 @@ bool ManifestExtractor::Dump(text::Printer* printer, IDiagnostics* diag) {
   // force them to always take READ_EXTERNAL_STORAGE as well.  We always
   // do this (regardless of target API version) because we can't have
   // an app with write permission but not read permission.
-  auto read_external = FindPermission(root.get(), "android.permission.READ_EXTERNAL_STORAGE");
+  auto read_external =
+      FindPermission(root_element_.get(), "android.permission.READ_EXTERNAL_STORAGE");
   if (!read_external && (insert_write_external || write_external_permission)) {
-    PrintPermission("android.permission.READ_EXTERNAL_STORAGE",
-                    "requested WRITE_EXTERNAL_STORAGE",
-                    (write_external_permission) ? write_external_permission->maxSdkVersion : -1);
+    AddImpliedPermission(
+        "android.permission.READ_EXTERNAL_STORAGE", "requested WRITE_EXTERNAL_STORAGE",
+        (write_external_permission) ? write_external_permission->maxSdkVersion : -1);
   }
 
   // Pre-JellyBean call log permission compatibility.
   if (target_sdk() < SDK_JELLY_BEAN) {
-    if (!FindPermission(root.get(), "android.permission.READ_CALL_LOG")
-        && FindPermission(root.get(), "android.permission.READ_CONTACTS")) {
-      PrintPermission("android.permission.READ_CALL_LOG",
-                      "targetSdkVersion < 16 and requested READ_CONTACTS", -1);
+    if (!FindPermission(root_element_.get(), "android.permission.READ_CALL_LOG") &&
+        FindPermission(root_element_.get(), "android.permission.READ_CONTACTS")) {
+      AddImpliedPermission("android.permission.READ_CALL_LOG",
+                           "targetSdkVersion < 16 and requested READ_CONTACTS", -1);
     }
 
-    if (!FindPermission(root.get(), "android.permission.WRITE_CALL_LOG")
-        && FindPermission(root.get(), "android.permission.WRITE_CONTACTS")) {
-      PrintPermission("android.permission.WRITE_CALL_LOG",
-                      "targetSdkVersion < 16 and requested WRITE_CONTACTS", -1);
+    if (!FindPermission(root_element_.get(), "android.permission.WRITE_CALL_LOG") &&
+        FindPermission(root_element_.get(), "android.permission.WRITE_CONTACTS")) {
+      AddImpliedPermission("android.permission.WRITE_CALL_LOG",
+                           "targetSdkVersion < 16 and requested WRITE_CONTACTS", -1);
     }
   }
 
   // If the app hasn't declared the touchscreen as a feature requirement (either
   // directly or implied, required or not), then the faketouch feature is implied.
-  if (!common_feature_group->HasFeature("android.hardware.touchscreen")) {
-    common_feature_group->addImpliedFeature("android.hardware.faketouch",
-                                            "default feature for all apps", false);
+  if (!common_feature_group()->HasFeature("android.hardware.touchscreen")) {
+    common_feature_group()->addImpliedFeature("android.hardware.faketouch",
+                                              "default feature for all apps", false);
   }
 
   // Only print the common feature group if no feature group is defined
   std::vector<FeatureGroup*> feature_groups;
-  ForEachChild(root.get(), [&feature_groups](ManifestExtractor::Element* el) -> void {
+  ForEachChild(root_element_.get(), [&feature_groups](ManifestExtractor::Element* el) -> void {
     if (auto feature_group = ElementCast<FeatureGroup>(el)) {
       feature_groups.push_back(feature_group);
     }
   });
 
   if (feature_groups.empty()) {
-    common_feature_group->PrintGroup(printer);
+    feature_groups_.push_back(common_feature_group());
   } else {
     // Merge the common feature group into the feature group
     for (auto& feature_group : feature_groups) {
-      feature_group->open_gles_version  = std::max(feature_group->open_gles_version,
-                                                   common_feature_group->open_gles_version);
-      feature_group->Merge(common_feature_group);
-      feature_group->PrintGroup(printer);
+      feature_group->Merge(common_feature_group());
+      feature_groups_.push_back(feature_group);
     }
   };
 
   // Collect the component types of the application
-  std::set<std::string> components;
-  ForEachChild(root.get(), [&components](ManifestExtractor::Element* el) -> void {
+  ForEachChild(root_element_.get(), [&](ManifestExtractor::Element* el) -> void {
     if (ElementCast<Action>(el)) {
       auto action = ElementCast<Action>(el);
       if (!action->component.empty()) {
-        components.insert(action->component);
+        components_.insert(action->component);
         return;
       }
     }
@@ -2167,15 +2206,14 @@ bool ManifestExtractor::Dump(text::Printer* printer, IDiagnostics* diag) {
     if (ElementCast<Category>(el)) {
       auto category = ElementCast<Category>(el);
       if (!category->component.empty()) {
-        components.insert(category->component);
+        components_.insert(category->component);
         return;
       }
     }
   });
 
   // Check for the payment component
-  auto apk = apk_;
-  ForEachChild(root.get(), [&apk, &components, &diag](ManifestExtractor::Element* el) -> void {
+  ForEachChild(root_element_.get(), [this, &diag](ManifestExtractor::Element* el) -> void {
     if (auto service = ElementCast<Service>(el)) {
       auto host_apdu_action = ElementCast<Action>(FindElement(service,
         [&](ManifestExtractor::Element* el) -> bool {
@@ -2193,44 +2231,162 @@ bool ManifestExtractor::Dump(text::Printer* printer, IDiagnostics* diag) {
            return false;
       }));
 
-      ForEachChild(service, [&apk, &components, &diag, &host_apdu_action,
-          &offhost_apdu_action](ManifestExtractor::Element* el) -> void {
-        if (auto meta_data = ElementCast<MetaData>(el)) {
-          if ((meta_data->name == "android.nfc.cardemulation.host_apdu_service" && host_apdu_action)
-              || (meta_data->name == "android.nfc.cardemulation.off_host_apdu_service"
-                  && offhost_apdu_action)) {
+      ForEachChild(service,
+                   [this, &diag, &host_apdu_action,
+                    &offhost_apdu_action](ManifestExtractor::Element* el) -> void {
+                     if (auto meta_data = ElementCast<MetaData>(el)) {
+                       if ((meta_data->name == "android.nfc.cardemulation.host_apdu_service" &&
+                            host_apdu_action) ||
+                           (meta_data->name == "android.nfc.cardemulation.off_host_apdu_service" &&
+                            offhost_apdu_action)) {
+                         // Attempt to load the resource file
+                         if (!meta_data->resource.empty()) {
+                           return;
+                         }
+                         auto resource = this->apk_->LoadXml(meta_data->resource, diag);
+                         if (!resource) {
+                           return;
+                         }
 
-            // Attempt to load the resource file
-            if (!meta_data->resource.empty()) {
-              return;
-            }
-            auto resource = apk->LoadXml(meta_data->resource, diag);
-            if (!resource) {
-              return;
-            }
-
-            // Look for the payment category on an <aid-group> element
-            auto& root = resource.get()->root;
-            if ((host_apdu_action && root->name == "host-apdu-service")
-                || (offhost_apdu_action && root->name == "offhost-apdu-service")) {
-
-              for (auto& child : root->GetChildElements()) {
-                if (child->name == "aid-group") {
-                  auto category = FindAttribute(child, CATEGORY_ATTR);
-                  if (category && category->value == "payment") {
-                    components.insert("payment");
-                    return;
-                  }
-                }
-              }
-            }
-          }
-        }
-      });
+                         // Look for the payment category on an <aid-group> element
+                         auto& root = resource.get()->root;
+                         if ((host_apdu_action && root->name == "host-apdu-service") ||
+                             (offhost_apdu_action && root->name == "offhost-apdu-service")) {
+                           for (auto& child : root->GetChildElements()) {
+                             if (child->name == "aid-group") {
+                               auto category = FindAttribute(child, CATEGORY_ATTR);
+                               if (category && category->value == "payment") {
+                                 this->components_.insert("payment");
+                                 return;
+                               }
+                             }
+                           }
+                         }
+                       }
+                     }
+                   });
     }
   });
 
+  // Print presence of activities, receivers, and services with no special components
+  FindElement(root_element_.get(), [&](ManifestExtractor::Element* el) -> bool {
+    if (auto activity = ElementCast<Activity>(el)) {
+      if (!activity->has_component_) {
+        other_activities_ = true;
+        return true;
+      }
+    }
+    return false;
+  });
+
+  FindElement(root_element_.get(), [&](ManifestExtractor::Element* el) -> bool {
+    if (auto receiver = ElementCast<Receiver>(el)) {
+      if (!receiver->has_component) {
+        other_receivers_ = true;
+        return true;
+      }
+    }
+    return false;
+  });
+
+  FindElement(root_element_.get(), [&](ManifestExtractor::Element* el) -> bool {
+    if (auto service = ElementCast<Service>(el)) {
+      if (!service->has_component) {
+        other_services_ = true;
+        return true;
+      }
+    }
+    return false;
+  });
+
+  // Gather the supported screens
+  const static SupportsScreen default_screens{};
+  SupportsScreen* screen = ElementCast<SupportsScreen>(
+      FindElement(root_element_.get(), [&](ManifestExtractor::Element* el) -> bool {
+        return ElementCast<SupportsScreen>(el) != nullptr;
+      }));
+  supports_screen_ = screen ? screen : &default_screens;
+
+  // Gather the supported architectures_ of the app
+  std::set<std::string> architectures_from_apk;
+  auto it = apk_->GetFileCollection()->Iterator();
+  while (it->HasNext()) {
+    auto file_path = it->Next()->GetSource().path;
+    size_t pos = file_path.find("lib/");
+    if (pos != std::string::npos) {
+      file_path = file_path.substr(pos + 4);
+      pos = file_path.find('/');
+      if (pos != std::string::npos) {
+        file_path = file_path.substr(0, pos);
+      }
+
+      architectures_from_apk.insert(file_path);
+    }
+  }
+
+  // Determine if the application has multiArch supports
+  auto has_multi_arch =
+      FindElement(root_element_.get(), [&](ManifestExtractor::Element* el) -> bool {
+        if (auto application = ElementCast<Application>(el)) {
+          return application->has_multi_arch;
+        }
+        return false;
+      });
+
+  bool output_alt_native_code = false;
+  // A multiArch package is one that contains 64-bit and
+  // 32-bit versions of native code and expects 3rd-party
+  // apps to load these native code libraries. Since most
+  // 64-bit systems also support 32-bit apps, the apps
+  // loading this multiArch package's code may be either
+  if (has_multi_arch) {
+    // If this is a multiArch package, report the 64-bit
+    // version only. Then as a separate entry, report the
+    // rest.
+    //
+    // If we report the 32-bit architecture, this APK will
+    // be installed on a 32-bit device, causing a large waste
+    // of bandwidth and disk space. This assumes that
+    // the developer of the multiArch package has also
+    // made a version that is 32-bit only.
+    const std::string kIntel64 = "x86_64";
+    const std::string kArm64 = "arm64-v8a";
+
+    auto arch = architectures_from_apk.find(kIntel64);
+    if (arch == architectures_from_apk.end()) {
+      arch = architectures_from_apk.find(kArm64);
+    }
+
+    if (arch != architectures_from_apk.end()) {
+      architectures_->architectures.insert(*arch);
+      architectures_from_apk.erase(arch);
+      output_alt_native_code = true;
+    }
+  }
+  for (auto& arch : architectures_from_apk) {
+    if (output_alt_native_code) {
+      architectures_->alt_architectures.insert(arch);
+    } else {
+      architectures_->architectures.insert(arch);
+    }
+  }
+  return true;
+}
+
+bool ManifestExtractor::Dump(text::Printer* printer) {
+  Print(root_element_.get(), printer);
+  if (options_.only_permissions) {
+    return true;
+  }
+
+  for (auto& implied_permission : implied_permissions_) {
+    implied_permission->Print(printer);
+  }
+  for (auto& feature_group : feature_groups_) {
+    feature_group->PrintGroup(printer);
+  }
   // Print the components types if they are present
+  auto& components = components_;
   auto PrintComponent = [&components, &printer](const std::string& component) -> void {
     if (components.find(component) != components.end()) {
       printer->Print(StringPrintf("provides-component:'%s'\n", component.data()));
@@ -2257,50 +2413,16 @@ bool ManifestExtractor::Dump(text::Printer* printer, IDiagnostics* diag) {
     printer->Print("main\n");
   }
 
-  // Print presence of activities, recivers, and services with no special components
-  FindElement(root.get(), [&printer](ManifestExtractor::Element* el) -> bool {
-    if (auto activity = ElementCast<Activity>(el)) {
-      if (!activity->has_component_) {
-        printer->Print("other-activities\n");
-        return true;
-      }
-    }
-    return false;
-  });
-
-  FindElement(root.get(), [&printer](ManifestExtractor::Element* el) -> bool {
-    if (auto receiver = ElementCast<Receiver>(el)) {
-      if (!receiver->has_component) {
-        printer->Print("other-receivers\n");
-        return true;
-      }
-    }
-    return false;
-  });
-
-  FindElement(root.get(), [&printer](ManifestExtractor::Element* el) -> bool {
-    if (auto service = ElementCast<Service>(el)) {
-      if (!service->has_component) {
-        printer->Print("other-services\n");
-        return true;
-      }
-    }
-    return false;
-  });
-
-  // Print the supported screens
-  SupportsScreen* screen = ElementCast<SupportsScreen>(FindElement(root.get(),
-      [&](ManifestExtractor::Element* el) -> bool {
-    return ElementCast<SupportsScreen>(el) != nullptr;
-  }));
-
-  if (screen) {
-    screen->PrintScreens(printer, target_sdk_);
-  } else {
-    // Print the default supported screens
-    SupportsScreen default_screens;
-    default_screens.PrintScreens(printer, target_sdk_);
+  if (other_activities_) {
+    printer->Print("other-activities\n");
   }
+  if (other_receivers_) {
+    printer->Print("other-receivers\n");
+  }
+  if (other_services_) {
+    printer->Print("other-services\n");
+  }
+  supports_screen_->PrintScreens(printer, target_sdk_);
 
   // Print all the unique locales of the apk
   printer->Print("locales:");
@@ -2320,75 +2442,7 @@ bool ManifestExtractor::Dump(text::Printer* printer, IDiagnostics* diag) {
   }
   printer->Print("\n");
 
-  // Print the supported architectures of the app
-  std::set<std::string> architectures;
-  auto it = apk_->GetFileCollection()->Iterator();
-  while (it->HasNext()) {
-    auto file_path = it->Next()->GetSource().path;
-
-
-    size_t pos = file_path.find("lib/");
-    if (pos != std::string::npos) {
-      file_path = file_path.substr(pos + 4);
-      pos = file_path.find('/');
-      if (pos != std::string::npos) {
-        file_path = file_path.substr(0, pos);
-      }
-
-      architectures.insert(file_path);
-    }
-  }
-
-  // Determine if the application has multiArch supports
-  auto has_multi_arch = FindElement(root.get(), [&](ManifestExtractor::Element* el) -> bool {
-    if (auto application = ElementCast<Application>(el)) {
-      return application->has_multi_arch;
-    }
-    return false;
-  });
-
-  bool output_alt_native_code = false;
-  // A multiArch package is one that contains 64-bit and
-  // 32-bit versions of native code and expects 3rd-party
-  // apps to load these native code libraries. Since most
-  // 64-bit systems also support 32-bit apps, the apps
-  // loading this multiArch package's code may be either
-  if (has_multi_arch) {
-    // If this is a multiArch package, report the 64-bit
-    // version only. Then as a separate entry, report the
-    // rest.
-    //
-    // If we report the 32-bit architecture, this APK will
-    // be installed on a 32-bit device, causing a large waste
-    // of bandwidth and disk space. This assumes that
-    // the developer of the multiArch package has also
-    // made a version that is 32-bit only.
-    const std::string kIntel64 = "x86_64";
-    const std::string kArm64 = "arm64-v8a";
-
-    auto arch = architectures.find(kIntel64);
-    if (arch == architectures.end()) {
-      arch = architectures.find(kArm64);
-    }
-
-    if (arch != architectures.end()) {
-      printer->Print(StringPrintf("native-code: '%s'\n", arch->data()));
-      architectures.erase(arch);
-      output_alt_native_code = true;
-    }
-  }
-
-  if (architectures.size() > 0) {
-    if (output_alt_native_code) {
-      printer->Print("alt-");
-    }
-    printer->Print("native-code:");
-    for (auto& arch : architectures) {
-      printer->Print(StringPrintf(" '%s'", arch.data()));
-    }
-    printer->Print("\n");
-  }
-
+  architectures_->Print(printer);
   return true;
 }
 
@@ -2531,7 +2585,10 @@ std::unique_ptr<ManifestExtractor::Element> ManifestExtractor::Visit(xml::Elemen
 int DumpManifest(LoadedApk* apk, DumpManifestOptions& options, text::Printer* printer,
                  IDiagnostics* diag) {
   ManifestExtractor extractor(apk, options);
-  return extractor.Dump(printer, diag) ? 0 : 1;
+  if (!extractor.Extract(diag)) {
+    return 0;
+  }
+  return extractor.Dump(printer) ? 0 : 1;
 }
 
 } // namespace aapt
