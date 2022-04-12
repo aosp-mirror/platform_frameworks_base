@@ -16,6 +16,9 @@
 
 package com.android.server.wm;
 
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
+import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
+
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.any;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.never;
@@ -201,5 +204,57 @@ public class TaskFragmentTest extends WindowTestsBase {
 
         assertTrue(primaryActivity.supportsEnterPipOnTaskSwitch);
         assertFalse(secondaryActivity.supportsEnterPipOnTaskSwitch);
+    }
+
+    @Test
+    public void testActivityHasOverlayOverUntrustedModeEmbedded() {
+        final Task rootTask = createTask(mDisplayContent, WINDOWING_MODE_MULTI_WINDOW,
+                ACTIVITY_TYPE_STANDARD);
+        final Task leafTask0 = new TaskBuilder(mSupervisor)
+                .setParentTaskFragment(rootTask)
+                .build();
+        final TaskFragment organizedTf = new TaskFragmentBuilder(mAtm)
+                .createActivityCount(2)
+                .setParentTask(leafTask0)
+                .setFragmentToken(new Binder())
+                .setOrganizer(mOrganizer)
+                .build();
+        final ActivityRecord activity0 = organizedTf.getBottomMostActivity();
+        final ActivityRecord activity1 = organizedTf.getTopMostActivity();
+        // Bottom activity is untrusted embedding. Top activity is trusted embedded.
+        // Activity0 has overlay over untrusted mode embedded.
+        activity0.info.applicationInfo.uid = DEFAULT_TASK_FRAGMENT_ORGANIZER_UID + 1;
+        activity1.info.applicationInfo.uid = DEFAULT_TASK_FRAGMENT_ORGANIZER_UID;
+        doReturn(true).when(organizedTf).isAllowedToEmbedActivityInUntrustedMode(activity0);
+
+        assertTrue(activity0.hasOverlayOverUntrustedModeEmbedded());
+        assertFalse(activity1.hasOverlayOverUntrustedModeEmbedded());
+
+        // Both activities are trusted embedded.
+        // None of the two has overlay over untrusted mode embedded.
+        activity0.info.applicationInfo.uid = DEFAULT_TASK_FRAGMENT_ORGANIZER_UID;
+
+        assertFalse(activity0.hasOverlayOverUntrustedModeEmbedded());
+        assertFalse(activity1.hasOverlayOverUntrustedModeEmbedded());
+
+        // Bottom activity is trusted embedding. Top activity is untrusted embedded.
+        // None of the two has overlay over untrusted mode embedded.
+        activity1.info.applicationInfo.uid = DEFAULT_TASK_FRAGMENT_ORGANIZER_UID + 1;
+
+        assertFalse(activity0.hasOverlayOverUntrustedModeEmbedded());
+        assertFalse(activity1.hasOverlayOverUntrustedModeEmbedded());
+
+        // There is an activity in a different leaf task on top of activity0 and activity1.
+        // None of the two has overlay over untrusted mode embedded because it is not the same Task.
+        final Task leafTask1 = new TaskBuilder(mSupervisor)
+                .setParentTaskFragment(rootTask)
+                .setOnTop(true)
+                .setCreateActivity(true)
+                .build();
+        final ActivityRecord activity2 = leafTask1.getTopMostActivity();
+        activity2.info.applicationInfo.uid = DEFAULT_TASK_FRAGMENT_ORGANIZER_UID + 2;
+
+        assertFalse(activity0.hasOverlayOverUntrustedModeEmbedded());
+        assertFalse(activity1.hasOverlayOverUntrustedModeEmbedded());
     }
 }
