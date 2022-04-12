@@ -557,7 +557,7 @@ public class BubblePositioner {
         }
 
         if (showBubblesVertically() && mImeVisible) {
-            return new PointF(x, getExpandedBubbleYForIme(index, state.numberOfBubbles));
+            return new PointF(x, getExpandedBubbleYForIme(index, state));
         }
         return new PointF(x, y);
     }
@@ -567,10 +567,10 @@ public class BubblePositioner {
      * is showing.
      *
      * @param index the index of the bubble in the stack.
-     * @param numberOfBubbles the total number of bubbles in the stack.
+     * @param state information about the stack state (# of bubbles, selected bubble).
      * @return y position of the bubble on-screen when the stack is expanded.
      */
-    private float getExpandedBubbleYForIme(int index, int numberOfBubbles) {
+    private float getExpandedBubbleYForIme(int index, BubbleStackView.StackViewState state) {
         final float top = getAvailableRect().top + mExpandedViewPadding;
         if (!showBubblesVertically()) {
             // Showing horizontally: align to top
@@ -578,10 +578,10 @@ public class BubblePositioner {
         }
 
         // Showing vertically: might need to translate the bubbles above the IME.
-        // Subtract spacing here to provide a margin between top of IME and bottom of bubble row.
-        final float bottomHeight = getImeHeight() + mInsets.bottom - (mSpacingBetweenBubbles * 2);
+        // Add spacing here to provide a margin between top of IME and bottom of bubble row.
+        final float bottomHeight = getImeHeight() + mInsets.bottom + (mSpacingBetweenBubbles * 2);
         final float bottomInset = mScreenRect.bottom - bottomHeight;
-        final float expandedStackSize = getExpandedStackSize(numberOfBubbles);
+        final float expandedStackSize = getExpandedStackSize(state.numberOfBubbles);
         final float centerPosition = mPositionRect.centerY();
         final float rowBottom = centerPosition + (expandedStackSize / 2f);
         final float rowTop = centerPosition - (expandedStackSize / 2f);
@@ -593,7 +593,7 @@ public class BubblePositioner {
             if (rowTop - translationY < top) {
                 // Even if we shift the bubbles, they will still overlap with the IME.
                 // Hide the overflow for a lil more space:
-                final float expandedStackSizeNoO = getExpandedStackSize(numberOfBubbles - 1);
+                final float expandedStackSizeNoO = getExpandedStackSize(state.numberOfBubbles - 1);
                 final float centerPositionNoO = showBubblesVertically()
                         ? mPositionRect.centerY()
                         : mPositionRect.centerX();
@@ -602,6 +602,13 @@ public class BubblePositioner {
                 translationY = rowBottomNoO - bottomInset;
                 rowTopForIme = rowTopNoO - translationY;
             }
+        }
+        // Check if the selected bubble is within the appropriate space
+        final float selectedPosition = rowTopForIme
+                + (state.selectedIndex * (mBubbleSize + mSpacingBetweenBubbles));
+        if (selectedPosition < top) {
+            // We must always keep the selected bubble in view so we'll have to allow more overlap.
+            rowTopForIme = top;
         }
         return rowTopForIme + (index * (mBubbleSize + mSpacingBetweenBubbles));
     }

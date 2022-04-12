@@ -619,7 +619,7 @@
     <string name="drag_to_rearrange_tiles" msgid="2143204300089638620">"ចុច​ឱ្យ​ជាប់ រួចអូស​ដើម្បី​រៀបចំ​ប្រអប់​ឡើងវិញ"</string>
     <string name="drag_to_remove_tiles" msgid="4682194717573850385">"អូសទីនេះដើម្បីយកចេញ"</string>
     <string name="drag_to_remove_disabled" msgid="933046987838658850">"អ្នក​ត្រូវការ​ប្រអប់​យ៉ាងតិច <xliff:g id="MIN_NUM_TILES">%1$d</xliff:g>"</string>
-    <string name="qs_edit" msgid="5583565172803472437">"កែសម្រួល"</string>
+    <string name="qs_edit" msgid="5583565172803472437">"កែ"</string>
     <string name="tuner_time" msgid="2450785840990529997">"ម៉ោង"</string>
   <string-array name="clock_options">
     <item msgid="3986445361435142273">"បង្ហាញម៉ោង នាទី និងវិនាទី"</item>
@@ -805,6 +805,8 @@
     <string name="controls_media_button_pause" msgid="8614887780950376258">"ផ្អាក"</string>
     <string name="controls_media_button_prev" msgid="8126822360056482970">"ចម្រៀងមុន"</string>
     <string name="controls_media_button_next" msgid="6662636627525947610">"ចម្រៀង​បន្ទាប់"</string>
+    <!-- no translation found for controls_media_button_connecting (3138354625847598095) -->
+    <skip />
     <string name="controls_media_smartspace_rec_title" msgid="1699818353932537407">"ចាក់"</string>
     <string name="controls_media_smartspace_rec_description" msgid="4136242327044070732">"បើក <xliff:g id="APP_LABEL">%1$s</xliff:g>"</string>
     <string name="controls_media_smartspace_rec_item_description" msgid="2189271793070870883">"ចាក់ <xliff:g id="SONG_NAME">%1$s</xliff:g> ច្រៀងដោយ <xliff:g id="ARTIST_NAME">%2$s</xliff:g> ពី <xliff:g id="APP_LABEL">%3$s</xliff:g>"</string>
