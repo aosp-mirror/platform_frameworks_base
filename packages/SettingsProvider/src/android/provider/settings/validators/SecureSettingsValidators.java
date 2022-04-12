@@ -332,5 +332,7 @@ public class SecureSettingsValidators {
             return true;
         });
         VALIDATORS.put(Secure.ODI_CAPTIONS_VOLUME_UI_ENABLED, BOOLEAN_VALIDATOR);
+        VALIDATORS.put(Secure.WEAR_TALKBACK_ENABLED, BOOLEAN_VALIDATOR);
+        VALIDATORS.put(Secure.HBM_SETTING_KEY, BOOLEAN_VALIDATOR);
     }
 }
