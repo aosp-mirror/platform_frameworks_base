@@ -266,8 +266,11 @@ final class InstallPackageHelper {
                 // Prune unused SharedUserSetting
                 if (mPm.mSettings.checkAndPruneSharedUserLPw(requestSharedUserSetting, false)) {
                     // Set the app ID in removed info for UID_REMOVED broadcasts
-                    reconciledPkg.mInstallResult.mRemovedInfo.mRemovedAppId =
-                            requestSharedUserSetting.mAppId;
+                    if (reconciledPkg.mInstallResult != null
+                            && reconciledPkg.mInstallResult.mRemovedInfo != null) {
+                        reconciledPkg.mInstallResult.mRemovedInfo.mRemovedAppId =
+                                requestSharedUserSetting.mAppId;
+                    }
                 }
             }
         }
