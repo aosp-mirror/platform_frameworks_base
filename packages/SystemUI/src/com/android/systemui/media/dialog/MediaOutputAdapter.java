@@ -119,6 +119,7 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
             mStatusIcon.setVisibility(View.GONE);
             mEndTouchArea.setVisibility(View.GONE);
             mContainerLayout.setOnClickListener(null);
+            mContainerLayout.setContentDescription(null);
             mTitleText.setTextColor(mController.getColorItemContent());
             mSubTitleText.setTextColor(mController.getColorItemContent());
             mTwoLineTitleText.setTextColor(mController.getColorItemContent());
@@ -169,6 +170,7 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
                     setSingleLineLayout(getItemTitle(device), true /* bFocused */,
                             true /* showSeekBar */,
                             false /* showProgressBar */, false /* showStatus */);
+                    setUpContentDescriptionForActiveDevice(device);
                     mCheckBox.setOnCheckedChangeListener(null);
                     mCheckBox.setVisibility(View.VISIBLE);
                     mCheckBox.setChecked(true);
@@ -188,6 +190,7 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
                             true /* showSeekBar */,
                             false /* showProgressBar */, true /* showStatus */);
                     initSeekbar(device);
+                    setUpContentDescriptionForActiveDevice(device);
                     mCurrentActivePosition = position;
                 } else if (isDeviceIncluded(mController.getSelectableMediaDevice(), device)) {
                     mCheckBox.setOnCheckedChangeListener(null);
@@ -253,6 +256,15 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
             if (!isAnimating()) {
                 notifyDataSetChanged();
             }
+        }
+
+        private void setUpContentDescriptionForActiveDevice(MediaDevice device) {
+            mContainerLayout.setClickable(false);
+            mContainerLayout.setContentDescription(
+                    mContext.getString(device.getDeviceType()
+                            == MediaDevice.MediaDeviceType.TYPE_BLUETOOTH_DEVICE
+                            ? R.string.accessibility_bluetooth_name
+                            : R.string.accessibility_cast_name, device.getName()));
         }
     }
 }
