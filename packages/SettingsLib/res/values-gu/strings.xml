@@ -197,7 +197,7 @@
     <string name="choose_profile" msgid="343803890897657450">"પ્રોફાઇલ પસંદ કરો"</string>
     <string name="category_personal" msgid="6236798763159385225">"વ્યક્તિગત"</string>
     <string name="category_work" msgid="4014193632325996115">"ઑફિસ"</string>
-    <string name="development_settings_title" msgid="140296922921597393">"વિકાસકર્તાના વિકલ્પો"</string>
+    <string name="development_settings_title" msgid="140296922921597393">"ડેવલપરના વિકલ્પો"</string>
     <string name="development_settings_enable" msgid="4285094651288242183">"વિકાસકર્તાનાં વિકલ્પો સક્ષમ કરો"</string>
     <string name="development_settings_summary" msgid="8718917813868735095">"ઍપ્લિકેશન વિકાસ માટે વિકલ્પો સેટ કરો"</string>
     <string name="development_settings_not_available" msgid="355070198089140951">"આ વપરાશકર્તા માટે વિકાસકર્તા વિકલ્પો ઉપલબ્ધ નથી"</string>
@@ -338,12 +338,12 @@
     <string name="show_touches_summary" msgid="3692861665994502193">"ટૅપ માટે વિઝ્યુઅલ પ્રતિસાદ બતાવો"</string>
     <string name="show_screen_updates" msgid="2078782895825535494">"સપાટી અપડેટ બતાવો"</string>
     <string name="show_screen_updates_summary" msgid="2126932969682087406">"તે અપડેટ થાય ત્યારે સમગ્ર વિન્ડો સપાટી ફ્લેશ કરો"</string>
-    <string name="show_hw_screen_updates" msgid="2021286231267747506">"દૃશ્યના અપડેટ બતાવો"</string>
-    <string name="show_hw_screen_updates_summary" msgid="3539770072741435691">"દોરવામાં આવે ત્યારે વિન્ડોની અંદર દૃશ્યો બતાવો"</string>
+    <string name="show_hw_screen_updates" msgid="2021286231267747506">"વ્યૂના અપડેટ બતાવો"</string>
+    <string name="show_hw_screen_updates_summary" msgid="3539770072741435691">"દોરવામાં આવે ત્યારે વિન્ડોની અંદર વ્યૂ બતાવો"</string>
     <string name="show_hw_layers_updates" msgid="5268370750002509767">"હાર્ડવેર સ્તરોના અપડેટ બતાવો"</string>
     <string name="show_hw_layers_updates_summary" msgid="5850955890493054618">"હાર્ડવેર સ્તરો અપડેટ થાય ત્યારે તેને લીલા રંગથી પ્રકાશિત કરો"</string>
     <string name="debug_hw_overdraw" msgid="8944851091008756796">"GPU ઓવરડ્રો ડીબગ કરો"</string>
-    <string name="disable_overlays" msgid="4206590799671557143">"HW ઓવરલે અક્ષમ કરો"</string>
+    <string name="disable_overlays" msgid="4206590799671557143">"HW ઓવરલે બંધ કરો"</string>
     <string name="disable_overlays_summary" msgid="1954852414363338166">"સ્ક્રીન જોડવા માટે હંમેશાં GPUનો ઉપયોગ કરો"</string>
     <string name="simulate_color_space" msgid="1206503300335835151">"રંગ સ્થાનનું અનુકરણ કરો"</string>
     <string name="enable_opengl_traces_title" msgid="4638773318659125196">"OpenGL ટ્રેસેસ સક્ષમ કરો"</string>
@@ -351,9 +351,9 @@
     <string name="usb_audio_disable_routing_summary" msgid="8768242894849534699">"USB ઑડિયો પેરિફિરલ પર ઑટોમૅટિક રીતે થતા રૂટિંગને બંધ કરો"</string>
     <string name="debug_layout" msgid="1659216803043339741">"લેઆઉટ બાઉન્ડ બતાવો"</string>
     <string name="debug_layout_summary" msgid="8825829038287321978">"ક્લિપ બાઉન્ડ, હાંસિયાં વગેરે બતાવો."</string>
-    <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"RTL લેઆઉટ દિશા નિર્દેશની ફરજ પાડો"</string>
-    <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"તમામ લૉકેલ માટે સ્ક્રીન લેઆઉટ દિશા નિર્દેશને RTLની ફરજ પાડો"</string>
-    <string name="window_blurs" msgid="6831008984828425106">"વિન્ડો-લેવલને ઝાંખું કરવાની સુવિધા ચાલુ કરો"</string>
+    <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"RTL લેઆઉટ દિશાનિર્દેશની ફરજ પાડો"</string>
+    <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"તમામ લોકેલ માટે સ્ક્રીન લેઆઉટ દિશાનિર્દેશને RTLની ફરજ પાડો"</string>
+    <string name="window_blurs" msgid="6831008984828425106">"વિન્ડો-લેવલને બ્લર કરવાની સુવિધા ચાલુ કરો"</string>
     <string name="force_msaa" msgid="4081288296137775550">"4x MSAAને ફરજ પાડો"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"OpenGL ES 2.0 ઍપમાં 4x MSAA ચાલુ કરો"</string>
     <string name="show_non_rect_clip" msgid="7499758654867881817">"બિન-લંબચોરસ ક્લિપ કામગીરી ડીબગ કરો"</string>
@@ -364,9 +364,9 @@
     <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"ખામીની જાણકારીમાં ડિવાઇસથી જોડાયેલા ચોક્કસ વેન્ડર લૉગ શામેલ કરો, જેમાં ખાનગી માહિતી શામેલ હોઈ શકે છે, તે વધુ બૅટરીનો ઉપયોગ કરી શકે છે અને/અથવા વધુ સ્ટોરેજનો ઉપયોગ કરી શકે છે."</string>
     <string name="window_animation_scale_title" msgid="5236381298376812508">"વિન્ડો ઍનિમેશન સ્કેલ"</string>
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"સંક્રમણ ઍનિમેશન સ્કેલ"</string>
-    <string name="animator_duration_scale_title" msgid="7082913931326085176">"એનિમેટર અવધિ સ્કેલ"</string>
+    <string name="animator_duration_scale_title" msgid="7082913931326085176">"ઍનિમેટર અવધિ સ્કેલ"</string>
     <string name="overlay_display_devices_title" msgid="5411894622334469607">"ગૌણ ડિસ્પ્લેનું અનુકરણ કરો"</string>
-    <string name="debug_applications_category" msgid="5394089406638954196">"ઍપ્લિકેશનો"</string>
+    <string name="debug_applications_category" msgid="5394089406638954196">"ઍપ"</string>
     <string name="immediately_destroy_activities" msgid="1826287490705167403">"પ્રવૃત્તિઓ રાખશો નહીં"</string>
     <string name="immediately_destroy_activities_summary" msgid="6289590341144557614">"જેવો વપરાશકર્તા તેને છોડે, તરત જ દરેક પ્રવૃત્તિ નષ્ટ કરો"</string>
     <string name="app_process_limit_title" msgid="8361367869453043007">"બૅકગ્રાઉન્ડ પ્રક્રિયા સીમા"</string>
@@ -374,7 +374,7 @@
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"બૅકગ્રાઉન્ડ ઍપ માટે \"ઍપ પ્રતિસાદ આપતી નથી\" સંવાદ બતાવો"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"નોટિફિકેશન ચૅનલની ચેતવણી બતાવો"</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"ઍપ માન્ય ચૅનલ વિના નોટિફિકેશન પોસ્ટ કરે તો સ્ક્રીન પર ચેતવણી દેખાય છે"</string>
-    <string name="force_allow_on_external" msgid="9187902444231637880">"બાહ્ય પર એપને મંજૂરી આપવાની ફરજ પાડો"</string>
+    <string name="force_allow_on_external" msgid="9187902444231637880">"બાહ્ય પર ઍપને મંજૂરી આપવાની ફરજ પાડો"</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"મેનિફેસ્ટ મૂલ્યોને ધ્યાનમાં લીધા સિવાય, કોઈપણ ઍપને બાહ્ય સ્ટોરેજ પર લખાવા માટે લાયક બનાવે છે"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"પ્રવૃત્તિઓને ફરીથી કદ યોગ્ય થવા માટે ફરજ પાડો"</string>
     <string name="force_resizable_activities_summary" msgid="2490382056981583062">"મૅનિફેસ્ટ મૂલ્યોને ધ્યાનમાં લીધા સિવાય, તમામ પ્રવૃત્તિઓને મલ્ટી-વિન્ડો માટે ફરીથી કદ બદલી શકે તેવી બનાવો."</string>
