@@ -791,67 +791,74 @@ class MediaDataManager(
      */
     private fun createActionsFromState(packageName: String, controller: MediaController):
             MediaButton? {
-        val actions = MediaButton()
-        controller.playbackState?.let { state ->
-            // First, check for standard actions
-            actions.playOrPause = if (isConnectingState(state.state)) {
-                // Spinner needs to be animating to render anything. Start it here.
-                val drawable = context.getDrawable(
-                        com.android.internal.R.drawable.progress_small_material)
-                (drawable as Animatable).start()
-                MediaAction(
-                    drawable,
-                    null, // no action to perform when clicked
-                    context.getString(R.string.controls_media_button_connecting),
-                    context.getDrawable(R.drawable.ic_media_connecting_container),
-                    // Specify a rebind id to prevent the spinner from restarting on later binds.
-                    com.android.internal.R.drawable.progress_small_material
-                )
-            } else if (isPlayingState(state.state)) {
-                getStandardAction(controller, state.actions, PlaybackState.ACTION_PAUSE)
-            } else {
-                getStandardAction(controller, state.actions, PlaybackState.ACTION_PLAY)
-            }
-            val prevButton = getStandardAction(controller, state.actions,
-                    PlaybackState.ACTION_SKIP_TO_PREVIOUS)
-            val nextButton = getStandardAction(controller, state.actions,
-                    PlaybackState.ACTION_SKIP_TO_NEXT)
-
-            // Then, create a way to build any custom actions that will be needed
-            val customActions = state.customActions.asSequence().filterNotNull().map {
-                getCustomAction(state, packageName, controller, it)
-            }.iterator()
-            fun nextCustomAction() = if (customActions.hasNext()) customActions.next() else null
-
-            // Finally, assign the remaining button slots: play/pause A B C D
-            // A = previous, else custom action (if not reserved)
-            // B = next, else custom action (if not reserved)
-            // C and D are always custom actions
-            val reservePrev = controller.extras?.getBoolean(
-                    MediaConstants.SESSION_EXTRAS_KEY_SLOT_RESERVATION_SKIP_TO_PREV) == true
-            val reserveNext = controller.extras?.getBoolean(
-                    MediaConstants.SESSION_EXTRAS_KEY_SLOT_RESERVATION_SKIP_TO_NEXT) == true
-
-            actions.prevOrCustom = if (prevButton != null) {
-                prevButton
-            } else if (!reservePrev) {
-                nextCustomAction()
-            } else {
-                null
-            }
-
-            actions.nextOrCustom = if (nextButton != null) {
-                nextButton
-            } else if (!reserveNext) {
-                nextCustomAction()
-            } else {
-                null
-            }
-
-            actions.custom0 = nextCustomAction()
-            actions.custom1 = nextCustomAction()
+        val state = controller.playbackState
+        if (state == null) {
+            return MediaButton()
         }
-        return actions
+        // First, check for} standard actions
+        val playOrPause = if (isConnectingState(state.state)) {
+            // Spinner needs to be animating to render anything. Start it here.
+            val drawable = context.getDrawable(
+                com.android.internal.R.drawable.progress_small_material)
+            (drawable as Animatable).start()
+            MediaAction(
+                drawable,
+                null, // no action to perform when clicked
+                context.getString(R.string.controls_media_button_connecting),
+                context.getDrawable(R.drawable.ic_media_connecting_container),
+                // Specify a rebind id to prevent the spinner from restarting on later binds.
+                com.android.internal.R.drawable.progress_small_material
+            )
+        } else if (isPlayingState(state.state)) {
+            getStandardAction(controller, state.actions, PlaybackState.ACTION_PAUSE)
+        } else {
+            getStandardAction(controller, state.actions, PlaybackState.ACTION_PLAY)
+        }
+        val prevButton = getStandardAction(controller, state.actions,
+            PlaybackState.ACTION_SKIP_TO_PREVIOUS)
+        val nextButton = getStandardAction(controller, state.actions,
+            PlaybackState.ACTION_SKIP_TO_NEXT)
+
+        // Then, create a way to build any custom actions that will be needed
+        val customActions = state.customActions.asSequence().filterNotNull().map {
+            getCustomAction(state, packageName, controller, it)
+        }.iterator()
+        fun nextCustomAction() = if (customActions.hasNext()) customActions.next() else null
+
+        // Finally, assign the remaining button slots: play/pause A B C D
+        // A = previous, else custom action (if not reserved)
+        // B = next, else custom action (if not reserved)
+        // C and D are always custom actions
+        val reservePrev = controller.extras?.getBoolean(
+            MediaConstants.SESSION_EXTRAS_KEY_SLOT_RESERVATION_SKIP_TO_PREV) == true
+        val reserveNext = controller.extras?.getBoolean(
+            MediaConstants.SESSION_EXTRAS_KEY_SLOT_RESERVATION_SKIP_TO_NEXT) == true
+
+        val prevOrCustom = if (prevButton != null) {
+            prevButton
+        } else if (!reservePrev) {
+            nextCustomAction()
+        } else {
+            null
+        }
+
+        val nextOrCustom = if (nextButton != null) {
+            nextButton
+        } else if (!reserveNext) {
+            nextCustomAction()
+        } else {
+            null
+        }
+
+        return MediaButton(
+            playOrPause,
+            nextOrCustom,
+            prevOrCustom,
+            nextCustomAction(),
+            nextCustomAction(),
+            reserveNext,
+            reservePrev
+        )
     }
 
     /**

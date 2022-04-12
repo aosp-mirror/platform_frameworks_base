@@ -437,6 +437,64 @@ public class MediaControlPanelTest : SysuiTestCase() {
     }
 
     @Test
+    fun bindSemanticActions_reservedPrev() {
+        val icon = context.getDrawable(android.R.drawable.ic_media_play)
+        val bg = context.getDrawable(R.drawable.qs_media_round_button_background)
+
+        // Setup button state: no prev or next button and their slots reserved
+        val semanticActions = MediaButton(
+            playOrPause = MediaAction(icon, Runnable {}, "play", bg),
+            nextOrCustom = null,
+            prevOrCustom = null,
+            custom0 = MediaAction(icon, null, "custom 0", bg),
+            custom1 = MediaAction(icon, null, "custom 1", bg),
+            false,
+            true
+        )
+        val state = mediaData.copy(semanticActions = semanticActions)
+
+        player.attachPlayer(viewHolder)
+        player.bindPlayer(state, PACKAGE)
+
+        assertThat(actionPrev.isEnabled()).isFalse()
+        assertThat(actionPrev.drawable).isNull()
+        verify(expandedSet).setVisibility(R.id.actionPrev, ConstraintSet.INVISIBLE)
+
+        assertThat(actionNext.isEnabled()).isFalse()
+        assertThat(actionNext.drawable).isNull()
+        verify(expandedSet).setVisibility(R.id.actionNext, ConstraintSet.GONE)
+    }
+
+    @Test
+    fun bindSemanticActions_reservedNext() {
+        val icon = context.getDrawable(android.R.drawable.ic_media_play)
+        val bg = context.getDrawable(R.drawable.qs_media_round_button_background)
+
+        // Setup button state: no prev or next button and their slots reserved
+        val semanticActions = MediaButton(
+            playOrPause = MediaAction(icon, Runnable {}, "play", bg),
+            nextOrCustom = null,
+            prevOrCustom = null,
+            custom0 = MediaAction(icon, null, "custom 0", bg),
+            custom1 = MediaAction(icon, null, "custom 1", bg),
+            true,
+            false
+        )
+        val state = mediaData.copy(semanticActions = semanticActions)
+
+        player.attachPlayer(viewHolder)
+        player.bindPlayer(state, PACKAGE)
+
+        assertThat(actionPrev.isEnabled()).isFalse()
+        assertThat(actionPrev.drawable).isNull()
+        verify(expandedSet).setVisibility(R.id.actionPrev, ConstraintSet.GONE)
+
+        assertThat(actionNext.isEnabled()).isFalse()
+        assertThat(actionNext.drawable).isNull()
+        verify(expandedSet).setVisibility(R.id.actionNext, ConstraintSet.INVISIBLE)
+    }
+
+    @Test
     fun bind_seekBarDisabled_seekBarVisibilityIsSetToInvisible() {
         whenever(seekBarViewModel.getEnabled()).thenReturn(false)
 

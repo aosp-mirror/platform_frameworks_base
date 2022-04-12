@@ -838,6 +838,9 @@ class MediaDataManagerTest : SysuiTestCase() {
 
         assertThat(actions.custom1).isNotNull()
         assertThat(actions.custom1!!.contentDescription).isEqualTo(customDesc[1])
+
+        assertThat(actions.reserveNext).isTrue()
+        assertThat(actions.reservePrev).isTrue()
     }
 
     @Test

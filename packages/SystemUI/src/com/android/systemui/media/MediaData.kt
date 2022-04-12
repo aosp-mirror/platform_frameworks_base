@@ -149,23 +149,31 @@ data class MediaButton(
     /**
      * Play/pause button
      */
-    var playOrPause: MediaAction? = null,
+    val playOrPause: MediaAction? = null,
     /**
      * Next button, or custom action
      */
-    var nextOrCustom: MediaAction? = null,
+    val nextOrCustom: MediaAction? = null,
     /**
      * Previous button, or custom action
      */
-    var prevOrCustom: MediaAction? = null,
+    val prevOrCustom: MediaAction? = null,
     /**
      * First custom action space
      */
-    var custom0: MediaAction? = null,
+    val custom0: MediaAction? = null,
     /**
      * Second custom action space
      */
-    var custom1: MediaAction? = null
+    val custom1: MediaAction? = null,
+    /**
+     * Whether to reserve the empty space when the nextOrCustom is null
+     */
+    val reserveNext: Boolean = false,
+    /**
+     * Whether to reserve the empty space when the prevOrCustom is null
+     */
+    val reservePrev: Boolean = false
 ) {
     fun getActionById(id: Int): MediaAction? {
         return when (id) {

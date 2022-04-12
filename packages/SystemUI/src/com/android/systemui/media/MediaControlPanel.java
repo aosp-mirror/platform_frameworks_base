@@ -786,7 +786,14 @@ public class MediaControlPanel {
                 scrubbingTimeViewsEnabled(semanticActions) && hideWhenScrubbing && mIsScrubbing;
         boolean visible = mediaAction != null && !shouldBeHiddenDueToScrubbing;
 
-        setVisibleAndAlpha(expandedSet, buttonId, visible);
+        int notVisibleValue;
+        if ((buttonId == R.id.actionPrev && semanticActions.getReservePrev())
+                || (buttonId == R.id.actionNext && semanticActions.getReserveNext())) {
+            notVisibleValue = ConstraintSet.INVISIBLE;
+        } else {
+            notVisibleValue = ConstraintSet.GONE;
+        }
+        setVisibleAndAlpha(expandedSet, buttonId, visible, notVisibleValue);
         setVisibleAndAlpha(collapsedSet, buttonId, visible && showInCompact);
     }
 
@@ -1191,7 +1198,12 @@ public class MediaControlPanel {
     }
 
     private void setVisibleAndAlpha(ConstraintSet set, int actionId, boolean visible) {
-        set.setVisibility(actionId, visible ? ConstraintSet.VISIBLE : ConstraintSet.GONE);
+        setVisibleAndAlpha(set, actionId, visible, ConstraintSet.GONE);
+    }
+
+    private void setVisibleAndAlpha(ConstraintSet set, int actionId, boolean visible,
+            int notVisibleValue) {
+        set.setVisibility(actionId, visible ? ConstraintSet.VISIBLE : notVisibleValue);
         set.setAlpha(actionId, visible ? 1.0f : 0.0f);
     }
 
