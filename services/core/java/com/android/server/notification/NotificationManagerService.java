@@ -2507,19 +2507,11 @@ public class NotificationManagerService extends SystemService {
             }
 
             @Override
-            public void updateAutogroupSummary(String key, boolean needsOngoingFlag) {
-                String pkg;
-                synchronized (mNotificationLock) {
-                    NotificationRecord r = mNotificationsByKey.get(key);
-                    pkg = r != null && r.getSbn() != null ? r.getSbn().getPackageName() : null;
-                }
+            public void updateAutogroupSummary(int userId, String pkg, boolean needsOngoingFlag) {
                 boolean isAppForeground = pkg != null
                         && mActivityManager.getPackageImportance(pkg) == IMPORTANCE_FOREGROUND;
                 synchronized (mNotificationLock) {
-                    NotificationRecord r = mNotificationsByKey.get(key);
-                    if (r == null) return;
-                    updateAutobundledSummaryFlags(r.getUser().getIdentifier(),
-                            r.getSbn().getPackageName(), needsOngoingFlag, isAppForeground);
+                    updateAutobundledSummaryFlags(userId, pkg, needsOngoingFlag, isAppForeground);
                 }
             }
         });
