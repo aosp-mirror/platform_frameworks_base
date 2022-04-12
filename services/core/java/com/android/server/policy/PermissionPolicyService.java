@@ -59,6 +59,8 @@ import android.content.pm.PackageManagerInternal.PackageListObserver;
 import android.content.pm.PermissionInfo;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -160,11 +162,13 @@ public final class PermissionPolicyService extends SystemService {
     private NotificationManagerInternal mNotificationManager;
     private final KeyguardManager mKeyguardManager;
     private final PackageManager mPackageManager;
+    private final Handler mHandler;
 
     public PermissionPolicyService(@NonNull Context context) {
         super(context);
 
         mContext = context;
+        mHandler = new Handler(Looper.getMainLooper());
         mPackageManager = context.getPackageManager();
         mKeyguardManager = context.getSystemService(KeyguardManager.class);
         LocalServices.addService(PermissionPolicyInternal.class, new Internal());
@@ -1068,8 +1072,11 @@ public final class PermissionPolicyService extends SystemService {
                                 activityInfo.packageName, user)) {
                             clearNotificationReviewFlagsIfNeeded(activityInfo.packageName, user);
                         } else {
-                            showNotificationPromptIfNeeded(activityInfo.packageName,
-                                    taskInfo.userId, taskInfo.taskId, info);
+                            // Post the activity start checks to ensure the notification channel
+                            // checks happen outside the WindowManager global lock.
+                            mHandler.post(() -> showNotificationPromptIfNeeded(
+                                    activityInfo.packageName, taskInfo.userId, taskInfo.taskId,
+                                    info));
                         }
                     }
                 };
