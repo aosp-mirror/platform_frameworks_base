@@ -104,7 +104,8 @@ public class RefreshRatePolicyTest extends WindowTestsBase {
         mPolicy.addNonHighRefreshRatePackage("com.android.test");
         assertEquals(0, mPolicy.getPreferredModeId(cameraUsingWindow));
         assertEquals(0, mPolicy.getPreferredRefreshRate(cameraUsingWindow), FLOAT_TOLERANCE);
-        assertEquals(0, mPolicy.getPreferredMinRefreshRate(cameraUsingWindow), FLOAT_TOLERANCE);
+        assertEquals(LOW_REFRESH_RATE,
+                mPolicy.getPreferredMinRefreshRate(cameraUsingWindow), FLOAT_TOLERANCE);
         assertEquals(LOW_REFRESH_RATE,
                 mPolicy.getPreferredMaxRefreshRate(cameraUsingWindow), FLOAT_TOLERANCE);
         mPolicy.removeNonHighRefreshRatePackage("com.android.test");
@@ -165,7 +166,8 @@ public class RefreshRatePolicyTest extends WindowTestsBase {
         assertEquals(HI_MODE_ID, mPolicy.getPreferredModeId(overrideWindow));
         assertEquals(HI_REFRESH_RATE,
                 mPolicy.getPreferredRefreshRate(overrideWindow), FLOAT_TOLERANCE);
-        assertEquals(0, mPolicy.getPreferredMinRefreshRate(overrideWindow), FLOAT_TOLERANCE);
+        assertEquals(LOW_REFRESH_RATE,
+                mPolicy.getPreferredMinRefreshRate(overrideWindow), FLOAT_TOLERANCE);
         assertEquals(LOW_REFRESH_RATE,
                 mPolicy.getPreferredMaxRefreshRate(overrideWindow), FLOAT_TOLERANCE);
     }
@@ -180,7 +182,8 @@ public class RefreshRatePolicyTest extends WindowTestsBase {
         assertEquals(0, mPolicy.getPreferredModeId(overrideWindow));
         assertEquals(HI_REFRESH_RATE,
                 mPolicy.getPreferredRefreshRate(overrideWindow), FLOAT_TOLERANCE);
-        assertEquals(0, mPolicy.getPreferredMinRefreshRate(overrideWindow), FLOAT_TOLERANCE);
+        assertEquals(LOW_REFRESH_RATE,
+                mPolicy.getPreferredMinRefreshRate(overrideWindow), FLOAT_TOLERANCE);
         assertEquals(LOW_REFRESH_RATE,
                 mPolicy.getPreferredMaxRefreshRate(overrideWindow), FLOAT_TOLERANCE);
     }
@@ -257,7 +260,8 @@ public class RefreshRatePolicyTest extends WindowTestsBase {
         mPolicy.addNonHighRefreshRatePackage("com.android.test");
         assertEquals(0, mPolicy.getPreferredModeId(cameraUsingWindow));
         assertEquals(0, mPolicy.getPreferredRefreshRate(cameraUsingWindow), FLOAT_TOLERANCE);
-        assertEquals(0, mPolicy.getPreferredMinRefreshRate(cameraUsingWindow), FLOAT_TOLERANCE);
+        assertEquals(LOW_REFRESH_RATE,
+                mPolicy.getPreferredMinRefreshRate(cameraUsingWindow), FLOAT_TOLERANCE);
         assertEquals(LOW_REFRESH_RATE,
                 mPolicy.getPreferredMaxRefreshRate(cameraUsingWindow), FLOAT_TOLERANCE);
 

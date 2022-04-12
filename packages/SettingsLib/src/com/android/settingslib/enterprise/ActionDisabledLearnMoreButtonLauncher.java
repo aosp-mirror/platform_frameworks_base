@@ -52,7 +52,6 @@ public abstract class ActionDisabledLearnMoreButtonLauncher {
     public final void setupLearnMoreButtonToShowAdminPolicies(Context context,
             int enforcementAdminUserId, EnforcedAdmin enforcedAdmin) {
         requireNonNull(context, "context cannot be null");
-        requireNonNull(enforcedAdmin, "enforcedAdmin cannot be null");
 
         // The "Learn more" button appears only if the restriction is enforced by an admin in the
         // same profile group or by the device owner. Otherwise the admin package and its policies
@@ -132,7 +131,7 @@ public abstract class ActionDisabledLearnMoreButtonLauncher {
     }
 
     private void showAdminPolicies(Context context, EnforcedAdmin enforcedAdmin) {
-        if (enforcedAdmin.component != null) {
+        if (enforcedAdmin != null && enforcedAdmin.component != null) {
             launchShowAdminPolicies(context, enforcedAdmin.user, enforcedAdmin.component);
         } else {
             launchShowAdminSettings(context);
