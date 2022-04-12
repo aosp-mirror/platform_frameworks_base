@@ -19,6 +19,7 @@ package com.android.systemui.dreams.complication.dagger;
 
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
+import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 import android.widget.TextView;
@@ -76,6 +77,7 @@ public interface DreamWeatherComplicationComponent {
         String DREAM_WEATHER_COMPLICATION_VIEW = "weather_complication_view";
         String DREAM_WEATHER_COMPLICATION_LAYOUT_PARAMS =
                 "weather_complication_layout_params";
+        String SMARTSPACE_TRAMPOLINE_ACTIVITY_COMPONENT = "smartspace_trampoline_activity";
         // Order weight of insert into parent container
         int INSERT_ORDER_WEIGHT = 1;
 
@@ -105,6 +107,16 @@ public interface DreamWeatherComplicationComponent {
                             | ComplicationLayoutParams.POSITION_START,
                     ComplicationLayoutParams.DIRECTION_END,
                     INSERT_ORDER_WEIGHT);
+        }
+
+        /**
+         * Provides the smartspace trampoline activity component.
+         */
+        @Provides
+        @DreamWeatherComplicationScope
+        @Named(SMARTSPACE_TRAMPOLINE_ACTIVITY_COMPONENT)
+        static String provideSmartspaceTrampolineActivityComponent(Context context) {
+            return context.getString(R.string.config_smartspaceTrampolineActivityComponent);
         }
     }
 }

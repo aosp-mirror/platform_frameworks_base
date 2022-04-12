@@ -18,10 +18,12 @@ package com.android.systemui.dreams.complication;
 
 import static com.android.systemui.dreams.complication.dagger.DreamWeatherComplicationComponent.DreamWeatherComplicationModule.DREAM_WEATHER_COMPLICATION_LAYOUT_PARAMS;
 import static com.android.systemui.dreams.complication.dagger.DreamWeatherComplicationComponent.DreamWeatherComplicationModule.DREAM_WEATHER_COMPLICATION_VIEW;
+import static com.android.systemui.dreams.complication.dagger.DreamWeatherComplicationComponent.DreamWeatherComplicationModule.SMARTSPACE_TRAMPOLINE_ACTIVITY_COMPONENT;
 
 import android.app.smartspace.SmartspaceAction;
 import android.app.smartspace.SmartspaceTarget;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.Icon;
 import android.text.TextUtils;
@@ -31,6 +33,7 @@ import com.android.systemui.CoreStartable;
 import com.android.systemui.R;
 import com.android.systemui.dreams.DreamOverlayStateController;
 import com.android.systemui.dreams.complication.dagger.DreamWeatherComplicationComponent;
+import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.BcSmartspaceDataPlugin.SmartspaceTargetListener;
 import com.android.systemui.statusbar.lockscreen.LockscreenSmartspaceController;
 import com.android.systemui.util.ViewController;
@@ -132,15 +135,21 @@ public class DreamWeatherComplication implements Complication {
      */
     static class DreamWeatherViewController extends ViewController<TextView> {
         private final LockscreenSmartspaceController mSmartSpaceController;
+        private final ActivityStarter mActivityStarter;
+        private final String mSmartspaceTrampolineActivityComponent;
         private SmartspaceTargetListener mSmartspaceTargetListener;
 
         @Inject
         DreamWeatherViewController(
                 @Named(DREAM_WEATHER_COMPLICATION_VIEW) TextView view,
+                @Named(SMARTSPACE_TRAMPOLINE_ACTIVITY_COMPONENT) String smartspaceTrampoline,
+                ActivityStarter activityStarter,
                 LockscreenSmartspaceController smartspaceController
         ) {
             super(view);
+            mActivityStarter = activityStarter;
             mSmartSpaceController = smartspaceController;
+            mSmartspaceTrampolineActivityComponent = smartspaceTrampoline;
         }
 
         @Override
@@ -172,6 +181,15 @@ public class DreamWeatherComplication implements Complication {
                                                 R.dimen.smart_action_button_icon_padding));
 
                             }
+                            mView.setOnClickListener(v -> {
+                                final Intent intent = headerAction.getIntent();
+                                if (intent != null && intent.getComponent() != null
+                                        && intent.getComponent().getClassName()
+                                        .equals(mSmartspaceTrampolineActivityComponent)) {
+                                    mActivityStarter.postStartActivityDismissingKeyguard(
+                                            intent, 0 /*delay*/);
+                                }
+                            });
                         }
                     });
             mSmartSpaceController.addListener(mSmartspaceTargetListener);
