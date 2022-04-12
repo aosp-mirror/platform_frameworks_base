@@ -18,6 +18,7 @@ package com.android.server.biometrics.sensors.fingerprint.aidl;
 
 import android.annotation.NonNull;
 import android.content.Context;
+import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricsProtoEnums;
 import android.hardware.fingerprint.Fingerprint;
 import android.os.IBinder;
@@ -71,5 +72,12 @@ class FingerprintInternalCleanupClient extends InternalCleanupClient<Fingerprint
                 null /* ClientMonitorCallbackConverter */, new int[] {biometricId}, userId, owner,
                 utils, sensorId, logger.swapAction(context, BiometricsProtoEnums.ACTION_REMOVE),
                 biometricContext, authenticatorIds);
+    }
+
+    @Override
+    protected void onAddUnknownTemplate(int userId,
+            @NonNull BiometricAuthenticator.Identifier identifier) {
+        FingerprintUtils.getInstance(getSensorId()).addBiometricForUser(
+                getContext(), getTargetUserId(), (Fingerprint) identifier);
     }
 }

@@ -757,6 +757,13 @@ public class Fingerprint21 implements IHwBinder.DeathRecipient, ServiceProvider 
                 mFingerprintStateCallback));
     }
 
+    @Override
+    public void scheduleInternalCleanup(int sensorId, int userId,
+            @Nullable ClientMonitorCallback callback, boolean favorHalEnrollments) {
+        scheduleInternalCleanup(userId, new ClientMonitorCompositeCallback(callback,
+                mFingerprintStateCallback));
+    }
+
     private BiometricLogger createLogger(int statsAction, int statsClient) {
         return new BiometricLogger(mContext, BiometricsProtoEnums.MODALITY_FINGERPRINT,
                 statsAction, statsClient);

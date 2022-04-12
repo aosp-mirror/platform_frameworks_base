@@ -50,8 +50,6 @@ public abstract class RemovalClient<S extends BiometricAuthenticator.Identifier,
             @NonNull Map<Integer, Long> authenticatorIds) {
         super(context, lazyDaemon, token, listener, userId, owner, 0 /* cookie */, sensorId,
                 logger, biometricContext);
-        //, BiometricsProtoEnums.ACTION_REMOVE,
-          //      BiometricsProtoEnums.CLIENT_UNKNOWN);
         mBiometricUtils = utils;
         mAuthenticatorIds = authenticatorIds;
         mHasEnrollmentsBeforeStarting = !utils.getBiometricsForUser(context, userId).isEmpty();
