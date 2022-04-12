@@ -6300,7 +6300,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // starting window is drawn, the transition can start earlier. Exclude finishing and bubble
         // because it may be a trampoline.
         if (!wasTaskVisible && mStartingData != null && !finishing && !mLaunchedFromBubble
-                && !mDisplayContent.mAppTransition.isReady()
+                && mVisibleRequested && !mDisplayContent.mAppTransition.isReady()
                 && !mDisplayContent.mAppTransition.isRunning()
                 && mDisplayContent.isNextTransitionForward()) {
             // The pending transition state will be cleared after the transition is started, so
