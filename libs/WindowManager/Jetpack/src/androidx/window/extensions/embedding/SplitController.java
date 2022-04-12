@@ -155,13 +155,18 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
         // Check if there are no running activities - consider the container empty if there are no
         // non-finishing activities left.
         if (!taskFragmentInfo.hasRunningActivity()) {
-            // TODO(b/225371112): Don't finish dependent if the last activity is moved to the PIP
-            // Task.
-            // Do not finish the dependents if this TaskFragment was cleared due to launching
-            // activity in the Task.
-            final boolean shouldFinishDependent =
-                    !taskFragmentInfo.isTaskClearedForReuse();
-            mPresenter.cleanupContainer(container, shouldFinishDependent);
+            if (taskFragmentInfo.isTaskFragmentClearedForPip()) {
+                // Do not finish the dependents if the last activity is reparented to PiP.
+                // Instead, the original split should be cleanup, and the dependent may be expanded
+                // to fullscreen.
+                cleanupForEnterPip(container);
+                mPresenter.cleanupContainer(container, false /* shouldFinishDependent */);
+            } else {
+                // Do not finish the dependents if this TaskFragment was cleared due to launching
+                // activity in the Task.
+                final boolean shouldFinishDependent = !taskFragmentInfo.isTaskClearedForReuse();
+                mPresenter.cleanupContainer(container, shouldFinishDependent);
+            }
         } else if (wasInPip && isInPip) {
             // No update until exit PIP.
             return;
