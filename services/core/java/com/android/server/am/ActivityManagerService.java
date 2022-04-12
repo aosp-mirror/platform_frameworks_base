@@ -2275,13 +2275,9 @@ public class ActivityManagerService extends IActivityManager.Stub
         return mAppOpsManager;
     }
 
-    /**
-     * Provides the basic functionality for activity task related tests when a handler thread is
-     * given to initialize the dependency members.
-     */
+    /** Provides the basic functionality for unit tests. */
     @VisibleForTesting
-    public ActivityManagerService(Injector injector, ServiceThread handlerThread) {
-        final boolean hasHandlerThread = handlerThread != null;
+    ActivityManagerService(Injector injector, @NonNull ServiceThread handlerThread) {
         mInjector = injector;
         mContext = mInjector.getContext();
         mUiContext = null;
@@ -2289,33 +2285,27 @@ public class ActivityManagerService extends IActivityManager.Stub
         mPackageWatchdog = null;
         mAppOpsService = mInjector.getAppOpsService(null /* file */, null /* handler */);
         mBatteryStatsService = null;
-        mHandler = hasHandlerThread ? new MainHandler(handlerThread.getLooper()) : null;
+        mHandler = new MainHandler(handlerThread.getLooper());
         mHandlerThread = handlerThread;
-        mConstants = hasHandlerThread
-                ? new ActivityManagerConstants(mContext, this, mHandler) : null;
+        mConstants = new ActivityManagerConstants(mContext, this, mHandler);
         final ActiveUids activeUids = new ActiveUids(this, false /* postChangesToAtm */);
         mPlatformCompat = null;
         mProcessList = injector.getProcessList(this);
         mProcessList.init(this, activeUids, mPlatformCompat);
         mAppProfiler = new AppProfiler(this, BackgroundThread.getHandler().getLooper(), null);
         mPhantomProcessList = new PhantomProcessList(this);
-        mOomAdjuster = hasHandlerThread
-                ? new OomAdjuster(this, mProcessList, activeUids, handlerThread) : null;
+        mOomAdjuster = new OomAdjuster(this, mProcessList, activeUids, handlerThread);
 
-        mIntentFirewall = hasHandlerThread
-                ? new IntentFirewall(new IntentFirewallInterface(), mHandler) : null;
+        mIntentFirewall = null;
         mProcessStats = null;
         mCpHelper = new ContentProviderHelper(this, false);
-        // For the usage of {@link ActiveServices#cleanUpServices} that may be invoked from
-        // {@link ActivityTaskSupervisor#cleanUpRemovedTaskLocked}.
-        mServices = hasHandlerThread ? new ActiveServices(this) : null;
+        mServices = null;
         mSystemThread = null;
         mUiHandler = injector.getUiHandler(null /* service */);
         mUidObserverController = new UidObserverController(mUiHandler);
-        mUserController = hasHandlerThread ? new UserController(this) : null;
-        mPendingIntentController = hasHandlerThread
-                ? new PendingIntentController(handlerThread.getLooper(), mUserController,
-                        mConstants) : null;
+        mUserController = new UserController(this);
+        mPendingIntentController =
+                new PendingIntentController(handlerThread.getLooper(), mUserController, mConstants);
         mAppRestrictionController = new AppRestrictionController(mContext, this);
         mProcStartHandlerThread = null;
         mProcStartHandler = null;
@@ -2323,7 +2313,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         mFactoryTest = FACTORY_TEST_OFF;
         mUgmInternal = LocalServices.getService(UriGrantsManagerInternal.class);
         mInternal = new LocalService();
-        mPendingStartActivityUids = new PendingStartActivityUids(mContext);
+        mPendingStartActivityUids = new PendingStartActivityUids();
         mUseFifoUiScheduling = false;
         mEnableOffloadQueue = false;
         mFgBroadcastQueue = mBgBroadcastQueue = mBgOffloadBroadcastQueue =
@@ -2458,7 +2448,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         mInternal = new LocalService();
-        mPendingStartActivityUids = new PendingStartActivityUids(mContext);
+        mPendingStartActivityUids = new PendingStartActivityUids();
         mTraceErrorLogger = new TraceErrorLogger();
         mComponentAliasResolver = new ComponentAliasResolver(this);
     }
@@ -17277,7 +17267,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             // next top activity on time. This race will fail the following binder transactions WM
             // sends to the activity. After this race issue between WM/ATMS and AMS is solved, this
             // workaround can be removed. (b/213288355)
-            if (isNewPending && mOomAdjuster != null) { // It can be null in unit test.
+            if (isNewPending) {
                 mOomAdjuster.mCachedAppOptimizer.unfreezeProcess(pid);
             }
             // We need to update the network rules for the app coming to the top state so that
