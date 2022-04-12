@@ -582,7 +582,7 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
         final int callingUserId = UserHandle.getUserId(callingUid);
         out.removeIf(it -> mPackageManagerInt.filterAppAccess(it.packageName, callingUid,
                 callingUserId));
-        return out.isEmpty() ? null : out;
+        return out;
     }
 
     @Override
