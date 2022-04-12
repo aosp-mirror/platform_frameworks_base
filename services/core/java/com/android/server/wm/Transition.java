@@ -713,6 +713,9 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
         for (int i = mParticipants.size() - 1; i >= 0; --i) {
             final WindowContainer wc = mParticipants.valueAt(i);
             if (wc.asWindowToken() == null || !wc.isVisibleRequested()) continue;
+            // don't include transient launches, though, since those are only temporarily visible.
+            if (mTransientLaunches != null && wc.asActivityRecord() != null
+                    && mTransientLaunches.containsKey(wc.asActivityRecord())) continue;
             mVisibleAtTransitionEndTokens.add(wc.asWindowToken());
         }
 
