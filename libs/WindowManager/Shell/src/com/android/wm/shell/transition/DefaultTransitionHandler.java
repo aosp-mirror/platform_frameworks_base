@@ -417,7 +417,8 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
                             || type == TRANSIT_TO_FRONT
                             || type == TRANSIT_TO_BACK;
                     final boolean isTranslucent = (change.getFlags() & FLAG_TRANSLUCENT) != 0;
-                    if (isOpenOrCloseTransition && !isTranslucent) {
+                    if (isOpenOrCloseTransition && !isTranslucent
+                            && wallpaperTransit == WALLPAPER_TRANSITION_NONE) {
                         // Use the overview background as the background for the animation
                         final Context uiContext = ActivityThread.currentActivityThread()
                                 .getSystemUiContext();
