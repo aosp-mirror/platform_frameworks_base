@@ -60,6 +60,8 @@
 
     <dimen name="global_actions_grid_item_layout_height">80dp</dimen>
 
+    <dimen name="qs_brightness_margin_bottom">16dp</dimen>
+
     <!--  For large screens the security footer appears below the footer,
     same as phones in portrait  -->
     <dimen name="qs_security_footer_single_line_height">48dp</dimen>
