@@ -99,4 +99,11 @@ class ActivityRecordInputSink {
         return inputWindowHandle;
     }
 
+    void releaseSurfaceControl() {
+        if (mSurfaceControl != null) {
+            mSurfaceControl.release();
+            mSurfaceControl = null;
+        }
+    }
+
 }
