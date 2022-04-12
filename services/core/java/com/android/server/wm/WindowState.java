@@ -5586,7 +5586,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                 mLastSurfaceInsets.set(mAttrs.surfaceInsets);
             }
             if (surfaceSizeChanged && mWinAnimator.getShown() && !canPlayMoveAnimation()
-                    && okToDisplay()) {
+                    && okToDisplay() && !useBLASTSync()) {
                 applyWithNextDraw(mSetSurfacePositionConsumer);
             } else {
                 mSetSurfacePositionConsumer.accept(t);
