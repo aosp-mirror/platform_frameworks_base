@@ -176,6 +176,10 @@ public class UserIconDrawable extends Drawable implements Drawable.Callback {
         return this;
     }
 
+    public boolean isEmpty() {
+        return getUserIcon() == null && getUserDrawable() == null;
+    }
+
     public UserIconDrawable setBadge(Drawable badge) {
         mBadge = badge;
         if (mBadge != null) {

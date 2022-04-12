@@ -42,6 +42,8 @@
     <string name="consent_yes" msgid="8344487259618762872">"Salli"</string>
     <string name="consent_no" msgid="2640796915611404382">"Älä salli"</string>
     <string name="consent_back" msgid="2560683030046918882">"Takaisin"</string>
-    <string name="permission_sync_confirmation_title" msgid="667074294393493186">"Siirrä sovellusluvat kelloon"</string>
-    <string name="permission_sync_summary" msgid="8873391306499120778">"Sovellukset, jotka on asennettu kelloon käyttöönoton aikana, käyttävät samoja lupia kuin puhelin. Näin kello on helpompi ottaa käyttöön.\n\n Näihin lupiin saattaa kuulua pääsy kellon mikrofoniin ja sijaintiin."</string>
+    <!-- no translation found for permission_sync_confirmation_title (4409622174437248702) -->
+    <skip />
+    <!-- no translation found for permission_sync_summary (4866838188678457084) -->
+    <skip />
 </resources>

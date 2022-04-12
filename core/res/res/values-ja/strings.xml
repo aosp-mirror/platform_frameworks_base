@@ -85,8 +85,8 @@
     <string name="RestrictedStateContentMsimTemplate" msgid="5228235722511044687">"SIM <xliff:g id="SIMNUMBER">%d</xliff:g> は携帯通信会社によって一時的に OFF になっています"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"モバイル ネットワークにアクセスできません"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"タップして、優先ネットワークを変更してください。"</string>
-    <string name="EmergencyCallWarningTitle" msgid="9164532362414787774">"緊急通報が利用できない可能性があります"</string>
-    <string name="EmergencyCallWarningSummary" msgid="3365701131304664899">"<xliff:g id="SPN">%s</xliff:g> は Wi-Fi 経由の緊急通報をサポートしていません。タップして詳細をご確認ください。"</string>
+    <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"緊急通報は利用できません"</string>
+    <string name="EmergencyCallWarningSummary" msgid="1194185880092805497">"Wi‑Fi では緊急通報ができません"</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"通知"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"電話の転送"</string>
     <string name="notification_channel_emergency_callback" msgid="54074839059123159">"緊急通報待機モード"</string>
@@ -1933,9 +1933,36 @@
     <string name="app_blocked_message" msgid="542972921087873023">"現在 <xliff:g id="APP_NAME">%1$s</xliff:g> はご利用になれません。"</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g>は利用できません"</string>
     <string name="app_streaming_blocked_title_for_permission_dialog" msgid="4483161748582966785">"権限が必要"</string>
-    <string name="app_streaming_blocked_message" product="tv" msgid="4003011766528814377">"現在、<xliff:g id="DEVICE">%1$s</xliff:g> からアクセスできません。Android TV デバイスでのアクセスをお試しください。"</string>
-    <string name="app_streaming_blocked_message" product="tablet" msgid="4242053045964946062">"現在、<xliff:g id="DEVICE">%1$s</xliff:g> からアクセスできません。タブレットでのアクセスをお試しください。"</string>
-    <string name="app_streaming_blocked_message" product="default" msgid="6159168735030739398">"現在、<xliff:g id="DEVICE">%1$s</xliff:g> からアクセスできません。スマートフォンでのアクセスをお試しください。"</string>
+    <!-- no translation found for app_streaming_blocked_title_for_camera_dialog (3935701653713853065) -->
+    <skip />
+    <!-- no translation found for app_streaming_blocked_title_for_fingerprint_dialog (3516853717714141951) -->
+    <skip />
+    <!-- no translation found for app_streaming_blocked_title_for_microphone_dialog (544822455127171206) -->
+    <skip />
+    <!-- no translation found for app_streaming_blocked_title_for_settings_dialog (196994247017450357) -->
+    <skip />
+    <!-- no translation found for app_streaming_blocked_title_for_settings_dialog (8222710146267948647) -->
+    <skip />
+    <!-- no translation found for app_streaming_blocked_title_for_settings_dialog (6895719984375299791) -->
+    <skip />
+    <!-- no translation found for app_streaming_blocked_message (5024599278277957935) -->
+    <skip />
+    <!-- no translation found for app_streaming_blocked_message (7491114163056552686) -->
+    <skip />
+    <!-- no translation found for app_streaming_blocked_message (1245180131667647277) -->
+    <skip />
+    <!-- no translation found for app_streaming_blocked_message_for_permission_dialog (6306583663205997979) -->
+    <skip />
+    <!-- no translation found for app_streaming_blocked_message_for_permission_dialog (6545624942642129664) -->
+    <skip />
+    <!-- no translation found for app_streaming_blocked_message_for_permission_dialog (8462740631707923000) -->
+    <skip />
+    <!-- no translation found for app_streaming_blocked_message_for_fingerprint_dialog (3470977315395784567) -->
+    <skip />
+    <!-- no translation found for app_streaming_blocked_message_for_fingerprint_dialog (698460091901465092) -->
+    <skip />
+    <!-- no translation found for app_streaming_blocked_message_for_fingerprint_dialog (8552691971910603907) -->
+    <skip />
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"このアプリは以前のバージョンの Android 用に作成されており、正常に動作しない可能性があります。アップデートを確認するか、デベロッパーにお問い合わせください。"</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"アップデートを確認"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"新着メッセージがあります"</string>
@@ -2040,6 +2067,14 @@
     <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"タップすると、詳細を確認して設定を変更できます。"</string>
     <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"サイレント モードが変わりました"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"タップしてブロック対象をご確認ください。"</string>
+    <!-- no translation found for review_notification_settings_title (5102557424459810820) -->
+    <skip />
+    <!-- no translation found for review_notification_settings_text (5696497037817525074) -->
+    <skip />
+    <!-- no translation found for review_notification_settings_remind_me_action (1081081018678480907) -->
+    <skip />
+    <!-- no translation found for review_notification_settings_dismiss (4160916504616428294) -->
+    <skip />
     <string name="notification_app_name_system" msgid="3045196791746735601">"システム"</string>
     <string name="notification_app_name_settings" msgid="9088548800899952531">"設定"</string>
     <string name="notification_appops_camera_active" msgid="8177643089272352083">"カメラ"</string>
@@ -2261,8 +2296,8 @@
     <string name="notification_title_abusive_bg_apps" msgid="3258460527676573815">"アプリがバッテリーを使用しています"</string>
     <string name="notification_title_long_running_fgs" msgid="8170284286477131587">"アプリがまだアクティブです"</string>
     <string name="notification_content_abusive_bg_apps" msgid="9180610713603474720">"<xliff:g id="APP">%1$s</xliff:g> がバックグラウンドでバッテリーを使用しています。タップしてご確認ください。"</string>
-    <string name="notification_content_long_running_fgs" msgid="8258193410039977101">"<xliff:g id="APP">%1$s</xliff:g> がバッテリー駆動時間に影響を与えている可能性があります。タップして、アクティブなアプリをご確認ください。"</string>
-    <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"有効なアプリをチェック"</string>
+    <string name="notification_content_long_running_fgs" msgid="8258193410039977101">"<xliff:g id="APP">%1$s</xliff:g> がバッテリー駆動時間に影響を与えている可能性があります。タップして、実行中のアプリをご確認ください。"</string>
+    <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"実行中のアプリをチェック"</string>
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"<xliff:g id="DEVICE">%1$s</xliff:g> からスマートフォンのカメラにアクセスできません"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"<xliff:g id="DEVICE">%1$s</xliff:g> からタブレットのカメラにアクセスできません"</string>
     <string name="system_locale_title" msgid="3978041860457277638">"システムの言語"</string>

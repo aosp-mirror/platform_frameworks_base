@@ -42,6 +42,8 @@
     <string name="consent_yes" msgid="8344487259618762872">"ອະນຸຍາດ"</string>
     <string name="consent_no" msgid="2640796915611404382">"ບໍ່ອະນຸຍາດ"</string>
     <string name="consent_back" msgid="2560683030046918882">"ກັບຄືນ"</string>
-    <string name="permission_sync_confirmation_title" msgid="667074294393493186">"ໂອນຍ້າຍການອະນຸຍາດແອັບໄປຫາໂມງຂອງທ່ານ"</string>
-    <string name="permission_sync_summary" msgid="8873391306499120778">"ເພື່ອເຮັດໃຫ້ຕັ້ງຄ່າໂມງຂອງທ່ານໄດ້ງ່າຍຂຶ້ນ, ແອັບທີ່ຕິດຕັ້ງຢູ່ໂມງຂອງທ່ານໃນລະຫວ່າງການຕັ້ງຄ່າຈະໃຊ້ການອະນຸຍາດດຽວກັນກັບໂທລະສັບຂອງທ່ານ.\n\n ການອະນຸຍາດເຫຼົ່ານີ້ອາດຮວມສິດເຂົ້າເຖິງໄມໂຄຣໂຟນ ແລະ ສະຖານທີ່ຂອງທ່ານນຳ."</string>
+    <!-- no translation found for permission_sync_confirmation_title (4409622174437248702) -->
+    <skip />
+    <!-- no translation found for permission_sync_summary (4866838188678457084) -->
+    <skip />
 </resources>

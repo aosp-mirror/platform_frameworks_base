@@ -42,6 +42,8 @@
     <string name="consent_yes" msgid="8344487259618762872">"Να επιτρέπεται"</string>
     <string name="consent_no" msgid="2640796915611404382">"Να μην επιτρέπεται"</string>
     <string name="consent_back" msgid="2560683030046918882">"Πίσω"</string>
-    <string name="permission_sync_confirmation_title" msgid="667074294393493186">"Μεταφορά αδειών εφαρμογών στο ρολόι σας"</string>
-    <string name="permission_sync_summary" msgid="8873391306499120778">"Για να είναι πιο εύκολη η ρύθμιση του ρολογιού σας, οι εφαρμογές που εγκαθίστανται στο ρολόι σας κατά τη ρύθμιση, θα χρησιμοποιούν τις ίδιες άδειες με το τηλέφωνό σας.\n\n Στις άδειες ενδέχεται να περιλαμβάνεται άδεια πρόσβασης στο μικρόφωνο και την τοποθεσία του ρολογιού σας."</string>
+    <!-- no translation found for permission_sync_confirmation_title (4409622174437248702) -->
+    <skip />
+    <!-- no translation found for permission_sync_summary (4866838188678457084) -->
+    <skip />
 </resources>

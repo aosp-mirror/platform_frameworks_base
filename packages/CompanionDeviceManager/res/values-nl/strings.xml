@@ -42,6 +42,8 @@
     <string name="consent_yes" msgid="8344487259618762872">"Toestaan"</string>
     <string name="consent_no" msgid="2640796915611404382">"Niet toestaan"</string>
     <string name="consent_back" msgid="2560683030046918882">"Terug"</string>
-    <string name="permission_sync_confirmation_title" msgid="667074294393493186">"App-rechten overzetten naar je horloge"</string>
-    <string name="permission_sync_summary" msgid="8873391306499120778">"We willen het makkelijker voor je maken om je horloge in te stellen. Daarom gebruiken apps die tijdens het instellen worden geïnstalleerd op je horloge, dezelfde rechten als op je telefoon.\n\n Deze rechten kunnen toegang tot de microfoon en locatie van je horloge omvatten."</string>
+    <!-- no translation found for permission_sync_confirmation_title (4409622174437248702) -->
+    <skip />
+    <!-- no translation found for permission_sync_summary (4866838188678457084) -->
+    <skip />
 </resources>

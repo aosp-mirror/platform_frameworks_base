@@ -42,6 +42,8 @@
     <string name="consent_yes" msgid="8344487259618762872">"অনুমতি দিন"</string>
     <string name="consent_no" msgid="2640796915611404382">"অনুমতি দেবেন না"</string>
     <string name="consent_back" msgid="2560683030046918882">"ফিরুন"</string>
-    <string name="permission_sync_confirmation_title" msgid="667074294393493186">"অ্যাপকে দেওয়া অনুমতি আপনার ঘড়িতে ট্রান্সফার করুন"</string>
-    <string name="permission_sync_summary" msgid="8873391306499120778">"ঘড়ি আরও সহজে সেট আপ করতে, সেট আপ চলাকালীন আপনার ঘড়িতে ইনস্টল করা অ্যাপ ফোনের মতো একই অনুমতি ব্যবহার করবে।\n\n এইসব অনুমতির মধ্যে আপনার ঘড়ির মাইক্রোফোন ও লোকেশন সম্পর্কে তথ্যের অ্যাক্সেস অন্তর্ভুক্ত থাকতে পারে।"</string>
+    <!-- no translation found for permission_sync_confirmation_title (4409622174437248702) -->
+    <skip />
+    <!-- no translation found for permission_sync_summary (4866838188678457084) -->
+    <skip />
 </resources>

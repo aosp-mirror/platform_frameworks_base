@@ -42,6 +42,8 @@
     <string name="consent_yes" msgid="8344487259618762872">"अनुमती द्या"</string>
     <string name="consent_no" msgid="2640796915611404382">"अनुमती देऊ नका"</string>
     <string name="consent_back" msgid="2560683030046918882">"मागे जा"</string>
-    <string name="permission_sync_confirmation_title" msgid="667074294393493186">"अ‍ॅप परवानग्या तुमच्या वॉचवर ट्रान्सफर करा"</string>
-    <string name="permission_sync_summary" msgid="8873391306499120778">"तुमचे वॉच सेट करणे आणखी सोपे करण्यासाठी, सेटअपदरम्यान तुमच्या वॉचवर इंस्टॉल केलेली ॲप्स ही तुमच्या फोनप्रमाणेच परवानग्या वापरतील.\n\n या परवानग्यांमध्ये तुमच्या वॉचचा मायक्रोफोन आणि स्थानाच्या अ‍ॅक्सेसचा समावेश असू शकतो."</string>
+    <!-- no translation found for permission_sync_confirmation_title (4409622174437248702) -->
+    <skip />
+    <!-- no translation found for permission_sync_summary (4866838188678457084) -->
+    <skip />
 </resources>

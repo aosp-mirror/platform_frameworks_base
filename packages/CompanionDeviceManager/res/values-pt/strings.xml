@@ -42,6 +42,8 @@
     <string name="consent_yes" msgid="8344487259618762872">"Permitir"</string>
     <string name="consent_no" msgid="2640796915611404382">"Não permitir"</string>
     <string name="consent_back" msgid="2560683030046918882">"Voltar"</string>
-    <string name="permission_sync_confirmation_title" msgid="667074294393493186">"Transferir as permissões de apps para o relógio"</string>
-    <string name="permission_sync_summary" msgid="8873391306499120778">"Para facilitar a configuração do relógio, os apps instalados nele durante a configuração vão usar as mesmas permissões que o smartphone.\n\n Essas permissões podem incluir acesso ao microfone ou à localização do relógio."</string>
+    <!-- no translation found for permission_sync_confirmation_title (4409622174437248702) -->
+    <skip />
+    <!-- no translation found for permission_sync_summary (4866838188678457084) -->
+    <skip />
 </resources>

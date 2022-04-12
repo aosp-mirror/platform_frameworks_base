@@ -42,6 +42,8 @@
     <string name="consent_yes" msgid="8344487259618762872">"ಅನುಮತಿಸಿ"</string>
     <string name="consent_no" msgid="2640796915611404382">"ಅನುಮತಿಸಬೇಡಿ"</string>
     <string name="consent_back" msgid="2560683030046918882">"ಹಿಂದೆ"</string>
-    <string name="permission_sync_confirmation_title" msgid="667074294393493186">"ಆ್ಯಪ್ ಅನುಮತಿಗಳನ್ನು ನಿಮ್ಮ ವಾಚ್‌ಗೆ ವರ್ಗಾವಣೆ ಮಾಡಿ"</string>
-    <string name="permission_sync_summary" msgid="8873391306499120778">"ನಿಮ್ಮ ವಾಚ್ ಸೆಟಪ್ ಮಾಡುವುದನ್ನು ಸುಲಭವಾಗಿಸಲು, ಸೆಟಪ್‌ನ ಸಮಯದಲ್ಲಿ ನಿಮ್ಮ ವಾಚ್‌ನಲ್ಲಿ ಇನ್‌ಸ್ಟಾಲ್ ಮಾಡಿದ ಆ್ಯಪ್‌ಗಳು, ನಿಮ್ಮ ಫೋನ್‌ನಲ್ಲಿನ ಅನುಮತಿಗಳನ್ನೇ ಬಳಸಿಕೊಳ್ಳುತ್ತವೆ.\n\n ಈ ಅನುಮತಿಗಳು ನಿಮ್ಮ ವಾಚ್‌ನ ಮೈಕ್ರೊಫೋನ್ ಮತ್ತು ಸ್ಥಳದ ಪ್ರವೇಶವನ್ನು ಒಳಗೊಳ್ಳಬಹುದು."</string>
+    <!-- no translation found for permission_sync_confirmation_title (4409622174437248702) -->
+    <skip />
+    <!-- no translation found for permission_sync_summary (4866838188678457084) -->
+    <skip />
 </resources>

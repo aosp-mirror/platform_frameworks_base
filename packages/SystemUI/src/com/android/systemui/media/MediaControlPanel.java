@@ -331,6 +331,7 @@ public class MediaControlPanel {
         });
         mRecommendationViewHolder.getSettings().setOnClickListener(v -> {
             if (!mFalsingManager.isFalseTap(FalsingManager.LOW_PENALTY)) {
+                mLogger.logLongPressSettings(mUid, mPackageName, mInstanceId);
                 mActivityStarter.startActivity(SETTINGS_INTENT, true /* dismissShade */);
             }
         });
@@ -940,6 +941,8 @@ public class MediaControlPanel {
 
         mSmartspaceId = SmallHash.hash(data.getTargetId());
         mBackgroundColor = data.getBackgroundColor();
+        mPackageName = data.getPackageName();
+        mInstanceId = data.getInstanceId();
         TransitionLayout recommendationCard = mRecommendationViewHolder.getRecommendations();
         recommendationCard.setBackgroundTintList(ColorStateList.valueOf(mBackgroundColor));
 
@@ -1068,6 +1071,7 @@ public class MediaControlPanel {
         mRecommendationViewHolder.getDismiss().setOnClickListener(v -> {
             if (mFalsingManager.isFalseTap(FalsingManager.LOW_PENALTY)) return;
 
+            mLogger.logLongPressDismiss(mUid, mPackageName, mInstanceId);
             logSmartspaceCardReported(
                     761 // SMARTSPACE_CARD_DISMISS
             );
@@ -1204,6 +1208,11 @@ public class MediaControlPanel {
         view.setOnClickListener(v -> {
             if (mFalsingManager.isFalseTap(FalsingManager.LOW_PENALTY)) return;
 
+            if (interactedSubcardRank == -1) {
+                mLogger.logRecommendationCardTap(mPackageName, mInstanceId);
+            } else {
+                mLogger.logRecommendationItemTap(mPackageName, mInstanceId, interactedSubcardRank);
+            }
             logSmartspaceCardReported(SMARTSPACE_CARD_CLICK_EVENT,
                     interactedSubcardRank,
                     getSmartspaceSubCardCardinality());
@@ -1270,6 +1279,8 @@ public class MediaControlPanel {
             return SysUiStatsLog.SMART_SPACE_CARD_REPORTED__DISPLAY_SURFACE__SHADE;
         } else if (currentEndLocation == MediaHierarchyManager.LOCATION_LOCKSCREEN) {
             return SysUiStatsLog.SMART_SPACE_CARD_REPORTED__DISPLAY_SURFACE__LOCKSCREEN;
+        } else if (currentEndLocation == MediaHierarchyManager.LOCATION_DREAM_OVERLAY) {
+            return SysUiStatsLog.SMART_SPACE_CARD_REPORTED__DISPLAY_SURFACE__DREAM_OVERLAY;
         }
         return SysUiStatsLog.SMART_SPACE_CARD_REPORTED__DISPLAY_SURFACE__DEFAULT_SURFACE;
     }
