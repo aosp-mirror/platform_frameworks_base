@@ -277,7 +277,7 @@ cc_defaults {
         },
         host: {
             srcs: [
-                "apex/LayoutlibLoader.cpp",
+                "apex/RobolectricNativeRuntime.cpp",
             ],
         },
     },
