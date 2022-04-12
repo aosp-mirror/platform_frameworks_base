@@ -2035,7 +2035,7 @@ class Task extends TaskFragment {
         Rect outOverrideBounds = getResolvedOverrideConfiguration().windowConfiguration.getBounds();
 
         if (windowingMode == WINDOWING_MODE_FULLSCREEN) {
-            if (!mCreatedByOrganizer) {
+            if (!isOrganized()) {
                 // Use empty bounds to indicate "fill parent".
                 outOverrideBounds.setEmpty();
             }
