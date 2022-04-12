@@ -293,6 +293,22 @@ public class WindowMagnificationControllerTest extends SysuiTestCase {
     }
 
     @Test
+    public void deleteWindowMagnification_notifySourceBoundsChanged() {
+        mInstrumentation.runOnMainSync(
+                () -> mWindowMagnificationController.enableWindowMagnificationInternal(Float.NaN,
+                        Float.NaN,
+                        Float.NaN));
+
+        mInstrumentation.runOnMainSync(
+                () -> mWindowMagnificationController.deleteWindowMagnification());
+
+        // The first time is for notifying magnification enabled and the second time is for
+        // notifying magnification disabled.
+        verify(mWindowMagnifierCallback, times(2)).onSourceBoundsChanged(
+                (eq(mContext.getDisplayId())), any());
+    }
+
+    @Test
     public void moveMagnifier_schedulesFrame() {
         mInstrumentation.runOnMainSync(() -> {
             mWindowMagnificationController.enableWindowMagnificationInternal(Float.NaN, Float.NaN,
