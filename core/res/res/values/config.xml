@@ -3804,6 +3804,9 @@
     <!-- True if the device supports running activities on secondary displays. -->
     <bool name="config_supportsMultiDisplay">true</bool>
 
+    <!-- Indicates whether the device supports bubble notifications or not. -->
+    <bool name="config_supportsBubble">true</bool>
+
     <!-- True if the device has no home screen. That is a launcher activity
          where the user can launch other applications from.  -->
     <bool name="config_noHomeScreen">false</bool>
