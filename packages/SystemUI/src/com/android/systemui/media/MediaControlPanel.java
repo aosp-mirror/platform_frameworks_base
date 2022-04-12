@@ -61,6 +61,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.logging.InstanceId;
 import com.android.settingslib.widget.AdaptiveIcon;
+import com.android.systemui.ActivityIntentHelper;
 import com.android.systemui.R;
 import com.android.systemui.animation.ActivityLaunchAnimator;
 import com.android.systemui.animation.GhostedViewLaunchAnimatorController;
@@ -73,6 +74,8 @@ import com.android.systemui.monet.ColorScheme;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.shared.system.SysUiStatsLog;
+import com.android.systemui.statusbar.NotificationLockscreenUserManager;
+import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.animation.TransitionLayout;
 import com.android.systemui.util.time.SystemClock;
 
@@ -161,6 +164,10 @@ public class MediaControlPanel {
     private int mArtworkBoundId = 0;
     private int mArtworkNextBindRequestId = 0;
 
+    private final KeyguardStateController mKeyguardStateController;
+    private final ActivityIntentHelper mActivityIntentHelper;
+    private final NotificationLockscreenUserManager mLockscreenUserManager;
+
     // Used for logging.
     protected boolean mIsImpressed = false;
     private SystemClock mSystemClock;
@@ -196,7 +203,10 @@ public class MediaControlPanel {
             MediaCarouselController mediaCarouselController,
             FalsingManager falsingManager,
             SystemClock systemClock,
-            MediaUiEventLogger logger) {
+            MediaUiEventLogger logger,
+            KeyguardStateController keyguardStateController,
+            ActivityIntentHelper activityIntentHelper,
+            NotificationLockscreenUserManager lockscreenUserManager) {
         mContext = context;
         mBackgroundExecutor = backgroundExecutor;
         mMainExecutor = mainExecutor;
@@ -210,6 +220,9 @@ public class MediaControlPanel {
         mFalsingManager = falsingManager;
         mSystemClock = systemClock;
         mLogger = logger;
+        mKeyguardStateController = keyguardStateController;
+        mActivityIntentHelper = activityIntentHelper;
+        mLockscreenUserManager = lockscreenUserManager;
 
         mSeekBarViewModel.setLogSeek(() -> {
             if (mPackageName != null && mInstanceId != null) {
@@ -416,8 +429,21 @@ public class MediaControlPanel {
                 if (mMediaViewController.isGutsVisible()) return;
                 mLogger.logTapContentView(mUid, mPackageName, mInstanceId);
                 logSmartspaceCardReported(SMARTSPACE_CARD_CLICK_EVENT);
-                mActivityStarter.postStartActivityDismissingKeyguard(clickIntent,
-                        buildLaunchAnimatorController(mMediaViewHolder.getPlayer()));
+
+                // See StatusBarNotificationActivityStarter#onNotificationClicked
+                boolean showOverLockscreen = mKeyguardStateController.isShowing()
+                        && mActivityIntentHelper.wouldShowOverLockscreen(clickIntent.getIntent(),
+                        mLockscreenUserManager.getCurrentUserId());
+
+                if (showOverLockscreen) {
+                    mActivityStarter.startActivity(clickIntent.getIntent(),
+                            /* dismissShade */ true,
+                            /* animationController */ null,
+                            /* showOverLockscreenWhenLocked */ true);
+                } else {
+                    mActivityStarter.postStartActivityDismissingKeyguard(clickIntent,
+                            buildLaunchAnimatorController(mMediaViewHolder.getPlayer()));
+                }
             });
         }
 
