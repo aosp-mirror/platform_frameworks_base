@@ -2693,7 +2693,7 @@ public class ActivityRecordTests extends WindowTestsBase {
                 .resumeFocusedTasksTopActivities();
         // Make mVisibleSetFromTransferredStartingWindow true.
         final ActivityRecord middle = new ActivityBuilder(mAtm).setTask(task).build();
-        task.startActivityLocked(middle, null /* focusedTopActivity */,
+        task.startActivityLocked(middle, null /* topTask */,
                 false /* newTask */, false /* isTaskSwitch */, null /* options */,
                 null /* sourceRecord */);
         middle.makeFinishingLocked();
@@ -2706,7 +2706,7 @@ public class ActivityRecordTests extends WindowTestsBase {
         // a visible activity.
         top.setVisible(false);
         // The finishing middle should be able to transfer starting window to top.
-        task.startActivityLocked(top, null /* focusedTopActivity */,
+        task.startActivityLocked(top, null /* topTask */,
                 false /* newTask */, false /* isTaskSwitch */, null /* options */,
                 null /* sourceRecord */);
 

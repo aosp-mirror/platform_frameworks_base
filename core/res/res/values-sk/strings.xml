@@ -87,8 +87,8 @@
     <string name="RestrictedStateContentMsimTemplate" msgid="5228235722511044687">"Dočasne vypnuté operátorom pre SIM kartu <xliff:g id="SIMNUMBER">%d</xliff:g>"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"Nepodarilo sa pripojiť k mobilnej sieti"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"Skúste zmeniť predvolenú sieť. Zmeníte ju klepnutím."</string>
-    <string name="EmergencyCallWarningTitle" msgid="9164532362414787774">"Tiesňové volanie môže byť nedostupné"</string>
-    <string name="EmergencyCallWarningSummary" msgid="3365701131304664899">"<xliff:g id="SPN">%s</xliff:g> nepodporuje tiesňové volanie cez Wi‑Fi. Klepnutím zobrazíte podrobnosti."</string>
+    <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"Tiesňové volania nie sú k dispozícii"</string>
+    <string name="EmergencyCallWarningSummary" msgid="1194185880092805497">"Nedajú sa uskutočniť tiesňové volania cez Wi-Fi"</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"Upozornenia"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"Presmerovanie hovorov"</string>
     <string name="notification_channel_emergency_callback" msgid="54074839059123159">"Režim tiesňového spätného volania"</string>
@@ -1935,9 +1935,36 @@
     <string name="app_blocked_message" msgid="542972921087873023">"Aplikácia <xliff:g id="APP_NAME">%1$s</xliff:g> nie je teraz dostupná."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> nie je k dispozícii"</string>
     <string name="app_streaming_blocked_title_for_permission_dialog" msgid="4483161748582966785">"Vyžaduje sa povolenie"</string>
-    <string name="app_streaming_blocked_message" product="tv" msgid="4003011766528814377">"V zariadení <xliff:g id="DEVICE">%1$s</xliff:g> momentálne nemáte k tomuto obsahu prístup. Skúste namiesto toho použiť zariadenie Android TV."</string>
-    <string name="app_streaming_blocked_message" product="tablet" msgid="4242053045964946062">"V zariadení <xliff:g id="DEVICE">%1$s</xliff:g> momentálne nemáte k tomuto obsahu prístup. Skúste namiesto toho použiť tablet."</string>
-    <string name="app_streaming_blocked_message" product="default" msgid="6159168735030739398">"V zariadení <xliff:g id="DEVICE">%1$s</xliff:g> momentálne nemáte k tomuto obsahu prístup. Skúste namiesto toho použiť telefón."</string>
+    <!-- no translation found for app_streaming_blocked_title_for_camera_dialog (3935701653713853065) -->
+    <skip />
+    <!-- no translation found for app_streaming_blocked_title_for_fingerprint_dialog (3516853717714141951) -->
+    <skip />
+    <!-- no translation found for app_streaming_blocked_title_for_microphone_dialog (544822455127171206) -->
+    <skip />
+    <!-- no translation found for app_streaming_blocked_title_for_settings_dialog (196994247017450357) -->
+    <skip />
+    <!-- no translation found for app_streaming_blocked_title_for_settings_dialog (8222710146267948647) -->
+    <skip />
+    <!-- no translation found for app_streaming_blocked_title_for_settings_dialog (6895719984375299791) -->
+    <skip />
+    <!-- no translation found for app_streaming_blocked_message (5024599278277957935) -->
+    <skip />
+    <!-- no translation found for app_streaming_blocked_message (7491114163056552686) -->
+    <skip />
+    <!-- no translation found for app_streaming_blocked_message (1245180131667647277) -->
+    <skip />
+    <!-- no translation found for app_streaming_blocked_message_for_permission_dialog (6306583663205997979) -->
+    <skip />
+    <!-- no translation found for app_streaming_blocked_message_for_permission_dialog (6545624942642129664) -->
+    <skip />
+    <!-- no translation found for app_streaming_blocked_message_for_permission_dialog (8462740631707923000) -->
+    <skip />
+    <!-- no translation found for app_streaming_blocked_message_for_fingerprint_dialog (3470977315395784567) -->
+    <skip />
+    <!-- no translation found for app_streaming_blocked_message_for_fingerprint_dialog (698460091901465092) -->
+    <skip />
+    <!-- no translation found for app_streaming_blocked_message_for_fingerprint_dialog (8552691971910603907) -->
+    <skip />
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"Táto aplikácia bola zostavená pre staršiu verziu Androidu a nemusí správne fungovať. Skúste skontrolovať dostupnosť aktualizácií alebo kontaktovať vývojára."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Skontrolovať dostupnosť aktualizácie"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Máte nové správy."</string>
@@ -2042,6 +2069,14 @@
     <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"Klepnutím získate ďalšie informácie a budete môcť vykonať zmeny."</string>
     <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"Režim bez vyrušení sa zmenil"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Klepnutím skontrolujete, čo je blokované."</string>
+    <!-- no translation found for review_notification_settings_title (5102557424459810820) -->
+    <skip />
+    <!-- no translation found for review_notification_settings_text (5696497037817525074) -->
+    <skip />
+    <!-- no translation found for review_notification_settings_remind_me_action (1081081018678480907) -->
+    <skip />
+    <!-- no translation found for review_notification_settings_dismiss (4160916504616428294) -->
+    <skip />
     <string name="notification_app_name_system" msgid="3045196791746735601">"Systém"</string>
     <string name="notification_app_name_settings" msgid="9088548800899952531">"Nastavenia"</string>
     <string name="notification_appops_camera_active" msgid="8177643089272352083">"Fotoaparát"</string>

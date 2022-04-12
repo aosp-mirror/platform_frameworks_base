@@ -2355,7 +2355,14 @@ public class BubbleStackView extends FrameLayout
             }
         } else if (mPositioner.showBubblesVertically() && mIsExpanded
                 && mExpandedBubble != null && mExpandedBubble.getExpandedView() != null) {
+            float selectedY = mPositioner.getExpandedBubbleXY(getState().selectedIndex,
+                    getState()).y;
+            float newExpandedViewTop = mPositioner.getExpandedViewY(mExpandedBubble, selectedY);
             mExpandedBubble.getExpandedView().setImeVisible(visible);
+            if (!mExpandedBubble.getExpandedView().isUsingMaxHeight()) {
+                mExpandedViewContainer.animate().translationY(newExpandedViewTop);
+            }
+
             List<Animator> animList = new ArrayList();
             for (int i = 0; i < mBubbleContainer.getChildCount(); i++) {
                 View child = mBubbleContainer.getChildAt(i);
