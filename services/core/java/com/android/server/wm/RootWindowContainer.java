@@ -24,6 +24,7 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 import static android.content.pm.ActivityInfo.LAUNCH_SINGLE_INSTANCE;
 import static android.content.pm.ActivityInfo.LAUNCH_SINGLE_TASK;
+import static android.content.res.Configuration.EMPTY;
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
@@ -2005,7 +2006,8 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             // of the activity entering PIP
             r.getDisplayContent().prepareAppTransition(TRANSIT_NONE);
 
-            final boolean singleActivity = task.getChildCount() == 1;
+            // TODO: Does it make sense to only count non-finishing activities?
+            final boolean singleActivity = task.getActivityCount() == 1;
             if (singleActivity) {
                 rootTask = task;
 
@@ -2081,6 +2083,15 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             // TODO(task-org): Figure-out more structured way to do this long term.
             r.setWindowingMode(intermediateWindowingMode);
             r.mWaitForEnteringPinnedMode = true;
+            rootTask.forAllTaskFragments(tf -> {
+                // When the Task is entering picture-in-picture, we should clear all override from
+                // the client organizer, so the PIP activity can get the correct config from the
+                // Task, and prevent conflict with the PipTaskOrganizer.
+                if (tf.isOrganizedTaskFragment()) {
+                    tf.resetAdjacentTaskFragment();
+                    tf.updateRequestedOverrideConfiguration(EMPTY);
+                }
+            });
             rootTask.setWindowingMode(WINDOWING_MODE_PINNED);
             // Set the launch bounds for launch-into-pip Activity on the root task.
             if (r.getOptions() != null && r.getOptions().isLaunchIntoPip()) {
