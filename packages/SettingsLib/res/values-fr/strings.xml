@@ -205,7 +205,7 @@
     <string name="tethering_settings_not_available" msgid="266821736434699780">"Les paramètres de partage de connexion ne sont pas disponibles pour cet utilisateur."</string>
     <string name="apn_settings_not_available" msgid="1147111671403342300">"Les paramètres de point d\'accès ne sont pas disponibles pour cet utilisateur."</string>
     <string name="enable_adb" msgid="8072776357237289039">"Débogage USB"</string>
-    <string name="enable_adb_summary" msgid="3711526030096574316">"Mode débogage lorsqu\'un câble USB est connecté"</string>
+    <string name="enable_adb_summary" msgid="3711526030096574316">"Mode de débogage en connexion USB"</string>
     <string name="clear_adb_keys" msgid="3010148733140369917">"Annuler autorisations pour débog. USB"</string>
     <string name="enable_adb_wireless" msgid="6973226350963971018">"Débogage sans fil"</string>
     <string name="enable_adb_wireless_summary" msgid="7344391423657093011">"Mode de débogage en connexion Wi-Fi"</string>

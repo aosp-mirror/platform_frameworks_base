@@ -144,11 +144,11 @@
     <string name="data_usage_uninstalled_apps" msgid="1933665711856171491">"Uklonjene aplikacije"</string>
     <string name="data_usage_uninstalled_apps_users" msgid="5533981546921913295">"Uklonjene aplikacije i korisnici"</string>
     <string name="data_usage_ota" msgid="7984667793701597001">"Ažuriranja sistema"</string>
-    <string name="tether_settings_title_usb" msgid="3728686573430917722">"Povezivanje mobitela USB-om"</string>
+    <string name="tether_settings_title_usb" msgid="3728686573430917722">"Dijeljenje internetske veze putem USB-a"</string>
     <string name="tether_settings_title_wifi" msgid="4803402057533895526">"Prijenosna pristupna tačka"</string>
-    <string name="tether_settings_title_bluetooth" msgid="916519902721399656">"Dijeljenje Bluetooth veze"</string>
-    <string name="tether_settings_title_usb_bluetooth" msgid="1727111807207577322">"Povezivanje putem mobitela"</string>
-    <string name="tether_settings_title_all" msgid="8910259483383010470">"Povezivanje putem mobitela i prijenosna pristupna tačka"</string>
+    <string name="tether_settings_title_bluetooth" msgid="916519902721399656">"Dijeljenje internetske veze putem Bluetootha"</string>
+    <string name="tether_settings_title_usb_bluetooth" msgid="1727111807207577322">"Dijeljenje internetske veze"</string>
+    <string name="tether_settings_title_all" msgid="8910259483383010470">"Dijeljenje internetske veze i prijenosna pristupna tačka"</string>
     <string name="managed_user_title" msgid="449081789742645723">"Sve radne aplikacije"</string>
     <string name="user_guest" msgid="6939192779649870792">"Gost"</string>
     <string name="unknown" msgid="3544487229740637809">"Nepoznato"</string>
@@ -202,7 +202,7 @@
     <string name="development_settings_summary" msgid="8718917813868735095">"Postavi opcije za razvoj aplikacija"</string>
     <string name="development_settings_not_available" msgid="355070198089140951">"Opcije za programere nisu dostupne za ovog korisnika"</string>
     <string name="vpn_settings_not_available" msgid="2894137119965668920">"VPN postavke nisu dostupne za ovog korisnika"</string>
-    <string name="tethering_settings_not_available" msgid="266821736434699780">"Postavke za povezivanje putem mobitela nisu dostupne za ovog korisnika"</string>
+    <string name="tethering_settings_not_available" msgid="266821736434699780">"Postavke dijeljenja internetske veze nisu dostupne za ovog korisnika"</string>
     <string name="apn_settings_not_available" msgid="1147111671403342300">"Postavke za ime pristupne tačke nisu dostupne za ovog korisnika"</string>
     <string name="enable_adb" msgid="8072776357237289039">"Otklanjanje grešaka putem USB-a"</string>
     <string name="enable_adb_summary" msgid="3711526030096574316">"Način rada za uklanjanje grešaka kada je povezan USB"</string>
@@ -254,7 +254,7 @@
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"Usporavanje skeniranja WiFi-ja"</string>
     <string name="wifi_enhanced_mac_randomization" msgid="882650208573834301">"Nasumičan odabir MAC adrese prema WiFi mreži s prekidima"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"Prijenos podataka na mobilnoj mreži uvijek aktivan"</string>
-    <string name="tethering_hardware_offload" msgid="4116053719006939161">"Hardversko ubrzavanje za povezivanje putem mobitela"</string>
+    <string name="tethering_hardware_offload" msgid="4116053719006939161">"Hardversko ubrzavanje dijeljenja internetske veze"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"Prikaži Bluetooth uređaje bez naziva"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="1452342324349203434">"Onemogući apsolutnu jačinu zvuka"</string>
     <string name="bluetooth_enable_gabeldorsche" msgid="9131730396242883416">"Omogući Gabeldorsche"</string>
@@ -299,7 +299,7 @@
     <string name="allow_mock_location_summary" msgid="179780881081354579">"Dozvoli lažne lokacije"</string>
     <string name="debug_view_attributes" msgid="3539609843984208216">"Omogući pregled atributa prikaza"</string>
     <string name="mobile_data_always_on_summary" msgid="1112156365594371019">"Prijenos podataka na mobilnoj mreži ostaje aktivan čak i kada je aktiviran WiFi (za brzo prebacivanje između mreža)."</string>
-    <string name="tethering_hardware_offload_summary" msgid="7801345335142803029">"Korištenje hardverskog ubrzavanja za povezivanje putem mobitela, ako je dostupno"</string>
+    <string name="tethering_hardware_offload_summary" msgid="7801345335142803029">"Korištenje hardverskog ubrzavanja dijeljenja internetske veze ako je dostupno"</string>
     <string name="adb_warning_title" msgid="7708653449506485728">"Omogućiti otklanjanje grešaka putem USB-a?"</string>
     <string name="adb_warning_message" msgid="8145270656419669221">"Otklanjanje grešaka putem USB-a je namijenjeno samo u svrhe razvoja aplikacija. Koristite ga za kopiranje podataka između računara i uređaja, instaliranje aplikacija na uređaj bez obavještenja te čitanje podataka iz zapisnika."</string>
     <string name="adbwifi_warning_title" msgid="727104571653031865">"Omogućiti bežično otklanjanje grešaka?"</string>

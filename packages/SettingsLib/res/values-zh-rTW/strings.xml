@@ -422,9 +422,9 @@
     <string name="picture_color_mode_desc" msgid="151780973768136200">"使用 sRGB"</string>
     <string name="daltonizer_mode_disabled" msgid="403424372812399228">"已停用"</string>
     <string name="daltonizer_mode_monochromacy" msgid="362060873835885014">"全色盲"</string>
-    <string name="daltonizer_mode_deuteranomaly" msgid="3507284319584683963">"綠色弱視 (紅-綠)"</string>
-    <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"紅色弱視 (紅-綠)"</string>
-    <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"藍色弱視 (藍-黃)"</string>
+    <string name="daltonizer_mode_deuteranomaly" msgid="3507284319584683963">"綠色弱 (紅綠)"</string>
+    <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"紅色弱 (紅綠)"</string>
+    <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"藍色弱視 (藍黃)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"色彩校正"</string>
     <string name="accessibility_display_daltonizer_preference_subtitle" msgid="2333641630205214702">"調整裝置顯示顏色的方式。這項設定適用於以下情況：&lt;br/&gt;&lt;br/&gt; &lt;ol&gt; &lt;li&gt;&amp;nbsp;想讓裝置更準確地顯示顏色&lt;/li&gt; &lt;li&gt;&amp;nbsp;移除顏色以提高專注力&lt;/li&gt; &lt;/ol&gt;"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"已改為<xliff:g id="TITLE">%1$s</xliff:g>"</string>

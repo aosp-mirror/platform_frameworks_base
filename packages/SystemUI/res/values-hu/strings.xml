@@ -51,7 +51,7 @@
     <string name="usb_accessory_permission_prompt" msgid="717963550388312123">"Engedélyezi a(z) <xliff:g id="APPLICATION">%1$s</xliff:g> számára, hogy hozzáférjen a következőhöz: <xliff:g id="USB_ACCESSORY">%2$s</xliff:g>?"</string>
     <string name="usb_device_confirm_prompt" msgid="4091711472439910809">"Megnyitja a(z) <xliff:g id="APPLICATION">%1$s</xliff:g> alkalmazást a(z) <xliff:g id="USB_DEVICE">%2$s</xliff:g> kezeléséhez?"</string>
     <string name="usb_device_confirm_prompt_warn" msgid="990208659736311769">"Megnyitja a(z) <xliff:g id="APPLICATION">%1$s</xliff:g> alkalmazást, hogy kezelje a következőt: <xliff:g id="USB_DEVICE">%2$s</xliff:g>?\nEz az alkalmazás nem rendelkezik rögzítési engedéllyel, de ezzel az USB-eszközzel képes a hangfelvételre."</string>
-    <string name="usb_accessory_confirm_prompt" msgid="5728408382798643421">"Megnyitja a(z) <xliff:g id="APPLICATION">%1$s</xliff:g> alkalmazást a(z) <xliff:g id="USB_ACCESSORY">%2$s</xliff:g> kezeléséhez?"</string>
+    <string name="usb_accessory_confirm_prompt" msgid="5728408382798643421">"Megnyitja a(z) <xliff:g id="APPLICATION">%1$s</xliff:g> appot a(z) <xliff:g id="USB_ACCESSORY">%2$s</xliff:g> kezeléséhez?"</string>
     <string name="usb_accessory_uri_prompt" msgid="6756649383432542382">"A telepített alkalmazások nem működnek ezzel az USB-kiegészítővel. Bővebben: <xliff:g id="URL">%1$s</xliff:g>"</string>
     <string name="title_usb_accessory" msgid="1236358027511638648">"USB-kellék"</string>
     <string name="label_view" msgid="6815442985276363364">"Megtekintés"</string>
