@@ -389,6 +389,15 @@ public abstract class IContextHubWrapper {
                     mCallback.handleTransactionResult(transactionId, success);
                 });
             }
+            @Override
+            public String getInterfaceHash() {
+                return android.hardware.contexthub.IContextHubCallback.HASH;
+            }
+
+            @Override
+            public int getInterfaceVersion() {
+                return android.hardware.contexthub.IContextHubCallback.VERSION;
+            }
         }
 
         ContextHubWrapperAidl(android.hardware.contexthub.IContextHub hub) {
