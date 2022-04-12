@@ -33,7 +33,7 @@
     <string name="invalid_charger_title" msgid="938685362320735167">"Не ўдалося выканаць зарадку праз USB"</string>
     <string name="invalid_charger_text" msgid="2339310107232691577">"Выкарыстоўвайце зараднае прыстасаванне з камплекта прылады"</string>
     <string name="battery_low_why" msgid="2056750982959359863">"Налады"</string>
-    <string name="battery_saver_confirmation_title" msgid="1234998463717398453">"Уключыць рэжым эканоміі зараду?"</string>
+    <string name="battery_saver_confirmation_title" msgid="1234998463717398453">"Уключыць рэжым энергазберажэння?"</string>
     <string name="battery_saver_confirmation_title_generic" msgid="2299231884234959849">"Інфармацыя пра рэжым эканоміі зараду"</string>
     <string name="battery_saver_confirmation_ok" msgid="5042136476802816494">"Уключыць"</string>
     <string name="battery_saver_start_action" msgid="4553256017945469937">"Уключыць рэжым эканоміі зараду"</string>
@@ -605,7 +605,7 @@
     <string name="accessibility_volume_expand" msgid="7653070939304433603">"Разгарнуць"</string>
     <string name="accessibility_volume_collapse" msgid="2746845391013829996">"Згарнуць"</string>
     <string name="volume_odi_captions_tip" msgid="8825655463280990941">"Аўтаматычныя субцітры"</string>
-    <string name="accessibility_volume_close_odi_captions_tip" msgid="8924753283621160480">"Падказка \"Схавайце цітры\""</string>
+    <string name="accessibility_volume_close_odi_captions_tip" msgid="8924753283621160480">"Закрыць падказку пра субцітры"</string>
     <string name="volume_odi_captions_content_description" msgid="4172765742046013630">"Накладанне субцітраў"</string>
     <string name="volume_odi_captions_hint_enable" msgid="2073091194012843195">"уключыць"</string>
     <string name="volume_odi_captions_hint_disable" msgid="2518846326748183407">"адключыць"</string>

@@ -884,7 +884,7 @@
   </string-array>
     <string name="menu_ime" msgid="5677467548258017952">"Ստեղնաշարի փոխարկիչ"</string>
     <string name="save" msgid="3392754183673848006">"Պահել"</string>
-    <string name="reset" msgid="8715144064608810383">"Վերակայել"</string>
+    <string name="reset" msgid="8715144064608810383">"Զրոյացնել"</string>
     <string name="adjust_button_width" msgid="8313444823666482197">"Կարգավորել կոճակի լայնությունը"</string>
     <string name="clipboard" msgid="8517342737534284617">"Սեղմատախտակ"</string>
     <string name="accessibility_key" msgid="3471162841552818281">"Հատուկ նավիգացիայի կոճակ"</string>
