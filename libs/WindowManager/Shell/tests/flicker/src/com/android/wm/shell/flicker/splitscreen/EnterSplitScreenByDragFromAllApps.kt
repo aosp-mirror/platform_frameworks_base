@@ -72,15 +72,16 @@ class EnterSplitScreenByDragFromAllApps(
             }
             transitions {
                 tapl.launchedAppState.taskbar
-                    .openAllApps()
-                    .getAppIcon(secondaryApp.appName)
-                    .dragToSplitscreen(secondaryApp.`package`, primaryApp.`package`)
+                        .openAllApps()
+                        .getAppIcon(secondaryApp.appName)
+                        .dragToSplitscreen(secondaryApp.`package`, primaryApp.`package`)
+                SplitScreenHelper.waitForSplitComplete(wmHelper, primaryApp, secondaryApp)
             }
         }
 
     @Presubmit
     @Test
-    fun dividerBecomesVisible() = testSpec.splitScreenDividerBecomesVisible()
+    fun splitScreenDividerBecomesVisible() = testSpec.splitScreenDividerBecomesVisible()
 
     @Presubmit
     @Test
@@ -93,12 +94,12 @@ class EnterSplitScreenByDragFromAllApps(
     @Presubmit
     @Test
     fun primaryAppBoundsIsVisibleAtEnd() = testSpec.splitAppLayerBoundsIsVisibleAtEnd(
-        testSpec.endRotation, primaryApp, false /* splitLeftTop */)
+        primaryApp, splitLeftTop = false)
 
     @Presubmit
     @Test
     fun secondaryAppBoundsBecomesVisible() = testSpec.splitAppLayerBoundsBecomesVisible(
-        testSpec.endRotation, secondaryApp, true /* splitLeftTop */)
+        secondaryApp, splitLeftTop = true)
 
     @Presubmit
     @Test
@@ -106,8 +107,7 @@ class EnterSplitScreenByDragFromAllApps(
 
     @Presubmit
     @Test
-    fun secondaryAppWindowBecomesVisible() =
-        testSpec.appWindowBecomesVisible(secondaryApp)
+    fun secondaryAppWindowBecomesVisible() = testSpec.appWindowBecomesVisible(secondaryApp)
 
     /** {@inheritDoc} */
     @Postsubmit
