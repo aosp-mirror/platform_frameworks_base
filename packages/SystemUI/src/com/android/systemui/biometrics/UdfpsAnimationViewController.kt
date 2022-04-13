@@ -54,14 +54,13 @@ abstract class UdfpsAnimationViewController<T : UdfpsAnimationView>(
     private var dialogAlphaAnimator: ValueAnimator? = null
     private val dialogListener = SystemUIDialogManager.Listener { runDialogAlphaAnimator() }
 
-    private val panelExpansionListener =
-        PanelExpansionListener { fraction, expanded, tracking ->
-            // Notification shade can be expanded but not visible (fraction: 0.0), for example
-            // when a heads-up notification (HUN) is showing.
-            notificationShadeVisible = expanded && fraction > 0f
-            view.onExpansionChanged(fraction)
-            updatePauseAuth()
-        }
+    private val panelExpansionListener = PanelExpansionListener { event ->
+        // Notification shade can be expanded but not visible (fraction: 0.0), for example
+        // when a heads-up notification (HUN) is showing.
+        notificationShadeVisible = event.expanded && event.fraction > 0f
+        view.onExpansionChanged(event.fraction)
+        updatePauseAuth()
+    }
 
     /** If the notification shade is visible. */
     var notificationShadeVisible: Boolean = false
