@@ -20,9 +20,17 @@
     android:color="@color/settingslib_ripple_color">
 
     <item android:id="@android:id/background">
-        <shape>
-            <corners android:radius="10dp"/>
-            <solid android:color="@android:color/system_accent2_100"/>
-        </shape>
+        <layer-list
+            android:paddingMode="stack"
+            android:paddingStart="0dp"
+            android:paddingEnd="12dp">
+
+            <item>
+                <shape>
+                    <corners android:radius="10dp"/>
+                    <solid android:color="@android:color/system_accent2_100"/>
+                </shape>
+            </item>
+        </layer-list>
     </item>
 </ripple>

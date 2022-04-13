@@ -35,7 +35,7 @@
         <item name="android:textColor">@color/settingslib_spinner_dropdown_color</item>
         <item name="android:maxLines">1</item>
         <item name="android:ellipsize">marquee</item>
-        <item name="android:minHeight">@dimen/spinner_height</item>
+        <item name="android:minHeight">@dimen/spinner_dropdown_height</item>
         <item name="android:paddingStart">16dp</item>
         <item name="android:paddingEnd">36dp</item>
         <item name="android:paddingTop">@dimen/spinner_padding_top_or_bottom</item>
