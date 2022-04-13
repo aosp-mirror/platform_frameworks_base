@@ -3937,8 +3937,8 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                 snapshot.isInstantAppInternal(packageName, userId, Process.SYSTEM_UID);
         final int[] userIds = isInstantApp ? EMPTY_INT_ARRAY : new int[] { userId };
         final int[] instantUserIds = isInstantApp ? new int[] { userId } : EMPTY_INT_ARRAY;
-        final SparseArray<int[]> broadcastAllowList = snapshot.getBroadcastAllowList(
-                packageName, userIds, isInstantApp);
+        final SparseArray<int[]> broadcastAllowList =
+                isInstantApp ? null : snapshot.getVisibilityAllowLists(packageName, userIds);
         mHandler.post(() -> mBroadcastHelper.sendPackageChangedBroadcast(
                 packageName, dontKillApp, componentNames, packageUid, reason, userIds,
                 instantUserIds, broadcastAllowList));

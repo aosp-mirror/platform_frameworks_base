@@ -5026,20 +5026,6 @@ public class ComputerEngine implements Computer {
 
     @Nullable
     @Override
-    public SparseArray<int[]> getBroadcastAllowList(@NonNull String packageName,
-            @UserIdInt int[] userIds, boolean isInstantApp) {
-        if (isInstantApp) {
-            return null;
-        }
-        PackageStateInternal setting = getPackageStateInternal(packageName, Process.SYSTEM_UID);
-        if (setting == null) {
-            return null;
-        }
-        return mAppsFilter.getVisibilityAllowList(setting, userIds, getPackageStates());
-    }
-
-    @Nullable
-    @Override
     public String getInstallerPackageName(@NonNull String packageName) {
         final int callingUid = Binder.getCallingUid();
         final InstallSource installSource = getInstallSource(packageName, callingUid);
@@ -5316,14 +5302,21 @@ public class ComputerEngine implements Computer {
 
     @Nullable
     @Override
-    public int[] getVisibilityAllowList(@NonNull String packageName, @UserIdInt int userId) {
+    public SparseArray<int[]> getVisibilityAllowLists(@NonNull String packageName,
+            @UserIdInt int[] userIds) {
         final PackageStateInternal ps =
                 getPackageStateInternal(packageName, Process.SYSTEM_UID);
         if (ps == null) {
             return null;
         }
-        final SparseArray<int[]> visibilityAllowList = mAppsFilter.getVisibilityAllowList(ps,
-                new int[]{userId}, getPackageStates());
+        return mAppsFilter.getVisibilityAllowList(ps, userIds, getPackageStates());
+    }
+
+    @Nullable
+    @Override
+    public int[] getVisibilityAllowList(@NonNull String packageName, @UserIdInt int userId) {
+        final SparseArray<int[]> visibilityAllowList = getVisibilityAllowLists(packageName,
+                new int[]{userId});
         return visibilityAllowList != null ? visibilityAllowList.get(userId) : null;
     }
 
