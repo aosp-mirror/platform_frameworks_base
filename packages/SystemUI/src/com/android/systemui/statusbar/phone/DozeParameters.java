@@ -31,8 +31,6 @@ import android.provider.Settings;
 import android.util.Log;
 import android.util.MathUtils;
 
-import android.util.Log;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.VisibleForTesting;
 
@@ -293,11 +291,6 @@ public class DozeParameters implements
     }
 
     public void updateControlScreenOff() {
-        Log.i("TEST", "Display needs blanking?" + getDisplayNeedsBlanking());
-        Log.i("TEST", "Should control screen off?" + shouldControlUnlockedScreenOff());
-        Log.i("TEST", "alwaysOn?" + getAlwaysOn());
-        Log.i("TEST", "keyguard showing?" + mKeyguardShowing);
-        Log.i("TEST", "Flag enabled? " + mFeatureFlags.isEnabled(Flags.LOCKSCREEN_ANIMATIONS));
         if (!getDisplayNeedsBlanking()) {
             final boolean controlScreenOff =
                     getAlwaysOn() && (mKeyguardShowing || shouldControlUnlockedScreenOff());
