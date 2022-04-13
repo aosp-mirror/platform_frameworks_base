@@ -42,8 +42,6 @@
     <string name="consent_yes" msgid="8344487259618762872">"Зөвшөөрөх"</string>
     <string name="consent_no" msgid="2640796915611404382">"Бүү зөвшөөр"</string>
     <string name="consent_back" msgid="2560683030046918882">"Буцах"</string>
-    <!-- no translation found for permission_sync_confirmation_title (4409622174437248702) -->
-    <skip />
-    <!-- no translation found for permission_sync_summary (4866838188678457084) -->
-    <skip />
+    <string name="permission_sync_confirmation_title" msgid="4409622174437248702">"&lt;strong&gt;<xliff:g id="COMPANION_DEVICE_NAME">%1$s</xliff:g>&lt;/strong&gt; дээрх аппуудад &lt;strong&gt;<xliff:g id="PRIMARY_DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt; дээрхтэй адил зөвшөөрөл өгөх үү?"</string>
+    <string name="permission_sync_summary" msgid="4866838188678457084">"&lt;p&gt;Үүнд Микрофон, Камер болон Байршлын хандалт болон &lt;strong&gt;<xliff:g id="COMPANION_DEVICE_NAME_0">%1$s</xliff:g>&lt;/strong&gt; дээрх бусад эмзэг зөвшөөрөл багтаж болно.&lt;/p&gt; &lt;p&gt;Та эдгээр зөвшөөрлийг &lt;strong&gt;<xliff:g id="COMPANION_DEVICE_NAME_1">%1$s</xliff:g>&lt;/strong&gt; дээрх Тохиргоо хэсэгтээ хүссэн үедээ өөрчлөх боломжтой.&lt;/p&gt;"</string>
 </resources>

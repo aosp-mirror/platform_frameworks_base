@@ -42,8 +42,6 @@
     <string name="consent_yes" msgid="8344487259618762872">"অনুমতি দিয়ক"</string>
     <string name="consent_no" msgid="2640796915611404382">"অনুমতি নিদিব"</string>
     <string name="consent_back" msgid="2560683030046918882">"উভতি যাওক"</string>
-    <!-- no translation found for permission_sync_confirmation_title (4409622174437248702) -->
-    <skip />
-    <!-- no translation found for permission_sync_summary (4866838188678457084) -->
-    <skip />
+    <string name="permission_sync_confirmation_title" msgid="4409622174437248702">"এপ্‌সমূহক &lt;strong&gt;<xliff:g id="PRIMARY_DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt;ত দিয়াৰ দৰে &lt;strong&gt;<xliff:g id="COMPANION_DEVICE_NAME">%1$s</xliff:g>&lt;/strong&gt;তো একে অনুমতি প্ৰদান কৰিবনে?"</string>
+    <string name="permission_sync_summary" msgid="4866838188678457084">"&lt;p&gt;ইয়াত &lt;strong&gt;<xliff:g id="COMPANION_DEVICE_NAME_0">%1$s</xliff:g>&lt;/strong&gt;ত মাইক্ৰ’ফ’ন, কেমেৰা আৰু অৱস্থানৰ এক্সেছ আৰু অন্য সংবেদশীল অনুমতিসমূহ প্ৰদান কৰাটো অন্তৰ্ভুক্ত হ’ব পাৰে।&lt;/p&gt; &lt;p&gt;আপুনি যিকোনো সময়তে &lt;strong&gt;<xliff:g id="COMPANION_DEVICE_NAME_1">%1$s</xliff:g>&lt;/strong&gt;ত থকা আপোনাৰ ছেটিঙত এই অনুমতিসমূহ সলনি কৰিব পাৰে।&lt;/p&gt;"</string>
 </resources>
