@@ -77,6 +77,7 @@ import com.android.systemui.decor.DecorProviderFactory;
 import com.android.systemui.decor.DecorProviderKt;
 import com.android.systemui.decor.OverlayWindow;
 import com.android.systemui.decor.PrivacyDotDecorProviderFactory;
+import com.android.systemui.decor.RoundedCornerDecorProviderFactory;
 import com.android.systemui.decor.RoundedCornerResDelegate;
 import com.android.systemui.qs.SettingObserver;
 import com.android.systemui.settings.UserTracker;
@@ -136,6 +137,9 @@ public class ScreenDecorations extends CoreStartable implements Tunable , Dumpab
     // mIsRoundedCornerMultipleRadius is set
     @VisibleForTesting
     protected RoundedCornerResDelegate mRoundedCornerResDelegate;
+    @VisibleForTesting
+    protected DecorProviderFactory mRoundedCornerFactory;
+    private int mProviderRefreshToken = 0;
     @VisibleForTesting
     protected OverlayWindow[] mOverlays = null;
     @VisibleForTesting
@@ -282,16 +286,58 @@ public class ScreenDecorations extends CoreStartable implements Tunable , Dumpab
         return mDotFactory.getHasProviders();
     }
 
+    @NonNull
+    private List<DecorProvider> getProviders(boolean hasHwLayer) {
+        List<DecorProvider> decorProviders = new ArrayList<>(mDotFactory.getProviders());
+        if (!hasHwLayer) {
+            decorProviders.addAll(mRoundedCornerFactory.getProviders());
+        }
+        return decorProviders;
+    }
+
+    private void updateDisplayIdToProviderFactories() {
+        mDotFactory.onDisplayUniqueIdChanged(mDisplayUniqueId);
+        mRoundedCornerFactory.onDisplayUniqueIdChanged(mDisplayUniqueId);
+    }
+
+    /**
+     * Check that newProviders is the same list with decorProviders inside mOverlay.
+     * @param newProviders expected comparing DecorProviders
+     * @return true if same provider list
+     */
+    @VisibleForTesting
+    boolean hasSameProviders(@NonNull List<DecorProvider> newProviders) {
+        final ArrayList<Integer> overlayViewIds = new ArrayList<>();
+        if (mOverlays != null) {
+            for (OverlayWindow overlay : mOverlays) {
+                if (overlay == null) {
+                    continue;
+                }
+                overlayViewIds.addAll(overlay.getViewIds());
+            }
+        }
+        if (overlayViewIds.size() != newProviders.size()) {
+            return false;
+        }
+
+        for (DecorProvider provider: newProviders) {
+            if (!overlayViewIds.contains(provider.getViewId())) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     private void startOnScreenDecorationsThread() {
         mRotation = mContext.getDisplay().getRotation();
         mDisplayUniqueId = mContext.getDisplay().getUniqueId();
         mRoundedCornerResDelegate = new RoundedCornerResDelegate(mContext.getResources(),
                 mDisplayUniqueId);
+        mRoundedCornerFactory = new RoundedCornerDecorProviderFactory(mRoundedCornerResDelegate);
         mWindowManager = mContext.getSystemService(WindowManager.class);
         mDisplayManager = mContext.getSystemService(DisplayManager.class);
         mHwcScreenDecorationSupport = mContext.getDisplay().getDisplayDecorationSupport();
-        updateRoundedCornerDrawable();
-        updateRoundedCornerRadii();
+        updateHwLayerRoundedCornerDrawable();
         setupDecorations();
         setupCameraListener();
 
@@ -343,18 +389,27 @@ public class ScreenDecorations extends CoreStartable implements Tunable , Dumpab
                 final String newUniqueId = mContext.getDisplay().getUniqueId();
                 if (!Objects.equals(newUniqueId, mDisplayUniqueId)) {
                     mDisplayUniqueId = newUniqueId;
-                    mRoundedCornerResDelegate.reloadAll(newUniqueId);
                     final DisplayDecorationSupport newScreenDecorationSupport =
                             mContext.getDisplay().getDisplayDecorationSupport();
-                    // When the value of mSupportHwcScreenDecoration is changed, re-setup the whole
-                    // screen decoration.
-                    if (!eq(newScreenDecorationSupport, mHwcScreenDecorationSupport)) {
+
+                    updateDisplayIdToProviderFactories();
+
+                    // When providers or the value of mSupportHwcScreenDecoration is changed,
+                    // re-setup the whole screen decoration.
+                    if (!hasSameProviders(getProviders(newScreenDecorationSupport != null))
+                            || !eq(newScreenDecorationSupport, mHwcScreenDecorationSupport)) {
                         mHwcScreenDecorationSupport = newScreenDecorationSupport;
                         removeAllOverlays();
                         setupDecorations();
                         return;
                     }
-                    updateRoundedCornerDrawable();
+
+                    if (mScreenDecorHwcLayer != null) {
+                        updateHwLayerRoundedCornerDrawable();
+                        updateHwLayerRoundedCornerSize();
+                    }
+
+                    updateOverlayProviderViews();
                 }
                 if (mCutoutViews != null) {
                     final int size = mCutoutViews.length;
@@ -369,7 +424,6 @@ public class ScreenDecorations extends CoreStartable implements Tunable , Dumpab
                 if (mScreenDecorHwcLayer != null) {
                     mScreenDecorHwcLayer.onDisplayChanged(displayId);
                 }
-                updateOrientation();
             }
         };
 
@@ -396,6 +450,19 @@ public class ScreenDecorations extends CoreStartable implements Tunable , Dumpab
         return null;
     }
 
+    private void removeRedundantOverlayViews(@NonNull List<DecorProvider> decorProviders) {
+        if (mOverlays == null) {
+            return;
+        }
+        int[] viewIds = decorProviders.stream().mapToInt(DecorProvider::getViewId).toArray();
+        for (final OverlayWindow overlay : mOverlays) {
+            if (overlay == null) {
+                continue;
+            }
+            overlay.removeRedundantViews(viewIds);
+        }
+    }
+
     private void removeOverlayView(@IdRes int id) {
         if (mOverlays == null) {
             return;
@@ -411,9 +478,10 @@ public class ScreenDecorations extends CoreStartable implements Tunable , Dumpab
     }
 
     private void setupDecorations() {
-        List<DecorProvider> decorProviders = mDotFactory.getProviders();
+        if (hasRoundedCorners() || shouldDrawCutout() || isPrivacyDotEnabled()) {
+            List<DecorProvider> decorProviders = getProviders(mHwcScreenDecorationSupport != null);
+            removeRedundantOverlayViews(decorProviders);
 
-        if (hasRoundedCorners() || shouldDrawCutout() || !decorProviders.isEmpty()) {
             if (mHwcScreenDecorationSupport != null) {
                 createHwcOverlay();
             } else {
@@ -427,7 +495,7 @@ public class ScreenDecorations extends CoreStartable implements Tunable , Dumpab
                     Pair<List<DecorProvider>, List<DecorProvider>> pair =
                             DecorProviderKt.partitionAlignedBound(decorProviders, i);
                     decorProviders = pair.getSecond();
-                    createOverlay(i, cutout, pair.getFirst(), isOnlyPrivacyDotInSwLayer);
+                    createOverlay(i, pair.getFirst(), isOnlyPrivacyDotInSwLayer);
                 } else {
                     removeOverlay(i);
                 }
@@ -560,7 +628,6 @@ public class ScreenDecorations extends CoreStartable implements Tunable , Dumpab
 
     private void createOverlay(
             @BoundsPosition int pos,
-            @Nullable DisplayCutout cutout,
             @NonNull List<DecorProvider> decorProviders,
             boolean isOnlyPrivacyDotInSwLayer) {
         if (mOverlays == null) {
@@ -568,14 +635,12 @@ public class ScreenDecorations extends CoreStartable implements Tunable , Dumpab
         }
 
         if (mOverlays[pos] != null) {
-            // When mOverlay[pos] is not null and only privacy dot in sw layer, use privacy dot
-            // view's visibility
-            mOverlays[pos].getRootView().setVisibility(
-                    getWindowVisibility(mOverlays[pos], isOnlyPrivacyDotInSwLayer));
+            initOverlay(mOverlays[pos], decorProviders, isOnlyPrivacyDotInSwLayer);
             return;
         }
 
-        mOverlays[pos] = overlayForPosition(pos, decorProviders, isOnlyPrivacyDotInSwLayer);
+        mOverlays[pos] = new OverlayWindow(mContext);
+        initOverlay(mOverlays[pos], decorProviders, isOnlyPrivacyDotInSwLayer);
         final ViewGroup overlayView = mOverlays[pos].getRootView();
         overlayView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
         overlayView.setAlpha(0);
@@ -590,7 +655,7 @@ public class ScreenDecorations extends CoreStartable implements Tunable , Dumpab
             mCutoutViews[pos] = new DisplayCutoutView(mContext, pos);
             mCutoutViews[pos].setColor(mTintColor);
             overlayView.addView(mCutoutViews[pos]);
-            updateView(pos, cutout);
+            mCutoutViews[pos].updateRotation(mRotation);
         }
 
         mWindowManager.addView(overlayView, getWindowLayoutParams(pos));
@@ -641,42 +706,24 @@ public class ScreenDecorations extends CoreStartable implements Tunable , Dumpab
     }
 
     /**
-     * Allow overrides for top/bottom positions
+     * Init OverlayWindow with decorProviders
      */
-    private OverlayWindow overlayForPosition(
-            @BoundsPosition int pos,
+    private void initOverlay(
+            @NonNull OverlayWindow overlay,
             @NonNull List<DecorProvider> decorProviders,
             boolean isOnlyPrivacyDotInSwLayer) {
-        final OverlayWindow currentOverlay = new OverlayWindow(LayoutInflater.from(mContext), pos);
-        decorProviders.forEach(provider -> {
-            removeOverlayView(provider.getViewId());
-            currentOverlay.addDecorProvider(provider, mRotation);
-        });
-        // When only privacy dot in mOverlay, set the initial visibility of mOverlays to
-        // INVISIBLE and set it to VISIBLE when the privacy dot is showing.
-        if (isOnlyPrivacyDotInSwLayer) {
-            currentOverlay.getRootView().setVisibility(View.INVISIBLE);
+        if (!overlay.hasSameProviders(decorProviders)) {
+            decorProviders.forEach(provider -> {
+                if (overlay.getView(provider.getViewId()) != null) {
+                    return;
+                }
+                removeOverlayView(provider.getViewId());
+                overlay.addDecorProvider(provider, mRotation);
+            });
         }
-        return currentOverlay;
-    }
-
-    private void updateView(@BoundsPosition int pos, @Nullable DisplayCutout cutout) {
-        if (mOverlays == null || mOverlays[pos] == null || mHwcScreenDecorationSupport != null) {
-            return;
-        }
-
-        // update rounded corner view rotation
-        updateRoundedCornerView(pos, R.id.left, cutout);
-        updateRoundedCornerView(pos, R.id.right, cutout);
-        updateRoundedCornerSize(
-                mRoundedCornerResDelegate.getTopRoundedSize(),
-                mRoundedCornerResDelegate.getBottomRoundedSize());
-        updateRoundedCornerImageView();
-
-        // update cutout view rotation
-        if (mCutoutViews != null && mCutoutViews[pos] != null) {
-            mCutoutViews[pos].updateRotation(mRotation);
-        }
+        // Use visibility of privacy dot views if only privacy dot in sw layer
+        overlay.getRootView().setVisibility(
+                getWindowVisibility(overlay, isOnlyPrivacyDotInSwLayer));
     }
 
     @VisibleForTesting
@@ -849,7 +896,6 @@ public class ScreenDecorations extends CoreStartable implements Tunable , Dumpab
             int oldRotation = mRotation;
             mPendingRotationChange = false;
             updateOrientation();
-            updateRoundedCornerRadii();
             if (DEBUG) Log.i(TAG, "onConfigChanged from rot " + oldRotation + " to " + mRotation);
             setupDecorations();
             if (mOverlays != null) {
@@ -910,109 +956,32 @@ public class ScreenDecorations extends CoreStartable implements Tunable , Dumpab
             mDotViewController.setNewRotation(newRotation);
         }
 
-        if (mPendingRotationChange) {
-            return;
-        }
-        if (newRotation != mRotation) {
+        if (!mPendingRotationChange && newRotation != mRotation) {
             mRotation = newRotation;
             if (mScreenDecorHwcLayer != null) {
                 mScreenDecorHwcLayer.pendingRotationChange = false;
                 mScreenDecorHwcLayer.updateRotation(mRotation);
+                updateHwLayerRoundedCornerSize();
+                updateHwLayerRoundedCornerDrawable();
             }
-            if (mOverlays != null) {
-                updateLayoutParams();
-                final DisplayCutout cutout = getCutout();
-                for (int i = 0; i < BOUNDS_POSITION_LENGTH; i++) {
-                    if (mOverlays[i] == null) {
+            updateLayoutParams();
+            // update cutout view rotation
+            if (mCutoutViews != null) {
+                for (final DisplayCutoutView cutoutView: mCutoutViews) {
+                    if (cutoutView == null) {
                         continue;
                     }
-                    updateView(i, cutout);
+                    cutoutView.updateRotation(mRotation);
                 }
             }
         }
+
+        // update all provider views inside overlay
+        updateOverlayProviderViews();
     }
 
-    private void updateRoundedCornerRadii() {
-        // We should eventually move to just using the intrinsic size of the drawables since
-        // they should be sized to the exact pixels they want to cover. Therefore I'm purposely not
-        // upgrading all of the configs to contain (width, height) pairs. Instead assume that a
-        // device configured using the single integer config value is okay with drawing the corners
-        // as a square
-        final Size oldRoundedDefaultTop = mRoundedCornerResDelegate.getTopRoundedSize();
-        final Size oldRoundedDefaultBottom = mRoundedCornerResDelegate.getBottomRoundedSize();
-        mRoundedCornerResDelegate.reloadAll(mDisplayUniqueId);
-        final Size newRoundedDefaultTop = mRoundedCornerResDelegate.getTopRoundedSize();
-        final Size newRoundedDefaultBottom = mRoundedCornerResDelegate.getBottomRoundedSize();
-
-        if (oldRoundedDefaultTop.getWidth() != newRoundedDefaultTop.getWidth()
-                || oldRoundedDefaultBottom.getWidth() != newRoundedDefaultBottom.getWidth()) {
-            onTuningChanged(SIZE, null);
-        }
-    }
-
-    private void updateRoundedCornerView(@BoundsPosition int pos, int id,
-            @Nullable DisplayCutout cutout) {
-        final View rounded = mOverlays[pos].getRootView().findViewById(id);
-        if (rounded == null) {
-            return;
-        }
-        rounded.setVisibility(View.GONE);
-        if (shouldShowSwLayerRoundedCorner(pos, cutout)) {
-            final int gravity = getRoundedCornerGravity(pos, id == R.id.left);
-            ((FrameLayout.LayoutParams) rounded.getLayoutParams()).gravity = gravity;
-            setRoundedCornerOrientation(rounded, gravity);
-            rounded.setVisibility(View.VISIBLE);
-        }
-    }
-
-    private int getRoundedCornerGravity(@BoundsPosition int pos, boolean isStart) {
-        final int rotatedPos = getBoundPositionFromRotation(pos, mRotation);
-        switch (rotatedPos) {
-            case BOUNDS_POSITION_LEFT:
-                return isStart ? Gravity.TOP | Gravity.LEFT : Gravity.BOTTOM | Gravity.LEFT;
-            case BOUNDS_POSITION_TOP:
-                return isStart ? Gravity.TOP | Gravity.LEFT : Gravity.TOP | Gravity.RIGHT;
-            case BOUNDS_POSITION_RIGHT:
-                return isStart ? Gravity.TOP | Gravity.RIGHT : Gravity.BOTTOM | Gravity.RIGHT;
-            case BOUNDS_POSITION_BOTTOM:
-                return isStart ? Gravity.BOTTOM | Gravity.LEFT : Gravity.BOTTOM | Gravity.RIGHT;
-            default:
-                throw new IllegalArgumentException("Incorrect position: " + rotatedPos);
-        }
-    }
-
-    /**
-     * Configures the rounded corner drawable's view matrix based on the gravity.
-     *
-     * The gravity describes which corner to configure for, and the drawable we are rotating is
-     * assumed to be oriented for the top-left corner of the device regardless of the target corner.
-     * Therefore we need to rotate 180 degrees to get a bottom-left corner, and mirror in the x- or
-     * y-axis for the top-right and bottom-left corners.
-     */
-    private void setRoundedCornerOrientation(View corner, int gravity) {
-        corner.setRotation(0);
-        corner.setScaleX(1);
-        corner.setScaleY(1);
-        switch (gravity) {
-            case Gravity.TOP | Gravity.LEFT:
-                return;
-            case Gravity.TOP | Gravity.RIGHT:
-                corner.setScaleX(-1); // flip X axis
-                return;
-            case Gravity.BOTTOM | Gravity.LEFT:
-                corner.setScaleY(-1); // flip Y axis
-                return;
-            case Gravity.BOTTOM | Gravity.RIGHT:
-                corner.setRotation(180);
-                return;
-            default:
-                throw new IllegalArgumentException("Unsupported gravity: " + gravity);
-        }
-    }
     private boolean hasRoundedCorners() {
-        return mRoundedCornerResDelegate.getBottomRoundedSize().getWidth() > 0
-                || mRoundedCornerResDelegate.getTopRoundedSize().getWidth() > 0
-                || mRoundedCornerResDelegate.isMultipleRadius();
+        return mRoundedCornerFactory.getHasProviders();
     }
 
     private boolean isDefaultShownOverlayPos(@BoundsPosition int pos,
@@ -1066,6 +1035,19 @@ public class ScreenDecorations extends CoreStartable implements Tunable , Dumpab
                 context.getResources(), context.getDisplay().getUniqueId());
     }
 
+    private void updateOverlayProviderViews() {
+        if (mOverlays == null) {
+            return;
+        }
+        ++mProviderRefreshToken;
+        for (final OverlayWindow overlay: mOverlays) {
+            if (overlay == null) {
+                continue;
+            }
+            overlay.onReloadResAndMeasure(null, mProviderRefreshToken, mRotation, mDisplayUniqueId);
+        }
+    }
+
     private void updateLayoutParams() {
         if (mOverlays == null) {
             return;
@@ -1085,61 +1067,31 @@ public class ScreenDecorations extends CoreStartable implements Tunable , Dumpab
             return;
         }
         mExecutor.execute(() -> {
-            if (mOverlays == null) return;
-            if (SIZE.equals(key)) {
-                boolean hasReloadRoundedCornerRes = false;
-                if (newValue != null) {
-                    try {
-                        mRoundedCornerResDelegate.updateTuningSizeFactor(
-                                Integer.parseInt(newValue));
-                        hasReloadRoundedCornerRes = true;
-                    } catch (Exception e) {
-                    }
-                }
-
-                // When onTuningChanged() is not called through updateRoundedCornerRadii(),
-                // we need to reload rounded corner res to prevent incorrect dimen
-                if (!hasReloadRoundedCornerRes) {
-                    mRoundedCornerResDelegate.reloadAll(mDisplayUniqueId);
-                }
-
-                updateRoundedCornerSize(
-                        mRoundedCornerResDelegate.getTopRoundedSize(),
-                        mRoundedCornerResDelegate.getBottomRoundedSize());
+            if (mOverlays == null || !SIZE.equals(key)) {
+                return;
             }
+            ++mProviderRefreshToken;
+            try {
+                final int sizeFactor = Integer.parseInt(newValue);
+                mRoundedCornerResDelegate.updateTuningSizeFactor(sizeFactor, mProviderRefreshToken);
+            } catch (NumberFormatException e) {
+                mRoundedCornerResDelegate.updateTuningSizeFactor(null, mProviderRefreshToken);
+            }
+            Integer[] filterIds = {
+                    R.id.rounded_corner_top_left,
+                    R.id.rounded_corner_top_right,
+                    R.id.rounded_corner_bottom_left,
+                    R.id.rounded_corner_bottom_right
+            };
+            for (final OverlayWindow overlay: mOverlays) {
+                if (overlay == null) {
+                    continue;
+                }
+                overlay.onReloadResAndMeasure(filterIds, mProviderRefreshToken, mRotation,
+                        mDisplayUniqueId);
+            }
+            updateHwLayerRoundedCornerSize();
         });
-    }
-
-    private void updateRoundedCornerDrawable() {
-        mRoundedCornerResDelegate.reloadAll(mDisplayUniqueId);
-        updateRoundedCornerImageView();
-    }
-
-    private void updateRoundedCornerImageView() {
-        final Drawable top = mRoundedCornerResDelegate.getTopRoundedDrawable();
-        final Drawable bottom = mRoundedCornerResDelegate.getBottomRoundedDrawable();
-
-        if (mScreenDecorHwcLayer != null) {
-            mScreenDecorHwcLayer.updateRoundedCornerDrawable(top, bottom);
-            return;
-        }
-
-        if (mOverlays == null) {
-            return;
-        }
-        final ColorStateList colorStateList = ColorStateList.valueOf(mTintColor);
-        for (int i = 0; i < BOUNDS_POSITION_LENGTH; i++) {
-            if (mOverlays[i] == null) {
-                continue;
-            }
-            final ViewGroup overlayView = mOverlays[i].getRootView();
-            ((ImageView) overlayView.findViewById(R.id.left)).setImageTintList(colorStateList);
-            ((ImageView) overlayView.findViewById(R.id.right)).setImageTintList(colorStateList);
-            ((ImageView) overlayView.findViewById(R.id.left)).setImageDrawable(
-                    isTopRoundedCorner(i, R.id.left) ? top : bottom);
-            ((ImageView) overlayView.findViewById(R.id.right)).setImageDrawable(
-                    isTopRoundedCorner(i, R.id.right) ? top : bottom);
-        }
     }
 
     private void updateHwLayerRoundedCornerDrawable() {
@@ -1156,25 +1108,6 @@ public class ScreenDecorations extends CoreStartable implements Tunable , Dumpab
         mScreenDecorHwcLayer.updateRoundedCornerDrawable(topDrawable, bottomDrawable);
     }
 
-    @VisibleForTesting
-    boolean isTopRoundedCorner(@BoundsPosition int pos, int id) {
-        switch (pos) {
-            case BOUNDS_POSITION_LEFT:
-            case BOUNDS_POSITION_RIGHT:
-                if (mRotation == ROTATION_270) {
-                    return id == R.id.left ? false : true;
-                } else {
-                    return id == R.id.left ? true : false;
-                }
-            case BOUNDS_POSITION_TOP:
-                return true;
-            case BOUNDS_POSITION_BOTTOM:
-                return false;
-            default:
-                throw new IllegalArgumentException("Unknown bounds position");
-        }
-    }
-
     private void updateHwLayerRoundedCornerSize() {
         if (mScreenDecorHwcLayer == null) {
             return;
@@ -1184,28 +1117,6 @@ public class ScreenDecorations extends CoreStartable implements Tunable , Dumpab
         final int bottomWidth = mRoundedCornerResDelegate.getBottomRoundedSize().getWidth();
 
         mScreenDecorHwcLayer.updateRoundedCornerSize(topWidth, bottomWidth);
-    }
-
-    private void updateRoundedCornerSize(Size sizeTop, Size sizeBottom) {
-
-        if (mScreenDecorHwcLayer != null) {
-            mScreenDecorHwcLayer.updateRoundedCornerSize(sizeTop.getWidth(), sizeBottom.getWidth());
-            return;
-        }
-
-        if (mOverlays == null) {
-            return;
-        }
-        for (int i = 0; i < BOUNDS_POSITION_LENGTH; i++) {
-            if (mOverlays[i] == null) {
-                continue;
-            }
-            final ViewGroup overlayView = mOverlays[i].getRootView();
-            setSize(overlayView.findViewById(R.id.left),
-                    isTopRoundedCorner(i, R.id.left) ? sizeTop : sizeBottom);
-            setSize(overlayView.findViewById(R.id.right),
-                    isTopRoundedCorner(i, R.id.right) ? sizeTop : sizeBottom);
-        }
     }
 
     @VisibleForTesting
