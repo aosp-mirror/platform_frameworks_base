@@ -180,7 +180,7 @@
       "name": "CtsAppSecurityHostTestCases",
       "options": [
         {
-          "include-filter": "com.android.cts.splitapp.SplitAppTest"
+          "include-filter": "android.appsecurity.cts.SplitTests"
         },
         {
           "include-filter": "android.appsecurity.cts.EphemeralTest"
@@ -197,14 +197,6 @@
     },
     {
       "name": "CtsRollbackManagerHostTestCases"
-    },
-    {
-      "name": "CtsOsHostTestCases",
-      "options": [
-        {
-          "include-filter": "com.android.server.pm.PackageParserTest"
-        }
-      ]
     },
     {
       "name": "CtsContentTestCases",
