@@ -289,12 +289,11 @@ public class DevicePolicyManagerServiceMigrationTest extends DpmTestBase {
     private void prepareAdmin1AsDo() throws Exception {
         setUpPackageManagerForAdmin(admin1, UserHandle.getUid(USER_SYSTEM, COPE_ADMIN1_APP_ID));
         final int xmlResource = R.raw.comp_policies_primary;
+        File dataSystemDirectory = getServices().pathProvider.getDataSystemDirectory();
         writeInputStreamToFile(getRawStream(xmlResource),
-                (new File(getServices().systemUserDataDir, "device_policies.xml"))
-                        .getAbsoluteFile());
+                (new File(dataSystemDirectory, "device_policies.xml")).getAbsoluteFile());
         writeInputStreamToFile(getRawStream(R.raw.comp_device_owner),
-                (new File(getServices().dataDir, "device_owner_2.xml"))
-                        .getAbsoluteFile());
+                (new File(dataSystemDirectory, "device_owner_2.xml")).getAbsoluteFile());
     }
 
     private void prepareAdmin1AsPo(int profileUserId, int targetSdk) throws Exception {

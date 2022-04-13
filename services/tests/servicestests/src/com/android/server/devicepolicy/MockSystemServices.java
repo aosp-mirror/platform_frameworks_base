@@ -137,6 +137,7 @@ public class MockSystemServices {
     public final PackageManager packageManager;
     public final BuildMock buildMock = new BuildMock();
     public final File dataDir;
+    public final PolicyPathProvider pathProvider;
 
     public MockSystemServices(Context realContext, String name) {
         dataDir = new File(realContext.getCacheDir(), name);
@@ -217,6 +218,17 @@ public class MockSystemServices {
 
         // System user is always running.
         setUserRunning(UserHandle.USER_SYSTEM, true);
+        pathProvider = new PolicyPathProvider() {
+            @Override
+            public File getDataSystemDirectory() {
+                return new File(systemUserDataDir.getAbsolutePath());
+            }
+
+            @Override
+            public File getUserSystemDirectory(int userId) {
+                return environment.getUserSystemDirectory(userId);
+            }
+        };
     }
 
     /** Optional mapping of other user contexts for {@link #createPackageContextAsUser} to return */

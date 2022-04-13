@@ -21,7 +21,6 @@ import android.annotation.Nullable;
 import android.app.admin.SystemUpdateInfo;
 import android.app.admin.SystemUpdatePolicy;
 import android.content.ComponentName;
-import android.os.Environment;
 import android.os.UserHandle;
 import android.util.ArrayMap;
 import android.util.AtomicFile;
@@ -106,10 +105,10 @@ class OwnersData {
     // Pending OTA info if there is one.
     @Nullable
     SystemUpdateInfo mSystemUpdateInfo;
-    private final Injector mInjector;
+    private final PolicyPathProvider mPathProvider;
 
-    OwnersData(Injector injector) {
-        mInjector = injector;
+    OwnersData(PolicyPathProvider pathProvider) {
+        mPathProvider = pathProvider;
     }
 
     void load(int[] allUsers) {
@@ -127,18 +126,24 @@ class OwnersData {
         }
     }
 
-    void writeDeviceOwner() {
+    /**
+     * @return true upon success, false otherwise.
+     */
+    boolean writeDeviceOwner() {
         if (DEBUG) {
             Log.d(TAG, "Writing to device owner file");
         }
-        new DeviceOwnerReadWriter().writeToFileLocked();
+        return new DeviceOwnerReadWriter().writeToFileLocked();
     }
 
-    void writeProfileOwner(int userId) {
+    /**
+     * @return true upon success, false otherwise.
+     */
+    boolean writeProfileOwner(int userId) {
         if (DEBUG) {
             Log.d(TAG, "Writing to profile owner file for user " + userId);
         }
-        new ProfileOwnerReadWriter(userId).writeToFileLocked();
+        return new ProfileOwnerReadWriter(userId).writeToFileLocked();
     }
 
     void dump(IndentingPrintWriter pw) {
@@ -206,12 +211,12 @@ class OwnersData {
 
     @VisibleForTesting
     File getDeviceOwnerFile() {
-        return new File(mInjector.environmentGetDataSystemDirectory(), DEVICE_OWNER_XML);
+        return new File(mPathProvider.getDataSystemDirectory(), DEVICE_OWNER_XML);
     }
 
     @VisibleForTesting
     File getProfileOwnerFile(int userId) {
-        return new File(mInjector.environmentGetUserSystemDirectory(userId), PROFILE_OWNER_XML);
+        return new File(mPathProvider.getUserSystemDirectory(userId), PROFILE_OWNER_XML);
     }
 
     private abstract static class FileReadWriter {
@@ -223,7 +228,7 @@ class OwnersData {
 
         abstract boolean shouldWrite();
 
-        void writeToFileLocked() {
+        boolean writeToFileLocked() {
             if (!shouldWrite()) {
                 if (DEBUG) {
                     Log.d(TAG, "No need to write to " + mFile);
@@ -237,7 +242,7 @@ class OwnersData {
                         Slog.e(TAG, "Failed to remove " + mFile.getPath());
                     }
                 }
-                return;
+                return true;
             }
             if (DEBUG) {
                 Log.d(TAG, "Writing to " + mFile);
@@ -270,7 +275,9 @@ class OwnersData {
                 if (outputStream != null) {
                     f.failWrite(outputStream);
                 }
+                return false;
             }
+            return true;
         }
 
         void readFromFileLocked() {
@@ -567,17 +574,6 @@ class OwnersData {
             pw.println("name=" + name);
             pw.println("package=" + packageName);
             pw.println("isOrganizationOwnedDevice=" + isOrganizationOwnedDevice);
-        }
-    }
-
-    @VisibleForTesting
-    static class Injector {
-        File environmentGetDataSystemDirectory() {
-            return Environment.getDataSystemDirectory();
-        }
-
-        File environmentGetUserSystemDirectory(int userId) {
-            return Environment.getUserSystemDirectory(userId);
         }
     }
 }

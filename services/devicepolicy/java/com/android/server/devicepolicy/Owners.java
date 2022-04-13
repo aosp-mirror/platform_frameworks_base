@@ -42,7 +42,6 @@ import android.util.SparseIntArray;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.LocalServices;
-import com.android.server.devicepolicy.OwnersData.Injector;
 import com.android.server.devicepolicy.OwnersData.OwnerInfo;
 import com.android.server.pm.UserManagerInternal;
 import com.android.server.wm.ActivityTaskManagerInternal;
@@ -78,28 +77,19 @@ class Owners {
 
     private boolean mSystemReady;
 
-    public Owners(UserManager userManager,
-            UserManagerInternal userManagerInternal,
-            PackageManagerInternal packageManagerInternal,
-            ActivityTaskManagerInternal activityTaskManagerInternal,
-            ActivityManagerInternal activityManagerInternal) {
-        this(userManager, userManagerInternal, packageManagerInternal,
-                activityTaskManagerInternal, activityManagerInternal, new Injector());
-    }
-
     @VisibleForTesting
     Owners(UserManager userManager,
             UserManagerInternal userManagerInternal,
             PackageManagerInternal packageManagerInternal,
             ActivityTaskManagerInternal activityTaskManagerInternal,
             ActivityManagerInternal activityManagerInternal,
-            Injector injector) {
+            PolicyPathProvider pathProvider) {
         mUserManager = userManager;
         mUserManagerInternal = userManagerInternal;
         mPackageManagerInternal = packageManagerInternal;
         mActivityTaskManagerInternal = activityTaskManagerInternal;
         mActivityManagerInternal = activityManagerInternal;
-        mData = new OwnersData(injector);
+        mData = new OwnersData(pathProvider);
     }
 
     /**
