@@ -97,6 +97,7 @@ import android.os.UserManager;
 import android.provider.Settings;
 import android.service.notification.NotificationListenerFilter;
 import android.service.notification.StatusBarNotification;
+import android.telecom.TelecomManager;
 import android.telephony.TelephonyManager;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.AndroidTestingRunner;
@@ -379,7 +380,7 @@ public class NotificationPermissionMigrationTest extends UiServiceTestCase {
                 mAppUsageStats, mock(DevicePolicyManagerInternal.class), mUgm, mUgmInternal,
                 mAppOpsManager, mock(IAppOpsService.class), mUm, mHistoryManager, mStatsManager,
                 mock(TelephonyManager.class), mAmi, mToastRateLimiter, mPermissionHelper,
-                mock(UsageStatsManagerInternal.class));
+                mock(UsageStatsManagerInternal.class), mock(TelecomManager.class));
         // Return first true for RoleObserver main-thread check
         when(mMainLooper.isCurrentThread()).thenReturn(true).thenReturn(false);
         mService.onBootPhase(SystemService.PHASE_SYSTEM_SERVICES_READY, mMainLooper);
