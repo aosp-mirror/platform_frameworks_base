@@ -328,8 +328,6 @@ public class DevicePolicyManagerTest extends DpmTestBase {
     private void initializeDpms() {
         // Need clearCallingIdentity() to pass permission checks.
         final long ident = mContext.binder.clearCallingIdentity();
-        LocalServices.removeServiceForTest(DevicePolicyManagerLiteInternal.class);
-        LocalServices.removeServiceForTest(DevicePolicyManagerInternal.class);
 
         dpms = new DevicePolicyManagerServiceTestable(getServices(), mContext);
         dpms.systemReady(SystemService.PHASE_LOCK_SETTINGS_READY);
@@ -417,8 +415,6 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         when(getServices().packageManager.hasSystemFeature(eq(PackageManager.FEATURE_DEVICE_ADMIN)))
                 .thenReturn(false);
 
-        LocalServices.removeServiceForTest(DevicePolicyManagerInternal.class);
-        LocalServices.removeServiceForTest(DevicePolicyManagerLiteInternal.class);
         new DevicePolicyManagerServiceTestable(getServices(), mContext);
 
         // If the device has no DPMS feature, it shouldn't register the local service.
