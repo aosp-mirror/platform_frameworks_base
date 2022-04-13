@@ -520,7 +520,7 @@
     <string name="ims_reg_status_not_registered" msgid="2989287366045704694">"नोंदवलेले नाही"</string>
     <string name="status_unavailable" msgid="5279036186589861608">"उपलब्ध नाही"</string>
     <string name="wifi_status_mac_randomized" msgid="466382542497832189">"MAC रँडमाइझ केला आहे"</string>
-    <string name="wifi_tether_connected_summary" msgid="5282919920463340158">"{count,plural, =0{0 device connected}=1{एक डिव्हाइस कनेक्ट केले}other{# डिव्हाइस कनेक्ट केली}}"</string>
+    <string name="wifi_tether_connected_summary" msgid="5282919920463340158">"{count,plural, =0{0 डिव्हाइस कनेक्ट केले}=1{एक डिव्हाइस कनेक्ट केले}other{# डिव्हाइस कनेक्ट केली}}"</string>
     <string name="accessibility_manual_zen_more_time" msgid="5141801092071134235">"जास्त वेळ."</string>
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"कमी वेळ."</string>
     <string name="cancel" msgid="5665114069455378395">"रद्द करा"</string>

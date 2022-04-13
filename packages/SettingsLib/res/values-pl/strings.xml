@@ -389,7 +389,7 @@
     <string name="enable_gpu_debug_layers" msgid="4986675516188740397">"Warstwy debugowania GPU"</string>
     <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"Zezwalaj na ładowanie warstw debugowania GPU"</string>
     <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"Włącz szczegółowe rejestrowanie dostawcy"</string>
-    <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"Dołączaj do raportów o błędach dodatkowe dane dostawcy dotyczące konkretnego urządzenia, które mogą zawierać dane prywatne oraz wykorzystywać więcej baterii lub pamięci."</string>
+    <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"Dołączaj do raportów o błędach dodatkowe dane dostawcy dotyczące konkretnego urządzenia, które mogą zawierać dane prywatne oraz wykorzystywać więcej baterii lub pamięci"</string>
     <string name="window_animation_scale_title" msgid="5236381298376812508">"Skala animacji okna"</string>
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"Skala animacji przejścia"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"Skala długości animacji"</string>
@@ -598,36 +598,21 @@
     <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"Resetuj"</string>
     <string name="guest_remove_guest_confirm_button" msgid="7858123434954143879">"Usuń"</string>
     <string name="guest_resetting" msgid="7822120170191509566">"Resetuję sesję gościa…"</string>
-    <!-- no translation found for guest_reset_and_restart_dialog_title (3396657008451616041) -->
-    <skip />
-    <!-- no translation found for guest_reset_and_restart_dialog_message (2764425635305200790) -->
-    <skip />
-    <!-- no translation found for guest_exit_dialog_title (1846494656849381804) -->
-    <skip />
-    <!-- no translation found for guest_exit_dialog_message (1743218864242719783) -->
-    <skip />
-    <!-- no translation found for guest_exit_dialog_button (1736401897067442044) -->
-    <skip />
-    <!-- no translation found for guest_exit_dialog_title_non_ephemeral (7675327443743162986) -->
-    <skip />
-    <!-- no translation found for guest_exit_dialog_message_non_ephemeral (223385323235719442) -->
-    <skip />
-    <!-- no translation found for guest_exit_clear_data_button (3425812652180679014) -->
-    <skip />
-    <!-- no translation found for guest_exit_save_data_button (3690974510644963547) -->
-    <skip />
-    <!-- no translation found for guest_exit_button (5774985819191803960) -->
-    <skip />
-    <!-- no translation found for guest_reset_button (2515069346223503479) -->
-    <skip />
-    <!-- no translation found for guest_exit_quick_settings_button (1912362095913765471) -->
-    <skip />
-    <!-- no translation found for guest_notification_ephemeral (7263252466950923871) -->
-    <skip />
-    <!-- no translation found for guest_notification_non_ephemeral (6843799963012259330) -->
-    <skip />
-    <!-- no translation found for guest_notification_non_ephemeral_non_first_login (8009307983766934876) -->
-    <skip />
+    <string name="guest_reset_and_restart_dialog_title" msgid="3396657008451616041">"Zresetować sesję gościa?"</string>
+    <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"Zostanie uruchomiona nowa sesja gościa. Wszystkie aplikacje i dane z obecnej sesji zostaną usunięte."</string>
+    <string name="guest_exit_dialog_title" msgid="1846494656849381804">"Zamknąć tryb gościa?"</string>
+    <string name="guest_exit_dialog_message" msgid="1743218864242719783">"Wszystkie aplikacje i dane z obecnej sesji gościa zostaną usunięte."</string>
+    <string name="guest_exit_dialog_button" msgid="1736401897067442044">"Wyjdź"</string>
+    <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"Zapisać aktywność gościa?"</string>
+    <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"Możesz zapisać aktywność z obecnej sesji lub usunąć wszystkie aplikacje i dane"</string>
+    <string name="guest_exit_clear_data_button" msgid="3425812652180679014">"Usuń"</string>
+    <string name="guest_exit_save_data_button" msgid="3690974510644963547">"Zapisz"</string>
+    <string name="guest_exit_button" msgid="5774985819191803960">"Zamknij tryb gościa"</string>
+    <string name="guest_reset_button" msgid="2515069346223503479">"Zresetuj sesję gościa"</string>
+    <string name="guest_exit_quick_settings_button" msgid="1912362095913765471">"Zakończ tryb gościa"</string>
+    <string name="guest_notification_ephemeral" msgid="7263252466950923871">"Cała aktywność zostanie usunięta po zamknięciu"</string>
+    <string name="guest_notification_non_ephemeral" msgid="6843799963012259330">"Możesz zapisać lub usunąć swoją aktywność podczas zamykania"</string>
+    <string name="guest_notification_non_ephemeral_non_first_login" msgid="8009307983766934876">"Zresetuj, aby usunąć aktywność w sesji w tym momencie. Możesz też ją zapisać lub usunąć podczas zamykania"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"Zrób zdjęcie"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"Wybierz obraz"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"Wybierz zdjęcie"</string>

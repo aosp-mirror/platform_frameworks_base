@@ -173,9 +173,9 @@
     <string name="data_usage_uninstalled_apps" msgid="1933665711856171491">"Odstránené aplikácie"</string>
     <string name="data_usage_uninstalled_apps_users" msgid="5533981546921913295">"Odstránené aplikácie a používatelia"</string>
     <string name="data_usage_ota" msgid="7984667793701597001">"Aktualizácie systému"</string>
-    <string name="tether_settings_title_usb" msgid="3728686573430917722">"Pripojenie cez USB"</string>
+    <string name="tether_settings_title_usb" msgid="3728686573430917722">"Tethering cez USB"</string>
     <string name="tether_settings_title_wifi" msgid="4803402057533895526">"Prenosný prístupový bod"</string>
-    <string name="tether_settings_title_bluetooth" msgid="916519902721399656">"Pripojenie cez Bluetooth"</string>
+    <string name="tether_settings_title_bluetooth" msgid="916519902721399656">"Tethering cez Bluetooth"</string>
     <string name="tether_settings_title_usb_bluetooth" msgid="1727111807207577322">"Zdieľané pripojenie"</string>
     <string name="tether_settings_title_all" msgid="8910259483383010470">"Zdieľané pripojenie a prenosný hotspot"</string>
     <string name="managed_user_title" msgid="449081789742645723">"Všetky pracovné aplikácie"</string>
@@ -598,36 +598,21 @@
     <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"Resetovať"</string>
     <string name="guest_remove_guest_confirm_button" msgid="7858123434954143879">"Odstrániť"</string>
     <string name="guest_resetting" msgid="7822120170191509566">"Relácia hosťa sa resetuje…"</string>
-    <!-- no translation found for guest_reset_and_restart_dialog_title (3396657008451616041) -->
-    <skip />
-    <!-- no translation found for guest_reset_and_restart_dialog_message (2764425635305200790) -->
-    <skip />
-    <!-- no translation found for guest_exit_dialog_title (1846494656849381804) -->
-    <skip />
-    <!-- no translation found for guest_exit_dialog_message (1743218864242719783) -->
-    <skip />
-    <!-- no translation found for guest_exit_dialog_button (1736401897067442044) -->
-    <skip />
-    <!-- no translation found for guest_exit_dialog_title_non_ephemeral (7675327443743162986) -->
-    <skip />
-    <!-- no translation found for guest_exit_dialog_message_non_ephemeral (223385323235719442) -->
-    <skip />
-    <!-- no translation found for guest_exit_clear_data_button (3425812652180679014) -->
-    <skip />
-    <!-- no translation found for guest_exit_save_data_button (3690974510644963547) -->
-    <skip />
-    <!-- no translation found for guest_exit_button (5774985819191803960) -->
-    <skip />
-    <!-- no translation found for guest_reset_button (2515069346223503479) -->
-    <skip />
-    <!-- no translation found for guest_exit_quick_settings_button (1912362095913765471) -->
-    <skip />
-    <!-- no translation found for guest_notification_ephemeral (7263252466950923871) -->
-    <skip />
-    <!-- no translation found for guest_notification_non_ephemeral (6843799963012259330) -->
-    <skip />
-    <!-- no translation found for guest_notification_non_ephemeral_non_first_login (8009307983766934876) -->
-    <skip />
+    <string name="guest_reset_and_restart_dialog_title" msgid="3396657008451616041">"Chcete resetovať reláciu hosťa?"</string>
+    <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"Týmto sa spustí nová relácia hosťa a odstránia sa všetky aplikácie a údaje z aktuálnej relácie"</string>
+    <string name="guest_exit_dialog_title" msgid="1846494656849381804">"Chcete skončiť režim pre hostí?"</string>
+    <string name="guest_exit_dialog_message" msgid="1743218864242719783">"Ukončí sa režim pre hostí a odstránia sa aplikácie a údaje z relácie hosťa"</string>
+    <string name="guest_exit_dialog_button" msgid="1736401897067442044">"Ukončiť"</string>
+    <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"Chcete uložiť aktivitu hosťa?"</string>
+    <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"Aktivitu v aktuálnej relácii uložte alebo odstráňte všetky aplikácie a údaje"</string>
+    <string name="guest_exit_clear_data_button" msgid="3425812652180679014">"Odstrániť"</string>
+    <string name="guest_exit_save_data_button" msgid="3690974510644963547">"Uložiť"</string>
+    <string name="guest_exit_button" msgid="5774985819191803960">"Ukončiť režim pre hostí"</string>
+    <string name="guest_reset_button" msgid="2515069346223503479">"Resetovať reláciu hosťa"</string>
+    <string name="guest_exit_quick_settings_button" msgid="1912362095913765471">"Ukončiť režim pre hostí"</string>
+    <string name="guest_notification_ephemeral" msgid="7263252466950923871">"Pri ukončení sa všetka aktivita odstráni"</string>
+    <string name="guest_notification_non_ephemeral" msgid="6843799963012259330">"Aktivitu môžete pri ukončení uložiť alebo odstrániť"</string>
+    <string name="guest_notification_non_ephemeral_non_first_login" msgid="8009307983766934876">"Resetovaním ihneď odstráňte aktivitu relácie alebo ju uložte či odstráňte pri ukončení relácie"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"Odfotiť"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"Vybrať obrázok"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"Vybrať fotku"</string>

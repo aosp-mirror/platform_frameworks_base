@@ -312,7 +312,7 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Mostra opcións para o certificado de visualización sen fíos"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Aumenta o nivel de rexistro da wifi, móstrao por SSID RSSI no selector de wifi"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Reduce o consumo de batería e mellora o rendemento da rede"</string>
-    <string name="wifi_non_persistent_mac_randomization_summary" msgid="2159794543105053930">"Cando este modo está activado, o enderezo MAC pode cambiar cada vez que se este dispositivo se conecta a unha rede que teña activada a orde aleatoria de enderezos MAC."</string>
+    <string name="wifi_non_persistent_mac_randomization_summary" msgid="2159794543105053930">"Cando este modo está activado, o enderezo MAC pode cambiar cada vez que este dispositivo se conecte a unha rede que teña activada a orde aleatoria de enderezos MAC"</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"Rede sen tarifa plana"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Rede con tarifa plana"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"Tamaño dos búfers do rexistrador"</string>
@@ -359,37 +359,37 @@
     <string name="media_category" msgid="8122076702526144053">"Multimedia"</string>
     <string name="debug_monitoring_category" msgid="1597387133765424994">"Supervisión"</string>
     <string name="strict_mode" msgid="889864762140862437">"Modo estrito activado"</string>
-    <string name="strict_mode_summary" msgid="1838248687233554654">"Ilumínase se as aplicacións tardan moito no proceso principal"</string>
+    <string name="strict_mode_summary" msgid="1838248687233554654">"A pantalla ilumínase se as aplicacións tardan moito no proceso principal"</string>
     <string name="pointer_location" msgid="7516929526199520173">"Localización do punteiro"</string>
     <string name="pointer_location_summary" msgid="957120116989798464">"Superpón os datos dos toques na pantalla"</string>
     <string name="show_touches" msgid="8437666942161289025">"Mostrar toques"</string>
     <string name="show_touches_summary" msgid="3692861665994502193">"Mostra a localización dos toques na pantalla"</string>
-    <string name="show_screen_updates" msgid="2078782895825535494">"Cambios de superficie"</string>
+    <string name="show_screen_updates" msgid="2078782895825535494">"Mostrar cambios de superficie"</string>
     <string name="show_screen_updates_summary" msgid="2126932969682087406">"Ilumina as superficies de ventás ao actualizarse"</string>
     <string name="show_hw_screen_updates" msgid="2021286231267747506">"Mostrar actualizacións"</string>
     <string name="show_hw_screen_updates_summary" msgid="3539770072741435691">"Ilumina as vistas das ventás creadas"</string>
     <string name="show_hw_layers_updates" msgid="5268370750002509767">"Ver actualizacións de capas de hardware"</string>
     <string name="show_hw_layers_updates_summary" msgid="5850955890493054618">"Ilumina as capas de hardware en verde ao actualizárense"</string>
-    <string name="debug_hw_overdraw" msgid="8944851091008756796">"Depurar superposición GPU"</string>
+    <string name="debug_hw_overdraw" msgid="8944851091008756796">"Depurar superposición de GPU"</string>
     <string name="disable_overlays" msgid="4206590799671557143">"Desactivar superposicións de hardware"</string>
-    <string name="disable_overlays_summary" msgid="1954852414363338166">"Utiliza sempre GPU para a composición da pantalla"</string>
+    <string name="disable_overlays_summary" msgid="1954852414363338166">"Utiliza sempre a GPU para a composición da pantalla"</string>
     <string name="simulate_color_space" msgid="1206503300335835151">"Simular espazo de cor"</string>
     <string name="enable_opengl_traces_title" msgid="4638773318659125196">"Activar rastros OpenGL"</string>
-    <string name="usb_audio_disable_routing" msgid="3367656923544254975">"Desactivar encamiñamento audio USB"</string>
+    <string name="usb_audio_disable_routing" msgid="3367656923544254975">"Desactivar encamiñamento de audio por USB"</string>
     <string name="usb_audio_disable_routing_summary" msgid="8768242894849534699">"Desactiva o encamiñamento automático a periféricos de audio USB"</string>
     <string name="debug_layout" msgid="1659216803043339741">"Mostrar límites de deseño"</string>
     <string name="debug_layout_summary" msgid="8825829038287321978">"Mostra os límites dos clips, as marxes etc."</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"Forzar dirección do deseño RTL"</string>
-    <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"Forza a dirección de pantalla a RTL (dereita a esquerda) para todas as configuración rexionais"</string>
-    <string name="window_blurs" msgid="6831008984828425106">"Permitir desenfoque ventá"</string>
+    <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"Forza a dirección de pantalla de dereita a esquerda para todas as opcións de configuración rexionais"</string>
+    <string name="window_blurs" msgid="6831008984828425106">"Permitir desenfoque de ventás"</string>
     <string name="force_msaa" msgid="4081288296137775550">"Forzar MSAA 4x"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"Activa MSAA 4x en aplicacións OpenGL ES 2.0"</string>
-    <string name="show_non_rect_clip" msgid="7499758654867881817">"Depurar accións recorte non rectangulares"</string>
-    <string name="track_frame_time" msgid="522674651937771106">"Perfil procesamento HWUI"</string>
+    <string name="show_non_rect_clip" msgid="7499758654867881817">"Depurar accións de recorte non rectangulares"</string>
+    <string name="track_frame_time" msgid="522674651937771106">"Perfil de procesamento de HWUI"</string>
     <string name="enable_gpu_debug_layers" msgid="4986675516188740397">"Activar depuración da GPU"</string>
-    <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"Permite capas da GPU para apps de depuración"</string>
+    <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"Permite cargar capas de depuración da GPU para aplicacións de depuración"</string>
     <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"Activar rexistro de provedores"</string>
-    <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"Inclúe outros rexistros de provedores específicos do dispositivo en informes de erros; pode conter información privada, consumir máis batería e ocupar máis espazo almacenamento"</string>
+    <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"Inclúe outros rexistros de provedores específicos do dispositivo en informes de erros; pode conter información privada, consumir máis batería e ocupar máis espazo de almacenamento"</string>
     <string name="window_animation_scale_title" msgid="5236381298376812508">"Escala de animación da ventá"</string>
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"Escala animación-transición"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"Escala duración animador"</string>

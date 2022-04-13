@@ -312,7 +312,7 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Mostra opzioni per la certificazione display wireless"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Aumenta livello di logging Wi-Fi, mostra SSID RSSI nel selettore Wi-Fi"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Riduce il consumo della batteria e migliora le prestazioni della rete"</string>
-    <string name="wifi_non_persistent_mac_randomization_summary" msgid="2159794543105053930">"Quando questa modalità è attiva, l\'indirizzo MAC del dispositivo potrebbe cambiare ogni volta che il dispositivo si connette a una rete con randomizzazione degli indirizzi MAC attiva."</string>
+    <string name="wifi_non_persistent_mac_randomization_summary" msgid="2159794543105053930">"Quando questa modalità è attiva, l\'indirizzo MAC del dispositivo potrebbe cambiare ogni volta che il dispositivo si connette a una rete con randomizzazione degli indirizzi MAC attiva"</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"A consumo"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Non a consumo"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"Dimensioni buffer logger"</string>
@@ -359,17 +359,17 @@
     <string name="media_category" msgid="8122076702526144053">"Contenuti multimediali"</string>
     <string name="debug_monitoring_category" msgid="1597387133765424994">"Monitoraggio"</string>
     <string name="strict_mode" msgid="889864762140862437">"Attiva StrictMode"</string>
-    <string name="strict_mode_summary" msgid="1838248687233554654">"Schermo lampeggia per operazioni lunghe su thread principale"</string>
+    <string name="strict_mode_summary" msgid="1838248687233554654">"Fai lampeggiare lo schermo per operazioni lunghe sul thread principale"</string>
     <string name="pointer_location" msgid="7516929526199520173">"Posizione puntatore"</string>
     <string name="pointer_location_summary" msgid="957120116989798464">"Overlay schermo che mostra i dati touch correnti"</string>
     <string name="show_touches" msgid="8437666942161289025">"Mostra tocchi"</string>
     <string name="show_touches_summary" msgid="3692861665994502193">"Mostra feedback visivi per i tocchi"</string>
     <string name="show_screen_updates" msgid="2078782895825535494">"Aggiornamenti superficie"</string>
-    <string name="show_screen_updates_summary" msgid="2126932969682087406">"Superfici delle finestre lampeggiano se aggiornate"</string>
+    <string name="show_screen_updates_summary" msgid="2126932969682087406">"Fai lampeggiare le superfici delle finestre quando si aggiornano"</string>
     <string name="show_hw_screen_updates" msgid="2021286231267747506">"Aggiornam. visualizzazione"</string>
-    <string name="show_hw_screen_updates_summary" msgid="3539770072741435691">"Visualizz. lampeggiano dentro finestre se disegnate"</string>
+    <string name="show_hw_screen_updates_summary" msgid="3539770072741435691">"Fai lampeggiare gli elementi nelle finestre se disegnati"</string>
     <string name="show_hw_layers_updates" msgid="5268370750002509767">"Aggiornam. livelli hardware"</string>
-    <string name="show_hw_layers_updates_summary" msgid="5850955890493054618">"Livelli hardware lampeggiano in verde se aggiornati"</string>
+    <string name="show_hw_layers_updates_summary" msgid="5850955890493054618">"Fai lampeggiare in verde i livelli hardware se aggiornati"</string>
     <string name="debug_hw_overdraw" msgid="8944851091008756796">"Debug overdraw GPU"</string>
     <string name="disable_overlays" msgid="4206590799671557143">"Disabilita overlay HW"</string>
     <string name="disable_overlays_summary" msgid="1954852414363338166">"Usa sempre GPU per la composizione dello schermo"</string>
@@ -405,9 +405,9 @@
     <string name="force_allow_on_external" msgid="9187902444231637880">"Forza autorizzazione app su memoria esterna"</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"Consente l\'installazione di qualsiasi app su memoria esterna, indipendentemente dai valori manifest"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"Imponi formato modificabile alle attività"</string>
-    <string name="force_resizable_activities_summary" msgid="2490382056981583062">"Rendi il formato di tutte le attività modificabile per la modalità multi-finestra, indipendentemente dai valori manifest."</string>
+    <string name="force_resizable_activities_summary" msgid="2490382056981583062">"Rendi il formato di tutte le attività modificabile per la modalità multi-finestra, indipendentemente dai valori manifest"</string>
     <string name="enable_freeform_support" msgid="7599125687603914253">"Attiva finestre a forma libera"</string>
-    <string name="enable_freeform_support_summary" msgid="1822862728719276331">"Attiva il supporto delle finestre a forma libera sperimentali."</string>
+    <string name="enable_freeform_support_summary" msgid="1822862728719276331">"Attiva il supporto delle finestre a forma libera sperimentali"</string>
     <string name="local_backup_password_title" msgid="4631017948933578709">"Password di backup desktop"</string>
     <string name="local_backup_password_summary_none" msgid="7646898032616361714">"I backup desktop completi non sono attualmente protetti"</string>
     <string name="local_backup_password_summary_change" msgid="1707357670383995567">"Tocca per modificare o rimuovere la password per i backup desktop completi"</string>
@@ -598,36 +598,21 @@
     <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"Reimposta"</string>
     <string name="guest_remove_guest_confirm_button" msgid="7858123434954143879">"Rimuovi"</string>
     <string name="guest_resetting" msgid="7822120170191509566">"Reimpostazione sessione Ospite in corso…"</string>
-    <!-- no translation found for guest_reset_and_restart_dialog_title (3396657008451616041) -->
-    <skip />
-    <!-- no translation found for guest_reset_and_restart_dialog_message (2764425635305200790) -->
-    <skip />
-    <!-- no translation found for guest_exit_dialog_title (1846494656849381804) -->
-    <skip />
-    <!-- no translation found for guest_exit_dialog_message (1743218864242719783) -->
-    <skip />
-    <!-- no translation found for guest_exit_dialog_button (1736401897067442044) -->
-    <skip />
-    <!-- no translation found for guest_exit_dialog_title_non_ephemeral (7675327443743162986) -->
-    <skip />
-    <!-- no translation found for guest_exit_dialog_message_non_ephemeral (223385323235719442) -->
-    <skip />
-    <!-- no translation found for guest_exit_clear_data_button (3425812652180679014) -->
-    <skip />
-    <!-- no translation found for guest_exit_save_data_button (3690974510644963547) -->
-    <skip />
-    <!-- no translation found for guest_exit_button (5774985819191803960) -->
-    <skip />
-    <!-- no translation found for guest_reset_button (2515069346223503479) -->
-    <skip />
-    <!-- no translation found for guest_exit_quick_settings_button (1912362095913765471) -->
-    <skip />
-    <!-- no translation found for guest_notification_ephemeral (7263252466950923871) -->
-    <skip />
-    <!-- no translation found for guest_notification_non_ephemeral (6843799963012259330) -->
-    <skip />
-    <!-- no translation found for guest_notification_non_ephemeral_non_first_login (8009307983766934876) -->
-    <skip />
+    <string name="guest_reset_and_restart_dialog_title" msgid="3396657008451616041">"Vuoi reimpostare la sessione Ospite?"</string>
+    <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"Verrà avviata una nuova sessione Ospite e verranno eliminati tutti i dati e le app della sessione corrente"</string>
+    <string name="guest_exit_dialog_title" msgid="1846494656849381804">"Vuoi uscire da modalità Ospite?"</string>
+    <string name="guest_exit_dialog_message" msgid="1743218864242719783">"Verranno eliminati i dati e le app della sessione Ospite corrente"</string>
+    <string name="guest_exit_dialog_button" msgid="1736401897067442044">"Esci"</string>
+    <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"Vuoi salvare l\'attività Ospite?"</string>
+    <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"Puoi salvare l\'attività della sessione corrente o eliminare tutti i dati e app"</string>
+    <string name="guest_exit_clear_data_button" msgid="3425812652180679014">"Elimina"</string>
+    <string name="guest_exit_save_data_button" msgid="3690974510644963547">"Salva"</string>
+    <string name="guest_exit_button" msgid="5774985819191803960">"Esci dalla modalità Ospite"</string>
+    <string name="guest_reset_button" msgid="2515069346223503479">"Reimposta sessione Ospite"</string>
+    <string name="guest_exit_quick_settings_button" msgid="1912362095913765471">"Esci dalla modalità Ospite"</string>
+    <string name="guest_notification_ephemeral" msgid="7263252466950923871">"Quando esci verrà eliminata tutta l\'attività"</string>
+    <string name="guest_notification_non_ephemeral" msgid="6843799963012259330">"Quando esci puoi salvare o eliminare la tua attività"</string>
+    <string name="guest_notification_non_ephemeral_non_first_login" msgid="8009307983766934876">"Reimposta per eliminare subito l\'attività della sessione oppure puoi salvare o eliminare l\'attività quando esci"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"Scatta una foto"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"Scegli un\'immagine"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"Seleziona la foto"</string>

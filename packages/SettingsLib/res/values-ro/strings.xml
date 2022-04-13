@@ -403,7 +403,7 @@
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"Afișați avertismentele de pe canalul de notificări"</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"Afișați avertisment pe ecran când o aplicație postează o notificare fără canal valid"</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"Forțați accesul aplicațiilor la stocarea externă"</string>
-    <string name="force_allow_on_external_summary" msgid="8525425782530728238">"Faceți ca orice aplicație eligibilă să fie scrisă în stocarea externă, indiferent de valorile manifestului"</string>
+    <string name="force_allow_on_external_summary" msgid="8525425782530728238">"Permiteți scrierea oricărei aplicații eligibile în stocarea externă, indiferent de valorile manifestului"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"Forțați redimensionarea activităților"</string>
     <string name="force_resizable_activities_summary" msgid="2490382056981583062">"Permiteți redimensionarea tuturor activităților pentru modul cu ferestre multiple, indiferent de valorile manifestului."</string>
     <string name="enable_freeform_support" msgid="7599125687603914253">"Activați ferestrele cu formă liberă"</string>
@@ -598,36 +598,21 @@
     <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"Resetați"</string>
     <string name="guest_remove_guest_confirm_button" msgid="7858123434954143879">"Eliminați"</string>
     <string name="guest_resetting" msgid="7822120170191509566">"Se resetează invitatul…"</string>
-    <!-- no translation found for guest_reset_and_restart_dialog_title (3396657008451616041) -->
-    <skip />
-    <!-- no translation found for guest_reset_and_restart_dialog_message (2764425635305200790) -->
-    <skip />
-    <!-- no translation found for guest_exit_dialog_title (1846494656849381804) -->
-    <skip />
-    <!-- no translation found for guest_exit_dialog_message (1743218864242719783) -->
-    <skip />
-    <!-- no translation found for guest_exit_dialog_button (1736401897067442044) -->
-    <skip />
-    <!-- no translation found for guest_exit_dialog_title_non_ephemeral (7675327443743162986) -->
-    <skip />
-    <!-- no translation found for guest_exit_dialog_message_non_ephemeral (223385323235719442) -->
-    <skip />
-    <!-- no translation found for guest_exit_clear_data_button (3425812652180679014) -->
-    <skip />
-    <!-- no translation found for guest_exit_save_data_button (3690974510644963547) -->
-    <skip />
-    <!-- no translation found for guest_exit_button (5774985819191803960) -->
-    <skip />
-    <!-- no translation found for guest_reset_button (2515069346223503479) -->
-    <skip />
-    <!-- no translation found for guest_exit_quick_settings_button (1912362095913765471) -->
-    <skip />
-    <!-- no translation found for guest_notification_ephemeral (7263252466950923871) -->
-    <skip />
-    <!-- no translation found for guest_notification_non_ephemeral (6843799963012259330) -->
-    <skip />
-    <!-- no translation found for guest_notification_non_ephemeral_non_first_login (8009307983766934876) -->
-    <skip />
+    <string name="guest_reset_and_restart_dialog_title" msgid="3396657008451616041">"Resetați sesiunea pentru invitați?"</string>
+    <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"Astfel, va începe o nouă sesiune pentru invitați și se vor șterge toate aplicațiile și datele din sesiunea actuală"</string>
+    <string name="guest_exit_dialog_title" msgid="1846494656849381804">"Ieșiți din modul pentru invitați?"</string>
+    <string name="guest_exit_dialog_message" msgid="1743218864242719783">"Se vor șterge toate aplicațiile și datele din sesiunea pentru invitați actuală"</string>
+    <string name="guest_exit_dialog_button" msgid="1736401897067442044">"Ieșiți"</string>
+    <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"Salvați activitatea invitatului?"</string>
+    <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"Salvați activitatea din sesiunea actuală sau ștergeți aplicațiile și datele"</string>
+    <string name="guest_exit_clear_data_button" msgid="3425812652180679014">"Ștergeți"</string>
+    <string name="guest_exit_save_data_button" msgid="3690974510644963547">"Salvați"</string>
+    <string name="guest_exit_button" msgid="5774985819191803960">"Ieșiți din modul pentru invitați"</string>
+    <string name="guest_reset_button" msgid="2515069346223503479">"Resetați sesiunea pentru invitați"</string>
+    <string name="guest_exit_quick_settings_button" msgid="1912362095913765471">"Ieșiți din modul pentru invitați"</string>
+    <string name="guest_notification_ephemeral" msgid="7263252466950923871">"Toate activitățile vor fi șterse la ieșire"</string>
+    <string name="guest_notification_non_ephemeral" msgid="6843799963012259330">"Puteți să salvați sau să ștergeți activitatea la ieșire"</string>
+    <string name="guest_notification_non_ephemeral_non_first_login" msgid="8009307983766934876">"Resetați pentru a șterge acum activitatea din sesiune sau salvați ori ștergeți activitatea la ieșire"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"Faceți o fotografie"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"Alegeți o imagine"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"Selectați fotografia"</string>
