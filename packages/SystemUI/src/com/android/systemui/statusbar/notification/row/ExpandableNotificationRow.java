@@ -32,6 +32,7 @@ import android.annotation.Nullable;
 import android.app.INotificationManager;
 import android.app.Notification;
 import android.app.NotificationChannel;
+import android.app.role.RoleManager;
 import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
@@ -380,12 +381,22 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
                 Settings.Secure.NOTIFICATION_PERMISSION_ENABLED, 0, USER_SYSTEM) == 1) {
             INotificationManager iNm = INotificationManager.Stub.asInterface(
                     ServiceManager.getService(Context.NOTIFICATION_SERVICE));
+
+            boolean isSystem = false;
             try {
-                return iNm.isPermissionFixed(sbn.getPackageName(), sbn.getUserId());
+                isSystem = iNm.isPermissionFixed(sbn.getPackageName(), sbn.getUserId());
             } catch (RemoteException e) {
                 Log.e(TAG, "cannot reach NMS");
             }
-            return false;
+            RoleManager rm = context.getSystemService(RoleManager.class);
+            List<String> fixedRoleHolders = new ArrayList<>();
+            fixedRoleHolders.addAll(rm.getRoleHolders(RoleManager.ROLE_DIALER));
+            fixedRoleHolders.addAll(rm.getRoleHolders(RoleManager.ROLE_EMERGENCY));
+            if (fixedRoleHolders.contains(sbn.getPackageName())) {
+                isSystem = true;
+            }
+
+            return isSystem;
         } else {
             PackageManager packageManager = CentralSurfaces.getPackageManagerForUser(
                     context, sbn.getUser().getIdentifier());
