@@ -80,7 +80,7 @@ ASurfaceControl* ASurfaceControl_createFromWindow(ANativeWindow* window, const c
     Surface* surface = static_cast<Surface*>(window);
     sp<IBinder> parentHandle = surface->getSurfaceControlHandle();
 
-    uint32_t flags = ISurfaceComposerClient::eFXSurfaceBufferState;
+    int32_t flags = ISurfaceComposerClient::eFXSurfaceBufferState;
     sp<SurfaceControl> surfaceControl;
     if (parentHandle) {
         surfaceControl =
@@ -88,11 +88,8 @@ ASurfaceControl* ASurfaceControl_createFromWindow(ANativeWindow* window, const c
                                       // Format is only relevant for buffer queue layers.
                                       PIXEL_FORMAT_UNKNOWN /* format */, flags, parentHandle);
     } else {
-        surfaceControl =
-                client->createWithSurfaceParent(String8(debug_name), 0 /* width */, 0 /* height */,
-                                                // Format is only relevant for buffer queue layers.
-                                                PIXEL_FORMAT_UNKNOWN /* format */, flags,
-                                                static_cast<Surface*>(window));
+        // deprecated, this should no longer be used
+        surfaceControl = nullptr;
     }
 
     if (!surfaceControl) {

@@ -249,8 +249,7 @@ void SpriteController::doUpdateSprites() {
                 // Pass cursor metadata in the sprite surface so that when Android is running as a
                 // client OS (e.g. ARC++) the host OS can get the requested cursor metadata and
                 // update mouse cursor in the host OS.
-                t.setMetadata(
-                        update.state.surfaceControl, METADATA_MOUSE_CURSOR, p);
+                t.setMetadata(update.state.surfaceControl, gui::METADATA_MOUSE_CURSOR, p);
             }
 
             int32_t surfaceLayer = mOverlayLayer + update.state.layer;
