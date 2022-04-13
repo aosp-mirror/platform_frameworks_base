@@ -315,6 +315,24 @@ public class QSFragmentTest extends SysuiBaseFragmentTest {
         verify(mQuickQSPanelController).setCollapseExpandAction(action);
     }
 
+    @Test
+    public void setOverScrollAmount_setsTranslationOnView() {
+        QSFragment fragment = resumeAndGetFragment();
+
+        fragment.setOverScrollAmount(123);
+
+        assertThat(mQsFragmentView.getTranslationY()).isEqualTo(123);
+    }
+
+    @Test
+    public void setOverScrollAmount_beforeViewCreated_translationIsNotSet() {
+        QSFragment fragment = getFragment();
+
+        fragment.setOverScrollAmount(123);
+
+        assertThat(mQsFragmentView.getTranslationY()).isEqualTo(0);
+    }
+
     @Override
     protected Fragment instantiate(Context context, String className, Bundle arguments) {
         MockitoAnnotations.initMocks(this);

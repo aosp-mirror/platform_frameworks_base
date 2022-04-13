@@ -519,7 +519,10 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
     @Override
     public void setOverScrollAmount(int overScrollAmount) {
         mOverScrolling = overScrollAmount != 0;
-        getView().setTranslationY(overScrollAmount);
+        View view = getView();
+        if (view != null) {
+            view.setTranslationY(overScrollAmount);
+        }
     }
 
     @Override
