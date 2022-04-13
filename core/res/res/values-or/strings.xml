@@ -1697,7 +1697,7 @@
     <string name="color_inversion_feature_name" msgid="326050048927789012">"ରଙ୍ଗ ବଦଳାଇବାର ସୁବିଧା"</string>
     <string name="color_correction_feature_name" msgid="3655077237805422597">"ରଙ୍ଗ ସଂଶୋଧନ"</string>
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"ଏକ-ହାତ ମୋଡ୍"</string>
-    <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"ଅତିରିକ୍ତ ଡିମ୍"</string>
+    <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"ଅତ୍ୟଧିକ ଡିମ"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"ଭଲ୍ୟୁମ୍ କୀ\'ଗୁଡ଼ିକୁ ଧରି ରଖାଯାଇଛି। <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ଚାଲୁ ହୋଇଛି।"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"ଭଲ୍ୟୁମ୍ କୀ\'ଗୁଡ଼ିକୁ ଧରି ରଖାଯାଇଛି। <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ବନ୍ଦ ହୋଇଛି।"</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"<xliff:g id="SERVICE_NAME">%1$s</xliff:g> ବ୍ୟବହାର କରିବାକୁ ତିନି ସେକେଣ୍ଡ ପାଇଁ ଉଭୟ ଭଲ୍ୟୁମ୍‍ କୀ ଦବାଇ ଧରି ରଖନ୍ତୁ"</string>
@@ -2293,9 +2293,11 @@
     <string name="ui_translation_accessibility_translated_text" msgid="3197547218178944544">"<xliff:g id="MESSAGE">%1$s</xliff:g> ଅନୁବାଦ କରାଯାଇଛି।"</string>
     <string name="ui_translation_accessibility_translation_finished" msgid="3057830947610088465">"ମେସେଜ୍, <xliff:g id="FROM_LANGUAGE">%1$s</xliff:g>ରୁ <xliff:g id="TO_LANGUAGE">%2$s</xliff:g>କୁ ଅନୁବାଦ କରାଯାଇଛି।"</string>
     <string name="notification_channel_abusive_bg_apps" msgid="6092140213264920355">"ପୃଷ୍ଠପଟ କାର୍ଯ୍ୟକଳାପ"</string>
-    <string name="notification_title_abusive_bg_apps" msgid="3258460527676573815">"ଏକ ଆପ ବ୍ୟାଟେରୀ ବ୍ୟବହାର କରୁଛି"</string>
+    <!-- no translation found for notification_title_abusive_bg_apps (994230770856147656) -->
+    <skip />
     <string name="notification_title_long_running_fgs" msgid="8170284286477131587">"ଏକ ଆପ ଏବେ ବି ସକ୍ରିୟ ଅଛି"</string>
-    <string name="notification_content_abusive_bg_apps" msgid="9180610713603474720">"<xliff:g id="APP">%1$s</xliff:g> ପୃଷ୍ଠପଟରେ ବ୍ୟାଟେରୀ ବ୍ୟବହାର କରୁଛି। ସମୀକ୍ଷା କରିବାକୁ ଟାପ କରନ୍ତୁ।"</string>
+    <!-- no translation found for notification_content_abusive_bg_apps (5296898075922695259) -->
+    <skip />
     <string name="notification_content_long_running_fgs" msgid="8258193410039977101">"<xliff:g id="APP">%1$s</xliff:g> ବ୍ୟାଟେରୀ ଲାଇଫକୁ ପ୍ରଭାବିତ କରିପାରେ। ସକ୍ରିୟ ଆପ୍ସକୁ ସମୀକ୍ଷା କରିବା ପାଇଁ ଟାପ କରନ୍ତୁ।"</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"ସକ୍ରିୟ ଆପଗୁଡ଼ିକୁ ଯାଞ୍ଚ କରନ୍ତୁ"</string>
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"ଆପଣଙ୍କ <xliff:g id="DEVICE">%1$s</xliff:g>ରୁ ଫୋନର କ୍ୟାମେରାକୁ ଆକ୍ସେସ କରାଯାଇପାରିବ ନାହିଁ"</string>

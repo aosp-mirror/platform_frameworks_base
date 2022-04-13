@@ -2068,14 +2068,10 @@
     <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"Atingeți ca să aflați mai multe și să modificați"</string>
     <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"Funcția Nu deranja s-a schimbat"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Atingeți pentru a verifica ce este blocat."</string>
-    <!-- no translation found for review_notification_settings_title (5102557424459810820) -->
-    <skip />
-    <!-- no translation found for review_notification_settings_text (5696497037817525074) -->
-    <skip />
-    <!-- no translation found for review_notification_settings_remind_me_action (1081081018678480907) -->
-    <skip />
-    <!-- no translation found for review_notification_settings_dismiss (4160916504616428294) -->
-    <skip />
+    <string name="review_notification_settings_title" msgid="5102557424459810820">"Examinați setările pentru notificări"</string>
+    <string name="review_notification_settings_text" msgid="5696497037817525074">"Pe Android 13, aplicațiile pe care le instalați necesită permisiunea de a trimite notificări. Atingeți ca să modificați permisiunea pentru aplicațiile existente."</string>
+    <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"Mai târziu"</string>
+    <string name="review_notification_settings_dismiss" msgid="4160916504616428294">"Închideți"</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"Sistem"</string>
     <string name="notification_app_name_settings" msgid="9088548800899952531">"Setări"</string>
     <string name="notification_appops_camera_active" msgid="8177643089272352083">"Cameră foto"</string>
@@ -2294,9 +2290,11 @@
     <string name="ui_translation_accessibility_translated_text" msgid="3197547218178944544">"<xliff:g id="MESSAGE">%1$s</xliff:g> a fost tradus."</string>
     <string name="ui_translation_accessibility_translation_finished" msgid="3057830947610088465">"Mesaj tradus din <xliff:g id="FROM_LANGUAGE">%1$s</xliff:g> în <xliff:g id="TO_LANGUAGE">%2$s</xliff:g>."</string>
     <string name="notification_channel_abusive_bg_apps" msgid="6092140213264920355">"Activitate de fundal"</string>
-    <string name="notification_title_abusive_bg_apps" msgid="3258460527676573815">"O aplicație folosește bateria"</string>
+    <!-- no translation found for notification_title_abusive_bg_apps (994230770856147656) -->
+    <skip />
     <string name="notification_title_long_running_fgs" msgid="8170284286477131587">"O aplicație este încă activă"</string>
-    <string name="notification_content_abusive_bg_apps" msgid="9180610713603474720">"<xliff:g id="APP">%1$s</xliff:g> folosește bateria în fundal. Atingeți pentru a examina."</string>
+    <!-- no translation found for notification_content_abusive_bg_apps (5296898075922695259) -->
+    <skip />
     <string name="notification_content_long_running_fgs" msgid="8258193410039977101">"<xliff:g id="APP">%1$s</xliff:g> poate afecta autonomia bateriei. Atingeți pentru a examina aplicațiile active."</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Verificați aplicațiile active"</string>
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"Nu se poate accesa camera foto a telefonului de pe <xliff:g id="DEVICE">%1$s</xliff:g>"</string>

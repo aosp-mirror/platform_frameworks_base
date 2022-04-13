@@ -2293,9 +2293,11 @@
     <string name="ui_translation_accessibility_translated_text" msgid="3197547218178944544">"A következő lefordítása sikeresen megtörtént: <xliff:g id="MESSAGE">%1$s</xliff:g>."</string>
     <string name="ui_translation_accessibility_translation_finished" msgid="3057830947610088465">"Sikerült lefordítani az üzenetet <xliff:g id="FROM_LANGUAGE">%1$s</xliff:g> nyelvről <xliff:g id="TO_LANGUAGE">%2$s</xliff:g> nyelvre."</string>
     <string name="notification_channel_abusive_bg_apps" msgid="6092140213264920355">"Háttértevékenység"</string>
-    <string name="notification_title_abusive_bg_apps" msgid="3258460527676573815">"Az egyik alkalmazás használja az akkumulátort"</string>
+    <!-- no translation found for notification_title_abusive_bg_apps (994230770856147656) -->
+    <skip />
     <string name="notification_title_long_running_fgs" msgid="8170284286477131587">"Az egyik alkalmazás még aktív"</string>
-    <string name="notification_content_abusive_bg_apps" msgid="9180610713603474720">"A(z) <xliff:g id="APP">%1$s</xliff:g> a háttérben használja az akkumulátort. Koppintson az áttekintéshez."</string>
+    <!-- no translation found for notification_content_abusive_bg_apps (5296898075922695259) -->
+    <skip />
     <string name="notification_content_long_running_fgs" msgid="8258193410039977101">"A(z) <xliff:g id="APP">%1$s</xliff:g> befolyásolhatja az akkumulátor üzemidejét. Koppintson az aktív alkalmazások áttekintéséhez."</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Aktív alkalmazások ellenőrzése"</string>
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"Nem lehet hozzáférni a telefon kamerájához a következő eszközön: <xliff:g id="DEVICE">%1$s</xliff:g>"</string>

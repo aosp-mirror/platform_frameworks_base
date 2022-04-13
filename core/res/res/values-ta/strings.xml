@@ -2067,14 +2067,10 @@
     <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"மேலும் அறிந்து மாற்ற, தட்டவும்."</string>
     <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"தொந்தரவு செய்ய வேண்டாம் அமைப்புகள் மாற்றப்பட்டன"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"எவற்றையெல்லாம் தடுக்கிறது என்பதைப் பார்க்க, தட்டவும்."</string>
-    <!-- no translation found for review_notification_settings_title (5102557424459810820) -->
-    <skip />
-    <!-- no translation found for review_notification_settings_text (5696497037817525074) -->
-    <skip />
-    <!-- no translation found for review_notification_settings_remind_me_action (1081081018678480907) -->
-    <skip />
-    <!-- no translation found for review_notification_settings_dismiss (4160916504616428294) -->
-    <skip />
+    <string name="review_notification_settings_title" msgid="5102557424459810820">"அறிவிப்பு அமைப்புகளை மதிப்பாய்வு செய்யுங்கள்"</string>
+    <string name="review_notification_settings_text" msgid="5696497037817525074">"Android 13ல், நீங்கள் நிறுவுகின்ற ஆப்ஸ் உங்களுக்கு அறிவிப்புகளை அனுப்ப உங்கள் அனுமதி தேவை. ஏற்கெனவே உள்ள ஆப்ஸுக்கு இந்த அனுமதியை மாற்ற தட்டவும்."</string>
+    <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"பின்னர் நினைவூட்டு"</string>
+    <string name="review_notification_settings_dismiss" msgid="4160916504616428294">"நிராகரி"</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"சிஸ்டம்"</string>
     <string name="notification_app_name_settings" msgid="9088548800899952531">"அமைப்புகள்"</string>
     <string name="notification_appops_camera_active" msgid="8177643089272352083">"கேமரா"</string>
@@ -2293,9 +2289,11 @@
     <string name="ui_translation_accessibility_translated_text" msgid="3197547218178944544">"<xliff:g id="MESSAGE">%1$s</xliff:g> மொழிபெயர்க்கப்பட்டது."</string>
     <string name="ui_translation_accessibility_translation_finished" msgid="3057830947610088465">"<xliff:g id="FROM_LANGUAGE">%1$s</xliff:g> மொழியிலிருந்து <xliff:g id="TO_LANGUAGE">%2$s</xliff:g> மொழிக்கு மெசேஜ் மொழிபெயர்க்கப்பட்டது."</string>
     <string name="notification_channel_abusive_bg_apps" msgid="6092140213264920355">"பின்னணிச் செயல்பாடு"</string>
-    <string name="notification_title_abusive_bg_apps" msgid="3258460527676573815">"ஆப்ஸ் பேட்டரியைப் பயன்படுத்துகிறது"</string>
+    <!-- no translation found for notification_title_abusive_bg_apps (994230770856147656) -->
+    <skip />
     <string name="notification_title_long_running_fgs" msgid="8170284286477131587">"ஆப்ஸ் செயல்பாட்டில் உள்ளது"</string>
-    <string name="notification_content_abusive_bg_apps" msgid="9180610713603474720">"<xliff:g id="APP">%1$s</xliff:g> ஆப்ஸ் பேட்டரியைப் பின்னணியில் பயன்படுத்துகிறது. பார்க்க தட்டவும்."</string>
+    <!-- no translation found for notification_content_abusive_bg_apps (5296898075922695259) -->
+    <skip />
     <string name="notification_content_long_running_fgs" msgid="8258193410039977101">"<xliff:g id="APP">%1$s</xliff:g> பேட்டரியின் ஆயுளைப் பாதிக்கலாம். செயலிலுள்ள ஆப்ஸைப் பார்க்க தட்டவும்."</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"செயலிலுள்ள ஆப்ஸைப் பாருங்கள்"</string>
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"உங்கள் <xliff:g id="DEVICE">%1$s</xliff:g> சாதனத்திலிருந்து மொபைலின் கேமராவை அணுக முடியாது"</string>
