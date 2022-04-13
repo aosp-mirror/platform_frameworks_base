@@ -68,6 +68,8 @@ class UserBroadcastDispatcherTest : SysuiTestCase() {
     private lateinit var mockContext: Context
     @Mock
     private lateinit var logger: BroadcastDispatcherLogger
+    @Mock
+    private lateinit var removalPendingStore: PendingRemovalStore
 
     private lateinit var testableLooper: TestableLooper
     private lateinit var userBroadcastDispatcher: UserBroadcastDispatcher
@@ -84,7 +86,13 @@ class UserBroadcastDispatcherTest : SysuiTestCase() {
         fakeExecutor = FakeExecutor(FakeSystemClock())
 
         userBroadcastDispatcher = object : UserBroadcastDispatcher(
-                mockContext, USER_ID, testableLooper.looper, mock(Executor::class.java), logger) {
+                mockContext,
+                USER_ID,
+                testableLooper.looper,
+                mock(Executor::class.java),
+                logger,
+                removalPendingStore
+        ) {
             override fun createActionReceiver(
                 action: String,
                 permission: String?,
@@ -216,7 +224,8 @@ class UserBroadcastDispatcherTest : SysuiTestCase() {
                 USER_ID,
                 testableLooper.looper,
                 fakeExecutor,
-                logger
+                logger,
+                removalPendingStore
         )
         uBR.registerReceiver(
                 ReceiverData(
@@ -243,7 +252,8 @@ class UserBroadcastDispatcherTest : SysuiTestCase() {
             USER_ID,
             testableLooper.looper,
             fakeExecutor,
-            logger
+            logger,
+            removalPendingStore
         )
         uBR.registerReceiver(
             ReceiverData(

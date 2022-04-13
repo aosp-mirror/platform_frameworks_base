@@ -35,7 +35,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 /**
- * TV specific values of the current state of the PIP bounds.
+ * TV specific values of the current state of the PiP bounds.
  */
 public class TvPipBoundsState extends PipBoundsState {
 
@@ -86,7 +86,7 @@ public class TvPipBoundsState extends PipBoundsState {
         mTvPipGravity = DEFAULT_TV_GRAVITY;
     }
 
-    /** Set the tv expanded bounds of PIP */
+    /** Set the tv expanded bounds of PiP */
     public void setTvExpandedSize(@Nullable Size size) {
         mTvExpandedSize = size;
     }
@@ -97,20 +97,24 @@ public class TvPipBoundsState extends PipBoundsState {
         return mTvExpandedSize;
     }
 
-    /** Set the PIP aspect ratio for the expanded PIP (TV) that is desired by the app. */
+    /** Set the PiP aspect ratio for the expanded PiP (TV) that is desired by the app. */
     public void setDesiredTvExpandedAspectRatio(float aspectRatio, boolean override) {
-        if (override || mTvFixedPipOrientation == ORIENTATION_UNDETERMINED || aspectRatio == 0) {
+        if (override || mTvFixedPipOrientation == ORIENTATION_UNDETERMINED) {
             mDesiredTvExpandedAspectRatio = aspectRatio;
             resetTvPipState();
             return;
         }
         if ((aspectRatio > 1 && mTvFixedPipOrientation == ORIENTATION_HORIZONTAL)
-                || (aspectRatio <= 1 && mTvFixedPipOrientation == ORIENTATION_VERTICAL)) {
+                || (aspectRatio <= 1 && mTvFixedPipOrientation == ORIENTATION_VERTICAL)
+                || aspectRatio == 0) {
             mDesiredTvExpandedAspectRatio = aspectRatio;
         }
     }
 
-    /** Get the PIP aspect ratio for the expanded PIP (TV) that is desired by the app. */
+    /**
+     * Get the aspect ratio for the expanded PiP (TV) that is desired, or {@code 0} if it is not
+     * enabled by the app.
+     */
     public float getDesiredTvExpandedAspectRatio() {
         return mDesiredTvExpandedAspectRatio;
     }
