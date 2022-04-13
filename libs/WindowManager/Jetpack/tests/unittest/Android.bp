@@ -23,6 +23,8 @@ package {
 
 android_test {
     name: "WMJetpackUnitTests",
+    // To make the test run via TEST_MAPPING
+    test_suites: ["device-tests"],
 
     srcs: [
         "**/*.java",
