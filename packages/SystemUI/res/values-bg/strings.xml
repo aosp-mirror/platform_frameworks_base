@@ -27,7 +27,7 @@
     <string name="invalid_charger_title" msgid="938685362320735167">"Зареждането през USB не е възможно"</string>
     <string name="invalid_charger_text" msgid="2339310107232691577">"Използвайте оригиналното зарядно устройство"</string>
     <string name="battery_saver_confirmation_title" msgid="1234998463717398453">"Да се включи ли режимът за запазване на батерията?"</string>
-    <string name="battery_saver_confirmation_title_generic" msgid="2299231884234959849">"Всичко за режима за запазване на батерията"</string>
+    <string name="battery_saver_confirmation_title_generic" msgid="2299231884234959849">"За режима за запазване на батерията"</string>
     <string name="battery_saver_confirmation_ok" msgid="5042136476802816494">"Включване"</string>
     <string name="battery_saver_start_action" msgid="8353766979886287140">"Включване"</string>
     <string name="battery_saver_dismiss_action" msgid="7199342621040014738">"Не, благодаря"</string>
@@ -732,8 +732,8 @@
     <string name="privacy_type_microphone" msgid="9136763906797732428">"микрофона"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"Няма заглавие"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Режим на готовност"</string>
-    <string name="magnification_window_title" msgid="4863914360847258333">"Прозорец за ниво на мащаба"</string>
-    <string name="magnification_controls_title" msgid="8421106606708891519">"Контроли за прозореца за ниво на мащаба"</string>
+    <string name="magnification_window_title" msgid="4863914360847258333">"Прозорец за увеличение"</string>
+    <string name="magnification_controls_title" msgid="8421106606708891519">"Контроли за прозореца за увеличение"</string>
     <string name="accessibility_control_zoom_in" msgid="1189272315480097417">"Увеличаване на мащаба"</string>
     <string name="accessibility_control_zoom_out" msgid="69578832020304084">"Намаляване на мащаба"</string>
     <string name="accessibility_control_move_up" msgid="6622825494014720136">"Преместване нагоре"</string>

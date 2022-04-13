@@ -905,7 +905,7 @@
     <string name="wifi_wont_autoconnect_for_now" msgid="5782282612749867762">"Şu anda kablosuz ağa otomatik olarak bağlanılamıyor"</string>
     <string name="see_all_networks" msgid="3773666844913168122">"Tümünü göster"</string>
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"Ağ değiştirmek için ethernet bağlantısını kesin"</string>
-    <string name="wifi_scan_notify_message" msgid="3753839537448621794">"Uygulamalar ve hizmetler, cihaz deneyimini iyileştirmek için Kablosuz özelliği kapalı bile olsa kablosuz ağlar herhangi bir zamanda tarayabilir. Bunu kablosuz ağ taraması ayarlarından değiştirebilirsiniz. "<annotation id="link">"Değiştir"</annotation></string>
+    <string name="wifi_scan_notify_message" msgid="3753839537448621794">"Uygulamalar ve hizmetler, cihaz deneyimini iyileştirmek için Kablosuz özelliği kapalı bile olsa kablosuz ağları herhangi bir zamanda tarayabilir. Bunu kablosuz ağ taraması ayarlarından değiştirebilirsiniz. "<annotation id="link">"Değiştir"</annotation></string>
     <string name="turn_off_airplane_mode" msgid="8425587763226548579">"Uçak modunu kapat"</string>
     <string name="qs_tile_request_dialog_text" msgid="3501359944139877694">"<xliff:g id="APPNAME">%1$s</xliff:g> aşağıdaki kartı Hızlı Ayarlar\'a eklemek istiyor"</string>
     <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"Kart ekle"</string>
