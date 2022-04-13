@@ -49,13 +49,13 @@
     <string name="usb_debugging_always" msgid="4003121804294739548">"Permitir sempre a partir deste computador"</string>
     <string name="usb_debugging_allow" msgid="1722643858015321328">"Permitir"</string>
     <string name="usb_debugging_secondary_user_title" msgid="7843050591380107998">"Depuração USB não permitida"</string>
-    <string name="usb_debugging_secondary_user_message" msgid="3740347841470403244">"O utilizador com sessão iniciada atualmente neste dispositivo não pode ativar a depuração USB. Para utilizar esta funcionalidade, mude para o utilizador principal."</string>
+    <string name="usb_debugging_secondary_user_message" msgid="3740347841470403244">"O utilizador com sessão iniciada atualmente neste dispositivo não pode ativar a depuração USB. Para usar esta funcionalidade, mude para o utilizador principal."</string>
     <string name="wifi_debugging_title" msgid="7300007687492186076">"Permitir a depuração sem fios nesta rede?"</string>
     <string name="wifi_debugging_message" msgid="5461204211731802995">"Nome da rede (SSID)\n<xliff:g id="SSID_0">%1$s</xliff:g>\n\nEndereço Wi-Fi (BSSID)\n<xliff:g id="BSSID_1">%2$s</xliff:g>"</string>
     <string name="wifi_debugging_always" msgid="2968383799517975155">"Permitir sempre nesta rede"</string>
     <string name="wifi_debugging_allow" msgid="4573224609684957886">"Permitir"</string>
     <string name="wifi_debugging_secondary_user_title" msgid="2493201475880517725">"Depuração sem fios não permitida"</string>
-    <string name="wifi_debugging_secondary_user_message" msgid="4492383073970079751">"O utilizador com sessão iniciada atualmente neste dispositivo não pode ativar a depuração sem fios. Para utilizar esta funcionalidade, mude para o utilizador principal."</string>
+    <string name="wifi_debugging_secondary_user_message" msgid="4492383073970079751">"O utilizador com sessão iniciada atualmente neste dispositivo não pode ativar a depuração sem fios. Para usar esta funcionalidade, mude para o utilizador principal."</string>
     <string name="usb_contaminant_title" msgid="894052515034594113">"Porta USB desativada"</string>
     <string name="usb_contaminant_message" msgid="7730476585174719805">"Para proteger o dispositivo contra líquidos ou resíduos, a porta USB está desativada e não irá detetar quaisquer acessórios.\n\nSerá notificado quando for seguro utilizar a porta USB novamente."</string>
     <string name="usb_port_enabled" msgid="531823867664717018">"Porta USB ativada para detetar carregadores e acessórios"</string>

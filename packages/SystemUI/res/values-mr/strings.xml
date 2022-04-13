@@ -567,7 +567,7 @@
     <string name="keyboard_key_num_lock" msgid="7209960042043090548">"Num Lock"</string>
     <string name="keyboard_key_numpad_template" msgid="7316338238459991821">"Numpad <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="notif_inline_reply_remove_attachment_description" msgid="7954075334095405429">"अटॅचमेंट काढा"</string>
-    <string name="keyboard_shortcut_group_system" msgid="1583416273777875970">"सिस्टम"</string>
+    <string name="keyboard_shortcut_group_system" msgid="1583416273777875970">"सिस्टीम"</string>
     <string name="keyboard_shortcut_group_system_home" msgid="7465138628692109907">"होम"</string>
     <string name="keyboard_shortcut_group_system_recents" msgid="8628108256824616927">"अलीकडील"</string>
     <string name="keyboard_shortcut_group_system_back" msgid="1055709713218453863">"परत"</string>

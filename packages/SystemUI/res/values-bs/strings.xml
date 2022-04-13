@@ -25,7 +25,7 @@
     <string name="invalid_charger_title" msgid="938685362320735167">"Punjenje putem USB-a nije moguće"</string>
     <string name="invalid_charger_text" msgid="2339310107232691577">"Koristite punjač koji ste dobili uz uređaj"</string>
     <string name="battery_saver_confirmation_title" msgid="1234998463717398453">"Uključiti Uštedu baterije?"</string>
-    <string name="battery_saver_confirmation_title_generic" msgid="2299231884234959849">"Informacije o Uštedi baterije"</string>
+    <string name="battery_saver_confirmation_title_generic" msgid="2299231884234959849">"O Uštedi baterije"</string>
     <string name="battery_saver_confirmation_ok" msgid="5042136476802816494">"Uključi"</string>
     <string name="battery_saver_start_action" msgid="4553256017945469937">"Uključi Uštedu baterije"</string>
     <string name="status_bar_settings_auto_rotation" msgid="8329080442278431708">"Automatsko rotiranje ekrana"</string>
@@ -458,7 +458,7 @@
     <string name="volume_dialog_ringer_guidance_ring" msgid="9143194270463146858">"Pozivi i obavještenja će zvoniti jačinom (<xliff:g id="VOLUME_LEVEL">%1$s</xliff:g>)"</string>
     <string name="system_ui_tuner" msgid="1471348823289954729">"Podešavač za korisnički interfejs sistema"</string>
     <string name="status_bar" msgid="4357390266055077437">"Statusna traka"</string>
-    <string name="demo_mode" msgid="263484519766901593">"Način rada za demonstraciju Sistemskog UI-a"</string>
+    <string name="demo_mode" msgid="263484519766901593">"Demo način rada Sistemskog UI-ja"</string>
     <string name="enable_demo_mode" msgid="3180345364745966431">"Omogući način rada za demonstraciju"</string>
     <string name="show_demo_mode" msgid="3677956462273059726">"Prikaži način rada za demonstraciju"</string>
     <string name="status_bar_ethernet" msgid="5690979758988647484">"Ethernet"</string>

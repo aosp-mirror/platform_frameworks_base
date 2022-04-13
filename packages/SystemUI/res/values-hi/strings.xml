@@ -388,7 +388,7 @@
     <string name="monitoring_title_device_owned" msgid="7029691083837606324">"डिवाइस मैनेजमेंट"</string>
     <string name="monitoring_subtitle_vpn" msgid="800485258004629079">"वीपीएन"</string>
     <string name="monitoring_subtitle_network_logging" msgid="2444199331891219596">"नेटवर्क लॉगिंग"</string>
-    <string name="monitoring_subtitle_ca_certificate" msgid="8588092029755175800">"CA प्रमाणपत्र"</string>
+    <string name="monitoring_subtitle_ca_certificate" msgid="8588092029755175800">"CA सर्टिफ़िकेट"</string>
     <string name="monitoring_button_view_policies" msgid="3869724835853502410">"नीतियां देखें"</string>
     <string name="monitoring_button_view_controls" msgid="8316440345340701117">"कंट्रोल देखें"</string>
     <string name="monitoring_description_named_management" msgid="505833016545056036">"इस डिवाइस का मालिकाना हक <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> के पास है.\n\nआपके संगठन का आईटी एडमिन कुछ चीज़ों की निगरानी और उन्हें प्रबंधित कर सकता है, जैसे कि सेटिंग, कॉर्पोरेट ऐक्सेस, ऐप्लिकेशन, आपके डिवाइस से जुड़ा डेटा, और आपके डिवाइस की जगह की जानकारी.\n\nज़्यादा जानकारी के लिए, अपने आईटी एडमिन से संपर्क करें."</string>
