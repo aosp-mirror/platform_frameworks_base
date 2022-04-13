@@ -424,7 +424,7 @@
     <string name="permdesc_writeCallLog" product="tablet" msgid="2657525794731690397">"Membenarkan apl untuk mengubah suai panggilan tablet anda, termasuk data tentang panggilan masuk dan keluar. Apl hasad boleh menggunakannya untuk memadam atau mengubah suai log panggilan anda."</string>
     <string name="permdesc_writeCallLog" product="tv" msgid="3934939195095317432">"Membenarkan apl mengubah suai log panggilan peranti Android TV anda, termasuk data tentang panggilan masuk dan keluar. Apl hasad boleh menggunakan keupayaan ini untuk memadamkan atau mengubah suai log panggilan anda."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="5903033505665134802">"Membenarkan apl untuk mengubah suai panggilan telefon anda, termasuk data tentang panggilan masuk dan keluar. Apl hasad boleh menggunakannya untuk memadam atau mengubah suai log panggilan anda."</string>
-    <string name="permlab_bodySensors" msgid="3411035315357380862">"akss pndia bdn (spt pmntau kdr dnyt jntg)"</string>
+    <string name="permlab_bodySensors" msgid="3411035315357380862">"Akses penderia badan (seperti pemantau kadar denyut jantung)"</string>
     <string name="permdesc_bodySensors" product="default" msgid="2365357960407973997">"Membenarkan apl mengakses data dari penderia yang memantau keadaan fizikal anda, seperti kadar denyutan jantung anda."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"Baca acara dan butiran kalendar"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"Apl ini boleh membaca semua acara kalendar yang disimpan pada tablet anda dan berkongsi atau menyimpan data kalendar anda."</string>
@@ -1629,7 +1629,7 @@
     <string name="wireless_display_route_description" msgid="8297563323032966831">"Paparan wayarles"</string>
     <string name="media_route_button_content_description" msgid="2299223698196869956">"Hantar"</string>
     <string name="media_route_chooser_title" msgid="6646594924991269208">"Sambung ke peranti"</string>
-    <string name="media_route_chooser_title_for_remote_display" msgid="3105906508794326446">"Hantar skrin ke peranti"</string>
+    <string name="media_route_chooser_title_for_remote_display" msgid="3105906508794326446">"Hantar skrin kepada peranti"</string>
     <string name="media_route_chooser_searching" msgid="6119673534251329535">"Mencari peranti..."</string>
     <string name="media_route_chooser_extended_settings" msgid="2506352159381327741">"Tetapan"</string>
     <string name="media_route_controller_disconnect" msgid="7362617572732576959">"Putuskan sambungan"</string>

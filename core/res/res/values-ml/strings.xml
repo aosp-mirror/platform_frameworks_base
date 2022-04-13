@@ -324,7 +324,7 @@
     <string name="permgroupdesc_calllog" msgid="2026996642917801803">"ഫോൺ കോൾ ലോഗ് വായിക്കുകയും എഴുതുകയും ചെയ്യുക"</string>
     <string name="permgrouplab_phone" msgid="570318944091926620">"ഫോണ്‍"</string>
     <string name="permgroupdesc_phone" msgid="270048070781478204">"ഫോൺ വിളിക്കുകയും നിയന്ത്രിക്കുകയും ചെയ്യുക"</string>
-    <string name="permgrouplab_sensors" msgid="9134046949784064495">"ബോഡി സെൻസർ"</string>
+    <string name="permgrouplab_sensors" msgid="9134046949784064495">"ബോഡി സെൻസറുകൾ"</string>
     <string name="permgroupdesc_sensors" msgid="2610631290633747752">"നിങ്ങളുടെ ജീവാധാര ലക്ഷണങ്ങളെ കുറിച്ചുള്ള സെൻസർ വിവരങ്ങൾ ആക്സസ് ചെയ്യുക"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="7554282892101587296">"വിൻഡോ ഉള്ളടക്കം വീണ്ടെടുക്കുക"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="6195610527625237661">"നിങ്ങൾ സംവദിക്കുന്ന ഒരു വിൻഡോയുടെ ഉള്ളടക്കം പരിശോധിക്കുക."</string>
@@ -424,7 +424,7 @@
     <string name="permdesc_writeCallLog" product="tablet" msgid="2657525794731690397">"ഇൻകമ്മിംഗ്-ഔട്ട്ഗോയിംഗ് കോളുകളെക്കുറിച്ചുള്ള ഡാറ്റയുൾപ്പെടെയുള്ള നിങ്ങളുടെ ടാബ്‌ലെറ്റിന്‍റെ കോൾ ചരിത്രം പരിഷ്‌ക്കരിക്കാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു.ഇതു വഴി കോൾ ചരിത്ര ഡാറ്റകൾ പരിഷ്‌ക്കരിക്കാനും ഇല്ലാതാക്കാനും ദോഷകരമായ അപ്ലിക്കേഷനുകൾക്ക് കഴിഞ്ഞേയ്ക്കാം."</string>
     <string name="permdesc_writeCallLog" product="tv" msgid="3934939195095317432">"ഇൻകമിംഗ്, ഔട്ട്‌ഗോയിംഗ് കോളുകളെക്കുറിച്ചുള്ള ഡാറ്റ ഉൾപ്പെടെ നിങ്ങളുടെ Android TV-യിലെ കോൾ ചരിത്രം പരിഷ്‌ക്കരിക്കാൻ ആപ്പിനെ അനുവദിക്കുന്നു. നിങ്ങളുടെ കോൾ ചരിത്രം മായ്‌ക്കാനോ പരിഷ്‌ക്കരിക്കാനോ ദോഷകരമായ ആപ്പുകൾ ഇത് ഉപയോഗിച്ചേക്കാം."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="5903033505665134802">"ഇൻകമ്മിംഗ്-ഔട്ട്ഗോയിംഗ് കോളുകളെക്കുറിച്ചുള്ള ഡാറ്റയുൾപ്പെടെയുള്ള നിങ്ങളുടെ ഫോണിന്‍റെ കോൾ ചരിത്രം പരിഷ്‌ക്കരിക്കാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു.ഇതു വഴി കോൾ ചരിത്ര ഡാറ്റകൾ പരിഷ്‌ക്കരിക്കാനും ഇല്ലാതാക്കാനും ദോഷകരമായ അപ്ലിക്കേഷനുകൾക്ക് കഴിഞ്ഞേയ്ക്കാം."</string>
-    <string name="permlab_bodySensors" msgid="3411035315357380862">"ശരീര സെൻസറുകൾ (ഹൃദയമിടിപ്പ് നിരക്ക് മോണിറ്ററുകൾ പോലെ) ആക്സസ് ചെയ്യുക"</string>
+    <string name="permlab_bodySensors" msgid="3411035315357380862">"ബോഡി സെൻസറുകൾ (ഹൃദയമിടിപ്പ് മോണിറ്ററുകൾ പോലുള്ളവ) ആക്സസ് ചെയ്യുക"</string>
     <string name="permdesc_bodySensors" product="default" msgid="2365357960407973997">"നിങ്ങളുടെ ഹൃദയമിടിപ്പ് പോലുള്ള ശാരീരികാവസ്ഥ നിരീക്ഷിക്കാൻ സെൻസറുകളിൽ നിന്ന് വിവരം ആക്‌സസ്സുചെയ്യാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"കലണ്ടർ ഇവന്റുകളും വിശദാംശങ്ങളും വായിക്കുക"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"ഈ ആപ്പിന് നിങ്ങളുടെ ടാബ്‌ലെറ്റിൽ സംഭരിച്ചിരിക്കുന്ന എല്ലാ കലണ്ടർ ഇവന്റുകളും വായിക്കാനും നിങ്ങളുടെ കലണ്ടർ വിവരങ്ങൾ പങ്കിടാനും അല്ലെങ്കിൽ സംരക്ഷിക്കാനും കഴിയും."</string>
@@ -1716,7 +1716,7 @@
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"കുറുക്കുവഴി ‌ഓഫാക്കുക"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"കുറുക്കുവഴി ഉപയോഗിക്കുക"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"വർണ്ണ വിപര്യയം"</string>
-    <string name="color_correction_feature_name" msgid="3655077237805422597">"നിറം ക്രമീകരിക്കൽ"</string>
+    <string name="color_correction_feature_name" msgid="3655077237805422597">"നിറം ശരിയാക്കൽ"</string>
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"ഒറ്റക്കൈ മോഡ്"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"കൂടുതൽ ഡിം ചെയ്യൽ"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"വോളിയം കീകൾ പിടിച്ചു. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ഓണാക്കി."</string>
@@ -1876,7 +1876,7 @@
     <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"\'ബാറ്ററി ലാഭിക്കൽ\' ഡാർക്ക് തീം ഓണാക്കുന്നു, ഒപ്പം പശ്ചാത്തല ആക്‌റ്റിവിറ്റിയും ചില വിഷ്വൽ ഇഫക്റ്റുകളും ചില ഫീച്ചറുകളും ചില നെറ്റ്‌വർക്ക് കണക്ഷനുകളും പരിമിതപ്പെടുത്തുകയോ ഓഫാക്കുകയോ ചെയ്യുന്നു."</string>
     <string name="battery_saver_description" msgid="8518809702138617167">"ബാറ്ററി ലാഭിക്കൽ ഡാർക്ക് തീം ഓണാക്കുന്നു, പശ്ചാത്തല ആക്‌റ്റിവിറ്റിയും ചില വിഷ്വൽ ഇഫക്റ്റുകളും ചില ഫീച്ചറുകളും ചില നെറ്റ്‌വർക്ക് കണക്ഷനുകളും അത് പരിമിതപ്പെടുത്തുകയോ ഓഫാക്കുകയോ ചെയ്യുന്നു."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"ഡാറ്റാ ഉപയോഗം കുറയ്ക്കാൻ സഹായിക്കുന്നതിനായി പശ്ചാത്തലത്തിൽ ഡാറ്റ അയയ്ക്കുകയോ സ്വീകരിക്കുകയോ ചെയ്യുന്നതിൽ നിന്ന് ചില ആപ്പുകളെ ഡാറ്റാ സേവർ തടയുന്നു. നിങ്ങൾ നിലവിൽ ഉപയോഗിക്കുന്ന ഒരു ആപ്പിന് ഡാറ്റ ആക്‌സസ് ചെയ്യാനാകും, എന്നാൽ വല്ലപ്പോഴും മാത്രമെ സംഭവിക്കുന്നുള്ളു. ഇതിനർത്ഥം, ഉദാഹരണമായി നിങ്ങൾ ടാപ്പ് ചെയ്യുന്നത് വരെ ചിത്രങ്ങൾ പ്രദ‍‍‍ർശിപ്പിക്കുകയില്ല എന്നാണ്."</string>
-    <string name="data_saver_enable_title" msgid="7080620065745260137">"ഡാറ്റ സേവർ ഓണാക്കണോ?"</string>
+    <string name="data_saver_enable_title" msgid="7080620065745260137">"ഡാറ്റാ സേവർ ഓണാക്കണോ?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"ഓണാക്കുക"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="2877101784123058273">
       <item quantity="other">%1$d മിനിറ്റ് സമയത്തേക്ക് (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> വരെ)</item>
