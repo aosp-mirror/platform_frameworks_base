@@ -676,7 +676,6 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv, bool zygote, bool p
     char dex2oatFlagsBuf[PROPERTY_VALUE_MAX];
     char dex2oatImageFlagsBuf[PROPERTY_VALUE_MAX];
     char extraOptsBuf[PROPERTY_VALUE_MAX];
-    char voldDecryptBuf[PROPERTY_VALUE_MAX];
     char perfettoHprofOptBuf[sizeof("-XX:PerfettoHprof=") + PROPERTY_VALUE_MAX];
     char perfettoJavaHeapStackOptBuf[
             sizeof("-XX:PerfettoJavaHeapStackProf=") + PROPERTY_VALUE_MAX];
@@ -958,19 +957,9 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv, bool zygote, bool p
         addOption("-Xint:jit");
     }
 
-    // If we are booting without the real /data, don't spend time compiling.
-    property_get("vold.decrypt", voldDecryptBuf, "");
-    bool skip_compilation = ((strcmp(voldDecryptBuf, "trigger_restart_min_framework") == 0) ||
-                             (strcmp(voldDecryptBuf, "1") == 0));
-
     // Extra options for JIT.
-    if (skip_compilation) {
-        addOption("-Xcompiler-option");
-        addOption("--compiler-filter=assume-verified");
-    } else {
-        parseCompilerOption("dalvik.vm.dex2oat-filter", dex2oatCompilerFilterBuf,
-                            "--compiler-filter=", "-Xcompiler-option");
-    }
+    parseCompilerOption("dalvik.vm.dex2oat-filter", dex2oatCompilerFilterBuf,
+                        "--compiler-filter=", "-Xcompiler-option");
     parseCompilerOption("dalvik.vm.dex2oat-threads", dex2oatThreadsBuf, "-j", "-Xcompiler-option");
     parseCompilerOption("dalvik.vm.dex2oat-cpu-set", dex2oatCpuSetBuf, "--cpu-set=",
                         "-Xcompiler-option");
@@ -1011,51 +1000,47 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv, bool zygote, bool p
     parseExtraOpts(extraOptsBuf, NULL);
 
     // Extra options for boot image generation.
-    if (skip_compilation) {
-        addOption("-Xnoimage-dex2oat");
-    } else {
-        parseCompilerRuntimeOption("dalvik.vm.image-dex2oat-Xms", dex2oatXmsImageFlagsBuf,
-                                   "-Xms", "-Ximage-compiler-option");
-        parseCompilerRuntimeOption("dalvik.vm.image-dex2oat-Xmx", dex2oatXmxImageFlagsBuf,
-                                   "-Xmx", "-Ximage-compiler-option");
+    parseCompilerRuntimeOption("dalvik.vm.image-dex2oat-Xms", dex2oatXmsImageFlagsBuf,
+                               "-Xms", "-Ximage-compiler-option");
+    parseCompilerRuntimeOption("dalvik.vm.image-dex2oat-Xmx", dex2oatXmxImageFlagsBuf,
+                               "-Xmx", "-Ximage-compiler-option");
 
-        parseCompilerOption("dalvik.vm.image-dex2oat-filter", dex2oatImageCompilerFilterBuf,
-                            "--compiler-filter=", "-Ximage-compiler-option");
+    parseCompilerOption("dalvik.vm.image-dex2oat-filter", dex2oatImageCompilerFilterBuf,
+                        "--compiler-filter=", "-Ximage-compiler-option");
 
-        // If there is a dirty-image-objects file, push it.
-        if (hasFile("/system/etc/dirty-image-objects")) {
-            addOption("-Ximage-compiler-option");
-            addOption("--dirty-image-objects=/system/etc/dirty-image-objects");
-        }
-
-        parseCompilerOption("dalvik.vm.image-dex2oat-threads", dex2oatThreadsImageBuf, "-j",
-                            "-Ximage-compiler-option");
-        parseCompilerOption("dalvik.vm.image-dex2oat-cpu-set", dex2oatCpuSetImageBuf, "--cpu-set=",
-                            "-Ximage-compiler-option");
-
-        // The runtime may compile a boot image, when necessary, not using installd. Thus, we need
-        // to pass the instruction-set-features/variant as an image-compiler-option.
-        // Note: it is OK to reuse the buffer, as the values are exactly the same between
-        //       * compiler-option, used for runtime compilation (DexClassLoader)
-        //       * image-compiler-option, used for boot-image compilation on device
-        parseCompilerOption(dex2oat_isa_variant_key, dex2oat_isa_variant,
-                            "--instruction-set-variant=", "-Ximage-compiler-option");
-        parseCompilerOption(dex2oat_isa_features_key, dex2oat_isa_features,
-                            "--instruction-set-features=", "-Ximage-compiler-option");
-
-        if (generate_debug_info) {
-            addOption("-Ximage-compiler-option");
-            addOption("--generate-debug-info");
-        }
-
-        if (generate_mini_debug_info) {
-            addOption("-Ximage-compiler-option");
-            addOption("--generate-mini-debug-info");
-        }
-
-        property_get("dalvik.vm.image-dex2oat-flags", dex2oatImageFlagsBuf, "");
-        parseExtraOpts(dex2oatImageFlagsBuf, "-Ximage-compiler-option");
+    // If there is a dirty-image-objects file, push it.
+    if (hasFile("/system/etc/dirty-image-objects")) {
+        addOption("-Ximage-compiler-option");
+        addOption("--dirty-image-objects=/system/etc/dirty-image-objects");
     }
+
+    parseCompilerOption("dalvik.vm.image-dex2oat-threads", dex2oatThreadsImageBuf, "-j",
+                        "-Ximage-compiler-option");
+    parseCompilerOption("dalvik.vm.image-dex2oat-cpu-set", dex2oatCpuSetImageBuf, "--cpu-set=",
+                        "-Ximage-compiler-option");
+
+    // The runtime may compile a boot image, when necessary, not using installd. Thus, we need
+    // to pass the instruction-set-features/variant as an image-compiler-option.
+    // Note: it is OK to reuse the buffer, as the values are exactly the same between
+    //       * compiler-option, used for runtime compilation (DexClassLoader)
+    //       * image-compiler-option, used for boot-image compilation on device
+    parseCompilerOption(dex2oat_isa_variant_key, dex2oat_isa_variant,
+                        "--instruction-set-variant=", "-Ximage-compiler-option");
+    parseCompilerOption(dex2oat_isa_features_key, dex2oat_isa_features,
+                        "--instruction-set-features=", "-Ximage-compiler-option");
+
+    if (generate_debug_info) {
+        addOption("-Ximage-compiler-option");
+        addOption("--generate-debug-info");
+    }
+
+    if (generate_mini_debug_info) {
+        addOption("-Ximage-compiler-option");
+        addOption("--generate-mini-debug-info");
+    }
+
+    property_get("dalvik.vm.image-dex2oat-flags", dex2oatImageFlagsBuf, "");
+    parseExtraOpts(dex2oatImageFlagsBuf, "-Ximage-compiler-option");
 
     /* Set the properties for locale */
     {
