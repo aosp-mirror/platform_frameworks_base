@@ -21,7 +21,6 @@ import static android.view.WindowManager.TRANSIT_CLOSE;
 import static android.view.WindowManager.TRANSIT_OPEN;
 import static android.view.WindowManager.TRANSIT_TO_BACK;
 import static android.view.WindowManager.TRANSIT_TO_FRONT;
-import static android.window.TransitionInfo.FLAG_FIRST_CUSTOM;
 
 import static com.android.wm.shell.splitscreen.SplitScreen.stageTypeToString;
 import static com.android.wm.shell.splitscreen.SplitScreenController.EXIT_REASON_DRAG_DIVIDER;
@@ -57,9 +56,6 @@ import java.util.ArrayList;
 /** Manages transition animations for split-screen. */
 class SplitScreenTransitions {
     private static final String TAG = "SplitScreenTransitions";
-
-    /** Flag applied to a transition change to identify it as a divider bar for animation. */
-    public static final int FLAG_IS_DIVIDER_BAR = FLAG_FIRST_CUSTOM;
 
     private final TransactionPool mTransactionPool;
     private final Transitions mTransitions;
@@ -187,27 +183,28 @@ class SplitScreenTransitions {
     }
 
     /** Starts a transition to dismiss split. */
-    IBinder startDismissTransition(@Nullable IBinder transition, WindowContainerTransaction wct,
+    IBinder startDismissTransition(WindowContainerTransaction wct,
             Transitions.TransitionHandler handler, @SplitScreen.StageType int dismissTop,
             @SplitScreenController.ExitReason int reason) {
         final int type = reason == EXIT_REASON_DRAG_DIVIDER
                 ? TRANSIT_SPLIT_DISMISS_SNAP : TRANSIT_SPLIT_DISMISS;
-        if (transition == null) {
-            transition = mTransitions.startTransition(type, wct, handler);
-        }
+        IBinder transition = mTransitions.startTransition(type, wct, handler);
+        setDismissTransition(transition, dismissTop, reason);
+        return transition;
+    }
+
+    /** Sets a transition to dismiss split. */
+    void setDismissTransition(@NonNull IBinder transition, @SplitScreen.StageType int dismissTop,
+            @SplitScreenController.ExitReason int reason) {
         mPendingDismiss = new DismissTransition(transition, reason, dismissTop);
 
         ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, "  splitTransition "
                         + " deduced Dismiss due to %s. toTop=%s",
                 exitReasonToString(reason), stageTypeToString(dismissTop));
-        return transition;
     }
 
-    IBinder startRecentTransition(@Nullable IBinder transition, WindowContainerTransaction wct,
-            Transitions.TransitionHandler handler, @Nullable RemoteTransition remoteTransition) {
-        if (transition == null) {
-            transition = mTransitions.startTransition(TRANSIT_OPEN, wct, handler);
-        }
+    void setRecentTransition(@NonNull IBinder transition,
+            @Nullable RemoteTransition remoteTransition) {
         mPendingRecent = transition;
 
         if (remoteTransition != null) {
@@ -219,7 +216,6 @@ class SplitScreenTransitions {
 
         ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, "  splitTransition "
                         + " deduced Enter recent panel");
-        return transition;
     }
 
     void mergeAnimation(IBinder transition, TransitionInfo info, SurfaceControl.Transaction t,

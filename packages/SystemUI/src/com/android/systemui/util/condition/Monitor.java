@@ -18,6 +18,7 @@ package com.android.systemui.util.condition;
 
 import android.util.Log;
 
+import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.statusbar.policy.CallbackController;
 
 import org.jetbrains.annotations.NotNull;
@@ -60,20 +61,12 @@ public class Monitor implements CallbackController<Monitor.Callback> {
     };
 
     @Inject
-    public Monitor(Executor executor, Set<Condition> conditions, Set<Callback> callbacks) {
+    public Monitor(@Main Executor executor, Set<Condition> conditions) {
         mConditions = new HashSet<>();
         mExecutor = executor;
 
         if (conditions != null) {
             mConditions.addAll(conditions);
-        }
-
-        if (callbacks == null) {
-            return;
-        }
-
-        for (Callback callback : callbacks) {
-            addCallbackLocked(callback);
         }
     }
 

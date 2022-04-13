@@ -675,7 +675,7 @@ public final class WindowInsets {
     @Deprecated
     @NonNull
     public Insets getStableInsets() {
-        return getInsets(mTypeMaxInsetsMap, mCompatInsetsTypes);
+        return getInsets(mTypeMaxInsetsMap, systemBars());
     }
 
     /**
