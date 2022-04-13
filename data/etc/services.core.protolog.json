@@ -3427,6 +3427,12 @@
       "group": "WM_DEBUG_FOCUS_LIGHT",
       "at": "com\/android\/server\/wm\/WindowState.java"
     },
+    "1288920916": {
+      "message": "Error sending initial insets change to WindowContainer overlay",
+      "level": "ERROR",
+      "group": "WM_DEBUG_ANIM",
+      "at": "com\/android\/server\/wm\/WindowContainer.java"
+    },
     "1305412562": {
       "message": "Report configuration: %s %s",
       "level": "VERBOSE",

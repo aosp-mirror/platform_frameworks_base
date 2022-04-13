@@ -85,7 +85,7 @@ public final class VirtualAudioController implements AudioPlaybackCallback,
             @NonNull IAudioRoutingCallback routingCallback,
             @Nullable IAudioConfigChangedCallback configChangedCallback) {
         mGenericWindowPolicyController = genericWindowPolicyController;
-        mGenericWindowPolicyController.setRunningAppsChangedListener(/* listener= */ this);
+        mGenericWindowPolicyController.registerRunningAppsChangedListener(/* listener= */ this);
         synchronized (mCallbackLock) {
             mRoutingCallback = routingCallback;
             mConfigChangedCallback = configChangedCallback;
@@ -111,7 +111,8 @@ public final class VirtualAudioController implements AudioPlaybackCallback,
         mAudioPlaybackDetector.unregister();
         mAudioRecordingDetector.unregister();
         if (mGenericWindowPolicyController != null) {
-            mGenericWindowPolicyController.setRunningAppsChangedListener(/* listener= */ null);
+            mGenericWindowPolicyController.unregisterRunningAppsChangedListener(
+                    /* listener= */ this);
             mGenericWindowPolicyController = null;
         }
         synchronized (mCallbackLock) {

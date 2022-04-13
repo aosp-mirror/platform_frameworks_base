@@ -133,7 +133,8 @@ class TvPipKeepClearAlgorithm(private val clock: () -> Long) {
         val pipAnchorBoundsWithAllDecors =
                 getNormalPipAnchorBounds(pipSizeWithAllDecors, transformedMovementBounds)
 
-        val pipAnchorBoundsWithPermanentDecors = removeTemporaryDecors(pipAnchorBoundsWithAllDecors)
+        val pipAnchorBoundsWithPermanentDecors =
+                removeTemporaryDecorsTransformed(pipAnchorBoundsWithAllDecors)
         val result = calculatePipPositionTransformed(
             pipAnchorBoundsWithPermanentDecors,
             transformedRestrictedAreas,
@@ -471,12 +472,10 @@ class TvPipKeepClearAlgorithm(private val clock: () -> Long) {
     }
 
     fun setPipPermanentDecorInsets(insets: Insets) {
-        if (pipPermanentDecorInsets == insets) return
         pipPermanentDecorInsets = insets
     }
 
     fun setPipTemporaryDecorInsets(insets: Insets) {
-        if (pipTemporaryDecorInsets == insets) return
         pipTemporaryDecorInsets = insets
     }
 
@@ -781,6 +780,7 @@ class TvPipKeepClearAlgorithm(private val clock: () -> Long) {
 
     /**
      * Removes the space that was reserved for permanent decorations around the pip
+     * @param bounds the bounds (in screen space) to remove the insets from
      */
     private fun removePermanentDecors(bounds: Rect): Rect {
         val pipDecorReverseInsets = Insets.subtract(Insets.NONE, pipPermanentDecorInsets)
@@ -790,11 +790,15 @@ class TvPipKeepClearAlgorithm(private val clock: () -> Long) {
 
     /**
      * Removes the space that was reserved for temporary decorations around the pip
+     * @param bounds the bounds (in base case) to remove the insets from
      */
-    private fun removeTemporaryDecors(bounds: Rect): Rect {
-        val pipDecorReverseInsets = Insets.subtract(Insets.NONE, pipTemporaryDecorInsets)
-        bounds.inset(pipDecorReverseInsets)
-        return bounds
+    private fun removeTemporaryDecorsTransformed(bounds: Rect): Rect {
+        if (pipTemporaryDecorInsets == Insets.NONE) return bounds
+
+        var reverseInsets = Insets.subtract(Insets.NONE, pipTemporaryDecorInsets)
+        var boundsInScreenSpace = fromTransformedSpace(bounds)
+        boundsInScreenSpace.inset(reverseInsets)
+        return toTransformedSpace(boundsInScreenSpace)
     }
 
     private fun Rect.offsetCopy(dx: Int, dy: Int) = Rect(this).apply { offset(dx, dy) }
