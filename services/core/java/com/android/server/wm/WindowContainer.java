@@ -3863,7 +3863,8 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
                 @AnimationType int type, @Nullable AnimationAdapter snapshotAnim);
     }
 
-    void addTrustedOverlay(SurfaceControlViewHost.SurfacePackage overlay) {
+    void addTrustedOverlay(SurfaceControlViewHost.SurfacePackage overlay,
+            @Nullable WindowState initialWindowState) {
         if (mOverlayHost == null) {
             mOverlayHost = new TrustedOverlayHost(mWmService);
         }
@@ -3878,6 +3879,20 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
             ProtoLog.e(WM_DEBUG_ANIM,
                     "Error sending initial configuration change to WindowContainer overlay");
             removeTrustedOverlay(overlay);
+        }
+
+        // Emit an initial WindowState so that proper insets are available to overlay views
+        // shortly after the overlay is added.
+        if (initialWindowState != null) {
+            final InsetsState insetsState = initialWindowState.getInsetsState();
+            final Rect dispBounds = getBounds();
+            try {
+                overlay.getRemoteInterface().onInsetsChanged(insetsState, dispBounds);
+            } catch (Exception e) {
+                ProtoLog.e(WM_DEBUG_ANIM,
+                        "Error sending initial insets change to WindowContainer overlay");
+                removeTrustedOverlay(overlay);
+            }
         }
     }
 
