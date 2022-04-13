@@ -418,13 +418,13 @@ public abstract class PanelViewController {
                     expand = false;
                 } else if (onKeyguard) {
                     expand = true;
-                } else if (mCentralSurfaces.isBouncerShowingOverDream()) {
-                    expand = false;
                 } else if (mKeyguardStateController.isKeyguardFadingAway()) {
                     // If we're in the middle of dismissing the keyguard, don't expand due to the
                     // cancelled gesture. Gesture cancellation during an unlock is expected in some
                     // situations, such keeping your finger down while swiping to unlock to an app
                     // that is locked in landscape (the rotation will cancel the touch event).
+                    expand = false;
+                } else if (mCentralSurfaces.isBouncerShowingOverDream()) {
                     expand = false;
                 } else {
                     // If we get a cancel, put the shade back to the state it was in when the

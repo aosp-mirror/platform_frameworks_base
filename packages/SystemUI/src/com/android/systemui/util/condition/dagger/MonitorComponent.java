@@ -34,8 +34,7 @@ public interface MonitorComponent {
      */
     @Subcomponent.Factory
     interface Factory {
-        MonitorComponent create(@BindsInstance Set<Condition> conditions,
-                @BindsInstance Set<Monitor.Callback> callbacks);
+        MonitorComponent create(@BindsInstance Set<Condition> conditions);
     }
 
     /**
