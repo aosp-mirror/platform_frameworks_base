@@ -4359,16 +4359,9 @@ public class UserManagerService extends IUserManager.Stub {
 
     private long logUserCreateJourneyBegin(@UserIdInt int userId, String userType,
             @UserInfoFlag int flags) {
-        final long sessionId = ThreadLocalRandom.current().nextLong(1, Long.MAX_VALUE);
-        // log the journey atom with the user metadata
-        FrameworkStatsLog.write(FrameworkStatsLog.USER_LIFECYCLE_JOURNEY_REPORTED, sessionId,
+        return logUserJourneyBegin(
                 FrameworkStatsLog.USER_LIFECYCLE_JOURNEY_REPORTED__JOURNEY__USER_CREATE,
-                /* origin_user= */ -1, userId, UserManager.getUserTypeForStatsd(userType), flags);
-        // log the event atom to indicate the event start
-        FrameworkStatsLog.write(FrameworkStatsLog.USER_LIFECYCLE_EVENT_OCCURRED, sessionId, userId,
-                FrameworkStatsLog.USER_LIFECYCLE_EVENT_OCCURRED__EVENT__CREATE_USER,
-                FrameworkStatsLog.USER_LIFECYCLE_EVENT_OCCURRED__STATE__BEGIN);
-        return sessionId;
+                userId, userType, flags);
     }
 
     private void logUserCreateJourneyFinish(long sessionId, @UserIdInt int userId, boolean finish) {
@@ -4376,6 +4369,46 @@ public class UserManagerService extends IUserManager.Stub {
                 FrameworkStatsLog.USER_LIFECYCLE_EVENT_OCCURRED__EVENT__CREATE_USER,
                 finish ? FrameworkStatsLog.USER_LIFECYCLE_EVENT_OCCURRED__STATE__FINISH
                         : FrameworkStatsLog.USER_LIFECYCLE_EVENT_OCCURRED__STATE__NONE);
+    }
+
+    private long logUserRemoveJourneyBegin(@UserIdInt int userId, String userType,
+            @UserInfoFlag int flags) {
+        return logUserJourneyBegin(
+                FrameworkStatsLog.USER_LIFECYCLE_JOURNEY_REPORTED__JOURNEY__USER_REMOVE,
+                userId, userType, flags);
+    }
+
+    private void logUserRemoveJourneyFinish(long sessionId, @UserIdInt int userId, boolean finish) {
+        FrameworkStatsLog.write(FrameworkStatsLog.USER_LIFECYCLE_EVENT_OCCURRED, sessionId, userId,
+                FrameworkStatsLog.USER_LIFECYCLE_EVENT_OCCURRED__EVENT__REMOVE_USER,
+                finish ? FrameworkStatsLog.USER_LIFECYCLE_EVENT_OCCURRED__STATE__FINISH
+                        : FrameworkStatsLog.USER_LIFECYCLE_EVENT_OCCURRED__STATE__NONE);
+    }
+
+    private long logUserJourneyBegin(int journey, @UserIdInt int userId, String userType,
+            @UserInfoFlag int flags) {
+        final long sessionId = ThreadLocalRandom.current().nextLong(1, Long.MAX_VALUE);
+        // log the journey atom with the user metadata
+        FrameworkStatsLog.write(FrameworkStatsLog.USER_LIFECYCLE_JOURNEY_REPORTED, sessionId,
+                journey, /* origin_user= */ -1, userId,
+                UserManager.getUserTypeForStatsd(userType), flags);
+
+        // log the event atom to indicate the event start
+        int event;
+        switch (journey) {
+            case FrameworkStatsLog.USER_LIFECYCLE_JOURNEY_REPORTED__JOURNEY__USER_CREATE:
+                event = FrameworkStatsLog.USER_LIFECYCLE_EVENT_OCCURRED__EVENT__CREATE_USER;
+                break;
+            case FrameworkStatsLog.USER_LIFECYCLE_JOURNEY_REPORTED__JOURNEY__USER_REMOVE:
+                event = FrameworkStatsLog.USER_LIFECYCLE_EVENT_OCCURRED__EVENT__REMOVE_USER;
+                break;
+            default:
+                throw new IllegalArgumentException("Journey " + journey + " not expected.");
+        }
+
+        FrameworkStatsLog.write(FrameworkStatsLog.USER_LIFECYCLE_EVENT_OCCURRED, sessionId, userId,
+                event, FrameworkStatsLog.USER_LIFECYCLE_EVENT_OCCURRED__STATE__BEGIN);
+        return sessionId;
     }
 
     /** Register callbacks for statsd pulled atoms. */
@@ -4620,6 +4653,10 @@ public class UserManagerService extends IUserManager.Stub {
                 userData.info.flags |= UserInfo.FLAG_DISABLED;
                 writeUserLP(userData);
             }
+
+            final long sessionId = logUserRemoveJourneyBegin(
+                    userId, userData.info.userType, userData.info.flags);
+
             try {
                 mAppOpsService.removeUser(userId);
             } catch (RemoteException e) {
@@ -4642,9 +4679,11 @@ public class UserManagerService extends IUserManager.Stub {
                             @Override
                             public void userStopped(int userIdParam) {
                                 finishRemoveUser(userIdParam);
+                                logUserRemoveJourneyFinish(sessionId, userIdParam, true);
                             }
                             @Override
                             public void userStopAborted(int userIdParam) {
+                                logUserRemoveJourneyFinish(sessionId, userIdParam, false);
                             }
                         });
             } catch (RemoteException e) {
