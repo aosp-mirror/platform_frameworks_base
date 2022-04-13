@@ -1163,7 +1163,7 @@
     <string name="textSelectionCABTitle" msgid="5151441579532476940">"ការ​ជ្រើស​អត្ថបទ"</string>
     <string name="addToDictionary" msgid="8041821113480950096">"បន្ថែម​ទៅ​វចនានុក្រម"</string>
     <string name="deleteText" msgid="4200807474529938112">"លុប"</string>
-    <string name="inputMethod" msgid="1784759500516314751">"វិធីសាស្ត្រ​បញ្ចូល"</string>
+    <string name="inputMethod" msgid="1784759500516314751">"វិធីបញ្ចូល"</string>
     <string name="editTextMenuTitle" msgid="857666911134482176">"សកម្មភាព​អត្ថបទ"</string>
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"អស់​ទំហំ​ផ្ទុក"</string>
     <string name="low_internal_storage_view_text" msgid="8172166728369697835">"មុខងារ​ប្រព័ន្ធ​មួយ​ចំនួន​អាច​មិន​ដំណើរការ​"</string>
@@ -1485,7 +1485,7 @@
     <string name="permission_request_notification_for_app_with_subtitle" msgid="1298704005732851350">"ការអនុញ្ញាត​ដែលស្នើដោយ <xliff:g id="APP">%1$s</xliff:g>\nសម្រាប់គណនី <xliff:g id="ACCOUNT">%2$s</xliff:g>។"</string>
     <string name="forward_intent_to_owner" msgid="4620359037192871015">"អ្នក​កំពុង​ប្រើ​កម្មវិធី​នេះ​នៅ​ខាងក្រៅ​ប្រវត្តិរូប​​ការងារ​របស់​អ្នក"</string>
     <string name="forward_intent_to_work" msgid="3620262405636021151">"អ្នក​កំពុង​ប្រើ​កម្មវិធី​នេះ​ក្នុង​ប្រវត្តិរូប​ការងារ​របស់​អ្នក"</string>
-    <string name="input_method_binding_label" msgid="1166731601721983656">"វិធីសាស្ត្រ​បញ្ចូល"</string>
+    <string name="input_method_binding_label" msgid="1166731601721983656">"វិធីបញ្ចូល"</string>
     <string name="sync_binding_label" msgid="469249309424662147">"ធ្វើ​សម​កាល​កម្ម"</string>
     <string name="accessibility_binding_label" msgid="1974602776545801715">"ភាព​ងាយស្រួល"</string>
     <string name="wallpaper_binding_label" msgid="1197440498000786738">"ផ្ទាំង​រូបភាព"</string>
@@ -1716,7 +1716,7 @@
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"បិទ​ផ្លូវកាត់"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"ប្រើប្រាស់​ផ្លូវកាត់"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"បញ្ច្រាស​ពណ៌"</string>
-    <string name="color_correction_feature_name" msgid="3655077237805422597">"ការ​កែ​ពណ៌"</string>
+    <string name="color_correction_feature_name" msgid="3655077237805422597">"ការ​កែតម្រូវ​ពណ៌"</string>
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"មុខងារប្រើដៃម្ខាង"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"ពន្លឺតិចខ្លាំង"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"បានសង្កត់​គ្រាប់ចុច​កម្រិតសំឡេង​ជាប់។ បាន​បើក <xliff:g id="SERVICE_NAME">%1$s</xliff:g>។"</string>
@@ -1875,7 +1875,7 @@
     <string name="confirm_battery_saver" msgid="5247976246208245754">"យល់ព្រម"</string>
     <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"មុខងារ​សន្សំថ្មបើករចនាប័ទ្មងងឹត និងដាក់កំហិត ឬបិទសកម្មភាពផ្ទៃខាងក្រោយ ឥទ្ធិពលរូបភាពមួយចំនួន មុខងារជាក់លាក់ និងការតភ្ជាប់បណ្ដាញមួយចំនួន។"</string>
     <string name="battery_saver_description" msgid="8518809702138617167">"មុខងារ​សន្សំថ្មបើករចនាប័ទ្មងងឹត និងដាក់កំហិត ឬបិទសកម្មភាពផ្ទៃខាងក្រោយ ឥទ្ធិពលរូបភាពមួយចំនួន មុខងារជាក់លាក់ និងការតភ្ជាប់បណ្ដាញមួយចំនួន។"</string>
-    <string name="data_saver_description" msgid="4995164271550590517">"ដើម្បីជួយកាត់បន្ថយការប្រើប្រាស់ទិន្នន័យ កម្មវិធីសន្សំសំចៃទិន្នន័យរារាំងកម្មវិធីមួយចំនួនមិនឲ្យបញ្ជូន ឬទទួលទិន្នន័យនៅផ្ទៃខាងក្រោយទេ។ កម្មវិធីដែលអ្នកកំពុងប្រើនាពេលបច្ចុប្បន្នអាចចូលប្រើប្រាស់​ទិន្នន័យបាន ប៉ុន្តែអាចនឹងមិនញឹកញាប់ដូចមុនទេ។ ឧទាហរណ៍ រូបភាពមិនបង្ហាញទេ លុះត្រាតែអ្នកប៉ះរូបភាពទាំងនោះ។"</string>
+    <string name="data_saver_description" msgid="4995164271550590517">"ដើម្បីជួយកាត់បន្ថយការប្រើប្រាស់ទិន្នន័យ មុខងារសន្សំសំចៃទិន្នន័យរារាំងកម្មវិធីមួយចំនួនមិនឲ្យបញ្ជូន ឬទទួលទិន្នន័យនៅផ្ទៃខាងក្រោយទេ។ កម្មវិធីដែលអ្នកកំពុងប្រើនាពេលបច្ចុប្បន្នអាចចូលប្រើប្រាស់​ទិន្នន័យបាន ប៉ុន្តែអាចនឹងមិនញឹកញាប់ដូចមុនទេ។ ឧទាហរណ៍ រូបភាពមិនបង្ហាញទេ លុះត្រាតែអ្នកប៉ះរូបភាពទាំងនោះ។"</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"បើកកម្មវិធីសន្សំសំចៃទិន្នន័យ?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"បើក"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="2877101784123058273">
