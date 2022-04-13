@@ -123,6 +123,9 @@ public interface ServiceProvider {
     void scheduleInternalCleanup(int sensorId, int userId,
             @Nullable ClientMonitorCallback callback);
 
+    void scheduleInternalCleanup(int sensorId, int userId,
+            @Nullable ClientMonitorCallback callback, boolean favorHalEnrollments);
+
     boolean isHardwareDetected(int sensorId);
 
     void rename(int sensorId, int fingerId, int userId, @NonNull String name);

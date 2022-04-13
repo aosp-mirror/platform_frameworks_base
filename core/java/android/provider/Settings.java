@@ -9659,6 +9659,13 @@ public final class Settings {
                 "biometric_debug_enabled";
 
         /**
+         * Whether or not virtual sensors are enabled.
+         * @hide
+         */
+        @Readable
+        public static final String BIOMETRIC_VIRTUAL_ENABLED = "biometric_virtual_enabled";
+
+        /**
          * Whether or not biometric is allowed on Keyguard.
          * @hide
          */

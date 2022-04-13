@@ -19,9 +19,11 @@ package com.android.server.biometrics.sensors;
 import android.annotation.NonNull;
 import android.content.Context;
 import android.hardware.biometrics.BiometricAuthenticator;
+import android.os.Build;
 import android.os.IBinder;
 import android.util.Slog;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.biometrics.BiometricsProto;
 import com.android.server.biometrics.log.BiometricContext;
 import com.android.server.biometrics.log.BiometricLogger;
@@ -65,6 +67,7 @@ public abstract class InternalCleanupClient<S extends BiometricAuthenticator.Ide
     private final List<S> mEnrolledList;
     private final boolean mHasEnrollmentsBeforeStarting;
     private BaseClientMonitor mCurrentTask;
+    private boolean mFavorHalEnrollments = false;
 
     private final ClientMonitorCallback mEnumerateCallback = new ClientMonitorCallback() {
         @Override
@@ -87,7 +90,21 @@ public abstract class InternalCleanupClient<S extends BiometricAuthenticator.Ide
                 // InternalEnumerateClient. Finish this client.
                 mCallback.onClientFinished(InternalCleanupClient.this, success);
             } else {
-                startCleanupUnknownHalTemplates();
+                if (mFavorHalEnrollments && Build.isDebuggable()) {
+                    // on debug builds, optionally allow the HAL be the source of
+                    // truth for enrollments
+                    try {
+                        for (UserTemplate template : mUnknownHALTemplates) {
+                            Slog.i(TAG, "Adding unknown HAL template: "
+                                    + template.mIdentifier.getBiometricId());
+                            onAddUnknownTemplate(template.mUserId, template.mIdentifier);
+                        }
+                    } finally {
+                        mCallback.onClientFinished(InternalCleanupClient.this, success);
+                    }
+                } else {
+                    startCleanupUnknownHalTemplates();
+                }
             }
         }
     };
@@ -197,8 +214,27 @@ public abstract class InternalCleanupClient<S extends BiometricAuthenticator.Ide
         ((EnumerateConsumer) mCurrentTask).onEnumerationResult(identifier, remaining);
     }
 
+    /** When set unknown templates in the HAL will be added instead of deleted. */
+    public void setFavorHalEnrollments() {
+        mFavorHalEnrollments = true;
+    }
+
+    /** Called when an unknown template is found and setFavorHalEnrollments was requested. */
+    protected void onAddUnknownTemplate(int userId,
+            @NonNull BiometricAuthenticator.Identifier identifier) {}
+
     @Override
     public int getProtoEnum() {
         return BiometricsProto.CM_INTERNAL_CLEANUP;
+    }
+
+    @VisibleForTesting
+    public InternalEnumerateClient<T> getCurrentEnumerateClient() {
+        return (InternalEnumerateClient<T>) mCurrentTask;
+    }
+
+    @VisibleForTesting
+    public RemovalClient<S, T> getCurrentRemoveClient() {
+        return (RemovalClient<S, T>) mCurrentTask;
     }
 }

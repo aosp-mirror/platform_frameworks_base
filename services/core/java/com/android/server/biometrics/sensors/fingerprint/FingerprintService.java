@@ -32,6 +32,7 @@ import static android.hardware.biometrics.SensorProperties.STRENGTH_STRONG;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.ActivityManager;
 import android.app.AppOpsManager;
 import android.content.Context;
 import android.content.pm.PackageManager;
@@ -67,7 +68,9 @@ import android.os.Looper;
 import android.os.Process;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
+import android.os.ResultReceiver;
 import android.os.ServiceManager;
+import android.os.ShellCallback;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
@@ -621,6 +624,15 @@ public class FingerprintService extends SystemService {
         }
 
         @Override // Binder call
+        public void onShellCommand(@Nullable FileDescriptor in, @Nullable FileDescriptor out,
+                @Nullable FileDescriptor err, @NonNull String[] args,
+                @Nullable ShellCallback callback, @NonNull ResultReceiver resultReceiver)
+                throws RemoteException {
+            (new FingerprintShellCommand(getContext(), FingerprintService.this))
+                    .exec(this, in, out, err, args, callback, resultReceiver);
+        }
+
+        @Override // Binder call
         protected void dump(@NonNull FileDescriptor fd, @NonNull PrintWriter pw, String[] args) {
             if (!DumpUtils.checkDumpPermission(getContext(), TAG, pw)) {
                 return;
@@ -1171,5 +1183,19 @@ public class FingerprintService extends SystemService {
             appOpsOk = true;
         }
         return appOpsOk;
+    }
+
+    void syncEnrollmentsNow() {
+        Utils.checkPermissionOrShell(getContext(), MANAGE_FINGERPRINT);
+        if (Utils.isVirtualEnabled(getContext())) {
+            Slog.i(TAG, "Sync virtual enrollments");
+            final int userId = ActivityManager.getCurrentUser();
+            for (ServiceProvider provider : mServiceProviders) {
+                for (FingerprintSensorPropertiesInternal props : provider.getSensorProperties()) {
+                    provider.scheduleInternalCleanup(props.sensorId, userId, null /* callback */,
+                            true /* favorHalEnrollments */);
+                }
+            }
+        }
     }
 }
