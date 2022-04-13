@@ -892,15 +892,6 @@ public class AdbDebuggingManager {
 
                 case MESSAGE_ADB_CONFIRM: {
                     String key = (String) msg.obj;
-                    if ("trigger_restart_min_framework".equals(
-                            SystemProperties.get("vold.decrypt"))) {
-                        Slog.w(TAG, "Deferring adb confirmation until after vold decrypt");
-                        if (mThread != null) {
-                            mThread.sendResponse("NO");
-                            logAdbConnectionChanged(key, AdbProtoEnums.DENIED_VOLD_DECRYPT, false);
-                        }
-                        break;
-                    }
                     String fingerprints = getFingerprints(key);
                     if ("".equals(fingerprints)) {
                         if (mThread != null) {
