@@ -2068,14 +2068,10 @@
     <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"Додирните да бисте сазнали више и променили подешавање."</string>
     <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"Режим Не узнемиравај је промењен"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Додирните да бисте проверили шта је блокирано."</string>
-    <!-- no translation found for review_notification_settings_title (5102557424459810820) -->
-    <skip />
-    <!-- no translation found for review_notification_settings_text (5696497037817525074) -->
-    <skip />
-    <!-- no translation found for review_notification_settings_remind_me_action (1081081018678480907) -->
-    <skip />
-    <!-- no translation found for review_notification_settings_dismiss (4160916504616428294) -->
-    <skip />
+    <string name="review_notification_settings_title" msgid="5102557424459810820">"Прегледајте подешавања обавештења"</string>
+    <string name="review_notification_settings_text" msgid="5696497037817525074">"У Android-у 13 апликације које инсталирате морају да имају дозволу за слање обавештења. Додирните да бисте променили ову дозволу за постојеће апликације."</string>
+    <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"Подсети ме касније"</string>
+    <string name="review_notification_settings_dismiss" msgid="4160916504616428294">"Одбаци"</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"Систем"</string>
     <string name="notification_app_name_settings" msgid="9088548800899952531">"Подешавања"</string>
     <string name="notification_appops_camera_active" msgid="8177643089272352083">"Камера"</string>
@@ -2294,9 +2290,11 @@
     <string name="ui_translation_accessibility_translated_text" msgid="3197547218178944544">"<xliff:g id="MESSAGE">%1$s</xliff:g> Преведено."</string>
     <string name="ui_translation_accessibility_translation_finished" msgid="3057830947610088465">"Порука је преведена са језика <xliff:g id="FROM_LANGUAGE">%1$s</xliff:g> на <xliff:g id="TO_LANGUAGE">%2$s</xliff:g>."</string>
     <string name="notification_channel_abusive_bg_apps" msgid="6092140213264920355">"Активност у позадини"</string>
-    <string name="notification_title_abusive_bg_apps" msgid="3258460527676573815">"Апликација користи батерију"</string>
+    <!-- no translation found for notification_title_abusive_bg_apps (994230770856147656) -->
+    <skip />
     <string name="notification_title_long_running_fgs" msgid="8170284286477131587">"Апликација је и даље активна"</string>
-    <string name="notification_content_abusive_bg_apps" msgid="9180610713603474720">"<xliff:g id="APP">%1$s</xliff:g> користи батерију у позадини. Додирните да бисте прегледали."</string>
+    <!-- no translation found for notification_content_abusive_bg_apps (5296898075922695259) -->
+    <skip />
     <string name="notification_content_long_running_fgs" msgid="8258193410039977101">"<xliff:g id="APP">%1$s</xliff:g> може да утиче на трајање батерије. Додирните да бисте прегледали активне апликације."</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Проверите активне апликације"</string>
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"Не може да се приступи камери телефона са <xliff:g id="DEVICE">%1$s</xliff:g> уређаја"</string>

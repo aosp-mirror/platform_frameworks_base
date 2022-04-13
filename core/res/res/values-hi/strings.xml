@@ -2293,9 +2293,11 @@
     <string name="ui_translation_accessibility_translated_text" msgid="3197547218178944544">"<xliff:g id="MESSAGE">%1$s</xliff:g> का अनुवाद किया गया."</string>
     <string name="ui_translation_accessibility_translation_finished" msgid="3057830947610088465">"मैसेज का <xliff:g id="FROM_LANGUAGE">%1$s</xliff:g> से <xliff:g id="TO_LANGUAGE">%2$s</xliff:g> में अनुवाद किया गया."</string>
     <string name="notification_channel_abusive_bg_apps" msgid="6092140213264920355">"बैकग्राउंड में हो रही गतिविधि"</string>
-    <string name="notification_title_abusive_bg_apps" msgid="3258460527676573815">"कोई ऐप्लिकेशन, बैटरी का इस्तेमाल कर रहा है"</string>
+    <!-- no translation found for notification_title_abusive_bg_apps (994230770856147656) -->
+    <skip />
     <string name="notification_title_long_running_fgs" msgid="8170284286477131587">"कोई ऐप्लिकेशन अब भी चालू है"</string>
-    <string name="notification_content_abusive_bg_apps" msgid="9180610713603474720">"<xliff:g id="APP">%1$s</xliff:g>, बैकग्राउंड में बैटरी का इस्तेमाल कर रहा है. समीक्षा करने के लिए टैप करें."</string>
+    <!-- no translation found for notification_content_abusive_bg_apps (5296898075922695259) -->
+    <skip />
     <string name="notification_content_long_running_fgs" msgid="8258193410039977101">"<xliff:g id="APP">%1$s</xliff:g> से, आपके डिवाइस की बैटरी लाइफ़ पर असर पड़ सकता है. चालू ऐप्लिकेशन देखने के लिए टैप करें."</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"चालू ऐप्लिकेशन देखें"</string>
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"आपके <xliff:g id="DEVICE">%1$s</xliff:g> से फ़ोन के कैमरे को ऐक्सेस नहीं किया जा सकता"</string>
