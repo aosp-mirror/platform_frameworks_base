@@ -68,16 +68,18 @@ import android.window.DisplayWindowPolicyController;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.BlockedAppStreamingActivity;
+import com.android.server.companion.virtual.GenericWindowPolicyController.RunningAppsChangedListener;
 import com.android.server.companion.virtual.audio.VirtualAudioController;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Consumer;
 
 
 final class VirtualDeviceImpl extends IVirtualDevice.Stub
-        implements IBinder.DeathRecipient {
+        implements IBinder.DeathRecipient, RunningAppsChangedListener {
 
     private static final String TAG = "VirtualDeviceImpl";
 
@@ -101,6 +103,8 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
     private final VirtualDeviceParams mParams;
     private final Map<Integer, PowerManager.WakeLock> mPerDisplayWakelocks = new ArrayMap<>();
     private final IVirtualDeviceActivityListener mActivityListener;
+    @NonNull
+    private Consumer<ArraySet<Integer>> mRunningAppsChangedCallback;
     // The default setting for showing the pointer on new displays.
     @GuardedBy("mVirtualDeviceLock")
     private boolean mDefaultShowPointerIcon = true;
@@ -139,21 +143,25 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
             IBinder token, int ownerUid, OnDeviceCloseListener listener,
             PendingTrampolineCallback pendingTrampolineCallback,
             IVirtualDeviceActivityListener activityListener,
+            Consumer<ArraySet<Integer>> runningAppsChangedCallback,
             VirtualDeviceParams params) {
         this(context, associationInfo, token, ownerUid, /* inputController= */ null, listener,
-                pendingTrampolineCallback, activityListener, params);
+                pendingTrampolineCallback, activityListener, runningAppsChangedCallback, params);
     }
 
     @VisibleForTesting
     VirtualDeviceImpl(Context context, AssociationInfo associationInfo, IBinder token,
             int ownerUid, InputController inputController, OnDeviceCloseListener listener,
             PendingTrampolineCallback pendingTrampolineCallback,
-            IVirtualDeviceActivityListener activityListener, VirtualDeviceParams params) {
+            IVirtualDeviceActivityListener activityListener,
+            Consumer<ArraySet<Integer>> runningAppsChangedCallback,
+            VirtualDeviceParams params) {
         UserHandle ownerUserHandle = UserHandle.getUserHandleForUid(ownerUid);
         mContext = context.createContextAsUser(ownerUserHandle, 0);
         mAssociationInfo = associationInfo;
         mPendingTrampolineCallback = pendingTrampolineCallback;
         mActivityListener = activityListener;
+        mRunningAppsChangedCallback = runningAppsChangedCallback;
         mOwnerUid = ownerUid;
         mAppToken = token;
         mParams = params;
@@ -276,6 +284,11 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
     @Override
     public void binderDied() {
         close();
+    }
+
+    @Override
+    public void onRunningAppsChanged(ArraySet<Integer> runningUids) {
+        mRunningAppsChangedCallback.accept(runningUids);
     }
 
     @VisibleForTesting
@@ -529,7 +542,7 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
             // reentrancy  problems.
             mContext.getMainThreadHandler().post(() -> addWakeLockForDisplay(displayId));
 
-            final GenericWindowPolicyController dwpc =
+            final GenericWindowPolicyController gwpc =
                     new GenericWindowPolicyController(FLAG_SECURE,
                             SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS,
                             getAllowedUserHandles(),
@@ -540,8 +553,9 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
                             mParams.getDefaultActivityPolicy(),
                             createListenerAdapter(displayId),
                             activityInfo -> onActivityBlocked(displayId, activityInfo));
-            mWindowPolicyControllers.put(displayId, dwpc);
-            return dwpc;
+            gwpc.registerRunningAppsChangedListener(/* listener= */ this);
+            mWindowPolicyControllers.put(displayId, gwpc);
+            return gwpc;
         }
     }
 
@@ -598,6 +612,10 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
             if (wakeLock != null) {
                 wakeLock.release();
                 mPerDisplayWakelocks.remove(displayId);
+            }
+            GenericWindowPolicyController gwpc = mWindowPolicyControllers.get(displayId);
+            if (gwpc != null) {
+                gwpc.unregisterRunningAppsChangedListener(/* listener= */ this);
             }
             mVirtualDisplayIds.remove(displayId);
             mWindowPolicyControllers.remove(displayId);

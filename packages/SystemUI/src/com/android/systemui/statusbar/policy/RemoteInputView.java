@@ -264,8 +264,12 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
                 super.onEnd(animation);
                 if (animation.getTypeMask() == WindowInsets.Type.ime()) {
                     mEntry.mRemoteEditImeAnimatingAway = false;
-                    mEntry.mRemoteEditImeVisible =
-                            mEditText.getRootWindowInsets().isVisible(WindowInsets.Type.ime());
+                    WindowInsets editTextRootWindowInsets = mEditText.getRootWindowInsets();
+                    if (editTextRootWindowInsets == null) {
+                        Log.w(TAG, "onEnd called on detached view", new Exception());
+                    }
+                    mEntry.mRemoteEditImeVisible = editTextRootWindowInsets != null
+                            && editTextRootWindowInsets.isVisible(WindowInsets.Type.ime());
                     if (!mEntry.mRemoteEditImeVisible && !mEditText.mShowImeOnInputConnection) {
                         mController.removeRemoteInput(mEntry, mToken);
                     }

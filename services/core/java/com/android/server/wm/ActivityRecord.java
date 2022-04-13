@@ -3967,6 +3967,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         } else {
             onRemovedFromDisplay();
         }
+        mActivityRecordInputSink.releaseSurfaceControl();
+
         super.removeImmediately();
     }
 
@@ -5551,7 +5553,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      * this activity when embedded in untrusted mode.
      */
     boolean hasOverlayOverUntrustedModeEmbedded() {
-        if (!isEmbeddedInUntrustedMode() || getRootTask() == null) {
+        if (!isEmbeddedInUntrustedMode() || getTask() == null) {
             // The activity is not embedded in untrusted mode.
             return false;
         }
@@ -5559,7 +5561,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // Check if there are any activities with different UID over the activity that is embedded
         // in untrusted mode. Traverse bottom to top with boundary so that it will only check
         // activities above this activity.
-        final ActivityRecord differentUidOverlayActivity = getRootTask().getActivity(
+        final ActivityRecord differentUidOverlayActivity = getTask().getActivity(
                 a -> a.getUid() != getUid(), this /* boundary */, false /* includeBoundary */,
                 false /* traverseTopToBottom */);
         return differentUidOverlayActivity != null;
@@ -6298,7 +6300,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // starting window is drawn, the transition can start earlier. Exclude finishing and bubble
         // because it may be a trampoline.
         if (!wasTaskVisible && mStartingData != null && !finishing && !mLaunchedFromBubble
-                && !mDisplayContent.mAppTransition.isReady()
+                && mVisibleRequested && !mDisplayContent.mAppTransition.isReady()
                 && !mDisplayContent.mAppTransition.isRunning()
                 && mDisplayContent.isNextTransitionForward()) {
             // The pending transition state will be cleared after the transition is started, so

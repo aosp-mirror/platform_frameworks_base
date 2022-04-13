@@ -108,7 +108,7 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
     static final int EXIT_REASON_ROOT_TASK_VANISHED = 6;
     static final int EXIT_REASON_SCREEN_LOCKED = 7;
     static final int EXIT_REASON_SCREEN_LOCKED_SHOW_ON_TOP = 8;
-    static final int EXIT_REASON_CHILD_TASK_ENTER_PIP = 9;
+    public static final int EXIT_REASON_CHILD_TASK_ENTER_PIP = 9;
     @IntDef(value = {
             EXIT_REASON_UNKNOWN,
             EXIT_REASON_APP_DOES_NOT_SUPPORT_MULTIWINDOW,
@@ -196,6 +196,10 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
 
     public boolean isSplitScreenVisible() {
         return mStageCoordinator.isSplitScreenVisible();
+    }
+
+    public StageCoordinator getTransitionHandler() {
+        return mStageCoordinator;
     }
 
     @Nullable

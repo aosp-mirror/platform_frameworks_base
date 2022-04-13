@@ -389,6 +389,10 @@ class KeyguardUnlockAnimationController @Inject constructor(
         listeners.add(listener)
     }
 
+    fun removeKeyguardUnlockAnimationListener(listener: KeyguardUnlockAnimationListener) {
+        listeners.remove(listener)
+    }
+
     /**
      * Called from [KeyguardViewMediator] to tell us that the RemoteAnimation on the surface behind
      * the keyguard has started successfully. We can use these parameters to directly manipulate the

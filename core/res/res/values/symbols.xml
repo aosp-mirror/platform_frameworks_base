@@ -379,6 +379,7 @@
   <java-symbol type="bool" name="config_supportSpeakerNearUltrasound" />
   <java-symbol type="bool" name="config_supportAudioSourceUnprocessed" />
   <java-symbol type="bool" name="config_freeformWindowManagement" />
+  <java-symbol type="bool" name="config_supportsBubble" />
   <java-symbol type="bool" name="config_supportsMultiWindow" />
   <java-symbol type="bool" name="config_supportsSplitScreenMultiWindow" />
   <java-symbol type="bool" name="config_supportsMultiDisplay" />
@@ -3604,6 +3605,7 @@
   <java-symbol type="dimen" name="notification_actions_icon_drawable_size"/>
   <java-symbol type="dimen" name="notification_custom_view_max_image_height"/>
   <java-symbol type="dimen" name="notification_custom_view_max_image_width"/>
+  <java-symbol type="dimen" name="notification_person_icon_max_size" />
 
   <java-symbol type="dimen" name="notification_small_icon_size_low_ram"/>
   <java-symbol type="dimen" name="notification_big_picture_max_height_low_ram"/>
@@ -3612,6 +3614,7 @@
   <java-symbol type="dimen" name="notification_grayscale_icon_max_size"/>
   <java-symbol type="dimen" name="notification_custom_view_max_image_height_low_ram"/>
   <java-symbol type="dimen" name="notification_custom_view_max_image_width_low_ram"/>
+  <java-symbol type="dimen" name="notification_person_icon_max_size_low_ram" />
 
   <!-- Accessibility fingerprint gestures -->
   <java-symbol type="string" name="capability_title_canCaptureFingerprintGestures" />
@@ -4774,4 +4777,6 @@
   <java-symbol type="layout" name="app_language_picker_current_locale_item" />
   <java-symbol type="id" name="system_locale_subtitle" />
   <java-symbol type="id" name="language_picker_item" />
+
+  <java-symbol type="dimen" name="status_bar_height_default" />
 </resources>

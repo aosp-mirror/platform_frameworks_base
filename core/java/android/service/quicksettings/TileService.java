@@ -353,7 +353,13 @@ public class TileService extends Service {
         try {
             mTile = mService.getTile(mTileToken);
         } catch (RemoteException e) {
-            throw new RuntimeException("Unable to reach IQSService", e);
+            String name = TileService.this.getClass().getSimpleName();
+            Log.w(TAG, name + " - Couldn't get tile from IQSService.", e);
+            // If we couldn't receive the tile, there's not much reason to continue as users won't
+            // be able to interact. Returning `null` will trigger an unbind in SystemUI and
+            // eventually we'll rebind when needed. This usually means that SystemUI crashed
+            // right after binding and therefore `mService` is outdated.
+            return null;
         }
         if (mTile != null) {
             mTile.setService(mService, mTileToken);
