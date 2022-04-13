@@ -77,8 +77,7 @@ interface IPermissionManager {
     List<SplitPermissionInfoParcelable> getSplitPermissions();
 
     void startOneTimePermissionSession(String packageName, int userId, long timeout,
-            long revokeAfterKilledDelay, int importanceToResetTimer,
-            int importanceToKeepSessionAlive);
+            long revokeAfterKilledDelay);
 
     void stopOneTimePermissionSession(String packageName, int userId);
 
