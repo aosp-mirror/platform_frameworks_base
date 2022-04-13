@@ -31,6 +31,8 @@ import android.provider.Settings;
 import android.util.Log;
 import android.util.MathUtils;
 
+import android.util.Log;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.VisibleForTesting;
 
@@ -291,11 +293,27 @@ public class DozeParameters implements
     }
 
     public void updateControlScreenOff() {
+        Log.i("TEST", "Display needs blanking?" + getDisplayNeedsBlanking());
+        Log.i("TEST", "Should control screen off?" + shouldControlUnlockedScreenOff());
+        Log.i("TEST", "alwaysOn?" + getAlwaysOn());
+        Log.i("TEST", "keyguard showing?" + mKeyguardShowing);
+        Log.i("TEST", "Flag enabled? " + mFeatureFlags.isEnabled(Flags.LOCKSCREEN_ANIMATIONS));
         if (!getDisplayNeedsBlanking()) {
             final boolean controlScreenOff =
                     getAlwaysOn() && (mKeyguardShowing || shouldControlUnlockedScreenOff());
             setControlScreenOffAnimation(controlScreenOff);
         }
+    }
+
+    /**
+     * Whether we're capable of controlling the screen off animation if we want to. This isn't
+     * possible if AOD isn't even enabled or if the flag is disabled, or if the display needs
+     * blanking.
+     */
+    public boolean canControlUnlockedScreenOff() {
+        return getAlwaysOn()
+                && mFeatureFlags.isEnabled(Flags.LOCKSCREEN_ANIMATIONS)
+                && !getDisplayNeedsBlanking();
     }
 
     /**
@@ -308,8 +326,7 @@ public class DozeParameters implements
      * disabled for a11y.
      */
     public boolean shouldControlUnlockedScreenOff() {
-        return canControlUnlockedScreenOff()
-                && mUnlockedScreenOffAnimationController.shouldPlayUnlockedScreenOffAnimation();
+        return mUnlockedScreenOffAnimationController.shouldPlayUnlockedScreenOffAnimation();
     }
 
     public boolean shouldDelayKeyguardShow() {
@@ -339,16 +356,6 @@ public class DozeParameters implements
 
     private boolean willAnimateFromLockScreenToAod() {
         return getAlwaysOn() && mKeyguardShowing;
-    }
-
-    /**
-     * Whether we're capable of controlling the screen off animation if we want to. This isn't
-     * possible if AOD isn't even enabled or if the flag is disabled.
-     */
-    public boolean canControlUnlockedScreenOff() {
-        return getAlwaysOn()
-                && mFeatureFlags.isEnabled(Flags.LOCKSCREEN_ANIMATIONS)
-                && !getDisplayNeedsBlanking();
     }
 
     private boolean getBoolean(String propName, int resId) {

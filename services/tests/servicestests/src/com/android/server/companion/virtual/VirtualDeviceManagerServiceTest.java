@@ -92,6 +92,7 @@ import org.mockito.MockitoAnnotations;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.function.Consumer;
 
 @Presubmit
 @RunWith(AndroidTestingRunner.class)
@@ -132,6 +133,8 @@ public class VirtualDeviceManagerServiceTest {
     private InputManagerInternal mInputManagerInternalMock;
     @Mock
     private IVirtualDeviceActivityListener mActivityListener;
+    @Mock
+    private Consumer<ArraySet<Integer>> mRunningAppsChangedCallback;
     @Mock
     IPowerManager mIPowerManagerMock;
     @Mock
@@ -207,7 +210,7 @@ public class VirtualDeviceManagerServiceTest {
         mDeviceImpl = new VirtualDeviceImpl(mContext,
                 mAssociationInfo, new Binder(), /* uid */ 0, mInputController,
                 (int associationId) -> {
-                }, mPendingTrampolineCallback, mActivityListener,
+                }, mPendingTrampolineCallback, mActivityListener, mRunningAppsChangedCallback,
                 params);
     }
 

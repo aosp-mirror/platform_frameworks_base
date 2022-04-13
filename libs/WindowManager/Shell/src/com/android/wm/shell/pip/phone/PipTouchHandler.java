@@ -53,6 +53,7 @@ import com.android.wm.shell.pip.PipAnimationController;
 import com.android.wm.shell.pip.PipBoundsAlgorithm;
 import com.android.wm.shell.pip.PipBoundsState;
 import com.android.wm.shell.pip.PipTaskOrganizer;
+import com.android.wm.shell.pip.PipTransitionController;
 import com.android.wm.shell.pip.PipUiEventLogger;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
 
@@ -247,6 +248,10 @@ public class PipTouchHandler {
                                 DEFAULT_STASH_VELOCITY_THRESHOLD);
                     }
                 });
+    }
+
+    public PipTransitionController getTransitionHandler() {
+        return mPipTaskOrganizer.getTransitionController();
     }
 
     private void reloadResources() {

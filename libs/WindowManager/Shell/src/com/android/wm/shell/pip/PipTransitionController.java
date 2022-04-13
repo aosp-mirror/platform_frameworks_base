@@ -17,6 +17,7 @@
 package com.android.wm.shell.pip;
 
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
+import static android.view.WindowManager.TRANSIT_PIP;
 
 import static com.android.wm.shell.pip.PipAnimationController.TRANSITION_DIRECTION_REMOVE_STACK;
 import static com.android.wm.shell.pip.PipAnimationController.isInPipDirection;
@@ -28,9 +29,15 @@ import android.content.ComponentName;
 import android.content.pm.ActivityInfo;
 import android.graphics.Rect;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.Looper;
 import android.view.SurfaceControl;
+import android.view.WindowManager;
+import android.window.TransitionInfo;
+import android.window.TransitionRequestInfo;
 import android.window.WindowContainerTransaction;
+
+import androidx.annotation.NonNull;
 
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.transition.Transitions;
@@ -204,6 +211,30 @@ public abstract class PipTransitionController implements Transitions.TransitionH
     public boolean handleRotateDisplay(int startRotation, int endRotation,
             WindowContainerTransaction wct) {
         return false;
+    }
+
+    /** @return whether the transition-request represents a pip-entry. */
+    public boolean requestHasPipEnter(@NonNull TransitionRequestInfo request) {
+        return request.getType() == TRANSIT_PIP;
+    }
+
+    /** Whether a particular change is a window that is entering pip. */
+    public boolean isEnteringPip(@NonNull TransitionInfo.Change change,
+            @WindowManager.TransitionType int transitType) {
+        return false;
+    }
+
+    /** Add PiP-related changes to `outWCT` for the given request. */
+    public void augmentRequest(@NonNull IBinder transition,
+            @NonNull TransitionRequestInfo request, @NonNull WindowContainerTransaction outWCT) {
+        throw new IllegalStateException("Request isn't entering PiP");
+    }
+
+    /** Play a transition animation for entering PiP on a specific PiP change. */
+    public void startEnterAnimation(@NonNull final TransitionInfo.Change pipChange,
+            @NonNull final SurfaceControl.Transaction startTransaction,
+            @NonNull final SurfaceControl.Transaction finishTransaction,
+            @NonNull final Transitions.TransitionFinishCallback finishCallback) {
     }
 
     /**
