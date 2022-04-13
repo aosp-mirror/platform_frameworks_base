@@ -968,7 +968,7 @@ public class ParsingPackageUtils {
         if (ParsedPermissionUtils.declareDuplicatePermission(pkg)) {
             return input.error(
                     INSTALL_PARSE_FAILED_MANIFEST_MALFORMED,
-                    "Declare duplicate permissions with different protection levels."
+                    "Found duplicate permission with a different attribute value."
             );
         }
 
