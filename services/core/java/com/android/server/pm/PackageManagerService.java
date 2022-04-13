@@ -1538,6 +1538,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
     }
 
     // Link watchables to the class
+    @SuppressWarnings("GuardedBy")
     private void registerObservers(boolean verify) {
         // Null check to handle nullable test parameters
         if (mPackages != null) {
@@ -2251,7 +2252,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
 
     @GuardedBy("mLock")
     void updateInstantAppInstallerLocked(String modifiedPackage) {
-        // we're only interested in updating the installer appliction when 1) it's not
+        // we're only interested in updating the installer application when 1) it's not
         // already set or 2) the modified package is the installer
         if (mInstantAppInstallerActivity != null
                 && !mInstantAppInstallerActivity.getComponentName().getPackageName()
@@ -2735,7 +2736,6 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         return mModuleInfoProvider.getModuleInfo(packageName, flags);
     }
 
-    @GuardedBy("mLock")
     void updateSequenceNumberLP(PackageSetting pkgSetting, int[] userList) {
         mChangedPackagesTracker.updateSequenceNumber(pkgSetting.getPackageName(), userList);
     }
@@ -3069,8 +3069,8 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                 userId);
     }
 
-    private void enforceCanSetDistractingPackageRestrictionsAsUser(@NonNull Computer snapshot,
-            int callingUid, int userId, String callingMethod) {
+    private void enforceCanSetDistractingPackageRestrictionsAsUser(int callingUid, int userId,
+            String callingMethod) {
         mContext.enforceCallingOrSelfPermission(Manifest.permission.SUSPEND_APPS,
                 callingMethod);
 
@@ -3137,6 +3137,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         });
     }
 
+    @SuppressWarnings("GuardedBy")
     VersionInfo getSettingsVersionForPackage(AndroidPackage pkg) {
         if (pkg.isExternalStorage()) {
             if (TextUtils.isEmpty(pkg.getVolumeUuid())) {
@@ -3266,6 +3267,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
      * Update component enabled settings to {@link PackageManager#COMPONENT_ENABLED_STATE_DEFAULT}
      * if the resetEnabledSettingsOnAppDataCleared is {@code true}.
      */
+    @GuardedBy("mLock")
     private void resetComponentEnabledSettingsIfNeededLPw(String packageName, int userId) {
         final AndroidPackage pkg = packageName != null ? mPackages.get(packageName) : null;
         if (pkg == null || !pkg.isResetEnabledSettingsOnAppDataCleared()) {
@@ -3857,6 +3859,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         }
     }
 
+    @GuardedBy("mLock")
     private boolean setEnabledSettingInternalLocked(@NonNull Computer computer,
             PackageSetting pkgSetting, ComponentEnabledSetting setting, @UserIdInt int userId,
             String callingPackage) {
@@ -4532,7 +4535,9 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                             final Computer snapshot = snapshotComputer();
                             unsuspendForSuspendingPackage(snapshot, packageName, userId);
                             removeAllDistractingPackageRestrictions(snapshot, userId);
-                            flushPackageRestrictionsAsUserInternalLocked(userId);
+                            synchronized (mLock) {
+                                flushPackageRestrictionsAsUserInternalLocked(userId);
+                            }
                         }
                     }
                     if (observer != null) {
@@ -4950,6 +4955,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         }
 
         @Override
+        @SuppressWarnings("GuardedBy")
         public int getRuntimePermissionsVersion(@UserIdInt int userId) {
             Preconditions.checkArgumentNonnegative(userId);
             enforceAdjustRuntimePermissionsPolicyOrUpgradeRuntimePermissions(
@@ -5558,7 +5564,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                 int restrictionFlags, int userId) {
             final int callingUid = Binder.getCallingUid();
             final Computer snapshot = snapshotComputer();
-            enforceCanSetDistractingPackageRestrictionsAsUser(snapshot, callingUid, userId,
+            enforceCanSetDistractingPackageRestrictionsAsUser(callingUid, userId,
                     "setDistractingPackageRestrictionsAsUser");
             Objects.requireNonNull(packageNames, "packageNames cannot be null");
             return mDistractingPackageHelper.setDistractingPackageRestrictionsAsUser(snapshot,
@@ -5827,6 +5833,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         }
 
         @Override
+        @SuppressWarnings("GuardedBy")
         public void setRuntimePermissionsVersion(int version, @UserIdInt int userId) {
             Preconditions.checkArgumentNonnegative(version);
             Preconditions.checkArgumentNonnegative(userId);
@@ -6346,6 +6353,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         }
 
         @Override
+        @SuppressWarnings("GuardedBy")
         public void updateRuntimePermissionsFingerprint(@UserIdInt int userId) {
             mSettings.updateRuntimePermissionsFingerprint(userId);
         }
@@ -6380,6 +6388,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         }
 
         @Override
+        @SuppressWarnings("GuardedBy")
         public boolean isPermissionUpgradeNeeded(int userId) {
             return mSettings.isPermissionUpgradeNeeded(userId);
         }

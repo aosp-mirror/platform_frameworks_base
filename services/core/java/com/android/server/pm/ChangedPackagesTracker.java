@@ -90,25 +90,27 @@ class ChangedPackagesTracker {
     }
 
     void updateSequenceNumber(@NonNull String packageName, int[] userList) {
-        for (int i = userList.length - 1; i >= 0; --i) {
-            final int userId = userList[i];
-            SparseArray<String> changedPackages = mUserIdToSequenceToPackage.get(userId);
-            if (changedPackages == null) {
-                changedPackages = new SparseArray<>();
-                mUserIdToSequenceToPackage.put(userId, changedPackages);
+        synchronized (mLock) {
+            for (int i = userList.length - 1; i >= 0; --i) {
+                final int userId = userList[i];
+                SparseArray<String> changedPackages = mUserIdToSequenceToPackage.get(userId);
+                if (changedPackages == null) {
+                    changedPackages = new SparseArray<>();
+                    mUserIdToSequenceToPackage.put(userId, changedPackages);
+                }
+                Map<String, Integer> sequenceNumbers = mChangedPackagesSequenceNumbers.get(userId);
+                if (sequenceNumbers == null) {
+                    sequenceNumbers = new HashMap<>();
+                    mChangedPackagesSequenceNumbers.put(userId, sequenceNumbers);
+                }
+                final Integer sequenceNumber = sequenceNumbers.get(packageName);
+                if (sequenceNumber != null) {
+                    changedPackages.remove(sequenceNumber);
+                }
+                changedPackages.put(mChangedPackagesSequenceNumber, packageName);
+                sequenceNumbers.put(packageName, mChangedPackagesSequenceNumber);
             }
-            Map<String, Integer> sequenceNumbers = mChangedPackagesSequenceNumbers.get(userId);
-            if (sequenceNumbers == null) {
-                sequenceNumbers = new HashMap<>();
-                mChangedPackagesSequenceNumbers.put(userId, sequenceNumbers);
-            }
-            final Integer sequenceNumber = sequenceNumbers.get(packageName);
-            if (sequenceNumber != null) {
-                changedPackages.remove(sequenceNumber);
-            }
-            changedPackages.put(mChangedPackagesSequenceNumber, packageName);
-            sequenceNumbers.put(packageName, mChangedPackagesSequenceNumber);
+            mChangedPackagesSequenceNumber++;
         }
-        mChangedPackagesSequenceNumber++;
     }
 }
