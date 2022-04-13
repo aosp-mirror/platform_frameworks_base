@@ -1689,7 +1689,7 @@
     <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"Neatļaut"</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"Pieskarieties funkcijai, lai sāktu to izmantot"</string>
     <string name="accessibility_edit_shortcut_menu_button_title" msgid="239446795930436325">"Izvēlieties funkcijas, ko izmantot ar pieejamības pogu"</string>
-    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="1077294237378645981">"Izvēlieties funkcijas, ko izmantot ar skaļuma pogu īsinājumtaustiņu"</string>
+    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="1077294237378645981">"Izvēlieties funkcijas, ko izmantot ar skaļuma pogu saīsni"</string>
     <string name="accessibility_uncheck_legacy_item_warning" msgid="8047830891064817447">"Pakalpojums <xliff:g id="SERVICE_NAME">%s</xliff:g> ir izslēgts."</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"Rediģēt īsinājumtaustiņus"</string>
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"Gatavs"</string>
@@ -2294,9 +2294,11 @@
     <string name="ui_translation_accessibility_translated_text" msgid="3197547218178944544">"Iztulkots: <xliff:g id="MESSAGE">%1$s</xliff:g>."</string>
     <string name="ui_translation_accessibility_translation_finished" msgid="3057830947610088465">"Ziņojums ir iztulkots no šādas valodas: <xliff:g id="FROM_LANGUAGE">%1$s</xliff:g> šādā valodā: <xliff:g id="TO_LANGUAGE">%2$s</xliff:g>."</string>
     <string name="notification_channel_abusive_bg_apps" msgid="6092140213264920355">"Darbība fonā"</string>
-    <string name="notification_title_abusive_bg_apps" msgid="3258460527676573815">"Lietotne patērē akumulatora enerģiju"</string>
+    <!-- no translation found for notification_title_abusive_bg_apps (994230770856147656) -->
+    <skip />
     <string name="notification_title_long_running_fgs" msgid="8170284286477131587">"Lietotne joprojām ir aktīva"</string>
-    <string name="notification_content_abusive_bg_apps" msgid="9180610713603474720">"Lietotne <xliff:g id="APP">%1$s</xliff:g> patērē akumulatora enerģiju fonā. Pieskarieties, lai pārskatītu."</string>
+    <!-- no translation found for notification_content_abusive_bg_apps (5296898075922695259) -->
+    <skip />
     <string name="notification_content_long_running_fgs" msgid="8258193410039977101">"Lietotne <xliff:g id="APP">%1$s</xliff:g> var ietekmēt akumulatora darbības ilgumu. Pieskarieties, lai pārskatītu aktīvās lietotnes."</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Pārbaudiet aktīvās lietotnes"</string>
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"Nevar piekļūt tālruņa kamerai no jūsu ierīces (<xliff:g id="DEVICE">%1$s</xliff:g>)."</string>
