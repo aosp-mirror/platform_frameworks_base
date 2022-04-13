@@ -403,7 +403,7 @@
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"Afișați avertismentele de pe canalul de notificări"</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"Afișați avertisment pe ecran când o aplicație postează o notificare fără canal valid"</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"Forțați accesul aplicațiilor la stocarea externă"</string>
-    <string name="force_allow_on_external_summary" msgid="8525425782530728238">"Faceți ca orice aplicație eligibilă să fie scrisă în stocarea externă, indiferent de valorile manifestului"</string>
+    <string name="force_allow_on_external_summary" msgid="8525425782530728238">"Permiteți scrierea oricărei aplicații eligibile în stocarea externă, indiferent de valorile manifestului"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"Forțați redimensionarea activităților"</string>
     <string name="force_resizable_activities_summary" msgid="2490382056981583062">"Permiteți redimensionarea tuturor activităților pentru modul cu ferestre multiple, indiferent de valorile manifestului."</string>
     <string name="enable_freeform_support" msgid="7599125687603914253">"Activați ferestrele cu formă liberă"</string>
