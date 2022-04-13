@@ -161,7 +161,7 @@ public class NetworkStatsDataMigrationUtils {
     @NonNull
     private static ArrayList<File> getPlatformFileListForPrefix(@NonNull @Prefix String prefix) {
         final ArrayList<File> list = new ArrayList<>();
-        final File platformFiles = new File(getPlatformBaseDir(), "netstats");
+        final File platformFiles = getPlatformBaseDir();
         if (platformFiles.exists()) {
             for (String name : platformFiles.list()) {
                 // Skip when prefix doesn't match.
