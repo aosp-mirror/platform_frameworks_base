@@ -732,8 +732,8 @@
     <string name="privacy_type_microphone" msgid="9136763906797732428">"микрофона"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"Няма заглавие"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Режим на готовност"</string>
-    <string name="magnification_window_title" msgid="4863914360847258333">"Прозорец за ниво на мащаба"</string>
-    <string name="magnification_controls_title" msgid="8421106606708891519">"Контроли за прозореца за ниво на мащаба"</string>
+    <string name="magnification_window_title" msgid="4863914360847258333">"Прозорец за увеличение"</string>
+    <string name="magnification_controls_title" msgid="8421106606708891519">"Контроли за прозореца за увеличение"</string>
     <string name="accessibility_control_zoom_in" msgid="1189272315480097417">"Увеличаване на мащаба"</string>
     <string name="accessibility_control_zoom_out" msgid="69578832020304084">"Намаляване на мащаба"</string>
     <string name="accessibility_control_move_up" msgid="6622825494014720136">"Преместване нагоре"</string>

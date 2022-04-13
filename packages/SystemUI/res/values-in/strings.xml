@@ -568,7 +568,7 @@
     <string name="keyboard_shortcut_group_system_recents" msgid="8628108256824616927">"Terbaru"</string>
     <string name="keyboard_shortcut_group_system_back" msgid="1055709713218453863">"Kembali"</string>
     <string name="keyboard_shortcut_group_system_notifications" msgid="3615971650562485878">"Notifikasi"</string>
-    <string name="keyboard_shortcut_group_system_shortcuts_helper" msgid="4856808328618265589">"Pintasan Keyboard"</string>
+    <string name="keyboard_shortcut_group_system_shortcuts_helper" msgid="4856808328618265589">"Pintasan keyboard"</string>
     <string name="keyboard_shortcut_group_system_switch_input" msgid="952555530383268166">"Ganti tata letak keyboard"</string>
     <string name="keyboard_shortcut_group_applications" msgid="7386239431100651266">"Aplikasi"</string>
     <string name="keyboard_shortcut_group_applications_assist" msgid="771606231466098742">"Bantuan"</string>
