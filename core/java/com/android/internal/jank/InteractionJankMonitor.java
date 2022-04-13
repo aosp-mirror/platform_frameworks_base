@@ -71,6 +71,7 @@ import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_IN
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SUW_LOADING_TO_NEXT_FLOW;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SUW_LOADING_TO_SHOW_INFO_WITH_ACTIONS;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SUW_SHOW_FUNCTION_SCREEN_WITH_ACTIONS;
+import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__TAKE_SCREENSHOT;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__UNFOLD_ANIM;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__USER_SWITCH;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__WALLPAPER_TRANSITION;
@@ -194,6 +195,7 @@ public class InteractionJankMonitor {
     public static final int CUJ_LOCKSCREEN_LAUNCH_CAMERA = 51; // reserved.
     public static final int CUJ_SPLIT_SCREEN_RESIZE = 52;
     public static final int CUJ_SETTINGS_SLIDER = 53;
+    public static final int CUJ_TAKE_SCREENSHOT = 54;
 
     private static final int NO_STATSD_LOGGING = -1;
 
@@ -256,6 +258,7 @@ public class InteractionJankMonitor {
             UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LOCKSCREEN_LAUNCH_CAMERA,
             UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SPLIT_SCREEN_RESIZE,
             UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SETTINGS_SLIDER,
+            UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__TAKE_SCREENSHOT,
     };
 
     private static volatile InteractionJankMonitor sInstance;
@@ -330,6 +333,7 @@ public class InteractionJankMonitor {
             CUJ_LOCKSCREEN_LAUNCH_CAMERA,
             CUJ_SPLIT_SCREEN_RESIZE,
             CUJ_SETTINGS_SLIDER,
+            CUJ_TAKE_SCREENSHOT,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface CujType {
@@ -756,6 +760,8 @@ public class InteractionJankMonitor {
                 return "CUJ_SPLIT_SCREEN_RESIZE";
             case CUJ_SETTINGS_SLIDER:
                 return "SETTINGS_SLIDER";
+            case CUJ_TAKE_SCREENSHOT:
+                return "TAKE_SCREENSHOT";
         }
         return "UNKNOWN";
     }

@@ -484,6 +484,7 @@ public class ScreenshotController {
                 setWindowFocusable(false);
             }
         });
+        mScreenshotView.setDefaultTimeoutMillis(mScreenshotHandler.getDefaultTimeoutMillis());
 
         mScreenshotView.setOnKeyListener((v, keyCode, event) -> {
             if (keyCode == KeyEvent.KEYCODE_BACK) {
