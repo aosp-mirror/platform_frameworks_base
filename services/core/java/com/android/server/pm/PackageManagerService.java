@@ -7168,4 +7168,10 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
     void notifyInstantAppPackageInstalled(String packageName, int[] newUsers) {
         mInstantAppRegistry.onPackageInstalled(snapshotComputer(), packageName, newUsers);
     }
+
+    void addInstallerPackageName(InstallSource installSource) {
+        synchronized (mLock) {
+            mSettings.addInstallerPackageNames(installSource);
+        }
+    }
 }
