@@ -14,16 +14,11 @@
     See the License for the specific language governing permissions and
     limitations under the License.
   -->
+
 <resources>
-    <style name="TextAppearance.PreferenceTitle.SettingsLib"
-           parent="@android:style/TextAppearance.Material.Subhead">
-    </style>
-
-    <style name="TextAppearance.PreferenceSummary.SettingsLib"
-           parent="@style/PreferenceSummaryTextStyle">
-    </style>
-
-    <style name="TextAppearance.CategoryTitle.SettingsLib"
-           parent="@android:style/TextAppearance.DeviceDefault.Medium">
+    <style name="Theme.SettingsBase" parent="Theme.SettingsBase_v31" >
+        <item name="android:spinnerStyle">@style/Spinner.SettingsLib</item>
+        <item name="android:spinnerItemStyle">@style/SpinnerItem.SettingsLib</item>
+        <item name="android:spinnerDropDownItemStyle">@style/SpinnerDropDownItem.SettingsLib</item>
     </style>
 </resources>
