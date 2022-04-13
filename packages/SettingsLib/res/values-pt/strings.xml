@@ -238,7 +238,7 @@
     <string name="bugreport_in_power" msgid="8664089072534638709">"Atalho para relatório de bugs"</string>
     <string name="bugreport_in_power_summary" msgid="1885529649381831775">"Mostrar um botão para gerar relatórios de bugs no menu do botão liga/desliga"</string>
     <string name="keep_screen_on" msgid="1187161672348797558">"Permanecer ativo"</string>
-    <string name="keep_screen_on_summary" msgid="1510731514101925829">"A tela nunca entrará em suspensão enquanto estiver carregando"</string>
+    <string name="keep_screen_on_summary" msgid="1510731514101925829">"A tela nunca entra em suspensão enquanto está carregando"</string>
     <string name="bt_hci_snoop_log" msgid="7291287955649081448">"Ativar registro de rastreamento Bluetooth HCI"</string>
     <string name="bt_hci_snoop_log_summary" msgid="6808538971394092284">"Capturar pacotes de Bluetooth. Ative o Bluetooth depois de alterar essa configuração."</string>
     <string name="oem_unlock_enable" msgid="5334869171871566731">"Desbloqueio de OEM"</string>
@@ -254,7 +254,7 @@
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"Limitar busca por Wi-Fi"</string>
     <string name="wifi_enhanced_mac_randomization" msgid="882650208573834301">"Ordem aleatória de MAC não persistente no Wi-Fi"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"Dados móveis sempre ativos"</string>
-    <string name="tethering_hardware_offload" msgid="4116053719006939161">"Aceleração de hardware de tethering"</string>
+    <string name="tethering_hardware_offload" msgid="4116053719006939161">"Aceleração de hardware para tethering"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"Mostrar dispositivos Bluetooth sem nomes"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="1452342324349203434">"Desativar volume absoluto"</string>
     <string name="bluetooth_enable_gabeldorsche" msgid="9131730396242883416">"Ativar Gabeldorsche"</string>
@@ -299,7 +299,7 @@
     <string name="allow_mock_location_summary" msgid="179780881081354579">"Permitir locais fictícios"</string>
     <string name="debug_view_attributes" msgid="3539609843984208216">"Ativar visualização de inspeção de atributo"</string>
     <string name="mobile_data_always_on_summary" msgid="1112156365594371019">"Sempre manter dados móveis ativos, mesmo quando o Wi-Fi estiver ativado (para troca rápida de rede)"</string>
-    <string name="tethering_hardware_offload_summary" msgid="7801345335142803029">"Usar aceleração de hardware de tethering quando disponível"</string>
+    <string name="tethering_hardware_offload_summary" msgid="7801345335142803029">"Usar aceleração de hardware para tethering quando disponível"</string>
     <string name="adb_warning_title" msgid="7708653449506485728">"Permitir a depuração USB?"</string>
     <string name="adb_warning_message" msgid="8145270656419669221">"A depuração USB serve apenas para fins de desenvolvimento. Use-a para copiar dados entre o computador e o dispositivo, instalar apps no seu aparelho sem notificação e ler dados de registro."</string>
     <string name="adbwifi_warning_title" msgid="727104571653031865">"Permitir a depuração por Wi-Fi?"</string>

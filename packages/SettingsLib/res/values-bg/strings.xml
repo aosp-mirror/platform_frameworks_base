@@ -197,7 +197,7 @@
     <string name="choose_profile" msgid="343803890897657450">"Избор на потребителски профил"</string>
     <string name="category_personal" msgid="6236798763159385225">"Лични"</string>
     <string name="category_work" msgid="4014193632325996115">"Служебни"</string>
-    <string name="development_settings_title" msgid="140296922921597393">"Опции на програмиста"</string>
+    <string name="development_settings_title" msgid="140296922921597393">"Опции за програмисти"</string>
     <string name="development_settings_enable" msgid="4285094651288242183">"Активиране на опциите за програмисти"</string>
     <string name="development_settings_summary" msgid="8718917813868735095">"Задаване на опции за програмиране на приложения"</string>
     <string name="development_settings_not_available" msgid="355070198089140951">"Опциите за програмисти не са налице за този потребител"</string>
@@ -336,7 +336,7 @@
     <string name="pointer_location_summary" msgid="957120116989798464">"Насл. на екран показва текущи данни при докосване"</string>
     <string name="show_touches" msgid="8437666942161289025">"Показване на докосванията"</string>
     <string name="show_touches_summary" msgid="3692861665994502193">"Показване на визуална обр. връзка за докосванията"</string>
-    <string name="show_screen_updates" msgid="2078782895825535494">"Актуал. на повърхн: Показв."</string>
+    <string name="show_screen_updates" msgid="2078782895825535494">"Актуализации на повърхн."</string>
     <string name="show_screen_updates_summary" msgid="2126932969682087406">"Примигв. на целите повърхности на прозорците при актуализирането им"</string>
     <string name="show_hw_screen_updates" msgid="2021286231267747506">"Актуализации на изгледите"</string>
     <string name="show_hw_screen_updates_summary" msgid="3539770072741435691">"Примигв. на изгледите в прозорците при начертаване"</string>

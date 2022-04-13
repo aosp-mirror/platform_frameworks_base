@@ -331,17 +331,17 @@
     <string name="media_category" msgid="8122076702526144053">"Contenuti multimediali"</string>
     <string name="debug_monitoring_category" msgid="1597387133765424994">"Monitoraggio"</string>
     <string name="strict_mode" msgid="889864762140862437">"Attiva StrictMode"</string>
-    <string name="strict_mode_summary" msgid="1838248687233554654">"Schermo lampeggia per operazioni lunghe su thread principale"</string>
+    <string name="strict_mode_summary" msgid="1838248687233554654">"Fai lampeggiare lo schermo per operazioni lunghe sul thread principale"</string>
     <string name="pointer_location" msgid="7516929526199520173">"Posizione puntatore"</string>
     <string name="pointer_location_summary" msgid="957120116989798464">"Overlay schermo che mostra i dati touch correnti"</string>
     <string name="show_touches" msgid="8437666942161289025">"Mostra tocchi"</string>
     <string name="show_touches_summary" msgid="3692861665994502193">"Mostra feedback visivi per i tocchi"</string>
     <string name="show_screen_updates" msgid="2078782895825535494">"Aggiornamenti superficie"</string>
-    <string name="show_screen_updates_summary" msgid="2126932969682087406">"Superfici delle finestre lampeggiano se aggiornate"</string>
+    <string name="show_screen_updates_summary" msgid="2126932969682087406">"Fai lampeggiare le superfici delle finestre quando si aggiornano"</string>
     <string name="show_hw_screen_updates" msgid="2021286231267747506">"Aggiornam. visualizzazione"</string>
-    <string name="show_hw_screen_updates_summary" msgid="3539770072741435691">"Visualizz. lampeggiano dentro finestre se disegnate"</string>
+    <string name="show_hw_screen_updates_summary" msgid="3539770072741435691">"Fai lampeggiare gli elementi nelle finestre se disegnati"</string>
     <string name="show_hw_layers_updates" msgid="5268370750002509767">"Aggiornam. livelli hardware"</string>
-    <string name="show_hw_layers_updates_summary" msgid="5850955890493054618">"Livelli hardware lampeggiano in verde se aggiornati"</string>
+    <string name="show_hw_layers_updates_summary" msgid="5850955890493054618">"Fai lampeggiare in verde i livelli hardware se aggiornati"</string>
     <string name="debug_hw_overdraw" msgid="8944851091008756796">"Debug overdraw GPU"</string>
     <string name="disable_overlays" msgid="4206590799671557143">"Disabilita overlay HW"</string>
     <string name="disable_overlays_summary" msgid="1954852414363338166">"Usa sempre GPU per la composizione dello schermo"</string>
@@ -377,9 +377,9 @@
     <string name="force_allow_on_external" msgid="9187902444231637880">"Forza autorizzazione app su memoria esterna"</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"Consente l\'installazione di qualsiasi app su memoria esterna, indipendentemente dai valori manifest"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"Imponi formato modificabile alle attività"</string>
-    <string name="force_resizable_activities_summary" msgid="2490382056981583062">"Rendi il formato di tutte le attività modificabile per la modalità multi-finestra, indipendentemente dai valori manifest."</string>
+    <string name="force_resizable_activities_summary" msgid="2490382056981583062">"Rendi il formato di tutte le attività modificabile per la modalità multi-finestra, indipendentemente dai valori manifest"</string>
     <string name="enable_freeform_support" msgid="7599125687603914253">"Attiva finestre a forma libera"</string>
-    <string name="enable_freeform_support_summary" msgid="1822862728719276331">"Attiva il supporto delle finestre a forma libera sperimentali."</string>
+    <string name="enable_freeform_support_summary" msgid="1822862728719276331">"Attiva il supporto delle finestre a forma libera sperimentali"</string>
     <string name="local_backup_password_title" msgid="4631017948933578709">"Password di backup desktop"</string>
     <string name="local_backup_password_summary_none" msgid="7646898032616361714">"I backup desktop completi non sono attualmente protetti"</string>
     <string name="local_backup_password_summary_change" msgid="1707357670383995567">"Tocca per modificare o rimuovere la password per i backup desktop completi"</string>

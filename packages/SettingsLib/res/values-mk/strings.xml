@@ -238,7 +238,7 @@
     <string name="bugreport_in_power" msgid="8664089072534638709">"Кратенка за извештај за грешка"</string>
     <string name="bugreport_in_power_summary" msgid="1885529649381831775">"Прикажи копче во менито за вклучување за да се направи извештај за грешка"</string>
     <string name="keep_screen_on" msgid="1187161672348797558">"Остани во активен режим"</string>
-    <string name="keep_screen_on_summary" msgid="1510731514101925829">"Екранот никогаш нема да биде во режим на штедење додека се полни"</string>
+    <string name="keep_screen_on_summary" msgid="1510731514101925829">"Екранот никогаш нема да биде во режим на спиење додека се полни"</string>
     <string name="bt_hci_snoop_log" msgid="7291287955649081448">"Овозможи Bluetooth HCI за евиденција на пресретнување пакети"</string>
     <string name="bt_hci_snoop_log_summary" msgid="6808538971394092284">"Снимај Bluetooth-пакети. (Вклучи Bluetooth по промената на поставкава)"</string>
     <string name="oem_unlock_enable" msgid="5334869171871566731">"Отклучување со OEM"</string>
@@ -309,7 +309,7 @@
     <string name="dev_settings_warning_message" msgid="37741686486073668">"Овие поставки се наменети само за употреба за развој. Тие може да предизвикаат уредот и апликациите во него да се расипат или да се однесуваат необично."</string>
     <string name="verify_apps_over_usb_title" msgid="6031809675604442636">"Потврди апликации преку USB"</string>
     <string name="verify_apps_over_usb_summary" msgid="1317933737581167839">"Провери апликации инсталирани преку ADB/ADT за штетно однесување."</string>
-    <string name="bluetooth_show_devices_without_names_summary" msgid="780964354377854507">"Уредите со Bluetooth без имиња (само MAC-адреси) ќе се прикажуваат"</string>
+    <string name="bluetooth_show_devices_without_names_summary" msgid="780964354377854507">"Ќе се прикажуваат уредите со Bluetooth без имиња (само MAC-адреси)"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="2006309932135547681">"Ја оневозможува функцијата за апсолутна јачина на звук преку Bluetooth во случај кога ќе настанат проблеми со далечинските уреди, како на пр., неприфатливо силен звук или недоволна контрола."</string>
     <string name="bluetooth_enable_gabeldorsche_summary" msgid="2054730331770712629">"Ја овозможува функцијата Bluetooth Gabeldorsche."</string>
     <string name="enhanced_connectivity_summary" msgid="1576414159820676330">"Ја овозможува функцијата „Подобрена поврзливост“."</string>
@@ -324,7 +324,7 @@
     <string name="select_application" msgid="2543228890535466325">"Избери апликација"</string>
     <string name="no_application" msgid="9038334538870247690">"Ништо"</string>
     <string name="wait_for_debugger" msgid="7461199843335409809">"Почекај ја програмата за отстранување грешки"</string>
-    <string name="wait_for_debugger_summary" msgid="6846330006113363286">"Пред да се изврши, апликација за отстранување грешки чека програмата за отстранување грешки да се закачи"</string>
+    <string name="wait_for_debugger_summary" msgid="6846330006113363286">"Пред да се изврши, апликацијата во која се отстрануваат грешки чека да се закачи програмата за отстранување грешки"</string>
     <string name="debug_input_category" msgid="7349460906970849771">"Внесување"</string>
     <string name="debug_drawing_category" msgid="5066171112313666619">"Цртање"</string>
     <string name="debug_hw_drawing_category" msgid="5830815169336975162">"Хардверско забрзување"</string>
@@ -350,7 +350,7 @@
     <string name="usb_audio_disable_routing" msgid="3367656923544254975">"Исклучи USB-пренасочување"</string>
     <string name="usb_audio_disable_routing_summary" msgid="8768242894849534699">"Исклучи автоматско пренасочување до USB-аудиоуреди"</string>
     <string name="debug_layout" msgid="1659216803043339741">"Прикажи граници на слој"</string>
-    <string name="debug_layout_summary" msgid="8825829038287321978">"Прикажи граници на клип, маргини, итн."</string>
+    <string name="debug_layout_summary" msgid="8825829038287321978">"Прикажи граници на клип, маргини итн."</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"Принудно користи RTL за насока"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"Принудно постави насока на распоред на екранот во RTL за сите локални стандарди"</string>
     <string name="window_blurs" msgid="6831008984828425106">"Дозволи замаглување прозорец"</string>
@@ -461,7 +461,7 @@
     <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"Бавно полнење"</string>
     <string name="battery_info_status_charging_wireless" msgid="8924722966861282197">"Се полни безжично"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"Не се полни"</string>
-    <string name="battery_info_status_not_charging" msgid="3371084153747234837">"Поврзана, не се полни"</string>
+    <string name="battery_info_status_not_charging" msgid="3371084153747234837">"Поврзано, не се полни"</string>
     <string name="battery_info_status_full" msgid="1339002294876531312">"Полна"</string>
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"Контролирано од администраторот"</string>
     <string name="disabled" msgid="8017887509554714950">"Оневозможено"</string>
