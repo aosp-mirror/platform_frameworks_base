@@ -61,7 +61,6 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
-import android.os.PowerExemptionManager;
 import android.os.PowerExemptionManager.ReasonCode;
 import android.os.PowerExemptionManager.TempAllowListType;
 import android.os.Process;
@@ -1934,9 +1933,6 @@ public final class BroadcastQueue {
     }
 
     private void maybeReportBroadcastDispatchedEventLocked(BroadcastRecord r, int targetUid) {
-        // STOPSHIP (217251579): Temporarily use temp-allowlist reason to identify
-        // push messages and record response events.
-        useTemporaryAllowlistReasonAsSignal(r);
         if (r.options == null || r.options.getIdForResponseEvent() <= 0) {
             return;
         }
@@ -1949,17 +1945,6 @@ public final class BroadcastQueue {
                 r.callingUid, targetPackage, UserHandle.of(r.userId),
                 r.options.getIdForResponseEvent(), SystemClock.elapsedRealtime(),
                 mService.getUidStateLocked(targetUid));
-    }
-
-    private void useTemporaryAllowlistReasonAsSignal(BroadcastRecord r) {
-        if (r.options == null || r.options.getIdForResponseEvent() > 0) {
-            return;
-        }
-        final int reasonCode = r.options.getTemporaryAppAllowlistReasonCode();
-        if (reasonCode == PowerExemptionManager.REASON_PUSH_MESSAGING
-                || reasonCode == PowerExemptionManager.REASON_PUSH_MESSAGING_OVER_QUOTA) {
-            r.options.recordResponseEventWhileInBackground(reasonCode);
-        }
     }
 
     @NonNull
