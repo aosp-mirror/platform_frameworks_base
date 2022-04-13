@@ -1026,7 +1026,10 @@ public final class ActivityThread extends ClientTransactionHandler
     }
 
     private class ApplicationThread extends IApplicationThread.Stub {
-        private static final String DB_INFO_FORMAT = "  %8s %8s %14s %14s  %s";
+        private static final String DB_CONNECTION_INFO_HEADER = "  %8s %8s %14s %5s %5s %5s  %s";
+        private static final String DB_CONNECTION_INFO_FORMAT = "  %8s %8s %14s %5d %5d %5d  %s";
+        private static final String DB_POOL_INFO_HEADER = "  %13s %13s %13s  %s";
+        private static final String DB_POOL_INFO_FORMAT = "  %13d %13d %13d  %s";
 
         public final void scheduleReceiver(Intent intent, ActivityInfo info,
                 CompatibilityInfo compatInfo, int resultCode, String data, Bundle extras,
@@ -1454,8 +1457,9 @@ public final class ActivityThread extends ClientTransactionHandler
                     pw.print(','); pw.print(dbStats.pageSize);
                     pw.print(','); pw.print(dbStats.dbSize);
                     pw.print(','); pw.print(dbStats.lookaside);
-                    pw.print(','); pw.print(dbStats.cache);
-                    pw.print(','); pw.print(dbStats.cache);
+                    pw.print(','); pw.print(dbStats.cacheHits);
+                    pw.print(','); pw.print(dbStats.cacheMisses);
+                    pw.print(','); pw.print(dbStats.cacheSize);
                 }
                 pw.println();
 
@@ -1490,15 +1494,34 @@ public final class ActivityThread extends ClientTransactionHandler
             int N = stats.dbStats.size();
             if (N > 0) {
                 pw.println(" DATABASES");
-                printRow(pw, DB_INFO_FORMAT, "pgsz", "dbsz", "Lookaside(b)", "cache",
-                        "Dbname");
+                printRow(pw, DB_CONNECTION_INFO_HEADER, "pgsz", "dbsz", "Lookaside(b)",
+                        "cache hits", "cache misses", "cache size", "Dbname");
+                pw.println("PER CONNECTION STATS");
                 for (int i = 0; i < N; i++) {
                     DbStats dbStats = stats.dbStats.get(i);
-                    printRow(pw, DB_INFO_FORMAT,
+                    if (dbStats.arePoolStats) {
+                        // these will be printed after
+                        continue;
+                    }
+                    printRow(pw, DB_CONNECTION_INFO_FORMAT,
                             (dbStats.pageSize > 0) ? String.valueOf(dbStats.pageSize) : " ",
                             (dbStats.dbSize > 0) ? String.valueOf(dbStats.dbSize) : " ",
                             (dbStats.lookaside > 0) ? String.valueOf(dbStats.lookaside) : " ",
-                            dbStats.cache, dbStats.dbName);
+                            dbStats.cacheHits, dbStats.cacheMisses, dbStats.cacheSize,
+                            dbStats.dbName);
+                }
+                // Print stats accumulated through all the connections that have existed in the
+                // pool since it was opened.
+                pw.println("POOL STATS");
+                printRow(pw, DB_POOL_INFO_HEADER, "cache hits", "cache misses", "cache size",
+                        "Dbname");
+                for (int i = 0; i < N; i++) {
+                    DbStats dbStats = stats.dbStats.get(i);
+                    if (!dbStats.arePoolStats) {
+                        continue;
+                    }
+                    printRow(pw, DB_POOL_INFO_FORMAT, dbStats.cacheHits, dbStats.cacheMisses,
+                            dbStats.cacheSize, dbStats.dbName);
                 }
             }
 
@@ -1623,7 +1646,12 @@ public final class ActivityThread extends ClientTransactionHandler
                 proto.write(MemInfoDumpProto.AppData.SqlStats.Database.DB_SIZE, dbStats.dbSize);
                 proto.write(MemInfoDumpProto.AppData.SqlStats.Database.LOOKASIDE_B,
                         dbStats.lookaside);
-                proto.write(MemInfoDumpProto.AppData.SqlStats.Database.CACHE, dbStats.cache);
+                proto.write(
+                        MemInfoDumpProto.AppData.SqlStats.Database.CACHE_HITS, dbStats.cacheHits);
+                proto.write(MemInfoDumpProto.AppData.SqlStats.Database.CACHE_MISSES,
+                        dbStats.cacheMisses);
+                proto.write(
+                        MemInfoDumpProto.AppData.SqlStats.Database.CACHE_SIZE, dbStats.cacheSize);
                 proto.end(dToken);
             }
             proto.end(sToken);

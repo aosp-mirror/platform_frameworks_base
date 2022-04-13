@@ -1053,6 +1053,7 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
     }
 
     private PreparedStatement acquirePreparedStatement(String sql) {
+        ++mPool.mTotalPrepareStatements;
         PreparedStatement statement = mPreparedStatementCache.get(sql);
         boolean skipCache = false;
         if (statement != null) {
@@ -1064,7 +1065,7 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
             // statement but do not cache it.
             skipCache = true;
         }
-
+        ++mPool.mTotalPrepareStatementCacheMiss;
         final long statementPtr = nativePrepareStatement(mConnectionPtr, sql);
         try {
             final int numParameters = nativeGetParameterCount(mConnectionPtr, statementPtr);
@@ -1320,7 +1321,8 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
                 if (!path.isEmpty()) {
                     label.append(": ").append(path);
                 }
-                dbStatsList.add(new DbStats(label.toString(), pageCount, pageSize, 0, 0, 0, 0));
+                dbStatsList.add(
+                        new DbStats(label.toString(), pageCount, pageSize, 0, 0, 0, 0, false));
             }
         } catch (SQLiteException ex) {
             // Ignore.
@@ -1349,9 +1351,8 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
             label = mConfiguration.path + " (" + mConnectionId + ")";
         }
         return new DbStats(label, pageCount, pageSize, lookaside,
-                mPreparedStatementCache.hitCount(),
-                mPreparedStatementCache.missCount(),
-                mPreparedStatementCache.size());
+                mPreparedStatementCache.hitCount(), mPreparedStatementCache.missCount(),
+                mPreparedStatementCache.size(), false);
     }
 
     @Override
