@@ -2067,14 +2067,10 @@
     <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"കൂടുതലറിയാനും മാറ്റാനും ടാപ്പ് ചെയ്യുക."</string>
     <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"\'ശല്യപ്പെടുത്തരുത്\' മാറ്റി"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"എന്തിനെയാണ് ബ്ലോക്ക് ചെയ്‌തതെന്ന് പരിശോധിക്കാൻ ടാപ്പ് ചെയ്യുക."</string>
-    <!-- no translation found for review_notification_settings_title (5102557424459810820) -->
-    <skip />
-    <!-- no translation found for review_notification_settings_text (5696497037817525074) -->
-    <skip />
-    <!-- no translation found for review_notification_settings_remind_me_action (1081081018678480907) -->
-    <skip />
-    <!-- no translation found for review_notification_settings_dismiss (4160916504616428294) -->
-    <skip />
+    <string name="review_notification_settings_title" msgid="5102557424459810820">"അറിയിപ്പ് ക്രമീകരണം അവലോകനം ചെയ്യുക"</string>
+    <string name="review_notification_settings_text" msgid="5696497037817525074">"Android 13-ൽ നിങ്ങൾ ഇൻസ്‌റ്റാൾ ചെയ്യുന്ന ആപ്പുകൾക്ക് അറിയിപ്പുകൾ അയയ്‌ക്കാൻ നിങ്ങളുടെ അനുമതി വേണം. നിലവിലുള്ള ആപ്പുകൾക്ക് ഈ അനുമതി മാറ്റാൻ ടാപ്പ് ചെയ്യുക."</string>
+    <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"പിന്നീട് ഓർമ്മിപ്പിക്കൂ"</string>
+    <string name="review_notification_settings_dismiss" msgid="4160916504616428294">"ഡിസ്‌മിസ് ചെയ്യുക"</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"സിസ്റ്റം"</string>
     <string name="notification_app_name_settings" msgid="9088548800899952531">"ക്രമീകരണം"</string>
     <string name="notification_appops_camera_active" msgid="8177643089272352083">"ക്യാമറ"</string>
@@ -2293,9 +2289,11 @@
     <string name="ui_translation_accessibility_translated_text" msgid="3197547218178944544">"<xliff:g id="MESSAGE">%1$s</xliff:g> വിവർത്തനം ചെയ്‌തു."</string>
     <string name="ui_translation_accessibility_translation_finished" msgid="3057830947610088465">"<xliff:g id="FROM_LANGUAGE">%1$s</xliff:g> എന്നതിൽ നിന്ന് <xliff:g id="TO_LANGUAGE">%2$s</xliff:g> എന്നതിലേക്ക് സന്ദേശം വിവർത്തനം ചെയ്തു."</string>
     <string name="notification_channel_abusive_bg_apps" msgid="6092140213264920355">"പശ്ചാത്തല ആക്റ്റിവിറ്റി"</string>
-    <string name="notification_title_abusive_bg_apps" msgid="3258460527676573815">"ഒരു ആപ്പ് ബാറ്ററി ഉപയോഗിക്കുന്നു"</string>
+    <!-- no translation found for notification_title_abusive_bg_apps (994230770856147656) -->
+    <skip />
     <string name="notification_title_long_running_fgs" msgid="8170284286477131587">"ഒരു ആപ്പ് ഇപ്പോഴും സജീവമാണ്"</string>
-    <string name="notification_content_abusive_bg_apps" msgid="9180610713603474720">"<xliff:g id="APP">%1$s</xliff:g> പശ്ചാത്തലത്തിൽ ബാറ്ററി ഉപയോഗിക്കുന്നു. അവലോകനം ചെയ്യാൻ ടാപ്പ് ചെയ്യുക."</string>
+    <!-- no translation found for notification_content_abusive_bg_apps (5296898075922695259) -->
+    <skip />
     <string name="notification_content_long_running_fgs" msgid="8258193410039977101">"<xliff:g id="APP">%1$s</xliff:g> ബാറ്ററി ലൈഫിനെ ബാധിച്ചേക്കാം. സജീവ ആപ്പുകൾ അവലോകനം ചെയ്യാൻ ടാപ്പ് ചെയ്യുക."</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"സജീവമായ ആപ്പുകൾ പരിശോധിക്കുക"</string>
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"നിങ്ങളുടെ <xliff:g id="DEVICE">%1$s</xliff:g> എന്നതിൽ നിന്ന് ഫോണിന്റെ ക്യാമറ ആക്‌സസ് ചെയ്യാനാകില്ല"</string>

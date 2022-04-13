@@ -2067,14 +2067,10 @@
     <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"Ketik untuk mengetahui lebih lanjut dan menukar tetapan."</string>
     <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"Jangan Ganggu telah berubah"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Ketik untuk menyemak item yang disekat."</string>
-    <!-- no translation found for review_notification_settings_title (5102557424459810820) -->
-    <skip />
-    <!-- no translation found for review_notification_settings_text (5696497037817525074) -->
-    <skip />
-    <!-- no translation found for review_notification_settings_remind_me_action (1081081018678480907) -->
-    <skip />
-    <!-- no translation found for review_notification_settings_dismiss (4160916504616428294) -->
-    <skip />
+    <string name="review_notification_settings_title" msgid="5102557424459810820">"Semak tetapan pemberitahuan"</string>
+    <string name="review_notification_settings_text" msgid="5696497037817525074">"Dalam Android 13, apl yang anda pasang memerlukan kebenaran anda untuk menghantar pemberitahuan. Ketik untuk menukar kebenaran ini bagi apl sedia ada."</string>
+    <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"Ingatkan saya nanti"</string>
+    <string name="review_notification_settings_dismiss" msgid="4160916504616428294">"Ketepikan"</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"Sistem"</string>
     <string name="notification_app_name_settings" msgid="9088548800899952531">"Tetapan"</string>
     <string name="notification_appops_camera_active" msgid="8177643089272352083">"Kamera"</string>
@@ -2293,9 +2289,11 @@
     <string name="ui_translation_accessibility_translated_text" msgid="3197547218178944544">"<xliff:g id="MESSAGE">%1$s</xliff:g> Diterjemahkan."</string>
     <string name="ui_translation_accessibility_translation_finished" msgid="3057830947610088465">"Mesej diterjemahkan daripada <xliff:g id="FROM_LANGUAGE">%1$s</xliff:g> kepada <xliff:g id="TO_LANGUAGE">%2$s</xliff:g>."</string>
     <string name="notification_channel_abusive_bg_apps" msgid="6092140213264920355">"Aktiviti Latar Belakang"</string>
-    <string name="notification_title_abusive_bg_apps" msgid="3258460527676573815">"Apl sedang menggunakan bateri"</string>
+    <!-- no translation found for notification_title_abusive_bg_apps (994230770856147656) -->
+    <skip />
     <string name="notification_title_long_running_fgs" msgid="8170284286477131587">"Apl masih aktif"</string>
-    <string name="notification_content_abusive_bg_apps" msgid="9180610713603474720">"<xliff:g id="APP">%1$s</xliff:g> sedang menggunakan bateri pada latar. Ketik untuk menyemak."</string>
+    <!-- no translation found for notification_content_abusive_bg_apps (5296898075922695259) -->
+    <skip />
     <string name="notification_content_long_running_fgs" msgid="8258193410039977101">"<xliff:g id="APP">%1$s</xliff:g> mungkin menjejaskan hayat bateri. Ketik untuk menyemak apl aktif."</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Semak apl aktif"</string>
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"Tidak dapat mengakses kamera telefon daripada <xliff:g id="DEVICE">%1$s</xliff:g> anda"</string>

@@ -2289,9 +2289,11 @@
     <string name="ui_translation_accessibility_translated_text" msgid="3197547218178944544">"<xliff:g id="MESSAGE">%1$s</xliff:g> चे भाषांतर केले."</string>
     <string name="ui_translation_accessibility_translation_finished" msgid="3057830947610088465">"मेसेजचे <xliff:g id="FROM_LANGUAGE">%1$s</xliff:g> मधून <xliff:g id="TO_LANGUAGE">%2$s</xliff:g> मध्ये भाषांतर केले."</string>
     <string name="notification_channel_abusive_bg_apps" msgid="6092140213264920355">"बॅकग्राउंड अ‍ॅक्टिव्हिटी"</string>
-    <string name="notification_title_abusive_bg_apps" msgid="3258460527676573815">"अ‍ॅप बॅटरी वापरत आहे"</string>
+    <!-- no translation found for notification_title_abusive_bg_apps (994230770856147656) -->
+    <skip />
     <string name="notification_title_long_running_fgs" msgid="8170284286477131587">"अ‍ॅप अजूनही अ‍ॅक्टिव्ह आहे"</string>
-    <string name="notification_content_abusive_bg_apps" msgid="9180610713603474720">"<xliff:g id="APP">%1$s</xliff:g> हे बॅकग्राउंडमध्ये बॅटरी वापरत आहे. पुनरावलोकन करण्यासाठी टॅप करा."</string>
+    <!-- no translation found for notification_content_abusive_bg_apps (5296898075922695259) -->
+    <skip />
     <string name="notification_content_long_running_fgs" msgid="8258193410039977101">"<xliff:g id="APP">%1$s</xliff:g> कदाचित बॅटरी लाइफवर परिणाम करेल. अ‍ॅक्टिव्ह अ‍ॅप्सचे पुनरावलोकन करण्यासाठी टॅप करा."</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"ॲक्टिव्ह ॲप्स पहा"</string>
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"तुमच्या <xliff:g id="DEVICE">%1$s</xliff:g> वरून फोनचा कॅमेरा अ‍ॅक्सेस करू शकत नाही"</string>

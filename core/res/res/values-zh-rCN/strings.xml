@@ -2293,9 +2293,11 @@
     <string name="ui_translation_accessibility_translated_text" msgid="3197547218178944544">"已翻译“<xliff:g id="MESSAGE">%1$s</xliff:g>”。"</string>
     <string name="ui_translation_accessibility_translation_finished" msgid="3057830947610088465">"已将消息内容从<xliff:g id="FROM_LANGUAGE">%1$s</xliff:g>翻译成<xliff:g id="TO_LANGUAGE">%2$s</xliff:g>。"</string>
     <string name="notification_channel_abusive_bg_apps" msgid="6092140213264920355">"后台活动"</string>
-    <string name="notification_title_abusive_bg_apps" msgid="3258460527676573815">"某个应用正在消耗电量"</string>
+    <!-- no translation found for notification_title_abusive_bg_apps (994230770856147656) -->
+    <skip />
     <string name="notification_title_long_running_fgs" msgid="8170284286477131587">"某个应用仍在使用中"</string>
-    <string name="notification_content_abusive_bg_apps" msgid="9180610713603474720">"“<xliff:g id="APP">%1$s</xliff:g>”正在后台消耗电量。点按即可查看。"</string>
+    <!-- no translation found for notification_content_abusive_bg_apps (5296898075922695259) -->
+    <skip />
     <string name="notification_content_long_running_fgs" msgid="8258193410039977101">"“<xliff:g id="APP">%1$s</xliff:g>”可能会影响电池续航时间。点按即可查看使用中的应用。"</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"查看使用中的应用"</string>
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"无法从<xliff:g id="DEVICE">%1$s</xliff:g>上访问手机的摄像头"</string>
