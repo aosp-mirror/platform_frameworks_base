@@ -20,4 +20,6 @@
     <dimen name="keyguard_clock_top_margin">40dp</dimen>
     <dimen name="keyguard_status_view_bottom_margin">40dp</dimen>
     <dimen name="bouncer_user_switcher_y_trans">20dp</dimen>
+
+    <dimen name="qqs_layout_padding_bottom">16dp</dimen>
 </resources>
