@@ -19,7 +19,6 @@ package com.android.systemui.dreams.touch;
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyFloat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
@@ -47,6 +46,7 @@ import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.phone.CentralSurfaces;
 import com.android.systemui.statusbar.phone.KeyguardBouncer;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
+import com.android.systemui.statusbar.phone.panelstate.PanelExpansionChangeEvent;
 import com.android.wm.shell.animation.FlingAnimationUtils;
 
 import org.junit.Before;
@@ -193,8 +193,7 @@ public class BouncerSwipeTouchHandlerTest extends SysuiTestCase {
         assertThat(gestureListener.onScroll(event1, event2, 0, distanceY))
                 .isTrue();
 
-        verify(mStatusBarKeyguardViewManager, never())
-                .onPanelExpansionChanged(anyFloat(), anyBoolean(), anyBoolean());
+        verify(mStatusBarKeyguardViewManager, never()).onPanelExpansionChanged(any());
     }
 
     /**
@@ -221,8 +220,7 @@ public class BouncerSwipeTouchHandlerTest extends SysuiTestCase {
         assertThat(gestureListener.onScroll(event1, event2, 0, distanceY))
                 .isTrue();
 
-        verify(mStatusBarKeyguardViewManager, never())
-                .onPanelExpansionChanged(anyFloat(), anyBoolean(), anyBoolean());
+        verify(mStatusBarKeyguardViewManager, never()).onPanelExpansionChanged(any());
     }
 
     /**
@@ -281,14 +279,16 @@ public class BouncerSwipeTouchHandlerTest extends SysuiTestCase {
                 .isTrue();
 
         // Ensure only called once
-        verify(mStatusBarKeyguardViewManager)
-                .onPanelExpansionChanged(anyFloat(), anyBoolean(), anyBoolean());
+        verify(mStatusBarKeyguardViewManager).onPanelExpansionChanged(any());
 
         final float expansion = isBouncerInitiallyShowing ? percent : 1 - percent;
+        final float dragDownAmount = event2.getY() - event1.getY();
 
         // Ensure correct expansion passed in.
-        verify(mStatusBarKeyguardViewManager).onPanelExpansionChanged(eq(expansion), eq(false),
-                eq(true));
+        PanelExpansionChangeEvent event =
+                new PanelExpansionChangeEvent(
+                        expansion, /* expanded= */ false, /* tracking= */ true, dragDownAmount);
+        verify(mStatusBarKeyguardViewManager).onPanelExpansionChanged(event);
     }
 
     /**

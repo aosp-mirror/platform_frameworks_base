@@ -38,6 +38,7 @@ import com.android.systemui.statusbar.phone.KeyguardBouncer;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.statusbar.phone.SystemUIDialogManager;
 import com.android.systemui.statusbar.phone.UnlockedScreenOffAnimationController;
+import com.android.systemui.statusbar.phone.panelstate.PanelExpansionChangeEvent;
 import com.android.systemui.statusbar.phone.panelstate.PanelExpansionListener;
 import com.android.systemui.statusbar.phone.panelstate.PanelExpansionStateManager;
 import com.android.systemui.statusbar.policy.ConfigurationController;
@@ -491,8 +492,8 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
 
     private final PanelExpansionListener mPanelExpansionListener = new PanelExpansionListener() {
         @Override
-        public void onPanelExpansionChanged(
-                float fraction, boolean expanded, boolean tracking) {
+        public void onPanelExpansionChanged(PanelExpansionChangeEvent event) {
+            float fraction = event.getFraction();
             mPanelExpansionFraction =
                     mKeyguardViewManager.isBouncerInTransit() ? BouncerPanelExpansionCalculator
                             .aboutToShowBouncerProgress(fraction) : fraction;
