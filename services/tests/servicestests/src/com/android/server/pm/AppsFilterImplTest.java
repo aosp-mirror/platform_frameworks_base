@@ -30,7 +30,6 @@ import android.annotation.Nullable;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageManagerInternal;
 import android.content.pm.Signature;
 import android.content.pm.SigningDetails;
 import android.content.pm.UserInfo;
@@ -48,7 +47,6 @@ import com.android.server.om.OverlayReferenceMapper;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.pm.parsing.pkg.PackageImpl;
 import com.android.server.pm.parsing.pkg.ParsedPackage;
-import com.android.server.pm.pkg.PackageStateInternal;
 import com.android.server.pm.pkg.component.ParsedActivity;
 import com.android.server.pm.pkg.component.ParsedActivityImpl;
 import com.android.server.pm.pkg.component.ParsedInstrumentationImpl;
@@ -69,6 +67,7 @@ import org.mockito.stubbing.Answer;
 import java.security.cert.CertificateException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -103,10 +102,9 @@ public class AppsFilterImplTest {
     AppsFilterImpl.StateProvider mStateProvider;
     @Mock
     Executor mMockExecutor;
-    @Mock
-    PackageManagerInternal mMockPmInternal;
 
     private ArrayMap<String, PackageSetting> mExisting = new ArrayMap<>();
+    private Collection<SharedUserSetting> mSharedUserSettings = new ArraySet<>();
 
     private static ParsingPackage pkg(String packageName) {
         return PackageImpl.forTesting(packageName)
@@ -205,7 +203,7 @@ public class AppsFilterImplTest {
         MockitoAnnotations.initMocks(this);
         doAnswer(invocation -> {
             ((AppsFilterImpl.StateProvider.CurrentStateCallback) invocation.getArgument(0))
-                    .currentState(mExisting, USER_INFO_LIST);
+                    .currentState(mExisting, mSharedUserSettings, USER_INFO_LIST);
             return new Object();
         }).when(mStateProvider)
                 .runWithState(any(AppsFilterImpl.StateProvider.CurrentStateCallback.class));
@@ -226,7 +224,7 @@ public class AppsFilterImplTest {
     public void testSystemReadyPropogates() throws Exception {
         final AppsFilterImpl appsFilter =
                 new AppsFilterImpl(mStateProvider, mFeatureConfigMock, new String[]{}, false, null,
-                        mMockExecutor, mMockPmInternal);
+                        mMockExecutor);
         final WatchableTester watcher = new WatchableTester(appsFilter, "onChange");
         watcher.register();
         appsFilter.onSystemReady();
@@ -238,7 +236,7 @@ public class AppsFilterImplTest {
     public void testQueriesAction_FilterMatches() throws Exception {
         final AppsFilterImpl appsFilter =
                 new AppsFilterImpl(mStateProvider, mFeatureConfigMock, new String[]{}, false, null,
-                        mMockExecutor, mMockPmInternal);
+                        mMockExecutor);
         final WatchableTester watcher = new WatchableTester(appsFilter, "onChange");
         watcher.register();
         simulateAddBasicAndroid(appsFilter);
@@ -261,7 +259,7 @@ public class AppsFilterImplTest {
     public void testQueriesProtectedAction_FilterDoesNotMatch() throws Exception {
         final AppsFilterImpl appsFilter =
                 new AppsFilterImpl(mStateProvider, mFeatureConfigMock, new String[]{}, false, null,
-                        mMockExecutor, mMockPmInternal);
+                        mMockExecutor);
         final WatchableTester watcher = new WatchableTester(appsFilter, "onChange");
         watcher.register();
         final Signature frameworkSignature = Mockito.mock(Signature.class);
@@ -310,7 +308,7 @@ public class AppsFilterImplTest {
     public void testQueriesProvider_FilterMatches() throws Exception {
         final AppsFilterImpl appsFilter =
                 new AppsFilterImpl(mStateProvider, mFeatureConfigMock, new String[]{}, false, null,
-                        mMockExecutor, mMockPmInternal);
+                        mMockExecutor);
         final WatchableTester watcher = new WatchableTester(appsFilter, "onChange");
         watcher.register();
         simulateAddBasicAndroid(appsFilter);
@@ -335,7 +333,7 @@ public class AppsFilterImplTest {
     public void testOnUserUpdated_FilterMatches() throws Exception {
         final AppsFilterImpl appsFilter =
                 new AppsFilterImpl(mStateProvider, mFeatureConfigMock, new String[]{}, false, null,
-                        mMockExecutor, mMockPmInternal);
+                        mMockExecutor);
         simulateAddBasicAndroid(appsFilter);
 
         appsFilter.onSystemReady();
@@ -357,7 +355,7 @@ public class AppsFilterImplTest {
         // adds new user
         doAnswer(invocation -> {
             ((AppsFilterImpl.StateProvider.CurrentStateCallback) invocation.getArgument(0))
-                    .currentState(mExisting, USER_INFO_LIST_WITH_ADDED);
+                    .currentState(mExisting, mSharedUserSettings, USER_INFO_LIST_WITH_ADDED);
             return new Object();
         }).when(mStateProvider)
                 .runWithState(any(AppsFilterImpl.StateProvider.CurrentStateCallback.class));
@@ -374,7 +372,7 @@ public class AppsFilterImplTest {
         // delete user
         doAnswer(invocation -> {
             ((AppsFilterImpl.StateProvider.CurrentStateCallback) invocation.getArgument(0))
-                    .currentState(mExisting, USER_INFO_LIST);
+                    .currentState(mExisting, mSharedUserSettings, USER_INFO_LIST);
             return new Object();
         }).when(mStateProvider)
                 .runWithState(any(AppsFilterImpl.StateProvider.CurrentStateCallback.class));
@@ -393,7 +391,7 @@ public class AppsFilterImplTest {
     public void testQueriesDifferentProvider_Filters() throws Exception {
         final AppsFilterImpl appsFilter =
                 new AppsFilterImpl(mStateProvider, mFeatureConfigMock, new String[]{}, false, null,
-                        mMockExecutor, mMockPmInternal);
+                        mMockExecutor);
         final WatchableTester watcher = new WatchableTester(appsFilter, "onChange");
         watcher.register();
         simulateAddBasicAndroid(appsFilter);
@@ -418,7 +416,7 @@ public class AppsFilterImplTest {
     public void testQueriesProviderWithSemiColon_FilterMatches() throws Exception {
         final AppsFilterImpl appsFilter =
                 new AppsFilterImpl(mStateProvider, mFeatureConfigMock, new String[]{}, false, null,
-                        mMockExecutor, mMockPmInternal);
+                        mMockExecutor);
         simulateAddBasicAndroid(appsFilter);
         appsFilter.onSystemReady();
 
@@ -437,7 +435,7 @@ public class AppsFilterImplTest {
     public void testQueriesAction_NoMatchingAction_Filters() throws Exception {
         final AppsFilterImpl appsFilter =
                 new AppsFilterImpl(mStateProvider, mFeatureConfigMock, new String[]{}, false, null,
-                        mMockExecutor, mMockPmInternal);
+                        mMockExecutor);
         simulateAddBasicAndroid(appsFilter);
         appsFilter.onSystemReady();
 
@@ -454,7 +452,7 @@ public class AppsFilterImplTest {
     public void testQueriesAction_NoMatchingActionFilterLowSdk_DoesntFilter() throws Exception {
         final AppsFilterImpl appsFilter =
                 new AppsFilterImpl(mStateProvider, mFeatureConfigMock, new String[]{}, false, null,
-                        mMockExecutor, mMockPmInternal);
+                        mMockExecutor);
         simulateAddBasicAndroid(appsFilter);
         appsFilter.onSystemReady();
 
@@ -475,7 +473,7 @@ public class AppsFilterImplTest {
     public void testNoQueries_Filters() throws Exception {
         final AppsFilterImpl appsFilter =
                 new AppsFilterImpl(mStateProvider, mFeatureConfigMock, new String[]{}, false, null,
-                        mMockExecutor, mMockPmInternal);
+                        mMockExecutor);
         simulateAddBasicAndroid(appsFilter);
         appsFilter.onSystemReady();
 
@@ -492,7 +490,7 @@ public class AppsFilterImplTest {
     public void testNoUsesLibrary_Filters() throws Exception {
         final AppsFilterImpl appsFilter = new AppsFilterImpl(mStateProvider, mFeatureConfigMock,
                 new String[]{}, /* systemAppsQueryable */ false, /* overlayProvider */ null,
-                mMockExecutor, mMockPmInternal);
+                mMockExecutor);
 
         simulateAddBasicAndroid(appsFilter);
         appsFilter.onSystemReady();
@@ -518,7 +516,7 @@ public class AppsFilterImplTest {
     public void testUsesLibrary_DoesntFilter() throws Exception {
         final AppsFilterImpl appsFilter = new AppsFilterImpl(mStateProvider, mFeatureConfigMock,
                 new String[]{}, /* systemAppsQueryable */ false, /* overlayProvider */ null,
-                mMockExecutor, mMockPmInternal);
+                mMockExecutor);
 
         simulateAddBasicAndroid(appsFilter);
         appsFilter.onSystemReady();
@@ -545,7 +543,7 @@ public class AppsFilterImplTest {
     public void testUsesOptionalLibrary_DoesntFilter() throws Exception {
         final AppsFilterImpl appsFilter = new AppsFilterImpl(mStateProvider, mFeatureConfigMock,
                 new String[]{}, /* systemAppsQueryable */ false, /* overlayProvider */ null,
-                mMockExecutor, mMockPmInternal);
+                mMockExecutor);
 
         simulateAddBasicAndroid(appsFilter);
         appsFilter.onSystemReady();
@@ -572,7 +570,7 @@ public class AppsFilterImplTest {
     public void testUsesLibrary_ShareUid_DoesntFilter() throws Exception {
         final AppsFilterImpl appsFilter = new AppsFilterImpl(mStateProvider, mFeatureConfigMock,
                 new String[]{}, /* systemAppsQueryable */ false, /* overlayProvider */ null,
-                mMockExecutor, mMockPmInternal);
+                mMockExecutor);
 
         simulateAddBasicAndroid(appsFilter);
         appsFilter.onSystemReady();
@@ -604,7 +602,7 @@ public class AppsFilterImplTest {
     public void testForceQueryable_SystemDoesntFilter() throws Exception {
         final AppsFilterImpl appsFilter =
                 new AppsFilterImpl(mStateProvider, mFeatureConfigMock, new String[]{}, false, null,
-                        mMockExecutor, mMockPmInternal);
+                        mMockExecutor);
         simulateAddBasicAndroid(appsFilter);
         appsFilter.onSystemReady();
 
@@ -623,7 +621,7 @@ public class AppsFilterImplTest {
     public void testForceQueryable_NonSystemFilters() throws Exception {
         final AppsFilterImpl appsFilter =
                 new AppsFilterImpl(mStateProvider, mFeatureConfigMock, new String[]{}, false, null,
-                        mMockExecutor, mMockPmInternal);
+                        mMockExecutor);
         simulateAddBasicAndroid(appsFilter);
         appsFilter.onSystemReady();
 
@@ -641,7 +639,7 @@ public class AppsFilterImplTest {
         final AppsFilterImpl appsFilter =
                 new AppsFilterImpl(mStateProvider, mFeatureConfigMock,
                         new String[]{"com.some.package"}, false, null,
-                        mMockExecutor, mMockPmInternal);
+                        mMockExecutor);
         simulateAddBasicAndroid(appsFilter);
         appsFilter.onSystemReady();
 
@@ -660,7 +658,7 @@ public class AppsFilterImplTest {
     public void testSystemSignedTarget_DoesntFilter() throws CertificateException {
         final AppsFilterImpl appsFilter =
                 new AppsFilterImpl(mStateProvider, mFeatureConfigMock, new String[]{}, false, null,
-                        mMockExecutor, mMockPmInternal);
+                        mMockExecutor);
         appsFilter.onSystemReady();
 
         final Signature frameworkSignature = Mockito.mock(Signature.class);
@@ -690,7 +688,7 @@ public class AppsFilterImplTest {
         final AppsFilterImpl appsFilter =
                 new AppsFilterImpl(mStateProvider, mFeatureConfigMock,
                         new String[]{"com.some.package"}, false, null,
-                        mMockExecutor, mMockPmInternal);
+                        mMockExecutor);
         simulateAddBasicAndroid(appsFilter);
         appsFilter.onSystemReady();
 
@@ -708,8 +706,7 @@ public class AppsFilterImplTest {
     public void testSystemQueryable_DoesntFilter() throws Exception {
         final AppsFilterImpl appsFilter =
                 new AppsFilterImpl(mStateProvider, mFeatureConfigMock, new String[]{},
-                        true /* system force queryable */, null, mMockExecutor,
-                        mMockPmInternal);
+                        true /* system force queryable */, null, mMockExecutor);
         simulateAddBasicAndroid(appsFilter);
         appsFilter.onSystemReady();
 
@@ -727,7 +724,7 @@ public class AppsFilterImplTest {
     public void testQueriesPackage_DoesntFilter() throws Exception {
         final AppsFilterImpl appsFilter =
                 new AppsFilterImpl(mStateProvider, mFeatureConfigMock, new String[]{}, false, null,
-                        mMockExecutor, mMockPmInternal);
+                        mMockExecutor);
         simulateAddBasicAndroid(appsFilter);
         appsFilter.onSystemReady();
 
@@ -746,7 +743,7 @@ public class AppsFilterImplTest {
                 .thenReturn(false);
         final AppsFilterImpl appsFilter =
                 new AppsFilterImpl(mStateProvider, mFeatureConfigMock, new String[]{}, false, null,
-                        mMockExecutor, mMockPmInternal);
+                        mMockExecutor);
         simulateAddBasicAndroid(appsFilter);
         appsFilter.onSystemReady();
 
@@ -763,7 +760,7 @@ public class AppsFilterImplTest {
     public void testSystemUid_DoesntFilter() throws Exception {
         final AppsFilterImpl appsFilter =
                 new AppsFilterImpl(mStateProvider, mFeatureConfigMock, new String[]{}, false, null,
-                        mMockExecutor, mMockPmInternal);
+                        mMockExecutor);
         simulateAddBasicAndroid(appsFilter);
         appsFilter.onSystemReady();
 
@@ -779,7 +776,7 @@ public class AppsFilterImplTest {
     public void testSystemUidSecondaryUser_DoesntFilter() throws Exception {
         final AppsFilterImpl appsFilter =
                 new AppsFilterImpl(mStateProvider, mFeatureConfigMock, new String[]{}, false, null,
-                        mMockExecutor, mMockPmInternal);
+                        mMockExecutor);
         simulateAddBasicAndroid(appsFilter);
         appsFilter.onSystemReady();
 
@@ -796,7 +793,7 @@ public class AppsFilterImplTest {
     public void testNonSystemUid_NoCallingSetting_Filters() throws Exception {
         final AppsFilterImpl appsFilter =
                 new AppsFilterImpl(mStateProvider, mFeatureConfigMock, new String[]{}, false, null,
-                        mMockExecutor, mMockPmInternal);
+                        mMockExecutor);
         simulateAddBasicAndroid(appsFilter);
         appsFilter.onSystemReady();
 
@@ -811,7 +808,7 @@ public class AppsFilterImplTest {
     public void testNoTargetPackage_filters() throws Exception {
         final AppsFilterImpl appsFilter =
                 new AppsFilterImpl(mStateProvider, mFeatureConfigMock, new String[]{}, false, null,
-                        mMockExecutor, mMockPmInternal);
+                        mMockExecutor);
         simulateAddBasicAndroid(appsFilter);
         appsFilter.onSystemReady();
 
@@ -869,7 +866,7 @@ public class AppsFilterImplTest {
                         return Collections.emptyMap();
                     }
                 },
-                mMockExecutor, mMockPmInternal);
+                mMockExecutor);
         simulateAddBasicAndroid(appsFilter);
         appsFilter.onSystemReady();
 
@@ -925,16 +922,11 @@ public class AppsFilterImplTest {
                 .setOverlayTargetOverlayableName("overlayableName");
         ParsingPackage actorOne = pkg("com.some.package.actor.one");
         ParsingPackage actorTwo = pkg("com.some.package.actor.two");
-        ArraySet<PackageStateInternal> actorSharedSettingPackages = new ArraySet<>();
         PackageSetting ps1 = getPackageSettingFromParsingPackage(actorOne, DUMMY_ACTOR_APPID,
                 null /*settingBuilder*/);
         PackageSetting ps2 = getPackageSettingFromParsingPackage(actorTwo, DUMMY_ACTOR_APPID,
                 null /*settingBuilder*/);
-        actorSharedSettingPackages.add(ps1);
-        actorSharedSettingPackages.add(ps2);
-        when(mMockPmInternal.getSharedUserPackages(any(Integer.class))).thenReturn(
-                actorSharedSettingPackages
-        );
+
         final AppsFilterImpl appsFilter = new AppsFilterImpl(
                 mStateProvider,
                 mFeatureConfigMock,
@@ -965,7 +957,7 @@ public class AppsFilterImplTest {
                         return Collections.emptyMap();
                     }
                 },
-                mMockExecutor, mMockPmInternal);
+                mMockExecutor);
         simulateAddBasicAndroid(appsFilter);
         appsFilter.onSystemReady();
 
@@ -989,7 +981,7 @@ public class AppsFilterImplTest {
     public void testInitiatingApp_DoesntFilter() throws Exception {
         final AppsFilterImpl appsFilter =
                 new AppsFilterImpl(mStateProvider, mFeatureConfigMock, new String[]{}, false, null,
-                        mMockExecutor, mMockPmInternal);
+                        mMockExecutor);
         simulateAddBasicAndroid(appsFilter);
         appsFilter.onSystemReady();
 
@@ -1007,7 +999,7 @@ public class AppsFilterImplTest {
     public void testUninstalledInitiatingApp_Filters() throws Exception {
         final AppsFilterImpl appsFilter =
                 new AppsFilterImpl(mStateProvider, mFeatureConfigMock, new String[]{}, false, null,
-                        mMockExecutor, mMockPmInternal);
+                        mMockExecutor);
         simulateAddBasicAndroid(appsFilter);
         appsFilter.onSystemReady();
 
@@ -1025,7 +1017,7 @@ public class AppsFilterImplTest {
     public void testOriginatingApp_Filters() throws Exception {
         final AppsFilterImpl appsFilter =
                 new AppsFilterImpl(mStateProvider, mFeatureConfigMock, new String[]{}, false, null,
-                        mMockExecutor, mMockPmInternal);
+                        mMockExecutor);
         final WatchableTester watcher = new WatchableTester(appsFilter, "onChange");
         watcher.register();
         simulateAddBasicAndroid(appsFilter);
@@ -1050,7 +1042,7 @@ public class AppsFilterImplTest {
     public void testInstallingApp_DoesntFilter() throws Exception {
         final AppsFilterImpl appsFilter =
                 new AppsFilterImpl(mStateProvider, mFeatureConfigMock, new String[]{}, false, null,
-                        mMockExecutor, mMockPmInternal);
+                        mMockExecutor);
         final WatchableTester watcher = new WatchableTester(appsFilter, "onChange");
         watcher.register();
         simulateAddBasicAndroid(appsFilter);
@@ -1075,7 +1067,7 @@ public class AppsFilterImplTest {
     public void testInstrumentation_DoesntFilter() throws Exception {
         final AppsFilterImpl appsFilter =
                 new AppsFilterImpl(mStateProvider, mFeatureConfigMock, new String[]{}, false, null,
-                        mMockExecutor, mMockPmInternal);
+                        mMockExecutor);
         final WatchableTester watcher = new WatchableTester(appsFilter, "onChange");
         watcher.register();
         simulateAddBasicAndroid(appsFilter);
@@ -1104,7 +1096,7 @@ public class AppsFilterImplTest {
     public void testWhoCanSee() throws Exception {
         final AppsFilterImpl appsFilter =
                 new AppsFilterImpl(mStateProvider, mFeatureConfigMock, new String[]{}, false, null,
-                        mMockExecutor, mMockPmInternal);
+                        mMockExecutor);
         final WatchableTester watcher = new WatchableTester(appsFilter, "onChange");
         watcher.register();
         simulateAddBasicAndroid(appsFilter);
@@ -1177,7 +1169,7 @@ public class AppsFilterImplTest {
     public void testOnChangeReport() throws Exception {
         final AppsFilterImpl appsFilter =
                 new AppsFilterImpl(mStateProvider, mFeatureConfigMock, new String[]{}, false, null,
-                        mMockExecutor, mMockPmInternal);
+                        mMockExecutor);
         final WatchableTester watcher = new WatchableTester(appsFilter, "onChange");
         watcher.register();
         simulateAddBasicAndroid(appsFilter);
@@ -1250,7 +1242,7 @@ public class AppsFilterImplTest {
     public void testOnChangeReportedFilter() throws Exception {
         final AppsFilterImpl appsFilter =
                 new AppsFilterImpl(mStateProvider, mFeatureConfigMock, new String[]{}, false, null,
-                        mMockExecutor, mMockPmInternal);
+                        mMockExecutor);
         simulateAddBasicAndroid(appsFilter);
         appsFilter.onSystemReady();
         final WatchableTester watcher = new WatchableTester(appsFilter, "onChange filter");
@@ -1276,7 +1268,7 @@ public class AppsFilterImplTest {
     public void testAppsFilterRead() throws Exception {
         final AppsFilterImpl appsFilter =
                 new AppsFilterImpl(mStateProvider, mFeatureConfigMock, new String[]{}, false, null,
-                        mMockExecutor, mMockPmInternal);
+                        mMockExecutor);
         simulateAddBasicAndroid(appsFilter);
         appsFilter.onSystemReady();
 
@@ -1379,6 +1371,7 @@ public class AppsFilterImplTest {
         if (sharedUserSetting != null) {
             sharedUserSetting.addPackage(setting);
             setting.setSharedUserAppId(sharedUserSetting.mAppId);
+            mSharedUserSettings.add(sharedUserSetting);
         }
         filter.addPackage(setting);
     }
