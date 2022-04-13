@@ -208,7 +208,7 @@
     <string name="enable_adb_summary" msgid="3711526030096574316">"USB компьютерге сайылганда мүчүлүштүктөрдү оңдоо режими иштейт"</string>
     <string name="clear_adb_keys" msgid="3010148733140369917">"USB аркылуу мүчүлүштүктөрдү аныктоо уруксатын артка кайтаруу"</string>
     <string name="enable_adb_wireless" msgid="6973226350963971018">"Мүчүлүштүктөрдү Wi-Fi аркылуу аныктоо"</string>
-    <string name="enable_adb_wireless_summary" msgid="7344391423657093011">"Wi‑Fi\'га туташканда, мүчүлүштүктөрдү аныктоо режими иштейт оңдоо режими"</string>
+    <string name="enable_adb_wireless_summary" msgid="7344391423657093011">"Wi‑Fi\'га туташканда, мүчүлүштүктөрдү аныктоо режими иштейт"</string>
     <string name="adb_wireless_error" msgid="721958772149779856">"Ката"</string>
     <string name="adb_wireless_settings" msgid="2295017847215680229">"Мүчүлүштүктөрдү Wi-Fi аркылуу аныктоо"</string>
     <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"Жеткиликтүү түзмөктөрдү көрүү үчүн мүчүлүштүктөрдү Wi-Fi аркылуу аныктоону күйгүзүңүз"</string>
@@ -251,8 +251,8 @@
     <string name="debug_networking_category" msgid="6829757985772659599">"Тармактар"</string>
     <string name="wifi_display_certification" msgid="1805579519992520381">"Зымсыз мониторлорду тастыктамалоо"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"Wi‑Fi таржымалы"</string>
-    <string name="wifi_scan_throttling" msgid="2985624788509913617">"Wi‑Fi тармактарын издөөнү жөнгө салуу"</string>
-    <string name="wifi_enhanced_mac_randomization" msgid="882650208573834301">"Wi‑Fi туташуусу туруксуз MAC даректерин башаламан түзүү"</string>
+    <string name="wifi_scan_throttling" msgid="2985624788509913617">"Wi‑Fi тармактарын издөөнү чектөө"</string>
+    <string name="wifi_enhanced_mac_randomization" msgid="882650208573834301">"Wi-Fi тармагындагы башаламан MAC даректери"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"Мобилдик Интернет иштей берет"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"Модем режиминде аппараттын иштешин тездетүү"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"Аталышсыз Bluetooth түзмөктөрү көрүнсүн"</string>
@@ -370,7 +370,7 @@
     <string name="immediately_destroy_activities" msgid="1826287490705167403">"Аракеттер сакталбасын"</string>
     <string name="immediately_destroy_activities_summary" msgid="6289590341144557614">"Колдонуучу чыгып кетери менен бардык аракеттер өчүрүлөт"</string>
     <string name="app_process_limit_title" msgid="8361367869453043007">"Фондогу процесстер чеги"</string>
-    <string name="show_all_anrs" msgid="9160563836616468726">"Фондогу \"Колдонмо жооп бербей жатат\" деп көрсөтүү"</string>
+    <string name="show_all_anrs" msgid="9160563836616468726">"Фондук режимдеги ANR"</string>
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"Фондогу колдонмо жооп бербей жатат деп билдирип турат"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"Билдирмелер каналынын эскертүүлөрүн көрсөтүү"</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"Тыюу салынган каналдын колдонмосунун жаңы билдирмелери тууралуу эскертүүлөр көрүнөт"</string>
@@ -529,7 +529,7 @@
     <string name="help_label" msgid="3528360748637781274">"Жардам/Пикир билдирүү"</string>
     <string name="storage_category" msgid="2287342585424631813">"Сактагыч"</string>
     <string name="shared_data_title" msgid="1017034836800864953">"Бөлүшүлгөн маалымат"</string>
-    <string name="shared_data_summary" msgid="5516326713822885652">"Бөлүшүлгөн маалыматты көрүп, өзгөртүү"</string>
+    <string name="shared_data_summary" msgid="5516326713822885652">"Бөлүшүлгөн маалыматты көрүп, өзгөртөсүз"</string>
     <string name="shared_data_no_blobs_text" msgid="3108114670341737434">"Бул колдонуучу менен бөлүшүлгөн маалымат жок."</string>
     <string name="shared_data_query_failure_text" msgid="3489828881998773687">"Бөлүшүлгөн маалыматты алууда ката кетти. Кайталоо."</string>
     <string name="blob_id_text" msgid="8680078988996308061">"Бөлүшүлгөн маалыматты идентификатору: <xliff:g id="BLOB_ID">%d</xliff:g>"</string>

@@ -146,7 +146,7 @@
     <string name="data_usage_ota" msgid="7984667793701597001">"Жүйелік жаңарту"</string>
     <string name="tether_settings_title_usb" msgid="3728686573430917722">"USB тетеринг"</string>
     <string name="tether_settings_title_wifi" msgid="4803402057533895526">"Алынбалы хот-спот"</string>
-    <string name="tether_settings_title_bluetooth" msgid="916519902721399656">"Bluetooth модем"</string>
+    <string name="tether_settings_title_bluetooth" msgid="916519902721399656">"Bluetooth тетеринг"</string>
     <string name="tether_settings_title_usb_bluetooth" msgid="1727111807207577322">"Тетеринг"</string>
     <string name="tether_settings_title_all" msgid="8910259483383010470">"Тетеринг және алынбалы хотспот"</string>
     <string name="managed_user_title" msgid="449081789742645723">"Барлық жұмыс қолданбалары"</string>
@@ -299,7 +299,7 @@
     <string name="allow_mock_location_summary" msgid="179780881081354579">"Жасанды аймақтарды пайдалануға рұқсат беру"</string>
     <string name="debug_view_attributes" msgid="3539609843984208216">"Көру төлсипатын тексеруді қосу"</string>
     <string name="mobile_data_always_on_summary" msgid="1112156365594371019">"Wi‑Fi қосулы кезде де мобильдік интернетті өшірмеу (желіні жылдам ауыстыру үшін)"</string>
-    <string name="tethering_hardware_offload_summary" msgid="7801345335142803029">"Тетеринг режиміндегі аппараттық жеделдетуді пайдалану (қолжетімді болса)"</string>
+    <string name="tethering_hardware_offload_summary" msgid="7801345335142803029">"Тетеринг режимінде аппаратпен жеделдетуді пайдалану (қолжетімді болса)"</string>
     <string name="adb_warning_title" msgid="7708653449506485728">"USB арқылы түзетуге рұқсат берілсін бе?"</string>
     <string name="adb_warning_message" msgid="8145270656419669221">"USB арқылы түзету дамыту мақсаттарына ғана арналған. Оны компьютер және құрылғы арасында дерек көшіру, құрылғыға ескертусіз қолданба орнату және журнал деректерін оқу үшін қолданыңыз."</string>
     <string name="adbwifi_warning_title" msgid="727104571653031865">"Сымсыз түзетуге рұқсат берілсін бе?"</string>
@@ -324,7 +324,7 @@
     <string name="select_application" msgid="2543228890535466325">"Қолданба таңдау"</string>
     <string name="no_application" msgid="9038334538870247690">"Ешнәрсе"</string>
     <string name="wait_for_debugger" msgid="7461199843335409809">"Түзеткішті күту"</string>
-    <string name="wait_for_debugger_summary" msgid="6846330006113363286">"Орындау алдында түзелетін қолданба түзетушінің қосылуын күтеді"</string>
+    <string name="wait_for_debugger_summary" msgid="6846330006113363286">"Орындау алдында түзелетін қолданба түзетушінің қосылуын күтеді."</string>
     <string name="debug_input_category" msgid="7349460906970849771">"Енгізу"</string>
     <string name="debug_drawing_category" msgid="5066171112313666619">"Сызу"</string>
     <string name="debug_hw_drawing_category" msgid="5830815169336975162">"Бейнелеуді аппаратпен жеделдету"</string>
@@ -357,7 +357,7 @@
     <string name="force_msaa" msgid="4081288296137775550">"4x MSAA қолдану"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"4x MSAA функциясын OpenGL ES 2.0 қолданбаларында іске қосу"</string>
     <string name="show_non_rect_clip" msgid="7499758654867881817">"Тіктөртбұрыштан басқа пішінге қиюды түзету"</string>
-    <string name="track_frame_time" msgid="522674651937771106">"Профиль бойынша HWUI рендерингі"</string>
+    <string name="track_frame_time" msgid="522674651937771106">"Профильдегі HWUI рендерингі"</string>
     <string name="enable_gpu_debug_layers" msgid="4986675516188740397">"GPU түзету қабаттары"</string>
     <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"GPU түзету қабаттарының жүктелуіне рұқсат ету"</string>
     <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"Жеткізуші туралы толық мәліметті тіркеу"</string>
@@ -369,16 +369,16 @@
     <string name="debug_applications_category" msgid="5394089406638954196">"Қолданбалар"</string>
     <string name="immediately_destroy_activities" msgid="1826287490705167403">"Әрекеттерді сақтамау"</string>
     <string name="immediately_destroy_activities_summary" msgid="6289590341144557614">"Әр әрекетті пайдаланушы аяқтай салысымен жою"</string>
-    <string name="app_process_limit_title" msgid="8361367869453043007">"Фондық үрдіс шектеуі"</string>
+    <string name="app_process_limit_title" msgid="8361367869453043007">"Фондық процесті шектеу"</string>
     <string name="show_all_anrs" msgid="9160563836616468726">"Фондық ANR-ларды көрсету"</string>
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"Фондық қолданбалар үшін \"Қолданба жауап бермейді\" терезесін шығару"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"Хабарландыру арнасының ескертулерін көрсету"</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"Қолданба жарамсыз арна арқылы хабарландыру жариялағанда, экранға ескерту шығарады."</string>
-    <string name="force_allow_on_external" msgid="9187902444231637880">"Сыртқы жадта қолданбаларға рұқсат ету"</string>
+    <string name="force_allow_on_external" msgid="9187902444231637880">"Сыртқы жадта сақтауға рұқсат ету"</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"Манифест мәндеріне қарамастан, кез келген қолданбаны сыртқы жадқа жазуға рұқсат беру"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"Әрекеттердің өлшемін өзгертуге рұқсат ету"</string>
     <string name="force_resizable_activities_summary" msgid="2490382056981583062">"Манифест мәндеріне қарамастан, бірнеше терезе режимінде барлық әрекеттердің өлшемін өзгертуге рұқсат беру"</string>
-    <string name="enable_freeform_support" msgid="7599125687603914253">"Еркін пішіндегі терезелерді қосу"</string>
+    <string name="enable_freeform_support" msgid="7599125687603914253">"Еркін пішінді терезелерге рұқсат беру"</string>
     <string name="enable_freeform_support_summary" msgid="1822862728719276331">"Еркін пішінді терезелерді құру эксперименттік функиясын қосу"</string>
     <string name="local_backup_password_title" msgid="4631017948933578709">"Компьютердегі сақтық көшірме құпия сөзі"</string>
     <string name="local_backup_password_summary_none" msgid="7646898032616361714">"Компьютердегі толық сақтық көшірмелер қазір қорғалмаған."</string>
@@ -401,7 +401,7 @@
     <string name="inactive_app_inactive_summary" msgid="3161222402614236260">"Белсенді емес. Ауыстырып қосу үшін түртіңіз."</string>
     <string name="inactive_app_active_summary" msgid="8047630990208722344">"Белсенді. Ауыстырып қосу үшін түртіңіз."</string>
     <string name="standby_bucket_summary" msgid="5128193447550429600">"Қолданбаның күту режимі: <xliff:g id="BUCKET"> %s</xliff:g>"</string>
-    <string name="transcode_settings_title" msgid="2581975870429850549">"Медиамазмұнды қайта кодтау параметрлері"</string>
+    <string name="transcode_settings_title" msgid="2581975870429850549">"Медиафайлдарды қайта кодтау параметрлері"</string>
     <string name="transcode_user_control" msgid="6176368544817731314">"Қайта қодтаудың әдепкі параметрлерін қайта анықтау"</string>
     <string name="transcode_enable_all" msgid="2411165920039166710">"Қайта кодтауды қосу"</string>
     <string name="transcode_default" msgid="3784803084573509491">"Қолданбалар қазіргі заманғы форматтарды қолдайды делік"</string>
@@ -574,7 +574,7 @@
     <string name="user_image_take_photo" msgid="467512954561638530">"Фотосуретке түсіру"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"Сурет таңдау"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"Фотосурет таңдау"</string>
-    <string name="cached_apps_freezer_device_default" msgid="2616594131750144342">"Құрылғының әдепкі параметрлері"</string>
+    <string name="cached_apps_freezer_device_default" msgid="2616594131750144342">"Құрылғының әдепкі параметрі"</string>
     <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"Өшірулі"</string>
     <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"Қосулы"</string>
     <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"Бұл өзгеріс күшіне енуі үшін, құрылғыны қайта жүктеу керек. Қазір қайта жүктеңіз не бас тартыңыз."</string>

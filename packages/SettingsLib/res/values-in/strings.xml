@@ -236,7 +236,7 @@
     <string name="adb_wireless_no_network_msg" msgid="2365795244718494658">"Harap sambungkan ke jaringan Wi-Fi"</string>
     <string name="keywords_adb_wireless" msgid="6507505581882171240">"adb, debug, dev"</string>
     <string name="bugreport_in_power" msgid="8664089072534638709">"Pintasan laporan bug"</string>
-    <string name="bugreport_in_power_summary" msgid="1885529649381831775">"Tampilkan tombol di menu daya untuk mengambil laporan bug"</string>
+    <string name="bugreport_in_power_summary" msgid="1885529649381831775">"Menampilkan tombol di menu daya untuk mengambil laporan bug"</string>
     <string name="keep_screen_on" msgid="1187161672348797558">"Tetap terjaga"</string>
     <string name="keep_screen_on_summary" msgid="1510731514101925829">"Layar tidak akan redup selama mengisi daya"</string>
     <string name="bt_hci_snoop_log" msgid="7291287955649081448">"Aktifkan log pengintaian HCI Bluetooth"</string>
@@ -281,8 +281,8 @@
     <string name="private_dns_mode_provider" msgid="3619040641762557028">"Hostname penyedia DNS pribadi"</string>
     <string name="private_dns_mode_provider_hostname_hint" msgid="6564868953748514595">"Masukkan hostname penyedia DNS"</string>
     <string name="private_dns_mode_provider_failure" msgid="8356259467861515108">"Tidak dapat terhubung"</string>
-    <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Tampilkan opsi untuk sertifikasi layar nirkabel"</string>
-    <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Tingkatkan level pencatatan log Wi-Fi, tampilkan per SSID RSSI di Pemilih Wi‑Fi"</string>
+    <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Menampilkan opsi untuk sertifikasi tampilan nirkabel"</string>
+    <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Meningkatkan level pencatatan log Wi-Fi, menampilkan per SSID RSSI di Pemilih Wi‑Fi"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Memperlambat kehabisan baterai &amp; meningkatkan performa jaringan"</string>
     <string name="wifi_enhanced_mac_randomization_summary" msgid="1210663439867489931">"Saat mode ini diaktifkan, alamat MAC perangkat ini dapat berubah setiap kali terhubung ke jaringan yang mengaktifkan pengacakan MAC."</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"Berbayar"</string>
@@ -298,8 +298,8 @@
     <string name="allow_mock_location" msgid="2102650981552527884">"Mengizinkan lokasi palsu"</string>
     <string name="allow_mock_location_summary" msgid="179780881081354579">"Mengizinkan lokasi palsu"</string>
     <string name="debug_view_attributes" msgid="3539609843984208216">"Aktifkan inspeksi atribut tampilan"</string>
-    <string name="mobile_data_always_on_summary" msgid="1112156365594371019">"Selalu aktifkan kuota, meski Wi-Fi aktif (agar jaringan beralih dengan cepat)."</string>
-    <string name="tethering_hardware_offload_summary" msgid="7801345335142803029">"Gunakan akselerasi hardware tethering jika tersedia"</string>
+    <string name="mobile_data_always_on_summary" msgid="1112156365594371019">"Selalu mengaktifkan data seluler, meskipun Wi-Fi aktif (agar jaringan beralih dengan cepat)."</string>
+    <string name="tethering_hardware_offload_summary" msgid="7801345335142803029">"Menggunakan akselerasi hardware tethering jika tersedia"</string>
     <string name="adb_warning_title" msgid="7708653449506485728">"Izinkan melakukan debug USB?"</string>
     <string name="adb_warning_message" msgid="8145270656419669221">"Debugging USB dimaksudkan untuk tujuan pengembangan saja. Gunakan untuk menyalin data antara komputer dan perangkat Anda, memasang apl pada perangkat tanpa notifikasi, dan membaca data log."</string>
     <string name="adbwifi_warning_title" msgid="727104571653031865">"Izinkan proses debug nirkabel?"</string>
@@ -308,7 +308,7 @@
     <string name="dev_settings_warning_title" msgid="8251234890169074553">"Izinkan setelan pengembangan?"</string>
     <string name="dev_settings_warning_message" msgid="37741686486073668">"Setelan ini hanya dimaksudkan untuk penggunaan pengembangan. Setelan dapat menyebabkan perangkat dan aplikasi yang menerapkannya rusak atau tidak berfungsi semestinya."</string>
     <string name="verify_apps_over_usb_title" msgid="6031809675604442636">"Verifikasi aplikasi melalui USB"</string>
-    <string name="verify_apps_over_usb_summary" msgid="1317933737581167839">"Periksa perilaku membahayakan dalam aplikasi yang terpasang melalui ADB/ADT."</string>
+    <string name="verify_apps_over_usb_summary" msgid="1317933737581167839">"Memeriksa perilaku berbahaya dalam aplikasi yang diinstal melalui ADB/ADT."</string>
     <string name="bluetooth_show_devices_without_names_summary" msgid="780964354377854507">"Perangkat Bluetooth tanpa nama (hanya alamat MAC) akan ditampilkan"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="2006309932135547681">"Menonaktifkan fitur volume absolut Bluetooth jika ada masalah volume dengan perangkat jarak jauh, misalnya volume terlalu keras atau kurangnya kontrol."</string>
     <string name="bluetooth_enable_gabeldorsche_summary" msgid="2054730331770712629">"Mengaktifkan stack fitur Gabeldorsche Bluetooth."</string>
@@ -331,13 +331,13 @@
     <string name="media_category" msgid="8122076702526144053">"Media"</string>
     <string name="debug_monitoring_category" msgid="1597387133765424994">"Memantau"</string>
     <string name="strict_mode" msgid="889864762140862437">"Mode ketat diaktifkan"</string>
-    <string name="strict_mode_summary" msgid="1838248687233554654">"Kedipkan layar saat apl beroperasi lama pada utas utama"</string>
+    <string name="strict_mode_summary" msgid="1838248687233554654">"Mengedipkan layar saat apl berjalan lama di utas utama"</string>
     <string name="pointer_location" msgid="7516929526199520173">"Lokasi penunjuk"</string>
-    <string name="pointer_location_summary" msgid="957120116989798464">"Hamparan layar menampilkan data sentuhan saat ini"</string>
+    <string name="pointer_location_summary" msgid="957120116989798464">"Overlay layar menampilkan data sentuhan saat ini"</string>
     <string name="show_touches" msgid="8437666942161289025">"Tampilkan ketukan"</string>
-    <string name="show_touches_summary" msgid="3692861665994502193">"Tampilkan efek visual untuk ketukan"</string>
+    <string name="show_touches_summary" msgid="3692861665994502193">"Menampilkan efek visual untuk ketukan"</string>
     <string name="show_screen_updates" msgid="2078782895825535494">"Lihat pembaruan permukaan"</string>
-    <string name="show_screen_updates_summary" msgid="2126932969682087406">"Sorot seluruh permukaan jendela saat diperbarui"</string>
+    <string name="show_screen_updates_summary" msgid="2126932969682087406">"Mengedipkan seluruh permukaan jendela saat diperbarui"</string>
     <string name="show_hw_screen_updates" msgid="2021286231267747506">"Tampilkan update tampilan"</string>
     <string name="show_hw_screen_updates_summary" msgid="3539770072741435691">"Tampilan cepat dalam jendela saat digambar"</string>
     <string name="show_hw_layers_updates" msgid="5268370750002509767">"Tunjukkan update lapisan hardware"</string>
@@ -347,39 +347,39 @@
     <string name="disable_overlays_summary" msgid="1954852414363338166">"Selalu gunakan GPU untuk pengomposisian layar"</string>
     <string name="simulate_color_space" msgid="1206503300335835151">"Simulasikan ruang warna"</string>
     <string name="enable_opengl_traces_title" msgid="4638773318659125196">"Aktifkan jejak OpenGL"</string>
-    <string name="usb_audio_disable_routing" msgid="3367656923544254975">"Pemilihan rute audio USB nonaktif"</string>
-    <string name="usb_audio_disable_routing_summary" msgid="8768242894849534699">"Pemilihan rute otomatis ke periferal audio USB nonaktif"</string>
+    <string name="usb_audio_disable_routing" msgid="3367656923544254975">"Nonaktifkan pemilihan rute audio USB"</string>
+    <string name="usb_audio_disable_routing_summary" msgid="8768242894849534699">"Menonaktifkan pemilihan rute otomatis ke periferal audio USB"</string>
     <string name="debug_layout" msgid="1659216803043339741">"Tampilkan batas tata letak"</string>
-    <string name="debug_layout_summary" msgid="8825829038287321978">"Tampilkan batas klip, margin, dll."</string>
+    <string name="debug_layout_summary" msgid="8825829038287321978">"Menampilkan batas klip, margin, dll."</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"Paksa arah tata letak RTL"</string>
-    <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"Paksa arah tata letak layar RTL untuk semua lokal"</string>
+    <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"Memaksa arah tata letak layar RTL untuk semua lokalitas"</string>
     <string name="window_blurs" msgid="6831008984828425106">"Izinkan buram level jendela"</string>
     <string name="force_msaa" msgid="4081288296137775550">"Paksa 4x MSAA"</string>
-    <string name="force_msaa_summary" msgid="9070437493586769500">"Aktifkan 4x MSAA dalam aplikasi OpenGL ES 2.0"</string>
+    <string name="force_msaa_summary" msgid="9070437493586769500">"Mengaktifkan 4x MSAA dalam aplikasi OpenGL ES 2.0"</string>
     <string name="show_non_rect_clip" msgid="7499758654867881817">"Debug operasi klip non-kotak"</string>
     <string name="track_frame_time" msgid="522674651937771106">"Rendering HWUI profil"</string>
     <string name="enable_gpu_debug_layers" msgid="4986675516188740397">"Aktifkan lapisan debug GPU"</string>
-    <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"Izinkan memuat lapisan debug GPU untuk aplikasi debug"</string>
+    <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"Mengizinkan lapisan debug GPU dimuat di apl debug"</string>
     <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"Aktifkan logging vendor panjang"</string>
-    <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"Sertakan log vendor khusus perangkat tambahan dalam laporan bug, yang mungkin berisi informasi pribadi, menggunakan lebih banyak baterai, dan/atau menggunakan lebih banyak ruang penyimpanan."</string>
+    <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"Menyertakan log vendor khusus perangkat tambahan dalam laporan bug, yang mungkin berisi informasi pribadi, menggunakan lebih banyak baterai, dan/atau menggunakan lebih banyak ruang penyimpanan."</string>
     <string name="window_animation_scale_title" msgid="5236381298376812508">"Skala animasi jendela"</string>
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"Skala animasi transisi"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"Skala durasi animator"</string>
     <string name="overlay_display_devices_title" msgid="5411894622334469607">"Simulasikan tampilan sekunder"</string>
     <string name="debug_applications_category" msgid="5394089406638954196">"Aplikasi"</string>
     <string name="immediately_destroy_activities" msgid="1826287490705167403">"Jangan simpan aktivitas"</string>
-    <string name="immediately_destroy_activities_summary" msgid="6289590341144557614">"Hancurkan tiap aktivitas setelah ditinggal pengguna"</string>
+    <string name="immediately_destroy_activities_summary" msgid="6289590341144557614">"Menghancurkan aktivitas setelah apl ditutup"</string>
     <string name="app_process_limit_title" msgid="8361367869453043007">"Batas proses latar blkng"</string>
     <string name="show_all_anrs" msgid="9160563836616468726">"Tampilkan ANR latar blkng"</string>
-    <string name="show_all_anrs_summary" msgid="8562788834431971392">"Tampilkan dialog Aplikasi Tidak Merespons untuk aplikasi yang ada di latar belakang"</string>
+    <string name="show_all_anrs_summary" msgid="8562788834431971392">"Menampilkan dialog Aplikasi Tidak Merespons untuk aplikasi yang ada di latar belakang"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"Tampilkan peringatan saluran notifikasi"</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"Menampilkan peringatan di layar saat aplikasi memposting notifikasi tanpa channel yang valid"</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"Paksa izinkan aplikasi di eksternal"</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"Membuat semua aplikasi dapat ditulis ke penyimpanan eksternal, terlepas dari nilai manifes"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"Paksa aktivitas agar ukurannya dapat diubah"</string>
-    <string name="force_resizable_activities_summary" msgid="2490382056981583062">"Buat semua aktivitas dapat diubah ukurannya untuk banyak jendela, terlepas dari nilai manifes."</string>
+    <string name="force_resizable_activities_summary" msgid="2490382056981583062">"Membuat semua aktivitas dapat diubah ukurannya untuk banyak jendela, terlepas dari nilai manifes."</string>
     <string name="enable_freeform_support" msgid="7599125687603914253">"Aktifkan jendela berformat bebas"</string>
-    <string name="enable_freeform_support_summary" msgid="1822862728719276331">"Aktifkan dukungan untuk jendela eksperimental berformat bebas."</string>
+    <string name="enable_freeform_support_summary" msgid="1822862728719276331">"Mengaktifkan dukungan untuk jendela eksperimental berformat bebas."</string>
     <string name="local_backup_password_title" msgid="4631017948933578709">"Sandi cadangan desktop"</string>
     <string name="local_backup_password_summary_none" msgid="7646898032616361714">"Saat ini cadangan desktop penuh tidak dilindungi"</string>
     <string name="local_backup_password_summary_change" msgid="1707357670383995567">"Ketuk guna mengubah atau menghapus sandi untuk cadangan lengkap desktop"</string>
@@ -426,7 +426,7 @@
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"Protanomali (merah-hijau)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"Tritanomali (biru-kuning)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"Koreksi warna"</string>
-    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="2333641630205214702">"Sesuaikan cara warna ditampilkan di perangkat Anda. Ini dapat bermanfaat saat Anda ingin:&lt;br/&gt;&lt;br/&gt; &lt;ol&gt; &lt;li&gt;&amp;nbsp;Melihat warna dengan lebih akurat&lt;/li&gt; &lt;li&gt;&amp;nbsp;Menghapus warna untuk membantu Anda fokus&lt;/li&gt; &lt;/ol&gt;"</string>
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="2333641630205214702">"Sesuaikan cara warna ditampilkan di perangkat Anda. Ini dapat bermanfaat saat Anda ingin:&lt;br/&gt;&lt;br/&gt; &lt;ol&gt; &lt;li&gt; Melihat warna dengan lebih akurat&lt;/li&gt; &lt;li&gt; Menghapus warna agar Anda lebih fokus&lt;/li&gt; &lt;/ol&gt;"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"Digantikan oleh <xliff:g id="TITLE">%1$s</xliff:g>"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> - <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
     <string name="power_remaining_duration_only" msgid="8264199158671531431">"Sekitar <xliff:g id="TIME_REMAINING">%1$s</xliff:g> lagi"</string>
