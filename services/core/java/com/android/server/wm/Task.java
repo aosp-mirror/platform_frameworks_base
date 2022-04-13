@@ -2788,9 +2788,11 @@ class Task extends TaskFragment {
         }
 
         final Rect visibleFrame = sTmpBounds;
+        final WindowManager.LayoutParams attrs = win.mAttrs;
         visibleFrame.set(win.getFrame());
         visibleFrame.inset(win.getInsetsStateWithVisibilityOverride().calculateVisibleInsets(
-                visibleFrame, win.mAttrs.softInputMode));
+                visibleFrame, attrs.type, win.getWindowingMode(), attrs.softInputMode,
+                attrs.flags));
         out.union(visibleFrame);
     }
 
