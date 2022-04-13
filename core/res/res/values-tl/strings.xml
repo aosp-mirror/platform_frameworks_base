@@ -1933,36 +1933,21 @@
     <string name="app_blocked_message" msgid="542972921087873023">"Hindi available sa ngayon ang <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"Hindi available ang <xliff:g id="ACTIVITY">%1$s</xliff:g>"</string>
     <string name="app_streaming_blocked_title_for_permission_dialog" msgid="4483161748582966785">"Kailangan ng pahintulot"</string>
-    <!-- no translation found for app_streaming_blocked_title_for_camera_dialog (3935701653713853065) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_title_for_fingerprint_dialog (3516853717714141951) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_title_for_microphone_dialog (544822455127171206) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_title_for_settings_dialog (196994247017450357) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_title_for_settings_dialog (8222710146267948647) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_title_for_settings_dialog (6895719984375299791) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_message (5024599278277957935) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_message (7491114163056552686) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_message (1245180131667647277) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_message_for_permission_dialog (6306583663205997979) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_message_for_permission_dialog (6545624942642129664) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_message_for_permission_dialog (8462740631707923000) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_message_for_fingerprint_dialog (3470977315395784567) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_message_for_fingerprint_dialog (698460091901465092) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_message_for_fingerprint_dialog (8552691971910603907) -->
-    <skip />
+    <string name="app_streaming_blocked_title_for_camera_dialog" msgid="3935701653713853065">"Hindi available ang camera"</string>
+    <string name="app_streaming_blocked_title_for_fingerprint_dialog" msgid="3516853717714141951">"Magpatuloy sa telepono"</string>
+    <string name="app_streaming_blocked_title_for_microphone_dialog" msgid="544822455127171206">"Hindi available ang mikropono"</string>
+    <string name="app_streaming_blocked_title_for_settings_dialog" product="tv" msgid="196994247017450357">"Hindi available ang mga setting ng Android TV"</string>
+    <string name="app_streaming_blocked_title_for_settings_dialog" product="tablet" msgid="8222710146267948647">"Hindi available ang mga setting ng tablet"</string>
+    <string name="app_streaming_blocked_title_for_settings_dialog" product="default" msgid="6895719984375299791">"Hindi available ang mga setting ng telepono"</string>
+    <string name="app_streaming_blocked_message" product="tv" msgid="5024599278277957935">"Hindi ito maa-access sa iyong <xliff:g id="DEVICE">%1$s</xliff:g>. Subukan na lang sa iyong Android TV device."</string>
+    <string name="app_streaming_blocked_message" product="tablet" msgid="7491114163056552686">"Hindi ito maa-access sa iyong <xliff:g id="DEVICE">%1$s</xliff:g>. Subukan na lang sa iyong tablet."</string>
+    <string name="app_streaming_blocked_message" product="default" msgid="1245180131667647277">"Hindi ito maa-access sa iyong <xliff:g id="DEVICE">%1$s</xliff:g>. Subukan na lang sa iyong telepono."</string>
+    <string name="app_streaming_blocked_message_for_permission_dialog" product="tv" msgid="6306583663205997979">"Hindi ito maa-access sa iyong <xliff:g id="DEVICE">%1$s</xliff:g> sa ngayon. Subukan na lang sa iyong Android TV device."</string>
+    <string name="app_streaming_blocked_message_for_permission_dialog" product="tablet" msgid="6545624942642129664">"Hindi ito maa-access sa iyong <xliff:g id="DEVICE">%1$s</xliff:g> sa ngayon. Subukan na lang sa iyong tablet."</string>
+    <string name="app_streaming_blocked_message_for_permission_dialog" product="default" msgid="8462740631707923000">"Hindi ito maa-access sa iyong <xliff:g id="DEVICE">%1$s</xliff:g> sa ngayon. Subukan na lang sa iyong telepono."</string>
+    <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tv" msgid="3470977315395784567">"Humihiling ng karagdagang seguridad ang app na ito. Subukan na lang sa iyong Android TV device."</string>
+    <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tablet" msgid="698460091901465092">"Humihiling ng karagdagang seguridad ang app na ito. Subukan na lang sa iyong tablet."</string>
+    <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="default" msgid="8552691971910603907">"Humihiling ng karagdagang seguridad ang app na ito. Subukan na lang sa iyong telepono."</string>
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"Ang app na ito ay ginawa para sa mas lumang bersyon ng Android at maaaring hindi gumana nang maayos. Subukang tingnan kung may mga update, o makipag-ugnayan sa developer."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Tingnan kung may update"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Mayroon kang mga bagong mensahe"</string>
@@ -2293,9 +2278,11 @@
     <string name="ui_translation_accessibility_translated_text" msgid="3197547218178944544">"Naisalin ang <xliff:g id="MESSAGE">%1$s</xliff:g>."</string>
     <string name="ui_translation_accessibility_translation_finished" msgid="3057830947610088465">"Naisalin ang mensahe sa <xliff:g id="TO_LANGUAGE">%2$s</xliff:g> mula sa <xliff:g id="FROM_LANGUAGE">%1$s</xliff:g>."</string>
     <string name="notification_channel_abusive_bg_apps" msgid="6092140213264920355">"Aktibidad sa Background"</string>
-    <string name="notification_title_abusive_bg_apps" msgid="3258460527676573815">"May app na gumagamit ng baterya"</string>
+    <!-- no translation found for notification_title_abusive_bg_apps (994230770856147656) -->
+    <skip />
     <string name="notification_title_long_running_fgs" msgid="8170284286477131587">"May app na aktibo pa rin"</string>
-    <string name="notification_content_abusive_bg_apps" msgid="9180610713603474720">"Gumagamit ng baterya ang <xliff:g id="APP">%1$s</xliff:g> sa background. I-tap para suriin."</string>
+    <!-- no translation found for notification_content_abusive_bg_apps (5296898075922695259) -->
+    <skip />
     <string name="notification_content_long_running_fgs" msgid="8258193410039977101">"Posibleng maapektuhan ng <xliff:g id="APP">%1$s</xliff:g> ang tagal ng baterya. I-tap para suriin ang mga aktibong app."</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Tingnan ang mga aktibong app"</string>
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"Hindi ma-access ang camera ng telepono mula sa iyong <xliff:g id="DEVICE">%1$s</xliff:g>"</string>

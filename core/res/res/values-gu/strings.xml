@@ -2293,9 +2293,11 @@
     <string name="ui_translation_accessibility_translated_text" msgid="3197547218178944544">"<xliff:g id="MESSAGE">%1$s</xliff:g>નો અનુવાદ કર્યો."</string>
     <string name="ui_translation_accessibility_translation_finished" msgid="3057830947610088465">"<xliff:g id="FROM_LANGUAGE">%1$s</xliff:g>થી <xliff:g id="TO_LANGUAGE">%2$s</xliff:g>માં સંદેશનો અનુવાદ કરવામાં આવ્યો."</string>
     <string name="notification_channel_abusive_bg_apps" msgid="6092140213264920355">"બૅકગ્રાઉન્ડ પ્રવૃત્તિ"</string>
-    <string name="notification_title_abusive_bg_apps" msgid="3258460527676573815">"કોઈ ઍપ બૅટરીનો વપરાશ કરી રહી છે"</string>
+    <!-- no translation found for notification_title_abusive_bg_apps (994230770856147656) -->
+    <skip />
     <string name="notification_title_long_running_fgs" msgid="8170284286477131587">"કોઈ ઍપ હજી પણ સક્રિય છે"</string>
-    <string name="notification_content_abusive_bg_apps" msgid="9180610713603474720">"<xliff:g id="APP">%1$s</xliff:g> દ્વારા બૅકગ્રાઉન્ડમાં બૅટરીનો વપરાશ કરવામાં આવી રહ્યો છે. રિવ્યૂ કરવા માટે ટૅપ કરો."</string>
+    <!-- no translation found for notification_content_abusive_bg_apps (5296898075922695259) -->
+    <skip />
     <string name="notification_content_long_running_fgs" msgid="8258193410039977101">"<xliff:g id="APP">%1$s</xliff:g>, બૅટરીની આવરદાને અસર કરી શકે છે. બધી સક્રિય ઍપનો રિવ્યૂ કરવા માટે ટૅપ કરો."</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"સક્રિય ઍપ ચેક કરો"</string>
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"તમારા <xliff:g id="DEVICE">%1$s</xliff:g> પરથી ફોનના કૅમેરાનો ઍક્સેસ કરી શકતાં નથી"</string>

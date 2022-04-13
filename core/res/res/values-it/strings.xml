@@ -1851,7 +1851,7 @@
     <string name="confirm_battery_saver" msgid="5247976246208245754">"OK"</string>
     <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"Il risparmio energetico attiva il tema scuro e limita o disattiva l\'attività in background, nonché alcuni effetti visivi, funzionalità e connessioni di rete."</string>
     <string name="battery_saver_description" msgid="8518809702138617167">"Il risparmio energetico attiva il tema scuro e limita o disattiva l\'attività in background, nonché alcuni effetti visivi, funzionalità e connessioni di rete."</string>
-    <string name="data_saver_description" msgid="4995164271550590517">"Per contribuire a ridurre l\'utilizzo dei dati, la funzione Risparmio dati impedisce ad alcune app di inviare o ricevere dati in background. Un\'app in uso può accedere ai dati, ma potrebbe farlo con meno frequenza. Esempio: le immagini non vengono visualizzate finché non le tocchi."</string>
+    <string name="data_saver_description" msgid="4995164271550590517">"Per contribuire a ridurre l\'utilizzo dei dati, la funzionalità Risparmio dati impedisce ad alcune app di inviare o ricevere dati in background. Un\'app in uso può accedere ai dati, ma potrebbe farlo con meno frequenza. Per esempio, è possibile che le immagini non vengano visualizzate finché non le tocchi."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Attivare Risparmio dati?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Attiva"</string>
     <string name="zen_mode_duration_minutes_summary" msgid="4555514757230849789">"{count,plural, =1{Per un minuto (fino alle ore {formattedTime})}other{Per # minuti (fino alle ore {formattedTime})}}"</string>
@@ -2067,14 +2067,10 @@
     <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"Tocca per avere ulteriori informazioni e modificare."</string>
     <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"L\'impostazione Non disturbare è cambiata"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Tocca per controllare le notifiche bloccate."</string>
-    <!-- no translation found for review_notification_settings_title (5102557424459810820) -->
-    <skip />
-    <!-- no translation found for review_notification_settings_text (5696497037817525074) -->
-    <skip />
-    <!-- no translation found for review_notification_settings_remind_me_action (1081081018678480907) -->
-    <skip />
-    <!-- no translation found for review_notification_settings_dismiss (4160916504616428294) -->
-    <skip />
+    <string name="review_notification_settings_title" msgid="5102557424459810820">"Controlla le impostazioni di notifica"</string>
+    <string name="review_notification_settings_text" msgid="5696497037817525074">"In Android 13, le app che installi devono avere la tua autorizzazione per poter inviare notifiche. Tocca per cambiare questa autorizzazione per le app esistenti."</string>
+    <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"Ricordamelo dopo"</string>
+    <string name="review_notification_settings_dismiss" msgid="4160916504616428294">"Ignora"</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"Sistema"</string>
     <string name="notification_app_name_settings" msgid="9088548800899952531">"Impostazioni"</string>
     <string name="notification_appops_camera_active" msgid="8177643089272352083">"Fotocamera"</string>
@@ -2293,9 +2289,11 @@
     <string name="ui_translation_accessibility_translated_text" msgid="3197547218178944544">"Messaggio <xliff:g id="MESSAGE">%1$s</xliff:g> tradotto."</string>
     <string name="ui_translation_accessibility_translation_finished" msgid="3057830947610088465">"Messaggio tradotto dalla lingua <xliff:g id="FROM_LANGUAGE">%1$s</xliff:g> alla lingua <xliff:g id="TO_LANGUAGE">%2$s</xliff:g>."</string>
     <string name="notification_channel_abusive_bg_apps" msgid="6092140213264920355">"Attività in background"</string>
-    <string name="notification_title_abusive_bg_apps" msgid="3258460527676573815">"Un\'app sta usando la batteria"</string>
+    <!-- no translation found for notification_title_abusive_bg_apps (994230770856147656) -->
+    <skip />
     <string name="notification_title_long_running_fgs" msgid="8170284286477131587">"C\'è un\'app ancora attiva"</string>
-    <string name="notification_content_abusive_bg_apps" msgid="9180610713603474720">"<xliff:g id="APP">%1$s</xliff:g> sta usando la batteria in background. Tocca per controllare."</string>
+    <!-- no translation found for notification_content_abusive_bg_apps (5296898075922695259) -->
+    <skip />
     <string name="notification_content_long_running_fgs" msgid="8258193410039977101">"<xliff:g id="APP">%1$s</xliff:g> potrebbe influire sulla durata della batteria. Tocca per controllare le app attive."</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Verifica le app attive"</string>
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"Impossibile accedere alla fotocamera del telefono dal tuo <xliff:g id="DEVICE">%1$s</xliff:g>"</string>

@@ -2067,14 +2067,10 @@
     <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"Tik om meer te wete te kom en te verander."</string>
     <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"Moenie Steur Nie het verander"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Tik om te kyk wat geblokkeer word."</string>
-    <!-- no translation found for review_notification_settings_title (5102557424459810820) -->
-    <skip />
-    <!-- no translation found for review_notification_settings_text (5696497037817525074) -->
-    <skip />
-    <!-- no translation found for review_notification_settings_remind_me_action (1081081018678480907) -->
-    <skip />
-    <!-- no translation found for review_notification_settings_dismiss (4160916504616428294) -->
-    <skip />
+    <string name="review_notification_settings_title" msgid="5102557424459810820">"Gaan kennisgewinginstellings na"</string>
+    <string name="review_notification_settings_text" msgid="5696497037817525074">"In Android 13 het programme wat jy installeer jou toestemming nodig om kennisgewings te stuur. Tik om hierdie toestemming vir bestaande programme te verander."</string>
+    <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"Herinner my later"</string>
+    <string name="review_notification_settings_dismiss" msgid="4160916504616428294">"Maak toe"</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"Stelsel"</string>
     <string name="notification_app_name_settings" msgid="9088548800899952531">"Instellings"</string>
     <string name="notification_appops_camera_active" msgid="8177643089272352083">"Kamera"</string>
@@ -2293,9 +2289,11 @@
     <string name="ui_translation_accessibility_translated_text" msgid="3197547218178944544">"<xliff:g id="MESSAGE">%1$s</xliff:g> is vertaal."</string>
     <string name="ui_translation_accessibility_translation_finished" msgid="3057830947610088465">"Boodskap is vertaal uit <xliff:g id="FROM_LANGUAGE">%1$s</xliff:g> in <xliff:g id="TO_LANGUAGE">%2$s</xliff:g>."</string>
     <string name="notification_channel_abusive_bg_apps" msgid="6092140213264920355">"Agtergrondaktiwiteit"</string>
-    <string name="notification_title_abusive_bg_apps" msgid="3258460527676573815">"’n Program gebruik tans batterykrag"</string>
+    <!-- no translation found for notification_title_abusive_bg_apps (994230770856147656) -->
+    <skip />
     <string name="notification_title_long_running_fgs" msgid="8170284286477131587">"’n Program is nog aktief"</string>
-    <string name="notification_content_abusive_bg_apps" msgid="9180610713603474720">"<xliff:g id="APP">%1$s</xliff:g> gebruik tans batterykrag op die agtergrond. Tik om na te gaan."</string>
+    <!-- no translation found for notification_content_abusive_bg_apps (5296898075922695259) -->
+    <skip />
     <string name="notification_content_long_running_fgs" msgid="8258193410039977101">"<xliff:g id="APP">%1$s</xliff:g> kan batterylewe beïnvloed. Tik om aktiewe programme na te gaan."</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Gaan aktiewe programme na"</string>
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"Kan nie toegang tot die foon se kamera op jou <xliff:g id="DEVICE">%1$s</xliff:g> kry nie"</string>
